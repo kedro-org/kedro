@@ -1,0 +1,318 @@
+
+@import url("https://fonts.googleapis.com/css?family=Titillium+Web:300,400,600");
+
+/* normilize css */
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    font-style: inherit;
+    font-variant-ligatures: inherit;
+    font-variant-caps: inherit;
+    font-variant-numeric: inherit;
+    font-variant-east-asian: inherit;
+    font-weight: inherit;
+    font-stretch: inherit;
+    font-size: 100%;
+    line-height: inherit;
+    font-family: inherit;
+    vertical-align: baseline;
+}
+
+html, body.wy-body-for-nav {
+    -webkit-font-smoothing: antialiased;
+    font-family: 'Titillium Web', sans-serif;
+    font-weight: 400;
+    font-size: 62.5%;
+    line-height: 2rem;
+    letter-spacing: 0.1px;
+}
+
+body.wy-body-for-nav {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    background: rgb(250, 250, 250) !important;
+    color: black;
+}
+
+.wy-body-for-nav .wy-side-nav-search input[type=text] {
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    padding: 6px 12px !important;
+    color: #333 !important;
+    background-color: #fff !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif !important;
+    font-size: 15px !important;
+    border: 1px #e8e8e8 solid !important;
+    border-radius: 2px !important;
+    transition: border-color ease-in-out .15s !important;
+    box-shadow: none !important;
+}
+
+.wy-body-for-nav .wy-nav-side {
+    font-size: 16px;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    padding-bottom: 2em;
+    width: 300px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    min-height: 100%;
+    background: white;
+    z-index: 200;
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, .05);
+}
+
+.wy-body-for-nav .wy-side-scroll {
+    width: 300px !important;
+    position: relative;
+    overflow-x: initial;
+    overflow-y: initial;
+    height: initial;
+}
+
+.wy-body-for-nav .wy-side-nav-search {
+    width: 300px;
+    background: none;
+    margin: 0;
+    padding: 15px;
+}
+.wy-body-for-nav .wy-side-nav-search a {
+    font-size: 26px;
+    margin-bottom: 16px;
+    color: black;
+}
+.wy-body-for-nav .wy-side-nav-search a:before {
+    content: '';
+}
+.wy-body-for-nav .wy-side-nav-search>div.version {
+    color: black;
+}
+
+
+.wy-body-for-nav .wy-menu-vertical {
+    width: 300px;
+    margin: 0;
+    padding: 0 10px 0 32px;
+}
+.wy-body-for-nav .wy-menu-vertical p.caption {
+    margin: auto;
+    text-align: center;
+}
+
+.wy-body-for-nav .wy-menu-vertical li.on a, .wy-body-for-nav .wy-menu-vertical li.current>a {
+    border-top: none;
+    border-bottom: none;
+}
+
+
+.wy-body-for-nav .wy-menu-vertical li.current {
+    background: white;
+}
+.wy-body-for-nav .wy-menu-vertical li {
+    margin: 0;
+    padding: 0;
+    font-size: 16px !important;
+}
+
+.wy-body-for-nav .wy-menu-vertical li a {
+    display: block;
+    margin: 0;
+    padding: 14px 0 !important;
+    font-size: 16px !important;
+    line-height: 1;
+    color: black !important;
+    background: none !important;
+}
+
+.wy-body-for-nav .toctree-expand:before {
+   font-size: 15px;
+    margin-right: 5px;
+}
+
+.wy-body-for-nav .wy-nav-content-wrap {
+    margin-left: 300px;
+    background: #fafafa;
+    font-size: 16px;
+}
+
+.wy-body-for-nav .wy-nav-content {
+    padding: 0;
+    max-width: initial;
+}
+
+.wy-body-for-nav .wy-breadcrumbs {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    width: 100%;
+    height: 71px;
+    padding-left: 32px;
+    background: white;
+    background-image: initial;
+    background-position-x: initial;
+    background-position-y: initial;
+    background-size: initial;
+    background-repeat-x: initial;
+    background-repeat-y: initial;
+    background-attachment: initial;
+    background-origin: initial;
+    background-clip: initial;
+    background-color: white;
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, .05);
+}
+
+.wy-body-for-nav .wy-breadcrumbs + hr {
+    display: none;
+}
+.wy-body-for-nav .wy-breadcrumbs li {
+    font-size: 20px;
+}
+
+.wy-body-for-nav .wy-breadcrumbs li:not(:first-child) {
+    margin-left: 6px;
+}
+
+
+.wy-body-for-nav .wy-nav-content .document{
+    padding: 32px 32px 20px;
+}
+
+.wy-body-for-nav footer {
+    padding: 32px;
+}
+
+.wy-body-for-nav .wy-body-for-nav {
+    background: #fafafa !important;
+    background-image: none;
+    background-size: initial;
+}
+
+.wy-body-for-nav .wy-menu-vertical li.current a:hover {
+    background: none;
+}
+.wy-body-for-nav .wy-menu-vertical a:hover {
+    background: none;
+    cursor: pointer;
+}
+
+.wy-body-for-nav .wy-menu-vertical li.current a {
+    border-right: none;
+}
+
+.wy-body-for-nav .toctree-l2 {
+    padding-left: 15px !important;
+}
+
+.wy-body-for-nav .toctree-l3 {
+    padding-left: 15px !important;
+}
+
+.wy-body-for-nav .toctree-l4 {
+     padding-left: 15px !important;
+ }
+
+.wy-body-for-nav .toctree-l5 {
+    padding-left: 15px !important;
+}
+
+
+.wy-body-for-nav .toctree-l2.current > a, .wy-body-for-nav .toctree-l3.current > a,.wy-body-for-nav .toctree-l4.current > a {
+    font-weight: normal !important;
+}
+.wy-body-for-nav .toctree-l4  a {
+    word-break: break-word;
+}
+
+.wy-body-for-nav b, .wy-body-for-nav strong {
+    font-weight: normal;
+}
+.wy-body-for-nav h1,.wy-body-for-nav h2, .wy-body-for-nav h3,.wy-body-for-nav  h4, .wy-body-for-nav h5 {
+    font-family: 'Titillium Web', sans-serif;
+    margin: 15px 0;
+}
+.wy-body-for-nav h1 {
+  font-size: 4rem;
+  line-height: 4.8rem;
+  letter-spacing: -0.3px;
+}
+
+.wy-body-for-nav h2 {
+    font-size: 3rem;
+    font-weight: normal;
+    line-height: 3.8rem;
+}
+
+.wy-body-for-nav h3 {
+    font-size: 2rem;
+    line-height: 2.8rem;
+}
+
+.wy-body-for-nav .headerlink {
+    display: none !important;
+}
+
+.wy-body-for-nav p {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    font-size: 100%;
+    margin: 0 0 15px 0;
+    line-height: 1.5;
+}
+
+.wy-body-for-nav .rst-content a, .wy-body-for-nav footer a{
+    font-family: inherit;
+    font-size: inherit;
+    color: #1978c8;
+    text-decoration: none;
+}
+
+.wy-body-for-nav .rst-content a:visited, .wy-body-for-nav footer a:visited {
+    font-family: inherit;
+    font-size: inherit;
+    color: #1978c8;
+    text-decoration: none;
+}
+
+.wy-body-for-nav .rst-content a:hover, .wy-body-for-nav footer a:hover {
+    color: #f28a25;
+    cursor: pointer;
+}
+
+.wy-body-for-nav .wy-nav-top {
+    background: white;
+    color: black;
+}
+.wy-body-for-nav .wy-nav-top a {
+    color: black !important;
+}
+
+
+@media screen and (max-width: 768px) {
+    .wy-body-for-nav .wy-nav-side {
+        left: -300px;
+    }
+    .wy-body-for-nav .wy-nav-side.shift {
+        width: 85%;
+        left: 0;
+    }
+    .wy-body-for-nav .wy-nav-content-wrap {
+        margin-left: 0;
+    }
+    .wy-body-for-nav .wy-breadcrumbs {
+        display: none;
+    }
+    .wy-body-for-nav h1 {
+        font-size: 3rem;
+        line-height: 3.8rem;
+        letter-spacing: 0px;
+    }
+}
+
+

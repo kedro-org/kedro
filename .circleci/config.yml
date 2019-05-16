@@ -1,0 +1,59 @@
+version: 2
+jobs:
+  build_35: &DEFAULT
+     docker:
+       - image: quantumblacklabs/kedro_builder:3.5.2
+     steps:
+       - checkout
+       - run: &CONDA_SETUP
+          name: Activate conda environment
+          command: |
+            echo ". /home/circleci/miniconda/etc/profile.d/conda.sh" >> $BASH_ENV
+            echo "conda deactivate; conda activate kedro_builder" >> $BASH_ENV
+
+       - run: &PIP_SETUP
+          name: Install PIP dependencies
+          command: |
+            # echo python version for debugging
+            echo "Python version: $(python --version 2>&1)"
+
+            # Install pip setuptools
+            make install-pip-setuptools
+
+            # Install requirements
+            pip install -r requirements.txt -U
+
+            # Install test requirements
+            pip install -r test_requirements.txt -U
+       - run:
+          name: Run pylint and flake8
+          command: |
+            make lint
+       - run:
+          name: Run tests
+          command: |
+            make test
+       - run:
+          name: Run all end to end tests
+          command: |
+            make e2e-tests
+       - run:
+          name: Check for legal compliance
+          command: |
+            make legal
+  build_36:
+     <<: *DEFAULT
+     docker:
+       - image: quantumblacklabs/kedro_builder:3.6
+  build_37:
+     <<: *DEFAULT
+     docker:
+       - image: quantumblacklabs/kedro_builder:3.7
+
+workflows:
+  version: 2
+  regular:
+    jobs:
+      - build_35
+      - build_36
+      - build_37

@@ -1,0 +1,7 @@
+{
+    "project_name": "default",
+    "repo_name": "{{ cookiecutter.project_name }}",
+    "python_package": "{{ cookiecutter.repo_name }}",
+    "kedro_version": "{{ cookiecutter.kedro_version }}",
+    "include_example": "{{ cookiecutter.include_example }}"
+}

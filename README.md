@@ -1,4 +1,4 @@
-![Kedro Logo Banner](https://github.com/quantumblacklabs/kedro/blob/master/img/kedro_banner.jpg)
+![Kedro Logo Banner](https://raw.githubusercontent.com/quantumblacklabs/kedro/master/img/kedro_banner.jpg)
 
 `develop` | `master`  
 ----------|---------  

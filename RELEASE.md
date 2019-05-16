@@ -4,7 +4,7 @@ The initial release of Kedro.
 
 ## Thanks to our main contributors
 
-Nikolaos Tsaousis, Ivan Danov, Dmitrii Deriabin, Gordon Wrigley, Yetunde Dada, Nasef Khan, Kiyohito Kunii, Nikolaos Kaltsas, Meisam Emamjome, Peteris Erins, Lorena Balan
+[Nikolaos Tsaousis](https://github.com/tsanikgr), [Ivan Danov](https://github.com/idanov), [Dmitrii Deriabin](https://github.com/DmitryDeryabin), [Gordon Wrigley](https://github.com/tolomea), [Yetunde Dada](https://github.com/yetudada), [Nasef Khan](https://github.com/nakhan98), [Kiyohito Kunii](https://github.com/921kiyo), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae), [Peteris Erins](https://github.com/Pet3ris), [Lorena Balan](https://github.com/lorenabalan)
 
 ## Thanks for supporting contributions 
 

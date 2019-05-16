@@ -1,0 +1,5 @@
+output_dir: ~/code
+project_name: Chess Master
+repo_name: project-chess-master
+python_package: project_chess_master
+include_example: False

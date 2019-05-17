@@ -15,8 +15,11 @@
 
 import importlib
 import re
+import subprocess
 import sys
 from inspect import getmembers, isclass, isfunction
+from os import getenv
+from pathlib import Path
 from typing import List, Tuple
 
 from click import secho, style
@@ -32,6 +35,8 @@ author = "QuantumBlack"
 
 # The short X.Y version.
 version = re.match(r"^([0-9]+\.[0-9]+).*", release).group(1)
+
+on_rtd = getenv("READTHEDOCS") == "True"
 
 # -- General configuration ---------------------------------------------------
 
@@ -84,6 +89,9 @@ language = None
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path .
 exclude_patterns = ["**cli*", "**.ipynb_checkpoints", "_templates", "modules.rst"]
+if on_rtd:
+    exclude_patterns.append("source")
+
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -371,7 +379,24 @@ def skip(app, what, name, obj, skip, options):
     return skip
 
 
+def _prepare_rtd(_):
+    here = Path(__file__).parent.absolute()
+    subprocess.check_call(["cp", "-a", str(here / "source"), str(here)])
+    subprocess.check_call(["mv", str(here / "05_api_docs" / "*"), str(here)])
+    subprocess.check_call(["rm", "-rf", str(here / "05_api_docs")])
+
+    from sphinx.apidoc import main
+
+    main(["--module-first", "-o", str(here), "kedro"])
+    subprocess.check_call(["rm", "-rf", str(here / "_build")])
+    _static = here / "_build" / "html" / "_static"
+    subprocess.check_call(["mkdir", "-p", str(_static)])
+    subprocess.check_call(["mv", str(here / "css"), str(_static)])
+
+
 def setup(app):
+    if on_rtd:
+        app.connect("builder-inited", _prepare_rtd)
     app.connect("autodoc-process-docstring", autodoc_process_docstring)
     app.connect("autodoc-skip-member", skip)
     app.add_stylesheet("css/qb1-sphinx-rtd.css")

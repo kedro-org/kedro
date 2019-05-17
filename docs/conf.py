@@ -14,11 +14,12 @@
 # serve to show the default.
 
 import importlib
+import os
 import re
-import subprocess
+import shutil
 import sys
+from distutils.dir_util import copy_tree
 from inspect import getmembers, isclass, isfunction
-from os import getenv
 from pathlib import Path
 from typing import List, Tuple
 
@@ -36,7 +37,7 @@ author = "QuantumBlack"
 # The short X.Y version.
 version = re.match(r"^([0-9]+\.[0-9]+).*", release).group(1)
 
-on_rtd = getenv("READTHEDOCS") == "True"
+on_rtd = os.getenv("READTHEDOCS") == "True"
 
 # -- General configuration ---------------------------------------------------
 
@@ -381,17 +382,18 @@ def skip(app, what, name, obj, skip, options):
 
 def _prepare_rtd(_):
     here = Path(__file__).parent.absolute()
-    subprocess.check_call(["cp", "-a", str(here / "source"), str(here)])
-    subprocess.check_call(["mv", str(here / "05_api_docs" / "*"), str(here)])
-    subprocess.check_call(["rm", "-rf", str(here / "05_api_docs")])
+    copy_tree(str(here / "source"), str(here))
+    copy_tree(str(here / "05_api_docs"), str(here))
+    shutil.rmtree(str(here / "05_api_docs"))
 
-    from sphinx.apidoc import main
+    from sphinx.ext.apidoc import main
 
-    main(["--module-first", "-o", str(here), "kedro"])
-    subprocess.check_call(["rm", "-rf", str(here / "_build")])
+    main(["--module-first", "-o", str(here), str(here.parent / "kedro")])
+
+    shutil.rmtree(str(here / "_build"), ignore_errors=True)
     _static = here / "_build" / "html" / "_static"
-    subprocess.check_call(["mkdir", "-p", str(_static)])
-    subprocess.check_call(["mv", str(here / "css"), str(_static)])
+    copy_tree(str(here / "css"), str(_static / "css"))
+    shutil.rmtree(str(here / "css"))
 
 
 def setup(app):

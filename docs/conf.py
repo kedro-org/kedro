@@ -37,9 +37,11 @@ author = "QuantumBlack"
 # The short X.Y version.
 version = re.match(r"^([0-9]+\.[0-9]+).*", release).group(1)
 
-on_rtd = os.getenv("READTHEDOCS") == "True"
 
 # -- General configuration ---------------------------------------------------
+
+on_rtd = os.getenv("READTHEDOCS") == "True"  # running on ReadTheDocs
+
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #
@@ -380,7 +382,10 @@ def skip(app, what, name, obj, skip, options):
     return skip
 
 
-def _prepare_rtd(_):
+def _prepare_cwd_for_rtd(app, config):
+    """Get current working directory to the state expected
+    by the ReadTheDocs builder. Shortly, it does the same as
+    ./build-docs.sh script except not running `sphinx-build` step."""
     here = Path(__file__).parent.absolute()
     copy_tree(str(here / "source"), str(here))
     copy_tree(str(here / "05_api_docs"), str(here))
@@ -391,14 +396,14 @@ def _prepare_rtd(_):
     main(["--module-first", "-o", str(here), str(here.parent / "kedro")])
 
     shutil.rmtree(str(here / "_build"), ignore_errors=True)
-    _static = here / "_build" / "html" / "_static"
-    copy_tree(str(here / "css"), str(_static / "css"))
+    _css = here / "_build" / "html" / "_static" / "css"
+    copy_tree(str(here / "css"), str(_css))
     shutil.rmtree(str(here / "css"))
 
 
 def setup(app):
     if on_rtd:
-        app.connect("builder-inited", _prepare_rtd)
+        app.connect("config-inited", _prepare_cwd_for_rtd)
     app.connect("autodoc-process-docstring", autodoc_process_docstring)
     app.connect("autodoc-skip-member", skip)
     app.add_stylesheet("css/qb1-sphinx-rtd.css")

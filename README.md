@@ -62,7 +62,7 @@ For more detailed installation instructions, including how to setup Python virtu
   - Kedro-Docker, a tool for packing and shipping Kedro projects within containers
 - Kedro can be deployed locally, on-premise and cloud (AWS, Azure and GCP) servers, or clusters (EMR, Azure HDinsight, GCP and Databricks)
 
-![Kedro-Viz Pipeline Visualisation](https://github.com/quantumblacklabs/kedro/blob/master/img/pipeline_visualisation.png)
+![Kedro-Viz Pipeline Visualisation](https://raw.githubusercontent.com/quantumblacklabs/kedro/master/img/pipeline_visualisation.png)
 *Random pipeline visualisation using Kedro-Viz (coming soon)*
 
 ## How do I use Kedro?

@@ -224,6 +224,14 @@ class TestCSVS3DataSet:
     def test_serializable(self, s3_data_set):
         ForkingPickler.dumps(s3_data_set)
 
+    # pylint: disable=unused-argument
+    def test_load_args_propagated(self, mocker, mocked_s3_object):
+        mock = mocker.patch("kedro.io.csv_s3.pd.read_csv")
+        CSVS3DataSet(
+            FILENAME, BUCKET_NAME, AWS_CREDENTIALS, load_args=dict(custom=42)
+        ).load()
+        assert mock.call_args_list[0][1] == {"custom": 42}
+
 
 @pytest.mark.usefixtures("mocked_s3_bucket")
 class TestCSVS3DataSetVersioned:

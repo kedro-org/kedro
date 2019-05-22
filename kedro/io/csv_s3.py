@@ -130,7 +130,7 @@ class CSVS3DataSet(AbstractDataSet, ExistsMixin, S3PathVersionMixIn):
         with self._s3.open(
             "{}/{}".format(self._bucket_name, load_key), mode="rb"
         ) as s3_file:
-            return pd.read_csv(s3_file)
+            return pd.read_csv(s3_file, **self._load_args)
 
     def _save(self, data: pd.DataFrame) -> None:
         save_key = self._get_save_path(

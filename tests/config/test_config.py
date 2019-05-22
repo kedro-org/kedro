@@ -34,7 +34,7 @@ from typing import Dict
 import pytest
 import yaml
 
-from kedro.config import ConfigLoader
+from kedro.config import ConfigLoader, MissingConfigException
 
 
 def _get_local_logging_config():
@@ -276,5 +276,5 @@ class TestConfigLoader:
             r"matching the glob pattern\(s\): "
             r"\[\'non\-existent\-pattern\'\]"
         )
-        with pytest.raises(ValueError, match=pattern):
+        with pytest.raises(MissingConfigException, match=pattern):
             ConfigLoader(conf_paths).get("non-existent-pattern")

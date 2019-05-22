@@ -47,6 +47,11 @@ SUPPORTED_EXTENSIONS = [
 ]
 
 
+class MissingConfigException(Exception):
+    """Raised when no configuration files can be found within a config path"""
+    pass
+
+
 class ConfigLoader:
     """Recursively scan the directories specified in ``conf_paths`` for
         configuration files with a ``yaml``, ``yml``, ``json``, ``ini``,
@@ -130,6 +135,8 @@ class ConfigLoader:
             ValueError: If 2 or more configuration files inside the same
                 config path (or its subdirectories) contain the same
                 top-level key.
+            MissingConfigException: If no configuration files exist within
+                a specified config path.
 
         Returns:
             Dict[str, Any]:  A Python dictionary with the combined
@@ -159,7 +166,7 @@ class ConfigLoader:
             config.update(new_conf)
             processed_files.extend(new_processed_files)
         if not processed_files:
-            raise ValueError(
+            raise MissingConfigException(
                 "No files found in {} matching the glob "
                 "pattern(s): {}".format(str(self.conf_paths), str(list(patterns)))
             )

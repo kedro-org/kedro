@@ -4,8 +4,28 @@
    contain the root `toctree` directive.
 
 
+.. image:: https://raw.githubusercontent.com/quantumblacklabs/kedro/master/img/kedro_banner.jpg
+
 Welcome to Kedro's API docs and tutorials!
 =============================================
+
+.. image:: https://circleci.com/gh/quantumblacklabs/kedro/tree/master.svg?style=shield
+    :target: https://circleci.com/gh/quantumblacklabs/kedro/tree/master
+
+.. image:: https://img.shields.io/badge/license-Apache%202.0-blue.svg
+    :target: https://opensource.org/licenses/Apache-2.0
+
+.. image:: https://img.shields.io/badge/python-3.5%20%7C%203.6%20%7C%203.7-blue.svg
+    :target: https://pypi.org/project/kedro/
+
+.. image:: https://badge.fury.io/py/kedro.svg
+    :target: https://pypi.org/project/kedro/
+
+.. image:: https://readthedocs.org/projects/kedro/badge/?version=latest
+    :target: https://kedro.readthedocs.io/
+
+.. image:: https://img.shields.io/badge/code%20style-black-black.svg
+    :target: https://github.com/ambv/black
 
 
 .. toctree::

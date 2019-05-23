@@ -105,6 +105,8 @@ pygments_style = "sphinx"
 # a list of builtin themes.
 #
 html_theme = "sphinx_rtd_theme"
+here = Path(__file__).parent.absolute()
+html_logo = str(here / "kedro_logo.png")
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -386,7 +388,6 @@ def _prepare_cwd_for_rtd(app, config):
     """Get current working directory to the state expected
     by the ReadTheDocs builder. Shortly, it does the same as
     ./build-docs.sh script except not running `sphinx-build` step."""
-    here = Path(__file__).parent.absolute()
     copy_tree(str(here / "source"), str(here))
     copy_tree(str(here / "05_api_docs"), str(here))
     shutil.rmtree(str(here / "05_api_docs"))

@@ -49,6 +49,7 @@ SUPPORTED_EXTENSIONS = [
 
 class MissingConfigException(Exception):
     """Raised when no configuration files can be found within a config path"""
+
     pass
 
 

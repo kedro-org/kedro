@@ -318,7 +318,7 @@ def _parse_config(config_path: str, verbose: bool) -> Dict:
     """
     try:
         with open(config_path, "r") as config_file:
-            config = yaml.load(config_file)
+            config = yaml.safe_load(config_file)
 
         if verbose:
             click.echo(config_path + ":")
@@ -372,7 +372,7 @@ def _check_config_ok(config_path: str, config: Dict[str, Any]) -> Dict[str, Any]
 def _get_default_config():
     default_config_path = os.path.join(TEMPLATE_PATH, "default_config.yml")
     with open(default_config_path) as default_config_file:
-        default_config = yaml.load(default_config_file)
+        default_config = yaml.safe_load(default_config_file)
     return default_config
 
 

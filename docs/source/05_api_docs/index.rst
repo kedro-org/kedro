@@ -81,9 +81,18 @@ Welcome to Kedro's API docs and tutorials!
    06_resources/04_lint
 
 
+API Docs
+========
+
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 0
    :caption: API Docs
+   :hidden:
+
+   kedro
+
+.. autosummary::
+   :template: autosummary/module.rst
 
    kedro
 

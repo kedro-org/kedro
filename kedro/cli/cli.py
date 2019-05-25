@@ -30,6 +30,7 @@
 
 This module implements commands available from the kedro CLI.
 """
+# pylint: disable=missing-param-doc,missing-type-doc,missing-return-doc,missing-return-type-doc
 import glob
 import importlib
 import os
@@ -473,8 +474,22 @@ def _get_prompt_text(title, *text):
     return "\n".join(str(x).strip() for x in prompt_text) + "\n"
 
 
-def get_project_context(key, default=NO_DEFAULT):  # pragma: no cover
-    """Get a value from the project context."""
+def get_project_context(key: Any, default: Any = NO_DEFAULT) -> Any:  # pragma: no cover
+    """Get a value from the project context.
+    The user is responsible having the specified key in their project's context
+    which typically is exposed in the ``__kedro_context__`` function in ``run.py``
+
+    Args:
+        key: Key in Kedro context dictionary.
+        default: Default value if the key is not found. If not provided
+            and the key is not found, this will raise a ``KedroCliError``.
+
+    Returns:
+        Requested value from Kedro context dictionary or the default if the key was not found.
+
+    Raises:
+        KedroCliError: When the key is not found and the default value was not specified.
+    """
     try:
         kedro_cli = importlib.import_module("kedro_cli")
         kedro_context = _KEDRO_CONTEXT.copy()

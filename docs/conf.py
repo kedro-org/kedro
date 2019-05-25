@@ -91,7 +91,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path .
-exclude_patterns = ["**cli*", "**.ipynb_checkpoints", "_templates", "modules.rst"]
+exclude_patterns = ["**.ipynb_checkpoints", "_templates", "modules.rst"]
 if on_rtd:
     exclude_patterns.append("source")
 
@@ -390,11 +390,6 @@ def _prepare_cwd_for_rtd(app, config):
     copy_tree(str(here / "source"), str(here))
     copy_tree(str(here / "05_api_docs"), str(here))
     shutil.rmtree(str(here / "05_api_docs"))
-
-    from sphinx.ext.apidoc import main
-
-    main(["--module-first", "-o", str(here), str(here.parent / "kedro")])
-
     shutil.rmtree(str(here / "_build"), ignore_errors=True)
     _css = here / "_build" / "html" / "_static" / "css"
     copy_tree(str(here / "css"), str(_css))

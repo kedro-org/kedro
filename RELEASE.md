@@ -1,3 +1,15 @@
+# Release 0.15
+
+## Major features and improvements
+Improved API docs
+
+
+## Bug fixes and other changes
+
+
+## Breaking changes to the API
+
+
 # Release 0.14.0:
 
 The initial release of Kedro.

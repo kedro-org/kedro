@@ -38,9 +38,8 @@ rm -rf docs/tmp-build-artifacts
 cp -a docs/source docs/tmp-build-artifacts
 mv docs/tmp-build-artifacts/05_api_docs/* docs/tmp-build-artifacts/
 rm -rf docs/tmp-build-artifacts/05_api_docs/
-sphinx-apidoc --module-first -o docs/tmp-build-artifacts kedro
 rm -rf docs/build
 mkdir -p docs/build/html/_static
 cp -r docs/source/css docs/build/html/_static
-sphinx-build docs/tmp-build-artifacts docs/build/html -c docs/ -E -a
+sphinx-build docs/tmp-build-artifacts docs/build/html -c docs/ -E -a -j auto
 rm -rf docs/tmp-build-artifacts

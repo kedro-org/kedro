@@ -10,6 +10,9 @@ Improved API docs
 ## Breaking changes to the API
 
 
+## Contrib
+- CachedDataSet which cached data in memory to avoid io/network operations (@tsanikgr)
+
 # Release 0.14.0:
 
 The initial release of Kedro.

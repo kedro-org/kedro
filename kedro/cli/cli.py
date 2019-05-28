@@ -30,7 +30,6 @@
 
 This module implements commands available from the kedro CLI.
 """
-# pylint: disable=missing-param-doc,missing-type-doc,missing-return-doc,missing-return-type-doc
 import glob
 import importlib
 import os

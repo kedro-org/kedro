@@ -31,7 +31,7 @@ This module contains ``CachedDataSet``, a dataset wrapper which caches in memory
 so that the user avoids io operations with slow storage media
 """
 import pickle
-from typing import Any, Dict
+from typing import Any, Dict, Union
 
 from kedro.io import (
     AbstractDataSet,
@@ -62,7 +62,10 @@ class CachedDataSet(AbstractDataSet, ExistsMixin, FilepathVersionMixIn):
     """
 
     def __init__(
-        self, dataset: AbstractDataSet, max_loads: int = None, version: Version = None
+        self,
+        dataset: Union[AbstractDataSet, Dict],
+        max_loads: int = None,
+        version: Version = None,
     ):
         super().__init__()
         if isinstance(dataset, Dict):

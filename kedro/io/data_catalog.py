@@ -444,7 +444,7 @@ class DataCatalog:
         return self._data_sets == other._data_sets  # pylint: disable=protected-access
 
     def set_max_loads(self, ds_name: str, max_loads: int):
-        """Set the maximum number of times this dataset can be loaded. ``DataSet``s like
+        """Set the maximum number of times the given dataset can be loaded. ``DataSet``s like
         ``MemoryDataSet`` use this to clear data from memory. In most other cases, this has no
         effect.
 

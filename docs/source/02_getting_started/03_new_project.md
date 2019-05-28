@@ -55,5 +55,10 @@ If you want to work with a Kedro project that has already been created, you may 
 To make sure you have the required dependencies, run (in your virtual environment):
 
 ```bash
-pip install -r src/requirements.txt
+pip install -U -r src/requirements.txt
 ```
+Or run the following if you have Kedro installed in your virtual environment:
+```bash
+kedro install
+```
+

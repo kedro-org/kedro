@@ -121,3 +121,6 @@ class MemoryDataSet(AbstractDataSet, ExistsMixin):
         if self._data is None:
             return False
         return True
+
+    def set_max_loads(self, max_loads):
+        self._max_loads = max_loads

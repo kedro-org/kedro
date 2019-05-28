@@ -5,7 +5,7 @@ Improved API docs
 
 
 ## Bug fixes and other changes
-
+Any custom `AbstractDataSet` may now specify the maximum number of times it can be loaded using `set_max_loads()`
 
 ## Breaking changes to the API
 

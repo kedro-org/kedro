@@ -63,14 +63,11 @@ class ParallelRunner(AbstractRunner):
         self._manager = ParallelRunnerManager()
         self._manager.start()
 
-    def create_default_data_set(self, ds_name: str, max_loads: int) -> AbstractDataSet:
+    def create_default_data_set(self, ds_name: str) -> AbstractDataSet:
         """Factory method for creating the default data set for the runner.
 
         Args:
             ds_name: Name of the missing data set
-            max_loads: Maximum number of times ``load`` method of the
-                default data set is allowed to be invoked. Any number of
-                calls is allowed if the argument is not set.
 
         Returns:
             An instance of an implementation of AbstractDataSet to be used
@@ -78,7 +75,7 @@ class ParallelRunner(AbstractRunner):
 
         """
         # pylint: disable=no-member
-        return self._manager.MemoryDataSet(max_loads=max_loads)
+        return self._manager.MemoryDataSet()
 
     @classmethod
     def _validate_nodes(cls, nodes: Iterable[Node]):

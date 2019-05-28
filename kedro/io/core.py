@@ -290,6 +290,18 @@ class AbstractDataSet(abc.ABC):
             "it must implement the `_describe` method".format(self.__class__.__name__)
         )
 
+    def set_max_loads(self, max_loads: int):
+        """Set how many times this dataset can be loaded. ``DataSet``s that can set a limit to
+        the number of times they can be loaded need to implement this method and the relevant
+        logic.
+
+        Args:
+            max_loads: Maximum number of times ``load`` method of the
+                data set is allowed to be invoked. Any number of calls
+                is allowed if the argument is not set.
+        """
+        pass
+
 
 class ExistsMixin(abc.ABC):
     """Mixin class which provides an exists() method."""

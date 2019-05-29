@@ -74,7 +74,7 @@ class CachedDataSet(AbstractDataSet, ExistsMixin, FilepathVersionMixIn):
             self._dataset = dataset
         else:
             raise ValueError(
-                "The argument type of `dataset` should be either a dict/YML "
+                "The argument type of `dataset` should be either a dict/YAML "
                 "representation of the dataset, or the actual dataset object."
             )
         self._cache = MemoryDataSet(max_loads=max_loads)
@@ -121,5 +121,5 @@ class CachedDataSet(AbstractDataSet, ExistsMixin, FilepathVersionMixIn):
         # in the future this can be made pickleable by erasing the cache.
         # A slight challenge would be to see how to propagate max_loads
         raise pickle.PicklingError(
-            "{}: `CachedDataSet`s cannot be " r"serialised".format(str(self))
+            "{}: `CachedDataSet`s cannot be serialised".format(str(self))
         )

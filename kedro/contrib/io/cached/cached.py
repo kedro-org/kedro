@@ -69,7 +69,7 @@ class CachedDataSet(AbstractDataSet, ExistsMixin, FilepathVersionMixIn):
     ):
         super().__init__()
         if isinstance(dataset, Dict):
-            self._dataset = self._from_config(dataset, version or Version(None, None))
+            self._dataset = self._from_config(dataset, version)
         elif isinstance(dataset, AbstractDataSet):
             self._dataset = dataset
         else:
@@ -87,8 +87,9 @@ class CachedDataSet(AbstractDataSet, ExistsMixin, FilepathVersionMixIn):
                 "`CachedDataSet`, not in the wrapped dataset."
             )
         if version:
-            config[VERSIONED_FLAG_KEY] = version
-        return AbstractDataSet.from_config("Cached", config, version.load, version.save)
+            config[VERSIONED_FLAG_KEY] = True
+            return AbstractDataSet.from_config("Cached", config, version.load, version.save)
+        return AbstractDataSet.from_config("Cached", config)
 
     def _describe(self) -> Dict[str, Any]:
         return {

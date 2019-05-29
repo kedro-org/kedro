@@ -1,58 +1,49 @@
-
 @import url("https://fonts.googleapis.com/css?family=Titillium+Web:300,400,600");
 
-/* normilize css */
-html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+html, body.wy-body-for-nav {
     margin: 0;
     padding: 0;
-    border: 0;
-    font-size: 100%;
-    font: inherit;
-    font-style: inherit;
-    font-variant-ligatures: inherit;
-    font-variant-caps: inherit;
-    font-variant-numeric: inherit;
-    font-variant-east-asian: inherit;
-    font-weight: inherit;
-    font-stretch: inherit;
-    font-size: 100%;
-    line-height: inherit;
-    font-family: inherit;
-    vertical-align: baseline;
-}
-
-html, body.wy-body-for-nav {
     -webkit-font-smoothing: antialiased;
     font-family: 'Titillium Web', sans-serif;
     font-weight: 400;
-    font-size: 62.5%;
     line-height: 2rem;
-    letter-spacing: 0.1px;
+}
+
+html {
+    font-size: 62.5%;
 }
 
 body.wy-body-for-nav {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    font-size: 1.6rem;
     background: rgb(250, 250, 250) !important;
     color: black;
 }
 
-.wy-body-for-nav .wy-side-nav-search input[type=text] {
-    display: block !important;
-    box-sizing: border-box !important;
-    width: 100% !important;
-    padding: 6px 12px !important;
-    color: #333 !important;
-    background-color: #fff !important;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif !important;
-    font-size: 15px !important;
-    border: 1px #e8e8e8 solid !important;
-    border-radius: 2px !important;
-    transition: border-color ease-in-out .15s !important;
-    box-shadow: none !important;
+.wy-side-nav-search {
+    text-align: left;
+}
+
+.wy-side-nav-search input[type=text] {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 6px 12px;
+    color: #666;
+    background-color: #fff;
+    font-family: inherit;
+    font-size: 1.6rem;
+    border: 1px #ccc solid;
+    border-radius: 2px;
+    transition: all ease 0.15s;
+    box-shadow: none;
+}
+
+.wy-side-nav-search input[type=text]:focus {
+    border-color: #888;
+    color: #333;
 }
 
 .wy-body-for-nav .wy-nav-side {
-    font-size: 16px;
     position: fixed;
     top: 0;
     bottom: 0;
@@ -68,7 +59,7 @@ body.wy-body-for-nav {
 }
 
 .wy-body-for-nav .wy-side-scroll {
-    width: 300px !important;
+    width: 100%;
     position: relative;
     overflow-x: initial;
     overflow-y: initial;
@@ -76,32 +67,50 @@ body.wy-body-for-nav {
 }
 
 .wy-body-for-nav .wy-side-nav-search {
-    width: 300px;
+    width: 100%;
     background: none;
     margin: 0;
-    padding: 15px;
+    padding: 0 20px;
 }
 .wy-body-for-nav .wy-side-nav-search a {
-    font-size: 26px;
-    margin-bottom: 16px;
+    display: inline-flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    font-size: 4rem;
+    margin: 0;
+    padding: 0;
+    height: 7rem;
+    line-height: 7rem;
     color: black;
 }
 .wy-body-for-nav .wy-side-nav-search a:before {
-    content: '';
+    display: none;
+}
+.wy-body-for-nav .wy-side-nav-search a img.logo {
+    width: 4.5rem;
+    height: auto;
+    margin: 0 0.3rem 0 -0.6rem;
+    padding: 0;
 }
 .wy-body-for-nav .wy-side-nav-search>div.version {
-    color: black;
+    color: #555;
+    display: inline-block;
+    margin-left: 0.5em;
+    font-size: 1.4rem;
 }
-
 
 .wy-body-for-nav .wy-menu-vertical {
     width: 300px;
     margin: 0;
-    padding: 0 10px 0 32px;
+    padding: 0 20px;
 }
+
 .wy-body-for-nav .wy-menu-vertical p.caption {
-    margin: auto;
-    text-align: center;
+    margin: 1.5em 0 0.2em;
+    padding: 0;
+    color: #666;
+    font-weight: bold;
+    font-size: 2rem;
 }
 
 .wy-body-for-nav .wy-menu-vertical li.on a, .wy-body-for-nav .wy-menu-vertical li.current>a {
@@ -109,35 +118,46 @@ body.wy-body-for-nav {
     border-bottom: none;
 }
 
-
 .wy-body-for-nav .wy-menu-vertical li.current {
-    background: white;
+    background: none;
 }
+
 .wy-body-for-nav .wy-menu-vertical li {
     margin: 0;
-    padding: 0;
-    font-size: 16px !important;
+    padding: 0 0 0 20px;
 }
 
 .wy-body-for-nav .wy-menu-vertical li a {
     display: block;
     margin: 0;
-    padding: 14px 0 !important;
-    font-size: 16px !important;
+    padding: 1.2rem 0 !important;
+    font-size: 1.6rem;
     line-height: 1;
-    color: black !important;
+    color: #222;
     background: none !important;
 }
 
+.rst-content.style-external-links a.reference.external:after {
+    color: inherit;
+    opacity: 0.8;
+}
+
+.wy-body-for-nav .wy-menu-vertical a:hover {
+    color: #000;
+}
+
+.wy-body-for-nav li span.toctree-expand {
+    margin-left: -20px;
+}
+
 .wy-body-for-nav .toctree-expand:before {
-   font-size: 15px;
+    font-size: 15px;
     margin-right: 5px;
 }
 
 .wy-body-for-nav .wy-nav-content-wrap {
     margin-left: 300px;
     background: #fafafa;
-    font-size: 16px;
 }
 
 .wy-body-for-nav .wy-nav-content {
@@ -153,8 +173,8 @@ body.wy-body-for-nav {
     -ms-flex-align: center;
     align-items: center;
     width: 100%;
-    height: 71px;
-    padding-left: 32px;
+    height: 7rem;
+    padding-left: 3.2rem;
     background: white;
     background-image: initial;
     background-position-x: initial;
@@ -173,16 +193,20 @@ body.wy-body-for-nav {
     display: none;
 }
 .wy-body-for-nav .wy-breadcrumbs li {
-    font-size: 20px;
+    font-size: 1.8rem;
 }
 
 .wy-body-for-nav .wy-breadcrumbs li:not(:first-child) {
     margin-left: 6px;
 }
 
+.wy-body-for-nav .wy-nav-content .document {
+    padding: 3.2rem 3.2rem 2rem;
+    max-width: 100rem;
+}
 
-.wy-body-for-nav .wy-nav-content .document{
-    padding: 32px 32px 20px;
+.kedro-logo {
+    margin-bottom: 3rem;
 }
 
 .wy-body-for-nav footer {
@@ -198,9 +222,13 @@ body.wy-body-for-nav {
 .wy-body-for-nav .wy-menu-vertical li.current a:hover {
     background: none;
 }
-.wy-body-for-nav .wy-menu-vertical a:hover {
-    background: none;
-    cursor: pointer;
+
+.wy-menu-vertical a span.toctree-expand {
+    color: #555 !important;
+}
+
+.wy-menu-vertical a:hover span.toctree-expand {
+    color: #000 !important;
 }
 
 .wy-body-for-nav .wy-menu-vertical li.current a {
@@ -234,25 +262,48 @@ body.wy-body-for-nav {
 .wy-body-for-nav b, .wy-body-for-nav strong {
     font-weight: normal;
 }
-.wy-body-for-nav h1,.wy-body-for-nav h2, .wy-body-for-nav h3,.wy-body-for-nav  h4, .wy-body-for-nav h5 {
-    font-family: 'Titillium Web', sans-serif;
-    margin: 15px 0;
+
+.wy-plain-list-disc li,
+.rst-content .section ul li,
+.rst-content .toctree-wrapper ul li,
+article ul li {
+    margin-top: 0.35em;
+    margin-bottom: 0.35em;
 }
+
+h1, h2, .rst-content .toctree-wrapper p.caption, h3, h4, h5, h6, legend {
+    font-family: 'Titillium Web', sans-serif;
+    margin: 1em 0 0.3em;
+    line-height: 1.2em;
+}
+
+.wy-body-for-nav .document > div > .section > *:not(:empty):first-of-type {
+    margin-top: 0;
+}
+
 .wy-body-for-nav h1 {
-  font-size: 4rem;
-  line-height: 4.8rem;
-  letter-spacing: -0.3px;
+    font-size: 3.9rem;
+    letter-spacing: -0.3px;
 }
 
 .wy-body-for-nav h2 {
-    font-size: 3rem;
-    font-weight: normal;
-    line-height: 3.8rem;
+    font-size: 3.25rem;
 }
 
 .wy-body-for-nav h3 {
-    font-size: 2rem;
-    line-height: 2.8rem;
+    font-size: 2.6rem;
+}
+
+.wy-body-for-nav h4 {
+    font-size: 1.95rem;
+}
+
+.wy-body-for-nav h5 {
+    font-size: 1.625rem;
+}
+
+.wy-body-for-nav h6 {
+    font-size: 1.4625rem;
 }
 
 .wy-body-for-nav .headerlink {
@@ -260,59 +311,95 @@ body.wy-body-for-nav {
 }
 
 .wy-body-for-nav p {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
     font-size: 100%;
     margin: 0 0 15px 0;
     line-height: 1.5;
 }
 
-.wy-body-for-nav .rst-content a, .wy-body-for-nav footer a{
+.wy-body-for-nav blockquote {
+    margin: 1em 0;
+    padding-left: 1em;
+    border-left: 4px solid #ddd;
+    color: #6a6a6a;
+}
+
+.wy-body-for-nav .rst-content a, .wy-body-for-nav footer a {
     font-family: inherit;
     font-size: inherit;
-    color: #1978c8;
+    color: #006ea7;
     text-decoration: none;
 }
 
 .wy-body-for-nav .rst-content a:visited, .wy-body-for-nav footer a:visited {
-    font-family: inherit;
-    font-size: inherit;
-    color: #1978c8;
-    text-decoration: none;
+    color: #446b7f;
 }
 
 .wy-body-for-nav .rst-content a:hover, .wy-body-for-nav footer a:hover {
-    color: #f28a25;
-    cursor: pointer;
+    text-decoration: underline;
+}
+
+.wy-body-for-nav .rst-content .btn:hover, .wy-body-for-nav footer .btn:hover {
+    text-decoration: none;
 }
 
 .wy-body-for-nav .wy-nav-top {
+    padding: 5px 20px;
     background: white;
     color: black;
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
 }
+
+.wy-body-for-nav .wy-nav-top i {
+    transform: translateY(6px);
+}
+
 .wy-body-for-nav .wy-nav-top a {
+    font-size: 2.8rem;
     color: black !important;
 }
 
 
 @media screen and (max-width: 768px) {
     .wy-body-for-nav .wy-nav-side {
-        left: -300px;
+        transform: translate(-300px, 0);
+        transition: all ease 0.3s;
     }
     .wy-body-for-nav .wy-nav-side.shift {
         width: 85%;
-        left: 0;
+        transform: translate(0, 0);
     }
     .wy-body-for-nav .wy-nav-content-wrap {
         margin-left: 0;
+        transform: translate(0, 0);
+        transition: all ease 0.3s;
+    }
+    .wy-body-for-nav .wy-nav-content-wrap.shift {
+        position: relative;
+        left: 0;
+        transform: translate(85%, 0);
     }
     .wy-body-for-nav .wy-breadcrumbs {
         display: none;
     }
-    .wy-body-for-nav h1 {
-        font-size: 3rem;
-        line-height: 3.8rem;
-        letter-spacing: 0px;
+    .wy-body-for-nav .wy-nav-content .document {
+        padding: 20px;
     }
 }
 
+@media screen and (min-width: 1600px) {
+    .wy-body-for-nav .wy-nav-side {
+        width: 350px;
+    }
+    .wy-body-for-nav .wy-nav-content-wrap {
+        margin-left: 350px;
+    }
+    html {
+        font-size: 70%;
+    }
+}
 
+/* Fix Read The Docs side-effects */
+.wy-body-for-nav .rst-versions {
+    font-size: 16px;
+    line-height: 1;
+}

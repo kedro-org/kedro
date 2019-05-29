@@ -52,7 +52,7 @@ class SequentialRunner(AbstractRunner):
             for all unregistered data sets.
 
         """
-        return MemoryDataSet(max_loads=0)
+        return MemoryDataSet()
 
     def _run(self, pipeline: Pipeline, catalog: DataCatalog) -> None:
         """The method implementing sequential pipeline running.

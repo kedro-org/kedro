@@ -446,8 +446,7 @@ class DataCatalog:
     def set_max_loads(self, ds_name: str, max_loads: int):
         """Set the maximum number of times the given dataset can be loaded. ``DataSet``s like
         ``MemoryDataSet`` use this to clear data from memory. In most other cases, this has no
-        effect. Dataset implementations can specify that they can be loaded unlimited times by
-        using ``kedro.io.core.FORCE_UNLIMITED_LOADS``
+        effect.
 
         Args:
             ds_name: The dataset to modify

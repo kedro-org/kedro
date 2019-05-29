@@ -45,7 +45,6 @@ from kedro.utils import load_obj
 MAX_DESCRIPTION_LENGTH = 70
 VERSIONED_FLAG_KEY = "versioned"
 VERSION_KEY = "version"
-FORCE_UNLIMITED_LOADS = -1
 
 
 class DataSetError(Exception):
@@ -291,11 +290,10 @@ class AbstractDataSet(abc.ABC):
             "it must implement the `_describe` method".format(self.__class__.__name__)
         )
 
-    def set_max_loads(self, max_loads: int = FORCE_UNLIMITED_LOADS):
+    def set_max_loads(self, max_loads: int):
         """Set how many times this dataset can be loaded. ``DataSet``s that can set a limit to
         the number of times they can be loaded need to implement this method and the relevant
-        logic, or the can specify that they can be loaded unlimited times by using
-        ``kedro.io.core.FORCE_UNLIMITED_LOADS``
+        logic.
 
         Args:
             max_loads: Maximum number of times ``load`` method of the

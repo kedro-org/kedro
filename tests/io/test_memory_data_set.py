@@ -161,7 +161,7 @@ class TestMemoryDataSet:
 
 
 class TestMemoryDataSetMaxLoads:
-    @pytest.mark.parametrize("max_loads", [None, -1, 0, 1, 2], indirect=True)
+    @pytest.mark.parametrize("max_loads", [-1, 0, 1, 2], indirect=True)
     def test_max_loads(self, memory_data_set_loads, input_data, max_loads):
         """Test that the first load succeeds regardless of the maximum number
         of loads specified"""
@@ -196,3 +196,10 @@ class TestMemoryDataSetMaxLoads:
         memory_data_set_loads.save(input_data)
         loaded_data = memory_data_set_loads.load()
         assert _check_equals(loaded_data, input_data)
+
+    def test_max_loads_zero(self, memory_data_set):
+        with pytest.raises(
+            ValueError,
+            match=r"Setting max_loads to zero " r"for `MemoryDataSet` is not allowed",
+        ):
+            memory_data_set.set_max_loads(0)

@@ -75,7 +75,7 @@ class ParallelRunner(AbstractRunner):
 
         """
         # pylint: disable=no-member
-        return self._manager.MemoryDataSet()
+        return self._manager.MemoryDataSet(max_loads=0)
 
     @classmethod
     def _validate_nodes(cls, nodes: Iterable[Node]):

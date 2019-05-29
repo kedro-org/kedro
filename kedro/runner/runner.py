@@ -81,8 +81,8 @@ class AbstractRunner(ABC):
 
         for ds_name in catalog.list():
             num_loads = len(pipeline.only_nodes_with_inputs(ds_name).nodes)
-            num_loads = num_loads if num_loads > 0 else None
-            catalog.set_max_loads(ds_name, num_loads)
+            if num_loads > 0:
+                catalog.set_max_loads(ds_name, num_loads)
 
         self._run(pipeline, catalog)
 

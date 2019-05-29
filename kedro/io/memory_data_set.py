@@ -35,7 +35,12 @@ from typing import Any, Dict
 import numpy as np
 import pandas as pd
 
-from kedro.io.core import AbstractDataSet, DataSetError, ExistsMixin
+from kedro.io.core import (
+    FORCE_UNLIMITED_LOADS,
+    AbstractDataSet,
+    DataSetError,
+    ExistsMixin,
+)
 
 
 class MemoryDataSet(AbstractDataSet, ExistsMixin):
@@ -67,7 +72,7 @@ class MemoryDataSet(AbstractDataSet, ExistsMixin):
             return dict(data="<{}>".format(type(self._data).__name__))
         return dict(data=None)  # pragma: no cover
 
-    def __init__(self, data: Any = None, max_loads: int = None):
+    def __init__(self, data: Any = None, max_loads: int = FORCE_UNLIMITED_LOADS):
         """Creates a new instance of ``MemoryDataSet`` pointing to the
         provided Python object.
 
@@ -77,17 +82,20 @@ class MemoryDataSet(AbstractDataSet, ExistsMixin):
                 ``MemoryDataSet`` data is reset after this number of calls is
                 made. Any number of calls is allowed if the argument is not
                 set. ``max_loads`` counter is reset after every ``save``
-                method call.
+                method call. Setting this to ``FORCE_UNLIMITED_LOADS`` (which is
+                the default) indicates that calls to ``.set_maximum_loads()``
+                should have no effect on this dataset.
 
         """
         self._data = None
         self._max_loads = max_loads
+        self._load_counter = max_loads
         if data is not None:
             self._save(data)
 
     def _load(self) -> Any:
         if self._data is None:
-            if self._max_loads is None:
+            if self._load_counter != 0:
                 message = "Data for MemoryDataSet has not been saved yet."
             else:
                 message = (
@@ -102,7 +110,7 @@ class MemoryDataSet(AbstractDataSet, ExistsMixin):
             data = self._data
         else:
             data = copy.deepcopy(self._data)
-        if self._load_counter:
+        if self._load_counter > 0:
             self._load_counter -= 1
             if self._load_counter == 0:
                 self._data = None
@@ -122,5 +130,11 @@ class MemoryDataSet(AbstractDataSet, ExistsMixin):
             return False
         return True
 
-    def set_max_loads(self, max_loads):
-        self._max_loads = max_loads
+    def set_max_loads(self, max_loads: int = FORCE_UNLIMITED_LOADS):
+        if max_loads == 0:
+            raise ValueError(
+                "Setting max_loads to zero for `MemoryDataSet` is not allowed."
+            )
+        if self._max_loads != FORCE_UNLIMITED_LOADS:
+            self._max_loads = max_loads
+            self._load_counter = max_loads

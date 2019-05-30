@@ -38,6 +38,12 @@ jobs:
           command: |
             make e2e-tests
        - run:
+           name: Check docs build on Python 3.6+
+           command: |
+             if python -c "import sys; sys.exit(sys.version_info[:2] == (3, 5))" ; then
+                 make build-docs
+             fi
+       - run:
           name: Check for legal compliance
           command: |
             make legal

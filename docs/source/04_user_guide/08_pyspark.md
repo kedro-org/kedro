@@ -4,7 +4,7 @@
 
 In this tutorial we explain how to work with `PySpark` in a Kedro pipeline.
 
-Relevant API documentation: [SparkDataSet](/kedro.contrib.io.pyspark)
+Relevant API documentation: [SparkDataSet](/kedro.contrib.io.pyspark.SparkDataSet), [SparkJDBCDataSet](/kedro.contrib.io.pyspark.SparkJDBCDataSet)
 
 ## Initialising a `SparkSession`
 
@@ -58,7 +58,7 @@ Since `SparkSession` is a [singleton](https://python-3-patterns-idioms-test.read
 
 Having created a `SparkSession`, you can load your data using `PySpark`'s [DataFrameReader](https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrameReader). 
 
-To do so, please use the provided [SparkDataSet](/kedro.contrib.io.pyspark):
+To do so, please use the provided [SparkDataSet](/kedro.contrib.io.pyspark.SparkDataSet):
 
 ### Code API
 

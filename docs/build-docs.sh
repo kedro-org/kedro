@@ -41,5 +41,5 @@ rm -rf docs/tmp-build-artifacts/05_api_docs/
 rm -rf docs/build
 mkdir -p docs/build/html/_static
 cp -r docs/source/css docs/build/html/_static
-sphinx-build docs/tmp-build-artifacts docs/build/html -c docs/ -E -a -j auto
+sphinx-build -c docs/ -W -E -a -j auto docs/tmp-build-artifacts docs/build/html
 rm -rf docs/tmp-build-artifacts

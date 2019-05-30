@@ -1,7 +1,8 @@
 # Release 0.15
 
 ## Major features and improvements
-Improved API docs
+* Improved API docs.
+* New I/O module `HDFS3DataSet`.
 
 
 ## Bug fixes and other changes

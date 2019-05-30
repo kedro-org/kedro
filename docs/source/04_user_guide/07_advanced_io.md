@@ -176,6 +176,7 @@ Currently the following datasets support versioning:
 - `CSVLocalDataSet`
 - `CSVS3DataSet`
 - `HDFLocalDataSet`
+- `HDFS3DataSet`
 - `JSONLocalDataSet`
 - `ParquetLocalDataSet`
 - `PickleLocalDataSet`

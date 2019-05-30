@@ -82,8 +82,8 @@ class HDFLocalDataSet(AbstractDataSet, ExistsMixin, FilepathVersionMixIn):
         filepath.
 
         Args:
-            filepath: path to an hdf file.
-            key: identifier to the group in the HDF store.
+            filepath: Path to an hdf file.
+            key: Identifier to the group in the HDF store.
             load_args: Pandas options for loading hdf files.
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_hdf.html

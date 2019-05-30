@@ -6,7 +6,6 @@
 #
 # An example data set definition can look as follows:
 #
-
 #cars.csv:
 #  type: CSVLocalDataSet # https://kedro.readthedocs.io/en/latest/kedro.io.CSVLocalDataSet.html
 #  filepath: data/01_raw/company/cars.csv
@@ -25,6 +24,7 @@
 #cars.csv.s3:
 #  type: CSVS3DataSet # https://kedro.readthedocs.io/en/latest/kedro.io.CSVS3DataSet.html
 #  filepath: data/02_intermediate/company/cars.csv
+#  bucket_name: my_bucket
 #  credentials: dev_s3
 #  load_args: # https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_csv.html
 #    sep: ','
@@ -48,6 +48,15 @@
 #    # mode: 'a'  # Appends or creates a file
 #    # mode: '+r'  # Appends an existing file
 #    dropna: True
+#
+#cars.hdf.s3:
+#  type: HDFS3DataSet  # https://kedro.readthedocs.io/en/latest/kedro.io.HDFS3DataSet.html
+#  filepath: data/02_intermediate/cars.hdf
+#  bucket_name: my_bucket
+#  key: hdf_key
+#  credentials: dev_s3
+#  load_args:
+#  save_args:
 #
 #cars.parquet:
 #  type: ParquetLocalDataSet  # https://kedro.readthedocs.io/en/latest/kedro.io.ParquetLocalDataSet.html

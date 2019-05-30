@@ -24,9 +24,9 @@ from pathlib import Path
 from typing import List, Tuple
 
 from click import secho, style
+from recommonmark.transform import AutoStructify
 
 from kedro import __version__ as release
-from recommonmark.transform import AutoStructify
 
 # -- Project information -----------------------------------------------------
 

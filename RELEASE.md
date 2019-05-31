@@ -11,7 +11,7 @@
 ## Breaking changes to the API
 
 
-# Release 0.14.0:
+# Release 0.14.1:
 
 The initial release of Kedro.
 

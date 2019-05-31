@@ -1,15 +1,25 @@
 kedro.contrib.io
 ================
 
-.. currentmodule:: kedro.contrib.io
+.. rubric:: Description
 
 .. automodule:: kedro.contrib.io
 
-.. autosummary::
-    :toctree:
-    :template: autosummary/module.rst
+   .. rubric:: Data catalog wrapper
 
-    kedro.contrib.io.catalog_with_default
-    kedro.contrib.io.azure
-    kedro.contrib.io.bioinformatics
-    kedro.contrib.io.pyspark
+   .. autosummary::
+      :toctree:
+      :template: autosummary/class.rst
+
+      kedro.contrib.io.catalog_with_default.DataCatalogWithDefault
+
+   .. rubric:: DataSets
+
+   .. autosummary::
+      :toctree:
+      :template: autosummary/class.rst
+
+      kedro.contrib.io.azure.CSVBlobDataSet
+      kedro.contrib.io.bioinformatics.BioSequenceLocalDataSet
+      kedro.contrib.io.pyspark.SparkDataSet
+      kedro.contrib.io.pyspark.SparkJDBCDataSet

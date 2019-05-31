@@ -313,7 +313,7 @@ class Node:
             keys are defined by the node outputs.
 
         """
-        self._logger.debug("Running node: %s", str(self))
+        self._logger.info("Running node: %s", str(self))
 
         outputs = None
 

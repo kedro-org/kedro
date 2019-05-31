@@ -1,7 +1,6 @@
-
-> *Note:* This documentation is based on `Kedro 0.14.0`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
-
 # Working with Kedro and IPython
+
+> *Note:* This documentation is based on `Kedro 0.14.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 In order to experiment with the code interactively, you may want to use a Python kernel inside a Jupyter notebook (formerly known as IPython).
 

@@ -1,14 +1,16 @@
 kedro.runner
 =================
 
-.. currentmodule:: kedro.runner
+.. rubric:: Description
 
 .. automodule:: kedro.runner
 
-.. autosummary::
-    :toctree:
-    :template: autosummary/class.rst
+   .. rubric:: Classes
 
-    kedro.runner.AbstractRunner
-    kedro.runner.SequentialRunner
-    kedro.runner.ParallelRunner
+   .. autosummary::
+      :toctree:
+      :template: autosummary/class.rst
+
+      kedro.runner.AbstractRunner
+      kedro.runner.SequentialRunner
+      kedro.runner.ParallelRunner

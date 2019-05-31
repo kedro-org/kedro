@@ -32,3 +32,4 @@ configuration from different file formats.
 
 
 from .config import ConfigLoader  # NOQA
+from .config import MissingConfigException  # NOQA

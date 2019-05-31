@@ -106,7 +106,7 @@ def _setup_template_files(context):
     copyfile(str(curr_dir / "e2e_test_catalog.yml"), str(catalog_file))
 
     with catalog_file.open("r") as cat_file:
-        catalog = yaml.load(cat_file)
+        catalog = yaml.safe_load(cat_file)
 
     context.output_file1 = context.root_project_dir / catalog["E"]["filepath"]
     context.output_file2 = context.root_project_dir / catalog["F"]["filepath"]
@@ -227,7 +227,7 @@ def node_tagged_with(context, node_name, tags):
 def change_log_level_proj(context, log_level):
     logging_yml = context.root_project_dir / "conf" / "base" / "logging.yml"
     with logging_yml.open() as file_handle:
-        logging_conf = yaml.load(file_handle)
+        logging_conf = yaml.safe_load(file_handle)
 
     logging_conf["handlers"]["console"]["level"] = log_level
     logging_conf["loggers"]["kedro.pipeline"]["level"] = log_level

@@ -1,12 +1,14 @@
 kedro.config
-=============
+============
 
-.. currentmodule:: kedro.config
+.. rubric:: Description
 
 .. automodule:: kedro.config
 
-.. autosummary::
-    :toctree:
-    :template: autosummary/class.rst
+   .. rubric:: Classes
 
-    kedro.config.ConfigLoader
+   .. autosummary::
+      :toctree:
+      :template: autosummary/class.rst
+
+      kedro.config.ConfigLoader

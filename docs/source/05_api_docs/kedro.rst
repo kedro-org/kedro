@@ -1,13 +1,19 @@
 kedro
-========
+=====
+
+.. rubric:: Description
 
 .. automodule:: kedro
 
-.. autosummary::
-    :toctree:
+.. rubric:: Modules
 
-    kedro.io
-    kedro.config
-    kedro.pipeline
-    kedro.runner
-    kedro.contrib
+.. autosummary::
+  :toctree:
+  :template: autosummary/module.rst
+
+  kedro.config
+  kedro.io
+  kedro.pipeline
+  kedro.runner
+  kedro.contrib
+  kedro.cli

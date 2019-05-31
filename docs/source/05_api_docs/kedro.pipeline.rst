@@ -1,19 +1,33 @@
 kedro.pipeline
-=================
+==============
 
-.. currentmodule:: kedro.pipeline
+.. rubric:: Description
 
 .. automodule:: kedro.pipeline
 
-.. autosummary::
-    :toctree:
-    :template: autosummary/class.rst
+   .. rubric:: Classes
 
-    kedro.pipeline.Pipeline
-    kedro.pipeline.node.Node
+   .. autosummary::
+       :toctree:
+       :template: autosummary/class.rst
 
-.. autosummary::
-    :toctree:
-    :template: autosummary/base.rst
+       kedro.pipeline.Pipeline
+       kedro.pipeline.node.Node
 
-    kedro.pipeline.node
+   .. rubric:: Functions
+
+   .. autosummary::
+       :toctree:
+       :template: autosummary/base.rst
+
+       kedro.pipeline.node
+
+   .. rubric:: Decorators
+
+   .. autosummary::
+       :toctree:
+       :template: autosummary/base.rst
+
+       kedro.pipeline.decorators.log_time
+       kedro.pipeline.decorators.mem_profile
+

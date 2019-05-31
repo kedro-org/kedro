@@ -44,6 +44,7 @@ from .csv_s3 import CSVS3DataSet  # NOQA
 from .data_catalog import DataCatalog  # NOQA
 from .excel_local import ExcelLocalDataSet  # NOQA
 from .hdf_local import HDFLocalDataSet  # NOQA
+from .hdf_s3 import HDFS3DataSet  # NOQA
 from .json_local import JSONLocalDataSet  # NOQA
 from .lambda_data_set import LambdaDataSet  # NOQA
 from .memory_data_set import MemoryDataSet  # NOQA

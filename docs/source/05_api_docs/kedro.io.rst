@@ -1,7 +1,7 @@
 kedro.io
 ========
 
-.. currentmodule:: kedro.io
+.. rubric:: Description
 
 .. automodule:: kedro.io
 
@@ -34,6 +34,8 @@ Data Sets
     kedro.io.SQLQueryDataSet
     kedro.io.TextLocalDataSet
     kedro.io.ExcelLocalDataSet
+
+Additional ``AbstractDataSet`` implementations can be found in ``kedro.contrib.io``.
 
 Errors
 ------

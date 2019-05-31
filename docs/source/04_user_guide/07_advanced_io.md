@@ -1,6 +1,6 @@
 # Advanced IO
 
-> *Note:* This documentation is based on `Kedro 0.14.0`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.14.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 In this tutorial, you will learn about advanced uses of the [Kedro IO](/kedro.io.rst) module and understand the underlying implementation.
 
@@ -176,6 +176,7 @@ Currently the following datasets support versioning:
 - `CSVLocalDataSet`
 - `CSVS3DataSet`
 - `HDFLocalDataSet`
+- `HDFS3DataSet`
 - `JSONLocalDataSet`
 - `ParquetLocalDataSet`
 - `PickleLocalDataSet`

@@ -82,3 +82,11 @@ Feature: Run Project
     When I execute the kedro command "run --parallel --runner=SequentialRunner"
     Then I should get an error exit code
     And I should get an error message including "Both --parallel and --runner options cannot be used together. Please use either --parallel or --runner."
+
+  Scenario: Run python entry point with no credentials in the configuration
+    Given I have prepared a config file with example code
+    And I have run a non-interactive kedro new
+    And I have deleted the credentials file
+    When I execute the kedro command "run"
+    Then I should get a successful exit code
+

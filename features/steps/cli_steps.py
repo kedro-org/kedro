@@ -257,6 +257,13 @@ def create_project_from_config_file(context):
     assert res.returncode == OK_EXIT_CODE
 
 
+@given("I have deleted the credentials file")
+def delete_credentials_file(context):
+    """Delete configuration file from project"""
+    path_to_config_file = context.root_project_dir / "conf" / "base" / "credentials.yml"
+    path_to_config_file.unlink()
+
+
 @given("I have added the project directory to staging")
 @when("I add the project directory to staging")
 def add_proj_dir_to_staging(context):

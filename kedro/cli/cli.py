@@ -318,7 +318,7 @@ def _parse_config(config_path: str, verbose: bool) -> Dict:
     """
     try:
         with open(config_path, "r") as config_file:
-            config = yaml.load(config_file)
+            config = yaml.safe_load(config_file)
 
         if verbose:
             click.echo(config_path + ":")
@@ -372,7 +372,7 @@ def _check_config_ok(config_path: str, config: Dict[str, Any]) -> Dict[str, Any]
 def _get_default_config():
     default_config_path = os.path.join(TEMPLATE_PATH, "default_config.yml")
     with open(default_config_path) as default_config_file:
-        default_config = yaml.load(default_config_file)
+        default_config = yaml.safe_load(default_config_file)
     return default_config
 
 
@@ -473,8 +473,22 @@ def _get_prompt_text(title, *text):
     return "\n".join(str(x).strip() for x in prompt_text) + "\n"
 
 
-def get_project_context(key, default=NO_DEFAULT):  # pragma: no cover
-    """Get a value from the project context."""
+def get_project_context(key: Any, default: Any = NO_DEFAULT) -> Any:  # pragma: no cover
+    """Get a value from the project context.
+    The user is responsible having the specified key in their project's context
+    which typically is exposed in the ``__kedro_context__`` function in ``run.py``
+
+    Args:
+        key: Key in Kedro context dictionary.
+        default: Default value if the key is not found. If not provided
+            and the key is not found, this will raise a ``KedroCliError``.
+
+    Returns:
+        Requested value from Kedro context dictionary or the default if the key was not found.
+
+    Raises:
+        KedroCliError: When the key is not found and the default value was not specified.
+    """
     try:
         kedro_cli = importlib.import_module("kedro_cli")
         kedro_context = _KEDRO_CONTEXT.copy()

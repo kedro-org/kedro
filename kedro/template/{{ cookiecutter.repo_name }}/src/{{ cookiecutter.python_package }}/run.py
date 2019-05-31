@@ -31,9 +31,10 @@
 import logging.config
 from pathlib import Path
 from typing import Iterable
+from warnings import warn
 
 from kedro.cli.utils import KedroCliError
-from kedro.config import ConfigLoader
+from kedro.config import ConfigLoader, MissingConfigException
 from kedro.io import DataCatalog
 from kedro.runner import SequentialRunner
 from kedro.utils import load_obj
@@ -100,7 +101,13 @@ def create_catalog(config: ConfigLoader, **kwargs) -> DataCatalog:
     conf_logging = config.get("logging*", "logging*/**")
     logging.config.dictConfig(conf_logging)
     conf_catalog = config.get("catalog*", "catalog*/**")
-    conf_creds = config.get("credentials*", "credentials*/**")
+
+    try:
+        conf_creds = config.get("credentials*", "credentials*/**")
+    except MissingConfigException:
+        warn("Your Kedro project is missing a credentials file!")
+        conf_creds = None
+
     conf_params = config.get("parameters*", "parameters*/**")
     logging.config.dictConfig(conf_logging)
     catalog = DataCatalog.from_config(conf_catalog, conf_creds)

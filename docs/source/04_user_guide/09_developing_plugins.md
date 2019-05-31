@@ -1,5 +1,7 @@
 # Developing Kedro plugins
 
+> *Note:* This documentation is based on `Kedro 0.14.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+
 ## Overview
 
 Kedro uses various entry points in the [`pkg_resources` entry_point system](https://setuptools.readthedocs.io/en/latest/setuptools.html#dynamic-discovery-of-services-and-plugins) to provide plugin functionality.

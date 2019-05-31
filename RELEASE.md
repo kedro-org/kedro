@@ -3,6 +3,8 @@
 ## Major features and improvements
 * Improved API docs.
 * New I/O module `HDFS3DataSet`.
+* Template `run.py` will throw a warning instead of error if `credentials.yml`
+  not present.
 
 
 ## Bug fixes and other changes

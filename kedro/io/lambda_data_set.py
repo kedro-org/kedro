@@ -29,7 +29,6 @@
 providing custom load, save, and exists methods without extending
 ``AbstractDataSet``.
 """
-import logging
 from typing import Any, Callable, Dict, Optional
 
 from kedro.io.core import AbstractDataSet, DataSetError
@@ -66,9 +65,11 @@ class LambdaDataSet(AbstractDataSet):
             except AttributeError:  # pragma: no cover
                 return str(func)
 
-        descr = {"load": _to_str(self.__load), "save": _to_str(self.__save)}
-        if hasattr(self, "exists"):
-            descr["exists"] = _to_str(self._exists)
+        descr = {
+            "load": _to_str(self.__load),
+            "save": _to_str(self.__save),
+            "exists": _to_str(self.__exists),
+        }
 
         return descr
 
@@ -88,11 +89,16 @@ class LambdaDataSet(AbstractDataSet):
             )
         return self.__load()
 
+    def _exists(self) -> bool:
+        if not self.__exists:
+            return super()._exists()
+        return self.__exists()
+
     def __init__(
         self,
         load: Optional[Callable[[], Any]],
         save: Optional[Callable[[Any], None]],
-        exists: Optional[Callable[[], bool]] = None,
+        exists: Callable[[], bool] = None,
     ):
         """Creates a new instance of ``LambdaDataSet`` with references to the
         required input/output data set methods.
@@ -118,24 +124,14 @@ class LambdaDataSet(AbstractDataSet):
                 "`save` function for LambdaDataSet must be a Callable. "
                 "Object of type `{}` provided instead.".format(save.__class__.__name__)
             )
+        if exists is not None and not callable(exists):
+            raise DataSetError(
+                "`exists` function for LambdaDataSet must be a Callable. "
+                "Object of type `{}` provided instead.".format(
+                    exists.__class__.__name__
+                )
+            )
 
         self.__load = load
         self.__save = save
-
-        if exists:
-            self._exists = exists
-
-            def _exists_with_error_handling():
-                # wrapper around exists method for error handling
-                try:
-                    logging.getLogger(__name__).debug(
-                        "Checking whether target of %s exists", str(self)
-                    )
-                    return self._exists()
-                except Exception as exc:
-                    message = "Failed during exists check for data set {}.\n{}".format(
-                        str(self), str(exc)
-                    )
-                    raise DataSetError(message) from exc
-
-            self.exists = _exists_with_error_handling
+        self.__exists = exists

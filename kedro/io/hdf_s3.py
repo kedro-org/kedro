@@ -35,19 +35,13 @@ from typing import Any, Dict, Optional
 import pandas as pd
 from s3fs import S3FileSystem
 
-from kedro.io.core import (
-    AbstractDataSet,
-    DataSetError,
-    ExistsMixin,
-    S3PathVersionMixIn,
-    Version,
-)
+from kedro.io.core import AbstractDataSet, DataSetError, S3PathVersionMixIn, Version
 
 HDFSTORE_DRIVER = "H5FD_CORE"
 
 
 # pylint: disable=too-many-instance-attributes
-class HDFS3DataSet(AbstractDataSet, ExistsMixin, S3PathVersionMixIn):
+class HDFS3DataSet(AbstractDataSet, S3PathVersionMixIn):
     """``HDFS3DataSet`` loads and saves data to a S3 bucket. The
     underlying functionality is supported by pandas, so it supports all
     allowed pandas options for loading and saving hdf files.

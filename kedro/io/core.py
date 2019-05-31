@@ -290,10 +290,6 @@ class AbstractDataSet(abc.ABC):
             "it must implement the `_describe` method".format(self.__class__.__name__)
         )
 
-
-class ExistsMixin(abc.ABC):
-    """Mixin class which provides an exists() method."""
-
     def exists(self) -> bool:
         """Checks whether a data set's output already exists by calling
         the provided _exists() method.
@@ -316,12 +312,12 @@ class ExistsMixin(abc.ABC):
             )
             raise DataSetError(message) from exc
 
-    @abc.abstractmethod
     def _exists(self) -> bool:
-        raise NotImplementedError(
-            "`{}` inherits from ExistsMixin and "
-            "it must implement the `_exists` method".format(self.__class__.__name__)
+        logging.getLogger(__name__).warning(
+            "`exists()` not implemented for `%s`. " "Assuming output does not exist.",
+            self.__class__.__name__,
         )
+        return False
 
 
 def generate_current_version() -> str:

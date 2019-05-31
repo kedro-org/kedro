@@ -304,16 +304,7 @@ class DataCatalog:
                 has not yet been registered.
         """
         if name in self._data_sets:
-            data_set = self._data_sets[name]
-            if hasattr(data_set, "exists"):
-                return data_set.exists()
-
-            self._logger.warning(
-                "`exists()` not implemented for `%s`. "
-                "Assuming output does not exist.",
-                name,
-            )
-            return False
+            return self._data_sets[name].exists()
 
         raise DataSetNotFoundError("DataSet '{}' not found in the catalog".format(name))
 

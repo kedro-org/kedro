@@ -36,10 +36,10 @@ from typing import Any, Dict, Optional
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.utils import AnalysisException
 
-from kedro.io import AbstractDataSet, ExistsMixin
+from kedro.io import AbstractDataSet
 
 
-class SparkDataSet(AbstractDataSet, ExistsMixin):
+class SparkDataSet(AbstractDataSet):
     """``SparkDataSet`` loads and saves Spark data frames.
 
     Example:

@@ -31,11 +31,11 @@ accessed text data using the python open function.
 from pathlib import Path
 from typing import Any, Dict
 
-from kedro.io import AbstractDataSet, ExistsMixin
+from kedro.io import AbstractDataSet
 from kedro.io.core import DataSetError, FilepathVersionMixIn, Version
 
 
-class TextLocalDataSet(AbstractDataSet, ExistsMixin, FilepathVersionMixIn):
+class TextLocalDataSet(AbstractDataSet, FilepathVersionMixIn):
     """``TextLocalDataSet`` loads and saves unstructured text files.
 
     Example:

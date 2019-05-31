@@ -36,13 +36,7 @@ import pickle
 from pathlib import Path
 from typing import Any, Dict
 
-from kedro.io.core import (
-    AbstractDataSet,
-    DataSetError,
-    ExistsMixin,
-    FilepathVersionMixIn,
-    Version,
-)
+from kedro.io.core import AbstractDataSet, DataSetError, FilepathVersionMixIn, Version
 
 try:
     import joblib
@@ -50,7 +44,7 @@ except ImportError:
     joblib = None
 
 
-class PickleLocalDataSet(AbstractDataSet, ExistsMixin, FilepathVersionMixIn):
+class PickleLocalDataSet(AbstractDataSet, FilepathVersionMixIn):
     """``PickleLocalDataSet`` loads and saves a Python object to a
     local pickle file. The underlying functionality is
     supported by the pickle and joblib libraries, so it supports

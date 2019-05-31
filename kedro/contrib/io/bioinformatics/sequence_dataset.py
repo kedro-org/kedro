@@ -35,10 +35,10 @@ from typing import Any, Dict, List, Optional
 
 from Bio import SeqIO
 
-from kedro.io import AbstractDataSet, ExistsMixin
+from kedro.io import AbstractDataSet
 
 
-class BioSequenceLocalDataSet(AbstractDataSet, ExistsMixin):
+class BioSequenceLocalDataSet(AbstractDataSet):
     """``BioSequenceLocalDataSet`` loads and saves data to a sequence file.
 
     Example:

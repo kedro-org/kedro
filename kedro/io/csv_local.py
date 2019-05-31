@@ -35,16 +35,10 @@ from typing import Any, Dict
 
 import pandas as pd
 
-from kedro.io.core import (
-    AbstractDataSet,
-    DataSetError,
-    ExistsMixin,
-    FilepathVersionMixIn,
-    Version,
-)
+from kedro.io.core import AbstractDataSet, DataSetError, FilepathVersionMixIn, Version
 
 
-class CSVLocalDataSet(AbstractDataSet, ExistsMixin, FilepathVersionMixIn):
+class CSVLocalDataSet(AbstractDataSet, FilepathVersionMixIn):
     """``CSVLocalDataSet`` loads and saves data to a local csv file. The
     underlying functionality is supported by pandas, so it supports all
     allowed pandas options for loading and saving csv files.

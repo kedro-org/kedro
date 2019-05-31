@@ -35,7 +35,6 @@ from .core import AbstractDataSet  # NOQA
 from .core import DataSetAlreadyExistsError  # NOQA
 from .core import DataSetError  # NOQA
 from .core import DataSetNotFoundError  # NOQA
-from .core import ExistsMixin  # NOQA
 from .core import FilepathVersionMixIn  # NOQA
 from .core import S3PathVersionMixIn  # NOQA
 from .core import Version  # NOQA

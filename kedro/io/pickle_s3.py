@@ -35,16 +35,10 @@ from typing import Any, Dict, Optional
 
 from s3fs.core import S3FileSystem
 
-from kedro.io.core import (
-    AbstractDataSet,
-    DataSetError,
-    ExistsMixin,
-    S3PathVersionMixIn,
-    Version,
-)
+from kedro.io.core import AbstractDataSet, DataSetError, S3PathVersionMixIn, Version
 
 
-class PickleS3DataSet(AbstractDataSet, ExistsMixin, S3PathVersionMixIn):
+class PickleS3DataSet(AbstractDataSet, S3PathVersionMixIn):
     """``PickleS3DataSet`` loads and saves a Python object to a
         pickle file on S3. The underlying functionality is
         supported by the pickle library, so it supports all

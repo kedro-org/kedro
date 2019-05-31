@@ -35,16 +35,10 @@ from typing import Any, Dict
 
 import pandas as pd
 
-from kedro.io.core import (
-    AbstractDataSet,
-    DataSetError,
-    ExistsMixin,
-    FilepathVersionMixIn,
-    Version,
-)
+from kedro.io.core import AbstractDataSet, DataSetError, FilepathVersionMixIn, Version
 
 
-class JSONLocalDataSet(AbstractDataSet, ExistsMixin, FilepathVersionMixIn):
+class JSONLocalDataSet(AbstractDataSet, FilepathVersionMixIn):
     """``JSONLocalDataSet`` encodes data as json and saves it to a local file
     or reads in and decodes an existing json file. The encoding/decoding
     functionality is provided by Python's ``json`` library.

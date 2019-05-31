@@ -35,16 +35,10 @@ from typing import Any, Dict, Union
 
 import pandas as pd
 
-from kedro.io.core import (
-    AbstractDataSet,
-    DataSetError,
-    ExistsMixin,
-    FilepathVersionMixIn,
-    Version,
-)
+from kedro.io.core import AbstractDataSet, DataSetError, FilepathVersionMixIn, Version
 
 
-class ExcelLocalDataSet(AbstractDataSet, ExistsMixin, FilepathVersionMixIn):
+class ExcelLocalDataSet(AbstractDataSet, FilepathVersionMixIn):
     """``ExcelLocalDataSet`` loads and saves data to a local Excel file. The
     underlying functionality is supported by pandas, so it supports all
     allowed pandas options for loading and saving Excel files.

@@ -36,16 +36,10 @@ from typing import Any, Dict
 import pandas as pd
 from pandas.io.pytables import HDFStore
 
-from kedro.io.core import (
-    AbstractDataSet,
-    DataSetError,
-    ExistsMixin,
-    FilepathVersionMixIn,
-    Version,
-)
+from kedro.io.core import AbstractDataSet, DataSetError, FilepathVersionMixIn, Version
 
 
-class HDFLocalDataSet(AbstractDataSet, ExistsMixin, FilepathVersionMixIn):
+class HDFLocalDataSet(AbstractDataSet, FilepathVersionMixIn):
     """``HDFLocalDataSet`` loads and saves data to a local hdf file. The
     underlying functionality is supported by pandas, so it supports all
     allowed pandas options for loading and saving hdf files.

@@ -10,6 +10,8 @@
 
 ## Breaking changes to the API
 
+Merged the ExistsMixin into AbstractDataSet
+
 
 # Release 0.14.0:
 

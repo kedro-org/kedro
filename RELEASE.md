@@ -1,17 +1,24 @@
-# Release 0.15
+# Release 0.15.0
 
 ## Major features and improvements
-* Improved API docs.
-* New I/O module `HDFS3DataSet`.
-
 
 ## Bug fixes and other changes
 
-
 ## Breaking changes to the API
-
 Merged the ExistsMixin into AbstractDataSet
 
+# Release 0.14.1
+
+## Major features and improvements
+* New I/O module `HDFS3DataSet`.
+
+## Bug fixes and other changes
+* Improved API docs.
+* Template `run.py` will throw a warning instead of error if `credentials.yml`
+  is not present.
+
+## Breaking changes to the API
+None
 
 # Release 0.14.0:
 

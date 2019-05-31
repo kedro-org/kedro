@@ -33,7 +33,6 @@ produced outputs and execution order.
 
 import copy
 import json
-import logging
 from collections import Counter, defaultdict
 from itertools import chain
 from typing import Callable, Dict, Iterable, List, Set, Tuple, Union
@@ -114,7 +113,6 @@ class Pipeline:
         if name:
             nodes = [n.tag([name]) for n in nodes]
         self._name = name
-        self._logger = logging.getLogger(__name__)
         self._nodes_by_name = {node.name: node for node in nodes}
         _validate_unique_outputs(nodes)
 

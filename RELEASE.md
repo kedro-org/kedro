@@ -1,4 +1,4 @@
-# Release 0.15
+# Release 0.14.1
 
 ## Major features and improvements
 * Improved API docs.

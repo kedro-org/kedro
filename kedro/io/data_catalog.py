@@ -431,5 +431,18 @@ class DataCatalog:
         """
         return DataCatalog({**self._data_sets})
 
+    def query(self, *args) -> List[str]:
+        """Queries the list of names registed in the catalog
+
+        Returns
+            Filtered list of _data_sets based on query inputs.
+        """
+
+        data_sets = self._data_sets
+        for arg in args:
+            data_sets = [data for data in data_sets if arg in data]
+
+        return data_sets
+
     def __eq__(self, other):
         return self._data_sets == other._data_sets  # pylint: disable=protected-access

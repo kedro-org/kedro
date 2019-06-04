@@ -147,4 +147,5 @@ kedro.db
 kedro/html
 docs/tmp-build-artifacts
 docs/build
+docs/node_modules
 docs/source/04_user_guide/source/.ipynb

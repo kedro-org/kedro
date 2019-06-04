@@ -1,4 +1,4 @@
-install: docs/build/html/index.html
+install: build-docs
 	cp -r docs/build/html kedro
 	pip install .
 
@@ -6,8 +6,6 @@ clean:
 	rm -rf build dist docs/build kedro/html pip-wheel-metadata
 	find . -regex ".*/__pycache__" -exec rm -rf {} +
 	find . -regex ".*\.egg-info" -exec rm -rf {} +
-
-docs/build/html/index.html: build-docs
 
 install-pip-setuptools:
 	python -m pip install -U "pip>=18.0, <19.0" "setuptools>=38.0, <39.0" wheel
@@ -32,6 +30,9 @@ SPHINXPROJ = Kedro
 
 build-docs:
 	./docs/build-docs.sh
+
+devserver: build-docs
+	cd docs && npm install && npm start
 
 package: clean install
 	python setup.py sdist bdist_wheel

@@ -80,9 +80,10 @@ class AbstractRunner(ABC):
             catalog.add(ds_name, self.create_default_data_set(ds_name))
 
         for ds_name in catalog.list():
-            num_loads = len(pipeline.only_nodes_with_inputs(ds_name).nodes)
-            if num_loads > 0:
-                catalog.set_max_loads(ds_name, num_loads)
+            if ds_name in pipeline.data_sets():
+                num_loads = len(pipeline.only_nodes_with_inputs(ds_name).nodes)
+                if num_loads > 0:
+                    catalog.set_max_loads(ds_name, num_loads)
 
         self._run(pipeline, catalog)
 

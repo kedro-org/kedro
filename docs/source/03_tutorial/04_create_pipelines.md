@@ -97,7 +97,7 @@ def create_pipeline(**kwargs):
 You will also need to import `node`, and your functions by adding them to the beginning of the `pipeline.py` file:
 
 ```python
-from kedro.pipeline import node
+from kedro.pipeline import node, Pipeline
 from kedro_tutorial.nodes.data_engineering import (
     preprocess_companies,
     preprocess_shuttles,

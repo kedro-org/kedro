@@ -30,12 +30,11 @@ a Directed Acyclic Graph, sequentially or in parallel. The ``Pipeline`` class
 offers quick access to input dependencies,
 produced outputs and execution order.
 """
-
 import copy
 import json
 from collections import Counter, defaultdict
 from itertools import chain
-from typing import Callable, Dict, Iterable, List, Set, Tuple, Union
+from typing import Callable, Dict, Iterable, List, Set, Union
 
 from toposort import CircularDependencyError as ToposortCircleError
 from toposort import toposort
@@ -126,7 +125,17 @@ class Pipeline:
             for output in node.outputs:
                 self._nodes_by_output[output] = node
 
-        self._topo_sorted_nodes = _topologically_sorted(nodes)
+        self._nodes = nodes
+        self._topo_sorted_nodes = _topologically_sorted(self.node_dependencies)
+
+    def __repr__(self):  # pragma: no cover
+        reprs = [repr(node) for node in self.nodes]
+        return "{}([\n{}\n])".format(self.__class__.name, ",\n".join(reprs))
+
+    def __add__(self, other):
+        if not isinstance(other, Pipeline):
+            return NotImplemented
+        return Pipeline(set(self.nodes + other.nodes))
 
     def all_inputs(self) -> Set[str]:
         """All inputs for all nodes in the pipeline.
@@ -252,6 +261,23 @@ class Pipeline:
         return self._name
 
     @property
+    def node_dependencies(self) -> Dict[Node, Set[Node]]:
+        """All dependencies of nodes where the first Node has a direct dependency on
+        the second Node.
+
+        Returns:
+            Dictionary where keys are nodes and values are sets made up of
+            their parent nodes. Independent nodes have this as empty sets.
+        """
+        dependencies = {node: set() for node in self._nodes}
+        for parent in self._nodes:
+            for output in parent.outputs:
+                for child in self._nodes_by_input[output]:
+                    dependencies[child].add(parent)
+
+        return dependencies
+
+    @property
     def nodes(self) -> List[Node]:
         """Return a list of the pipeline nodes in topological order, i.e. if
         node A needs to be run before node B, it will appear earlier in the
@@ -264,7 +290,7 @@ class Pipeline:
         return copy.copy(list(chain.from_iterable(self._topo_sorted_nodes)))
 
     @property
-    def grouped_nodes(self) -> List[List[Node]]:
+    def grouped_nodes(self) -> List[Set[Node]]:
         """Return a list of the pipeline nodes in topologically ordered groups,
         i.e. if node A needs to be run before node B, it will appear in an
         earlier group.
@@ -510,21 +536,6 @@ class Pipeline:
         nodes = [node for node in self.nodes if tags & node.tags]
         return Pipeline(nodes)
 
-    @property
-    def node_dependencies(self) -> Set[Tuple[Node, Node]]:
-        """All pairs of nodes where the first Node has a direct dependency on
-        the second Node.
-
-        Returns:
-            Pairs of dependent nodes
-        """
-        deps = set()
-        for parent in self.nodes:
-            for output in parent.outputs:
-                for child in self._nodes_by_input[output]:
-                    deps.add((child, parent))
-        return deps
-
     def decorate(self, *decorators: Callable) -> "Pipeline":
         """Create a new ``Pipeline`` by applying the provided decorators to
         all the nodes in the pipeline. If no decorators are passed, it will
@@ -543,10 +554,6 @@ class Pipeline:
         nodes = [node.decorate(*decorators) for node in self.nodes]
         return Pipeline(nodes)
 
-    def __repr__(self):  # pragma: no cover
-        reprs = [repr(node) for node in self.nodes]
-        return "{}([\n{}\n])".format(self.__class__.name, ",\n".join(reprs))
-
     def to_json(self):
         """Return a json representation of the pipeline."""
         transformed = [
@@ -564,11 +571,6 @@ class Pipeline:
         }
 
         return json.dumps(pipeline_versioned)
-
-    def __add__(self, other):
-        if not isinstance(other, Pipeline):
-            return NotImplemented
-        return Pipeline(set(self.nodes + other.nodes))
 
 
 def _validate_no_node_list(nodes: Iterable[Node]):
@@ -604,7 +606,7 @@ def _validate_unique_outputs(nodes: List[Node]) -> None:
         )
 
 
-def _topologically_sorted(nodes) -> List[List[Node]]:
+def _topologically_sorted(node_dependencies) -> List[Set[Node]]:
     """Topologically group and sort (order) nodes such that no node depends on
     a node that appears in the same or a later group.
 
@@ -613,8 +615,9 @@ def _topologically_sorted(nodes) -> List[List[Node]]:
             provided nodes.
 
     Returns:
-        The list of nodes in order of execution.
-
+        The list of node sets in order of execution. First set is nodes that should
+        be executed first (no dependencies), second set are nodes that should be
+        executed on the second step, etc.
     """
 
     def _circle_error_message(error_data: Dict[str, str]) -> str:
@@ -623,29 +626,14 @@ def _topologically_sorted(nodes) -> List[List[Node]]:
         This method can be used to replace that message with
         one that refers to the nodes' string representations.
         """
-        indices = error_data.keys()
-        circular = [str(nodes[int(index)]) for index in indices]
+        circular = [str(node) for node in error_data.keys()]
         return "Circular dependencies exist among these items: {}".format(circular)
 
-    output_to_node = dict()
-    for node_id, node in enumerate(nodes):
-        for output_id in node.outputs:
-            output_to_node[output_id] = node_id
-
-    toposort_ready = dict()
-    for node_id, node in enumerate(nodes):
-        toposort_ready[node_id] = set()
-        for input_id in node.inputs:
-            if input_id in output_to_node:
-                toposort_ready[node_id].add(output_to_node[input_id])
-
     try:
-        toposorted = list(toposort(toposort_ready))
+        return list(toposort(node_dependencies))
     except ToposortCircleError as error:
         message = _circle_error_message(error.data)
         raise CircularDependencyError(message) from error
-
-    return [[nodes[idx] for idx in sorted(group)] for group in toposorted]
 
 
 class CircularDependencyError(Exception):

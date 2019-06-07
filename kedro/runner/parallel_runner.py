@@ -158,12 +158,13 @@ class ParallelRunner(AbstractRunner):
         self._validate_catalog(catalog, pipeline)
         self._validate_nodes(pipeline.nodes)
 
-        done_inputs = pipeline.inputs()
-        todo_nodes = set(pipeline.nodes)
+        node_dependencies = pipeline.node_dependencies
+        todo_nodes = node_dependencies.keys()
+        done_nodes = set()
         futures = set()
         with ProcessPoolExecutor() as pool:
             while True:
-                ready = {n for n in todo_nodes if set(n.inputs) <= done_inputs}
+                ready = {n for n in todo_nodes if node_dependencies[n] <= done_nodes}
                 todo_nodes -= ready
                 for node in ready:
                     futures.add(pool.submit(run_node, node, catalog))
@@ -172,4 +173,4 @@ class ParallelRunner(AbstractRunner):
                     break
                 done, futures = wait(futures, return_when=FIRST_COMPLETED)
                 for future in done:
-                    done_inputs.update(future.result().outputs)
+                    done_nodes.add(future.result())

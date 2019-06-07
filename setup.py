@@ -70,7 +70,7 @@ setup(
     name=name,
     version=version,
     description="Kedro helps you build production-ready data and analytics pipelines",
-    license="Apache Software License (Apache 2.0)", 
+    license="Apache Software License (Apache 2.0)",
     long_description=readme,
     long_description_content_type="text/markdown",
     url="https://github.com/quantumblacklabs/kedro",

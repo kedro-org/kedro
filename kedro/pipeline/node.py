@@ -123,6 +123,52 @@ class Node:
         self._validate_unique_outputs()
         self._validate_inputs_dif_than_outputs()
 
+    @property
+    def _logger(self):
+        return logging.getLogger(__name__)
+
+    @property
+    def _unique_key(self):
+        return (self.name, tuple(self.inputs), tuple(self.outputs))
+
+    def __eq__(self, other):
+        if not isinstance(other, Node):
+            return NotImplemented
+        return self._unique_key == other._unique_key  # pylint: disable=protected-access
+
+    def __lt__(self, other):
+        if not isinstance(other, Node):
+            return NotImplemented
+        return self._unique_key < other._unique_key  # pylint: disable=protected-access
+
+    def __hash__(self):
+        return hash(self._unique_key)
+
+    def __str__(self):
+        def _sorted_set_to_str(xset):
+            return "[{}]".format(",".join(sorted(xset)))
+
+        out_str = _sorted_set_to_str(self.outputs) if self._outputs else "None"
+        in_str = _sorted_set_to_str(self.inputs) if self._inputs else "None"
+
+        prefix = self._name + ": " if self._name else ""
+        return prefix + "{}({}) -> {}".format(self._func.__name__, in_str, out_str)
+
+    def __repr__(self):  # pragma: no cover
+        return "Node({}, {!r}, {!r}, {!r})".format(
+            self._func.__name__, self._inputs, self._outputs, self._name
+        )
+
+    @property
+    def tags(self) -> Set[str]:
+        """Return the tags assigned to the node.
+
+        Returns:
+            Return the set of all assigned tags to the node.
+
+        """
+        return set(self._tags)
+
     def tag(self, tags: Iterable[str]) -> "Node":
         """Create a new ``Node`` which is an exact copy of the current one,
             but with more tags added to it.
@@ -144,18 +190,39 @@ class Node:
         )
 
     @property
-    def tags(self) -> Set[str]:
-        """Return the tags assigned to the node.
+    def name(self) -> str:  # pragma: no-cover
+        """Node's name.
 
         Returns:
-            Return the set of all assigned tags to the node.
-
+            Node's name if provided or the name of its function.
         """
-        return set(self._tags)
+        return self._name if self._name else str(self)
 
     @property
-    def _logger(self):
-        return logging.getLogger(__name__)
+    def inputs(self) -> List[str]:
+        """Return node inputs as a list preserving the original order
+            if possible.
+
+        Returns:
+            Node input names as a list.
+
+        """
+        return self._to_list(self._inputs)
+
+    @property
+    def outputs(self) -> List[str]:
+        """Return node outputs as a list preserving the original order
+            if possible.
+
+        Returns:
+            Node output names as a list.
+
+        """
+        return self._to_list(self._outputs)
+
+    @property
+    def _decorated_func(self):
+        return reduce(lambda g, f: f(g), self._decorators, self._func)
 
     def decorate(self, *decorators: Callable) -> "Node":
         """Create a new ``Node`` by applying the provided decorators to the
@@ -239,52 +306,6 @@ class Node:
             decorators=decorators,
         )
 
-    @property
-    def name(self) -> str:  # pragma: no-cover
-        """Node's name.
-
-        Returns:
-            Node's name if provided or the name of its function.
-        """
-        return self._name if self._name else str(self)
-
-    @property
-    def inputs(self) -> List[str]:
-        """Return node inputs as a list preserving the original order
-            if possible.
-
-        Returns:
-            Node input names as a list.
-
-        """
-        return self._to_list(self._inputs)
-
-    @property
-    def outputs(self) -> List[str]:
-        """Return node outputs as a list preserving the original order
-            if possible.
-
-        Returns:
-            Node output names as a list.
-
-        """
-        return self._to_list(self._outputs)
-
-    @staticmethod
-    def _to_list(element: Union[None, str, List[str], Dict[str, str]]) -> List:
-        """Make a list out of node inputs/outputs.
-
-        Returns:
-            List[str]: Node input/output names as a list to standardise.
-        """
-        if element is None:
-            return list()
-        if isinstance(element, str):
-            return [element]
-        if isinstance(element, dict):
-            return list(element.values())
-        return element
-
     def run(self, inputs: Dict[str, Any] = None) -> Dict[str, Any]:
         """Run this node using the provided inputs and return its results
         in a dictionary.
@@ -340,10 +361,6 @@ class Node:
         except Exception as exc:
             self._logger.error("Node `%s` failed with error: \n%s", str(self), str(exc))
             raise exc
-
-    @property
-    def _decorated_func(self):
-        return reduce(lambda g, f: f(g), self._decorators, self._func)
 
     def _run_no_inputs(self, inputs: Dict[str, Any]):
         if inputs:
@@ -463,20 +480,6 @@ class Node:
                     )
                 ) from exc
 
-    @staticmethod
-    def _process_inputs_for_bind(inputs: Union[None, str, List[str], Dict[str, str]]):
-        # Safeguard that we do not mutate list inputs
-        inputs = copy.copy(inputs)
-        args = []
-        kwargs = {}
-        if isinstance(inputs, str):
-            args = [inputs]
-        elif isinstance(inputs, list):
-            args = inputs
-        elif isinstance(inputs, dict):
-            kwargs = inputs
-        return args, kwargs
-
     def _validate_unique_outputs(self):
         diff = Counter(self.outputs) - Counter(set(self.outputs))
         if diff:
@@ -496,27 +499,34 @@ class Node:
                 "{}".format(str(self), common_in_out)
             )
 
-    def __str__(self):
-        def _sorted_set_to_str(xset):
-            return "[" + ",".join([name for name in sorted(xset)]) + "]"
+    @staticmethod
+    def _to_list(element: Union[None, str, List[str], Dict[str, str]]) -> List:
+        """Make a list out of node inputs/outputs.
 
-        out_str = _sorted_set_to_str(self.outputs) if self._outputs else "None"
-        in_str = _sorted_set_to_str(self.inputs) if self._inputs else "None"
+        Returns:
+            List[str]: Node input/output names as a list to standardise.
+        """
+        if element is None:
+            return list()
+        if isinstance(element, str):
+            return [element]
+        if isinstance(element, dict):
+            return list(element.values())
+        return element
 
-        prefix = self._name + ": " if self._name else ""
-        return prefix + "{}({}) -> {}".format(self._func.__name__, in_str, out_str)
-
-    def __repr__(self):  # pragma: no cover
-        return "Node({}, {!r}, {!r}, {!r})".format(
-            self._func.__name__, self._inputs, self._outputs, self._name
-        )
-
-    def __eq__(self, other):  # pragma: no cover
-        keys = {"_inputs", "_outputs", "_func", "_name"}
-        return all(self.__dict__[k] == other.__dict__[k] for k in keys)
-
-    def __hash__(self):
-        return hash((tuple(self.inputs), tuple(self.outputs), self._name))
+    @staticmethod
+    def _process_inputs_for_bind(inputs: Union[None, str, List[str], Dict[str, str]]):
+        # Safeguard that we do not mutate list inputs
+        inputs = copy.copy(inputs)
+        args = []
+        kwargs = {}
+        if isinstance(inputs, str):
+            args = [inputs]
+        elif isinstance(inputs, list):
+            args = inputs
+        elif isinstance(inputs, dict):
+            kwargs = inputs
+        return args, kwargs
 
 
 def _node_error_message(msg) -> str:

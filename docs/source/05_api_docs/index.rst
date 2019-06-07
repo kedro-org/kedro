@@ -35,6 +35,9 @@ Welcome to Kedro's API docs and tutorials!
     :target: https://github.com/ambv/black
     :alt: Code style is Black
 
+.. image:: https://pepy.tech/badge/kedro
+    :target: https://pepy.tech/project/kedro
+    :alt: Downloads
 
 .. toctree::
    :maxdepth: 2

@@ -9,6 +9,7 @@
 [![PyPI version](https://badge.fury.io/py/kedro.svg)](https://pypi.org/project/kedro/)
 [![Documentation](https://readthedocs.org/projects/kedro/badge/?version=latest)](https://kedro.readthedocs.io/)
 [![Code Style: Black](https://img.shields.io/badge/code%20style-black-black.svg)](https://github.com/ambv/black)
+[![Downloads](https://pepy.tech/badge/kedro)](https://pepy.tech/project/kedro)
 
 # What is Kedro?
 

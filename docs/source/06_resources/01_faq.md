@@ -6,33 +6,15 @@
 
 [Kedro](https://github.com/quantumblacklabs/kedro) is a workflow development tool that helps you build data pipelines that are robust, scaleable, deployable, reproducible and versioned. It was originally designed by [Aris Valtazanos](https://github.com/arisvqb) and [Nikolaos Tsaousis](https://github.com/tsanikgr) at [QuantumBlack](https://github.com/quantumblacklabs/) to solve the challenges they faced in their project work.
 
-### Philosophy
-
-Kedro is a Python library and lightly opinionated framework. This means that we give you the flexibility and extensibility of a standard Python library and make very few assumptions on the _best_ way to do things. We have created independent but friendly modules – modules that understand each others' defaults and are compatible. You can use alternative methods and choose to use one or all of the modules but it is understood that using Kedro in its entirety is the best thing that you can do for your projects.
-
-### Principles
-
-The Kedro design principles are:
-
--   Declarative definitions
--   Composability
--   Flexibility
--   Extensibility
--   Simplicity
-
-## What version of Python does Kedro use?
-
-Kedro is built for Python 3.5+.
-
 ## What are the primary advantages of Kedro?
 
 It is important to consider the primary advantages of Kedro over existing tools. As we see it, Kedro:
 
-- Is designed to assist both during development and production, allowing quick iterations
+- Is designed to emphasize a seamless transition from development to production without slowing the pace of the experimentation stage
 - Enforces separation of concerns between data processing and data storing
 - Does the heavy lifting for dependency resolution
 - Passes data between nodes for faster iterations during development
-
+- Defines workflow around a common project template, which builds in best practice knowledge and experience. By providing a consistent structure across analytics pipelines, it's easy to start and pick up other Kedro projects.
 
 ## How does Kedro compare to other projects?
 
@@ -40,7 +22,7 @@ Data pipelines consist of extract-transform-load (ETL) workflows. If we understa
 
 ### Kedro vs workflow schedulers
 
-We see Airflow and Luigi as complementary frameworks: Airflow and Luigi are tools that handle deployment, scheduling, monitoring and alerting. Kedro is the _worker_ that should execute a series of tasks, and report to the Airflow and Luigi _managers_. We are building integrations for both tools and intend these integrations to offer a faster prototyping time and reduce the barriers to entry associated with moving pipelines to both workflow schedulers.
+We see Airflow and Luigi as complementary frameworks: Airflow and Luigi are tools that handle deployment, scheduling, monitoring and alerting. Kedro is the _worker_ (with built-in sequential and parallel runners). It doesn't have to rely on a scheduler, but instead executes a series of tasks, and then reports to the Airflow and Luigi _managers_. We are building integrations for both tools and intend these integrations to offer a faster prototyping time and reduce the barriers to entry associated with moving pipelines to both workflow schedulers.
 
 ### Kedro vs other ETL frameworks
 
@@ -50,6 +32,13 @@ The primary differences to Bonobo ETL and Bubbles are related to the following f
  - **Project structure**. Kedro provides a built-in project structure from the beginning of your project configured for best-practice project management.
  - **Automatic dependency resolution for pipelines**. The `Pipeline` module also maps out dependencies between nodes and displays the results of this in a sophisticated but easy to understand directed acyclic graph.
  - Extensibility
+
+## How is Kedro similar to other projects?
+
+* Kedro's pipeline syntax is absolutely minimal (even supporting lambdas for simple transitions), and is inspired by the [Clojure library core.graph](https://github.com/plumatic/plumbing)
+
+* Kedro provides wrappers for existing, familiar, data sources and borrows APIs directly from Pandas and Spark, allowing rapid uptake with no new API to learn
+
 
 ## What is data engineering convention?
 
@@ -92,6 +81,9 @@ The primary differences to Bonobo ETL and Bubbles are related to the following f
 +----------------+---------------------------------------------------------------------------------------------------+
 ```
 
+## What version of Python does Kedro use?
+
+Kedro is built for Python 3.5+.
 
 ## What best practice should I follow to avoid leaking confidential data?
 
@@ -101,6 +93,18 @@ The primary differences to Bonobo ETL and Bubbles are related to the following f
 * Don't commit credentials in `conf/`. There are two default folders for adding configuration - `conf/base/` and `conf/local/`. Only the `conf/local/` folder should be used for sensitive information like access credentials. To add credentials, please refer to the `conf/base/credentials.yml` file in the project template.
 * By default any file inside the `conf/` folder (and its subfolders) containing `credentials` in its name will be ignored via `.gitignore` and not commited to your git repository.
 * To describe where your colleagues can access the credentials, you may edit the `README.md` to provide instructions.
+
+## What is the philosphy behind Kedro?
+
+Kedro is a Python library and lightly opinionated framework. This means that we give you the flexibility and extensibility of a standard Python library and make very few assumptions on the _best_ way to do things. We have created independent but friendly modules – modules that understand each others' defaults and are compatible. You can use alternative methods and choose to use one or all of the modules but it is understood that using Kedro in its entirety is the best thing that you can do for your projects.
+
+The Kedro design principles are:
+
+-   Declarative definitions
+-   Composability
+-   Flexibility
+-   Extensibility
+-   Simplicity
 
 ## Where do I store my custom editor configuration?
 

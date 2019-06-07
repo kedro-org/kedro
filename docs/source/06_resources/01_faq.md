@@ -37,7 +37,7 @@ The primary differences to Bonobo ETL and Bubbles are related to the following f
 
 * Kedro's pipeline syntax is absolutely minimal (even supporting lambdas for simple transitions), and is inspired by the [Clojure library core.graph](https://github.com/plumatic/plumbing)
 
-* Kedro provides wrappers for existing, familiar, data sources and borrows APIs directly from Pandas and Spark, allowing rapid uptake with no new API to learn
+* Kedro provides wrappers for existing, familiar, data sources and borrows APIs directly from Pandas and Spark, allowing rapid uptake with no new API to learn to use the Data Catalog.
 
 
 ## What is data engineering convention?

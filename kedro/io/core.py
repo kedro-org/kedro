@@ -37,7 +37,7 @@ from collections import namedtuple
 from datetime import datetime, timezone
 from glob import iglob
 from pathlib import Path, PurePosixPath
-from typing import Any, Dict, Type
+from typing import Any, Dict, Optional, Type
 from warnings import warn
 
 from kedro.utils import load_obj
@@ -100,6 +100,9 @@ class AbstractDataSet(abc.ABC):
         >>>     def _describe(self):
         >>>         return dict(param1=self._param1, param2=self._param2)
     """
+
+    DEFAULT_LOAD_ARGS = {}
+    DEFAULT_SAVE_ARGS = {}
 
     @classmethod
     def from_config(
@@ -188,6 +191,22 @@ class AbstractDataSet(abc.ABC):
                 )
             )
         return data_set
+
+    def __init__(
+        self,
+        load_args: Optional[Dict[str, Any]] = None,
+        save_args: Optional[Dict[str, Any]] = None,
+    ) -> None:
+        self._load_args = (
+            {**self.DEFAULT_LOAD_ARGS, **load_args}
+            if load_args is not None
+            else self.DEFAULT_LOAD_ARGS
+        )
+        self._save_args = (
+            {**self.DEFAULT_SAVE_ARGS, **save_args}
+            if save_args is not None
+            else self.DEFAULT_SAVE_ARGS
+        )
 
     def load(self) -> Any:
         """Loads data by delegation to the provided load method.

@@ -139,6 +139,8 @@ class SQLTableDataSet(AbstractDataSet):
 
     """
 
+    DEFAULT_SAVE_ARGS = {"index": False}
+
     def _describe(self) -> Dict[str, Any]:
         load_args = self._load_args.copy()
         save_args = self._save_args.copy()
@@ -193,19 +195,7 @@ class SQLTableDataSet(AbstractDataSet):
                 "provide a SQLAlchemy connection string."
             )
 
-        default_save_args = {"index": False}
-        default_load_args = {}
-
-        self._load_args = (
-            {**default_load_args, **load_args}
-            if load_args is not None
-            else default_load_args
-        )
-        self._save_args = (
-            {**default_save_args, **save_args}
-            if save_args is not None
-            else default_save_args
-        )
+        super().__init__(load_args, save_args)
 
         self._load_args["table_name"] = table_name
         self._save_args["name"] = table_name

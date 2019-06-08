@@ -113,9 +113,6 @@ class PickleLocalDataSet(AbstractDataSet, FilepathVersionMixIn):
             ImportError: If 'backend' could not be imported.
 
         """
-        default_save_args = {}
-        default_load_args = {}
-
         if backend not in ["pickle", "joblib"]:
             raise ValueError(
                 "backend should be one of ['pickle', 'joblib'], got %s" % backend
@@ -128,16 +125,7 @@ class PickleLocalDataSet(AbstractDataSet, FilepathVersionMixIn):
 
         self._filepath = filepath
         self._backend = backend
-        self._load_args = (
-            {**default_load_args, **load_args}
-            if load_args is not None
-            else default_load_args
-        )
-        self._save_args = (
-            {**default_save_args, **save_args}
-            if save_args is not None
-            else default_save_args
-        )
+        super().__init__(load_args, save_args)
         self._version = version
 
     def _load(self) -> Any:

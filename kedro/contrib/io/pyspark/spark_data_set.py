@@ -106,8 +106,7 @@ class SparkDataSet(AbstractDataSet):
 
         self._filepath = filepath
         self._file_format = file_format
-        self._load_args = load_args if load_args is not None else {}
-        self._save_args = save_args if save_args is not None else {}
+        super().__init__(load_args, save_args)
 
     @staticmethod
     def _get_spark():

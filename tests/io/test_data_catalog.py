@@ -93,6 +93,7 @@ def conflicting_feed_dict():
 
 class BadDataSet(AbstractDataSet):  # pragma: no cover
     def __init__(self, filepath):
+        # pylint: disable=super-init-not-called
         self.filepath = filepath
         raise Exception("Naughty!")
 

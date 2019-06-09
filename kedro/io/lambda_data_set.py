@@ -113,6 +113,7 @@ class LambdaDataSet(AbstractDataSet):
             DataSetError: If load and/or save is specified, but is not a Callable.
 
         """
+        # pylint: disable=super-init-not-called
 
         if load is not None and not callable(load):
             raise DataSetError(

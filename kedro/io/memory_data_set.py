@@ -80,6 +80,7 @@ class MemoryDataSet(AbstractDataSet):
                 method call.
 
         """
+        # pylint: disable=super-init-not-called
         self._data = None
         self._max_loads = max_loads
         if data is not None:

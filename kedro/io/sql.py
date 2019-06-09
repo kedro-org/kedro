@@ -281,6 +281,7 @@ class SQLQueryDataSet(AbstractDataSet):
             DataSetError: When either ``sql`` or ``con`` parameters is emtpy.
 
         """
+        # pylint: disable=super-init-not-called
 
         if not sql:
             raise DataSetError(

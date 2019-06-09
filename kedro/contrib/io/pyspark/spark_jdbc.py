@@ -123,6 +123,7 @@ class SparkJDBCDataSet(AbstractDataSet):
             DataSetError: When either ``url`` or ``table`` is empty.
 
         """
+        # pylint: disable=super-init-not-called
 
         if not url:
             raise DataSetError(
@@ -140,7 +141,8 @@ class SparkJDBCDataSet(AbstractDataSet):
 
         self._url = url
         self._table = table
-        super().__init__(load_args, save_args)
+        self._load_args = load_args if load_args is not None else {}
+        self._save_args = save_args if save_args is not None else {}
 
         # Update properties in load_args and save_args with credentials.
         if credentials is not None:

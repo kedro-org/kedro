@@ -41,6 +41,12 @@ from kedro.contrib.io.pyspark import SparkDataSet
 from kedro.io import CSVLocalDataSet, DataSetError, ParquetLocalDataSet
 
 
+# all the tests in this file require Spark
+@pytest.fixture(autouse=True)
+def spark_session(spark_session):
+    return spark_session
+
+
 def _get_sample_pandas_data_frame() -> pd.DataFrame:
     return pd.DataFrame(
         {"Name": ["Alex", "Bob", "Clarke", "Dave"], "Age": [31, 12, 65, 29]}

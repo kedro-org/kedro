@@ -162,6 +162,7 @@ class ParallelRunner(AbstractRunner):
         todo_nodes = node_dependencies.keys()
         done_nodes = set()
         futures = set()
+        done = None
         with ProcessPoolExecutor() as pool:
             while True:
                 ready = {n for n in todo_nodes if node_dependencies[n] <= done_nodes}
@@ -169,7 +170,7 @@ class ParallelRunner(AbstractRunner):
                 for node in ready:
                     futures.add(pool.submit(run_node, node, catalog))
                 if not futures:
-                    assert not todo_nodes, todo_nodes
+                    assert not todo_nodes, (todo_nodes, done_nodes, ready, done)
                     break
                 done, futures = wait(futures, return_when=FIRST_COMPLETED)
                 for future in done:

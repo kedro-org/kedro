@@ -169,7 +169,7 @@ class ParallelRunner(AbstractRunner):
                 for node in ready:
                     futures.add(pool.submit(run_node, node, catalog))
                 if not futures:
-                    assert not todo_nodes
+                    assert not todo_nodes, todo_nodes
                     break
                 done, futures = wait(futures, return_when=FIRST_COMPLETED)
                 for future in done:

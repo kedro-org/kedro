@@ -31,6 +31,47 @@ Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) a
 pip install kedro
 ```
 
+Or launch it in a Docker container by building the following Dockerfile (./cicd)
+
+```dockerfile
+FROM ubuntu:16.04
+
+RUN apt-get update && \
+    apt-get install -y cmake build-essential gcc g++ git wget libgl1-mesa-glx
+
+RUN echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections
+RUN apt-get install -y --no-install-recommends msttcorefonts
+
+# python-package
+# miniconda
+RUN wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
+    /bin/bash Miniconda3-latest-Linux-x86_64.sh -f -b -p /opt/conda && \
+    export PATH="/opt/conda/bin:$PATH"
+
+ENV PATH /opt/conda/bin:$PATH
+
+# install some basic data science libs
+RUN conda install -y numpy scipy scikit-learn pandas matplotlib
+
+# install the kedro libs
+RUN pip install kedro
+
+# clean the container
+RUN apt-get autoremove -y && apt-get clean && \
+    conda clean -i -l -t -y && \
+    rm -rf /usr/local/src/*
+
+# open up a terminal by executing: docker run -it <image> /bin/bash
+```
+
+and running the following commands in terminal
+
+```bash
+$ docker build . -t kedrodatascience
+$ docker run -it kedrodatascience:latest /bin/bash
+$ kedro info
+```
+
 For more detailed installation instructions, including how to setup Python virtual environments, please visit our [installation guide](https://kedro.readthedocs.io/en/latest/02_getting_started/02_install.html).
 
 ## What are the main features of Kedro?

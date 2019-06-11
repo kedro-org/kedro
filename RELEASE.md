@@ -1,3 +1,11 @@
+# Release 0.15.0
+
+## Major features and improvements
+
+## Breaking changes to the API
+
+## Thanks for supporting contributions
+
 # Release 0.14.2
 
 ## Major features and improvements

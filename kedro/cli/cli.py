@@ -120,12 +120,12 @@ def new(config):
 
     \b
     You will have to provide four choices:
-    * ``Output Directory`` - parent directory where new project directory
-    should be created.
     * ``Project Name`` - name of the project, not to be confused with name of
     the project folder.
     * ``Repository Name`` - intended name of your project folder.
     * ``Package Name`` - intended name of your Python package.
+    * ``Generate Example Pipeline`` - yes/no to generating an example pipeline
+    in your project.
 
     \b
     ``kedro new --config <config.yml>``
@@ -133,8 +133,9 @@ def new(config):
     Create a new project from configuration.
 
     * ``config.yml`` - The configuration YAML must contain at the top level
-                    the above parameters (output_dir, project_name, repo_name,
-                    python_package).
+                    the above parameters (project_name, repo_name,
+                    python_package, include_example) and output_dir - the
+                    parent directory for the new project directory.
     """
     _create_project(config, _KEDRO_CONTEXT["verbose"])
 

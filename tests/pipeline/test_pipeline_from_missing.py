@@ -171,7 +171,9 @@ class TestPipelineMissing:
 
         log_record = caplog.records[0]
         assert log_record.levelname == "WARNING"
-        assert "`exists()` not implemented for `F`" in log_record.getMessage()
+        assert (
+            "`exists()` not implemented for `LambdaDataSet`" in log_record.getMessage()
+        )
 
     def test_all_no_exists_method(self, branched_pipeline, caplog):
         catalog = _make_catalog(no_exists_method=["A", "B", "C", "D", "E", "F"])
@@ -179,12 +181,11 @@ class TestPipelineMissing:
         assert _pipelines_equal(branched_pipeline, new_pipeline)
 
         log_msgs = [record.getMessage() for record in caplog.records]
-        for name in ["B", "C", "D", "E", "F"]:
-            expected_msg = (
-                "`exists()` not implemented for `{}`. "
-                "Assuming output does not exist.".format(name)
-            )
-            assert expected_msg in log_msgs
+        expected_msg = (
+            "`exists()` not implemented for `LambdaDataSet`. "
+            "Assuming output does not exist."
+        )
+        assert expected_msg in log_msgs
 
     def test_catalog_and_feed_dict(self, branched_pipeline):
         """Mix of feed_dict and non-existent F."""

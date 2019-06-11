@@ -35,10 +35,10 @@ from typing import Any, Dict
 import numpy as np
 import pandas as pd
 
-from kedro.io.core import AbstractDataSet, DataSetError, ExistsMixin
+from kedro.io.core import AbstractDataSet, DataSetError
 
 
-class MemoryDataSet(AbstractDataSet, ExistsMixin):
+class MemoryDataSet(AbstractDataSet):
     """``MemoryDataSet`` loads and saves data from/to an in-memory\
     Python object.
 

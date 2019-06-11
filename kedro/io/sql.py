@@ -34,7 +34,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy.exc import NoSuchModuleError
 
-from kedro.io.core import AbstractDataSet, DataSetError, ExistsMixin
+from kedro.io.core import AbstractDataSet, DataSetError
 
 __all__ = ["SQLTableDataSet", "SQLQueryDataSet"]
 
@@ -108,7 +108,7 @@ def _get_sql_alchemy_missing_error() -> DataSetError:
     )
 
 
-class SQLTableDataSet(AbstractDataSet, ExistsMixin):
+class SQLTableDataSet(AbstractDataSet):
     """``SQLTableDataSet`` loads data from a SQL table and saves a pandas
     dataframe to a table. It uses ``pandas.DataFrame`` internally,
     so it supports all allowed pandas options on ``read_sql_table`` and

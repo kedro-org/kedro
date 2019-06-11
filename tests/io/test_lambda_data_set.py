@@ -151,7 +151,7 @@ class TestLambdaDataSetExists:
     def test_exists_not_implemented(self):
         """Check that `exists` method is not implemented by default"""
         data_set = LambdaDataSet(None, None)
-        assert not hasattr(data_set, "exists")
+        assert not data_set.exists()
 
     def test_exists_raises_error(self, mocker):
         """Check the error when `exists` raises an exception"""
@@ -163,3 +163,11 @@ class TestLambdaDataSetExists:
         with pytest.raises(DataSetError, match=error_message):
             data_set.exists()
         mocked_exists.assert_called_once_with()
+
+    def test_exists_not_callable(self):
+        pattern = (
+            r"`exists` function for LambdaDataSet must be a Callable\. "
+            r"Object of type `str` provided instead\."
+        )
+        with pytest.raises(DataSetError, match=pattern):
+            LambdaDataSet(None, None, "exists")

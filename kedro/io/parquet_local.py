@@ -41,16 +41,10 @@ from typing import Any, Dict
 
 import pandas as pd
 
-from kedro.io.core import (
-    AbstractDataSet,
-    DataSetError,
-    ExistsMixin,
-    FilepathVersionMixIn,
-    Version,
-)
+from kedro.io.core import AbstractDataSet, DataSetError, FilepathVersionMixIn, Version
 
 
-class ParquetLocalDataSet(AbstractDataSet, ExistsMixin, FilepathVersionMixIn):
+class ParquetLocalDataSet(AbstractDataSet, FilepathVersionMixIn):
     """``AbstractDataSet`` with functionality for handling local parquet files.
 
     Example:

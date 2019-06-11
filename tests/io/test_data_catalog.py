@@ -199,7 +199,7 @@ class TestDataCatalog:
         log_record = caplog.records[0]
         assert log_record.levelname == "WARNING"
         assert (
-            "`exists()` not implemented for `test`. "
+            "`exists()` not implemented for `LambdaDataSet`. "
             "Assuming output does not exist." in log_record.message
         )
         assert result is False

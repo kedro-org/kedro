@@ -69,7 +69,8 @@ for pattern in ["**/*", "**/.*", "**/.*/**", "**/.*/.**"]:
 setup(
     name=name,
     version=version,
-    description="Kedro is a data science framework",
+    description="Kedro helps you build production-ready data and analytics pipelines",
+    license="Apache Software License (Apache 2.0)",
     long_description=readme,
     long_description_content_type="text/markdown",
     url="https://github.com/quantumblacklabs/kedro",
@@ -78,9 +79,16 @@ setup(
     include_package_data=True,
     tests_require=test_requires,
     install_requires=requires,
-    author="QuantumBlack Visual Analytics Limited",
+    author="QuantumBlack Labs",
     entry_points={"console_scripts": ["kedro = kedro.cli:main"]},
     package_data={name: template_files + doc_html_files},
+    keywords="pipelines, machine learning, data pipelines, data science, data engineering",
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+    ],
     extras_require={
         "docs": [
             "sphinx>=1.8.4, <2.0",

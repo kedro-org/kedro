@@ -1,6 +1,6 @@
 # Nodes and pipelines
 
-> *Note:* This documentation is based on `Kedro 0.14.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.14.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 In this section we introduce pipelines and nodes.
 
 Relevant API documentation:

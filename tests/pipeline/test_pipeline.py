@@ -258,7 +258,7 @@ class TestValidPipeline:
         # Flatten a list of grouped nodes
         assert pipeline.nodes == list(chain.from_iterable(grouped))
         # Check each grouped node matches with expected group
-        assert all(e == set(g) for e, g in zip(expected, grouped))
+        assert all(g == e for g, e in zip(grouped, expected))
 
     @pytest.mark.parametrize(
         "target_node_names", [["node2", "node3", "node4", "node8"], ["node1"]]
@@ -268,7 +268,7 @@ class TestValidPipeline:
         partial = full.only_nodes(*target_node_names)
         target_list = list(target_node_names)
         names = map(lambda node_: node_.name, partial.nodes)
-        assert sorted(target_list) == sorted(names)
+        assert sorted(names) == sorted(target_list)
 
     def test_free_input(self, input_data):
         nodes = input_data["nodes"]
@@ -276,7 +276,7 @@ class TestValidPipeline:
 
         pipeline = Pipeline(nodes)
 
-        assert set(inputs) == pipeline.inputs()
+        assert pipeline.inputs() == set(inputs)
 
     def test_outputs(self, input_data):
         nodes = input_data["nodes"]
@@ -501,18 +501,20 @@ class TestComplexPipeline:
 
     def test_node_dependencies(self, complex_pipeline):
         expected = {
-            ("node1", "node2"),
-            ("node1", "node3"),
-            ("node1", "node4"),
-            ("node2", "node4"),
-            ("node3", "node4"),
-            ("node4", "node7"),
-            ("node5", "node6"),
-            ("node6", "node7"),
-            ("node7", "node8"),
-            ("node8", "node9"),
+            "node1": {"node2", "node3", "node4"},
+            "node2": {"node4"},
+            "node3": {"node4"},
+            "node4": {"node7"},
+            "node5": {"node6"},
+            "node6": {"node7"},
+            "node7": {"node8"},
+            "node8": {"node9"},
+            "node9": set(),
         }
-        actual = {(n1.name, n2.name) for n1, n2 in complex_pipeline.node_dependencies}
+        actual = {
+            child.name: {parent.name for parent in parents}
+            for child, parents in complex_pipeline.node_dependencies.items()
+        }
         assert actual == expected
 
 

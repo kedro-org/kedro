@@ -34,16 +34,10 @@ from typing import Any, Dict, Optional
 import pandas as pd
 from s3fs.core import S3FileSystem
 
-from kedro.io.core import (
-    AbstractDataSet,
-    DataSetError,
-    ExistsMixin,
-    S3PathVersionMixIn,
-    Version,
-)
+from kedro.io.core import AbstractDataSet, DataSetError, S3PathVersionMixIn, Version
 
 
-class CSVS3DataSet(AbstractDataSet, ExistsMixin, S3PathVersionMixIn):
+class CSVS3DataSet(AbstractDataSet, S3PathVersionMixIn):
     """``CSVS3DataSet`` loads and saves data to a file in S3. It uses s3fs
     to read and write from S3 and pandas to handle the csv file.
 

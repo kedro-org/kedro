@@ -1,14 +1,14 @@
 ---
 name: Bug Report
 about: Create a report to help us improve
-title: "<Title>"
+title: '<Title>'
 labels: 'Issue: Bug Report'
 assignees: ''
 
 ---
 
 ## Description
-Short description of the problem here
+Short description of the problem here.
 
 ## Context
 How has this bug affected you? What were you trying to accomplish?
@@ -20,10 +20,10 @@ How has this bug affected you? What were you trying to accomplish?
 3. [and so on...]
 
 ## Expected Result
-Tell us what should happen
+Tell us what should happen.
 
 ## Actual Result
-Tell us what happens instead
+Tell us what happens instead.
 
 ```
 -- If you received an error, place it here.
@@ -34,14 +34,14 @@ Tell us what happens instead
 ```
 
 ## Your Environment
-Include as many relevant details about the environment you experienced the bug in
+Include as many relevant details about the environment in which you experienced the bug:
 
-* Kedro version used:
-* Python version used:
+* Kedro version used (`pip show kedro` or `kedro -V`):
+* Python version used (`python -V`):
 * Operating system and version:
 
 ## Checklist
-Include labels so that we can categorise your issue
+Include labels so that we can categorise your issue:
 
 - [ ] Add a "Component" label to the issue
 - [ ] Add a "Priority" label to the issue

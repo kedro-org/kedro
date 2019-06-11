@@ -52,13 +52,6 @@ def _check_equals(data1, data2):
     return False  # pragma: no cover
 
 
-@pytest.fixture(scope="module")
-def spark_session():
-    spark = SparkSession.builder.getOrCreate()
-    yield spark
-    spark.stop()
-
-
 @pytest.fixture
 def spark_data_frame(spark_session):
     return spark_session.createDataFrame(

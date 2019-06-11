@@ -26,31 +26,46 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``kedro.io`` provides functionality to read and write to a
-number of data sets. At core of the library is ``AbstractDataSet``
-which allows implementation of various ``AbstractDataSet``s.
-"""
+from typing import Any, Dict
 
-from .core import AbstractDataSet  # NOQA
-from .core import DataSetAlreadyExistsError  # NOQA
-from .core import DataSetError  # NOQA
-from .core import DataSetNotFoundError  # NOQA
-from .core import FilepathVersionMixIn  # NOQA
-from .core import S3PathVersionMixIn  # NOQA
-from .core import Version  # NOQA
-from .csv_local import CSVLocalDataSet  # NOQA
-from .csv_s3 import CSVS3DataSet  # NOQA
-from .data_catalog import DataCatalog  # NOQA
-from .excel_local import ExcelLocalDataSet  # NOQA
-from .hdf_local import HDFLocalDataSet  # NOQA
-from .hdf_s3 import HDFS3DataSet  # NOQA
-from .json_local import JSONLocalDataSet  # NOQA
-from .lambda_data_set import LambdaDataSet  # NOQA
-from .memory_data_set import MemoryDataSet  # NOQA
-from .parquet_local import ParquetLocalDataSet  # NOQA
-from .pickle_local import PickleLocalDataSet  # NOQA
-from .pickle_s3 import PickleS3DataSet  # NOQA
-from .sql import SQLQueryDataSet  # NOQA
-from .sql import SQLTableDataSet  # NOQA
-from .text_local import TextLocalDataSet  # NOQA
-from .transformers import AbstractTransformer  # NOQA
+import pytest
+
+from kedro.contrib.io.transformers import ProfileTimeTransformer
+from kedro.io import AbstractDataSet, DataCatalog
+
+
+class FakeDataSet(AbstractDataSet):
+    def __init__(self, data):
+        self.log = []
+        self.data = data
+
+    def _load(self) -> Any:
+        self.log.append(("load", self.data))
+        return self.data
+
+    def _save(self, data: Any) -> None:
+        self.log.append(("save", data))
+        self.data = data
+
+    def _describe(self) -> Dict[str, Any]:
+        return {"data": self.data}
+
+
+@pytest.fixture
+def fake_data_set():
+    return FakeDataSet(123)
+
+
+@pytest.fixture
+def catalog(fake_data_set):
+    return DataCatalog({"test": fake_data_set})
+
+
+class TestTransformers:
+    def test_timing(self, catalog, caplog):
+        catalog.add_transformer(ProfileTimeTransformer())
+
+        catalog.save("test", 42)
+        assert "Saving test took" in caplog.text
+        assert catalog.load("test") == 42
+        assert "Loading test took" in caplog.text

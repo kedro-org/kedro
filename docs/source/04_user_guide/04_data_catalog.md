@@ -175,6 +175,28 @@ airplanes:
 
 In this example the default `csv` configuration is inserted into `airplanes` and then the `load_args` block is overridden. Normally that would replace the whole dictionary. In order to extend `load_args` the defaults for that block are then re-inserted.
 
+### Transforming datasets
+
+If you need to augment the loading and / or saving of one or more datasets you can use the transformer API. To do this create a subclass of `AbstractTransformer` that implements your changes and then apply it to your catalog with `DataCatalog.add_transformer`. For example to print the runtimes of load and save operations you could do this:
+
+```python
+class PrintTimeTransformer(AbstractTransformer):
+    def load(self, data_set_name: str, load: Callable[[], Any]) -> Any:
+        start = time.time()
+        data = load()
+        print("Loading {} took {:0.3f}s".format(data_set_name, time.time() - start))
+        return data
+
+    def save(self, data_set_name: str, save: Callable[[Any], None], data: Any) -> None:
+        start = time.time()
+        save(data)
+        print("Saving {} took {:0.3}s".format(data_set_name, time.time() - start))
+
+catalog.add_transformer(PrintTimeTransformer())
+```
+
+By default transformers are applied to all datasets in the catalog (including any that are added in the future). The `DataCatalog.add_transformers` method has an additional argument `data_set_names` that lets you limit which data sets the transformer will be applied to.
+
 ### Versioning datasets and ML models
 
 Making a simple addition to your Data Catalog allows you to perform versioning of datasets and machine learning models.

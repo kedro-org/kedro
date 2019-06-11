@@ -25,32 +25,40 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-"""``kedro.io`` provides functionality to read and write to a
-number of data sets. At core of the library is ``AbstractDataSet``
-which allows implementation of various ``AbstractDataSet``s.
+"""``Transformers`` modify the loading and saving of ``DataSets`` in a
+``DataCatalog``.
 """
+import abc
+from typing import Any, Callable
 
-from .core import AbstractDataSet  # NOQA
-from .core import DataSetAlreadyExistsError  # NOQA
-from .core import DataSetError  # NOQA
-from .core import DataSetNotFoundError  # NOQA
-from .core import FilepathVersionMixIn  # NOQA
-from .core import S3PathVersionMixIn  # NOQA
-from .core import Version  # NOQA
-from .csv_local import CSVLocalDataSet  # NOQA
-from .csv_s3 import CSVS3DataSet  # NOQA
-from .data_catalog import DataCatalog  # NOQA
-from .excel_local import ExcelLocalDataSet  # NOQA
-from .hdf_local import HDFLocalDataSet  # NOQA
-from .hdf_s3 import HDFS3DataSet  # NOQA
-from .json_local import JSONLocalDataSet  # NOQA
-from .lambda_data_set import LambdaDataSet  # NOQA
-from .memory_data_set import MemoryDataSet  # NOQA
-from .parquet_local import ParquetLocalDataSet  # NOQA
-from .pickle_local import PickleLocalDataSet  # NOQA
-from .pickle_s3 import PickleS3DataSet  # NOQA
-from .sql import SQLQueryDataSet  # NOQA
-from .sql import SQLTableDataSet  # NOQA
-from .text_local import TextLocalDataSet  # NOQA
-from .transformers import AbstractTransformer  # NOQA
+
+class AbstractTransformer(abc.ABC):
+    """ Base transformer """
+
+    def load(self, data_set_name: str, load: Callable[[], Any]) -> Any:
+        """Wrap the loading of a dataset.
+        Call ``load`` to get the data from the data set / next transformer.
+
+        Args:
+            data_set_name: The name of the data set being loaded.
+            load: A callback to retrieve the data being loaded from the
+                data set / next transformer.
+
+        Returns:
+            The loaded data.
+        """
+        # pylint: disable=unused-argument, no-self-use
+        return load()
+
+    def save(self, data_set_name: str, save: Callable[[Any], None], data: Any) -> None:
+        """ Wrap the saving of a dataset.
+        Call ``save`` to pass the data to the  data set / next transformer.
+
+        Args:
+            data_set_name: The name of the data set being saved.
+            save: A callback to pass the data being saved on to the
+                data set / next transformer.
+            data: The data being saved
+        """
+        # pylint: disable=unused-argument, no-self-use
+        save(data)

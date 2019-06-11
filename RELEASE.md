@@ -1,6 +1,7 @@
 # Release 0.15.0
 
 ## Major features and improvements
+* Added Data Set transformer support in the form of AbstractTransformer and DataCatalog.add_transformer
 
 ## Bug fixes and other changes
 

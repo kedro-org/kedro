@@ -3,8 +3,6 @@
 ## Major features and improvements
 * Added Data Set transformer support in the form of AbstractTransformer and DataCatalog.add_transformer
 
-## Bug fixes and other changes
-
 ## Breaking changes to the API
 * Merged the ExistsMixin into AbstractDataSet
 

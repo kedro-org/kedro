@@ -7,6 +7,10 @@
 ## Breaking changes to the API
 Merged the ExistsMixin into AbstractDataSet
 
+## Thanks for supporting contributions
+
+[Nikolaos Tsaousis](https://github.com/tsanikgr), [Ivan Danov](https://github.com/idanov), [Gordon Wrigley](https://github.com/tolomea), [Yetunde Dada](https://github.com/yetudada), [Kiyohito Kunii](https://github.com/921kiyo), [Lorena Balan](https://github.com/lorenabalan), [Richard Westenra](https://github.com/richardwestenra), [Darren Gallagher](https://github.com/dazzag24)
+
 # Release 0.14.1
 
 ## Major features and improvements
@@ -30,6 +34,6 @@ The initial release of Kedro.
 
 ## Thanks for supporting contributions
 
-Jo Stichbury, Aris Valtazanos, Fabian Peters, Guilherme Braccialli, Joel Schwarzmann, Miguel Beltre, Mohammed ElNabawy, Deepyaman Datta, Shubham Agrawal, Oleg Andreyev, Mayur Chougule, William Ashford, Ed Cannon, Nikhilesh Nukala, Sean Bailey, Vikram Tegginamath, Thomas Huijskens, Musa Bilal, Darren Gallagher
+Jo Stichbury, Aris Valtazanos, Fabian Peters, Guilherme Braccialli, Joel Schwarzmann, Miguel Beltre, Mohammed ElNabawy, Deepyaman Datta, Shubham Agrawal, Oleg Andreyev, Mayur Chougule, William Ashford, Ed Cannon, Nikhilesh Nukala, Sean Bailey, Vikram Tegginamath, Thomas Huijskens, Musa Bilal
 
 We are also grateful to everyone who advised and supported us, filed issues or helped resolve them, asked and answered questions and were part of inspiring discussions.

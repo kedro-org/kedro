@@ -87,31 +87,6 @@ class TestValidNode:
     def test_no_output(self):
         assert "<lambda>([input1]) -> None" in str(node(lambda x: None, "input1", None))
 
-    def test_node_equals(self):
-        first = node(identity, "input1", "output1", name="a node")
-        second = node(identity, "input1", "output1", name="a node")
-        assert first == second
-        assert first is not second
-
-    def test_node_less_than(self):
-        first = node(identity, "input1", "output1", name="A")
-        second = node(identity, "input1", "output1", name="B")
-        assert first < second
-        assert first is not second
-
-    def test_node_invalid_equals(self):
-        n = node(identity, "input1", "output1", name="a node")
-        assert n != "hello"
-
-    def test_node_invalid_less_than(self):
-        n = node(identity, "input1", "output1", name="a node")
-        pattern_36_37 = "'<' not supported between instances of 'Node' and 'str'"
-        pattern_35 = "unorderable types"
-
-        pattern = pattern_35 if sys.version_info[:2] == (3, 5) else pattern_36_37
-        with pytest.raises(TypeError, match=pattern):
-            n < "hello"  # pylint: disable=pointless-statement
-
     def test_inputs_none(self):
         dummy_node = node(constant_output, None, "output")
         assert dummy_node.inputs == []
@@ -163,6 +138,67 @@ class TestValidNode:
             ["output2", "output1", "last node"],
         )
         assert dummy_node.outputs == ["output2", "output1", "last node"]
+
+
+class TestNodeComparisons:
+    def test_node_equals(self):
+        first = node(identity, "input1", "output1", name="a node")
+        second = node(identity, "input1", "output1", name="a node")
+        assert first == second
+        assert first is not second
+
+    def test_node_less_than(self):
+        first = node(identity, "input1", "output1", name="A")
+        second = node(identity, "input1", "output1", name="B")
+        assert first < second
+        assert first is not second
+
+    def test_node_invalid_equals(self):
+        n = node(identity, "input1", "output1", name="a node")
+        assert n != "hello"
+
+    def test_node_invalid_less_than(self):
+        n = node(identity, "input1", "output1", name="a node")
+        pattern_36_37 = "'<' not supported between instances of 'Node' and 'str'"
+        pattern_35 = "unorderable types"
+
+        pattern = pattern_35 if sys.version_info[:2] == (3, 5) else pattern_36_37
+        with pytest.raises(TypeError, match=pattern):
+            n < "hello"  # pylint: disable=pointless-statement
+
+    def test_different_input_list_order_not_equal(self):
+        first = node(biconcat, ["input1", "input2"], "output1", name="A")
+        second = node(biconcat, ["input2", "input1"], "output1", name="A")
+        assert first != second
+
+    def test_different_output_list_order_not_equal(self):
+        first = node(identity, "input1", ["output1", "output2"], name="A")
+        second = node(identity, "input1", ["output2", "output1"], name="A")
+        assert first != second
+
+    def test_different_input_dict_order_equal(self):
+        first = node(biconcat, {"input1": "a", "input2": "b"}, "output1", name="A")
+        second = node(biconcat, {"input2": "b", "input1": "a"}, "output1", name="A")
+        assert first == second
+
+    def test_different_output_dict_order_equal(self):
+        first = node(identity, "input1", {"output1": "a", "output2": "b"}, name="A")
+        second = node(identity, "input1", {"output2": "b", "output1": "a"}, name="A")
+        assert first == second
+
+    def test_input_dict_list_not_equal(self):
+        first = node(biconcat, ["input1", "input2"], "output1", name="A")
+        second = node(
+            biconcat, {"input1": "input1", "input2": "input2"}, "output1", name="A"
+        )
+        assert first != second
+
+    def test_output_dict_list_not_equal(self):
+        first = node(identity, "input1", ["output1", "output2"], name="A")
+        second = node(
+            identity, "input1", {"output1": "output1", "output2": "output2"}, name="A"
+        )
+        assert first != second
 
 
 def bad_input_type_node():

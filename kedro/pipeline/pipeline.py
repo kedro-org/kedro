@@ -287,7 +287,7 @@ class Pipeline:
             The list of all pipeline nodes in topological order.
 
         """
-        return copy.copy(list(chain.from_iterable(self._topo_sorted_nodes)))
+        return list(chain.from_iterable(self._topo_sorted_nodes))
 
     @property
     def grouped_nodes(self) -> List[Set[Node]]:

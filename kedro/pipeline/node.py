@@ -129,7 +129,14 @@ class Node:
 
     @property
     def _unique_key(self):
-        return (self.name, tuple(self.inputs), tuple(self.outputs))
+        def hashable(value):
+            if isinstance(value, dict):
+                return tuple(sorted(value.items()))
+            if isinstance(value, list):
+                return tuple(value)
+            return value
+
+        return (self.name, hashable(self._inputs), hashable(self._outputs))
 
     def __eq__(self, other):
         if not isinstance(other, Node):
@@ -511,7 +518,7 @@ class Node:
         if isinstance(element, str):
             return [element]
         if isinstance(element, dict):
-            return list(element.values())
+            return sorted(element.values())
         return element
 
     @staticmethod

@@ -131,7 +131,7 @@ def _expand_user(filepath):
        Returns
        -------
        expanded_filepath : an expanded filepath or the
-                                  input if not expandable
+                           input if not expandable
     """
 
     if isinstance(filepath, str):

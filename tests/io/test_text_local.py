@@ -82,9 +82,9 @@ class TestTextLocalDataSet:
         traditional_write(filepath_txt, sample_text)
         assert txt_data_set.exists()
 
-    def test_nontext_filepath_expanduser(self, txt_data_set, filepath_txt):
-        txt_dataset = TextLocalDataSet(filepath=Path(filepath_txt))
-        assert Path(filepath_txt) == txt_dataset._filepath
+    def test_filepath_expanduser(self, txt_data_set):
+        txt_dataset = TextLocalDataSet(filepath='~')
+        assert '~' not in txt_dataset._filepath
 
 class TestTextLocalDataSetVersioned:
     def test_save_and_load(self, versioned_txt_data_set, sample_text):

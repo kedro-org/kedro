@@ -2,9 +2,13 @@
 
 ## Major features and improvements
 
+## Bug fixes and other changes
+* Expand user home directory (~) for TextLocalDataSet (see issue #19)
+
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
+[Alex Kalmikov](https://github.com/kalexqb)
 
 # Release 0.14.2
 

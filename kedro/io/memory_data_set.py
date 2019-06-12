@@ -67,34 +67,28 @@ class MemoryDataSet(AbstractDataSet):
             return dict(data="<{}>".format(type(self._data).__name__))
         return dict(data=None)  # pragma: no cover
 
-    def __init__(self, data: Any = None, max_loads: int = None):
+    def __init__(self, data: Any = None):
         """Creates a new instance of ``MemoryDataSet`` pointing to the
         provided Python object.
 
         Args:
             data: Python object containing the data.
-            max_loads: Maximum number of times ``load`` method can be invoked.
-                ``MemoryDataSet`` data is reset after this number of calls is
-                made. Any number of calls is allowed if the argument is not
-                set. ``max_loads`` counter is reset after every ``save``
-                method call.
-
         """
         self._data = None
-        self._max_loads = max_loads
+        self._remaining_loads = None
         if data is not None:
             self._save(data)
 
     def _load(self) -> Any:
         if self._data is None:
-            if self._max_loads is None:
-                message = "Data for MemoryDataSet has not been saved yet."
-            else:
+            if self._remaining_loads == 0:
                 message = (
-                    "Maximum number of MemoryDataSet loads exceeded "
-                    "the threshold of {}. The data set was cleared "
-                    "and holds no data now.".format(self._max_loads)
+                    "The MemoryDataSet was cleared and holds no data now, "
+                    "as the maximum number of loads exceeds the limit set "
+                    "by `.set_remaining_loads()`"
                 )
+            else:
+                message = "Data for MemoryDataSet has not been saved yet."
             raise DataSetError(message)
         if isinstance(self._data, (pd.DataFrame, np.ndarray)):
             data = self._data.copy()
@@ -102,9 +96,9 @@ class MemoryDataSet(AbstractDataSet):
             data = self._data
         else:
             data = copy.deepcopy(self._data)
-        if self._load_counter:
-            self._load_counter -= 1
-            if self._load_counter == 0:
+        if self._remaining_loads:
+            self._remaining_loads -= 1
+            if self._remaining_loads == 0:
                 self._data = None
         return data
 
@@ -115,9 +109,22 @@ class MemoryDataSet(AbstractDataSet):
             self._data = data
         else:
             self._data = copy.deepcopy(data)
-        self._load_counter = self._max_loads
 
     def _exists(self) -> bool:
         if self._data is None:
             return False
         return True
+
+    def set_remaining_loads(self, remaining_loads: int):
+        """Set how many times this dataset can be loaded before its data being cleared to release
+        memory. Calling this method on a ``MemoryDataSet`` that already contains data has no
+        effect.
+
+        Args:
+            remaining_loads: Maximum number of times ``load`` method of the
+                data set is allowed to be invoked, before clearing the
+                data to release memory. Any number of calls is allowed
+                if the argument is not set.
+        """
+        if self._data is not None:
+            self._remaining_loads = remaining_loads

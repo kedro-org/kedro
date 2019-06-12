@@ -27,14 +27,22 @@
 # limitations under the License.
 
 import logging
+from functools import partial
 from time import sleep
 
+from kedro.io import DataCatalog
+from kedro.pipeline import Pipeline, node
 from kedro.pipeline.decorators import log_time, mem_profile
+from kedro.runner import SequentialRunner
 
 
 def sleeping_identity(inp):
     sleep(0.1)
     return inp
+
+
+def identity(arg):
+    return arg
 
 
 def test_log_time(caplog):
@@ -71,6 +79,21 @@ def test_log_time_no_module(caplog):
     assert severity == logging.INFO
     expected = "Running %r took" % no_module.__qualname__
     assert expected in message
+
+
+def test_log_time_with_partial(recwarn):
+    pipeline = Pipeline(
+        [node(partial(identity, 1), None, "output", name="identity1")]
+    ).decorate(log_time)
+    catalog = DataCatalog({}, dict(number=1))
+    result = SequentialRunner().run(pipeline, catalog)
+    assert result["output"] == 1
+    warning = recwarn.pop(UserWarning)
+    assert (
+        "The node producing outputs `['output']` is made from a "
+        "`partial` function. Partial functions do not have a "
+        "`__name__` attribute" in str(warning.message)
+    )
 
 
 def test_mem_profile(caplog):

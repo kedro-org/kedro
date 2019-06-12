@@ -34,6 +34,7 @@ import logging
 from collections import Counter
 from functools import reduce
 from typing import Any, Callable, Dict, Iterable, List, Set, Union
+from warnings import warn
 
 
 class Node:
@@ -159,12 +160,28 @@ class Node:
         in_str = _sorted_set_to_str(self.inputs) if self._inputs else "None"
 
         prefix = self._name + ": " if self._name else ""
-        return prefix + "{}({}) -> {}".format(self._func.__name__, in_str, out_str)
+        return prefix + "{}({}) -> {}".format(self._func_name, in_str, out_str)
 
     def __repr__(self):  # pragma: no cover
         return "Node({}, {!r}, {!r}, {!r})".format(
-            self._func.__name__, self._inputs, self._outputs, self._name
+            self._func_name, self._inputs, self._outputs, self._name
         )
+
+    @property
+    def _func_name(self):
+        if hasattr(self._func, "__name__"):
+            return self._func.__name__
+
+        name = repr(self._func)
+        if "functools.partial" in name:
+            warn(
+                "The node producing outputs `{}` is made from a `partial` function. "
+                "Partial functions do not have a `__name__` attribute: consider using "
+                "`functools.update_wrapper` for better log messages.".format(
+                    self.outputs
+                )
+            )
+        return name
 
     @property
     def tags(self) -> Set[str]:

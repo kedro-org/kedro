@@ -2,9 +2,13 @@
 
 ## Major features and improvements
 
+## Bug fixes and other changes
+- Add support for pipeline nodes made up from partial functions
+
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
+[Nikolaos Tsaousis](https://github.com/tsanikgr), [Ivan Danov](https://github.com/idanov), [Gordon Wrigley](https://github.com/tolomea), [Yetunde Dada](https://github.com/yetudada), [Kiyohito Kunii](https://github.com/921kiyo), [Lorena Balan](https://github.com/lorenabalan), [Richard Westenra](https://github.com/richardwestenra)
 
 # Release 0.14.2
 

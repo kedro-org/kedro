@@ -1,5 +1,6 @@
 import logging.config
 import os
+from pathlib import Path
 
 from IPython.core.magic import register_line_magic
 
@@ -14,19 +15,21 @@ def reload_kedro(line=None):
     global startup_error
     try:
         import kedro.config.default_logger
-        from {{cookiecutter.python_package}}.run import create_catalog, get_config
+        from kedro.context import load_context
 
         proj_name = "{{cookiecutter.project_name}}"
         logging.info("** Kedro project {}".format(proj_name))
 
-        os.chdir(proj_dir)  # Move to project root
+        project_context = load_context(proj_dir)
 
-        # Load Kedro context (conf, io, parameters)
-        conf = get_config(proj_dir)
-        io = create_catalog(conf)
+        conf = project_context["get_config"](proj_dir)
+        io = project_context["create_catalog"](conf)
 
         logging.info("Defined global variables proj_dir, proj_name, conf and io")
-    except ImportError as err:
+    except ImportError:
+        logging.error("Kedro appears not to be installed in your current environment.")
+        raise
+    except KeyError as err:
         startup_error = err
         if "create_catalog" in str(err):
             message = (
@@ -46,10 +49,6 @@ def reload_kedro(line=None):
                 "{{cookiecutter.repo_name}}/"
                 ".ipython/profile_default/startup/00-kedro-init.py."
             )
-        else:
-            message = (
-                "Kedro appears not to be installed in your " "current environment."
-            )
         logging.error(message)
         raise err
     except Exception as err:
@@ -60,7 +59,5 @@ def reload_kedro(line=None):
 
 # Find the project root (./../../../)
 startup_error = None
-proj_dir = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir)
-)
+proj_dir = str(Path(__file__).parents[3].resolve())
 reload_kedro()

@@ -38,6 +38,7 @@ import shutil
 import sys
 import traceback
 import webbrowser
+from copy import deepcopy
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Union
 
@@ -49,6 +50,7 @@ from cookiecutter.main import cookiecutter
 import kedro.config.default_logger  # noqa
 from kedro import __version__ as version
 from kedro.cli.utils import CommandCollection, KedroCliError
+from kedro.context import load_context
 
 KEDRO_PATH = os.path.dirname(kedro.__file__)
 TEMPLATE_PATH = os.path.join(KEDRO_PATH, "template")
@@ -485,16 +487,17 @@ def get_project_context(key: Any, default: Any = NO_DEFAULT) -> Any:  # pragma: 
             and the key is not found, this will raise a ``KedroCliError``.
 
     Returns:
-        Requested value from Kedro context dictionary or the default if the key was not found.
+        Requested value from Kedro context dictionary or the default if the key
+            was not found.
 
     Raises:
-        KedroCliError: When the key is not found and the default value was not specified.
+        KedroCliError: When the key is not found and the default value was not
+            specified.
     """
+
+    _KEDRO_CONTEXT.update(load_context(Path.cwd()))
     try:
-        kedro_cli = importlib.import_module("kedro_cli")
-        kedro_context = _KEDRO_CONTEXT.copy()
-        kedro_context.update(kedro_cli.__get_kedro_context__())
-        value = kedro_context[key]
+        value = _KEDRO_CONTEXT[key]
     except KeyError:
         if default is not NO_DEFAULT:
             return default
@@ -503,7 +506,7 @@ def get_project_context(key: Any, default: Any = NO_DEFAULT) -> Any:  # pragma: 
             "__get_kedro_context__".format(key)
         )
 
-    return value
+    return deepcopy(value)
 
 
 def _get_plugin_command_groups(name):  # pragma: no cover

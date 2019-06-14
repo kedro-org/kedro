@@ -197,16 +197,12 @@ class AbstractDataSet(abc.ABC):
         load_args: Optional[Dict[str, Any]] = None,
         save_args: Optional[Dict[str, Any]] = None,
     ) -> None:
-        self._load_args = (
-            {**self.DEFAULT_LOAD_ARGS, **load_args}
-            if load_args is not None
-            else self.DEFAULT_LOAD_ARGS
-        )
-        self._save_args = (
-            {**self.DEFAULT_SAVE_ARGS, **save_args}
-            if save_args is not None
-            else self.DEFAULT_SAVE_ARGS
-        )
+        self._load_args = self.DEFAULT_LOAD_ARGS.copy()
+        if load_args is not None:
+            self._load_args.update(load_args)
+        self._save_args = self.DEFAULT_SAVE_ARGS.copy()
+        if save_args is not None:
+            self._save_args.update(save_args)
 
     def load(self) -> Any:
         """Loads data by delegation to the provided load method.

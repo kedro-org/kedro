@@ -8,13 +8,18 @@
 
 ## What are the primary advantages of Kedro?
 
-It is important to consider the primary advantages of Kedro over existing tools. As we see it, Kedro:
+It is important to consider the primary advantages of Kedro over existing tools. 
 
-- Is designed to emphasize a seamless transition from development to production without slowing the pace of the experimentation stage
-- Enforces separation of concerns between data processing and data storing
-- Does the heavy lifting for dependency resolution
-- Passes data between nodes for faster iterations during development
-- Defines workflow around a common project template, which builds in best practice knowledge and experience. By providing a consistent structure across analytics pipelines, it's easy to start and pick up other Kedro projects.
+As we see it, Kedro emphasises a seamless transition from development to production without slowing the pace of the experimentation stage, because it:
+
+- **Simplifies data access,** using YAML configuration to define a single-source of truth for all data sources that your workflow requires 
+- **Uses a familiar data interface,** by borrowing arguments from Pandas and Spark APIs meaning you don't have to learn a new API
+- **Has a minimal pipeline syntax,** that uses Python functions 
+- **Makes datasets 1st-level citizens,**  resolving task running order according to what each task produces and consumes, meaning you don't need to explicitly define dependencies between tasks
+- **Has built-in runner selection,** choosing sequential or parallel runner functionality is a `kedro run` argument
+- **Has a low-effort setup,** that does not need a scheduler or database 
+- **Starts with a project template,** which has built-in conventions and best practices from 50+ analytics engagements
+- **Is flexible,** simplifying your extension or replacement of core functionality e.g. the whole Data Catalog could be replaced with another mechanism for data access like [`Haxl`](https://github.com/facebook/Haxl)
 
 ## How does Kedro compare to other projects?
 
@@ -31,14 +36,6 @@ The primary differences to Bonobo ETL and Bubbles are related to the following f
  - **Ability to support big data operations**. Kedro supports big data operations by allowing you to use PySpark on your projects. We also look at processing dataframes differently to both tools as we consider entire dataframes and do not make use of the slower line-by-line data stream processing. 
  - **Project structure**. Kedro provides a built-in project structure from the beginning of your project configured for best-practice project management.
  - **Automatic dependency resolution for pipelines**. The `Pipeline` module also maps out dependencies between nodes and displays the results of this in a sophisticated but easy to understand directed acyclic graph.
- - Extensibility
-
-## How is Kedro similar to other projects?
-
-* Kedro's pipeline syntax is absolutely minimal (even supporting lambdas for simple transitions), and is inspired by the [Clojure library core.graph](https://github.com/plumatic/plumbing)
-
-* Kedro provides wrappers for existing, familiar, data sources and borrows APIs directly from Pandas and Spark, allowing rapid uptake with no new API to learn to use the Data Catalog.
-
 
 ## What is data engineering convention?
 

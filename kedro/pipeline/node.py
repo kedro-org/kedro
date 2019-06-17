@@ -36,6 +36,8 @@ from functools import reduce
 from typing import Any, Callable, Dict, Iterable, List, Set, Union
 from warnings import warn
 
+TRANSCODING_SEPARATOR = "@"
+
 
 class Node:
     """``Node`` is an auxiliary class facilitating the operations required to
@@ -234,6 +236,19 @@ class Node:
         return self._to_list(self._inputs)
 
     @property
+    def input_namespaces(self) -> List[str]:
+        """Strip out inputs (input name without @...) to be used for
+        topo sort only.
+
+        Returns:
+            List of stripped out inputs.
+        Raises:
+            ValueError: Raised if more than one transcoding separator
+            is present in an input name.
+        """
+        return [self.get_namespace(elem) for elem in self._to_list(self._inputs)]
+
+    @property
     def outputs(self) -> List[str]:
         """Return node outputs as a list preserving the original order
             if possible.
@@ -243,6 +258,19 @@ class Node:
 
         """
         return self._to_list(self._outputs)
+
+    @property
+    def output_namespaces(self) -> List[str]:
+        """Strip out outputs (input name without @...) to be used for
+        topo sort only.
+
+        Returns:
+            List of stripped out outputs.
+        Raises:
+            ValueError: Raised if more than one transcoding separator
+            is present in an output name.
+        """
+        return [self.get_namespace(elem) for elem in self._to_list(self._outputs)]
 
     @property
     def _decorated_func(self):
@@ -522,6 +550,25 @@ class Node:
                 "A node cannot have the same inputs and outputs: "
                 "{}".format(str(self), common_in_out)
             )
+
+    @staticmethod
+    def get_namespace(element: str) -> str:
+        """Strip out the transcoding separator and anything that follows.
+
+        Returns:
+            Namespace of node input/output
+        Raises:
+            ValueError: Raised if more than one transcoding separator
+            is present in the name.
+        """
+        split_name = element.split(TRANSCODING_SEPARATOR)
+        if len(split_name) > 2:
+            raise ValueError(
+                "Expected maximum 1 transcoding separator, found {} instead: '{}'.".format(
+                    len(split_name) - 1, element
+                )
+            )
+        return split_name[0]
 
     @staticmethod
     def _to_list(element: Union[None, str, List[str], Dict[str, str]]) -> List:

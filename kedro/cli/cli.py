@@ -529,13 +529,13 @@ def main():  # pragma: no cover
     commands to `kedro`'s then invoke the cli.
     """
 
-    # run plugin initilization
+    # Run plugin initialization
     for entry_point in pkg_resources.iter_entry_points(group="kedro.init"):
         try:
             init_hook = entry_point.load()
             init_hook()
         except Exception:  # pylint: disable=broad-except
-            _handle_exception("Initilizing {}".format(str(entry_point)), end=False)
+            _handle_exception("Initializing {}".format(str(entry_point)), end=False)
 
     global_groups = [cli]
     global_groups.extend(_get_plugin_command_groups("global"))

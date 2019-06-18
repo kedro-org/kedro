@@ -91,7 +91,7 @@ Kedro is built for Python 3.5+.
 * By default any file inside the `conf/` folder (and its subfolders) containing `credentials` in its name will be ignored via `.gitignore` and not commited to your git repository.
 * To describe where your colleagues can access the credentials, you may edit the `README.md` to provide instructions.
 
-## What is the philosphy behind Kedro?
+## What is the philosophy behind Kedro?
 
 Kedro is a Python library and lightly opinionated framework. This means that we give you the flexibility and extensibility of a standard Python library and make very few assumptions on the _best_ way to do things. We have created independent but friendly modules – modules that understand each others' defaults and are compatible. You can use alternative methods and choose to use one or all of the modules but it is understood that using Kedro in its entirety is the best thing that you can do for your projects.
 

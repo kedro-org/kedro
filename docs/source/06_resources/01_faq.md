@@ -15,7 +15,7 @@ As we see it, Kedro emphasises a seamless transition from development to product
 - **Simplifies data access,** using YAML configuration to define a single-source of truth for all data sources that your workflow requires 
 - **Uses a familiar data interface,** by borrowing arguments from Pandas and Spark APIs meaning you do not have to learn a new API
 - **Has a minimal pipeline syntax,** that uses Python functions 
-- **Makes datasets 1st-level citizens,**  resolving task running order according to what each task produces and consumes, meaning you don't need to explicitly define dependencies between tasks
+- **Makes datasets 1st-level citizens,**  resolving task running order according to what each task produces and consumes, meaning you do not need to explicitly define dependencies between tasks
 - **Has built-in runner selection,** choosing sequential or parallel runner functionality is a `kedro run` argument
 - **Has a low-effort setup,** that does not need a scheduler or database 
 - **Starts with a project template,** which has built-in conventions and best practices from 50+ analytics engagements

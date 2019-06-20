@@ -76,6 +76,22 @@ def _get_credentials(credentials_name: str, credentials: Dict) -> Dict:
         )
 
 
+class _FrozenDatasets:
+    """Helper class to access underlying loaded datasets"""
+
+    def __init__(self, datasets):
+        self.__dict__.update(**datasets)
+
+    # Don't allow users to add/change attributes on the fly
+    def __setattr__(self, key, value):
+        msg = "Operation not allowed! "
+        if key in self.__dict__.keys():
+            msg += "Please change datasets through configuration."
+        else:
+            msg += "Please use DataCatalog.add() instead."
+        raise AttributeError(msg)
+
+
 class DataCatalog:
     """``DataCatalog`` stores instances of ``AbstractDataSet`` implementations
     to provide ``load`` and ``save`` capabilities from anywhere in the
@@ -121,6 +137,8 @@ class DataCatalog:
             >>> io = DataCatalog(data_sets={'cars': cars})
         """
         self._data_sets = dict(data_sets or {})
+        self.datasets = _FrozenDatasets(self._data_sets)
+
         self._transformers = {k: list(v) for k, v in (transformers or {}).items()}
         self._default_transformers = list(default_transformers or [])
         self._check_and_normalize_transformers()
@@ -128,6 +146,10 @@ class DataCatalog:
         # import the feed dict
         if feed_dict:
             self.add_feed_dict(feed_dict)
+
+    @property
+    def _logger(self):
+        return logging.getLogger(__name__)
 
     def _check_and_normalize_transformers(self):
         data_sets = self._data_sets.keys()
@@ -144,10 +166,6 @@ class DataCatalog:
 
         for data_set_name in missing_transformers:
             self._transformers[data_set_name] = list(self._default_transformers)
-
-    @property
-    def _logger(self):
-        return logging.getLogger(__name__)
 
     @classmethod
     def from_config(
@@ -386,6 +404,7 @@ class DataCatalog:
                 )
         self._data_sets[data_set_name] = data_set
         self._transformers[data_set_name] = list(self._default_transformers)
+        self.datasets = _FrozenDatasets(self._data_sets)
 
     def add_all(
         self, data_sets: Dict[str, AbstractDataSet], replace: bool = False

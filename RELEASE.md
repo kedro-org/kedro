@@ -1,11 +1,12 @@
 # Release 0.14.3
 
 ## Major features and improvements
+* Tab completion for catalog datasets in `ipython` or `jupyter` sessions.
 * Added support for transcoding, an ability to decouple loading/saving mechanisms of a dataset from its storage location. It is denoted by adding '@' to the dataset name. This will allow you to read the same dataset or file in two different ways.
 
 ## Bug fixes and other changes
-- Add support for pipeline nodes made up from partial functions
-- Any custom `AbstractDataSet` may be aware of how many times a pipeline run is going to load it by implementing `set_remaining_loads()`
+* Add support for pipeline nodes made up from partial functions
+* Any custom `AbstractDataSet` may be aware of how many times a pipeline run is going to load it by implementing `set_remaining_loads()`
 
 ## Breaking changes to the API
 
@@ -13,7 +14,7 @@
 * Added Kedro project loader for IPython: `extras/kedro_project_loader.py`.
 
 ## Thanks for supporting contributions
-[Nikolaos Tsaousis](https://github.com/tsanikgr), [Ivan Danov](https://github.com/idanov), [Gordon Wrigley](https://github.com/tolomea), [Yetunde Dada](https://github.com/yetudada), [Kiyohito Kunii](https://github.com/921kiyo), [Lorena Balan](https://github.com/lorenabalan), [Richard Westenra](https://github.com/richardwestenra), [Dmitrii Deriabin](https://github.com/DmitryDeryabin)
+[Nikolaos Tsaousis](https://github.com/tsanikgr), [Ivan Danov](https://github.com/idanov), [Gordon Wrigley](https://github.com/tolomea), [Yetunde Dada](https://github.com/yetudada), [Kiyohito Kunii](https://github.com/921kiyo), [Lorena Balan](https://github.com/lorenabalan), [Richard Westenra](https://github.com/richardwestenra), [Dmitrii Deriabin](https://github.com/DmitryDeryabin), [Joel Schwarzmann](https://github.com/datajoely)
 
 # Release 0.14.2
 

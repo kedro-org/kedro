@@ -6,7 +6,6 @@
 
 ## Bug fixes and other changes
 * Add support for pipeline nodes made up from partial functions
-* Any custom `AbstractDataSet` may be aware of how many times a pipeline run is going to load it by implementing `set_remaining_loads()`
 
 ## Breaking changes to the API
 

@@ -537,16 +537,3 @@ class DataCatalog:
             other._transformers,  # pylint: disable=protected-access
             other._default_transformers,  # pylint: disable=protected-access
         )
-
-    def set_remaining_loads(self, ds_name: str, remaining_loads: int):
-        """Set the maximum number of times the given dataset can be loaded. Datasets like
-        ``MemoryDataSet`` use this to clear data from memory. In most other cases, this has no
-        effect.
-
-        Args:
-            ds_name: The dataset to modify
-            remaining_loads: Maximum number of times ``load`` method of the
-                data set is allowed to be invoked. Any number of calls
-                is allowed if the argument is not set.
-        """
-        self._data_sets[ds_name].set_remaining_loads(remaining_loads)

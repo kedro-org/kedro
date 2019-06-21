@@ -290,18 +290,6 @@ class AbstractDataSet(abc.ABC):
             "it must implement the `_describe` method".format(self.__class__.__name__)
         )
 
-    def set_remaining_loads(self, remaining_loads: int):
-        """Set how many times this dataset can be loaded. Datasets that can set a limit to
-        the number of times they can be loaded need to implement this method and the relevant
-        logic.
-
-        Args:
-            remaining_loads: Maximum number of times ``load`` method of the
-                data set is allowed to be invoked. Any number of calls
-                is allowed if the argument is not set.
-        """
-        pass
-
     def exists(self) -> bool:
         """Checks whether a data set's output already exists by calling
         the provided _exists() method.

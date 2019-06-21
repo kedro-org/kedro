@@ -72,18 +72,6 @@ def memory_data_set(input_data):
     return MemoryDataSet(data=input_data)
 
 
-@pytest.fixture
-def remaining_loads(request):
-    return request.param
-
-
-@pytest.fixture
-def memory_data_set_loads(input_data, remaining_loads):
-    memory = MemoryDataSet(data=input_data)
-    memory.set_remaining_loads(remaining_loads)
-    return memory
-
-
 class TestMemoryDataSet:
     def test_load(self, memory_data_set, input_data):
         """Test basic load"""
@@ -160,37 +148,3 @@ class TestMemoryDataSet:
 
         data_set.save(new_data)
         assert data_set.exists()
-
-
-class TestMemoryDataSetMaxLoads:
-    @pytest.mark.parametrize("remaining_loads", [None, 1, 2], indirect=True)
-    def test_remaining_loads(self, memory_data_set_loads, input_data, remaining_loads):
-        """Test that the first load succeeds regardless of the maximum number
-        of loads specified"""
-        loaded_data = memory_data_set_loads.load()
-        assert _check_equals(loaded_data, input_data)
-
-    @pytest.mark.parametrize("remaining_loads", [1, 2], indirect=True)
-    def test_remaining_loads_exceeded(self, memory_data_set_loads, remaining_loads):
-        """Check the error when the maximum number of data set loads
-        is exceeded"""
-        with pytest.raises(
-            DataSetError, match="The MemoryDataSet was cleared and holds no data now"
-        ):
-            for _ in range(remaining_loads + 1):
-                memory_data_set_loads.load()
-
-    @pytest.mark.parametrize("remaining_loads", [1], indirect=True)
-    def test_remaining_loads_reset(
-        self, memory_data_set_loads, input_data, remaining_loads
-    ):
-        """Test that the maximum number of loads is reset after
-        save operation"""
-        memory_data_set_loads.load()
-        with pytest.raises(
-            DataSetError, match=r"The MemoryDataSet was cleared and holds no data now"
-        ):
-            memory_data_set_loads.load()
-        memory_data_set_loads.save(input_data)
-        loaded_data = memory_data_set_loads.load()
-        assert _check_equals(loaded_data, input_data)

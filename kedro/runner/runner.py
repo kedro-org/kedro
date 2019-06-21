@@ -79,10 +79,6 @@ class AbstractRunner(ABC):
         for ds_name in unregistered_ds:
             catalog.add(ds_name, self.create_default_data_set(ds_name))
 
-        for ds_name in pipeline.all_inputs():
-            num_loads = len(pipeline.only_nodes_with_inputs(ds_name).nodes)
-            catalog.set_remaining_loads(ds_name, num_loads)
-
         self._run(pipeline, catalog)
 
         self._logger.info("Pipeline execution completed successfully.")

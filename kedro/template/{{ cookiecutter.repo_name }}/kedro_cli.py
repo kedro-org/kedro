@@ -122,8 +122,10 @@ def test(args):
 
 @cli.command()
 def install():
-    """Install project dependencies from requirements.txt."""
+    """Install project dependencies from both requirements.txt and requirements.yml."""
     python_call("pip", ["install", "-U", "-r", "src/requirements.txt"])
+	os.system('conda install --file src/requirements.yml --yes')
+
 
 
 @forward_command(cli, forward_help=True)

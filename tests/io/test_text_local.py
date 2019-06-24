@@ -86,6 +86,7 @@ class TestTextLocalDataSet:
         txt_dataset = TextLocalDataSet(filepath='~')
         assert '~' not in txt_dataset._filepath  # pylint: disable=protected-access
 
+
 class TestTextLocalDataSetVersioned:
     def test_save_and_load(self, versioned_txt_data_set, sample_text):
         """Test that saved and reloaded data matches the original one for

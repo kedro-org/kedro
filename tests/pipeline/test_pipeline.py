@@ -226,6 +226,58 @@ def str_node_inputs_list():
     }
 
 
+@fixture
+def pipeline_with_namespaces():
+    return {
+        "nodes": [
+            node(identity, "A", "B@pandas", name="node1"),
+            node(identity, "B@pandas", "C", name="node2"),
+            node(identity, "B@spark", "D", name="node3"),
+        ],
+        "expected": [
+            {node(identity, "A", "B@pandas", name="node1")},  # no dependency
+            {
+                node(identity, "B@pandas", "C", name="node2"),  # one dependency
+                node(identity, "B@spark", "D", name="node3"),
+            },
+        ],
+        "free_inputs": ["A"],
+        "outputs": ["C", "D"],
+    }
+
+
+@fixture
+def pipeline_with_duplicate_namespaces_inputs():
+    return {
+        "nodes": [
+            node(identity, "A", "B@pandas", name="node1"),
+            node(biconcat, ["B@spark", "B@pandas"], "C", name="node2"),
+        ],
+        "expected": [
+            {node(identity, "A", "B@pandas", name="node1")},
+            {node(biconcat, ["B@spark", "B@pandas"], "C", name="node2")},
+        ],
+        "free_inputs": ["A"],
+        "outputs": ["C"],
+    }
+
+
+@fixture
+def pipeline_with_namespaced_free_input():
+    return {
+        "nodes": [
+            node(identity, "B@pandas", "C", name="node1"),
+            node(identity, "C", "D", name="node2"),
+        ],
+        "expected": [
+            {node(identity, "B@pandas", "C", name="node1")},
+            {node(identity, "C", "D", name="node2")},
+        ],
+        "free_inputs": ["B@pandas"],
+        "outputs": ["D"],
+    }
+
+
 @pytest.fixture(
     params=[
         "branchless_pipeline",
@@ -235,6 +287,9 @@ def str_node_inputs_list():
         "disjoint_pipeline",
         "pipeline_input_duplicated",
         "str_node_inputs_list",
+        "pipeline_with_namespaces",
+        "pipeline_with_namespaced_free_input",
+        "pipeline_with_duplicate_namespaces_inputs",
     ]
 )
 def input_data(request):
@@ -284,7 +339,7 @@ class TestValidPipeline:
 
         pipeline = Pipeline(nodes)
 
-        assert set(outputs) == pipeline.outputs()
+        assert pipeline.outputs() == set(outputs)
 
     def test_combine(self):
         pipeline1 = Pipeline([node(biconcat, ["input", "input1"], "output1", name="a")])
@@ -392,6 +447,31 @@ class TestInvalidPipeline:
         )
         with pytest.raises(OutputNotUniqueError, match=r"\['output'\]"):
             pipeline1 + new_pipeline  # pylint: disable=pointless-statement
+
+    def test_namespaced_inputs_outputs(self):
+        """Nodes must not refer to a dataset without the separator if
+        it is referenced later on in the catalog.
+        """
+        pattern = "The following datasets are used with transcoding, "
+        pattern += "but were referenced without the separator: B."
+        with pytest.raises(ValueError, match=pattern):
+            Pipeline(
+                [
+                    node(identity, "A", "B", name="node1"),
+                    node(identity, "B@pandas", "C", name="node2"),
+                    node(identity, "B@spark", "D", name="node3"),
+                    node(biconcat, ["A", "D"], "E", name="node4"),
+                ]
+            )
+
+    def test_namespace_duplicates_in_outputs(self):
+        with pytest.raises(OutputNotUniqueError, match="['B']"):
+            Pipeline(
+                [
+                    node(identity, "A", "B@pandas", name="node1"),
+                    node(identity, "A", "B@spark", name="node2"),
+                ]
+            )
 
 
 @pytest.fixture
@@ -646,7 +726,11 @@ def test_pipeline_to_json(input_data):
     json_rep = Pipeline(nodes).to_json()
     for pipeline_node in nodes:
         assert pipeline_node.name in json_rep
-        assert all([node_input in json_rep for node_input in pipeline_node.inputs])
-        assert all([node_output in json_rep for node_output in pipeline_node.outputs])
+        assert all(
+            node_input in json_rep for node_input in pipeline_node.input_namespaces
+        )
+        assert all(
+            node_output in json_rep for node_output in pipeline_node.output_namespaces
+        )
 
     assert kedro.__version__ in json_rep

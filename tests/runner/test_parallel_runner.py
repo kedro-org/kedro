@@ -74,7 +74,7 @@ def fan_out_fan_in():
 class TestValidParallelRunner:
     def test_create_default_data_set(self):
         # data_set is a proxy to a dataset in another process.
-        data_set = ParallelRunner().create_default_data_set("", 0)
+        data_set = ParallelRunner().create_default_data_set("")
         assert isinstance(data_set, BaseProxy)
 
     def test_parallel_run(self, fan_out_fan_in, catalog):

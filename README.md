@@ -58,9 +58,9 @@ For more detailed installation instructions, including how to setup Python virtu
 ### 4. Feature extensibility
 
 - A plugin system that injects commands into the Kedro command line interface (CLI)
-- (_coming soon_) List of officially supported plugins:
-  - Kedro-Airflow, making it easy to prototype your data pipeline in Kedro before deploying to [Airflow](https://github.com/apache/airflow), a workflow scheduler
-  - Kedro-Docker, a tool for packing and shipping Kedro projects within containers
+- List of officially supported plugins:
+  - (_coming soon_) Kedro-Airflow, making it easy to prototype your data pipeline in Kedro before deploying to [Airflow](https://github.com/apache/airflow), a workflow scheduler
+  - [Kedro-Docker](https://github.com/quantumblacklabs/kedro-docker), a tool for packaging and shipping Kedro projects within containers
 - Kedro can be deployed locally, on-premise and cloud (AWS, Azure and GCP) servers, or clusters (EMR, Azure HDinsight, GCP and Databricks)
 
 ![Kedro-Viz Pipeline Visualisation](https://raw.githubusercontent.com/quantumblacklabs/kedro/master/img/pipeline_visualisation.png)

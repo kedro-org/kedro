@@ -72,16 +72,6 @@ def memory_data_set(input_data):
     return MemoryDataSet(data=input_data)
 
 
-@pytest.fixture
-def max_loads(request):
-    return request.param
-
-
-@pytest.fixture
-def memory_data_set_loads(input_data, max_loads):
-    return MemoryDataSet(data=input_data, max_loads=max_loads)
-
-
 class TestMemoryDataSet:
     def test_load(self, memory_data_set, input_data):
         """Test basic load"""
@@ -158,41 +148,3 @@ class TestMemoryDataSet:
 
         data_set.save(new_data)
         assert data_set.exists()
-
-
-class TestMemoryDataSetMaxLoads:
-    @pytest.mark.parametrize("max_loads", [None, -1, 0, 1, 2], indirect=True)
-    def test_max_loads(self, memory_data_set_loads, input_data, max_loads):
-        """Test that the first load succeeds regardless of the maximum number
-        of loads specified"""
-        loaded_data = memory_data_set_loads.load()
-        assert _check_equals(loaded_data, input_data)
-
-    @pytest.mark.parametrize("max_loads", [1, 2], indirect=True)
-    def test_max_loads_exceeded(self, memory_data_set_loads, max_loads):
-        """Check the error when the maximum number of data set loads
-        is exceeded"""
-        pattern = (
-            r"Maximum number of MemoryDataSet loads exceeded the "
-            r"threshold of {}\. The data set was cleared and holds "
-            r"no data now\.".format(max_loads)
-        )
-        with pytest.raises(DataSetError, match=pattern):
-            for _ in range(max_loads + 1):
-                memory_data_set_loads.load()
-
-    @pytest.mark.parametrize("max_loads", [1], indirect=True)
-    def test_max_loads_reset(self, memory_data_set_loads, input_data, max_loads):
-        """Test that the maximum number of loads is reset after
-        save operation"""
-        memory_data_set_loads.load()
-        pattern = (
-            r"Maximum number of MemoryDataSet loads exceeded the "
-            r"threshold of 1\. The data set was cleared and holds "
-            r"no data now\."
-        )
-        with pytest.raises(DataSetError, match=pattern):
-            memory_data_set_loads.load()
-        memory_data_set_loads.save(input_data)
-        loaded_data = memory_data_set_loads.load()
-        assert _check_equals(loaded_data, input_data)

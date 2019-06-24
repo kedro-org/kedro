@@ -37,9 +37,9 @@ from memory_profiler import memory_usage
 
 
 def _func_full_name(func: Callable):
-    if not func.__module__:
-        return func.__qualname__
-    return "%s.%s" % (func.__module__, func.__qualname__)
+    if not getattr(func, "__module__", None):
+        return getattr(func, "__qualname__", repr(func))
+    return "{}.{}".format(func.__module__, func.__qualname__)
 
 
 def _human_readable_time(elapsed: float):  # pragma: no cover

@@ -108,6 +108,7 @@ class Pipeline:
             )
         )
         _validate_duplicate_nodes(nodes)
+        _validate_namespaced_inputs_outputs(nodes)
 
         if name:
             nodes = [n.tag([name]) for n in nodes]
@@ -117,12 +118,12 @@ class Pipeline:
 
         self._nodes_by_input = defaultdict(set)  # input: {nodes with input}
         for node in nodes:
-            for input_ in node.inputs:
+            for input_ in node.input_namespaces:
                 self._nodes_by_input[input_].add(node)
 
         self._nodes_by_output = {}  # output: node
         for node in nodes:
-            for output in node.outputs:
+            for output in node.output_namespaces:
                 self._nodes_by_output[output] = node
 
         self._nodes = nodes
@@ -155,27 +156,34 @@ class Pipeline:
         """
         return set.union(set(), *[node.outputs for node in self.nodes])
 
+    def _remove_intermediates(self, datasets: Set[str]) -> Set[str]:
+        intermediate = {Node.get_namespace(i) for i in self.all_inputs()} & {
+            Node.get_namespace(o) for o in self.all_outputs()
+        }
+        return {d for d in datasets if Node.get_namespace(d) not in intermediate}
+
     def inputs(self) -> Set[str]:
         """The names of free inputs that must be provided at runtime so that
         the pipeline is runnable. Does not include intermediate inputs which
-        are produced and consumed by the inner pipeline nodes.
+        are produced and consumed by the inner pipeline nodes. Resolves
+        namespaces where necessary.
 
         Returns:
             The set of free input names needed by the pipeline.
 
         """
-        return self.all_inputs() - self.all_outputs()
+        return self._remove_intermediates(self.all_inputs())
 
     def outputs(self) -> Set[str]:
         """The names of outputs produced when the whole pipeline is run.
         Does not include intermediate outputs that are consumed by
-        other pipeline nodes.
+        other pipeline nodes. Resolves namespaces where necessary.
 
         Returns:
             The set of final pipeline outputs.
 
         """
-        return self.all_outputs() - self.all_inputs()
+        return self._remove_intermediates(self.all_outputs())
 
     def data_sets(self) -> Set[str]:
         """The names of all data sets used by the ``Pipeline``,
@@ -271,7 +279,7 @@ class Pipeline:
         """
         dependencies = {node: set() for node in self._nodes}
         for parent in self._nodes:
-            for output in parent.outputs:
+            for output in parent.output_namespaces:
                 for child in self._nodes_by_input[output]:
                     dependencies[child].add(parent)
 
@@ -559,8 +567,8 @@ class Pipeline:
         transformed = [
             {
                 "name": n.name,
-                "inputs": list(n.inputs),
-                "outputs": list(n.outputs),
+                "inputs": list(n.input_namespaces),
+                "outputs": list(n.output_namespaces),
                 "tags": list(n.tags),
             }
             for n in self.nodes
@@ -594,15 +602,41 @@ def _validate_duplicate_nodes(nodes: List[Node]):
 
 
 def _validate_unique_outputs(nodes: List[Node]) -> None:
-    outputs_list = list(chain.from_iterable(node.outputs for node in nodes))
+    outputs_list = list(chain.from_iterable(node.output_namespaces for node in nodes))
     counter_list = Counter(outputs_list)
     counter_set = Counter(set(outputs_list))
     diff = counter_list - counter_set
     if diff:
         raise OutputNotUniqueError(
-            "Output(s) %s are returned by "
+            "Output(s) {} are returned by "
             "more than one nodes. Node "
-            "outputs must be unique." % str(list(sorted(diff.keys())))
+            "outputs must be unique.".format(sorted(diff.keys()))
+        )
+
+
+def _validate_namespaced_inputs_outputs(nodes: List[Node]) -> None:
+    """Users should not be allowed to refer to a dataset without
+    the separator if it is referenced later on in the pipeline.
+    """
+    all_inputs_outputs = set(
+        chain(
+            chain.from_iterable(node.inputs for node in nodes),
+            chain.from_iterable(node.outputs for node in nodes),
+        )
+    )
+
+    invalid = set()
+    for dataset_name in all_inputs_outputs:
+        namespace = Node.get_namespace(dataset_name)
+        if namespace != dataset_name and namespace in all_inputs_outputs:
+            invalid.add(namespace)
+
+    if invalid:
+        raise ValueError(
+            "The following datasets are used with transcoding, but "
+            "were referenced without the separator: {}.\n"
+            "Please specify a transcoding option or "
+            "rename the datasets.".format(", ".join(invalid))
         )
 
 

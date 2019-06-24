@@ -41,21 +41,18 @@ class SequentialRunner(AbstractRunner):
     topological sort of provided nodes.
     """
 
-    def create_default_data_set(self, ds_name: str, max_loads: int) -> AbstractDataSet:
+    def create_default_data_set(self, ds_name: str) -> AbstractDataSet:
         """Factory method for creating the default data set for the runner.
 
         Args:
             ds_name: Name of the missing data set
-            max_loads: Maximum number of times ``load`` method of the
-                default data set is allowed to be invoked. Any number of
-                calls is allowed if the argument is not set.
 
         Returns:
             An instance of an implementation of AbstractDataSet to be used
             for all unregistered data sets.
 
         """
-        return MemoryDataSet(max_loads=max_loads)
+        return MemoryDataSet()
 
     def _run(self, pipeline: Pipeline, catalog: DataCatalog) -> None:
         """The method implementing sequential pipeline running.

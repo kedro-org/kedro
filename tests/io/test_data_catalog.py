@@ -34,6 +34,7 @@ from pandas.util.testing import assert_frame_equal
 from kedro.io import (
     AbstractDataSet,
     CSVLocalDataSet,
+    CSVS3DataSet,
     DataCatalog,
     DataSetAlreadyExistsError,
     DataSetError,
@@ -221,6 +222,31 @@ class TestDataCatalog:
         assert multi_catalog == multi_catalog  # pylint: disable=comparison-with-itself
         assert multi_catalog == multi_catalog.shallow_copy()
         assert multi_catalog != data_catalog
+
+    def test_datasets_on_init(self, data_catalog_from_config):
+        """Check datasets are loaded correctly on construction"""
+        assert isinstance(data_catalog_from_config.datasets.boats, CSVLocalDataSet)
+        assert isinstance(data_catalog_from_config.datasets.cars, CSVS3DataSet)
+
+    def test_datasets_on_add(self, data_catalog_from_config):
+        """Check datasets are updated correctly after adding"""
+        data_catalog_from_config.add("new_dataset", CSVLocalDataSet("some_path"))
+        assert isinstance(
+            data_catalog_from_config.datasets.new_dataset, CSVLocalDataSet
+        )
+        assert isinstance(data_catalog_from_config.datasets.boats, CSVLocalDataSet)
+
+    def test_adding_datasets_not_allowed(self, data_catalog_from_config):
+        """Check error if user tries to update the datasets attribute"""
+        pattern = r"Please use DataCatalog.add\(\) instead"
+        with pytest.raises(AttributeError, match=pattern):
+            data_catalog_from_config.datasets.new_dataset = None
+
+    def test_mutating_datasets_not_allowed(self, data_catalog_from_config):
+        """Check error if user tries to update the datasets attribute"""
+        pattern = "Please change datasets through configuration."
+        with pytest.raises(AttributeError, match=pattern):
+            data_catalog_from_config.datasets.cars = None
 
 
 class TestDataCatalogFromConfig:

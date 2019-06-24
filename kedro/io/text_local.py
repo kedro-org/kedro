@@ -28,6 +28,7 @@
 """``TextLocalDataSet`` loads and saves data to a local text file. The data is
 accessed text data using the python open function.
 """
+import os
 from pathlib import Path
 from typing import Any, Dict
 
@@ -83,7 +84,7 @@ class TextLocalDataSet(AbstractDataSet, FilepathVersionMixIn):
         default_save_args = {"mode": "w"}
         default_load_args = {"mode": "r"}
 
-        self._filepath = filepath
+        self._filepath = os.path.expanduser(filepath)
         self._load_args = (
             {**default_load_args, **load_args}
             if load_args is not None

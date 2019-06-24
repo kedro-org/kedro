@@ -7,13 +7,16 @@
 ## Bug fixes and other changes
 * Add support for pipeline nodes made up from partial functions
 
+## Bug fixes and other changes
+* Expand user home directory (~) for TextLocalDataSet (see issue #19)
+
 ## Breaking changes to the API
 
 ## Bug fixes and other changes
 * Added Kedro project loader for IPython: `extras/kedro_project_loader.py`.
 
 ## Thanks for supporting contributions
-[Nikolaos Tsaousis](https://github.com/tsanikgr), [Ivan Danov](https://github.com/idanov), [Gordon Wrigley](https://github.com/tolomea), [Yetunde Dada](https://github.com/yetudada), [Kiyohito Kunii](https://github.com/921kiyo), [Lorena Balan](https://github.com/lorenabalan), [Richard Westenra](https://github.com/richardwestenra), [Dmitrii Deriabin](https://github.com/DmitryDeryabin), [Joel Schwarzmann](https://github.com/datajoely)
+[Nikolaos Tsaousis](https://github.com/tsanikgr), [Ivan Danov](https://github.com/idanov), [Gordon Wrigley](https://github.com/tolomea), [Yetunde Dada](https://github.com/yetudada), [Kiyohito Kunii](https://github.com/921kiyo), [Lorena Balan](https://github.com/lorenabalan), [Richard Westenra](https://github.com/richardwestenra), [Dmitrii Deriabin](https://github.com/DmitryDeryabin), [Joel Schwarzmann](https://github.com/datajoely), [Alex Kalmikov](https://github.com/kalexqb)
 
 # Release 0.14.2
 

@@ -34,6 +34,7 @@ https://docs.pytest.org/en/latest/fixture.html
 """
 
 import gc
+import os
 from subprocess import Popen
 
 import pytest
@@ -57,11 +58,9 @@ def no_spark():
 
 # clean up pyspark after the test module finishes
 @pytest.fixture(scope="module")
-def spark_session():
+def spark_session_base():
     SparkSession.builder.getOrCreate = the_real_getOrCreate
-    spark = SparkSession.builder.getOrCreate()
-    yield spark
-    spark.stop()
+    yield None
     SparkSession.builder.getOrCreate = UseTheSparkSessionFixtureOrMock
 
     # remove the cached JVM vars
@@ -72,3 +71,10 @@ def spark_session():
     for obj in gc.get_objects():
         if isinstance(obj, Popen) and "pyspark" in obj.args[0]:
             obj.terminate()
+
+
+@pytest.fixture(scope="module")
+def spark_session(spark_session_base):
+    spark = SparkSession.builder.getOrCreate()
+    yield spark
+    spark.stop()

@@ -29,3 +29,4 @@
 
 from .spark_data_set import SparkDataSet  # NOQA
 from .spark_jdbc import SparkJDBCDataSet  # NOQA
+from .spark_hive_data_set import SparkHiveDataSet  # NOQA

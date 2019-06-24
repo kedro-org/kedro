@@ -40,6 +40,7 @@ TESTSPARKDIR = "test_spark_dir"
 
 @pytest.fixture(scope="module", autouse=True)
 def spark_hive_session(spark_session_base):
+    default_cwd = os.getcwd()
     with TemporaryDirectory(TESTSPARKDIR) as tmpdir:
         os.chdir(tmpdir)
         spark = (
@@ -55,6 +56,7 @@ def spark_hive_session(spark_session_base):
         _write_hive(spark, _generate_spark_df_one(), "default_1", "table_1")
         yield spark
         spark.stop()
+        os.chdir(default_cwd)
 
 
 def assert_df_equal(expected, result):

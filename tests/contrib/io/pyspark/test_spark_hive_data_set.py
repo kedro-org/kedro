@@ -30,10 +30,11 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 import pytest
-from pyspark.sql import SparkSession, DataFrame
+from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 
 from kedro.contrib.io.pyspark.spark_hive_data_set import SparkHiveDataSet
+from kedro.io import DataSetError
 
 TESTSPARKDIR = "test_spark_dir"
 
@@ -44,12 +45,18 @@ def spark_hive_session(spark_session_base):
     with TemporaryDirectory(TESTSPARKDIR) as tmpdir:
         os.chdir(tmpdir)
         spark = (
-            SparkSession.builder.config(
-                "spark.local.dir", (Path(tmpdir) / "spark_local").absolute()
+            spark_session_base
+            if spark_session_base
+            else (
+                SparkSession.builder.config(
+                    "spark.local.dir", (Path(tmpdir) / "spark_local").absolute()
+                )
+                .config(
+                    "spark.sql.warehouse.dir", (Path(tmpdir) / "warehouse").absolute()
+                )
+                .enableHiveSupport()
+                .getOrCreate()
             )
-            .config("spark.sql.warehouse.dir", (Path(tmpdir) / "warehouse").absolute())
-            .enableHiveSupport()
-            .getOrCreate()
         )
         spark.sql("create database default_1")
         spark.sql("create database default_2")
@@ -142,18 +149,6 @@ def test_overwrite_empty_table(spark_hive_session):
     assert_df_equal(dataset.load(), _generate_spark_df_one())
 
 
-def test_fail_data_correctness(spark_hive_session):
-    spark_hive_session.sql(
-        "create table default_1.test_fail_data_correctness (name string, age integer)"
-    ).take(1)
-    dataset = SparkHiveDataSet(
-        database="default_1", table="test_fail_data_correctness", write_mode="overwrite"
-    )
-    dataset.save(_generate_spark_df_one().union(_generate_spark_df_one()))
-    with pytest.raises(AssertionError):
-        assert_df_equal(dataset.load(), _generate_spark_df_one())
-
-
 def test_overwrite_not_empty_table(spark_hive_session):
     spark_hive_session.sql(
         "create table default_1.test_overwrite_full_table (name string, age integer)"
@@ -183,7 +178,7 @@ def test_insert_not_empty_table(spark_hive_session):
 def test_upsert_config_err():
     # no pk provided should prompt config error
     with pytest.raises(
-        ValueError, match="table_pk must be set to utilise upsert read mode"
+        DataSetError, match="table_pk must be set to utilise upsert read mode"
     ):
         SparkHiveDataSet(database="default_1", table="table_1", write_mode="upsert")
 
@@ -215,4 +210,56 @@ def test_upsert_not_empty_table(spark_hive_session):
     dataset.save(_generate_spark_df_one())
     dataset.save(_generate_spark_df_upsert())
 
-    assert_df_equal(dataset.load().sort("name"), _generate_spark_df_upsert_expected().sort("name"))
+    assert_df_equal(
+        dataset.load().sort("name"), _generate_spark_df_upsert_expected().sort("name")
+    )
+
+
+def test_invalid_pk_provided():
+    with pytest.raises(
+        DataSetError,
+        match=r"columns \[column_doesnt_exist\] selected as PK not "
+        "found in table default_1.table_1",
+    ):
+        SparkHiveDataSet(
+            database="default_1",
+            table="table_1",
+            write_mode="upsert",
+            table_pk=["column_doesnt_exist"],
+        )
+
+
+def test_invalid_write_mode_provided():
+    with pytest.raises(
+        DataSetError, match="Invalid write_mode provided: not_a_write_mode"
+    ):
+        SparkHiveDataSet(
+            database="default_1",
+            table="table_1",
+            write_mode="not_a_write_mode",
+            table_pk=["name"],
+        )
+
+
+def test_table_doesnt_exist():
+    with pytest.raises(
+        DataSetError, match="requested table not found: default_1.not_a_table"
+    ):
+        SparkHiveDataSet(
+            database="default_1",
+            table="not_a_table",
+            write_mode="upsert",
+            table_pk=["name"],
+        )
+
+
+def test_invalid_schema_insert(spark_hive_session):
+    spark_hive_session.sql(
+        "create table default_1.test_invalid_schema_insert "
+        "(name string, age integer, additional_column integer)"
+    ).take(1)
+    dataset = SparkHiveDataSet(
+        database="default_1", table="test_invalid_schema_insert", write_mode="insert"
+    )
+    with pytest.raises(DataSetError, match="dataset does not match hive table schema"):
+        dataset.save(_generate_spark_df_one())

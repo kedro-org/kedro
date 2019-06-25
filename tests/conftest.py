@@ -34,7 +34,6 @@ https://docs.pytest.org/en/latest/fixture.html
 """
 
 import gc
-import os
 from subprocess import Popen
 
 import pytest
@@ -75,6 +74,8 @@ def spark_session_base():
 
 @pytest.fixture(scope="module")
 def spark_session(spark_session_base):
-    spark = SparkSession.builder.getOrCreate()
+    spark = (
+        spark_session_base if spark_session_base else SparkSession.builder.getOrCreate()
+    )
     yield spark
     spark.stop()

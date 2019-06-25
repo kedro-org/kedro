@@ -32,7 +32,6 @@ from typing import Callable
 import pytest
 
 from kedro.pipeline import node
-from kedro.pipeline.node import Node
 
 
 # Different dummy func based on the number of arguments
@@ -139,36 +138,6 @@ class TestValidNode:
             ["output2", "output1", "last node"],
         )
         assert dummy_node.outputs == ["output2", "output1", "last node"]
-
-    def test_input_namespaces(self):
-        dummy_node = node(
-            triconcat, ["input@formA", "input@formB", "another node"], "output"
-        )
-        assert dummy_node.input_namespaces == ["input", "input", "another node"]
-
-    def test_output_namespaces(self):
-        dummy_node = node(
-            triconcat,
-            ["input@formA", "input@formB", "another node"],
-            ["output@formC", "output@formD"],
-        )
-        assert dummy_node.output_namespaces == ["output", "output"]
-
-    def test_get_namespace(self):
-        dataset_name = "mydata@pandas"
-        assert Node.get_namespace(dataset_name) == "mydata"
-
-    def test_get_namespace_no_separator(self):
-        dataset_name = "mydata"
-        assert Node.get_namespace(dataset_name) == dataset_name
-
-    def test_get_namespace_multiple_separators(self):
-        dataset_name = "mydata@formA@formB"
-        pattern = "Expected maximum 1 transcoding separator, "
-        pattern += "found 2 instead: 'mydata@formA@formB'"
-
-        with pytest.raises(ValueError, match=pattern):
-            Node.get_namespace(dataset_name)
 
 
 class TestNodeComparisons:

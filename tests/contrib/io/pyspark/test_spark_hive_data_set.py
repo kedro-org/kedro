@@ -256,10 +256,12 @@ def test_table_doesnt_exist():
 def test_invalid_schema_insert(spark_hive_session):
     spark_hive_session.sql(
         "create table default_1.test_invalid_schema_insert "
-        "(name string, age integer, additional_column integer)"
+        "(name string, additional_column_on_hive integer)"
     ).take(1)
     dataset = SparkHiveDataSet(
         database="default_1", table="test_invalid_schema_insert", write_mode="insert"
     )
-    with pytest.raises(DataSetError, match="dataset does not match hive table schema"):
+    with pytest.raises(DataSetError, match=r"dataset does not match hive table schema\.\n"
+                r"Present on insert only: \[\('age', 'int'\)\]\n"
+                r"Present on schema only: \[\('additional_column_on_hive', 'int'\)\]"):
         dataset.save(_generate_spark_df_one())

@@ -32,7 +32,7 @@
 
 import pickle
 import uuid
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.functions import coalesce
@@ -96,7 +96,6 @@ class StagedHiveDataSet:
         )
 
 
-# pylint: disable=too-many-instance-attributes
 class SparkHiveDataSet(AbstractDataSet):
     """``SparkHiveDataSet`` loads and saves Spark data frames stored on Hive.
     This data set also handles some incompatible file types such as using partitioned parquet on
@@ -135,19 +134,10 @@ class SparkHiveDataSet(AbstractDataSet):
             table=self._table,
             write_mode=self._write_mode,
             table_pk=self._table_pk,
-            load_args=self._load_args,
-            save_args=self._save_args,
         )
 
-    # pylint: disable=too-many-arguments
     def __init__(
-        self,
-        database: str,
-        table: str,
-        write_mode: str,
-        table_pk: List[str] = None,
-        load_args: Optional[Dict[str, Any]] = None,
-        save_args: Optional[Dict[str, Any]] = None,
+        self, database: str, table: str, write_mode: str, table_pk: List[str] = None
     ) -> None:
         """Creates a new instance of ``SparkHiveDataSet``.
 
@@ -157,18 +147,6 @@ class SparkHiveDataSet(AbstractDataSet):
             write_mode: ``insert``, ``upsert`` or ``overwrite`` are supported.
             table_pk: If performing an upsert, this identifies the primary key columns used to
                 resolve preexisting data. Is required for ``write_mode="upsert"``
-            load_args: Load args passed to Spark DataFrameReader load method.
-                It is dependent on the selected file format. You can find
-                a list of read options for each supported format
-                in Spark DataFrame read documentation:
-                https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrame
-            save_args: Save args passed to Spark DataFrame write options.
-                Similar to load_args this is dependent on the selected file
-                format. You can pass ``mode`` and ``partitionBy`` to specify
-                your overwrite mode and partitioning respectively. You can find
-                a list of options for each format in Spark DataFrame
-                write documentation:
-                https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrame
 
         Raises:
             DataSetError: Invalid configuration supplied
@@ -187,8 +165,6 @@ class SparkHiveDataSet(AbstractDataSet):
         if self._write_mode == "upsert" and not table_pk:
             raise DataSetError("table_pk must be set to utilise upsert read mode")
         self._table_pk = table_pk
-        self._load_args = load_args if load_args is not None else {}
-        self._save_args = save_args if save_args is not None else {}
 
         if not self._exists():
             raise DataSetError(

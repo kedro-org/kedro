@@ -27,28 +27,30 @@
 # limitations under the License.
 
 
-import matplotlib.pyplot as plt
+import matplotlib
 import numpy as np
 import pytest
 
 from kedro.contrib.io.matplotlib import MatplotlibWriter
 from kedro.io import DataSetError
 
+matplotlib.use('TkAgg')  # used to facilitate simple inclusion into kedro CI/CD
+
 
 def test_should_write_to_image_in_single_mode(tmpdir):
 
     # generate plot
-    plt.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
+    matplotlib.pyplot.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
 
     # write and compare
     trusted_filepath = str(tmpdir.join("image_we_expect.png"))
-    plt.savefig(trusted_filepath)
+    matplotlib.pyplot.savefig(trusted_filepath)
 
     experimental_filepath = str(tmpdir.join("image_we_write.png"))
     plot_writer = MatplotlibWriter(filepath=experimental_filepath)
-    plot_writer.save(plt)
+    plot_writer.save(matplotlib.pyplot)
 
-    plt.close()
+    matplotlib.pyplot.close()
 
     assert (
         open(experimental_filepath, "rb").read() == open(trusted_filepath, "rb").read()
@@ -61,9 +63,9 @@ def test_should_write_to_image_in_list_multi_mode(tmpdir):
 
     # generate plots
     for index in range(5):
-        plots.append(plt.figure())
-        plt.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
-        plt.close()
+        plots.append(matplotlib.pyplot.figure())
+        matplotlib.pyplot.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
+        matplotlib.pyplot.close()
 
     experimental_filepath = str(tmpdir.join("list_images"))
     plot_writer = MatplotlibWriter(
@@ -91,13 +93,14 @@ def test_should_write_to_image_in_list_multi_mode(tmpdir):
 def test_should_write_to_image_in_dict_multi_mode(tmpdir):
 
     plots = dict()
+
     # generate plots
     for index in ["boo", "far"]:
         filename = "{}.png".format(index)
 
-        plots[filename] = plt.figure()
-        plt.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
-        plt.close()
+        plots[filename] = matplotlib.pyplot.figure()
+        matplotlib.pyplot.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
+        matplotlib.pyplot.close()
 
     directory = str(tmpdir.join("dict_images"))
     plot_writer = MatplotlibWriter(filepath=directory, save_args={"multiFile": True})
@@ -119,9 +122,9 @@ def test_should_write_to_image_in_dict_multi_mode(tmpdir):
 
 def test_only_lists_or_dicts_should_be_accepted_for_mulit_mode(tmpdir):
 
-    plot_object = plt.figure()
-    plt.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
-    plt.close()
+    plot_object = matplotlib.pyplot.figure()
+    matplotlib.pyplot.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
+    matplotlib.pyplot.close()
 
     plot_writer = MatplotlibWriter(
         filepath=str(tmpdir.join("some_path")), save_args={"multiFile": True}
@@ -153,9 +156,9 @@ def test_load_should_fail(tmpdir):
 
 def test_exists_functionality(tmpdir):
 
-    plot_object = plt.figure()
-    plt.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
-    plt.close()
+    plot_object = matplotlib.pyplot.figure()
+    matplotlib.pyplot.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
+    matplotlib.pyplot.close()
 
     plot_writer = MatplotlibWriter(filepath=str(tmpdir.join("some_image.png")))
 

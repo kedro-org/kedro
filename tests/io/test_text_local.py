@@ -83,8 +83,8 @@ class TestTextLocalDataSet:
         assert txt_data_set.exists()
 
     def test_filepath_expanduser(self):
-        txt_dataset = TextLocalDataSet(filepath='~')
-        assert '~' not in txt_dataset._filepath  # pylint: disable=protected-access
+        txt_dataset = TextLocalDataSet(filepath="~")
+        assert "~" not in txt_dataset._filepath  # pylint: disable=protected-access
 
 
 class TestTextLocalDataSetVersioned:

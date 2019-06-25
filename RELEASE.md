@@ -8,7 +8,8 @@
 * Add support for pipeline nodes made up from partial functions
 
 ## Bug fixes and other changes
-* Expand user home directory (~) for TextLocalDataSet (see issue #19)
+* Expand user home directory `~` for TextLocalDataSet (see issue #19)
+* Add a `short_name` property to `Node`s for a display-friendly (but not necessarily unique) name
 
 ## Breaking changes to the API
 

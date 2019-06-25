@@ -183,6 +183,7 @@ class Node:
                     self.outputs
                 )
             )
+            name = "<partial>"
         return name
 
     @property
@@ -216,13 +217,22 @@ class Node:
         )
 
     @property
-    def name(self) -> str:  # pragma: no-cover
+    def name(self) -> str:
         """Node's name.
 
         Returns:
             Node's name if provided or the name of its function.
         """
-        return self._name if self._name else str(self)
+        return self._name or str(self)
+
+    @property
+    def short_name(self) -> str:
+        """Node's name.
+
+        Returns:
+            Returns a short user-friendly name that is not guaranteed to be unique.
+        """
+        return self._name or self._func_name
 
     @property
     def inputs(self) -> List[str]:

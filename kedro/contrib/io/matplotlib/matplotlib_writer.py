@@ -34,10 +34,10 @@
 import os.path
 from typing import Any, Dict, Optional
 
-from kedro.io import AbstractDataSet, DataSetError, ExistsMixin
+from kedro.io import AbstractDataSet, DataSetError
 
 
-class MatplotlibWriter(AbstractDataSet, ExistsMixin):
+class MatplotlibWriter(AbstractDataSet):
     """
         ``MatplotlibWriter`` saves matplotlib objects as image files.
 

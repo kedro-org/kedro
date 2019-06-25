@@ -367,6 +367,23 @@ class DataCatalog:
 
         raise DataSetNotFoundError("DataSet '{}' not found in the catalog".format(name))
 
+    def release(self, name: str):
+        """Release any cached data associated with a data set
+
+        Args:
+            name: A data set to be checked.
+
+        Raises:
+            DataSetNotFoundError: When a data set with the given name
+                has not yet been registered.
+        """
+        if name not in self._data_sets:
+            raise DataSetNotFoundError(
+                "DataSet '{}' not found in the catalog".format(name)
+            )
+
+        self._data_sets[name].release()
+
     def add(
         self, data_set_name: str, data_set: AbstractDataSet, replace: bool = False
     ) -> None:

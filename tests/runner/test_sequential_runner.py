@@ -28,11 +28,18 @@
 
 # pylint: disable=unused-argument
 from random import random
+from typing import Any, Dict
 
 import pandas as pd
 import pytest
 
-from kedro.io import DataCatalog, DataSetError, LambdaDataSet, MemoryDataSet
+from kedro.io import (
+    AbstractDataSet,
+    DataCatalog,
+    DataSetError,
+    LambdaDataSet,
+    MemoryDataSet,
+)
 from kedro.pipeline import Pipeline, node
 from kedro.runner import SequentialRunner
 
@@ -57,6 +64,10 @@ def conflicting_feed_dict(pandas_df_feed_dict):
     return {"ds1": ds1, "ds3": ds3}
 
 
+def source():
+    return "stuff"
+
+
 def identity(arg):
     return arg
 
@@ -65,7 +76,7 @@ def sink(arg):
     pass
 
 
-def null(arg):
+def return_none(arg):
     return None
 
 
@@ -105,7 +116,7 @@ def saving_result_pipeline():
 @pytest.fixture
 def saving_none_pipeline():
     return Pipeline(
-        [node(random, None, "A"), node(null, "A", "B"), node(identity, "B", "C")]
+        [node(random, None, "A"), node(return_none, "A", "B"), node(identity, "B", "C")]
     )
 
 
@@ -192,3 +203,100 @@ class TestSeqentialRunnerBranchedPipeline:
         """ds1, ds2 and ds3 were not specified."""
         with pytest.raises(ValueError, match=r"not found in the DataCatalog"):
             SequentialRunner().run(unfinished_outputs_pipeline, DataCatalog())
+
+
+class LoggingDataSet(AbstractDataSet):
+    def __init__(self, log, name, value=None):
+        self.log = log
+        self.name = name
+        self.value = value
+
+    def _load(self) -> Any:
+        self.log.append(("load", self.name))
+        return self.value
+
+    def _save(self, data: Any) -> None:
+        self.value = data
+
+    def _release(self) -> None:
+        self.log.append(("release", self.name))
+        self.value = None
+
+    def _describe(self) -> Dict[str, Any]:
+        return {}
+
+
+class TestSequentialRunnerRelease:
+    def test_dont_release_inputs_and_outputs(self):
+        log = []
+        pipeline = Pipeline(
+            [node(identity, "in", "middle"), node(identity, "middle", "out")]
+        )
+        catalog = DataCatalog(
+            {
+                "in": LoggingDataSet(log, "in", "stuff"),
+                "middle": LoggingDataSet(log, "middle"),
+                "out": LoggingDataSet(log, "out"),
+            }
+        )
+        SequentialRunner().run(pipeline, catalog)
+
+        # we don't want to see release in or out in here
+        assert log == [("load", "in"), ("load", "middle"), ("release", "middle")]
+
+    def test_release_at_earliest_opportunity(self):
+        log = []
+        pipeline = Pipeline(
+            [
+                node(source, None, "first"),
+                node(identity, "first", "second"),
+                node(sink, "second", None),
+            ]
+        )
+        catalog = DataCatalog(
+            {
+                "first": LoggingDataSet(log, "first"),
+                "second": LoggingDataSet(log, "second"),
+            }
+        )
+        SequentialRunner().run(pipeline, catalog)
+
+        # we want to see "release first" before "load second"
+        assert log == [
+            ("load", "first"),
+            ("release", "first"),
+            ("load", "second"),
+            ("release", "second"),
+        ]
+
+    def test_count_multiple_loads(self):
+        log = []
+        pipeline = Pipeline(
+            [
+                node(source, None, "dataset"),
+                node(sink, "dataset", None, name="bob"),
+                node(sink, "dataset", None, name="fred"),
+            ]
+        )
+        catalog = DataCatalog({"dataset": LoggingDataSet(log, "dataset")})
+        SequentialRunner().run(pipeline, catalog)
+
+        # we want to the release after both the loads
+        assert log == [("load", "dataset"), ("load", "dataset"), ("release", "dataset")]
+
+    def test_release_transcoded(self):
+        log = []
+        pipeline = Pipeline(
+            [node(source, None, "ds@save"), node(sink, "ds@load", None)]
+        )
+        catalog = DataCatalog(
+            {
+                "ds@save": LoggingDataSet(log, "save"),
+                "ds@load": LoggingDataSet(log, "load"),
+            }
+        )
+
+        SequentialRunner().run(pipeline, catalog)
+
+        # we want to see both datasets being released
+        assert log == [("release", "save"), ("load", "load"), ("release", "load")]

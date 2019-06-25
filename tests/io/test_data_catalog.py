@@ -205,12 +205,19 @@ class TestDataCatalog:
         )
         assert result is False
 
-    def test_exists_error(self, data_catalog):
+    def test_exists_unregistered(self, data_catalog):
         """Check the the error when calling `exists`
         on unregistered data set"""
         pattern = r"DataSet \'wrong_key\' not found in the catalog"
         with pytest.raises(DataSetError, match=pattern):
             data_catalog.exists("wrong_key")
+
+    def test_release_unregistered(self, data_catalog):
+        """Check the the error when calling `release`
+        on unregistered data set"""
+        pattern = r"DataSet \'wrong_key\' not found in the catalog"
+        with pytest.raises(DataSetError, match=pattern):
+            data_catalog.release("wrong_key")
 
     def test_multi_catalog_list(self, multi_catalog):
         """Test data catalog which contains multiple data sets"""

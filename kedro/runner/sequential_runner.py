@@ -30,6 +30,9 @@ used to run the ``Pipeline`` in a sequential manner using a topological sort
 of provided nodes.
 """
 
+from collections import Counter
+from itertools import chain
+
 from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
 from kedro.pipeline import Pipeline
 from kedro.runner.runner import AbstractRunner, run_node
@@ -63,8 +66,21 @@ class SequentialRunner(AbstractRunner):
 
         """
         nodes = pipeline.nodes
+
+        load_counts = Counter(chain.from_iterable(n.inputs for n in nodes))
+
         for exec_index, node in enumerate(nodes):
             run_node(node, catalog)
+
+            # decrement load counts and release any data sets we've finished with
+            for data_set in node.inputs:
+                load_counts[data_set] -= 1
+                if load_counts[data_set] < 1 and data_set not in pipeline.inputs():
+                    catalog.release(data_set)
+            for data_set in node.outputs:
+                if load_counts[data_set] < 1 and data_set not in pipeline.outputs():
+                    catalog.release(data_set)
+
             self._logger.info(
                 "Completed %d out of %d tasks", exec_index + 1, len(nodes)
             )

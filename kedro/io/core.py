@@ -319,6 +319,25 @@ class AbstractDataSet(abc.ABC):
         )
         return False
 
+    def release(self) -> bool:
+        """Release any cached data.
+
+        Raises:
+            DataSetError: when underlying exists method raises error.
+
+        """
+        try:
+            logging.getLogger(__name__).debug("Releasing %s", str(self))
+            self._release()
+        except Exception as exc:
+            message = "Failed during release for data set {}.\n{}".format(
+                str(self), str(exc)
+            )
+            raise DataSetError(message) from exc
+
+    def _release(self) -> None:
+        pass
+
 
 def generate_current_version() -> str:
     """Generate the current version to be used by versioned data sets.

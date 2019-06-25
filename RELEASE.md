@@ -3,6 +3,7 @@
 ## Major features and improvements
 * Tab completion for catalog datasets in `ipython` or `jupyter` sessions.
 * Added support for transcoding, an ability to decouple loading/saving mechanisms of a dataset from its storage location, denoted by adding '@' to the dataset name.
+* Datasets have a new `release` function that instructs them to free any cached data. The runners will call this when the dataset is no longer needed downstream.
 
 ## Bug fixes and other changes
 * Add support for pipeline nodes made up from partial functions

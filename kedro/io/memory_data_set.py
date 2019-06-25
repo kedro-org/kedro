@@ -101,3 +101,6 @@ class MemoryDataSet(AbstractDataSet):
         if self._data is None:
             return False
         return True
+
+    def _release(self):
+        self._data = None

@@ -9,11 +9,12 @@
 * Add support for pipeline nodes made up from partial functions.
 * Expand user home directory `~` for TextLocalDataSet (see issue #19).
 * Add a `short_name` property to `Node`s for a display-friendly (but not necessarily unique) name.
-* Added Kedro project loader for IPython: `extras/kedro_project_loader.py`.
-* Fix source file encoding issues with Python 3.5 on Windows
+* Add Kedro project loader for IPython: `extras/kedro_project_loader.py`.
+* Fix source file encoding issues with Python 3.5 on Windows.
+* Fix local project source not having priority over the same source installed as a package, leading to local updates not being recognised.
 
 ## Breaking changes to the API
-None
+* Remove the max_loads argument from the `MemoryDataSet` constructor and from the `AbstractRunner.create_default_data_set` method.
 
 ## Thanks for supporting contributions
 [Nikolaos Tsaousis](https://github.com/tsanikgr), [Ivan Danov](https://github.com/idanov), [Gordon Wrigley](https://github.com/tolomea), [Yetunde Dada](https://github.com/yetudada), [Kiyohito Kunii](https://github.com/921kiyo), [Lorena Balan](https://github.com/lorenabalan), [Richard Westenra](https://github.com/richardwestenra), [Dmitrii Deriabin](https://github.com/DmitryDeryabin), [Joel Schwarzmann](https://github.com/datajoely), [Alex Kalmikov](https://github.com/kalexqb)

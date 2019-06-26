@@ -249,9 +249,9 @@ In a file like `catalog.py`, you can generate the Data Catalog. This will allow 
 io = DataCatalog({
   'bikes': CSVLocalDataSet(filepath='../data/01_raw/bikes.csv'),
   'cars': CSVLocalDataSet(filepath='../data/01_raw/cars.csv', load_args=dict(sep=',')), # additional arguments
-  'scooters': SQLTableDataSet(table_name="scooters", credentials=dict(con="sqlite:///kedro.db")),
+  'cars_table': SQLTableDataSet(table_name="cars", credentials=dict(con="sqlite:///kedro.db")),
   'scooters_query': SQLQueryDataSet(sql="select * from cars where gear=4", credentials=dict(con="sqlite:///kedro.db")),
-  'trucks': ParquetLocalDataSet(filepath="trucks.parquet")
+  'ranked': ParquetLocalDataSet(filepath="ranked.parquet")
 })
 ```
 
@@ -298,7 +298,7 @@ io.load('car_cache')
 
 #### Saving data to a SQL database for querying
 
-At this point we may want to put the data in a SQLite database to run queries on it. Let's use that to rank cars by their mpg.
+At this point we may want to put the data in a SQLite database to run queries on it. Let's use that to rank scooters by their mpg.
 
 ```python
 # This cleans up the database in case it exists at this point
@@ -309,7 +309,7 @@ except FileNotFoundError:
     pass
 
 io.save('cars_table', cars)
-ranked = io.load('cars_query')[['brand', 'mpg']]
+ranked = io.load('scooters_query')[['brand', 'mpg']]
 ```
 
 #### Saving data in parquet

@@ -1,14 +1,14 @@
 # Release 0.14.3
 
 ## Major features and improvements
-* Tab completion for catalog datasets in `ipython` or `jupyter` sessions.
+* Tab completion for catalog datasets in `ipython` or `jupyter` sessions. (Thank you [@datajoely](https://github.com/datajoely) and [@WaylonWalker](https://github.com/WaylonWalker))
 * Added support for transcoding, an ability to decouple loading/saving mechanisms of a dataset from its storage location, denoted by adding '@' to the dataset name.
 * Datasets have a new `release` function that instructs them to free any cached data. The runners will call this when the dataset is no longer needed downstream.
 
 ## Bug fixes and other changes
-* Add support for pipeline nodes made up from partial functions
-* Expand user home directory `~` for TextLocalDataSet (see issue #19)
-* Add a `short_name` property to `Node`s for a display-friendly (but not necessarily unique) name
+* Add support for pipeline nodes made up from partial functions.
+* Expand user home directory `~` for TextLocalDataSet (see issue #19).
+* Add a `short_name` property to `Node`s for a display-friendly (but not necessarily unique) name.
 * Added Kedro project loader for IPython: `extras/kedro_project_loader.py`.
 
 ## Breaking changes to the API

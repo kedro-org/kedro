@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -34,6 +34,7 @@ import logging
 from collections import Counter
 from functools import reduce
 from typing import Any, Callable, Dict, Iterable, List, Set, Union
+from warnings import warn
 
 
 class Node:
@@ -159,12 +160,29 @@ class Node:
         in_str = _sorted_set_to_str(self.inputs) if self._inputs else "None"
 
         prefix = self._name + ": " if self._name else ""
-        return prefix + "{}({}) -> {}".format(self._func.__name__, in_str, out_str)
+        return prefix + "{}({}) -> {}".format(self._func_name, in_str, out_str)
 
     def __repr__(self):  # pragma: no cover
         return "Node({}, {!r}, {!r}, {!r})".format(
-            self._func.__name__, self._inputs, self._outputs, self._name
+            self._func_name, self._inputs, self._outputs, self._name
         )
+
+    @property
+    def _func_name(self):
+        if hasattr(self._func, "__name__"):
+            return self._func.__name__
+
+        name = repr(self._func)
+        if "functools.partial" in name:
+            warn(
+                "The node producing outputs `{}` is made from a `partial` function. "
+                "Partial functions do not have a `__name__` attribute: consider using "
+                "`functools.update_wrapper` for better log messages.".format(
+                    self.outputs
+                )
+            )
+            name = "<partial>"
+        return name
 
     @property
     def tags(self) -> Set[str]:
@@ -197,13 +215,22 @@ class Node:
         )
 
     @property
-    def name(self) -> str:  # pragma: no-cover
+    def name(self) -> str:
         """Node's name.
 
         Returns:
             Node's name if provided or the name of its function.
         """
-        return self._name if self._name else str(self)
+        return self._name or str(self)
+
+    @property
+    def short_name(self) -> str:
+        """Node's name.
+
+        Returns:
+            Returns a short user-friendly name that is not guaranteed to be unique.
+        """
+        return self._name or self._func_name
 
     @property
     def inputs(self) -> List[str]:

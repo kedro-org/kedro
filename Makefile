@@ -18,7 +18,8 @@ lint:
 	pylint -j 0 --disable=unnecessary-pass kedro
 	pylint -j 0 --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name tests
 	pylint -j 0 --disable=missing-docstring,no-name-in-module features
-	flake8 kedro tests features --exclude kedro/template*
+	pylint -j 0 extras
+	flake8 kedro tests features extras --exclude kedro/template*
 
 test:
 	pytest tests

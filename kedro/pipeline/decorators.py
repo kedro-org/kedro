@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -37,9 +37,9 @@ from memory_profiler import memory_usage
 
 
 def _func_full_name(func: Callable):
-    if not func.__module__:
-        return func.__qualname__
-    return "%s.%s" % (func.__module__, func.__qualname__)
+    if not getattr(func, "__module__", None):
+        return getattr(func, "__qualname__", repr(func))
+    return "{}.{}".format(func.__module__, func.__qualname__)
 
 
 def _human_readable_time(elapsed: float):  # pragma: no cover

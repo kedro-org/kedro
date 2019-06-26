@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -26,7 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import sys
-from functools import wraps
+from functools import partial, wraps
 from typing import Callable
 
 import pytest
@@ -359,3 +359,29 @@ class TestTagDecorator:
         assert "hello" in tagged_node.tags
         assert "world" in tagged_node.tags
         assert tagged_node.run(dict(input=1))["output"] == "f(1)"
+
+
+class TestNames:
+    def test_named(self):
+        n = node(identity, ["in"], ["out"], name="name")
+        assert str(n) == "name: identity([in]) -> [out]"
+        assert n.name == "name"
+        assert n.short_name == "name"
+
+    def test_function(self):
+        n = node(identity, ["in"], ["out"])
+        assert str(n) == "identity([in]) -> [out]"
+        assert n.name == "identity([in]) -> [out]"
+        assert n.short_name == "identity"
+
+    def test_lambda(self):
+        n = node(lambda a: a, ["in"], ["out"])
+        assert str(n) == "<lambda>([in]) -> [out]"
+        assert n.name == "<lambda>([in]) -> [out]"
+        assert n.short_name == "<lambda>"
+
+    def test_partial(self):
+        n = node(partial(identity), ["in"], ["out"])
+        assert str(n) == "<partial>([in]) -> [out]"
+        assert n.name == "<partial>([in]) -> [out]"
+        assert n.short_name == "<partial>"

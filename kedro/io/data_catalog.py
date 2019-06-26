@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -76,6 +76,22 @@ def _get_credentials(credentials_name: str, credentials: Dict) -> Dict:
         )
 
 
+class _FrozenDatasets:
+    """Helper class to access underlying loaded datasets"""
+
+    def __init__(self, datasets):
+        self.__dict__.update(**datasets)
+
+    # Don't allow users to add/change attributes on the fly
+    def __setattr__(self, key, value):
+        msg = "Operation not allowed! "
+        if key in self.__dict__.keys():
+            msg += "Please change datasets through configuration."
+        else:
+            msg += "Please use DataCatalog.add() instead."
+        raise AttributeError(msg)
+
+
 class DataCatalog:
     """``DataCatalog`` stores instances of ``AbstractDataSet`` implementations
     to provide ``load`` and ``save`` capabilities from anywhere in the
@@ -121,6 +137,8 @@ class DataCatalog:
             >>> io = DataCatalog(data_sets={'cars': cars})
         """
         self._data_sets = dict(data_sets or {})
+        self.datasets = _FrozenDatasets(self._data_sets)
+
         self._transformers = {k: list(v) for k, v in (transformers or {}).items()}
         self._default_transformers = list(default_transformers or [])
         self._check_and_normalize_transformers()
@@ -128,6 +146,10 @@ class DataCatalog:
         # import the feed dict
         if feed_dict:
             self.add_feed_dict(feed_dict)
+
+    @property
+    def _logger(self):
+        return logging.getLogger(__name__)
 
     def _check_and_normalize_transformers(self):
         data_sets = self._data_sets.keys()
@@ -144,10 +166,6 @@ class DataCatalog:
 
         for data_set_name in missing_transformers:
             self._transformers[data_set_name] = list(self._default_transformers)
-
-    @property
-    def _logger(self):
-        return logging.getLogger(__name__)
 
     @classmethod
     def from_config(
@@ -349,6 +367,23 @@ class DataCatalog:
 
         raise DataSetNotFoundError("DataSet '{}' not found in the catalog".format(name))
 
+    def release(self, name: str):
+        """Release any cached data associated with a data set
+
+        Args:
+            name: A data set to be checked.
+
+        Raises:
+            DataSetNotFoundError: When a data set with the given name
+                has not yet been registered.
+        """
+        if name not in self._data_sets:
+            raise DataSetNotFoundError(
+                "DataSet '{}' not found in the catalog".format(name)
+            )
+
+        self._data_sets[name].release()
+
     def add(
         self, data_set_name: str, data_set: AbstractDataSet, replace: bool = False
     ) -> None:
@@ -386,6 +421,7 @@ class DataCatalog:
                 )
         self._data_sets[data_set_name] = data_set
         self._transformers[data_set_name] = list(self._default_transformers)
+        self.datasets = _FrozenDatasets(self._data_sets)
 
     def add_all(
         self, data_sets: Dict[str, AbstractDataSet], replace: bool = False

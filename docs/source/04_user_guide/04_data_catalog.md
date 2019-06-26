@@ -1,6 +1,6 @@
 # The Data Catalog
 
-> *Note:* This documentation is based on `Kedro 0.14.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.14.3`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 This section introduces `catalog.yml`, the project-shareable Data Catalog. The file is located in `conf/base` and is a registry of all data sources available for use by a project; it manages loading and saving of data. 
 
@@ -175,6 +175,24 @@ airplanes:
 
 In this example the default `csv` configuration is inserted into `airplanes` and then the `load_args` block is overridden. Normally that would replace the whole dictionary. In order to extend `load_args` the defaults for that block are then re-inserted.
 
+
+### Transcoding datasets
+
+You may come across a situation where you would like to read the same file using two different dataset implementations. For instance, `parquet` files can not only be loaded via the `ParquetLocalDataSet`, but also directly by `SparkDataSet` using `pandas`. To do this, you can can define your `catalog.yml` as follows:
+
+```yaml
+mydata@pandas:
+  type: ParquetLocalDataSet
+  filepath: data/01_raw/data.parquet
+
+mydata@spark:
+    type: kedro.contrib.io.pyspark.SparkDataSet
+    filepath: data/01_raw/data.parquet
+```
+
+In your pipeline, you may refer to either dataset as input or output, and it will ensure the dependencies point to a single dataset `mydata` both while running the pipeline and in the visualisation.
+
+
 ### Transforming datasets
 
 If you need to augment the loading and / or saving of one or more datasets you can use the transformer API. To do this create a subclass of `AbstractTransformer` that implements your changes and then apply it to your catalog with `DataCatalog.add_transformer`. For example to print the runtimes of load and save operations you could do this:
@@ -231,9 +249,9 @@ In a file like `catalog.py`, you can generate the Data Catalog. This will allow 
 io = DataCatalog({
   'bikes': CSVLocalDataSet(filepath='../data/01_raw/bikes.csv'),
   'cars': CSVLocalDataSet(filepath='../data/01_raw/cars.csv', load_args=dict(sep=',')), # additional arguments
-  'scooters': SQLTableDataSet(table_name="scooters", credentials=dict(con="sqlite:///kedro.db")),
+  'cars_table': SQLTableDataSet(table_name="cars", credentials=dict(con="sqlite:///kedro.db")),
   'scooters_query': SQLQueryDataSet(sql="select * from cars where gear=4", credentials=dict(con="sqlite:///kedro.db")),
-  'trucks': ParquetLocalDataSet(filepath="trucks.parquet")
+  'ranked': ParquetLocalDataSet(filepath="ranked.parquet")
 })
 ```
 
@@ -280,7 +298,7 @@ io.load('car_cache')
 
 #### Saving data to a SQL database for querying
 
-At this point we may want to put the data in a SQLite database to run queries on it. Let's use that to rank cars by their mpg.
+At this point we may want to put the data in a SQLite database to run queries on it. Let's use that to rank scooters by their mpg.
 
 ```python
 # This cleans up the database in case it exists at this point
@@ -291,7 +309,7 @@ except FileNotFoundError:
     pass
 
 io.save('cars_table', cars)
-ranked = io.load('cars_query')[['brand', 'mpg']]
+ranked = io.load('scooters_query')[['brand', 'mpg']]
 ```
 
 #### Saving data in parquet

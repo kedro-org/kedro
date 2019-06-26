@@ -14,7 +14,7 @@
 
 # What is Kedro?
 
-> “The centre of your data pipeline.”
+> "The centre of your data pipeline."
 
 Kedro is a workflow development tool that helps you build data pipelines that are robust, scalable, deployable, reproducible and versioned. We provide a standard approach so that you can:
 -   spend more time building your data pipeline,

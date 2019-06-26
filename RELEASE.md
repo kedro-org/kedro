@@ -10,6 +10,7 @@
 * Expand user home directory `~` for TextLocalDataSet (see issue #19).
 * Add a `short_name` property to `Node`s for a display-friendly (but not necessarily unique) name.
 * Added Kedro project loader for IPython: `extras/kedro_project_loader.py`.
+* Fix source file encoding issues with Python 3.5 on Windows
 
 ## Breaking changes to the API
 None

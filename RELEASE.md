@@ -3,11 +3,12 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Documentation improvements
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Dmitry Vukolov](https://github.com/dvukolov)
+[Dmitry Vukolov](https://github.com/dvukolov), [Jo Stichbury](https://github.com/stichbury)
 
 # Release 0.14.3
 

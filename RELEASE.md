@@ -7,6 +7,7 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
+[Jo Stichbury](https://github.com/stichbury)
 
 # Release 0.14.3
 
@@ -27,7 +28,7 @@
 * Remove the max_loads argument from the `MemoryDataSet` constructor and from the `AbstractRunner.create_default_data_set` method.
 
 ## Thanks for supporting contributions
-[Nikolaos Tsaousis](https://github.com/tsanikgr), [Ivan Danov](https://github.com/idanov), [Gordon Wrigley](https://github.com/tolomea), [Yetunde Dada](https://github.com/yetudada), [Kiyohito Kunii](https://github.com/921kiyo), [Lorena Balan](https://github.com/lorenabalan), [Richard Westenra](https://github.com/richardwestenra), [Dmitrii Deriabin](https://github.com/DmitryDeryabin), [Joel Schwarzmann](https://github.com/datajoely), [Alex Kalmikov](https://github.com/kalexqb), [Jo Stichbury](https://github.com/stichbury)
+[Nikolaos Tsaousis](https://github.com/tsanikgr), [Ivan Danov](https://github.com/idanov), [Gordon Wrigley](https://github.com/tolomea), [Yetunde Dada](https://github.com/yetudada), [Kiyohito Kunii](https://github.com/921kiyo), [Lorena Balan](https://github.com/lorenabalan), [Richard Westenra](https://github.com/richardwestenra), [Dmitrii Deriabin](https://github.com/DmitryDeryabin), [Joel Schwarzmann](https://github.com/datajoely), [Alex Kalmikov](https://github.com/kalexqb)
 
 # Release 0.14.2
 
@@ -42,18 +43,6 @@
 ## Thanks for supporting contributions
 
 [Nikolaos Tsaousis](https://github.com/tsanikgr), [Ivan Danov](https://github.com/idanov), [Gordon Wrigley](https://github.com/tolomea), [Yetunde Dada](https://github.com/yetudada), [Kiyohito Kunii](https://github.com/921kiyo), [Lorena Balan](https://github.com/lorenabalan), [Richard Westenra](https://github.com/richardwestenra), [Darren Gallagher](https://github.com/dazzag24), [Zain Patel](https://github.com/mzjp2)
-
-# [Upcoming] Release 0.14.2
-
-## Major features and improvements
-* 
-
-## Bug fixes and other changes
-* Documentation enhancements
-
-## Breaking changes to the API
-None
-
 
 # Release 0.14.1
 

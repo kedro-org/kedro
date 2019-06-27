@@ -95,8 +95,7 @@ class MatplotlibWriter(AbstractDataSet):
         self._filepath = filepath
         self._load_args = self._handle_default_args(load_args, default_load_args)
         self._save_args = self._handle_default_args(save_args, default_save_args)
-        self._mutlifile_mode = self._save_args.get("multiFile")
-        self._save_args.pop("multiFile")
+        self._mutlifile_mode = self._save_args.pop("multiFile")
 
     @staticmethod
     def _handle_default_args(user_args: dict, default_args: dict) -> dict:

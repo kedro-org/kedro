@@ -11,6 +11,14 @@ Run `kedro new` from your chosen working directory to create an empty template p
 
 Call the project **`Kedro Tutorial`** and keep the default naming by pressing enter when prompted. Choose `N` to create a project template _without_ the Iris dataset example. Alternatively, you can create a new project from a [configuration file](../02_getting_started/03_new_project.md#create-a-new-project-from-a-configuration-file).
 
+### Install project dependencies
+
+Within your [virtual environment](../02_getting_started/03_new_project.md#install-project-dependencies) and your project's root directory, you can install project dependencies by running:
+
+```bash
+kedro install
+```
+
 ### Project configuration
 
 The project template has a default configuration, but you should reconfigure it as follows:

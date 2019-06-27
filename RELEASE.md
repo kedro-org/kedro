@@ -7,7 +7,7 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Jo Stichbury](https://github.com/stichbury)
+[Dmitry Vukolov](https://github.com/dvukolov), [Jo Stichbury](https://github.com/stichbury)
 
 # Release 0.14.3
 

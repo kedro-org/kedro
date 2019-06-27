@@ -12,8 +12,7 @@ The `local` folder should be used for configuration that is either user-specific
 
 ## Base configuration
 
-The `base` folder is for shared configuration, such as non-sensitive and project-related configuration that may
-be shared across team members.
+The `base` folder is for shared configuration, such as non-sensitive and project-related configuration that may be shared across team members.
 
 WARNING: Please do not put access credentials in the base configuration folder.
 

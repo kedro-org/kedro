@@ -102,6 +102,20 @@
 #raw_banana_trials:
 #  <<: *csv
 #  filepath: "s3a://supermarket/01_raw/Banana/trials.csv"
+#
+## Transcoding
+#
+#cars@parquet:
+#  type: ParquetLocalDataSet  # https://kedro.readthedocs.io/en/latest/kedro.io.ParquetLocalDataSet.html
+#  filepath: data/02_intermediate/cars.parquet
+#  load_args:
+#    columns: ['name', 'gear','disp', 'wt']
+#  save_args:
+#     compression: 'GZIP'
+#
+#cars@spark:
+#  type: kedro.contrib.io.pyspark.SparkDataSet  # https://kedro.readthedocs.io/en/latest/kedro.contrib.io.pyspark.SparkDataSet.html
+#  filepath: data/02_intermediate/cars.parquet
 
 
 

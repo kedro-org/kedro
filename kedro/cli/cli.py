@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -38,6 +38,7 @@ import shutil
 import sys
 import traceback
 import webbrowser
+from copy import deepcopy
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Union
 
@@ -49,6 +50,7 @@ from cookiecutter.main import cookiecutter
 import kedro.config.default_logger  # noqa
 from kedro import __version__ as version
 from kedro.cli.utils import CommandCollection, KedroCliError
+from kedro.context import load_context
 
 KEDRO_PATH = os.path.dirname(kedro.__file__)
 TEMPLATE_PATH = os.path.join(KEDRO_PATH, "template")
@@ -120,12 +122,12 @@ def new(config):
 
     \b
     You will have to provide four choices:
-    * ``Output Directory`` - parent directory where new project directory
-    should be created.
     * ``Project Name`` - name of the project, not to be confused with name of
     the project folder.
     * ``Repository Name`` - intended name of your project folder.
     * ``Package Name`` - intended name of your Python package.
+    * ``Generate Example Pipeline`` - yes/no to generating an example pipeline
+    in your project.
 
     \b
     ``kedro new --config <config.yml>``
@@ -133,8 +135,9 @@ def new(config):
     Create a new project from configuration.
 
     * ``config.yml`` - The configuration YAML must contain at the top level
-                    the above parameters (output_dir, project_name, repo_name,
-                    python_package).
+                    the above parameters (project_name, repo_name,
+                    python_package, include_example) and output_dir - the
+                    parent directory for the new project directory.
     """
     _create_project(config, _KEDRO_CONTEXT["verbose"])
 
@@ -484,16 +487,17 @@ def get_project_context(key: Any, default: Any = NO_DEFAULT) -> Any:  # pragma: 
             and the key is not found, this will raise a ``KedroCliError``.
 
     Returns:
-        Requested value from Kedro context dictionary or the default if the key was not found.
+        Requested value from Kedro context dictionary or the default if the key
+            was not found.
 
     Raises:
-        KedroCliError: When the key is not found and the default value was not specified.
+        KedroCliError: When the key is not found and the default value was not
+            specified.
     """
+
+    _KEDRO_CONTEXT.update(load_context(Path.cwd()))
     try:
-        kedro_cli = importlib.import_module("kedro_cli")
-        kedro_context = _KEDRO_CONTEXT.copy()
-        kedro_context.update(kedro_cli.__get_kedro_context__())
-        value = kedro_context[key]
+        value = _KEDRO_CONTEXT[key]
     except KeyError:
         if default is not NO_DEFAULT:
             return default
@@ -502,7 +506,7 @@ def get_project_context(key: Any, default: Any = NO_DEFAULT) -> Any:  # pragma: 
             "__get_kedro_context__".format(key)
         )
 
-    return value
+    return deepcopy(value)
 
 
 def _get_plugin_command_groups(name):  # pragma: no cover
@@ -525,13 +529,13 @@ def main():  # pragma: no cover
     commands to `kedro`'s then invoke the cli.
     """
 
-    # run plugin initilization
+    # Run plugin initialization
     for entry_point in pkg_resources.iter_entry_points(group="kedro.init"):
         try:
             init_hook = entry_point.load()
             init_hook()
         except Exception:  # pylint: disable=broad-except
-            _handle_exception("Initilizing {}".format(str(entry_point)), end=False)
+            _handle_exception("Initializing {}".format(str(entry_point)), end=False)
 
     global_groups = [cli]
     global_groups.extend(_get_plugin_command_groups("global"))

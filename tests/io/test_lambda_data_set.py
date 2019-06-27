@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -53,6 +53,9 @@ def test_data_set_describe():
     def _dummy_exists():
         return False  # pragma: no cover
 
+    def _dummy_release():
+        pass  # pragma: no cover
+
     assert "LambdaDataSet(load=<tests.io.test_lambda_data_set._dummy_load>)" in str(
         LambdaDataSet(_dummy_load, None)
     )
@@ -61,6 +64,10 @@ def test_data_set_describe():
     )
     assert "LambdaDataSet(exists=<tests.io.test_lambda_data_set._dummy_exists>)" in str(
         LambdaDataSet(None, None, _dummy_exists)
+    )
+    assert (
+        "LambdaDataSet(release=<tests.io.test_lambda_data_set._dummy_release>)"
+        in str(LambdaDataSet(None, None, None, _dummy_release))
     )
 
 
@@ -149,7 +156,7 @@ class TestLambdaDataSetExists:
         assert result is True
 
     def test_exists_not_implemented(self):
-        """Check that `exists` method is not implemented by default"""
+        """Check that `exists` method returns False by default"""
         data_set = LambdaDataSet(None, None)
         assert not data_set.exists()
 
@@ -171,3 +178,36 @@ class TestLambdaDataSetExists:
         )
         with pytest.raises(DataSetError, match=pattern):
             LambdaDataSet(None, None, "exists")
+
+
+class TestLambdaDataSetRelease:
+    def test_release_invocation(self, mocker):
+        """Test the basic `release` method invocation"""
+        mocked_release = mocker.Mock()
+        data_set = LambdaDataSet(None, None, None, mocked_release)
+        data_set.release()
+        mocked_release.assert_called_once_with()
+
+    def test_release_not_implemented(self):
+        """Check that `release` does nothing by default"""
+        data_set = LambdaDataSet(None, None)
+        data_set.release()
+
+    def test_release_raises_error(self, mocker):
+        """Check the error when `release` raises an exception"""
+        mocked_release = mocker.Mock()
+        error_message = "File not found"
+        mocked_release.side_effect = FileNotFoundError(error_message)
+        data_set = LambdaDataSet(None, None, None, mocked_release)
+
+        with pytest.raises(DataSetError, match=error_message):
+            data_set.release()
+        mocked_release.assert_called_once_with()
+
+    def test_release_not_callable(self):
+        pattern = (
+            r"`release` function for LambdaDataSet must be a Callable\. "
+            r"Object of type `str` provided instead\."
+        )
+        with pytest.raises(DataSetError, match=pattern):
+            LambdaDataSet(None, None, None, "release")

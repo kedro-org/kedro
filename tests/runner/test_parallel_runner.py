@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -26,18 +26,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pylint: disable=no-member
+
+from multiprocessing import Manager
 from multiprocessing.managers import BaseProxy
+from typing import Any, Dict
 
 import pytest
 
-from kedro.io import DataCatalog, DataSetError, LambdaDataSet, MemoryDataSet
+from kedro.io import (
+    AbstractDataSet,
+    DataCatalog,
+    DataSetError,
+    LambdaDataSet,
+    MemoryDataSet,
+)
 from kedro.pipeline import Pipeline, node
 from kedro.pipeline.decorators import log_time
 from kedro.runner import ParallelRunner
+from kedro.runner.parallel_runner import ParallelRunnerManager
 
 
-def identity(input1: str):
-    return input1  # pragma: no cover
+def source():
+    return "stuff"
+
+
+def identity(arg):
+    return arg
+
+
+def sink(arg):  # pylint: disable=unused-argument
+    pass
 
 
 def fan_in(*args):
@@ -48,7 +67,7 @@ def exception_fn(arg):
     raise Exception("test exception")
 
 
-def null(arg):
+def return_none(arg):
     arg = None
     return arg
 
@@ -74,7 +93,7 @@ def fan_out_fan_in():
 class TestValidParallelRunner:
     def test_create_default_data_set(self):
         # data_set is a proxy to a dataset in another process.
-        data_set = ParallelRunner().create_default_data_set("", 0)
+        data_set = ParallelRunner().create_default_data_set("")
         assert isinstance(data_set, BaseProxy)
 
     def test_parallel_run(self, fan_out_fan_in, catalog):
@@ -117,7 +136,7 @@ class TestInvalidParallelRunner:
             ParallelRunner().run(pipeline, catalog)
 
     def test_node_returning_none(self):
-        pipeline = Pipeline([node(identity, "A", "B"), node(null, "B", "C")])
+        pipeline = Pipeline([node(identity, "A", "B"), node(return_none, "B", "C")])
         catalog = DataCatalog({"A": MemoryDataSet("42")})
         pattern = "Saving `None` to a `DataSet` is not allowed"
         with pytest.raises(DataSetError, match=pattern):
@@ -174,3 +193,123 @@ class TestParallelRunnerDecorator:
         assert "Z" in result
         assert len(result["Z"]) == 3
         assert result["Z"] == (42, 42, 42)
+
+
+class LoggingDataSet(AbstractDataSet):
+    def __init__(self, log, name, value=None):
+        self.log = log
+        self.name = name
+        self.value = value
+
+    def _load(self) -> Any:
+        self.log["log"] += [("load", self.name)]
+        return self.value
+
+    def _save(self, data: Any) -> None:
+        self.value = data
+
+    def _release(self) -> None:
+        self.log["log"] += [("release", self.name)]
+        self.value = None
+
+    def _describe(self) -> Dict[str, Any]:
+        return {}
+
+
+ParallelRunnerManager.register("LoggingDataSet", LoggingDataSet)
+
+
+class TestParallelRunnerRelease:
+    def test_dont_release_inputs_and_outputs(self):
+        manager = ParallelRunnerManager()
+        manager.start()
+        log = Manager().dict(log=[])
+
+        pipeline = Pipeline(
+            [node(identity, "in", "middle"), node(identity, "middle", "out")]
+        )
+        catalog = DataCatalog(
+            {
+                "in": manager.LoggingDataSet(log, "in", "stuff"),
+                "middle": manager.LoggingDataSet(log, "middle"),
+                "out": manager.LoggingDataSet(log, "out"),
+            }
+        )
+        ParallelRunner().run(pipeline, catalog)
+
+        # we don't want to see release in or out in here
+        assert log["log"] == [("load", "in"), ("load", "middle"), ("release", "middle")]
+
+    def test_release_at_earliest_opportunity(self):
+        manager = ParallelRunnerManager()
+        manager.start()
+        log = Manager().dict(log=[])
+
+        pipeline = Pipeline(
+            [
+                node(source, None, "first"),
+                node(identity, "first", "second"),
+                node(sink, "second", None),
+            ]
+        )
+        catalog = DataCatalog(
+            {
+                "first": manager.LoggingDataSet(log, "first"),
+                "second": manager.LoggingDataSet(log, "second"),
+            }
+        )
+        ParallelRunner().run(pipeline, catalog)
+
+        # we want to see "release first" before "load second"
+        assert log["log"] == [
+            ("load", "first"),
+            ("release", "first"),
+            ("load", "second"),
+            ("release", "second"),
+        ]
+
+    def test_count_multiple_loads(self):
+        manager = ParallelRunnerManager()
+        manager.start()
+        log = Manager().dict(log=[])
+
+        pipeline = Pipeline(
+            [
+                node(source, None, "dataset"),
+                node(sink, "dataset", None, name="bob"),
+                node(sink, "dataset", None, name="fred"),
+            ]
+        )
+        catalog = DataCatalog({"dataset": manager.LoggingDataSet(log, "dataset")})
+        ParallelRunner().run(pipeline, catalog)
+
+        # we want to the release after both the loads
+        assert log["log"] == [
+            ("load", "dataset"),
+            ("load", "dataset"),
+            ("release", "dataset"),
+        ]
+
+    def test_release_transcoded(self):
+        manager = ParallelRunnerManager()
+        manager.start()
+        log = Manager().dict(log=[])
+
+        pipeline = Pipeline(
+            [node(source, None, "ds@save"), node(sink, "ds@load", None)]
+        )
+        catalog = DataCatalog(
+            {
+                "ds@save": LoggingDataSet(log, "save"),
+                "ds@load": LoggingDataSet(log, "load"),
+            }
+        )
+
+        ParallelRunner().run(pipeline, catalog)
+
+        # we want to see both datasets being released
+        assert log["log"] == [
+            ("release", "save"),
+            ("load", "load"),
+            ("release", "load"),
+        ]

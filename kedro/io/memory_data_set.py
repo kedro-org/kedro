@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -67,45 +67,26 @@ class MemoryDataSet(AbstractDataSet):
             return dict(data="<{}>".format(type(self._data).__name__))
         return dict(data=None)  # pragma: no cover
 
-    def __init__(self, data: Any = None, max_loads: int = None):
+    def __init__(self, data: Any = None):
         """Creates a new instance of ``MemoryDataSet`` pointing to the
         provided Python object.
 
         Args:
             data: Python object containing the data.
-            max_loads: Maximum number of times ``load`` method can be invoked.
-                ``MemoryDataSet`` data is reset after this number of calls is
-                made. Any number of calls is allowed if the argument is not
-                set. ``max_loads`` counter is reset after every ``save``
-                method call.
-
         """
         self._data = None
-        self._max_loads = max_loads
         if data is not None:
             self._save(data)
 
     def _load(self) -> Any:
         if self._data is None:
-            if self._max_loads is None:
-                message = "Data for MemoryDataSet has not been saved yet."
-            else:
-                message = (
-                    "Maximum number of MemoryDataSet loads exceeded "
-                    "the threshold of {}. The data set was cleared "
-                    "and holds no data now.".format(self._max_loads)
-                )
-            raise DataSetError(message)
+            raise DataSetError("Data for MemoryDataSet has not been saved yet.")
         if isinstance(self._data, (pd.DataFrame, np.ndarray)):
             data = self._data.copy()
         elif type(self._data).__name__ == "DataFrame":
             data = self._data
         else:
             data = copy.deepcopy(self._data)
-        if self._load_counter:
-            self._load_counter -= 1
-            if self._load_counter == 0:
-                self._data = None
         return data
 
     def _save(self, data: Any):
@@ -115,9 +96,11 @@ class MemoryDataSet(AbstractDataSet):
             self._data = data
         else:
             self._data = copy.deepcopy(data)
-        self._load_counter = self._max_loads
 
     def _exists(self) -> bool:
         if self._data is None:
             return False
         return True
+
+    def _release(self):
+        self._data = None

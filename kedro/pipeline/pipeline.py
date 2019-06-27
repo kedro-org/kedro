@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -30,18 +30,38 @@ a Directed Acyclic Graph, sequentially or in parallel. The ``Pipeline`` class
 offers quick access to input dependencies,
 produced outputs and execution order.
 """
-
 import copy
 import json
 from collections import Counter, defaultdict
 from itertools import chain
-from typing import Callable, Dict, Iterable, List, Set, Tuple, Union
+from typing import Callable, Dict, Iterable, List, Set, Union
 
 from toposort import CircularDependencyError as ToposortCircleError
 from toposort import toposort
 
 import kedro
 from kedro.pipeline.node import Node
+
+TRANSCODING_SEPARATOR = "@"
+
+
+def _get_transcode_compatible_name(element: str) -> str:
+    """Strip out the transcoding separator and anything that follows.
+
+    Returns:
+        Node input/output name before the transcoding separator, if present.
+    Raises:
+        ValueError: Raised if more than one transcoding separator
+        is present in the name.
+    """
+    split_name = element.split(TRANSCODING_SEPARATOR)
+    if len(split_name) > 2:
+        raise ValueError(
+            "Expected maximum 1 transcoding separator, found {} instead: '{}'.".format(
+                len(split_name) - 1, element
+            )
+        )
+    return split_name[0]
 
 
 class OutputNotUniqueError(Exception):
@@ -109,6 +129,7 @@ class Pipeline:
             )
         )
         _validate_duplicate_nodes(nodes)
+        _validate_transcoded_inputs_outputs(nodes)
 
         if name:
             nodes = [n.tag([name]) for n in nodes]
@@ -119,14 +140,24 @@ class Pipeline:
         self._nodes_by_input = defaultdict(set)  # input: {nodes with input}
         for node in nodes:
             for input_ in node.inputs:
-                self._nodes_by_input[input_].add(node)
+                self._nodes_by_input[_get_transcode_compatible_name(input_)].add(node)
 
         self._nodes_by_output = {}  # output: node
         for node in nodes:
             for output in node.outputs:
-                self._nodes_by_output[output] = node
+                self._nodes_by_output[_get_transcode_compatible_name(output)] = node
 
-        self._topo_sorted_nodes = _topologically_sorted(nodes)
+        self._nodes = nodes
+        self._topo_sorted_nodes = _topologically_sorted(self.node_dependencies)
+
+    def __repr__(self):  # pragma: no cover
+        reprs = [repr(node) for node in self.nodes]
+        return "{}([\n{}\n])".format(self.__class__.name, ",\n".join(reprs))
+
+    def __add__(self, other):
+        if not isinstance(other, Pipeline):
+            return NotImplemented
+        return Pipeline(set(self.nodes + other.nodes))
 
     def all_inputs(self) -> Set[str]:
         """All inputs for all nodes in the pipeline.
@@ -146,27 +177,36 @@ class Pipeline:
         """
         return set.union(set(), *[node.outputs for node in self.nodes])
 
+    def _remove_intermediates(self, datasets: Set[str]) -> Set[str]:
+        intermediate = {
+            _get_transcode_compatible_name(i) for i in self.all_inputs()
+        } & {_get_transcode_compatible_name(o) for o in self.all_outputs()}
+        return {
+            d for d in datasets if _get_transcode_compatible_name(d) not in intermediate
+        }
+
     def inputs(self) -> Set[str]:
         """The names of free inputs that must be provided at runtime so that
         the pipeline is runnable. Does not include intermediate inputs which
-        are produced and consumed by the inner pipeline nodes.
+        are produced and consumed by the inner pipeline nodes. Resolves
+        transcoded names where necessary.
 
         Returns:
             The set of free input names needed by the pipeline.
 
         """
-        return self.all_inputs() - self.all_outputs()
+        return self._remove_intermediates(self.all_inputs())
 
     def outputs(self) -> Set[str]:
         """The names of outputs produced when the whole pipeline is run.
         Does not include intermediate outputs that are consumed by
-        other pipeline nodes.
+        other pipeline nodes. Resolves transcoded names where necessary.
 
         Returns:
             The set of final pipeline outputs.
 
         """
-        return self.all_outputs() - self.all_inputs()
+        return self._remove_intermediates(self.all_outputs())
 
     def data_sets(self) -> Set[str]:
         """The names of all data sets used by the ``Pipeline``,
@@ -177,6 +217,9 @@ class Pipeline:
 
         """
         return self.all_outputs() | self.all_inputs()
+
+    def _transcode_compatible_names(self):
+        return {_get_transcode_compatible_name(ds) for ds in self.data_sets()}
 
     def describe(self, names_only: bool = True) -> str:
         """Obtain the order of execution and expected free input variables in
@@ -252,6 +295,25 @@ class Pipeline:
         return self._name
 
     @property
+    def node_dependencies(self) -> Dict[Node, Set[Node]]:
+        """All dependencies of nodes where the first Node has a direct dependency on
+        the second Node.
+
+        Returns:
+            Dictionary where keys are nodes and values are sets made up of
+            their parent nodes. Independent nodes have this as empty sets.
+        """
+        dependencies = {node: set() for node in self._nodes}
+        for parent in self._nodes:
+            for output in parent.outputs:
+                for child in self._nodes_by_input[
+                    _get_transcode_compatible_name(output)
+                ]:
+                    dependencies[child].add(parent)
+
+        return dependencies
+
+    @property
     def nodes(self) -> List[Node]:
         """Return a list of the pipeline nodes in topological order, i.e. if
         node A needs to be run before node B, it will appear earlier in the
@@ -261,10 +323,10 @@ class Pipeline:
             The list of all pipeline nodes in topological order.
 
         """
-        return copy.copy(list(chain.from_iterable(self._topo_sorted_nodes)))
+        return list(chain.from_iterable(self._topo_sorted_nodes))
 
     @property
-    def grouped_nodes(self) -> List[List[Node]]:
+    def grouped_nodes(self) -> List[Set[Node]]:
         """Return a list of the pipeline nodes in topologically ordered groups,
         i.e. if node A needs to be run before node B, it will appear in an
         earlier group.
@@ -301,9 +363,86 @@ class Pipeline:
         nodes = [self._nodes_by_name[name] for name in node_names]
         return Pipeline(nodes)
 
+    def _get_nodes_with_inputs_transcode_compatible(
+        self, datasets: Set[str]
+    ) -> Set[Node]:
+        """Retrieves nodes that use the given `datasets` as inputs.
+        If provided a name, but no format, for a transcoded dataset, it
+        includes all nodes that use inputs with that name, otherwise it
+        matches to the fully-qualified name only (i.e. name@format).
+
+        Raises:
+            ValueError: if any of the given datasets do not exist in the
+                ``Pipeline`` object
+
+        Returns:
+            Set of ``Nodes`` that use the given datasets as inputs.
+        """
+        missing = sorted(
+            datasets - self.data_sets() - self._transcode_compatible_names()
+        )
+        if missing:
+            raise ValueError(
+                "Pipeline does not contain data_sets named {}".format(missing)
+            )
+
+        relevant_nodes = set()
+        for input_ in datasets:
+            if _get_transcode_compatible_name(input_) == input_:
+                relevant_nodes.update(
+                    self._nodes_by_input[_get_transcode_compatible_name(input_)]
+                )
+            else:
+                for node_ in self._nodes_by_input[
+                    _get_transcode_compatible_name(input_)
+                ]:
+                    if input_ in node_.inputs:
+                        relevant_nodes.add(node_)
+        return relevant_nodes
+
+    def _get_nodes_with_outputs_transcode_compatible(
+        self, datasets: Set[str]
+    ) -> Set[Node]:
+        """Retrieves nodes that output to the given `datasets`.
+        If provided a name, but no format, for a transcoded dataset, it
+        includes the node that outputs to that name, otherwise it matches
+        to the fully-qualified name only (i.e. name@format).
+
+        Raises:
+            ValueError: if any of the given datasets do not exist in the
+                ``Pipeline`` object
+
+        Returns:
+            Set of ``Nodes`` that output to the given datasets.
+        """
+        missing = sorted(
+            datasets - self.data_sets() - self._transcode_compatible_names()
+        )
+        if missing:
+            raise ValueError(
+                "Pipeline does not contain data_sets named {}".format(missing)
+            )
+
+        relevant_nodes = set()
+        for output in datasets:
+            if _get_transcode_compatible_name(output) in self._nodes_by_output:
+                node_with_output = self._nodes_by_output[
+                    _get_transcode_compatible_name(output)
+                ]
+                if (
+                    _get_transcode_compatible_name(output) == output
+                    or output in node_with_output.outputs
+                ):
+                    relevant_nodes.add(node_with_output)
+
+        return relevant_nodes
+
     def only_nodes_with_inputs(self, *inputs: str) -> "Pipeline":
         """Create a new ``Pipeline`` object with the nodes which depend
-         directly on the provided inputs.
+        directly on the provided inputs.
+        If provided a name, but no format, for a transcoded input, it
+        includes all the nodes that use inputs with that name, otherwise it
+        matches to the fully-qualified name only (i.e. name@format).
 
         Args:
             inputs: A list of inputs which should be used as a starting
@@ -320,22 +459,16 @@ class Pipeline:
 
         """
         starting = set(inputs)
-
-        missing = sorted(starting - self.data_sets())
-        if missing:
-            raise ValueError(
-                "Pipeline does not contain data_sets named {}".format(missing)
-            )
-
-        nodes = set(
-            chain.from_iterable(self._nodes_by_input[input_] for input_ in starting)
-        )
+        nodes = self._get_nodes_with_inputs_transcode_compatible(starting)
 
         return Pipeline(nodes)
 
     def from_inputs(self, *inputs: str) -> "Pipeline":
         """Create a new ``Pipeline`` object with the nodes which depend
-         directly or transitively on the provided inputs.
+        directly or transitively on the provided inputs.
+        If provided a name, but no format, for a transcoded input, it
+        includes all the nodes that use inputs with that name, otherwise it
+        matches to the fully-qualified name only (i.e. name@format).
 
         Args:
             inputs: A list of inputs which should be used as a starting point
@@ -353,39 +486,37 @@ class Pipeline:
 
         """
         starting = set(inputs)
+        result = set()
+        next_nodes = self._get_nodes_with_inputs_transcode_compatible(starting)
 
-        missing = sorted(starting - self.data_sets())
-        if missing:
-            raise ValueError(
-                "Pipeline does not contain data_sets named {}".format(missing)
-            )
-
-        all_nodes = set()
-        while True:
-            nodes = set(
-                chain.from_iterable(self._nodes_by_input[input_] for input_ in starting)
-            )
-
-            outputs = set(chain.from_iterable(node.outputs for node in nodes))
-
+        while next_nodes:
+            result |= next_nodes
+            outputs = set(chain.from_iterable(node.outputs for node in next_nodes))
             starting = outputs
-            all_nodes |= nodes
-            if not nodes:
-                break
 
-        return Pipeline(all_nodes)
+            next_nodes = set(
+                chain.from_iterable(
+                    self._nodes_by_input[_get_transcode_compatible_name(input_)]
+                    for input_ in starting
+                )
+            )
+
+        return Pipeline(result)
 
     def only_nodes_with_outputs(self, *outputs: str) -> "Pipeline":
         """Create a new ``Pipeline`` object with the nodes which are directly
         required to produce the provided outputs.
+        If provided a name, but no format, for a transcoded dataset, it
+        includes all the nodes that output to that name, otherwise it matches
+        to the fully-qualified name only (i.e. name@format).
 
         Args:
             outputs: A list of outputs which should be the final outputs
                 of the new ``Pipeline``.
 
         Raises:
-            ValueError: Raised when any of the given outputs do not exist in
-                the ``Pipeline`` object.
+            ValueError: Raised when any of the given outputs do not exist in the
+                ``Pipeline`` object.
 
         Returns:
             A new ``Pipeline`` object, containing a subset of the nodes of the
@@ -393,32 +524,25 @@ class Pipeline:
             produce the provided outputs are being copied.
         """
         starting = set(outputs)
-
-        missing = sorted(starting - self.data_sets())
-        if missing:
-            raise ValueError(
-                "Pipeline does not contain data_sets named {}".format(missing)
-            )
-
-        nodes = {
-            self._nodes_by_output[output]
-            for output in starting
-            if output in self._nodes_by_output
-        }
+        nodes = self._get_nodes_with_outputs_transcode_compatible(starting)
 
         return Pipeline(nodes)
 
     def to_outputs(self, *outputs: str) -> "Pipeline":
         """Create a new ``Pipeline`` object with the nodes which are directly
         or transitively required to produce the provided outputs.
+        If provided a name, but no format, for a transcoded dataset, it
+        includes all the nodes that output to that name, otherwise it matches
+        to the fully-qualified name only (i.e. name@format).
 
         Args:
             outputs: A list of outputs which should be the final outputs of
                 the new ``Pipeline``.
 
         Raises:
-            ValueError: Raised when any of the given outputs do not exist in
-                the ``Pipeline`` object.
+            ValueError: Raised when any of the given outputs do not exist in the
+                ``Pipeline`` object.
+
 
         Returns:
             A new ``Pipeline`` object, containing a subset of the nodes of the
@@ -427,29 +551,21 @@ class Pipeline:
 
         """
         starting = set(outputs)
+        result = set()
+        next_nodes = self._get_nodes_with_outputs_transcode_compatible(starting)
 
-        missing = sorted(starting - self.data_sets())
-        if missing:
-            raise ValueError(
-                "Pipeline does not contain data_sets named {}".format(missing)
-            )
+        while next_nodes:
+            result |= next_nodes
+            inputs = set(chain.from_iterable(node.inputs for node in next_nodes))
+            starting = inputs
 
-        all_nodes = set()
-        while True:
-            nodes = {
-                self._nodes_by_output[output]
+            next_nodes = {
+                self._nodes_by_output[_get_transcode_compatible_name(output)]
                 for output in starting
-                if output in self._nodes_by_output
+                if _get_transcode_compatible_name(output) in self._nodes_by_output
             }
 
-            inputs = set(chain.from_iterable(node.inputs for node in nodes))
-
-            starting = inputs
-            all_nodes |= nodes
-            if not nodes:
-                break
-
-        return Pipeline(all_nodes)
+        return Pipeline(result)
 
     def from_nodes(self, *node_names: str) -> "Pipeline":
         """Create a new ``Pipeline`` object with the nodes which depend
@@ -510,21 +626,6 @@ class Pipeline:
         nodes = [node for node in self.nodes if tags & node.tags]
         return Pipeline(nodes)
 
-    @property
-    def node_dependencies(self) -> Set[Tuple[Node, Node]]:
-        """All pairs of nodes where the first Node has a direct dependency on
-        the second Node.
-
-        Returns:
-            Pairs of dependent nodes
-        """
-        deps = set()
-        for parent in self.nodes:
-            for output in parent.outputs:
-                for child in self._nodes_by_input[output]:
-                    deps.add((child, parent))
-        return deps
-
     def decorate(self, *decorators: Callable) -> "Pipeline":
         """Create a new ``Pipeline`` by applying the provided decorators to
         all the nodes in the pipeline. If no decorators are passed, it will
@@ -543,10 +644,6 @@ class Pipeline:
         nodes = [node.decorate(*decorators) for node in self.nodes]
         return Pipeline(nodes)
 
-    def __repr__(self):  # pragma: no cover
-        reprs = [repr(node) for node in self.nodes]
-        return "{}([\n{}\n])".format(self.__class__.name, ",\n".join(reprs))
-
     def to_json(self):
         """Return a json representation of the pipeline."""
         transformed = [
@@ -564,11 +661,6 @@ class Pipeline:
         }
 
         return json.dumps(pipeline_versioned)
-
-    def __add__(self, other):
-        if not isinstance(other, Pipeline):
-            return NotImplemented
-        return Pipeline(set(self.nodes + other.nodes))
 
 
 def _validate_no_node_list(nodes: Iterable[Node]):
@@ -593,18 +685,45 @@ def _validate_duplicate_nodes(nodes: List[Node]):
 
 def _validate_unique_outputs(nodes: List[Node]) -> None:
     outputs_list = list(chain.from_iterable(node.outputs for node in nodes))
+    outputs_list = [_get_transcode_compatible_name(o) for o in outputs_list]
     counter_list = Counter(outputs_list)
     counter_set = Counter(set(outputs_list))
     diff = counter_list - counter_set
     if diff:
         raise OutputNotUniqueError(
-            "Output(s) %s are returned by "
+            "Output(s) {} are returned by "
             "more than one nodes. Node "
-            "outputs must be unique." % str(list(sorted(diff.keys())))
+            "outputs must be unique.".format(sorted(diff.keys()))
         )
 
 
-def _topologically_sorted(nodes) -> List[List[Node]]:
+def _validate_transcoded_inputs_outputs(nodes: List[Node]) -> None:
+    """Users should not be allowed to refer to a transcoded dataset both
+    with and without the separator.
+    """
+    all_inputs_outputs = set(
+        chain(
+            chain.from_iterable(node.inputs for node in nodes),
+            chain.from_iterable(node.outputs for node in nodes),
+        )
+    )
+
+    invalid = set()
+    for dataset_name in all_inputs_outputs:
+        name = _get_transcode_compatible_name(dataset_name)
+        if name != dataset_name and name in all_inputs_outputs:
+            invalid.add(name)
+
+    if invalid:
+        raise ValueError(
+            "The following datasets are used with transcoding, but "
+            "were referenced without the separator: {}.\n"
+            "Please specify a transcoding option or "
+            "rename the datasets.".format(", ".join(invalid))
+        )
+
+
+def _topologically_sorted(node_dependencies) -> List[Set[Node]]:
     """Topologically group and sort (order) nodes such that no node depends on
     a node that appears in the same or a later group.
 
@@ -613,8 +732,9 @@ def _topologically_sorted(nodes) -> List[List[Node]]:
             provided nodes.
 
     Returns:
-        The list of nodes in order of execution.
-
+        The list of node sets in order of execution. First set is nodes that should
+        be executed first (no dependencies), second set are nodes that should be
+        executed on the second step, etc.
     """
 
     def _circle_error_message(error_data: Dict[str, str]) -> str:
@@ -623,29 +743,14 @@ def _topologically_sorted(nodes) -> List[List[Node]]:
         This method can be used to replace that message with
         one that refers to the nodes' string representations.
         """
-        indices = error_data.keys()
-        circular = [str(nodes[int(index)]) for index in indices]
+        circular = [str(node) for node in error_data.keys()]
         return "Circular dependencies exist among these items: {}".format(circular)
 
-    output_to_node = dict()
-    for node_id, node in enumerate(nodes):
-        for output_id in node.outputs:
-            output_to_node[output_id] = node_id
-
-    toposort_ready = dict()
-    for node_id, node in enumerate(nodes):
-        toposort_ready[node_id] = set()
-        for input_id in node.inputs:
-            if input_id in output_to_node:
-                toposort_ready[node_id].add(output_to_node[input_id])
-
     try:
-        toposorted = list(toposort(toposort_ready))
+        return list(toposort(node_dependencies))
     except ToposortCircleError as error:
         message = _circle_error_message(error.data)
         raise CircularDependencyError(message) from error
-
-    return [[nodes[idx] for idx in sorted(group)] for group in toposorted]
 
 
 class CircularDependencyError(Exception):

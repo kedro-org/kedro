@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -69,6 +69,7 @@ class LambdaDataSet(AbstractDataSet):
             "load": _to_str(self.__load),
             "save": _to_str(self.__save),
             "exists": _to_str(self.__exists),
+            "release": _to_str(self.__release),
         }
 
         return descr
@@ -94,11 +95,18 @@ class LambdaDataSet(AbstractDataSet):
             return super()._exists()
         return self.__exists()
 
+    def _release(self) -> None:
+        if not self.__release:
+            super()._release()
+        else:
+            self.__release()
+
     def __init__(
         self,
         load: Optional[Callable[[], Any]],
         save: Optional[Callable[[Any], None]],
         exists: Callable[[], bool] = None,
+        release: Callable[[], None] = None,
     ):
         """Creates a new instance of ``LambdaDataSet`` with references to the
         required input/output data set methods.
@@ -107,31 +115,28 @@ class LambdaDataSet(AbstractDataSet):
             load: Method to load data from a data set.
             save: Method to save data to a data set.
             exists: Method to check whether output data already exists.
-                If None, no exists method is added.
+            release: Method to release any cached information.
 
         Raises:
-            DataSetError: If load and/or save is specified, but is not a Callable.
+            DataSetError: If a method is specified, but is not a Callable.
 
         """
 
-        if load is not None and not callable(load):
-            raise DataSetError(
-                "`load` function for LambdaDataSet must be a Callable. "
-                "Object of type `{}` provided instead.".format(load.__class__.__name__)
-            )
-        if save is not None and not callable(save):
-            raise DataSetError(
-                "`save` function for LambdaDataSet must be a Callable. "
-                "Object of type `{}` provided instead.".format(save.__class__.__name__)
-            )
-        if exists is not None and not callable(exists):
-            raise DataSetError(
-                "`exists` function for LambdaDataSet must be a Callable. "
-                "Object of type `{}` provided instead.".format(
-                    exists.__class__.__name__
+        for name, value in [
+            ("load", load),
+            ("save", save),
+            ("exists", exists),
+            ("release", release),
+        ]:
+            if value is not None and not callable(value):
+                raise DataSetError(
+                    "`{}` function for LambdaDataSet must be a Callable. "
+                    "Object of type `{}` provided instead.".format(
+                        name, value.__class__.__name__
+                    )
                 )
-            )
 
         self.__load = load
         self.__save = save
         self.__exists = exists
+        self.__release = release

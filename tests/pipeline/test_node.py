@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -25,7 +25,8 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from functools import wraps
+import sys
+from functools import partial, wraps
 from typing import Callable
 
 import pytest
@@ -86,12 +87,6 @@ class TestValidNode:
     def test_no_output(self):
         assert "<lambda>([input1]) -> None" in str(node(lambda x: None, "input1", None))
 
-    def test_node_equals(self):
-        first = node(identity, "input1", "output1", name="a node")
-        second = node(identity, "input1", "output1", name="a node")
-        assert first == second
-        assert first is not second
-
     def test_inputs_none(self):
         dummy_node = node(constant_output, None, "output")
         assert dummy_node.inputs == []
@@ -143,6 +138,67 @@ class TestValidNode:
             ["output2", "output1", "last node"],
         )
         assert dummy_node.outputs == ["output2", "output1", "last node"]
+
+
+class TestNodeComparisons:
+    def test_node_equals(self):
+        first = node(identity, "input1", "output1", name="a node")
+        second = node(identity, "input1", "output1", name="a node")
+        assert first == second
+        assert first is not second
+
+    def test_node_less_than(self):
+        first = node(identity, "input1", "output1", name="A")
+        second = node(identity, "input1", "output1", name="B")
+        assert first < second
+        assert first is not second
+
+    def test_node_invalid_equals(self):
+        n = node(identity, "input1", "output1", name="a node")
+        assert n != "hello"
+
+    def test_node_invalid_less_than(self):
+        n = node(identity, "input1", "output1", name="a node")
+        pattern_36_37 = "'<' not supported between instances of 'Node' and 'str'"
+        pattern_35 = "unorderable types"
+
+        pattern = pattern_35 if sys.version_info[:2] == (3, 5) else pattern_36_37
+        with pytest.raises(TypeError, match=pattern):
+            n < "hello"  # pylint: disable=pointless-statement
+
+    def test_different_input_list_order_not_equal(self):
+        first = node(biconcat, ["input1", "input2"], "output1", name="A")
+        second = node(biconcat, ["input2", "input1"], "output1", name="A")
+        assert first != second
+
+    def test_different_output_list_order_not_equal(self):
+        first = node(identity, "input1", ["output1", "output2"], name="A")
+        second = node(identity, "input1", ["output2", "output1"], name="A")
+        assert first != second
+
+    def test_different_input_dict_order_equal(self):
+        first = node(biconcat, {"input1": "a", "input2": "b"}, "output1", name="A")
+        second = node(biconcat, {"input2": "b", "input1": "a"}, "output1", name="A")
+        assert first == second
+
+    def test_different_output_dict_order_equal(self):
+        first = node(identity, "input1", {"output1": "a", "output2": "b"}, name="A")
+        second = node(identity, "input1", {"output2": "b", "output1": "a"}, name="A")
+        assert first == second
+
+    def test_input_dict_list_not_equal(self):
+        first = node(biconcat, ["input1", "input2"], "output1", name="A")
+        second = node(
+            biconcat, {"input1": "input1", "input2": "input2"}, "output1", name="A"
+        )
+        assert first != second
+
+    def test_output_dict_list_not_equal(self):
+        first = node(identity, "input1", ["output1", "output2"], name="A")
+        second = node(
+            identity, "input1", {"output1": "output1", "output2": "output2"}, name="A"
+        )
+        assert first != second
 
 
 def bad_input_type_node():
@@ -303,3 +359,29 @@ class TestTagDecorator:
         assert "hello" in tagged_node.tags
         assert "world" in tagged_node.tags
         assert tagged_node.run(dict(input=1))["output"] == "f(1)"
+
+
+class TestNames:
+    def test_named(self):
+        n = node(identity, ["in"], ["out"], name="name")
+        assert str(n) == "name: identity([in]) -> [out]"
+        assert n.name == "name"
+        assert n.short_name == "name"
+
+    def test_function(self):
+        n = node(identity, ["in"], ["out"])
+        assert str(n) == "identity([in]) -> [out]"
+        assert n.name == "identity([in]) -> [out]"
+        assert n.short_name == "identity"
+
+    def test_lambda(self):
+        n = node(lambda a: a, ["in"], ["out"])
+        assert str(n) == "<lambda>([in]) -> [out]"
+        assert n.name == "<lambda>([in]) -> [out]"
+        assert n.short_name == "<lambda>"
+
+    def test_partial(self):
+        n = node(partial(identity), ["in"], ["out"])
+        assert str(n) == "<partial>([in]) -> [out]"
+        assert n.name == "<partial>([in]) -> [out]"
+        assert n.short_name == "<partial>"

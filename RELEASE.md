@@ -7,7 +7,7 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Dmitry Vukolov](https://github.com/dvukolov)
+[Kiyohito Kunii](https://github.com/921kiyo), [Dmitry Vukolov](https://github.com/dvukolov)
 
 # Release 0.14.3
 

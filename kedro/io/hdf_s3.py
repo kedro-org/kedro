@@ -48,6 +48,7 @@ class HDFS3DataSet(AbstractDataSet, S3PathVersionMixIn):
 
     Example:
     ::
+
         >>> from kedro.io import HDFS3DataSet
         >>> import pandas as pd
         >>>

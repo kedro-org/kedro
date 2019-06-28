@@ -70,22 +70,22 @@ class ConfigLoader:
         ::
 
             .
-            └── conf
-                ├── README.md
-                ├── base
-                │   ├── catalog.yml
-                │   ├── logging.yml
-                │   └── experiment1
-                │       └── parameters.yml
-                └── local
-                    ├── catalog.yml
-                    ├── db.ini
-                    ├── experiment1
-                    │   ├── parameters.yml
-                    │   └── model_parameters.yml
-                    └── experiment2
-                        └── parameters.yml
-               
+            `-- conf
+                |-- README.md
+                |-- base
+                |   |-- catalog.yml
+                |   |-- logging.yml
+                |   `-- experiment1
+                |       `-- parameters.yml
+                `-- local
+                    |-- catalog.yml
+                    |-- db.ini
+                    |-- experiment1
+                    |   |-- parameters.yml
+                    |   `-- model_parameters.yml
+                    `-- experiment2
+                        `-- parameters.yml
+
 
         You can access the different configurations as follows:
         ::

@@ -114,6 +114,41 @@ def proj_catalog_param_w_vals_and_dict(tmp_path, param_config, template_config_g
     _write_yaml(values_catalog, template_config_general)
 
 
+@pytest.fixture
+def param_config_advanced():
+    return {
+        "planes": {
+            "type": "${plane_data_type}",
+            "postgres_credentials": "${credentials}",
+            "batch_size": "${batch_size}",
+            "need_permission": "${permission_param}",
+            "secret_tables": "${secret_table_list}"
+        }
+    }
+
+
+@pytest.fixture
+def template_config_advanced():
+    return {
+        "plane_data_type": "SparkJDBCDataSet",
+        "credentials": {
+            "user": "Fakeuser",
+            "password": "F@keP@55word"
+        },
+        "batch_size": 10000,
+        "permission_param": True,
+        "secret_table_list": ["models", "pilots", "engines"]
+    }
+
+
+@pytest.fixture
+def proj_catalog_param_w_vals_advanced(tmp_path, param_config_advanced, template_config_advanced):
+    proj_catalog = tmp_path / "base" / "catalog.yml"
+    values_catalog = tmp_path / "base" / "values.yml"
+    _write_yaml(proj_catalog, param_config_advanced)
+    _write_yaml(values_catalog, template_config_advanced)
+
+
 class TestTemplatedConfigLoader:
 
     @pytest.mark.usefixtures("proj_catalog_param_w_vals")
@@ -177,3 +212,18 @@ class TestTemplatedConfigLoader:
         assert catalog["boats"]["columns"]["name"] == "VARCHAR"
         assert catalog["boats"]["columns"]["top_speed"] == "FLOAT"
         assert catalog["boats"]["users"] == ["fred", "ron"]
+
+    @pytest.mark.usefixtures("proj_catalog_param_w_vals_advanced")
+    def test_catlog_parameterized_advanced(self, tmp_path, conf_paths):
+        """Test advanced (i.e. nested dicts, booleans, lists, etc.) parameterized config with input
+        from values.yml file inside conf_paths"""
+        (tmp_path / "local").mkdir(exist_ok=True)
+
+        catalog = TemplatedConfigLoader(conf_paths).resolve("catalog*.yml")
+
+        assert catalog["planes"]["type"] == "SparkJDBCDataSet"
+        assert catalog["planes"]["postgres_credentials"]["user"] == "Fakeuser"
+        assert catalog["planes"]["postgres_credentials"]["password"] == "F@keP@55word"
+        assert catalog["planes"]["batch_size"] == 10000
+        assert catalog["planes"]["need_permission"]
+        assert catalog["planes"]["secret_tables"] == ["models", "pilots", "engines"]

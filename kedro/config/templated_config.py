@@ -62,7 +62,7 @@ class TemplatedConfigLoader(ConfigLoader):
         return _replace_vals_map(config_raw, combined_values_dict)
 
 
-def _replace_val(val: Any, defaults: Dict[str, str]) -> Any:
+def _replace_val(val: Any, defaults: Dict[str, Any]) -> Any:
     """
     Use the default dict to replace strings that look like ${param_name} (where param_name can be
     any key value) with the corresponding value of the key 'param_name' in the default dict.
@@ -89,12 +89,20 @@ def _replace_val(val: Any, defaults: Dict[str, str]) -> Any:
         either the replacement value, if input val is a string
 
     """
-    return re.sub(r'\$\{([^\}]*)\}', lambda m: defaults.get(m.group(1), m.group(0)),
-                  val) if isinstance(val, str) \
-        else val
+
+    if isinstance(val, str):
+        regex_pattern = r'\$\{([^\}]*)\}'
+        regex_pattern_full = r'^\$\{([^\}]*)\}$'
+        match_full = re.search(regex_pattern_full, val)
+        if match_full:
+            return defaults.get(match_full.group(1), val)
+        else:
+            return re.sub(regex_pattern, lambda m: defaults.get(m.group(1), m.group(0)), val)
+    else:
+        return val
 
 
-def _replace_vals_list(listt: List[Any], defaults: Dict[str, str]) -> List[Any]:
+def _replace_vals_list(listt: List[Any], defaults: Dict[str, Any]) -> List[Any]:
     """
     Loops through list and applies _replace_vals function
     Args:
@@ -110,7 +118,7 @@ def _replace_vals_list(listt: List[Any], defaults: Dict[str, str]) -> List[Any]:
     return [_replace_val(e, defaults) for e in listt]
 
 
-def _replace_vals_map(mapp: Dict[str, Any], defaults: Dict[str, str]) -> Dict[str, Any]:
+def _replace_vals_map(mapp: Dict[str, Any], defaults: Dict[str, Any]) -> Dict[str, Any]:
     """
     Recursive function that loops through the values of a map. In case another map is encountered,
     it calls itsself, otherwise it calls either _replace_vals_list or _replace_val, depending on

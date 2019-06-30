@@ -106,6 +106,55 @@ def local_config(tmp_path):
 
 
 @pytest.fixture
+def param_config():
+    return {
+        "boats": {
+            "type": "${boat_data_type}",
+            "filepath": "${s3_bucket}/${raw_data_folder}/boats.csv",
+            "columns": {"id": "${string_type}",
+                        "name": "${string_type}",
+                        "top_speed": "${float_type}"},
+            "users": ["fred",
+                      "${write_only_user}"]
+        }
+    }
+
+
+@pytest.fixture
+def template_config():
+    return {
+        "templates": {
+            "boat_data_type": "SparkDataSet",
+            "s3_bucket": "s3a://boat-and-car-bucket",
+            "raw_data_folder": "01_raw",
+            "string_type": "VARCHAR",
+            "float_type": "FLOAT",
+            "write_only_user": "ron"
+        }
+    }
+
+
+@pytest.fixture
+def param_incl_config():
+    return {
+        "templates": {
+            "plane_data_type": "SparkDataSet",
+            "login_template": "User1",
+            "password_template": "Password1",
+            "owner_template": "John"
+        },
+        "planes": {
+            "type": "${plane_data_type}",
+            "credentials": {
+                "login": "${login_template}",
+                "password": "${password_template}"
+            },
+            "owner": "${owner_template}"
+        }
+    }
+
+
+@pytest.fixture
 def create_config_dir(tmp_path, base_config, local_config):
     proj_catalog = tmp_path / "base" / "catalog.yml"
     local_catalog = tmp_path / "local" / "catalog.yml"
@@ -138,6 +187,20 @@ def proj_catalog_nested(tmp_path, base_config):
     _write_yaml(proj_catalog, {"prod": base_config})
 
 
+@pytest.fixture
+def proj_catalog_param(tmp_path, param_config, template_config):
+    proj_catalog = tmp_path / "base" / "catalog.yml"
+    template_catalog = tmp_path / "base" / "template.yml"
+    _write_yaml(proj_catalog, param_config)
+    _write_yaml(template_catalog, template_config)
+
+
+@pytest.fixture
+def proj_catalog_param_incl(tmp_path, param_incl_config):
+    proj_catalog = tmp_path / "base" / "catalog.yml"
+    _write_yaml(proj_catalog, param_incl_config)
+
+
 use_config_dir = pytest.mark.usefixtures("create_config_dir")
 use_proj_catalog = pytest.mark.usefixtures("proj_catalog")
 
@@ -166,6 +229,31 @@ class TestConfigLoader:
         (tmp_path / "local").mkdir(exist_ok=True)
         catalog = ConfigLoader(conf_paths).get("catalog*.yml")
         assert catalog == base_config
+
+    @pytest.mark.usefixtures("proj_catalog_param")
+    def test_catlog_parameterized_separate(self, tmp_path, conf_paths):
+        """Test parameterized config"""
+        (tmp_path / "local").mkdir(exist_ok=True)
+
+        catalog = ConfigLoader(conf_paths).get("catalog*.yml", "template*.yml")
+
+        assert catalog["boats"]["type"] == "SparkDataSet"
+        assert catalog["boats"]["filepath"] == "s3a://boat-and-car-bucket/01_raw/boats.csv"
+        assert catalog["boats"]["columns"]["id"] == "VARCHAR"
+        assert catalog["boats"]["columns"]["name"] == "VARCHAR"
+        assert catalog["boats"]["columns"]["top_speed"] == "FLOAT"
+        assert catalog["boats"]["users"] == ["fred", "ron"]
+
+    @pytest.mark.usefixtures("proj_catalog_param_incl")
+    def test_catlog_parameterized_incl(self, tmp_path, conf_paths):
+        """Test parameterized config when templates live in the same config file"""
+        (tmp_path / "local").mkdir(exist_ok=True)
+
+        catalog = ConfigLoader(conf_paths).get("catalog*.yml")
+        assert catalog["planes"]["type"] == "SparkDataSet"
+        assert catalog["planes"]["credentials"]["login"] == "User1"
+        assert catalog["planes"]["credentials"]["password"] == "Password1"
+        assert catalog["planes"]["owner"] == "John"
 
     @use_proj_catalog
     def test_duplicate_patterns(self, tmp_path, conf_paths, base_config):

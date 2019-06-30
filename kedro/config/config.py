@@ -123,7 +123,7 @@ class ConfigLoader:
         self.conf_paths = conf_paths
         self.logger = logging.getLogger(__name__)
 
-    def get(self, *patterns: str) -> Dict[str, Any]:
+    def get(self, *patterns: Tuple[str]) -> Dict[str, Any]:
         """Recursively scan for configuration files, load and merge them, and
         return them in the form of a config dictionary.
 

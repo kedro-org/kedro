@@ -53,7 +53,7 @@ To configure the coverage threshold, please have a look at the file `.coveragerc
 In order to use notebooks in your Kedro project, you need to install Jupyter:
 
 ```
-   pip install jupyter
+pip install jupyter
 ```
 
 For using Jupyter Lab, you need to install it:

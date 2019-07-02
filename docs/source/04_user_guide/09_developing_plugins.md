@@ -2,6 +2,8 @@
 
 > *Note:* This documentation is based on `Kedro 0.14.3`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
+The functionality of Kedro can be extended using its `plugin` framework, which is designed to reduce the complexity involved in creating new features for Kedro while allowing you to inject additional commands into the CLI. Plugins are developed as separate Python packages that exist outside of any Kedro project.
+
 ## Overview
 
 Kedro uses various entry points in the [`pkg_resources` entry_point system](https://setuptools.readthedocs.io/en/latest/setuptools.html#dynamic-discovery-of-services-and-plugins) to provide plugin functionality.
@@ -29,11 +31,29 @@ Plugins may also add commands to the Kedro CLI, which supports two types of comm
 
 Global commands use the `entry_point` key `kedro.global_commands`. Project commands use the `entry_point` key `kedro.project_commands`.
 
+### Suggested command convention
+
+We use the following command convention: `kedro <plugin-name> <command>`. With `kedro <plugin-name>` acting as a top-level command group. Note, this is a suggested way of structuring your plugin and is not necessary for your plugin to work.
+
 ## Working with `click`
 
 Commands must be provided as [`click` `Groups`](https://click.palletsprojects.com/en/7.x/api/#click.Group)
 
 The `click` `Group` will be merged into the main CLI Group. In the process, the options on the group are lost, as is any processing that was done as part of its callback function.
+
+## Contributing process
+
+When you are ready to submit your code:
+
+ 1. Create a separate repository using our naming convention for `plugin`s (`kedro-<plugin-name>`)
+ 2. Choose a command approach, plugins can have `global` and / or `project` commands
+   - All `global` commands should be provided as a single `click` group
+   - All `project` commands should be provided as another `click` group
+   - The `click` groups are declared through the [`pkg_resources` entry_point system](https://setuptools.readthedocs.io/en/latest/setuptools.html#dynamic-discovery-of-services-and-plugins)
+ 3. Include a `README.md` describing your `plugin`'s functionality and all dependencies that should be included
+ 4. Use GitHub tagging to tag your plugin as a `kedro-plugin` so that we can find it
+ 
+>*Note:* In future, we will feature a list of "Plugins by Contributors". Your plugin needs to have an [Apache 2.0 compatible license](https://www.apache.org/legal/resolved.html#category-a) to be considered for this list.
 
 ## Example of a simple plugin
 
@@ -70,3 +90,7 @@ Once the plugin is installed, you can run it as follows:
 ```bash
 kedro to_json
 ```
+
+## Supported plugins
+
+- [Kedro-Docker](https://github.com/quantumblacklabs/kedro-docker), a tool for packaging and shipping Kedro projects within containers

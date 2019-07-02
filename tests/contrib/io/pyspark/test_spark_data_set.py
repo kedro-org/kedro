@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -39,6 +39,12 @@ from pyspark.sql.utils import AnalysisException
 
 from kedro.contrib.io.pyspark import SparkDataSet
 from kedro.io import CSVLocalDataSet, DataSetError, ParquetLocalDataSet
+
+
+# all the tests in this file require Spark
+@pytest.fixture(autouse=True)
+def spark_session(spark_session):
+    return spark_session
 
 
 def _get_sample_pandas_data_frame() -> pd.DataFrame:

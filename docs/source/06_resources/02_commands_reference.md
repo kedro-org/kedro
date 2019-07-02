@@ -1,10 +1,18 @@
 # Guide to CLI commands
 
-> *Note:* This documentation is based on `Kedro 0.14.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.14.3`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 The `kedro` command line interface (CLI) helps with reproducibility in projects by allowing you to associate a set of commands and dependencies with a target and then execute them from the command line when inside a Kedro project directory. All project related CLI commands should be run from the project’s root directory.
 
 The supported commands are specified in the `kedro_cli.py` file. It is easy to extend `kedro_cli.py` by either modifying the file or injecting commands into it by using the [`plugin` framework](../04_user_guide/09_developing_plugins.md).
+
+### Autocomplete
+
+To allow your shell to autocomplete `kedro` commands, you can add the following to your `.bashrc` (or just run it on the command line) 
+
+```
+eval "$(_KEDRO_COMPLETE=source kedro)"
+```
 
 ## Global Kedro commands
 

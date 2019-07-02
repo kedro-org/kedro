@@ -8,6 +8,7 @@ When building a Kedro project, you will typically follow a standard development 
 ### 1. Set up the project template
 
 * Create a new project with `kedro new`
+* Install dependencies with `kedro install`
 * Configure the following in the `conf` folder:
 	* Logging
 	* Credentials

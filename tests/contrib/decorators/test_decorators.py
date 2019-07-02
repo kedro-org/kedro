@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -27,15 +27,9 @@
 # limitations under the License.
 import pandas as pd
 import pytest
-from pyspark.sql import SparkSession
 
 from kedro.contrib.decorators import pandas_to_spark, retry, spark_to_pandas
 from kedro.pipeline import node
-
-
-@pytest.fixture()
-def spark():
-    return SparkSession.builder.getOrCreate()
 
 
 @pytest.fixture()
@@ -50,8 +44,8 @@ def pandas_df():
 
 
 @pytest.fixture()
-def spark_df(pandas_df, spark):
-    return spark.createDataFrame(pandas_df)
+def spark_df(pandas_df, spark_session):
+    return spark_session.createDataFrame(pandas_df)
 
 
 @pytest.fixture()
@@ -68,8 +62,8 @@ def inputs(pandas_df, spark_df):
     return {"input1": pandas_df, "input2": spark_df, "input3": pandas_df}
 
 
-def test_pandas_to_spark(three_arg_node, spark, pandas_df, inputs):
-    res = three_arg_node.decorate(pandas_to_spark(spark)).run(inputs)
+def test_pandas_to_spark(three_arg_node, spark_session, pandas_df, inputs):
+    res = three_arg_node.decorate(pandas_to_spark(spark_session)).run(inputs)
     for output in ["output1", "output2", "output3"]:
         assert res[output].toPandas().equals(pandas_df)
 

@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -50,13 +50,6 @@ def _check_equals(data1, data2):
     if isinstance(data1, SparkDataFrame) and isinstance(data2, SparkDataFrame):
         return data1.toPandas().equals(data2.toPandas())
     return False  # pragma: no cover
-
-
-@pytest.fixture(scope="module")
-def spark_session():
-    spark = SparkSession.builder.getOrCreate()
-    yield spark
-    spark.stop()
 
 
 @pytest.fixture

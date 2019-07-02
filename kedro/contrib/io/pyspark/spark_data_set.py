@@ -36,10 +36,11 @@ from typing import Any, Dict, Optional
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.utils import AnalysisException
 
+from kedro.contrib.io import DefaultArgumentsMixIn
 from kedro.io import AbstractDataSet
 
 
-class SparkDataSet(AbstractDataSet):
+class SparkDataSet(DefaultArgumentsMixIn, AbstractDataSet):
     """``SparkDataSet`` loads and saves Spark data frames.
 
     Example:

@@ -35,10 +35,11 @@ from typing import Any, Dict, Optional
 import pandas as pd
 from azure.storage.blob import BlockBlobService
 
+from kedro.contrib.io import DefaultArgumentsMixIn
 from kedro.io import AbstractDataSet
 
 
-class CSVBlobDataSet(AbstractDataSet):
+class CSVBlobDataSet(DefaultArgumentsMixIn, AbstractDataSet):
     """``CSVBlobDataSet`` loads and saves csv files in Microsoft's Azure
     blob storage. It uses azure storage SDK to read and write in azure and
     pandas to handle the csv file locally.

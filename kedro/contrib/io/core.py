@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
+# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
+# (either separately or in combination, “QuantumBlack Trademarks”) are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -26,10 +26,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-This module contains functionality which we might consider moving into the
-`kedro.io` module (e.g. additional ``AbstractDataSet``s and
-extensions/alternative ``DataCatalog``s.
-"""
+"""This module extends the set of classes ``kedro.io.core`` provides."""
 
-from .core import DefaultArgumentsMixIn  # NOQA
+from typing import Any, Dict, Optional
+
+
+# pylint: disable=too-few-public-methods
+class DefaultArgumentsMixIn:
+    """Mixin class that helps handle default load and save arguments."""
+
+    DEFAULT_LOAD_ARGS = {}
+    DEFAULT_SAVE_ARGS = {}
+
+    def __init__(
+        self,
+        load_args: Optional[Dict[str, Any]] = None,
+        save_args: Optional[Dict[str, Any]] = None,
+    ) -> None:
+        self._load_args = self.DEFAULT_LOAD_ARGS.copy()
+        if load_args is not None:
+            self._load_args.update(load_args)
+        self._save_args = self.DEFAULT_SAVE_ARGS.copy()
+        if save_args is not None:
+            self._save_args.update(save_args)

@@ -14,7 +14,6 @@ Short description of the problem here.
 How has this bug affected you? What were you trying to accomplish?
 
 ## Steps to Reproduce
-
 1. [First Step]
 2. [Second Step]
 3. [and so on...]
@@ -39,9 +38,3 @@ Include as many relevant details about the environment in which you experienced 
 * Kedro version used (`pip show kedro` or `kedro -V`):
 * Python version used (`python -V`):
 * Operating system and version:
-
-## Checklist
-Include labels so that we can categorise your issue:
-
-- [ ] Add a "Component" label to the issue
-- [ ] Add a "Priority" label to the issue

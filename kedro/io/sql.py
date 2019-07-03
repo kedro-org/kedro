@@ -196,6 +196,7 @@ class SQLTableDataSet(AbstractDataSet):
                 "provide a SQLAlchemy connection string."
             )
 
+        # Handle default load and save arguments
         self._load_args = self.DEFAULT_LOAD_ARGS.copy()
         if load_args is not None:
             self._load_args.update(load_args)

@@ -94,12 +94,15 @@ class JSONLocalDataSet(AbstractDataSet, FilepathVersionMixIn):
 
         """
         self._filepath = filepath
+
+        # Handle default load and save arguments
         self._load_args = self.DEFAULT_LOAD_ARGS.copy()
         if load_args is not None:
             self._load_args.update(load_args)
         self._save_args = self.DEFAULT_SAVE_ARGS.copy()
         if save_args is not None:
             self._save_args.update(save_args)
+
         self._version = version
 
     def _load(self) -> Any:

@@ -56,6 +56,7 @@ To make sure you have the required dependencies, run (in your virtual environmen
 
 ```bash
 pip install -U -r src/requirements.txt
+conda install --file src/requirements.yml --yes
 ```
 Or run the following if you have Kedro installed in your virtual environment:
 ```bash

@@ -61,6 +61,9 @@ class PickleS3DataSet(AbstractDataSet, S3PathVersionMixIn):
             >>> reloaded = data_set.load()
     """
 
+    DEFAULT_LOAD_ARGS = {}
+    DEFAULT_SAVE_ARGS = {}
+
     # pylint: disable=too-many-arguments
     def __init__(
         self,
@@ -98,7 +101,12 @@ class PickleS3DataSet(AbstractDataSet, S3PathVersionMixIn):
         self._filepath = filepath
         self._bucket_name = bucket_name
         self._credentials = credentials if credentials else {}
-        super().__init__(load_args, save_args)
+        self._load_args = self.DEFAULT_LOAD_ARGS.copy()
+        if load_args is not None:
+            self._load_args.update(load_args)
+        self._save_args = self.DEFAULT_SAVE_ARGS.copy()
+        if save_args is not None:
+            self._save_args.update(save_args)
         self._version = version
         self._s3 = S3FileSystem(client_kwargs=self._credentials)
 

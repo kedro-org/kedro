@@ -121,7 +121,6 @@ class LambdaDataSet(AbstractDataSet):
             DataSetError: If a method is specified, but is not a Callable.
 
         """
-        # pylint: disable=super-init-not-called
 
         for name, value in [
             ("load", load),

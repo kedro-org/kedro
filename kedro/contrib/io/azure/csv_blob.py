@@ -39,7 +39,7 @@ from kedro.contrib.io import DefaultArgumentsMixIn
 from kedro.io import AbstractDataSet
 
 
-class CSVBlobDataSet(DefaultArgumentsMixIn, AbstractDataSet):
+class CSVBlobDataSet(AbstractDataSet, DefaultArgumentsMixIn):
     """``CSVBlobDataSet`` loads and saves csv files in Microsoft's Azure
     blob storage. It uses azure storage SDK to read and write in azure and
     pandas to handle the csv file locally.

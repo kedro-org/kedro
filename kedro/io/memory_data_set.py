@@ -74,7 +74,6 @@ class MemoryDataSet(AbstractDataSet):
         Args:
             data: Python object containing the data.
         """
-        # pylint: disable=super-init-not-called
         self._data = None
         if data is not None:
             self._save(data)

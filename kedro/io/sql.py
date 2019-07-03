@@ -139,6 +139,7 @@ class SQLTableDataSet(AbstractDataSet):
 
     """
 
+    DEFAULT_LOAD_ARGS = {}
     DEFAULT_SAVE_ARGS = {"index": False}
 
     def _describe(self) -> Dict[str, Any]:
@@ -195,7 +196,12 @@ class SQLTableDataSet(AbstractDataSet):
                 "provide a SQLAlchemy connection string."
             )
 
-        super().__init__(load_args, save_args)
+        self._load_args = self.DEFAULT_LOAD_ARGS.copy()
+        if load_args is not None:
+            self._load_args.update(load_args)
+        self._save_args = self.DEFAULT_SAVE_ARGS.copy()
+        if save_args is not None:
+            self._save_args.update(save_args)
 
         self._load_args["table_name"] = table_name
         self._save_args["name"] = table_name
@@ -281,7 +287,6 @@ class SQLQueryDataSet(AbstractDataSet):
             DataSetError: When either ``sql`` or ``con`` parameters is emtpy.
 
         """
-        # pylint: disable=super-init-not-called
 
         if not sql:
             raise DataSetError(

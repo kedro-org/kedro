@@ -9,7 +9,7 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Kiyohito Kunii](https://github.com/921kiyo), [Dmitry Vukolov](https://github.com/dvukolov), [Jo Stichbury](https://github.com/stichbury)
+[Kiyohito Kunii](https://github.com/921kiyo), [Dmitry Vukolov](https://github.com/dvukolov), [Jo Stichbury](https://github.com/stichbury), [Deepyaman Datta](https://github.com/deepyaman)
 
 # Release 0.14.3
 

@@ -9,7 +9,7 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Kiyohito Kunii](https://github.com/921kiyo), [Dmitry Vukolov](https://github.com/dvukolov), [Jo Stichbury](https://github.com/stichbury)
+[Kiyohito Kunii](https://github.com/921kiyo), [Dmitry Vukolov](https://github.com/dvukolov), [Jo Stichbury](https://github.com/stichbury), [Angus Williams](https://github.com/awqb)
 
 # Release 0.14.3
 
@@ -73,6 +73,6 @@ The initial release of Kedro.
 
 ## Thanks for supporting contributions
 
-Jo Stichbury, Aris Valtazanos, Fabian Peters, Guilherme Braccialli, Joel Schwarzmann, Miguel Beltre, Mohammed ElNabawy, Deepyaman Datta, Shubham Agrawal, Oleg Andreyev, Mayur Chougule, William Ashford, Ed Cannon, Nikhilesh Nukala, Sean Bailey, Vikram Tegginamath, Thomas Huijskens, Musa Bilal, Angus Williams
+Jo Stichbury, Aris Valtazanos, Fabian Peters, Guilherme Braccialli, Joel Schwarzmann, Miguel Beltre, Mohammed ElNabawy, Deepyaman Datta, Shubham Agrawal, Oleg Andreyev, Mayur Chougule, William Ashford, Ed Cannon, Nikhilesh Nukala, Sean Bailey, Vikram Tegginamath, Thomas Huijskens, Musa Bilal
 
 We are also grateful to everyone who advised and supported us, filed issues or helped resolve them, asked and answered questions and were part of inspiring discussions.

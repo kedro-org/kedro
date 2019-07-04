@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -82,7 +82,7 @@ setup(
     author="QuantumBlack Labs",
     entry_points={"console_scripts": ["kedro = kedro.cli:main"]},
     package_data={name: template_files + doc_html_files},
-    keywords="pipelines, machine learning, data pipelines, data science, data engineering",
+    keywords="pipelines, machine learning, data pipelines, data science, data engineering",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Programming Language :: Python :: 3.5",

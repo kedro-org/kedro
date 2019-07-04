@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -70,22 +70,22 @@ class ConfigLoader:
         ::
 
             .
-            └── conf
-                ├── README.md
-                ├── base
-                │   ├── catalog.yml
-                │   ├── logging.yml
-                │   └── experiment1
-                │       └── parameters.yml
-                └── local
-                    ├── catalog.yml
-                    ├── db.ini
-                    ├── experiment1
-                    │   ├── parameters.yml
-                    │   └── model_parameters.yml
-                    └── experiment2
-                        └── parameters.yml
-               
+            `-- conf
+                |-- README.md
+                |-- base
+                |   |-- catalog.yml
+                |   |-- logging.yml
+                |   `-- experiment1
+                |       `-- parameters.yml
+                `-- local
+                    |-- catalog.yml
+                    |-- db.ini
+                    |-- experiment1
+                    |   |-- parameters.yml
+                    |   `-- model_parameters.yml
+                    `-- experiment2
+                        `-- parameters.yml
+
 
         You can access the different configurations as follows:
         ::

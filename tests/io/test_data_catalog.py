@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -205,12 +205,19 @@ class TestDataCatalog:
         )
         assert result is False
 
-    def test_exists_error(self, data_catalog):
+    def test_exists_unregistered(self, data_catalog):
         """Check the the error when calling `exists`
         on unregistered data set"""
         pattern = r"DataSet \'wrong_key\' not found in the catalog"
         with pytest.raises(DataSetError, match=pattern):
             data_catalog.exists("wrong_key")
+
+    def test_release_unregistered(self, data_catalog):
+        """Check the the error when calling `release`
+        on unregistered data set"""
+        pattern = r"DataSet \'wrong_key\' not found in the catalog"
+        with pytest.raises(DataSetError, match=pattern):
+            data_catalog.release("wrong_key")
 
     def test_multi_catalog_list(self, multi_catalog):
         """Test data catalog which contains multiple data sets"""

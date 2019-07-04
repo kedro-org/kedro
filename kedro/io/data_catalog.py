@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -367,6 +367,23 @@ class DataCatalog:
 
         raise DataSetNotFoundError("DataSet '{}' not found in the catalog".format(name))
 
+    def release(self, name: str):
+        """Release any cached data associated with a data set
+
+        Args:
+            name: A data set to be checked.
+
+        Raises:
+            DataSetNotFoundError: When a data set with the given name
+                has not yet been registered.
+        """
+        if name not in self._data_sets:
+            raise DataSetNotFoundError(
+                "DataSet '{}' not found in the catalog".format(name)
+            )
+
+        self._data_sets[name].release()
+
     def add(
         self, data_set_name: str, data_set: AbstractDataSet, replace: bool = False
     ) -> None:
@@ -537,16 +554,3 @@ class DataCatalog:
             other._transformers,  # pylint: disable=protected-access
             other._default_transformers,  # pylint: disable=protected-access
         )
-
-    def set_remaining_loads(self, ds_name: str, remaining_loads: int):
-        """Set the maximum number of times the given dataset can be loaded. Datasets like
-        ``MemoryDataSet`` use this to clear data from memory. In most other cases, this has no
-        effect.
-
-        Args:
-            ds_name: The dataset to modify
-            remaining_loads: Maximum number of times ``load`` method of the
-                data set is allowed to be invoked. Any number of calls
-                is allowed if the argument is not set.
-        """
-        self._data_sets[ds_name].set_remaining_loads(remaining_loads)

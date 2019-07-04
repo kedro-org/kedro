@@ -1,6 +1,6 @@
 # Nodes and pipelines
 
-> *Note:* This documentation is based on `Kedro 0.14.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.14.3`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 In this section we introduce pipelines and nodes.
 
 Relevant API documentation:
@@ -782,8 +782,6 @@ Outputs: m, m2
 This will create a partial pipeline, consisting solely of the nodes you specify as arguments in the method call.
 
 #### Recreating Missing Outputs
-
-Kedro supports the automatic generation of partial pipelines that take into account existing node outputs. This can be helpful to avoid re-running nodes which take a long time.
 
 Kedro supports the automatic generation of partial pipelines that take into account existing node outputs. This can be helpful to avoid re-running nodes that take a long time:
 

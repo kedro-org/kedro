@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -75,31 +75,18 @@ class MemoryDataSet(AbstractDataSet):
             data: Python object containing the data.
         """
         self._data = None
-        self._remaining_loads = None
         if data is not None:
             self._save(data)
 
     def _load(self) -> Any:
         if self._data is None:
-            if self._remaining_loads == 0:
-                message = (
-                    "The MemoryDataSet was cleared and holds no data now, "
-                    "as the maximum number of loads exceeds the limit set "
-                    "by `.set_remaining_loads()`"
-                )
-            else:
-                message = "Data for MemoryDataSet has not been saved yet."
-            raise DataSetError(message)
+            raise DataSetError("Data for MemoryDataSet has not been saved yet.")
         if isinstance(self._data, (pd.DataFrame, np.ndarray)):
             data = self._data.copy()
         elif type(self._data).__name__ == "DataFrame":
             data = self._data
         else:
             data = copy.deepcopy(self._data)
-        if self._remaining_loads:
-            self._remaining_loads -= 1
-            if self._remaining_loads == 0:
-                self._data = None
         return data
 
     def _save(self, data: Any):
@@ -115,16 +102,5 @@ class MemoryDataSet(AbstractDataSet):
             return False
         return True
 
-    def set_remaining_loads(self, remaining_loads: int):
-        """Set how many times this dataset can be loaded before its data being cleared to release
-        memory. Calling this method on a ``MemoryDataSet`` that already contains data has no
-        effect.
-
-        Args:
-            remaining_loads: Maximum number of times ``load`` method of the
-                data set is allowed to be invoked, before clearing the
-                data to release memory. Any number of calls is allowed
-                if the argument is not set.
-        """
-        if self._data is not None:
-            self._remaining_loads = remaining_loads
+    def _release(self):
+        self._data = None

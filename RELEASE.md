@@ -1,20 +1,36 @@
-# Release 0.14.3
+# Release 0.15.0
 
 ## Major features and improvements
-* Tab completion for catalog datasets in `ipython` or `jupyter` sessions.
-* Added support for transcoding, an ability to decouple loading/saving mechanisms of a dataset from its storage location. It is denoted by adding '@' to the dataset name. This will allow you to read the same dataset or file in two different ways.
+* Added `KedroContext` base class which holds the configuration and Kedro's main functionality (catalog, pipeline, config).
 
 ## Bug fixes and other changes
-* Add support for pipeline nodes made up from partial functions
-* Any custom `AbstractDataSet` may be aware of how many times a pipeline run is going to load it by implementing `set_remaining_loads()`
+* Documentation improvements
 
 ## Breaking changes to the API
 
+## Thanks for supporting contributions
+[Kiyohito Kunii](https://github.com/921kiyo), [Dmitry Vukolov](https://github.com/dvukolov), [Jo Stichbury](https://github.com/stichbury)
+
+# Release 0.14.3
+
+## Major features and improvements
+* Tab completion for catalog datasets in `ipython` or `jupyter` sessions. (Thank you [@datajoely](https://github.com/datajoely) and [@WaylonWalker](https://github.com/WaylonWalker))
+* Added support for transcoding, an ability to decouple loading/saving mechanisms of a dataset from its storage location, denoted by adding '@' to the dataset name.
+* Datasets have a new `release` function that instructs them to free any cached data. The runners will call this when the dataset is no longer needed downstream.
+
 ## Bug fixes and other changes
-* Added Kedro project loader for IPython: `extras/kedro_project_loader.py`.
+* Add support for pipeline nodes made up from partial functions.
+* Expand user home directory `~` for TextLocalDataSet (see issue #19).
+* Add a `short_name` property to `Node`s for a display-friendly (but not necessarily unique) name.
+* Add Kedro project loader for IPython: `extras/kedro_project_loader.py`.
+* Fix source file encoding issues with Python 3.5 on Windows.
+* Fix local project source not having priority over the same source installed as a package, leading to local updates not being recognised.
+
+## Breaking changes to the API
+* Remove the max_loads argument from the `MemoryDataSet` constructor and from the `AbstractRunner.create_default_data_set` method.
 
 ## Thanks for supporting contributions
-[Nikolaos Tsaousis](https://github.com/tsanikgr), [Ivan Danov](https://github.com/idanov), [Gordon Wrigley](https://github.com/tolomea), [Yetunde Dada](https://github.com/yetudada), [Kiyohito Kunii](https://github.com/921kiyo), [Lorena Balan](https://github.com/lorenabalan), [Richard Westenra](https://github.com/richardwestenra), [Dmitrii Deriabin](https://github.com/DmitryDeryabin), [Joel Schwarzmann](https://github.com/datajoely)
+[Nikolaos Tsaousis](https://github.com/tsanikgr), [Ivan Danov](https://github.com/idanov), [Gordon Wrigley](https://github.com/tolomea), [Yetunde Dada](https://github.com/yetudada), [Kiyohito Kunii](https://github.com/921kiyo), [Lorena Balan](https://github.com/lorenabalan), [Richard Westenra](https://github.com/richardwestenra), [Dmitrii Deriabin](https://github.com/DmitryDeryabin), [Joel Schwarzmann](https://github.com/datajoely), [Alex Kalmikov](https://github.com/kalexqb)
 
 # Release 0.14.2
 

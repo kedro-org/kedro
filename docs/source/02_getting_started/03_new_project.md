@@ -52,14 +52,12 @@ include_example: true
 
 If you want to work with a Kedro project that has already been created, you may use `git clone` to directly clone it. You don’t need to create a new Kedro project.
 
-To make sure you have the required dependencies, run (in your virtual environment):
+## Install project dependencies
 
-```bash
-pip install -U -r src/requirements.txt
-conda install --file src/requirements.yml --yes
-```
-Or run the following if you have Kedro installed in your virtual environment:
+Within your virtual environment and your project's root directory, you can install project dependencies by executing the following:
+
 ```bash
 kedro install
 ```
 
+This command will install dependencies listed in `src/requirements.txt`.

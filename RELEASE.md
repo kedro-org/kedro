@@ -1,3 +1,16 @@
+# Release 0.15.0
+
+## Major features and improvements
+* Added `KedroContext` base class which holds the configuration and Kedro's main functionality (catalog, pipeline, config).
+
+## Bug fixes and other changes
+* Documentation improvements
+
+## Breaking changes to the API
+
+## Thanks for supporting contributions
+[Kiyohito Kunii](https://github.com/921kiyo), [Dmitry Vukolov](https://github.com/dvukolov), [Jo Stichbury](https://github.com/stichbury)
+
 # Release 0.14.3
 
 ## Major features and improvements

@@ -82,7 +82,7 @@ setup(
     author="QuantumBlack Labs",
     entry_points={"console_scripts": ["kedro = kedro.cli:main"]},
     package_data={name: template_files + doc_html_files},
-    keywords="pipelines, machine learning, data pipelines, data science, data engineering",
+    keywords="pipelines, machine learning, data pipelines, data science, data engineering",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Programming Language :: Python :: 3.5",

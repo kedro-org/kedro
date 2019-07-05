@@ -783,8 +783,6 @@ This will create a partial pipeline, consisting solely of the nodes you specify 
 
 #### Recreating Missing Outputs
 
-Kedro supports the automatic generation of partial pipelines that take into account existing node outputs. This can be helpful to avoid re-running nodes which take a long time.
-
 Kedro supports the automatic generation of partial pipelines that take into account existing node outputs. This can be helpful to avoid re-running nodes that take a long time:
 
 ```python

@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -29,7 +29,9 @@
 be used to run the ``Pipeline`` in parallel groups formed by toposort.
 """
 
+from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
+from itertools import chain
 from multiprocessing.managers import BaseManager, BaseProxy
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
@@ -139,7 +141,9 @@ class ParallelRunner(AbstractRunner):
                 "MemoryDataSets".format(memory_data_sets)
             )
 
-    def _run(self, pipeline: Pipeline, catalog: DataCatalog) -> None:
+    def _run(  # pylint: disable=too-many-locals
+        self, pipeline: Pipeline, catalog: DataCatalog
+    ) -> None:
         """The abstract interface for running pipelines.
 
         Args:
@@ -151,10 +155,11 @@ class ParallelRunner(AbstractRunner):
                 parallel execution.
 
         """
-
+        nodes = pipeline.nodes
         self._validate_catalog(catalog, pipeline)
-        self._validate_nodes(pipeline.nodes)
+        self._validate_nodes(nodes)
 
+        load_counts = Counter(chain.from_iterable(n.inputs for n in nodes))
         node_dependencies = pipeline.node_dependencies
         todo_nodes = node_dependencies.keys()
         done_nodes = set()
@@ -171,4 +176,21 @@ class ParallelRunner(AbstractRunner):
                     break
                 done, futures = wait(futures, return_when=FIRST_COMPLETED)
                 for future in done:
-                    done_nodes.add(future.result())
+                    node = future.result()
+                    done_nodes.add(node)
+
+                    # decrement load counts and release any data sets we've finished with
+                    # this is particularly important for the shared datasets we create above
+                    for data_set in node.inputs:
+                        load_counts[data_set] -= 1
+                        if (
+                            load_counts[data_set] < 1
+                            and data_set not in pipeline.inputs()
+                        ):
+                            catalog.release(data_set)
+                    for data_set in node.outputs:
+                        if (
+                            load_counts[data_set] < 1
+                            and data_set not in pipeline.outputs()
+                        ):
+                            catalog.release(data_set)

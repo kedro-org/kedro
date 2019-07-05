@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -290,18 +290,6 @@ class AbstractDataSet(abc.ABC):
             "it must implement the `_describe` method".format(self.__class__.__name__)
         )
 
-    def set_remaining_loads(self, remaining_loads: int):
-        """Set how many times this dataset can be loaded. Datasets that can set a limit to
-        the number of times they can be loaded need to implement this method and the relevant
-        logic.
-
-        Args:
-            remaining_loads: Maximum number of times ``load`` method of the
-                data set is allowed to be invoked. Any number of calls
-                is allowed if the argument is not set.
-        """
-        pass
-
     def exists(self) -> bool:
         """Checks whether a data set's output already exists by calling
         the provided _exists() method.
@@ -330,6 +318,25 @@ class AbstractDataSet(abc.ABC):
             self.__class__.__name__,
         )
         return False
+
+    def release(self) -> bool:
+        """Release any cached data.
+
+        Raises:
+            DataSetError: when underlying exists method raises error.
+
+        """
+        try:
+            logging.getLogger(__name__).debug("Releasing %s", str(self))
+            self._release()
+        except Exception as exc:
+            message = "Failed during release for data set {}.\n{}".format(
+                str(self), str(exc)
+            )
+            raise DataSetError(message) from exc
+
+    def _release(self) -> None:
+        pass
 
 
 def generate_current_version() -> str:

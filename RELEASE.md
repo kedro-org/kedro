@@ -2,14 +2,16 @@
 
 ## Major features and improvements
 * Added `KedroContext` base class which holds the configuration and Kedro's main functionality (catalog, pipeline, config).
+* `kedro install` uses requirements.yml to install packages via conda
 
 ## Bug fixes and other changes
 * Documentation improvements
 
 ## Breaking changes to the API
+* `src/requirements.yml` will be required to run `kedro install`
 
 ## Thanks for supporting contributions
-[Kiyohito Kunii](https://github.com/921kiyo), [Dmitry Vukolov](https://github.com/dvukolov), [Jo Stichbury](https://github.com/stichbury)
+[Kiyohito Kunii](https://github.com/921kiyo), [Dmitry Vukolov](https://github.com/dvukolov), [Jo Stichbury](https://github.com/stichbury), [Evan Miller](https://github.com/evanmiller29)
 
 # Release 0.14.3
 

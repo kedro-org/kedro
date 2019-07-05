@@ -60,4 +60,4 @@ Within your virtual environment and your project's root directory, you can insta
 kedro install
 ```
 
-This command will install dependencies listed in `src/requirements.txt`.
+This command will install dependencies listed in `src/requirements.txt` using pip and `src/requirements.yml` via conda.

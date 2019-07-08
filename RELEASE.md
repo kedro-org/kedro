@@ -1,6 +1,7 @@
 # Release 0.15.0
 
 ## Major features and improvements
+* Added a new CLI command `kedro jupyter convert` to facilitate converting Jupyter notebook cells into Kedro nodes. 
 * Added `KedroContext` base class which holds the configuration and Kedro's main functionality (catalog, pipeline, config).
 
 ## Bug fixes and other changes
@@ -9,7 +10,7 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Kiyohito Kunii](https://github.com/921kiyo), [Dmitry Vukolov](https://github.com/dvukolov), [Jo Stichbury](https://github.com/stichbury), [Angus Williams](https://github.com/awqb)
+[Dmitry Vukolov](https://github.com/dvukolov), [Angus Williams](https://github.com/awqb)
 
 # Release 0.14.3
 
@@ -30,7 +31,7 @@
 * Remove the max_loads argument from the `MemoryDataSet` constructor and from the `AbstractRunner.create_default_data_set` method.
 
 ## Thanks for supporting contributions
-[Nikolaos Tsaousis](https://github.com/tsanikgr), [Ivan Danov](https://github.com/idanov), [Gordon Wrigley](https://github.com/tolomea), [Yetunde Dada](https://github.com/yetudada), [Kiyohito Kunii](https://github.com/921kiyo), [Lorena Balan](https://github.com/lorenabalan), [Richard Westenra](https://github.com/richardwestenra), [Dmitrii Deriabin](https://github.com/DmitryDeryabin), [Joel Schwarzmann](https://github.com/datajoely), [Alex Kalmikov](https://github.com/kalexqb)
+[Joel Schwarzmann](https://github.com/datajoely), [Alex Kalmikov](https://github.com/kalexqb)
 
 # Release 0.14.2
 
@@ -44,7 +45,7 @@
 
 ## Thanks for supporting contributions
 
-[Nikolaos Tsaousis](https://github.com/tsanikgr), [Ivan Danov](https://github.com/idanov), [Gordon Wrigley](https://github.com/tolomea), [Yetunde Dada](https://github.com/yetudada), [Kiyohito Kunii](https://github.com/921kiyo), [Lorena Balan](https://github.com/lorenabalan), [Richard Westenra](https://github.com/richardwestenra), [Darren Gallagher](https://github.com/dazzag24), [Zain Patel](https://github.com/mzjp2)
+[Darren Gallagher](https://github.com/dazzag24), [Zain Patel](https://github.com/mzjp2)
 
 # Release 0.14.1
 
@@ -59,9 +60,6 @@
 ## Breaking changes to the API
 None
 
-## Thanks for supporting contributions
-
-[Nikolaos Tsaousis](https://github.com/tsanikgr), [Ivan Danov](https://github.com/idanov), [Dmitrii Deriabin](https://github.com/DmitryDeryabin), [Gordon Wrigley](https://github.com/tolomea), [Nasef Khan](https://github.com/nakhan98), [Kiyohito Kunii](https://github.com/921kiyo), [Lorena Balan](https://github.com/lorenabalan), [Richard Westenra](https://github.com/richardwestenra)
 
 # Release 0.14.0:
 

@@ -43,6 +43,7 @@ class DefaultArgumentsMixIn:
         load_args: Optional[Dict[str, Any]] = None,
         save_args: Optional[Dict[str, Any]] = None,
     ) -> None:
+        super().__init__()
         self._load_args = self.DEFAULT_LOAD_ARGS.copy()
         if load_args is not None:
             self._load_args.update(load_args)

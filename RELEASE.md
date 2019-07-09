@@ -3,6 +3,7 @@
 ## Major features and improvements
 * Added a new CLI command `kedro jupyter convert` to facilitate converting Jupyter notebook cells into Kedro nodes. 
 * Added `KedroContext` base class which holds the configuration and Kedro's main functionality (catalog, pipeline, config).
+* New I/O module `ParquetS3DataSet` when using Pandas. (by [@mmchougule](https://github.com/mmchougule)) 
 
 ## Bug fixes and other changes
 * Documentation improvements
@@ -10,7 +11,7 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Dmitry Vukolov](https://github.com/dvukolov), [Angus Williams](https://github.com/awqb)
+[Dmitry Vukolov](https://github.com/dvukolov), [Angus Williams](https://github.com/awqb), [Mayur Chougule](https://github.com/mmchougule)
 
 # Release 0.14.3
 

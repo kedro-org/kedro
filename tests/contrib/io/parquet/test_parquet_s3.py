@@ -26,7 +26,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pylint: disable=protected-access,no-member
+# pylint: disable=no-member
+
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -37,7 +38,7 @@ from moto import mock_s3
 from pandas.util.testing import assert_frame_equal
 
 from kedro.contrib.io.parquet import ParquetS3DataSet
-from kedro.io import DataSetError
+from kedro.io import DataSetError, Version
 
 FILENAME = "test.parquet"
 BUCKET_NAME = "test_bucket"
@@ -97,6 +98,32 @@ def s3_data_set(load_args, save_args):
     )
 
 
+@pytest.fixture
+def mocked_s3_object_versioned(mocked_s3_bucket, dummy_dataframe, save_version):
+    """Create versioned test data and add it to mocked S3 bucket."""
+    table = pa.Table.from_pandas(dummy_dataframe)
+    pq.write_table(table, FILENAME)
+
+    with open(FILENAME, 'rb') as f:
+        object_data = f.read()
+        mocked_s3_bucket.put_object(
+            Bucket=BUCKET_NAME,
+            Key="{0}/{1}/{0}".format(FILENAME, save_version),
+            Body=object_data,
+        )
+    return mocked_s3_bucket
+
+
+@pytest.fixture
+def versioned_s3_data_set(load_version, save_version):
+    return ParquetS3DataSet(
+        filepath=FILENAME,
+        bucket_name=BUCKET_NAME,
+        credentials={'aws_access_key_id': 'YOUR_KEY', 'aws_secret_access_key': 'YOUR SECRET'},
+        version=Version(load_version, save_version),
+    )
+
+
 class TestParquetS3DataSet:
     @pytest.mark.parametrize(
         "bad_credentials",
@@ -142,6 +169,8 @@ class TestParquetS3DataSet:
         with pytest.raises(DataSetError, match=pattern):
             s3_data_set.load()
 
+        print(s3fs.core.boto3.Session)
+        print(s3fs.core.boto3.Session.client.call_count)
         assert s3fs.core.boto3.Session.client.call_count == 1
         args, kwargs = s3fs.core.boto3.Session.client.call_args_list[0]
         assert args == ("s3",)
@@ -177,3 +206,68 @@ class TestParquetS3DataSet:
         """Check the error if the given S3 bucket doesn't exist."""
         with pytest.raises(DataSetError, match="NoSuchBucket"):
             s3_data_set.exists()
+
+
+@pytest.mark.usefixtures("mocked_s3_bucket")
+class TestParquetS3DataSetVersioned:
+    def test_exists(self, versioned_s3_data_set, dummy_dataframe):
+        """Test `exists` method invocation for versioned data set."""
+        assert not versioned_s3_data_set.exists()
+        versioned_s3_data_set.save(dummy_dataframe)
+
+        assert versioned_s3_data_set.exists()
+
+    def test_no_versions(self, versioned_s3_data_set):
+        """Check the error if no versions are available for load."""
+        pattern = r"Did not find any versions for ParquetS3DataSet\(.+\)"
+        with pytest.raises(DataSetError, match=pattern):
+            versioned_s3_data_set.load()
+
+    @pytest.mark.usefixtures("mocked_s3_object_versioned")
+    def test_prevent_override(self, versioned_s3_data_set, dummy_dataframe):
+        """Check the error when attempting to override the data set if the
+        corresponding parquet file for a given save version already exists in S3."""
+        pattern = (
+            r"Save path \`.+\` for ParquetS3DataSet\(.+\) must not exist "
+            r"if versioning is enabled"
+        )
+        with pytest.raises(DataSetError, match=pattern):
+            versioned_s3_data_set.save(dummy_dataframe)
+
+    @pytest.mark.parametrize(
+        "load_version", ["2019-01-01T23.59.59.999Z"], indirect=True
+    )
+    @pytest.mark.parametrize(
+        "save_version", ["2019-01-02T00.00.00.000Z"], indirect=True
+    )
+    def test_save_version_warning(
+        self, versioned_s3_data_set, dummy_dataframe, load_version, save_version
+    ):
+        """Check the warning when saving to the path that differs from
+        the subsequent load path."""
+        pattern = (
+            r"Save path `{f}/{sv}/{f}` did not match load path "
+            r"`{f}/{lv}/{f}` for ParquetS3DataSet\(.+\)".format(
+                f=FILENAME, sv=save_version, lv=load_version
+            )
+        )
+        with pytest.warns(UserWarning, match=pattern):
+            versioned_s3_data_set.save(dummy_dataframe)
+
+    def test_version_str_repr(self, load_version, save_version):
+        """Test that version is in string representation of the class instance
+        when applicable."""
+        ds = ParquetS3DataSet(filepath=FILENAME, bucket_name=BUCKET_NAME)
+        ds_versioned = ParquetS3DataSet(
+            filepath=FILENAME,
+            bucket_name=BUCKET_NAME,
+            version=Version(load_version, save_version),
+        )
+        assert FILENAME in str(ds)
+        assert "version" not in str(ds)
+
+        assert FILENAME in str(ds_versioned)
+        ver_str = "version=Version(load={}, save='{}')".format(
+            load_version, save_version
+        )
+        assert ver_str in str(ds_versioned)

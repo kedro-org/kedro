@@ -34,7 +34,6 @@ https://docs.pytest.org/en/latest/fixture.html
 """
 
 from pytest import fixture
-from s3fs import S3FileSystem
 
 from kedro.io.core import generate_current_version
 

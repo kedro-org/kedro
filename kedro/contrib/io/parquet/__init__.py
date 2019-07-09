@@ -27,4 +27,4 @@
 # limitations under the License.
 """kedro.contrib.io.parquet provides I/O modules for Parquet files on S3."""
 
-from .parquet_s3 import ParquetS3DataSet
+from .parquet_s3 import ParquetS3DataSet  # NOQA

@@ -68,14 +68,6 @@ class ParquetS3DataSet(AbstractDataSet, S3PathVersionMixIn):
         >>> assert data.equals(reloaded)
     """
 
-    def _describe(self) -> Dict[str, Any]:
-        return dict(
-            filepath=self._filepath,
-            bucket_name=self._bucket_name,
-            load_args=self._load_args,
-            save_args=self._save_args,
-        )
-
     # pylint: disable=too-many-arguments
     def __init__(
         self,
@@ -137,13 +129,21 @@ class ParquetS3DataSet(AbstractDataSet, S3PathVersionMixIn):
     def _client(self):
         return self._s3.s3
 
+    def _describe(self) -> Dict[str, Any]:
+        return dict(
+            filepath=self._filepath,
+            bucket_name=self._bucket_name,
+            load_args=self._load_args,
+            save_args=self._save_args,
+        )
+
     def _load(self) -> pd.DataFrame:
         load_key = self._get_load_path(
             self._client, self._bucket_name, self._filepath
         )
 
         with self._s3.open(
-            f"s3://{self._bucket_name}/{load_key}", mode="rb"
+            "s3://{}/{}".format(self._bucket_name, load_key), mode="rb"
         ) as s3_file:
             return pd.read_parquet(s3_file, engine=self._engine, **self._load_args)
 

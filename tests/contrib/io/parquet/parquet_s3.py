@@ -28,7 +28,6 @@
 
 # pylint: disable=protected-access,no-member
 
-import boto3
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -163,9 +162,6 @@ class TestParquetS3DataSet:
         )
         s3_data_set.save(new_data)
         loaded_data = s3_data_set.load()
-        print(loaded_data)
-        print(s3_data_set)
-        print("saved and loaded above ")
         assert_frame_equal(loaded_data, new_data)
 
     @pytest.mark.usefixtures("mocked_s3_bucket")

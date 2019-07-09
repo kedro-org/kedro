@@ -39,7 +39,7 @@ from kedro.contrib.io import DefaultArgumentsMixIn
 from kedro.io import AbstractDataSet
 
 
-class BioSequenceLocalDataSet(AbstractDataSet, DefaultArgumentsMixIn):
+class BioSequenceLocalDataSet(DefaultArgumentsMixIn, AbstractDataSet):
     """``BioSequenceLocalDataSet`` loads and saves data to a sequence file.
 
     Example:

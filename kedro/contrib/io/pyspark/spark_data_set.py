@@ -40,7 +40,7 @@ from kedro.contrib.io import DefaultArgumentsMixIn
 from kedro.io import AbstractDataSet
 
 
-class SparkDataSet(AbstractDataSet, DefaultArgumentsMixIn):
+class SparkDataSet(DefaultArgumentsMixIn, AbstractDataSet):
     """``SparkDataSet`` loads and saves Spark data frames.
 
     Example:

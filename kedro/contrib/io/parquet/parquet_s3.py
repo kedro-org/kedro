@@ -1,4 +1,4 @@
-#Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,11 +37,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 from s3fs.core import S3FileSystem
 
-from kedro.io.core import (
-    AbstractDataSet,
-    DataSetError,
-    S3PathVersionMixIn,
-)
+from kedro.io.core import AbstractDataSet, DataSetError, S3PathVersionMixIn
 
 
 class ParquetS3DataSet(AbstractDataSet, S3PathVersionMixIn):

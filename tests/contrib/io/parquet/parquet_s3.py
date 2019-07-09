@@ -27,7 +27,6 @@
 # limitations under the License.
 
 # pylint: disable=protected-access,no-member
-
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -82,7 +81,7 @@ def mocked_s3_object(mocked_s3_bucket, dummy_dataframe: pd.DataFrame):
     with open(FILENAME, 'rb') as f:
         object_data = f.read()
         mocked_s3_bucket.put_object(
-             Bucket=BUCKET_NAME, Key=FILENAME, Body=object_data
+            Bucket=BUCKET_NAME, Key=FILENAME, Body=object_data
         )
     return mocked_s3_bucket
 
@@ -96,6 +95,7 @@ def s3_data_set(load_args, save_args):
         load_args=load_args,
         save_args=save_args,
     )
+
 
 class TestParquetS3DataSet:
     @pytest.mark.parametrize(

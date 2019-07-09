@@ -148,7 +148,7 @@ class ParquetS3DataSet(AbstractDataSet, S3PathVersionMixIn):
             self._client, self._bucket_name, self._filepath
         )
 
-        output_file = f"s3://{self._bucket_name}/{self._filepath}"
+        output_file = "s3://{}/{}".format(self._bucket_name, self._filepath)
         pq.write_table(pa.Table.from_pandas(data), output_file, filesystem=self._s3)
 
         load_key = self._get_load_path(

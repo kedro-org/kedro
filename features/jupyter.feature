@@ -35,9 +35,9 @@ Feature: Jupyter targets in new project
     And I have executed the kedro command "install"
 
   Scenario: Execute jupyter-notebook target
-    When I execute the kedro jupyter command "jupyter notebook"
+    When I execute the kedro jupyter command "notebook"
     Then jupyter notebook should run on port 8888
 
   Scenario: Execute jupyter-lab target
-    When I execute the kedro jupyter command "jupyter lab"
+    When I execute the kedro jupyter command "lab"
     Then Jupyter Lab should run on port 8888

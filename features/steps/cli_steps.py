@@ -190,11 +190,11 @@ def create_config_file_with_example(context):
 
 
 @given('I have executed the kedro command "{command}"')
-def exec_make_target_checked(context, command):
-    """Execute Makefile target and check the status."""
-    make_cmd = [context.kedro] + command.split()
+def exec_kedro_target_checked(context, command):
+    """Execute Kedro command and check the status."""
+    cmd = [context.kedro] + command.split()
 
-    res = run(make_cmd, env=context.env, cwd=str(context.root_project_dir))
+    res = run(cmd, env=context.env, cwd=str(context.root_project_dir))
 
     if res.returncode != OK_EXIT_CODE:
         print(res.stdout)
@@ -228,6 +228,14 @@ def modify_example_test_to_fail(context):
 def uninstall_package_via_pip(context, package):
     """Uninstall a python package using pip."""
     run([context.pip, "uninstall", "-y", package], env=context.env)
+
+
+@given("I have installed the project's python package")
+def install_project_package_via_pip(context):
+    """Install a python package using pip."""
+    dist_dir = context.root_project_dir / "src" / "dist"
+    whl_file, = dist_dir.glob("*.whl")
+    run([context.pip, "install", str(whl_file)], env=context.env)
 
 
 @given("I have initialized a git repository")
@@ -281,11 +289,18 @@ def commit_changes_to_git(context):
 
 
 @when('I execute the kedro command "{command}"')
-def exec_make_target(context, command):
-    """Execute Makefile target."""
+def exec_kedro_target(context, command):
+    """Execute Kedro target."""
     split_command = command.split()
-    make_cmd = [context.kedro] + split_command
-    context.result = run(make_cmd, env=context.env, cwd=str(context.root_project_dir))
+    cmd = [context.kedro] + split_command
+    context.result = run(cmd, env=context.env, cwd=str(context.root_project_dir))
+
+
+@when("I execute the project")
+def exec_project(context):
+    """Execute installed Kedro project target."""
+    cmd = [str(context.bin_dir / context.project_name)]
+    context.result = run(cmd, env=context.env, cwd=str(context.root_project_dir))
 
 
 @when('with tags {tags:CSV}, I execute the kedro command "{cmd}"')
@@ -320,14 +335,14 @@ def get_kedro_version_python(context):
 
 @when('I execute the kedro jupyter command "{command}"')
 def exec_notebook(context, command):
-    """Execute Makefile target."""
+    """Execute Kedro Jupyter target."""
     split_command = command.split()
-    make_cmd = [context.kedro] + split_command
+    cmd = [context.kedro, "jupyter"] + split_command
 
     # Jupyter notebook forks a child process from a parent process, and
     # only kills the parent process when it is terminated
     context.result = ChildTerminatingPopen(
-        make_cmd + ["--no-browser"], env=context.env, cwd=str(context.root_project_dir)
+        cmd + ["--no-browser"], env=context.env, cwd=str(context.root_project_dir)
     )
 
 

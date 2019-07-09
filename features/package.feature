@@ -37,3 +37,9 @@ Feature: Package target in new project
     When I execute the kedro command "package"
     Then I should get a successful exit code
     And the relevant packages should be created
+
+  Scenario: Install package
+    Given I have executed the kedro command "package"
+    And I have installed the project's python package
+    When I execute the project
+    Then I should get a successful exit code

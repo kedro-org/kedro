@@ -230,7 +230,10 @@ class Node:
         Returns:
             Returns a short user-friendly name that is not guaranteed to be unique.
         """
-        return self._name or self._func_name
+        if self._name:
+            return self._name
+
+        return self._func_name.replace("_", " ").title()
 
     @property
     def inputs(self) -> List[str]:

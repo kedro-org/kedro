@@ -35,7 +35,7 @@ If you're unsure where to begin contributing to Kedro, please start by looking t
 We focus on three areas for contribution: `core`, [`contrib`](/kedro/contrib/) or `plugin`:
 - `core` refers to the primary Kedro library
 - [`contrib`](/kedro/contrib/) refers to features that could be added to `core` that do not introduce too many depencies or require new Kedro CLI commands to be created e.g. adding a new dataset to the `io` data management module
-- `plugin` refers to new functionality that requires a Kedro CLI command e.g. adding in Airflow functionality
+- [`plugin`](https://kedro.readthedocs.io/en/latest/04_user_guide/09_developing_plugins.html) refers to new functionality that requires a Kedro CLI command e.g. adding in Airflow functionality
 
 Typically, we only accept small contributions for the `core` Kedro library but accept new features as `plugin`s or additions to the [`contrib`](/kedro/contrib/) module. We regularly review [`contrib`](/kedro/contrib/) and may migrate modules to `core` if they prove to be essential for the functioning of the framework or if we believe that they are used by most projects.
 
@@ -98,18 +98,7 @@ You can add new work to `contrib` if you do not need to create a new Kedro CLI c
 
 ## `plugin` contribution process
 
-The functionality of Kedro can be extended using its `plugin` framework, which is designed to reduce the complexity involved in creating new features for Kedro while allowing you to inject additional commands into the CLI. See the [`plugin` development documentation](https://kedro.readthedocs.io/en/latest/04_user_guide/09_developing_plugins.html) for guidance on how to design and develop a Kedro `plugin`.
-
-When you are ready to submit your code:
-
- 1. Create a separate repository using our naming convention for `plugin`s (`kedro-<plugin-name>`)
- 2. Choose a command approach, plugins can have `global` and / or `project` commands
-   - All `global` commands should be provided as a single `click` group
-   - All `project` commands should be provided as another `click` group
-
-   - The `click` groups are declared through the [`pkg_resources` entry_point system](https://setuptools.readthedocs.io/en/latest/setuptools.html#dynamic-discovery-of-services-and-plugins)
- 3. Include a `README.md` describing your `plugin`'s functionality and all dependencies that should be included
- 4. Include an Apache 2.0 License
+See the [`plugin` development documentation](https://kedro.readthedocs.io/en/latest/04_user_guide/09_developing_plugins.html) for guidance on how to design and develop a Kedro `plugin`.
 
 ## CI / CD and running checks locally
 To run E2E tests you need to install the test requirements which includes `behave`, do this using the following command:

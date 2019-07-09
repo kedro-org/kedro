@@ -24,6 +24,7 @@ Data Sets
     kedro.io.CSVLocalDataSet
     kedro.io.CSVS3DataSet
     kedro.io.HDFLocalDataSet
+    kedro.io.HDFS3DataSet
     kedro.io.JSONLocalDataSet
     kedro.io.LambdaDataSet
     kedro.io.MemoryDataSet

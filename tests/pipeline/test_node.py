@@ -372,16 +372,16 @@ class TestNames:
         n = node(identity, ["in"], ["out"])
         assert str(n) == "identity([in]) -> [out]"
         assert n.name == "identity([in]) -> [out]"
-        assert n.short_name == "identity"
+        assert n.short_name == "Identity"
 
     def test_lambda(self):
         n = node(lambda a: a, ["in"], ["out"])
         assert str(n) == "<lambda>([in]) -> [out]"
         assert n.name == "<lambda>([in]) -> [out]"
-        assert n.short_name == "<lambda>"
+        assert n.short_name == "<Lambda>"
 
     def test_partial(self):
         n = node(partial(identity), ["in"], ["out"])
         assert str(n) == "<partial>([in]) -> [out]"
         assert n.name == "<partial>([in]) -> [out]"
-        assert n.short_name == "<partial>"
+        assert n.short_name == "<Partial>"

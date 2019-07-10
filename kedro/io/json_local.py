@@ -83,8 +83,8 @@ class JSONLocalDataSet(AbstractVersionedDataSet):
 
         """
         super().__init__(Path(filepath), version)
-        default_save_args = {"indent": 4}
-        default_load_args = {}
+        default_save_args = {"indent": 4}  # type: Dict[str, Any]
+        default_load_args = {}  # type: Dict[str, Any]
         self._load_args = (
             {**default_load_args, **load_args}
             if load_args is not None

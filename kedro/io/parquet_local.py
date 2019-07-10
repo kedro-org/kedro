@@ -99,8 +99,8 @@ class ParquetLocalDataSet(AbstractVersionedDataSet):
 
         """
         super().__init__(Path(filepath), version)
-        default_save_args = {"compression": None}
-        default_load_args = {}
+        default_save_args = {"compression": None}  # type: Dict[str, Any]
+        default_load_args = {}  # type: Dict[str, Any]
 
         self._engine = engine
         self._load_args = (

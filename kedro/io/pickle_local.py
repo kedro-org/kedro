@@ -114,8 +114,8 @@ class PickleLocalDataSet(AbstractVersionedDataSet):
 
         """
         super().__init__(Path(filepath), version)
-        default_save_args = {}
-        default_load_args = {}
+        default_save_args = {}  # type: Dict[str, Any]
+        default_load_args = {}  # type: Dict[str, Any]
 
         if backend not in ["pickle", "joblib"]:
             raise ValueError(

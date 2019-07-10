@@ -107,8 +107,8 @@ class PickleS3DataSet(AbstractVersionedDataSet):
             glob_function=partial(_s3.glob, refresh=True),
         )
 
-        default_load_args = {}
-        default_save_args = {}
+        default_load_args = {}  # type: Dict[str, Any]
+        default_save_args = {}  # type: Dict[str, Any]
 
         self._bucket_name = bucket_name
         self._credentials = _credentials

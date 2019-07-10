@@ -28,17 +28,14 @@
 
 import shlex
 import subprocess
-from typing import Dict, List, Union
+from typing import Any, List, Union
 
 import psutil
 
 
 def run(
-    cmd: Union[list, str],
-    split: bool = True,
-    print_output: bool = False,
-    **kwargs: Dict
-) -> int:
+    cmd: Union[list, str], split: bool = True, print_output: bool = False, **kwargs: Any
+) -> subprocess.CompletedProcess:
     """Run a shell command.
 
     Args:

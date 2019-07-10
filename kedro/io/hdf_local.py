@@ -93,8 +93,8 @@ class HDFLocalDataSet(AbstractVersionedDataSet):
 
         """
         super().__init__(Path(filepath), version)
-        default_load_args = {}
-        default_save_args = {}
+        default_load_args = {}  # type: Dict[str, Any]
+        default_save_args = {}  # type: Dict[str, Any]
         self._key = key
         self._load_args = (
             {**default_load_args, **load_args}

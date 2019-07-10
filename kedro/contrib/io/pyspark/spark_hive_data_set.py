@@ -35,7 +35,11 @@ import uuid
 from typing import Any, Dict, List
 
 from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql.functions import coalesce, col, lit
+from pyspark.sql.functions import (  # pylint: disable=no-name-in-module
+    coalesce,
+    col,
+    lit,
+)
 
 from kedro.io import DataSetError
 
@@ -262,9 +266,19 @@ class SparkHiveDataSet(AbstractDataSet):
             )
 
     def _exists(self) -> bool:
-        if self._get_spark().sql("show databases").filter(col("databaseName") == lit(self._database)).take(1):
+        if (
+            self._get_spark()
+            .sql("show databases")
+            .filter(col("databaseName") == lit(self._database))
+            .take(1)
+        ):
             self._get_spark().sql("use {database}".format(database=self._database))
-            if self._get_spark().sql("show tables").filter(col("tableName") == lit(self._table)).take(1):
+            if (
+                self._get_spark()
+                .sql("show tables")
+                .filter(col("tableName") == lit(self._table))
+                .take(1)
+            ):
                 return True
         return False
 

@@ -169,8 +169,6 @@ class TestParquetS3DataSet:
         with pytest.raises(DataSetError, match=pattern):
             s3_data_set.load()
 
-        print(s3fs.core.boto3.Session)
-        print(s3fs.core.boto3.Session.client.call_count)
         assert s3fs.core.boto3.Session.client.call_count == 1
         args, kwargs = s3fs.core.boto3.Session.client.call_args_list[0]
         assert args == ("s3",)
@@ -200,12 +198,6 @@ class TestParquetS3DataSet:
         assert not s3_data_set.exists()
         s3_data_set.save(dummy_dataframe)
         assert s3_data_set.exists()
-
-    @mock_s3
-    def test_exists_raises_error(self, s3_data_set):
-        """Check the error if the given S3 bucket doesn't exist."""
-        with pytest.raises(DataSetError, match="NoSuchBucket"):
-            s3_data_set.exists()
 
 
 @pytest.mark.usefixtures("mocked_s3_bucket")
@@ -246,9 +238,9 @@ class TestParquetS3DataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            r"Save path `{f}/{sv}/{f}` did not match load path "
-            r"`{f}/{lv}/{f}` for ParquetS3DataSet\(.+\)".format(
-                f=FILENAME, sv=save_version, lv=load_version
+            r"Save path `{b}/{f}/{sv}/{f}` did not match load path "
+            r"`{b}/{f}/{lv}/{f}` for ParquetS3DataSet\(.+\)".format(
+                b=BUCKET_NAME, f=FILENAME, sv=save_version, lv=load_version
             )
         )
         with pytest.warns(UserWarning, match=pattern):

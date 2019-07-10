@@ -59,8 +59,8 @@ class JSONLocalDataSet(AbstractVersionedDataSet):
 
     """
 
-    DEFAULT_LOAD_ARGS = {}
-    DEFAULT_SAVE_ARGS = {"indent": 4}
+    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_SAVE_ARGS = {"indent": 4}  # type: Dict[str, Any]
 
     def __init__(
         self,

@@ -62,8 +62,8 @@ class CSVLocalDataSet(AbstractVersionedDataSet):
 
     """
 
-    DEFAULT_LOAD_ARGS = {}
-    DEFAULT_SAVE_ARGS = {"index": False}
+    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_SAVE_ARGS = {"index": False}  # type: Dict[str, Any]
 
     def __init__(
         self,

@@ -68,8 +68,8 @@ class PickleLocalDataSet(AbstractVersionedDataSet):
         >>> reloaded = data_set.load()
     """
 
-    DEFAULT_LOAD_ARGS = {}
-    DEFAULT_SAVE_ARGS = {}
+    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
     BACKENDS = {"pickle": pickle, "joblib": joblib}
 

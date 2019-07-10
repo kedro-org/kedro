@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -29,9 +29,8 @@
 or more configuration files from specified paths.
 """
 import logging
-from glob import iglob
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Union
+from typing import AbstractSet, Any, Dict, List, Tuple, Union
 
 import anyconfig
 
@@ -70,22 +69,22 @@ class ConfigLoader:
         ::
 
             .
-            └── conf
-                ├── README.md
-                ├── base
-                │   ├── catalog.yml
-                │   ├── logging.yml
-                │   └── experiment1
-                │       └── parameters.yml
-                └── local
-                    ├── catalog.yml
-                    ├── db.ini
-                    ├── experiment1
-                    │   ├── parameters.yml
-                    │   └── model_parameters.yml
-                    └── experiment2
-                        └── parameters.yml
-               
+            `-- conf
+                |-- README.md
+                |-- base
+                |   |-- catalog.yml
+                |   |-- logging.yml
+                |   `-- experiment1
+                |       `-- parameters.yml
+                `-- local
+                    |-- catalog.yml
+                    |-- db.ini
+                    |-- experiment1
+                    |   |-- parameters.yml
+                    |   `-- model_parameters.yml
+                    `-- experiment2
+                        `-- parameters.yml
+
 
         You can access the different configurations as follows:
         ::
@@ -151,7 +150,7 @@ class ConfigLoader:
                 "pattern to match config filenames against."
             )
 
-        config = {}
+        config = {}  # type: Dict[str, Any]
         processed_files = []
 
         for conf_path in self.conf_paths:
@@ -199,14 +198,15 @@ def _load_config(
             "or is not a valid directory: {0}".format(conf_path)
         )
     config = {}
-    keys_by_filepath = {}
+    keys_by_filepath = {}  # type: Dict[Path, AbstractSet[str]]
 
     def _check_dups(file1, conf):
         dups = []
         for file2, keys in keys_by_filepath.items():
             common = ", ".join(sorted(conf.keys() & keys))
             if common:
-                common = common[:100] + (common[100:] and "...")
+                if len(common) > 100:
+                    common = common[:100] + "..."
                 dups.append(str(file2) + ": " + common)
 
         if dups:
@@ -238,8 +238,7 @@ def _path_lookup(conf_path: Path, patterns: List[str]) -> List[Path]:
     result = set()
 
     for pattern in patterns:
-        for path in iglob(str(conf_path / pattern), recursive=True):
-            path = Path(path).resolve()
+        for path in conf_path.resolve().glob(pattern):
             if path.is_file() and path.suffix in SUPPORTED_EXTENSIONS:
                 result.add(path)
     return sorted(result)

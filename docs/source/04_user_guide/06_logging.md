@@ -1,6 +1,6 @@
 # Logging
 
-> *Note:* This documentation is based on `Kedro 0.14.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.14.3`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 Kedro uses, and facilitates the use of Python’s `logging` library, by providing a default logging configuration. This can be found in `conf/base/logging.yml` in every project generated using Kedro’s CLI `kedro new` command.
 
@@ -29,4 +29,18 @@ import logging
 log = logging.getLogger(__name__)
 log.warning('Issue warning')
 log.info('Send information')
+```
+
+## Logging for `anyconfig`
+
+By default, [anyconfig](https://github.com/ssato/python-anyconfig) library that is used by `kedro` to read configuration files emits a log message with `INFO` level on every read. To reduce the amount of logs being sent for CLI calls, default project logging configuration in `conf/base/logging.yml` sets the level for `anyconfig` logger to `WARNING`.
+
+If you would like `INFO` level messages to propagate, you can update `anyconfig` logger level in `conf/base/logging.yml` as follows:
+
+```yaml
+loggers:
+    anyconfig:
+        level: INFO  # change
+        handlers: [console, info_file_handler, error_file_handler]
+        propagate: no
 ```

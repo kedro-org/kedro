@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -25,21 +25,25 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import json
 from os.path import join
+from pathlib import Path
 
 import click
 from mock import patch
-from pytest import fixture, mark, raises
+from pytest import fixture, mark, raises, warns
 
 from kedro import __version__ as version
 from kedro.cli.cli import cli
 from kedro.cli.utils import (
     CommandCollection,
     KedroCliError,
+    export_nodes,
     forward_command,
     get_pkg_version,
 )
+
+PACKAGE_NAME = "my_project"
 
 
 @click.group()
@@ -67,6 +71,19 @@ def forwarded_help(args):
 def invoke_result(cli_runner, request):
     cmd_collection = CommandCollection(("Commands", [cli, stub_cli]))
     return cli_runner.invoke(cmd_collection, request.param)
+
+
+@fixture
+def project_path(tmp_path):
+    temp = Path(str(tmp_path))
+    return Path(temp / "some/path/to/my_project")
+
+
+@fixture
+def nodes_path(project_path):
+    path = project_path / "src" / PACKAGE_NAME / "nodes"
+    path.mkdir(parents=True)
+    return path
 
 
 @fixture
@@ -190,15 +207,131 @@ class TestForwardCommand:
         assert "forwarded_help" not in result.output
 
 
-def test_get_pkg_version(requirements_file):
-    """Test get_pkg_version(), which extracts package version
-    from the provided requirements file."""
-    sa_version = "SQLAlchemy>=1.2.0, <2.0"
-    assert get_pkg_version(requirements_file, "SQLAlchemy") == sa_version
-    assert get_pkg_version(requirements_file, "pandas") == "pandas==0.23.0"
-    assert get_pkg_version(requirements_file, "toposort") == "toposort"
-    with raises(KedroCliError):
-        get_pkg_version(requirements_file, "nonexistent")
-    with raises(KedroCliError):
-        non_existent_file = str(requirements_file) + "-nonexistent"
-        get_pkg_version(non_existent_file, "pandas")
+class TestCliUtils:
+    def test_get_pkg_version(self, requirements_file):
+        """Test get_pkg_version(), which extracts package version
+        from the provided requirements file."""
+        sa_version = "SQLAlchemy>=1.2.0, <2.0"
+        assert get_pkg_version(requirements_file, "SQLAlchemy") == sa_version
+        assert get_pkg_version(requirements_file, "pandas") == "pandas==0.23.0"
+        assert get_pkg_version(requirements_file, "toposort") == "toposort"
+        with raises(KedroCliError):
+            get_pkg_version(requirements_file, "nonexistent")
+        with raises(KedroCliError):
+            non_existent_file = str(requirements_file) + "-nonexistent"
+            get_pkg_version(non_existent_file, "pandas")
+
+    def test_export_nodes(self, project_path, nodes_path):
+        nodes = json.dumps(
+            {
+                "cells": [
+                    {
+                        "cell_type": "code",
+                        "source": "print('hello world')",
+                        "metadata": {"tags": ["node"]},
+                    },
+                    {
+                        "cell_type": "code",
+                        "source": "print(10+5)",
+                        "metadata": {"tags": ["node"]},
+                    },
+                    {"cell_type": "code", "source": "a = 10", "metadata": {}},
+                ]
+            }
+        )
+        notebook_file = project_path / "notebook.ipynb"
+        notebook_file.write_text(nodes)
+
+        output_path = nodes_path / "{}.py".format(notebook_file.stem)
+        export_nodes(notebook_file, output_path)
+
+        assert output_path.is_file()
+        assert output_path.read_text() == "print('hello world')\nprint(10+5)\n"
+
+    def test_export_nodes_different_notebook_paths(self, project_path, nodes_path):
+        nodes = json.dumps(
+            {
+                "cells": [
+                    {
+                        "cell_type": "code",
+                        "source": "print('hello world')",
+                        "metadata": {"tags": ["node"]},
+                    }
+                ]
+            }
+        )
+        notebook_file1 = project_path / "notebook1.ipynb"
+        notebook_file1.write_text(nodes)
+        output_path1 = nodes_path / "notebook1.py"
+
+        notebook_file2 = nodes_path / "notebook2.ipynb"
+        notebook_file2.write_text(nodes)
+        output_path2 = nodes_path / "notebook2.py"
+
+        export_nodes(notebook_file1, output_path1)
+        export_nodes(notebook_file2, output_path2)
+
+        assert output_path1.read_text() == "print('hello world')\n"
+        assert output_path2.read_text() == "print('hello world')\n"
+
+    def test_export_nodes_nothing_to_write(self, project_path, nodes_path):
+        nodes = json.dumps(
+            {
+                "cells": [
+                    {
+                        "cell_type": "code",
+                        "source": "print('hello world')",
+                        "metadata": {},
+                    },
+                    {
+                        "cell_type": "text",
+                        "source": "hello world",
+                        "metadata": {"tags": ["node"]},
+                    },
+                ]
+            }
+        )
+        notebook_file = project_path / "notebook.iypnb"
+        notebook_file.write_text(nodes)
+
+        with warns(UserWarning, match="Skipping notebook"):
+            output_path = nodes_path / "{}.py".format(notebook_file.stem)
+            export_nodes(notebook_file, output_path)
+
+        output_path = nodes_path / "notebook.py"
+        assert not output_path.exists()
+
+    def test_export_nodes_overwrite(self, project_path, nodes_path):
+        existing_nodes = nodes_path / "notebook.py"
+        existing_nodes.touch()
+        existing_nodes.write_text("original")
+
+        nodes = json.dumps(
+            {
+                "cells": [
+                    {
+                        "cell_type": "code",
+                        "source": "print('hello world')",
+                        "metadata": {"tags": ["node"]},
+                    }
+                ]
+            }
+        )
+        notebook_file = project_path / "notebook.iypnb"
+        notebook_file.write_text(nodes)
+
+        output_path = nodes_path / "{}.py".format(notebook_file.stem)
+        export_nodes(notebook_file, output_path)
+
+        assert output_path.is_file()
+        assert output_path.read_text() == "print('hello world')\n"
+
+    def test_export_nodes_json_error(self, nodes_path):
+        random_file = nodes_path / "notebook.txt"
+        random_file.touch()
+        random_file.write_text("original")
+        output_path = nodes_path / "{}.py".format(random_file.stem)
+
+        pattern = "Provided filepath is not a Jupyter notebook"
+        with raises(KedroCliError, match=pattern):
+            export_nodes(random_file, output_path)

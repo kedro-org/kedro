@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -34,7 +34,7 @@ relaying load and save functions to the underlying data sets.
 import copy
 import logging
 from functools import partial
-from typing import Any, Dict, List, Optional, Sequence, Type, Union
+from typing import Any, Dict, Iterable, List, Optional, Type, Union
 
 from kedro.io.core import (
     AbstractDataSet,
@@ -74,6 +74,22 @@ def _get_credentials(credentials_name: str, credentials: Dict) -> Dict:
             "https://kedro.readthedocs.io/en/latest/kedro.io.DataCatalog.html "
             "for an example.".format(credentials_name)
         )
+
+
+class _FrozenDatasets:
+    """Helper class to access underlying loaded datasets"""
+
+    def __init__(self, datasets):
+        self.__dict__.update(**datasets)
+
+    # Don't allow users to add/change attributes on the fly
+    def __setattr__(self, key, value):
+        msg = "Operation not allowed! "
+        if key in self.__dict__.keys():
+            msg += "Please change datasets through configuration."
+        else:
+            msg += "Please use DataCatalog.add() instead."
+        raise AttributeError(msg)
 
 
 class DataCatalog:
@@ -121,6 +137,8 @@ class DataCatalog:
             >>> io = DataCatalog(data_sets={'cars': cars})
         """
         self._data_sets = dict(data_sets or {})
+        self.datasets = _FrozenDatasets(self._data_sets)
+
         self._transformers = {k: list(v) for k, v in (transformers or {}).items()}
         self._default_transformers = list(default_transformers or [])
         self._check_and_normalize_transformers()
@@ -128,6 +146,10 @@ class DataCatalog:
         # import the feed dict
         if feed_dict:
             self.add_feed_dict(feed_dict)
+
+    @property
+    def _logger(self):
+        return logging.getLogger(__name__)
 
     def _check_and_normalize_transformers(self):
         data_sets = self._data_sets.keys()
@@ -144,10 +166,6 @@ class DataCatalog:
 
         for data_set_name in missing_transformers:
             self._transformers[data_set_name] = list(self._default_transformers)
-
-    @property
-    def _logger(self):
-        return logging.getLogger(__name__)
 
     @classmethod
     def from_config(
@@ -349,6 +367,23 @@ class DataCatalog:
 
         raise DataSetNotFoundError("DataSet '{}' not found in the catalog".format(name))
 
+    def release(self, name: str):
+        """Release any cached data associated with a data set
+
+        Args:
+            name: A data set to be checked.
+
+        Raises:
+            DataSetNotFoundError: When a data set with the given name
+                has not yet been registered.
+        """
+        if name not in self._data_sets:
+            raise DataSetNotFoundError(
+                "DataSet '{}' not found in the catalog".format(name)
+            )
+
+        self._data_sets[name].release()
+
     def add(
         self, data_set_name: str, data_set: AbstractDataSet, replace: bool = False
     ) -> None:
@@ -386,6 +421,7 @@ class DataCatalog:
                 )
         self._data_sets[data_set_name] = data_set
         self._transformers[data_set_name] = list(self._default_transformers)
+        self.datasets = _FrozenDatasets(self._data_sets)
 
     def add_all(
         self, data_sets: Dict[str, AbstractDataSet], replace: bool = False
@@ -458,7 +494,7 @@ class DataCatalog:
     def add_transformer(
         self,
         transformer: AbstractTransformer,
-        data_set_names: Union[str, Sequence[str]] = None,
+        data_set_names: Union[str, Iterable[str]] = None,
     ):
         """Add a ``DataSet`` Transformer to the``DataCatalog``.
         Transformers can modify the way Data Sets are loaded and saved.
@@ -518,16 +554,3 @@ class DataCatalog:
             other._transformers,  # pylint: disable=protected-access
             other._default_transformers,  # pylint: disable=protected-access
         )
-
-    def set_remaining_loads(self, ds_name: str, remaining_loads: int):
-        """Set the maximum number of times the given dataset can be loaded. Datasets like
-        ``MemoryDataSet`` use this to clear data from memory. In most other cases, this has no
-        effect.
-
-        Args:
-            ds_name: The dataset to modify
-            remaining_loads: Maximum number of times ``load`` method of the
-                data set is allowed to be invoked. Any number of calls
-                is allowed if the argument is not set.
-        """
-        self._data_sets[ds_name].set_remaining_loads(remaining_loads)

@@ -1,6 +1,6 @@
 # Advanced IO
 
-> *Note:* This documentation is based on `Kedro 0.14.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.14.3`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 In this tutorial, you will learn about advanced uses of the [Kedro IO](/kedro.io.rst) module and understand the underlying implementation.
 
@@ -46,9 +46,10 @@ For contributors, if you would like to submit a new dataset, you will have to ex
 In order to enable versioning, all of the following conditions must be met:
 
 1. The dataset must:
-    1. extend `kedro.io.core.FilepathVersionMixin` AND
+    1. extend `kedro.io.core.AbstractVersionedDataSet` AND
     2. add `version` namedtuple as an argument to its `__init__` method AND
-    3. modify its `_load` and `_save` methods respectively to support versioning (see [`kedro.io.CSVLocalDataSet`](/kedro.io.CSVLocalDataSet) for an example implementation)
+    3. call `super().__init__()` with positional arguments `version`, `filepath`, and optionally with a `glob` and an `exists` functions if it uses non-local filesystem (see [`kedro.io.CSVLocalDataSet`](/kedro.io.CSVLocalDataSet) and [`kedro.io.CSVS3DataSet`](/kedro.io.CSVS3DataSet) example implementations) AND
+    4. modify its `_describe`, `_load` and `_save` methods respectively to support versioning (see [`kedro.io.CSVLocalDataSet`](/kedro.io.CSVLocalDataSet) for an example implementation) AND
 2. In the `catalog.yml` config file you must enable versioning by setting `versioned` attribute to `true` for the given dataset.
 
 ### `version` namedtuple

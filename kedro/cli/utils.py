@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -27,19 +27,22 @@
 # limitations under the License.
 
 """Utilities for use with click."""
-
+import json
 import re
 import shlex
 import subprocess
 import sys
 from itertools import chain
 from pathlib import Path
-from typing import List, Tuple, Union
+from typing import Any, Dict, Sequence, Tuple, Union
+from warnings import warn
 
 import click
 from click import ClickException, style
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
+
+NODE_TAG = "node"
 
 
 def call(cmd, **kwargs):  # pragma: no cover
@@ -53,6 +56,44 @@ def call(cmd, **kwargs):  # pragma: no cover
 def python_call(module, arguments, **kwargs):  # pragma: no cover
     """Run a subprocess command that invokes a Python module."""
     call([sys.executable, "-m", module] + list(arguments), **kwargs)
+
+
+def _append_source_code(cell: Dict[str, Any], path: Path) -> None:
+    source_code = "".join(cell["source"]).strip() + "\n"
+    with path.open(mode="a") as file_:
+        file_.write(source_code)
+
+
+def export_nodes(filepath: Path, output_path: Path) -> None:
+    """Copy code from Jupyter cells into nodes in src/<package_name>/nodes/,
+    under filename with same name as notebook.
+
+    Args:
+        filepath: Path to Jupyter notebook file
+        output_path: Path where notebook cells' source code will be exported
+    Raises:
+        KedroCliError: When provided a filepath that cannot be read as a
+            Jupyer notebook and loaded into json format.
+    """
+    try:
+        content = json.loads(filepath.read_text())
+    except json.JSONDecodeError:
+        raise KedroCliError(
+            "Provided filepath is not a Jupyter notebook: {}".format(filepath)
+        )
+
+    cells = [
+        cell
+        for cell in content["cells"]
+        if cell["cell_type"] == "code" and NODE_TAG in cell["metadata"].get("tags", {})
+    ]
+
+    if cells:
+        output_path.write_text("")
+        for cell in cells:
+            _append_source_code(cell, output_path)
+    else:
+        warn("Skipping notebook '{}' - no nodes to export.".format(filepath))
 
 
 def forward_command(group, name=None, forward_help=False):
@@ -75,7 +116,7 @@ def forward_command(group, name=None, forward_help=False):
 class CommandCollection(click.CommandCollection):
     """Modified from the Click one to still run the source groups function."""
 
-    def __init__(self, *groups: Tuple[str, List[click.core.Group]]):
+    def __init__(self, *groups: Tuple[str, Sequence[click.core.MultiCommand]]):
         self.groups = groups
         sources = list(chain.from_iterable(groups for title, groups in groups))
         help_strs = [source.help for source in sources if source.help]

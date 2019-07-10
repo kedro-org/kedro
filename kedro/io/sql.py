@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -193,8 +193,8 @@ class SQLTableDataSet(AbstractDataSet):
                 "provide a SQLAlchemy connection string."
             )
 
-        default_save_args = {"index": False}
-        default_load_args = {}
+        default_save_args = {"index": False}  # type: Dict[str, Any]
+        default_load_args = {}  # type: Dict[str, Any]
 
         self._load_args = (
             {**default_load_args, **load_args}
@@ -303,7 +303,7 @@ class SQLQueryDataSet(AbstractDataSet):
                 "provide a SQLAlchemy connection string."
             )
 
-        default_load_args = {}
+        default_load_args = {}  # type: Dict[str, Any]
 
         self._load_args = (
             {**default_load_args, **load_args}

@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -184,12 +184,6 @@ class TestCSVS3DataSet:
         s3_data_set.save(dummy_dataframe)
         assert s3_data_set.exists()
 
-    @mock_s3
-    def test_exists_raises_error(self, s3_data_set):
-        """Check the error if the given S3 bucket doesn't exist."""
-        with pytest.raises(DataSetError, match="NoSuchBucket"):
-            s3_data_set.exists()
-
     def test_load_save_args(self, s3_data_set):
         """Test default load and save arguments of the data set."""
         assert not s3_data_set._load_args
@@ -279,9 +273,9 @@ class TestCSVS3DataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            r"Save path `{f}/{sv}/{f}` did not match load path "
-            r"`{f}/{lv}/{f}` for CSVS3DataSet\(.+\)".format(
-                f=FILENAME, sv=save_version, lv=load_version
+            r"Save path `{b}/{f}/{sv}/{f}` did not match load path "
+            r"`{b}/{f}/{lv}/{f}` for CSVS3DataSet\(.+\)".format(
+                b=BUCKET_NAME, f=FILENAME, sv=save_version, lv=load_version
             )
         )
         with pytest.warns(UserWarning, match=pattern):

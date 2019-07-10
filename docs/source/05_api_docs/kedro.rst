@@ -15,5 +15,6 @@ kedro
   kedro.io
   kedro.pipeline
   kedro.runner
+  kedro.context
   kedro.contrib
   kedro.cli

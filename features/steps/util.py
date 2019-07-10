@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -133,7 +133,7 @@ def wait_for(
     )
 
 
-def create_new_venv() -> str:
+def create_new_venv() -> Path:
     """Create a new venv.
 
     Note: Due to a bug in Python 3.5.2 pip needs to be manually installed.
@@ -155,7 +155,7 @@ def create_new_venv() -> str:
     with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
         tmp_file.write(requests.get(PIP_INSTALL_SCRIPT).content)
         tmp_file.flush()
-        os.fsync(tmp_file)
+        os.fsync(tmp_file.fileno())
         subprocess.check_call([str(python_executable), tmp_file.name])
 
     os.unlink(tmp_file.name)

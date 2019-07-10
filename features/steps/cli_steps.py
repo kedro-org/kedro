@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -190,11 +190,11 @@ def create_config_file_with_example(context):
 
 
 @given('I have executed the kedro command "{command}"')
-def exec_make_target_checked(context, command):
-    """Execute Makefile target and check the status."""
-    make_cmd = [context.kedro] + command.split()
+def exec_kedro_target_checked(context, command):
+    """Execute Kedro command and check the status."""
+    cmd = [context.kedro] + command.split()
 
-    res = run(make_cmd, env=context.env, cwd=str(context.root_project_dir))
+    res = run(cmd, env=context.env, cwd=str(context.root_project_dir))
 
     if res.returncode != OK_EXIT_CODE:
         print(res.stdout)
@@ -207,10 +207,34 @@ def create_new_env(context, env_name):
     env_path = context.root_project_dir / "conf" / env_name
     env_path.mkdir()
 
-    for config_name in ("catalog", "parameters", "logging", "credentials"):
+    for config_name in ("catalog", "parameters", "credentials"):
         path = env_path / "{}.yml".format(config_name)
         with path.open("w") as config_file:
             yaml.dump({}, config_file, default_flow_style=False)
+
+    # overwrite the log level for anyconfig from WARNING to INFO
+    logging_path = env_path / "logging.yml"
+    logging_json = {
+        "loggers": {
+            "anyconfig": {
+                "level": "INFO",
+                "handlers": ["console", "info_file_handler", "error_file_handler"],
+                "propagate": "no",
+            },
+            "kedro.io": {
+                "level": "INFO",
+                "handlers": ["console", "info_file_handler", "error_file_handler"],
+                "propagate": "no",
+            },
+            "kedro.pipeline": {
+                "level": "INFO",
+                "handlers": ["console", "info_file_handler", "error_file_handler"],
+                "propagate": "no",
+            },
+        }
+    }
+    with logging_path.open("w") as config_file:
+        yaml.dump(logging_json, config_file, default_flow_style=False)
 
 
 @given("the example test has been set to fail")
@@ -228,6 +252,14 @@ def modify_example_test_to_fail(context):
 def uninstall_package_via_pip(context, package):
     """Uninstall a python package using pip."""
     run([context.pip, "uninstall", "-y", package], env=context.env)
+
+
+@given("I have installed the project's python package")
+def install_project_package_via_pip(context):
+    """Install a python package using pip."""
+    dist_dir = context.root_project_dir / "src" / "dist"
+    whl_file, = dist_dir.glob("*.whl")
+    run([context.pip, "install", str(whl_file)], env=context.env)
 
 
 @given("I have initialized a git repository")
@@ -281,11 +313,18 @@ def commit_changes_to_git(context):
 
 
 @when('I execute the kedro command "{command}"')
-def exec_make_target(context, command):
-    """Execute Makefile target."""
+def exec_kedro_target(context, command):
+    """Execute Kedro target."""
     split_command = command.split()
-    make_cmd = [context.kedro] + split_command
-    context.result = run(make_cmd, env=context.env, cwd=str(context.root_project_dir))
+    cmd = [context.kedro] + split_command
+    context.result = run(cmd, env=context.env, cwd=str(context.root_project_dir))
+
+
+@when("I execute the project")
+def exec_project(context):
+    """Execute installed Kedro project target."""
+    cmd = [str(context.bin_dir / context.project_name)]
+    context.result = run(cmd, env=context.env, cwd=str(context.root_project_dir))
 
 
 @when('with tags {tags:CSV}, I execute the kedro command "{cmd}"')
@@ -320,14 +359,14 @@ def get_kedro_version_python(context):
 
 @when('I execute the kedro jupyter command "{command}"')
 def exec_notebook(context, command):
-    """Execute Makefile target."""
+    """Execute Kedro Jupyter target."""
     split_command = command.split()
-    make_cmd = [context.kedro] + split_command
+    cmd = [context.kedro, "jupyter"] + split_command
 
     # Jupyter notebook forks a child process from a parent process, and
     # only kills the parent process when it is terminated
     context.result = ChildTerminatingPopen(
-        make_cmd + ["--no-browser"], env=context.env, cwd=str(context.root_project_dir)
+        cmd + ["--no-browser"], env=context.env, cwd=str(context.root_project_dir)
     )
 
 
@@ -452,15 +491,13 @@ def check_environment_used(context, env):
     else:
         stdout = context.result.stdout
 
-    for config_name in ("catalog", "parameters", "credentials", "logging"):
+    for config_name in ("catalog", "parameters", "credentials"):
         path = env_path.joinpath("{}.yml".format(config_name))
         if path.exists():
             msg = "Loading: {}".format(str(path.resolve()))
             assert msg in stdout, (
                 "Expected the following message segment to be printed on stdout: "
-                "{exp_msg},\nbut got {actual_msg}".format(
-                    exp_msg=msg, actual_msg=stdout
-                )
+                "{0}, but got:\n{1}".format(msg, stdout)
             )
 
 

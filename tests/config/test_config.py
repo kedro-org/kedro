@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -228,6 +228,18 @@ class TestConfigLoader:
         pattern = (
             r"^Duplicate keys found in .*catalog3\.yml and\:\n\- .*catalog1\.yml\: k1$"
         )
+        with pytest.raises(ValueError, match=pattern):
+            conf.get("**/catalog*")
+
+    def test_lots_of_duplicates(self, tmp_path):
+        """Check that the config key starting with `_` are ignored and also
+        don't cause a config merge error"""
+        data = {str(i): i for i in range(100)}
+        _write_yaml(tmp_path / "base" / "catalog1.yml", data)
+        _write_yaml(tmp_path / "base" / "catalog2.yml", data)
+
+        conf = ConfigLoader(str(tmp_path))
+        pattern = r"^Duplicate keys found in .*catalog2\.yml and\:\n\- .*catalog1\.yml\: .*\.\.\.$"
         with pytest.raises(ValueError, match=pattern):
             conf.get("**/catalog*")
 

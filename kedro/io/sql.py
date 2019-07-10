@@ -301,7 +301,7 @@ class SQLQueryDataSet(AbstractDataSet):
                 "provide a SQLAlchemy connection string."
             )
 
-        default_load_args = {}
+        default_load_args = {}  # type: Dict[str, Any]
 
         self._load_args = (
             {**default_load_args, **load_args}

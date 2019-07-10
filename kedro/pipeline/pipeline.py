@@ -34,7 +34,7 @@ import copy
 import json
 from collections import Counter, defaultdict
 from itertools import chain
-from typing import Callable, Dict, Iterable, List, Set, Union
+from typing import Callable, Dict, Iterable, List, Optional, Set, Union
 
 from toposort import CircularDependencyError as ToposortCircleError
 from toposort import toposort
@@ -137,12 +137,14 @@ class Pipeline:
         self._nodes_by_name = {node.name: node for node in nodes}
         _validate_unique_outputs(nodes)
 
-        self._nodes_by_input = defaultdict(set)  # input: {nodes with input}
+        # input -> nodes with input
+        self._nodes_by_input = defaultdict(set)  # type: Dict[str, Set[Node]]
         for node in nodes:
             for input_ in node.inputs:
                 self._nodes_by_input[_get_transcode_compatible_name(input_)].add(node)
 
-        self._nodes_by_output = {}  # output: node
+        # output -> node with output
+        self._nodes_by_output = {}  # type: Dict[str, Node]
         for node in nodes:
             for output in node.outputs:
                 self._nodes_by_output[_get_transcode_compatible_name(output)] = node
@@ -285,7 +287,7 @@ class Pipeline:
         )
 
     @property
-    def name(self) -> str:
+    def name(self) -> Optional[str]:
         """Get the pipeline name.
 
         Returns:
@@ -303,7 +305,9 @@ class Pipeline:
             Dictionary where keys are nodes and values are sets made up of
             their parent nodes. Independent nodes have this as empty sets.
         """
-        dependencies = {node: set() for node in self._nodes}
+        dependencies = {
+            node: set() for node in self._nodes
+        }  # type: Dict[Node, Set[Node]]
         for parent in self._nodes:
             for output in parent.outputs:
                 for child in self._nodes_by_input[
@@ -486,7 +490,7 @@ class Pipeline:
 
         """
         starting = set(inputs)
-        result = set()
+        result = set()  # type: Set[Node]
         next_nodes = self._get_nodes_with_inputs_transcode_compatible(starting)
 
         while next_nodes:
@@ -551,7 +555,7 @@ class Pipeline:
 
         """
         starting = set(outputs)
-        result = set()
+        result = set()  # type: Set[Node]
         next_nodes = self._get_nodes_with_outputs_transcode_compatible(starting)
 
         while next_nodes:
@@ -663,7 +667,7 @@ class Pipeline:
         return json.dumps(pipeline_versioned)
 
 
-def _validate_no_node_list(nodes: Iterable[Node]):
+def _validate_no_node_list(nodes: Iterable[Union[Node, Pipeline]]):
     if nodes is None:
         raise ValueError(
             "`nodes` argument of `Pipeline` is None. "

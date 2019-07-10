@@ -20,6 +20,7 @@ lint:
 	pylint -j 0 --disable=missing-docstring,no-name-in-module features
 	pylint -j 0 extras
 	flake8 kedro tests features extras --exclude kedro/template*
+	mypy --allow-redefinition --ignore-missing-imports kedro tests features extras
 
 test:
 	pytest tests

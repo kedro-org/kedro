@@ -34,7 +34,7 @@ import subprocess
 import sys
 from itertools import chain
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, Sequence, Tuple, Union
 from warnings import warn
 
 import click
@@ -116,7 +116,7 @@ def forward_command(group, name=None, forward_help=False):
 class CommandCollection(click.CommandCollection):
     """Modified from the Click one to still run the source groups function."""
 
-    def __init__(self, *groups: Tuple[str, List[click.core.Group]]):
+    def __init__(self, *groups: Tuple[str, Sequence[click.core.MultiCommand]]):
         self.groups = groups
         sources = list(chain.from_iterable(groups for title, groups in groups))
         help_strs = [source.help for source in sources if source.help]

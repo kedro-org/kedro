@@ -207,10 +207,34 @@ def create_new_env(context, env_name):
     env_path = context.root_project_dir / "conf" / env_name
     env_path.mkdir()
 
-    for config_name in ("catalog", "parameters", "logging", "credentials"):
+    for config_name in ("catalog", "parameters", "credentials"):
         path = env_path / "{}.yml".format(config_name)
         with path.open("w") as config_file:
             yaml.dump({}, config_file, default_flow_style=False)
+
+    # overwrite the log level for anyconfig from WARNING to INFO
+    logging_path = env_path / "logging.yml"
+    logging_json = {
+        "loggers": {
+            "anyconfig": {
+                "level": "INFO",
+                "handlers": ["console", "info_file_handler", "error_file_handler"],
+                "propagate": "no",
+            },
+            "kedro.io": {
+                "level": "INFO",
+                "handlers": ["console", "info_file_handler", "error_file_handler"],
+                "propagate": "no",
+            },
+            "kedro.pipeline": {
+                "level": "INFO",
+                "handlers": ["console", "info_file_handler", "error_file_handler"],
+                "propagate": "no",
+            },
+        }
+    }
+    with logging_path.open("w") as config_file:
+        yaml.dump(logging_json, config_file, default_flow_style=False)
 
 
 @given("the example test has been set to fail")
@@ -467,15 +491,13 @@ def check_environment_used(context, env):
     else:
         stdout = context.result.stdout
 
-    for config_name in ("catalog", "parameters", "credentials", "logging"):
+    for config_name in ("catalog", "parameters", "credentials"):
         path = env_path.joinpath("{}.yml".format(config_name))
         if path.exists():
             msg = "Loading: {}".format(str(path.resolve()))
             assert msg in stdout, (
                 "Expected the following message segment to be printed on stdout: "
-                "{exp_msg},\nbut got {actual_msg}".format(
-                    exp_msg=msg, actual_msg=stdout
-                )
+                "{0}, but got:\n{1}".format(msg, stdout)
             )
 
 

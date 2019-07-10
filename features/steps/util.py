@@ -133,7 +133,7 @@ def wait_for(
     )
 
 
-def create_new_venv() -> str:
+def create_new_venv() -> Path:
     """Create a new venv.
 
     Note: Due to a bug in Python 3.5.2 pip needs to be manually installed.
@@ -155,7 +155,7 @@ def create_new_venv() -> str:
     with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
         tmp_file.write(requests.get(PIP_INSTALL_SCRIPT).content)
         tmp_file.flush()
-        os.fsync(tmp_file)
+        os.fsync(tmp_file.fileno())
         subprocess.check_call([str(python_executable), tmp_file.name])
 
     os.unlink(tmp_file.name)

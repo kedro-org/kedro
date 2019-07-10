@@ -32,10 +32,10 @@ be used to run the ``Pipeline`` in parallel groups formed by toposort.
 from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
 from itertools import chain
-from multiprocessing.managers import BaseProxy, SyncManager
+from multiprocessing.managers import BaseProxy, SyncManager  # type: ignore
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
-from typing import Iterable
+from typing import Iterable, Set
 
 from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
 from kedro.pipeline import Pipeline
@@ -163,8 +163,8 @@ class ParallelRunner(AbstractRunner):
 
         load_counts = Counter(chain.from_iterable(n.inputs for n in nodes))
         node_dependencies = pipeline.node_dependencies
-        todo_nodes = node_dependencies.keys()
-        done_nodes = set()
+        todo_nodes = set(node_dependencies.keys())
+        done_nodes = set()  # type: Set[Node]
         futures = set()
         done = None
         with ProcessPoolExecutor() as pool:

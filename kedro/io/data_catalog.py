@@ -34,7 +34,7 @@ relaying load and save functions to the underlying data sets.
 import copy
 import logging
 from functools import partial
-from typing import Any, Dict, List, Optional, Sequence, Type, Union
+from typing import Any, Dict, Iterable, List, Optional, Type, Union
 
 from kedro.io.core import (
     AbstractDataSet,
@@ -494,7 +494,7 @@ class DataCatalog:
     def add_transformer(
         self,
         transformer: AbstractTransformer,
-        data_set_names: Union[str, Sequence[str]] = None,
+        data_set_names: Union[str, Iterable[str]] = None,
     ):
         """Add a ``DataSet`` Transformer to the``DataCatalog``.
         Transformers can modify the way Data Sets are loaded and saved.

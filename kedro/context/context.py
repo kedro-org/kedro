@@ -157,7 +157,7 @@ class KedroContext(abc.ABC):
                     str(exc)
                 )
             )
-            params = None
+            params = {}
         return {"parameters": params}
 
     def _get_config_credentials(self) -> Dict[str, Any]:
@@ -170,7 +170,7 @@ class KedroContext(abc.ABC):
                     str(exc)
                 )
             )
-            conf_creds = None
+            conf_creds = {}
         return conf_creds
 
     def _create_catalog(self) -> DataCatalog:
@@ -244,7 +244,7 @@ def load_context(proj_path: Union[str, Path]) -> Dict:
         sys.path.append(str(proj_path))
 
     kedro_cli = importlib.import_module("kedro_cli")
-    result = kedro_cli.__get_kedro_context__()
+    result = kedro_cli.__get_kedro_context__()  # type: ignore
     _LOADED_PATH = proj_path
     os.chdir(str(proj_path))  # Move to project root
     return result

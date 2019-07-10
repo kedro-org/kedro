@@ -95,8 +95,8 @@ class BioSequenceLocalDataSet(AbstractDataSet):
 
         """
         self._filepath = filepath
-        default_load_args = {}
-        default_save_args = {}
+        default_load_args = {}  # type: Dict[str, Any]
+        default_save_args = {}  # type: Dict[str, Any]
         self._load_args = (
             {**default_load_args, **load_args}
             if load_args is not None

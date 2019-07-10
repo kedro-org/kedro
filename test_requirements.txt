@@ -18,3 +18,4 @@ psutil==5.4.7
 wheel==0.32.2
 biopython>=1.73, <2.0
 requests>=2.21.0, <3.0
+mypy<=1.0

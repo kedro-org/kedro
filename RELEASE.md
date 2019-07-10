@@ -6,6 +6,7 @@
 
 ## Bug fixes and other changes
 * Documentation improvements
+* `anyconfig` default log level changed from `INFO` to `WARNING`
 
 ## Breaking changes to the API
 * Merged `FilepathVersionMixIn` and `S3VersionMixIn` under one abstract class `AbstractVersionedDataSet` which extends`AbstractDataSet`.

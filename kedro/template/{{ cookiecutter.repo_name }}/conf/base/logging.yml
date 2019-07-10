@@ -35,6 +35,11 @@ handlers:
         delay: True
 
 loggers:
+    anyconfig:
+        level: WARNING
+        handlers: [console, info_file_handler, error_file_handler]
+        propagate: no
+
     kedro.io:
         level: INFO
         handlers: [console, info_file_handler, error_file_handler]

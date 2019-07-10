@@ -32,6 +32,11 @@ handlers:
         delay: True
 
 loggers:
+    anyconfig:
+        level: WARNING
+        handlers: [console]
+        propagate: no
+
     kedro.cli:
         level: WARNING
         handlers: [console]

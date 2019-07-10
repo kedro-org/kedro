@@ -116,10 +116,6 @@ You should see output similar to the following
 kedro run
 
 2019-04-18 19:16:15,206 - root - INFO - ** Kedro project kedro-tutorial
-2019-04-18 19:16:15,207 - anyconfig - INFO - Loading: /projects/kedro-tutorial/conf/base/logging.yml
-2019-04-18 19:16:15,221 - anyconfig - INFO - Loading: /projects/kedro-tutorial/conf/base/catalog.yml
-2019-04-18 19:16:15,225 - anyconfig - INFO - Loading: /projects/kedro-tutorial/conf/local/credentials.yml
-2019-04-18 19:16:15,227 - anyconfig - INFO - Loading: /projects/kedro-tutorial/conf/base/parameters.yml
 2019-04-18 19:16:15,233 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVLocalDataSet)...
 2019-04-18 19:16:15,365 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_companies` (MemoryDataSet)...
 2019-04-18 19:16:15,366 - kedro.runner.sequential_runner - INFO - Completed 1 out of 2 tasks
@@ -269,10 +265,6 @@ You may want to test that all is working with your code at this point:
 kedro run
 
 2019-04-19 15:44:21,748 - root - INFO - ** Kedro project kedro-tutorial
-2019-04-19 15:44:21,749 - anyconfig - INFO - Loading: /projects/kedro-tutorial/conf/base/logging.yml
-2019-04-19 15:44:21,762 - anyconfig - INFO - Loading: /projects/kedro-tutorial/conf/base/catalog.yml
-2019-04-19 15:44:21,769 - anyconfig - INFO - Loading: /projects/kedro-tutorial/conf/local/credentials.yml
-2019-04-19 15:44:21,771 - anyconfig - INFO - Loading: /projects/kedro-tutorial/conf/base/parameters.yml
 2019-04-19 15:44:21,777 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVLocalDataSet)...
 2019-04-19 15:44:21,909 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_companies` (CSVLocalDataSet)...
 2019-04-19 15:44:22,224 - kedro.runner.sequential_runner - INFO - Completed 1 out of 3 tasks
@@ -458,10 +450,6 @@ You should see output similar to the following:
 kedro run
 
 2019-04-19 16:02:47,383 - root - INFO - ** Kedro project kedro-tutorial
-2019-04-19 16:02:47,385 - anyconfig - INFO - Loading: /projects/kedro-tutorial/conf/base/logging.yml
-2019-04-19 16:02:47,398 - anyconfig - INFO - Loading: /projects/kedro-tutorial/conf/base/catalog.yml
-2019-04-19 16:02:47,405 - anyconfig - INFO - Loading: /projects/kedro-tutorial/conf/local/credentials.yml
-2019-04-19 16:02:47,407 - anyconfig - INFO - Loading: /projects/kedro-tutorial/conf/base/parameters.yml
 2019-04-19 16:02:47,414 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVLocalDataSet)...
 2019-04-19 16:02:47,540 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_companies` (CSVLocalDataSet)...
 2019-04-19 16:02:47,854 - kedro.runner.sequential_runner - INFO - Completed 1 out of 6 tasks

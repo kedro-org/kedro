@@ -101,9 +101,6 @@ class AbstractDataSet(abc.ABC):
         >>>         return dict(param1=self._param1, param2=self._param2)
     """
 
-    DEFAULT_LOAD_ARGS = {}
-    DEFAULT_SAVE_ARGS = {}
-
     @classmethod
     def from_config(
         cls: Type,

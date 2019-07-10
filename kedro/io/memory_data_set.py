@@ -102,5 +102,5 @@ class MemoryDataSet(AbstractDataSet):
             return False
         return True
 
-    def _release(self):
+    def _release(self) -> None:
         self._data = None

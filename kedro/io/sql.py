@@ -140,8 +140,8 @@ class SQLTableDataSet(AbstractDataSet):
 
     """
 
-    DEFAULT_LOAD_ARGS = {}
-    DEFAULT_SAVE_ARGS = {"index": False}
+    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: Dict[str, Any] = {"index": False}
 
     def _describe(self) -> Dict[str, Any]:
         load_args = self._load_args.copy()

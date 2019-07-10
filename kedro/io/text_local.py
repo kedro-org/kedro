@@ -51,8 +51,8 @@ class TextLocalDataSet(AbstractVersionedDataSet):
         >>> reloaded = data_set.load()
     """
 
-    DEFAULT_LOAD_ARGS = {"mode": "r"}
-    DEFAULT_SAVE_ARGS = {"mode": "w"}
+    DEFAULT_LOAD_ARGS: Dict[str, Any] = {"mode": "r"}
+    DEFAULT_SAVE_ARGS: Dict[str, Any] = {"mode": "w"}
 
     def __init__(
         self,

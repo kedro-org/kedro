@@ -62,8 +62,8 @@ class ParquetLocalDataSet(AbstractVersionedDataSet):
         >>> assert data.equals(loaded_data)
     """
 
-    DEFAULT_LOAD_ARGS = {}
-    DEFAULT_SAVE_ARGS = {"compression": None}
+    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
+    DEFAULT_SAVE_ARGS: Dict[str, Any] = {"compression": None}
 
     # pylint: disable=too-many-arguments
     def __init__(

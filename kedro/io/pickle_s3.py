@@ -65,8 +65,8 @@ class PickleS3DataSet(AbstractVersionedDataSet):
             >>> reloaded = data_set.load()
     """
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
+    DEFAULT_LOAD_ARGS = {}
+    DEFAULT_SAVE_ARGS = {}
 
     # pylint: disable=too-many-arguments
     def __init__(

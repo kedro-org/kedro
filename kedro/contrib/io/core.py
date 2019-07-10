@@ -36,8 +36,8 @@ from typing import Any, Dict, Optional
 class DefaultArgumentsMixIn:
     """Mixin class that helps handle default load and save arguments."""
 
-    DEFAULT_LOAD_ARGS: Dict[str, Any] = {}
-    DEFAULT_SAVE_ARGS: Dict[str, Any] = {}
+    DEFAULT_LOAD_ARGS = {}
+    DEFAULT_SAVE_ARGS = {}
 
     def __init__(
         self,

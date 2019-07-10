@@ -31,39 +31,39 @@ data to parquet files on S3
 """
 from copy import deepcopy
 from functools import partial
+from pathlib import PurePosixPath
 from typing import Any, Dict, Optional
 
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
-from pathlib import PurePosixPath
 from s3fs.core import S3FileSystem
 
-from kedro.io.core import DataSetError, Version, AbstractVersionedDataSet
+from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
 
 
 class ParquetS3DataSet(AbstractVersionedDataSet):
     """``ParquetS3DataSet`` loads and saves data to a file in S3. It uses s3fs
-    to read and write from S3 and pandas to handle the parquet file.
-    Example:
-    ::
-        >>> from kedro.contrib.io.parquet.parquet_s3 import ParquetS3DataSet
-        >>> import pandas as pd
-        >>>
-        >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        >>>                      'col3': [5, 6]})
-        >>>
-        >>> data_set = ParquetS3DataSet(
-        >>>                         filepath="temp3.parquet",
-        >>>                         bucket_name="test_bucket",
-        >>>                         credentials={
-        >>>                             'aws_access_key_id': 'YOUR_KEY',
-        >>>                             'aws_access_secredt_key': 'YOUR SECRET'},
-        >>>                         save_args={"compression": "GZIP"})
-        >>> data_set.save(data)
-        >>> reloaded = data_set.load()
-        >>>
-        >>> assert data.equals(reloaded)
+        to read and write from S3 and pandas to handle the parquet file.
+        Example:
+        ::
+            >>> from kedro.contrib.io.parquet.parquet_s3 import ParquetS3DataSet
+            >>> import pandas as pd
+            >>>
+            >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
+            >>>                      'col3': [5, 6]})
+            >>>
+            >>> data_set = ParquetS3DataSet(
+            >>>                         filepath="temp3.parquet",
+            >>>                         bucket_name="test_bucket",
+            >>>                         credentials={
+            >>>                             'aws_access_key_id': 'YOUR_KEY',
+            >>>                             'aws_access_secredt_key': 'YOUR SECRET'},
+            >>>                         save_args={"compression": "GZIP"})
+            >>> data_set.save(data)
+            >>> reloaded = data_set.load()
+            >>>
+            >>> assert data.equals(reloaded)
     """
 
     # pylint: disable=too-many-arguments
@@ -136,30 +136,23 @@ class ParquetS3DataSet(AbstractVersionedDataSet):
         )
 
     def _load(self) -> pd.DataFrame:
-        load_path = PurePosixPath(self._get_load_path());print(f" thi is the {load_path}")
+        load_path = PurePosixPath(self._get_load_path())
 
         with self._s3.open(str(load_path), mode="rb") as s3_file:
             return pd.read_parquet(s3_file, **self._load_args)
 
     def _save(self, data: pd.DataFrame) -> None:
-        save_path = PurePosixPath(self._get_save_path());print(f"save path is {save_path}")
+        save_path = PurePosixPath(self._get_save_path())
 
         pq.write_table(pa.Table.from_pandas(data), str(save_path), filesystem=self._s3)
 
         load_path = PurePosixPath(self._get_load_path())
-        print(self._exists())
-        print("?? aboveself._exists()")
 
         self._check_paths_consistency(load_path, save_path)
 
     def _exists(self) -> bool:
         try:
             load_path = self._get_load_path()
-            # print(str(PurePosixPath(load_path)));print(
-            #     self._s3.isfile(str(PurePosixPath(load_path)))
-            # );print(f"loadpaht is {load_path}")
-            # print(self._s3.ls(path=str(f"s3://{PurePosixPath(load_path)}")))
         except DataSetError:
             return False
         return self._s3.isfile(str(PurePosixPath(load_path)))
-        # return self._s3.isfile(str(f"s3://{PurePosixPath(load_path)}"))

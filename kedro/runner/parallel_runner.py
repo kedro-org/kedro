@@ -32,7 +32,7 @@ be used to run the ``Pipeline`` in parallel groups formed by toposort.
 from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
 from itertools import chain
-from multiprocessing.managers import BaseManager, BaseProxy
+from multiprocessing.managers import BaseProxy, SyncManager
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
 from typing import Iterable
@@ -43,7 +43,7 @@ from kedro.pipeline.node import Node
 from kedro.runner.runner import AbstractRunner, run_node
 
 
-class ParallelRunnerManager(BaseManager):
+class ParallelRunnerManager(SyncManager):
     """``ParallelRunnerManager`` is used to create shared ``MemoryDataSet``
     objects as default data sets in a pipeline.
     """
@@ -51,7 +51,9 @@ class ParallelRunnerManager(BaseManager):
     pass
 
 
-ParallelRunnerManager.register("MemoryDataSet", MemoryDataSet)
+ParallelRunnerManager.register(  # pylint: disable=no-member
+    "MemoryDataSet", MemoryDataSet
+)
 
 
 class ParallelRunner(AbstractRunner):

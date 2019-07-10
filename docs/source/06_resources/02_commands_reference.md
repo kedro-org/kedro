@@ -83,6 +83,9 @@ To reload these at any point in your notebook (e.g. if you updated `catalog.yml`
 
 This [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#line-magics) can be also used to see the error message if any of the variables above are undefined.
 
+### `kedro jupyter convert`
+Copy the code from cells [tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) with `node` tag into Python files under `src/<package_name>/nodes/` in a Kedro project.
+
 ### `kedro activate-nbstripout`
 Typically output cells of Jupyter Notebook should not be tracked by git, especially if they contain sensitive information.
 

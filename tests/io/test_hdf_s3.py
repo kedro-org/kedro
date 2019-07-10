@@ -25,6 +25,7 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from multiprocessing.reduction import ForkingPickler
 
 import pytest
 import s3fs
@@ -185,6 +186,9 @@ class TestHDFS3DataSet:
         reloaded_df = hdf_data_set_with_args.load()
 
         assert_frame_equal(reloaded_df, dummy_dataframe)
+
+    def test_serializable(self, hdf_data_set):
+        ForkingPickler.dumps(hdf_data_set)
 
 
 class TestHDFS3DataSetVersioned:

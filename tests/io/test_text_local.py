@@ -106,7 +106,7 @@ class TestTextLocalDataSet:
 
     def test_filepath_expanduser(self):
         txt_dataset = TextLocalDataSet(filepath="~")
-        assert "~" not in txt_dataset._filepath  # pylint: disable=protected-access
+        assert "~" not in str(txt_dataset._filepath)  # pylint: disable=protected-access
 
 
 class TestTextLocalDataSetVersioned:

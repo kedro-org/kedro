@@ -112,12 +112,6 @@ class TestPickleS3DataSet:
         s3_data_set.save(DUMMY_PICKABLE_OBJECT)
         assert s3_data_set.exists()
 
-    @mock_s3
-    def test_exists_raises_error(self, s3_data_set):
-        """Check the error if the given S3 bucket doesn't exist."""
-        with pytest.raises(DataSetError, match="NoSuchBucket"):
-            s3_data_set.exists()
-
     @pytest.mark.usefixtures("mocked_s3_object")
     def test_load(self, s3_data_set):
         """Test loading the data from S3."""
@@ -238,9 +232,9 @@ class TestPickleS3DataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            r"Save path `{f}/{sv}/{f}` did not match load path "
-            r"`{f}/{lv}/{f}` for PickleS3DataSet\(.+\)".format(
-                f=FILENAME, sv=save_version, lv=load_version
+            r"Save path `{b}/{f}/{sv}/{f}` did not match load path "
+            r"`{b}/{f}/{lv}/{f}` for PickleS3DataSet\(.+\)".format(
+                b=BUCKET_NAME, f=FILENAME, sv=save_version, lv=load_version
             )
         )
         with pytest.warns(UserWarning, match=pattern):

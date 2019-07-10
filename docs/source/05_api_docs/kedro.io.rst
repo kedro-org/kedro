@@ -58,6 +58,5 @@ Base Classes
     :template: autosummary/class.rst
 
     kedro.io.AbstractDataSet
-    kedro.io.FilepathVersionMixIn
-    kedro.io.S3PathVersionMixIn
+    kedro.io.AbstractVersionedDataSet
     kedro.io.Version

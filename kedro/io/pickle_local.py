@@ -106,7 +106,7 @@ class PickleLocalDataSet(AbstractDataSet, FilepathVersionMixIn):
             load_args: Options for loading pickle files. Refer to the help
                 file of ``pickle.load`` or ``joblib.load`` for options.
             save_args: Options for saving pickle files. Refer to the help
-                file of ``pickle.dump`` or ``joblib.load`` for options.
+                file of ``pickle.dump`` or ``joblib.dump`` for options.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``

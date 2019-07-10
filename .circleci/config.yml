@@ -5,12 +5,16 @@ jobs:
        - image: quantumblacklabs/kedro_builder:3.5.2
      steps:
        - checkout
+       - run:
+          name: Install Java 1.8
+          command: |
+            sudo apt install openjdk-8-jdk
+            sudo update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
        - run: &CONDA_SETUP
           name: Activate conda environment
           command: |
             echo ". /home/circleci/miniconda/etc/profile.d/conda.sh" >> $BASH_ENV
             echo "conda deactivate; conda activate kedro_builder" >> $BASH_ENV
-
        - run: &PIP_SETUP
           name: Install PIP dependencies
           command: |

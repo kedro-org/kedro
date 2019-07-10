@@ -29,6 +29,7 @@
 """``CSVS3DataSet`` loads and saves data to a file in S3. It uses s3fs
 to read and write from S3 and pandas to handle the csv file.
 """
+import copy
 from typing import Any, Dict, Optional
 
 import pandas as pd
@@ -109,10 +110,10 @@ class CSVS3DataSet(AbstractDataSet, S3PathVersionMixIn):
         self._credentials = credentials if credentials else {}
 
         # Handle default load and save arguments
-        self._load_args = self.DEFAULT_LOAD_ARGS.copy()
+        self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args is not None:
             self._load_args.update(load_args)
-        self._save_args = self.DEFAULT_SAVE_ARGS.copy()
+        self._save_args = copy.deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
             self._save_args.update(save_args)
 

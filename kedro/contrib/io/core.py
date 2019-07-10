@@ -28,6 +28,7 @@
 
 """This module extends the set of classes ``kedro.io.core`` provides."""
 
+import copy
 from typing import Any, Dict, Optional
 
 
@@ -44,9 +45,9 @@ class DefaultArgumentsMixIn:
         save_args: Optional[Dict[str, Any]] = None,
     ) -> None:
         super().__init__()
-        self._load_args = self.DEFAULT_LOAD_ARGS.copy()
+        self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args is not None:
             self._load_args.update(load_args)
-        self._save_args = self.DEFAULT_SAVE_ARGS.copy()
+        self._save_args = copy.deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
             self._save_args.update(save_args)

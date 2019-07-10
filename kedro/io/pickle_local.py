@@ -32,6 +32,7 @@ supported by the ``pickle`` and ``joblib`` libraries, so it supports
 all allowed options for loading and saving pickle files.
 """
 
+import copy
 import pickle
 from pathlib import Path
 from typing import Any, Dict
@@ -130,10 +131,10 @@ class PickleLocalDataSet(AbstractDataSet, FilepathVersionMixIn):
         self._backend = backend
 
         # Handle default load and save arguments
-        self._load_args = self.DEFAULT_LOAD_ARGS.copy()
+        self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args is not None:
             self._load_args.update(load_args)
-        self._save_args = self.DEFAULT_SAVE_ARGS.copy()
+        self._save_args = copy.deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
             self._save_args.update(save_args)
 

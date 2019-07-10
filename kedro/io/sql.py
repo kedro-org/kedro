@@ -27,6 +27,7 @@
 # limitations under the License.
 """``SQLDataSet`` to load and save data to a SQL backend."""
 
+import copy
 import re
 from typing import Any, Dict, Optional
 
@@ -197,10 +198,10 @@ class SQLTableDataSet(AbstractDataSet):
             )
 
         # Handle default load and save arguments
-        self._load_args = self.DEFAULT_LOAD_ARGS.copy()
+        self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args is not None:
             self._load_args.update(load_args)
-        self._save_args = self.DEFAULT_SAVE_ARGS.copy()
+        self._save_args = copy.deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
             self._save_args.update(save_args)
 

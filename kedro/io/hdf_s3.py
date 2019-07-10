@@ -30,6 +30,7 @@
 underlying functionality is supported by pandas HDFStore and PyTables,
 so it supports all allowed PyTables options for loading and saving hdf files.
 """
+import copy
 from typing import Any, Dict, Optional
 
 import pandas as pd
@@ -110,10 +111,10 @@ class HDFS3DataSet(AbstractDataSet, S3PathVersionMixIn):
         self._credentials = credentials if credentials else {}
 
         # Handle default load and save arguments
-        self._load_args = self.DEFAULT_LOAD_ARGS.copy()
+        self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args is not None:
             self._load_args.update(load_args)
-        self._save_args = self.DEFAULT_SAVE_ARGS.copy()
+        self._save_args = copy.deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
             self._save_args.update(save_args)
 

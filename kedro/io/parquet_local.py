@@ -36,6 +36,7 @@ list and known caveats can also be found on their official guide at:
 https://arrow.apache.org/docs/python/index.html
 """
 
+import copy
 from pathlib import Path
 from typing import Any, Dict
 
@@ -114,10 +115,10 @@ class ParquetLocalDataSet(AbstractDataSet, FilepathVersionMixIn):
         self._engine = engine
 
         # Handle default load and save arguments
-        self._load_args = self.DEFAULT_LOAD_ARGS.copy()
+        self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args is not None:
             self._load_args.update(load_args)
-        self._save_args = self.DEFAULT_SAVE_ARGS.copy()
+        self._save_args = copy.deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
             self._save_args.update(save_args)
 

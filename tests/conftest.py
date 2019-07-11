@@ -70,7 +70,5 @@ def spark_session():
 
     # py4j doesn't shutdown properly so kill the actual JVM process
     for obj in gc.get_objects():
-        print(obj)
-        print("gc objects")
-        if obj and isinstance(obj, Popen) and "pyspark" in obj.args[0]:
+        if isinstance(obj, Popen) and "pyspark" in obj.args[0]:
             obj.terminate()

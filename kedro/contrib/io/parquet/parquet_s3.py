@@ -45,8 +45,10 @@ from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
 class ParquetS3DataSet(AbstractVersionedDataSet):
     """``ParquetS3DataSet`` loads and saves data to a file in S3. It uses s3fs
         to read and write from S3 and pandas to handle the parquet file.
+
         Example:
         ::
+
             >>> from kedro.contrib.io.parquet.parquet_s3 import ParquetS3DataSet
             >>> import pandas as pd
             >>>

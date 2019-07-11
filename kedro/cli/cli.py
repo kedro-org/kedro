@@ -509,7 +509,7 @@ def get_project_context(key: Any, default: Any = NO_DEFAULT) -> Any:  # pragma: 
     return deepcopy(value)
 
 
-def _get_plugin_command_groups(name):  # pragma: no cover
+def _get_plugin_command_groups(name):
     entry_points = pkg_resources.iter_entry_points(
         group="kedro.{}_commands".format(name)
     )
@@ -524,18 +524,20 @@ def _get_plugin_command_groups(name):  # pragma: no cover
     return groups
 
 
-def main():  # pragma: no cover
-    """Main entry point, look for a `kedro_cli.py` and if found add its
-    commands to `kedro`'s then invoke the cli.
-    """
-
-    # Run plugin initialization
+def _init_plugins():
     for entry_point in pkg_resources.iter_entry_points(group="kedro.init"):
         try:
             init_hook = entry_point.load()
             init_hook()
         except Exception:  # pylint: disable=broad-except
             _handle_exception("Initializing {}".format(str(entry_point)), end=False)
+
+
+def main():  # pragma: no cover
+    """Main entry point, look for a `kedro_cli.py` and if found add its
+    commands to `kedro`'s then invoke the cli.
+    """
+    _init_plugins()
 
     global_groups = [cli]
     global_groups.extend(_get_plugin_command_groups("global"))

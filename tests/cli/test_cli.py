@@ -34,7 +34,7 @@ from mock import patch
 from pytest import fixture, mark, raises, warns
 
 from kedro import __version__ as version
-from kedro.cli.cli import cli
+from kedro.cli.cli import _get_plugin_command_groups, _init_plugins, cli
 from kedro.cli.utils import (
     CommandCollection,
     KedroCliError,
@@ -349,3 +349,51 @@ class TestCliUtils:
         pattern = "Provided filepath is not a Jupyter notebook"
         with raises(KedroCliError, match=pattern):
             export_nodes(random_file, output_path)
+
+
+@fixture
+def entry_points(mocker):
+    return mocker.patch("pkg_resources.iter_entry_points")
+
+
+@fixture
+def entry_point(mocker, entry_points):
+    ep = mocker.MagicMock()
+    entry_points.return_value = [ep]
+    return ep
+
+
+class TestEntryPoints:
+    def test_project_groups(self, entry_points, entry_point):
+        entry_point.load.return_value = "groups"
+        groups = _get_plugin_command_groups("project")
+        assert groups == ["groups"]
+        entry_points.assert_called_once_with(group="kedro.project_commands")
+
+    def test_project_error_is_caught(self, entry_points, entry_point):
+        entry_point.load.side_effect = Exception()
+        groups = _get_plugin_command_groups("project")
+        assert groups == []
+        entry_points.assert_called_once_with(group="kedro.project_commands")
+
+    def test_global_groups(self, entry_points, entry_point):
+        entry_point.load.return_value = "groups"
+        groups = _get_plugin_command_groups("global")
+        assert groups == ["groups"]
+        entry_points.assert_called_once_with(group="kedro.global_commands")
+
+    def test_global_error_is_caught(self, entry_points, entry_point):
+        entry_point.load.side_effect = Exception()
+        groups = _get_plugin_command_groups("global")
+        assert groups == []
+        entry_points.assert_called_once_with(group="kedro.global_commands")
+
+    def test_init(self, entry_points, entry_point):
+        _init_plugins()
+        entry_points.assert_called_once_with(group="kedro.init")
+        entry_point.load().assert_called_once_with()
+
+    def test_init_error_is_caught(self, entry_points, entry_point):
+        entry_point.load.side_effect = Exception()
+        _init_plugins()
+        entry_points.assert_called_once_with(group="kedro.init")

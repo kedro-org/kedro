@@ -36,6 +36,7 @@ import s3fs
 from botocore.exceptions import PartialCredentialsError
 from moto import mock_s3
 from pandas.util.testing import assert_frame_equal
+from s3fs import S3FileSystem
 
 from kedro.contrib.io.parquet import ParquetS3DataSet
 from kedro.io import DataSetError, Version
@@ -122,6 +123,16 @@ def versioned_s3_data_set(load_version, save_version):
         credentials={'aws_access_key_id': 'YOUR_KEY', 'aws_secret_access_key': 'YOUR SECRET'},
         version=Version(load_version, save_version),
     )
+
+
+# pylint: disable=protected-access
+@pytest.fixture()
+def s3fs_cleanup():
+    # s3fs caches some connection details globally, which should be
+    # cleared so we get a clean slate every time we instantiate a S3FileSystem
+    yield
+    S3FileSystem._conn = {}
+    S3FileSystem._singleton = [None]
 
 
 @pytest.mark.usefixtures("s3fs_cleanup")

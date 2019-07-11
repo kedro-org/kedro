@@ -50,7 +50,7 @@ def save_version(request):
 
 
 # pylint: disable=protected-access
-@fixture(autouse=True)
+@fixture()
 def s3fs_cleanup():
     # s3fs caches some connection details globally, which should be
     # cleared so we get a clean slate every time we instantiate a S3FileSystem

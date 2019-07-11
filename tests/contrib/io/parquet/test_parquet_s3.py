@@ -124,6 +124,7 @@ def versioned_s3_data_set(load_version, save_version):
     )
 
 
+@pytest.mark.usefixtures("s3fs_cleanup")
 class TestParquetS3DataSet:
     @pytest.mark.parametrize(
         "bad_credentials",
@@ -200,7 +201,7 @@ class TestParquetS3DataSet:
         assert s3_data_set.exists()
 
 
-@pytest.mark.usefixtures("mocked_s3_bucket")
+@pytest.mark.usefixtures("mocked_s3_bucket", "s3fs_cleanup")
 class TestParquetS3DataSetVersioned:
     def test_exists(self, versioned_s3_data_set, dummy_dataframe):
         """Test `exists` method invocation for versioned data set."""

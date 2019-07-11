@@ -1,4 +1,4 @@
-click==6.7
+click<8.0
 cookiecutter==1.6.0
 pandas>=0.23.0, <0.25.0
 PyYAML>=4.2, <6.0

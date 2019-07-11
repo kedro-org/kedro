@@ -46,24 +46,29 @@ from kedro.cli.utils import (
 PACKAGE_NAME = "my_project"
 
 
-@click.group()
+@click.group(name="stub_cli")
 def stub_cli():
     """Stub CLI group description."""
     print("group callback")
 
 
-@stub_cli.command()
+@stub_cli.command(name="stub_command")
 def stub_command():
     print("command callback")
 
 
-@forward_command(stub_cli)
+@forward_command(stub_cli, name="forwarded_command")
 def forwarded_command(args):
     print("fred", args)
 
 
-@forward_command(stub_cli, forward_help=True)
+@forward_command(stub_cli, name="forwarded_help", forward_help=True)
 def forwarded_help(args):
+    print("fred", args)
+
+
+@forward_command(stub_cli)
+def unnamed(args):
     print("fred", args)
 
 
@@ -182,7 +187,16 @@ class TestForwardCommand:
     def test_regular(self, cli_runner):
         """Test forwarded command invocation."""
         result = cli_runner.invoke(stub_cli, ["forwarded_command", "bob"])
-        assert result.exit_code == 0
+        assert result.exit_code == 0, result.output
+        assert "bob" in result.output
+        assert "fred" in result.output
+        assert "--help" not in result.output
+        assert "forwarded_command" not in result.output
+
+    def test_unnamed(self, cli_runner):
+        """Test forwarded command invocation."""
+        result = cli_runner.invoke(stub_cli, ["unnamed", "bob"])
+        assert result.exit_code == 0, result.output
         assert "bob" in result.output
         assert "fred" in result.output
         assert "--help" not in result.output
@@ -191,7 +205,7 @@ class TestForwardCommand:
     def test_help(self, cli_runner):
         """Test help output for the command with help flags not forwarded."""
         result = cli_runner.invoke(stub_cli, ["forwarded_command", "bob", "--help"])
-        assert result.exit_code == 0
+        assert result.exit_code == 0, result.output
         assert "bob" not in result.output
         assert "fred" not in result.output
         assert "--help" in result.output
@@ -200,7 +214,7 @@ class TestForwardCommand:
     def test_forwarded_help(self, cli_runner):
         """Test help output for the command with forwarded help flags."""
         result = cli_runner.invoke(stub_cli, ["forwarded_help", "bob", "--help"])
-        assert result.exit_code == 0
+        assert result.exit_code == 0, result.output
         assert "bob" in result.output
         assert "fred" in result.output
         assert "--help" in result.output

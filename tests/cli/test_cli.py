@@ -127,6 +127,23 @@ class TestCliCommands:
         assert result.exit_code == 0
         assert "QuantumBlack" in result.output
 
+    def test_info_contains_plugin_versions(self, cli_runner, entry_point, mocker):
+        get_distribution = mocker.patch("pkg_resources.get_distribution")
+        get_distribution().version = "1.0.2"
+        entry_point.module_name = "bob.fred"
+
+        result = cli_runner.invoke(cli, ["info"])
+        assert result.exit_code == 0
+        assert "bob: 1.0.2 (hooks:global,init,project)" in result.output
+
+        entry_point.load.assert_not_called()
+
+    @mark.usefixtures("entry_points")
+    def test_info_no_plugins(self, cli_runner):
+        result = cli_runner.invoke(cli, ["info"])
+        assert result.exit_code == 0
+        assert "No plugins installed" in result.output
+
     def test_help(self, cli_runner):
         """Check that `kedro --help` returns a valid help message."""
         result = cli_runner.invoke(cli, ["--help"])

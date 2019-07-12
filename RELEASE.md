@@ -7,6 +7,7 @@
 ## Bug fixes and other changes
 * Documentation improvements
 * `anyconfig` default log level changed from `INFO` to `WARNING`
+* Add information on installed plugins to `kedro info`
 
 ## Breaking changes to the API
 * Merged `FilepathVersionMixIn` and `S3VersionMixIn` under one abstract class `AbstractVersionedDataSet` which extends`AbstractDataSet`.
@@ -16,7 +17,7 @@ If you defined any custom dataset classes which support versioning in your proje
 
 1. Make sure your dataset inherits from `AbstractVersionedDataSet` only.
 2. Call `super().__init__()` with the appropriate arguments in the dataset's `__init__`. If storing on local filesystem, providing the filepath and the version is enough. Otherwise, you should also pass in an `exists_function` and a `glob_function` that emulate `exists` and `glob` in a different filesystem (see `CSVS3DataSet` as an example). 
-3. Remove setting of the `_filepath` and `_version` attributes in the dataset's `__init__`, as this is take care of in the base abstract class.
+3. Remove setting of the `_filepath` and `_version` attributes in the dataset's `__init__`, as this is taken care of in the base abstract class.
 4. Any calls to `_get_load_path` and `_get_save_path` methods should take no arguments.
 5. Ensure you convert the output of `_get_load_path` and `_get_save_path` appropriately, as these now return [`PurePath`s](https://docs.python.org/3/library/pathlib.html#pure-paths) instead of strings.
 6. Make sure `_check_paths_consistency` is called with [`PurePath`s](https://docs.python.org/3/library/pathlib.html#pure-paths) as input arguments, instead of strings.

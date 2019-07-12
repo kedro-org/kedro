@@ -38,6 +38,7 @@ import shutil
 import sys
 import traceback
 import webbrowser
+from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Union
@@ -89,6 +90,13 @@ def cli(verbose):
     _KEDRO_CONTEXT["verbose"] = verbose
 
 
+ENTRY_POINT_GROUPS = {
+    "global": "kedro.global_commands",
+    "project": "kedro.project_commands",
+    "init": "kedro.init",
+}
+
+
 @cli.command()
 def info():
     """Get more information about kedro.
@@ -99,6 +107,24 @@ def info():
         "projects. It is developed as part of\n"
         "the Kedro initiative at QuantumBlack."
     )
+
+    plugin_versions = {}
+    plugin_hooks = defaultdict(set)
+    for hook, group in ENTRY_POINT_GROUPS.items():
+        for entry_point in pkg_resources.iter_entry_points(group=group):
+            module_name = entry_point.module_name.split(".")[0]
+            plugin_version = pkg_resources.get_distribution(module_name).version
+            plugin_versions[module_name] = plugin_version
+            plugin_hooks[module_name].add(hook)
+
+    click.echo()
+    if plugin_versions:
+        click.echo("Installed plugins:")
+        for plugin_name, plugin_version in sorted(plugin_versions.items()):
+            hooks = ",".join(sorted(plugin_hooks[plugin_name]))
+            click.echo("{}: {} (hooks:{})".format(plugin_name, plugin_version, hooks))
+    else:
+        click.echo("No plugins installed")
 
 
 @cli.command(short_help="Create a new kedro project.")
@@ -510,22 +536,21 @@ def get_project_context(key: Any, default: Any = NO_DEFAULT) -> Any:  # pragma: 
 
 
 def _get_plugin_command_groups(name):
-    entry_points = pkg_resources.iter_entry_points(
-        group="kedro.{}_commands".format(name)
-    )
-    groups = []
+    entry_points = pkg_resources.iter_entry_points(group=ENTRY_POINT_GROUPS[name])
+    command_groups = []
     for entry_point in entry_points:
         try:
-            groups.append(entry_point.load())
+            command_groups.append(entry_point.load())
         except Exception:  # pylint: disable=broad-except
             _handle_exception(
                 "Loading {} commands from {}".format(name, str(entry_point)), end=False
             )
-    return groups
+    return command_groups
 
 
 def _init_plugins():
-    for entry_point in pkg_resources.iter_entry_points(group="kedro.init"):
+    group = ENTRY_POINT_GROUPS["init"]
+    for entry_point in pkg_resources.iter_entry_points(group=group):
         try:
             init_hook = entry_point.load()
             init_hook()

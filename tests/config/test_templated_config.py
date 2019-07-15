@@ -80,6 +80,28 @@ def proj_catalog_param(tmp_path, param_config):
 
 
 @pytest.fixture
+def normal_config_advanced():
+    return {
+        "planes": {
+            "type": "SparkJDBCDataSet",
+            "postgres_credentials": {
+                    "user": "Fakeuser",
+                    "password": "F@keP@55word"
+                    },
+            "batch_size": 1000,
+            "need_permission": True,
+            "secret_tables": ["models", "pilots", "engines"],
+        }
+    }
+
+
+@pytest.fixture
+def proj_catalog_advanced(tmp_path, normal_config_advanced):
+    proj_catalog = tmp_path / "base" / "catalog.yml"
+    _write_yaml(proj_catalog, param_config_advanced)
+
+
+@pytest.fixture
 def param_config_advanced():
     return {
         "planes": {
@@ -87,7 +109,7 @@ def param_config_advanced():
             "postgres_credentials": "${credentials}",
             "batch_size": "${batch_size}",
             "need_permission": "${permission_param}",
-            "secret_tables": "${secret_table_list}"
+            "secret_tables": "${secret_table_list}",
         }
     }
 
@@ -128,9 +150,38 @@ class TestTemplatedConfigLoader:
         assert catalog["boats"]["columns"]["top_speed"] == "FLOAT"
         assert catalog["boats"]["users"] == ["fred", "ron"]
 
+    @pytest.mark.usefixtures("proj_catalog_param")
+    def test_catlog_parameterized_no_dict(self, tmp_path, conf_paths):
+        """Test parameterized config with input from dictionary with values"""
+        (tmp_path / "local").mkdir(exist_ok=True)
+
+        catalog = TemplatedConfigLoader(conf_paths).resolve(["catalog*.yml"])
+
+        assert catalog["boats"]["type"] == "${boat_data_type}"
+        assert catalog["boats"]["filepath"] == "${s3_bucket}/${raw_data_folder}/boats.csv"
+        assert catalog["boats"]["columns"]["id"] == "${string_type}"
+        assert catalog["boats"]["columns"]["name"] == "${string_type}"
+        assert catalog["boats"]["columns"]["top_speed"] == "${float_type}"
+        assert catalog["boats"]["users"] == ["fred", "${write_only_user}"]
+
+    @pytest.mark.usefixtures("proj_catalog_advanced")
+    def test_catlog_parameterized_advanced(self, tmp_path, conf_paths):
+        """Test whether it responds well to advanced yaml values (i.e. nested dicts, booleans,
+        lists, etc.)"""
+        (tmp_path / "local").mkdir(exist_ok=True)
+
+        catalog = TemplatedConfigLoader(conf_paths).resolve("catalog*.yml")
+
+        assert catalog["planes"]["type"] == "SparkJDBCDataSet"
+        assert catalog["planes"]["postgres_credentials"]["user"] == "Fakeuser"
+        assert catalog["planes"]["postgres_credentials"]["password"] == "F@keP@55word"
+        assert catalog["planes"]["batch_size"] == 10000
+        assert catalog["planes"]["need_permission"]
+        assert catalog["planes"]["secret_tables"] == ["models", "pilots", "engines"]
+
     @pytest.mark.usefixtures("proj_catalog_param_w_vals_advanced", "template_config_advanced")
     def test_catlog_parameterized_advanced(self, tmp_path, conf_paths, template_config_advanced):
-        """Test advanced (i.e. nested dicts, booleans, lists, etc.)"""
+        """Test advanced templating(i.e. nested dicts, booleans, lists, etc.)"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
         catalog = TemplatedConfigLoader(conf_paths).resolve("catalog*.yml",

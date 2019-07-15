@@ -134,6 +134,33 @@ def proj_catalog_param_w_vals_advanced(tmp_path, param_config_advanced):
     _write_yaml(proj_catalog, param_config_advanced)
 
 
+@pytest.fixture
+def mixed_config_advanced():
+    return {
+        "planes": {
+            "type": "SparkJDBCDataSet",
+            "type_parameterized": "${plane_data_type}",
+            "postgres_credentials": {
+                "user": "Fakeuser",
+                "password": "F@keP@55word"
+            },
+            "postgres_credentials_parameterized": "${credentials}",
+            "batch_size": 10000,
+            "batch_size_parameterized": "${batch_size}",
+            "need_permission": True,
+            "need_permission_parameterized": "${permission_param}",
+            "secret_tables": ["models", "pilots", "engines"],
+            "secret_tables_parameterized": "${secret_table_list}",
+        }
+    }
+
+
+@pytest.fixture
+def proj_catalog_mixed(tmp_path, mixed_config_advanced):
+    proj_catalog = tmp_path / "base" / "catalog.yml"
+    _write_yaml(proj_catalog, mixed_config_advanced)
+
+
 class TestTemplatedConfigLoader:
 
     @pytest.mark.usefixtures("proj_catalog_param", "template_config")
@@ -193,3 +220,24 @@ class TestTemplatedConfigLoader:
         assert catalog["planes"]["batch_size"] == 10000
         assert catalog["planes"]["need_permission"]
         assert catalog["planes"]["secret_tables"] == ["models", "pilots", "engines"]
+
+    @pytest.mark.usefixtures("proj_catalog_mixed", "template_config_advanced")
+    def test_catlog_parameterized_mixed(self, tmp_path, conf_paths, template_config_advanced):
+        """Test advanced templating(i.e. nested dicts, booleans, lists, etc.)"""
+        (tmp_path / "local").mkdir(exist_ok=True)
+
+        catalog = TemplatedConfigLoader(conf_paths).resolve("catalog*.yml",
+                                                            template_config_advanced)
+
+        assert catalog["planes"]["type"] == "SparkJDBCDataSet"
+        assert catalog["planes"]["postgres_credentials"]["user"] == "Fakeuser"
+        assert catalog["planes"]["postgres_credentials"]["password"] == "F@keP@55word"
+        assert catalog["planes"]["batch_size"] == 10000
+        assert catalog["planes"]["need_permission"]
+        assert catalog["planes"]["secret_tables"] == ["models", "pilots", "engines"]
+        assert catalog["planes"]["type_parameterized"] == "SparkJDBCDataSet"
+        assert catalog["planes"]["postgres_credentials_parameterized"]["user"] == "Fakeuser"
+        assert catalog["planes"]["postgres_credentials_parameterized"]["password"] == "F@keP@55word"
+        assert catalog["planes"]["batch_size_parameterized"] == 10000
+        assert catalog["planes"]["need_permission_parameterized"]
+        assert catalog["planes"]["secret_tables_parameterized"] == ["models", "pilots", "engines"]

@@ -69,4 +69,4 @@ kedro install --conda
 ```
 
 This command will install dependencies listed in `src/environment.yml`. 
-Please use the template provided there to base your `enviroment.yml` off.  
+Please use the template provided to base your `enviroment.yml` off.  

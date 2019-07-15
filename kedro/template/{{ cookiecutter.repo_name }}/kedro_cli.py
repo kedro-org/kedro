@@ -123,7 +123,7 @@ def test(args):
 @cli.command()
 @click.option("--conda")
 def install():
-    """Install project dependencies from both requirements.txt and requirements.yml."""
+    """Install project dependencies from both requirements.txt and environment.yml (optional)."""
 
     if conda:
         call("conda", ["install", "--file src/environment.yml", "--yes"])

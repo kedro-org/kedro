@@ -34,7 +34,7 @@ from mock import patch
 from pytest import fixture, mark, raises, warns
 
 from kedro import __version__ as version
-from kedro.cli.cli import cli
+from kedro.cli.cli import _get_plugin_command_groups, _init_plugins, cli
 from kedro.cli.utils import (
     CommandCollection,
     KedroCliError,
@@ -46,24 +46,29 @@ from kedro.cli.utils import (
 PACKAGE_NAME = "my_project"
 
 
-@click.group()
+@click.group(name="stub_cli")
 def stub_cli():
     """Stub CLI group description."""
     print("group callback")
 
 
-@stub_cli.command()
+@stub_cli.command(name="stub_command")
 def stub_command():
     print("command callback")
 
 
-@forward_command(stub_cli)
+@forward_command(stub_cli, name="forwarded_command")
 def forwarded_command(args):
     print("fred", args)
 
 
-@forward_command(stub_cli, forward_help=True)
+@forward_command(stub_cli, name="forwarded_help", forward_help=True)
 def forwarded_help(args):
+    print("fred", args)
+
+
+@forward_command(stub_cli)
+def unnamed(args):
     print("fred", args)
 
 
@@ -121,6 +126,23 @@ class TestCliCommands:
 
         assert result.exit_code == 0
         assert "QuantumBlack" in result.output
+
+    def test_info_contains_plugin_versions(self, cli_runner, entry_point, mocker):
+        get_distribution = mocker.patch("pkg_resources.get_distribution")
+        get_distribution().version = "1.0.2"
+        entry_point.module_name = "bob.fred"
+
+        result = cli_runner.invoke(cli, ["info"])
+        assert result.exit_code == 0
+        assert "bob: 1.0.2 (hooks:global,init,project)" in result.output
+
+        entry_point.load.assert_not_called()
+
+    @mark.usefixtures("entry_points")
+    def test_info_no_plugins(self, cli_runner):
+        result = cli_runner.invoke(cli, ["info"])
+        assert result.exit_code == 0
+        assert "No plugins installed" in result.output
 
     def test_help(self, cli_runner):
         """Check that `kedro --help` returns a valid help message."""
@@ -182,7 +204,16 @@ class TestForwardCommand:
     def test_regular(self, cli_runner):
         """Test forwarded command invocation."""
         result = cli_runner.invoke(stub_cli, ["forwarded_command", "bob"])
-        assert result.exit_code == 0
+        assert result.exit_code == 0, result.output
+        assert "bob" in result.output
+        assert "fred" in result.output
+        assert "--help" not in result.output
+        assert "forwarded_command" not in result.output
+
+    def test_unnamed(self, cli_runner):
+        """Test forwarded command invocation."""
+        result = cli_runner.invoke(stub_cli, ["unnamed", "bob"])
+        assert result.exit_code == 0, result.output
         assert "bob" in result.output
         assert "fred" in result.output
         assert "--help" not in result.output
@@ -191,7 +222,7 @@ class TestForwardCommand:
     def test_help(self, cli_runner):
         """Test help output for the command with help flags not forwarded."""
         result = cli_runner.invoke(stub_cli, ["forwarded_command", "bob", "--help"])
-        assert result.exit_code == 0
+        assert result.exit_code == 0, result.output
         assert "bob" not in result.output
         assert "fred" not in result.output
         assert "--help" in result.output
@@ -200,7 +231,7 @@ class TestForwardCommand:
     def test_forwarded_help(self, cli_runner):
         """Test help output for the command with forwarded help flags."""
         result = cli_runner.invoke(stub_cli, ["forwarded_help", "bob", "--help"])
-        assert result.exit_code == 0
+        assert result.exit_code == 0, result.output
         assert "bob" in result.output
         assert "fred" in result.output
         assert "--help" in result.output
@@ -335,3 +366,51 @@ class TestCliUtils:
         pattern = "Provided filepath is not a Jupyter notebook"
         with raises(KedroCliError, match=pattern):
             export_nodes(random_file, output_path)
+
+
+@fixture
+def entry_points(mocker):
+    return mocker.patch("pkg_resources.iter_entry_points")
+
+
+@fixture
+def entry_point(mocker, entry_points):
+    ep = mocker.MagicMock()
+    entry_points.return_value = [ep]
+    return ep
+
+
+class TestEntryPoints:
+    def test_project_groups(self, entry_points, entry_point):
+        entry_point.load.return_value = "groups"
+        groups = _get_plugin_command_groups("project")
+        assert groups == ["groups"]
+        entry_points.assert_called_once_with(group="kedro.project_commands")
+
+    def test_project_error_is_caught(self, entry_points, entry_point):
+        entry_point.load.side_effect = Exception()
+        groups = _get_plugin_command_groups("project")
+        assert groups == []
+        entry_points.assert_called_once_with(group="kedro.project_commands")
+
+    def test_global_groups(self, entry_points, entry_point):
+        entry_point.load.return_value = "groups"
+        groups = _get_plugin_command_groups("global")
+        assert groups == ["groups"]
+        entry_points.assert_called_once_with(group="kedro.global_commands")
+
+    def test_global_error_is_caught(self, entry_points, entry_point):
+        entry_point.load.side_effect = Exception()
+        groups = _get_plugin_command_groups("global")
+        assert groups == []
+        entry_points.assert_called_once_with(group="kedro.global_commands")
+
+    def test_init(self, entry_points, entry_point):
+        _init_plugins()
+        entry_points.assert_called_once_with(group="kedro.init")
+        entry_point.load().assert_called_once_with()
+
+    def test_init_error_is_caught(self, entry_points, entry_point):
+        entry_point.load.side_effect = Exception()
+        _init_plugins()
+        entry_points.assert_called_once_with(group="kedro.init")

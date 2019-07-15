@@ -62,24 +62,10 @@ def param_config():
 
 
 @pytest.fixture
-def template_config_folders():
+def template_config():
     return {
         "s3_bucket": "s3a://boat-and-car-bucket",
         "raw_data_folder": "01_raw",
-    }
-
-
-@pytest.fixture
-def template_config_folders_clash():
-    return {
-        "s3_bucket": "s3a://boat-and-car-bucket-2",
-        "raw_data_folder": "02_int",
-    }
-
-
-@pytest.fixture
-def template_config_general():
-    return {
         "boat_data_type": "SparkDataSet",
         "string_type": "VARCHAR",
         "float_type": "FLOAT",
@@ -88,30 +74,9 @@ def template_config_general():
 
 
 @pytest.fixture
-def template_config(template_config_folders, template_config_general):
-    return {**template_config_folders, **template_config_general}
-
-
-@pytest.fixture
 def proj_catalog_param(tmp_path, param_config):
     proj_catalog = tmp_path / "base" / "catalog.yml"
     _write_yaml(proj_catalog, param_config)
-
-
-@pytest.fixture
-def proj_catalog_param_w_vals(tmp_path, param_config, template_config):
-    proj_catalog = tmp_path / "base" / "catalog.yml"
-    values_catalog = tmp_path / "base" / "values.yml"
-    _write_yaml(proj_catalog, param_config)
-    _write_yaml(values_catalog, template_config)
-
-
-@pytest.fixture
-def proj_catalog_param_w_vals_and_dict(tmp_path, param_config, template_config_general):
-    proj_catalog = tmp_path / "base" / "catalog.yml"
-    values_catalog = tmp_path / "base" / "values.yml"
-    _write_yaml(proj_catalog, param_config)
-    _write_yaml(values_catalog, template_config_general)
 
 
 @pytest.fixture
@@ -142,36 +107,19 @@ def template_config_advanced():
 
 
 @pytest.fixture
-def proj_catalog_param_w_vals_advanced(tmp_path, param_config_advanced, template_config_advanced):
+def proj_catalog_param_w_vals_advanced(tmp_path, param_config_advanced):
     proj_catalog = tmp_path / "base" / "catalog.yml"
-    values_catalog = tmp_path / "base" / "values.yml"
     _write_yaml(proj_catalog, param_config_advanced)
-    _write_yaml(values_catalog, template_config_advanced)
 
 
 class TestTemplatedConfigLoader:
-
-    @pytest.mark.usefixtures("proj_catalog_param_w_vals")
-    def test_catlog_parameterized_separate(self, tmp_path, conf_paths):
-        """Test parameterized config with input from values.yml file inside conf_paths"""
-        (tmp_path / "local").mkdir(exist_ok=True)
-
-        catalog = TemplatedConfigLoader(conf_paths).resolve("catalog*.yml")
-
-        assert catalog["boats"]["type"] == "SparkDataSet"
-        assert catalog["boats"]["filepath"] == "s3a://boat-and-car-bucket/01_raw/boats.csv"
-        assert catalog["boats"]["columns"]["id"] == "VARCHAR"
-        assert catalog["boats"]["columns"]["name"] == "VARCHAR"
-        assert catalog["boats"]["columns"]["top_speed"] == "FLOAT"
-        assert catalog["boats"]["users"] == ["fred", "ron"]
 
     @pytest.mark.usefixtures("proj_catalog_param", "template_config")
     def test_catlog_parameterized_w_dict(self, tmp_path, conf_paths, template_config):
         """Test parameterized config with input from dictionary with values"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
-        catalog = TemplatedConfigLoader(conf_paths) \
-            .resolve(["catalog*.yml"], template_config, search_for_values=False)
+        catalog = TemplatedConfigLoader(conf_paths).resolve(["catalog*.yml"], template_config)
 
         assert catalog["boats"]["type"] == "SparkDataSet"
         assert catalog["boats"]["filepath"] == "s3a://boat-and-car-bucket/01_raw/boats.csv"
@@ -180,46 +128,12 @@ class TestTemplatedConfigLoader:
         assert catalog["boats"]["columns"]["top_speed"] == "FLOAT"
         assert catalog["boats"]["users"] == ["fred", "ron"]
 
-    @pytest.mark.usefixtures("proj_catalog_param_w_vals_and_dict", "template_config_folders")
-    def test_catlog_parameterized_w_dict_and_vals(self, tmp_path, conf_paths,
-                                                  template_config_folders):
-        """Test parameterized config with input from values.yml file inside conf_paths and input
-        from dictionary with values"""
+    @pytest.mark.usefixtures("proj_catalog_param_w_vals_advanced", "template_config_advanced")
+    def test_catlog_parameterized_advanced(self, tmp_path, conf_paths, template_config_advanced):
+        """Test advanced (i.e. nested dicts, booleans, lists, etc.)"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
-        catalog = TemplatedConfigLoader(conf_paths) \
-            .resolve(["catalog*.yml"], template_config_folders)
-
-        assert catalog["boats"]["type"] == "SparkDataSet"
-        assert catalog["boats"]["filepath"] == "s3a://boat-and-car-bucket/01_raw/boats.csv"
-        assert catalog["boats"]["columns"]["id"] == "VARCHAR"
-        assert catalog["boats"]["columns"]["name"] == "VARCHAR"
-        assert catalog["boats"]["columns"]["top_speed"] == "FLOAT"
-        assert catalog["boats"]["users"] == ["fred", "ron"]
-
-    @pytest.mark.usefixtures("proj_catalog_param_w_vals", "template_config_folders_clash")
-    def test_catlog_parameterized_w_clash(self, tmp_path, conf_paths,
-                                          template_config_folders_clash):
-        """Test that dictionary config takes precedence over loaded config"""
-        (tmp_path / "local").mkdir(exist_ok=True)
-
-        catalog = TemplatedConfigLoader(conf_paths) \
-            .resolve(["catalog*.yml"], template_config_folders_clash)
-
-        assert catalog["boats"]["type"] == "SparkDataSet"
-        assert catalog["boats"]["filepath"] == "s3a://boat-and-car-bucket-2/02_int/boats.csv"
-        assert catalog["boats"]["columns"]["id"] == "VARCHAR"
-        assert catalog["boats"]["columns"]["name"] == "VARCHAR"
-        assert catalog["boats"]["columns"]["top_speed"] == "FLOAT"
-        assert catalog["boats"]["users"] == ["fred", "ron"]
-
-    @pytest.mark.usefixtures("proj_catalog_param_w_vals_advanced")
-    def test_catlog_parameterized_advanced(self, tmp_path, conf_paths):
-        """Test advanced (i.e. nested dicts, booleans, lists, etc.) parameterized config with input
-        from values.yml file inside conf_paths"""
-        (tmp_path / "local").mkdir(exist_ok=True)
-
-        catalog = TemplatedConfigLoader(conf_paths).resolve("catalog*.yml")
+        catalog = TemplatedConfigLoader(conf_paths).resolve("catalog*.yml", template_config_advanced)
 
         assert catalog["planes"]["type"] == "SparkJDBCDataSet"
         assert catalog["planes"]["postgres_credentials"]["user"] == "Fakeuser"

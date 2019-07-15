@@ -85,10 +85,10 @@ def normal_config_advanced():
         "planes": {
             "type": "SparkJDBCDataSet",
             "postgres_credentials": {
-                    "user": "Fakeuser",
-                    "password": "F@keP@55word"
-                    },
-            "batch_size": 1000,
+                "user": "Fakeuser",
+                "password": "F@keP@55word"
+            },
+            "batch_size": 10000,
             "need_permission": True,
             "secret_tables": ["models", "pilots", "engines"],
         }
@@ -98,7 +98,7 @@ def normal_config_advanced():
 @pytest.fixture
 def proj_catalog_advanced(tmp_path, normal_config_advanced):
     proj_catalog = tmp_path / "base" / "catalog.yml"
-    _write_yaml(proj_catalog, param_config_advanced)
+    _write_yaml(proj_catalog, normal_config_advanced)
 
 
 @pytest.fixture
@@ -165,7 +165,7 @@ class TestTemplatedConfigLoader:
         assert catalog["boats"]["users"] == ["fred", "${write_only_user}"]
 
     @pytest.mark.usefixtures("proj_catalog_advanced")
-    def test_catlog_parameterized_advanced(self, tmp_path, conf_paths):
+    def test_catlog_advanced(self, tmp_path, conf_paths):
         """Test whether it responds well to advanced yaml values (i.e. nested dicts, booleans,
         lists, etc.)"""
         (tmp_path / "local").mkdir(exist_ok=True)

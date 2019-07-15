@@ -121,10 +121,15 @@ def test(args):
 
 
 @cli.command()
+@click.option("--conda")
 def install():
     """Install project dependencies from both requirements.txt and requirements.yml."""
+
+    if conda:
+        call("conda", ["install", "--file src/environment.yml", "--yes"])
+
     python_call("pip", ["install", "-U", "-r", "src/requirements.txt"])
-    call("conda", ["install", "--file src/requirements.yml", "--yes"])
+
 
 @forward_command(cli, forward_help=True)
 def ipython(args):

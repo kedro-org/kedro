@@ -90,7 +90,7 @@ class JSONBlobDataSet(AbstractDataSet):
             filepath: path to a azure blob of a json(l) file.
             container_name: Azure container name.
             credentials: Credentials (``account_name`` and
-                ``account_key`` or ``sas_token``) to access the Azure blob
+                ``account_key`` or ``sas_token``) to access the Azure blob storage
             encoding: Default utf-8. Defines encoding of json files downloaded as binary streams.
             blob_to_bytes_args: Any additional arguments to pass to Azure's
                 ``get_blob_to_bytes`` method:

@@ -146,8 +146,12 @@ class ParquetS3DataSet(AbstractVersionedDataSet):
     def _save(self, data: pd.DataFrame) -> None:
         save_path = PurePosixPath(self._get_save_path())
 
-        pq.write_table(pa.Table.from_pandas(data), str(save_path), filesystem=self._s3)
-
+        pq.write_table(
+            table=pa.Table.from_pandas(data),
+            where=str(save_path),
+            filesystem=self._s3,
+            **self._save_args,
+        )
         load_path = PurePosixPath(self._get_load_path())
 
         self._check_paths_consistency(load_path, save_path)

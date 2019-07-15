@@ -12,14 +12,11 @@ class TemplatedConfigLoader(ConfigLoader):
     Extension of the ConfigLoader class that allows for template values, wrapped in brackets like:
      ${..}, to be replaced by default values.
 
-    Default values are either provided by a values.yml file in the specified conf_paths directories,
-    or in a dictionary. User has the option to not search directory for values.yml when a dictionary
-    has been provided, using the search_for_values flag. Otherwise these two will be merged, where
-    the provided dictionary takes precedence over the values.yml file.
+    Default values are provided in a dictionary.
     """
 
     def resolve(self, patterns: Union[str, List[str]],
-                arg_values_dict: Optional[Dict[str, Any]] = None, search_for_values: bool = True):
+                arg_values_dict: Optional[Dict[str, Any]] = None):
         """
         Tries to resolve the template variables in the config dictionary provided by the
         ConfigLoader (super class) `get` method.
@@ -28,38 +25,24 @@ class TemplatedConfigLoader(ConfigLoader):
             patterns: Glob patterns to match. Files, which names match
                 any of the specified patterns, will be processed.
             arg_values_dict: Optional dictionary containing default values.
-            search_for_values: Boolean indicating whether the user wants to search the conf_paths
-            directories for default values or not.
-
-        Raises:
-            ValueError: If no values dict is provided and search_for_values is set to False.
 
         Returns:
             Dict[str, Any]:  A Python dictionary with the combined
                 configuration from all configuration files. **Note:** any keys
                 that start with `_` will be ignored.
                 String values wrapped in `${..} will be replaced with default values if they can be
-                found in one of the provided default values locations (values.yml or default_values
-                dict).
+                found in the arg_values_dict).
         """
 
         if isinstance(patterns, str):
             patterns = [patterns]
 
-        config_raw = self.get(*patterns)
+        config_raw = super(TemplatedConfigLoader, self).get(*patterns)
 
-        if not search_for_values and not arg_values_dict:
-            raise ValueError(
-                'Must specify values_dict when search_for_values is set to false.'
-            )
+        config_out = _replace_vals_map(config_raw, arg_values_dict) if arg_values_dict \
+            else config_raw
 
-        file_values_dict = self.get("*values.yml") if search_for_values else None
-
-        combined_values_dict = \
-            {**file_values_dict, **arg_values_dict} if arg_values_dict and file_values_dict \
-            else arg_values_dict or file_values_dict
-
-        return _replace_vals_map(config_raw, combined_values_dict)
+        return config_out
 
 
 def _replace_val(val: Any, defaults: Dict[str, Any]) -> Any:
@@ -96,10 +79,8 @@ def _replace_val(val: Any, defaults: Dict[str, Any]) -> Any:
         match_full = re.search(regex_pattern_full, val)
         if match_full:
             return defaults.get(match_full.group(1), val)
-        else:
-            return re.sub(regex_pattern, lambda m: defaults.get(m.group(1), m.group(0)), val)
-    else:
-        return val
+        return re.sub(regex_pattern, lambda m: defaults.get(m.group(1), m.group(0)), val)
+    return val
 
 
 def _replace_vals_list(listt: List[Any], defaults: Dict[str, Any]) -> List[Any]:

@@ -180,6 +180,7 @@ Currently the following datasets support versioning:
 - `HDFS3DataSet`
 - `JSONLocalDataSet`
 - `ParquetLocalDataSet`
+- `ParquetS3DataSet`
 - `PickleLocalDataSet`
 - `PickleS3DataSet`
 - `TextLocalDataSet`

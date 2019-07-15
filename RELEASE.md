@@ -3,6 +3,7 @@
 ## Major features and improvements
 * Added a new CLI command `kedro jupyter convert` to facilitate converting Jupyter notebook cells into Kedro nodes. 
 * Added `KedroContext` base class which holds the configuration and Kedro's main functionality (catalog, pipeline, config).
+* Added a new I/O module `ParquetS3DataSet` in `contrib` for usage with Pandas. (by [@mmchougule](https://github.com/mmchougule)) 
 
 ## Bug fixes and other changes
 * Documentation improvements
@@ -23,7 +24,7 @@ If you defined any custom dataset classes which support versioning in your proje
 6. Make sure `_check_paths_consistency` is called with [`PurePath`s](https://docs.python.org/3/library/pathlib.html#pure-paths) as input arguments, instead of strings.
 
 ## Thanks for supporting contributions
-[Dmitry Vukolov](https://github.com/dvukolov), [Jo Stichbury](https://github.com/stichbury), [Angus Williams](https://github.com/awqb), [Deepyaman Datta](https://github.com/deepyaman)
+[Dmitry Vukolov](https://github.com/dvukolov), [Jo Stichbury](https://github.com/stichbury), [Angus Williams](https://github.com/awqb), [Deepyaman Datta](https://github.com/deepyaman), [Mayur Chougule](https://github.com/mmchougule)
 
 # Release 0.14.3
 

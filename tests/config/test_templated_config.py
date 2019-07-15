@@ -133,7 +133,8 @@ class TestTemplatedConfigLoader:
         """Test advanced (i.e. nested dicts, booleans, lists, etc.)"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
-        catalog = TemplatedConfigLoader(conf_paths).resolve("catalog*.yml", template_config_advanced)
+        catalog = TemplatedConfigLoader(conf_paths).resolve("catalog*.yml",
+                                                            template_config_advanced)
 
         assert catalog["planes"]["type"] == "SparkJDBCDataSet"
         assert catalog["planes"]["postgres_credentials"]["user"] == "Fakeuser"

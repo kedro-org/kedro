@@ -34,6 +34,7 @@ from mock import patch
 from pytest import fixture, mark, raises, warns
 
 from kedro import __version__ as version
+from kedro.cli import get_project_context
 from kedro.cli.cli import _get_plugin_command_groups, _init_plugins, cli
 from kedro.cli.utils import (
     CommandCollection,
@@ -97,6 +98,23 @@ def requirements_file(tmp_path):
     reqs_file = tmp_path / "requirements.txt"
     reqs_file.write_text(body)
     yield reqs_file
+
+
+# pylint:disable=too-few-public-methods
+class DummyContext:
+    def __init__(self):
+        self.config_loader = "config_loader"
+
+    catalog = "catalog"
+    pipeline = "pipeline"
+    project_name = "dummy_name"
+    project_path = "dummy_path"
+    project_version = "dummy_version"
+
+
+@fixture
+def dummy_context(mocker):
+    return mocker.patch("kedro.cli.cli.load_context", return_value=DummyContext())
 
 
 class TestCliCommands:
@@ -366,6 +384,86 @@ class TestCliUtils:
         pattern = "Provided filepath is not a Jupyter notebook"
         with raises(KedroCliError, match=pattern):
             export_nodes(random_file, output_path)
+
+
+@mark.usefixtures("dummy_context")
+class TestGetProjectContext:
+    def _deprecation_msg(self, key):
+        msg_dict = {
+            "get_config": ["config_loader", "ConfigLoader"],
+            "create_catalog": ["catalog", "DataCatalog"],
+            "create_pipeline": ["pipeline", "Pipeline"],
+            "template_version": ["project_version", None],
+            "project_name": ["project_name", None],
+            "project_path": ["project_path", None],
+        }
+        attr, obj_name = msg_dict[key]
+        msg = r"\`get_project_context\(\"{}\"\)\` is now deprecated\. ".format(key)
+        if obj_name:
+            msg += (
+                r"This is still returning a function that returns \`{}\` "
+                r"instance\, however passed arguments have no effect anymore\. ".format(
+                    obj_name
+                )
+            )
+        msg += (
+            r"Please get \`KedroContext\` instance by calling "
+            r"\`get_project_context\(\)\` and use its \`{}\` attribute\.".format(attr)
+        )
+        return msg
+
+    def test_context(self):
+        dummy_context = get_project_context("context")
+        assert isinstance(dummy_context, DummyContext)
+
+    def test_get_config(self, tmp_path):
+        key = "get_config"
+        pattern = self._deprecation_msg(key)
+        with warns(DeprecationWarning, match=pattern):
+            config_loader = get_project_context(key)
+            assert config_loader(tmp_path) == "config_loader"
+
+    def test_create_catalog(self):
+        key = "create_catalog"
+        pattern = self._deprecation_msg(key)
+        with warns(DeprecationWarning, match=pattern):
+            catalog = get_project_context(key)
+            assert catalog("config") == "catalog"
+
+    def test_create_pipeline(self):
+        key = "create_pipeline"
+        pattern = self._deprecation_msg(key)
+        with warns(DeprecationWarning, match=pattern):
+            pipeline = get_project_context(key)
+            assert pipeline() == "pipeline"
+
+    def test_template_version(self):
+        key = "template_version"
+        pattern = self._deprecation_msg(key)
+        with warns(DeprecationWarning, match=pattern):
+            assert get_project_context(key) == "dummy_version"
+
+    def test_project_name(self):
+        key = "project_name"
+        pattern = self._deprecation_msg(key)
+        with warns(DeprecationWarning, match=pattern):
+            assert get_project_context(key) == "dummy_name"
+
+    def test_project_path(self):
+        key = "project_path"
+        pattern = self._deprecation_msg(key)
+        with warns(DeprecationWarning, match=pattern):
+            assert get_project_context(key) == "dummy_path"
+
+    def test_verbose(self):
+        assert not get_project_context("verbose")
+
+    def test_invalid_key(self):
+        pattern = (
+            r"`invalid` not found in the context returned by __get_kedro_context__"
+        )
+        with raises(Exception, match=pattern):
+            get_project_context("invalid")
 
 
 @fixture

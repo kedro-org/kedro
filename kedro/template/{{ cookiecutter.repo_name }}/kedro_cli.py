@@ -36,11 +36,14 @@ import sys
 from collections import Counter
 from glob import iglob
 from pathlib import Path
+from typing import Union
 
 import click
 from click import secho, style
 from kedro.cli import main as kedro_main
 from kedro.cli.utils import KedroCliError, call, forward_command, python_call, export_nodes
+from kedro.utils import load_obj
+from kedro.runner import SequentialRunner
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -77,17 +80,17 @@ with --runner."""
 RUNNER_ARG_HELP = """Specify a runner that you want to run the pipeline with.
 This option cannot be used together with --parallel."""
 
-CONVERT_ALL_HELP = """Extract the nodes from all notebooks in the Kedro project directory, 
+CONVERT_ALL_HELP = """Extract the nodes from all notebooks in the Kedro project directory,
 including sub-folders."""
 
-OVERWRITE_HELP = """If Python file already exists for the equivalent notebook, 
+OVERWRITE_HELP = """If Python file already exists for the equivalent notebook,
 overwrite its contents."""
 
 
-def __get_kedro_context__():
+def __get_kedro_context__(**kwargs):
     """Used to provide this project's context to plugins."""
     from {{cookiecutter.python_package}}.run import __kedro_context__
-    return __kedro_context__()
+    return __kedro_context__(**kwargs)
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, name=__file__)
@@ -96,7 +99,9 @@ def cli():
 
 
 @cli.command()
-@click.option("--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP)
+@click.option(
+    "--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP
+)
 @click.option("--parallel", "-p", is_flag=True, multiple=False, help=PARALLEL_ARG_HELP)
 @click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
 @click.option("--tag", "-t", type=str, default=None, multiple=True, help=TAG_ARG_HELP)
@@ -110,7 +115,8 @@ def run(tag, env, parallel, runner):
         )
     if parallel:
         runner = "ParallelRunner"
-    main(tags=tag, env=env, runner=runner)
+    runner_class = load_obj(runner, "kedro.runner") if runner else SequentialRunner
+    main(tags=tag, env=env, runner=runner_class())
 
 
 @forward_command(cli, forward_help=True)
@@ -251,7 +257,7 @@ def convert_notebook(all_flag, overwrite_flag, filepath):
         )
         return
 
-    kedro_project_path = __get_kedro_context__()["project_path"]
+    kedro_project_path = __get_kedro_context__(**kwargs)["project_path"]
     kedro_package_name = "{{cookiecutter.python_package}}"
 
     if all_flag:
@@ -296,7 +302,7 @@ def convert_notebook(all_flag, overwrite_flag, filepath):
 
 def ipython_message():
     """Show a message saying how we have configured the IPython env."""
-    ipy_vars = ["proj_dir", "proj_name", "io", "startup_error"]
+    ipy_vars = ["startup_error", "context"]
     secho("-" * 79, fg="cyan")
     secho("Starting a Kedro session with the following variables in scope")
     secho(", ".join(ipy_vars), fg="green")

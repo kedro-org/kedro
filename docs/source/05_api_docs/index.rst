@@ -84,7 +84,7 @@ Welcome to Kedro's API docs and tutorials!
    04_user_guide/07_advanced_io
    04_user_guide/08_pyspark
    04_user_guide/09_developing_plugins
-
+   04_user_guide/10_ipython
 
 .. toctree::
    :maxdepth: 2
@@ -92,8 +92,7 @@ Welcome to Kedro's API docs and tutorials!
 
    06_resources/01_faq
    06_resources/02_commands_reference
-   06_resources/03_ipython
-   06_resources/04_lint
+   06_resources/03_lint
 
 
 API Docs

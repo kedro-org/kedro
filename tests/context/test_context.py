@@ -167,6 +167,9 @@ def identity(input1: str):
 
 
 class DummyContext(KedroContext):
+    project_name = "bob"
+    project_version = "fred"
+
     @property
     def pipeline(self) -> Pipeline:
         return Pipeline(
@@ -189,6 +192,12 @@ def dummy_context(tmp_path, mocker, env):
 
 @pytest.mark.usefixtures("config_dir")
 class TestKedroContext:
+    def test_project_name(self, dummy_context):
+        assert dummy_context.project_name == "bob"
+
+    def test_project_version(self, dummy_context):
+        assert dummy_context.project_version == "fred"
+
     def test_project_path(self, dummy_context, tmp_path):
         assert str(dummy_context.project_path) == str(tmp_path.resolve())
 
@@ -201,6 +210,19 @@ class TestKedroContext:
         dummy_context.io.save("cars", dummy_dataframe)
         reloaded_df = dummy_context.io.load("cars")
         assert_frame_equal(reloaded_df, dummy_dataframe)
+
+    def test_config_loader(self, dummy_context):
+        params = dummy_context.config_loader.get("parameters*")
+        db_conf = dummy_context.config_loader.get("db*")
+        catalog = dummy_context.config_loader.get("catalog*")
+
+        assert params["param1"] == 1
+        assert db_conf["prod"]["url"] == "postgresql://user:pass@url_prod/db"
+
+        assert catalog["trains"]["type"] == "CSVLocalDataSet"
+        assert catalog["cars"]["type"] == "CSVLocalDataSet"
+        assert catalog["boats"]["type"] == "CSVLocalDataSet"
+        assert not catalog["cars"]["save_args"]["index"]
 
     def test_default_env(self, dummy_context):
         assert dummy_context.env == "local"
@@ -288,13 +310,17 @@ class TestKedroContext:
     @pytest.mark.filterwarnings("ignore")
     def test_run_with_empty_pipeline(self, tmp_path, mocker):
         class DummyContext(KedroContext):
+            project_name = "bob"
+            project_version = "fred"
+
             @property
             def pipeline(self) -> Pipeline:
                 return Pipeline([])
 
         mocker.patch("logging.config.dictConfig")
         dummy_context = DummyContext(str(tmp_path))
-
+        assert dummy_context.project_name == "bob"
+        assert dummy_context.project_version == "fred"
         pattern = "Pipeline contains no nodes"
         with pytest.raises(KedroContextError, match=pattern):
             dummy_context.run()

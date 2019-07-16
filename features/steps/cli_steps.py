@@ -243,7 +243,8 @@ def modify_example_test_to_fail(context):
     path_to_example_test = context.root_project_dir / "src" / "tests" / "test_run.py"
     test_run_contents = path_to_example_test.read_text("utf-8")
     failed_test_str = test_run_contents.replace(
-        "test_create_catalog():", "test_create_catalog():\n    assert False"
+        "test_project_name(self, project_context):",
+        "test_project_name(self, project_context):\n    assert False",
     )
     path_to_example_test.write_text(failed_test_str)
 

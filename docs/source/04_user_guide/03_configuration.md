@@ -1,6 +1,6 @@
 # Configuration
 
-> *Note:* This documentation is based on `Kedro 0.14.3`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.0`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 This section contains detailed information about configuration. You may also want to consult the relevant API documentation on [kedro.config](/kedro.config.rst).
 
@@ -44,10 +44,10 @@ In addition to the 2 built-in configuration environments, it is possible to crea
 kedro run --env=test
 ```
 
-If no `env` option is specified, this will default to using `local` environment to overwrite `conf/base`. 
+If no `env` option is specified, this will default to using `local` environment to overwrite `conf/base`.
 
-You can alternatively change the default environment by modifying the `DEFAULT_RUN_ENV` variable in `src/run.py`.
+You can alternatively change the default environment by modifying the `env` variable in `__kedro_context__` in `src/run.py`.
 
 ```python
-DEFAULT_RUN_ENV = "test"
+env = "test"
 ```

@@ -63,7 +63,7 @@ A `kedro` project consists of the following main components:
 +--------------+----------------------------------------------------------------------+
 | Component    | Description                                                          |
 +==============+======================================================================+
-| Data Catalog | A collection of datasets that can be used to form the data pipeline. | 
+| Data Catalog | A collection of datasets that can be used to form the data pipeline. |
 |              | Each dataset provides :code:`load` and :code:`save` capabilities for |
 |              | a specific data type, e.g. :code:`CSVS3DataSet` loads and saves data |
 |              | to a csv file in S3.                                                 |
@@ -139,7 +139,7 @@ kedro run
 
 This command calls the `main()` function from `src/getting_started/run.py`, which in turn does the following:
 
-1. Initiates the context:
+1. Instantiates `ProjectContext` class defined in `src/getting_started/run.py`:
     * Reads relevant configuration
     * Configures Python `logging`
     * Instantiates the `DataCatalog` and feeds a dictionary containing `parameters` config

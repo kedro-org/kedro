@@ -1,6 +1,6 @@
 # Advanced IO
 
-> *Note:* This documentation is based on `Kedro 0.14.3`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.0`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 In this tutorial, you will learn about advanced uses of the [Kedro IO](/kedro.io.rst) module and understand the underlying implementation.
 
@@ -105,22 +105,22 @@ data1 = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
 data2 = pd.DataFrame({"col1": [7], "col2": [8], "col3": [9]})
 version = Version(
     load=None,  # load the latest available version
-    save=None,  # generate save version automatically on each save operation 
+    save=None,  # generate save version automatically on each save operation
 )
 test_data_set = CSVLocalDataSet(
-    filepath="data/01_raw/test.csv", 
-    save_args={"index": False}, 
+    filepath="data/01_raw/test.csv",
+    save_args={"index": False},
     version=version,
 )
 io = DataCatalog({"test_data_set": test_data_set})
 
 # save the dataset to data/01_raw/test.csv/<version>/test.csv
-io.save("test_data_set", data1)  
+io.save("test_data_set", data1)
 # save the dataset into a new file data/01_raw/test.csv/<version>/test.csv
-io.save("test_data_set", data2)  
+io.save("test_data_set", data2)
 
 # load the latest version from data/test.csv/*/test.csv
-reloaded = io.load("test_data_set")  
+reloaded = io.load("test_data_set")
 assert data2.equals(reloaded)
 ```
 
@@ -129,11 +129,11 @@ assert data2.equals(reloaded)
 ```python
 version = Version(
     load="my_exact_version",   # load exact version
-    save="my_exact_version",   # save to exact version 
+    save="my_exact_version",   # save to exact version
 )
 test_data_set = CSVLocalDataSet(
-    filepath="data/01_raw/test.csv", 
-    save_args={"index": False}, 
+    filepath="data/01_raw/test.csv",
+    save_args={"index": False},
     version=version,
 )
 io = DataCatalog({"test_data_set": test_data_set})
@@ -141,12 +141,12 @@ io = DataCatalog({"test_data_set": test_data_set})
 # save the dataset to data/01_raw/test.csv/my_exact_version/test.csv
 io.save("test_data_set", data1)
 # load from data/01_raw/test.csv/my_exact_version/test.csv
-reloaded = io.load("test_data_set")  
+reloaded = io.load("test_data_set")
 assert data1.equals(reloaded)
 
 # raises DataSetError since the path
 # data/01_raw/test.csv/my_exact_version/test.csv already exists
-io.save("test_data_set", data2)  
+io.save("test_data_set", data2)
 ```
 
 > **Important:** Passing exact load and/or save versions to the dataset instantiation is not recommended, since it may lead to inconsistencies between operations. For example, if versions for load and save operations do not match, save operation would result in a `UserWarning` indicating that save a load versions do not match. Load after save may also return an error if the corresponding load version is not found:
@@ -154,18 +154,18 @@ io.save("test_data_set", data2)
 ```python
 version = Version(
     load="exact_load_version",  # load exact version
-    save="exact_save_version"   # save to exact version 
+    save="exact_save_version"   # save to exact version
 )
 test_data_set = CSVLocalDataSet(
-    filepath="data/01_raw/test.csv", 
-    save_args={"index": False}, 
+    filepath="data/01_raw/test.csv",
+    save_args={"index": False},
     version=version,
 )
 io = DataCatalog({"test_data_set": test_data_set})
 
 io.save("test_data_set", data1)  # emits a UserWarning due to version inconsistency
 
-# raises DataSetError since the data/01_raw/test.csv/exact_load_version/test.csv 
+# raises DataSetError since the data/01_raw/test.csv/exact_load_version/test.csv
 # file does not exist
 reloaded = io.load("test_data_set")
 ```

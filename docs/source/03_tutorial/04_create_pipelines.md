@@ -2,9 +2,8 @@
 
 This section covers how to create a pipeline from a set of `node`s, which are Python functions, as described in more detail in the [nodes and pipelines user guide](../04_user_guide/05_nodes_and_pipelines.md) documentation.
 
-1. As you draft experimental code, you can use a [Jupyter Notebook](./04_create_pipelines.md#working-with-kedro-projects-from-jupyter) or [IPython session](../06_resources/03_ipython.md#working-with-kedro-and-ipython). If you include [`docstrings`](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) to explain what your functions do, you can take advantage of [auto-generated Sphinx documentation](http://www.sphinx-doc.org/en/master/) later on. Once you are happy with how you have written your `node` functions, you will copy & paste the code into the `src/kedro_tutorial/nodes/` folder as a `.py` file.
+1. As you draft experimental code, you can use a [Jupyter Notebook](../04_user_guide/10_ipython.md#working-with-kedro-projects-from-jupyter) or [IPython session](../04_user_guide/10_ipython.md). If you include [`docstrings`](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) to explain what your functions do, you can take advantage of [auto-generated Sphinx documentation](http://www.sphinx-doc.org/en/master/) later on. Once you are happy with how you have written your `node` functions, you will copy & paste the code into the `src/kedro_tutorial/nodes/` folder as a `.py` file.
 2. When you are ready with a node you should add it to the pipeline in `src/kedro_tutorial/pipeline.py`, specifying its inputs and outputs.
-3. Finally, you will choose how you would like to run your pipeline: sequentially or in parallel, by specifying your preference in `src/kedro_tutorial/run.py`.
 
 
 ## Node basics
@@ -154,34 +153,6 @@ kedro run
 
 `CSVLocalDataSet` is chosen for its simplicity, but you can choose any other available dataset implementation class to save the data, for example, to a database table, cloud storage (like [AWS S3](https://aws.amazon.com/s3/), [Azure Blob Storage](https://azure.microsoft.com/en-gb/services/storage/blobs/), etc.) and others. If you cannot find the dataset implementation you need, you can easily implement your own as [you already did earlier](./03_set_up_data.md#creating-custom-datasets) and share it with the world by contributing back to Kedro!
 
-
-## Working with Kedro projects from Jupyter
-
-Currently, the pipeline consists of just two nodes and performs just some data pre-processing. Let's expand it by adding more nodes.
-
-When you are developing new nodes for your pipeline, you can write them as regular Python functions, but you may want to use Jupyter Notebooks for experimenting with your code before committing to a specific implementation. To take advantage of Kedro's Jupyter session, you can run this in your terminal:
-
-```bash
-kedro jupyter notebook
-```
-
-This will open a Jupyter Notebook in your browser. Navigate to `notebooks` folder and create a notebook there with a Kedro kernel. After opening the newly created notebook you can check what the data looks like by pasting this into the first cell of the notebook and selecting **Run**:
-
-```python
-df = io.load('preprocessed_shuttles')
-df.head()
-```
-
-You should be able to see the first 5 rows of the loaded dataset as follows:
-
-![](img/jupyter_notebook_ch3.png)
-
-> *Note:* 
-<br/>If you see an error message stating that `io` is undefined, you can see what went wrong by using `print(startup_error)`, where `startup_error` is available as a variable in Python. 
-<br/>If you cannot access `startup_error` please make sure you have run **`kedro`**`jupyter notebook` from the project's root directory. Running without the `kedro` command (that is, just running a `jupyter notebook`) will not load the Kedro session for you.
-<br/>When you add new datasets to your `catalog.yml` file you need to reload Kedro's session by running `%reload_kedro` in your cell.
-
-
 ## Creating a master table
 
 We need to add a function to join together the three dataframes into a single master table in a cell in the notebook as follows:
@@ -292,7 +263,7 @@ You can start by updating the dependencies in `src/requirements.txt` with the fo
 scikit-learn==0.20.2
 ```
 
-You can find out more about requirements files [here](https://pip.pypa.io/en/stable/user_guide/#requirements-files). 
+You can find out more about requirements files [here](https://pip.pypa.io/en/stable/user_guide/#requirements-files).
 
 Then, from within the project directory, run:
 
@@ -319,7 +290,7 @@ def split_data(data: pd.DataFrame, parameters: Dict) -> List:
         Args:
             data: Source data.
             parameters: Parameters defined in parameters.yml.
-            
+
         Returns:
             A list containing split data.
 
@@ -347,7 +318,7 @@ def train_model(X_train: np.ndarray, y_train: np.ndarray) -> LinearRegression:
         Args:
             X_train: Training data of independent features.
             y_train: Training data for price.
-            
+
         Returns:
             Trained model.
 
@@ -378,7 +349,7 @@ test_size: 0.2
 random_state: 3
 ```
 
-These are the parameters fed into the `DataCatalog` when the pipeline is executed (see the details in `create_catalog()` and `main()` in `src/kedro_tutorial/run.py`).
+These are the parameters fed into the `DataCatalog` when the pipeline is executed.
 
 Next, register the dataset, which will save the trained model, by adding the following definition to `conf/base/catalog.yml`:
 
@@ -555,9 +526,9 @@ kedro run --tag=ds --tag=de
 
 ```python
 node(
-    train_model, 
-    ["X_train", "y_train"], 
-    "regressor", 
+    train_model,
+    ["X_train", "y_train"],
+    "regressor",
     tags=["my-regressor-node"],
 )
 ```
@@ -586,7 +557,7 @@ def log_running_time(func: Callable) -> Callable:
 
         Args:
             func: Function to be executed.
-            
+
         Returns:
             Decorator for logging the running time.
 
@@ -688,17 +659,17 @@ Another built-in decorator is `kedro.pipeline.decorators.mem_profile`, which wil
 
 ## Kedro runners
 
-Having specified the data catalog and the pipeline, you are now ready to run the pipeline. There are two different runners you can specify:  
+Having specified the data catalog and the pipeline, you are now ready to run the pipeline. There are two different runners you can specify:
 
 * `SequentialRunner` - runs your nodes sequentially; once a node has completed its task then the next one starts.
 * `ParallelRunner` - runs your nodes in parallel; independent nodes are able to run at the same time, allowing you to take advantage of multiple CPU cores.
 
-By default, `src/kedro_tutorial/run.py` uses a `SequentialRunner`, which is instantiated when you execute `kedro run` from the command line. Switching to use `ParallelRunner` is as simple as providing an additional flag when running the pipeline from the command line as follows:
+By default, Kedro uses a `SequentialRunner`, which is instantiated when you execute `kedro run` from the command line. Switching to use `ParallelRunner` is as simple as providing an additional flag when running the pipeline from the command line as follows:
 
 ```bash
 kedro run --parallel
 ```
 
-`ParallelRunner` executes the pipeline nodes in parallel, and is more efficient when there are independent branches in your pipeline. 
+`ParallelRunner` executes the pipeline nodes in parallel, and is more efficient when there are independent branches in your pipeline.
 
 > *Note:* `ParallelRunner` performs task parallelisation, which is different from data parallelisation as seen in PySpark.

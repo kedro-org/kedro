@@ -80,11 +80,9 @@ def mocked_s3_object(mocked_s3_bucket, dummy_dataframe: pd.DataFrame):
     table = pa.Table.from_pandas(dummy_dataframe)
     pq.write_table(table, FILENAME)
 
-    with open(FILENAME, 'rb') as f:
+    with open(FILENAME, "rb") as f:
         object_data = f.read()
-        mocked_s3_bucket.put_object(
-            Bucket=BUCKET_NAME, Key=FILENAME, Body=object_data
-        )
+        mocked_s3_bucket.put_object(Bucket=BUCKET_NAME, Key=FILENAME, Body=object_data)
     return mocked_s3_bucket
 
 
@@ -93,7 +91,10 @@ def s3_data_set(load_args, save_args):
     return ParquetS3DataSet(
         filepath=FILENAME,
         bucket_name=BUCKET_NAME,
-        credentials={'aws_access_key_id': 'YOUR_KEY', 'aws_secret_access_key': 'YOUR SECRET'},
+        credentials={
+            "aws_access_key_id": "YOUR_KEY",
+            "aws_secret_access_key": "YOUR SECRET",
+        },
         load_args=load_args,
         save_args=save_args,
     )
@@ -105,7 +106,7 @@ def mocked_s3_object_versioned(mocked_s3_bucket, dummy_dataframe, save_version):
     table = pa.Table.from_pandas(dummy_dataframe)
     pq.write_table(table, FILENAME)
 
-    with open(FILENAME, 'rb') as f:
+    with open(FILENAME, "rb") as f:
         object_data = f.read()
         mocked_s3_bucket.put_object(
             Bucket=BUCKET_NAME,
@@ -120,7 +121,10 @@ def versioned_s3_data_set(load_version, save_version):
     return ParquetS3DataSet(
         filepath=FILENAME,
         bucket_name=BUCKET_NAME,
-        credentials={'aws_access_key_id': 'YOUR_KEY', 'aws_secret_access_key': 'YOUR SECRET'},
+        credentials={
+            "aws_access_key_id": "YOUR_KEY",
+            "aws_secret_access_key": "YOUR SECRET",
+        },
         version=Version(load_version, save_version),
     )
 

@@ -6,9 +6,10 @@
 * Added a new I/O module `ParquetS3DataSet` in `contrib` for usage with Pandas. (by [@mmchougule](https://github.com/mmchougule)) 
 
 ## Bug fixes and other changes
-* Documentation improvements
-* `anyconfig` default log level changed from `INFO` to `WARNING`
-* Add information on installed plugins to `kedro info`
+* Documentation improvements.
+* `anyconfig` default log level changed from `INFO` to `WARNING`.
+* Added information on installed plugins to `kedro info`.
+* Added style sheets for project documentation, so the output of `kedro build-docs` will resemble the style of `kedro docs`.
 
 ## Breaking changes to the API
 * Simplify the Kedro template in `run.py` with the introduction of `KedroContext` class.

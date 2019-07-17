@@ -53,7 +53,6 @@ class FeatherLocalDataSet(AbstractVersionedDataSet):
         >>>                      'col3': [5, 6]})
         >>>
         >>> data_set = FeatherLocalDataSet(filepath="test.feather",
-        >>>                                bucket_name="test_bucket",
         >>>                                load_args=None,
         >>>                                save_args={"index": False})
         >>> data_set.save(data)

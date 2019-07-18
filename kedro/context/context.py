@@ -51,6 +51,7 @@ class KedroContext(abc.ABC):
 
     Attributes:
        CONF_ROOT: Name of root directory containing project configuration.
+       Default name is "conf".
 
     Example:
     ::
@@ -82,6 +83,34 @@ class KedroContext(abc.ABC):
         self._config_loader = self._create_config()
         self._setup_logging()
         self._catalog = self._create_catalog()
+
+    @property
+    @abc.abstractmethod
+    def project_name(self) -> str:
+        """Abstract property for Kedro project name.
+
+        Returns:
+            Name of Kedro project.
+
+        """
+        raise NotImplementedError(
+            "`{}` is a subclass of KedroContext and it must implement "
+            "the `project_name` property".format(self.__class__.__name__)
+        )
+
+    @property
+    @abc.abstractmethod
+    def project_version(self) -> str:
+        """Abstract property for Kedro version.
+
+        Returns:
+            Kedro version.
+
+        """
+        raise NotImplementedError(
+            "`{}` is a subclass of KedroContext and it must implement "
+            "the `project_version` property".format(self.__class__.__name__)
+        )
 
     @property
     @abc.abstractmethod
@@ -128,6 +157,17 @@ class KedroContext(abc.ABC):
         """
         # pylint: disable=invalid-name
         return self._catalog
+
+    @property
+    def config_loader(self) -> ConfigLoader:
+        """Read-only property referring to Kedro's ``ConfigLoader`` for this
+        context.
+
+        Returns:
+            Instance of `ConfigLoader` created by `_create_config()`.
+
+        """
+        return self._config_loader
 
     def _create_config(self) -> ConfigLoader:
         """Load Kedro's configuration at the root of the project.
@@ -216,14 +256,16 @@ class KedroContext(abc.ABC):
         runner.run(pipeline, self.catalog)
 
 
-def load_context(proj_path: Union[str, Path]) -> Dict:
-    """Load a context dictionary defined in `kedro_cli.__kedro_context__`.
+def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
+    """Loads KedroContext object defined in `kedro_cli.__kedro_context__`.
+    This function will change the current working directory to the project path.
 
     Args:
-        proj_path: Path to the Kedro project.
+        project_path: Path to the Kedro project.
+        kwargs: Optional custom arguments defined by users.
 
     Returns:
-        Kedro context dictionary.
+        Instance of KedroContext class defined in Kedro project.
 
     Raises:
         KedroContextError: If another project context has already been loaded.
@@ -232,21 +274,22 @@ def load_context(proj_path: Union[str, Path]) -> Dict:
     # global due to importlib caching import_module("kedro_cli") call
     global _LOADED_PATH  # pylint: disable=global-statement
 
-    proj_path = Path(proj_path).expanduser().resolve()
+    project_path = Path(project_path).expanduser().resolve()
 
-    if _LOADED_PATH and proj_path != _LOADED_PATH:
+    if _LOADED_PATH and project_path != _LOADED_PATH:
         raise KedroContextError(
             "Cannot load context for `{}`, since another project `{}` has "
-            "already been loaded".format(proj_path, _LOADED_PATH)
+            "already been loaded".format(project_path, _LOADED_PATH)
         )
-
-    if str(proj_path) not in sys.path:
-        sys.path.append(str(proj_path))
+    if str(project_path) not in sys.path:
+        sys.path.append(str(project_path))
 
     kedro_cli = importlib.import_module("kedro_cli")
-    result = kedro_cli.__get_kedro_context__()  # type: ignore
-    _LOADED_PATH = proj_path
-    os.chdir(str(proj_path))  # Move to project root
+    if os.getcwd() != str(project_path):
+        warn("Changing the current working directory to {}".format(str(project_path)))
+        os.chdir(str(project_path))  # Move to project root
+    result = kedro_cli.__get_kedro_context__(**kwargs)  # type: ignore
+    _LOADED_PATH = project_path
     return result
 
 

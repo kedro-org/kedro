@@ -207,10 +207,34 @@ def create_new_env(context, env_name):
     env_path = context.root_project_dir / "conf" / env_name
     env_path.mkdir()
 
-    for config_name in ("catalog", "parameters", "logging", "credentials"):
+    for config_name in ("catalog", "parameters", "credentials"):
         path = env_path / "{}.yml".format(config_name)
         with path.open("w") as config_file:
             yaml.dump({}, config_file, default_flow_style=False)
+
+    # overwrite the log level for anyconfig from WARNING to INFO
+    logging_path = env_path / "logging.yml"
+    logging_json = {
+        "loggers": {
+            "anyconfig": {
+                "level": "INFO",
+                "handlers": ["console", "info_file_handler", "error_file_handler"],
+                "propagate": "no",
+            },
+            "kedro.io": {
+                "level": "INFO",
+                "handlers": ["console", "info_file_handler", "error_file_handler"],
+                "propagate": "no",
+            },
+            "kedro.pipeline": {
+                "level": "INFO",
+                "handlers": ["console", "info_file_handler", "error_file_handler"],
+                "propagate": "no",
+            },
+        }
+    }
+    with logging_path.open("w") as config_file:
+        yaml.dump(logging_json, config_file, default_flow_style=False)
 
 
 @given("the example test has been set to fail")
@@ -219,7 +243,8 @@ def modify_example_test_to_fail(context):
     path_to_example_test = context.root_project_dir / "src" / "tests" / "test_run.py"
     test_run_contents = path_to_example_test.read_text("utf-8")
     failed_test_str = test_run_contents.replace(
-        "test_create_catalog():", "test_create_catalog():\n    assert False"
+        "test_project_name(self, project_context):",
+        "test_project_name(self, project_context):\n    assert False",
     )
     path_to_example_test.write_text(failed_test_str)
 
@@ -467,15 +492,13 @@ def check_environment_used(context, env):
     else:
         stdout = context.result.stdout
 
-    for config_name in ("catalog", "parameters", "credentials", "logging"):
+    for config_name in ("catalog", "parameters", "credentials"):
         path = env_path.joinpath("{}.yml".format(config_name))
         if path.exists():
             msg = "Loading: {}".format(str(path.resolve()))
             assert msg in stdout, (
                 "Expected the following message segment to be printed on stdout: "
-                "{exp_msg},\nbut got {actual_msg}".format(
-                    exp_msg=msg, actual_msg=stdout
-                )
+                "{0}, but got:\n{1}".format(msg, stdout)
             )
 
 

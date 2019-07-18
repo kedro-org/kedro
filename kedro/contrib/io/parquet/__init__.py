@@ -25,16 +25,6 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""kedro.contrib.io.parquet provides I/O modules for Parquet files on S3."""
 
-Feature: IPython target in new project
-
-  Background:
-    Given I have prepared a config file with example code
-    And I have run a non-interactive kedro new
-    And I have executed the kedro command "install"
-
-  Scenario: Execute ipython target
-    When I execute the kedro command "ipython"
-    Then I should get a message including "An enhanced Interactive Python"
-    And I should get a message including "INFO - ** Kedro project project-dummy"
-    And I should get a message including "INFO - Defined global variable context"
+from .parquet_s3 import ParquetS3DataSet  # NOQA

@@ -1,8 +1,8 @@
 # The Data Catalog
 
-> *Note:* This documentation is based on `Kedro 0.14.3`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.0`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
-This section introduces `catalog.yml`, the project-shareable Data Catalog. The file is located in `conf/base` and is a registry of all data sources available for use by a project; it manages loading and saving of data. 
+This section introduces `catalog.yml`, the project-shareable Data Catalog. The file is located in `conf/base` and is a registry of all data sources available for use by a project; it manages loading and saving of data.
 
 ## Using the Data Catalog within Kedro configuration
 
@@ -97,15 +97,15 @@ scooters:
   load_args:
     index_col: ['name']
     columns: ['name', 'gear']
-  save_args:  
+  save_args:
     if_exists: 'replace'
 
 # Example 8: Load a SQL table with credentials and applies a SQL query to the table
 scooters_query:
-  type: SQLQueryDataSet  
+  type: SQLQueryDataSet
   credentials: scooters_credentials
   sql: 'select * from cars where gear=4'
-  load_args:  
+  load_args:
     index_col: ['name']
 ```
 
@@ -114,7 +114,7 @@ The above `catalog.yml` gets `dev_s3` `scooters_credentials` from `conf/local/cr
 ```yaml
 dev_s3:
      aws_access_key_id: token
-     aws_secret_access_key: key    
+     aws_secret_access_key: key
 
 scooters_credentials:
   con: sqlite:///kedro.db
@@ -282,7 +282,7 @@ io.list()
 
 ## Saving data
 
-Saving data can be completed with a similar API. 
+Saving data can be completed with a similar API.
 
 > *Note:* This use is not recommended unless you are prototyping in notebooks.
 

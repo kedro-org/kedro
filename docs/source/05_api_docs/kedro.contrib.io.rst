@@ -23,3 +23,4 @@ kedro.contrib.io
       kedro.contrib.io.bioinformatics.BioSequenceLocalDataSet
       kedro.contrib.io.pyspark.SparkDataSet
       kedro.contrib.io.pyspark.SparkJDBCDataSet
+      kedro.contrib.io.parquet.ParquetS3DataSet

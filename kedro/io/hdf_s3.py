@@ -31,7 +31,6 @@ underlying functionality is supported by pandas HDFStore and PyTables,
 so it supports all allowed PyTables options for loading and saving hdf files.
 """
 import copy
-from functools import partial
 from pathlib import PurePosixPath
 from typing import Any, Dict, Optional
 
@@ -112,7 +111,7 @@ class HDFS3DataSet(AbstractVersionedDataSet):
             PurePosixPath("{}/{}".format(bucket_name, filepath)),
             version,
             exists_function=_s3.exists,
-            glob_function=partial(_s3.glob, refresh=True),
+            glob_function=_s3.glob,
         )
         self._bucket_name = bucket_name
         self._key = key

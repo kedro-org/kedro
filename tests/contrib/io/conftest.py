@@ -26,15 +26,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-Feature: IPython target in new project
+"""
+This file contains the fixtures that are reusable by any tests within
+this directory. You don't need to import the fixtures as pytest will
+discover them automatically. More info here:
+https://docs.pytest.org/en/latest/fixture.html
+"""
 
-  Background:
-    Given I have prepared a config file with example code
-    And I have run a non-interactive kedro new
-    And I have executed the kedro command "install"
+from pytest import fixture
 
-  Scenario: Execute ipython target
-    When I execute the kedro command "ipython"
-    Then I should get a message including "An enhanced Interactive Python"
-    And I should get a message including "INFO - ** Kedro project project-dummy"
-    And I should get a message including "INFO - Defined global variable context"
+from kedro.io.core import generate_current_version
+
+
+@fixture(params=[None])
+def load_version(request):
+    return request.param
+
+
+@fixture(params=[None])
+def save_version(request):
+    return request.param or generate_current_version()

@@ -226,7 +226,7 @@ class KedroContext(abc.ABC):
         catalog.add_feed_dict(self._get_feed_dict())
         return catalog
 
-    def run(self, tags: Iterable[str] = None, runner: AbstractRunner = None) -> None:
+    def run(self, tags: Iterable[str] = None, runner: AbstractRunner = None, only_missing: bool = False) -> None:
         """Runs the pipeline with a specified runner.
 
         Args:
@@ -235,6 +235,7 @@ class KedroContext(abc.ABC):
                 containing *any* of these tags will be added to the ``Pipeline``.
             runner: An optional parameter specifying the runner that you want to run
                 the pipeline with.
+            only_missing: An option to run only missing nodes.
         Raises:
             KedroContextError: If the resulting ``Pipeline`` is empty
                 or incorrect tags are provided.
@@ -253,7 +254,10 @@ class KedroContext(abc.ABC):
 
         # Run the runner
         runner = runner or SequentialRunner()
-        runner.run(pipeline, self.catalog)
+        if only_missing:
+            runner.run_only_missing(pipeline, self.catalog)
+        else:
+            runner.run(pipeline, self.catalog)
 
 
 def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:

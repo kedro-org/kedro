@@ -135,8 +135,7 @@ def s3fs_cleanup():
     # s3fs caches some connection details globally, which should be
     # cleared so we get a clean slate every time we instantiate a S3FileSystem
     yield
-    S3FileSystem._conn = {}
-    S3FileSystem._singleton = [None]
+    S3FileSystem.cachable = False
 
 
 @pytest.mark.usefixtures("s3fs_cleanup")

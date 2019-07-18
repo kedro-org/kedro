@@ -30,7 +30,6 @@
 to read and write from S3 and pandas to handle the csv file.
 """
 from copy import deepcopy
-from functools import partial
 from pathlib import PurePosixPath
 from typing import Any, Dict, Optional
 
@@ -101,7 +100,7 @@ class CSVS3DataSet(AbstractVersionedDataSet):
             PurePosixPath("{}/{}".format(bucket_name, filepath)),
             version,
             exists_function=_s3.exists,
-            glob_function=partial(_s3.glob, refresh=True),
+            glob_function=_s3.glob,
         )
         default_save_args = {"index": False}
         self._save_args = (

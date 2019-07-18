@@ -11,4 +11,4 @@ xlsxwriter>=1.0.7, <2.0
 anyconfig==0.9.7
 python-json-logger==0.1.9
 memory_profiler==0.54.0
-s3fs>=0.2.1, <1.0
+s3fs>=0.3.0, <1.0

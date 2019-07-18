@@ -30,7 +30,6 @@
 data to parquet files on S3
 """
 from copy import deepcopy
-from functools import partial
 from pathlib import PurePosixPath
 from typing import Any, Dict, Optional
 
@@ -107,7 +106,7 @@ class ParquetS3DataSet(AbstractVersionedDataSet):
             PurePosixPath("{}/{}".format(bucket_name, filepath)),
             version,
             exists_function=_s3.exists,
-            glob_function=partial(_s3.glob, refresh=True),
+            glob_function=_s3.glob,
         )
 
         default_load_args = {}  # type: Dict[str, Any]

@@ -95,6 +95,7 @@ def _assert_template_ok(
         if package_name:
             assert (full_path / "src" / package_name / "__init__.py").is_file()
 
+
 class TestInteractiveNew:
     """Tests for running `kedro new` interactively."""
 

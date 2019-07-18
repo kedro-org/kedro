@@ -39,8 +39,8 @@ import yaml
 from kedro import __version__ as version
 from kedro.cli.cli import TEMPLATE_PATH, _fix_user_path, _get_default_config, cli
 
-FILES_IN_TEMPLATE_NO_EXAMPLE = 35
-FILES_IN_TEMPLATE_WITH_EXAMPLE = 37
+FILES_IN_TEMPLATE_NO_EXAMPLE = 36
+FILES_IN_TEMPLATE_WITH_EXAMPLE = 38
 
 
 # pylint: disable=too-many-arguments
@@ -94,7 +94,6 @@ def _assert_template_ok(
 
         if package_name:
             assert (full_path / "src" / package_name / "__init__.py").is_file()
-
 
 class TestInteractiveNew:
     """Tests for running `kedro new` interactively."""

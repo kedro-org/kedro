@@ -79,6 +79,7 @@ with --runner."""
 RUNNER_ARG_HELP = """Specify a runner that you want to run the pipeline with.
 This option cannot be used together with --parallel."""
 
+CONDA_FLAG_HELP = """Specify whether you want the packages in src/environment.yml to be installed via conda"""
 
 def __get_kedro_context__():
     """Used to provide this project's context to plugins."""
@@ -121,12 +122,12 @@ def test(args):
 
 
 @cli.command()
-@click.option("--conda")
-def install():
+@click.option("--conda", is_flag=True, multiple=False, help=CONDA_FLAG_HELP)
+def install(conda):
     """Install project dependencies from both requirements.txt and environment.yml (optional)."""
 
     if conda:
-        call("conda", ["install", "--file src/environment.yml", "--yes"])
+        call(["conda", "install", "--file",  "src/environment.yml", "--yes"])
 
     python_call("pip", ["install", "-U", "-r", "src/requirements.txt"])
 

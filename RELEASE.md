@@ -5,9 +5,7 @@
 * Added `KedroContext` base class which holds the configuration and Kedro's main functionality (catalog, pipeline, config).
 <<<<<<< HEAD
 * `kedro install` uses requirements.yml to install packages via conda
-=======
 * Added a new I/O module `ParquetS3DataSet` in `contrib` for usage with Pandas. (by [@mmchougule](https://github.com/mmchougule)) 
->>>>>>> upstream/develop
 
 ## Bug fixes and other changes
 * Documentation improvements.
@@ -16,12 +14,11 @@
 * Added style sheets for project documentation, so the output of `kedro build-docs` will resemble the style of `kedro docs`.
 
 ## Breaking changes to the API
-<<<<<<< HEAD
-* `src/requirements.yml` will be required to run `kedro install`
+* `src/requirements.yml` will be required to run `kedro install --conda`
 
 ## Thanks for supporting contributions
 [Kiyohito Kunii](https://github.com/921kiyo), [Dmitry Vukolov](https://github.com/dvukolov), [Jo Stichbury](https://github.com/stichbury), [Evan Miller](https://github.com/evanmiller29)
-=======
+
 * Simplify the Kedro template in `run.py` with the introduction of `KedroContext` class.
 * Merged `FilepathVersionMixIn` and `S3VersionMixIn` under one abstract class `AbstractVersionedDataSet` which extends`AbstractDataSet`.
 

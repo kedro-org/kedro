@@ -80,16 +80,13 @@ with --runner."""
 RUNNER_ARG_HELP = """Specify a runner that you want to run the pipeline with.
 This option cannot be used together with --parallel."""
 
-<<<<<<< HEAD
 CONDA_FLAG_HELP = """Specify whether you want the packages in src/environment.yml to be installed via conda"""
-=======
+
 CONVERT_ALL_HELP = """Extract the nodes from all notebooks in the Kedro project directory,
 including sub-folders."""
 
 OVERWRITE_HELP = """If Python file already exists for the equivalent notebook,
 overwrite its contents."""
-
->>>>>>> upstream/develop
 
 def __get_kedro_context__(**kwargs):
     """Used to provide this project's context to plugins."""

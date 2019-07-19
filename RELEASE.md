@@ -106,7 +106,6 @@ These steps should have brought your project to Kedro 0.15.0. There might be som
 * Merged the `ExistsMixin` into `AbstractDataSet`.
 * `Pipeline.node_dependencies` returns a dictionary keyed by node, with sets of parent nodes as values; `Pipeline` and `ParallelRunner` were refactored to make use of this for topological sort for node dependency resolution and running pipelines respectively.
 * `Pipeline.grouped_nodes` returns a list of sets, rather than a list of lists.
-* `src/requirements.yml` will be required to run `kedro install`
 
 ## Thanks for supporting contributions
 

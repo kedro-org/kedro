@@ -33,12 +33,17 @@ import os
 import shutil
 import subprocess
 import sys
+from collections import Counter
+from glob import iglob
 from pathlib import Path
+from typing import Union
 
 import click
 from click import secho, style
-from kedro.cli import main as kernalai_main
-from kedro.cli.utils import KedroCliError, call, forward_command, python_call
+from kedro.cli import main as kedro_main
+from kedro.cli.utils import KedroCliError, call, forward_command, python_call, export_nodes
+from kedro.utils import load_obj
+from kedro.runner import SequentialRunner
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -56,21 +61,17 @@ pytest is not installed. Please make sure pytest is in
 src/requirements.txt and run `kedro install`.
 """
 
-
 NO_NBSTRIPOUT_MESSAGE = """
 nbstripout is not installed. Please make sure nbstripout is in
 `src/requirements.txt` and run `kedro install`.
 """
 
-
 TAG_ARG_HELP = """Construct the pipeline using only nodes which have this tag
 attached. Option can be used multiple times, what results in a
 pipeline constructed from nodes having any of those tags."""
 
-
 ENV_ARG_HELP = """Run the pipeline in a configured environment. If not specified,
 pipeline will run using environment `local`."""
-
 
 PARALLEL_ARG_HELP = """Run the pipeline using the `ParallelRunner`.
 If not specified, use the `SequentialRunner`. This flag cannot be used together
@@ -79,12 +80,21 @@ with --runner."""
 RUNNER_ARG_HELP = """Specify a runner that you want to run the pipeline with.
 This option cannot be used together with --parallel."""
 
+<<<<<<< HEAD
 CONDA_FLAG_HELP = """Specify whether you want the packages in src/environment.yml to be installed via conda"""
+=======
+CONVERT_ALL_HELP = """Extract the nodes from all notebooks in the Kedro project directory,
+including sub-folders."""
 
-def __get_kedro_context__():
+OVERWRITE_HELP = """If Python file already exists for the equivalent notebook,
+overwrite its contents."""
+
+>>>>>>> upstream/develop
+
+def __get_kedro_context__(**kwargs):
     """Used to provide this project's context to plugins."""
     from {{cookiecutter.python_package}}.run import __kedro_context__
-    return __kedro_context__()
+    return __kedro_context__(**kwargs)
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, name=__file__)
@@ -93,7 +103,9 @@ def cli():
 
 
 @cli.command()
-@click.option("--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP)
+@click.option(
+    "--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP
+)
 @click.option("--parallel", "-p", is_flag=True, multiple=False, help=PARALLEL_ARG_HELP)
 @click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
 @click.option("--tag", "-t", type=str, default=None, multiple=True, help=TAG_ARG_HELP)
@@ -107,7 +119,8 @@ def run(tag, env, parallel, runner):
         )
     if parallel:
         runner = "ParallelRunner"
-    main(tags=tag, env=env, runner=runner)
+    runner_class = load_obj(runner, "kedro.runner") if runner else SequentialRunner
+    main(tags=tag, env=env, runner=runner_class())
 
 
 @forward_command(cli, forward_help=True)
@@ -201,7 +214,9 @@ def activate_nbstripout():
 
 @cli.group()
 def jupyter():
-    """Open Jupyter Notebook / Lab with project specific variables loaded."""
+    """Open Jupyter Notebook / Lab with project specific variables loaded, or
+    convert notebooks into Kedro code.
+    """
 
 
 @forward_command(jupyter, "notebook", forward_help=True)
@@ -222,9 +237,81 @@ def jupyter_lab(ip, args):
     call(["jupyter-lab", "--ip=" + ip] + list(args))
 
 
+@jupyter.command("convert")
+@click.option("--all", "all_flag", is_flag=True, help=CONVERT_ALL_HELP)
+@click.option("-y", "overwrite_flag", is_flag=True, help=OVERWRITE_HELP)
+@click.argument(
+    "filepath",
+    type=click.Path(exists=True, dir_okay=False, resolve_path=True),
+    required=False,
+    nargs=-1,
+)
+def convert_notebook(all_flag, overwrite_flag, filepath):
+    """Convert selected or all notebooks found in a Kedro project
+    to Kedro code, by exporting code from the appropriately-tagged cells:
+
+    Cells tagged as `node` will be copied over to a Python file matching
+    the name of the notebook, under `src/<package_name>/nodes`.
+    *Note*: Make sure your notebooks have unique names!
+
+    FILEPATH: Path(s) to exact notebook file(s) to be converted. Both
+    relative and absolute paths are accepted.
+    Should not be provided if --all flag is already present.
+
+    """
+    if not filepath and not all_flag:
+        secho(
+            "Please specify a notebook filepath "
+            "or add '--all' to convert all notebooks."
+        )
+        return
+
+    kedro_project_path = __get_kedro_context__(**kwargs)["project_path"]
+    kedro_package_name = "{{cookiecutter.python_package}}"
+
+    if all_flag:
+        # pathlib glob does not ignore hidden directories,
+        # whereas Python glob does, which is more useful in
+        # ensuring checkpoints will not be included
+        pattern = kedro_project_path / "**" / "*.ipynb"
+        notebooks = sorted(Path(p) for p in iglob(str(pattern), recursive=True))
+    else:
+        notebooks = [Path(f) for f in filepath]
+
+    counter = Counter(n.stem for n in notebooks)
+    non_unique_names = [name for name, counts in counter.items() if counts > 1]
+    if non_unique_names:
+        raise KedroCliError(
+            "Found non-unique notebook names! "
+            "Please rename the following: {}".format(", ".join(non_unique_names))
+        )
+
+    for notebook in notebooks:
+        secho("Converting notebook '{}'...".format(str(notebook)))
+        output_path = (
+            kedro_project_path
+            / "src"
+            / kedro_package_name
+            / "nodes"
+            / "{}.py".format(notebook.stem)
+        )
+
+        if output_path.is_file():
+            overwrite = overwrite_flag or click.confirm(
+                "Output file {} already exists. Overwrite?".format(str(output_path)),
+                default=False,
+            )
+            if overwrite:
+                export_nodes(notebook, output_path)
+        else:
+            export_nodes(notebook, output_path)
+
+    secho("Done!")
+
+
 def ipython_message():
     """Show a message saying how we have configured the IPython env."""
-    ipy_vars = ["proj_dir", "proj_name", "io", "startup_error"]
+    ipy_vars = ["startup_error", "context"]
     secho("-" * 79, fg="cyan")
     secho("Starting a Kedro session with the following variables in scope")
     secho(", ".join(ipy_vars), fg="green")
@@ -239,4 +326,4 @@ def ipython_message():
 
 if __name__ == "__main__":
     os.chdir(str(PROJ_PATH))
-    kernalai_main()
+    kedro_main()

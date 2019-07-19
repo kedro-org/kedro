@@ -10,7 +10,6 @@ jobs:
           command: |
             echo ". /home/circleci/miniconda/etc/profile.d/conda.sh" >> $BASH_ENV
             echo "conda deactivate; conda activate kedro_builder" >> $BASH_ENV
-
        - run: &PIP_SETUP
           name: Install PIP dependencies
           command: |

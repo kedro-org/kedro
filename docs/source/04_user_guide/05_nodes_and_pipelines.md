@@ -1,6 +1,6 @@
 # Nodes and pipelines
 
-> *Note:* This documentation is based on `Kedro 0.14.3`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.0`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 In this section we introduce pipelines and nodes.
 
 Relevant API documentation:
@@ -104,6 +104,17 @@ There is a special syntax for describing function inputs and outputs. This allow
 ```
 
 Any combinations of the above are possible, except nodes of the form `node(f, None, None)` (at least a single input or output needs to be provided).
+
+## Tagging nodes
+
+To tag a node, you can simply specify the `tag` argument, as follows:
+
+```python
+node(func=add, inputs=["a", "b"], outputs="sum", name="adding_a_and_b", tag="node_tag")
+``` 
+
+Moreover, you can [tag all nodes in a ``Pipeline``](./05_nodes_and_pipelines.md#tagging-pipeline-nodes).
+
 
 ## Running nodes
 
@@ -258,6 +269,16 @@ variance node
 Outputs: v
 ##################################
 ```
+
+### Tagging pipeline nodes
+
+You can specify a `name` for your ``Pipeline``, which will be used to tag all of the pipeline's nodes.
+
+```python
+pipeline = Pipeline([node(..., name="node1"), node(..., name="node2", tag="node_tag")], name="pipeline_tag")
+```
+
+Node `node1` will only be tagged with `pipeline_tag`, while `node2` will have both `node_tag` and `pipeline_tag`.
 
 ### Merging pipelines
 
@@ -426,11 +447,8 @@ kedro run
 `Output`:
 
 ```console
+
 2019-04-26 17:19:01,341 - root - INFO - ** Kedro project new-kedro-project
-2019-04-26 17:19:01,343 - anyconfig - INFO - Loading: /private/tmp/new-kedro-project/conf/base/logging.yml
-2019-04-26 17:19:01,349 - anyconfig - INFO - Loading: /private/tmp/new-kedro-project/conf/base/catalog.yml
-2019-04-26 17:19:01,351 - anyconfig - INFO - Loading: /private/tmp/new-kedro-project/conf/base/credentials.yml
-2019-04-26 17:19:01,352 - anyconfig - INFO - Loading: /private/tmp/new-kedro-project/conf/base/parameters.yml
 2019-04-26 17:19:01,360 - kedro.io.data_catalog - INFO - Loading data from `example_iris_data` (CSVLocalDataSet)...
 2019-04-26 17:19:01,387 - kedro.io.data_catalog - INFO - Loading data from `parameters` (MemoryDataSet)...
 2019-04-26 17:19:01,437 - kedro.io.data_catalog - INFO - Saving data to `example_test_x` (MemoryDataSet)...
@@ -475,11 +493,8 @@ kedro run --runner=ParallelRunner
 `Output`:
 
 ```console
+
 2019-04-26 17:20:45,012 - root - INFO - ** Kedro project new-kedro-project
-2019-04-26 17:20:45,012 - anyconfig - INFO - Loading: /private/tmp/new-kedro-project/conf/base/logging.yml
-2019-04-26 17:20:45,014 - anyconfig - INFO - Loading: /private/tmp/new-kedro-project/conf/base/catalog.yml
-2019-04-26 17:20:45,016 - anyconfig - INFO - Loading: /private/tmp/new-kedro-project/conf/base/credentials.yml
-2019-04-26 17:20:45,016 - anyconfig - INFO - Loading: /private/tmp/new-kedro-project/conf/base/parameters.yml
 2019-04-26 17:20:45,081 - kedro.io.data_catalog - INFO - Loading data from `example_iris_data` (CSVLocalDataSet)...
 2019-04-26 17:20:45,099 - kedro.io.data_catalog - INFO - Loading data from `parameters` (MemoryDataSet)...
 2019-04-26 17:20:45,115 - kedro.io.data_catalog - INFO - Saving data to `example_test_x` (AutoProxy[MemoryDataSet])...
@@ -545,7 +560,7 @@ io = DataCatalog(dict(
 io.list()
 ```
 
-`Output`: 
+`Output`:
 
 ```console
 Out[10]: ['xs']

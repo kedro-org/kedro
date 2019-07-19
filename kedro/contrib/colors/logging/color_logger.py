@@ -107,7 +107,7 @@ class ColorHandler(logging.StreamHandler):
 
         return None  # pragma: no cover
 
-    def format(self, record: str) -> str:
+    def format(self, record: logging.LogRecord) -> str:
         """The handler formatter.
 
         Args:

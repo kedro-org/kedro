@@ -28,7 +28,7 @@
 
 # pylint: disable=no-member
 
-from multiprocessing.managers import BaseProxy
+from multiprocessing.managers import BaseProxy  # type: ignore
 from typing import Any, Dict
 
 import pytest

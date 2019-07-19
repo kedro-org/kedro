@@ -32,11 +32,10 @@ which allows implementation of various ``AbstractDataSet``s.
 """
 
 from .core import AbstractDataSet  # NOQA
+from .core import AbstractVersionedDataSet  # NOQA
 from .core import DataSetAlreadyExistsError  # NOQA
 from .core import DataSetError  # NOQA
 from .core import DataSetNotFoundError  # NOQA
-from .core import FilepathVersionMixIn  # NOQA
-from .core import S3PathVersionMixIn  # NOQA
 from .core import Version  # NOQA
 from .csv_local import CSVLocalDataSet  # NOQA
 from .csv_s3 import CSVS3DataSet  # NOQA

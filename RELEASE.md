@@ -75,7 +75,6 @@ These steps should have brought your project to Kedro 0.15.0. There might be som
 
 ## Thanks for supporting contributions
 [Dmitry Vukolov](https://github.com/dvukolov), [Jo Stichbury](https://github.com/stichbury), [Angus Williams](https://github.com/awqb), [Deepyaman Datta](https://github.com/deepyaman), [Mayur Chougule](https://github.com/mmchougule)
->>>>>>> upstream/develop
 
 # Release 0.14.3
 

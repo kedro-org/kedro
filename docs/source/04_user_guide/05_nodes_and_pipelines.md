@@ -105,6 +105,17 @@ There is a special syntax for describing function inputs and outputs. This allow
 
 Any combinations of the above are possible, except nodes of the form `node(f, None, None)` (at least a single input or output needs to be provided).
 
+## Tagging nodes
+
+To tag a node, you can simply specify the `tag` argument, as follows:
+
+```python
+node(func=add, inputs=["a", "b"], outputs="sum", name="adding_a_and_b", tag="node_tag")
+``` 
+
+Moreover, you can [tag all nodes in a ``Pipeline``](./05_nodes_and_pipelines.md#tagging-pipeline-nodes).
+
+
 ## Running nodes
 
 To run a node, you need to instantiate its inputs. In this case, the node expects two inputs:
@@ -258,6 +269,16 @@ variance node
 Outputs: v
 ##################################
 ```
+
+### Tagging pipeline nodes
+
+You can specify a `name` for your ``Pipeline``, which will be used to tag all of the pipeline's nodes.
+
+```python
+pipeline = Pipeline([node(..., name="node1"), node(..., name="node2", tag="node_tag")], name="pipeline_tag")
+```
+
+Node `node1` will only be tagged with `pipeline_tag`, while `node2` will have both `node_tag` and `pipeline_tag`.
 
 ### Merging pipelines
 

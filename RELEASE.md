@@ -3,8 +3,6 @@
 ## Major features and improvements
 * Added a new CLI command `kedro jupyter convert` to facilitate converting Jupyter notebook cells into Kedro nodes.
 * Added `KedroContext` base class which holds the configuration and Kedro's main functionality (catalog, pipeline, config).
-<<<<<<< HEAD
-* `kedro install` uses requirements.yml to install packages via conda
 * Added a new I/O module `ParquetS3DataSet` in `contrib` for usage with Pandas. (by [@mmchougule](https://github.com/mmchougule)) 
 
 ## Bug fixes and other changes
@@ -14,13 +12,9 @@
 * Added style sheets for project documentation, so the output of `kedro build-docs` will resemble the style of `kedro docs`.
 
 ## Breaking changes to the API
-* `src/requirements.yml` will be required to run `kedro install --conda`
-
-## Thanks for supporting contributions
-[Kiyohito Kunii](https://github.com/921kiyo), [Dmitry Vukolov](https://github.com/dvukolov), [Jo Stichbury](https://github.com/stichbury), [Evan Miller](https://github.com/evanmiller29)
-
 * Simplify the Kedro template in `run.py` with the introduction of `KedroContext` class.
 * Merged `FilepathVersionMixIn` and `S3VersionMixIn` under one abstract class `AbstractVersionedDataSet` which extends`AbstractDataSet`.
+* `src/environment.yml` will be required to run `kedro install --conda`
 
 #### Migration guide from Kedro 0.14.* to Kedro 0.15.0
 ##### Migration for Kedro project template
@@ -75,8 +69,7 @@ If you defined any custom dataset classes which support versioning in your proje
 These steps should have brought your project to Kedro 0.15.0. There might be some more minor tweaks needed as every project is unique, but now you have a pretty solid base to work with. If you run into any problems, please consult the [Kedro documentation](https://kedro.readthedocs.io).
 
 ## Thanks for supporting contributions
-[Dmitry Vukolov](https://github.com/dvukolov), [Jo Stichbury](https://github.com/stichbury), [Angus Williams](https://github.com/awqb), [Deepyaman Datta](https://github.com/deepyaman), [Mayur Chougule](https://github.com/mmchougule)
->>>>>>> upstream/develop
+[Dmitry Vukolov](https://github.com/dvukolov), [Jo Stichbury](https://github.com/stichbury), [Angus Williams](https://github.com/awqb), [Deepyaman Datta](https://github.com/deepyaman), [Mayur Chougule](https://github.com/mmchougule), [Evan Miller](https://github.com/evanmiller29)
 
 # Release 0.14.3
 
@@ -108,7 +101,6 @@ These steps should have brought your project to Kedro 0.15.0. There might be som
 * Merged the `ExistsMixin` into `AbstractDataSet`.
 * `Pipeline.node_dependencies` returns a dictionary keyed by node, with sets of parent nodes as values; `Pipeline` and `ParallelRunner` were refactored to make use of this for topological sort for node dependency resolution and running pipelines respectively.
 * `Pipeline.grouped_nodes` returns a list of sets, rather than a list of lists.
-* `src/requirements.yml` will be required to run `kedro install`
 
 ## Thanks for supporting contributions
 
@@ -138,6 +130,6 @@ The initial release of Kedro.
 
 ## Thanks for supporting contributions
 
-Jo Stichbury, Aris Valtazanos, Fabian Peters, Guilherme Braccialli, Joel Schwarzmann, Miguel Beltre, Mohammed ElNabawy, Deepyaman Datta, Shubham Agrawal, Oleg Andreyev, Mayur Chougule, William Ashford, Ed Cannon, Nikhilesh Nukala, Sean Bailey, Vikram Tegginamath, Thomas Huijskens, Musa Bilal, Evan Miller
+Jo Stichbury, Aris Valtazanos, Fabian Peters, Guilherme Braccialli, Joel Schwarzmann, Miguel Beltre, Mohammed ElNabawy, Deepyaman Datta, Shubham Agrawal, Oleg Andreyev, Mayur Chougule, William Ashford, Ed Cannon, Nikhilesh Nukala, Sean Bailey, Vikram Tegginamath, Thomas Huijskens, Musa Bilal
 
 We are also grateful to everyone who advised and supported us, filed issues or helped resolve them, asked and answered questions and were part of inspiring discussions.

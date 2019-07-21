@@ -226,7 +226,8 @@ class KedroContext(abc.ABC):
         catalog.add_feed_dict(self._get_feed_dict())
         return catalog
 
-    def run(self, tags: Iterable[str] = None, runner: AbstractRunner = None, only_missing: bool = False) -> None:
+    def run(self, tags: Iterable[str] = None, runner: AbstractRunner = None,
+            only_missing: bool = False) -> None:
         """Runs the pipeline with a specified runner.
 
         Args:

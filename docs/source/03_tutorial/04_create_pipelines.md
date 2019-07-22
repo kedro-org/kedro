@@ -85,8 +85,8 @@ def create_pipeline(**kwargs):
     """
     pipeline = Pipeline(
         [
-            node(preprocess_companies, "companies", "preprocessed_companies"),
-            node(preprocess_shuttles, "shuttles", "preprocessed_shuttles"),
+            node(preprocess_companies, "companies", "preprocessed_companies", name="preprocess1"),
+            node(preprocess_shuttles, "shuttles", "preprocessed_shuttles", name="preprocess2"),
         ]
     )
 
@@ -103,7 +103,23 @@ from kedro_tutorial.nodes.data_engineering import (
 )
 ```
 
-Now check if your pipeline is running without any errors by typing this in your terminal window:
+As you develop your nodes, you can test too see if they work as expected. As an example, run the following command in your terminal window:
+
+```bash
+kedro run --node=preprocess1
+```
+
+You should see output similar to the below:
+
+```bash
+2019-04-18 19:16:12,206 - root - INFO - ** Kedro project kedro-tutorial
+2019-04-18 19:16:12,233 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVLocalDataSet)...
+2019-04-18 19:16:12,365 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_companies` (MemoryDataSet)...
+2019-04-18 19:16:12,366 - kedro.runner.sequential_runner - INFO - Completed 1 out of 1 tasks
+```
+
+
+Now check if the entire pipeline is running without any errors by typing this in your terminal window:
 
 ```bash
 kedro run

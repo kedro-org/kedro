@@ -516,6 +516,37 @@ kedro run --runner=ParallelRunner
 
 > *Note:* You cannot use both `--parallel` and `--runner` flags at the same time (e.g. `kedro run --parallel --runner=SequentialRunner` raises an exception).
 
+Furthermore, you may opt to run only specific nodes by name. To illustrate this, you can update the first node's definition in `pipeline.py` as follows:
+
+```python
+node(
+    split_data,
+    ["example_iris_data", "parameters"],
+    dict(
+        train_x="example_train_x",
+        train_y="example_train_y",
+        test_x="example_test_x",
+        test_y="example_test_y",
+    ),
+    name="node1",
+),
+
+```
+
+and then run the following command in your shell:
+
+```bash
+kedro run --node=node1
+```
+
+You may specify multiple names like so:
+
+```bash
+kedro run --node=node1 --node=node2
+```
+
+> *Note:* The run will only succeed if the nodes require existing inputs, i.e. already produced or present in the data catalog.
+
 ### Applying decorators on pipelines
 
 You can apply decorators on whole pipelines, the same way you apply decorators on single nodes. For example, if you want to apply the decorators defined in the earlier section to all pipeline nodes simultaneously, you can do so as follows:

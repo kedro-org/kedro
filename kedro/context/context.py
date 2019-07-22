@@ -226,15 +226,23 @@ class KedroContext(abc.ABC):
         catalog.add_feed_dict(self._get_feed_dict())
         return catalog
 
-    def run(self, tags: Iterable[str] = None, runner: AbstractRunner = None) -> None:
+    def run(
+        self,
+        tags: Iterable[str] = None,
+        runner: AbstractRunner = None,
+        node_names: Iterable[str] = None,
+    ) -> None:
         """Runs the pipeline with a specified runner.
 
         Args:
             tags: An optional list of node tags which should be used to
                 filter the nodes of the ``Pipeline``. If specified, only the nodes
-                containing *any* of these tags will be added to the ``Pipeline``.
+                containing *any* of these tags will be run.
             runner: An optional parameter specifying the runner that you want to run
                 the pipeline with.
+            node_names: An optional list of node names which should be used to
+                filter the nodes of the ``Pipeline``. If specified, only the nodes
+                with these names will be run.
         Raises:
             KedroContextError: If the resulting ``Pipeline`` is empty
                 or incorrect tags are provided.
@@ -244,7 +252,12 @@ class KedroContext(abc.ABC):
         logging.info("** Kedro project {}".format(self.project_path.name))
 
         # Load the pipeline
-        pipeline = self.pipeline.only_nodes_with_tags(*tags) if tags else self.pipeline
+        pipeline = self.pipeline
+        if node_names:
+            pipeline = pipeline.only_nodes(*node_names)
+        if tags:
+            pipeline = pipeline.only_nodes_with_tags(*tags)
+
         if not pipeline.nodes:
             msg = "Pipeline contains no nodes"
             if tags:

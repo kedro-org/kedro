@@ -266,7 +266,7 @@ class KedroContext(abc.ABC):
 
         # Run the runner
         runner = runner or SequentialRunner()
-        runner.run(pipeline, self.catalog)
+        return runner.run(pipeline, self.catalog)
 
 
 def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:

@@ -231,7 +231,7 @@ class KedroContext(abc.ABC):
         tags: Iterable[str] = None,
         runner: AbstractRunner = None,
         node_names: Iterable[str] = None,
-    ) -> None:
+    ) -> Dict[str, Any]:
         """Runs the pipeline with a specified runner.
 
         Args:
@@ -246,7 +246,10 @@ class KedroContext(abc.ABC):
         Raises:
             KedroContextError: If the resulting ``Pipeline`` is empty
                 or incorrect tags are provided.
-
+        Returns:
+            Any node outputs that cannot be processed by the ``DataCatalog``.
+            These are returned in a dictionary, where the keys are defined
+            by the node outputs.
         """
         # Report project name
         logging.info("** Kedro project {}".format(self.project_path.name))

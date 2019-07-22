@@ -28,7 +28,7 @@
 
 
 """
-``AbstractDataSet`` implementation to save matplotlib objects as image files.
+``MatplotlibWriter ``  saves matplotlib objects as image files.
 """
 
 import os.path

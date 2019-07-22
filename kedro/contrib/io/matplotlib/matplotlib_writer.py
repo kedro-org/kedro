@@ -31,7 +31,7 @@
 ``AbstractDataSet`` implementation to save matplotlib objects as image files.
 """
 
-import os.path
+from pathlib import Path, PurePath
 from typing import Any, Dict, Optional
 
 from kedro.io import AbstractDataSet, DataSetError
@@ -108,19 +108,19 @@ class MatplotlibWriter(AbstractDataSet):
 
         if self._mutlifile_mode:
 
-            if not os.path.isdir(self._filepath):
-                os.makedirs(self._filepath)
+            if not Path(self._filepath).is_dir():
+                Path(self._filepath).mkdir()
 
             if isinstance(data, list):
                 for index, plot in enumerate(data):
                     plot.savefig(
-                        os.path.join(self._filepath, str(index)), **self._save_args
+                        PurePath(self._filepath, str(index)), **self._save_args
                     )
 
             elif isinstance(data, dict):
                 for plot_name, plot in data.items():
                     plot.savefig(
-                        os.path.join(self._filepath, plot_name), **self._save_args
+                        PurePath(self._filepath, plot_name), **self._save_args
                     )
 
             else:
@@ -136,4 +136,4 @@ class MatplotlibWriter(AbstractDataSet):
             data.savefig(self._filepath, **self._save_args)
 
     def _exists(self) -> bool:
-        return os.path.isfile(self._filepath)
+        return Path(self._filepath).is_file()

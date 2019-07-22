@@ -101,7 +101,7 @@ class MatplotlibWriter(AbstractDataSet):
     def _handle_default_args(user_args: dict, default_args: dict) -> dict:
         return {**default_args, **user_args} if user_args else default_args
 
-    def _load(self) -> str:
+    def _load(self) -> None:
         raise DataSetError("Loading not supported for MatplotlibWriter")
 
     def _save(self, data) -> None:

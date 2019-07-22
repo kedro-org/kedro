@@ -31,6 +31,7 @@ import matplotlib
 import numpy as np
 import pytest
 
+
 from kedro.contrib.io.matplotlib import MatplotlibWriter
 from kedro.io import DataSetError
 

@@ -64,7 +64,6 @@ This command will install dependencies listed in `src/requirements.txt`.
 
 If your project has conda dependencies which you would like to install with this command, you can create a `src/environment.yml` file and list them there.
 
-```
 
 This command will install dependencies listed in `src/environment.yml`. 
 Please use the template provided to base your `enviroment.yml` off.  

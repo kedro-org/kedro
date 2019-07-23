@@ -161,6 +161,34 @@ def proj_catalog_mixed(tmp_path, mixed_config_advanced):
     _write_yaml(proj_catalog, mixed_config_advanced)
 
 
+@pytest.fixture
+def param_config_namespaced():
+    return {
+        "boats": {
+            "type": "${global.boat_data_type}",
+            "filepath": "${global.s3_bucket}/${global.raw_data_folder}/boats.csv",
+            "columns": {"id": "${global.string_type}",
+                        "name": "${global.string_type}",
+                        "top_speed": "${global.float_type}"},
+            "users": ["fred",
+                      "${env.USER}"]
+        }
+    }
+
+
+@pytest.fixture
+def get_environ():
+    return {
+        "USER": "ron"
+    }
+
+
+@pytest.fixture
+def proj_catalog_param_namespaced(tmp_path, param_config_namespaced):
+    proj_catalog = tmp_path / "base" / "catalog.yml"
+    _write_yaml(proj_catalog, param_config_namespaced)
+
+
 class TestTemplatedConfigLoader:
 
     @pytest.mark.usefixtures("proj_catalog_param", "template_config")
@@ -241,3 +269,20 @@ class TestTemplatedConfigLoader:
         assert catalog["planes"]["batch_size_parameterized"] == 10000
         assert catalog["planes"]["need_permission_parameterized"]
         assert catalog["planes"]["secret_tables_parameterized"] == ["models", "pilots", "engines"]
+
+    @pytest.mark.usefixtures("proj_catalog_param_namespaced", "template_config", "get_environ")
+    def test_catlog_parameterized_w_dict_namespaced(self, tmp_path, conf_paths, template_config,
+                                                    get_environ):
+        """Test parameterized config with input from dictionary with values"""
+        (tmp_path / "local").mkdir(exist_ok=True)
+
+        catalog = TemplatedConfigLoader(conf_paths)\
+            .resolve(["catalog*.yml"], arg_values_dict={"global": template_config,
+                                                        "env": get_environ})
+
+        assert catalog["boats"]["type"] == "SparkDataSet"
+        assert catalog["boats"]["filepath"] == "s3a://boat-and-car-bucket/01_raw/boats.csv"
+        assert catalog["boats"]["columns"]["id"] == "VARCHAR"
+        assert catalog["boats"]["columns"]["name"] == "VARCHAR"
+        assert catalog["boats"]["columns"]["top_speed"] == "FLOAT"
+        assert catalog["boats"]["users"] == ["fred", "ron"]

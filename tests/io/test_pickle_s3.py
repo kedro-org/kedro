@@ -54,6 +54,17 @@ def s3_data_set():
 
 
 @pytest.fixture
+def s3_data_set_with_args():
+    return PickleS3DataSet(
+        filepath=FILENAME,
+        bucket_name=BUCKET_NAME,
+        credentials=AWS_CREDENTIALS,
+        load_args={"fix_imports": False},
+        save_args={"fix_imports": False},
+    )
+
+
+@pytest.fixture
 def versioned_s3_data_set(load_version, save_version):
     return PickleS3DataSet(
         filepath=FILENAME,
@@ -105,6 +116,12 @@ class TestPickleS3DataSet:
     def test_load(self, s3_data_set):
         """Test loading the data from S3."""
         loaded_data = s3_data_set.load()
+        assert loaded_data == DUMMY_PICKABLE_OBJECT
+
+    @pytest.mark.usefixtures("mocked_s3_object")
+    def test_load_args(self, s3_data_set_with_args):
+        """Test loading the data from S3 with options."""
+        loaded_data = s3_data_set_with_args.load()
         assert loaded_data == DUMMY_PICKABLE_OBJECT
 
     @pytest.mark.parametrize(
@@ -163,6 +180,14 @@ class TestPickleS3DataSet:
         new_data = {"x": "y"}
         s3_data_set.save(new_data)
         loaded_data = s3_data_set.load()
+        assert loaded_data == new_data
+
+    @pytest.mark.usefixtures("mocked_s3_object")
+    def test_save_args(self, s3_data_set_with_args):
+        """Test saving the data to S3 with options."""
+        new_data = {"x": "y"}
+        s3_data_set_with_args.save(new_data)
+        loaded_data = s3_data_set_with_args.load()
         assert loaded_data == new_data
 
     def test_serializable(self, s3_data_set):

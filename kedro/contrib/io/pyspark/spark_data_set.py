@@ -36,10 +36,11 @@ from typing import Any, Dict, Optional
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.utils import AnalysisException
 
+from kedro.contrib.io import DefaultArgumentsMixIn
 from kedro.io import AbstractDataSet
 
 
-class SparkDataSet(AbstractDataSet):
+class SparkDataSet(DefaultArgumentsMixIn, AbstractDataSet):
     """``SparkDataSet`` loads and saves Spark data frames.
 
     Example:
@@ -106,8 +107,7 @@ class SparkDataSet(AbstractDataSet):
 
         self._filepath = filepath
         self._file_format = file_format
-        self._load_args = load_args if load_args is not None else {}
-        self._save_args = save_args if save_args is not None else {}
+        super().__init__(load_args, save_args)
 
     @staticmethod
     def _get_spark():

@@ -46,6 +46,15 @@ def pickle_data_set(filepath_pkl, request):
 
 
 @pytest.fixture
+def pickle_data_set_with_args(filepath_pkl):
+    return PickleLocalDataSet(
+        filepath=filepath_pkl,
+        load_args={"fix_imports": False},
+        save_args={"fix_imports": False},
+    )
+
+
+@pytest.fixture
 def versioned_pickle_data_set(filepath_pkl, load_version, save_version):
     return PickleLocalDataSet(
         filepath=filepath_pkl, version=Version(load_version, save_version)
@@ -96,6 +105,12 @@ class TestPickleLocalDataSet:
         )
         with pytest.raises(ImportError, match=pattern):
             PickleLocalDataSet(filepath=filepath_pkl, backend="joblib")
+
+    def test_save_and_load_args(self, pickle_data_set_with_args, dummy_dataframe):
+        """Test saving and reloading the data with different options."""
+        pickle_data_set_with_args.save(dummy_dataframe)
+        reloaded_df = pickle_data_set_with_args.load()
+        assert_frame_equal(reloaded_df, dummy_dataframe)
 
 
 class TestPickleLocalDataSetVersioned:

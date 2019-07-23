@@ -35,10 +35,11 @@ from typing import Any, Dict, Optional
 import pandas as pd
 from azure.storage.blob import BlockBlobService
 
+from kedro.contrib.io import DefaultArgumentsMixIn
 from kedro.io import AbstractDataSet
 
 
-class CSVBlobDataSet(AbstractDataSet):
+class CSVBlobDataSet(DefaultArgumentsMixIn, AbstractDataSet):
     """``CSVBlobDataSet`` loads and saves csv files in Microsoft's Azure
     blob storage. It uses azure storage SDK to read and write in azure and
     pandas to handle the csv file locally.
@@ -60,6 +61,8 @@ class CSVBlobDataSet(AbstractDataSet):
         >>>
         >>> assert data.equals(reloaded)
     """
+
+    DEFAULT_SAVE_ARGS = {"index": False}
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
@@ -106,16 +109,12 @@ class CSVBlobDataSet(AbstractDataSet):
                 All defaults are preserved, but "index", which is set to False.
 
         """
-        default_save_args = {"index": False}
-        self._save_args = (
-            {**default_save_args, **save_args} if save_args else default_save_args
-        )
-        self._load_args = load_args if load_args else {}
         self._filepath = filepath
         self._container_name = container_name
         self._credentials = credentials if credentials else {}
         self._blob_to_text_args = blob_to_text_args if blob_to_text_args else {}
         self._blob_from_text_args = blob_from_text_args if blob_from_text_args else {}
+        super().__init__(load_args, save_args)
 
     def _load(self) -> pd.DataFrame:
         blob_service = BlockBlobService(**self._credentials)

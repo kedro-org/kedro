@@ -26,10 +26,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``kedro.config`` provides functionality for loading Kedro
-configuration from different file formats.
+"""``kedro.contrib.config`` provides functionality for loading templated Kedro
+configuration.
 """
 
-
-from .config import ConfigLoader  # NOQA
-from .config import MissingConfigException  # NOQA
+from .templated_config import TemplatedConfigLoader  # NOQA

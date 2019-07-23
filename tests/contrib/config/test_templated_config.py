@@ -32,7 +32,7 @@ from typing import Dict
 import pytest
 import yaml
 
-from kedro.config import TemplatedConfigLoader
+from kedro.contrib.config import TemplatedConfigLoader
 
 
 def _write_yaml(filepath: Path, config: Dict):

@@ -31,6 +31,8 @@ or more configuration files from specified paths, and replace template strings w
 import re
 from typing import Any, Dict, List, Optional, Union
 
+import jmespath
+
 from kedro.config import ConfigLoader
 
 
@@ -105,8 +107,10 @@ def _replace_val(val: Any, defaults: Dict[str, Any]) -> Any:
         regex_pattern_full = r'^\$\{([^\}]*)\}$'
         match_full = re.search(regex_pattern_full, val)
         if match_full:
-            return defaults.get(match_full.group(1), val)
-        return re.sub(regex_pattern, lambda m: defaults.get(m.group(1), m.group(0)), val)
+            return jmespath.search(match_full.group(1), defaults) or val
+        return re.sub(regex_pattern,
+                      lambda m: jmespath.search(m.group(1), defaults) or m.group(0),
+                      val)
     return val
 
 

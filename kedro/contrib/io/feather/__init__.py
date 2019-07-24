@@ -29,4 +29,4 @@
 """kedro.contrib.io.feather provides I/O modules for feather data format.
 https://github.com/wesm/feather"""
 
-from .feather_local import FeatherLocalDataSet
+from .feather_local import FeatherLocalDataSet  # NOQA

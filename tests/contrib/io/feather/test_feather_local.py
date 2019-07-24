@@ -27,6 +27,7 @@
 # limitations under the License.
 from pathlib import Path
 
+import pandas as pd
 import pytest
 from pandas.util.testing import assert_frame_equal
 
@@ -35,18 +36,24 @@ from kedro.io import DataSetError
 from kedro.io.core import Version
 
 
-@pytest.fixture(params=[{"sep": ","}])
-def feather_data_set(filepath, request):
-    return FeatherLocalDataSet(filepath=filepath, save_args=request.param)
+@pytest.fixture(params=[None])
+def filepath(tmp_path, request):
+    return request.param or str(tmp_path / "some" / "dir" / "test.feather")
+
+
+@pytest.fixture
+def dummy_dataframe():
+    return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+
+
+@pytest.fixture
+def feather_data_set(filepath):
+    return FeatherLocalDataSet(filepath=filepath)
 
 
 @pytest.fixture
 def versioned_feather_data_set(filepath, load_version, save_version):
-    return FeatherLocalDataSet(
-        filepath=filepath,
-        save_args={"sep": ","},
-        version=Version(load_version, save_version),
-    )
+    return FeatherLocalDataSet(filepath=filepath, version=Version(load_version, save_version))
 
 
 class TestFeatherLocalDataSet:
@@ -56,7 +63,6 @@ class TestFeatherLocalDataSet:
         reloaded_df = feather_data_set.load()
         assert_frame_equal(reloaded_df, dummy_dataframe)
 
-    @pytest.mark.parametrize("feather_data_set", [{"index": False}], indirect=True)
     def test_load_missing_file(self, feather_data_set):
         """Check the error while trying to load from missing source."""
         pattern = r"Failed while loading data from data set FeatherLocalDataSet"
@@ -131,9 +137,8 @@ class TestFeatherLocalDataSetVersioned:
         when applicable."""
         filepath = "test.feather"
         ds = FeatherLocalDataSet(filepath=filepath)
-        ds_versioned = FeatherLocalDataSet(
-            filepath=filepath, version=Version(load_version, save_version)
-        )
+        ds_versioned = FeatherLocalDataSet(filepath=filepath,
+                                           version=Version(load_version, save_version))
         assert filepath in str(ds)
         assert "version" not in str(ds)
 

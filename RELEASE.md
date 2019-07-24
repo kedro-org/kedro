@@ -16,6 +16,7 @@
 * Simplified the Kedro template in `run.py` with the introduction of `KedroContext` class.
 * Merged `FilepathVersionMixIn` and `S3VersionMixIn` under one abstract class `AbstractVersionedDataSet` which extends`AbstractDataSet`.
 * `name` changed to be a keyword-only argument for `Pipeline`.
+* `CSVLocalDataSet` no longer supports URLs.
 
 #### Migration guide from Kedro 0.14.* to Kedro 0.15.0
 ##### Migration for Kedro project template

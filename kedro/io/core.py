@@ -33,11 +33,13 @@ saving functionality provided by ``kedro.io``.
 import abc
 import copy
 import logging
+import os
 from collections import namedtuple
 from datetime import datetime, timezone
 from glob import iglob
 from pathlib import Path, PurePath
 from typing import Any, Callable, Dict, List, Optional, Type
+from urllib.parse import urlparse
 from warnings import warn
 
 from kedro.utils import load_obj
@@ -314,7 +316,7 @@ class AbstractDataSet(abc.ABC):
 
     def _exists(self) -> bool:
         logging.getLogger(__name__).warning(
-            "`exists()` not implemented for `%s`. " "Assuming output does not exist.",
+            "`exists()` not implemented for `%s`. Assuming output does not exist.",
             self.__class__.__name__,
         )
         return False
@@ -374,6 +376,16 @@ _PATH_CONSISTENCY_WARNING = (
 
 def _local_exists(filepath: str) -> bool:
     return Path(filepath).exists()
+
+
+def is_remote_path(filepath: str) -> bool:
+    """
+    Check if the given path looks like a remote URL (has scheme).
+    """
+    # Get rid of Windows-specific "C:\" start,
+    # which is treated as a URL scheme.
+    _, filepath = os.path.splitdrive(filepath)
+    return bool(urlparse(filepath).scheme)
 
 
 class AbstractVersionedDataSet(AbstractDataSet):

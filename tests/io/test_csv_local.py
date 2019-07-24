@@ -68,6 +68,22 @@ class TestCSVLocalDataSet:
         csv_data_set.save(dummy_dataframe)
         assert csv_data_set.exists()
 
+    @pytest.mark.parametrize(
+        'path', [
+            'http://abc.com',
+            'https://abc.com/def?ghi=jkl#mnop',
+            'blahblah://abc',
+        ]
+    )
+    def test_fails_with_remote_path(self, path):
+        with pytest.raises(ValueError) as assertion:
+            CSVLocalDataSet(
+                filepath=path,
+                save_args={"sep": ","},
+            )
+
+        assert 'seems to be a remote file' in assertion.value.args[0]
+
 
 class TestCSVLocalDataSetVersioned:
     def test_save_and_load(

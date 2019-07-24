@@ -44,6 +44,16 @@ def hdf_data_set(filepath_hdf):
 
 
 @pytest.fixture
+def hdf_data_set_with_args(filepath_hdf):
+    return HDFLocalDataSet(
+        filepath=filepath_hdf,
+        key="test_hdf",
+        load_args={"errors": "ignore"},
+        save_args={"errors": "ignore"},
+    )
+
+
+@pytest.fixture
 def versioned_hdf_data_set(filepath_hdf, load_version, save_version):
     return HDFLocalDataSet(
         filepath=filepath_hdf,
@@ -87,6 +97,13 @@ class TestHDFLocalDataSet:
         hdf_data_set.save(dummy_dataframe.T)
         reloaded_df = hdf_data_set.load()
         assert_frame_equal(reloaded_df, dummy_dataframe.T)
+
+    def test_save_and_load_args(self, hdf_data_set_with_args, dummy_dataframe):
+        """Test saving and reloading the data set."""
+        hdf_data_set_with_args.save(dummy_dataframe)
+        reloaded_df = hdf_data_set_with_args.load()
+
+        assert_frame_equal(reloaded_df, dummy_dataframe)
 
 
 class TestHDFLocalDataSetVersioned:

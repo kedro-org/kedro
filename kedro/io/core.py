@@ -378,7 +378,7 @@ def _local_exists(filepath: str) -> bool:
 
 class AbstractVersionedDataSet(AbstractDataSet):
     """
-    `AbstractVersionedDataSet`` is the base class for all versioned data set implementations.
+    ``AbstractVersionedDataSet`` is the base class for all versioned data set implementations.
     All data sets that implement versioning should extend this abstract class
     and implement the methods marked as abstract.
 

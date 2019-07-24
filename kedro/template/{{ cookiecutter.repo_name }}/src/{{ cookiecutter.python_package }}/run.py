@@ -82,23 +82,28 @@ def __kedro_context__(env: str = None, **kwargs) -> KedroContext:
 
 
 def main(
-    tags: Iterable[str] = None, env: str = None, runner: Type[AbstractRunner] = None
+    tags: Iterable[str] = None,
+    env: str = None, runner: Type[AbstractRunner] = None,
+    node_names: Iterable[str] = None,
 ):
     """Application main entry point.
 
     Args:
         tags: An optional list of node tags which should be used to
             filter the nodes of the ``Pipeline``. If specified, only the nodes
-            containing *any* of these tags will be added to the ``Pipeline``.
+            containing *any* of these tags will be run.
         env: An optional parameter specifying the environment in which
             the ``Pipeline`` should be run. If not specified defaults to "local".
         runner: An optional parameter specifying the runner that you want to run
             the pipeline with.
+        node_names: An optional list of node names which should be used to filter
+            the nodes of the ``Pipeline``. If specified, only the nodes with these
+            names will be run.
 
     """
 
     context = __kedro_context__(env)
-    context.run(tags, runner)
+    context.run(tags, runner, node_names)
 
 
 if __name__ == "__main__":

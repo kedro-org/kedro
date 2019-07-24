@@ -72,6 +72,18 @@ def mocked_s3_object(mocked_s3_bucket, dummy_dataframe):
 
 
 @pytest.fixture
+def hdf_data_set_with_args():
+    return HDFS3DataSet(
+        filepath=FILENAME,
+        bucket_name=BUCKET_NAME,
+        credentials=AWS_CREDENTIALS,
+        key="test_hdf",
+        load_args={"title": "test_hdf"},
+        save_args={"title": "test_hdf"},
+    )
+
+
+@pytest.fixture
 def versioned_hdf_data_set(load_version, save_version):
     return HDFS3DataSet(
         filepath=FILENAME,
@@ -166,6 +178,14 @@ class TestHDFS3DataSet:
         hdf_data_set.save(dummy_dataframe.T)
         reloaded_df = hdf_data_set.load()
         assert_frame_equal(reloaded_df, dummy_dataframe.T)
+
+    @pytest.mark.usefixtures("mocked_s3_object")
+    def test_save_and_load_args(self, hdf_data_set_with_args, dummy_dataframe):
+        """Test saving and reloading the data set."""
+        hdf_data_set_with_args.save(dummy_dataframe)
+        reloaded_df = hdf_data_set_with_args.load()
+
+        assert_frame_equal(reloaded_df, dummy_dataframe)
 
     def test_serializable(self, hdf_data_set):
         ForkingPickler.dumps(hdf_data_set)

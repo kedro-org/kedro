@@ -34,7 +34,7 @@ import subprocess
 import sys
 from itertools import chain
 from pathlib import Path
-from typing import Any, Dict, Sequence, Tuple, Union
+from typing import Any, Dict, Iterable, Sequence, Tuple, Union
 from warnings import warn
 
 import click
@@ -56,6 +56,16 @@ def call(cmd, **kwargs):  # pragma: no cover
 def python_call(module, arguments, **kwargs):  # pragma: no cover
     """Run a subprocess command that invokes a Python module."""
     call([sys.executable, "-m", module] + list(arguments), **kwargs)
+
+
+def find_stylesheets() -> Iterable[str]:  # pragma: no cover
+    """Fetch all stylesheets used in the official Kedro documentation"""
+    css_path = Path(__file__).resolve().parents[1] / "html" / "_static" / "css"
+    return (
+        str(css_path / "copybutton.css"),
+        str(css_path / "qb1-sphinx-rtd.css"),
+        str(css_path / "theme-overrides.css"),
+    )
 
 
 def _append_source_code(cell: Dict[str, Any], path: Path) -> None:

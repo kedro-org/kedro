@@ -78,7 +78,9 @@ class Pipeline:
     outputs and execution order.
     """
 
-    def __init__(self, nodes: Iterable[Union[Node, "Pipeline"]], name: str = None):
+    def __init__(
+        self, nodes: Iterable[Union[Node, "Pipeline"]], *, name: str = None
+    ):  # pylint: disable=missing-type-doc
         """Initialise ``Pipeline`` with a list of ``Node`` instances.
 
         Args:
@@ -88,6 +90,7 @@ class Pipeline:
                 new pipeline.
             name: The name of the pipeline. If specified, this name
                 will be used to tag all of the nodes in the pipeline.
+
         Raises:
             ValueError:
                 When an empty list of nodes is provided, or when not all

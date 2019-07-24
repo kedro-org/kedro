@@ -3,17 +3,20 @@
 ## Major features and improvements
 * Added a new CLI command `kedro jupyter convert` to facilitate converting Jupyter notebook cells into Kedro nodes.
 * Added `KedroContext` base class which holds the configuration and Kedro's main functionality (catalog, pipeline, config).
-* Added a new I/O module `ParquetS3DataSet` in `contrib` for usage with Pandas. (by [@mmchougule](https://github.com/mmchougule)) 
+* Added a new I/O module `ParquetS3DataSet` in `contrib` for usage with Pandas. (by [@mmchougule](https://github.com/mmchougule))
+* Added a new `--node` flag to `kedro run`, allowing users to run only the nodes with the specified names.
 * Added a new I/O module `FeatherLocalDataSet` in `contrib` for usage with Pandas. (by [@mdomarsaleem](https://github.com/mdomarsaleem)) 
 
 ## Bug fixes and other changes
-* Documentation improvements
-* `anyconfig` default log level changed from `INFO` to `WARNING`
-* Add information on installed plugins to `kedro info`
+* Documentation improvements.
+* `anyconfig` default log level changed from `INFO` to `WARNING`.
+* Added information on installed plugins to `kedro info`.
+* Added style sheets for project documentation, so the output of `kedro build-docs` will resemble the style of `kedro docs`.
 
 ## Breaking changes to the API
-* Simplify the Kedro template in `run.py` with the introduction of `KedroContext` class.
+* Simplified the Kedro template in `run.py` with the introduction of `KedroContext` class.
 * Merged `FilepathVersionMixIn` and `S3VersionMixIn` under one abstract class `AbstractVersionedDataSet` which extends`AbstractDataSet`.
+* `name` changed to be a keyword-only argument for `Pipeline`.
 
 #### Migration guide from Kedro 0.14.* to Kedro 0.15.0
 ##### Migration for Kedro project template

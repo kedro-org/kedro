@@ -85,6 +85,7 @@ Welcome to Kedro's API docs and tutorials!
    04_user_guide/08_pyspark
    04_user_guide/09_developing_plugins
    04_user_guide/10_ipython
+   04_user_guide/11_working_with_databricks
 
 .. toctree::
    :maxdepth: 2

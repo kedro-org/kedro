@@ -176,7 +176,8 @@ class DummyContext(KedroContext):
             [
                 node(identity, "cars", "boats", name="node1", tags=["tag1"]),
                 node(identity, "boats", "trains", name="node2"),
-            ]
+            ],
+            name="pipeline",
         )
 
 
@@ -290,6 +291,24 @@ class TestKedroContext:
         log_names = [record.name for record in caplog.records]
         assert "kedro.runner.parallel_runner" in log_names
         assert "Pipeline execution completed successfully." in log_msgs
+
+    def test_run_with_node_names(self, dummy_context, dummy_dataframe, caplog):
+        dummy_context.catalog.save("cars", dummy_dataframe)
+        dummy_context.run(node_names=["node1"])
+
+        log_msgs = [record.getMessage() for record in caplog.records]
+        assert "Running node: node1: identity([cars]) -> [boats]" in log_msgs
+        assert "Pipeline execution completed successfully." in log_msgs
+        assert "Running node: node2: identity([boats]) -> [trains]" not in log_msgs
+
+    def test_run_with_node_names_and_tags(self, dummy_context, dummy_dataframe, caplog):
+        dummy_context.catalog.save("cars", dummy_dataframe)
+        dummy_context.run(node_names=["node1"], tags=["tag1", "pipeline"])
+
+        log_msgs = [record.getMessage() for record in caplog.records]
+        assert "Running node: node1: identity([cars]) -> [boats]" in log_msgs
+        assert "Pipeline execution completed successfully." in log_msgs
+        assert "Running node: node2: identity([boats]) -> [trains]" not in log_msgs
 
     def test_run_with_tags(self, dummy_context, dummy_dataframe, caplog):
         dummy_context.catalog.save("cars", dummy_dataframe)

@@ -105,6 +105,17 @@ There is a special syntax for describing function inputs and outputs. This allow
 
 Any combinations of the above are possible, except nodes of the form `node(f, None, None)` (at least a single input or output needs to be provided).
 
+## Tagging nodes
+
+To tag a node, you can simply specify the `tag` argument, as follows:
+
+```python
+node(func=add, inputs=["a", "b"], outputs="sum", name="adding_a_and_b", tag="node_tag")
+``` 
+
+Moreover, you can [tag all nodes in a ``Pipeline``](./05_nodes_and_pipelines.md#tagging-pipeline-nodes).
+
+
 ## Running nodes
 
 To run a node, you need to instantiate its inputs. In this case, the node expects two inputs:
@@ -258,6 +269,16 @@ variance node
 Outputs: v
 ##################################
 ```
+
+### Tagging pipeline nodes
+
+You can specify a `name` for your ``Pipeline``, which will be used to tag all of the pipeline's nodes.
+
+```python
+pipeline = Pipeline([node(..., name="node1"), node(..., name="node2", tag="node_tag")], name="pipeline_tag")
+```
+
+Node `node1` will only be tagged with `pipeline_tag`, while `node2` will have both `node_tag` and `pipeline_tag`.
 
 ### Merging pipelines
 
@@ -494,6 +515,37 @@ kedro run --runner=ParallelRunner
 ```
 
 > *Note:* You cannot use both `--parallel` and `--runner` flags at the same time (e.g. `kedro run --parallel --runner=SequentialRunner` raises an exception).
+
+Furthermore, you may opt to run only specific nodes by name. To illustrate this, you can update the first node's definition in `pipeline.py` as follows:
+
+```python
+node(
+    split_data,
+    ["example_iris_data", "parameters"],
+    dict(
+        train_x="example_train_x",
+        train_y="example_train_y",
+        test_x="example_test_x",
+        test_y="example_test_y",
+    ),
+    name="node1",
+),
+
+```
+
+and then run the following command in your shell:
+
+```bash
+kedro run --node=node1
+```
+
+You may specify multiple names like so:
+
+```bash
+kedro run --node=node1 --node=node2
+```
+
+> *Note:* The run will only succeed if the nodes require existing inputs, i.e. already produced or present in the data catalog.
 
 ### Applying decorators on pipelines
 

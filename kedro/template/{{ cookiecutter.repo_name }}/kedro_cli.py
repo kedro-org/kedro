@@ -36,7 +36,6 @@ import sys
 from collections import Counter
 from glob import iglob
 from pathlib import Path
-from typing import Union
 
 import click
 from click import secho, style
@@ -73,6 +72,8 @@ pipeline constructed from nodes having any of those tags."""
 ENV_ARG_HELP = """Run the pipeline in a configured environment. If not specified,
 pipeline will run using environment `local`."""
 
+NODE_ARG_HELP = """Run only nodes with specified names."""
+
 PARALLEL_ARG_HELP = """Run the pipeline using the `ParallelRunner`.
 If not specified, use the `SequentialRunner`. This flag cannot be used together
 with --runner."""
@@ -99,13 +100,14 @@ def cli():
 
 
 @cli.command()
+@click.option("--node", "-n", "node_names", type=str, default=None, multiple=True, help=NODE_ARG_HELP)
 @click.option(
     "--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP
 )
 @click.option("--parallel", "-p", is_flag=True, multiple=False, help=PARALLEL_ARG_HELP)
 @click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
 @click.option("--tag", "-t", type=str, default=None, multiple=True, help=TAG_ARG_HELP)
-def run(tag, env, parallel, runner):
+def run(tag, env, parallel, runner, node_names):
     """Run the pipeline."""
     from {{cookiecutter.python_package}}.run import main
     if parallel and runner:
@@ -116,7 +118,7 @@ def run(tag, env, parallel, runner):
     if parallel:
         runner = "ParallelRunner"
     runner_class = load_obj(runner, "kedro.runner") if runner else SequentialRunner
-    main(tags=tag, env=env, runner=runner_class())
+    main(tags=tag, env=env, runner=runner_class(), node_names=node_names)
 
 
 @forward_command(cli, forward_help=True)

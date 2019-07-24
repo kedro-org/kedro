@@ -2,7 +2,7 @@
 
 This section covers how to create a pipeline from a set of `node`s, which are Python functions, as described in more detail in the [nodes and pipelines user guide](../04_user_guide/05_nodes_and_pipelines.md) documentation.
 
-1. As you draft experimental code, you can use a [Jupyter Notebook](../04_user_guide/10_ipython.md#working-with-kedro-projects-from-jupyter) or [IPython session](../04_user_guide/10_ipython.md). If you include [`docstrings`](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) to explain what your functions do, you can take advantage of [auto-generated Sphinx documentation](http://www.sphinx-doc.org/en/master/) later on. Once you are happy with how you have written your `node` functions, you will copy & paste the code into the `src/kedro_tutorial/nodes/` folder as a `.py` file.
+1. As you draft experimental code, you can use a [Jupyter Notebook](../04_user_guide/10_ipython.md#working-with-kedro-projects-from-jupyter) or [IPython session](../04_user_guide/10_ipython.md). If you include [`docstrings`](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) to explain what your functions do, you can take advantage of [auto-generated Sphinx documentation](http://www.sphinx-doc.org/en/master/) later on. Once you are happy with how you have written your `node` functions, you will run `kedro jupyter convert --all` (or `kedro jupyter convert <filepath_to_my_notebook>`) to export the code into the `src/kedro_tutorial/nodes/` folder as a `.py` file.
 2. When you are ready with a node you should add it to the pipeline in `src/kedro_tutorial/pipeline.py`, specifying its inputs and outputs.
 
 
@@ -85,8 +85,8 @@ def create_pipeline(**kwargs):
     """
     pipeline = Pipeline(
         [
-            node(preprocess_companies, "companies", "preprocessed_companies"),
-            node(preprocess_shuttles, "shuttles", "preprocessed_shuttles"),
+            node(preprocess_companies, "companies", "preprocessed_companies", name="preprocess1"),
+            node(preprocess_shuttles, "shuttles", "preprocessed_shuttles", name="preprocess2"),
         ]
     )
 
@@ -103,7 +103,23 @@ from kedro_tutorial.nodes.data_engineering import (
 )
 ```
 
-Now check if your pipeline is running without any errors by typing this in your terminal window:
+As you develop your nodes, you can test too see if they work as expected. As an example, run the following command in your terminal window:
+
+```bash
+kedro run --node=preprocess1
+```
+
+You should see output similar to the below:
+
+```bash
+2019-04-18 19:16:12,206 - root - INFO - ** Kedro project kedro-tutorial
+2019-04-18 19:16:12,233 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVLocalDataSet)...
+2019-04-18 19:16:12,365 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_companies` (MemoryDataSet)...
+2019-04-18 19:16:12,366 - kedro.runner.sequential_runner - INFO - Completed 1 out of 1 tasks
+```
+
+
+Now check if the entire pipeline is running without any errors by typing this in your terminal window:
 
 ```bash
 kedro run

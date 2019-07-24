@@ -31,7 +31,7 @@ import pandas as pd
 import pytest
 from pandas.util.testing import assert_frame_equal
 
-from kedro.contrib.io import FeatherLocalDataSet
+from kedro.contrib.io.feather import FeatherLocalDataSet
 from kedro.io import DataSetError
 from kedro.io.core import Version
 

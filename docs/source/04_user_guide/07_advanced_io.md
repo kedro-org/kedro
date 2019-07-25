@@ -48,9 +48,46 @@ In order to enable versioning, all of the following conditions must be met:
 1. The dataset must:
     1. extend `kedro.io.core.AbstractVersionedDataSet` AND
     2. add `version` namedtuple as an argument to its `__init__` method AND
-    3. call `super().__init__()` with positional arguments `version`, `filepath`, and optionally with a `glob` and an `exists` functions if it uses non-local filesystem (see [`kedro.io.CSVLocalDataSet`](/kedro.io.CSVLocalDataSet) and [`kedro.io.CSVS3DataSet`](/kedro.io.CSVS3DataSet) example implementations) AND
+    3. call `super().__init__()` with positional arguments `filepath`, `version`, and optionally with a `glob` and an `exists` functions if it uses non-local filesystem (see [kedro.io.CSVLocalDataSet](https://github.com/quantumblacklabs/kedro/blob/master/kedro/io/csv_local.py) and [kedro.io.CSVS3DataSet](https://github.com/quantumblacklabs/kedro/blob/master/kedro/io/csv_s3.py) for example) AND
     4. modify its `_describe`, `_load` and `_save` methods respectively to support versioning (see [`kedro.io.CSVLocalDataSet`](/kedro.io.CSVLocalDataSet) for an example implementation) AND
 2. In the `catalog.yml` config file you must enable versioning by setting `versioned` attribute to `true` for the given dataset.
+
+An example dataset could look similar to the below: 
+
+```python
+from pathlib import Path
+
+import pandas as pd
+
+from kedro.io import AbstractVersionedDataSet
+
+
+class MyOwnDataSet(AbstractVersionedDataSet):
+    def __init__(self, param1, param2, filepath, version):
+        super().__init__(Path(filepath), version)
+        self._param1 = param1
+        self._param2 = param2
+
+    def _load(self) -> pd.DataFrame:
+        load_path = self._get_load_path()
+        return pd.read_csv(load_path)
+
+    def _save(self, df: pd.DataFrame) -> None:
+        save_path = self._get_save_path()
+        df.to_csv(save_path)
+
+    def _describe(self):
+        return dict(version=self._version, param1=self._param1, param2=self._param2)
+```
+
+With `catalog.yml` specifying:
+
+```yaml
+my_dataset:
+  type: <path-to-my-own-dataset>.MyOwnDataSet
+  filepath: data/01_raw/my_data.csv
+  versioned: true
+```
 
 ### `version` namedtuple
 

@@ -103,7 +103,7 @@ class CSVLocalDataSet(AbstractVersionedDataSet):
         if is_remote_path(filepath):
             raise ValueError(
                 "{} seems to be a remote file, which is not supported by {}".format(
-                    filepath, self.__class__.__name__,
+                    filepath, self.__class__.__name__
                 )
             )
 

@@ -25,7 +25,7 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import pandas as pd
 import pytest
 from pandas.util.testing import assert_frame_equal
 
@@ -36,6 +36,11 @@ from kedro.io.core import Version
 @pytest.fixture
 def filepath_xls(tmp_path):
     return str(tmp_path / "test.xlsx")
+
+
+@pytest.fixture
+def dummy_dataframe():
+    return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
 
 
 @pytest.fixture(params=[dict()])

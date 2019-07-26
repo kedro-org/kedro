@@ -3,7 +3,7 @@ cookiecutter==1.6.0
 pandas>=0.23.0, <0.25.0
 PyYAML>=4.2, <6.0
 tables==3.5.1
-pyarrow==0.12.0
+pyarrow>=0.12.0, <1.0.0
 SQLAlchemy>=1.2.0, <2.0
 toposort==1.5
 xlrd>=1.0.0, <2.0

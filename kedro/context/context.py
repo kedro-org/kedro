@@ -275,7 +275,8 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
 
     Args:
         project_path: Path to the Kedro project.
-        kwargs: Optional custom arguments defined by users.
+        kwargs: Optional custom arguments defined by users, which will be passed to
+        __kedro_context__() in `run.py`.
 
     Returns:
         Instance of KedroContext class defined in Kedro project.

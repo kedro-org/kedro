@@ -78,12 +78,13 @@ def __kedro_context__(env: str = None, **kwargs) -> KedroContext:
         # from a different location.
         env = "local"
 
-    return ProjectContext(Path.cwd(), env, **kwargs)
+    return ProjectContext(Path.cwd(), env)
 
 
 def main(
     tags: Iterable[str] = None,
-    env: str = None, runner: Type[AbstractRunner] = None,
+    env: str = None,
+    runner: Type[AbstractRunner] = None,
     node_names: Iterable[str] = None,
 ):
     """Application main entry point.

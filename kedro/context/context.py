@@ -36,6 +36,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, Union
 from warnings import warn
 
+from kedro import __version__
 from kedro.config import ConfigLoader, MissingConfigException
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
@@ -310,12 +311,41 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
         sys.path.append(str(project_path))
 
     kedro_cli = importlib.import_module("kedro_cli")
+
+    context = kedro_cli.__get_kedro_context__(**kwargs)  # type: ignore
+    check_context_version(context)
+
     if os.getcwd() != str(project_path):
         warn("Changing the current working directory to {}".format(str(project_path)))
         os.chdir(str(project_path))  # Move to project root
-    result = kedro_cli.__get_kedro_context__(**kwargs)  # type: ignore
     _LOADED_PATH = project_path
-    return result
+    return context
+
+
+def check_context_version(context: Union[Dict, KedroContext]) -> None:
+    """ Check if the Kedro package version and Kedro template version match.
+    Args:
+        context: Instance of KedroContext from Kedro template.
+
+    Raises:
+        KedroContextError: If there is a mismatch
+            between Kedro project version and package version.
+
+    """
+
+    def _error_message(context_version):
+        return (
+            "Your Kedro project version {} does not match Kedro package "
+            "version {} you are running. Make sure to update your project template. "
+            "See https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md for how to "
+            "migrate your Kedro project."
+        ).format(context_version, __version__)
+
+    if not isinstance(context, KedroContext):
+        raise KedroContextError(_error_message(context["project_version"]))
+    # check the match for major and minor version (skip patch version)
+    if context.project_version.split(".")[:2] != __version__.split(".")[:2]:
+        raise KedroContextError(_error_message(context.project_version))
 
 
 class KedroContextError(Exception):

@@ -28,17 +28,11 @@
 
 """Application entry point."""
 
-import logging.config
 from pathlib import Path
-from typing import Iterable, Type, Union
-from warnings import warn
+from typing import Iterable, Type
 
-from kedro.cli.utils import KedroCliError
-from kedro.config import ConfigLoader, MissingConfigException
 from kedro.context import KedroContext
-from kedro.io import DataCatalog
 from kedro.runner import AbstractRunner
-from kedro.utils import load_obj
 from kedro.pipeline import Pipeline
 
 from {{ cookiecutter.python_package }}.pipeline import create_pipeline
@@ -86,6 +80,8 @@ def main(
     env: str = None,
     runner: Type[AbstractRunner] = None,
     node_names: Iterable[str] = None,
+    from_nodes: Iterable[str] = None,
+    to_nodes: Iterable[str] = None,
 ):
     """Application main entry point.
 
@@ -100,11 +96,15 @@ def main(
         node_names: An optional list of node names which should be used to filter
             the nodes of the ``Pipeline``. If specified, only the nodes with these
             names will be run.
+        from_nodes: An optional list of node names which should be used as a
+            starting point of the new ``Pipeline``.
+        to_nodes: An optional list of node names which should be used as an
+            end point of the new ``Pipeline``.
 
     """
 
     context = __kedro_context__(env)
-    context.run(tags, runner, node_names)
+    context.run(tags, runner, node_names, from_nodes, to_nodes)
 
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@
 * Added a new I/O module `ParquetS3DataSet` in `contrib` for usage with Pandas. (by [@mmchougule](https://github.com/mmchougule))
 * Added a new `--node` flag to `kedro run`, allowing users to run only the nodes with the specified names.
 * Added `CSVHTTPDataSet` to load CSV using HTTP(s) links.
+* Added new `--from-nodes` and `--to-nodes` run arguments, allowing users to run a range of nodes from the pipeline.
 
 ## Bug fixes and other changes
 * Documentation improvements.

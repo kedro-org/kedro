@@ -176,6 +176,8 @@ class DummyContext(KedroContext):
             [
                 node(identity, "cars", "boats", name="node1", tags=["tag1"]),
                 node(identity, "boats", "trains", name="node2"),
+                node(identity, "trains", "ships", name="node3"),
+                node(identity, "ships", "planes", name="node4"),
             ],
             name="pipeline",
         )
@@ -264,6 +266,9 @@ class TestKedroContext:
         assert dummy_context.pipeline.nodes[1].inputs == ["boats"]
         assert dummy_context.pipeline.nodes[1].outputs == ["trains"]
 
+
+@pytest.mark.usefixtures("config_dir")
+class TestKedroContextRun:
     def test_default_run(self, dummy_context, dummy_dataframe, caplog):
         dummy_context.catalog.save("cars", dummy_dataframe)
         dummy_context.run()
@@ -322,9 +327,47 @@ class TestKedroContext:
 
     def test_run_with_wrong_tags(self, dummy_context, dummy_dataframe):
         dummy_context.catalog.save("cars", dummy_dataframe)
-        pattern = r"Pipeline contains no nodes with tags\: \['non\-existent'\]"
+        pattern = r"Pipeline contains no nodes with tags: \['non\-existent'\]"
         with pytest.raises(KedroContextError, match=pattern):
             dummy_context.run(tags=["non-existent"])
+
+    def test_run_from_nodes(self, dummy_context, dummy_dataframe, caplog):
+        dummy_context.catalog.save("cars", dummy_dataframe)
+        dummy_context.run(from_nodes=["node1"])
+
+        log_msgs = [record.getMessage() for record in caplog.records]
+        assert "Completed 4 out of 4 tasks" in log_msgs
+        assert "Running node: node1: identity([cars]) -> [boats]" in log_msgs
+        assert "Pipeline execution completed successfully." in log_msgs
+
+    def test_run_to_nodes(self, dummy_context, dummy_dataframe, caplog):
+        dummy_context.catalog.save("cars", dummy_dataframe)
+        dummy_context.run(to_nodes=["node2"])
+
+        log_msgs = [record.getMessage() for record in caplog.records]
+        assert "Completed 2 out of 2 tasks" in log_msgs
+        assert "Running node: node1: identity([cars]) -> [boats]" in log_msgs
+        assert "Running node: node2: identity([boats]) -> [trains]" in log_msgs
+        assert "Running node: node3: identity([trains]) -> [ships]" not in log_msgs
+        assert "Pipeline execution completed successfully." in log_msgs
+
+    def test_run_with_node_range(self, dummy_context, dummy_dataframe, caplog):
+        dummy_context.catalog.save("cars", dummy_dataframe)
+        dummy_context.run(from_nodes=["node1"], to_nodes=["node3"])
+
+        log_msgs = [record.getMessage() for record in caplog.records]
+        assert "Completed 3 out of 3 tasks" in log_msgs
+        assert "Running node: node1: identity([cars]) -> [boats]" in log_msgs
+        assert "Running node: node2: identity([boats]) -> [trains]" in log_msgs
+        assert "Running node: node3: identity([trains]) -> [ships]" in log_msgs
+        assert "Pipeline execution completed successfully." in log_msgs
+
+    def test_run_with_invalid_node_range(self, dummy_context, dummy_dataframe):
+        dummy_context.catalog.save("cars", dummy_dataframe)
+        pattern = "Pipeline contains no nodes"
+
+        with pytest.raises(KedroContextError, match=pattern):
+            dummy_context.run(from_nodes=["node3"], to_nodes=["node1"])
 
     @pytest.mark.filterwarnings("ignore")
     def test_run_with_empty_pipeline(self, tmp_path, mocker):

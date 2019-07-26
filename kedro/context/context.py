@@ -226,11 +226,13 @@ class KedroContext(abc.ABC):
         catalog.add_feed_dict(self._get_feed_dict())
         return catalog
 
-    def run(
+    def run(  # pylint: disable=too-many-arguments
         self,
         tags: Iterable[str] = None,
         runner: AbstractRunner = None,
         node_names: Iterable[str] = None,
+        from_nodes: Iterable[str] = None,
+        to_nodes: Iterable[str] = None,
     ) -> None:
         """Runs the pipeline with a specified runner.
 
@@ -243,6 +245,10 @@ class KedroContext(abc.ABC):
             node_names: An optional list of node names which should be used to
                 filter the nodes of the ``Pipeline``. If specified, only the nodes
                 with these names will be run.
+            from_nodes: An optional list of node names which should be used as a
+                starting point of the new ``Pipeline``.
+            to_nodes: An optional list of node names which should be used as an
+                end point of the new ``Pipeline``.
         Raises:
             KedroContextError: If the resulting ``Pipeline`` is empty
                 or incorrect tags are provided.
@@ -251,18 +257,23 @@ class KedroContext(abc.ABC):
         # Report project name
         logging.info("** Kedro project {}".format(self.project_path.name))
 
-        # Load the pipeline
+        # Load the pipeline as the intersection of all conditions
         pipeline = self.pipeline
-        if node_names:
-            pipeline = pipeline.only_nodes(*node_names)
         if tags:
-            pipeline = pipeline.only_nodes_with_tags(*tags)
+            pipeline = pipeline & self.pipeline.only_nodes_with_tags(*tags)
+            if not pipeline.nodes:
+                raise KedroContextError(
+                    "Pipeline contains no nodes with tags: {}".format(str(tags))
+                )
+        if from_nodes:
+            pipeline = pipeline & self.pipeline.from_nodes(*from_nodes)
+        if to_nodes:
+            pipeline = pipeline & self.pipeline.to_nodes(*to_nodes)
+        if node_names:
+            pipeline = pipeline & self.pipeline.only_nodes(*node_names)
 
         if not pipeline.nodes:
-            msg = "Pipeline contains no nodes"
-            if tags:
-                msg += " with tags: {}".format(str(tags))
-            raise KedroContextError(msg)
+            raise KedroContextError("Pipeline contains no nodes")
 
         # Run the runner
         runner = runner or SequentialRunner()

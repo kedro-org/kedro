@@ -164,6 +164,16 @@ class Pipeline:
             return NotImplemented
         return Pipeline(set(self.nodes + other.nodes))
 
+    def __and__(self, other):
+        if not isinstance(other, Pipeline):
+            return NotImplemented
+        return Pipeline(set(self.nodes) & set(other.nodes))
+
+    def __or__(self, other):
+        if not isinstance(other, Pipeline):
+            return NotImplemented
+        return Pipeline(set(self.nodes + other.nodes))
+
     def all_inputs(self) -> Set[str]:
         """All inputs for all nodes in the pipeline.
 
@@ -600,8 +610,8 @@ class Pipeline:
         or transitively by the provided nodes.
 
         Args:
-            node_names: A list of node_names which should be used as a
-                starting point of the new ``Pipeline``.
+            node_names: A list of node_names which should be used as an
+                end point of the new ``Pipeline``.
         Raises:
             ValueError: Raised when any of the given names do not exist in the
                 ``Pipeline`` object.

@@ -74,6 +74,10 @@ pipeline will run using environment `local`."""
 
 NODE_ARG_HELP = """Run only nodes with specified names."""
 
+FROM_NODES_HELP = """A list of node names which should be used as a starting point."""
+
+TO_NODES_HELP = """A list of node names which should be used as an end point"""
+
 PARALLEL_ARG_HELP = """Run the pipeline using the `ParallelRunner`.
 If not specified, use the `SequentialRunner`. This flag cannot be used together
 with --runner."""
@@ -100,6 +104,8 @@ def cli():
 
 
 @cli.command()
+@click.option("--from-nodes", type=str, default="", help=FROM_NODES_HELP)
+@click.option("--to-nodes", type=str, default="", help=TO_NODES_HELP)
 @click.option("--node", "-n", "node_names", type=str, default=None, multiple=True, help=NODE_ARG_HELP)
 @click.option(
     "--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP
@@ -107,9 +113,12 @@ def cli():
 @click.option("--parallel", "-p", is_flag=True, multiple=False, help=PARALLEL_ARG_HELP)
 @click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
 @click.option("--tag", "-t", type=str, default=None, multiple=True, help=TAG_ARG_HELP)
-def run(tag, env, parallel, runner, node_names):
+def run(tag, env, parallel, runner, node_names, to_nodes, from_nodes):
     """Run the pipeline."""
     from {{cookiecutter.python_package}}.run import main
+    from_nodes = [n for n in from_nodes.split(",") if n]
+    to_nodes = [n for n in to_nodes.split(",") if n]
+
     if parallel and runner:
         raise KedroCliError(
             "Both --parallel and --runner options cannot be used together. "
@@ -118,7 +127,8 @@ def run(tag, env, parallel, runner, node_names):
     if parallel:
         runner = "ParallelRunner"
     runner_class = load_obj(runner, "kedro.runner") if runner else SequentialRunner
-    main(tags=tag, env=env, runner=runner_class(), node_names=node_names)
+
+    main(tags=tag, env=env, runner=runner_class(), node_names=node_names, from_nodes=from_nodes, to_nodes=to_nodes)
 
 
 @forward_command(cli, forward_help=True)

@@ -5,6 +5,7 @@
 * Added `KedroContext` base class which holds the configuration and Kedro's main functionality (catalog, pipeline, config).
 * Added a new I/O module `ParquetS3DataSet` in `contrib` for usage with Pandas. (by [@mmchougule](https://github.com/mmchougule))
 * Added a new `--node` flag to `kedro run`, allowing users to run only the nodes with the specified names.
+* Added `CSVHTTPDataSet` to load CSV using HTTP(s) links.
 
 ## Bug fixes and other changes
 * Documentation improvements.

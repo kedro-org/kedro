@@ -31,11 +31,11 @@
 See https://pyyaml.org/wiki/PyYAMLDocumentation for details.
 """
 import copy
-import yaml
 from pathlib import Path
 from typing import Any, Dict
 
 import pandas as pd
+import yaml
 
 from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
 

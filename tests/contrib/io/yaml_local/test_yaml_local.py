@@ -29,8 +29,8 @@
 
 import pytest
 
-from kedro.io import DataSetError
 from kedro.contrib.io.yaml_local import YAMLLocalDataSet
+from kedro.io import DataSetError
 from kedro.io.core import Version
 
 

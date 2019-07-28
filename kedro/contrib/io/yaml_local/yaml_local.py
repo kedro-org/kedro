@@ -92,11 +92,11 @@ class YAMLLocalDataSet(AbstractVersionedDataSet):
 
         # Handle default load and save arguments
         self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
+        load_args = load_args or dict()
+        self._load_args.update(load_args)
         self._save_args = copy.deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
+        save_args = save_args or dict()
+        self._save_args.update(save_args)
 
     def _describe(self) -> Dict[str, Any]:
         return dict(

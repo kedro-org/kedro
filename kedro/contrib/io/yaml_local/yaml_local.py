@@ -26,7 +26,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``YAMLLocalDataset`` loads and saves data to a local yaml file.
+"""``YAMLLocalDataset`` loads and saves data to a local yaml file using
+``PyYAML``.
+See https://pyyaml.org/wiki/PyYAMLDocumentation for details.
 """
 import copy
 import yaml
@@ -39,9 +41,10 @@ from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
 
 
 class YAMLLocalDataSet(AbstractVersionedDataSet):
-    """``YAMLLocalDataset`` encodes data as yaml_local and saves it to a local file
-    or reads in and decodes an existing yaml_local file. The encoding/decoding
-    functionality is provided by Python's ``PyYAML`` library.
+    """
+    ``YAMLLocalDataset`` loads and saves data to a local yaml file using
+    ``PyYAML``.
+    See https://pyyaml.org/wiki/PyYAMLDocumentation for details.
 
     Example:
     ::
@@ -51,7 +54,7 @@ class YAMLLocalDataSet(AbstractVersionedDataSet):
         >>>     'a_string': 'Hello, World!',
         >>>     'a_list': [1, 2, 3]
         >>> }
-        >>> data_set = YAMLLocalDataset(filepath="test.yaml_local")
+        >>> data_set = YAMLLocalDataSet(filepath="test.yml")
         >>> data_set.save(my_dict)
         >>> reloaded = data_set.load()
         >>> assert my_dict == reloaded

@@ -120,7 +120,6 @@ class JSONBlobDataSet(AbstractDataSet):
         self._blob_from_bytes_args = blob_from_bytes_args if blob_from_bytes_args else {}
 
     def _load(self) -> pd.DataFrame:
-
         blob_service = BlockBlobService(**self._credentials)
         blob = blob_service.get_blob_to_bytes(
             container_name=self._container_name, blob_name=self._filepath,

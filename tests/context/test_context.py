@@ -159,13 +159,13 @@ def fake_project(tmp_path):
     project.mkdir()
     kedro_cli = project / "kedro_cli.py"
     script = """
-    class Fake:
-        project_name = "fake"
-        project_version = "{}"
+        class Fake:
+            project_name = "fake"
+            project_version = "{}"
 
-    def __get_kedro_context__():
-        return Fake()
-        """.format(
+        def __get_kedro_context__():
+            return Fake()
+    """.format(
         __version__
     )
     kedro_cli.write_text(textwrap.dedent(script), encoding="utf-8")

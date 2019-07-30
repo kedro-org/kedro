@@ -126,7 +126,6 @@ class JSONBlobDataSet(AbstractDataSet):
             container_name=self._container_name, blob_name=self._filepath,
             **self._blob_to_bytes_args)
         bytes_stream = io.BytesIO(blob.content)
-
         return pd.read_json(bytes_stream, encoding=self._encoding, **self._load_args)
 
     def _save(self, data: pd.DataFrame) -> None:

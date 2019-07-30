@@ -132,7 +132,6 @@ class JSONBlobDataSet(AbstractDataSet):
 
     def _save(self, data: pd.DataFrame) -> None:
         blob_service = BlockBlobService(**self._credentials)
-
         blob_service.create_blob_from_bytes(
             container_name=self._container_name,
             blob_name=self._filepath,

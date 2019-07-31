@@ -27,7 +27,7 @@ Data pipelines consist of extract-transform-load (ETL) workflows. If we understa
 
 ### Kedro vs workflow schedulers
 
-We see Airflow and Luigi as complementary frameworks: Airflow and Luigi are tools that handle deployment, scheduling, monitoring and alerting. Kedro is the _worker_ (with built-in sequential and parallel runners). It doesn't have to rely on a scheduler, but instead executes a series of tasks, and then reports to the Airflow and Luigi _managers_. We are building integrations for both tools and intend these integrations to offer a faster prototyping time and reduce the barriers to entry associated with moving pipelines to both workflow schedulers.
+Kedro is not a workflow scheduler like Airflow and Luigi. Kedro makes it easy to prototype your data pipeline, while Airflow and Luigi are complementary frameworks that are great at managing deployment, scheduling, monitoring and alerting. A Kedro pipeline is like a machine that builds a car part. Airflow and Luigi tell the different Kedro machines to switch on or off in order to work together to produce a car. We have built a [Kedro-Airflow](https://github.com/quantumblacklabs/kedro-airflow/) plugin, providing faster prototyping time and reducing the barriers to entry associated with moving pipelines to Airflow.
 
 ### Kedro vs other ETL frameworks
 

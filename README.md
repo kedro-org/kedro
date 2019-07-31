@@ -63,7 +63,7 @@ For more detailed installation instructions, including how to setup Python virtu
 
 - A plugin system that injects commands into the Kedro command line interface (CLI)
 - List of officially supported plugins:
-  - (_coming soon_) Kedro-Airflow, making it easy to prototype your data pipeline in Kedro before deploying to [Airflow](https://github.com/apache/airflow), a workflow scheduler
+  - [Kedro-Airflow](https://github.com/quantumblacklabs/kedro-airflow), making it easy to prototype your data pipeline in Kedro before deploying to [Airflow](https://github.com/apache/airflow), a workflow scheduler
   - [Kedro-Docker](https://github.com/quantumblacklabs/kedro-docker), a tool for packaging and shipping Kedro projects within containers
 - Kedro can be deployed locally, on-premise and cloud (AWS, Azure and GCP) servers, or clusters (EMR, Azure HDinsight, GCP and Databricks)
 

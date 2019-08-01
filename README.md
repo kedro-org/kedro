@@ -1,7 +1,7 @@
 ![Kedro Logo Banner](https://raw.githubusercontent.com/quantumblacklabs/kedro/master/img/kedro_banner.jpg)
 
-`develop` | `master`  
-----------|---------  
+`develop` | `master`
+----------|---------
 [![CircleCI](https://circleci.com/gh/quantumblacklabs/kedro/tree/develop.svg?style=shield)](https://circleci.com/gh/quantumblacklabs/kedro/tree/develop) | [![CircleCI](https://circleci.com/gh/quantumblacklabs/kedro/tree/master.svg?style=shield)](https://circleci.com/gh/quantumblacklabs/kedro/tree/master)
 [![Build status](https://ci.appveyor.com/api/projects/status/2u74p5g8fdc45wwh/branch/develop?svg=true)](https://ci.appveyor.com/project/QuantumBlack/kedro/branch/develop) | [![Build status](https://ci.appveyor.com/api/projects/status/2u74p5g8fdc45wwh/branch/master?svg=true)](https://ci.appveyor.com/project/QuantumBlack/kedro/branch/master)
 

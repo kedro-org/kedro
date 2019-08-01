@@ -101,10 +101,13 @@ You can add new work to `contrib` if you do not need to create a new Kedro CLI c
 See the [`plugin` development documentation](https://kedro.readthedocs.io/en/latest/04_user_guide/09_developing_plugins.html) for guidance on how to design and develop a Kedro `plugin`.
 
 ## CI / CD and running checks locally
-To run E2E tests you need to install the test requirements which includes `behave`, do this using the following command:
+To run E2E tests you need to install the test requirements which includes `behave`.
+Also we use [pre-commit](https://pre-commit.com) hooks for the repository to run the checks automatically.
+It can all be installed using the following command:
 
 ```bash
-pip install -r test_requirements.txt
+make install-test-requirements
+make install-pre-commit
 ```
 
 ### Running checks locally
@@ -146,3 +149,25 @@ make build-docs
 This command will only work on Unix-like systems and requires `pandoc` to be installed.
 
 > ❗ Running `make build-docs` in a Python 3.5 environment may sometimes yield multiple warning messages like the following: `MemoryDataSet.md: WARNING: document isn't included in any toctree`. You can simply ignore them or switch to Python 3.6+ when building documentation.
+
+## Hints on pre-commit usage
+The checks will automatically run on all the changed files on each commit.
+Even more extensive set of checks (including the heavy set of `pylint` checks)
+will run before the push.
+
+The pre-commit/pre-push checks can be omitted by running with `--no-verify` flag, as per below:
+
+```bash
+git commit --no-verify <...>
+git push --no-verify <...>
+```
+(`-n` alias works for `git commit`, but not for `git push`)
+
+All checks will run during CI build, so skipping checks on push will
+not allow you to merge your code with failing checks.
+
+You can uninstall the pre-commit hooks by running
+```bash
+make uninstall-pre-commit
+```
+`pre-commit` will still be used by `make lint`, but will install the git hooks.

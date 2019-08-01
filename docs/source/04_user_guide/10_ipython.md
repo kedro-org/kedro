@@ -174,4 +174,3 @@ Placing your `Notebook.ipynb` file anywhere in `new-kedro-project/notebooks/`, `
 #### Error handling
 
 In case this script fails to execute any of your Kedro project startup scripts, global variable `load_kedro_errors` will contain a dictionary with the key pointing to the failed script path and the value containing exception object.
-

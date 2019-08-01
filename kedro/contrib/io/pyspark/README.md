@@ -60,8 +60,8 @@ Loading and saving spark `DataFrame`s using Kedro can be easily done using the [
 ```python
 from kedro.contrib.io.pyspark import SparkDataSet
 
-csv = SparkDataSet('../data/01_raw/2015_points_old.csv', 
-                   file_format='csv', 
+csv = SparkDataSet('../data/01_raw/2015_points_old.csv',
+                   file_format='csv',
                    load_args={'header': True})
 
 df = csv.load() \
@@ -74,9 +74,9 @@ df.show()
 ### Save it as parquet to your local disk
 
 ```python
-parquet = SparkDataSet('../data/01_raw/2015_points_old_parquet', 
-                       file_format='parquet', 
-                       save_args={'mode': 'overwrite', 
+parquet = SparkDataSet('../data/01_raw/2015_points_old_parquet',
+                       file_format='parquet',
+                       save_args={'mode': 'overwrite',
                                   'compression': 'none'})
 parquet.save(df)
 ```

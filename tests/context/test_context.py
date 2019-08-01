@@ -318,7 +318,7 @@ class TestKedroContextRun:
         assert "Running node: node1: identity([cars]) -> [boats]" in log_msgs
         assert "Pipeline execution completed successfully." in log_msgs
         assert "Running node: node2: identity([boats]) -> [trains]" not in log_msgs
-        assert not bool(outputs)
+        assert not outputs
 
     def test_run_with_node_names_and_tags(self, dummy_context, dummy_dataframe, caplog):
         dummy_context.catalog.save("cars", dummy_dataframe)
@@ -328,7 +328,7 @@ class TestKedroContextRun:
         assert "Running node: node1: identity([cars]) -> [boats]" in log_msgs
         assert "Pipeline execution completed successfully." in log_msgs
         assert "Running node: node2: identity([boats]) -> [trains]" not in log_msgs
-        assert not bool(outputs)
+        assert not outputs
 
     def test_run_with_tags(self, dummy_context, dummy_dataframe, caplog):
         dummy_context.catalog.save("cars", dummy_dataframe)
@@ -339,7 +339,7 @@ class TestKedroContextRun:
         assert "Running node: node1: identity([cars]) -> [boats]" in log_msgs
         assert "Running node: node2: identity([boats]) -> [trains]" not in log_msgs
         assert "Pipeline execution completed successfully." in log_msgs
-        assert not bool(outputs)
+        assert not outputs
 
     def test_run_with_wrong_tags(self, dummy_context, dummy_dataframe):
         dummy_context.catalog.save("cars", dummy_dataframe)
@@ -367,7 +367,7 @@ class TestKedroContextRun:
         assert "Running node: node2: identity([boats]) -> [trains]" in log_msgs
         assert "Running node: node3: identity([trains]) -> [ships]" not in log_msgs
         assert "Pipeline execution completed successfully." in log_msgs
-        assert not bool(outputs)
+        assert not outputs
 
     def test_run_with_node_range(self, dummy_context, dummy_dataframe, caplog):
         dummy_context.catalog.save("cars", dummy_dataframe)

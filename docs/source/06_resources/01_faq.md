@@ -88,7 +88,7 @@ Kedro is built for Python 3.5+.
 * Avoid committing data to notebook output cells (data can easily sneak into notebooks when you don't delete output cells)
 * Don't commit sensitive results or plots to version control (in notebooks or otherwise)
 * Don't commit credentials in `conf/`. There are two default folders for adding configuration - `conf/base/` and `conf/local/`. Only the `conf/local/` folder should be used for sensitive information like access credentials. To add credentials, please refer to the `conf/base/credentials.yml` file in the project template.
-* By default any file inside the `conf/` folder (and its subfolders) containing `credentials` in its name will be ignored via `.gitignore` and not commited to your git repository.
+* By default any file inside the `conf/` folder (and its subfolders) containing `credentials` in its name will be ignored via `.gitignore` and not committed to your git repository.
 * To describe where your colleagues can access the credentials, you may edit the `README.md` to provide instructions.
 
 ## What is the philosophy behind Kedro?

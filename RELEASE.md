@@ -7,6 +7,7 @@
 * Added a new `--node` flag to `kedro run`, allowing users to run only the nodes with the specified names.
 * Added `CSVHTTPDataSet` to load CSV using HTTP(s) links.
 * Added new `--from-nodes` and `--to-nodes` run arguments, allowing users to run a range of nodes from the pipeline.
+* Jupyter Lab/Notebook now starts with only one kernel by default.
 
 ## Bug fixes and other changes
 * Documentation improvements including instructions on how to initialise a Spark session using YAML configuration.

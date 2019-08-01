@@ -27,8 +27,15 @@ With `context`, you can access the following variables and methods
   - `tags`: An optional list of node tags which should be used to
           filter the nodes of the ``Pipeline``. If specified, only the nodes
           containing *any* of these tags will be added to the ``Pipeline``
-   - `runner`: An optional parameter specifying the runner _instance_ that you want to run
+  - `runner`: An optional parameter specifying the runner _instance_ that you want to run
           the pipeline with
+  - `node_names`: An optional list of node names which should be used to
+          filter the nodes of the ``Pipeline``. If specified, only the nodes
+          with these names will be run.
+  - `from_nodes`: An optional list of node names which should be used as a
+          starting point of the new ``Pipeline``.
+  - `to_nodes`: An optional list of node names which should be used as an
+          end point of the new ``Pipeline``.
 
 ## Loading `DataCatalog` in IPython
 
@@ -87,12 +94,11 @@ jupyter notebook
 And then add the following code in a notebook cell:
 
 ```python
+from pathlib import Path
 from kedro.context import load_context
-import os
 
-proj_path = os.getcwd()
-context_class = load_context(proj_path)
-context = context_class(proj_path)
+proj_path = Path.cwd()
+context = load_context(proj_path)
 df = context.io.load("example_iris_data")
 df.head()
 ```
@@ -104,6 +110,21 @@ You should be able to see the first 5 rows of the loaded dataset as follows:
 > *Note:*
 If you see an error message in a notebook cell, you can see what went wrong by using `print(startup_error)`, where `startup_error` is available as a variable in Python.
 <br/>When you add new datasets to your `catalog.yml` file you need to reload Kedro's session by running `%reload_kedro` in your cell.
+
+You can also run your Kedro pipeline by using `context.run()`, which provides the same functionality as the CLI command `kedro run`. You can try this out by typing the following in a notebook cell:
+
+```python
+from pathlib import Path
+from kedro.context import load_context
+
+proj_path = Path.cwd()
+context = load_context(proj_path)
+context.run()
+```
+
+You should be able to see the logging output as follows:
+
+![](images/jupyter-notebook-ch10-3.png)
 
 ## Extras
 

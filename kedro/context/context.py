@@ -199,7 +199,12 @@ class KedroContext(abc.ABC):
                 )
             )
             params = {}
-        return {"parameters": params}
+
+        feed_dict = {"parameters": params}
+        for param_name, param_value in params.items():
+            key = "params:{}".format(param_name)
+            feed_dict[key] = param_value
+        return feed_dict
 
     def _get_config_credentials(self) -> Dict[str, Any]:
         """Getter for credentials specified in credentials directory."""

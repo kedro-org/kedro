@@ -7,6 +7,7 @@
 * Added a new `--node` flag to `kedro run`, allowing users to run only the nodes with the specified names.
 * Added `CSVHTTPDataSet` to load CSV using HTTP(s) links.
 * Added new `--from-nodes` and `--to-nodes` run arguments, allowing users to run a range of nodes from the pipeline.
+* Added prefix `params:` to the parameters specified in `parameters.yml` which allows users to differentiate between their different parameters node inputs and outputs
 * Added `JSONBlobDataSet` to load json (-delimited) files from Azure Blob Storage
 * Jupyter Lab/Notebook now starts with only one kernel by default.
 

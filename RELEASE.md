@@ -8,9 +8,10 @@
 * Added `CSVHTTPDataSet` to load CSV using HTTP(s) links.
 * Added new `--from-nodes` and `--to-nodes` run arguments, allowing users to run a range of nodes from the pipeline.
 * Added `JSONBlobDataSet` to load json (-delimited) files from Azure Blob Storage
+* Jupyter Lab/Notebook now starts with only one kernel by default.
 
 ## Bug fixes and other changes
-* Documentation improvements.
+* Documentation improvements including instructions on how to initialise a Spark session using YAML configuration.
 * `anyconfig` default log level changed from `INFO` to `WARNING`.
 * Added information on installed plugins to `kedro info`.
 * Added style sheets for project documentation, so the output of `kedro build-docs` will resemble the style of `kedro docs`.

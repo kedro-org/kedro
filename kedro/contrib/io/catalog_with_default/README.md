@@ -14,8 +14,8 @@ from kedro.runner import SequentialRunner
 def default_io(name):
     return ParquetLocalDataSet(name)
 
-catalog = DataCatalogWithDefault({}, 
-                                 default=default_io, 
+catalog = DataCatalogWithDefault({},
+                                 default=default_io,
                                  default_prefix='data/')
 
 def my_node(input):
@@ -36,4 +36,3 @@ Less safe during production, very handy during development.
 ### Motivation and Context
 
 Very useful during development, saves a lot of time. Usually most datasets in a pipeline come from a single-source.
-

@@ -1,15 +1,15 @@
+anyconfig==0.9.7
 click<8.0
 cookiecutter==1.6.0
+memory_profiler==0.54.0
 pandas>=0.23.0, <0.25.0
-PyYAML>=4.2, <6.0
-tables==3.5.1
 pyarrow>=0.12.0, <1.0.0
+python-json-logger==0.1.9
+PyYAML>=4.2, <6.0
+requests>=2.21.0, <3.0.0
+s3fs>=0.3.0, <1.0
 SQLAlchemy>=1.2.0, <2.0
+tables==3.5.1
 toposort==1.5
 xlrd>=1.0.0, <2.0
 xlsxwriter>=1.0.7, <2.0
-anyconfig==0.9.7
-python-json-logger==0.1.9
-memory_profiler==0.54.0
-s3fs>=0.3.0, <1.0
-requests>=2.21.0, <3.0.0

@@ -111,7 +111,7 @@ To tag a node, you can simply specify the `tag` argument, as follows:
 
 ```python
 node(func=add, inputs=["a", "b"], outputs="sum", name="adding_a_and_b", tag="node_tag")
-``` 
+```
 
 Moreover, you can [tag all nodes in a ``Pipeline``](./05_nodes_and_pipelines.md#tagging-pipeline-nodes).
 

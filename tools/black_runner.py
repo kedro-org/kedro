@@ -27,32 +27,26 @@
 # limitations under the License.
 
 """
-This module contains an example test.
+Black needs python 3.6+, but Kedro should work on 3.5 too,
+that's why we can't put ``black`` into test_requirements.txt and
+have to install it manually like that.
 
-Tests should be placed in ``src/tests``, in modules that mirror your
-project's structure, and in files named test_*.py. They are simply functions
-named ``test_*`` which test a unit of logic.
-
-To run the tests, run ``kedro test``.
+If python version is 3.5 - just exit with 0 status.
 """
-from os.path import abspath, curdir, join
-from pathlib import Path
+import platform
+import subprocess
+import sys
 
-import pytest
-from kedro.config import ConfigLoader
-from kedro.io import DataCatalog
+VERSION = tuple(map(int, platform.python_version_tuple()[:2]))
 
-from {{ cookiecutter.python_package }}.run import ProjectContext
+if VERSION < (3, 6):
+    print("Python version is too low, exiting")
+    sys.exit(0)
+
+try:
+    import black  # noqa: F401 pylint: disable=unused-import
+except ImportError:
+    subprocess.run(["pip", "install", "black"], check=True)
 
 
-@pytest.fixture
-def project_context():
-    return ProjectContext(str(Path.cwd()))
-
-
-class TestProjectContext:
-    def test_project_name(self, project_context):
-        assert project_context.project_name == "{{ cookiecutter.project_name }}"
-
-    def test_project_version(self, project_context):
-        assert project_context.project_version == "{{ cookiecutter.kedro_version }}"
+subprocess.run(["black"] + sys.argv[1:], check=True)

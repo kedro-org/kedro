@@ -518,8 +518,6 @@ def create_pipeline(**kwargs):
     return de_pipeline + ds_pipeline
 ```
 
-Should you need to, you can add more than one tag to the pipeline by adding `name=['tag1', 'tag2']`.
-
 To run a partial pipeline:
 
 ```bash

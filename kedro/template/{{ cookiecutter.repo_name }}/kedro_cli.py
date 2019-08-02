@@ -43,6 +43,7 @@ from kedro.cli import main as kedro_main
 from kedro.cli.utils import KedroCliError, call, forward_command, python_call, export_nodes
 from kedro.utils import load_obj
 from kedro.runner import SequentialRunner
+from typing import Iterable, List
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -215,6 +216,15 @@ def activate_nbstripout():
     call(["nbstripout", "--install"])
 
 
+def _build_jupyter_command(base: str, ip: str, all_kernels: bool, args: Iterable[str]) -> List[str]:
+    cmd = [base, "--ip=" + ip]
+
+    if not all_kernels:
+        cmd.append("--KernelSpecManager.whitelist=['python3']")
+
+    return cmd + list(args)
+
+
 @cli.group()
 def jupyter():
     """Open Jupyter Notebook / Lab with project specific variables loaded, or
@@ -224,20 +234,30 @@ def jupyter():
 
 @forward_command(jupyter, "notebook", forward_help=True)
 @click.option("--ip", type=str, default="127.0.0.1")
-def jupyter_notebook(ip, args):
+@click.option("--all-kernels", is_flag=True, default=False)
+def jupyter_notebook(ip, all_kernels, args):
     """Open Jupyter Notebook with project specific variables loaded."""
     if "-h" not in args and "--help" not in args:
-        ipython_message()
-    call(["jupyter-notebook", "--ip=" + ip] + list(args))
+        ipython_message(all_kernels)
+
+    call(_build_jupyter_command(
+        "jupyter-notebook", ip=ip,
+        all_kernels=all_kernels, args=args,
+    ))
 
 
 @forward_command(jupyter, "lab", forward_help=True)
 @click.option("--ip", type=str, default="127.0.0.1")
-def jupyter_lab(ip, args):
+@click.option("--all-kernels", is_flag=True, default=False)
+def jupyter_lab(ip, all_kernels, args):
     """Open Jupyter Lab with project specific variables loaded."""
     if "-h" not in args and "--help" not in args:
-        ipython_message()
-    call(["jupyter-lab", "--ip=" + ip] + list(args))
+        ipython_message(all_kernels)
+
+    call(_build_jupyter_command(
+        "jupyter-lab", ip=ip,
+        all_kernels=all_kernels, args=args,
+    ))
 
 
 @jupyter.command("convert")
@@ -312,7 +332,7 @@ def convert_notebook(all_flag, overwrite_flag, filepath):
     secho("Done!")
 
 
-def ipython_message():
+def ipython_message(all_kernels=True):
     """Show a message saying how we have configured the IPython env."""
     ipy_vars = ["startup_error", "context"]
     secho("-" * 79, fg="cyan")
@@ -324,6 +344,17 @@ def ipython_message():
         )
     )
     secho("or to see the error message if they are undefined")
+
+    if not all_kernels:
+        secho(
+            "The choice of kernels is limited to the default one.",
+            fg="yellow",
+        )
+        secho(
+            "(restart with --all-kernels to get access to others)",
+            fg="yellow",
+        )
+
     secho("-" * 79, fg="cyan")
 
 

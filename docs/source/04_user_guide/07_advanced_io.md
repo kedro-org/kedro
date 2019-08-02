@@ -52,7 +52,7 @@ In order to enable versioning, all of the following conditions must be met:
     4. modify its `_describe`, `_load` and `_save` methods respectively to support versioning (see [`kedro.io.CSVLocalDataSet`](/kedro.io.CSVLocalDataSet) for an example implementation) AND
 2. In the `catalog.yml` config file you must enable versioning by setting `versioned` attribute to `true` for the given dataset.
 
-An example dataset could look similar to the below: 
+An example dataset could look similar to the below:
 
 ```python
 from pathlib import Path

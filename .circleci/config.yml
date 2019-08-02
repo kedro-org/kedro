@@ -22,8 +22,11 @@ jobs:
             # Install requirements
             pip install -r requirements.txt -U
 
+            # venv is required for some pre-commit hooks
+            conda install -y virtualenv
+
             # Install test requirements
-            pip install -r test_requirements.txt -U
+            make install-pre-commit
        - run:
           name: Run pylint and flake8
           command: |

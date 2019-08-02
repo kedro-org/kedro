@@ -7,6 +7,7 @@
 * Added a new `--node` flag to `kedro run`, allowing users to run only the nodes with the specified names.
 * Added `CSVHTTPDataSet` to load CSV using HTTP(s) links.
 * Added new `--from-nodes` and `--to-nodes` run arguments, allowing users to run a range of nodes from the pipeline.
+* Added `JSONBlobDataSet` to load json (-delimited) files from Azure Blob Storage
 * Jupyter Lab/Notebook now starts with only one kernel by default.
 
 ## Bug fixes and other changes
@@ -74,7 +75,7 @@ If you defined any custom dataset classes which support versioning in your proje
 These steps should have brought your project to Kedro 0.15.0. There might be some more minor tweaks needed as every project is unique, but now you have a pretty solid base to work with. If you run into any problems, please consult the [Kedro documentation](https://kedro.readthedocs.io).
 
 ## Thanks for supporting contributions
-[Dmitry Vukolov](https://github.com/dvukolov), [Jo Stichbury](https://github.com/stichbury), [Angus Williams](https://github.com/awqb), [Deepyaman Datta](https://github.com/deepyaman), [Mayur Chougule](https://github.com/mmchougule)
+[Dmitry Vukolov](https://github.com/dvukolov), [Jo Stichbury](https://github.com/stichbury), [Angus Williams](https://github.com/awqb), [Deepyaman Datta](https://github.com/deepyaman), [Mayur Chougule](https://github.com/mmchougule), [Marat Kopytjuk](https://github.com/kopytjuk)
 
 # Release 0.14.3
 

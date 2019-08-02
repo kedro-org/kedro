@@ -108,22 +108,24 @@ class JSONBlobDataSet(AbstractDataSet):
                 All defaults are preserved, but "index", which is set to False.
 
         """
-        self._save_args = (
-            {**save_args} if save_args else {}
-        )
+        self._save_args = {**save_args} if save_args else {}
         self._load_args = load_args if load_args else {}
         self._filepath = filepath
         self._encoding = encoding
         self._container_name = container_name
         self._credentials = credentials if credentials else {}
         self._blob_to_bytes_args = blob_to_bytes_args if blob_to_bytes_args else {}
-        self._blob_from_bytes_args = blob_from_bytes_args if blob_from_bytes_args else {}
+        self._blob_from_bytes_args = (
+            blob_from_bytes_args if blob_from_bytes_args else {}
+        )
 
     def _load(self) -> pd.DataFrame:
         blob_service = BlockBlobService(**self._credentials)
         blob = blob_service.get_blob_to_bytes(
-            container_name=self._container_name, blob_name=self._filepath,
-            **self._blob_to_bytes_args)
+            container_name=self._container_name,
+            blob_name=self._filepath,
+            **self._blob_to_bytes_args
+        )
         bytes_stream = io.BytesIO(blob.content)
         return pd.read_json(bytes_stream, encoding=self._encoding, **self._load_args)
 

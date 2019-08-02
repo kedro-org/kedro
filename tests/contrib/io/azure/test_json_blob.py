@@ -125,7 +125,9 @@ def test_load(get_blob_mock, blob_json_data_set):
 
 class BlobMockDelimited:
     def __init__(self):
-        self._content = '{"name": "tom", "age": 3}\n{"name": "bob", "age": 4}\n'.encode("utf-8")
+        self._content = '{"name": "tom", "age": 3}\n{"name": "bob", "age": 4}\n'.encode(
+            "utf-8"
+        )
 
     @property
     def content(self):

@@ -73,3 +73,8 @@ repos:
         language: system
         pass_filenames: false
         entry: python -m tools.black_runner kedro extras features tests
+    -   id: legal
+        name: "Licence check"
+        language: system
+        pass_filenames: false
+        entry: make legal

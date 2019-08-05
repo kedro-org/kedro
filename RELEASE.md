@@ -10,6 +10,8 @@
 * Added prefix `params:` to the parameters specified in `parameters.yml` which allows users to differentiate between their different parameters node inputs and outputs
 * Added `JSONBlobDataSet` to load json (-delimited) files from Azure Blob Storage
 * Jupyter Lab/Notebook now starts with only one kernel by default.
+* Running `kedro install` will install packages to conda environment if `src/environment.yml` exists in your project.
+
 
 ## Bug fixes and other changes
 * Documentation improvements including instructions on how to initialise a Spark session using YAML configuration.
@@ -76,7 +78,7 @@ If you defined any custom dataset classes which support versioning in your proje
 These steps should have brought your project to Kedro 0.15.0. There might be some more minor tweaks needed as every project is unique, but now you have a pretty solid base to work with. If you run into any problems, please consult the [Kedro documentation](https://kedro.readthedocs.io).
 
 ## Thanks for supporting contributions
-[Dmitry Vukolov](https://github.com/dvukolov), [Jo Stichbury](https://github.com/stichbury), [Angus Williams](https://github.com/awqb), [Deepyaman Datta](https://github.com/deepyaman), [Mayur Chougule](https://github.com/mmchougule), [Marat Kopytjuk](https://github.com/kopytjuk)
+[Dmitry Vukolov](https://github.com/dvukolov), [Jo Stichbury](https://github.com/stichbury), [Angus Williams](https://github.com/awqb), [Deepyaman Datta](https://github.com/deepyaman), [Mayur Chougule](https://github.com/mmchougule), [Marat Kopytjuk](https://github.com/kopytjuk), [Evan Miller](https://github.com/evanmiller29)
 
 # Release 0.14.3
 

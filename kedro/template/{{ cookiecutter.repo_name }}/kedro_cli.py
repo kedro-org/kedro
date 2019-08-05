@@ -92,7 +92,6 @@ including sub-folders."""
 OVERWRITE_HELP = """If Python file already exists for the equivalent notebook,
 overwrite its contents."""
 
-
 def __get_kedro_context__(**kwargs):
     """Used to provide this project's context to plugins."""
     from {{cookiecutter.python_package}}.run import __kedro_context__
@@ -145,9 +144,12 @@ def test(args):
 
 @cli.command()
 def install():
-    """Install project dependencies from requirements.txt."""
-    python_call("pip", ["install", "-U", "-r", "src/requirements.txt"])
+    """Install project dependencies from both requirements.txt and environment.yml (optional)."""
 
+    if (Path.cwd() / "src" / "environment.yml").is_file():
+        call(["conda", "install", "--file",  "src/environment.yml", "--yes"])
+
+    python_call("pip", ["install", "-U", "-r", "src/requirements.txt"])
 
 @forward_command(cli, forward_help=True)
 def ipython(args):

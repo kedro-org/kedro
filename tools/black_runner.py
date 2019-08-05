@@ -27,22 +27,26 @@
 # limitations under the License.
 
 """
-This file contains the fixtures that are reusable by any tests within
-this directory. You don't need to import the fixtures as pytest will
-discover them automatically. More info here:
-https://docs.pytest.org/en/latest/fixture.html
+Black needs python 3.6+, but Kedro should work on 3.5 too,
+that's why we can't put ``black`` into test_requirements.txt and
+have to install it manually like that.
+
+If python version is 3.5 - just exit with 0 status.
 """
+import platform
+import subprocess
+import sys
 
-from pytest import fixture
+VERSION = tuple(map(int, platform.python_version_tuple()[:2]))
 
-from kedro.io.core import generate_current_version
+if VERSION < (3, 6):
+    print("Python version is too low, exiting")
+    sys.exit(0)
+
+try:
+    import black  # noqa: F401 pylint: disable=unused-import
+except ImportError:
+    subprocess.run(["pip", "install", "black"], check=True)
 
 
-@fixture(params=[None])
-def load_version(request):
-    return request.param
-
-
-@fixture(params=[None])
-def save_version(request):
-    return request.param or generate_current_version()
+subprocess.run(["black"] + sys.argv[1:], check=True)

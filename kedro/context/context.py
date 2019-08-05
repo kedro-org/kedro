@@ -36,6 +36,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, Union
 from warnings import warn
 
+from kedro import __version__
 from kedro.config import ConfigLoader, MissingConfigException
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
@@ -198,7 +199,12 @@ class KedroContext(abc.ABC):
                 )
             )
             params = {}
-        return {"parameters": params}
+
+        feed_dict = {"parameters": params}
+        for param_name, param_value in params.items():
+            key = "params:{}".format(param_name)
+            feed_dict[key] = param_value
+        return feed_dict
 
     def _get_config_credentials(self) -> Dict[str, Any]:
         """Getter for credentials specified in credentials directory."""
@@ -226,15 +232,29 @@ class KedroContext(abc.ABC):
         catalog.add_feed_dict(self._get_feed_dict())
         return catalog
 
-    def run(self, tags: Iterable[str] = None, runner: AbstractRunner = None) -> None:
+    def run(  # pylint: disable=too-many-arguments
+        self,
+        tags: Iterable[str] = None,
+        runner: AbstractRunner = None,
+        node_names: Iterable[str] = None,
+        from_nodes: Iterable[str] = None,
+        to_nodes: Iterable[str] = None,
+    ) -> None:
         """Runs the pipeline with a specified runner.
 
         Args:
             tags: An optional list of node tags which should be used to
                 filter the nodes of the ``Pipeline``. If specified, only the nodes
-                containing *any* of these tags will be added to the ``Pipeline``.
+                containing *any* of these tags will be run.
             runner: An optional parameter specifying the runner that you want to run
                 the pipeline with.
+            node_names: An optional list of node names which should be used to
+                filter the nodes of the ``Pipeline``. If specified, only the nodes
+                with these names will be run.
+            from_nodes: An optional list of node names which should be used as a
+                starting point of the new ``Pipeline``.
+            to_nodes: An optional list of node names which should be used as an
+                end point of the new ``Pipeline``.
         Raises:
             KedroContextError: If the resulting ``Pipeline`` is empty
                 or incorrect tags are provided.
@@ -243,13 +263,23 @@ class KedroContext(abc.ABC):
         # Report project name
         logging.info("** Kedro project {}".format(self.project_path.name))
 
-        # Load the pipeline
-        pipeline = self.pipeline.only_nodes_with_tags(*tags) if tags else self.pipeline
+        # Load the pipeline as the intersection of all conditions
+        pipeline = self.pipeline
+        if tags:
+            pipeline = pipeline & self.pipeline.only_nodes_with_tags(*tags)
+            if not pipeline.nodes:
+                raise KedroContextError(
+                    "Pipeline contains no nodes with tags: {}".format(str(tags))
+                )
+        if from_nodes:
+            pipeline = pipeline & self.pipeline.from_nodes(*from_nodes)
+        if to_nodes:
+            pipeline = pipeline & self.pipeline.to_nodes(*to_nodes)
+        if node_names:
+            pipeline = pipeline & self.pipeline.only_nodes(*node_names)
+
         if not pipeline.nodes:
-            msg = "Pipeline contains no nodes"
-            if tags:
-                msg += " with tags: {}".format(str(tags))
-            raise KedroContextError(msg)
+            raise KedroContextError("Pipeline contains no nodes")
 
         # Run the runner
         runner = runner or SequentialRunner()
@@ -262,7 +292,8 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
 
     Args:
         project_path: Path to the Kedro project.
-        kwargs: Optional custom arguments defined by users.
+        kwargs: Optional custom arguments defined by users, which will be passed to
+        __kedro_context__() in `run.py`.
 
     Returns:
         Instance of KedroContext class defined in Kedro project.
@@ -285,12 +316,41 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
         sys.path.append(str(project_path))
 
     kedro_cli = importlib.import_module("kedro_cli")
+
+    context = kedro_cli.__get_kedro_context__(**kwargs)  # type: ignore
+    check_context_version(context)
+
     if os.getcwd() != str(project_path):
         warn("Changing the current working directory to {}".format(str(project_path)))
         os.chdir(str(project_path))  # Move to project root
-    result = kedro_cli.__get_kedro_context__(**kwargs)  # type: ignore
     _LOADED_PATH = project_path
-    return result
+    return context
+
+
+def check_context_version(context: Union[Dict, KedroContext]) -> None:
+    """ Check if the Kedro package version and Kedro template version match.
+    Args:
+        context: Instance of KedroContext from Kedro template.
+
+    Raises:
+        KedroContextError: If there is a mismatch
+            between Kedro project version and package version.
+
+    """
+
+    def _error_message(context_version):
+        return (
+            "Your Kedro project version {} does not match Kedro package "
+            "version {} you are running. Make sure to update your project template. "
+            "See https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md for how to "
+            "migrate your Kedro project."
+        ).format(context_version, __version__)
+
+    if not isinstance(context, KedroContext):
+        raise KedroContextError(_error_message(context["project_version"]))
+    # check the match for major and minor version (skip patch version)
+    if context.project_version.split(".")[:2] != __version__.split(".")[:2]:
+        raise KedroContextError(_error_message(context.project_version))
 
 
 class KedroContextError(Exception):

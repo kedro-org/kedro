@@ -3,18 +3,27 @@
 ## Major features and improvements
 * Added a new CLI command `kedro jupyter convert` to facilitate converting Jupyter notebook cells into Kedro nodes.
 * Added `KedroContext` base class which holds the configuration and Kedro's main functionality (catalog, pipeline, config).
-* Added a new I/O module `ParquetS3DataSet` in `contrib` for usage with Pandas. (by [@mmchougule](https://github.com/mmchougule)) 
+* Added a new I/O module `ParquetS3DataSet` in `contrib` for usage with Pandas. (by [@mmchougule](https://github.com/mmchougule))
+* Added a new `--node` flag to `kedro run`, allowing users to run only the nodes with the specified names.
+* Added `CSVHTTPDataSet` to load CSV using HTTP(s) links.
+* Added new `--from-nodes` and `--to-nodes` run arguments, allowing users to run a range of nodes from the pipeline.
+* Added prefix `params:` to the parameters specified in `parameters.yml` which allows users to differentiate between their different parameters node inputs and outputs
+* Added `JSONBlobDataSet` to load json (-delimited) files from Azure Blob Storage
+* Jupyter Lab/Notebook now starts with only one kernel by default.
+`src/environment.yml` will be required to run `kedro install --conda`
+
 
 ## Bug fixes and other changes
-* Documentation improvements.
+* Documentation improvements including instructions on how to initialise a Spark session using YAML configuration.
 * `anyconfig` default log level changed from `INFO` to `WARNING`.
 * Added information on installed plugins to `kedro info`.
 * Added style sheets for project documentation, so the output of `kedro build-docs` will resemble the style of `kedro docs`.
 
 ## Breaking changes to the API
-* Simplify the Kedro template in `run.py` with the introduction of `KedroContext` class.
+* Simplified the Kedro template in `run.py` with the introduction of `KedroContext` class.
 * Merged `FilepathVersionMixIn` and `S3VersionMixIn` under one abstract class `AbstractVersionedDataSet` which extends`AbstractDataSet`.
-* `src/environment.yml` will be required to run `kedro install --conda`
+* `name` changed to be a keyword-only argument for `Pipeline`.
+* `CSVLocalDataSet` no longer supports URLs.
 
 #### Migration guide from Kedro 0.14.* to Kedro 0.15.0
 ##### Migration for Kedro project template
@@ -69,7 +78,7 @@ If you defined any custom dataset classes which support versioning in your proje
 These steps should have brought your project to Kedro 0.15.0. There might be some more minor tweaks needed as every project is unique, but now you have a pretty solid base to work with. If you run into any problems, please consult the [Kedro documentation](https://kedro.readthedocs.io).
 
 ## Thanks for supporting contributions
-[Dmitry Vukolov](https://github.com/dvukolov), [Jo Stichbury](https://github.com/stichbury), [Angus Williams](https://github.com/awqb), [Deepyaman Datta](https://github.com/deepyaman), [Mayur Chougule](https://github.com/mmchougule), [Evan Miller](https://github.com/evanmiller29)
+[Dmitry Vukolov](https://github.com/dvukolov), [Jo Stichbury](https://github.com/stichbury), [Angus Williams](https://github.com/awqb), [Deepyaman Datta](https://github.com/deepyaman), [Mayur Chougule](https://github.com/mmchougule), [Marat Kopytjuk](https://github.com/kopytjuk), [Evan Miller](https://github.com/evanmiller29)
 
 # Release 0.14.3
 

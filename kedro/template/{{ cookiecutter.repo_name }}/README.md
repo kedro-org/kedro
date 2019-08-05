@@ -87,7 +87,7 @@ scope: `proj_dir`, `proj_name`, `conf`, `io`, `parameters` and `startup_error`.
 
 Once you are happy with a notebook, you may want to move your code over into the Kedro project structure for the next stage in your development. This is done through a mixture of [cell tagging](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) and Kedro CLI commands.
 
-By adding the `node` tag to a cell and running the command below, the cell's source code will be copied over to a Python file within `src/<package_name>/nodes/`. 
+By adding the `node` tag to a cell and running the command below, the cell's source code will be copied over to a Python file within `src/<package_name>/nodes/`.
 ```
 kedro jupyter convert <filepath_to_my_notebook>
 ```

@@ -13,30 +13,58 @@ Before any `PySpark` operations are performed, you should initialise your `Spark
 For example, if you are using Kedro's project template, then you could add `init_spark_session()` method to the `ProjectContext` class in `src/<your_project_name>/run.py` as follows:
 
 ```python
+import getpass
+
+from pyspark import SparkConf
 from pyspark.sql import SparkSession
 
 # ...
 
 class ProjectContext(KedroContext):
     # ...
+    def __init__(self, project_path: Union[Path, str], env: str):
+        super().__init__(project_path, env)
+        self._spark_session = None
+        self.init_spark_session()
 
-    def init_spark_session(self, aws_access_key, aws_secret_key):
-        # select only/add more config options as per your needs
-        return (
-            SparkSession.builder.master("local[*]")
-            .appName("kedro")
-            .config("spark.driver.memory", params["spark.driver.memory"])
-            .config("spark.driver.maxResultSize", "3g")
-            .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
-            .config("spark.sql.execution.arrow.enabled", "true")
-            .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:2.7.5")
-            .config("spark.jars.excludes", "joda-time:joda-time")
-            .config("fs.s3a.access.key", aws_access_key)
-            .config("fs.s3a.secret.key", aws_secret_key)
-            .getOrCreate()
+    def init_spark_session(self, yarn=True) -> None:
+        """Initialises a SparkSession using the config defined in project's conf folder."""
+
+        if self._spark_session:
+            return self._spark_session
+        parameters = self.config_loader.get("spark*", "spark*/**")
+        spark_conf = SparkConf().setAll(parameters.items())
+
+        spark_session_conf = (
+            SparkSession.builder.appName(
+                "{}_{}".format(self.project_name, getpass.getuser())
+            )
+            .enableHiveSupport()
+            .config(conf=spark_conf)
         )
+        if yarn:
+            self._spark_session = spark_session_conf.master("yarn").getOrCreate()
+        else:
+            self._spark_session = spark_session_conf.getOrCreate()
+
+        self._spark_session.sparkContext.setLogLevel("WARN")
+
+    project_name = "kedro"
+    project_version = "0.14.3"
 # ...
+
 ```
+
+Create `conf/base/spark.yml` and specify the parameters as follows:
+
+```yaml
+spark.driver.maxResultSize: 3g
+spark.hadoop.fs.s3a.impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+spark.sql.execution.arrow.enabled: true
+spark.jars.packages: org.apache.hadoop:hadoop-aws:2.7.5
+spark.jars.excludes: joda-time:joda-time
+```
+
 
 Since `SparkSession` is a [singleton](https://python-3-patterns-idioms-test.readthedocs.io/en/latest/Singleton.html), the next time you call `SparkSession.builder.getOrCreate()` you will be provided with the same `SparkSession` you initialised at your app's entry point.
 

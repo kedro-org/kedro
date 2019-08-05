@@ -30,6 +30,7 @@
 underlying functionality is supported by pandas, so it supports all
 allowed pandas options for loading and saving Excel files.
 """
+import copy
 from pathlib import Path
 from typing import Any, Dict, Union
 
@@ -60,6 +61,9 @@ class ExcelLocalDataSet(AbstractVersionedDataSet):
         >>> assert data.equals(reloaded)
 
     """
+
+    DEFAULT_LOAD_ARGS = {"engine": "xlrd"}
+    DEFAULT_SAVE_ARGS = {"index": False}
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
@@ -105,20 +109,15 @@ class ExcelLocalDataSet(AbstractVersionedDataSet):
 
         """
         super().__init__(Path(filepath), version)
-        default_save_args = {"index": False}
-        default_load_args = {"engine": "xlrd"}
-
-        self._load_args = (
-            {**default_load_args, **load_args}
-            if load_args is not None
-            else default_load_args
-        )
-        self._save_args = (
-            {**default_save_args, **save_args}
-            if save_args is not None
-            else default_save_args
-        )
         self._engine = engine
+
+        # Handle default load and save arguments
+        self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
+        if load_args is not None:
+            self._load_args.update(load_args)
+        self._save_args = copy.deepcopy(self.DEFAULT_SAVE_ARGS)
+        if save_args is not None:
+            self._save_args.update(save_args)
 
     def _load(self) -> Union[pd.DataFrame, Dict[str, pd.DataFrame]]:
         load_path = Path(self._get_load_path())
@@ -127,7 +126,9 @@ class ExcelLocalDataSet(AbstractVersionedDataSet):
     def _save(self, data: pd.DataFrame) -> None:
         save_path = Path(self._get_save_path())
         save_path.parent.mkdir(parents=True, exist_ok=True)
-        with pd.ExcelWriter(str(save_path), engine=self._engine) as writer:
+        with pd.ExcelWriter(  # pylint: disable=abstract-class-instantiated
+            str(save_path), engine=self._engine
+        ) as writer:
             data.to_excel(writer, **self._save_args)
 
         load_path = Path(self._get_load_path())

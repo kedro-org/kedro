@@ -78,7 +78,9 @@ class Pipeline:
     outputs and execution order.
     """
 
-    def __init__(self, nodes: Iterable[Union[Node, "Pipeline"]], name: str = None):
+    def __init__(
+        self, nodes: Iterable[Union[Node, "Pipeline"]], *, name: str = None
+    ):  # pylint: disable=missing-type-doc
         """Initialise ``Pipeline`` with a list of ``Node`` instances.
 
         Args:
@@ -88,6 +90,7 @@ class Pipeline:
                 new pipeline.
             name: The name of the pipeline. If specified, this name
                 will be used to tag all of the nodes in the pipeline.
+
         Raises:
             ValueError:
                 When an empty list of nodes is provided, or when not all
@@ -157,6 +160,16 @@ class Pipeline:
         return "{}([\n{}\n])".format(self.__class__.name, ",\n".join(reprs))
 
     def __add__(self, other):
+        if not isinstance(other, Pipeline):
+            return NotImplemented
+        return Pipeline(set(self.nodes + other.nodes))
+
+    def __and__(self, other):
+        if not isinstance(other, Pipeline):
+            return NotImplemented
+        return Pipeline(set(self.nodes) & set(other.nodes))
+
+    def __or__(self, other):
         if not isinstance(other, Pipeline):
             return NotImplemented
         return Pipeline(set(self.nodes + other.nodes))
@@ -597,8 +610,8 @@ class Pipeline:
         or transitively by the provided nodes.
 
         Args:
-            node_names: A list of node_names which should be used as a
-                starting point of the new ``Pipeline``.
+            node_names: A list of node_names which should be used as an
+                end point of the new ``Pipeline``.
         Raises:
             ValueError: Raised when any of the given names do not exist in the
                 ``Pipeline`` object.

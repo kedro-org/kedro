@@ -26,23 +26,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-This file contains the fixtures that are reusable by any tests within
-this directory. You don't need to import the fixtures as pytest will
-discover them automatically. More info here:
-https://docs.pytest.org/en/latest/fixture.html
-"""
+"""This module extends the set of classes ``kedro.io.core`` provides."""
 
-from pytest import fixture
-
-from kedro.io.core import generate_current_version
+import copy
+from typing import Any, Dict, Optional
 
 
-@fixture(params=[None])
-def load_version(request):
-    return request.param
+# pylint: disable=too-few-public-methods
+class DefaultArgumentsMixIn:
+    """Mixin class that helps handle default load and save arguments."""
 
+    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-@fixture(params=[None])
-def save_version(request):
-    return request.param or generate_current_version()
+    def __init__(
+        self,
+        load_args: Optional[Dict[str, Any]] = None,
+        save_args: Optional[Dict[str, Any]] = None,
+    ) -> None:
+        super().__init__()
+        self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
+        if load_args is not None:
+            self._load_args.update(load_args)
+        self._save_args = copy.deepcopy(self.DEFAULT_SAVE_ARGS)
+        if save_args is not None:
+            self._save_args.update(save_args)

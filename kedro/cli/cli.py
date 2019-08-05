@@ -510,7 +510,8 @@ def get_project_context(key: str = "context", **kwargs) -> Any:
 
     Args:
         key: Optional key in Kedro context dictionary. Defaults to "context".
-        kwargs: Optional custom arguments defined by users.
+        kwargs: Optional custom arguments defined by users, which will be passed to
+        __kedro_context__() in `run.py`.
 
     Returns:
         Requested value from Kedro context dictionary or the default if the key

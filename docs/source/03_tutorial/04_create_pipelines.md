@@ -85,8 +85,8 @@ def create_pipeline(**kwargs):
     """
     pipeline = Pipeline(
         [
-            node(preprocess_companies, "companies", "preprocessed_companies"),
-            node(preprocess_shuttles, "shuttles", "preprocessed_shuttles"),
+            node(preprocess_companies, "companies", "preprocessed_companies", name="preprocess1"),
+            node(preprocess_shuttles, "shuttles", "preprocessed_shuttles", name="preprocess2"),
         ]
     )
 
@@ -103,7 +103,23 @@ from kedro_tutorial.nodes.data_engineering import (
 )
 ```
 
-Now check if your pipeline is running without any errors by typing this in your terminal window:
+As you develop your nodes, you can test too see if they work as expected. As an example, run the following command in your terminal window:
+
+```bash
+kedro run --node=preprocess1
+```
+
+You should see output similar to the below:
+
+```bash
+2019-04-18 19:16:12,206 - root - INFO - ** Kedro project kedro-tutorial
+2019-04-18 19:16:12,233 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVLocalDataSet)...
+2019-04-18 19:16:12,365 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_companies` (MemoryDataSet)...
+2019-04-18 19:16:12,366 - kedro.runner.sequential_runner - INFO - Completed 1 out of 1 tasks
+```
+
+
+Now check if the entire pipeline is running without any errors by typing this in your terminal window:
 
 ```bash
 kedro run
@@ -349,7 +365,40 @@ test_size: 0.2
 random_state: 3
 ```
 
-These are the parameters fed into the `DataCatalog` when the pipeline is executed.
+These are the parameters fed into the `DataCatalog` when the pipeline is executed. Alternatively, the parameters specified in `parameters.yml` can also be referenced using `params:` prefix in the nodes. For example, you could pass `test_size` and `random_state` parameters as follows:
+```python
+
+def split_data(data: pd.DataFrame, test_size: str, random_state: str) -> List:
+    """
+    Arguments now accepts `test_size` and `random_state` rather than `parameters: Dict`.
+    """
+    X = data[
+        [
+            "engines",
+            "passenger_capacity",
+            "crew",
+            "d_check_complete",
+            "moon_clearance_complete",
+        ]
+    ].values
+    y = data["price"].values
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=test_size, random_state=random_state
+    )
+
+    return [X_train, X_test, y_train, y_test]
+
+# ...
+ds_pipeline = Pipeline(
+        [
+            node(
+                split_data,
+                ["master_table", "params:test_size", "params:random_state"],
+                ["X_train", "X_test", "y_train", "y_test"],
+            )
+        ]
+    )
+```
 
 Next, register the dataset, which will save the trained model, by adding the following definition to `conf/base/catalog.yml`:
 
@@ -501,8 +550,6 @@ def create_pipeline(**kwargs):
 
     return de_pipeline + ds_pipeline
 ```
-
-Should you need to, you can add more than one tag to the pipeline by adding `name=['tag1', 'tag2']`.
 
 To run a partial pipeline:
 

@@ -32,3 +32,4 @@ Storage
 
 
 from .csv_blob import CSVBlobDataSet  # NOQA
+from .json_blob import JSONBlobDataSet  # NOQA

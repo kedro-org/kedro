@@ -21,7 +21,7 @@ In order to get the best out of the template:
 
 ## Installing dependencies
 
-Dependencies should be declared in `src/requirements.txt` for pip installation and `src/requirements.yml` for conda installation.
+Dependencies should be declared in `src/requirements.txt` for pip installation and `src/environment.yml` for conda installation.
 
 To install them, run:
 

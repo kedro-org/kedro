@@ -86,8 +86,6 @@ with --runner."""
 RUNNER_ARG_HELP = """Specify a runner that you want to run the pipeline with.
 This option cannot be used together with --parallel."""
 
-CONDA_FLAG_HELP = """Specify whether you want the packages in src/environment.yml to be installed via conda"""
-
 CONVERT_ALL_HELP = """Extract the nodes from all notebooks in the Kedro project directory,
 including sub-folders."""
 
@@ -145,15 +143,13 @@ def test(args):
 
 
 @cli.command()
-@click.option("--conda", is_flag=True, multiple=False, help=CONDA_FLAG_HELP)
-def install(conda):
+def install():
     """Install project dependencies from both requirements.txt and environment.yml (optional)."""
 
-    if conda:
+    if (Path.cwd() / "src" / "environment.yml").is_file():
         call(["conda", "install", "--file",  "src/environment.yml", "--yes"])
 
     python_call("pip", ["install", "-U", "-r", "src/requirements.txt"])
-
 
 @forward_command(cli, forward_help=True)
 def ipython(args):

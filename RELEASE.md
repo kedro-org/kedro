@@ -10,7 +10,7 @@
 * Added prefix `params:` to the parameters specified in `parameters.yml` which allows users to differentiate between their different parameters node inputs and outputs
 * Added `JSONBlobDataSet` to load json (-delimited) files from Azure Blob Storage
 * Jupyter Lab/Notebook now starts with only one kernel by default.
-`src/environment.yml` will be required to run `kedro install --conda`
+* Running `kedro install` will install packages to conda environment if `src/environment.yml` exists in your project.
 
 
 ## Bug fixes and other changes

@@ -42,6 +42,7 @@ from kedro.cli.cli import TEMPLATE_PATH, _fix_user_path, _get_default_config, cl
 FILES_IN_TEMPLATE_NO_EXAMPLE = 35
 FILES_IN_TEMPLATE_WITH_EXAMPLE = 37
 
+
 # pylint: disable=too-many-arguments
 def _invoke(
     cli_runner,

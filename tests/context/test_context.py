@@ -282,7 +282,7 @@ class TestKedroContextRun:
     def test_run_output(self, dummy_context, dummy_dataframe):
         dummy_context.catalog.save("cars", dummy_dataframe)
         outputs = dummy_context.run()
-        pd.testing.assert_frame_equal(outputs['planes'], dummy_dataframe)
+        pd.testing.assert_frame_equal(outputs["planes"], dummy_dataframe)
 
     def test_run_no_output(self, dummy_context, dummy_dataframe):
         dummy_context.catalog.save("cars", dummy_dataframe)

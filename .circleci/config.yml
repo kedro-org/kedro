@@ -1,7 +1,7 @@
 version: 2
 
 images:
-  - &py35 quantumblacklabs/kedro_builder:3.5.2
+  - &py35 quantumblacklabs/kedro_builder:3.5
   - &py36 quantumblacklabs/kedro_builder:3.6
   - &py37 quantumblacklabs/kedro_builder:3.7
 

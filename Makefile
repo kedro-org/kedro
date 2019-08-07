@@ -14,7 +14,7 @@ legal:
 	python tools/license_and_headers.py
 
 lint:
-	pre-commit run -a --hook-stage push
+	pre-commit run -a --hook-stage manual
 
 test:
 	pytest tests
@@ -38,7 +38,6 @@ install-test-requirements:
 
 install-pre-commit: install-test-requirements
 	pre-commit install --install-hooks
-	pre-commit install --hook-type pre-push
 
 uninstall-pre-commit:
 	pre-commit uninstall

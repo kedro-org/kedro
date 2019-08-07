@@ -1,14 +1,16 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 
-default_stages: [commit, push]
+default_stages: [commit, manual]
 
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v2.2.3
     hooks:
     -   id: trailing-whitespace
+        stages: [commit, manual]
     -   id: end-of-file-fixer
+        stages: [commit, manual]
     -   id: check-yaml  # Checks yaml files for parseable syntax.
         exclude: "^kedro/template/"
     -   id: check-json  # Checks json files for parseable syntax.
@@ -43,29 +45,61 @@ repos:
     hooks:
     # It's impossible to specify per-directory configuration, so we just run it many times.
     # https://github.com/PyCQA/pylint/issues/618
+    # The first set of pylint checks if for local pre-commit, it only runs on the files changed.
+    -   id: pylint-quick-kedro
+        name: "Quick PyLint on kedro/*"
+        language: system
+        types: [file, python]
+        files: ^kedro/
+        exclude: ^kedro/template/
+        entry: pylint -j0 --disable=unnecessary-pass
+        stages: [commit]
+    -   id: pylint-quick-features
+        name: "Quick PyLint on features/*"
+        language: system
+        types: [file, python]
+        files: ^features/
+        entry: pylint -j0 --disable=missing-docstring,no-name-in-module
+        stages: [commit]
+    -   id: pylint-quick-extras
+        name: "Quick PyLint on extras/*"
+        language: system
+        types: [file, python]
+        files: ^extras/
+        entry: pylint -j0
+        stages: [commit]
+    -   id: pylint-quick-tests
+        name: "Quick PyLint on tests/*"
+        language: system
+        types: [file, python]
+        files: ^tests/
+        entry: pylint -j0 --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name
+        stages: [commit]
+
+    # The same pylint checks, but running on all files. It's for manual run with `make lint`
     -   id: pylint-kedro
         name: "PyLint on kedro/*"
         language: system
         pass_filenames: false
-        stages: [push]
+        stages: [manual]
         entry: pylint -j0 --disable=unnecessary-pass kedro
     -   id: pylint-features
         name: "PyLint on features/*"
         language: system
         pass_filenames: false
-        stages: [push]
+        stages: [manual]
         entry: pylint -j0 --disable=missing-docstring,no-name-in-module features
     -   id: pylint-extras
         name: "PyLint on extras/*"
         language: system
         pass_filenames: false
-        stages: [push]
+        stages: [manual]
         entry: pylint -j0 extras
     -   id: pylint-tests
         name: "PyLint on tests/*"
         language: system
         pass_filenames: false
-        stages: [push]
+        stages: [manual]
         entry: pylint -j0 --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name tests
     # We need to make some exceptions for 3.5, that's why it's a custom runner.
     -   id: black

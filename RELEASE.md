@@ -11,7 +11,7 @@
 * Added `JSONBlobDataSet` to load json (-delimited) files from Azure Blob Storage
 * Jupyter Lab/Notebook now starts with only one kernel by default.
 * Running `kedro install` will install packages to conda environment if `src/environment.yml` exists in your project.
-
+- Added `CachedDataSet` in `contrib` which will cache data in memory to avoid io/network operations. It will clear the cache once a dataset is no longer needed by a pipeline. (by [@tsanikgr](https://github.com/tsanikgr))
 
 ## Bug fixes and other changes
 * Documentation improvements including instructions on how to initialise a Spark session using YAML configuration.

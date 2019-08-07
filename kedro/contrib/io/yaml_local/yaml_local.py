@@ -109,7 +109,7 @@ class YAMLLocalDataSet(AbstractVersionedDataSet):
     def _load(self) -> Any:
         load_path = Path(self._get_load_path())
         with load_path.open("r") as local_file:
-            return yaml.load(local_file, **self._load_args)
+            return yaml.safe_load(local_file, **self._load_args)
 
     def _save(self, data: pd.DataFrame) -> None:
         save_path = Path(self._get_save_path())

@@ -123,3 +123,15 @@ kedro build-docs
 ```
 
 See your documentation by opening `docs/build/html/index.html`.
+
+## Building the project requirements
+
+To generate or update the dependency requirements for your project, run:
+
+```
+kedro build-reqs
+```
+
+This will copy the contents of `src/requirements.txt` into a new file `src/requirements.in` which will be used as the source for `pip-compile`. You can see the output of the resolution by opening `src/requirements.txt`.
+
+After this, if you'd like to update your project requirements, please update `src/requirements.in` and re-run `kedro build-reqs`.

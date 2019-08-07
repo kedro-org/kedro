@@ -18,6 +18,7 @@
 * `anyconfig` default log level changed from `INFO` to `WARNING`.
 * Added information on installed plugins to `kedro info`.
 * Added style sheets for project documentation, so the output of `kedro build-docs` will resemble the style of `kedro docs`.
+* Added support for `pip-compile` and new Kedro command `kedro build-reqs` that generates `requirements.txt` based on `requirements.in`.
 
 ## Breaking changes to the API
 * Simplified the Kedro template in `run.py` with the introduction of `KedroContext` class.
@@ -63,6 +64,8 @@ The easiest way to migrate your project from Kedro 0.14.* to Kedro 0.15.0 is to 
  - `io` -> `context.catalog` (e.g., `io.load()` -> `context.catalog.load()`)
 
 5. If you customised your `kedro_cli.py`, you need to apply the same customisations to your `kedro_cli.py` in the new project.
+
+6. Copy the contents of the old project's `src/requirements.txt` into the new project's `src/requirements.in` and, from the project root directory, run the `kedro build-reqs` command in your terminal window.
 
 ##### Migration for versioning custom dataset classes
 

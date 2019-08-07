@@ -188,6 +188,24 @@ def build_docs():
     call(["sphinx-build", "-M", "html", "docs/source", "docs/build", "-a"])
 
 
+@cli.command("build-reqs")
+def build_reqs():
+    """Build the project dependency requirements."""
+    requirements_path = Path.cwd() / "src" / "requirements.in"
+    if not requirements_path.is_file():
+        secho("No requirements.in found. Copying contents from requirements.txt...")
+        contents = (Path.cwd() / "src" / "requirements.txt").read_text()
+        requirements_path.write_text(contents)
+    python_call("piptools", ["compile", str(requirements_path)])
+    secho(
+        (
+            "Requirements built! Please update requirements.in "
+            "if you'd like to make a change in your project's dependencies, "
+            "and re-run build-reqs to generate the new requirements.txt."
+        )
+    )
+
+
 @cli.command("activate-nbstripout")
 def activate_nbstripout():
     """Install the nbstripout git hook to automatically clean notebooks."""

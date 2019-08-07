@@ -31,7 +31,17 @@ import pytest
 
 from kedro.contrib.io.yaml_local import YAMLLocalDataSet
 from kedro.io import DataSetError
-from kedro.io.core import Version
+from kedro.io.core import generate_current_version, Version
+
+
+@pytest.fixture(params=[None])
+def load_version(request):
+    return request.param
+
+
+@pytest.fixture(params=[None])
+def save_version(request):
+    return request.param or generate_current_version()
 
 
 @pytest.fixture

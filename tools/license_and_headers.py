@@ -27,7 +27,6 @@
 # limitations under the License.
 
 import glob
-import sys
 
 PATHS_REQUIRING_HEADER = ["kedro", "tests"]
 LEGAL_HEADER_FILE = "legal_header.txt"

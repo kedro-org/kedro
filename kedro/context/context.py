@@ -199,7 +199,12 @@ class KedroContext(abc.ABC):
                 )
             )
             params = {}
-        return {"parameters": params}
+
+        feed_dict = {"parameters": params}
+        for param_name, param_value in params.items():
+            key = "params:{}".format(param_name)
+            feed_dict[key] = param_value
+        return feed_dict
 
     def _get_config_credentials(self) -> Dict[str, Any]:
         """Getter for credentials specified in credentials directory."""
@@ -234,7 +239,7 @@ class KedroContext(abc.ABC):
         node_names: Iterable[str] = None,
         from_nodes: Iterable[str] = None,
         to_nodes: Iterable[str] = None,
-    ) -> None:
+    ) -> Dict[str, Any]:
         """Runs the pipeline with a specified runner.
 
         Args:
@@ -253,7 +258,10 @@ class KedroContext(abc.ABC):
         Raises:
             KedroContextError: If the resulting ``Pipeline`` is empty
                 or incorrect tags are provided.
-
+        Returns:
+            Any node outputs that cannot be processed by the ``DataCatalog``.
+            These are returned in a dictionary, where the keys are defined
+            by the node outputs.
         """
         # Report project name
         logging.info("** Kedro project {}".format(self.project_path.name))
@@ -278,7 +286,7 @@ class KedroContext(abc.ABC):
 
         # Run the runner
         runner = runner or SequentialRunner()
-        runner.run(pipeline, self.catalog)
+        return runner.run(pipeline, self.catalog)
 
 
 def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:

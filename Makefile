@@ -14,13 +14,7 @@ legal:
 	python tools/license_and_headers.py
 
 lint:
-	isort
-	pylint -j 0 --disable=unnecessary-pass kedro
-	pylint -j 0 --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name tests
-	pylint -j 0 --disable=missing-docstring,no-name-in-module features
-	pylint -j 0 extras
-	flake8 kedro tests features extras --exclude kedro/template*
-	mypy --allow-redefinition --ignore-missing-imports kedro tests features extras
+	pre-commit run -a --hook-stage push
 
 test:
 	pytest tests
@@ -38,3 +32,14 @@ devserver: build-docs
 
 package: clean install
 	python setup.py sdist bdist_wheel
+
+install-test-requirements:
+	pip install -r test_requirements.txt
+
+install-pre-commit: install-test-requirements
+	pre-commit install --install-hooks
+	pre-commit install --hook-type pre-push
+
+uninstall-pre-commit:
+	pre-commit uninstall
+	pre-commit uninstall --hook-type pre-push

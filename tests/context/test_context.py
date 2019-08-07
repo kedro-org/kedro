@@ -159,13 +159,13 @@ def fake_project(tmp_path):
     project.mkdir()
     kedro_cli = project / "kedro_cli.py"
     script = """
-    class Fake:
-        project_name = "fake"
-        project_version = "{}"
+        class Fake:
+            project_name = "fake"
+            project_version = "{}"
 
-    def __get_kedro_context__():
-        return Fake()
-        """.format(
+        def __get_kedro_context__():
+            return Fake()
+    """.format(
         __version__
     )
     kedro_cli.write_text(textwrap.dedent(script), encoding="utf-8")
@@ -279,6 +279,16 @@ class TestKedroContext:
 
 @pytest.mark.usefixtures("config_dir")
 class TestKedroContextRun:
+    def test_run_output(self, dummy_context, dummy_dataframe):
+        dummy_context.catalog.save("cars", dummy_dataframe)
+        outputs = dummy_context.run()
+        pd.testing.assert_frame_equal(outputs["planes"], dummy_dataframe)
+
+    def test_run_no_output(self, dummy_context, dummy_dataframe):
+        dummy_context.catalog.save("cars", dummy_dataframe)
+        outputs = dummy_context.run(node_names=["node1"])
+        assert not outputs
+
     def test_default_run(self, dummy_context, dummy_dataframe, caplog):
         dummy_context.catalog.save("cars", dummy_dataframe)
         dummy_context.run()

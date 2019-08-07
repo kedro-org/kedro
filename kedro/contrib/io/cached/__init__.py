@@ -26,10 +26,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``AbstractDataSet`` implementation for reading/writing data to Azure Blob
-Storage
+"""
+This module contains ``CachedDataSet``, a dataset wrapper which caches in memory the data saved,
+so that the user avoids io operations with slow storage media
 """
 
-
-from .csv_blob import CSVBlobDataSet  # NOQA
-from .json_blob import JSONBlobDataSet  # NOQA
+from .cached_dataset import CachedDataSet  # NOQA

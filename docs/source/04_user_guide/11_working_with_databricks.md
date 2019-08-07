@@ -9,7 +9,7 @@ Databricks Connect connects your favourite IDE (IntelliJ, Eclipse, [VS Code](01_
 
 You can setup Databricks Connect according to the instructions listed [here](https://docs.databricks.com/user-guide/dev-tools/db-connect.html).
 
-> *Note:* You will need to uninstall PySpark, as Databricks Connect will install it for you. This method only works for 5.x versions of Databricks clusters and disables use of Databricks Notebook. 
+> *Note:* You will need to uninstall PySpark, as Databricks Connect will install it for you. This method only works for 5.x versions of Databricks clusters and disables use of Databricks Notebook.
 
 ## GitHub workflow with Databricks
 

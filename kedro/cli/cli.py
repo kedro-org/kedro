@@ -30,7 +30,6 @@
 
 This module implements commands available from the kedro CLI.
 """
-import glob
 import importlib
 import os
 import re
@@ -186,13 +185,13 @@ def _clean_pycache(project_path):
     # Since template is part of the Kedro package __pycache__ is generated.
     # This method recursively cleans all __pycache__ folders.
     to_delete = [
-        os.path.join(project_path, filename)
-        for filename in glob.iglob(project_path + "/**/*", recursive=True)
-        if filename.endswith("__pycache__")
+        filename.resolve()
+        for filename in project_path.rglob("**/*")
+        if str(filename).endswith("__pycache__")
     ]
 
     for file in to_delete:  # pragma: no cover
-        shutil.rmtree(file)
+        shutil.rmtree(str(file))
 
 
 def _create_project(config_path: str, verbose: bool):
@@ -211,27 +210,28 @@ def _create_project(config_path: str, verbose: bool):
             config = _get_config_from_prompts()
         config.setdefault("kedro_version", version)
 
-        result_path = cookiecutter(
-            TEMPLATE_PATH,
-            output_dir=config["output_dir"],
-            no_input=True,
-            extra_context=config,
+        result_path = Path(
+            cookiecutter(
+                TEMPLATE_PATH,
+                output_dir=config["output_dir"],
+                no_input=True,
+                extra_context=config,
+            )
         )
+
         if not config["include_example"]:
             paths_to_remove = [
-                os.path.join(result_path, "data", "01_raw", "iris.csv"),
-                os.path.join(
-                    result_path, "src", config["python_package"], "nodes", "example.py"
-                ),
+                result_path / "data" / "01_raw" / "iris.csv",
+                result_path / "src" / config["python_package"] / "nodes" / "example.py",
             ]
 
             for path in paths_to_remove:
-                os.remove(path)
+                path.unlink()
         _clean_pycache(result_path)
         _print_kedro_new_success_message(result_path)
     except click.exceptions.Abort:  # pragma: no cover
         _handle_exception("User interrupt.")
-    # we dont want the user to see a stack trace on the cli
+    # we don't want the user to see a stack trace on the cli
     except Exception:  # pylint: disable=broad-except
         _handle_exception("Failed to generate project.")
 
@@ -489,7 +489,7 @@ def _show_example_config():
 
 
 def _print_kedro_new_success_message(result):
-    click.secho("Project generated in " + os.path.abspath(result), fg="green")
+    click.secho("Project generated in " + str(result.resolve()), fg="green")
     click.secho(
         "Don't forget to initialise git and create a virtual environment. "
         "Refer to the Kedro documentation."

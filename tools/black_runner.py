@@ -26,10 +26,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``AbstractDataSet`` implementation for reading/writing data to Azure Blob
-Storage
 """
+Black needs python 3.6+, but Kedro should work on 3.5 too,
+that's why we can't put ``black`` into test_requirements.txt and
+have to install it manually like that.
+
+If python version is 3.5 - just exit with 0 status.
+"""
+import platform
+import subprocess
+import sys
+
+VERSION = tuple(map(int, platform.python_version_tuple()[:2]))
+
+if VERSION < (3, 6):
+    print("Python version is too low, exiting")
+    sys.exit(0)
+
+try:
+    import black  # noqa: F401 pylint: disable=unused-import
+except ImportError:
+    subprocess.run(["pip", "install", "black"], check=True)
 
 
-from .csv_blob import CSVBlobDataSet  # NOQA
-from .json_blob import JSONBlobDataSet  # NOQA
+subprocess.run(["black"] + sys.argv[1:], check=True)

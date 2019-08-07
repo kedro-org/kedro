@@ -365,7 +365,40 @@ test_size: 0.2
 random_state: 3
 ```
 
-These are the parameters fed into the `DataCatalog` when the pipeline is executed.
+These are the parameters fed into the `DataCatalog` when the pipeline is executed. Alternatively, the parameters specified in `parameters.yml` can also be referenced using `params:` prefix in the nodes. For example, you could pass `test_size` and `random_state` parameters as follows:
+```python
+
+def split_data(data: pd.DataFrame, test_size: str, random_state: str) -> List:
+    """
+    Arguments now accepts `test_size` and `random_state` rather than `parameters: Dict`.
+    """
+    X = data[
+        [
+            "engines",
+            "passenger_capacity",
+            "crew",
+            "d_check_complete",
+            "moon_clearance_complete",
+        ]
+    ].values
+    y = data["price"].values
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=test_size, random_state=random_state
+    )
+
+    return [X_train, X_test, y_train, y_test]
+
+# ...
+ds_pipeline = Pipeline(
+        [
+            node(
+                split_data,
+                ["master_table", "params:test_size", "params:random_state"],
+                ["X_train", "X_test", "y_train", "y_test"],
+            )
+        ]
+    )
+```
 
 Next, register the dataset, which will save the trained model, by adding the following definition to `conf/base/catalog.yml`:
 
@@ -517,8 +550,6 @@ def create_pipeline(**kwargs):
 
     return de_pipeline + ds_pipeline
 ```
-
-Should you need to, you can add more than one tag to the pipeline by adding `name=['tag1', 'tag2']`.
 
 To run a partial pipeline:
 

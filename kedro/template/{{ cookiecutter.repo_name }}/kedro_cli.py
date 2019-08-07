@@ -43,6 +43,7 @@ from kedro.cli import main as kedro_main
 from kedro.cli.utils import KedroCliError, call, forward_command, python_call, export_nodes
 from kedro.utils import load_obj
 from kedro.runner import SequentialRunner
+from typing import Iterable, List
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -90,7 +91,6 @@ including sub-folders."""
 
 OVERWRITE_HELP = """If Python file already exists for the equivalent notebook,
 overwrite its contents."""
-
 
 def __get_kedro_context__(**kwargs):
     """Used to provide this project's context to plugins."""
@@ -144,9 +144,12 @@ def test(args):
 
 @cli.command()
 def install():
-    """Install project dependencies from requirements.txt."""
-    python_call("pip", ["install", "-U", "-r", "src/requirements.txt"])
+    """Install project dependencies from both requirements.txt and environment.yml (optional)."""
 
+    if (Path.cwd() / "src" / "environment.yml").is_file():
+        call(["conda", "install", "--file",  "src/environment.yml", "--yes"])
+
+    python_call("pip", ["install", "-U", "-r", "src/requirements.txt"])
 
 @forward_command(cli, forward_help=True)
 def ipython(args):
@@ -185,6 +188,24 @@ def build_docs():
     call(["sphinx-build", "-M", "html", "docs/source", "docs/build", "-a"])
 
 
+@cli.command("build-reqs")
+def build_reqs():
+    """Build the project dependency requirements."""
+    requirements_path = Path.cwd() / "src" / "requirements.in"
+    if not requirements_path.is_file():
+        secho("No requirements.in found. Copying contents from requirements.txt...")
+        contents = (Path.cwd() / "src" / "requirements.txt").read_text()
+        requirements_path.write_text(contents)
+    python_call("piptools", ["compile", str(requirements_path)])
+    secho(
+        (
+            "Requirements built! Please update requirements.in "
+            "if you'd like to make a change in your project's dependencies, "
+            "and re-run build-reqs to generate the new requirements.txt."
+        )
+    )
+
+
 @cli.command("activate-nbstripout")
 def activate_nbstripout():
     """Install the nbstripout git hook to automatically clean notebooks."""
@@ -215,6 +236,15 @@ def activate_nbstripout():
     call(["nbstripout", "--install"])
 
 
+def _build_jupyter_command(base: str, ip: str, all_kernels: bool, args: Iterable[str]) -> List[str]:
+    cmd = [base, "--ip=" + ip]
+
+    if not all_kernels:
+        cmd.append("--KernelSpecManager.whitelist=['python3']")
+
+    return cmd + list(args)
+
+
 @cli.group()
 def jupyter():
     """Open Jupyter Notebook / Lab with project specific variables loaded, or
@@ -224,20 +254,30 @@ def jupyter():
 
 @forward_command(jupyter, "notebook", forward_help=True)
 @click.option("--ip", type=str, default="127.0.0.1")
-def jupyter_notebook(ip, args):
+@click.option("--all-kernels", is_flag=True, default=False)
+def jupyter_notebook(ip, all_kernels, args):
     """Open Jupyter Notebook with project specific variables loaded."""
     if "-h" not in args and "--help" not in args:
-        ipython_message()
-    call(["jupyter-notebook", "--ip=" + ip] + list(args))
+        ipython_message(all_kernels)
+
+    call(_build_jupyter_command(
+        "jupyter-notebook", ip=ip,
+        all_kernels=all_kernels, args=args,
+    ))
 
 
 @forward_command(jupyter, "lab", forward_help=True)
 @click.option("--ip", type=str, default="127.0.0.1")
-def jupyter_lab(ip, args):
+@click.option("--all-kernels", is_flag=True, default=False)
+def jupyter_lab(ip, all_kernels, args):
     """Open Jupyter Lab with project specific variables loaded."""
     if "-h" not in args and "--help" not in args:
-        ipython_message()
-    call(["jupyter-lab", "--ip=" + ip] + list(args))
+        ipython_message(all_kernels)
+
+    call(_build_jupyter_command(
+        "jupyter-lab", ip=ip,
+        all_kernels=all_kernels, args=args,
+    ))
 
 
 @jupyter.command("convert")
@@ -312,7 +352,7 @@ def convert_notebook(all_flag, overwrite_flag, filepath):
     secho("Done!")
 
 
-def ipython_message():
+def ipython_message(all_kernels=True):
     """Show a message saying how we have configured the IPython env."""
     ipy_vars = ["startup_error", "context"]
     secho("-" * 79, fg="cyan")
@@ -324,6 +364,17 @@ def ipython_message():
         )
     )
     secho("or to see the error message if they are undefined")
+
+    if not all_kernels:
+        secho(
+            "The choice of kernels is limited to the default one.",
+            fg="yellow",
+        )
+        secho(
+            "(restart with --all-kernels to get access to others)",
+            fg="yellow",
+        )
+
     secho("-" * 79, fg="cyan")
 
 

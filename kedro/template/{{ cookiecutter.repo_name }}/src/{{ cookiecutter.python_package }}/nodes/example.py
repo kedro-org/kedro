@@ -40,14 +40,13 @@ import numpy as np
 import pandas as pd
 
 
-def split_data(data: pd.DataFrame, parameters: Dict[str, Any]) -> Dict[str, Any]:
+def split_data(data: pd.DataFrame, example_test_data_ratio: str) -> Dict[str, Any]:
     """Node for splitting the classical Iris data set into training and test
     sets, each split into features and labels.
     The split ratio parameter is taken from conf/project/parameters.yml.
     The data and the parameters will be loaded and provided to your function
     automatically when the pipeline is executed and it is time to run this node.
     """
-    test_data_ratio = parameters["example_test_data_ratio"]
     data.columns = [
         "sepal_length",
         "sepal_width",
@@ -64,7 +63,7 @@ def split_data(data: pd.DataFrame, parameters: Dict[str, Any]) -> Dict[str, Any]
 
     # Split to training and testing data
     n = data.shape[0]
-    n_test = int(n * test_data_ratio)
+    n_test = int(n * example_test_data_ratio)
     training_data = data.iloc[n_test:, :].reset_index(drop=True)
     test_data = data.iloc[:n_test, :].reset_index(drop=True)
 

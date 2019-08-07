@@ -22,8 +22,8 @@ kedro.contrib.io
       kedro.contrib.io.azure.CSVBlobDataSet
       kedro.contrib.io.azure.JSONBlobDataSet
       kedro.contrib.io.bioinformatics.BioSequenceLocalDataSet
+      kedro.contrib.io.cached.CachedDataSet
       kedro.contrib.io.pyspark.SparkDataSet
       kedro.contrib.io.pyspark.SparkJDBCDataSet
       kedro.contrib.io.parquet.ParquetS3DataSet
-      kedro.contrib.io.cached.CachedDataSet
       kedro.contrib.io.yaml_local.YAMLLocalDataSet

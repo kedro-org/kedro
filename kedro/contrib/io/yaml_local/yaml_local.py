@@ -61,13 +61,11 @@ class YAMLLocalDataSet(AbstractVersionedDataSet):
 
     """
 
-    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {"default_flow_style": False}  # type: Dict[str, Any]
 
     def __init__(
         self,
         filepath: str,
-        load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
         version: Version = None,
     ) -> None:
@@ -76,9 +74,6 @@ class YAMLLocalDataSet(AbstractVersionedDataSet):
 
         Args:
             filepath: path to a local yaml file.
-            load_args: Arguments passed on to ```yaml.load``.
-                See https://pyyaml.org/wiki/PyYAMLDocumentation for details.
-                All defaults are preserved.
             save_args: Arguments passed on to ```yaml.dump``.
                 See https://pyyaml.org/wiki/PyYAMLDocumentation for details.
                 ``{"default_flow_style": False}`` in default.
@@ -91,9 +86,6 @@ class YAMLLocalDataSet(AbstractVersionedDataSet):
         super().__init__(Path(filepath), version)
 
         # Handle default load and save arguments
-        self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
-        load_args = load_args or dict()
-        self._load_args.update(load_args)
         self._save_args = copy.deepcopy(self.DEFAULT_SAVE_ARGS)
         save_args = save_args or dict()
         self._save_args.update(save_args)
@@ -101,7 +93,6 @@ class YAMLLocalDataSet(AbstractVersionedDataSet):
     def _describe(self) -> Dict[str, Any]:
         return dict(
             filepath=self._filepath,
-            load_args=self._load_args,
             save_args=self._save_args,
             version=self._version,
         )
@@ -109,7 +100,7 @@ class YAMLLocalDataSet(AbstractVersionedDataSet):
     def _load(self) -> Any:
         load_path = Path(self._get_load_path())
         with load_path.open("r") as local_file:
-            return yaml.safe_load(local_file, **self._load_args)
+            return yaml.safe_load(local_file)
 
     def _save(self, data: pd.DataFrame) -> None:
         save_path = Path(self._get_save_path())

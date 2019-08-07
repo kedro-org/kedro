@@ -72,9 +72,14 @@ repos:
         name: "Black"
         language: system
         pass_filenames: false
-        entry: python -m tools.black_runner kedro extras features tests
+        entry: python -m tools.min_version 3.6 "pip install black" "black kedro extras features tests"
     -   id: legal
         name: "Licence check"
         language: system
         pass_filenames: false
         entry: make legal
+    -   id: imports
+        name: "Import Linter"
+        language: system
+        pass_filenames: false
+        entry: python -m tools.min_version 3.6 "pip install import-linter" lint-imports

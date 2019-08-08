@@ -30,7 +30,6 @@
 ``PyYAML``.
 See https://pyyaml.org/wiki/PyYAMLDocumentation for details.
 """
-import copy
 from pathlib import Path
 from typing import Any, Dict
 

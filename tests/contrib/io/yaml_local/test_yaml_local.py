@@ -68,12 +68,7 @@ def yaml_data(request):
 
 class TestYAMLLocalDataSet:
     @pytest.mark.parametrize(
-        "yaml_data",
-        {
-            'a_string': 'Hello, World!',
-            'a_list': [1, 2, 3]
-        },
-        indirect=True,
+        "yaml_data", {"a_string": "Hello, World!", "a_list": [1, 2, 3]}, indirect=True
     )
     def test_save_and_load(self, yaml_data_set, yaml_data):
         """Test saving and reloading the data set."""

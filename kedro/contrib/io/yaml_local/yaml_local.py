@@ -64,10 +64,7 @@ class YAMLLocalDataSet(AbstractVersionedDataSet):
     DEFAULT_SAVE_ARGS = {"default_flow_style": False}  # type: Dict[str, Any]
 
     def __init__(
-        self,
-        filepath: str,
-        save_args: Dict[str, Any] = None,
-        version: Version = None,
+        self, filepath: str, save_args: Dict[str, Any] = None, version: Version = None
     ) -> None:
         """Creates a new instance of ``YAMLLocalDataset`` pointing to a concrete
         filepath.
@@ -92,9 +89,7 @@ class YAMLLocalDataSet(AbstractVersionedDataSet):
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
-            filepath=self._filepath,
-            save_args=self._save_args,
-            version=self._version,
+            filepath=self._filepath, save_args=self._save_args, version=self._version
         )
 
     def _load(self) -> Any:

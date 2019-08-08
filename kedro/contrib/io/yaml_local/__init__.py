@@ -26,7 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``YAMLLocalDataset`` is an ``AbstractDataSet`` to save and load YAML files.
+"""``YAMLLocalDataset`` is an ``AbstractVersionedDataSet`` to save and load YAML files.
 """
 
 from .yaml_local import YAMLLocalDataSet  # NOQA

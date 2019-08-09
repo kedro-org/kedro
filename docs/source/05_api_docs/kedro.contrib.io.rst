@@ -26,3 +26,4 @@ kedro.contrib.io
       kedro.contrib.io.pyspark.SparkDataSet
       kedro.contrib.io.pyspark.SparkJDBCDataSet
       kedro.contrib.io.parquet.ParquetS3DataSet
+      kedro.contrib.io.yaml_local.YAMLLocalDataSet

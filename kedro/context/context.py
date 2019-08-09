@@ -81,9 +81,7 @@ class KedroContext(abc.ABC):
         """
         self._project_path = Path(project_path).expanduser().resolve()
         self.env = env
-        self._config_loader = self._create_config()
         self._setup_logging()
-        self._catalog = self._create_catalog()
 
     @property
     @abc.abstractmethod
@@ -137,6 +135,17 @@ class KedroContext(abc.ABC):
         """
         return self._project_path
 
+    def _create_catalog(  # pylint: disable=no-self-use
+        self, conf_catalog: Dict[str, Any], conf_creds: Dict[str, Any]
+    ) -> DataCatalog:
+        """A hook for changing the creation of the DataCatalog instance.
+
+        Returns:
+            DataCatalog defined in `catalog.yml`.
+
+        """
+        return DataCatalog.from_config(conf_catalog, conf_creds)
+
     @property
     def catalog(self) -> DataCatalog:
         """Read-only property referring to Kedro's ``DataCatalog`` for this context.
@@ -145,7 +154,11 @@ class KedroContext(abc.ABC):
             DataCatalog defined in `catalog.yml`.
 
         """
-        return self._catalog
+        conf_catalog = self.config_loader.get("catalog*", "catalog*/**")
+        conf_creds = self._get_config_credentials()
+        catalog = self._create_catalog(conf_catalog, conf_creds)
+        catalog.add_feed_dict(self._get_feed_dict())
+        return catalog
 
     @property
     def io(self) -> DataCatalog:
@@ -157,7 +170,18 @@ class KedroContext(abc.ABC):
 
         """
         # pylint: disable=invalid-name
-        return self._catalog
+        return self.catalog
+
+    def _create_config_loader(  # pylint: disable=no-self-use
+        self, conf_paths: Iterable[str]
+    ) -> ConfigLoader:
+        """A hook for changing the creation of the ConfigLoader instance.
+
+        Returns:
+            Instance of `ConfigLoader`.
+
+        """
+        return ConfigLoader(conf_paths)
 
     @property
     def config_loader(self) -> ConfigLoader:
@@ -165,33 +189,24 @@ class KedroContext(abc.ABC):
         context.
 
         Returns:
-            Instance of `ConfigLoader` created by `_create_config()`.
-
-        """
-        return self._config_loader
-
-    def _create_config(self) -> ConfigLoader:
-        """Load Kedro's configuration at the root of the project.
-
-        Returns:
-            ConfigLoader which can be queried to access the project config.
+            Instance of `ConfigLoader` created by `_create_config_loader()`.
 
         """
         conf_paths = [
             str(self.project_path / self.CONF_ROOT / "base"),
             str(self.project_path / self.CONF_ROOT / self.env),
         ]
-        return ConfigLoader(conf_paths)
+        return self._create_config_loader(conf_paths)
 
     def _setup_logging(self) -> None:
         """Register logging specified in logging directory."""
-        conf_logging = self._config_loader.get("logging*", "logging*/**")
+        conf_logging = self.config_loader.get("logging*", "logging*/**")
         logging.config.dictConfig(conf_logging)
 
     def _get_feed_dict(self) -> Dict[str, Any]:
         """Get parameters and return the feed dictionary."""
         try:
-            params = self._config_loader.get("parameters*", "parameters*/**")
+            params = self.config_loader.get("parameters*", "parameters*/**")
         except MissingConfigException as exc:
             warn(
                 "Parameters not found in your Kedro project config.\n{}".format(
@@ -209,7 +224,7 @@ class KedroContext(abc.ABC):
     def _get_config_credentials(self) -> Dict[str, Any]:
         """Getter for credentials specified in credentials directory."""
         try:
-            conf_creds = self._config_loader.get("credentials*", "credentials*/**")
+            conf_creds = self.config_loader.get("credentials*", "credentials*/**")
         except MissingConfigException as exc:
             warn(
                 "Credentials not found in your Kedro project config.\n{}".format(
@@ -219,19 +234,6 @@ class KedroContext(abc.ABC):
             conf_creds = {}
         return conf_creds
 
-    def _create_catalog(self) -> DataCatalog:
-        """Load Kedro's ``DataCatalog`` specified in catalog directory.
-
-        Returns:
-            DataCatalog defined in `catalog.yml`.
-
-        """
-        conf_catalog = self._config_loader.get("catalog*", "catalog*/**")
-        conf_creds = self._get_config_credentials()
-        catalog = DataCatalog.from_config(conf_catalog, conf_creds)
-        catalog.add_feed_dict(self._get_feed_dict())
-        return catalog
-
     def run(  # pylint: disable=too-many-arguments
         self,
         tags: Iterable[str] = None,
@@ -239,6 +241,8 @@ class KedroContext(abc.ABC):
         node_names: Iterable[str] = None,
         from_nodes: Iterable[str] = None,
         to_nodes: Iterable[str] = None,
+        pipeline: Pipeline = None,
+        catalog: DataCatalog = None,
     ) -> Dict[str, Any]:
         """Runs the pipeline with a specified runner.
 
@@ -255,6 +259,8 @@ class KedroContext(abc.ABC):
                 starting point of the new ``Pipeline``.
             to_nodes: An optional list of node names which should be used as an
                 end point of the new ``Pipeline``.
+            pipeline: Optional Pipeline to run, defaults to self.pipeline.
+            catalog: Optional DataCatalog to run with, defaults to self.catalog.
         Raises:
             KedroContextError: If the resulting ``Pipeline`` is empty
                 or incorrect tags are provided.
@@ -267,7 +273,7 @@ class KedroContext(abc.ABC):
         logging.info("** Kedro project {}".format(self.project_path.name))
 
         # Load the pipeline as the intersection of all conditions
-        pipeline = self.pipeline
+        pipeline = pipeline or self.pipeline
         if tags:
             pipeline = pipeline & self.pipeline.only_nodes_with_tags(*tags)
             if not pipeline.nodes:
@@ -284,9 +290,11 @@ class KedroContext(abc.ABC):
         if not pipeline.nodes:
             raise KedroContextError("Pipeline contains no nodes")
 
+        catalog = catalog or self.catalog
+
         # Run the runner
         runner = runner or SequentialRunner()
-        return runner.run(pipeline, self.catalog)
+        return runner.run(pipeline, catalog)
 
 
 def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:

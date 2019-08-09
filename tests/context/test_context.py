@@ -255,7 +255,9 @@ class TestKedroContext:
         with pytest.warns(
             UserWarning, match="Parameters not found in your Kedro project config."
         ):
-            DummyContext(str(tmp_path))
+            DummyContext(  # pylint: disable=expression-not-assigned
+                str(tmp_path)
+            ).catalog
 
     def test_missing_credentials(self, tmp_path, mocker):
         env_credentials = tmp_path / "conf" / "local" / "credentials.yml"
@@ -268,7 +270,9 @@ class TestKedroContext:
         with pytest.warns(
             UserWarning, match="Credentials not found in your Kedro project config."
         ):
-            DummyContext(str(tmp_path))
+            DummyContext(  # pylint: disable=expression-not-assigned
+                str(tmp_path)
+            ).catalog
 
     def test_pipeline(self, dummy_context):
         assert dummy_context.pipeline.nodes[0].inputs == ["cars"]

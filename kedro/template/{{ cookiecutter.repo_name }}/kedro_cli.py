@@ -40,7 +40,13 @@ from pathlib import Path
 import click
 from click import secho, style
 from kedro.cli import main as kedro_main
-from kedro.cli.utils import KedroCliError, call, forward_command, python_call, export_nodes
+from kedro.cli.utils import (
+    KedroCliError,
+    call,
+    forward_command,
+    python_call,
+    export_nodes,
+)
 from kedro.utils import load_obj
 from kedro.runner import SequentialRunner
 from typing import Iterable, List
@@ -92,11 +98,6 @@ including sub-folders."""
 OVERWRITE_HELP = """If Python file already exists for the equivalent notebook,
 overwrite its contents."""
 
-def __get_kedro_context__(**kwargs):
-    """Used to provide this project's context to plugins."""
-    from {{cookiecutter.python_package}}.run import __kedro_context__
-    return __kedro_context__(**kwargs)
-
 
 @click.group(context_settings=CONTEXT_SETTINGS, name=__file__)
 def cli():
@@ -106,7 +107,15 @@ def cli():
 @cli.command()
 @click.option("--from-nodes", type=str, default="", help=FROM_NODES_HELP)
 @click.option("--to-nodes", type=str, default="", help=TO_NODES_HELP)
-@click.option("--node", "-n", "node_names", type=str, default=None, multiple=True, help=NODE_ARG_HELP)
+@click.option(
+    "--node",
+    "-n",
+    "node_names",
+    type=str,
+    default=None,
+    multiple=True,
+    help=NODE_ARG_HELP,
+)
 @click.option(
     "--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP
 )
@@ -128,7 +137,14 @@ def run(tag, env, parallel, runner, node_names, to_nodes, from_nodes):
         runner = "ParallelRunner"
     runner_class = load_obj(runner, "kedro.runner") if runner else SequentialRunner
 
-    main(tags=tag, env=env, runner=runner_class(), node_names=node_names, from_nodes=from_nodes, to_nodes=to_nodes)
+    main(
+        tags=tag,
+        env=env,
+        runner=runner_class(),
+        node_names=node_names,
+        from_nodes=from_nodes,
+        to_nodes=to_nodes,
+    )
 
 
 @forward_command(cli, forward_help=True)
@@ -147,9 +163,10 @@ def install():
     """Install project dependencies from both requirements.txt and environment.yml (optional)."""
 
     if (Path.cwd() / "src" / "environment.yml").is_file():
-        call(["conda", "install", "--file",  "src/environment.yml", "--yes"])
+        call(["conda", "install", "--file", "src/environment.yml", "--yes"])
 
     python_call("pip", ["install", "-U", "-r", "src/requirements.txt"])
+
 
 @forward_command(cli, forward_help=True)
 def ipython(args):
@@ -236,7 +253,9 @@ def activate_nbstripout():
     call(["nbstripout", "--install"])
 
 
-def _build_jupyter_command(base: str, ip: str, all_kernels: bool, args: Iterable[str]) -> List[str]:
+def _build_jupyter_command(
+    base: str, ip: str, all_kernels: bool, args: Iterable[str]
+) -> List[str]:
     cmd = [base, "--ip=" + ip]
 
     if not all_kernels:
@@ -260,10 +279,11 @@ def jupyter_notebook(ip, all_kernels, args):
     if "-h" not in args and "--help" not in args:
         ipython_message(all_kernels)
 
-    call(_build_jupyter_command(
-        "jupyter-notebook", ip=ip,
-        all_kernels=all_kernels, args=args,
-    ))
+    call(
+        _build_jupyter_command(
+            "jupyter-notebook", ip=ip, all_kernels=all_kernels, args=args
+        )
+    )
 
 
 @forward_command(jupyter, "lab", forward_help=True)
@@ -274,10 +294,9 @@ def jupyter_lab(ip, all_kernels, args):
     if "-h" not in args and "--help" not in args:
         ipython_message(all_kernels)
 
-    call(_build_jupyter_command(
-        "jupyter-lab", ip=ip,
-        all_kernels=all_kernels, args=args,
-    ))
+    call(
+        _build_jupyter_command("jupyter-lab", ip=ip, all_kernels=all_kernels, args=args)
+    )
 
 
 @jupyter.command("convert")
@@ -302,6 +321,7 @@ def convert_notebook(all_flag, overwrite_flag, filepath):
     Should not be provided if --all flag is already present.
 
     """
+    from {{cookiecutter.python_package}}.run import ProjectContext
     if not filepath and not all_flag:
         secho(
             "Please specify a notebook filepath "
@@ -309,7 +329,7 @@ def convert_notebook(all_flag, overwrite_flag, filepath):
         )
         return
 
-    kedro_project_path = __get_kedro_context__(**kwargs)["project_path"]
+    kedro_project_path = ProjectContext(Path.cwd()).project_path
     kedro_package_name = "{{cookiecutter.python_package}}"
 
     if all_flag:
@@ -366,14 +386,8 @@ def ipython_message(all_kernels=True):
     secho("or to see the error message if they are undefined")
 
     if not all_kernels:
-        secho(
-            "The choice of kernels is limited to the default one.",
-            fg="yellow",
-        )
-        secho(
-            "(restart with --all-kernels to get access to others)",
-            fg="yellow",
-        )
+        secho("The choice of kernels is limited to the default one.", fg="yellow")
+        secho("(restart with --all-kernels to get access to others)", fg="yellow")
 
     secho("-" * 79, fg="cyan")
 

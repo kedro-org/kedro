@@ -51,30 +51,6 @@ class ProjectContext(KedroContext):
     def pipeline(self) -> Pipeline:
         return create_pipeline()
 
-
-def __kedro_context__(env: str = None, **kwargs) -> KedroContext:
-    """Provide this project's context to ``kedro`` CLI and plugins.
-    Please do not rename or remove, as this will break the CLI tool.
-
-    Plugins may request additional objects from this method.
-
-    Args:
-        env: An optional parameter specifying the environment in which
-        the ``Pipeline`` should be run. If not specified defaults to "local".
-        kwargs: Optional custom arguments defined by users.
-    Returns:
-        Instance of ProjectContext class defined in Kedro project.
-
-    """
-    if env is None:
-        # Default configuration environment to be used for running the pipeline.
-        # Change this constant value if you want to load configuration
-        # from a different location.
-        env = "local"
-
-    return ProjectContext(Path.cwd(), env)
-
-
 def main(
     tags: Iterable[str] = None,
     env: str = None,
@@ -90,7 +66,7 @@ def main(
             filter the nodes of the ``Pipeline``. If specified, only the nodes
             containing *any* of these tags will be run.
         env: An optional parameter specifying the environment in which
-            the ``Pipeline`` should be run. If not specified defaults to "local".
+            the ``Pipeline`` should be run.
         runner: An optional parameter specifying the runner that you want to run
             the pipeline with.
         node_names: An optional list of node names which should be used to filter
@@ -102,8 +78,7 @@ def main(
             end point of the new ``Pipeline``.
 
     """
-
-    context = __kedro_context__(env)
+    context = ProjectContext(Path.cwd(), env)
     context.run(tags, runner, node_names, from_nodes, to_nodes)
 
 

@@ -37,6 +37,7 @@ The breaking changes were introduced in the following project template files:
 - `<project-name>/kedro_cli.py`
 - `<project-name>/src/tests/test_run.py`
 - `<project-name>/src/<package-name>/run.py`
+- `<project-name>/.kedro.yml` (new file)
 
 The easiest way to migrate your project from Kedro 0.14.* to Kedro 0.15.0 is to create a new project (by using `kedro new`) and move code and files bit by bit as suggested in the detailed guide below:
 

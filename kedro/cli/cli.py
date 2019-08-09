@@ -504,14 +504,13 @@ def _get_prompt_text(title, *text):
 
 
 def get_project_context(key: str = "context", **kwargs) -> Any:
-    """Get a value from the project context.
-    The user is responsible having the specified key in their project's context
-    which typically is exposed in the ``__kedro_context__`` function in ``run.py``
+    """Gets the context value from context associated with the key.
 
     Args:
-        key: Optional key in Kedro context dictionary. Defaults to "context".
-        kwargs: Optional custom arguments defined by users, which will be passed to
-        __kedro_context__() in `run.py`.
+        key: Optional key to get associated value from Kedro context.
+        Supported keys are "verbose" and "context", and it defaults to "context".
+        kwargs: Optional custom arguments defined by users, which will be passed into
+        the constructor of the projects KedroContext subclass.
 
     Returns:
         Requested value from Kedro context dictionary or the default if the key
@@ -535,8 +534,8 @@ def get_project_context(key: str = "context", **kwargs) -> Any:
         msg = '`get_project_context("{}")` is now deprecated. '.format(key)
         if obj_name:
             msg += (
-                "This is still returning a function that returns `{}` "
-                "instance, however passed arguments have no effect anymore. ".format(
+                "This is still returning a function that returns `{}` instance, "
+                "however passed arguments have no effect anymore since Kedro 0.15.0. ".format(
                     obj_name
                 )
             )
@@ -548,28 +547,21 @@ def get_project_context(key: str = "context", **kwargs) -> Any:
         return msg
 
     context = load_context(Path.cwd(), **kwargs)
-    try:
-        # Dictionary to be compatible with existing Plugins. Future plugins should
-        # retrieve necessary Kedro project properties from context
-        value = {
-            "context": context,
-            "get_config": lambda project_path, env=None, **kw: context.config_loader,
-            "create_catalog": lambda config, **kw: context.catalog,
-            "create_pipeline": lambda **kw: context.pipeline,
-            "template_version": context.project_version,
-            "project_name": context.project_name,
-            "project_path": context.project_path,
-            "verbose": _VERBOSE,
-        }[key]
+    # Dictionary to be compatible with existing Plugins. Future plugins should
+    # retrieve necessary Kedro project properties from context
+    value = {
+        "context": context,
+        "get_config": lambda project_path, env=None, **kw: context.config_loader,
+        "create_catalog": lambda config, **kw: context.catalog,
+        "create_pipeline": lambda **kw: context.pipeline,
+        "template_version": context.project_version,
+        "project_name": context.project_name,
+        "project_path": context.project_path,
+        "verbose": _VERBOSE,
+    }[key]
 
-        if key not in ("verbose", "context"):
-            warnings.warn(_deprecation_msg(key), DeprecationWarning)
-
-    except KeyError:
-        _handle_exception(
-            "`{}` not found in the context returned by "
-            "__get_kedro_context__".format(key)
-        )
+    if key not in ("verbose", "context"):
+        warnings.warn(_deprecation_msg(key), DeprecationWarning)
 
     return deepcopy(value)
 

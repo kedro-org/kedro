@@ -1,0 +1,1 @@
+context_path: {{ cookiecutter.python_package }}.run.ProjectContext

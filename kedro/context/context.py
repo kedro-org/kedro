@@ -28,7 +28,6 @@
 """This module provides context for Kedro project."""
 
 import abc
-import importlib
 import logging.config
 import os
 import sys
@@ -36,13 +35,14 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, Union
 from warnings import warn
 
+import yaml
+
 from kedro import __version__
 from kedro.config import ConfigLoader, MissingConfigException
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.runner import AbstractRunner, SequentialRunner
-
-_LOADED_PATH = None
+from kedro.utils import load_obj
 
 
 class KedroContext(abc.ABC):
@@ -69,18 +69,35 @@ class KedroContext(abc.ABC):
 
     CONF_ROOT = "conf"
 
-    def __init__(self, project_path: Union[Path, str], env: str = "local"):
+    def __init__(self, project_path: Union[Path, str], env: str = None):
         """Create a context object by providing the root of a Kedro project and
         the environment configuration subfolders (see ``kedro.config.ConfigLoader``)
+
+        Raises:
+            KedroContextError: If there is a mismatch
+                between Kedro project version and package version.
 
         Args:
             project_path: Project path to define the context for.
             env: Optional argument for configuration default environment to be used
-            for running the pipeline. Default environment is 'local'.
+            for running the pipeline. If not specified, it defaults to "local".
 
         """
+
+        def _version_mismatch_error(context_version):
+            return (
+                "Your Kedro project version {} does not match Kedro package "
+                "version {} you are running. Make sure to update your project template. "
+                "See https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md for how to "
+                "migrate your Kedro project."
+            ).format(context_version, __version__)
+
+        # check the match for major and minor version (skip patch version)
+        if self.project_version.split(".")[:2] != __version__.split(".")[:2]:
+            raise KedroContextError(_version_mismatch_error(self.project_version))
+
         self._project_path = Path(project_path).expanduser().resolve()
-        self.env = env
+        self.env = env or "local"
         self._setup_logging()
 
     @property
@@ -298,70 +315,47 @@ class KedroContext(abc.ABC):
 
 
 def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
-    """Loads KedroContext object defined in `kedro_cli.__kedro_context__`.
+    """Loads the KedroContext object of a Kedro Project as defined in `src/<package-name>/run.py`.
     This function will change the current working directory to the project path.
 
     Args:
         project_path: Path to the Kedro project.
         kwargs: Optional custom arguments defined by users, which will be passed to
-        __kedro_context__() in `run.py`.
+        ProjectContext class in `run.py`. kwargs will need to be passed explicitly to
+        the constructor of ProjectContext.
 
     Returns:
         Instance of KedroContext class defined in Kedro project.
 
     Raises:
-        KedroContextError: If another project context has already been loaded.
+        KedroContextError: Either '.kedro.yml' was not found
+        or loaded context has package conflict.
 
     """
-    # global due to importlib caching import_module("kedro_cli") call
-    global _LOADED_PATH  # pylint: disable=global-statement
-
     project_path = Path(project_path).expanduser().resolve()
-
-    if _LOADED_PATH and project_path != _LOADED_PATH:
-        raise KedroContextError(
-            "Cannot load context for `{}`, since another project `{}` has "
-            "already been loaded".format(project_path, _LOADED_PATH)
-        )
     if str(project_path) not in sys.path:
         sys.path.append(str(project_path))
 
-    kedro_cli = importlib.import_module("kedro_cli")
+    kedro_yaml = project_path / ".kedro.yml"
+    try:
+        with kedro_yaml.open("r") as kedro_yml:
 
-    context = kedro_cli.__get_kedro_context__(**kwargs)  # type: ignore
-    check_context_version(context)
+            context_path = yaml.safe_load(kedro_yml)["context_path"]
+    except Exception:
+        raise KedroContextError(
+            "Could not retrive 'context_path' from '.kedro.yml' in {}. If you have created "
+            "your project with Kedro version <0.15.0, make sure to update your project template. "
+            "See https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md "
+            "for how to migrate your Kedro project.".format(str(project_path))
+        )
+
+    context_class = load_obj(context_path)
+    context = context_class(project_path, **kwargs)
 
     if os.getcwd() != str(project_path):
         warn("Changing the current working directory to {}".format(str(project_path)))
         os.chdir(str(project_path))  # Move to project root
-    _LOADED_PATH = project_path
     return context
-
-
-def check_context_version(context: Union[Dict, KedroContext]) -> None:
-    """ Check if the Kedro package version and Kedro template version match.
-    Args:
-        context: Instance of KedroContext from Kedro template.
-
-    Raises:
-        KedroContextError: If there is a mismatch
-            between Kedro project version and package version.
-
-    """
-
-    def _error_message(context_version):
-        return (
-            "Your Kedro project version {} does not match Kedro package "
-            "version {} you are running. Make sure to update your project template. "
-            "See https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md for how to "
-            "migrate your Kedro project."
-        ).format(context_version, __version__)
-
-    if not isinstance(context, KedroContext):
-        raise KedroContextError(_error_message(context["project_version"]))
-    # check the match for major and minor version (skip patch version)
-    if context.project_version.split(".")[:2] != __version__.split(".")[:2]:
-        raise KedroContextError(_error_message(context.project_version))
 
 
 class KedroContextError(Exception):

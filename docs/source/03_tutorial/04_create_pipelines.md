@@ -205,9 +205,9 @@ def create_master_table(
 To create a new node to join all tables to form a master table, you need to add the three dataframes to a cell in the Jupyter notebook:
 
 ```python
-preprocessed_shuttles = io.load("preprocessed_shuttles")
-preprocessed_companies = io.load("preprocessed_companies")
-reviews = io.load("reviews")
+preprocessed_shuttles = context.catalog.load("preprocessed_shuttles")
+preprocessed_companies = context.catalog.load("preprocessed_companies")
+reviews = context.catalog.load("reviews")
 
 master = create_master_table(preprocessed_shuttles, preprocessed_companies, reviews)
 master.head()

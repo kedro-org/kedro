@@ -41,7 +41,6 @@ from pandas.util.testing import assert_frame_equal
 
 from kedro import __version__
 from kedro.context import KedroContext, KedroContextError, load_context
-from kedro.context.context import check_context_version
 from kedro.pipeline import Pipeline, node
 from kedro.runner import ParallelRunner, SequentialRunner
 
@@ -156,19 +155,25 @@ def restore_cwd():
 @pytest.fixture
 def fake_project(tmp_path):
     project = tmp_path / "project"
-    project.mkdir()
-    kedro_cli = project / "kedro_cli.py"
+
+    package_name = "fake_package"
+    package_path = project / "src" / package_name
+    package_path.mkdir(parents=True)
+
+    kedro_yaml = project / ".kedro.yml"
+    _write_yaml(kedro_yaml, {"context_path": package_name + ".run.Fake"})
+    sys.path.append(str(project / "src"))
+    run = package_path / "run.py"
     script = """
         class Fake:
+            def __init__(self, project_path, **kwargs):
+                pass
             project_name = "fake"
             project_version = "{}"
-
-        def __get_kedro_context__():
-            return Fake()
     """.format(
         __version__
     )
-    kedro_cli.write_text(textwrap.dedent(script), encoding="utf-8")
+    run.write_text(textwrap.dedent(script), encoding="utf-8")
     yield project
 
 
@@ -239,6 +244,31 @@ class TestKedroContext:
 
     def test_default_env(self, dummy_context):
         assert dummy_context.env == "local"
+
+    @pytest.mark.parametrize(
+        "invalid_version", ["0.13.0", "10.0", "101.1", "100.0", "-0"]
+    )
+    def test_invalid_version(self, tmp_path, mocker, invalid_version):
+        # Disable logging.config.dictConfig in KedroContext._setup_logging as
+        # it changes logging.config and affects other unit tests
+        mocker.patch("logging.config.dictConfig")
+
+        class _DummyContext(KedroContext):
+            project_name = "bob"
+            project_version = invalid_version
+
+            @property
+            def pipeline(self) -> Pipeline:
+                return Pipeline([])  # pragma: no cover
+
+        pattern = (
+            r"Your Kedro project version {} does not match "
+            r"Kedro package version {} you are running. ".format(
+                invalid_version, __version__
+            )
+        )
+        with pytest.raises(KedroContextError, match=pattern):
+            _DummyContext(str(tmp_path))
 
     @pytest.mark.parametrize("env", ["custom_env"], indirect=True)
     def test_custom_env(self, dummy_context):
@@ -412,55 +442,19 @@ class TestKedroContextRun:
             dummy_context.run()
 
 
-def test_load_context(fake_project, tmp_path, mocker):
-    """Test getting project context"""
-    mocker.patch("kedro.context.context.check_context_version")
-    result = load_context(str(fake_project))
-    assert result.project_name == "fake"
-    assert result.project_version == __version__
-    assert str(fake_project.resolve()) in sys.path
-    assert os.getcwd() == str(fake_project.resolve())
+class TestLoadContext:
+    def test_valid_context(self, fake_project):
+        """Test getting project context."""
+        result = load_context(str(fake_project))
+        assert result.project_name == "fake"
+        assert result.project_version == __version__
+        assert str(fake_project.resolve()) in sys.path
+        assert os.getcwd() == str(fake_project.resolve())
 
-    other_path = tmp_path / "other"
-    other_path.mkdir()
-    pattern = (
-        r"Cannot load context for `{}`, since another project "
-        r"`.*` has already been loaded".format(other_path.resolve())
-    )
-    with pytest.raises(KedroContextError, match=pattern):
-        load_context(str(other_path))
-
-
-def test_valid_context_version(mocker):
-    mocked_context = mocker.patch("kedro.context.KedroContext", autospec=True)
-    context = mocked_context("fake_path")
-    context.project_version = __version__
-    check_context_version(context)
-
-
-def test_invalid_context_version_dict():
-    context_dict = {"project_version": __version__}
-    pattern = (
-        r"Your Kedro project version {} does not match "
-        r"Kedro package version {} you are running. ".format(
-            context_dict["project_version"], __version__
-        )
-    )
-    with pytest.raises(KedroContextError, match=pattern):
-        check_context_version(context_dict)
-
-
-@pytest.mark.parametrize("project_version", ["0.13.0", "10.0", "101.1", "100.0", "-0"])
-def test_invalid_context_version(mocker, project_version):
-    mocked_context = mocker.patch("kedro.context.KedroContext", autospec=True)
-    context = mocked_context("fake_path")
-    context.project_version = project_version
-
-    pattern = (
-        r"Your Kedro project version {} does not match "
-        r"Kedro package version {} you are running. ".format(
-            context.project_version, __version__
-        )
-    )
-    with pytest.raises(KedroContextError, match=pattern):
-        check_context_version(context)
+    def test_invalid_path(self, tmp_path):
+        """Test for loading context from an invalid path. """
+        other_path = tmp_path / "other"
+        other_path.mkdir()
+        pattern = r"Could not retrive \'context_path\' from \'.kedro.yml\'"
+        with pytest.raises(KedroContextError, match=pattern):
+            load_context(str(other_path))

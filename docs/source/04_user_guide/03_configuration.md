@@ -46,7 +46,7 @@ kedro run --env=test
 
 If no `env` option is specified, this will default to using `local` environment to overwrite `conf/base`.
 
-You can alternatively change the default environment by modifying the `env` variable in `__kedro_context__` in `src/run.py`.
+You can alternatively pass a different environment variable in `ProjectContext` in `src/run.py`.
 
 ```python
 env = "test"

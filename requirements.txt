@@ -14,3 +14,4 @@ tables>=3.4.4, <4.0
 toposort>=1.5, <2.0  # Needs to be at least 1.5 to be able to raise CircularDependencyError
 xlrd>=1.0.0, <2.0
 xlsxwriter>=1.0.0, <2.0
+networkx==2.3 

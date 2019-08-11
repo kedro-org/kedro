@@ -122,7 +122,7 @@ def _replace_vals(val: Any, defaults: Dict[str, Any]) -> Any:
 
         pattern_partial = r'\$\{([^\}]*)\}'
         return re.sub(pattern_partial,
-                      lambda m: jmespath.search(m.group(1), defaults) or m.group(0),
+                      lambda m: str(jmespath.search(m.group(1), defaults)) or m.group(0),
                       val)
     return val
 

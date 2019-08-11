@@ -190,6 +190,29 @@ def proj_catalog_param_namespaced(tmp_path, param_config_namespaced):
     _write_yaml(proj_catalog, param_config_namespaced)
 
 
+@pytest.fixture
+def param_config_exceptional():
+    return {
+        "postcode": "${area}${district} ${sector}${unit}",
+    }
+
+
+@pytest.fixture
+def template_config_exceptional():
+    return {
+        "area": "NW",
+        "district": 10,
+        "sector": 2,
+        "unit": "JK"
+    }
+
+
+@pytest.fixture
+def proj_catalog_param_w_vals_exceptional(tmp_path, param_config_exceptional):
+    proj_catalog = tmp_path / "base" / "catalog.yml"
+    _write_yaml(proj_catalog, param_config_exceptional)
+
+
 class TestTemplatedConfigLoader:
 
     @pytest.mark.usefixtures("proj_catalog_param")
@@ -287,3 +310,14 @@ class TestTemplatedConfigLoader:
         assert catalog["boats"]["columns"]["name"] == "VARCHAR"
         assert catalog["boats"]["columns"]["top_speed"] == "FLOAT"
         assert catalog["boats"]["users"] == ["fred", "ron"]
+
+    @pytest.mark.usefixtures("proj_catalog_param_w_vals_exceptional")
+    def test_catlog_parameterized_exceptional(self, tmp_path, conf_paths,
+                                              template_config_exceptional):
+        """Test templating with mixed type replacement values going into one string"""
+        (tmp_path / "local").mkdir(exist_ok=True)
+
+        catalog = TemplatedConfigLoader(conf_paths).get("catalog*.yml",
+                                                        arg_values=template_config_exceptional)
+
+        assert catalog["postcode"] == "NW10 2JK"

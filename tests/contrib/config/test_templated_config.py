@@ -52,11 +52,12 @@ def param_config():
         "boats": {
             "type": "${boat_data_type}",
             "filepath": "${s3_bucket}/${raw_data_folder}/${boat_file_name}",
-            "columns": {"id": "${string_type}",
-                        "name": "${string_type}",
-                        "top_speed": "${float_type}"},
-            "users": ["fred",
-                      "${write_only_user}"]
+            "columns": {
+                "id": "${string_type}",
+                "name": "${string_type}",
+                "top_speed": "${float_type}",
+            },
+            "users": ["fred", "${write_only_user}"],
         }
     }
 
@@ -70,7 +71,7 @@ def template_config():
         "boat_data_type": "SparkDataSet",
         "string_type": "VARCHAR",
         "float_type": "FLOAT",
-        "write_only_user": "ron"
+        "write_only_user": "ron",
     }
 
 
@@ -85,10 +86,7 @@ def normal_config_advanced():
     return {
         "planes": {
             "type": "SparkJDBCDataSet",
-            "postgres_credentials": {
-                "user": "Fakeuser",
-                "password": "F@keP@55word"
-            },
+            "postgres_credentials": {"user": "Fakeuser", "password": "F@keP@55word"},
             "batch_size": 10000,
             "need_permission": True,
             "secret_tables": ["models", "pilots", "engines"],
@@ -119,13 +117,10 @@ def param_config_advanced():
 def template_config_advanced():
     return {
         "plane_data_type": "SparkJDBCDataSet",
-        "credentials": {
-            "user": "Fakeuser",
-            "password": "F@keP@55word"
-        },
+        "credentials": {"user": "Fakeuser", "password": "F@keP@55word"},
         "batch_size": 10000,
         "permission_param": True,
-        "secret_table_list": ["models", "pilots", "engines"]
+        "secret_table_list": ["models", "pilots", "engines"],
     }
 
 
@@ -141,10 +136,7 @@ def mixed_config_advanced():
         "planes": {
             "type": "SparkJDBCDataSet",
             "type_parameterized": "${plane_data_type}",
-            "postgres_credentials": {
-                "user": "Fakeuser",
-                "password": "F@keP@55word"
-            },
+            "postgres_credentials": {"user": "Fakeuser", "password": "F@keP@55word"},
             "postgres_credentials_parameterized": "${credentials}",
             "batch_size": 10000,
             "batch_size_parameterized": "${batch_size}",
@@ -168,20 +160,19 @@ def param_config_namespaced():
         "boats": {
             "type": "${global.boat_data_type}",
             "filepath": "${global.s3_bucket}/${global.raw_data_folder}/${global.boat_file_name}",
-            "columns": {"id": "${global.string_type}",
-                        "name": "${global.string_type}",
-                        "top_speed": "${global.float_type}"},
-            "users": ["fred",
-                      "${env.USER}"]
+            "columns": {
+                "id": "${global.string_type}",
+                "name": "${global.string_type}",
+                "top_speed": "${global.float_type}",
+            },
+            "users": ["fred", "${env.USER}"],
         }
     }
 
 
 @pytest.fixture
 def get_environ():
-    return {
-        "USER": "ron"
-    }
+    return {"USER": "ron"}
 
 
 @pytest.fixture
@@ -192,19 +183,12 @@ def proj_catalog_param_namespaced(tmp_path, param_config_namespaced):
 
 @pytest.fixture
 def param_config_exceptional():
-    return {
-        "postcode": "${area}${district} ${sector}${unit}",
-    }
+    return {"postcode": "${area}${district} ${sector}${unit}"}
 
 
 @pytest.fixture
 def template_config_exceptional():
-    return {
-        "area": "NW",
-        "district": 10,
-        "sector": 2,
-        "unit": "JK"
-    }
+    return {"area": "NW", "district": 10, "sector": 2, "unit": "JK"}
 
 
 @pytest.fixture
@@ -214,17 +198,19 @@ def proj_catalog_param_w_vals_exceptional(tmp_path, param_config_exceptional):
 
 
 class TestTemplatedConfigLoader:
-
     @pytest.mark.usefixtures("proj_catalog_param")
     def test_catlog_parameterized_w_dict(self, tmp_path, conf_paths, template_config):
         """Test parameterized config with input from dictionary with values"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
-        catalog = TemplatedConfigLoader(conf_paths).get(["catalog*.yml"],
-                                                        arg_values=template_config)
+        catalog = TemplatedConfigLoader(conf_paths).get(
+            ["catalog*.yml"], arg_values=template_config
+        )
 
         assert catalog["boats"]["type"] == "SparkDataSet"
-        assert catalog["boats"]["filepath"] == "s3a://boat-and-car-bucket/01_raw/boats.csv"
+        assert (
+            catalog["boats"]["filepath"] == "s3a://boat-and-car-bucket/01_raw/boats.csv"
+        )
         assert catalog["boats"]["columns"]["id"] == "VARCHAR"
         assert catalog["boats"]["columns"]["name"] == "VARCHAR"
         assert catalog["boats"]["columns"]["top_speed"] == "FLOAT"
@@ -238,7 +224,10 @@ class TestTemplatedConfigLoader:
         catalog = TemplatedConfigLoader(conf_paths).get(["catalog*.yml"])
 
         assert catalog["boats"]["type"] == "${boat_data_type}"
-        assert catalog["boats"]["filepath"] == "${s3_bucket}/${raw_data_folder}/${boat_file_name}"
+        assert (
+            catalog["boats"]["filepath"]
+            == "${s3_bucket}/${raw_data_folder}/${boat_file_name}"
+        )
         assert catalog["boats"]["columns"]["id"] == "${string_type}"
         assert catalog["boats"]["columns"]["name"] == "${string_type}"
         assert catalog["boats"]["columns"]["top_speed"] == "${float_type}"
@@ -260,12 +249,15 @@ class TestTemplatedConfigLoader:
         assert catalog["planes"]["secret_tables"] == ["models", "pilots", "engines"]
 
     @pytest.mark.usefixtures("proj_catalog_param_w_vals_advanced")
-    def test_catlog_parameterized_advanced(self, tmp_path, conf_paths, template_config_advanced):
+    def test_catlog_parameterized_advanced(
+        self, tmp_path, conf_paths, template_config_advanced
+    ):
         """Test advanced templating (i.e. nested dicts, booleans, lists, etc.)"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
-        catalog = TemplatedConfigLoader(conf_paths).get("catalog*.yml",
-                                                        arg_values=template_config_advanced)
+        catalog = TemplatedConfigLoader(conf_paths).get(
+            "catalog*.yml", arg_values=template_config_advanced
+        )
 
         assert catalog["planes"]["type"] == "SparkJDBCDataSet"
         assert catalog["planes"]["postgres_credentials"]["user"] == "Fakeuser"
@@ -275,12 +267,15 @@ class TestTemplatedConfigLoader:
         assert catalog["planes"]["secret_tables"] == ["models", "pilots", "engines"]
 
     @pytest.mark.usefixtures("proj_catalog_mixed")
-    def test_catlog_parameterized_mixed(self, tmp_path, conf_paths, template_config_advanced):
+    def test_catlog_parameterized_mixed(
+        self, tmp_path, conf_paths, template_config_advanced
+    ):
         """Test advanced templating (i.e. nested dicts, booleans, lists, etc.) with mixed conf"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
-        catalog = TemplatedConfigLoader(conf_paths).get("catalog*.yml",
-                                                        arg_values=template_config_advanced)
+        catalog = TemplatedConfigLoader(conf_paths).get(
+            "catalog*.yml", arg_values=template_config_advanced
+        )
 
         assert catalog["planes"]["type"] == "SparkJDBCDataSet"
         assert catalog["planes"]["postgres_credentials"]["user"] == "Fakeuser"
@@ -289,35 +284,51 @@ class TestTemplatedConfigLoader:
         assert catalog["planes"]["need_permission"]
         assert catalog["planes"]["secret_tables"] == ["models", "pilots", "engines"]
         assert catalog["planes"]["type_parameterized"] == "SparkJDBCDataSet"
-        assert catalog["planes"]["postgres_credentials_parameterized"]["user"] == "Fakeuser"
-        assert catalog["planes"]["postgres_credentials_parameterized"]["password"] == "F@keP@55word"
+        assert (
+            catalog["planes"]["postgres_credentials_parameterized"]["user"]
+            == "Fakeuser"
+        )
+        assert (
+            catalog["planes"]["postgres_credentials_parameterized"]["password"]
+            == "F@keP@55word"
+        )
         assert catalog["planes"]["batch_size_parameterized"] == 10000
         assert catalog["planes"]["need_permission_parameterized"]
-        assert catalog["planes"]["secret_tables_parameterized"] == ["models", "pilots", "engines"]
+        assert catalog["planes"]["secret_tables_parameterized"] == [
+            "models",
+            "pilots",
+            "engines",
+        ]
 
     @pytest.mark.usefixtures("proj_catalog_param_namespaced")
-    def test_catlog_parameterized_w_dict_namespaced(self, tmp_path, conf_paths, template_config,
-                                                    get_environ):
+    def test_catlog_parameterized_w_dict_namespaced(
+        self, tmp_path, conf_paths, template_config, get_environ
+    ):
         """Test parameterized config with input from dictionary with values"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
-        catalog = TemplatedConfigLoader(conf_paths)\
-            .get(["catalog*.yml"], arg_values={"global": template_config, "env": get_environ})
+        catalog = TemplatedConfigLoader(conf_paths).get(
+            ["catalog*.yml"], arg_values={"global": template_config, "env": get_environ}
+        )
 
         assert catalog["boats"]["type"] == "SparkDataSet"
-        assert catalog["boats"]["filepath"] == "s3a://boat-and-car-bucket/01_raw/boats.csv"
+        assert (
+            catalog["boats"]["filepath"] == "s3a://boat-and-car-bucket/01_raw/boats.csv"
+        )
         assert catalog["boats"]["columns"]["id"] == "VARCHAR"
         assert catalog["boats"]["columns"]["name"] == "VARCHAR"
         assert catalog["boats"]["columns"]["top_speed"] == "FLOAT"
         assert catalog["boats"]["users"] == ["fred", "ron"]
 
     @pytest.mark.usefixtures("proj_catalog_param_w_vals_exceptional")
-    def test_catlog_parameterized_exceptional(self, tmp_path, conf_paths,
-                                              template_config_exceptional):
+    def test_catlog_parameterized_exceptional(
+        self, tmp_path, conf_paths, template_config_exceptional
+    ):
         """Test templating with mixed type replacement values going into one string"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
-        catalog = TemplatedConfigLoader(conf_paths).get("catalog*.yml",
-                                                        arg_values=template_config_exceptional)
+        catalog = TemplatedConfigLoader(conf_paths).get(
+            "catalog*.yml", arg_values=template_config_exceptional
+        )
 
         assert catalog["postcode"] == "NW10 2JK"

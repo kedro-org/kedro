@@ -44,8 +44,12 @@ class TemplatedConfigLoader(ConfigLoader):
     Default values are provided in a dictionary.
     """
 
-    def get(self, patterns: Union[str, List[str]], *,
-            arg_values: Optional[Dict[str, Any]] = None):
+    def get(
+        self,
+        patterns: Union[str, List[str]],
+        *,
+        arg_values: Optional[Dict[str, Any]] = None
+    ):
         """
         Tries to resolve the template variables in the config dictionary provided by the
         ConfigLoader (super class) `get` method.
@@ -68,8 +72,7 @@ class TemplatedConfigLoader(ConfigLoader):
 
         config_raw = super(TemplatedConfigLoader, self).get(*patterns)
 
-        config_out = _replace_vals(config_raw, arg_values) if arg_values \
-            else config_raw
+        config_out = _replace_vals(config_raw, arg_values) if arg_values else config_raw
 
         return config_out
 
@@ -115,14 +118,15 @@ def _replace_vals(val: Any, defaults: Dict[str, Any]) -> Any:
 
     elif isinstance(val, str):
         # Distinguish case where entire string matches, as the replacement can be different type
-        pattern_full = r'^\$\{([^\}]*)\}$'
+        pattern_full = r"^\$\{([^\}]*)\}$"
         match_full = re.search(pattern_full, val)
         if match_full:
             return jmespath.search(match_full.group(1), defaults) or val
 
-        pattern_partial = r'\$\{([^\}]*)\}'
-        return re.sub(pattern_partial,
-                      lambda m: str(jmespath.search(m.group(1), defaults)) or m.group(0),
-                      val)
+        pattern_partial = r"\$\{([^\}]*)\}"
+        return re.sub(
+            pattern_partial,
+            lambda m: str(jmespath.search(m.group(1), defaults)) or m.group(0),
+            val,
+        )
     return val
-

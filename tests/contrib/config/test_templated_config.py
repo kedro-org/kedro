@@ -196,7 +196,8 @@ class TestTemplatedConfigLoader:
         """Test parameterized config with input from dictionary with values"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
-        catalog = TemplatedConfigLoader(conf_paths).resolve(["catalog*.yml"], template_config)
+        catalog = TemplatedConfigLoader(conf_paths).get(["catalog*.yml"],
+                                                        arg_values=template_config)
 
         assert catalog["boats"]["type"] == "SparkDataSet"
         assert catalog["boats"]["filepath"] == "s3a://boat-and-car-bucket/01_raw/boats.csv"
@@ -210,7 +211,7 @@ class TestTemplatedConfigLoader:
         """Test parameterized config with input from dictionary with values"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
-        catalog = TemplatedConfigLoader(conf_paths).resolve(["catalog*.yml"])
+        catalog = TemplatedConfigLoader(conf_paths).get(["catalog*.yml"])
 
         assert catalog["boats"]["type"] == "${boat_data_type}"
         assert catalog["boats"]["filepath"] == "${s3_bucket}/${raw_data_folder}/boats.csv"
@@ -225,7 +226,7 @@ class TestTemplatedConfigLoader:
         lists, etc.)"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
-        catalog = TemplatedConfigLoader(conf_paths).resolve("catalog*.yml")
+        catalog = TemplatedConfigLoader(conf_paths).get("catalog*.yml")
 
         assert catalog["planes"]["type"] == "SparkJDBCDataSet"
         assert catalog["planes"]["postgres_credentials"]["user"] == "Fakeuser"
@@ -239,8 +240,8 @@ class TestTemplatedConfigLoader:
         """Test advanced templating(i.e. nested dicts, booleans, lists, etc.)"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
-        catalog = TemplatedConfigLoader(conf_paths).resolve("catalog*.yml",
-                                                            template_config_advanced)
+        catalog = TemplatedConfigLoader(conf_paths).get("catalog*.yml",
+                                                        arg_values=template_config_advanced)
 
         assert catalog["planes"]["type"] == "SparkJDBCDataSet"
         assert catalog["planes"]["postgres_credentials"]["user"] == "Fakeuser"
@@ -254,8 +255,8 @@ class TestTemplatedConfigLoader:
         """Test advanced templating(i.e. nested dicts, booleans, lists, etc.)"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
-        catalog = TemplatedConfigLoader(conf_paths).resolve("catalog*.yml",
-                                                            template_config_advanced)
+        catalog = TemplatedConfigLoader(conf_paths).get("catalog*.yml",
+                                                        arg_values=template_config_advanced)
 
         assert catalog["planes"]["type"] == "SparkJDBCDataSet"
         assert catalog["planes"]["postgres_credentials"]["user"] == "Fakeuser"
@@ -277,8 +278,7 @@ class TestTemplatedConfigLoader:
         (tmp_path / "local").mkdir(exist_ok=True)
 
         catalog = TemplatedConfigLoader(conf_paths)\
-            .resolve(["catalog*.yml"], arg_values_dict={"global": template_config,
-                                                        "env": get_environ})
+            .get(["catalog*.yml"], arg_values={"global": template_config, "env": get_environ})
 
         assert catalog["boats"]["type"] == "SparkDataSet"
         assert catalog["boats"]["filepath"] == "s3a://boat-and-car-bucket/01_raw/boats.csv"

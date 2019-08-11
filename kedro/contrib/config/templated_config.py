@@ -44,8 +44,8 @@ class TemplatedConfigLoader(ConfigLoader):
     Default values are provided in a dictionary.
     """
 
-    def resolve(self, patterns: Union[str, List[str]],
-                arg_values_dict: Optional[Dict[str, Any]] = None):
+    def get(self, patterns: Union[str, List[str]], *,
+            arg_values: Optional[Dict[str, Any]] = None):
         """
         Tries to resolve the template variables in the config dictionary provided by the
         ConfigLoader (super class) `get` method.
@@ -53,7 +53,7 @@ class TemplatedConfigLoader(ConfigLoader):
         Args:
             patterns: Glob patterns to match. Files, which names match
                 any of the specified patterns, will be processed.
-            arg_values_dict: Optional dictionary containing default values.
+            arg_values: Optional dictionary containing default values.
 
         Returns:
             Dict[str, Any]:  A Python dictionary with the combined
@@ -68,7 +68,7 @@ class TemplatedConfigLoader(ConfigLoader):
 
         config_raw = super(TemplatedConfigLoader, self).get(*patterns)
 
-        config_out = _replace_vals_map(config_raw, arg_values_dict) if arg_values_dict \
+        config_out = _replace_vals_map(config_raw, arg_values) if arg_values \
             else config_raw
 
         return config_out

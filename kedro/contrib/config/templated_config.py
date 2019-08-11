@@ -68,30 +68,35 @@ class TemplatedConfigLoader(ConfigLoader):
 
         config_raw = super(TemplatedConfigLoader, self).get(*patterns)
 
-        config_out = _replace_vals_map(config_raw, arg_values) if arg_values \
+        config_out = _replace_vals(config_raw, arg_values) if arg_values \
             else config_raw
 
         return config_out
 
 
-def _replace_val(val: Any, defaults: Dict[str, Any]) -> Any:
+def _replace_vals(val: Any, defaults: Dict[str, Any]) -> Any:
     """
-    Use the default dict to replace strings that look like ${param_name} (where param_name can be
-    any key value) with the corresponding value of the key 'param_name' in the default dict.
+    Recursive function that loops through the values of a map. In case another map or a list is
+    encountered, it calls itsself. When a string is encountered it will use the default dict to
+    replace strings that look like ${param_name} (where param_name can be any key value) with the
+    corresponding value of the key 'param_name' in the default dict.
 
     Some notes on behavior:
-        if val is not a string, the same value gets passed back
-        if val does not match the ${..} pattern, the same value gets passed back
+        if val is not a dict, list or string, the same value gets passed back
+        if val is a string and does not match the ${..} pattern, the same value gets passed back
         if the value inside ${..} does not match any keys in the dictionary, the same value gets
-        passed back.
+            passed back.
+        if the ${..} is part of a larger string, the corresponding entry in the defaults dictionary
+            gets parsed into a string and put into the larger string
 
     Examples:
         val = '${test_key}' with defaults = {'test_key': 'test_val'} returns 'test_val'
-        val = ['string1', 'string2'] (i.e. a list of strings) returns ['string1', 'string2']
-            (irrespective of defaults)
+        val = 5 (i.e. not a dict, list or string) returns 5
         val = 'test_key' (i.e. does not match ${..} pattern returns 'test_key' (irrespective of
             defaults)
         val = '${wrong_test_key}' with defaults = {'test_key': 'test_val'} returns 'wrong_test_key'
+        val = 'string-with-${test_key}' with defaults = {'test_key': 1000} returns
+            'string-with-1000'
 
     Args:
         val: If this is a string of the format ${param_name}, it gets replaced by a parameter
@@ -102,50 +107,22 @@ def _replace_val(val: Any, defaults: Dict[str, Any]) -> Any:
 
     """
 
-    if isinstance(val, str):
-        regex_pattern = r'\$\{([^\}]*)\}'
-        regex_pattern_full = r'^\$\{([^\}]*)\}$'
-        match_full = re.search(regex_pattern_full, val)
+    if isinstance(val, dict):
+        return {k: _replace_vals(val[k], defaults) for k in val.keys()}
+
+    elif isinstance(val, list):
+        return [_replace_vals(e, defaults) for e in val]
+
+    elif isinstance(val, str):
+        # Distinguish case where entire string matches, as the replacement can be different type
+        pattern_full = r'^\$\{([^\}]*)\}$'
+        match_full = re.search(pattern_full, val)
         if match_full:
             return jmespath.search(match_full.group(1), defaults) or val
-        return re.sub(regex_pattern,
+
+        pattern_partial = r'\$\{([^\}]*)\}'
+        return re.sub(pattern_partial,
                       lambda m: jmespath.search(m.group(1), defaults) or m.group(0),
                       val)
     return val
 
-
-def _replace_vals_list(listt: List[Any], defaults: Dict[str, Any]) -> List[Any]:
-    """
-    Loops through list and applies _replace_vals function
-    Args:
-        listt: List containing any value
-        defaults: default value dictionary to be applied to each element (according to rules
-        described in _replace_vals docstring
-
-    Returns:
-        List with string values replaced if they match the rules described in _replace_vals
-        docstring
-
-    """
-    return [_replace_val(e, defaults) for e in listt]
-
-
-def _replace_vals_map(mapp: Dict[str, Any], defaults: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Recursive function that loops through the values of a map. In case another map is encountered,
-    it calls itsself, otherwise it calls either _replace_vals_list or _replace_val, depending on
-    data type of the value.
-    Args:
-        mapp: A map from string to any. In the context of the ConfigLoader class, this would be a
-        config dictionary,
-            obtained from a yml file.
-        defaults: A mapping from string to string (right now no support for replacement with maps or
-        lists).
-
-    Returns:
-        a map with parameters replaced with values.
-
-    """
-    return {k: _replace_vals_map(mapp[k], defaults) if isinstance(mapp[k], dict)
-            else _replace_vals_list(mapp[k], defaults) if isinstance(mapp[k], list)
-            else _replace_val(mapp[k], defaults) for k in mapp.keys()}

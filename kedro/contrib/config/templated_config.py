@@ -113,10 +113,10 @@ def _replace_vals(val: Any, defaults: Dict[str, Any]) -> Any:
     if isinstance(val, dict):
         return {k: _replace_vals(val[k], defaults) for k in val.keys()}
 
-    elif isinstance(val, list):
+    if isinstance(val, list):
         return [_replace_vals(e, defaults) for e in val]
 
-    elif isinstance(val, str):
+    if isinstance(val, str):
         # Distinguish case where entire string matches, as the replacement can be different type
         pattern_full = r"^\$\{([^\}]*)\}$"
         match_full = re.search(pattern_full, val)

@@ -109,16 +109,40 @@ scooters_query:
     index_col: ['name']
 ```
 
-The above `catalog.yml` gets `dev_s3` `scooters_credentials` from `conf/local/credentials.yml`:
+## Feeding in credentials
+
+Before instantiating the `DataCatalog` Kedro will first attempt to read the credentials from project configuration (see [this section](./03_configuration.md#aws-credentials) for more details). Resulting dictionary will then be passed into `DataCatalog.from_config()` as `credentials` argument.
+
+Let's assume that the project contains the file `conf/local/credentials.yml` with the following contents:
 
 ```yaml
 dev_s3:
-     aws_access_key_id: token
-     aws_secret_access_key: key
+  aws_access_key_id: token
+  aws_secret_access_key: key
 
 scooters_credentials:
   con: sqlite:///kedro.db
 ```
+
+In the example above `catalog.yml` contains references to credentials keys `dev_s3` and `scooters_credentials`. It means that when instantiating `motorbikes` dataset, for example, the `DataCatalog` will attempt to read top-level key `dev_s3` from the received `credentials` dictionary, and then will pass its values into the dataset `__init__` as `credentials` argument. This is essentially equivalent to calling this:
+
+```python
+CSVS3DataSet(
+    bucket_name="test_bucket",
+    filepath="data/02_intermediate/company/motorbikes.csv",
+    load_args=dict(
+        sep=",",
+        skiprows=5,
+        skipfooter=1,
+        na_values=["#NA", "NA"],
+    ),
+    credentials=dict(
+        aws_access_key_id="token",
+        aws_secret_access_key="key",
+    )
+)
+```
+
 
 ## Loading multiple datasets that have similar configuration
 

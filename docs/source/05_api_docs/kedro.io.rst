@@ -22,6 +22,7 @@ Data Sets
     :template: autosummary/class.rst
 
     kedro.io.CSVLocalDataSet
+    kedro.io.CSVHTTPDataSet
     kedro.io.CSVS3DataSet
     kedro.io.HDFLocalDataSet
     kedro.io.HDFS3DataSet

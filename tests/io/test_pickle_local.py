@@ -27,6 +27,7 @@
 # limitations under the License.
 from importlib import reload
 
+import pandas as pd
 import pytest
 from pandas.util.testing import assert_frame_equal
 
@@ -40,9 +41,23 @@ def filepath_pkl(tmp_path):
     return str(tmp_path / "test.pkl")
 
 
+@pytest.fixture
+def dummy_dataframe():
+    return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+
+
 @pytest.fixture(params=["pickle"])
 def pickle_data_set(filepath_pkl, request):
     return PickleLocalDataSet(filepath=filepath_pkl, backend=request.param)
+
+
+@pytest.fixture
+def pickle_data_set_with_args(filepath_pkl):
+    return PickleLocalDataSet(
+        filepath=filepath_pkl,
+        load_args={"fix_imports": False},
+        save_args={"fix_imports": False},
+    )
 
 
 @pytest.fixture
@@ -96,6 +111,12 @@ class TestPickleLocalDataSet:
         )
         with pytest.raises(ImportError, match=pattern):
             PickleLocalDataSet(filepath=filepath_pkl, backend="joblib")
+
+    def test_save_and_load_args(self, pickle_data_set_with_args, dummy_dataframe):
+        """Test saving and reloading the data with different options."""
+        pickle_data_set_with_args.save(dummy_dataframe)
+        reloaded_df = pickle_data_set_with_args.load()
+        assert_frame_equal(reloaded_df, dummy_dataframe)
 
 
 class TestPickleLocalDataSetVersioned:

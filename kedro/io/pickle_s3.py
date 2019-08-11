@@ -30,6 +30,7 @@
 The underlying functionality is supported by the ``pickle`` library, so
 it supports all allowed options for loading and saving pickle files.
 """
+import copy
 import pickle
 from copy import deepcopy
 from pathlib import PurePosixPath
@@ -62,6 +63,9 @@ class PickleS3DataSet(AbstractVersionedDataSet):
             >>> data_set.save(dummy_data)
             >>> reloaded = data_set.load()
     """
+
+    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -105,22 +109,17 @@ class PickleS3DataSet(AbstractVersionedDataSet):
             exists_function=_s3.exists,
             glob_function=_s3.glob,
         )
-
-        default_load_args = {}  # type: Dict[str, Any]
-        default_save_args = {}  # type: Dict[str, Any]
-
         self._bucket_name = bucket_name
         self._credentials = _credentials
-        self._load_args = (
-            {**default_load_args, **load_args}
-            if load_args is not None
-            else default_load_args
-        )
-        self._save_args = (
-            {**default_save_args, **save_args}
-            if save_args is not None
-            else default_save_args
-        )
+
+        # Handle default load and save arguments
+        self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
+        if load_args is not None:
+            self._load_args.update(load_args)
+        self._save_args = copy.deepcopy(self.DEFAULT_SAVE_ARGS)
+        if save_args is not None:
+            self._save_args.update(save_args)
+
         self._s3 = _s3
 
     def _describe(self) -> Dict[str, Any]:

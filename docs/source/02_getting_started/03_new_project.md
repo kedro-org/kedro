@@ -54,10 +54,20 @@ If you want to work with a Kedro project that has already been created, you may 
 
 ## Install project dependencies
 
-Within your virtual environment and your project's root directory, you can install project dependencies by executing the following:
+Project dependencies are listed under `src/requirements.txt`. You can run the following command
 
 ```bash
 kedro install
 ```
 
-This command will install dependencies listed in `src/requirements.txt`.
+to install the dependencies, using the aforementioned file as source of truth.
+
+You can either use the file as is from the project template, or you can run:
+
+```bash
+kedro build-reqs
+```
+
+This will `pip-compile` requirements from `src/requirements.in` (if non-existent, it will create it with the contents of `requirements.txt` copied over) and generate the list of pinned project dependencies in `src/requirements.txt`. From that point onward, you should only update `requirements.in` and run `build-reqs` to update the project requirements.
+
+If your project has conda dependencies which you would like to install with this command, you can create a `src/environment.yml` file and list them there.

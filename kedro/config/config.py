@@ -30,7 +30,7 @@ or more configuration files from specified paths.
 """
 import logging
 from pathlib import Path
-from typing import AbstractSet, Any, Dict, List, Tuple, Union
+from typing import AbstractSet, Any, Dict, Iterable, List, Tuple, Union
 
 import anyconfig
 
@@ -103,7 +103,7 @@ class ConfigLoader:
 
     """
 
-    def __init__(self, conf_paths: Union[str, List[str]]):
+    def __init__(self, conf_paths: Union[str, Iterable[str]]):
         """Instantiate a ConfigLoader.
 
         Args:
@@ -120,7 +120,7 @@ class ConfigLoader:
             )
         if isinstance(conf_paths, str):
             conf_paths = [conf_paths]
-        self.conf_paths = conf_paths
+        self.conf_paths = list(conf_paths)
         self.logger = logging.getLogger(__name__)
 
     def get(self, *patterns: str) -> Dict[str, Any]:

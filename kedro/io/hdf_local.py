@@ -30,6 +30,7 @@
 underlying functionality is supported by pandas, so it supports all
 allowed pandas options for loading and saving hdf files.
 """
+import copy
 from pathlib import Path
 from typing import Any, Dict
 
@@ -63,6 +64,9 @@ class HDFLocalDataSet(AbstractVersionedDataSet):
 
     """
 
+    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
+
     # pylint: disable=too-many-arguments
     def __init__(
         self,
@@ -93,19 +97,15 @@ class HDFLocalDataSet(AbstractVersionedDataSet):
 
         """
         super().__init__(Path(filepath), version)
-        default_load_args = {}  # type: Dict[str, Any]
-        default_save_args = {}  # type: Dict[str, Any]
         self._key = key
-        self._load_args = (
-            {**default_load_args, **load_args}
-            if load_args is not None
-            else default_load_args
-        )
-        self._save_args = (
-            {**default_load_args, **save_args}
-            if save_args is not None
-            else default_save_args
-        )
+
+        # Handle default load and save arguments
+        self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
+        if load_args is not None:
+            self._load_args.update(load_args)
+        self._save_args = copy.deepcopy(self.DEFAULT_SAVE_ARGS)
+        if save_args is not None:
+            self._save_args.update(save_args)
 
     def _load(self) -> pd.DataFrame:
         load_path = Path(self._get_load_path())

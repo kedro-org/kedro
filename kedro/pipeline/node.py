@@ -572,7 +572,7 @@ def _node_error_message(msg) -> str:
     ).format(msg)
 
 
-def node(  # pylint: disable=W9016
+def node(  # pylint: disable=missing-type-doc
     func: Callable,
     inputs: Union[None, str, List[str], Dict[str, str]],
     outputs: Union[None, str, List[str], Dict[str, str]],

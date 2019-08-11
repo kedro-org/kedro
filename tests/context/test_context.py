@@ -30,6 +30,7 @@ import configparser
 import json
 import os
 import sys
+import textwrap
 from pathlib import Path
 from typing import Dict
 
@@ -38,6 +39,7 @@ import pytest
 import yaml
 from pandas.util.testing import assert_frame_equal
 
+from kedro import __version__
 from kedro.context import KedroContext, KedroContextError, load_context
 from kedro.pipeline import Pipeline, node
 from kedro.runner import ParallelRunner, SequentialRunner
@@ -146,19 +148,32 @@ def dummy_dataframe():
 def restore_cwd():
     cwd_ = os.getcwd()
     yield
-    os.chdir(cwd_)
+    if cwd_ != os.getcwd():
+        os.chdir(cwd_)
 
 
 @pytest.fixture
 def fake_project(tmp_path):
     project = tmp_path / "project"
-    project.mkdir()
-    kedro_cli = project / "kedro_cli.py"
+
+    package_name = "fake_package"
+    package_path = project / "src" / package_name
+    package_path.mkdir(parents=True)
+
+    kedro_yaml = project / ".kedro.yml"
+    _write_yaml(kedro_yaml, {"context_path": package_name + ".run.Fake"})
+    sys.path.append(str(project / "src"))
+    run = package_path / "run.py"
     script = """
-def __get_kedro_context__():
-    return "fake"
-    """
-    kedro_cli.write_text(script, encoding="utf-8")
+        class Fake:
+            def __init__(self, project_path, **kwargs):
+                pass
+            project_name = "fake"
+            project_version = "{}"
+    """.format(
+        __version__
+    )
+    run.write_text(textwrap.dedent(script), encoding="utf-8")
     yield project
 
 
@@ -168,7 +183,7 @@ def identity(input1: str):
 
 class DummyContext(KedroContext):
     project_name = "bob"
-    project_version = "fred"
+    project_version = __version__
 
     @property
     def pipeline(self) -> Pipeline:
@@ -176,7 +191,10 @@ class DummyContext(KedroContext):
             [
                 node(identity, "cars", "boats", name="node1", tags=["tag1"]),
                 node(identity, "boats", "trains", name="node2"),
-            ]
+                node(identity, "trains", "ships", name="node3"),
+                node(identity, "ships", "planes", name="node4"),
+            ],
+            name="pipeline",
         )
 
 
@@ -196,7 +214,7 @@ class TestKedroContext:
         assert dummy_context.project_name == "bob"
 
     def test_project_version(self, dummy_context):
-        assert dummy_context.project_version == "fred"
+        assert dummy_context.project_version == __version__
 
     def test_project_path(self, dummy_context, tmp_path):
         assert str(dummy_context.project_path) == str(tmp_path.resolve())
@@ -227,6 +245,31 @@ class TestKedroContext:
     def test_default_env(self, dummy_context):
         assert dummy_context.env == "local"
 
+    @pytest.mark.parametrize(
+        "invalid_version", ["0.13.0", "10.0", "101.1", "100.0", "-0"]
+    )
+    def test_invalid_version(self, tmp_path, mocker, invalid_version):
+        # Disable logging.config.dictConfig in KedroContext._setup_logging as
+        # it changes logging.config and affects other unit tests
+        mocker.patch("logging.config.dictConfig")
+
+        class _DummyContext(KedroContext):
+            project_name = "bob"
+            project_version = invalid_version
+
+            @property
+            def pipeline(self) -> Pipeline:
+                return Pipeline([])  # pragma: no cover
+
+        pattern = (
+            r"Your Kedro project version {} does not match "
+            r"Kedro package version {} you are running. ".format(
+                invalid_version, __version__
+            )
+        )
+        with pytest.raises(KedroContextError, match=pattern):
+            _DummyContext(str(tmp_path))
+
     @pytest.mark.parametrize("env", ["custom_env"], indirect=True)
     def test_custom_env(self, dummy_context):
         assert dummy_context.env == "custom_env"
@@ -242,7 +285,9 @@ class TestKedroContext:
         with pytest.warns(
             UserWarning, match="Parameters not found in your Kedro project config."
         ):
-            DummyContext(str(tmp_path))
+            DummyContext(  # pylint: disable=expression-not-assigned
+                str(tmp_path)
+            ).catalog
 
     def test_missing_credentials(self, tmp_path, mocker):
         env_credentials = tmp_path / "conf" / "local" / "credentials.yml"
@@ -255,13 +300,28 @@ class TestKedroContext:
         with pytest.warns(
             UserWarning, match="Credentials not found in your Kedro project config."
         ):
-            DummyContext(str(tmp_path))
+            DummyContext(  # pylint: disable=expression-not-assigned
+                str(tmp_path)
+            ).catalog
 
     def test_pipeline(self, dummy_context):
         assert dummy_context.pipeline.nodes[0].inputs == ["cars"]
         assert dummy_context.pipeline.nodes[0].outputs == ["boats"]
         assert dummy_context.pipeline.nodes[1].inputs == ["boats"]
         assert dummy_context.pipeline.nodes[1].outputs == ["trains"]
+
+
+@pytest.mark.usefixtures("config_dir")
+class TestKedroContextRun:
+    def test_run_output(self, dummy_context, dummy_dataframe):
+        dummy_context.catalog.save("cars", dummy_dataframe)
+        outputs = dummy_context.run()
+        pd.testing.assert_frame_equal(outputs["planes"], dummy_dataframe)
+
+    def test_run_no_output(self, dummy_context, dummy_dataframe):
+        dummy_context.catalog.save("cars", dummy_dataframe)
+        outputs = dummy_context.run(node_names=["node1"])
+        assert not outputs
 
     def test_default_run(self, dummy_context, dummy_dataframe, caplog):
         dummy_context.catalog.save("cars", dummy_dataframe)
@@ -291,6 +351,24 @@ class TestKedroContext:
         assert "kedro.runner.parallel_runner" in log_names
         assert "Pipeline execution completed successfully." in log_msgs
 
+    def test_run_with_node_names(self, dummy_context, dummy_dataframe, caplog):
+        dummy_context.catalog.save("cars", dummy_dataframe)
+        dummy_context.run(node_names=["node1"])
+
+        log_msgs = [record.getMessage() for record in caplog.records]
+        assert "Running node: node1: identity([cars]) -> [boats]" in log_msgs
+        assert "Pipeline execution completed successfully." in log_msgs
+        assert "Running node: node2: identity([boats]) -> [trains]" not in log_msgs
+
+    def test_run_with_node_names_and_tags(self, dummy_context, dummy_dataframe, caplog):
+        dummy_context.catalog.save("cars", dummy_dataframe)
+        dummy_context.run(node_names=["node1"], tags=["tag1", "pipeline"])
+
+        log_msgs = [record.getMessage() for record in caplog.records]
+        assert "Running node: node1: identity([cars]) -> [boats]" in log_msgs
+        assert "Pipeline execution completed successfully." in log_msgs
+        assert "Running node: node2: identity([boats]) -> [trains]" not in log_msgs
+
     def test_run_with_tags(self, dummy_context, dummy_dataframe, caplog):
         dummy_context.catalog.save("cars", dummy_dataframe)
         dummy_context.run(tags=["tag1"])
@@ -303,15 +381,53 @@ class TestKedroContext:
 
     def test_run_with_wrong_tags(self, dummy_context, dummy_dataframe):
         dummy_context.catalog.save("cars", dummy_dataframe)
-        pattern = r"Pipeline contains no nodes with tags\: \['non\-existent'\]"
+        pattern = r"Pipeline contains no nodes with tags: \['non\-existent'\]"
         with pytest.raises(KedroContextError, match=pattern):
             dummy_context.run(tags=["non-existent"])
+
+    def test_run_from_nodes(self, dummy_context, dummy_dataframe, caplog):
+        dummy_context.catalog.save("cars", dummy_dataframe)
+        dummy_context.run(from_nodes=["node1"])
+
+        log_msgs = [record.getMessage() for record in caplog.records]
+        assert "Completed 4 out of 4 tasks" in log_msgs
+        assert "Running node: node1: identity([cars]) -> [boats]" in log_msgs
+        assert "Pipeline execution completed successfully." in log_msgs
+
+    def test_run_to_nodes(self, dummy_context, dummy_dataframe, caplog):
+        dummy_context.catalog.save("cars", dummy_dataframe)
+        dummy_context.run(to_nodes=["node2"])
+
+        log_msgs = [record.getMessage() for record in caplog.records]
+        assert "Completed 2 out of 2 tasks" in log_msgs
+        assert "Running node: node1: identity([cars]) -> [boats]" in log_msgs
+        assert "Running node: node2: identity([boats]) -> [trains]" in log_msgs
+        assert "Running node: node3: identity([trains]) -> [ships]" not in log_msgs
+        assert "Pipeline execution completed successfully." in log_msgs
+
+    def test_run_with_node_range(self, dummy_context, dummy_dataframe, caplog):
+        dummy_context.catalog.save("cars", dummy_dataframe)
+        dummy_context.run(from_nodes=["node1"], to_nodes=["node3"])
+
+        log_msgs = [record.getMessage() for record in caplog.records]
+        assert "Completed 3 out of 3 tasks" in log_msgs
+        assert "Running node: node1: identity([cars]) -> [boats]" in log_msgs
+        assert "Running node: node2: identity([boats]) -> [trains]" in log_msgs
+        assert "Running node: node3: identity([trains]) -> [ships]" in log_msgs
+        assert "Pipeline execution completed successfully." in log_msgs
+
+    def test_run_with_invalid_node_range(self, dummy_context, dummy_dataframe):
+        dummy_context.catalog.save("cars", dummy_dataframe)
+        pattern = "Pipeline contains no nodes"
+
+        with pytest.raises(KedroContextError, match=pattern):
+            dummy_context.run(from_nodes=["node3"], to_nodes=["node1"])
 
     @pytest.mark.filterwarnings("ignore")
     def test_run_with_empty_pipeline(self, tmp_path, mocker):
         class DummyContext(KedroContext):
             project_name = "bob"
-            project_version = "fred"
+            project_version = __version__
 
             @property
             def pipeline(self) -> Pipeline:
@@ -320,24 +436,25 @@ class TestKedroContext:
         mocker.patch("logging.config.dictConfig")
         dummy_context = DummyContext(str(tmp_path))
         assert dummy_context.project_name == "bob"
-        assert dummy_context.project_version == "fred"
+        assert dummy_context.project_version == __version__
         pattern = "Pipeline contains no nodes"
         with pytest.raises(KedroContextError, match=pattern):
             dummy_context.run()
 
 
-def test_load_context(fake_project, tmp_path):
-    """Test getting project context"""
-    result = load_context(str(fake_project))
-    assert result == "fake"
-    assert str(fake_project.resolve()) in sys.path
-    assert os.getcwd() == str(fake_project.resolve())
+class TestLoadContext:
+    def test_valid_context(self, fake_project):
+        """Test getting project context."""
+        result = load_context(str(fake_project))
+        assert result.project_name == "fake"
+        assert result.project_version == __version__
+        assert str(fake_project.resolve()) in sys.path
+        assert os.getcwd() == str(fake_project.resolve())
 
-    other_path = tmp_path / "other"
-    other_path.mkdir()
-    pattern = (
-        "Cannot load context for `{}`, since another project "
-        "`.*` has already been loaded".format(other_path.resolve())
-    )
-    with pytest.raises(KedroContextError, match=pattern):
-        load_context(str(other_path))
+    def test_invalid_path(self, tmp_path):
+        """Test for loading context from an invalid path. """
+        other_path = tmp_path / "other"
+        other_path.mkdir()
+        pattern = r"Could not retrive \'context_path\' from \'.kedro.yml\'"
+        with pytest.raises(KedroContextError, match=pattern):
+            load_context(str(other_path))

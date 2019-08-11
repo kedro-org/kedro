@@ -46,6 +46,11 @@ def json_data_set(filepath_json):
 
 
 @pytest.fixture
+def json_data_set_with_load_args(filepath_json):
+    return JSONLocalDataSet(filepath=filepath_json, load_args={"parse_float": Decimal})
+
+
+@pytest.fixture
 def versioned_json_data_set(filepath_json, load_version, save_version):
     return JSONLocalDataSet(
         filepath=filepath_json, version=Version(load_version, save_version)
@@ -91,6 +96,11 @@ class TestJSONLocalDataSet:
 
         json_data_set.save(json_data)
         assert json_data_set.exists()
+
+    def test_load_args(self, json_data_set_with_load_args):
+        """Test reloading the data set with load arguments specified."""
+        json_data_set_with_load_args.save([1.1])
+        assert json_data_set_with_load_args.load() == [Decimal("1.1")]
 
     def test_allow_nan(self, json_data_set, filepath_json):
         """Strict JSON specification does not allow out of range float values,

@@ -256,7 +256,7 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
         These ``LambdaDataSet``s load and save
 
     Will convert to:
-        These :class:`kedro.io.LambdaDataSet`\s load and save
+        These :class:`kedro.io.LambdaDataSet` load and save
 
     Args:
         what: The objects to create replacement tuples for. Possible values

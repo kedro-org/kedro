@@ -27,6 +27,7 @@
 # limitations under the License.
 """``SQLDataSet`` to load and save data to a SQL backend."""
 
+import copy
 import re
 from typing import Any, Dict, Optional
 
@@ -139,6 +140,9 @@ class SQLTableDataSet(AbstractDataSet):
 
     """
 
+    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_SAVE_ARGS = {"index": False}  # type: Dict[str, Any]
+
     def _describe(self) -> Dict[str, Any]:
         load_args = self._load_args.copy()
         save_args = self._save_args.copy()
@@ -193,19 +197,13 @@ class SQLTableDataSet(AbstractDataSet):
                 "provide a SQLAlchemy connection string."
             )
 
-        default_save_args = {"index": False}  # type: Dict[str, Any]
-        default_load_args = {}  # type: Dict[str, Any]
-
-        self._load_args = (
-            {**default_load_args, **load_args}
-            if load_args is not None
-            else default_load_args
-        )
-        self._save_args = (
-            {**default_save_args, **save_args}
-            if save_args is not None
-            else default_save_args
-        )
+        # Handle default load and save arguments
+        self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
+        if load_args is not None:
+            self._load_args.update(load_args)
+        self._save_args = copy.deepcopy(self.DEFAULT_SAVE_ARGS)
+        if save_args is not None:
+            self._save_args.update(save_args)
 
         self._load_args["table_name"] = table_name
         self._save_args["name"] = table_name

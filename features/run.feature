@@ -89,4 +89,3 @@ Feature: Run Project
     And I have deleted the credentials file
     When I execute the kedro command "run"
     Then I should get a successful exit code
-

@@ -28,6 +28,7 @@
 from pathlib import Path
 from typing import Any
 
+import pandas as pd
 import pytest
 from pandas.util.testing import assert_frame_equal
 
@@ -44,6 +45,16 @@ from kedro.io import (
     ParquetLocalDataSet,
 )
 from kedro.io.core import generate_current_version
+
+
+@pytest.fixture
+def filepath(tmp_path):
+    return str(tmp_path / "some" / "dir" / "test.csv")
+
+
+@pytest.fixture
+def dummy_dataframe():
+    return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
 
 
 @pytest.fixture

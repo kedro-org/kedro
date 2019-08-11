@@ -40,12 +40,23 @@ from s3fs import S3FileSystem
 
 from kedro.contrib.io.parquet import ParquetS3DataSet
 from kedro.io import DataSetError, Version
+from kedro.io.core import generate_current_version
 
 FILENAME = "test.parquet"
 BUCKET_NAME = "test_bucket"
 AWS_CREDENTIALS = dict(
     aws_access_key_id="FAKE_ACCESS_KEY", aws_secret_access_key="FAKE_SECRET_KEY"
 )
+
+
+@pytest.fixture(params=[None])
+def load_version(request):
+    return request.param
+
+
+@pytest.fixture(params=[None])
+def save_version(request):
+    return request.param or generate_current_version()
 
 
 @pytest.fixture(params=[None])
@@ -75,14 +86,15 @@ def dummy_dataframe() -> pd.DataFrame:
 
 
 @pytest.fixture
-def mocked_s3_object(mocked_s3_bucket, dummy_dataframe: pd.DataFrame):
+def mocked_s3_object(tmp_path, mocked_s3_bucket, dummy_dataframe: pd.DataFrame):
     """Creates test data and adds it to mocked S3 bucket."""
     table = pa.Table.from_pandas(dummy_dataframe)
-    pq.write_table(table, FILENAME)
+    temporary_path = tmp_path / FILENAME
+    pq.write_table(table, str(temporary_path))
 
-    with open(FILENAME, "rb") as f:
-        object_data = f.read()
-        mocked_s3_bucket.put_object(Bucket=BUCKET_NAME, Key=FILENAME, Body=object_data)
+    mocked_s3_bucket.put_object(
+        Bucket=BUCKET_NAME, Key=FILENAME, Body=temporary_path.read_bytes()
+    )
     return mocked_s3_bucket
 
 
@@ -101,18 +113,19 @@ def s3_data_set(load_args, save_args):
 
 
 @pytest.fixture
-def mocked_s3_object_versioned(mocked_s3_bucket, dummy_dataframe, save_version):
+def mocked_s3_object_versioned(
+    tmp_path, mocked_s3_bucket, dummy_dataframe, save_version
+):
     """Create versioned test data and add it to mocked S3 bucket."""
     table = pa.Table.from_pandas(dummy_dataframe)
-    pq.write_table(table, FILENAME)
+    temporary_path = tmp_path / FILENAME
+    pq.write_table(table, str(temporary_path))
 
-    with open(FILENAME, "rb") as f:
-        object_data = f.read()
-        mocked_s3_bucket.put_object(
-            Bucket=BUCKET_NAME,
-            Key="{0}/{1}/{0}".format(FILENAME, save_version),
-            Body=object_data,
-        )
+    mocked_s3_bucket.put_object(
+        Bucket=BUCKET_NAME,
+        Key="{0}/{1}/{0}".format(FILENAME, save_version),
+        Body=temporary_path.read_bytes(),
+    )
     return mocked_s3_bucket
 
 
@@ -129,11 +142,9 @@ def versioned_s3_data_set(load_version, save_version):
     )
 
 
-# pylint: disable=protected-access
 @pytest.fixture()
 def s3fs_cleanup():
-    # s3fs caches some connection details globally, which should be
-    # cleared so we get a clean slate every time we instantiate a S3FileSystem
+    # clear cache so we get a clean slate every time we instantiate a S3FileSystem
     yield
     S3FileSystem.cachable = False
 

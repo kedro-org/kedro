@@ -18,7 +18,7 @@ Every time you start/restart an IPython session, a startup script (`<your_projec
 To reload these at any point (e.g., if you updated `catalog.yml`) use the [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) `%reload_kedro`. This magic can also be used to see the error message if any of the variables above are undefined.
 
 With `context`, you can access the following variables and methods
-- `context.project_path` (`str`) - Root directory of the project
+- `context.project_path` (`Path`) - Root directory of the project
 - `context.project_name` (`str`) - Project folder name
 - `context.io` or `context.catalog` (`DataCatalog`) - Data catalog
 - `context.config_loader` - An instance of `ConfigLoader`
@@ -39,10 +39,10 @@ With `context`, you can access the following variables and methods
 
 ## Loading `DataCatalog` in IPython
 
-You can load a dataset of [Iris Test example](https://archive.ics.uci.edu/ml/datasets/iris) inside the IPython console, by simply executing the following:
+You can load a dataset of [Iris test example](https://archive.ics.uci.edu/ml/datasets/iris) inside the IPython console, by simply executing the following:
 
 ```python
-context.io.load("example_iris_data").head()
+context.catalog.load("example_iris_data").head()
 ```
 
 ```bash
@@ -75,7 +75,7 @@ kedro jupyter notebook
 This will open a Jupyter Notebook in your browser. Navigate to `notebooks` folder and create a notebook there with a **Kedro** kernel. After opening the newly created notebook you can check what the data looks like by pasting this into the first cell of the notebook and selecting **Run**:
 
 ```python
-df = context.io.load("example_iris_data")
+df = context.catalog.load("example_iris_data")
 df.head()
 ```
 
@@ -99,7 +99,7 @@ from kedro.context import load_context
 
 proj_path = Path.cwd()
 context = load_context(proj_path)
-df = context.io.load("example_iris_data")
+df = context.catalog.load("example_iris_data")
 df.head()
 ```
 

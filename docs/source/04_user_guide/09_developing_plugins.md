@@ -17,7 +17,7 @@ This function provides access to the verbose flag via the key `verbose` and to a
 * `catalog`: an instance of `kedro.io.DataCatalog`.
 * `pipeline`: an instance of `kedro.pipeline.Pipeline`.
 
->*Note*: Plugins may require additional keys be added to `ProjectContext` in `run.py`.
+>*Note*: Plugins may require additional keys to be added to `ProjectContext` in `run.py`.
 
 
 >*Note*: `kedro.cli.get_project_context(key)`, where `key` is `get_config`, `create_catalog`, `create_pipeline`, `template_version`, `project_name` and `project_path`, is deprecated as of `Kedro 0.15.0`, and will be removed for future versions.

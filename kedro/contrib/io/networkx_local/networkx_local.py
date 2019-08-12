@@ -34,7 +34,6 @@ See https://networkx.github.io/documentation/stable/tutorial.html for details.
 
 import json
 from os.path import isfile
-from pathlib import Path
 from typing import Any, Dict, Union
 
 import networkx
@@ -78,34 +77,33 @@ class NetworkXLocalDataSet(DefaultArgumentsMixIn, AbstractDataSet):
             filepath: The path to the NetworkX graph JSON file.
 
             load_args: Arguments passed on to ```networkx.node_link_graph``.
-                See https://networkx.github.io/documentation/stable/reference/readwrite/generated/networkx.readwrite.json_graph.node_link_graph.html for details.
+                See https://networkx.github.io/documentation for details.
 
             save_args: Arguments passed on to ```networkx.node_link_data``.
-                See https://networkx.github.io/documentation/stable/reference/readwrite/generated/networkx.readwrite.json_graph.node_link_data.html for details.
+                See https://networkx.github.io/documentation for details.
 
         """
-        super().__init__(
-            filepath=Path(filepath), load_args=load_args, save_args=save_args
-        )
+        self._filepath = filepath
+        super().__init__(load_args, save_args)
 
     def _load(self) -> Union[networkx.Graph, Dict[str, networkx.Graph]]:
-        G = None
-        with open(self._filepath, "r") as f:
-            json_payload = json.loads(f.readline())
-            G = networkx.node_link_graph(json_payload, **self._load_args)
+        graph = None
+        with open(self._filepath, "r") as input_file:
+            json_payload = json.loads(input_file.readline())
+            graph = networkx.node_link_graph(json_payload, **self._load_args)
 
-        return G
+        return graph
 
     def _save(self, data: networkx.Graph) -> None:
         json_graph = networkx.node_link_data(data)
         target_path = (
             self._save_args["output_filepath"]
             if "output_filepath" in self._save_args
-            else f"{self._filepath}"
+            else self._filepath
         )
-        with open(target_path, "w") as f:
+        with open(target_path, "w") as output_file:
             json_payload = json.dumps(json_graph)
-            f.write(json_payload)
+            output_file.write(json_payload)
 
     def _exists(self) -> bool:
         return isfile(self._filepath)

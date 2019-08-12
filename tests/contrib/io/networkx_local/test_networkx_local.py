@@ -45,20 +45,20 @@ def networkx_data_set(filepath_json):
 
 
 @pytest.fixture(params=[[1, 2, 3]])
-def network_graph_data(request):
-    return request.param
+def network_graph_data():
+    return networkx.complete_graph(3)
 
 
 class TestNetworkXLocalDataSet:
-    @pytest.mark.parametrize(
-        "network_graph_data", networkx.complete_graph(100), indirect=True
-    )
+    # @pytest.mark.parametrize(
+    #     "network_graph_data", networkx.complete_graph(100), indirect=True
+    # )
     def test_save_and_load(self, networkx_data_set, network_graph_data):
         """Test saving and reloading the data set."""
         networkx_data_set.save(network_graph_data)
         reloaded = networkx_data_set.load()
 
-        assert network_graph_data == reloaded
+        assert network_graph_data.nodes(data=True) == reloaded.nodes(data=True)
 
     def test_load_missing_file(self, networkx_data_set):
         """Check the error when trying to load missing file."""
@@ -72,5 +72,5 @@ class TestNetworkXLocalDataSet:
         """Test `exists` method invocation."""
         assert not networkx_data_set.exists()
 
-        networkx_data_set.save(json_data)
+        networkx_data_set.save(network_graph_data)
         assert networkx_data_set.exists()

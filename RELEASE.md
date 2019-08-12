@@ -13,6 +13,7 @@
 * Running `kedro install` will install packages to conda environment if `src/environment.yml` exists in your project.
 - Added `CachedDataSet` in `contrib` which will cache data in memory to avoid io/network operations. It will clear the cache once a dataset is no longer needed by a pipeline. (by [@tsanikgr](https://github.com/tsanikgr))
 - Added `YAMLLocalDataSet` in `contrib` to load and save local YAML files. (by [@Minyus](https://github.com/Minyus))
+- Added `NetworkXLocalDataSet` in `contrib` to load and save local graphs via NetworkX. (by [@josephhaaga](https://github.com/josephhaaga))
 
 ## Bug fixes and other changes
 * Documentation improvements including instructions on how to initialise a Spark session using YAML configuration.

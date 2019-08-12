@@ -53,8 +53,8 @@ The easiest way to migrate your project from Kedro 0.14.* to Kedro 0.15.0 is to 
  - `conf/`
 
 3. If you customised your `src/<package>/run.py`, make sure you apply the same customisations to `src/<package>/run.py`
- - If you customised `get_config()`, you can override `_create_config()` method in `ProjectContext` derived class
- - If you customised `create_catalog()`, you can override `_create_catalog()` method in `ProjectContext` derived class
+ - If you customised `get_config()`, you can override `config_loader` property in `ProjectContext` derived class
+ - If you customised `create_catalog()`, you can override `catalog()` property in `ProjectContext` derived class
  - If you customised `run()`, you can override `run()` method in `ProjectContext` derived class
  - If you customised default `env`, you can override it in `ProjectContext` derived class or pass it at construction. By default, `env` is `local`.
  - If you customised default `root_conf`, you can override `CONF_ROOT` attribute in `ProjectContext` derived class. By default, `KedroContext` base class has `CONF_ROOT` attribute set to `conf`.
@@ -138,9 +138,6 @@ None
 
 The initial release of Kedro.
 
-## Thanks to our main contributors
-
-[Nikolaos Tsaousis](https://github.com/tsanikgr), [Ivan Danov](https://github.com/idanov), [Dmitrii Deriabin](https://github.com/DmitryDeryabin), [Gordon Wrigley](https://github.com/tolomea), [Yetunde Dada](https://github.com/yetudada), [Nasef Khan](https://github.com/nakhan98), [Kiyohito Kunii](https://github.com/921kiyo), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae), [Peteris Erins](https://github.com/Pet3ris), [Lorena Balan](https://github.com/lorenabalan), [Richard Westenra](https://github.com/richardwestenra)
 
 ## Thanks for supporting contributions
 

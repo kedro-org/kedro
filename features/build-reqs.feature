@@ -32,6 +32,7 @@ Feature: build-reqs target in new project
   Scenario: Execute build-reqs target
     Given I have prepared a config file with example code
     And I have run a non-interactive kedro new
+    And I have removed kedro from the requirements
     When I execute the kedro command "build-reqs"
     Then I should get a successful exit code
     And requirements should be generated
@@ -39,6 +40,7 @@ Feature: build-reqs target in new project
   Scenario: Execute build-reqs target
     Given I have prepared a config file with example code
     And I have run a non-interactive kedro new
+    And I have removed kedro from the requirements
     And I have executed the kedro command "build-reqs"
     When I add scrapy>=1.7.3 to the requirements
     And I execute the kedro command "build-reqs"

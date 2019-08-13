@@ -35,10 +35,11 @@ from typing import Any, Dict, List, Optional
 
 from Bio import SeqIO
 
+from kedro.contrib.io import DefaultArgumentsMixIn
 from kedro.io import AbstractDataSet
 
 
-class BioSequenceLocalDataSet(AbstractDataSet):
+class BioSequenceLocalDataSet(DefaultArgumentsMixIn, AbstractDataSet):
     """``BioSequenceLocalDataSet`` loads and saves data to a sequence file.
 
     Example:
@@ -95,18 +96,7 @@ class BioSequenceLocalDataSet(AbstractDataSet):
 
         """
         self._filepath = filepath
-        default_load_args = {}
-        default_save_args = {}
-        self._load_args = (
-            {**default_load_args, **load_args}
-            if load_args is not None
-            else default_load_args
-        )
-        self._save_args = (
-            {**default_save_args, **save_args}
-            if save_args is not None
-            else default_save_args
-        )
+        super().__init__(load_args, save_args)
 
     def _load(self) -> List:
         return list(SeqIO.parse(self._filepath, **self._load_args))

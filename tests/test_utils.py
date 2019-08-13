@@ -40,7 +40,7 @@ class DummyClass:
 
 class TestExtractObject:
     def test_load_obj(self):
-        extracted_obj = load_obj("tests.test_utils.DummyClass", "")
+        extracted_obj = load_obj("tests.test_utils.DummyClass")
         assert extracted_obj is DummyClass
 
     def test_load_obj_default_path(self):

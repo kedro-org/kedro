@@ -20,4 +20,3 @@ What testing strategies have you used?
 - [ ] Added new entries to the `RELEASE.md` file
 - [ ] Added tests to cover my changes
 - [ ] Assigned myself to the PR
-- [ ] Added `Type` label to the PR

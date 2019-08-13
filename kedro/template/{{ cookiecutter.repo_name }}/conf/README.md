@@ -12,8 +12,7 @@ The `local` folder should be used for configuration that is either user-specific
 
 ## Base configuration
 
-The `base` folder is for shared configuration, such as non-sensitive and project-related configuration that may
-be shared across team members.
+The `base` folder is for shared configuration, such as non-sensitive and project-related configuration that may be shared across team members.
 
 WARNING: Please do not put access credentials in the base configuration folder.
 
@@ -24,4 +23,4 @@ WARNING: Please do not put access credentials in the base configuration folder.
 
 
 # Find out more
-You can find out more about configuration from the [user guide documentation](https://kedro.readthedocs.io/04_user_guide/03_configuration.html).
+You can find out more about configuration from the [user guide documentation](https://kedro.readthedocs.io/en/latest/04_user_guide/03_configuration.html).

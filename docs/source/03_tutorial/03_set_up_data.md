@@ -14,9 +14,23 @@ This tutorial will make use of fictional datasets for spaceflight companies shut
 
 The spaceflight tutorial has three files and uses two data formats: `.csv` and `.xlsx`. Download and save the files to the `data/01_raw/` folder of your project directory:
 
-* [reviews.csv](https://github.com/quantumblacklabs/kedro/tree/develop/docs/source/03_tutorial/data/reviews.csv)
-* [companies.csv](https://github.com/quantumblacklabs/kedro/tree/develop/docs/source/03_tutorial/data/companies.csv)
-* [shuttles.xlsx](https://github.com/quantumblacklabs/kedro/tree/develop/docs/source/03_tutorial/data/shuttles.xlsx)
+* [reviews.csv](https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/reviews.csv)
+* [companies.csv](https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/companies.csv)
+* [shuttles.xlsx](https://github.com/quantumblacklabs/kedro/blob/develop/docs/source/03_tutorial/data/shuttles.xlsx?raw=true)
+
+You can [download the files from GitHub](https://www.quora.com/How-do-I-download-something-from-GitHub) using [cURL](https://curl.haxx.se/download.html) or [Wget](https://www.gnu.org/software/wget/).
+
+An example of downloading [reviews.csv](https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/reviews.csv) to your current directory is done by running this in your terminal or command line:
+
+```bash
+curl -O https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/reviews.csv
+```
+
+Or through using Wget:
+
+```bash
+wget https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/reviews.csv
+```
 
 
 ## Reference all datasets
@@ -47,16 +61,10 @@ reviews:
 If you want to check whether Kedro loads the data correctly, open a `kedro ipython` session and run:
 
 ```python
-io.load('companies').head()
+context.catalog.load('companies').head()
 ```
 
-This should show you the first five rows of the dataset. If you want to explore more of it before moving on with the project:
-
-```python
-df = io.load('companies')
-```
-
-The entire `companies` dataset is loaded into a `pandas` DataFrame and you can play with it as you wish.
+This should show you the first five rows of the dataset. The entire `companies` dataset is loaded into a `pandas` DataFrame and you can play with it as you wish.
 
 When you have finished, simply close `ipython` session by typing the following:
 
@@ -98,6 +106,7 @@ class ExcelLocalDataSet(AbstractDataSet):
 
     Example:
     ::
+
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
@@ -180,7 +189,7 @@ shuttles:
 A good way to test that everything works as expected is by trying to load the dataset within a new `kedro ipython` session:
 
 ```python
-io.load('shuttles').head()
+context.catalog.load('shuttles').head()
 ```
 
 ### Contributing a custom dataset implementation

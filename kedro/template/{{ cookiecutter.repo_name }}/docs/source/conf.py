@@ -47,6 +47,9 @@
 #
 import re
 
+from kedro.cli.utils import find_stylesheets
+from recommonmark.transform import AutoStructify
+
 from {{ cookiecutter.python_package }} import __version__ as release
 
 # -- Project information -----------------------------------------------------
@@ -79,7 +82,13 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.mathjax",
     "nbsphinx",
+    "recommonmark",
+    "sphinx_copybutton",
 ]
+
+# enable autosummary plugin (table of contents for modules/classes/class
+# methods)
+autosummary_generate = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -87,8 +96,7 @@ templates_path = ["_templates"]
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-# source_suffix = ['.rst', '.md']
-source_suffix = ".rst"
+source_suffix = {".rst": "restructuredtext", ".md": "markdown"}
 
 # The master toctree document.
 master_doc = "index"
@@ -119,7 +127,7 @@ html_theme = "sphinx_rtd_theme"
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+html_theme_options = {"collapse_navigation": False, "style_external_links": True}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -241,3 +249,9 @@ def skip(app, what, name, obj, skip, options):
 def setup(app):
     app.connect("autodoc-process-docstring", autodoc_process_docstring)
     app.connect("autodoc-skip-member", skip)
+    # add Kedro stylesheets
+    for stylesheet in find_stylesheets():
+        app.add_stylesheet(stylesheet)
+    # enable rendering RST tables in Markdown
+    app.add_config_value("recommonmark_config", {"enable_eval_rst": True}, True)
+    app.add_transform(AutoStructify)

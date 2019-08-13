@@ -36,6 +36,7 @@ import s3fs
 from botocore.exceptions import PartialCredentialsError
 from moto import mock_s3
 from pandas.util.testing import assert_frame_equal
+from s3fs import S3FileSystem
 
 from kedro.io import CSVS3DataSet, DataSetError
 from kedro.io.core import Version
@@ -45,6 +46,11 @@ BUCKET_NAME = "test_bucket"
 AWS_CREDENTIALS = dict(
     aws_access_key_id="FAKE_ACCESS_KEY", aws_secret_access_key="FAKE_SECRET_KEY"
 )
+
+
+@pytest.fixture
+def dummy_dataframe():
+    return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
 
 
 @pytest.fixture(params=[None])
@@ -109,6 +115,14 @@ def mocked_s3_object_versioned(mocked_s3_bucket, dummy_dataframe, save_version):
     return mocked_s3_bucket
 
 
+@pytest.fixture()
+def s3fs_cleanup():
+    # clear cache so we get a clean slate every time we instantiate a S3FileSystem
+    yield
+    S3FileSystem.cachable = False
+
+
+@pytest.mark.usefixtures("s3fs_cleanup")
 class TestCSVS3DataSet:
     @pytest.mark.parametrize(
         "bad_credentials",
@@ -184,12 +198,6 @@ class TestCSVS3DataSet:
         s3_data_set.save(dummy_dataframe)
         assert s3_data_set.exists()
 
-    @mock_s3
-    def test_exists_raises_error(self, s3_data_set):
-        """Check the error if the given S3 bucket doesn't exist."""
-        with pytest.raises(DataSetError, match="NoSuchBucket"):
-            s3_data_set.exists()
-
     def test_load_save_args(self, s3_data_set):
         """Test default load and save arguments of the data set."""
         assert not s3_data_set._load_args
@@ -233,7 +241,7 @@ class TestCSVS3DataSet:
         assert mock.call_args_list[0][1] == {"custom": 42}
 
 
-@pytest.mark.usefixtures("mocked_s3_bucket")
+@pytest.mark.usefixtures("s3fs_cleanup", "mocked_s3_bucket")
 class TestCSVS3DataSetVersioned:
     def test_save_and_load(self, versioned_s3_data_set, dummy_dataframe):
         """Test that saved and reloaded data matches the original one for
@@ -279,9 +287,9 @@ class TestCSVS3DataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            r"Save path `{f}/{sv}/{f}` did not match load path "
-            r"`{f}/{lv}/{f}` for CSVS3DataSet\(.+\)".format(
-                f=FILENAME, sv=save_version, lv=load_version
+            r"Save path `{b}/{f}/{sv}/{f}` did not match load path "
+            r"`{b}/{f}/{lv}/{f}` for CSVS3DataSet\(.+\)".format(
+                b=BUCKET_NAME, f=FILENAME, sv=save_version, lv=load_version
             )
         )
         with pytest.warns(UserWarning, match=pattern):

@@ -32,11 +32,12 @@ supported by the ``pickle`` and ``joblib`` libraries, so it supports
 all allowed options for loading and saving pickle files.
 """
 
+import copy
 import pickle
 from pathlib import Path
 from typing import Any, Dict
 
-from kedro.io.core import AbstractDataSet, DataSetError, FilepathVersionMixIn, Version
+from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
 
 try:
     import joblib
@@ -44,7 +45,7 @@ except ImportError:
     joblib = None
 
 
-class PickleLocalDataSet(AbstractDataSet, FilepathVersionMixIn):
+class PickleLocalDataSet(AbstractVersionedDataSet):
     """``PickleLocalDataSet`` loads and saves a Python object to a
     local pickle file. The underlying functionality is
     supported by the pickle and joblib libraries, so it supports
@@ -66,6 +67,9 @@ class PickleLocalDataSet(AbstractDataSet, FilepathVersionMixIn):
         >>> data_set.save(dummy_data)
         >>> reloaded = data_set.load()
     """
+
+    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
     BACKENDS = {"pickle": pickle, "joblib": joblib}
 
@@ -102,7 +106,7 @@ class PickleLocalDataSet(AbstractDataSet, FilepathVersionMixIn):
             load_args: Options for loading pickle files. Refer to the help
                 file of ``pickle.load`` or ``joblib.load`` for options.
             save_args: Options for saving pickle files. Refer to the help
-                file of ``pickle.dump`` or ``joblib.load`` for options.
+                file of ``pickle.dump`` or ``joblib.dump`` for options.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -113,8 +117,7 @@ class PickleLocalDataSet(AbstractDataSet, FilepathVersionMixIn):
             ImportError: If 'backend' could not be imported.
 
         """
-        default_save_args = {}
-        default_load_args = {}
+        super().__init__(Path(filepath), version)
 
         if backend not in ["pickle", "joblib"]:
             raise ValueError(
@@ -126,37 +129,31 @@ class PickleLocalDataSet(AbstractDataSet, FilepathVersionMixIn):
                 "imported. Make sure it is installed."
             )
 
-        self._filepath = filepath
         self._backend = backend
-        self._load_args = (
-            {**default_load_args, **load_args}
-            if load_args is not None
-            else default_load_args
-        )
-        self._save_args = (
-            {**default_save_args, **save_args}
-            if save_args is not None
-            else default_save_args
-        )
-        self._version = version
+
+        # Handle default load and save arguments
+        self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
+        if load_args is not None:
+            self._load_args.update(load_args)
+        self._save_args = copy.deepcopy(self.DEFAULT_SAVE_ARGS)
+        if save_args is not None:
+            self._save_args.update(save_args)
 
     def _load(self) -> Any:
-        load_path = self._get_load_path(self._filepath, self._version)
-        with open(load_path, "rb") as local_file:
+        load_path = Path(self._get_load_path())
+        with load_path.open("rb") as local_file:
             result = self.BACKENDS[self._backend].load(local_file, **self._load_args)
         return result
 
     def _save(self, data: Any) -> None:
-        save_path = Path(self._get_save_path(self._filepath, self._version))
+        save_path = Path(self._get_save_path())
         save_path.parent.mkdir(parents=True, exist_ok=True)
 
         with save_path.open("wb") as local_file:
             self.BACKENDS[self._backend].dump(data, local_file, **self._save_args)
 
-        load_path = Path(self._get_load_path(self._filepath, self._version))
-        self._check_paths_consistency(
-            str(load_path.absolute()), str(save_path.absolute())
-        )
+        load_path = Path(self._get_load_path())
+        self._check_paths_consistency(load_path.absolute(), save_path.absolute())
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
@@ -169,7 +166,7 @@ class PickleLocalDataSet(AbstractDataSet, FilepathVersionMixIn):
 
     def _exists(self) -> bool:
         try:
-            path = self._get_load_path(self._filepath, self._version)
+            path = self._get_load_path()
         except DataSetError:
             return False
         return Path(path).is_file()

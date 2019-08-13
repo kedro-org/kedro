@@ -21,6 +21,7 @@ The project directory will be structured as shown. You are free to adapt the fol
 getting-started     # Parent directory of the template
 ├── .gitignore      # Prevent staging of unnecessary files to git
 ├── kedro_cli.py    # A collection of Kedro command line interface (CLI) commands
+├── .kedro.yml      # Path to discover project context
 ├── README.md       # Project README
 ├── .ipython        # IPython startup scripts
 ├── conf            # Project configuration files
@@ -63,7 +64,7 @@ A `kedro` project consists of the following main components:
 +--------------+----------------------------------------------------------------------+
 | Component    | Description                                                          |
 +==============+======================================================================+
-| Data Catalog | A collection of datasets that can be used to form the data pipeline. | 
+| Data Catalog | A collection of datasets that can be used to form the data pipeline. |
 |              | Each dataset provides :code:`load` and :code:`save` capabilities for |
 |              | a specific data type, e.g. :code:`CSVS3DataSet` loads and saves data |
 |              | to a csv file in S3.                                                 |
@@ -139,7 +140,7 @@ kedro run
 
 This command calls the `main()` function from `src/getting_started/run.py`, which in turn does the following:
 
-1. Initiates the context:
+1. Instantiates `ProjectContext` class defined in `src/getting_started/run.py`:
     * Reads relevant configuration
     * Configures Python `logging`
     * Instantiates the `DataCatalog` and feeds a dictionary containing `parameters` config

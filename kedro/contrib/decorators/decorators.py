@@ -33,7 +33,7 @@ decorators. See ``kedro.pipeline.node.decorate``
 import logging
 from functools import wraps
 from time import sleep
-from typing import Callable
+from typing import Callable, Type
 
 import pandas as pd
 from pyspark.sql import SparkSession
@@ -129,7 +129,7 @@ def spark_to_pandas() -> Callable:
 
 
 def retry(
-    exceptions: Exception = Exception, n_times: int = 1, delay_sec: float = 0
+    exceptions: Type[Exception] = Exception, n_times: int = 1, delay_sec: float = 0
 ) -> Callable:
     """
     Catches exceptions from the wrapped function at most n_times and then

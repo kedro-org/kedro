@@ -25,41 +25,51 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import json
 from os.path import join
+from pathlib import Path
 
 import click
 from mock import patch
-from pytest import fixture, mark, raises
+from pytest import fixture, mark, raises, warns
 
 from kedro import __version__ as version
-from kedro.cli.cli import cli
+from kedro.cli import get_project_context
+from kedro.cli.cli import _get_plugin_command_groups, _init_plugins, cli
 from kedro.cli.utils import (
     CommandCollection,
     KedroCliError,
+    export_nodes,
     forward_command,
     get_pkg_version,
 )
 
+PACKAGE_NAME = "my_project"
 
-@click.group()
+
+@click.group(name="stub_cli")
 def stub_cli():
     """Stub CLI group description."""
     print("group callback")
 
 
-@stub_cli.command()
+@stub_cli.command(name="stub_command")
 def stub_command():
     print("command callback")
 
 
-@forward_command(stub_cli)
+@forward_command(stub_cli, name="forwarded_command")
 def forwarded_command(args):
     print("fred", args)
 
 
-@forward_command(stub_cli, forward_help=True)
+@forward_command(stub_cli, name="forwarded_help", forward_help=True)
 def forwarded_help(args):
+    print("fred", args)
+
+
+@forward_command(stub_cli)
+def unnamed(args):
     print("fred", args)
 
 
@@ -70,11 +80,41 @@ def invoke_result(cli_runner, request):
 
 
 @fixture
+def project_path(tmp_path):
+    temp = Path(str(tmp_path))
+    return Path(temp / "some/path/to/my_project")
+
+
+@fixture
+def nodes_path(project_path):
+    path = project_path / "src" / PACKAGE_NAME / "nodes"
+    path.mkdir(parents=True)
+    return path
+
+
+@fixture
 def requirements_file(tmp_path):
     body = "\n".join(["SQLAlchemy>=1.2.0, <2.0", "pandas==0.23.0", "toposort"]) + "\n"
     reqs_file = tmp_path / "requirements.txt"
     reqs_file.write_text(body)
     yield reqs_file
+
+
+# pylint:disable=too-few-public-methods
+class DummyContext:
+    def __init__(self):
+        self.config_loader = "config_loader"
+
+    catalog = "catalog"
+    pipeline = "pipeline"
+    project_name = "dummy_name"
+    project_path = "dummy_path"
+    project_version = "dummy_version"
+
+
+@fixture
+def dummy_context(mocker):
+    return mocker.patch("kedro.cli.cli.load_context", return_value=DummyContext())
 
 
 class TestCliCommands:
@@ -104,6 +144,23 @@ class TestCliCommands:
 
         assert result.exit_code == 0
         assert "QuantumBlack" in result.output
+
+    def test_info_contains_plugin_versions(self, cli_runner, entry_point, mocker):
+        get_distribution = mocker.patch("pkg_resources.get_distribution")
+        get_distribution().version = "1.0.2"
+        entry_point.module_name = "bob.fred"
+
+        result = cli_runner.invoke(cli, ["info"])
+        assert result.exit_code == 0
+        assert "bob: 1.0.2 (hooks:global,init,project)" in result.output
+
+        entry_point.load.assert_not_called()
+
+    @mark.usefixtures("entry_points")
+    def test_info_no_plugins(self, cli_runner):
+        result = cli_runner.invoke(cli, ["info"])
+        assert result.exit_code == 0
+        assert "No plugins installed" in result.output
 
     def test_help(self, cli_runner):
         """Check that `kedro --help` returns a valid help message."""
@@ -165,7 +222,16 @@ class TestForwardCommand:
     def test_regular(self, cli_runner):
         """Test forwarded command invocation."""
         result = cli_runner.invoke(stub_cli, ["forwarded_command", "bob"])
-        assert result.exit_code == 0
+        assert result.exit_code == 0, result.output
+        assert "bob" in result.output
+        assert "fred" in result.output
+        assert "--help" not in result.output
+        assert "forwarded_command" not in result.output
+
+    def test_unnamed(self, cli_runner):
+        """Test forwarded command invocation."""
+        result = cli_runner.invoke(stub_cli, ["unnamed", "bob"])
+        assert result.exit_code == 0, result.output
         assert "bob" in result.output
         assert "fred" in result.output
         assert "--help" not in result.output
@@ -174,7 +240,7 @@ class TestForwardCommand:
     def test_help(self, cli_runner):
         """Test help output for the command with help flags not forwarded."""
         result = cli_runner.invoke(stub_cli, ["forwarded_command", "bob", "--help"])
-        assert result.exit_code == 0
+        assert result.exit_code == 0, result.output
         assert "bob" not in result.output
         assert "fred" not in result.output
         assert "--help" in result.output
@@ -183,22 +249,259 @@ class TestForwardCommand:
     def test_forwarded_help(self, cli_runner):
         """Test help output for the command with forwarded help flags."""
         result = cli_runner.invoke(stub_cli, ["forwarded_help", "bob", "--help"])
-        assert result.exit_code == 0
+        assert result.exit_code == 0, result.output
         assert "bob" in result.output
         assert "fred" in result.output
         assert "--help" in result.output
         assert "forwarded_help" not in result.output
 
 
-def test_get_pkg_version(requirements_file):
-    """Test get_pkg_version(), which extracts package version
-    from the provided requirements file."""
-    sa_version = "SQLAlchemy>=1.2.0, <2.0"
-    assert get_pkg_version(requirements_file, "SQLAlchemy") == sa_version
-    assert get_pkg_version(requirements_file, "pandas") == "pandas==0.23.0"
-    assert get_pkg_version(requirements_file, "toposort") == "toposort"
-    with raises(KedroCliError):
-        get_pkg_version(requirements_file, "nonexistent")
-    with raises(KedroCliError):
-        non_existent_file = str(requirements_file) + "-nonexistent"
-        get_pkg_version(non_existent_file, "pandas")
+class TestCliUtils:
+    def test_get_pkg_version(self, requirements_file):
+        """Test get_pkg_version(), which extracts package version
+        from the provided requirements file."""
+        sa_version = "SQLAlchemy>=1.2.0, <2.0"
+        assert get_pkg_version(requirements_file, "SQLAlchemy") == sa_version
+        assert get_pkg_version(requirements_file, "pandas") == "pandas==0.23.0"
+        assert get_pkg_version(requirements_file, "toposort") == "toposort"
+        with raises(KedroCliError):
+            get_pkg_version(requirements_file, "nonexistent")
+        with raises(KedroCliError):
+            non_existent_file = str(requirements_file) + "-nonexistent"
+            get_pkg_version(non_existent_file, "pandas")
+
+    def test_export_nodes(self, project_path, nodes_path):
+        nodes = json.dumps(
+            {
+                "cells": [
+                    {
+                        "cell_type": "code",
+                        "source": "print('hello world')",
+                        "metadata": {"tags": ["node"]},
+                    },
+                    {
+                        "cell_type": "code",
+                        "source": "print(10+5)",
+                        "metadata": {"tags": ["node"]},
+                    },
+                    {"cell_type": "code", "source": "a = 10", "metadata": {}},
+                ]
+            }
+        )
+        notebook_file = project_path / "notebook.ipynb"
+        notebook_file.write_text(nodes)
+
+        output_path = nodes_path / "{}.py".format(notebook_file.stem)
+        export_nodes(notebook_file, output_path)
+
+        assert output_path.is_file()
+        assert output_path.read_text() == "print('hello world')\nprint(10+5)\n"
+
+    def test_export_nodes_different_notebook_paths(self, project_path, nodes_path):
+        nodes = json.dumps(
+            {
+                "cells": [
+                    {
+                        "cell_type": "code",
+                        "source": "print('hello world')",
+                        "metadata": {"tags": ["node"]},
+                    }
+                ]
+            }
+        )
+        notebook_file1 = project_path / "notebook1.ipynb"
+        notebook_file1.write_text(nodes)
+        output_path1 = nodes_path / "notebook1.py"
+
+        notebook_file2 = nodes_path / "notebook2.ipynb"
+        notebook_file2.write_text(nodes)
+        output_path2 = nodes_path / "notebook2.py"
+
+        export_nodes(notebook_file1, output_path1)
+        export_nodes(notebook_file2, output_path2)
+
+        assert output_path1.read_text() == "print('hello world')\n"
+        assert output_path2.read_text() == "print('hello world')\n"
+
+    def test_export_nodes_nothing_to_write(self, project_path, nodes_path):
+        nodes = json.dumps(
+            {
+                "cells": [
+                    {
+                        "cell_type": "code",
+                        "source": "print('hello world')",
+                        "metadata": {},
+                    },
+                    {
+                        "cell_type": "text",
+                        "source": "hello world",
+                        "metadata": {"tags": ["node"]},
+                    },
+                ]
+            }
+        )
+        notebook_file = project_path / "notebook.iypnb"
+        notebook_file.write_text(nodes)
+
+        with warns(UserWarning, match="Skipping notebook"):
+            output_path = nodes_path / "{}.py".format(notebook_file.stem)
+            export_nodes(notebook_file, output_path)
+
+        output_path = nodes_path / "notebook.py"
+        assert not output_path.exists()
+
+    def test_export_nodes_overwrite(self, project_path, nodes_path):
+        existing_nodes = nodes_path / "notebook.py"
+        existing_nodes.touch()
+        existing_nodes.write_text("original")
+
+        nodes = json.dumps(
+            {
+                "cells": [
+                    {
+                        "cell_type": "code",
+                        "source": "print('hello world')",
+                        "metadata": {"tags": ["node"]},
+                    }
+                ]
+            }
+        )
+        notebook_file = project_path / "notebook.iypnb"
+        notebook_file.write_text(nodes)
+
+        output_path = nodes_path / "{}.py".format(notebook_file.stem)
+        export_nodes(notebook_file, output_path)
+
+        assert output_path.is_file()
+        assert output_path.read_text() == "print('hello world')\n"
+
+    def test_export_nodes_json_error(self, nodes_path):
+        random_file = nodes_path / "notebook.txt"
+        random_file.touch()
+        random_file.write_text("original")
+        output_path = nodes_path / "{}.py".format(random_file.stem)
+
+        pattern = "Provided filepath is not a Jupyter notebook"
+        with raises(KedroCliError, match=pattern):
+            export_nodes(random_file, output_path)
+
+
+@mark.usefixtures("dummy_context")
+class TestGetProjectContext:
+    def _deprecation_msg(self, key):
+        msg_dict = {
+            "get_config": ["config_loader", "ConfigLoader"],
+            "create_catalog": ["catalog", "DataCatalog"],
+            "create_pipeline": ["pipeline", "Pipeline"],
+            "template_version": ["project_version", None],
+            "project_name": ["project_name", None],
+            "project_path": ["project_path", None],
+        }
+        attr, obj_name = msg_dict[key]
+        msg = r"\`get_project_context\(\"{}\"\)\` is now deprecated\. ".format(key)
+        if obj_name:
+            msg += (
+                r"This is still returning a function that returns \`{}\` instance\, "
+                r"however passed arguments have no effect anymore since Kedro 0.15.0\. ".format(
+                    obj_name
+                )
+            )
+        msg += (
+            r"Please get \`KedroContext\` instance by calling "
+            r"\`get_project_context\(\)\` and use its \`{}\` attribute\.".format(attr)
+        )
+        return msg
+
+    def test_context(self):
+        dummy_context = get_project_context("context")
+        assert isinstance(dummy_context, DummyContext)
+
+    def test_get_config(self, tmp_path):
+        key = "get_config"
+        pattern = self._deprecation_msg(key)
+        with warns(DeprecationWarning, match=pattern):
+            config_loader = get_project_context(key)
+            assert config_loader(tmp_path) == "config_loader"
+
+    def test_create_catalog(self):
+        key = "create_catalog"
+        pattern = self._deprecation_msg(key)
+        with warns(DeprecationWarning, match=pattern):
+            catalog = get_project_context(key)
+            assert catalog("config") == "catalog"
+
+    def test_create_pipeline(self):
+        key = "create_pipeline"
+        pattern = self._deprecation_msg(key)
+        with warns(DeprecationWarning, match=pattern):
+            pipeline = get_project_context(key)
+            assert pipeline() == "pipeline"
+
+    def test_template_version(self):
+        key = "template_version"
+        pattern = self._deprecation_msg(key)
+        with warns(DeprecationWarning, match=pattern):
+            assert get_project_context(key) == "dummy_version"
+
+    def test_project_name(self):
+        key = "project_name"
+        pattern = self._deprecation_msg(key)
+        with warns(DeprecationWarning, match=pattern):
+            assert get_project_context(key) == "dummy_name"
+
+    def test_project_path(self):
+        key = "project_path"
+        pattern = self._deprecation_msg(key)
+        with warns(DeprecationWarning, match=pattern):
+            assert get_project_context(key) == "dummy_path"
+
+    def test_verbose(self):
+        assert not get_project_context("verbose")
+
+
+@fixture
+def entry_points(mocker):
+    return mocker.patch("pkg_resources.iter_entry_points")
+
+
+@fixture
+def entry_point(mocker, entry_points):
+    ep = mocker.MagicMock()
+    entry_points.return_value = [ep]
+    return ep
+
+
+class TestEntryPoints:
+    def test_project_groups(self, entry_points, entry_point):
+        entry_point.load.return_value = "groups"
+        groups = _get_plugin_command_groups("project")
+        assert groups == ["groups"]
+        entry_points.assert_called_once_with(group="kedro.project_commands")
+
+    def test_project_error_is_caught(self, entry_points, entry_point):
+        entry_point.load.side_effect = Exception()
+        groups = _get_plugin_command_groups("project")
+        assert groups == []
+        entry_points.assert_called_once_with(group="kedro.project_commands")
+
+    def test_global_groups(self, entry_points, entry_point):
+        entry_point.load.return_value = "groups"
+        groups = _get_plugin_command_groups("global")
+        assert groups == ["groups"]
+        entry_points.assert_called_once_with(group="kedro.global_commands")
+
+    def test_global_error_is_caught(self, entry_points, entry_point):
+        entry_point.load.side_effect = Exception()
+        groups = _get_plugin_command_groups("global")
+        assert groups == []
+        entry_points.assert_called_once_with(group="kedro.global_commands")
+
+    def test_init(self, entry_points, entry_point):
+        _init_plugins()
+        entry_points.assert_called_once_with(group="kedro.init")
+        entry_point.load().assert_called_once_with()
+
+    def test_init_error_is_caught(self, entry_points, entry_point):
+        entry_point.load.side_effect = Exception()
+        _init_plugins()
+        entry_points.assert_called_once_with(group="kedro.init")

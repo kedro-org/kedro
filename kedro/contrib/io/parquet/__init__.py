@@ -25,46 +25,6 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
-import sys
+"""kedro.contrib.io.parquet provides I/O modules for Parquet files on S3."""
 
-import pytest
-
-from kedro.context import KedroContextError, load_context
-
-
-@pytest.fixture(autouse=True)
-def restore_cwd():
-    cwd_ = os.getcwd()
-    yield
-    os.chdir(cwd_)
-
-
-@pytest.fixture
-def fake_project(tmp_path):
-    project = tmp_path / "project"
-    project.mkdir()
-    kedro_cli = project / "kedro_cli.py"
-    script = """
-def __get_kedro_context__():
-    return "fake"
-    """
-    kedro_cli.write_text(script, encoding="utf-8")
-    yield project
-
-
-def test_load(fake_project, tmp_path):
-    """Test getting project context"""
-    result = load_context(str(fake_project))
-    assert result == "fake"
-    assert str(fake_project.resolve()) in sys.path
-    assert os.getcwd() == str(fake_project.resolve())
-
-    other_path = tmp_path / "other"
-    other_path.mkdir()
-    pattern = (
-        "Cannot load context for `{}`, since another project "
-        "`.*` has already been loaded".format(other_path.resolve())
-    )
-    with pytest.raises(KedroContextError, match=pattern):
-        load_context(str(other_path))
+from .parquet_s3 import ParquetS3DataSet  # NOQA

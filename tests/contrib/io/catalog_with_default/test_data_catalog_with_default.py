@@ -26,20 +26,54 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pylint: disable=unused-import
+import pandas as pd
 import pytest
 
 from kedro.contrib.io.catalog_with_default import DataCatalogWithDefault
 from kedro.io import CSVLocalDataSet, DataCatalog, MemoryDataSet
-from tests.io.conftest import dummy_dataframe, filepath  # NOQA
-from tests.io.test_data_catalog import data_set, sane_config  # NOQA
+
+
+@pytest.fixture
+def filepath(tmp_path):
+    return str(tmp_path / "some" / "dir" / "test.csv")
+
+
+@pytest.fixture
+def data_set(filepath):
+    return CSVLocalDataSet(filepath=filepath, save_args={"index": False})
 
 
 def default_csv(name):
     return CSVLocalDataSet(name)
 
 
-def test_load_from_unregistered(dummy_dataframe, tmpdir):  # NOQA
+@pytest.fixture
+def dummy_dataframe():
+    return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+
+
+@pytest.fixture
+def sane_config(filepath):
+    return {
+        "catalog": {
+            "boats": {"type": "CSVLocalDataSet", "filepath": filepath},
+            "cars": {
+                "type": "CSVS3DataSet",
+                "filepath": "test_file.csv",
+                "bucket_name": "test_bucket",
+                "credentials": "s3_credentials",
+            },
+        },
+        "credentials": {
+            "s3_credentials": {
+                "aws_access_key_id": "FAKE_ACCESS_KEY",
+                "aws_secret_access_key": "FAKE_SECRET_KEY",
+            }
+        },
+    }
+
+
+def test_load_from_unregistered(dummy_dataframe, tmpdir):
     catalog = DataCatalogWithDefault(data_sets={}, default=default_csv)
 
     path = str(tmpdir.mkdir("sub").join("test.csv"))
@@ -49,7 +83,7 @@ def test_load_from_unregistered(dummy_dataframe, tmpdir):  # NOQA
     assert dummy_dataframe.equals(reloaded_df)
 
 
-def test_save_and_load_catalog(data_set, dummy_dataframe, tmpdir):  # NOQA
+def test_save_and_load_catalog(data_set, dummy_dataframe, tmpdir):
     catalog = DataCatalogWithDefault(data_sets={"test": data_set}, default=default_csv)
 
     path = str(tmpdir.mkdir("sub").join("test"))
@@ -58,7 +92,7 @@ def test_save_and_load_catalog(data_set, dummy_dataframe, tmpdir):  # NOQA
     assert dummy_dataframe.equals(reloaded_df)
 
 
-def test_from_sane_config(sane_config):  # NOQA
+def test_from_sane_config(sane_config):
     with pytest.raises(
         ValueError, match="Cannot instantiate a `DataCatalogWithDefault`"
     ):
@@ -67,7 +101,7 @@ def test_from_sane_config(sane_config):  # NOQA
         )
 
 
-def test_from_sane_config_default(sane_config, dummy_dataframe, tmpdir):  # NOQA
+def test_from_sane_config_default(sane_config, dummy_dataframe, tmpdir):
     catalog = DataCatalog.from_config(
         sane_config["catalog"], sane_config["credentials"]
     )
@@ -103,7 +137,7 @@ def test_remember_load():
     assert "any" in catalog.list()
 
 
-def test_remember_save(tmpdir, dummy_dataframe):  # NOQA
+def test_remember_save(tmpdir, dummy_dataframe):
     catalog = DataCatalogWithDefault(data_sets={}, default=default_csv, remember=True)
 
     path = str(tmpdir.mkdir("sub").join("test.csv"))

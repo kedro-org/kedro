@@ -26,5 +26,3 @@ python:
       extra_requirements:
         - docs
     - requirements: test_requirements.txt
-
-

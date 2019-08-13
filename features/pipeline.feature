@@ -42,5 +42,3 @@ Feature: Pipelines that can be run from a library or a template project
     Given I have executed the kedro command "install"
     When the template pipeline is run
     Then it should successfully produce the results
-
-

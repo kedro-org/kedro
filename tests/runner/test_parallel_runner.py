@@ -28,8 +28,7 @@
 
 # pylint: disable=no-member
 
-from multiprocessing import Manager
-from multiprocessing.managers import BaseProxy
+from multiprocessing.managers import BaseProxy  # type: ignore
 from typing import Any, Dict
 
 import pytest
@@ -202,28 +201,30 @@ class LoggingDataSet(AbstractDataSet):
         self.value = value
 
     def _load(self) -> Any:
-        self.log["log"] += [("load", self.name)]
+        self.log.append(("load", self.name))
         return self.value
 
     def _save(self, data: Any) -> None:
         self.value = data
 
     def _release(self) -> None:
-        self.log["log"] += [("release", self.name)]
+        self.log.append(("release", self.name))
         self.value = None
 
     def _describe(self) -> Dict[str, Any]:
         return {}
 
 
-ParallelRunnerManager.register("LoggingDataSet", LoggingDataSet)
+ParallelRunnerManager.register(  # pylint: disable=no-member
+    "LoggingDataSet", LoggingDataSet
+)
 
 
 class TestParallelRunnerRelease:
     def test_dont_release_inputs_and_outputs(self):
         manager = ParallelRunnerManager()
         manager.start()
-        log = Manager().dict(log=[])
+        log = manager.list()
 
         pipeline = Pipeline(
             [node(identity, "in", "middle"), node(identity, "middle", "out")]
@@ -238,12 +239,12 @@ class TestParallelRunnerRelease:
         ParallelRunner().run(pipeline, catalog)
 
         # we don't want to see release in or out in here
-        assert log["log"] == [("load", "in"), ("load", "middle"), ("release", "middle")]
+        assert list(log) == [("load", "in"), ("load", "middle"), ("release", "middle")]
 
     def test_release_at_earliest_opportunity(self):
         manager = ParallelRunnerManager()
         manager.start()
-        log = Manager().dict(log=[])
+        log = manager.list()
 
         pipeline = Pipeline(
             [
@@ -261,7 +262,7 @@ class TestParallelRunnerRelease:
         ParallelRunner().run(pipeline, catalog)
 
         # we want to see "release first" before "load second"
-        assert log["log"] == [
+        assert list(log) == [
             ("load", "first"),
             ("release", "first"),
             ("load", "second"),
@@ -271,7 +272,7 @@ class TestParallelRunnerRelease:
     def test_count_multiple_loads(self):
         manager = ParallelRunnerManager()
         manager.start()
-        log = Manager().dict(log=[])
+        log = manager.list()
 
         pipeline = Pipeline(
             [
@@ -284,7 +285,7 @@ class TestParallelRunnerRelease:
         ParallelRunner().run(pipeline, catalog)
 
         # we want to the release after both the loads
-        assert log["log"] == [
+        assert list(log) == [
             ("load", "dataset"),
             ("load", "dataset"),
             ("release", "dataset"),
@@ -293,7 +294,7 @@ class TestParallelRunnerRelease:
     def test_release_transcoded(self):
         manager = ParallelRunnerManager()
         manager.start()
-        log = Manager().dict(log=[])
+        log = manager.list()
 
         pipeline = Pipeline(
             [node(source, None, "ds@save"), node(sink, "ds@load", None)]
@@ -308,8 +309,4 @@ class TestParallelRunnerRelease:
         ParallelRunner().run(pipeline, catalog)
 
         # we want to see both datasets being released
-        assert log["log"] == [
-            ("release", "save"),
-            ("load", "load"),
-            ("release", "load"),
-        ]
+        assert list(log) == [("release", "save"), ("load", "load"), ("release", "load")]

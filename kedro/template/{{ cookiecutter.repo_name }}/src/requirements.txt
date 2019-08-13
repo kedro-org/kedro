@@ -1,9 +1,9 @@
-kedro=={{ cookiecutter.kedro_version }}
 ipython>=7.0.0, <8.0
 jupyter>=1.0.0, <2.0
 jupyterlab==0.31.1
+kedro=={{ cookiecutter.kedro_version }}
 nbstripout==0.3.3
-pytest>=3.4, <4.0
 pytest-cov>=2.5, <3.0
 pytest-mock>=1.7.1,<2.0
+pytest>=3.4, <4.0
 wheel==0.32.2

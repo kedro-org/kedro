@@ -77,6 +77,17 @@ def files_missing_substring(file_names, substring):
             if content.strip() and substring not in content:
                 yield file_name
 
+            # In some locales Python 3.5 on Windows can't deal with non ascii chars in source files
+            try:
+                content.encode("ascii")
+            except UnicodeError as e:
+                print(
+                    "Non ascii characters in {} after '{}'".format(
+                        file_name, content[e.start - 30 : e.start]
+                    )
+                )
+                yield file_name
+
 
 def main():
     exit_code = 0

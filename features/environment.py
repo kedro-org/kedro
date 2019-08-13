@@ -65,6 +65,7 @@ def before_all(context):
     else:
         bin_dir = context.venv_dir / "Scripts"
         path_sep = ";"
+    context.bin_dir = bin_dir
     context.pip = str(bin_dir / "pip")
     context.python = str(bin_dir / "python")
     context.kedro = str(bin_dir / "kedro")

@@ -114,6 +114,11 @@ html_logo = str(here / "kedro_logo.svg")
 #
 html_theme_options = {"collapse_navigation": False, "style_external_links": True}
 
+html_context = {
+    "display_github": True,
+    "github_url": "https://github.com/quantumblacklabs/kedro/tree/develop/docs/source",
+}
+
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
@@ -251,7 +256,7 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
         These ``LambdaDataSet``s load and save
 
     Will convert to:
-        These :class:`kedro.io.LambdaDataSet`\s load and save
+        These :class:`kedro.io.LambdaDataSet` load and save
 
     Args:
         what: The objects to create replacement tuples for. Possible values

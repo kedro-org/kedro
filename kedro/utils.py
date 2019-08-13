@@ -34,7 +34,7 @@ import importlib
 from typing import Any
 
 
-def load_obj(obj_path: str, default_obj_path: str) -> Any:
+def load_obj(obj_path: str, default_obj_path: str = "") -> Any:
     """Extract an object from a given path.
 
         Args:

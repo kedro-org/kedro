@@ -25,22 +25,16 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from functools import wraps
 from itertools import chain
 from typing import Callable
 
 import pytest
-from pytest import fixture
 
 import kedro
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline, node
-from kedro.pipeline.pipeline import (
-    CircularDependencyError,
-    OutputNotUniqueError,
-    _get_transcode_compatible_name,
-)
+from kedro.pipeline.pipeline import CircularDependencyError, OutputNotUniqueError
 from kedro.runner import SequentialRunner
 
 
@@ -61,7 +55,7 @@ def triconcat(input1: str, input2: str, input3: str):
     return input1 + input2 + input3  # pragma: no cover
 
 
-@fixture
+@pytest.fixture
 def branchless_pipeline():
     return {
         "nodes": [
@@ -85,7 +79,7 @@ def branchless_pipeline():
     }
 
 
-@fixture
+@pytest.fixture
 def pipeline_list_with_lists():
     return {
         "nodes": [
@@ -119,7 +113,7 @@ def pipeline_list_with_lists():
     }
 
 
-@fixture
+@pytest.fixture
 def pipeline_with_dicts():
     return {
         "nodes": [
@@ -153,7 +147,7 @@ def pipeline_with_dicts():
     }
 
 
-@fixture
+@pytest.fixture
 def free_input_needed_pipeline():
     return {
         "nodes": [
@@ -171,7 +165,7 @@ def free_input_needed_pipeline():
     }
 
 
-@fixture
+@pytest.fixture
 def disjoint_pipeline():
     # Two separate pipelines: A->B->C and D->E->F
     return {
@@ -196,7 +190,7 @@ def disjoint_pipeline():
     }
 
 
-@fixture
+@pytest.fixture
 def pipeline_input_duplicated():
     return {
         "nodes": [
@@ -214,7 +208,7 @@ def pipeline_input_duplicated():
     }
 
 
-@fixture
+@pytest.fixture
 def str_node_inputs_list():
     return {
         "nodes": [
@@ -230,58 +224,6 @@ def str_node_inputs_list():
     }
 
 
-@fixture
-def pipeline_with_transcoded_names():
-    return {
-        "nodes": [
-            node(identity, "A", "B@pandas", name="node1"),
-            node(identity, "B@pandas", "C", name="node2"),
-            node(identity, "B@spark", "D", name="node3"),
-        ],
-        "expected": [
-            {node(identity, "A", "B@pandas", name="node1")},  # no dependency
-            {
-                node(identity, "B@pandas", "C", name="node2"),  # one dependency
-                node(identity, "B@spark", "D", name="node3"),
-            },
-        ],
-        "free_inputs": ["A"],
-        "outputs": ["C", "D"],
-    }
-
-
-@fixture
-def pipeline_with_duplicate_transcoded_inputs():
-    return {
-        "nodes": [
-            node(identity, "A", "B@pandas", name="node1"),
-            node(biconcat, ["B@spark", "B@pandas"], "C", name="node2"),
-        ],
-        "expected": [
-            {node(identity, "A", "B@pandas", name="node1")},
-            {node(biconcat, ["B@spark", "B@pandas"], "C", name="node2")},
-        ],
-        "free_inputs": ["A"],
-        "outputs": ["C"],
-    }
-
-
-@fixture
-def pipeline_with_transcoded_free_input():
-    return {
-        "nodes": [
-            node(identity, "B@pandas", "C", name="node1"),
-            node(identity, "C", "D", name="node2"),
-        ],
-        "expected": [
-            {node(identity, "B@pandas", "C", name="node1")},
-            {node(identity, "C", "D", name="node2")},
-        ],
-        "free_inputs": ["B@pandas"],
-        "outputs": ["D"],
-    }
-
-
 @pytest.fixture(
     params=[
         "branchless_pipeline",
@@ -291,9 +233,6 @@ def pipeline_with_transcoded_free_input():
         "disjoint_pipeline",
         "pipeline_input_duplicated",
         "str_node_inputs_list",
-        "pipeline_with_transcoded_names",
-        "pipeline_with_transcoded_free_input",
-        "pipeline_with_duplicate_transcoded_inputs",
     ]
 )
 def input_data(request):
@@ -365,6 +304,44 @@ class TestValidPipeline:
         assert new_pipeline.inputs() == {"input", "input1"}
         assert new_pipeline.outputs() == {"output"}
         assert {n.name for n in new_pipeline.nodes} == {"a"}
+
+    def test_intersection(self):
+        pipeline1 = Pipeline(
+            [
+                node(biconcat, ["input", "input1"], "output1", name="a"),
+                node(biconcat, ["input", "input2"], "output2", name="b"),
+            ]
+        )
+        pipeline2 = Pipeline([node(biconcat, ["input", "input2"], "output2", name="b")])
+        new_pipeline = pipeline1 & pipeline2
+        assert new_pipeline.inputs() == {"input", "input2"}
+        assert new_pipeline.outputs() == {"output2"}
+        assert {n.name for n in new_pipeline.nodes} == {"b"}
+
+    def test_invalid_intersection(self):
+        p = Pipeline([])
+        pattern = r"unsupported operand type\(s\) for &: 'Pipeline' and 'str'"
+        with pytest.raises(TypeError, match=pattern):
+            p & "hello"  # pylint: disable=pointless-statement
+
+    def test_union(self):
+        pipeline1 = Pipeline(
+            [
+                node(biconcat, ["input", "input1"], "output1", name="a"),
+                node(biconcat, ["input", "input2"], "output2", name="b"),
+            ]
+        )
+        pipeline2 = Pipeline([node(biconcat, ["input", "input2"], "output2", name="b")])
+        new_pipeline = pipeline1 | pipeline2
+        assert new_pipeline.inputs() == {"input", "input1", "input2"}
+        assert new_pipeline.outputs() == {"output1", "output2"}
+        assert {n.name for n in new_pipeline.nodes} == {"a", "b"}
+
+    def test_invalid_union(self):
+        p = Pipeline([])
+        pattern = r"unsupported operand type\(s\) for |: 'Pipeline' and 'str'"
+        with pytest.raises(TypeError, match=pattern):
+            p | "hello"  # pylint: disable=pointless-statement
 
     def test_empty_case(self):
         """Empty pipeline is possible"""
@@ -452,252 +429,12 @@ class TestInvalidPipeline:
         with pytest.raises(OutputNotUniqueError, match=r"\['output'\]"):
             pipeline1 + new_pipeline  # pylint: disable=pointless-statement
 
-    def test_transcoded_inputs_outputs(self):
-        """Nodes must not refer to a dataset without the separator if
-        it is referenced later on in the catalog.
-        """
-        pattern = "The following datasets are used with transcoding, "
-        pattern += "but were referenced without the separator: B."
-        with pytest.raises(ValueError, match=pattern):
-            Pipeline(
-                [
-                    node(identity, "A", "B", name="node1"),
-                    node(identity, "B@pandas", "C", name="node2"),
-                    node(identity, "B@spark", "D", name="node3"),
-                    node(biconcat, ["A", "D"], "E", name="node4"),
-                ]
-            )
-
-    def test_duplicates_in_transcoded_outputs(self):
-        with pytest.raises(OutputNotUniqueError, match="['B']"):
-            Pipeline(
-                [
-                    node(identity, "A", "B@pandas", name="node1"),
-                    node(identity, "A", "B@spark", name="node2"),
-                ]
-            )
-
 
 @pytest.fixture
 def complex_pipeline(pipeline_list_with_lists):
     nodes = pipeline_list_with_lists["nodes"]
     pipeline = Pipeline(nodes)
     return pipeline
-
-
-@pytest.fixture
-def complex_pipeline_with_transcoding():
-    pipeline = Pipeline(
-        [
-            node(triconcat, ["H@node1", "I", "M"], "N", name="node1"),
-            node(identity, "H@node2", "I", name="node2"),
-            node(identity, "F", ["G", "M"], name="node3"),
-            node(identity, "E", ["F", "H@node4"], name="node4"),
-            node(identity, "D", None, name="node5"),
-            node(identity, "C", "D", name="node6"),
-            node(identity, "B@node7", ["C", "E"], name="node7"),
-            node(identity, "A", ["B@node8", "L"], name="node8"),
-            node(constant_output, None, "A", name="node9"),
-            node(identity, "B@node10", None, name="node10"),
-        ]
-    )
-    return pipeline
-
-
-def _get_node_names(pipeline):
-    return {n.name for n in pipeline.nodes}
-
-
-class TestComplexPipelineWithTranscoding:
-    """
-    Pipeline used for the underlying test cases is presented
-    in the diagram below, where numbers are nodes and letters
-    are datasets.
-
-                  +---+
-                  |   |
-                  | 9 |
-                  |   |
-                  +-+-+
-                    |
-                  +-+-+
-                  | A |
-                  +-+-+
-                    |
-                  +-+-+
-                  |   |
-                  | 8 |
-                  |   |
-                  +-+-+
-    +----+          |
-    |    |  +---+   |   +---+
-    | 10 +--+ B +---+---+ L |
-    |    |  +-+-+       +---+
-    +----+    |
-            +-+-+
-            |   |
-            | 7 |
-            |   |
-            +-+-+
-              |
-      +---+   |   +---+
-      | C +---+---+ E |
-      +-+-+       +-+-+
-        |           |
-      +-+-+       +-+-+
-      |   |       |   |
-      | 6 |       | 4 |
-      |   |       |   |
-      +-+-+       +-+-+
-        |           |
-      +-+-+   +---+ | +---+
-      | D |   | F +-+-+ H +-+
-      +-+-+   +-+-+   +-+-+ |
-        |       |       |   |
-      +-+-+   +-+-+     | +-+-+
-      |   |   |   |     | |   |
-      | 5 |   | 3 |     | | 2 |
-      |   |   |   |     | |   |
-      +---+   +-+-+     | +-+-+
-                |       |   |
-          +---+ | +---+ | +-+-+
-          | G +-+-+ M | | | I |
-          +---+   +-+-+ | +-+-+
-                    |   |   |
-                    +-------+
-                        |
-                      +-+-+
-                      |   |
-                      | 1 |
-                      |   |
-                      +-+-+
-                        |
-                      +-+-+
-                      | N |
-                      +---+
-
-    """
-
-    def test_only_nodes_with_inputs(self, complex_pipeline_with_transcoding):
-        p = complex_pipeline_with_transcoding.only_nodes_with_inputs("H@node2")
-        assert _get_node_names(p) == {"node2"}
-
-    def test_only_nodes_with_inputs_transcoded_name(
-        self, complex_pipeline_with_transcoding
-    ):
-        p = complex_pipeline_with_transcoding.only_nodes_with_inputs("H")
-        assert _get_node_names(p) == {"node1", "node2"}
-
-    def test_only_nodes_with_inputs_duplicate_transcoded_names(
-        self, complex_pipeline_with_transcoding
-    ):
-        p1 = complex_pipeline_with_transcoding.only_nodes_with_inputs("H", "H@node1")
-        p2 = complex_pipeline_with_transcoding.only_nodes_with_inputs("H")
-
-        assert _get_node_names(p1) == _get_node_names(p2)
-
-    def test_only_nodes_with_inputs_inexistent_inputs(
-        self, complex_pipeline_with_transcoding
-    ):
-        pattern = r"Pipeline does not contain data_sets named \['Z'\]"
-        with pytest.raises(ValueError, match=pattern):
-            complex_pipeline_with_transcoding.only_nodes_with_inputs("Z")
-
-    def test_from_inputs(self, complex_pipeline_with_transcoding):
-        p = complex_pipeline_with_transcoding.from_inputs("H@node1")
-        assert _get_node_names(p) == {"node1"}
-
-        p = complex_pipeline_with_transcoding.from_inputs("H@node2")
-        assert _get_node_names(p) == {"node1", "node2"}
-
-    def test_from_inputs_traverses_transcoded(self, complex_pipeline_with_transcoding):
-        p = complex_pipeline_with_transcoding.from_inputs("E")
-        assert _get_node_names(p) == {"node4", "node3", "node2", "node1"}
-
-    def test_from_inputs_traverses_transcoded_on_correct_branch(
-        self, complex_pipeline_with_transcoding
-    ):
-        """Test that from_inputs intercepts only the correct branch at top layer (B@node7),
-        but traverses transcoded nodes (H) found further down the graph."""
-
-        p = complex_pipeline_with_transcoding.from_inputs("B@node7", "L")
-        assert _get_node_names(p) == {"node{}".format(i) for i in range(1, 8)}
-
-    def test_from_inputs_transcode_compatible_name(
-        self, complex_pipeline_with_transcoding
-    ):
-        p = complex_pipeline_with_transcoding.from_inputs("H")
-        assert _get_node_names(p) == {"node1", "node2"}
-
-    def test_from_inputs_duplicate_transcoded_names(
-        self, complex_pipeline_with_transcoding
-    ):
-        p1 = complex_pipeline_with_transcoding.from_inputs("H", "H@node4")
-        p2 = complex_pipeline_with_transcoding.from_inputs("H")
-
-        assert _get_node_names(p1) == _get_node_names(p2)
-
-    def test_from_inputs_inexistent_inputs(self, complex_pipeline_with_transcoding):
-        pattern = r"Pipeline does not contain data_sets named \['Z'\]"
-        with pytest.raises(ValueError, match=pattern):
-            complex_pipeline_with_transcoding.from_inputs("Z")
-
-    def test_only_nodes_with_outputs(self, complex_pipeline_with_transcoding):
-        p1 = complex_pipeline_with_transcoding.only_nodes_with_outputs("H@node4")
-        p2 = complex_pipeline_with_transcoding.only_nodes_with_outputs("H@node2")
-
-        assert _get_node_names(p1) == {"node4"}
-        assert _get_node_names(p2) == set()
-
-    def test_only_nodes_with_outputs_transcode_compatible_name(
-        self, complex_pipeline_with_transcoding
-    ):
-        p = complex_pipeline_with_transcoding.only_nodes_with_outputs("H")
-        assert _get_node_names(p) == {"node4"}
-
-    def test_only_nodes_with_outputs_duplicate_transcoded_names(
-        self, complex_pipeline_with_transcoding
-    ):
-        p1 = complex_pipeline_with_transcoding.only_nodes_with_outputs("H", "H@node4")
-        p2 = complex_pipeline_with_transcoding.only_nodes_with_outputs("H")
-
-        assert _get_node_names(p1) == _get_node_names(p2)
-
-    def test_only_nodes_with_outputs_inexistent_outputs(
-        self, complex_pipeline_with_transcoding
-    ):
-        pattern = r"Pipeline does not contain data_sets named \['Z'\]"
-        with pytest.raises(ValueError, match=pattern):
-            complex_pipeline_with_transcoding.only_nodes_with_outputs("Z")
-
-    def test_to_outputs(self, complex_pipeline_with_transcoding):
-        p1 = complex_pipeline_with_transcoding.to_outputs("H@node4")
-        p2 = complex_pipeline_with_transcoding.to_outputs("H@node2")
-
-        assert _get_node_names(p1) == {"node4", "node7", "node8", "node9"}
-        assert _get_node_names(p2) == set()
-
-    def test_to_outputs_traverses_transcoded(self, complex_pipeline_with_transcoding):
-        """Test that to_outputs traverses transcoded nodes (B) found further up the graph."""
-        p = complex_pipeline_with_transcoding.to_outputs("H@node4", "D")
-        assert _get_node_names(p) == {"node4", "node6", "node7", "node8", "node9"}
-
-    def test_to_outputs_transcoded_name(self, complex_pipeline_with_transcoding):
-        p = complex_pipeline_with_transcoding.to_outputs("H")
-        assert _get_node_names(p) == {"node4", "node7", "node8", "node9"}
-
-    def test_to_outputs_duplicate_transcoded_names(
-        self, complex_pipeline_with_transcoding
-    ):
-        p1 = complex_pipeline_with_transcoding.to_outputs("H", "H@node4")
-        p2 = complex_pipeline_with_transcoding.to_outputs("H")
-
-        assert _get_node_names(p1) == _get_node_names(p2)
-
-    def test_to_outputs_inexistent_outputs(self, complex_pipeline_with_transcoding):
-        pattern = r"Pipeline does not contain data_sets named \['Z'\]"
-        with pytest.raises(ValueError, match=pattern):
-            complex_pipeline_with_transcoding.to_outputs("Z")
 
 
 class TestComplexPipeline:
@@ -938,24 +675,6 @@ class TestPipelineTags:
             return sorted(n.name for n in p.nodes)
 
         assert get_nodes_with_tags(*tags) == expected_nodes
-
-
-class TestGetTranscodeCompatibleName:
-    def test_get_transcode_compatible_name(self):
-        dataset_name = "mydata@pandas"
-        assert _get_transcode_compatible_name(dataset_name) == "mydata"
-
-    def test_get_transcode_compatible_name_no_separator(self):
-        dataset_name = "mydata"
-        assert _get_transcode_compatible_name(dataset_name) == dataset_name
-
-    def test_get_transcode_compatible_name_multiple_separators(self):
-        dataset_name = "mydata@formA@formB"
-        pattern = "Expected maximum 1 transcoding separator, "
-        pattern += "found 2 instead: 'mydata@formA@formB'"
-
-        with pytest.raises(ValueError, match=pattern):
-            _get_transcode_compatible_name(dataset_name)
 
 
 def test_pipeline_to_json(input_data):

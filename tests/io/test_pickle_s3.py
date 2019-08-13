@@ -35,6 +35,7 @@ import pytest
 import s3fs
 from botocore.exceptions import PartialCredentialsError
 from moto import mock_s3
+from s3fs import S3FileSystem
 
 from kedro.io import DataSetError, PickleS3DataSet, Version
 
@@ -50,6 +51,17 @@ DUMMY_PICKABLE_OBJECT = {"key": "value"}
 def s3_data_set():
     return PickleS3DataSet(
         filepath=FILENAME, bucket_name=BUCKET_NAME, credentials=AWS_CREDENTIALS
+    )
+
+
+@pytest.fixture
+def s3_data_set_with_args():
+    return PickleS3DataSet(
+        filepath=FILENAME,
+        bucket_name=BUCKET_NAME,
+        credentials=AWS_CREDENTIALS,
+        load_args={"fix_imports": False},
+        save_args={"fix_imports": False},
     )
 
 
@@ -92,6 +104,14 @@ def mocked_s3_object_versioned(mocked_s3_bucket, save_version):
     return mocked_s3_bucket
 
 
+@pytest.fixture()
+def s3fs_cleanup():
+    # clear cache so we get a clean slate every time we instantiate a S3FileSystem
+    yield
+    S3FileSystem.cachable = False
+
+
+@pytest.mark.usefixtures("s3fs_cleanup")
 class TestPickleS3DataSet:
     @pytest.mark.usefixtures("mocked_s3_bucket")
     def test_exists(self, s3_data_set):
@@ -101,16 +121,16 @@ class TestPickleS3DataSet:
         s3_data_set.save(DUMMY_PICKABLE_OBJECT)
         assert s3_data_set.exists()
 
-    @mock_s3
-    def test_exists_raises_error(self, s3_data_set):
-        """Check the error if the given S3 bucket doesn't exist."""
-        with pytest.raises(DataSetError, match="NoSuchBucket"):
-            s3_data_set.exists()
-
     @pytest.mark.usefixtures("mocked_s3_object")
     def test_load(self, s3_data_set):
         """Test loading the data from S3."""
         loaded_data = s3_data_set.load()
+        assert loaded_data == DUMMY_PICKABLE_OBJECT
+
+    @pytest.mark.usefixtures("mocked_s3_object")
+    def test_load_args(self, s3_data_set_with_args):
+        """Test loading the data from S3 with options."""
+        loaded_data = s3_data_set_with_args.load()
         assert loaded_data == DUMMY_PICKABLE_OBJECT
 
     @pytest.mark.parametrize(
@@ -171,11 +191,19 @@ class TestPickleS3DataSet:
         loaded_data = s3_data_set.load()
         assert loaded_data == new_data
 
+    @pytest.mark.usefixtures("mocked_s3_object")
+    def test_save_args(self, s3_data_set_with_args):
+        """Test saving the data to S3 with options."""
+        new_data = {"x": "y"}
+        s3_data_set_with_args.save(new_data)
+        loaded_data = s3_data_set_with_args.load()
+        assert loaded_data == new_data
+
     def test_serializable(self, s3_data_set):
         ForkingPickler.dumps(s3_data_set)
 
 
-@pytest.mark.usefixtures("mocked_s3_bucket")
+@pytest.mark.usefixtures("s3fs_cleanup", "mocked_s3_bucket")
 class TestPickleS3DataSetVersioned:
     def test_exists(self, versioned_s3_data_set):
         """Test `exists` method invocation for versioned data set."""
@@ -213,9 +241,9 @@ class TestPickleS3DataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            r"Save path `{f}/{sv}/{f}` did not match load path "
-            r"`{f}/{lv}/{f}` for PickleS3DataSet\(.+\)".format(
-                f=FILENAME, sv=save_version, lv=load_version
+            r"Save path `{b}/{f}/{sv}/{f}` did not match load path "
+            r"`{b}/{f}/{lv}/{f}` for PickleS3DataSet\(.+\)".format(
+                b=BUCKET_NAME, f=FILENAME, sv=save_version, lv=load_version
             )
         )
         with pytest.warns(UserWarning, match=pattern):

@@ -1,6 +1,6 @@
 # Advanced IO
 
-> *Note:* This documentation is based on `Kedro 0.14.3`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.0`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 In this tutorial, you will learn about advanced uses of the [Kedro IO](/kedro.io.rst) module and understand the underlying implementation.
 
@@ -46,10 +46,48 @@ For contributors, if you would like to submit a new dataset, you will have to ex
 In order to enable versioning, all of the following conditions must be met:
 
 1. The dataset must:
-    1. extend `kedro.io.core.FilepathVersionMixin` AND
+    1. extend `kedro.io.core.AbstractVersionedDataSet` AND
     2. add `version` namedtuple as an argument to its `__init__` method AND
-    3. modify its `_load` and `_save` methods respectively to support versioning (see [`kedro.io.CSVLocalDataSet`](/kedro.io.CSVLocalDataSet) for an example implementation)
+    3. call `super().__init__()` with positional arguments `filepath`, `version`, and optionally with a `glob` and an `exists` functions if it uses non-local filesystem (see [kedro.io.CSVLocalDataSet](https://github.com/quantumblacklabs/kedro/blob/master/kedro/io/csv_local.py) and [kedro.io.CSVS3DataSet](https://github.com/quantumblacklabs/kedro/blob/master/kedro/io/csv_s3.py) for example) AND
+    4. modify its `_describe`, `_load` and `_save` methods respectively to support versioning (see [`kedro.io.CSVLocalDataSet`](/kedro.io.CSVLocalDataSet) for an example implementation) AND
 2. In the `catalog.yml` config file you must enable versioning by setting `versioned` attribute to `true` for the given dataset.
+
+An example dataset could look similar to the below:
+
+```python
+from pathlib import Path
+
+import pandas as pd
+
+from kedro.io import AbstractVersionedDataSet
+
+
+class MyOwnDataSet(AbstractVersionedDataSet):
+    def __init__(self, param1, param2, filepath, version):
+        super().__init__(Path(filepath), version)
+        self._param1 = param1
+        self._param2 = param2
+
+    def _load(self) -> pd.DataFrame:
+        load_path = self._get_load_path()
+        return pd.read_csv(load_path)
+
+    def _save(self, df: pd.DataFrame) -> None:
+        save_path = self._get_save_path()
+        df.to_csv(save_path)
+
+    def _describe(self):
+        return dict(version=self._version, param1=self._param1, param2=self._param2)
+```
+
+With `catalog.yml` specifying:
+
+```yaml
+my_dataset:
+  type: <path-to-my-own-dataset>.MyOwnDataSet
+  filepath: data/01_raw/my_data.csv
+  versioned: true
+```
 
 ### `version` namedtuple
 
@@ -104,22 +142,22 @@ data1 = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
 data2 = pd.DataFrame({"col1": [7], "col2": [8], "col3": [9]})
 version = Version(
     load=None,  # load the latest available version
-    save=None,  # generate save version automatically on each save operation 
+    save=None,  # generate save version automatically on each save operation
 )
 test_data_set = CSVLocalDataSet(
-    filepath="data/01_raw/test.csv", 
-    save_args={"index": False}, 
+    filepath="data/01_raw/test.csv",
+    save_args={"index": False},
     version=version,
 )
 io = DataCatalog({"test_data_set": test_data_set})
 
 # save the dataset to data/01_raw/test.csv/<version>/test.csv
-io.save("test_data_set", data1)  
+io.save("test_data_set", data1)
 # save the dataset into a new file data/01_raw/test.csv/<version>/test.csv
-io.save("test_data_set", data2)  
+io.save("test_data_set", data2)
 
 # load the latest version from data/test.csv/*/test.csv
-reloaded = io.load("test_data_set")  
+reloaded = io.load("test_data_set")
 assert data2.equals(reloaded)
 ```
 
@@ -128,11 +166,11 @@ assert data2.equals(reloaded)
 ```python
 version = Version(
     load="my_exact_version",   # load exact version
-    save="my_exact_version",   # save to exact version 
+    save="my_exact_version",   # save to exact version
 )
 test_data_set = CSVLocalDataSet(
-    filepath="data/01_raw/test.csv", 
-    save_args={"index": False}, 
+    filepath="data/01_raw/test.csv",
+    save_args={"index": False},
     version=version,
 )
 io = DataCatalog({"test_data_set": test_data_set})
@@ -140,12 +178,12 @@ io = DataCatalog({"test_data_set": test_data_set})
 # save the dataset to data/01_raw/test.csv/my_exact_version/test.csv
 io.save("test_data_set", data1)
 # load from data/01_raw/test.csv/my_exact_version/test.csv
-reloaded = io.load("test_data_set")  
+reloaded = io.load("test_data_set")
 assert data1.equals(reloaded)
 
 # raises DataSetError since the path
 # data/01_raw/test.csv/my_exact_version/test.csv already exists
-io.save("test_data_set", data2)  
+io.save("test_data_set", data2)
 ```
 
 > **Important:** Passing exact load and/or save versions to the dataset instantiation is not recommended, since it may lead to inconsistencies between operations. For example, if versions for load and save operations do not match, save operation would result in a `UserWarning` indicating that save a load versions do not match. Load after save may also return an error if the corresponding load version is not found:
@@ -153,18 +191,18 @@ io.save("test_data_set", data2)
 ```python
 version = Version(
     load="exact_load_version",  # load exact version
-    save="exact_save_version"   # save to exact version 
+    save="exact_save_version"   # save to exact version
 )
 test_data_set = CSVLocalDataSet(
-    filepath="data/01_raw/test.csv", 
-    save_args={"index": False}, 
+    filepath="data/01_raw/test.csv",
+    save_args={"index": False},
     version=version,
 )
 io = DataCatalog({"test_data_set": test_data_set})
 
 io.save("test_data_set", data1)  # emits a UserWarning due to version inconsistency
 
-# raises DataSetError since the data/01_raw/test.csv/exact_load_version/test.csv 
+# raises DataSetError since the data/01_raw/test.csv/exact_load_version/test.csv
 # file does not exist
 reloaded = io.load("test_data_set")
 ```
@@ -179,6 +217,7 @@ Currently the following datasets support versioning:
 - `HDFS3DataSet`
 - `JSONLocalDataSet`
 - `ParquetLocalDataSet`
+- `ParquetS3DataSet`
 - `PickleLocalDataSet`
 - `PickleS3DataSet`
 - `TextLocalDataSet`

@@ -25,12 +25,15 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from multiprocessing.reduction import ForkingPickler
 
+import pandas as pd
 import pytest
 import s3fs
 from botocore.exceptions import PartialCredentialsError
 from moto import mock_s3
 from pandas.util.testing import assert_frame_equal
+from s3fs import S3FileSystem
 
 from kedro.io import DataSetError, HDFS3DataSet
 from kedro.io.core import Version
@@ -40,6 +43,11 @@ FILENAME = "test.hdf"
 AWS_CREDENTIALS = dict(
     aws_access_key_id="FAKE_ACCESS_KEY", aws_secret_access_key="FAKE_SECRET_KEY"
 )
+
+
+@pytest.fixture
+def dummy_dataframe():
+    return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
 
 
 @pytest.fixture
@@ -71,6 +79,18 @@ def mocked_s3_object(mocked_s3_bucket, dummy_dataframe):
 
 
 @pytest.fixture
+def hdf_data_set_with_args():
+    return HDFS3DataSet(
+        filepath=FILENAME,
+        bucket_name=BUCKET_NAME,
+        credentials=AWS_CREDENTIALS,
+        key="test_hdf",
+        load_args={"title": "test_hdf"},
+        save_args={"title": "test_hdf"},
+    )
+
+
+@pytest.fixture
 def versioned_hdf_data_set(load_version, save_version):
     return HDFS3DataSet(
         filepath=FILENAME,
@@ -81,6 +101,14 @@ def versioned_hdf_data_set(load_version, save_version):
     )
 
 
+@pytest.fixture()
+def s3fs_cleanup():
+    # clear cache so we get a clean slate every time we instantiate a S3FileSystem
+    yield
+    S3FileSystem.cachable = False
+
+
+@pytest.mark.usefixtures("s3fs_cleanup")
 class TestHDFS3DataSet:
     @pytest.mark.parametrize(
         "bad_credentials",
@@ -166,7 +194,19 @@ class TestHDFS3DataSet:
         reloaded_df = hdf_data_set.load()
         assert_frame_equal(reloaded_df, dummy_dataframe.T)
 
+    @pytest.mark.usefixtures("mocked_s3_object")
+    def test_save_and_load_args(self, hdf_data_set_with_args, dummy_dataframe):
+        """Test saving and reloading the data set."""
+        hdf_data_set_with_args.save(dummy_dataframe)
+        reloaded_df = hdf_data_set_with_args.load()
 
+        assert_frame_equal(reloaded_df, dummy_dataframe)
+
+    def test_serializable(self, hdf_data_set):
+        ForkingPickler.dumps(hdf_data_set)
+
+
+@pytest.mark.usefixtures("s3fs_cleanup")
 class TestHDFS3DataSetVersioned:
     @pytest.mark.usefixtures("mocked_s3_object")
     def test_save_and_load(self, versioned_hdf_data_set, dummy_dataframe):

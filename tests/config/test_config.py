@@ -231,6 +231,18 @@ class TestConfigLoader:
         with pytest.raises(ValueError, match=pattern):
             conf.get("**/catalog*")
 
+    def test_lots_of_duplicates(self, tmp_path):
+        """Check that the config key starting with `_` are ignored and also
+        don't cause a config merge error"""
+        data = {str(i): i for i in range(100)}
+        _write_yaml(tmp_path / "base" / "catalog1.yml", data)
+        _write_yaml(tmp_path / "base" / "catalog2.yml", data)
+
+        conf = ConfigLoader(str(tmp_path))
+        pattern = r"^Duplicate keys found in .*catalog2\.yml and\:\n\- .*catalog1\.yml\: .*\.\.\.$"
+        with pytest.raises(ValueError, match=pattern):
+            conf.get("**/catalog*")
+
     @use_config_dir
     def test_same_key_in_same_dir(self, tmp_path, conf_paths, base_config):
         """Check the error if 2 files in the same config dir contain

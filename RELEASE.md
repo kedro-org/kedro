@@ -1,7 +1,7 @@
 # Release 0.15.0
 
 ## Major features and improvements
-* Added a new CLI command `kedro jupyter convert` to facilitate converting Jupyter notebook cells into Kedro nodes.
+* Added a new CLI command `kedro jupyter convert` to facilitate converting Jupyter Notebook cells into Kedro nodes.
 * Added `KedroContext` base class which holds the configuration and Kedro's main functionality (catalog, pipeline, config, runner).
 * Added a `ParquetS3DataSet` in `contrib` for usage with Pandas. (by [@mmchougule](https://github.com/mmchougule))
 * Added a new `--node` flag to `kedro run`, allowing users to run only the nodes with the specified names.

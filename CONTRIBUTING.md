@@ -170,4 +170,4 @@ You can uninstall the pre-commit hooks by running
 ```bash
 make uninstall-pre-commit
 ```
-`pre-commit` will still be used by `make lint`, but will install the git hooks.
+`pre-commit` will still be used by `make lint`, but will not install the git hooks.

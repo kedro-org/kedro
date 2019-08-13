@@ -29,4 +29,4 @@
 """``NetworkXLocalDataSet`` is an ``AbstractDataSet`` to save and load NetworkX graphs.
 """
 
-from .networkx_local import NetworkXLocalDataSet
+from .networkx_local import NetworkXLocalDataSet  # NOQA

@@ -1,34 +1,37 @@
 # Release 0.15.0
 
 ## Major features and improvements
-* Added a new CLI command `kedro jupyter convert` to facilitate converting Jupyter Notebook cells into Kedro nodes.
 * Added `KedroContext` base class which holds the configuration and Kedro's main functionality (catalog, pipeline, config, runner).
-* Added a `ParquetS3DataSet` in `contrib` for usage with Pandas. (by [@mmchougule](https://github.com/mmchougule))
-* Added a new `--node` flag to `kedro run`, allowing users to run only the nodes with the specified names.
-* Added `CSVHTTPDataSet` to load CSV using HTTP(s) links.
-* Added new `--from-nodes` and `--to-nodes` run arguments, allowing users to run a range of nodes from the pipeline.
-* Added prefix `params:` to the parameters specified in `parameters.yml` which allows users to differentiate between their different parameter node inputs and outputs
-* Added `JSONBlobDataSet` to load json (-delimited) files from Azure Blob Storage
-* Jupyter Lab/Notebook now starts with only one kernel by default.
+* Added a new CLI command `kedro jupyter convert` to facilitate converting Jupyter Notebook cells into Kedro nodes.
+* Added support for `pip-compile` and new Kedro command `kedro build-reqs` that generates `requirements.txt` based on `requirements.in`.
 * Running `kedro install` will install packages to conda environment if `src/environment.yml` exists in your project.
-- Added `CachedDataSet` in `contrib` which will cache data in memory to avoid io/network operations. It will clear the cache once a dataset is no longer needed by a pipeline. (by [@tsanikgr](https://github.com/tsanikgr))
-- Added `YAMLLocalDataSet` in `contrib` to load and save local YAML files. (by [@Minyus](https://github.com/Minyus))
+* Added a new `--node` flag to `kedro run`, allowing users to run only the nodes with the specified names.
+* Added new `--from-nodes` and `--to-nodes` run arguments, allowing users to run a range of nodes from the pipeline.
+* Added prefix `params:` to the parameters specified in `parameters.yml` which allows users to differentiate between their different parameter node inputs and outputs.
+* Jupyter Lab/Notebook now starts with only one kernel by default.
+
+
+* Added the following datasets:
+  -  `CSVHTTPDataSet` to load CSV using HTTP(s) links.
+  - `JSONBlobDataSet` to load json (-delimited) files from Azure Blob Storage.
+  - `ParquetS3DataSet` in `contrib` for usage with Pandas. (by [@mmchougule](https://github.com/mmchougule))
+  - `CachedDataSet` in `contrib` which will cache data in memory to avoid io/network operations. It will clear the cache once a dataset is no longer needed by a pipeline. (by [@tsanikgr](https://github.com/tsanikgr))
+  - `YAMLLocalDataSet` in `contrib` to load and save local YAML files. (by [@Minyus](https://github.com/Minyus))
 
 ## Bug fixes and other changes
 * Documentation improvements including instructions on how to initialise a Spark session using YAML configuration.
 * `anyconfig` default log level changed from `INFO` to `WARNING`.
 * Added information on installed plugins to `kedro info`.
 * Added style sheets for project documentation, so the output of `kedro build-docs` will resemble the style of `kedro docs`.
-* Added support for `pip-compile` and new Kedro command `kedro build-reqs` that generates `requirements.txt` based on `requirements.in`.
 
 ## Breaking changes to the API
 * Simplified the Kedro template in `run.py` with the introduction of `KedroContext` class.
 * Merged `FilepathVersionMixIn` and `S3VersionMixIn` under one abstract class `AbstractVersionedDataSet` which extends`AbstractDataSet`.
 * `name` changed to be a keyword-only argument for `Pipeline`.
-* `CSVLocalDataSet` no longer supports URLs.
+* `CSVLocalDataSet` no longer supports URLs. `CSVHTTPDataSet` supports URLs.
 
-#### Migration guide from Kedro 0.14.* to Kedro 0.15.0
-##### Migration for Kedro project template
+### Migration guide from Kedro 0.14.* to Kedro 0.15.0
+#### Migration for Kedro project template
 This guide assumes that:
   * The framework specific code has not been altered significantly
   * Your project specific code is stored in the dedicated python package under `src/`.
@@ -69,7 +72,7 @@ The easiest way to migrate your project from Kedro 0.14.* to Kedro 0.15.0 is to 
 
 6. Copy the contents of the old project's `src/requirements.txt` into the new project's `src/requirements.in` and, from the project root directory, run the `kedro build-reqs` command in your terminal window.
 
-##### Migration for versioning custom dataset classes
+#### Migration for versioning custom dataset classes
 
 If you defined any custom dataset classes which support versioning in your project, you need to apply the following changes:
 

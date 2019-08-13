@@ -9,8 +9,6 @@
 * Added new `--from-nodes` and `--to-nodes` run arguments, allowing users to run a range of nodes from the pipeline.
 * Added prefix `params:` to the parameters specified in `parameters.yml` which allows users to differentiate between their different parameter node inputs and outputs.
 * Jupyter Lab/Notebook now starts with only one kernel by default.
-
-
 * Added the following datasets:
   -  `CSVHTTPDataSet` to load CSV using HTTP(s) links.
   - `JSONBlobDataSet` to load json (-delimited) files from Azure Blob Storage.

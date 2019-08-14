@@ -26,9 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-This module contains functionality which we might consider moving into the
-`kedro.io` module (e.g. additional ``AbstractDataSet``s and
-extensions/alternative ``DataCatalog``s.
-"""
-from .core import DefaultArgumentsMixIn  # NOQA
+"""kedro.contrib.io.feather provides I/O modules for feather data format.
+https://github.com/wesm/feather"""
+
+from .feather_local import FeatherLocalDataSet  # NOQA

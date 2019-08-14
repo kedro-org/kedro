@@ -29,6 +29,10 @@
 """ ``AbstractDataSet`` implementation to access CSV files directly from
 Microsoft's Azure blob storage.
 """
+
+# TODO Reference https://kedro.readthedocs.io/en/latest/04_user_guide/07_advanced_io.html?#versioning in enabling versioning
+# TODO Use https://github.com/quantumblacklabs/kedro/blob/develop/kedro/io/csv_local.py to base off versioning functionality
+
 import io
 from typing import Any, Dict, Optional
 

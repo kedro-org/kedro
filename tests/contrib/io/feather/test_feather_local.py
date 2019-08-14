@@ -46,9 +46,9 @@ def save_version(request):
     return request.param or generate_current_version()
 
 
-@pytest.fixture(params=[None])
-def filepath(tmp_path, request):
-    return request.param or str(tmp_path / "some" / "dir" / "test.feather")
+@pytest.fixture()
+def filepath(tmp_path):
+    return str(tmp_path / "some" / "dir" / "test.feather")
 
 
 @pytest.fixture

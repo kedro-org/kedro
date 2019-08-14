@@ -2,11 +2,14 @@
 
 ## Major features and improvements
 
+* Added the following datasets:
+  - `FeatherLocalDataSet` in `contrib` for usage with Pandas. (by [@mdomarsaleem](https://github.com/mdomarsaleem))
 ## Bug fixes and other changes
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
+[Omar Saleem](https://github.com/mdomarsaleem)
 
 # Release 0.15.0
 
@@ -16,7 +19,6 @@
 * Added support for `pip-compile` and new Kedro command `kedro build-reqs` that generates `requirements.txt` based on `requirements.in`.
 * Running `kedro install` will install packages to conda environment if `src/environment.yml` exists in your project.
 * Added a new `--node` flag to `kedro run`, allowing users to run only the nodes with the specified names.
-* Added a new I/O module `FeatherLocalDataSet` in `contrib` for usage with Pandas. (by [@mdomarsaleem](https://github.com/mdomarsaleem))
 * Added new `--from-nodes` and `--to-nodes` run arguments, allowing users to run a range of nodes from the pipeline.
 * Added prefix `params:` to the parameters specified in `parameters.yml` which allows users to differentiate between their different parameter node inputs and outputs.
 * Jupyter Lab/Notebook now starts with only one kernel by default.

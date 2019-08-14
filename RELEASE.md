@@ -1,14 +1,34 @@
+# Release 0.15.1
+
+## Major features and improvements
+
+## Bug fixes and other changes
+
+## Breaking changes to the API
+
+## Thanks for supporting contributions
+
 # Release 0.15.0
 
 ## Major features and improvements
-* Added a new CLI command `kedro jupyter convert` to facilitate converting Jupyter notebook cells into Kedro nodes.
-* Added `KedroContext` base class which holds the configuration and Kedro's main functionality (catalog, pipeline, config).
-* Added a new I/O module `ParquetS3DataSet` in `contrib` for usage with Pandas. (by [@mmchougule](https://github.com/mmchougule))
+* Added `KedroContext` base class which holds the configuration and Kedro's main functionality (catalog, pipeline, config, runner).
+* Added a new CLI command `kedro jupyter convert` to facilitate converting Jupyter Notebook cells into Kedro nodes.
+* Added support for `pip-compile` and new Kedro command `kedro build-reqs` that generates `requirements.txt` based on `requirements.in`.
+* Running `kedro install` will install packages to conda environment if `src/environment.yml` exists in your project.
 * Added a new `--node` flag to `kedro run`, allowing users to run only the nodes with the specified names.
 * Added a new I/O module `FeatherLocalDataSet` in `contrib` for usage with Pandas. (by [@mdomarsaleem](https://github.com/mdomarsaleem)) 
+* Added new `--from-nodes` and `--to-nodes` run arguments, allowing users to run a range of nodes from the pipeline.
+* Added prefix `params:` to the parameters specified in `parameters.yml` which allows users to differentiate between their different parameter node inputs and outputs.
+* Jupyter Lab/Notebook now starts with only one kernel by default.
+* Added the following datasets:
+  -  `CSVHTTPDataSet` to load CSV using HTTP(s) links.
+  - `JSONBlobDataSet` to load json (-delimited) files from Azure Blob Storage.
+  - `ParquetS3DataSet` in `contrib` for usage with Pandas. (by [@mmchougule](https://github.com/mmchougule))
+  - `CachedDataSet` in `contrib` which will cache data in memory to avoid io/network operations. It will clear the cache once a dataset is no longer needed by a pipeline. (by [@tsanikgr](https://github.com/tsanikgr))
+  - `YAMLLocalDataSet` in `contrib` to load and save local YAML files. (by [@Minyus](https://github.com/Minyus))
 
 ## Bug fixes and other changes
-* Documentation improvements.
+* Documentation improvements including instructions on how to initialise a Spark session using YAML configuration.
 * `anyconfig` default log level changed from `INFO` to `WARNING`.
 * Added information on installed plugins to `kedro info`.
 * Added style sheets for project documentation, so the output of `kedro build-docs` will resemble the style of `kedro docs`.
@@ -17,9 +37,10 @@
 * Simplified the Kedro template in `run.py` with the introduction of `KedroContext` class.
 * Merged `FilepathVersionMixIn` and `S3VersionMixIn` under one abstract class `AbstractVersionedDataSet` which extends`AbstractDataSet`.
 * `name` changed to be a keyword-only argument for `Pipeline`.
+* `CSVLocalDataSet` no longer supports URLs. `CSVHTTPDataSet` supports URLs.
 
-#### Migration guide from Kedro 0.14.* to Kedro 0.15.0
-##### Migration for Kedro project template
+### Migration guide from Kedro 0.14.* to Kedro 0.15.0
+#### Migration for Kedro project template
 This guide assumes that:
   * The framework specific code has not been altered significantly
   * Your project specific code is stored in the dedicated python package under `src/`.
@@ -29,6 +50,7 @@ The breaking changes were introduced in the following project template files:
 - `<project-name>/kedro_cli.py`
 - `<project-name>/src/tests/test_run.py`
 - `<project-name>/src/<package-name>/run.py`
+- `<project-name>/.kedro.yml` (new file)
 
 The easiest way to migrate your project from Kedro 0.14.* to Kedro 0.15.0 is to create a new project (by using `kedro new`) and move code and files bit by bit as suggested in the detailed guide below:
 
@@ -43,8 +65,8 @@ The easiest way to migrate your project from Kedro 0.14.* to Kedro 0.15.0 is to 
  - `conf/`
 
 3. If you customised your `src/<package>/run.py`, make sure you apply the same customisations to `src/<package>/run.py`
- - If you customised `get_config()`, you can override `_create_config()` method in `ProjectContext` derived class
- - If you customised `create_catalog()`, you can override `_create_catalog()` method in `ProjectContext` derived class
+ - If you customised `get_config()`, you can override `config_loader` property in `ProjectContext` derived class
+ - If you customised `create_catalog()`, you can override `catalog()` property in `ProjectContext` derived class
  - If you customised `run()`, you can override `run()` method in `ProjectContext` derived class
  - If you customised default `env`, you can override it in `ProjectContext` derived class or pass it at construction. By default, `env` is `local`.
  - If you customised default `root_conf`, you can override `CONF_ROOT` attribute in `ProjectContext` derived class. By default, `KedroContext` base class has `CONF_ROOT` attribute set to `conf`.
@@ -57,7 +79,9 @@ The easiest way to migrate your project from Kedro 0.14.* to Kedro 0.15.0 is to 
 
 5. If you customised your `kedro_cli.py`, you need to apply the same customisations to your `kedro_cli.py` in the new project.
 
-##### Migration for versioning custom dataset classes
+6. Copy the contents of the old project's `src/requirements.txt` into the new project's `src/requirements.in` and, from the project root directory, run the `kedro build-reqs` command in your terminal window.
+
+#### Migration for versioning custom dataset classes
 
 If you defined any custom dataset classes which support versioning in your project, you need to apply the following changes:
 
@@ -71,7 +95,7 @@ If you defined any custom dataset classes which support versioning in your proje
 These steps should have brought your project to Kedro 0.15.0. There might be some more minor tweaks needed as every project is unique, but now you have a pretty solid base to work with. If you run into any problems, please consult the [Kedro documentation](https://kedro.readthedocs.io).
 
 ## Thanks for supporting contributions
-[Dmitry Vukolov](https://github.com/dvukolov), [Jo Stichbury](https://github.com/stichbury), [Angus Williams](https://github.com/awqb), [Deepyaman Datta](https://github.com/deepyaman), [Mayur Chougule](https://github.com/mmchougule)
+[Dmitry Vukolov](https://github.com/dvukolov), [Jo Stichbury](https://github.com/stichbury), [Angus Williams](https://github.com/awqb), [Deepyaman Datta](https://github.com/deepyaman), [Mayur Chougule](https://github.com/mmchougule), [Marat Kopytjuk](https://github.com/kopytjuk), [Evan Miller](https://github.com/evanmiller29), [Yusuke Minami](https://github.com/Minyus)
 
 # Release 0.14.3
 
@@ -126,9 +150,6 @@ None
 
 The initial release of Kedro.
 
-## Thanks to our main contributors
-
-[Nikolaos Tsaousis](https://github.com/tsanikgr), [Ivan Danov](https://github.com/idanov), [Dmitrii Deriabin](https://github.com/DmitryDeryabin), [Gordon Wrigley](https://github.com/tolomea), [Yetunde Dada](https://github.com/yetudada), [Nasef Khan](https://github.com/nakhan98), [Kiyohito Kunii](https://github.com/921kiyo), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae), [Peteris Erins](https://github.com/Pet3ris), [Lorena Balan](https://github.com/lorenabalan), [Richard Westenra](https://github.com/richardwestenra)
 
 ## Thanks for supporting contributions
 

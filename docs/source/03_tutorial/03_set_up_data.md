@@ -61,16 +61,10 @@ reviews:
 If you want to check whether Kedro loads the data correctly, open a `kedro ipython` session and run:
 
 ```python
-io.load('companies').head()
+context.catalog.load('companies').head()
 ```
 
-This should show you the first five rows of the dataset. If you want to explore more of it before moving on with the project:
-
-```python
-df = io.load('companies')
-```
-
-The entire `companies` dataset is loaded into a `pandas` DataFrame and you can play with it as you wish.
+This should show you the first five rows of the dataset. The entire `companies` dataset is loaded into a `pandas` DataFrame and you can play with it as you wish.
 
 When you have finished, simply close `ipython` session by typing the following:
 
@@ -112,6 +106,7 @@ class ExcelLocalDataSet(AbstractDataSet):
 
     Example:
     ::
+
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
@@ -194,7 +189,7 @@ shuttles:
 A good way to test that everything works as expected is by trying to load the dataset within a new `kedro ipython` session:
 
 ```python
-io.load('shuttles').head()
+context.catalog.load('shuttles').head()
 ```
 
 ### Contributing a custom dataset implementation

@@ -111,7 +111,7 @@ To tag a node, you can simply specify the `tag` argument, as follows:
 
 ```python
 node(func=add, inputs=["a", "b"], outputs="sum", name="adding_a_and_b", tag="node_tag")
-``` 
+```
 
 Moreover, you can [tag all nodes in a ``Pipeline``](./05_nodes_and_pipelines.md#tagging-pipeline-nodes).
 
@@ -516,36 +516,6 @@ kedro run --runner=ParallelRunner
 
 > *Note:* You cannot use both `--parallel` and `--runner` flags at the same time (e.g. `kedro run --parallel --runner=SequentialRunner` raises an exception).
 
-Furthermore, you may opt to run only specific nodes by name. To illustrate this, you can update the first node's definition in `pipeline.py` as follows:
-
-```python
-node(
-    split_data,
-    ["example_iris_data", "parameters"],
-    dict(
-        train_x="example_train_x",
-        train_y="example_train_y",
-        test_x="example_test_x",
-        test_y="example_test_y",
-    ),
-    name="node1",
-),
-
-```
-
-and then run the following command in your shell:
-
-```bash
-kedro run --node=node1
-```
-
-You may specify multiple names like so:
-
-```bash
-kedro run --node=node1 --node=node2
-```
-
-> *Note:* The run will only succeed if the nodes require existing inputs, i.e. already produced or present in the data catalog.
 
 ### Applying decorators on pipelines
 
@@ -768,6 +738,52 @@ Outputs: v
 
 As you can see, this will create a partial pipeline starting from the specified node and continuing to all other nodes downstream.
 
+You can run the resulting partial pipeline by running the following command in your terminal window:
+
+```bash
+kedro run --from-nodes="mean node"
+```
+
+#### Partial pipeline ending at nodes
+Similarly, you can specify the nodes which should be used as an end of the new pipeline. For example, you can do as follows:
+
+```python
+print(pipeline.to_nodes('mean node').describe())
+```
+
+`Output`:
+
+```console
+#### Pipeline execution order ####
+Name: None
+Inputs: xs
+
+len([xs]) -> [n]
+mean node
+
+Outputs: m
+##################################
+```
+
+As you can see, this will create a partial pipeline starting at the top and ending with the specified node.
+
+You can run the resulting partial pipeline by running the following command in your terminal window:
+
+```bash
+kedro run --to-nodes="mean node"
+```
+
+Furthermore, you can combine these two flags to specify a range of nodes to be included in the new pipeline. This would look like:
+
+```bash
+kedro run --from-nodes A --to-nodes Z
+```
+
+or, when specifying multiple nodes:
+```bash
+kedro run --from-nodes A,D --to-nodes X,Y,Z
+```
+
 #### Partial pipeline from nodes with tags
 One can also create a partial pipeline from the nodes that have specific tags attached to them. In order to construct a partial pipeline out of nodes that have both tag `t1` *AND* tag `t2`, you can run the following:
 
@@ -826,6 +842,38 @@ Outputs: m, m2
 ```
 
 This will create a partial pipeline, consisting solely of the nodes you specify as arguments in the method call.
+
+You can check this out for yourself by updating the definition of the first node in the example code provided in `pipeline.py` as follows:
+
+```python
+node(
+    split_data,
+    ["example_iris_data", "parameters"],
+    dict(
+        train_x="example_train_x",
+        train_y="example_train_y",
+        test_x="example_test_x",
+        test_y="example_test_y",
+    ),
+    name="node1",
+),
+
+```
+
+and then run the following command in your terminal window:
+
+```bash
+kedro run --node=node1
+```
+
+You may specify multiple names like so:
+
+```bash
+kedro run --node=node1 --node=node2
+```
+
+> *Note:* The run will only succeed if all the inputs required by those nodes already exist, i.e. already produced or present in the data catalog.
+
 
 #### Recreating Missing Outputs
 

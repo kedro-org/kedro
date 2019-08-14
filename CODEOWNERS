@@ -20,3 +20,5 @@ README.md                               @idanov
 RELEASE.md                              @idanov
 LICENSE.md                              @idanov
 legal_header.txt                        @idanov
+
+kedro/contrib/io/cached                 @tsanikgr

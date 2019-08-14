@@ -10,14 +10,14 @@ Kedro uses various entry points in the [`pkg_resources` entry_point system](http
 
 While running, plugins may request information about the current project by calling `kedro.cli.get_project_context()`.
 
-This function provides access to the verbose flag via the key `verbose` and to anything returned by the project's `__kedro_context__`. The returned instance of `ProjectContext` class must contain at least the following properties and methods:
+This function provides access to the verbose flag via the key `verbose` and to anything returned by the project's `KedroContext`. The returned instance of `ProjectContext(KedroContext)` class must contain at least the following properties and methods:
 * `project_version`: the version of Kedro the project was created with, or `None` if the project was not created with `kedro new`.
-* `project_path`: the path to the directory where `kedro_cli.py` is located.
+* `project_path`: the path to the directory where `.kedro.yml` is located.
 * `config_loader`: an instance of `kedro.config.ConfigLoader`.
 * `catalog`: an instance of `kedro.io.DataCatalog`.
 * `pipeline`: an instance of `kedro.pipeline.Pipeline`.
 
->*Note*: Plugins may require additional keys be added to `ProjectContext` in `run.py`.
+>*Note*: Plugins may require additional keys to be added to `ProjectContext` in `run.py`.
 
 
 >*Note*: `kedro.cli.get_project_context(key)`, where `key` is `get_config`, `create_catalog`, `create_pipeline`, `template_version`, `project_name` and `project_path`, is deprecated as of `Kedro 0.15.0`, and will be removed for future versions.
@@ -96,4 +96,5 @@ kedro to_json
 ## Supported plugins
 
 - [Kedro-Docker](https://github.com/quantumblacklabs/kedro-docker), a tool for packaging and shipping Kedro projects within containers
+- [Kedro-Airflow](https://github.com/quantumblacklabs/kedro-airflow), a tool for converting your Kedro project into an Airflow project
 - [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz), a tool for visualising your Kedro pipelines

@@ -21,6 +21,7 @@ The project directory will be structured as shown. You are free to adapt the fol
 getting-started     # Parent directory of the template
 ├── .gitignore      # Prevent staging of unnecessary files to git
 ├── kedro_cli.py    # A collection of Kedro command line interface (CLI) commands
+├── .kedro.yml      # Path to discover project context
 ├── README.md       # Project README
 ├── .ipython        # IPython startup scripts
 ├── conf            # Project configuration files

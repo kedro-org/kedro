@@ -35,6 +35,7 @@ import pytest
 import s3fs
 from botocore.exceptions import PartialCredentialsError
 from moto import mock_s3
+from s3fs import S3FileSystem
 
 from kedro.io import DataSetError, PickleS3DataSet, Version
 
@@ -103,6 +104,14 @@ def mocked_s3_object_versioned(mocked_s3_bucket, save_version):
     return mocked_s3_bucket
 
 
+@pytest.fixture()
+def s3fs_cleanup():
+    # clear cache so we get a clean slate every time we instantiate a S3FileSystem
+    yield
+    S3FileSystem.cachable = False
+
+
+@pytest.mark.usefixtures("s3fs_cleanup")
 class TestPickleS3DataSet:
     @pytest.mark.usefixtures("mocked_s3_bucket")
     def test_exists(self, s3_data_set):
@@ -194,7 +203,7 @@ class TestPickleS3DataSet:
         ForkingPickler.dumps(s3_data_set)
 
 
-@pytest.mark.usefixtures("mocked_s3_bucket")
+@pytest.mark.usefixtures("s3fs_cleanup", "mocked_s3_bucket")
 class TestPickleS3DataSetVersioned:
     def test_exists(self, versioned_s3_data_set):
         """Test `exists` method invocation for versioned data set."""

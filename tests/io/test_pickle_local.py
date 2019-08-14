@@ -27,6 +27,7 @@
 # limitations under the License.
 from importlib import reload
 
+import pandas as pd
 import pytest
 from pandas.util.testing import assert_frame_equal
 
@@ -38,6 +39,11 @@ from kedro.io.core import DataSetError, Version
 @pytest.fixture
 def filepath_pkl(tmp_path):
     return str(tmp_path / "test.pkl")
+
+
+@pytest.fixture
+def dummy_dataframe():
+    return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
 
 
 @pytest.fixture(params=["pickle"])

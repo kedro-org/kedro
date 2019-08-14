@@ -249,7 +249,7 @@ def skip(app, what, name, obj, skip, options):
 def setup(app):
     app.connect("autodoc-process-docstring", autodoc_process_docstring)
     app.connect("autodoc-skip-member", skip)
-    # add Kedro styleheets
+    # add Kedro stylesheets
     for stylesheet in find_stylesheets():
         app.add_stylesheet(stylesheet)
     # enable rendering RST tables in Markdown

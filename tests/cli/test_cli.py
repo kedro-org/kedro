@@ -401,8 +401,8 @@ class TestGetProjectContext:
         msg = r"\`get_project_context\(\"{}\"\)\` is now deprecated\. ".format(key)
         if obj_name:
             msg += (
-                r"This is still returning a function that returns \`{}\` "
-                r"instance\, however passed arguments have no effect anymore\. ".format(
+                r"This is still returning a function that returns \`{}\` instance\, "
+                r"however passed arguments have no effect anymore since Kedro 0.15.0\. ".format(
                     obj_name
                 )
             )
@@ -457,13 +457,6 @@ class TestGetProjectContext:
 
     def test_verbose(self):
         assert not get_project_context("verbose")
-
-    def test_invalid_key(self):
-        pattern = (
-            r"`invalid` not found in the context returned by __get_kedro_context__"
-        )
-        with raises(Exception, match=pattern):
-            get_project_context("invalid")
 
 
 @fixture

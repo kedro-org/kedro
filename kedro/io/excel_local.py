@@ -126,7 +126,9 @@ class ExcelLocalDataSet(AbstractVersionedDataSet):
     def _save(self, data: pd.DataFrame) -> None:
         save_path = Path(self._get_save_path())
         save_path.parent.mkdir(parents=True, exist_ok=True)
-        with pd.ExcelWriter(str(save_path), engine=self._engine) as writer:
+        with pd.ExcelWriter(  # pylint: disable=abstract-class-instantiated
+            str(save_path), engine=self._engine
+        ) as writer:
             data.to_excel(writer, **self._save_args)
 
         load_path = Path(self._get_load_path())

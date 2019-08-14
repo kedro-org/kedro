@@ -15,7 +15,11 @@ This will create documentation based on the code structure of your project. Docu
 
 You can package your project by running `kedro package` from the command line. This will create one `.egg` file  and one `.whl` file within the `src/dist/` folder of your project, which are Python packaging formats. For further information about packaging for Python, documentation is provided [here](https://packaging.python.org/overview/).
 
-You can also check out [Kedro-Docker](https://github.com/quantumblacklabs/kedro-docker), an officially supported Kedro plugin for packaging and shipping Kedro projects within [Docker](https://www.docker.com/) containers.
+## Extend your project
+
+- You can also check out [Kedro-Docker](https://github.com/quantumblacklabs/kedro-docker), an officially supported Kedro plugin for packaging and shipping Kedro projects within [Docker](https://www.docker.com/) containers.
+
+- We also support converting your Kedro project into an Airflow project with the [Kedro-Airflow](https://github.com/quantumblacklabs/kedro-airflow) plugin.
 
 ## What is next?
 

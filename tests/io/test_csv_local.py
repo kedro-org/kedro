@@ -27,11 +27,22 @@
 # limitations under the License.
 from pathlib import Path
 
+import pandas as pd
 import pytest
 from pandas.util.testing import assert_frame_equal
 
 from kedro.io import CSVLocalDataSet, DataSetError
 from kedro.io.core import Version
+
+
+@pytest.fixture()
+def filepath(tmp_path):
+    return str(tmp_path / "some" / "dir" / "test.csv")
+
+
+@pytest.fixture
+def dummy_dataframe():
+    return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
 
 
 @pytest.fixture(params=[{"sep": ","}])
@@ -67,6 +78,15 @@ class TestCSVLocalDataSet:
         assert not csv_data_set.exists()
         csv_data_set.save(dummy_dataframe)
         assert csv_data_set.exists()
+
+    @pytest.mark.parametrize(
+        "path", ["http://abc.com", "https://abc.com/def?ghi=jkl#mnop", "blahblah://abc"]
+    )
+    def test_fails_with_remote_path(self, path):
+        with pytest.raises(ValueError) as assertion:
+            CSVLocalDataSet(filepath=path, save_args={"sep": ","})
+
+        assert "seems to be a remote file" in assertion.value.args[0]
 
 
 class TestCSVLocalDataSetVersioned:

@@ -18,7 +18,7 @@ Every time you start/restart an IPython session, a startup script (`<your_projec
 To reload these at any point (e.g., if you updated `catalog.yml`) use the [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) `%reload_kedro`. This magic can also be used to see the error message if any of the variables above are undefined.
 
 With `context`, you can access the following variables and methods
-- `context.project_path` (`str`) - Root directory of the project
+- `context.project_path` (`Path`) - Root directory of the project
 - `context.project_name` (`str`) - Project folder name
 - `context.io` or `context.catalog` (`DataCatalog`) - Data catalog
 - `context.config_loader` - An instance of `ConfigLoader`
@@ -27,15 +27,22 @@ With `context`, you can access the following variables and methods
   - `tags`: An optional list of node tags which should be used to
           filter the nodes of the ``Pipeline``. If specified, only the nodes
           containing *any* of these tags will be added to the ``Pipeline``
-   - `runner`: An optional parameter specifying the runner _instance_ that you want to run
+  - `runner`: An optional parameter specifying the runner _instance_ that you want to run
           the pipeline with
+  - `node_names`: An optional list of node names which should be used to
+          filter the nodes of the ``Pipeline``. If specified, only the nodes
+          with these names will be run.
+  - `from_nodes`: An optional list of node names which should be used as a
+          starting point of the new ``Pipeline``.
+  - `to_nodes`: An optional list of node names which should be used as an
+          end point of the new ``Pipeline``.
 
 ## Loading `DataCatalog` in IPython
 
-You can load a dataset of [Iris Test example](https://archive.ics.uci.edu/ml/datasets/iris) inside the IPython console, by simply executing the following:
+You can load a dataset of [Iris test example](https://archive.ics.uci.edu/ml/datasets/iris) inside the IPython console, by simply executing the following:
 
 ```python
-context.io.load("example_iris_data").head()
+context.catalog.load("example_iris_data").head()
 ```
 
 ```bash
@@ -68,7 +75,7 @@ kedro jupyter notebook
 This will open a Jupyter Notebook in your browser. Navigate to `notebooks` folder and create a notebook there with a **Kedro** kernel. After opening the newly created notebook you can check what the data looks like by pasting this into the first cell of the notebook and selecting **Run**:
 
 ```python
-df = context.io.load("example_iris_data")
+df = context.catalog.load("example_iris_data")
 df.head()
 ```
 
@@ -87,13 +94,12 @@ jupyter notebook
 And then add the following code in a notebook cell:
 
 ```python
+from pathlib import Path
 from kedro.context import load_context
-import os
 
-proj_path = os.getcwd()
-context_class = load_context(proj_path)
-context = context_class(proj_path)
-df = context.io.load("example_iris_data")
+proj_path = Path.cwd()
+context = load_context(proj_path)
+df = context.catalog.load("example_iris_data")
 df.head()
 ```
 
@@ -104,6 +110,21 @@ You should be able to see the first 5 rows of the loaded dataset as follows:
 > *Note:*
 If you see an error message in a notebook cell, you can see what went wrong by using `print(startup_error)`, where `startup_error` is available as a variable in Python.
 <br/>When you add new datasets to your `catalog.yml` file you need to reload Kedro's session by running `%reload_kedro` in your cell.
+
+You can also run your Kedro pipeline by using `context.run()`, which provides the same functionality as the CLI command `kedro run`. You can try this out by typing the following in a notebook cell:
+
+```python
+from pathlib import Path
+from kedro.context import load_context
+
+proj_path = Path.cwd()
+context = load_context(proj_path)
+context.run()
+```
+
+You should be able to see the logging output as follows:
+
+![](images/jupyter-notebook-ch10-3.png)
 
 ## Extras
 
@@ -153,4 +174,3 @@ Placing your `Notebook.ipynb` file anywhere in `new-kedro-project/notebooks/`, `
 #### Error handling
 
 In case this script fails to execute any of your Kedro project startup scripts, global variable `load_kedro_errors` will contain a dictionary with the key pointing to the failed script path and the value containing exception object.
-

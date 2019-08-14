@@ -45,6 +45,11 @@ ERROR_PREFIX = (
 )
 
 
+@pytest.fixture
+def dummy_dataframe():
+    return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+
+
 @pytest.fixture(params=[dict()])
 def table_data_set(request):
     kwargs = dict(table_name=TABLE_NAME, credentials=dict(con=CONNECTION))

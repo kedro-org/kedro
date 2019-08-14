@@ -40,9 +40,16 @@ from pathlib import Path
 import click
 from click import secho, style
 from kedro.cli import main as kedro_main
-from kedro.cli.utils import KedroCliError, call, forward_command, python_call, export_nodes
+from kedro.cli.utils import (
+    KedroCliError,
+    call,
+    forward_command,
+    python_call,
+    export_nodes,
+)
 from kedro.utils import load_obj
 from kedro.runner import SequentialRunner
+from typing import Iterable, List
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -74,6 +81,10 @@ pipeline will run using environment `local`."""
 
 NODE_ARG_HELP = """Run only nodes with specified names."""
 
+FROM_NODES_HELP = """A list of node names which should be used as a starting point."""
+
+TO_NODES_HELP = """A list of node names which should be used as an end point"""
+
 PARALLEL_ARG_HELP = """Run the pipeline using the `ParallelRunner`.
 If not specified, use the `SequentialRunner`. This flag cannot be used together
 with --runner."""
@@ -88,28 +99,35 @@ OVERWRITE_HELP = """If Python file already exists for the equivalent notebook,
 overwrite its contents."""
 
 
-def __get_kedro_context__(**kwargs):
-    """Used to provide this project's context to plugins."""
-    from {{cookiecutter.python_package}}.run import __kedro_context__
-    return __kedro_context__(**kwargs)
-
-
 @click.group(context_settings=CONTEXT_SETTINGS, name=__file__)
 def cli():
     """Command line tools for manipulating a Kedro project."""
 
 
 @cli.command()
-@click.option("--node", "-n", "node_names", type=str, default=None, multiple=True, help=NODE_ARG_HELP)
+@click.option("--from-nodes", type=str, default="", help=FROM_NODES_HELP)
+@click.option("--to-nodes", type=str, default="", help=TO_NODES_HELP)
+@click.option(
+    "--node",
+    "-n",
+    "node_names",
+    type=str,
+    default=None,
+    multiple=True,
+    help=NODE_ARG_HELP,
+)
 @click.option(
     "--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP
 )
 @click.option("--parallel", "-p", is_flag=True, multiple=False, help=PARALLEL_ARG_HELP)
 @click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
 @click.option("--tag", "-t", type=str, default=None, multiple=True, help=TAG_ARG_HELP)
-def run(tag, env, parallel, runner, node_names):
+def run(tag, env, parallel, runner, node_names, to_nodes, from_nodes):
     """Run the pipeline."""
     from {{cookiecutter.python_package}}.run import main
+    from_nodes = [n for n in from_nodes.split(",") if n]
+    to_nodes = [n for n in to_nodes.split(",") if n]
+
     if parallel and runner:
         raise KedroCliError(
             "Both --parallel and --runner options cannot be used together. "
@@ -118,7 +136,15 @@ def run(tag, env, parallel, runner, node_names):
     if parallel:
         runner = "ParallelRunner"
     runner_class = load_obj(runner, "kedro.runner") if runner else SequentialRunner
-    main(tags=tag, env=env, runner=runner_class(), node_names=node_names)
+
+    main(
+        tags=tag,
+        env=env,
+        runner=runner_class(),
+        node_names=node_names,
+        from_nodes=from_nodes,
+        to_nodes=to_nodes,
+    )
 
 
 @forward_command(cli, forward_help=True)
@@ -134,7 +160,11 @@ def test(args):
 
 @cli.command()
 def install():
-    """Install project dependencies from requirements.txt."""
+    """Install project dependencies from both requirements.txt and environment.yml (optional)."""
+
+    if (Path.cwd() / "src" / "environment.yml").is_file():
+        call(["conda", "install", "--file", "src/environment.yml", "--yes"])
+
     python_call("pip", ["install", "-U", "-r", "src/requirements.txt"])
 
 
@@ -175,6 +205,24 @@ def build_docs():
     call(["sphinx-build", "-M", "html", "docs/source", "docs/build", "-a"])
 
 
+@cli.command("build-reqs")
+def build_reqs():
+    """Build the project dependency requirements."""
+    requirements_path = Path.cwd() / "src" / "requirements.in"
+    if not requirements_path.is_file():
+        secho("No requirements.in found. Copying contents from requirements.txt...")
+        contents = (Path.cwd() / "src" / "requirements.txt").read_text()
+        requirements_path.write_text(contents)
+    python_call("piptools", ["compile", str(requirements_path)])
+    secho(
+        (
+            "Requirements built! Please update requirements.in "
+            "if you'd like to make a change in your project's dependencies, "
+            "and re-run build-reqs to generate the new requirements.txt."
+        )
+    )
+
+
 @cli.command("activate-nbstripout")
 def activate_nbstripout():
     """Install the nbstripout git hook to automatically clean notebooks."""
@@ -205,6 +253,17 @@ def activate_nbstripout():
     call(["nbstripout", "--install"])
 
 
+def _build_jupyter_command(
+    base: str, ip: str, all_kernels: bool, args: Iterable[str]
+) -> List[str]:
+    cmd = [base, "--ip=" + ip]
+
+    if not all_kernels:
+        cmd.append("--KernelSpecManager.whitelist=['python3']")
+
+    return cmd + list(args)
+
+
 @cli.group()
 def jupyter():
     """Open Jupyter Notebook / Lab with project specific variables loaded, or
@@ -214,20 +273,30 @@ def jupyter():
 
 @forward_command(jupyter, "notebook", forward_help=True)
 @click.option("--ip", type=str, default="127.0.0.1")
-def jupyter_notebook(ip, args):
+@click.option("--all-kernels", is_flag=True, default=False)
+def jupyter_notebook(ip, all_kernels, args):
     """Open Jupyter Notebook with project specific variables loaded."""
     if "-h" not in args and "--help" not in args:
-        ipython_message()
-    call(["jupyter-notebook", "--ip=" + ip] + list(args))
+        ipython_message(all_kernels)
+
+    call(
+        _build_jupyter_command(
+            "jupyter-notebook", ip=ip, all_kernels=all_kernels, args=args
+        )
+    )
 
 
 @forward_command(jupyter, "lab", forward_help=True)
 @click.option("--ip", type=str, default="127.0.0.1")
-def jupyter_lab(ip, args):
+@click.option("--all-kernels", is_flag=True, default=False)
+def jupyter_lab(ip, all_kernels, args):
     """Open Jupyter Lab with project specific variables loaded."""
     if "-h" not in args and "--help" not in args:
-        ipython_message()
-    call(["jupyter-lab", "--ip=" + ip] + list(args))
+        ipython_message(all_kernels)
+
+    call(
+        _build_jupyter_command("jupyter-lab", ip=ip, all_kernels=all_kernels, args=args)
+    )
 
 
 @jupyter.command("convert")
@@ -252,6 +321,7 @@ def convert_notebook(all_flag, overwrite_flag, filepath):
     Should not be provided if --all flag is already present.
 
     """
+    from {{cookiecutter.python_package}}.run import ProjectContext
     if not filepath and not all_flag:
         secho(
             "Please specify a notebook filepath "
@@ -259,7 +329,7 @@ def convert_notebook(all_flag, overwrite_flag, filepath):
         )
         return
 
-    kedro_project_path = __get_kedro_context__(**kwargs)["project_path"]
+    kedro_project_path = ProjectContext(Path.cwd()).project_path
     kedro_package_name = "{{cookiecutter.python_package}}"
 
     if all_flag:
@@ -302,7 +372,7 @@ def convert_notebook(all_flag, overwrite_flag, filepath):
     secho("Done!")
 
 
-def ipython_message():
+def ipython_message(all_kernels=True):
     """Show a message saying how we have configured the IPython env."""
     ipy_vars = ["startup_error", "context"]
     secho("-" * 79, fg="cyan")
@@ -314,6 +384,11 @@ def ipython_message():
         )
     )
     secho("or to see the error message if they are undefined")
+
+    if not all_kernels:
+        secho("The choice of kernels is limited to the default one.", fg="yellow")
+        secho("(restart with --all-kernels to get access to others)", fg="yellow")
+
     secho("-" * 79, fg="cyan")
 
 

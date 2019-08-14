@@ -5,7 +5,7 @@ environment:
   # APPVEYOR_RDP_PASSWORD: <your_password>
 
   matrix:
-    - PYTHON_VERSION: 3.5.2
+    - PYTHON_VERSION: 3.5
       MINICONDA3: C:\Miniconda3-x64
       PYTHON_ARCH: "64"
 
@@ -13,7 +13,7 @@ environment:
       MINICONDA3: C:\Miniconda3-x64
       PYTHON_ARCH: "64"
 
-    - PYTHON_VERSION: 3.7.2
+    - PYTHON_VERSION: 3.7
       MINICONDA3: C:\Miniconda3-x64
       PYTHON_ARCH: "64"
 

@@ -25,24 +25,25 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
-"""
-This file contains the fixtures that are reusable by any tests within
-this directory. You don't need to import the fixtures as pytest will
-discover them automatically. More info here:
-https://docs.pytest.org/en/latest/fixture.html
-"""
+Feature: build-reqs target in new project
 
-from pytest import fixture
+  Scenario: Execute build-reqs target
+    Given I have prepared a config file with example code
+    And I have run a non-interactive kedro new
+    And I have removed kedro from the requirements
+    When I execute the kedro command "build-reqs"
+    Then I should get a successful exit code
+    And requirements should be generated
 
-from kedro.io.core import generate_current_version
-
-
-@fixture(params=[None])
-def load_version(request):
-    return request.param
-
-
-@fixture(params=[None])
-def save_version(request):
-    return request.param or generate_current_version()
+  Scenario: Execute build-reqs target
+    Given I have prepared a config file with example code
+    And I have run a non-interactive kedro new
+    And I have removed kedro from the requirements
+    And I have executed the kedro command "build-reqs"
+    When I add scrapy>=1.7.3 to the requirements
+    And I execute the kedro command "build-reqs"
+    Then I should get a successful exit code
+    Then requirements should be generated
+    And scrapy should be in the requirements

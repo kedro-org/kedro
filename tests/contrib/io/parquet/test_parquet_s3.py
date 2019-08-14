@@ -40,12 +40,23 @@ from s3fs import S3FileSystem
 
 from kedro.contrib.io.parquet import ParquetS3DataSet
 from kedro.io import DataSetError, Version
+from kedro.io.core import generate_current_version
 
 FILENAME = "test.parquet"
 BUCKET_NAME = "test_bucket"
 AWS_CREDENTIALS = dict(
     aws_access_key_id="FAKE_ACCESS_KEY", aws_secret_access_key="FAKE_SECRET_KEY"
 )
+
+
+@pytest.fixture(params=[None])
+def load_version(request):
+    return request.param
+
+
+@pytest.fixture(params=[None])
+def save_version(request):
+    return request.param or generate_current_version()
 
 
 @pytest.fixture(params=[None])

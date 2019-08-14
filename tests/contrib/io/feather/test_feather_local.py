@@ -34,6 +34,17 @@ from pandas.util.testing import assert_frame_equal
 from kedro.contrib.io.feather import FeatherLocalDataSet
 from kedro.io import DataSetError
 from kedro.io.core import Version
+from kedro.io.core import generate_current_version
+
+
+@pytest.fixture(params=[None])
+def load_version(request):
+    return request.param
+
+
+@pytest.fixture(params=[None])
+def save_version(request):
+    return request.param or generate_current_version()
 
 
 @pytest.fixture(params=[None])

@@ -63,7 +63,9 @@ def feather_data_set(filepath):
 
 @pytest.fixture
 def versioned_feather_data_set(filepath, load_version, save_version):
-    return FeatherLocalDataSet(filepath=filepath, version=Version(load_version, save_version))
+    return FeatherLocalDataSet(
+        filepath=filepath, version=Version(load_version, save_version)
+    )
 
 
 class TestFeatherLocalDataSet:
@@ -88,7 +90,7 @@ class TestFeatherLocalDataSet:
 
 class TestFeatherLocalDataSetVersioned:
     def test_save_and_load(
-            self, versioned_feather_data_set, dummy_dataframe, filepath, save_version
+        self, versioned_feather_data_set, dummy_dataframe, filepath, save_version
     ):
         """Test that saved and reloaded data matches the original one for
         the versioned data set."""
@@ -129,7 +131,7 @@ class TestFeatherLocalDataSetVersioned:
         "save_version", ["2019-01-02T00.00.00.000Z"], indirect=True
     )
     def test_save_version_warning(
-            self, versioned_feather_data_set, load_version, save_version, dummy_dataframe
+        self, versioned_feather_data_set, load_version, save_version, dummy_dataframe
     ):
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
@@ -147,8 +149,9 @@ class TestFeatherLocalDataSetVersioned:
         when applicable."""
         filepath = "test.feather"
         ds = FeatherLocalDataSet(filepath=filepath)
-        ds_versioned = FeatherLocalDataSet(filepath=filepath,
-                                           version=Version(load_version, save_version))
+        ds_versioned = FeatherLocalDataSet(
+            filepath=filepath, version=Version(load_version, save_version)
+        )
         assert filepath in str(ds)
         assert "version" not in str(ds)
 

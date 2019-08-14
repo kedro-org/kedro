@@ -71,8 +71,9 @@ class FeatherLocalDataSet(AbstractVersionedDataSet):
 
     """
 
-    def __init__(self, filepath: str, load_args: Dict[str, Any] = None,
-                 version: Version = None) -> None:
+    def __init__(
+        self, filepath: str, load_args: Dict[str, Any] = None, version: Version = None
+    ) -> None:
         """Creates a new instance of ``FeatherLocalDataSet`` pointing to a concrete
         filepath.
 
@@ -117,7 +118,5 @@ class FeatherLocalDataSet(AbstractVersionedDataSet):
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
-            filepath=self._filepath,
-            load_args=self._load_args,
-            version=self._version,
+            filepath=self._filepath, load_args=self._load_args, version=self._version
         )

@@ -1,0 +1,5 @@
+output_dir: tests/template/
+project_name: Test Project
+repo_name: fake_project
+python_package: fake_project
+include_example: true

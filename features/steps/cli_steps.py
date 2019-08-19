@@ -261,6 +261,7 @@ def uninstall_package_via_pip(context, package):
 
 
 @given("I have installed the project's python package")
+@when("I install the project's python package")
 def install_project_package_via_pip(context):
     """Install a python package using pip."""
     dist_dir = context.root_project_dir / "src" / "dist"
@@ -421,7 +422,7 @@ def do_git_reset_hard(context):
 def add_req(context: behave.runner.Context, dependency: str):
     reqs_path = context.root_project_dir / "src" / "requirements.in"
     if reqs_path.is_file():
-        reqs_path.write_text("\n" + str(dependency) + "\n")
+        reqs_path.write_text(reqs_path.read_text() + "\n" + str(dependency) + "\n")
 
 
 @then("CLI should print the version in an expected format")

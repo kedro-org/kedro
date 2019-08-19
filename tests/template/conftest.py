@@ -26,20 +26,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import shutil
+import sys
+from pathlib import Path
 
-Feature: Kedro IO SQLTableDataSet and SQLQueryDataSet features
+import pytest
 
-  Scenario: Read from SQL data set
-    Given I have defined an SQL data set with tables A and B
-    When I load from table A
-    Then I should get the expected number of rows back
+from kedro.cli.cli import _create_project
 
-  Scenario: Write to SQL data set
-    Given I have defined an SQL data set with tables A and B
-    When I save to table B
-    Then I should get the written data back
 
-  Scenario: Read from SQL query data set
-    Given I have defined an SQL query data set with filtered query to table C
-    When I query table C
-    Then I should get the filtered rows back
+@pytest.fixture(scope='session')
+def project_path():
+    return Path(__file__).parent / 'fake_project'
+
+
+@pytest.fixture(autouse=True, scope='function')
+def fake_project(project_path: Path):
+    shutil.rmtree(str(project_path), ignore_errors=True)
+    _create_project(str(Path(__file__).parent / 'project_config.yml'), verbose=True)
+
+    (project_path / '__init__.py').touch()
+    (project_path / 'src' / '__init__.py').touch()
+
+    path_to_add = str(project_path.parent)
+    if path_to_add not in sys.path:
+        sys.path = [path_to_add] + sys.path
+
+    import fake_project.kedro_cli  # pylint: disable=import-error
+
+    yield fake_project
+    shutil.rmtree(str(project_path))

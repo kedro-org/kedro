@@ -143,7 +143,7 @@ def report_accuracy(predictions: np.ndarray, test_y: pd.DataFrame) -> None:
     accuracy = np.sum(predictions == target) / target.shape[0]
     # Log the accuracy of the model
     log = logging.getLogger(__name__)
-    log.info("Model accuracy on test set: {0:.2f}%".format(accuracy * 100))
+    log.info("Model accuracy on test set: %0.2f%%", accuracy * 100)
 
 
 def _sigmoid(z):

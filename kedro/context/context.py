@@ -287,7 +287,7 @@ class KedroContext(abc.ABC):
             by the node outputs.
         """
         # Report project name
-        logging.info("** Kedro project {}".format(self.project_path.name))
+        logging.info("** Kedro project %s", self.project_path.name)
 
         # Load the pipeline as the intersection of all conditions
         pipeline = pipeline or self.pipeline

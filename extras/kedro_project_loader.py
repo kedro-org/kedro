@@ -111,11 +111,13 @@ def startup_kedro_project(project_dir: Path):
                     exec(_compiled, globals())  # pylint: disable=exec-used
                 except Exception as err:  # pylint: disable=broad-except
                     load_kedro_errors[str(script)] = err
-                    msg = "Startup script `%s` failed:\n%s"
-                    logging.error(msg, str(script), str(err))
+                    logging.error(
+                        "Startup script `%s` failed:\n%s", str(script), str(err)
+                    )
                 else:
-                    msg = "Successfully executed startup script `%s`"
-                    logging.info(msg, str(script))
+                    logging.info(
+                        "Successfully executed startup script `%s`", str(script)
+                    )
 
 
 def main():

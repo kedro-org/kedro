@@ -38,7 +38,7 @@ from kedro.cli.utils import KedroCliError
 
 @pytest.fixture(autouse=True)
 def call_mock(mocker, fake_project):
-    return mocker.patch.object(fake_project.kedro_cli, 'call')
+    return mocker.patch.object(fake_project.kedro_cli, "call")
 
 
 @pytest.fixture()
@@ -48,9 +48,9 @@ def fake_nbstripout():
     on import, but it's patches by pytest.
     Let's replace it by the fake!
     """
-    sys.modules['nbstripout'] = 'fake'
+    sys.modules["nbstripout"] = "fake"
     yield
-    del sys.modules['nbstripout']
+    del sys.modules["nbstripout"]
 
 
 @pytest.fixture
@@ -59,23 +59,23 @@ def missing_nbstripout(mocker):
     Pretend ``nbstripout`` module doesn't exist.
     In fact, no new imports are possible after that.
     """
-    sys.modules.pop('nbstripout', None)
-    mocker.patch.object(sys, 'path', [])
+    sys.modules.pop("nbstripout", None)
+    mocker.patch.object(sys, "path", [])
 
 
 @pytest.fixture
 def fake_git_repo(mocker):
-    return mocker.patch('subprocess.run', return_value=mocker.Mock(returncode=0))
+    return mocker.patch("subprocess.run", return_value=mocker.Mock(returncode=0))
 
 
 @pytest.fixture
 def without_git_repo(mocker):
-    return mocker.patch('subprocess.run', return_value=mocker.Mock(returncode=1))
+    return mocker.patch("subprocess.run", return_value=mocker.Mock(returncode=1))
 
 
 def test_install_successfully(fake_project, call_mock, fake_nbstripout, fake_git_repo):
     fake_project.kedro_cli.activate_nbstripout.callback()
-    call_mock.assert_called_once_with(['nbstripout', '--install'])
+    call_mock.assert_called_once_with(["nbstripout", "--install"])
 
     fake_git_repo.assert_called_once_with(
         ["git", "rev-parse", "--git-dir"],
@@ -89,7 +89,7 @@ def test_nbstripout_not_found(fake_project, missing_nbstripout, fake_git_repo):
     Run activate-nbstripout target without nbstripout installed
     There should be a clear message about it.
     """
-    with pytest.raises(KedroCliError, match='nbstripout is not installed'):
+    with pytest.raises(KedroCliError, match="nbstripout is not installed"):
         fake_project.kedro_cli.activate_nbstripout.callback()
 
 
@@ -98,5 +98,5 @@ def test_no_git_repo(fake_project, fake_nbstripout, without_git_repo):
     Run activate-nbstripout target with no git repo available.
     There should be a clear message about it.
     """
-    with pytest.raises(KedroCliError, match='Not a git repository'):
+    with pytest.raises(KedroCliError, match="Not a git repository"):
         fake_project.kedro_cli.activate_nbstripout.callback()

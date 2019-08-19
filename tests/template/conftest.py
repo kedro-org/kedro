@@ -35,18 +35,18 @@ import pytest
 from kedro.cli.cli import _create_project
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def project_path():
-    return Path(__file__).parent / 'fake_project'
+    return Path(__file__).parent / "fake_project"
 
 
-@pytest.fixture(autouse=True, scope='function')
+@pytest.fixture(autouse=True, scope="function")
 def fake_project(project_path: Path):
     shutil.rmtree(str(project_path), ignore_errors=True)
-    _create_project(str(Path(__file__).parent / 'project_config.yml'), verbose=True)
+    _create_project(str(Path(__file__).parent / "project_config.yml"), verbose=True)
 
-    (project_path / '__init__.py').touch()
-    (project_path / 'src' / '__init__.py').touch()
+    (project_path / "__init__.py").touch()
+    (project_path / "src" / "__init__.py").touch()
 
     path_to_add = str(project_path.parent)
     if path_to_add not in sys.path:

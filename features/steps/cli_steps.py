@@ -261,6 +261,7 @@ def uninstall_package_via_pip(context, package):
 
 
 @given("I have installed the project's python package")
+@when("I install the project's python package")
 def install_project_package_via_pip(context):
     """Install a python package using pip."""
     dist_dir = context.root_project_dir / "src" / "dist"
@@ -316,6 +317,16 @@ def commit_changes_to_git(context):
     """Commit changes to git"""
     with util.chdir(context.root_project_dir):
         check_run("git commit -m 'Change {time}'".format(time=time()))
+
+
+@given("I have removed kedro from the requirements")
+def remove_req(context: behave.runner.Context):
+    reqs_path = context.root_project_dir / "src" / "requirements.txt"
+    if reqs_path.is_file():
+        old_reqs = reqs_path.read_text()
+        new_reqs = old_reqs.replace("kedro==", "#kedro==")
+        assert not old_reqs == new_reqs
+        reqs_path.write_text(new_reqs)
 
 
 @when('I execute the kedro command "{command}"')
@@ -411,8 +422,7 @@ def do_git_reset_hard(context):
 def add_req(context: behave.runner.Context, dependency: str):
     reqs_path = context.root_project_dir / "src" / "requirements.in"
     if reqs_path.is_file():
-        with open(str(reqs_path), "a") as reqs_file:
-            reqs_file.write("\n" + str(dependency) + "\n")
+        reqs_path.write_text(reqs_path.read_text() + "\n" + str(dependency) + "\n")
 
 
 @then("CLI should print the version in an expected format")

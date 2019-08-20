@@ -50,7 +50,7 @@ class ProjectContext(KedroContext):
         self._spark_session.sparkContext.setLogLevel("WARN")
 
     project_name = "kedro"
-    project_version = "0.14.3"
+    project_version = "0.15.0"
 # ...
 
 ```

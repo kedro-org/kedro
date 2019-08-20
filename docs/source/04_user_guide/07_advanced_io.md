@@ -222,3 +222,4 @@ Currently the following datasets support versioning:
 - `PickleS3DataSet`
 - `TextLocalDataSet`
 - `ExcelLocalDataSet`
+- `FeatherLocalDataSet`

@@ -166,8 +166,9 @@ git push --no-verify <...>
 All checks will run during CI build, so skipping checks on push will
 not allow you to merge your code with failing checks.
 
-You can uninstall the pre-commit hooks by running
+You can uninstall the pre-commit hooks by running:
+
 ```bash
 make uninstall-pre-commit
 ```
-`pre-commit` will still be used by `make lint`, but will install the git hooks.
+`pre-commit` will still be used by `make lint`, but will not install the git hooks.

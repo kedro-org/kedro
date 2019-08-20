@@ -150,3 +150,4 @@ docs/tmp-build-artifacts
 docs/build
 docs/node_modules
 docs/source/04_user_guide/source/.ipynb
+tests/template/fake_project/

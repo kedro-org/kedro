@@ -162,7 +162,7 @@ class ConfigLoader:
                     "Config from path `%s` will override the following "
                     "existing top-level config keys: %s"
                 )
-                self.logger.debug(msg, conf_path, sorted_keys)
+                self.logger.info(msg, conf_path, sorted_keys)
             config.update(new_conf)
             processed_files.extend(new_processed_files)
         if not processed_files:

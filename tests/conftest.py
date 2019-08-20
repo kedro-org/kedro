@@ -70,5 +70,10 @@ def spark_session():
 
     # py4j doesn't shutdown properly so kill the actual JVM process
     for obj in gc.get_objects():
-        if isinstance(obj, Popen) and "pyspark" in obj.args[0]:
-            obj.terminate()
+        try:
+            if isinstance(obj, Popen) and "pyspark" in obj.args[0]:
+                obj.terminate()
+        except ReferenceError:  # pragma: no cover
+            # gc.get_objects may return dead weak proxy objects that will raise
+            # ReferenceError when you isinstance them
+            pass

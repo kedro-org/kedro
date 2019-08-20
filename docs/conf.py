@@ -14,7 +14,6 @@
 # serve to show the default.
 
 import importlib
-import os
 import re
 import shutil
 import sys
@@ -39,10 +38,6 @@ version = re.match(r"^([0-9]+\.[0-9]+).*", release).group(1)
 
 
 # -- General configuration ---------------------------------------------------
-
-on_rtd = os.getenv("READTHEDOCS") == "True"  # running on ReadTheDocs
-
-
 # If your documentation needs a minimal Sphinx version, state it here.
 #
 # needs_sphinx = '1.0'
@@ -91,9 +86,9 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path .
-exclude_patterns = ["**.ipynb_checkpoints", "_templates", "modules.rst"]
-if on_rtd:
-    exclude_patterns.append("source")
+exclude_patterns = [
+    "**.ipynb_checkpoints", "_templates", "modules.rst", "source",
+]
 
 
 # The name of the Pygments (syntax highlighting) style to use.
@@ -389,22 +384,22 @@ def skip(app, what, name, obj, skip, options):
     return skip
 
 
-def _prepare_cwd_for_rtd(app, config):
+def _prepare_build_dir(app, config):
     """Get current working directory to the state expected
     by the ReadTheDocs builder. Shortly, it does the same as
     ./build-docs.sh script except not running `sphinx-build` step."""
-    copy_tree(str(here / "source"), str(here))
-    copy_tree(str(here / "05_api_docs"), str(here))
-    shutil.rmtree(str(here / "05_api_docs"))
-    shutil.rmtree(str(here / "_build"), ignore_errors=True)
-    _css = here / "_build" / "html" / "_static" / "css"
-    copy_tree(str(here / "css"), str(_css))
-    shutil.rmtree(str(here / "css"))
+    build_root = Path(app.srcdir)
+    copy_tree(str(here / "source"), str(build_root))
+    copy_tree(str(build_root / "05_api_docs"), str(build_root))
+    shutil.rmtree(str(build_root / "05_api_docs"))
+    shutil.rmtree(str(build_root / "_build"), ignore_errors=True)
+    _css = build_root / "_build" / "html" / "_static" / "css"
+    copy_tree(str(build_root / "css"), str(_css))
+    shutil.rmtree(str(build_root / "css"))
 
 
 def setup(app):
-    if on_rtd:
-        app.connect("config-inited", _prepare_cwd_for_rtd)
+    app.connect("config-inited", _prepare_build_dir)
     app.connect("autodoc-process-docstring", autodoc_process_docstring)
     app.connect("autodoc-skip-member", skip)
     app.add_stylesheet("css/qb1-sphinx-rtd.css")

@@ -43,14 +43,11 @@ For contributors, if you would like to submit a new dataset, you will have to ex
 
 ## Versioning
 
-In order to enable versioning, all of the following conditions must be met:
-
-1. The dataset must:
+In order to enable versioning, you need to update the `catalog.yml` config file and set the `versioned` attribute to `true` for the given dataset. If this is a custom dataset, the implementation must also:
     1. extend `kedro.io.core.AbstractVersionedDataSet` AND
     2. add `version` namedtuple as an argument to its `__init__` method AND
     3. call `super().__init__()` with positional arguments `filepath`, `version`, and optionally with a `glob` and an `exists` functions if it uses non-local filesystem (see [kedro.io.CSVLocalDataSet](https://github.com/quantumblacklabs/kedro/blob/master/kedro/io/csv_local.py) and [kedro.io.CSVS3DataSet](https://github.com/quantumblacklabs/kedro/blob/master/kedro/io/csv_s3.py) for example) AND
     4. modify its `_describe`, `_load` and `_save` methods respectively to support versioning (see [`kedro.io.CSVLocalDataSet`](/kedro.io.CSVLocalDataSet) for an example implementation) AND
-2. In the `catalog.yml` config file you must enable versioning by setting `versioned` attribute to `true` for the given dataset.
 
 An example dataset could look similar to the below:
 
@@ -217,9 +214,9 @@ Currently the following datasets support versioning:
 - `HDFS3DataSet`
 - `JSONLocalDataSet`
 - `ParquetLocalDataSet`
-- `ParquetS3DataSet`
 - `PickleLocalDataSet`
 - `PickleS3DataSet`
 - `TextLocalDataSet`
 - `ExcelLocalDataSet`
-- `FeatherLocalDataSet`
+- `kedro.contrib.io.feather.FeatherLocalDataSet`
+- `kedro.contrib.io.parquet.ParquetS3DataSet`

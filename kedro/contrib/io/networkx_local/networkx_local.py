@@ -33,7 +33,6 @@ See https://networkx.github.io/documentation/stable/tutorial.html for details.
 """
 
 import json
-from os.path import isfile
 from pathlib import Path
 from typing import Any, Dict, Union
 
@@ -41,6 +40,7 @@ import networkx
 
 from kedro.contrib.io import DefaultArgumentsMixIn
 from kedro.io import AbstractDataSet
+from kedro.io.core import DataSetError
 
 
 class NetworkXLocalDataSet(DefaultArgumentsMixIn, AbstractDataSet):
@@ -68,7 +68,7 @@ class NetworkXLocalDataSet(DefaultArgumentsMixIn, AbstractDataSet):
 
     def __init__(
         self,
-        filepath: str,
+        filepath: Union[str, Path],
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
     ) -> None:
@@ -102,4 +102,8 @@ class NetworkXLocalDataSet(DefaultArgumentsMixIn, AbstractDataSet):
             output_file.write(json_payload)
 
     def _exists(self) -> bool:
-        return isfile(self._filepath)
+        try:
+            path = self._filepath
+        except DataSetError:
+            return False
+        return Path(path).is_file()

@@ -7,6 +7,8 @@
   - Added `NetworkXLocalDataSet` in `contrib` to load and save local graphs via NetworkX. (by [@josephhaaga](https://github.com/josephhaaga))
 ## Bug fixes and other changes
 
+* Fixed a bug in `ConfigLoader.get()` not listing nested files for `**`-ending glob patterns.
+
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions

@@ -89,6 +89,10 @@ class NetworkXLocalDataSet(DefaultArgumentsMixIn, AbstractDataSet):
 
     def _load(self) -> Union[networkx.Graph]:
         graph = None
+        if not self._exists():
+            raise DataSetError(
+                "Failed while loading data from data set NetworkXLocalDataSet()"
+            )
         with self._filepath.open("r") as input_file:
             json_payload = json.loads(input_file.readline())
             graph = networkx.node_link_graph(json_payload, **self._load_args)
@@ -102,8 +106,5 @@ class NetworkXLocalDataSet(DefaultArgumentsMixIn, AbstractDataSet):
             output_file.write(json_payload)
 
     def _exists(self) -> bool:
-        try:
-            path = self._filepath
-        except DataSetError:
-            return False
+        path = self._filepath
         return Path(path).is_file()

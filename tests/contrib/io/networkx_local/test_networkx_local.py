@@ -69,7 +69,7 @@ class TestNetworkXLocalDataSet:
             r"Failed while loading data from data set " r"NetworkXLocalDataSet\(.*\)"
         )
         with pytest.raises(DataSetError, match=pattern):
-            networkx_data_set.load()
+            assert networkx_data_set.load()
 
     def test_exists(self, networkx_data_set, network_graph_data):
         """Test `exists` method invocation."""

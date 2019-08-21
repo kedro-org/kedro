@@ -41,7 +41,12 @@ def filepath_json(tmp_path):
 
 @pytest.fixture
 def networkx_data_set(filepath_json):
-    return NetworkXLocalDataSet(filepath=filepath_json)
+    attrs = dict(source="from", target="to", name="id", key="key", link="links")
+    return NetworkXLocalDataSet(
+        filepath=filepath_json,
+        load_args={"attrs": attrs, "directed": True},
+        save_args={"attrs": attrs},
+    )
 
 
 @pytest.fixture(params=[[1, 2, 3]])
@@ -49,10 +54,8 @@ def network_graph_data():
     return networkx.complete_graph(3)
 
 
+@pytest.mark.usefixtures("networkx_data_set")
 class TestNetworkXLocalDataSet:
-    # @pytest.mark.parametrize(
-    #     "network_graph_data", networkx.complete_graph(100), indirect=True
-    # )
     def test_save_and_load(self, networkx_data_set, network_graph_data):
         """Test saving and reloading the data set."""
         networkx_data_set.save(network_graph_data)

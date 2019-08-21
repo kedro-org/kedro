@@ -34,6 +34,7 @@ See https://networkx.github.io/documentation/stable/tutorial.html for details.
 
 import json
 from os.path import isfile
+from pathlib import Path
 from typing import Any, Dict, Union
 
 import networkx
@@ -49,13 +50,13 @@ class NetworkXLocalDataSet(DefaultArgumentsMixIn, AbstractDataSet):
     See https://networkx.github.io/documentation/stable/tutorial.html for details.
     Example:
     ::
-        >>> from kedro.contrib.io.networkx import NetworkXLocalDataSet
-        >>> graph = NetworkXLocalDataSet(filepath="graph.json")
-        >>> bb = networkx.betweenness_centrality(graph)
-        >>> nx.set_node_attributes(graph, bb, 'betweenness')
-        >>> graph.save()
-        >>> reloaded = graph.load()
-        >>> assert graph == reloaded
+        >>> from kedro.contrib.io.networkx_local import NetworkXLocalDataSet
+        >>> import networkx as nx
+        >>> graph = nx.complete_graph(100)
+        >>> graph_dataset = NetworkXLocalDataSet(filepath="test.json")
+        >>> graph_dataset.save(graph)
+        >>> reloaded = graph_dataset.load()
+        >>> assert nx.is_isomorphic(graph, reloaded)
     """
 
     def _describe(self) -> Dict[str, Any]:
@@ -83,25 +84,20 @@ class NetworkXLocalDataSet(DefaultArgumentsMixIn, AbstractDataSet):
                 See https://networkx.github.io/documentation for details.
 
         """
-        self._filepath = filepath
+        self._filepath = Path(filepath)
         super().__init__(load_args, save_args)
 
-    def _load(self) -> Union[networkx.Graph, Dict[str, networkx.Graph]]:
+    def _load(self) -> Union[networkx.Graph]:
         graph = None
-        with open(self._filepath, "r") as input_file:
+        with self._filepath.open("r") as input_file:
             json_payload = json.loads(input_file.readline())
             graph = networkx.node_link_graph(json_payload, **self._load_args)
 
         return graph
 
     def _save(self, data: networkx.Graph) -> None:
-        json_graph = networkx.node_link_data(data)
-        target_path = (
-            self._save_args["output_filepath"]
-            if "output_filepath" in self._save_args
-            else self._filepath
-        )
-        with open(target_path, "w") as output_file:
+        json_graph = networkx.node_link_data(data, **self._save_args)
+        with self._filepath.open("w") as output_file:
             json_payload = json.dumps(json_graph)
             output_file.write(json_payload)
 

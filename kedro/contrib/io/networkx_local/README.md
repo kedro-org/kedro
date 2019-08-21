@@ -8,13 +8,13 @@ See [NetworkX Documentation](https://networkx.github.io/documentation/stable/tut
 #### Example use:
 
 ```python
-from kedro.contrib.io.networkx_label import NetworkXLocalDataSet
-import networkx
-graph = networkx.complete_graph(100)
+from kedro.contrib.io.networkx_local import NetworkXLocalDataSet
+import networkx as nx
+graph = nx.complete_graph(100)
 graph_dataset = NetworkXLocalDataSet(filepath="test.json")
 graph_dataset.save(graph)
 reloaded = graph_dataset.load()
-assert graph == reloaded
+assert nx.is_isomorphic(graph, reloaded)
 ```
 
 #### Example catalog.yml:

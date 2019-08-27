@@ -7,6 +7,7 @@ clean:
 	rm -rf build dist docs/build kedro/html pip-wheel-metadata
 	find . -regex ".*/__pycache__" -exec rm -rf {} +
 	find . -regex ".*\.egg-info" -exec rm -rf {} +
+	pre-commit clean || true
 
 install-pip-setuptools:
 	python -m pip install -U "pip>=18.0, <19.0" "setuptools>=38.0, <39.0" wheel

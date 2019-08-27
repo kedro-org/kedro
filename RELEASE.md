@@ -4,6 +4,9 @@
 
 * Added the following datasets:
   - `FeatherLocalDataSet` in `contrib` for usage with Pandas. (by [@mdomarsaleem](https://github.com/mdomarsaleem))
+* Add `get_last_load_version` and `get_last_save_version` to `AbstractVersionedDataSet`
+* Implemented `__call__` method on `Node` to allow for users to execute `my_node(input1=1, input2=2)` as an alternative to `my_node.run(dict(input1=1, input2=2))`.
+
 ## Bug fixes and other changes
 
 * Fixed a bug in `ConfigLoader.get()` not listing nested files for `**`-ending glob patterns.
@@ -11,7 +14,7 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Omar Saleem](https://github.com/mdomarsaleem)
+[Omar Saleem](https://github.com/mdomarsaleem), [Mariana Silva](https://github.com/marianansilva)
 
 # Release 0.15.0
 

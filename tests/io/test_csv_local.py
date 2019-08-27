@@ -161,3 +161,69 @@ class TestCSVLocalDataSetVersioned:
             load_version, save_version
         )
         assert ver_str in str(ds_versioned)
+
+    def test_sequential_save_and_load(self, dummy_dataframe, filepath):
+        """Tests if the correct load version is logged when two datasets are saved
+        sequentially."""
+
+        dataset1 = CSVLocalDataSet(
+            filepath=filepath,
+            save_args={"sep": ","},
+            version=Version(None, "2000-01-01"),
+        )
+
+        dataset2 = CSVLocalDataSet(
+            filepath=filepath,
+            save_args={"sep": ","},
+            version=Version(None, "2001-01-01"),
+        )
+
+        dataset1.save(dummy_dataframe)
+        last_save_version1 = dataset1.get_last_save_version()
+
+        dataset2.save(dummy_dataframe)
+        last_save_version2 = dataset2.get_last_save_version()
+
+        dataset2.load()
+        last_load_version = dataset2.get_last_load_version()
+        assert last_save_version2 == last_load_version
+        assert last_save_version1 != last_save_version2
+
+    def test_sequential_load_from_disk(
+        self, dummy_dataframe, filepath, versioned_csv_data_set
+    ):
+        """Tests if the correct load version is logged when two versions are saved in
+        disk."""
+        save_version_1 = "2019-01-01T23.00.00.000Z"
+        save_version_2 = "2019-01-01T23.59.59.999Z"
+        CSVLocalDataSet(
+            filepath=filepath,
+            save_args={"sep": ","},
+            version=Version(None, save_version_1),
+        ).save(dummy_dataframe)
+        CSVLocalDataSet(
+            filepath=filepath,
+            save_args={"sep": ","},
+            version=Version(None, save_version_2),
+        ).save(dummy_dataframe)
+
+        versioned_csv_data_set.load()
+        last_load_version = versioned_csv_data_set.get_last_load_version()
+
+        assert last_load_version == save_version_2
+
+    @pytest.mark.parametrize(
+        "load_version, save_version",
+        [("2019-01-01T23.59.59.999Z", "2019-01-01T23.59.59.999Z")],
+        indirect=True,
+    )
+    def test_save_and_load_with_version(
+        self, dummy_dataframe, load_version, save_version, versioned_csv_data_set
+    ):
+        """Tests if the correct load and save versions are logged when specified."""
+        versioned_csv_data_set.save(dummy_dataframe)
+        last_save_version = versioned_csv_data_set.get_last_save_version()
+        versioned_csv_data_set.load()
+        last_load_version = versioned_csv_data_set.get_last_load_version()
+        assert load_version == last_load_version
+        assert save_version == last_save_version

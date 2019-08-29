@@ -109,6 +109,8 @@ scooters_query:
     index_col: ['name']
 ```
 
+> *Note:* When using `SQLTableDataSet` or `SQLQueryDataSet` you must provide a database connection string. In the example above we pass it using `scooters_credentials` key from the credentials (see the details in [Feeding in credentials](#feeding-in-credentials) section below). `scooters_credentials` must have a top-level key `con` containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. Alternative to credentials would be to explicitly put `con` into `load_args` and `save_args` (`SQLTableDataSet` only).
+
 ## Feeding in credentials
 
 Before instantiating the `DataCatalog` Kedro will first attempt to read the credentials from project configuration (see [this section](./03_configuration.md#aws-credentials) for more details). Resulting dictionary will then be passed into `DataCatalog.from_config()` as `credentials` argument.
@@ -277,6 +279,8 @@ io = DataCatalog({
   'ranked': ParquetLocalDataSet(filepath="ranked.parquet")
 })
 ```
+
+> *Note:* When using `SQLTableDataSet` or `SQLQueryDataSet` you must provide a `con` key containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) database connection string. In the example above we pass it as part of `credentials` argument. Alternative to `credentials` would be to put `con` into `load_args` and `save_args` (`SQLTableDataSet` only).
 
 ## Loading datasets
 

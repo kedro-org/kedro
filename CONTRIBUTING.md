@@ -65,6 +65,9 @@ def count_truthy(elements: List[Any]) -> int:
 
 > *Note:* We only accept contributions under the Apache 2.0 license and you should have permission to share the submitted code.
 
+Please note that each code file should have a licence header (the content of `LICENSE.md` included as a comment).
+There is an automated check to verify that it exists. The check will highlight any issues and suggest a solution.
+
 ### Branching conventions
 We use a branching model that helps us keep track of branches in a logical, consistent way. All branches should have the hyphen-separated convention of: `<type-of-change>/<short-description-of-change>` e.g. `contrib/io-dataset`
 

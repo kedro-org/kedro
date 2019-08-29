@@ -12,6 +12,10 @@
 [![Code Style: Black](https://img.shields.io/badge/code%20style-black-black.svg)](https://github.com/ambv/black)
 [![Downloads](https://pepy.tech/badge/kedro)](https://pepy.tech/project/kedro)
 
+# We're Hiring!
+
+Do you want to be part of the team that builds Kedro? If so, you're in luck! QuantumBlack is currently hiring Software Engineers who love using data to drive their decisions. Take a look at [our open positions](https://www.quantumblack.com/careers/current-openings#content) and see if you are a fit.
+
 # What is Kedro?
 
 > "The centre of your data pipeline."

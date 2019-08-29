@@ -28,7 +28,7 @@
 
 
 """
-``AbstractDataSet`` implementation to save matplotlib objects as image files.
+``MatplotlibWriter ``  saves matplotlib objects as image files.
 """
 
 from pathlib import Path, PurePath
@@ -92,7 +92,7 @@ class MatplotlibWriter(AbstractDataSet):
         self._load_args = load_args if load_args else dict()
         self._save_args = save_args if save_args else dict()
 
-    def _load(self) -> str:
+    def _load(self) -> None:
         raise DataSetError("Loading not supported for MatplotlibWriter")
 
     def _save(self, data: Any) -> None:

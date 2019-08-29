@@ -61,8 +61,7 @@ class MatplotlibWriter(AbstractDataSet):
             >>>     plt.plot([1,2,3],[4,5,6], color=colour)
             >>>     plt.close()
             >>>
-            >>> multi_plot_writer = MatplotlibWriter(filepath="docs/",
-            >>>                                      save_args={'multiFile': True})
+            >>> multi_plot_writer = MatplotlibWriter(filepath="docs/")
             >>> multi_plot_writer.save(plots)
 
     """
@@ -89,47 +88,27 @@ class MatplotlibWriter(AbstractDataSet):
                 to be saved. Additional load arguments can be found at
                 https://matplotlib.org/api/_as_gen/matplotlib.pyplot.savefig.html
         """
-        default_save_args = {"multiFile": False}
-        default_load_args = {}
-
         self._filepath = filepath
-        self._load_args = self._handle_default_args(load_args, default_load_args)
-        self._save_args = self._handle_default_args(save_args, default_save_args)
-        self._mutlifile_mode = self._save_args.pop("multiFile")
-
-    @staticmethod
-    def _handle_default_args(user_args: dict, default_args: dict) -> dict:
-        return {**default_args, **user_args} if user_args else default_args
+        self._load_args = load_args if load_args else dict()
+        self._save_args = save_args if save_args else dict()
 
     def _load(self) -> str:
         raise DataSetError("Loading not supported for MatplotlibWriter")
 
-    def _save(self, data) -> None:
+    def _save(self, data: Any) -> None:
 
-        if self._mutlifile_mode:
+        if isinstance(data, list):
+            Path(self._filepath).mkdir(exist_ok=True)
+            for index, plot in enumerate(data):
+                plot.savefig(
+                    str(PurePath(self._filepath, str(index))), **self._save_args
+                )
 
-            if not Path(self._filepath).is_dir():
-                Path(self._filepath).mkdir()
-
-            if isinstance(data, list):
-                for index, plot in enumerate(data):
-                    plot.savefig(
-                        PurePath(self._filepath, str(index)), **self._save_args
-                    )
-
-            elif isinstance(data, dict):
-                for plot_name, plot in data.items():
-                    plot.savefig(
-                        PurePath(self._filepath, plot_name), **self._save_args
-                    )
-
-            else:
-                plot_type = type(data)
-                raise DataSetError(
-                    (
-                        "multiFile is True but data type "
-                        "not dict or list. Rather, {}".format(plot_type)
-                    )
+        elif isinstance(data, dict):
+            Path(self._filepath).mkdir(exist_ok=True)
+            for plot_name, plot in data.items():
+                plot.savefig(
+                    str(PurePath(self._filepath, plot_name)), **self._save_args
                 )
 
         else:

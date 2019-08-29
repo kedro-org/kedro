@@ -27,10 +27,11 @@
 # limitations under the License.
 
 
+from pathlib import PurePath
+
 import matplotlib
 import numpy as np
 import pytest
-
 
 from kedro.contrib.io.matplotlib import MatplotlibWriter
 from kedro.io import DataSetError
@@ -50,16 +51,23 @@ def test_should_write_to_image_in_single_mode(tmpdir):
 
     experimental_filepath = str(tmpdir.join("image_we_write.png"))
     plot_writer = MatplotlibWriter(filepath=experimental_filepath)
+
     plot_writer.save(plt)
 
     plt.close()
 
-    assert (
-        open(experimental_filepath, "rb").read() == open(trusted_filepath, "rb").read()
-    )
+    with open(experimental_filepath, "rb") as f:
+        experimental_obj = f.read()
+        f.close()
+
+    with open(trusted_filepath, "rb") as f:
+        trusted_obj = f.read()
+        f.close()
+
+    assert trusted_obj == experimental_obj
 
 
-def test_should_write_to_image_in_list_multi_mode(tmpdir):
+def test_should_write_to_image_in_list(tmpdir):
     import matplotlib.pyplot as plt
 
     plots = list()
@@ -72,7 +80,7 @@ def test_should_write_to_image_in_list_multi_mode(tmpdir):
 
     experimental_filepath = str(tmpdir.join("list_images"))
     plot_writer = MatplotlibWriter(
-        filepath=experimental_filepath, save_args={"multiFile": True}
+        filepath=experimental_filepath
     )
     plot_writer.save(plots)
 
@@ -87,13 +95,19 @@ def test_should_write_to_image_in_list_multi_mode(tmpdir):
         full_experimental_filepath = "{}/{}.png".format(
             experimental_filepath, string_index
         )
-        assert (
-            open(full_experimental_filepath, "rb").read()
-            == open(trusted_filepath, "rb").read()
-        )
+
+        with open(full_experimental_filepath, "rb") as f:
+            full_experimental_obj = f.read()
+            f.close()
+
+        with open(trusted_filepath, "rb") as f:
+            trusted_obj = f.read()
+            f.close()
+
+        assert trusted_obj == full_experimental_obj
 
 
-def test_should_write_to_image_in_dict_multi_mode(tmpdir):
+def test_should_write_to_image_in_dict(tmpdir):
     import matplotlib.pyplot as plt
 
     plots = dict()
@@ -106,8 +120,8 @@ def test_should_write_to_image_in_dict_multi_mode(tmpdir):
         plt.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
         plt.close()
 
-    directory = str(tmpdir.join("dict_images"))
-    plot_writer = MatplotlibWriter(filepath=directory, save_args={"multiFile": True})
+    directory = str(tmpdir) + "/dict_images"
+    plot_writer = MatplotlibWriter(filepath=directory)
     plot_writer.save(plots)
 
     # write and compare
@@ -118,45 +132,25 @@ def test_should_write_to_image_in_dict_multi_mode(tmpdir):
         )
         plot.savefig(trusted_filepath)
 
-        assert (
-            open(experimental_filepath, "rb").read()
-            == open(trusted_filepath, "rb").read()
-        )
+        with open(experimental_filepath, "rb") as f:
+            experimental_obj = f.read()
+            f.close()
 
+        with open(trusted_filepath, "rb") as f:
+            trusted_obj = f.read()
+            f.close()
 
-def test_only_lists_or_dicts_should_be_accepted_for_mulit_mode(tmpdir):
-    import matplotlib.pyplot as plt
-
-    plot_object = plt.figure()
-    plt.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
-    plt.close()
-
-    plot_writer = MatplotlibWriter(
-        filepath=str(tmpdir.join("some_path")), save_args={"multiFile": True}
-    )
-
-    with pytest.raises(DataSetError) as excinfo:
-        plot_writer.save(plot_object)
-
-    expected_dict_error = (
-        "multiFile is True but data type not "
-        "dict or list. Rather, "
-        "<class 'matplotlib.figure.Figure'>"
-    )
-
-    assert str(excinfo.value) == expected_dict_error
+        assert trusted_obj == experimental_obj
 
 
 def test_load_should_fail(tmpdir):
 
     plot_writer = MatplotlibWriter(filepath=str(tmpdir.join("some_path")))
 
-    with pytest.raises(DataSetError) as excinfo:
-        plot_writer.load()
-
     expected_load_error = "Loading not supported for MatplotlibWriter"
 
-    assert str(excinfo.value) == expected_load_error
+    with pytest.raises(DataSetError, match=expected_load_error):
+        plot_writer.load()
 
 
 def test_exists_functionality(tmpdir):

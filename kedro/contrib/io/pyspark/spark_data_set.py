@@ -37,10 +37,11 @@ from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.utils import AnalysisException
 
 from kedro.contrib.io import DefaultArgumentsMixIn
-from kedro.io import AbstractDataSet
+from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
+from pathlib import Path
 
 
-class SparkDataSet(DefaultArgumentsMixIn, AbstractDataSet):
+class SparkDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
     """``SparkDataSet`` loads and saves Spark data frames.
 
     Example:
@@ -81,6 +82,7 @@ class SparkDataSet(DefaultArgumentsMixIn, AbstractDataSet):
         file_format: str = "parquet",
         load_args: Optional[Dict[str, Any]] = None,
         save_args: Optional[Dict[str, Any]] = None,
+        version: Version = None,
     ) -> None:
         """Creates a new instance of ``SparkDataSet``.
 
@@ -107,7 +109,8 @@ class SparkDataSet(DefaultArgumentsMixIn, AbstractDataSet):
 
         self._filepath = filepath
         self._file_format = file_format
-        super().__init__(load_args, save_args)
+        super().__init__(load_args=load_args, save_args=save_args,
+                         filepath=Path(filepath), version=version)
 
     @staticmethod
     def _get_spark():
@@ -115,15 +118,15 @@ class SparkDataSet(DefaultArgumentsMixIn, AbstractDataSet):
 
     def _load(self) -> DataFrame:
         return self._get_spark().read.load(
-            self._filepath, self._file_format, **self._load_args
+            str(self._filepath), self._file_format, **self._load_args
         )
 
     def _save(self, data: DataFrame) -> None:
-        data.write.save(self._filepath, self._file_format, **self._save_args)
+        data.write.save(str(self._filepath), self._file_format, **self._save_args)
 
     def _exists(self) -> bool:
         try:
-            self._get_spark().read.load(self._filepath, self._file_format)
+            self._get_spark().read.load(str(self._filepath), self._file_format)
         except AnalysisException as exception:
             if exception.desc.startswith("Path does not exist:"):
                 return False

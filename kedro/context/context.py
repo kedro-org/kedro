@@ -43,6 +43,7 @@ from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.runner import AbstractRunner, SequentialRunner
 from kedro.utils import load_obj
+from kedro.versioning import VersionJournal
 
 
 class KedroContext(abc.ABC):
@@ -251,6 +252,56 @@ class KedroContext(abc.ABC):
             conf_creds = {}
         return conf_creds
 
+    # pylint: disable=too-many-arguments
+    def _filter_pipeline(
+        self,
+        pipeline: Pipeline = None,
+        tags: Iterable[str] = None,
+        from_nodes: Iterable[str] = None,
+        to_nodes: Iterable[str] = None,
+        node_names: Iterable[str] = None,
+    ) -> Pipeline:
+        """Filter the pipeline as the intersection of all conditions."""
+        pipeline = pipeline or self.pipeline
+        if tags:
+            pipeline = pipeline & self.pipeline.only_nodes_with_tags(*tags)
+            if not pipeline.nodes:
+                raise KedroContextError(
+                    "Pipeline contains no nodes with tags: {}".format(str(tags))
+                )
+        if from_nodes:
+            pipeline = pipeline & self.pipeline.from_nodes(*from_nodes)
+        if to_nodes:
+            pipeline = pipeline & self.pipeline.to_nodes(*to_nodes)
+        if node_names:
+            pipeline = pipeline & self.pipeline.only_nodes(*node_names)
+
+        if not pipeline.nodes:
+            raise KedroContextError("Pipeline contains no nodes")
+        return pipeline
+
+    # pylint: disable=too-many-arguments
+    def _record_version_journal(
+        self,
+        catalog: DataCatalog,
+        tags: Iterable[str] = None,
+        from_nodes: Iterable[str] = None,
+        to_nodes: Iterable[str] = None,
+        node_names: Iterable[str] = None,
+    ) -> None:
+        """Record the run variables into journal."""
+        record_data = {
+            "project_path": self.project_path,
+            "env": self.env,
+            "kedro_version": self.project_version,
+            "tags": tags,
+            "from_nodes": from_nodes,
+            "to_nodes": to_nodes,
+            "node_names": node_names,
+        }
+        journal = VersionJournal(record_data)
+        catalog.set_version_journal(journal)
+
     def run(  # pylint: disable=too-many-arguments
         self,
         tags: Iterable[str] = None,
@@ -289,25 +340,12 @@ class KedroContext(abc.ABC):
         # Report project name
         logging.info("** Kedro project %s", self.project_path.name)
 
-        # Load the pipeline as the intersection of all conditions
-        pipeline = pipeline or self.pipeline
-        if tags:
-            pipeline = pipeline & self.pipeline.only_nodes_with_tags(*tags)
-            if not pipeline.nodes:
-                raise KedroContextError(
-                    "Pipeline contains no nodes with tags: {}".format(str(tags))
-                )
-        if from_nodes:
-            pipeline = pipeline & self.pipeline.from_nodes(*from_nodes)
-        if to_nodes:
-            pipeline = pipeline & self.pipeline.to_nodes(*to_nodes)
-        if node_names:
-            pipeline = pipeline & self.pipeline.only_nodes(*node_names)
-
-        if not pipeline.nodes:
-            raise KedroContextError("Pipeline contains no nodes")
-
+        pipeline = self._filter_pipeline(
+            pipeline, tags, from_nodes, to_nodes, node_names
+        )
         catalog = catalog or self.catalog
+
+        self._record_version_journal(catalog, tags, from_nodes, to_nodes, node_names)
 
         # Run the runner
         runner = runner or SequentialRunner()

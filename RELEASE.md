@@ -10,6 +10,7 @@
 ## Bug fixes and other changes
 
 * Fixed a bug in `ConfigLoader.get()` not listing nested files for `**`-ending glob patterns.
+* Updated documentation in `03_configuration` regarding how to modify the configuration path.
 * Documented Kedro architecture diagram.
 
 ## Breaking changes to the API

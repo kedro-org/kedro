@@ -29,8 +29,6 @@
 import configparser
 import json
 import os
-import sys
-import textwrap
 from pathlib import Path
 from typing import Dict
 
@@ -40,7 +38,7 @@ import yaml
 from pandas.util.testing import assert_frame_equal
 
 from kedro import __version__
-from kedro.context import KedroContext, KedroContextError, load_context
+from kedro.context import KedroContext, KedroContextError
 from kedro.pipeline import Pipeline, node
 from kedro.runner import ParallelRunner, SequentialRunner
 
@@ -142,39 +140,6 @@ def config_dir(tmp_path, base_config, local_config, env):
 @pytest.fixture
 def dummy_dataframe():
     return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-
-
-@pytest.fixture(autouse=True)
-def restore_cwd():
-    cwd_ = os.getcwd()
-    yield
-    if cwd_ != os.getcwd():
-        os.chdir(cwd_)
-
-
-@pytest.fixture
-def fake_project(tmp_path):
-    project = tmp_path / "project"
-
-    package_name = "fake_package"
-    package_path = project / "src" / package_name
-    package_path.mkdir(parents=True)
-
-    kedro_yaml = project / ".kedro.yml"
-    _write_yaml(kedro_yaml, {"context_path": package_name + ".run.Fake"})
-    sys.path.append(str(project / "src"))
-    run = package_path / "run.py"
-    script = """
-        class Fake:
-            def __init__(self, project_path, **kwargs):
-                pass
-            project_name = "fake"
-            project_version = "{}"
-    """.format(
-        __version__
-    )
-    run.write_text(textwrap.dedent(script), encoding="utf-8")
-    yield project
 
 
 def identity(input1: str):
@@ -440,21 +405,3 @@ class TestKedroContextRun:
         pattern = "Pipeline contains no nodes"
         with pytest.raises(KedroContextError, match=pattern):
             dummy_context.run()
-
-
-class TestLoadContext:
-    def test_valid_context(self, fake_project):
-        """Test getting project context."""
-        result = load_context(str(fake_project))
-        assert result.project_name == "fake"
-        assert result.project_version == __version__
-        assert str(fake_project.resolve()) in sys.path
-        assert os.getcwd() == str(fake_project.resolve())
-
-    def test_invalid_path(self, tmp_path):
-        """Test for loading context from an invalid path. """
-        other_path = tmp_path / "other"
-        other_path.mkdir()
-        pattern = r"Could not retrive \'context_path\' from \'.kedro.yml\'"
-        with pytest.raises(KedroContextError, match=pattern):
-            load_context(str(other_path))

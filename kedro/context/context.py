@@ -358,16 +358,14 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
 
     Args:
         project_path: Path to the Kedro project.
-        kwargs: Optional custom arguments defined by users, which will be passed to
-        ProjectContext class in `run.py`. kwargs will need to be passed explicitly to
-        the constructor of ProjectContext.
+        kwargs: Optional kwargs for ``ProjectContext`` class in `run.py`.
 
     Returns:
-        Instance of KedroContext class defined in Kedro project.
+        Instance of ``KedroContext`` class defined in Kedro project.
 
     Raises:
         KedroContextError: Either '.kedro.yml' was not found
-        or loaded context has package conflict.
+            or loaded context has package conflict.
 
     """
     project_path = Path(project_path).expanduser().resolve()

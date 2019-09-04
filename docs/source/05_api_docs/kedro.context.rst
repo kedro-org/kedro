@@ -14,8 +14,8 @@ Base Classes
 
     kedro.context.KedroContext
 
-Modules
--------
+Functions
+---------
 
 .. autosummary::
     :toctree:

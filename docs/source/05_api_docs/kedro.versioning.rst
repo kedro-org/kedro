@@ -1,9 +1,9 @@
-kedro.context
-=============
+kedro.versioning
+================
 
 .. rubric:: Description
 
-.. automodule:: kedro.context
+.. automodule:: kedro.versioning
 
 Base Classes
 ------------
@@ -12,16 +12,14 @@ Base Classes
     :toctree:
     :template: autosummary/class.rst
 
-    kedro.context.KedroContext
+    kedro.versioning.VersionJournal
 
-Functions
----------
+Modules
+-------
 
 .. autosummary::
     :toctree:
     :template: autosummary/base.rst
-
-    kedro.context.load_context
 
 
 Errors
@@ -30,5 +28,3 @@ Errors
 .. autosummary::
     :toctree:
     :template: autosummary/class.rst
-
-    kedro.context.KedroContextError

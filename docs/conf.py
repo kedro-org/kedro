@@ -86,9 +86,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path .
-exclude_patterns = [
-    "**.ipynb_checkpoints", "_templates", "modules.rst", "source",
-]
+exclude_patterns = ["**.ipynb_checkpoints", "_templates", "modules.rst", "source"]
 
 
 # The name of the Pygments (syntax highlighting) style to use.
@@ -389,12 +387,12 @@ def _prepare_build_dir(app, config):
     by the ReadTheDocs builder. Shortly, it does the same as
     ./build-docs.sh script except not running `sphinx-build` step."""
     build_root = Path(app.srcdir)
+    build_out = Path(app.outdir)
     copy_tree(str(here / "source"), str(build_root))
     copy_tree(str(build_root / "05_api_docs"), str(build_root))
     shutil.rmtree(str(build_root / "05_api_docs"))
-    shutil.rmtree(str(build_root / "_build"), ignore_errors=True)
-    _css = build_root / "_build" / "html" / "_static" / "css"
-    copy_tree(str(build_root / "css"), str(_css))
+    shutil.rmtree(str(build_out), ignore_errors=True)
+    copy_tree(str(build_root / "css"), str(build_out / "_static" / "css"))
     shutil.rmtree(str(build_root / "css"))
 
 

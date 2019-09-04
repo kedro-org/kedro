@@ -25,34 +25,77 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# pylint: disable=unused-argument
 
-import shutil
 import sys
+import tempfile
 from pathlib import Path
 
 import pytest
+import yaml
 
 from kedro.cli.cli import _create_project
 
+TEST_REPO_NAME = 'fake_repo'
+
 
 @pytest.fixture(scope="session")
-def project_path():
-    return Path(__file__).parent / "fake_project"
+def fake_root_dir():
+    with tempfile.TemporaryDirectory() as tmp_root:
+        yield Path(tmp_root)
 
 
-@pytest.fixture(autouse=True, scope="function")
-def fake_project(project_path: Path):
-    shutil.rmtree(str(project_path), ignore_errors=True)
-    _create_project(str(Path(__file__).parent / "project_config.yml"), verbose=True)
+@pytest.fixture(scope="session")
+def fake_repo_path(fake_root_dir):
+    return fake_root_dir / TEST_REPO_NAME
 
-    (project_path / "__init__.py").touch()
-    (project_path / "src" / "__init__.py").touch()
 
-    path_to_add = str(project_path.parent)
-    if path_to_add not in sys.path:
-        sys.path = [path_to_add] + sys.path
+@pytest.fixture(scope='session')
+def fake_repo_config_path(fake_root_dir):
+    repo_config = {
+        'output_dir': str(fake_root_dir),
+        'project_name': 'Test Project',
+        'repo_name': TEST_REPO_NAME,
+        'python_package': 'fake_package',
+        'include_example': True,
+    }
+    config_path = fake_root_dir / 'repo_config.yml'
 
-    import fake_project.kedro_cli  # pylint: disable=import-error
+    with open(str(config_path), 'w') as fd:
+        yaml.safe_dump(repo_config, fd)
 
-    yield fake_project
-    shutil.rmtree(str(project_path))
+    return config_path
+
+
+@pytest.fixture(autouse=True, scope="session")
+def fake_repo(fake_repo_path: Path, fake_repo_config_path: Path):
+    _create_project(str(fake_repo_config_path), verbose=True)
+
+    # NOTE: Here we load a couple of modules, as they would be imported in
+    # the code and tests.
+    # It's safe to remove the new entries from path due to the python
+    # module caching mechanism. Any `reload` on it will not work though.
+    old_path = sys.path.copy()
+    sys.path = [
+        str(fake_repo_path),
+        str(fake_repo_path / "src"),
+    ] + sys.path
+
+    import kedro_cli  # noqa: F401 pylint: disable=import-error,unused-import
+
+    # `load_context` will try to `import fake_package`,
+    # will fail without this line:
+    import fake_package  # noqa: F401 pylint: disable=import-error,unused-import
+
+    sys.path = old_path
+
+
+@pytest.fixture(scope="session")
+def fake_kedro_cli(fake_repo):
+    """
+    A small helper to pass kedro_cli into tests without importing.
+    It only becomes available after `fake_repo` fixture is applied,
+    that's why it can't be done on module level.
+    """
+    import kedro_cli  # pylint: disable=import-error
+    return kedro_cli

@@ -1,7 +1,7 @@
 # Release 0.15.1
 
 ## Major features and improvements
-
+* Added `versioning` support for tracking of environment, code and dataset version.
 * Added the following datasets:
   - `FeatherLocalDataSet` in `contrib` for usage with Pandas. (by [@mdomarsaleem](https://github.com/mdomarsaleem))
 * Add `get_last_load_version` and `get_last_save_version` to `AbstractVersionedDataSet`
@@ -10,11 +10,13 @@
 ## Bug fixes and other changes
 
 * Fixed a bug in `ConfigLoader.get()` not listing nested files for `**`-ending glob patterns.
+* Updated documentation in `03_configuration` regarding how to modify the configuration path.
+* Documented Kedro architecture diagram.
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Omar Saleem](https://github.com/mdomarsaleem), [Mariana Silva](https://github.com/marianansilva)
+[Omar Saleem](https://github.com/mdomarsaleem), [Mariana Silva](https://github.com/marianansilva), [Anil Choudhary](https://github.com/aniryou)
 
 # Release 0.15.0
 

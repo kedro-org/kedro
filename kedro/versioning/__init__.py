@@ -26,30 +26,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""``kedro.logging`` provides functionality to setup journal for capturing
+information required to reproduce a Kedro run.
+"""
 
-Feature: Run Project
-
-
-  Scenario: Run default python entry point with example code
-
-    Local environment should be used by default when no env option is specified.
-
-    Given I have prepared a config file with example code
-    And I have run a non-interactive kedro new
-    When I execute the kedro command "run"
-    Then I should get a successful exit code
-    And the console log should show that 4 nodes were run
-
-  Scenario: Run default python entry point without example code
-    Given I have prepared a config file without example code
-    And I have run a non-interactive kedro new
-    When I execute the kedro command "run"
-    Then I should get an error exit code
-    And "local" environment was used
-
-  Scenario: Run python entry point with no credentials in the configuration
-    Given I have prepared a config file with example code
-    And I have run a non-interactive kedro new
-    And I have deleted the credentials file
-    When I execute the kedro command "run"
-    Then I should get a successful exit code
+from .journal import VersionJournal  # NOQA

@@ -261,16 +261,13 @@ This section shows just the very basics of versioning. You can learn more about 
 
 The code API allows you to configure data sources in code. This can also be used to operate the IO module within notebooks.
 
-```python
-from kedro.io import *
-import os
-```
-
 ## Configuring a data catalog
 
 In a file like `catalog.py`, you can generate the Data Catalog. This will allow everyone in the project to review all the available data sources. In the following, we are using the pre-built CSV loader, which is documented in the API reference documentation: [CSVLocalDataSet](/kedro.io.CSVLocalDataSet)
 
 ```python
+from kedro.io import DataCatalog, CSVLocalDataSet, SQLTableDataSet, SQLQueryDataSet, ParquetLocalDataSet
+
 io = DataCatalog({
   'bikes': CSVLocalDataSet(filepath='../data/01_raw/bikes.csv'),
   'cars': CSVLocalDataSet(filepath='../data/01_raw/cars.csv', load_args=dict(sep=',')), # additional arguments
@@ -317,6 +314,8 @@ Saving data can be completed with a similar API.
 ### Saving data to memory
 
 ```python
+from kedro.io import MemoryDataSet
+
 memory = MemoryDataSet(data=None)
 io.add('cars_cache', memory)
 io.save('cars_cache', 'Memory can store anything.')
@@ -328,8 +327,9 @@ io.load('car_cache')
 At this point we may want to put the data in a SQLite database to run queries on it. Let's use that to rank scooters by their mpg.
 
 ```python
-# This cleans up the database in case it exists at this point
+import os
 
+# This cleans up the database in case it exists at this point
 try:
     os.remove("kedro.db")
 except FileNotFoundError:

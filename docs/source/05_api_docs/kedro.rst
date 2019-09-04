@@ -18,3 +18,4 @@ kedro
   kedro.context
   kedro.contrib
   kedro.cli
+  kedro.versioning

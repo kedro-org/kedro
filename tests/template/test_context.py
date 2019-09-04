@@ -26,30 +26,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import sys
 
-Feature: Run Project
+import pytest
+
+import kedro
+from kedro.context import KedroContextError, load_context
 
 
-  Scenario: Run default python entry point with example code
+class TestLoadContext:
+    def test_valid_context(self, fake_repo_path):
+        """Test getting project context."""
+        result = load_context(str(fake_repo_path))
+        assert result.project_name == "Test Project"
+        assert result.project_version == kedro.__version__
+        assert str(fake_repo_path.resolve()) in sys.path
+        assert os.getcwd() == str(fake_repo_path.resolve())
 
-    Local environment should be used by default when no env option is specified.
-
-    Given I have prepared a config file with example code
-    And I have run a non-interactive kedro new
-    When I execute the kedro command "run"
-    Then I should get a successful exit code
-    And the console log should show that 4 nodes were run
-
-  Scenario: Run default python entry point without example code
-    Given I have prepared a config file without example code
-    And I have run a non-interactive kedro new
-    When I execute the kedro command "run"
-    Then I should get an error exit code
-    And "local" environment was used
-
-  Scenario: Run python entry point with no credentials in the configuration
-    Given I have prepared a config file with example code
-    And I have run a non-interactive kedro new
-    And I have deleted the credentials file
-    When I execute the kedro command "run"
-    Then I should get a successful exit code
+    def test_invalid_path(self, tmp_path):
+        """Test for loading context from an invalid path. """
+        other_path = tmp_path / "other"
+        other_path.mkdir()
+        pattern = r"Could not retrive \'context_path\' from \'.kedro.yml\'"
+        with pytest.raises(KedroContextError, match=pattern):
+            load_context(str(other_path))

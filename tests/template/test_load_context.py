@@ -36,8 +36,11 @@ from kedro.context import KedroContextError, load_context
 
 
 class TestLoadContext:
-    def test_valid_context(self, fake_repo_path):
+    def test_valid_context(self, mocker, fake_repo_path):
         """Test getting project context."""
+        # Disable logging.config.dictConfig in KedroContext._setup_logging as
+        # it changes logging.config and affects other unit tests
+        mocker.patch("logging.config.dictConfig")
         result = load_context(str(fake_repo_path))
         assert result.project_name == "Test Project"
         assert result.project_version == kedro.__version__

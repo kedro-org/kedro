@@ -129,16 +129,15 @@ class CSVGCSDataSet(AbstractVersionedDataSet):
         load_path = PurePosixPath(self._get_load_path())
 
         buffer = BytesIO()
-        blob = storage.Blob(str(load_path), self._bucket)
-        blob.download_to_file(buffer)
+        self._bucket.blob(str(load_path)).download_to_file(buffer)
+        buffer.seek(0)
 
         return pd.read_csv(buffer, **self._load_args)
 
     def _save(self, data: pd.DataFrame) -> None:
         save_path = PurePosixPath(self._get_save_path())
 
-        blob = storage.Blob(str(save_path), self._bucket)
-        blob.upload_from_string(data.to_csv(**self._save_args).encode("utf8"))
+        self._bucket.blob(str(save_path)).upload_from_string(data.to_csv(**self._save_args).encode("utf8"))
 
         load_path = PurePosixPath(self._get_load_path())
         self._check_paths_consistency(load_path, save_path)

@@ -369,8 +369,13 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
 
     """
     project_path = Path(project_path).expanduser().resolve()
-    if str(project_path) not in sys.path:
-        sys.path.append(str(project_path))
+    src_path = str(project_path / "src")
+
+    if src_path not in sys.path:
+        sys.path.insert(0, src_path)
+
+    if "PYTHONPATH" not in os.environ:
+        os.environ["PYTHONPATH"] = src_path
 
     kedro_yaml = project_path / ".kedro.yml"
     try:

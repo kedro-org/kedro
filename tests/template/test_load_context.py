@@ -44,7 +44,7 @@ class TestLoadContext:
         result = load_context(str(fake_repo_path))
         assert result.project_name == "Test Project"
         assert result.project_version == kedro.__version__
-        assert str(fake_repo_path.resolve()) in sys.path
+        assert str(fake_repo_path.resolve() / "src") in sys.path
         assert os.getcwd() == str(fake_repo_path.resolve())
 
     def test_invalid_path(self, tmp_path):

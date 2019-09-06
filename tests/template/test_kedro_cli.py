@@ -74,11 +74,10 @@ class TestActivateNbstripoutCommand:
     def without_git_repo(mocker):
         return mocker.patch("subprocess.run", return_value=mocker.Mock(returncode=1))
 
-    def test_install_successfully(self, fake_kedro_cli, call_mock, fake_nbstripout, fake_git_repo):
-        result = CliRunner().invoke(
-            fake_kedro_cli.cli,
-            ['activate-nbstripout'],
-        )
+    def test_install_successfully(
+        self, fake_kedro_cli, call_mock, fake_nbstripout, fake_git_repo
+    ):
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["activate-nbstripout"])
         assert not result.exit_code
 
         call_mock.assert_called_once_with(["nbstripout", "--install"])
@@ -89,78 +88,85 @@ class TestActivateNbstripoutCommand:
             stderr=subprocess.PIPE,
         )
 
-    def test_nbstripout_not_found(self, fake_kedro_cli, missing_nbstripout, fake_git_repo):
+    def test_nbstripout_not_found(
+        self, fake_kedro_cli, missing_nbstripout, fake_git_repo
+    ):
         """
         Run activate-nbstripout target without nbstripout installed
         There should be a clear message about it.
         """
 
-        result = CliRunner().invoke(
-            fake_kedro_cli.cli,
-            ['activate-nbstripout'],
-        )
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["activate-nbstripout"])
         assert result.exit_code
-        assert 'nbstripout is not installed' in result.stdout
+        assert "nbstripout is not installed" in result.stdout
 
     def test_no_git_repo(self, fake_kedro_cli, fake_nbstripout, without_git_repo):
         """
         Run activate-nbstripout target with no git repo available.
         There should be a clear message about it.
         """
-        result = CliRunner().invoke(
-            fake_kedro_cli.cli,
-            ['activate-nbstripout'],
-        )
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["activate-nbstripout"])
+
         assert result.exit_code
-        assert 'Not a git repository' in result.stdout
+        assert "Not a git repository" in result.stdout
 
 
 class TestRunCommand:
     @staticmethod
     @pytest.fixture(autouse=True)
-    def fake_main(mocker, fake_repo):
-        from fake_package import run  # pylint: disable=import-error
-        yield mocker.patch.object(run, 'main', mocker.Mock())
+    def fake_load_context(mocker, fake_kedro_cli):
+        context = mocker.Mock()
+        yield mocker.patch.object(fake_kedro_cli, "load_context", return_value=context)
 
-    def test_run_successfully(self, fake_kedro_cli, fake_main, mocker):
-        result = CliRunner().invoke(
-            fake_kedro_cli.cli,
-            ['run'],
-        )
+    def test_run_successfully(self, fake_kedro_cli, fake_load_context, mocker):
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["run"])
         assert not result.exit_code
 
-        fake_main.assert_called_once_with(
-            tags=(),
-            env=None,
-            runner=mocker.ANY,
-            node_names=(),
-            from_nodes=[],
-            to_nodes=[],
+        fake_load_context.return_value.run.assert_called_once_with(
+            tags=(), runner=mocker.ANY, node_names=(), from_nodes=[], to_nodes=[]
         )
-        assert isinstance(fake_main.call_args_list[0][1]['runner'], SequentialRunner)
 
-    def test_with_sequential_runner_and_parallel_flag(self, fake_kedro_cli, fake_main):
-        result = CliRunner().invoke(
-            fake_kedro_cli.cli,
-            ['run', '--parallel', '--runner=SequentialRunner'],
+        assert isinstance(
+            fake_load_context.return_value.run.call_args_list[0][1]["runner"],
+            SequentialRunner,
         )
+
+    def test_with_sequential_runner_and_parallel_flag(
+        self, fake_kedro_cli, fake_load_context
+    ):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["run", "--parallel", "--runner=SequentialRunner"]
+        )
+
         assert result.exit_code
-        assert 'Please use either --parallel or --runner' in result.stdout
-        fake_main.assert_not_called()
+        assert "Please use either --parallel or --runner" in result.stdout
+        fake_load_context.return_value.run.assert_not_called()
 
-    def test_run_successfully_parallel_via_flag(self, fake_kedro_cli, fake_main):
-        result = CliRunner().invoke(
-            fake_kedro_cli.cli,
-            ['run', '--parallel'],
-        )
-        assert not result.exit_code
-        assert isinstance(fake_main.call_args_list[0][1]['runner'],
-                          ParallelRunner)
+    def test_run_successfully_parallel_via_flag(
+        self, fake_kedro_cli, fake_load_context, mocker
+    ):
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["run", "--parallel"])
 
-    def test_run_successfully_parallel_via_name(self, fake_kedro_cli, fake_main):
-        result = CliRunner().invoke(
-            fake_kedro_cli.cli,
-            ['run', '--runner=ParallelRunner'],
-        )
         assert not result.exit_code
-        assert isinstance(fake_main.call_args_list[0][1]['runner'], ParallelRunner)
+
+        fake_load_context.return_value.run.assert_called_once_with(
+            tags=(), runner=mocker.ANY, node_names=(), from_nodes=[], to_nodes=[]
+        )
+
+        assert isinstance(
+            fake_load_context.return_value.run.call_args_list[0][1]["runner"],
+            ParallelRunner,
+        )
+
+    def test_run_successfully_parallel_via_name(
+        self, fake_kedro_cli, fake_load_context
+    ):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["run", "--runner=ParallelRunner"]
+        )
+
+        assert not result.exit_code
+        assert isinstance(
+            fake_load_context.return_value.run.call_args_list[0][1]["runner"],
+            ParallelRunner,
+        )

@@ -46,10 +46,3 @@ Feature: Run Project
     When I execute the kedro command "run"
     Then I should get an error exit code
     And "local" environment was used
-
-  Scenario: Run python entry point with no credentials in the configuration
-    Given I have prepared a config file with example code
-    And I have run a non-interactive kedro new
-    And I have deleted the credentials file
-    When I execute the kedro command "run"
-    Then I should get a successful exit code

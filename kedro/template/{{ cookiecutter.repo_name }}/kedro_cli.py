@@ -187,8 +187,7 @@ def build_docs():
     python_call(
         "ipykernel", ["install", "--user", "--name={{ cookiecutter.python_package }}"]
     )
-    if Path("docs/build").exists():
-        shutil.rmtree("docs/build")
+    shutil.rmtree("docs/build", ignore_errors=True)
     call(
         [
             "sphinx-apidoc",
@@ -307,30 +306,29 @@ def jupyter_lab(ip, all_kernels, args):
 def convert_notebook(all_flag, overwrite_flag, filepath):
     """Convert selected or all notebooks found in a Kedro project
     to Kedro code, by exporting code from the appropriately-tagged cells:
-
     Cells tagged as `node` will be copied over to a Python file matching
     the name of the notebook, under `src/<package_name>/nodes`.
     *Note*: Make sure your notebooks have unique names!
-
     FILEPATH: Path(s) to exact notebook file(s) to be converted. Both
     relative and absolute paths are accepted.
     Should not be provided if --all flag is already present.
-
     """
+    from {{cookiecutter.python_package}}.run import ProjectContext
     if not filepath and not all_flag:
         secho(
             "Please specify a notebook filepath "
             "or add '--all' to convert all notebooks."
         )
-        return
-    context = load_context(Path.cwd())
-    kedro_package_name = context.__class__.__module__.split(".")[0]
+        sys.exit(1)
+
+    kedro_project_path = ProjectContext(Path.cwd()).project_path
+    kedro_package_name = "{{cookiecutter.python_package}}"
 
     if all_flag:
         # pathlib glob does not ignore hidden directories,
         # whereas Python glob does, which is more useful in
         # ensuring checkpoints will not be included
-        pattern = context.project_path / "**" / "*.ipynb"
+        pattern = kedro_project_path / "**" / "*.ipynb"
         notebooks = sorted(Path(p) for p in iglob(str(pattern), recursive=True))
     else:
         notebooks = [Path(f) for f in filepath]
@@ -346,7 +344,7 @@ def convert_notebook(all_flag, overwrite_flag, filepath):
     for notebook in notebooks:
         secho("Converting notebook '{}'...".format(str(notebook)))
         output_path = (
-            context.project_path
+            kedro_project_path
             / "src"
             / kedro_package_name
             / "nodes"

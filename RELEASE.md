@@ -10,6 +10,7 @@
 ## Bug fixes and other changes
 * Fixed a bug in `load_context()` not loading context in non-kedro jupyter notebook.
 * Fixed a bug in `ConfigLoader.get()` not listing nested files for `**`-ending glob patterns.
+* Fixed an error of logging config in jupyter notebook.
 * Updated documentation in `03_configuration` regarding how to modify the configuration path.
 * Documented Kedro architecture diagram.
 

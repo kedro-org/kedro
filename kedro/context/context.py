@@ -28,6 +28,7 @@
 """This module provides context for Kedro project."""
 
 import abc
+import logging
 import logging.config
 import os
 import sys
@@ -391,11 +392,15 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
         )
 
     context_class = load_obj(context_path)
-    context = context_class(project_path, **kwargs)
 
     if os.getcwd() != str(project_path):
-        warn("Changing the current working directory to {}".format(str(project_path)))
+        logging.getLogger(__name__).warning(
+            "Changing the current working directory to %s", str(project_path)
+        )
         os.chdir(str(project_path))  # Move to project root
+
+    # Instantiate the context after changing the cwd for logging to be properly configured.
+    context = context_class(project_path, **kwargs)
     return context
 
 

@@ -40,6 +40,7 @@ from .core import Version  # NOQA
 from .csv_http import CSVHTTPDataSet  # NOQA
 from .csv_local import CSVLocalDataSet  # NOQA
 from .csv_s3 import CSVS3DataSet  # NOQA
+from .csv_gcs import CSVGCSDataSet  # NOQA
 from .data_catalog import DataCatalog  # NOQA
 from .excel_local import ExcelLocalDataSet  # NOQA
 from .hdf_local import HDFLocalDataSet  # NOQA

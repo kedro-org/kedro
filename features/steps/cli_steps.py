@@ -242,18 +242,6 @@ def create_new_env(context, env_name):
         yaml.dump(logging_json, config_file, default_flow_style=False)
 
 
-@given("the example test has been set to fail")
-def modify_example_test_to_fail(context):
-    """Modify test_run.py to fail."""
-    path_to_example_test = context.root_project_dir / "src" / "tests" / "test_run.py"
-    test_run_contents = path_to_example_test.read_text("utf-8")
-    failed_test_str = test_run_contents.replace(
-        "test_project_name(self, project_context):",
-        "test_project_name(self, project_context):\n    assert False",
-    )
-    path_to_example_test.write_text(failed_test_str)
-
-
 @given('the python package "{package}" has been uninstalled')
 def uninstall_package_via_pip(context, package):
     """Uninstall a python package using pip."""

@@ -37,8 +37,3 @@ Feature: Test target in new project
   Scenario: Execute successful test in new project
     When I execute the kedro command "test"
     Then I should get a successful exit code
-
-  Scenario: Execute failing test in new project
-    Given the example test has been set to fail
-    When I execute the kedro command "test"
-    Then I should get an error exit code

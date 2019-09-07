@@ -6,7 +6,12 @@ This section contains detailed information about configuration. You may also wan
 
 ## Local and base configuration
 
-We recommend that you keep all configuration files in the `conf` directory of a Kedro project. However, if you prefer, you may point Kedro to any other directory and change the configuration paths by modifying the `CONF_ROOT` variable in `src/run.py`.
+We recommend that you keep all configuration files in the `conf` directory of a Kedro project. However, if you prefer, you may point Kedro to any other directory and change the configuration paths by overriding `CONF_ROOT` variable from the derived `ProjectContext` class in `src/<project-package>/run.py` as follows:
+```python
+class ProjectContext(KedroContext):
+    CONF_ROOT = "new_conf"
+    # ...
+```
 
 ## Loading
 

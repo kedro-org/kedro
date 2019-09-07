@@ -25,11 +25,39 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# pylint: disable=protected-access
+
 import json
+import logging
+import logging.config
+from importlib import reload
 
 import pytest
 
 from kedro.versioning.journal import VersionJournal, _git_sha
+
+
+@pytest.fixture()
+def setup_logging(tmp_path):
+    config = {
+        "version": 1,
+        "loggers": {
+            "kedro.journal": {
+                "level": "INFO",
+                "handlers": ["journal_file_handler"],
+                "propagate": False,
+            }
+        },
+        "handlers": {
+            "journal_file_handler": {
+                "class": "kedro.versioning.journal.JournalFileHandler",
+                "level": "INFO",
+                "base_dir": str(tmp_path),
+            }
+        },
+    }
+    reload(logging)
+    logging.config.dictConfig(config)
 
 
 @pytest.fixture
@@ -39,34 +67,44 @@ def fake_git_sha(mocker):
 
 @pytest.mark.usefixtures("fake_git_sha")
 class TestVersionJournal:
-    def test_context_record(self, tmp_path, caplog):
+    @pytest.mark.usefixtures("setup_logging")
+    def test_context_record(self, tmp_path):
         """Test journal initialisation"""
         record_data = {"project_path": str(tmp_path)}
-        _ = VersionJournal(record_data)
+        journal = VersionJournal(record_data)
+        file_path = list(tmp_path.glob("journal_*"))
 
-        result = json.loads(caplog.record_tuples[0][2])
-        assert result["type"] == "ContextJournalRecord"
-        assert result["project_path"] == str(tmp_path)
-        assert result["git_sha"] == "git_sha"
-        assert "id" in result
+        assert len(file_path) == 1
+        assert journal._id in str(file_path[0])
+        log = json.loads(file_path[0].read_text())
+        assert log["type"] == "ContextJournalRecord"
+        assert log["project_path"] == str(tmp_path)
+        assert log["git_sha"] == "git_sha"
+        assert "id" in log
 
     def test_invalid_context_record(self, tmp_path, caplog):
         record_data = {"project_path": str(tmp_path), "blah": lambda x: x}
         _ = VersionJournal(record_data)
         assert "Unable to record" in caplog.record_tuples[0][2]
 
-    def test_log_catalog(self, tmp_path, caplog):
+    @pytest.mark.usefixtures("setup_logging")
+    def test_log_catalog(self, tmp_path):
         record_data = {"project_path": str(tmp_path)}
         journal = VersionJournal(record_data)
         journal.log_catalog("fake_data", "fake_operation", "fake_version")
-        context_log = json.loads(caplog.record_tuples[0][2])
-        catalog_log = json.loads(caplog.record_tuples[1][2])
+        file_path = list(tmp_path.glob("journal_*"))
 
-        assert catalog_log["type"] == "DatasetJournalRecord"
-        assert catalog_log["name"] == "fake_data"
-        assert catalog_log["operation"] == "fake_operation"
-        assert catalog_log["version"] == "fake_version"
-        assert catalog_log["id"] == context_log["id"]
+        assert journal._id in str(file_path[0])
+        assert len(file_path) == 1
+        with file_path[0].open() as log_file:
+            context_log = json.loads(log_file.readline())
+            catalog_log = json.loads(log_file.readline())
+
+            assert catalog_log["type"] == "DatasetJournalRecord"
+            assert catalog_log["name"] == "fake_data"
+            assert catalog_log["operation"] == "fake_operation"
+            assert catalog_log["version"] == "fake_version"
+            assert catalog_log["id"] == context_log["id"]
 
 
 def test_git_sha(tmp_path, mocker):

@@ -226,7 +226,7 @@ def test_cant_pickle():
 
 @pytest.fixture
 def versioned_spark_data_set(tmpdir, load_version, save_version):
-    temp_path = str(tmpdir.join("data"))
+    temp_path = str(tmpdir.join("data.parquet"))
     return SparkDataSet(filepath=temp_path, version=Version(load_version, save_version))
 
 
@@ -281,8 +281,8 @@ class TestSparkDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            r"Save path `.*/{}/test\.xlsx` did not match load path "
-            r"`.*/{}/test\.xlsx` for ExcelLocalDataSet\(.+\)".format(
+            r"Save path `.*{}.*data.parquet` did not match load path "
+            r"`.*{}.*data.parquet` for SparkDataSet\(.+\)".format(
                 save_version, load_version
             )
         )

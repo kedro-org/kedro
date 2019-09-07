@@ -38,7 +38,7 @@ from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
 
 from kedro.contrib.io.pyspark import SparkDataSet
-from kedro.io import CSVLocalDataSet, DataSetError, ParquetLocalDataSet
+from kedro.io import CSVLocalDataSet, DataSetError, ParquetLocalDataSet, Version
 
 
 # all the tests in this file require Spark
@@ -222,3 +222,76 @@ def test_cant_pickle():
 
     with pytest.raises(pickle.PicklingError):
         pickle.dumps(SparkDataSet("bob"))
+
+
+@pytest.fixture
+def load_version():
+    return None
+
+
+@pytest.fixture
+def save_version():
+    return "2019-01-02T00.00.00.000Z"
+
+
+@pytest.fixture
+def versioned_spark_data_set(tmpdir, load_version, save_version):
+    temp_path = str(tmpdir.join("data"))
+    return SparkDataSet(filepath=temp_path, version=Version(load_version, save_version))
+
+
+@pytest.fixture
+def dummy_dataframe():
+    return _get_sample_spark_data_frame().coalesce(1)
+
+
+class TestSparkDataSetVersioned:
+    def test_exists(self, versioned_spark_data_set, dummy_dataframe):
+        """Test `exists` method invocation for versioned data set."""
+        assert not versioned_spark_data_set.exists()
+        versioned_spark_data_set.save(dummy_dataframe)
+        assert versioned_spark_data_set.exists()
+
+    def test_save_and_load(self, versioned_spark_data_set, dummy_dataframe):
+        """Test that saved and reloaded data matches the original one for
+        the versioned data set."""
+        versioned_spark_data_set.save(dummy_dataframe)
+        reloaded_df = versioned_spark_data_set.load()
+        assert (
+            reloaded_df.orderBy("name").collect()
+            == dummy_dataframe.orderBy("name").collect()
+        )
+
+    def test_no_versions(self, versioned_spark_data_set):
+        """Check the error if no versions are available for load."""
+        pattern = r"Did not find any versions for "
+        with pytest.raises(DataSetError, match=pattern):
+            versioned_spark_data_set.load()
+
+    def test_prevent_overwrite(self, versioned_spark_data_set, dummy_dataframe):
+        """Check the error when attempting to override the data set if the
+        corresponding hdf file for a given save version already exists."""
+        versioned_spark_data_set.save(dummy_dataframe)
+        pattern = (
+            r"Save path \`.+\` for SparkDataSet\(.+\) must "
+            r"not exist if versioning is enabled\."
+        )
+        with pytest.raises(DataSetError, match=pattern):
+            versioned_spark_data_set.save(dummy_dataframe)
+
+    def test_version_str_repr(self, load_version, save_version):
+        """Test that version is in string representation of the class instance
+        when applicable."""
+        filepath = "test.pkl"
+        ds = SparkDataSet(filepath=filepath)
+        ds_versioned = SparkDataSet(
+            filepath=filepath, version=Version(load_version, save_version)
+        )
+        assert filepath in str(ds)
+        assert "version" not in str(ds)
+
+        assert filepath in str(ds_versioned)
+        ver_str = "version=Version(load={}, save='{}')".format(
+            load_version, save_version
+        )
+        assert ver_str in str(ds_versioned)

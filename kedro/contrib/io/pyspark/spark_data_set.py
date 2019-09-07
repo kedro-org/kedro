@@ -74,6 +74,7 @@ class SparkDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
             file_format=self._file_format,
             load_args=self._load_args,
             save_args=self._save_args,
+            version=self._version,
         )
 
     def __init__(  # pylint: disable=too-many-arguments
@@ -124,12 +125,18 @@ class SparkDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
         return SparkSession.builder.getOrCreate()
 
     def _load(self) -> DataFrame:
+        load_path = self._get_load_path()
         return self._get_spark().read.load(
-            str(self._filepath), self._file_format, **self._load_args
+            str(load_path), self._file_format, **self._load_args
         )
 
     def _save(self, data: DataFrame) -> None:
-        data.write.save(str(self._filepath), self._file_format, **self._save_args)
+        save_path = Path(self._get_save_path())
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+        data.write.save(str(save_path), self._file_format, **self._save_args)
+
+        load_path = Path(self._get_load_path())
+        self._check_paths_consistency(load_path.absolute(), save_path.absolute())
 
     def _exists(self) -> bool:
         try:

@@ -26,10 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""kedro.contrib.io.feather provides I/O modules for feather data format.
+https://github.com/wesm/feather"""
 
-Feature: Local Parquet data set IO scenarios
-
-  Scenario: Save and load a Parquet file
-    Given I have defined data in a pandas DataFrame
-    When I write a given data to a Parquet file
-    Then the data should be loaded without any alteration
+from .feather_local import FeatherLocalDataSet  # NOQA

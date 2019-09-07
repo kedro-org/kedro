@@ -29,6 +29,7 @@
 or more configuration files from specified paths.
 """
 import logging
+from glob import iglob
 from pathlib import Path
 from typing import AbstractSet, Any, Dict, Iterable, List, Tuple, Union
 
@@ -162,7 +163,7 @@ class ConfigLoader:
                     "Config from path `%s` will override the following "
                     "existing top-level config keys: %s"
                 )
-                self.logger.debug(msg, conf_path, sorted_keys)
+                self.logger.info(msg, conf_path, sorted_keys)
             config.update(new_conf)
             processed_files.extend(new_processed_files)
         if not processed_files:
@@ -237,9 +238,13 @@ def _path_lookup(conf_path: Path, patterns: List[str]) -> List[Path]:
 
     """
     result = set()
+    conf_path = conf_path.resolve()
 
     for pattern in patterns:
-        for path in conf_path.resolve().glob(pattern):
+        # `Path.glob()` ignores the files if pattern ends with "**",
+        # therefore iglob is used instead
+        for each in iglob(str(conf_path / pattern), recursive=True):
+            path = Path(each).resolve()
             if path.is_file() and path.suffix in SUPPORTED_EXTENSIONS:
                 result.add(path)
     return sorted(result)

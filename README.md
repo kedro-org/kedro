@@ -12,6 +12,10 @@
 [![Code Style: Black](https://img.shields.io/badge/code%20style-black-black.svg)](https://github.com/ambv/black)
 [![Downloads](https://pepy.tech/badge/kedro)](https://pepy.tech/project/kedro)
 
+# We're Hiring!
+
+Do you want to be part of the team that builds Kedro? If so, you're in luck! QuantumBlack is currently hiring Software Engineers who love using data to drive their decisions. Take a look at [our open positions](https://www.quantumblack.com/careers/current-openings#content) and see if you are a fit.
+
 # What is Kedro?
 
 > "The centre of your data pipeline."
@@ -23,6 +27,9 @@ Kedro is a workflow development tool that helps you build data pipelines that ar
 -   work more efficiently.
 
 Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) and [Nikolaos Tsaousis](https://github.com/tsanikgr) to solve challenges they faced in their project work.
+
+This work was later turned into a product thanks to the following contributors:
+[Ivan Danov](https://github.com/idanov), [Dmitrii Deriabin](https://github.com/DmitryDeryabin), [Gordon Wrigley](https://github.com/tolomea), [Yetunde Dada](https://github.com/yetudada), [Nasef Khan](https://github.com/nakhan98), [Kiyohito Kunii](https://github.com/921kiyo), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae), [Peteris Erins](https://github.com/Pet3ris), [Lorena Balan](https://github.com/lorenabalan), [Richard Westenra](https://github.com/richardwestenra) and [Anton Kirilenko](https://github.com/Flid).
 
 ## How do I install Kedro?
 
@@ -66,6 +73,10 @@ For more detailed installation instructions, including how to setup Python virtu
   - [Kedro-Airflow](https://github.com/quantumblacklabs/kedro-airflow), making it easy to prototype your data pipeline in Kedro before deploying to [Airflow](https://github.com/apache/airflow), a workflow scheduler
   - [Kedro-Docker](https://github.com/quantumblacklabs/kedro-docker), a tool for packaging and shipping Kedro projects within containers
 - Kedro can be deployed locally, on-premise and cloud (AWS, Azure and GCP) servers, or clusters (EMR, Azure HDinsight, GCP and Databricks)
+
+## What are the main Kedro building blocks?
+
+You can find the overview of Kedro architecture [here](https://kedro.readthedocs.io/en/latest/06_resources/02_architecture_overview.html).
 
 ## How do I use Kedro?
 

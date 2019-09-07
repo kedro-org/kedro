@@ -18,18 +18,26 @@ The spaceflight tutorial has three files and uses two data formats: `.csv` and `
 * [companies.csv](https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/companies.csv)
 * [shuttles.xlsx](https://github.com/quantumblacklabs/kedro/blob/develop/docs/source/03_tutorial/data/shuttles.xlsx?raw=true)
 
-You can [download the files from GitHub](https://www.quora.com/How-do-I-download-something-from-GitHub) using [cURL](https://curl.haxx.se/download.html) or [Wget](https://www.gnu.org/software/wget/).
-
-An example of downloading [reviews.csv](https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/reviews.csv) to your current directory is done by running this in your terminal or command line:
+Here is an example of how you can [download the files from GitHub](https://www.quora.com/How-do-I-download-something-from-GitHub) to `data/01_raw` directory inside your project using [cURL](https://curl.haxx.se/download.html):
 
 ```bash
-curl -O https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/reviews.csv
+# reviews
+curl -o data/01_raw/reviews.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/reviews.csv
+# companies
+curl -o data/01_raw/companies.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/companies.csv
+# shuttles
+curl -L -o data/01_raw/shuttles.xlsx https://github.com/quantumblacklabs/kedro/blob/develop/docs/source/03_tutorial/data/shuttles.xlsx?raw=true
 ```
 
-Or through using Wget:
+Or through using [Wget](https://www.gnu.org/software/wget/):
 
 ```bash
-wget https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/reviews.csv
+# reviews
+wget -O data/01_raw/reviews.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/reviews.csv
+# companies
+wget -O data/01_raw/companies.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/companies.csv
+# shuttles
+wget -O data/01_raw/shuttles.xlsx https://github.com/quantumblacklabs/kedro/blob/develop/docs/source/03_tutorial/data/shuttles.xlsx?raw=true
 ```
 
 
@@ -64,13 +72,7 @@ If you want to check whether Kedro loads the data correctly, open a `kedro ipyth
 context.catalog.load('companies').head()
 ```
 
-This should show you the first five rows of the dataset. If you want to explore more of it before moving on with the project:
-
-```python
-df = context.catalog.load('companies')
-```
-
-The entire `companies` dataset is loaded into a `pandas` DataFrame and you can play with it as you wish.
+This should show you the first five rows of the dataset. The entire `companies` dataset is loaded into a `pandas` DataFrame and you can play with it as you wish.
 
 When you have finished, simply close `ipython` session by typing the following:
 
@@ -112,6 +114,7 @@ class ExcelLocalDataSet(AbstractDataSet):
 
     Example:
     ::
+
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],

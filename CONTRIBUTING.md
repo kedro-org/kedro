@@ -65,6 +65,9 @@ def count_truthy(elements: List[Any]) -> int:
 
 > *Note:* We only accept contributions under the Apache 2.0 license and you should have permission to share the submitted code.
 
+Please note that each code file should have a licence header (the content of `LICENSE.md` included as a comment).
+There is an automated check to verify that it exists. The check will highlight any issues and suggest a solution.
+
 ### Branching conventions
 We use a branching model that helps us keep track of branches in a logical, consistent way. All branches should have the hyphen-separated convention of: `<type-of-change>/<short-description-of-change>` e.g. `contrib/io-dataset`
 
@@ -166,8 +169,9 @@ git push --no-verify <...>
 All checks will run during CI build, so skipping checks on push will
 not allow you to merge your code with failing checks.
 
-You can uninstall the pre-commit hooks by running
+You can uninstall the pre-commit hooks by running:
+
 ```bash
 make uninstall-pre-commit
 ```
-`pre-commit` will still be used by `make lint`, but will install the git hooks.
+`pre-commit` will still be used by `make lint`, but will not install the git hooks.

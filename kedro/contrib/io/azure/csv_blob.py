@@ -53,7 +53,7 @@ class CSVBlobDataSet(DefaultArgumentsMixIn, AbstractDataSet):
         >>>                      'col3': [5, 6]})
         >>>
         >>> data_set = CSVBlobDataSet(filepath="test.csv",
-        >>>                            bucket_name="test_bucket",
+        >>>                            container_name="test_bucket",
         >>>                            load_args=None,
         >>>                            save_args={"index": False})
         >>> data_set.save(data)

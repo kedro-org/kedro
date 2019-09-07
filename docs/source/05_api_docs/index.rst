@@ -92,8 +92,9 @@ Welcome to Kedro's API docs and tutorials!
    :caption: Resources
 
    06_resources/01_faq
-   06_resources/02_commands_reference
-   06_resources/03_lint
+   06_resources/02_architecture_overview
+   06_resources/03_commands_reference
+   06_resources/04_lint
 
 
 API Docs

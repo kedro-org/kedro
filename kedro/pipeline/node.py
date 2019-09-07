@@ -42,7 +42,7 @@ class Node:
     run user-provided functions as part of Kedro pipelines.
     """
 
-    # pylint: disable=W9016
+    # pylint: disable=missing-type-doc
     def __init__(
         self,
         func: Callable,
@@ -166,6 +166,9 @@ class Node:
         return "Node({}, {!r}, {!r}, {!r})".format(
             self._func_name, self._inputs, self._outputs, self._name
         )
+
+    def __call__(self, **kwargs) -> Dict[str, Any]:
+        return self.run(inputs=kwargs)
 
     @property
     def _func_name(self):

@@ -38,7 +38,7 @@ from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.utils import AnalysisException
 
 from kedro.contrib.io import DefaultArgumentsMixIn
-from kedro.io.core import AbstractVersionedDataSet, Version
+from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
 
 
 class SparkDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
@@ -140,7 +140,12 @@ class SparkDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
 
     def _exists(self) -> bool:
         try:
-            self._get_spark().read.load(str(self._filepath), self._file_format)
+            load_path = Path(self._get_load_path())
+        except DataSetError:
+            return False
+
+        try:
+            self._get_spark().read.load(str(load_path), self._file_format)
         except AnalysisException as exception:
             if exception.desc.startswith("Path does not exist:"):
                 return False

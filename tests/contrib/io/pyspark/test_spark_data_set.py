@@ -225,16 +225,6 @@ def test_cant_pickle():
 
 
 @pytest.fixture
-def load_version():
-    return None
-
-
-@pytest.fixture
-def save_version():
-    return "2019-01-02T00.00.00.000Z"
-
-
-@pytest.fixture
 def versioned_spark_data_set(tmpdir, load_version, save_version):
     temp_path = str(tmpdir.join("data"))
     return SparkDataSet(filepath=temp_path, version=Version(load_version, save_version))
@@ -277,6 +267,26 @@ class TestSparkDataSetVersioned:
             r"not exist if versioning is enabled\."
         )
         with pytest.raises(DataSetError, match=pattern):
+            versioned_spark_data_set.save(dummy_dataframe)
+
+    @pytest.mark.parametrize(
+        "load_version", ["2019-01-01T23.59.59.999Z"], indirect=True
+    )
+    @pytest.mark.parametrize(
+        "save_version", ["2019-01-02T00.00.00.000Z"], indirect=True
+    )
+    def test_save_version_warning(
+        self, versioned_spark_data_set, load_version, save_version, dummy_dataframe
+    ):
+        """Check the warning when saving to the path that differs from
+        the subsequent load path."""
+        pattern = (
+            r"Save path `.*/{}/test\.xlsx` did not match load path "
+            r"`.*/{}/test\.xlsx` for ExcelLocalDataSet\(.+\)".format(
+                save_version, load_version
+            )
+        )
+        with pytest.warns(UserWarning, match=pattern):
             versioned_spark_data_set.save(dummy_dataframe)
 
     def test_version_str_repr(self, load_version, save_version):

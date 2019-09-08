@@ -208,7 +208,7 @@ class TestTemplatedConfigLoader:
         (tmp_path / "local").mkdir(exist_ok=True)
 
         catalog = TemplatedConfigLoader(conf_paths, arg_values=template_config).get(
-            ["catalog*.yml"]
+            "catalog*.yml"
         )
 
         assert catalog["boats"]["type"] == "SparkDataSet"
@@ -226,7 +226,7 @@ class TestTemplatedConfigLoader:
         (tmp_path / "local").mkdir(exist_ok=True)
 
         catalog = TemplatedConfigLoader(conf_paths, globals_pattern="*globals.yml").get(
-            ["catalog*.yml"]
+            "catalog*.yml"
         )
 
         assert catalog["boats"]["type"] == "SparkDataSet"
@@ -243,7 +243,7 @@ class TestTemplatedConfigLoader:
         """Test parameterized config without input"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
-        catalog = TemplatedConfigLoader(conf_paths).get(["catalog*.yml"])
+        catalog = TemplatedConfigLoader(conf_paths).get("catalog*.yml")
 
         assert catalog["boats"]["type"] == "${boat_data_type}"
         assert (
@@ -295,7 +295,7 @@ class TestTemplatedConfigLoader:
 
         catalog = TemplatedConfigLoader(
             conf_paths, globals_pattern="*globals.yml", arg_values=get_environ
-        ).get(["catalog*.yml"])
+        ).get("catalog*.yml")
 
         assert catalog["boats"]["type"] == "SparkDataSet"
         assert (
@@ -315,7 +315,7 @@ class TestTemplatedConfigLoader:
 
         catalog = TemplatedConfigLoader(
             conf_paths, arg_values={"global": template_config, "env": get_environ}
-        ).get(["catalog*.yml"])
+        ).get("catalog*.yml")
 
         assert catalog["boats"]["type"] == "SparkDataSet"
         assert (

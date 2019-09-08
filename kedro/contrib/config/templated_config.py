@@ -29,7 +29,7 @@
 or more configuration files from specified paths, and replace template strings with default values.
 """
 import re
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Iterable, Optional, Union
 
 import jmespath
 
@@ -41,23 +41,114 @@ class TemplatedConfigLoader(ConfigLoader):
     Extension of the ConfigLoader class that allows for template values, wrapped in brackets like:
      ${..}, to be replaced by default values.
 
-    Default values are provided in a dictionary.
+    The easiest way to use this class is by incorporating it into the KedroContext. This can be done
+    by extending the KedroContext and overwriting the config_loader method, making it return an
+    TemplatedConfigLoader object instead of a ConfigLoader object.
+
+    For this method to work, the context_path variable in the .kedro.yml needs to be pointing at
+    this newly created class. The run.py script has an extension of the KedroContext by default,
+    called the ProjectContext.
+
+    Example:
+    ::
+        >>> from kedro.context import KedroContext, load_context
+        >>> from kedro.contrib.config import TemplatedConfigLoader
+        >>>
+        >>> class MyNewContext(KedroContext):
+        >>>
+        >>>    @property
+        >>>    def config_loader(self) -> TemplatedConfigLoader:
+        >>>        conf_paths = [
+        >>>            str(self.project_path / self.CONF_ROOT / "base"),
+        >>>            str(self.project_path / self.CONF_ROOT / self.env),
+        >>>        ]
+        >>>        return TemplatedConfigLoader(conf_paths,
+        >>>                                     globals_pattern="*globals.yml",
+        >>>                                     arg_values={"param1": "CSVLocalDataSet"})
+
+        >>> my_context = load_context(Path.cwd(), env=env)
+        >>> my_context.run(tags, runner, node_names, from_nodes, to_nodes)
+
+    Or alternatively, if you don't want to hard-code the globals_pattern or the arg_values in
+    the newly created class:
+    ::
+        >>> from kedro.context import KedroContext, load_context
+        >>> from kedro.contrib.config import TemplatedConfigLoader
+        >>>
+        >>> class MyNewContext(KedroContext):
+        >>>
+        >>>    def __init__(self,
+        >>>                 project_path: Union[Path, str],
+        >>>                 env: str = None,
+        >>>                 arg_values=None,
+        >>>                 globals_pattern=None):
+        >>>
+        >>>        self.arg_values = arg_values
+        >>>        self.globals_pattern = globals_pattern
+        >>>        super(ProjectContext, self).__init__(project_path, env)
+        >>>
+        >>>    @property
+        >>>    def config_loader(self) -> TemplatedConfigLoader:
+        >>>        conf_paths = [
+        >>>            str(self.project_path / self.CONF_ROOT / "base"),
+        >>>            str(self.project_path / self.CONF_ROOT / self.env),
+        >>>        ]
+        >>>        return TemplatedConfigLoader(conf_paths,
+        >>>                                     globals_pattern=self.globals_pattern,
+        >>>                                     arg_values=self.arg_values)
+
+        >>> my_context = load_context(Path.cwd(),
+        >>>                           env=env,
+        >>>                           globals_pattern="*globals.yml",
+        >>>                           arg_values={"param1": "CSVLocalDataSet"})
+        >>>
+        >>> my_context.run(tags, runner, node_names, from_nodes, to_nodes)
+
+    This last method also works a bit nicer in notebooks (i.e. when you run kedro jupyter notebook),
+    because it allows you to overwrite the context object with custom arg_values of your choosing.
     """
 
-    def get(
+    def __init__(
         self,
-        patterns: Union[str, List[str]],
-        *,
-        arg_values: Optional[Dict[str, Any]] = None
+        conf_paths: Union[str, Iterable[str]],
+        globals_pattern: Optional[str] = None,
+        arg_values: Optional[Dict[str, Any]] = None,
     ):
-        """
-        Tries to resolve the template variables in the config dictionary provided by the
-        ConfigLoader (super class) `get` method.
+        """Instantiate a TemplatedConfigLoader.
 
         Args:
+            conf_paths: Non-empty path or list of paths to configuration
+                directories.
+            globals_pattern: Optional keyword-only argument specifying a glob pattern.
+                Files that match the pattern will be loaded as a dictionary with default
+                values used for replacement.
+            arg_values: Optional keyword-only specifying an additional dictionary with
+                default values used for replacement. This dictionary will get merged with
+                the globals dictionary obtained from the globals_pattern. In case of
+                duplicate keys, the arg_values keys take precedence.
+        """
+
+        super(TemplatedConfigLoader, self).__init__(conf_paths)
+
+        self.globals_dict = (
+            super(TemplatedConfigLoader, self).get(*globals_pattern)
+            if globals_pattern
+            else {}
+        )
+
+        self.arg_dict = (
+            dict(**self.globals_dict, **arg_values) if arg_values else self.globals_dict
+        )
+
+    def get(self, *patterns: str):
+        """
+        Tries to resolve the template variables in the config dictionary provided by the
+        ConfigLoader (super class) `get` method using the dictionary of replacement values
+        obtained in the __init__ method.
+
+         Args:
             patterns: Glob patterns to match. Files, which names match
                 any of the specified patterns, will be processed.
-            arg_values: Optional dictionary containing default values.
 
         Returns:
             Dict[str, Any]:  A Python dictionary with the combined
@@ -67,14 +158,12 @@ class TemplatedConfigLoader(ConfigLoader):
                 found in the arg_values_dict).
         """
 
-        if isinstance(patterns, str):
-            patterns = [patterns]
+        config_raw = super().get(*patterns)
 
-        config_raw = super(TemplatedConfigLoader, self).get(*patterns)
+        if self.arg_dict:
+            return _replace_vals(config_raw, self.arg_dict)
 
-        config_out = _replace_vals(config_raw, arg_values) if arg_values else config_raw
-
-        return config_out
+        return config_raw
 
 
 def _replace_vals(val: Any, defaults: Dict[str, Any]) -> Any:

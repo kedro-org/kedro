@@ -82,6 +82,12 @@ def proj_catalog_param(tmp_path, param_config):
 
 
 @pytest.fixture
+def proj_catalog_globals(tmp_path, template_config):
+    global_yml = tmp_path / "base" / "globals.yml"
+    _write_yaml(global_yml, template_config)
+
+
+@pytest.fixture
 def normal_config_advanced():
     return {
         "planes": {
@@ -131,27 +137,30 @@ def proj_catalog_param_w_vals_advanced(tmp_path, param_config_advanced):
 
 
 @pytest.fixture
-def mixed_config_advanced():
+def param_config_mixed():
     return {
-        "planes": {
-            "type": "SparkJDBCDataSet",
-            "type_parameterized": "${plane_data_type}",
-            "postgres_credentials": {"user": "Fakeuser", "password": "F@keP@55word"},
-            "postgres_credentials_parameterized": "${credentials}",
-            "batch_size": 10000,
-            "batch_size_parameterized": "${batch_size}",
-            "need_permission": True,
-            "need_permission_parameterized": "${permission_param}",
-            "secret_tables": ["models", "pilots", "engines"],
-            "secret_tables_parameterized": "${secret_table_list}",
+        "boats": {
+            "type": "${boat_data_type}",
+            "filepath": "${s3_bucket}/${raw_data_folder}/${boat_file_name}",
+            "columns": {
+                "id": "${string_type}",
+                "name": "${string_type}",
+                "top_speed": "${float_type}",
+            },
+            "users": ["fred", "${USER}"],
         }
     }
 
 
 @pytest.fixture
-def proj_catalog_mixed(tmp_path, mixed_config_advanced):
+def get_environ():
+    return {"USER": "ron"}
+
+
+@pytest.fixture
+def proj_catalog_param_mixed(tmp_path, param_config_mixed):
     proj_catalog = tmp_path / "base" / "catalog.yml"
-    _write_yaml(proj_catalog, mixed_config_advanced)
+    _write_yaml(proj_catalog, param_config_mixed)
 
 
 @pytest.fixture
@@ -168,11 +177,6 @@ def param_config_namespaced():
             "users": ["fred", "${env.USER}"],
         }
     }
-
-
-@pytest.fixture
-def get_environ():
-    return {"USER": "ron"}
 
 
 @pytest.fixture
@@ -203,8 +207,26 @@ class TestTemplatedConfigLoader:
         """Test parameterized config with input from dictionary with values"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
-        catalog = TemplatedConfigLoader(conf_paths).get(
-            ["catalog*.yml"], arg_values=template_config
+        catalog = TemplatedConfigLoader(conf_paths, arg_values=template_config).get(
+            ["catalog*.yml"]
+        )
+
+        assert catalog["boats"]["type"] == "SparkDataSet"
+        assert (
+            catalog["boats"]["filepath"] == "s3a://boat-and-car-bucket/01_raw/boats.csv"
+        )
+        assert catalog["boats"]["columns"]["id"] == "VARCHAR"
+        assert catalog["boats"]["columns"]["name"] == "VARCHAR"
+        assert catalog["boats"]["columns"]["top_speed"] == "FLOAT"
+        assert catalog["boats"]["users"] == ["fred", "ron"]
+
+    @pytest.mark.usefixtures("proj_catalog_param", "proj_catalog_globals")
+    def test_catlog_parameterized_w_globals(self, tmp_path, conf_paths):
+        """Test parameterized config with globals yaml file"""
+        (tmp_path / "local").mkdir(exist_ok=True)
+
+        catalog = TemplatedConfigLoader(conf_paths, globals_pattern="*globals.yml").get(
+            ["catalog*.yml"]
         )
 
         assert catalog["boats"]["type"] == "SparkDataSet"
@@ -217,8 +239,8 @@ class TestTemplatedConfigLoader:
         assert catalog["boats"]["users"] == ["fred", "ron"]
 
     @pytest.mark.usefixtures("proj_catalog_param")
-    def test_catlog_parameterized_no_dict(self, tmp_path, conf_paths):
-        """Test parameterized config with input from dictionary with values"""
+    def test_catlog_parameterized_no_params(self, tmp_path, conf_paths):
+        """Test parameterized config without input"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
         catalog = TemplatedConfigLoader(conf_paths).get(["catalog*.yml"])
@@ -255,9 +277,9 @@ class TestTemplatedConfigLoader:
         """Test advanced templating (i.e. nested dicts, booleans, lists, etc.)"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
-        catalog = TemplatedConfigLoader(conf_paths).get(
-            "catalog*.yml", arg_values=template_config_advanced
-        )
+        catalog = TemplatedConfigLoader(
+            conf_paths, arg_values=template_config_advanced
+        ).get("catalog*.yml")
 
         assert catalog["planes"]["type"] == "SparkJDBCDataSet"
         assert catalog["planes"]["postgres_credentials"]["user"] == "Fakeuser"
@@ -266,50 +288,34 @@ class TestTemplatedConfigLoader:
         assert catalog["planes"]["need_permission"]
         assert catalog["planes"]["secret_tables"] == ["models", "pilots", "engines"]
 
-    @pytest.mark.usefixtures("proj_catalog_mixed")
-    def test_catlog_parameterized_mixed(
-        self, tmp_path, conf_paths, template_config_advanced
-    ):
-        """Test advanced templating (i.e. nested dicts, booleans, lists, etc.) with mixed conf"""
+    @pytest.mark.usefixtures("proj_catalog_param_mixed", "proj_catalog_globals")
+    def test_catlog_parameterized_w_dict_mixed(self, tmp_path, conf_paths, get_environ):
+        """Test parameterized config with input from dictionary with values and globals.yml"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
-        catalog = TemplatedConfigLoader(conf_paths).get(
-            "catalog*.yml", arg_values=template_config_advanced
-        )
+        catalog = TemplatedConfigLoader(
+            conf_paths, globals_pattern="*globals.yml", arg_values=get_environ
+        ).get(["catalog*.yml"])
 
-        assert catalog["planes"]["type"] == "SparkJDBCDataSet"
-        assert catalog["planes"]["postgres_credentials"]["user"] == "Fakeuser"
-        assert catalog["planes"]["postgres_credentials"]["password"] == "F@keP@55word"
-        assert catalog["planes"]["batch_size"] == 10000
-        assert catalog["planes"]["need_permission"]
-        assert catalog["planes"]["secret_tables"] == ["models", "pilots", "engines"]
-        assert catalog["planes"]["type_parameterized"] == "SparkJDBCDataSet"
+        assert catalog["boats"]["type"] == "SparkDataSet"
         assert (
-            catalog["planes"]["postgres_credentials_parameterized"]["user"]
-            == "Fakeuser"
+            catalog["boats"]["filepath"] == "s3a://boat-and-car-bucket/01_raw/boats.csv"
         )
-        assert (
-            catalog["planes"]["postgres_credentials_parameterized"]["password"]
-            == "F@keP@55word"
-        )
-        assert catalog["planes"]["batch_size_parameterized"] == 10000
-        assert catalog["planes"]["need_permission_parameterized"]
-        assert catalog["planes"]["secret_tables_parameterized"] == [
-            "models",
-            "pilots",
-            "engines",
-        ]
+        assert catalog["boats"]["columns"]["id"] == "VARCHAR"
+        assert catalog["boats"]["columns"]["name"] == "VARCHAR"
+        assert catalog["boats"]["columns"]["top_speed"] == "FLOAT"
+        assert catalog["boats"]["users"] == ["fred", "ron"]
 
     @pytest.mark.usefixtures("proj_catalog_param_namespaced")
     def test_catlog_parameterized_w_dict_namespaced(
         self, tmp_path, conf_paths, template_config, get_environ
     ):
-        """Test parameterized config with input from dictionary with values"""
+        """Test parameterized config with namespacing in the template values"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
-        catalog = TemplatedConfigLoader(conf_paths).get(
-            ["catalog*.yml"], arg_values={"global": template_config, "env": get_environ}
-        )
+        catalog = TemplatedConfigLoader(
+            conf_paths, arg_values={"global": template_config, "env": get_environ}
+        ).get(["catalog*.yml"])
 
         assert catalog["boats"]["type"] == "SparkDataSet"
         assert (
@@ -327,8 +333,8 @@ class TestTemplatedConfigLoader:
         """Test templating with mixed type replacement values going into one string"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
-        catalog = TemplatedConfigLoader(conf_paths).get(
-            "catalog*.yml", arg_values=template_config_exceptional
-        )
+        catalog = TemplatedConfigLoader(
+            conf_paths, arg_values=template_config_exceptional
+        ).get("catalog*.yml")
 
         assert catalog["postcode"] == "NW10 2JK"

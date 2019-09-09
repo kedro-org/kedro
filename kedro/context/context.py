@@ -292,7 +292,7 @@ class KedroContext(abc.ABC):
     ) -> None:
         """Record the run variables into journal."""
         record_data = {
-            "project_path": self.project_path,
+            "project_path": str(self.project_path),
             "env": self.env,
             "kedro_version": self.project_version,
             "tags": tags,

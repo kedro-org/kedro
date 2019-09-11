@@ -27,8 +27,11 @@
 # limitations under the License.
 
 # pylint: disable=unused-argument
+import os
 import subprocess
 import sys
+from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 import pytest
 from click.testing import CliRunner
@@ -39,6 +42,16 @@ from kedro.runner import ParallelRunner, SequentialRunner
 @pytest.fixture(autouse=True)
 def call_mock(mocker, fake_kedro_cli):
     return mocker.patch.object(fake_kedro_cli, "call")
+
+
+@pytest.fixture(autouse=True)
+def python_call_mock(mocker, fake_kedro_cli):
+    return mocker.patch.object(fake_kedro_cli, "python_call")
+
+
+@pytest.fixture()
+def fake_ipython_message(mocker, fake_kedro_cli):
+    return mocker.patch.object(fake_kedro_cli, 'ipython_message')
 
 
 class TestActivateNbstripoutCommand:
@@ -74,11 +87,10 @@ class TestActivateNbstripoutCommand:
     def without_git_repo(mocker):
         return mocker.patch("subprocess.run", return_value=mocker.Mock(returncode=1))
 
-    def test_install_successfully(self, fake_kedro_cli, call_mock, fake_nbstripout, fake_git_repo):
-        result = CliRunner().invoke(
-            fake_kedro_cli.cli,
-            ['activate-nbstripout'],
-        )
+    def test_install_successfully(
+        self, fake_kedro_cli, call_mock, fake_nbstripout, fake_git_repo
+    ):
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["activate-nbstripout"])
         assert not result.exit_code
 
         call_mock.assert_called_once_with(["nbstripout", "--install"])
@@ -89,78 +101,411 @@ class TestActivateNbstripoutCommand:
             stderr=subprocess.PIPE,
         )
 
-    def test_nbstripout_not_found(self, fake_kedro_cli, missing_nbstripout, fake_git_repo):
+    def test_nbstripout_not_found(
+        self, fake_kedro_cli, missing_nbstripout, fake_git_repo
+    ):
         """
         Run activate-nbstripout target without nbstripout installed
         There should be a clear message about it.
         """
 
-        result = CliRunner().invoke(
-            fake_kedro_cli.cli,
-            ['activate-nbstripout'],
-        )
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["activate-nbstripout"])
         assert result.exit_code
-        assert 'nbstripout is not installed' in result.stdout
+        assert "nbstripout is not installed" in result.stdout
 
     def test_no_git_repo(self, fake_kedro_cli, fake_nbstripout, without_git_repo):
         """
         Run activate-nbstripout target with no git repo available.
         There should be a clear message about it.
         """
-        result = CliRunner().invoke(
-            fake_kedro_cli.cli,
-            ['activate-nbstripout'],
-        )
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["activate-nbstripout"])
+
         assert result.exit_code
-        assert 'Not a git repository' in result.stdout
+        assert "Not a git repository" in result.stdout
 
 
 class TestRunCommand:
     @staticmethod
     @pytest.fixture(autouse=True)
-    def fake_main(mocker, fake_repo):
-        from fake_package import run  # pylint: disable=import-error
-        yield mocker.patch.object(run, 'main', mocker.Mock())
+    def fake_load_context(mocker, fake_kedro_cli):
+        context = mocker.Mock()
+        yield mocker.patch.object(fake_kedro_cli, "load_context", return_value=context)
 
-    def test_run_successfully(self, fake_kedro_cli, fake_main, mocker):
-        result = CliRunner().invoke(
-            fake_kedro_cli.cli,
-            ['run'],
-        )
+    def test_run_successfully(self, fake_kedro_cli, fake_load_context, mocker):
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["run"])
         assert not result.exit_code
 
-        fake_main.assert_called_once_with(
-            tags=(),
-            env=None,
-            runner=mocker.ANY,
-            node_names=(),
-            from_nodes=[],
-            to_nodes=[],
+        fake_load_context.return_value.run.assert_called_once_with(
+            tags=(), runner=mocker.ANY, node_names=(), from_nodes=[], to_nodes=[]
         )
-        assert isinstance(fake_main.call_args_list[0][1]['runner'], SequentialRunner)
 
-    def test_with_sequential_runner_and_parallel_flag(self, fake_kedro_cli, fake_main):
+        assert isinstance(
+            fake_load_context.return_value.run.call_args_list[0][1]["runner"],
+            SequentialRunner,
+        )
+
+    def test_with_sequential_runner_and_parallel_flag(
+        self, fake_kedro_cli, fake_load_context
+    ):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["run", "--parallel", "--runner=SequentialRunner"]
+        )
+
+        assert result.exit_code
+        assert "Please use either --parallel or --runner" in result.stdout
+        fake_load_context.return_value.run.assert_not_called()
+
+    def test_run_successfully_parallel_via_flag(
+        self, fake_kedro_cli, fake_load_context, mocker
+    ):
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["run", "--parallel"])
+
+        assert not result.exit_code
+
+        fake_load_context.return_value.run.assert_called_once_with(
+            tags=(), runner=mocker.ANY, node_names=(), from_nodes=[], to_nodes=[]
+        )
+
+        assert isinstance(
+            fake_load_context.return_value.run.call_args_list[0][1]["runner"],
+            ParallelRunner,
+        )
+
+    def test_run_successfully_parallel_via_name(
+        self, fake_kedro_cli, fake_load_context
+    ):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["run", "--runner=ParallelRunner"]
+        )
+
+        assert not result.exit_code
+        assert isinstance(
+            fake_load_context.return_value.run.call_args_list[0][1]["runner"],
+            ParallelRunner,
+        )
+
+
+class TestTestCommand:
+    @staticmethod
+    @pytest.fixture
+    def missing_pytest(mocker):
+        """
+        Pretend ``nbstripout`` module doesn't exist.
+        In fact, no new imports are possible after that.
+        """
+        sys.modules.pop("pytest", None)
+        mocker.patch.object(sys, "path", [])
+
+    def test_happy_path(self, fake_kedro_cli, python_call_mock):
         result = CliRunner().invoke(
             fake_kedro_cli.cli,
-            ['run', '--parallel', '--runner=SequentialRunner'],
+            ['test', '--random-arg', 'value'],
+        )
+        assert not result.exit_code
+        python_call_mock.assert_called_once_with(
+            'pytest', ('--random-arg', 'value'),
+        )
+
+    def test_pytest_not_installed(self, fake_kedro_cli, python_call_mock, missing_pytest):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli,
+            ['test', '--random-arg', 'value'],
         )
         assert result.exit_code
-        assert 'Please use either --parallel or --runner' in result.stdout
-        fake_main.assert_not_called()
+        assert fake_kedro_cli.NO_PYTEST_MESSAGE in result.stdout
+        python_call_mock.assert_not_called()
 
-    def test_run_successfully_parallel_via_flag(self, fake_kedro_cli, fake_main):
+
+class TestInstallCommand:
+    def test_happy_path(self, python_call_mock, call_mock, fake_kedro_cli):
         result = CliRunner().invoke(
             fake_kedro_cli.cli,
-            ['run', '--parallel'],
+            ['install'],
         )
         assert not result.exit_code
-        assert isinstance(fake_main.call_args_list[0][1]['runner'],
-                          ParallelRunner)
+        python_call_mock.assert_called_once_with(
+            'pip', ["install", "-U", "-r", "src/requirements.txt"],
+        )
+        call_mock.assert_not_called()
 
-    def test_run_successfully_parallel_via_name(self, fake_kedro_cli, fake_main):
+    def test_with_env_file(self, python_call_mock, call_mock, fake_kedro_cli, mocker):
+        # Pretend env file exists:
+        mocker.patch.object(Path, 'is_file', return_value=True)
+
         result = CliRunner().invoke(
             fake_kedro_cli.cli,
-            ['run', '--runner=ParallelRunner'],
+            ['install'],
         )
-        assert not result.exit_code
-        assert isinstance(fake_main.call_args_list[0][1]['runner'], ParallelRunner)
+        assert not result.exit_code, result.stdout
+        python_call_mock.assert_called_once_with(
+            'pip', ["install", "-U", "-r", "src/requirements.txt"],
+        )
+        call_mock.assert_called_once_with(
+            ['conda', 'install', '--file', 'src/environment.yml', '--yes'],
+        )
+
+
+class TestIpythonCommand:
+    def test_happy_path(self, call_mock, fake_kedro_cli, fake_ipython_message):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli,
+            ['ipython', '--random-arg', 'value'],
+        )
+        assert not result.exit_code, result.stdout
+        fake_ipython_message.assert_called_once_with()
+        call_mock.assert_called_once_with(['ipython', '--random-arg', 'value'])
+
+    @pytest.mark.parametrize(
+        'help_flag', [
+            '-h', '--help'
+        ]
+    )
+    def test_help(self, help_flag, call_mock, fake_kedro_cli, fake_ipython_message):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli,
+            ['ipython', help_flag],
+        )
+        assert not result.exit_code, result.stdout
+        fake_ipython_message.assert_not_called()
+        call_mock.assert_called_once_with(['ipython', help_flag])
+
+
+class TestPackageCommand:
+    def test_happy_path(self, call_mock, fake_kedro_cli, mocker):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli,
+            ['package'],
+        )
+        assert not result.exit_code, result.stdout
+        call_mock.assert_has_calls([
+            mocker.call([sys.executable, "setup.py", "clean", "--all", "bdist_egg"], cwd="src"),
+            mocker.call([sys.executable, "setup.py", "clean", "--all", "bdist_wheel"], cwd="src"),
+        ])
+
+
+class TestBuildDocsCommand:
+    def test_happy_path(self, call_mock, python_call_mock, fake_kedro_cli, mocker):
+        fake_rmtree = mocker.patch('shutil.rmtree')
+
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli,
+            ['build-docs'],
+        )
+        assert not result.exit_code, result.stdout
+        call_mock.assert_has_calls([
+            mocker.call([
+                "sphinx-apidoc", "--module-first",
+                "-o", "docs/source",
+                "src/fake_package",
+            ]),
+            mocker.call([
+                "sphinx-build", "-M", "html", "docs/source", "docs/build", "-a",
+            ]),
+        ])
+        python_call_mock.assert_has_calls([
+            mocker.call(
+                "pip", ["install", "src/[docs]"],
+            ),
+            mocker.call(
+                "pip", ["install", "-r", "src/requirements.txt"],
+            ),
+            mocker.call(
+                "ipykernel", ["install", "--user", "--name=fake_package"],
+            ),
+        ])
+        fake_rmtree.assert_called_once_with("docs/build", ignore_errors=True)
+
+
+class TestBuildReqsCommand:
+    def test_requirements_file_exists(self, python_call_mock, fake_kedro_cli,
+                                      mocker):
+        # File exists:
+        mocker.patch.object(Path, 'is_file', return_value=True)
+
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli,
+            ['build-reqs'],
+        )
+        assert not result.exit_code, result.stdout
+        assert 'Requirements built!' in result.stdout
+
+        python_call_mock.assert_called_once_with(
+            "piptools", ["compile", str(Path.cwd() / "src" / "requirements.in")],
+        )
+
+    def test_requirements_file_doesnt_exist(
+            self, python_call_mock, fake_kedro_cli, mocker,
+    ):
+        # File does not exist:
+        mocker.patch.object(Path, 'is_file', return_value=False)
+        mocker.patch.object(Path, 'read_text', return_value='fake requirements')
+        fake_writer = mocker.patch.object(Path, 'write_text')
+
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli,
+            ['build-reqs'],
+        )
+        assert not result.exit_code, result.stdout
+        assert 'Requirements built!' in result.stdout
+        python_call_mock.assert_called_once_with(
+            "piptools", ["compile", str(Path.cwd() / "src" / "requirements.in")],
+        )
+        fake_writer.assert_called_once_with('fake requirements')
+
+
+class TestJupyterNotebookCommand:
+    def test_default_kernel(self, call_mock, fake_kedro_cli,
+                            fake_ipython_message):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli,
+            ['jupyter', 'notebook', '--ip=0.0.0.0'],
+        )
+        assert not result.exit_code, result.stdout
+        fake_ipython_message.assert_called_once_with(False)
+        call_mock.assert_called_once_with([
+            'jupyter-notebook', '--ip=0.0.0.0',
+            "--KernelSpecManager.whitelist=['python3']",
+        ])
+
+    def test_all_kernels(self, call_mock, fake_kedro_cli, fake_ipython_message):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli,
+            ['jupyter', 'notebook', '--all-kernels'],
+        )
+        assert not result.exit_code, result.stdout
+        fake_ipython_message.assert_called_once_with(True)
+        call_mock.assert_called_once_with(['jupyter-notebook', '--ip=127.0.0.1'])
+
+    @pytest.mark.parametrize(
+        'help_flag', [
+            '-h', '--help'
+        ]
+    )
+    def test_help(self, help_flag, fake_kedro_cli, fake_ipython_message):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli,
+            ['jupyter', 'notebook', help_flag],
+        )
+        assert not result.exit_code, result.stdout
+        fake_ipython_message.assert_not_called()
+
+
+class TestJupyterLabCommand:
+    def test_default_kernel(self, call_mock, fake_kedro_cli, fake_ipython_message):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli,
+            ['jupyter', 'lab', '--ip=0.0.0.0'],
+        )
+        assert not result.exit_code, result.stdout
+        fake_ipython_message.assert_called_once_with(False)
+        call_mock.assert_called_once_with([
+            'jupyter-lab', '--ip=0.0.0.0',
+            "--KernelSpecManager.whitelist=['python3']",
+        ])
+
+    def test_all_kernels(self, call_mock, fake_kedro_cli, fake_ipython_message):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli,
+            ['jupyter', 'lab', '--all-kernels'],
+        )
+        assert not result.exit_code, result.stdout
+        fake_ipython_message.assert_called_once_with(True)
+        call_mock.assert_called_once_with(['jupyter-lab', '--ip=127.0.0.1'])
+
+    @pytest.mark.parametrize(
+        'help_flag', [
+            '-h', '--help'
+        ]
+    )
+    def test_help(self, help_flag, fake_kedro_cli, fake_ipython_message):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli,
+            ['jupyter', 'lab', help_flag],
+        )
+        assert not result.exit_code, result.stdout
+        fake_ipython_message.assert_not_called()
+
+
+class TestConvertNotebookCommand:
+    @staticmethod
+    @pytest.fixture
+    def fake_export_nodes(mocker, fake_kedro_cli):
+        return mocker.patch.object(fake_kedro_cli, 'export_nodes')
+
+    @staticmethod
+    @pytest.fixture
+    def tmp_file_path():
+        with NamedTemporaryFile() as f:
+            yield Path(f.name)
+
+    @staticmethod
+    @pytest.fixture(autouse=True)
+    def chdir_to_repo_root(fake_repo_path):
+        os.chdir(str(fake_repo_path))
+
+    # pylint: disable=too-many-arguments
+    def test_convert_one_file_overwrite(
+            self, mocker, fake_kedro_cli, fake_export_nodes,
+            tmp_file_path, fake_repo_path,
+    ):
+        """
+        Trying to convert one file, the output file already exists,
+        overwriting it.
+        """
+        mocker.patch.object(Path, 'is_file', return_value=True)
+        mocker.patch('click.confirm', return_value=True)
+
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli,
+            ['jupyter', 'convert', str(tmp_file_path)],
+        )
+        assert not result.exit_code, result.stdout
+
+        output_prefix = fake_repo_path.resolve() / "src" / 'fake_package' / "nodes"
+        fake_export_nodes.assert_called_once_with(
+            tmp_file_path.resolve(),
+            output_prefix / "{}.py".format(tmp_file_path.stem),
+        )
+
+    def test_convert_one_file_do_not_overwrite(
+            self, mocker, fake_kedro_cli, fake_export_nodes, tmp_file_path,
+    ):
+        """
+        Trying to convert one file, the output file already exists,
+        user refuses to overwrite it.
+        """
+        mocker.patch.object(Path, 'is_file', return_value=True)
+        mocker.patch('click.confirm', return_value=False)
+
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli,
+            ['jupyter', 'convert', str(tmp_file_path)],
+        )
+        assert not result.exit_code, result.stdout
+
+        fake_export_nodes.assert_not_called()
+
+    def test_convert_all_files(
+            self, mocker, fake_kedro_cli, fake_export_nodes, fake_repo_path,
+    ):
+        """
+        Trying to convert all files, the output files already exist.
+        """
+        mocker.patch.object(Path, 'is_file', return_value=True)
+        mocker.patch('click.confirm', return_value=True)
+        mocker.patch.object(
+            fake_kedro_cli, 'iglob',
+            return_value=['/path/1', '/path/2'],
+        )
+
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli,
+            ['jupyter', 'convert', '--all'],
+        )
+        assert not result.exit_code, result.stdout
+
+        output_prefix = (fake_repo_path / "src" / 'fake_package' / "nodes").resolve()
+        fake_export_nodes.assert_has_calls([
+            mocker.call(Path('/path/1'), output_prefix / '1.py'),
+            mocker.call(Path('/path/2'), output_prefix / '2.py'),
+        ])

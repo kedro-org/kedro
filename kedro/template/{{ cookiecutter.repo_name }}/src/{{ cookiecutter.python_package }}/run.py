@@ -31,7 +31,7 @@
 from pathlib import Path
 from typing import Iterable, Type
 
-from kedro.context import KedroContext
+from kedro.context import KedroContext, load_context
 from kedro.runner import AbstractRunner
 from kedro.pipeline import Pipeline
 
@@ -50,6 +50,7 @@ class ProjectContext(KedroContext):
     @property
     def pipeline(self) -> Pipeline:
         return create_pipeline()
+
 
 def main(
     tags: Iterable[str] = None,
@@ -78,8 +79,8 @@ def main(
             end point of the new ``Pipeline``.
 
     """
-    context = ProjectContext(Path.cwd(), env)
-    context.run(tags, runner, node_names, from_nodes, to_nodes)
+    project_context = load_context(Path.cwd(), env=env)
+    project_context.run(tags, runner, node_names, from_nodes, to_nodes)
 
 
 if __name__ == "__main__":

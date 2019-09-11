@@ -28,6 +28,7 @@
 """This module provides context for Kedro project."""
 
 import abc
+import logging
 import logging.config
 import os
 import sys
@@ -291,7 +292,7 @@ class KedroContext(abc.ABC):
     ) -> None:
         """Record the run variables into journal."""
         record_data = {
-            "project_path": self.project_path,
+            "project_path": str(self.project_path),
             "env": self.env,
             "kedro_version": self.project_version,
             "tags": tags,
@@ -358,21 +359,24 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
 
     Args:
         project_path: Path to the Kedro project.
-        kwargs: Optional custom arguments defined by users, which will be passed to
-        ProjectContext class in `run.py`. kwargs will need to be passed explicitly to
-        the constructor of ProjectContext.
+        kwargs: Optional kwargs for ``ProjectContext`` class in `run.py`.
 
     Returns:
-        Instance of KedroContext class defined in Kedro project.
+        Instance of ``KedroContext`` class defined in Kedro project.
 
     Raises:
         KedroContextError: Either '.kedro.yml' was not found
-        or loaded context has package conflict.
+            or loaded context has package conflict.
 
     """
     project_path = Path(project_path).expanduser().resolve()
-    if str(project_path) not in sys.path:
-        sys.path.append(str(project_path))
+    src_path = str(project_path / "src")
+
+    if src_path not in sys.path:
+        sys.path.insert(0, src_path)
+
+    if "PYTHONPATH" not in os.environ:
+        os.environ["PYTHONPATH"] = src_path
 
     kedro_yaml = project_path / ".kedro.yml"
     try:
@@ -388,11 +392,15 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
         )
 
     context_class = load_obj(context_path)
-    context = context_class(project_path, **kwargs)
 
     if os.getcwd() != str(project_path):
-        warn("Changing the current working directory to {}".format(str(project_path)))
+        logging.getLogger(__name__).warning(
+            "Changing the current working directory to %s", str(project_path)
+        )
         os.chdir(str(project_path))  # Move to project root
+
+    # Instantiate the context after changing the cwd for logging to be properly configured.
+    context = context_class(project_path, **kwargs)
     return context
 
 

@@ -8,8 +8,9 @@
 * Implemented `__call__` method on `Node` to allow for users to execute `my_node(input1=1, input2=2)` as an alternative to `my_node.run(dict(input1=1, input2=2))`.
 
 ## Bug fixes and other changes
-
+* Fixed a bug in `load_context()` not loading context in non-kedro jupyter notebook.
 * Fixed a bug in `ConfigLoader.get()` not listing nested files for `**`-ending glob patterns.
+* Fixed an error of logging config in jupyter notebook.
 * Updated documentation in `03_configuration` regarding how to modify the configuration path.
 * Documented Kedro architecture diagram.
 

@@ -85,10 +85,11 @@ def data_set(filepath):
 
 
 @pytest.fixture
-def multi_catalog():
+def multi_catalog(mocker):
     csv = CSVLocalDataSet(filepath="abc.csv")
     parq = ParquetLocalDataSet(filepath="xyz.parq")
-    return DataCatalog({"abc": csv, "xyz": parq})
+    journal = mocker.Mock()
+    return DataCatalog({"abc": csv, "xyz": parq}, journal=journal)
 
 
 @pytest.fixture

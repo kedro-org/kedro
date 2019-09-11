@@ -31,10 +31,11 @@ import json
 import logging
 import subprocess
 import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Mapping, Optional, Union
 
-_JOURNAL_KEY = "kedro_journal"
+_JOURNAL_KEY = "kedro.journal"
 
 
 class VersionJournal:
@@ -97,8 +98,7 @@ class VersionJournal:
 
 
 def _git_sha(proj_dir: Union[str, Path] = None) -> Optional[str]:
-    """
-    Git description of working tree.
+    """Git description of working tree.
 
     Returns: Git description or None.
 
@@ -112,3 +112,51 @@ def _git_sha(proj_dir: Union[str, Path] = None) -> Optional[str]:
     except (subprocess.CalledProcessError, FileNotFoundError):
         logging.getLogger(__name__).warning("Unable to git describe %s", proj_dir)
     return None
+
+
+class JournalFileHandler(logging.Handler):
+    """Handler for logging journal record to a file based on journal ID.
+    """
+
+    def __init__(self, base_dir: Union[str, Path]):
+        """Initialise ``JournalFileHandler`` which will handle logging journal record.
+
+        Args:
+            base_dir: Base directory for saving journals.
+
+        """
+        super(JournalFileHandler, self).__init__()
+        self.base_dir = Path(base_dir).expanduser().resolve()
+        self._file_handler_paths = {}  # type:Dict[str, Path]
+
+    def _generate_log(self, journal_id) -> Path:
+        """Generate unique filename for journal record path.
+
+        Returns:
+            Path to the journal log.
+
+        """
+        current_ts = datetime.now(tz=timezone.utc)
+        fmt = (
+            "{d.year:04d}-{d.month:02d}-{d.day:02d}T{d.hour:02d}"
+            ".{d.minute:02d}.{d.second:02d}.{ms:03d}Z"
+        )
+        current_ts_str = fmt.format(d=current_ts, ms=current_ts.microsecond // 1000)
+        return self.base_dir / ("journal_" + journal_id + current_ts_str + ".log")
+
+    def emit(self, record: logging.LogRecord) -> None:
+        """Overriding emit function in logging.Handler, which will output the record to
+        the filelog based on journal id.
+
+        Args:
+            record: logging record.
+
+        """
+        message = json.loads(record.getMessage())
+
+        handler_path = self._file_handler_paths.setdefault(
+            message["id"], self._generate_log(message["id"])
+        )
+
+        handler_path.parent.mkdir(parents=True, exist_ok=True)
+        logging.FileHandler(str(handler_path), mode="a").emit(record)

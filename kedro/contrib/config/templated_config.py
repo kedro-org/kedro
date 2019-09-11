@@ -64,55 +64,19 @@ class TemplatedConfigLoader(ConfigLoader):
         >>>        ]
         >>>        return TemplatedConfigLoader(conf_paths,
         >>>                                     globals_pattern="*globals.yml",
-        >>>                                     arg_values={"param1": "CSVLocalDataSet"})
+        >>>                                     globals_dict={"param1": "CSVLocalDataSet"})
 
         >>> my_context = load_context(Path.cwd(), env=env)
         >>> my_context.run(tags, runner, node_names, from_nodes, to_nodes)
-
-    Or alternatively, if you don't want to hard-code the globals_pattern or the arg_values in
-    the newly created class:
-    ::
-        >>> from kedro.context import KedroContext, load_context
-        >>> from kedro.contrib.config import TemplatedConfigLoader
-        >>>
-        >>> class MyNewContext(KedroContext):
-        >>>
-        >>>    def __init__(self,
-        >>>                 project_path: Union[Path, str],
-        >>>                 env: str = None,
-        >>>                 arg_values=None,
-        >>>                 globals_pattern=None):
-        >>>
-        >>>        self.arg_values = arg_values
-        >>>        self.globals_pattern = globals_pattern
-        >>>        super(ProjectContext, self).__init__(project_path, env)
-        >>>
-        >>>    @property
-        >>>    def config_loader(self) -> TemplatedConfigLoader:
-        >>>        conf_paths = [
-        >>>            str(self.project_path / self.CONF_ROOT / "base"),
-        >>>            str(self.project_path / self.CONF_ROOT / self.env),
-        >>>        ]
-        >>>        return TemplatedConfigLoader(conf_paths,
-        >>>                                     globals_pattern=self.globals_pattern,
-        >>>                                     arg_values=self.arg_values)
-
-        >>> my_context = load_context(Path.cwd(),
-        >>>                           env=env,
-        >>>                           globals_pattern="*globals.yml",
-        >>>                           arg_values={"param1": "CSVLocalDataSet"})
-        >>>
-        >>> my_context.run(tags, runner, node_names, from_nodes, to_nodes)
-
-    This last method also works a bit nicer in notebooks (i.e. when you run kedro jupyter notebook),
-    because it allows you to overwrite the context object with custom arg_values of your choosing.
     """
 
+    # pylint: disable=missing-type-doc
     def __init__(
         self,
         conf_paths: Union[str, Iterable[str]],
+        *,
         globals_pattern: Optional[str] = None,
-        arg_values: Optional[Dict[str, Any]] = None,
+        globals_dict: Optional[Dict[str, Any]] = None,
     ):
         """Instantiate a TemplatedConfigLoader.
 
@@ -122,7 +86,7 @@ class TemplatedConfigLoader(ConfigLoader):
             globals_pattern: Optional keyword-only argument specifying a glob pattern.
                 Files that match the pattern will be loaded as a dictionary with default
                 values used for replacement.
-            arg_values: Optional keyword-only specifying an additional dictionary with
+            globals_dict: Optional keyword-only specifying an additional dictionary with
                 default values used for replacement. This dictionary will get merged with
                 the globals dictionary obtained from the globals_pattern. In case of
                 duplicate keys, the arg_values keys take precedence.
@@ -137,7 +101,9 @@ class TemplatedConfigLoader(ConfigLoader):
         )
 
         self.arg_dict = (
-            dict(**self.globals_dict, **arg_values) if arg_values else self.globals_dict
+            dict(**self.globals_dict, **globals_dict)
+            if globals_dict
+            else self.globals_dict
         )
 
     def get(self, *patterns: str):

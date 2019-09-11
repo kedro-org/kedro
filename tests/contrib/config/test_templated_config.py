@@ -207,7 +207,7 @@ class TestTemplatedConfigLoader:
         """Test parameterized config with input from dictionary with values"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
-        catalog = TemplatedConfigLoader(conf_paths, arg_values=template_config).get(
+        catalog = TemplatedConfigLoader(conf_paths, globals_dict=template_config).get(
             "catalog*.yml"
         )
 
@@ -278,7 +278,7 @@ class TestTemplatedConfigLoader:
         (tmp_path / "local").mkdir(exist_ok=True)
 
         catalog = TemplatedConfigLoader(
-            conf_paths, arg_values=template_config_advanced
+            conf_paths, globals_dict=template_config_advanced
         ).get("catalog*.yml")
 
         assert catalog["planes"]["type"] == "SparkJDBCDataSet"
@@ -294,7 +294,7 @@ class TestTemplatedConfigLoader:
         (tmp_path / "local").mkdir(exist_ok=True)
 
         catalog = TemplatedConfigLoader(
-            conf_paths, globals_pattern="*globals.yml", arg_values=get_environ
+            conf_paths, globals_pattern="*globals.yml", globals_dict=get_environ
         ).get("catalog*.yml")
 
         assert catalog["boats"]["type"] == "SparkDataSet"
@@ -314,7 +314,7 @@ class TestTemplatedConfigLoader:
         (tmp_path / "local").mkdir(exist_ok=True)
 
         catalog = TemplatedConfigLoader(
-            conf_paths, arg_values={"global": template_config, "env": get_environ}
+            conf_paths, globals_dict={"global": template_config, "env": get_environ}
         ).get("catalog*.yml")
 
         assert catalog["boats"]["type"] == "SparkDataSet"
@@ -334,7 +334,7 @@ class TestTemplatedConfigLoader:
         (tmp_path / "local").mkdir(exist_ok=True)
 
         catalog = TemplatedConfigLoader(
-            conf_paths, arg_values=template_config_exceptional
+            conf_paths, globals_dict=template_config_exceptional
         ).get("catalog*.yml")
 
         assert catalog["postcode"] == "NW10 2JK"

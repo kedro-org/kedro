@@ -14,7 +14,7 @@
 * Updated documentation in `03_configuration` regarding how to modify the configuration path.
 * Documented Kedro architecture diagram.
 * `extras/kedro_project_loader.py` renamed to `extras/ipython_loader.py` and now runs any IPython startup scripts without relying on Kedro project structure.
-* Fix TypeError when validating partial function's signature
+* Fixed TypeError when validating partial function's signature
 
 ## Breaking changes to the API
 

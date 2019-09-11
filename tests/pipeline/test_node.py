@@ -26,7 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import sys
-from functools import partial, wraps
+from functools import partial, update_wrapper, wraps
 from typing import Callable
 
 import pytest
@@ -401,3 +401,9 @@ class TestNames:
         assert str(n) == "<partial>([in]) -> [out]"
         assert n.name == "<partial>([in]) -> [out]"
         assert n.short_name == "<Partial>"
+
+    def test_updated_partial(self):
+        n = node(update_wrapper(partial(identity), identity), ["in"], ["out"])
+        assert str(n) == "identity([in]) -> [out]"
+        assert n.name == "identity([in]) -> [out]"
+        assert n.short_name == "Identity"

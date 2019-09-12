@@ -1,6 +1,6 @@
 ---
-name: Bug Report
-about: Create a report to help us improve
+name: Bug report
+about: If something isn't working
 title: '<Title>'
 labels: 'Issue: Bug Report'
 assignees: ''
@@ -16,7 +16,7 @@ How has this bug affected you? What were you trying to accomplish?
 ## Steps to Reproduce
 1. [First Step]
 2. [Second Step]
-3. [and so on...]
+3. [And so on...]
 
 ## Expected Result
 Tell us what should happen.

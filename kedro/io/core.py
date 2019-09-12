@@ -191,6 +191,12 @@ class AbstractDataSet(abc.ABC):
             )
         return data_set
 
+    def get_last_load_version(self) -> Optional[str]:
+        """Versioned datasets should override this property to return last loaded
+        version"""
+        # pylint: disable=no-self-use
+        return None  # pragma: no cover
+
     def load(self) -> Any:
         """Loads data by delegation to the provided load method.
 
@@ -214,6 +220,12 @@ class AbstractDataSet(abc.ABC):
                 str(self), str(exc)
             )
             raise DataSetError(message) from exc
+
+    def get_last_save_version(self) -> Optional[str]:
+        """Versioned datasets should override this property to return last saved
+        version."""
+        # pylint: disable=no-self-use
+        return None  # pragma: no cover
 
     def save(self, data: Any) -> None:
         """Saves data by delegation to the provided save method.
@@ -444,31 +456,51 @@ class AbstractVersionedDataSet(AbstractDataSet):
         self._version = version
         self._exists_function = exists_function or _local_exists
         self._glob_function = glob_function or iglob
+        self._last_load_version = None  # type: Optional[str]
+        self._last_save_version = None  # type: Optional[str]
+
+    def get_last_load_version(self) -> Optional[str]:
+        return self._last_load_version
 
     def _get_load_path(self) -> PurePath:
         if not self._version:
+            # When versioning is disabled, load from provided filepath
+            self._last_load_version = None
             return self._filepath
+
         if self._version.load:
+            # When load version is pinned, get versioned path
+            self._last_load_version = self._version.load
             return self._get_versioned_path(self._version.load)
 
+        # When load version is unpinned, fetch the most recent existing
+        # version from the given path
         pattern = str(self._get_versioned_path("*"))
-        paths = [
-            path for path in self._glob_function(pattern) if self._exists_function(path)
-        ]
+        version_paths = sorted(self._glob_function(pattern), reverse=True)
+        most_recent = next(
+            (path for path in version_paths if self._exists_function(path)), None
+        )
 
-        if not paths:
+        if not most_recent:
             raise DataSetError("Did not find any versions for {}".format(str(self)))
 
-        most_recent = sorted(paths, reverse=True)[0]
-        return PurePath(most_recent)
+        versioned_path = PurePath(most_recent)
+        self._last_load_version = versioned_path.parent.name
+
+        return versioned_path
+
+    def get_last_save_version(self) -> Optional[str]:
+        return self._last_save_version
 
     def _get_save_path(self) -> PurePath:
         if not self._version:
+            # When versioning is disabled, return given filepath
+            self._last_save_version = None
             return self._filepath
 
-        save_version = self._version.save or generate_current_version()
-        versioned_path = self._get_versioned_path(save_version)
+        self._last_save_version = self._version.save or generate_current_version()
 
+        versioned_path = self._get_versioned_path(self._last_save_version)
         if self._exists_function(str(versioned_path)):
             raise DataSetError(
                 "Save path `{}` for {} must not exist if versioning "

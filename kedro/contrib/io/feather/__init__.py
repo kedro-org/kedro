@@ -26,19 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""kedro.contrib.io.feather provides I/O modules for feather data format.
+https://github.com/wesm/feather"""
 
-Feature: Pipelines that can be run from a library or a template project
-
-  Background:
-    Given I have added external packages "matplotlib" to project requirements
-    And I have included a pipeline definition in a project template
-    And I have defined an io catalog containing ["A", "B", "C", "D"]
-
-  Scenario: Pipeline running from a template with packages not installed
-    When the template pipeline is run
-    Then it should fail with an error message including "No module named 'matplotlib'"
-
-  Scenario: Pipeline running from a template with packages installed
-    Given I have executed the kedro command "install"
-    When the template pipeline is run
-    Then it should successfully produce the results
+from .feather_local import FeatherLocalDataSet  # NOQA

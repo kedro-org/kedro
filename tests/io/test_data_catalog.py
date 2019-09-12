@@ -45,6 +45,7 @@ from kedro.io import (
     ParquetLocalDataSet,
 )
 from kedro.io.core import generate_current_version
+from kedro.versioning.journal import VersionJournal
 
 
 @pytest.fixture
@@ -84,10 +85,11 @@ def data_set(filepath):
 
 
 @pytest.fixture
-def multi_catalog():
+def multi_catalog(mocker):
     csv = CSVLocalDataSet(filepath="abc.csv")
     parq = ParquetLocalDataSet(filepath="xyz.parq")
-    return DataCatalog({"abc": csv, "xyz": parq})
+    journal = mocker.Mock()
+    return DataCatalog({"abc": csv, "xyz": parq}, journal=journal)
 
 
 @pytest.fixture
@@ -360,6 +362,10 @@ class TestDataCatalogVersioned:
         catalog = DataCatalog.from_config(
             **sane_config, load_versions={"boats": version}, save_version=version
         )
+        journal = VersionJournal({"project_path": "fake-path"})
+        catalog.set_version_journal(journal)
+        assert catalog._journal == journal  # pylint: disable=protected-access
+
         catalog.save("boats", dummy_dataframe)
         path = Path(sane_config["catalog"]["boats"]["filepath"])
         path = path / version / path.name

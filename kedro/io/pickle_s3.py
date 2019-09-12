@@ -50,7 +50,7 @@ class PickleS3DataSet(AbstractVersionedDataSet):
         Example:
         ::
 
-            >>> from kedro.io import PickleLocalDataSet
+            >>> from kedro.io import PickleS3DataSet
             >>> import pandas as pd
             >>>
             >>> dummy_data =  pd.DataFrame({'col1': [1, 2],

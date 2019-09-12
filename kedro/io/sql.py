@@ -113,7 +113,14 @@ class SQLTableDataSet(AbstractDataSet):
     """``SQLTableDataSet`` loads data from a SQL table and saves a pandas
     dataframe to a table. It uses ``pandas.DataFrame`` internally,
     so it supports all allowed pandas options on ``read_sql_table`` and
-    ``to_sql`` methods. However, it modifies the save parameters and stores
+    ``to_sql`` methods. Since Pandas uses SQLAlchemy behind the scenes, when
+    instantiating ``SQLTableDataSet`` one needs to pass a compatible connection
+    string either in ``credentials`` (see the example code snippet below) or in
+    ``load_args`` and ``save_args``. Connection string formats supported by
+    SQLAlchemy can be found here:
+    https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls
+
+    ``SQLTableDataSet`` modifies the save parameters and stores
     the data with no index. This is designed to make load and save methods
     symmetric.
 
@@ -124,11 +131,11 @@ class SQLTableDataSet(AbstractDataSet):
         >>> from kedro.io import SQLTableDataSet
         >>> import pandas as pd
         >>>
-        >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        >>>                      'col3': [5, 6]})
-        >>> table_name="table_a"
+        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5],
+        >>>                      "col3": [5, 6]})
+        >>> table_name = "table_a"
         >>> credentials = {
-        >>>          con: "postgresql://scott:tiger@localhost/test"
+        >>>     "con": "postgresql://scott:tiger@localhost/test"
         >>> }
         >>> data_set = SQLTableDataSet(table_name=table_name,
         >>>                            credentials=credentials)
@@ -171,16 +178,22 @@ class SQLTableDataSet(AbstractDataSet):
                 parameters in ``load_args``.
             credentials: A dictionary with a ``SQLAlchemy`` connection string.
                 Users are supposed to provide the connection string 'con'
-                through credentials. It overwrites con parameter in
-                ``load_args`` and ``save_args`` in case it is provided.
+                through credentials. It overwrites `con` parameter in
+                ``load_args`` and ``save_args`` in case it is provided. To find
+                all supported connection string formats, see here:
+                https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls
             load_args: Provided to underlying pandas ``read_sql_table``
                 function along with the connection string.
                 To find all supported arguments, see here:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_sql_table.html
+                To find all supported connection string formats, see here:
+                https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls
             save_args: Provided to underlying pandas ``to_sql`` function along
                 with the connection string.
                 To find all supported arguments, see here:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_sql.html
+                To find all supported connection string formats, see here:
+                https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls
                 It has ``index=False`` in the default parameters.
 
         Raises:
@@ -237,7 +250,12 @@ class SQLTableDataSet(AbstractDataSet):
 class SQLQueryDataSet(AbstractDataSet):
     """``SQLQueryDataSet`` loads data from a provided SQL query. It
     uses ``pandas.DataFrame`` internally, so it supports all allowed
-    pandas options on ``read_sql_query``.
+    pandas options on ``read_sql_query``. Since Pandas uses SQLAlchemy behind
+    the scenes, when instantiating ``SQLQueryDataSet`` one needs to pass
+    a compatible connection string either in ``credentials`` (see the example
+    code snippet below) or in ``load_args``. Connection string formats supported
+    by SQLAlchemy can be found here:
+    https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls
 
     It does not support save method so it is a read only data set.
     To save data to a SQL server use ``SQLTableDataSet``.
@@ -249,11 +267,11 @@ class SQLQueryDataSet(AbstractDataSet):
         >>> from kedro.io import SQLQueryDataSet
         >>> import pandas as pd
         >>>
-        >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        >>>                      'col3': [5, 6]})
-        >>> sql="SELECT * FROM table_a"
+        >>> data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5],
+        >>>                      "col3": [5, 6]})
+        >>> sql = "SELECT * FROM table_a"
         >>> credentials = {
-        >>>          con: "postgresql://scott:tiger@localhost/test"
+        >>>     "con": "postgresql://scott:tiger@localhost/test"
         >>> }
         >>> data_set = SQLQueryDataSet(sql=sql,
         >>>                            credentials=credentials)
@@ -278,12 +296,16 @@ class SQLQueryDataSet(AbstractDataSet):
             sql: The sql query statement.
             credentials: A dictionary with a ``SQLAlchemy`` connection string.
                 Users are supposed to provide the connection string 'con'
-                through credentials. It overwrites con parameter in
-                ``load_args`` and ``save_args`` in case it is provided.
+                through credentials. It overwrites `con` parameter in
+                ``load_args`` and ``save_args`` in case it is provided. To find
+                all supported connection string formats, see here:
+                https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls
             load_args: Provided to underlying pandas ``read_sql_query``
                 function along with the connection string.
                 To find all supported arguments, see here:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_sql_query.html
+                To find all supported connection string formats, see here:
+                https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls
 
         Raises:
             DataSetError: When either ``sql`` or ``con`` parameters is emtpy.

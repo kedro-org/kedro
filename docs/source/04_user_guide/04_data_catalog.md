@@ -1,6 +1,6 @@
 # The Data Catalog
 
-> *Note:* This documentation is based on `Kedro 0.15.0`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 This section introduces `catalog.yml`, the project-shareable Data Catalog. The file is located in `conf/base` and is a registry of all data sources available for use by a project; it manages loading and saving of data.
 
@@ -108,6 +108,8 @@ scooters_query:
   load_args:
     index_col: ['name']
 ```
+
+> *Note:* When using `SQLTableDataSet` or `SQLQueryDataSet` you must provide a database connection string. In the example above we pass it using `scooters_credentials` key from the credentials (see the details in [Feeding in credentials](#feeding-in-credentials) section below). `scooters_credentials` must have a top-level key `con` containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. Alternative to credentials would be to explicitly put `con` into `load_args` and `save_args` (`SQLTableDataSet` only).
 
 ## Feeding in credentials
 
@@ -259,16 +261,13 @@ This section shows just the very basics of versioning. You can learn more about 
 
 The code API allows you to configure data sources in code. This can also be used to operate the IO module within notebooks.
 
-```python
-from kedro.io import *
-import os
-```
-
 ## Configuring a data catalog
 
 In a file like `catalog.py`, you can generate the Data Catalog. This will allow everyone in the project to review all the available data sources. In the following, we are using the pre-built CSV loader, which is documented in the API reference documentation: [CSVLocalDataSet](/kedro.io.CSVLocalDataSet)
 
 ```python
+from kedro.io import DataCatalog, CSVLocalDataSet, SQLTableDataSet, SQLQueryDataSet, ParquetLocalDataSet
+
 io = DataCatalog({
   'bikes': CSVLocalDataSet(filepath='../data/01_raw/bikes.csv'),
   'cars': CSVLocalDataSet(filepath='../data/01_raw/cars.csv', load_args=dict(sep=',')), # additional arguments
@@ -277,6 +276,8 @@ io = DataCatalog({
   'ranked': ParquetLocalDataSet(filepath="ranked.parquet")
 })
 ```
+
+> *Note:* When using `SQLTableDataSet` or `SQLQueryDataSet` you must provide a `con` key containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) database connection string. In the example above we pass it as part of `credentials` argument. Alternative to `credentials` would be to put `con` into `load_args` and `save_args` (`SQLTableDataSet` only).
 
 ## Loading datasets
 
@@ -313,6 +314,8 @@ Saving data can be completed with a similar API.
 ### Saving data to memory
 
 ```python
+from kedro.io import MemoryDataSet
+
 memory = MemoryDataSet(data=None)
 io.add('cars_cache', memory)
 io.save('cars_cache', 'Memory can store anything.')
@@ -324,8 +327,9 @@ io.load('car_cache')
 At this point we may want to put the data in a SQLite database to run queries on it. Let's use that to rank scooters by their mpg.
 
 ```python
-# This cleans up the database in case it exists at this point
+import os
 
+# This cleans up the database in case it exists at this point
 try:
     os.remove("kedro.db")
 except FileNotFoundError:

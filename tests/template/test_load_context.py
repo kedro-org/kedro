@@ -26,10 +26,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import sys
 
-Feature: Local Parquet data set IO scenarios
+import pytest
 
-  Scenario: Save and load a Parquet file
-    Given I have defined data in a pandas DataFrame
-    When I write a given data to a Parquet file
-    Then the data should be loaded without any alteration
+import kedro
+from kedro.context import KedroContextError, load_context
+
+
+class TestLoadContext:
+    def test_valid_context(self, mocker, fake_repo_path):
+        """Test getting project context."""
+        # Disable logging.config.dictConfig in KedroContext._setup_logging as
+        # it changes logging.config and affects other unit tests
+        mocker.patch("logging.config.dictConfig")
+        result = load_context(str(fake_repo_path))
+        assert result.project_name == "Test Project"
+        assert result.project_version == kedro.__version__
+        assert str(fake_repo_path.resolve() / "src") in sys.path
+        assert os.getcwd() == str(fake_repo_path.resolve())
+
+    def test_invalid_path(self, tmp_path):
+        """Test for loading context from an invalid path. """
+        other_path = tmp_path / "other"
+        other_path.mkdir()
+        pattern = r"Could not retrive \'context_path\' from \'.kedro.yml\'"
+        with pytest.raises(KedroContextError, match=pattern):
+            load_context(str(other_path))

@@ -70,6 +70,10 @@ For more detailed installation instructions, including how to setup Python virtu
   - [Kedro-Docker](https://github.com/quantumblacklabs/kedro-docker), a tool for packaging and shipping Kedro projects within containers
 - Kedro can be deployed locally, on-premise and cloud (AWS, Azure and GCP) servers, or clusters (EMR, Azure HDinsight, GCP and Databricks)
 
+## What are the main Kedro building blocks?
+
+You can find the overview of Kedro architecture [here](https://kedro.readthedocs.io/en/latest/06_resources/02_architecture_overview.html).
+
 ## How do I use Kedro?
 
 Our [documentation](https://kedro.readthedocs.io/en/latest/) explains:
@@ -118,3 +122,7 @@ pip install kedro -U
 ## What licence do you use?
 
 Kedro is licensed under the [Apache 2.0](https://github.com/quantumblacklabs/kedro/blob/master/LICENSE.md) License.
+
+## We're hiring!
+
+Do you want to be part of the team that builds Kedro and [other great products](https://quantumblack.com/labs) at QuantumBlack? If so, you're in luck! QuantumBlack is currently hiring Software Engineers who love using data to drive their decisions. Take a look at [our open positions](https://www.quantumblack.com/careers/current-openings#content) and see if you're a fit.

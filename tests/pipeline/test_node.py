@@ -26,7 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import sys
-from functools import partial, wraps
+from functools import partial, update_wrapper, wraps
 from typing import Callable
 
 import pytest
@@ -78,6 +78,22 @@ class TestValidNode:
         assert "labeled_node: <lambda>([input1]) -> [output1]" in str(
             node(lambda x: None, "input1", "output1", name="labeled_node")
         )
+
+    def test_call(self):
+        dummy_node = node(
+            biconcat, inputs=["input1", "input2"], outputs="output", name="myname"
+        )
+        actual = dummy_node(input1="in1", input2="in2")
+        expected = dummy_node.run(dict(input1="in1", input2="in2"))
+        assert actual == expected
+
+    def test_call_with_non_keyword_arguments(self):
+        dummy_node = node(
+            biconcat, inputs=["input1", "input2"], outputs="output", name="myname"
+        )
+        pattern = r"__call__\(\) takes 1 positional argument but 2 were given"
+        with pytest.raises(TypeError, match=pattern):
+            dummy_node("in1", input2="in2")
 
     def test_no_input(self):
         assert "constant_output(None) -> [output1]" in str(
@@ -385,3 +401,9 @@ class TestNames:
         assert str(n) == "<partial>([in]) -> [out]"
         assert n.name == "<partial>([in]) -> [out]"
         assert n.short_name == "<Partial>"
+
+    def test_updated_partial(self):
+        n = node(update_wrapper(partial(identity), identity), ["in"], ["out"])
+        assert str(n) == "identity([in]) -> [out]"
+        assert n.name == "identity([in]) -> [out]"
+        assert n.short_name == "Identity"

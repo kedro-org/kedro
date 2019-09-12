@@ -45,6 +45,7 @@ from kedro.io.core import (
 )
 from kedro.io.memory_data_set import MemoryDataSet
 from kedro.io.transformers import AbstractTransformer
+from kedro.versioning import VersionJournal
 
 CATALOG_KEY = "catalog"
 CREDENTIALS_KEY = "credentials"
@@ -101,12 +102,14 @@ class DataCatalog:
     to the underlying data sets.
     """
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         data_sets: Dict[str, AbstractDataSet] = None,
         feed_dict: Dict[str, Any] = None,
         transformers: Dict[str, List[AbstractTransformer]] = None,
         default_transformers: List[AbstractTransformer] = None,
+        journal: VersionJournal = None,
     ) -> None:
         """``DataCatalog`` stores instances of ``AbstractDataSet``
         implementations to provide ``load`` and ``save`` capabilities from
@@ -122,6 +125,7 @@ class DataCatalog:
                 to the data sets.
             default_transformers: A list of transformers to be applied to any
                 new data sets.
+            journal: Instance of VersionJournal.
         Raises:
             DataSetNotFoundError: When transformers are passed for a non
                 existent data set.
@@ -142,7 +146,7 @@ class DataCatalog:
         self._transformers = {k: list(v) for k, v in (transformers or {}).items()}
         self._default_transformers = list(default_transformers or [])
         self._check_and_normalize_transformers()
-
+        self._journal = journal
         # import the feed dict
         if feed_dict:
             self.add_feed_dict(feed_dict)
@@ -301,6 +305,11 @@ class DataCatalog:
                 type(self._data_sets[name]).__name__,
             )
             func = self._get_transformed_dataset_function(name, "load")
+
+            version = self._data_sets[name].get_last_load_version()
+            # Log only if versioning is enabled for the data set
+            if self._journal and version:
+                self._journal.log_catalog(name, "load", version)
             return func()
 
         raise DataSetNotFoundError("DataSet '{}' not found in the catalog".format(name))
@@ -342,6 +351,11 @@ class DataCatalog:
             )
             func = self._get_transformed_dataset_function(name, "save")
             func(data)
+
+            version = self._data_sets[name].get_last_save_version()
+            # Log only if versioning is enabled for the data set
+            if self._journal and version:
+                self._journal.log_catalog(name, "save", version)
         else:
             raise DataSetNotFoundError(
                 "DataSet '{}' not found in the catalog".format(name)
@@ -546,11 +560,28 @@ class DataCatalog:
             data_sets=self._data_sets,
             transformers=self._transformers,
             default_transformers=self._default_transformers,
+            journal=self._journal,
         )
 
+    def set_version_journal(self, journal: VersionJournal) -> None:
+        """Set an instance of VersionJournal class.
+
+        Args:
+            Instance of VersionJournal.
+
+        """
+        if not self._journal:
+            self._journal = journal
+
     def __eq__(self, other):
-        return (self._data_sets, self._transformers, self._default_transformers) == (
+        return (
+            self._data_sets,
+            self._transformers,
+            self._default_transformers,
+            self._journal,
+        ) == (
             other._data_sets,  # pylint: disable=protected-access
             other._transformers,  # pylint: disable=protected-access
             other._default_transformers,  # pylint: disable=protected-access
+            other._journal,  # pylint: disable=protected-access
         )

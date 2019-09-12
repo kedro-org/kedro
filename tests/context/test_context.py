@@ -29,8 +29,6 @@
 import configparser
 import json
 import os
-import sys
-import textwrap
 from pathlib import Path
 from typing import Dict
 
@@ -40,7 +38,7 @@ import yaml
 from pandas.util.testing import assert_frame_equal
 
 from kedro import __version__
-from kedro.context import KedroContext, KedroContextError, load_context
+from kedro.context import KedroContext, KedroContextError
 from kedro.pipeline import Pipeline, node
 from kedro.runner import ParallelRunner, SequentialRunner
 
@@ -144,41 +142,46 @@ def dummy_dataframe():
     return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
 
 
-@pytest.fixture(autouse=True)
-def restore_cwd():
-    cwd_ = os.getcwd()
-    yield
-    if cwd_ != os.getcwd():
-        os.chdir(cwd_)
-
-
-@pytest.fixture
-def fake_project(tmp_path):
-    project = tmp_path / "project"
-
-    package_name = "fake_package"
-    package_path = project / "src" / package_name
-    package_path.mkdir(parents=True)
-
-    kedro_yaml = project / ".kedro.yml"
-    _write_yaml(kedro_yaml, {"context_path": package_name + ".run.Fake"})
-    sys.path.append(str(project / "src"))
-    run = package_path / "run.py"
-    script = """
-        class Fake:
-            def __init__(self, project_path, **kwargs):
-                pass
-            project_name = "fake"
-            project_version = "{}"
-    """.format(
-        __version__
-    )
-    run.write_text(textwrap.dedent(script), encoding="utf-8")
-    yield project
-
-
 def identity(input1: str):
     return input1  # pragma: no cover
+
+
+def bad_node(x):
+    raise ValueError("Oh no!")
+
+
+bad_pipeline_middle = Pipeline(
+    [
+        node(identity, "cars", "boats", name="node1", tags=["tag1"]),
+        node(identity, "boats", "trains", name="node2"),
+        node(bad_node, "trains", "ships", name="nodes3"),
+        node(identity, "ships", "planes", name="node4"),
+    ],
+    name="bad_pipeline",
+)
+
+expected_message_middle = (
+    "There are 2 nodes that have not run.\n"
+    "You can resume the pipeline run with the following command:\n"
+    "kedro run --from-inputs trains"
+)
+
+
+bad_pipeline_head = Pipeline(
+    [
+        node(bad_node, "cars", "boats", name="node1", tags=["tag1"]),
+        node(identity, "boats", "trains", name="node2"),
+        node(identity, "trains", "ships", name="nodes3"),
+        node(identity, "ships", "planes", name="node4"),
+    ],
+    name="bad_pipeline",
+)
+
+expected_message_head = (
+    "There are 4 nodes that have not run.\n"
+    "You can resume the pipeline run with the following command:\n"
+    "kedro run"
+)
 
 
 class DummyContext(KedroContext):
@@ -203,9 +206,7 @@ def dummy_context(tmp_path, mocker, env):
     # Disable logging.config.dictConfig in KedroContext._setup_logging as
     # it changes logging.config and affects other unit tests
     mocker.patch("logging.config.dictConfig")
-    if env is None:
-        return DummyContext(str(tmp_path))
-    return DummyContext(str(tmp_path), env)
+    return DummyContext(str(tmp_path), env=env)
 
 
 @pytest.mark.usefixtures("config_dir")
@@ -423,7 +424,17 @@ class TestKedroContextRun:
         with pytest.raises(KedroContextError, match=pattern):
             dummy_context.run(from_nodes=["node3"], to_nodes=["node1"])
 
-    @pytest.mark.filterwarnings("ignore")
+    def test_run_from_inputs(self, dummy_context, dummy_dataframe, caplog):
+        for dataset in ("cars", "trains", "boats"):
+            dummy_context.catalog.save(dataset, dummy_dataframe)
+        dummy_context.run(from_inputs=["trains"])
+
+        log_msgs = [record.getMessage() for record in caplog.records]
+        assert "Completed 2 out of 2 tasks" in log_msgs
+        assert "Running node: node3: identity([trains]) -> [ships]" in log_msgs
+        assert "Running node: node4: identity([ships]) -> [planes]" in log_msgs
+        assert "Pipeline execution completed successfully." in log_msgs
+
     def test_run_with_empty_pipeline(self, tmp_path, mocker):
         class DummyContext(KedroContext):
             project_name = "bob"
@@ -441,20 +452,41 @@ class TestKedroContextRun:
         with pytest.raises(KedroContextError, match=pattern):
             dummy_context.run()
 
+    @pytest.mark.parametrize(
+        "context_pipeline,expected_message",
+        [
+            (bad_pipeline_middle, expected_message_middle),
+            (bad_pipeline_head, expected_message_head),
+        ],  # pylint: disable=too-many-arguments
+    )
+    def test_run_failure_prompts_resume_command(
+        self,
+        mocker,
+        tmp_path,
+        dummy_dataframe,
+        caplog,
+        context_pipeline,
+        expected_message,
+    ):
+        class BadContext(KedroContext):
+            project_name = "fred"
+            project_version = __version__
 
-class TestLoadContext:
-    def test_valid_context(self, fake_project):
-        """Test getting project context."""
-        result = load_context(str(fake_project))
-        assert result.project_name == "fake"
-        assert result.project_version == __version__
-        assert str(fake_project.resolve()) in sys.path
-        assert os.getcwd() == str(fake_project.resolve())
+            @property
+            def pipeline(self) -> Pipeline:
+                return context_pipeline
 
-    def test_invalid_path(self, tmp_path):
-        """Test for loading context from an invalid path. """
-        other_path = tmp_path / "other"
-        other_path.mkdir()
-        pattern = r"Could not retrive \'context_path\' from \'.kedro.yml\'"
-        with pytest.raises(KedroContextError, match=pattern):
-            load_context(str(other_path))
+        mocker.patch("logging.config.dictConfig")
+
+        bad_context = BadContext(str(tmp_path))
+        bad_context.catalog.save("cars", dummy_dataframe)
+        with pytest.raises(ValueError, match="Oh no"):
+            bad_context.run()
+
+        actual_messages = [
+            record.getMessage()
+            for record in caplog.records
+            if record.levelname == "WARNING"
+        ]
+
+        assert expected_message in actual_messages

@@ -64,13 +64,21 @@ class SequentialRunner(AbstractRunner):
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
 
+        Raises:
+            Exception: in case of any downstream node failure.
         """
         nodes = pipeline.nodes
+        done_nodes = set()
 
         load_counts = Counter(chain.from_iterable(n.inputs for n in nodes))
 
         for exec_index, node in enumerate(nodes):
-            run_node(node, catalog)
+            try:
+                run_node(node, catalog)
+                done_nodes.add(node)
+            except Exception:
+                self._suggest_resume_scenario(pipeline, done_nodes)
+                raise
 
             # decrement load counts and release any data sets we've finished with
             for data_set in node.inputs:

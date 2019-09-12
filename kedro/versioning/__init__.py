@@ -26,20 +26,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""``kedro.logging`` provides functionality to setup the journal for capturing
+information required to reproduce a Kedro run.
+"""
 
-Feature: Kedro IO SQLTableDataSet and SQLQueryDataSet features
-
-  Scenario: Read from SQL data set
-    Given I have defined an SQL data set with tables A and B
-    When I load from table A
-    Then I should get the expected number of rows back
-
-  Scenario: Write to SQL data set
-    Given I have defined an SQL data set with tables A and B
-    When I save to table B
-    Then I should get the written data back
-
-  Scenario: Read from SQL query data set
-    Given I have defined an SQL query data set with filtered query to table C
-    When I query table C
-    Then I should get the filtered rows back
+from .journal import VersionJournal  # NOQA

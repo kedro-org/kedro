@@ -125,4 +125,4 @@ Kedro is licensed under the [Apache 2.0](https://github.com/quantumblacklabs/ked
 
 ## We're hiring!
 
-Do you want to be part of the team that builds Kedro? If so, you're in luck! QuantumBlack is currently hiring Software Engineers who love using data to drive their decisions. Take a look at [our open positions](https://www.quantumblack.com/careers/current-openings#content) and see if you are a fit.
+Do you want to be part of the team that builds Kedro and [other great products](https://quantumblack.com/labs) at QuantumBlack? If so, you're in luck! QuantumBlack is currently hiring Software Engineers who love using data to drive their decisions. Take a look at [our open positions](https://www.quantumblack.com/careers/current-openings#content) and see if you're a fit.

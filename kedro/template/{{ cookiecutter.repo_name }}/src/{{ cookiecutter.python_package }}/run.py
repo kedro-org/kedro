@@ -59,6 +59,7 @@ def main(
     node_names: Iterable[str] = None,
     from_nodes: Iterable[str] = None,
     to_nodes: Iterable[str] = None,
+    from_inputs: Iterable[str] = None,
 ):
     """Application main entry point.
 
@@ -77,10 +78,19 @@ def main(
             starting point of the new ``Pipeline``.
         to_nodes: An optional list of node names which should be used as an
             end point of the new ``Pipeline``.
+        from_inputs: An optional list of input datasets which should be used as a
+            starting point of the new ``Pipeline``.
 
     """
     project_context = load_context(Path.cwd(), env=env)
-    project_context.run(tags, runner, node_names, from_nodes, to_nodes)
+    project_context.run(
+        tags=tags,
+        runner=runner,
+        node_names=node_names,
+        from_nodes=from_nodes,
+        to_nodes=to_nodes,
+        from_inputs=from_inputs,
+    )
 
 
 if __name__ == "__main__":

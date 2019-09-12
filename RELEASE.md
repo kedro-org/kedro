@@ -6,6 +6,7 @@
   - `FeatherLocalDataSet` in `contrib` for usage with Pandas. (by [@mdomarsaleem](https://github.com/mdomarsaleem))
 * Add `get_last_load_version` and `get_last_save_version` to `AbstractVersionedDataSet`
 * Implemented `__call__` method on `Node` to allow for users to execute `my_node(input1=1, input2=2)` as an alternative to `my_node.run(dict(input1=1, input2=2))`.
+* Added new `--from-inputs` run argument.
 
 ## Bug fixes and other changes
 * Fixed a bug in `load_context()` not loading context in non-kedro jupyter notebook.
@@ -15,6 +16,7 @@
 * Documented Kedro architecture diagram.
 * `extras/kedro_project_loader.py` renamed to `extras/ipython_loader.py` and now runs any IPython startup scripts without relying on Kedro project structure.
 * Fixed TypeError when validating partial function's signature
+* After a node failure during a pipeline run, a resume command will be suggested in the logs. This command will not work if the required inputs are MemoryDataSets.
 
 ## Breaking changes to the API
 

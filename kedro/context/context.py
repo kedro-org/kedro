@@ -261,45 +261,45 @@ class KedroContext(abc.ABC):
         from_nodes: Iterable[str] = None,
         to_nodes: Iterable[str] = None,
         node_names: Iterable[str] = None,
+        from_inputs: Iterable[str] = None,
     ) -> Pipeline:
         """Filter the pipeline as the intersection of all conditions."""
-        pipeline = pipeline or self.pipeline
+        original_pipeline = pipeline or self.pipeline
+        new_pipeline = original_pipeline
+
+        # We need to intersect with the original_pipeline because the order
+        # of operations matters, so we don't want to do it incrementally.
+        # As an example, with a pipeline of nodes 1,2,3, think of
+        # "from 1", and "only 1 and 3" - the order you do them in results in
+        # either 1 & 3, or just 1.
         if tags:
-            pipeline = pipeline & self.pipeline.only_nodes_with_tags(*tags)
-            if not pipeline.nodes:
+            new_pipeline &= original_pipeline.only_nodes_with_tags(*tags)
+            if not new_pipeline.nodes:
                 raise KedroContextError(
                     "Pipeline contains no nodes with tags: {}".format(str(tags))
                 )
         if from_nodes:
-            pipeline = pipeline & self.pipeline.from_nodes(*from_nodes)
+            new_pipeline &= original_pipeline.from_nodes(*from_nodes)
         if to_nodes:
-            pipeline = pipeline & self.pipeline.to_nodes(*to_nodes)
+            new_pipeline &= original_pipeline.to_nodes(*to_nodes)
         if node_names:
-            pipeline = pipeline & self.pipeline.only_nodes(*node_names)
+            new_pipeline &= original_pipeline.only_nodes(*node_names)
+        if from_inputs:
+            new_pipeline &= original_pipeline.from_inputs(*from_inputs)
 
-        if not pipeline.nodes:
+        if not new_pipeline.nodes:
             raise KedroContextError("Pipeline contains no nodes")
-        return pipeline
+        return new_pipeline
 
-    # pylint: disable=too-many-arguments
-    def _record_version_journal(
-        self,
-        catalog: DataCatalog,
-        tags: Iterable[str] = None,
-        from_nodes: Iterable[str] = None,
-        to_nodes: Iterable[str] = None,
-        node_names: Iterable[str] = None,
-    ) -> None:
+    def _record_version_journal(self, catalog: DataCatalog, **kwargs) -> None:
         """Record the run variables into journal."""
         record_data = {
             "project_path": str(self.project_path),
             "env": self.env,
             "kedro_version": self.project_version,
-            "tags": tags,
-            "from_nodes": from_nodes,
-            "to_nodes": to_nodes,
-            "node_names": node_names,
         }
+        record_data.update(**kwargs)
+
         journal = VersionJournal(record_data)
         catalog.set_version_journal(journal)
 
@@ -310,6 +310,7 @@ class KedroContext(abc.ABC):
         node_names: Iterable[str] = None,
         from_nodes: Iterable[str] = None,
         to_nodes: Iterable[str] = None,
+        from_inputs: Iterable[str] = None,
         pipeline: Pipeline = None,
         catalog: DataCatalog = None,
     ) -> Dict[str, Any]:
@@ -328,6 +329,8 @@ class KedroContext(abc.ABC):
                 starting point of the new ``Pipeline``.
             to_nodes: An optional list of node names which should be used as an
                 end point of the new ``Pipeline``.
+            from_inputs: An optional list of input datasets which should be used as a
+                starting point of the new ``Pipeline``.
             pipeline: Optional Pipeline to run, defaults to self.pipeline.
             catalog: Optional DataCatalog to run with, defaults to self.catalog.
         Raises:
@@ -342,11 +345,23 @@ class KedroContext(abc.ABC):
         logging.info("** Kedro project %s", self.project_path.name)
 
         pipeline = self._filter_pipeline(
-            pipeline, tags, from_nodes, to_nodes, node_names
+            pipeline=pipeline,
+            tags=tags,
+            from_nodes=from_nodes,
+            to_nodes=to_nodes,
+            node_names=node_names,
+            from_inputs=from_inputs,
         )
         catalog = catalog or self.catalog
 
-        self._record_version_journal(catalog, tags, from_nodes, to_nodes, node_names)
+        self._record_version_journal(
+            catalog,
+            tags=tags,
+            from_nodes=from_nodes,
+            to_nodes=to_nodes,
+            node_names=node_names,
+            from_inputs=from_inputs,
+        )
 
         # Run the runner
         runner = runner or SequentialRunner()

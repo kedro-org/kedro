@@ -31,7 +31,7 @@ implementations.
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Dict
+from typing import Any, Dict, Iterable
 
 from kedro.io import AbstractDataSet, DataCatalog
 from kedro.pipeline import Pipeline
@@ -145,6 +145,25 @@ class AbstractRunner(ABC):
 
         """
         pass
+
+    def _suggest_resume_scenario(
+        self, pipeline: Pipeline, done_nodes: Iterable[Node]
+    ) -> None:
+        remaining_nodes = set(pipeline.nodes) - set(done_nodes)
+        command = "kedro run"
+
+        if done_nodes:
+            node_names = [n.name for n in remaining_nodes]
+            resume_pipeline = pipeline.only_nodes(*node_names)
+
+            command += " --from-inputs {}".format(",".join(resume_pipeline.inputs()))
+
+        self._logger.warning(
+            "There are %d nodes that have not run.\n"
+            "You can resume the pipeline run with the following command:\n%s",
+            len(remaining_nodes),
+            command,
+        )
 
 
 def run_node(node: Node, catalog: DataCatalog) -> Node:

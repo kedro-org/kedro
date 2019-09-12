@@ -10,7 +10,7 @@
 ## Bug fixes and other changes
 * Fixed a bug in `load_context()` not loading context in non-Kedro Jupyter Notebooks.
 * Fixed a bug in `ConfigLoader.get()` not listing nested files for `**`-ending glob patterns.
-* Fixed an error of logging config in jupyter notebook.
+* Fixed a logging config error in Jupyter Notebook.
 * Updated documentation in `03_configuration` regarding how to modify the configuration path.
 * Documented the architecture of Kedro showing how we think about library, project and framework components.
 * `extras/kedro_project_loader.py` renamed to `extras/ipython_loader.py` and now runs any IPython startup scripts without relying on the Kedro project structure.

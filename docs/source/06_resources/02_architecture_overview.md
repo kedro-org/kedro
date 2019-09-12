@@ -8,7 +8,7 @@ Here is a diagram showing high-level architecture of Kedro library:
 
 > *Note:* The arrow `A -> B` on the diagram above should be read as: _"A is aware of existence of B or directly uses B, while B does not necessarily know about A"_.
 
-> *Note:* Internally we use [import-linter](https://github.com/seddonym/import-linter/) to enforce this structure and generally want the lower layer to not know anything about the layers above.
+> *Note:* Internally we use [import-linter](https://github.com/seddonym/import-linter/) to enforce this structure and generally want the lower layer to be unaware of the above layers.
 
 ## Building blocks
 

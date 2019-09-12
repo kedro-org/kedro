@@ -1,7 +1,7 @@
 # Release 0.15.1
 
 ## Major features and improvements
-* Added `versioning` support for tracking of environment, code and dataset version.
+* Extended `versioning` support to cover the tracking of environment setup, code and datasets.
 * Added the following datasets:
   - `FeatherLocalDataSet` in `contrib` for usage with Pandas. (by [@mdomarsaleem](https://github.com/mdomarsaleem))
 * Add `get_last_load_version` and `get_last_save_version` to `AbstractVersionedDataSet`

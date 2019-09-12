@@ -136,7 +136,12 @@ class TestRunCommand:
         assert not result.exit_code
 
         fake_load_context.return_value.run.assert_called_once_with(
-            tags=(), runner=mocker.ANY, node_names=(), from_nodes=[], to_nodes=[]
+            tags=(),
+            runner=mocker.ANY,
+            node_names=(),
+            from_nodes=[],
+            to_nodes=[],
+            from_inputs=[],
         )
 
         assert isinstance(
@@ -163,7 +168,12 @@ class TestRunCommand:
         assert not result.exit_code
 
         fake_load_context.return_value.run.assert_called_once_with(
-            tags=(), runner=mocker.ANY, node_names=(), from_nodes=[], to_nodes=[]
+            tags=(),
+            runner=mocker.ANY,
+            node_names=(),
+            from_nodes=[],
+            to_nodes=[],
+            from_inputs=[],
         )
 
         assert isinstance(

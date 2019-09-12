@@ -76,7 +76,7 @@ class TemplatedConfigLoader(ConfigLoader):
         conf_paths: Union[str, Iterable[str]],
         *,
         globals_pattern: Optional[str] = None,
-        globals_dict: Optional[Dict[str, Any]] = None,
+        globals_dict: Optional[Dict[str, Any]] = None
     ):
         """Instantiate a TemplatedConfigLoader.
 
@@ -171,17 +171,15 @@ def _replace_vals(val: Any, defaults: Dict[str, Any]) -> Any:
     if isinstance(val, list):
         return [_replace_vals(e, defaults) for e in val]
 
-    if isinstance(val, str):
-        # Distinguish case where entire string matches, as the replacement can be different type
-        pattern_full = r"^\$\{([^\}]*)\}$"
-        match_full = re.search(pattern_full, val)
-        if match_full:
-            return jmespath.search(match_full.group(1), defaults) or val
+    # Distinguish case where entire string matches, as the replacement can be different type
+    pattern_full = r"^\$\{([^\}]*)\}$"
+    match_full = re.search(pattern_full, val)
+    if match_full:
+        return jmespath.search(match_full.group(1), defaults) or val
 
-        pattern_partial = r"\$\{([^\}]*)\}"
-        return re.sub(
-            pattern_partial,
-            lambda m: str(jmespath.search(m.group(1), defaults)) or m.group(0),
-            val,
-        )
-    return val
+    pattern_partial = r"\$\{([^\}]*)\}"
+    return re.sub(
+        pattern_partial,
+        lambda m: str(jmespath.search(m.group(1), defaults)) or m.group(0),
+        val,
+    )

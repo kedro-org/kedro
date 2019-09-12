@@ -12,7 +12,7 @@
 * Fixed a bug in `ConfigLoader.get()` not listing nested files for `**`-ending glob patterns.
 * Fixed an error of logging config in jupyter notebook.
 * Updated documentation in `03_configuration` regarding how to modify the configuration path.
-* Documented Kedro architecture diagram.
+* Documented the architecture of Kedro showing how we think about library, project and framework components.
 * `extras/kedro_project_loader.py` renamed to `extras/ipython_loader.py` and now runs any IPython startup scripts without relying on Kedro project structure.
 * Fixed TypeError when validating partial function's signature
 

@@ -13,7 +13,7 @@
 * Fixed an error of logging config in jupyter notebook.
 * Updated documentation in `03_configuration` regarding how to modify the configuration path.
 * Documented the architecture of Kedro showing how we think about library, project and framework components.
-* `extras/kedro_project_loader.py` renamed to `extras/ipython_loader.py` and now runs any IPython startup scripts without relying on Kedro project structure.
+* `extras/kedro_project_loader.py` renamed to `extras/ipython_loader.py` and now runs any IPython startup scripts without relying on the Kedro project structure.
 * Fixed TypeError when validating partial function's signature
 
 ## Breaking changes to the API

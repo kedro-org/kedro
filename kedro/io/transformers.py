@@ -33,7 +33,9 @@ from typing import Any, Callable
 
 
 class AbstractTransformer(abc.ABC):
-    """ Base transformer """
+    """``AbstractTransformer`` is the base class for all transformer implementations.
+    All transformer implementations should extend this abstract class
+    and customise the `load` and `save` methods where appropriate."""
 
     def load(self, data_set_name: str, load: Callable[[], Any]) -> Any:
         """Wrap the loading of a dataset.

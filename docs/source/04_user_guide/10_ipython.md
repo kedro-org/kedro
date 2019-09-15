@@ -1,6 +1,6 @@
 # Working with IPython and Jupyter Notebooks / Lab
 
-> *Note:* This documentation is based on `Kedro 0.15.0`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 In order to experiment with the code interactively, you may want to use a Python kernel inside a Jupyter notebook (formerly known as IPython).
 
@@ -130,10 +130,13 @@ You should be able to see the logging output as follows:
 
 There are optional extra scripts that can help improve your Kedro experience for certain use cases. Those are not essential for using Kedro CLI or library components.
 
-### Kedro project loader
+### IPython loader
 
-The script `extras/kedro_project_loader.py` helps to locate Kedro project and run IPython startup scripts in it when working with Jupyter Notebooks and IPython sessions.
-This script will automatically identify your Kedro project root directory and execute all Python scripts from `<project_dir>/.ipython/profile_default/startup` directory.
+The script `extras/ipython_loader.py` helps to locate IPython startup directory and run all Python scripts in it when working with Jupyter Notebooks and IPython sessions. It should work identically not just within a Kedro project, but also with any project that contains IPython startup scripts.
+
+This script will automatically locate `.ipython/profile_default/startup` directory starting from the current working directory and going up the directory tree. If the directory was found, all Python scripts in it are be executed.
+
+> *Note:* This script will only run startup scripts from the first encountered `.ipython/profile_default/startup` directory. All consecutive `.ipython` directories higher up in the directory tree will be disregarded.
 
 #### Installation
 
@@ -141,36 +144,34 @@ To install this script simply download it into your default IPython config direc
 
 ```bash
 mkdir -p ~/.ipython/profile_default/startup
-wget https://raw.githubusercontent.com/quantumblacklabs/kedro/master/extras/kedro_project_loader.py -O ~/.ipython/profile_default/startup/kedro_project_loader.py
+wget -O ~/.ipython/profile_default/startup/ipython_loader.py https://raw.githubusercontent.com/quantumblacklabs/kedro/master/extras/ipython_loader.py
 ```
 
 #### Prerequisites
 
 In order for this script to work, the following conditions must be met:
 
-1. You Kedro project must contain `kedro_cli.py` file in its root directory.
-2. Jupyter Notebook should be saved inside Kedro project root directory or any nested subdirectory.
-3. IPython interactive session should be started with the working directory inside Kedro project root directory or any nested subdirectory.
+1. You project must contain `.ipython/profile_default/startup` folder in its root directory.
+2. Jupyter Notebook should be saved inside the project root directory or any nested subdirectory.
+3. IPython interactive session should be started with the working directory pointing to the project root directory or any nested subdirectory.
 
-For example, given the following Kedro project structure:
+For example, given the following project structure:
 ```console
 new-kedro-project/
+├── .ipython
+│   └── profile_default
+│       └── startup
+│           └── 00-kedro-init.py
 ├── conf/
 ├── data/
 ├── docs/
-├── kedro_cli.py
 ├── logs/
 ├── notebooks
 │   └── subdir1
 │       └── subdir2
-├── setup.cfg
 └── src/
 ```
 
-Placing your `Notebook.ipynb` file anywhere in `new-kedro-project/notebooks/`, `new-kedro-project/notebooks/subdir1/`, `new-kedro-project/notebooks/subdir1/subdir2/` or even `new-kedro-project/` (although strongly discouraged) will work.
+If your `Notebook.ipynb` is placed anywhere in `new-kedro-project/notebooks/`, `new-kedro-project/notebooks/subdir1/`, `new-kedro-project/notebooks/subdir1/subdir2/` or even `new-kedro-project/` (although strongly discouraged), then `.ipython/profile_default/startup/00-kedro-init.py` will automatically be executed on every notebook startup.
 
-> *Note:* Given the example structure above, this script *will not* load your Kedro project context if the notebook is saved anywhere *outside* `new-kedro-project` directory.
-
-#### Error handling
-
-In case this script fails to execute any of your Kedro project startup scripts, global variable `load_kedro_errors` will contain a dictionary with the key pointing to the failed script path and the value containing exception object.
+> *Note:* Given the example structure above, this script *will not* load your IPython startup scripts if the notebook is saved anywhere *outside* `new-kedro-project` directory.

@@ -28,7 +28,6 @@
 
 """Command line tools for manipulating a Kedro project.
 Intended to be invoked via `kedro`."""
-
 import os
 import shutil
 import subprocess
@@ -80,7 +79,9 @@ NODE_ARG_HELP = """Run only nodes with specified names."""
 
 FROM_NODES_HELP = """A list of node names which should be used as a starting point."""
 
-TO_NODES_HELP = """A list of node names which should be used as an end point"""
+TO_NODES_HELP = """A list of node names which should be used as an end point."""
+
+FROM_INPUTS_HELP = """A list of dataset names which should be used as a starting point."""
 
 PARALLEL_ARG_HELP = """Run the pipeline using the `ParallelRunner`.
 If not specified, use the `SequentialRunner`. This flag cannot be used together
@@ -96,14 +97,18 @@ OVERWRITE_HELP = """If Python file already exists for the equivalent notebook,
 overwrite its contents."""
 
 
+def _split_string(ctx, param, value):
+    return [item for item in value.split(",") if item]
+
 @click.group(context_settings=CONTEXT_SETTINGS, name=__file__)
 def cli():
     """Command line tools for manipulating a Kedro project."""
 
 
 @cli.command()
-@click.option("--from-nodes", type=str, default="", help=FROM_NODES_HELP)
-@click.option("--to-nodes", type=str, default="", help=TO_NODES_HELP)
+@click.option("--from-inputs", type=str, default="", help=FROM_INPUTS_HELP, callback=_split_string)
+@click.option("--from-nodes", type=str, default="", help=FROM_NODES_HELP, callback=_split_string)
+@click.option("--to-nodes", type=str, default="", help=TO_NODES_HELP, callback=_split_string)
 @click.option(
     "--node",
     "-n",
@@ -119,11 +124,8 @@ def cli():
 @click.option("--parallel", "-p", is_flag=True, multiple=False, help=PARALLEL_ARG_HELP)
 @click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
 @click.option("--tag", "-t", type=str, default=None, multiple=True, help=TAG_ARG_HELP)
-def run(tag, env, parallel, runner, node_names, to_nodes, from_nodes):
+def run(tag, env, parallel, runner, node_names, to_nodes, from_nodes, from_inputs):
     """Run the pipeline."""
-    from_nodes = [n for n in from_nodes.split(",") if n]
-    to_nodes = [n for n in to_nodes.split(",") if n]
-
     if parallel and runner:
         raise KedroCliError(
             "Both --parallel and --runner options cannot be used together. "
@@ -140,6 +142,7 @@ def run(tag, env, parallel, runner, node_names, to_nodes, from_nodes):
         node_names=node_names,
         from_nodes=from_nodes,
         to_nodes=to_nodes,
+        from_inputs=from_inputs,
     )
 
 

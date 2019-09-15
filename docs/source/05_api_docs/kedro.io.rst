@@ -60,4 +60,5 @@ Base Classes
 
     kedro.io.AbstractDataSet
     kedro.io.AbstractVersionedDataSet
+    kedro.io.AbstractTransformer
     kedro.io.Version

@@ -253,10 +253,10 @@ class KedroContext(abc.ABC):
             conf_creds = {}
         return conf_creds
 
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments, no-self-use
     def _filter_pipeline(
         self,
-        pipeline: Pipeline = None,
+        pipeline: Pipeline,
         tags: Iterable[str] = None,
         from_nodes: Iterable[str] = None,
         to_nodes: Iterable[str] = None,
@@ -264,28 +264,26 @@ class KedroContext(abc.ABC):
         from_inputs: Iterable[str] = None,
     ) -> Pipeline:
         """Filter the pipeline as the intersection of all conditions."""
-        original_pipeline = pipeline or self.pipeline
-        new_pipeline = original_pipeline
-
-        # We need to intersect with the original_pipeline because the order
+        new_pipeline = pipeline
+        # We need to intersect with the pipeline because the order
         # of operations matters, so we don't want to do it incrementally.
         # As an example, with a pipeline of nodes 1,2,3, think of
         # "from 1", and "only 1 and 3" - the order you do them in results in
         # either 1 & 3, or just 1.
         if tags:
-            new_pipeline &= original_pipeline.only_nodes_with_tags(*tags)
+            new_pipeline &= pipeline.only_nodes_with_tags(*tags)
             if not new_pipeline.nodes:
                 raise KedroContextError(
                     "Pipeline contains no nodes with tags: {}".format(str(tags))
                 )
         if from_nodes:
-            new_pipeline &= original_pipeline.from_nodes(*from_nodes)
+            new_pipeline &= pipeline.from_nodes(*from_nodes)
         if to_nodes:
-            new_pipeline &= original_pipeline.to_nodes(*to_nodes)
+            new_pipeline &= pipeline.to_nodes(*to_nodes)
         if node_names:
-            new_pipeline &= original_pipeline.only_nodes(*node_names)
+            new_pipeline &= pipeline.only_nodes(*node_names)
         if from_inputs:
-            new_pipeline &= original_pipeline.from_inputs(*from_inputs)
+            new_pipeline &= pipeline.from_inputs(*from_inputs)
 
         if not new_pipeline.nodes:
             raise KedroContextError("Pipeline contains no nodes")
@@ -344,7 +342,8 @@ class KedroContext(abc.ABC):
         # Report project name
         logging.info("** Kedro project %s", self.project_path.name)
 
-        pipeline = self._filter_pipeline(
+        pipeline = pipeline or self.pipeline
+        filtered_pipeline = self._filter_pipeline(
             pipeline=pipeline,
             tags=tags,
             from_nodes=from_nodes,
@@ -365,7 +364,7 @@ class KedroContext(abc.ABC):
 
         # Run the runner
         runner = runner or SequentialRunner()
-        return runner.run(pipeline, catalog)
+        return runner.run(filtered_pipeline, catalog)
 
 
 def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:

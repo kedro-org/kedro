@@ -31,7 +31,7 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Omar Saleem](https://github.com/mdomarsaleem), [Mariana Silva](https://github.com/marianansilva), [Anil Choudhary](https://github.com/aniryou), [Craig](https://github.com/cfranklin11)
+[Omar Saleem](https://github.com/mdomarsaleem), [Mariana Silva](https://github.com/marianansilva), [Anil Choudhary](https://github.com/aniryou), [Craig](https://github.com/cfranklin11), [Deepyaman Datta](https://github.com/deepyaman)
 
 # Release 0.15.0
 

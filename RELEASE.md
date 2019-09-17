@@ -3,6 +3,7 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Improved an error message when versioned local dataset is saved and unversioned path already exists.
 
 ## Breaking changes to the API
 
@@ -25,7 +26,7 @@
 * Updated documentation in `03_configuration` regarding how to modify the configuration path.
 * Documented the architecture of Kedro showing how we think about library, project and framework components.
 * `extras/kedro_project_loader.py` renamed to `extras/ipython_loader.py` and now runs any IPython startup scripts without relying on the Kedro project structure.
-* Fixed TypeError when validating partial function's signature
+* Fixed TypeError when validating partial function's signature.
 * After a node failure during a pipeline run, a resume command will be suggested in the logs. This command will not work if the required inputs are MemoryDataSets.
 
 ## Breaking changes to the API

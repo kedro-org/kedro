@@ -387,7 +387,8 @@ _PATH_CONSISTENCY_WARNING = (
 
 
 def _local_exists(filepath: str) -> bool:
-    return Path(filepath).exists()
+    filepath = Path(filepath)
+    return filepath.exists() or any(par.is_file() for par in filepath.parents)
 
 
 def is_remote_path(filepath: str) -> bool:
@@ -400,11 +401,11 @@ def is_remote_path(filepath: str) -> bool:
     return bool(urlparse(filepath).scheme)
 
 
-class AbstractVersionedDataSet(AbstractDataSet):
+class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
     """
-    ``AbstractVersionedDataSet`` is the base class for all versioned data set implementations.
-    All data sets that implement versioning should extend this abstract class
-    and implement the methods marked as abstract.
+    ``AbstractVersionedDataSet`` is the base class for all versioned data set
+    implementations. All data sets that implement versioning should extend this
+    abstract class and implement the methods marked as abstract.
 
     Example:
     ::

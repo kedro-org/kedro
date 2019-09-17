@@ -26,5 +26,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """kedro.contrib is the place for all contribution from third parties.
-Some of this functionality might be include in the core package in the future.
+Some of this functionality might be included in the core package in the future.
 """

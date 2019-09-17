@@ -36,7 +36,7 @@ import yaml
 
 from kedro.cli.cli import _create_project
 
-TEST_REPO_NAME = 'fake_repo'
+TEST_REPO_NAME = "fake_repo"
 
 
 @pytest.fixture(scope="session")
@@ -50,18 +50,18 @@ def fake_repo_path(fake_root_dir):
     return fake_root_dir / TEST_REPO_NAME
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def fake_repo_config_path(fake_root_dir):
     repo_config = {
-        'output_dir': str(fake_root_dir),
-        'project_name': 'Test Project',
-        'repo_name': TEST_REPO_NAME,
-        'python_package': 'fake_package',
-        'include_example': True,
+        "output_dir": str(fake_root_dir),
+        "project_name": "Test Project",
+        "repo_name": TEST_REPO_NAME,
+        "python_package": "fake_package",
+        "include_example": True,
     }
-    config_path = fake_root_dir / 'repo_config.yml'
+    config_path = fake_root_dir / "repo_config.yml"
 
-    with open(str(config_path), 'w') as fd:
+    with open(str(config_path), "w") as fd:
         yaml.safe_dump(repo_config, fd)
 
     return config_path
@@ -76,10 +76,7 @@ def fake_repo(fake_repo_path: Path, fake_repo_config_path: Path):
     # It's safe to remove the new entries from path due to the python
     # module caching mechanism. Any `reload` on it will not work though.
     old_path = sys.path.copy()
-    sys.path = [
-        str(fake_repo_path),
-        str(fake_repo_path / "src"),
-    ] + sys.path
+    sys.path = [str(fake_repo_path), str(fake_repo_path / "src")] + sys.path
 
     import kedro_cli  # noqa: F401 pylint: disable=import-error,unused-import
 
@@ -98,4 +95,5 @@ def fake_kedro_cli(fake_repo):
     that's why it can't be done on module level.
     """
     import kedro_cli  # pylint: disable=import-error
+
     return kedro_cli

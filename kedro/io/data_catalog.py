@@ -102,12 +102,14 @@ class DataCatalog:
     to the underlying data sets.
     """
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         data_sets: Dict[str, AbstractDataSet] = None,
         feed_dict: Dict[str, Any] = None,
         transformers: Dict[str, List[AbstractTransformer]] = None,
         default_transformers: List[AbstractTransformer] = None,
+        journal: VersionJournal = None,
     ) -> None:
         """``DataCatalog`` stores instances of ``AbstractDataSet``
         implementations to provide ``load`` and ``save`` capabilities from
@@ -123,6 +125,7 @@ class DataCatalog:
                 to the data sets.
             default_transformers: A list of transformers to be applied to any
                 new data sets.
+            journal: Instance of VersionJournal.
         Raises:
             DataSetNotFoundError: When transformers are passed for a non
                 existent data set.
@@ -143,7 +146,7 @@ class DataCatalog:
         self._transformers = {k: list(v) for k, v in (transformers or {}).items()}
         self._default_transformers = list(default_transformers or [])
         self._check_and_normalize_transformers()
-        self._journal = None  # type: Optional[VersionJournal]
+        self._journal = journal
         # import the feed dict
         if feed_dict:
             self.add_feed_dict(feed_dict)
@@ -557,6 +560,7 @@ class DataCatalog:
             data_sets=self._data_sets,
             transformers=self._transformers,
             default_transformers=self._default_transformers,
+            journal=self._journal,
         )
 
     def set_version_journal(self, journal: VersionJournal) -> None:
@@ -570,8 +574,14 @@ class DataCatalog:
             self._journal = journal
 
     def __eq__(self, other):
-        return (self._data_sets, self._transformers, self._default_transformers) == (
+        return (
+            self._data_sets,
+            self._transformers,
+            self._default_transformers,
+            self._journal,
+        ) == (
             other._data_sets,  # pylint: disable=protected-access
             other._transformers,  # pylint: disable=protected-access
             other._default_transformers,  # pylint: disable=protected-access
+            other._journal,  # pylint: disable=protected-access
         )

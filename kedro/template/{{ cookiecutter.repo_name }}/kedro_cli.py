@@ -28,7 +28,6 @@
 
 """Command line tools for manipulating a Kedro project.
 Intended to be invoked via `kedro`."""
-
 import os
 import shutil
 import subprocess
@@ -49,16 +48,13 @@ from kedro.cli.utils import (
 )
 from kedro.utils import load_obj
 from kedro.runner import SequentialRunner
+from kedro.context import load_context
 from typing import Iterable, List
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 # get our package onto the python path
 PROJ_PATH = Path(__file__).resolve().parent
-sys.path.insert(0, str(PROJ_PATH / "src"))
-os.environ["PYTHONPATH"] = (
-    str(PROJ_PATH / "src") + os.pathsep + os.environ.get("PYTHONPATH", "")
-)
 os.environ["IPYTHONDIR"] = str(PROJ_PATH / ".ipython")
 
 
@@ -83,7 +79,9 @@ NODE_ARG_HELP = """Run only nodes with specified names."""
 
 FROM_NODES_HELP = """A list of node names which should be used as a starting point."""
 
-TO_NODES_HELP = """A list of node names which should be used as an end point"""
+TO_NODES_HELP = """A list of node names which should be used as an end point."""
+
+FROM_INPUTS_HELP = """A list of dataset names which should be used as a starting point."""
 
 PARALLEL_ARG_HELP = """Run the pipeline using the `ParallelRunner`.
 If not specified, use the `SequentialRunner`. This flag cannot be used together
@@ -99,14 +97,18 @@ OVERWRITE_HELP = """If Python file already exists for the equivalent notebook,
 overwrite its contents."""
 
 
+def _split_string(ctx, param, value):
+    return [item for item in value.split(",") if item]
+
 @click.group(context_settings=CONTEXT_SETTINGS, name=__file__)
 def cli():
     """Command line tools for manipulating a Kedro project."""
 
 
 @cli.command()
-@click.option("--from-nodes", type=str, default="", help=FROM_NODES_HELP)
-@click.option("--to-nodes", type=str, default="", help=TO_NODES_HELP)
+@click.option("--from-inputs", type=str, default="", help=FROM_INPUTS_HELP, callback=_split_string)
+@click.option("--from-nodes", type=str, default="", help=FROM_NODES_HELP, callback=_split_string)
+@click.option("--to-nodes", type=str, default="", help=TO_NODES_HELP, callback=_split_string)
 @click.option(
     "--node",
     "-n",
@@ -122,12 +124,8 @@ def cli():
 @click.option("--parallel", "-p", is_flag=True, multiple=False, help=PARALLEL_ARG_HELP)
 @click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
 @click.option("--tag", "-t", type=str, default=None, multiple=True, help=TAG_ARG_HELP)
-def run(tag, env, parallel, runner, node_names, to_nodes, from_nodes):
+def run(tag, env, parallel, runner, node_names, to_nodes, from_nodes, from_inputs):
     """Run the pipeline."""
-    from {{cookiecutter.python_package}}.run import main
-    from_nodes = [n for n in from_nodes.split(",") if n]
-    to_nodes = [n for n in to_nodes.split(",") if n]
-
     if parallel and runner:
         raise KedroCliError(
             "Both --parallel and --runner options cannot be used together. "
@@ -137,13 +135,14 @@ def run(tag, env, parallel, runner, node_names, to_nodes, from_nodes):
         runner = "ParallelRunner"
     runner_class = load_obj(runner, "kedro.runner") if runner else SequentialRunner
 
-    main(
+    context = load_context(Path.cwd(), env=env)
+    context.run(
         tags=tag,
-        env=env,
         runner=runner_class(),
         node_names=node_names,
         from_nodes=from_nodes,
         to_nodes=to_nodes,
+        from_inputs=from_inputs,
     )
 
 
@@ -191,8 +190,7 @@ def build_docs():
     python_call(
         "ipykernel", ["install", "--user", "--name={{ cookiecutter.python_package }}"]
     )
-    if Path("docs/build").exists():
-        shutil.rmtree("docs/build")
+    shutil.rmtree("docs/build", ignore_errors=True)
     call(
         [
             "sphinx-apidoc",
@@ -311,15 +309,12 @@ def jupyter_lab(ip, all_kernels, args):
 def convert_notebook(all_flag, overwrite_flag, filepath):
     """Convert selected or all notebooks found in a Kedro project
     to Kedro code, by exporting code from the appropriately-tagged cells:
-
     Cells tagged as `node` will be copied over to a Python file matching
     the name of the notebook, under `src/<package_name>/nodes`.
     *Note*: Make sure your notebooks have unique names!
-
     FILEPATH: Path(s) to exact notebook file(s) to be converted. Both
     relative and absolute paths are accepted.
     Should not be provided if --all flag is already present.
-
     """
     from {{cookiecutter.python_package}}.run import ProjectContext
     if not filepath and not all_flag:
@@ -327,7 +322,7 @@ def convert_notebook(all_flag, overwrite_flag, filepath):
             "Please specify a notebook filepath "
             "or add '--all' to convert all notebooks."
         )
-        return
+        sys.exit(1)
 
     kedro_project_path = ProjectContext(Path.cwd()).project_path
     kedro_package_name = "{{cookiecutter.python_package}}"

@@ -26,108 +26,157 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Test kedro extras located in `extras/` folder."""
+"""Test Kedro extras."""
 from pathlib import Path
 
-import extras.kedro_project_loader as loader
 import pytest
-from extras.kedro_project_loader import locate_project_root
+from extras import ipython_loader
+from extras.ipython_loader import locate_ipython_startup_dir
 
 
 @pytest.fixture
 def dummy_project_dir(tmp_path):
-    root = tmp_path / "dummy_project"
+    # wrap in str is needed for Python 3.5
+    # since tmp_path is not directly compatible with Path in that version
+    root = Path(str(tmp_path)).resolve() / "dummy_project"
     root.mkdir()
-    (root / "kedro_cli.py").touch()
     startup_path = root / ".ipython" / "profile_default" / "startup"
     startup_path.mkdir(parents=True)
-    script = "dummy_project_var1 = 111"
-    (startup_path / "startup_script.py").write_text(script, encoding="utf-8")
-    yield root.resolve()
+    yield root
 
 
 @pytest.fixture
 def nested_project_dir(dummy_project_dir):
     nested = dummy_project_dir / "some_dir" / "another_dummy_project"
-    nested.mkdir(parents=True)
-    (nested / "kedro_cli.py").touch()
+    startup_path = nested / ".ipython" / "profile_default" / "startup"
+    startup_path.mkdir(parents=True)
     yield nested.resolve()
 
 
-class TestLocateKedroProject:
-    """Test locating Kedro project."""
-
-    def test_locate(self, dummy_project_dir):
-        assert locate_project_root(dummy_project_dir) == dummy_project_dir
-        assert (
-            locate_project_root(dummy_project_dir / "kedro_cli.py") == dummy_project_dir
-        )
-
-        path = dummy_project_dir / "notebooks" / "foo" / "bar"
-        path.mkdir(parents=True)
-        assert locate_project_root(path) == dummy_project_dir
-
-    def test_locate_nested(self, nested_project_dir, dummy_project_dir):
-        assert locate_project_root(nested_project_dir) == nested_project_dir
-        assert locate_project_root(nested_project_dir.parent) == dummy_project_dir
-
-        path = nested_project_dir / "notebooks" / "foo" / "bar"
-        path.mkdir(parents=True)
-        assert locate_project_root(path) == nested_project_dir
-
-        path = dummy_project_dir / "other" / "dir"
-        path.mkdir(parents=True)
-        assert locate_project_root(path) == dummy_project_dir
-
-    @pytest.mark.usefixtures("dummy_project_dir")
-    def test_locate_no_project(self, tmp_path):
-        assert locate_project_root(tmp_path) is None
-        assert locate_project_root(Path("/")) is None
-
-
-class TestStartupKedroProject:
-    """Test running Kedro project IPython startup scripts."""
-
-    def test_load(self, dummy_project_dir):
-        loader.startup_kedro_project(dummy_project_dir)
-        assert getattr(loader, "dummy_project_var1") == 111
-
-    def test_load_exception(self, dummy_project_dir):
-        bad_script_path = (
-            dummy_project_dir
-            / ".ipython"
-            / "profile_default"
-            / "startup"
-            / "bad_script.py"
-        )
-        script = """raise ValueError('bad_script!')"""
-        bad_script_path.write_text(script, encoding="utf-8")
-        loader.startup_kedro_project(dummy_project_dir)
-        errors = list(loader.load_kedro_errors.values())
-        assert len(errors) == 1
-        assert isinstance(errors[0], ValueError)
-        assert str(errors[0]) == "bad_script!"
-
-
-def test_modify_globals():
-    """Test modify_globals context manager."""
-    with loader.modify_globals(__file__="new_file_value", some_new_key=999):
-        assert loader.__file__ == "new_file_value"
-        assert getattr(loader, "some_new_key") == 999
-    assert loader.__file__ != "new_file_value"
-    assert not hasattr(loader, "some_new_key")
-
-
-def test_main(mocker, dummy_project_dir):
-    """Test running kedro_project_loader."""
-    mocker.patch("pathlib.Path.cwd", return_value=dummy_project_dir)
+@pytest.fixture
+def startup_script(dummy_project_dir):
+    script = "dummy_project_var1 = 111"
     script_path = (
         dummy_project_dir
         / ".ipython"
         / "profile_default"
         / "startup"
-        / "startup_script.py"
+        / "01-startup-script.py"
     )
-    script_path.write_text("dummy_project_var2 = 2222", encoding="utf-8")
-    loader.main()
-    assert getattr(loader, "dummy_project_var2") == 2222
+    script_path.write_text(script, encoding="utf-8")
+    return script_path
+
+
+@pytest.fixture
+def bad_startup_script(dummy_project_dir):
+    script = "raise ValueError('bad script!')"
+    script_path = (
+        dummy_project_dir
+        / ".ipython"
+        / "profile_default"
+        / "startup"
+        / "00-bad-script.py"
+    )
+    script_path.write_text(script, encoding="utf-8")
+    return script_path
+
+
+class TestIpythonStartupDir:
+    """Test locating IPython startup directory."""
+
+    def test_locate(self, dummy_project_dir):
+        ipython_dir = dummy_project_dir / ".ipython" / "profile_default" / "startup"
+        assert locate_ipython_startup_dir(dummy_project_dir) == ipython_dir
+
+        path = dummy_project_dir / "notebooks" / "foo" / "bar"
+        path.mkdir(parents=True)
+        assert locate_ipython_startup_dir(path) == ipython_dir
+
+    def test_locate_nested(self, nested_project_dir, dummy_project_dir):
+        root_ipython_dir = (
+            dummy_project_dir / ".ipython" / "profile_default" / "startup"
+        )
+        nested_ipython_dir = (
+            nested_project_dir / ".ipython" / "profile_default" / "startup"
+        )
+        assert locate_ipython_startup_dir(nested_project_dir) == nested_ipython_dir
+        assert locate_ipython_startup_dir(nested_project_dir.parent) == root_ipython_dir
+
+        path = nested_project_dir / "notebooks" / "foo" / "bar"
+        path.mkdir(parents=True)
+        assert locate_ipython_startup_dir(path) == nested_ipython_dir
+
+        path = dummy_project_dir / "other" / "dir"
+        path.mkdir(parents=True)
+        assert locate_ipython_startup_dir(path) == root_ipython_dir
+
+    @pytest.mark.usefixtures("dummy_project_dir")
+    def test_locate_no_project(self, tmp_path):
+        assert locate_ipython_startup_dir(str(tmp_path)) is None
+        assert locate_ipython_startup_dir(Path("/")) is None
+
+
+class TestRunStartupScripts:
+    """Test running IPython startup scripts from the project."""
+
+    def test_run(self, dummy_project_dir, startup_script, caplog):
+        ipython_loader.run_startup_scripts(dummy_project_dir)
+        expected_message = "Startup script `{}` successfully executed".format(
+            startup_script
+        )
+
+        assert getattr(ipython_loader, "dummy_project_var1") == 111
+        assert len(caplog.records) == 1
+        assert caplog.records[0].message == expected_message
+
+    def test_run_bad_script(self, dummy_project_dir, bad_startup_script, caplog):
+        ipython_loader.run_startup_scripts(dummy_project_dir)
+        expected_error_message = (
+            "Startup script `{}` failed:\n"
+            "ValueError: bad script!".format(bad_startup_script)
+        )
+        assert len(caplog.records) == 1
+        assert caplog.records[0].message == expected_error_message
+
+    def test_run_both_scripts(
+        self, dummy_project_dir, startup_script, bad_startup_script, caplog
+    ):
+        ipython_loader.run_startup_scripts(dummy_project_dir)
+        expected_error_message = (
+            "Startup script `{}` failed:\n"
+            "ValueError: bad script!".format(bad_startup_script)
+        )
+        expected_success_message = "Startup script `{}` successfully executed".format(
+            startup_script
+        )
+
+        assert len(caplog.records) == 2
+        assert caplog.records[0].message == expected_error_message
+        assert caplog.records[1].message == expected_success_message
+
+    def test_modify_globals(self):
+        """Test modify_globals context manager."""
+        with ipython_loader.modify_globals(__file__="new_file_value", new_key=999):
+            assert ipython_loader.__file__ == "new_file_value"
+            assert getattr(ipython_loader, "new_key") == 999
+        assert ipython_loader.__file__ != "new_file_value"
+        assert not hasattr(ipython_loader, "some_new_key")
+
+    def test_ipython_loader_main(self, mocker, dummy_project_dir, caplog):
+        mocker.patch("pathlib.Path.cwd", return_value=dummy_project_dir)
+        script_path = (
+            dummy_project_dir
+            / ".ipython"
+            / "profile_default"
+            / "startup"
+            / "startup_script.py"
+        )
+        script_path.write_text("dummy_project_var2 = 2222", encoding="utf-8")
+        ipython_loader.main()
+
+        assert getattr(ipython_loader, "dummy_project_var2") == 2222
+        assert len(caplog.records) == 1
+        expected_message = "Startup script `{}` successfully executed".format(
+            script_path
+        )
+        assert caplog.records[0].message == expected_message

@@ -9,7 +9,7 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Deepyaman Datta](https://github.com/deepyaman)
+[Deepyaman Datta](https://github.com/deepyaman), [Luciano Issoe](https://github.com/Lucianois)
 
 # Release 0.15.1
 
@@ -180,6 +180,6 @@ The initial release of Kedro.
 
 ## Thanks for supporting contributions
 
-Jo Stichbury, Aris Valtazanos, Fabian Peters, Guilherme Braccialli, Joel Schwarzmann, Miguel Beltre, Mohammed ElNabawy, Deepyaman Datta, Shubham Agrawal, Oleg Andreyev, Mayur Chougule, William Ashford, Ed Cannon, Nikhilesh Nukala, Sean Bailey, Vikram Tegginamath, Thomas Huijskens, Musa Bilal, Luciano Issoe
+Jo Stichbury, Aris Valtazanos, Fabian Peters, Guilherme Braccialli, Joel Schwarzmann, Miguel Beltre, Mohammed ElNabawy, Deepyaman Datta, Shubham Agrawal, Oleg Andreyev, Mayur Chougule, William Ashford, Ed Cannon, Nikhilesh Nukala, Sean Bailey, Vikram Tegginamath, Thomas Huijskens, Musa Bilal
 
 We are also grateful to everyone who advised and supported us, filed issues or helped resolve them, asked and answered questions and were part of inspiring discussions.

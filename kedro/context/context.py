@@ -131,9 +131,18 @@ class KedroContext(abc.ABC):
         )
 
     @property
-    @abc.abstractmethod
     def pipeline(self) -> Pipeline:
-        """Abstract property for Pipeline getter.
+        """Read-only property for an instance of Pipeline.
+
+        Returns:
+            Defined pipeline.
+
+        """
+        return self._get_pipeline()
+
+    @abc.abstractmethod
+    def _get_pipeline(self) -> Pipeline:
+        """Abstract method for a hook for changing the creation of a Pipeline instance.
 
         Returns:
             Defined pipeline.
@@ -141,7 +150,7 @@ class KedroContext(abc.ABC):
         """
         raise NotImplementedError(
             "`{}` is a subclass of KedroContext and it must implement "
-            "the `pipeline` property".format(self.__class__.__name__)
+            "the `_get_pipeline` method".format(self.__class__.__name__)
         )
 
     @property
@@ -154,20 +163,18 @@ class KedroContext(abc.ABC):
         """
         return self._project_path
 
-    def _create_catalog(  # pylint: disable=no-self-use
-        self, conf_catalog: Dict[str, Any], conf_creds: Dict[str, Any]
-    ) -> DataCatalog:
-        """A hook for changing the creation of the DataCatalog instance.
+    @property
+    def catalog(self) -> DataCatalog:
+        """Read-only property referring to Kedro's ``DataCatalog`` for this context.
 
         Returns:
             DataCatalog defined in `catalog.yml`.
 
         """
-        return DataCatalog.from_config(conf_catalog, conf_creds)
+        return self._get_catalog()
 
-    @property
-    def catalog(self) -> DataCatalog:
-        """Read-only property referring to Kedro's ``DataCatalog`` for this context.
+    def _get_catalog(self) -> DataCatalog:
+        """A hook for changing the creation of a DataCatalog instance.
 
         Returns:
             DataCatalog defined in `catalog.yml`.
@@ -178,6 +185,17 @@ class KedroContext(abc.ABC):
         catalog = self._create_catalog(conf_catalog, conf_creds)
         catalog.add_feed_dict(self._get_feed_dict())
         return catalog
+
+    def _create_catalog(  # pylint: disable=no-self-use
+        self, conf_catalog: Dict[str, Any], conf_creds: Dict[str, Any]
+    ) -> DataCatalog:
+        """A factory method for the DataCatalog instantiation.
+
+        Returns:
+            DataCatalog defined in `catalog.yml`.
+
+        """
+        return DataCatalog.from_config(conf_catalog, conf_creds)
 
     @property
     def io(self) -> DataCatalog:
@@ -194,7 +212,7 @@ class KedroContext(abc.ABC):
     def _create_config_loader(  # pylint: disable=no-self-use
         self, conf_paths: Iterable[str]
     ) -> ConfigLoader:
-        """A hook for changing the creation of the ConfigLoader instance.
+        """A factory method for the ConfigLoader instantiation.
 
         Returns:
             Instance of `ConfigLoader`.
@@ -202,10 +220,8 @@ class KedroContext(abc.ABC):
         """
         return ConfigLoader(conf_paths)
 
-    @property
-    def config_loader(self) -> ConfigLoader:
-        """Read-only property referring to Kedro's ``ConfigLoader`` for this
-        context.
+    def _get_config_loader(self) -> ConfigLoader:
+        """A hook for changing the creation of a ConfigLoader instance.
 
         Returns:
             Instance of `ConfigLoader` created by `_create_config_loader()`.
@@ -216,6 +232,17 @@ class KedroContext(abc.ABC):
             str(self.project_path / self.CONF_ROOT / self.env),
         ]
         return self._create_config_loader(conf_paths)
+
+    @property
+    def config_loader(self) -> ConfigLoader:
+        """Read-only property referring to Kedro's ``ConfigLoader`` for this
+        context.
+
+        Returns:
+            Instance of `ConfigLoader`.
+
+        """
+        return self._get_config_loader()
 
     def _setup_logging(self) -> None:
         """Register logging specified in logging directory."""

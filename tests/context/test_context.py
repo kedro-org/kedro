@@ -188,8 +188,7 @@ class DummyContext(KedroContext):
     project_name = "bob"
     project_version = __version__
 
-    @property
-    def pipeline(self) -> Pipeline:
+    def _get_pipeline(self) -> Pipeline:
         return Pipeline(
             [
                 node(identity, "cars", "boats", name="node1", tags=["tag1"]),
@@ -258,8 +257,7 @@ class TestKedroContext:
             project_name = "bob"
             project_version = invalid_version
 
-            @property
-            def pipeline(self) -> Pipeline:
+            def _get_pipeline(self) -> Pipeline:
                 return Pipeline([])  # pragma: no cover
 
         pattern = (
@@ -440,8 +438,7 @@ class TestKedroContextRun:
             project_name = "bob"
             project_version = __version__
 
-            @property
-            def pipeline(self) -> Pipeline:
+            def _get_pipeline(self) -> Pipeline:
                 return Pipeline([])
 
         mocker.patch("logging.config.dictConfig")
@@ -472,8 +469,7 @@ class TestKedroContextRun:
             project_name = "fred"
             project_version = __version__
 
-            @property
-            def pipeline(self) -> Pipeline:
+            def _get_pipeline(self) -> Pipeline:
                 return context_pipeline
 
         mocker.patch("logging.config.dictConfig")

@@ -47,8 +47,8 @@ class ProjectContext(KedroContext):
     project_name = "{{ cookiecutter.project_name }}"
     project_version = "{{ cookiecutter.kedro_version }}"
 
-    @property
-    def pipeline(self) -> Pipeline:
+    def _get_pipeline(self) -> Pipeline:
+        # pylint: disable=no-self-use
         return create_pipeline()
 
 

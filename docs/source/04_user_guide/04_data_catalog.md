@@ -203,7 +203,7 @@ In this example the default `csv` configuration is inserted into `airplanes` and
 
 ## Transcoding datasets
 
-You may come across a situation where you would like to read the same file using two different dataset implementations. For instance, `parquet` files can not only be loaded via the `ParquetLocalDataSet`, but also directly by `SparkDataSet` using `pandas`. To do this, you can can define your `catalog.yml` as follows:
+You may come across a situation where you would like to read the same file using two different dataset implementations. For instance, `parquet` files can not only be loaded via the `ParquetLocalDataSet`, but also directly by `SparkDataSet` using `pandas`. To do this, you can define your `catalog.yml` as follows:
 
 ```yaml
 mydata@pandas:

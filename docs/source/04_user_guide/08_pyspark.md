@@ -22,7 +22,7 @@ from pyspark.sql import SparkSession
 
 class ProjectContext(KedroContext):
     # ...
-    def __init__(self, project_path: Union[Path, str], env: str):
+    def __init__(self, project_path: Union[Path, str], env: str = None):
         super().__init__(project_path, env)
         self._spark_session = None
         self.init_spark_session()

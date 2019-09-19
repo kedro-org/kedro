@@ -1,6 +1,7 @@
 anyconfig>=0.9.7, <1.0
 click<8.0
 cookiecutter>=1.6.0, <2.0
+dask>=2.4.0
 memory_profiler>=0.50.0, <1.0
 pandas>=0.23.0, <1.0
 pip-tools>=4.0.0, <5.0.0

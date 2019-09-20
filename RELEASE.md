@@ -5,11 +5,12 @@
 ## Bug fixes and other changes
 * Users will override `_get_pipeline` abstract method in `ProjectContext(KedroContext)` in `run.py` rather than `pipeline` abstract property. `pipeline` property is not abstract anymore.
 * Improved an error message when versioned local dataset is saved and unversioned path already exists.
+* Added a `__main__` entrypoint in the test_run.py to enable running the tests directly
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Deepyaman Datta](https://github.com/deepyaman), [Luciano Issoe](https://github.com/Lucianois)
+[Deepyaman Datta](https://github.com/deepyaman), [Luciano Issoe](https://github.com/Lucianois), [Alexandre Ouellet](https://github.com/AlexandreOuellet)
 
 # Release 0.15.1
 

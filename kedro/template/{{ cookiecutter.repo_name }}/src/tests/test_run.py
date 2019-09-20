@@ -56,3 +56,9 @@ class TestProjectContext:
 
     def test_project_version(self, project_context):
         assert project_context.project_version == "{{ cookiecutter.kedro_version }}"
+
+
+if __name__ == "__main__":
+    import sys
+
+    pytest.main(sys.argv + ["--no-cov"])

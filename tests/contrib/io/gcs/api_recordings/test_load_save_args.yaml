@@ -1,0 +1,99 @@
+interactions:
+- request:
+    body: assertion=xxx&grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '987'
+      content-type:
+      - application/x-www-form-urlencoded
+    method: POST
+    uri: https://oauth2.googleapis.com/token
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAC/x3Oy46CMBQA0L1fQbpWU4svZsc1glFjrBgY3DQVywxpo1hEWo3/bmB7VufdcxzE
+        s0xUFXvcpLiiHwdZTrxhNlyqyQBG6/p54YKZ0FMTO63vfBNEc7DGn2lMqcr93SFNlrcxabTMcVK8
+        gvMeAn8x8xL5azCN8Grg/gVNGUMOdLylCylz2oSpiucsAgtw1nEp/0cnl4SEpKo25nhJARvUb3PC
+        lIUWFSvamjvFuNPuyh62FG0YBNdCo97nC+gIloPPAAAA
+    headers:
+      Alt-Svc:
+      - quic=":443"; ma=2592000; v="46,43,39"
+      Cache-Control:
+      - private
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Mon, 09 Sep 2019 11:01:01 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip
+      Connection:
+      - keep-alive
+      authorization:
+      - Bearer ya29.c.El5-B1Juvdre_xG9l5y6uqaKFS8ByxA7r0QQlfANRYWEo42wrkf0WizFbPBFAC79WkXx0QS0H-3gFwpVBfBQ4LQCkkfQwGYlV8_SByBBbrVpkh1Z32G22YluxxTdYB0x
+    method: GET
+    uri: https://www.googleapis.com/storage/v1/b/test_bucket?projection=noAcl
+  response:
+    body:
+      string: "{\n \"kind\": \"storage#bucket\",\n \"id\": \"test_bucket\",\n
+        \"selfLink\": \"https://www.googleapis.com/storage/v1/b/test_bucket\",\n
+        \"projectNumber\": \"0123456789012\",\n \"name\": \"test_bucket\",\n
+        \"timeCreated\": \"2019-09-06T22:03:27.598Z\",\n \"updated\": \"2019-09-06T22:53:16.791Z\",\n
+        \"metageneration\": \"3\",\n \"iamConfiguration\": {\n  \"bucketPolicyOnly\":
+        {\n   \"enabled\": false\n  },\n  \"uniformBucketLevelAccess\": {\n   \"enabled\":
+        false\n  }\n },\n \"location\": \"EUROPE-WEST1\",\n \"locationType\": \"region\",\n
+        \"defaultEventBasedHold\": false,\n \"storageClass\": \"STANDARD\",\n \"etag\":
+        \"CAM=\"\n}\n"
+    headers:
+      Alt-Svc:
+      - quic=":443"; ma=2592000; v="46,43,39"
+      Cache-Control:
+      - private, max-age=0, must-revalidate, no-transform
+      Content-Length:
+      - '581'
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Mon, 09 Sep 2019 10:24:38 GMT
+      ETag:
+      - CAM=
+      Expires:
+      - Mon, 09 Sep 2019 10:24:38 GMT
+      Server:
+      - UploadServer
+      Vary:
+      - Origin
+      - X-Origin
+    status:
+      code: 200
+      message: OK
+version: 1

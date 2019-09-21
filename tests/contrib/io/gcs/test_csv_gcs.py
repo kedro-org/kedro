@@ -28,7 +28,6 @@
 
 # pylint: disable=protected-access,no-member
 import os
-from multiprocessing.reduction import ForkingPickler
 
 import mock
 import pytest
@@ -38,7 +37,7 @@ from google.cloud.exceptions import NotFound, Unauthorized
 import pandas as pd
 from pandas.util.testing import assert_frame_equal
 
-from tests.contrib.io.gcs.utils import my_vcr
+from tests.contrib.io.gcs.utils import gcs_vcr
 
 from kedro.contrib.io.gcs.csv_gcs import CSVGCSDataSet
 
@@ -53,8 +52,29 @@ def dummy_dataframe():
     return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
 
 
-class TestCSGCSDataSet:
+@pytest.fixture(params=[None])
+def load_args(request):
+    return request.param
 
+
+@pytest.fixture(params=[None])
+def save_args(request):
+    return request.param
+
+
+@pytest.fixture
+@gcs_vcr.use_cassette(match=['all'])
+def gcs_data_set(load_args, save_args):
+    return CSVGCSDataSet(
+        filepath=FILENAME,
+        bucket_name=BUCKET_NAME,
+        credentials=GCP_CREDENTIALS,
+        load_args=load_args,
+        save_args=save_args,
+    )
+
+
+class TestCSVGCSDataSet:
     @mock.patch.dict(os.environ, {'GOOGLE_APPLICATION_CREDENTIALS': 'wrong credentials'})
     def test_invalid_default_credentials(self):
         """Test invalid credentials for connecting to GCS"""
@@ -74,7 +94,7 @@ class TestCSGCSDataSet:
                 credentials=GCP_CREDENTIALS
             )
 
-    @my_vcr.use_cassette(match=['all'])
+    @gcs_vcr.use_cassette(match=['all'])
     def test_not_existing_bucket(self):
         """Test not existing bucket"""
         with pytest.raises(NotFound):
@@ -84,101 +104,61 @@ class TestCSGCSDataSet:
                 credentials=GCP_CREDENTIALS
             )
 
-    @my_vcr.use_cassette(match=['all'])
-    @pytest.mark.usefixtures("dummy_dataframe")
-    def test_load_data(self, dummy_dataframe):
+    @gcs_vcr.use_cassette(match=['all'])
+    def test_load_data(self, gcs_data_set, dummy_dataframe):
         """Test loading the data from gcs."""
-        dataset = CSVGCSDataSet(
-            filepath=FILENAME,
-            bucket_name=BUCKET_NAME,
-            credentials=GCP_CREDENTIALS
-        )
-        loaded_data = dataset.load()
+        loaded_data = gcs_data_set.load()
         assert_frame_equal(loaded_data, dummy_dataframe)
 
-    @my_vcr.use_cassette(match=['all'])
-    @pytest.mark.usefixtures("dummy_dataframe")
-    def test_save_data(self, dummy_dataframe):
+    @gcs_vcr.use_cassette(match=['all'])
+    def test_save_data(self, gcs_data_set, dummy_dataframe):
         """Test saving the data"""
-        dataset = CSVGCSDataSet(
-            filepath=FILENAME,
-            bucket_name=BUCKET_NAME,
-            credentials=GCP_CREDENTIALS
-        )
-        assert not dataset.exists()
-        dataset.save(dummy_dataframe)
-        loaded_data = dataset.load()
+        assert not gcs_data_set.exists()
+        gcs_data_set.save(dummy_dataframe)
+        loaded_data = gcs_data_set.load()
         assert_frame_equal(loaded_data, dummy_dataframe)
 
-    @my_vcr.use_cassette(match=['all'])
-    @pytest.mark.usefixtures("dummy_dataframe")
-    def test_exists(self, dummy_dataframe):
+    @gcs_vcr.use_cassette(match=['all'])
+    def test_exists(self, gcs_data_set, dummy_dataframe):
         """Test `exists` method invocation for both existing and
         nonexistent data set."""
-        dataset = CSVGCSDataSet(
-            filepath=FILENAME,
-            bucket_name=BUCKET_NAME,
-            credentials=GCP_CREDENTIALS
-        )
-        assert not dataset.exists()
-        dataset.save(dummy_dataframe)
-        assert dataset.exists()
+        assert not gcs_data_set.exists()
+        gcs_data_set.save(dummy_dataframe)
+        assert gcs_data_set.exists()
 
-    @my_vcr.use_cassette(match=['all'])
-    def test_load_save_args(self):
+    def test_load_save_args(self, gcs_data_set):
         """Test default load and save arguments of the data set."""
-        dataset = CSVGCSDataSet(
-            filepath=FILENAME,
-            bucket_name=BUCKET_NAME,
-            credentials=GCP_CREDENTIALS
-        )
-        assert not dataset._load_args
-        assert "index" in dataset._save_args
+        assert not gcs_data_set._load_args
+        assert "index" in gcs_data_set._save_args
 
-    @my_vcr.use_cassette(match=['all'])
-    def test_load_extra_params(self):
+    @pytest.mark.parametrize(
+        "load_args", [{"k1": "v1", "index": "value"}], indirect=True
+    )
+    def test_load_extra_params(self, gcs_data_set, load_args):
         """Test overriding the default load arguments."""
-        load_args = {"k1": "v1", "index": "value"}
-        dataset = CSVGCSDataSet(
-            filepath=FILENAME,
-            bucket_name=BUCKET_NAME,
-            credentials=GCP_CREDENTIALS,
-            load_args=load_args
-        )
         for key, value in load_args.items():
-            assert dataset._load_args[key] == value
+            assert gcs_data_set._load_args[key] == value
 
-    @my_vcr.use_cassette(match=['all'])
-    def test_save_extra_params(self):
+    @pytest.mark.parametrize(
+        "save_args", [{"k1": "v1", "index": "value"}], indirect=True
+    )
+    def test_save_extra_params(self, gcs_data_set, save_args):
         """Test overriding the default save arguments."""
         save_args = {"k1": "v1", "index": "value"}
-        dataset = CSVGCSDataSet(
-            filepath=FILENAME,
-            bucket_name=BUCKET_NAME,
-            credentials=GCP_CREDENTIALS,
-            save_args=save_args
-        )
         for key, value in save_args.items():
-            assert dataset._save_args[key] == value
+            assert gcs_data_set._save_args[key] == value
 
-    @my_vcr.use_cassette(match=['all'])
-    def test_str_representation(self):
+    @pytest.mark.parametrize("save_args", [{"option": "value"}], indirect=True)
+    def test_str_representation(self, gcs_data_set, save_args):
         """Test string representation of the data set instance."""
-        save_args = {"option": "value"}
-        dataset = CSVGCSDataSet(
-            filepath=FILENAME,
-            bucket_name=BUCKET_NAME,
-            credentials=GCP_CREDENTIALS,
-            save_args=save_args
-        )
-        str_repr = str(dataset)
+        str_repr = str(gcs_data_set)
         assert "CSVGCSDataSet" in str_repr
         for k in save_args.keys():
             assert k in str_repr
 
     # pylint: disable=unused-argument
-    @my_vcr.use_cassette(match=['all'])
-    def test_load_args_propagated(self, mocker):
+    @gcs_vcr.use_cassette(match=['all'])
+    def test_load_args_propagated(self, mocker, gcs_data_set):
         mock = mocker.patch("kedro.contrib.io.gcs.csv_gcs.pd.read_csv")
         CSVGCSDataSet(
             filepath=FILENAME,

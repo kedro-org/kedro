@@ -1,4 +1,3 @@
-import json
 import os
 
 import vcr
@@ -37,12 +36,12 @@ def matcher(r1, r2):
     return True
 
 
-my_vcr = vcr.VCR(
+gcs_vcr = vcr.VCR(
     cassette_library_dir=api_records_path,
     path_transformer=vcr.VCR.ensure_suffix('.yaml'),
     filter_headers=['Authorization'],
     filter_query_parameters=['refresh_token', 'client_id',
                              'client_secret']
     )
-my_vcr.register_matcher('all', matcher)
-my_vcr.match_on = ['all']
+gcs_vcr.register_matcher('all', matcher)
+gcs_vcr.match_on = ['all']

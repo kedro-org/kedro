@@ -32,11 +32,10 @@ import os
 import mock
 import pytest
 import google.auth.credentials
-from google.auth.exceptions import DefaultCredentialsError
-from google.cloud.exceptions import NotFound, Unauthorized
 import pandas as pd
 from pandas.util.testing import assert_frame_equal
 
+from kedro.io import DataSetError
 from tests.contrib.io.gcs.utils import gcs_vcr
 
 from kedro.contrib.io.gcs.csv_gcs import CSVGCSDataSet
@@ -76,33 +75,25 @@ def gcs_data_set(load_args, save_args):
 
 class TestCSVGCSDataSet:
     @mock.patch.dict(os.environ, {'GOOGLE_APPLICATION_CREDENTIALS': 'wrong credentials'})
-    def test_invalid_default_credentials(self):
+    def test_invalid_credentials(self):
         """Test invalid credentials for connecting to GCS"""
-        with pytest.raises(DefaultCredentialsError):
+        pattern = "Anonymous caller"
+        with pytest.raises(DataSetError, match=pattern):
             CSVGCSDataSet(
                 filepath=FILENAME,
                 bucket_name=BUCKET_NAME
-            )
-
-    @mock.patch.dict(os.environ, {})
-    def test_invalid_passed_credentials(self):
-        """Test invalid credentials for connecting to GCS"""
-        with pytest.raises(Unauthorized):
-            CSVGCSDataSet(
-                filepath=FILENAME,
-                bucket_name=BUCKET_NAME,
-                credentials=GCP_CREDENTIALS
-            )
+            ).load()
 
     @gcs_vcr.use_cassette(match=['all'])
     def test_not_existing_bucket(self):
         """Test not existing bucket"""
-        with pytest.raises(NotFound):
+        pattern = "Failed while loading data from data set"
+        with pytest.raises(DataSetError, match=pattern):
             CSVGCSDataSet(
                 filepath=FILENAME,
                 bucket_name='not-existing-bucket',
                 credentials=GCP_CREDENTIALS
-            )
+            ).load()
 
     @gcs_vcr.use_cassette(match=['all'])
     def test_load_data(self, gcs_data_set, dummy_dataframe):

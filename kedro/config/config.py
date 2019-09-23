@@ -171,7 +171,6 @@ class ConfigLoader:
                 "No files found in {} matching the glob "
                 "pattern(s): {}".format(str(self.conf_paths), str(list(patterns)))
             )
-
         return config
 
 

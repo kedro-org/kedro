@@ -57,6 +57,7 @@ def param_config():
                 "name": "${string_type}",
                 "top_speed": "${float_type}",
             },
+            "rows": 5,
             "users": ["fred", "${write_only_user}"],
         }
     }
@@ -261,7 +262,7 @@ class TestTemplatedConfigLoader:
         lists, etc.)"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
-        catalog = TemplatedConfigLoader(conf_paths).get("catalog*.yml")
+        catalog = TemplatedConfigLoader(conf_paths, globals_dict={}).get("catalog*.yml")
 
         assert catalog["planes"]["type"] == "SparkJDBCDataSet"
         assert catalog["planes"]["postgres_credentials"]["user"] == "Fakeuser"

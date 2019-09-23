@@ -94,17 +94,15 @@ class TemplatedConfigLoader(ConfigLoader):
 
         super(TemplatedConfigLoader, self).__init__(conf_paths)
 
-        self.globals_dict = (
-            super(TemplatedConfigLoader, self).get(*globals_pattern)
+        self._arg_dict = (
+            super(TemplatedConfigLoader, self).get(globals_pattern)
             if globals_pattern
             else {}
         )
 
-        self.arg_dict = (
-            dict(**self.globals_dict, **globals_dict)
-            if globals_dict
-            else self.globals_dict
-        )
+        globals_dict = globals_dict or {}
+
+        self._arg_dict = dict(**self._arg_dict, **globals_dict)
 
     def get(self, *patterns: str):
         """
@@ -126,8 +124,8 @@ class TemplatedConfigLoader(ConfigLoader):
 
         config_raw = super().get(*patterns)
 
-        if self.arg_dict:
-            return _replace_vals(config_raw, self.arg_dict)
+        if self._arg_dict:
+            return _replace_vals(config_raw, self._arg_dict)
 
         return config_raw
 
@@ -171,15 +169,17 @@ def _replace_vals(val: Any, defaults: Dict[str, Any]) -> Any:
     if isinstance(val, list):
         return [_replace_vals(e, defaults) for e in val]
 
-    # Distinguish case where entire string matches, as the replacement can be different type
-    pattern_full = r"^\$\{([^\}]*)\}$"
-    match_full = re.search(pattern_full, val)
-    if match_full:
-        return jmespath.search(match_full.group(1), defaults) or val
+    if isinstance(val, str):
+        # Distinguish case where entire string matches, as the replacement can be different type
+        pattern_full = r"^\$\{([^\}]*)\}$"
+        match_full = re.search(pattern_full, val)
+        if match_full:
+            return jmespath.search(match_full.group(1), defaults) or val
 
-    pattern_partial = r"\$\{([^\}]*)\}"
-    return re.sub(
-        pattern_partial,
-        lambda m: str(jmespath.search(m.group(1), defaults)) or m.group(0),
-        val,
-    )
+        pattern_partial = r"\$\{([^\}]*)\}"
+        return re.sub(
+            pattern_partial,
+            lambda m: str(jmespath.search(m.group(1), defaults)) or m.group(0),
+            val,
+        )
+    return val

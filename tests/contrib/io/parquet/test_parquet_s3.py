@@ -40,7 +40,7 @@ from s3fs import S3FileSystem
 
 from kedro.contrib.io.parquet import ParquetS3DataSet
 from kedro.io import DataSetError, Version
-from kedro.io.core import generate_current_version
+from kedro.io.core import generate_timestamp
 
 FILENAME = "test.parquet"
 BUCKET_NAME = "test_bucket"
@@ -56,7 +56,7 @@ def load_version(request):
 
 @pytest.fixture(params=[None])
 def save_version(request):
-    return request.param or generate_current_version()
+    return request.param or generate_timestamp()
 
 
 @pytest.fixture(params=[None])

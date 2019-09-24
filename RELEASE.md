@@ -7,6 +7,7 @@
 * Improved an error message when versioned local dataset is saved and unversioned path already exists.
 
 ## Breaking changes to the API
+* `KedroContext.run()` no longer accepts `catalog` and `pipeline` arguments.
 
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman), [Luciano Issoe](https://github.com/Lucianois)

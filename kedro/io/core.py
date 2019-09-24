@@ -132,7 +132,7 @@ class AbstractDataSet(abc.ABC):
 
         """
         config = copy.deepcopy(config)
-        save_version = save_version or generate_current_version()
+        save_version = save_version or generate_timestamp()
 
         if VERSION_KEY in config:
             # remove "version" key so that it's not passed
@@ -353,11 +353,11 @@ class AbstractDataSet(abc.ABC):
         pass
 
 
-def generate_current_version() -> str:
-    """Generate the current version to be used by versioned data sets.
+def generate_timestamp() -> str:
+    """Generate the timestamp to be used by versioning.
 
     Returns:
-        String representation of the current version.
+        String representation of the current timestamp.
 
     """
     current_ts = datetime.now(tz=timezone.utc)
@@ -499,7 +499,7 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
             self._last_save_version = None
             return self._filepath
 
-        self._last_save_version = self._version.save or generate_current_version()
+        self._last_save_version = self._version.save or generate_timestamp()
 
         versioned_path = self._get_versioned_path(self._last_save_version)
         if self._exists_function(str(versioned_path)):

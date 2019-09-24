@@ -8,6 +8,7 @@
 * Added a `__main__` entrypoint in the test_run.py to enable running the tests directly
 
 ## Breaking changes to the API
+* `KedroContext.run()` no longer accepts `catalog` and `pipeline` arguments.
 
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman), [Luciano Issoe](https://github.com/Lucianois), [Alexandre Ouellet](https://github.com/AlexandreOuellet)

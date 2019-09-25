@@ -143,7 +143,7 @@ class ParallelRunner(AbstractRunner):
                 "MemoryDataSets".format(memory_data_sets)
             )
 
-    def _run(  # pylint: disable=too-many-locals
+    def _run(  # pylint: disable=too-many-locals,useless-suppression
         self, pipeline: Pipeline, catalog: DataCatalog
     ) -> None:
         """The abstract interface for running pipelines.

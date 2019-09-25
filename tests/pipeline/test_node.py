@@ -66,6 +66,7 @@ def simple_tuple_node_list():
         (constant_output, None, "M"),
         (biconcat, ["N", "O"], None),
         (lambda x: None, "F", "G"),
+        (lambda x: ("a", "b"), "G", ["X", "Y"]),
     ]
 
 
@@ -222,7 +223,7 @@ def bad_input_type_node():
 
 
 def bad_output_type_node():
-    return lambda x: None, "A", ("B", "C")
+    return lambda x: None, "A", {"B", "C"}
 
 
 def bad_function_type_node():

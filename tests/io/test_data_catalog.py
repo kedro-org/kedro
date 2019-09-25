@@ -44,7 +44,7 @@ from kedro.io import (
     MemoryDataSet,
     ParquetLocalDataSet,
 )
-from kedro.io.core import generate_current_version
+from kedro.io.core import generate_timestamp
 from kedro.versioning.journal import VersionJournal
 
 
@@ -358,12 +358,15 @@ class TestDataCatalogVersioned:
     def test_from_sane_config_versioned(self, sane_config, dummy_dataframe):
         """Test load and save of versioned data sets from config"""
         sane_config["catalog"]["boats"]["versioned"] = True
-        version = generate_current_version()
+        version = generate_timestamp()
+        journal = VersionJournal({"run_id": "fake-id", "project_path": "fake-path"})
         catalog = DataCatalog.from_config(
-            **sane_config, load_versions={"boats": version}, save_version=version
+            **sane_config,
+            load_versions={"boats": version},
+            save_version=version,
+            journal=journal
         )
-        journal = VersionJournal({"project_path": "fake-path"})
-        catalog.set_version_journal(journal)
+
         assert catalog._journal == journal  # pylint: disable=protected-access
 
         catalog.save("boats", dummy_dataframe)

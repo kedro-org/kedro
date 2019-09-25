@@ -141,7 +141,6 @@ class KedroContext(abc.ABC):
         """
         return self._get_pipeline()
 
-    @abc.abstractmethod
     def _get_pipeline(self) -> Pipeline:
         """Abstract method for a hook for changing the creation of a Pipeline instance.
 

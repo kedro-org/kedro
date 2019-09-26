@@ -324,7 +324,6 @@ class TestBuildDocsCommand:
             assert each in args[0]
 
 
-
 class TestBuildReqsCommand:
     def test_requirements_file_exists(self, python_call_mock, fake_kedro_cli, mocker):
         # File exists:

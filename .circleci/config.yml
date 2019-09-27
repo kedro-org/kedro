@@ -1,65 +1,189 @@
 version: 2
+
+images:
+  - &py35 quantumblacklabs/kedro_builder:3.5
+  - &py36 quantumblacklabs/kedro_builder:3.6
+  - &py37 quantumblacklabs/kedro_builder:3.7
+
+utils:
+  setup_conda: &setup_conda
+    name: Activate conda environment
+    command: |
+      echo ". /home/circleci/miniconda/etc/profile.d/conda.sh" >> $BASH_ENV
+      echo "conda deactivate; conda activate kedro_builder" >> $BASH_ENV
+
+  setup_requirements: &setup_requirements
+    name: Install PIP dependencies
+    command: |
+      # echo python version for debugging
+      echo "Python version: $(python --version 2>&1)"
+
+      # Install pip setuptools
+      make install-pip-setuptools
+
+      # Install requirements
+      pip install -r requirements.txt -U
+
+      # venv is required for some pre-commit hooks
+      conda install -y virtualenv
+
+      # Install test requirements
+      pip install -r test_requirements.txt -U
+
+  setup_pre_commit: &setup_pre_commit
+    name: Install pre-commit hooks
+    command: |
+      pre-commit install --install-hooks
+      pre-commit install --hook-type pre-push
+
+
+  linters: &linters
+    name: Run pylint and flake8
+    command: |
+      make lint
+
+  unit_tests: &unit_tests
+    name: Run tests
+    command: |
+      make test
+
+  e2e_tests: &e2e_tests
+    name: Run all end to end tests
+    command: |
+      make e2e-tests
+
+  build_docs: &build_docs
+    # NOTE: doesn't work on python 3.5
+    name: Build documentation
+    command: |
+      make build-docs
+
+  check_legal: &check_legal
+    name: Check for legal compliance
+    command: |
+      make legal
+
+  steps_unit_tests: &steps_unit_tests
+    steps:
+      - checkout
+      - run: *setup_conda
+      - run: *setup_requirements
+      - run: *unit_tests
+
+  steps_linters: &steps_linters
+    steps:
+      - checkout
+      - run: *setup_conda
+      - run: *setup_requirements
+      - run: *setup_pre_commit
+      - run: *linters
+      - run: *check_legal
+
+  steps_e2e_tests: &steps_e2e_tests
+    steps:
+      - checkout
+      - run: *setup_conda
+      - run: *setup_requirements
+      - run: *e2e_tests
+
+  steps_build_docs: &steps_build_docs
+    # NOTE: requires python3.6+
+    steps:
+      - checkout
+      - run: *setup_conda
+      - run: *setup_requirements
+      - run: *build_docs
+
 jobs:
-  build_35: &DEFAULT
-     docker:
-       - image: quantumblacklabs/kedro_builder:3.5.2
-     steps:
-       - checkout
-       - run: &CONDA_SETUP
-          name: Activate conda environment
-          command: |
-            echo ". /home/circleci/miniconda/etc/profile.d/conda.sh" >> $BASH_ENV
-            echo "conda deactivate; conda activate kedro_builder" >> $BASH_ENV
+  unit_tests_35:
+    docker:
+      - image: *py35
+    <<: *steps_unit_tests
 
-       - run: &PIP_SETUP
-          name: Install PIP dependencies
-          command: |
-            # echo python version for debugging
-            echo "Python version: $(python --version 2>&1)"
+  linters_35:
+    docker:
+      - image: *py35
+    <<: *steps_linters
 
-            # Install pip setuptools
-            make install-pip-setuptools
+  e2e_tests_35:
+    docker:
+      - image: *py35
+    <<: *steps_e2e_tests
 
-            # Install requirements
-            pip install -r requirements.txt -U
+  unit_tests_36:
+    docker:
+      - image: *py36
+    <<: *steps_unit_tests
 
-            # Install test requirements
-            pip install -r test_requirements.txt -U
-       - run:
-          name: Run pylint and flake8
-          command: |
-            make lint
-       - run:
-          name: Run tests
-          command: |
-            make test
-       - run:
-          name: Run all end to end tests
-          command: |
-            make e2e-tests
-       - run:
-           name: Check docs build on Python 3.6+
-           command: |
-             if python -c "import sys; sys.exit(sys.version_info[:2] == (3, 5))" ; then
-                 make build-docs
-             fi
-       - run:
-          name: Check for legal compliance
-          command: |
-            make legal
-  build_36:
-     <<: *DEFAULT
-     docker:
-       - image: quantumblacklabs/kedro_builder:3.6
-  build_37:
-     <<: *DEFAULT
-     docker:
-       - image: quantumblacklabs/kedro_builder:3.7
+  linters_36:
+    docker:
+      - image: *py36
+    <<: *steps_linters
+
+  e2e_tests_36:
+    docker:
+      - image: *py36
+    <<: *steps_e2e_tests
+
+  docs_36:
+    docker:
+      - image: *py36
+    <<: *steps_build_docs
+
+  unit_tests_37:
+    docker:
+      - image: *py37
+    <<: *steps_unit_tests
+
+  linters_37:
+    docker:
+      - image: *py37
+    <<: *steps_linters
+
+  e2e_tests_37:
+    docker:
+      - image: *py37
+    <<: *steps_e2e_tests
+
+  docs_37:
+    docker:
+      - image: *py37
+    <<: *steps_build_docs
+
+  all_circleci_checks_succeeded:
+    docker:
+      - image: circleci/python  # any light-weight image
+
+    steps:
+      - run:
+          name: Success!
+          command: echo "All checks passed"
 
 workflows:
   version: 2
   regular:
     jobs:
-      - build_35
-      - build_36
-      - build_37
+      - unit_tests_35
+      - linters_35
+      - e2e_tests_35
+      - unit_tests_36
+      - linters_36
+      - e2e_tests_36
+      - docs_36
+      - unit_tests_37
+      - linters_37
+      - e2e_tests_37
+      - docs_37
+      - all_circleci_checks_succeeded:
+          requires:
+            - unit_tests_35
+            - linters_35
+            - e2e_tests_35
+            - unit_tests_36
+            - linters_36
+            - e2e_tests_36
+            - docs_36
+            - unit_tests_37
+            - linters_37
+            - e2e_tests_37
+            - docs_37

@@ -1,6 +1,6 @@
 ---
-name: Feature Request
-about: Suggest a feature or enhancement for this project
+name: Feature request
+about: Let us know if you have a feature request or enhancement
 title: '<Title>'
 labels: 'Issue: Feature Request'
 assignees: ''
@@ -18,9 +18,3 @@ Why is this change important to you? How would you use it? How can it benefit ot
 
 ## Possible Alternatives
 (Optional) Describe any alternative solutions or features you've considered.
-
-## Checklist
-Include labels so that we can categorise your issue:
-
-- [ ] Add a "Component" label to the issue
-- [ ] Add a "Priority" label to the issue

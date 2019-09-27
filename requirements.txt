@@ -1,15 +1,17 @@
-click==6.7
-cookiecutter==1.6.0
-pandas>=0.23.0, <0.25.0
-PyYAML>=5.1, <6.0
-tables==3.5.1
-pyarrow==0.12.0
+anyconfig>=0.9.7, <1.0
+click<8.0
+cookiecutter>=1.6.0, <2.0
+memory_profiler>=0.50.0, <1.0
+pandas>=0.23.0, <1.0
+pip-tools>=4.0.0, <5.0.0
+pyarrow>=0.12.0, <1.0.0
+python-json-logger>=0.1.9, <1.0
+PyYAML>=4.2, <6.0
+requests>=2.20.0, <3.0
+s3fs>=0.3.0, <1.0  # Needs to be at least 0.3.0 to make use of `cachable` attribute on S3FileSystem
 SQLAlchemy>=1.2.0, <2.0
-toposort==1.5
+tables>=3.4.4, <4.0
+toposort>=1.5, <2.0  # Needs to be at least 1.5 to be able to raise CircularDependencyError
 xlrd>=1.0.0, <2.0
-xlsxwriter>=1.0.7, <2.0
-anyconfig==0.9.7
-python-json-logger==0.1.9
-memory_profiler==0.54.0
-s3fs>=0.2.1, <1.0
+xlsxwriter>=1.0.0, <2.0
 matplotlib >=3.0.3, <4.0

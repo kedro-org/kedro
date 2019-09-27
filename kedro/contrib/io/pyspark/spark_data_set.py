@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -36,10 +36,11 @@ from typing import Any, Dict, Optional
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.utils import AnalysisException
 
+from kedro.contrib.io import DefaultArgumentsMixIn
 from kedro.io import AbstractDataSet
 
 
-class SparkDataSet(AbstractDataSet):
+class SparkDataSet(DefaultArgumentsMixIn, AbstractDataSet):
     """``SparkDataSet`` loads and saves Spark data frames.
 
     Example:
@@ -106,8 +107,7 @@ class SparkDataSet(AbstractDataSet):
 
         self._filepath = filepath
         self._file_format = file_format
-        self._load_args = load_args if load_args is not None else {}
-        self._save_args = save_args if save_args is not None else {}
+        super().__init__(load_args, save_args)
 
     @staticmethod
     def _get_spark():

@@ -2,9 +2,8 @@
 
 This section covers how to create a pipeline from a set of `node`s, which are Python functions, as described in more detail in the [nodes and pipelines user guide](../04_user_guide/05_nodes_and_pipelines.md) documentation.
 
-1. As you draft experimental code, you can use a [Jupyter Notebook](./04_create_pipelines.md#working-with-kedro-projects-from-jupyter) or [IPython session](../06_resources/03_ipython.md#working-with-kedro-and-ipython). If you include [`docstrings`](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) to explain what your functions do, you can take advantage of [auto-generated Sphinx documentation](http://www.sphinx-doc.org/en/master/) later on. Once you are happy with how you have written your `node` functions, you will copy & paste the code into the `src/kedro_tutorial/nodes/` folder as a `.py` file.
+1. As you draft experimental code, you can use a [Jupyter Notebook](../04_user_guide/10_ipython.md#working-with-kedro-projects-from-jupyter) or [IPython session](../04_user_guide/10_ipython.md). If you include [`docstrings`](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) to explain what your functions do, you can take advantage of [auto-generated Sphinx documentation](http://www.sphinx-doc.org/en/master/) later on. Once you are happy with how you have written your `node` functions, you will run `kedro jupyter convert --all` (or `kedro jupyter convert <filepath_to_my_notebook>`) to export the code cells [tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) as `node` into the `src/kedro_tutorial/nodes/` folder as a `.py` file.
 2. When you are ready with a node you should add it to the pipeline in `src/kedro_tutorial/pipeline.py`, specifying its inputs and outputs.
-3. Finally, you will choose how you would like to run your pipeline: sequentially or in parallel, by specifying your preference in `src/kedro_tutorial/run.py`.
 
 
 ## Node basics
@@ -86,8 +85,8 @@ def create_pipeline(**kwargs):
     """
     pipeline = Pipeline(
         [
-            node(preprocess_companies, "companies", "preprocessed_companies"),
-            node(preprocess_shuttles, "shuttles", "preprocessed_shuttles"),
+            node(preprocess_companies, "companies", "preprocessed_companies", name="preprocess1"),
+            node(preprocess_shuttles, "shuttles", "preprocessed_shuttles", name="preprocess2"),
         ]
     )
 
@@ -97,14 +96,33 @@ def create_pipeline(**kwargs):
 You will also need to import `node`, and your functions by adding them to the beginning of the `pipeline.py` file:
 
 ```python
-from kedro.pipeline import node
+from kedro.pipeline import node, Pipeline
 from kedro_tutorial.nodes.data_engineering import (
     preprocess_companies,
     preprocess_shuttles,
 )
 ```
 
-Now check if your pipeline is running without any errors by typing this in your terminal window:
+As you develop your nodes, you can test too see if they work as expected. As an example, run the following command in your terminal window:
+
+```bash
+kedro run --node=preprocess1
+```
+
+You should see output similar to the below:
+
+```bash
+2019-08-19 10:44:33,112 - root - INFO - ** Kedro project kedro-tutorial
+2019-08-19 10:44:33,123 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVLocalDataSet)...
+2019-08-19 10:44:33,161 - kedro.pipeline.node - INFO - Running node: preprocess1: preprocess_companies([companies]) -> [preprocessed_companies]
+2019-08-19 10:44:33,206 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_companies` (CSVLocalDataSet)...
+2019-08-19 10:44:33,471 - kedro.runner.sequential_runner - INFO - Completed 1 out of 1 tasks
+2019-08-19 10:44:33,471 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
+
+```
+
+
+Now check if the entire pipeline is running without any errors by typing this in your terminal window:
 
 ```bash
 kedro run
@@ -115,20 +133,17 @@ You should see output similar to the following
 ```bash
 kedro run
 
-2019-04-18 19:16:15,206 - root - INFO - ** Kedro project kedro-tutorial
-2019-04-18 19:16:15,207 - anyconfig - INFO - Loading: /projects/kedro-tutorial/conf/base/logging.yml
-2019-04-18 19:16:15,221 - anyconfig - INFO - Loading: /projects/kedro-tutorial/conf/base/catalog.yml
-2019-04-18 19:16:15,225 - anyconfig - INFO - Loading: /projects/kedro-tutorial/conf/local/credentials.yml
-2019-04-18 19:16:15,227 - anyconfig - INFO - Loading: /projects/kedro-tutorial/conf/base/parameters.yml
-2019-04-18 19:16:15,233 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVLocalDataSet)...
-2019-04-18 19:16:15,365 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_companies` (MemoryDataSet)...
-2019-04-18 19:16:15,366 - kedro.runner.sequential_runner - INFO - Completed 1 out of 2 tasks
-2019-04-18 19:16:15,367 - kedro.io.data_catalog - INFO - Loading data from `shuttles` (ExcelLocalDataSet)...
-2019-04-18 19:16:35,738 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_shuttles` (MemoryDataSet)...
-2019-04-18 19:16:35,745 - kedro.runner.sequential_runner - INFO - Completed 2 out of 2 tasks
-2019-04-18 19:16:35,745 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
-2019-04-18 19:16:35,746 - kedro.io.data_catalog - INFO - Loading data from `preprocessed_shuttles` (MemoryDataSet)...
-2019-04-18 19:16:35,748 - kedro.io.data_catalog - INFO - Loading data from `preprocessed_companies` (MemoryDataSet)...
+2019-08-19 10:50:39,950 - root - INFO - ** Kedro project kedro-tutorial
+2019-08-19 10:50:39,957 - kedro.io.data_catalog - INFO - Loading data from `shuttles` (ExcelLocalDataSet)...
+2019-08-19 10:50:48,521 - kedro.pipeline.node - INFO - Running node: preprocess2: preprocess_shuttles([shuttles]) -> [preprocessed_shuttles]
+2019-08-19 10:50:48,587 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_shuttles` (CSVLocalDataSet)...
+2019-08-19 10:50:49,133 - kedro.runner.sequential_runner - INFO - Completed 1 out of 2 tasks
+2019-08-19 10:50:49,133 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVLocalDataSet)...
+2019-08-19 10:50:49,168 - kedro.pipeline.node - INFO - Running node: preprocess1: preprocess_companies([companies]) -> [preprocessed_companies]
+2019-08-19 10:50:49,212 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_companies` (CSVLocalDataSet)...
+2019-08-19 10:50:49,458 - kedro.runner.sequential_runner - INFO - Completed 2 out of 2 tasks
+2019-08-19 10:50:49,459 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
+
 ```
 
 
@@ -157,34 +172,6 @@ kedro run
 ```
 
 `CSVLocalDataSet` is chosen for its simplicity, but you can choose any other available dataset implementation class to save the data, for example, to a database table, cloud storage (like [AWS S3](https://aws.amazon.com/s3/), [Azure Blob Storage](https://azure.microsoft.com/en-gb/services/storage/blobs/), etc.) and others. If you cannot find the dataset implementation you need, you can easily implement your own as [you already did earlier](./03_set_up_data.md#creating-custom-datasets) and share it with the world by contributing back to Kedro!
-
-
-## Working with Kedro projects from Jupyter
-
-Currently, the pipeline consists of just two nodes and performs just some data pre-processing. Let's expand it by adding more nodes.
-
-When you are developing new nodes for your pipeline, you can write them as regular Python functions, but you may want to use Jupyter Notebooks for experimenting with your code before committing to a specific implementation. To take advantage of Kedro's Jupyter session, you can run this in your terminal:
-
-```bash
-kedro jupyter notebook
-```
-
-This will open a Jupyter Notebook in your browser. Navigate to `notebooks` folder and create a notebook there with a Kedro kernel. After opening the newly created notebook you can check what the data looks like by pasting this into the first cell of the notebook and selecting **Run**:
-
-```python
-df = io.load('preprocessed_shuttles')
-df.head()
-```
-
-You should be able to see the first 5 rows of the loaded dataset as follows:
-
-![](img/jupyter_notebook_ch3.png)
-
-> *Note:* 
-<br/>If you see an error message stating that `io` is undefined, you can see what went wrong by using `print(startup_error)`, where `startup_error` is available as a variable in Python. 
-<br/>If you cannot access `startup_error` please make sure you have run **`kedro`**`jupyter notebook` from the project's root directory. Running without the `kedro` command (that is, just running a `jupyter notebook`) will not load the Kedro session for you.
-<br/>When you add new datasets to your `catalog.yml` file you need to reload Kedro's session by running `%reload_kedro` in your cell.
-
 
 ## Creating a master table
 
@@ -222,9 +209,9 @@ def create_master_table(
 To create a new node to join all tables to form a master table, you need to add the three dataframes to a cell in the Jupyter notebook:
 
 ```python
-preprocessed_shuttles = io.load("preprocessed_shuttles")
-preprocessed_companies = io.load("preprocessed_companies")
-reviews = io.load("reviews")
+preprocessed_shuttles = context.catalog.load("preprocessed_shuttles")
+preprocessed_companies = context.catalog.load("preprocessed_companies")
+reviews = context.catalog.load("reviews")
 
 master = create_master_table(preprocessed_shuttles, preprocessed_companies, reviews)
 master.head()
@@ -268,23 +255,23 @@ You may want to test that all is working with your code at this point:
 ```bash
 kedro run
 
-2019-04-19 15:44:21,748 - root - INFO - ** Kedro project kedro-tutorial
-2019-04-19 15:44:21,749 - anyconfig - INFO - Loading: /projects/kedro-tutorial/conf/base/logging.yml
-2019-04-19 15:44:21,762 - anyconfig - INFO - Loading: /projects/kedro-tutorial/conf/base/catalog.yml
-2019-04-19 15:44:21,769 - anyconfig - INFO - Loading: /projects/kedro-tutorial/conf/local/credentials.yml
-2019-04-19 15:44:21,771 - anyconfig - INFO - Loading: /projects/kedro-tutorial/conf/base/parameters.yml
-2019-04-19 15:44:21,777 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVLocalDataSet)...
-2019-04-19 15:44:21,909 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_companies` (CSVLocalDataSet)...
-2019-04-19 15:44:22,224 - kedro.runner.sequential_runner - INFO - Completed 1 out of 3 tasks
-2019-04-19 15:44:22,224 - kedro.io.data_catalog - INFO - Loading data from `shuttles` (ExcelLocalDataSet)...
-2019-04-19 15:44:44,310 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_shuttles` (CSVLocalDataSet)...
-2019-04-19 15:44:44,993 - kedro.runner.sequential_runner - INFO - Completed 2 out of 3 tasks
-2019-04-19 15:44:44,994 - kedro.io.data_catalog - INFO - Loading data from `preprocessed_shuttles` (CSVLocalDataSet)...
-2019-04-19 15:44:45,132 - kedro.io.data_catalog - INFO - Loading data from `preprocessed_companies` (CSVLocalDataSet)...
-2019-04-19 15:44:45,178 - kedro.io.data_catalog - INFO - Loading data from `reviews` (CSVLocalDataSet)...
-2019-04-19 15:44:47,909 - kedro.io.data_catalog - INFO - Saving data to `master_table` (CSVLocalDataSet)...
-2019-04-19 15:45:02,448 - kedro.runner.sequential_runner - INFO - Completed 3 out of 3 tasks
-2019-04-19 15:45:02,449 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
+2019-08-19 10:55:47,534 - root - INFO - ** Kedro project kedro-tutorial
+2019-08-19 10:55:47,541 - kedro.io.data_catalog - INFO - Loading data from `shuttles` (ExcelLocalDataSet)...
+2019-08-19 10:55:55,670 - kedro.pipeline.node - INFO - Running node: preprocess2: preprocess_shuttles([shuttles]) -> [preprocessed_shuttles]
+2019-08-19 10:55:55,736 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_shuttles` (CSVLocalDataSet)...
+2019-08-19 10:55:56,284 - kedro.runner.sequential_runner - INFO - Completed 1 out of 3 tasks
+2019-08-19 10:55:56,284 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVLocalDataSet)...
+2019-08-19 10:55:56,318 - kedro.pipeline.node - INFO - Running node: preprocess1: preprocess_companies([companies]) -> [preprocessed_companies]
+2019-08-19 10:55:56,361 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_companies` (CSVLocalDataSet)...
+2019-08-19 10:55:56,610 - kedro.runner.sequential_runner - INFO - Completed 2 out of 3 tasks
+2019-08-19 10:55:56,610 - kedro.io.data_catalog - INFO - Loading data from `preprocessed_shuttles` (CSVLocalDataSet)...
+2019-08-19 10:55:56,715 - kedro.io.data_catalog - INFO - Loading data from `preprocessed_companies` (CSVLocalDataSet)...
+2019-08-19 10:55:56,750 - kedro.io.data_catalog - INFO - Loading data from `reviews` (CSVLocalDataSet)...
+2019-08-19 10:55:56,812 - kedro.pipeline.node - INFO - Running node: create_master_table([preprocessed_companies,preprocessed_shuttles,reviews]) -> [master_table]
+2019-08-19 10:55:58,679 - kedro.io.data_catalog - INFO - Saving data to `master_table` (CSVLocalDataSet)...
+2019-08-19 10:56:09,991 - kedro.runner.sequential_runner - INFO - Completed 3 out of 3 tasks
+2019-08-19 10:56:09,991 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
+
 ```
 
 
@@ -300,7 +287,7 @@ You can start by updating the dependencies in `src/requirements.txt` with the fo
 scikit-learn==0.20.2
 ```
 
-You can find out more about requirements files [here](https://pip.pypa.io/en/stable/user_guide/#requirements-files). 
+You can find out more about requirements files [here](https://pip.pypa.io/en/stable/user_guide/#requirements-files).
 
 Then, from within the project directory, run:
 
@@ -327,7 +314,7 @@ def split_data(data: pd.DataFrame, parameters: Dict) -> List:
         Args:
             data: Source data.
             parameters: Parameters defined in parameters.yml.
-            
+
         Returns:
             A list containing split data.
 
@@ -355,7 +342,7 @@ def train_model(X_train: np.ndarray, y_train: np.ndarray) -> LinearRegression:
         Args:
             X_train: Training data of independent features.
             y_train: Training data for price.
-            
+
         Returns:
             Trained model.
 
@@ -386,7 +373,40 @@ test_size: 0.2
 random_state: 3
 ```
 
-These are the parameters fed into the `DataCatalog` when the pipeline is executed (see the details in `create_catalog()` and `main()` in `src/kedro_tutorial/run.py`).
+These are the parameters fed into the `DataCatalog` when the pipeline is executed. Alternatively, the parameters specified in `parameters.yml` can also be referenced using `params:` prefix in the nodes. For example, you could pass `test_size` and `random_state` parameters as follows:
+```python
+
+def split_data(data: pd.DataFrame, test_size: str, random_state: str) -> List:
+    """
+    Arguments now accepts `test_size` and `random_state` rather than `parameters: Dict`.
+    """
+    X = data[
+        [
+            "engines",
+            "passenger_capacity",
+            "crew",
+            "d_check_complete",
+            "moon_clearance_complete",
+        ]
+    ].values
+    y = data["price"].values
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=test_size, random_state=random_state
+    )
+
+    return [X_train, X_test, y_train, y_test]
+
+# ...
+ds_pipeline = Pipeline(
+        [
+            node(
+                split_data,
+                ["master_table", "params:test_size", "params:random_state"],
+                ["X_train", "X_test", "y_train", "y_test"],
+            )
+        ]
+    )
+```
 
 Next, register the dataset, which will save the trained model, by adding the following definition to `conf/base/catalog.yml`:
 
@@ -457,39 +477,42 @@ You should see output similar to the following:
 ```bash
 kedro run
 
-2019-04-19 16:02:47,383 - root - INFO - ** Kedro project kedro-tutorial
-2019-04-19 16:02:47,385 - anyconfig - INFO - Loading: /projects/kedro-tutorial/conf/base/logging.yml
-2019-04-19 16:02:47,398 - anyconfig - INFO - Loading: /projects/kedro-tutorial/conf/base/catalog.yml
-2019-04-19 16:02:47,405 - anyconfig - INFO - Loading: /projects/kedro-tutorial/conf/local/credentials.yml
-2019-04-19 16:02:47,407 - anyconfig - INFO - Loading: /projects/kedro-tutorial/conf/base/parameters.yml
-2019-04-19 16:02:47,414 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVLocalDataSet)...
-2019-04-19 16:02:47,540 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_companies` (CSVLocalDataSet)...
-2019-04-19 16:02:47,854 - kedro.runner.sequential_runner - INFO - Completed 1 out of 6 tasks
-2019-04-19 16:02:47,854 - kedro.io.data_catalog - INFO - Loading data from `shuttles` (ExcelLocalDataSet)...
-2019-04-19 16:03:10,498 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_shuttles` (CSVLocalDataSet)...
-2019-04-19 16:03:11,163 - kedro.runner.sequential_runner - INFO - Completed 2 out of 6 tasks
-2019-04-19 16:03:11,163 - kedro.io.data_catalog - INFO - Loading data from `preprocessed_shuttles` (CSVLocalDataSet)...
-2019-04-19 16:03:11,307 - kedro.io.data_catalog - INFO - Loading data from `preprocessed_companies` (CSVLocalDataSet)...
-2019-04-19 16:03:11,355 - kedro.io.data_catalog - INFO - Loading data from `reviews` (CSVLocalDataSet)...
-2019-04-19 16:03:14,627 - kedro.io.data_catalog - INFO - Saving data to `master_table` (CSVLocalDataSet)...
-2019-04-19 16:03:29,827 - kedro.runner.sequential_runner - INFO - Completed 3 out of 6 tasks
-2019-04-19 16:03:29,827 - kedro.io.data_catalog - INFO - Loading data from `master_table` (CSVLocalDataSet)...
-2019-04-19 16:03:32,491 - kedro.io.data_catalog - INFO - Loading data from `parameters` (MemoryDataSet)...
-2019-04-19 16:03:32,950 - kedro.io.data_catalog - INFO - Saving data to `y_test` (MemoryDataSet)...
-2019-04-19 16:03:32,952 - kedro.io.data_catalog - INFO - Saving data to `y_train` (MemoryDataSet)...
-2019-04-19 16:03:32,953 - kedro.io.data_catalog - INFO - Saving data to `X_train` (MemoryDataSet)...
-2019-04-19 16:03:32,993 - kedro.io.data_catalog - INFO - Saving data to `X_test` (MemoryDataSet)...
-2019-04-19 16:03:33,062 - kedro.runner.sequential_runner - INFO - Completed 4 out of 6 tasks
-2019-04-19 16:03:33,062 - kedro.io.data_catalog - INFO - Loading data from `X_train` (MemoryDataSet)...
-2019-04-19 16:03:33,134 - kedro.io.data_catalog - INFO - Loading data from `y_train` (MemoryDataSet)...
-2019-04-19 16:03:33,399 - kedro.io.data_catalog - INFO - Saving data to `regressor` (PickleLocalDataSet)...
-2019-04-19 16:03:33,469 - kedro.runner.sequential_runner - INFO - Completed 5 out of 6 tasks
-2019-04-19 16:03:33,469 - kedro.io.data_catalog - INFO - Loading data from `regressor` (PickleLocalDataSet)...
-2019-04-19 16:03:33,470 - kedro.io.data_catalog - INFO - Loading data from `X_test` (MemoryDataSet)...
-2019-04-19 16:03:33,487 - kedro.io.data_catalog - INFO - Loading data from `y_test` (MemoryDataSet)...
-2019-04-19 16:03:33,538 - kedro_tutorial.nodes.price_prediction - INFO - Model has a coefficient R^2 of 0.456.
-2019-04-19 16:03:33,573 - kedro.runner.sequential_runner - INFO - Completed 6 out of 6 tasks
-2019-04-19 16:03:33,573 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
+2019-08-19 10:51:46,501 - root - INFO - ** Kedro project kedro-tutorial
+2019-08-19 10:51:46,510 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVLocalDataSet)...
+2019-08-19 10:51:46,547 - kedro.pipeline.node - INFO - Running node: preprocess1: preprocess_companies([companies]) -> [preprocessed_companies]
+2019-08-19 10:51:46,597 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_companies` (CSVLocalDataSet)...
+2019-08-19 10:51:46,906 - kedro.runner.sequential_runner - INFO - Completed 1 out of 6 tasks
+2019-08-19 10:51:46,906 - kedro.io.data_catalog - INFO - Loading data from `shuttles` (ExcelLocalDataSet)...
+2019-08-19 10:51:55,324 - kedro.pipeline.node - INFO - Running node: preprocess2: preprocess_shuttles([shuttles]) -> [preprocessed_shuttles]
+2019-08-19 10:51:55,389 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_shuttles` (CSVLocalDataSet)...
+2019-08-19 10:51:55,932 - kedro.runner.sequential_runner - INFO - Completed 2 out of 6 tasks
+2019-08-19 10:51:55,932 - kedro.io.data_catalog - INFO - Loading data from `preprocessed_shuttles` (CSVLocalDataSet)...
+2019-08-19 10:51:56,042 - kedro.io.data_catalog - INFO - Loading data from `preprocessed_companies` (CSVLocalDataSet)...
+2019-08-19 10:51:56,078 - kedro.io.data_catalog - INFO - Loading data from `reviews` (CSVLocalDataSet)...
+2019-08-19 10:51:56,139 - kedro.pipeline.node - INFO - Running node: create_master_table([preprocessed_companies,preprocessed_shuttles,reviews]) -> [master_table]
+2019-08-19 10:51:58,037 - kedro.io.data_catalog - INFO - Saving data to `master_table` (CSVLocalDataSet)...
+2019-08-19 10:52:09,133 - kedro.runner.sequential_runner - INFO - Completed 3 out of 6 tasks
+2019-08-19 10:52:09,133 - kedro.io.data_catalog - INFO - Loading data from `master_table` (CSVLocalDataSet)...
+2019-08-19 10:52:10,941 - kedro.io.data_catalog - INFO - Loading data from `parameters` (MemoryDataSet)...
+2019-08-19 10:52:10,941 - kedro.pipeline.node - INFO - Running node: split_data([master_table,parameters]) -> [X_test,X_train,y_test,y_train]
+2019-08-19 10:52:11,343 - kedro.io.data_catalog - INFO - Saving data to `X_train` (MemoryDataSet)...
+2019-08-19 10:52:11,372 - kedro.io.data_catalog - INFO - Saving data to `X_test` (MemoryDataSet)...
+2019-08-19 10:52:11,380 - kedro.io.data_catalog - INFO - Saving data to `y_train` (MemoryDataSet)...
+2019-08-19 10:52:11,381 - kedro.io.data_catalog - INFO - Saving data to `y_test` (MemoryDataSet)...
+2019-08-19 10:52:11,443 - kedro.runner.sequential_runner - INFO - Completed 4 out of 6 tasks
+2019-08-19 10:52:11,443 - kedro.io.data_catalog - INFO - Loading data from `X_train` (MemoryDataSet)...
+2019-08-19 10:52:11,472 - kedro.io.data_catalog - INFO - Loading data from `y_train` (MemoryDataSet)...
+2019-08-19 10:52:11,474 - kedro.pipeline.node - INFO - Running node: train_model([X_train,y_train]) -> [regressor]
+2019-08-19 10:52:11,704 - kedro.io.data_catalog - INFO - Saving data to `regressor` (PickleLocalDataSet)...
+2019-08-19 10:52:11,776 - kedro.runner.sequential_runner - INFO - Completed 5 out of 6 tasks
+2019-08-19 10:52:11,776 - kedro.io.data_catalog - INFO - Loading data from `regressor` (PickleLocalDataSet)...
+2019-08-19 10:52:11,776 - kedro.io.data_catalog - INFO - Loading data from `X_test` (MemoryDataSet)...
+2019-08-19 10:52:11,784 - kedro.io.data_catalog - INFO - Loading data from `y_test` (MemoryDataSet)...
+2019-08-19 10:52:11,785 - kedro.pipeline.node - INFO - Running node: evaluate_model([X_test,regressor,y_test]) -> None
+2019-08-19 10:52:11,830 - kedro_tutorial.nodes.price_prediction - INFO - Model has a coefficient R^2 of 0.456.
+2019-08-19 10:52:11,869 - kedro.runner.sequential_runner - INFO - Completed 6 out of 6 tasks
+2019-08-19 10:52:11,869 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
+
 ```
 
 The `de_pipeline` will preprocess the data, and `ds_pipeline` will then create features, train and evaluate the model.
@@ -543,8 +566,6 @@ def create_pipeline(**kwargs):
     return de_pipeline + ds_pipeline
 ```
 
-Should you need to, you can add more than one tag to the pipeline by adding `name=['tag1', 'tag2']`.
-
 To run a partial pipeline:
 
 ```bash
@@ -567,9 +588,9 @@ kedro run --tag=ds --tag=de
 
 ```python
 node(
-    train_model, 
-    ["X_train", "y_train"], 
-    "regressor", 
+    train_model,
+    ["X_train", "y_train"],
+    "regressor",
     tags=["my-regressor-node"],
 )
 ```
@@ -598,7 +619,7 @@ def log_running_time(func: Callable) -> Callable:
 
         Args:
             func: Function to be executed.
-            
+
         Returns:
             Decorator for logging the running time.
 
@@ -700,17 +721,17 @@ Another built-in decorator is `kedro.pipeline.decorators.mem_profile`, which wil
 
 ## Kedro runners
 
-Having specified the data catalog and the pipeline, you are now ready to run the pipeline. There are two different runners you can specify:  
+Having specified the data catalog and the pipeline, you are now ready to run the pipeline. There are two different runners you can specify:
 
 * `SequentialRunner` - runs your nodes sequentially; once a node has completed its task then the next one starts.
 * `ParallelRunner` - runs your nodes in parallel; independent nodes are able to run at the same time, allowing you to take advantage of multiple CPU cores.
 
-By default, `src/kedro_tutorial/run.py` uses a `SequentialRunner`, which is instantiated when you execute `kedro run` from the command line. Switching to use `ParallelRunner` is as simple as providing an additional flag when running the pipeline from the command line as follows:
+By default, Kedro uses a `SequentialRunner`, which is instantiated when you execute `kedro run` from the command line. Switching to use `ParallelRunner` is as simple as providing an additional flag when running the pipeline from the command line as follows:
 
 ```bash
 kedro run --parallel
 ```
 
-`ParallelRunner` executes the pipeline nodes in parallel, and is more efficient when there are independent branches in your pipeline. 
+`ParallelRunner` executes the pipeline nodes in parallel, and is more efficient when there are independent branches in your pipeline.
 
 > *Note:* `ParallelRunner` performs task parallelisation, which is different from data parallelisation as seen in PySpark.

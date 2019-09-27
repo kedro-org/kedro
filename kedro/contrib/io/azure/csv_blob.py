@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -35,10 +35,11 @@ from typing import Any, Dict, Optional
 import pandas as pd
 from azure.storage.blob import BlockBlobService
 
+from kedro.contrib.io import DefaultArgumentsMixIn
 from kedro.io import AbstractDataSet
 
 
-class CSVBlobDataSet(AbstractDataSet):
+class CSVBlobDataSet(DefaultArgumentsMixIn, AbstractDataSet):
     """``CSVBlobDataSet`` loads and saves csv files in Microsoft's Azure
     blob storage. It uses azure storage SDK to read and write in azure and
     pandas to handle the csv file locally.
@@ -52,7 +53,7 @@ class CSVBlobDataSet(AbstractDataSet):
         >>>                      'col3': [5, 6]})
         >>>
         >>> data_set = CSVBlobDataSet(filepath="test.csv",
-        >>>                            bucket_name="test_bucket",
+        >>>                            container_name="test_bucket",
         >>>                            load_args=None,
         >>>                            save_args={"index": False})
         >>> data_set.save(data)
@@ -60,6 +61,8 @@ class CSVBlobDataSet(AbstractDataSet):
         >>>
         >>> assert data.equals(reloaded)
     """
+
+    DEFAULT_SAVE_ARGS = {"index": False}
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
@@ -106,16 +109,12 @@ class CSVBlobDataSet(AbstractDataSet):
                 All defaults are preserved, but "index", which is set to False.
 
         """
-        default_save_args = {"index": False}
-        self._save_args = (
-            {**default_save_args, **save_args} if save_args else default_save_args
-        )
-        self._load_args = load_args if load_args else {}
         self._filepath = filepath
         self._container_name = container_name
         self._credentials = credentials if credentials else {}
         self._blob_to_text_args = blob_to_text_args if blob_to_text_args else {}
         self._blob_from_text_args = blob_from_text_args if blob_from_text_args else {}
+        super().__init__(load_args, save_args)
 
     def _load(self) -> pd.DataFrame:
         blob_service = BlockBlobService(**self._credentials)

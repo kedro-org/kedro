@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -28,30 +28,9 @@
 #
 Feature: Activate_nbstripout target in new project
 
-  Background:
+  Scenario: Check nbstripout git post commit hook functionality
     Given I have prepared a config file with example code
     And I have run a non-interactive kedro new
-
-  Scenario: Run activate-nbstripout target without nbstripout installed
-    Given I have initialized a git repository
-    And the python package "nbstripout" has been uninstalled
-    When I execute the kedro command "activate-nbstripout"
-    Then I should get an error exit code
-    And I should get an error message including "nbstripout is not installed."
-
-  Scenario: Run activate-nbstripout target without git initialisation
-    Given I have executed the kedro command "install"
-    When I execute the kedro command "activate-nbstripout"
-    Then I should get an error exit code
-    And I should get an error message including "Not a git repository. Run `git init` first."
-
-  Scenario: Run activate-nbstripout target with nbstripout installed and git initialized
-    Given I have executed the kedro command "install"
-    And I have initialized a git repository
-    When I execute the kedro command "activate-nbstripout"
-    Then I should get a successful exit code
-
-  Scenario: Check nbstripout git post commit hook functionality
     Given I have executed the kedro command "install"
     And I have added a test jupyter notebook
     And I have initialized a git repository

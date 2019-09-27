@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -42,38 +42,17 @@ import pytest
 from kedro.config import ConfigLoader
 from kedro.io import DataCatalog
 
-from {{ cookiecutter.python_package }}.run import (
-    CONF_ROOT,
-    DEFAULT_RUN_ENV,
-    create_catalog,
-    get_config,
-    main,
-)
+from {{ cookiecutter.python_package }}.run import ProjectContext
 
 
-def test_main_wrong_cwd(mocker):
-    cwd = mocker.MagicMock(name="mocked", __str__=mocker.Mock(return_value="invalid/"))
-    mocker.patch.object(Path, "cwd", return_value=cwd)
-    with pytest.raises(
-        ValueError,
-        match=r"Given configuration path either does not "
-        r"exist or is not a valid directory: invalid.*",
-    ):
-        main()
+@pytest.fixture
+def project_context():
+    return ProjectContext(str(Path.cwd()))
 
 
-def test_get_config():
-    project_dir = abspath(curdir)
-    local_env = join(project_dir, CONF_ROOT, DEFAULT_RUN_ENV)
+class TestProjectContext:
+    def test_project_name(self, project_context):
+        assert project_context.project_name == "{{ cookiecutter.project_name }}"
 
-    conf = get_config(project_dir, env=None)
-
-    assert isinstance(conf, ConfigLoader)
-    assert local_env in conf.conf_paths
-
-
-def test_create_catalog():
-    project_dir = abspath(curdir)
-    conf = get_config(project_dir)
-    catalog = create_catalog(conf)
-    assert isinstance(catalog, DataCatalog)
+    def test_project_version(self, project_context):
+        assert project_context.project_version == "{{ cookiecutter.kedro_version }}"

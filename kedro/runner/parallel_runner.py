@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -29,11 +29,13 @@
 be used to run the ``Pipeline`` in parallel groups formed by toposort.
 """
 
+from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
-from multiprocessing.managers import BaseManager, BaseProxy
+from itertools import chain
+from multiprocessing.managers import BaseProxy, SyncManager  # type: ignore
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
-from typing import Iterable
+from typing import Iterable, Set
 
 from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
 from kedro.pipeline import Pipeline
@@ -41,7 +43,7 @@ from kedro.pipeline.node import Node
 from kedro.runner.runner import AbstractRunner, run_node
 
 
-class ParallelRunnerManager(BaseManager):
+class ParallelRunnerManager(SyncManager):
     """``ParallelRunnerManager`` is used to create shared ``MemoryDataSet``
     objects as default data sets in a pipeline.
     """
@@ -49,7 +51,9 @@ class ParallelRunnerManager(BaseManager):
     pass
 
 
-ParallelRunnerManager.register("MemoryDataSet", MemoryDataSet)
+ParallelRunnerManager.register(  # pylint: disable=no-member
+    "MemoryDataSet", MemoryDataSet
+)
 
 
 class ParallelRunner(AbstractRunner):
@@ -63,14 +67,11 @@ class ParallelRunner(AbstractRunner):
         self._manager = ParallelRunnerManager()
         self._manager.start()
 
-    def create_default_data_set(self, ds_name: str, max_loads: int) -> AbstractDataSet:
+    def create_default_data_set(self, ds_name: str) -> AbstractDataSet:
         """Factory method for creating the default data set for the runner.
 
         Args:
             ds_name: Name of the missing data set
-            max_loads: Maximum number of times ``load`` method of the
-                default data set is allowed to be invoked. Any number of
-                calls is allowed if the argument is not set.
 
         Returns:
             An instance of an implementation of AbstractDataSet to be used
@@ -78,7 +79,7 @@ class ParallelRunner(AbstractRunner):
 
         """
         # pylint: disable=no-member
-        return self._manager.MemoryDataSet(max_loads=max_loads)
+        return self._manager.MemoryDataSet()
 
     @classmethod
     def _validate_nodes(cls, nodes: Iterable[Node]):
@@ -142,7 +143,9 @@ class ParallelRunner(AbstractRunner):
                 "MemoryDataSets".format(memory_data_sets)
             )
 
-    def _run(self, pipeline: Pipeline, catalog: DataCatalog) -> None:
+    def _run(  # pylint: disable=too-many-locals,useless-suppression
+        self, pipeline: Pipeline, catalog: DataCatalog
+    ) -> None:
         """The abstract interface for running pipelines.
 
         Args:
@@ -152,24 +155,49 @@ class ParallelRunner(AbstractRunner):
         Raises:
             AttributeError: when the provided pipeline is not suitable for
                 parallel execution.
+            Exception: in case of any downstream node failure.
 
         """
-
+        nodes = pipeline.nodes
         self._validate_catalog(catalog, pipeline)
-        self._validate_nodes(pipeline.nodes)
+        self._validate_nodes(nodes)
 
-        done_inputs = pipeline.inputs()
-        todo_nodes = set(pipeline.nodes)
+        load_counts = Counter(chain.from_iterable(n.inputs for n in nodes))
+        node_dependencies = pipeline.node_dependencies
+        todo_nodes = set(node_dependencies.keys())
+        done_nodes = set()  # type: Set[Node]
         futures = set()
+        done = None
         with ProcessPoolExecutor() as pool:
             while True:
-                ready = {n for n in todo_nodes if set(n.inputs) <= done_inputs}
+                ready = {n for n in todo_nodes if node_dependencies[n] <= done_nodes}
                 todo_nodes -= ready
                 for node in ready:
                     futures.add(pool.submit(run_node, node, catalog))
                 if not futures:
-                    assert not todo_nodes
+                    assert not todo_nodes, (todo_nodes, done_nodes, ready, done)
                     break
                 done, futures = wait(futures, return_when=FIRST_COMPLETED)
                 for future in done:
-                    done_inputs.update(future.result().outputs)
+                    try:
+                        node = future.result()
+                    except Exception:
+                        self._suggest_resume_scenario(pipeline, done_nodes)
+                        raise
+                    done_nodes.add(node)
+
+                    # decrement load counts and release any data sets we've finished with
+                    # this is particularly important for the shared datasets we create above
+                    for data_set in node.inputs:
+                        load_counts[data_set] -= 1
+                        if (
+                            load_counts[data_set] < 1
+                            and data_set not in pipeline.inputs()
+                        ):
+                            catalog.release(data_set)
+                    for data_set in node.outputs:
+                        if (
+                            load_counts[data_set] < 1
+                            and data_set not in pipeline.outputs()
+                        ):
+                            catalog.release(data_set)

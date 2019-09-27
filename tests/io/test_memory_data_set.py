@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -57,6 +57,11 @@ def dummy_numpy_array():
     return np.array([[1, 4, 5], [2, 5, 6]])
 
 
+@pytest.fixture
+def dummy_dataframe():
+    return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+
+
 @pytest.fixture(params=["dummy_dataframe", "dummy_numpy_array"])
 def input_data(request):
     return request.getfixturevalue(request.param)
@@ -70,16 +75,6 @@ def new_data():
 @pytest.fixture
 def memory_data_set(input_data):
     return MemoryDataSet(data=input_data)
-
-
-@pytest.fixture
-def max_loads(request):
-    return request.param
-
-
-@pytest.fixture
-def memory_data_set_loads(input_data, max_loads):
-    return MemoryDataSet(data=input_data, max_loads=max_loads)
 
 
 class TestMemoryDataSet:
@@ -158,41 +153,3 @@ class TestMemoryDataSet:
 
         data_set.save(new_data)
         assert data_set.exists()
-
-
-class TestMemoryDataSetMaxLoads:
-    @pytest.mark.parametrize("max_loads", [None, -1, 0, 1, 2], indirect=True)
-    def test_max_loads(self, memory_data_set_loads, input_data, max_loads):
-        """Test that the first load succeeds regardless of the maximum number
-        of loads specified"""
-        loaded_data = memory_data_set_loads.load()
-        assert _check_equals(loaded_data, input_data)
-
-    @pytest.mark.parametrize("max_loads", [1, 2], indirect=True)
-    def test_max_loads_exceeded(self, memory_data_set_loads, max_loads):
-        """Check the error when the maximum number of data set loads
-        is exceeded"""
-        pattern = (
-            r"Maximum number of MemoryDataSet loads exceeded the "
-            r"threshold of {}\. The data set was cleared and holds "
-            r"no data now\.".format(max_loads)
-        )
-        with pytest.raises(DataSetError, match=pattern):
-            for _ in range(max_loads + 1):
-                memory_data_set_loads.load()
-
-    @pytest.mark.parametrize("max_loads", [1], indirect=True)
-    def test_max_loads_reset(self, memory_data_set_loads, input_data, max_loads):
-        """Test that the maximum number of loads is reset after
-        save operation"""
-        memory_data_set_loads.load()
-        pattern = (
-            r"Maximum number of MemoryDataSet loads exceeded the "
-            r"threshold of 1\. The data set was cleared and holds "
-            r"no data now\."
-        )
-        with pytest.raises(DataSetError, match=pattern):
-            memory_data_set_loads.load()
-        memory_data_set_loads.save(input_data)
-        loaded_data = memory_data_set_loads.load()
-        assert _check_equals(loaded_data, input_data)

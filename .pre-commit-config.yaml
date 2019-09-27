@@ -1,0 +1,119 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+
+default_stages: [commit, manual]
+
+repos:
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v2.2.3
+      hooks:
+          - id: trailing-whitespace
+            stages: [commit, manual]
+          - id: end-of-file-fixer
+            stages: [commit, manual]
+          - id: check-yaml # Checks yaml files for parseable syntax.
+            exclude: "^kedro/template/"
+          - id: check-json # Checks json files for parseable syntax.
+          - id: check-added-large-files
+          - id: check-case-conflict # Check for files that would conflict in case-insensitive filesystems
+          - id: check-merge-conflict # Check for files that contain merge conflict strings.
+          - id: debug-statements # Check for debugger imports and py37+ `breakpoint()` calls in python source.
+            exclude: "^kedro/template/"
+          - id: detect-private-key # Detects the presence of private keys
+          - id: requirements-txt-fixer # Sorts entries in requirements.txt
+          - id: flake8
+            exclude: "^kedro/template/"
+
+    - repo: https://github.com/pre-commit/mirrors-isort
+      rev: v4.3.21
+      hooks:
+          - id: isort
+            exclude: "^kedro/template/"
+
+    - repo: https://github.com/pre-commit/mirrors-mypy
+      rev: v0.720
+      hooks:
+          - id: mypy
+            args: [--allow-redefinition, --ignore-missing-imports]
+            exclude: |
+                (?x)(
+                  ^kedro/template/|
+                  ^docs/
+                )
+
+    - repo: local
+      hooks:
+          # It's impossible to specify per-directory configuration, so we just run it many times.
+          # https://github.com/PyCQA/pylint/issues/618
+          # The first set of pylint checks if for local pre-commit, it only runs on the files changed.
+          - id: pylint-quick-kedro
+            name: "Quick PyLint on kedro/*"
+            language: system
+            types: [file, python]
+            files: ^kedro/
+            exclude: ^kedro/template/
+            entry: pylint --disable=unnecessary-pass
+            stages: [commit]
+          - id: pylint-quick-features
+            name: "Quick PyLint on features/*"
+            language: system
+            types: [file, python]
+            files: ^features/
+            entry: pylint --disable=missing-docstring,no-name-in-module
+            stages: [commit]
+          - id: pylint-quick-extras
+            name: "Quick PyLint on extras/*"
+            language: system
+            types: [file, python]
+            files: ^extras/
+            entry: pylint
+            stages: [commit]
+          - id: pylint-quick-tests
+            name: "Quick PyLint on tests/*"
+            language: system
+            types: [file, python]
+            files: ^tests/
+            entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name
+            stages: [commit]
+
+          # The same pylint checks, but running on all files. It's for manual run with `make lint`
+          - id: pylint-kedro
+            name: "PyLint on kedro/*"
+            language: system
+            pass_filenames: false
+            stages: [manual]
+            entry: pylint --disable=unnecessary-pass kedro
+          - id: pylint-features
+            name: "PyLint on features/*"
+            language: system
+            pass_filenames: false
+            stages: [manual]
+            entry: pylint --disable=missing-docstring,no-name-in-module features
+          - id: pylint-extras
+            name: "PyLint on extras/*"
+            language: system
+            pass_filenames: false
+            stages: [manual]
+            entry: pylint extras
+          - id: pylint-tests
+            name: "PyLint on tests/*"
+            language: system
+            pass_filenames: false
+            stages: [manual]
+            entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name tests
+          # We need to make some exceptions for 3.5, that's why it's a custom runner.
+          - id: black
+            name: "Black"
+            language: system
+            pass_filenames: false
+            entry: python -m tools.min_version 3.6 "pip install black" "black kedro extras features tests"
+          - id: legal
+            name: "Licence check"
+            language: system
+            pass_filenames: false
+            entry: make legal
+          - id: imports
+            name: "Import Linter"
+            language: system
+            pass_filenames: false
+            entry: python -m tools.min_version 3.6 "pip install import-linter" lint-imports

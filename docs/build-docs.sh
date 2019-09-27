@@ -16,8 +16,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -30,16 +30,17 @@
 
 set -e
 
-rm -rf kedro/html
 pip install -e ".[docs]"
 pip install -r test_requirements.txt
 python -m ipykernel install --user --name=kedro --display-name=Kedro
-rm -rf docs/tmp-build-artifacts
-cp -a docs/source docs/tmp-build-artifacts
-mv docs/tmp-build-artifacts/05_api_docs/* docs/tmp-build-artifacts/
-rm -rf docs/tmp-build-artifacts/05_api_docs/
+
+# Move some files around. We need a separate build directory, which would
+# have all the files, build scripts would shuffle the files,
+# we don't want that happening on the actual code locally.
+# When running on ReadTheDocs, sphinx-build would run directly on the original files,
+# but we don't care about the code state there.
 rm -rf docs/build
-mkdir -p docs/build/html/_static
-cp -r docs/source/css docs/build/html/_static
-sphinx-build -c docs/ -W -E -a -j auto docs/tmp-build-artifacts docs/build/html
-rm -rf docs/tmp-build-artifacts
+mkdir docs/build/
+cp -r docs/_templates docs/conf.py docs/*.svg docs/*.json  docs/build/
+
+sphinx-build -c docs/ -WETa -j auto -D language=en docs/build/ docs/build/html

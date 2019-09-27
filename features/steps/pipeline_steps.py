@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -215,9 +215,10 @@ def node_tagged_with(context, node_name, tags):
     sys.path.append(
         str(context.root_project_dir / "src" / context.project_name.replace("-", "_"))
     )
-    import pipeline  # pylint: disable=import-error
+    import pipeline  # pylint: disable=import-error,useless-suppression
 
-    context.project_pipeline = pipeline.create_pipeline()
+    # pylint: disable=no-member
+    context.project_pipeline = pipeline.create_pipelines()["__default__"]
     node_objs = [n for n in context.project_pipeline.nodes if n.name == node_name]
     assert node_objs
     assert set(tags) == node_objs[0].tags

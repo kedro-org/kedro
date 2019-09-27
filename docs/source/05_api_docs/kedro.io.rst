@@ -22,8 +22,10 @@ Data Sets
     :template: autosummary/class.rst
 
     kedro.io.CSVLocalDataSet
+    kedro.io.CSVHTTPDataSet
     kedro.io.CSVS3DataSet
     kedro.io.HDFLocalDataSet
+    kedro.io.HDFS3DataSet
     kedro.io.JSONLocalDataSet
     kedro.io.LambdaDataSet
     kedro.io.MemoryDataSet
@@ -57,6 +59,6 @@ Base Classes
     :template: autosummary/class.rst
 
     kedro.io.AbstractDataSet
-    kedro.io.FilepathVersionMixIn
-    kedro.io.S3PathVersionMixIn
+    kedro.io.AbstractVersionedDataSet
+    kedro.io.AbstractTransformer
     kedro.io.Version

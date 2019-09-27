@@ -1,6 +1,6 @@
 # Nodes and pipelines
 
-> *Note:* This documentation is based on `Kedro 0.14.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 In this section we introduce pipelines and nodes.
 
 Relevant API documentation:
@@ -104,6 +104,17 @@ There is a special syntax for describing function inputs and outputs. This allow
 ```
 
 Any combinations of the above are possible, except nodes of the form `node(f, None, None)` (at least a single input or output needs to be provided).
+
+## Tagging nodes
+
+To tag a node, you can simply specify the `tag` argument, as follows:
+
+```python
+node(func=add, inputs=["a", "b"], outputs="sum", name="adding_a_and_b", tag="node_tag")
+```
+
+Moreover, you can [tag all nodes in a ``Pipeline``](./05_nodes_and_pipelines.md#tagging-pipeline-nodes).
+
 
 ## Running nodes
 
@@ -258,6 +269,16 @@ variance node
 Outputs: v
 ##################################
 ```
+
+### Tagging pipeline nodes
+
+You can specify a `name` for your ``Pipeline``, which will be used to tag all of the pipeline's nodes.
+
+```python
+pipeline = Pipeline([node(..., name="node1"), node(..., name="node2", tag="node_tag")], name="pipeline_tag")
+```
+
+Node `node1` will only be tagged with `pipeline_tag`, while `node2` will have both `node_tag` and `pipeline_tag`.
 
 ### Merging pipelines
 
@@ -426,13 +447,11 @@ kedro run
 `Output`:
 
 ```console
+
 2019-04-26 17:19:01,341 - root - INFO - ** Kedro project new-kedro-project
-2019-04-26 17:19:01,343 - anyconfig - INFO - Loading: /private/tmp/new-kedro-project/conf/base/logging.yml
-2019-04-26 17:19:01,349 - anyconfig - INFO - Loading: /private/tmp/new-kedro-project/conf/base/catalog.yml
-2019-04-26 17:19:01,351 - anyconfig - INFO - Loading: /private/tmp/new-kedro-project/conf/base/credentials.yml
-2019-04-26 17:19:01,352 - anyconfig - INFO - Loading: /private/tmp/new-kedro-project/conf/base/parameters.yml
 2019-04-26 17:19:01,360 - kedro.io.data_catalog - INFO - Loading data from `example_iris_data` (CSVLocalDataSet)...
 2019-04-26 17:19:01,387 - kedro.io.data_catalog - INFO - Loading data from `parameters` (MemoryDataSet)...
+2019-04-26 17:19:01,387 - kedro.pipeline.node - INFO - Running node: split_data([example_iris_data,params:example_test_data_ratio]) -> [example_test_x,example_test_y,example_train_x,example_train_y]
 2019-04-26 17:19:01,437 - kedro.io.data_catalog - INFO - Saving data to `example_test_x` (MemoryDataSet)...
 2019-04-26 17:19:01,439 - kedro.io.data_catalog - INFO - Saving data to `example_train_y` (MemoryDataSet)...
 2019-04-26 17:19:01,443 - kedro.io.data_catalog - INFO - Saving data to `example_train_x` (MemoryDataSet)...
@@ -441,14 +460,17 @@ kedro run
 2019-04-26 17:19:01,448 - kedro.io.data_catalog - INFO - Loading data from `example_train_x` (MemoryDataSet)...
 2019-04-26 17:19:01,454 - kedro.io.data_catalog - INFO - Loading data from `example_train_y` (MemoryDataSet)...
 2019-04-26 17:19:01,461 - kedro.io.data_catalog - INFO - Loading data from `parameters` (MemoryDataSet)...
+2019-04-26 17:19:01,461 - kedro.pipeline.node - INFO - Running node: train_model([example_train_x,example_train_y,parameters]) -> [example_model]
 2019-04-26 17:19:01,887 - kedro.io.data_catalog - INFO - Saving data to `example_model` (MemoryDataSet)...
 2019-04-26 17:19:01,887 - kedro.runner.sequential_runner - INFO - Completed 2 out of 4 tasks
 2019-04-26 17:19:01,888 - kedro.io.data_catalog - INFO - Loading data from `example_test_x` (MemoryDataSet)...
 2019-04-26 17:19:01,888 - kedro.io.data_catalog - INFO - Loading data from `example_model` (MemoryDataSet)...
+2019-04-26 17:19:01,888 - kedro.pipeline.node - INFO - Running node: predict([example_model,example_test_x]) -> [example_predictions]
 2019-04-26 17:19:01,890 - kedro.io.data_catalog - INFO - Saving data to `example_predictions` (MemoryDataSet)...
 2019-04-26 17:19:01,891 - kedro.runner.sequential_runner - INFO - Completed 3 out of 4 tasks
 2019-04-26 17:19:01,891 - kedro.io.data_catalog - INFO - Loading data from `example_predictions` (MemoryDataSet)...
 2019-04-26 17:19:01,891 - kedro.io.data_catalog - INFO - Loading data from `example_test_y` (MemoryDataSet)...
+2019-04-26 17:19:01,891 - kedro.pipeline.node - INFO - Running node: report_accuracy([example_predictions,example_test_y]) -> None
 2019-04-26 17:19:01,892 - new_kedro_project.nodes.example - INFO - Model accuracy on test set: 96.67%
 2019-04-26 17:19:01,892 - kedro.runner.sequential_runner - INFO - Completed 4 out of 4 tasks
 2019-04-26 17:19:01,892 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
@@ -475,13 +497,11 @@ kedro run --runner=ParallelRunner
 `Output`:
 
 ```console
+
 2019-04-26 17:20:45,012 - root - INFO - ** Kedro project new-kedro-project
-2019-04-26 17:20:45,012 - anyconfig - INFO - Loading: /private/tmp/new-kedro-project/conf/base/logging.yml
-2019-04-26 17:20:45,014 - anyconfig - INFO - Loading: /private/tmp/new-kedro-project/conf/base/catalog.yml
-2019-04-26 17:20:45,016 - anyconfig - INFO - Loading: /private/tmp/new-kedro-project/conf/base/credentials.yml
-2019-04-26 17:20:45,016 - anyconfig - INFO - Loading: /private/tmp/new-kedro-project/conf/base/parameters.yml
 2019-04-26 17:20:45,081 - kedro.io.data_catalog - INFO - Loading data from `example_iris_data` (CSVLocalDataSet)...
 2019-04-26 17:20:45,099 - kedro.io.data_catalog - INFO - Loading data from `parameters` (MemoryDataSet)...
+2019-04-26 17:20:45,099 - kedro.pipeline.node - INFO - Running node: split_data([example_iris_data,params:example_test_data_ratio]) -> [example_test_x,example_test_y,example_train_x,example_train_y]
 2019-04-26 17:20:45,115 - kedro.io.data_catalog - INFO - Saving data to `example_test_x` (AutoProxy[MemoryDataSet])...
 2019-04-26 17:20:45,121 - kedro.io.data_catalog - INFO - Saving data to `example_test_y` (AutoProxy[MemoryDataSet])...
 2019-04-26 17:20:45,123 - kedro.io.data_catalog - INFO - Saving data to `example_train_x` (AutoProxy[MemoryDataSet])...
@@ -489,17 +509,21 @@ kedro run --runner=ParallelRunner
 2019-04-26 17:20:45,135 - kedro.io.data_catalog - INFO - Loading data from `example_train_x` (AutoProxy[MemoryDataSet])...
 2019-04-26 17:20:45,140 - kedro.io.data_catalog - INFO - Loading data from `example_train_y` (AutoProxy[MemoryDataSet])...
 2019-04-26 17:20:45,142 - kedro.io.data_catalog - INFO - Loading data from `parameters` (MemoryDataSet)...
+2019-04-26 17:20:45,142 - kedro.pipeline.node - INFO - Running node: train_model([example_train_x,example_train_y,parameters]) -> [example_model]
 2019-04-26 17:20:45,437 - kedro.io.data_catalog - INFO - Saving data to `example_model` (AutoProxy[MemoryDataSet])...
 2019-04-26 17:20:45,444 - kedro.io.data_catalog - INFO - Loading data from `example_test_x` (AutoProxy[MemoryDataSet])...
 2019-04-26 17:20:45,449 - kedro.io.data_catalog - INFO - Loading data from `example_model` (AutoProxy[MemoryDataSet])...
+2019-04-26 17:20:45,449 - kedro.pipeline.node - INFO - Running node: predict([example_model,example_test_x]) -> [example_predictions]
 2019-04-26 17:20:45,451 - kedro.io.data_catalog - INFO - Saving data to `example_predictions` (AutoProxy[MemoryDataSet])...
 2019-04-26 17:20:45,457 - kedro.io.data_catalog - INFO - Loading data from `example_predictions` (AutoProxy[MemoryDataSet])...
 2019-04-26 17:20:45,461 - kedro.io.data_catalog - INFO - Loading data from `example_test_y` (AutoProxy[MemoryDataSet])...
+2019-04-26 17:20:45,461 - kedro.pipeline.node - INFO - Running node: report_accuracy([example_predictions,example_test_y]) -> None
 2019-04-26 17:20:45,466 - new_kedro_project.nodes.example - INFO - Model accuracy on test set: 100.00%
 2019-04-26 17:20:45,494 - kedro.runner.parallel_runner - INFO - Pipeline execution completed successfully.
 ```
 
 > *Note:* You cannot use both `--parallel` and `--runner` flags at the same time (e.g. `kedro run --parallel --runner=SequentialRunner` raises an exception).
+
 
 ### Applying decorators on pipelines
 
@@ -545,7 +569,7 @@ io = DataCatalog(dict(
 io.list()
 ```
 
-`Output`: 
+`Output`:
 
 ```console
 Out[10]: ['xs']
@@ -722,6 +746,52 @@ Outputs: v
 
 As you can see, this will create a partial pipeline starting from the specified node and continuing to all other nodes downstream.
 
+You can run the resulting partial pipeline by running the following command in your terminal window:
+
+```bash
+kedro run --from-nodes="mean node"
+```
+
+#### Partial pipeline ending at nodes
+Similarly, you can specify the nodes which should be used as an end of the new pipeline. For example, you can do as follows:
+
+```python
+print(pipeline.to_nodes('mean node').describe())
+```
+
+`Output`:
+
+```console
+#### Pipeline execution order ####
+Name: None
+Inputs: xs
+
+len([xs]) -> [n]
+mean node
+
+Outputs: m
+##################################
+```
+
+As you can see, this will create a partial pipeline starting at the top and ending with the specified node.
+
+You can run the resulting partial pipeline by running the following command in your terminal window:
+
+```bash
+kedro run --to-nodes="mean node"
+```
+
+Furthermore, you can combine these two flags to specify a range of nodes to be included in the new pipeline. This would look like:
+
+```bash
+kedro run --from-nodes A --to-nodes Z
+```
+
+or, when specifying multiple nodes:
+```bash
+kedro run --from-nodes A,D --to-nodes X,Y,Z
+```
+
 #### Partial pipeline from nodes with tags
 One can also create a partial pipeline from the nodes that have specific tags attached to them. In order to construct a partial pipeline out of nodes that have both tag `t1` *AND* tag `t2`, you can run the following:
 
@@ -781,9 +851,39 @@ Outputs: m, m2
 
 This will create a partial pipeline, consisting solely of the nodes you specify as arguments in the method call.
 
-#### Recreating Missing Outputs
+You can check this out for yourself by updating the definition of the first node in the example code provided in `pipeline.py` as follows:
 
-Kedro supports the automatic generation of partial pipelines that take into account existing node outputs. This can be helpful to avoid re-running nodes which take a long time.
+```python
+node(
+    split_data,
+    ["example_iris_data", "parameters"],
+    dict(
+        train_x="example_train_x",
+        train_y="example_train_y",
+        test_x="example_test_x",
+        test_y="example_test_y",
+    ),
+    name="node1",
+),
+
+```
+
+and then run the following command in your terminal window:
+
+```bash
+kedro run --node=node1
+```
+
+You may specify multiple names like so:
+
+```bash
+kedro run --node=node1 --node=node2
+```
+
+> *Note:* The run will only succeed if all the inputs required by those nodes already exist, i.e. already produced or present in the data catalog.
+
+
+#### Recreating Missing Outputs
 
 Kedro supports the automatic generation of partial pipelines that take into account existing node outputs. This can be helpful to avoid re-running nodes that take a long time:
 

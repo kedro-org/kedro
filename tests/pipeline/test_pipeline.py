@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -25,13 +25,11 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from functools import wraps
 from itertools import chain
 from typing import Callable
 
 import pytest
-from pytest import fixture
 
 import kedro
 from kedro.io import DataCatalog
@@ -57,7 +55,7 @@ def triconcat(input1: str, input2: str, input3: str):
     return input1 + input2 + input3  # pragma: no cover
 
 
-@fixture
+@pytest.fixture
 def branchless_pipeline():
     return {
         "nodes": [
@@ -81,7 +79,7 @@ def branchless_pipeline():
     }
 
 
-@fixture
+@pytest.fixture
 def pipeline_list_with_lists():
     return {
         "nodes": [
@@ -115,7 +113,7 @@ def pipeline_list_with_lists():
     }
 
 
-@fixture
+@pytest.fixture
 def pipeline_with_dicts():
     return {
         "nodes": [
@@ -149,7 +147,7 @@ def pipeline_with_dicts():
     }
 
 
-@fixture
+@pytest.fixture
 def free_input_needed_pipeline():
     return {
         "nodes": [
@@ -167,7 +165,7 @@ def free_input_needed_pipeline():
     }
 
 
-@fixture
+@pytest.fixture
 def disjoint_pipeline():
     # Two separate pipelines: A->B->C and D->E->F
     return {
@@ -192,7 +190,7 @@ def disjoint_pipeline():
     }
 
 
-@fixture
+@pytest.fixture
 def pipeline_input_duplicated():
     return {
         "nodes": [
@@ -210,7 +208,7 @@ def pipeline_input_duplicated():
     }
 
 
-@fixture
+@pytest.fixture
 def str_node_inputs_list():
     return {
         "nodes": [
@@ -258,7 +256,7 @@ class TestValidPipeline:
         # Flatten a list of grouped nodes
         assert pipeline.nodes == list(chain.from_iterable(grouped))
         # Check each grouped node matches with expected group
-        assert all(e == set(g) for e, g in zip(expected, grouped))
+        assert all(g == e for g, e in zip(grouped, expected))
 
     @pytest.mark.parametrize(
         "target_node_names", [["node2", "node3", "node4", "node8"], ["node1"]]
@@ -268,7 +266,7 @@ class TestValidPipeline:
         partial = full.only_nodes(*target_node_names)
         target_list = list(target_node_names)
         names = map(lambda node_: node_.name, partial.nodes)
-        assert sorted(target_list) == sorted(names)
+        assert sorted(names) == sorted(target_list)
 
     def test_free_input(self, input_data):
         nodes = input_data["nodes"]
@@ -276,7 +274,7 @@ class TestValidPipeline:
 
         pipeline = Pipeline(nodes)
 
-        assert set(inputs) == pipeline.inputs()
+        assert pipeline.inputs() == set(inputs)
 
     def test_outputs(self, input_data):
         nodes = input_data["nodes"]
@@ -284,7 +282,7 @@ class TestValidPipeline:
 
         pipeline = Pipeline(nodes)
 
-        assert set(outputs) == pipeline.outputs()
+        assert pipeline.outputs() == set(outputs)
 
     def test_combine(self):
         pipeline1 = Pipeline([node(biconcat, ["input", "input1"], "output1", name="a")])
@@ -306,6 +304,44 @@ class TestValidPipeline:
         assert new_pipeline.inputs() == {"input", "input1"}
         assert new_pipeline.outputs() == {"output"}
         assert {n.name for n in new_pipeline.nodes} == {"a"}
+
+    def test_intersection(self):
+        pipeline1 = Pipeline(
+            [
+                node(biconcat, ["input", "input1"], "output1", name="a"),
+                node(biconcat, ["input", "input2"], "output2", name="b"),
+            ]
+        )
+        pipeline2 = Pipeline([node(biconcat, ["input", "input2"], "output2", name="b")])
+        new_pipeline = pipeline1 & pipeline2
+        assert new_pipeline.inputs() == {"input", "input2"}
+        assert new_pipeline.outputs() == {"output2"}
+        assert {n.name for n in new_pipeline.nodes} == {"b"}
+
+    def test_invalid_intersection(self):
+        p = Pipeline([])
+        pattern = r"unsupported operand type\(s\) for &: 'Pipeline' and 'str'"
+        with pytest.raises(TypeError, match=pattern):
+            p & "hello"  # pylint: disable=pointless-statement
+
+    def test_union(self):
+        pipeline1 = Pipeline(
+            [
+                node(biconcat, ["input", "input1"], "output1", name="a"),
+                node(biconcat, ["input", "input2"], "output2", name="b"),
+            ]
+        )
+        pipeline2 = Pipeline([node(biconcat, ["input", "input2"], "output2", name="b")])
+        new_pipeline = pipeline1 | pipeline2
+        assert new_pipeline.inputs() == {"input", "input1", "input2"}
+        assert new_pipeline.outputs() == {"output1", "output2"}
+        assert {n.name for n in new_pipeline.nodes} == {"a", "b"}
+
+    def test_invalid_union(self):
+        p = Pipeline([])
+        pattern = r"unsupported operand type\(s\) for |: 'Pipeline' and 'str'"
+        with pytest.raises(TypeError, match=pattern):
+            p | "hello"  # pylint: disable=pointless-statement
 
     def test_empty_case(self):
         """Empty pipeline is possible"""
@@ -501,18 +537,20 @@ class TestComplexPipeline:
 
     def test_node_dependencies(self, complex_pipeline):
         expected = {
-            ("node1", "node2"),
-            ("node1", "node3"),
-            ("node1", "node4"),
-            ("node2", "node4"),
-            ("node3", "node4"),
-            ("node4", "node7"),
-            ("node5", "node6"),
-            ("node6", "node7"),
-            ("node7", "node8"),
-            ("node8", "node9"),
+            "node1": {"node2", "node3", "node4"},
+            "node2": {"node4"},
+            "node3": {"node4"},
+            "node4": {"node7"},
+            "node5": {"node6"},
+            "node6": {"node7"},
+            "node7": {"node8"},
+            "node8": {"node9"},
+            "node9": set(),
         }
-        actual = {(n1.name, n2.name) for n1, n2 in complex_pipeline.node_dependencies}
+        actual = {
+            child.name: {parent.name for parent in parents}
+            for child, parents in complex_pipeline.node_dependencies.items()
+        }
         assert actual == expected
 
 
@@ -644,7 +682,7 @@ def test_pipeline_to_json(input_data):
     json_rep = Pipeline(nodes).to_json()
     for pipeline_node in nodes:
         assert pipeline_node.name in json_rep
-        assert all([node_input in json_rep for node_input in pipeline_node.inputs])
-        assert all([node_output in json_rep for node_output in pipeline_node.outputs])
+        assert all(node_input in json_rep for node_input in pipeline_node.inputs)
+        assert all(node_output in json_rep for node_output in pipeline_node.outputs)
 
     assert kedro.__version__ in json_rep

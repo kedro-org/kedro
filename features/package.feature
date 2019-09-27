@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -33,7 +33,9 @@ Feature: Package target in new project
     And I have run a non-interactive kedro new
     And I have executed the kedro command "install"
 
-  Scenario: Package new project
+  Scenario: Install package
     When I execute the kedro command "package"
     Then I should get a successful exit code
-    And the relevant packages should be created
+    When I install the project's python package
+    And I execute the project
+    Then I should get a successful exit code

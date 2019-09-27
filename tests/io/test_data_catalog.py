@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -28,12 +28,14 @@
 from pathlib import Path
 from typing import Any
 
+import pandas as pd
 import pytest
 from pandas.util.testing import assert_frame_equal
 
 from kedro.io import (
     AbstractDataSet,
     CSVLocalDataSet,
+    CSVS3DataSet,
     DataCatalog,
     DataSetAlreadyExistsError,
     DataSetError,
@@ -42,7 +44,18 @@ from kedro.io import (
     MemoryDataSet,
     ParquetLocalDataSet,
 )
-from kedro.io.core import generate_current_version
+from kedro.io.core import generate_timestamp
+from kedro.versioning.journal import VersionJournal
+
+
+@pytest.fixture
+def filepath(tmp_path):
+    return str(tmp_path / "some" / "dir" / "test.csv")
+
+
+@pytest.fixture
+def dummy_dataframe():
+    return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
 
 
 @pytest.fixture
@@ -72,10 +85,11 @@ def data_set(filepath):
 
 
 @pytest.fixture
-def multi_catalog():
+def multi_catalog(mocker):
     csv = CSVLocalDataSet(filepath="abc.csv")
     parq = ParquetLocalDataSet(filepath="xyz.parq")
-    return DataCatalog({"abc": csv, "xyz": parq})
+    journal = mocker.Mock()
+    return DataCatalog({"abc": csv, "xyz": parq}, journal=journal)
 
 
 @pytest.fixture
@@ -204,12 +218,19 @@ class TestDataCatalog:
         )
         assert result is False
 
-    def test_exists_error(self, data_catalog):
+    def test_exists_unregistered(self, data_catalog):
         """Check the the error when calling `exists`
         on unregistered data set"""
         pattern = r"DataSet \'wrong_key\' not found in the catalog"
         with pytest.raises(DataSetError, match=pattern):
             data_catalog.exists("wrong_key")
+
+    def test_release_unregistered(self, data_catalog):
+        """Check the the error when calling `release`
+        on unregistered data set"""
+        pattern = r"DataSet \'wrong_key\' not found in the catalog"
+        with pytest.raises(DataSetError, match=pattern):
+            data_catalog.release("wrong_key")
 
     def test_multi_catalog_list(self, multi_catalog):
         """Test data catalog which contains multiple data sets"""
@@ -221,6 +242,31 @@ class TestDataCatalog:
         assert multi_catalog == multi_catalog  # pylint: disable=comparison-with-itself
         assert multi_catalog == multi_catalog.shallow_copy()
         assert multi_catalog != data_catalog
+
+    def test_datasets_on_init(self, data_catalog_from_config):
+        """Check datasets are loaded correctly on construction"""
+        assert isinstance(data_catalog_from_config.datasets.boats, CSVLocalDataSet)
+        assert isinstance(data_catalog_from_config.datasets.cars, CSVS3DataSet)
+
+    def test_datasets_on_add(self, data_catalog_from_config):
+        """Check datasets are updated correctly after adding"""
+        data_catalog_from_config.add("new_dataset", CSVLocalDataSet("some_path"))
+        assert isinstance(
+            data_catalog_from_config.datasets.new_dataset, CSVLocalDataSet
+        )
+        assert isinstance(data_catalog_from_config.datasets.boats, CSVLocalDataSet)
+
+    def test_adding_datasets_not_allowed(self, data_catalog_from_config):
+        """Check error if user tries to update the datasets attribute"""
+        pattern = r"Please use DataCatalog.add\(\) instead"
+        with pytest.raises(AttributeError, match=pattern):
+            data_catalog_from_config.datasets.new_dataset = None
+
+    def test_mutating_datasets_not_allowed(self, data_catalog_from_config):
+        """Check error if user tries to update the datasets attribute"""
+        pattern = "Please change datasets through configuration."
+        with pytest.raises(AttributeError, match=pattern):
+            data_catalog_from_config.datasets.cars = None
 
 
 class TestDataCatalogFromConfig:
@@ -312,10 +358,17 @@ class TestDataCatalogVersioned:
     def test_from_sane_config_versioned(self, sane_config, dummy_dataframe):
         """Test load and save of versioned data sets from config"""
         sane_config["catalog"]["boats"]["versioned"] = True
-        version = generate_current_version()
+        version = generate_timestamp()
+        journal = VersionJournal({"run_id": "fake-id", "project_path": "fake-path"})
         catalog = DataCatalog.from_config(
-            **sane_config, load_versions={"boats": version}, save_version=version
+            **sane_config,
+            load_versions={"boats": version},
+            save_version=version,
+            journal=journal
         )
+
+        assert catalog._journal == journal  # pylint: disable=protected-access
+
         catalog.save("boats", dummy_dataframe)
         path = Path(sane_config["catalog"]["boats"]["filepath"])
         path = path / version / path.name

@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -46,47 +46,3 @@ Feature: Run Project
     When I execute the kedro command "run"
     Then I should get an error exit code
     And "local" environment was used
-
-  Scenario: Run python entry point in a specific environment
-    Given I have prepared a config file with example code
-    And I have run a non-interactive kedro new
-    And I have created new environment "test"
-    When I execute the kedro command "run --env=test"
-    Then I should get a successful exit code
-    And "test" environment was used
-
-  Scenario: Run python entry point in an invalid environment
-    Given I have prepared a config file with example code
-    And I have run a non-interactive kedro new
-    When I execute the kedro command "run --env=nonexistent"
-    Then I should get an error exit code
-    And I should get an error message including "Given configuration path either does not exist or is not a valid directory:"
-
-  Scenario: Run python entry point using a parallel flag
-    Given I have prepared a config file with example code
-    And I have run a non-interactive kedro new
-    When I execute the kedro command "run --parallel"
-    Then I should get a successful exit code
-    And I should get a message including "parallel"
-
-  Scenario: Run python entry point using a runner flag
-    Given I have prepared a config file with example code
-    And I have run a non-interactive kedro new
-    When I execute the kedro command "run --runner=ParallelRunner"
-    Then I should get a successful exit code
-    And I should get a message including "parallel"
-
-  Scenario: Run python entry point using both parallel and runner flags
-    Given I have prepared a config file with example code
-    And I have run a non-interactive kedro new
-    When I execute the kedro command "run --parallel --runner=SequentialRunner"
-    Then I should get an error exit code
-    And I should get an error message including "Both --parallel and --runner options cannot be used together. Please use either --parallel or --runner."
-
-  Scenario: Run python entry point with no credentials in the configuration
-    Given I have prepared a config file with example code
-    And I have run a non-interactive kedro new
-    And I have deleted the credentials file
-    When I execute the kedro command "run"
-    Then I should get a successful exit code
-

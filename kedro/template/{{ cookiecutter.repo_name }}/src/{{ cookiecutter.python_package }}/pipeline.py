@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -26,12 +26,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Pipeline construction."""
-{% if cookiecutter.include_example == "True" %}
-from kedro.pipeline import Pipeline, node
 
-from .nodes.example import predict, report_accuracy, split_data, train_model
-{% else %}
 from kedro.pipeline import Pipeline
+{% if cookiecutter.include_example == "True" %}
+from {{ cookiecutter.python_package }}.pipelines import (
+    data_engineering as de,
+    data_science as ds,
+)
 {% endif %}
 # Here you can define your data-driven pipeline by importing your functions
 # and adding them to the pipeline as follows:
@@ -47,10 +48,9 @@ from kedro.pipeline import Pipeline
 # project by calling:
 #
 # $ kedro run
-#
 
 
-def create_pipeline(**kwargs):
+def create_pipelines(**kwargs):
     """Create the project's pipeline.
 
     Args:
@@ -61,41 +61,21 @@ def create_pipeline(**kwargs):
 
     """
 {% if cookiecutter.include_example == "True" %}
-
     ###########################################################################
-    # Here you can find an example pipeline with 4 nodes.
+    # Here you can find an example pipeline, made of two modular pipelines.
     #
     # PLEASE DELETE THIS PIPELINE ONCE YOU START WORKING ON YOUR OWN PROJECT AS
-    # WELL AS THE FILE nodes/example.py
+    # WELL AS pipelines/data_science AND pipelines/data_engineering
     # -------------------------------------------------------------------------
+    data_engineering_pipeline = de.create_pipeline()
+    data_science_pipeline = ds.create_pipeline()
 
-    pipeline = Pipeline(
-        [
-            node(
-                split_data,
-                ["example_iris_data", "parameters"],
-                dict(
-                    train_x="example_train_x",
-                    train_y="example_train_y",
-                    test_x="example_test_x",
-                    test_y="example_test_y",
-                ),
-            ),
-            node(
-                train_model,
-                ["example_train_x", "example_train_y", "parameters"],
-                "example_model",
-            ),
-            node(
-                predict,
-                dict(model="example_model", test_x="example_test_x"),
-                "example_predictions",
-            ),
-            node(report_accuracy, ["example_predictions", "example_test_y"], None),
-        ]
-    )
-    ###########################################################################
+    return {
+        "de": data_engineering_pipeline,
+        "__default__": data_engineering_pipeline + data_science_pipeline,
+    }
 {% else %}
-    pipeline = Pipeline([])
+    return {
+        "__default__": Pipeline([])
+    }
 {% endif %}
-    return pipeline

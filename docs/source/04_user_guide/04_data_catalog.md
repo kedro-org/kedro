@@ -1,8 +1,8 @@
 # The Data Catalog
 
-> *Note:* This documentation is based on `Kedro 0.14.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
-This section introduces `catalog.yml`, the project-shareable Data Catalog. The file is located in `conf/base` and is a registry of all data sources available for use by a project; it manages loading and saving of data. 
+This section introduces `catalog.yml`, the project-shareable Data Catalog. The file is located in `conf/base` and is a registry of all data sources available for use by a project; it manages loading and saving of data.
 
 ## Using the Data Catalog within Kedro configuration
 
@@ -97,32 +97,58 @@ scooters:
   load_args:
     index_col: ['name']
     columns: ['name', 'gear']
-  save_args:  
+  save_args:
     if_exists: 'replace'
 
 # Example 8: Load a SQL table with credentials and applies a SQL query to the table
 scooters_query:
-  type: SQLQueryDataSet  
+  type: SQLQueryDataSet
   credentials: scooters_credentials
   sql: 'select * from cars where gear=4'
-  load_args:  
+  load_args:
     index_col: ['name']
 ```
 
-The above `catalog.yml` gets `dev_s3` `scooters_credentials` from `conf/local/credentials.yml`:
+> *Note:* When using `SQLTableDataSet` or `SQLQueryDataSet` you must provide a database connection string. In the example above we pass it using `scooters_credentials` key from the credentials (see the details in [Feeding in credentials](#feeding-in-credentials) section below). `scooters_credentials` must have a top-level key `con` containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. Alternative to credentials would be to explicitly put `con` into `load_args` and `save_args` (`SQLTableDataSet` only).
+
+## Feeding in credentials
+
+Before instantiating the `DataCatalog` Kedro will first attempt to read the credentials from project configuration (see [this section](./03_configuration.md#aws-credentials) for more details). Resulting dictionary will then be passed into `DataCatalog.from_config()` as `credentials` argument.
+
+Let's assume that the project contains the file `conf/local/credentials.yml` with the following contents:
 
 ```yaml
 dev_s3:
-     aws_access_key_id: token
-     aws_secret_access_key: key    
+  aws_access_key_id: token
+  aws_secret_access_key: key
 
 scooters_credentials:
   con: sqlite:///kedro.db
 ```
 
+In the example above `catalog.yml` contains references to credentials keys `dev_s3` and `scooters_credentials`. It means that when instantiating `motorbikes` dataset, for example, the `DataCatalog` will attempt to read top-level key `dev_s3` from the received `credentials` dictionary, and then will pass its values into the dataset `__init__` as `credentials` argument. This is essentially equivalent to calling this:
+
+```python
+CSVS3DataSet(
+    bucket_name="test_bucket",
+    filepath="data/02_intermediate/company/motorbikes.csv",
+    load_args=dict(
+        sep=",",
+        skiprows=5,
+        skipfooter=1,
+        na_values=["#NA", "NA"],
+    ),
+    credentials=dict(
+        aws_access_key_id="token",
+        aws_secret_access_key="key",
+    )
+)
+```
+
+
 ## Loading multiple datasets that have similar configuration
 
-You may encounter situations where your datasets use the same file format, load and save arguments, and are stored in the same folder. The YAML has a [built-in syntax](https://yaml.org/spec/1.2/spec.html#id2765878) for factorising parts of a YAML file, which means that you can decide what is generalisable across your datasets so that you do not have to spend time copying and pasting dataset configurations in `catalog.yml`.
+You may encounter situations where your datasets use the same file format, load and save arguments, and are stored in the same folder. YAML has a [built-in syntax](https://yaml.org/spec/1.2/spec.html#id2765878) for factorising parts of a YAML file, which means that you can decide what is generalisable across your datasets so that you do not have to spend time copying and pasting dataset configurations in `catalog.yml`.
 
 You can see this in the following example:
 
@@ -175,7 +201,46 @@ airplanes:
 
 In this example the default `csv` configuration is inserted into `airplanes` and then the `load_args` block is overridden. Normally that would replace the whole dictionary. In order to extend `load_args` the defaults for that block are then re-inserted.
 
-### Versioning datasets and ML models
+## Transcoding datasets
+
+You may come across a situation where you would like to read the same file using two different dataset implementations. For instance, `parquet` files can not only be loaded via the `ParquetLocalDataSet`, but also directly by `SparkDataSet` using `pandas`. To do this, you can define your `catalog.yml` as follows:
+
+```yaml
+mydata@pandas:
+  type: ParquetLocalDataSet
+  filepath: data/01_raw/data.parquet
+
+mydata@spark:
+    type: kedro.contrib.io.pyspark.SparkDataSet
+    filepath: data/01_raw/data.parquet
+```
+
+In your pipeline, you may refer to either dataset as input or output, and it will ensure the dependencies point to a single dataset `mydata` both while running the pipeline and in the visualisation.
+
+
+## Transforming datasets
+
+If you need to augment the loading and / or saving of one or more datasets you can use the transformer API. To do this create a subclass of `AbstractTransformer` that implements your changes and then apply it to your catalog with `DataCatalog.add_transformer`. For example to print the runtimes of load and save operations you could do this:
+
+```python
+class PrintTimeTransformer(AbstractTransformer):
+    def load(self, data_set_name: str, load: Callable[[], Any]) -> Any:
+        start = time.time()
+        data = load()
+        print("Loading {} took {:0.3f}s".format(data_set_name, time.time() - start))
+        return data
+
+    def save(self, data_set_name: str, save: Callable[[Any], None], data: Any) -> None:
+        start = time.time()
+        save(data)
+        print("Saving {} took {:0.3}s".format(data_set_name, time.time() - start))
+
+catalog.add_transformer(PrintTimeTransformer())
+```
+
+By default transformers are applied to all datasets in the catalog (including any that are added in the future). The `DataCatalog.add_transformers` method has an additional argument `data_set_names` that lets you limit which data sets the transformer will be applied to.
+
+## Versioning datasets and ML models
 
 Making a simple addition to your Data Catalog allows you to perform versioning of datasets and machine learning models.
 
@@ -196,26 +261,25 @@ This section shows just the very basics of versioning. You can learn more about 
 
 The code API allows you to configure data sources in code. This can also be used to operate the IO module within notebooks.
 
-```python
-from kedro.io import *
-import os
-```
-
-### Configuring a data catalog
+## Configuring a data catalog
 
 In a file like `catalog.py`, you can generate the Data Catalog. This will allow everyone in the project to review all the available data sources. In the following, we are using the pre-built CSV loader, which is documented in the API reference documentation: [CSVLocalDataSet](/kedro.io.CSVLocalDataSet)
 
 ```python
+from kedro.io import DataCatalog, CSVLocalDataSet, SQLTableDataSet, SQLQueryDataSet, ParquetLocalDataSet
+
 io = DataCatalog({
   'bikes': CSVLocalDataSet(filepath='../data/01_raw/bikes.csv'),
   'cars': CSVLocalDataSet(filepath='../data/01_raw/cars.csv', load_args=dict(sep=',')), # additional arguments
-  'scooters': SQLTableDataSet(table_name="scooters", credentials=dict(con="sqlite:///kedro.db")),
+  'cars_table': SQLTableDataSet(table_name="cars", credentials=dict(con="sqlite:///kedro.db")),
   'scooters_query': SQLQueryDataSet(sql="select * from cars where gear=4", credentials=dict(con="sqlite:///kedro.db")),
-  'trucks': ParquetLocalDataSet(filepath="trucks.parquet")
+  'ranked': ParquetLocalDataSet(filepath="ranked.parquet")
 })
 ```
 
-### Loading datasets
+> *Note:* When using `SQLTableDataSet` or `SQLQueryDataSet` you must provide a `con` key containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) database connection string. In the example above we pass it as part of `credentials` argument. Alternative to `credentials` would be to put `con` into `load_args` and `save_args` (`SQLTableDataSet` only).
+
+## Loading datasets
 
 Each dataset can be accessed by its name.
 
@@ -224,7 +288,7 @@ cars = io.load('cars') # data is now loaded as a DataFrame in 'cars'
 gear = cars['gear'].values
 ```
 
-#### Behind the scenes
+### Behind the scenes
 
 The following steps happened behind the scenes when `load` was called:
 
@@ -233,7 +297,7 @@ The following steps happened behind the scenes when `load` was called:
 - The `load` method of this dataset was called
 - This `load` method delegated the loading to the underlying pandas `read_csv` function
 
-#### Viewing the available data sources
+### Viewing the available data sources
 
 If you forget what data was assigned, you can always review the `DataCatalog`.
 
@@ -241,38 +305,41 @@ If you forget what data was assigned, you can always review the `DataCatalog`.
 io.list()
 ```
 
-### Saving data
+## Saving data
 
-Saving data can be completed with a similar API. 
+Saving data can be completed with a similar API.
 
 > *Note:* This use is not recommended unless you are prototyping in notebooks.
 
-#### Saving data to memory
+### Saving data to memory
 
 ```python
+from kedro.io import MemoryDataSet
+
 memory = MemoryDataSet(data=None)
 io.add('cars_cache', memory)
 io.save('cars_cache', 'Memory can store anything.')
 io.load('car_cache')
 ```
 
-#### Saving data to a SQL database for querying
+### Saving data to a SQL database for querying
 
-At this point we may want to put the data in a SQLite database to run queries on it. Let's use that to rank cars by their mpg.
+At this point we may want to put the data in a SQLite database to run queries on it. Let's use that to rank scooters by their mpg.
 
 ```python
-# This cleans up the database in case it exists at this point
+import os
 
+# This cleans up the database in case it exists at this point
 try:
     os.remove("kedro.db")
 except FileNotFoundError:
     pass
 
 io.save('cars_table', cars)
-ranked = io.load('cars_query')[['brand', 'mpg']]
+ranked = io.load('scooters_query')[['brand', 'mpg']]
 ```
 
-#### Saving data in parquet
+### Saving data in parquet
 
 Finally we can save the processed data in Parquet format.
 
@@ -280,5 +347,5 @@ Finally we can save the processed data in Parquet format.
 io.save('ranked', ranked)
 ```
 
-#### Creating your own dataset
+### Creating your own dataset
 More specialised datasets can be found in `contrib/io`. [Creating new datasets](../03_tutorial/03_set_up_data.md#creating-custom-datasets) is the easiest way to contribute to the Kedro project.

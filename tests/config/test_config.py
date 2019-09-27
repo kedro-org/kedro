@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -133,9 +133,9 @@ def proj_catalog(tmp_path, base_config):
 
 
 @pytest.fixture
-def proj_catalog_nested(tmp_path, base_config):
-    proj_catalog = tmp_path / "base" / "prod" / "catalog.yml"
-    _write_yaml(proj_catalog, {"prod": base_config})
+def proj_catalog_nested(tmp_path):
+    path = tmp_path / "base" / "catalog" / "dir" / "nested.yml"
+    _write_yaml(path, {"nested": {"type": "MemoryDataSet"}})
 
 
 use_config_dir = pytest.mark.usefixtures("create_config_dir")
@@ -190,29 +190,27 @@ class TestConfigLoader:
             ConfigLoader(conf_paths).get("catalog*")
 
     @pytest.mark.usefixtures("create_config_dir", "proj_catalog", "proj_catalog_nested")
-    def test_nested_subdirs(self, tmp_path):
+    def test_nested(self, tmp_path):
         """Test loading the config from subdirectories"""
-        catalog = ConfigLoader(str(tmp_path / "base")).get("**/catalog*")
-        assert (
-            catalog["cars"]["type"]
-            == catalog["prod"]["cars"]["type"]
-            == "CSVLocalDataSet"
-        )
+        catalog = ConfigLoader(str(tmp_path / "base")).get("catalog*", "catalog*/**")
+        assert catalog.keys() == {"cars", "trains", "nested"}
+        assert catalog["cars"]["type"] == "CSVLocalDataSet"
         assert catalog["cars"]["save_args"]["index"] is True
+        assert catalog["nested"]["type"] == "MemoryDataSet"
 
     @use_config_dir
     def test_nested_subdirs_duplicate(self, tmp_path, conf_paths, base_config):
         """Check the error when the configs from subdirectories contain
         duplicate keys"""
-        nested = tmp_path / "base" / "prod" / "catalog.yml"
+        nested = tmp_path / "base" / "catalog" / "dir" / "nested.yml"
         _write_yaml(nested, base_config)
 
         pattern = (
             r"Duplicate keys found in .*catalog\.yml "
-            r"and\:\n\- .*catalog\.yml\: cars, trains"
+            r"and\:\n\- .*nested\.yml\: cars, trains"
         )
         with pytest.raises(ValueError, match=pattern):
-            ConfigLoader(conf_paths).get("**/catalog*")
+            ConfigLoader(conf_paths).get("catalog*", "catalog*/**")
 
     def test_ignore_hidden_keys(self, tmp_path):
         """Check that the config key starting with `_` are ignored and also
@@ -228,6 +226,18 @@ class TestConfigLoader:
         pattern = (
             r"^Duplicate keys found in .*catalog3\.yml and\:\n\- .*catalog1\.yml\: k1$"
         )
+        with pytest.raises(ValueError, match=pattern):
+            conf.get("**/catalog*")
+
+    def test_lots_of_duplicates(self, tmp_path):
+        """Check that the config key starting with `_` are ignored and also
+        don't cause a config merge error"""
+        data = {str(i): i for i in range(100)}
+        _write_yaml(tmp_path / "base" / "catalog1.yml", data)
+        _write_yaml(tmp_path / "base" / "catalog2.yml", data)
+
+        conf = ConfigLoader(str(tmp_path))
+        pattern = r"^Duplicate keys found in .*catalog2\.yml and\:\n\- .*catalog1\.yml\: .*\.\.\.$"
         with pytest.raises(ValueError, match=pattern):
             conf.get("**/catalog*")
 

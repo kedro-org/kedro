@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -43,6 +43,11 @@ def filepath_json(tmp_path):
 @pytest.fixture
 def json_data_set(filepath_json):
     return JSONLocalDataSet(filepath=filepath_json)
+
+
+@pytest.fixture
+def json_data_set_with_load_args(filepath_json):
+    return JSONLocalDataSet(filepath=filepath_json, load_args={"parse_float": Decimal})
 
 
 @pytest.fixture
@@ -91,6 +96,11 @@ class TestJSONLocalDataSet:
 
         json_data_set.save(json_data)
         assert json_data_set.exists()
+
+    def test_load_args(self, json_data_set_with_load_args):
+        """Test reloading the data set with load arguments specified."""
+        json_data_set_with_load_args.save([1.1])
+        assert json_data_set_with_load_args.load() == [Decimal("1.1")]
 
     def test_allow_nan(self, json_data_set, filepath_json):
         """Strict JSON specification does not allow out of range float values,

@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -37,4 +37,4 @@ Feature: IPython target in new project
     When I execute the kedro command "ipython"
     Then I should get a message including "An enhanced Interactive Python"
     And I should get a message including "INFO - ** Kedro project project-dummy"
-    And I should get a message including "INFO - Defined global variables proj_dir, proj_name, conf and io"
+    And I should get a message including "INFO - Defined global variable context"

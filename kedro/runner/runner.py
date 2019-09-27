@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -31,7 +31,7 @@ implementations.
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Dict
+from typing import Any, Dict, Iterable
 
 from kedro.io import AbstractDataSet, DataCatalog
 from kedro.pipeline import Pipeline
@@ -77,9 +77,7 @@ class AbstractRunner(ABC):
         free_outputs = pipeline.outputs() - set(catalog.list())
         unregistered_ds = pipeline.data_sets() - set(catalog.list())
         for ds_name in unregistered_ds:
-            num_loads = len(pipeline.only_nodes_with_inputs(ds_name).nodes)
-            num_loads = num_loads if num_loads > 0 else None
-            catalog.add(ds_name, self.create_default_data_set(ds_name, num_loads))
+            catalog.add(ds_name, self.create_default_data_set(ds_name))
 
         self._run(pipeline, catalog)
 
@@ -135,14 +133,11 @@ class AbstractRunner(ABC):
         pass
 
     @abstractmethod  # pragma: no cover
-    def create_default_data_set(self, ds_name: str, max_loads: int) -> AbstractDataSet:
+    def create_default_data_set(self, ds_name: str) -> AbstractDataSet:
         """Factory method for creating the default data set for the runner.
 
         Args:
             ds_name: Name of the missing data set
-            max_loads: Maximum number of times ``load`` method of the
-                default data set is allowed to be invoked. Any number of
-                calls is allowed if the argument is not set.
 
         Returns:
             An instance of an implementation of AbstractDataSet to be
@@ -150,6 +145,25 @@ class AbstractRunner(ABC):
 
         """
         pass
+
+    def _suggest_resume_scenario(
+        self, pipeline: Pipeline, done_nodes: Iterable[Node]
+    ) -> None:
+        remaining_nodes = set(pipeline.nodes) - set(done_nodes)
+        command = "kedro run"
+
+        if done_nodes:
+            node_names = [n.name for n in remaining_nodes]
+            resume_pipeline = pipeline.only_nodes(*node_names)
+
+            command += " --from-inputs {}".format(",".join(resume_pipeline.inputs()))
+
+        self._logger.warning(
+            "There are %d nodes that have not run.\n"
+            "You can resume the pipeline run with the following command:\n%s",
+            len(remaining_nodes),
+            command,
+        )
 
 
 def run_node(node: Node, catalog: DataCatalog) -> Node:

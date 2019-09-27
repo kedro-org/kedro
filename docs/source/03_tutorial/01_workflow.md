@@ -8,6 +8,7 @@ When building a Kedro project, you will typically follow a standard development 
 ### 1. Set up the project template
 
 * Create a new project with `kedro new`
+* Install dependencies with `kedro install`
 * Configure the following in the `conf` folder:
 	* Logging
 	* Credentials
@@ -23,7 +24,7 @@ When building a Kedro project, you will typically follow a standard development 
 * Create the data transformation steps as [pure](https://en.wikipedia.org/wiki/Pure_function) Python functions
 * Construct the pipeline by adding your functions as nodes
   - Specify inputs and outputs for each node
-* Choose how to run the pipeline: sequentially or in parallel  
+* Choose how to run the pipeline: sequentially or in parallel
 
 ### 4. Package the project
 
@@ -53,7 +54,7 @@ As you work on a project, you will periodically want to save your changes. If yo
 # create a new feature branch called 'feature-project-template'
 git checkout -b feature/project-template
 # stage all the files you have changed
-git add .                                
+git add .
 # commit changes to git with an instructive message
 git commit -m 'Create project template'
 # push changes to remote branch
@@ -64,9 +65,9 @@ It isn't necessary to branch, but if everyone in a team works on the same branch
 
 ```bash
 # stage all files
-git add .                                
+git add .
 # commit changes to git with an instructive message
 git commit -m 'Create project template'
 # push changes to remote master
-git push origin master                   
+git push origin master
 ```

@@ -1,18 +1,20 @@
 ![Kedro Logo Banner](https://raw.githubusercontent.com/quantumblacklabs/kedro/master/img/kedro_banner.jpg)
 
-`develop` | `master`  
-----------|---------  
+`develop` | `master`
+----------|---------
 [![CircleCI](https://circleci.com/gh/quantumblacklabs/kedro/tree/develop.svg?style=shield)](https://circleci.com/gh/quantumblacklabs/kedro/tree/develop) | [![CircleCI](https://circleci.com/gh/quantumblacklabs/kedro/tree/master.svg?style=shield)](https://circleci.com/gh/quantumblacklabs/kedro/tree/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/2u74p5g8fdc45wwh/branch/develop?svg=true)](https://ci.appveyor.com/project/QuantumBlack/kedro/branch/develop) | [![Build status](https://ci.appveyor.com/api/projects/status/2u74p5g8fdc45wwh/branch/master?svg=true)](https://ci.appveyor.com/project/QuantumBlack/kedro/branch/master)
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python Version](https://img.shields.io/badge/python-3.5%20%7C%203.6%20%7C%203.7-blue.svg)](https://pypi.org/project/kedro/)
 [![PyPI version](https://badge.fury.io/py/kedro.svg)](https://pypi.org/project/kedro/)
 [![Documentation](https://readthedocs.org/projects/kedro/badge/?version=latest)](https://kedro.readthedocs.io/)
 [![Code Style: Black](https://img.shields.io/badge/code%20style-black-black.svg)](https://github.com/ambv/black)
+[![Downloads](https://pepy.tech/badge/kedro)](https://pepy.tech/project/kedro)
 
 # What is Kedro?
 
-> “The centre of your data pipeline.”
+> "The centre of your data pipeline."
 
 Kedro is a workflow development tool that helps you build data pipelines that are robust, scalable, deployable, reproducible and versioned. We provide a standard approach so that you can:
 -   spend more time building your data pipeline,
@@ -21,6 +23,9 @@ Kedro is a workflow development tool that helps you build data pipelines that ar
 -   work more efficiently.
 
 Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) and [Nikolaos Tsaousis](https://github.com/tsanikgr) to solve challenges they faced in their project work.
+
+This work was later turned into a product thanks to the following contributors:
+[Ivan Danov](https://github.com/idanov), [Dmitrii Deriabin](https://github.com/DmitryDeryabin), [Gordon Wrigley](https://github.com/tolomea), [Yetunde Dada](https://github.com/yetudada), [Nasef Khan](https://github.com/nakhan98), [Kiyohito Kunii](https://github.com/921kiyo), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae), [Peteris Erins](https://github.com/Pet3ris), [Lorena Balan](https://github.com/lorenabalan), [Richard Westenra](https://github.com/richardwestenra) and [Anton Kirilenko](https://github.com/Flid).
 
 ## How do I install Kedro?
 
@@ -50,20 +55,24 @@ For more detailed installation instructions, including how to setup Python virtu
 
 - Support for pure Python functions, `nodes`, to break large chunks of code into small independent sections
 - Automatic resolution of dependencies between `nodes`
-- (_coming soon_) Visualise your data pipeline with Kedro-Viz, a tool that shows the pipeline structure of Kedro projects
+- Visualise your data pipeline with [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz), a tool that shows the pipeline structure of Kedro projects
 
 *Note:* Read our [FAQs](https://kedro.readthedocs.io/en/latest/06_resources/01_faq.html#how-does-kedro-compare-to-other-projects) to learn how we differ from workflow managers like Airflow and Luigi.
+
+![Kedro-Viz Pipeline Visualisation](https://raw.githubusercontent.com/quantumblacklabs/kedro/master/img/pipeline_visualisation.png)
+*A pipeline visualisation generated using [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz)*
 
 ### 4. Feature extensibility
 
 - A plugin system that injects commands into the Kedro command line interface (CLI)
-- (_coming soon_) List of officially supported plugins:
-  - Kedro-Airflow, making it easy to prototype your data pipeline in Kedro before deploying to [Airflow](https://github.com/apache/airflow), a workflow scheduler
-  - Kedro-Docker, a tool for packing and shipping Kedro projects within containers
+- List of officially supported plugins:
+  - [Kedro-Airflow](https://github.com/quantumblacklabs/kedro-airflow), making it easy to prototype your data pipeline in Kedro before deploying to [Airflow](https://github.com/apache/airflow), a workflow scheduler
+  - [Kedro-Docker](https://github.com/quantumblacklabs/kedro-docker), a tool for packaging and shipping Kedro projects within containers
 - Kedro can be deployed locally, on-premise and cloud (AWS, Azure and GCP) servers, or clusters (EMR, Azure HDinsight, GCP and Databricks)
 
-![Kedro-Viz Pipeline Visualisation](https://raw.githubusercontent.com/quantumblacklabs/kedro/master/img/pipeline_visualisation.png)
-*Random pipeline visualisation using Kedro-Viz (coming soon)*
+## What are the main Kedro building blocks?
+
+You can find the overview of Kedro architecture [here](https://kedro.readthedocs.io/en/latest/06_resources/02_architecture_overview.html).
 
 ## How do I use Kedro?
 
@@ -113,3 +122,7 @@ pip install kedro -U
 ## What licence do you use?
 
 Kedro is licensed under the [Apache 2.0](https://github.com/quantumblacklabs/kedro/blob/master/LICENSE.md) License.
+
+## We're hiring!
+
+Do you want to be part of the team that builds Kedro and [other great products](https://quantumblack.com/labs) at QuantumBlack? If so, you're in luck! QuantumBlack is currently hiring Software Engineers who love using data to drive their decisions. Take a look at [our open positions](https://www.quantumblack.com/careers/current-openings#content) and see if you're a fit.

@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -45,6 +45,16 @@ def txt_data_set(filepath_txt, request):
     return TextLocalDataSet(filepath=filepath_txt, **request.param)
 
 
+@pytest.fixture(params=[dict()])
+def txt_data_set_with_args(filepath_txt, request):
+    return TextLocalDataSet(
+        filepath=filepath_txt,
+        load_args={"errors": "ignore"},
+        save_args={"errors": "ignore"},
+        **request.param
+    )
+
+
 @pytest.fixture
 def versioned_txt_data_set(filepath_txt, load_version, save_version):
     return TextLocalDataSet(
@@ -67,6 +77,12 @@ class TestTextLocalDataSet:
         txt_data_set.save(sample_text)
         assert Path(filepath_txt).read_text("utf-8") == sample_text
 
+    def test_should_write_to_file_with_args(
+        self, txt_data_set_with_args, sample_text, filepath_txt
+    ):
+        txt_data_set_with_args.save(sample_text)
+        assert Path(filepath_txt).read_text("utf-8") == sample_text
+
     def test_load_missing_txt_file(self, txt_data_set):
         """Check the error raised when trying to load nonexistent txt file."""
         pattern = r"Failed while loading data from data set TextLocalDataSet"
@@ -77,10 +93,20 @@ class TestTextLocalDataSet:
         traditional_write(filepath_txt, sample_text)
         assert sample_text == txt_data_set.load()
 
+    def test_should_read_from_file_with_args(
+        self, txt_data_set_with_args, sample_text, filepath_txt
+    ):
+        traditional_write(filepath_txt, sample_text)
+        assert sample_text == txt_data_set_with_args.load()
+
     def test_assess_if_file_exists(self, txt_data_set, sample_text, filepath_txt):
         assert not txt_data_set.exists()
         traditional_write(filepath_txt, sample_text)
         assert txt_data_set.exists()
+
+    def test_filepath_expanduser(self):
+        txt_dataset = TextLocalDataSet(filepath="~")
+        assert "~" not in str(txt_dataset._filepath)  # pylint: disable=protected-access
 
 
 class TestTextLocalDataSetVersioned:

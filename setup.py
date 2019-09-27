@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -38,7 +38,12 @@ here = path.abspath(path.dirname(__file__))
 
 # get package version
 with open(path.join(here, name, "__init__.py"), encoding="utf-8") as f:
-    version = re.search(r'__version__ = ["\']([^"\']+)', f.read()).group(1)
+    result = re.search(r'__version__ = ["\']([^"\']+)', f.read())
+
+    if not result:
+        raise ValueError("Can't find the version in kedro/__init__.py")
+
+    version = result.group(1)
 
 # get the dependencies and installs
 with open("requirements.txt", "r", encoding="utf-8") as f:
@@ -70,7 +75,7 @@ setup(
     name=name,
     version=version,
     description="Kedro helps you build production-ready data and analytics pipelines",
-    license="Apache Software License (Apache 2.0)", 
+    license="Apache Software License (Apache 2.0)",
     long_description=readme,
     long_description_content_type="text/markdown",
     url="https://github.com/quantumblacklabs/kedro",
@@ -81,8 +86,9 @@ setup(
     install_requires=requires,
     author="QuantumBlack Labs",
     entry_points={"console_scripts": ["kedro = kedro.cli:main"]},
-    package_data={name: template_files + doc_html_files},
-    keywords="pipelines, machine learning, data pipelines, data science, data engineering",
+    package_data={name: ["py.typed"] + template_files + doc_html_files},
+    zip_safe=False,
+    keywords="pipelines, machine learning, data pipelines, data science, data engineering",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Programming Language :: Python :: 3.5",

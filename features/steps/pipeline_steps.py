@@ -217,9 +217,8 @@ def node_tagged_with(context, node_name, tags):
     )
     import pipeline  # pylint: disable=import-error,useless-suppression
 
-    context.project_pipeline = (
-        pipeline.create_pipeline()  # pylint: disable=no-member,useless-suppression
-    )
+    # pylint: disable=no-member
+    context.project_pipeline = pipeline.create_pipelines()["__default__"]
     node_objs = [n for n in context.project_pipeline.nodes if n.name == node_name]
     assert node_objs
     assert set(tags) == node_objs[0].tags

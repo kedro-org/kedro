@@ -29,13 +29,13 @@
 """Application entry point."""
 
 from pathlib import Path
-from typing import Iterable, Type
+from typing import Iterable, Type, Dict
 
-from kedro.context import KedroContext, load_context
+from kedro.context import KedroContext, load_context, KedroContextError
 from kedro.runner import AbstractRunner
 from kedro.pipeline import Pipeline
 
-from {{ cookiecutter.python_package }}.pipeline import create_pipeline
+from {{ cookiecutter.python_package }}.pipeline import create_pipelines
 
 
 class ProjectContext(KedroContext):
@@ -47,9 +47,8 @@ class ProjectContext(KedroContext):
     project_name = "{{ cookiecutter.project_name }}"
     project_version = "{{ cookiecutter.kedro_version }}"
 
-    def _get_pipeline(self) -> Pipeline:
-        # pylint: disable=no-self-use
-        return create_pipeline()
+    def _get_pipelines(self) -> Dict[str, Pipeline]:
+        return create_pipelines()
 
 
 def main(

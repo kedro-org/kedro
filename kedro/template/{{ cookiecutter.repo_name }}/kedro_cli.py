@@ -72,6 +72,9 @@ TAG_ARG_HELP = """Construct the pipeline using only nodes which have this tag
 attached. Option can be used multiple times, what results in a
 pipeline constructed from nodes having any of those tags."""
 
+PIPELINE_ARG_HELP = """Name of the modular pipeline to run.
+If not set, the project pipeline is run by default."""
+
 ENV_ARG_HELP = """Run the pipeline in a configured environment. If not specified,
 pipeline will run using environment `local`."""
 
@@ -100,6 +103,7 @@ overwrite its contents."""
 def _split_string(ctx, param, value):
     return [item for item in value.split(",") if item]
 
+
 @click.group(context_settings=CONTEXT_SETTINGS, name=__file__)
 def cli():
     """Command line tools for manipulating a Kedro project."""
@@ -124,7 +128,8 @@ def cli():
 @click.option("--parallel", "-p", is_flag=True, multiple=False, help=PARALLEL_ARG_HELP)
 @click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
 @click.option("--tag", "-t", type=str, default=None, multiple=True, help=TAG_ARG_HELP)
-def run(tag, env, parallel, runner, node_names, to_nodes, from_nodes, from_inputs):
+@click.option("--pipeline", type=str, default=None, help=PIPELINE_ARG_HELP)
+def run(tag, env, parallel, runner, node_names, to_nodes, from_nodes, from_inputs, pipeline):
     """Run the pipeline."""
     if parallel and runner:
         raise KedroCliError(
@@ -143,6 +148,7 @@ def run(tag, env, parallel, runner, node_names, to_nodes, from_nodes, from_input
         from_nodes=from_nodes,
         to_nodes=to_nodes,
         from_inputs=from_inputs,
+        pipeline_name=pipeline,
     )
 
 
@@ -316,7 +322,8 @@ def convert_notebook(all_flag, overwrite_flag, filepath):
     relative and absolute paths are accepted.
     Should not be provided if --all flag is already present.
     """
-    from {{cookiecutter.python_package}}.run import ProjectContext
+    context = load_context(Path.cwd())
+
     if not filepath and not all_flag:
         secho(
             "Please specify a notebook filepath "
@@ -324,7 +331,7 @@ def convert_notebook(all_flag, overwrite_flag, filepath):
         )
         sys.exit(1)
 
-    kedro_project_path = ProjectContext(Path.cwd()).project_path
+    kedro_project_path = context.project_path
     kedro_package_name = "{{cookiecutter.python_package}}"
 
     if all_flag:

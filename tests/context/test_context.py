@@ -39,6 +39,8 @@ from pandas.util.testing import assert_frame_equal
 
 from kedro import __version__
 from kedro.context import KedroContext, KedroContextError
+from kedro.io import CSVLocalDataSet
+from kedro.io.core import Version, generate_timestamp
 from kedro.pipeline import Pipeline, node
 from kedro.runner import ParallelRunner, SequentialRunner
 
@@ -109,6 +111,7 @@ def local_config(tmp_path):
             "type": "CSVLocalDataSet",
             "filepath": cars_filepath,
             "save_args": {"index": False},
+            "versioned": True,
         },
         "boats": {"type": "CSVLocalDataSet", "filepath": boats_filepath},
     }
@@ -460,6 +463,40 @@ class TestKedroContextRun:
         assert "Running node: node3: identity([trains]) -> [ships]" in log_msgs
         assert "Running node: node4: identity([ships]) -> [planes]" in log_msgs
         assert "Pipeline execution completed successfully." in log_msgs
+
+    def test_run_load_versions(self, tmp_path, dummy_context, dummy_dataframe, mocker):
+        class DummyContext(KedroContext):
+            project_name = "bob"
+            project_version = __version__
+
+            def _get_pipelines(self) -> Dict[str, Pipeline]:
+                return {"__default__": Pipeline([node(identity, "cars", "boats")])}
+
+        mocker.patch("logging.config.dictConfig")
+        dummy_context = DummyContext(str(tmp_path))
+        filepath = str(dummy_context.project_path / "cars.csv")
+
+        old_save_version = generate_timestamp()
+        old_df = pd.DataFrame({"col1": [0, 0], "col2": [0, 0], "col3": [0, 0]})
+        old_csv_data_set = CSVLocalDataSet(
+            filepath=filepath,
+            save_args={"sep": ","},
+            version=Version(None, old_save_version),
+        )
+        old_csv_data_set.save(old_df)
+
+        new_save_version = generate_timestamp()
+        new_csv_data_set = CSVLocalDataSet(
+            filepath=filepath,
+            save_args={"sep": ","},
+            version=Version(None, new_save_version),
+        )
+        new_csv_data_set.save(dummy_dataframe)
+
+        load_versions = {"cars": old_save_version}
+        dummy_context.run(load_versions=load_versions)
+        assert not dummy_context.catalog.load("boats").equals(dummy_dataframe)
+        assert dummy_context.catalog.load("boats").equals(old_df)
 
     def test_run_with_empty_pipeline(self, tmp_path, mocker):
         class DummyContext(KedroContext):

@@ -1,6 +1,7 @@
 # Release 0.15.2
 
 ## Major features and improvements
+* Added a new `--load-version` to specify a particular dataset version for loading.
 * Modular pipeline support - break the pipeline into isolated parts with reusability in mind.
 * Multiple pipelines - ability to have multiple entry point pipelines and chose one with `kedro run --pipeline NAME`.
 

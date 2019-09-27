@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -27,8 +27,6 @@
 # limitations under the License.
 
 
-from pathlib import PurePath
-
 import matplotlib
 import numpy as np
 import pytest
@@ -36,7 +34,7 @@ import pytest
 from kedro.contrib.io.matplotlib import MatplotlibWriter
 from kedro.io import DataSetError
 
-matplotlib.use('TkAgg')  # used to facilitate simple inclusion into kedro CI/CD
+matplotlib.use("TkAgg")  # used to facilitate simple inclusion into kedro CI/CD
 
 
 def test_should_write_to_image_in_single_mode(tmpdir):
@@ -79,9 +77,7 @@ def test_should_write_to_image_in_list(tmpdir):
         plt.close()
 
     experimental_filepath = str(tmpdir.join("list_images"))
-    plot_writer = MatplotlibWriter(
-        filepath=experimental_filepath
-    )
+    plot_writer = MatplotlibWriter(filepath=experimental_filepath)
     plot_writer.save(plots)
 
     # write and compare

@@ -1,9 +1,9 @@
 ## Description
-A dataset class to save matplotlib figures/plt objects to images locally, MatplotlibWriter. 
+A dataset class to save matplotlib figures/plt objects to images locally, MatplotlibWriter.
 
 
 ## Context
-In the process of making documentation of features, programmatically making plots of all features in a standardised way 
+In the process of making documentation of features, programmatically making plots of all features in a standardised way
 and embedding links in .md files has been a big timesaver.
 
 

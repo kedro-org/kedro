@@ -142,6 +142,7 @@ class TestRunCommand:
             from_nodes=[],
             to_nodes=[],
             from_inputs=[],
+            pipeline_name=None,
         )
 
         assert isinstance(
@@ -174,6 +175,7 @@ class TestRunCommand:
             from_nodes=[],
             to_nodes=[],
             from_inputs=[],
+            pipeline_name=None,
         )
 
         assert isinstance(

@@ -188,7 +188,31 @@ class DummyContext(KedroContext):
     project_name = "bob"
     project_version = __version__
 
-    def _get_pipeline(self) -> Pipeline:
+    def _get_pipelines(self) -> Dict[str, Pipeline]:
+        pipeline = Pipeline(
+            [
+                node(identity, "cars", "boats", name="node1", tags=["tag1"]),
+                node(identity, "boats", "trains", name="node2"),
+                node(identity, "trains", "ships", name="node3"),
+                node(identity, "ships", "planes", name="node4"),
+            ],
+            name="pipeline",
+        )
+        return {"__default__": pipeline}
+
+
+class DummyContextWithPipelinePropertyOnly(KedroContext):
+    """
+    We need this for testing the backward compatibility.
+    """
+
+    # pylint: disable=abstract-method
+
+    project_name = "bob_old"
+    project_version = __version__
+
+    @property
+    def pipeline(self) -> Pipeline:
         return Pipeline(
             [
                 node(identity, "cars", "boats", name="node1", tags=["tag1"]),
@@ -257,8 +281,8 @@ class TestKedroContext:
             project_name = "bob"
             project_version = invalid_version
 
-            def _get_pipeline(self) -> Pipeline:
-                return Pipeline([])  # pragma: no cover
+            def _get_pipelines(self) -> Dict[str, Pipeline]:
+                return {"__default__": Pipeline([])}  # pragma: no cover
 
         pattern = (
             r"Your Kedro project version {} does not match "
@@ -308,6 +332,10 @@ class TestKedroContext:
         assert dummy_context.pipeline.nodes[0].outputs == ["boats"]
         assert dummy_context.pipeline.nodes[1].inputs == ["boats"]
         assert dummy_context.pipeline.nodes[1].outputs == ["trains"]
+
+    def test_pipelines(self, dummy_context):
+        assert len(dummy_context.pipelines) == 1
+        assert len(dummy_context.pipelines["__default__"].nodes) == 4
 
 
 @pytest.mark.usefixtures("config_dir")
@@ -438,8 +466,8 @@ class TestKedroContextRun:
             project_name = "bob"
             project_version = __version__
 
-            def _get_pipeline(self) -> Pipeline:
-                return Pipeline([])
+            def _get_pipelines(self) -> Dict[str, Pipeline]:
+                return {"__default__": Pipeline([])}
 
         mocker.patch("logging.config.dictConfig")
         dummy_context = DummyContext(str(tmp_path))
@@ -469,8 +497,8 @@ class TestKedroContextRun:
             project_name = "fred"
             project_version = __version__
 
-            def _get_pipeline(self) -> Pipeline:
-                return context_pipeline
+            def _get_pipelines(self) -> Dict[str, Pipeline]:
+                return {"__default__": context_pipeline}
 
         mocker.patch("logging.config.dictConfig")
 
@@ -486,3 +514,42 @@ class TestKedroContextRun:
         ]
 
         assert expected_message in actual_messages
+
+    def test_missing_pipeline_name(self, dummy_context, dummy_dataframe):
+        dummy_context.catalog.save("cars", dummy_dataframe)
+
+        with pytest.raises(KedroContextError, match="Failed to find the pipeline"):
+            dummy_context.run(pipeline_name="invalid-name")
+
+    def test_without_get_pipeline_deprecated(
+        self, dummy_dataframe, mocker, tmp_path, env
+    ):
+        """
+        The old way of providing a `pipeline` context property is deprecated,
+        but still works, yielding a warning message.
+        """
+        mocker.patch("logging.config.dictConfig")
+        dummy_context = DummyContextWithPipelinePropertyOnly(str(tmp_path), env=env)
+        dummy_context.catalog.save("cars", dummy_dataframe)
+
+        msg = "You are using the deprecated pipeline construction mechanism"
+        with pytest.warns(DeprecationWarning, match=msg):
+            outputs = dummy_context.run()
+
+        pd.testing.assert_frame_equal(outputs["planes"], dummy_dataframe)
+
+    def test_without_get_pipeline_error(self, dummy_dataframe, mocker, tmp_path, env):
+        """
+        The old way of providing a `pipeline` context property is deprecated,
+        but still works, yielding a warning message.
+        If you try to run a sub-pipeline by name - it's an error.
+        """
+
+        mocker.patch("logging.config.dictConfig")
+        dummy_context = DummyContextWithPipelinePropertyOnly(str(tmp_path), env=env)
+        dummy_context.catalog.save("cars", dummy_dataframe)
+
+        error_msg = "The project is not fully migrated to use multiple pipelines."
+
+        with pytest.raises(KedroContextError, match=error_msg):
+            dummy_context.run(pipeline_name="missing-pipeline")

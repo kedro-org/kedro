@@ -220,13 +220,16 @@ def _create_project(config_path: str, verbose: bool):
         )
 
         if not config["include_example"]:
-            paths_to_remove = [
-                result_path / "data" / "01_raw" / "iris.csv",
-                result_path / "src" / config["python_package"] / "nodes" / "example.py",
-            ]
+            (result_path / "data" / "01_raw" / "iris.csv").unlink()
 
-            for path in paths_to_remove:
-                path.unlink()
+            pipelines_dir = result_path / "src" / config["python_package"] / "pipelines"
+
+            for dir_path in [
+                pipelines_dir / "data_engineering",
+                pipelines_dir / "data_science",
+            ]:
+                shutil.rmtree(str(dir_path))
+
         _clean_pycache(result_path)
         _print_kedro_new_success_message(result_path)
     except click.exceptions.Abort:  # pragma: no cover

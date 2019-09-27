@@ -39,7 +39,7 @@ def sum_dfs(dataframe1: pd.DataFrame, dataframe2: pd.DataFrame):
     return dataframe1 + dataframe2.values
 
 
-def create_pipeline(*tags: str):
+def create_pipelines(*tags: str):
     example_pipeline = Pipeline(
         [
             node(
@@ -87,4 +87,4 @@ def create_pipeline(*tags: str):
     else:
         pipeline = example_pipeline
 
-    return pipeline
+    return {"__default__": pipeline}

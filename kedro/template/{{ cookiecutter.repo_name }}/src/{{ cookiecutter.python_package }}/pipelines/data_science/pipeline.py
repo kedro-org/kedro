@@ -25,32 +25,29 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Example code for the nodes in the example pipeline. This code is meant
+just for illustrating basic Kedro features.
 
+PLEASE DELETE THIS FILE ONCE YOU START WORKING ON YOUR OWN PROJECT!
 """
-Black needs python 3.6+, but Kedro should work on 3.5 too,
-that's why we can't put ``black`` into test_requirements.txt and
-have to install it manually like that.
 
-If python version is 3.5 - just exit with 0 status.
-"""
-import platform
-import shlex
-import subprocess
-import sys
+from kedro.pipeline import Pipeline, node
+from .nodes import train_model, predict, report_accuracy
 
-if __name__ == "__main__":
-    required_version = tuple(int(x) for x in sys.argv[1].strip().split("."))
-    install_cmd = shlex.split(sys.argv[2])
-    run_cmd = shlex.split(sys.argv[3])
 
-    current_version = tuple(map(int, platform.python_version_tuple()[:2]))
-
-    if current_version < required_version:
-        print("Python version is too low, exiting")
-        sys.exit(0)
-
-    try:
-        subprocess.run(run_cmd, check=True)
-    except (FileNotFoundError, subprocess.CalledProcessError):
-        subprocess.run(install_cmd, check=True)
-        subprocess.run(run_cmd, check=True)
+def create_pipeline(**kwargs):
+    return Pipeline(
+        [
+            node(
+                train_model,
+                ["example_train_x", "example_train_y", "parameters"],
+                "example_model",
+            ),
+            node(
+                predict,
+                dict(model="example_model", test_x="example_test_x"),
+                "example_predictions",
+            ),
+            node(report_accuracy, ["example_predictions", "example_test_y"], None),
+        ]
+    )

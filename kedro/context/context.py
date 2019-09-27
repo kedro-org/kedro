@@ -83,8 +83,7 @@ class KedroContext(abc.ABC):
         Args:
             project_path: Project path to define the context for.
             env: Optional argument for configuration default environment to be used
-            for running the pipeline. If not specified, it defaults to "local".
-
+                for running the pipeline. If not specified, it defaults to "local".
         """
 
         def _version_mismatch_error(context_version):
@@ -141,16 +140,38 @@ class KedroContext(abc.ABC):
         """
         return self._get_pipeline()
 
-    def _get_pipeline(self) -> Pipeline:
+    @property
+    def pipelines(self) -> Dict[str, Pipeline]:
+        """Read-only property for an instance of Pipeline.
+
+        Returns:
+            A dictionary of defined pipelines.
+        """
+        return self._get_pipelines()
+
+    def _get_pipeline(self, name: str = None) -> Pipeline:
+        name = name or "__default__"
+        pipelines = self._get_pipelines()
+
+        try:
+            return pipelines[name]
+        except (TypeError, KeyError):
+            raise KedroContextError(
+                "Failed to find the pipeline named '{}'. "
+                "It needs to be generated and returned "
+                "by the '_get_pipelines' function.".format(name)
+            )
+
+    def _get_pipelines(self) -> Dict[str, Pipeline]:
         """Abstract method for a hook for changing the creation of a Pipeline instance.
 
         Returns:
-            Defined pipeline.
-
+            A dictionary of defined pipelines.
         """
+        # NOTE: This method is not `abc.abstractmethod` for backward compatibility.
         raise NotImplementedError(
             "`{}` is a subclass of KedroContext and it must implement "
-            "the `_get_pipeline` method".format(self.__class__.__name__)
+            "the `_get_pipelines` method".format(self.__class__.__name__)
         )
 
     @property
@@ -324,7 +345,7 @@ class KedroContext(abc.ABC):
             raise KedroContextError("Pipeline contains no nodes")
         return new_pipeline
 
-    def run(  # pylint: disable=too-many-arguments
+    def run(  # pylint: disable=too-many-arguments,too-many-locals
         self,
         tags: Iterable[str] = None,
         runner: AbstractRunner = None,
@@ -332,6 +353,7 @@ class KedroContext(abc.ABC):
         from_nodes: Iterable[str] = None,
         to_nodes: Iterable[str] = None,
         from_inputs: Iterable[str] = None,
+        pipeline_name: str = None,
     ) -> Dict[str, Any]:
         """Runs the pipeline with a specified runner.
 
@@ -350,6 +372,8 @@ class KedroContext(abc.ABC):
                 end point of the new ``Pipeline``.
             from_inputs: An optional list of input datasets which should be used as a
                 starting point of the new ``Pipeline``.
+            pipeline_name: Name of the ``Pipeline`` to execute.
+                Defaults to "__default__".
         Raises:
             KedroContextError: If the resulting ``Pipeline`` is empty
                 or incorrect tags are provided.
@@ -361,7 +385,26 @@ class KedroContext(abc.ABC):
         # Report project name
         logging.info("** Kedro project %s", self.project_path.name)
 
-        pipeline = self.pipeline
+        try:
+            pipeline = self._get_pipeline(name=pipeline_name)
+        except NotImplementedError:
+            common_migration_message = (
+                "`ProjectContext._get_pipeline(self, name)` method is expected. "
+                "Please refer to the 'Modular Pipelines' section of the documentation."
+            )
+            if pipeline_name:
+                raise KedroContextError(
+                    "The project is not fully migrated to use multiple pipelines. "
+                    + common_migration_message
+                )
+
+            warn(
+                "You are using the deprecated pipeline construction mechanism. "
+                + common_migration_message,
+                DeprecationWarning,
+            )
+            pipeline = self.pipeline
+
         filtered_pipeline = self._filter_pipeline(
             pipeline=pipeline,
             tags=tags,
@@ -419,16 +462,26 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
         os.environ["PYTHONPATH"] = src_path
 
     kedro_yaml = project_path / ".kedro.yml"
+
     try:
         with kedro_yaml.open("r") as kedro_yml:
-
-            context_path = yaml.safe_load(kedro_yml)["context_path"]
-    except Exception:
+            kedro_yaml_content = yaml.safe_load(kedro_yml)
+    except FileNotFoundError:
         raise KedroContextError(
-            "Could not retrive 'context_path' from '.kedro.yml' in {}. If you have created "
+            "Could not find '.kedro.yml' in {}. If you have created "
             "your project with Kedro version <0.15.0, make sure to update your project template. "
             "See https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md "
             "for how to migrate your Kedro project.".format(str(project_path))
+        )
+    except Exception:
+        raise KedroContextError("Failed to parse '.kedro.yml' file")
+
+    try:
+        context_path = kedro_yaml_content["context_path"]
+    except (KeyError, TypeError):
+        raise KedroContextError(
+            "'.kedro.yml' doesn't have a required `context_path` field. "
+            "Please refer to the documentation."
         )
 
     context_class = load_obj(context_path)

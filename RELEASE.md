@@ -1,6 +1,8 @@
 # Release 0.15.2
 
 ## Major features and improvements
+* Modular pipeline support - break the pipeline into isolated parts with reusability in mind.
+* Multiple pipelines - ability to have multiple entry point pipelines and chose one with `kedro run --pipeline NAME`.
 
 ## Bug fixes and other changes
 * Users will override `_get_pipeline` abstract method in `ProjectContext(KedroContext)` in `run.py` rather than `pipeline` abstract property. `pipeline` property is not abstract anymore.

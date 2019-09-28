@@ -28,17 +28,30 @@
 
 # pylint: disable=unused-argument
 
+from pathlib import PurePath
 from unittest.mock import patch
 
 import pandas as pd
 import pytest
 
 from kedro.contrib.io.azure import CSVBlobDataSet
-from kedro.io import DataSetError
+from kedro.io import DataSetError, Version
+from kedro.io.core import generate_timestamp
 
 TEST_FILE_NAME = "test.csv"
+TEST_FILE_PATH = PurePath(TEST_FILE_NAME)
 TEST_CONTAINER_NAME = "test_bucket"
 TEST_CREDENTIALS = {"account_name": "ACCOUNT_NAME", "account_key": "ACCOUNT_KEY"}
+
+
+@pytest.fixture(params=[None])
+def load_version(request):
+    return request.param
+
+
+@pytest.fixture(params=[None])
+def save_version(request):
+    return request.param or generate_timestamp()
 
 
 @pytest.fixture()
@@ -60,6 +73,84 @@ def blob_csv_data_set():
         )
 
     return make_data_set
+
+
+@pytest.fixture
+def versioned_blob_csv_data_set(load_version, save_version):
+    return CSVBlobDataSet(
+        filepath=TEST_FILE_PATH,
+        container_name=TEST_CONTAINER_NAME,
+        credentials=TEST_CREDENTIALS,
+        blob_to_text_args={"to_extra": 42},
+        blob_from_text_args={"from_extra": 42},
+        version=Version(load_version, save_version),
+    )
+
+
+class TestCSVBlobDataSetVersioned:
+    @patch("kedro.contrib.io.azure.csv_blob.BlockBlobService.create_blob_from_text")
+    def test_save(
+        self, save_mock, versioned_blob_csv_data_set, dummy_dataframe, save_version
+    ):
+        """Test that saved and reloaded data matches the original one for
+        the versioned data set."""
+        versioned_blob_csv_data_set.save(dummy_dataframe)
+        # pylint: disable=protected-access
+        assert versioned_blob_csv_data_set._version == Version(None, save_version)
+
+    def test_no_versions(self, versioned_blob_csv_data_set):
+        """Check the error if no versions are available for load."""
+        pattern = r"Did not find any versions for CSVBlobDataSet\(.+\)"
+        with pytest.raises(DataSetError, match=pattern):
+            versioned_blob_csv_data_set.load()
+
+    @patch("kedro.io.core.AbstractVersionedDataSet._get_load_path")
+    @patch("kedro.contrib.io.azure.csv_blob.BlockBlobService.exists")
+    @patch("kedro.contrib.io.azure.csv_blob.BlockBlobService.create_blob_from_text")
+    def test_exists(
+        self,
+        save_mock,
+        exists_mock,
+        load_mock,
+        versioned_blob_csv_data_set,
+        dummy_dataframe,
+        save_version,
+    ):  # pylint: disable=too-many-arguments
+        """Test `exists` method invocation for versioned data set."""
+        versioned_blob_csv_data_set.save(dummy_dataframe)
+        load_path = "{0}/{1}/{0}".format(TEST_FILE_NAME, save_version)
+        load_mock.return_value = load_path
+        versioned_blob_csv_data_set.exists()
+        exists_mock.assert_called_with(load_path)
+
+    @patch("kedro.io.core.AbstractVersionedDataSet._get_load_path")
+    def test_exists_fail(self, load_mock, versioned_blob_csv_data_set, dummy_dataframe):
+        """Test `exists` method returns false when getting load path fails."""
+        load_mock.side_effect = DataSetError
+        assert not versioned_blob_csv_data_set.exists()
+
+    def test_version_str_repr(self, load_version, save_version):
+        """Test that version is in string representation of the class instance
+        when applicable."""
+        ds = CSVBlobDataSet(
+            filepath=TEST_FILE_NAME,
+            container_name=TEST_CONTAINER_NAME,
+            credentials=TEST_CREDENTIALS,
+        )
+        ds_versioned = CSVBlobDataSet(
+            filepath=TEST_FILE_PATH,
+            container_name=TEST_CONTAINER_NAME,
+            credentials=TEST_CREDENTIALS,
+            version=Version(load_version, save_version),
+        )
+        assert TEST_FILE_NAME in str(ds)
+        assert "version" not in str(ds)
+
+        assert TEST_FILE_NAME in str(ds_versioned)
+        ver_str = "version=Version(load={}, save='{}')".format(
+            load_version, save_version
+        )
+        assert ver_str in str(ds_versioned)
 
 
 @patch("kedro.contrib.io.azure.csv_blob.BlockBlobService")

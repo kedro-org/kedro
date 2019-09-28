@@ -35,6 +35,7 @@ import copy
 import logging
 from functools import partial
 from typing import Any, Dict, Iterable, List, Optional, Type, Union
+from warnings import warn
 
 from kedro.io.core import (
     AbstractDataSet,
@@ -254,6 +255,14 @@ class DataCatalog:
         run_id = journal.run_id if journal else None
         save_version = save_version or run_id or generate_timestamp()
         load_versions = copy.deepcopy(load_versions) or {}
+
+        missing_keys = load_versions.keys() - catalog.keys()
+        if missing_keys:
+            warn(
+                "`load_versions` keys [{}] are not found in the catalog.".format(
+                    ", ".join(sorted(missing_keys))
+                )
+            )
 
         for ds_name, ds_config in catalog.items():
             if "type" not in ds_config:

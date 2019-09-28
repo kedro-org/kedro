@@ -51,6 +51,22 @@ class TestLoadContext:
         """Test for loading context from an invalid path. """
         other_path = tmp_path / "other"
         other_path.mkdir()
-        pattern = r"Could not retrive \'context_path\' from \'.kedro.yml\'"
+        pattern = r"Could not find '\.kedro\.yml'"
         with pytest.raises(KedroContextError, match=pattern):
             load_context(str(other_path))
+
+    def test_kedro_yml_invalid_format(self, fake_repo_path):
+        """Test for loading context from an invalid path. """
+        kedro_yml_path = fake_repo_path / ".kedro.yml"
+        kedro_yml_path.write_text("!!")  # Invalid YAML
+        pattern = r"Failed to parse '\.kedro\.yml' file"
+        with pytest.raises(KedroContextError, match=pattern):
+            load_context(str(fake_repo_path))
+
+    def test_kedro_yml_has_no_context_path(self, fake_repo_path):
+        """Test for loading context from an invalid path. """
+        kedro_yml_path = fake_repo_path / ".kedro.yml"
+        kedro_yml_path.write_text('fake_key: fake_value\n')
+        pattern = r"'\.kedro\.yml' doesn't have a required `context_path` field"
+        with pytest.raises(KedroContextError, match=pattern):
+            load_context(str(fake_repo_path))

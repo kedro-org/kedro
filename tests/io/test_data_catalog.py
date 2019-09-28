@@ -390,3 +390,11 @@ class TestDataCatalogVersioned:
             "configuration since it is a reserved word and cannot be "
             "directly specified" in log_record.message
         )
+
+    def test_from_sane_config_load_versions_warn(self, sane_config):
+        sane_config["catalog"]["boats"]["versioned"] = True
+        version = generate_timestamp()
+        load_version = {"non-boart": version}
+        pattern = r"\`load_versions\` keys \[non-boart\] are not found in the catalog\."
+        with pytest.warns(UserWarning, match=pattern):
+            DataCatalog.from_config(**sane_config, load_versions=load_version)

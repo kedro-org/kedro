@@ -49,7 +49,7 @@ from kedro.cli.utils import (
 from kedro.utils import load_obj
 from kedro.runner import SequentialRunner
 from kedro.context import load_context
-from typing import Iterable, List
+from typing import Iterable, List, Dict
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -84,7 +84,9 @@ FROM_NODES_HELP = """A list of node names which should be used as a starting poi
 
 TO_NODES_HELP = """A list of node names which should be used as an end point."""
 
-FROM_INPUTS_HELP = """A list of dataset names which should be used as a starting point."""
+FROM_INPUTS_HELP = (
+    """A list of dataset names which should be used as a starting point."""
+)
 
 PARALLEL_ARG_HELP = """Run the pipeline using the `ParallelRunner`.
 If not specified, use the `SequentialRunner`. This flag cannot be used together
@@ -99,9 +101,31 @@ including sub-folders."""
 OVERWRITE_HELP = """If Python file already exists for the equivalent notebook,
 overwrite its contents."""
 
+LOAD_VERSION_HELP = """Specify a particular dataset version (timestamp) for loading."""
+
 
 def _split_string(ctx, param, value):
     return [item for item in value.split(",") if item]
+
+
+def _reformat_load_versions(ctx, param, value) -> Dict[str, str]:
+    """Reformat data structure from tuple to dictionary for `load-version`.
+        E.g ('dataset1:time1', 'dataset2:time2') -> {"dataset1": "time1", "dataset2": "time2"}.
+    """
+    load_version_separator = ":"
+    load_versions_dict = {}
+
+    for load_version in value:
+        load_version_list = load_version.split(load_version_separator)
+        if len(load_version_list) != 2:
+            raise ValueError(
+                "Expected the form of `load_version` to be "
+                "`dataset_name:YYYY-MM-DDThh.mm.ss.sssZ`,"
+                "found {} instead".format(load_version)
+            )
+        load_versions_dict[load_version_list[0]] = load_version_list[1]
+
+    return load_versions_dict
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, name=__file__)
@@ -110,26 +134,43 @@ def cli():
 
 
 @cli.command()
-@click.option("--from-inputs", type=str, default="", help=FROM_INPUTS_HELP, callback=_split_string)
-@click.option("--from-nodes", type=str, default="", help=FROM_NODES_HELP, callback=_split_string)
-@click.option("--to-nodes", type=str, default="", help=TO_NODES_HELP, callback=_split_string)
 @click.option(
-    "--node",
-    "-n",
-    "node_names",
-    type=str,
-    default=None,
-    multiple=True,
-    help=NODE_ARG_HELP,
+    "--from-inputs", type=str, default="", help=FROM_INPUTS_HELP, callback=_split_string
 )
+@click.option(
+    "--from-nodes", type=str, default="", help=FROM_NODES_HELP, callback=_split_string
+)
+@click.option(
+    "--to-nodes", type=str, default="", help=TO_NODES_HELP, callback=_split_string
+)
+@click.option("--node", "-n", "node_names", type=str, multiple=True, help=NODE_ARG_HELP)
 @click.option(
     "--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP
 )
 @click.option("--parallel", "-p", is_flag=True, multiple=False, help=PARALLEL_ARG_HELP)
 @click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
-@click.option("--tag", "-t", type=str, default=None, multiple=True, help=TAG_ARG_HELP)
+@click.option("--tag", "-t", type=str, multiple=True, help=TAG_ARG_HELP)
+@click.option(
+    "--load-version",
+    "-lv",
+    type=str,
+    multiple=True,
+    help=LOAD_VERSION_HELP,
+    callback=_reformat_load_versions,
+)
 @click.option("--pipeline", type=str, default=None, help=PIPELINE_ARG_HELP)
-def run(tag, env, parallel, runner, node_names, to_nodes, from_nodes, from_inputs, pipeline):
+def run(
+    tag,
+    env,
+    parallel,
+    runner,
+    node_names,
+    to_nodes,
+    from_nodes,
+    from_inputs,
+    load_version,
+    pipeline,
+):
     """Run the pipeline."""
     if parallel and runner:
         raise KedroCliError(
@@ -148,6 +189,7 @@ def run(tag, env, parallel, runner, node_names, to_nodes, from_nodes, from_input
         from_nodes=from_nodes,
         to_nodes=to_nodes,
         from_inputs=from_inputs,
+        load_versions=load_version,
         pipeline_name=pipeline,
     )
 

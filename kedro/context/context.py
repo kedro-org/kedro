@@ -195,7 +195,10 @@ class KedroContext(abc.ABC):
         return self._get_catalog()
 
     def _get_catalog(
-        self, save_version: str = None, journal: VersionJournal = None
+        self,
+        save_version: str = None,
+        journal: VersionJournal = None,
+        load_versions: Dict[str, str] = None,
     ) -> DataCatalog:
         """A hook for changing the creation of a DataCatalog instance.
 
@@ -205,16 +208,19 @@ class KedroContext(abc.ABC):
         """
         conf_catalog = self.config_loader.get("catalog*", "catalog*/**")
         conf_creds = self._get_config_credentials()
-        catalog = self._create_catalog(conf_catalog, conf_creds, save_version, journal)
+        catalog = self._create_catalog(
+            conf_catalog, conf_creds, save_version, journal, load_versions
+        )
         catalog.add_feed_dict(self._get_feed_dict())
         return catalog
 
-    def _create_catalog(  # pylint: disable=no-self-use
+    def _create_catalog(  # pylint: disable=no-self-use,too-many-arguments
         self,
         conf_catalog: Dict[str, Any],
         conf_creds: Dict[str, Any],
         save_version: str = None,
         journal: VersionJournal = None,
+        load_versions: Dict[str, str] = None,
     ) -> DataCatalog:
         """A factory method for the DataCatalog instantiation.
 
@@ -223,7 +229,11 @@ class KedroContext(abc.ABC):
 
         """
         return DataCatalog.from_config(
-            conf_catalog, conf_creds, save_version=save_version, journal=journal
+            conf_catalog,
+            conf_creds,
+            save_version=save_version,
+            journal=journal,
+            load_versions=load_versions,
         )
 
     @property
@@ -353,6 +363,7 @@ class KedroContext(abc.ABC):
         from_nodes: Iterable[str] = None,
         to_nodes: Iterable[str] = None,
         from_inputs: Iterable[str] = None,
+        load_versions: Dict[str, str] = None,
         pipeline_name: str = None,
     ) -> Dict[str, Any]:
         """Runs the pipeline with a specified runner.
@@ -372,6 +383,8 @@ class KedroContext(abc.ABC):
                 end point of the new ``Pipeline``.
             from_inputs: An optional list of input datasets which should be used as a
                 starting point of the new ``Pipeline``.
+            load_versions: An optional flag to specify a particular dataset version timestamp
+                to load.
             pipeline_name: Name of the ``Pipeline`` to execute.
                 Defaults to "__default__".
         Raises:
@@ -429,7 +442,9 @@ class KedroContext(abc.ABC):
         }
         journal = VersionJournal(record_data)
 
-        catalog = self._get_catalog(save_version=run_id, journal=journal)
+        catalog = self._get_catalog(
+            save_version=run_id, journal=journal, load_versions=load_versions
+        )
 
         # Run the runner
         runner = runner or SequentialRunner()

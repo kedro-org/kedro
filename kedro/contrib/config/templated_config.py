@@ -68,6 +68,43 @@ class TemplatedConfigLoader(ConfigLoader):
 
         >>> my_context = load_context(Path.cwd(), env=env)
         >>> my_context.run(tags, runner, node_names, from_nodes, to_nodes)
+
+    The contents of the dictionary resulting from the `globals_pattern` get merged with the
+    `globals_dict`. In case of conflicts, the keys in the `globals_dict` get precedence.
+
+    Global parameters can be namespaced as well. An example could work as follows:
+
+    globals.yml
+    ::
+        bucket: "my_s3_bucket"
+
+        environment: "dev"
+
+        datasets:
+            csv: "CSVS3DataSet"
+            spark: "SparkLocalDataSet"
+
+        folders:
+            raw: "00_raw"
+            int: "01_intermediate"
+            pri: "02_primary"
+            fea: "04_feature"
+
+
+
+    catalog.yml:
+    ::
+        raw_boat_data:
+            type: ${datasets.spark}
+            filepath: "s3a://${bucket}/${environment}/${folders.raw}/boats.csv"
+            file_format: parquet
+
+        raw_car_data:
+            type: ${datasets.csv}
+            filepath: "/${environment}/${folders.raw}/cars.csv"
+            bucket_name: "${bucket}"
+
+    This uses jmespath in the background. For more information see: http://jmespath.org/.
     """
 
     # pylint: disable=missing-type-doc
@@ -92,17 +129,13 @@ class TemplatedConfigLoader(ConfigLoader):
                 duplicate keys, the arg_values keys take precedence.
         """
 
-        super(TemplatedConfigLoader, self).__init__(conf_paths)
+        super().__init__(conf_paths)
 
-        self._arg_dict = (
-            super(TemplatedConfigLoader, self).get(globals_pattern)
-            if globals_pattern
-            else {}
-        )
+        self._arg_dict = super().get(globals_pattern) if globals_pattern else {}
 
         globals_dict = globals_dict or {}
 
-        self._arg_dict = dict(**self._arg_dict, **globals_dict)
+        self._arg_dict = {**self._arg_dict, **globals_dict}
 
     def get(self, *patterns: str):
         """
@@ -133,7 +166,7 @@ class TemplatedConfigLoader(ConfigLoader):
 def _replace_vals(val: Any, defaults: Dict[str, Any]) -> Any:
     """
     Recursive function that loops through the values of a map. In case another map or a list is
-    encountered, it calls itsself. When a string is encountered it will use the default dict to
+    encountered, it calls itself. When a string is encountered it will use the default dict to
     replace strings that look like ${param_name} (where param_name can be any key value) with the
     corresponding value of the key 'param_name' in the default dict.
 

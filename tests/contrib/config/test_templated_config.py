@@ -257,12 +257,14 @@ class TestTemplatedConfigLoader:
         assert catalog["boats"]["users"] == ["fred", "${write_only_user}"]
 
     @pytest.mark.usefixtures("proj_catalog_advanced")
-    def test_catlog_advanced(self, tmp_path, conf_paths):
+    def test_catlog_advanced(self, tmp_path, conf_paths, normal_config_advanced):
         """Test whether it responds well to advanced yaml values (i.e. nested dicts, booleans,
         lists, etc.)"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
-        catalog = TemplatedConfigLoader(conf_paths, globals_dict={}).get("catalog*.yml")
+        catalog = TemplatedConfigLoader(
+            conf_paths, globals_dict=normal_config_advanced
+        ).get("catalog*.yml")
 
         assert catalog["planes"]["type"] == "SparkJDBCDataSet"
         assert catalog["planes"]["postgres_credentials"]["user"] == "Fakeuser"

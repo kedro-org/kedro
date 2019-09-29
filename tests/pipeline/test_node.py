@@ -26,7 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import sys
-from functools import partial, wraps
+from functools import partial, update_wrapper, wraps
 from typing import Callable
 
 import pytest
@@ -66,6 +66,7 @@ def simple_tuple_node_list():
         (constant_output, None, "M"),
         (biconcat, ["N", "O"], None),
         (lambda x: None, "F", "G"),
+        (lambda x: ("a", "b"), "G", ["X", "Y"]),
     ]
 
 
@@ -222,7 +223,7 @@ def bad_input_type_node():
 
 
 def bad_output_type_node():
-    return lambda x: None, "A", ("B", "C")
+    return lambda x: None, "A", {"B", "C"}
 
 
 def bad_function_type_node():
@@ -401,3 +402,9 @@ class TestNames:
         assert str(n) == "<partial>([in]) -> [out]"
         assert n.name == "<partial>([in]) -> [out]"
         assert n.short_name == "<Partial>"
+
+    def test_updated_partial(self):
+        n = node(update_wrapper(partial(identity), identity), ["in"], ["out"])
+        assert str(n) == "identity([in]) -> [out]"
+        assert n.name == "identity([in]) -> [out]"
+        assert n.short_name == "Identity"

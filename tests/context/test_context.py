@@ -39,6 +39,8 @@ from pandas.util.testing import assert_frame_equal
 
 from kedro import __version__
 from kedro.context import KedroContext, KedroContextError
+from kedro.io import CSVLocalDataSet
+from kedro.io.core import Version, generate_timestamp
 from kedro.pipeline import Pipeline, node
 from kedro.runner import ParallelRunner, SequentialRunner
 
@@ -109,6 +111,7 @@ def local_config(tmp_path):
             "type": "CSVLocalDataSet",
             "filepath": cars_filepath,
             "save_args": {"index": False},
+            "versioned": True,
         },
         "boats": {"type": "CSVLocalDataSet", "filepath": boats_filepath},
     }
@@ -146,8 +149,69 @@ def identity(input1: str):
     return input1  # pragma: no cover
 
 
+def bad_node(x):
+    raise ValueError("Oh no!")
+
+
+bad_pipeline_middle = Pipeline(
+    [
+        node(identity, "cars", "boats", name="node1", tags=["tag1"]),
+        node(identity, "boats", "trains", name="node2"),
+        node(bad_node, "trains", "ships", name="nodes3"),
+        node(identity, "ships", "planes", name="node4"),
+    ],
+    name="bad_pipeline",
+)
+
+expected_message_middle = (
+    "There are 2 nodes that have not run.\n"
+    "You can resume the pipeline run with the following command:\n"
+    "kedro run --from-inputs trains"
+)
+
+
+bad_pipeline_head = Pipeline(
+    [
+        node(bad_node, "cars", "boats", name="node1", tags=["tag1"]),
+        node(identity, "boats", "trains", name="node2"),
+        node(identity, "trains", "ships", name="nodes3"),
+        node(identity, "ships", "planes", name="node4"),
+    ],
+    name="bad_pipeline",
+)
+
+expected_message_head = (
+    "There are 4 nodes that have not run.\n"
+    "You can resume the pipeline run with the following command:\n"
+    "kedro run"
+)
+
+
 class DummyContext(KedroContext):
     project_name = "bob"
+    project_version = __version__
+
+    def _get_pipelines(self) -> Dict[str, Pipeline]:
+        pipeline = Pipeline(
+            [
+                node(identity, "cars", "boats", name="node1", tags=["tag1"]),
+                node(identity, "boats", "trains", name="node2"),
+                node(identity, "trains", "ships", name="node3"),
+                node(identity, "ships", "planes", name="node4"),
+            ],
+            name="pipeline",
+        )
+        return {"__default__": pipeline}
+
+
+class DummyContextWithPipelinePropertyOnly(KedroContext):
+    """
+    We need this for testing the backward compatibility.
+    """
+
+    # pylint: disable=abstract-method
+
+    project_name = "bob_old"
     project_version = __version__
 
     @property
@@ -168,9 +232,7 @@ def dummy_context(tmp_path, mocker, env):
     # Disable logging.config.dictConfig in KedroContext._setup_logging as
     # it changes logging.config and affects other unit tests
     mocker.patch("logging.config.dictConfig")
-    if env is None:
-        return DummyContext(str(tmp_path))
-    return DummyContext(str(tmp_path), env)
+    return DummyContext(str(tmp_path), env=env)
 
 
 @pytest.mark.usefixtures("config_dir")
@@ -222,9 +284,8 @@ class TestKedroContext:
             project_name = "bob"
             project_version = invalid_version
 
-            @property
-            def pipeline(self) -> Pipeline:
-                return Pipeline([])  # pragma: no cover
+            def _get_pipelines(self) -> Dict[str, Pipeline]:
+                return {"__default__": Pipeline([])}  # pragma: no cover
 
         pattern = (
             r"Your Kedro project version {} does not match "
@@ -274,6 +335,10 @@ class TestKedroContext:
         assert dummy_context.pipeline.nodes[0].outputs == ["boats"]
         assert dummy_context.pipeline.nodes[1].inputs == ["boats"]
         assert dummy_context.pipeline.nodes[1].outputs == ["trains"]
+
+    def test_pipelines(self, dummy_context):
+        assert len(dummy_context.pipelines) == 1
+        assert len(dummy_context.pipelines["__default__"].nodes) == 4
 
 
 @pytest.mark.usefixtures("config_dir")
@@ -388,15 +453,58 @@ class TestKedroContextRun:
         with pytest.raises(KedroContextError, match=pattern):
             dummy_context.run(from_nodes=["node3"], to_nodes=["node1"])
 
-    @pytest.mark.filterwarnings("ignore")
+    def test_run_from_inputs(self, dummy_context, dummy_dataframe, caplog):
+        for dataset in ("cars", "trains", "boats"):
+            dummy_context.catalog.save(dataset, dummy_dataframe)
+        dummy_context.run(from_inputs=["trains"])
+
+        log_msgs = [record.getMessage() for record in caplog.records]
+        assert "Completed 2 out of 2 tasks" in log_msgs
+        assert "Running node: node3: identity([trains]) -> [ships]" in log_msgs
+        assert "Running node: node4: identity([ships]) -> [planes]" in log_msgs
+        assert "Pipeline execution completed successfully." in log_msgs
+
+    def test_run_load_versions(self, tmp_path, dummy_context, dummy_dataframe, mocker):
+        class DummyContext(KedroContext):
+            project_name = "bob"
+            project_version = __version__
+
+            def _get_pipelines(self) -> Dict[str, Pipeline]:
+                return {"__default__": Pipeline([node(identity, "cars", "boats")])}
+
+        mocker.patch("logging.config.dictConfig")
+        dummy_context = DummyContext(str(tmp_path))
+        filepath = str(dummy_context.project_path / "cars.csv")
+
+        old_save_version = generate_timestamp()
+        old_df = pd.DataFrame({"col1": [0, 0], "col2": [0, 0], "col3": [0, 0]})
+        old_csv_data_set = CSVLocalDataSet(
+            filepath=filepath,
+            save_args={"sep": ","},
+            version=Version(None, old_save_version),
+        )
+        old_csv_data_set.save(old_df)
+
+        new_save_version = generate_timestamp()
+        new_csv_data_set = CSVLocalDataSet(
+            filepath=filepath,
+            save_args={"sep": ","},
+            version=Version(None, new_save_version),
+        )
+        new_csv_data_set.save(dummy_dataframe)
+
+        load_versions = {"cars": old_save_version}
+        dummy_context.run(load_versions=load_versions)
+        assert not dummy_context.catalog.load("boats").equals(dummy_dataframe)
+        assert dummy_context.catalog.load("boats").equals(old_df)
+
     def test_run_with_empty_pipeline(self, tmp_path, mocker):
         class DummyContext(KedroContext):
             project_name = "bob"
             project_version = __version__
 
-            @property
-            def pipeline(self) -> Pipeline:
-                return Pipeline([])
+            def _get_pipelines(self) -> Dict[str, Pipeline]:
+                return {"__default__": Pipeline([])}
 
         mocker.patch("logging.config.dictConfig")
         dummy_context = DummyContext(str(tmp_path))
@@ -405,3 +513,80 @@ class TestKedroContextRun:
         pattern = "Pipeline contains no nodes"
         with pytest.raises(KedroContextError, match=pattern):
             dummy_context.run()
+
+    @pytest.mark.parametrize(
+        "context_pipeline,expected_message",
+        [
+            (bad_pipeline_middle, expected_message_middle),
+            (bad_pipeline_head, expected_message_head),
+        ],  # pylint: disable=too-many-arguments
+    )
+    def test_run_failure_prompts_resume_command(
+        self,
+        mocker,
+        tmp_path,
+        dummy_dataframe,
+        caplog,
+        context_pipeline,
+        expected_message,
+    ):
+        class BadContext(KedroContext):
+            project_name = "fred"
+            project_version = __version__
+
+            def _get_pipelines(self) -> Dict[str, Pipeline]:
+                return {"__default__": context_pipeline}
+
+        mocker.patch("logging.config.dictConfig")
+
+        bad_context = BadContext(str(tmp_path))
+        bad_context.catalog.save("cars", dummy_dataframe)
+        with pytest.raises(ValueError, match="Oh no"):
+            bad_context.run()
+
+        actual_messages = [
+            record.getMessage()
+            for record in caplog.records
+            if record.levelname == "WARNING"
+        ]
+
+        assert expected_message in actual_messages
+
+    def test_missing_pipeline_name(self, dummy_context, dummy_dataframe):
+        dummy_context.catalog.save("cars", dummy_dataframe)
+
+        with pytest.raises(KedroContextError, match="Failed to find the pipeline"):
+            dummy_context.run(pipeline_name="invalid-name")
+
+    def test_without_get_pipeline_deprecated(
+        self, dummy_dataframe, mocker, tmp_path, env
+    ):
+        """
+        The old way of providing a `pipeline` context property is deprecated,
+        but still works, yielding a warning message.
+        """
+        mocker.patch("logging.config.dictConfig")
+        dummy_context = DummyContextWithPipelinePropertyOnly(str(tmp_path), env=env)
+        dummy_context.catalog.save("cars", dummy_dataframe)
+
+        msg = "You are using the deprecated pipeline construction mechanism"
+        with pytest.warns(DeprecationWarning, match=msg):
+            outputs = dummy_context.run()
+
+        pd.testing.assert_frame_equal(outputs["planes"], dummy_dataframe)
+
+    def test_without_get_pipeline_error(self, dummy_dataframe, mocker, tmp_path, env):
+        """
+        The old way of providing a `pipeline` context property is deprecated,
+        but still works, yielding a warning message.
+        If you try to run a sub-pipeline by name - it's an error.
+        """
+
+        mocker.patch("logging.config.dictConfig")
+        dummy_context = DummyContextWithPipelinePropertyOnly(str(tmp_path), env=env)
+        dummy_context.catalog.save("cars", dummy_dataframe)
+
+        error_msg = "The project is not fully migrated to use multiple pipelines."
+
+        with pytest.raises(KedroContextError, match=error_msg):
+            dummy_context.run(pipeline_name="missing-pipeline")

@@ -143,7 +143,7 @@ class ParallelRunner(AbstractRunner):
                 "MemoryDataSets".format(memory_data_sets)
             )
 
-    def _run(  # pylint: disable=too-many-locals
+    def _run(  # pylint: disable=too-many-locals,useless-suppression
         self, pipeline: Pipeline, catalog: DataCatalog
     ) -> None:
         """The abstract interface for running pipelines.
@@ -155,6 +155,7 @@ class ParallelRunner(AbstractRunner):
         Raises:
             AttributeError: when the provided pipeline is not suitable for
                 parallel execution.
+            Exception: in case of any downstream node failure.
 
         """
         nodes = pipeline.nodes
@@ -178,7 +179,11 @@ class ParallelRunner(AbstractRunner):
                     break
                 done, futures = wait(futures, return_when=FIRST_COMPLETED)
                 for future in done:
-                    node = future.result()
+                    try:
+                        node = future.result()
+                    except Exception:
+                        self._suggest_resume_scenario(pipeline, done_nodes)
+                        raise
                     done_nodes.add(node)
 
                     # decrement load counts and release any data sets we've finished with

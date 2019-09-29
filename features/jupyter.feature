@@ -47,4 +47,5 @@ Feature: Jupyter targets in new project
     When I execute the test jupyter notebook and save changes
     And I execute the kedro jupyter command "convert --all"
     And Wait until the process is finished
-    Then Code cell with node tag should be converted into kedro node
+    Then I should get a successful exit code
+    And Code cell with node tag should be converted into kedro node

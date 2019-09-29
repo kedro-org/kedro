@@ -441,7 +441,7 @@ def check_empty_pipeline_exists(context):
         / context.project_name.replace("-", "_")
         / "pipeline.py"
     )
-    assert "pipeline = Pipeline([])" in pipeline_file.read_text("utf-8")
+    assert '"__default__": Pipeline([])' in pipeline_file.read_text("utf-8")
 
 
 @then("the pipeline should contain nodes")
@@ -651,5 +651,4 @@ def check_cell_conversion(context: behave.runner.Context):
         / "nodes"
         / "hello_world.py"
     )
-
     assert "Hello World!" in converted_file.read_text()

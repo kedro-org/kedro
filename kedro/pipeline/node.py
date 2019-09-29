@@ -470,7 +470,7 @@ class Node:
             return {name: outputs[key] for key, name in self._outputs.items()}
 
         def _from_list():
-            if not isinstance(outputs, list):
+            if not isinstance(outputs, (list, tuple)):
                 raise ValueError(
                     "Failed to save outputs of node {}.\n"
                     "The node definition contains a list of "
@@ -510,9 +510,11 @@ class Node:
         if not inspect.isbuiltin(func):
             args, kwargs = self._process_inputs_for_bind(inputs)
             try:
-                inspect.signature(func).bind(*args, **kwargs)
+                inspect.signature(func, follow_wrapped=False).bind(*args, **kwargs)
             except Exception as exc:
-                func_args = inspect.signature(func).parameters.keys()
+                func_args = inspect.signature(
+                    func, follow_wrapped=False
+                ).parameters.keys()
                 raise TypeError(
                     "Inputs of function expected {}, but got {}".format(
                         str(list(func_args)), str(inputs)

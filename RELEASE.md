@@ -11,7 +11,7 @@
 * Improved an error message when versioned local dataset is saved and unversioned path already exists.
 * Enabled tuples to be returned from a node.
 * Added versioning `CSVBlobDataSet` in `kedro.contrib.io.azure`.
-i
+
 ## Breaking changes to the API
 * `KedroContext.run()` no longer accepts `catalog` and `pipeline` arguments.
 

@@ -1,16 +1,11 @@
 ## Description
-A dataset class to save matplotlib figures/plt objects to images locally, MatplotlibWriter.
-
-
-## Context
-In the process of making documentation of features, programmatically making plots of all features in a standardised way
-and embedding links in .md files has been a big timesaver.
+A dataset class to save matplotlib figures/plot objects as image files.
 
 
 ## Implementation
 ```python
 
-``MatplotlibWriter`` saves matplotlib objects as image files.
+`MatplotlibWriter` saves matplotlib objects as image files.
 
 Example:
 ::
@@ -32,7 +27,7 @@ Example:
     >>>     plt.plot([1,2,3],[4,5,6], color=colour)
     >>>     plt.close()
     >>>
-    >>> multi_plot_writer = MatplotlibWriter(filepath="docs/",
-    >>>                                      save_args={'multiFile': True})
+    >>> multi_plot_writer = MatplotlibWriter(filepath="docs/")
     >>> multi_plot_writer.save(plots)
+
 ```

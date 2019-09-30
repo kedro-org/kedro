@@ -35,12 +35,12 @@ import pytest
 from kedro.contrib.io.matplotlib import MatplotlibWriter
 from kedro.io import DataSetError
 
-matplotlib.use("TkAgg")  # used to facilitate simple inclusion into kedro CI/CD
+matplotlib.use("Agg")  # Disable interactive mode
 
 
 class TestMatplotlibWriter:
     def test_simgle_image(self, tmp_path):
-        # generate plot
+        # generate a plot
         plt.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
 
         # write and compare
@@ -60,7 +60,6 @@ class TestMatplotlibWriter:
         for index in range(5):
             plots.append(plt.figure())
             plt.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
-        plt.close()
 
         experimental_filepath = tmp_path / "list_images"
         plot_writer = MatplotlibWriter(filepath=str(experimental_filepath))
@@ -86,7 +85,6 @@ class TestMatplotlibWriter:
 
             plots[filename] = plt.figure()
             plt.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
-        plt.close()
 
         plot_writer = MatplotlibWriter(filepath=str(tmp_path / "dict_images"))
 
@@ -116,9 +114,6 @@ class TestMatplotlibWriter:
         plt.close()
 
         plot_writer = MatplotlibWriter(filepath=str(tmp_path / "some_image.png"))
-
         assert not plot_writer.exists()
-
         plot_writer.save(plot_object)
-
         assert plot_writer.exists()

@@ -66,7 +66,7 @@ class TestLoadContext:
     def test_kedro_yml_has_no_context_path(self, fake_repo_path):
         """Test for loading context from an invalid path. """
         kedro_yml_path = fake_repo_path / ".kedro.yml"
-        kedro_yml_path.write_text('fake_key: fake_value\n')
+        kedro_yml_path.write_text("fake_key: fake_value\n")
         pattern = r"'\.kedro\.yml' doesn't have a required `context_path` field"
         with pytest.raises(KedroContextError, match=pattern):
             load_context(str(fake_repo_path))

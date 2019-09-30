@@ -15,7 +15,7 @@ Example:
     >>>
     >>> plt.plot([1,2,3],[4,5,6])
     >>>
-    >>> single_plot_writer = MatplotlibWriter(filepath="docs/new_plot.png")
+    >>> single_plot_writer = MatplotlibWriter(filepath="data/new_plot.png")
     >>> single_plot_writer.save(plt)
     >>>
     >>> plt.close()

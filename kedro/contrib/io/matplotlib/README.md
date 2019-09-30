@@ -27,7 +27,7 @@ Example:
     >>>     plt.plot([1,2,3],[4,5,6], color=colour)
     >>>     plt.close()
     >>>
-    >>> multi_plot_writer = MatplotlibWriter(filepath="docs/")
+    >>> multi_plot_writer = MatplotlibWriter(filepath="data/")
     >>> multi_plot_writer.save(plots)
 
 ```

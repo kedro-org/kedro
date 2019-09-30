@@ -107,9 +107,8 @@ class MatplotlibWriter(AbstractDataSet):
             self._filepath.mkdir(exist_ok=True)
             for plot_name, plot in data.items():
                 plot.savefig(str(self._filepath / plot_name), **self._save_args)
-
         else:
-            data.savefig(self._filepath, **self._save_args)
+            data.savefig(str(self._filepath), **self._save_args)
 
     def _exists(self) -> bool:
         return self._filepath.is_file()

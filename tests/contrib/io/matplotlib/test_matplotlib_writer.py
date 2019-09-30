@@ -69,8 +69,7 @@ class TestMatplotlibWriter:
         # write and compare
         for index, plot in enumerate(plots):
             trusted_filepath = tmp_path / "image_we_expect_{}.png".format(str(index))
-
-            plot.savefig(trusted_filepath)
+            plot.savefig(str(trusted_filepath))
 
             full_experimental_filepath = experimental_filepath / "{}.png".format(
                 str(index)

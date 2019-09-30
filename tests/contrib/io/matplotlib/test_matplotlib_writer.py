@@ -44,60 +44,40 @@ class TestMatplotlibWriter:
         plt.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
 
         # write and compare
-        trusted_filepath = str(tmp_path / "image_we_expect.png")
-        plt.savefig(trusted_filepath)
+        trusted_filepath = tmp_path / "image_we_expect.png"
+        plt.savefig(str(trusted_filepath))
 
-        experimental_filepath = str(tmp_path / "image_we_write.png")
-        plot_writer = MatplotlibWriter(filepath=experimental_filepath)
-
+        experimental_filepath = tmp_path / "image_we_write.png"
+        plot_writer = MatplotlibWriter(filepath=str(experimental_filepath))
         plot_writer.save(plt)
-
         plt.close()
 
-        with open(experimental_filepath, "rb") as f:
-            experimental_obj = f.read()
-            f.close()
-
-        with open(trusted_filepath, "rb") as f:
-            trusted_obj = f.read()
-            f.close()
-
-        assert trusted_obj == experimental_obj
+        assert trusted_filepath.read_bytes() == experimental_filepath.read_bytes()
 
     def test_list_images(self, tmp_path):
-        plots = list()
         # generate plots
+        plots = list()
         for index in range(5):
             plots.append(plt.figure())
             plt.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
-            plt.close()
+        plt.close()
 
-        experimental_filepath = str(tmp_path / "list_images")
-        plot_writer = MatplotlibWriter(filepath=experimental_filepath)
+        experimental_filepath = tmp_path / "list_images"
+        plot_writer = MatplotlibWriter(filepath=str(experimental_filepath))
         plot_writer.save(plots)
 
         # write and compare
         for index, plot in enumerate(plots):
-            string_index = str(index)
-            trusted_filepath = str(
-                tmp_path / "image_we_expect_{}.png".format(string_index)
-            )
+            trusted_filepath = tmp_path / "image_we_expect_{}.png".format(str(index))
 
             plot.savefig(trusted_filepath)
 
-            full_experimental_filepath = "{}/{}.png".format(
-                experimental_filepath, string_index
+            full_experimental_filepath = experimental_filepath / "{}.png".format(
+                str(index)
             )
-
-            with open(full_experimental_filepath, "rb") as f:
-                full_experimental_obj = f.read()
-                f.close()
-
-            with open(trusted_filepath, "rb") as f:
-                trusted_obj = f.read()
-                f.close()
-
-            assert trusted_obj == full_experimental_obj
+            assert (
+                trusted_filepath.read_bytes() == full_experimental_filepath.read_bytes()
+            )
 
     def test_dict_images(self, tmp_path):
         plots = dict()

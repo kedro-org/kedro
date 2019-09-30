@@ -32,7 +32,7 @@
 """
 
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from matplotlib.pyplot import figure
 
@@ -40,8 +40,7 @@ from kedro.io import AbstractDataSet, DataSetError
 
 
 class MatplotlibWriter(AbstractDataSet):
-    """
-        ``MatplotlibWriter`` saves matplotlib objects as image files.
+    """``MatplotlibWriter`` saves matplotlib objects as image files.
 
         Example:
         ::
@@ -78,16 +77,15 @@ class MatplotlibWriter(AbstractDataSet):
     def __init__(
         self,
         filepath: str,
-        load_args: Optional[Dict[str, Any]] = None,
-        save_args: Optional[Dict[str, Any]] = None,
+        load_args: Dict[str, Any] = None,
+        save_args: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``MatplotlibWriter``.
 
         Args:
-            filepath: path to a text file.
+            filepath: Path to a matplot object file.
             load_args: Currently ignored as loading is not supported.
-            save_args: multiFile: allows for multiple plot objects
-                to be saved. Additional load arguments can be found at
+            save_args: Save args passed to `plt.savefig`. See
                 https://matplotlib.org/api/_as_gen/matplotlib.pyplot.savefig.html
         """
         self._filepath = Path(filepath)
@@ -100,7 +98,6 @@ class MatplotlibWriter(AbstractDataSet):
         )
 
     def _save(self, data: figure) -> None:
-
         if isinstance(data, list):
             self._filepath.mkdir(exist_ok=True)
             for index, plot in enumerate(data):

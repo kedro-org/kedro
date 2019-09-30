@@ -41,6 +41,7 @@ matplotlib.use("Agg")  # Disable interactive mode
 class TestMatplotlibWriter:
     def test_simgle_image(self, tmp_path):
         # generate a plot
+        # pylint: disable=unsubscriptable-object,useless-suppression
         plt.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
 
         # write and compare
@@ -59,6 +60,7 @@ class TestMatplotlibWriter:
         plots = list()
         for index in range(5):
             plots.append(plt.figure())
+            # pylint: disable=unsubscriptable-object,useless-suppression
             plt.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
 
         experimental_filepath = tmp_path / "list_images"
@@ -84,6 +86,7 @@ class TestMatplotlibWriter:
             filename = "{}.png".format(index)
 
             plots[filename] = plt.figure()
+            # pylint: disable=unsubscriptable-object,useless-suppression
             plt.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
 
         plot_writer = MatplotlibWriter(filepath=str(tmp_path / "dict_images"))
@@ -109,6 +112,7 @@ class TestMatplotlibWriter:
 
     def test_exists(self, tmp_path):
         plot_object = plt.figure()
+        # pylint: disable=unsubscriptable-object,useless-suppression
         plt.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
         plt.close()
 

@@ -95,7 +95,9 @@ class MatplotlibWriter(AbstractDataSet):
         self._save_args = save_args if save_args else dict()
 
     def _load(self) -> None:
-        raise DataSetError("Loading not supported for MatplotlibWriter")
+        raise DataSetError(
+            "Loading not supported for {}".format(self.__class__.__name__)
+        )
 
     def _save(self, data: figure) -> None:
 

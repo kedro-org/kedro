@@ -87,31 +87,21 @@ class TestMatplotlibWriter:
 
             plots[filename] = plt.figure()
             plt.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
-            plt.close()
+        plt.close()
 
-        directory = str(tmp_path / "dict_images")
-
-        plot_writer = MatplotlibWriter(filepath=directory)
+        plot_writer = MatplotlibWriter(filepath=str(tmp_path / "dict_images"))
 
         plot_writer.save(plots)
 
         # write and compare
         for filename, plot in plots.items():
-            experimental_filepath = str(tmp_path / "dict_images" / filename)
-            trusted_filepath = str(
+            trusted_filepath = (
                 tmp_path / "dict_images" / filename.replace(".png", "_trusted.png")
             )
-            plot.savefig(trusted_filepath)
+            plot.savefig(str(trusted_filepath))
+            experimental_filepath = tmp_path / "dict_images" / filename
 
-            with open(experimental_filepath, "rb") as f:
-                experimental_obj = f.read()
-                f.close()
-
-            with open(trusted_filepath, "rb") as f:
-                trusted_obj = f.read()
-                f.close()
-
-            assert trusted_obj == experimental_obj
+            assert trusted_filepath.read_bytes() == experimental_filepath.read_bytes()
 
     def test_load_fail(self, tmp_path):
         plot_writer = MatplotlibWriter(filepath=str(tmp_path / "some_path"))

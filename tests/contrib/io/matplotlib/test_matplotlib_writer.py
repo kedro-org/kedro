@@ -104,7 +104,6 @@ class TestMatplotlibWriter:
         plot_writer = MatplotlibWriter(filepath=str(tmp_path / "some_path"))
 
         expected_load_error = "Loading not supported for MatplotlibWriter"
-
         with pytest.raises(DataSetError, match=expected_load_error):
             plot_writer.load()
 

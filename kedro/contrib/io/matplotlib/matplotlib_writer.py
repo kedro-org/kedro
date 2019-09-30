@@ -31,8 +31,10 @@
 ``MatplotlibWriter ``  saves matplotlib objects as image files.
 """
 
-from pathlib import Path, PurePath
+from pathlib import Path
 from typing import Any, Dict, Optional
+
+from matplotlib.pyplot import figure
 
 from kedro.io import AbstractDataSet, DataSetError
 
@@ -88,31 +90,27 @@ class MatplotlibWriter(AbstractDataSet):
                 to be saved. Additional load arguments can be found at
                 https://matplotlib.org/api/_as_gen/matplotlib.pyplot.savefig.html
         """
-        self._filepath = filepath
+        self._filepath = Path(filepath)
         self._load_args = load_args if load_args else dict()
         self._save_args = save_args if save_args else dict()
 
     def _load(self) -> None:
         raise DataSetError("Loading not supported for MatplotlibWriter")
 
-    def _save(self, data: Any) -> None:
+    def _save(self, data: figure) -> None:
 
         if isinstance(data, list):
-            Path(self._filepath).mkdir(exist_ok=True)
+            self._filepath.mkdir(exist_ok=True)
             for index, plot in enumerate(data):
-                plot.savefig(
-                    str(PurePath(self._filepath, str(index))), **self._save_args
-                )
+                plot.savefig(str(self._filepath / str(index)), **self._save_args)
 
         elif isinstance(data, dict):
-            Path(self._filepath).mkdir(exist_ok=True)
+            self._filepath.mkdir(exist_ok=True)
             for plot_name, plot in data.items():
-                plot.savefig(
-                    str(PurePath(self._filepath, plot_name)), **self._save_args
-                )
+                plot.savefig(str(self._filepath / plot_name), **self._save_args)
 
         else:
             data.savefig(self._filepath, **self._save_args)
 
     def _exists(self) -> bool:
-        return Path(self._filepath).is_file()
+        return self._filepath.is_file()

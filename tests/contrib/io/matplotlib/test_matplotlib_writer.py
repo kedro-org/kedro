@@ -27,19 +27,15 @@
 # limitations under the License.
 
 
-import matplotlib
+import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 
 from kedro.contrib.io.matplotlib import MatplotlibWriter
 from kedro.io import DataSetError
 
-matplotlib.use("TkAgg")  # used to facilitate simple inclusion into kedro CI/CD
-
 
 def test_should_write_to_image_in_single_mode(tmpdir):
-    import matplotlib.pyplot as plt
-
     # generate plot
     plt.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
 
@@ -66,10 +62,7 @@ def test_should_write_to_image_in_single_mode(tmpdir):
 
 
 def test_should_write_to_image_in_list(tmpdir):
-    import matplotlib.pyplot as plt
-
     plots = list()
-
     # generate plots
     for index in range(5):
         plots.append(plt.figure())
@@ -104,10 +97,7 @@ def test_should_write_to_image_in_list(tmpdir):
 
 
 def test_should_write_to_image_in_dict(tmpdir):
-    import matplotlib.pyplot as plt
-
     plots = dict()
-
     # generate plots
     for index in ["boo", "far"]:
         filename = "{}.png".format(index)
@@ -140,7 +130,6 @@ def test_should_write_to_image_in_dict(tmpdir):
 
 
 def test_load_should_fail(tmpdir):
-
     plot_writer = MatplotlibWriter(filepath=str(tmpdir.join("some_path")))
 
     expected_load_error = "Loading not supported for MatplotlibWriter"
@@ -150,8 +139,6 @@ def test_load_should_fail(tmpdir):
 
 
 def test_exists_functionality(tmpdir):
-    import matplotlib.pyplot as plt
-
     plot_object = plt.figure()
     plt.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
     plt.close()

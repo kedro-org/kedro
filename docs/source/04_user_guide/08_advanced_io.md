@@ -4,9 +4,7 @@
 
 In this tutorial, you will learn about advanced uses of the [Kedro IO](/kedro.io.rst) module and understand the underlying implementation.
 
-Relevant API documentation:
-* [AbstractDataSet](/kedro.io.AbstractDataSet)
-* [DataSetError](/kedro.io.DataSetError)
+Relevant API documentation: [AbstractDataSet](/kedro.io.AbstractDataSet), [DataSetError](/kedro.io.DataSetError)
 
 ## Error handling
 

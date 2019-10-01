@@ -318,18 +318,12 @@ class TestBuildDocsCommand:
         fake_rmtree.assert_called_once_with("docs/build", ignore_errors=True)
 
     @pytest.mark.parametrize("open_flag", ["-o", "--open"])
-    def test_open_docs(
-        self, open_flag, fake_repo_path, call_mock, python_call_mock, fake_kedro_cli, mocker
-    ):
-        docs_path = fake_repo_path / "docs" / "build" / "html" / "index.html"
-
-        # Python 3.5 pathlib.Path.resolve() has strict resolve (i.e: it checks the filepath exists)
-        mocker.patch.object(Path, "resolve", return_value=docs_path)
+    def test_open_docs(self, open_flag, fake_kedro_cli, mocker):
         patched_browser = mocker.patch("webbrowser.open")
-
         result = CliRunner().invoke(fake_kedro_cli.cli, ["build-docs", open_flag])
         assert not result.exit_code, result.stdout
-        patched_browser.assert_called_once_with(str(docs_path.as_uri()))
+        expected_path = (Path.cwd() / "docs" / "build" / "html" / "index.html").as_uri()
+        patched_browser.assert_called_once_with(expected_path)
 
 
 class TestBuildReqsCommand:

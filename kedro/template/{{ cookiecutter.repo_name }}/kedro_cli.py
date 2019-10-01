@@ -254,9 +254,9 @@ def build_docs(open_docs):
     )
     call(["sphinx-build", "-M", "html", "docs/source", "docs/build", "-a"])
     if open_docs:
-        p = Path("docs/build/html/index.html").resolve().as_uri()
-        secho("Opening {}".format(p))
-        webbrowser.open(str(p))
+        docs_page = (Path.cwd() / "docs" / "build" / "html" / "index.html").as_uri()
+        secho("Opening {}".format(docs_page))
+        webbrowser.open(docs_page)
 
 
 

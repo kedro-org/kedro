@@ -119,5 +119,5 @@ class MatplotlibWriter(AbstractDataSet):
 
     def _exists(self) -> bool:
         return self._filepath.is_file() or (
-            self._filepath.is_dir() and list(self._filepath.iterdir())
+            self._filepath.is_dir() and not list(self._filepath.iterdir())
         )

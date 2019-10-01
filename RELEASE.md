@@ -6,7 +6,7 @@
 * Multiple pipelines - ability to have multiple entry point pipelines and chose one with `kedro run --pipeline NAME`.
 * Added the following datasets:
   -  `MatplotlibWriter` in `contrib` for saving matplotlib images (by [@williamashfordQB](https://github.com/williamashfordQB))
-* Paremetized config loader - Ability to use central set of parameters throughout all your config files with `kedro.contrib.config.TemplatedConfigLoader`
+* Parameterized config loader - ability to use central set of parameters throughout all your config files with `kedro.contrib.config.TemplatedConfigLoader`
 
 ## Bug fixes and other changes
 * Users will override `_get_pipeline` abstract method in `ProjectContext(KedroContext)` in `run.py` rather than `pipeline` abstract property. `pipeline` property is not abstract anymore.

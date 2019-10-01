@@ -39,75 +39,70 @@ matplotlib.use("Agg")  # Disable interactive mode
 
 
 class TestMatplotlibWriter:
-    def test_simgle_image(self, tmp_path):
+    def test_save_simgle_image(self, tmp_path):
         # generate a plot
         # pylint: disable=unsubscriptable-object,useless-suppression
         plt.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
 
         # write and compare
-        trusted_filepath = tmp_path / "image_we_expect.png"
-        plt.savefig(str(trusted_filepath))
+        actual_filepath = tmp_path / "image_we_expect.png"
+        plt.savefig(str(actual_filepath))
 
-        experimental_filepath = tmp_path / "image_we_write.png"
-        plot_writer = MatplotlibWriter(filepath=str(experimental_filepath))
+        expected_filepath = tmp_path / "image_we_write.png"
+        plot_writer = MatplotlibWriter(filepath=str(expected_filepath))
         plot_writer.save(plt)
         plt.close()
 
-        assert trusted_filepath.read_bytes() == experimental_filepath.read_bytes()
+        assert actual_filepath.read_bytes() == expected_filepath.read_bytes()
 
-    def test_list_images(self, tmp_path):
+    def test_save_list_images(self, tmp_path):
         # generate plots
-        plots = list()
+        plots = []
         for index in range(5):
             plots.append(plt.figure())
             # pylint: disable=unsubscriptable-object,useless-suppression
             plt.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
 
-        experimental_filepath = tmp_path / "list_images"
-        plot_writer = MatplotlibWriter(filepath=str(experimental_filepath))
+        expected_filepath = tmp_path / "list_images"
+        plot_writer = MatplotlibWriter(filepath=str(expected_filepath))
+        assert not plot_writer.exists()
         plot_writer.save(plots)
 
         # write and compare
         for index, plot in enumerate(plots):
-            trusted_filepath = tmp_path / "image_we_expect_{}.png".format(str(index))
-            plot.savefig(str(trusted_filepath))
+            actual_filepath = tmp_path / "image_we_expect_{}.png".format(str(index))
+            plot.savefig(str(actual_filepath))
 
-            full_experimental_filepath = experimental_filepath / "{}.png".format(
-                str(index)
-            )
-            assert (
-                trusted_filepath.read_bytes() == full_experimental_filepath.read_bytes()
-            )
+            full_expected_filepath = expected_filepath / "{}.png".format(str(index))
+            assert actual_filepath.read_bytes() == full_expected_filepath.read_bytes()
 
-    def test_dict_images(self, tmp_path):
+    def test_save_dict_images(self, tmp_path):
         plots = dict()
         # generate plots
-        for index in ["boo", "far"]:
-            filename = "{}.png".format(index)
-
+        for filename in ["boo.png", "far.png"]:
             plots[filename] = plt.figure()
             # pylint: disable=unsubscriptable-object,useless-suppression
             plt.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
 
         plot_writer = MatplotlibWriter(filepath=str(tmp_path / "dict_images"))
-
+        assert not plot_writer.exists()
         plot_writer.save(plots)
 
         # write and compare
         for filename, plot in plots.items():
-            trusted_filepath = (
-                tmp_path / "dict_images" / filename.replace(".png", "_trusted.png")
+            actual_filepath = (
+                tmp_path / "dict_images" / filename.replace(".png", "_actual.png")
             )
-            plot.savefig(str(trusted_filepath))
-            experimental_filepath = tmp_path / "dict_images" / filename
+            plot.savefig(str(actual_filepath))
+            expected_filepath = tmp_path / "dict_images" / filename
 
-            assert trusted_filepath.read_bytes() == experimental_filepath.read_bytes()
+            assert actual_filepath.read_bytes() == expected_filepath.read_bytes()
 
     def test_load_fail(self, tmp_path):
         plot_writer = MatplotlibWriter(filepath=str(tmp_path / "some_path"))
 
-        expected_load_error = "Loading not supported for MatplotlibWriter"
-        with pytest.raises(DataSetError, match=expected_load_error):
+        pattern = r"Loading not supported for `MatplotlibWriter`"
+        with pytest.raises(DataSetError, match=pattern):
             plot_writer.load()
 
     def test_exists(self, tmp_path):

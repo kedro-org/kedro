@@ -32,7 +32,7 @@
 """
 
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List, Union
 
 from matplotlib.pyplot import figure
 
@@ -67,13 +67,6 @@ class MatplotlibWriter(AbstractDataSet):
 
     """
 
-    def _describe(self) -> Dict[str, Any]:
-        return dict(
-            filepath=self._filepath,
-            load_args=self._load_args,
-            save_args=self._save_args,
-        )
-
     def __init__(
         self,
         filepath: str,
@@ -92,12 +85,19 @@ class MatplotlibWriter(AbstractDataSet):
         self._load_args = load_args if load_args else dict()
         self._save_args = save_args if save_args else dict()
 
-    def _load(self) -> None:
-        raise DataSetError(
-            "Loading not supported for {}".format(self.__class__.__name__)
+    def _describe(self) -> Dict[str, Any]:
+        return dict(
+            filepath=self._filepath,
+            load_args=self._load_args,
+            save_args=self._save_args,
         )
 
-    def _save(self, data: figure) -> None:
+    def _load(self) -> None:
+        raise DataSetError(
+            "Loading not supported for `{}`".format(self.__class__.__name__)
+        )
+
+    def _save(self, data: Union[figure, List[figure], Dict[str, figure]]) -> None:
         if isinstance(data, list):
             self._filepath.mkdir(exist_ok=True)
             for index, plot in enumerate(data):

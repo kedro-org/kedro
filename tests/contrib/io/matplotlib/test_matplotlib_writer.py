@@ -67,6 +67,7 @@ class TestMatplotlibWriter:
         plot_writer = MatplotlibWriter(filepath=str(expected_filepath))
         assert not plot_writer.exists()
         plot_writer.save(plots)
+        assert plot_writer.exists()
 
         # write and compare
         for index, plot in enumerate(plots):
@@ -87,6 +88,7 @@ class TestMatplotlibWriter:
         plot_writer = MatplotlibWriter(filepath=str(tmp_path / "dict_images"))
         assert not plot_writer.exists()
         plot_writer.save(plots)
+        assert plot_writer.exists()
 
         # write and compare
         for filename, plot in plots.items():

@@ -55,15 +55,22 @@ class MatplotlibWriter(AbstractDataSet):
             >>>
             >>> plt.close()
             >>>
-            >>> plots = dict()
+            >>> plots_dict = dict()
             >>>
             >>> for colour in ['blue', 'green', 'red']:
-            >>>     plots[colour] = plt.figure()
+            >>>     plots_dict[colour] = plt.figure()
             >>>     plt.plot([1,2,3],[4,5,6], color=colour)
             >>>     plt.close()
             >>>
-            >>> multi_plot_writer = MatplotlibWriter(filepath="data/")
-            >>> multi_plot_writer.save(plots)
+            >>> dict_plot_writer = MatplotlibWriter(filepath="data/")
+            >>> dict_plot_writer.save(plots_dict)
+            >>>
+            >>> plots_list = []
+            >>> for index in range(5):
+            >>>    plots_list.append(plt.figure())
+            >>>    plt.plot([1,2,3],[4,5,6], color=colour)
+            >>> list_plot_writer = MatplotlibWriter(filepath="data/")
+            >>> list_plot_writer.save(plots_list)
 
     """
 
@@ -111,4 +118,6 @@ class MatplotlibWriter(AbstractDataSet):
             data.savefig(str(self._filepath), **self._save_args)
 
     def _exists(self) -> bool:
-        return self._filepath.is_file()
+        return self._filepath.is_file() or (
+            self._filepath.is_dir() and len(list(self._filepath.iterdir())) != 0
+        )

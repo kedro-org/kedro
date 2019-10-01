@@ -21,7 +21,7 @@ The are two ways of defining a Data Catalog: through the use of YAML configurati
  - Location of the dataset (includes file paths, S3 bucket locations and more)
  - Credentials needed in order to access the dataset
  - Load and saving arguments
- - Whether or not you want a [dataset or ML model to be versioned](./07_advanced_io.md#versioning) when you run your data pipeline
+ - Whether or not you want a [dataset or ML model to be versioned](./08_advanced_io.md#versioning) when you run your data pipeline
 
 ## Using the Data Catalog with the YAML API
 
@@ -262,7 +262,7 @@ kedro run --load-version="cars.csv:YYYY-MM-DDThh.mm.ss.sssZ"
 ```
 where `--load-version` is dataset name and version timestamp separated by `:`.
 
-This section shows just the very basics of versioning. You can learn more about how this feature can be used in [Advanced IO](./07_advanced_io.md#versioning).
+This section shows just the very basics of versioning. You can learn more about how this feature can be used in [Advanced IO](./08_advanced_io.md#versioning).
 
 ## Using the Data Catalog with the Code API
 

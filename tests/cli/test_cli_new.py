@@ -40,7 +40,7 @@ from kedro import __version__ as version
 from kedro.cli.cli import TEMPLATE_PATH, _fix_user_path, _get_default_config, cli
 
 FILES_IN_TEMPLATE_NO_EXAMPLE = 37
-FILES_IN_TEMPLATE_WITH_EXAMPLE = 44
+FILES_IN_TEMPLATE_WITH_EXAMPLE = 46
 
 
 # pylint: disable=too-many-arguments

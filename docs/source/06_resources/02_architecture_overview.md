@@ -52,7 +52,7 @@ A Python file that contains Kedro global CLI commands, i.e. the ones that do not
 
 #### `plugins`
 
-Any CLI command that is implemented by a [Kedro plugin](../04_user_guide/09_developing_plugins.md) (e.g., [Kedro-Docker](https://github.com/quantumblacklabs/kedro-docker), [Kedro-Airflow](https://github.com/quantumblacklabs/kedro-airflow), [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz)).
+Any CLI command that is implemented by a [Kedro plugin](../04_user_guide/10_developing_plugins.md) (e.g., [Kedro-Docker](https://github.com/quantumblacklabs/kedro-docker), [Kedro-Airflow](https://github.com/quantumblacklabs/kedro-airflow), [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz)).
 
 #### `get_project_context()`
 

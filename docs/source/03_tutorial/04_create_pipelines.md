@@ -1,8 +1,8 @@
 # Creating a pipeline
 
-This section covers how to create a pipeline from a set of `node`s, which are Python functions, as described in more detail in the [nodes and pipelines user guide](../04_user_guide/05_nodes_and_pipelines.md) documentation.
+This section covers how to create a pipeline from a set of `node`s, which are Python functions, as described in more detail in the [nodes user guide](../04_user_guide/05_nodes.md#nodes) documentation.
 
-1. As you draft experimental code, you can use a [Jupyter Notebook](../04_user_guide/10_ipython.md#working-with-kedro-projects-from-jupyter) or [IPython session](../04_user_guide/10_ipython.md). If you include [`docstrings`](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) to explain what your functions do, you can take advantage of [auto-generated Sphinx documentation](http://www.sphinx-doc.org/en/master/) later on. Once you are happy with how you have written your `node` functions, you will run `kedro jupyter convert --all` (or `kedro jupyter convert <filepath_to_my_notebook>`) to export the code cells [tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) as `node` into the `src/kedro_tutorial/nodes/` folder as a `.py` file.
+1. As you draft experimental code, you can use a [Jupyter Notebook](../04_user_guide/11_ipython.md#working-with-kedro-projects-from-jupyter) or [IPython session](../04_user_guide/11_ipython.md). If you include [`docstrings`](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) to explain what your functions do, you can take advantage of [auto-generated Sphinx documentation](http://www.sphinx-doc.org/en/master/) later on. Once you are happy with how you have written your `node` functions, you will run `kedro jupyter convert --all` (or `kedro jupyter convert <filepath_to_my_notebook>`) to export the code cells [tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) as `node` into the `src/kedro_tutorial/nodes/` folder as a `.py` file.
 2. When you are ready with a node you should add it to the pipeline in `src/kedro_tutorial/pipeline.py`, specifying its inputs and outputs.
 
 
@@ -417,7 +417,7 @@ regressor:
   versioned: true
 ```
 
-> *Note:* Versioning is enabled for `regressor`, which means that the pickled output of the `regressor` will be versioned and saved every time the pipeline is run. This allows us to keep the history of the models built using this pipeline. See the details in the [Versioning](../04_user_guide/07_advanced_io.md#versioning) section of the User Guide.
+> *Note:* Versioning is enabled for `regressor`, which means that the pickled output of the `regressor` will be versioned and saved every time the pipeline is run. This allows us to keep the history of the models built using this pipeline. See the details in the [Versioning](../04_user_guide/08_advanced_io.md#versioning) section of the User Guide.
 
 Now to create a pipeline for the price prediction model. In `src/kedro_tutorial/nodes/pipeline.py`, update `create_pipeline()` to add an extra import statement as follows:
 

@@ -258,8 +258,8 @@ class TestTemplatedConfigLoader:
 
     @pytest.mark.usefixtures("proj_catalog_advanced")
     def test_catlog_advanced(self, tmp_path, conf_paths, normal_config_advanced):
-        """Test whether it responds well to advanced yaml values (i.e. nested dicts, booleans,
-        lists, etc.)"""
+        """Test whether it responds well to advanced yaml values
+        (i.e. nested dicts, booleans, lists, etc.)"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
         catalog = TemplatedConfigLoader(
@@ -293,7 +293,8 @@ class TestTemplatedConfigLoader:
 
     @pytest.mark.usefixtures("proj_catalog_param_mixed", "proj_catalog_globals")
     def test_catlog_parameterized_w_dict_mixed(self, tmp_path, conf_paths, get_environ):
-        """Test parameterized config with input from dictionary with values and globals.yml"""
+        """Test parameterized config with input from dictionary with values
+        and globals.yml"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
         catalog = TemplatedConfigLoader(

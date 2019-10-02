@@ -35,6 +35,7 @@ import sys
 from collections import Counter
 from glob import iglob
 from pathlib import Path
+import webbrowser
 
 import click
 from click import secho, style
@@ -91,6 +92,8 @@ FROM_INPUTS_HELP = (
 PARALLEL_ARG_HELP = """Run the pipeline using the `ParallelRunner`.
 If not specified, use the `SequentialRunner`. This flag cannot be used together
 with --runner."""
+
+OPEN_ARG_HELP = """Open the documentation in your default browser after building."""
 
 RUNNER_ARG_HELP = """Specify a runner that you want to run the pipeline with.
 This option cannot be used together with --parallel."""
@@ -231,7 +234,8 @@ def package():
 
 
 @cli.command("build-docs")
-def build_docs():
+@click.option("--open", "-o", "open_docs", is_flag=True, multiple=False, default=False, help=OPEN_ARG_HELP)
+def build_docs(open_docs):
     """Build the project documentation."""
     python_call("pip", ["install", "src/[docs]"])
     python_call("pip", ["install", "-r", "src/requirements.txt"])
@@ -249,6 +253,11 @@ def build_docs():
         ]
     )
     call(["sphinx-build", "-M", "html", "docs/source", "docs/build", "-a"])
+    if open_docs:
+        docs_page = (Path.cwd() / "docs" / "build" / "html" / "index.html").as_uri()
+        secho("Opening {}".format(docs_page))
+        webbrowser.open(docs_page)
+
 
 
 @cli.command("build-reqs")

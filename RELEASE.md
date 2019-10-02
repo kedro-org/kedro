@@ -13,12 +13,13 @@
 * Improved an error message when versioned local dataset is saved and unversioned path already exists.
 * Enabled tuples to be returned from a node.
 * Disallow the ConfigLoader loading the same file more than once, and deduplicate the `conf_paths` passed in
+* Added a `--open` flag to `kedro build-docs` that opens the documentation on build.
 
 ## Breaking changes to the API
 * `KedroContext.run()` no longer accepts `catalog` and `pipeline` arguments.
 
 ## Thanks for supporting contributions
-[Deepyaman Datta](https://github.com/deepyaman), [Luciano Issoe](https://github.com/Lucianois), [Joost Duisters](https://github.com/JoostDuisters), [William Ashford](https://github.com/williamashfordQB)
+[Deepyaman Datta](https://github.com/deepyaman), [Luciano Issoe](https://github.com/Lucianois), [Joost Duisters](https://github.com/JoostDuisters), [Zain Patel](https://github.com/mzjp2), [William Ashford](https://github.com/williamashfordQB)
 
 # Release 0.15.1
 

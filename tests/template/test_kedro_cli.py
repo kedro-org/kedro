@@ -317,6 +317,14 @@ class TestBuildDocsCommand:
         )
         fake_rmtree.assert_called_once_with("docs/build", ignore_errors=True)
 
+    @pytest.mark.parametrize("open_flag", ["-o", "--open"])
+    def test_open_docs(self, open_flag, fake_kedro_cli, mocker):
+        patched_browser = mocker.patch("webbrowser.open")
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["build-docs", open_flag])
+        assert not result.exit_code, result.stdout
+        expected_path = (Path.cwd() / "docs" / "build" / "html" / "index.html").as_uri()
+        patched_browser.assert_called_once_with(expected_path)
+
 
 class TestBuildReqsCommand:
     def test_requirements_file_exists(self, python_call_mock, fake_kedro_cli, mocker):

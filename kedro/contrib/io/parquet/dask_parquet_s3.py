@@ -26,8 +26,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``ParquetS3DataSet`` is a data set used to load and save
-data to parquet files on S3
+"""``ParquetS3DaskDataSet`` is a data set used to load and save
+data to parquet files using Dask on S3
 """
 from copy import deepcopy
 from pathlib import PurePosixPath
@@ -46,7 +46,7 @@ class ParquetS3DaskDataSet(AbstractVersionedDataSet):
         Example:
         ::
 
-            >>> from kedro.contrib.io.dask_parquet_s3 import ParquetS3DaskDataSet
+            >>> from kedro.contrib.io.parquet.dask_parquet_s3 import ParquetS3DaskDataSet
             >>> import pandas as pd
             >>> import dask.dataframe as dd
             >>>
@@ -77,7 +77,7 @@ class ParquetS3DaskDataSet(AbstractVersionedDataSet):
         save_args: Optional[Dict[str, Any]] = None,
         version: Version = None,
     ) -> None:
-        """Creates a new instance of ``ParquetS3DataSet`` pointing to a concrete
+        """Creates a new instance of ``ParquetS3DaskDataSet`` pointing to a concrete
         parquet file on S3.
 
         Args:

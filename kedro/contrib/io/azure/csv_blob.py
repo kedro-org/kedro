@@ -82,7 +82,7 @@ class CSVBlobDataSet(AbstractVersionedDataSet):
         self,
         filepath: str,
         container_name: str,
-        credentials: Dict[str, Any],
+        credentials: Optional[Dict[str, Any]] = None,
         blob_to_text_args: Optional[Dict[str, Any]] = None,
         blob_from_text_args: Optional[Dict[str, Any]] = None,
         load_args: Optional[Dict[str, Any]] = None,
@@ -118,9 +118,9 @@ class CSVBlobDataSet(AbstractVersionedDataSet):
 
         """
         self._container_name = container_name
-        self._credentials = credentials if credentials else {}
-        self._blob_to_text_args = blob_to_text_args if blob_to_text_args else {}
-        self._blob_from_text_args = blob_from_text_args if blob_from_text_args else {}
+        self._credentials = copy.deepcopy(credentials) or {}
+        self._blob_to_text_args = copy.deepcopy(blob_to_text_args) or {}
+        self._blob_from_text_args = copy.deepcopy(blob_from_text_args) or {}
         self._blob_service = BlockBlobService(**self._credentials)
         super().__init__(
             PurePath(filepath),

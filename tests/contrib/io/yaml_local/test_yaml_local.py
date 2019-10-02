@@ -31,7 +31,7 @@ import pytest
 
 from kedro.contrib.io.yaml_local import YAMLLocalDataSet
 from kedro.io import DataSetError
-from kedro.io.core import Version, generate_current_version
+from kedro.io.core import Version, generate_timestamp
 
 
 @pytest.fixture(params=[None])
@@ -41,7 +41,7 @@ def load_version(request):
 
 @pytest.fixture(params=[None])
 def save_version(request):
-    return request.param or generate_current_version()
+    return request.param or generate_timestamp()
 
 
 @pytest.fixture

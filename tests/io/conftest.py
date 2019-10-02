@@ -35,7 +35,7 @@ https://docs.pytest.org/en/latest/fixture.html
 
 from pytest import fixture
 
-from kedro.io.core import generate_current_version
+from kedro.io.core import generate_timestamp
 
 
 @fixture(params=[None])
@@ -45,4 +45,4 @@ def load_version(request):
 
 @fixture(params=[None])
 def save_version(request):
-    return request.param or generate_current_version()
+    return request.param or generate_timestamp()

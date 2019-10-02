@@ -41,7 +41,7 @@ from kedro.io.core import (
     DataSetAlreadyExistsError,
     DataSetError,
     DataSetNotFoundError,
-    generate_current_version,
+    generate_timestamp,
 )
 from kedro.io.memory_data_set import MemoryDataSet
 from kedro.io.transformers import AbstractTransformer
@@ -171,6 +171,7 @@ class DataCatalog:
         for data_set_name in missing_transformers:
             self._transformers[data_set_name] = list(self._default_transformers)
 
+    # pylint: disable=too-many-arguments
     @classmethod
     def from_config(
         cls: Type,
@@ -178,6 +179,7 @@ class DataCatalog:
         credentials: Dict[str, Dict[str, Any]] = None,
         load_versions: Dict[str, str] = None,
         save_version: str = None,
+        journal: VersionJournal = None,
     ) -> "DataCatalog":
         """Create a ``DataCatalog`` instance from configuration. This is a
         factory method used to provide developers with a way to instantiate
@@ -202,6 +204,7 @@ class DataCatalog:
                 case-insensitive string that conforms with operating system
                 filename limitations, b) always return the latest version when
                 sorted in lexicographical order.
+            journal: Instance of VersionJournal.
 
         Returns:
             An instantiated ``DataCatalog`` containing all specified
@@ -248,7 +251,8 @@ class DataCatalog:
         data_sets = {}
         catalog = copy.deepcopy(catalog) or {}
         credentials = copy.deepcopy(credentials) or {}
-        save_version = save_version or generate_current_version()
+        run_id = journal.run_id if journal else None
+        save_version = save_version or run_id or generate_timestamp()
         load_versions = copy.deepcopy(load_versions) or {}
 
         for ds_name, ds_config in catalog.items():
@@ -264,7 +268,7 @@ class DataCatalog:
             data_sets[ds_name] = AbstractDataSet.from_config(
                 ds_name, ds_config, load_versions.get(ds_name), save_version
             )
-        return cls(data_sets=data_sets)
+        return cls(data_sets=data_sets, journal=journal)
 
     def _get_transformed_dataset_function(self, data_set_name, operation):
         data_set = self._data_sets[data_set_name]
@@ -562,16 +566,6 @@ class DataCatalog:
             default_transformers=self._default_transformers,
             journal=self._journal,
         )
-
-    def set_version_journal(self, journal: VersionJournal) -> None:
-        """Set an instance of VersionJournal class.
-
-        Args:
-            Instance of VersionJournal.
-
-        """
-        if not self._journal:
-            self._journal = journal
 
     def __eq__(self, other):
         return (

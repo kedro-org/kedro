@@ -470,7 +470,7 @@ class Node:
             return {name: outputs[key] for key, name in self._outputs.items()}
 
         def _from_list():
-            if not isinstance(outputs, list):
+            if not isinstance(outputs, (list, tuple)):
                 raise ValueError(
                     "Failed to save outputs of node {}.\n"
                     "The node definition contains a list of "

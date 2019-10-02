@@ -41,6 +41,7 @@ import yaml
 from kedro import __version__
 from kedro.config import ConfigLoader, MissingConfigException
 from kedro.io import DataCatalog
+from kedro.io.core import generate_timestamp
 from kedro.pipeline import Pipeline
 from kedro.runner import AbstractRunner, SequentialRunner
 from kedro.utils import load_obj
@@ -173,7 +174,9 @@ class KedroContext(abc.ABC):
         """
         return self._get_catalog()
 
-    def _get_catalog(self) -> DataCatalog:
+    def _get_catalog(
+        self, save_version: str = None, journal: VersionJournal = None
+    ) -> DataCatalog:
         """A hook for changing the creation of a DataCatalog instance.
 
         Returns:
@@ -182,12 +185,16 @@ class KedroContext(abc.ABC):
         """
         conf_catalog = self.config_loader.get("catalog*", "catalog*/**")
         conf_creds = self._get_config_credentials()
-        catalog = self._create_catalog(conf_catalog, conf_creds)
+        catalog = self._create_catalog(conf_catalog, conf_creds, save_version, journal)
         catalog.add_feed_dict(self._get_feed_dict())
         return catalog
 
     def _create_catalog(  # pylint: disable=no-self-use
-        self, conf_catalog: Dict[str, Any], conf_creds: Dict[str, Any]
+        self,
+        conf_catalog: Dict[str, Any],
+        conf_creds: Dict[str, Any],
+        save_version: str = None,
+        journal: VersionJournal = None,
     ) -> DataCatalog:
         """A factory method for the DataCatalog instantiation.
 
@@ -195,7 +202,9 @@ class KedroContext(abc.ABC):
             DataCatalog defined in `catalog.yml`.
 
         """
-        return DataCatalog.from_config(conf_catalog, conf_creds)
+        return DataCatalog.from_config(
+            conf_catalog, conf_creds, save_version=save_version, journal=journal
+        )
 
     @property
     def io(self) -> DataCatalog:
@@ -316,18 +325,6 @@ class KedroContext(abc.ABC):
             raise KedroContextError("Pipeline contains no nodes")
         return new_pipeline
 
-    def _record_version_journal(self, catalog: DataCatalog, **kwargs) -> None:
-        """Record the run variables into journal."""
-        record_data = {
-            "project_path": str(self.project_path),
-            "env": self.env,
-            "kedro_version": self.project_version,
-        }
-        record_data.update(**kwargs)
-
-        journal = VersionJournal(record_data)
-        catalog.set_version_journal(journal)
-
     def run(  # pylint: disable=too-many-arguments
         self,
         tags: Iterable[str] = None,
@@ -336,8 +333,6 @@ class KedroContext(abc.ABC):
         from_nodes: Iterable[str] = None,
         to_nodes: Iterable[str] = None,
         from_inputs: Iterable[str] = None,
-        pipeline: Pipeline = None,
-        catalog: DataCatalog = None,
     ) -> Dict[str, Any]:
         """Runs the pipeline with a specified runner.
 
@@ -356,8 +351,6 @@ class KedroContext(abc.ABC):
                 end point of the new ``Pipeline``.
             from_inputs: An optional list of input datasets which should be used as a
                 starting point of the new ``Pipeline``.
-            pipeline: Optional Pipeline to run, defaults to self.pipeline.
-            catalog: Optional DataCatalog to run with, defaults to self.catalog.
         Raises:
             KedroContextError: If the resulting ``Pipeline`` is empty
                 or incorrect tags are provided.
@@ -369,7 +362,7 @@ class KedroContext(abc.ABC):
         # Report project name
         logging.info("** Kedro project %s", self.project_path.name)
 
-        pipeline = pipeline or self.pipeline
+        pipeline = self.pipeline
         filtered_pipeline = self._filter_pipeline(
             pipeline=pipeline,
             tags=tags,
@@ -378,16 +371,23 @@ class KedroContext(abc.ABC):
             node_names=node_names,
             from_inputs=from_inputs,
         )
-        catalog = catalog or self.catalog
 
-        self._record_version_journal(
-            catalog,
-            tags=tags,
-            from_nodes=from_nodes,
-            to_nodes=to_nodes,
-            node_names=node_names,
-            from_inputs=from_inputs,
-        )
+        run_id = generate_timestamp()
+
+        record_data = {
+            "run_id": run_id,
+            "project_path": str(self.project_path),
+            "env": self.env,
+            "kedro_version": self.project_version,
+            "tags": tags,
+            "from_nodes": from_nodes,
+            "to_nodes": to_nodes,
+            "node_names": node_names,
+            "from_inputs": from_inputs,
+        }
+        journal = VersionJournal(record_data)
+
+        catalog = self._get_catalog(save_version=run_id, journal=journal)
 
         # Run the runner
         runner = runner or SequentialRunner()

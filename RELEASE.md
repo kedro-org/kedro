@@ -1,17 +1,23 @@
 # Release 0.15.2
 
 ## Major features and improvements
+* Added a new `--load-version` to specify a particular dataset version for loading.
+* Modular pipeline support - break the pipeline into isolated parts with reusability in mind.
+* Multiple pipelines - ability to have multiple entry point pipelines and chose one with `kedro run --pipeline NAME`.
+* Parameterized config loader - ability to use central set of parameters throughout all your config files with `kedro.contrib.config.TemplatedConfigLoader`
 
 ## Bug fixes and other changes
 * Users will override `_get_pipeline` abstract method in `ProjectContext(KedroContext)` in `run.py` rather than `pipeline` abstract property. `pipeline` property is not abstract anymore.
 * Improved an error message when versioned local dataset is saved and unversioned path already exists.
 * Enabled tuples to be returned from a node.
+* Disallow the ConfigLoader loading the same file more than once, and deduplicate the `conf_paths` passed in
+* Added a `--open` flag to `kedro build-docs` that opens the documentation on build.
 
 ## Breaking changes to the API
 * `KedroContext.run()` no longer accepts `catalog` and `pipeline` arguments.
 
 ## Thanks for supporting contributions
-[Deepyaman Datta](https://github.com/deepyaman), [Luciano Issoe](https://github.com/Lucianois)
+[Deepyaman Datta](https://github.com/deepyaman), [Luciano Issoe](https://github.com/Lucianois), [Joost Duisters](https://github.com/JoostDuisters), [Zain Patel](https://github.com/mzjp2)
 
 # Release 0.15.1
 

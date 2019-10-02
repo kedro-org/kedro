@@ -26,31 +26,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""``kedro.contrib.config`` provides functionality for loading templated Kedro
+configuration.
 """
-Black needs python 3.6+, but Kedro should work on 3.5 too,
-that's why we can't put ``black`` into test_requirements.txt and
-have to install it manually like that.
 
-If python version is 3.5 - just exit with 0 status.
-"""
-import platform
-import shlex
-import subprocess
-import sys
-
-if __name__ == "__main__":
-    required_version = tuple(int(x) for x in sys.argv[1].strip().split("."))
-    install_cmd = shlex.split(sys.argv[2])
-    run_cmd = shlex.split(sys.argv[3])
-
-    current_version = tuple(map(int, platform.python_version_tuple()[:2]))
-
-    if current_version < required_version:
-        print("Python version is too low, exiting")
-        sys.exit(0)
-
-    try:
-        subprocess.run(run_cmd, check=True)
-    except (FileNotFoundError, subprocess.CalledProcessError):
-        subprocess.run(install_cmd, check=True)
-        subprocess.run(run_cmd, check=True)
+from .templated_config import TemplatedConfigLoader  # NOQA

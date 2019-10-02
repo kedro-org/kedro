@@ -1,7 +1,7 @@
 {% if cookiecutter.include_example == "True" %}
 # Parameters for the example pipeline. Feel free to delete these once you
 # remove the example pipeline from pipeline.py and the example nodes in
-# nodes/example.py
+# `src/pipelines/`
 example_test_data_ratio: 0.2
 example_num_train_iter: 10000
 example_learning_rate: 0.01

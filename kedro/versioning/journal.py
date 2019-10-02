@@ -102,7 +102,7 @@ def _git_sha(proj_dir: Union[str, Path] = None) -> Optional[str]:
     """
     proj_dir = str(proj_dir or Path.cwd())
     try:
-        res = subprocess.check_output(
+        res = subprocess.check_output(  # pylint: disable=unexpected-keyword-arg
             ["git", "rev-parse", "--short", "HEAD"], cwd=proj_dir
         )
         return res.decode().strip()

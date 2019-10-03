@@ -194,6 +194,25 @@ class KedroContext(abc.ABC):
         """
         return self._get_catalog()
 
+    @property
+    def params(self) -> Dict[str, Any]:
+        """Read-only property referring to Kedro's parameters for this context.
+
+        Returns:
+            Parameters defined in `parameters.yml`.
+        """
+        try:
+            params = self.config_loader.get("parameters*", "parameters*/**")
+        except MissingConfigException as exc:
+            warn(
+                "Parameters not found in your Kedro project config.\n{}".format(
+                    str(exc)
+                )
+            )
+            params = {}
+
+        return params
+
     def _get_catalog(
         self,
         save_version: str = None,
@@ -290,17 +309,9 @@ class KedroContext(abc.ABC):
 
     def _get_feed_dict(self) -> Dict[str, Any]:
         """Get parameters and return the feed dictionary."""
-        try:
-            params = self.config_loader.get("parameters*", "parameters*/**")
-        except MissingConfigException as exc:
-            warn(
-                "Parameters not found in your Kedro project config.\n{}".format(
-                    str(exc)
-                )
-            )
-            params = {}
-
+        params = self.params
         feed_dict = {"parameters": params}
+
         for param_name, param_value in params.items():
             key = "params:{}".format(param_name)
             feed_dict[key] = param_value

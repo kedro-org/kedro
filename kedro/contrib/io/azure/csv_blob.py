@@ -82,7 +82,7 @@ class CSVBlobDataSet(AbstractVersionedDataSet):
         self,
         filepath: str,
         container_name: str,
-        credentials: Optional[Dict[str, Any]] = None,
+        credentials: Dict[str, Any],
         blob_to_text_args: Optional[Dict[str, Any]] = None,
         blob_from_text_args: Optional[Dict[str, Any]] = None,
         load_args: Optional[Dict[str, Any]] = None,
@@ -99,10 +99,10 @@ class CSVBlobDataSet(AbstractVersionedDataSet):
                 ``account_key`` or ``sas_token``)to access the azure blob
             blob_to_text_args: Any additional arguments to pass to azure's
                 ``get_blob_to_text`` method:
-                https://docs.microsoft.com/en-us/python/api/azure.storage.blob.baseblobservice.baseblobservice?view=azure-python#get-blob-to-text
+                https://docs.microsoft.com/en-us/python/api/azure-storage-blob/azure.storage.blob.baseblobservice.baseblobservice?view=azure-python#get-blob-to-text
             blob_from_text_args: Any additional arguments to pass to azure's
                 ``create_blob_from_text`` method:
-                https://docs.microsoft.com/en-us/python/api/azure.storage.blob.blockblobservice.blockblobservice?view=azure-python#create-blob-from-text
+                https://docs.microsoft.com/en-us/python/api/azure-storage-blob/azure.storage.blob.baseblobservice.baseblobservice?view=azure-python#get-blob-to-text
             load_args: Pandas options for loading csv files.
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_csv.html
@@ -118,7 +118,7 @@ class CSVBlobDataSet(AbstractVersionedDataSet):
 
         """
         self._container_name = container_name
-        self._credentials = copy.deepcopy(credentials) or {}
+        self._credentials = copy.deepcopy(credentials)
         self._blob_to_text_args = copy.deepcopy(blob_to_text_args) or {}
         self._blob_from_text_args = copy.deepcopy(blob_from_text_args) or {}
         self._blob_service = BlockBlobService(**self._credentials)

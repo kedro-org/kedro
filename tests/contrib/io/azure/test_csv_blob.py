@@ -162,6 +162,24 @@ class TestCSVBlobDataSetVersioned:
         versioned_blob_csv_data_set.exists()
         exists_mock.assert_called_with(TEST_CONTAINER_NAME, blob_name=save_path)
 
+    @patch("kedro.contrib.io.azure.csv_blob.BlockBlobService.create_blob_from_text")
+    @patch(
+        "kedro.contrib.io.azure.csv_blob.BlockBlobService.exists", return_value=False
+    )
+    @patch("kedro.contrib.io.azure.csv_blob.CSVBlobDataSet._get_load_path")
+    def test_exists_dataset_error(
+        self,
+        load_mock,
+        exists_mock,
+        save_mock,
+        versioned_blob_csv_data_set,
+        dummy_dataframe,
+        save_path,
+    ):
+        versioned_blob_csv_data_set.save(dummy_dataframe)
+        load_mock.side_effect = DataSetError
+        assert not versioned_blob_csv_data_set.exists()
+
     @patch("kedro.contrib.io.azure.csv_blob.BlockBlobService.exists", return_value=True)
     @patch("kedro.contrib.io.azure.csv_blob.CSVBlobDataSet._get_load_path")
     def test_prevent_override(

@@ -81,7 +81,7 @@ def versioned_blob_csv_data_set(load_version, save_version):
         filepath=TEST_FILE_NAME,
         container_name=TEST_CONTAINER_NAME,
         credentials=TEST_CREDENTIALS,
-        blob_to_text_args={"to_extra": 42},
+        blob_to_text_args={"to_extra": 41},
         blob_from_text_args={"from_extra": 42},
         version=Version(load_version, save_version),
     )
@@ -122,7 +122,7 @@ class TestCSVBlobDataSetVersioned:
         blob_mock.return_value = BlobMock()
         result = versioned_blob_csv_data_set.load()
         blob_mock.assert_called_once_with(
-            container_name=TEST_CONTAINER_NAME, blob_name=TEST_FILE_NAME, to_extra=42
+            container_name=TEST_CONTAINER_NAME, blob_name=TEST_FILE_NAME, to_extra=41
         )
         expected = pd.read_csv(io.StringIO(BlobMock().content))
         assert result.equals(expected)

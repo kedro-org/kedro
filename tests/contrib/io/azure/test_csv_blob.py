@@ -160,6 +160,20 @@ class TestCSVBlobDataSetVersioned:
         versioned_blob_csv_data_set.exists()
         exists_mock.assert_called_with(TEST_CONTAINER_NAME, blob_name=save_path)
 
+    @patch("kedro.contrib.io.azure.csv_blob.BlockBlobService.exists", return_value=True)
+    def test_prevent_override(
+        self, exists_mock, versioned_blob_csv_data_set, dummy_dataframe
+    ):
+        """Check the error when attempting to override the data set if the
+        corresponding csv file for a given save version already exists in S3.
+        """
+        pattern = (
+            r"Save path \`.+\` for CSVBlobDataSet\(.+\) must not exist "
+            r"if versioning is enabled"
+        )
+        with pytest.raises(DataSetError, match=pattern):
+            versioned_blob_csv_data_set.save(dummy_dataframe)
+
     def test_version_str_repr(self, load_version, save_version):
         """Test that version is in string representation of the class instance
         when applicable."""

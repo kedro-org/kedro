@@ -28,6 +28,7 @@
 
 # pylint: disable=unused-argument
 
+import io
 from pathlib import PurePath
 from unittest.mock import patch
 
@@ -113,6 +114,18 @@ class TestCSVBlobDataSetVersioned:
             text=dummy_dataframe.to_csv(index=False),
             from_extra=42,
         )
+
+    @patch("kedro.contrib.io.azure.csv_blob.CSVBlobDataSet._get_load_path")
+    @patch("kedro.contrib.io.azure.csv_blob.BlockBlobService.get_blob_to_text")
+    def test_load(self, blob_mock, load_mock, versioned_blob_csv_data_set):
+        load_mock.return_value = TEST_FILE_NAME
+        blob_mock.return_value = BlobMock()
+        result = versioned_blob_csv_data_set.load()
+        blob_mock.assert_called_once_with(
+            container_name=TEST_CONTAINER_NAME, blob_name=TEST_FILE_NAME, to_extra=42
+        )
+        expected = pd.read_csv(io.StringIO(BlobMock().content))
+        assert result.equals(expected)
 
     @patch(
         "kedro.contrib.io.azure.csv_blob.BlockBlobService.list_blob_names",

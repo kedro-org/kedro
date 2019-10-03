@@ -37,7 +37,7 @@ from typing import Any, Dict, List, Optional
 import pandas as pd
 from azure.storage.blob import BlockBlobService
 
-from kedro.io import AbstractVersionedDataSet, Version
+from kedro.io import AbstractVersionedDataSet, DataSetError, Version
 
 
 class CSVBlobDataSet(AbstractVersionedDataSet):
@@ -158,7 +158,11 @@ class CSVBlobDataSet(AbstractVersionedDataSet):
         )
 
     def _exists(self) -> bool:
-        return self._exists_blob(str(self._get_load_path()))
+        try:
+            load_path = str(self._get_load_path())
+        except DataSetError:
+            return False
+        return self._exists_blob(load_path)
 
     def _exists_blob(self, blob_name: str) -> bool:
         return self._blob_service.exists(self._container_name, blob_name=blob_name)

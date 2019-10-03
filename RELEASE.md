@@ -11,8 +11,9 @@
 * Users will override `_get_pipeline` abstract method in `ProjectContext(KedroContext)` in `run.py` rather than `pipeline` abstract property. `pipeline` property is not abstract anymore.
 * Improved an error message when versioned local dataset is saved and unversioned path already exists.
 * Enabled tuples to be returned from a node.
-* Disallow the ConfigLoader loading the same file more than once, and deduplicate the `conf_paths` passed in
+* Disallow the ConfigLoader loading the same file more than once, and deduplicate the `conf_paths` passed in.
 * Added a `--open` flag to `kedro build-docs` that opens the documentation on build.
+* Updated ``Pipeline`` representation to include name and number of nodes, also making it readable as a context property.
 
 ## Breaking changes to the API
 * `KedroContext.run()` no longer accepts `catalog` and `pipeline` arguments.

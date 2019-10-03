@@ -98,8 +98,10 @@ class TestCSVBlobDataSetVersioned:
     @patch(
         "kedro.contrib.io.azure.csv_blob.BlockBlobService.exists", return_value=False
     )
+    @patch("kedro.contrib.io.azure.csv_blob.CSVBlobDataSet._get_load_path")
     def test_save(
         self,
+        load_mock,
         exists_mock,
         save_mock,
         versioned_blob_csv_data_set,
@@ -161,8 +163,9 @@ class TestCSVBlobDataSetVersioned:
         exists_mock.assert_called_with(TEST_CONTAINER_NAME, blob_name=save_path)
 
     @patch("kedro.contrib.io.azure.csv_blob.BlockBlobService.exists", return_value=True)
+    @patch("kedro.contrib.io.azure.csv_blob.CSVBlobDataSet._get_load_path")
     def test_prevent_override(
-        self, exists_mock, versioned_blob_csv_data_set, dummy_dataframe
+        self, load_mock, exists_mock, versioned_blob_csv_data_set, dummy_dataframe
     ):
         """Check the error when attempting to override the data set if the
         corresponding csv file for a given save version already exists in S3.
@@ -172,6 +175,36 @@ class TestCSVBlobDataSetVersioned:
             r"if versioning is enabled"
         )
         with pytest.raises(DataSetError, match=pattern):
+            versioned_blob_csv_data_set.save(dummy_dataframe)
+
+    @patch("kedro.contrib.io.azure.csv_blob.BlockBlobService.create_blob_from_text")
+    @patch("kedro.contrib.io.azure.csv_blob.CSVBlobDataSet._get_save_path")
+    @patch("kedro.contrib.io.azure.csv_blob.CSVBlobDataSet._get_load_path")
+    def test_save_version_warning(
+        self,
+        load_mock,
+        save_mock,
+        create_blob_mock,
+        versioned_blob_csv_data_set,
+        dummy_dataframe,
+    ):
+        """Check the warning when saving to the path that differs from
+        the subsequent load path."""
+        save_version = "2019-01-02T00.00.00.000Z"
+        load_version = "2019-01-01T23.59.59.999Z"
+        pattern = (
+            r"Save path `{f}/{sv}/{f}` did not match load path "
+            r"`{f}/{lv}/{f}` for CSVBlobDataSet\(.+\)".format(
+                f=TEST_FILE_NAME, sv=save_version, lv=load_version
+            )
+        )
+        load_mock.return_value = PurePath(
+            "{0}/{1}/{0}".format(TEST_FILE_NAME, load_version)
+        )
+        save_mock.return_value = PurePath(
+            "{0}/{1}/{0}".format(TEST_FILE_NAME, save_version)
+        )
+        with pytest.warns(UserWarning, match=pattern):
             versioned_blob_csv_data_set.save(dummy_dataframe)
 
     def test_version_str_repr(self, load_version, save_version):

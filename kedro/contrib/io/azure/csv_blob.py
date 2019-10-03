@@ -148,14 +148,17 @@ class CSVBlobDataSet(AbstractVersionedDataSet):
         return pd.read_csv(csv_content, **self._load_args)
 
     def _save(self, data: pd.DataFrame) -> None:
-        save_path = str(self._get_save_path())
+        save_path = self._get_save_path()
 
         self._blob_service.create_blob_from_text(
             container_name=self._container_name,
-            blob_name=save_path,
+            blob_name=str(save_path),
             text=data.to_csv(**self._save_args),
             **self._blob_from_text_args
         )
+
+        load_path = self._get_load_path()
+        self._check_paths_consistency(load_path, save_path)
 
     def _exists(self) -> bool:
         try:

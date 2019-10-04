@@ -27,7 +27,7 @@
 # limitations under the License.
 
 # pylint: disable=no-member
-
+from concurrent.futures.process import ProcessPoolExecutor
 from multiprocessing.managers import BaseProxy  # type: ignore
 from typing import Any, Dict
 
@@ -109,6 +109,53 @@ class TestValidParallelRunner:
         assert "Z" in result
         assert len(result["Z"]) == 3
         assert result["Z"] == ("42", "42", "42")
+
+
+class TestMaxWorkers:
+    @pytest.mark.parametrize(
+        "cpu_cores, user_specified_number, expected_number",
+        [
+            # The pipeline only needs 3 processes, no need for more
+            (4, 6, 3),
+            (4, None, 3),
+            # We need 3 processes, but only 2 CPU cores available
+            (2, None, 2),
+            # Even though we have 1 CPU core, allow user to use more.
+            (1, 2, 2),
+        ],
+    )
+    def test_specified_max_workers_bellow_cpu_cores_count(
+        self,
+        mocker,
+        fan_out_fan_in,
+        catalog,
+        cpu_cores,
+        user_specified_number,
+        expected_number,
+    ):  # pylint: disable=too-many-arguments
+        """
+        The system has 2 cores, but we initialize the runner with max_workers=4.
+        `fan_out_fan_in` pipeline needs 3 processes.
+        A pool with 3 workers should be used.
+        """
+        mocker.patch("os.cpu_count", return_value=cpu_cores)
+
+        executor_cls_mock = mocker.patch(
+            "kedro.runner.parallel_runner.ProcessPoolExecutor",
+            wraps=ProcessPoolExecutor,
+        )
+
+        catalog.add_feed_dict(dict(A=42))
+        result = ParallelRunner(max_workers=user_specified_number).run(
+            fan_out_fan_in, catalog
+        )
+        assert result == {"Z": (42, 42, 42)}
+
+        executor_cls_mock.assert_called_once_with(max_workers=expected_number)
+
+    def test_init_with_negative_process_count(self):
+        with pytest.raises(ValueError):
+            ParallelRunner(max_workers=-1)
 
 
 class TestInvalidParallelRunner:
@@ -221,19 +268,19 @@ ParallelRunnerManager.register(  # pylint: disable=no-member
 
 
 class TestParallelRunnerRelease:
+    # pylint: disable=protected-access
     def test_dont_release_inputs_and_outputs(self):
-        manager = ParallelRunnerManager()
-        manager.start()
-        log = manager.list()
+        runner = ParallelRunner()
+        log = runner._manager.list()
 
         pipeline = Pipeline(
             [node(identity, "in", "middle"), node(identity, "middle", "out")]
         )
         catalog = DataCatalog(
             {
-                "in": manager.LoggingDataSet(log, "in", "stuff"),
-                "middle": manager.LoggingDataSet(log, "middle"),
-                "out": manager.LoggingDataSet(log, "out"),
+                "in": runner._manager.LoggingDataSet(log, "in", "stuff"),
+                "middle": runner._manager.LoggingDataSet(log, "middle"),
+                "out": runner._manager.LoggingDataSet(log, "out"),
             }
         )
         ParallelRunner().run(pipeline, catalog)
@@ -242,9 +289,8 @@ class TestParallelRunnerRelease:
         assert list(log) == [("load", "in"), ("load", "middle"), ("release", "middle")]
 
     def test_release_at_earliest_opportunity(self):
-        manager = ParallelRunnerManager()
-        manager.start()
-        log = manager.list()
+        runner = ParallelRunner()
+        log = runner._manager.list()
 
         pipeline = Pipeline(
             [
@@ -255,11 +301,11 @@ class TestParallelRunnerRelease:
         )
         catalog = DataCatalog(
             {
-                "first": manager.LoggingDataSet(log, "first"),
-                "second": manager.LoggingDataSet(log, "second"),
+                "first": runner._manager.LoggingDataSet(log, "first"),
+                "second": runner._manager.LoggingDataSet(log, "second"),
             }
         )
-        ParallelRunner().run(pipeline, catalog)
+        runner.run(pipeline, catalog)
 
         # we want to see "release first" before "load second"
         assert list(log) == [
@@ -270,9 +316,8 @@ class TestParallelRunnerRelease:
         ]
 
     def test_count_multiple_loads(self):
-        manager = ParallelRunnerManager()
-        manager.start()
-        log = manager.list()
+        runner = ParallelRunner()
+        log = runner._manager.list()
 
         pipeline = Pipeline(
             [
@@ -281,8 +326,10 @@ class TestParallelRunnerRelease:
                 node(sink, "dataset", None, name="fred"),
             ]
         )
-        catalog = DataCatalog({"dataset": manager.LoggingDataSet(log, "dataset")})
-        ParallelRunner().run(pipeline, catalog)
+        catalog = DataCatalog(
+            {"dataset": runner._manager.LoggingDataSet(log, "dataset")}
+        )
+        runner.run(pipeline, catalog)
 
         # we want to the release after both the loads
         assert list(log) == [
@@ -292,9 +339,8 @@ class TestParallelRunnerRelease:
         ]
 
     def test_release_transcoded(self):
-        manager = ParallelRunnerManager()
-        manager.start()
-        log = manager.list()
+        runner = ParallelRunner()
+        log = runner._manager.list()
 
         pipeline = Pipeline(
             [node(source, None, "ds@save"), node(sink, "ds@load", None)]

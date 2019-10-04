@@ -166,6 +166,6 @@ class CSVBlobDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
 
     def _glob(self, pattern: str) -> List[str]:
         blob_paths = self._blob_service.list_blob_names(
-            self._container_name, prefix=str(self._filepath)
+            self._container_name, prefix=self._filepath
         )
         return [path for path in blob_paths if PurePosixPath(path).match(pattern)]

@@ -4,6 +4,8 @@
 * Added a new `--load-version` to specify a particular dataset version for loading.
 * Modular pipeline support - break the pipeline into isolated parts with reusability in mind.
 * Multiple pipelines - ability to have multiple entry point pipelines and chose one with `kedro run --pipeline NAME`.
+* Added the following datasets:
+  -  `MatplotlibWriter` in `contrib` for saving matplotlib images (by [@williamashfordQB](https://github.com/williamashfordQB))
 * Parameterized config loader - ability to use central set of parameters throughout all your config files with `kedro.contrib.config.TemplatedConfigLoader`
 * Parameters are exposed as a context property for ease of access in iPython / Jupyter notebooks (i.e `context.property`).
 
@@ -20,7 +22,7 @@
 * `KedroContext.run()` no longer accepts `catalog` and `pipeline` arguments.
 
 ## Thanks for supporting contributions
-[Deepyaman Datta](https://github.com/deepyaman), [Luciano Issoe](https://github.com/Lucianois), [Joost Duisters](https://github.com/JoostDuisters), [Zain Patel](https://github.com/mzjp2)
+[Deepyaman Datta](https://github.com/deepyaman), [Luciano Issoe](https://github.com/Lucianois), [Joost Duisters](https://github.com/JoostDuisters), [Zain Patel](https://github.com/mzjp2), [William Ashford](https://github.com/williamashfordQB)
 
 # Release 0.15.1
 

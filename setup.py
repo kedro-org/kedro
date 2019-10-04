@@ -116,5 +116,6 @@ setup(
             "azure-storage-queue>=1.1.0, <2.0",
         ],
         "bioinformatics": ["biopython>=1.73, <2.0"],
+        "matplotlib": ["matplotlib>=3.0.3, <4.0"],
     },
 )

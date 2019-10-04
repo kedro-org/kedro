@@ -131,7 +131,7 @@ class TestCSVBlobDataSetVersioned:
 
     @patch(
         "kedro.contrib.io.azure.csv_blob.BlockBlobService.list_blob_names",
-        return_value=list(),
+        return_value=[],
     )
     @patch(
         "kedro.contrib.io.azure.csv_blob.BlockBlobService.exists", return_value=False

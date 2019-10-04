@@ -234,7 +234,15 @@ def package():
 
 
 @cli.command("build-docs")
-@click.option("--open", "-o", "open_docs", is_flag=True, multiple=False, default=False, help=OPEN_ARG_HELP)
+@click.option(
+    "--open",
+    "-o",
+    "open_docs",
+    is_flag=True,
+    multiple=False,
+    default=False,
+    help=OPEN_ARG_HELP,
+)
 def build_docs(open_docs):
     """Build the project documentation."""
     python_call("pip", ["install", "src/[docs]"])
@@ -257,7 +265,6 @@ def build_docs(open_docs):
         docs_page = (Path.cwd() / "docs" / "build" / "html" / "index.html").as_uri()
         secho("Opening {}".format(docs_page))
         webbrowser.open(docs_page)
-
 
 
 @cli.command("build-reqs")

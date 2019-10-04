@@ -31,9 +31,9 @@ Microsoft's Azure blob storage.
 """
 import copy
 import io
+from functools import partial
 from pathlib import PurePosixPath
 from typing import Any, Dict, List, Optional
-from functools import partial
 
 import pandas as pd
 from azure.storage.blob import BlockBlobService

@@ -31,16 +31,17 @@ Microsoft's Azure blob storage.
 """
 import copy
 import io
-from pathlib import PurePath
+from pathlib import PurePosixPath
 from typing import Any, Dict, List, Optional
 
 import pandas as pd
 from azure.storage.blob import BlockBlobService
 
+from kedro.contrib.io import DefaultArgumentsMixIn
 from kedro.io import AbstractVersionedDataSet, DataSetError, Version
 
 
-class CSVBlobDataSet(AbstractVersionedDataSet):
+class CSVBlobDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
     """``CSVBlobDataSet`` loads and saves csv files in Microsoft's Azure
     blob storage. It uses azure storage SDK to read and write in azure and
     pandas to handle the csv file locally.
@@ -63,7 +64,6 @@ class CSVBlobDataSet(AbstractVersionedDataSet):
         >>> assert data.equals(reloaded)
     """
 
-    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {"index": False}
 
     def _describe(self) -> Dict[str, Any]:
@@ -123,19 +123,13 @@ class CSVBlobDataSet(AbstractVersionedDataSet):
         self._blob_from_text_args = copy.deepcopy(blob_from_text_args) or {}
         self._blob_service = BlockBlobService(**self._credentials)
         super().__init__(
-            PurePath(filepath),
-            version,
+            load_args=load_args,
+            save_args=save_args,
+            filepath=PurePosixPath(filepath),
+            version=version,
             exists_function=self._exists_blob,
             glob_function=self._glob,
         )
-
-        # Handle default load and save arguments
-        self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = copy.deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
 
     def _load(self) -> pd.DataFrame:
         load_path = str(self._get_load_path())
@@ -167,11 +161,11 @@ class CSVBlobDataSet(AbstractVersionedDataSet):
             return False
         return self._exists_blob(load_path)
 
-    def _exists_blob(self, blob_name: str) -> bool:
-        return self._blob_service.exists(self._container_name, blob_name=blob_name)
+    def _exists_blob(self, filepath: str) -> bool:
+        return self._blob_service.exists(self._container_name, blob_name=filepath)
 
     def _glob(self, pattern: str) -> List[str]:
         blob_paths = self._blob_service.list_blob_names(
             self._container_name, prefix=str(self._filepath)
         )
-        return [path for path in blob_paths if PurePath(path).match(pattern)]
+        return [path for path in blob_paths if PurePosixPath(path).match(pattern)]

@@ -29,7 +29,7 @@
 # pylint: disable=unused-argument
 
 import io
-from pathlib import PurePath
+from pathlib import PurePosixPath
 from unittest.mock import patch
 
 import pandas as pd
@@ -158,7 +158,7 @@ class TestCSVBlobDataSetVersioned:
         save_path,
     ):
         versioned_blob_csv_data_set.save(dummy_dataframe)
-        load_mock.return_value = PurePath(save_path)
+        load_mock.return_value = PurePosixPath(save_path)
         versioned_blob_csv_data_set.exists()
         exists_mock.assert_called_with(TEST_CONTAINER_NAME, blob_name=save_path)
 
@@ -216,10 +216,10 @@ class TestCSVBlobDataSetVersioned:
                 f=TEST_FILE_NAME, sv=save_version, lv=load_version
             )
         )
-        load_mock.return_value = PurePath(
+        load_mock.return_value = PurePosixPath(
             "{0}/{1}/{0}".format(TEST_FILE_NAME, load_version)
         )
-        save_mock.return_value = PurePath(
+        save_mock.return_value = PurePosixPath(
             "{0}/{1}/{0}".format(TEST_FILE_NAME, save_version)
         )
         with pytest.warns(UserWarning, match=pattern):

@@ -93,7 +93,13 @@ To keep your code well-structured you should create a Python sub-package called 
 mkdir -p src/kedro_tutorial/io && touch src/kedro_tutorial/io/__init__.py
 ```
 
-Creating new custom dataset implementations is done by creating a class that extends and implements all methods from `AbstractDataSet`. To implement a class that will allow you to load and save Excel files, you need to create the file `src/kedro_tutorial/io/xls_local.py` and paste the following into it:
+Creating new custom dataset implementations is done by creating a class that extends and implements all methods from `AbstractDataSet`. To implement a class that will allow you to load and save Excel files, you need to create the file `src/kedro_tutorial/io/xls_local.py` by running in your Unix terminal:
+
+```bash
+touch src/kedro_tutorial/io/xls_local.py
+```
+
+and paste the following into the newly created file:
 
 ```python
 """ExcelLocalDataSet loads and saves data to a local Excel file. The
@@ -184,7 +190,7 @@ class ExcelLocalDataSet(AbstractDataSet):
         return isfile(self._filepath)
 ```
 
-And update the `catalog.yml` file by adding the following:
+And update the `conf/base/catalog.yml` file by adding the following:
 
 ```yaml
 shuttles:

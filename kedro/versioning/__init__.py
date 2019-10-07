@@ -30,4 +30,4 @@
 information required to reproduce a Kedro run.
 """
 
-from .journal import VersionJournal  # NOQA
+from .journal import Journal  # NOQA

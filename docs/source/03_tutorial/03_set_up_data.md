@@ -42,7 +42,7 @@ wget -O data/01_raw/shuttles.xlsx https://raw.githubusercontent.com/quantumblack
 
 Alternatively, if you are a Windows user, try [Wget for Windows](https://eternallybored.org/misc/wget/) and the following commands instead:
 
-```bash
+```bat
 wget -O data\01_raw\reviews.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/reviews.csv
 wget -O data\01_raw\companies.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/companies.csv
 wget -O data\01_raw\shuttles.xlsx https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/shuttles.xlsx
@@ -50,7 +50,7 @@ wget -O data\01_raw\shuttles.xlsx https://raw.githubusercontent.com/quantumblack
 
 or [cURL for Windows](https://curl.haxx.se/windows/):
 
-```bash
+```bat
 curl -o data\01_raw\reviews.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/reviews.csv
 curl -o data\01_raw\companies.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/companies.csv
 curl -o data\01_raw\shuttles.xlsx https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/shuttles.xlsx
@@ -111,7 +111,7 @@ mkdir -p src/kedro_tutorial/io && touch src/kedro_tutorial/io/__init__.py
 
 Or, if you are a Windows user:
 
-```bash
+```bat
 mkdir src\kedro_turorial\io && type nul > src\kedro_turorial\io\__init__.py
 ```
 
@@ -121,7 +121,7 @@ Creating new custom dataset implementations is done by creating a class that ext
 touch src/kedro_tutorial/io/xls_local.py
 ```
 For Windows, try:
-```bash
+```bat
 type nul > src\kedro_tutorial\io\xls_local.py
 ```
 

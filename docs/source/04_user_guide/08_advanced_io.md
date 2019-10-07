@@ -218,3 +218,4 @@ Currently the following datasets support versioning:
 - `ExcelLocalDataSet`
 - `kedro.contrib.io.feather.FeatherLocalDataSet`
 - `kedro.contrib.io.parquet.ParquetS3DataSet`
+- `kedro.contrib.io.pyspark.SparkDataSet`

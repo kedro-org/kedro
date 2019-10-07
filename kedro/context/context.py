@@ -45,7 +45,7 @@ from kedro.io.core import generate_timestamp
 from kedro.pipeline import Pipeline
 from kedro.runner import AbstractRunner, SequentialRunner
 from kedro.utils import load_obj
-from kedro.versioning import VersionJournal
+from kedro.versioning import Journal
 
 
 class KedroContext(abc.ABC):
@@ -216,7 +216,7 @@ class KedroContext(abc.ABC):
     def _get_catalog(
         self,
         save_version: str = None,
-        journal: VersionJournal = None,
+        journal: Journal = None,
         load_versions: Dict[str, str] = None,
     ) -> DataCatalog:
         """A hook for changing the creation of a DataCatalog instance.
@@ -238,7 +238,7 @@ class KedroContext(abc.ABC):
         conf_catalog: Dict[str, Any],
         conf_creds: Dict[str, Any],
         save_version: str = None,
-        journal: VersionJournal = None,
+        journal: Journal = None,
         load_versions: Dict[str, str] = None,
     ) -> DataCatalog:
         """A factory method for the DataCatalog instantiation.
@@ -450,8 +450,10 @@ class KedroContext(abc.ABC):
             "to_nodes": to_nodes,
             "node_names": node_names,
             "from_inputs": from_inputs,
+            "load_versions": load_versions,
+            "pipeline_name": pipeline_name,
         }
-        journal = VersionJournal(record_data)
+        journal = Journal(record_data)
 
         catalog = self._get_catalog(
             save_version=run_id, journal=journal, load_versions=load_versions

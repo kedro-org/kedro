@@ -46,7 +46,7 @@ from kedro.io.core import (
 )
 from kedro.io.memory_data_set import MemoryDataSet
 from kedro.io.transformers import AbstractTransformer
-from kedro.versioning import VersionJournal
+from kedro.versioning import Journal
 
 CATALOG_KEY = "catalog"
 CREDENTIALS_KEY = "credentials"
@@ -110,7 +110,7 @@ class DataCatalog:
         feed_dict: Dict[str, Any] = None,
         transformers: Dict[str, List[AbstractTransformer]] = None,
         default_transformers: List[AbstractTransformer] = None,
-        journal: VersionJournal = None,
+        journal: Journal = None,
     ) -> None:
         """``DataCatalog`` stores instances of ``AbstractDataSet``
         implementations to provide ``load`` and ``save`` capabilities from
@@ -126,7 +126,7 @@ class DataCatalog:
                 to the data sets.
             default_transformers: A list of transformers to be applied to any
                 new data sets.
-            journal: Instance of VersionJournal.
+            journal: Instance of Journal.
         Raises:
             DataSetNotFoundError: When transformers are passed for a non
                 existent data set.
@@ -180,7 +180,7 @@ class DataCatalog:
         credentials: Dict[str, Dict[str, Any]] = None,
         load_versions: Dict[str, str] = None,
         save_version: str = None,
-        journal: VersionJournal = None,
+        journal: Journal = None,
     ) -> "DataCatalog":
         """Create a ``DataCatalog`` instance from configuration. This is a
         factory method used to provide developers with a way to instantiate
@@ -205,7 +205,7 @@ class DataCatalog:
                 case-insensitive string that conforms with operating system
                 filename limitations, b) always return the latest version when
                 sorted in lexicographical order.
-            journal: Instance of VersionJournal.
+            journal: Instance of Journal.
 
         Returns:
             An instantiated ``DataCatalog`` containing all specified

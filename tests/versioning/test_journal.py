@@ -34,7 +34,7 @@ from importlib import reload
 
 import pytest
 
-from kedro.versioning.journal import VersionJournal, _git_sha
+from kedro.versioning.journal import Journal, _git_sha
 
 
 @pytest.fixture()
@@ -66,12 +66,12 @@ def fake_git_sha(mocker):
 
 
 @pytest.mark.usefixtures("fake_git_sha")
-class TestVersionJournal:
+class TestJournal:
     @pytest.mark.usefixtures("setup_logging")
     def test_context_record(self, tmp_path):
         """Test journal initialisation"""
         record_data = {"run_id": "fake_id", "project_path": str(tmp_path)}
-        journal = VersionJournal(record_data)
+        journal = Journal(record_data)
         file_path = list(tmp_path.glob("journal_*"))
 
         assert len(file_path) == 1
@@ -88,14 +88,14 @@ class TestVersionJournal:
             "project_path": str(tmp_path),
             "blah": lambda x: x,
         }
-        _ = VersionJournal(record_data)
+        _ = Journal(record_data)
 
         assert "Unable to record" in caplog.record_tuples[0][2]
 
     @pytest.mark.usefixtures("setup_logging")
     def test_log_catalog(self, tmp_path):
         record_data = {"run_id": "fake_id", "project_path": str(tmp_path)}
-        journal = VersionJournal(record_data)
+        journal = Journal(record_data)
         journal.log_catalog("fake_data", "fake_operation", "fake_version")
         file_path = list(tmp_path.glob("journal_*"))
 

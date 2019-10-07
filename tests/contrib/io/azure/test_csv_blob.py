@@ -34,6 +34,7 @@ from unittest.mock import patch
 
 import pandas as pd
 import pytest
+from pandas.util.testing import assert_frame_equal
 
 from kedro.contrib.io.azure import CSVBlobDataSet
 from kedro.io import DataSetError, Version
@@ -127,7 +128,7 @@ class TestCSVBlobDataSetVersioned:
             container_name=TEST_CONTAINER_NAME, blob_name=TEST_FILE_NAME, to_extra=41
         )
         expected = pd.read_csv(io.StringIO(BlobMock().content))
-        assert result.equals(expected)
+        assert_frame_equal(result, expected)
 
     @patch(
         "kedro.contrib.io.azure.csv_blob.BlockBlobService.list_blob_names",
@@ -306,7 +307,7 @@ def test_load(get_blob_mock, blob_csv_data_set):
     result = blob_csv_data_set().load()[["name", "age"]]
     expected = pd.DataFrame({"name": ["tom", "bob"], "age": [3, 4]})
     expected = expected[["name", "age"]]
-    assert result.equals(expected)
+    assert_frame_equal(result, expected)
 
 
 @patch("kedro.contrib.io.azure.csv_blob.BlockBlobService.create_blob_from_text")

@@ -4,9 +4,7 @@
 
 In this tutorial, you will learn about advanced uses of the [Kedro IO](/kedro.io.rst) module and understand the underlying implementation.
 
-Relevant API documentation:
-* [AbstractDataSet](/kedro.io.AbstractDataSet)
-* [DataSetError](/kedro.io.DataSetError)
+Relevant API documentation: [AbstractDataSet](/kedro.io.AbstractDataSet), [DataSetError](/kedro.io.DataSetError)
 
 ## Error handling
 
@@ -221,3 +219,4 @@ Currently the following datasets support versioning:
 - `kedro.contrib.io.feather.FeatherLocalDataSet`
 - `kedro.contrib.io.parquet.ParquetS3DataSet`
 - `kedro.contrib.io.azure.CSVBlobDataSet`
+- `kedro.contrib.io.pyspark.SparkDataSet`

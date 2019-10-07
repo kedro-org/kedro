@@ -27,6 +27,8 @@
 # limitations under the License.
 """Pipeline construction."""
 
+from typing import Dict
+
 from kedro.pipeline import Pipeline
 {% if cookiecutter.include_example == "True" %}
 from {{ cookiecutter.python_package }}.pipelines import (
@@ -50,14 +52,14 @@ from {{ cookiecutter.python_package }}.pipelines import (
 # $ kedro run
 
 
-def create_pipelines(**kwargs):
+def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
     """Create the project's pipeline.
 
     Args:
         kwargs: Ignore any additional arguments added in the future.
 
     Returns:
-        Pipeline: The resulting pipeline.
+        A mapping from a pipeline name to a ``Pipeline`` object.
 
     """
 {% if cookiecutter.include_example == "True" %}

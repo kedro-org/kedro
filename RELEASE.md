@@ -4,20 +4,28 @@
 * Added a new `--load-version` to specify a particular dataset version for loading.
 * Modular pipeline support - break the pipeline into isolated parts with reusability in mind.
 * Multiple pipelines - ability to have multiple entry point pipelines and chose one with `kedro run --pipeline NAME`.
-* Parameterized config loader - ability to use central set of parameters throughout all your config files with `kedro.contrib.config.TemplatedConfigLoader`
+* Added the following datasets:
+  -  `MatplotlibWriter` in `contrib` for saving matplotlib images (by [@williamashfordQB](https://github.com/williamashfordQB)).
+* Parameterized config loader - ability to use central set of parameters throughout all your config files with `kedro.contrib.config.TemplatedConfigLoader`.
+* Parameters are exposed as a context property for ease of access in iPython / Jupyter notebooks (i.e `context.params`).
+* Added `max_workers` parameter for ``ParallelRunner``.
 
 ## Bug fixes and other changes
 * Users will override `_get_pipeline` abstract method in `ProjectContext(KedroContext)` in `run.py` rather than `pipeline` abstract property. `pipeline` property is not abstract anymore.
 * Improved an error message when versioned local dataset is saved and unversioned path already exists.
+* Add `catalog` global variable to `00-kedro-init.py`.
 * Enabled tuples to be returned from a node.
-* Disallow the ConfigLoader loading the same file more than once, and deduplicate the `conf_paths` passed in
-* Added versioning capability to `CSVBlobDataSet` in `kedro.contrib.io.azure`.
+* Disallow the ``ConfigLoader`` loading the same file more than once, and deduplicate the `conf_paths` passed in.
+* Added a `--open` flag to `kedro build-docs` that opens the documentation on build.
+* Updated ``Pipeline`` representation to include name and number of nodes, also making it readable as a context property.
+* `kedro.contrib.io.pyspark.SparkDataSet` now supports versioning.
+* `kedro.contrib.io.azure.CSVBlobDataSet` now supports versioning.
 
 ## Breaking changes to the API
 * `KedroContext.run()` no longer accepts `catalog` and `pipeline` arguments.
 
 ## Thanks for supporting contributions
-[Deepyaman Datta](https://github.com/deepyaman), [Luciano Issoe](https://github.com/Lucianois), [Joost Duisters](https://github.com/JoostDuisters), [Zain Patel](https://github.com/mzjp2)
+[Deepyaman Datta](https://github.com/deepyaman), [Luciano Issoe](https://github.com/Lucianois), [Joost Duisters](https://github.com/JoostDuisters), [Zain Patel](https://github.com/mzjp2), [William Ashford](https://github.com/williamashfordQB), [Karlson Lee](https://github.com/i25959341)
 
 # Release 0.15.1
 

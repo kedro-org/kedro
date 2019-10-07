@@ -156,8 +156,19 @@ class Pipeline:
         self._topo_sorted_nodes = _topologically_sorted(self.node_dependencies)
 
     def __repr__(self):  # pragma: no cover
-        reprs = [repr(node) for node in self.nodes]
-        return "{}([\n{}\n])".format(self.__class__.name, ",\n".join(reprs))
+        """Pipeline ([node1, ..., node10 ...], name='pipeline_name')"""
+        max_nodes_to_display = 10
+
+        nodes_reprs = [repr(node) for node in self.nodes[:max_nodes_to_display]]
+        if len(self.nodes) > max_nodes_to_display:
+            nodes_reprs.append("...")
+        nodes_reprs_str = (
+            "[\n{}\n]".format(",\n".join(nodes_reprs)) if nodes_reprs else "[]"
+        )
+        name = ",\nname='{}'".format(self.name) if self.name else ""
+
+        constructor_repr = "({}{})".format(nodes_reprs_str, name)
+        return "{}{}".format(self.__class__.__name__, constructor_repr)
 
     def __add__(self, other):
         if not isinstance(other, Pipeline):

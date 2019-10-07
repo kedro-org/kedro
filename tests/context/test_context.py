@@ -38,6 +38,7 @@ import yaml
 from pandas.util.testing import assert_frame_equal
 
 from kedro import __version__
+from kedro.config import MissingConfigException
 from kedro.context import KedroContext, KedroContextError
 from kedro.io import CSVLocalDataSet
 from kedro.io.core import Version, generate_timestamp
@@ -255,6 +256,18 @@ class TestKedroContext:
         dummy_context.io.save("cars", dummy_dataframe)
         reloaded_df = dummy_context.io.load("cars")
         assert_frame_equal(reloaded_df, dummy_dataframe)
+
+    def test_params(self, dummy_context):
+        assert dummy_context.params == dict(param1=1, param2=2)
+
+    def test_params_missing(self, dummy_context, mocker):
+        mock_config_loader = mocker.patch.object(DummyContext, "config_loader")
+        mock_config_loader.get.side_effect = MissingConfigException("nope")
+
+        pattern = "Parameters not found in your Kedro project config"
+        with pytest.warns(UserWarning, match=pattern):
+            actual = dummy_context.params
+        assert actual == {}
 
     def test_config_loader(self, dummy_context):
         params = dummy_context.config_loader.get("parameters*")

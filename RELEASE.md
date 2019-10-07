@@ -19,6 +19,7 @@
 * Added a `--open` flag to `kedro build-docs` that opens the documentation on build.
 * Updated ``Pipeline`` representation to include name and number of nodes, also making it readable as a context property.
 * `kedro.contrib.io.pyspark.SparkDataSet` now supports versioning.
+* `kedro.contrib.io.azure.CSVBlobDataSet` now supports versioning.
 
 ## Breaking changes to the API
 * `KedroContext.run()` no longer accepts `catalog` and `pipeline` arguments.

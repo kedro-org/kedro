@@ -120,11 +120,11 @@ class TestCSVBlobDataSetVersioned:
 
     @patch("kedro.contrib.io.azure.csv_blob.CSVBlobDataSet._get_load_path")
     @patch("kedro.contrib.io.azure.csv_blob.BlockBlobService.get_blob_to_text")
-    def test_load(self, blob_mock, load_mock, versioned_blob_csv_data_set):
+    def test_load(self, get_blob_mock, load_mock, versioned_blob_csv_data_set):
         load_mock.return_value = TEST_FILE_NAME
-        blob_mock.return_value = BlobMock()
+        get_blob_mock.return_value = BlobMock()
         result = versioned_blob_csv_data_set.load()
-        blob_mock.assert_called_once_with(
+        get_blob_mock.assert_called_once_with(
             container_name=TEST_CONTAINER_NAME, blob_name=TEST_FILE_NAME, to_extra=41
         )
         expected = pd.read_csv(io.StringIO(BlobMock().content))

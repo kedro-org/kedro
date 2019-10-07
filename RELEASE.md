@@ -7,7 +7,8 @@
 * Added the following datasets:
   -  `MatplotlibWriter` in `contrib` for saving matplotlib images (by [@williamashfordQB](https://github.com/williamashfordQB))
 * Parameterized config loader - ability to use central set of parameters throughout all your config files with `kedro.contrib.config.TemplatedConfigLoader`
-* Parameters are exposed as a context property for ease of access in iPython / Jupyter notebooks (i.e `context.property`).
+* Parameters are exposed as a context property for ease of access in iPython / Jupyter notebooks (i.e `context.params`).
+* Added `max_workers` parameter for ``ParallelRunner``.
 
 ## Bug fixes and other changes
 * Users will override `_get_pipeline` abstract method in `ProjectContext(KedroContext)` in `run.py` rather than `pipeline` abstract property. `pipeline` property is not abstract anymore.

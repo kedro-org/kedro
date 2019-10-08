@@ -1,8 +1,10 @@
 # Configuration
 
-> *Note:* This documentation is based on `Kedro 0.15.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+>
+> This section contains detailed information about configuration.
 
-This section contains detailed information about configuration. You may also want to consult the relevant API documentation on [kedro.config](/kedro.config.rst).
+Relevant API documentation: [ConfigLoader](/kedro.config.ConfigLoader)
 
 ## Local and base configuration
 
@@ -39,6 +41,7 @@ Configuration information from files stored in `base` or `local` that match thes
 > *Note:* Any top-level keys that start with `_` character are considered hidden (or reserved) and therefore are ignored right after the config load. Those keys will neither trigger a key duplication error mentioned above, nor will they appear in the resulting configuration dictionary. However, you may still use such keys for various purposes. For example, as [YAML anchors and aliases](https://confluence.atlassian.com/bitbucket/yaml-anchors-960154027.html).
 
 * If 2 configuration files have duplicate top-level keys, but are placed into different environment paths (one in `conf/base/`, another in `conf/local/`, for example) then the last loaded path (`conf/local/` in this case) takes precedence and overrides that key value. `ConfigLoader.get(<pattern>, ...)` will not raise any errors, however a `DEBUG` level log message will be emitted with the information on the over-ridden keys.
+* If the same environment path is passed multiple times, a `UserWarning` will be emitted to draw attention to the duplicate loading attempt, and any subsequent loading after the first one will be skipped.
 
 
 ## Additional configuration environments
@@ -51,11 +54,14 @@ kedro run --env=test
 
 If no `env` option is specified, this will default to using `local` environment to overwrite `conf/base`.
 
-You can alternatively pass a different environment variable in `ProjectContext` in `src/run.py`.
+You can alternatively pass a different environment value in the constructor of `ProjectContext` in `src/run.py`.
 
 ```python
 env = "test"
 ```
+
+> *Note*: If, for some reason, your project does not have any other environments apart from `base`, i.e. no `local` environment to default to, the recommended course of action is to use the approach above, namely customise your `ProjectContext` to take `env="base"` in the constructor.
+
 
 ## Credentials
 

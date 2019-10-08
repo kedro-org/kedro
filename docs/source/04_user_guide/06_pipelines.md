@@ -1,227 +1,14 @@
-# Nodes and pipelines
+# Pipelines
 
-> *Note:* This documentation is based on `Kedro 0.15.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
-In this section we introduce pipelines and nodes.
+> *Note:* This documentation is based on `Kedro 0.15.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+>
+> In this section we introduce the concept of a pipeline.
 
-Relevant API documentation:
-* [`Pipeline`](/kedro.pipeline.Pipeline)
-* [`node`](/kedro.pipeline.node)
+Relevant API documentation: [Pipeline](/kedro.pipeline.Pipeline)
 
-To run the code snippets demonstrated below for yourself, you will first need to import some Kedro and standard libraries.
-
-```python
-from kedro.pipeline import *
-from kedro.io import *
-from kedro.runner import *
-
-import pickle
-import os
-```
-## Nodes
-
-Nodes are used to coordinate complex, dependent tasks. Pipelines are flexible and are used to combine nodes reproducibly to build simple machine learning workflows or even build entire end-to-end production workflows.
-
-## Creating a pipeline node
-
-A node is created by specifying a function, input variable names and output variable names. Let's consider a simple function that adds two numbers:
-
-```python
-def add(x, y):
-    return x + y
-```
-
-The add function has two inputs `x` and `y` and a single output. A new node can now be created with this function:
-
-```python
-adder_node = node(func=add, inputs=['a', 'b'], outputs='sum')
-adder_node
-```
-
-`Output`:
-
-```console
-Out[1]: Node(add, ['a', 'b'], 'sum', None)
-```
-
-You can also add labels to nodes which will be used to describe them in logs:
-
-```python
-adder_node = node(func=add, inputs=['a', 'b'], outputs='sum')
-print(str(adder_node))
-
-adder_node = node(func=add, inputs=['a', 'b'], outputs='sum', name='adding_a_and_b')
-print(str(adder_node))
-```
-
-`Output`:
-
-```console
-add([a,b]) -> [sum]
-adding_a_and_b: add([a,b]) -> [sum]
-```
-
-Let's break down the node definition:
-
-* `add` is our function that will execute when running the node
-* `['a', 'b']` specify our input variable names. Note that in this case, they are different from `x` and `y`
-* `sum` specifies the name of our return variable. The value returned by `add` will be bound in this variable
-* `name` is an optional label, which can be used to provide description of the business logic of the node
-
-### Node definition syntax
-
-There is a special syntax for describing function inputs and outputs. This allows different Python functions to be reused in nodes and supports dependency resolution in pipelines.
-
-### Syntax for input variables
-
-```eval_rst
-+----------------------------------+-----------------+-----------------------------+---------------------------------------+
-| Input syntax                     | Meaning         | Example function parameters | How function is called when node runs |
-+==================================+=================+=============================+=======================================+
-| :code:`None`                     | No input        | :code:`def f()`             | :code:`f()`                           |
-+----------------------------------+-----------------+-----------------------------+---------------------------------------+
-| :code:`'a'`                      | Single input    | :code:`def f(arg1)`         | :code:`f(a)`                          |
-+----------------------------------+-----------------+-----------------------------+---------------------------------------+
-| :code:`['a', 'b']`               | Multiple inputs | :code:`def f(arg1, arg2)`   | :code:`f(a, b)`                       |
-+----------------------------------+-----------------+-----------------------------+---------------------------------------+
-| :code:`dict(arg1='x', arg2='y')` | Keyword inputs  | :code:`def f(arg1, arg2)`   | :code:`f(arg1='x', arg2='y')`         |
-+----------------------------------+-----------------+-----------------------------+---------------------------------------+
-```
-
-### Syntax for output variables
-
-```eval_rst
-+----------------------------------+-------------------+-------------------------------------+
-| Output syntax                    | Meaning           | Example return statement            |
-+==================================+===================+=====================================+
-| :code:`None`                     | No output         | Does not return                     |
-+----------------------------------+-------------------+-------------------------------------+
-| :code:`'a'`                      | Single output     | :code:`return a`                    |
-+----------------------------------+-------------------+-------------------------------------+
-| :code:`['a', 'b']`               | List output       | :code:`return [a, b]`               |
-+----------------------------------+-------------------+-------------------------------------+
-| :code:`dict(key1='a', key2='b')` | Dictionary output | :code:`return dict(key1=a, key2=b)` |
-+----------------------------------+-------------------+-------------------------------------+
-```
-
-Any combinations of the above are possible, except nodes of the form `node(f, None, None)` (at least a single input or output needs to be provided).
-
-## Tagging nodes
-
-To tag a node, you can simply specify the `tag` argument, as follows:
-
-```python
-node(func=add, inputs=["a", "b"], outputs="sum", name="adding_a_and_b", tag="node_tag")
-```
-
-Moreover, you can [tag all nodes in a ``Pipeline``](./05_nodes_and_pipelines.md#tagging-pipeline-nodes).
-
-
-## Running nodes
-
-To run a node, you need to instantiate its inputs. In this case, the node expects two inputs:
-
-```python
-adder_node.run(dict(a=2, b=3))
-```
-
-`Output`:
-
-```console
-Out[2]: {'sum': 5}
-```
-
-### Applying decorators to nodes
-
-For computations that need to run before and after node execution, Kedro is compatible with Python decorators. Below are example decorators that modify the first string argument of a given function:
-
-
-```python
-from functools import wraps
-from typing import Callable
-
-
-def apply_f(func: Callable) -> Callable:
-    @wraps(func)
-    def with_f(*args, **kwargs):
-        return func(*["f({})".format(a) for a in args], **kwargs)
-    return with_f
-
-
-def apply_g(func: Callable) -> Callable:
-    @wraps(func)
-    def with_g(*args, **kwargs):
-        return func(*["g({})".format(a) for a in args], **kwargs)
-    return with_g
-
-
-def apply_h(func: Callable) -> Callable:
-    @wraps(func)
-    def with_h(*args, **kwargs):
-        return func(*["h({})".format(a) for a in args], **kwargs)
-    return with_h
-```
-
-So if you want to create a function and make sure that `apply_f` is applied to every call of your function, including in Kedro nodes, you can do as follows:
-
-```python
-@apply_f
-def say_hello(name):
-    print("Hello {}!".format(name))
-
-
-hello_node = node(say_hello, 'name', None)
-hello_node.run(dict(name="Kedro"))
-```
-
-`Output`:
-
-```console
-In [3]: hello_node.run(dict(name="Kedro"))
-Hello f(Kedro)!
-Out[3]: {}
-```
-
-If you want to apply an additional decorator to the same function, but just for another node:
-
-```python
-hello_node_wrapped = node(apply_g(say_hello), 'name', None)
-
-hello_node.run(dict(name="Kedro"))
-hello_node_wrapped.run(dict(name="Kedro"))
-```
-
-`Output`:
-
-```console
-Hello f(Kedro)!
-Hello f(g(Kedro))!
-Out[4]: {}
-```
-
-### Applying multiple decorators to nodes
-
-You can also provide a list of decorators as shown here:
-
-```python
-hello_wrapped = node(apply_g(apply_h(say_hello)), 'name', None)
-hello_decorated = hello_node.decorate(apply_g, apply_h)
-
-hello_wrapped.run(dict(name="Kedro"))
-hello_decorated.run(dict(name="Kedro"))
-```
-
-`Output`:
-
-```console
-Hello f(h(g(Kedro)))!
-Hello f(h(g(Kedro)))!
-```
-
-Kedro comes with a few built-in decorators which are very useful when building your pipeline. You can learn more how to apply decorators to whole pipelines and the list of built-in decorators in [a separate section below](./05_nodes_and_pipelines.md#applying-decorators-on-pipelines).
+To benefit from Kedro's automatic dependency resolution, [nodes](./05_nodes.md#nodes) can be chained in a pipeline. A pipeline is a list of nodes that use a shared set of variables.
 
 ## Building pipelines
-
-To benefit from Kedro's automatic dependency resolution, nodes can be chained in a pipeline. A pipeline is a list of nodes that use a shared set of variables.
 
 In the following example, we construct a simple pipeline that computes the variance of a set of numbers. In practice, pipelines can use more complicated node definitions and variables usually correspond to entire datasets:
 
@@ -352,6 +139,143 @@ nodes[0].inputs
 ```console
 Out[6]: ['xs']
 ```
+
+## Modular pipelines
+
+As your Kedro project evolves and gets more sophisticated, you may find out that a single (_"master"_) pipeline does not fit the purpose of discoverability anymore due to its complexity. Also, it may be quite hard to port any reusable parts of the original pipeline into a different project. The solution would be to split the pipeline into several logically isolated reusable components, i.e. _modular pipelines_.
+
+Modular pipelines serve the following main purposes:
+
+1. **Discoverability:** modular pipeline represents a logically isolated unit of work that is much easier to develop, test and maintain
+2. **Portability:** the proposed internal structure of a modular pipeline makes it easy to copy the pipeline between projects
+
+### Modular pipeline structure
+
+> *Note:* Although Kedro does not enforce the structure from below, we strongly encourage to follow it when developing your modular pipelines. Future versions of Kedro may assume this structure, which would make your modular pipelines compatible with new Kedro features out of box.
+
+Here is the proposed structure of Kedro project pipelines:
+
+* modular pipelines:
+  - `src/new_kedro_project/pipelines/data_engineering` - Data Engineering pipeline
+  - `src/new_kedro_project/pipelines/data_science` - Data Science pipeline
+* master (or `__default__`) pipeline:
+  - `src/new_kedro_project/pipeline.py` - combines 2 modular pipelines from the above
+
+```console
+new-kedro-project
+├── .ipython/
+├── conf/
+├── data/
+├── docs/
+├── logs/
+├── notebooks/
+├── references/
+├── results/
+├── src
+│   ├── new_kedro_project
+│   │   ├── pipelines
+│   │   │   ├── data_engineering
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── nodes.py
+│   │   │   │   ├── pipeline.py
+│   │   │   │   ├── requirements.txt
+│   │   │   │   └── README.md
+│   │   │   ├── data_science
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── nodes.py
+│   │   │   │   ├── pipeline.py
+│   │   │   │   ├── requirements.txt
+│   │   │   │   └── README.md
+│   │   │   └── __init__.py
+│   │   ├── __init__.py
+│   │   ├── nodes.py
+│   │   ├── pipeline.py
+│   │   └── run.py
+│   ├── tests
+│   │   ├── __init__.py
+│   │   └── test_run.py
+│   ├── requirements.txt
+│   └── setup.py
+├── .kedro.yml
+├── README.md
+├── kedro_cli.py
+└── setup.cfg
+```
+
+### Requirements
+
+Here is a list of requirements to make your pipeline modular:
+
+1. Each modular pipeline should be placed in a Python module `src/<python_package>/pipelines/<pipeline_name>`
+2. `src/<python_package>/pipelines` should be a Python package itself
+3. Modular pipeline must expose a function called `create_pipeline` at the top level of its package. Calling `create_pipeline` with no arguments should return an instance of a [Pipeline](/kedro.pipeline.Pipeline):
+
+```python
+import new_kedro_project.pipelines.data_engineering as de
+
+de_pipeline = de.create_pipeline()  # type: kedro.pipeline.Pipeline
+```
+
+### Best practice
+
+This is a list of recommendations for developing modular pipeline. They are not enforced by Kedro at this stage, however this may change in future versions.
+
+* A modular pipeline should include a `README.md` as a main documentation source for the end users with all the information regarding the execution of the pipeline
+* A modular pipeline _may_ have external dependencies specified in `requirements.txt`. Those, however, are _not_ currently installed by `kedro install` command, so the users of your pipeline would have to run `pip install -r src/<python_package>/pipelines/<pipeline_name>/requirements.txt`
+* To ensure portability, modular pipeline should use relative imports when accessing its own objects and absolute imports otherwise. Example from `src/<python_package>/pipelines/data_engineering/pipeline.py`:
+
+```python
+from external_package import add  # importing from external package
+from kedro.pipeline import node, Pipeline
+
+from .nodes import node1_func, node2_func  # importing its own node functions
+
+
+def create_pipeline():
+    node1 = node(func=node1_func, inputs='a', outputs='b')
+    node2 = node(func=node2_func, inputs='c', outputs='d')
+    node3 = node(func=add, inputs=['b', 'd'], outputs='sum')
+    return Pipeline([node1, node2, node3])
+```
+
+* Modular pipelines should _not_ depend on the main Python package (`new_kedro_project` in this example) as it would break the portability to another project
+* Master pipeline should import and instantiate modular pipelines as shown in this example from `src/<python_package>/pipeline.py`:
+
+```python
+from typing import Dict
+
+from kedro.pipeline import Pipeline
+
+from new_kedro_project.pipelines import data_engineering as de, data_science as ds
+
+def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
+    data_engineering_pipeline = de.create_pipeline()
+    data_science_pipeline = ds.create_pipeline()
+    pipeline_all = data_engineering_pipeline + data_science_pipeline
+    return {
+        "de": data_engineering_pipeline,
+        "__default__": pipeline_all
+    }
+```
+
+> *Note:* To find out how you can run a pipeline by its name, please navigate to [this section](#running-a-pipeline-by-name).
+
+### Configuration
+
+Nested configuration in modular pipelines is _not_ currently supported by Kedro. It means that putting config files (like `catalog.yml`) in `src/<python_package>/pipelines/<pipeline_name>/conf` will have no effect on Kedro project configuration.
+
+The recommended way to apply the changes to project catalog or any other project configuration is to document those changes in the `README.md` of your modular pipeline. For example, you may instruct the users to copy `catalog.yml` into their top-level configuration like that:
+
+```bash
+mkdir -p conf/base/pipelines/data_engineering  # create a separate folder for the pipeline configs
+cp -r src/<python_package>/pipelines/data_engineering/conf/* conf/base/pipelines/data_engineering  # copy the pipeline configs
+```
+
+### Datasets
+
+It is important to keep in mind that Kedro resolves node execution order based on their input and output datasets. For example, if node 1 outputs the dataset `A`, and node 2 requires the dataset `A` as an input, node 1 is guaranteed to be executed before node 2 when Kedro runs the pipeline.
+
+As a modular pipeline developer, you may not know how your pipeline will be integrated in the downstream projects and what data catalog configuration they may have. Therefore, it is crucial to make it clear in the pipeline documentation what datasets (names and types) are required as inputs by your modular pipeline and what datasets it produces as outputs.
 
 ## Bad pipelines
 
@@ -524,6 +448,44 @@ kedro run --runner=ParallelRunner
 
 > *Note:* You cannot use both `--parallel` and `--runner` flags at the same time (e.g. `kedro run --parallel --runner=SequentialRunner` raises an exception).
 
+### Running a pipeline by name
+
+To run the pipeline by its name, you need to add your new pipeline to `create_pipelines()` function `src/<python_package>/pipeline.py` as below:
+
+```python
+def create_pipelines(**kwargs):
+    """Create the project's pipeline.
+
+    Args:
+        kwargs: Ignore any additional arguments added in the future.
+
+    Returns:
+        Pipeline: The resulting pipeline.
+
+    """
+
+    data_engineering_pipeline = de.create_pipeline()
+    data_science_pipeline = ds.create_pipeline()
+    my_pipeline = Pipeline(
+        [
+            # your definition goes here
+        ]
+    )
+
+    return {
+        "de": data_engineering_pipeline,
+        "my_pipeline": my_pipeline,
+        "__default__": data_engineering_pipeline + data_science_pipeline,
+    }
+```
+
+Then from the command line, execute the following:
+
+```bash
+kedro run --pipeline my_pipeline
+```
+
+> *Note:* `kedro run` without `--pipeline` option runs `__default__` pipeline from the dictionary returned by `create_pipelines()`.
 
 ### Applying decorators on pipelines
 

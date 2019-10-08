@@ -26,6 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from pathlib import Path
+from re import escape
 
 import pandas as pd
 import pytest
@@ -83,10 +84,9 @@ class TestCSVLocalDataSet:
         "path", ["http://abc.com", "https://abc.com/def?ghi=jkl#mnop", "blahblah://abc"]
     )
     def test_fails_with_remote_path(self, path):
-        with pytest.raises(ValueError) as assertion:
+        pattern = "seems to be a remote file"
+        with pytest.raises(ValueError, match=pattern):
             CSVLocalDataSet(filepath=path, save_args={"sep": ","})
-
-        assert "seems to be a remote file" in assertion.value.args[0]
 
 
 class TestCSVLocalDataSetVersioned:
@@ -227,3 +227,34 @@ class TestCSVLocalDataSetVersioned:
         last_load_version = versioned_csv_data_set.get_last_load_version()
         assert load_version == last_load_version
         assert save_version == last_save_version
+
+    def test_save_versioned_after_unversioned(
+        self, csv_data_set, versioned_csv_data_set, dummy_dataframe
+    ):
+        """
+        Check the error when saving versioned dataset if unversioned path already exists
+        """
+        csv_data_set.save(dummy_dataframe)
+
+        assert versioned_csv_data_set.exists() is False
+
+        pattern = (
+            r"Save path \`.+\` for CSVLocalDataSet\(.+\) must not "
+            r"exist if versioning is enabled"
+        )
+        with pytest.raises(DataSetError, match=pattern):
+            versioned_csv_data_set.save(dummy_dataframe)
+
+    def test_save_unversioned_after_versioned(
+        self, csv_data_set, versioned_csv_data_set, dummy_dataframe, filepath
+    ):
+        """
+        Check the error when saving unversioned dataset if versioned path already exists
+        """
+        versioned_csv_data_set.save(dummy_dataframe)
+
+        assert csv_data_set.exists() is False
+
+        pattern = "Is a directory: '{}'".format(filepath)
+        with pytest.raises(DataSetError, match=escape(pattern)):
+            csv_data_set.save(dummy_dataframe)

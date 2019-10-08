@@ -6,14 +6,16 @@ behave==1.2.6
 biopython>=1.73, <2.0
 codacy-coverage
 flake8>=3.5,<4.0
+hdfs>=2.5.8, <3.0
 joblib==0.12.3
+matplotlib>=3.0.3, <4.0
 moto==1.3.7
 mypy<=1.0
 nbconvert>=5.3.1, <6.0
 nbformat>=4.4.0, <5.0
 pre-commit>=1.17.0, <2.0.0
 psutil==5.4.7
-pylint>=2.3.1, <3.0
+pylint>=2.3.1, <2.4.0 # 2.4.1 doesn't work for Python 3.5, and requires investigation.
 pyspark>=2.2.0, <3.0
 pytest-cov>=2.5, <3.0
 pytest-mock>=1.7.1,<2.0

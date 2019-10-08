@@ -1,10 +1,10 @@
 # Guide to CLI commands
 
-> *Note:* This documentation is based on `Kedro 0.15.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 The `kedro` command line interface (CLI) helps with reproducibility in projects by allowing you to associate a set of commands and dependencies with a target and then execute them from the command line when inside a Kedro project directory. All project related CLI commands should be run from the project’s root directory.
 
-The supported commands are specified in the `kedro_cli.py` file. It is easy to extend `kedro_cli.py` by either modifying the file or injecting commands into it by using the [`plugin` framework](../04_user_guide/09_developing_plugins.md).
+The supported commands are specified in the `kedro_cli.py` file. It is easy to extend `kedro_cli.py` by either modifying the file or injecting commands into it by using the [`plugin` framework](../04_user_guide/10_developing_plugins.md).
 
 ### Autocomplete
 
@@ -72,7 +72,7 @@ Build the project documentation using the [Sphinx](https://www.sphinx-doc.org) f
 Start a Jupyter Notebook, Lab or REPL session respectively.
 
 Every time you start or restart a notebook kernel, a startup script (`<project-root>/.ipython/profile_default/startup/00-kedro-init.py`) will add the following variables in scope:
-- `context` (Instance of `ProjectContext` class defined in `src/project-name/run.py`) (The details of how to use `context` can be found [here](../04_user_guide/10_ipython.md))
+- `context` (Instance of `ProjectContext` class defined in `src/project-name/run.py`) (The details of how to use `context` can be found [here](../04_user_guide/11_ipython.md))
 - `startup_error` (`Exception`)
 
 To reload these at any point in your notebook (e.g. if you updated `catalog.yml`) use the line magic `%reload_kedro`.

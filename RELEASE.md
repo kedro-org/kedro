@@ -1,3 +1,30 @@
+# Release 0.15.2
+
+## Major features and improvements
+* Added `--load-version`, a `kedro run` argument that allows you run the pipeline with a particular load version of a dataset.
+* Support for modular pipelines in `src/`, break the pipeline into isolated parts with reusability in mind.
+* Support for multiple pipelines, an ability to have multiple entry point pipelines and choose one with `kedro run --pipeline NAME`.
+* Added a `MatplotlibWriter` dataset in `contrib` for saving Matplotlib images.
+* An ability to template/parameterize configuration files with `kedro.contrib.config.TemplatedConfigLoader`.
+* Parameters are exposed as a context property for ease of access in iPython / Jupyter Notebooks with `context.params`.
+* Added `max_workers` parameter for ``ParallelRunner``.
+
+## Bug fixes and other changes
+* Users will override the `_get_pipeline` abstract method in `ProjectContext(KedroContext)` in `run.py` rather than the `pipeline` abstract property. The `pipeline` property is not abstract anymore.
+* Improved an error message when versioned local dataset is saved and unversioned path already exists.
+* Add `catalog` global variable to `00-kedro-init.py`, allowing you to load datasets with `catalog.load()`.
+* Enabled tuples to be returned from a node.
+* Disallowed the ``ConfigLoader`` loading the same file more than once, and deduplicated the `conf_paths` passed in.
+* Added a `--open` flag to `kedro build-docs` that opens the documentation on build.
+* Updated the ``Pipeline`` representation to include name of the pipeline, also making it readable as a context property.
+* `kedro.contrib.io.pyspark.SparkDataSet` and `kedro.contrib.io.azure.CSVBlobDataSet` now support versioning.
+
+## Breaking changes to the API
+* `KedroContext.run()` no longer accepts `catalog` and `pipeline` arguments.
+
+## Thanks for supporting contributions
+[Deepyaman Datta](https://github.com/deepyaman), [Luciano Issoe](https://github.com/Lucianois), [Joost Duisters](https://github.com/JoostDuisters), [Zain Patel](https://github.com/mzjp2), [William Ashford](https://github.com/williamashfordQB), [Karlson Lee](https://github.com/i25959341)
+
 # Release 0.15.1
 
 ## Major features and improvements
@@ -15,7 +42,7 @@
 * Updated documentation in `03_configuration` regarding how to modify the configuration path.
 * Documented the architecture of Kedro showing how we think about library, project and framework components.
 * `extras/kedro_project_loader.py` renamed to `extras/ipython_loader.py` and now runs any IPython startup scripts without relying on the Kedro project structure.
-* Fixed TypeError when validating partial function's signature
+* Fixed TypeError when validating partial function's signature.
 * After a node failure during a pipeline run, a resume command will be suggested in the logs. This command will not work if the required inputs are MemoryDataSets.
 
 ## Breaking changes to the API

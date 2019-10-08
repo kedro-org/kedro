@@ -1,6 +1,6 @@
 # The Data Catalog
 
-> *Note:* This documentation is based on `Kedro 0.15.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 This section introduces `catalog.yml`, the project-shareable Data Catalog. The file is located in `conf/base` and is a registry of all data sources available for use by a project; it manages loading and saving of data.
 
@@ -21,7 +21,7 @@ The are two ways of defining a Data Catalog: through the use of YAML configurati
  - Location of the dataset (includes file paths, S3 bucket locations and more)
  - Credentials needed in order to access the dataset
  - Load and saving arguments
- - Whether or not you want a [dataset or ML model to be versioned](./07_advanced_io.md#versioning) when you run your data pipeline
+ - Whether or not you want a [dataset or ML model to be versioned](./08_advanced_io.md#versioning) when you run your data pipeline
 
 ## Using the Data Catalog with the YAML API
 
@@ -203,7 +203,7 @@ In this example the default `csv` configuration is inserted into `airplanes` and
 
 ## Transcoding datasets
 
-You may come across a situation where you would like to read the same file using two different dataset implementations. For instance, `parquet` files can not only be loaded via the `ParquetLocalDataSet`, but also directly by `SparkDataSet` using `pandas`. To do this, you can can define your `catalog.yml` as follows:
+You may come across a situation where you would like to read the same file using two different dataset implementations. For instance, `parquet` files can not only be loaded via the `ParquetLocalDataSet`, but also directly by `SparkDataSet` using `pandas`. To do this, you can define your `catalog.yml` as follows:
 
 ```yaml
 mydata@pandas:
@@ -255,7 +255,14 @@ cars.csv:
 
 The `DataCatalog` will create a versioned `CSVLocalDataSet` called `cars.csv`. The actual csv file location will look like `data/01_raw/company/cars.csv/<version>/cars.csv`, where `<version>` corresponds to a global save version string formatted as `YYYY-MM-DDThh.mm.ss.sssZ`.
 
-This section shows just the very basics of versioning. You can learn more about how this feature can be used in [Advanced IO](./07_advanced_io.md#versioning).
+You can run the pipeline with a particular versioned data set with `--load-version` flag as follows:
+
+```bash
+kedro run --load-version="cars.csv:YYYY-MM-DDThh.mm.ss.sssZ"
+```
+where `--load-version` is dataset name and version timestamp separated by `:`.
+
+This section shows just the very basics of versioning. You can learn more about how this feature can be used in [Advanced IO](./08_advanced_io.md#versioning).
 
 ## Using the Data Catalog with the Code API
 

@@ -37,7 +37,7 @@ handlers:
     journal_file_handler:
         class: kedro.versioning.journal.JournalFileHandler
         level: INFO
-        base_dir: logs
+        base_dir: logs/journals
         formatter: json_formatter
 
 loggers:

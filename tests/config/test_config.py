@@ -288,3 +288,45 @@ class TestConfigLoader:
         )
         with pytest.raises(MissingConfigException, match=pattern):
             ConfigLoader(conf_paths).get("non-existent-pattern")
+
+    def test_duplicate_paths(self, tmp_path, caplog):
+        """Check that trying to load the same environment config multiple times logs a
+        warning and skips the reload"""
+        paths = [str(tmp_path / "base"), str(tmp_path / "base")]
+        _write_yaml(tmp_path / "base" / "catalog.yml", {"env": "base", "a": "a"})
+
+        with pytest.warns(UserWarning, match="Duplicate environment detected"):
+            conf = ConfigLoader(paths)
+        assert conf.conf_paths == paths[:1]
+
+        conf.get("catalog*", "catalog*/**")
+        log_messages = [record.getMessage() for record in caplog.records]
+        assert not log_messages
+
+    def test_overlapping_patterns(self, tmp_path, caplog):
+        """Check that same configuration file is not loaded more than once."""
+        paths = [
+            str(tmp_path / "base"),
+            str(tmp_path / "dev"),
+            str(tmp_path / "dev" / "user1"),
+        ]
+        _write_yaml(
+            tmp_path / "base" / "catalog0.yml", {"env": "base", "common": "common"}
+        )
+        _write_yaml(
+            tmp_path / "dev" / "catalog1.yml", {"env": "dev", "dev_specific": "wiz"}
+        )
+        _write_yaml(tmp_path / "dev" / "user1" / "catalog2.yml", {"user1_c2": True})
+        _write_yaml(tmp_path / "dev" / "user1" / "catalog3.yml", {"user1_c3": True})
+
+        catalog = ConfigLoader(paths).get("catalog*", "catalog*/**", "user1/catalog2*")
+        assert catalog == dict(
+            env="dev", common="common", dev_specific="wiz", user1_c2=True, user1_c3=True
+        )
+
+        log_messages = [record.getMessage() for record in caplog.records]
+        expected_path = (tmp_path / "dev" / "user1" / "catalog2.yml").resolve()
+        expected_message = "Config file(s): {} already processed, skipping loading...".format(
+            str(expected_path)
+        )
+        assert expected_message in log_messages

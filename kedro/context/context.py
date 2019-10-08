@@ -41,10 +41,11 @@ import yaml
 from kedro import __version__
 from kedro.config import ConfigLoader, MissingConfigException
 from kedro.io import DataCatalog
+from kedro.io.core import generate_timestamp
 from kedro.pipeline import Pipeline
 from kedro.runner import AbstractRunner, SequentialRunner
 from kedro.utils import load_obj
-from kedro.versioning import VersionJournal
+from kedro.versioning import Journal
 
 
 class KedroContext(abc.ABC):
@@ -82,8 +83,7 @@ class KedroContext(abc.ABC):
         Args:
             project_path: Project path to define the context for.
             env: Optional argument for configuration default environment to be used
-            for running the pipeline. If not specified, it defaults to "local".
-
+                for running the pipeline. If not specified, it defaults to "local".
         """
 
         def _version_mismatch_error(context_version):
@@ -131,17 +131,47 @@ class KedroContext(abc.ABC):
         )
 
     @property
-    @abc.abstractmethod
     def pipeline(self) -> Pipeline:
-        """Abstract property for Pipeline getter.
+        """Read-only property for an instance of Pipeline.
 
         Returns:
             Defined pipeline.
 
         """
+        return self._get_pipeline()
+
+    @property
+    def pipelines(self) -> Dict[str, Pipeline]:
+        """Read-only property for an instance of Pipeline.
+
+        Returns:
+            A dictionary of defined pipelines.
+        """
+        return self._get_pipelines()
+
+    def _get_pipeline(self, name: str = None) -> Pipeline:
+        name = name or "__default__"
+        pipelines = self._get_pipelines()
+
+        try:
+            return pipelines[name]
+        except (TypeError, KeyError):
+            raise KedroContextError(
+                "Failed to find the pipeline named '{}'. "
+                "It needs to be generated and returned "
+                "by the '_get_pipelines' function.".format(name)
+            )
+
+    def _get_pipelines(self) -> Dict[str, Pipeline]:
+        """Abstract method for a hook for changing the creation of a Pipeline instance.
+
+        Returns:
+            A dictionary of defined pipelines.
+        """
+        # NOTE: This method is not `abc.abstractmethod` for backward compatibility.
         raise NotImplementedError(
             "`{}` is a subclass of KedroContext and it must implement "
-            "the `pipeline` property".format(self.__class__.__name__)
+            "the `_get_pipelines` method".format(self.__class__.__name__)
         )
 
     @property
@@ -154,17 +184,6 @@ class KedroContext(abc.ABC):
         """
         return self._project_path
 
-    def _create_catalog(  # pylint: disable=no-self-use
-        self, conf_catalog: Dict[str, Any], conf_creds: Dict[str, Any]
-    ) -> DataCatalog:
-        """A hook for changing the creation of the DataCatalog instance.
-
-        Returns:
-            DataCatalog defined in `catalog.yml`.
-
-        """
-        return DataCatalog.from_config(conf_catalog, conf_creds)
-
     @property
     def catalog(self) -> DataCatalog:
         """Read-only property referring to Kedro's ``DataCatalog`` for this context.
@@ -173,11 +192,68 @@ class KedroContext(abc.ABC):
             DataCatalog defined in `catalog.yml`.
 
         """
+        return self._get_catalog()
+
+    @property
+    def params(self) -> Dict[str, Any]:
+        """Read-only property referring to Kedro's parameters for this context.
+
+        Returns:
+            Parameters defined in `parameters.yml`.
+        """
+        try:
+            params = self.config_loader.get("parameters*", "parameters*/**")
+        except MissingConfigException as exc:
+            warn(
+                "Parameters not found in your Kedro project config.\n{}".format(
+                    str(exc)
+                )
+            )
+            params = {}
+
+        return params
+
+    def _get_catalog(
+        self,
+        save_version: str = None,
+        journal: Journal = None,
+        load_versions: Dict[str, str] = None,
+    ) -> DataCatalog:
+        """A hook for changing the creation of a DataCatalog instance.
+
+        Returns:
+            DataCatalog defined in `catalog.yml`.
+
+        """
         conf_catalog = self.config_loader.get("catalog*", "catalog*/**")
         conf_creds = self._get_config_credentials()
-        catalog = self._create_catalog(conf_catalog, conf_creds)
+        catalog = self._create_catalog(
+            conf_catalog, conf_creds, save_version, journal, load_versions
+        )
         catalog.add_feed_dict(self._get_feed_dict())
         return catalog
+
+    def _create_catalog(  # pylint: disable=no-self-use,too-many-arguments
+        self,
+        conf_catalog: Dict[str, Any],
+        conf_creds: Dict[str, Any],
+        save_version: str = None,
+        journal: Journal = None,
+        load_versions: Dict[str, str] = None,
+    ) -> DataCatalog:
+        """A factory method for the DataCatalog instantiation.
+
+        Returns:
+            DataCatalog defined in `catalog.yml`.
+
+        """
+        return DataCatalog.from_config(
+            conf_catalog,
+            conf_creds,
+            save_version=save_version,
+            journal=journal,
+            load_versions=load_versions,
+        )
 
     @property
     def io(self) -> DataCatalog:
@@ -194,7 +270,7 @@ class KedroContext(abc.ABC):
     def _create_config_loader(  # pylint: disable=no-self-use
         self, conf_paths: Iterable[str]
     ) -> ConfigLoader:
-        """A hook for changing the creation of the ConfigLoader instance.
+        """A factory method for the ConfigLoader instantiation.
 
         Returns:
             Instance of `ConfigLoader`.
@@ -202,10 +278,8 @@ class KedroContext(abc.ABC):
         """
         return ConfigLoader(conf_paths)
 
-    @property
-    def config_loader(self) -> ConfigLoader:
-        """Read-only property referring to Kedro's ``ConfigLoader`` for this
-        context.
+    def _get_config_loader(self) -> ConfigLoader:
+        """A hook for changing the creation of a ConfigLoader instance.
 
         Returns:
             Instance of `ConfigLoader` created by `_create_config_loader()`.
@@ -217,6 +291,17 @@ class KedroContext(abc.ABC):
         ]
         return self._create_config_loader(conf_paths)
 
+    @property
+    def config_loader(self) -> ConfigLoader:
+        """Read-only property referring to Kedro's ``ConfigLoader`` for this
+        context.
+
+        Returns:
+            Instance of `ConfigLoader`.
+
+        """
+        return self._get_config_loader()
+
     def _setup_logging(self) -> None:
         """Register logging specified in logging directory."""
         conf_logging = self.config_loader.get("logging*", "logging*/**")
@@ -224,17 +309,9 @@ class KedroContext(abc.ABC):
 
     def _get_feed_dict(self) -> Dict[str, Any]:
         """Get parameters and return the feed dictionary."""
-        try:
-            params = self.config_loader.get("parameters*", "parameters*/**")
-        except MissingConfigException as exc:
-            warn(
-                "Parameters not found in your Kedro project config.\n{}".format(
-                    str(exc)
-                )
-            )
-            params = {}
-
+        params = self.params
         feed_dict = {"parameters": params}
+
         for param_name, param_value in params.items():
             key = "params:{}".format(param_name)
             feed_dict[key] = param_value
@@ -253,10 +330,10 @@ class KedroContext(abc.ABC):
             conf_creds = {}
         return conf_creds
 
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments, no-self-use
     def _filter_pipeline(
         self,
-        pipeline: Pipeline = None,
+        pipeline: Pipeline,
         tags: Iterable[str] = None,
         from_nodes: Iterable[str] = None,
         to_nodes: Iterable[str] = None,
@@ -264,46 +341,32 @@ class KedroContext(abc.ABC):
         from_inputs: Iterable[str] = None,
     ) -> Pipeline:
         """Filter the pipeline as the intersection of all conditions."""
-        original_pipeline = pipeline or self.pipeline
-        new_pipeline = original_pipeline
-
-        # We need to intersect with the original_pipeline because the order
+        new_pipeline = pipeline
+        # We need to intersect with the pipeline because the order
         # of operations matters, so we don't want to do it incrementally.
         # As an example, with a pipeline of nodes 1,2,3, think of
         # "from 1", and "only 1 and 3" - the order you do them in results in
         # either 1 & 3, or just 1.
         if tags:
-            new_pipeline &= original_pipeline.only_nodes_with_tags(*tags)
+            new_pipeline &= pipeline.only_nodes_with_tags(*tags)
             if not new_pipeline.nodes:
                 raise KedroContextError(
                     "Pipeline contains no nodes with tags: {}".format(str(tags))
                 )
         if from_nodes:
-            new_pipeline &= original_pipeline.from_nodes(*from_nodes)
+            new_pipeline &= pipeline.from_nodes(*from_nodes)
         if to_nodes:
-            new_pipeline &= original_pipeline.to_nodes(*to_nodes)
+            new_pipeline &= pipeline.to_nodes(*to_nodes)
         if node_names:
-            new_pipeline &= original_pipeline.only_nodes(*node_names)
+            new_pipeline &= pipeline.only_nodes(*node_names)
         if from_inputs:
-            new_pipeline &= original_pipeline.from_inputs(*from_inputs)
+            new_pipeline &= pipeline.from_inputs(*from_inputs)
 
         if not new_pipeline.nodes:
             raise KedroContextError("Pipeline contains no nodes")
         return new_pipeline
 
-    def _record_version_journal(self, catalog: DataCatalog, **kwargs) -> None:
-        """Record the run variables into journal."""
-        record_data = {
-            "project_path": str(self.project_path),
-            "env": self.env,
-            "kedro_version": self.project_version,
-        }
-        record_data.update(**kwargs)
-
-        journal = VersionJournal(record_data)
-        catalog.set_version_journal(journal)
-
-    def run(  # pylint: disable=too-many-arguments
+    def run(  # pylint: disable=too-many-arguments,too-many-locals
         self,
         tags: Iterable[str] = None,
         runner: AbstractRunner = None,
@@ -311,8 +374,8 @@ class KedroContext(abc.ABC):
         from_nodes: Iterable[str] = None,
         to_nodes: Iterable[str] = None,
         from_inputs: Iterable[str] = None,
-        pipeline: Pipeline = None,
-        catalog: DataCatalog = None,
+        load_versions: Dict[str, str] = None,
+        pipeline_name: str = None,
     ) -> Dict[str, Any]:
         """Runs the pipeline with a specified runner.
 
@@ -331,8 +394,10 @@ class KedroContext(abc.ABC):
                 end point of the new ``Pipeline``.
             from_inputs: An optional list of input datasets which should be used as a
                 starting point of the new ``Pipeline``.
-            pipeline: Optional Pipeline to run, defaults to self.pipeline.
-            catalog: Optional DataCatalog to run with, defaults to self.catalog.
+            load_versions: An optional flag to specify a particular dataset version timestamp
+                to load.
+            pipeline_name: Name of the ``Pipeline`` to execute.
+                Defaults to "__default__".
         Raises:
             KedroContextError: If the resulting ``Pipeline`` is empty
                 or incorrect tags are provided.
@@ -344,7 +409,27 @@ class KedroContext(abc.ABC):
         # Report project name
         logging.info("** Kedro project %s", self.project_path.name)
 
-        pipeline = self._filter_pipeline(
+        try:
+            pipeline = self._get_pipeline(name=pipeline_name)
+        except NotImplementedError:
+            common_migration_message = (
+                "`ProjectContext._get_pipeline(self, name)` method is expected. "
+                "Please refer to the 'Modular Pipelines' section of the documentation."
+            )
+            if pipeline_name:
+                raise KedroContextError(
+                    "The project is not fully migrated to use multiple pipelines. "
+                    + common_migration_message
+                )
+
+            warn(
+                "You are using the deprecated pipeline construction mechanism. "
+                + common_migration_message,
+                DeprecationWarning,
+            )
+            pipeline = self.pipeline
+
+        filtered_pipeline = self._filter_pipeline(
             pipeline=pipeline,
             tags=tags,
             from_nodes=from_nodes,
@@ -352,20 +437,31 @@ class KedroContext(abc.ABC):
             node_names=node_names,
             from_inputs=from_inputs,
         )
-        catalog = catalog or self.catalog
 
-        self._record_version_journal(
-            catalog,
-            tags=tags,
-            from_nodes=from_nodes,
-            to_nodes=to_nodes,
-            node_names=node_names,
-            from_inputs=from_inputs,
+        run_id = generate_timestamp()
+
+        record_data = {
+            "run_id": run_id,
+            "project_path": str(self.project_path),
+            "env": self.env,
+            "kedro_version": self.project_version,
+            "tags": tags,
+            "from_nodes": from_nodes,
+            "to_nodes": to_nodes,
+            "node_names": node_names,
+            "from_inputs": from_inputs,
+            "load_versions": load_versions,
+            "pipeline_name": pipeline_name,
+        }
+        journal = Journal(record_data)
+
+        catalog = self._get_catalog(
+            save_version=run_id, journal=journal, load_versions=load_versions
         )
 
         # Run the runner
         runner = runner or SequentialRunner()
-        return runner.run(pipeline, catalog)
+        return runner.run(filtered_pipeline, catalog)
 
 
 def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
@@ -394,16 +490,26 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
         os.environ["PYTHONPATH"] = src_path
 
     kedro_yaml = project_path / ".kedro.yml"
+
     try:
         with kedro_yaml.open("r") as kedro_yml:
-
-            context_path = yaml.safe_load(kedro_yml)["context_path"]
-    except Exception:
+            kedro_yaml_content = yaml.safe_load(kedro_yml)
+    except FileNotFoundError:
         raise KedroContextError(
-            "Could not retrive 'context_path' from '.kedro.yml' in {}. If you have created "
+            "Could not find '.kedro.yml' in {}. If you have created "
             "your project with Kedro version <0.15.0, make sure to update your project template. "
             "See https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md "
             "for how to migrate your Kedro project.".format(str(project_path))
+        )
+    except Exception:
+        raise KedroContextError("Failed to parse '.kedro.yml' file")
+
+    try:
+        context_path = kedro_yaml_content["context_path"]
+    except (KeyError, TypeError):
+        raise KedroContextError(
+            "'.kedro.yml' doesn't have a required `context_path` field. "
+            "Please refer to the documentation."
         )
 
     context_class = load_obj(context_path)

@@ -30,29 +30,26 @@ Kedro project."""
 import json
 import logging
 import subprocess
-import uuid
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Mapping, Optional, Union
 
 _JOURNAL_KEY = "kedro.journal"
 
 
-class VersionJournal:
-    """``VersionJournal`` class provides journal logging to enable versioning support for
+class Journal:
+    """``Journal`` class provides journal logging to enable versioning support for
     Kedro project.
     """
 
     def __init__(self, record_data: Dict[str, Any]):
-        """Initialise ``VersionJournal`` as a session of the journal versioning,
+        """Initialise ``Journal`` as a session of the journal versioning,
         and log the project context with an unique identifier.
 
         Args:
             record_data: JSON serializable dictionary specific to project context.
 
         """
-        self._id = str(uuid.uuid1())
-        record_data["id"] = self._id
+        self.run_id = record_data["run_id"]
         record_data["git_sha"] = _git_sha(record_data["project_path"])
         self._log_journal("ContextJournalRecord", record_data)
 
@@ -89,7 +86,7 @@ class VersionJournal:
 
         """
         record_data = {
-            "id": self._id,
+            "run_id": self.run_id,
             "name": dataset_name,
             "operation": operation,
             "version": version,
@@ -105,7 +102,7 @@ def _git_sha(proj_dir: Union[str, Path] = None) -> Optional[str]:
     """
     proj_dir = str(proj_dir or Path.cwd())
     try:
-        res = subprocess.check_output(
+        res = subprocess.check_output(  # pylint: disable=unexpected-keyword-arg
             ["git", "rev-parse", "--short", "HEAD"], cwd=proj_dir
         )
         return res.decode().strip()
@@ -126,27 +123,23 @@ class JournalFileHandler(logging.Handler):
 
         """
         super(JournalFileHandler, self).__init__()
-        self.base_dir = Path(base_dir).expanduser().resolve()
-        self._file_handler_paths = {}  # type:Dict[str, Path]
+        self.base_dir = Path(base_dir).expanduser()
+        self._file_handlers = {}  # type:Dict[str, logging.FileHandler]
 
-    def _generate_log(self, journal_id) -> Path:
+    def _generate_handler(self, run_id: str) -> logging.FileHandler:
         """Generate unique filename for journal record path.
 
         Returns:
-            Path to the journal log.
+            Logging FileHandler object.
 
         """
-        current_ts = datetime.now(tz=timezone.utc)
-        fmt = (
-            "{d.year:04d}-{d.month:02d}-{d.day:02d}T{d.hour:02d}"
-            ".{d.minute:02d}.{d.second:02d}.{ms:03d}Z"
-        )
-        current_ts_str = fmt.format(d=current_ts, ms=current_ts.microsecond // 1000)
-        return self.base_dir / ("journal_" + journal_id + current_ts_str + ".log")
+        self.base_dir.mkdir(parents=True, exist_ok=True)
+        handler_path = self.base_dir.resolve() / "journal_{}.log".format(run_id)
+        return logging.FileHandler(str(handler_path), mode="a")
 
     def emit(self, record: logging.LogRecord) -> None:
         """Overriding emit function in logging.Handler, which will output the record to
-        the filelog based on journal id.
+        the filelog based on run id.
 
         Args:
             record: logging record.
@@ -154,9 +147,8 @@ class JournalFileHandler(logging.Handler):
         """
         message = json.loads(record.getMessage())
 
-        handler_path = self._file_handler_paths.setdefault(
-            message["id"], self._generate_log(message["id"])
+        handler = self._file_handlers.setdefault(
+            message["run_id"], self._generate_handler(message["run_id"])
         )
 
-        handler_path.parent.mkdir(parents=True, exist_ok=True)
-        logging.FileHandler(str(handler_path), mode="a").emit(record)
+        handler.emit(record)

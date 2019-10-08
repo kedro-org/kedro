@@ -51,6 +51,6 @@ if __name__ == "__main__":
 
     try:
         subprocess.run(run_cmd, check=True)
-    except FileNotFoundError:
+    except (FileNotFoundError, subprocess.CalledProcessError):
         subprocess.run(install_cmd, check=True)
         subprocess.run(run_cmd, check=True)

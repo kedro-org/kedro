@@ -1,6 +1,6 @@
 # Journal
 
-> *Note:* This documentation is based on `Kedro 0.15.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 ## Overview
 Journal in Kedro allows you to save the history of pipeline. This functionality helps you reproduce results and gives you an ability to investigate failures in your workflow.
@@ -16,7 +16,7 @@ A context journal record captures all the necessary information to reproduce the
     "run_id": "2019-10-01T09.15.57.289Z",
     "project_path": "<path-to-project>/src/kedro-tutorial",
     "env": "local",
-    "kedro_version": "0.15.1",
+    "kedro_version": "0.15.2",
     "tags": [],
     "from_nodes": [],
     "to_nodes": [],

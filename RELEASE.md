@@ -3,7 +3,7 @@
 ## Major features and improvements
 * Added `--load-version`, a `kedro run` argument that allows you run the pipeline with a particular load version of a dataset.
 * Support for modular pipelines in `src/`, break the pipeline into isolated parts with reusability in mind.
-* Support for multiple pipelines, an ability to have multiple entry point pipelines and chose one with `kedro run --pipeline NAME`.
+* Support for multiple pipelines, an ability to have multiple entry point pipelines and choose one with `kedro run --pipeline NAME`.
 * Added a `MatplotlibWriter` dataset in `contrib` for saving Matplotlib images.
 * An ability to template/parameterize configuration files with `kedro.contrib.config.TemplatedConfigLoader`.
 * Parameters are exposed as a context property for ease of access in iPython / Jupyter Notebooks with `context.params`.
@@ -16,7 +16,7 @@
 * Enabled tuples to be returned from a node.
 * Disallowed the ``ConfigLoader`` loading the same file more than once, and deduplicated the `conf_paths` passed in.
 * Added a `--open` flag to `kedro build-docs` that opens the documentation on build.
-* Updated ``Pipeline`` representation to include name of the pipeline, also making it readable as a context property.
+* Updated the ``Pipeline`` representation to include name of the pipeline, also making it readable as a context property.
 * `kedro.contrib.io.pyspark.SparkDataSet` and `kedro.contrib.io.azure.CSVBlobDataSet` now support versioning.
 
 ## Breaking changes to the API

@@ -1,7 +1,7 @@
 # Release 0.15.2
 
 ## Major features and improvements
-* Added a new `--load-version` to specify a particular dataset version for loading.
+* Added `--load-version`, a `kedro run` argument that allows you run the pipeline with a particular load version of a dataset.
 * Support for modular pipelines in `src/`, break the pipeline into isolated parts with reusability in mind.
 * Support for multiple pipelines, an ability to have multiple entry point pipelines and chose one with `kedro run --pipeline NAME`.
 * Added a `MatplotlibWriter` dataset in `contrib` for saving Matplotlib images.
@@ -12,11 +12,11 @@
 ## Bug fixes and other changes
 * Users will override the `_get_pipeline` abstract method in `ProjectContext(KedroContext)` in `run.py` rather than the `pipeline` abstract property. The `pipeline` property is not abstract anymore.
 * Improved an error message when versioned local dataset is saved and unversioned path already exists.
-* Add `catalog` global variable to `00-kedro-init.py`.
+* Add `catalog` global variable to `00-kedro-init.py`, allowing you to load datasets with `catalog.load()`.
 * Enabled tuples to be returned from a node.
 * Disallowed the ``ConfigLoader`` loading the same file more than once, and deduplicated the `conf_paths` passed in.
 * Added a `--open` flag to `kedro build-docs` that opens the documentation on build.
-* Updated ``Pipeline`` representation to include name and number of nodes, also making it readable as a context property.
+* Updated ``Pipeline`` representation to include name of the pipeline, also making it readable as a context property.
 * `kedro.contrib.io.pyspark.SparkDataSet` and `kedro.contrib.io.azure.CSVBlobDataSet` now support versioning.
 
 ## Breaking changes to the API

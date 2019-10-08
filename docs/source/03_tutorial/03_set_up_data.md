@@ -14,9 +14,9 @@ This tutorial will make use of fictional datasets for spaceflight companies shut
 
 The spaceflight tutorial has three files and uses two data formats: `.csv` and `.xlsx`. Download and save the files to the `data/01_raw/` folder of your project directory:
 
-* [reviews.csv](https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/reviews.csv)
-* [companies.csv](https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/companies.csv)
-* [shuttles.xlsx](https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/shuttles.xlsx)
+* [reviews.csv](https://quantumblacklabs.github.io/kedro/reviews.csv)
+* [companies.csv](https://quantumblacklabs.github.io/kedro/companies.csv)
+* [shuttles.xlsx](https://quantumblacklabs.github.io/kedro/shuttles.xlsx)
 
 Here is an example of how you can [download the files from GitHub](https://www.quora.com/How-do-I-download-something-from-GitHub) to `data/01_raw` directory inside your project using [cURL](https://curl.haxx.se/download.html) in a Unix terminal:
 

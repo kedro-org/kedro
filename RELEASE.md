@@ -1,6 +1,7 @@
 # Release 0.15.3
 
 ## Major features and improvements
+* `Pipeline.name` has been deprecated in favour of `Pipeline.tags`.
 
 ## Bug fixes and other changes
 

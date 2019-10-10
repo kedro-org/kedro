@@ -108,7 +108,7 @@ setup(
             "tornado>=4.2, <6.0",
             "ipykernel>=4.8.1, <5.0",
         ],
-        "pyspark": ["pyspark>=2.2.0, <3.0"],
+        "pyspark": ["pyspark>=2.2.0, <3.0", "hdfs>=2.5.8, <3.0"],
         "notebook_templates": ["nbconvert>=5.3.1, <6.0", "nbformat>=4.4.0, <5.0"],
         "azure": [
             "azure-storage-blob>=1.1.0, <2.0",
@@ -116,5 +116,6 @@ setup(
             "azure-storage-queue>=1.1.0, <2.0",
         ],
         "bioinformatics": ["biopython>=1.73, <2.0"],
+        "matplotlib": ["matplotlib>=3.0.3, <4.0"],
     },
 )

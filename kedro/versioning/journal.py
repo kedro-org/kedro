@@ -36,13 +36,13 @@ from typing import Any, Dict, Mapping, Optional, Union
 _JOURNAL_KEY = "kedro.journal"
 
 
-class VersionJournal:
-    """``VersionJournal`` class provides journal logging to enable versioning support for
+class Journal:
+    """``Journal`` class provides journal logging to enable versioning support for
     Kedro project.
     """
 
     def __init__(self, record_data: Dict[str, Any]):
-        """Initialise ``VersionJournal`` as a session of the journal versioning,
+        """Initialise ``Journal`` as a session of the journal versioning,
         and log the project context with an unique identifier.
 
         Args:
@@ -123,7 +123,7 @@ class JournalFileHandler(logging.Handler):
 
         """
         super(JournalFileHandler, self).__init__()
-        self.base_dir = Path(base_dir).expanduser().resolve()
+        self.base_dir = Path(base_dir).expanduser()
         self._file_handlers = {}  # type:Dict[str, logging.FileHandler]
 
     def _generate_handler(self, run_id: str) -> logging.FileHandler:
@@ -133,9 +133,8 @@ class JournalFileHandler(logging.Handler):
             Logging FileHandler object.
 
         """
-
-        handler_path = self.base_dir / ("journal_{}.log".format(run_id))
-        handler_path.parent.mkdir(parents=True, exist_ok=True)
+        self.base_dir.mkdir(parents=True, exist_ok=True)
+        handler_path = self.base_dir.resolve() / "journal_{}.log".format(run_id)
         return logging.FileHandler(str(handler_path), mode="a")
 
     def emit(self, record: logging.LogRecord) -> None:

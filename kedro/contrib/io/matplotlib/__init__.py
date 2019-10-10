@@ -26,15 +26,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-Feature: IPython target in new project
 
-  Background:
-    Given I have prepared a config file with example code
-    And I have run a non-interactive kedro new
-    And I have executed the kedro command "install"
+"""
+``AbstractDataSet`` implementation to save matplotlib objects as image files.
+"""
 
-  Scenario: Execute ipython target
-    When I execute the kedro command "ipython"
-    Then I should get a message including "An enhanced Interactive Python"
-    And I should get a message including "INFO - ** Kedro project project-dummy"
-    And I should get a message including "INFO - Defined global variable `context` and `catalog`"
+from .matplotlib_writer import MatplotlibWriter  # NOQA

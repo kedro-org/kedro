@@ -38,16 +38,17 @@ from kedro.config import ConfigLoader
 
 class TemplatedConfigLoader(ConfigLoader):
     """
-    Extension of the ConfigLoader class that allows for template values, wrapped in brackets like:
-     ${..}, to be replaced by default values.
+    Extension of the ConfigLoader class that allows for template values,
+    wrapped in brackets like: ${...}, to be replaced by default values.
 
-    The easiest way to use this class is by incorporating it into the KedroContext. This can be done
-    by extending the KedroContext and overwriting the config_loader method, making it return an
-    TemplatedConfigLoader object instead of a ConfigLoader object.
+    The easiest way to use this class is by incorporating it into the
+    ``KedroContext``. This can be done by extending the ``KedroContext`` and overwriting
+    the config_loader method, making it return a ``TemplatedConfigLoader``
+    object instead of a ``ConfigLoader`` object.
 
-    For this method to work, the context_path variable in the .kedro.yml needs to be pointing at
-    this newly created class. The run.py script has an extension of the KedroContext by default,
-    called the ProjectContext.
+    For this method to work, the context_path variable in `.kedro.yml` needs
+    to be pointing at this newly created class. The `run.py` script has an
+    extension of the ``KedroContext`` by default, called the ``ProjectContext``.
 
     Example:
     ::
@@ -69,8 +70,9 @@ class TemplatedConfigLoader(ConfigLoader):
         >>> my_context = load_context(Path.cwd(), env=env)
         >>> my_context.run(tags, runner, node_names, from_nodes, to_nodes)
 
-    The contents of the dictionary resulting from the `globals_pattern` get merged with the
-    `globals_dict`. In case of conflicts, the keys in the `globals_dict` get precedence.
+    The contents of the dictionary resulting from the `globals_pattern` get
+    merged with the `globals_dict`. In case of conflicts, the keys in the
+    `globals_dict` take precedence.
 
     Global parameters can be namespaced as well. An example could work as follows:
 
@@ -85,14 +87,13 @@ class TemplatedConfigLoader(ConfigLoader):
             spark: "SparkLocalDataSet"
 
         folders:
-            raw: "00_raw"
-            int: "01_intermediate"
-            pri: "02_primary"
-            fea: "04_feature"
+            raw: "01_raw"
+            int: "02_intermediate"
+            pri: "03_primary"
+            fea: "04_features"
 
 
-
-    catalog.yml:
+    catalog.yml
     ::
         raw_boat_data:
             type: ${datasets.spark}
@@ -104,7 +105,8 @@ class TemplatedConfigLoader(ConfigLoader):
             filepath: "/${environment}/${folders.raw}/cars.csv"
             bucket_name: "${bucket}"
 
-    This uses jmespath in the background. For more information see: http://jmespath.org/.
+    This uses ``jmespath`` in the background. For more information see:
+    https://github.com/jmespath/jmespath.py and http://jmespath.org/.
     """
 
     # pylint: disable=missing-type-doc
@@ -115,18 +117,19 @@ class TemplatedConfigLoader(ConfigLoader):
         globals_pattern: Optional[str] = None,
         globals_dict: Optional[Dict[str, Any]] = None
     ):
-        """Instantiate a TemplatedConfigLoader.
+        """Instantiate a ``TemplatedConfigLoader``.
 
         Args:
             conf_paths: Non-empty path or list of paths to configuration
                 directories.
-            globals_pattern: Optional keyword-only argument specifying a glob pattern.
-                Files that match the pattern will be loaded as a dictionary with default
-                values used for replacement.
-            globals_dict: Optional keyword-only specifying an additional dictionary with
-                default values used for replacement. This dictionary will get merged with
-                the globals dictionary obtained from the globals_pattern. In case of
-                duplicate keys, the arg_values keys take precedence.
+            globals_pattern: Optional keyword-only argument specifying a glob
+                pattern. Files that match the pattern will be loaded as a
+                dictionary with default values used for replacement.
+            globals_dict: Optional keyword-only argument specifying an additional
+                dictionary with default values used for replacement. This
+                dictionary will get merged with the globals dictionary obtained
+                from the globals_pattern. In case of duplicate keys, the
+                `globals_dict` keys take precedence.
         """
 
         super().__init__(conf_paths)
@@ -137,22 +140,23 @@ class TemplatedConfigLoader(ConfigLoader):
 
         self._arg_dict = {**self._arg_dict, **globals_dict}
 
-    def get(self, *patterns: str):
+    def get(self, *patterns: str) -> Dict[str, Any]:
         """
-        Tries to resolve the template variables in the config dictionary provided by the
-        ConfigLoader (super class) `get` method using the dictionary of replacement values
-        obtained in the __init__ method.
+        Tries to resolve the template variables in the config dictionary
+        provided by the ``ConfigLoader`` (super class) `get` method using the
+        dictionary of replacement values obtained in the `__init__` method.
 
-         Args:
+        Args:
             patterns: Glob patterns to match. Files, which names match
                 any of the specified patterns, will be processed.
 
         Returns:
-            Dict[str, Any]:  A Python dictionary with the combined
-                configuration from all configuration files. **Note:** any keys
-                that start with `_` will be ignored.
-                String values wrapped in `${..} will be replaced with default values if they can be
-                found in the arg_values_dict).
+            A Python dictionary with the combined configuration from all
+                configuration files. **Note:** any keys that start with `_`
+                will be ignored. String values wrapped in `${...}` will be
+                replaced with the result of the corresponding JMESpath
+                expression evaluated against globals (see `__init` for more
+                details).
         """
 
         config_raw = super().get(*patterns)
@@ -165,34 +169,40 @@ class TemplatedConfigLoader(ConfigLoader):
 
 def _replace_vals(val: Any, defaults: Dict[str, Any]) -> Any:
     """
-    Recursive function that loops through the values of a map. In case another map or a list is
-    encountered, it calls itself. When a string is encountered it will use the default dict to
-    replace strings that look like ${param_name} (where param_name can be any key value) with the
-    corresponding value of the key 'param_name' in the default dict.
+    Recursive function that loops through the values of a map. In case another
+    map or a list is encountered, it calls itself. When a string is encountered,
+    it will use the `defaults` dict to replace strings that look like `${expr}`,
+    where `expr` is a JMESPath expression evaluated against `defaults` dict.
 
     Some notes on behavior:
-        if val is not a dict, list or string, the same value gets passed back
-        if val is a string and does not match the ${..} pattern, the same value gets passed back
-        if the value inside ${..} does not match any keys in the dictionary, the same value gets
-            passed back.
-        if the ${..} is part of a larger string, the corresponding entry in the defaults dictionary
-            gets parsed into a string and put into the larger string
+        * If val is not a dict, list or string, the same value gets passed back.
+        * If val is a string and does not match the ${...} pattern, the same
+            value gets passed back.
+        * If the value inside ${...} does not match any keys in the dictionary,
+            the same value gets passed back.
+        * If the ${...} is part of a larger string, the corresponding entry in
+            the defaults dictionary gets parsed into a string and put into the
+            larger string.
 
     Examples:
-        val = '${test_key}' with defaults = {'test_key': 'test_val'} returns 'test_val'
+        val = '${test_key}' with defaults = {'test_key': 'test_val'} returns
+            'test_val'
         val = 5 (i.e. not a dict, list or string) returns 5
-        val = 'test_key' (i.e. does not match ${..} pattern returns 'test_key' (irrespective of
-            defaults)
-        val = '${wrong_test_key}' with defaults = {'test_key': 'test_val'} returns 'wrong_test_key'
-        val = 'string-with-${test_key}' with defaults = {'test_key': 1000} returns
-            'string-with-1000'
+        val = 'test_key' (i.e. does not match ${...} pattern returns 'test_key'
+            (irrespective of defaults)
+        val = '${wrong_test_key}' with defaults = {'test_key': 'test_val'}
+            returns 'wrong_test_key'
+        val = 'string-with-${test_key}' with defaults = {'test_key': 1000}
+            returns 'string-with-1000'
 
     Args:
-        val: If this is a string of the format ${param_name}, it gets replaced by a parameter
+        val: If this is a string of the format ${expr}, it gets replaced
+            by the result of JMESPath expression
         defaults: A lookup from string to string with replacement values
 
     Returns:
-        either the replacement value, if input val is a string
+        Either the replacement value, if `val` is a string and was found
+            in the defaults, or the original value otherwise
 
     """
 
@@ -203,7 +213,8 @@ def _replace_vals(val: Any, defaults: Dict[str, Any]) -> Any:
         return [_replace_vals(e, defaults) for e in val]
 
     if isinstance(val, str):
-        # Distinguish case where entire string matches, as the replacement can be different type
+        # Distinguish case where entire string matches the pattern,
+        # as the replacement can be of a different type
         pattern_full = r"^\$\{([^\}]*)\}$"
         match_full = re.search(pattern_full, val)
         if match_full:

@@ -1,21 +1,41 @@
+# Release 0.15.3
+
+## Major features and improvements
+* `Pipeline.name` has been deprecated in favour of `Pipeline.tags`.
+
+## Bug fixes and other changes
+
+## Breaking changes to the API
+
+## Thanks for supporting contributions
+
+
 # Release 0.15.2
 
 ## Major features and improvements
-* Added a new `--load-version` to specify a particular dataset version for loading.
-* Modular pipeline support - break the pipeline into isolated parts with reusability in mind.
-* Multiple pipelines - ability to have multiple entry point pipelines and chose one with `kedro run --pipeline NAME`.
-* Paremetized config loader - Ability to use central set of parameters throughout all your config files with `kedro.contrib.config.TemplatedConfigLoader`
+* Added `--load-version`, a `kedro run` argument that allows you run the pipeline with a particular load version of a dataset.
+* Support for modular pipelines in `src/`, break the pipeline into isolated parts with reusability in mind.
+* Support for multiple pipelines, an ability to have multiple entry point pipelines and choose one with `kedro run --pipeline NAME`.
+* Added a `MatplotlibWriter` dataset in `contrib` for saving Matplotlib images.
+* An ability to template/parameterize configuration files with `kedro.contrib.config.TemplatedConfigLoader`.
+* Parameters are exposed as a context property for ease of access in iPython / Jupyter Notebooks with `context.params`.
+* Added `max_workers` parameter for ``ParallelRunner``.
 
 ## Bug fixes and other changes
-* Users will override `_get_pipeline` abstract method in `ProjectContext(KedroContext)` in `run.py` rather than `pipeline` abstract property. `pipeline` property is not abstract anymore.
+* Users will override the `_get_pipeline` abstract method in `ProjectContext(KedroContext)` in `run.py` rather than the `pipeline` abstract property. The `pipeline` property is not abstract anymore.
 * Improved an error message when versioned local dataset is saved and unversioned path already exists.
+* Add `catalog` global variable to `00-kedro-init.py`, allowing you to load datasets with `catalog.load()`.
 * Enabled tuples to be returned from a node.
+* Disallowed the ``ConfigLoader`` loading the same file more than once, and deduplicated the `conf_paths` passed in.
+* Added a `--open` flag to `kedro build-docs` that opens the documentation on build.
+* Updated the ``Pipeline`` representation to include name of the pipeline, also making it readable as a context property.
+* `kedro.contrib.io.pyspark.SparkDataSet` and `kedro.contrib.io.azure.CSVBlobDataSet` now support versioning.
 
 ## Breaking changes to the API
 * `KedroContext.run()` no longer accepts `catalog` and `pipeline` arguments.
 
 ## Thanks for supporting contributions
-[Deepyaman Datta](https://github.com/deepyaman), [Luciano Issoe](https://github.com/Lucianois), [Joost Duisters](https://github.com/JoostDuisters)
+[Deepyaman Datta](https://github.com/deepyaman), [Luciano Issoe](https://github.com/Lucianois), [Joost Duisters](https://github.com/JoostDuisters), [Zain Patel](https://github.com/mzjp2), [William Ashford](https://github.com/williamashfordQB), [Karlson Lee](https://github.com/i25959341)
 
 # Release 0.15.1
 

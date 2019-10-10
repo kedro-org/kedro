@@ -347,6 +347,25 @@ class TestValidPipeline:
         """Empty pipeline is possible"""
         Pipeline([])
 
+    def test_pipeline_name_is_deprecated(self):
+        with pytest.warns(DeprecationWarning, match=r"`name` parameter is deprecated"):
+            pipeline = Pipeline([], name="p_name")
+
+        with pytest.warns(DeprecationWarning, match=r"`Pipeline\.name` is deprecated"):
+            assert pipeline.name == "p_name"
+
+    def test_initialized_with_tags(self):
+        pipeline = Pipeline(
+            [node(identity, "A", "B", tags=["node1", "p1"]), node(identity, "B", "C")],
+            tags=["p1", "p2"],
+        )
+
+        node1 = pipeline.grouped_nodes[0].pop()
+        node2 = pipeline.grouped_nodes[1].pop()
+        assert node1.tags == {"node1", "p1", "p2"}
+        assert node2.tags == {"p1", "p2"}
+        assert pipeline.tags == {"p1", "p2"}
+
 
 def pipeline_with_circle():
     return [
@@ -516,7 +535,7 @@ class TestComplexPipeline:
     def test_connected_pipeline(self, disjoint_pipeline):
         """Connect two separate pipelines."""
         nodes = disjoint_pipeline["nodes"]
-        subpipeline = Pipeline(nodes, name="subpipeline")
+        subpipeline = Pipeline(nodes, tags=["subpipeline"])
 
         assert len(subpipeline.inputs()) == 2
         assert len(subpipeline.outputs()) == 2
@@ -528,9 +547,9 @@ class TestComplexPipeline:
         assert len(pipeline.nodes) == 1 + len(nodes)
         assert len(pipeline.inputs()) == 1
         assert len(pipeline.outputs()) == 1
-        assert all(pipeline.name in n.tags for n in pipeline.nodes)
+        assert all(set(pipeline.tags) <= n.tags for n in pipeline.nodes)
         assert all(
-            subpipeline.name in n.tags
+            set(subpipeline.tags) <= n.tags
             for n in pipeline.nodes
             if n.name != "connecting_node"
         )

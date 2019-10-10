@@ -1,12 +1,10 @@
 # Advanced IO
 
-> *Note:* This documentation is based on `Kedro 0.15.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 In this tutorial, you will learn about advanced uses of the [Kedro IO](/kedro.io.rst) module and understand the underlying implementation.
 
-Relevant API documentation:
-* [AbstractDataSet](/kedro.io.AbstractDataSet)
-* [DataSetError](/kedro.io.DataSetError)
+Relevant API documentation: [AbstractDataSet](/kedro.io.AbstractDataSet), [DataSetError](/kedro.io.DataSetError)
 
 ## Error handling
 
@@ -44,10 +42,10 @@ For contributors, if you would like to submit a new dataset, you will have to ex
 ## Versioning
 
 In order to enable versioning, you need to update the `catalog.yml` config file and set the `versioned` attribute to `true` for the given dataset. If this is a custom dataset, the implementation must also:
-    1. extend `kedro.io.core.AbstractVersionedDataSet` AND
-    2. add `version` namedtuple as an argument to its `__init__` method AND
-    3. call `super().__init__()` with positional arguments `filepath`, `version`, and optionally with a `glob` and an `exists` functions if it uses non-local filesystem (see [kedro.io.CSVLocalDataSet](https://github.com/quantumblacklabs/kedro/blob/master/kedro/io/csv_local.py) and [kedro.io.CSVS3DataSet](https://github.com/quantumblacklabs/kedro/blob/master/kedro/io/csv_s3.py) for example) AND
-    4. modify its `_describe`, `_load` and `_save` methods respectively to support versioning (see [`kedro.io.CSVLocalDataSet`](/kedro.io.CSVLocalDataSet) for an example implementation) AND
+  1. extend `kedro.io.core.AbstractVersionedDataSet` AND
+  2. add `version` namedtuple as an argument to its `__init__` method AND
+  3. call `super().__init__()` with positional arguments `filepath`, `version`, and, optionally, with a `glob` and an `exists` functions if it uses non-local filesystem (see [kedro.io.CSVLocalDataSet](/kedro.io.CSVLocalDataSet) and [kedro.io.CSVS3DataSet](/kedro.io.CSVS3DataSet) for examples) AND
+  4. modify its `_describe`, `_load` and `_save` methods respectively to support versioning (see [`kedro.io.CSVLocalDataSet`](/kedro.io.CSVLocalDataSet) for an example implementation)
 
 An example dataset could look similar to the below:
 
@@ -220,3 +218,5 @@ Currently the following datasets support versioning:
 - `ExcelLocalDataSet`
 - `kedro.contrib.io.feather.FeatherLocalDataSet`
 - `kedro.contrib.io.parquet.ParquetS3DataSet`
+- `kedro.contrib.io.azure.CSVBlobDataSet`
+- `kedro.contrib.io.pyspark.SparkDataSet`

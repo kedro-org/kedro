@@ -1,6 +1,6 @@
 # Working with IPython and Jupyter Notebooks / Lab
 
-> *Note:* This documentation is based on `Kedro 0.15.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 In order to experiment with the code interactively, you may want to use a Python kernel inside a Jupyter notebook (formerly known as IPython).
 
@@ -13,6 +13,7 @@ kedro ipython
 Every time you start/restart an IPython session, a startup script (`<your_project_name>/.ipython/profile_default/startup/00-kedro-init.py`) will add the following variables in scope:
 
 - `context` (`KedroContext`) - Kedro project context which holds the configuration
+- `catalog` (`DataCatalog`) - Data catalog instance which contains all defined datasets
 - `startup_error` (`Exception`) - An error that was raised during the execution of the startup script or `None` if no errors occurred
 
 To reload these at any point (e.g., if you updated `catalog.yml`) use the [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) `%reload_kedro`. This magic can also be used to see the error message if any of the variables above are undefined.
@@ -36,6 +37,23 @@ With `context`, you can access the following variables and methods
           starting point of the new ``Pipeline``.
   - `to_nodes`: An optional list of node names which should be used as an
           end point of the new ``Pipeline``.
+
+You can easily add customised global variables in `.ipython/profile_default/startup/00-kedro-init.py`. For example, if you want to add a global variable for `parameters` from `parameters.yml`, update `reload_kedro()` as follows:
+
+```python
+@register_line_magic
+def reload_kedro(project_path, line=None):
+    """"Line magic which reloads all Kedro default variables."""
+    # ...
+    global parameters
+    try:
+        # ...
+        context = load_context(project_path)
+        parameters = context.config_loader.get("parameters*", "parameters*/**")
+        # ...
+        logging.info("Defined global variable `context`, `catalog` and `parameters`")
+
+```
 
 ## Loading `DataCatalog` in IPython
 
@@ -76,6 +94,7 @@ This will open a Jupyter Notebook in your browser. Navigate to `notebooks` folde
 
 ```python
 df = context.catalog.load("example_iris_data")
+# Or `df = catalog.load("example_iris_data")`
 df.head()
 ```
 

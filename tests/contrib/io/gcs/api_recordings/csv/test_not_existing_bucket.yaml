@@ -1,0 +1,100 @@
+interactions:
+- request:
+    body: assertion=eyJ0eXAiOiAiSldUIiwgImFsZyI6ICJSUzI1NiIsICJraWQiOiAiMzc0N2RiMDk3YmI3NDFjZjBhMzRlN2U3ZjIxNzVhNzU4NDk4NDFlNyJ9.eyJpYXQiOiAxNTcwOTg4MDE3LCAiZXhwIjogMTU3MDk5MTYxNywgImlzcyI6ICJrYXJsc29uQHN0cmFuZ2UtdG9tZS0yNTU3MjAuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCAiYXVkIjogImh0dHBzOi8vb2F1dGgyLmdvb2dsZWFwaXMuY29tL3Rva2VuIiwgInNjb3BlIjogImh0dHBzOi8vd3d3Lmdvb2dsZWFwaXMuY29tL2F1dGgvZGV2c3RvcmFnZS5mdWxsX2NvbnRyb2wifQ.s75Dr4vkeddNt0UfQzaQsv5253RwVGicsWcT01bx1L-cXnpM3zi8kON9lmFXIZJZHMnTaYkM2Wp3SnbhEqusheE1zlCXUqI_8G9ZZjktOQhVorxXrCmgESGeUutQQF3ojFjTS9iqZHufq4txcNkxTBRuQ-pOZbrzTJBCBiDtHsjUeP7ui9I94hWsPYddEXJ4FgFqEl9THGpwtCWiphq0OwGGOGaeqJMetruHPfjpVbANLNONJ01e1Brq9xQe_qo-5gLDc7W2JNqHl8bIoavF2qeg5QNqexxUGXaXP3AYL1QhrY4oAVBt8XiPwFDK1atM83PUTpBjZg7wwF8TZXhsUw&grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '813'
+      User-Agent:
+      - python-requests/2.22.0
+      content-type:
+      - application/x-www-form-urlencoded
+    method: POST
+    uri: https://oauth2.googleapis.com/token
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAC/x3OOw6CMAAA0J1TkM5iFJQGN6uIpigYxd/SIBYhSIstCmi8u4H1Te+rqCoIo4hK
+        SUqeUQYmKmhC3epHffwwr6jG1gnpBg7efMascwmxefCc2ee4ZcSBcp3Y+SovsObnIg5ssSP7MHmM
+        Vr4xlhm5VsPKuMPIzy62O0yOmOsn+DzobuLeNh6qXzgnnqctbwLxOmU0JpcdnDK5iIs5r0CvzdG6
+        SAWVJG1rhjkYdNpdSdkUtA0jGgoqgPL7A7oLiPbPAAAA
+    headers:
+      Alt-Svc:
+      - quic=":443"; ma=2592000; v="46,43",h3-Q048=":443"; ma=2592000,h3-Q046=":443";
+        ma=2592000,h3-Q043=":443"; ma=2592000
+      Cache-Control:
+      - private
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Sun, 13 Oct 2019 17:33:37 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://www.googleapis.com/storage/v1/b/not-existing-bucket/o/?delimiter=%2F
+  response:
+    body:
+      string: "{\n  \"error\": {\n    \"code\": 404,\n    \"message\": \"Not Found\"\
+        ,\n    \"errors\": [\n      {\n        \"message\": \"Not Found\",\n     \
+        \   \"domain\": \"global\",\n        \"reason\": \"notFound\"\n      }\n \
+        \   ]\n  }\n}\n"
+    headers:
+      Alt-Svc:
+      - quic=":443"; ma=2592000; v="46,43",h3-Q048=":443"; ma=2592000,h3-Q046=":443";
+        ma=2592000,h3-Q043=":443"; ma=2592000
+      Cache-Control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      Content-Length:
+      - '193'
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sun, 13 Oct 2019 17:33:37 GMT
+      Expires:
+      - Mon, 01 Jan 1990 00:00:00 GMT
+      Pragma:
+      - no-cache
+      Server:
+      - UploadServer
+      Vary:
+      - Origin
+      - X-Origin
+      X-GUploader-UploadID:
+      - AEnB2Uob0EqVE28vWb8PNnTZP0jbQOomVg96_MC14X9SBAM4eBTuhVzBL99CcDWV0hcK89oxybsuIWBKxI3rg5eaKNOaczSGFA
+    status:
+      code: 404
+      message: Not Found
+version: 1

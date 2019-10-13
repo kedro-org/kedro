@@ -1,10 +1,3 @@
-import os
-
-import vcr
-
-api_records_path = os.path.join(os.path.dirname(__file__), "api_recordings")
-
-
 def matcher(r1, r2):
     if r2.uri != r1.uri:
         return False
@@ -34,13 +27,3 @@ def matcher(r1, r2):
                 if r1.headers.get(key, "") != r2.headers.get(key, ""):
                     return False
     return True
-
-
-gcs_vcr = vcr.VCR(
-    cassette_library_dir=api_records_path,
-    path_transformer=vcr.VCR.ensure_suffix(".yaml"),
-    filter_headers=["Authorization"],
-    filter_query_parameters=["refresh_token", "client_id", "client_secret"],
-)
-gcs_vcr.register_matcher("all", matcher)
-gcs_vcr.match_on = ["all"]

@@ -45,7 +45,7 @@ BUCKET_NAME = "testbucketkedro"
 GCP_PROJECT = "test_project"
 GCP_CREDENTIALS = mock.Mock(spec=google.auth.credentials.Credentials)
 
-api_records_path = os.path.join(os.path.dirname(__file__), "api_recordings/json")
+api_records_path = os.path.join(os.path.dirname(__file__), "api_recordings/csv")
 
 gcs_vcr = vcr.VCR(
     cassette_library_dir=api_records_path,
@@ -76,7 +76,7 @@ def save_args(request):
 def gcs_data_set(load_args, save_args):
     return GCSDataSet(
         filepath=FILENAME,
-        file_format="json",
+        file_format="csv",
         bucket_name=BUCKET_NAME,
         project=GCP_PROJECT,
         credentials=GCP_CREDENTIALS,
@@ -94,22 +94,22 @@ class TestCSVGCSDataSet:
         pattern = "Anonymous caller"
         with pytest.raises(DataSetError, match=pattern):
             GCSDataSet(
-                filepath=FILENAME, file_format="json", bucket_name=BUCKET_NAME
+                filepath=FILENAME, file_format="csv", bucket_name=BUCKET_NAME
             ).load()
 
-    @gcs_vcr.use_cassette(match=["api_recordings/json/*.yaml"])
+    @gcs_vcr.use_cassette(match=["api_recordings/csv/*.yaml"])
     def test_not_existing_bucket(self):
         """Test not existing bucket"""
         pattern = "Failed while loading data from data set"
         with pytest.raises(DataSetError, match=pattern):
             GCSDataSet(
                 filepath=FILENAME,
-                file_format="json",
+                file_format="csv",
                 bucket_name="not-existing-bucket",
                 credentials=GCP_CREDENTIALS,
             ).load()
 
-    @gcs_vcr.use_cassette(match=["api_recordings/json/*.yaml"])
+    @gcs_vcr.use_cassette(match=["api_recordings/csv/*.yaml"])
     def test_save_data(self, gcs_data_set, dummy_dataframe):
         """Test saving the data"""
         assert not gcs_data_set.exists()
@@ -117,13 +117,13 @@ class TestCSVGCSDataSet:
         loaded_data = gcs_data_set.load()
         assert_frame_equal(loaded_data, dummy_dataframe)
 
-    @gcs_vcr.use_cassette(match=["api_recordings/json/*.yaml"])
+    @gcs_vcr.use_cassette(match=["api_recordings/csv/*.yaml"])
     def test_load_data(self, gcs_data_set, dummy_dataframe):
         """Test loading the data from gcs."""
         loaded_data = gcs_data_set.load()
         assert_frame_equal(loaded_data, dummy_dataframe)
 
-    @gcs_vcr.use_cassette(match=["api_recordings/json/*.yaml"])
+    @gcs_vcr.use_cassette(match=["api_recordings/csv/*.yaml"])
     def test_exists(self, gcs_data_set, dummy_dataframe):
         """Test `exists` method invocation for both existing and
         nonexistent data set."""
@@ -162,12 +162,12 @@ class TestCSVGCSDataSet:
             assert k in str_repr
 
     # pylint: disable=unused-argument
-    @gcs_vcr.use_cassette(match=["api_recordings/json/*.yaml"])
+    @gcs_vcr.use_cassette(match=["api_recordings/csv/*.yaml"])
     def test_load_args_propagated(self, mocker, gcs_data_set):
-        mock = mocker.patch("kedro.contrib.io.gcs.gcs.pd.read_json")
+        mock = mocker.patch("kedro.contrib.io.gcs.gcs.pd.read_csv")
         GCSDataSet(
             filepath=FILENAME,
-            file_format="json",
+            file_format="csv",
             bucket_name=BUCKET_NAME,
             credentials=GCP_CREDENTIALS,
             load_args=dict(custom=42),

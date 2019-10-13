@@ -29,3 +29,13 @@ kedro.contrib.io
       kedro.contrib.io.pyspark.SparkDataSet
       kedro.contrib.io.pyspark.SparkJDBCDataSet
       kedro.contrib.io.yaml_local.YAMLLocalDataSet
+      kedro.contrib.io.matplotlib.MatplotlibWriter
+
+
+   .. rubric:: DataSet Transformers
+
+   .. autosummary::
+      :toctree:
+      :template: autosummary/class.rst
+
+      kedro.contrib.io.transformers.ProfileTimeTransformer

@@ -582,7 +582,7 @@ kedro.io.core.DataSetError: Failed while loading data from data set CSVLocalData
 
 ### Using tags
 
-Another way to run partial pipelines without changing your code is to use tags. Each node within the pipeline can be tagged by passing **`name`** into the `Pipeline()`. Update the `create_pipelines()` code in `src/kedro_tutorial/pipeline.py` one more time:
+Another way to run partial pipelines without changing your code is to use tags. Each node within the pipeline can be tagged by passing **`tags`** into the `Pipeline()`. Update the `create_pipelines()` code in `src/kedro_tutorial/pipeline.py` one more time:
 
 ```python
 def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
@@ -616,7 +616,7 @@ def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
                 name="master_table",
             ),
         ],
-        name="de_tag",
+        tags=["de_tag"],
     )
 
     ds_pipeline = Pipeline(
@@ -629,7 +629,7 @@ def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
             node(train_model, ["X_train", "y_train"], "regressor"),
             node(evaluate_model, ["regressor", "X_test", "y_test"], None),
         ],
-        name="ds_tag",
+        tags=["ds_tag"],
     )
 
     return {
@@ -639,7 +639,7 @@ def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
     }
 ```
 
-If the pipeline definition contains `name=` argument, Kedro will attach the corresponding tag (`de_tag` and `ds_tag` in the example above) to every node within that pipeline.
+If the pipeline definition contains `tags=` argument, Kedro will attach the corresponding tags (`de_tag` and `ds_tag` in the example above) to every node within that pipeline.
 
 To run a partial pipeline using a tag:
 
@@ -669,6 +669,8 @@ node(
     tags=["my-regressor-node"],
 )
 ```
+
+> ❗The `name` `Pipeline` constructor parameter and object property are deprecated, use `tags` instead.
 
 
 ## Using decorators for nodes and pipelines

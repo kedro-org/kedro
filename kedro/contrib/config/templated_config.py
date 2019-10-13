@@ -87,10 +87,10 @@ class TemplatedConfigLoader(ConfigLoader):
             spark: "SparkLocalDataSet"
 
         folders:
-            raw: "00_raw"
-            int: "01_intermediate"
-            pri: "02_primary"
-            fea: "04_feature"
+            raw: "01_raw"
+            int: "02_intermediate"
+            pri: "03_primary"
+            fea: "04_features"
 
 
     catalog.yml

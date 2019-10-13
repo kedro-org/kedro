@@ -14,15 +14,15 @@ class GCSDataSet(AbstractVersionedDataSet):
 
     # pylint: disable=too-many-arguments
     def __init__(
-            self,
-            filepath: str,
-            bucket_name: str,
-            file_format: str = "csv",
-            credentials: Optional[Credentials] = None,
-            project: Optional[str] = None,
-            load_args: Optional[Dict[str, Any]] = None,
-            save_args: Optional[Dict[str, Any]] = None,
-            version: Version = None,
+        self,
+        filepath: str,
+        bucket_name: str,
+        file_format: str = "csv",
+        credentials: Optional[Credentials] = None,
+        project: Optional[str] = None,
+        load_args: Optional[Dict[str, Any]] = None,
+        save_args: Optional[Dict[str, Any]] = None,
+        version: Version = None,
     ) -> None:
         _gcs = gcsfs.GCSFileSystem(credentials=credentials, project=project)
 
@@ -45,19 +45,6 @@ class GCSDataSet(AbstractVersionedDataSet):
 
         self._file_format = file_format
 
-        if self._file_format == "json":
-            self._pd_read = pd.read_json
-        elif self._file_format == "csv":
-            self._pd_read = pd.read_csv
-        elif self._file_format == "pickle":
-            self._pd_read = pd.read_pickle
-        elif self._file_format == "parquet":
-            self._pd_read = pd.read_parquet
-        elif self._file_format == "hdf":
-            self._pd_read = pd.read_hdf
-        else:
-            raise DataSetError(f"Unsupported File type {self._file_format}")
-
     def _describe(self) -> Dict[str, Any]:
         return dict(
             filepath=self._filepath,
@@ -71,7 +58,19 @@ class GCSDataSet(AbstractVersionedDataSet):
     def _load(self) -> pd.DataFrame:
         load_path = PurePosixPath(self._get_load_path())
         with self._gcs.open(str(load_path), mode="rb") as gcs_file:
-            return self._pd_read(gcs_file, **self._load_args)
+            if self._file_format == "json":
+                return pd.read_json(gcs_file, **self._load_args)
+            elif self._file_format == "csv":
+                self._pd_read = pd.read_csv
+                return pd.read_csv(gcs_file, **self._load_args)
+            elif self._file_format == "pickle":
+                return pd.read_pickle(gcs_file, **self._load_args)
+            elif self._file_format == "parquet":
+                return pd.read_parquet(gcs_file, **self._load_args)
+            elif self._file_format == "hdf":
+                return pd.read_hdf(gcs_file, **self._load_args)
+            else:
+                raise DataSetError(f"Unsupported File type {self._file_format}")
 
     def _save(self, data: pd.DataFrame) -> None:
         save_path = PurePosixPath(self._get_save_path())

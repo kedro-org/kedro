@@ -465,7 +465,8 @@ class KedroContext(abc.ABC):
 
 
 def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
-    """Loads the KedroContext object of a Kedro Project as defined in `src/<package-name>/run.py`.
+    """Loads the KedroContext object of a Kedro Project based on the path specified
+    in `.kedro.yml`.
     This function will change the current working directory to the project path.
 
     Args:

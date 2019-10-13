@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: assertion=eyJ0eXAiOiAiSldUIiwgImFsZyI6ICJSUzI1NiIsICJraWQiOiAiYWJlMGI3ZDJjODk0MDMwOGJmNDU4YTVkMTMzNWY2Y2NlMDI2NTMzOSJ9.eyJpYXQiOiAxNTY5MTUwMjMwLCAiZXhwIjogMTU2OTE1MzgzMCwgImlzcyI6ICJrZWRyby1idWNrZXQtc2VydmljZS1hY2NvdW50QG1ja3ZlbnRvLTIyMzUxOS5pYW0uZ3NlcnZpY2VhY2NvdW50LmNvbSIsICJhdWQiOiAiaHR0cHM6Ly9vYXV0aDIuZ29vZ2xlYXBpcy5jb20vdG9rZW4iLCAic2NvcGUiOiAiaHR0cHM6Ly93d3cuZ29vZ2xlYXBpcy5jb20vYXV0aC9kZXZzdG9yYWdlLmZ1bGxfY29udHJvbCJ9.Pphl0_9OZh8eVc4z6iXSRlnjZxsoX-I9x9nhxK_Onir1N6Zya4Hpe3gV9ZEdl4uos5KFyGdNGNH2XnNKmRu8mhAsmm7NGVh5U4TeGTJve8UqpYFJlxygsX9JInt1MIaaHGOydliBgTJQ17weWq2qT-CHVAfKiRvGr0HVbMjAgEdSnXwiyR8wKMre-28oV4p6iXcsXuHWn6Sl5A0V3MZYQyE0oRZ7lZQXPfmt4YRZh9J0zpDU3hOkNFhI1WLP2JoqOf8tHi7dB64BSraZQCYDtCK0UixvUjePl_qfNawScCMUSKeKzA3DxHeK7W_ZbMxgX2-r5fFg8n3mR-qzf2H8nA%3D%3D&grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer
+    body: assertion=eyJ0eXAiOiAiSldUIiwgImFsZyI6ICJSUzI1NiIsICJraWQiOiAiMzc0N2RiMDk3YmI3NDFjZjBhMzRlN2U3ZjIxNzVhNzU4NDk4NDFlNyJ9.eyJpYXQiOiAxNTcwOTc4NDI4LCAiZXhwIjogMTU3MDk4MjAyOCwgImlzcyI6ICJrYXJsc29uQHN0cmFuZ2UtdG9tZS0yNTU3MjAuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCAiYXVkIjogImh0dHBzOi8vb2F1dGgyLmdvb2dsZWFwaXMuY29tL3Rva2VuIiwgInNjb3BlIjogImh0dHBzOi8vd3d3Lmdvb2dsZWFwaXMuY29tL2F1dGgvZGV2c3RvcmFnZS5mdWxsX2NvbnRyb2wifQ.reJpIGJ8AWu25zZkv5o6wq67a5mBqCNrbd6wfC5-M-w82llT_pS6AUJqi3eGwrL5pSHw54NGc1U98zN7hJ_XXiqptWs_sZIqCs_2Z5ADm5Vb29GA7ugDOF-2DfjqllwCr_nTGMeADjD8pcn-vMLK-ZiforCs1c9lecKkM4gkGJME2J32zxmmbIgZZldtSK_POk4l_jkN4loGv7wxP5k_hDDT6bHq-bfw6HQthZrK2aYgiJ3Bm7BQZE2oUAK5JriMeJz53jQg6gjBrkAfq24z-WoL4HV439nwdSEFuPTu8Z-Ge6xGgq6dinzkUCKXdmyO-zfrwV-lLE3DRL6vmE-cmg&grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer
     headers:
       Accept:
       - '*/*'
@@ -9,7 +9,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '841'
+      - '813'
       User-Agent:
       - python-requests/2.22.0
       content-type:
@@ -19,13 +19,14 @@ interactions:
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAC/x3OwRKBQBgA4LunaPYssxUpN1bNMkvS2NSlSf4xLFmVWTLe3eT6nb5PT9NQXhRQ
-        11lzF1CiiYbeuekOioF3fbCZubjEKxGOYBc76uI9V+MblS3xzTSNw6swFJFqS4yGl4Gwkj1rCa3N
-        A8aV4a+nj824sHmo05O3Zs5yHvMo4XoE2CC5Yyv3rotbdCw9kGEbqJSNOGU04Jsh6ncveMlzBXV2
-        7laWjfFf/82seUvorjPIK6hQ7/sDWyFvzcoAAAA=
+        H4sIAAAAAAAC/x3OzRKBQAAA4LunaPYsU61BbimlDGonVi47qWUilXb1Z7y7qet3+r4jQQBhFFHG
+        CM+fNANLAbShok6iyTadXVd1aC0caGMJp/7NzoKzBot915jGWcOKdtDFh0jFyoTyq631XTXngftC
+        ebTF025vuMzh2emjtsFbmSNWOHbOUhnfIUpvvu7qF+I/4kSxIKpdGW3izoYM8s+RmNba88C4z9Gm
+        SErKSNLX4EySBh2uhLcF7cMrGpa0BKPfHyhHlHjPAAAA
     headers:
       Alt-Svc:
-      - quic=":443"; ma=2592000; v="46,43,39"
+      - quic=":443"; ma=2592000; v="46,43",h3-Q048=":443"; ma=2592000,h3-Q046=":443";
+        ma=2592000,h3-Q043=":443"; ma=2592000
       Cache-Control:
       - private
       Content-Encoding:
@@ -33,7 +34,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Sun, 22 Sep 2019 11:03:50 GMT
+      - Sun, 13 Oct 2019 14:53:49 GMT
       Server:
       - scaffolding on HTTPServer2
       Transfer-Encoding:
@@ -62,113 +63,15 @@ interactions:
       - keep-alive
       User-Agent:
       - python-requests/2.22.0
-      authorization:
-      - Bearer ya29.c.ElqLB2IjWMkQ5eUW8wjEuM7mHpzCF2ZZWQlk1wCpwRC1tVnOk3YXLzCHs2b00r1FNAqP7c6VQ-HgENL8JDWVSYV-Se01Ca86w9o-kmSdnEepQzOwZL5VHLHOVP4
     method: GET
-    uri: https://www.googleapis.com/storage/v1/b/anaconda-public-data/o/?delimiter=%2F
-  response:
-    body:
-      string: "{\n  \"kind\": \"storage#objects\",\n  \"prefixes\": [\n    \"airline/\"\
-        ,\n    \"dnscensus2013/\",\n    \"github-data/\",\n    \"iris/\",\n    \"\
-        nyc-taxi/\",\n    \"orc/\",\n    \"packages/\",\n    \"projects-data/\"\n\
-        \  ]\n}\n"
-    headers:
-      Alt-Svc:
-      - quic=":443"; ma=2592000; v="46,43,39"
-      Cache-Control:
-      - private, max-age=0, must-revalidate, no-transform
-      Content-Length:
-      - '191'
-      Content-Type:
-      - application/json; charset=UTF-8
-      Date:
-      - Sun, 22 Sep 2019 11:03:51 GMT
-      Expires:
-      - Sun, 22 Sep 2019 11:03:51 GMT
-      Server:
-      - UploadServer
-      Vary:
-      - Origin
-      - X-Origin
-      X-GUploader-UploadID:
-      - AEnB2UqK21hYGavZDxWgsCq810koMwi5UChI3L5pg7_I8iB83MK3Y2QY-zWaqpYF5X8FaOCKFreHxmm02HUYI-MGVJtH3crJWg
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python-requests/2.22.0
-      authorization:
-      - Bearer ya29.c.ElqLB2IjWMkQ5eUW8wjEuM7mHpzCF2ZZWQlk1wCpwRC1tVnOk3YXLzCHs2b00r1FNAqP7c6VQ-HgENL8JDWVSYV-Se01Ca86w9o-kmSdnEepQzOwZL5VHLHOVP4
-    method: GET
-    uri: https://www.googleapis.com/storage/v1/b/test_bucket/o/?delimiter=%2F
-  response:
-    body:
-      string: "{\n  \"kind\": \"storage#objects\",\n  \"prefixes\": [\n    \"test_bucket/\"\
-        ,\n    \"test_0.08787259430867833.csv/\"\n  ],\n  \"items\": [\n    {\n  \
-        \    \"kind\": \"storage#object\",\n      \"id\": \"test_bucket/test_0.08787259430867833.csv/1569150050209678\"\
-        ,\n      \"selfLink\": \"https://www.googleapis.com/storage/v1/b/test_bucket/o/test_0.08787259430867833.csv\"\
-        ,\n      \"name\": \"test_0.08787259430867833.csv\",\n      \"bucket\": \"\
-        test_bucket\",\n      \"generation\": \"1569150050209678\",\n      \"metageneration\"\
-        : \"1\",\n      \"storageClass\": \"STANDARD\",\n      \"size\": \"30\",\n\
-        \      \"md5Hash\": \"7o9vAhPGXhDTvh8MgEDSfw==\",\n      \"mediaLink\": \"\
-        https://www.googleapis.com/download/storage/v1/b/test_bucket/o/test_0.08787259430867833.csv?generation=1569150050209678&alt=media\"\
-        ,\n      \"crc32c\": \"Gh7sgQ==\",\n      \"etag\": \"CI6f3rqj5OQCEAE=\",\n\
-        \      \"timeCreated\": \"2019-09-22T11:00:50.209Z\",\n      \"updated\":\
-        \ \"2019-09-22T11:00:50.209Z\",\n      \"timeStorageClassUpdated\": \"2019-09-22T11:00:50.209Z\"\
-        \n    }\n  ]\n}\n"
-    headers:
-      Alt-Svc:
-      - quic=":443"; ma=2592000; v="46,43,39"
-      Cache-Control:
-      - private, max-age=0, must-revalidate, no-transform
-      Content-Length:
-      - '961'
-      Content-Type:
-      - application/json; charset=UTF-8
-      Date:
-      - Sun, 22 Sep 2019 11:03:51 GMT
-      Expires:
-      - Sun, 22 Sep 2019 11:03:51 GMT
-      Server:
-      - UploadServer
-      Vary:
-      - Origin
-      - X-Origin
-      X-GUploader-UploadID:
-      - AEnB2Uo9zSUj_3MLrhutJlKfD6JJfBWpVV3WzNKF-DlOlsPYWk3sEa3uyOYRpgj_Ss3c4l1pqZxR-QpgYRRVEjb5Hf0PoDEbzw
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python-requests/2.22.0
-      authorization:
-      - Bearer ya29.c.ElqLB2IjWMkQ5eUW8wjEuM7mHpzCF2ZZWQlk1wCpwRC1tVnOk3YXLzCHs2b00r1FNAqP7c6VQ-HgENL8JDWVSYV-Se01Ca86w9o-kmSdnEepQzOwZL5VHLHOVP4
-    method: GET
-    uri: https://www.googleapis.com/storage/v1/b/test_bucket/o/?delimiter=%2F&prefix=test.csv
+    uri: https://www.googleapis.com/storage/v1/b/testbucketkedro/o/?delimiter=%2F
   response:
     body:
       string: "{\n  \"kind\": \"storage#objects\"\n}\n"
     headers:
       Alt-Svc:
-      - quic=":443"; ma=2592000; v="46,43,39"
+      - quic=":443"; ma=2592000; v="46,43",h3-Q048=":443"; ma=2592000,h3-Q046=":443";
+        ma=2592000,h3-Q043=":443"; ma=2592000
       Cache-Control:
       - private, max-age=0, must-revalidate, no-transform
       Content-Length:
@@ -176,16 +79,16 @@ interactions:
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Sun, 22 Sep 2019 11:03:51 GMT
+      - Sun, 13 Oct 2019 14:53:49 GMT
       Expires:
-      - Sun, 22 Sep 2019 11:03:51 GMT
+      - Sun, 13 Oct 2019 14:53:49 GMT
       Server:
       - UploadServer
       Vary:
       - Origin
       - X-Origin
       X-GUploader-UploadID:
-      - AEnB2UqZyTN2itf-HM_SRW0OZgYeq4qp0k4sZP_eD39rYP5_A7rxkW50zqtFTrOZ-FFphqKNqI_Wqd3nCG7_CM3veQ5jMjAQzA
+      - AEnB2UqxFnAz5TxXfldn1RZSmmeuxXSlyih7rLKyJ25rLPlqfQ0oX4Z67ByWQdwcSuI7qeELufhbPiavOMNeEpyqB35ZhHZZxg
     status:
       code: 200
       message: OK
@@ -200,16 +103,15 @@ interactions:
       - keep-alive
       User-Agent:
       - python-requests/2.22.0
-      authorization:
-      - Bearer ya29.c.ElqLB2IjWMkQ5eUW8wjEuM7mHpzCF2ZZWQlk1wCpwRC1tVnOk3YXLzCHs2b00r1FNAqP7c6VQ-HgENL8JDWVSYV-Se01Ca86w9o-kmSdnEepQzOwZL5VHLHOVP4
     method: GET
-    uri: https://www.googleapis.com/storage/v1/b/test_bucket/o/?delimiter=%2F&prefix=test.csv%2F
+    uri: https://www.googleapis.com/storage/v1/b/testbucketkedro/o/?delimiter=%2F&prefix=test.json
   response:
     body:
       string: "{\n  \"kind\": \"storage#objects\"\n}\n"
     headers:
       Alt-Svc:
-      - quic=":443"; ma=2592000; v="46,43,39"
+      - quic=":443"; ma=2592000; v="46,43",h3-Q048=":443"; ma=2592000,h3-Q046=":443";
+        ma=2592000,h3-Q043=":443"; ma=2592000
       Cache-Control:
       - private, max-age=0, must-revalidate, no-transform
       Content-Length:
@@ -217,21 +119,61 @@ interactions:
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Sun, 22 Sep 2019 11:03:51 GMT
+      - Sun, 13 Oct 2019 14:53:49 GMT
       Expires:
-      - Sun, 22 Sep 2019 11:03:51 GMT
+      - Sun, 13 Oct 2019 14:53:49 GMT
       Server:
       - UploadServer
       Vary:
       - Origin
       - X-Origin
       X-GUploader-UploadID:
-      - AEnB2Ur6W_OOl-36pATPM5n8az98atjoUTkfxx-t6GKlCtqTx8FdXAt9RStb--Iz2J6D_HylzKMwGy8OvKz9aRJd4AaaFB_bfw
+      - AEnB2UoScVOP91q67ZwZSQpIN_RcvEapvyRpdXanFQeKHaP054RKbEXo2eh6JDH2JMYKkJ3zVnuAXrHulhutShWFGvpoYKxLQw
     status:
       code: 200
       message: OK
 - request:
-    body: '{"name": "test.csv", "metadata": null}'
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://www.googleapis.com/storage/v1/b/testbucketkedro/o/?delimiter=%2F&prefix=test.json%2F
+  response:
+    body:
+      string: "{\n  \"kind\": \"storage#objects\"\n}\n"
+    headers:
+      Alt-Svc:
+      - quic=":443"; ma=2592000; v="46,43",h3-Q048=":443"; ma=2592000,h3-Q046=":443";
+        ma=2592000,h3-Q043=":443"; ma=2592000
+      Cache-Control:
+      - private, max-age=0, must-revalidate, no-transform
+      Content-Length:
+      - '32'
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sun, 13 Oct 2019 14:53:50 GMT
+      Expires:
+      - Sun, 13 Oct 2019 14:53:50 GMT
+      Server:
+      - UploadServer
+      Vary:
+      - Origin
+      - X-Origin
+      X-GUploader-UploadID:
+      - AEnB2UpqUycoPhGtBgwD3-FKRVi8NvVaRd87y7SVR-vAvNBsXUSTBvx6_Tsyv4OtUa2tHQUgG2KC4YiNM0XmwZ4C4CDOwmx2kw
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"name": "test.json", "metadata": null}'
     headers:
       Accept:
       - '*/*'
@@ -240,21 +182,20 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '38'
+      - '39'
       Content-Type:
       - application/json
       User-Agent:
       - python-requests/2.22.0
-      authorization:
-      - Bearer ya29.c.ElqLB2IjWMkQ5eUW8wjEuM7mHpzCF2ZZWQlk1wCpwRC1tVnOk3YXLzCHs2b00r1FNAqP7c6VQ-HgENL8JDWVSYV-Se01Ca86w9o-kmSdnEepQzOwZL5VHLHOVP4
     method: POST
-    uri: https://www.googleapis.com/upload/storage/v1/b/test_bucket/o?uploadType=resumable
+    uri: https://www.googleapis.com/upload/storage/v1/b/testbucketkedro/o?uploadType=resumable
   response:
     body:
       string: ''
     headers:
       Alt-Svc:
-      - quic=":443"; ma=2592000; v="46,43,39"
+      - quic=":443"; ma=2592000; v="46,43",h3-Q048=":443"; ma=2592000,h3-Q046=":443";
+        ma=2592000,h3-Q043=":443"; ma=2592000
       Cache-Control:
       - no-cache, no-store, max-age=0, must-revalidate
       Content-Length:
@@ -262,11 +203,11 @@ interactions:
       Content-Type:
       - text/plain; charset=utf-8
       Date:
-      - Sun, 22 Sep 2019 11:03:51 GMT
+      - Sun, 13 Oct 2019 14:53:50 GMT
       Expires:
       - Mon, 01 Jan 1990 00:00:00 GMT
       Location:
-      - https://www.googleapis.com/upload/storage/v1/b/test_bucket/o?uploadType=resumable&upload_id=AEnB2UogansHsqEDyEMHsqOpUd416SYByAZb03cDdGKZHzhVe9pZ_oD3gC42kQvf5hsicVVF5ZvHTW0ONw19kclyoDpnC3lsoA
+      - https://www.googleapis.com/upload/storage/v1/b/testbucketkedro/o?uploadType=resumable&upload_id=AEnB2UoZ78b8wH0oFJc3e8QTos7z8uhSwMtZzELzz5WEiY_ecQheJqYv5eJd03jIzaZjetcGuq2Lg6cYrOc-9r99PB2xJFYRJA
       Pragma:
       - no-cache
       Server:
@@ -275,12 +216,12 @@ interactions:
       - Origin
       - X-Origin
       X-GUploader-UploadID:
-      - AEnB2UogansHsqEDyEMHsqOpUd416SYByAZb03cDdGKZHzhVe9pZ_oD3gC42kQvf5hsicVVF5ZvHTW0ONw19kclyoDpnC3lsoA
+      - AEnB2UoZ78b8wH0oFJc3e8QTos7z8uhSwMtZzELzz5WEiY_ecQheJqYv5eJd03jIzaZjetcGuq2Lg6cYrOc-9r99PB2xJFYRJA
     status:
       code: 200
       message: OK
 - request:
-    body: "col1,col2,col3\r\n1,4,5\r\n2,5,6\r\n"
+    body: '{"col1":{"0":1,"1":2},"col2":{"0":4,"1":5},"col3":{"0":5,"1":6}}'
     headers:
       Accept:
       - '*/*'
@@ -289,41 +230,40 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '30'
+      - '64'
       Content-Range:
-      - bytes 0-29/30
+      - bytes 0-63/64
       Content-Type:
       - application/octet-stream
       User-Agent:
       - python-requests/2.22.0
-      authorization:
-      - Bearer ya29.c.ElqLB2IjWMkQ5eUW8wjEuM7mHpzCF2ZZWQlk1wCpwRC1tVnOk3YXLzCHs2b00r1FNAqP7c6VQ-HgENL8JDWVSYV-Se01Ca86w9o-kmSdnEepQzOwZL5VHLHOVP4
     method: POST
-    uri: https://www.googleapis.com/upload/storage/v1/b/test_bucket/o?uploadType=resumable&upload_id=AEnB2UogansHsqEDyEMHsqOpUd416SYByAZb03cDdGKZHzhVe9pZ_oD3gC42kQvf5hsicVVF5ZvHTW0ONw19kclyoDpnC3lsoA&uploadType=resumable
+    uri: https://www.googleapis.com/upload/storage/v1/b/testbucketkedro/o?uploadType=resumable&uploadType=resumable&upload_id=AEnB2UoZ78b8wH0oFJc3e8QTos7z8uhSwMtZzELzz5WEiY_ecQheJqYv5eJd03jIzaZjetcGuq2Lg6cYrOc-9r99PB2xJFYRJA
   response:
     body:
-      string: "{\n \"kind\": \"storage#object\",\n \"id\": \"test_bucket/test.csv/1569150231615794\"\
-        ,\n \"selfLink\": \"https://www.googleapis.com/storage/v1/b/test_bucket/o/test.csv\"\
-        ,\n \"name\": \"test.csv\",\n \"bucket\": \"test_bucket\",\n \"generation\"\
-        : \"1569150231615794\",\n \"metageneration\": \"1\",\n \"timeCreated\": \"\
-        2019-09-22T11:03:51.615Z\",\n \"updated\": \"2019-09-22T11:03:51.615Z\",\n\
-        \ \"storageClass\": \"STANDARD\",\n \"timeStorageClassUpdated\": \"2019-09-22T11:03:51.615Z\"\
-        ,\n \"size\": \"30\",\n \"md5Hash\": \"7o9vAhPGXhDTvh8MgEDSfw==\",\n \"mediaLink\"\
-        : \"https://www.googleapis.com/download/storage/v1/b/test_bucket/o/test.csv?generation=1569150231615794&alt=media\"\
-        ,\n \"crc32c\": \"Gh7sgQ==\",\n \"etag\": \"CLKynpGk5OQCEAE=\"\n}\n"
+      string: "{\n \"kind\": \"storage#object\",\n \"id\": \"testbucketkedro/test.json/1570978430879162\"\
+        ,\n \"selfLink\": \"https://www.googleapis.com/storage/v1/b/testbucketkedro/o/test.json\"\
+        ,\n \"name\": \"test.json\",\n \"bucket\": \"testbucketkedro\",\n \"generation\"\
+        : \"1570978430879162\",\n \"metageneration\": \"1\",\n \"timeCreated\": \"\
+        2019-10-13T14:53:50.879Z\",\n \"updated\": \"2019-10-13T14:53:50.879Z\",\n\
+        \ \"storageClass\": \"STANDARD\",\n \"timeStorageClassUpdated\": \"2019-10-13T14:53:50.879Z\"\
+        ,\n \"size\": \"64\",\n \"md5Hash\": \"STFR3Z82Eh35dGSG0ttpZg==\",\n \"mediaLink\"\
+        : \"https://www.googleapis.com/download/storage/v1/b/testbucketkedro/o/test.json?generation=1570978430879162&alt=media\"\
+        ,\n \"crc32c\": \"Secq5g==\",\n \"etag\": \"CLqLytq+meUCEAE=\"\n}\n"
     headers:
       Alt-Svc:
-      - quic=":443"; ma=2592000; v="46,43,39"
+      - quic=":443"; ma=2592000; v="46,43",h3-Q048=":443"; ma=2592000,h3-Q046=":443";
+        ma=2592000,h3-Q043=":443"; ma=2592000
       Cache-Control:
       - no-cache, no-store, max-age=0, must-revalidate
       Content-Length:
-      - '666'
+      - '686'
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Sun, 22 Sep 2019 11:03:51 GMT
+      - Sun, 13 Oct 2019 14:53:50 GMT
       ETag:
-      - CLKynpGk5OQCEAE=
+      - CLqLytq+meUCEAE=
       Expires:
       - Mon, 01 Jan 1990 00:00:00 GMT
       Pragma:
@@ -334,7 +274,7 @@ interactions:
       - Origin
       - X-Origin
       X-GUploader-UploadID:
-      - AEnB2UogansHsqEDyEMHsqOpUd416SYByAZb03cDdGKZHzhVe9pZ_oD3gC42kQvf5hsicVVF5ZvHTW0ONw19kclyoDpnC3lsoA
+      - AEnB2UoZ78b8wH0oFJc3e8QTos7z8uhSwMtZzELzz5WEiY_ecQheJqYv5eJd03jIzaZjetcGuq2Lg6cYrOc-9r99PB2xJFYRJA
     status:
       code: 200
       message: OK
@@ -349,54 +289,42 @@ interactions:
       - keep-alive
       User-Agent:
       - python-requests/2.22.0
-      authorization:
-      - Bearer ya29.c.ElqLB2IjWMkQ5eUW8wjEuM7mHpzCF2ZZWQlk1wCpwRC1tVnOk3YXLzCHs2b00r1FNAqP7c6VQ-HgENL8JDWVSYV-Se01Ca86w9o-kmSdnEepQzOwZL5VHLHOVP4
     method: GET
-    uri: https://www.googleapis.com/storage/v1/b/test_bucket/o/?delimiter=%2F
+    uri: https://www.googleapis.com/storage/v1/b/testbucketkedro/o/?delimiter=%2F
   response:
     body:
-      string: "{\n  \"kind\": \"storage#objects\",\n  \"prefixes\": [\n    \"test_bucket/\"\
-        ,\n    \"test_0.08787259430867833.csv/\"\n  ],\n  \"items\": [\n    {\n  \
-        \    \"kind\": \"storage#object\",\n      \"id\": \"test_bucket/test_0.08787259430867833.csv/1569150050209678\"\
-        ,\n      \"selfLink\": \"https://www.googleapis.com/storage/v1/b/test_bucket/o/test_0.08787259430867833.csv\"\
-        ,\n      \"name\": \"test_0.08787259430867833.csv\",\n      \"bucket\": \"\
-        test_bucket\",\n      \"generation\": \"1569150050209678\",\n      \"metageneration\"\
-        : \"1\",\n      \"storageClass\": \"STANDARD\",\n      \"size\": \"30\",\n\
-        \      \"md5Hash\": \"7o9vAhPGXhDTvh8MgEDSfw==\",\n      \"mediaLink\": \"\
-        https://www.googleapis.com/download/storage/v1/b/test_bucket/o/test_0.08787259430867833.csv?generation=1569150050209678&alt=media\"\
-        ,\n      \"crc32c\": \"Gh7sgQ==\",\n      \"etag\": \"CI6f3rqj5OQCEAE=\",\n\
-        \      \"timeCreated\": \"2019-09-22T11:00:50.209Z\",\n      \"updated\":\
-        \ \"2019-09-22T11:00:50.209Z\",\n      \"timeStorageClassUpdated\": \"2019-09-22T11:00:50.209Z\"\
-        \n    },\n    {\n      \"kind\": \"storage#object\",\n      \"id\": \"test_bucket/test.csv/1569150231615794\"\
-        ,\n      \"selfLink\": \"https://www.googleapis.com/storage/v1/b/test_bucket/o/test.csv\"\
-        ,\n      \"name\": \"test.csv\",\n      \"bucket\": \"test_bucket\",\n   \
-        \   \"generation\": \"1569150231615794\",\n      \"metageneration\": \"1\"\
-        ,\n      \"storageClass\": \"STANDARD\",\n      \"size\": \"30\",\n      \"\
-        md5Hash\": \"7o9vAhPGXhDTvh8MgEDSfw==\",\n      \"mediaLink\": \"https://www.googleapis.com/download/storage/v1/b/test_bucket/o/test.csv?generation=1569150231615794&alt=media\"\
-        ,\n      \"crc32c\": \"Gh7sgQ==\",\n      \"etag\": \"CLKynpGk5OQCEAE=\",\n\
-        \      \"timeCreated\": \"2019-09-22T11:03:51.615Z\",\n      \"updated\":\
-        \ \"2019-09-22T11:03:51.615Z\",\n      \"timeStorageClassUpdated\": \"2019-09-22T11:03:51.615Z\"\
+      string: "{\n  \"kind\": \"storage#objects\",\n  \"items\": [\n    {\n      \"\
+        kind\": \"storage#object\",\n      \"id\": \"testbucketkedro/test.json/1570978430879162\"\
+        ,\n      \"selfLink\": \"https://www.googleapis.com/storage/v1/b/testbucketkedro/o/test.json\"\
+        ,\n      \"name\": \"test.json\",\n      \"bucket\": \"testbucketkedro\",\n\
+        \      \"generation\": \"1570978430879162\",\n      \"metageneration\": \"\
+        1\",\n      \"storageClass\": \"STANDARD\",\n      \"size\": \"64\",\n   \
+        \   \"md5Hash\": \"STFR3Z82Eh35dGSG0ttpZg==\",\n      \"mediaLink\": \"https://www.googleapis.com/download/storage/v1/b/testbucketkedro/o/test.json?generation=1570978430879162&alt=media\"\
+        ,\n      \"crc32c\": \"Secq5g==\",\n      \"etag\": \"CLqLytq+meUCEAE=\",\n\
+        \      \"timeCreated\": \"2019-10-13T14:53:50.879Z\",\n      \"updated\":\
+        \ \"2019-10-13T14:53:50.879Z\",\n      \"timeStorageClassUpdated\": \"2019-10-13T14:53:50.879Z\"\
         \n    }\n  ]\n}\n"
     headers:
       Alt-Svc:
-      - quic=":443"; ma=2592000; v="46,43,39"
+      - quic=":443"; ma=2592000; v="46,43",h3-Q048=":443"; ma=2592000,h3-Q046=":443";
+        ma=2592000,h3-Q043=":443"; ma=2592000
       Cache-Control:
       - private, max-age=0, must-revalidate, no-transform
       Content-Length:
-      - '1716'
+      - '824'
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Sun, 22 Sep 2019 11:03:51 GMT
+      - Sun, 13 Oct 2019 14:53:51 GMT
       Expires:
-      - Sun, 22 Sep 2019 11:03:51 GMT
+      - Sun, 13 Oct 2019 14:53:51 GMT
       Server:
       - UploadServer
       Vary:
       - Origin
       - X-Origin
       X-GUploader-UploadID:
-      - AEnB2Uofmq-x7u9goZLNhv-mZkX97oxcMYvwwYH-nMqlYZ3hw5a8rYCa3drsUgou9YOU-6iRUK0fkPvt6hSPVfnsphUtnNZYlQ
+      - AEnB2Url1Q6jM2867pTjHj_Q6XGpSe3U9KRGyQDX8TNIUlwxiTorTCEEysgMo8b1gCjEWweJAScB6hRxs8S1v-raVQ-0bY4Nkw
     status:
       code: 200
       message: OK

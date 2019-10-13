@@ -35,12 +35,12 @@ import pandas as pd
 import pytest
 from pandas.util.testing import assert_frame_equal
 
-from kedro.contrib.io.gcs.json_gcs import JsonGCSDataSet
+from kedro.contrib.io.gcs.gcs import GCSDataSet
 from kedro.io import DataSetError
 from tests.contrib.io.gcs.utils import gcs_vcr
 
 FILENAME = "test.json"
-BUCKET_NAME = "test_bucket"
+BUCKET_NAME = "testbucketkedro"
 GCP_PROJECT = "test_project"
 GCP_CREDENTIALS = mock.Mock(spec=google.auth.credentials.Credentials)
 
@@ -63,9 +63,11 @@ def save_args(request):
 @pytest.fixture
 @gcs_vcr.use_cassette(match=["all"])
 def gcs_data_set(load_args, save_args):
-    return JsonGCSDataSet(
+    return GCSDataSet(
         filepath=FILENAME,
+        file_format="json",
         bucket_name=BUCKET_NAME,
+        project=GCP_PROJECT,
         credentials=GCP_CREDENTIALS,
         load_args=load_args,
         save_args=save_args,
@@ -80,30 +82,33 @@ class TestCSVGCSDataSet:
         """Test invalid credentials for connecting to GCS"""
         pattern = "Anonymous caller"
         with pytest.raises(DataSetError, match=pattern):
-            JsonGCSDataSet(filepath=FILENAME, bucket_name=BUCKET_NAME).load()
+            GCSDataSet(
+                filepath=FILENAME, file_format="json", bucket_name=BUCKET_NAME
+            ).load()
 
     @gcs_vcr.use_cassette(match=["all"])
     def test_not_existing_bucket(self):
         """Test not existing bucket"""
         pattern = "Failed while loading data from data set"
         with pytest.raises(DataSetError, match=pattern):
-            JsonGCSDataSet(
+            GCSDataSet(
                 filepath=FILENAME,
+                file_format="json",
                 bucket_name="not-existing-bucket",
                 credentials=GCP_CREDENTIALS,
             ).load()
-
-    @gcs_vcr.use_cassette(match=["all"])
-    def test_load_data(self, gcs_data_set, dummy_dataframe):
-        """Test loading the data from gcs."""
-        loaded_data = gcs_data_set.load()
-        assert_frame_equal(loaded_data, dummy_dataframe)
 
     @gcs_vcr.use_cassette(match=["all"])
     def test_save_data(self, gcs_data_set, dummy_dataframe):
         """Test saving the data"""
         assert not gcs_data_set.exists()
         gcs_data_set.save(dummy_dataframe)
+        loaded_data = gcs_data_set.load()
+        assert_frame_equal(loaded_data, dummy_dataframe)
+
+    @gcs_vcr.use_cassette(match=["all"])
+    def test_load_data(self, gcs_data_set, dummy_dataframe):
+        """Test loading the data from gcs."""
         loaded_data = gcs_data_set.load()
         assert_frame_equal(loaded_data, dummy_dataframe)
 
@@ -141,16 +146,17 @@ class TestCSVGCSDataSet:
     def test_str_representation(self, gcs_data_set, save_args):
         """Test string representation of the data set instance."""
         str_repr = str(gcs_data_set)
-        assert "CSVGCSDataSet" in str_repr
+        assert "GCSDataSet" in str_repr
         for k in save_args.keys():
             assert k in str_repr
 
     # pylint: disable=unused-argument
     @gcs_vcr.use_cassette(match=["all"])
     def test_load_args_propagated(self, mocker, gcs_data_set):
-        mock = mocker.patch("kedro.contrib.io.gcs.csv_gcs.pd.read_csv")
-        JsonGCSDataSet(
+        mock = mocker.patch("kedro.contrib.io.gcs.gcs.pd.read_json")
+        GCSDataSet(
             filepath=FILENAME,
+            file_format="json",
             bucket_name=BUCKET_NAME,
             credentials=GCP_CREDENTIALS,
             load_args=dict(custom=42),

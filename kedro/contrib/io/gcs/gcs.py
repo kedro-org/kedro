@@ -14,15 +14,15 @@ class GCSDataSet(AbstractVersionedDataSet):
 
     # pylint: disable=too-many-arguments
     def __init__(
-        self,
-        filepath: str,
-        bucket_name: str,
-        file_format: str = "csv",
-        credentials: Optional[Credentials] = None,
-        project: Optional[str] = None,
-        load_args: Optional[Dict[str, Any]] = None,
-        save_args: Optional[Dict[str, Any]] = None,
-        version: Version = None,
+            self,
+            filepath: str,
+            bucket_name: str,
+            file_format: str = "csv",
+            credentials: Optional[Credentials] = None,
+            project: Optional[str] = None,
+            load_args: Optional[Dict[str, Any]] = None,
+            save_args: Optional[Dict[str, Any]] = None,
+            version: Version = None,
     ) -> None:
         _gcs = gcsfs.GCSFileSystem(credentials=credentials, project=project)
 
@@ -51,6 +51,8 @@ class GCSDataSet(AbstractVersionedDataSet):
             self._pd_read = pd.read_csv
         elif self._file_format == "pickle":
             self._pd_read = pd.read_pickle
+        elif self._file_format == "parquet":
+            self._pd_read = pd.read_parquet
         elif self._file_format == "hdf":
             self._pd_read = pd.read_hdf
         else:
@@ -80,6 +82,8 @@ class GCSDataSet(AbstractVersionedDataSet):
             data = data.to_csv(**self._save_args)
         elif self._file_format == "pickle":
             data = data.to_pickle(**self._save_args)
+        elif self._file_format == "parquet":
+            data = data.to_parquet(**self._save_args)
         elif self._file_format == "hdf":
             data = data.to_hdf(**self._save_args)
         else:

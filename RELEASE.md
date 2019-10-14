@@ -5,8 +5,11 @@
 * `Pipeline.name` has been deprecated in favour of `Pipeline.tags`.
 
 ## Bug fixes and other changes
+* `get_last_load_version()` method for versioned datasets now returns exact last load version if the dataset has been loaded at least once and `None` otherwise.
+* Fixed a bug in `_exists` method for versioned `SparkDataSet`.
 
 ## Breaking changes to the API
+* Removed `_check_paths_consistency()` method from `AbstractVersionedDataSet`. Version consistency check is now done in `AbstractVersionedDataSet.save()`. Custom versioned datasets should modify `save()` method implementation accordingly.
 
 ## Thanks for supporting contributions
 

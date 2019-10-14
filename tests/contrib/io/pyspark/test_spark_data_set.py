@@ -300,11 +300,8 @@ class TestSparkDataSetVersionedLocal:
         )
 
         pattern = (
-            r"Save path `{save}` did not match load path "
-            r"`{load}` for SparkDataSet\(.+\)".format(
-                save=str(tmp_path / FILENAME / exact_version.save / FILENAME),
-                load=str(tmp_path / FILENAME / exact_version.load / FILENAME),
-            )
+            r"Save version `{ev.save}` did not match load version "
+            r"`{ev.load}` for SparkDataSet\(.+\)".format(ev=exact_version)
         )
         with pytest.warns(UserWarning, match=pattern):
             ds_local.save(sample_spark_df)
@@ -370,14 +367,10 @@ class TestSparkDataSetVersionedS3:
     def test_save(self, versioned_dataset_s3, version, mocker):
         mocked_spark_df = mocker.Mock()
 
-        mocked_load_version = mocker.MagicMock()
-        mocked_load_version.__eq__.return_value = True
-
-        # need to mock _get_load_path() call inside _save()
-        # also need _get_load_path() to return a load version that
-        # _check_paths_consistency() will be happy with (hence mocking __eq__)
+        # need _lookup_load_version() call to return a load version that
+        # matches save version due to consistency check in versioned_dataset_s3.save()
         mocker.patch.object(
-            versioned_dataset_s3, "_get_load_path", return_value=mocked_load_version
+            versioned_dataset_s3, "_lookup_load_version", return_value=version.save
         )
 
         versioned_dataset_s3.save(mocked_spark_df)
@@ -396,10 +389,8 @@ class TestSparkDataSetVersionedS3:
         mocked_spark_df = mocker.Mock()
 
         pattern = (
-            r"Save path `{b}/{f}/{sv}/{f}` did not match load path "
-            r"`{b}/{f}/{lv}/{f}` for SparkDataSet\(.+\)".format(
-                b=BUCKET_NAME, f=FILENAME, sv=exact_version.save, lv=exact_version.load
-            )
+            r"Save version `{ev.save}` did not match load version "
+            r"`{ev.load}` for SparkDataSet\(.+\)".format(ev=exact_version)
         )
         with pytest.warns(UserWarning, match=pattern):
             ds_s3.save(mocked_spark_df)
@@ -510,13 +501,10 @@ class TestSparkDataSetVersionedHdfs:
             filepath="hdfs://{}".format(HDFS_PREFIX), version=version
         )
 
-        mocked_load_version = mocker.MagicMock()
-        mocked_load_version.__eq__.return_value = True
-        # need to mock _get_load_path() call inside _save()
-        # also need _get_load_path() to return a load version that
-        # _check_paths_consistency() will be happy with (hence mocking __eq__)
+        # need _lookup_load_version() call to return a load version that
+        # matches save version due to consistency check in versioned_hdfs.save()
         mocker.patch.object(
-            versioned_hdfs, "_get_load_path", return_value=mocked_load_version
+            versioned_hdfs, "_lookup_load_version", return_value=version.save
         )
 
         mocked_spark_df = mocker.Mock()
@@ -542,10 +530,8 @@ class TestSparkDataSetVersionedHdfs:
         mocked_spark_df = mocker.Mock()
 
         pattern = (
-            r"Save path `{fn}/{f}/{sv}/{f}` did not match load path "
-            r"`{fn}/{f}/{lv}/{f}` for SparkDataSet\(.+\)".format(
-                fn=FOLDER_NAME, f=FILENAME, sv=exact_version.save, lv=exact_version.load
-            )
+            r"Save version `{ev.save}` did not match load version "
+            r"`{ev.load}` for SparkDataSet\(.+\)".format(ev=exact_version)
         )
 
         with pytest.warns(UserWarning, match=pattern):

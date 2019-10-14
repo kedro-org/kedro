@@ -33,7 +33,7 @@ import os
 from pathlib import Path
 from typing import Any, Dict
 
-from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
+from kedro.io.core import AbstractVersionedDataSet, Version
 
 
 class TextLocalDataSet(AbstractVersionedDataSet):
@@ -97,14 +97,8 @@ class TextLocalDataSet(AbstractVersionedDataSet):
         with save_path.open(**self._save_args) as _file:
             _file.write(data)
 
-        load_path = Path(self._get_load_path())
-        self._check_paths_consistency(load_path.absolute(), save_path.absolute())
-
     def _exists(self) -> bool:
-        try:
-            path = self._get_load_path()
-        except DataSetError:
-            return False
+        path = self._get_load_path()
         return Path(path).is_file()
 
     def _describe(self) -> Dict[str, Any]:

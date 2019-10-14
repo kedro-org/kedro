@@ -1,6 +1,7 @@
 # Release 0.15.3
 
 ## Major features and improvements
+* `kedro jupyter` now gives the default kernel a sensible name.
 * `Pipeline.name` has been deprecated in favour of `Pipeline.tags`.
 
 ## Bug fixes and other changes

@@ -37,8 +37,8 @@ import vcr
 from pandas.util.testing import assert_frame_equal
 
 from kedro.contrib.io.gcs.json_gcs import JsonGCSDataSet
-from kedro.io import DataSetError
 from tests.contrib.io.gcs.utils import matcher
+from kedro.io import DataSetError, Version
 
 FILENAME = "test.json"
 BUCKET_NAME = "testbucketkedro"
@@ -76,7 +76,6 @@ def save_args(request):
 def gcs_data_set(load_args, save_args):
     return JsonGCSDataSet(
         filepath=FILENAME,
-        file_format="json",
         bucket_name=BUCKET_NAME,
         project=GCP_PROJECT,
         credentials=GCP_CREDENTIALS,
@@ -85,7 +84,7 @@ def gcs_data_set(load_args, save_args):
     )
 
 
-class TestCSVGCSDataSet:
+class TestJsonGCSDataSet:
     @mock.patch.dict(
         os.environ, {"GOOGLE_APPLICATION_CREDENTIALS": "wrong credentials"}
     )
@@ -94,7 +93,7 @@ class TestCSVGCSDataSet:
         pattern = "Anonymous caller"
         with pytest.raises(DataSetError, match=pattern):
             JsonGCSDataSet(
-                filepath=FILENAME, file_format="json", bucket_name=BUCKET_NAME
+                filepath=FILENAME, bucket_name=BUCKET_NAME
             ).load()
 
     @gcs_vcr.use_cassette(match=["api_recordings/json/*.yaml"])
@@ -104,7 +103,6 @@ class TestCSVGCSDataSet:
         with pytest.raises(DataSetError, match=pattern):
             JsonGCSDataSet(
                 filepath=FILENAME,
-                file_format="json",
                 bucket_name="not-existing-bucket",
                 credentials=GCP_CREDENTIALS,
             ).load()
@@ -167,9 +165,96 @@ class TestCSVGCSDataSet:
         mock = mocker.patch("kedro.contrib.io.gcs.gcs.pd.read_json")
         JsonGCSDataSet(
             filepath=FILENAME,
-            file_format="json",
+
             bucket_name=BUCKET_NAME,
             credentials=GCP_CREDENTIALS,
             load_args=dict(custom=42),
         ).load()
         assert mock.call_args_list[0][1] == {"custom": 42}
+
+
+@pytest.fixture
+def versioned_gcs_data_set(load_version, save_version, load_args, save_args):
+    return JsonGCSDataSet(bucket_name=BUCKET_NAME, filepath=FILENAME, project=GCP_PROJECT,
+                          credentials=GCP_CREDENTIALS, load_args=load_args,
+                          save_args=save_args,
+                          version=Version(load_version, save_version))
+
+from pandas.util.testing import assert_frame_equal
+
+class TestJsonGCSDataSetVersioned:
+    @gcs_vcr.use_cassette(match=["api_recordings/json/*.yaml"])
+    def test_no_versions(self, versioned_gcs_data_set):
+        """Check the error if no versions are available for load."""
+        pattern = r"Did not find any versions for"
+        with pytest.raises(DataSetError, match=pattern):
+            versioned_gcs_data_set.load()
+
+    @gcs_vcr.use_cassette(match=["api_recordings/json/*.yaml"])
+    def test_save_and_load(self, versioned_gcs_data_set, dummy_dataframe):
+        """Test that saved and reloaded data matches the original one for
+        the versioned data set."""
+        versioned_gcs_data_set.save(dummy_dataframe)
+        reloaded_df = versioned_gcs_data_set.load()
+        assert_frame_equal(dummy_dataframe, reloaded_df)
+
+    @gcs_vcr.use_cassette(match=["api_recordings/json/*.yaml"])
+    def test_prevent_override(self, versioned_gcs_data_set, dummy_dataframe):
+        """Check the error when attempting to override the data set if the
+        corresponding pickled object for a given save version already exists in S3."""
+        versioned_gcs_data_set.save(dummy_dataframe)
+        pattern = (
+            r"Save path \`.+\` for JsonGCSDataSet\(.+\) must not exist "
+            r"if versioning is enabled"
+        )
+        with pytest.raises(DataSetError, match=pattern):
+            versioned_gcs_data_set.save(dummy_dataframe)
+
+    @pytest.mark.parametrize(
+        "load_version", ["2019-01-01T23.59.59.999Z"], indirect=True
+    )
+    @pytest.mark.parametrize(
+        "save_version", ["2019-01-02T00.00.00.000Z"], indirect=True
+    )
+    @gcs_vcr.use_cassette(match=["api_recordings/json/*.yaml"])
+    def test_save_version_warning(
+            self, versioned_gcs_data_set, load_version, save_version, dummy_dataframe
+    ):
+        """Check the warning when saving to the path that differs from
+        the subsequent load path."""
+        pattern = (
+            r"Save path `.*/{}/test\.json` did not match load path "
+            r"`.*/{}/test\.json` for JsonGCSDataSet\(.+\)".format(
+                save_version, load_version
+            )
+        )
+        with pytest.warns(UserWarning, match=pattern):
+            versioned_gcs_data_set.save(dummy_dataframe)
+
+    def test_version_str_repr(self, load_version, save_version):
+        """Test that version is in string representation of the class instance
+        when applicable."""
+        ds = JsonGCSDataSet(filepath=FILENAME, bucket_name=BUCKET_NAME)
+        ds_versioned = JsonGCSDataSet(
+            filepath=FILENAME,
+            bucket_name=BUCKET_NAME,
+            version=Version(load_version, save_version),
+        )
+        assert FILENAME in str(ds)
+        assert "version" not in str(ds)
+
+        assert FILENAME in str(ds_versioned)
+        ver_str = "version=Version(load={}, save='{}')".format(
+            load_version, save_version
+        )
+        assert ver_str in str(ds_versioned)
+
+        assert BUCKET_NAME in str(ds)
+        assert BUCKET_NAME in str(ds_versioned)
+    # TODO: Fix this test
+    # @gcs_vcr.use_cassette(match=["api_recordings/json/*.yaml"])
+    # def test_existed_versioned(self, versioned_gcs_data_set, dummy_dataframe):
+    #     """Test `exists` method invocation for versioned data set."""
+    #     assert not versioned_gcs_data_set.exists()
+    #     versioned_gcs_data_set.save(dummy_dataframe)
+    #     assert versioned_gcs_data_set.exists()

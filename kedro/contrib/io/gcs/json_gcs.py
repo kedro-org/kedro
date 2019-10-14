@@ -17,7 +17,6 @@ class JsonGCSDataSet(AbstractVersionedDataSet):
         self,
         filepath: str,
         bucket_name: str,
-        file_format: str = "csv",
         credentials: Optional[Credentials] = None,
         project: Optional[str] = None,
         load_args: Optional[Dict[str, Any]] = None,
@@ -43,12 +42,9 @@ class JsonGCSDataSet(AbstractVersionedDataSet):
 
         self._gcs = _gcs
 
-        self._file_format = file_format
-
     def _describe(self) -> Dict[str, Any]:
         return dict(
             filepath=self._filepath,
-            file_format=self._file_format,
             bucket_name=self._bucket_name,
             load_args=self._load_args,
             save_args=self._save_args,
@@ -67,6 +63,9 @@ class JsonGCSDataSet(AbstractVersionedDataSet):
         with self._gcs.open(str(save_path), mode="wb") as gcs_file:
             gcs_file.write(data.encode("utf8"))
 
+        # gcs maintain cache of the directory, so invalidate to
+        # see new files
+        self._gcs.invalidate_cache()
         load_path = PurePosixPath(self._get_load_path())
         self._check_paths_consistency(load_path, save_path)
 

@@ -483,7 +483,6 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
         most_recent = next(
             (path for path in version_paths if self._exists_function(path)), None
         )
-
         if not most_recent:
             raise DataSetError("Did not find any versions for {}".format(str(self)))
 

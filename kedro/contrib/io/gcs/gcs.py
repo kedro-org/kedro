@@ -14,15 +14,15 @@ class JsonGCSDataSet(AbstractVersionedDataSet):
 
     # pylint: disable=too-many-arguments
     def __init__(
-            self,
-            filepath: str,
-            bucket_name: str,
-            file_format: str = "csv",
-            credentials: Optional[Credentials] = None,
-            project: Optional[str] = None,
-            load_args: Optional[Dict[str, Any]] = None,
-            save_args: Optional[Dict[str, Any]] = None,
-            version: Version = None,
+        self,
+        filepath: str,
+        bucket_name: str,
+        file_format: str = "csv",
+        credentials: Optional[Credentials] = None,
+        project: Optional[str] = None,
+        load_args: Optional[Dict[str, Any]] = None,
+        save_args: Optional[Dict[str, Any]] = None,
+        version: Version = None,
     ) -> None:
         _gcs = gcsfs.GCSFileSystem(credentials=credentials, project=project)
 

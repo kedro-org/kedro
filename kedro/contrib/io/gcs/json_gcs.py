@@ -63,8 +63,8 @@ class JsonGCSDataSet(AbstractVersionedDataSet):
         with self._gcs.open(str(save_path), mode="wb") as gcs_file:
             gcs_file.write(data.encode("utf8"))
 
-        # gcs maintain cache of the directory, so invalidate to
-        # see new files
+        # gcs maintain cache of the directory,
+        # so invalidate to see new files
         self._gcs.invalidate_cache()
         load_path = PurePosixPath(self._get_load_path())
         self._check_paths_consistency(load_path, save_path)

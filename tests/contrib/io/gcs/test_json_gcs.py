@@ -92,9 +92,7 @@ class TestJsonGCSDataSet:
         """Test invalid credentials for connecting to GCS"""
         pattern = "Anonymous caller"
         with pytest.raises(DataSetError, match=pattern):
-            JsonGCSDataSet(
-                filepath=FILENAME, bucket_name=BUCKET_NAME
-            ).load()
+            JsonGCSDataSet(filepath=FILENAME, bucket_name=BUCKET_NAME).load()
 
     @gcs_vcr.use_cassette(match=["api_recordings/json/*.yaml"])
     def test_not_existing_bucket(self):
@@ -165,7 +163,6 @@ class TestJsonGCSDataSet:
         mock = mocker.patch("kedro.contrib.io.gcs.gcs.pd.read_json")
         JsonGCSDataSet(
             filepath=FILENAME,
-
             bucket_name=BUCKET_NAME,
             credentials=GCP_CREDENTIALS,
             load_args=dict(custom=42),
@@ -175,10 +172,15 @@ class TestJsonGCSDataSet:
 
 @pytest.fixture
 def versioned_gcs_data_set(load_version, save_version, load_args, save_args):
-    return JsonGCSDataSet(bucket_name=BUCKET_NAME, filepath=FILENAME, project=GCP_PROJECT,
-                          credentials=GCP_CREDENTIALS, load_args=load_args,
-                          save_args=save_args,
-                          version=Version(load_version, save_version))
+    return JsonGCSDataSet(
+        bucket_name=BUCKET_NAME,
+        filepath=FILENAME,
+        project=GCP_PROJECT,
+        credentials=GCP_CREDENTIALS,
+        load_args=load_args,
+        save_args=save_args,
+        version=Version(load_version, save_version),
+    )
 
 
 class TestJsonGCSDataSetVersioned:
@@ -217,7 +219,7 @@ class TestJsonGCSDataSetVersioned:
     )
     @gcs_vcr.use_cassette(match=["api_recordings/json/*.yaml"])
     def test_save_version_warning(
-            self, versioned_gcs_data_set, load_version, save_version, dummy_dataframe
+        self, versioned_gcs_data_set, load_version, save_version, dummy_dataframe
     ):
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
@@ -251,7 +253,7 @@ class TestJsonGCSDataSetVersioned:
         assert BUCKET_NAME in str(ds)
         assert BUCKET_NAME in str(ds_versioned)
 
-    # TODO: Fix this test
+    # TODO: Fix this test, works without cassette
     # @gcs_vcr.use_cassette(match=["api_recordings/json/*.yaml"])
     # def test_existed_versioned(self, versioned_gcs_data_set, dummy_dataframe):
     #     """Test `exists` method invocation for versioned data set."""

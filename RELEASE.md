@@ -34,6 +34,7 @@
 
 ## Breaking changes to the API
 * `KedroContext.run()` no longer accepts `catalog` and `pipeline` arguments.
+* `node.inputs` now returns the node's inputs in the order required to bind them properly to the node's function
 
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman), [Luciano Issoe](https://github.com/Lucianois), [Joost Duisters](https://github.com/JoostDuisters), [Zain Patel](https://github.com/mzjp2), [William Ashford](https://github.com/williamashfordQB), [Karlson Lee](https://github.com/i25959341)

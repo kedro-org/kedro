@@ -240,14 +240,17 @@ class Node:
 
     @property
     def inputs(self) -> List[str]:
-        """Return node inputs as a list preserving the original order
-            if possible.
+        """Return node inputs as a list, in the order required to bind them properly to
+        the node's function. If the node's function contains ``kwargs``, then ``kwarg`` inputs
+        are sorted alphabetically (for python 3.5 deterministic behavior).
 
         Returns:
             Node input names as a list.
 
         """
-        return self._to_list(self._inputs)
+        if isinstance(self._inputs, dict):
+            return _dict_inputs_to_list(self._func, self._inputs)
+        return _to_list(self._inputs)
 
     @property
     def outputs(self) -> List[str]:
@@ -258,7 +261,7 @@ class Node:
             Node output names as a list.
 
         """
-        return self._to_list(self._outputs)
+        return _to_list(self._outputs)
 
     @property
     def _decorated_func(self):
@@ -541,21 +544,6 @@ class Node:
             )
 
     @staticmethod
-    def _to_list(element: Union[None, str, List[str], Dict[str, str]]) -> List:
-        """Make a list out of node inputs/outputs.
-
-        Returns:
-            List[str]: Node input/output names as a list to standardise.
-        """
-        if element is None:
-            return list()
-        if isinstance(element, str):
-            return [element]
-        if isinstance(element, dict):
-            return sorted(element.values())
-        return element
-
-    @staticmethod
     def _process_inputs_for_bind(inputs: Union[None, str, List[str], Dict[str, str]]):
         # Safeguard that we do not mutate list inputs
         inputs = copy.copy(inputs)
@@ -635,3 +623,28 @@ def node(  # pylint: disable=missing-type-doc
         >>> ]
     """
     return Node(func, inputs, outputs, name=name, tags=tags)
+
+
+def _dict_inputs_to_list(func: Callable[[Any], Any], inputs: Dict[str, str]):
+    """Convert a dict representation of the node inputs to a list , ensuring
+    the appropriate order for binding them to the node's function.
+    """
+    sig = inspect.signature(func).bind(**inputs)
+    # for deterministic behavior in python 3.5, sort kwargs inputs alphabetically
+    return list(sig.args) + sorted(sig.kwargs.values())
+
+
+def _to_list(element: Union[None, str, List[str], Dict[str, str]]) -> List:
+    """Make a list out of node inputs/outputs.
+
+    Returns:
+        List[str]: Node input/output names as a list to standardise.
+    """
+
+    if element is None:
+        return list()
+    if isinstance(element, str):
+        return [element]
+    if isinstance(element, dict):
+        return sorted(element.values())
+    return element

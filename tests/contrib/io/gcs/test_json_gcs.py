@@ -36,7 +36,7 @@ import pytest
 import vcr
 from pandas.util.testing import assert_frame_equal
 
-from kedro.contrib.io.gcs.gcs import JsonGCSDataSet
+from kedro.contrib.io.gcs.json_gcs import JsonGCSDataSet
 from kedro.io import DataSetError
 from tests.contrib.io.gcs.utils import matcher
 

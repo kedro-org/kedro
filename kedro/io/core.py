@@ -499,7 +499,6 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
             # When versioning is disabled, return given filepath
             self._last_save_version = None
             return self._filepath
-
         self._last_save_version = self._version.save or generate_timestamp()
 
         versioned_path = self._get_versioned_path(self._last_save_version)

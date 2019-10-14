@@ -26,7 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pylint: disable=protected-access,no-member
+# pylint: disable=protected-access
 import os
 
 import google.auth.credentials
@@ -160,7 +160,7 @@ class TestJsonGCSDataSet:
     # pylint: disable=unused-argument
     @gcs_vcr.use_cassette(match=["api_recordings/json/*.yaml"])
     def test_load_args_propagated(self, mocker, gcs_data_set):
-        mock = mocker.patch("kedro.contrib.io.gcs.gcs.pd.read_json")
+        mock = mocker.patch("kedro.contrib.io.gcs.json_gcs.pd.read_json")
         JsonGCSDataSet(
             filepath=FILENAME,
             bucket_name=BUCKET_NAME,
@@ -192,6 +192,9 @@ class TestJsonGCSDataSetVersioned:
             versioned_gcs_data_set.load()
 
     @gcs_vcr.use_cassette(match=["api_recordings/json/*.yaml"])
+    @pytest.mark.parametrize(
+        "save_version", ["2019-01-02T00.00.00.000Z"], indirect=True
+    )
     def test_save_and_load(self, versioned_gcs_data_set, dummy_dataframe):
         """Test that saved and reloaded data matches the original one for
         the versioned data set."""
@@ -200,6 +203,9 @@ class TestJsonGCSDataSetVersioned:
         assert_frame_equal(dummy_dataframe, reloaded_df)
 
     @gcs_vcr.use_cassette(match=["api_recordings/json/*.yaml"])
+    @pytest.mark.parametrize(
+        "save_version", ["2019-01-02T00.00.00.000Z"], indirect=True
+    )
     def test_prevent_override(self, versioned_gcs_data_set, dummy_dataframe):
         """Check the error when attempting to override the data set if the
         corresponding pickled object for a given save version already exists in S3."""
@@ -253,10 +259,12 @@ class TestJsonGCSDataSetVersioned:
         assert BUCKET_NAME in str(ds)
         assert BUCKET_NAME in str(ds_versioned)
 
-    # TODO: Fix this test, works without cassette
-    # @gcs_vcr.use_cassette(match=["api_recordings/json/*.yaml"])
-    # def test_existed_versioned(self, versioned_gcs_data_set, dummy_dataframe):
-    #     """Test `exists` method invocation for versioned data set."""
-    #     assert not versioned_gcs_data_set.exists()
-    #     versioned_gcs_data_set.save(dummy_dataframe)
-    #     assert versioned_gcs_data_set.exists()
+    @gcs_vcr.use_cassette(match=["api_recordings/json/*.yaml"])
+    @pytest.mark.parametrize(
+        "save_version", ["2019-01-02T00.00.00.000Z"], indirect=True
+    )
+    def test_existed_versioned(self, versioned_gcs_data_set, dummy_dataframe):
+        """Test `exists` method invocation for versioned data set."""
+        assert not versioned_gcs_data_set.exists()
+        versioned_gcs_data_set.save(dummy_dataframe)
+        assert versioned_gcs_data_set.exists()

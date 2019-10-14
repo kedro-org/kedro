@@ -35,12 +35,9 @@ named ``test_*`` which test a unit of logic.
 
 To run the tests, run ``kedro test``.
 """
-from os.path import abspath, curdir, join
 from pathlib import Path
 
 import pytest
-from kedro.config import ConfigLoader
-from kedro.io import DataCatalog
 
 from {{ cookiecutter.python_package }}.run import ProjectContext
 

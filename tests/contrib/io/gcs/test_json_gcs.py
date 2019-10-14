@@ -37,8 +37,8 @@ import vcr
 from pandas.util.testing import assert_frame_equal
 
 from kedro.contrib.io.gcs.json_gcs import JsonGCSDataSet
-from tests.contrib.io.gcs.utils import matcher
 from kedro.io import DataSetError, Version
+from tests.contrib.io.gcs.utils import matcher
 
 FILENAME = "test.json"
 BUCKET_NAME = "testbucketkedro"
@@ -180,7 +180,6 @@ def versioned_gcs_data_set(load_version, save_version, load_args, save_args):
                           save_args=save_args,
                           version=Version(load_version, save_version))
 
-from pandas.util.testing import assert_frame_equal
 
 class TestJsonGCSDataSetVersioned:
     @gcs_vcr.use_cassette(match=["api_recordings/json/*.yaml"])

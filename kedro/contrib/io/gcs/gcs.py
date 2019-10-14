@@ -8,21 +8,21 @@ from google.auth.credentials import Credentials
 from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
 
 
-class GCSDataSet(AbstractVersionedDataSet):
+class JsonGCSDataSet(AbstractVersionedDataSet):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {"index": True}  # type: Dict[str, Any]
 
     # pylint: disable=too-many-arguments
     def __init__(
-        self,
-        filepath: str,
-        bucket_name: str,
-        file_format: str = "csv",
-        credentials: Optional[Credentials] = None,
-        project: Optional[str] = None,
-        load_args: Optional[Dict[str, Any]] = None,
-        save_args: Optional[Dict[str, Any]] = None,
-        version: Version = None,
+            self,
+            filepath: str,
+            bucket_name: str,
+            file_format: str = "csv",
+            credentials: Optional[Credentials] = None,
+            project: Optional[str] = None,
+            load_args: Optional[Dict[str, Any]] = None,
+            save_args: Optional[Dict[str, Any]] = None,
+            version: Version = None,
     ) -> None:
         _gcs = gcsfs.GCSFileSystem(credentials=credentials, project=project)
 
@@ -58,35 +58,11 @@ class GCSDataSet(AbstractVersionedDataSet):
     def _load(self) -> pd.DataFrame:
         load_path = PurePosixPath(self._get_load_path())
         with self._gcs.open(str(load_path), mode="rb") as gcs_file:
-            if self._file_format == "json":
-                return pd.read_json(gcs_file, **self._load_args)
-            elif self._file_format == "csv":
-                self._pd_read = pd.read_csv
-                return pd.read_csv(gcs_file, **self._load_args)
-            elif self._file_format == "pickle":
-                return pd.read_pickle(gcs_file, **self._load_args)
-            elif self._file_format == "parquet":
-                return pd.read_parquet(gcs_file, **self._load_args)
-            elif self._file_format == "hdf":
-                return pd.read_hdf(gcs_file, **self._load_args)
-            else:
-                raise DataSetError(f"Unsupported File type {self._file_format}")
+            return pd.read_json(gcs_file, **self._load_args)
 
     def _save(self, data: pd.DataFrame) -> None:
         save_path = PurePosixPath(self._get_save_path())
-
-        if self._file_format == "json":
-            data = data.to_json(**self._save_args)
-        elif self._file_format == "csv":
-            data = data.to_csv(**self._save_args)
-        elif self._file_format == "pickle":
-            data = data.to_pickle(**self._save_args)
-        elif self._file_format == "parquet":
-            data = data.to_parquet(**self._save_args)
-        elif self._file_format == "hdf":
-            data = data.to_hdf(**self._save_args)
-        else:
-            raise DataSetError(f"Unsupported File type {self._file_format}")
+        data = data.to_json(**self._save_args)
 
         with self._gcs.open(str(save_path), mode="wb") as gcs_file:
             gcs_file.write(data.encode("utf8"))

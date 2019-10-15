@@ -75,6 +75,10 @@ class MatplotlibWriterS3(AbstractDataSet):
             dict_plot_writer.save(plots_dict)
 
             # Saving list of plots
+            plots_list = []
+            for index in range(5):
+                plots_list.append(plt.figure())
+                plt.plot([1,2,3],[4,5,6], color=colour)
             list_plot_writer = MatplotlibWriterS3(
                 bucket="my-super-great-bucket", filepath="matplotlib_list"
             )

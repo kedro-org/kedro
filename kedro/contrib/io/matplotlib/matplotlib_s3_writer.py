@@ -31,19 +31,18 @@
 ``MatplotlibWriterS3`` saves matplotlib objects as image files to s3.
 """
 
-from typing import Any, Dict, List, Union, Optional
-
-from matplotlib.pyplot import figure
-import boto3
 import copy
-from kedro.io import AbstractDataSet, DataSetError
 import io
-import logging
+from typing import Any, Dict, List, Optional, Union
 
-logger = logging.getLogger(__name__)
+import boto3
+from matplotlib.pyplot import figure
+
+from kedro.io import AbstractDataSet, DataSetError
 
 
 class MatplotlibWriterS3(AbstractDataSet):
+    # pylint: disable=too-many-instance-attributes
     """``MatplotlibWriter`` saves matplotlib objects as image files.
 
         Example:
@@ -86,6 +85,7 @@ class MatplotlibWriterS3(AbstractDataSet):
 
     """
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         bucket: str,
@@ -100,7 +100,7 @@ class MatplotlibWriterS3(AbstractDataSet):
         """Creates a new instance of ``MatplotlibWriter``.
 
         Args:
-            bucket:
+            bucket: Name of the bucket without "s3://" prefix
             filepath: Path to a matplot object file.
             boto_session_args: # TODO
             s3_client_args: # TODO

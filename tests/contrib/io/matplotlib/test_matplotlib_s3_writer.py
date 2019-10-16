@@ -1,6 +1,5 @@
 import pytest
 import s3fs
-from botocore.exceptions import PartialCredentialsError
 from moto import mock_s3
 import matplotlib.pyplot as plt
 

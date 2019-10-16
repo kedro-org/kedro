@@ -37,7 +37,7 @@ import pickle
 from pathlib import Path
 from typing import Any, Dict
 
-from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
+from kedro.io.core import AbstractVersionedDataSet, Version
 
 try:
     import joblib
@@ -152,9 +152,6 @@ class PickleLocalDataSet(AbstractVersionedDataSet):
         with save_path.open("wb") as local_file:
             self.BACKENDS[self._backend].dump(data, local_file, **self._save_args)
 
-        load_path = Path(self._get_load_path())
-        self._check_paths_consistency(load_path.absolute(), save_path.absolute())
-
     def _describe(self) -> Dict[str, Any]:
         return dict(
             filepath=self._filepath,
@@ -165,8 +162,5 @@ class PickleLocalDataSet(AbstractVersionedDataSet):
         )
 
     def _exists(self) -> bool:
-        try:
-            path = self._get_load_path()
-        except DataSetError:
-            return False
+        path = self._get_load_path()
         return Path(path).is_file()

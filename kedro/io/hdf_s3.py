@@ -37,7 +37,7 @@ from typing import Any, Dict, Optional
 import pandas as pd
 from s3fs import S3FileSystem
 
-from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
+from kedro.io.core import AbstractVersionedDataSet, Version
 
 HDFSTORE_DRIVER = "H5FD_CORE"
 
@@ -138,7 +138,7 @@ class HDFS3DataSet(AbstractVersionedDataSet):
         )
 
     def _load(self) -> pd.DataFrame:
-        load_path = PurePosixPath(self._get_load_path())
+        load_path = self._get_load_path()
 
         with self._s3.open(str(load_path), mode="rb") as s3_file:
             binary_data = s3_file.read()
@@ -154,7 +154,7 @@ class HDFS3DataSet(AbstractVersionedDataSet):
             return store[self._key]
 
     def _save(self, data: pd.DataFrame) -> None:
-        save_path = PurePosixPath(self._get_save_path())
+        save_path = str(self._get_save_path())
 
         with pd.HDFStore(
             str(self._filepath),
@@ -167,18 +167,12 @@ class HDFS3DataSet(AbstractVersionedDataSet):
             # pylint: disable=protected-access
             binary_data = store._handle.get_file_image()
 
-        with self._s3.open(str(save_path), mode="wb") as s3_file:
+        with self._s3.open(save_path, mode="wb") as s3_file:
             # Only binary read and write modes are implemented for S3Files
             s3_file.write(binary_data)
 
-        load_path = PurePosixPath(self._get_load_path())
-        self._check_paths_consistency(load_path, save_path)
-
     def _exists(self) -> bool:
-        try:
-            load_path = str(PurePosixPath(self._get_load_path()))
-        except DataSetError:
-            return False
+        load_path = str(self._get_load_path())
 
         if self._s3.isfile(load_path):
             with self._s3.open(load_path, mode="rb") as s3_file:

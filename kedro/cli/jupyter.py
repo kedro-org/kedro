@@ -27,29 +27,35 @@
 # limitations under the License.
 
 """
-This module contains an example test.
-
-Tests should be placed in ``src/tests``, in modules that mirror your
-project's structure, and in files named test_*.py. They are simply functions
-named ``test_*`` which test a unit of logic.
-
-To run the tests, run ``kedro test``.
+A collection of helper functions to integrate with Jupyter/IPython.
 """
-from pathlib import Path
-
-import pytest
-
-from {{ cookiecutter.python_package }}.run import ProjectContext
 
 
-@pytest.fixture
-def project_context():
-    return ProjectContext(str(Path.cwd()))
+from jupyter_client.kernelspec import NATIVE_KERNEL_NAME, KernelSpecManager
+from traitlets import Unicode
 
 
-class TestProjectContext:
-    def test_project_name(self, project_context):
-        assert project_context.project_name == "{{ cookiecutter.project_name }}"
+class SingleKernelSpecManager(KernelSpecManager):
+    """
+    A custom KernelSpec manager to be used by Kedro projects.
+    It limits the kernels to the default one only,
+    to make it less confusing for users, and gives it a sensible name.
+    """
 
-    def test_project_version(self, project_context):
-        assert project_context.project_version == "{{ cookiecutter.kedro_version }}"
+    default_kernel_name = Unicode(
+        "Kedro", config=True, help="Alternative name for the default kernel"
+    )
+    whitelist = [NATIVE_KERNEL_NAME]
+
+    def get_kernel_spec(self, kernel_name):
+        """
+        This function will only be called by Jupyter to get a KernelSpec
+        for the default kernel.
+        We replace the name by something sensible here.
+        """
+        kernelspec = super().get_kernel_spec(kernel_name)
+
+        if kernel_name == NATIVE_KERNEL_NAME:
+            kernelspec.display_name = self.default_kernel_name
+
+        return kernelspec

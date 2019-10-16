@@ -37,7 +37,7 @@ from typing import Any, Dict
 import pandas as pd
 from pandas.io.pytables import HDFStore
 
-from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
+from kedro.io.core import AbstractVersionedDataSet, Version
 
 
 class HDFLocalDataSet(AbstractVersionedDataSet):
@@ -116,9 +116,6 @@ class HDFLocalDataSet(AbstractVersionedDataSet):
         save_path.parent.mkdir(parents=True, exist_ok=True)
         data.to_hdf(str(save_path), key=self._key, **self._save_args)
 
-        load_path = Path(self._get_load_path())
-        self._check_paths_consistency(load_path.absolute(), save_path.absolute())
-
     def _describe(self) -> Dict[str, Any]:
         return dict(
             filepath=self._filepath,
@@ -129,10 +126,7 @@ class HDFLocalDataSet(AbstractVersionedDataSet):
         )
 
     def _exists(self) -> bool:
-        try:
-            path = self._get_load_path()
-        except DataSetError:
-            return False
+        path = self._get_load_path()
         if Path(path).is_file():
             with HDFStore(Path(path), mode="r") as hdfstore:
                 key_with_slash = (

@@ -90,7 +90,11 @@ When you are developing new nodes for your pipeline, you can write them as regul
 kedro jupyter notebook
 ```
 
-This will open a Jupyter Notebook in your browser. Navigate to `notebooks` folder and create a notebook there with a **Kedro** kernel. After opening the newly created notebook you can check what the data looks like by pasting this into the first cell of the notebook and selecting **Run**:
+This will open a Jupyter Notebook in your browser. Navigate to `notebooks` folder
+and create a notebook. The only kernel available by default has a name of the current project.
+If you need to access all available kernels, add `--all-kernels` to the command above.
+After opening the newly created notebook you can check what the data looks
+like by pasting this into the first cell of the notebook and selecting **Run**:
 
 ```python
 df = context.catalog.load("example_iris_data")

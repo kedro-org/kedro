@@ -39,7 +39,7 @@ import pandas as pd
 from azure.storage.blob import BlockBlobService
 
 from kedro.contrib.io import DefaultArgumentsMixIn
-from kedro.io import AbstractVersionedDataSet, DataSetError, Version
+from kedro.io import AbstractVersionedDataSet, Version
 
 
 class CSVBlobDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
@@ -166,14 +166,8 @@ class CSVBlobDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
             **self._blob_from_text_args
         )
 
-        load_path = self._get_load_path()
-        self._check_paths_consistency(load_path, save_path)
-
     def _exists(self) -> bool:
-        try:
-            load_path = str(self._get_load_path())
-        except DataSetError:
-            return False
+        load_path = str(self._get_load_path())
         return _exists_blob(load_path, self._blob_service, self._container_name)
 
 

@@ -29,7 +29,6 @@
 # pylint: disable=unused-argument
 
 import io
-from pathlib import PurePosixPath
 from unittest.mock import patch
 
 import pandas as pd
@@ -38,7 +37,7 @@ from pandas.util.testing import assert_frame_equal
 
 from kedro.contrib.io.azure import CSVBlobDataSet
 from kedro.io import DataSetError, Version
-from kedro.io.core import generate_timestamp
+from kedro.io.core import VersionNotFoundError, generate_timestamp
 
 TEST_FILE_NAME = "test.csv"
 TEST_CONTAINER_NAME = "test_bucket"
@@ -95,21 +94,26 @@ def save_path(save_version):
 
 class TestCSVBlobDataSetVersioned:
     # pylint: disable=too-many-arguments
-    @patch("kedro.contrib.io.azure.csv_blob.BlockBlobService.create_blob_from_text")
-    @patch(
-        "kedro.contrib.io.azure.csv_blob.BlockBlobService.exists", return_value=False
-    )
-    @patch("kedro.contrib.io.azure.csv_blob.CSVBlobDataSet._get_load_path")
     def test_save(
         self,
-        load_mock,
-        exists_mock,
-        save_mock,
         versioned_blob_csv_data_set,
         dummy_dataframe,
         save_path,
+        save_version,
+        mocker,
     ):
         """Test that saving saves with a correct version"""
+        mocker.patch.object(
+            versioned_blob_csv_data_set,
+            "_lookup_load_version",
+            return_value=save_version,
+        )
+        mocker.patch.object(
+            versioned_blob_csv_data_set._blob_service, "exists", return_value=False
+        )
+        save_mock = mocker.patch.object(
+            versioned_blob_csv_data_set._blob_service, "create_blob_from_text"
+        )
         versioned_blob_csv_data_set.save(dummy_dataframe)
         save_mock.assert_called_with(
             container_name=TEST_CONTAINER_NAME,
@@ -118,14 +122,26 @@ class TestCSVBlobDataSetVersioned:
             from_extra=42,
         )
 
-    @patch("kedro.contrib.io.azure.csv_blob.CSVBlobDataSet._get_load_path")
-    @patch("kedro.contrib.io.azure.csv_blob.BlockBlobService.get_blob_to_text")
-    def test_load(self, get_blob_mock, load_mock, versioned_blob_csv_data_set):
-        load_mock.return_value = TEST_FILE_NAME
-        get_blob_mock.return_value = BlobMock()
+    def test_load(self, mocker, versioned_blob_csv_data_set):
+        mocked_load_version = "mocked_load_version"
+        mocker.patch.object(
+            versioned_blob_csv_data_set,
+            "_lookup_load_version",
+            return_value=mocked_load_version,
+        )
+        get_blob_mock = mocker.patch.object(
+            versioned_blob_csv_data_set._blob_service,
+            "get_blob_to_text",
+            return_value=BlobMock(),
+        )
+
+        # load_mock.return_value = TEST_FILE_NAME
+        # get_blob_mock.return_value = BlobMock()
         result = versioned_blob_csv_data_set.load()
         get_blob_mock.assert_called_once_with(
-            container_name=TEST_CONTAINER_NAME, blob_name=TEST_FILE_NAME, to_extra=41
+            container_name=TEST_CONTAINER_NAME,
+            blob_name="{f}/{lv}/{f}".format(f=TEST_FILE_NAME, lv=mocked_load_version),
+            to_extra=41,
         )
         expected = pd.read_csv(io.StringIO(BlobMock().content))
         assert_frame_equal(result, expected)
@@ -140,45 +156,46 @@ class TestCSVBlobDataSetVersioned:
     def test_no_versions(self, exists_mock, list_mock, versioned_blob_csv_data_set):
         """Check the error if no versions are available for load."""
         pattern = r"Did not find any versions for CSVBlobDataSet\(.+\)"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(VersionNotFoundError, match=pattern):
             versioned_blob_csv_data_set.load()
 
     # pylint: disable=too-many-arguments
-    @patch("kedro.contrib.io.azure.csv_blob.BlockBlobService.create_blob_from_text")
-    @patch(
-        "kedro.contrib.io.azure.csv_blob.BlockBlobService.exists", return_value=False
-    )
-    @patch("kedro.contrib.io.azure.csv_blob.CSVBlobDataSet._get_load_path")
     def test_exists(
         self,
-        load_mock,
-        exists_mock,
-        save_mock,
+        mocker,
         versioned_blob_csv_data_set,
         dummy_dataframe,
         save_path,
+        save_version,
     ):
+        mocker.patch.object(
+            versioned_blob_csv_data_set._blob_service, "create_blob_from_text"
+        )
+        exists_mock = mocker.patch.object(
+            versioned_blob_csv_data_set._blob_service, "exists", return_value=False
+        )
+        load_mock = mocker.patch.object(
+            versioned_blob_csv_data_set, "_lookup_load_version"
+        )
         versioned_blob_csv_data_set.save(dummy_dataframe)
-        load_mock.return_value = PurePosixPath(save_path)
+        load_mock.return_value = save_version
         versioned_blob_csv_data_set.exists()
         exists_mock.assert_called_with(TEST_CONTAINER_NAME, blob_name=save_path)
 
-    @patch("kedro.contrib.io.azure.csv_blob.BlockBlobService.create_blob_from_text")
-    @patch(
-        "kedro.contrib.io.azure.csv_blob.BlockBlobService.exists", return_value=False
-    )
-    @patch("kedro.contrib.io.azure.csv_blob.CSVBlobDataSet._get_load_path")
     def test_exists_dataset_error(
-        self,
-        load_mock,
-        exists_mock,
-        save_mock,
-        versioned_blob_csv_data_set,
-        dummy_dataframe,
-        save_path,
+        self, mocker, versioned_blob_csv_data_set, dummy_dataframe
     ):
+        mocker.patch.object(
+            versioned_blob_csv_data_set._blob_service, "create_blob_from_text"
+        )
+        mocker.patch.object(
+            versioned_blob_csv_data_set._blob_service, "exists", return_value=False
+        )
+        load_mock = mocker.patch.object(
+            versioned_blob_csv_data_set, "_lookup_load_version"
+        )
         versioned_blob_csv_data_set.save(dummy_dataframe)
-        load_mock.side_effect = DataSetError
+        load_mock.side_effect = VersionNotFoundError
         assert not versioned_blob_csv_data_set.exists()
 
     @patch("kedro.contrib.io.azure.csv_blob.BlockBlobService.exists", return_value=True)
@@ -196,32 +213,32 @@ class TestCSVBlobDataSetVersioned:
         with pytest.raises(DataSetError, match=pattern):
             versioned_blob_csv_data_set.save(dummy_dataframe)
 
-    @patch("kedro.contrib.io.azure.csv_blob.BlockBlobService.create_blob_from_text")
-    @patch("kedro.contrib.io.azure.csv_blob.CSVBlobDataSet._get_save_path")
-    @patch("kedro.contrib.io.azure.csv_blob.CSVBlobDataSet._get_load_path")
     def test_save_version_warning(
-        self,
-        load_mock,
-        save_mock,
-        create_blob_mock,
-        versioned_blob_csv_data_set,
-        dummy_dataframe,
+        self, mocker, versioned_blob_csv_data_set, dummy_dataframe
     ):
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         save_version = "2019-01-02T00.00.00.000Z"
         load_version = "2019-01-01T23.59.59.999Z"
+        mocker.patch.object(
+            versioned_blob_csv_data_set._blob_service, "create_blob_from_text"
+        )
+        mocker.patch.object(
+            versioned_blob_csv_data_set._blob_service, "exists", return_value=False
+        )
+        mocker.patch.object(
+            versioned_blob_csv_data_set,
+            "_lookup_load_version",
+            return_value=load_version,
+        )
+        mocker.patch.object(
+            versioned_blob_csv_data_set,
+            "_lookup_save_version",
+            return_value=save_version,
+        )
         pattern = (
-            r"Save path `{f}/{sv}/{f}` did not match load path "
-            r"`{f}/{lv}/{f}` for CSVBlobDataSet\(.+\)".format(
-                f=TEST_FILE_NAME, sv=save_version, lv=load_version
-            )
-        )
-        load_mock.return_value = PurePosixPath(
-            "{0}/{1}/{0}".format(TEST_FILE_NAME, load_version)
-        )
-        save_mock.return_value = PurePosixPath(
-            "{0}/{1}/{0}".format(TEST_FILE_NAME, save_version)
+            r"Save version `{0}` did not match load version `{1}` "
+            r"for CSVBlobDataSet\(.+\)".format(save_version, load_version)
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_blob_csv_data_set.save(dummy_dataframe)

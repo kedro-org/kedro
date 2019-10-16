@@ -102,9 +102,12 @@ class MatplotlibWriterS3(AbstractDataSet):
         Args:
             bucket: Name of the bucket without "s3://" prefix
             filepath: Path to a matplot object file.
-            boto_session_args: # TODO
-            s3_client_args: # TODO
-            s3_put_object_args: # TODO
+            boto_session_args: See
+                https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html
+            s3_client_args: See
+                https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html#client
+            s3_put_object_args: See
+                https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html#S3.Client.put_object
             credentials: A dictionary of s3 access and secret keys.
                 Must contain ``aws_access_key_id`` and ``aws_secret_access_key``.
                 Updates ``s3_client_args`` if provided.

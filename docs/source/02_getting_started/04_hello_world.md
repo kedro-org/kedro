@@ -42,8 +42,9 @@ The project's source code can be found in the `src` directory. It contains 2 sub
 
 * `getting_started/` - this is the Python package for your project:
 
-	* `nodes/example.py` - Example node functions, which perform the actual operations on the data (more on this in the [Example pipeline](04_hello_world.md#example-pipeline) below)
-	* `pipeline.py` - Where the pipeline is created from the above nodes to form the business logic flow
+	* `pipelines/data_engineering/nodes.py` and `pipelines/data_science/nodes.py`- Example node functions, which perform the actual operations on the data (more on this in the [Example pipeline](04_hello_world.md#example-pipeline) below)
+	* `pipelines/data_engineering/pipeline.py` and `pipelines/data_science/pipeline.py` - Where each individual pipeline is created from the above nodes to form the business logic flow
+	* `pipeline.py` - Where the project's main pipelines are collated and named
 	* `run.py` - The main entry point of the project, which brings all the components together and runs the pipeline
 
 * `tests/`: This is where you should keep the project unit tests. Newly generated projects are preconfigured to run these tests using `pytest`. To kick off project testing, simply run the following from the project's root directory:

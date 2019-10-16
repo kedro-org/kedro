@@ -153,7 +153,6 @@ class MatplotlibWriterS3(AbstractDataSet):
                 self._save_to_s3(key_name=key_path, plot=plot)
 
         else:
-
             self._save_to_s3(key_name=self._filepath, plot=data)
 
     def _save_to_s3(self, key_name, plot):

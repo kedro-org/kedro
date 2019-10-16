@@ -48,15 +48,6 @@ def mocked_s3_bucket():
         yield conn
 
 
-# @pytest.fixture
-# def mocked_encryped_s3_bucket():
-#     """Create a bucket for testing using moto."""
-#     with mock_s3():
-#         conn = s3fs.core.boto3.client("s3", **AWS_CREDENTIALS)
-#         conn.create_bucket(Bucket=BUCKET_NAME)
-#         yield conn
-
-
 @pytest.fixture
 def single_plot_writer():
     return MatplotlibWriterS3(bucket=BUCKET_NAME, filepath=KEY_PATH)
@@ -124,7 +115,10 @@ def test_bad_credentials(mock_dict_plot):
     bad_writer = MatplotlibWriterS3(
         bucket=BUCKET_NAME,
         filepath=KEY_PATH,
-        credentials=dict(aws_access_key_id="real", aws_secret_access_key="key"),
+        credentials={
+            "aws_access_key_id": "not_for_testing",
+            "aws_secret_access_key": "definitely_not_for_testing",
+        },
     )
     pattern = "InvalidAccessKeyId"
 

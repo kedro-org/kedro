@@ -37,7 +37,7 @@ from kedro.io.core import Version
 
 @pytest.fixture
 def filepath_txt(tmp_path):
-    return str(tmp_path / "test.png")
+    return str(tmp_path / "test.txt")
 
 
 @pytest.fixture(params=[dict()])
@@ -164,7 +164,7 @@ class TestTextLocalDataSetVersioned:
     def test_version_str_repr(self, load_version, save_version):
         """Test that version is in string representation of the class instance
         when applicable."""
-        filepath = "test.png"
+        filepath = "test.txt"
         ds = TextLocalDataSet(filepath=filepath)
         ds_versioned = TextLocalDataSet(
             filepath=filepath, version=Version(load_version, save_version)

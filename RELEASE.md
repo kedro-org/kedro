@@ -1,4 +1,4 @@
-# Release 0.15.3
+# Release 0.15.4
 
 ## Major features and improvements
 * `kedro jupyter` now gives the default kernel a sensible name.
@@ -14,6 +14,10 @@
 
 ## Thanks for supporting contributions
 
+# Release 0.15.3
+
+## Bug Fixes and other changes
+* Narrowed the requirements for `PyTables` so that we maintain support for Python 3.5.
 
 # Release 0.15.2
 

@@ -2,7 +2,7 @@
 
 Thank you for considering contributing to Kedro! It's people like you that make Kedro such a great tool. We welcome contributions in the form of pull requests (PRs), issues or code reviews. You can add to code, [documentation](https://kedro.readthedocs.io), or simply send us spelling and grammar fixes or extra tests. Contribute anything that you think improves the community for us all!
 
-The following sections describe our vision and the contribution process.
+The following sections describe our vision and contribution process.
 
 ## Vision
 
@@ -83,21 +83,29 @@ We use a branching model that helps us keep track of branches in a logical, cons
 
 Small contributions are accepted for the `core` library:
 
- 1. Fork the project
- 2. Develop your contribution in a new branch and open a PR against the `develop` branch
- 3. Make sure the CI builds are green (have a look at the section [Running checks locally](/CONTRIBUTING.md#running-checks-locally) below)
- 4. Update the PR according to the reviewer's comments
+ 1. Fork the project by clicking **Fork** in the top-right corner of the [Kedro GitHub repository](https://github.com/quantumblacklabs/kedro) and then choosing the target account the repository will be forked to.
+ 2. Create a feature branch on your forked repository and push all your local changes to that feature branch.
+ 3. Before submitting a pull request (PR), please ensure that unit, end-to-end tests and linting are passing for your changes by running `make test`, `make e2e-tests` and `make lint` locally, have a look at the section [Running checks locally](/CONTRIBUTING.md#running-checks-locally) below.
+ 4. Open a PR against the `quantumblacklabs:develop` branch from your feature branch.
+ 5. Update the PR according to the reviewer's comments.
+ 6. Your PR will be merged by the Kedro team once all the comments are addressed.
+
+ > _Note:_ We will work with you to complete your contribution but we reserve the right to takeover abandoned PRs.
 
 ## `contrib` contribution process
 
 You can add new work to `contrib` if you do not need to create a new Kedro CLI command:
 
- 1. Create an [issue](https://github.com/quantumblacklabs/kedro/issues) describing your contribution
- 2. Fork the project and work in [`contrib`](/kedro/contrib/)
- 3. Develop your contribution in a new branch and open a PR against the `develop` branch
- 4. Make sure the CI builds are green (have a look at the section [Running checks locally](CONTRIBUTING.md#ci--cd-and-running-checks-locally) below)
- 5. Include a `README.md` with instructions on how to use your contribution
- 6. Update the PR according to the reviewer's comments
+ 1. Create an [issue](https://github.com/quantumblacklabs/kedro/issues) describing your contribution.
+ 2. Fork the project by clicking **Fork** in the top-right corner of the [Kedro GitHub repository](https://github.com/quantumblacklabs/kedro) and then choosing the target account the repository will be forked to.
+ 3. Work in [`contrib`](/kedro/contrib/) and create a feature branch on your forked repository and push all your local changes to that feature branch.
+ 4. Before submitting a pull request, please ensure that unit, e2e tests and linting are passing for your changes by running `make test`, `make e2e-tests` and `make lint` locally, have a look at the section [Running checks locally](/CONTRIBUTING.md#running-checks-locally) below.
+ 5. Include a `README.md` with instructions on how to use your contribution.
+ 6. Open a PR against the `quantumblacklabs:develop` branch from your feature branch and reference your issue in the PR description (e.g., `Resolves #<issue-number>`).
+ 7. Update the PR according to the reviewer's comments.
+ 8. Your PR will be merged by the Kedro team once all the comments are addressed.
+
+ > _Note:_ We will work with you to complete your contribution but we reserve the right to takeover abandoned PRs.
 
 ## `plugin` contribution process
 

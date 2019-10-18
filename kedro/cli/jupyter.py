@@ -26,13 +26,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-A collection of helper functions to integrate with Jupyter/IPython.
+"""A collection of helper functions to integrate with Jupyter/IPython.
 """
 
 
 from jupyter_client.kernelspec import NATIVE_KERNEL_NAME, KernelSpecManager
 from traitlets import Unicode
+
+from kedro.cli import load_entry_points
+
+
+def collect_line_magic():
+    """Interface function for collecting line magic functions from plugin entry points.
+    """
+    return load_entry_points("line_magic")
 
 
 class SingleKernelSpecManager(KernelSpecManager):

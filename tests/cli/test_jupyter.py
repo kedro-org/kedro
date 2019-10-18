@@ -26,10 +26,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from jupyter_client.kernelspec import NATIVE_KERNEL_NAME, KernelSpecManager
 
-from kedro.cli.jupyter import SingleKernelSpecManager
+from kedro.cli.jupyter import SingleKernelSpecManager, collect_line_magic
+
+
+def test_collect_line_magic(entry_points, entry_point):
+    entry_point.load.return_value = "line_magic"
+    line_magics = collect_line_magic()
+    assert line_magics == ["line_magic"]
+    entry_points.assert_called_once_with(group="kedro.line_magic")
 
 
 class TestSingleKernelSpecManager:

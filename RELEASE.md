@@ -3,6 +3,7 @@
 ## Major features and improvements
 * `kedro jupyter` now gives the default kernel a sensible name.
 * `Pipeline.name` has been deprecated in favour of `Pipeline.tags`.
+* Added Jupyter notebook line magic (`%run_viz`) to run `kedro viz` in notebook cell.
 
 ## Bug fixes and other changes
 * `get_last_load_version()` method for versioned datasets now returns exact last load version if the dataset has been loaded at least once and `None` otherwise.

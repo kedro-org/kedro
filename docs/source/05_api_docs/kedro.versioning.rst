@@ -12,7 +12,7 @@ Base Classes
     :toctree:
     :template: autosummary/class.rst
 
-    kedro.versioning.VersionJournal
+    kedro.versioning.Journal
 
 Modules
 -------

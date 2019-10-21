@@ -45,7 +45,7 @@ from kedro.io.core import generate_timestamp
 from kedro.pipeline import Pipeline
 from kedro.runner import AbstractRunner, SequentialRunner
 from kedro.utils import load_obj
-from kedro.versioning import VersionJournal
+from kedro.versioning import Journal
 
 
 class KedroContext(abc.ABC):
@@ -194,10 +194,29 @@ class KedroContext(abc.ABC):
         """
         return self._get_catalog()
 
+    @property
+    def params(self) -> Dict[str, Any]:
+        """Read-only property referring to Kedro's parameters for this context.
+
+        Returns:
+            Parameters defined in `parameters.yml`.
+        """
+        try:
+            params = self.config_loader.get("parameters*", "parameters*/**")
+        except MissingConfigException as exc:
+            warn(
+                "Parameters not found in your Kedro project config.\n{}".format(
+                    str(exc)
+                )
+            )
+            params = {}
+
+        return params
+
     def _get_catalog(
         self,
         save_version: str = None,
-        journal: VersionJournal = None,
+        journal: Journal = None,
         load_versions: Dict[str, str] = None,
     ) -> DataCatalog:
         """A hook for changing the creation of a DataCatalog instance.
@@ -219,7 +238,7 @@ class KedroContext(abc.ABC):
         conf_catalog: Dict[str, Any],
         conf_creds: Dict[str, Any],
         save_version: str = None,
-        journal: VersionJournal = None,
+        journal: Journal = None,
         load_versions: Dict[str, str] = None,
     ) -> DataCatalog:
         """A factory method for the DataCatalog instantiation.
@@ -290,17 +309,9 @@ class KedroContext(abc.ABC):
 
     def _get_feed_dict(self) -> Dict[str, Any]:
         """Get parameters and return the feed dictionary."""
-        try:
-            params = self.config_loader.get("parameters*", "parameters*/**")
-        except MissingConfigException as exc:
-            warn(
-                "Parameters not found in your Kedro project config.\n{}".format(
-                    str(exc)
-                )
-            )
-            params = {}
-
+        params = self.params
         feed_dict = {"parameters": params}
+
         for param_name, param_value in params.items():
             key = "params:{}".format(param_name)
             feed_dict[key] = param_value
@@ -439,8 +450,10 @@ class KedroContext(abc.ABC):
             "to_nodes": to_nodes,
             "node_names": node_names,
             "from_inputs": from_inputs,
+            "load_versions": load_versions,
+            "pipeline_name": pipeline_name,
         }
-        journal = VersionJournal(record_data)
+        journal = Journal(record_data)
 
         catalog = self._get_catalog(
             save_version=run_id, journal=journal, load_versions=load_versions
@@ -452,7 +465,8 @@ class KedroContext(abc.ABC):
 
 
 def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
-    """Loads the KedroContext object of a Kedro Project as defined in `src/<package-name>/run.py`.
+    """Loads the KedroContext object of a Kedro Project based on the path specified
+    in `.kedro.yml`.
     This function will change the current working directory to the project path.
 
     Args:

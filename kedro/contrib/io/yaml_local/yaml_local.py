@@ -37,7 +37,7 @@ import pandas as pd
 import yaml
 
 from kedro.contrib.io import DefaultArgumentsMixIn
-from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
+from kedro.io.core import AbstractVersionedDataSet, Version
 
 
 class YAMLLocalDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
@@ -98,12 +98,6 @@ class YAMLLocalDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
         with save_path.open("w") as local_file:
             yaml.dump(data, local_file, **self._save_args)
 
-        load_path = Path(self._get_load_path())
-        self._check_paths_consistency(load_path.absolute(), save_path.absolute())
-
     def _exists(self) -> bool:
-        try:
-            path = self._get_load_path()
-        except DataSetError:
-            return False
+        path = self._get_load_path()
         return Path(path).is_file()

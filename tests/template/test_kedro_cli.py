@@ -367,7 +367,8 @@ class TestJupyterNotebookCommand:
             [
                 "jupyter-notebook",
                 "--ip=0.0.0.0",
-                "--KernelSpecManager.whitelist=['python3']",
+                '--NotebookApp.kernel_spec_manager_class=kedro.cli.jupyter.SingleKernelSpecManager',
+                "--KernelSpecManager.default_kernel_name='TestProject'"
             ]
         )
 
@@ -395,9 +396,11 @@ class TestJupyterLabCommand:
         )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_called_once_with(False)
-        call_mock.assert_called_once_with(
-            ["jupyter-lab", "--ip=0.0.0.0", "--KernelSpecManager.whitelist=['python3']"]
-        )
+        call_mock.assert_called_once_with([
+            "jupyter-lab", "--ip=0.0.0.0",
+            '--NotebookApp.kernel_spec_manager_class=kedro.cli.jupyter.SingleKernelSpecManager',
+            "--KernelSpecManager.default_kernel_name='TestProject'",
+        ])
 
     def test_all_kernels(self, call_mock, fake_kedro_cli, fake_ipython_message):
         result = CliRunner().invoke(

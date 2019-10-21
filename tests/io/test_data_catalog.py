@@ -45,7 +45,7 @@ from kedro.io import (
     ParquetLocalDataSet,
 )
 from kedro.io.core import generate_timestamp
-from kedro.versioning.journal import VersionJournal
+from kedro.versioning.journal import Journal
 
 
 @pytest.fixture
@@ -359,7 +359,7 @@ class TestDataCatalogVersioned:
         """Test load and save of versioned data sets from config"""
         sane_config["catalog"]["boats"]["versioned"] = True
         version = generate_timestamp()
-        journal = VersionJournal({"run_id": "fake-id", "project_path": "fake-path"})
+        journal = Journal({"run_id": "fake-id", "project_path": "fake-path"})
         catalog = DataCatalog.from_config(
             **sane_config,
             load_versions={"boats": version},

@@ -32,7 +32,7 @@ which is not registered in the catalog.
 from typing import Any, Callable, Dict, Optional
 
 from kedro.io import AbstractDataSet, DataCatalog
-from kedro.versioning import VersionJournal
+from kedro.versioning import Journal
 
 
 class DataCatalogWithDefault(DataCatalog):
@@ -140,7 +140,7 @@ class DataCatalogWithDefault(DataCatalog):
         credentials: Dict[str, Dict[str, Any]] = None,
         load_versions: Dict[str, str] = None,
         save_version: str = None,
-        journal: VersionJournal = None,
+        journal: Journal = None,
     ):
         """To create a ``DataCatalogWithDefault`` from configuration, please
         use:

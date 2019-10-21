@@ -38,7 +38,7 @@ from typing import Any, Dict, Optional
 
 from s3fs.core import S3FileSystem
 
-from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
+from kedro.io.core import AbstractVersionedDataSet, Version
 
 
 class PickleS3DataSet(AbstractVersionedDataSet):
@@ -132,24 +132,18 @@ class PickleS3DataSet(AbstractVersionedDataSet):
         )
 
     def _load(self) -> Any:
-        load_path = PurePosixPath(self._get_load_path())
+        load_path = str(self._get_load_path())
 
-        with self._s3.open(str(load_path), mode="rb") as s3_file:
+        with self._s3.open(load_path, mode="rb") as s3_file:
             return pickle.loads(s3_file.read(), **self._load_args)
 
     def _save(self, data: Any) -> None:
-        save_path = PurePosixPath(self._get_save_path())
+        save_path = str(self._get_save_path())
         bytes_object = pickle.dumps(data, **self._save_args)
 
-        with self._s3.open(str(save_path), mode="wb") as s3_file:
+        with self._s3.open(save_path, mode="wb") as s3_file:
             s3_file.write(bytes_object)
 
-        load_path = PurePosixPath(self._get_load_path())
-        self._check_paths_consistency(load_path, save_path)
-
     def _exists(self) -> bool:
-        try:
-            load_path = self._get_load_path()
-        except DataSetError:
-            return False
-        return self._s3.isfile(str(PurePosixPath(load_path)))
+        load_path = str(self._get_load_path())
+        return self._s3.isfile(load_path)

@@ -36,7 +36,7 @@ from typing import Any, Dict, Optional
 import pandas as pd
 from s3fs.core import S3FileSystem
 
-from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
+from kedro.io.core import AbstractVersionedDataSet, Version
 
 
 class CSVS3DataSet(AbstractVersionedDataSet):
@@ -128,24 +128,18 @@ class CSVS3DataSet(AbstractVersionedDataSet):
         )
 
     def _load(self) -> pd.DataFrame:
-        load_path = PurePosixPath(self._get_load_path())
+        load_path = self._get_load_path()
 
         with self._s3.open(str(load_path), mode="rb") as s3_file:
             return pd.read_csv(s3_file, **self._load_args)
 
     def _save(self, data: pd.DataFrame) -> None:
-        save_path = PurePosixPath(self._get_save_path())
+        save_path = self._get_save_path()
 
         with self._s3.open(str(save_path), mode="wb") as s3_file:
             # Only binary read and write modes are implemented for S3Files
             s3_file.write(data.to_csv(**self._save_args).encode("utf8"))
 
-        load_path = PurePosixPath(self._get_load_path())
-        self._check_paths_consistency(load_path, save_path)
-
     def _exists(self) -> bool:
-        try:
-            load_path = self._get_load_path()
-        except DataSetError:
-            return False
-        return self._s3.isfile(str(PurePosixPath(load_path)))
+        load_path = str(self._get_load_path())
+        return self._s3.isfile(load_path)

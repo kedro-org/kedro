@@ -241,10 +241,8 @@ class TestPickleS3DataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            r"Save path `{b}/{f}/{sv}/{f}` did not match load path "
-            r"`{b}/{f}/{lv}/{f}` for PickleS3DataSet\(.+\)".format(
-                b=BUCKET_NAME, f=FILENAME, sv=save_version, lv=load_version
-            )
+            r"Save version `{0}` did not match load version `{1}` "
+            r"for PickleS3DataSet\(.+\)".format(save_version, load_version)
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_s3_data_set.save(DUMMY_PICKABLE_OBJECT)

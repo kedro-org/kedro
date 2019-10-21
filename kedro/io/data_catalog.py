@@ -46,7 +46,7 @@ from kedro.io.core import (
 )
 from kedro.io.memory_data_set import MemoryDataSet
 from kedro.io.transformers import AbstractTransformer
-from kedro.versioning import VersionJournal
+from kedro.versioning import Journal
 
 CATALOG_KEY = "catalog"
 CREDENTIALS_KEY = "credentials"
@@ -110,7 +110,7 @@ class DataCatalog:
         feed_dict: Dict[str, Any] = None,
         transformers: Dict[str, List[AbstractTransformer]] = None,
         default_transformers: List[AbstractTransformer] = None,
-        journal: VersionJournal = None,
+        journal: Journal = None,
     ) -> None:
         """``DataCatalog`` stores instances of ``AbstractDataSet``
         implementations to provide ``load`` and ``save`` capabilities from
@@ -126,7 +126,7 @@ class DataCatalog:
                 to the data sets.
             default_transformers: A list of transformers to be applied to any
                 new data sets.
-            journal: Instance of VersionJournal.
+            journal: Instance of Journal.
         Raises:
             DataSetNotFoundError: When transformers are passed for a non
                 existent data set.
@@ -180,7 +180,7 @@ class DataCatalog:
         credentials: Dict[str, Dict[str, Any]] = None,
         load_versions: Dict[str, str] = None,
         save_version: str = None,
-        journal: VersionJournal = None,
+        journal: Journal = None,
     ) -> "DataCatalog":
         """Create a ``DataCatalog`` instance from configuration. This is a
         factory method used to provide developers with a way to instantiate
@@ -205,7 +205,7 @@ class DataCatalog:
                 case-insensitive string that conforms with operating system
                 filename limitations, b) always return the latest version when
                 sorted in lexicographical order.
-            journal: Instance of VersionJournal.
+            journal: Instance of Journal.
 
         Returns:
             An instantiated ``DataCatalog`` containing all specified
@@ -311,21 +311,23 @@ class DataCatalog:
             >>>
             >>> df = io.load("cars")
         """
-        if name in self._data_sets:
-            self._logger.info(
-                "Loading data from `%s` (%s)...",
-                name,
-                type(self._data_sets[name]).__name__,
+        if name not in self._data_sets:
+            raise DataSetNotFoundError(
+                "DataSet '{}' not found in the catalog".format(name)
             )
-            func = self._get_transformed_dataset_function(name, "load")
 
-            version = self._data_sets[name].get_last_load_version()
-            # Log only if versioning is enabled for the data set
-            if self._journal and version:
-                self._journal.log_catalog(name, "load", version)
-            return func()
+        self._logger.info(
+            "Loading data from `%s` (%s)...", name, type(self._data_sets[name]).__name__
+        )
 
-        raise DataSetNotFoundError("DataSet '{}' not found in the catalog".format(name))
+        func = self._get_transformed_dataset_function(name, "load")
+        result = func()
+
+        version = self._data_sets[name].get_last_load_version()
+        # Log only if versioning is enabled for the data set
+        if self._journal and version:
+            self._journal.log_catalog(name, "load", version)
+        return result
 
     def save(self, name: str, data: Any) -> None:
         """Save data to a registered data set.
@@ -356,23 +358,22 @@ class DataCatalog:
             >>>                    'col3': [5, 6]})
             >>> io.save("cars", df)
         """
-        if name in self._data_sets:
-            self._logger.info(
-                "Saving data to `%s` (%s)...",
-                name,
-                type(self._data_sets[name]).__name__,
-            )
-            func = self._get_transformed_dataset_function(name, "save")
-            func(data)
-
-            version = self._data_sets[name].get_last_save_version()
-            # Log only if versioning is enabled for the data set
-            if self._journal and version:
-                self._journal.log_catalog(name, "save", version)
-        else:
+        if name not in self._data_sets:
             raise DataSetNotFoundError(
                 "DataSet '{}' not found in the catalog".format(name)
             )
+
+        self._logger.info(
+            "Saving data to `%s` (%s)...", name, type(self._data_sets[name]).__name__
+        )
+
+        func = self._get_transformed_dataset_function(name, "save")
+        func(data)
+
+        version = self._data_sets[name].get_last_save_version()
+        # Log only if versioning is enabled for the data set
+        if self._journal and version:
+            self._journal.log_catalog(name, "save", version)
 
     def exists(self, name: str) -> bool:
         """Checks whether registered data set exists by calling its `exists()`

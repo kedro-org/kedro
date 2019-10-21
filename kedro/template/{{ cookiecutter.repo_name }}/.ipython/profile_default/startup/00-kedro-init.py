@@ -9,15 +9,21 @@ def reload_kedro(project_path, line=None):
     """"Line magic which reloads all Kedro default variables."""
     global startup_error
     global context
+    global catalog
     try:
         import kedro.config.default_logger
         from kedro.context import load_context
+        from kedro.cli.jupyter import collect_line_magic
 
         context = load_context(project_path)
-
+        catalog = context.catalog
         logging.info("** Kedro project {}".format(context.project_name))
+        logging.info("Defined global variable `context` and `catalog`")
 
-        logging.info("Defined global variable context")
+        for line_magic in collect_line_magic():
+            register_line_magic(line_magic)
+            logging.info("Registered line magic `{}`".format(line_magic.__name__))
+
     except ImportError:
         logging.error(
             "Kedro appears not to be installed in your current environment "

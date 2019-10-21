@@ -69,6 +69,65 @@ class TestExcelLocalDataSet:
         assert dummy_dataframe.equals(reloaded_df)
 
     @pytest.mark.parametrize(
+        "xls_data_set",
+        [
+            dict(
+                save_args={
+                    "na_rep": "N/A",
+                    "writer": {
+                        "date_format": "YYYY-MM-DD",
+                        "datetime_format": "YYYY-MM-DD HH:MM:SS",
+                    },
+                }
+            )
+        ],
+        indirect=True,
+    )
+    def test_save_custom_writer(
+        self, xls_data_set, dummy_dataframe, filepath_xls, mocker
+    ):
+        """Check that save options are passed down to the ExcelWriter"""
+        mock_writer = mocker.patch("pandas.ExcelWriter")
+        mocker.patch("pandas.DataFrame.to_excel")
+        save_args_before = xls_data_set._save_args
+
+        xls_data_set.save(dummy_dataframe)
+        save_args_after = xls_data_set._save_args
+
+        mock_writer.assert_called_once_with(
+            filepath_xls,
+            engine="xlsxwriter",
+            date_format="YYYY-MM-DD",
+            datetime_format="YYYY-MM-DD HH:MM:SS",
+        )
+        assert save_args_before == save_args_after  # ensure save_args were not mutated
+
+    @pytest.mark.parametrize(
+        "xls_data_set",
+        [
+            dict(
+                engine="xlsxwriter",
+                save_args={
+                    "na_rep": "N/A",
+                    "writer": {"mode": "a", "engine": "openpyxl"},
+                },
+            )
+        ],
+        indirect=True,
+    )
+    def test_save_custom_writer_overwrite_engine(
+        self, xls_data_set, dummy_dataframe, filepath_xls, mocker
+    ):
+        """Check that engine defined under writer save_args takes precedence
+        over the one defined on the class."""
+        mock_writer = mocker.patch("pandas.ExcelWriter")
+        mocker.patch("pandas.DataFrame.to_excel")
+
+        xls_data_set.save(dummy_dataframe)
+
+        mock_writer.assert_called_once_with(filepath_xls, engine="openpyxl", mode="a")
+
+    @pytest.mark.parametrize(
         "xls_data_set", [dict(load_args={"sheet_name": "Sheet1"})], indirect=True
     )
     def test_load_missing_xls_file(self, xls_data_set):
@@ -129,10 +188,8 @@ class TestExcelLocalDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            r"Save path `.*/{}/test\.xlsx` did not match load path "
-            r"`.*/{}/test\.xlsx` for ExcelLocalDataSet\(.+\)".format(
-                save_version, load_version
-            )
+            r"Save version `{0}` did not match load version `{1}` "
+            r"for ExcelLocalDataSet\(.+\)".format(save_version, load_version)
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_xls_data_set.save(dummy_dataframe)

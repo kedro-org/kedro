@@ -29,6 +29,7 @@
 """Command line tools for manipulating a Kedro project.
 Intended to be invoked via `kedro`."""
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -234,7 +235,15 @@ def package():
 
 
 @cli.command("build-docs")
-@click.option("--open", "-o", "open_docs", is_flag=True, multiple=False, default=False, help=OPEN_ARG_HELP)
+@click.option(
+    "--open",
+    "-o",
+    "open_docs",
+    is_flag=True,
+    multiple=False,
+    default=False,
+    help=OPEN_ARG_HELP,
+)
 def build_docs(open_docs):
     """Build the project documentation."""
     python_call("pip", ["install", "src/[docs]"])
@@ -257,7 +266,6 @@ def build_docs(open_docs):
         docs_page = (Path.cwd() / "docs" / "build" / "html" / "index.html").as_uri()
         secho("Opening {}".format(docs_page))
         webbrowser.open(docs_page)
-
 
 
 @cli.command("build-reqs")
@@ -314,7 +322,13 @@ def _build_jupyter_command(
     cmd = [base, "--ip=" + ip]
 
     if not all_kernels:
-        cmd.append("--KernelSpecManager.whitelist=['python3']")
+        project_name = "{{ cookiecutter.project_name }}"
+        kernel_name = re.sub(r"[^\w]+", "", project_name).strip() or 'Kedro'
+
+        cmd += [
+            "--NotebookApp.kernel_spec_manager_class=kedro.cli.jupyter.SingleKernelSpecManager",
+            "--KernelSpecManager.default_kernel_name='{}'".format(kernel_name),
+        ]
 
     return cmd + list(args)
 

@@ -55,18 +55,16 @@ class TemplatedConfigLoader(ConfigLoader):
         >>> from kedro.context import KedroContext, load_context
         >>> from kedro.contrib.config import TemplatedConfigLoader
         >>>
+        >>>
         >>> class MyNewContext(KedroContext):
         >>>
-        >>>    @property
-        >>>    def config_loader(self) -> TemplatedConfigLoader:
-        >>>        conf_paths = [
-        >>>            str(self.project_path / self.CONF_ROOT / "base"),
-        >>>            str(self.project_path / self.CONF_ROOT / self.env),
-        >>>        ]
-        >>>        return TemplatedConfigLoader(conf_paths,
-        >>>                                     globals_pattern="*globals.yml",
-        >>>                                     globals_dict={"param1": "CSVLocalDataSet"})
-
+        >>>     def _create_config_loader(self, conf_paths: Iterable[str]) -> TemplatedConfigLoader:
+        >>>         return TemplatedConfigLoader(
+        >>>             conf_paths,
+        >>>             globals_pattern="*globals.yml",
+        >>>             globals_dict={"param1": "CSVLocalDataSet"}
+        >>>         )
+        >>>
         >>> my_context = load_context(Path.cwd(), env=env)
         >>> my_context.run(tags, runner, node_names, from_nodes, to_nodes)
 
@@ -87,10 +85,10 @@ class TemplatedConfigLoader(ConfigLoader):
             spark: "SparkLocalDataSet"
 
         folders:
-            raw: "00_raw"
-            int: "01_intermediate"
-            pri: "02_primary"
-            fea: "04_feature"
+            raw: "01_raw"
+            int: "02_intermediate"
+            pri: "03_primary"
+            fea: "04_features"
 
 
     catalog.yml

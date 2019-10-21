@@ -32,6 +32,7 @@ produced outputs and execution order.
 """
 import copy
 import json
+import warnings
 from collections import Counter, defaultdict
 from itertools import chain
 from typing import Callable, Dict, Iterable, List, Optional, Set, Union
@@ -78,8 +79,14 @@ class Pipeline:
     outputs and execution order.
     """
 
+    # pylint: disable=too-many-public-methods
+
     def __init__(
-        self, nodes: Iterable[Union[Node, "Pipeline"]], *, name: str = None
+        self,
+        nodes: Iterable[Union[Node, "Pipeline"]],
+        *,
+        name: str = None,
+        tags: Iterable[str] = None
     ):  # pylint: disable=missing-type-doc
         """Initialise ``Pipeline`` with a list of ``Node`` instances.
 
@@ -88,8 +95,10 @@ class Pipeline:
                 provide pipelines among the list of nodes, those pipelines will
                 be expanded and all their nodes will become part of this
                 new pipeline.
-            name: The name of the pipeline. If specified, this name
-                will be used to tag all of the nodes in the pipeline.
+            name: (DEPRECATED, use `tags` instead) The name of the pipeline.
+                If specified, this name will be used to tag all of the nodes
+                in the pipeline.
+            tags: Optional set of tags to be applied to all the pipeline nodes.
 
         Raises:
             ValueError:
@@ -134,8 +143,18 @@ class Pipeline:
         _validate_duplicate_nodes(nodes)
         _validate_transcoded_inputs_outputs(nodes)
 
+        self._tags = set(tags or [])
+
         if name:
-            nodes = [n.tag([name]) for n in nodes]
+            warnings.warn(
+                "`name` parameter is deprecated for the `Pipeline`"
+                " constructor, use `tags` instead",
+                DeprecationWarning,
+            )
+            self._tags.add(name)
+
+        nodes = [n.tag(self._tags) for n in nodes]
+
         self._name = name
         self._nodes_by_name = {node.name: node for node in nodes}
         _validate_unique_outputs(nodes)
@@ -156,8 +175,19 @@ class Pipeline:
         self._topo_sorted_nodes = _topologically_sorted(self.node_dependencies)
 
     def __repr__(self):  # pragma: no cover
-        reprs = [repr(node) for node in self.nodes]
-        return "{}([\n{}\n])".format(self.__class__.name, ",\n".join(reprs))
+        """Pipeline ([node1, ..., node10 ...], name='pipeline_name')"""
+        max_nodes_to_display = 10
+
+        nodes_reprs = [repr(node) for node in self.nodes[:max_nodes_to_display]]
+        if len(self.nodes) > max_nodes_to_display:
+            nodes_reprs.append("...")
+        nodes_reprs_str = (
+            "[\n{}\n]".format(",\n".join(nodes_reprs)) if nodes_reprs else "[]"
+        )
+        name = ",\nname='{}'".format(self.name) if self.name else ""
+
+        constructor_repr = "({}{})".format(nodes_reprs_str, name)
+        return "{}{}".format(self.__class__.__name__, constructor_repr)
 
     def __add__(self, other):
         if not isinstance(other, Pipeline):
@@ -301,13 +331,27 @@ class Pipeline:
 
     @property
     def name(self) -> Optional[str]:
-        """Get the pipeline name.
+        """(DEPRECATED, use `tags` instead) Get the pipeline name.
 
         Returns:
             The name of the pipeline as provided in the constructor.
 
         """
+        warnings.warn(
+            "`Pipeline.name` is deprecated, use `Pipeline.tags` instead.",
+            DeprecationWarning,
+        )
         return self._name
+
+    @property
+    def tags(self) -> Iterable[str]:
+        """Get the pipeline tags.
+
+        Returns:
+            The list of the pipeline tags as provided in the constructor.
+
+        """
+        return self._tags
 
     @property
     def node_dependencies(self) -> Dict[Node, Set[Node]]:

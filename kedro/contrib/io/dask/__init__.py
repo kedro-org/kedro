@@ -25,6 +25,6 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""kedro.contrib.io.parquet provides I/O modules for Parquet files on S3."""
+"""kedro.contrib.io.dask provides I/O modules for Dask dataset on S3."""
 
-from .parquet_s3 import ParquetS3DataSet  # NOQA
+from .dask_parquet_s3 import ParquetS3DaskDataSet  # NOQA

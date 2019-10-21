@@ -9,6 +9,7 @@
 * Parameterized config loader - ability to use central set of parameters throughout all your config files with `kedro.contrib.config.TemplatedConfigLoader`.
 * Parameters are exposed as a context property for ease of access in iPython / Jupyter notebooks (i.e `context.params`).
 * Added `max_workers` parameter for ``ParallelRunner``.
+* Added new IO to read multiple XLS/XLSX files from S3 bucket
 
 ## Bug fixes and other changes
 * Users will override `_get_pipeline` abstract method in `ProjectContext(KedroContext)` in `run.py` rather than `pipeline` abstract property. `pipeline` property is not abstract anymore.
@@ -25,7 +26,7 @@
 * `KedroContext.run()` no longer accepts `catalog` and `pipeline` arguments.
 
 ## Thanks for supporting contributions
-[Deepyaman Datta](https://github.com/deepyaman), [Luciano Issoe](https://github.com/Lucianois), [Joost Duisters](https://github.com/JoostDuisters), [Zain Patel](https://github.com/mzjp2), [William Ashford](https://github.com/williamashfordQB), [Karlson Lee](https://github.com/i25959341)
+[Deepyaman Datta](https://github.com/deepyaman), [Luciano Issoe](https://github.com/Lucianois), [Joost Duisters](https://github.com/JoostDuisters), [Zain Patel](https://github.com/mzjp2), [William Ashford](https://github.com/williamashfordQB), [Karlson Lee](https://github.com/i25959341), [Neeraj Malhotra](https://github.com/NeerajMalhotra-QB)
 
 # Release 0.15.1
 

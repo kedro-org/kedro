@@ -29,18 +29,15 @@
 """``ParquetS3DaskDataSet`` is a data set used to load and save
 data to parquet files using Dask on S3
 """
-from copy import deepcopy
-from pathlib import PurePosixPath
 from typing import Any, Dict, Optional
 
 import dask.dataframe as dd
-from s3fs.core import S3FileSystem
 
 from kedro.contrib.io import DefaultArgumentsMixIn
-from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
+from kedro.io.core import AbstractDataSet, DataSetError
 
 
-class ParquetS3DaskDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
+class ParquetS3DaskDataSet(DefaultArgumentsMixIn, AbstractDataSet):
     """``ParquetS3DaskDataSet`` loads and saves data to file(s) in S3. It uses s3fs
         to read and write from S3 and dask to handle the parquet file.
 
@@ -57,7 +54,6 @@ class ParquetS3DaskDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
             >>>
             >>> data_set = ParquetS3DaskDataSet(
             >>>                         filepath="temp_folder",
-            >>>                         bucket_name="test_bucket",
             >>>                         credentials={
             >>>                             'aws_access_key_id': 'YOUR_KEY',
             >>>                             'aws_secret_access_key': 'YOUR SECRET'},
@@ -68,17 +64,13 @@ class ParquetS3DaskDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
             >>> assert ddf.compute().equals(reloaded.compute())
     """
 
-    DEFAULT_SAVE_ARGS = {"index": False}
-
     # pylint: disable=too-many-arguments
     def __init__(
         self,
         filepath: str,
-        bucket_name: str,
         credentials: Optional[Dict[str, Any]] = None,
         load_args: Optional[Dict[str, Any]] = None,
         save_args: Optional[Dict[str, Any]] = None,
-        version: Version = None,
     ) -> None:
         """Creates a new instance of ``ParquetS3DaskDataSet`` pointing to a concrete
         parquet file on S3.
@@ -98,45 +90,27 @@ class ParquetS3DaskDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
                 or `fastparquet`:
                 https://fastparquet.readthedocs.io/en/latest/api.html#fastparquet.write
         """
-        _credentials = deepcopy(credentials) or {}
-        _s3 = S3FileSystem(client_kwargs=_credentials)
-        super().__init__(
-            PurePosixPath("{}/{}".format(bucket_name, filepath)),
-            version,
-            exists_function=_s3.exists,
-            glob_function=_s3.glob,
-        )
+
         self._filepath = filepath
-        self._bucket_name = bucket_name
         self._credentials = credentials if credentials else {}
-        self._s3 = _s3
         super().__init__(load_args, save_args)
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
             filepath=self._filepath,
-            bucket_name=self._bucket_name,
             load_args=self._load_args,
             save_args=self._save_args,
-            version=self._version,
         )
 
     def _load(self) -> dd.DataFrame:
-        load_path = PurePosixPath(self._get_load_path())
-
-        with self._s3.open(str(load_path), mode="rb") as s3_file:
-            return dd.read_parquet(s3_file, **self._load_args)
+        return dd.read_parquet(self._filepath, **self._load_args)
 
     def _save(self, data: dd.DataFrame) -> None:
-        save_path = PurePosixPath(self._get_save_path())
-        data.to_parquet(save_path)
-        load_path = PurePosixPath(self._get_load_path())
-
-        self._check_paths_consistency(load_path, save_path)
+        data.to_parquet(self._filepath, **self._save_args)
 
     def _exists(self) -> bool:
         try:
-            load_path = self._get_load_path()
+            dd.read_parquet(self._filepath, **self._load_args)
         except DataSetError:
             return False
-        return self._s3.isfile(str(PurePosixPath(load_path)))
+        return True

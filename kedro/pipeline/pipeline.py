@@ -35,7 +35,7 @@ import json
 import warnings
 from collections import Counter, defaultdict
 from itertools import chain
-from typing import Callable, Dict, Iterable, List, Optional, Set, Union
+from typing import Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from toposort import CircularDependencyError as ToposortCircleError
 from toposort import toposort
@@ -44,6 +44,48 @@ import kedro
 from kedro.pipeline.node import Node
 
 TRANSCODING_SEPARATOR = "@"
+
+
+def _transcode_split(element: str) -> Tuple[str, str]:
+    """Split the name by the transcoding separator.
+    If the transcoding part is missing, empty string will be put in.
+
+    Returns:
+        Node input/output name before the transcoding separator, if present.
+    Raises:
+        ValueError: Raised if more than one transcoding separator
+        is present in the name.
+    """
+    split_name = element.split(TRANSCODING_SEPARATOR)
+
+    if len(split_name) > 2:
+        raise ValueError(
+            "Expected maximum 1 transcoding separator, found {} instead: '{}'.".format(
+                len(split_name) - 1, element
+            )
+        )
+    if len(split_name) == 1:
+        split_name.append("")
+
+    return tuple(split_name)  # type: ignore
+
+
+def _transcode_join(parts: Tuple[str, str]) -> str:
+    """Join the name parts using the transcoding separator.
+    If the transcoding part is missing, the resulting name wil not have it as well.
+
+    Raises:
+        ValueError: wrong number of parts have been provided.
+
+    Returns:
+        Node input/output name.
+    """
+    if not parts or len(parts) > 2:
+        raise ValueError("1 or 2 parts are expected: {}".format(parts))
+    if len(parts) == 1 or not parts[1]:
+        return parts[0]
+
+    return TRANSCODING_SEPARATOR.join(parts)
 
 
 def _get_transcode_compatible_name(element: str) -> str:
@@ -55,14 +97,7 @@ def _get_transcode_compatible_name(element: str) -> str:
         ValueError: Raised if more than one transcoding separator
         is present in the name.
     """
-    split_name = element.split(TRANSCODING_SEPARATOR)
-    if len(split_name) > 2:
-        raise ValueError(
-            "Expected maximum 1 transcoding separator, found {} instead: '{}'.".format(
-                len(split_name) - 1, element
-            )
-        )
-    return split_name[0]
+    return _transcode_split(element)[0]
 
 
 class OutputNotUniqueError(Exception):
@@ -95,7 +130,7 @@ class Pipeline:
                 provide pipelines among the list of nodes, those pipelines will
                 be expanded and all their nodes will become part of this
                 new pipeline.
-            name: (DEPRECATED, use `tags` instead) The name of the pipeline.
+            name: (DEPRECATED, use `tags` method instead) The name of the pipeline.
                 If specified, this name will be used to tag all of the nodes
                 in the pipeline.
             tags: Optional set of tags to be applied to all the pipeline nodes.
@@ -142,18 +177,17 @@ class Pipeline:
         )
         _validate_duplicate_nodes(nodes)
         _validate_transcoded_inputs_outputs(nodes)
-
-        self._tags = set(tags or [])
+        _tags = set(tags or [])
 
         if name:
             warnings.warn(
                 "`name` parameter is deprecated for the `Pipeline`"
-                " constructor, use `tags` instead",
+                " constructor, use `Pipeline.tag` method instead",
                 DeprecationWarning,
             )
-            self._tags.add(name)
+            _tags.add(name)
 
-        nodes = [n.tag(self._tags) for n in nodes]
+        nodes = [n.tag(_tags) for n in nodes]
 
         self._name = name
         self._nodes_by_name = {node.name: node for node in nodes}
@@ -184,9 +218,7 @@ class Pipeline:
         nodes_reprs_str = (
             "[\n{}\n]".format(",\n".join(nodes_reprs)) if nodes_reprs else "[]"
         )
-        name = ",\nname='{}'".format(self.name) if self.name else ""
-
-        constructor_repr = "({}{})".format(nodes_reprs_str, name)
+        constructor_repr = "({})".format(nodes_reprs_str)
         return "{}{}".format(self.__class__.__name__, constructor_repr)
 
     def __add__(self, other):
@@ -331,27 +363,17 @@ class Pipeline:
 
     @property
     def name(self) -> Optional[str]:
-        """(DEPRECATED, use `tags` instead) Get the pipeline name.
+        """(DEPRECATED, use `Pipeline.tag` method instead) Get the pipeline name.
 
         Returns:
             The name of the pipeline as provided in the constructor.
 
         """
         warnings.warn(
-            "`Pipeline.name` is deprecated, use `Pipeline.tags` instead.",
+            "`Pipeline.name` is deprecated, use `Pipeline.tag` method instead.",
             DeprecationWarning,
         )
         return self._name
-
-    @property
-    def tags(self) -> Iterable[str]:
-        """Get the pipeline tags.
-
-        Returns:
-            The list of the pipeline tags as provided in the constructor.
-
-        """
-        return self._tags
 
     @property
     def node_dependencies(self) -> Dict[Node, Set[Node]]:
@@ -705,6 +727,15 @@ class Pipeline:
         nodes = [node.decorate(*decorators) for node in self.nodes]
         return Pipeline(nodes)
 
+    def tag(self, tags: Iterable[str]) -> "Pipeline":
+        """
+        Return a copy of the pipeline, with each node tagged accordingly.
+        :param tags: The tags to be added to the nodes.
+        :return: New `Pipeline` object.
+        """
+        nodes = [n.tag(tags) for n in self.nodes]
+        return Pipeline(nodes)
+
     def to_json(self):
         """Return a json representation of the pipeline."""
         transformed = [
@@ -722,6 +753,84 @@ class Pipeline:
         }
 
         return json.dumps(pipeline_versioned)
+
+    def transform(
+        self, datasets: Dict[str, str] = None, prefix: str = None
+    ) -> "Pipeline":
+        """
+        Create a copy of the pipeline and its nodes,
+        with some dataset names modified.
+
+        Args:
+            datasets: A map of the existing dataset name to the new one.
+                Both input and output datasets can be replaced this way.
+            prefix: A prefix to give to all dataset names,
+                except those explicitly named with the `datasets` parameter.
+
+        Raises:
+            ValueError: invalid dataset names are given.
+
+        Returns:
+            A new ``Pipeline`` object with the new nodes, modified as requested.
+        """
+        # pylint: disable=protected-access
+        datasets = datasets or {}
+        new_nodes = []
+        used_dataset_names = set()
+
+        def _prefix(name):
+            return "{}.{}".format(prefix, name) if prefix else name
+
+        def _map_and_prefix(name):
+            if name in datasets:
+                used_dataset_names.add(name)
+                return datasets[name]
+
+            base_name, transcode_name = _transcode_split(name)
+
+            if base_name in datasets:
+                used_dataset_names.add(base_name)
+                base_name = datasets[base_name]
+                return _transcode_join((base_name, transcode_name))
+
+            return _prefix(name)
+
+        def _process_dataset_names(names: Union[None, str, List[str], Dict[str, str]]):
+            if names is None:
+                return None
+            if isinstance(names, str):
+                return _map_and_prefix(names)  # type: ignore
+            if isinstance(names, list):
+                return [
+                    _map_and_prefix(name) for name in names  # type: ignore
+                ]
+            if isinstance(names, dict):
+                return {
+                    key: _map_and_prefix(value)  # type: ignore
+                    for key, value in names.items()
+                }
+
+            raise ValueError(  # pragma: no cover
+                "Unexpected input {} of type {}".format(names, type(names))
+            )
+
+        for node in self.nodes:
+            new_nodes.append(
+                node._copy(
+                    inputs=_process_dataset_names(node._inputs),
+                    outputs=_process_dataset_names(node._outputs),
+                    name=_prefix(node._name) if node._name else None,
+                )
+            )
+
+        unused_dataset_names = set(datasets) - used_dataset_names
+
+        if unused_dataset_names:
+            raise ValueError(
+                "Failed to map datasets: {}".format(sorted(unused_dataset_names))
+            )
+
+        return Pipeline(new_nodes)
 
 
 def _validate_no_node_list(nodes: Iterable[Union[Node, Pipeline]]):

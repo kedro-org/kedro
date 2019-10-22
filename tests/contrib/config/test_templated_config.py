@@ -77,6 +77,11 @@ def template_config():
 
 
 @pytest.fixture
+def wrong_config():
+    return {"wrong_param_1": "wrong_val", "wrong_param_2": 99, "wrong_param_3": 1.0}
+
+
+@pytest.fixture
 def proj_catalog_param(tmp_path, param_config):
     proj_catalog = tmp_path / "base" / "catalog.yml"
     _write_yaml(proj_catalog, param_config)
@@ -245,6 +250,27 @@ class TestTemplatedConfigLoader:
         (tmp_path / "local").mkdir(exist_ok=True)
 
         catalog = TemplatedConfigLoader(conf_paths).get("catalog*.yml")
+
+        assert catalog["boats"]["type"] == "${boat_data_type}"
+        assert (
+            catalog["boats"]["filepath"]
+            == "${s3_bucket}/${raw_data_folder}/${boat_file_name}"
+        )
+        assert catalog["boats"]["columns"]["id"] == "${string_type}"
+        assert catalog["boats"]["columns"]["name"] == "${string_type}"
+        assert catalog["boats"]["columns"]["top_speed"] == "${float_type}"
+        assert catalog["boats"]["users"] == ["fred", "${write_only_user}"]
+
+    @pytest.mark.usefixtures("proj_catalog_param")
+    def test_catlog_parameterized_wrong_params(
+        self, tmp_path, conf_paths, wrong_config
+    ):
+        """Test parameterized config without input"""
+        (tmp_path / "local").mkdir(exist_ok=True)
+
+        catalog = TemplatedConfigLoader(conf_paths, globals_dict=wrong_config).get(
+            "catalog*.yml"
+        )
 
         assert catalog["boats"]["type"] == "${boat_data_type}"
         assert (

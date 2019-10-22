@@ -277,22 +277,19 @@ class TestSparkHiveDataSet:
 
     def test_insert_to_non_existant_empty_table(self, spark_hive_session):
         dataset = SparkHiveDataSet(
-            database="default_1",
-            table="table_not_yet_created",
-            write_mode="insert",
+            database="default_1", table="table_not_yet_created", write_mode="insert"
         )
         dataset.save(_generate_spark_df_one())
         assert_df_equal(
-            dataset.load().sort('name'),
-            _generate_spark_df_one().sort("name"),
+            dataset.load().sort("name"), _generate_spark_df_one().sort("name")
         )
 
     def test_read_from_non_existant_table(self, spark_hive_session):
         dataset = SparkHiveDataSet(
-            database="default_1",
-            table="table_doesnt_exist",
-            write_mode="insert",
+            database="default_1", table="table_doesnt_exist", write_mode="insert"
         )
-        with pytest.raises(DataSetError,
-                           match='requested table not found: default_1.table_doesnt_exist'):
+        with pytest.raises(
+            DataSetError,
+            match="requested table not found: default_1.table_doesnt_exist",
+        ):
             dataset.load()

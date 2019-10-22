@@ -14,8 +14,8 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-# The QuantumBlack Visual Analytics Limited (“QuantumBlack”) name and logo
-# (either separately or in combination, “QuantumBlack Trademarks”) are
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
@@ -170,16 +170,14 @@ class SparkHiveDataSet(AbstractDataSet):
             raise DataSetError("table_pk must be set to utilise upsert read mode")
         self._table_pk = table_pk
 
-        if not self._exists():
-            raise DataSetError(
-                "requested table not found: {database}.{table}".format(
-                    database=self._database, table=self._table
-                )
-            )
-        self._table_columns = self._load().columns
+        self._table_columns = self._load().columns if self._exists() else None
 
-        if self._table_pk and not all(
-            (col_name in self._table_columns for col_name in self._table_pk)
+        if (
+            self._table_pk
+            and self._exists()
+            and not all(
+                (col_name in self._table_columns for col_name in self._table_pk)
+            )
         ):
             raise DataSetError(
                 "columns [{colnames}] selected as PK not found in table {database}.{table}".format(
@@ -193,7 +191,26 @@ class SparkHiveDataSet(AbstractDataSet):
     def _get_spark():
         return SparkSession.builder.getOrCreate()
 
+    def _create_empty_hive_table(self, data):
+        data.createOrReplaceTempView("tmp")
+        self._get_spark().sql(
+            "create table {database}.{table} select * from tmp limit 1".format(
+                table=self._table, database=self._database
+            )
+        )
+        self._get_spark().sql(
+            "truncate table {database}.{table}".format(
+                database=self._database, table=self._table
+            )
+        )
+
     def _load(self) -> DataFrame:
+        if not self._exists():
+            raise DataSetError(
+                "requested table not found: {database}.{table}".format(
+                    database=self._database, table=self._table
+                )
+            )
         return self._get_spark().sql(
             "select * from {database}.{table}".format(
                 database=self._database, table=self._table
@@ -201,6 +218,9 @@ class SparkHiveDataSet(AbstractDataSet):
         )
 
     def _save(self, data: DataFrame) -> None:
+        if not self._exists():
+            self._create_empty_hive_table(data)
+            self._table_columns = data.columns
         self._validate_save(data)
         write_methods = {
             "insert": self._insert_save,
@@ -232,15 +252,15 @@ class SparkHiveDataSet(AbstractDataSet):
                         "new.{}".format(col_name), "old.{}".format(col_name)
                     ).alias(col_name)
                     for col_name in data.columns
-                    if col_name not in self._table_pk
+                    if col_name not in self._table_pk  # type: ignore
                 ]
-                + self._table_pk
+                + self._table_pk  # type: ignore
             )
-            temporary_persisted_tbl = "temp_{}".format(uuid.uuid4().int)
+            temporary_persisted_tbl_name = "temp_{}".format(uuid.uuid4().int)
             with StagedHiveDataSet(
                 upsert_dataset,
                 stage_database_name=self._database,
-                stage_table_name=temporary_persisted_tbl,
+                stage_table_name=temporary_persisted_tbl_name,
             ) as temp_table:
                 self._overwrite_save(temp_table.staged_data)
 

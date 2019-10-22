@@ -50,7 +50,7 @@ class UseTheSparkSessionFixtureOrMock:  # pylint: disable=too-few-public-methods
 
 # prevent using spark without going through the spark_session fixture
 @pytest.fixture(scope="session", autouse=True)
-def no_spark():
+def replace_default_getorcreate():
     global the_real_getOrCreate  # pylint: disable=global-statement
     the_real_getOrCreate = SparkSession.builder.getOrCreate
     SparkSession.builder.getOrCreate = UseTheSparkSessionFixtureOrMock

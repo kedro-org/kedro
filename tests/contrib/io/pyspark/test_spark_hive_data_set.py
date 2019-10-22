@@ -45,8 +45,8 @@ TESTSPARKDIR = "test_spark_dir"
 
 # clean up pyspark after the test module finishes
 @pytest.fixture(scope="module", autouse=True)
-def spark_hive_session(no_spark):
-    SparkSession.builder.getOrCreate = no_spark
+def spark_hive_session(replace_default_getorcreate):
+    SparkSession.builder.getOrCreate = replace_default_getorcreate
     default_cwd = os.getcwd()
     with TemporaryDirectory(TESTSPARKDIR) as tmpdir:
         os.chdir(tmpdir)

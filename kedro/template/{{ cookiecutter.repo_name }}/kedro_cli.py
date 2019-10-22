@@ -29,6 +29,7 @@
 """Command line tools for manipulating a Kedro project.
 Intended to be invoked via `kedro`."""
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -321,7 +322,13 @@ def _build_jupyter_command(
     cmd = [base, "--ip=" + ip]
 
     if not all_kernels:
-        cmd.append("--KernelSpecManager.whitelist=['python3']")
+        project_name = "{{ cookiecutter.project_name }}"
+        kernel_name = re.sub(r"[^\w]+", "", project_name).strip() or 'Kedro'
+
+        cmd += [
+            "--NotebookApp.kernel_spec_manager_class=kedro.cli.jupyter.SingleKernelSpecManager",
+            "--KernelSpecManager.default_kernel_name='{}'".format(kernel_name),
+        ]
 
     return cmd + list(args)
 

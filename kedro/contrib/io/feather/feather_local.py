@@ -45,7 +45,7 @@ from typing import Any, Dict
 
 import pandas as pd
 
-from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
+from kedro.io.core import AbstractVersionedDataSet, Version
 
 
 class FeatherLocalDataSet(AbstractVersionedDataSet):
@@ -98,7 +98,6 @@ class FeatherLocalDataSet(AbstractVersionedDataSet):
 
     def _load(self) -> pd.DataFrame:
         load_path = Path(self._get_load_path())
-
         return pd.read_feather(load_path, **self._load_args)
 
     def _save(self, data: pd.DataFrame) -> None:
@@ -106,14 +105,8 @@ class FeatherLocalDataSet(AbstractVersionedDataSet):
         save_path.parent.mkdir(parents=True, exist_ok=True)
         data.to_feather(str(save_path))
 
-        load_path = Path(self._get_load_path())
-        self._check_paths_consistency(load_path.absolute(), save_path.absolute())
-
     def _exists(self) -> bool:
-        try:
-            path = self._get_load_path()
-        except DataSetError:
-            return False
+        path = self._get_load_path()
         return Path(path).is_file()
 
     def _describe(self) -> Dict[str, Any]:

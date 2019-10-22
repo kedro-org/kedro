@@ -137,10 +137,8 @@ class TestCSVLocalDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            r"Save path `.*/{}/test\.csv` did not match load path "
-            r"`.*/{}/test\.csv` for CSVLocalDataSet\(.+\)".format(
-                save_version, load_version
-            )
+            r"Save version `{0}` did not match load version `{1}` "
+            r"for CSVLocalDataSet\(.+\)".format(save_version, load_version)
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_csv_data_set.save(dummy_dataframe)

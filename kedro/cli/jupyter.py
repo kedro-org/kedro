@@ -26,14 +26,43 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Kedro is a framework that makes it easy to build robust and scalable
-data pipelines by providing uniform project templates, data abstraction,
-configuration and pipeline assembly.
+"""A collection of helper functions to integrate with Jupyter/IPython.
 """
 
-__version__ = "0.15.3"
+
+from jupyter_client.kernelspec import NATIVE_KERNEL_NAME, KernelSpecManager
+from traitlets import Unicode
+
+from kedro.cli import load_entry_points
 
 
-import logging
+def collect_line_magic():
+    """Interface function for collecting line magic functions from plugin entry points.
+    """
+    return load_entry_points("line_magic")
 
-logging.getLogger(__name__).addHandler(logging.NullHandler())
+
+class SingleKernelSpecManager(KernelSpecManager):
+    """
+    A custom KernelSpec manager to be used by Kedro projects.
+    It limits the kernels to the default one only,
+    to make it less confusing for users, and gives it a sensible name.
+    """
+
+    default_kernel_name = Unicode(
+        "Kedro", config=True, help="Alternative name for the default kernel"
+    )
+    whitelist = [NATIVE_KERNEL_NAME]
+
+    def get_kernel_spec(self, kernel_name):
+        """
+        This function will only be called by Jupyter to get a KernelSpec
+        for the default kernel.
+        We replace the name by something sensible here.
+        """
+        kernelspec = super().get_kernel_spec(kernel_name)
+
+        if kernel_name == NATIVE_KERNEL_NAME:
+            kernelspec.display_name = self.default_kernel_name
+
+        return kernelspec

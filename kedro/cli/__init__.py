@@ -31,4 +31,4 @@
 This module implements commands available from the kedro CLI.
 """
 
-from kedro.cli.cli import get_project_context, main  # NOQA
+from kedro.cli.cli import get_project_context, load_entry_points, main  # NOQA

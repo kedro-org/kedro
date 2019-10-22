@@ -47,3 +47,15 @@ def cli_runner_fixture():
     with runner.isolated_filesystem():
         makedirs(MOCKED_HOME)
         yield runner
+
+
+@fixture
+def entry_points(mocker):
+    return mocker.patch("pkg_resources.iter_entry_points")
+
+
+@fixture
+def entry_point(mocker, entry_points):
+    ep = mocker.MagicMock()
+    entry_points.return_value = [ep]
+    return ep

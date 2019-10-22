@@ -247,14 +247,14 @@ class SparkHiveDataSet(AbstractDataSet):
                 self._load().alias("old"), self._table_pk, "outer"
             )
             upsert_dataset = joined_data.select(
-                [
+                [  # type: ignore
                     coalesce(
                         "new.{}".format(col_name), "old.{}".format(col_name)
                     ).alias(col_name)
                     for col_name in data.columns
                     if col_name not in self._table_pk  # type: ignore
                 ]
-                + self._table_pk  # type: ignore
+                + self._table_pk
             )
             temporary_persisted_tbl_name = "temp_{}".format(uuid.uuid4().int)
             with StagedHiveDataSet(

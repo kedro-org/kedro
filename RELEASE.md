@@ -5,6 +5,7 @@
 * `Pipeline.name` has been deprecated in favour of `Pipeline.tags`.
 * `Pipeline.transform` has been added, allowing to rename and prefix datasets and nodes.
 * Added Jupyter notebook line magic (`%run_viz`) to run `kedro viz` in notebook cell.
+* Added `SparkHiveDataSet` allowing usage of spark and insert/upsert on non-transactional hive tables
 
 ## Bug fixes and other changes
 * `get_last_load_version()` method for versioned datasets now returns exact last load version if the dataset has been loaded at least once and `None` otherwise.
@@ -15,6 +16,7 @@
 * Removed `_check_paths_consistency()` method from `AbstractVersionedDataSet`. Version consistency check is now done in `AbstractVersionedDataSet.save()`. Custom versioned datasets should modify `save()` method implementation accordingly.
 
 ## Thanks for supporting contributions
+[Tom Vigrass](https://github.com/tomvigrass)
 
 # Release 0.15.3
 

@@ -1,6 +1,6 @@
 # Setting up PyCharm
 
-> *Note:* This documentation is based on `Kedro 0.14.3`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 This section will present a quick guide on how to configure [PyCharm](https://www.jetbrains.com/pycharm/) as a development environment for working on Kedro projects.
 
@@ -66,7 +66,7 @@ Edit the new Run configuration as follows:
 
 ![](images/pycharm_edit_py_run_config.png)
 
-Replace **Script path** with path obtained above and **Working directory** with the path of your project directory and then click **OK**. 
+Replace **Script path** with path obtained above and **Working directory** with the path of your project directory and then click **OK**.
 
 To execute the Run configuration, select it from the **Run / Debug Configurations** dropdown in the toolbar (if that toolbar is not visible, you can enable it by going to **View > Toolbar**). Click the green triangle:
 
@@ -94,7 +94,7 @@ Then click the bug button in the toolbar (![](images/pycharm_debugger_button.png
 
 ## Advanced: Remote SSH interpreter
 
-> *Note:* This section uses the features supported in PyCharm Professional Edition only. 
+> *Note:* This section uses the features supported in PyCharm Professional Edition only.
 
 Firstly, add an SSH interpreter. Go to **Preferences | Project Interpreter** as above and proceed to add a new interpreter. Select **SSH Interpreter** and fill in details of the remote computer:
 

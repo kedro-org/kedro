@@ -1,6 +1,6 @@
 # Linting your Kedro project
 
-> *Note:* This documentation is based on `Kedro 0.14.3`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 > *Note:* The following suggestions would require installing the  `pylint` package, subject to GPL licence.
 
@@ -19,7 +19,7 @@ Alternatively, you can opt to use it as a plugin to your Kedro project. To do th
 @cli.command()
 def lint():
     """Check the Python code quality."""
-    python_call("isort", [])
+    python_call("isort", ["-rc", "src/<your_project>", "src/tests", "kedro_cli.py"])
     python_call(
         "pylint", ["-j", "0", "src/<your_project>", "kedro_cli.py"]
     )

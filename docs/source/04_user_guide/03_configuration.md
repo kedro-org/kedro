@@ -1,12 +1,19 @@
 # Configuration
 
-> *Note:* This documentation is based on `Kedro 0.14.3`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+>
+> This section contains detailed information about configuration.
 
-This section contains detailed information about configuration. You may also want to consult the relevant API documentation on [kedro.config](/kedro.config.rst).
+Relevant API documentation: [ConfigLoader](/kedro.config.ConfigLoader)
 
 ## Local and base configuration
 
-We recommend that you keep all configuration files in the `conf` directory of a Kedro project. However, if you prefer, you may point Kedro to any other directory and change the configuration paths by modifying the `CONF_ROOT` variable in `src/run.py`.
+We recommend that you keep all configuration files in the `conf` directory of a Kedro project. However, if you prefer, you may point Kedro to any other directory and change the configuration paths by overriding `CONF_ROOT` variable from the derived `ProjectContext` class in `src/<project-package>/run.py` as follows:
+```python
+class ProjectContext(KedroContext):
+    CONF_ROOT = "new_conf"
+    # ...
+```
 
 ## Loading
 
@@ -34,6 +41,7 @@ Configuration information from files stored in `base` or `local` that match thes
 > *Note:* Any top-level keys that start with `_` character are considered hidden (or reserved) and therefore are ignored right after the config load. Those keys will neither trigger a key duplication error mentioned above, nor will they appear in the resulting configuration dictionary. However, you may still use such keys for various purposes. For example, as [YAML anchors and aliases](https://confluence.atlassian.com/bitbucket/yaml-anchors-960154027.html).
 
 * If 2 configuration files have duplicate top-level keys, but are placed into different environment paths (one in `conf/base/`, another in `conf/local/`, for example) then the last loaded path (`conf/local/` in this case) takes precedence and overrides that key value. `ConfigLoader.get(<pattern>, ...)` will not raise any errors, however a `DEBUG` level log message will be emitted with the information on the over-ridden keys.
+* If the same environment path is passed multiple times, a `UserWarning` will be emitted to draw attention to the duplicate loading attempt, and any subsequent loading after the first one will be skipped.
 
 
 ## Additional configuration environments
@@ -44,10 +52,53 @@ In addition to the 2 built-in configuration environments, it is possible to crea
 kedro run --env=test
 ```
 
-If no `env` option is specified, this will default to using `local` environment to overwrite `conf/base`. 
+If no `env` option is specified, this will default to using `local` environment to overwrite `conf/base`.
 
-You can alternatively change the default environment by modifying the `DEFAULT_RUN_ENV` variable in `src/run.py`.
+You can alternatively pass a different environment value in the constructor of `ProjectContext` in `src/run.py`.
 
 ```python
-DEFAULT_RUN_ENV = "test"
+env = "test"
 ```
+
+> *Note*: If, for some reason, your project does not have any other environments apart from `base`, i.e. no `local` environment to default to, the recommended course of action is to use the approach above, namely customise your `ProjectContext` to take `env="base"` in the constructor.
+
+
+## Credentials
+
+> *Note:* For security reasons, we strongly recommend *not* committing any credentials or other secrets to the Version Control System. Hence, by default any file inside the `conf/` folder (and its subfolders) containing `credentials` in its name will be ignored via `.gitignore` and not committed to your git repository.
+
+Credentials configuration can be loaded the same way as any other project configuration using the `ConfigLoader` class:
+
+```python
+from kedro.config import ConfigLoader
+
+conf_paths = ["conf/base", "conf/local"]
+conf_loader = ConfigLoader(conf_paths)
+credentials = conf_loader.get("credentials*", "credentials*/**")
+```
+
+This will load all configuration files from `conf/base` and `conf/local`, which either have the filename starting with `credentials` or are located inside a folder with name starting with `credentials`.
+
+> *Note:* Configuration path `conf/local` takes precedence in the example above since it's loaded last, therefore any overlapping top-level keys from `conf/base` will be overwritten by the ones from `conf/local`.
+
+Calling `conf_loader.get()` in the example above will throw a `MissingConfigException` error if there are no configuration files matching the given patterns in any of the specified paths. If this is a valid workflow for your application, you can handle it as follows:
+
+```python
+from kedro.config import ConfigLoader, MissingConfigException
+
+conf_paths = ["conf/base", "conf/local"]
+conf_loader = ConfigLoader(conf_paths)
+
+try:
+    credentials = conf_loader.get("credentials*", "credentials*/**")
+except MissingConfigException:
+    credentials = {}
+```
+
+> *Note:* `kedro.context.KedroContext` class uses the approach above to load project credentials.
+
+Credentials configuration can then be used on its own or fed into the `DataCatalog` as described in [this section](./04_data_catalog.md#feeding-in-credentials).
+
+### AWS credentials
+
+When working with AWS S3-backed datasets (e.g., `kedro.io.CSVS3DataSet`), you are not required to store AWS credentials in the project configuration files. Instead, you can specify them using environment variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and, optionally, `AWS_SESSION_TOKEN`. Please refer to the [official documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html) for more details.

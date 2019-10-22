@@ -28,6 +28,7 @@
 from pathlib import Path
 from typing import Any
 
+import pandas as pd
 import pytest
 from pandas.util.testing import assert_frame_equal
 
@@ -43,7 +44,18 @@ from kedro.io import (
     MemoryDataSet,
     ParquetLocalDataSet,
 )
-from kedro.io.core import generate_current_version
+from kedro.io.core import generate_timestamp
+from kedro.versioning.journal import Journal
+
+
+@pytest.fixture
+def filepath(tmp_path):
+    return str(tmp_path / "some" / "dir" / "test.csv")
+
+
+@pytest.fixture
+def dummy_dataframe():
+    return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
 
 
 @pytest.fixture
@@ -73,10 +85,11 @@ def data_set(filepath):
 
 
 @pytest.fixture
-def multi_catalog():
+def multi_catalog(mocker):
     csv = CSVLocalDataSet(filepath="abc.csv")
     parq = ParquetLocalDataSet(filepath="xyz.parq")
-    return DataCatalog({"abc": csv, "xyz": parq})
+    journal = mocker.Mock()
+    return DataCatalog({"abc": csv, "xyz": parq}, journal=journal)
 
 
 @pytest.fixture
@@ -345,10 +358,17 @@ class TestDataCatalogVersioned:
     def test_from_sane_config_versioned(self, sane_config, dummy_dataframe):
         """Test load and save of versioned data sets from config"""
         sane_config["catalog"]["boats"]["versioned"] = True
-        version = generate_current_version()
+        version = generate_timestamp()
+        journal = Journal({"run_id": "fake-id", "project_path": "fake-path"})
         catalog = DataCatalog.from_config(
-            **sane_config, load_versions={"boats": version}, save_version=version
+            **sane_config,
+            load_versions={"boats": version},
+            save_version=version,
+            journal=journal
         )
+
+        assert catalog._journal == journal  # pylint: disable=protected-access
+
         catalog.save("boats", dummy_dataframe)
         path = Path(sane_config["catalog"]["boats"]["filepath"])
         path = path / version / path.name
@@ -370,3 +390,11 @@ class TestDataCatalogVersioned:
             "configuration since it is a reserved word and cannot be "
             "directly specified" in log_record.message
         )
+
+    def test_from_sane_config_load_versions_warn(self, sane_config):
+        sane_config["catalog"]["boats"]["versioned"] = True
+        version = generate_timestamp()
+        load_version = {"non-boart": version}
+        pattern = r"\`load_versions\` keys \[non-boart\] are not found in the catalog\."
+        with pytest.warns(UserWarning, match=pattern):
+            DataCatalog.from_config(**sane_config, load_versions=load_version)

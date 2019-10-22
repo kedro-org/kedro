@@ -14,7 +14,6 @@
 # serve to show the default.
 
 import importlib
-import os
 import re
 import shutil
 import sys
@@ -39,10 +38,6 @@ version = re.match(r"^([0-9]+\.[0-9]+).*", release).group(1)
 
 
 # -- General configuration ---------------------------------------------------
-
-on_rtd = os.getenv("READTHEDOCS") == "True"  # running on ReadTheDocs
-
-
 # If your documentation needs a minimal Sphinx version, state it here.
 #
 # needs_sphinx = '1.0'
@@ -91,9 +86,13 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path .
-exclude_patterns = ["**.ipynb_checkpoints", "_templates", "modules.rst"]
-if on_rtd:
-    exclude_patterns.append("source")
+exclude_patterns = [
+    "**.ipynb_checkpoints",
+    "_templates",
+    "modules.rst",
+    "source",
+    "README.md",
+]
 
 
 # The name of the Pygments (syntax highlighting) style to use.
@@ -113,6 +112,11 @@ html_logo = str(here / "kedro_logo.svg")
 # documentation.
 #
 html_theme_options = {"collapse_navigation": False, "style_external_links": True}
+
+html_context = {
+    "display_github": True,
+    "github_url": "https://github.com/quantumblacklabs/kedro/tree/develop/docs/source",
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -251,7 +255,7 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
         These ``LambdaDataSet``s load and save
 
     Will convert to:
-        These :class:`kedro.io.LambdaDataSet`\s load and save
+        These :class:`kedro.io.LambdaDataSet` load and save
 
     Args:
         what: The objects to create replacement tuples for. Possible values
@@ -384,22 +388,22 @@ def skip(app, what, name, obj, skip, options):
     return skip
 
 
-def _prepare_cwd_for_rtd(app, config):
+def _prepare_build_dir(app, config):
     """Get current working directory to the state expected
     by the ReadTheDocs builder. Shortly, it does the same as
     ./build-docs.sh script except not running `sphinx-build` step."""
-    copy_tree(str(here / "source"), str(here))
-    copy_tree(str(here / "05_api_docs"), str(here))
-    shutil.rmtree(str(here / "05_api_docs"))
-    shutil.rmtree(str(here / "_build"), ignore_errors=True)
-    _css = here / "_build" / "html" / "_static" / "css"
-    copy_tree(str(here / "css"), str(_css))
-    shutil.rmtree(str(here / "css"))
+    build_root = Path(app.srcdir)
+    build_out = Path(app.outdir)
+    copy_tree(str(here / "source"), str(build_root))
+    copy_tree(str(build_root / "05_api_docs"), str(build_root))
+    shutil.rmtree(str(build_root / "05_api_docs"))
+    shutil.rmtree(str(build_out), ignore_errors=True)
+    copy_tree(str(build_root / "css"), str(build_out / "_static" / "css"))
+    shutil.rmtree(str(build_root / "css"))
 
 
 def setup(app):
-    if on_rtd:
-        app.connect("config-inited", _prepare_cwd_for_rtd)
+    app.connect("config-inited", _prepare_build_dir)
     app.connect("autodoc-process-docstring", autodoc_process_docstring)
     app.connect("autodoc-skip-member", skip)
     app.add_stylesheet("css/qb1-sphinx-rtd.css")

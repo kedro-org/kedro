@@ -33,21 +33,9 @@ discover them automatically. More info here:
 https://docs.pytest.org/en/latest/fixture.html
 """
 
-import pandas as pd
 from pytest import fixture
-from s3fs import S3FileSystem
 
-from kedro.io.core import generate_current_version
-
-
-@fixture(params=[None])
-def filepath(tmp_path, request):
-    return request.param or str(tmp_path / "some" / "dir" / "test.csv")
-
-
-@fixture
-def dummy_dataframe():
-    return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+from kedro.io.core import generate_timestamp
 
 
 @fixture(params=[None])
@@ -57,14 +45,4 @@ def load_version(request):
 
 @fixture(params=[None])
 def save_version(request):
-    return request.param or generate_current_version()
-
-
-# pylint: disable=protected-access
-@fixture(autouse=True)
-def s3fs_cleanup():
-    # s3fs caches some connection details globally, which should be
-    # cleared so we get a clean slate every time we instantiate a S3FileSystem
-    yield
-    S3FileSystem._conn = {}
-    S3FileSystem._singleton = [None]
+    return request.param or generate_timestamp()

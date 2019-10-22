@@ -133,9 +133,9 @@ def proj_catalog(tmp_path, base_config):
 
 
 @pytest.fixture
-def proj_catalog_nested(tmp_path, base_config):
-    proj_catalog = tmp_path / "base" / "prod" / "catalog.yml"
-    _write_yaml(proj_catalog, {"prod": base_config})
+def proj_catalog_nested(tmp_path):
+    path = tmp_path / "base" / "catalog" / "dir" / "nested.yml"
+    _write_yaml(path, {"nested": {"type": "MemoryDataSet"}})
 
 
 use_config_dir = pytest.mark.usefixtures("create_config_dir")
@@ -190,29 +190,27 @@ class TestConfigLoader:
             ConfigLoader(conf_paths).get("catalog*")
 
     @pytest.mark.usefixtures("create_config_dir", "proj_catalog", "proj_catalog_nested")
-    def test_nested_subdirs(self, tmp_path):
+    def test_nested(self, tmp_path):
         """Test loading the config from subdirectories"""
-        catalog = ConfigLoader(str(tmp_path / "base")).get("**/catalog*")
-        assert (
-            catalog["cars"]["type"]
-            == catalog["prod"]["cars"]["type"]
-            == "CSVLocalDataSet"
-        )
+        catalog = ConfigLoader(str(tmp_path / "base")).get("catalog*", "catalog*/**")
+        assert catalog.keys() == {"cars", "trains", "nested"}
+        assert catalog["cars"]["type"] == "CSVLocalDataSet"
         assert catalog["cars"]["save_args"]["index"] is True
+        assert catalog["nested"]["type"] == "MemoryDataSet"
 
     @use_config_dir
     def test_nested_subdirs_duplicate(self, tmp_path, conf_paths, base_config):
         """Check the error when the configs from subdirectories contain
         duplicate keys"""
-        nested = tmp_path / "base" / "prod" / "catalog.yml"
+        nested = tmp_path / "base" / "catalog" / "dir" / "nested.yml"
         _write_yaml(nested, base_config)
 
         pattern = (
             r"Duplicate keys found in .*catalog\.yml "
-            r"and\:\n\- .*catalog\.yml\: cars, trains"
+            r"and\:\n\- .*nested\.yml\: cars, trains"
         )
         with pytest.raises(ValueError, match=pattern):
-            ConfigLoader(conf_paths).get("**/catalog*")
+            ConfigLoader(conf_paths).get("catalog*", "catalog*/**")
 
     def test_ignore_hidden_keys(self, tmp_path):
         """Check that the config key starting with `_` are ignored and also
@@ -290,3 +288,45 @@ class TestConfigLoader:
         )
         with pytest.raises(MissingConfigException, match=pattern):
             ConfigLoader(conf_paths).get("non-existent-pattern")
+
+    def test_duplicate_paths(self, tmp_path, caplog):
+        """Check that trying to load the same environment config multiple times logs a
+        warning and skips the reload"""
+        paths = [str(tmp_path / "base"), str(tmp_path / "base")]
+        _write_yaml(tmp_path / "base" / "catalog.yml", {"env": "base", "a": "a"})
+
+        with pytest.warns(UserWarning, match="Duplicate environment detected"):
+            conf = ConfigLoader(paths)
+        assert conf.conf_paths == paths[:1]
+
+        conf.get("catalog*", "catalog*/**")
+        log_messages = [record.getMessage() for record in caplog.records]
+        assert not log_messages
+
+    def test_overlapping_patterns(self, tmp_path, caplog):
+        """Check that same configuration file is not loaded more than once."""
+        paths = [
+            str(tmp_path / "base"),
+            str(tmp_path / "dev"),
+            str(tmp_path / "dev" / "user1"),
+        ]
+        _write_yaml(
+            tmp_path / "base" / "catalog0.yml", {"env": "base", "common": "common"}
+        )
+        _write_yaml(
+            tmp_path / "dev" / "catalog1.yml", {"env": "dev", "dev_specific": "wiz"}
+        )
+        _write_yaml(tmp_path / "dev" / "user1" / "catalog2.yml", {"user1_c2": True})
+        _write_yaml(tmp_path / "dev" / "user1" / "catalog3.yml", {"user1_c3": True})
+
+        catalog = ConfigLoader(paths).get("catalog*", "catalog*/**", "user1/catalog2*")
+        assert catalog == dict(
+            env="dev", common="common", dev_specific="wiz", user1_c2=True, user1_c3=True
+        )
+
+        log_messages = [record.getMessage() for record in caplog.records]
+        expected_path = (tmp_path / "dev" / "user1" / "catalog2.yml").resolve()
+        expected_message = "Config file(s): {} already processed, skipping loading...".format(
+            str(expected_path)
+        )
+        assert expected_message in log_messages

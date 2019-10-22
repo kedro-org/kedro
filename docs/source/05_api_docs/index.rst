@@ -79,20 +79,23 @@ Welcome to Kedro's API docs and tutorials!
    04_user_guide/02_setting_up_pycharm
    04_user_guide/03_configuration
    04_user_guide/04_data_catalog
-   04_user_guide/05_nodes_and_pipelines
-   04_user_guide/06_logging
-   04_user_guide/07_advanced_io
-   04_user_guide/08_pyspark
-   04_user_guide/09_developing_plugins
-
+   04_user_guide/05_nodes
+   04_user_guide/06_pipelines
+   04_user_guide/07_logging
+   04_user_guide/08_advanced_io
+   04_user_guide/09_pyspark
+   04_user_guide/10_developing_plugins
+   04_user_guide/11_ipython
+   04_user_guide/12_working_with_databricks
+   04_user_guide/13_journal
 
 .. toctree::
    :maxdepth: 2
    :caption: Resources
 
    06_resources/01_faq
-   06_resources/02_commands_reference
-   06_resources/03_ipython
+   06_resources/02_architecture_overview
+   06_resources/03_commands_reference
    06_resources/04_lint
 
 

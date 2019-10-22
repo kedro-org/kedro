@@ -21,6 +21,7 @@ The project directory will be structured as shown. You are free to adapt the fol
 getting-started     # Parent directory of the template
 ├── .gitignore      # Prevent staging of unnecessary files to git
 ├── kedro_cli.py    # A collection of Kedro command line interface (CLI) commands
+├── .kedro.yml      # Path to discover project context
 ├── README.md       # Project README
 ├── .ipython        # IPython startup scripts
 ├── conf            # Project configuration files
@@ -41,8 +42,9 @@ The project's source code can be found in the `src` directory. It contains 2 sub
 
 * `getting_started/` - this is the Python package for your project:
 
-	* `nodes/example.py` - Example node functions, which perform the actual operations on the data (more on this in the [Example pipeline](04_hello_world.md#example-pipeline) below)
-	* `pipeline.py` - Where the pipeline is created from the above nodes to form the business logic flow
+	* `pipelines/data_engineering/nodes.py` and `pipelines/data_science/nodes.py`- Example node functions, which perform the actual operations on the data (more on this in the [Example pipeline](04_hello_world.md#example-pipeline) below)
+	* `pipelines/data_engineering/pipeline.py` and `pipelines/data_science/pipeline.py` - Where each individual pipeline is created from the above nodes to form the business logic flow
+	* `pipeline.py` - Where the project's main pipelines are collated and named
 	* `run.py` - The main entry point of the project, which brings all the components together and runs the pipeline
 
 * `tests/`: This is where you should keep the project unit tests. Newly generated projects are preconfigured to run these tests using `pytest`. To kick off project testing, simply run the following from the project's root directory:
@@ -63,7 +65,7 @@ A `kedro` project consists of the following main components:
 +--------------+----------------------------------------------------------------------+
 | Component    | Description                                                          |
 +==============+======================================================================+
-| Data Catalog | A collection of datasets that can be used to form the data pipeline. | 
+| Data Catalog | A collection of datasets that can be used to form the data pipeline. |
 |              | Each dataset provides :code:`load` and :code:`save` capabilities for |
 |              | a specific data type, e.g. :code:`CSVS3DataSet` loads and saves data |
 |              | to a csv file in S3.                                                 |
@@ -139,7 +141,7 @@ kedro run
 
 This command calls the `main()` function from `src/getting_started/run.py`, which in turn does the following:
 
-1. Initiates the context:
+1. Instantiates `ProjectContext` class defined in `src/getting_started/run.py`:
     * Reads relevant configuration
     * Configures Python `logging`
     * Instantiates the `DataCatalog` and feeds a dictionary containing `parameters` config

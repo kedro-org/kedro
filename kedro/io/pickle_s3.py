@@ -30,15 +30,15 @@
 The underlying functionality is supported by the ``pickle`` library, so
 it supports all allowed options for loading and saving pickle files.
 """
+import copy
 import pickle
 from copy import deepcopy
-from functools import partial
 from pathlib import PurePosixPath
 from typing import Any, Dict, Optional
 
 from s3fs.core import S3FileSystem
 
-from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
+from kedro.io.core import AbstractVersionedDataSet, Version
 
 
 class PickleS3DataSet(AbstractVersionedDataSet):
@@ -50,7 +50,7 @@ class PickleS3DataSet(AbstractVersionedDataSet):
         Example:
         ::
 
-            >>> from kedro.io import PickleLocalDataSet
+            >>> from kedro.io import PickleS3DataSet
             >>> import pandas as pd
             >>>
             >>> dummy_data =  pd.DataFrame({'col1': [1, 2],
@@ -63,6 +63,9 @@ class PickleS3DataSet(AbstractVersionedDataSet):
             >>> data_set.save(dummy_data)
             >>> reloaded = data_set.load()
     """
+
+    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -104,24 +107,19 @@ class PickleS3DataSet(AbstractVersionedDataSet):
             PurePosixPath("{}/{}".format(bucket_name, filepath)),
             version,
             exists_function=_s3.exists,
-            glob_function=partial(_s3.glob, refresh=True),
+            glob_function=_s3.glob,
         )
-
-        default_load_args = {}  # type: Dict[str, Any]
-        default_save_args = {}  # type: Dict[str, Any]
-
         self._bucket_name = bucket_name
         self._credentials = _credentials
-        self._load_args = (
-            {**default_load_args, **load_args}
-            if load_args is not None
-            else default_load_args
-        )
-        self._save_args = (
-            {**default_save_args, **save_args}
-            if save_args is not None
-            else default_save_args
-        )
+
+        # Handle default load and save arguments
+        self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
+        if load_args is not None:
+            self._load_args.update(load_args)
+        self._save_args = copy.deepcopy(self.DEFAULT_SAVE_ARGS)
+        if save_args is not None:
+            self._save_args.update(save_args)
+
         self._s3 = _s3
 
     def _describe(self) -> Dict[str, Any]:
@@ -134,24 +132,18 @@ class PickleS3DataSet(AbstractVersionedDataSet):
         )
 
     def _load(self) -> Any:
-        load_path = PurePosixPath(self._get_load_path())
+        load_path = str(self._get_load_path())
 
-        with self._s3.open(str(load_path), mode="rb") as s3_file:
+        with self._s3.open(load_path, mode="rb") as s3_file:
             return pickle.loads(s3_file.read(), **self._load_args)
 
     def _save(self, data: Any) -> None:
-        save_path = PurePosixPath(self._get_save_path())
+        save_path = str(self._get_save_path())
         bytes_object = pickle.dumps(data, **self._save_args)
 
-        with self._s3.open(str(save_path), mode="wb") as s3_file:
+        with self._s3.open(save_path, mode="wb") as s3_file:
             s3_file.write(bytes_object)
 
-        load_path = PurePosixPath(self._get_load_path())
-        self._check_paths_consistency(load_path, save_path)
-
     def _exists(self) -> bool:
-        try:
-            load_path = self._get_load_path()
-        except DataSetError:
-            return False
-        return self._s3.isfile(str(PurePosixPath(load_path)))
+        load_path = str(self._get_load_path())
+        return self._s3.isfile(load_path)

@@ -31,3 +31,4 @@ This module contains functionality which we might consider moving into the
 `kedro.io` module (e.g. additional ``AbstractDataSet``s and
 extensions/alternative ``DataCatalog``s.
 """
+from .core import DefaultArgumentsMixIn  # NOQA

@@ -1,12 +1,12 @@
 # Setting up Visual Studio Code
 
-> *Note:* This documentation is based on `Kedro 0.14.3`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 Start by opening a new project directory in VS Code and installing the Python plugin under **Tools and languages**:
 
 ![](images/vscode_startup.png)
 
-Python is an interpreted language; to run Python code you must tell VS Code which interpreter to use. From within VS Code, select a Python 3 interpreter by opening the **Command Palette** (`Cmd + Shift + P` for macOS), start typing the **Python: Select Interpreter** command to search, then select the command. 
+Python is an interpreted language; to run Python code you must tell VS Code which interpreter to use. From within VS Code, select a Python 3 interpreter by opening the **Command Palette** (`Cmd + Shift + P` for macOS), start typing the **Python: Select Interpreter** command to search, then select the command.
 
 At this stage, you should be able to see the `conda` environment that you have created. Select the environment:
 
@@ -111,9 +111,9 @@ set PYTHONPATH=C:/path/to/project/src;%PYTHONPATH%
 
 You can find more information about setting up environmental variables [here](https://code.visualstudio.com/docs/python/environments#_environment-variable-definitions-file).
 
-Go to **Debug > Add Configurations**. 
+Go to **Debug > Add Configurations**.
 
-> *Note:* If you encounter the following error: `Cannot read property 'openConfigFile' of undefined`, you can manually create `launch.json` file in your project root folder and paste the configuration from below.
+> *Note:* If you encounter the following error: `Cannot read property 'openConfigFile' of undefined`, you can manually create `launch.json` file in `.vscode` directory and paste the configuration from below.
 
 Edit the `launch.json` that opens in the editor with:
 
@@ -135,7 +135,7 @@ Edit the `launch.json` that opens in the editor with:
 }
 ```
 
-To add a breakpoint in your `run.py` script, for example, click on the left hand side of the line of code:
+To add a breakpoint in your `pipeline.py` script, for example, click on the left hand side of the line of code:
 
 ![](images/vscode_set_breakpoint.png)
 
@@ -153,7 +153,7 @@ Execution should stop at the breakpoint:
 
 ### Advanced: Remote Interpreter / Debugging
 
-It is possible to debug remotely using VS Code. The following example assumes SSH access is available on the remote computer (running a Unix-like OS) running the code that will be debugged. 
+It is possible to debug remotely using VS Code. The following example assumes SSH access is available on the remote computer (running a Unix-like OS) running the code that will be debugged.
 
 First install the `ptvsd` Python library on both the local and remote computer using the following command (execute it on both computers in the appropriate `conda` environment):
 

@@ -45,6 +45,16 @@ def txt_data_set(filepath_txt, request):
     return TextLocalDataSet(filepath=filepath_txt, **request.param)
 
 
+@pytest.fixture(params=[dict()])
+def txt_data_set_with_args(filepath_txt, request):
+    return TextLocalDataSet(
+        filepath=filepath_txt,
+        load_args={"errors": "ignore"},
+        save_args={"errors": "ignore"},
+        **request.param
+    )
+
+
 @pytest.fixture
 def versioned_txt_data_set(filepath_txt, load_version, save_version):
     return TextLocalDataSet(
@@ -67,6 +77,12 @@ class TestTextLocalDataSet:
         txt_data_set.save(sample_text)
         assert Path(filepath_txt).read_text("utf-8") == sample_text
 
+    def test_should_write_to_file_with_args(
+        self, txt_data_set_with_args, sample_text, filepath_txt
+    ):
+        txt_data_set_with_args.save(sample_text)
+        assert Path(filepath_txt).read_text("utf-8") == sample_text
+
     def test_load_missing_txt_file(self, txt_data_set):
         """Check the error raised when trying to load nonexistent txt file."""
         pattern = r"Failed while loading data from data set TextLocalDataSet"
@@ -76,6 +92,12 @@ class TestTextLocalDataSet:
     def test_should_read_from_file(self, txt_data_set, sample_text, filepath_txt):
         traditional_write(filepath_txt, sample_text)
         assert sample_text == txt_data_set.load()
+
+    def test_should_read_from_file_with_args(
+        self, txt_data_set_with_args, sample_text, filepath_txt
+    ):
+        traditional_write(filepath_txt, sample_text)
+        assert sample_text == txt_data_set_with_args.load()
 
     def test_assess_if_file_exists(self, txt_data_set, sample_text, filepath_txt):
         assert not txt_data_set.exists()
@@ -131,10 +153,8 @@ class TestTextLocalDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            r"Save path `.*/{}/test\.txt` did not match load path "
-            r"`.*/{}/test\.txt` for TextLocalDataSet\(.+\)".format(
-                save_version, load_version
-            )
+            r"Save version `{0}` did not match load version `{1}` "
+            r"for TextLocalDataSet\(.+\)".format(save_version, load_version)
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_txt_data_set.save(sample_text)

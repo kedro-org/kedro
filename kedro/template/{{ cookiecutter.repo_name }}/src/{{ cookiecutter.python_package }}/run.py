@@ -28,134 +28,68 @@
 
 """Application entry point."""
 
-import logging.config
 from pathlib import Path
-from typing import Iterable
-from warnings import warn
+from typing import Iterable, Type, Dict
 
-from kedro.cli.utils import KedroCliError
-from kedro.config import ConfigLoader, MissingConfigException
-from kedro.io import DataCatalog
-from kedro.runner import SequentialRunner
-from kedro.utils import load_obj
+from kedro.context import KedroContext, load_context, KedroContextError
+from kedro.runner import AbstractRunner
+from kedro.pipeline import Pipeline
 
-from {{ cookiecutter.python_package }}.pipeline import create_pipeline
-
-# Name of root directory containing project configuration.
-CONF_ROOT = "conf"
-
-# Default configuration environment to be used for running the pipeline.
-# Change this constant value if you want to load configuration
-# from a different location.
-DEFAULT_RUN_ENV = "local"
+from {{ cookiecutter.python_package }}.pipeline import create_pipelines
 
 
-def __kedro_context__():
-    """Provide this project's context to ``kedro`` CLI and plugins.
-    Please do not rename or remove, as this will break the CLI tool.
-
-    Plugins may request additional objects from this method.
-    """
-    return {
-        "get_config": get_config,
-        "create_catalog": create_catalog,
-        "create_pipeline": create_pipeline,
-        "template_version": "{{ cookiecutter.kedro_version }}",
-        "project_name": "{{ cookiecutter.project_name }}",
-        "project_path": Path.cwd(),
-    }
-
-
-def get_config(project_path: str, env: str = None, **kwargs) -> ConfigLoader:
-    """Loads Kedro's configuration at the root of the project.
-
-    Args:
-        project_path: The root directory of the Kedro project.
-        env: The environment used for loading configuration.
-        kwargs: Ignore any additional arguments added in the future.
-
-    Returns:
-        ConfigLoader which can be queried to access the project config.
+class ProjectContext(KedroContext):
+    """Users can override the remaining methods from the parent class here, or create new ones
+    (e.g. as required by plugins)
 
     """
-    project_path = Path(project_path)
-    env = env or DEFAULT_RUN_ENV
-    conf_paths = [
-        str(project_path / CONF_ROOT / "base"),
-        str(project_path / CONF_ROOT / env),
-    ]
-    return ConfigLoader(conf_paths)
 
+    project_name = "{{ cookiecutter.project_name }}"
+    project_version = "{{ cookiecutter.kedro_version }}"
 
-def create_catalog(config: ConfigLoader, **kwargs) -> DataCatalog:
-    """Loads Kedro's ``DataCatalog``.
-
-    Args:
-        config: ConfigLoader which can be queried to access the project config.
-        kwargs: Ignore any additional arguments added in the future.
-
-    Returns:
-        DataCatalog defined in `catalog.yml`.
-
-    """
-    conf_logging = config.get("logging*", "logging*/**")
-    logging.config.dictConfig(conf_logging)
-    conf_catalog = config.get("catalog*", "catalog*/**")
-
-    try:
-        conf_creds = config.get("credentials*", "credentials*/**")
-    except MissingConfigException:
-        warn("Your Kedro project is missing a credentials file!")
-        conf_creds = None
-
-    conf_params = config.get("parameters*", "parameters*/**")
-    logging.config.dictConfig(conf_logging)
-    catalog = DataCatalog.from_config(conf_catalog, conf_creds)
-    catalog.add_feed_dict({"parameters": conf_params})
-    return catalog
+    def _get_pipelines(self) -> Dict[str, Pipeline]:
+        return create_pipelines()
 
 
 def main(
     tags: Iterable[str] = None,
     env: str = None,
-    runner: str = None,
+    runner: Type[AbstractRunner] = None,
+    node_names: Iterable[str] = None,
+    from_nodes: Iterable[str] = None,
+    to_nodes: Iterable[str] = None,
+    from_inputs: Iterable[str] = None,
 ):
     """Application main entry point.
 
     Args:
         tags: An optional list of node tags which should be used to
             filter the nodes of the ``Pipeline``. If specified, only the nodes
-            containing *any* of these tags will be added to the ``Pipeline``.
+            containing *any* of these tags will be run.
         env: An optional parameter specifying the environment in which
-            the ``Pipeline`` should be run. If not specified defaults to "local".
+            the ``Pipeline`` should be run.
         runner: An optional parameter specifying the runner that you want to run
             the pipeline with.
-
-    Raises:
-        KedroCliError: If the resulting ``Pipeline`` is empty.
+        node_names: An optional list of node names which should be used to filter
+            the nodes of the ``Pipeline``. If specified, only the nodes with these
+            names will be run.
+        from_nodes: An optional list of node names which should be used as a
+            starting point of the new ``Pipeline``.
+        to_nodes: An optional list of node names which should be used as an
+            end point of the new ``Pipeline``.
+        from_inputs: An optional list of input datasets which should be used as a
+            starting point of the new ``Pipeline``.
 
     """
-    # Report project name
-    logging.info("** Kedro project {}".format(Path.cwd().name))
-
-    # Load Catalog
-    conf = get_config(project_path=str(Path.cwd()), env=env)
-    catalog = create_catalog(config=conf)
-
-    # Load the pipeline
-    pipeline = create_pipeline()
-    pipeline = pipeline.only_nodes_with_tags(*tags) if tags else pipeline
-    if not pipeline.nodes:
-        if tags:
-            raise KedroCliError("Pipeline contains no nodes with tags: " + str(tags))
-        raise KedroCliError("Pipeline contains no nodes")
-
-    # Load the runner
-    # When either --parallel or --runner is used, class_obj is assigned to runner
-    runner = load_obj(runner, "kedro.runner") if runner else SequentialRunner
-
-    # Run the runner
-    runner().run(pipeline, catalog)
+    project_context = load_context(Path.cwd(), env=env)
+    project_context.run(
+        tags=tags,
+        runner=runner,
+        node_names=node_names,
+        from_nodes=from_nodes,
+        to_nodes=to_nodes,
+        from_inputs=from_inputs,
+    )
 
 
 if __name__ == "__main__":

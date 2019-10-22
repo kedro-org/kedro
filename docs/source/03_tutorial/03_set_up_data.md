@@ -14,22 +14,46 @@ This tutorial will make use of fictional datasets for spaceflight companies shut
 
 The spaceflight tutorial has three files and uses two data formats: `.csv` and `.xlsx`. Download and save the files to the `data/01_raw/` folder of your project directory:
 
-* [reviews.csv](https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/reviews.csv)
-* [companies.csv](https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/companies.csv)
-* [shuttles.xlsx](https://github.com/quantumblacklabs/kedro/blob/develop/docs/source/03_tutorial/data/shuttles.xlsx?raw=true)
+* [reviews.csv](https://quantumblacklabs.github.io/kedro/reviews.csv)
+* [companies.csv](https://quantumblacklabs.github.io/kedro/companies.csv)
+* [shuttles.xlsx](https://quantumblacklabs.github.io/kedro/shuttles.xlsx)
 
-You can [download the files from GitHub](https://www.quora.com/How-do-I-download-something-from-GitHub) using [cURL](https://curl.haxx.se/download.html) or [Wget](https://www.gnu.org/software/wget/).
-
-An example of downloading [reviews.csv](https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/reviews.csv) to your current directory is done by running this in your terminal or command line:
+Here is an example of how you can [download the files from GitHub](https://www.quora.com/How-do-I-download-something-from-GitHub) to `data/01_raw` directory inside your project using [cURL](https://curl.haxx.se/download.html) in a Unix terminal:
 
 ```bash
-curl -O https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/reviews.csv
+# reviews
+curl -o data/01_raw/reviews.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/reviews.csv
+# companies
+curl -o data/01_raw/companies.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/companies.csv
+# shuttles
+curl -o data/01_raw/shuttles.xlsx https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/shuttles.xlsx
 ```
 
-Or through using Wget:
+Or through using [Wget](https://www.gnu.org/software/wget/):
 
 ```bash
-wget https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/reviews.csv
+# reviews
+wget -O data/01_raw/reviews.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/reviews.csv
+# companies
+wget -O data/01_raw/companies.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/companies.csv
+# shuttles
+wget -O data/01_raw/shuttles.xlsx https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/shuttles.xlsx
+```
+
+Alternatively, if you are a Windows user, try [Wget for Windows](https://eternallybored.org/misc/wget/) and the following commands instead:
+
+```bat
+wget -O data\01_raw\reviews.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/reviews.csv
+wget -O data\01_raw\companies.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/companies.csv
+wget -O data\01_raw\shuttles.xlsx https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/shuttles.xlsx
+```
+
+or [cURL for Windows](https://curl.haxx.se/windows/):
+
+```bat
+curl -o data\01_raw\reviews.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/reviews.csv
+curl -o data\01_raw\companies.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/companies.csv
+curl -o data\01_raw\shuttles.xlsx https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/shuttles.xlsx
 ```
 
 
@@ -61,16 +85,10 @@ reviews:
 If you want to check whether Kedro loads the data correctly, open a `kedro ipython` session and run:
 
 ```python
-io.load('companies').head()
+context.catalog.load('companies').head()
 ```
 
-This should show you the first five rows of the dataset. If you want to explore more of it before moving on with the project:
-
-```python
-df = io.load('companies')
-```
-
-The entire `companies` dataset is loaded into a `pandas` DataFrame and you can play with it as you wish.
+This should show you the first five rows of the dataset. The entire `companies` dataset is loaded into a `pandas` DataFrame and you can play with it as you wish.
 
 When you have finished, simply close `ipython` session by typing the following:
 
@@ -85,13 +103,29 @@ Often, real world data is stored in formats that are not supported by Kedro. We 
 
 Let’s create a custom dataset implementation which will allow you to load and save `.xlsx` files.
 
-To keep your code well-structured you should create a Python sub-package called **`kedro_tutorial.io`**. You can do that by running this in your terminal:
+To keep your code well-structured you should create a Python sub-package called **`kedro_tutorial.io`**. You can do that by running this in your Unix terminal:
 
 ```bash
 mkdir -p src/kedro_tutorial/io && touch src/kedro_tutorial/io/__init__.py
 ```
 
-Creating new custom dataset implementations is done by creating a class that extends and implements all methods from `AbstractDataSet`. To implement a class that will allow you to load and save Excel files, you need to create the file `src/kedro_tutorial/io/xls_local.py` and paste the following into it:
+Or, if you are a Windows user:
+
+```bat
+mkdir src\kedro_tutorial\io && type nul > src\kedro_tutorial\io\__init__.py
+```
+
+Creating new custom dataset implementations is done by creating a class that extends and implements all methods from `AbstractDataSet`. To implement a class that will allow you to load and save Excel files, you need to create the file `src/kedro_tutorial/io/xls_local.py` by running in your Unix terminal:
+
+```bash
+touch src/kedro_tutorial/io/xls_local.py
+```
+For Windows, try:
+```bat
+type nul > src\kedro_tutorial\io\xls_local.py
+```
+
+and paste the following into the newly created file:
 
 ```python
 """ExcelLocalDataSet loads and saves data to a local Excel file. The
@@ -112,6 +146,7 @@ class ExcelLocalDataSet(AbstractDataSet):
 
     Example:
     ::
+
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
@@ -181,7 +216,7 @@ class ExcelLocalDataSet(AbstractDataSet):
         return isfile(self._filepath)
 ```
 
-And update the `catalog.yml` file by adding the following:
+And update the `conf/base/catalog.yml` file by adding the following:
 
 ```yaml
 shuttles:
@@ -194,7 +229,7 @@ shuttles:
 A good way to test that everything works as expected is by trying to load the dataset within a new `kedro ipython` session:
 
 ```python
-io.load('shuttles').head()
+context.catalog.load('shuttles').head()
 ```
 
 ### Contributing a custom dataset implementation

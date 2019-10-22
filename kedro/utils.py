@@ -29,12 +29,11 @@
 """This module provides a set of helper functions being used across different components
 of kedro package.
 """
-
 import importlib
 from typing import Any
 
 
-def load_obj(obj_path: str, default_obj_path: str) -> Any:
+def load_obj(obj_path: str, default_obj_path: str = "") -> Any:
     """Extract an object from a given path.
 
         Args:

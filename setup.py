@@ -38,7 +38,12 @@ here = path.abspath(path.dirname(__file__))
 
 # get package version
 with open(path.join(here, name, "__init__.py"), encoding="utf-8") as f:
-    version = re.search(r'__version__ = ["\']([^"\']+)', f.read()).group(1)
+    result = re.search(r'__version__ = ["\']([^"\']+)', f.read())
+
+    if not result:
+        raise ValueError("Can't find the version in kedro/__init__.py")
+
+    version = result.group(1)
 
 # get the dependencies and installs
 with open("requirements.txt", "r", encoding="utf-8") as f:
@@ -81,7 +86,8 @@ setup(
     install_requires=requires,
     author="QuantumBlack Labs",
     entry_points={"console_scripts": ["kedro = kedro.cli:main"]},
-    package_data={name: template_files + doc_html_files},
+    package_data={name: ["py.typed"] + template_files + doc_html_files},
+    zip_safe=False,
     keywords="pipelines, machine learning, data pipelines, data science, data engineering",
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -102,7 +108,7 @@ setup(
             "tornado>=4.2, <6.0",
             "ipykernel>=4.8.1, <5.0",
         ],
-        "pyspark": ["pyspark>=2.2.0, <3.0"],
+        "pyspark": ["pyspark>=2.2.0, <3.0", "hdfs>=2.5.8, <3.0"],
         "notebook_templates": ["nbconvert>=5.3.1, <6.0", "nbformat>=4.4.0, <5.0"],
         "azure": [
             "azure-storage-blob>=1.1.0, <2.0",
@@ -110,5 +116,6 @@ setup(
             "azure-storage-queue>=1.1.0, <2.0",
         ],
         "bioinformatics": ["biopython>=1.73, <2.0"],
+        "matplotlib": ["matplotlib>=3.0.3, <4.0"],
     },
 )

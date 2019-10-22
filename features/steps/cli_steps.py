@@ -46,7 +46,7 @@ from features.steps.sh_run import ChildTerminatingPopen, check_run, run
 OK_EXIT_CODE = 0
 
 
-TEST_JUPYTER_NB_SOURCE_ORG = r"""
+TEST_JUPYTER_ORG = r"""
 {
  "cells": [
   {
@@ -84,13 +84,17 @@ TEST_JUPYTER_NB_SOURCE_ORG = r"""
 """
 
 # The difference
-TEST_JUPYTER_NB_SOURCE_AFTER_EXEC = r"""
+TEST_JUPYTER_AFTER_EXEC = r"""
 {
  "cells": [
   {
    "cell_type": "code",
    "execution_count": 1,
-   "metadata": {},
+   "metadata": {
+    "tags": [
+     "node"
+    ]
+   },
    "outputs": [
     {
      "name": "stdout",
@@ -162,11 +166,12 @@ def _create_config_file(context, include_example):
     context.project_name = "project-dummy"
     root_project_dir = context.temp_dir / context.project_name
     context.root_project_dir = root_project_dir
+    context.package_name = context.project_name.replace("-", "_")
     config = {
         "project_name": context.project_name,
         "repo_name": context.project_name,
         "output_dir": str(context.temp_dir),
-        "python_package": context.project_name.replace("-", "_"),
+        "python_package": context.package_name,
         "include_example": include_example,
     }
     with context.config_file.open("w") as config_file:
@@ -237,17 +242,6 @@ def create_new_env(context, env_name):
         yaml.dump(logging_json, config_file, default_flow_style=False)
 
 
-@given("the example test has been set to fail")
-def modify_example_test_to_fail(context):
-    """Modify test_run.py to fail."""
-    path_to_example_test = context.root_project_dir / "src" / "tests" / "test_run.py"
-    test_run_contents = path_to_example_test.read_text("utf-8")
-    failed_test_str = test_run_contents.replace(
-        "test_create_catalog():", "test_create_catalog():\n    assert False"
-    )
-    path_to_example_test.write_text(failed_test_str)
-
-
 @given('the python package "{package}" has been uninstalled')
 def uninstall_package_via_pip(context, package):
     """Uninstall a python package using pip."""
@@ -255,6 +249,7 @@ def uninstall_package_via_pip(context, package):
 
 
 @given("I have installed the project's python package")
+@when("I install the project's python package")
 def install_project_package_via_pip(context):
     """Install a python package using pip."""
     dist_dir = context.root_project_dir / "src" / "dist"
@@ -273,11 +268,11 @@ def init_git_repo(context):
 
 @given("I have added a test jupyter notebook")
 def add_test_jupyter_nb(context):
-    """Create a test jupyter notebook using TEST_JUPYTER_NB_SOURCE_ORG."""
+    """Create a test jupyter notebook using TEST_JUPYTER_ORG."""
     with open(
         str(context.root_project_dir / "notebooks" / "hello_world.ipynb"), "wt"
     ) as test_nb_fh:
-        test_nb_fh.write(TEST_JUPYTER_NB_SOURCE_ORG)
+        test_nb_fh.write(TEST_JUPYTER_ORG)
 
 
 @given("I have run a non-interactive kedro new")
@@ -310,6 +305,16 @@ def commit_changes_to_git(context):
     """Commit changes to git"""
     with util.chdir(context.root_project_dir):
         check_run("git commit -m 'Change {time}'".format(time=time()))
+
+
+@given("I have removed kedro from the requirements")
+def remove_req(context: behave.runner.Context):
+    reqs_path = context.root_project_dir / "src" / "requirements.txt"
+    if reqs_path.is_file():
+        old_reqs = reqs_path.read_text()
+        new_reqs = old_reqs.replace("kedro==", "#kedro==")
+        assert not old_reqs == new_reqs
+        reqs_path.write_text(new_reqs)
 
 
 @when('I execute the kedro command "{command}"')
@@ -366,19 +371,25 @@ def exec_notebook(context, command):
     # Jupyter notebook forks a child process from a parent process, and
     # only kills the parent process when it is terminated
     context.result = ChildTerminatingPopen(
-        cmd + ["--no-browser"], env=context.env, cwd=str(context.root_project_dir)
+        cmd, env=context.env, cwd=str(context.root_project_dir)
     )
+
+
+@when("Wait until the process is finished")
+def wait(context):
+    """Wait for child process to terminate."""
+    context.result.wait()
 
 
 @when("I execute the test jupyter notebook and save changes")
 def simulate_nb_execution(context):
-    """Change test jupyter notebook to TEST_JUPYTER_NB_SOURCE_AFTER_EXEC
+    """Change test jupyter notebook to TEST_JUPYTER_AFTER_EXEC
     simulate that it was executed and output was saved.
     """
     with open(
         str(context.root_project_dir / "notebooks" / "hello_world.ipynb"), "wt"
     ) as test_nb_fh:
-        test_nb_fh.write(TEST_JUPYTER_NB_SOURCE_AFTER_EXEC)
+        test_nb_fh.write(TEST_JUPYTER_AFTER_EXEC)
 
 
 @when("I remove the notebooks directory")
@@ -393,6 +404,13 @@ def do_git_reset_hard(context):
     """Perform a hard git reset"""
     with util.chdir(context.root_project_dir):
         check_run("git reset --hard HEAD")
+
+
+@when("I add {dependency} to the requirements")
+def add_req(context: behave.runner.Context, dependency: str):
+    reqs_path = context.root_project_dir / "src" / "requirements.in"
+    if reqs_path.is_file():
+        reqs_path.write_text(reqs_path.read_text() + "\n" + str(dependency) + "\n")
 
 
 @then("CLI should print the version in an expected format")
@@ -423,7 +441,7 @@ def check_empty_pipeline_exists(context):
         / context.project_name.replace("-", "_")
         / "pipeline.py"
     )
-    assert "pipeline = Pipeline([])" in pipeline_file.read_text("utf-8")
+    assert '"__default__": Pipeline([])' in pipeline_file.read_text("utf-8")
 
 
 @then("the pipeline should contain nodes")
@@ -536,7 +554,7 @@ def check_error_message_printed(context, msg):
 @then("there should be an additional cell in the jupyter notebook")
 def check_additional_cell_added(context):
     """Check that an addiitonal cell has been added compared to notebook
-    coded by TEST_JUPYTER_NB_SOURCE_ORG.
+    coded by TEST_JUPYTER_ORG.
     """
     with open(
         str(context.root_project_dir / "notebooks" / "hello_world.ipynb")
@@ -598,10 +616,39 @@ def check_jupyter_lab_proc_on_port(context: behave.runner.Context, port: int):
 
 
 @then("docs should be generated")
-def check_docs_generated(context):
+def check_docs_generated(context: behave.runner.Context):
     """Check that new project docs are generated."""
     index_html = (
         context.root_project_dir / "docs" / "build" / "html" / "index.html"
     ).read_text("utf-8")
     project_repo = context.project_name.replace("-", "_")
     assert "Welcome to project’s %s API docs!" % project_repo in index_html
+
+
+@then("requirements should be generated")
+def check_reqs_generated(context: behave.runner.Context):
+    """Check that new project docs are generated."""
+    reqs_path = context.root_project_dir / "src" / "requirements.in"
+    assert reqs_path.is_file()
+    assert (
+        "This file is autogenerated by pip-compile"
+        in (context.root_project_dir / "src" / "requirements.txt").read_text()
+    )
+
+
+@then("{dependency} should be in the requirements")
+def check_dependency_in_reqs(context: behave.runner.Context, dependency: str):
+    reqs_path = context.root_project_dir / "src" / "requirements.txt"
+    assert dependency in reqs_path.read_text()
+
+
+@then("Code cell with node tag should be converted into kedro node")
+def check_cell_conversion(context: behave.runner.Context):
+    converted_file = (
+        context.root_project_dir
+        / "src"
+        / context.package_name
+        / "nodes"
+        / "hello_world.py"
+    )
+    assert "Hello World!" in converted_file.read_text()

@@ -2,7 +2,7 @@
 
 Thank you for considering contributing to Kedro! It's people like you that make Kedro such a great tool. We welcome contributions in the form of pull requests (PRs), issues or code reviews. You can add to code, [documentation](https://kedro.readthedocs.io), or simply send us spelling and grammar fixes or extra tests. Contribute anything that you think improves the community for us all!
 
-The following sections describe our vision and the contribution process.
+The following sections describe our vision and contribution process.
 
 ## Vision
 
@@ -35,7 +35,7 @@ If you're unsure where to begin contributing to Kedro, please start by looking t
 We focus on three areas for contribution: `core`, [`contrib`](/kedro/contrib/) or `plugin`:
 - `core` refers to the primary Kedro library
 - [`contrib`](/kedro/contrib/) refers to features that could be added to `core` that do not introduce too many depencies or require new Kedro CLI commands to be created e.g. adding a new dataset to the `io` data management module
-- [`plugin`](https://kedro.readthedocs.io/en/latest/04_user_guide/09_developing_plugins.html) refers to new functionality that requires a Kedro CLI command e.g. adding in Airflow functionality
+- [`plugin`](https://kedro.readthedocs.io/en/latest/04_user_guide/10_developing_plugins.html) refers to new functionality that requires a Kedro CLI command e.g. adding in Airflow functionality
 
 Typically, we only accept small contributions for the `core` Kedro library but accept new features as `plugin`s or additions to the [`contrib`](/kedro/contrib/) module. We regularly review [`contrib`](/kedro/contrib/) and may migrate modules to `core` if they prove to be essential for the functioning of the framework or if we believe that they are used by most projects.
 
@@ -65,6 +65,9 @@ def count_truthy(elements: List[Any]) -> int:
 
 > *Note:* We only accept contributions under the Apache 2.0 license and you should have permission to share the submitted code.
 
+Please note that each code file should have a licence header, include the content of [`legal_header.txt`](https://github.com/quantumblacklabs/kedro/blob/master/legal_header.txt).
+There is an automated check to verify that it exists. The check will highlight any issues and suggest a solution.
+
 ### Branching conventions
 We use a branching model that helps us keep track of branches in a logical, consistent way. All branches should have the hyphen-separated convention of: `<type-of-change>/<short-description-of-change>` e.g. `contrib/io-dataset`
 
@@ -80,31 +83,42 @@ We use a branching model that helps us keep track of branches in a logical, cons
 
 Small contributions are accepted for the `core` library:
 
- 1. Fork the project
- 2. Develop your contribution in a new branch and open a PR against the `develop` branch
- 3. Make sure the CI builds are green (have a look at the section [Running checks locally](/CONTRIBUTING.md#running-checks-locally) below)
- 4. Update the PR according to the reviewer's comments
+ 1. Fork the project by clicking **Fork** in the top-right corner of the [Kedro GitHub repository](https://github.com/quantumblacklabs/kedro) and then choosing the target account the repository will be forked to.
+ 2. Create a feature branch on your forked repository and push all your local changes to that feature branch.
+ 3. Before submitting a pull request (PR), please ensure that unit, end-to-end tests and linting are passing for your changes by running `make test`, `make e2e-tests` and `make lint` locally, have a look at the section [Running checks locally](/CONTRIBUTING.md#running-checks-locally) below.
+ 4. Open a PR against the `quantumblacklabs:develop` branch from your feature branch.
+ 5. Update the PR according to the reviewer's comments.
+ 6. Your PR will be merged by the Kedro team once all the comments are addressed.
+
+ > _Note:_ We will work with you to complete your contribution but we reserve the right to takeover abandoned PRs.
 
 ## `contrib` contribution process
 
 You can add new work to `contrib` if you do not need to create a new Kedro CLI command:
 
- 1. Create an [issue](https://github.com/quantumblacklabs/kedro/issues) describing your contribution
- 2. Fork the project and work in [`contrib`](/kedro/contrib/)
- 3. Develop your contribution in a new branch and open a PR against the `develop` branch
- 4. Make sure the CI builds are green (have a look at the section [Running checks locally](CONTRIBUTING.md#ci--cd-and-running-checks-locally) below)
- 5. Include a `README.md` with instructions on how to use your contribution
- 6. Update the PR according to the reviewer's comments
+ 1. Create an [issue](https://github.com/quantumblacklabs/kedro/issues) describing your contribution.
+ 2. Fork the project by clicking **Fork** in the top-right corner of the [Kedro GitHub repository](https://github.com/quantumblacklabs/kedro) and then choosing the target account the repository will be forked to.
+ 3. Work in [`contrib`](/kedro/contrib/) and create a feature branch on your forked repository and push all your local changes to that feature branch.
+ 4. Before submitting a pull request, please ensure that unit, e2e tests and linting are passing for your changes by running `make test`, `make e2e-tests` and `make lint` locally, have a look at the section [Running checks locally](/CONTRIBUTING.md#running-checks-locally) below.
+ 5. Include a `README.md` with instructions on how to use your contribution.
+ 6. Open a PR against the `quantumblacklabs:develop` branch from your feature branch and reference your issue in the PR description (e.g., `Resolves #<issue-number>`).
+ 7. Update the PR according to the reviewer's comments.
+ 8. Your PR will be merged by the Kedro team once all the comments are addressed.
+
+ > _Note:_ We will work with you to complete your contribution but we reserve the right to takeover abandoned PRs.
 
 ## `plugin` contribution process
 
-See the [`plugin` development documentation](https://kedro.readthedocs.io/en/latest/04_user_guide/09_developing_plugins.html) for guidance on how to design and develop a Kedro `plugin`.
+See the [`plugin` development documentation](https://kedro.readthedocs.io/en/latest/04_user_guide/10_developing_plugins.html) for guidance on how to design and develop a Kedro `plugin`.
 
 ## CI / CD and running checks locally
-To run E2E tests you need to install the test requirements which includes `behave`, do this using the following command:
+To run E2E tests you need to install the test requirements which includes `behave`.
+Also we use [pre-commit](https://pre-commit.com) hooks for the repository to run the checks automatically.
+It can all be installed using the following command:
 
 ```bash
-pip install -r test_requirements.txt
+make install-test-requirements
+make install-pre-commit
 ```
 
 ### Running checks locally
@@ -146,3 +160,26 @@ make build-docs
 This command will only work on Unix-like systems and requires `pandoc` to be installed.
 
 > ❗ Running `make build-docs` in a Python 3.5 environment may sometimes yield multiple warning messages like the following: `MemoryDataSet.md: WARNING: document isn't included in any toctree`. You can simply ignore them or switch to Python 3.6+ when building documentation.
+
+## Hints on pre-commit usage
+The checks will automatically run on all the changed files on each commit.
+Even more extensive set of checks (including the heavy set of `pylint` checks)
+will run before the push.
+
+The pre-commit/pre-push checks can be omitted by running with `--no-verify` flag, as per below:
+
+```bash
+git commit --no-verify <...>
+git push --no-verify <...>
+```
+(`-n` alias works for `git commit`, but not for `git push`)
+
+All checks will run during CI build, so skipping checks on push will
+not allow you to merge your code with failing checks.
+
+You can uninstall the pre-commit hooks by running:
+
+```bash
+make uninstall-pre-commit
+```
+`pre-commit` will still be used by `make lint`, but will not install the git hooks.

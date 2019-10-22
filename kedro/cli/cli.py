@@ -30,14 +30,15 @@
 
 This module implements commands available from the kedro CLI.
 """
-import glob
 import importlib
 import os
 import re
 import shutil
 import sys
 import traceback
+import warnings
 import webbrowser
+from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Union
@@ -56,8 +57,7 @@ KEDRO_PATH = os.path.dirname(kedro.__file__)
 TEMPLATE_PATH = os.path.join(KEDRO_PATH, "template")
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
-NO_DEFAULT = object()
-_KEDRO_CONTEXT = {"verbose": True}
+_VERBOSE = True
 
 LOGO = r"""
  _            _
@@ -86,7 +86,16 @@ def cli(verbose):
     When inside a Kedro project (created with `kedro new`) commands from
     the project's `kedro_cli.py` file will also be available here.
     """
-    _KEDRO_CONTEXT["verbose"] = verbose
+    global _VERBOSE  # pylint: disable=global-statement
+    _VERBOSE = verbose
+
+
+ENTRY_POINT_GROUPS = {
+    "global": "kedro.global_commands",
+    "project": "kedro.project_commands",
+    "init": "kedro.init",
+    "line_magic": "kedro.line_magic",
+}
 
 
 @cli.command()
@@ -99,6 +108,24 @@ def info():
         "projects. It is developed as part of\n"
         "the Kedro initiative at QuantumBlack."
     )
+
+    plugin_versions = {}
+    plugin_hooks = defaultdict(set)
+    for hook, group in ENTRY_POINT_GROUPS.items():
+        for entry_point in pkg_resources.iter_entry_points(group=group):
+            module_name = entry_point.module_name.split(".")[0]
+            plugin_version = pkg_resources.get_distribution(module_name).version
+            plugin_versions[module_name] = plugin_version
+            plugin_hooks[module_name].add(hook)
+
+    click.echo()
+    if plugin_versions:
+        click.echo("Installed plugins:")
+        for plugin_name, plugin_version in sorted(plugin_versions.items()):
+            hooks = ",".join(sorted(plugin_hooks[plugin_name]))
+            click.echo("{}: {} (hooks:{})".format(plugin_name, plugin_version, hooks))
+    else:
+        click.echo("No plugins installed")
 
 
 @cli.command(short_help="Create a new kedro project.")
@@ -139,7 +166,7 @@ def new(config):
                     python_package, include_example) and output_dir - the
                     parent directory for the new project directory.
     """
-    _create_project(config, _KEDRO_CONTEXT["verbose"])
+    _create_project(config, _VERBOSE)
 
 
 @cli.command(short_help="See the kedro API docs and introductory tutorial.")
@@ -159,13 +186,13 @@ def _clean_pycache(project_path):
     # Since template is part of the Kedro package __pycache__ is generated.
     # This method recursively cleans all __pycache__ folders.
     to_delete = [
-        os.path.join(project_path, filename)
-        for filename in glob.iglob(project_path + "/**/*", recursive=True)
-        if filename.endswith("__pycache__")
+        filename.resolve()
+        for filename in project_path.rglob("**/*")
+        if str(filename).endswith("__pycache__")
     ]
 
     for file in to_delete:  # pragma: no cover
-        shutil.rmtree(file)
+        shutil.rmtree(str(file))
 
 
 def _create_project(config_path: str, verbose: bool):
@@ -184,27 +211,31 @@ def _create_project(config_path: str, verbose: bool):
             config = _get_config_from_prompts()
         config.setdefault("kedro_version", version)
 
-        result_path = cookiecutter(
-            TEMPLATE_PATH,
-            output_dir=config["output_dir"],
-            no_input=True,
-            extra_context=config,
+        result_path = Path(
+            cookiecutter(
+                TEMPLATE_PATH,
+                output_dir=config["output_dir"],
+                no_input=True,
+                extra_context=config,
+            )
         )
-        if not config["include_example"]:
-            paths_to_remove = [
-                os.path.join(result_path, "data", "01_raw", "iris.csv"),
-                os.path.join(
-                    result_path, "src", config["python_package"], "nodes", "example.py"
-                ),
-            ]
 
-            for path in paths_to_remove:
-                os.remove(path)
+        if not config["include_example"]:
+            (result_path / "data" / "01_raw" / "iris.csv").unlink()
+
+            pipelines_dir = result_path / "src" / config["python_package"] / "pipelines"
+
+            for dir_path in [
+                pipelines_dir / "data_engineering",
+                pipelines_dir / "data_science",
+            ]:
+                shutil.rmtree(str(dir_path))
+
         _clean_pycache(result_path)
         _print_kedro_new_success_message(result_path)
     except click.exceptions.Abort:  # pragma: no cover
         _handle_exception("User interrupt.")
-    # we dont want the user to see a stack trace on the cli
+    # we don't want the user to see a stack trace on the cli
     except Exception:  # pylint: disable=broad-except
         _handle_exception("Failed to generate project.")
 
@@ -462,7 +493,7 @@ def _show_example_config():
 
 
 def _print_kedro_new_success_message(result):
-    click.secho("Project generated in " + os.path.abspath(result), fg="green")
+    click.secho("Project generated in " + str(result.resolve()), fg="green")
     click.secho(
         "Don't forget to initialise git and create a virtual environment. "
         "Refer to the Kedro documentation."
@@ -476,15 +507,14 @@ def _get_prompt_text(title, *text):
     return "\n".join(str(x).strip() for x in prompt_text) + "\n"
 
 
-def get_project_context(key: Any, default: Any = NO_DEFAULT) -> Any:  # pragma: no cover
-    """Get a value from the project context.
-    The user is responsible having the specified key in their project's context
-    which typically is exposed in the ``__kedro_context__`` function in ``run.py``
+def get_project_context(key: str = "context", **kwargs) -> Any:
+    """Gets the context value from context associated with the key.
 
     Args:
-        key: Key in Kedro context dictionary.
-        default: Default value if the key is not found. If not provided
-            and the key is not found, this will raise a ``KedroCliError``.
+        key: Optional key to get associated value from Kedro context.
+        Supported keys are "verbose" and "context", and it defaults to "context".
+        kwargs: Optional custom arguments defined by users, which will be passed into
+        the constructor of the projects KedroContext subclass.
 
     Returns:
         Requested value from Kedro context dictionary or the default if the key
@@ -495,50 +525,94 @@ def get_project_context(key: Any, default: Any = NO_DEFAULT) -> Any:  # pragma: 
             specified.
     """
 
-    _KEDRO_CONTEXT.update(load_context(Path.cwd()))
-    try:
-        value = _KEDRO_CONTEXT[key]
-    except KeyError:
-        if default is not NO_DEFAULT:
-            return default
-        _handle_exception(
-            "`{}` not found in the context returned by "
-            "__get_kedro_context__".format(key)
+    def _deprecation_msg(key):
+        msg_dict = {
+            "get_config": ["config_loader", "ConfigLoader"],
+            "create_catalog": ["catalog", "DataCatalog"],
+            "create_pipeline": ["pipeline", "Pipeline"],
+            "template_version": ["project_version", None],
+            "project_name": ["project_name", None],
+            "project_path": ["project_path", None],
+        }
+        attr, obj_name = msg_dict[key]
+        msg = '`get_project_context("{}")` is now deprecated. '.format(key)
+        if obj_name:
+            msg += (
+                "This is still returning a function that returns `{}` instance, "
+                "however passed arguments have no effect anymore since Kedro 0.15.0. ".format(
+                    obj_name
+                )
+            )
+        msg += (
+            "Please get `KedroContext` instance by calling `get_project_context()` "
+            "and use its `{}` attribute.".format(attr)
         )
+
+        return msg
+
+    context = load_context(Path.cwd(), **kwargs)
+    # Dictionary to be compatible with existing Plugins. Future plugins should
+    # retrieve necessary Kedro project properties from context
+    value = {
+        "context": context,
+        "get_config": lambda project_path, env=None, **kw: context.config_loader,
+        "create_catalog": lambda config, **kw: context.catalog,
+        "create_pipeline": lambda **kw: context.pipeline,
+        "template_version": context.project_version,
+        "project_name": context.project_name,
+        "project_path": context.project_path,
+        "verbose": _VERBOSE,
+    }[key]
+
+    if key not in ("verbose", "context"):
+        warnings.warn(_deprecation_msg(key), DeprecationWarning)
 
     return deepcopy(value)
 
 
-def _get_plugin_command_groups(name):  # pragma: no cover
-    entry_points = pkg_resources.iter_entry_points(
-        group="kedro.{}_commands".format(name)
-    )
-    groups = []
+def load_entry_points(name: str) -> List[str]:
+    """Load package entry point commands.
+
+    Args:
+        name: The key value specified in ENTRY_POINT_GROUPS.
+
+    Raises:
+        Exception: If loading an entry point failed.
+
+    Returns:
+        List of entry point commands.
+
+    """
+    entry_points = pkg_resources.iter_entry_points(group=ENTRY_POINT_GROUPS[name])
+    entry_point_commands = []
     for entry_point in entry_points:
         try:
-            groups.append(entry_point.load())
+            entry_point_commands.append(entry_point.load())
         except Exception:  # pylint: disable=broad-except
             _handle_exception(
                 "Loading {} commands from {}".format(name, str(entry_point)), end=False
             )
-    return groups
+    return entry_point_commands
 
 
-def main():  # pragma: no cover
-    """Main entry point, look for a `kedro_cli.py` and if found add its
-    commands to `kedro`'s then invoke the cli.
-    """
-
-    # Run plugin initialization
-    for entry_point in pkg_resources.iter_entry_points(group="kedro.init"):
+def _init_plugins():
+    group = ENTRY_POINT_GROUPS["init"]
+    for entry_point in pkg_resources.iter_entry_points(group=group):
         try:
             init_hook = entry_point.load()
             init_hook()
         except Exception:  # pylint: disable=broad-except
             _handle_exception("Initializing {}".format(str(entry_point)), end=False)
 
+
+def main():  # pragma: no cover
+    """Main entry point, look for a `kedro_cli.py` and if found add its
+    commands to `kedro`'s then invoke the cli.
+    """
+    _init_plugins()
+
     global_groups = [cli]
-    global_groups.extend(_get_plugin_command_groups("global"))
+    global_groups.extend(load_entry_points("global"))
     project_groups = []
 
     # load project commands from kedro_cli.py
@@ -549,7 +623,7 @@ def main():  # pragma: no cover
         try:
             sys.path.append(str(path))
             kedro_cli = importlib.import_module("kedro_cli")
-            project_groups.extend(_get_plugin_command_groups("project"))
+            project_groups.extend(load_entry_points("project"))
             project_groups.append(kedro_cli.cli)
         except Exception:  # pylint: disable=broad-except
             _handle_exception(
@@ -563,7 +637,7 @@ def main():  # pragma: no cover
 
 def _handle_exception(msg, end=True):
     """Pretty print the current exception then exit."""
-    if _KEDRO_CONTEXT["verbose"]:
+    if _VERBOSE:
         click.secho(traceback.format_exc(), nl=False, fg="yellow")
     else:
         etype, value, _ = sys.exc_info()

@@ -29,8 +29,10 @@
 or more configuration files from specified paths.
 """
 import logging
+from glob import iglob
 from pathlib import Path
-from typing import AbstractSet, Any, Dict, List, Tuple, Union
+from typing import AbstractSet, Any, Dict, Iterable, List, Set, Union
+from warnings import warn
 
 import anyconfig
 
@@ -103,7 +105,7 @@ class ConfigLoader:
 
     """
 
-    def __init__(self, conf_paths: Union[str, List[str]]):
+    def __init__(self, conf_paths: Union[str, Iterable[str]]):
         """Instantiate a ConfigLoader.
 
         Args:
@@ -120,7 +122,8 @@ class ConfigLoader:
             )
         if isinstance(conf_paths, str):
             conf_paths = [conf_paths]
-        self.conf_paths = conf_paths
+
+        self.conf_paths = _remove_duplicates(conf_paths)
         self.logger = logging.getLogger(__name__)
 
     def get(self, *patterns: str) -> Dict[str, Any]:
@@ -151,10 +154,25 @@ class ConfigLoader:
             )
 
         config = {}  # type: Dict[str, Any]
-        processed_files = []
+        processed_files = set()  # type: Set[Path]
 
         for conf_path in self.conf_paths:
-            new_conf, new_processed_files = _load_config(conf_path, list(patterns))
+            if not Path(conf_path).is_dir():
+                raise ValueError(
+                    "Given configuration path either does not exist "
+                    "or is not a valid directory: {0}".format(conf_path)
+                )
+
+            config_files = _path_lookup(Path(conf_path), patterns)
+            seen_files = set(config_files) & processed_files
+            if seen_files:
+                self.logger.warning(
+                    "Config file(s): %s already processed, skipping loading...",
+                    ",".join(str(seen) for seen in sorted(seen_files)),
+                )
+                config_files = [cf for cf in config_files if cf not in seen_files]
+            new_conf = _load_config(config_files)
+
             common_keys = config.keys() & new_conf.keys()
             if common_keys:
                 sorted_keys = ", ".join(sorted(common_keys))
@@ -162,9 +180,11 @@ class ConfigLoader:
                     "Config from path `%s` will override the following "
                     "existing top-level config keys: %s"
                 )
-                self.logger.debug(msg, conf_path, sorted_keys)
+                self.logger.info(msg, conf_path, sorted_keys)
+
             config.update(new_conf)
-            processed_files.extend(new_processed_files)
+            processed_files |= set(config_files)
+
         if not processed_files:
             raise MissingConfigException(
                 "No files found in {} matching the glob "
@@ -173,15 +193,12 @@ class ConfigLoader:
         return config
 
 
-def _load_config(
-    conf_path: str, patterns: List[str]
-) -> Tuple[Dict[str, Any], List[Path]]:
+def _load_config(config_files: List[Path]) -> Dict[str, Any]:
     """Recursively load all configuration files, which satisfy
     a given list of glob patterns from a specific path.
 
     Args:
-        conf_path: Path to a kedro configuration directory.
-        patterns: List of glob patterns to match the filenames against.
+        config_files: Configuration files sorted in the order of precedence.
 
     Raises:
         ValueError: If 2 or more configuration files contain the same key(s).
@@ -190,24 +207,17 @@ def _load_config(
         Resulting configuration dictionary.
 
     """
-
-    conf_path = Path(conf_path)
-    if not conf_path.is_dir():
-        raise ValueError(
-            "Given configuration path either does not exist "
-            "or is not a valid directory: {0}".format(conf_path)
-        )
     config = {}
     keys_by_filepath = {}  # type: Dict[Path, AbstractSet[str]]
 
-    def _check_dups(file1, conf):
-        dups = []
+    def _check_dups(file1: Path, conf: Dict[str, Any]) -> None:
+        dups = set()
         for file2, keys in keys_by_filepath.items():
             common = ", ".join(sorted(conf.keys() & keys))
             if common:
                 if len(common) > 100:
                     common = common[:100] + "..."
-                dups.append(str(file2) + ": " + common)
+                dups.add("{}: {}".format(str(file2), common))
 
         if dups:
             msg = "Duplicate keys found in {0} and:\n- {1}".format(
@@ -215,15 +225,19 @@ def _load_config(
             )
             raise ValueError(msg)
 
-    for path in _path_lookup(conf_path, patterns):
-        cfg = {k: v for k, v in anyconfig.load(path).items() if not k.startswith("_")}
-        _check_dups(path, cfg)
-        keys_by_filepath[path] = cfg.keys()
+    for config_file in config_files:
+        cfg = {
+            k: v
+            for k, v in anyconfig.load(config_file).items()
+            if not k.startswith("_")
+        }
+        _check_dups(config_file, cfg)
+        keys_by_filepath[config_file] = cfg.keys()
         config.update(cfg)
-    return config, list(keys_by_filepath.keys())
+    return config
 
 
-def _path_lookup(conf_path: Path, patterns: List[str]) -> List[Path]:
+def _path_lookup(conf_path: Path, patterns: Iterable[str]) -> List[Path]:
     """Return a sorted list of all configuration files from ``conf_path`` or
     its subdirectories, which satisfy a given list of glob patterns.
 
@@ -235,10 +249,28 @@ def _path_lookup(conf_path: Path, patterns: List[str]) -> List[Path]:
         Sorted list of ``Path`` objects representing configuration files.
 
     """
-    result = set()
+    config_files = set()
+    conf_path = conf_path.resolve()
 
     for pattern in patterns:
-        for path in conf_path.resolve().glob(pattern):
+        # `Path.glob()` ignores the files if pattern ends with "**",
+        # therefore iglob is used instead
+        for each in iglob(str(conf_path / pattern), recursive=True):
+            path = Path(each).resolve()
             if path.is_file() and path.suffix in SUPPORTED_EXTENSIONS:
-                result.add(path)
-    return sorted(result)
+                config_files.add(path)
+    return sorted(config_files)
+
+
+def _remove_duplicates(items: Iterable[str]):
+    """Remove duplicates while preserving the order."""
+    unique_items = []  # type: List[str]
+    for item in items:
+        if item not in unique_items:
+            unique_items.append(item)
+        else:
+            warn(
+                "Duplicate environment detected! "
+                "Skipping re-loading from configuration path: {}".format(item)
+            )
+    return unique_items

@@ -75,7 +75,7 @@ def spark_hive_session(replace_default_getorcreate):
     for obj in gc.get_objects():
         try:
             if isinstance(obj, Popen) and "pyspark" in obj.args[0]:
-                obj.terminate()
+                obj.terminate()  # pragma: no cover
         except ReferenceError:  # pragma: no cover
             # gc.get_objects may return dead weak proxy objects that will raise
             # ReferenceError when you isinstance them

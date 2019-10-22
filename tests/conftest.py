@@ -54,6 +54,7 @@ def no_spark():
     global the_real_getOrCreate  # pylint: disable=global-statement
     the_real_getOrCreate = SparkSession.builder.getOrCreate
     SparkSession.builder.getOrCreate = UseTheSparkSessionFixtureOrMock
+    return the_real_getOrCreate
 
 
 # clean up pyspark after the test module finishes

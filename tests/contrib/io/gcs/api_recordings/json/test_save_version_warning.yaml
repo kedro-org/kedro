@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: assertion=eyJ0eXAiOiAiSldUIiwgImFsZyI6ICJSUzI1NiIsICJraWQiOiAiMzc0N2RiMDk3YmI3NDFjZjBhMzRlN2U3ZjIxNzVhNzU4NDk4NDFlNyJ9.eyJpYXQiOiAxNTcxMDg5MjgxLCAiZXhwIjogMTU3MTA5Mjg4MSwgImlzcyI6ICJrYXJsc29uQHN0cmFuZ2UtdG9tZS0yNTU3MjAuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCAiYXVkIjogImh0dHBzOi8vb2F1dGgyLmdvb2dsZWFwaXMuY29tL3Rva2VuIiwgInNjb3BlIjogImh0dHBzOi8vd3d3Lmdvb2dsZWFwaXMuY29tL2F1dGgvZGV2c3RvcmFnZS5mdWxsX2NvbnRyb2wifQ.kfNqvRpuh6NgJUmYw7o11XbpszK5qK23XSmZAvDnDveTttIiTaRf57L0o6evgqzFQaUXbCTZfLqjdHnC70jfEhOSxzUfQTMNCRFkPehUAt1NMr5EprR1q6WVNXE6rvF4xdPeJRY7HDD8nZj-8W1Ne_qiZ_7AK9ZXq_dLtRXJuG8uqiSJ5U9KwxGm0DvJUk177lPdS6vXvcUxn7cnjwwI1YlTrbEp4IYh-678JogjLkET2RPAtSle5luakvxqhFDJLPED7gyoN8vTydHTm7Vtx1nalInALfK0mAhbqVeJe-ix2THHQIVJfYjO2DQVxc_pAxnCGl6lQs16ZPHVGDUfhA&grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer
+    body: assertion=eyJ0eXAiOiAiSldUIiwgImFsZyI6ICJSUzI1NiIsICJraWQiOiAiMzc0N2RiMDk3YmI3NDFjZjBhMzRlN2U3ZjIxNzVhNzU4NDk4NDFlNyJ9.eyJpYXQiOiAxNTcxODU1ODUwLCAiZXhwIjogMTU3MTg1OTQ1MCwgImlzcyI6ICJrYXJsc29uQHN0cmFuZ2UtdG9tZS0yNTU3MjAuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCAiYXVkIjogImh0dHBzOi8vb2F1dGgyLmdvb2dsZWFwaXMuY29tL3Rva2VuIiwgInNjb3BlIjogImh0dHBzOi8vd3d3Lmdvb2dsZWFwaXMuY29tL2F1dGgvZGV2c3RvcmFnZS5mdWxsX2NvbnRyb2wifQ.MPIaPF7FudebNWqGUhaJvt6PYJzWaPDr8BKvp3sB2Xs8N-mmre0nvB143a7-6yXjlu_b6SNfDd_ZA4snvUwWiuw7_YyqY6M2Spm34k4FF4GDM4QM7PpXUcgWjy1NyAsMTHZ29gmanIbLArFWmphCL_yXmkUs9eXWgl87gz6Ylke6HcmJP5rTrZE3V72XYRL7C7ir31-73frun-2e5mO-qKSfUw6_X8jgx0OtigiU8egEACNgLZTNLTiljxLTlr8FaJZkcCmLtOMZY3hpULPl9fjSUg_a1HOwG2uMGiz4VgxItMv-UwqTBl9iA6huTWWRBnnusdpGdDvsrKu7RnvBVA&grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer
     headers:
       Accept:
       - '*/*'
@@ -19,10 +19,10 @@ interactions:
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAC/x3OTW+CMBgA4Lu/gvQ8TfmqYzfNOjVuOpFtsktTyksqTItFpdTsvxu8PqfnNnAc
-        xIWApmFnVcERvTio4140EqPlH8mm4fvvxCxEFE/ctlqVdFlCILdJPKQH8pq6Qu8ssetNZFb8xPPm
-        kOE29ojPdjqUXYDVQjwXRmFXfsGReq1ISiy/WU1l/ZZHllk9U5ef8SWdk6vvm+pTsXFypR+tLQh6
-        6nNg6r2Ghu37mk8wfujjys5dDX14ClyDRoP/O+ZwskvPAAAA
+        H4sIAAAAAAAC/x3Ouw6CMBQA0N2vIJ3FVFRER1HEN0qk2KVpaBHEaMPFRzH+u8H1TOfTMgzEk0QC
+        sOpeyBsaG0hza9RJOqurnU/qw6UeCozdl+16zJ3RVJDnJliQbcQ0LGPTicGJaZUGQl37BSucPmD1
+        4l5oBl2fsIjcj7tU7E8AOlfrow7tJ32HfiYyOq9Xnks5fsyYVZKpf+lWg+Qc+RkAHZoWajc5+VZ5
+        KYHlTa1nY/zX/5VVWskmPJG8lCVqfX8C5XBozwAAAA==
     headers:
       Alt-Svc:
       - quic=":443"; ma=2592000; v="46,43",h3-Q048=":443"; ma=2592000,h3-Q046=":443";
@@ -34,7 +34,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Mon, 14 Oct 2019 21:41:21 GMT
+      - Wed, 23 Oct 2019 18:37:30 GMT
       Server:
       - scaffolding on HTTPServer2
       Transfer-Encoding:
@@ -79,16 +79,16 @@ interactions:
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Mon, 14 Oct 2019 21:41:22 GMT
+      - Wed, 23 Oct 2019 18:37:30 GMT
       Expires:
-      - Mon, 14 Oct 2019 21:41:22 GMT
+      - Wed, 23 Oct 2019 18:37:30 GMT
       Server:
       - UploadServer
       Vary:
       - Origin
       - X-Origin
       X-GUploader-UploadID:
-      - AEnB2UppDPWdc7nGB2YLfpKUXAKO5OV8nYP8Jm-THGcS5Cr4Wp9KXwXLi3Amj9Uw8vIAtUeFLrUhczwdDEwehO3EjTeJR8xDjA
+      - AEnB2UpMHrf4RfpvUc6VuG5uMkx1LPTIX0D_GllRfU18Ro9vi8BdjXtmGdahrgQKglaOiySrXcRY5xCCM_0oN07oIknpS524Nw
     status:
       code: 200
       message: OK
@@ -119,16 +119,16 @@ interactions:
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Mon, 14 Oct 2019 21:41:22 GMT
+      - Wed, 23 Oct 2019 18:37:30 GMT
       Expires:
-      - Mon, 14 Oct 2019 21:41:22 GMT
+      - Wed, 23 Oct 2019 18:37:30 GMT
       Server:
       - UploadServer
       Vary:
       - Origin
       - X-Origin
       X-GUploader-UploadID:
-      - AEnB2UrISCEiwqRKlG9KvziROxuSOJVYzwXqsK5vmTnBTYzZQ_WuclvuQGmhcOQ9CyLSVNkMF2OE17-gj774NoSGysRrSEjKYg
+      - AEnB2Ur8bzjVkdexMky5-n_wxcaggXNnvmR1CKOWif29GDXSMHNqFSWXjCUdnkT7rK6MPOP5BDHadoo8sWVbk9SrGG_nhcGv_w
     status:
       code: 200
       message: OK
@@ -147,7 +147,7 @@ interactions:
     uri: https://www.googleapis.com/storage/v1/b/testbucketkedro/o/?delimiter=%2F&prefix=test.json%2F2019-01-02T00.00.00.000Z%2Ftest.json
   response:
     body:
-      string: "{\n  \"kind\": \"storage#objects\"\n}\n"
+      string: "{\n \"kind\": \"storage#objects\"\n}\n"
     headers:
       Alt-Svc:
       - quic=":443"; ma=2592000; v="46,43",h3-Q048=":443"; ma=2592000,h3-Q046=":443";
@@ -155,20 +155,20 @@ interactions:
       Cache-Control:
       - private, max-age=0, must-revalidate, no-transform
       Content-Length:
-      - '32'
+      - '31'
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Mon, 14 Oct 2019 21:41:22 GMT
+      - Wed, 23 Oct 2019 18:37:30 GMT
       Expires:
-      - Mon, 14 Oct 2019 21:41:22 GMT
+      - Wed, 23 Oct 2019 18:37:30 GMT
       Server:
       - UploadServer
       Vary:
       - Origin
       - X-Origin
       X-GUploader-UploadID:
-      - AEnB2UoJt_G1cV8mS7CpW6T2cX6QiTqfhMOpZ2Jak-YkPnPUuN9Hqs7ka320rKvYVT6fOCWEg7xSeFY4QtJ02m_V5tL5b0dNzQ
+      - AEnB2Uq5G1QNqxsrboJEy2pFctl0bLvj0Yt4y1hXl6agqbIUp8GrcHcGvoI_MIKrujNLBDzKOSo07G-SfQnNMRX0moXGqXAlCg
     status:
       code: 200
       message: OK
@@ -199,16 +199,16 @@ interactions:
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Mon, 14 Oct 2019 21:41:22 GMT
+      - Wed, 23 Oct 2019 18:37:30 GMT
       Expires:
-      - Mon, 14 Oct 2019 21:41:22 GMT
+      - Wed, 23 Oct 2019 18:37:30 GMT
       Server:
       - UploadServer
       Vary:
       - Origin
       - X-Origin
       X-GUploader-UploadID:
-      - AEnB2Ur8BH98FGNZGoa_skQi6WCdnG7jlhh6N3YXEzx7coPuANVk3-CW1N4aNjWoJ7dH_Q-g9epQviQwfSK5UjPhKVMzx8bhUA
+      - AEnB2UrnHHJzfK5oo-Wh2fW1Lqw2nYLq_zhmwERdPDXoAOfOBLhqdHiyZHaczZegZiUTeENl3dhob88MPiJZNIQXt1l2IgoP8A
     status:
       code: 200
       message: OK
@@ -243,11 +243,11 @@ interactions:
       Content-Type:
       - text/plain; charset=utf-8
       Date:
-      - Mon, 14 Oct 2019 21:41:23 GMT
+      - Wed, 23 Oct 2019 18:37:31 GMT
       Expires:
       - Mon, 01 Jan 1990 00:00:00 GMT
       Location:
-      - https://www.googleapis.com/upload/storage/v1/b/testbucketkedro/o?uploadType=resumable&upload_id=AEnB2UriDVCGIyv3u_u9Sj2Er_WA1SH_Rl_W9Oc58M-X1pBfm43rnJX7__sZhBf8o7UQK6ykyutFDONFDoP_yh9KvZXjSoTJmw
+      - https://www.googleapis.com/upload/storage/v1/b/testbucketkedro/o?uploadType=resumable&upload_id=AEnB2UqebqBPcDkYrlBR7MLXjzAXz0ieW165bjQUUpgyAU6f_bvASXMaMn3vkdHfcg-caT0_bdSvmoe_3evHboB3wQPLlCkyng
       Pragma:
       - no-cache
       Server:
@@ -256,7 +256,7 @@ interactions:
       - Origin
       - X-Origin
       X-GUploader-UploadID:
-      - AEnB2UriDVCGIyv3u_u9Sj2Er_WA1SH_Rl_W9Oc58M-X1pBfm43rnJX7__sZhBf8o7UQK6ykyutFDONFDoP_yh9KvZXjSoTJmw
+      - AEnB2UqebqBPcDkYrlBR7MLXjzAXz0ieW165bjQUUpgyAU6f_bvASXMaMn3vkdHfcg-caT0_bdSvmoe_3evHboB3wQPLlCkyng
     status:
       code: 200
       message: OK
@@ -278,18 +278,18 @@ interactions:
       User-Agent:
       - python-requests/2.22.0
     method: POST
-    uri: https://www.googleapis.com/upload/storage/v1/b/testbucketkedro/o?uploadType=resumable&uploadType=resumable&upload_id=AEnB2UriDVCGIyv3u_u9Sj2Er_WA1SH_Rl_W9Oc58M-X1pBfm43rnJX7__sZhBf8o7UQK6ykyutFDONFDoP_yh9KvZXjSoTJmw
+    uri: https://www.googleapis.com/upload/storage/v1/b/testbucketkedro/o?uploadType=resumable&uploadType=resumable&upload_id=AEnB2UqebqBPcDkYrlBR7MLXjzAXz0ieW165bjQUUpgyAU6f_bvASXMaMn3vkdHfcg-caT0_bdSvmoe_3evHboB3wQPLlCkyng
   response:
     body:
-      string: "{\n \"kind\": \"storage#object\",\n \"id\": \"testbucketkedro/test.json/2019-01-02T00.00.00.000Z/test.json/1571089283493766\"\
+      string: "{\n \"kind\": \"storage#object\",\n \"id\": \"testbucketkedro/test.json/2019-01-02T00.00.00.000Z/test.json/1571855851765547\"\
         ,\n \"selfLink\": \"https://www.googleapis.com/storage/v1/b/testbucketkedro/o/test.json%2F2019-01-02T00.00.00.000Z%2Ftest.json\"\
         ,\n \"name\": \"test.json/2019-01-02T00.00.00.000Z/test.json\",\n \"bucket\"\
-        : \"testbucketkedro\",\n \"generation\": \"1571089283493766\",\n \"metageneration\"\
-        : \"1\",\n \"timeCreated\": \"2019-10-14T21:41:23.493Z\",\n \"updated\": \"\
-        2019-10-14T21:41:23.493Z\",\n \"storageClass\": \"STANDARD\",\n \"timeStorageClassUpdated\"\
-        : \"2019-10-14T21:41:23.493Z\",\n \"size\": \"64\",\n \"md5Hash\": \"STFR3Z82Eh35dGSG0ttpZg==\"\
-        ,\n \"mediaLink\": \"https://www.googleapis.com/download/storage/v1/b/testbucketkedro/o/test.json%2F2019-01-02T00.00.00.000Z%2Ftest.json?generation=1571089283493766&alt=media\"\
-        ,\n \"crc32c\": \"Secq5g==\",\n \"etag\": \"CIbfnNXbnOUCEAE=\"\n}\n"
+        : \"testbucketkedro\",\n \"generation\": \"1571855851765547\",\n \"metageneration\"\
+        : \"1\",\n \"timeCreated\": \"2019-10-23T18:37:31.765Z\",\n \"updated\": \"\
+        2019-10-23T18:37:31.765Z\",\n \"storageClass\": \"STANDARD\",\n \"timeStorageClassUpdated\"\
+        : \"2019-10-23T18:37:31.765Z\",\n \"size\": \"64\",\n \"md5Hash\": \"STFR3Z82Eh35dGSG0ttpZg==\"\
+        ,\n \"mediaLink\": \"https://www.googleapis.com/download/storage/v1/b/testbucketkedro/o/test.json%2F2019-01-02T00.00.00.000Z%2Ftest.json?generation=1571855851765547&alt=media\"\
+        ,\n \"crc32c\": \"Secq5g==\",\n \"etag\": \"CKv+uq2Ds+UCEAE=\"\n}\n"
     headers:
       Alt-Svc:
       - quic=":443"; ma=2592000; v="46,43",h3-Q048=":443"; ma=2592000,h3-Q046=":443";
@@ -301,9 +301,9 @@ interactions:
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Mon, 14 Oct 2019 21:41:23 GMT
+      - Wed, 23 Oct 2019 18:37:31 GMT
       ETag:
-      - CIbfnNXbnOUCEAE=
+      - CKv+uq2Ds+UCEAE=
       Expires:
       - Mon, 01 Jan 1990 00:00:00 GMT
       Pragma:
@@ -314,7 +314,7 @@ interactions:
       - Origin
       - X-Origin
       X-GUploader-UploadID:
-      - AEnB2UriDVCGIyv3u_u9Sj2Er_WA1SH_Rl_W9Oc58M-X1pBfm43rnJX7__sZhBf8o7UQK6ykyutFDONFDoP_yh9KvZXjSoTJmw
+      - AEnB2UqebqBPcDkYrlBR7MLXjzAXz0ieW165bjQUUpgyAU6f_bvASXMaMn3vkdHfcg-caT0_bdSvmoe_3evHboB3wQPLlCkyng
     status:
       code: 200
       message: OK

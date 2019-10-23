@@ -42,7 +42,7 @@ from tests.contrib.io.gcs.utils import matcher
 
 FILENAME = "test.json"
 BUCKET_NAME = "testbucketkedro"
-GCP_PROJECT = "test_project"
+GCP_PROJECT = "testproject"
 GCP_CREDENTIALS = mock.Mock(spec=google.auth.credentials.Credentials)
 
 api_records_path = os.path.join(os.path.dirname(__file__), "api_recordings/json")
@@ -128,11 +128,6 @@ class TestJsonGCSDataSet:
         gcs_data_set.save(dummy_dataframe)
         assert gcs_data_set.exists()
 
-    def test_load_save_args(self, gcs_data_set):
-        """Test default load and save arguments of the data set."""
-        assert not gcs_data_set._load_args
-        assert "index" in gcs_data_set._save_args
-
     @pytest.mark.parametrize(
         "load_args", [{"k1": "v1", "index": "value"}], indirect=True
     )
@@ -154,7 +149,7 @@ class TestJsonGCSDataSet:
     def test_str_representation(self, gcs_data_set, save_args):
         """Test string representation of the data set instance."""
         str_repr = str(gcs_data_set)
-        assert "JsonGCSDataSet" in str_repr
+        assert "JSONGCSDataSet" in str_repr
         for k in save_args.keys():
             assert k in str_repr
 
@@ -212,7 +207,7 @@ class TestJsonGCSDataSetVersioned:
         corresponding pickled object for a given save version already exists in S3."""
         versioned_gcs_data_set.save(dummy_dataframe)
         pattern = (
-            r"Save path \`.+\` for JsonGCSDataSet\(.+\) must not exist "
+            r"Save path \`.+\` for JSONGCSDataSet\(.+\) must not exist "
             r"if versioning is enabled"
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -231,10 +226,8 @@ class TestJsonGCSDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            r"Save path `.*/{}/test\.json` did not match load path "
-            r"`.*/{}/test\.json` for JsonGCSDataSet\(.+\)".format(
-                save_version, load_version
-            )
+            r"Save version `{0}` did not match load version `{1}` "
+            r"for JSONGCSDataSet\(.+\)".format(save_version, load_version)
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_gcs_data_set.save(dummy_dataframe)

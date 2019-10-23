@@ -41,11 +41,16 @@ def filepath_json(tmp_path):
 
 @pytest.fixture
 def networkx_data_set(filepath_json):
-    attrs = dict(source="from", target="to", name="id", key="key", link="links")
+    return NetworkXLocalDataSet(filepath=filepath_json)
+
+
+@pytest.fixture
+def networkx_multigraph_data_set(filepath_json):
+    attrs = dict(
+        source="from", target="to", name="fake_id", key="fake_key", link="fake_link"
+    )
     return NetworkXLocalDataSet(
-        filepath=filepath_json,
-        load_args={"attrs": attrs, "directed": True},
-        save_args={"attrs": attrs},
+        filepath=filepath_json, load_args={"attrs": attrs}, save_args={"attrs": attrs}
     )
 
 
@@ -54,13 +59,11 @@ def network_graph_data():
     return networkx.complete_graph(3)
 
 
-@pytest.mark.usefixtures("networkx_data_set")
 class TestNetworkXLocalDataSet:
     def test_save_and_load(self, networkx_data_set, network_graph_data):
         """Test saving and reloading the data set."""
         networkx_data_set.save(network_graph_data)
         reloaded = networkx_data_set.load()
-
         assert network_graph_data.nodes(data=True) == reloaded.nodes(data=True)
 
     def test_load_missing_file(self, networkx_data_set):
@@ -70,6 +73,45 @@ class TestNetworkXLocalDataSet:
         )
         with pytest.raises(DataSetError, match=pattern):
             assert networkx_data_set.load()
+
+    def test_load_args_save_args(
+        self, mocker, networkx_multigraph_data_set, network_graph_data
+    ):
+        """Test saving and reloading with save and load arguments."""
+        patched_save = mocker.patch(
+            "networkx.node_link_data", wraps=networkx.node_link_data
+        )
+        networkx_multigraph_data_set.save(network_graph_data)
+        attrs = dict(
+            source="from", target="to", name="fake_id", key="fake_key", link="fake_link"
+        )
+        patched_save.assert_called_once_with(network_graph_data, attrs=attrs)
+
+        patched_load = mocker.patch(
+            "networkx.node_link_graph", wraps=networkx.node_link_graph
+        )
+        # load args need to be the same attrs as the ones used for saving
+        # in order to successfully retrieve data
+        load_attrs = dict(
+            source="from", target="to", name="fake_id", key="fake_key", link="fake_link"
+        )
+        reloaded = networkx_multigraph_data_set.load()
+
+        patched_load.assert_called_once_with(
+            {
+                "directed": False,
+                "multigraph": False,
+                "graph": {},
+                "nodes": [{"fake_id": 0}, {"fake_id": 1}, {"fake_id": 2}],
+                "fake_link": [
+                    {"from": 0, "to": 1},
+                    {"from": 0, "to": 2},
+                    {"from": 1, "to": 2},
+                ],
+            },
+            attrs=load_attrs,
+        )
+        assert network_graph_data.nodes(data=True) == reloaded.nodes(data=True)
 
     def test_exists(self, networkx_data_set, network_graph_data):
         """Test `exists` method invocation."""

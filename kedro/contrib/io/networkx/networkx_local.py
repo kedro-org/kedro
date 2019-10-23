@@ -40,7 +40,6 @@ import networkx
 
 from kedro.contrib.io import DefaultArgumentsMixIn
 from kedro.io import AbstractDataSet
-from kedro.io.core import DataSetError
 
 
 class NetworkXLocalDataSet(DefaultArgumentsMixIn, AbstractDataSet):
@@ -48,6 +47,7 @@ class NetworkXLocalDataSet(DefaultArgumentsMixIn, AbstractDataSet):
     ``NetworkXLocalDataSet`` loads and saves graphs to a local json file in node/link format using
     ``NetworkX``.
     See https://networkx.github.io/documentation/stable/tutorial.html for details.
+
     Example:
     ::
         >>> from kedro.contrib.io.networkx_local import NetworkXLocalDataSet
@@ -76,23 +76,20 @@ class NetworkXLocalDataSet(DefaultArgumentsMixIn, AbstractDataSet):
         Args:
             filepath: The path to the NetworkX graph JSON file.
             load_args: Arguments passed on to ```networkx.node_link_graph``.
-                See https://networkx.github.io/documentation for details.
+                See the details in
+                https://networkx.github.io/documentation/networkx-1.9.1/reference/generated/networkx.readwrite.json_graph.node_link_graph.html
             save_args: Arguments passed on to ```networkx.node_link_data``.
-                See https://networkx.github.io/documentation for details.
+                See the details in
+                https://networkx.github.io/documentation/networkx-1.9.1/reference/generated/networkx.readwrite.json_graph.node_link_data.html
+
         """
         self._filepath = Path(filepath)
         super().__init__(load_args, save_args)
 
-    def _load(self) -> Union[networkx.Graph]:
+    def _load(self) -> networkx.Graph:
         graph = None
-        if not self._exists():
-            raise DataSetError(
-                "Failed while loading data from data set NetworkXLocalDataSet()"
-            )
-        with self._filepath.open("r") as input_file:
-            json_payload = json.loads(input_file.readline())
-            graph = networkx.node_link_graph(json_payload, **self._load_args)
-
+        json_payload = json.loads(self._filepath.read_text())
+        graph = networkx.node_link_graph(json_payload, **self._load_args)
         return graph
 
     def _save(self, data: networkx.Graph) -> None:

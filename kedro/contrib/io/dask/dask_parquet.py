@@ -26,9 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``ParquetS3DaskDataSet`` is a data set used to load and save
-data to parquet files using Dask on S3
-"""
+"""``ParquetDaskDataSet`` is a data set used to load and save data to parquet files using Dask"""
 from typing import Any, Dict, Optional
 
 import dask.dataframe as dd
@@ -37,14 +35,15 @@ from kedro.contrib.io import DefaultArgumentsMixIn
 from kedro.io.core import AbstractDataSet, DataSetError
 
 
-class ParquetS3DaskDataSet(DefaultArgumentsMixIn, AbstractDataSet):
-    """``ParquetS3DaskDataSet`` loads and saves data to file(s) in S3. It uses s3fs
-        to read and write from S3 and dask to handle the parquet file.
+class ParquetDaskDataSet(DefaultArgumentsMixIn, AbstractDataSet):
+    """``ParquetDaskDataSet`` loads and saves data to file(s). It uses dask
+    remove data services to handle the parquet file.
+        https://docs.dask.org/en/latest/remote-data-services.html
 
-        Example:
+        Example (AWS S3):
         ::
 
-            >>> from kedro.contrib.io.parquet.dask_parquet_s3 import ParquetS3DaskDataSet
+            >>> from kedro.contrib.io.dask.dask_parquet import ParquetDaskDataSet
             >>> import pandas as pd
             >>> import dask.dataframe as dd
             >>>
@@ -52,7 +51,7 @@ class ParquetS3DaskDataSet(DefaultArgumentsMixIn, AbstractDataSet):
             >>>                      'col3': [5, 6]})
             >>> ddf = dd.from_pandas(data, npartitions=2)
             >>>
-            >>> data_set = ParquetS3DaskDataSet(
+            >>> data_set = ParquetDaskDataSet(
             >>>                         filepath="temp_folder",
             >>>                         credentials={
             >>>                             'aws_access_key_id': 'YOUR_KEY',
@@ -72,27 +71,22 @@ class ParquetS3DaskDataSet(DefaultArgumentsMixIn, AbstractDataSet):
         load_args: Optional[Dict[str, Any]] = None,
         save_args: Optional[Dict[str, Any]] = None,
     ) -> None:
-        """Creates a new instance of ``ParquetS3DaskDataSet`` pointing to a concrete
-        parquet file on S3.
+        """Creates a new instance of ``ParquetDaskDataSet`` pointing to concrete
+        parquet files.
 
         Args:
             filepath: Path to a parquet file
                 parquet collection or the directory of a multipart parquet.
-            bucket_name: S3 bucket name.
-            credentials: Credentials to access the S3 bucket, such as
+            credentials: Credentials to any remove services, such as AWS S3 bucket
                 ``aws_access_key_id``, ``aws_secret_access_key``.
-            load_args: Additional loading options `pyarrow`:
-                https://arrow.apache.org/docs/python/generated/pyarrow.parquet.read_table.html
-                or `fastparquet`:
-                https://fastparquet.readthedocs.io/en/latest/api.html#fastparquet.ParquetFile.to_pandas
-            save_args: Additional saving options for `pyarrow`:
-                https://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table.from_pandas
-                or `fastparquet`:
-                https://fastparquet.readthedocs.io/en/latest/api.html#fastparquet.write
+            load_args: Additional loading options `dask.dataframe.read_parquet`:
+                https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.read_parquet
+            save_args: Additional saving options for `dask.dataframe.to_parquet`:
+                https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.to_parquet
         """
 
         self._filepath = filepath
-        self._credentials = credentials if credentials else {}
+        self._credentials = credentials or {}
         super().__init__(load_args, save_args)
 
     def _describe(self) -> Dict[str, Any]:

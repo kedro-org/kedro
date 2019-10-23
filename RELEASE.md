@@ -4,7 +4,7 @@
 * `kedro jupyter` now gives the default kernel a sensible name.
 * `Pipeline.name` has been deprecated in favour of `Pipeline.tags`.
 * Added Jupyter notebook line magic (`%run_viz`) to run `kedro viz` in notebook cell.
-* Added a new `kedro.contrib.io` for dask parquet dataset on S3
+* Added a new `kedro.contrib.io` for dask parquet dataset.
 
 ## Bug fixes and other changes
 * `get_last_load_version()` method for versioned datasets now returns exact last load version if the dataset has been loaded at least once and `None` otherwise.

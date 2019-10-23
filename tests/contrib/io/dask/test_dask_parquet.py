@@ -39,8 +39,8 @@ from moto import mock_s3
 from pandas.util.testing import assert_frame_equal
 from s3fs import S3FileSystem
 
-from kedro.contrib.io.parquet import ParquetS3DaskDataSet
-from kedro.io import DataSetError, Version
+from kedro.contrib.io.dask import ParquetDaskDataSet
+from kedro.io import DataSetError
 from kedro.io.core import generate_current_version
 
 FILENAME = "test.parquet"
@@ -103,9 +103,8 @@ def mocked_s3_object(tmp_path, mocked_s3_bucket, dummy_dataframe: dd.DataFrame):
 
 @pytest.fixture
 def s3_data_set(load_args, save_args):
-    return ParquetS3DaskDataSet(
+    return ParquetDaskDataSet(
         filepath=FILENAME,
-        bucket_name=BUCKET_NAME,
         credentials={
             "aws_access_key_id": "YOUR_KEY",
             "aws_secret_access_key": "YOUR SECRET",
@@ -135,14 +134,12 @@ def mocked_s3_object_versioned(
 
 @pytest.fixture
 def versioned_s3_data_set(load_version, save_version):
-    return ParquetS3DaskDataSet(
+    return ParquetDaskDataSet(
         filepath=FILENAME,
-        bucket_name=BUCKET_NAME,
         credentials={
             "aws_access_key_id": "YOUR_KEY",
             "aws_secret_access_key": "YOUR SECRET",
         },
-        version=Version(load_version, save_version),
     )
 
 
@@ -162,17 +159,16 @@ class TestParquetS3DaskDataSet:
     def test_incomplete_credentials_load(self, bad_credentials):
         """Test that incomplete credentials passed in credentials.yml raises exception."""
         with pytest.raises(PartialCredentialsError):
-            ParquetS3DaskDataSet(
-                filepath=FILENAME, bucket_name=BUCKET_NAME, credentials=bad_credentials
+            ParquetDaskDataSet(
+                filepath=FILENAME, credentials=bad_credentials
             )
 
     def test_incorrect_credentials_load(self):
         """Test that incorrect credential keys won't instantiate dataset."""
         pattern = "unexpected keyword argument"
         with pytest.raises(TypeError, match=pattern):
-            ParquetS3DaskDataSet(
+            ParquetDaskDataSet(
                 filepath=FILENAME,
-                bucket_name=BUCKET_NAME,
                 credentials={"access_token": "TOKEN", "access_key": "KEY"},
             )
 
@@ -181,8 +177,8 @@ class TestParquetS3DaskDataSet:
         [{"aws_access_key_id": None, "aws_secret_access_key": None}, {}, None],
     )
     def test_empty_credentials_load(self, bad_credentials):
-        parquet_data_set = ParquetS3DaskDataSet(
-            filepath=FILENAME, bucket_name=BUCKET_NAME, credentials=bad_credentials
+        parquet_data_set = ParquetDaskDataSet(
+            filepath=FILENAME, credentials=bad_credentials
         )
         pattern = r"Failed while loading data from data set ParquetS3DaskDataSet\(.+\)"
         with pytest.raises(DataSetError, match=pattern):
@@ -192,8 +188,8 @@ class TestParquetS3DaskDataSet:
         """Test that AWS credentials are passed successfully into boto3
         client instantiation on creating S3 connection."""
         mocker.patch("s3fs.core.boto3.Session.client")
-        s3_data_set = ParquetS3DaskDataSet(
-            filepath=FILENAME, bucket_name=BUCKET_NAME, credentials=AWS_CREDENTIALS
+        s3_data_set = ParquetDaskDataSet(
+            filepath=FILENAME, credentials=AWS_CREDENTIALS
         )
         pattern = r"Failed while loading data from data set ParquetS3DaskDataSet\(.+\)"
         with pytest.raises(DataSetError, match=pattern):
@@ -280,11 +276,9 @@ class TestParquetS3DaskDataSetVersioned:
     def test_version_str_repr(self, load_version, save_version):
         """Test that version is in string representation of the class instance
         when applicable."""
-        ds = ParquetS3DaskDataSet(filepath=FILENAME, bucket_name=BUCKET_NAME)
-        ds_versioned = ParquetS3DaskDataSet(
+        ds = ParquetDaskDataSet(filepath=FILENAME)
+        ds_versioned = ParquetDaskDataSet(
             filepath=FILENAME,
-            bucket_name=BUCKET_NAME,
-            version=Version(load_version, save_version),
         )
         assert FILENAME in str(ds)
         assert "version" not in str(ds)

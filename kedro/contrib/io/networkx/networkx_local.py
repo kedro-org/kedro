@@ -44,13 +44,13 @@ from kedro.io import AbstractDataSet
 
 class NetworkXLocalDataSet(DefaultArgumentsMixIn, AbstractDataSet):
     """
-    ``NetworkXLocalDataSet`` loads and saves graphs to a local json file in node/link format using
+    ``NetworkXLocalDataSet`` loads and saves graphs to a local JSON file in node/link format using
     ``NetworkX``.
     See https://networkx.github.io/documentation/stable/tutorial.html for details.
 
     Example:
     ::
-        >>> from kedro.contrib.io.networkx_local import NetworkXLocalDataSet
+        >>> from kedro.contrib.io.networkx import NetworkXLocalDataSet
         >>> import networkx as nx
         >>> graph = nx.complete_graph(100)
         >>> graph_dataset = NetworkXLocalDataSet(filepath="test.json")
@@ -68,7 +68,7 @@ class NetworkXLocalDataSet(DefaultArgumentsMixIn, AbstractDataSet):
 
     def __init__(
         self,
-        filepath: Union[str, Path],
+        filepath: str,
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
     ) -> None:
@@ -87,7 +87,6 @@ class NetworkXLocalDataSet(DefaultArgumentsMixIn, AbstractDataSet):
         super().__init__(load_args, save_args)
 
     def _load(self) -> networkx.Graph:
-        graph = None
         json_payload = json.loads(self._filepath.read_text())
         graph = networkx.node_link_graph(json_payload, **self._load_args)
         return graph
@@ -99,5 +98,4 @@ class NetworkXLocalDataSet(DefaultArgumentsMixIn, AbstractDataSet):
             output_file.write(json_payload)
 
     def _exists(self) -> bool:
-        path = self._filepath
-        return Path(path).is_file()
+        return Path(self._filepath).is_file()

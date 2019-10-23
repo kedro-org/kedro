@@ -45,7 +45,7 @@ def networkx_data_set(filepath_json):
 
 
 @pytest.fixture
-def networkx_multigraph_data_set(filepath_json):
+def networkx_data_set_args(filepath_json):
     attrs = dict(
         source="from", target="to", name="fake_id", key="fake_key", link="fake_link"
     )
@@ -75,13 +75,13 @@ class TestNetworkXLocalDataSet:
             assert networkx_data_set.load()
 
     def test_load_args_save_args(
-        self, mocker, networkx_multigraph_data_set, network_graph_data
+        self, mocker, networkx_data_set_args, network_graph_data
     ):
         """Test saving and reloading with save and load arguments."""
         patched_save = mocker.patch(
             "networkx.node_link_data", wraps=networkx.node_link_data
         )
-        networkx_multigraph_data_set.save(network_graph_data)
+        networkx_data_set_args.save(network_graph_data)
         attrs = dict(
             source="from", target="to", name="fake_id", key="fake_key", link="fake_link"
         )
@@ -95,7 +95,7 @@ class TestNetworkXLocalDataSet:
         load_attrs = dict(
             source="from", target="to", name="fake_id", key="fake_key", link="fake_link"
         )
-        reloaded = networkx_multigraph_data_set.load()
+        reloaded = networkx_data_set_args.load()
 
         patched_load.assert_called_once_with(
             {

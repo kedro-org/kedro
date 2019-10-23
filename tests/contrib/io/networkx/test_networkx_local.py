@@ -68,9 +68,7 @@ class TestNetworkXLocalDataSet:
 
     def test_load_missing_file(self, networkx_data_set):
         """Check the error when trying to load missing file."""
-        pattern = (
-            r"Failed while loading data from data set " r"NetworkXLocalDataSet\(.*\)"
-        )
+        pattern = r"Failed while loading data from data set NetworkXLocalDataSet\(.*\)"
         with pytest.raises(DataSetError, match=pattern):
             assert networkx_data_set.load()
 

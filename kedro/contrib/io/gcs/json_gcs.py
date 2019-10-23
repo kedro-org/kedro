@@ -36,10 +36,11 @@ import gcsfs
 import pandas as pd
 from google.auth.credentials import Credentials
 
+from kedro.contrib.io import DefaultArgumentsMixIn
 from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
 
 
-class JSONGCSDataSet(AbstractVersionedDataSet):
+class JSONGCSDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
     """``JSONGCSDataSet`` loads and saves data to a file in GCS (Google Cloud Storage).
     It uses google-cloud-storage to read and write from S3 and pandas to handle the json file.
 
@@ -60,9 +61,6 @@ class JSONGCSDataSet(AbstractVersionedDataSet):
         >>>
         >>> assert data.equals(reloaded)
     """
-
-    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
-    DEFAULT_SAVE_ARGS = {"index": True}  # type: Dict[str, Any]
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -98,20 +96,14 @@ class JSONGCSDataSet(AbstractVersionedDataSet):
         _gcs = gcsfs.GCSFileSystem(credentials=credentials, project=project)
 
         super().__init__(
-            PurePosixPath("{}/{}".format(bucket_name, filepath)),
-            version,
+            filepath=PurePosixPath("{}/{}".format(bucket_name, filepath)),
+            version=version,
             exists_function=_gcs.exists,
             glob_function=_gcs.glob,
+            load_args=load_args,
+            save_args=save_args,
         )
         self._bucket_name = bucket_name
-
-        # Handle default load and save arguments
-        load_args = {} if load_args is None else load_args
-        save_args = {} if save_args is None else save_args
-
-        self._load_args = {**self.DEFAULT_LOAD_ARGS, **load_args}
-        self._save_args = {**self.DEFAULT_SAVE_ARGS, **save_args}
-
         self._gcs = _gcs
 
     def _describe(self) -> Dict[str, Any]:

@@ -76,6 +76,14 @@ class DataSetAlreadyExistsError(DataSetError):
     pass
 
 
+class VersionNotFoundError(DataSetError):
+    """``VersionNotFoundError`` raised by ``AbstractVersionedDataSet`` implementations
+    in case of no load versions available for the data set.
+    """
+
+    pass
+
+
 class AbstractDataSet(abc.ABC):
     """``AbstractDataSet`` is the base class for all data set implementations.
     All data set implementations should extend this abstract class
@@ -212,8 +220,9 @@ class AbstractDataSet(abc.ABC):
 
         """
 
+        self._logger.debug("Loading %s", str(self))
+
         try:
-            self._logger.debug("Loading %s", str(self))
             return self._load()
         except DataSetError:
             raise
@@ -380,8 +389,8 @@ class Version(namedtuple("Version", ["load", "save"])):
     __slots__ = ()
 
 
-_PATH_CONSISTENCY_WARNING = (
-    "Save path `{}` did not match load path `{}` for {}. This is strongly "
+CONSISTENCY_WARNING = (
+    "Save version `{}` did not match load version `{}` for {}. This is strongly "
     "discouraged due to inconsistencies it may cause between `save` and "
     "`load` operations. Please refrain from setting exact load version for "
     "intermediate data sets where possible to avoid this warning."
@@ -415,6 +424,7 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
         >>> from kedro.io import AbstractVersionedDataSet
         >>> import pandas as pd
         >>>
+        >>>
         >>> class MyOwnDataSet(AbstractVersionedDataSet):
         >>>     def __init__(self, param1, param2, filepath, version):
         >>>         super().__init__(filepath, version)
@@ -427,7 +437,11 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
         >>>
         >>>     def _save(self, df: pd.DataFrame) -> None:
         >>>         save_path = self._get_save_path()
-        >>>         df.to_csv(save_path)
+        >>>         df.to_csv(str(save_path))
+        >>>
+        >>>     def _exists(self) -> bool:
+        >>>         path = self._get_load_path()
+        >>>         return path.is_file()
         >>>
         >>>     def _describe(self):
         >>>         return dict(version=self._version, param1=self._param1, param2=self._param2)
@@ -465,16 +479,11 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
     def get_last_load_version(self) -> Optional[str]:
         return self._last_load_version
 
-    def _get_load_path(self) -> PurePath:
+    def _lookup_load_version(self) -> Optional[str]:
         if not self._version:
-            # When versioning is disabled, load from provided filepath
-            self._last_load_version = None
-            return self._filepath
-
+            return None
         if self._version.load:
-            # When load version is pinned, get versioned path
-            self._last_load_version = self._version.load
-            return self._get_versioned_path(self._version.load)
+            return self._version.load
 
         # When load version is unpinned, fetch the most recent existing
         # version from the given path
@@ -484,24 +493,35 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
             (path for path in version_paths if self._exists_function(path)), None
         )
         if not most_recent:
-            raise DataSetError("Did not find any versions for {}".format(str(self)))
+            raise VersionNotFoundError(
+                "Did not find any versions for {}".format(str(self))
+            )
 
-        versioned_path = PurePath(most_recent)
-        self._last_load_version = versioned_path.parent.name
+        return PurePath(most_recent).parent.name
 
-        return versioned_path
+    def _get_load_path(self) -> PurePath:
+        if not self._version:
+            # When versioning is disabled, load from original filepath
+            return self._filepath
+
+        load_version = self._last_load_version or self._lookup_load_version()
+        return self._get_versioned_path(load_version)  # type: ignore
 
     def get_last_save_version(self) -> Optional[str]:
         return self._last_save_version
 
+    def _lookup_save_version(self) -> Optional[str]:
+        if not self._version:
+            return None
+        return self._version.save or generate_timestamp()
+
     def _get_save_path(self) -> PurePath:
         if not self._version:
-            # When versioning is disabled, return given filepath
-            self._last_save_version = None
+            # When versioning is disabled, return original filepath
             return self._filepath
-        self._last_save_version = self._version.save or generate_timestamp()
 
-        versioned_path = self._get_versioned_path(self._last_save_version)
+        save_version = self._last_save_version or self._lookup_save_version()
+        versioned_path = self._get_versioned_path(save_version)  # type: ignore
         if self._exists_function(str(versioned_path)):
             raise DataSetError(
                 "Save path `{}` for {} must not exist if versioning "
@@ -513,6 +533,40 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
     def _get_versioned_path(self, version: str) -> PurePath:
         return self._filepath / version / self._filepath.name
 
-    def _check_paths_consistency(self, load_path: PurePath, save_path: PurePath):
-        if load_path != save_path:
-            warn(_PATH_CONSISTENCY_WARNING.format(save_path, load_path, str(self)))
+    def load(self) -> Any:
+        self._last_load_version = self._lookup_load_version()
+        return super().load()
+
+    def save(self, data: Any) -> None:
+        self._last_save_version = self._lookup_save_version()
+        super().save(data)
+
+        load_version = self._lookup_load_version()
+        if load_version != self._last_save_version:
+            warn(
+                CONSISTENCY_WARNING.format(
+                    self._last_save_version, load_version, str(self)
+                )
+            )
+
+    def exists(self) -> bool:
+        """Checks whether a data set's output already exists by calling
+        the provided _exists() method.
+
+        Returns:
+            Flag indicating whether the output already exists.
+
+        Raises:
+            DataSetError: when underlying exists method raises error.
+
+        """
+        self._logger.debug("Checking whether target of %s exists", str(self))
+        try:
+            return self._exists()
+        except VersionNotFoundError:
+            return False
+        except Exception as exc:
+            message = "Failed during exists check for data set {}.\n{}".format(
+                str(self), str(exc)
+            )
+            raise DataSetError(message) from exc

@@ -39,18 +39,19 @@ from google.auth.credentials import Credentials
 from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
 
 
-class JsonGCSDataSet(AbstractVersionedDataSet):
-    """``JsonGCSDataSet`` loads and saves data to a file in gcs. It uses google-cloud-storage
-    to read and write from S3 and pandas to handle the json file.
+class JSONGCSDataSet(AbstractVersionedDataSet):
+    """``JSONGCSDataSet`` loads and saves data to a file in GCS (Google Cloud Storage).
+    It uses google-cloud-storage to read and write from S3 and pandas to handle the json file.
+
     Example:
     ::
-        >>> from kedro.contrib.io.gcs.json_gcs import JsonGCSDataSet
+        >>> from kedro.contrib.io.gcs.json_gcs import JSONGCSDataSet
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
         >>>
-        >>> data_set = JsonGCSDataSet(filepath="test.json",
+        >>> data_set = JSONGCSDataSet(filepath="test.json",
         >>>                          bucket_name="test_bucket",
         >>>                          load_args=None,
         >>>                          save_args={"index": False})
@@ -137,8 +138,6 @@ class JsonGCSDataSet(AbstractVersionedDataSet):
         # gcs maintain cache of the directory,
         # so invalidate to see new files
         self._gcs.invalidate_cache()
-        load_path = PurePosixPath(self._get_load_path())
-        self._check_paths_consistency(load_path, save_path)
 
     def _exists(self) -> bool:
         try:
@@ -146,4 +145,4 @@ class JsonGCSDataSet(AbstractVersionedDataSet):
         except DataSetError:
             return False
 
-        return self._gcs.exists(load_path)
+        return self._gcs.exists(str(load_path))

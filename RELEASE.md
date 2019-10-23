@@ -1,14 +1,25 @@
-# Release 0.15.3
+# Release 0.15.4
 
 ## Major features and improvements
+* `kedro jupyter` now gives the default kernel a sensible name.
 * `Pipeline.name` has been deprecated in favour of `Pipeline.tags`.
+* `Pipeline.transform` has been added, allowing to rename and prefix datasets and nodes.
+* Added Jupyter notebook line magic (`%run_viz`) to run `kedro viz` in notebook cell.
 
 ## Bug fixes and other changes
+* `get_last_load_version()` method for versioned datasets now returns exact last load version if the dataset has been loaded at least once and `None` otherwise.
+* Fixed a bug in `_exists` method for versioned `SparkDataSet`.
+* Enabled the customisation of the ExcelWriter in `ExcelLocalDataSet` by specifying options under `writer` key in `save_args`.
 
 ## Breaking changes to the API
+* Removed `_check_paths_consistency()` method from `AbstractVersionedDataSet`. Version consistency check is now done in `AbstractVersionedDataSet.save()`. Custom versioned datasets should modify `save()` method implementation accordingly.
 
 ## Thanks for supporting contributions
 
+# Release 0.15.3
+
+## Bug Fixes and other changes
+* Narrowed the requirements for `PyTables` so that we maintain support for Python 3.5.
 
 # Release 0.15.2
 
@@ -33,6 +44,7 @@
 
 ## Breaking changes to the API
 * `KedroContext.run()` no longer accepts `catalog` and `pipeline` arguments.
+* `node.inputs` now returns the node's inputs in the order required to bind them properly to the node's function
 
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman), [Luciano Issoe](https://github.com/Lucianois), [Joost Duisters](https://github.com/JoostDuisters), [Zain Patel](https://github.com/mzjp2), [William Ashford](https://github.com/williamashfordQB), [Karlson Lee](https://github.com/i25959341)

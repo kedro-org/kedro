@@ -36,7 +36,7 @@ import pytest
 import vcr
 from pandas.util.testing import assert_frame_equal
 
-from kedro.contrib.io.gcs.json_gcs import JsonGCSDataSet
+from kedro.contrib.io.gcs.json_gcs import JSONGCSDataSet
 from kedro.io import DataSetError, Version
 from tests.contrib.io.gcs.utils import matcher
 
@@ -74,7 +74,7 @@ def save_args(request):
 
 @pytest.fixture
 def gcs_data_set(load_args, save_args):
-    return JsonGCSDataSet(
+    return JSONGCSDataSet(
         filepath=FILENAME,
         bucket_name=BUCKET_NAME,
         project=GCP_PROJECT,
@@ -92,14 +92,15 @@ class TestJsonGCSDataSet:
         """Test invalid credentials for connecting to GCS"""
         pattern = "Anonymous caller"
         with pytest.raises(DataSetError, match=pattern):
-            JsonGCSDataSet(filepath=FILENAME, bucket_name=BUCKET_NAME).load()
+            JSONGCSDataSet(filepath=FILENAME, bucket_name=BUCKET_NAME).load()
 
     @gcs_vcr.use_cassette(match=["api_recordings/json/*.yaml"])
     def test_not_existing_bucket(self):
         """Test not existing bucket"""
-        pattern = "Failed while loading data from data set"
+        pattern = r"Failed while loading data from data set JSONGCSDataSet\(.+\)"
+
         with pytest.raises(DataSetError, match=pattern):
-            JsonGCSDataSet(
+            JSONGCSDataSet(
                 filepath=FILENAME,
                 bucket_name="not-existing-bucket",
                 credentials=GCP_CREDENTIALS,
@@ -161,7 +162,7 @@ class TestJsonGCSDataSet:
     @gcs_vcr.use_cassette(match=["api_recordings/json/*.yaml"])
     def test_load_args_propagated(self, mocker, gcs_data_set):
         mock = mocker.patch("kedro.contrib.io.gcs.json_gcs.pd.read_json")
-        JsonGCSDataSet(
+        JSONGCSDataSet(
             filepath=FILENAME,
             bucket_name=BUCKET_NAME,
             credentials=GCP_CREDENTIALS,
@@ -172,7 +173,7 @@ class TestJsonGCSDataSet:
 
 @pytest.fixture
 def versioned_gcs_data_set(load_version, save_version, load_args, save_args):
-    return JsonGCSDataSet(
+    return JSONGCSDataSet(
         bucket_name=BUCKET_NAME,
         filepath=FILENAME,
         project=GCP_PROJECT,
@@ -187,7 +188,7 @@ class TestJsonGCSDataSetVersioned:
     @gcs_vcr.use_cassette(match=["api_recordings/json/*.yaml"])
     def test_no_versions(self, versioned_gcs_data_set):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for"
+        pattern = r"Did not find any versions for JSONGCSDataSet\(.+\)"
         with pytest.raises(DataSetError, match=pattern):
             versioned_gcs_data_set.load()
 
@@ -241,8 +242,8 @@ class TestJsonGCSDataSetVersioned:
     def test_version_str_repr(self, load_version, save_version):
         """Test that version is in string representation of the class instance
         when applicable."""
-        ds = JsonGCSDataSet(filepath=FILENAME, bucket_name=BUCKET_NAME)
-        ds_versioned = JsonGCSDataSet(
+        ds = JSONGCSDataSet(filepath=FILENAME, bucket_name=BUCKET_NAME)
+        ds_versioned = JSONGCSDataSet(
             filepath=FILENAME,
             bucket_name=BUCKET_NAME,
             version=Version(load_version, save_version),

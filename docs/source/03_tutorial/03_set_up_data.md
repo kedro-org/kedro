@@ -112,7 +112,7 @@ mkdir -p src/kedro_tutorial/io && touch src/kedro_tutorial/io/__init__.py
 Or, if you are a Windows user:
 
 ```bat
-mkdir src\kedro_turorial\io && type nul > src\kedro_turorial\io\__init__.py
+mkdir src\kedro_tutorial\io && type nul > src\kedro_tutorial\io\__init__.py
 ```
 
 Creating new custom dataset implementations is done by creating a class that extends and implements all methods from `AbstractDataSet`. To implement a class that will allow you to load and save Excel files, you need to create the file `src/kedro_tutorial/io/xls_local.py` by running in your Unix terminal:

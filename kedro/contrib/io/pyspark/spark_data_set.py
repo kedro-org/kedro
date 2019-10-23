@@ -241,16 +241,13 @@ class SparkDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
         )
 
     def _save(self, data: DataFrame) -> None:
-        save_path = self._get_save_path()
+        save_path = str(self._get_save_path())
         data.write.save(
-            self._fs_prefix + str(save_path), self._file_format, **self._save_args
+            self._fs_prefix + save_path, self._file_format, **self._save_args
         )
 
-        load_path = self._get_load_path()
-        self._check_paths_consistency(load_path, save_path)
-
     def _exists(self) -> bool:
-        load_path = self._fs_prefix + str(self._filepath)
+        load_path = self._fs_prefix + str(self._get_load_path())
 
         try:
             self._get_spark().read.load(load_path, self._file_format)

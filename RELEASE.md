@@ -3,6 +3,7 @@
 ## Major features and improvements
 * `kedro jupyter` now gives the default kernel a sensible name.
 * `Pipeline.name` has been deprecated in favour of `Pipeline.tags`.
+* `Pipeline.transform` has been added, allowing to rename and prefix datasets and nodes.
 * Added Jupyter notebook line magic (`%run_viz`) to run `kedro viz` in notebook cell.
 * Added a new `kedro.contrib.io` for dask parquet dataset.
 

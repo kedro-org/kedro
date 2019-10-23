@@ -124,6 +124,21 @@ class Node:
         self._validate_unique_outputs()
         self._validate_inputs_dif_than_outputs()
 
+    def _copy(self, **overwrite_params):
+        """
+        Helper function to copy the node, replacing some values.
+        """
+        params = {
+            "func": self._func,
+            "inputs": self._inputs,
+            "outputs": self._outputs,
+            "name": self._name,
+            "tags": self._tags,
+            "decorators": self._decorators,
+        }
+        params.update(overwrite_params)
+        return Node(**params)
+
     @property
     def _logger(self):
         return logging.getLogger(__name__)
@@ -208,14 +223,7 @@ class Node:
             A copy of the current ``Node`` object with the tags added.
 
         """
-        return Node(
-            self._func,
-            self._inputs,
-            self._outputs,
-            name=self._name,
-            tags=set(self._tags) | set(tags),
-            decorators=self._decorators,
-        )
+        return self._copy(tags=set(self._tags) | set(tags))
 
     @property
     def name(self) -> str:
@@ -339,14 +347,7 @@ class Node:
             >>> assert "output" in result
             >>> assert result['output'] == "f(g(fg(h(1))))"
         """
-        return Node(
-            self._func,
-            self._inputs,
-            self._outputs,
-            name=self._name,
-            tags=self.tags,
-            decorators=self._decorators + list(reversed(decorators)),
-        )
+        return self._copy(decorators=self._decorators + list(reversed(decorators)))
 
     def run(self, inputs: Dict[str, Any] = None) -> Dict[str, Any]:
         """Run this node using the provided inputs and return its results

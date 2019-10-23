@@ -26,8 +26,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``JsonGCSDataSet`` loads and saves data to a file in gcs. It uses google-cloud-storage
-to read and write from gcs and pandas to handle the json file.
+"""``JSONGCSDataSet`` loads and saves data to a file in GCS (Google Cloud Storage).
+It uses google-cloud-storageto read and write from gcs and pandas to handle the json file.
 """
 from pathlib import PurePosixPath
 from typing import Any, Dict, Optional

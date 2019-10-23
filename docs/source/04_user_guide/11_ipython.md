@@ -48,7 +48,7 @@ def reload_kedro(project_path, line=None):
     global parameters
     try:
         # ...
-        context = load_context(project_path)
+        context = load_context(path)
         parameters = context.config_loader.get("parameters*", "parameters*/**")
         # ...
         logging.info("Defined global variable `context`, `catalog` and `parameters`")

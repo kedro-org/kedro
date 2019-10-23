@@ -5,6 +5,8 @@
 * `Pipeline.name` has been deprecated in favour of `Pipeline.tags`.
 * `Pipeline.transform` has been added, allowing to rename and prefix datasets and nodes.
 * Added Jupyter notebook line magic (`%run_viz`) to run `kedro viz` in notebook cell.
+* Added the following datasets:
+  - `NetworkXLocalDataSet` in `contrib` to load and save local graphs via NetworkX. (by [@josephhaaga](https://github.com/josephhaaga))
 
 ## Bug fixes and other changes
 * `get_last_load_version()` method for versioned datasets now returns exact last load version if the dataset has been loaded at least once and `None` otherwise.
@@ -15,6 +17,7 @@
 * Removed `_check_paths_consistency()` method from `AbstractVersionedDataSet`. Version consistency check is now done in `AbstractVersionedDataSet.save()`. Custom versioned datasets should modify `save()` method implementation accordingly.
 
 ## Thanks for supporting contributions
+[Joseph Haaga](https://github.com/josephhaaga)
 
 # Release 0.15.3
 

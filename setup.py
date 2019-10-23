@@ -53,7 +53,6 @@ with open("requirements.txt", "r", encoding="utf-8") as f:
 with open("test_requirements.txt", "r", encoding="utf-8") as f:
     test_requires = [x.strip() for x in f if x.strip() and not x.startswith("-r")]
 
-
 # Get the long description from the README file
 with open(path.join(here, "README.md"), encoding="utf-8") as f:
     readme = f.read()
@@ -116,6 +115,7 @@ setup(
             "azure-storage-queue>=1.1.0, <2.0",
         ],
         "bioinformatics": ["biopython>=1.73, <2.0"],
+        "gcs": ["gcsfs>=0.3.0, <1.0"],
         "matplotlib": ["matplotlib>=3.0.3, <4.0"],
     },
 )

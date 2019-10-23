@@ -54,7 +54,7 @@ def networkx_data_set_args(filepath_json):
     )
 
 
-@pytest.fixture(params=[[1, 2, 3]])
+@pytest.fixture()
 def network_graph_data():
     return networkx.complete_graph(3)
 

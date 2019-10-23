@@ -34,7 +34,7 @@ See https://networkx.github.io/documentation/stable/tutorial.html for details.
 
 import json
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Any, Dict
 
 import networkx
 

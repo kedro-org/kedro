@@ -134,9 +134,11 @@ class TestNetworkXLocalDataSetVersioned:
     ):
         """Test that saved and reloaded data matches the original one for
         the versioned data set."""
-        versioned_networkx_data_set.save(dummy_graph_data)
         path = Path(filepath_json)
-        assert (path / save_version / path.name).is_file()
+        path = path / save_version / path.name
+        assert not path.is_file()
+        versioned_networkx_data_set.save(dummy_graph_data)
+        assert path.is_file()
         reloaded = versioned_networkx_data_set.load()
         assert dummy_graph_data.nodes(data=True) == reloaded.nodes(data=True)
 

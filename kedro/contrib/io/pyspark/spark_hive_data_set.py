@@ -41,7 +41,7 @@ from pyspark.sql.functions import (  # pylint: disable=no-name-in-module
     lit,
 )
 
-from kedro.io import DataSetError
+from kedro.io import AbstractDataSet, DataSetError
 
 
 

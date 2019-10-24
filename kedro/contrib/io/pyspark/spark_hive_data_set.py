@@ -43,7 +43,6 @@ from pyspark.sql.functions import (  # pylint: disable=no-name-in-module
 
 from kedro.io import DataSetError
 
-from ....io import AbstractDataSet
 
 
 class StagedHiveDataSet:

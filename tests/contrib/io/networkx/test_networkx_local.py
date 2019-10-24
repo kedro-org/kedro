@@ -33,7 +33,7 @@ import pytest
 
 from kedro.contrib.io.networkx import NetworkXLocalDataSet
 from kedro.io import DataSetError
-from kedro.io.core import Version
+from kedro.io.core import Version, generate_timestamp
 
 
 @pytest.fixture
@@ -44,6 +44,16 @@ def filepath_json(tmp_path):
 @pytest.fixture
 def networkx_data_set(filepath_json):
     return NetworkXLocalDataSet(filepath=filepath_json)
+
+
+@pytest.fixture(params=[None])
+def load_version(request):
+    return request.param
+
+
+@pytest.fixture(params=[None])
+def save_version(request):
+    return request.param or generate_timestamp()
 
 
 @pytest.fixture

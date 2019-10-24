@@ -174,7 +174,7 @@ class SparkHiveDataSet(AbstractDataSet):
         if (
             self._table_pk
             and self._exists()
-            and not all(
+            and set(self._table_pk) - set(self._table_columns)
                 (col_name in self._table_columns for col_name in self._table_pk)
             )
         ):

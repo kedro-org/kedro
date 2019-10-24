@@ -5,7 +5,7 @@
 * `Pipeline.name` has been deprecated in favour of `Pipeline.tags`.
 * `Pipeline.transform` has been added, allowing to rename and prefix datasets and nodes.
 * Added Jupyter notebook line magic (`%run_viz`) to run `kedro viz` in notebook cell.
-* Added `SparkHiveDataSet` allowing usage of spark and insert/upsert on non-transactional hive tables
+* Added `kedro.contrib.io.pyspark.SparkHiveDataSet` allowing usage of Spark and insert/upsert on non-transactional Hive tables
 
 ## Bug fixes and other changes
 * `get_last_load_version()` method for versioned datasets now returns exact last load version if the dataset has been loaded at least once and `None` otherwise.

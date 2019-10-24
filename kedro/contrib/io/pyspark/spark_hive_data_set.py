@@ -103,7 +103,6 @@ class SparkHiveDataSet(AbstractDataSet):
     This data set also handles some incompatible file types such as using partitioned parquet on
     hive which will not normally allow upserts to existing data without a complete replacement
     of the existing file/partition.
-    Requires the Hive table to be preexisting.
 
     Example:
     ::
@@ -186,7 +185,7 @@ class SparkHiveDataSet(AbstractDataSet):
             )
 
     @staticmethod
-    def _get_spark():
+    def _get_spark() -> SparkSession:
         return SparkSession.builder.getOrCreate()
 
     def _create_empty_hive_table(self, data):
@@ -227,7 +226,7 @@ class SparkHiveDataSet(AbstractDataSet):
         }
         write_methods[self._write_mode](data)
 
-    def _insert_save(self, data):
+    def _insert_save(self, data: DataFrame) -> None:
         data.createOrReplaceTempView("tmp")
         self._get_spark().sql(
             "insert into {database}.{table} select {columns} from tmp".format(
@@ -237,7 +236,7 @@ class SparkHiveDataSet(AbstractDataSet):
             )
         )
 
-    def _upsert_save(self, data: DataFrame):
+    def _upsert_save(self, data: DataFrame) -> None:
         if self._load().rdd.isEmpty():
             self._insert_save(data)
         else:
@@ -262,7 +261,7 @@ class SparkHiveDataSet(AbstractDataSet):
             ) as temp_table:
                 self._overwrite_save(temp_table.staged_data)
 
-    def _overwrite_save(self, data):
+    def _overwrite_save(self, data: DataFrame) -> None:
         self._get_spark().sql(
             "truncate table {database}.{table}".format(
                 database=self._database, table=self._table
@@ -270,7 +269,7 @@ class SparkHiveDataSet(AbstractDataSet):
         )
         self._insert_save(data)
 
-    def _validate_save(self, data):
+    def _validate_save(self, data: DataFrame):
         hive_dtypes = set(self._load().dtypes)
         data_dtypes = set(data.dtypes)
         if data_dtypes != hive_dtypes:
@@ -301,5 +300,5 @@ class SparkHiveDataSet(AbstractDataSet):
                 return True
         return False
 
-    def __getstate__(self):
+    def __getstate__(self) -> None:
         raise pickle.PicklingError("PySpark datasets can't be serialized")

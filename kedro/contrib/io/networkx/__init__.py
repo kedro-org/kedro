@@ -26,7 +26,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``NetworkXLocalDataSet`` is an ``AbstractDataSet`` to save and load NetworkX graphs.
+"""``NetworkXLocalDataSet`` is an ``AbstractVersionedDataSet`` to save and load NetworkX graphs
+in JSON format using ``NetworkX``.
 """
 
 from .networkx_local import NetworkXLocalDataSet  # NOQA

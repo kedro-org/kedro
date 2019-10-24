@@ -180,7 +180,7 @@ class SparkHiveDataSet(AbstractDataSet):
         ):
             raise DataSetError(
                 "columns [{colnames}] selected as PK not found in table {database}.{table}".format(
-                    colnames=", ".join(self._table_pk),
+                    colnames=", ".join(sorted(set(self._table_pk) - set(self._table_columns))),
                     database=self._database,
                     table=self._table,
                 )

@@ -271,10 +271,11 @@ class SparkHiveDataSet(AbstractDataSet):
         self._insert_save(data)
 
     def _validate_save(self, data):
-        hive_dtypes = self._load().dtypes
+        hive_dtypes = set(self._load().dtypes)
+        data_dtypes = set(data.dtypes)
         if data.dtypes != hive_dtypes:
-            new_cols = [i for i in data.dtypes if i not in hive_dtypes]
-            missing_cols = [i for i in hive_dtypes if i not in data.dtypes]
+            new_cols = data_dtypes - hive_dtypes
+            missing_cols = hive_dtypes - data_dtypes
             raise DataSetError(
                 "dataset does not match hive table schema.\n"
                 "Present on insert only: {new_cols}\n"

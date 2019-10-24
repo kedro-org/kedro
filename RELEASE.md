@@ -6,7 +6,7 @@
 * `Pipeline.transform` has been added, allowing to rename and prefix datasets and nodes.
 * Added Jupyter notebook line magic (`%run_viz`) to run `kedro viz` in notebook cell.
 * Added the following datasets:
-  - `NetworkXLocalDataSet` in `contrib` to load and save local graphs (JSON format) via NetworkX. (by [@josephhaaga](https://github.com/josephhaaga))
+  - `NetworkXLocalDataSet` in `kedro.contrib.io.networkx` to load and save local graphs (JSON format) via NetworkX. (by [@josephhaaga](https://github.com/josephhaaga))
 
 ## Bug fixes and other changes
 * `get_last_load_version()` method for versioned datasets now returns exact last load version if the dataset has been loaded at least once and `None` otherwise.

@@ -21,6 +21,6 @@ assert nx.is_isomorphic(graph, reloaded)
 
 ```yaml
 example_graph_data:
-  type: kedro.contrib.io.networkx_local.NetworkXLocalDataSet
+  type: kedro.contrib.io.networkx.NetworkXLocalDataSet
   filepath: data/02_intermediate/test.json
 ```

@@ -44,7 +44,6 @@ from pyspark.sql.functions import (  # pylint: disable=no-name-in-module
 from kedro.io import AbstractDataSet, DataSetError
 
 
-
 class StagedHiveDataSet:
     """
     Provides a context manager for temporarily writing data to a staging hive table, for example
@@ -175,12 +174,12 @@ class SparkHiveDataSet(AbstractDataSet):
             self._table_pk
             and self._exists()
             and set(self._table_pk) - set(self._table_columns)
-                (col_name in self._table_columns for col_name in self._table_pk)
-            )
         ):
             raise DataSetError(
                 "columns [{colnames}] selected as PK not found in table {database}.{table}".format(
-                    colnames=", ".join(sorted(set(self._table_pk) - set(self._table_columns))),
+                    colnames=", ".join(
+                        sorted(set(self._table_pk) - set(self._table_columns))
+                    ),
                     database=self._database,
                     table=self._table,
                 )
@@ -250,7 +249,8 @@ class SparkHiveDataSet(AbstractDataSet):
                     coalesce(
                         "new.{}".format(col_name), "old.{}".format(col_name)
                     ).alias(col_name)
-                    for col_name in set(data.columns) - set(self._table_pk)
+                    for col_name in set(data.columns)
+                    - set(self._table_pk)  # type: ignore
                 ]
                 + self._table_pk
             )
@@ -273,7 +273,7 @@ class SparkHiveDataSet(AbstractDataSet):
     def _validate_save(self, data):
         hive_dtypes = set(self._load().dtypes)
         data_dtypes = set(data.dtypes)
-        if data.dtypes != hive_dtypes:
+        if data_dtypes != hive_dtypes:
             new_cols = data_dtypes - hive_dtypes
             missing_cols = hive_dtypes - data_dtypes
             raise DataSetError(

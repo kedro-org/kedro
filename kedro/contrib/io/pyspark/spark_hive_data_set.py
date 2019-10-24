@@ -251,7 +251,6 @@ class SparkHiveDataSet(AbstractDataSet):
                         "new.{}".format(col_name), "old.{}".format(col_name)
                     ).alias(col_name)
                     for col_name in set(data.columns) - set(self._table_pk)
-                    if col_name not in self._table_pk  # type: ignore
                 ]
                 + self._table_pk
             )

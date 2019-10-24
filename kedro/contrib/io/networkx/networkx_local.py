@@ -94,8 +94,7 @@ class NetworkXLocalDataSet(DefaultArgumentsMixIn, AbstractDataSet):
     def _save(self, data: networkx.Graph) -> None:
         json_graph = networkx.node_link_data(data, **self._save_args)
         with self._filepath.open("w") as output_file:
-            json_payload = json.dumps(json_graph)
-            output_file.write(json_payload)
+            json.dump(json_graph, output_file)
 
     def _exists(self) -> bool:
         return Path(self._filepath).is_file()

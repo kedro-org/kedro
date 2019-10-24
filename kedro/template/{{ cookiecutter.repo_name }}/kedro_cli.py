@@ -323,7 +323,7 @@ def _build_jupyter_command(
 
     if not all_kernels:
         project_name = "{{ cookiecutter.project_name }}"
-        kernel_name = re.sub(r"[^\w]+", "", project_name).strip() or 'Kedro'
+        kernel_name = re.sub(r"[^\w]+", "", project_name).strip() or "Kedro"
 
         cmd += [
             "--NotebookApp.kernel_spec_manager_class=kedro.cli.jupyter.SingleKernelSpecManager",

@@ -13,6 +13,14 @@ kedro.contrib
 
       kedro.contrib.io
 
+   .. rubric:: Templated Config
+
+   .. autosummary::
+      :toctree:
+      :template: autosummary/class.rst
+
+      kedro.contrib.config.templated_config.TemplatedConfigLoader
+
    .. rubric:: Classes
 
    .. autosummary::

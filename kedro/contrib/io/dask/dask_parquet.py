@@ -36,8 +36,8 @@ from kedro.io.core import AbstractDataSet, DataSetError
 
 
 class ParquetDaskDataSet(DefaultArgumentsMixIn, AbstractDataSet):
-    """``ParquetDaskDataSet`` loads and saves data to file(s). It uses dask
-    remove data services to handle the parquet file.
+    """``ParquetDaskDataSet`` loads and saves data to parquet file(s). It uses Dask
+    remote data services to handle the corresponding load and save operations:
         https://docs.dask.org/en/latest/remote-data-services.html
 
         Example (AWS S3):
@@ -52,7 +52,7 @@ class ParquetDaskDataSet(DefaultArgumentsMixIn, AbstractDataSet):
             >>> ddf = dd.from_pandas(data, npartitions=2)
             >>>
             >>> data_set = ParquetDaskDataSet(
-            >>>                         filepath="temp_folder",
+            >>>                         filepath="s3://bucket_name/path/to/folder",
             >>>                         credentials={
             >>>                             'aws_access_key_id': 'YOUR_KEY',
             >>>                             'aws_secret_access_key': 'YOUR SECRET'},

@@ -41,23 +41,12 @@ from s3fs import S3FileSystem
 
 from kedro.contrib.io.dask import ParquetDaskDataSet
 from kedro.io import DataSetError
-from kedro.io.core import generate_current_version
 
 FILENAME = "test.parquet"
 BUCKET_NAME = "test_bucket"
 AWS_CREDENTIALS = dict(
     aws_access_key_id="FAKE_ACCESS_KEY", aws_secret_access_key="FAKE_SECRET_KEY"
 )
-
-
-@pytest.fixture(params=[None])
-def load_version(request):
-    return request.param
-
-
-@pytest.fixture(params=[None])
-def save_version(request):
-    return request.param or generate_current_version()
 
 
 @pytest.fixture(params=[None])
@@ -114,35 +103,6 @@ def s3_data_set(load_args, save_args):
     )
 
 
-@pytest.fixture
-def mocked_s3_object_versioned(
-    tmp_path, mocked_s3_bucket, dummy_dataframe, save_version
-):
-    """Create versioned test data and add it to mocked S3 bucket."""
-    pandas_df = dummy_dataframe.compute()
-    table = pa.Table.from_pandas(pandas_df)
-    temporary_path = tmp_path / FILENAME
-    pq.write_table(table, str(temporary_path))
-
-    mocked_s3_bucket.put_object(
-        Bucket=BUCKET_NAME,
-        Key="{0}/{1}/{0}".format(FILENAME, save_version),
-        Body=temporary_path.read_bytes(),
-    )
-    return mocked_s3_bucket
-
-
-@pytest.fixture
-def versioned_s3_data_set(load_version, save_version):
-    return ParquetDaskDataSet(
-        filepath=FILENAME,
-        credentials={
-            "aws_access_key_id": "YOUR_KEY",
-            "aws_secret_access_key": "YOUR SECRET",
-        },
-    )
-
-
 @pytest.fixture()
 def s3fs_cleanup():
     # clear cache so we get a clean slate every time we instantiate a S3FileSystem
@@ -151,7 +111,7 @@ def s3fs_cleanup():
 
 
 @pytest.mark.usefixtures("s3fs_cleanup")
-class TestParquetS3DaskDataSet:
+class TestParquetDaskDataSet:
     @pytest.mark.parametrize(
         "bad_credentials",
         [{"aws_secret_access_key": "SECRET"}, {"aws_access_key_id": "KEY"}],
@@ -159,9 +119,7 @@ class TestParquetS3DaskDataSet:
     def test_incomplete_credentials_load(self, bad_credentials):
         """Test that incomplete credentials passed in credentials.yml raises exception."""
         with pytest.raises(PartialCredentialsError):
-            ParquetDaskDataSet(
-                filepath=FILENAME, credentials=bad_credentials
-            )
+            ParquetDaskDataSet(filepath=FILENAME, credentials=bad_credentials)
 
     def test_incorrect_credentials_load(self):
         """Test that incorrect credential keys won't instantiate dataset."""
@@ -180,7 +138,7 @@ class TestParquetS3DaskDataSet:
         parquet_data_set = ParquetDaskDataSet(
             filepath=FILENAME, credentials=bad_credentials
         )
-        pattern = r"Failed while loading data from data set ParquetS3DaskDataSet\(.+\)"
+        pattern = r"Failed while loading data from data set ParquetDaskDataSet\(.+\)"
         with pytest.raises(DataSetError, match=pattern):
             parquet_data_set.load()
 
@@ -188,10 +146,8 @@ class TestParquetS3DaskDataSet:
         """Test that AWS credentials are passed successfully into boto3
         client instantiation on creating S3 connection."""
         mocker.patch("s3fs.core.boto3.Session.client")
-        s3_data_set = ParquetDaskDataSet(
-            filepath=FILENAME, credentials=AWS_CREDENTIALS
-        )
-        pattern = r"Failed while loading data from data set ParquetS3DaskDataSet\(.+\)"
+        s3_data_set = ParquetDaskDataSet(filepath=FILENAME, credentials=AWS_CREDENTIALS)
+        pattern = r"Failed while loading data from data set ParquetDaskDataSet\(.+\)"
         with pytest.raises(DataSetError, match=pattern):
             s3_data_set.load()
 
@@ -225,66 +181,3 @@ class TestParquetS3DaskDataSet:
         assert not s3_data_set.exists()
         s3_data_set.save(dummy_dataframe)
         assert s3_data_set.exists()
-
-
-@pytest.mark.usefixtures("mocked_s3_bucket", "s3fs_cleanup")
-class TestParquetS3DaskDataSetVersioned:
-    def test_exists(self, versioned_s3_data_set, dummy_dataframe):
-        """Test `exists` method invocation for versioned data set."""
-        assert not versioned_s3_data_set.exists()
-        versioned_s3_data_set.save(dummy_dataframe)
-
-        assert versioned_s3_data_set.exists()
-
-    def test_no_versions(self, versioned_s3_data_set):
-        """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for ParquetS3DaskDataSet\(.+\)"
-        with pytest.raises(DataSetError, match=pattern):
-            versioned_s3_data_set.load()
-
-    @pytest.mark.usefixtures("mocked_s3_object_versioned")
-    def test_prevent_override(self, versioned_s3_data_set, dummy_dataframe):
-        """Check the error when attempting to override the data set if the
-        corresponding parquet file for a given save version already exists in S3."""
-        pattern = (
-            r"Save path \`.+\` for ParquetS3DaskDataSet\(.+\) must not exist "
-            r"if versioning is enabled"
-        )
-        with pytest.raises(DataSetError, match=pattern):
-            versioned_s3_data_set.save(dummy_dataframe)
-
-    @pytest.mark.parametrize(
-        "load_version", ["2019-01-01T23.59.59.999Z"], indirect=True
-    )
-    @pytest.mark.parametrize(
-        "save_version", ["2019-01-02T00.00.00.000Z"], indirect=True
-    )
-    def test_save_version_warning(
-        self, versioned_s3_data_set, dummy_dataframe, load_version, save_version
-    ):
-        """Check the warning when saving to the path that differs from
-        the subsequent load path."""
-        pattern = (
-            r"Save path `{b}/{f}/{sv}/{f}` did not match load path "
-            r"`{b}/{f}/{lv}/{f}` for ParquetS3DaskDataSet\(.+\)".format(
-                b=BUCKET_NAME, f=FILENAME, sv=save_version, lv=load_version
-            )
-        )
-        with pytest.warns(UserWarning, match=pattern):
-            versioned_s3_data_set.save(dummy_dataframe)
-
-    def test_version_str_repr(self, load_version, save_version):
-        """Test that version is in string representation of the class instance
-        when applicable."""
-        ds = ParquetDaskDataSet(filepath=FILENAME)
-        ds_versioned = ParquetDaskDataSet(
-            filepath=FILENAME,
-        )
-        assert FILENAME in str(ds)
-        assert "version" not in str(ds)
-
-        assert FILENAME in str(ds_versioned)
-        ver_str = "version=Version(load={}, save='{}')".format(
-            load_version, save_version
-        )
-        assert ver_str in str(ds_versioned)

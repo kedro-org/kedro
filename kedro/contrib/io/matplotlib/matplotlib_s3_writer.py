@@ -118,7 +118,7 @@ class MatplotlibWriterS3(AbstractDataSet):
 
         self._boto_session_args = boto_session_args or {}
         self._s3_client_args = s3_client_args or {}
-        self._credentials = copy.deepcopy(credentials) or {}
+       _credentials = copy.deepcopy(credentials) or {}
         self._s3_put_object_args = s3_put_object_args or {}
 
         if self._credentials:

@@ -109,8 +109,8 @@ def mocked_encrypted_s3_bucket():
 #     return MatplotlibWriterS3(bucket_name=BUCKET_NAME, filepath=KEY_PATH)
 
 
-@mock_s3
 @pytest.fixture
+@mock_s3
 def plot_writer():
     return MatplotlibWriterS3(bucket_name=BUCKET_NAME, filepath=KEY_PATH)
 

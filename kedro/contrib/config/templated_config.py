@@ -26,7 +26,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """This module provides ``kedro.config`` with the functionality to load one
-or more configuration files from specified paths, and replace template strings with default values.
+or more configuration files from specified paths, and replace template strings
+with default values.
 """
 import re
 from typing import Any, Dict, Iterable, Optional, Union
@@ -38,7 +39,7 @@ from kedro.config import ConfigLoader
 
 class TemplatedConfigLoader(ConfigLoader):
     """
-    Extension of the ConfigLoader class that allows for template values,
+    Extension of the ``ConfigLoader`` class that allows for template values,
     wrapped in brackets like: ${...}, to be replaced by default values.
 
     The easiest way to use this class is by incorporating it into the
@@ -52,6 +53,7 @@ class TemplatedConfigLoader(ConfigLoader):
 
     Example:
     ::
+
         >>> from kedro.context import KedroContext, load_context
         >>> from kedro.contrib.config import TemplatedConfigLoader
         >>>
@@ -76,6 +78,7 @@ class TemplatedConfigLoader(ConfigLoader):
 
     globals.yml
     ::
+
         bucket: "my_s3_bucket"
 
         environment: "dev"
@@ -93,14 +96,15 @@ class TemplatedConfigLoader(ConfigLoader):
 
     catalog.yml
     ::
+
         raw_boat_data:
-            type: ${datasets.spark}
+            type: "${datasets.spark}"
             filepath: "s3a://${bucket}/${environment}/${folders.raw}/boats.csv"
             file_format: parquet
 
         raw_car_data:
-            type: ${datasets.csv}
-            filepath: "/${environment}/${folders.raw}/cars.csv"
+            type: "${datasets.csv}"
+            filepath: "data/${environment}/${folders.raw}/cars.csv"
             bucket_name: "${bucket}"
 
     This uses ``jmespath`` in the background. For more information see:

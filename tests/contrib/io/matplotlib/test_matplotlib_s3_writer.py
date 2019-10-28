@@ -105,12 +105,12 @@ def mocked_encrypted_s3_bucket():
 
 
 @pytest.fixture
-def single_plot_writer():
+def single_plot_writer(mocked_s3_bucket):  # pylint: disable=unused-argument
     return MatplotlibWriterS3(bucket_name=BUCKET_NAME, filepath=KEY_PATH)
 
 
 @pytest.fixture
-def iterable_plot_writer():
+def iterable_plot_writer(mocked_s3_bucket):  # pylint: disable=unused-argument
     return MatplotlibWriterS3(bucket_name=BUCKET_NAME, filepath=KEY_PATH)
 
 

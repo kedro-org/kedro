@@ -114,7 +114,6 @@ def iterable_plot_writer():
     return MatplotlibWriterS3(bucket_name=BUCKET_NAME, filepath=KEY_PATH)
 
 
-@pytest.mark.usefixtures("mocked_s3_bucket")
 def test_save_data(tmp_path, mock_single_plot, single_plot_writer, mocked_s3_bucket):
     """Test saving single matplotlib plot to S3."""
     single_plot_writer.save(mock_single_plot)
@@ -129,7 +128,6 @@ def test_save_data(tmp_path, mock_single_plot, single_plot_writer, mocked_s3_buc
     assert actual_filepath.read_bytes() == expected_path.read_bytes()
 
 
-@pytest.mark.usefixtures("mocked_s3_bucket")
 def test_list_save(tmp_path, mock_list_plot, iterable_plot_writer, mocked_s3_bucket):
     """Test saving list of plots to S3."""
 
@@ -149,7 +147,6 @@ def test_list_save(tmp_path, mock_list_plot, iterable_plot_writer, mocked_s3_buc
         assert actual_filepath.read_bytes() == expected_path.read_bytes()
 
 
-@pytest.mark.usefixtures("mocked_s3_bucket")
 def test_dict_save(tmp_path, mock_dict_plot, iterable_plot_writer, mocked_s3_bucket):
     """Test saving dictionary of plots to S3."""
 
@@ -185,7 +182,6 @@ def test_bad_credentials(mock_dict_plot):
         bad_writer.save(mock_dict_plot)
 
 
-@pytest.mark.usefixtures("mocked_s3_bucket")
 def test_credentials(tmp_path, mock_single_plot, mocked_s3_bucket):
     """Test entering credentials"""
     normal_writer = MatplotlibWriterS3(
@@ -206,7 +202,6 @@ def test_credentials(tmp_path, mock_single_plot, mocked_s3_bucket):
     assert actual_filepath.read_bytes() == expected_path.read_bytes()
 
 
-@pytest.mark.usefixtures("mocked_s3_bucket")
 def test_s3_encryption(tmp_path, mock_single_plot, mocked_encrypted_s3_bucket):
     """Test writing to encrypted bucket"""
     normal_encryped_writer = MatplotlibWriterS3(

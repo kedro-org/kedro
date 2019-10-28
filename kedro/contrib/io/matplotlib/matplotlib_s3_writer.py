@@ -88,7 +88,7 @@ class MatplotlibWriterS3(AbstractDataSet):
     # pylint: disable=too-many-arguments
     def __init__(
         self,
-        bucket: str,
+        bucket_name: str,
         filepath: str,
         boto_session_args: Optional[Dict[str, Any]] = None,
         s3_client_args: Optional[Dict[str, Any]] = None,

@@ -118,21 +118,21 @@ class MatplotlibWriterS3(AbstractDataSet):
 
         self._boto_session_args = boto_session_args or {}
         self._s3_client_args = s3_client_args or {}
-       _credentials = copy.deepcopy(credentials) or {}
+        _credentials = copy.deepcopy(credentials) or {}
         self._s3_put_object_args = s3_put_object_args or {}
 
-        if self._credentials:
-            self._s3_client_args["aws_access_key_id"] = self._credentials[
+        if _credentials:
+            self._s3_client_args["aws_access_key_id"] = _credentials[
                 "aws_access_key_id"
             ]
-            self._s3_client_args["aws_secret_access_key"] = self._credentials[
+            self._s3_client_args["aws_secret_access_key"] = _credentials[
                 "aws_secret_access_key"
             ]
 
         self._filepath = filepath
         self._load_args = load_args if load_args else dict()
         self._save_args = save_args if save_args else dict()
-        self._bucket = bucket
+        self._bucket = bucket_name
 
     def _describe(self) -> Dict[str, Any]:
         return dict(

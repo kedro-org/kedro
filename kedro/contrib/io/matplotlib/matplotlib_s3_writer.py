@@ -35,8 +35,8 @@ import copy
 import io
 from typing import Any, Dict, List, Optional, Union
 
-import boto3
 from matplotlib.pyplot import figure
+from s3fs import S3FileSystem
 
 from kedro.io import AbstractDataSet, DataSetError
 
@@ -90,53 +90,50 @@ class MatplotlibWriterS3(AbstractDataSet):
         self,
         bucket_name: str,
         filepath: str,
-        boto_session_args: Optional[Dict[str, Any]] = None,
-        s3_client_args: Optional[Dict[str, Any]] = None,
-        s3_put_object_args: Optional[Dict[str, Any]] = None,
+        s3fs_args: Optional[Dict] = None,
         credentials: Optional[Dict[str, Any]] = None,
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
+        savefig_args: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``MatplotlibWriter``.
 
         Args:
             bucket_name: Name of the bucket without "s3://" prefix
             filepath: Path to a matplot object file.
-            boto_session_args: See
-                https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html
-            s3_client_args: See
-                https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html#client
-            s3_put_object_args: See
-                https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html#S3.Client.put_object
+            s3fs_args: Dictionary of arguments
             credentials: A dictionary of s3 access and secret keys.
                 Must contain ``aws_access_key_id`` and ``aws_secret_access_key``.
                 Updates ``s3_client_args`` if provided.
-            load_args: Currently ignored as loading is not supported.
-            save_args: Save args passed to `plt.savefig`. See
+            savefig_args: Save args passed to `plt.savefig`. See
                 https://matplotlib.org/api/_as_gen/matplotlib.pyplot.savefig.html
         """
 
-        self._boto_session_args = boto_session_args or {}
-        self._s3_client_args = s3_client_args or {}
         _credentials = copy.deepcopy(credentials) or {}
-        self._s3_put_object_args = s3_put_object_args or {}
+
+        self._s3fs_args = s3fs_args or {}
 
         if _credentials:
-            self._s3_client_args["aws_access_key_id"] = _credentials[
+            if "client_kwargs" not in self._s3fs_args.keys():
+                self._s3fs_args["client_kwargs"] = {}
+
+            self._s3fs_args["client_kwargs"]["aws_access_key_id"] = _credentials[
                 "aws_access_key_id"
             ]
-            self._s3_client_args["aws_secret_access_key"] = _credentials[
+            self._s3fs_args["client_kwargs"]["aws_secret_access_key"] = _credentials[
                 "aws_secret_access_key"
             ]
 
         self._filepath = filepath
-        self._load_args = load_args if load_args else dict()
-        self._save_args = save_args if save_args else dict()
-        self._bucket = bucket_name
+        self._savefig_args = savefig_args if savefig_args else dict()
+        self._bucket_name = bucket_name
+
+        _s3 = S3FileSystem(**self._s3fs_args)
+        self._s3 = _s3
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
-            bucket=self._bucket, load_args=self._load_args, save_args=self._save_args
+            bucket_name=self._bucket_name,
+            filepath=self._filepath,
+            s3fs_args=self._s3fs_args,
         )
 
     def _load(self) -> None:
@@ -161,13 +158,9 @@ class MatplotlibWriterS3(AbstractDataSet):
     def _save_to_s3(self, key_name, plot):
 
         bytes_object = io.BytesIO()
-        plot.savefig(bytes_object, **self._save_args)
+        plot.savefig(bytes_object, **self._savefig_args)
 
-        session = boto3.Session(**self._boto_session_args)
+        full_key_path = "/".join([self._bucket_name, key_name])
 
-        session.client("s3", **self._s3_client_args).put_object(
-            Bucket=self._bucket,
-            Key=key_name,
-            **self._s3_put_object_args,
-            Body=bytes_object.getvalue(),
-        )
+        with self._s3.open(str(full_key_path), mode="wb") as s3_file:
+            s3_file.write(bytes_object.getvalue())

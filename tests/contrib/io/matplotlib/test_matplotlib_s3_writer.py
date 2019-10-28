@@ -27,6 +27,8 @@
 # limitations under the License.
 
 
+import json
+
 import matplotlib.pyplot as plt
 import pytest
 import s3fs
@@ -73,6 +75,32 @@ def mocked_s3_bucket():
     with mock_s3():
         conn = s3fs.core.boto3.client("s3", **AWS_CREDENTIALS)
         conn.create_bucket(Bucket=BUCKET_NAME)
+        yield conn
+
+
+@pytest.fixture
+def mocked_encrypted_s3_bucket():
+    bucket_policy = {
+        "Version": "2012-10-17",
+        "Id": "PutObjPolicy",
+        "Statement": [
+            {
+                "Sid": "DenyUnEncryptedObjectUploads",
+                "Effect": "Deny",
+                "Principal": "*",
+                "Action": "s3:PutObject",
+                "Resource": "arn:aws:s3:::{}/*".format(BUCKET_NAME),
+                "Condition": {"Null": {"s3:x-amz-server-side-encryption": "aws:kms"}},
+            }
+        ],
+    }
+    bucket_policy = json.dumps(bucket_policy)
+
+    with mock_s3():
+        conn = s3fs.core.boto3.client("s3", **AWS_CREDENTIALS)
+        conn.create_bucket(Bucket=BUCKET_NAME)
+        conn.put_bucket_policy(Bucket=BUCKET_NAME, Policy=bucket_policy)
+
         yield conn
 
 
@@ -174,11 +202,11 @@ def test_credentials(tmp_path, mock_single_plot, mocked_s3_bucket):
     assert actual_filepath.read_bytes() == expected_path.read_bytes()
 
 
-def test_s3_encryption(tmp_path, mock_single_plot, mocked_s3_bucket):
+def test_s3_encryption(tmp_path, mock_single_plot, mocked_encrypted_s3_bucket):
     """Test writing to encrypted bucket"""
     normal_encryped_writer = MatplotlibWriterS3(
         bucket_name=BUCKET_NAME,
-        s3_put_object_args={"ServerSideEncryption": "AES256"},
+        s3fs_args={"s3_additional_kwargs": {"ServerSideEncryption": "AES256"}},
         filepath=KEY_PATH,
     )
 
@@ -189,6 +217,6 @@ def test_s3_encryption(tmp_path, mock_single_plot, mocked_s3_bucket):
 
     mock_single_plot.savefig(actual_filepath)
 
-    mocked_s3_bucket.download_file(BUCKET_NAME, KEY_PATH, str(expected_path))
+    mocked_encrypted_s3_bucket.download_file(BUCKET_NAME, KEY_PATH, str(expected_path))
 
     assert actual_filepath.read_bytes() == expected_path.read_bytes()

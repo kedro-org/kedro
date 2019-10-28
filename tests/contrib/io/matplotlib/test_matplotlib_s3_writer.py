@@ -104,20 +104,23 @@ def mocked_encrypted_s3_bucket():
         yield conn
 
 
-def single_plot_writer():
+# @mock_s3
+# def single_plot_writer():
+#     return MatplotlibWriterS3(bucket_name=BUCKET_NAME, filepath=KEY_PATH)
+
+
+@mock_s3
+@pytest.fixture
+def plot_writer():
     return MatplotlibWriterS3(bucket_name=BUCKET_NAME, filepath=KEY_PATH)
 
 
-def iterable_plot_writer():
-    return MatplotlibWriterS3(bucket_name=BUCKET_NAME, filepath=KEY_PATH)
-
-
-def test_save_data(tmp_path, mock_single_plot, mocked_s3_bucket):
+def test_save_data(tmp_path, mock_single_plot, plot_writer, mocked_s3_bucket):
     """Test saving single matplotlib plot to S3."""
 
-    single_plot_writer = MatplotlibWriterS3(bucket_name=BUCKET_NAME, filepath=KEY_PATH)
+    # single_plot_writer = MatplotlibWriterS3(bucket_name=BUCKET_NAME, filepath=KEY_PATH)
 
-    single_plot_writer.save(mock_single_plot)
+    plot_writer.save(mock_single_plot)
 
     expected_path = tmp_path / "downloaded_image.png"
     actual_filepath = tmp_path / "locally_saved.png"
@@ -129,13 +132,13 @@ def test_save_data(tmp_path, mock_single_plot, mocked_s3_bucket):
     assert actual_filepath.read_bytes() == expected_path.read_bytes()
 
 
-def test_list_save(tmp_path, mock_list_plot, mocked_s3_bucket):
+def test_list_save(tmp_path, mock_list_plot, plot_writer, mocked_s3_bucket):
     """Test saving list of plots to S3."""
-    iterable_plot_writer = MatplotlibWriterS3(
-        bucket_name=BUCKET_NAME, filepath=KEY_PATH
-    )
+    # iterable_plot_writer = MatplotlibWriterS3(
+    #     bucket_name=BUCKET_NAME, filepath=KEY_PATH
+    # )
 
-    iterable_plot_writer.save(mock_list_plot)
+    plot_writer.save(mock_list_plot)
 
     for index in range(5):
 
@@ -151,13 +154,13 @@ def test_list_save(tmp_path, mock_list_plot, mocked_s3_bucket):
         assert actual_filepath.read_bytes() == expected_path.read_bytes()
 
 
-def test_dict_save(tmp_path, mock_dict_plot, mocked_s3_bucket):
+def test_dict_save(tmp_path, mock_dict_plot, plot_writer, mocked_s3_bucket):
     """Test saving dictionary of plots to S3."""
 
-    iterable_plot_writer = MatplotlibWriterS3(
-        bucket_name=BUCKET_NAME, filepath=KEY_PATH
-    )
-    iterable_plot_writer.save(mock_dict_plot)
+    # iterable_plot_writer = MatplotlibWriterS3(
+    #     bucket_name=BUCKET_NAME, filepath=KEY_PATH
+    # )
+    plot_writer.save(mock_dict_plot)
 
     for colour in COLOUR_LIST:
 

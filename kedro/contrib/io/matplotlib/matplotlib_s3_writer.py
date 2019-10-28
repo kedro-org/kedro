@@ -100,7 +100,7 @@ class MatplotlibWriterS3(AbstractDataSet):
         """Creates a new instance of ``MatplotlibWriter``.
 
         Args:
-            bucket: Name of the bucket without "s3://" prefix
+            bucket_name: Name of the bucket without "s3://" prefix
             filepath: Path to a matplot object file.
             boto_session_args: See
                 https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html

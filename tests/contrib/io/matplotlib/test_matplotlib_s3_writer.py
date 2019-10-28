@@ -78,12 +78,12 @@ def mocked_s3_bucket():
 
 @pytest.fixture
 def single_plot_writer():
-    return MatplotlibWriterS3(bucket=BUCKET_NAME, filepath=KEY_PATH)
+    return MatplotlibWriterS3(bucket_name=BUCKET_NAME, filepath=KEY_PATH)
 
 
 @pytest.fixture
 def iterable_plot_writer():
-    return MatplotlibWriterS3(bucket=BUCKET_NAME, filepath=KEY_PATH)
+    return MatplotlibWriterS3(bucket_name=BUCKET_NAME, filepath=KEY_PATH)
 
 
 def test_save_data(tmp_path, mock_single_plot, single_plot_writer, mocked_s3_bucket):
@@ -141,7 +141,7 @@ def test_dict_save(tmp_path, mock_dict_plot, iterable_plot_writer, mocked_s3_buc
 def test_bad_credentials(mock_dict_plot):
     """Test writing with bad credentials"""
     bad_writer = MatplotlibWriterS3(
-        bucket=BUCKET_NAME,
+        bucket_name=BUCKET_NAME,
         filepath=KEY_PATH,
         credentials={
             "aws_access_key_id": "not_for_testing",
@@ -157,7 +157,7 @@ def test_bad_credentials(mock_dict_plot):
 def test_credentials(tmp_path, mock_single_plot, mocked_s3_bucket):
     """Test entering credentials"""
     normal_writer = MatplotlibWriterS3(
-        bucket=BUCKET_NAME,
+        bucket_name=BUCKET_NAME,
         filepath=KEY_PATH,
         credentials=dict(aws_access_key_id="testing", aws_secret_access_key="testing"),
     )
@@ -177,7 +177,7 @@ def test_credentials(tmp_path, mock_single_plot, mocked_s3_bucket):
 def test_s3_encryption(tmp_path, mock_single_plot, mocked_s3_bucket):
     """Test writing to encrypted bucket"""
     normal_encryped_writer = MatplotlibWriterS3(
-        bucket=BUCKET_NAME,
+        bucket_name=BUCKET_NAME,
         s3_put_object_args={"ServerSideEncryption": "AES256"},
         filepath=KEY_PATH,
     )

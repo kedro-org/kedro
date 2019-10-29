@@ -70,6 +70,15 @@ def test_data_set_describe():
         in str(LambdaDataSet(None, None, None, _dummy_release))
     )
 
+    # __init__ keys alphabetically sorted, None values not shown
+    expected = (
+        "LambdaDataSet(exists=<tests.io.test_lambda_data_set._dummy_exists>, "
+        "load=<tests.io.test_lambda_data_set._dummy_load>, "
+        "save=<tests.io.test_lambda_data_set._dummy_save>)"
+    )
+    actual = str(LambdaDataSet(_dummy_load, _dummy_save, _dummy_exists, None))
+    assert actual == expected
+
 
 class TestLambdaDataSetLoad:
     def test_load_invocation(self, mocker):

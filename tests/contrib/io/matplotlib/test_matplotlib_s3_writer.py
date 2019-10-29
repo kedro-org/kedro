@@ -234,3 +234,9 @@ def test_s3_encryption(tmp_path, mock_single_plot, mocked_encrypted_s3_bucket):
     mocked_encrypted_s3_bucket.download_file(BUCKET_NAME, KEY_PATH, str(expected_path))
 
     assert actual_filepath.read_bytes() == expected_path.read_bytes()
+
+
+def test_load_fail(plot_writer):
+    pattern = r"Loading not supported for `MatplotlibWriterS3`"
+    with pytest.raises(DataSetError, match=pattern):
+        plot_writer.load()

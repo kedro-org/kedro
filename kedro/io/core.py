@@ -44,7 +44,6 @@ from warnings import warn
 
 from kedro.utils import load_obj
 
-MAX_DESCRIPTION_LENGTH = 70
 VERSIONED_FLAG_KEY = "versioned"
 VERSION_KEY = "version"
 
@@ -272,8 +271,6 @@ class AbstractDataSet(abc.ABC):
             formatted like DataSet(key=value).
             2. Dictionaries have the keys alphabetically sorted recursively.
             3. Empty dictionaries and None values are not shown.
-            4. String representations of dictionary values are
-            capped to MAX_DESCRIPTION_LENGTH.
             """
 
             fmt = "{}={}" if is_root else "'{}': {}"  # 1
@@ -290,9 +287,7 @@ class AbstractDataSet(abc.ABC):
                 return text if is_root else "{" + text + "}"  # 1
 
             # not a dictionary
-            value = str(obj)
-            suffix = "" if len(value) <= MAX_DESCRIPTION_LENGTH else "..."
-            return value[:MAX_DESCRIPTION_LENGTH] + suffix  # 4
+            return str(obj)
 
         return "{}({})".format(type(self).__name__, _to_str(self._describe(), True))
 

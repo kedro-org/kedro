@@ -7,12 +7,15 @@
 * Added Jupyter notebook line magic (`%run_viz`) to run `kedro viz` in notebook cell.
 * Added the following datasets:
   - `NetworkXLocalDataSet` in `kedro.contrib.io.networkx` to load and save local graphs (JSON format) via NetworkX. (by [@josephhaaga](https://github.com/josephhaaga))
+* `kedro.contrib.config.TemplatedConfigLoader` now supports name/dict key templating and default values.
 
 ## Bug fixes and other changes
 * `get_last_load_version()` method for versioned datasets now returns exact last load version if the dataset has been loaded at least once and `None` otherwise.
 * Fixed a bug in `_exists` method for versioned `SparkDataSet`.
 * Enabled the customisation of the ExcelWriter in `ExcelLocalDataSet` by specifying options under `writer` key in `save_args`.
 * Fixed a bug in IPython startup script, attempting to load context from the incorrect location.
+* Removed capping the length of a dataset's string representation.
+* Fixed `kedro install` command failing on Windows if `src/requirements.txt` contains a different version of Kedro.
 
 ## Breaking changes to the API
 * Removed `_check_paths_consistency()` method from `AbstractVersionedDataSet`. Version consistency check is now done in `AbstractVersionedDataSet.save()`. Custom versioned datasets should modify `save()` method implementation accordingly.

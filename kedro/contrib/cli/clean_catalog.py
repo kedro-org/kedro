@@ -6,12 +6,14 @@ from kedro.context import load_context
 
 def clean_catalog(**kwargs) -> Tuple[Set[str], Set[str]]:
     """
-
+    This function compares the data sets listed in the catalog against those used by the pipeline and
+        returns the differences.
     Args:
         kwargs: Optional custom arguments defined by users, which will be passed into
 
     Returns:
-
+        A tuple of sets. First is the set of redundant entries in catalog.
+        Second is the set of entries that Kedro considers as MemoryDataSets.
     """
     context = load_context(Path.cwd(), **kwargs)
 

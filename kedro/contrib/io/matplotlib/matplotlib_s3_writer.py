@@ -43,46 +43,42 @@ from kedro.io import AbstractDataSet, DataSetError
 
 class MatplotlibWriterS3(AbstractDataSet):
     # pylint: disable=too-many-instance-attributes
-    """``MatplotlibWriter`` saves matplotlib objects as image files.
+    """
+    ``MatplotlibWriter`` saves matplotlib objects as image files.
 
-        Example:
-        ::
+    Example:
+    ::
 
-            import matplotlib.pyplot as plt
-            from kedro.contrib.io.matplotlib_s3_writer import MatplotlibWriterS3
+        import matplotlib.pyplot as plt
+        from kedro.contrib.io.matplotlib_s3_writer import MatplotlibWriterS3
 
-            plt.plot([1, 2, 3], [4, 5, 6])
+        # Saving single plot
+        plt.plot([1, 2, 3], [4, 5, 6])
+        single_plot_writer = MatplotlibWriterS3(
+            bucket="my-super-great-bucket", filepath="matplot_lib_single_plot.png"
+        )
+        single_plot_writer.save(plt)
 
-            # Saving single plot
-            single_plot_writer = MatplotlibWriterS3(
-                bucket="my-super-great-bucket", filepath="matplot_lib_single_plot.png"
-            )
-            single_plot_writer.save(plt)
+        # Saving dictionary of plots (with SSE)
+        plots_dict = {}
+        for colour in ["blue", "green", "red"]:
+            plots_dict[colour] = plt.figure()
+            plt.plot([1, 2, 3], [4, 5, 6], color=colour)
+            plt.close()
+        dict_plot_writer = MatplotlibWriterS3(
+            bucket="my-super-great-bucket", filepath="matplotlib_dict",
+        )
+        dict_plot_writer.save(plots_dict)
 
-            # Saving dictionary of plots (with SSE)
-            plots_dict = {}
-            for colour in ["blue", "green", "red"]:
-                plots_dict[colour] = plt.figure()
-                plt.plot([1, 2, 3], [4, 5, 6], color=colour)
-                plt.close()
-
-            dict_plot_writer = MatplotlibWriterS3(
-                bucket="my-super-great-bucket",
-                s3_put_object_args={"ServerSideEncryption": "AES256"},
-                filepath="matplotlib_dict",
-            )
-            dict_plot_writer.save(plots_dict)
-
-            # Saving list of plots
-            plots_list = []
-            for index in range(5):
-                plots_list.append(plt.figure())
-                plt.plot([1,2,3],[4,5,6], color=colour)
-            list_plot_writer = MatplotlibWriterS3(
-                bucket="my-super-great-bucket", filepath="matplotlib_list"
-            )
-            list_plot_writer.save(plots_list)
-
+        # Saving list of plots
+        plots_list = []
+        for index in range(5):
+            plots_list.append(plt.figure())
+            plt.plot([1,2,3],[4,5,6], color=colour)
+        list_plot_writer = MatplotlibWriterS3(
+            bucket="my-super-great-bucket", filepath="matplotlib_list"
+        )
+        list_plot_writer.save(plots_list)
     """
 
     # pylint: disable=too-many-arguments

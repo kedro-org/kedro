@@ -211,12 +211,19 @@ def test(args):
 
 @cli.command()
 def install():
-    """Install project dependencies from both requirements.txt and environment.yml (optional)."""
+    """Install project dependencies from both requirements.txt
+    and environment.yml (optional)."""
 
     if (Path.cwd() / "src" / "environment.yml").is_file():
         call(["conda", "install", "--file", "src/environment.yml", "--yes"])
 
-    python_call("pip", ["install", "-U", "-r", "src/requirements.txt"])
+    pip_command = ["install", "-U", "-r", "src/requirements.txt"]
+
+    if os.name == "posix":
+        python_call("pip", pip_command)
+    else:
+        command = [sys.executable, "-m", "pip"] + pip_command
+        subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_CONSOLE)
 
 
 @forward_command(cli, forward_help=True)

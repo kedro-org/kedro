@@ -113,7 +113,9 @@ def mocked_encrypted_s3_bucket():
 def plot_writer(mocked_s3_bucket):  # pylint: disable=unused-argument
     # @mock_s3
     def _matplotlibwriters3():
-        return MatplotlibWriterS3(bucket_name=BUCKET_NAME, filepath=KEY_PATH)
+        return MatplotlibWriterS3(
+            bucket_name=BUCKET_NAME, filepath=KEY_PATH, credentials=AWS_CREDENTIALS
+        )
 
     return _matplotlibwriters3()
 
@@ -198,9 +200,7 @@ def test_bad_credentials(mock_dict_plot):
 def test_credentials(tmp_path, mock_single_plot, mocked_s3_bucket):
     """Test entering credentials"""
     normal_writer = MatplotlibWriterS3(
-        bucket_name=BUCKET_NAME,
-        filepath=KEY_PATH,
-        credentials=dict(aws_access_key_id="testing", aws_secret_access_key="testing"),
+        bucket_name=BUCKET_NAME, filepath=KEY_PATH, credentials=AWS_CREDENTIALS
     )
 
     normal_writer.save(mock_single_plot)
@@ -221,6 +221,7 @@ def test_s3_encryption(tmp_path, mock_single_plot, mocked_encrypted_s3_bucket):
         bucket_name=BUCKET_NAME,
         s3fs_args={"s3_additional_kwargs": {"ServerSideEncryption": "AES256"}},
         filepath=KEY_PATH,
+        credentials=AWS_CREDENTIALS,
     )
 
     normal_encryped_writer.save(mock_single_plot)

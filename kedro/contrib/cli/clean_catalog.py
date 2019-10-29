@@ -5,6 +5,14 @@ from kedro.context import load_context
 
 
 def clean_catalog(**kwargs) -> Tuple[Set[str], Set[str]]:
+    """
+
+    Args:
+        kwargs: Optional custom arguments defined by users, which will be passed into
+
+    Returns:
+
+    """
     context = load_context(Path.cwd(), **kwargs)
 
     pipeline = context.pipeline.data_sets()

@@ -130,7 +130,7 @@ def test_save_data(tmp_path, mock_single_plot, plot_writer, mocked_s3_bucket):
     expected_path = tmp_path / "downloaded_image.png"
     actual_filepath = tmp_path / "locally_saved.png"
 
-    plt.savefig(actual_filepath)
+    plt.savefig(str(actual_filepath))
 
     mocked_s3_bucket.download_file(BUCKET_NAME, KEY_PATH, str(expected_path))
 
@@ -150,7 +150,7 @@ def test_list_save(tmp_path, mock_list_plot, plot_writer, mocked_s3_bucket):
         expected_path = tmp_path / "downloaded_image.png"
         actual_filepath = tmp_path / "locally_saved.png"
 
-        mock_list_plot[index].savefig(actual_filepath)
+        mock_list_plot[index].savefig(str(actual_filepath))
 
         _key_path = KEY_PATH + "/" + str(index) + ".png"
 
@@ -172,7 +172,7 @@ def test_dict_save(tmp_path, mock_dict_plot, plot_writer, mocked_s3_bucket):
         expected_path = tmp_path / "downloaded_image.png"
         actual_filepath = tmp_path / "locally_saved.png"
 
-        mock_dict_plot[colour].savefig(actual_filepath)
+        mock_dict_plot[colour].savefig(str(actual_filepath))
 
         _key_path = KEY_PATH + "/" + colour
 
@@ -208,7 +208,7 @@ def test_credentials(tmp_path, mock_single_plot, mocked_s3_bucket):
     expected_path = tmp_path / "downloaded_image.png"
     actual_filepath = tmp_path / "locally_saved.png"
 
-    plt.savefig(actual_filepath)
+    plt.savefig(str(actual_filepath))
 
     mocked_s3_bucket.download_file(BUCKET_NAME, KEY_PATH, str(expected_path))
 
@@ -229,7 +229,7 @@ def test_s3_encryption(tmp_path, mock_single_plot, mocked_encrypted_s3_bucket):
     expected_path = tmp_path / "downloaded_image.png"
     actual_filepath = tmp_path / "locally_saved.png"
 
-    mock_single_plot.savefig(actual_filepath)
+    mock_single_plot.savefig(str(actual_filepath))
 
     mocked_encrypted_s3_bucket.download_file(BUCKET_NAME, KEY_PATH, str(expected_path))
 

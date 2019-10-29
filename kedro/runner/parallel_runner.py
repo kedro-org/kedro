@@ -115,7 +115,7 @@ class ParallelRunner(AbstractRunner):
                 "serializable, i.e. nodes should not include lambda "
                 "functions, nested functions, closures, etc.\nIf you "
                 "are using custom decorators ensure they are correctly using "
-                "functools.wraps().".format(unserializable)
+                "functools.wraps().".format(sorted(unserializable))
             )
 
     @classmethod
@@ -141,7 +141,7 @@ class ParallelRunner(AbstractRunner):
                 "sets are serializable, i.e. data sets should not make use of "
                 "lambda functions, nested functions, closures etc.\nIf you "
                 "are using custom decorators ensure they are correctly using "
-                "functools.wraps().".format(unserializable)
+                "functools.wraps().".format(sorted(unserializable))
             )
 
         memory_data_sets = []
@@ -157,7 +157,7 @@ class ParallelRunner(AbstractRunner):
             raise AttributeError(
                 "The following data sets are memory data sets: {}\n"
                 "ParallelRunner does not support output to externally created "
-                "MemoryDataSets".format(memory_data_sets)
+                "MemoryDataSets".format(sorted(memory_data_sets))
             )
 
     def _get_required_workers_count(self, pipeline: Pipeline):

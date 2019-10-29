@@ -182,7 +182,7 @@ class TestCliCommands:
         for each in ("Opening file", join("html", "index.html")):
             assert each in result.output
 
-        patched_browser.assert_called_once()
+        assert patched_browser.call_count == 1
         args, _ = patched_browser.call_args
         for each in ("file://", join("kedro", "html", "index.html")):
             assert each in args[0]

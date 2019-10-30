@@ -497,8 +497,8 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
             kedro_yaml_content = yaml.safe_load(kedro_yml)
     except FileNotFoundError:
         raise KedroContextError(
-            "Could not find '.kedro.yml' in {}. If you have created "
-            "your project with Kedro version <0.15.0, make sure to update your project template. "
+            "Could not find '.kedro.yml' in {}. If you have created your project "
+            "with Kedro version <0.15.0, make sure to update your project template. "
             "See https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md "
             "for how to migrate your Kedro project.".format(str(project_path))
         )

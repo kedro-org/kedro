@@ -401,10 +401,9 @@ class TestGetProjectContext:
         msg = r"\`get_project_context\(\"{}\"\)\` is now deprecated\. ".format(key)
         if obj_name:
             msg += (
-                r"This is still returning a function that returns \`{}\` instance\, "
-                r"however passed arguments have no effect anymore since Kedro 0.15.0\. ".format(
-                    obj_name
-                )
+                r"This is still returning a function that returns \`{}\` "
+                r"instance\, however passed arguments have no effect anymore "
+                r"since Kedro 0.15.0\. ".format(obj_name)
             )
         msg += (
             r"Please get \`KedroContext\` instance by calling "

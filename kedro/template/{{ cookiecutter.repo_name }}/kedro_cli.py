@@ -29,6 +29,7 @@
 """Command line tools for manipulating a Kedro project.
 Intended to be invoked via `kedro`."""
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -210,12 +211,19 @@ def test(args):
 
 @cli.command()
 def install():
-    """Install project dependencies from both requirements.txt and environment.yml (optional)."""
+    """Install project dependencies from both requirements.txt
+    and environment.yml (optional)."""
 
     if (Path.cwd() / "src" / "environment.yml").is_file():
         call(["conda", "install", "--file", "src/environment.yml", "--yes"])
 
-    python_call("pip", ["install", "-U", "-r", "src/requirements.txt"])
+    pip_command = ["install", "-U", "-r", "src/requirements.txt"]
+
+    if os.name == "posix":
+        python_call("pip", pip_command)
+    else:
+        command = [sys.executable, "-m", "pip"] + pip_command
+        subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_CONSOLE)
 
 
 @forward_command(cli, forward_help=True)
@@ -321,7 +329,13 @@ def _build_jupyter_command(
     cmd = [base, "--ip=" + ip]
 
     if not all_kernels:
-        cmd.append("--KernelSpecManager.whitelist=['python3']")
+        project_name = "{{ cookiecutter.project_name }}"
+        kernel_name = re.sub(r"[^\w]+", "", project_name).strip() or "Kedro"
+
+        cmd += [
+            "--NotebookApp.kernel_spec_manager_class=kedro.cli.jupyter.SingleKernelSpecManager",
+            "--KernelSpecManager.default_kernel_name='{}'".format(kernel_name),
+        ]
 
     return cmd + list(args)
 

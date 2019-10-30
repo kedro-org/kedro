@@ -1,6 +1,6 @@
 # Working with IPython and Jupyter Notebooks / Lab
 
-> *Note:* This documentation is based on `Kedro 0.15.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 In order to experiment with the code interactively, you may want to use a Python kernel inside a Jupyter notebook (formerly known as IPython).
 
@@ -48,7 +48,7 @@ def reload_kedro(project_path, line=None):
     global parameters
     try:
         # ...
-        context = load_context(project_path)
+        context = load_context(path)
         parameters = context.config_loader.get("parameters*", "parameters*/**")
         # ...
         logging.info("Defined global variable `context`, `catalog` and `parameters`")
@@ -90,7 +90,11 @@ When you are developing new nodes for your pipeline, you can write them as regul
 kedro jupyter notebook
 ```
 
-This will open a Jupyter Notebook in your browser. Navigate to `notebooks` folder and create a notebook there with a **Kedro** kernel. After opening the newly created notebook you can check what the data looks like by pasting this into the first cell of the notebook and selecting **Run**:
+This will open a Jupyter Notebook in your browser. Navigate to `notebooks` folder
+and create a notebook. The only kernel available by default has a name of the current project.
+If you need to access all available kernels, add `--all-kernels` to the command above.
+After opening the newly created notebook you can check what the data looks
+like by pasting this into the first cell of the notebook and selecting **Run**:
 
 ```python
 df = context.catalog.load("example_iris_data")

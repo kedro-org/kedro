@@ -1,6 +1,6 @@
 # Pipelines
 
-> *Note:* This documentation is based on `Kedro 0.15.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 >
 > In this section we introduce the concept of a pipeline.
 
@@ -59,10 +59,12 @@ Outputs: v
 
 ### Tagging pipeline nodes
 
-You can specify a `name` for your ``Pipeline``, which will be used to tag all of the pipeline's nodes.
+You can also tag your ``Pipeline`` by providing `tags` argument, which will tag all of the pipeline's nodes.
 
 ```python
-pipeline = Pipeline([node(..., name="node1"), node(..., name="node2", tag="node_tag")], name="pipeline_tag")
+pipeline = Pipeline(
+    [node(..., name="node1"), node(..., name="node2", tags="node_tag")], tags="pipeline_tag"
+)
 ```
 
 Node `node1` will only be tagged with `pipeline_tag`, while `node2` will have both `node_tag` and `pipeline_tag`.
@@ -276,6 +278,74 @@ cp -r src/<python_package>/pipelines/data_engineering/conf/* conf/base/pipelines
 It is important to keep in mind that Kedro resolves node execution order based on their input and output datasets. For example, if node 1 outputs the dataset `A`, and node 2 requires the dataset `A` as an input, node 1 is guaranteed to be executed before node 2 when Kedro runs the pipeline.
 
 As a modular pipeline developer, you may not know how your pipeline will be integrated in the downstream projects and what data catalog configuration they may have. Therefore, it is crucial to make it clear in the pipeline documentation what datasets (names and types) are required as inputs by your modular pipeline and what datasets it produces as outputs.
+
+## Connecting existing pipelines
+
+When two existing pipelines need to work together, they should be connected by the datasets.
+But the names might be different, requiring manual fixes to be applied to the pipeline itself.
+Alternative solution would be to `transform` an existing pipeline. Consider this example:
+
+```python
+cook_pipeline = Pipeline([
+    node(defrost, 'frozen_meat', 'meat'),
+    node(grill, 'meat', 'grilled_meat'),
+])
+
+lunch_pipeline = Pipeline([
+    node(eat, 'food', None),
+])
+```
+
+A simple `cook_pipeline + lunch_pipeline` doesn't work, `food` input needs to be mapped to `grilled_meat` output.
+That's how it can be done, all three resulting pipelines do the job equally fine:
+
+```python
+final_pipeline1 = cook_pipeline.transform(datasets={"grilled_meat": "food"}) + lunch_pipeline
+final_pipeline2 = cook_pipeline + lunch_pipeline.transform(datasets={"food": "grilled_meat"})
+final_pipeline3 = cook_pipeline.transform(datasets={"grilled_meat": "new_name"}) + \
+     lunch_pipeline.transform(datasets={"food": "new_name")
+```
+
+## Using a modular pipeline twice
+Consider the example:
+
+```python
+cook_pipeline = Pipeline([
+    node(defrost, "frozen_meat", "meat", name="defrost_node"),
+    node(grill, "meat", "grilled_meat"),
+])
+
+breakfast_pipeline = Pipeline([
+    node(eat_breakfast, "breakfast_food", None),
+])
+lunch_pipeline = Pipeline([
+    node(eat_lunch, "lunch_food", None),
+])
+```
+Now we need to "defrost" two different types of food and feed it to different pipelines.
+But we can't use the `cook_pipeline` twice, the internal dataset names will conflict.
+We might try to call `transform` and rename all datasets,
+but the conflicting explicitly set `name="defrost_node"` remains.
+
+The right solution is:
+```python
+pipeline = (
+    cook_pipeline.transform(
+        datasets={"grilled_meat": "breakfast_food"}, prefix="breakfast"
+    )
+    + breakfast_pipeline
+    + cook_pipeline.transform(
+        datasets={"grilled_meat": "lunch_food"}, prefix="lunch"
+    )
+    + lunch_pipeline
+)
+```
+`prefix="lunch"` renames all datasets and nodes, prefixing them with `"lunch."`,
+except those datasets that we rename explicitly (`grilled_meat`).
+
+The resulting pipeline now has two separate nodes, `breakfast.defrost_node` and
+`lunch.defrost_node`. Also two separate datasets `breakfast.meat` and `lunch.meat`
+connect the nodes inside the pipelines, causing no confusion between them.
 
 ## Bad pipelines
 

@@ -36,7 +36,7 @@ from typing import Any, Dict, Union
 
 import pandas as pd
 
-from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
+from kedro.io.core import AbstractVersionedDataSet, Version
 
 
 class ExcelLocalDataSet(AbstractVersionedDataSet):
@@ -52,9 +52,11 @@ class ExcelLocalDataSet(AbstractVersionedDataSet):
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
-        >>> data_set = ExcelLocalDataSet(filepath="test.xlsx",
-        >>>                              load_args={'sheet_name':"Sheet1"},
-        >>>                              save_args=None)
+        >>> data_set = ExcelLocalDataSet(
+        >>>     filepath="test.xlsx",
+        >>>     load_args={"sheet_name": "Sheet1"},
+        >>>     save_args={"writer": {"date_format": "YYYY-MM-DD"}},
+        >>>)
         >>> data_set.save(data)
         >>> reloaded = data_set.load()
         >>>
@@ -68,9 +70,9 @@ class ExcelLocalDataSet(AbstractVersionedDataSet):
     def _describe(self) -> Dict[str, Any]:
         return dict(
             filepath=self._filepath,
-            engine=self._engine,
             load_args=self._load_args,
             save_args=self._save_args,
+            writer_args=self._writer_args,
             version=self._version,
         )
 
@@ -88,7 +90,7 @@ class ExcelLocalDataSet(AbstractVersionedDataSet):
 
         Args:
             engine: The engine used to write to excel files. The default
-                engine is 'xlswriter'.
+                engine is 'xlsxwriter'.
 
             filepath: path to an Excel file.
 
@@ -101,6 +103,10 @@ class ExcelLocalDataSet(AbstractVersionedDataSet):
                 find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_excel.html
                 All defaults are preserved, but "index", which is set to False.
+                If you would like to specify options for the `ExcelWriter`,
+                you can include them under "writer" key. Here you can
+                find all available arguments:
+                https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.ExcelWriter.html
 
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
@@ -109,14 +115,17 @@ class ExcelLocalDataSet(AbstractVersionedDataSet):
 
         """
         super().__init__(Path(filepath), version)
-        self._engine = engine
 
         # Handle default load and save arguments
         self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args is not None:
             self._load_args.update(load_args)
+
         self._save_args = copy.deepcopy(self.DEFAULT_SAVE_ARGS)
+        self._writer_args = {"engine": engine}  # type: Dict[str, Any]
         if save_args is not None:
+            writer_args = save_args.pop("writer", {})  # type: Dict[str, Any]
+            self._writer_args.update(writer_args)
             self._save_args.update(save_args)
 
     def _load(self) -> Union[pd.DataFrame, Dict[str, pd.DataFrame]]:
@@ -126,17 +135,12 @@ class ExcelLocalDataSet(AbstractVersionedDataSet):
     def _save(self, data: pd.DataFrame) -> None:
         save_path = Path(self._get_save_path())
         save_path.parent.mkdir(parents=True, exist_ok=True)
+
         with pd.ExcelWriter(  # pylint: disable=abstract-class-instantiated
-            str(save_path), engine=self._engine
+            str(save_path), **self._writer_args
         ) as writer:
             data.to_excel(writer, **self._save_args)
 
-        load_path = Path(self._get_load_path())
-        self._check_paths_consistency(load_path.absolute(), save_path.absolute())
-
     def _exists(self) -> bool:
-        try:
-            path = self._get_load_path()
-        except DataSetError:
-            return False
+        path = self._get_load_path()
         return Path(path).is_file()

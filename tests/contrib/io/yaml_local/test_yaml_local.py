@@ -135,10 +135,8 @@ class TestYAMLLocalDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            r"Save path `.*/{}/test\.yaml` did not match load path "
-            r"`.*/{}/test\.yaml` for YAMLLocalDataSet\(.+\)".format(
-                save_version, load_version
-            )
+            r"Save version `{0}` did not match load version `{1}` "
+            r"for YAMLLocalDataSet\(.+\)".format(save_version, load_version)
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_yaml_data_set.save(yaml_data)

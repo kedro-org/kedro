@@ -1,6 +1,6 @@
 # Journal
 
-> *Note:* This documentation is based on `Kedro 0.15.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 ## Overview
 Journal in Kedro allows you to save the history of pipeline. This functionality helps you reproduce results and gives you an ability to investigate failures in your workflow.
@@ -16,7 +16,7 @@ A context journal record captures all the necessary information to reproduce the
     "run_id": "2019-10-01T09.15.57.289Z",
     "project_path": "<path-to-project>/src/kedro-tutorial",
     "env": "local",
-    "kedro_version": "0.15.2",
+    "kedro_version": "0.15.4",
     "tags": [],
     "from_nodes": [],
     "to_nodes": [],
@@ -51,3 +51,22 @@ The dataset journal record has the following JSON format:
 ```
 
 > ❗While the context journal record is always logged at every run time of your pipeline, dataset journal record is only logged when `load` or `save` method is invoked for [versioned](./04_data_catalog.md#versioning-datasets-and-ml-models) dataset in `DataCatalog`.
+
+## Steps to manually reproduce your code and run the previous pipeline
+
+Journals must be persisted to manually reproduce your specific pipeline run. You can keep journals corresponding to checkpoints in your development workflow in your source control repo. Once you have found a version you would like to revert to, follow the below steps:
+
+1. Checkout a commit from `git_sha` in the context journal record by running the following `git` command in your terminal:
+```bash
+git checkout <git_sha>
+```
+> *Note:* If you want to go back to the latest commit in the current branch, you can run `git checkout <branch-name>`.
+
+2. Verify that the installed Kedro version is the same as the `project_version` in `src/<project-package>/run.py` by running `kedro --version`.
+    - If the installed Kedro version does not match the `project_version`, verify that there are no changes that affect your project between the different Kedro versions by looking at [`RELEASE.md`](https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md), then update the Kedro version by pinning the `kedro==project_version` in `requirements.txt` and run `kedro install` in your terminal.
+
+3. Run the pipeline with the corresponding versioned datasets' load versions fixed. Open the corresponding journal log file found in `logs/journals`, find dataset journal record, list all the dataset load versions and run the following command in your terminal:
+```bash
+kedro run --load-version="dataset1:YYYY-MM-DDThh.mm.ss.sssZ" --load-version="dataset2:YYYY-MM-DDThh.mm.ss.sssZ"
+```
+where `--load-version` should contain a dataset name and load version timestamp separated by `:`.

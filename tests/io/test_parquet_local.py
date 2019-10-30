@@ -190,10 +190,8 @@ class TestParquetLocalDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            r"Save path `.*/{}/data` did not match load path "
-            r"`.*/{}/data` for ParquetLocalDataSet\(.+\)".format(
-                save_version, load_version
-            )
+            r"Save version `{0}` did not match load version `{1}` "
+            r"for ParquetLocalDataSet\(.+\)".format(save_version, load_version)
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_parquet_data_set.save(input_data)

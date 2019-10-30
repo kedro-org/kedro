@@ -94,6 +94,7 @@ ENTRY_POINT_GROUPS = {
     "global": "kedro.global_commands",
     "project": "kedro.project_commands",
     "init": "kedro.init",
+    "line_magic": "kedro.line_magic",
 }
 
 
@@ -537,10 +538,9 @@ def get_project_context(key: str = "context", **kwargs) -> Any:
         msg = '`get_project_context("{}")` is now deprecated. '.format(key)
         if obj_name:
             msg += (
-                "This is still returning a function that returns `{}` instance, "
-                "however passed arguments have no effect anymore since Kedro 0.15.0. ".format(
-                    obj_name
-                )
+                "This is still returning a function that returns `{}` "
+                "instance, however passed arguments have no effect anymore "
+                "since Kedro 0.15.0. ".format(obj_name)
             )
         msg += (
             "Please get `KedroContext` instance by calling `get_project_context()` "
@@ -569,17 +569,29 @@ def get_project_context(key: str = "context", **kwargs) -> Any:
     return deepcopy(value)
 
 
-def _get_plugin_command_groups(name):
+def load_entry_points(name: str) -> List[str]:
+    """Load package entry point commands.
+
+    Args:
+        name: The key value specified in ENTRY_POINT_GROUPS.
+
+    Raises:
+        Exception: If loading an entry point failed.
+
+    Returns:
+        List of entry point commands.
+
+    """
     entry_points = pkg_resources.iter_entry_points(group=ENTRY_POINT_GROUPS[name])
-    command_groups = []
+    entry_point_commands = []
     for entry_point in entry_points:
         try:
-            command_groups.append(entry_point.load())
+            entry_point_commands.append(entry_point.load())
         except Exception:  # pylint: disable=broad-except
             _handle_exception(
                 "Loading {} commands from {}".format(name, str(entry_point)), end=False
             )
-    return command_groups
+    return entry_point_commands
 
 
 def _init_plugins():
@@ -599,7 +611,7 @@ def main():  # pragma: no cover
     _init_plugins()
 
     global_groups = [cli]
-    global_groups.extend(_get_plugin_command_groups("global"))
+    global_groups.extend(load_entry_points("global"))
     project_groups = []
 
     # load project commands from kedro_cli.py
@@ -610,7 +622,7 @@ def main():  # pragma: no cover
         try:
             sys.path.append(str(path))
             kedro_cli = importlib.import_module("kedro_cli")
-            project_groups.extend(_get_plugin_command_groups("project"))
+            project_groups.extend(load_entry_points("project"))
             project_groups.append(kedro_cli.cli)
         except Exception:  # pylint: disable=broad-except
             _handle_exception(

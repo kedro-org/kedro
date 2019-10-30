@@ -31,7 +31,7 @@
 from pathlib import Path
 from typing import Iterable, Type, Dict
 
-from kedro.context import KedroContext, load_context, KedroContextError
+from kedro.context import KedroContext, load_context
 from kedro.runner import AbstractRunner
 from kedro.pipeline import Pipeline
 

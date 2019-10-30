@@ -1,6 +1,6 @@
 # Nodes
 
-> *Note:* This documentation is based on `Kedro 0.15.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 >
 > In this section we introduce the concept of a node.
 
@@ -107,10 +107,10 @@ Any combinations of the above are possible, except nodes of the form `node(f, No
 
 Tags may be useful to run partial pipelines without changing the code. For instance, `kedro run --tag=ds` will only run nodes that have a `ds` tag attached.
 
-To tag a node, you can simply specify the `tag` argument, as follows:
+To tag a node, you can simply specify the `tags` argument, as follows:
 
 ```python
-node(func=add, inputs=["a", "b"], outputs="sum", name="adding_a_and_b", tag="node_tag")
+node(func=add, inputs=["a", "b"], outputs="sum", name="adding_a_and_b", tags="node_tag")
 ```
 
 Moreover, you can [tag all nodes in a ``Pipeline``](./06_pipelines.md#tagging-pipeline-nodes).

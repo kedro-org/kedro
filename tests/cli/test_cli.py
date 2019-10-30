@@ -35,7 +35,7 @@ from pytest import fixture, mark, raises, warns
 
 from kedro import __version__ as version
 from kedro.cli import get_project_context
-from kedro.cli.cli import _get_plugin_command_groups, _init_plugins, cli
+from kedro.cli.cli import _init_plugins, cli, load_entry_points
 from kedro.cli.utils import (
     CommandCollection,
     KedroCliError,
@@ -152,7 +152,7 @@ class TestCliCommands:
 
         result = cli_runner.invoke(cli, ["info"])
         assert result.exit_code == 0
-        assert "bob: 1.0.2 (hooks:global,init,project)" in result.output
+        assert "bob: 1.0.2 (hooks:global,init,line_magic,project)" in result.output
 
         entry_point.load.assert_not_called()
 
@@ -182,7 +182,7 @@ class TestCliCommands:
         for each in ("Opening file", join("html", "index.html")):
             assert each in result.output
 
-        patched_browser.assert_called_once()
+        assert patched_browser.call_count == 1
         args, _ = patched_browser.call_args
         for each in ("file://", join("kedro", "html", "index.html")):
             assert each in args[0]
@@ -401,10 +401,9 @@ class TestGetProjectContext:
         msg = r"\`get_project_context\(\"{}\"\)\` is now deprecated\. ".format(key)
         if obj_name:
             msg += (
-                r"This is still returning a function that returns \`{}\` instance\, "
-                r"however passed arguments have no effect anymore since Kedro 0.15.0\. ".format(
-                    obj_name
-                )
+                r"This is still returning a function that returns \`{}\` "
+                r"instance\, however passed arguments have no effect anymore "
+                r"since Kedro 0.15.0\. ".format(obj_name)
             )
         msg += (
             r"Please get \`KedroContext\` instance by calling "
@@ -459,40 +458,28 @@ class TestGetProjectContext:
         assert not get_project_context("verbose")
 
 
-@fixture
-def entry_points(mocker):
-    return mocker.patch("pkg_resources.iter_entry_points")
-
-
-@fixture
-def entry_point(mocker, entry_points):
-    ep = mocker.MagicMock()
-    entry_points.return_value = [ep]
-    return ep
-
-
 class TestEntryPoints:
     def test_project_groups(self, entry_points, entry_point):
         entry_point.load.return_value = "groups"
-        groups = _get_plugin_command_groups("project")
+        groups = load_entry_points("project")
         assert groups == ["groups"]
         entry_points.assert_called_once_with(group="kedro.project_commands")
 
     def test_project_error_is_caught(self, entry_points, entry_point):
         entry_point.load.side_effect = Exception()
-        groups = _get_plugin_command_groups("project")
+        groups = load_entry_points("project")
         assert groups == []
         entry_points.assert_called_once_with(group="kedro.project_commands")
 
     def test_global_groups(self, entry_points, entry_point):
         entry_point.load.return_value = "groups"
-        groups = _get_plugin_command_groups("global")
+        groups = load_entry_points("global")
         assert groups == ["groups"]
         entry_points.assert_called_once_with(group="kedro.global_commands")
 
     def test_global_error_is_caught(self, entry_points, entry_point):
         entry_point.load.side_effect = Exception()
-        groups = _get_plugin_command_groups("global")
+        groups = load_entry_points("global")
         assert groups == []
         entry_points.assert_called_once_with(group="kedro.global_commands")
 

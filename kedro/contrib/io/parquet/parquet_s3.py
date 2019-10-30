@@ -38,7 +38,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 from s3fs.core import S3FileSystem
 
-from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
+from kedro.io.core import AbstractVersionedDataSet, Version
 
 
 class ParquetS3DataSet(AbstractVersionedDataSet):
@@ -143,21 +143,15 @@ class ParquetS3DataSet(AbstractVersionedDataSet):
             return pd.read_parquet(s3_file, **self._load_args)
 
     def _save(self, data: pd.DataFrame) -> None:
-        save_path = PurePosixPath(self._get_save_path())
+        save_path = str(self._get_save_path())
 
         pq.write_table(
             table=pa.Table.from_pandas(data),
-            where=str(save_path),
+            where=save_path,
             filesystem=self._s3,
             **self._save_args,
         )
-        load_path = PurePosixPath(self._get_load_path())
-
-        self._check_paths_consistency(load_path, save_path)
 
     def _exists(self) -> bool:
-        try:
-            load_path = self._get_load_path()
-        except DataSetError:
-            return False
+        load_path = self._get_load_path()
         return self._s3.isfile(str(PurePosixPath(load_path)))

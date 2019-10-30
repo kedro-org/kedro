@@ -42,7 +42,7 @@ from typing import Any, Dict
 
 import pandas as pd
 
-from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
+from kedro.io.core import AbstractVersionedDataSet, Version
 
 
 class ParquetLocalDataSet(AbstractVersionedDataSet):
@@ -131,12 +131,6 @@ class ParquetLocalDataSet(AbstractVersionedDataSet):
         save_path.parent.mkdir(parents=True, exist_ok=True)
         data.to_parquet(save_path, engine=self._engine, **self._save_args)
 
-        load_path = Path(self._get_load_path())
-        self._check_paths_consistency(load_path.absolute(), save_path.absolute())
-
     def _exists(self) -> bool:
-        try:
-            path = self._get_load_path()
-        except DataSetError:
-            return False
+        path = self._get_load_path()
         return Path(path).is_file()

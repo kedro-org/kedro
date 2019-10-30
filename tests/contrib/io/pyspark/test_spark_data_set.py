@@ -37,8 +37,17 @@ from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
 
 from kedro.contrib.io.pyspark import SparkDataSet
-from kedro.io import CSVLocalDataSet, DataSetError, ParquetLocalDataSet, Version
+from kedro.io import (
+    CSVLocalDataSet,
+    DataCatalog,
+    DataSetError,
+    ParquetLocalDataSet,
+    PickleLocalDataSet,
+    Version,
+)
 from kedro.io.core import generate_timestamp
+from kedro.pipeline import Pipeline, node
+from kedro.runner import ParallelRunner
 
 FOLDER_NAME = "fake_folder"
 FILENAME = "test.parquet"
@@ -116,6 +125,22 @@ def sample_spark_df():
     data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
 
     return SparkSession.builder.getOrCreate().createDataFrame(data, schema)
+
+
+def identity(arg):
+    return arg  # pragma: no cover
+
+
+@pytest.fixture
+def spark_in(tmp_path, sample_spark_df):
+    spark_in = SparkDataSet(filepath=str(tmp_path / "input"))
+    spark_in.save(sample_spark_df)
+    return spark_in
+
+
+@pytest.fixture
+def spark_out(tmp_path):
+    return SparkDataSet(filepath=str(tmp_path / "output"))
 
 
 class TestSparkDataSet:
@@ -257,6 +282,67 @@ class TestSparkDataSet:
         with pytest.raises(pickle.PicklingError):
             pickle.dumps(SparkDataSet("bob"))
 
+    def test_parallel_runner(self, spark_in, spark_out):
+        """Test ParallelRunner with SparkDataSet load and save.
+        """
+        catalog = DataCatalog(data_sets={"spark_in": spark_in, "spark_out": spark_out})
+        pipeline = Pipeline([node(identity, "spark_in", "spark_out")])
+        runner = ParallelRunner()
+
+        pattern = (
+            r"The following data_sets cannot be "
+            r"serialized: \[\'spark\_in\'\, \'spark\_out\'\]"
+        )
+        with pytest.raises(AttributeError, match=pattern):
+            runner.run(pipeline, catalog)
+
+    def test_parallel_runner_with_pickle_dataset(self, tmp_path, spark_in, spark_out):
+        """Test ParallelRunner with SparkDataSet -> PickleDataSet -> SparkDataSet .
+        """
+        pickle_data = PickleLocalDataSet(
+            filepath=str(tmp_path / "data.pkl"), backend="pickle"
+        )
+        catalog = DataCatalog(
+            data_sets={
+                "spark_in": spark_in,
+                "pickle": pickle_data,
+                "spark_out": spark_out,
+            }
+        )
+        pipeline = Pipeline(
+            [
+                node(identity, "spark_in", "pickle"),
+                node(identity, "pickle", "spark_out"),
+            ]
+        )
+        runner = ParallelRunner()
+
+        pattern = (
+            r"The following data_sets cannot be "
+            r"serialized: \[\'spark\_in\'\, \'spark\_out\'\]"
+        )
+        with pytest.raises(AttributeError, match=pattern):
+            runner.run(pipeline, catalog)
+
+    def test_parallel_runner_with_memory_dataset(self, spark_in, spark_out):
+        """Run ParallelRunner with SparkDataSet -> MemoryDataSet -> SparkDataSet.
+        """
+        catalog = DataCatalog(data_sets={"spark_in": spark_in, "spark_out": spark_out})
+        pipeline = Pipeline(
+            [
+                node(identity, "spark_in", "memory"),
+                node(identity, "memory", "spark_out"),
+            ]
+        )
+        runner = ParallelRunner()
+
+        pattern = (
+            r"The following data_sets cannot be "
+            r"serialized: \[\'spark\_in\'\, \'spark\_out\'\]"
+        )
+        with pytest.raises(AttributeError, match=pattern):
+            runner.run(pipeline, catalog)
+
 
 class TestSparkDataSetVersionedLocal:
     def test_no_version(self, versioned_dataset_local):
@@ -300,11 +386,8 @@ class TestSparkDataSetVersionedLocal:
         )
 
         pattern = (
-            r"Save path `{save}` did not match load path "
-            r"`{load}` for SparkDataSet\(.+\)".format(
-                save=str(tmp_path / FILENAME / exact_version.save / FILENAME),
-                load=str(tmp_path / FILENAME / exact_version.load / FILENAME),
-            )
+            r"Save version `{ev.save}` did not match load version "
+            r"`{ev.load}` for SparkDataSet\(.+\)".format(ev=exact_version)
         )
         with pytest.warns(UserWarning, match=pattern):
             ds_local.save(sample_spark_df)
@@ -370,14 +453,10 @@ class TestSparkDataSetVersionedS3:
     def test_save(self, versioned_dataset_s3, version, mocker):
         mocked_spark_df = mocker.Mock()
 
-        mocked_load_version = mocker.MagicMock()
-        mocked_load_version.__eq__.return_value = True
-
-        # need to mock _get_load_path() call inside _save()
-        # also need _get_load_path() to return a load version that
-        # _check_paths_consistency() will be happy with (hence mocking __eq__)
+        # need _lookup_load_version() call to return a load version that
+        # matches save version due to consistency check in versioned_dataset_s3.save()
         mocker.patch.object(
-            versioned_dataset_s3, "_get_load_path", return_value=mocked_load_version
+            versioned_dataset_s3, "_lookup_load_version", return_value=version.save
         )
 
         versioned_dataset_s3.save(mocked_spark_df)
@@ -396,10 +475,8 @@ class TestSparkDataSetVersionedS3:
         mocked_spark_df = mocker.Mock()
 
         pattern = (
-            r"Save path `{b}/{f}/{sv}/{f}` did not match load path "
-            r"`{b}/{f}/{lv}/{f}` for SparkDataSet\(.+\)".format(
-                b=BUCKET_NAME, f=FILENAME, sv=exact_version.save, lv=exact_version.load
-            )
+            r"Save version `{ev.save}` did not match load version "
+            r"`{ev.load}` for SparkDataSet\(.+\)".format(ev=exact_version)
         )
         with pytest.warns(UserWarning, match=pattern):
             ds_s3.save(mocked_spark_df)
@@ -510,13 +587,10 @@ class TestSparkDataSetVersionedHdfs:
             filepath="hdfs://{}".format(HDFS_PREFIX), version=version
         )
 
-        mocked_load_version = mocker.MagicMock()
-        mocked_load_version.__eq__.return_value = True
-        # need to mock _get_load_path() call inside _save()
-        # also need _get_load_path() to return a load version that
-        # _check_paths_consistency() will be happy with (hence mocking __eq__)
+        # need _lookup_load_version() call to return a load version that
+        # matches save version due to consistency check in versioned_hdfs.save()
         mocker.patch.object(
-            versioned_hdfs, "_get_load_path", return_value=mocked_load_version
+            versioned_hdfs, "_lookup_load_version", return_value=version.save
         )
 
         mocked_spark_df = mocker.Mock()
@@ -542,10 +616,8 @@ class TestSparkDataSetVersionedHdfs:
         mocked_spark_df = mocker.Mock()
 
         pattern = (
-            r"Save path `{fn}/{f}/{sv}/{f}` did not match load path "
-            r"`{fn}/{f}/{lv}/{f}` for SparkDataSet\(.+\)".format(
-                fn=FOLDER_NAME, f=FILENAME, sv=exact_version.save, lv=exact_version.load
-            )
+            r"Save version `{ev.save}` did not match load version "
+            r"`{ev.load}` for SparkDataSet\(.+\)".format(ev=exact_version)
         )
 
         with pytest.warns(UserWarning, match=pattern):

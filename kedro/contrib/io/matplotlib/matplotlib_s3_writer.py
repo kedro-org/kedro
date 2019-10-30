@@ -28,7 +28,7 @@
 
 
 """
-``MatplotlibWriterS3`` saves matplotlib objects as image files to s3.
+``MatplotlibWriterS3`` saves matplotlib objects as image files to S3.
 """
 
 import copy
@@ -88,7 +88,7 @@ class MatplotlibWriterS3(AbstractDataSet):
         filepath: str,
         s3fs_args: Optional[Dict] = None,
         credentials: Optional[Dict[str, Any]] = None,
-        savefig_args: Dict[str, Any] = None,
+        save_args: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``MatplotlibWriter``.
 
@@ -96,10 +96,10 @@ class MatplotlibWriterS3(AbstractDataSet):
             bucket_name: Name of the bucket without "s3://" prefix
             filepath: Path to a matplot object file.
             s3fs_args: Dictionary of arguments
-            credentials: A dictionary of s3 access and secret keys.
+            credentials: A dictionary of S3 access and secret keys.
                 Must contain ``aws_access_key_id`` and ``aws_secret_access_key``.
                 Updates ``s3_client_args`` if provided.
-            savefig_args: Save args passed to `plt.savefig`. See
+            save_args: Save args passed to `plt.savefig`. See
                 https://matplotlib.org/api/_as_gen/matplotlib.pyplot.savefig.html
         """
 
@@ -119,7 +119,7 @@ class MatplotlibWriterS3(AbstractDataSet):
             ]
 
         self._filepath = filepath
-        self._savefig_args = savefig_args if savefig_args else dict()
+        self._save_args = save_args if save_args else dict()
         self._bucket_name = bucket_name
 
         _s3 = S3FileSystem(**self._s3fs_args)
@@ -154,7 +154,7 @@ class MatplotlibWriterS3(AbstractDataSet):
     def _save_to_s3(self, key_name, plot):
 
         bytes_object = io.BytesIO()
-        plot.savefig(bytes_object, **self._savefig_args)
+        plot.savefig(bytes_object, **self._save_args)
 
         full_key_path = "/".join([self._bucket_name, key_name])
 

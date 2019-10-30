@@ -105,7 +105,7 @@ class MatplotlibWriterS3(AbstractDataSet):
 
         _credentials = copy.deepcopy(credentials) or {}
 
-        self._s3fs_args = s3fs_args or {}
+        self._s3fs_args = copy.deepcopy(s3fs_args) or {}
 
         if _credentials:
             if "client_kwargs" not in self._s3fs_args.keys():

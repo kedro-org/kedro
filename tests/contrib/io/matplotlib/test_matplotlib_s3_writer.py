@@ -205,7 +205,7 @@ def test_s3_encryption(tmp_path, mock_single_plot, mocked_encrypted_s3_bucket):
     """Test writing to encrypted bucket"""
     normal_encryped_writer = MatplotlibWriterS3(
         bucket_name=BUCKET_NAME,
-        s3fs_args={"s3_additional_kwargs": {"ServerSideEncryption": "AES256"}},
+        # s3fs_args={"s3_additional_kwargs": {"ServerSideEncryption": "AES256"}},
         filepath=KEY_PATH,
         credentials=AWS_CREDENTIALS,
     )

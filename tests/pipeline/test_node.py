@@ -384,6 +384,12 @@ class TestTagDecorator:
         assert "world" in tagged_node.tags
         assert len(tagged_node.tags) == 2
 
+    def test_tag_nodes_single_tag(self):
+        tagged_node = node(identity, "input", "output", tags="hello").tag("world")
+        assert "hello" in tagged_node.tags
+        assert "world" in tagged_node.tags
+        assert len(tagged_node.tags) == 2
+
     def test_tag_and_decorate(self):
         tagged_node = node(identity, "input", "output", tags=["hello"])
         tagged_node = tagged_node.decorate(apply_f)

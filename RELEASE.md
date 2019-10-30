@@ -16,6 +16,7 @@
 * Fixed a bug in IPython startup script, attempting to load context from the incorrect location.
 * Removed capping the length of a dataset's string representation.
 * Fixed `kedro install` command failing on Windows if `src/requirements.txt` contains a different version of Kedro.
+* Enabled passing a single tag into a node or a pipeline without having to wrap it in a list (i.e. tags="my_tag").
 
 ## Breaking changes to the API
 * Removed `_check_paths_consistency()` method from `AbstractVersionedDataSet`. Version consistency check is now done in `AbstractVersionedDataSet.save()`. Custom versioned datasets should modify `save()` method implementation accordingly.

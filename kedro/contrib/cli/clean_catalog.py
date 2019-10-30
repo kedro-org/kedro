@@ -29,3 +29,14 @@ def clean_catalog(**kwargs) -> Tuple[Set[str], Set[str]]:
     redundant_pipeline = pipeline - catalog
 
     return redundant_catalog, redundant_pipeline
+
+
+def terminus_datasets(**kwargs) -> Set[str]:
+
+    context = load_context(Path.cwd(), **kwargs)
+    all_outputs = context.pipeline.all_outputs()
+    all_inputs = context.pipeline.all_inputs()
+
+    terminus_ds = all_outputs - all_inputs
+
+    return terminus_ds

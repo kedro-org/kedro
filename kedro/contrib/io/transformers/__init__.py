@@ -25,10 +25,5 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-"""``AbstractDataSet`` implementation for reading/writing data to Azure Blob
-Storage
-"""
-
-
+"""``AbstractTransformer`` implementations to modify ``DataSet`` I/O."""
 from .transformers import ProfileTimeTransformer  # NOQA

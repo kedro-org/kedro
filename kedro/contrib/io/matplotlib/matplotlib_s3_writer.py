@@ -93,12 +93,12 @@ class MatplotlibWriterS3(AbstractDataSet):
         """Creates a new instance of ``MatplotlibWriter``.
 
         Args:
-            bucket_name: Name of the bucket without "s3://" prefix
-            filepath: Path to a matplot object file.
-            s3fs_args: Dictionary of arguments
-            credentials: A dictionary of S3 access and secret keys.
-                Must contain ``aws_access_key_id`` and ``aws_secret_access_key``.
-                Updates ``s3_client_args`` if provided.
+            bucket_name: Name of the bucket without "s3://" prefix.
+            filepath: Key path to a matplot object file.
+            s3fs_args: Arguments for ``S3FileSystem``. See
+                https://s3fs.readthedocs.io/en/latest/api.html#s3fs.core.S3FileSystem
+            credentials: Argument for ``client_kwargs``. If needed ``aws_access_key_id``
+                and ``aws_secret_access_key`` are provided here.
             save_args: Save args passed to `plt.savefig`. See
                 https://matplotlib.org/api/_as_gen/matplotlib.pyplot.savefig.html
         """
@@ -107,23 +107,11 @@ class MatplotlibWriterS3(AbstractDataSet):
 
         self._s3fs_args = copy.deepcopy(s3fs_args) or {}
 
-        if _credentials:
-            if "client_kwargs" not in self._s3fs_args.keys():
-                self._s3fs_args["client_kwargs"] = {}
-
-            self._s3fs_args["client_kwargs"]["aws_access_key_id"] = _credentials[
-                "aws_access_key_id"
-            ]
-            self._s3fs_args["client_kwargs"]["aws_secret_access_key"] = _credentials[
-                "aws_secret_access_key"
-            ]
-
         self._filepath = filepath
         self._save_args = save_args if save_args else dict()
         self._bucket_name = bucket_name
 
-        _s3 = S3FileSystem(**self._s3fs_args)
-        self._s3 = _s3
+        self._s3 = S3FileSystem(client_kwargs=_credentials, **self._s3fs_args)
 
     def _describe(self) -> Dict[str, Any]:
         return dict(

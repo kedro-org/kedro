@@ -139,12 +139,12 @@ class MatplotlibWriterS3(AbstractDataSet):
         else:
             self._save_to_s3(key_name=self._filepath, plot=data)
 
-    def _save_to_s3(self, key_name, plot):
+    def _save_to_s3(self, key_name: str, plot: figure):
 
         bytes_object = io.BytesIO()
         plot.savefig(bytes_object, **self._save_args)
 
-        full_key_path = "/".join([self._bucket_name, key_name])
+        full_key_path = "{}/{}".format(self._bucket_name, key_name)
 
         with self._s3.open(str(full_key_path), mode="wb") as s3_file:
             s3_file.write(bytes_object.getvalue())

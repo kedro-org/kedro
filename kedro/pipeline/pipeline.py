@@ -41,7 +41,7 @@ from toposort import CircularDependencyError as ToposortCircleError
 from toposort import toposort
 
 import kedro
-from kedro.pipeline.node import Node
+from kedro.pipeline.node import Node, _to_list
 
 TRANSCODING_SEPARATOR = "@"
 
@@ -121,7 +121,7 @@ class Pipeline:
         nodes: Iterable[Union[Node, "Pipeline"]],
         *,
         name: str = None,
-        tags: Iterable[str] = None
+        tags: Union[str, Iterable[str]] = None
     ):  # pylint: disable=missing-type-doc
         """Initialise ``Pipeline`` with a list of ``Node`` instances.
 
@@ -177,7 +177,7 @@ class Pipeline:
         )
         _validate_duplicate_nodes(nodes)
         _validate_transcoded_inputs_outputs(nodes)
-        _tags = set(tags or [])
+        _tags = set(_to_list(tags))
 
         if name:
             warnings.warn(
@@ -727,7 +727,7 @@ class Pipeline:
         nodes = [node.decorate(*decorators) for node in self.nodes]
         return Pipeline(nodes)
 
-    def tag(self, tags: Iterable[str]) -> "Pipeline":
+    def tag(self, tags: Union[str, Iterable[str]]) -> "Pipeline":
         """
         Return a copy of the pipeline, with each node tagged accordingly.
         :param tags: The tags to be added to the nodes.

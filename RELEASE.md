@@ -5,6 +5,7 @@
 ## Bug fixes and other changes
 
 ## Breaking changes to the API
+* Renamed entry point for running pip-installed projects to `run_package()` instead of `main()` in `src/<package>/run.py`.
 
 ## Thanks for supporting contributions
 

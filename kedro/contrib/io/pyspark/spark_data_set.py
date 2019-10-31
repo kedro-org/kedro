@@ -235,19 +235,23 @@ class SparkDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
 
     def _load(self) -> DataFrame:
         load_path = self._fs_prefix + str(self._get_load_path())
+        if load_path.startswith("/dbfs"):
+            load_path = load_path[5:]
 
         return self._get_spark().read.load(
             load_path, self._file_format, **self._load_args
         )
 
     def _save(self, data: DataFrame) -> None:
-        save_path = str(self._get_save_path())
-        data.write.save(
-            self._fs_prefix + save_path, self._file_format, **self._save_args
-        )
+        save_path = self._fs_prefix + str(self._get_save_path())
+        if save_path.startswith("/dbfs"):
+            save_path = save_path[5:]
+        data.write.save(save_path, self._file_format, **self._save_args)
 
     def _exists(self) -> bool:
         load_path = self._fs_prefix + str(self._get_load_path())
+        if load_path.startswith("/dbfs"):
+            load_path = load_path[5:]
 
         try:
             self._get_spark().read.load(load_path, self._file_format)

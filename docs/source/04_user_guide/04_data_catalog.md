@@ -238,7 +238,7 @@ class PrintTimeTransformer(AbstractTransformer):
 catalog.add_transformer(PrintTimeTransformer())
 ```
 
-By default transformers are applied to all datasets in the catalog (including any that are added in the future). The `DataCatalog.add_transformers` method has an additional argument `data_set_names` that lets you limit which data sets the transformer will be applied to.
+By default transformers are applied to all datasets in the catalog (including any that are added in the future). The `DataCatalog.add_transformer` method has an additional argument `data_set_names` that lets you limit which data sets the transformer will be applied to.
 
 ## Versioning datasets and ML models
 

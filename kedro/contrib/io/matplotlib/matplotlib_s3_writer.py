@@ -79,6 +79,7 @@ class MatplotlibWriterS3(AbstractDataSet):
             bucket="my-super-great-bucket", filepath="matplotlib_list"
         )
         list_plot_writer.save(plots_list)
+
     """
 
     # pylint: disable=too-many-arguments

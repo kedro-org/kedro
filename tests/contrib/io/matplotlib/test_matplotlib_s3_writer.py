@@ -34,7 +34,7 @@ import pytest
 import s3fs
 from moto import mock_s3
 
-from kedro.contrib.io.matplotlib.matplotlib_s3_writer import MatplotlibWriterS3
+from kedro.contrib.io.matplotlib import MatplotlibS3Writer
 from kedro.io import DataSetError
 
 BUCKET_NAME = "test_bucket"
@@ -107,7 +107,7 @@ def mocked_encrypted_s3_bucket():
 @pytest.fixture
 def plot_writer(mocked_s3_bucket):  # pylint: disable=unused-argument
     def _matplotlibwriters3():
-        return MatplotlibWriterS3(
+        return MatplotlibS3Writer(
             bucket_name=BUCKET_NAME, filepath=KEY_PATH, credentials=AWS_CREDENTIALS
         )
 
@@ -169,7 +169,7 @@ def test_dict_save(tmp_path, mock_dict_plot, plot_writer, mocked_s3_bucket):
 
 def test_bad_credentials(mock_dict_plot):
     """Test writing with bad credentials"""
-    bad_writer = MatplotlibWriterS3(
+    bad_writer = MatplotlibS3Writer(
         bucket_name=BUCKET_NAME,
         filepath=KEY_PATH,
         credentials={
@@ -185,7 +185,7 @@ def test_bad_credentials(mock_dict_plot):
 
 def test_credentials(tmp_path, mock_single_plot, mocked_s3_bucket):
     """Test entering credentials"""
-    normal_writer = MatplotlibWriterS3(
+    normal_writer = MatplotlibS3Writer(
         bucket_name=BUCKET_NAME, filepath=KEY_PATH, credentials=AWS_CREDENTIALS
     )
 
@@ -203,7 +203,7 @@ def test_credentials(tmp_path, mock_single_plot, mocked_s3_bucket):
 
 def test_s3_encryption(tmp_path, mock_single_plot, mocked_encrypted_s3_bucket):
     """Test writing to encrypted bucket"""
-    normal_encryped_writer = MatplotlibWriterS3(
+    normal_encryped_writer = MatplotlibS3Writer(
         bucket_name=BUCKET_NAME,
         s3fs_args={"s3_additional_kwargs": {"ServerSideEncryption": "AES256"}},
         filepath=KEY_PATH,

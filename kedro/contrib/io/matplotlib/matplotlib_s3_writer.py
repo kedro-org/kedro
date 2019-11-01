@@ -41,20 +41,20 @@ from s3fs import S3FileSystem
 from kedro.io import AbstractDataSet, DataSetError
 
 
-class MatplotlibWriterS3(AbstractDataSet):
+class MatplotlibS3Writer(AbstractDataSet):
     # pylint: disable=too-many-instance-attributes
     """
-    ``MatplotlibWriter`` saves matplotlib objects as image files.
+    ``MatplotlibS3Writer`` saves matplotlib objects as image files.
 
     Example:
     ::
 
         import matplotlib.pyplot as plt
-        from kedro.contrib.io.matplotlib_s3_writer import MatplotlibWriterS3
+        from kedro.contrib.io.matplotlib import MatplotlibS3Writer
 
         # Saving single plot
         plt.plot([1, 2, 3], [4, 5, 6])
-        single_plot_writer = MatplotlibWriterS3(
+        single_plot_writer = MatplotlibS3Writer(
             bucket="my-super-great-bucket", filepath="matplot_lib_single_plot.png"
         )
         single_plot_writer.save(plt)
@@ -66,7 +66,7 @@ class MatplotlibWriterS3(AbstractDataSet):
             plots_dict[colour] = plt.figure()
             plt.plot([1, 2, 3], [4, 5, 6], color=colour)
             plt.close()
-        dict_plot_writer = MatplotlibWriterS3(
+        dict_plot_writer = MatplotlibS3Writer(
             bucket="my-super-great-bucket", filepath="matplotlib_dict",
         )
         dict_plot_writer.save(plots_dict)
@@ -76,7 +76,7 @@ class MatplotlibWriterS3(AbstractDataSet):
         for index in range(5):
             plots_list.append(plt.figure())
             plt.plot([1,2,3],[4,5,6], color=colour)
-        list_plot_writer = MatplotlibWriterS3(
+        list_plot_writer = MatplotlibS3Writer(
             bucket="my-super-great-bucket", filepath="matplotlib_list"
         )
         list_plot_writer.save(plots_list)

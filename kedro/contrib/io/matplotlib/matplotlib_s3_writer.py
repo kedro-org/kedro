@@ -28,7 +28,7 @@
 
 
 """
-``MatplotlibWriterS3`` saves matplotlib objects as image files to S3.
+``MatplotlibS3Writer`` saves matplotlib objects as image files to S3.
 """
 
 import copy
@@ -92,7 +92,7 @@ class MatplotlibS3Writer(AbstractDataSet):
         credentials: Optional[Dict[str, Any]] = None,
         save_args: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``MatplotlibWriter``.
+        """Creates a new instance of ``MatplotlibS3Writer``.
 
         Args:
             bucket_name: Name of the bucket without "s3://" prefix.

@@ -58,9 +58,10 @@ class MatplotlibWriterS3(AbstractDataSet):
             bucket="my-super-great-bucket", filepath="matplot_lib_single_plot.png"
         )
         single_plot_writer.save(plt)
+        plt.close()
 
         # Saving dictionary of plots (with SSE)
-        plots_dict = {}
+        plots_dict = dict()
         for colour in ["blue", "green", "red"]:
             plots_dict[colour] = plt.figure()
             plt.plot([1, 2, 3], [4, 5, 6], color=colour)
@@ -130,23 +131,23 @@ class MatplotlibWriterS3(AbstractDataSet):
     def _save(self, data: Union[figure, List[figure], Dict[str, figure]]) -> None:
         if isinstance(data, list):
             for index, plot in enumerate(data):
-                key_path = self._filepath + "/" + str(index) + ".png"
-                self._save_to_s3(key_name=key_path, plot=plot)
+                full_key_path = "/".join(
+                    [self._bucket_name, self._filepath, (str(index) + ".png")]
+                )
+                self._save_to_s3(full_key_path=full_key_path, plot=plot)
 
         elif isinstance(data, dict):
             for plot_name, plot in data.items():
-                key_path = self._filepath + "/" + plot_name
-                self._save_to_s3(key_name=key_path, plot=plot)
+                full_key_path = "/".join([self._bucket_name, self._filepath, plot_name])
+                self._save_to_s3(full_key_path=full_key_path, plot=plot)
 
         else:
-            self._save_to_s3(key_name=self._filepath, plot=data)
+            full_key_path = "/".join([self._bucket_name, self._filepath])
+            self._save_to_s3(full_key_path=full_key_path, plot=data)
 
-    def _save_to_s3(self, key_name: str, plot: figure):
-
+    def _save_to_s3(self, full_key_path: str, plot: figure):
         bytes_buffer = io.BytesIO()
         plot.savefig(bytes_buffer, **self._save_args)
 
-        full_key_path = "{}/{}".format(self._bucket_name, key_name)
-
-        with self._s3.open(str(full_key_path), mode="wb") as s3_file:
+        with self._s3.open(full_key_path, mode="wb") as s3_file:
             s3_file.write(bytes_buffer.getvalue())

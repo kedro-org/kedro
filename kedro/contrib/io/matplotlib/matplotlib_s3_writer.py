@@ -84,8 +84,8 @@ class MatplotlibWriterS3(AbstractDataSet):
     # pylint: disable=too-many-arguments
     def __init__(
         self,
-        bucket_name: str,
         filepath: str,
+        bucket_name: str,
         s3fs_args: Optional[Dict] = None,
         credentials: Optional[Dict[str, Any]] = None,
         save_args: Dict[str, Any] = None,
@@ -118,6 +118,7 @@ class MatplotlibWriterS3(AbstractDataSet):
             bucket_name=self._bucket_name,
             filepath=self._filepath,
             s3fs_args=self._s3fs_args,
+            save_args=self._save_args,
         )
 
     def _load(self) -> None:
@@ -141,10 +142,10 @@ class MatplotlibWriterS3(AbstractDataSet):
 
     def _save_to_s3(self, key_name: str, plot: figure):
 
-        bytes_object = io.BytesIO()
-        plot.savefig(bytes_object, **self._save_args)
+        bytes_buffer = io.BytesIO()
+        plot.savefig(bytes_buffer, **self._save_args)
 
         full_key_path = "{}/{}".format(self._bucket_name, key_name)
 
         with self._s3.open(str(full_key_path), mode="wb") as s3_file:
-            s3_file.write(bytes_object.getvalue())
+            s3_file.write(bytes_buffer.getvalue())

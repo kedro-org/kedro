@@ -49,37 +49,37 @@ class MatplotlibS3Writer(AbstractDataSet):
     Example:
     ::
 
-        import matplotlib.pyplot as plt
-        from kedro.contrib.io.matplotlib import MatplotlibS3Writer
-
-        # Saving single plot
-        plt.plot([1, 2, 3], [4, 5, 6])
-        single_plot_writer = MatplotlibS3Writer(
-            bucket="my-super-great-bucket", filepath="matplot_lib_single_plot.png"
-        )
-        single_plot_writer.save(plt)
-        plt.close()
-
-        # Saving dictionary of plots (with SSE)
-        plots_dict = dict()
-        for colour in ["blue", "green", "red"]:
-            plots_dict[colour] = plt.figure()
-            plt.plot([1, 2, 3], [4, 5, 6], color=colour)
-            plt.close()
-        dict_plot_writer = MatplotlibS3Writer(
-            bucket="my-super-great-bucket", filepath="matplotlib_dict",
-        )
-        dict_plot_writer.save(plots_dict)
-
-        # Saving list of plots
-        plots_list = []
-        for index in range(5):
-            plots_list.append(plt.figure())
-            plt.plot([1,2,3],[4,5,6], color=colour)
-        list_plot_writer = MatplotlibS3Writer(
-            bucket="my-super-great-bucket", filepath="matplotlib_list"
-        )
-        list_plot_writer.save(plots_list)
+        >>> import matplotlib.pyplot as plt
+        >>> from kedro.contrib.io.matplotlib import MatplotlibS3Writer
+        >>>
+        >>> # Saving single plot
+        >>> plt.plot([1, 2, 3], [4, 5, 6])
+        >>> single_plot_writer = MatplotlibS3Writer(
+        >>>     bucket="my-super-great-bucket", filepath="matplot_lib_single_plot.png"
+        >>> )
+        >>> single_plot_writer.save(plt)
+        >>> plt.close()
+        >>>
+        >>> # Saving dictionary of plots (with SSE)
+        >>> plots_dict = dict()
+        >>> for colour in ["blue", "green", "red"]:
+        >>>     plots_dict[colour] = plt.figure()
+        >>>     plt.plot([1, 2, 3], [4, 5, 6], color=colour)
+        >>>     plt.close()
+        >>> dict_plot_writer = MatplotlibS3Writer(
+        >>>     bucket="my-super-great-bucket", filepath="matplotlib_dict",
+        >>> )
+        >>> dict_plot_writer.save(plots_dict)
+        >>>
+        >>> # Saving list of plots
+        >>> plots_list = []
+        >>> for index in range(5):
+        >>>     plots_list.append(plt.figure())
+        >>>     plt.plot([1,2,3],[4,5,6], color=colour)
+        >>> list_plot_writer = MatplotlibS3Writer(
+        >>>     bucket="my-super-great-bucket", filepath="matplotlib_list"
+        >>> )
+        >>> list_plot_writer.save(plots_list)
 
     """
 

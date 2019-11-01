@@ -151,3 +151,7 @@ class MatplotlibS3Writer(AbstractDataSet):
 
         with self._s3.open(full_key_path, mode="wb") as s3_file:
             s3_file.write(bytes_buffer.getvalue())
+
+    def _exists(self) -> bool:
+        load_path = "/".join([self._bucket_name, self._filepath])
+        return self._s3.isdir(load_path) or self._s3.isfile(load_path)

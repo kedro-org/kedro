@@ -226,3 +226,13 @@ def test_load_fail(plot_writer):
     pattern = r"Loading not supported for `MatplotlibS3Writer`"
     with pytest.raises(DataSetError, match=pattern):
         plot_writer.load()
+
+
+def test_exists_single(mock_single_plot, plot_writer):
+    plot_writer.save(mock_single_plot)
+    plot_writer.exists()
+
+
+def test_exists_multiple(mock_dict_plot, plot_writer):
+    plot_writer.save(mock_dict_plot)
+    plot_writer.exists()

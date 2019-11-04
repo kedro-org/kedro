@@ -35,7 +35,8 @@ def reload_kedro(path, line=None):
         catalog = context.catalog
 
         # remove cached user modules
-        to_remove = [mod for mod in sys.modules if mod.startswith(context.project_name)]
+        package_name = context.__module__.split(".")[0]
+        to_remove = [mod for mod in sys.modules if mod.startswith(package_name)]
         for module in to_remove:
             del sys.modules[module]
 

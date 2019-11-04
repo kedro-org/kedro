@@ -38,7 +38,7 @@ from typing import Any, Dict, Optional
 
 from s3fs.core import S3FileSystem
 
-from kedro.io.core import AbstractVersionedDataSet, Version
+from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
 
 
 class PickleS3DataSet(AbstractVersionedDataSet):
@@ -139,7 +139,21 @@ class PickleS3DataSet(AbstractVersionedDataSet):
 
     def _save(self, data: Any) -> None:
         save_path = str(self._get_save_path())
-        bytes_object = pickle.dumps(data, **self._save_args)
+        try:
+            bytes_object = pickle.dumps(data, **self._save_args)
+        except Exception:  # pylint: disable=broad-except
+            # Checks if the error is due to serialisation or not
+            try:
+                pickle.dumps(data)
+            except Exception:
+                raise DataSetError(
+                    "{} cannot be serialized. {} can only be used with "
+                    "serializable data".format(
+                        str(data.__class__), str(self.__class__.__name__)
+                    )
+                )
+            else:
+                raise  # pragma: no cover
 
         with self._s3.open(save_path, mode="wb") as s3_file:
             s3_file.write(bytes_object)

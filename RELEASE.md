@@ -3,6 +3,8 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* `ParallelRunner` now works with `SparkDataSet`.
+* Allowed the use of nulls in `parameters.yml`.
 
 ## Breaking changes to the API
 * Renamed entry point for running pip-installed projects to `run_package()` instead of `main()` in `src/<package>/run.py`.

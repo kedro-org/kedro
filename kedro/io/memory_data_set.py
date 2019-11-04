@@ -37,6 +37,8 @@ import pandas as pd
 
 from kedro.io.core import AbstractDataSet, DataSetError
 
+_EMPTY = object()
+
 
 class MemoryDataSet(AbstractDataSet):
     """``MemoryDataSet`` loads and saves data from/to an in-memory\
@@ -62,24 +64,19 @@ class MemoryDataSet(AbstractDataSet):
 
     """
 
-    def _describe(self) -> Dict[str, Any]:
-        if self._data is not None:
-            return dict(data="<{}>".format(type(self._data).__name__))
-        return dict(data=None)  # pragma: no cover
-
-    def __init__(self, data: Any = None):
+    def __init__(self, data: Any = _EMPTY):
         """Creates a new instance of ``MemoryDataSet`` pointing to the
         provided Python object.
 
         Args:
             data: Python object containing the data.
         """
-        self._data = None
-        if data is not None:
+        self._data = _EMPTY
+        if data is not _EMPTY:
             self._save(data)
 
     def _load(self) -> Any:
-        if self._data is None:
+        if self._data is _EMPTY:
             raise DataSetError("Data for MemoryDataSet has not been saved yet.")
         if isinstance(self._data, (pd.DataFrame, np.ndarray)):
             data = self._data.copy()
@@ -98,9 +95,14 @@ class MemoryDataSet(AbstractDataSet):
             self._data = copy.deepcopy(data)
 
     def _exists(self) -> bool:
-        if self._data is None:
-            return False
-        return True
+        return self._data is not _EMPTY
 
     def _release(self) -> None:
-        self._data = None
+        self._data = _EMPTY
+
+    def _describe(self) -> Dict[str, Any]:
+        if self._data is not _EMPTY:
+            return dict(data="<{}>".format(type(self._data).__name__))
+        # the string representation of datasets leaves out __init__
+        # arguments that are empty/None, equivalent here is _EMPTY
+        return dict(data=None)  # pragma: no cover

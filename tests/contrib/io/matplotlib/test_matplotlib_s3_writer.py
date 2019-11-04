@@ -33,6 +33,7 @@ import matplotlib.pyplot as plt
 import pytest
 import s3fs
 from moto import mock_s3
+from s3fs import S3FileSystem
 
 from kedro.contrib.io.matplotlib import MatplotlibS3Writer
 from kedro.io import DataSetError
@@ -101,6 +102,13 @@ def mocked_encrypted_s3_bucket():
         conn.create_bucket(Bucket=BUCKET_NAME)
         conn.put_bucket_policy(Bucket=BUCKET_NAME, Policy=bucket_policy)
         yield conn
+
+
+@pytest.fixture()
+def s3fs_cleanup():
+    # clear cache for clean mocked s3 bucket each time
+    yield
+    S3FileSystem.cachable = False
 
 
 @pytest.fixture
@@ -206,13 +214,15 @@ def test_load_fail(plot_writer):
         plot_writer.load()
 
 
+@pytest.mark.usefixtures("s3fs_cleanup")
 def test_exists_single(mock_single_plot, plot_writer):
     assert not plot_writer.exists()
     plot_writer.save(mock_single_plot)
     assert plot_writer.exists()
 
 
+@pytest.mark.usefixtures("s3fs_cleanup")
 def test_exists_multiple(mock_dict_plot, plot_writer):
-    # assert not plot_writer.exists()
+    assert not plot_writer.exists()
     plot_writer.save(mock_dict_plot)
     assert plot_writer.exists()

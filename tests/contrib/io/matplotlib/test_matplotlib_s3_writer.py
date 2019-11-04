@@ -100,7 +100,6 @@ def mocked_encrypted_s3_bucket():
         conn = s3fs.core.boto3.client("s3", **AWS_CREDENTIALS)
         conn.create_bucket(Bucket=BUCKET_NAME)
         conn.put_bucket_policy(Bucket=BUCKET_NAME, Policy=bucket_policy)
-
         yield conn
 
 

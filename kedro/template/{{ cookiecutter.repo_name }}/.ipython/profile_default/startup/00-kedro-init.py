@@ -1,5 +1,6 @@
 import logging.config
 from pathlib import Path
+import sys
 
 from IPython.core.magic import register_line_magic
 
@@ -32,6 +33,12 @@ def reload_kedro(path, line=None):
 
         context = load_context(path)
         catalog = context.catalog
+
+        # remove cached user modules
+        to_remove = [mod for mod in sys.modules if mod.startswith(context.project_name)]
+        for module in to_remove:
+            del sys.modules[module]
+
         logging.info("** Kedro project %s", str(context.project_name))
         logging.info("Defined global variable `context` and `catalog`")
 

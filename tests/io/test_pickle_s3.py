@@ -199,6 +199,20 @@ class TestPickleS3DataSet:
         loaded_data = s3_data_set_with_args.load()
         assert loaded_data == new_data
 
+    @pytest.mark.usefixtures("mocked_s3_object")
+    def test_unserialisable_data(self, s3_data_set):
+        """Test saving the data to S3 with options."""
+
+        def closure_cant_be_pickled():
+            pass  # pragma: no cover
+
+        new_data = closure_cant_be_pickled
+        pattern = r"{0} cannot be serialized. {1} can only be used with serializable data".format(
+            str(new_data.__class__), str(s3_data_set.__class__.__name__)
+        )
+        with pytest.raises(DataSetError, match=pattern):
+            s3_data_set.save(new_data)
+
     def test_serializable(self, s3_data_set):
         ForkingPickler.dumps(s3_data_set)
 

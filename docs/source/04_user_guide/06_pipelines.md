@@ -1,6 +1,6 @@
 # Pipelines
 
-> *Note:* This documentation is based on `Kedro 0.15.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 >
 > In this section we introduce the concept of a pipeline.
 
@@ -59,10 +59,12 @@ Outputs: v
 
 ### Tagging pipeline nodes
 
-You can specify a `name` for your ``Pipeline``, which will be used to tag all of the pipeline's nodes.
+You can also tag your ``Pipeline`` by providing `tags` argument, which will tag all of the pipeline's nodes.
 
 ```python
-pipeline = Pipeline([node(..., name="node1"), node(..., name="node2", tag="node_tag")], name="pipeline_tag")
+pipeline = Pipeline(
+    [node(..., name="node1"), node(..., name="node2", tags="node_tag")], tags="pipeline_tag"
+)
 ```
 
 Node `node1` will only be tagged with `pipeline_tag`, while `node2` will have both `node_tag` and `pipeline_tag`.
@@ -425,7 +427,6 @@ We recommend using `SequentialRunner` in cases where:
 - the pipeline has limited branching
 - the pipeline is fast
 - the resource consuming steps require most of a scarce resource (e.g., significant RAM, disk memory or CPU)
-- `PySpark` is being used
 
 
 Now we can execute the pipeline by providing a runner and values for each of the inputs.

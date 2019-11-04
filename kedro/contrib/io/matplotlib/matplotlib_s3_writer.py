@@ -88,8 +88,8 @@ class MatplotlibS3Writer(AbstractDataSet):
         self,
         filepath: str,
         bucket_name: str,
-        s3fs_args: Optional[Dict] = None,
-        credentials: Optional[Dict[str, Any]] = None,
+        s3fs_args: Dict[str, Any] = None,
+        credentials: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``MatplotlibS3Writer``.
@@ -108,7 +108,6 @@ class MatplotlibS3Writer(AbstractDataSet):
         _credentials = copy.deepcopy(credentials) or {}
 
         self._s3fs_args = copy.deepcopy(s3fs_args) or {}
-
         self._filepath = filepath
         self._save_args = save_args if save_args else dict()
         self._bucket_name = bucket_name

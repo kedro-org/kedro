@@ -37,7 +37,7 @@ import pickle
 from pathlib import Path
 from typing import Any, Dict
 
-from kedro.io.core import AbstractVersionedDataSet, Version
+from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
 
 try:
     import joblib
@@ -150,7 +150,21 @@ class PickleLocalDataSet(AbstractVersionedDataSet):
         save_path.parent.mkdir(parents=True, exist_ok=True)
 
         with save_path.open("wb") as local_file:
-            self.BACKENDS[self._backend].dump(data, local_file, **self._save_args)
+            try:
+                self.BACKENDS[self._backend].dump(data, local_file, **self._save_args)
+            except Exception:  # pylint: disable=broad-except
+                # Checks if the error is due to serialisation or not
+                try:
+                    self.BACKENDS[self._backend].dumps(data)
+                except Exception:
+                    raise DataSetError(
+                        "{} cannot be serialized. {} can only be used with "
+                        "serializable data".format(
+                            str(data.__class__), str(self.__class__.__name__)
+                        )
+                    )
+                else:
+                    raise  # pragma: no cover
 
     def _describe(self) -> Dict[str, Any]:
         return dict(

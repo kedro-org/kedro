@@ -427,7 +427,6 @@ We recommend using `SequentialRunner` in cases where:
 - the pipeline has limited branching
 - the pipeline is fast
 - the resource consuming steps require most of a scarce resource (e.g., significant RAM, disk memory or CPU)
-- `PySpark` is being used
 
 
 Now we can execute the pipeline by providing a runner and values for each of the inputs.

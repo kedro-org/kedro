@@ -88,7 +88,7 @@ class MatplotlibS3Writer(AbstractDataSet):
         self,
         filepath: str,
         bucket_name: str,
-        s3fs_args: Optional[Dict] = None,
+        s3fs_args: Dict[str, Any] = None,
         credentials: Optional[Dict[str, Any]] = None,
         save_args: Dict[str, Any] = None,
     ) -> None:

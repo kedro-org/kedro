@@ -234,4 +234,4 @@ def test_exists_single(mock_single_plot, plot_writer):
 
 def test_exists_multiple(mock_dict_plot, plot_writer):
     plot_writer.save(mock_dict_plot)
-    plot_writer.exists()
+    assert plot_writer.exists()

@@ -33,6 +33,7 @@
 
 import copy
 import io
+from pathlib import Path
 from typing import Any, Dict, List, Union
 
 from matplotlib.pyplot import figure
@@ -107,9 +108,9 @@ class MatplotlibS3Writer(AbstractDataSet):
         _credentials = copy.deepcopy(credentials) or {}
 
         self._s3fs_args = copy.deepcopy(s3fs_args) or {}
-        self._filepath = filepath
+        self._filepath = Path(filepath)
         self._save_args = save_args if save_args else dict()
-        self._bucket_name = bucket_name
+        self._bucket_name = Path(bucket_name)
 
         self._s3 = S3FileSystem(client_kwargs=_credentials, **self._s3fs_args)
 
@@ -129,19 +130,19 @@ class MatplotlibS3Writer(AbstractDataSet):
     def _save(self, data: Union[figure, List[figure], Dict[str, figure]]) -> None:
         if isinstance(data, list):
             for index, plot in enumerate(data):
-                full_key_path = "/".join(
-                    [self._bucket_name, self._filepath, (str(index) + ".png")]
+                full_key_path = (
+                    self._bucket_name / self._filepath / (str(index) + ".png")
                 )
-                self._save_to_s3(full_key_path=full_key_path, plot=plot)
+                self._save_to_s3(full_key_path=str(full_key_path), plot=plot)
 
         elif isinstance(data, dict):
             for plot_name, plot in data.items():
-                full_key_path = "/".join([self._bucket_name, self._filepath, plot_name])
-                self._save_to_s3(full_key_path=full_key_path, plot=plot)
+                full_key_path = self._bucket_name / self._filepath / plot_name
+                self._save_to_s3(full_key_path=str(full_key_path), plot=plot)
 
         else:
-            full_key_path = "/".join([self._bucket_name, self._filepath])
-            self._save_to_s3(full_key_path=full_key_path, plot=data)
+            full_key_path = self._bucket_name / self._filepath
+            self._save_to_s3(full_key_path=str(full_key_path), plot=data)
 
     def _save_to_s3(self, full_key_path: str, plot: figure):
         bytes_buffer = io.BytesIO()
@@ -151,7 +152,7 @@ class MatplotlibS3Writer(AbstractDataSet):
             s3_file.write(bytes_buffer.getvalue())
 
     def _exists(self) -> bool:
-        load_path = "/".join([self._bucket_name, self._filepath])
+        load_path = str(self._bucket_name / self._filepath)
         return self._s3.isfile(load_path) or (
             self._s3.isdir(load_path) and bool(list(self._s3.walk(load_path)))
         )

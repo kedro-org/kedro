@@ -89,7 +89,7 @@ class MatplotlibS3Writer(AbstractDataSet):
         filepath: str,
         bucket_name: str,
         s3fs_args: Dict[str, Any] = None,
-        credentials: Optional[Dict[str, Any]] = None,
+        credentials: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``MatplotlibS3Writer``.

@@ -1,6 +1,7 @@
 # Release 0.15.5
 
 ## Major features and improvements
+* Added a `MatplotlibS3Writer` dataset in `contrib` for saving Matplotlib images to S3.
 
 ## Bug fixes and other changes
 * `ParallelRunner` now works with `SparkDataSet`.
@@ -11,7 +12,7 @@
 * Renamed entry point for running pip-installed projects to `run_package()` instead of `main()` in `src/<package>/run.py`.
 
 ## Thanks for supporting contributions
-
+[Sheldon Tsen](https://github.com/sheldontsen-qb)
 
 # Release 0.15.4
 

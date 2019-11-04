@@ -179,7 +179,7 @@ def test_bad_credentials(mock_dict_plot):
         bad_writer.save(mock_dict_plot)
 
 
-def test_s3_encryption(tmp_path, mock_single_plot, mocked_encrypted_s3_bucket):
+def test_s3_s3fs_args(tmp_path, mock_single_plot, mocked_encrypted_s3_bucket):
     """Test writing to encrypted bucket"""
     normal_encryped_writer = MatplotlibS3Writer(
         bucket_name=BUCKET_NAME,

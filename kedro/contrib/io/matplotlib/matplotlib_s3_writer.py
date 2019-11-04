@@ -108,7 +108,6 @@ class MatplotlibS3Writer(AbstractDataSet):
         _credentials = copy.deepcopy(credentials) or {}
 
         self._s3fs_args = copy.deepcopy(s3fs_args) or {}
-
         self._filepath = filepath
         self._save_args = save_args if save_args else dict()
         self._bucket_name = bucket_name

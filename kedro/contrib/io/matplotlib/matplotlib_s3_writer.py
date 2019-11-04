@@ -60,7 +60,7 @@ class MatplotlibS3Writer(AbstractDataSet):
         >>> single_plot_writer.save(plt)
         >>> plt.close()
         >>>
-        >>> # Saving dictionary of plots (with SSE)
+        >>> # Saving dictionary of plots
         >>> plots_dict = dict()
         >>> for colour in ["blue", "green", "red"]:
         >>>     plots_dict[colour] = plt.figure()
@@ -96,10 +96,10 @@ class MatplotlibS3Writer(AbstractDataSet):
 
         Args:
             bucket_name: Name of the bucket without "s3://" prefix.
-            filepath: Key path to a matplot object file.
+            filepath: Key path to matplot object file(s).
             s3fs_args: Arguments for ``S3FileSystem``. See
                 https://s3fs.readthedocs.io/en/latest/api.html#s3fs.core.S3FileSystem
-            credentials: Argument for ``client_kwargs``. If needed ``aws_access_key_id``
+            credentials: Arguments for ``client_kwargs``. If needed ``aws_access_key_id``
                 and ``aws_secret_access_key`` are provided here.
             save_args: Save args passed to `plt.savefig`. See
                 https://matplotlib.org/api/_as_gen/matplotlib.pyplot.savefig.html

@@ -105,12 +105,9 @@ def mocked_encrypted_s3_bucket():
 
 @pytest.fixture
 def plot_writer(mocked_s3_bucket):  # pylint: disable=unused-argument
-    def _matplotlibwriters3():
-        return MatplotlibS3Writer(
-            bucket_name=BUCKET_NAME, filepath=KEY_PATH, credentials=AWS_CREDENTIALS
-        )
-
-    return _matplotlibwriters3()
+    return MatplotlibS3Writer(
+        bucket_name=BUCKET_NAME, filepath=KEY_PATH, credentials=AWS_CREDENTIALS
+    )
 
 
 def test_save_data(tmp_path, mock_single_plot, plot_writer, mocked_s3_bucket):
@@ -182,24 +179,6 @@ def test_bad_credentials(mock_dict_plot):
         bad_writer.save(mock_dict_plot)
 
 
-def test_credentials(tmp_path, mock_single_plot, mocked_s3_bucket):
-    """Test entering credentials"""
-    normal_writer = MatplotlibS3Writer(
-        bucket_name=BUCKET_NAME, filepath=KEY_PATH, credentials=AWS_CREDENTIALS
-    )
-
-    normal_writer.save(mock_single_plot)
-
-    expected_path = tmp_path / "downloaded_image.png"
-    actual_filepath = tmp_path / "locally_saved.png"
-
-    plt.savefig(str(actual_filepath))
-
-    mocked_s3_bucket.download_file(BUCKET_NAME, KEY_PATH, str(expected_path))
-
-    assert actual_filepath.read_bytes() == expected_path.read_bytes()
-
-
 def test_s3_encryption(tmp_path, mock_single_plot, mocked_encrypted_s3_bucket):
     """Test writing to encrypted bucket"""
     normal_encryped_writer = MatplotlibS3Writer(
@@ -228,10 +207,12 @@ def test_load_fail(plot_writer):
 
 
 def test_exists_single(mock_single_plot, plot_writer):
+    assert not plot_writer.exists()
     plot_writer.save(mock_single_plot)
     assert plot_writer.exists()
 
 
 def test_exists_multiple(mock_dict_plot, plot_writer):
+    # assert not plot_writer.exists()
     plot_writer.save(mock_dict_plot)
     assert plot_writer.exists()

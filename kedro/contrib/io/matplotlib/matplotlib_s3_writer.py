@@ -33,7 +33,7 @@
 
 import copy
 import io
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Union
 
 from matplotlib.pyplot import figure
 from s3fs import S3FileSystem
@@ -42,7 +42,6 @@ from kedro.io import AbstractDataSet, DataSetError
 
 
 class MatplotlibS3Writer(AbstractDataSet):
-    # pylint: disable=too-many-instance-attributes
     """
     ``MatplotlibS3Writer`` saves matplotlib objects as image files.
 
@@ -153,4 +152,6 @@ class MatplotlibS3Writer(AbstractDataSet):
 
     def _exists(self) -> bool:
         load_path = "/".join([self._bucket_name, self._filepath])
-        return self._s3.isdir(load_path) or self._s3.isfile(load_path)
+        return self._s3.isfile(load_path) or (
+            self._s3.isdir(load_path) and bool(list(self._s3.walk(load_path)))
+        )

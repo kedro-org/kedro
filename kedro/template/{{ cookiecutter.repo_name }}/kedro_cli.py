@@ -469,13 +469,13 @@ def ipython_message(all_kernels=True):
 
 @cli.group()
 def catalog():
-    """
+    """Docstring here
     """
 
 
 @forward_command(catalog, "info", forward_help=True)
 def catalog_info(args):
-    """"""
+    """Docstring here"""
     if "-h" not in args and "--help" not in args:
         secho("Helper message")
 
@@ -485,7 +485,7 @@ def catalog_info(args):
 
 @forward_command(catalog, "analyze", forward_help=True)
 def catalog_analyze(args):
-    """Open Jupyter Notebook with project specific variables loaded."""
+    """Docstring here"""
     if "-h" not in args and "--help" not in args:
         secho("Helper message")
 

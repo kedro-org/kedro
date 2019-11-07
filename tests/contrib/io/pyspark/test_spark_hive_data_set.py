@@ -237,7 +237,7 @@ class TestSparkHiveDataSet:
         with pytest.raises(
             DataSetError,
             match=r"columns \[column_doesnt_exist\] selected as PK not "
-            "found in table default_1.table_1",
+            r"found in table default_1\.table_1",
         ):
             SparkHiveDataSet(
                 database="default_1",

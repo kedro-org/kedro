@@ -270,8 +270,8 @@ class TestSparkHiveDataSet:
         with pytest.raises(
             DataSetError,
             match=r"dataset does not match hive table schema\.\n"
-            r"Present on insert only: \{\('age', 'int'\)\}\n"
-            r"Present on schema only: \{\('additional_column_on_hive', 'int'\)\}",
+            r"Present on insert only: \[\('age', 'int'\)\]\n"
+            r"Present on schema only: \[\('additional_column_on_hive', 'int'\)\]",
         ):
             dataset.save(_generate_spark_df_one())
 

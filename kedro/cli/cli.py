@@ -538,10 +538,9 @@ def get_project_context(key: str = "context", **kwargs) -> Any:
         msg = '`get_project_context("{}")` is now deprecated. '.format(key)
         if obj_name:
             msg += (
-                "This is still returning a function that returns `{}` instance, "
-                "however passed arguments have no effect anymore since Kedro 0.15.0. ".format(
-                    obj_name
-                )
+                "This is still returning a function that returns `{}` "
+                "instance, however passed arguments have no effect anymore "
+                "since Kedro 0.15.0. ".format(obj_name)
             )
         msg += (
             "Please get `KedroContext` instance by calling `get_project_context()` "

@@ -1,6 +1,6 @@
 # The Data Catalog
 
-> *Note:* This documentation is based on `Kedro 0.15.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 This section introduces `catalog.yml`, the project-shareable Data Catalog. The file is located in `conf/base` and is a registry of all data sources available for use by a project; it manages loading and saving of data.
 
@@ -238,7 +238,7 @@ class PrintTimeTransformer(AbstractTransformer):
 catalog.add_transformer(PrintTimeTransformer())
 ```
 
-By default transformers are applied to all datasets in the catalog (including any that are added in the future). The `DataCatalog.add_transformers` method has an additional argument `data_set_names` that lets you limit which data sets the transformer will be applied to.
+By default transformers are applied to all datasets in the catalog (including any that are added in the future). The `DataCatalog.add_transformer` method has an additional argument `data_set_names` that lets you limit which data sets the transformer will be applied to.
 
 ## Versioning datasets and ML models
 
@@ -353,6 +353,8 @@ Finally we can save the processed data in Parquet format.
 ```python
 io.save('ranked', ranked)
 ```
+
+> *Note:* Saving `None` to a dataset is not allowed!
 
 ### Creating your own dataset
 More specialised datasets can be found in `contrib/io`. [Creating new datasets](../03_tutorial/03_set_up_data.md#creating-custom-datasets) is the easiest way to contribute to the Kedro project.

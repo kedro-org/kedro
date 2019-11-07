@@ -37,8 +37,17 @@ from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
 
 from kedro.contrib.io.pyspark import SparkDataSet
-from kedro.io import CSVLocalDataSet, DataSetError, ParquetLocalDataSet, Version
+from kedro.io import (
+    CSVLocalDataSet,
+    DataCatalog,
+    DataSetError,
+    ParquetLocalDataSet,
+    PickleLocalDataSet,
+    Version,
+)
 from kedro.io.core import generate_timestamp
+from kedro.pipeline import Pipeline, node
+from kedro.runner import ParallelRunner
 
 FOLDER_NAME = "fake_folder"
 FILENAME = "test.parquet"
@@ -116,6 +125,22 @@ def sample_spark_df():
     data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
 
     return SparkSession.builder.getOrCreate().createDataFrame(data, schema)
+
+
+def identity(arg):
+    return arg  # pragma: no cover
+
+
+@pytest.fixture
+def spark_in(tmp_path, sample_spark_df):
+    spark_in = SparkDataSet(filepath=str(tmp_path / "input"))
+    spark_in.save(sample_spark_df)
+    return spark_in
+
+
+@pytest.fixture
+def spark_out(tmp_path):
+    return SparkDataSet(filepath=str(tmp_path / "output"))
 
 
 class TestSparkDataSet:
@@ -251,11 +276,68 @@ class TestSparkDataSet:
         with pytest.raises(DataSetError, match="Other Exception"):
             spark_data_set.exists()
 
-    def test_cant_pickle(self):
-        import pickle
+    def test_parallel_runner(self, spark_in, spark_out):
+        """Test ParallelRunner with SparkDataSet load and save.
+        """
+        catalog = DataCatalog(data_sets={"spark_in": spark_in, "spark_out": spark_out})
+        pipeline = Pipeline([node(identity, "spark_in", "spark_out")])
+        runner = ParallelRunner()
+        result = runner.run(pipeline, catalog)
+        # 'spark_out' is saved in 'tmp_path/input', so the result of run should be empty
+        assert not result
 
-        with pytest.raises(pickle.PicklingError):
-            pickle.dumps(SparkDataSet("bob"))
+    def test_parallel_runner_with_pickle_dataset(
+        self, tmp_path, spark_in, spark_out, sample_spark_df
+    ):
+        """Test ParallelRunner with SparkDataSet -> PickleDataSet -> SparkDataSet .
+        """
+        pickle_data = PickleLocalDataSet(
+            filepath=str(tmp_path / "data.pkl"), backend="pickle"
+        )
+        catalog = DataCatalog(
+            data_sets={
+                "spark_in": spark_in,
+                "pickle": pickle_data,
+                "spark_out": spark_out,
+            }
+        )
+        pipeline = Pipeline(
+            [
+                node(identity, "spark_in", "pickle"),
+                node(identity, "pickle", "spark_out"),
+            ]
+        )
+        runner = ParallelRunner()
+
+        pattern = r"{0} cannot be serialized. {1} can only be used with serializable data".format(
+            str(sample_spark_df.__class__), str(pickle_data.__class__.__name__)
+        )
+
+        with pytest.raises(DataSetError, match=pattern):
+            runner.run(pipeline, catalog)
+
+    def test_parallel_runner_with_memory_dataset(
+        self, spark_in, spark_out, sample_spark_df
+    ):
+        """Run ParallelRunner with SparkDataSet -> MemoryDataSet -> SparkDataSet.
+        """
+        catalog = DataCatalog(data_sets={"spark_in": spark_in, "spark_out": spark_out})
+        pipeline = Pipeline(
+            [
+                node(identity, "spark_in", "memory"),
+                node(identity, "memory", "spark_out"),
+            ]
+        )
+        runner = ParallelRunner()
+
+        pattern = (
+            r"{0} cannot be serialized. ParallelRunner implicit memory datasets "
+            r"can only be used with serializable data".format(
+                str(sample_spark_df.__class__)
+            )
+        )
+        with pytest.raises(DataSetError, match=pattern):
+            runner.run(pipeline, catalog)
 
 
 class TestSparkDataSetVersionedLocal:

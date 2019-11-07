@@ -724,6 +724,13 @@ class TestPipelineTags:
         pipeline = pipeline.tag(["new_tag"])
         assert all("new_tag" in n.tags for n in pipeline.nodes)
 
+    def test_pipeline_single_tag(self, branchless_pipeline):
+        p1 = Pipeline(branchless_pipeline["nodes"], tags="single_tag")
+        p2 = Pipeline(branchless_pipeline["nodes"]).tag("single_tag")
+
+        for pipeline in (p1, p2):
+            assert all("single_tag" in n.tags for n in pipeline.nodes)
+
 
 def test_pipeline_to_json(input_data):
     nodes = input_data["nodes"]

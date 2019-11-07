@@ -253,7 +253,7 @@ def uninstall_package_via_pip(context, package):
 def install_project_package_via_pip(context):
     """Install a python package using pip."""
     dist_dir = context.root_project_dir / "src" / "dist"
-    whl_file, = dist_dir.glob("*.whl")
+    (whl_file,) = dist_dir.glob("*.whl")
     run([context.pip, "install", str(whl_file)], env=context.env)
 
 

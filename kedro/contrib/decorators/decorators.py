@@ -93,7 +93,7 @@ def pandas_to_spark(spark: SparkSession) -> Callable:
         def _wrapper(*args, **kwargs):
             return node_func(
                 *[_to_spark(arg) for arg in args],
-                **{key: _to_spark(value) for key, value in kwargs}
+                **{key: _to_spark(value) for key, value in kwargs.items()}
             )
 
         return _wrapper
@@ -120,7 +120,7 @@ def spark_to_pandas() -> Callable:
         def _wrapper(*args, **kwargs):
             return node_func(
                 *[_to_pandas(arg) for arg in args],
-                **{key: _to_pandas(value) for key, value in kwargs}
+                **{key: _to_pandas(value) for key, value in kwargs.items()}
             )
 
         return _wrapper

@@ -33,6 +33,7 @@ import pytest
 import yaml
 
 from kedro.contrib.config import TemplatedConfigLoader
+from kedro.contrib.config.templated_config import _format_object
 
 
 def _write_yaml(filepath: Path, config: Dict):
@@ -342,3 +343,69 @@ class TestTemplatedConfigLoader:
         ).get("catalog*.yml")
 
         assert catalog["postcode"] == "NW10 2JK"
+
+
+class TestFormatObject:
+    @pytest.mark.parametrize(
+        "val, format_dict, expected",
+        [
+            # No templating
+            ("a", {}, "a"),
+            ("a", {"a": "b"}, "a"),
+            ("{a}", {"a": "b"}, "{a}"),
+            ("ab.c-d", {}, "ab.c-d"),
+            # Simple templating
+            ("${a}", {"a": "b"}, "b"),
+            ("${a}", {"a": True}, True),
+            ("${a}", {"a": 123}, 123),
+            ("${a}", {"a": {"b": "c"}}, {"b": "c"}),
+            ("${a}", {"a": ["b", "c"]}, ["b", "c"]),
+            ("X${a}", {"a": "b"}, "Xb"),
+            ("X${a}", {"a": True}, "XTrue"),
+            ("X${a}", {"a": {"b": "c"}}, "X{'b': 'c'}"),
+            ("X${a}", {"a": ["b", "c"]}, "X['b', 'c']"),
+            # Nested templating
+            ("${a.b}", {"a": {"b": "c"}}, "c"),
+            ("${a.b}", {"a": {"b": True}}, True),
+            ("X${a.b}", {"a": {"b": True}}, "XTrue"),
+            # Templating with defaults
+            ("${a|D}", {"a": "b"}, "b"),
+            ("${a|D}", {}, "D"),
+            ("${a|}", {}, ""),
+            ("${a.b|D}", {"a": {"b": "c"}}, "c"),
+            ("${a|D}", {"a": True}, True),
+            ("X${a|D}Y", {"a": True}, "XTrueY"),
+            ("X${a|D1}Y${b|D2}", {}, "XD1YD2"),
+            # Lists
+            (["a"], {"a": "A"}, ["a"]),
+            (["${a}", "X${a}"], {"a": "A"}, ["A", "XA"]),
+            (["${b|D}"], {"a": "A"}, ["D"]),
+            (["${b|abcDEF_.<>/@$%^&!}"], {"a": "A"}, ["abcDEF_.<>/@$%^&!"]),
+            # Dicts
+            ({"key": "${a}"}, {"a": "A"}, {"key": "A"}),
+            ({"${a}": "value"}, {"a": "A"}, {"A": "value"}),
+            ({"${a|D}": "value"}, {}, {"D": "value"}),
+        ],
+    )
+    def test_simple_replace(self, val, format_dict, expected):
+        assert _format_object(val, format_dict) == expected
+
+    @pytest.mark.parametrize(
+        "val, format_dict, expected_error_message",
+        [
+            ("${a}", {}, r"Failed to format pattern '\$\{a\}': no config"),
+            (
+                "${a.b}",
+                {"a": "xxx"},
+                r"Failed to format pattern '\$\{a\.b\}': no config",
+            ),
+            (
+                {"${a}": "VALUE"},
+                {"a": True},
+                r"When formatting '\$\{a\}' key, only string values can be used. 'True' found",
+            ),
+        ],
+    )
+    def test_raises_error(self, val, format_dict, expected_error_message):
+        with pytest.raises(ValueError, match=expected_error_message):
+            _format_object(val, format_dict)

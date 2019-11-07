@@ -110,3 +110,20 @@ def test_mem_profile(caplog):
         sleeping_identity.__qualname__,
     )
     assert expected in message
+
+
+def test_mem_profile_old_versions(caplog, mocker):
+    caplog.clear()
+    mocker.patch("kedro.pipeline.decorators.memory_usage", return_value=[[float(0)], 1])
+    func = mem_profile(sleeping_identity)
+    res = func(1)
+
+    logger_name, severity, message = caplog.record_tuples[0]
+    assert res == 1
+    assert logger_name == "kedro.pipeline.decorators"
+    assert severity == logging.INFO
+    expected = "Running '%s.%s' consumed" % (
+        sleeping_identity.__module__,
+        sleeping_identity.__qualname__,
+    )
+    assert expected in message

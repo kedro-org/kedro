@@ -118,10 +118,12 @@ def mem_profile(func: Callable) -> Callable:
             retval=True,
             include_children=True,
         )
+        # memory_profiler < 0.56.0 returns list instead of float
+        mem_usage = mem_usage[0] if isinstance(mem_usage, (list, tuple)) else mem_usage
         log.info(
             "Running %r consumed %2.2fMiB memory at peak time",
             _func_full_name(func),
-            mem_usage[0],
+            mem_usage,
         )
         return result
 

@@ -285,7 +285,7 @@ class SparkHiveDataSet(AbstractDataSet):
                 "dataset does not match hive table schema.\n"
                 "Present on insert only: {new_cols}\n"
                 "Present on schema only: {missing_cols}".format(
-                    new_cols=new_cols, missing_cols=missing_cols
+                    new_cols=sorted(new_cols), missing_cols=sorted(missing_cols)
                 )
             )
 

@@ -51,6 +51,7 @@ from kedro.cli.utils import (
 from kedro.utils import load_obj
 from kedro.runner import SequentialRunner
 from kedro.context import load_context
+from kedro.contrib.cli.clean_catalog import clean_catalog, terminus_datasets
 from typing import Iterable, List, Dict
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
@@ -464,6 +465,32 @@ def ipython_message(all_kernels=True):
         secho("(restart with --all-kernels to get access to others)", fg="yellow")
 
     secho("-" * 79, fg="cyan")
+
+
+@cli.group()
+def catalog():
+    """
+    """
+
+
+@forward_command(catalog, "info", forward_help=True)
+def catalog_info(args):
+    """"""
+    if "-h" not in args and "--help" not in args:
+        secho("Helper message")
+
+    redundant_catalog, redundant_pipeline = clean_catalog()
+    terminus_ds = terminus_datasets()
+
+
+@forward_command(catalog, "analyze", forward_help=True)
+def catalog_analyze(args):
+    """Open Jupyter Notebook with project specific variables loaded."""
+    if "-h" not in args and "--help" not in args:
+        secho("Helper message")
+
+    redundant_catalog, redundant_pipeline = clean_catalog()
+    terminus_ds = terminus_datasets()
 
 
 if __name__ == "__main__":

@@ -10,10 +10,13 @@ This will create documentation based on the code structure of your project. Docu
 
 `kedro build-docs` uses the [Sphinx](https://www.sphinx-doc.org) framework to build your project documentation, so if you want to customise it, please refer to `docs/source/conf.py` and the [corresponding section](http://www.sphinx-doc.org/en/master/usage/configuration.html) of the Sphinx documentation.
 
-
 ## Package your project
 
 You can package your project by running `kedro package` from the command line. This will create one `.egg` file  and one `.whl` file within the `src/dist/` folder of your project, which are Python packaging formats. For further information about packaging for Python, documentation is provided [here](https://packaging.python.org/overview/).
+
+## Manage project dependencies
+
+Ensuring that you have accounted for all Python package versions that your project relies on encourages reproducibility of your Kedro project. Use the `kedro build-reqs` CLI command to pin package versions. It works by taking a `requirements.in` file (or `requirements.txt` if the first one does not exist), resolving all package versions using [pip compile](https://github.com/jazzband/pip-tools#example-usage-for-pip-compile) and _freezing_ them by putting pinned versions back into `requirements.txt`. It significantly reduces the chances of dependencies issues due to downstream changes as you would always install the same package versions using `kedro install`.
 
 ## Extend your project
 
@@ -23,4 +26,4 @@ You can package your project by running `kedro package` from the command line. T
 
 ## What is next?
 
-You have now successfully built a project along with its documentation and packaged it using one of standard Python distribution formats. You may choose to open-source your project and make it available to a wider community of users and contributors. For further steps we advise you to consult [this GitHub guide](https://github.com/open-source), [PyPI help](https://pypi.org/help/), a [Read the Docs tutorial](https://docs.readthedocs.io/en/latest/intro/getting-started-with-sphinx.html#), and a guide to [Open Source Licenses & Standards](https://opensource.org/licenses).
+You have now successfully built a project along with its documentation and packaged it using one of standard Python distribution formats. You may choose to open-source your project and make it available to a wider community of users and contributors. For further steps we advise you to consult [this GitHub guide](https://github.com/open-source), [PyPI help](https://pypi.org/help/), a [Read the Docs tutorial](https://docs.readthedocs.io/en/latest/intro/getting-started-with-sphinx.html#), and a guide on [Open Source Licenses & Standards](https://opensource.org/licenses).

@@ -181,8 +181,8 @@ def test_bad_credentials(mock_dict_plot):
             "aws_secret_access_key": "definitely_not_for_testing",
         },
     )
-    pattern = "InvalidAccessKeyId"
 
+    pattern = r"The AWS Access Key Id you provided does not exist in our records"
     with pytest.raises(DataSetError, match=pattern):
         bad_writer.save(mock_dict_plot)
 

@@ -52,7 +52,7 @@ kedro docs
 ## Project-specific Kedro commands
 
 ### `kedro run`
-Runs the `main()` function in `run.py` (`src/project-name/run.py`)
+Calls the `run()` method of the `ProjectContext` defined in `run.py` (`src/project-name/run.py`)
 
 To make sure the project is shareable and reproducible, you should maintain the `kedro run` program definitions in the `kedro_cli.py` to point to the entry point in your project.
 

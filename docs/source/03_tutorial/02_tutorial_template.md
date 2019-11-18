@@ -24,7 +24,7 @@ kedro install
 The project template has a default configuration, but you should reconfigure it as follows:
 
 * Move `credentials.yml` from `conf/base/` to `conf/local/`
-  - To do this in the terminal, type the following from within the project's root directory: `mv ./conf/base/credentials.yml ./conf/local/`.
+  - To do this in the terminal, type the following from within the project's root directory: `move ./conf/base/credentials.yml ./conf/local/`.
 * [optional] Add in any credentials to `conf/local/credentials.yml` that you would need to load specific data sources like usernames and passwords. Some examples are given within the file to illustrate how you store credentials.
 * [optional] Set up local configuration. Additional information can be found in the section on [configuration](../04_user_guide/03_configuration.md) in the user guide.
 * [optional] Set up [logging](../04_user_guide/07_logging.md).

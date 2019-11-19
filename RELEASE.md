@@ -8,6 +8,7 @@
 * Allowed the use of nulls in `parameters.yml`.
 * Fixed an issue where `%reload_kedro` wasn't reloading all user modules.
 * Fixed `pandas_to_spark` and `spark_to_pandas` decorators to work with functions with kwargs.
+* Fixed a bug where `kedro jupyter notebook` and `kedro jupyter lab` would run a different Jupyter installation to the one in the local environment.
 
 ## Breaking changes to the API
 * Renamed entry point for running pip-installed projects to `run_package()` instead of `main()` in `src/<package>/run.py`.

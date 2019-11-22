@@ -31,6 +31,7 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
+from mock import call
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col  # pylint: disable=no-name-in-module
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
@@ -411,6 +412,35 @@ class TestSparkDataSetVersionedLocal:
 
 
 class TestSparkDataSetVersionedDBFS:
+    def test_load_latest(  # pylint: disable=too-many-arguments
+        self, mocker, versioned_dataset_dbfs, version, tmp_path, sample_spark_df
+    ):
+        mocked_glob = mocker.patch.object(versioned_dataset_dbfs, "_glob_function")
+        mocked_glob.return_value = [str(tmp_path / FILENAME / version.save / FILENAME)]
+
+        versioned_dataset_dbfs.save(sample_spark_df)
+        reloaded = versioned_dataset_dbfs.load()
+
+        assert mocked_glob.call_count == 2
+        mocked_glob.assert_has_calls(
+            [
+                call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME)),
+                call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME)),
+            ]
+        )
+        assert reloaded.exceptAll(sample_spark_df).count() == 0
+
+    def test_load_exact(self, tmp_path, sample_spark_df):
+        ts = generate_timestamp()
+        ds_dbfs = SparkDataSet(
+            filepath="/dbfs" + str(tmp_path / FILENAME), version=Version(ts, ts)
+        )
+
+        ds_dbfs.save(sample_spark_df)
+        reloaded = ds_dbfs.load()
+
+        assert reloaded.exceptAll(sample_spark_df).count() == 0
+
     def test_save(  # pylint: disable=too-many-arguments
         self, mocker, versioned_dataset_dbfs, version, tmp_path, sample_spark_df
     ):

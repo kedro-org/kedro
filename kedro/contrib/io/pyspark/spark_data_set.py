@@ -62,6 +62,10 @@ def _split_filepath(filepath: str) -> Tuple[str, str]:
     return "", split_[0]
 
 
+def _strip_dbfs_prefix(path: str) -> str:
+    return path[5:] if path.startswith("/dbfs") else path
+
+
 class KedroHdfsInsecureClient(InsecureClient):
     """Subclasses ``hdfs.InsecureClient`` and implements ``hdfs_exists``
     and ``hdfs_glob`` methods required by ``SparkDataSet``"""
@@ -233,25 +237,18 @@ class SparkDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
         return SparkSession.builder.getOrCreate()
 
     def _load(self) -> DataFrame:
-        load_path = self._fs_prefix + str(self._get_load_path())
-        if load_path.startswith("/dbfs"):
-            load_path = load_path[5:]
+        load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_load_path()))
 
-        retval = self._get_spark().read.load(
+        return self._get_spark().read.load(
             load_path, self._file_format, **self._load_args
         )
-        return retval
 
     def _save(self, data: DataFrame) -> None:
-        save_path = self._fs_prefix + str(self._get_save_path())
-        if save_path.startswith("/dbfs"):
-            save_path = save_path[5:]
+        save_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_save_path()))
         data.write.save(save_path, self._file_format, **self._save_args)
 
     def _exists(self) -> bool:
-        load_path = self._fs_prefix + str(self._get_load_path())
-        if load_path.startswith("/dbfs"):
-            load_path = load_path[5:]
+        load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_load_path()))
 
         try:
             self._get_spark().read.load(load_path, self._file_format)

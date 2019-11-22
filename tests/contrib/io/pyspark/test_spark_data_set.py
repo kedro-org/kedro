@@ -106,7 +106,7 @@ def versioned_dataset_local(tmp_path, version):
 
 @pytest.fixture
 def versioned_dataset_dbfs(tmp_path, version):
-    return SparkDataSet(filepath=str("/dbfs" / tmp_path / FILENAME), version=version)
+    return SparkDataSet(filepath="/dbfs" + str(tmp_path / FILENAME), version=version)
 
 
 @pytest.fixture
@@ -411,8 +411,17 @@ class TestSparkDataSetVersionedLocal:
 
 
 class TestSparkDataSetVersionedDBFS:
-    def test_save(self, versioned_dataset_dbfs, version, tmp_path, sample_spark_df):
+    def test_save(  # pylint: disable=too-many-arguments
+        self, mocker, versioned_dataset_dbfs, version, tmp_path, sample_spark_df
+    ):
+        mocked_glob = mocker.patch.object(versioned_dataset_dbfs, "_glob_function")
+        mocked_glob.return_value = [str(tmp_path / FILENAME / version.save / FILENAME)]
+
         versioned_dataset_dbfs.save(sample_spark_df)
+
+        mocked_glob.assert_called_once_with(
+            "/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME)
+        )
         assert (tmp_path / FILENAME / version.save / FILENAME).exists()
 
 

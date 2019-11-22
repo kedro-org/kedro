@@ -454,6 +454,26 @@ class TestSparkDataSetVersionedDBFS:
         )
         assert (tmp_path / FILENAME / version.save / FILENAME).exists()
 
+    def test_exists(  # pylint: disable=too-many-arguments
+        self, mocker, versioned_dataset_dbfs, version, tmp_path, sample_spark_df
+    ):
+        mocked_glob = mocker.patch.object(versioned_dataset_dbfs, "_glob_function")
+        mocked_glob.return_value = [str(tmp_path / FILENAME / version.save / FILENAME)]
+
+        assert not versioned_dataset_dbfs.exists()
+
+        versioned_dataset_dbfs.save(sample_spark_df)
+        assert versioned_dataset_dbfs.exists()
+
+        assert mocked_glob.call_count == 3
+        mocked_glob.assert_has_calls(
+            [
+                call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME)),
+                call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME)),
+                call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME)),
+            ]
+        )
+
 
 class TestSparkDataSetVersionedS3:
     def test_no_version(self, versioned_dataset_s3):

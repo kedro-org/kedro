@@ -105,6 +105,11 @@ def versioned_dataset_local(tmp_path, version):
 
 
 @pytest.fixture
+def versioned_dataset_dbfs(tmp_path, version):
+    return SparkDataSet(filepath=str("/dbfs" / tmp_path / FILENAME), version=version)
+
+
+@pytest.fixture
 def versioned_dataset_s3(version):
     return SparkDataSet(
         filepath="s3a://{}/{}".format(BUCKET_NAME, FILENAME),
@@ -407,6 +412,12 @@ class TestSparkDataSetVersionedLocal:
         )
         with pytest.raises(DataSetError, match=pattern):
             versioned_local.save(sample_spark_df)
+
+
+class TestSparkDataSetVersionedDBFS:
+    def test_save(self, versioned_dataset_dbfs, version, tmp_path, sample_spark_df):
+        versioned_dataset_dbfs.save(sample_spark_df)
+        assert (tmp_path / FILENAME / version.save / FILENAME).exists()
 
 
 class TestSparkDataSetVersionedS3:

@@ -30,7 +30,6 @@
 ``pyspark``
 """
 
-import pickle
 from copy import deepcopy
 from fnmatch import fnmatch
 from pathlib import Path, PurePosixPath
@@ -258,6 +257,3 @@ class SparkDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
                 return False
             raise
         return True
-
-    def __getstate__(self):
-        raise pickle.PicklingError("PySpark datasets can't be serialized")

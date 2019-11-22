@@ -281,27 +281,19 @@ class TestSparkDataSet:
         with pytest.raises(DataSetError, match="Other Exception"):
             spark_data_set.exists()
 
-    def test_cant_pickle(self):
-        import pickle
-
-        with pytest.raises(pickle.PicklingError):
-            pickle.dumps(SparkDataSet("bob"))
-
     def test_parallel_runner(self, spark_in, spark_out):
         """Test ParallelRunner with SparkDataSet load and save.
         """
         catalog = DataCatalog(data_sets={"spark_in": spark_in, "spark_out": spark_out})
         pipeline = Pipeline([node(identity, "spark_in", "spark_out")])
         runner = ParallelRunner()
+        result = runner.run(pipeline, catalog)
+        # 'spark_out' is saved in 'tmp_path/input', so the result of run should be empty
+        assert not result
 
-        pattern = (
-            r"The following data_sets cannot be "
-            r"serialized: \[\'spark\_in\'\, \'spark\_out\'\]"
-        )
-        with pytest.raises(AttributeError, match=pattern):
-            runner.run(pipeline, catalog)
-
-    def test_parallel_runner_with_pickle_dataset(self, tmp_path, spark_in, spark_out):
+    def test_parallel_runner_with_pickle_dataset(
+        self, tmp_path, spark_in, spark_out, sample_spark_df
+    ):
         """Test ParallelRunner with SparkDataSet -> PickleDataSet -> SparkDataSet .
         """
         pickle_data = PickleLocalDataSet(
@@ -322,14 +314,16 @@ class TestSparkDataSet:
         )
         runner = ParallelRunner()
 
-        pattern = (
-            r"The following data_sets cannot be "
-            r"serialized: \[\'spark\_in\'\, \'spark\_out\'\]"
+        pattern = r"{0} cannot be serialized. {1} can only be used with serializable data".format(
+            str(sample_spark_df.__class__), str(pickle_data.__class__.__name__)
         )
-        with pytest.raises(AttributeError, match=pattern):
+
+        with pytest.raises(DataSetError, match=pattern):
             runner.run(pipeline, catalog)
 
-    def test_parallel_runner_with_memory_dataset(self, spark_in, spark_out):
+    def test_parallel_runner_with_memory_dataset(
+        self, spark_in, spark_out, sample_spark_df
+    ):
         """Run ParallelRunner with SparkDataSet -> MemoryDataSet -> SparkDataSet.
         """
         catalog = DataCatalog(data_sets={"spark_in": spark_in, "spark_out": spark_out})
@@ -342,10 +336,12 @@ class TestSparkDataSet:
         runner = ParallelRunner()
 
         pattern = (
-            r"The following data_sets cannot be "
-            r"serialized: \[\'spark\_in\'\, \'spark\_out\'\]"
+            r"{0} cannot be serialized. ParallelRunner implicit memory datasets "
+            r"can only be used with serializable data".format(
+                str(sample_spark_df.__class__)
+            )
         )
-        with pytest.raises(AttributeError, match=pattern):
+        with pytest.raises(DataSetError, match=pattern):
             runner.run(pipeline, catalog)
 
 

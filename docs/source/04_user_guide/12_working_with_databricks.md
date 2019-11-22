@@ -60,7 +60,7 @@ sys.path.append(os.path.abspath("./src")
 Then, import and execute the `run` module to run your pipeline:
 ```python
 import your_project.run as run
-run.main()
+run.run_package()
 ```
 
 To pull in updates to your code run from your project directory:

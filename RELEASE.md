@@ -1,13 +1,20 @@
 # Release 0.15.5
 
 ## Major features and improvements
+* Added a `MatplotlibS3Writer` dataset in `contrib` for saving Matplotlib images to S3.
 
 ## Bug fixes and other changes
+* `ParallelRunner` now works with `SparkDataSet`.
+* Allowed the use of nulls in `parameters.yml`.
+* Fixed an issue where `%reload_kedro` wasn't reloading all user modules.
+* Fixed `pandas_to_spark` and `spark_to_pandas` decorators to work with functions with kwargs.
+* Fixed a bug where `kedro jupyter notebook` and `kedro jupyter lab` would run a different Jupyter installation to the one in the local environment.
 
 ## Breaking changes to the API
+* Renamed entry point for running pip-installed projects to `run_package()` instead of `main()` in `src/<package>/run.py`.
 
 ## Thanks for supporting contributions
-
+[Sheldon Tsen](https://github.com/sheldontsen-qb), [@roumail](https://github.com/roumail)
 
 # Release 0.15.4
 
@@ -18,7 +25,9 @@
 * Added Jupyter Notebook line magic (`%run_viz`) to run `kedro viz` in a Notebook cell (requires [`kedro-viz`](https://github.com/quantumblacklabs/kedro-viz) version `3.0.0` or later).
 * Added the following datasets:
   - `NetworkXLocalDataSet` in `kedro.contrib.io.networkx` to load and save local graphs (JSON format) via NetworkX. (by [@josephhaaga](https://github.com/josephhaaga))
+  - `SparkHiveDataSet` in `kedro.contrib.io.pyspark.SparkHiveDataSet` allowing usage of Spark and insert/upsert on non-transactional Hive tables
 * `kedro.contrib.config.TemplatedConfigLoader` now supports name/dict key templating and default values.
+
 
 ## Bug fixes and other changes
 * `get_last_load_version()` method for versioned datasets now returns exact last load version if the dataset has been loaded at least once and `None` otherwise.
@@ -33,7 +42,7 @@
 * Removed `_check_paths_consistency()` method from `AbstractVersionedDataSet`. Version consistency check is now done in `AbstractVersionedDataSet.save()`. Custom versioned datasets should modify `save()` method implementation accordingly.
 
 ## Thanks for supporting contributions
-[Joseph Haaga](https://github.com/josephhaaga), [Deepyaman Datta](https://github.com/deepyaman), [Joost Duisters](https://github.com/JoostDuisters), [Zain Patel](https://github.com/mzjp2)
+[Joseph Haaga](https://github.com/josephhaaga), [Deepyaman Datta](https://github.com/deepyaman), [Joost Duisters](https://github.com/JoostDuisters), [Zain Patel](https://github.com/mzjp2), [Tom Vigrass](https://github.com/tomvigrass)
 
 # Release 0.15.3
 

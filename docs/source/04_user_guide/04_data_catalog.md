@@ -111,6 +111,12 @@ scooters_query:
 
 > *Note:* When using `SQLTableDataSet` or `SQLQueryDataSet` you must provide a database connection string. In the example above we pass it using `scooters_credentials` key from the credentials (see the details in [Feeding in credentials](#feeding-in-credentials) section below). `scooters_credentials` must have a top-level key `con` containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. Alternative to credentials would be to explicitly put `con` into `load_args` and `save_args` (`SQLTableDataSet` only).
 
+
+## Adding parameters
+
+You can [configure parameters](./03_configuration.md#loading-parameters) for your project and [reference them](./03_configuration.md#using-parameters) in your nodes. The way to do this is via `add_feed_dict()` method (Relevant API documentation: [DataCatalog](/kedro.io.DataCatalog)). You should be able to use this method to add any other entry / metadata you wish on the `DataCatalog`.
+
+
 ## Feeding in credentials
 
 Before instantiating the `DataCatalog` Kedro will first attempt to read the credentials from project configuration (see [this section](./03_configuration.md#aws-credentials) for more details). Resulting dictionary will then be passed into `DataCatalog.from_config()` as `credentials` argument.
@@ -201,6 +207,7 @@ airplanes:
 
 In this example the default `csv` configuration is inserted into `airplanes` and then the `load_args` block is overridden. Normally that would replace the whole dictionary. In order to extend `load_args` the defaults for that block are then re-inserted.
 
+
 ## Transcoding datasets
 
 You may come across a situation where you would like to read the same file using two different dataset implementations. For instance, `parquet` files can not only be loaded via the `ParquetLocalDataSet`, but also directly by `SparkDataSet` using `pandas`. To do this, you can define your `catalog.yml` as follows:
@@ -238,7 +245,7 @@ class PrintTimeTransformer(AbstractTransformer):
 catalog.add_transformer(PrintTimeTransformer())
 ```
 
-By default transformers are applied to all datasets in the catalog (including any that are added in the future). The `DataCatalog.add_transformers` method has an additional argument `data_set_names` that lets you limit which data sets the transformer will be applied to.
+By default transformers are applied to all datasets in the catalog (including any that are added in the future). The `DataCatalog.add_transformer` method has an additional argument `data_set_names` that lets you limit which data sets the transformer will be applied to.
 
 ## Versioning datasets and ML models
 
@@ -353,6 +360,8 @@ Finally we can save the processed data in Parquet format.
 ```python
 io.save('ranked', ranked)
 ```
+
+> *Note:* Saving `None` to a dataset is not allowed!
 
 ### Creating your own dataset
 More specialised datasets can be found in `contrib/io`. [Creating new datasets](../03_tutorial/03_set_up_data.md#creating-custom-datasets) is the easiest way to contribute to the Kedro project.

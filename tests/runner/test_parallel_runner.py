@@ -28,7 +28,6 @@
 
 # pylint: disable=no-member
 from concurrent.futures.process import ProcessPoolExecutor
-from multiprocessing.managers import BaseProxy  # type: ignore
 from typing import Any, Dict
 
 import pytest
@@ -43,7 +42,7 @@ from kedro.io import (
 from kedro.pipeline import Pipeline, node
 from kedro.pipeline.decorators import log_time
 from kedro.runner import ParallelRunner
-from kedro.runner.parallel_runner import ParallelRunnerManager
+from kedro.runner.parallel_runner import ParallelRunnerManager, _SharedMemoryDataSet
 
 
 def source():
@@ -93,7 +92,7 @@ class TestValidParallelRunner:
     def test_create_default_data_set(self):
         # data_set is a proxy to a dataset in another process.
         data_set = ParallelRunner().create_default_data_set("")
-        assert isinstance(data_set, BaseProxy)
+        assert isinstance(data_set, _SharedMemoryDataSet)
 
     def test_parallel_run(self, fan_out_fan_in, catalog):
         catalog.add_feed_dict(dict(A=42))

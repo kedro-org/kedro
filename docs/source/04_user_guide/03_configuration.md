@@ -63,6 +63,100 @@ env = "test"
 > *Note*: If, for some reason, your project does not have any other environments apart from `base`, i.e. no `local` environment to default to, the recommended course of action is to use the approach above, namely customise your `ProjectContext` to take `env="base"` in the constructor.
 
 
+## Parameters
+
+### Loading parameters
+
+Parameters project configuration can be loaded with the help of the `ConfigLoader` class:
+
+```python
+from kedro.config import ConfigLoader
+
+conf_paths = ["conf/base", "conf/local"]
+conf_loader = ConfigLoader(conf_paths)
+parameters = conf_loader.get("parameters*", "parameters*/**")
+```
+
+The code snippet above will load all configuration files from `conf/base` and `conf/local`, which either have the filename starting with `parameters` or are located inside a folder with name starting with `parameters`.
+
+> *Note:* Configuration path `conf/local` takes precedence in the example above since it's loaded last, therefore any overlapping top-level keys from `conf/base` will be overwritten by the ones from `conf/local`.
+
+Calling `conf_loader.get()` in the example above will throw a `MissingConfigException` error if there are no configuration files matching the given patterns in any of the specified paths. If this is a valid workflow for your application, you can handle it as follows:
+
+```python
+from kedro.config import ConfigLoader, MissingConfigException
+
+conf_paths = ["conf/base", "conf/local"]
+conf_loader = ConfigLoader(conf_paths)
+
+try:
+    parameters = conf_loader.get("parameters*", "parameters*/**")
+except MissingConfigException:
+    parameters = {}
+```
+
+> *Note:* `kedro.context.KedroContext` class uses the approach above to load project parameters.
+
+Parameters can then be used on their own or fed in as function inputs, as per section below.
+
+### Using parameters
+
+Say you have a set of parameters you're playing around with for your model. You can declare these in one place, for instance `conf/base/parameters.yml`, so that you isolate your changes to one central location.
+
+```yaml
+step_size: 1
+learning_rate: 0.01
+```
+
+ You may now reference these parameters in the `node` definition, using the `params:` prefix:
+
+```python
+def increase_volume(volume, step):
+    return volume + step
+
+# in pipeline definition
+node(func=increase_volume, inputs=["input_volume", "params:step_size"], outputs="output_volume")
+```
+
+You can also group your parameters into nested structures and, using the same method above, load them by top-level key:
+
+```yaml
+step_size: 1
+model_params:
+    learning_rate: 0.01
+    test_data_ratio: 0.2
+    number_of_train_iterations: 10000
+```
+
+
+```python
+def train_model(data, model):
+    lr = model["learning_rate"]
+    test_data_ratio = model["test_data_ratio"]
+    iterations = model["number_of_train_iterations"]
+    ...
+
+# in pipeline definition
+node(func=train_model, inputs=["input_data", "params:model_params"], outputs="output_data")
+```
+
+Alternatively, you can also pass `parameters` to the node inputs and get access to the entire collection of values inside the node function.
+
+```python
+def increase_volume(volume, params):
+    step = params["step_size"]
+    return volume + step
+
+# in pipeline definition
+node(func=increase_volume, inputs=["input_volume", "parameters"], outputs="output_volume")
+```
+
+In both cases, what happened under the hood is that the parameters had been added to the Data Catalog through the method `add_feed_dict()` (Relevant API documentation: [DataCatalog](/kedro.io.DataCatalog)), where they live as `MemoryDataSet`s. This method is also what the `KedroContext` class uses when instantiating the catalog.
+
+> *Note*: You can use `add_feed_dict()` to inject any other entries into your `DataCatalog` as per your use case.
+
+
+
 ## Credentials
 
 > *Note:* For security reasons, we strongly recommend *not* committing any credentials or other secrets to the Version Control System. Hence, by default any file inside the `conf/` folder (and its subfolders) containing `credentials` in its name will be ignored via `.gitignore` and not committed to your git repository.

@@ -28,4 +28,5 @@
 """kedro.contrib.io.pyspark provides I/O modules for Apache Spark."""
 
 from .spark_data_set import SparkDataSet  # NOQA
+from .spark_hive_data_set import SparkHiveDataSet  # NOQA
 from .spark_jdbc import SparkJDBCDataSet  # NOQA

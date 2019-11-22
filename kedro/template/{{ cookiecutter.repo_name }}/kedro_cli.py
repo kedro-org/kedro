@@ -326,7 +326,7 @@ def activate_nbstripout():
 def _build_jupyter_command(
     base: str, ip: str, all_kernels: bool, args: Iterable[str]
 ) -> List[str]:
-    cmd = [base, "--ip=" + ip]
+    cmd = [base, "--ip", ip]
 
     if not all_kernels:
         project_name = "{{ cookiecutter.project_name }}"
@@ -355,11 +355,10 @@ def jupyter_notebook(ip, all_kernels, args):
     if "-h" not in args and "--help" not in args:
         ipython_message(all_kernels)
 
-    call(
-        _build_jupyter_command(
-            "jupyter-notebook", ip=ip, all_kernels=all_kernels, args=args
-        )
+    arguments = _build_jupyter_command(
+        "notebook", ip=ip, all_kernels=all_kernels, args=args
     )
+    python_call("jupyter", arguments)
 
 
 @forward_command(jupyter, "lab", forward_help=True)
@@ -370,9 +369,8 @@ def jupyter_lab(ip, all_kernels, args):
     if "-h" not in args and "--help" not in args:
         ipython_message(all_kernels)
 
-    call(
-        _build_jupyter_command("jupyter-lab", ip=ip, all_kernels=all_kernels, args=args)
-    )
+    arguments = _build_jupyter_command("lab", ip=ip, all_kernels=all_kernels, args=args)
+    python_call("jupyter", arguments)
 
 
 @jupyter.command("convert")

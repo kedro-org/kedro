@@ -94,7 +94,7 @@ def mocked_s3_object(tmp_path, mocked_s3_bucket, dummy_dataframe: dd.DataFrame):
 def s3_data_set(load_args, save_args):
     return ParquetDaskDataSet(
         filepath=FILENAME,
-        credentials=AWS_CREDENTIALS,
+        storage_options={"client_kwargs": AWS_CREDENTIALS},
         load_args=load_args,
         save_args=save_args,
     )
@@ -116,7 +116,9 @@ class TestParquetDaskDataSet:
     def test_incomplete_credentials_load(self, bad_credentials):
         """Test that incomplete credentials passed in credentials.yml raises exception."""
         with pytest.raises(PartialCredentialsError):
-            ParquetDaskDataSet(filepath=FILENAME, credentials=bad_credentials)
+            ParquetDaskDataSet(
+                filepath=FILENAME, storage_options={"client_kwargs": bad_credentials}
+            )
 
     def test_incorrect_credentials_load(self):
         """Test that incorrect credential keys won't instantiate dataset."""
@@ -124,7 +126,9 @@ class TestParquetDaskDataSet:
         with pytest.raises(TypeError, match=pattern):
             ParquetDaskDataSet(
                 filepath=FILENAME,
-                credentials={"access_token": "TOKEN", "access_key": "KEY"},
+                storage_options={
+                    "client_kwargs": {"access_token": "TOKEN", "access_key": "KEY"}
+                },
             )
 
     @pytest.mark.parametrize(
@@ -133,7 +137,7 @@ class TestParquetDaskDataSet:
     )
     def test_empty_credentials_load(self, bad_credentials):
         parquet_data_set = ParquetDaskDataSet(
-            filepath=FILENAME, credentials=bad_credentials
+            filepath=FILENAME, storage_options={"client_kwargs": bad_credentials}
         )
         pattern = r"Failed while loading data from data set ParquetDaskDataSet\(.+\)"
         with pytest.raises(DataSetError, match=pattern):
@@ -143,7 +147,9 @@ class TestParquetDaskDataSet:
         """Test that AWS credentials are passed successfully into boto3
         client instantiation on creating S3 connection."""
         mocker.patch("s3fs.core.boto3.Session.client")
-        s3_data_set = ParquetDaskDataSet(filepath=FILENAME, credentials=AWS_CREDENTIALS)
+        s3_data_set = ParquetDaskDataSet(
+            filepath=FILENAME, storage_options={"client_kwargs": AWS_CREDENTIALS}
+        )
         pattern = r"Failed while loading data from data set ParquetDaskDataSet\(.+\)"
         with pytest.raises(DataSetError, match=pattern):
             s3_data_set.load()

@@ -94,10 +94,7 @@ def mocked_s3_object(tmp_path, mocked_s3_bucket, dummy_dataframe: dd.DataFrame):
 def s3_data_set(load_args, save_args):
     return ParquetDaskDataSet(
         filepath=FILENAME,
-        credentials={
-            "aws_access_key_id": "YOUR_KEY",
-            "aws_secret_access_key": "YOUR SECRET",
-        },
+        credentials=AWS_CREDENTIALS,
         load_args=load_args,
         save_args=save_args,
     )

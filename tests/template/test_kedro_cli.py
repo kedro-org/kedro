@@ -250,6 +250,27 @@ class TestInstallCommand:
             ["conda", "install", "--file", "src/environment.yml", "--yes"]
         )
 
+    def test_windows(self, fake_kedro_cli, mocker):
+        mock_subprocess = mocker.patch.object(fake_kedro_cli, "subprocess")
+        # pretend we are on Windows
+        mocker.patch.object(fake_kedro_cli, "os").name = "nt"
+
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["install"])
+        assert not result.exit_code, result.stdout
+
+        command = [
+            sys.executable,
+            "-m",
+            "pip",
+            "install",
+            "-U",
+            "-r",
+            "src/requirements.txt",
+        ]
+        mock_subprocess.Popen.assert_called_once_with(
+            command, creationflags=mock_subprocess.CREATE_NEW_CONSOLE
+        )
+
 
 class TestIpythonCommand:
     def test_happy_path(self, call_mock, fake_kedro_cli, fake_ipython_message):
@@ -357,28 +378,34 @@ class TestBuildReqsCommand:
 
 
 class TestJupyterNotebookCommand:
-    def test_default_kernel(self, call_mock, fake_kedro_cli, fake_ipython_message):
+    def test_default_kernel(
+        self, python_call_mock, fake_kedro_cli, fake_ipython_message
+    ):
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["jupyter", "notebook", "--ip=0.0.0.0"]
+            fake_kedro_cli.cli, ["jupyter", "notebook", "--ip", "0.0.0.0"]
         )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_called_once_with(False)
-        call_mock.assert_called_once_with(
+        python_call_mock.assert_called_once_with(
+            "jupyter",
             [
-                "jupyter-notebook",
-                "--ip=0.0.0.0",
-                '--NotebookApp.kernel_spec_manager_class=kedro.cli.jupyter.SingleKernelSpecManager',
-                "--KernelSpecManager.default_kernel_name='TestProject'"
-            ]
+                "notebook",
+                "--ip",
+                "0.0.0.0",
+                "--NotebookApp.kernel_spec_manager_class=kedro.cli.jupyter.SingleKernelSpecManager",
+                "--KernelSpecManager.default_kernel_name='TestProject'",
+            ],
         )
 
-    def test_all_kernels(self, call_mock, fake_kedro_cli, fake_ipython_message):
+    def test_all_kernels(self, python_call_mock, fake_kedro_cli, fake_ipython_message):
         result = CliRunner().invoke(
             fake_kedro_cli.cli, ["jupyter", "notebook", "--all-kernels"]
         )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_called_once_with(True)
-        call_mock.assert_called_once_with(["jupyter-notebook", "--ip=127.0.0.1"])
+        python_call_mock.assert_called_once_with(
+            "jupyter", ["notebook", "--ip", "127.0.0.1"]
+        )
 
     @pytest.mark.parametrize("help_flag", ["-h", "--help"])
     def test_help(self, help_flag, fake_kedro_cli, fake_ipython_message):
@@ -390,29 +417,40 @@ class TestJupyterNotebookCommand:
 
 
 class TestJupyterLabCommand:
-    def test_default_kernel(self, call_mock, fake_kedro_cli, fake_ipython_message):
+    def test_default_kernel(
+        self, python_call_mock, fake_kedro_cli, fake_ipython_message
+    ):
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["jupyter", "lab", "--ip=0.0.0.0"]
+            fake_kedro_cli.cli, ["jupyter", "lab", "--ip", "0.0.0.0"]
         )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_called_once_with(False)
-        call_mock.assert_called_once_with([
-            "jupyter-lab", "--ip=0.0.0.0",
-            '--NotebookApp.kernel_spec_manager_class=kedro.cli.jupyter.SingleKernelSpecManager',
-            "--KernelSpecManager.default_kernel_name='TestProject'",
-        ])
+        python_call_mock.assert_called_once_with(
+            "jupyter",
+            [
+                "lab",
+                "--ip",
+                "0.0.0.0",
+                "--NotebookApp.kernel_spec_manager_class=kedro.cli.jupyter.SingleKernelSpecManager",
+                "--KernelSpecManager.default_kernel_name='TestProject'",
+            ],
+        )
 
-    def test_all_kernels(self, call_mock, fake_kedro_cli, fake_ipython_message):
+    def test_all_kernels(self, python_call_mock, fake_kedro_cli, fake_ipython_message):
         result = CliRunner().invoke(
             fake_kedro_cli.cli, ["jupyter", "lab", "--all-kernels"]
         )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_called_once_with(True)
-        call_mock.assert_called_once_with(["jupyter-lab", "--ip=127.0.0.1"])
+        python_call_mock.assert_called_once_with(
+            "jupyter", ["lab", "--ip", "127.0.0.1"]
+        )
 
     @pytest.mark.parametrize("help_flag", ["-h", "--help"])
     def test_help(self, help_flag, fake_kedro_cli, fake_ipython_message):
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["jupyter", "lab", help_flag])
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, [sys.executable, "-m", "jupyter", "lab", help_flag]
+        )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_not_called()
 

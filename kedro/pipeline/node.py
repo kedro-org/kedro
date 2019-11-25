@@ -50,7 +50,7 @@ class Node:
         outputs: Union[None, str, List[str], Dict[str, str]],
         *,
         name: str = None,
-        tags: Iterable[str] = None,
+        tags: Union[str, Iterable[str]] = None,
         decorators: Iterable[Callable] = None
     ):
         """Create a node in the pipeline by providing a function to be called
@@ -118,7 +118,7 @@ class Node:
         self._inputs = inputs
         self._outputs = outputs
         self._name = name
-        self._tags = set([] if tags is None else tags)
+        self._tags = set(_to_list(tags))
         self._decorators = list(decorators or [])
 
         self._validate_unique_outputs()
@@ -212,7 +212,7 @@ class Node:
         """
         return set(self._tags)
 
-    def tag(self, tags: Iterable[str]) -> "Node":
+    def tag(self, tags: Union[str, Iterable[str]]) -> "Node":
         """Create a new ``Node`` which is an exact copy of the current one,
             but with more tags added to it.
 
@@ -223,7 +223,7 @@ class Node:
             A copy of the current ``Node`` object with the tags added.
 
         """
-        return self._copy(tags=set(self._tags) | set(tags))
+        return self._copy(tags=self.tags | set(_to_list(tags)))
 
     @property
     def name(self) -> str:
@@ -635,7 +635,7 @@ def _dict_inputs_to_list(func: Callable[[Any], Any], inputs: Dict[str, str]):
     return list(sig.args) + sorted(sig.kwargs.values())
 
 
-def _to_list(element: Union[None, str, List[str], Dict[str, str]]) -> List:
+def _to_list(element: Union[None, str, Iterable[str], Dict[str, str]]) -> List:
     """Make a list out of node inputs/outputs.
 
     Returns:
@@ -643,9 +643,9 @@ def _to_list(element: Union[None, str, List[str], Dict[str, str]]) -> List:
     """
 
     if element is None:
-        return list()
+        return []
     if isinstance(element, str):
         return [element]
     if isinstance(element, dict):
         return sorted(element.values())
-    return element
+    return list(element)

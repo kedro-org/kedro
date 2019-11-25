@@ -29,18 +29,60 @@
 be used to run the ``Pipeline`` in parallel groups formed by toposort.
 """
 import os
+import pickle
 from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
 from itertools import chain
 from multiprocessing.managers import BaseProxy, SyncManager  # type: ignore
 from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
-from typing import Iterable, Set
+from typing import Any, Iterable, Set
 
-from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
+from kedro.io import DataCatalog, DataSetError, MemoryDataSet
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 from kedro.runner.runner import AbstractRunner, run_node
+
+
+class _SharedMemoryDataSet:
+    """``_SharedMemoryDataSet`` a wrapper class for a shared MemoryDataSet in SyncManager.
+    It is not inherited from AbstractDataSet class.
+    """
+
+    def __init__(self, manager: SyncManager):
+        """Creates a new instance of ``_SharedMemoryDataSet``,
+        and creates shared memorydataset attribute.
+
+        Args:
+            manager: An instance of multiprocessing manager for shared objects.
+
+        """
+        self.shared_memory_dataset = manager.MemoryDataSet()  # type: ignore
+
+    def __getattr__(self, name):
+        # This if condition prevents recursive call when deserializing
+        if name == "__setstate__":
+            raise AttributeError()
+        return getattr(self.shared_memory_dataset, name)
+
+    def save(self, data: Any):
+        """Calls save method of a shared MemoryDataSet in SyncManager.
+        """
+        try:
+            self.shared_memory_dataset.save(data)
+        except Exception as exc:  # pylint: disable=broad-except
+            # Checks if the error is due to serialisation or not
+            try:
+                pickle.dumps(data)
+            except Exception:
+                raise DataSetError(
+                    "{} cannot be serialized. ParallelRunner implicit memory datasets "
+                    "can only be used with serializable data".format(
+                        str(data.__class__)
+                    )
+                )
+            else:
+                raise exc
 
 
 class ParallelRunnerManager(SyncManager):
@@ -84,19 +126,20 @@ class ParallelRunner(AbstractRunner):
     def __del__(self):
         self._manager.shutdown()
 
-    def create_default_data_set(self, ds_name: str) -> AbstractDataSet:
+    def create_default_data_set(  # type: ignore
+        self, ds_name: str
+    ) -> _SharedMemoryDataSet:
         """Factory method for creating the default data set for the runner.
 
         Args:
             ds_name: Name of the missing data set
 
         Returns:
-            An instance of an implementation of AbstractDataSet to be used
+            An instance of an implementation of _SharedMemoryDataSet to be used
             for all unregistered data sets.
 
         """
-        # pylint: disable=no-member
-        return self._manager.MemoryDataSet()  # type: ignore
+        return _SharedMemoryDataSet(self._manager)
 
     @classmethod
     def _validate_nodes(cls, nodes: Iterable[Node]):
@@ -115,7 +158,7 @@ class ParallelRunner(AbstractRunner):
                 "serializable, i.e. nodes should not include lambda "
                 "functions, nested functions, closures, etc.\nIf you "
                 "are using custom decorators ensure they are correctly using "
-                "functools.wraps().".format(unserializable)
+                "functools.wraps().".format(sorted(unserializable))
             )
 
     @classmethod
@@ -141,7 +184,7 @@ class ParallelRunner(AbstractRunner):
                 "sets are serializable, i.e. data sets should not make use of "
                 "lambda functions, nested functions, closures etc.\nIf you "
                 "are using custom decorators ensure they are correctly using "
-                "functools.wraps().".format(unserializable)
+                "functools.wraps().".format(sorted(unserializable))
             )
 
         memory_data_sets = []
@@ -157,7 +200,7 @@ class ParallelRunner(AbstractRunner):
             raise AttributeError(
                 "The following data sets are memory data sets: {}\n"
                 "ParallelRunner does not support output to externally created "
-                "MemoryDataSets".format(memory_data_sets)
+                "MemoryDataSets".format(sorted(memory_data_sets))
             )
 
     def _get_required_workers_count(self, pipeline: Pipeline):

@@ -182,7 +182,7 @@ class TestCliCommands:
         for each in ("Opening file", join("html", "index.html")):
             assert each in result.output
 
-        patched_browser.assert_called_once()
+        assert patched_browser.call_count == 1
         args, _ = patched_browser.call_args
         for each in ("file://", join("kedro", "html", "index.html")):
             assert each in args[0]
@@ -401,10 +401,9 @@ class TestGetProjectContext:
         msg = r"\`get_project_context\(\"{}\"\)\` is now deprecated\. ".format(key)
         if obj_name:
             msg += (
-                r"This is still returning a function that returns \`{}\` instance\, "
-                r"however passed arguments have no effect anymore since Kedro 0.15.0\. ".format(
-                    obj_name
-                )
+                r"This is still returning a function that returns \`{}\` "
+                r"instance\, however passed arguments have no effect anymore "
+                r"since Kedro 0.15.0\. ".format(obj_name)
             )
         msg += (
             r"Please get \`KedroContext\` instance by calling "

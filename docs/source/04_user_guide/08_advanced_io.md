@@ -1,6 +1,6 @@
 # Advanced IO
 
-> *Note:* This documentation is based on `Kedro 0.15.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 In this tutorial, you will learn about advanced uses of the [Kedro IO](/kedro.io.rst) module and understand the underlying implementation.
 
@@ -220,3 +220,4 @@ Currently the following datasets support versioning:
 - `kedro.contrib.io.parquet.ParquetS3DataSet`
 - `kedro.contrib.io.azure.CSVBlobDataSet`
 - `kedro.contrib.io.pyspark.SparkDataSet`
+- `kedro.contrib.io.networkx.NetworkXLocalDataSet`

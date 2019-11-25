@@ -68,10 +68,30 @@ def test_pandas_to_spark(three_arg_node, spark_session, pandas_df, inputs):
         assert res[output].toPandas().equals(pandas_df)
 
 
+def test_pandas_to_spark_dict(pandas_df, spark_df, spark_session):
+    @pandas_to_spark(spark_session)
+    def func_with_kwargs(arg1, arg2=None, arg3=None):
+        return [arg1, arg2, arg3]
+
+    res = func_with_kwargs(pandas_df, arg2=spark_df, arg3=pandas_df)
+    for output in res:
+        assert output.toPandas().equals(pandas_df)
+
+
 def test_spark_to_pandas(three_arg_node, pandas_df, inputs):
     res = three_arg_node.decorate(spark_to_pandas()).run(inputs)
     for output in ["output1", "output2", "output3"]:
         assert res[output].equals(pandas_df)
+
+
+def test_spark_to_pandas_dict(pandas_df, spark_df):
+    @spark_to_pandas()
+    def func_with_kwargs(arg1, arg2=None, arg3=None):
+        return [arg1, arg2, arg3]
+
+    res = func_with_kwargs(pandas_df, arg2=spark_df, arg3=pandas_df)
+    for output in res:
+        assert output.equals(pandas_df)
 
 
 def test_retry():

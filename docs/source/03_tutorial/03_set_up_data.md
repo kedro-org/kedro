@@ -70,7 +70,7 @@ All Kedro projects have a `conf/base/catalog.yml` file where users register the 
 
 Kedro supports a number of different data types, such as `csv`, which is implemented by `CSVLocalDataSet`. The full list of supported datasets can be found in the [API documentation](../kedro.io.rst#data-sets).
 
-Let’s start this process by registering the `csv` datasets by copying the following to the end of the `catalog.yml` file:
+Let’s start this process by registering the `csv` datasets by copying the following to the end of the `conf/base/catalog.yml` file:
 
 ```yaml
 companies:
@@ -88,7 +88,7 @@ If you want to check whether Kedro loads the data correctly, open a `kedro ipyth
 context.catalog.load('companies').head()
 ```
 
-This should show you the first five rows of the dataset. The entire `companies` dataset is loaded into a `pandas` DataFrame and you can play with it as you wish.
+This will load the dataset named `companies` (as per top-level key in `catalog.yml`), from the underlying filepath `data/01_raw/companies.csv`, and show you the first five rows of the dataset. It is loaded into a `pandas` DataFrame and you can play with it as you wish.
 
 When you have finished, simply close `ipython` session by typing the following:
 

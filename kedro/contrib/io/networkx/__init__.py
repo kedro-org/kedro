@@ -26,10 +26,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+"""``NetworkXLocalDataSet`` is an ``AbstractVersionedDataSet`` to save and load NetworkX graphs
+in JSON format using ``NetworkX``.
 """
-``AbstractDataSet`` implementation to save matplotlib objects as image files.
-"""
 
-from .matplotlib_s3_writer import MatplotlibS3Writer  # NOQA
-from .matplotlib_writer import MatplotlibWriter  # NOQA
+from .networkx_local import NetworkXLocalDataSet  # NOQA

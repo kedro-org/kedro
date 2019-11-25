@@ -1,22 +1,48 @@
+# Release 0.15.5
+
+## Major features and improvements
+* Added the following datasets:
+  - `MatplotlibS3Writer` in `kedro.contrib.io.matplotlib` for saving Matplotlib images to S3.
+  - `ParquetDaskDataSet` in `kedro.contrib.io.dask` for handling parquet datasets using Dask.
+## Bug fixes and other changes
+* `ParallelRunner` now works with `SparkDataSet`.
+* Allowed the use of nulls in `parameters.yml`.
+* Fixed an issue where `%reload_kedro` wasn't reloading all user modules.
+* Fixed `pandas_to_spark` and `spark_to_pandas` decorators to work with functions with kwargs.
+* Fixed a bug where `kedro jupyter notebook` and `kedro jupyter lab` would run a different Jupyter installation to the one in the local environment.
+
+## Breaking changes to the API
+* Renamed entry point for running pip-installed projects to `run_package()` instead of `main()` in `src/<package>/run.py`.
+
+## Thanks for supporting contributions
+[Sheldon Tsen](https://github.com/sheldontsen-qb), [@roumail](https://github.com/roumail), [Yuhao Zhu](https://github.com/yhzqb)
+
 # Release 0.15.4
 
 ## Major features and improvements
 * `kedro jupyter` now gives the default kernel a sensible name.
 * `Pipeline.name` has been deprecated in favour of `Pipeline.tags`.
-* `Pipeline.transform` has been added, allowing to rename and prefix datasets and nodes.
-* Added Jupyter notebook line magic (`%run_viz`) to run `kedro viz` in notebook cell.
-* Added a new `kedro.contrib.io.dask.ParquetDaskDataSet` for handling parquet datasets using Dask.
+* Reuse pipelines within a Kedro project using `Pipeline.transform`, it simplifies dataset and node renaming.
+* Added Jupyter Notebook line magic (`%run_viz`) to run `kedro viz` in a Notebook cell (requires [`kedro-viz`](https://github.com/quantumblacklabs/kedro-viz) version `3.0.0` or later).
+* Added the following datasets:
+  - `NetworkXLocalDataSet` in `kedro.contrib.io.networkx` to load and save local graphs (JSON format) via NetworkX. (by [@josephhaaga](https://github.com/josephhaaga))
+  - `SparkHiveDataSet` in `kedro.contrib.io.pyspark.SparkHiveDataSet` allowing usage of Spark and insert/upsert on non-transactional Hive tables
+* `kedro.contrib.config.TemplatedConfigLoader` now supports name/dict key templating and default values.
 
 ## Bug fixes and other changes
 * `get_last_load_version()` method for versioned datasets now returns exact last load version if the dataset has been loaded at least once and `None` otherwise.
 * Fixed a bug in `_exists` method for versioned `SparkDataSet`.
 * Enabled the customisation of the ExcelWriter in `ExcelLocalDataSet` by specifying options under `writer` key in `save_args`.
+* Fixed a bug in IPython startup script, attempting to load context from the incorrect location.
+* Removed capping the length of a dataset's string representation.
+* Fixed `kedro install` command failing on Windows if `src/requirements.txt` contains a different version of Kedro.
+* Enabled passing a single tag into a node or a pipeline without having to wrap it in a list (i.e. `tags="my_tag"`).
 
 ## Breaking changes to the API
 * Removed `_check_paths_consistency()` method from `AbstractVersionedDataSet`. Version consistency check is now done in `AbstractVersionedDataSet.save()`. Custom versioned datasets should modify `save()` method implementation accordingly.
 
 ## Thanks for supporting contributions
-[Yuhao Zhu](https://github.com/yhzqb)
+[Joseph Haaga](https://github.com/josephhaaga), [Deepyaman Datta](https://github.com/deepyaman), [Joost Duisters](https://github.com/JoostDuisters), [Zain Patel](https://github.com/mzjp2), [Tom Vigrass](https://github.com/tomvigrass)
 
 # Release 0.15.3
 
@@ -37,7 +63,7 @@
 ## Bug fixes and other changes
 * Users will override the `_get_pipeline` abstract method in `ProjectContext(KedroContext)` in `run.py` rather than the `pipeline` abstract property. The `pipeline` property is not abstract anymore.
 * Improved an error message when versioned local dataset is saved and unversioned path already exists.
-* Add `catalog` global variable to `00-kedro-init.py`, allowing you to load datasets with `catalog.load()`.
+* Added `catalog` global variable to `00-kedro-init.py`, allowing you to load datasets with `catalog.load()`.
 * Enabled tuples to be returned from a node.
 * Disallowed the ``ConfigLoader`` loading the same file more than once, and deduplicated the `conf_paths` passed in.
 * Added a `--open` flag to `kedro build-docs` that opens the documentation on build.
@@ -46,7 +72,7 @@
 
 ## Breaking changes to the API
 * `KedroContext.run()` no longer accepts `catalog` and `pipeline` arguments.
-* `node.inputs` now returns the node's inputs in the order required to bind them properly to the node's function
+* `node.inputs` now returns the node's inputs in the order required to bind them properly to the node's function.
 
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman), [Luciano Issoe](https://github.com/Lucianois), [Joost Duisters](https://github.com/JoostDuisters), [Zain Patel](https://github.com/mzjp2), [William Ashford](https://github.com/williamashfordQB), [Karlson Lee](https://github.com/i25959341)

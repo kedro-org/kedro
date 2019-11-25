@@ -1,6 +1,6 @@
 # Working with Databricks
 
-> *Note:* This documentation is based on `Kedro 0.15.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 ## Databricks Connect (recommended)
 We recommend using [Databricks Connect](https://pypi.org/project/databricks-connect/) to easily execute your Kedro pipeline on a Databricks cluster.
@@ -60,7 +60,7 @@ sys.path.append(os.path.abspath("./src")
 Then, import and execute the `run` module to run your pipeline:
 ```python
 import your_project.run as run
-run.main()
+run.run_package()
 ```
 
 To pull in updates to your code run from your project directory:

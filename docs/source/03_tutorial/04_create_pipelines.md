@@ -10,7 +10,7 @@ This section covers how to create a pipeline from a set of `node`s, which are Py
 
 You previously registered the raw datasets for your Kedro project, so you can now start processing the data and preparing it for model building. Let’s pre-process two of the datasets ([companies.csv](https://github.com/quantumblacklabs/kedro/tree/develop/docs/source/03_tutorial/data/companies.csv) and [shuttles.xlsx](https://github.com/quantumblacklabs/kedro/tree/develop/docs/source/03_tutorial/data/shuttles.xlsx)) by creating Python functions for each.
 
-Create a file `src/kedro_tutorial/nodes/data_engineering.py` and add the following functions:
+Create a file `src/kedro_tutorial/pipelines/data_engineering/nodes.py` (and any missing directories) and add the following functions:
 
 ```python
 import pandas as pd
@@ -70,10 +70,52 @@ def preprocess_shuttles(shuttles: pd.DataFrame) -> pd.DataFrame:
 
 ## Assemble nodes into a pipeline
 
-Now you have functions which take one dataframe and output a pre-processed version of that dataframe. Next you should add these functions as nodes into the pipeline in `src/kedro_tutorial/pipeline.py`, so the `create_pipelines()` function looks as follows:
+Now you have functions which take one dataframe and output a pre-processed version of that dataframe. Next you should add these functions as nodes into the pipeline in `src/kedro_tutorial/pipelines/data_engineering/pipeline.py`, so the `create_pipeline()` function looks as follows:
 
 ```python
-def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
+def create_pipeline(**kwargs):
+    return Pipeline(
+        [
+            node(
+                func=preprocess_companies,
+                inputs="companies",
+                outputs="preprocessed_companies",
+                name="preprocessing_companies",
+            ),
+            node(
+                func=preprocess_shuttles,
+                inputs="shuttles",
+                outputs="preprocessed_shuttles",
+                name="preprocessing_shuttles",
+            ),
+            node(
+                func=create_master_table,
+                inputs=["preprocessed_shuttles", "preprocessed_companies", "reviews"],
+                outputs="master_table",
+            ),
+        ]
+    )
+
+```
+
+It's important to note that here `companies` and `shuttles` refer to the datasets defined in `conf/base/catalog.yml`. Their contents will be loaded and served as inputs to the `preprocess_companies` and `preprocess_shuttles` functions.
+
+You will also need to import `node`, and your functions by adding them to the beginning of the `pipeline.py` file:
+
+```python
+from kedro.pipeline import node, Pipeline
+from kedro_tutorial.pipelines.data_engineering.nodes import (
+    preprocess_companies,
+    preprocess_shuttles,
+)
+```
+
+As well as this, you should update the project's pipelines in `src/kedro_tutorial/pipeline.py`:
+```python
+from kedro_tutorial.pipelines.data_engineering import pipeline as de
+
+
+def create_pipelines(**kwargs):
     """Create the project's pipeline.
 
     Args:
@@ -83,30 +125,18 @@ def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
         A mapping from a pipeline name to a ``Pipeline`` object.
 
     """
-    de_pipeline = Pipeline(
-        [
-            node(preprocess_companies, "companies", "preprocessed_companies", name="preprocess1"),
-            node(preprocess_shuttles, "shuttles", "preprocessed_shuttles", name="preprocess2"),
-        ]
-    )
+    de_pipeline = de.create_pipeline()
 
-    return {"de": de_pipeline, "__default__": de_pipeline}
-```
-
-You will also need to import `node`, and your functions by adding them to the beginning of the `pipeline.py` file:
-
-```python
-from kedro.pipeline import node, Pipeline
-from kedro_tutorial.nodes.data_engineering import (
-    preprocess_companies,
-    preprocess_shuttles,
-)
+    return {
+        "de": de_pipeline,
+        "__default__": de_pipeline,
+    }
 ```
 
 As you develop your nodes, you can test too see if they work as expected. As an example, run the following command in your terminal window:
 
 ```bash
-kedro run --node=preprocess1
+kedro run --node=preprocessing_companies
 ```
 
 You should see output similar to the below:
@@ -114,8 +144,8 @@ You should see output similar to the below:
 ```bash
 2019-08-19 10:44:33,112 - root - INFO - ** Kedro project kedro-tutorial
 2019-08-19 10:44:33,123 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVLocalDataSet)...
-2019-08-19 10:44:33,161 - kedro.pipeline.node - INFO - Running node: preprocess1: preprocess_companies([companies]) -> [preprocessed_companies]
-2019-08-19 10:44:33,206 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_companies` (CSVLocalDataSet)...
+2019-08-19 10:44:33,161 - kedro.pipeline.node - INFO - Running node: preprocessing_companies: preprocess_companies([companies]) -> [preprocessed_companies]
+2019-08-19 10:44:33,206 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_companies` (MemoryDataSet)...
 2019-08-19 10:44:33,471 - kedro.runner.sequential_runner - INFO - Completed 1 out of 1 tasks
 2019-08-19 10:44:33,471 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
 
@@ -135,12 +165,12 @@ kedro run
 
 2019-08-19 10:50:39,950 - root - INFO - ** Kedro project kedro-tutorial
 2019-08-19 10:50:39,957 - kedro.io.data_catalog - INFO - Loading data from `shuttles` (ExcelLocalDataSet)...
-2019-08-19 10:50:48,521 - kedro.pipeline.node - INFO - Running node: preprocess2: preprocess_shuttles([shuttles]) -> [preprocessed_shuttles]
-2019-08-19 10:50:48,587 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_shuttles` (CSVLocalDataSet)...
+2019-08-19 10:50:48,521 - kedro.pipeline.node - INFO - Running node: preprocessing_shuttles: preprocess_shuttles([shuttles]) -> [preprocessed_shuttles]
+2019-08-19 10:50:48,587 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_shuttles` (MemoryDataSet)...
 2019-08-19 10:50:49,133 - kedro.runner.sequential_runner - INFO - Completed 1 out of 2 tasks
 2019-08-19 10:50:49,133 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVLocalDataSet)...
-2019-08-19 10:50:49,168 - kedro.pipeline.node - INFO - Running node: preprocess1: preprocess_companies([companies]) -> [preprocessed_companies]
-2019-08-19 10:50:49,212 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_companies` (CSVLocalDataSet)...
+2019-08-19 10:50:49,168 - kedro.pipeline.node - INFO - Running node: preprocessing_companies: preprocess_companies([companies]) -> [preprocessed_companies]
+2019-08-19 10:50:49,212 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_companies` (MemoryDataSet)...
 2019-08-19 10:50:49,458 - kedro.runner.sequential_runner - INFO - Completed 2 out of 2 tasks
 2019-08-19 10:50:49,459 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
 
@@ -209,9 +239,9 @@ def create_master_table(
 To create a new node to join all tables to form a master table, you need to add the three dataframes to a cell in the Jupyter notebook:
 
 ```python
-preprocessed_shuttles = context.catalog.load("preprocessed_shuttles")
-preprocessed_companies = context.catalog.load("preprocessed_companies")
-reviews = context.catalog.load("reviews")
+preprocessed_shuttles = catalog.load("preprocessed_shuttles")
+preprocessed_companies = catalog.load("preprocessed_companies")
+reviews = catalog.load("reviews")
 
 master = create_master_table(preprocessed_shuttles, preprocessed_companies, reviews)
 master.head()
@@ -219,15 +249,15 @@ master.head()
 
 ### Extending the project's code
 
-Having tested that all is working with the master table, it is now time to add the code you've worked on to the Spaceflights project code. First, add the `create_master_table()` function from the snippet above to `src/kedro_tutorial/nodes/data_engineering.py` - you do not need to copy the import statement `import pandas as pd` as it has already been imported at the top of the file.
+Having tested that all is working with the master table, it is now time to add the code you've worked on to the Spaceflights project code. First, add the `create_master_table()` function from the snippet above to `src/kedro_tutorial/pipelines/data_engineering/nodes.py` - you do not need to copy the import statement `import pandas as pd` as it has already been imported at the top of the file.
 
-Then you should add it to the pipeline in `src/kedro_tutorial/pipeline.py` by adding the node as follows:
+Then you should add it to the pipeline in `src/kedro_tutorial/pipelines/data_engineering/pipeline.py` by adding the node as follows:
 
 ```python
 node(
-    create_master_table,
-    ["preprocessed_shuttles", "preprocessed_companies", "reviews"],
-    "master_table",
+    func=create_master_table,
+    inputs=["preprocessed_shuttles", "preprocessed_companies", "reviews"],
+    outputs="master_table",
     name="master_table"
 ),
 ```
@@ -236,7 +266,7 @@ By adding this code to the project, you are telling Kedro that the function `cre
 You will also need to add an import statement for `create_master_table` at the top of the file:
 
 ```python
-from kedro_tutorial.nodes.data_engineering import (
+from kedro_tutorial.pipelines.data_engineering.nodes import (
     preprocess_companies,
     preprocess_shuttles,
     create_master_table,
@@ -258,11 +288,11 @@ kedro run
 
 2019-08-19 10:55:47,534 - root - INFO - ** Kedro project kedro-tutorial
 2019-08-19 10:55:47,541 - kedro.io.data_catalog - INFO - Loading data from `shuttles` (ExcelLocalDataSet)...
-2019-08-19 10:55:55,670 - kedro.pipeline.node - INFO - Running node: preprocess2: preprocess_shuttles([shuttles]) -> [preprocessed_shuttles]
+2019-08-19 10:55:55,670 - kedro.pipeline.node - INFO - Running node: preprocessing_shuttles: preprocess_shuttles([shuttles]) -> [preprocessed_shuttles]
 2019-08-19 10:55:55,736 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_shuttles` (CSVLocalDataSet)...
 2019-08-19 10:55:56,284 - kedro.runner.sequential_runner - INFO - Completed 1 out of 3 tasks
 2019-08-19 10:55:56,284 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVLocalDataSet)...
-2019-08-19 10:55:56,318 - kedro.pipeline.node - INFO - Running node: preprocess1: preprocess_companies([companies]) -> [preprocessed_companies]
+2019-08-19 10:55:56,318 - kedro.pipeline.node - INFO - Running node: preprocessing_companies: preprocess_companies([companies]) -> [preprocessed_companies]
 2019-08-19 10:55:56,361 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_companies` (CSVLocalDataSet)...
 2019-08-19 10:55:56,610 - kedro.runner.sequential_runner - INFO - Completed 2 out of 3 tasks
 2019-08-19 10:55:56,610 - kedro.io.data_catalog - INFO - Loading data from `preprocessed_shuttles` (CSVLocalDataSet)...
@@ -296,7 +326,7 @@ Then, from within the project directory, run:
 kedro install
 ```
 
-Next, create a file `src/kedro_tutorial/nodes/price_prediction.py` and add the following code to it:
+Next, create a file `src/kedro_tutorial/pipelines/data_science/nodes.py` (along with any missing directories) and add the following code to it:
 
 ```python
 import logging
@@ -377,7 +407,7 @@ random_state: 3
 These are the parameters fed into the `DataCatalog` when the pipeline is executed. Alternatively, the parameters specified in `parameters.yml` can also be referenced using `params:` prefix in the nodes. For example, you could pass `test_size` and `random_state` parameters as follows:
 
 ```python
-# in src/kedro_tutorial/nodes/price_prediction.py:
+# in src/kedro_tutorial/pipelines/data_science/nodes.py:
 
 def split_data(data: pd.DataFrame, test_size: str, random_state: str) -> List:
     """
@@ -399,14 +429,16 @@ def split_data(data: pd.DataFrame, test_size: str, random_state: str) -> List:
 
     return [X_train, X_test, y_train, y_test]
 
-# in src/kedro_tutorial/pipeline.py:
 
-ds_pipeline = Pipeline(
+# in src/kedro_tutorial/pipelines/data_science/pipeline.py:
+
+def create_pipeline(**kwargs) -> Dict[str, Pipeline]:
+    return Pipeline(
         [
             node(
-                split_data,
-                ["master_table", "params:test_size", "params:random_state"],
-                ["X_train", "X_test", "y_train", "y_test"],
+                func=split_data,
+                inputs=["master_table", "params:test_size", "params:random_state"],
+                outputs=["X_train", "X_test", "y_train", "y_test"],
             )
         ]
     )
@@ -423,18 +455,38 @@ regressor:
 
 > *Note:* Versioning is enabled for `regressor`, which means that the pickled output of the `regressor` will be versioned and saved every time the pipeline is run. This allows us to keep the history of the models built using this pipeline. See the details in the [Versioning](../04_user_guide/08_advanced_io.md#versioning) section of the User Guide.
 
-Now to create a pipeline for the price prediction model. In `src/kedro_tutorial/pipeline.py`, add an extra import statement near the top of the file as follows:
+Now to create a pipeline for the price prediction model. In `src/kedro_tutorial/pipelines/data_science/pipeline.py`, add an extra import statement near the top of the file as follows:
 
 ```python
-from kedro_tutorial.nodes.price_prediction import (
+from kedro_tutorial.pipelines.data_science.nodes import (
     evaluate_model,
     split_data,
     train_model,
 )
 ```
 
-Then add a separate Data Science pipeline, by replacing the code in `create_pipelines()` as follows:
+And add the following pipeline definition to the same file:
 
+```python
+def create_pipeline(**kwargs):
+    return Pipeline(
+        [
+            node(
+                func=split_data,
+                inputs=["master_table", "parameters"],
+                outputs=["X_train", "X_test", "y_train", "y_test"],
+            ),
+            node(func=train_model, inputs=["X_train", "y_train"], outputs="regressor"),
+            node(
+                func=evaluate_model,
+                inputs=["regressor", "X_test", "y_test"],
+                outputs=None,
+            ),
+        ]
+    )
+```
+
+Finally, add a separate Data Science pipeline, by replacing the code in `create_pipeline` as follows:
 ```python
 def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
     """Create the project's pipeline.
@@ -446,40 +498,8 @@ def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
         A mapping from a pipeline name to a ``Pipeline`` object.
 
     """
-    de_pipeline = Pipeline(
-        [
-            node(
-                preprocess_companies,
-                "companies",
-                "preprocessed_companies",
-                name="preprocess1",
-            ),
-            node(
-                preprocess_shuttles,
-                "shuttles",
-                "preprocessed_shuttles",
-                name="preprocess2",
-            ),
-            node(
-                create_master_table,
-                ["preprocessed_shuttles", "preprocessed_companies", "reviews"],
-                "master_table",
-                name="master_table",
-            ),
-        ]
-    )
-
-    ds_pipeline = Pipeline(
-        [
-            node(
-                split_data,
-                ["master_table", "parameters"],
-                ["X_train", "X_test", "y_train", "y_test"],
-            ),
-            node(train_model, ["X_train", "y_train"], "regressor"),
-            node(evaluate_model, ["regressor", "X_test", "y_test"], None),
-        ]
-    )
+    de_pipeline = de.create_pipeline()
+    ds_pipeline = ds.create_pipeline()
 
     return {
         "de": de_pipeline,
@@ -502,11 +522,11 @@ kedro run
 
 2019-08-19 10:51:46,501 - root - INFO - ** Kedro project kedro-tutorial
 2019-08-19 10:51:46,510 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVLocalDataSet)...
-2019-08-19 10:51:46,547 - kedro.pipeline.node - INFO - Running node: preprocess1: preprocess_companies([companies]) -> [preprocessed_companies]
+2019-08-19 10:51:46,547 - kedro.pipeline.node - INFO - Running node: preprocessing_companies: preprocess_companies([companies]) -> [preprocessed_companies]
 2019-08-19 10:51:46,597 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_companies` (CSVLocalDataSet)...
 2019-08-19 10:51:46,906 - kedro.runner.sequential_runner - INFO - Completed 1 out of 6 tasks
 2019-08-19 10:51:46,906 - kedro.io.data_catalog - INFO - Loading data from `shuttles` (ExcelLocalDataSet)...
-2019-08-19 10:51:55,324 - kedro.pipeline.node - INFO - Running node: preprocess2: preprocess_shuttles([shuttles]) -> [preprocessed_shuttles]
+2019-08-19 10:51:55,324 - kedro.pipeline.node - INFO - Running node: preprocessing_shuttles: preprocess_shuttles([shuttles]) -> [preprocessed_shuttles]
 2019-08-19 10:51:55,389 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_shuttles` (CSVLocalDataSet)...
 2019-08-19 10:51:55,932 - kedro.runner.sequential_runner - INFO - Completed 2 out of 6 tasks
 2019-08-19 10:51:55,932 - kedro.io.data_catalog - INFO - Loading data from `preprocessed_shuttles` (CSVLocalDataSet)...
@@ -582,61 +602,49 @@ kedro.io.core.DataSetError: Failed while loading data from data set CSVLocalData
 
 ### Using tags
 
-Another way to run partial pipelines without changing your code is to use tags. Each node within the pipeline can be tagged by passing **`tags`** into the `Pipeline()`. Update the `create_pipelines()` code in `src/kedro_tutorial/pipeline.py` one more time:
+Another way to run partial pipelines without changing your code is to use tags. Each node within the pipeline can be tagged by passing **`tags`** into the `Pipeline()`. Update the `create_pipeline()` code in `src/kedro_tutorial/pipelines/data_engineering/pipeline.py` and `src/kedro_tutorial/pipelines/data_science/pipeline.py` one more time:
 
 ```python
-def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
-    """Create the project's pipeline.
-
-    Args:
-        kwargs: Ignore any additional arguments added in the future.
-
-    Returns:
-        A mapping from a pipeline name to a ``Pipeline`` object.
-
-    """
-    de_pipeline = Pipeline(
+# src/kedro_tutorial/pipelines/data_engineering/pipeline.py
+def create_pipeline(**kwargs) -> Dict[str, Pipeline]:
+    return Pipeline(
         [
             node(
-                preprocess_companies,
-                "companies",
-                "preprocessed_companies",
-                name="preprocess1",
+                func=preprocess_companies,
+                inputs="companies",
+                outputs="preprocessed_companies",
+                name="preprocessing_companies",
             ),
             node(
-                preprocess_shuttles,
-                "shuttles",
-                "preprocessed_shuttles",
-                name="preprocess2",
+                func=preprocess_shuttles,
+                inputs="shuttles",
+                outputs="preprocessed_shuttles",
+                name="preprocessing_shuttles",
             ),
             node(
-                create_master_table,
-                ["preprocessed_shuttles", "preprocessed_companies", "reviews"],
-                "master_table",
+                func=create_master_table,
+                inputs=["preprocessed_shuttles", "preprocessed_companies", "reviews"],
+                outputs="master_table",
                 name="master_table",
             ),
         ],
         tags=["de_tag"],
     )
 
-    ds_pipeline = Pipeline(
+# src/kedro_tutorial/pipelines/data_science/pipeline.py
+def create_pipeline(**kwargs) -> Dict[str, Pipeline]:
+    return Pipeline(
         [
             node(
-                split_data,
-                ["master_table", "parameters"],
-                ["X_train", "X_test", "y_train", "y_test"],
+                func=split_data,
+                inputs=["master_table", "parameters"],
+                outputs=["X_train", "X_test", "y_train", "y_test"],
             ),
-            node(train_model, ["X_train", "y_train"], "regressor"),
-            node(evaluate_model, ["regressor", "X_test", "y_test"], None),
+            node(func=train_model, inputs=["X_train", "y_train"], outputs="regressor"),
+            node(func=evaluate_model, inputs=["regressor", "X_test", "y_test"], outputs=None),
         ],
         tags=["ds_tag"],
     )
-
-    return {
-        "de": de_pipeline,
-        "ds": ds_pipeline,
-        "__default__": de_pipeline + ds_pipeline,
-    }
 ```
 
 If the pipeline definition contains `tags=` argument, Kedro will attach the corresponding tags (`de_tag` and `ds_tag` in the example above) to every node within that pipeline.
@@ -683,7 +691,7 @@ In this section, you will learn about Kedro's built-in decorators as well as how
 
 Logging the execution time for each node can be performed by creating a function and adding it to each node as a decorator.
 
-In `src/kedro_tutorial/nodes/data_engineering.py`, add the following decorator function near the top of the file:
+In `src/kedro_tutorial/pipelines/data_engineering/nodes.py`, add the following decorator function near the top of the file:
 
 ```python
 from functools import wraps
@@ -738,10 +746,10 @@ kedro_tutorial.nodes.data_engineering - INFO - Running 'preprocess_shuttles' too
 
 ### Decorating the pipeline
 
-A decorator can also be applied to the pipeline rather than each node. In `src/kedro_tutorial/pipeline.py`, update the imports from `src/kedro_tutorial/nodes/data_engineering.py` as follows:
+A decorator can also be applied to the pipeline rather than each node. In `src/kedro_tutorial/pipeline.py`, update the imports from `src/kedro_tutorial/pipelines/data_engineering/nodes.py` as follows:
 
 ```python
-from kedro_tutorial.nodes.data_engineering import (
+from kedro_tutorial.pipelines.data_engineering.nodes import (
     create_master_table,
     log_running_time,
     preprocess_companies,
@@ -762,42 +770,8 @@ def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
         A mapping from a pipeline name to a ``Pipeline`` object.
 
     """
-    de_pipeline = Pipeline(
-        [
-            node(
-                preprocess_companies,
-                "companies",
-                "preprocessed_companies",
-                name="preprocess1",
-            ),
-            node(
-                preprocess_shuttles,
-                "shuttles",
-                "preprocessed_shuttles",
-                name="preprocess2",
-            ),
-            node(
-                create_master_table,
-                ["preprocessed_shuttles", "preprocessed_companies", "reviews"],
-                "master_table",
-                name="master_table",
-            ),
-        ],
-        name="de_tag",
-    ).decorate(log_running_time)
-
-    ds_pipeline = Pipeline(
-        [
-            node(
-                split_data,
-                ["master_table", "parameters"],
-                ["X_train", "X_test", "y_train", "y_test"],
-            ),
-            node(train_model, ["X_train", "y_train"], "regressor"),
-            node(evaluate_model, ["regressor", "X_test", "y_test"], None),
-        ],
-        name="ds_tag",
-    ).decorate(log_running_time)
+    de_pipeline = de.create_pipeline().decorate(log_running_time)
+    ds_pipeline = ds.create_pipeline().decorate(log_running_time)
 
     return {
         "de": de_pipeline,

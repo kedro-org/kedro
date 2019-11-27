@@ -186,13 +186,13 @@ class TestParquetDaskDataSet:
         loaded_data = s3_data_set.load()
         assert_frame_equal(loaded_data.compute(), dummy_dd_dataframe.compute())
 
-    # @pytest.mark.usefixtures("mocked_s3_bucket")
-    # def test_exists(self, s3_data_set, dummy_dd_dataframe):
-    #     """Test `exists` method invocation for both existing and
-    #     nonexistent data set."""
-    #     assert not s3_data_set.exists()
-    #     s3_data_set.save(dummy_dd_dataframe)
-    #     assert s3_data_set.exists()
+    @pytest.mark.usefixtures("mocked_s3_bucket")
+    def test_exists(self, s3_data_set, dummy_dd_dataframe):
+        """Test `exists` method invocation for both existing and
+        nonexistent data set."""
+        assert not s3_data_set.exists()
+        s3_data_set.save(dummy_dd_dataframe)
+        assert s3_data_set.exists()
 
     def test_save_load_locally(self, tmp_path, dummy_dd_dataframe):
         """Test loading the data locally."""

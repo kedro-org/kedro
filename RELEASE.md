@@ -4,6 +4,8 @@
 * Added the following datasets:
   - `MatplotlibS3Writer` in `kedro.contrib.io.matplotlib` for saving Matplotlib images to S3.
   - `ParquetDaskDataSet` in `kedro.contrib.io.dask` for handling parquet datasets using Dask.
+  -  `JSONGCSDataSet` in `kedro.contrib.io.gcs` for connecting to Google Cloud Storage.
+
 ## Bug fixes and other changes
 * `ParallelRunner` now works with `SparkDataSet`.
 * Allowed the use of nulls in `parameters.yml`.
@@ -15,8 +17,7 @@
 * Renamed entry point for running pip-installed projects to `run_package()` instead of `main()` in `src/<package>/run.py`.
 
 ## Thanks for supporting contributions
-[Sheldon Tsen](https://github.com/sheldontsen-qb), [@roumail](https://github.com/roumail), [Yuhao Zhu](https://github.com/yhzqb)
-
+[Sheldon Tsen](https://github.com/sheldontsen-qb), [@roumail](https://github.com/roumail), [Karlson Lee](https://github.com/i25959341), [Yuhao Zhu](https://github.com/yhzqb)
 # Release 0.15.4
 
 ## Major features and improvements

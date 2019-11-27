@@ -117,6 +117,7 @@ setup(
         ],
         "bioinformatics": ["biopython>=1.73, <2.0"],
         "dask": ["dask[complete]>=2.6.0, <3.0"],
+        "gcs": ["gcsfs>=0.3.0, <1.0"],
         "matplotlib": ["matplotlib>=3.0.3, <4.0"],
         "networkx": ["networkx>=2.4, <3.0"],
     },

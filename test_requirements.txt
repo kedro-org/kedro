@@ -7,6 +7,7 @@ biopython>=1.73, <2.0
 codacy-coverage
 dask[complete]>=2.6.0, <3.0
 flake8>=3.5,<4.0
+gcsfs>=0.3.0, <1.0
 hdfs>=2.5.8, <3.0
 joblib==0.12.3
 jupyter_client>=5.1.0, <6.0

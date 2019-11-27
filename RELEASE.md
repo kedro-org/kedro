@@ -2,6 +2,7 @@
 
 ## Major features and improvements
 * Added a `MatplotlibS3Writer` dataset in `contrib` for saving Matplotlib images to S3.
+* Added a `JSONGCSDataSet` dataset in `contrib` for connecting to Google Cloud Storage.
 
 ## Bug fixes and other changes
 * `ParallelRunner` now works with `SparkDataSet`.
@@ -14,7 +15,7 @@
 * Renamed entry point for running pip-installed projects to `run_package()` instead of `main()` in `src/<package>/run.py`.
 
 ## Thanks for supporting contributions
-[Sheldon Tsen](https://github.com/sheldontsen-qb), [@roumail](https://github.com/roumail)
+[Sheldon Tsen](https://github.com/sheldontsen-qb), [@roumail](https://github.com/roumail), [Karlson Lee](https://github.com/i25959341)
 
 # Release 0.15.4
 

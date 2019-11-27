@@ -31,9 +31,13 @@ from copy import deepcopy
 from typing import Any, Dict, Optional
 
 import dask.dataframe as dd
+import fsspec
+from fsspec.utils import infer_storage_options
 
 from kedro.contrib.io import DefaultArgumentsMixIn
-from kedro.io.core import AbstractDataSet, DataSetError
+from kedro.io.core import AbstractDataSet
+
+_PROTOCOL_DELIM = "://"
 
 
 class ParquetDaskDataSet(DefaultArgumentsMixIn, AbstractDataSet):
@@ -65,6 +69,8 @@ class ParquetDaskDataSet(DefaultArgumentsMixIn, AbstractDataSet):
             >>> assert ddf.compute().equals(reloaded.compute())
     """
 
+    DEFAULT_SAVE_ARGS = {"write_index": False}
+
     # pylint: disable=too-many-arguments
     def __init__(
         self,
@@ -87,8 +93,8 @@ class ParquetDaskDataSet(DefaultArgumentsMixIn, AbstractDataSet):
             save_args: Additional saving options for `dask.dataframe.to_parquet`:
                 https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.to_parquet
         """
-
         self._filepath = filepath
+        self._protocol = infer_storage_options(self._filepath)["protocol"]
         self._storage_options = deepcopy(storage_options) or {}
         super().__init__(load_args, save_args)
 
@@ -110,8 +116,14 @@ class ParquetDaskDataSet(DefaultArgumentsMixIn, AbstractDataSet):
         )
 
     def _exists(self) -> bool:
-        try:
-            dd.read_parquet(self._filepath, **self._load_args)
-        except DataSetError:
-            return False
-        return True
+        path = self._extract_path()
+        file_system = fsspec.filesystem(
+            protocol=self._protocol, **self._storage_options
+        )
+        return file_system.exists(path)
+
+    def _extract_path(self) -> str:
+        split_path = self._filepath.split(_PROTOCOL_DELIM, 1)
+        if len(split_path) > 1:
+            return split_path[1]
+        return self._filepath  # If the length is 1, then it is local path

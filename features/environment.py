@@ -58,7 +58,7 @@ def before_all(context):
         context.venv_dir = Path(create_new_venv())
 
     # note the locations of some useful stuff
-    # this is because exe resolution in supbrocess doens't respect a passed env
+    # this is because exe resolution in subprocess doesn't respect a passed env
     if os.name == "posix":
         bin_dir = context.venv_dir / "bin"
         path_sep = ":"
@@ -80,6 +80,7 @@ def before_all(context):
 
     # install Kedro
     call([context.python, "-m", "pip", "install", "-U", "pip"])
+    call([context.pip, "install", "--upgrade", "setuptools"])
     for wheel_path in Path("dist").glob("*.whl"):
         wheel_path.unlink()
     call([context.pip, "install", "wheel"])

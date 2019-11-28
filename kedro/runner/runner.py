@@ -177,7 +177,7 @@ def run_node(node: Node, catalog: DataCatalog) -> Node:
         The node argument.
 
     """
-    self._logger.debug("Runnning node %s", node.name)
+    logging.getLogger(__name__).info("Runnning node %s", node.name)
     inputs = {name: catalog.load(name) for name in node.inputs}
     outputs = node.run(inputs)
     for name, data in outputs.items():

@@ -3,7 +3,7 @@
 ## Major features and improvements
 * Added a `MatplotlibS3Writer` dataset in `contrib` for saving Matplotlib images to S3.
 * Added a `JSONGCSDataSet` dataset in `contrib` for connecting to Google Cloud Storage.
-* Added subtract method to Pipeline objects for trimming off subsets of a pipeline.
+* Added `__sub__` method to Pipeline objects for trimming off subsets of a pipeline.
 
 ## Bug fixes and other changes
 * `ParallelRunner` now works with `SparkDataSet`.

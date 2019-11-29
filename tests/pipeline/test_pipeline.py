@@ -323,6 +323,21 @@ class TestValidPipeline:
         assert new_pipeline.outputs() == {"output1", "output2"}
         assert {n.name for n in new_pipeline.nodes} == {"a", "b"}
 
+    def test_remove(self):
+        """create a pipeline of 3 nodes and remove one of them"""
+        pipeline1 = Pipeline(
+            [
+                node(biconcat, ["input", "input1"], "output1", name="a"),
+                node(biconcat, ["input", "input2"], "output2", name="b"),
+                node(biconcat, ["input", "input3"], "output3", name="c"),
+            ]
+        )
+        pipeline2 = Pipeline([node(biconcat, ["input", "input2"], "output2", name="b")])
+        new_pipeline = pipeline1 - pipeline2
+        assert new_pipeline.inputs() == {"input", "input1", "input3"}
+        assert new_pipeline.outputs() == {"output1", "output3"}
+        assert {n.name for n in new_pipeline.nodes} == {"a", "c"}
+
     def test_combine_same_node(self):
         """Multiple (identical) pipelines are possible"""
         pipeline1 = Pipeline(

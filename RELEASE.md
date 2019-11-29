@@ -3,6 +3,7 @@
 ## Major features and improvements
 * Added a `MatplotlibS3Writer` dataset in `contrib` for saving Matplotlib images to S3.
 * Added a `JSONGCSDataSet` dataset in `contrib` for connecting to Google Cloud Storage.
+* Added subtract method to Pipeline objects for trimming off subsets of a pipeline.
 
 ## Bug fixes and other changes
 * `ParallelRunner` now works with `SparkDataSet`.
@@ -16,7 +17,7 @@
 * Renamed entry point for running pip-installed projects to `run_package()` instead of `main()` in `src/<package>/run.py`.
 
 ## Thanks for supporting contributions
-[Sheldon Tsen](https://github.com/sheldontsen-qb), [@roumail](https://github.com/roumail), [Karlson Lee](https://github.com/i25959341)
+[Sheldon Tsen](https://github.com/sheldontsen-qb), [@roumail](https://github.com/roumail), [Karlson Lee](https://github.com/i25959341), [Waylon Walker](https://github.com/WaylonWalker)
 
 # Release 0.15.4
 

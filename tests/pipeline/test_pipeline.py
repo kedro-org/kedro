@@ -340,7 +340,7 @@ class TestValidPipeline:
 
     def test_invalid_remove(self):
         p = Pipeline([])
-        pattern = r"unsupported operand type\(s\) for &: 'Pipeline' and 'str'"
+        pattern = r"unsupported operand type\(s\) for -: 'Pipeline' and 'str'"
         with pytest.raises(TypeError, match=pattern):
             p - "hello"  # pylint: disable=pointless-statement
 

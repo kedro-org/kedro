@@ -39,3 +39,12 @@ Feature: Package target in new project
     When I install the project's python package
     And I execute the project
     Then I should get a successful exit code
+
+  Scenario: Install package after running kedro build-reqs
+    When I execute the kedro command "build-reqs"
+    Then I should get a successful exit code
+    When I execute the kedro command "package"
+    Then I should get a successful exit code
+    When I install the project's python package
+    And I execute the project
+    Then I should get a successful exit code

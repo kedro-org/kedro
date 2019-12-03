@@ -70,7 +70,7 @@ def _assert_template_ok(
 ):
     print(result.output)
     assert result.exit_code == 0
-    assert "Project generated in" in result.output
+    assert "Change directory to the project generated in" in result.output
 
     if repo_name:
         full_path = (Path(output_dir) / repo_name).absolute()

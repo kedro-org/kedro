@@ -323,6 +323,76 @@ class TestValidPipeline:
         assert new_pipeline.outputs() == {"output1", "output2"}
         assert {n.name for n in new_pipeline.nodes} == {"a", "b"}
 
+    def test_remove(self):
+        """Create a pipeline of 3 nodes and remove one of them"""
+        pipeline1 = Pipeline(
+            [
+                node(biconcat, ["input", "input1"], "output1", name="a"),
+                node(biconcat, ["input", "input2"], "output2", name="b"),
+                node(biconcat, ["input", "input3"], "output3", name="c"),
+            ]
+        )
+        pipeline2 = Pipeline([node(biconcat, ["input", "input2"], "output2", name="b")])
+        new_pipeline = pipeline1 - pipeline2
+        assert new_pipeline.inputs() == {"input", "input1", "input3"}
+        assert new_pipeline.outputs() == {"output1", "output3"}
+        assert {n.name for n in new_pipeline.nodes} == {"a", "c"}
+
+    def test_remove_with_partial_intersection(self):
+        """Create a pipeline of 3 nodes and remove one of them using a pipeline
+        that contains a partial match.
+        """
+        pipeline1 = Pipeline(
+            [
+                node(biconcat, ["input", "input1"], "output1", name="a"),
+                node(biconcat, ["input", "input2"], "output2", name="b"),
+                node(biconcat, ["input", "input3"], "output3", name="c"),
+            ]
+        )
+        pipeline2 = Pipeline(
+            [
+                node(biconcat, ["input", "input2"], "output2", name="b"),
+                node(biconcat, ["input", "input4"], "output4", name="d"),
+            ]
+        )
+        new_pipeline = pipeline1 - pipeline2
+        assert new_pipeline.inputs() == {"input", "input1", "input3"}
+        assert new_pipeline.outputs() == {"output1", "output3"}
+        assert {n.name for n in new_pipeline.nodes} == {"a", "c"}
+
+    def test_remove_empty_from_pipeline(self):
+        """Remove an empty pipeline"""
+        pipeline1 = Pipeline([node(biconcat, ["input", "input1"], "output1", name="a")])
+        pipeline2 = Pipeline([])
+        new_pipeline = pipeline1 - pipeline2
+        assert new_pipeline.inputs() == pipeline1.inputs()
+        assert new_pipeline.outputs() == pipeline1.outputs()
+        assert {n.name for n in new_pipeline.nodes} == {"a"}
+
+    def test_remove_from_empty_pipeline(self):
+        """Remove node from an empty pipeline"""
+        pipeline1 = Pipeline([node(biconcat, ["input", "input1"], "output1", name="a")])
+        pipeline2 = Pipeline([])
+        new_pipeline = pipeline2 - pipeline1
+        assert new_pipeline.inputs() == pipeline2.inputs()
+        assert new_pipeline.outputs() == pipeline2.outputs()
+        assert not new_pipeline.nodes
+
+    def test_remove_all_nodes(self):
+        """Remove an entire pipeline"""
+        pipeline1 = Pipeline([node(biconcat, ["input", "input1"], "output1", name="a")])
+        pipeline2 = Pipeline([node(biconcat, ["input", "input1"], "output1", name="a")])
+        new_pipeline = pipeline1 - pipeline2
+        assert new_pipeline.inputs() == set()
+        assert new_pipeline.outputs() == set()
+        assert not new_pipeline.nodes
+
+    def test_invalid_remove(self):
+        p = Pipeline([])
+        pattern = r"unsupported operand type\(s\) for -: 'Pipeline' and 'str'"
+        with pytest.raises(TypeError, match=pattern):
+            p - "hello"  # pylint: disable=pointless-statement
+
     def test_combine_same_node(self):
         """Multiple (identical) pipelines are possible"""
         pipeline1 = Pipeline(

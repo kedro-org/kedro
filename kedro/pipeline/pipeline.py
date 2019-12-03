@@ -226,6 +226,11 @@ class Pipeline:
             return NotImplemented
         return Pipeline(set(self.nodes + other.nodes))
 
+    def __sub__(self, other):
+        if not isinstance(other, Pipeline):
+            return NotImplemented
+        return Pipeline(set(self.nodes) - set(other.nodes))
+
     def __and__(self, other):
         if not isinstance(other, Pipeline):
             return NotImplemented

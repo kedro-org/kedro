@@ -275,7 +275,7 @@ This section shows just the very basics of versioning. You can learn more about 
 
 The code API allows you to configure data sources in code. This can also be used to operate the IO module within notebooks.
 
-## Configuring a data catalog
+## Configuring a Data Catalog
 
 In a file like `catalog.py`, you can generate the Data Catalog. This will allow everyone in the project to review all the available data sources. In the following, we are using the pre-built CSV loader, which is documented in the API reference documentation: [CSVLocalDataSet](/kedro.io.CSVLocalDataSet)
 

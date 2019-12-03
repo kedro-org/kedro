@@ -352,7 +352,7 @@ class TestValidPipeline:
         pipeline2 = Pipeline(
             [
                 node(biconcat, ["input", "input2"], "output2", name="b"),
-                node(biconcat, ["input", "input4"], "output4", name="b"),
+                node(biconcat, ["input", "input4"], "output4", name="d"),
             ]
         )
         new_pipeline = pipeline1 - pipeline2

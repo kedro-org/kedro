@@ -354,7 +354,7 @@ class TestValidPipeline:
         new_pipeline = pipeline2 - pipeline1
         assert new_pipeline.inputs() == pipeline2.inputs()
         assert new_pipeline.outputs() == pipeline2.outputs()
-        assert len(new_pipeline.nodes) == 0
+        assert not new_pipeline.nodes
 
     def test_remove_all_nodes(self):
         """Remove an empty pipeline"""
@@ -363,7 +363,7 @@ class TestValidPipeline:
         new_pipeline = pipeline1 - pipeline2
         assert new_pipeline.inputs() == set()
         assert new_pipeline.outputs() == set()
-        assert len(new_pipeline.nodes) == 0
+        assert not new_pipeline.nodes
 
     def test_invalid_remove(self):
         p = Pipeline([])

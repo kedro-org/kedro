@@ -349,7 +349,10 @@ class TestValidPipeline:
                 node(biconcat, ["input", "input3"], "output3", name="c"),
             ]
         )
-        pipeline2 = Pipeline([node(biconcat, ["input", "input2"], "output2", name="b"), node(biconcat, ["input", "input4"], "output4", name="b")])
+        pipeline2 = Pipeline([
+            node(biconcat, ["input", "input2"], "output2", name="b"),
+            node(biconcat, ["input", "input4"], "output4", name="b")
+             ])
         new_pipeline = pipeline1 - pipeline2
         assert new_pipeline.inputs() == {"input", "input1", "input3"}
         assert new_pipeline.outputs() == {"output1", "output3"}

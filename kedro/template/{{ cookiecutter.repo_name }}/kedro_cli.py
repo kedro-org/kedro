@@ -59,6 +59,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 PROJ_PATH = Path(__file__).resolve().parent
 os.environ["IPYTHONDIR"] = str(PROJ_PATH / ".ipython")
 
+KEDRO_ENV_VAR = "KEDRO_ENV"
 
 NO_PYTEST_MESSAGE = """
 pytest is not installed. Please make sure pytest is in
@@ -152,7 +153,15 @@ def cli():
     "--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP
 )
 @click.option("--parallel", "-p", is_flag=True, multiple=False, help=PARALLEL_ARG_HELP)
-@click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
+@click.option(
+    "--env",
+    "-e",
+    type=str,
+    default=None,
+    multiple=False,
+    envvar="KEDRO_ENV",
+    help=ENV_ARG_HELP,
+)
 @click.option("--tag", "-t", type=str, multiple=True, help=TAG_ARG_HELP)
 @click.option(
     "--load-version",
@@ -340,6 +349,14 @@ def _build_jupyter_command(
     return cmd + list(args)
 
 
+def _build_jupyter_env(kedro_env: str) -> Dict[str, str]:
+    if not kedro_env:
+        return {}
+    jupyter_env = os.environ.copy()
+    jupyter_env[KEDRO_ENV_VAR] = kedro_env
+    return {"env": jupyter_env}
+
+
 @cli.group()
 def jupyter():
     """Open Jupyter Notebook / Lab with project specific variables loaded, or
@@ -350,7 +367,16 @@ def jupyter():
 @forward_command(jupyter, "notebook", forward_help=True)
 @click.option("--ip", type=str, default="127.0.0.1")
 @click.option("--all-kernels", is_flag=True, default=False)
-def jupyter_notebook(ip, all_kernels, args):
+@click.option(
+    "--env",
+    "-e",
+    type=str,
+    default=None,
+    multiple=False,
+    envvar=KEDRO_ENV_VAR,
+    help=ENV_ARG_HELP,
+)
+def jupyter_notebook(ip, all_kernels, env, args):
     """Open Jupyter Notebook with project specific variables loaded."""
     if "-h" not in args and "--help" not in args:
         ipython_message(all_kernels)
@@ -358,19 +384,32 @@ def jupyter_notebook(ip, all_kernels, args):
     arguments = _build_jupyter_command(
         "notebook", ip=ip, all_kernels=all_kernels, args=args
     )
-    python_call("jupyter", arguments)
+
+    python_call_kwargs = _build_jupyter_env(env)
+    python_call("jupyter", arguments, **python_call_kwargs)
 
 
 @forward_command(jupyter, "lab", forward_help=True)
 @click.option("--ip", type=str, default="127.0.0.1")
 @click.option("--all-kernels", is_flag=True, default=False)
-def jupyter_lab(ip, all_kernels, args):
+@click.option(
+    "--env",
+    "-e",
+    type=str,
+    default=None,
+    multiple=False,
+    envvar=KEDRO_ENV_VAR,
+    help=ENV_ARG_HELP,
+)
+def jupyter_lab(ip, all_kernels, env, args):
     """Open Jupyter Lab with project specific variables loaded."""
     if "-h" not in args and "--help" not in args:
         ipython_message(all_kernels)
 
     arguments = _build_jupyter_command("lab", ip=ip, all_kernels=all_kernels, args=args)
-    python_call("jupyter", arguments)
+
+    python_call_kwargs = _build_jupyter_env(env)
+    python_call("jupyter", arguments, **python_call_kwargs)
 
 
 @jupyter.command("convert")

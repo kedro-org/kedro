@@ -338,6 +338,33 @@ class TestValidPipeline:
         assert new_pipeline.outputs() == {"output1", "output3"}
         assert {n.name for n in new_pipeline.nodes} == {"a", "c"}
 
+    def test_remove_empty_from_pipeline(self):
+        """Remove an empty pipeline"""
+        pipeline1 = Pipeline([node(biconcat, ["input", "input1"], "output1", name="a")])
+        pipeline2 = Pipeline([])
+        new_pipeline = pipeline1 - pipeline2
+        assert new_pipeline.inputs() == pipeline1.inputs()
+        assert new_pipeline.outputs() == pipeline1.outputs()
+        assert {n.name for n in new_pipeline.nodes} == {"a"}
+
+    def test_remove_from_empty_pipeline(self):
+        """Remove node from an empty pipeline"""
+        pipeline1 = Pipeline([node(biconcat, ["input", "input1"], "output1", name="a")])
+        pipeline2 = Pipeline([])
+        new_pipeline = pipeline2 - pipeline1
+        assert new_pipeline.inputs() == pipeline2.inputs()
+        assert new_pipeline.outputs() == pipeline2.outputs()
+        assert len(new_pipeline.nodes) == 0
+
+    def test_remove_all_nodes(self):
+        """Remove an empty pipeline"""
+        pipeline1 = Pipeline([node(biconcat, ["input", "input1"], "output1", name="a")])
+        pipeline2 = Pipeline([node(biconcat, ["input", "input1"], "output1", name="a")])
+        new_pipeline = pipeline1 - pipeline2
+        assert new_pipeline.inputs() == set()
+        assert new_pipeline.outputs() == set()
+        assert len(new_pipeline.nodes) == 0
+
     def test_invalid_remove(self):
         p = Pipeline([])
         pattern = r"unsupported operand type\(s\) for -: 'Pipeline' and 'str'"

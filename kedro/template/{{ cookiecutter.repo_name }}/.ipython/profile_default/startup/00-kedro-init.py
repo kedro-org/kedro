@@ -1,6 +1,7 @@
 import logging.config
 from pathlib import Path
 import sys
+import os
 
 from IPython.core.magic import register_line_magic
 
@@ -31,7 +32,7 @@ def reload_kedro(path, line=None):
         path = path or project_path
         logging.debug("Loading the context from %s", str(path))
 
-        context = load_context(path)
+        context = load_context(path, env=os.getenv("KEDRO_ENV"))
         catalog = context.catalog
 
         # remove cached user modules

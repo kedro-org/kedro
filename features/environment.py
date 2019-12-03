@@ -78,6 +78,11 @@ def before_all(context):
     path = [str(bin_dir)] + path
     context.env["PATH"] = path_sep.join(path)
 
+    # Create an empty pip.conf file and point pip to it
+    pip_conf_path = context.venv_dir / "pip.conf"
+    pip_conf_path.touch()
+    context.env["PIP_CONFIG_FILE"] = str(pip_conf_path)
+
     # install Kedro
     call([context.python, "-m", "pip", "install", "-U", "pip"])
     call([context.pip, "install", "--upgrade", "setuptools"])

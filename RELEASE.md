@@ -4,6 +4,8 @@
 * Added a `MatplotlibS3Writer` dataset in `contrib` for saving Matplotlib images to S3.
 * Added a `JSONGCSDataSet` dataset in `contrib` for connecting to Google Cloud Storage.
 * Pipelines can be deducted with `pipeline1 - pipeline2`
+* Added the ability to load a specific environment with Jupyter notebooks and introduced `KEDRO_ENV` to set it globally for `run`, `jupyter notebook` and `jupyter lab` commands using environment variables.
+
 
 ## Bug fixes and other changes
 * `ParallelRunner` now works with `SparkDataSet`.

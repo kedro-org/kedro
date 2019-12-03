@@ -198,6 +198,15 @@ class TestRunCommand:
             ParallelRunner,
         )
 
+    def test_run_env_environment_var(
+        self, fake_kedro_cli, fake_load_context, fake_repo_path, monkeypatch, mocker
+    ):
+        monkeypatch.setenv("KEDRO_ENV", "my_special_env")
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["run"])
+        assert not result.exit_code
+
+        fake_load_context.assert_called_once_with(Path.cwd(), env="my_special_env")
+
 
 class TestTestCommand:
     @staticmethod
@@ -378,6 +387,19 @@ class TestBuildReqsCommand:
 
 
 class TestJupyterNotebookCommand:
+    @pytest.fixture
+    def default_jupyter_options(self):
+        return (
+            "jupyter",
+            [
+                "notebook",
+                "--ip",
+                "127.0.0.1",
+                "--NotebookApp.kernel_spec_manager_class=kedro.cli.jupyter.SingleKernelSpecManager",
+                "--KernelSpecManager.default_kernel_name='TestProject'",
+            ],
+        )
+
     def test_default_kernel(
         self, python_call_mock, fake_kedro_cli, fake_ipython_message
     ):
@@ -415,8 +437,47 @@ class TestJupyterNotebookCommand:
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_not_called()
 
+    @pytest.mark.parametrize("env_flag", ["--env", "-e"])
+    def test_env(
+        self, env_flag, fake_kedro_cli, python_call_mock, default_jupyter_options
+    ):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["jupyter", "notebook", env_flag, "my_special_env"]
+        )
+        assert not result.exit_code
+
+        args, kwargs = python_call_mock.call_args
+        assert args == default_jupyter_options
+        assert "env" in kwargs
+        assert fake_kedro_cli.KEDRO_ENV_VAR in kwargs["env"]
+
+    def test_env_environment_variable(
+        self, fake_kedro_cli, python_call_mock, monkeypatch, default_jupyter_options
+    ):
+        monkeypatch.setenv("KEDRO_ENV", "my_special_env")
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["jupyter", "notebook"])
+        assert not result.exit_code
+
+        args, kwargs = python_call_mock.call_args
+        assert args == default_jupyter_options
+        assert "env" in kwargs
+        assert fake_kedro_cli.KEDRO_ENV_VAR in kwargs["env"]
+
 
 class TestJupyterLabCommand:
+    @pytest.fixture
+    def default_jupyter_options(self):
+        return (
+            "jupyter",
+            [
+                "lab",
+                "--ip",
+                "127.0.0.1",
+                "--NotebookApp.kernel_spec_manager_class=kedro.cli.jupyter.SingleKernelSpecManager",
+                "--KernelSpecManager.default_kernel_name='TestProject'",
+            ],
+        )
+
     def test_default_kernel(
         self, python_call_mock, fake_kedro_cli, fake_ipython_message
     ):
@@ -453,6 +514,32 @@ class TestJupyterLabCommand:
         )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_not_called()
+
+    @pytest.mark.parametrize("env_flag", ["--env", "-e"])
+    def test_env(
+        self, env_flag, fake_kedro_cli, python_call_mock, default_jupyter_options
+    ):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["jupyter", "lab", env_flag, "my_special_env"]
+        )
+        assert not result.exit_code
+
+        args, kwargs = python_call_mock.call_args
+        assert args == default_jupyter_options
+        assert "env" in kwargs
+        assert fake_kedro_cli.KEDRO_ENV_VAR in kwargs["env"]
+
+    def test_env_environment_variable(
+        self, fake_kedro_cli, python_call_mock, monkeypatch, default_jupyter_options
+    ):
+        monkeypatch.setenv("KEDRO_ENV", "my_special_env")
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["jupyter", "lab"])
+        assert not result.exit_code
+
+        args, kwargs = python_call_mock.call_args
+        assert args == default_jupyter_options
+        assert "env" in kwargs
+        assert fake_kedro_cli.KEDRO_ENV_VAR in kwargs["env"]
 
 
 class TestConvertNotebookCommand:

@@ -373,7 +373,7 @@ class TestValidPipeline:
         assert not new_pipeline.nodes
 
     def test_remove_all_nodes(self):
-        """Remove an empty pipeline"""
+        """Remove an entire pipeline"""
         pipeline1 = Pipeline([node(biconcat, ["input", "input1"], "output1", name="a")])
         pipeline2 = Pipeline([node(biconcat, ["input", "input1"], "output1", name="a")])
         new_pipeline = pipeline1 - pipeline2

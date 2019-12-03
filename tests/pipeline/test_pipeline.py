@@ -324,7 +324,7 @@ class TestValidPipeline:
         assert {n.name for n in new_pipeline.nodes} == {"a", "b"}
 
     def test_remove(self):
-        """create a pipeline of 3 nodes and remove one of them"""
+        """Create a pipeline of 3 nodes and remove one of them"""
         pipeline1 = Pipeline(
             [
                 node(biconcat, ["input", "input1"], "output1", name="a"),

@@ -6,8 +6,8 @@
 |------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Latest Release | [![PyPI version](https://badge.fury.io/py/kedro.svg)](https://pypi.org/project/kedro/) |
 | Python Version | [![Python Version](https://img.shields.io/badge/python-3.5%20%7C%203.6%20%7C%203.7-blue.svg)](https://pypi.org/project/kedro/) |
-| `master` Branch Build | [![CircleCI](https://circleci.com/gh/quantumblacklabs/kedro/tree/master.svg?style=shield)](https://circleci.com/gh/quantumblacklabs/kedro/tree/master) [![Build Status](https://ci.appveyor.com/api/projects/status/2u74p5g8fdc45wwh/branch/master?svg=true)](https://ci.appveyor.com/project/QuantumBlack/kedro/branch/master) |
-| `develop` Branch Build | [![CircleCI](https://circleci.com/gh/quantumblacklabs/kedro/tree/develop.svg?style=shield)](https://circleci.com/gh/quantumblacklabs/kedro/tree/develop) [![Build status](https://ci.appveyor.com/api/projects/status/2u74p5g8fdc45wwh/branch/develop?svg=true)](https://ci.appveyor.com/project/QuantumBlack/kedro/branch/develop) |
+| `master` Branch Build | [![CircleCI](https://circleci.com/gh/quantumblacklabs/kedro/tree/master.svg?style=shield)](https://circleci.com/gh/quantumblacklabs/kedro/tree/master) |
+| `develop` Branch Build | [![CircleCI](https://circleci.com/gh/quantumblacklabs/kedro/tree/develop.svg?style=shield)](https://circleci.com/gh/quantumblacklabs/kedro/tree/develop) |
 | Documentation Build | [![Documentation](https://readthedocs.org/projects/kedro/badge/?version=latest)](https://kedro.readthedocs.io/) |
 | License | [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) |
 | Code Style | [![Code Style: Black](https://img.shields.io/badge/code%20style-black-black.svg)](https://github.com/ambv/black) |
@@ -58,7 +58,7 @@ Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) a
 | Pipeline Abstraction | Automatic resolution of dependencies between pure Python functions and data pipeline visualisation using [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz). |
 | The Journal | An ability to reproduce pipeline runs with saved pipeline run results. |
 | Coding Standards | Test-driven development using `pytest`, produce well-documented code using [Sphinx](http://www.sphinx-doc.org/en/master/) and make use of the standard Python logging library. |
-| Flexible Deployment | Deployment strategies that include the use of Docker with [Kedro-Docker](https://github.com/quantumblacklabs/kedro-docker), conversion of Kedro pipelines into Airflow DAGs with [Kedro-Airflow](https://github.com/quantumblacklabs/kedro-airflow), leveraging a REST API endpoint with Kedro-Server _(coming soon)_ and serving Kedro pipelines as a Python package. Kedro can be deployed locally, on-premise and cloud (AWS, Azure and GCP) servers, or clusters (EMR, Azure HDinsight, GCP and Databricks) |
+| Flexible Deployment | Deployment strategies that include the use of Docker with [Kedro-Docker](https://github.com/quantumblacklabs/kedro-docker), conversion of Kedro pipelines into Airflow DAGs with [Kedro-Airflow](https://github.com/quantumblacklabs/kedro-airflow), leveraging a REST API endpoint with Kedro-Server _(coming soon)_ and serving Kedro pipelines as a Python package. Kedro can be deployed locally, on-premise and cloud (AWS, Azure and GCP) servers, or clusters (EMR, Azure HDinsight, GCP and Databricks). |
 
 
 ## How do I use Kedro?

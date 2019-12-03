@@ -336,7 +336,23 @@ class TestValidPipeline:
         new_pipeline = pipeline1 - pipeline2
         assert new_pipeline.inputs() == {"input", "input1", "input3"}
         assert new_pipeline.outputs() == {"output1", "output3"}
-        assert {n.name for n in new_pipeline.nodes} == {"a", "c"}
+
+    def test_remove_with_partial_intersection(self):
+        """Create a pipeline of 3 nodes and remove one of them using a pipeline
+        that contains a partial match.
+        """
+        pipeline1 = Pipeline(
+            [
+                node(biconcat, ["input", "input1"], "output1", name="a"),
+                node(biconcat, ["input", "input2"], "output2", name="b"),
+                node(biconcat, ["input", "input3"], "output3", name="c"),
+            ]
+        )
+        pipeline2 = Pipeline([node(biconcat, ["input", "input2"], "output2", name="b"), node(biconcat, ["input", "input4"], "output4", name="b")])
+        new_pipeline = pipeline1 - pipeline2
+        assert new_pipeline.inputs() == {"input", "input1", "input3"}
+        assert new_pipeline.outputs() == {"output1", "output3"}
+        assert {n.name for n in new_pipeline.nodes} == {"a", "c"}   assert {n.name for n in new_pipeline.nodes} == {"a", "c"}
 
     def test_remove_empty_from_pipeline(self):
         """Remove an empty pipeline"""

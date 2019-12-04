@@ -63,7 +63,7 @@ def _split_filepath(filepath: str) -> Tuple[str, str]:
 
 
 def _strip_dbfs_prefix(path: str) -> str:
-    return path[len("/dbfs"):] if path.startswith("/dbfs") else path
+    return path[len("/dbfs") :] if path.startswith("/dbfs") else path
 
 
 class KedroHdfsInsecureClient(InsecureClient):

@@ -216,8 +216,9 @@ Currently the following datasets support versioning:
 - `PickleS3DataSet`
 - `TextLocalDataSet`
 - `ExcelLocalDataSet`
-- `kedro.contrib.io.feather.FeatherLocalDataSet`
-- `kedro.contrib.io.parquet.ParquetS3DataSet`
 - `kedro.contrib.io.azure.CSVBlobDataSet`
-- `kedro.contrib.io.pyspark.SparkDataSet`
+- `kedro.contrib.io.gcs.JSONGCSDataSet`
+- `kedro.contrib.io.feather.FeatherLocalDataSet`
 - `kedro.contrib.io.networkx.NetworkXLocalDataSet`
+- `kedro.contrib.io.parquet.ParquetS3DataSet`
+- `kedro.contrib.io.pyspark.SparkDataSet`

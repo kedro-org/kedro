@@ -424,7 +424,7 @@ class TestSparkDataSetVersionedDBFS:
             mocker.call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME)),
         ] * 2
         assert mocked_glob.call_args_list == expected_calls
-        
+
         assert reloaded.exceptAll(sample_spark_df).count() == 0
 
     def test_load_exact(self, tmp_path, sample_spark_df):

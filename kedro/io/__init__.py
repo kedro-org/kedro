@@ -48,6 +48,7 @@ from .json_local import JSONLocalDataSet  # NOQA
 from .lambda_data_set import LambdaDataSet  # NOQA
 from .memory_data_set import MemoryDataSet  # NOQA
 from .parquet_local import ParquetLocalDataSet  # NOQA
+from .partitioned_data_set import PartitionedDataSet  # NOQA
 from .pickle_local import PickleLocalDataSet  # NOQA
 from .pickle_s3 import PickleS3DataSet  # NOQA
 from .sql import SQLQueryDataSet  # NOQA

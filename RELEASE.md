@@ -1,11 +1,12 @@
 # Release 0.15.5
 
 ## Major features and improvements
-* Added a `MatplotlibS3Writer` dataset in `contrib` for saving Matplotlib images to S3.
-* Added a `JSONGCSDataSet` dataset in `contrib` for connecting to Google Cloud Storage.
+* Added the following datasets:
+  - `MatplotlibS3Writer` dataset in `contrib` for saving Matplotlib images to S3.
+  - `JSONGCSDataSet` dataset in `contrib` for connecting to Google Cloud Storage.
+  - `PartitionedDataSet` for working with datasets split across multiple files.
 * Pipelines can be deducted with `pipeline1 - pipeline2`.
 * Added the ability to load a specific environment with Jupyter notebooks and introduced `KEDRO_ENV` to set it globally for `run`, `jupyter notebook` and `jupyter lab` commands using environment variables.
-
 
 ## Bug fixes and other changes
 * `ParallelRunner` now works with `SparkDataSet`.
@@ -15,9 +16,11 @@
 * Fixed a bug where `kedro jupyter notebook` and `kedro jupyter lab` would run a different Jupyter installation to the one in the local environment.
 * Implemented Databricks-compatible dataset versioning for `SparkDataSet`.
 * Fixed a bug where `kedro package` would fail in certain situations where `kedro build-reqs` was used to generate `requirements.txt`.
+* Made `bucket_name` argument optional for the following datasets: `CSVS3DataSet`, `HDFS3DataSet`, `PickleS3DataSet`, `contrib.io.parquet.ParquetS3DataSet`, `contrib.io.gcs.JSONGCSDataSet` - bucket name can now be included into the filepath along with the filesystem protocol (e.g. `s3://bucket-name/path/to/key.csv`).
 
 ## Breaking changes to the API
 * Renamed entry point for running pip-installed projects to `run_package()` instead of `main()` in `src/<package>/run.py`.
+* `bucket_name` key has been removed from the string representation of the following datasets: `CSVS3DataSet`, `HDFS3DataSet`, `PickleS3DataSet`, `contrib.io.parquet.ParquetS3DataSet`, `contrib.io.gcs.JSONGCSDataSet`.
 
 ## Thanks for supporting contributions
 [Sheldon Tsen](https://github.com/sheldontsen-qb), [@roumail](https://github.com/roumail), [Karlson Lee](https://github.com/i25959341), [Waylon Walker](https://github.com/WaylonWalker), [Deepyaman Datta](https://github.com/deepyaman)
@@ -31,7 +34,7 @@
 * Added Jupyter Notebook line magic (`%run_viz`) to run `kedro viz` in a Notebook cell (requires [`kedro-viz`](https://github.com/quantumblacklabs/kedro-viz) version `3.0.0` or later).
 * Added the following datasets:
   - `NetworkXLocalDataSet` in `kedro.contrib.io.networkx` to load and save local graphs (JSON format) via NetworkX. (by [@josephhaaga](https://github.com/josephhaaga))
-  - `SparkHiveDataSet` in `kedro.contrib.io.pyspark.SparkHiveDataSet` allowing usage of Spark and insert/upsert on non-transactional Hive tables
+  - `SparkHiveDataSet` in `kedro.contrib.io.pyspark.SparkHiveDataSet` allowing usage of Spark and insert/upsert on non-transactional Hive tables.
 * `kedro.contrib.config.TemplatedConfigLoader` now supports name/dict key templating and default values.
 
 

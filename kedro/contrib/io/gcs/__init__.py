@@ -27,4 +27,5 @@
 # limitations under the License.
 """kedro.contrib.io.gcs provides I/O modules for Google Cloud Storage."""
 
+from .csv_gcs import CSVGCSDataSet  # NOQA
 from .json_gcs import JSONGCSDataSet  # NOQA

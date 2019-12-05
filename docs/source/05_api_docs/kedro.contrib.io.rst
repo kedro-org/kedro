@@ -30,6 +30,8 @@ kedro.contrib.io
       kedro.contrib.io.pyspark.SparkJDBCDataSet
       kedro.contrib.io.yaml_local.YAMLLocalDataSet
       kedro.contrib.io.matplotlib.MatplotlibWriter
+      kedro.contrib.io.gcs.JSONGCSDataSet
+      kedro.contrib.io.gcs.CSVGCSDataSet
 
 
    .. rubric:: DataSet Transformers

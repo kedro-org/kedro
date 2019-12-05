@@ -27,73 +27,30 @@
 # limitations under the License.
 
 from contextlib import contextmanager
-from copy import deepcopy
-from fnmatch import fnmatch
-from io import BufferedIOBase
-from typing import Any, Dict
 
 import pandas as pd
 import pytest
 from pandas.util.testing import assert_frame_equal
 
-from kedro.contrib.io.gcs.json_gcs import JSONGCSDataSet
+from kedro.contrib.io.gcs.csv_gcs import CSVGCSDataSet
 from kedro.io import DataSetError, Version
 from kedro.io.core import generate_timestamp
 
-FILENAME = "test.json"
+from . import gcs_mocks
+
+FILENAME = "test.csv"
 BUCKET_NAME = "testbucketkedro"
 GCP_PROJECT = "testproject"
 
 
-class MockGCSFileSystem:
-    protocol = ("gcs", "gs")
-    root_marker = ""
-
-    def __init__(self, files: Dict[str, Any] = None):
-        self.files = deepcopy(files) or {}
-
+class MockGCSFileSystem(gcs_mocks.BasicGCSFileSystemMock):
     @contextmanager
-    def open(self, filepath, *args, **kwargs):  # pylint: disable=unused-argument
-        yield MockGCSFile(self, filepath)
-
-    def exists(self, filepath):
-        return filepath in self.files
-
-    def glob(self, pattern, **kwargs):  # pylint: disable=unused-argument
-        all_filepaths = set(self.files.keys())
-        return [f for f in all_filepaths if fnmatch(f, pattern)]
-
-    def invalidate_cache(self, **kwargs):
-        pass
-
-    @classmethod
-    def _strip_protocol(cls, path):
-        """ Turn path from fully-qualified to file-system-specific
-
-        May require FS-specific handling, e.g., for relative paths or links.
-        """
-        protos = (cls.protocol,) if isinstance(cls.protocol, str) else cls.protocol
-        for protocol in protos:
-            path = path.rstrip("/")
-            if path.startswith(protocol + "://"):
-                path = path[(len(protocol) + 3) :]  # pragma: no cover
-            elif path.startswith(protocol + ":"):
-                path = path[(len(protocol) + 1) :]  # pragma: no cover
-        # use of root_marker to make minimum required path, e.g., "/"
-        return path or cls.root_marker
-
-
-class MockGCSFile(BufferedIOBase):
-    def __init__(self, gcs_filesystem, filepath):
-        super().__init__()
-        self.gcs_filesystem = gcs_filesystem
-        self.filepath = filepath
-
-    def write(self, data):
-        self.gcs_filesystem.files[self.filepath] = data
-
-    def read(self, size=None):  # pylint: disable=unused-argument
-        return self.gcs_filesystem.files[self.filepath]
+    def open(self, filepath, *args, **kwargs):
+        gcs_file = self._files.get(filepath)
+        if not gcs_file:
+            gcs_file = gcs_mocks.MockGCSFile()
+            self._files[filepath] = gcs_file
+        yield gcs_file
 
 
 @pytest.fixture
@@ -106,7 +63,7 @@ def load_args(request):
     return request.param
 
 
-@pytest.fixture(params=[None])
+@pytest.fixture(params=[{"index": False}])
 def save_args(request):
     return request.param
 
@@ -132,7 +89,7 @@ def mock_gcs_filesystem(mocker):
 def gcs_data_set(
     load_args, save_args, mock_gcs_filesystem
 ):  # pylint: disable=unused-argument
-    return JSONGCSDataSet(
+    return CSVGCSDataSet(
         filepath=FILENAME,
         bucket_name=BUCKET_NAME,
         credentials=None,
@@ -144,26 +101,25 @@ def gcs_data_set(
 
 class TestJSONGCSDataSet:
     def test_credentials_propagated(self, mocker):
-        """Test invalid credentials for connecting to GCS"""
+        """Test propagating credentials for connecting to GCS"""
         mock_gcs = mocker.patch("gcsfs.GCSFileSystem")
-        bad_credentials = {"client_email": "a@b.com", "whatever": "useless"}
+        credentials = {"client_email": "a@b.com", "whatever": "useless"}
 
-        JSONGCSDataSet(
+        CSVGCSDataSet(
             filepath=FILENAME,
             bucket_name=BUCKET_NAME,
             project=GCP_PROJECT,
-            credentials=bad_credentials,
+            credentials=credentials,
         )
 
-        mock_gcs.assert_called_once_with(project=GCP_PROJECT, token=bad_credentials)
+        mock_gcs.assert_called_once_with(project=GCP_PROJECT, token=credentials)
 
     @pytest.mark.usefixtures("mock_gcs_filesystem")
     def test_non_existent_bucket(self):
         """Test non-existent bucket"""
-        pattern = r"Failed while loading data from data set JSONGCSDataSet\(.+\)"
-
+        pattern = r"Failed while loading data from data set CSVGCSDataSet\(.+\)"
         with pytest.raises(DataSetError, match=pattern):
-            JSONGCSDataSet(
+            CSVGCSDataSet(
                 filepath=FILENAME,
                 bucket_name="not-existing-bucket",
                 project=GCP_PROJECT,
@@ -179,8 +135,8 @@ class TestJSONGCSDataSet:
 
     @pytest.mark.usefixtures("mock_gcs_filesystem")
     def test_save_and_load_with_protocol(self, dummy_dataframe, load_args, save_args):
-        """Test loading the data from S3."""
-        gcs_data_set = JSONGCSDataSet(
+        """Test loading the data from GCS using full path."""
+        gcs_data_set = CSVGCSDataSet(
             filepath="gcs://{}/{}".format(BUCKET_NAME, FILENAME),
             credentials=None,
             load_args=load_args,
@@ -213,7 +169,6 @@ class TestJSONGCSDataSet:
     )
     def test_save_extra_params(self, gcs_data_set, save_args):
         """Test overriding the default save arguments."""
-        save_args = {"k1": "v1", "index": "value"}
         for key, value in save_args.items():
             assert gcs_data_set._save_args[key] == value
 
@@ -221,17 +176,22 @@ class TestJSONGCSDataSet:
     def test_str_representation(self, gcs_data_set, save_args):
         """Test string representation of the data set instance."""
         str_repr = str(gcs_data_set)
-        assert "JSONGCSDataSet" in str_repr
+        assert "CSVGCSDataSet" in str_repr
         for k in save_args.keys():
             assert k in str_repr
 
     @pytest.mark.parametrize("load_args", [{"custom": 42}], indirect=True)
-    def test_load_args_propagated(
-        self, gcs_data_set, load_args, mocker
-    ):  # pylint: disable=unused-argument
-        mock_read_json = mocker.patch("kedro.contrib.io.gcs.json_gcs.pd.read_json")
+    def test_load_args_propagated(self, gcs_data_set, load_args, mocker):
+        mock_read_csv = mocker.patch("kedro.contrib.io.gcs.csv_gcs.pd.read_csv")
         gcs_data_set.load()
-        assert mock_read_json.call_args_list[0][1] == {"custom": 42}
+        assert mock_read_csv.call_args_list[0][1] == load_args
+
+    @pytest.mark.parametrize("save_args", [{"custom": 45}], indirect=True)
+    def test_save_args_propagated(self, gcs_data_set, save_args, mocker):
+        mocked_df = mocker.MagicMock()
+        mocked_df.to_csv.return_value = "dumpedDF"
+        gcs_data_set.save(mocked_df)
+        mocked_df.to_csv.assert_called_once_with(**save_args)
 
 
 @pytest.fixture
@@ -242,7 +202,7 @@ def versioned_gcs_data_set(
     save_args,
     mock_gcs_filesystem,  # pylint: disable=unused-argument
 ):
-    return JSONGCSDataSet(
+    return CSVGCSDataSet(
         bucket_name=BUCKET_NAME,
         filepath=FILENAME,
         credentials=None,
@@ -256,7 +216,7 @@ def versioned_gcs_data_set(
 class TestJSONGCSDataSetVersioned:
     def test_no_versions(self, versioned_gcs_data_set):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for JSONGCSDataSet\(.+\)"
+        pattern = r"Did not find any versions for CSVGCSDataSet\(.+\)"
         with pytest.raises(DataSetError, match=pattern):
             versioned_gcs_data_set.load()
 
@@ -272,7 +232,7 @@ class TestJSONGCSDataSetVersioned:
         corresponding dataframe object for a given save version already exists in GCS."""
         versioned_gcs_data_set.save(dummy_dataframe)
         pattern = (
-            r"Save path \`.+\` for JSONGCSDataSet\(.+\) must not exist "
+            r"Save path \`.+\` for CSVGCSDataSet\(.+\) must not exist "
             r"if versioning is enabled"
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -291,12 +251,11 @@ class TestJSONGCSDataSetVersioned:
         the subsequent load path."""
         pattern = (
             r"Save version `{0}` did not match load version `{1}` "
-            r"for JSONGCSDataSet\(.+\)".format(save_version, load_version)
+            r"for CSVGCSDataSet\(.+\)".format(save_version, load_version)
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_gcs_data_set.save(dummy_dataframe)
 
-    @pytest.mark.usefixtures("mock_gcs_filesystem")
     def test_version_str_repr(
         self, save_version, gcs_data_set, versioned_gcs_data_set,
     ):

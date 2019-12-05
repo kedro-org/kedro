@@ -222,3 +222,5 @@ Currently the following datasets support versioning:
 - `kedro.contrib.io.networkx.NetworkXLocalDataSet`
 - `kedro.contrib.io.parquet.ParquetS3DataSet`
 - `kedro.contrib.io.pyspark.SparkDataSet`
+- `kedro.contrib.io.gcs.JSONGCSDataSet`
+- `kedro.contrib.io.gcs.CSVGCSDataSet`

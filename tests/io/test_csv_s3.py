@@ -181,8 +181,42 @@ class TestCSVS3DataSet:
         assert_frame_equal(loaded_data, dummy_dataframe)
 
     @pytest.mark.usefixtures("mocked_s3_object")
+    def test_load_with_protocol(self, dummy_dataframe, load_args, save_args):
+        """Test loading the data from S3."""
+        s3_data_set = CSVS3DataSet(
+            filepath="s3://{}/{}".format(BUCKET_NAME, FILENAME),
+            credentials={
+                "aws_access_key_id": "YOUR_KEY",
+                "aws_secret_access_key": "YOUR SECRET",
+            },
+            load_args=load_args,
+            save_args=save_args,
+        )
+        loaded_data = s3_data_set.load()
+        assert_frame_equal(loaded_data, dummy_dataframe)
+
+    @pytest.mark.usefixtures("mocked_s3_object")
     def test_save_data(self, s3_data_set):
         """Test saving the data to S3."""
+        new_data = pd.DataFrame(
+            {"col1": ["a", "b"], "col2": ["c", "d"], "col3": ["e", "f"]}
+        )
+        s3_data_set.save(new_data)
+        loaded_data = s3_data_set.load()
+        assert_frame_equal(loaded_data, new_data)
+
+    @pytest.mark.usefixtures("mocked_s3_object")
+    def test_save_with_protocol(self, load_args, save_args):
+        """Test saving the data to S3."""
+        s3_data_set = CSVS3DataSet(
+            filepath="s3://{}/{}".format(BUCKET_NAME, FILENAME),
+            credentials={
+                "aws_access_key_id": "YOUR_KEY",
+                "aws_secret_access_key": "YOUR SECRET",
+            },
+            load_args=load_args,
+            save_args=save_args,
+        )
         new_data = pd.DataFrame(
             {"col1": ["a", "b"], "col2": ["c", "d"], "col3": ["e", "f"]}
         )

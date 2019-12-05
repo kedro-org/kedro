@@ -32,7 +32,7 @@ so it supports all allowed PyTables options for loading and saving hdf files.
 """
 import copy
 from pathlib import PurePosixPath
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import pandas as pd
 from s3fs import S3FileSystem
@@ -75,9 +75,9 @@ class HDFS3DataSet(AbstractVersionedDataSet):
     def __init__(
         self,
         filepath: str,
-        bucket_name: str,
         key: str,
-        credentials: Optional[Dict[str, Any]] = None,
+        bucket_name: str = None,
+        credentials: Dict[str, Any] = None,
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
         version: Version = None,
@@ -86,8 +86,10 @@ class HDFS3DataSet(AbstractVersionedDataSet):
         hdf file on S3.
 
         Args:
-            filepath: Path to an hdf file.
-            bucket_name: S3 bucket name.
+            filepath: Path to an hdf file. May contain the full path in S3
+                including bucket and protocol, e.g. `s3://bucket-name/path/to/file.hdf`.
+            bucket_name: S3 bucket name. Must be specified **only** if not
+                present in ``filepath``.
             key: Identifier to the group in the HDF store.
             credentials: Credentials to access the S3 bucket, such as
                 ``aws_access_key_id``, ``aws_secret_access_key``.
@@ -107,13 +109,11 @@ class HDFS3DataSet(AbstractVersionedDataSet):
         """
         _credentials = copy.deepcopy(credentials) or {}
         _s3 = S3FileSystem(client_kwargs=_credentials)
+        path = _s3._strip_protocol(filepath)  # pylint: disable=protected-access
+        path = PurePosixPath("{}/{}".format(bucket_name, path) if bucket_name else path)
         super().__init__(
-            PurePosixPath("{}/{}".format(bucket_name, filepath)),
-            version,
-            exists_function=_s3.exists,
-            glob_function=_s3.glob,
+            path, version, exists_function=_s3.exists, glob_function=_s3.glob,
         )
-        self._bucket_name = bucket_name
         self._key = key
         self._credentials = _credentials
 
@@ -130,7 +130,6 @@ class HDFS3DataSet(AbstractVersionedDataSet):
     def _describe(self) -> Dict[str, Any]:
         return dict(
             filepath=self._filepath,
-            bucket_name=self._bucket_name,
             key=self._key,
             load_args=self._load_args,
             save_args=self._save_args,

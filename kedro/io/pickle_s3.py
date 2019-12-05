@@ -34,7 +34,7 @@ import copy
 import pickle
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from s3fs.core import S3FileSystem
 
@@ -71,10 +71,10 @@ class PickleS3DataSet(AbstractVersionedDataSet):
     def __init__(
         self,
         filepath: str,
-        bucket_name: str,
-        credentials: Optional[Dict[str, Any]] = None,
-        load_args: Optional[Dict[str, Any]] = None,
-        save_args: Optional[Dict[str, Any]] = None,
+        bucket_name: str = None,
+        credentials: Dict[str, Any] = None,
+        load_args: Dict[str, Any] = None,
+        save_args: Dict[str, Any] = None,
         version: Version = None,
     ) -> None:
         """Creates a new instance of ``PickleS3DataSet`` pointing to a
@@ -88,8 +88,10 @@ class PickleS3DataSet(AbstractVersionedDataSet):
         pickle.loads: https://docs.python.org/3/library/pickle.html#pickle.loads
 
         Args:
-            filepath: path to a pkl file.
-            bucket_name: S3 bucket name.
+            filepath: path to a pkl file. May contain the full path in S3
+                including bucket and protocol, e.g. `s3://bucket-name/path/to/file.pkl`.
+            bucket_name: S3 bucket name. Must be specified **only** if not
+                present in ``filepath``.
             credentials: Credentials to access the S3 bucket, such as
                 ``aws_access_key_id``, ``aws_secret_access_key``.
             load_args: Options for loading pickle files. Refer to the help
@@ -103,13 +105,11 @@ class PickleS3DataSet(AbstractVersionedDataSet):
         """
         _credentials = deepcopy(credentials) or {}
         _s3 = S3FileSystem(client_kwargs=_credentials)
+        path = _s3._strip_protocol(filepath)  # pylint: disable=protected-access
+        path = PurePosixPath("{}/{}".format(bucket_name, path) if bucket_name else path)
         super().__init__(
-            PurePosixPath("{}/{}".format(bucket_name, filepath)),
-            version,
-            exists_function=_s3.exists,
-            glob_function=_s3.glob,
+            path, version, exists_function=_s3.exists, glob_function=_s3.glob,
         )
-        self._bucket_name = bucket_name
         self._credentials = _credentials
 
         # Handle default load and save arguments
@@ -125,7 +125,6 @@ class PickleS3DataSet(AbstractVersionedDataSet):
     def _describe(self) -> Dict[str, Any]:
         return dict(
             filepath=self._filepath,
-            bucket_name=self._bucket_name,
             load_args=self._load_args,
             save_args=self._save_args,
             version=self._version,

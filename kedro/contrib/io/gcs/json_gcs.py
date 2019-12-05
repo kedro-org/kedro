@@ -31,7 +31,7 @@ It uses google-cloud-storage to read and write from gcs and pandas to handle the
 """
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import gcsfs
 import pandas as pd
@@ -68,20 +68,23 @@ class JSONGCSDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
     def __init__(
         self,
         filepath: str,
-        bucket_name: str,
-        credentials: Optional[Dict[str, Any]] = None,
-        load_args: Optional[Dict[str, Any]] = None,
-        save_args: Optional[Dict[str, Any]] = None,
+        bucket_name: str = None,
+        credentials: Dict[str, Any] = None,
+        load_args: Dict[str, Any] = None,
+        save_args: Dict[str, Any] = None,
         version: Version = None,
-        project: Optional[str] = None,
-        gcsfs_args: Optional[Dict[str, Any]] = None,
+        project: str = None,
+        gcsfs_args: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``JSONGCSDataSet`` pointing to a concrete
         JSON file on GCS.
 
         Args:
-            filepath: Path to a JSON file.
-            bucket_name: GCS bucket name.
+            filepath: Path to a JSON file. May contain the full path in Google
+                Cloud Storage including bucket and protocol, e.g.
+                `gcs://bucket-name/path/to/file.json`.
+            bucket_name: GCS bucket name. Must be specified **only** if not
+                present in ``filepath``.
             credentials: Credentials to access the GCS bucket such as
                 ``client_email`` and ``token_uri``, or
                 ``refresh_token``, ``client_secret``, ``client_id``.
@@ -105,22 +108,22 @@ class JSONGCSDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
         _credentials = deepcopy(credentials) or {}
         _gcsfs_args = deepcopy(gcsfs_args) or {}
         _gcs = gcsfs.GCSFileSystem(project=project, token=_credentials, **_gcsfs_args)
+        path = _gcs._strip_protocol(filepath)  # pylint: disable=protected-access
+        path = PurePosixPath("{}/{}".format(bucket_name, path) if bucket_name else path)
 
         super().__init__(
-            filepath=PurePosixPath("{}/{}".format(bucket_name, filepath)),
+            filepath=path,
             version=version,
             exists_function=_gcs.exists,
             glob_function=_gcs.glob,
             load_args=load_args,
             save_args=save_args,
         )
-        self._bucket_name = bucket_name
         self._gcs = _gcs
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
             filepath=self._filepath,
-            bucket_name=self._bucket_name,
             load_args=self._load_args,
             save_args=self._save_args,
             version=self._version,

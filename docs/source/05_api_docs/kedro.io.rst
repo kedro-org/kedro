@@ -30,6 +30,7 @@ Data Sets
     kedro.io.LambdaDataSet
     kedro.io.MemoryDataSet
     kedro.io.ParquetLocalDataSet
+    kedro.io.PartitionedDataSet
     kedro.io.PickleLocalDataSet
     kedro.io.PickleS3DataSet
     kedro.io.SQLTableDataSet

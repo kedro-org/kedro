@@ -128,6 +128,19 @@ class TestPickleS3DataSet:
         assert loaded_data == DUMMY_PICKABLE_OBJECT
 
     @pytest.mark.usefixtures("mocked_s3_object")
+    def test_load_with_protocol(self):
+        """Test loading the data from S3."""
+        s3_data_set = PickleS3DataSet(
+            filepath="s3://{}/{}".format(BUCKET_NAME, FILENAME),
+            credentials={
+                "aws_access_key_id": "YOUR_KEY",
+                "aws_secret_access_key": "YOUR SECRET",
+            },
+        )
+        loaded_data = s3_data_set.load()
+        assert loaded_data == DUMMY_PICKABLE_OBJECT
+
+    @pytest.mark.usefixtures("mocked_s3_object")
     def test_load_args(self, s3_data_set_with_args):
         """Test loading the data from S3 with options."""
         loaded_data = s3_data_set_with_args.load()
@@ -186,6 +199,21 @@ class TestPickleS3DataSet:
     @pytest.mark.usefixtures("mocked_s3_object")
     def test_save(self, s3_data_set):
         """Test saving the data to S3."""
+        new_data = {"x": "y"}
+        s3_data_set.save(new_data)
+        loaded_data = s3_data_set.load()
+        assert loaded_data == new_data
+
+    @pytest.mark.usefixtures("mocked_s3_object")
+    def test_save_with_protocol(self):
+        """Test saving the data to S3."""
+        s3_data_set = PickleS3DataSet(
+            filepath="s3://{}/{}".format(BUCKET_NAME, FILENAME),
+            credentials={
+                "aws_access_key_id": "YOUR_KEY",
+                "aws_secret_access_key": "YOUR SECRET",
+            },
+        )
         new_data = {"x": "y"}
         s3_data_set.save(new_data)
         loaded_data = s3_data_set.load()

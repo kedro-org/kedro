@@ -46,6 +46,9 @@ GCP_PROJECT = "testproject"
 
 
 class MockGCSFileSystem:
+    protocol = ("gcs", "gs")
+    root_marker = ""
+
     def __init__(self, files: Dict[str, Any] = None):
         self.files = deepcopy(files) or {}
 
@@ -62,6 +65,22 @@ class MockGCSFileSystem:
 
     def invalidate_cache(self, **kwargs):
         pass
+
+    @classmethod
+    def _strip_protocol(cls, path):
+        """ Turn path from fully-qualified to file-system-specific
+
+        May require FS-specific handling, e.g., for relative paths or links.
+        """
+        protos = (cls.protocol,) if isinstance(cls.protocol, str) else cls.protocol
+        for protocol in protos:
+            path = path.rstrip("/")
+            if path.startswith(protocol + "://"):
+                path = path[(len(protocol) + 3) :]  # pragma: no cover
+            elif path.startswith(protocol + ":"):
+                path = path[(len(protocol) + 1) :]  # pragma: no cover
+        # use of root_marker to make minimum required path, e.g., "/"
+        return path or cls.root_marker
 
 
 class MockGCSFile(BufferedIOBase):
@@ -138,9 +157,8 @@ class TestJSONGCSDataSet:
 
         mock_gcs.assert_called_once_with(project=GCP_PROJECT, token=bad_credentials)
 
-    def test_non_existent_bucket(
-        self, mock_gcs_filesystem  # pylint: disable=unused-argument
-    ):
+    @pytest.mark.usefixtures("mock_gcs_filesystem")
+    def test_non_existent_bucket(self):
         """Test non-existent bucket"""
         pattern = r"Failed while loading data from data set JSONGCSDataSet\(.+\)"
 
@@ -152,16 +170,28 @@ class TestJSONGCSDataSet:
                 credentials=None,
             ).load()
 
-    def test_save_load_data(
-        self,
-        gcs_data_set,
-        dummy_dataframe,
-        mock_gcs_filesystem,  # pylint: disable=unused-argument
-    ):
+    @pytest.mark.usefixtures("mock_gcs_filesystem")
+    def test_save_load_data(self, gcs_data_set, dummy_dataframe):
         assert not gcs_data_set.exists()
         gcs_data_set.save(dummy_dataframe)
         loaded_data = gcs_data_set.load()
         assert_frame_equal(dummy_dataframe, loaded_data)
+
+    @pytest.mark.usefixtures("mock_gcs_filesystem")
+    def test_save_and_load_with_protocol(self, dummy_dataframe, load_args, save_args):
+        """Test loading the data from S3."""
+        gcs_data_set = JSONGCSDataSet(
+            filepath="gcs://{}/{}".format(BUCKET_NAME, FILENAME),
+            credentials=None,
+            load_args=load_args,
+            save_args=save_args,
+            project=GCP_PROJECT,
+        )
+        assert not gcs_data_set.exists()
+        gcs_data_set.save(dummy_dataframe)
+        loaded_data = gcs_data_set.load()
+        assert_frame_equal(loaded_data, dummy_dataframe)
+        assert str(gcs_data_set._filepath) == "{}/{}".format(BUCKET_NAME, FILENAME)
 
     def test_exists(self, gcs_data_set, dummy_dataframe):
         """Test `exists` method invocation for both existing and
@@ -266,12 +296,9 @@ class TestJSONGCSDataSetVersioned:
         with pytest.warns(UserWarning, match=pattern):
             versioned_gcs_data_set.save(dummy_dataframe)
 
+    @pytest.mark.usefixtures("mock_gcs_filesystem")
     def test_version_str_repr(
-        self,
-        save_version,
-        gcs_data_set,
-        versioned_gcs_data_set,
-        mock_gcs_filesystem,  # pylint: disable=unused-argument
+        self, save_version, gcs_data_set, versioned_gcs_data_set,
     ):
         """Test that version is in string representation of the class instance
         when applicable."""

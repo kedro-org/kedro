@@ -420,13 +420,11 @@ class TestSparkDataSetVersionedDBFS:
         versioned_dataset_dbfs.save(sample_spark_df)
         reloaded = versioned_dataset_dbfs.load()
 
-        assert mocked_glob.call_count == 2
-        mocked_glob.assert_has_calls(
-            [
-                mocker.call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME)),
-                mocker.call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME)),
-            ]
-        )
+        expected_calls = [
+            mocker.call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME)),
+        ] * 2
+        assert mocked_glob.call_args_list == expected_calls
+        
         assert reloaded.exceptAll(sample_spark_df).count() == 0
 
     def test_load_exact(self, tmp_path, sample_spark_df):
@@ -464,14 +462,10 @@ class TestSparkDataSetVersionedDBFS:
         versioned_dataset_dbfs.save(sample_spark_df)
         assert versioned_dataset_dbfs.exists()
 
-        assert mocked_glob.call_count == 3
-        mocked_glob.assert_has_calls(
-            [
-                mocker.call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME)),
-                mocker.call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME)),
-                mocker.call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME)),
-            ]
-        )
+        expected_calls = [
+            mocker.call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME)),
+        ] * 3
+        assert mocked_glob.call_args_list == expected_calls
 
 
 class TestSparkDataSetVersionedS3:

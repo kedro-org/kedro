@@ -31,7 +31,6 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
-from mock import call
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col  # pylint: disable=no-name-in-module
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
@@ -424,8 +423,8 @@ class TestSparkDataSetVersionedDBFS:
         assert mocked_glob.call_count == 2
         mocked_glob.assert_has_calls(
             [
-                call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME)),
-                call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME)),
+                mocker.call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME)),
+                mocker.call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME)),
             ]
         )
         assert reloaded.exceptAll(sample_spark_df).count() == 0
@@ -468,9 +467,9 @@ class TestSparkDataSetVersionedDBFS:
         assert mocked_glob.call_count == 3
         mocked_glob.assert_has_calls(
             [
-                call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME)),
-                call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME)),
-                call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME)),
+                mocker.call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME)),
+                mocker.call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME)),
+                mocker.call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME)),
             ]
         )
 

@@ -107,10 +107,14 @@ from kedro_tutorial.pipelines.data_engineering.nodes import (
 
 As well as this, you should update the project's pipelines in `src/kedro_tutorial/pipeline.py`:
 ```python
+from typing import Dict
+
+from kedro.pipeline import Pipeline
+
 from kedro_tutorial.pipelines.data_engineering import pipeline as de
 
 
-def create_pipelines(**kwargs):
+def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
     """Create the project's pipeline.
 
     Args:
@@ -453,6 +457,8 @@ regressor:
 Now to create a pipeline for the price prediction model. In `src/kedro_tutorial/pipelines/data_science/pipeline.py`, add an extra import statement near the top of the file as follows:
 
 ```python
+from kedro.pipeline import Pipeline, node
+
 from kedro_tutorial.pipelines.data_science.nodes import (
     evaluate_model,
     split_data,
@@ -481,7 +487,7 @@ def create_pipeline(**kwargs):
     )
 ```
 
-Finally, add a separate Data Science pipeline, by replacing the code in `create_pipeline` as follows:
+Finally, add a separate Data Science pipeline, by replacing the code in `create_pipelines` in `src/kedro_tutorial/pipeline.py` as follows:
 ```python
 def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
     """Create the project's pipeline.
@@ -501,6 +507,11 @@ def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
         "ds": ds_pipeline,
         "__default__": de_pipeline + ds_pipeline,
     }
+```
+
+Make sure to include the import at the top of the file:
+```python
+from kedro_tutorial.pipelines.data_science import pipeline as ds
 ```
 
 The first node of the `ds_pipeline` outputs 4 objects: `X_train`, `X_test`, `y_train`, `y_test`, which are not registered in `conf/base/catalog.yml`. (If you recall, if a dataset is not specified in the catalog, Kedro will automatically save it in memory using the `MemoryDataSet`). Normally you would add dataset definitions of your model features into `conf/base/catalog.yml` with the save location in `data/04_features/`.

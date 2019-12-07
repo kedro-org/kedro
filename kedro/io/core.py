@@ -426,9 +426,7 @@ def _local_exists(filepath: str) -> bool:
 
 
 def is_remote_path(filepath: str) -> bool:
-    """
-    Check if the given path looks like a remote URL (has scheme).
-    """
+    """Check if the given path looks like a remote URL (has scheme)."""
     # Get rid of Windows-specific "C:\" start,
     # which is treated as a URL scheme.
     _, filepath = os.path.splitdrive(filepath)

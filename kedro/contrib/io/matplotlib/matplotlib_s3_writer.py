@@ -44,7 +44,7 @@ from kedro.io import AbstractDataSet, DataSetError
 
 class MatplotlibS3Writer(AbstractDataSet):
     """
-    ``MatplotlibS3Writer`` saves matplotlib objects as image files.
+    ``MatplotlibS3Writer`` saves matplotlib objects to an image file in S3.
 
     Example:
     ::

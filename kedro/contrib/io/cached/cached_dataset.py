@@ -38,7 +38,8 @@ from kedro.io.core import VERSIONED_FLAG_KEY
 
 
 class CachedDataSet(AbstractDataSet):
-    """"``CachedDataSet`` is a dataset wrapper which caches in memory the data saved,
+    """
+    ``CachedDataSet`` is a dataset wrapper which caches in memory the data saved,
     so that the user avoids io operations with slow storage media.
 
     You can also specify a ``CachedDataSet`` in catalog.yml:

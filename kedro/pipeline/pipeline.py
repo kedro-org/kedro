@@ -720,9 +720,8 @@ class Pipeline:
         return a copy of the current ``Pipeline`` object.
 
         Args:
-            decorators: List of decorators to be applied on
-                all node functions in the pipeline. Decorators will be applied
-                from right to left.
+            decorators: Decorators to be applied on all node functions in
+            the pipeline. Decorators will be applied from right to left.
 
         Returns:
             A new ``Pipeline`` object with all nodes decorated with the
@@ -762,8 +761,7 @@ class Pipeline:
     def transform(
         self, datasets: Dict[str, str] = None, prefix: str = None
     ) -> "Pipeline":
-        """
-        Create a copy of the pipeline and its nodes,
+        """Create a copy of the pipeline and its nodes,
         with some dataset names modified.
 
         Args:
@@ -933,5 +931,4 @@ class CircularDependencyError(Exception):
     order for nodes, due to a circular dependency existing in the node
     definition.
     """
-
     pass

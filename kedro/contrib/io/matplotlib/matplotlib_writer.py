@@ -28,7 +28,7 @@
 
 
 """
-``MatplotlibWriter `` saves matplotlib objects as image files.
+``MatplotlibWriter `` saves matplotlib objects to a local image file.
 """
 
 from pathlib import Path
@@ -40,7 +40,7 @@ from kedro.io import AbstractDataSet, DataSetError
 
 
 class MatplotlibWriter(AbstractDataSet):
-    """``MatplotlibWriter`` saves matplotlib objects as image files.
+    """``MatplotlibWriter`` saves matplotlib objects to a local image file.
 
         Example:
         ::

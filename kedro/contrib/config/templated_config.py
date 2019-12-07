@@ -186,7 +186,7 @@ class TemplatedConfigLoader(ConfigLoader):
         return config_raw
 
 
-def _format_object(val: Any, format_dict: Dict[str, Any]) -> str:
+def _format_object(val: Any, format_dict: Dict[str, Any]) -> Any:
     """Recursive function that loops through the values of a map. In case another
     map or a list is encountered, it calls itself. When a string is encountered,
     it will use the `format_dict` to replace strings that look like `${expr}`,

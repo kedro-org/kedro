@@ -931,5 +931,5 @@ class CircularDependencyError(Exception):
     order for nodes, due to a circular dependency existing in the node
     definition.
     """
-    
+
     pass

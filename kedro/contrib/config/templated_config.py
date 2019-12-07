@@ -84,7 +84,7 @@ class TemplatedConfigLoader(ConfigLoader):
         >>> my_context.run(tags, runner, node_names, from_nodes, to_nodes)
 
     The contents of the dictionary resulting from the `globals_pattern` get
-    merged with the ``globals_dict``. In case of conflicts, the keys in 
+    merged with the ``globals_dict``. In case of conflicts, the keys in
     ``globals_dict`` take precedence.
     If the formatting key is missing from the dictionary, the default template
     value is used (the format is "${key|default value}"). If no default is set,

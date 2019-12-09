@@ -78,14 +78,14 @@ class PartitionedDataSet(AbstractDataSet):
         >>>     credentials=credentials
         >>> )
         >>> loaded = data_set.load()
-        >>> assert isinstance(loaded, dict)
+        >>> # assert isinstance(loaded, dict)
         >>>
         >>> combine_all = pd.DataFrame()
         >>>
-        >>> for partition_id, load_function in loaded.items():
-        >>>     data = load_function()
+        >>> for partition_id, partition_load_func in loaded.items():
+        >>>     partition_data = partition_load_func()
         >>>     combine_all = pd.concat(
-        >>>         [combine_all, data], ignore_index=True, sort=True
+        >>>         [combine_all, partition_data], ignore_index=True, sort=True
         >>>     )
         >>>
         >>> new_data = pd.DataFrame({"new": [1, 2]})
@@ -107,19 +107,19 @@ class PartitionedDataSet(AbstractDataSet):
 
         Args:
             path: Path to the folder containing partitioned data.
-                If path starts with the protocol (e.g., `s3://`) then the
-                corresponding `fsspec` concrete filesystem implementation will
+                If path starts with the protocol (e.g., ``s3://``) then the
+                corresponding ``fsspec`` concrete filesystem implementation will
                 be used. If protocol is not specified,
                 ``fsspec.implementations.local.LocalFileSystem`` will be used.
-                **Note:** Some concrete implementations are bundled with `fsspec`,
-                while others (like `s3` or `gcs`) must be installed separately
+                **Note:** Some concrete implementations are bundled with ``fsspec``,
+                while others (like ``s3`` or ``gcs``) must be installed separately
                 prior to usage of the ``PartitionedDataSet``.
             dataset: Underlying dataset definition. This is used to instantiate
                 the dataset for each file located inside the ``path``.
                 Accepted formats are:
                 a) object of a class that inherits from ``AbstractDataSet``
                 b) a string representing a fully qualified class name to such class
-                c) a dictionary with `type` key pointing to a string from b),
+                c) a dictionary with ``type`` key pointing to a string from b),
                 other keys are passed to the Dataset initializer.
                 **Note:** Credentials resolution is *not* currently supported
                 for the underlying dataset definition.
@@ -129,29 +129,33 @@ class PartitionedDataSet(AbstractDataSet):
             filename_suffix: If specified, only partitions that end with this
                 string will be processed.
             credentials: Protocol-specific options that will be passed to
-                `fsspec.filesystem` call:
+                ``fsspec.filesystem`` call:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.filesystem
                 _and_ also to the underlying dataset initializer. If
-                `dataset_credentials` key is present in this dictionary, then
-                only its value will be passed to the dataset initializer `credentials`
+                ``dataset_credentials`` key is present in this dictionary, then
+                only its value will be passed to the dataset initializer ``credentials``
                 argument instead of the copy of the entire dictionary.
 
-                Example 1: If `credentials = {"k1": "secret1"}`, then filesystem
-                    is called as `filesystem(..., k1="secret1")`, the dataset is
-                    instantiated as `dataset_class(..., credentials={"k1": "secret1"})`.
+                Example 1: If ``credentials = {"k1": "secret1"}``, then filesystem
+                    is called as ``filesystem(..., k1="secret1")``, the dataset is
+                    instantiated as
+                    ``dataset_class(..., credentials={"k1": "secret1"})``.
                 Example 2: If
-                    `credentials = {"k1": "secret1", "dataset_credentials": {"k2": "secret2"}}`,
-                    then filesystem is called as `filesystem(..., k1="secret1")`,
+                    ``credentials = {"k1": "secret1", "dataset_credentials": {"k2": "secret2"}}``,
+                    then filesystem is called as ``filesystem(..., k1="secret1")``,
                     the dataset is instantiated as
-                    `dataset_class(..., credentials={"k2": "secret2"})`.
-                Example 3: If `credentials = {"dataset_credentials": {"k2": "secret2"}}`,
+                    ``dataset_class(..., credentials={"k2": "secret2"})``.
+                Example 3: If
+                    ``credentials = {"dataset_credentials": {"k2": "secret2"}}``,
                     then credentials are not passed to the filesystem call, the dataset
-                    is instantiated as `dataset_class(..., credentials={"k2": "secret2"})`.
-                Example 4: If `credentials = {"k1": "secret1", "dataset_credentials": None}`,
-                    then filesystem is called as `filesystem(..., k1="secret1")`,
+                    is instantiated as
+                    ``dataset_class(..., credentials={"k2": "secret2"})``.
+                Example 4: If
+                    ``credentials = {"k1": "secret1", "dataset_credentials": None}``,
+                    then filesystem is called as ``filesystem(..., k1="secret1")``,
                     credentials are not passed to the dataset initializer.
 
-            load_args: Keyword arguments to be passed into `find()` method of
+            load_args: Keyword arguments to be passed into ``find()`` method of
                 the filesystem implementation.
 
         Raises:

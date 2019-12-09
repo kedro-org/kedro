@@ -33,6 +33,7 @@ import sys
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
+import anyconfig
 import pytest
 from click.testing import CliRunner
 
@@ -131,6 +132,22 @@ class TestRunCommand:
         context = mocker.Mock()
         yield mocker.patch.object(fake_kedro_cli, "load_context", return_value=context)
 
+    @staticmethod
+    @pytest.fixture(params=["run_config.yml", "run_config.json"])
+    def fake_run_config(request, fake_root_dir):
+        config_path = str(fake_root_dir / request.param)
+        anyconfig.dump(
+            {
+                "run": {
+                    "pipeline": "pipeline1",
+                    "tag": ["tag1", "tag2"],
+                    "node_names": ["node1", "node2"],
+                }
+            },
+            config_path,
+        )
+        return config_path
+
     def test_run_successfully(self, fake_kedro_cli, fake_load_context, mocker):
         result = CliRunner().invoke(fake_kedro_cli.cli, ["run"])
         assert not result.exit_code
@@ -196,6 +213,26 @@ class TestRunCommand:
         assert isinstance(
             fake_load_context.return_value.run.call_args_list[0][1]["runner"],
             ParallelRunner,
+        )
+
+    @pytest.mark.parametrize("config_flag", ["--config", "-c"])
+    def test_run_with_config(
+        self, config_flag, fake_kedro_cli, fake_load_context, fake_run_config, mocker
+    ):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["run", config_flag, fake_run_config]
+        )
+        assert not result.exit_code
+
+        fake_load_context.return_value.run.assert_called_once_with(
+            tags=("tag1", "tag2"),
+            runner=mocker.ANY,
+            node_names=("node1", "node2"),
+            from_nodes=[],
+            to_nodes=[],
+            from_inputs=[],
+            load_versions={},
+            pipeline_name="pipeline1",
         )
 
     def test_run_env_environment_var(

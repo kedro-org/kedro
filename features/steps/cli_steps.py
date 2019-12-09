@@ -32,6 +32,7 @@ import itertools
 import json
 import shlex
 import shutil
+from pathlib import Path
 from time import time
 
 import behave
@@ -176,6 +177,13 @@ def _create_config_file(context, include_example):
     }
     with context.config_file.open("w") as config_file:
         yaml.dump(config, config_file, default_flow_style=False)
+
+
+@given("I have prepared a run_config file with config options")
+def create_run_config_file(context):
+    curr_dir = Path(__file__).parent
+    run_config_file = context.root_project_dir / "run_config.yml"
+    shutil.copyfile(str(curr_dir / "e2e_test_cli_config.yml"), str(run_config_file))
 
 
 @given("I have prepared a config file without example code")

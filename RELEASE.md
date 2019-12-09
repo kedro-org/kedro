@@ -7,6 +7,7 @@
   - `PartitionedDataSet` for working with datasets split across multiple files.
 * Pipelines can be deducted with `pipeline1 - pipeline2`
 * Added the ability to load a specific environment with Jupyter notebooks and introduced `KEDRO_ENV` to set it globally for `run`, `jupyter notebook` and `jupyter lab` commands using environment variables.
+* Added the ability to load `kedro run` options from a config file with the `--config` option.
 
 ## Bug fixes and other changes
 * `ParallelRunner` now works with `SparkDataSet`.

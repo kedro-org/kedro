@@ -33,25 +33,26 @@ import re
 import shutil
 import subprocess
 import sys
+import webbrowser
 from collections import Counter
 from glob import iglob
 from pathlib import Path
-import webbrowser
+from typing import Dict, Iterable, List
 
+import anyconfig
 import click
 from click import secho, style
 from kedro.cli import main as kedro_main
 from kedro.cli.utils import (
     KedroCliError,
     call,
+    export_nodes,
     forward_command,
     python_call,
-    export_nodes,
 )
-from kedro.utils import load_obj
-from kedro.runner import SequentialRunner
 from kedro.context import load_context
-from typing import Iterable, List, Dict
+from kedro.runner import SequentialRunner
+from kedro.utils import load_obj
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -108,6 +109,10 @@ overwrite its contents."""
 
 LOAD_VERSION_HELP = """Specify a particular dataset version (timestamp) for loading."""
 
+CONFIG_FILE_HELP = """Specify a YAML configuration file to load the run
+command arguments from. If command line arguments are provided, they will
+override the loaded ones."""
+
 
 def _split_string(ctx, param, value):
     return [item for item in value.split(",") if item]
@@ -131,6 +136,20 @@ def _reformat_load_versions(ctx, param, value) -> Dict[str, str]:
         load_versions_dict[load_version_list[0]] = load_version_list[1]
 
     return load_versions_dict
+
+
+def _config_file_callback(ctx, param, value):
+    """Config file callback, that replaces command line options with config file
+    values. If command line options are passed, they override config file values.
+    """
+    ctx.default_map = ctx.default_map or {}
+    section = ctx.info_name
+
+    if value:
+        config = anyconfig.load(value)[section]
+        ctx.default_map.update(config)
+
+    return value
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, name=__file__)
@@ -172,6 +191,13 @@ def cli():
     callback=_reformat_load_versions,
 )
 @click.option("--pipeline", type=str, default=None, help=PIPELINE_ARG_HELP)
+@click.option(
+    "--config",
+    "-c",
+    type=click.Path(exists=True, dir_okay=False, resolve_path=True),
+    help=CONFIG_FILE_HELP,
+    callback=_config_file_callback,
+)
 def run(
     tag,
     env,
@@ -183,6 +209,7 @@ def run(
     from_inputs,
     load_version,
     pipeline,
+    config,
 ):
     """Run the pipeline."""
     if parallel and runner:

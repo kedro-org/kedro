@@ -196,3 +196,29 @@ Credentials configuration can then be used on its own or fed into the `DataCatal
 ### AWS credentials
 
 When working with AWS S3-backed datasets (e.g., `kedro.io.CSVS3DataSet`), you are not required to store AWS credentials in the project configuration files. Instead, you can specify them using environment variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and, optionally, `AWS_SESSION_TOKEN`. Please refer to the [official documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html) for more details.
+
+## Configuring `kedro run` arguments
+
+Instead of specifying all the command line options to `kedro run` each time you run the command, you can specify a config file that contains the arguments, say `config.yml` and run
+
+```console
+$ kedro run --config config.yml
+```
+
+where `config.yml` is formatted as below (for example):
+
+```yaml
+run:
+  tag:
+    - tag1
+    - tag2
+    - tag3
+  pipeline: pipeline1
+  parallel: true
+  node_names:
+    - node1
+    - node2
+  env: env1
+```
+
+> *Note*: If you pass both a configuration file and an option that clashes with one inside the configuration file, the provided option will override the configuration file.

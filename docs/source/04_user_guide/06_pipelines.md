@@ -577,10 +577,7 @@ Hello f(h(g(Python)))!
 Out[9]: {}
 ```
 
-Kedro has a couple of built-in decorators, which can be useful for monitoring your pipeline. You can find the built-in decorators in `kedro.pipeline.decorators`:
-
- - `log_time` will log the time taken for executing your node
- - `mem_profile` will log the max memory usage of your node. `mem_profile` needs to perform at least 4 memory snapshots of your node and it will do them every 100ms, therefore it can be used only for nodes which take more than half a second to run.
+Decorators can be useful for monitoring your pipeline. Kedro currently has 1 built-in decorator: `log_time`, which will log the time taken for executing your node. You can find it in `kedro.pipeline.decorators`. Other decorators can be found in `kedro.contrib.decorators`, for which you will need to install the required dependencies.
 
 ## Running pipelines with IO
 

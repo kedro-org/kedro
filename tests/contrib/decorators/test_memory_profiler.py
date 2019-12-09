@@ -25,15 +25,14 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import importlib
 import logging
-from functools import partial
+import re
 from time import sleep
 
-from kedro.io import DataCatalog
-from kedro.pipeline import Pipeline, node
-from kedro.pipeline.decorators import log_time
-from kedro.runner import SequentialRunner
+import pytest
+
+import kedro.contrib.decorators.memory_profiler as memory_profiler
 
 
 def sleeping_identity(inp):
@@ -41,56 +40,45 @@ def sleeping_identity(inp):
     return inp
 
 
-def identity(arg):
-    return arg
-
-
-def test_log_time(caplog):
+def test_mem_profile(caplog):
     caplog.clear()
-    func = log_time(sleeping_identity)
+    func = memory_profiler.mem_profile(sleeping_identity)
     res = func(1)
 
     logger_name, severity, message = caplog.record_tuples[0]
     assert res == 1
-    assert logger_name == "kedro.pipeline.decorators"
+    assert logger_name == "kedro.contrib.decorators.memory_profiler"
     assert severity == logging.INFO
-    expected = "Running '%s.%s' took" % (
-        sleeping_identity.__module__,
-        sleeping_identity.__qualname__,
+    expected = "Running '{}.{}' consumed".format(
+        sleeping_identity.__module__, sleeping_identity.__qualname__,
     )
     assert expected in message
 
 
-def test_log_time_no_module(caplog):
-    """When func module is not defined, function full name is not logged."""
-
-    def no_module(arg):
-        return sleeping_identity(arg)
-
-    no_module.__module__ = None
-
+def test_mem_profile_old_versions(caplog, mocker):
     caplog.clear()
-    func = log_time(no_module)
+    mocker.patch(
+        "kedro.contrib.decorators.memory_profiler.memory_usage",
+        return_value=[[float(0)], 1],
+    )
+    func = memory_profiler.mem_profile(sleeping_identity)
     res = func(1)
 
     logger_name, severity, message = caplog.record_tuples[0]
     assert res == 1
-    assert logger_name == "kedro.pipeline.decorators"
+    assert logger_name == "kedro.contrib.decorators.memory_profiler"
     assert severity == logging.INFO
-    expected = "Running %r took" % no_module.__qualname__
+    expected = "Running '{}.{}' consumed".format(
+        sleeping_identity.__module__, sleeping_identity.__qualname__,
+    )
     assert expected in message
 
 
-def test_log_time_with_partial(recwarn):
-    pipeline = Pipeline(
-        [node(partial(identity, 1), None, "output", name="identity1")]
-    ).decorate(log_time)
-    catalog = DataCatalog({}, dict(number=1))
-    result = SequentialRunner().run(pipeline, catalog)
-    assert result["output"] == 1
-    warning = recwarn.pop(UserWarning)
-    assert (
-        "The node producing outputs `['output']` is made from a "
-        "`partial` function. Partial functions do not have a "
-        "`__name__` attribute" in str(warning.message)
+def test_spark_import_error(mocker):
+    mocker.patch.dict("sys.modules", {"memory_profiler": None})
+    pattern = (
+        "`pip install kedro[memory_profiler]` to get the required "
+        "memory-profiler dependencies"
     )
+    with pytest.raises(ImportError, match=re.escape(pattern)):
+        importlib.reload(memory_profiler)

@@ -63,6 +63,82 @@ env = "test"
 > *Note*: If, for some reason, your project does not have any other environments apart from `base`, i.e. no `local` environment to default to, the recommended course of action is to use the approach above, namely customise your `ProjectContext` to take `env="base"` in the constructor.
 
 
+## Templating configuration
+
+Kedro also provides an extension [TemplatedConfigLoader](/kedro.contrib.config.templated_config.TemplatedConfigLoader) class that allows to template values in your configuration files. `TemplatedConfigLoader` is available in `contrib`, to apply templating to your `ProjectContext` in `src/<project-name>/run.py`, you will need to overwrite the `_create_config_loader` method as follows:
+
+```python
+from kedro.contrib.config import TemplatedConfigLoader  # new import
+
+
+class ProjectContext(KedroContext):
+
+    def _create_config_loader(self, conf_paths: Iterable[str]) -> TemplatedConfigLoader:
+        return TemplatedConfigLoader(
+            conf_paths,
+            globals_pattern="*globals.yml",  # read the globals dictionary from project config
+            globals_dict={  # extra keys to add to the globals dictionary, take precedence over globals_pattern
+                "bucket_name": "another_bucket_name",
+                "non_string_key": 10
+            }
+        )
+```
+
+Let's assume the project contains a `conf/base/globals.yml` file with the following contents:
+
+```yaml
+bucket_name: "my_s3_bucket"
+key_prefix: "my/key/prefix/"
+
+datasets:
+    csv: "CSVS3DataSet"
+    spark: "SparkDataSet"
+
+folders:
+    raw: "01_raw"
+    int: "02_intermediate"
+    pri: "03_primary"
+    fea: "04_features"
+```
+
+The contents of the dictionary resulting from `globals_pattern` get merged with the `globals_dict` dictionary. In case of conflicts, the keys from the `globals_dict` dictionary take precedence. The resulting global dictionary prepared by `TemplatedConfigLoader` will look like this:
+
+```python
+{
+    "bucket_name": "another_bucket_name",
+    "non_string_key": 10,
+    "key_prefix": "my/key/prefix",
+    "datasets": {
+        "csv": "CSVS3DataSet",
+        "spark": "SparkDataSet"
+    },
+    "folders": {
+        "raw": "01_raw",
+        "int": "02_intermediate",
+        "pri": "03_primary",
+        "fea": "04_features"
+    }
+}
+```
+
+Now the templating can be applied to the configs. Here is an example of a templated `conf/base/catalog.yml`:
+
+```yaml
+raw_boat_data:
+    type: "${datasets.spark}"  # nested paths into global dict are allowed
+    filepath: "s3a://${bucket_name}/${key_prefix}/${folders.raw}/boats.csv"
+    file_format: parquet
+
+raw_car_data:
+    type: "${datasets.csv}"
+    filepath: "data/${key_prefix}/${folders.raw}/cars.csv"
+    bucket_name: "${bucket_name}"
+    file_format: "${non.existent.key|parquet}"  # default to 'parquet' if the key is not found in the global dict
+```
+
+> Note: `TemplatedConfigLoader` uses `jmespath` package in the background to extract elements from global dictionary. For more information about JMESPath syntax please see: https://github.com/jmespath/jmespath.py.
+
+
 ## Parameters
 
 ### Loading parameters

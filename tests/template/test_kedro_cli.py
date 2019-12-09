@@ -242,7 +242,58 @@ class TestRunCommand:
         result = CliRunner().invoke(fake_kedro_cli.cli, ["run"])
         assert not result.exit_code
 
-        fake_load_context.assert_called_once_with(Path.cwd(), env="my_special_env")
+        fake_load_context.assert_called_once_with(
+            Path.cwd(), env="my_special_env", extra_params=mocker.ANY
+        )
+
+    @pytest.mark.parametrize(
+        "cli_arg,expected_extra_params",
+        [
+            ("foo:bar", {"foo": "bar"}),
+            (
+                "foo:123.45, bar:1a,baz:678. ,qux:1e-2,quux:0,quuz:",
+                {
+                    "foo": 123.45,
+                    "bar": "1a",
+                    "baz": 678,
+                    "qux": 0.01,
+                    "quux": 0,
+                    "quuz": "",
+                },
+            ),
+            ("foo:bar,baz:fizz:buzz", {"foo": "bar", "baz": "fizz:buzz"}),
+            (
+                "foo:bar, baz: https://example.com",
+                {"foo": "bar", "baz": "https://example.com"},
+            ),
+            ("foo:bar,baz:fizz buzz", {"foo": "bar", "baz": "fizz buzz"}),
+            ("foo:bar, foo : fizz buzz  ", {"foo": "fizz buzz"}),
+        ],
+    )
+    def test_run_extra_params(
+        self, mocker, fake_kedro_cli, fake_load_context, cli_arg, expected_extra_params
+    ):
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["run", "--params", cli_arg])
+
+        assert not result.exit_code
+        fake_load_context.assert_called_once_with(
+            Path.cwd(), env=mocker.ANY, extra_params=expected_extra_params
+        )
+
+    @pytest.mark.parametrize("bad_arg", ["bad", "foo:bar,bad"])
+    def test_bad_extra_params(self, fake_kedro_cli, fake_load_context, bad_arg):
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["run", "--params", bad_arg])
+        assert result.exit_code
+        assert (
+            "Item `bad` must contain a key and a value separated by `:`"
+            in result.stdout
+        )
+
+    @pytest.mark.parametrize("bad_arg", [":", ":value", " :value"])
+    def test_bad_params_key(self, fake_kedro_cli, fake_load_context, bad_arg):
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["run", "--params", bad_arg])
+        assert result.exit_code
+        assert "Parameter key cannot be an empty string" in result.stdout
 
 
 class TestTestCommand:

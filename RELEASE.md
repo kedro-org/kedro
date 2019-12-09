@@ -18,6 +18,7 @@
 * Implemented Databricks-compatible dataset versioning for `SparkDataSet`.
 * Fixed a bug where `kedro package` would fail in certain situations where `kedro build-reqs` was used to generate `requirements.txt`.
 * Made `bucket_name` argument optional for the following datasets: `CSVS3DataSet`, `HDFS3DataSet`, `PickleS3DataSet`, `contrib.io.parquet.ParquetS3DataSet`, `contrib.io.gcs.JSONGCSDataSet` - bucket name can now be included into the filepath along with the filesystem protocol (e.g. `s3://bucket-name/path/to/key.csv`).
+* `kedro run` CLI command now accepts `--params` option, where you can pass comma-separated extra parameters for your run (e.g. `param1:value1,param2:value2`).
 
 ## Breaking changes to the API
 * Renamed entry point for running pip-installed projects to `run_package()` instead of `main()` in `src/<package>/run.py`.

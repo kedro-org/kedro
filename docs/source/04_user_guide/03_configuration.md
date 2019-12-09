@@ -97,7 +97,27 @@ except MissingConfigException:
 
 > *Note:* `kedro.context.KedroContext` class uses the approach above to load project parameters.
 
-Parameters can then be used on their own or fed in as function inputs, as per section below.
+Parameters can then be used on their own or fed in as function inputs, as described in [this section](#using-parameters) below.
+
+### Specifying extra parameters
+
+Kedro also allows you to specify extra parameters for `kedro run` CLI command. To do that, you need to add the `--params` command line option and specify a comma-separated list of key-value pairs that will be added to [KedroContext](/kedro.context.KedroContext) parameters and made available to pipeline nodes. Each key-value pair is split on the first colon. Here is an example of triggering Kedro run with extra parameters specified:
+
+```bash
+kedro run --params param_key1:value1,param_key2:2.0  # this will add {"param_key1": "value1", "param_key2": 2} to parameters dictionary
+```
+
+> Note: Parameter keys are _always_ treated as strings. Parameter values are converted to a float or an integer number if the corresponding conversion succeeds, otherwise they are also treated as string.
+
+> Note: If, for example, `param_key1` parameter has already been defined in the project configuration, the value provided in the CLI option will take precedence and will overwrite the one from the configuration.
+
+> Tip: Since key-value pairs are split on the first colon, values can contain colons, but the keys cannot. This is a valid CLI command:
+>
+> `kedro run --params endpoint_url:https://endpoint.example.com`
+
+> Tip: If any extra parameter key and/or value contains spaces, wrap the whole option contents into quotes:
+>
+> `kedro run --params "key1:value with spaces,key2:value"`
 
 ### Using parameters
 

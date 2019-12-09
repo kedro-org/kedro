@@ -32,6 +32,7 @@ import logging
 import logging.config
 import os
 import sys
+from copy import deepcopy
 from pathlib import Path
 from typing import Any, Dict, Iterable, Union
 from warnings import warn
@@ -46,6 +47,15 @@ from kedro.pipeline import Pipeline
 from kedro.runner import AbstractRunner, SequentialRunner
 from kedro.utils import load_obj
 from kedro.versioning import Journal
+
+
+def _version_mismatch_error(context_version) -> str:
+    return (
+        "Your Kedro project version {} does not match Kedro package version {} "
+        "you are running. Make sure to update your project template. See "
+        "https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md "
+        "for how to migrate your Kedro project."
+    ).format(context_version, __version__)
 
 
 class KedroContext(abc.ABC):
@@ -72,7 +82,12 @@ class KedroContext(abc.ABC):
 
     CONF_ROOT = "conf"
 
-    def __init__(self, project_path: Union[Path, str], env: str = None):
+    def __init__(
+        self,
+        project_path: Union[Path, str],
+        env: str = None,
+        extra_params: Dict[str, Any] = None,
+    ):
         """Create a context object by providing the root of a Kedro project and
         the environment configuration subfolders (see ``kedro.config.ConfigLoader``)
 
@@ -84,15 +99,10 @@ class KedroContext(abc.ABC):
             project_path: Project path to define the context for.
             env: Optional argument for configuration default environment to be used
                 for running the pipeline. If not specified, it defaults to "local".
+            extra_params: Optional dictionary containing extra project parameters.
+                If specified, will update (and therefore take precedence over)
+                the parameters retrieved from the project configuration.
         """
-
-        def _version_mismatch_error(context_version):
-            return (
-                "Your Kedro project version {} does not match Kedro package "
-                "version {} you are running. Make sure to update your project template. "
-                "See https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md for how to "
-                "migrate your Kedro project."
-            ).format(context_version, __version__)
 
         # check the match for major and minor version (skip patch version)
         if self.project_version.split(".")[:2] != __version__.split(".")[:2]:
@@ -100,6 +110,7 @@ class KedroContext(abc.ABC):
 
         self._project_path = Path(project_path).expanduser().resolve()
         self.env = env or "local"
+        self._extra_params = deepcopy(extra_params)
         self._setup_logging()
 
     @property
@@ -199,7 +210,8 @@ class KedroContext(abc.ABC):
         """Read-only property referring to Kedro's parameters for this context.
 
         Returns:
-            Parameters defined in `parameters.yml`.
+            Parameters defined in `parameters.yml` with the addition of any
+                extra parameters passed at initialization.
         """
         try:
             params = self.config_loader.get("parameters*", "parameters*/**")
@@ -210,7 +222,7 @@ class KedroContext(abc.ABC):
                 )
             )
             params = {}
-
+        params.update(self._extra_params or {})
         return params
 
     def _get_catalog(
@@ -452,6 +464,7 @@ class KedroContext(abc.ABC):
             "from_inputs": from_inputs,
             "load_versions": load_versions,
             "pipeline_name": pipeline_name,
+            "extra_params": self._extra_params,
         }
         journal = Journal(record_data)
 

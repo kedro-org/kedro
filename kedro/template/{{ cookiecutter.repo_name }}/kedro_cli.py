@@ -113,9 +113,40 @@ CONFIG_FILE_HELP = """Specify a YAML configuration file to load the run
 command arguments from. If command line arguments are provided, they will
 override the loaded ones."""
 
+PARAMS_ARG_HELP = """Specify extra parameters that you want to pass
+to the context initializer. Items must be separated by comma, keys - by colon,
+example: param1:value1,param2:value2. Each parameter is split by the first comma,
+so parameter values are allowed to contain colons, parameter keys are not."""
+
 
 def _split_string(ctx, param, value):
     return [item for item in value.split(",") if item]
+
+
+def _split_params(ctx, param, value):
+    result = {}
+    for item in _split_string(ctx, param, value):
+        item = item.split(":", 1)
+        if len(item) != 2:
+            ctx.fail(
+                "Invalid format of `{}` option: Item `{}` must contain a key and "
+                "a value separated by `:`.".format(param.name, item[0])
+            )
+        key = item[0].strip()
+        if not key:
+            ctx.fail(
+                "Invalid format of `{}` option: Parameter key cannot be "
+                "an empty string.".format(param.name)
+            )
+        value = item[1].strip()
+        try:
+            value = float(value)
+        except ValueError:
+            pass
+        else:
+            value = int(value) if value.is_integer() else value
+        result[key] = value
+    return result
 
 
 def _reformat_load_versions(ctx, param, value) -> Dict[str, str]:
@@ -198,6 +229,9 @@ def cli():
     help=CONFIG_FILE_HELP,
     callback=_config_file_callback,
 )
+@click.option(
+    "--params", type=str, default="", help=PARAMS_ARG_HELP, callback=_split_params,
+)
 def run(
     tag,
     env,
@@ -210,6 +244,7 @@ def run(
     load_version,
     pipeline,
     config,
+    params,
 ):
     """Run the pipeline."""
     if parallel and runner:
@@ -221,7 +256,7 @@ def run(
         runner = "ParallelRunner"
     runner_class = load_obj(runner, "kedro.runner") if runner else SequentialRunner
 
-    context = load_context(Path.cwd(), env=env)
+    context = load_context(Path.cwd(), env=env, extra_params=params)
     context.run(
         tags=tag,
         runner=runner_class(),

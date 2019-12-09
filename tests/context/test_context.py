@@ -29,6 +29,7 @@
 import configparser
 import json
 import os
+import re
 from pathlib import Path
 from typing import Dict
 
@@ -228,12 +229,17 @@ class DummyContextWithPipelinePropertyOnly(KedroContext):
         )
 
 
+@pytest.fixture(params=[None])
+def extra_params(request):
+    return request.param
+
+
 @pytest.fixture
-def dummy_context(tmp_path, mocker, env):
+def dummy_context(tmp_path, mocker, env, extra_params):
     # Disable logging.config.dictConfig in KedroContext._setup_logging as
     # it changes logging.config and affects other unit tests
     mocker.patch("logging.config.dictConfig")
-    return DummyContext(str(tmp_path), env=env)
+    return DummyContext(str(tmp_path), env=env, extra_params=extra_params)
 
 
 @pytest.mark.usefixtures("config_dir")
@@ -257,17 +263,30 @@ class TestKedroContext:
         reloaded_df = dummy_context.io.load("cars")
         assert_frame_equal(reloaded_df, dummy_dataframe)
 
-    def test_params(self, dummy_context):
-        assert dummy_context.params == dict(param1=1, param2=2)
+    @pytest.mark.parametrize(
+        "extra_params",
+        [None, {}, {"foo": "bar", "baz": [1, 2], "qux": None}],
+        indirect=True,
+    )
+    def test_params(self, dummy_context, extra_params):
+        extra_params = extra_params or {}
+        expected = dict(param1=1, param2=2, **extra_params)
+        assert dummy_context.params == expected
 
-    def test_params_missing(self, dummy_context, mocker):
+    @pytest.mark.parametrize(
+        "extra_params",
+        [None, {}, {"foo": "bar", "baz": [1, 2], "qux": None}],
+        indirect=True,
+    )
+    def test_params_missing(self, dummy_context, mocker, extra_params):
         mock_config_loader = mocker.patch.object(DummyContext, "config_loader")
         mock_config_loader.get.side_effect = MissingConfigException("nope")
+        extra_params = extra_params or {}
 
         pattern = "Parameters not found in your Kedro project config"
         with pytest.warns(UserWarning, match=pattern):
             actual = dummy_context.params
-        assert actual == {}
+        assert actual == extra_params
 
     def test_config_loader(self, dummy_context):
         params = dummy_context.config_loader.get("parameters*")
@@ -321,9 +340,8 @@ class TestKedroContext:
         # it changes logging.config and affects other unit tests
         mocker.patch("logging.config.dictConfig")
 
-        with pytest.warns(
-            UserWarning, match="Parameters not found in your Kedro project config."
-        ):
+        pattern = "Parameters not found in your Kedro project config."
+        with pytest.warns(UserWarning, match=re.escape(pattern)):
             DummyContext(  # pylint: disable=expression-not-assigned
                 str(tmp_path)
             ).catalog
@@ -336,9 +354,8 @@ class TestKedroContext:
         # it changes logging.config and affects other unit tests
         mocker.patch("logging.config.dictConfig")
 
-        with pytest.warns(
-            UserWarning, match="Credentials not found in your Kedro project config."
-        ):
+        pattern = "Credentials not found in your Kedro project config."
+        with pytest.warns(UserWarning, match=re.escape(pattern)):
             DummyContext(  # pylint: disable=expression-not-assigned
                 str(tmp_path)
             ).catalog
@@ -354,7 +371,7 @@ class TestKedroContext:
         assert len(dummy_context.pipelines["__default__"].nodes) == 4
 
 
-@pytest.mark.usefixtures("config_dir")
+@pytest.mark.usefixtures("config_dir")  # pylint: disable=too-many-public-methods
 class TestKedroContextRun:
     def test_run_output(self, dummy_context, dummy_dataframe):
         dummy_context.catalog.save("cars", dummy_dataframe)
@@ -603,3 +620,18 @@ class TestKedroContextRun:
 
         with pytest.raises(KedroContextError, match=error_msg):
             dummy_context.run(pipeline_name="missing-pipeline")
+
+    @pytest.mark.parametrize(
+        "extra_params",
+        [None, {}, {"foo": "bar", "baz": [1, 2], "qux": None}],
+        indirect=True,
+    )
+    def test_run_with_extra_params(
+        self, mocker, dummy_context, dummy_dataframe, extra_params
+    ):
+        mocker.patch("logging.config.dictConfig")
+        mock_journal = mocker.patch("kedro.context.context.Journal")
+        dummy_context.catalog.save("cars", dummy_dataframe)
+        dummy_context.run()
+
+        assert mock_journal.call_args[0][0]["extra_params"] == extra_params

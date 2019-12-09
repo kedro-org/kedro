@@ -27,9 +27,7 @@
 # limitations under the License.
 
 
-"""
-``MatplotlibWriter `` saves matplotlib objects to a local image file.
-"""
+"""``MatplotlibWriter `` saves matplotlib objects to a local image file."""
 
 from pathlib import Path
 from typing import Any, Dict, List, Union

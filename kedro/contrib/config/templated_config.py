@@ -145,9 +145,9 @@ class TemplatedConfigLoader(ConfigLoader):
                 pattern. Files that match the pattern will be loaded as a
                 formatting dictionary.
             globals_dict: Optional keyword-only argument specifying a formatting
-            dictionary. This dictionary will get merged with the globals dictionary
-            obtained from the globals_pattern. In case of duplicate keys, the
-            ``globals_dict`` keys take precedence.
+                dictionary. This dictionary will get merged with the globals dictionary
+                obtained from the globals_pattern. In case of duplicate keys, the
+                ``globals_dict`` keys take precedence.
         """
 
         super().__init__(conf_paths)

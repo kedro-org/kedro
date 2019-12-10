@@ -338,15 +338,21 @@ class TestDataCatalogFromConfig:
         with pytest.raises(KeyError, match=r"Unable to find credentials"):
             DataCatalog.from_config(**sane_config)
 
-    # pylint: disable=protected-access
-    def test_link_credentials(self, data_catalog_from_config, sane_config):
+    def test_link_credentials(self, sane_config, mocker):
         """Test credentials being linked to the relevant data set"""
-        assert (
-            data_catalog_from_config._data_sets["cars"]._credentials[
+        mock_client = mocker.patch("kedro.io.csv_s3.S3FileSystem")
+
+        DataCatalog.from_config(**sane_config)
+
+        expected_client_kwargs = {
+            "aws_access_key_id": sane_config["credentials"]["s3_credentials"][
                 "aws_access_key_id"
-            ]
-            == sane_config["credentials"]["s3_credentials"]["aws_access_key_id"]
-        )
+            ],
+            "aws_secret_access_key": sane_config["credentials"]["s3_credentials"][
+                "aws_secret_access_key"
+            ],
+        }
+        mock_client.assert_called_once_with(client_kwargs=expected_client_kwargs)
 
     def test_idempotent_catalog(self, sane_config):
         """Test that data catalog instantiations are idempotent"""

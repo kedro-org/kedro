@@ -295,7 +295,7 @@ When working with AWS S3-backed datasets (e.g., `kedro.io.CSVS3DataSet`), you ar
 
 ## Configuring `kedro run` arguments
 
-Instead of specifying all the command line options to `kedro run` each time you run the command, you can specify a config file that contains the arguments, say `config.yml` and run
+The extensive list of CLI options for a `kedro run` is available [here](./06_pipelines.md#modifying-a-kedro-run). Instead of specifying all the command line options to a `kedro run` via the CLI, you can specify a config file that contains the arguments, say `config.yml` and run:
 
 ```console
 $ kedro run --config config.yml

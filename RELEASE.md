@@ -1,14 +1,15 @@
 # Release 0.15.5
 
 ## Major features and improvements
+* Load `kedro run` CLI options from a configuration file with the `--config` flag (e.g. `kedro run --config run_config.yml`)
+* Run parametrised pipeline runs with the `--params` flag (e.g. `kedro run --params param1:value1,param2:value2`).
+* Load specific environments with Jupyter notebooks using `KEDRO_ENV` which will globally set `run`, `jupyter notebook` and `jupyter lab` commands using environment variables.
 * Added the following datasets:
+  - `JSONGCSDataSet` dataset in `contrib` for working with JSON files in Google Cloud Storage.
   - `MatplotlibS3Writer` dataset in `contrib` for saving Matplotlib images to S3.
-  - `JSONGCSDataSet` dataset in `contrib` for connecting to Google Cloud Storage.
   - `PartitionedDataSet` for working with datasets split across multiple files.
-* Pipelines can be deducted with `pipeline1 - pipeline2`
-* Added the ability to load a specific environment with Jupyter notebooks and introduced `KEDRO_ENV` to set it globally for `run`, `jupyter notebook` and `jupyter lab` commands using environment variables.
-* Added the ability to load `kedro run` options from a config file with the `--config` option.
 * Added `s3fs_args` to all S3 datasets.
+* Pipelines can be deducted with `pipeline1 - pipeline2`
 
 ## Bug fixes and other changes
 * `ParallelRunner` now works with `SparkDataSet`.
@@ -19,7 +20,7 @@
 * Implemented Databricks-compatible dataset versioning for `SparkDataSet`.
 * Fixed a bug where `kedro package` would fail in certain situations where `kedro build-reqs` was used to generate `requirements.txt`.
 * Made `bucket_name` argument optional for the following datasets: `CSVS3DataSet`, `HDFS3DataSet`, `PickleS3DataSet`, `contrib.io.parquet.ParquetS3DataSet`, `contrib.io.gcs.JSONGCSDataSet` - bucket name can now be included into the filepath along with the filesystem protocol (e.g. `s3://bucket-name/path/to/key.csv`).
-* `kedro run` CLI command now accepts `--params` option, where you can pass comma-separated extra parameters for your run (e.g. `param1:value1,param2:value2`).
+* Documentation improvements
 
 ## Breaking changes to the API
 * Renamed entry point for running pip-installed projects to `run_package()` instead of `main()` in `src/<package>/run.py`.
@@ -40,7 +41,6 @@
   - `NetworkXLocalDataSet` in `kedro.contrib.io.networkx` to load and save local graphs (JSON format) via NetworkX. (by [@josephhaaga](https://github.com/josephhaaga))
   - `SparkHiveDataSet` in `kedro.contrib.io.pyspark.SparkHiveDataSet` allowing usage of Spark and insert/upsert on non-transactional Hive tables
 * `kedro.contrib.config.TemplatedConfigLoader` now supports name/dict key templating and default values.
-
 
 ## Bug fixes and other changes
 * `get_last_load_version()` method for versioned datasets now returns exact last load version if the dataset has been loaded at least once and `None` otherwise.

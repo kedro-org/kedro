@@ -259,6 +259,14 @@ class TestParquetS3DataSet:
         s3_data_set.save(dummy_dataframe)
         assert s3_data_set.exists()
 
+    @pytest.mark.usefixtures("mocked_s3_object")
+    def test_s3fs_args_propagated(self, mocker):
+        mock = mocker.patch("kedro.contrib.io.parquet.parquet_s3.S3FileSystem")
+        ParquetS3DataSet(
+            FILENAME, BUCKET_NAME, AWS_CREDENTIALS, s3fs_args=dict(custom=42)
+        )
+        mock.assert_called_with(client_kwargs=mocker.ANY, custom=42)
+
 
 @pytest.mark.usefixtures("mocked_s3_bucket", "s3fs_cleanup")
 class TestParquetS3DataSetVersioned:

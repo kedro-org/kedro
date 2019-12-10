@@ -230,7 +230,7 @@ def cli():
     callback=_config_file_callback,
 )
 @click.option(
-    "--params", type=str, default="", help=PARAMS_ARG_HELP, callback=_split_params,
+    "--params", type=str, default="", help=PARAMS_ARG_HELP, callback=_split_params
 )
 def run(
     tag,

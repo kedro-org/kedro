@@ -50,7 +50,7 @@ def test_mem_profile(caplog):
     assert logger_name == "kedro.contrib.decorators.memory_profiler"
     assert severity == logging.INFO
     expected = "Running '{}.{}' consumed".format(
-        sleeping_identity.__module__, sleeping_identity.__qualname__,
+        sleeping_identity.__module__, sleeping_identity.__qualname__
     )
     assert expected in message
 
@@ -69,7 +69,7 @@ def test_mem_profile_old_versions(caplog, mocker):
     assert logger_name == "kedro.contrib.decorators.memory_profiler"
     assert severity == logging.INFO
     expected = "Running '{}.{}' consumed".format(
-        sleeping_identity.__module__, sleeping_identity.__qualname__,
+        sleeping_identity.__module__, sleeping_identity.__qualname__
     )
     assert expected in message
 

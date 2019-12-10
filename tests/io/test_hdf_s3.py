@@ -222,6 +222,12 @@ class TestHDFS3DataSet:
     def test_serializable(self, hdf_data_set):
         ForkingPickler.dumps(hdf_data_set)
 
+    @pytest.mark.usefixtures("mocked_s3_object")
+    def test_s3fs_args_propagated(self, mocker):
+        mock = mocker.patch("kedro.io.hdf_s3.S3FileSystem")
+        HDFS3DataSet(FILENAME, BUCKET_NAME, AWS_CREDENTIALS, s3fs_args=dict(custom=42))
+        mock.assert_called_with(client_kwargs=mocker.ANY, custom=42)
+
 
 @pytest.mark.usefixtures("s3fs_cleanup")
 class TestHDFS3DataSetVersioned:

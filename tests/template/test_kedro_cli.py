@@ -37,6 +37,7 @@ import anyconfig
 import pytest
 from click.testing import CliRunner
 
+from kedro.context import KEDRO_ENV_VAR
 from kedro.runner import ParallelRunner, SequentialRunner
 
 
@@ -537,7 +538,8 @@ class TestJupyterNotebookCommand:
         args, kwargs = python_call_mock.call_args
         assert args == default_jupyter_options
         assert "env" in kwargs
-        assert fake_kedro_cli.KEDRO_ENV_VAR in kwargs["env"]
+        assert KEDRO_ENV_VAR in kwargs["env"]
+        assert kwargs["env"][KEDRO_ENV_VAR] == "my_special_env"
 
     def test_env_environment_variable(
         self, fake_kedro_cli, python_call_mock, monkeypatch, default_jupyter_options
@@ -549,7 +551,8 @@ class TestJupyterNotebookCommand:
         args, kwargs = python_call_mock.call_args
         assert args == default_jupyter_options
         assert "env" in kwargs
-        assert fake_kedro_cli.KEDRO_ENV_VAR in kwargs["env"]
+        assert KEDRO_ENV_VAR in kwargs["env"]
+        assert kwargs["env"][KEDRO_ENV_VAR] == "my_special_env"
 
 
 class TestJupyterLabCommand:
@@ -615,7 +618,8 @@ class TestJupyterLabCommand:
         args, kwargs = python_call_mock.call_args
         assert args == default_jupyter_options
         assert "env" in kwargs
-        assert fake_kedro_cli.KEDRO_ENV_VAR in kwargs["env"]
+        assert KEDRO_ENV_VAR in kwargs["env"]
+        assert kwargs["env"][KEDRO_ENV_VAR] == "my_special_env"
 
     def test_env_environment_variable(
         self, fake_kedro_cli, python_call_mock, monkeypatch, default_jupyter_options
@@ -627,7 +631,8 @@ class TestJupyterLabCommand:
         args, kwargs = python_call_mock.call_args
         assert args == default_jupyter_options
         assert "env" in kwargs
-        assert fake_kedro_cli.KEDRO_ENV_VAR in kwargs["env"]
+        assert KEDRO_ENV_VAR in kwargs["env"]
+        assert kwargs["env"][KEDRO_ENV_VAR] == "my_special_env"
 
 
 class TestConvertNotebookCommand:

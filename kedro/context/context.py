@@ -48,6 +48,8 @@ from kedro.runner import AbstractRunner, SequentialRunner
 from kedro.utils import load_obj
 from kedro.versioning import Journal
 
+KEDRO_ENV_VAR = "KEDRO_ENV"
+
 
 def _version_mismatch_error(context_version) -> str:
     return (

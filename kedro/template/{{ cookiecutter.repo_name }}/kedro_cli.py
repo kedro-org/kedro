@@ -37,7 +37,7 @@ import webbrowser
 from collections import Counter
 from glob import iglob
 from pathlib import Path
-from typing import Dict, Iterable, List
+from typing import Any, Dict, Iterable, List
 
 import anyconfig
 import click
@@ -50,7 +50,7 @@ from kedro.cli.utils import (
     forward_command,
     python_call,
 )
-from kedro.context import load_context
+from kedro.context import KEDRO_ENV_VAR, load_context
 from kedro.runner import SequentialRunner
 from kedro.utils import load_obj
 
@@ -411,7 +411,11 @@ def _build_jupyter_command(
     return cmd + list(args)
 
 
-def _build_jupyter_env(kedro_env: str) -> Dict[str, str]:
+def _build_jupyter_env(kedro_env: str) -> Dict[str, Any]:
+    """Build the environment dictionary that gets injected into the subprocess running
+    Jupyter. Since the subprocess has access only to the environment variables passed
+    in, we need to copy the current environment and add ``KEDRO_ENV_VAR``.
+    """
     if not kedro_env:
         return {}
     jupyter_env = os.environ.copy()

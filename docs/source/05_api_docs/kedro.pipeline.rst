@@ -29,4 +29,3 @@ kedro.pipeline
        :template: autosummary/base.rst
 
        kedro.pipeline.decorators.log_time
-       kedro.pipeline.decorators.mem_profile

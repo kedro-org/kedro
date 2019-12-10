@@ -33,9 +33,11 @@ import sys
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
+import anyconfig
 import pytest
 from click.testing import CliRunner
 
+from kedro.context import KEDRO_ENV_VAR
 from kedro.runner import ParallelRunner, SequentialRunner
 
 
@@ -131,6 +133,22 @@ class TestRunCommand:
         context = mocker.Mock()
         yield mocker.patch.object(fake_kedro_cli, "load_context", return_value=context)
 
+    @staticmethod
+    @pytest.fixture(params=["run_config.yml", "run_config.json"])
+    def fake_run_config(request, fake_root_dir):
+        config_path = str(fake_root_dir / request.param)
+        anyconfig.dump(
+            {
+                "run": {
+                    "pipeline": "pipeline1",
+                    "tag": ["tag1", "tag2"],
+                    "node_names": ["node1", "node2"],
+                }
+            },
+            config_path,
+        )
+        return config_path
+
     def test_run_successfully(self, fake_kedro_cli, fake_load_context, mocker):
         result = CliRunner().invoke(fake_kedro_cli.cli, ["run"])
         assert not result.exit_code
@@ -198,6 +216,26 @@ class TestRunCommand:
             ParallelRunner,
         )
 
+    @pytest.mark.parametrize("config_flag", ["--config", "-c"])
+    def test_run_with_config(
+        self, config_flag, fake_kedro_cli, fake_load_context, fake_run_config, mocker
+    ):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["run", config_flag, fake_run_config]
+        )
+        assert not result.exit_code
+
+        fake_load_context.return_value.run.assert_called_once_with(
+            tags=("tag1", "tag2"),
+            runner=mocker.ANY,
+            node_names=("node1", "node2"),
+            from_nodes=[],
+            to_nodes=[],
+            from_inputs=[],
+            load_versions={},
+            pipeline_name="pipeline1",
+        )
+
     def test_run_env_environment_var(
         self, fake_kedro_cli, fake_load_context, fake_repo_path, monkeypatch, mocker
     ):
@@ -205,7 +243,58 @@ class TestRunCommand:
         result = CliRunner().invoke(fake_kedro_cli.cli, ["run"])
         assert not result.exit_code
 
-        fake_load_context.assert_called_once_with(Path.cwd(), env="my_special_env")
+        fake_load_context.assert_called_once_with(
+            Path.cwd(), env="my_special_env", extra_params=mocker.ANY
+        )
+
+    @pytest.mark.parametrize(
+        "cli_arg,expected_extra_params",
+        [
+            ("foo:bar", {"foo": "bar"}),
+            (
+                "foo:123.45, bar:1a,baz:678. ,qux:1e-2,quux:0,quuz:",
+                {
+                    "foo": 123.45,
+                    "bar": "1a",
+                    "baz": 678,
+                    "qux": 0.01,
+                    "quux": 0,
+                    "quuz": "",
+                },
+            ),
+            ("foo:bar,baz:fizz:buzz", {"foo": "bar", "baz": "fizz:buzz"}),
+            (
+                "foo:bar, baz: https://example.com",
+                {"foo": "bar", "baz": "https://example.com"},
+            ),
+            ("foo:bar,baz:fizz buzz", {"foo": "bar", "baz": "fizz buzz"}),
+            ("foo:bar, foo : fizz buzz  ", {"foo": "fizz buzz"}),
+        ],
+    )
+    def test_run_extra_params(
+        self, mocker, fake_kedro_cli, fake_load_context, cli_arg, expected_extra_params
+    ):
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["run", "--params", cli_arg])
+
+        assert not result.exit_code
+        fake_load_context.assert_called_once_with(
+            Path.cwd(), env=mocker.ANY, extra_params=expected_extra_params
+        )
+
+    @pytest.mark.parametrize("bad_arg", ["bad", "foo:bar,bad"])
+    def test_bad_extra_params(self, fake_kedro_cli, fake_load_context, bad_arg):
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["run", "--params", bad_arg])
+        assert result.exit_code
+        assert (
+            "Item `bad` must contain a key and a value separated by `:`"
+            in result.stdout
+        )
+
+    @pytest.mark.parametrize("bad_arg", [":", ":value", " :value"])
+    def test_bad_params_key(self, fake_kedro_cli, fake_load_context, bad_arg):
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["run", "--params", bad_arg])
+        assert result.exit_code
+        assert "Parameter key cannot be an empty string" in result.stdout
 
 
 class TestTestCommand:
@@ -449,7 +538,8 @@ class TestJupyterNotebookCommand:
         args, kwargs = python_call_mock.call_args
         assert args == default_jupyter_options
         assert "env" in kwargs
-        assert fake_kedro_cli.KEDRO_ENV_VAR in kwargs["env"]
+        assert KEDRO_ENV_VAR in kwargs["env"]
+        assert kwargs["env"][KEDRO_ENV_VAR] == "my_special_env"
 
     def test_env_environment_variable(
         self, fake_kedro_cli, python_call_mock, monkeypatch, default_jupyter_options
@@ -461,7 +551,8 @@ class TestJupyterNotebookCommand:
         args, kwargs = python_call_mock.call_args
         assert args == default_jupyter_options
         assert "env" in kwargs
-        assert fake_kedro_cli.KEDRO_ENV_VAR in kwargs["env"]
+        assert KEDRO_ENV_VAR in kwargs["env"]
+        assert kwargs["env"][KEDRO_ENV_VAR] == "my_special_env"
 
 
 class TestJupyterLabCommand:
@@ -527,7 +618,8 @@ class TestJupyterLabCommand:
         args, kwargs = python_call_mock.call_args
         assert args == default_jupyter_options
         assert "env" in kwargs
-        assert fake_kedro_cli.KEDRO_ENV_VAR in kwargs["env"]
+        assert KEDRO_ENV_VAR in kwargs["env"]
+        assert kwargs["env"][KEDRO_ENV_VAR] == "my_special_env"
 
     def test_env_environment_variable(
         self, fake_kedro_cli, python_call_mock, monkeypatch, default_jupyter_options
@@ -539,7 +631,8 @@ class TestJupyterLabCommand:
         args, kwargs = python_call_mock.call_args
         assert args == default_jupyter_options
         assert "env" in kwargs
-        assert fake_kedro_cli.KEDRO_ENV_VAR in kwargs["env"]
+        assert KEDRO_ENV_VAR in kwargs["env"]
+        assert kwargs["env"][KEDRO_ENV_VAR] == "my_special_env"
 
 
 class TestConvertNotebookCommand:

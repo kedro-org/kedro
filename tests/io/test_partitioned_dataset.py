@@ -238,7 +238,7 @@ class TestPartitionedDataSetLocal:
     @pytest.mark.parametrize(
         "dataset_config,error_pattern",
         [
-            ("UndefinedDatasetType", "Class `UndefinedDatasetType` not found",),
+            ("UndefinedDatasetType", "Class `UndefinedDatasetType` not found"),
             (
                 "missing.module.UndefinedDatasetType",
                 r"Cannot import module when trying to load type `missing\."
@@ -407,14 +407,9 @@ class TestPartitionedDataSetS3:
         else:
             assert "dataset_config" not in str(pds)
 
-    @pytest.mark.parametrize(
-        "credentials", ["foo", [1, 2, 3], {"bar": "baz"}],
-    )
+    @pytest.mark.parametrize("credentials", ["foo", [1, 2, 3], {"bar": "baz"}])
     def test_credentials_not_allowed_in_dataset_config(self, credentials):
-        dataset = {
-            "type": "CSVS3DataSet",
-            "credentials": credentials,
-        }
+        dataset = {"type": "CSVS3DataSet", "credentials": credentials}
         pattern = (
             "Credentials for the underlying dataset must not be "
             "specified explicitly in dataset configuration"

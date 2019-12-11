@@ -27,9 +27,7 @@
 # limitations under the License.
 
 
-"""
-``MatplotlibWriter `` saves matplotlib objects as image files.
-"""
+"""``MatplotlibWriter `` saves matplotlib objects to a local image file."""
 
 from pathlib import Path
 from typing import Any, Dict, List, Union
@@ -40,7 +38,7 @@ from kedro.io import AbstractDataSet, DataSetError
 
 
 class MatplotlibWriter(AbstractDataSet):
-    """``MatplotlibWriter`` saves matplotlib objects as image files.
+    """``MatplotlibWriter`` saves matplotlib objects to a local image file.
 
         Example:
         ::

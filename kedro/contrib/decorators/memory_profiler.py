@@ -25,63 +25,62 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""A module containing predefined node decorators in Kedro.
-"""
 
+"""
+This module contains function decorators for memory-profiler, which can
+be used as ``Node`` decorators. See ``kedro.pipeline.node.decorate``
+"""
 import logging
-import time
 from functools import wraps
 from typing import Callable
 
+from kedro.pipeline.decorators import _func_full_name
 
-def _func_full_name(func: Callable):
-    if not getattr(func, "__module__", None):
-        return getattr(func, "__qualname__", repr(func))
-    return "{}.{}".format(func.__module__, func.__qualname__)
-
-
-def _human_readable_time(elapsed: float):  # pragma: no cover
-    mins, secs = divmod(elapsed, 60)
-    hours, mins = divmod(mins, 60)
-
-    if hours > 0:
-        message = "%dh%02dm%02ds" % (hours, mins, secs)
-    elif mins > 0:
-        message = "%dm%02ds" % (mins, secs)
-    elif secs >= 1:
-        message = "%.2fs" % secs
-    else:
-        message = "%.0fms" % (secs * 1000.0)
-
-    return message
+try:
+    from memory_profiler import memory_usage
+except ImportError as error:
+    raise ImportError(
+        "{}: `pip install kedro[memory_profiler]` to get the required "
+        "memory-profiler dependencies.".format(error)
+    )
 
 
-def log_time(func: Callable) -> Callable:
-    """A function decorator which logs the time taken for executing a function.
+def mem_profile(func: Callable) -> Callable:
+    """A function decorator which profiles the memory used when executing the
+    function. The logged memory is collected by using the memory_profiler
+    python module and includes memory used by children processes. The usage
+    is collected by taking memory snapshots every 100ms. This decorator will
+    only work with functions taking at least 0.5s to execute due to a bug in
+    the memory_profiler python module. For more information about the bug,
+    please see https://github.com/pythonprofilers/memory_profiler/issues/216
 
     Args:
-        func: The function to be logged.
+        func: The function to be profiled.
 
     Returns:
         A wrapped function, which will execute the provided function and log
-        the running time.
+        its max memory usage upon completion.
 
     """
 
     @wraps(func)
-    def with_time(*args, **kwargs):
+    def with_memory(*args, **kwargs):
         log = logging.getLogger(__name__)
-        t_start = time.time()
-        result = func(*args, **kwargs)
-        t_end = time.time()
-        elapsed = t_end - t_start
-
+        mem_usage, result = memory_usage(
+            (func, args, kwargs),
+            interval=0.1,
+            timeout=1,
+            max_usage=True,
+            retval=True,
+            include_children=True,
+        )
+        # memory_profiler < 0.56.0 returns list instead of float
+        mem_usage = mem_usage[0] if isinstance(mem_usage, (list, tuple)) else mem_usage
         log.info(
-            "Running %r took %s [%.3fs]",
+            "Running %r consumed %2.2fMiB memory at peak time",
             _func_full_name(func),
-            _human_readable_time(elapsed),
-            elapsed,
+            mem_usage,
         )
         return result
 
-    return with_time
+    return with_memory

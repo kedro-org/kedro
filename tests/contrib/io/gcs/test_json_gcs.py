@@ -297,9 +297,7 @@ class TestJSONGCSDataSetVersioned:
             versioned_gcs_data_set.save(dummy_dataframe)
 
     @pytest.mark.usefixtures("mock_gcs_filesystem")
-    def test_version_str_repr(
-        self, save_version, gcs_data_set, versioned_gcs_data_set,
-    ):
+    def test_version_str_repr(self, save_version, gcs_data_set, versioned_gcs_data_set):
         """Test that version is in string representation of the class instance
         when applicable."""
         assert FILENAME in str(gcs_data_set)

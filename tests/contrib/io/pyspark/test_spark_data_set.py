@@ -421,7 +421,7 @@ class TestSparkDataSetVersionedDBFS:
         reloaded = versioned_dataset_dbfs.load()
 
         expected_calls = [
-            mocker.call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME)),
+            mocker.call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME))
         ] * 2
         assert mocked_glob.call_args_list == expected_calls
 
@@ -463,7 +463,7 @@ class TestSparkDataSetVersionedDBFS:
         assert versioned_dataset_dbfs.exists()
 
         expected_calls = [
-            mocker.call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME)),
+            mocker.call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME))
         ] * 3
         assert mocked_glob.call_args_list == expected_calls
 

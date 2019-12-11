@@ -35,6 +35,7 @@ kedro.contrib
       :toctree:
       :template: autosummary/base.rst
 
-      kedro.contrib.decorators.pandas_to_spark
-      kedro.contrib.decorators.spark_to_pandas
-      kedro.contrib.decorators.retry
+      kedro.contrib.decorators.pyspark.pandas_to_spark
+      kedro.contrib.decorators.pyspark.spark_to_pandas
+      kedro.contrib.decorators.retry.retry
+      kedro.contrib.decorators.memory_profiler.mem_profile

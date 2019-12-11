@@ -244,6 +244,14 @@ class TestPickleS3DataSet:
     def test_serializable(self, s3_data_set):
         ForkingPickler.dumps(s3_data_set)
 
+    @pytest.mark.usefixtures("mocked_s3_object")
+    def test_s3fs_args_propagated(self, mocker):
+        mock = mocker.patch("kedro.io.pickle_s3.S3FileSystem")
+        PickleS3DataSet(
+            FILENAME, BUCKET_NAME, AWS_CREDENTIALS, s3fs_args=dict(custom=42)
+        )
+        mock.assert_called_with(client_kwargs=mocker.ANY, custom=42)
+
 
 @pytest.mark.usefixtures("s3fs_cleanup", "mocked_s3_bucket")
 class TestPickleS3DataSetVersioned:

@@ -1,12 +1,15 @@
 # Release 0.15.5
 
 ## Major features and improvements
+* Load `kedro run` CLI options from a configuration file with the `--config` flag (e.g. `kedro run --config run_config.yml`)
+* Run parametrised pipeline runs with the `--params` flag (e.g. `kedro run --params param1:value1,param2:value2`).
+* Load specific environments with Jupyter notebooks using `KEDRO_ENV` which will globally set `run`, `jupyter notebook` and `jupyter lab` commands using environment variables.
 * Added the following datasets:
+  - `JSONGCSDataSet` dataset in `contrib` for working with JSON files in Google Cloud Storage.
   - `MatplotlibS3Writer` dataset in `contrib` for saving Matplotlib images to S3.
-  - `JSONGCSDataSet` dataset in `contrib` for connecting to Google Cloud Storage.
   - `PartitionedDataSet` for working with datasets split across multiple files.
+* Added `s3fs_args` to all S3 datasets.
 * Pipelines can be deducted with `pipeline1 - pipeline2`
-* Added the ability to load a specific environment with Jupyter notebooks and introduced `KEDRO_ENV` to set it globally for `run`, `jupyter notebook` and `jupyter lab` commands using environment variables.
 
 ## Bug fixes and other changes
 * `ParallelRunner` now works with `SparkDataSet`.
@@ -17,10 +20,12 @@
 * Implemented Databricks-compatible dataset versioning for `SparkDataSet`.
 * Fixed a bug where `kedro package` would fail in certain situations where `kedro build-reqs` was used to generate `requirements.txt`.
 * Made `bucket_name` argument optional for the following datasets: `CSVS3DataSet`, `HDFS3DataSet`, `PickleS3DataSet`, `contrib.io.parquet.ParquetS3DataSet`, `contrib.io.gcs.JSONGCSDataSet` - bucket name can now be included into the filepath along with the filesystem protocol (e.g. `s3://bucket-name/path/to/key.csv`).
+* Documentation improvements
 
 ## Breaking changes to the API
 * Renamed entry point for running pip-installed projects to `run_package()` instead of `main()` in `src/<package>/run.py`.
 * `bucket_name` key has been removed from the string representation of the following datasets: `CSVS3DataSet`, `HDFS3DataSet`, `PickleS3DataSet`, `contrib.io.parquet.ParquetS3DataSet`, `contrib.io.gcs.JSONGCSDataSet`.
+* Moved the `mem_profiler` decorator to `contrib` and separated the `contrib` decorators so that dependencies are modular. You may need to update your import paths, for example the pyspark decorators should be imported as `from kedro.contrib.decorators.pyspark import <pyspark_decorator>` instead of `from kedro.contrib.decorators import <pyspark_decorator>`.
 
 ## Thanks for supporting contributions
 [Sheldon Tsen](https://github.com/sheldontsen-qb), [@roumail](https://github.com/roumail), [Karlson Lee](https://github.com/i25959341), [Waylon Walker](https://github.com/WaylonWalker), [Deepyaman Datta](https://github.com/deepyaman), [Zain Patel](https://github.com/mzjp2)
@@ -36,7 +41,6 @@
   - `NetworkXLocalDataSet` in `kedro.contrib.io.networkx` to load and save local graphs (JSON format) via NetworkX. (by [@josephhaaga](https://github.com/josephhaaga))
   - `SparkHiveDataSet` in `kedro.contrib.io.pyspark.SparkHiveDataSet` allowing usage of Spark and insert/upsert on non-transactional Hive tables
 * `kedro.contrib.config.TemplatedConfigLoader` now supports name/dict key templating and default values.
-
 
 ## Bug fixes and other changes
 * `get_last_load_version()` method for versioned datasets now returns exact last load version if the dataset has been loaded at least once and `None` otherwise.

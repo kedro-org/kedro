@@ -33,25 +33,26 @@ import re
 import shutil
 import subprocess
 import sys
+import webbrowser
 from collections import Counter
 from glob import iglob
 from pathlib import Path
-import webbrowser
+from typing import Any, Dict, Iterable, List
 
+import anyconfig
 import click
 from click import secho, style
 from kedro.cli import main as kedro_main
 from kedro.cli.utils import (
     KedroCliError,
     call,
+    export_nodes,
     forward_command,
     python_call,
-    export_nodes,
 )
-from kedro.utils import load_obj
+from kedro.context import KEDRO_ENV_VAR, load_context
 from kedro.runner import SequentialRunner
-from kedro.context import load_context
-from typing import Iterable, List, Dict
+from kedro.utils import load_obj
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -108,9 +109,44 @@ overwrite its contents."""
 
 LOAD_VERSION_HELP = """Specify a particular dataset version (timestamp) for loading."""
 
+CONFIG_FILE_HELP = """Specify a YAML configuration file to load the run
+command arguments from. If command line arguments are provided, they will
+override the loaded ones."""
+
+PARAMS_ARG_HELP = """Specify extra parameters that you want to pass
+to the context initializer. Items must be separated by comma, keys - by colon,
+example: param1:value1,param2:value2. Each parameter is split by the first comma,
+so parameter values are allowed to contain colons, parameter keys are not."""
+
 
 def _split_string(ctx, param, value):
     return [item for item in value.split(",") if item]
+
+
+def _split_params(ctx, param, value):
+    result = {}
+    for item in _split_string(ctx, param, value):
+        item = item.split(":", 1)
+        if len(item) != 2:
+            ctx.fail(
+                "Invalid format of `{}` option: Item `{}` must contain a key and "
+                "a value separated by `:`.".format(param.name, item[0])
+            )
+        key = item[0].strip()
+        if not key:
+            ctx.fail(
+                "Invalid format of `{}` option: Parameter key cannot be "
+                "an empty string.".format(param.name)
+            )
+        value = item[1].strip()
+        try:
+            value = float(value)
+        except ValueError:
+            pass
+        else:
+            value = int(value) if value.is_integer() else value
+        result[key] = value
+    return result
 
 
 def _reformat_load_versions(ctx, param, value) -> Dict[str, str]:
@@ -131,6 +167,20 @@ def _reformat_load_versions(ctx, param, value) -> Dict[str, str]:
         load_versions_dict[load_version_list[0]] = load_version_list[1]
 
     return load_versions_dict
+
+
+def _config_file_callback(ctx, param, value):
+    """Config file callback, that replaces command line options with config file
+    values. If command line options are passed, they override config file values.
+    """
+    ctx.default_map = ctx.default_map or {}
+    section = ctx.info_name
+
+    if value:
+        config = anyconfig.load(value)[section]
+        ctx.default_map.update(config)
+
+    return value
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, name=__file__)
@@ -172,6 +222,16 @@ def cli():
     callback=_reformat_load_versions,
 )
 @click.option("--pipeline", type=str, default=None, help=PIPELINE_ARG_HELP)
+@click.option(
+    "--config",
+    "-c",
+    type=click.Path(exists=True, dir_okay=False, resolve_path=True),
+    help=CONFIG_FILE_HELP,
+    callback=_config_file_callback,
+)
+@click.option(
+    "--params", type=str, default="", help=PARAMS_ARG_HELP, callback=_split_params
+)
 def run(
     tag,
     env,
@@ -183,6 +243,8 @@ def run(
     from_inputs,
     load_version,
     pipeline,
+    config,
+    params,
 ):
     """Run the pipeline."""
     if parallel and runner:
@@ -194,7 +256,7 @@ def run(
         runner = "ParallelRunner"
     runner_class = load_obj(runner, "kedro.runner") if runner else SequentialRunner
 
-    context = load_context(Path.cwd(), env=env)
+    context = load_context(Path.cwd(), env=env, extra_params=params)
     context.run(
         tags=tag,
         runner=runner_class(),
@@ -349,7 +411,11 @@ def _build_jupyter_command(
     return cmd + list(args)
 
 
-def _build_jupyter_env(kedro_env: str) -> Dict[str, str]:
+def _build_jupyter_env(kedro_env: str) -> Dict[str, Any]:
+    """Build the environment dictionary that gets injected into the subprocess running
+    Jupyter. Since the subprocess has access only to the environment variables passed
+    in, we need to copy the current environment and add ``KEDRO_ENV_VAR``.
+    """
     if not kedro_env:
         return {}
     jupyter_env = os.environ.copy()

@@ -36,17 +36,17 @@ class BasicGCSFileSystemMock:
     root_marker = ""
 
     def __init__(self):
-        self._files = {}
+        self.files = {}
 
     @contextmanager
     def open(self, filepath, *args, **kwargs):
         raise NotImplementedError
 
     def exists(self, filepath):
-        return str(filepath) in self._files
+        return str(filepath) in self.files
 
     def glob(self, pattern, **kwargs):  # pylint: disable=unused-argument
-        all_filepaths = set(self._files.keys())
+        all_filepaths = set(self.files.keys())
         return [f for f in all_filepaths if fnmatch(f, pattern)]
 
     def invalidate_cache(self, *args, **kwargs):

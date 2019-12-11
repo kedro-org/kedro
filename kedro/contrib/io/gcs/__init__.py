@@ -29,3 +29,4 @@
 
 from .csv_gcs import CSVGCSDataSet  # NOQA
 from .json_gcs import JSONGCSDataSet  # NOQA
+from .parquet_gcs import ParquetGCSDataSet  # NOQA

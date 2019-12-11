@@ -55,9 +55,7 @@ def save_args(request):
 
 @pytest.fixture
 def json_data_set(filepath_json, load_args, save_args):
-    return JSONDataSet(
-        filepath=filepath_json, load_args=load_args, save_args=save_args,
-    )
+    return JSONDataSet(filepath=filepath_json, load_args=load_args, save_args=save_args)
 
 
 @pytest.fixture

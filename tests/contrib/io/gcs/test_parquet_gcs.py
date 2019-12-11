@@ -146,9 +146,7 @@ class TestParquetGCSDataSet:
             ).load()
 
     @pytest.mark.usefixtures("mock_gcs_filesystem", "write_table_mock")
-    def test_save_load_data(
-        self, gcs_data_set, dummy_dataframe,
-    ):
+    def test_save_load_data(self, gcs_data_set, dummy_dataframe):
         assert not gcs_data_set.exists()
         gcs_data_set.save(dummy_dataframe)
         loaded_data = gcs_data_set.load()

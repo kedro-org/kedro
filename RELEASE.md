@@ -12,6 +12,7 @@
   - `ParquetGCSDataSet` dataset in `contrib` for working with Parquet files in Google Cloud Storage.
 * Added `s3fs_args` to all S3 datasets.
 * Pipelines can be deducted with `pipeline1 - pipeline2`.
+* Added a `kedro lint` command to lint your project.
 
 ## Bug fixes and other changes
 * `ParallelRunner` now works with `SparkDataSet`.

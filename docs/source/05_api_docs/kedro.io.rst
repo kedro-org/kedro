@@ -27,6 +27,7 @@ Data Sets
     kedro.io.HDFLocalDataSet
     kedro.io.HDFS3DataSet
     kedro.io.JSONLocalDataSet
+    kedro.io.JSONDataSet
     kedro.io.LambdaDataSet
     kedro.io.MemoryDataSet
     kedro.io.ParquetLocalDataSet

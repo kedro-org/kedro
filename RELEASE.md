@@ -8,6 +8,8 @@
   - `JSONGCSDataSet` dataset in `contrib` for working with JSON files in Google Cloud Storage.
   - `MatplotlibS3Writer` dataset in `contrib` for saving Matplotlib images to S3.
   - `PartitionedDataSet` for working with datasets split across multiple files.
+  - `JSONDataSet` dataset for working with JSON files that uses `fsspec` to communicate with the underlying filesystem. Note: it doesn't support `http(s)` protocol for now.
+  - `ParquetGCSDataSet` dataset in `contrib` for working with Parquet files in Google Cloud Storage.
 * Added `s3fs_args` to all S3 datasets.
 * Pipelines can be deducted with `pipeline1 - pipeline2`.
 
@@ -28,7 +30,7 @@
 * Moved the `mem_profiler` decorator to `contrib` and separated the `contrib` decorators so that dependencies are modular. You may need to update your import paths, for example the pyspark decorators should be imported as `from kedro.contrib.decorators.pyspark import <pyspark_decorator>` instead of `from kedro.contrib.decorators import <pyspark_decorator>`.
 
 ## Thanks for supporting contributions
-[Sheldon Tsen](https://github.com/sheldontsen-qb), [@roumail](https://github.com/roumail), [Karlson Lee](https://github.com/i25959341), [Waylon Walker](https://github.com/WaylonWalker), [Deepyaman Datta](https://github.com/deepyaman)
+[Sheldon Tsen](https://github.com/sheldontsen-qb), [@roumail](https://github.com/roumail), [Karlson Lee](https://github.com/i25959341), [Waylon Walker](https://github.com/WaylonWalker), [Deepyaman Datta](https://github.com/deepyaman), [Giovanni](https://github.com/plauto)
 
 # Release 0.15.4
 

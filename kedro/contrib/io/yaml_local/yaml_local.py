@@ -41,9 +41,7 @@ from kedro.io.core import AbstractVersionedDataSet, Version
 
 
 class YAMLLocalDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
-    """
-    ``YAMLLocalDataset`` loads and saves data to a local yaml file using
-    ``PyYAML``.
+    """``YAMLLocalDataset`` loads and saves data to a local yaml file using ``PyYAML``.
     See https://pyyaml.org/wiki/PyYAMLDocumentation for details.
 
     Example:

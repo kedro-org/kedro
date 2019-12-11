@@ -41,9 +41,9 @@ from kedro.io import AbstractVersionedDataSet, Version
 
 
 class NetworkXLocalDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
-    """
-    ``NetworkXLocalDataSet`` loads and saves graphs to a local JSON file format using ``NetworkX``.
-    See https://networkx.github.io/documentation/stable/tutorial.html for details.
+    """``NetworkXLocalDataSet`` loads and saves graphs to a local JSON file format
+    using ``NetworkX``. See https://networkx.github.io/documentation/stable/tutorial.html
+    for details.
 
     Example:
     ::

@@ -27,9 +27,7 @@
 # limitations under the License.
 
 
-"""
-``AbstractDataSet`` implementation to save matplotlib objects as image files.
-"""
+"""``AbstractDataSet`` implementation to save matplotlib objects as image files."""
 
 from .matplotlib_s3_writer import MatplotlibS3Writer  # NOQA
 from .matplotlib_writer import MatplotlibWriter  # NOQA

@@ -8,6 +8,8 @@
   - `JSONGCSDataSet` dataset in `contrib` for working with JSON files in Google Cloud Storage.
   - `MatplotlibS3Writer` dataset in `contrib` for saving Matplotlib images to S3.
   - `PartitionedDataSet` for working with datasets split across multiple files.
+  - `JSONDataSet` dataset for working with JSON files that uses `fsspec` to communicate with the underlying filesystem. Note: it doesn't support `http(s)` protocol for now.
+  - `ParquetGCSDataSet` dataset in `contrib` for working with Parquet files in Google Cloud Storage.
 * Added `s3fs_args` to all S3 datasets.
 * Pipelines can be deducted with `pipeline1 - pipeline2`
 

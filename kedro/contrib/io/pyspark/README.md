@@ -5,7 +5,7 @@ In this tutorial we talk about how Kedro integrates with `pyspark` using the `Sp
 We also present brief instructions on how to set-up pyspark to read from `AWS S3` and `Azure Blob storage`.
 
 Relevant API:
-[SparkDataSet](https://kedro.readthedocs.io/en/latest/kedro.contrib.io.pyspark.html)
+[`SparkDataSet`](https://kedro.readthedocs.io/en/latest/kedro.contrib.io.pyspark.html)
 
 
 ## Install spark
@@ -51,7 +51,7 @@ spark = SparkSession.builder\
     .getOrCreate()
 ```
 
-## SparkDataSet
+## `SparkDataSet`
 
 Loading and saving spark `DataFrame`s using Kedro can be easily done using the [`SparkDataSet`](https://kedro.readthedocs.io/en/latest/kedro.contrib.io.pyspark.html) class, as shown below:
 
@@ -81,7 +81,7 @@ parquet = SparkDataSet('../data/01_raw/2015_points_old_parquet',
 parquet.save(df)
 ```
 
-## Using SparkDataSet with the DataCatalog
+## Using `SparkDataSet` with the `DataCatalog`
 
 Since `SparkDataSet` is a concrete implementation of [`AbstractDataSet`](https://kedro.readthedocs.io/en/latest/kedro.io.AbstractDataSet.html), it integrates nicely with the `DataCatalog` and with Kedro's pipelines.
 

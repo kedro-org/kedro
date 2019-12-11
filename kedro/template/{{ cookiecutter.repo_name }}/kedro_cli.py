@@ -60,17 +60,9 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 PROJ_PATH = Path(__file__).resolve().parent
 os.environ["IPYTHONDIR"] = str(PROJ_PATH / ".ipython")
 
-KEDRO_ENV_VAR = "KEDRO_ENV"
 
-NO_PYTEST_MESSAGE = """
-pytest is not installed. Please make sure pytest is in
-src/requirements.txt and run `kedro install`.
-"""
-
-NO_NBSTRIPOUT_MESSAGE = """
-nbstripout is not installed. Please make sure nbstripout is in
-`src/requirements.txt` and run `kedro install`.
-"""
+NO_DEPENDENCY_MESSAGE = """{0} is not installed. Please make sure {0} is in
+src/requirements.txt and run `kedro install`."""
 
 TAG_ARG_HELP = """Construct the pipeline using only nodes which have this tag
 attached. Option can be used multiple times, what results in a
@@ -275,9 +267,34 @@ def test(args):
     try:
         import pytest  # pylint: disable=unused-import
     except ImportError:
-        raise KedroCliError(NO_PYTEST_MESSAGE)
+        raise KedroCliError(NO_DEPENDENCY_MESSAGE.format("pytest"))
     else:
         python_call("pytest", args)
+
+
+@cli.command()
+@click.argument("files", type=click.Path(exists=True), nargs=-1)
+def lint(files):
+    """Run flake8, isort and (on Python >=3.6) black."""
+    # pylint: disable=unused-import
+    if not files:
+        files = ("src/tests", "src/{{ cookiecutter.python_package }}")
+
+    try:
+        import flake8
+        import isort
+    except ImportError as exc:
+        raise KedroCliError(NO_DEPENDENCY_MESSAGE.format(exc.name))
+
+    python_call("flake8", ("--max-line-length=88",) + files)
+    python_call("isort", ("-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + files)
+
+    if sys.version_info[:2] >= (3, 6):
+        try:
+            import black
+        except ImportError:
+            raise KedroCliError(NO_DEPENDENCY_MESSAGE.format("black"))
+        python_call("black", files)
 
 
 @cli.command()
@@ -378,7 +395,7 @@ def activate_nbstripout():
     try:
         import nbstripout  # pylint: disable=unused-import
     except ImportError:
-        raise KedroCliError(NO_NBSTRIPOUT_MESSAGE)
+        raise KedroCliError(NO_DEPENDENCY_MESSAGE.format("nbstripout"))
 
     try:
         res = subprocess.run(

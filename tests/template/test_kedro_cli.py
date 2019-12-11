@@ -71,16 +71,6 @@ class TestActivateNbstripoutCommand:
 
     @staticmethod
     @pytest.fixture
-    def missing_nbstripout(mocker):
-        """
-        Pretend ``nbstripout`` module doesn't exist.
-        In fact, no new imports are possible after that.
-        """
-        sys.modules.pop("nbstripout", None)
-        mocker.patch.object(sys, "path", [])
-
-    @staticmethod
-    @pytest.fixture
     def fake_git_repo(mocker):
         return mocker.patch("subprocess.run", return_value=mocker.Mock(returncode=0))
 
@@ -103,13 +93,12 @@ class TestActivateNbstripoutCommand:
             stderr=subprocess.PIPE,
         )
 
-    def test_nbstripout_not_found(
-        self, fake_kedro_cli, missing_nbstripout, fake_git_repo
-    ):
+    def test_nbstripout_not_installed(self, fake_kedro_cli, fake_git_repo, mocker):
         """
         Run activate-nbstripout target without nbstripout installed
         There should be a clear message about it.
         """
+        mocker.patch.dict("sys.modules", {"nbstripout": None})
 
         result = CliRunner().invoke(fake_kedro_cli.cli, ["activate-nbstripout"])
         assert result.exit_code
@@ -298,16 +287,6 @@ class TestRunCommand:
 
 
 class TestTestCommand:
-    @staticmethod
-    @pytest.fixture
-    def missing_pytest(mocker):
-        """
-        Pretend ``nbstripout`` module doesn't exist.
-        In fact, no new imports are possible after that.
-        """
-        sys.modules.pop("pytest", None)
-        mocker.patch.object(sys, "path", [])
-
     def test_happy_path(self, fake_kedro_cli, python_call_mock):
         result = CliRunner().invoke(
             fake_kedro_cli.cli, ["test", "--random-arg", "value"]
@@ -315,14 +294,63 @@ class TestTestCommand:
         assert not result.exit_code
         python_call_mock.assert_called_once_with("pytest", ("--random-arg", "value"))
 
-    def test_pytest_not_installed(
-        self, fake_kedro_cli, python_call_mock, missing_pytest
-    ):
+    def test_pytest_not_installed(self, fake_kedro_cli, python_call_mock, mocker):
+        mocker.patch.dict("sys.modules", {"pytest": None})
+
         result = CliRunner().invoke(
             fake_kedro_cli.cli, ["test", "--random-arg", "value"]
         )
+        expected_message = fake_kedro_cli.NO_DEPENDENCY_MESSAGE.format("pytest")
+
         assert result.exit_code
-        assert fake_kedro_cli.NO_PYTEST_MESSAGE in result.stdout
+        assert expected_message in result.stdout
+        python_call_mock.assert_not_called()
+
+
+class TestLintCommand:
+    def test_bare_lint(self, fake_kedro_cli, python_call_mock, mocker):
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["lint"])
+        assert not result.exit_code
+
+        files = ("src/tests", "src/fake_package")
+        expected_calls = [
+            mocker.call("flake8", ("--max-line-length=88",) + files),
+            mocker.call(
+                "isort", ("-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + files
+            ),
+        ]
+        if sys.version_info[:2] >= (3, 6):
+            expected_calls.append(mocker.call("black", files))  # pragma: no cover
+
+        assert python_call_mock.call_args_list == expected_calls
+
+    def test_file_lint(self, fake_kedro_cli, python_call_mock, mocker):
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["lint", "kedro"])
+        assert not result.exit_code
+
+        files = ("kedro",)
+        expected_calls = [
+            mocker.call("flake8", ("--max-line-length=88",) + files),
+            mocker.call(
+                "isort", ("-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + files
+            ),
+        ]
+        if sys.version_info[:2] >= (3, 6):
+            expected_calls.append(mocker.call("black", files))  # pragma: no cover
+
+        assert python_call_mock.call_args_list == expected_calls
+
+    @pytest.mark.parametrize("module_name", ["flake8", "isort"])
+    def test_import_not_installed(
+        self, fake_kedro_cli, python_call_mock, module_name, mocker
+    ):
+        mocker.patch.dict("sys.modules", {module_name: None})
+
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["lint"])
+        expected_message = fake_kedro_cli.NO_DEPENDENCY_MESSAGE.format(module_name)
+
+        assert result.exit_code
+        assert expected_message in result.stdout
         python_call_mock.assert_not_called()
 
 

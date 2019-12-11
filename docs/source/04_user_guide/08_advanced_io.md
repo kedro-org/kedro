@@ -211,6 +211,7 @@ Currently the following datasets support versioning:
 - `HDFLocalDataSet`
 - `HDFS3DataSet`
 - `JSONLocalDataSet`
+- `JSONDataSet`
 - `ParquetLocalDataSet`
 - `PickleLocalDataSet`
 - `PickleS3DataSet`
@@ -218,6 +219,7 @@ Currently the following datasets support versioning:
 - `ExcelLocalDataSet`
 - `kedro.contrib.io.azure.CSVBlobDataSet`
 - `kedro.contrib.io.gcs.JSONGCSDataSet`
+- `kedro.contrib.io.gcs.ParquetGCSDataSet`
 - `kedro.contrib.io.feather.FeatherLocalDataSet`
 - `kedro.contrib.io.networkx.NetworkXLocalDataSet`
 - `kedro.contrib.io.parquet.ParquetS3DataSet`

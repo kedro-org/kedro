@@ -8,8 +8,11 @@
   - `JSONGCSDataSet` dataset in `contrib` for working with JSON files in Google Cloud Storage.
   - `MatplotlibS3Writer` dataset in `contrib` for saving Matplotlib images to S3.
   - `PartitionedDataSet` for working with datasets split across multiple files.
+  - `JSONDataSet` dataset for working with JSON files that uses `fsspec` to communicate with the underlying filesystem. Note: it doesn't support `http(s)` protocol for now.
+  - `ParquetGCSDataSet` dataset in `contrib` for working with Parquet files in Google Cloud Storage.
 * Added `s3fs_args` to all S3 datasets.
-* Pipelines can be deducted with `pipeline1 - pipeline2`
+* Pipelines can be deducted with `pipeline1 - pipeline2`.
+* Added a `kedro lint` command to lint your project.
 
 ## Bug fixes and other changes
 * `ParallelRunner` now works with `SparkDataSet`.
@@ -28,7 +31,7 @@
 * Moved the `mem_profiler` decorator to `contrib` and separated the `contrib` decorators so that dependencies are modular. You may need to update your import paths, for example the pyspark decorators should be imported as `from kedro.contrib.decorators.pyspark import <pyspark_decorator>` instead of `from kedro.contrib.decorators import <pyspark_decorator>`.
 
 ## Thanks for supporting contributions
-[Sheldon Tsen](https://github.com/sheldontsen-qb), [@roumail](https://github.com/roumail), [Karlson Lee](https://github.com/i25959341), [Waylon Walker](https://github.com/WaylonWalker), [Deepyaman Datta](https://github.com/deepyaman), [Zain Patel](https://github.com/mzjp2)
+[Sheldon Tsen](https://github.com/sheldontsen-qb), [@roumail](https://github.com/roumail), [Karlson Lee](https://github.com/i25959341), [Waylon Walker](https://github.com/WaylonWalker), [Deepyaman Datta](https://github.com/deepyaman), [Giovanni](https://github.com/plauto), [Zain Patel](https://github.com/mzjp2)
 
 # Release 0.15.4
 
@@ -39,7 +42,7 @@
 * Added Jupyter Notebook line magic (`%run_viz`) to run `kedro viz` in a Notebook cell (requires [`kedro-viz`](https://github.com/quantumblacklabs/kedro-viz) version `3.0.0` or later).
 * Added the following datasets:
   - `NetworkXLocalDataSet` in `kedro.contrib.io.networkx` to load and save local graphs (JSON format) via NetworkX. (by [@josephhaaga](https://github.com/josephhaaga))
-  - `SparkHiveDataSet` in `kedro.contrib.io.pyspark.SparkHiveDataSet` allowing usage of Spark and insert/upsert on non-transactional Hive tables
+  - `SparkHiveDataSet` in `kedro.contrib.io.pyspark.SparkHiveDataSet` allowing usage of Spark and insert/upsert on non-transactional Hive tables.
 * `kedro.contrib.config.TemplatedConfigLoader` now supports name/dict key templating and default values.
 
 ## Bug fixes and other changes

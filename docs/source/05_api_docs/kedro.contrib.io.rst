@@ -32,6 +32,8 @@ kedro.contrib.io
       kedro.contrib.io.yaml_local.YAMLLocalDataSet
       kedro.contrib.io.gcs.JSONGCSDataSet
       kedro.contrib.io.gcs.CSVGCSDataSet
+      kedro.contrib.io.gcs.JSONGCSDataSet
+      kedro.contrib.io.gcs.ParquetGCSDataSet
 
 
    .. rubric:: DataSet Transformers

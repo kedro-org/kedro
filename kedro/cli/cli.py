@@ -500,7 +500,8 @@ def _print_kedro_new_success_message(result):
     click.secho(
         "A best-practice setup includes initialising git and creating "
         "a virtual environment before running `kedro install` to install "
-        "project-specific dependencies. Refer to the Kedro documentation."
+        "project-specific dependencies. Refer to the Kedro documentation: "
+        "https://kedro.readthedocs.io/"
     )
 
 

@@ -37,9 +37,8 @@ from {{ cookiecutter.python_package }}.pipeline import create_pipelines
 
 
 class ProjectContext(KedroContext):
-    """Users can override the remaining methods from the parent class here, or create new ones
-    (e.g. as required by plugins)
-
+    """Users can override the remaining methods from the parent class here,
+    or create new ones (e.g. as required by plugins)
     """
 
     project_name = "{{ cookiecutter.project_name }}"

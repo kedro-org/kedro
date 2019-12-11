@@ -81,7 +81,7 @@ parquet = SparkDataSet('../data/01_raw/2015_points_old_parquet',
 parquet.save(df)
 ```
 
-## Using `SparkDataSet` with the DataCatalog
+## Using `SparkDataSet` with the `DataCatalog`
 
 Since `SparkDataSet` is a concrete implementation of [`AbstractDataSet`](https://kedro.readthedocs.io/en/latest/kedro.io.AbstractDataSet.html), it integrates nicely with the `DataCatalog` and with Kedro's pipelines.
 

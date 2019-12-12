@@ -25,10 +25,13 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import importlib
+import re
+
 import pandas as pd
 import pytest
 
-from kedro.contrib.decorators import pandas_to_spark, retry, spark_to_pandas
+import kedro.contrib.decorators.pyspark as spark_decorators
 from kedro.pipeline import node
 
 
@@ -63,28 +66,41 @@ def inputs(pandas_df, spark_df):
 
 
 def test_pandas_to_spark(three_arg_node, spark_session, pandas_df, inputs):
-    res = three_arg_node.decorate(pandas_to_spark(spark_session)).run(inputs)
+    res = three_arg_node.decorate(spark_decorators.pandas_to_spark(spark_session)).run(
+        inputs
+    )
     for output in ["output1", "output2", "output3"]:
         assert res[output].toPandas().equals(pandas_df)
 
 
+def test_pandas_to_spark_dict(pandas_df, spark_df, spark_session):
+    @spark_decorators.pandas_to_spark(spark_session)
+    def func_with_kwargs(arg1, arg2=None, arg3=None):
+        return [arg1, arg2, arg3]
+
+    res = func_with_kwargs(pandas_df, arg2=spark_df, arg3=pandas_df)
+    for output in res:
+        assert output.toPandas().equals(pandas_df)
+
+
 def test_spark_to_pandas(three_arg_node, pandas_df, inputs):
-    res = three_arg_node.decorate(spark_to_pandas()).run(inputs)
+    res = three_arg_node.decorate(spark_decorators.spark_to_pandas()).run(inputs)
     for output in ["output1", "output2", "output3"]:
         assert res[output].equals(pandas_df)
 
 
-def test_retry():
-    def _bigger(obj):
-        obj["value"] += 1
-        if obj["value"] >= 0:
-            return True
-        raise ValueError("Value less than 0")
+def test_spark_to_pandas_dict(pandas_df, spark_df):
+    @spark_decorators.spark_to_pandas()
+    def func_with_kwargs(arg1, arg2=None, arg3=None):
+        return [arg1, arg2, arg3]
 
-    decorated = node(_bigger, "in", "out").decorate(retry())
+    res = func_with_kwargs(pandas_df, arg2=spark_df, arg3=pandas_df)
+    for output in res:
+        assert output.equals(pandas_df)
 
-    with pytest.raises(ValueError, match=r"Value less than 0"):
-        decorated.run({"in": {"value": -3}})
 
-    decorated2 = node(_bigger, "in", "out").decorate(retry(n_times=2))
-    assert decorated2.run({"in": {"value": -3}})
+def test_spark_import_error(mocker):
+    mocker.patch.dict("sys.modules", {"pyspark.sql": None})
+    pattern = "`pip install kedro[pyspark]` to get the required dependencies"
+    with pytest.raises(ImportError, match=re.escape(pattern)):
+        importlib.reload(spark_decorators)

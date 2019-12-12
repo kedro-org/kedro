@@ -89,8 +89,7 @@ You can store data under the appropriate layer in the `data` folder. We recommen
 
 ## Example pipeline
 
-The `getting-started` project contains a pipeline with example node functions, which can be found in `src/getting_started/nodes/example.py`. The following nodes are provided:
-
+The `getting-started` project contains two pipelines: a `data_engineering` pipeline and `data_science` pipeline, found in `src/getting_started/pipelines`, with relevant example node functions pertaining to each of them. The following data-engineering nodes are provided in `src/getting_started/pipelines/data_engineering/nodes.py`:
 ```eval_rst
 +-----------------+----------------------------------------------------------------+--------------------------+
 | Node            | Description                                                    | Node Function Name       |
@@ -99,6 +98,13 @@ The `getting-started` project contains a pipeline with example node functions, w
 |                 | `Iris dataset <https://archive.ics.uci.edu/ml/datasets/iris>`_ |                          |
 |                 | into train and test samples                                    |                          |
 +-----------------+----------------------------------------------------------------+--------------------------+
+```
+
+As well as data-science nodes in `src/getting_started/pipelines/data_science/nodes.py`:
+```eval_rst
++-----------------+----------------------------------------------------------------+--------------------------+
+| Node            | Description                                                    | Node Function Name       |
++=================+================================================================+==========================+
 | Train model     | Trains a simple multi-class logistic regression model          | :code:`train_model`      |
 +-----------------+----------------------------------------------------------------+--------------------------+
 | Predict         | Makes class predictions given a pre-trained model and a test   | :code:`predict`          |
@@ -139,9 +145,9 @@ In order to run the `getting-started` project, simply execute the following from
 kedro run
 ```
 
-This command calls the `main()` function from `src/getting_started/run.py`, which in turn does the following:
+This command calls the `run()` method on the `ProjectContext` class defined in `src/getting_started/run.py`, which in turn does the following:
 
-1. Instantiates `ProjectContext` class defined in `src/getting_started/run.py`:
+1. Instantiates `ProjectContext` class:
     * Reads relevant configuration
     * Configures Python `logging`
     * Instantiates the `DataCatalog` and feeds a dictionary containing `parameters` config

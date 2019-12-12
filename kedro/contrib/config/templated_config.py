@@ -84,15 +84,15 @@ class TemplatedConfigLoader(ConfigLoader):
         >>> my_context.run(tags, runner, node_names, from_nodes, to_nodes)
 
     The contents of the dictionary resulting from the `globals_pattern` get
-    merged with the `globals_dict`. In case of conflicts, the keys in the
-    `globals_dict` take precedence.
+    merged with the ``globals_dict``. In case of conflicts, the keys in
+    ``globals_dict`` take precedence.
     If the formatting key is missing from the dictionary, the default template
     value is used (the format is "${key|default value}"). If no default is set,
-    a `ValueError` will be raised.
+    a ``ValueError`` will be raised.
 
     Global parameters can be namespaced as well. An example could work as follows:
 
-    globals.yml
+    `globals.yml`
     ::
 
         bucket: "my_s3_bucket"
@@ -110,7 +110,7 @@ class TemplatedConfigLoader(ConfigLoader):
             fea: "04_features"
 
 
-    catalog.yml
+    `catalog.yml`
     ::
 
         raw_boat_data:
@@ -144,10 +144,10 @@ class TemplatedConfigLoader(ConfigLoader):
             globals_pattern: Optional keyword-only argument specifying a glob
                 pattern. Files that match the pattern will be loaded as a
                 formatting dictionary.
-            globals_dict: Optional keyword-only argument specifying a formatting dictionary.
-                This dictionary will get merged with the globals dictionary obtained
-                from the globals_pattern. In case of duplicate keys, the
-                `globals_dict` keys take precedence.
+            globals_dict: Optional keyword-only argument specifying a formatting
+                dictionary. This dictionary will get merged with the globals dictionary
+                obtained from the globals_pattern. In case of duplicate keys, the
+                ``globals_dict`` keys take precedence.
         """
 
         super().__init__(conf_paths)
@@ -157,10 +157,9 @@ class TemplatedConfigLoader(ConfigLoader):
         self._arg_dict = {**self._arg_dict, **globals_dict}
 
     def get(self, *patterns: str) -> Dict[str, Any]:
-        """
-        Tries to resolve the template variables in the config dictionary
-        provided by the ``ConfigLoader`` (super class) `get` method using the
-        dictionary of replacement values obtained in the `__init__` method.
+        """Tries to resolve the template variables in the config dictionary
+        provided by the ``ConfigLoader`` (super class) ``get`` method using the
+        dictionary of replacement values obtained in the ``__init__`` method.
 
         Args:
             patterns: Glob patterns to match. Files, which names match
@@ -168,11 +167,13 @@ class TemplatedConfigLoader(ConfigLoader):
 
         Returns:
             A Python dictionary with the combined configuration from all
-                configuration files. **Note:** any keys that start with `_`
-                will be ignored. String values wrapped in `${...}` will be
-                replaced with the result of the corresponding JMESpath
-                expression evaluated against globals (see `__init` for more
-                details).
+            configuration files. **Note:** any keys that start with `_`
+            will be ignored. String values wrapped in `${...}` will be
+            replaced with the result of the corresponding JMESpath
+            expression evaluated against globals (see `__init` for more
+            configuration files. **Note:** any keys that start with `_`
+            details).
+
         Raises:
             ValueError: malformed config found.
         """
@@ -186,8 +187,7 @@ class TemplatedConfigLoader(ConfigLoader):
 
 
 def _format_object(val: Any, format_dict: Dict[str, Any]) -> Any:
-    """
-    Recursive function that loops through the values of a map. In case another
+    """Recursive function that loops through the values of a map. In case another
     map or a list is encountered, it calls itself. When a string is encountered,
     it will use the `format_dict` to replace strings that look like `${expr}`,
     where `expr` is a JMESPath expression evaluated against `format_dict`.
@@ -205,29 +205,28 @@ def _format_object(val: Any, format_dict: Dict[str, Any]) -> Any:
             larger string.
 
     Examples:
-        val = '${test_key}' with format_dict = {'test_key': 'test_val'} returns
+        val = "${test_key}" with format_dict = {'test_key': 'test_val'} returns
             'test_val'
         val = 5 (i.e. not a dict, list or string) returns 5
-        val = 'test_key' (i.e. does not match ${...} pattern returns 'test_key'
+        val = "test_key" (i.e. does not match ${...} pattern returns 'test_key'
             (irrespective of `format_dict`)
-        val = '${wrong_test_key}' with format_dict = {'test_key': 'test_val'}
-            raises `ValueError`
-        val = 'string-with-${test_key}' with format_dict = {'test_key': 1000}
-            returns 'string-with-1000'
+        val = "${wrong_test_key}" with format_dict = {'test_key': 'test_val'}
+            raises ``ValueError``
+        val = "string-with-${test_key}" with format_dict = {'test_key': 1000}
+            returns "string-with-1000"
         val = "${wrong_test_key|default_value}" with format_dict = {}
             returns 'default_value'
 
     Args:
-        val: If this is a string of the format ${expr}, it gets replaced
+        val: If this is a string of the format `${expr}`, it gets replaced
             by the result of JMESPath expression
         format_dict: A lookup from string to string with replacement values
 
     Returns:
-        String, formatted according to the `format_dict`.
+        A string formatted according to the ``format_dict`` input.
 
     Raises:
-        ValueError: the input data is malformed.
-
+        ValueError: The input data is malformed.
     """
 
     def _format_string(match):

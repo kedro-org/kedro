@@ -32,7 +32,7 @@ from time import sleep
 
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline, node
-from kedro.pipeline.decorators import log_time, mem_profile
+from kedro.pipeline.decorators import log_time
 from kedro.runner import SequentialRunner
 
 
@@ -94,19 +94,3 @@ def test_log_time_with_partial(recwarn):
         "`partial` function. Partial functions do not have a "
         "`__name__` attribute" in str(warning.message)
     )
-
-
-def test_mem_profile(caplog):
-    caplog.clear()
-    func = mem_profile(sleeping_identity)
-    res = func(1)
-
-    logger_name, severity, message = caplog.record_tuples[0]
-    assert res == 1
-    assert logger_name == "kedro.pipeline.decorators"
-    assert severity == logging.INFO
-    expected = "Running '%s.%s' consumed" % (
-        sleeping_identity.__module__,
-        sleeping_identity.__qualname__,
-    )
-    assert expected in message

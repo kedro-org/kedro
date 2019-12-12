@@ -30,7 +30,6 @@
 ``pyspark``
 """
 
-import pickle
 from copy import deepcopy
 from fnmatch import fnmatch
 from pathlib import Path, PurePosixPath
@@ -61,6 +60,10 @@ def _split_filepath(filepath: str) -> Tuple[str, str]:
     if len(split_) == 2:
         return split_[0] + "://", split_[1]
     return "", split_[0]
+
+
+def _strip_dbfs_prefix(path: str) -> str:
+    return path[len("/dbfs") :] if path.startswith("/dbfs") else path
 
 
 class KedroHdfsInsecureClient(InsecureClient):
@@ -153,7 +156,10 @@ class SparkDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
         """Creates a new instance of ``SparkDataSet``.
 
         Args:
-            filepath: path to a Spark data frame.
+            filepath: path to a Spark data frame. When using Databricks
+                and working with data written to mount path points,
+                specify ``filepath``s for (versioned) ``SparkDataSet``s
+                starting with ``/dbfs/mnt``.
             file_format: file format used during load and save
                 operations. These are formats supported by the running
                 SparkContext include parquet, csv. For a list of supported
@@ -234,20 +240,18 @@ class SparkDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
         return SparkSession.builder.getOrCreate()
 
     def _load(self) -> DataFrame:
-        load_path = self._fs_prefix + str(self._get_load_path())
+        load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_load_path()))
 
         return self._get_spark().read.load(
             load_path, self._file_format, **self._load_args
         )
 
     def _save(self, data: DataFrame) -> None:
-        save_path = str(self._get_save_path())
-        data.write.save(
-            self._fs_prefix + save_path, self._file_format, **self._save_args
-        )
+        save_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_save_path()))
+        data.write.save(save_path, self._file_format, **self._save_args)
 
     def _exists(self) -> bool:
-        load_path = self._fs_prefix + str(self._get_load_path())
+        load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_load_path()))
 
         try:
             self._get_spark().read.load(load_path, self._file_format)
@@ -256,6 +260,3 @@ class SparkDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
                 return False
             raise
         return True
-
-    def __getstate__(self):
-        raise pickle.PicklingError("PySpark datasets can't be serialized")

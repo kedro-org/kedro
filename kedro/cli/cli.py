@@ -493,10 +493,15 @@ def _show_example_config():
 
 
 def _print_kedro_new_success_message(result):
-    click.secho("Project generated in " + str(result.resolve()), fg="green")
     click.secho(
-        "Don't forget to initialise git and create a virtual environment. "
-        "Refer to the Kedro documentation."
+        "Change directory to the project generated in " + str(result.resolve()),
+        fg="green",
+    )
+    click.secho(
+        "A best-practice setup includes initialising git and creating "
+        "a virtual environment before running `kedro install` to install "
+        "project-specific dependencies. Refer to the Kedro documentation: "
+        "https://kedro.readthedocs.io/"
     )
 
 

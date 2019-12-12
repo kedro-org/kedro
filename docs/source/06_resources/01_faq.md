@@ -1,6 +1,6 @@
 # Frequently asked questions
 
-> *Note:* This documentation is based on `Kedro 0.15.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.5`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 ## What is Kedro?
 
@@ -83,7 +83,23 @@ The primary differences to Bonobo ETL and Bubbles are related to the following f
 
 ## What version of Python does Kedro use?
 
-Kedro is built for Python 3.5+.
+Kedro is built for Python 3.5, 3.6 and 3.7.
+
+## How do I upgrade Kedro?
+
+We use [Semantic Versioning](http://semver.org/). The best way to safely upgrade is to check our [release notes](https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md) for any notable breaking changes.
+
+Once Kedro is installed, you can check your version as follows:
+
+```
+kedro --version
+```
+
+To later upgrade Kedro to a different version, simply run:
+
+```
+pip install kedro -U
+```
 
 ## What best practice should I follow to avoid leaking confidential data?
 

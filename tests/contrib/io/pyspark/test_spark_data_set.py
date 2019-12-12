@@ -105,6 +105,11 @@ def versioned_dataset_local(tmp_path, version):
 
 
 @pytest.fixture
+def versioned_dataset_dbfs(tmp_path, version):
+    return SparkDataSet(filepath="/dbfs" + str(tmp_path / FILENAME), version=version)
+
+
+@pytest.fixture
 def versioned_dataset_s3(version):
     return SparkDataSet(
         filepath="s3a://{}/{}".format(BUCKET_NAME, FILENAME),
@@ -276,27 +281,19 @@ class TestSparkDataSet:
         with pytest.raises(DataSetError, match="Other Exception"):
             spark_data_set.exists()
 
-    def test_cant_pickle(self):
-        import pickle
-
-        with pytest.raises(pickle.PicklingError):
-            pickle.dumps(SparkDataSet("bob"))
-
     def test_parallel_runner(self, spark_in, spark_out):
         """Test ParallelRunner with SparkDataSet load and save.
         """
         catalog = DataCatalog(data_sets={"spark_in": spark_in, "spark_out": spark_out})
         pipeline = Pipeline([node(identity, "spark_in", "spark_out")])
         runner = ParallelRunner()
+        result = runner.run(pipeline, catalog)
+        # 'spark_out' is saved in 'tmp_path/input', so the result of run should be empty
+        assert not result
 
-        pattern = (
-            r"The following data_sets cannot be "
-            r"serialized: \[\'spark\_in\'\, \'spark\_out\'\]"
-        )
-        with pytest.raises(AttributeError, match=pattern):
-            runner.run(pipeline, catalog)
-
-    def test_parallel_runner_with_pickle_dataset(self, tmp_path, spark_in, spark_out):
+    def test_parallel_runner_with_pickle_dataset(
+        self, tmp_path, spark_in, spark_out, sample_spark_df
+    ):
         """Test ParallelRunner with SparkDataSet -> PickleDataSet -> SparkDataSet .
         """
         pickle_data = PickleLocalDataSet(
@@ -317,14 +314,16 @@ class TestSparkDataSet:
         )
         runner = ParallelRunner()
 
-        pattern = (
-            r"The following data_sets cannot be "
-            r"serialized: \[\'spark\_in\'\, \'spark\_out\'\]"
+        pattern = r"{0} cannot be serialized. {1} can only be used with serializable data".format(
+            str(sample_spark_df.__class__), str(pickle_data.__class__.__name__)
         )
-        with pytest.raises(AttributeError, match=pattern):
+
+        with pytest.raises(DataSetError, match=pattern):
             runner.run(pipeline, catalog)
 
-    def test_parallel_runner_with_memory_dataset(self, spark_in, spark_out):
+    def test_parallel_runner_with_memory_dataset(
+        self, spark_in, spark_out, sample_spark_df
+    ):
         """Run ParallelRunner with SparkDataSet -> MemoryDataSet -> SparkDataSet.
         """
         catalog = DataCatalog(data_sets={"spark_in": spark_in, "spark_out": spark_out})
@@ -337,10 +336,12 @@ class TestSparkDataSet:
         runner = ParallelRunner()
 
         pattern = (
-            r"The following data_sets cannot be "
-            r"serialized: \[\'spark\_in\'\, \'spark\_out\'\]"
+            r"{0} cannot be serialized. ParallelRunner implicit memory datasets "
+            r"can only be used with serializable data".format(
+                str(sample_spark_df.__class__)
+            )
         )
-        with pytest.raises(AttributeError, match=pattern):
+        with pytest.raises(DataSetError, match=pattern):
             runner.run(pipeline, catalog)
 
 
@@ -407,6 +408,64 @@ class TestSparkDataSetVersionedLocal:
         )
         with pytest.raises(DataSetError, match=pattern):
             versioned_local.save(sample_spark_df)
+
+
+class TestSparkDataSetVersionedDBFS:
+    def test_load_latest(  # pylint: disable=too-many-arguments
+        self, mocker, versioned_dataset_dbfs, version, tmp_path, sample_spark_df
+    ):
+        mocked_glob = mocker.patch.object(versioned_dataset_dbfs, "_glob_function")
+        mocked_glob.return_value = [str(tmp_path / FILENAME / version.save / FILENAME)]
+
+        versioned_dataset_dbfs.save(sample_spark_df)
+        reloaded = versioned_dataset_dbfs.load()
+
+        expected_calls = [
+            mocker.call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME))
+        ] * 2
+        assert mocked_glob.call_args_list == expected_calls
+
+        assert reloaded.exceptAll(sample_spark_df).count() == 0
+
+    def test_load_exact(self, tmp_path, sample_spark_df):
+        ts = generate_timestamp()
+        ds_dbfs = SparkDataSet(
+            filepath="/dbfs" + str(tmp_path / FILENAME), version=Version(ts, ts)
+        )
+
+        ds_dbfs.save(sample_spark_df)
+        reloaded = ds_dbfs.load()
+
+        assert reloaded.exceptAll(sample_spark_df).count() == 0
+
+    def test_save(  # pylint: disable=too-many-arguments
+        self, mocker, versioned_dataset_dbfs, version, tmp_path, sample_spark_df
+    ):
+        mocked_glob = mocker.patch.object(versioned_dataset_dbfs, "_glob_function")
+        mocked_glob.return_value = [str(tmp_path / FILENAME / version.save / FILENAME)]
+
+        versioned_dataset_dbfs.save(sample_spark_df)
+
+        mocked_glob.assert_called_once_with(
+            "/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME)
+        )
+        assert (tmp_path / FILENAME / version.save / FILENAME).exists()
+
+    def test_exists(  # pylint: disable=too-many-arguments
+        self, mocker, versioned_dataset_dbfs, version, tmp_path, sample_spark_df
+    ):
+        mocked_glob = mocker.patch.object(versioned_dataset_dbfs, "_glob_function")
+        mocked_glob.return_value = [str(tmp_path / FILENAME / version.save / FILENAME)]
+
+        assert not versioned_dataset_dbfs.exists()
+
+        versioned_dataset_dbfs.save(sample_spark_df)
+        assert versioned_dataset_dbfs.exists()
+
+        expected_calls = [
+            mocker.call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME))
+        ] * 3
+        assert mocked_glob.call_args_list == expected_calls
 
 
 class TestSparkDataSetVersionedS3:

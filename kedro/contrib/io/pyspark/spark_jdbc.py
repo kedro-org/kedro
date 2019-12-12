@@ -26,7 +26,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """SparkJDBCDataSet to load and save a PySpark DataFrame via JDBC."""
-import pickle
 from typing import Any, Dict, Optional
 
 from pyspark.sql import DataFrame, SparkSession
@@ -159,6 +158,3 @@ class SparkJDBCDataSet(DefaultArgumentsMixIn, AbstractDataSet):
 
     def _save(self, data: DataFrame) -> None:
         return data.write.jdbc(self._url, self._table, **self._save_args)
-
-    def __getstate__(self):
-        raise pickle.PicklingError("PySpark datasets can't be serialized")

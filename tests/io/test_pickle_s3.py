@@ -128,6 +128,19 @@ class TestPickleS3DataSet:
         assert loaded_data == DUMMY_PICKABLE_OBJECT
 
     @pytest.mark.usefixtures("mocked_s3_object")
+    def test_load_with_protocol(self):
+        """Test loading the data from S3."""
+        s3_data_set = PickleS3DataSet(
+            filepath="s3://{}/{}".format(BUCKET_NAME, FILENAME),
+            credentials={
+                "aws_access_key_id": "YOUR_KEY",
+                "aws_secret_access_key": "YOUR SECRET",
+            },
+        )
+        loaded_data = s3_data_set.load()
+        assert loaded_data == DUMMY_PICKABLE_OBJECT
+
+    @pytest.mark.usefixtures("mocked_s3_object")
     def test_load_args(self, s3_data_set_with_args):
         """Test loading the data from S3 with options."""
         loaded_data = s3_data_set_with_args.load()
@@ -192,6 +205,21 @@ class TestPickleS3DataSet:
         assert loaded_data == new_data
 
     @pytest.mark.usefixtures("mocked_s3_object")
+    def test_save_with_protocol(self):
+        """Test saving the data to S3."""
+        s3_data_set = PickleS3DataSet(
+            filepath="s3://{}/{}".format(BUCKET_NAME, FILENAME),
+            credentials={
+                "aws_access_key_id": "YOUR_KEY",
+                "aws_secret_access_key": "YOUR SECRET",
+            },
+        )
+        new_data = {"x": "y"}
+        s3_data_set.save(new_data)
+        loaded_data = s3_data_set.load()
+        assert loaded_data == new_data
+
+    @pytest.mark.usefixtures("mocked_s3_object")
     def test_save_args(self, s3_data_set_with_args):
         """Test saving the data to S3 with options."""
         new_data = {"x": "y"}
@@ -199,8 +227,30 @@ class TestPickleS3DataSet:
         loaded_data = s3_data_set_with_args.load()
         assert loaded_data == new_data
 
+    @pytest.mark.usefixtures("mocked_s3_object")
+    def test_unserialisable_data(self, s3_data_set):
+        """Test saving the data to S3 with options."""
+
+        def closure_cant_be_pickled():
+            pass  # pragma: no cover
+
+        new_data = closure_cant_be_pickled
+        pattern = r"{0} cannot be serialized. {1} can only be used with serializable data".format(
+            str(new_data.__class__), str(s3_data_set.__class__.__name__)
+        )
+        with pytest.raises(DataSetError, match=pattern):
+            s3_data_set.save(new_data)
+
     def test_serializable(self, s3_data_set):
         ForkingPickler.dumps(s3_data_set)
+
+    @pytest.mark.usefixtures("mocked_s3_object")
+    def test_s3fs_args_propagated(self, mocker):
+        mock = mocker.patch("kedro.io.pickle_s3.S3FileSystem")
+        PickleS3DataSet(
+            FILENAME, BUCKET_NAME, AWS_CREDENTIALS, s3fs_args=dict(custom=42)
+        )
+        mock.assert_called_with(client_kwargs=mocker.ANY, custom=42)
 
 
 @pytest.mark.usefixtures("s3fs_cleanup", "mocked_s3_bucket")

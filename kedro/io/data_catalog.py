@@ -40,7 +40,6 @@ from warnings import warn
 from kedro.io.core import (
     AbstractDataSet,
     DataSetAlreadyExistsError,
-    DataSetError,
     DataSetNotFoundError,
     generate_timestamp,
 )
@@ -265,11 +264,6 @@ class DataCatalog:
             )
 
         for ds_name, ds_config in catalog.items():
-            if "type" not in ds_config:
-                raise DataSetError(
-                    "`type` is missing from DataSet '{}' "
-                    "catalog configuration".format(ds_name)
-                )
             if CREDENTIALS_KEY in ds_config:
                 ds_config[CREDENTIALS_KEY] = _get_credentials(
                     ds_config.pop(CREDENTIALS_KEY), credentials  # credentials name

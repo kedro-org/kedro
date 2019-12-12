@@ -33,9 +33,11 @@ import sys
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
+import anyconfig
 import pytest
 from click.testing import CliRunner
 
+from kedro.context import KEDRO_ENV_VAR
 from kedro.runner import ParallelRunner, SequentialRunner
 
 
@@ -69,16 +71,6 @@ class TestActivateNbstripoutCommand:
 
     @staticmethod
     @pytest.fixture
-    def missing_nbstripout(mocker):
-        """
-        Pretend ``nbstripout`` module doesn't exist.
-        In fact, no new imports are possible after that.
-        """
-        sys.modules.pop("nbstripout", None)
-        mocker.patch.object(sys, "path", [])
-
-    @staticmethod
-    @pytest.fixture
     def fake_git_repo(mocker):
         return mocker.patch("subprocess.run", return_value=mocker.Mock(returncode=0))
 
@@ -101,13 +93,12 @@ class TestActivateNbstripoutCommand:
             stderr=subprocess.PIPE,
         )
 
-    def test_nbstripout_not_found(
-        self, fake_kedro_cli, missing_nbstripout, fake_git_repo
-    ):
+    def test_nbstripout_not_installed(self, fake_kedro_cli, fake_git_repo, mocker):
         """
         Run activate-nbstripout target without nbstripout installed
         There should be a clear message about it.
         """
+        mocker.patch.dict("sys.modules", {"nbstripout": None})
 
         result = CliRunner().invoke(fake_kedro_cli.cli, ["activate-nbstripout"])
         assert result.exit_code
@@ -130,6 +121,22 @@ class TestRunCommand:
     def fake_load_context(mocker, fake_kedro_cli):
         context = mocker.Mock()
         yield mocker.patch.object(fake_kedro_cli, "load_context", return_value=context)
+
+    @staticmethod
+    @pytest.fixture(params=["run_config.yml", "run_config.json"])
+    def fake_run_config(request, fake_root_dir):
+        config_path = str(fake_root_dir / request.param)
+        anyconfig.dump(
+            {
+                "run": {
+                    "pipeline": "pipeline1",
+                    "tag": ["tag1", "tag2"],
+                    "node_names": ["node1", "node2"],
+                }
+            },
+            config_path,
+        )
+        return config_path
 
     def test_run_successfully(self, fake_kedro_cli, fake_load_context, mocker):
         result = CliRunner().invoke(fake_kedro_cli.cli, ["run"])
@@ -198,18 +205,88 @@ class TestRunCommand:
             ParallelRunner,
         )
 
+    @pytest.mark.parametrize("config_flag", ["--config", "-c"])
+    def test_run_with_config(
+        self, config_flag, fake_kedro_cli, fake_load_context, fake_run_config, mocker
+    ):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["run", config_flag, fake_run_config]
+        )
+        assert not result.exit_code
+
+        fake_load_context.return_value.run.assert_called_once_with(
+            tags=("tag1", "tag2"),
+            runner=mocker.ANY,
+            node_names=("node1", "node2"),
+            from_nodes=[],
+            to_nodes=[],
+            from_inputs=[],
+            load_versions={},
+            pipeline_name="pipeline1",
+        )
+
+    def test_run_env_environment_var(
+        self, fake_kedro_cli, fake_load_context, fake_repo_path, monkeypatch, mocker
+    ):
+        monkeypatch.setenv("KEDRO_ENV", "my_special_env")
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["run"])
+        assert not result.exit_code
+
+        fake_load_context.assert_called_once_with(
+            Path.cwd(), env="my_special_env", extra_params=mocker.ANY
+        )
+
+    @pytest.mark.parametrize(
+        "cli_arg,expected_extra_params",
+        [
+            ("foo:bar", {"foo": "bar"}),
+            (
+                "foo:123.45, bar:1a,baz:678. ,qux:1e-2,quux:0,quuz:",
+                {
+                    "foo": 123.45,
+                    "bar": "1a",
+                    "baz": 678,
+                    "qux": 0.01,
+                    "quux": 0,
+                    "quuz": "",
+                },
+            ),
+            ("foo:bar,baz:fizz:buzz", {"foo": "bar", "baz": "fizz:buzz"}),
+            (
+                "foo:bar, baz: https://example.com",
+                {"foo": "bar", "baz": "https://example.com"},
+            ),
+            ("foo:bar,baz:fizz buzz", {"foo": "bar", "baz": "fizz buzz"}),
+            ("foo:bar, foo : fizz buzz  ", {"foo": "fizz buzz"}),
+        ],
+    )
+    def test_run_extra_params(
+        self, mocker, fake_kedro_cli, fake_load_context, cli_arg, expected_extra_params
+    ):
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["run", "--params", cli_arg])
+
+        assert not result.exit_code
+        fake_load_context.assert_called_once_with(
+            Path.cwd(), env=mocker.ANY, extra_params=expected_extra_params
+        )
+
+    @pytest.mark.parametrize("bad_arg", ["bad", "foo:bar,bad"])
+    def test_bad_extra_params(self, fake_kedro_cli, fake_load_context, bad_arg):
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["run", "--params", bad_arg])
+        assert result.exit_code
+        assert (
+            "Item `bad` must contain a key and a value separated by `:`"
+            in result.stdout
+        )
+
+    @pytest.mark.parametrize("bad_arg", [":", ":value", " :value"])
+    def test_bad_params_key(self, fake_kedro_cli, fake_load_context, bad_arg):
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["run", "--params", bad_arg])
+        assert result.exit_code
+        assert "Parameter key cannot be an empty string" in result.stdout
+
 
 class TestTestCommand:
-    @staticmethod
-    @pytest.fixture
-    def missing_pytest(mocker):
-        """
-        Pretend ``nbstripout`` module doesn't exist.
-        In fact, no new imports are possible after that.
-        """
-        sys.modules.pop("pytest", None)
-        mocker.patch.object(sys, "path", [])
-
     def test_happy_path(self, fake_kedro_cli, python_call_mock):
         result = CliRunner().invoke(
             fake_kedro_cli.cli, ["test", "--random-arg", "value"]
@@ -217,14 +294,63 @@ class TestTestCommand:
         assert not result.exit_code
         python_call_mock.assert_called_once_with("pytest", ("--random-arg", "value"))
 
-    def test_pytest_not_installed(
-        self, fake_kedro_cli, python_call_mock, missing_pytest
-    ):
+    def test_pytest_not_installed(self, fake_kedro_cli, python_call_mock, mocker):
+        mocker.patch.dict("sys.modules", {"pytest": None})
+
         result = CliRunner().invoke(
             fake_kedro_cli.cli, ["test", "--random-arg", "value"]
         )
+        expected_message = fake_kedro_cli.NO_DEPENDENCY_MESSAGE.format("pytest")
+
         assert result.exit_code
-        assert fake_kedro_cli.NO_PYTEST_MESSAGE in result.stdout
+        assert expected_message in result.stdout
+        python_call_mock.assert_not_called()
+
+
+class TestLintCommand:
+    def test_bare_lint(self, fake_kedro_cli, python_call_mock, mocker):
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["lint"])
+        assert not result.exit_code
+
+        files = ("src/tests", "src/fake_package")
+        expected_calls = [
+            mocker.call("flake8", ("--max-line-length=88",) + files),
+            mocker.call(
+                "isort", ("-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + files
+            ),
+        ]
+        if sys.version_info[:2] >= (3, 6):
+            expected_calls.append(mocker.call("black", files))  # pragma: no cover
+
+        assert python_call_mock.call_args_list == expected_calls
+
+    def test_file_lint(self, fake_kedro_cli, python_call_mock, mocker):
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["lint", "kedro"])
+        assert not result.exit_code
+
+        files = ("kedro",)
+        expected_calls = [
+            mocker.call("flake8", ("--max-line-length=88",) + files),
+            mocker.call(
+                "isort", ("-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + files
+            ),
+        ]
+        if sys.version_info[:2] >= (3, 6):
+            expected_calls.append(mocker.call("black", files))  # pragma: no cover
+
+        assert python_call_mock.call_args_list == expected_calls
+
+    @pytest.mark.parametrize("module_name", ["flake8", "isort"])
+    def test_import_not_installed(
+        self, fake_kedro_cli, python_call_mock, module_name, mocker
+    ):
+        mocker.patch.dict("sys.modules", {module_name: None})
+
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["lint"])
+        expected_message = fake_kedro_cli.NO_DEPENDENCY_MESSAGE.format(module_name)
+
+        assert result.exit_code
+        assert expected_message in result.stdout
         python_call_mock.assert_not_called()
 
 
@@ -378,28 +504,47 @@ class TestBuildReqsCommand:
 
 
 class TestJupyterNotebookCommand:
-    def test_default_kernel(self, call_mock, fake_kedro_cli, fake_ipython_message):
+    @pytest.fixture
+    def default_jupyter_options(self):
+        return (
+            "jupyter",
+            [
+                "notebook",
+                "--ip",
+                "127.0.0.1",
+                "--NotebookApp.kernel_spec_manager_class=kedro.cli.jupyter.SingleKernelSpecManager",
+                "--KernelSpecManager.default_kernel_name='TestProject'",
+            ],
+        )
+
+    def test_default_kernel(
+        self, python_call_mock, fake_kedro_cli, fake_ipython_message
+    ):
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["jupyter", "notebook", "--ip=0.0.0.0"]
+            fake_kedro_cli.cli, ["jupyter", "notebook", "--ip", "0.0.0.0"]
         )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_called_once_with(False)
-        call_mock.assert_called_once_with(
+        python_call_mock.assert_called_once_with(
+            "jupyter",
             [
-                "jupyter-notebook",
-                "--ip=0.0.0.0",
+                "notebook",
+                "--ip",
+                "0.0.0.0",
                 "--NotebookApp.kernel_spec_manager_class=kedro.cli.jupyter.SingleKernelSpecManager",
                 "--KernelSpecManager.default_kernel_name='TestProject'",
-            ]
+            ],
         )
 
-    def test_all_kernels(self, call_mock, fake_kedro_cli, fake_ipython_message):
+    def test_all_kernels(self, python_call_mock, fake_kedro_cli, fake_ipython_message):
         result = CliRunner().invoke(
             fake_kedro_cli.cli, ["jupyter", "notebook", "--all-kernels"]
         )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_called_once_with(True)
-        call_mock.assert_called_once_with(["jupyter-notebook", "--ip=127.0.0.1"])
+        python_call_mock.assert_called_once_with(
+            "jupyter", ["notebook", "--ip", "127.0.0.1"]
+        )
 
     @pytest.mark.parametrize("help_flag", ["-h", "--help"])
     def test_help(self, help_flag, fake_kedro_cli, fake_ipython_message):
@@ -409,36 +554,113 @@ class TestJupyterNotebookCommand:
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_not_called()
 
+    @pytest.mark.parametrize("env_flag", ["--env", "-e"])
+    def test_env(
+        self, env_flag, fake_kedro_cli, python_call_mock, default_jupyter_options
+    ):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["jupyter", "notebook", env_flag, "my_special_env"]
+        )
+        assert not result.exit_code
+
+        args, kwargs = python_call_mock.call_args
+        assert args == default_jupyter_options
+        assert "env" in kwargs
+        assert KEDRO_ENV_VAR in kwargs["env"]
+        assert kwargs["env"][KEDRO_ENV_VAR] == "my_special_env"
+
+    def test_env_environment_variable(
+        self, fake_kedro_cli, python_call_mock, monkeypatch, default_jupyter_options
+    ):
+        monkeypatch.setenv("KEDRO_ENV", "my_special_env")
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["jupyter", "notebook"])
+        assert not result.exit_code
+
+        args, kwargs = python_call_mock.call_args
+        assert args == default_jupyter_options
+        assert "env" in kwargs
+        assert KEDRO_ENV_VAR in kwargs["env"]
+        assert kwargs["env"][KEDRO_ENV_VAR] == "my_special_env"
+
 
 class TestJupyterLabCommand:
-    def test_default_kernel(self, call_mock, fake_kedro_cli, fake_ipython_message):
+    @pytest.fixture
+    def default_jupyter_options(self):
+        return (
+            "jupyter",
+            [
+                "lab",
+                "--ip",
+                "127.0.0.1",
+                "--NotebookApp.kernel_spec_manager_class=kedro.cli.jupyter.SingleKernelSpecManager",
+                "--KernelSpecManager.default_kernel_name='TestProject'",
+            ],
+        )
+
+    def test_default_kernel(
+        self, python_call_mock, fake_kedro_cli, fake_ipython_message
+    ):
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["jupyter", "lab", "--ip=0.0.0.0"]
+            fake_kedro_cli.cli, ["jupyter", "lab", "--ip", "0.0.0.0"]
         )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_called_once_with(False)
-        call_mock.assert_called_once_with(
+        python_call_mock.assert_called_once_with(
+            "jupyter",
             [
-                "jupyter-lab",
-                "--ip=0.0.0.0",
+                "lab",
+                "--ip",
+                "0.0.0.0",
                 "--NotebookApp.kernel_spec_manager_class=kedro.cli.jupyter.SingleKernelSpecManager",
                 "--KernelSpecManager.default_kernel_name='TestProject'",
-            ]
+            ],
         )
 
-    def test_all_kernels(self, call_mock, fake_kedro_cli, fake_ipython_message):
+    def test_all_kernels(self, python_call_mock, fake_kedro_cli, fake_ipython_message):
         result = CliRunner().invoke(
             fake_kedro_cli.cli, ["jupyter", "lab", "--all-kernels"]
         )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_called_once_with(True)
-        call_mock.assert_called_once_with(["jupyter-lab", "--ip=127.0.0.1"])
+        python_call_mock.assert_called_once_with(
+            "jupyter", ["lab", "--ip", "127.0.0.1"]
+        )
 
     @pytest.mark.parametrize("help_flag", ["-h", "--help"])
     def test_help(self, help_flag, fake_kedro_cli, fake_ipython_message):
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["jupyter", "lab", help_flag])
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, [sys.executable, "-m", "jupyter", "lab", help_flag]
+        )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_not_called()
+
+    @pytest.mark.parametrize("env_flag", ["--env", "-e"])
+    def test_env(
+        self, env_flag, fake_kedro_cli, python_call_mock, default_jupyter_options
+    ):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["jupyter", "lab", env_flag, "my_special_env"]
+        )
+        assert not result.exit_code
+
+        args, kwargs = python_call_mock.call_args
+        assert args == default_jupyter_options
+        assert "env" in kwargs
+        assert KEDRO_ENV_VAR in kwargs["env"]
+        assert kwargs["env"][KEDRO_ENV_VAR] == "my_special_env"
+
+    def test_env_environment_variable(
+        self, fake_kedro_cli, python_call_mock, monkeypatch, default_jupyter_options
+    ):
+        monkeypatch.setenv("KEDRO_ENV", "my_special_env")
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["jupyter", "lab"])
+        assert not result.exit_code
+
+        args, kwargs = python_call_mock.call_args
+        assert args == default_jupyter_options
+        assert "env" in kwargs
+        assert KEDRO_ENV_VAR in kwargs["env"]
+        assert kwargs["env"][KEDRO_ENV_VAR] == "my_special_env"
 
 
 class TestConvertNotebookCommand:

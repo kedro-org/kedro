@@ -83,6 +83,10 @@ class TestMemoryDataSet:
         loaded_data = memory_data_set.load()
         assert _check_equals(loaded_data, input_data)
 
+    def test_load_none(self):
+        loaded_data = MemoryDataSet(None).load()
+        assert loaded_data is None
+
     def test_save(self, memory_data_set, input_data, new_data):
         """Test overriding the data set"""
         memory_data_set.save(data=new_data)

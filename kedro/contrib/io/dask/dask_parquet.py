@@ -63,7 +63,7 @@ class ParquetDaskDataSet(DefaultArgumentsMixIn, AbstractDataSet):
             >>>                                 'aws_access_key_id': 'YOUR_KEY',
             >>>                                 'aws_secret_access_key': 'YOUR SECRET'},
             >>>                         save_args={"compression": "GZIP"})
-            >>> data_set.save(data)
+            >>> data_set.save(ddf)
             >>> reloaded = data_set.load()
             >>>
             >>> assert ddf.compute().equals(reloaded.compute())
@@ -103,6 +103,8 @@ class ParquetDaskDataSet(DefaultArgumentsMixIn, AbstractDataSet):
             filepath=self._filepath,
             load_args=self._load_args,
             save_args=self._save_args,
+            protocol=self._protocol,
+            storage_options=self._storage_options,
         )
 
     def _load(self) -> dd.DataFrame:

@@ -204,5 +204,4 @@ class TestParquetDaskDataSet:
         data_set.save(dummy_dd_dataframe)
         assert data_set.exists()
         loaded_data = data_set.load()
-
-        assert_frame_equal(dummy_dd_dataframe.compute(), loaded_data.compute())
+        dummy_dd_dataframe.compute().equals(loaded_data.compute())

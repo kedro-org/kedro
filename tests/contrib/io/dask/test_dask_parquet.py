@@ -170,7 +170,8 @@ class TestParquetDaskDataSet:
         for k, v in AWS_CREDENTIALS.items():
             assert kwargs[k] == v
 
-    def test_save_data(self, s3_data_set, mocked_s3_bucket):
+    @pytest.mark.usefixtures("mocked_s3_bucket")
+    def test_save_data(self, s3_data_set):
         """Test saving the data to S3."""
         pd_data = pd.DataFrame(
             {"col1": ["a", "b"], "col2": ["c", "d"], "col3": ["e", "f"]}

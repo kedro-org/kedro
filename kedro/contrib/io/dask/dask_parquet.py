@@ -28,7 +28,7 @@
 
 """``ParquetDaskDataSet`` is a data set used to load and save data to parquet files using Dask"""
 from copy import deepcopy
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import dask.dataframe as dd
 import fsspec
@@ -75,9 +75,9 @@ class ParquetDaskDataSet(DefaultArgumentsMixIn, AbstractDataSet):
     def __init__(
         self,
         filepath: str,
-        storage_options: Optional[Dict[str, Any]] = None,
-        load_args: Optional[Dict[str, Any]] = None,
-        save_args: Optional[Dict[str, Any]] = None,
+        storage_options: Dict[str, Any] = None,
+        load_args: Dict[str, Any] = None,
+        save_args: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``ParquetDaskDataSet`` pointing to concrete
         parquet files.

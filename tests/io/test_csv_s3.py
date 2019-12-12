@@ -26,7 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pylint: disable=protected-access,no-member
+# pylint: disable=no-member
 
 from multiprocessing.reduction import ForkingPickler
 

@@ -48,6 +48,7 @@
 
 ## Thanks for supporting contributions
 [Sheldon Tsen](https://github.com/sheldontsen-qb), [@roumail](https://github.com/roumail), [Karlson Lee](https://github.com/i25959341), [Waylon Walker](https://github.com/WaylonWalker), [Deepyaman Datta](https://github.com/deepyaman), [Giovanni](https://github.com/plauto), [Zain Patel](https://github.com/mzjp2)
+
 # Release 0.15.4
 
 ## Major features and improvements

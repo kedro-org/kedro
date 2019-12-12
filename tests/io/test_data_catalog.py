@@ -380,7 +380,7 @@ class TestDataCatalogVersioned:
             journal=journal
         )
 
-        assert catalog._journal == journal  # pylint: disable=protected-access
+        assert catalog._journal == journal
 
         catalog.save("boats", dummy_dataframe)
         path = Path(sane_config["catalog"]["boats"]["filepath"])

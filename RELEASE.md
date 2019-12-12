@@ -1,18 +1,20 @@
 # Release 0.15.5
 
 ## Major features and improvements
-* Load `kedro run` CLI options from a configuration file with the `--config` flag (e.g. `kedro run --config run_config.yml`)
-* Run parametrised pipeline runs with the `--params` flag (e.g. `kedro run --params param1:value1,param2:value2`).
+* New CLI commands and command flags:
+  - Load mulitple `kedro run` CLI flags from a configuration file with the `--config` flag (e.g. `kedro run --config run_config.yml`)
+  - Run parametrised pipeline runs with the `--params` flag (e.g. `kedro run --params param1:value1,param2:value2`).
+  - Lint your project code using the `kedro lint` command, your project is linted with [`black`](https://github.com/psf/black) (Python 3.6+), [`flake8`](https://gitlab.com/pycqa/flake8) and [`isort`](https://github.com/timothycrosley/isort).
 * Load specific environments with Jupyter notebooks using `KEDRO_ENV` which will globally set `run`, `jupyter notebook` and `jupyter lab` commands using environment variables.
 * Added the following datasets:
+  - `CSVGCSDataSet` dataset in `contrib` for working with CSV files in Google Cloud Storage.
+  - `ParquetGCSDataSet` dataset in `contrib` for working with Parquet files in Google Cloud Storage.
   - `JSONGCSDataSet` dataset in `contrib` for working with JSON files in Google Cloud Storage.
   - `MatplotlibS3Writer` dataset in `contrib` for saving Matplotlib images to S3.
   - `PartitionedDataSet` for working with datasets split across multiple files.
-  - `JSONDataSet` dataset for working with JSON files that uses `fsspec` to communicate with the underlying filesystem. Note: it doesn't support `http(s)` protocol for now.
-  - `ParquetGCSDataSet` dataset in `contrib` for working with Parquet files in Google Cloud Storage.
+  - `JSONDataSet` dataset for working with JSON files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem. It doesn't support `http(s)` protocol for now.
 * Added `s3fs_args` to all S3 datasets.
 * Pipelines can be deducted with `pipeline1 - pipeline2`.
-* Added a `kedro lint` command to lint your project.
 
 ## Bug fixes and other changes
 * `ParallelRunner` now works with `SparkDataSet`.
@@ -23,7 +25,7 @@
 * Implemented Databricks-compatible dataset versioning for `SparkDataSet`.
 * Fixed a bug where `kedro package` would fail in certain situations where `kedro build-reqs` was used to generate `requirements.txt`.
 * Made `bucket_name` argument optional for the following datasets: `CSVS3DataSet`, `HDFS3DataSet`, `PickleS3DataSet`, `contrib.io.parquet.ParquetS3DataSet`, `contrib.io.gcs.JSONGCSDataSet` - bucket name can now be included into the filepath along with the filesystem protocol (e.g. `s3://bucket-name/path/to/key.csv`).
-* Documentation improvements
+* Documentation improvements and fixes.
 
 ## Breaking changes to the API
 * Renamed entry point for running pip-installed projects to `run_package()` instead of `main()` in `src/<package>/run.py`.

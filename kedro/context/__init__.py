@@ -30,4 +30,9 @@
 project context.
 """
 
-from .context import KedroContext, KedroContextError, load_context  # NOQA
+from .context import (  # NOQA
+    KEDRO_ENV_VAR,
+    KedroContext,
+    KedroContextError,
+    load_context,
+)

@@ -33,25 +33,26 @@ import re
 import shutil
 import subprocess
 import sys
+import webbrowser
 from collections import Counter
 from glob import iglob
 from pathlib import Path
-import webbrowser
+from typing import Any, Dict, Iterable, List
 
+import anyconfig
 import click
 from click import secho, style
 from kedro.cli import main as kedro_main
 from kedro.cli.utils import (
     KedroCliError,
     call,
+    export_nodes,
     forward_command,
     python_call,
-    export_nodes,
 )
-from kedro.utils import load_obj
+from kedro.context import KEDRO_ENV_VAR, load_context
 from kedro.runner import SequentialRunner
-from kedro.context import load_context
-from typing import Iterable, List, Dict
+from kedro.utils import load_obj
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -60,15 +61,8 @@ PROJ_PATH = Path(__file__).resolve().parent
 os.environ["IPYTHONDIR"] = str(PROJ_PATH / ".ipython")
 
 
-NO_PYTEST_MESSAGE = """
-pytest is not installed. Please make sure pytest is in
-src/requirements.txt and run `kedro install`.
-"""
-
-NO_NBSTRIPOUT_MESSAGE = """
-nbstripout is not installed. Please make sure nbstripout is in
-`src/requirements.txt` and run `kedro install`.
-"""
+NO_DEPENDENCY_MESSAGE = """{0} is not installed. Please make sure {0} is in
+src/requirements.txt and run `kedro install`."""
 
 TAG_ARG_HELP = """Construct the pipeline using only nodes which have this tag
 attached. Option can be used multiple times, what results in a
@@ -107,9 +101,44 @@ overwrite its contents."""
 
 LOAD_VERSION_HELP = """Specify a particular dataset version (timestamp) for loading."""
 
+CONFIG_FILE_HELP = """Specify a YAML configuration file to load the run
+command arguments from. If command line arguments are provided, they will
+override the loaded ones."""
+
+PARAMS_ARG_HELP = """Specify extra parameters that you want to pass
+to the context initializer. Items must be separated by comma, keys - by colon,
+example: param1:value1,param2:value2. Each parameter is split by the first comma,
+so parameter values are allowed to contain colons, parameter keys are not."""
+
 
 def _split_string(ctx, param, value):
     return [item for item in value.split(",") if item]
+
+
+def _split_params(ctx, param, value):
+    result = {}
+    for item in _split_string(ctx, param, value):
+        item = item.split(":", 1)
+        if len(item) != 2:
+            ctx.fail(
+                "Invalid format of `{}` option: Item `{}` must contain a key and "
+                "a value separated by `:`.".format(param.name, item[0])
+            )
+        key = item[0].strip()
+        if not key:
+            ctx.fail(
+                "Invalid format of `{}` option: Parameter key cannot be "
+                "an empty string.".format(param.name)
+            )
+        value = item[1].strip()
+        try:
+            value = float(value)
+        except ValueError:
+            pass
+        else:
+            value = int(value) if value.is_integer() else value
+        result[key] = value
+    return result
 
 
 def _reformat_load_versions(ctx, param, value) -> Dict[str, str]:
@@ -132,6 +161,20 @@ def _reformat_load_versions(ctx, param, value) -> Dict[str, str]:
     return load_versions_dict
 
 
+def _config_file_callback(ctx, param, value):
+    """Config file callback, that replaces command line options with config file
+    values. If command line options are passed, they override config file values.
+    """
+    ctx.default_map = ctx.default_map or {}
+    section = ctx.info_name
+
+    if value:
+        config = anyconfig.load(value)[section]
+        ctx.default_map.update(config)
+
+    return value
+
+
 @click.group(context_settings=CONTEXT_SETTINGS, name=__file__)
 def cli():
     """Command line tools for manipulating a Kedro project."""
@@ -152,7 +195,15 @@ def cli():
     "--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP
 )
 @click.option("--parallel", "-p", is_flag=True, multiple=False, help=PARALLEL_ARG_HELP)
-@click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
+@click.option(
+    "--env",
+    "-e",
+    type=str,
+    default=None,
+    multiple=False,
+    envvar="KEDRO_ENV",
+    help=ENV_ARG_HELP,
+)
 @click.option("--tag", "-t", type=str, multiple=True, help=TAG_ARG_HELP)
 @click.option(
     "--load-version",
@@ -163,6 +214,16 @@ def cli():
     callback=_reformat_load_versions,
 )
 @click.option("--pipeline", type=str, default=None, help=PIPELINE_ARG_HELP)
+@click.option(
+    "--config",
+    "-c",
+    type=click.Path(exists=True, dir_okay=False, resolve_path=True),
+    help=CONFIG_FILE_HELP,
+    callback=_config_file_callback,
+)
+@click.option(
+    "--params", type=str, default="", help=PARAMS_ARG_HELP, callback=_split_params
+)
 def run(
     tag,
     env,
@@ -174,6 +235,8 @@ def run(
     from_inputs,
     load_version,
     pipeline,
+    config,
+    params,
 ):
     """Run the pipeline."""
     if parallel and runner:
@@ -185,7 +248,7 @@ def run(
         runner = "ParallelRunner"
     runner_class = load_obj(runner, "kedro.runner") if runner else SequentialRunner
 
-    context = load_context(Path.cwd(), env=env)
+    context = load_context(Path.cwd(), env=env, extra_params=params)
     context.run(
         tags=tag,
         runner=runner_class(),
@@ -204,9 +267,34 @@ def test(args):
     try:
         import pytest  # pylint: disable=unused-import
     except ImportError:
-        raise KedroCliError(NO_PYTEST_MESSAGE)
+        raise KedroCliError(NO_DEPENDENCY_MESSAGE.format("pytest"))
     else:
         python_call("pytest", args)
+
+
+@cli.command()
+@click.argument("files", type=click.Path(exists=True), nargs=-1)
+def lint(files):
+    """Run flake8, isort and (on Python >=3.6) black."""
+    # pylint: disable=unused-import
+    if not files:
+        files = ("src/tests", "src/{{ cookiecutter.python_package }}")
+
+    try:
+        import flake8
+        import isort
+    except ImportError as exc:
+        raise KedroCliError(NO_DEPENDENCY_MESSAGE.format(exc.name))
+
+    python_call("flake8", ("--max-line-length=88",) + files)
+    python_call("isort", ("-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + files)
+
+    if sys.version_info[:2] >= (3, 6):
+        try:
+            import black
+        except ImportError:
+            raise KedroCliError(NO_DEPENDENCY_MESSAGE.format("black"))
+        python_call("black", files)
 
 
 @cli.command()
@@ -307,7 +395,7 @@ def activate_nbstripout():
     try:
         import nbstripout  # pylint: disable=unused-import
     except ImportError:
-        raise KedroCliError(NO_NBSTRIPOUT_MESSAGE)
+        raise KedroCliError(NO_DEPENDENCY_MESSAGE.format("nbstripout"))
 
     try:
         res = subprocess.run(
@@ -340,6 +428,18 @@ def _build_jupyter_command(
     return cmd + list(args)
 
 
+def _build_jupyter_env(kedro_env: str) -> Dict[str, Any]:
+    """Build the environment dictionary that gets injected into the subprocess running
+    Jupyter. Since the subprocess has access only to the environment variables passed
+    in, we need to copy the current environment and add ``KEDRO_ENV_VAR``.
+    """
+    if not kedro_env:
+        return {}
+    jupyter_env = os.environ.copy()
+    jupyter_env[KEDRO_ENV_VAR] = kedro_env
+    return {"env": jupyter_env}
+
+
 @cli.group()
 def jupyter():
     """Open Jupyter Notebook / Lab with project specific variables loaded, or
@@ -350,7 +450,16 @@ def jupyter():
 @forward_command(jupyter, "notebook", forward_help=True)
 @click.option("--ip", type=str, default="127.0.0.1")
 @click.option("--all-kernels", is_flag=True, default=False)
-def jupyter_notebook(ip, all_kernels, args):
+@click.option(
+    "--env",
+    "-e",
+    type=str,
+    default=None,
+    multiple=False,
+    envvar=KEDRO_ENV_VAR,
+    help=ENV_ARG_HELP,
+)
+def jupyter_notebook(ip, all_kernels, env, args):
     """Open Jupyter Notebook with project specific variables loaded."""
     if "-h" not in args and "--help" not in args:
         ipython_message(all_kernels)
@@ -358,19 +467,32 @@ def jupyter_notebook(ip, all_kernels, args):
     arguments = _build_jupyter_command(
         "notebook", ip=ip, all_kernels=all_kernels, args=args
     )
-    python_call("jupyter", arguments)
+
+    python_call_kwargs = _build_jupyter_env(env)
+    python_call("jupyter", arguments, **python_call_kwargs)
 
 
 @forward_command(jupyter, "lab", forward_help=True)
 @click.option("--ip", type=str, default="127.0.0.1")
 @click.option("--all-kernels", is_flag=True, default=False)
-def jupyter_lab(ip, all_kernels, args):
+@click.option(
+    "--env",
+    "-e",
+    type=str,
+    default=None,
+    multiple=False,
+    envvar=KEDRO_ENV_VAR,
+    help=ENV_ARG_HELP,
+)
+def jupyter_lab(ip, all_kernels, env, args):
     """Open Jupyter Lab with project specific variables loaded."""
     if "-h" not in args and "--help" not in args:
         ipython_message(all_kernels)
 
     arguments = _build_jupyter_command("lab", ip=ip, all_kernels=all_kernels, args=args)
-    python_call("jupyter", arguments)
+
+    python_call_kwargs = _build_jupyter_env(env)
+    python_call("jupyter", arguments, **python_call_kwargs)
 
 
 @jupyter.command("convert")

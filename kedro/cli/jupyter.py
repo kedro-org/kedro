@@ -43,8 +43,7 @@ def collect_line_magic():
 
 
 class SingleKernelSpecManager(KernelSpecManager):
-    """
-    A custom KernelSpec manager to be used by Kedro projects.
+    """A custom KernelSpec manager to be used by Kedro projects.
     It limits the kernels to the default one only,
     to make it less confusing for users, and gives it a sensible name.
     """

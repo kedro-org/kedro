@@ -1,6 +1,6 @@
 # The Data Catalog
 
-> *Note:* This documentation is based on `Kedro 0.15.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.5`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 This section introduces `catalog.yml`, the project-shareable Data Catalog. The file is located in `conf/base` and is a registry of all data sources available for use by a project; it manages loading and saving of data.
 
@@ -210,42 +210,199 @@ In this example the default `csv` configuration is inserted into `airplanes` and
 
 ## Transcoding datasets
 
-You may come across a situation where you would like to read the same file using two different dataset implementations. For instance, `parquet` files can not only be loaded via the `ParquetLocalDataSet`, but also directly by `SparkDataSet` using `pandas`. To do this, you can define your `catalog.yml` as follows:
+You may come across a situation where you would like to read the same file using two different dataset implementations. Use transcoding when you want to load and save the same file, via its specified `filepath`, using different `DataSet` implementations.
+
+### A typical example of transcoding
+
+For instance, parquet files can not only be loaded via the `ParquetLocalDataSet` using `pandas`, but also directly by `SparkDataSet`. This conversion is typical when coordinating a `Spark` to `pandas` workflow.
+
+To enable transcoding, you will need to define two `DataCatalog` entries for the same dataset in a common format (Parquet, JSON, CSV, etc.) in your `conf/base/catalog.yml`:
 
 ```yaml
-mydata@pandas:
-  type: ParquetLocalDataSet
-  filepath: data/01_raw/data.parquet
+my_dataframe@spark:
+  type: kedro.contrib.io.pyspark.SparkDataSet
+  filepath: data/02_intermediate/data.parquet
 
-mydata@spark:
-    type: kedro.contrib.io.pyspark.SparkDataSet
-    filepath: data/01_raw/data.parquet
+my_dataframe@pandas:
+  type: ParquetLocalDataSet
+  filepath: data/02_intermediate/data.parquet
 ```
 
-In your pipeline, you may refer to either dataset as input or output, and it will ensure the dependencies point to a single dataset `mydata` both while running the pipeline and in the visualisation.
+These entries will be used in the pipeline like this:
+
+```python
+Pipeline(
+    [
+        node(func=my_func1, inputs="spark_input", outputs="my_dataframe@spark"),
+        node(func=my_func2, inputs="my_dataframe@pandas", outputs="pipeline_output"),
+    ]
+)
+```
+
+### How does transcoding work?
+
+In this example, Kedro understands that `my_dataframe` is the same dataset in its `SparkDataSet` and `ParquetLocalDataSet` formats and helps resolve the node execution order.
+
+In the pipeline, Kedro uses the `SparkDataSet` implementation for saving and `ParquetLocalDataSet`
+for loading, so the first node should output a `pyspark.sql.DataFrame`, while the second node would receive a `pandas.Dataframe`.
 
 
 ## Transforming datasets
 
-If you need to augment the loading and / or saving of one or more datasets you can use the transformer API. To do this create a subclass of `AbstractTransformer` that implements your changes and then apply it to your catalog with `DataCatalog.add_transformer`. For example to print the runtimes of load and save operations you could do this:
+Transformers intercept the load and save operations on Kedro `DataSet`s. Use cases that transformers enable include:
+ - Performing data validation,
+ - Tracking operation performance,
+ - And, converting a data format (although we would recommend [Transcoding](https://kedro.readthedocs.io/en/latest/04_user_guide/04_data_catalog.html#transcoding-datasets) for this).
+
+### Applying built-in transformers
+
+The use case of _tracking operation performance_ by applying built-in transformers for monitoring load and save operation latency will be covered.
+
+Transformers are applied at the `DataCatalog` level. To apply the built-in `ProfileTimeTransformer`, you need to:
+1. Navigate to `src/<package_name>/run.py`
+2. Override `_create_catalog` method for your `ProjectContext` class using the following:
 
 ```python
-class PrintTimeTransformer(AbstractTransformer):
+from typing import Dict, Any
+
+from kedro.context import KedroContext
+from kedro.contrib.io.transformers import ProfileTimeTransformer  # new import
+from kedro.io import DataCatalog
+from kedro.versioning import Journal
+
+
+class ProjectContext(KedroContext):
+
+    ...
+    def _create_catalog(self, *args, **kwargs:
+        catalog = super()._create_catalog(*args, **kwargs)
+        profile_time = ProfileTimeTransformer()  # instantiate a built-in transformer
+        catalog.add_transfomer(profile_time) # apply it to the catalog
+        return catalog
+```
+
+Once complete, rerun the pipeline from the terminal and you should see the following logging output:
+
+```console
+$ kedro run
+
+...
+2019-11-13 15:09:01,784 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVLocalDataSet)...
+2019-11-13 15:09:01,827 - ProfileTimeTransformer - INFO - Loading companies took 0.043 seconds
+2019-11-13 15:09:01,828 - kedro.pipeline.node - INFO - Running node: preprocessing_companies: preprocess_companies([companies]) -> [preprocessed_companies]
+2019-11-13 15:09:01,880 - kedro_tutorial.nodes.data_engineering - INFO - Running 'preprocess_companies' took 0.05 seconds
+2019-11-13 15:09:01,880 - kedro_tutorial.nodes.data_engineering - INFO - Running 'preprocess_companies' took 0.05 seconds
+2019-11-13 15:09:01,880 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_companies` (CSVLocalDataSet)...
+2019-11-13 15:09:02,112 - ProfileTimeTransformer - INFO - Saving preprocessed_companies took 0.232 seconds
+2019-11-13 15:09:02,113 - kedro.runner.sequential_runner - INFO - Completed 1 out of 6 tasks
+...
+```
+
+You can notice 2 new `INFO` level log messages from `ProfileTimeTransformer`, which report the corresponding dataset load and save operation latency.
+
+> Pro Tip: You can narrow down the application of the transformer by specifying an optional list of the datasets in `add_transformer`. For example, the command `catalog.add_transformer(profile_time, ["dataset1", "dataset2"])` will apply `profile_time` transformer _only_ to the datasets named `dataset1` and `dataset2`. This may be useful when you need to apply a transformer only to a subset of datasets, rather than all of them.
+
+### Developing your own transformer
+
+The use case of _tracking operation performance_ by developing our own transformer for tracking memory consumption will be covered.
+
+You can profile memory using [memory-profiler](https://github.com/pythonprofilers/memory_profiler). The custom transformer should:
+1. Inherit the `kedro.io.AbstractTransformer` base class
+2. Implement the `load` and `save` method (as show in the example below)
+
+Create `src/<package_name>/memory_profile.py` and then paste the following code into it:
+
+```python
+import logging
+from typing import Callable, Any
+
+from kedro.io import AbstractTransformer
+from memory_profiler import memory_usage
+
+
+def _normalise_mem_usage(mem_usage):
+    # memory_profiler < 0.56.0 returns list instead of float
+    return mem_usage[0] if isinstance(mem_usage, (list, tuple)) else mem_usage
+
+
+class ProfileMemoryTransformer(AbstractTransformer):
+    """ A transformer that logs the maximum memory consumption during load and save calls """
+
+    @property
+    def _logger(self):
+        return logging.getLogger(self.__class__.__name__)
+
     def load(self, data_set_name: str, load: Callable[[], Any]) -> Any:
-        start = time.time()
-        data = load()
-        print("Loading {} took {:0.3f}s".format(data_set_name, time.time() - start))
+        mem_usage, data = memory_usage(
+            (load, [], {}),
+            interval=0.1,
+            max_usage=True,
+            retval=True,
+            include_children=True,
+        )
+        # memory_profiler < 0.56.0 returns list instead of float
+        mem_usage = _normalise_mem_usage(mem_usage)
+
+        self._logger.info(
+            "Loading %s consumed %2.2fMiB memory at peak time", data_set_name, mem_usage
+        )
         return data
 
     def save(self, data_set_name: str, save: Callable[[Any], None], data: Any) -> None:
-        start = time.time()
-        save(data)
-        print("Saving {} took {:0.3}s".format(data_set_name, time.time() - start))
+        mem_usage = memory_usage(
+            (save, [data], {}),
+            interval=0.1,
+            max_usage=True,
+            retval=False,
+            include_children=True,
+        )
+        mem_usage = _normalise_mem_usage(mem_usage)
 
-catalog.add_transformer(PrintTimeTransformer())
+        self._logger.info(
+            "Saving %s consumed %2.2fMiB memory at peak time", data_set_name, mem_usage
+        )
 ```
 
-By default transformers are applied to all datasets in the catalog (including any that are added in the future). The `DataCatalog.add_transformer` method has an additional argument `data_set_names` that lets you limit which data sets the transformer will be applied to.
+Finally, you need to update `ProjectContext._create_catalog` method definition to apply your custom transformer:
+
+```python
+
+...
+from .memory_profile import ProfileMemoryTransformer  # new import
+
+
+class ProjectContext(KedroContext):
+
+    ...
+
+    def _create_catalog(self, *args, **kwargs:
+        catalog = super()._create_catalog(*args, **kwargs)
+
+        profile_time = ProfileTimeTransformer()
+        catalog.add_transformer(profile_time)
+
+        profile_memory = ProfileMemoryTransformer()  # instantiate our custom transformer
+        # as memory tracking is quite time-consuming, for the demonstration purposes
+        # let's apply profile_memory only to the master_table
+        catalog.add_transformer(profile_memory, "master_table")
+        return catalog
+```
+
+And rerun the pipeline:
+
+```console
+$ kedro run
+
+...
+2019-11-13 15:55:01,674 - kedro.io.data_catalog - INFO - Saving data to `master_table` (CSVLocalDataSet)...
+2019-11-13 15:55:12,322 - ProfileMemoryTransformer - INFO - Saving master_table consumed 606.98MiB memory at peak time
+2019-11-13 15:55:12,322 - ProfileTimeTransformer - INFO - Saving master_table took 10.648 seconds
+2019-11-13 15:55:12,357 - kedro.runner.sequential_runner - INFO - Completed 3 out of 6 tasks
+2019-11-13 15:55:12,358 - kedro.io.data_catalog - INFO - Loading data from `master_table` (CSVLocalDataSet)...
+2019-11-13 15:55:13,933 - ProfileMemoryTransformer - INFO - Loading master_table consumed 533.05MiB memory at peak time
+2019-11-13 15:55:13,933 - ProfileTimeTransformer - INFO - Loading master_table took 1.576 seconds
+...
+```
 
 ## Versioning datasets and ML models
 
@@ -275,7 +432,7 @@ This section shows just the very basics of versioning. You can learn more about 
 
 The code API allows you to configure data sources in code. This can also be used to operate the IO module within notebooks.
 
-## Configuring a data catalog
+## Configuring a Data Catalog
 
 In a file like `catalog.py`, you can generate the Data Catalog. This will allow everyone in the project to review all the available data sources. In the following, we are using the pre-built CSV loader, which is documented in the API reference documentation: [CSVLocalDataSet](/kedro.io.CSVLocalDataSet)
 

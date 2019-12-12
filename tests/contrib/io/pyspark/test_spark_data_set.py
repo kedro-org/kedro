@@ -105,6 +105,11 @@ def versioned_dataset_local(tmp_path, version):
 
 
 @pytest.fixture
+def versioned_dataset_dbfs(tmp_path, version):
+    return SparkDataSet(filepath="/dbfs" + str(tmp_path / FILENAME), version=version)
+
+
+@pytest.fixture
 def versioned_dataset_s3(version):
     return SparkDataSet(
         filepath="s3a://{}/{}".format(BUCKET_NAME, FILENAME),
@@ -403,6 +408,64 @@ class TestSparkDataSetVersionedLocal:
         )
         with pytest.raises(DataSetError, match=pattern):
             versioned_local.save(sample_spark_df)
+
+
+class TestSparkDataSetVersionedDBFS:
+    def test_load_latest(  # pylint: disable=too-many-arguments
+        self, mocker, versioned_dataset_dbfs, version, tmp_path, sample_spark_df
+    ):
+        mocked_glob = mocker.patch.object(versioned_dataset_dbfs, "_glob_function")
+        mocked_glob.return_value = [str(tmp_path / FILENAME / version.save / FILENAME)]
+
+        versioned_dataset_dbfs.save(sample_spark_df)
+        reloaded = versioned_dataset_dbfs.load()
+
+        expected_calls = [
+            mocker.call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME))
+        ] * 2
+        assert mocked_glob.call_args_list == expected_calls
+
+        assert reloaded.exceptAll(sample_spark_df).count() == 0
+
+    def test_load_exact(self, tmp_path, sample_spark_df):
+        ts = generate_timestamp()
+        ds_dbfs = SparkDataSet(
+            filepath="/dbfs" + str(tmp_path / FILENAME), version=Version(ts, ts)
+        )
+
+        ds_dbfs.save(sample_spark_df)
+        reloaded = ds_dbfs.load()
+
+        assert reloaded.exceptAll(sample_spark_df).count() == 0
+
+    def test_save(  # pylint: disable=too-many-arguments
+        self, mocker, versioned_dataset_dbfs, version, tmp_path, sample_spark_df
+    ):
+        mocked_glob = mocker.patch.object(versioned_dataset_dbfs, "_glob_function")
+        mocked_glob.return_value = [str(tmp_path / FILENAME / version.save / FILENAME)]
+
+        versioned_dataset_dbfs.save(sample_spark_df)
+
+        mocked_glob.assert_called_once_with(
+            "/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME)
+        )
+        assert (tmp_path / FILENAME / version.save / FILENAME).exists()
+
+    def test_exists(  # pylint: disable=too-many-arguments
+        self, mocker, versioned_dataset_dbfs, version, tmp_path, sample_spark_df
+    ):
+        mocked_glob = mocker.patch.object(versioned_dataset_dbfs, "_glob_function")
+        mocked_glob.return_value = [str(tmp_path / FILENAME / version.save / FILENAME)]
+
+        assert not versioned_dataset_dbfs.exists()
+
+        versioned_dataset_dbfs.save(sample_spark_df)
+        assert versioned_dataset_dbfs.exists()
+
+        expected_calls = [
+            mocker.call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME))
+        ] * 3
+        assert mocked_glob.call_args_list == expected_calls
 
 
 class TestSparkDataSetVersionedS3:

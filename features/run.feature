@@ -46,3 +46,19 @@ Feature: Run Project
     When I execute the kedro command "run"
     Then I should get an error exit code
     And "local" environment was used
+
+  Scenario: Run kedro run with config file
+    Given I have prepared a config file with example code
+    And I have run a non-interactive kedro new
+    And I have prepared a run_config file with config options
+    When I execute the kedro command "run --config run_config.yml"
+    Then I should get a successful exit code
+    And the console log should show that 1 nodes were run
+
+  Scenario: Run kedro run with config file and override option
+    Given I have prepared a config file with example code
+    And I have run a non-interactive kedro new
+    And I have prepared a run_config file with config options
+    When I execute the kedro command "run --config run_config.yml --pipeline __default__"
+    Then I should get a successful exit code
+    And the console log should show that 4 nodes were run

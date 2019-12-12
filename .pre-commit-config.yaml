@@ -73,7 +73,7 @@ repos:
             language: system
             types: [file, python]
             files: ^tests/
-            entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access
+            entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments
             stages: [commit]
 
           # The same pylint checks, but running on all files. It's for manual run with `make lint`
@@ -100,7 +100,7 @@ repos:
             language: system
             pass_filenames: false
             stages: [manual]
-            entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access tests
+            entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments tests
           # We need to make some exceptions for 3.5, that's why it's a custom runner.
           - id: black
             name: "Black"

@@ -2,7 +2,7 @@
 
 This section covers how to create a pipeline from a set of `node`s, which are Python functions, as described in more detail in the [nodes user guide](../04_user_guide/05_nodes.md#nodes) documentation.
 
-1. As you draft experimental code, you can use a [Jupyter Notebook](../04_user_guide/11_ipython.md#working-with-kedro-projects-from-jupyter) or [IPython session](../04_user_guide/11_ipython.md). If you include [`docstrings`](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) to explain what your functions do, you can take advantage of [auto-generated Sphinx documentation](http://www.sphinx-doc.org/en/master/) later on. Once you are happy with how you have written your `node` functions, you will run `kedro jupyter convert --all` (or `kedro jupyter convert <filepath_to_my_notebook>`) to export the code cells [tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) as `node` into the `src/kedro_tutorial/nodes/` folder as a `.py` file.
+1. As you draft experimental code, you can use a [Jupyter Notebook](../04_user_guide/11_ipython.md#working-from-jupyter) or [IPython session](../04_user_guide/11_ipython.md). If you include [`docstrings`](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) to explain what your functions do, you can take advantage of [auto-generated Sphinx documentation](http://www.sphinx-doc.org/en/master/) later on. Once you are happy with how you have written your `node` functions, you will run `kedro jupyter convert --all` (or `kedro jupyter convert <filepath_to_my_notebook>`) to export the code cells [tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) as `node` into the `src/kedro_tutorial/nodes/` folder as a `.py` file.
 2. When you are ready with a node you should add it to the pipeline in `src/kedro_tutorial/pipeline.py`, specifying its inputs and outputs.
 
 
@@ -88,11 +88,6 @@ def create_pipeline(**kwargs):
                 outputs="preprocessed_shuttles",
                 name="preprocessing_shuttles",
             ),
-            node(
-                func=create_master_table,
-                inputs=["preprocessed_shuttles", "preprocessed_companies", "reviews"],
-                outputs="master_table",
-            ),
         ]
     )
 
@@ -112,10 +107,14 @@ from kedro_tutorial.pipelines.data_engineering.nodes import (
 
 As well as this, you should update the project's pipelines in `src/kedro_tutorial/pipeline.py`:
 ```python
+from typing import Dict
+
+from kedro.pipeline import Pipeline
+
 from kedro_tutorial.pipelines.data_engineering import pipeline as de
 
 
-def create_pipelines(**kwargs):
+def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
     """Create the project's pipeline.
 
     Args:
@@ -458,6 +457,8 @@ regressor:
 Now to create a pipeline for the price prediction model. In `src/kedro_tutorial/pipelines/data_science/pipeline.py`, add an extra import statement near the top of the file as follows:
 
 ```python
+from kedro.pipeline import Pipeline, node
+
 from kedro_tutorial.pipelines.data_science.nodes import (
     evaluate_model,
     split_data,
@@ -486,7 +487,7 @@ def create_pipeline(**kwargs):
     )
 ```
 
-Finally, add a separate Data Science pipeline, by replacing the code in `create_pipeline` as follows:
+Finally, add a separate Data Science pipeline, by replacing the code in `create_pipelines` in `src/kedro_tutorial/pipeline.py` as follows:
 ```python
 def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
     """Create the project's pipeline.
@@ -506,6 +507,11 @@ def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
         "ds": ds_pipeline,
         "__default__": de_pipeline + ds_pipeline,
     }
+```
+
+Make sure to include the import at the top of the file:
+```python
+from kedro_tutorial.pipelines.data_science import pipeline as ds
 ```
 
 The first node of the `ds_pipeline` outputs 4 objects: `X_train`, `X_test`, `y_train`, `y_test`, which are not registered in `conf/base/catalog.yml`. (If you recall, if a dataset is not specified in the catalog, Kedro will automatically save it in memory using the `MemoryDataSet`). Normally you would add dataset definitions of your model features into `conf/base/catalog.yml` with the save location in `data/04_features/`.

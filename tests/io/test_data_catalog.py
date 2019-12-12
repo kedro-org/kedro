@@ -25,6 +25,7 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import re
 from pathlib import Path
 from typing import Any
 
@@ -280,8 +281,11 @@ class TestDataCatalogFromConfig:
         """Check the error if type attribute is missing for some data set(s)
         in the config"""
         del sane_config["catalog"]["boats"]["type"]
-        pattern = r"`type` is missing from DataSet \'boats\' " r"catalog configuration"
-        with pytest.raises(DataSetError, match=pattern):
+        pattern = (
+            "An exception occurred when parsing config for DataSet `boats`:\n"
+            "`type` is missing from DataSet catalog configuration"
+        )
+        with pytest.raises(DataSetError, match=re.escape(pattern)):
             DataCatalog.from_config(**sane_config)
 
     def test_config_invalid_module(self, sane_config):
@@ -295,20 +299,23 @@ class TestDataCatalogFromConfig:
     def test_config_missing_class(self, sane_config):
         """Check the error if the type points to nonexistent class"""
         sane_config["catalog"]["boats"]["type"] = "kedro.io.CSVLocalDataSetInvalid"
+
         pattern = (
-            r"Class `kedro.io.CSVLocalDataSetInvalid` for DataSet `boats` not found."
+            "An exception occurred when parsing config for DataSet `boats`:\n"
+            "Class `kedro.io.CSVLocalDataSetInvalid` not found"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DataSetError, match=re.escape(pattern)):
             DataCatalog.from_config(**sane_config)
 
     def test_config_invalid_data_set(self, sane_config):
         """Check the error if the type points to invalid class"""
         sane_config["catalog"]["boats"]["type"] = "DataCatalog"
         pattern = (
-            r"DataSet 'boats' type `.*DataCatalog` is invalid: all "
-            r"data set types must extend `AbstractDataSet`"
+            "An exception occurred when parsing config for DataSet `boats`:\n"
+            "DataSet type `kedro.io.data_catalog.DataCatalog` is invalid: "
+            "all data set types must extend `AbstractDataSet`"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DataSetError, match=re.escape(pattern)):
             DataCatalog.from_config(**sane_config)
 
     def test_config_invalid_arguments(self, sane_config):
@@ -331,15 +338,21 @@ class TestDataCatalogFromConfig:
         with pytest.raises(KeyError, match=r"Unable to find credentials"):
             DataCatalog.from_config(**sane_config)
 
-    # pylint: disable=protected-access
-    def test_link_credentials(self, data_catalog_from_config, sane_config):
+    def test_link_credentials(self, sane_config, mocker):
         """Test credentials being linked to the relevant data set"""
-        assert (
-            data_catalog_from_config._data_sets["cars"]._credentials[
+        mock_client = mocker.patch("kedro.io.csv_s3.S3FileSystem")
+
+        DataCatalog.from_config(**sane_config)
+
+        expected_client_kwargs = {
+            "aws_access_key_id": sane_config["credentials"]["s3_credentials"][
                 "aws_access_key_id"
-            ]
-            == sane_config["credentials"]["s3_credentials"]["aws_access_key_id"]
-        )
+            ],
+            "aws_secret_access_key": sane_config["credentials"]["s3_credentials"][
+                "aws_secret_access_key"
+            ],
+        }
+        mock_client.assert_called_once_with(client_kwargs=expected_client_kwargs)
 
     def test_idempotent_catalog(self, sane_config):
         """Test that data catalog instantiations are idempotent"""
@@ -384,12 +397,12 @@ class TestDataCatalogVersioned:
         sane_config["catalog"]["boats"]["version"] = True
         DataCatalog.from_config(**sane_config)
         log_record = caplog.records[0]
-        assert log_record.levelname == "WARNING"
-        assert (
-            "`version` attribute removed from `boats` data set "
-            "configuration since it is a reserved word and cannot be "
-            "directly specified" in log_record.message
+        expected_log_message = (
+            "`version` attribute removed from data set configuration since it "
+            "is a reserved word and cannot be directly specified"
         )
+        assert log_record.levelname == "WARNING"
+        assert expected_log_message in log_record.message
 
     def test_from_sane_config_load_versions_warn(self, sane_config):
         sane_config["catalog"]["boats"]["versioned"] = True

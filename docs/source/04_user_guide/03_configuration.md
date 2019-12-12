@@ -1,6 +1,6 @@
 # Configuration
 
-> *Note:* This documentation is based on `Kedro 0.15.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.5`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 >
 > This section contains detailed information about configuration.
 
@@ -63,6 +63,82 @@ env = "test"
 > *Note*: If, for some reason, your project does not have any other environments apart from `base`, i.e. no `local` environment to default to, the recommended course of action is to use the approach above, namely customise your `ProjectContext` to take `env="base"` in the constructor.
 
 
+## Templating configuration
+
+Kedro also provides an extension [TemplatedConfigLoader](/kedro.contrib.config.templated_config.TemplatedConfigLoader) class that allows to template values in your configuration files. `TemplatedConfigLoader` is available in `contrib`, to apply templating to your `ProjectContext` in `src/<project-name>/run.py`, you will need to overwrite the `_create_config_loader` method as follows:
+
+```python
+from kedro.contrib.config import TemplatedConfigLoader  # new import
+
+
+class ProjectContext(KedroContext):
+
+    def _create_config_loader(self, conf_paths: Iterable[str]) -> TemplatedConfigLoader:
+        return TemplatedConfigLoader(
+            conf_paths,
+            globals_pattern="*globals.yml",  # read the globals dictionary from project config
+            globals_dict={  # extra keys to add to the globals dictionary, take precedence over globals_pattern
+                "bucket_name": "another_bucket_name",
+                "non_string_key": 10
+            }
+        )
+```
+
+Let's assume the project contains a `conf/base/globals.yml` file with the following contents:
+
+```yaml
+bucket_name: "my_s3_bucket"
+key_prefix: "my/key/prefix/"
+
+datasets:
+    csv: "CSVS3DataSet"
+    spark: "SparkDataSet"
+
+folders:
+    raw: "01_raw"
+    int: "02_intermediate"
+    pri: "03_primary"
+    fea: "04_features"
+```
+
+The contents of the dictionary resulting from `globals_pattern` get merged with the `globals_dict` dictionary. In case of conflicts, the keys from the `globals_dict` dictionary take precedence. The resulting global dictionary prepared by `TemplatedConfigLoader` will look like this:
+
+```python
+{
+    "bucket_name": "another_bucket_name",
+    "non_string_key": 10,
+    "key_prefix": "my/key/prefix",
+    "datasets": {
+        "csv": "CSVS3DataSet",
+        "spark": "SparkDataSet"
+    },
+    "folders": {
+        "raw": "01_raw",
+        "int": "02_intermediate",
+        "pri": "03_primary",
+        "fea": "04_features"
+    }
+}
+```
+
+Now the templating can be applied to the configs. Here is an example of a templated `conf/base/catalog.yml`:
+
+```yaml
+raw_boat_data:
+    type: "${datasets.spark}"  # nested paths into global dict are allowed
+    filepath: "s3a://${bucket_name}/${key_prefix}/${folders.raw}/boats.csv"
+    file_format: parquet
+
+raw_car_data:
+    type: "${datasets.csv}"
+    filepath: "data/${key_prefix}/${folders.raw}/cars.csv"
+    bucket_name: "${bucket_name}"
+    file_format: "${non.existent.key|parquet}"  # default to 'parquet' if the key is not found in the global dict
+```
+
+> Note: `TemplatedConfigLoader` uses `jmespath` package in the background to extract elements from global dictionary. For more information about JMESPath syntax please see: https://github.com/jmespath/jmespath.py.
+
+
 ## Parameters
 
 ### Loading parameters
@@ -97,7 +173,27 @@ except MissingConfigException:
 
 > *Note:* `kedro.context.KedroContext` class uses the approach above to load project parameters.
 
-Parameters can then be used on their own or fed in as function inputs, as per section below.
+Parameters can then be used on their own or fed in as function inputs, as described in [this section](#using-parameters) below.
+
+### Specifying extra parameters
+
+Kedro also allows you to specify extra parameters for `kedro run` CLI command. To do that, you need to add the `--params` command line option and specify a comma-separated list of key-value pairs that will be added to [KedroContext](/kedro.context.KedroContext) parameters and made available to pipeline nodes. Each key-value pair is split on the first colon. Here is an example of triggering Kedro run with extra parameters specified:
+
+```bash
+kedro run --params param_key1:value1,param_key2:2.0  # this will add {"param_key1": "value1", "param_key2": 2} to parameters dictionary
+```
+
+> Note: Parameter keys are _always_ treated as strings. Parameter values are converted to a float or an integer number if the corresponding conversion succeeds, otherwise they are also treated as string.
+
+> Note: If, for example, `param_key1` parameter has already been defined in the project configuration, the value provided in the CLI option will take precedence and will overwrite the one from the configuration.
+
+> Tip: Since key-value pairs are split on the first colon, values can contain colons, but the keys cannot. This is a valid CLI command:
+>
+> `kedro run --params endpoint_url:https://endpoint.example.com`
+
+> Tip: If any extra parameter key and/or value contains spaces, wrap the whole option contents into quotes:
+>
+> `kedro run --params "key1:value with spaces,key2:value"`
 
 ### Using parameters
 
@@ -196,3 +292,29 @@ Credentials configuration can then be used on its own or fed into the `DataCatal
 ### AWS credentials
 
 When working with AWS S3-backed datasets (e.g., `kedro.io.CSVS3DataSet`), you are not required to store AWS credentials in the project configuration files. Instead, you can specify them using environment variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and, optionally, `AWS_SESSION_TOKEN`. Please refer to the [official documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html) for more details.
+
+## Configuring `kedro run` arguments
+
+The extensive list of CLI options for a `kedro run` is available [here](./06_pipelines.md#modifying-a-kedro-run). Instead of specifying all the command line options to a `kedro run` via the CLI, you can specify a config file that contains the arguments, say `config.yml` and run:
+
+```console
+$ kedro run --config config.yml
+```
+
+where `config.yml` is formatted as below (for example):
+
+```yaml
+run:
+  tag:
+    - tag1
+    - tag2
+    - tag3
+  pipeline: pipeline1
+  parallel: true
+  node_names:
+    - node1
+    - node2
+  env: env1
+```
+
+> *Note*: If you pass both a configuration file and an option that clashes with one inside the configuration file, the provided option will override the configuration file.

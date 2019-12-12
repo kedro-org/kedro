@@ -5,7 +5,7 @@ In this tutorial we talk about how Kedro integrates with `pyspark` using the `Sp
 We also present brief instructions on how to set-up pyspark to read from `AWS S3` and `Azure Blob storage`.
 
 Relevant API:
-[SparkDataSet](https://kedro.readthedocs.io/en/latest/kedro.contrib.io.pyspark.html)
+[`SparkDataSet`](https://kedro.readthedocs.io/en/latest/kedro.contrib.io.pyspark.html)
 
 
 ## Install spark
@@ -51,7 +51,7 @@ spark = SparkSession.builder\
     .getOrCreate()
 ```
 
-## SparkDataSet
+## `SparkDataSet`
 
 Loading and saving spark `DataFrame`s using Kedro can be easily done using the [`SparkDataSet`](https://kedro.readthedocs.io/en/latest/kedro.contrib.io.pyspark.html) class, as shown below:
 
@@ -81,7 +81,7 @@ parquet = SparkDataSet('../data/01_raw/2015_points_old_parquet',
 parquet.save(df)
 ```
 
-## Using SparkDataSet with the DataCatalog
+## Using `SparkDataSet` with the `DataCatalog`
 
 Since `SparkDataSet` is a concrete implementation of [`AbstractDataSet`](https://kedro.readthedocs.io/en/latest/kedro.io.AbstractDataSet.html), it integrates nicely with the `DataCatalog` and with Kedro's pipelines.
 
@@ -268,3 +268,13 @@ filepath = 'wasbs://' + bucket_name + '@' + account_name + '.blob.core.windows.n
 azure_parquet = SparkDataSet(filepath, file_format='parquet')
 azure_parquet.load()
 ```
+
+## A note about Databricks
+
+A number of Kedro projects that use PySpark do so on Databricks. As per [Databricks documentation](https://docs.databricks.com/data/databricks-file-system.html#dbfs-root):
+
+> Data written to [mount point paths](https://docs.databricks.com/data/databricks-file-system.html#mount-storage) (`/mnt`) is stored outside of the DBFS root. Even though the DBFS root is writeable, we recommend that you store data in mounted object storage rather than in the DBFS root.
+
+However, while [you can use local file APIs to read and write to DBFS paths](https://docs.databricks.com/data/databricks-file-system.html#local-file-apis), the same does not work for mount point paths. Because versioned data sets use `glob.iglob` — a local file API — to find versions, `filepath`s that begin with `/mnt` fail.
+
+When working with data written to mount path points, specify `filepath`s for (versioned) `SparkDataSet`s starting with `/dbfs/mnt`, and `SparkDataSet` will handle the rest! :smiley:

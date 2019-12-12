@@ -15,10 +15,6 @@ Welcome to Kedro's API docs and tutorials!
     :target: https://circleci.com/gh/quantumblacklabs/kedro/tree/master
     :alt: CircleCI build status
 
-.. image:: https://ci.appveyor.com/api/projects/status/2u74p5g8fdc45wwh/branch/master?svg=true
-    :target: https://ci.appveyor.com/project/QuantumBlack/kedro/branch/master
-    :alt: AppVeyor build status
-
 .. image:: https://img.shields.io/badge/license-Apache%202.0-blue.svg
     :target: https://opensource.org/licenses/Apache-2.0
     :alt: License is Apache 2.0

@@ -281,7 +281,7 @@ class Node:
         new ``Node`` object, but with no changes to the function.
 
         Args:
-            decorators: List of decorators to be applied on the node function.
+            decorators: Decorators to be applied on the node function.
                 Decorators will be applied from right to left.
 
         Returns:

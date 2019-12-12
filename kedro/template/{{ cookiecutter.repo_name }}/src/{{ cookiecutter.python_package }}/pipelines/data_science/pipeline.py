@@ -32,7 +32,8 @@ PLEASE DELETE THIS FILE ONCE YOU START WORKING ON YOUR OWN PROJECT!
 """
 
 from kedro.pipeline import Pipeline, node
-from .nodes import train_model, predict, report_accuracy
+
+from .nodes import predict, report_accuracy, train_model
 
 
 def create_pipeline(**kwargs):

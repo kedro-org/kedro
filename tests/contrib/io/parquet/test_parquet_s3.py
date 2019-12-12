@@ -208,8 +208,42 @@ class TestParquetS3DataSet:
         assert_frame_equal(loaded_data, dummy_dataframe)
 
     @pytest.mark.usefixtures("mocked_s3_object")
+    def test_load_with_protocol(self, dummy_dataframe, load_args, save_args):
+        """Test loading the data from S3."""
+        s3_data_set = ParquetS3DataSet(
+            filepath="s3://{}/{}".format(BUCKET_NAME, FILENAME),
+            credentials={
+                "aws_access_key_id": "YOUR_KEY",
+                "aws_secret_access_key": "YOUR SECRET",
+            },
+            load_args=load_args,
+            save_args=save_args,
+        )
+        loaded_data = s3_data_set.load()
+        assert_frame_equal(loaded_data, dummy_dataframe)
+
+    @pytest.mark.usefixtures("mocked_s3_object")
     def test_save_data(self, s3_data_set):
         """Test saving the data to S3."""
+        new_data = pd.DataFrame(
+            {"col1": ["a", "b"], "col2": ["c", "d"], "col3": ["e", "f"]}
+        )
+        s3_data_set.save(new_data)
+        loaded_data = s3_data_set.load()
+        assert_frame_equal(loaded_data, new_data)
+
+    @pytest.mark.usefixtures("mocked_s3_object")
+    def test_save_with_protocol(self, load_args, save_args):
+        """Test saving the data to S3."""
+        s3_data_set = ParquetS3DataSet(
+            filepath="s3://{}/{}".format(BUCKET_NAME, FILENAME),
+            credentials={
+                "aws_access_key_id": "YOUR_KEY",
+                "aws_secret_access_key": "YOUR SECRET",
+            },
+            load_args=load_args,
+            save_args=save_args,
+        )
         new_data = pd.DataFrame(
             {"col1": ["a", "b"], "col2": ["c", "d"], "col3": ["e", "f"]}
         )
@@ -224,6 +258,14 @@ class TestParquetS3DataSet:
         assert not s3_data_set.exists()
         s3_data_set.save(dummy_dataframe)
         assert s3_data_set.exists()
+
+    @pytest.mark.usefixtures("mocked_s3_object")
+    def test_s3fs_args_propagated(self, mocker):
+        mock = mocker.patch("kedro.contrib.io.parquet.parquet_s3.S3FileSystem")
+        ParquetS3DataSet(
+            FILENAME, BUCKET_NAME, AWS_CREDENTIALS, s3fs_args=dict(custom=42)
+        )
+        mock.assert_called_with(client_kwargs=mocker.ANY, custom=42)
 
 
 @pytest.mark.usefixtures("mocked_s3_bucket", "s3fs_cleanup")

@@ -5,12 +5,14 @@
 
 ## Bug fixes and other changes
 
+* * Fixed a bug in the `invalidate_cache` method of `ParquetGCSDataSet` and `CSVGCSDataSet`.
 
 ## Breaking changes to the API
 
 
 ## Thanks for supporting contributions
 
+[Jonas Kemper](https://github.com/jonasrk)
 
 # Release 0.15.5
 

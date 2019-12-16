@@ -153,4 +153,5 @@ class CSVGCSDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
 
     def invalidate_cache(self) -> None:
         """Invalidate underlying filesystem caches."""
-        self._gcs.invalidate_cache(self._filepath)
+        # gcsfs expects a string as filepath. It will crash with PosixPath.
+        self._gcs.invalidate_cache(str(self._filepath))

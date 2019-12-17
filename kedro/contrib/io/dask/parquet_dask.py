@@ -48,7 +48,7 @@ class ParquetDaskDataSet(DefaultArgumentsMixIn, AbstractDataSet):
         Example (AWS S3):
         ::
 
-            >>> from kedro.contrib.io.dask.dask_parquet import ParquetDaskDataSet
+            >>> from kedro.contrib.io.dask.parquet_dask import ParquetDaskDataSet
             >>> import pandas as pd
             >>> import dask.dataframe as dd
             >>>

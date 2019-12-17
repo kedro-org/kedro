@@ -27,4 +27,4 @@
 # limitations under the License.
 """kedro.contrib.io.dask provides I/O modules for Dask dataset."""
 
-from .dask_parquet import ParquetDaskDataSet  # NOQA
+from .parquet_dask import ParquetDaskDataSet  # NOQA

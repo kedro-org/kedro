@@ -5,7 +5,8 @@
 
 ## Bug fixes and other changes
 
-* * Fixed a bug in the `invalidate_cache` method of `ParquetGCSDataSet` and `CSVGCSDataSet`.
+* Fixed a bug in the `invalidate_cache` method of `ParquetGCSDataSet` and `CSVGCSDataSet`.
+* `--load-version` now won't break if version value contains a colon.
 
 ## Breaking changes to the API
 

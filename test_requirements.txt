@@ -9,6 +9,7 @@ codacy-coverage
 flake8>=3.5,<4.0
 gcsfs>=0.3.0, <1.0
 hdfs>=2.5.8, <3.0
+import-linter==1.0; python_version >= '3.6'
 joblib==0.12.3
 jupyter_client>=5.1.0, <6.0
 matplotlib>=3.0.3, <4.0

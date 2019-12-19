@@ -28,3 +28,4 @@ pytest-mock>=1.7.1,<2.0
 pytest>=3.9, <4.0
 requests-mock>=1.6.0, <2.0.0
 wheel==0.32.2
+geopands==0.6.0

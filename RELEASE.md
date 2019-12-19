@@ -4,9 +4,9 @@
 
 
 ## Bug fixes and other changes
-
 * Fixed a bug in the `invalidate_cache` method of `ParquetGCSDataSet` and `CSVGCSDataSet`.
 * `--load-version` now won't break if version value contains a colon.
+* Enabled running `node`s with duplicate inputs.
 
 ## Breaking changes to the API
 

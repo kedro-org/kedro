@@ -1,7 +1,7 @@
 # Release 0.15.6
 
 ## Major features and improvements
-
+* Enabled loading a particular version of a dataset in Jupyter Notebooks and ipython, using `catalog.load("dataset_name", version="<2019-12-13T15.08.09.255Z>")`.
 
 ## Bug fixes and other changes
 * Fixed a bug in the `invalidate_cache` method of `ParquetGCSDataSet` and `CSVGCSDataSet`.
@@ -9,7 +9,6 @@
 * Enabled running `node`s with duplicate inputs.
 
 ## Breaking changes to the API
-
 
 ## Thanks for supporting contributions
 

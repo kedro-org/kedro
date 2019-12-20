@@ -327,6 +327,12 @@ class AbstractDataSet(abc.ABC):
     def _release(self) -> None:
         pass
 
+    def _copy(self, **overwrite_params) -> "AbstractDataSet":
+        dataset_copy = copy.deepcopy(self)
+        for name, value in overwrite_params.items():
+            setattr(dataset_copy, name, value)
+        return dataset_copy
+
 
 def generate_timestamp() -> str:
     """Generate the timestamp to be used by versioning.

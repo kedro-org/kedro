@@ -90,6 +90,21 @@ kedro.io.data_catalog - INFO - Loading data from `example_iris_data` (CSVLocalDa
 4           5.0          3.6           1.4          0.2  setosa
 ```
 
+If you enable versioning, you can load a particular version of a dataset. Given a catalog entry
+
+```yaml
+example_train_x:
+  type: CSVLocalDataSet
+  filepath: data/02_intermediate/example_train_x.csv
+  versioned: true
+```
+
+and having run the pipeline at least once, you may specify which version to load like so:
+
+```python
+catalog.load("example_train_x", version="2019-12-13T15.08.09.255Z")
+```
+
 When you have finished, you can exit IPython by typing:
 
 ```python
@@ -140,6 +155,21 @@ df.head()
 ```
 
 ![](./images/jupyter_notebook_workflow_loading_data.png)
+
+If you enable versioning, you also have the option of loading a particular version of a dataset. Given a catalog entry
+
+```yaml
+example_train_x:
+  type: CSVLocalDataSet
+  filepath: data/02_intermediate/example_train_x.csv
+  versioned: true
+```
+
+and having run the pipeline at least once, you can specify which version to load like so:
+
+```python
+catalog.load("example_train_x", version="2019-12-13T15.08.09.255Z")
+```
 
 ### Saving `DataCatalog` in Jupyter
 

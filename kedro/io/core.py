@@ -42,10 +42,14 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 from urllib.parse import urlparse
 from warnings import warn
 
+from fsspec.utils import infer_storage_options
+
 from kedro.utils import load_obj
 
 VERSIONED_FLAG_KEY = "versioned"
 VERSION_KEY = "version"
+HTTP_PROTOCOLS = ("http", "https")
+PROTOCOL_DELIMITER = "://"
 
 
 class DataSetError(Exception):
@@ -598,3 +602,48 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
                 str(self), str(exc)
             )
             raise DataSetError(message) from exc
+
+
+def get_protocol_and_path(filepath: str, version: Version = None) -> Tuple[str, str]:
+    """Parses filepath on protocol and path.
+
+    Args:
+        filepath: raw filepath e.g.: `gcs://bucket/test.json`.
+        version: instance of ``kedro.io.core.Version`` or None.
+
+    Returns:
+            Protocol and path.
+
+    Raises:
+            DataSetError: when protocol is http(s) and version is not None.
+            Note: HTTP(s) dataset doesn't support versioning.
+    """
+    options_dict = infer_storage_options(filepath)
+    path = options_dict["path"]
+    protocol = options_dict["protocol"]
+
+    if protocol in HTTP_PROTOCOLS:
+        if version:
+            raise DataSetError(
+                "HTTP(s) DataSet doesn't support versioning. "
+                "Please remove version flag from the dataset configuration."
+            )
+        path = path.split(PROTOCOL_DELIMITER, 1)[-1]
+
+    return protocol, path
+
+
+def get_filepath_str(path: PurePath, protocol: str) -> str:
+    """Returns filepath. Returns full filepath (with protocol) if protocol is HTTP(s).
+
+    Args:
+        path: filepath without protocol.
+        protocol: protocol.
+
+    Returns:
+        Filepath string.
+    """
+    path = str(path)
+    if protocol in HTTP_PROTOCOLS:
+        path = "".join((protocol, PROTOCOL_DELIMITER, path))
+    return path

@@ -207,6 +207,7 @@ reloaded = io.load("test_data_set")
 Currently the following datasets support versioning:
 
 - `CSVLocalDataSet`
+- `CSVDataSet`
 - `CSVS3DataSet`
 - `HDFLocalDataSet`
 - `HDFS3DataSet`

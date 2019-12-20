@@ -37,6 +37,7 @@ from .core import DataSetAlreadyExistsError  # NOQA
 from .core import DataSetError  # NOQA
 from .core import DataSetNotFoundError  # NOQA
 from .core import Version  # NOQA
+from .csv_dataset import CSVDataSet  # NOQA
 from .csv_http import CSVHTTPDataSet  # NOQA
 from .csv_local import CSVLocalDataSet  # NOQA
 from .csv_s3 import CSVS3DataSet  # NOQA

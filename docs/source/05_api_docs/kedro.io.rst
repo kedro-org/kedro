@@ -36,6 +36,7 @@ Data Sets
     kedro.io.PartitionedDataSet
     kedro.io.PickleLocalDataSet
     kedro.io.PickleS3DataSet
+    kedro.io.PickleDataSet
     kedro.io.SQLTableDataSet
     kedro.io.SQLQueryDataSet
     kedro.io.TextLocalDataSet

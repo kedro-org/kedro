@@ -32,6 +32,7 @@ import pandas as pd
 import pytest
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
+from pandas.testing import assert_frame_equal
 from s3fs.core import S3FileSystem
 
 from kedro.io import DataSetError, JSONDataSet
@@ -75,7 +76,7 @@ class TestJSONDataSet:
         """Test saving and reloading the data set."""
         json_data_set.save(dummy_dataframe)
         reloaded = json_data_set.load()
-        assert dummy_dataframe.equals(reloaded)
+        assert_frame_equal(dummy_dataframe, reloaded)
 
     def test_exists(self, json_data_set, dummy_dataframe):
         """Test `exists` method invocation for both existing and
@@ -110,6 +111,7 @@ class TestJSONDataSet:
         "filepath,instance_type",
         [
             ("s3://bucket/file.json", S3FileSystem),
+            ("file:///tmp/test.json", LocalFileSystem),
             ("/tmp/test.json", LocalFileSystem),
             ("gcs://bucket/file.json", GCSFileSystem),
         ],
@@ -118,9 +120,6 @@ class TestJSONDataSet:
         data_set = JSONDataSet(filepath=filepath)
         assert isinstance(data_set._fs, instance_type)
         assert str(data_set._filepath) == data_set._fs._strip_protocol(filepath)
-
-    def test_filepath(self):
-        data_set = JSONDataSet(filepath="/tmp/test.json")
         assert isinstance(data_set._filepath, PurePosixPath)
 
     def test_catalog_release(self, mocker):
@@ -158,7 +157,7 @@ class TestJSONDataSetVersioned:
         the versioned data set."""
         versioned_json_data_set.save(dummy_dataframe)
         reloaded_df = versioned_json_data_set.load()
-        assert dummy_dataframe.equals(reloaded_df)
+        assert_frame_equal(dummy_dataframe, reloaded_df)
 
     def test_no_versions(self, versioned_json_data_set):
         """Check the error if no versions are available for load."""

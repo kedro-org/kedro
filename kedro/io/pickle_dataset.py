@@ -26,15 +26,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``CSVDataSet`` loads/saves data from/to a CSV file using an underlying
-filesystem (e.g.: local, S3, GCS). It uses pandas to handle the CSV file.
+"""``PickleDataSet`` loads/saves data from/to a Pickle file using an underlying
+filesystem (e.g.: local, S3, GCS). The underlying functionality is supported by
+the ``pickle`` library, so it supports all allowed options for loading and saving
+pickle files.
 """
+import pickle
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any, Dict
 
 import fsspec
-import pandas as pd
 
 from kedro.io.core import (
     AbstractVersionedDataSet,
@@ -45,21 +47,23 @@ from kedro.io.core import (
 )
 
 
-class CSVDataSet(AbstractVersionedDataSet):
-    """``CSVDataSet`` loads/saves data from/to a CSV file using an underlying
-    filesystem (e.g.: local, S3, GCS). It uses pandas to handle the CSV file.
+class PickleDataSet(AbstractVersionedDataSet):
+    """``PickleDataSet`` loads/saves data from/to a Pickle file using an underlying
+    filesystem (e.g.: local, S3, GCS). The underlying functionality is supported by
+    the ``pickle`` library, so it supports all allowed options for loading and saving
+    pickle files.
 
     Example:
     ::
 
-        >>> from kedro.io.csv_dataset import CSVDataSet
+        >>> from kedro.io.pickle_dataset import PickleDataSet
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
         >>>
-        >>> # data_set = CSVDataSet(filepath="gcs://bucket/test.csv")
-        >>> data_set = CSVDataSet(filepath="test.csv")
+        >>> # data_set = PickleDataSet(filepath="gcs://bucket/test.pkl")
+        >>> data_set = PickleDataSet(filepath="test.pkl")
         >>> data_set.save(data)
         >>> reloaded = data_set.load()
         >>> assert data.equals(reloaded)
@@ -67,7 +71,7 @@ class CSVDataSet(AbstractVersionedDataSet):
     """
 
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
-    DEFAULT_SAVE_ARGS = {"index": False}  # type: Dict[str, Any]
+    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -79,22 +83,26 @@ class CSVDataSet(AbstractVersionedDataSet):
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``CSVDataSet`` pointing to a concrete CSV file
-        on a specific filesystem.
+        """Creates a new instance of ``PickleDataSet`` pointing to a concrete Pickle
+        file on a specific filesystem. ``PickleDataSet`` uses `pickle` library to
+        serialize/deserialize objects.
+
+        pickle.dumps: https://docs.python.org/3/library/pickle.html#pickle.dumps
+        pickle.loads: https://docs.python.org/3/library/pickle.html#pickle.loads
 
         Args:
-            filepath: Filepath to a CSV file prefixed with a protocol like `s3://`.
+            filepath: Filepath to a Pickle file prefixed with a protocol like `s3://`.
                 If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.
-            load_args: Pandas options for loading CSV files.
+            load_args: Pickle options for loading pickle files.
                 Here you can find all available arguments:
-                https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_csv.html
+                https://docs.python.org/3/library/pickle.html#pickle.loads
                 All defaults are preserved.
-            save_args: Pandas options for saving CSV files.
+            save_args: Pickle options for saving pickle files.
                 Here you can find all available arguments:
-                https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_csv.html
-                All defaults are preserved, but "index", which is set to False.
+                https://docs.python.org/3/library/pickle.html#pickle.dumps
+                All defaults are preserved.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -136,17 +144,27 @@ class CSVDataSet(AbstractVersionedDataSet):
             version=self._version,
         )
 
-    def _load(self) -> pd.DataFrame:
+    def _load(self) -> Any:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
-        with self._fs.open(load_path, mode="r") as fs_file:
-            return pd.read_csv(fs_file, **self._load_args)
+        with self._fs.open(load_path, mode="rb") as fs_file:
+            return pickle.loads(fs_file.read(), **self._load_args)
 
-    def _save(self, data: pd.DataFrame) -> None:
+    def _save(self, data: Any) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
-        with self._fs.open(save_path, mode="w") as fs_file:
-            data.to_csv(path_or_buf=fs_file, **self._save_args)
+        try:
+            bytes_object = pickle.dumps(data, **self._save_args)
+        except pickle.PickleError:
+            raise DataSetError(
+                "{} cannot be serialized. {} can only be used with "
+                "serializable data".format(
+                    str(data.__class__), str(self.__class__.__name__)
+                )
+            )
+
+        with self._fs.open(save_path, mode="wb") as fs_file:
+            fs_file.write(bytes_object)
 
         self.invalidate_cache()
 

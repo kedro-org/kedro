@@ -31,6 +31,7 @@ Data Sets
     kedro.io.JSONDataSet
     kedro.io.LambdaDataSet
     kedro.io.MemoryDataSet
+    kedro.io.ParquetDataSet
     kedro.io.ParquetLocalDataSet
     kedro.io.PartitionedDataSet
     kedro.io.PickleLocalDataSet

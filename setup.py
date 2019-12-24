@@ -117,6 +117,7 @@ setup(
         ],
         "bioinformatics": ["biopython>=1.73, <2.0"],
         "gcs": ["gcsfs>=0.3.0, <1.0"],
+        "gbq": ["pandas-gbq>=0.12.0, <1.0"],
         "matplotlib": ["matplotlib>=3.0.3, <4.0"],
         "networkx": ["networkx>=2.4, <3.0"],
         "memory_profiler": ["memory_profiler>=0.50.0, <1.0"],

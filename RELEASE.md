@@ -11,12 +11,13 @@
 * Fixed a bug in the `invalidate_cache` method of `ParquetGCSDataSet` and `CSVGCSDataSet`.
 * `--load-version` now won't break if version value contains a colon.
 * Enabled running `node`s with duplicate inputs.
+* Added preventions for accidentally passing in empty credentials to `SparkJDBCDataSet`.
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
 
-[Jonas Kemper](https://github.com/jonasrk)
+[Jonas Kemper](https://github.com/jonasrk), [Tam-Sanh Nguyen](https://github.com/tamsanh)
 
 # Release 0.15.5
 

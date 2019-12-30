@@ -47,6 +47,13 @@ def spark_jdbc_args_credentials(spark_jdbc_args):
 
 
 @pytest.fixture
+def spark_jdbc_args_credentials_with_empty_password(spark_jdbc_args):
+    args = spark_jdbc_args
+    args.update({"credentials": {"user": "dummy_user", "password": None}})
+    return args
+
+
+@pytest.fixture
 def spark_jdbc_args_save_load(spark_jdbc_args):
     args = spark_jdbc_args
     connection_properties = {"properties": {"driver": "dummy_driver"}}
@@ -100,6 +107,12 @@ def test_save_args(spark_jdbc_args_save_load):
     data.write.jdbc.assert_called_with(
         "dummy_url", "dummy_table", properties={"driver": "dummy_driver"}
     )
+
+
+def test_except_bad_credentials(spark_jdbc_args_credentials_with_empty_password):
+    with pytest.raises(DataSetError) as excinfo:
+        mock_save(spark_jdbc_args_credentials_with_empty_password)
+    assert "Credential property `password` cannot be empty. Please provide a value" == str(excinfo.value)
 
 
 @mock.patch("kedro.contrib.io.pyspark.spark_jdbc.SparkSession.builder.getOrCreate")

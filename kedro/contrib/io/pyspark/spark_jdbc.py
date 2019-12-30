@@ -120,7 +120,7 @@ class SparkJDBCDataSet(DefaultArgumentsMixIn, AbstractDataSet):
                 https://spark.apache.org/docs/latest/api/python/pyspark.sql.html?highlight=jdbc#pyspark.sql.DataFrameWriter.jdbc
 
         Raises:
-            DataSetError: When either ``url`` or ``table`` is empty.
+            DataSetError: When either ``url`` or ``table`` is empty or when a property is provided with a None value.
 
         """
 
@@ -144,6 +144,12 @@ class SparkJDBCDataSet(DefaultArgumentsMixIn, AbstractDataSet):
 
         # Update properties in load_args and save_args with credentials.
         if credentials is not None:
+
+            # Check credentials for bad inputs
+            for k, v in credentials.items():
+                if v is None:
+                    raise DataSetError(f"Credential property `{k}` cannot be empty. Please provide a value")
+
             load_properties = self._load_args.get("properties", {})
             save_properties = self._save_args.get("properties", {})
             self._load_args["properties"] = {**load_properties, **credentials}

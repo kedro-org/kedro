@@ -93,12 +93,12 @@ class SparkJDBCDataSet(DefaultArgumentsMixIn, AbstractDataSet):
 
     # pylint: disable=too-many-arguments
     def __init__(
-        self,
-        url: str,
-        table: str,
-        credentials: Optional[Dict[str, Any]] = None,
-        load_args: Optional[Dict[str, Any]] = None,
-        save_args: Optional[Dict[str, Any]] = None,
+            self,
+            url: str,
+            table: str,
+            credentials: Optional[Dict[str, Any]] = None,
+            load_args: Optional[Dict[str, Any]] = None,
+            save_args: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Creates a new ``SparkJDBCDataSet``.
 
@@ -146,9 +146,12 @@ class SparkJDBCDataSet(DefaultArgumentsMixIn, AbstractDataSet):
         if credentials is not None:
 
             # Check credentials for bad inputs
-            for k, v in credentials.items():
-                if v is None:
-                    raise DataSetError("Credential property `{}` cannot be empty. Please provide a value".format(k))
+            for cred_key, cred_value in credentials.items():
+                if cred_value is None:
+                    raise DataSetError(
+                        "Credential property `{}` cannot be empty. "
+                        "Please provide a value".format(cred_key)
+                    )
 
             load_properties = self._load_args.get("properties", {})
             save_properties = self._save_args.get("properties", {})

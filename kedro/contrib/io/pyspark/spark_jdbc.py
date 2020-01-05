@@ -120,7 +120,8 @@ class SparkJDBCDataSet(DefaultArgumentsMixIn, AbstractDataSet):
                 https://spark.apache.org/docs/latest/api/python/pyspark.sql.html?highlight=jdbc#pyspark.sql.DataFrameWriter.jdbc
 
         Raises:
-            DataSetError: When either ``url`` or ``table`` is empty or when a property is provided with a None value.
+            DataSetError: When either ``url`` or ``table`` is empty or
+                when a property is provided with a None value.
 
         """
 

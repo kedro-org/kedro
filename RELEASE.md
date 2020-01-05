@@ -17,7 +17,7 @@
 
 ## Thanks for supporting contributions
 
-[Jonas Kemper](https://github.com/jonasrk), [Tam-Sanh Nguyen](https://github.com/tamsanh)
+[Jonas Kemper](https://github.com/jonasrk), [Tam-Sanh Nguyen](https://github.com/tamsanh), [Peter Zhao](https://github.com/zxpeter)
 
 # Release 0.15.5
 

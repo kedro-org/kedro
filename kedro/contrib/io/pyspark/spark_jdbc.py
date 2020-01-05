@@ -93,12 +93,12 @@ class SparkJDBCDataSet(DefaultArgumentsMixIn, AbstractDataSet):
 
     # pylint: disable=too-many-arguments
     def __init__(
-            self,
-            url: str,
-            table: str,
-            credentials: Optional[Dict[str, Any]] = None,
-            load_args: Optional[Dict[str, Any]] = None,
-            save_args: Optional[Dict[str, Any]] = None,
+        self,
+        url: str,
+        table: str,
+        credentials: Optional[Dict[str, Any]] = None,
+        load_args: Optional[Dict[str, Any]] = None,
+        save_args: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Creates a new ``SparkJDBCDataSet``.
 

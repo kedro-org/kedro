@@ -112,8 +112,9 @@ def test_save_args(spark_jdbc_args_save_load):
 def test_except_bad_credentials(spark_jdbc_args_credentials_with_empty_password):
     with pytest.raises(DataSetError) as excinfo:
         mock_save(spark_jdbc_args_credentials_with_empty_password)
-    assert "Credential property `password` cannot be empty. " \
-           "Please provide a value." == str(excinfo.value)
+    assert str(excinfo.value) == "Credential property " \
+                                 "`password` cannot be empty. " \
+                                 "Please provide a value."
 
 
 @mock.patch("kedro.contrib.io.pyspark.spark_jdbc.SparkSession.builder.getOrCreate")

@@ -145,12 +145,12 @@ class SparkJDBCDataSet(DefaultArgumentsMixIn, AbstractDataSet):
         # Update properties in load_args and save_args with credentials.
         if credentials is not None:
 
-            # Check credentials for bad inputs
+            # Check credentials for bad inputs.
             for cred_key, cred_value in credentials.items():
                 if cred_value is None:
                     raise DataSetError(
                         "Credential property `{}` cannot be empty. "
-                        "Please provide a value".format(cred_key)
+                        "Please provide a value.".format(cred_key)
                     )
 
             load_properties = self._load_args.get("properties", {})

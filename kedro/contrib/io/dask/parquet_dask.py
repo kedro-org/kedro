@@ -118,9 +118,8 @@ class ParquetDaskDataSet(DefaultArgumentsMixIn, AbstractDataSet):
         )
 
     def _exists(self) -> bool:
-        path = fsspec.core.strip_protocol(self._filepath)
         file_system = fsspec.filesystem(
             protocol=self._protocol, **self._storage_options
         )
-        return file_system.exists(path)
+        return file_system.exists(self._filepath)
 

@@ -24,16 +24,19 @@ Data Sets
     kedro.io.CSVLocalDataSet
     kedro.io.CSVHTTPDataSet
     kedro.io.CSVS3DataSet
+    kedro.io.CSVDataSet
     kedro.io.HDFLocalDataSet
     kedro.io.HDFS3DataSet
     kedro.io.JSONLocalDataSet
     kedro.io.JSONDataSet
     kedro.io.LambdaDataSet
     kedro.io.MemoryDataSet
+    kedro.io.ParquetDataSet
     kedro.io.ParquetLocalDataSet
     kedro.io.PartitionedDataSet
     kedro.io.PickleLocalDataSet
     kedro.io.PickleS3DataSet
+    kedro.io.PickleDataSet
     kedro.io.SQLTableDataSet
     kedro.io.SQLQueryDataSet
     kedro.io.TextLocalDataSet

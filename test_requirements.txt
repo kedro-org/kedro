@@ -10,6 +10,7 @@ dask[complete]>=2.6.0, <3.0
 flake8>=3.5,<4.0
 gcsfs>=0.3.0, <1.0
 hdfs>=2.5.8, <3.0
+import-linter==1.0; python_version >= '3.6'
 joblib==0.12.3
 jupyter_client>=5.1.0, <6.0
 matplotlib>=3.0.3, <4.0
@@ -19,6 +20,7 @@ mypy<=1.0
 nbconvert>=5.3.1, <6.0
 nbformat>=4.4.0, <5.0
 networkx>=2.4, <3.0
+pandas-gbq>=0.12.0, <1.0
 pre-commit>=1.17.0, <2.0.0
 psutil==5.4.7
 pylint>=2.3.1, <2.4.0 # 2.4.1 doesn't work for Python 3.5, and requires investigation.

@@ -11,6 +11,7 @@
 | Documentation Build | [![Documentation](https://readthedocs.org/projects/kedro/badge/?version=latest)](https://kedro.readthedocs.io/) |
 | License | [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) |
 | Code Style | [![Code Style: Black](https://img.shields.io/badge/code%20style-black-black.svg)](https://github.com/ambv/black) |
+| Questions | [![Questions: Stackoverflow "kedro"](https://img.shields.io/badge/stackoverflow%20tag-kedro-yellow)](https://stackoverflow.com/questions/tagged/kedro) |
 
 
 ## What is Kedro?
@@ -33,6 +34,7 @@ pip install kedro
 
 See more detailed installation instructions, including how to setup Python virtual environments, in our [installation guide](https://kedro.readthedocs.io/en/latest/02_getting_started/02_install.html) and get started with our ["Hello Word"](https://kedro.readthedocs.io/en/latest/02_getting_started/04_hello_world.html) example.
 
+
 ## Why does Kedro exist?
 
 Kedro is built upon our collective best-practice (and mistakes) trying to deliver real-world ML applications that have vast amounts of dirty data. We developed Kedro to achieve the following:
@@ -44,6 +46,7 @@ Kedro is built upon our collective best-practice (and mistakes) trying to delive
 
 Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) and [Nikolaos Tsaousis](https://github.com/tsanikgr) to solve challenges they faced in their project work. This work was later turned into a product thanks to the following contributors:
 [Ivan Danov](https://github.com/idanov), [Dmitrii Deriabin](https://github.com/DmitryDeryabin), [Gordon Wrigley](https://github.com/tolomea), [Yetunde Dada](https://github.com/yetudada), [Nasef Khan](https://github.com/nakhan98), [Kiyohito Kunii](https://github.com/921kiyo), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae), [Peteris Erins](https://github.com/Pet3ris), [Lorena Balan](https://github.com/lorenabalan), [Richard Westenra](https://github.com/richardwestenra) and [Anton Kirilenko](https://github.com/Flid).
+
 
 ## What are the main features of Kedro?
 
@@ -78,9 +81,15 @@ Documentation for the latest stable release can be found [here](https://kedro.re
 
 *Note:* Read our [FAQs](https://kedro.readthedocs.io/en/latest/06_resources/01_faq.html#how-does-kedro-compare-to-other-projects) to learn how we differ from workflow managers like Airflow and Luigi.
 
+
 ## Can I contribute?
 
 Yes! Want to help build Kedro? Check out our guide to [contributing](https://github.com/quantumblacklabs/kedro/blob/master/CONTRIBUTING.md).
+
+
+## Where can I learn more?
+
+There is a growing community around Kedro. Have a look at our [FAQs](https://kedro.readthedocs.io/en/latest/06_resources/01_faq.html#where-can-i-learn-more) to find projects using Kedro and links to articles, podcasts and talks.
 
 
 ## What licence do you use?

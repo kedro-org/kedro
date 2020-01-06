@@ -28,7 +28,6 @@
 
 # pylint: disable=no-member
 
-import os
 import re
 
 import dask.dataframe as dd
@@ -40,6 +39,7 @@ import s3fs
 from moto import mock_s3
 from pandas.util.testing import assert_frame_equal
 from s3fs import S3FileSystem
+
 from kedro.contrib.io.dask import ParquetDaskDataSet
 from kedro.io import DataSetError
 

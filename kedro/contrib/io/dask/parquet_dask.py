@@ -71,7 +71,6 @@ class ParquetDaskDataSet(DefaultArgumentsMixIn, AbstractDataSet):
 
     DEFAULT_SAVE_ARGS = {"write_index": False}
 
-    # pylint: disable=too-many-arguments
     def __init__(
         self,
         filepath: str,
@@ -122,4 +121,3 @@ class ParquetDaskDataSet(DefaultArgumentsMixIn, AbstractDataSet):
             protocol=self._protocol, **self._storage_options
         )
         return file_system.exists(self._filepath)
-

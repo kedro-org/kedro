@@ -113,22 +113,9 @@ def s3fs_cleanup():
 
 @pytest.mark.usefixtures("s3fs_cleanup")
 class TestParquetDaskDataSet:
-    @pytest.mark.parametrize(
-        "bad_credentials",
-        [{"aws_secret_access_key": "SECRET"}, {"aws_access_key_id": "KEY"}],
-    )
-    def test_incomplete_credentials_load(self, bad_credentials):
-        """Test that incomplete credentials passed in credentials.yml raises exception."""
-        pattern = "Partial credentials found in explicit, missing:"
-
-        with pytest.raises(DataSetError, match=re.escape(pattern)):
-            ParquetDaskDataSet(
-                filepath=S3_PATH, storage_options={"client_kwargs": bad_credentials}
-            ).load().compute()
-
     def test_incorrect_credentials_load(self):
         """Test that incorrect credential keys won't instantiate dataset."""
-        pattern = "unexpected keyword argument"
+        pattern = r"unexpected keyword argument"
         with pytest.raises(DataSetError, match=pattern):
             ParquetDaskDataSet(
                 filepath=S3_PATH,

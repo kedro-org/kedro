@@ -149,7 +149,7 @@ def _reformat_load_versions(ctx, param, value) -> Dict[str, str]:
     load_versions_dict = {}
 
     for load_version in value:
-        load_version_list = load_version.split(load_version_separator)
+        load_version_list = load_version.split(load_version_separator, 1)
         if len(load_version_list) != 2:
             raise ValueError(
                 "Expected the form of `load_version` to be "

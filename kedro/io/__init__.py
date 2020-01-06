@@ -37,6 +37,7 @@ from .core import DataSetAlreadyExistsError  # NOQA
 from .core import DataSetError  # NOQA
 from .core import DataSetNotFoundError  # NOQA
 from .core import Version  # NOQA
+from .csv_dataset import CSVDataSet  # NOQA
 from .csv_http import CSVHTTPDataSet  # NOQA
 from .csv_local import CSVLocalDataSet  # NOQA
 from .csv_s3 import CSVS3DataSet  # NOQA
@@ -48,8 +49,10 @@ from .json_dataset import JSONDataSet  # NOQA
 from .json_local import JSONLocalDataSet  # NOQA
 from .lambda_data_set import LambdaDataSet  # NOQA
 from .memory_data_set import MemoryDataSet  # NOQA
+from .parquet_dataset import ParquetDataSet  # NOQA
 from .parquet_local import ParquetLocalDataSet  # NOQA
 from .partitioned_data_set import PartitionedDataSet  # NOQA
+from .pickle_dataset import PickleDataSet  # NOQA
 from .pickle_local import PickleLocalDataSet  # NOQA
 from .pickle_s3 import PickleS3DataSet  # NOQA
 from .sql import SQLQueryDataSet  # NOQA

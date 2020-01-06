@@ -3,14 +3,20 @@
 ## Major features and improvements
 * Added the following datasets:
   - `ParquetDaskDataSet` in `kedro.contrib.io.dask` for handling parquet datasets using Dask.
-## Bug fixes and other changes
+  - `PickleDataSet` dataset for working with Pickle files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `CSVDataSet` dataset for working with CSV files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `ParquetDataSet` dataset for working with Parquet files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+* Enabled loading a particular version of a dataset in Jupyter Notebooks and ipython, using `catalog.load("dataset_name", version="<2019-12-13T15.08.09.255Z>")`.
 
+## Bug fixes and other changes
+* Fixed a bug in the `invalidate_cache` method of `ParquetGCSDataSet` and `CSVGCSDataSet`.
+* `--load-version` now won't break if version value contains a colon.
+* Enabled running `node`s with duplicate inputs.
 
 ## Breaking changes to the API
 
-
 ## Thanks for supporting contributions
- [Yuhao Zhu](https://github.com/yhzqb)
+[Jonas Kemper](https://github.com/jonasrk), [Yuhao Zhu](https://github.com/yhzqb)
 
 # Release 0.15.5
 

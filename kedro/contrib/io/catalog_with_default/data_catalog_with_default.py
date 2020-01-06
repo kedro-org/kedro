@@ -91,11 +91,13 @@ class DataCatalogWithDefault(DataCatalog):
         self._default = default
         self._remember = remember
 
-    def load(self, name: str) -> Any:
+    def load(self, name: str, version: str = None) -> Any:
         """Loads a registered data set
 
         Args:
             name: A data set to be loaded.
+            version: Optional version to be loaded.
+
 
         Returns:
             The loaded data as configured.

@@ -28,16 +28,16 @@
 
 """``ParquetDaskDataSet`` is a data set used to load and save data to parquet files using Dask"""
 from copy import deepcopy
+from pathlib import PurePosixPath
 from typing import Any, Dict
 
 import dask.dataframe as dd
 import fsspec
-from fsspec.utils import infer_storage_options
 
 from kedro.contrib.io import DefaultArgumentsMixIn
-from kedro.io.core import AbstractDataSet
+from kedro.io.core import AbstractDataSet, get_protocol_and_path
 
-_PROTOCOL_DELIM = "://"
+PROTOCOL_DELIMITER = "://"
 
 
 class ParquetDaskDataSet(DefaultArgumentsMixIn, AbstractDataSet):
@@ -95,8 +95,8 @@ class ParquetDaskDataSet(DefaultArgumentsMixIn, AbstractDataSet):
             save_args: Additional saving options for `dask.dataframe.to_parquet`:
                 https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.to_parquet
         """
-        self._filepath = filepath
-        self._protocol = infer_storage_options(self._filepath)["protocol"]
+        self._protocol, path = get_protocol_and_path(filepath)
+        self._filepath = PurePosixPath(path)
         self._storage_options = deepcopy(storage_options) or {}
         super().__init__(load_args, save_args)
 
@@ -106,21 +106,30 @@ class ParquetDaskDataSet(DefaultArgumentsMixIn, AbstractDataSet):
             load_args=self._load_args,
             save_args=self._save_args,
             protocol=self._protocol,
-            storage_options=self._storage_options,
         )
 
     def _load(self) -> dd.DataFrame:
+        load_path = self.get_filepath_str()
         return dd.read_parquet(
-            self._filepath, storage_options=self._storage_options, **self._load_args
+            load_path, storage_options=self._storage_options, **self._load_args
         )
 
     def _save(self, data: dd.DataFrame) -> None:
+        save_path = self.get_filepath_str()
         data.to_parquet(
-            self._filepath, storage_options=self._storage_options, **self._save_args
+            save_path, storage_options=self._storage_options, **self._save_args
         )
 
     def _exists(self) -> bool:
         file_system = fsspec.filesystem(
             protocol=self._protocol, **self._storage_options
         )
-        return file_system.exists(self._filepath)
+        return file_system.exists(str(self._filepath))
+
+    def get_filepath_str(self) -> str:
+        """Returns filepath. Returns full filepath with any protocol .
+
+        Returns:
+            Filepath string.
+        """
+        return "".join((self._protocol, PROTOCOL_DELIMITER, str(self._filepath)))

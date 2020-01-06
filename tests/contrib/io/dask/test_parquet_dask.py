@@ -28,7 +28,6 @@
 
 # pylint: disable=no-member
 
-import re
 
 import dask.dataframe as dd
 import pandas as pd

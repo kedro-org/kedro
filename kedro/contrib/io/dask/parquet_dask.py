@@ -57,12 +57,15 @@ class ParquetDaskDataSet(DefaultArgumentsMixIn, AbstractDataSet):
             >>> ddf = dd.from_pandas(data, npartitions=2)
             >>>
             >>> data_set = ParquetDaskDataSet(
-            >>>                         filepath="s3://bucket_name/path/to/folder",
-            >>>                         storage_options={
-            >>>                             'client_kwargs':
-            >>>                                 'aws_access_key_id': 'YOUR_KEY',
-            >>>                                 'aws_secret_access_key': 'YOUR SECRET'},
-            >>>                         save_args={"compression": "GZIP"})
+            >>>     filepath="s3://bucket_name/path/to/folder",
+            >>>     storage_options={
+            >>>         'client_kwargs':{
+            >>>             'aws_access_key_id': 'YOUR_KEY',
+            >>>             'aws_secret_access_key': 'YOUR SECRET',
+            >>>         }
+            >>>     },
+            >>>     save_args={"compression": "GZIP"}
+            >>> )
             >>> data_set.save(ddf)
             >>> reloaded = data_set.load()
             >>>

@@ -118,14 +118,9 @@ class ParquetDaskDataSet(DefaultArgumentsMixIn, AbstractDataSet):
         )
 
     def _exists(self) -> bool:
-        path = self._extract_path()
+        path = fsspec.core.strip_protocol(self._filepath)
         file_system = fsspec.filesystem(
             protocol=self._protocol, **self._storage_options
         )
         return file_system.exists(path)
 
-    def _extract_path(self) -> str:
-        split_path = self._filepath.split(_PROTOCOL_DELIM, 1)
-        if len(split_path) > 1:
-            return split_path[1]
-        return self._filepath  # If the length is 1, then it is local path

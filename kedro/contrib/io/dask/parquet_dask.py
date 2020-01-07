@@ -97,10 +97,10 @@ class ParquetDaskDataSet(DefaultArgumentsMixIn, AbstractDataSet):
             save_args: Additional saving options for `dask.dataframe.to_parquet`:
                 https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.to_parquet
         """
+        super().__init__(load_args, save_args)
         self._protocol, path = get_protocol_and_path(filepath)
         self._filepath = PurePosixPath(path)
         self._storage_options = deepcopy(storage_options) or {}
-        super().__init__(load_args, save_args)
 
     def _describe(self) -> Dict[str, Any]:
         return dict(

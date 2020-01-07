@@ -26,7 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``ParquetDaskDataSet`` is a data set used to load and save data to parquet files using Dask
+"""``DaskParquetDataSet`` is a data set used to load and save data to parquet files using Dask
 dataframe"""
 
 from copy import deepcopy
@@ -42,15 +42,15 @@ from kedro.io.core import AbstractDataSet, get_protocol_and_path
 PROTOCOL_DELIMITER = "://"
 
 
-class ParquetDaskDataSet(DefaultArgumentsMixIn, AbstractDataSet):
-    """``ParquetDaskDataSet`` loads and saves data to parquet file(s). It uses Dask
+class DaskParquetDataSet(DefaultArgumentsMixIn, AbstractDataSet):
+    """``DaskParquetDataSet`` loads and saves data to parquet file(s). It uses Dask
     remote data services to handle the corresponding load and save operations:
         https://docs.dask.org/en/latest/remote-data-services.html
 
         Example (AWS S3):
         ::
 
-            >>> from kedro.contrib.io.dask.parquet_dask import ParquetDaskDataSet
+            >>> from kedro.contrib.io.dask.parquet_dask import DaskParquetDataSet
             >>> import pandas as pd
             >>> import dask.dataframe as dd
             >>>
@@ -58,7 +58,7 @@ class ParquetDaskDataSet(DefaultArgumentsMixIn, AbstractDataSet):
             >>>                      'col3': [5, 6]})
             >>> ddf = dd.from_pandas(data, npartitions=2)
             >>>
-            >>> data_set = ParquetDaskDataSet(
+            >>> data_set = DaskParquetDataSet(
             >>>     filepath="s3://bucket_name/path/to/folder",
             >>>     storage_options={
             >>>         'client_kwargs':{
@@ -83,7 +83,7 @@ class ParquetDaskDataSet(DefaultArgumentsMixIn, AbstractDataSet):
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``ParquetDaskDataSet`` pointing to concrete
+        """Creates a new instance of ``DaskParquetDataSet`` pointing to concrete
         parquet files.
 
         Args:

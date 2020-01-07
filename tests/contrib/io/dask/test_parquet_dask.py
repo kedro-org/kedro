@@ -39,7 +39,7 @@ from moto import mock_s3
 from pandas.util.testing import assert_frame_equal
 from s3fs import S3FileSystem
 
-from kedro.contrib.io.dask import ParquetDaskDataSet
+from kedro.contrib.io.dask import DaskParquetDataSet
 from kedro.io import DataSetError
 
 FILE_NAME = "test.parquet"
@@ -95,7 +95,7 @@ def mocked_s3_object(tmp_path, mocked_s3_bucket, dummy_dd_dataframe: dd.DataFram
 
 @pytest.fixture
 def s3_data_set(load_args, save_args):
-    return ParquetDaskDataSet(
+    return DaskParquetDataSet(
         filepath=S3_PATH,
         storage_options={"client_kwargs": AWS_CREDENTIALS},
         load_args=load_args,
@@ -111,12 +111,12 @@ def s3fs_cleanup():
 
 
 @pytest.mark.usefixtures("s3fs_cleanup")
-class TestParquetDaskDataSet:
+class TestDaskParquetDataSet:
     def test_incorrect_credentials_load(self):
         """Test that incorrect credential keys won't instantiate dataset."""
         pattern = r"unexpected keyword argument"
         with pytest.raises(DataSetError, match=pattern):
-            ParquetDaskDataSet(
+            DaskParquetDataSet(
                 filepath=S3_PATH,
                 storage_options={
                     "client_kwargs": {"access_token": "TOKEN", "access_key": "KEY"}
@@ -128,10 +128,10 @@ class TestParquetDaskDataSet:
         [{"aws_access_key_id": None, "aws_secret_access_key": None}, {}, None],
     )
     def test_empty_credentials_load(self, bad_credentials):
-        parquet_data_set = ParquetDaskDataSet(
+        parquet_data_set = DaskParquetDataSet(
             filepath=S3_PATH, storage_options={"client_kwargs": bad_credentials}
         )
-        pattern = r"Failed while loading data from data set ParquetDaskDataSet\(.+\)"
+        pattern = r"Failed while loading data from data set DaskParquetDataSet\(.+\)"
         with pytest.raises(DataSetError, match=pattern):
             parquet_data_set.load().compute()
 
@@ -139,10 +139,10 @@ class TestParquetDaskDataSet:
         """Test that AWS credentials are passed successfully into boto3
         client instantiation on creating S3 connection."""
         mocker.patch("s3fs.core.boto3.Session.client")
-        s3_data_set = ParquetDaskDataSet(
+        s3_data_set = DaskParquetDataSet(
             filepath=S3_PATH, storage_options={"client_kwargs": AWS_CREDENTIALS}
         )
-        pattern = r"Failed while loading data from data set ParquetDaskDataSet\(.+\)"
+        pattern = r"Failed while loading data from data set DaskParquetDataSet\(.+\)"
         with pytest.raises(DataSetError, match=pattern):
             s3_data_set.load().compute()
 
@@ -180,7 +180,7 @@ class TestParquetDaskDataSet:
     def test_save_load_locally(self, tmp_path, dummy_dd_dataframe):
         """Test loading the data locally."""
         file_path = str(tmp_path / "some" / "dir" / FILE_NAME)
-        data_set = ParquetDaskDataSet(filepath=file_path)
+        data_set = DaskParquetDataSet(filepath=file_path)
 
         assert not data_set.exists()
         data_set.save(dummy_dd_dataframe)

@@ -26,7 +26,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``ParquetDaskDataSet`` is a data set used to load and save data to parquet files using Dask"""
+"""``ParquetDaskDataSet`` is a data set used to load and save data to parquet files using Dask
+dataframe"""
+
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any, Dict

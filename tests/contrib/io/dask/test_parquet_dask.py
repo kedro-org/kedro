@@ -48,7 +48,7 @@ AWS_CREDENTIALS = dict(
     aws_access_key_id="FAKE_ACCESS_KEY", aws_secret_access_key="FAKE_SECRET_KEY"
 )
 
-# Cannot use Pathlib since it strips the second slash from "s3://"
+# Pathlib cannot be used since it strips out the second slash from "s3://"
 S3_PATH = "s3://" + BUCKET_NAME + "/" + FILE_NAME
 
 

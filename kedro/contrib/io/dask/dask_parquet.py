@@ -129,7 +129,7 @@ class DaskParquetDataSet(DefaultArgumentsMixIn, AbstractDataSet):
         return file_system.exists(str(self._filepath))
 
     def get_filepath_str(self) -> str:
-        """Returns filepath. Returns full filepath with any protocol .
+        """Returns full filepath joined with protocol.
 
         Returns:
             Filepath string.

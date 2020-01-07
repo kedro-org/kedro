@@ -2,7 +2,7 @@
 
 ## Major features and improvements
 * Added the following datasets:
-  - `ParquetDaskDataSet` in `kedro.contrib.io.dask` for handling parquet datasets using Dask dataframe.
+  - `ParquetDaskDataSet` in `kedro.contrib.io.dask` for handling parquet datasets using Dask dataframes.
   - `PickleDataSet` dataset for working with Pickle files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
   - `CSVDataSet` dataset for working with CSV files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
   - `ParquetDataSet` dataset for working with Parquet files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.

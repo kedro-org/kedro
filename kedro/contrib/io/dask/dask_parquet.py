@@ -30,7 +30,6 @@
 dataframe"""
 
 from copy import deepcopy
-from pathlib import PurePosixPath
 from typing import Any, Dict
 
 import dask.dataframe as dd
@@ -98,40 +97,38 @@ class DaskParquetDataSet(DefaultArgumentsMixIn, AbstractDataSet):
                 https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.to_parquet
         """
         super().__init__(load_args, save_args)
-        self._protocol, path = get_protocol_and_path(filepath)
-        self._filepath = PurePosixPath(path)
+        self._filepath = filepath
         self._storage_options = deepcopy(storage_options) or {}
+
+    # @property
+    # def fs_args(self) -> Dict[str, Any]:
+    #     """Property of optional file system parameters.
+
+    #     Returns:
+    #         A dictionary of backend file system parameters, including credentials.
+    #     """
+    #     fs_args = self._fs_args
+    #     fs_args.update(self._credentials)
+    #     return fs_args
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
             filepath=self._filepath,
             load_args=self._load_args,
             save_args=self._save_args,
-            protocol=self._protocol,
         )
 
     def _load(self) -> dd.DataFrame:
-        load_path = self.get_filepath_str()
         return dd.read_parquet(
-            load_path, storage_options=self._storage_options, **self._load_args
+            self._filepath, storage_options=self._storage_options, **self._load_args
         )
 
     def _save(self, data: dd.DataFrame) -> None:
-        save_path = self.get_filepath_str()
         data.to_parquet(
-            save_path, storage_options=self._storage_options, **self._save_args
+            self._filepath, storage_options=self._storage_options, **self._save_args
         )
 
     def _exists(self) -> bool:
-        file_system = fsspec.filesystem(
-            protocol=self._protocol, **self._storage_options
-        )
-        return file_system.exists(str(self._filepath))
-
-    def get_filepath_str(self) -> str:
-        """Returns full filepath joined with protocol.
-
-        Returns:
-            Filepath string.
-        """
-        return "".join((self._protocol, PROTOCOL_DELIMITER, str(self._filepath)))
+        protocol, path = get_protocol_and_path(self._filepath)
+        file_system = fsspec.filesystem(protocol=protocol, **self._storage_options)
+        return file_system.exists(path)

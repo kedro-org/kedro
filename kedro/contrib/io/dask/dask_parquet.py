@@ -38,8 +38,6 @@ import fsspec
 from kedro.contrib.io import DefaultArgumentsMixIn
 from kedro.io.core import AbstractDataSet, get_protocol_and_path
 
-PROTOCOL_DELIMITER = "://"
-
 
 class DaskParquetDataSet(DefaultArgumentsMixIn, AbstractDataSet):
     """``DaskParquetDataSet`` loads and saves data to parquet file(s). It uses Dask
@@ -75,12 +73,14 @@ class DaskParquetDataSet(DefaultArgumentsMixIn, AbstractDataSet):
 
     DEFAULT_SAVE_ARGS = {"write_index": False}
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         filepath: str,
-        storage_options: Dict[str, Any] = None,
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
+        credentials: Dict[str, Any] = None,
+        fs_args: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``DaskParquetDataSet`` pointing to concrete
         parquet files.
@@ -88,28 +88,30 @@ class DaskParquetDataSet(DefaultArgumentsMixIn, AbstractDataSet):
         Args:
             filepath: Path to a parquet file
                 parquet collection or the directory of a multipart parquet.
-            storage_options: Optional parameters to the backend file system driver,
-                such as credentials:
-                https://docs.dask.org/en/latest/remote-data-services.html#optional-parameters
             load_args: Additional loading options `dask.dataframe.read_parquet`:
                 https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.read_parquet
             save_args: Additional saving options for `dask.dataframe.to_parquet`:
                 https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.to_parquet
+            credentials: Credentials required to get access to the underlying filesystem.
+                E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
+            fs_args: Optional parameters to the backend file system driver:
+                https://docs.dask.org/en/latest/remote-data-services.html#optional-parameters
         """
         super().__init__(load_args, save_args)
         self._filepath = filepath
-        self._storage_options = deepcopy(storage_options) or {}
+        self._fs_args = deepcopy(fs_args) or {}
+        self._credentials = deepcopy(credentials) or {}
 
-    # @property
-    # def fs_args(self) -> Dict[str, Any]:
-    #     """Property of optional file system parameters.
+    @property
+    def fs_args(self) -> Dict[str, Any]:
+        """Property of optional file system parameters.
 
-    #     Returns:
-    #         A dictionary of backend file system parameters, including credentials.
-    #     """
-    #     fs_args = self._fs_args
-    #     fs_args.update(self._credentials)
-    #     return fs_args
+        Returns:
+            A dictionary of backend file system parameters, including credentials.
+        """
+        fs_args = self._fs_args
+        fs_args.update(self._credentials)
+        return fs_args
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
@@ -120,15 +122,13 @@ class DaskParquetDataSet(DefaultArgumentsMixIn, AbstractDataSet):
 
     def _load(self) -> dd.DataFrame:
         return dd.read_parquet(
-            self._filepath, storage_options=self._storage_options, **self._load_args
+            self._filepath, storage_options=self.fs_args, **self._load_args
         )
 
     def _save(self, data: dd.DataFrame) -> None:
-        data.to_parquet(
-            self._filepath, storage_options=self._storage_options, **self._save_args
-        )
+        data.to_parquet(self._filepath, storage_options=self.fs_args, **self._save_args)
 
     def _exists(self) -> bool:
         protocol, path = get_protocol_and_path(self._filepath)
-        file_system = fsspec.filesystem(protocol=protocol, **self._storage_options)
+        file_system = fsspec.filesystem(protocol=protocol, **self.fs_args)
         return file_system.exists(path)

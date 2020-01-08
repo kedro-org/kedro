@@ -49,7 +49,7 @@ AWS_CREDENTIALS = dict(
 )
 
 # Pathlib cannot be used since it strips out the second slash from "s3://"
-S3_PATH = "s3://" + BUCKET_NAME + "/" + FILE_NAME
+S3_PATH = "s3://{}/{}".format(BUCKET_NAME, FILE_NAME)
 
 
 @pytest.fixture(params=[None])
@@ -97,7 +97,7 @@ def mocked_s3_object(tmp_path, mocked_s3_bucket, dummy_dd_dataframe: dd.DataFram
 def s3_data_set(load_args, save_args):
     return DaskParquetDataSet(
         filepath=S3_PATH,
-        storage_options={"client_kwargs": AWS_CREDENTIALS},
+        credentials={"client_kwargs": AWS_CREDENTIALS},
         load_args=load_args,
         save_args=save_args,
     )
@@ -118,7 +118,7 @@ class TestDaskParquetDataSet:
         with pytest.raises(DataSetError, match=pattern):
             DaskParquetDataSet(
                 filepath=S3_PATH,
-                storage_options={
+                credentials={
                     "client_kwargs": {"access_token": "TOKEN", "access_key": "KEY"}
                 },
             ).load().compute()
@@ -129,7 +129,7 @@ class TestDaskParquetDataSet:
     )
     def test_empty_credentials_load(self, bad_credentials):
         parquet_data_set = DaskParquetDataSet(
-            filepath=S3_PATH, storage_options={"client_kwargs": bad_credentials}
+            filepath=S3_PATH, credentials={"client_kwargs": bad_credentials}
         )
         pattern = r"Failed while loading data from data set DaskParquetDataSet\(.+\)"
         with pytest.raises(DataSetError, match=pattern):
@@ -140,7 +140,7 @@ class TestDaskParquetDataSet:
         client instantiation on creating S3 connection."""
         mocker.patch("s3fs.core.boto3.Session.client")
         s3_data_set = DaskParquetDataSet(
-            filepath=S3_PATH, storage_options={"client_kwargs": AWS_CREDENTIALS}
+            filepath=S3_PATH, credentials={"client_kwargs": AWS_CREDENTIALS}
         )
         pattern = r"Failed while loading data from data set DaskParquetDataSet\(.+\)"
         with pytest.raises(DataSetError, match=pattern):

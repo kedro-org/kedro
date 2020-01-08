@@ -267,7 +267,6 @@ ParallelRunnerManager.register(  # pylint: disable=no-member
 
 
 class TestParallelRunnerRelease:
-    # pylint: disable=protected-access
     def test_dont_release_inputs_and_outputs(self):
         runner = ParallelRunner()
         log = runner._manager.list()

@@ -116,6 +116,7 @@ setup(
             "azure-storage-queue>=1.1.0, <2.0",
         ],
         "bioinformatics": ["biopython>=1.73, <2.0"],
+        "dask": ["dask[complete]>=2.6.0, <3.0"],
         "gcs": ["gcsfs>=0.3.0, <1.0"],
         "gbq": ["pandas-gbq>=0.12.0, <1.0"],
         "matplotlib": ["matplotlib>=3.0.3, <4.0"],

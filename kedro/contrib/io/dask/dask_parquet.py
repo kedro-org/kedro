@@ -109,7 +109,7 @@ class DaskParquetDataSet(DefaultArgumentsMixIn, AbstractDataSet):
         Returns:
             A dictionary of backend file system parameters, including credentials.
         """
-        fs_args = self._fs_args
+        fs_args = deepcopy(self._fs_args)
         fs_args.update(self._credentials)
         return fs_args
 
@@ -129,6 +129,6 @@ class DaskParquetDataSet(DefaultArgumentsMixIn, AbstractDataSet):
         data.to_parquet(self._filepath, storage_options=self.fs_args, **self._save_args)
 
     def _exists(self) -> bool:
-        protocol, _ = get_protocol_and_path(self._filepath)
+        protocol = get_protocol_and_path(self._filepath)[0]
         file_system = fsspec.filesystem(protocol=protocol, **self.fs_args)
         return file_system.exists(self._filepath)

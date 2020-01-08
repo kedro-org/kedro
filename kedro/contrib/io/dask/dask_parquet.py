@@ -57,7 +57,7 @@ class DaskParquetDataSet(DefaultArgumentsMixIn, AbstractDataSet):
             >>>
             >>> data_set = DaskParquetDataSet(
             >>>     filepath="s3://bucket_name/path/to/folder",
-            >>>     storage_options={
+            >>>     credentials={
             >>>         'client_kwargs':{
             >>>             'aws_access_key_id': 'YOUR_KEY',
             >>>             'aws_secret_access_key': 'YOUR SECRET',
@@ -129,6 +129,6 @@ class DaskParquetDataSet(DefaultArgumentsMixIn, AbstractDataSet):
         data.to_parquet(self._filepath, storage_options=self.fs_args, **self._save_args)
 
     def _exists(self) -> bool:
-        protocol, path = get_protocol_and_path(self._filepath)
+        protocol, _ = get_protocol_and_path(self._filepath)
         file_system = fsspec.filesystem(protocol=protocol, **self.fs_args)
-        return file_system.exists(path)
+        return file_system.exists(self._filepath)

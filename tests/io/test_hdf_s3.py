@@ -43,6 +43,7 @@ FILENAME = "test.hdf"
 AWS_CREDENTIALS = dict(
     aws_access_key_id="FAKE_ACCESS_KEY", aws_secret_access_key="FAKE_SECRET_KEY"
 )
+HDF_KEY = "test_hdf"
 
 
 @pytest.fixture
@@ -56,7 +57,7 @@ def hdf_data_set():
         filepath=FILENAME,
         bucket_name=BUCKET_NAME,
         credentials=AWS_CREDENTIALS,
-        key="test_hdf",
+        key=HDF_KEY,
     )
 
 
@@ -84,7 +85,7 @@ def hdf_data_set_with_args():
         filepath=FILENAME,
         bucket_name=BUCKET_NAME,
         credentials=AWS_CREDENTIALS,
-        key="test_hdf",
+        key=HDF_KEY,
         load_args={"title": "test_hdf"},
         save_args={"title": "test_hdf"},
     )
@@ -96,7 +97,7 @@ def versioned_hdf_data_set(load_version, save_version):
         filepath=FILENAME,
         bucket_name=BUCKET_NAME,
         credentials=AWS_CREDENTIALS,
-        key="test_hdf",
+        key=HDF_KEY,
         version=Version(load_version, save_version),
     )
 
@@ -158,6 +159,22 @@ class TestHDFS3DataSet:
 
         assert_frame_equal(reloaded_df, dummy_dataframe)
 
+    @pytest.mark.usefixtures("mocked_s3_object")
+    def test_save_and_load_with_protocol(self, dummy_dataframe):
+        """Test loading the data from S3."""
+        hdf_data_set = HDFS3DataSet(
+            filepath="s3://{}/{}".format(BUCKET_NAME, FILENAME),
+            credentials={
+                "aws_access_key_id": "YOUR_KEY",
+                "aws_secret_access_key": "YOUR SECRET",
+            },
+            key=HDF_KEY,
+        )
+        hdf_data_set.save(dummy_dataframe)
+        reloaded_df = hdf_data_set.load()
+
+        assert_frame_equal(reloaded_df, dummy_dataframe)
+
     @pytest.mark.usefixtures("mocked_s3_bucket")
     def test_load_missing(self, hdf_data_set):
         """Check the error when trying to load missing hdf file."""
@@ -204,6 +221,12 @@ class TestHDFS3DataSet:
 
     def test_serializable(self, hdf_data_set):
         ForkingPickler.dumps(hdf_data_set)
+
+    @pytest.mark.usefixtures("mocked_s3_object")
+    def test_s3fs_args_propagated(self, mocker):
+        mock = mocker.patch("kedro.io.hdf_s3.S3FileSystem")
+        HDFS3DataSet(FILENAME, BUCKET_NAME, AWS_CREDENTIALS, s3fs_args=dict(custom=42))
+        mock.assert_called_with(client_kwargs=mocker.ANY, custom=42)
 
 
 @pytest.mark.usefixtures("s3fs_cleanup")

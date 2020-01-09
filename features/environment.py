@@ -58,7 +58,7 @@ def before_all(context):
         context.venv_dir = Path(create_new_venv())
 
     # note the locations of some useful stuff
-    # this is because exe resolution in supbrocess doens't respect a passed env
+    # this is because exe resolution in subprocess doesn't respect a passed env
     if os.name == "posix":
         bin_dir = context.venv_dir / "bin"
         path_sep = ":"
@@ -69,6 +69,7 @@ def before_all(context):
     context.pip = str(bin_dir / "pip")
     context.python = str(bin_dir / "python")
     context.kedro = str(bin_dir / "kedro")
+    context.requirements_path = Path("requirements.txt").resolve()
 
     # clone the environment, remove any condas and venvs and insert our venv
     context.env = os.environ.copy()
@@ -78,8 +79,14 @@ def before_all(context):
     path = [str(bin_dir)] + path
     context.env["PATH"] = path_sep.join(path)
 
+    # Create an empty pip.conf file and point pip to it
+    pip_conf_path = context.venv_dir / "pip.conf"
+    pip_conf_path.touch()
+    context.env["PIP_CONFIG_FILE"] = str(pip_conf_path)
+
     # install Kedro
     call([context.python, "-m", "pip", "install", "-U", "pip"])
+    call([context.pip, "install", "--upgrade", "setuptools"])
     for wheel_path in Path("dist").glob("*.whl"):
         wheel_path.unlink()
     call([context.pip, "install", "wheel"])

@@ -73,7 +73,7 @@ repos:
             language: system
             types: [file, python]
             files: ^tests/
-            entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access
+            entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments
             stages: [commit]
 
           # The same pylint checks, but running on all files. It's for manual run with `make lint`
@@ -100,13 +100,13 @@ repos:
             language: system
             pass_filenames: false
             stages: [manual]
-            entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access tests
+            entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments tests
           # We need to make some exceptions for 3.5, that's why it's a custom runner.
           - id: black
             name: "Black"
             language: system
             pass_filenames: false
-            entry: python -m tools.min_version 3.6 "pip install black" "black kedro extras features tests"
+            entry: python -m tools.min_version 3.6 "black kedro extras features tests"
           - id: legal
             name: "Licence check"
             language: system
@@ -116,4 +116,4 @@ repos:
             name: "Import Linter"
             language: system
             pass_filenames: false
-            entry: python -m tools.min_version 3.6 "pip install import-linter" lint-imports
+            entry: python -m tools.min_version 3.6 lint-imports

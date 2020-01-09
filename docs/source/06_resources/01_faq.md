@@ -1,6 +1,6 @@
 # Frequently asked questions
 
-> *Note:* This documentation is based on `Kedro 0.15.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.5`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 ## What is Kedro?
 
@@ -39,6 +39,45 @@ The primary differences to Bonobo ETL and Bubbles are related to the following f
  - **Ability to support big data operations**. Kedro supports big data operations by allowing you to use PySpark on your projects. We also look at processing dataframes differently to both tools as we consider entire dataframes and do not make use of the slower line-by-line data stream processing.
  - **Project structure**. Kedro provides a built-in project structure from the beginning of your project configured for best-practice project management.
  - **Automatic dependency resolution for pipelines**. The `Pipeline` module also maps out dependencies between nodes and displays the results of this in a sophisticated but easy to understand directed acyclic graph.
+
+## Where can I learn more?
+
+You have two sources of community-generated content:
+ - Articles, podcasts and talks
+ - Kedro used on real-world use cases
+
+We'll be updating links to community-generated content when we come across them.
+
+### Articles, podcasts and talks
+
+```eval_rst
++---------------------------------------------------------+-----------------------------+-------------------------------+-----------+------------------------------------------------------------------------------------------------+
+| Title                                                   | Author                      | Audience                      | Format    | URL                                                                                            |
++=========================================================+=============================+===============================+===========+================================================================================================+
+| Using Kedro and MLflow                                  | Tom Goldenberg & Musa Bilal | QuantumBlack Medium           | Article   | https://medium.com/@QuantumBlack/deploying-and-versioning-data-pipelines-at-scale-942b1d81b5f5 |
+| Deploying and versioning data pipelines at scale        |                             |                               |           |                                                                                                |
++---------------------------------------------------------+-----------------------------+-------------------------------+-----------+------------------------------------------------------------------------------------------------+
+| Kedro: A New Tool For Data Science                      | Jo Stichbury                | Towards Data Science          | Article   | https://towardsdatascience.com/kedro-prepare-to-pimp-your-pipeline-f8f68c263466                |
++---------------------------------------------------------+-----------------------------+-------------------------------+-----------+------------------------------------------------------------------------------------------------+
+| Building a Pipeline with Kedro for an ML Competition    | Masaaki Hirotsu             | mhiro2                        | Article   | https://medium.com/mhiro2/building-pipeline-with-kedro-for-ml-competition-63e1db42d179         |
++---------------------------------------------------------+-----------------------------+-------------------------------+-----------+------------------------------------------------------------------------------------------------+
+| Kedro in Jupyter Notebooks On Google GCP Dataproc       | Zhong Chen                  | Zhong Chen                    | Article   | https://medium.com/@zhongchen/kedro-in-jupyter-notebooks-on-google-gcp-dataproc-31d5f45ad235   |
++---------------------------------------------------------+-----------------------------+-------------------------------+-----------+------------------------------------------------------------------------------------------------+
+| Ship Faster With An Opinionated Data Pipeline Framework | Tom Goldenberg              | Data Engineering Podcast      | Podcast   | https://www.dataengineeringpodcast.com/kedro-data-pipeline-episode-100/                        |
+| Episode 100                                             |                             |                               |           |                                                                                                |
++---------------------------------------------------------+-----------------------------+-------------------------------+-----------+------------------------------------------------------------------------------------------------+
+| Production-level data pipelines that make everyone      | Yetunde Dada                | PyData Berlin 2019            | Recording | https://youtu.be/OFObles2CJs                                                                   |
+| happy using Kedro                                       |                             |                               |           |                                                                                                |
++---------------------------------------------------------+-----------------------------+-------------------------------+-----------+------------------------------------------------------------------------------------------------+
+| Data Science Best Practices con Kedro                   | Carlos Gimenez              | PyData Córdoba Argentina 2019 | Recording | https://youtu.be/_0kMmRfltEQ                                                                   |
++---------------------------------------------------------+-----------------------------+-------------------------------+-----------+------------------------------------------------------------------------------------------------+
+| Kedro - Nubank ML Meetup                                | Carlos Barreto              | Nubank On the Stage           | Recording | https://youtu.be/clBgxmDsSjI                                                                   |
++---------------------------------------------------------+-----------------------------+-------------------------------+-----------+------------------------------------------------------------------------------------------------+
+```
+
+### Kedro used on real-world use cases
+
+You can find a list of Kedro projects in the [`kedro-examples`](https://github.com/quantumblacklabs/kedro-examples) repository.
 
 ## What is data engineering convention?
 
@@ -83,7 +122,23 @@ The primary differences to Bonobo ETL and Bubbles are related to the following f
 
 ## What version of Python does Kedro use?
 
-Kedro is built for Python 3.5+.
+Kedro is built for Python 3.5, 3.6 and 3.7.
+
+## How do I upgrade Kedro?
+
+We use [Semantic Versioning](http://semver.org/). The best way to safely upgrade is to check our [release notes](https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md) for any notable breaking changes.
+
+Once Kedro is installed, you can check your version as follows:
+
+```
+kedro --version
+```
+
+To later upgrade Kedro to a different version, simply run:
+
+```
+pip install kedro -U
+```
 
 ## What best practice should I follow to avoid leaking confidential data?
 

@@ -1,19 +1,61 @@
+# Release 0.15.6
+
+## Major features and improvements
+* Added the following datasets:
+  - `DaskParquetDataSet` in `kedro.contrib.io.dask` for handling parquet datasets using Dask dataframes.
+  - `PickleDataSet` dataset for working with Pickle files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `CSVDataSet` dataset for working with CSV files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `ParquetDataSet` dataset for working with Parquet files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `ExcelDataSet` dataset for working with Excel files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+* Enabled loading a particular version of a dataset in Jupyter Notebooks and ipython, using `catalog.load("dataset_name", version="<2019-12-13T15.08.09.255Z>")`.
+* Added http(s) protocol support for `JSONDataSet`.
+
+## Bug fixes and other changes
+* Fixed a bug in the `invalidate_cache` method of `ParquetGCSDataSet` and `CSVGCSDataSet`.
+* `--load-version` now won't break if version value contains a colon.
+* Enabled running `node`s with duplicate inputs.
+
+## Breaking changes to the API
+
+## Thanks for supporting contributions
+[Jonas Kemper](https://github.com/jonasrk), [Yuhao Zhu](https://github.com/yhzqb)
+
 # Release 0.15.5
 
 ## Major features and improvements
-* Added a `MatplotlibS3Writer` dataset in `contrib` for saving Matplotlib images to S3.
+* New CLI commands and command flags:
+  - Load mulitple `kedro run` CLI flags from a configuration file with the `--config` flag (e.g. `kedro run --config run_config.yml`)
+  - Run parametrised pipeline runs with the `--params` flag (e.g. `kedro run --params param1:value1,param2:value2`).
+  - Lint your project code using the `kedro lint` command, your project is linted with [`black`](https://github.com/psf/black) (Python 3.6+), [`flake8`](https://gitlab.com/pycqa/flake8) and [`isort`](https://github.com/timothycrosley/isort).
+* Load specific environments with Jupyter notebooks using `KEDRO_ENV` which will globally set `run`, `jupyter notebook` and `jupyter lab` commands using environment variables.
+* Added the following datasets:
+  - `CSVGCSDataSet` dataset in `contrib` for working with CSV files in Google Cloud Storage.
+  - `ParquetGCSDataSet` dataset in `contrib` for working with Parquet files in Google Cloud Storage.
+  - `JSONGCSDataSet` dataset in `contrib` for working with JSON files in Google Cloud Storage.
+  - `MatplotlibS3Writer` dataset in `contrib` for saving Matplotlib images to S3.
+  - `PartitionedDataSet` for working with datasets split across multiple files.
+  - `JSONDataSet` dataset for working with JSON files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem. It doesn't support `http(s)` protocol for now.
+* Added `s3fs_args` to all S3 datasets.
+* Pipelines can be deducted with `pipeline1 - pipeline2`.
 
 ## Bug fixes and other changes
 * `ParallelRunner` now works with `SparkDataSet`.
 * Allowed the use of nulls in `parameters.yml`.
 * Fixed an issue where `%reload_kedro` wasn't reloading all user modules.
 * Fixed `pandas_to_spark` and `spark_to_pandas` decorators to work with functions with kwargs.
+* Fixed a bug where `kedro jupyter notebook` and `kedro jupyter lab` would run a different Jupyter installation to the one in the local environment.
+* Implemented Databricks-compatible dataset versioning for `SparkDataSet`.
+* Fixed a bug where `kedro package` would fail in certain situations where `kedro build-reqs` was used to generate `requirements.txt`.
+* Made `bucket_name` argument optional for the following datasets: `CSVS3DataSet`, `HDFS3DataSet`, `PickleS3DataSet`, `contrib.io.parquet.ParquetS3DataSet`, `contrib.io.gcs.JSONGCSDataSet` - bucket name can now be included into the filepath along with the filesystem protocol (e.g. `s3://bucket-name/path/to/key.csv`).
+* Documentation improvements and fixes.
 
 ## Breaking changes to the API
 * Renamed entry point for running pip-installed projects to `run_package()` instead of `main()` in `src/<package>/run.py`.
+* `bucket_name` key has been removed from the string representation of the following datasets: `CSVS3DataSet`, `HDFS3DataSet`, `PickleS3DataSet`, `contrib.io.parquet.ParquetS3DataSet`, `contrib.io.gcs.JSONGCSDataSet`.
+* Moved the `mem_profiler` decorator to `contrib` and separated the `contrib` decorators so that dependencies are modular. You may need to update your import paths, for example the pyspark decorators should be imported as `from kedro.contrib.decorators.pyspark import <pyspark_decorator>` instead of `from kedro.contrib.decorators import <pyspark_decorator>`.
 
 ## Thanks for supporting contributions
-[Sheldon Tsen](https://github.com/sheldontsen-qb), [@roumail](https://github.com/roumail)
+[Sheldon Tsen](https://github.com/sheldontsen-qb), [@roumail](https://github.com/roumail), [Karlson Lee](https://github.com/i25959341), [Waylon Walker](https://github.com/WaylonWalker), [Deepyaman Datta](https://github.com/deepyaman), [Giovanni](https://github.com/plauto), [Zain Patel](https://github.com/mzjp2)
 
 # Release 0.15.4
 
@@ -24,6 +66,7 @@
 * Added Jupyter Notebook line magic (`%run_viz`) to run `kedro viz` in a Notebook cell (requires [`kedro-viz`](https://github.com/quantumblacklabs/kedro-viz) version `3.0.0` or later).
 * Added the following datasets:
   - `NetworkXLocalDataSet` in `kedro.contrib.io.networkx` to load and save local graphs (JSON format) via NetworkX. (by [@josephhaaga](https://github.com/josephhaaga))
+  - `SparkHiveDataSet` in `kedro.contrib.io.pyspark.SparkHiveDataSet` allowing usage of Spark and insert/upsert on non-transactional Hive tables.
 * `kedro.contrib.config.TemplatedConfigLoader` now supports name/dict key templating and default values.
 
 ## Bug fixes and other changes
@@ -39,7 +82,7 @@
 * Removed `_check_paths_consistency()` method from `AbstractVersionedDataSet`. Version consistency check is now done in `AbstractVersionedDataSet.save()`. Custom versioned datasets should modify `save()` method implementation accordingly.
 
 ## Thanks for supporting contributions
-[Joseph Haaga](https://github.com/josephhaaga), [Deepyaman Datta](https://github.com/deepyaman), [Joost Duisters](https://github.com/JoostDuisters), [Zain Patel](https://github.com/mzjp2)
+[Joseph Haaga](https://github.com/josephhaaga), [Deepyaman Datta](https://github.com/deepyaman), [Joost Duisters](https://github.com/JoostDuisters), [Zain Patel](https://github.com/mzjp2), [Tom Vigrass](https://github.com/tomvigrass)
 
 # Release 0.15.3
 

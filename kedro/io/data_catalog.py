@@ -39,9 +39,10 @@ from warnings import warn
 
 from kedro.io.core import (
     AbstractDataSet,
+    AbstractVersionedDataSet,
     DataSetAlreadyExistsError,
-    DataSetError,
     DataSetNotFoundError,
+    Version,
     generate_timestamp,
 )
 from kedro.io.memory_data_set import MemoryDataSet
@@ -265,11 +266,6 @@ class DataCatalog:
             )
 
         for ds_name, ds_config in catalog.items():
-            if "type" not in ds_config:
-                raise DataSetError(
-                    "`type` is missing from DataSet '{}' "
-                    "catalog configuration".format(ds_name)
-                )
             if CREDENTIALS_KEY in ds_config:
                 ds_config[CREDENTIALS_KEY] = _get_credentials(
                     ds_config.pop(CREDENTIALS_KEY), credentials  # credentials name
@@ -279,18 +275,28 @@ class DataCatalog:
             )
         return cls(data_sets=data_sets, journal=journal)
 
-    def _get_transformed_dataset_function(self, data_set_name, operation):
+    def _get_transformed_dataset_function(
+        self, data_set_name: str, operation: str, version: Version = None
+    ):
         data_set = self._data_sets[data_set_name]
+        if version and isinstance(data_set, AbstractVersionedDataSet):
+            # we only want to return a similar-looking dataset,
+            # not modify the one stored in the current catalog
+            data_set = data_set._copy(  # pylint: disable=protected-access
+                _version=version
+            )
+
         func = getattr(data_set, operation)
         for transformer in reversed(self._transformers[data_set_name]):
             func = partial(getattr(transformer, operation), data_set_name, func)
         return func
 
-    def load(self, name: str) -> Any:
+    def load(self, name: str, version: str = None) -> Any:
         """Loads a registered data set.
 
         Args:
             name: A data set to be loaded.
+            version: Optional version to be loaded.
 
         Returns:
             The loaded data as configured.
@@ -320,13 +326,16 @@ class DataCatalog:
             "Loading data from `%s` (%s)...", name, type(self._data_sets[name]).__name__
         )
 
-        func = self._get_transformed_dataset_function(name, "load")
+        version = Version(version, None) if version else None
+        func = self._get_transformed_dataset_function(name, "load", version)
         result = func()
 
-        version = self._data_sets[name].get_last_load_version()
+        load_version = (
+            version.load if version else self._data_sets[name].get_last_load_version()
+        )
         # Log only if versioning is enabled for the data set
-        if self._journal and version:
-            self._journal.log_catalog(name, "load", version)
+        if self._journal and load_version:
+            self._journal.log_catalog(name, "load", load_version)
         return result
 
     def save(self, name: str, data: Any) -> None:

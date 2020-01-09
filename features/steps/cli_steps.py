@@ -30,8 +30,10 @@
 
 import itertools
 import json
+import re
 import shlex
 import shutil
+from pathlib import Path
 from time import time
 
 import behave
@@ -178,6 +180,13 @@ def _create_config_file(context, include_example):
         yaml.dump(config, config_file, default_flow_style=False)
 
 
+@given("I have prepared a run_config file with config options")
+def create_run_config_file(context):
+    curr_dir = Path(__file__).parent
+    run_config_file = context.root_project_dir / "run_config.yml"
+    shutil.copyfile(str(curr_dir / "e2e_test_cli_config.yml"), str(run_config_file))
+
+
 @given("I have prepared a config file without example code")
 def create_config_file_no_example(context):
     """Behave step to create a temporary config file
@@ -307,16 +316,6 @@ def commit_changes_to_git(context):
         check_run("git commit -m 'Change {time}'".format(time=time()))
 
 
-@given("I have removed kedro from the requirements")
-def remove_req(context: behave.runner.Context):
-    reqs_path = context.root_project_dir / "src" / "requirements.txt"
-    if reqs_path.is_file():
-        old_reqs = reqs_path.read_text()
-        new_reqs = old_reqs.replace("kedro==", "#kedro==")
-        assert not old_reqs == new_reqs
-        reqs_path.write_text(new_reqs)
-
-
 @when('I execute the kedro command "{command}"')
 def exec_kedro_target(context, command):
     """Execute Kedro target."""
@@ -404,6 +403,21 @@ def do_git_reset_hard(context):
     """Perform a hard git reset"""
     with util.chdir(context.root_project_dir):
         check_run("git reset --hard HEAD")
+
+
+@given("I have updated kedro requirements")
+def update_kedro_req(context: behave.runner.Context):
+    """Replace kedro as a standalone requirement with a line
+    that includes all of kedro's dependencies (-r kedro/requirements.txt)
+    """
+    reqs_path = context.root_project_dir / "src" / "requirements.txt"
+    kedro_reqs = "-r {}\n".format(str(context.requirements_path))
+
+    if reqs_path.is_file():
+        old_reqs = reqs_path.read_text()
+        new_reqs = re.sub(r"#?kedro==.*\n", kedro_reqs, old_reqs)
+        assert not old_reqs == new_reqs
+        reqs_path.write_text(new_reqs)
 
 
 @when("I add {dependency} to the requirements")

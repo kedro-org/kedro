@@ -34,7 +34,7 @@ import subprocess
 import sys
 from itertools import chain
 from pathlib import Path
-from typing import Any, Dict, Iterable, Sequence, Tuple, Union
+from typing import Any, Dict, Iterable, List, Sequence, Tuple, Union
 from warnings import warn
 
 import click
@@ -45,7 +45,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 NODE_TAG = "node"
 
 
-def call(cmd, **kwargs):  # pragma: no cover
+def call(cmd: List[str], **kwargs):  # pragma: no cover
     """Run a subprocess command and exit if it fails."""
     print(" ".join(shlex.quote(c) for c in cmd))
     res = subprocess.run(cmd, **kwargs).returncode
@@ -53,7 +53,7 @@ def call(cmd, **kwargs):  # pragma: no cover
         sys.exit(res)
 
 
-def python_call(module, arguments, **kwargs):  # pragma: no cover
+def python_call(module: str, arguments: Iterable[str], **kwargs):  # pragma: no cover
     """Run a subprocess command that invokes a Python module."""
     call([sys.executable, "-m", module] + list(arguments), **kwargs)
 

@@ -25,17 +25,9 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+"""kedro.contrib.io.gcs provides I/O modules for Google Cloud Storage."""
 
-Feature: build-reqs target in new project
-
-  Scenario: Execute build-reqs target
-    Given I have prepared a config file with example code
-    And I have run a non-interactive kedro new
-    And I have removed kedro from the requirements
-    And I have executed the kedro command "build-reqs"
-    When I add scrapy>=1.7.3 to the requirements
-    When I execute the kedro command "build-reqs"
-    Then I should get a successful exit code
-    Then requirements should be generated
-    And scrapy should be in the requirements
+from .csv_gcs import CSVGCSDataSet  # NOQA
+from .gbq_dataset import GBQTableDataSet  # NOQA
+from .json_gcs import JSONGCSDataSet  # NOQA
+from .parquet_gcs import ParquetGCSDataSet  # NOQA

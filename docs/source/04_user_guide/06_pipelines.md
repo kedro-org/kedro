@@ -1,6 +1,6 @@
 # Pipelines
 
-> *Note:* This documentation is based on `Kedro 0.15.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.5`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 >
 > In this section we introduce the concept of a pipeline.
 
@@ -556,6 +556,35 @@ kedro run --pipeline my_pipeline
 
 > *Note:* `kedro run` without `--pipeline` option runs `__default__` pipeline from the dictionary returned by `create_pipelines()`.
 
+### Modifying a `kedro run`
+
+Kedro has options to modify pipeline runs. Here is a list of CLI arguments supported out of the box:
+
+```eval_rst
++------------------------------------------------------+----------------------------------------------------------------------- ---------+---------------------------+
+| CLI command                                          | Description                                                                     | Multiple options allowed? |
++======================================================+=================================================================================+===========================+
+| kedro run --pipeline de                              | Run the whole pipeline by its name                                              | No                        |
++------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+| kedro run --node debug_me --node debug_me_too        | Run only nodes with specified names                                             | Yes                       |
++------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+| kedro run --from-nodes node1,node2                   | A list of node names which should be used as a starting point                   | No                        |
++------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+| kedro run --to-nodes node3,node4                     | A list of node names which should be used as an end point                       | No                        |
++------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+| kedro run --from-inputs dataset1,dataset2            | A list of dataset names which should be used as a starting point                | No                        |
++------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+| kedro run --tag some_tag1 --tag some_tag2            | Run only nodes which have any of these tags attached                            | Yes                       |
++------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+| kedro run --params param_key1:value1,param_key2:2.0  | Does a parametrised kedro run with {"param_key1": "value1", "param_key2": 2}    | Yes                       |
++------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+| kedro run --config config.yml                        | Specify all command line options in a configuration file called config.yml      | No                        |
++------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+```
+
+You can also combine these options together, so the command `kedro run --from-nodes split --to-nodes predict, report` will run all the nodes from `split` to `predict` and `report`. And this functionality is extended to the `kedro run --config config.yml` command which allows you to [specify run commands in a configuration file](./03_configuration.md#configuring-kedro-run-arguments). And note, a parameterized run is best used for dynamic parameters, i.e. running the same pipeline with different inputs, for static parameters that do not change we recommend following this [methodology](./03_configuration.md#parameters).
+
+
 ### Applying decorators on pipelines
 
 You can apply decorators on whole pipelines, the same way you apply decorators on single nodes. For example, if you want to apply the decorators defined in the earlier section to all pipeline nodes simultaneously, you can do so as follows:
@@ -577,10 +606,7 @@ Hello f(h(g(Python)))!
 Out[9]: {}
 ```
 
-Kedro has a couple of built-in decorators, which can be useful for monitoring your pipeline. You can find the built-in decorators in `kedro.pipeline.decorators`:
-
- - `log_time` will log the time taken for executing your node
- - `mem_profile` will log the max memory usage of your node. `mem_profile` needs to perform at least 4 memory snapshots of your node and it will do them every 100ms, therefore it can be used only for nodes which take more than half a second to run.
+Decorators can be useful for monitoring your pipeline. Kedro currently has 1 built-in decorator: `log_time`, which will log the time taken for executing your node. You can find it in `kedro.pipeline.decorators`. Other decorators can be found in `kedro.contrib.decorators`, for which you will need to install the required dependencies.
 
 ## Running pipelines with IO
 

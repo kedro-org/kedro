@@ -38,14 +38,18 @@ from collections import namedtuple
 from datetime import datetime, timezone
 from glob import iglob
 from pathlib import Path, PurePath
-from typing import Any, Callable, Dict, List, Optional, Type
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 from urllib.parse import urlparse
 from warnings import warn
+
+from fsspec.utils import infer_storage_options
 
 from kedro.utils import load_obj
 
 VERSIONED_FLAG_KEY = "versioned"
 VERSION_KEY = "version"
+HTTP_PROTOCOLS = ("http", "https")
+PROTOCOL_DELIMITER = "://"
 
 
 class DataSetError(Exception):
@@ -138,49 +142,18 @@ class AbstractDataSet(abc.ABC):
                 from its config.
 
         """
-        config = copy.deepcopy(config)
-        save_version = save_version or generate_timestamp()
-
-        if VERSION_KEY in config:
-            # remove "version" key so that it's not passed
-            # to the 'unversioned' data set constructor
-            message = (
-                "`%s` attribute removed from `%s` data set "
-                "configuration since it is a reserved word and cannot "
-                "be directly specified",
-                VERSION_KEY,
-                name,
-            )
-            logging.getLogger(__name__).warning(*message)
-            del config[VERSION_KEY]
-        if config.pop(VERSIONED_FLAG_KEY, False):  # data set is versioned
-            config[VERSION_KEY] = Version(load_version, save_version)
-
-        dataset_class_path = config.pop("type")
         try:
-            class_obj = load_obj(dataset_class_path, "kedro.io")
-        except ImportError:
-            raise DataSetError(
-                "Cannot import module when trying to load type "
-                "`{}` for DataSet `{}`.".format(dataset_class_path, name)
+            class_obj, config = parse_dataset_definition(
+                config, load_version, save_version
             )
-        except AttributeError:
+        except Exception as ex:
             raise DataSetError(
-                "Class `{}` for DataSet `{}` not found.".format(
-                    dataset_class_path, name
-                )
+                "An exception occurred when parsing config "
+                "for DataSet `{}`:\n{}".format(name, str(ex))
             )
 
-        if not issubclass(class_obj, AbstractDataSet):
-            raise DataSetError(
-                "DataSet '{}' type `{}.{}` is invalid: "
-                "all data set types must extend "
-                "`AbstractDataSet`.".format(
-                    name, class_obj.__module__, class_obj.__qualname__
-                )
-            )
         try:
-            data_set = class_obj(**config)
+            data_set = class_obj(**config)  # type: ignore
         except TypeError as err:
             raise DataSetError(
                 "\n{}.\nDataSet '{}' must only contain "
@@ -358,6 +331,12 @@ class AbstractDataSet(abc.ABC):
     def _release(self) -> None:
         pass
 
+    def _copy(self, **overwrite_params) -> "AbstractDataSet":
+        dataset_copy = copy.deepcopy(self)
+        for name, value in overwrite_params.items():
+            setattr(dataset_copy, name, value)
+        return dataset_copy
+
 
 def generate_timestamp() -> str:
     """Generate the timestamp to be used by versioning.
@@ -392,15 +371,72 @@ CONSISTENCY_WARNING = (
 )
 
 
+def parse_dataset_definition(
+    config: Dict[str, Any], load_version: str = None, save_version: str = None
+) -> Tuple[Type[AbstractDataSet], Dict]:
+    """Parse and instantiate a dataset class using the configuration provided.
+
+    Args:
+        config: Data set config dictionary. It *must* contain the `type` key
+            with fully qualified class name.
+        load_version: Version string to be used for ``load`` operation if
+                the data set is versioned. Has no effect on the data set
+                if versioning was not enabled.
+        save_version: Version string to be used for ``save`` operation if
+            the data set is versioned. Has no effect on the data set
+            if versioning was not enabled.
+
+    Raises:
+        DataSetError: If the function fails to parse the configuration provided.
+
+    Returns:
+        2-tuple: (Dataset class object, configuration dictionary)
+    """
+    save_version = save_version or generate_timestamp()
+    config = copy.deepcopy(config)
+
+    if "type" not in config:
+        raise DataSetError("`type` is missing from DataSet catalog configuration")
+
+    class_obj = config.pop("type")
+
+    if isinstance(class_obj, str):
+        try:
+            class_obj = load_obj(class_obj, "kedro.io")
+        except ImportError:
+            raise DataSetError(
+                "Cannot import module when trying to load type `{}`.".format(class_obj)
+            )
+        except AttributeError:
+            raise DataSetError("Class `{}` not found.".format(class_obj))
+    if not issubclass(class_obj, AbstractDataSet):
+        raise DataSetError(
+            "DataSet type `{}.{}` is invalid: all data set types must extend "
+            "`AbstractDataSet`.".format(class_obj.__module__, class_obj.__qualname__)
+        )
+
+    if VERSION_KEY in config:
+        # remove "version" key so that it's not passed
+        # to the "unversioned" data set constructor
+        message = (
+            "`%s` attribute removed from data set configuration since it is a "
+            "reserved word and cannot be directly specified"
+        )
+        logging.getLogger(__name__).warning(message, VERSION_KEY)
+        del config[VERSION_KEY]
+    if config.pop(VERSIONED_FLAG_KEY, False):  # data set is versioned
+        config[VERSION_KEY] = Version(load_version, save_version)
+
+    return class_obj, config
+
+
 def _local_exists(filepath: str) -> bool:
     filepath = Path(filepath)
     return filepath.exists() or any(par.is_file() for par in filepath.parents)
 
 
 def is_remote_path(filepath: str) -> bool:
-    """
-    Check if the given path looks like a remote URL (has scheme).
-    """
+    """Check if the given path looks like a remote URL (has scheme)."""
     # Get rid of Windows-specific "C:\" start,
     # which is treated as a URL scheme.
     _, filepath = os.path.splitdrive(filepath)
@@ -566,3 +602,48 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
                 str(self), str(exc)
             )
             raise DataSetError(message) from exc
+
+
+def get_protocol_and_path(filepath: str, version: Version = None) -> Tuple[str, str]:
+    """Parses filepath on protocol and path.
+
+    Args:
+        filepath: raw filepath e.g.: `gcs://bucket/test.json`.
+        version: instance of ``kedro.io.core.Version`` or None.
+
+    Returns:
+            Protocol and path.
+
+    Raises:
+            DataSetError: when protocol is http(s) and version is not None.
+            Note: HTTP(s) dataset doesn't support versioning.
+    """
+    options_dict = infer_storage_options(filepath)
+    path = options_dict["path"]
+    protocol = options_dict["protocol"]
+
+    if protocol in HTTP_PROTOCOLS:
+        if version:
+            raise DataSetError(
+                "HTTP(s) DataSet doesn't support versioning. "
+                "Please remove version flag from the dataset configuration."
+            )
+        path = path.split(PROTOCOL_DELIMITER, 1)[-1]
+
+    return protocol, path
+
+
+def get_filepath_str(path: PurePath, protocol: str) -> str:
+    """Returns filepath. Returns full filepath (with protocol) if protocol is HTTP(s).
+
+    Args:
+        path: filepath without protocol.
+        protocol: protocol.
+
+    Returns:
+        Filepath string.
+    """
+    path = str(path)
+    if protocol in HTTP_PROTOCOLS:
+        path = "".join((protocol, PROTOCOL_DELIMITER, path))
+    return path

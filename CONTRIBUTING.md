@@ -133,6 +133,8 @@ make lint
 
 #### Unit tests, 100% coverage (`pytest`, `pytest-cov`)
 
+Note that you will need the dependencies installed in `test_requirements.txt`, which includes `memory-profiler`. If you are on a Unix-like system, you may need to install the necessary build tools. See the `README.md` [file](/kedro/contrib/decorators/README.md) in `kedro.contrib.decorators` for more information.
+
 ```bash
 make test
 ```

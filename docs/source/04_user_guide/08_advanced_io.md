@@ -219,6 +219,7 @@ Currently the following datasets support versioning:
 - `PickleS3DataSet`
 - `PickleDataSet`
 - `TextLocalDataSet`
+- `ExcelDataSet`
 - `ExcelLocalDataSet`
 - `kedro.contrib.io.azure.CSVBlobDataSet`
 - `kedro.contrib.io.feather.FeatherLocalDataSet`

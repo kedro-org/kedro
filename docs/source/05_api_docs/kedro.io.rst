@@ -40,6 +40,7 @@ Data Sets
     kedro.io.SQLTableDataSet
     kedro.io.SQLQueryDataSet
     kedro.io.TextLocalDataSet
+    kedro.io.ExcelDataSet
     kedro.io.ExcelLocalDataSet
 
 Additional ``AbstractDataSet`` implementations can be found in ``kedro.contrib.io``.

@@ -218,6 +218,7 @@ Currently the following datasets support versioning:
 - `PickleLocalDataSet`
 - `PickleS3DataSet`
 - `PickleDataSet`
+- `TextDataSet`
 - `TextLocalDataSet`
 - `ExcelDataSet`
 - `ExcelLocalDataSet`

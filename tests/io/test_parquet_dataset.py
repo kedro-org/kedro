@@ -82,9 +82,7 @@ class TestParquetDataSet:
         mock_fs = mocker.patch("fsspec.filesystem")
         credentials = {"key": "value"}
 
-        ParquetDataSet(
-            filepath=FILENAME, credentials=credentials,
-        )
+        ParquetDataSet(filepath=FILENAME, credentials=credentials)
 
         mock_fs.assert_called_once_with("file", **credentials)
 

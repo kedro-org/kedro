@@ -15,12 +15,12 @@
 * Fixed a bug in the `invalidate_cache` method of `ParquetGCSDataSet` and `CSVGCSDataSet`.
 * `--load-version` now won't break if version value contains a colon.
 * Enabled running `node`s with duplicate inputs.
+* Fixed bug that caused an empty project to fail unexpectedly with ImportError in `template/.../pipeline.py`
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Jonas Kemper](https://github.com/jonasrk), [Yuhao Zhu](https://github.com/yhzqb)
-
+[Jonas Kemper](https://github.com/jonasrk), [Yuhao Zhu](https://github.com/yhzqb), [Balazs Konig](https://github.com/BalazsKonigQB)
 # Release 0.15.5
 
 ## Major features and improvements

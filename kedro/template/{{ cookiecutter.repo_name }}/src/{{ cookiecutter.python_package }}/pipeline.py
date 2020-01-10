@@ -30,10 +30,10 @@
 from typing import Dict
 
 from kedro.pipeline import Pipeline
-from {{ cookiecutter.python_package }}.pipelines import data_engineering as de
-from {{ cookiecutter.python_package }}.pipelines import data_science as ds
 
 {% if cookiecutter.include_example == "True" %}
+from {{ cookiecutter.python_package }}.pipelines import data_engineering as de
+from {{ cookiecutter.python_package }}.pipelines import data_science as ds
 {% endif %}
 # Here you can define your data-driven pipeline by importing your functions
 # and adding them to the pipeline as follows:

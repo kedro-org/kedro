@@ -81,7 +81,7 @@ There is a special syntax for describing function inputs and outputs. This allow
 +----------------------------------+-----------------+-----------------------------+---------------------------------------+
 | :code:`['a', 'b']`               | Multiple inputs | :code:`def f(arg1, arg2)`   | :code:`f(a, b)`                       |
 +----------------------------------+-----------------+-----------------------------+---------------------------------------+
-| :code:`dict(arg1='x', arg2='y')` | Keyword inputs  | :code:`def f(arg1, arg2)`   | :code:`f(arg1='x', arg2='y')`         |
+| :code:`dict(arg1='x', arg2='y')` | Keyword inputs  | :code:`def f(arg1, arg2)`   | :code:`f(arg1=x, arg2=y)`         |
 +----------------------------------+-----------------+-----------------------------+---------------------------------------+
 ```
 

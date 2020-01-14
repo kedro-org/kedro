@@ -27,93 +27,211 @@
 # limitations under the License.
 
 
-import matplotlib
+import json
+
 import matplotlib.pyplot as plt
-import numpy as np
 import pytest
+import s3fs
+from moto import mock_s3
+from s3fs import S3FileSystem
 
 from kedro.contrib.io.matplotlib import MatplotlibWriter
 from kedro.io import DataSetError
 
-matplotlib.use("Agg")  # Disable interactive mode
+BUCKET_NAME = "test_bucket"
+AWS_CREDENTIALS = dict(aws_access_key_id="testing", aws_secret_access_key="testing")
+CREDENTIALS = {"client_kwargs": AWS_CREDENTIALS}
+KEY_PATH = "matplotlib"
+COLOUR_LIST = ["blue", "green", "red"]
+FULL_PATH = "s3://{}/{}".format(BUCKET_NAME, KEY_PATH)
 
 
-class TestMatplotlibWriter:
-    def test_save_simgle_image(self, tmp_path):
-        # generate a plot
-        # pylint: disable=unsubscriptable-object,useless-suppression
-        plt.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
+@pytest.fixture
+def mock_single_plot():
+    plt.plot([1, 2, 3], [4, 5, 6])
+    return plt
 
-        # write and compare
-        actual_filepath = tmp_path / "image_we_expect.png"
-        plt.savefig(str(actual_filepath))
 
-        expected_filepath = tmp_path / "image_we_write.png"
-        plot_writer = MatplotlibWriter(filepath=str(expected_filepath))
-        plot_writer.save(plt)
+@pytest.fixture
+def mock_list_plot():
+    plots_list = []
+    colour = "red"
+    for index in range(5):  # pylint: disable=unused-variable
+        plots_list.append(plt.figure())
+        plt.plot([1, 2, 3], [4, 5, 6], color=colour)
+    return plots_list
+
+
+@pytest.fixture
+def mock_dict_plot():
+    plots_dict = {}
+    for colour in COLOUR_LIST:
+        plots_dict[colour] = plt.figure()
+        plt.plot([1, 2, 3], [4, 5, 6], color=colour)
         plt.close()
+    return plots_dict
 
-        assert actual_filepath.read_bytes() == expected_filepath.read_bytes()
 
-    def test_save_list_images(self, tmp_path):
-        # generate plots
-        plots = []
-        for index in range(5):
-            plots.append(plt.figure())
-            # pylint: disable=unsubscriptable-object,useless-suppression
-            plt.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
+@pytest.fixture
+def mocked_s3_bucket():
+    """Create a bucket for testing using moto."""
+    with mock_s3():
+        conn = s3fs.core.boto3.client("s3", **AWS_CREDENTIALS)
+        conn.create_bucket(Bucket=BUCKET_NAME)
+        yield conn
 
-        expected_filepath = tmp_path / "list_images"
-        plot_writer = MatplotlibWriter(filepath=str(expected_filepath))
-        assert not plot_writer.exists()
-        plot_writer.save(plots)
-        assert plot_writer.exists()
 
-        # write and compare
-        for index, plot in enumerate(plots):
-            actual_filepath = tmp_path / "image_we_expect_{}.png".format(str(index))
-            plot.savefig(str(actual_filepath))
+@pytest.fixture
+def mocked_encrypted_s3_bucket():
+    bucket_policy = {
+        "Version": "2012-10-17",
+        "Id": "PutObjPolicy",
+        "Statement": [
+            {
+                "Sid": "DenyUnEncryptedObjectUploads",
+                "Effect": "Deny",
+                "Principal": "*",
+                "Action": "s3:PutObject",
+                "Resource": "arn:aws:s3:::{}/*".format(BUCKET_NAME),
+                "Condition": {"Null": {"s3:x-amz-server-side-encryption": "aws:kms"}},
+            }
+        ],
+    }
+    bucket_policy = json.dumps(bucket_policy)
 
-            full_expected_filepath = expected_filepath / "{}.png".format(str(index))
-            assert actual_filepath.read_bytes() == full_expected_filepath.read_bytes()
+    with mock_s3():
+        conn = s3fs.core.boto3.client("s3", **AWS_CREDENTIALS)
+        conn.create_bucket(Bucket=BUCKET_NAME)
+        conn.put_bucket_policy(Bucket=BUCKET_NAME, Policy=bucket_policy)
+        yield conn
 
-    def test_save_dict_images(self, tmp_path):
-        plots = dict()
-        # generate plots
-        for filename in ["boo.png", "far.png"]:
-            plots[filename] = plt.figure()
-            # pylint: disable=unsubscriptable-object,useless-suppression
-            plt.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
 
-        plot_writer = MatplotlibWriter(filepath=str(tmp_path / "dict_images"))
-        assert not plot_writer.exists()
-        plot_writer.save(plots)
-        assert plot_writer.exists()
+@pytest.fixture()
+def s3fs_cleanup():
+    # clear cache for clean mocked s3 bucket each time
+    yield
+    S3FileSystem.cachable = False
 
-        # write and compare
-        for filename, plot in plots.items():
-            actual_filepath = (
-                tmp_path / "dict_images" / filename.replace(".png", "_actual.png")
-            )
-            plot.savefig(str(actual_filepath))
-            expected_filepath = tmp_path / "dict_images" / filename
 
-            assert actual_filepath.read_bytes() == expected_filepath.read_bytes()
+@pytest.fixture
+def plot_writer(mocked_s3_bucket):  # pylint: disable=unused-argument
+    return MatplotlibWriter(filepath=FULL_PATH, credentials=CREDENTIALS)
 
-    def test_load_fail(self, tmp_path):
-        plot_writer = MatplotlibWriter(filepath=str(tmp_path / "some_path"))
 
-        pattern = r"Loading not supported for `MatplotlibWriter`"
-        with pytest.raises(DataSetError, match=pattern):
-            plot_writer.load()
+def test_save_data(tmp_path, mock_single_plot, plot_writer, mocked_s3_bucket):
+    """Test saving single matplotlib plot to S3."""
 
-    def test_exists(self, tmp_path):
-        plot_object = plt.figure()
-        # pylint: disable=unsubscriptable-object,useless-suppression
-        plt.plot(np.random.rand(1, 5)[0], np.random.rand(1, 5)[0])
-        plt.close()
+    plot_writer.save(mock_single_plot)
 
-        plot_writer = MatplotlibWriter(filepath=str(tmp_path / "some_image.png"))
-        assert not plot_writer.exists()
-        plot_writer.save(plot_object)
-        assert plot_writer.exists()
+    download_path = tmp_path / "downloaded_image.png"
+    actual_filepath = tmp_path / "locally_saved.png"
+
+    plt.savefig(str(actual_filepath))
+
+    mocked_s3_bucket.download_file(BUCKET_NAME, KEY_PATH, str(download_path))
+
+    assert actual_filepath.read_bytes() == download_path.read_bytes()
+
+
+def test_list_save(tmp_path, mock_list_plot, plot_writer, mocked_s3_bucket):
+    """Test saving list of plots to S3."""
+
+    plot_writer.save(mock_list_plot)
+
+    for index in range(5):
+
+        download_path = tmp_path / "downloaded_image.png"
+        actual_filepath = tmp_path / "locally_saved.png"
+
+        mock_list_plot[index].savefig(str(actual_filepath))
+
+        _key_path = "{}/{}.png".format(KEY_PATH, index)
+
+        mocked_s3_bucket.download_file(BUCKET_NAME, _key_path, str(download_path))
+
+        assert actual_filepath.read_bytes() == download_path.read_bytes()
+
+
+def test_dict_save(tmp_path, mock_dict_plot, plot_writer, mocked_s3_bucket):
+    """Test saving dictionary of plots to S3."""
+
+    plot_writer.save(mock_dict_plot)
+
+    for colour in COLOUR_LIST:
+
+        download_path = tmp_path / "downloaded_image.png"
+        actual_filepath = tmp_path / "locally_saved.png"
+
+        mock_dict_plot[colour].savefig(str(actual_filepath))
+
+        _key_path = "{}/{}".format(KEY_PATH, colour)
+
+        mocked_s3_bucket.download_file(BUCKET_NAME, _key_path, str(download_path))
+
+        assert actual_filepath.read_bytes() == download_path.read_bytes()
+
+
+def test_bad_credentials(mock_dict_plot):
+    """Test writing with bad credentials"""
+    bad_writer = MatplotlibWriter(
+        filepath=FULL_PATH,
+        credentials={
+            "client_kwargs": {
+                "aws_access_key_id": "not_for_testing",
+                "aws_secret_access_key": "definitely_not_for_testing",
+            }
+        },
+    )
+
+    pattern = r"The AWS Access Key Id you provided does not exist in our records"
+    with pytest.raises(DataSetError, match=pattern):
+        bad_writer.save(mock_dict_plot)
+
+
+def test_fs_args(tmp_path, mock_single_plot, mocked_encrypted_s3_bucket):
+    """Test writing to encrypted bucket"""
+    normal_encryped_writer = MatplotlibWriter(
+        fs_args={"s3_additional_kwargs": {"ServerSideEncryption": "AES256"}},
+        filepath=FULL_PATH,
+        credentials=CREDENTIALS,
+    )
+
+    normal_encryped_writer.save(mock_single_plot)
+
+    download_path = tmp_path / "downloaded_image.png"
+    actual_filepath = tmp_path / "locally_saved.png"
+
+    mock_single_plot.savefig(str(actual_filepath))
+
+    mocked_encrypted_s3_bucket.download_file(BUCKET_NAME, KEY_PATH, str(download_path))
+
+    assert actual_filepath.read_bytes() == download_path.read_bytes()
+
+
+def test_load_fail(plot_writer):
+    pattern = r"Loading not supported for `MatplotlibWriter`"
+    with pytest.raises(DataSetError, match=pattern):
+        plot_writer.load()
+
+
+@pytest.mark.usefixtures("s3fs_cleanup")
+def test_exists_single(mock_single_plot, plot_writer):
+    assert not plot_writer.exists()
+    plot_writer.save(mock_single_plot)
+    assert plot_writer.exists()
+
+
+@pytest.mark.usefixtures("s3fs_cleanup")
+def test_exists_multiple(mock_dict_plot, plot_writer):
+    assert not plot_writer.exists()
+    plot_writer.save(mock_dict_plot)
+    assert plot_writer.exists()
+
+
+def test_release(mocker):
+    fs_mock = mocker.patch("fsspec.filesystem").return_value
+    data_set = MatplotlibWriter(filepath=FULL_PATH)
+    data_set.release()
+    fs_mock.invalidate_cache.assert_called_once_with(
+        "{}/{}".format(BUCKET_NAME, KEY_PATH)
+    )

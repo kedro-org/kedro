@@ -8,6 +8,7 @@
   - `ParquetDataSet` dataset for working with Parquet files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
   - `TextDataSet` dataset for working with text files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
   - `ExcelDataSet` dataset for working with Excel files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `MatplotlibWriter` dataset in `contrib` for saving matplotlib objects to image file(s) that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
 * Enabled loading a particular version of a dataset in Jupyter Notebooks and ipython, using `catalog.load("dataset_name", version="<2019-12-13T15.08.09.255Z>")`.
 * Added http(s) protocol support for `JSONDataSet`.
 
@@ -19,6 +20,8 @@
 * Fixed bug related to saving dataframe with categorical variables in table mode using HDFS3DataSet.
 
 ## Breaking changes to the API
+* Existing `MatplotlibWriter` dataset in `contrib` was renamed to `MatplotlibLocalWriter`.
+* `kedro/contrib/io/matplotlib/matplotlib_writer.py` was renamed to `kedro/contrib/io/matplotlib/matplotlib_local_writer.py`.
 
 ## Thanks for supporting contributions
 [Jonas Kemper](https://github.com/jonasrk), [Yuhao Zhu](https://github.com/yhzqb), [Balazs Konig](https://github.com/BalazsKonigQB)

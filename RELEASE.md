@@ -16,6 +16,7 @@
 * `--load-version` now won't break if version value contains a colon.
 * Enabled running `node`s with duplicate inputs.
 * Fixed bug that caused an empty project to fail unexpectedly with ImportError in `template/.../pipeline.py`
+* Fixed bug related to saving dataframe with categorical variables in table mode using HDFS3DataSet.
 
 ## Breaking changes to the API
 

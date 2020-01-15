@@ -209,6 +209,7 @@ Currently the following datasets support versioning:
 - `CSVLocalDataSet`
 - `CSVDataSet`
 - `CSVS3DataSet`
+- `HDFDataSet`
 - `HDFLocalDataSet`
 - `HDFS3DataSet`
 - `JSONLocalDataSet`

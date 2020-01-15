@@ -8,6 +8,7 @@
   - `ParquetDataSet` dataset for working with Parquet files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
   - `TextDataSet` dataset for working with text files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
   - `ExcelDataSet` dataset for working with Excel files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `HDFDataSet` dataset for working with hdf files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
   - `MatplotlibWriter` dataset in `contrib` for saving matplotlib objects to image file(s) that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
 * Enabled loading a particular version of a dataset in Jupyter Notebooks and ipython, using `catalog.load("dataset_name", version="<2019-12-13T15.08.09.255Z>")`.
 * Added http(s) protocol support for `JSONDataSet`.

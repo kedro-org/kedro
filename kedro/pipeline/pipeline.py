@@ -673,7 +673,7 @@ class Pipeline:
         """
 
         res = self.only_nodes(*node_names)
-        res += self.from_inputs(*res.all_outputs())
+        res += self.from_inputs(*map(_get_transcode_compatible_name, res.all_outputs()))
         return res
 
     def to_nodes(self, *node_names: str) -> "Pipeline":
@@ -694,7 +694,7 @@ class Pipeline:
         """
 
         res = self.only_nodes(*node_names)
-        res += self.to_outputs(*res.all_inputs())
+        res += self.to_outputs(*map(_get_transcode_compatible_name, res.all_inputs()))
         return res
 
     def only_nodes_with_tags(self, *tags: str) -> "Pipeline":

@@ -274,12 +274,13 @@ class TestComplexPipelineWithTranscoding:
 
     """
 
-    def test_from_to_nodes_transcoded_names(self, complex_pipeline):
-        """New pipelines contain all nodes that depend on node8, node7."""
+    # pylint: disable=too-many-public-methods
+
+    def test_from_nodes_transcoded_names(self, complex_pipeline):
+        """New pipelines contain all nodes that depend on node8 downstream."""
         from_nodes_pipeline = complex_pipeline.from_nodes("node8")
         nodes = {node.name for node in from_nodes_pipeline.nodes}
 
-        assert len(from_nodes_pipeline.nodes) == 9
         assert nodes == {
             "node1",
             "node2",
@@ -292,10 +293,11 @@ class TestComplexPipelineWithTranscoding:
             "node10",
         }
 
+    def test_to_nodes_transcoded_names(self, complex_pipeline):
+        """New pipelines contain all nodes that depend on node7 upstream."""
         to_nodes_pipeline = complex_pipeline.to_nodes("node7")
         nodes = {node.name for node in to_nodes_pipeline.nodes}
 
-        assert len(to_nodes_pipeline.nodes) == 3
         assert nodes == {"node7", "node8", "node9"}
 
     def test_only_nodes_with_inputs(self, complex_pipeline):

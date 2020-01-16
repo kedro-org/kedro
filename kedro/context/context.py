@@ -380,6 +380,13 @@ class KedroContext(abc.ABC):
             raise KedroContextError("Pipeline contains no nodes")
         return new_pipeline
 
+    @property
+    def run_id(self) -> Union[None, str]:
+        """Unique identifier for a run / journal record, defaults to None.
+        If `run_id` is None, `save_version` will be used instead.
+        """
+        return self._get_run_id()
+
     def run(  # pylint: disable=too-many-arguments,too-many-locals
         self,
         tags: Iterable[str] = None,
@@ -452,7 +459,8 @@ class KedroContext(abc.ABC):
             from_inputs=from_inputs,
         )
 
-        run_id = generate_timestamp()
+        save_version = self._get_save_version()
+        run_id = self.run_id or save_version
 
         record_data = {
             "run_id": run_id,
@@ -471,12 +479,30 @@ class KedroContext(abc.ABC):
         journal = Journal(record_data)
 
         catalog = self._get_catalog(
-            save_version=run_id, journal=journal, load_versions=load_versions
+            save_version=save_version, journal=journal, load_versions=load_versions
         )
 
         # Run the runner
         runner = runner or SequentialRunner()
         return runner.run(filtered_pipeline, catalog)
+
+    def _get_run_id(
+        self, *args, **kwargs  # pylint: disable=unused-argument
+    ) -> Union[None, str]:
+        """A hook for generating a unique identifier for a
+        run / journal record, defaults to None.
+        If None, `save_version` will be used instead.
+        """
+        return None
+
+    def _get_save_version(
+        self, *args, **kwargs  # pylint: disable=unused-argument
+    ) -> str:
+        """Generate unique ID for dataset versioning, defaults to timestamp.
+        `save_version` MUST be something that can be ordered, in order to
+        easily determine the latest version.
+        """
+        return generate_timestamp()
 
 
 def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:

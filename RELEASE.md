@@ -12,6 +12,7 @@
   - `MatplotlibWriter` dataset in `contrib` for saving matplotlib objects to image file(s) that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
 * Enabled loading a particular version of a dataset in Jupyter Notebooks and ipython, using `catalog.load("dataset_name", version="<2019-12-13T15.08.09.255Z>")`.
 * Added http(s) protocol support for `JSONDataSet`.
+* Added property `run_id` on `ProjectContext`, used for versioning using the [`Journal`](https://kedro.readthedocs.io/en/latest/04_user_guide/13_journal.html). To customise your journal `run_id` you can override the private method `_get_run_id()`.
 
 ## Bug fixes and other changes
 * Fixed a bug in the `invalidate_cache` method of `ParquetGCSDataSet` and `CSVGCSDataSet`.

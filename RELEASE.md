@@ -19,13 +19,15 @@
 * Enabled running `node`s with duplicate inputs.
 * Fixed bug that caused an empty project to fail unexpectedly with ImportError in `template/.../pipeline.py`
 * Fixed bug related to saving dataframe with categorical variables in table mode using HDFS3DataSet.
+* Fixed bug that caused unexpected behavior when using `from_nodes` and `to_nodes` in pipelines using transcoding.
 
 ## Breaking changes to the API
 * Existing `MatplotlibWriter` dataset in `contrib` was renamed to `MatplotlibLocalWriter`.
 * `kedro/contrib/io/matplotlib/matplotlib_writer.py` was renamed to `kedro/contrib/io/matplotlib/matplotlib_local_writer.py`.
 
 ## Thanks for supporting contributions
-[Jonas Kemper](https://github.com/jonasrk), [Yuhao Zhu](https://github.com/yhzqb), [Balazs Konig](https://github.com/BalazsKonigQB)
+[Jonas Kemper](https://github.com/jonasrk), [Yuhao Zhu](https://github.com/yhzqb), [Balazs Konig](https://github.com/BalazsKonigQB), [Pedro Abreu](https://github.com/PedroAbreuQB)
+
 # Release 0.15.5
 
 ## Major features and improvements

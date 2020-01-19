@@ -116,7 +116,9 @@ def test_except_bad_credentials(spark_jdbc_args_credentials_with_empty_password)
         str(excinfo.value) == "Credential property "
         "`password` cannot be empty. "
         "Please provide a value."
-    )
+    pattern = r"Credential property `password` cannot be empty\(.+\)"
+    with pytest.raises(DataSetError, match=pattern):
+        mock_save(spark_jdbc_args_credentials_with_empty_password)
 
 
 @mock.patch("kedro.contrib.io.pyspark.spark_jdbc.SparkSession.builder.getOrCreate")

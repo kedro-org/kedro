@@ -53,7 +53,9 @@ CATALOG_KEY = "catalog"
 CREDENTIALS_KEY = "credentials"
 
 
-def _get_credentials(credentials_name: str, credentials: Dict) -> Dict:
+def _get_credentials(
+    credentials_name: str, credentials: Dict[str, Any]
+) -> Dict[str, Any]:
     """Return a set of credentials from the provided credentials dict.
 
     Args:
@@ -77,6 +79,31 @@ def _get_credentials(credentials_name: str, credentials: Dict) -> Dict:
             "https://kedro.readthedocs.io/en/latest/kedro.io.DataCatalog.html "
             "for an example.".format(credentials_name)
         )
+
+
+def _resolve_credentials(
+    config: Dict[str, Any], credentials: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Return the dataset configuration where credentials are resolved using
+    credentials dictionary provided.
+
+    Args:
+        config: Original dataset config, which may contain unresolved credentials.
+        credentials: A dictionary with all credentials.
+
+    Returns:
+        The dataset config, where all the credentials are successfully resolved.
+    """
+    config = copy.deepcopy(config)
+
+    def _map_value(key: str, value: Any) -> Any:
+        if key == CREDENTIALS_KEY and isinstance(value, str):
+            return _get_credentials(value, credentials)
+        if isinstance(value, dict):
+            return {k: _map_value(k, v) for k, v in value.items()}
+        return value
+
+    return {k: _map_value(k, v) for k, v in config.items()}
 
 
 class _FrozenDatasets:
@@ -266,10 +293,7 @@ class DataCatalog:
             )
 
         for ds_name, ds_config in catalog.items():
-            if CREDENTIALS_KEY in ds_config:
-                ds_config[CREDENTIALS_KEY] = _get_credentials(
-                    ds_config.pop(CREDENTIALS_KEY), credentials  # credentials name
-                )
+            ds_config = _resolve_credentials(ds_config, credentials)
             data_sets[ds_name] = AbstractDataSet.from_config(
                 ds_name, ds_config, load_versions.get(ds_name), save_version
             )

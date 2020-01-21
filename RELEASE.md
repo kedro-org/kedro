@@ -21,6 +21,7 @@
 * Fixed bug that caused an empty project to fail unexpectedly with ImportError in `template/.../pipeline.py`
 * Fixed bug related to saving dataframe with categorical variables in table mode using HDFS3DataSet.
 * Fixed bug that caused unexpected behavior when using `from_nodes` and `to_nodes` in pipelines using transcoding.
+* Credentials nested in the dataset config are now also resolved correctly.
 
 ## Breaking changes to the API
 * Existing `MatplotlibWriter` dataset in `contrib` was renamed to `MatplotlibLocalWriter`.

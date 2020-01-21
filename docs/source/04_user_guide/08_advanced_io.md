@@ -223,6 +223,7 @@ Currently the following datasets support versioning:
 - `TextLocalDataSet`
 - `ExcelDataSet`
 - `ExcelLocalDataSet`
+- `YAMLDataSet`
 - `kedro.contrib.io.azure.CSVBlobDataSet`
 - `kedro.contrib.io.feather.FeatherLocalDataSet`
 - `kedro.contrib.io.networkx.NetworkXLocalDataSet`

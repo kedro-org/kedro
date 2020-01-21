@@ -44,6 +44,7 @@ Data Sets
     kedro.io.TextLocalDataSet
     kedro.io.ExcelDataSet
     kedro.io.ExcelLocalDataSet
+    kedro.io.YAMLDataSet
 
 Additional ``AbstractDataSet`` implementations can be found in ``kedro.contrib.io``.
 

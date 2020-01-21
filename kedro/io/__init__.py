@@ -62,3 +62,4 @@ from .sql import SQLTableDataSet  # NOQA
 from .text_dataset import TextDataSet  # NOQA
 from .text_local import TextLocalDataSet  # NOQA
 from .transformers import AbstractTransformer  # NOQA
+from .yaml_dataset import YAMLDataSet  # NOQA

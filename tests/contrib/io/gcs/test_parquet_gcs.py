@@ -49,7 +49,7 @@ class MockGCSFileSystem(gcs_mocks.BasicGCSFileSystemMock):
         self.tmp_path = tmp_path
 
     @contextmanager
-    def open(self, filepath, *args, **kwargs):  # pylint: disable=unused-argument
+    def open(self, filepath, *args, **kwargs):
         path = self.files.get(str(filepath))
         mode = kwargs.get("mode", "r")
         if path:

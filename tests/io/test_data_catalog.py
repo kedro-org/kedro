@@ -81,6 +81,19 @@ def sane_config(filepath):
 
 
 @pytest.fixture
+def sane_config_with_nested_creds(sane_config):
+    sane_config["catalog"]["cars"]["credentials"] = {
+        "nested": {"credentials": "other_credentials"},
+        "key": "secret",
+    }
+    sane_config["credentials"]["other_credentials"] = {
+        "aws_access_key_id": "OTHER_FAKE_ACCESS_KEY",
+        "aws_secret_access_key": "OTHER_FAKE_SECRET_KEY",
+    }
+    return sane_config
+
+
+@pytest.fixture
 def data_set(filepath):
     return CSVLocalDataSet(filepath=filepath, save_args={"index": False})
 
@@ -335,7 +348,7 @@ class TestDataCatalogFromConfig:
     def test_missing_credentials(self, sane_config):
         """Check the error if credentials can't be located"""
         sane_config["catalog"]["cars"]["credentials"] = "missing"
-        with pytest.raises(KeyError, match=r"Unable to find credentials"):
+        with pytest.raises(KeyError, match=r"Unable to find credentials \'missing\'"):
             DataCatalog.from_config(**sane_config)
 
     def test_link_credentials(self, sane_config, mocker):
@@ -354,6 +367,27 @@ class TestDataCatalogFromConfig:
         }
         mock_client.assert_called_once_with(client_kwargs=expected_client_kwargs)
 
+    def test_nested_credentials(self, sane_config_with_nested_creds, mocker):
+        mock_client = mocker.patch("kedro.io.csv_s3.S3FileSystem")
+        DataCatalog.from_config(**sane_config_with_nested_creds)
+
+        expected_client_kwargs = {
+            "nested": {
+                "credentials": {
+                    "aws_access_key_id": "OTHER_FAKE_ACCESS_KEY",
+                    "aws_secret_access_key": "OTHER_FAKE_SECRET_KEY",
+                }
+            },
+            "key": "secret",
+        }
+        mock_client.assert_called_once_with(client_kwargs=expected_client_kwargs)
+
+    def test_missing_nested_credentials(self, sane_config_with_nested_creds):
+        del sane_config_with_nested_creds["credentials"]["other_credentials"]
+        pattern = "Unable to find credentials 'other_credentials'"
+        with pytest.raises(KeyError, match=pattern):
+            DataCatalog.from_config(**sane_config_with_nested_creds)
+
     def test_idempotent_catalog(self, sane_config):
         """Test that data catalog instantiations are idempotent"""
         _ = DataCatalog.from_config(**sane_config)  # NOQA
@@ -362,7 +396,7 @@ class TestDataCatalogFromConfig:
 
     def test_error_dataset_init(self, bad_config):
         """Check the error when trying to instantiate erroneous data set"""
-        pattern = r"Failed to instantiate DataSet \'bad\' " r"of type `.*BadDataSet`"
+        pattern = r"Failed to instantiate DataSet \'bad\' of type `.*BadDataSet`"
         with pytest.raises(DataSetError, match=pattern):
             DataCatalog.from_config(bad_config, None)
 
@@ -380,14 +414,18 @@ class TestDataCatalogVersioned:
             journal=journal
         )
 
-        assert catalog._journal == journal  # pylint: disable=protected-access
+        assert catalog._journal == journal
 
         catalog.save("boats", dummy_dataframe)
         path = Path(sane_config["catalog"]["boats"]["filepath"])
         path = path / version / path.name
         assert path.is_file()
+
         reloaded_df = catalog.load("boats")
         assert_frame_equal(reloaded_df, dummy_dataframe)
+
+        reloaded_df_version = catalog.load("boats", version=version)
+        assert_frame_equal(reloaded_df_version, dummy_dataframe)
 
     @pytest.mark.parametrize("versioned", [True, False])
     def test_from_sane_config_versioned_warn(self, caplog, sane_config, versioned):
@@ -411,3 +449,34 @@ class TestDataCatalogVersioned:
         pattern = r"\`load_versions\` keys \[non-boart\] are not found in the catalog\."
         with pytest.warns(UserWarning, match=pattern):
             DataCatalog.from_config(**sane_config, load_versions=load_version)
+
+    def test_load_version(self, sane_config, dummy_dataframe, mocker):
+        """Test load versioned data sets from config"""
+        new_dataframe = pd.DataFrame({"col1": [0, 0], "col2": [0, 0], "col3": [0, 0]})
+        sane_config["catalog"]["boats"]["versioned"] = True
+        mocker.patch(
+            "kedro.io.data_catalog.generate_timestamp", side_effect=["first", "second"]
+        )
+
+        # save first version of the dataset
+        catalog = DataCatalog.from_config(**sane_config)
+        catalog.save("boats", dummy_dataframe)
+
+        # save second version of the dataset
+        catalog = DataCatalog.from_config(**sane_config)
+        catalog.save("boats", new_dataframe)
+
+        assert_frame_equal(catalog.load("boats", version="first"), dummy_dataframe)
+        assert_frame_equal(catalog.load("boats", version="second"), new_dataframe)
+        assert_frame_equal(catalog.load("boats"), new_dataframe)
+
+    def test_load_version_on_unversioned_dataset(
+        self, sane_config, dummy_dataframe, mocker
+    ):
+        mocker.patch("kedro.io.data_catalog.generate_timestamp", return_value="first")
+
+        catalog = DataCatalog.from_config(**sane_config)
+        catalog.save("boats", dummy_dataframe)
+
+        with pytest.raises(DataSetError):
+            catalog.load("boats", version="first")

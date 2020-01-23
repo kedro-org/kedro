@@ -24,6 +24,9 @@ test:
 e2e-tests:
 	behave
 
+pip-compile:
+	pip-compile -q -o -
+
 SPHINXPROJ = Kedro
 
 build-docs:

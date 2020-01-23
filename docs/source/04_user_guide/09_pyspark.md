@@ -14,6 +14,7 @@ For example, if you are using Kedro's project template, then you could add `init
 
 ```python
 import getpass
+from typing import Any, Dict, Union
 
 from pyspark import SparkConf
 from pyspark.sql import SparkSession
@@ -22,8 +23,13 @@ from pyspark.sql import SparkSession
 
 class ProjectContext(KedroContext):
     # ...
-    def __init__(self, project_path: Union[Path, str], env: str = None):
-        super().__init__(project_path, env)
+    def __init__(
+        self,
+        project_path: Union[Path, str],
+        env: str = None,
+        extra_params: Dict[str, Any] = None,
+    ):
+         super().__init__(project_path, env, extra_params)
         self._spark_session = None
         self.init_spark_session()
 

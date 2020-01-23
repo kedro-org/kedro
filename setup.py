@@ -29,6 +29,7 @@
 import re
 from codecs import open
 from glob import glob
+from itertools import chain
 from os import path
 
 from setuptools import find_packages, setup
@@ -71,6 +72,37 @@ for pattern in ["**/*", "**/.*", "**/.*/**", "**/.*/.**"]:
         ]
     )
 
+extras_require = {
+    "docs": [
+        "sphinx>=1.8.4, <2.0",
+        "sphinx_rtd_theme==0.4.3",
+        "nbsphinx==0.4.2",
+        "nbstripout==0.3.3",
+        "recommonmark==0.5.0",
+        "sphinx-autodoc-typehints==1.6.0",
+        "sphinx_copybutton==0.2.5",
+        "jupyter_client>=5.1.0, <6.0",
+        "tornado>=4.2, <6.0",
+        "ipykernel>=4.8.1, <5.0",
+    ],
+    "pyspark": ["pyspark>=2.2.0, <3.0", "hdfs>=2.5.8, <3.0"],
+    "notebook_templates": ["nbconvert>=5.3.1, <6.0", "nbformat>=4.4.0, <5.0"],
+    "azure": [
+        "azure-storage-blob>=1.1.0, <2.0",
+        "azure-storage-file>=1.1.0, <2.0",
+        "azure-storage-queue>=1.1.0, <2.0",
+    ],
+    "bioinformatics": ["biopython>=1.73, <2.0"],
+    "dask": ["dask[complete]>=2.6.0, <3.0"],
+    "gcs": ["gcsfs>=0.3.0, <1.0"],
+    "gbq": ["pandas-gbq>=0.12.0, <1.0"],
+    "matplotlib": ["matplotlib>=3.0.3, <4.0"],
+    "networkx": ["networkx>=2.4, <3.0"],
+    "memory_profiler": ["memory_profiler>=0.50.0, <1.0"],
+}
+
+extras_require["all"] = sorted(chain.from_iterable(extras_require.values()))
+
 setup(
     name=name,
     version=version,
@@ -95,30 +127,5 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
     ],
-    extras_require={
-        "docs": [
-            "sphinx>=1.8.4, <2.0",
-            "sphinx_rtd_theme==0.4.3",
-            "nbsphinx==0.4.2",
-            "nbstripout==0.3.3",
-            "recommonmark==0.5.0",
-            "sphinx-autodoc-typehints==1.6.0",
-            "sphinx_copybutton==0.2.5",
-            "jupyter_client>=5.1.0, <6.0",
-            "tornado>=4.2, <6.0",
-            "ipykernel>=4.8.1, <5.0",
-        ],
-        "pyspark": ["pyspark>=2.2.0, <3.0", "hdfs>=2.5.8, <3.0"],
-        "notebook_templates": ["nbconvert>=5.3.1, <6.0", "nbformat>=4.4.0, <5.0"],
-        "azure": [
-            "azure-storage-blob>=1.1.0, <2.0",
-            "azure-storage-file>=1.1.0, <2.0",
-            "azure-storage-queue>=1.1.0, <2.0",
-        ],
-        "bioinformatics": ["biopython>=1.73, <2.0"],
-        "gcs": ["gcsfs>=0.3.0, <1.0"],
-        "matplotlib": ["matplotlib>=3.0.3, <4.0"],
-        "networkx": ["networkx>=2.4, <3.0"],
-        "memory_profiler": ["memory_profiler>=0.50.0, <1.0"],
-    },
+    extras_require=extras_require,
 )

@@ -28,5 +28,6 @@
 """kedro.contrib.io.gcs provides I/O modules for Google Cloud Storage."""
 
 from .csv_gcs import CSVGCSDataSet  # NOQA
+from .gbq_dataset import GBQTableDataSet  # NOQA
 from .json_gcs import JSONGCSDataSet  # NOQA
 from .parquet_gcs import ParquetGCSDataSet  # NOQA

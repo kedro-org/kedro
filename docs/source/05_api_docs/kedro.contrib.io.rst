@@ -25,6 +25,7 @@ kedro.contrib.io
       kedro.contrib.io.cached.CachedDataSet
       kedro.contrib.io.feather.FeatherLocalDataSet
       kedro.contrib.io.matplotlib.MatplotlibWriter
+      kedro.contrib.io.matplotlib.MatplotlibLocalWriter
       kedro.contrib.io.matplotlib.MatplotlibS3Writer
       kedro.contrib.io.parquet.ParquetS3DataSet
       kedro.contrib.io.pyspark.SparkDataSet
@@ -34,6 +35,7 @@ kedro.contrib.io
       kedro.contrib.io.gcs.JSONGCSDataSet
       kedro.contrib.io.gcs.ParquetGCSDataSet
       kedro.contrib.io.geojson_local.GeoJSONLocalDataSet
+      kedro.contrib.io.gcs.GBQTableDataSet
 
 
    .. rubric:: DataSet Transformers

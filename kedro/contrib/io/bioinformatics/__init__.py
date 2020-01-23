@@ -31,4 +31,5 @@ file.
 """
 
 
-from .sequence_dataset import BioSequenceLocalDataSet  # NOQA
+from .biosequence_dataset import BioSequenceDataSet  # NOQA
+from .biosequence_local_dataset import BioSequenceLocalDataSet  # NOQA

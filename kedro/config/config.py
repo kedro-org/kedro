@@ -44,7 +44,6 @@ SUPPORTED_EXTENSIONS = [
     ".pickle",
     ".properties",
     ".xml",
-    ".shellvars",
 ]
 
 
@@ -57,8 +56,8 @@ class MissingConfigException(Exception):
 class ConfigLoader:
     """Recursively scan the directories specified in ``conf_paths`` for
         configuration files with a ``yaml``, ``yml``, ``json``, ``ini``,
-        ``pickle``, ``xml``, ``properties`` or ``shellvars`` extension,
-        load them, and return them in the form of a config dictionary.
+        ``pickle``, ``xml`` or ``properties`` extension, load them,
+        and return them in the form of a config dictionary.
 
         When the same top-level key appears in any 2 config files located in
         the same ``conf_path`` (sub)directory, a ``ValueError`` is raised.

@@ -27,73 +27,100 @@
 # limitations under the License.
 
 
-"""``MatplotlibWriter `` saves matplotlib objects to a local image file."""
+"""``MatplotlibWriter`` saves matplotlib objects as image file(s) to an underlying
+filesystem (e.g. local, S3, GCS)."""
 
+import copy
+import io
 from pathlib import Path
 from typing import Any, Dict, List, Union
 
+import fsspec
 from matplotlib.pyplot import figure
 
 from kedro.io import AbstractDataSet, DataSetError
+from kedro.io.core import get_filepath_str, get_protocol_and_path
 
 
 class MatplotlibWriter(AbstractDataSet):
-    """``MatplotlibWriter`` saves matplotlib objects to a local image file.
+    """``MatplotlibWriter`` saves matplotlib objects to image file(s) in an underlying
+    filesystem (e.g. local, S3, GCS).
 
-        Example:
-        ::
+    Example:
+    ::
 
-            >>> import matplotlib.pyplot as plt
-            >>> from kedro.contrib.io.matplotlib import MatplotlibWriter
-            >>>
-            >>> plt.plot([1,2,3],[4,5,6])
-            >>>
-            >>> single_plot_writer = MatplotlibWriter(filepath="data/new_plot.png")
-            >>> single_plot_writer.save(plt)
-            >>>
-            >>> plt.close()
-            >>>
-            >>> plots_dict = dict()
-            >>>
-            >>> for colour in ['blue', 'green', 'red']:
-            >>>     plots_dict[colour] = plt.figure()
-            >>>     plt.plot([1,2,3],[4,5,6], color=colour)
-            >>>     plt.close()
-            >>>
-            >>> dict_plot_writer = MatplotlibWriter(filepath="data/")
-            >>> dict_plot_writer.save(plots_dict)
-            >>>
-            >>> plots_list = []
-            >>> for index in range(5):
-            >>>    plots_list.append(plt.figure())
-            >>>    plt.plot([1,2,3],[4,5,6], color=colour)
-            >>> list_plot_writer = MatplotlibWriter(filepath="data/")
-            >>> list_plot_writer.save(plots_list)
+        >>> import matplotlib.pyplot as plt
+        >>> from kedro.contrib.io.matplotlib import MatplotlibWriter
+        >>>
+        >>> # Saving single plot
+        >>> plt.plot([1, 2, 3], [4, 5, 6])
+        >>> single_plot_writer = MatplotlibWriter(
+        >>>     filepath="matplot_lib_single_plot.png"
+        >>> )
+        >>> single_plot_writer.save(plt)
+        >>> plt.close()
+        >>>
+        >>> # Saving dictionary of plots
+        >>> plots_dict = dict()
+        >>> for colour in ["blue", "green", "red"]:
+        >>>     plots_dict[colour] = plt.figure()
+        >>>     plt.plot([1, 2, 3], [4, 5, 6], color=colour)
+        >>>     plt.close()
+        >>> dict_plot_writer = MatplotlibWriter(
+        >>>     filepath="matplotlib_dict"
+        >>> )
+        >>> dict_plot_writer.save(plots_dict)
+        >>>
+        >>> # Saving list of plots
+        >>> plots_list = []
+        >>> for index in range(5):
+        >>>     plots_list.append(plt.figure())
+        >>>     plt.plot([1,2,3],[4,5,6])
+        >>>     plt.close()
+        >>> list_plot_writer = MatplotlibWriter(
+        >>>     filepath="matplotlib_list"
+        >>> )
+        >>> list_plot_writer.save(plots_list)
 
     """
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         filepath: str,
-        load_args: Dict[str, Any] = None,
+        fs_args: Dict[str, Any] = None,
+        credentials: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``MatplotlibWriter``.
 
         Args:
-            filepath: Path to a matplot object file.
-            load_args: Currently ignored as loading is not supported.
+            filepath: Key path to a matplot object file(s) prefixed with a protocol like `s3://`.
+                If prefix is not provided, `file` protocol (local filesystem) will be used.
+                The prefix should be any protocol supported by ``fsspec``.
+            fs_args: Extra arguments to pass into underlying filesystem class.
+                E.g. for ``GCSFileSystem`` class: `{"project": "my-project", ...}`
+            credentials: Credentials required to get access to the underlying filesystem.
+                E.g. for ``S3FileSystem`` it should look like:
+                `{'client_kwargs': {'aws_access_key_id': '<id>', 'aws_secret_access_key': '<key>'}}`
             save_args: Save args passed to `plt.savefig`. See
                 https://matplotlib.org/api/_as_gen/matplotlib.pyplot.savefig.html
         """
-        self._filepath = Path(filepath)
-        self._load_args = load_args if load_args else dict()
-        self._save_args = save_args if save_args else dict()
+        _credentials = copy.deepcopy(credentials) or {}
+        self._fs_args = copy.deepcopy(fs_args) or {}
+        self._save_args = save_args or {}
+
+        protocol, path = get_protocol_and_path(filepath)
+
+        self._protocol = protocol
+        self._filepath = Path(path)
+        self._fs = fsspec.filesystem(self._protocol, **_credentials, **self._fs_args)
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
             filepath=self._filepath,
-            load_args=self._load_args,
+            protocol=self._protocol,
+            fs_args=self._fs_args,
             save_args=self._save_args,
         )
 
@@ -104,18 +131,43 @@ class MatplotlibWriter(AbstractDataSet):
 
     def _save(self, data: Union[figure, List[figure], Dict[str, figure]]) -> None:
         if isinstance(data, list):
-            self._filepath.mkdir(exist_ok=True)
             for index, plot in enumerate(data):
-                plot.savefig(str(self._filepath / str(index)), **self._save_args)
+                full_key_path = self._fs.pathsep.join(
+                    [
+                        get_filepath_str(self._filepath, self._protocol),
+                        "{}.png".format(index),
+                    ]
+                )
+                self._save_to_fs(full_key_path=full_key_path, plot=plot)
 
         elif isinstance(data, dict):
-            self._filepath.mkdir(exist_ok=True)
             for plot_name, plot in data.items():
-                plot.savefig(str(self._filepath / plot_name), **self._save_args)
+                full_key_path = self._fs.pathsep.join(
+                    [get_filepath_str(self._filepath, self._protocol), plot_name]
+                )
+                self._save_to_fs(full_key_path=full_key_path, plot=plot)
+
         else:
-            data.savefig(str(self._filepath), **self._save_args)
+            full_key_path = get_filepath_str(self._filepath, self._protocol)
+            self._save_to_fs(full_key_path=full_key_path, plot=data)
+
+        self.invalidate_cache()
+
+    def _save_to_fs(self, full_key_path: str, plot: figure):
+        bytes_buffer = io.BytesIO()
+        plot.savefig(bytes_buffer, **self._save_args)
+
+        with self._fs.open(full_key_path, mode="wb") as fs_file:
+            fs_file.write(bytes_buffer.getvalue())
 
     def _exists(self) -> bool:
-        return self._filepath.is_file() or (
-            self._filepath.is_dir() and bool(list(self._filepath.iterdir()))
-        )
+        load_path = get_filepath_str(self._filepath, self._protocol)
+        return self._fs.exists(load_path)
+
+    def _release(self) -> None:
+        self.invalidate_cache()
+
+    def invalidate_cache(self) -> None:
+        """Invalidate underlying filesystem caches."""
+        filepath = get_filepath_str(self._filepath, self._protocol)
+        self._fs.invalidate_cache(filepath)

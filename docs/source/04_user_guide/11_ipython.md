@@ -29,16 +29,31 @@ With `context`, you can access the following variables and methods
 ### Additional parameters for `context.run()`
 If you want to parameterize the run, you can also specify the following optional arguments for `context.run()`:
 
-| Argument name | Accepted types | Description |
-| :--------: | :--------: | :----------- |
-| `tags` | `Iterable[str]` | Construct the pipeline using only nodes which have this tag attached. A node is included in the resulting pipeline if it contains _any_ of those tags |
-| `runner` | `AbstractRunner` | An instance of Kedro [AbstractRunner](/kedro.runner.AbstractRunner); for example, can be an instance of a [ParallelRunner](/kedro.runner.ParallelRunner) |
-| `node_names` | `Iterable[str]` | Run only nodes with specified names |
-| `from_nodes` | `Iterable[str]` | A list of node names which should be used as a starting point |
-| `to_nodes`   | `Iterable[str]` | A list of node names which should be used as an end point |
-| `from_inputs` | `Iterable[str]` | A list of dataset names which should be used as a starting point |
-| `load_versions` | `Dict[str, str]` | A mapping of a dataset name to a specific dataset version (timestamp) for loading - this applies to the versioned datasets only |
-| `pipeline_name` | `str` | Name of the modular pipeline to run - must be one of those returned by `create_pipelines` function from `src/<package_name>/pipeline.py` |
+```eval_rst
++---------------+----------------+-------------------------------------------------------------------------------+
+| Argument name | Accepted types | Description                                                                   |
++===============+================+===============================================================================+
+| tags          | Iterable[str]  | Construct the pipeline using only nodes which have this tag attached.         |
+|               |                | A node is included in the resulting pipeline if it contains any of those tags |
++---------------+----------------+-------------------------------------------------------------------------------+
+| runner        | AbstractRunner | An instance of Kedro [AbstractRunner](/kedro.runner.AbstractRunner);          |
+|               |                | can be an instance of a [ParallelRunner](/kedro.runner.ParallelRunner)        |
++---------------+----------------+-------------------------------------------------------------------------------+
+| node_names    | Iterable[str]  | Run only nodes with specified names                                           |
++---------------+----------------+-------------------------------------------------------------------------------+
+| from_nodes    | Iterable[str]  | A list of node names which should be used as a starting point                 |
++---------------+----------------+-------------------------------------------------------------------------------+
+| to_nodes      | Iterable[str]  | A list of node names which should be used as an end point                     |
++---------------+----------------+-------------------------------------------------------------------------------+
+| from_inputs   | Iterable[str]  | A list of dataset names which should be used as a starting point              |
++---------------+----------------+-------------------------------------------------------------------------------+
+| load_versions | Dict[str, str] | A mapping of a dataset name to a specific dataset version (timestamp)         |
+|               |                | for loading - this applies to the versioned datasets only                     |
++---------------+----------------+-------------------------------------------------------------------------------+
+| pipeline_name | str            | Name of the modular pipeline to run - must be one of those returned           |
+|               |                | by create_pipelines function from src/<package_name>/pipeline.py              |
++---------------+----------------+-------------------------------------------------------------------------------+
+```
 
 This list of options is fully compatible with the list of CLI options for `kedro run` command. In fact, `kedro run` is calling `context.run()` behind the scenes.
 
@@ -88,6 +103,21 @@ kedro.io.data_catalog - INFO - Loading data from `example_iris_data` (CSVLocalDa
 2           4.7          3.2           1.3          0.2  setosa
 3           4.6          3.1           1.5          0.2  setosa
 4           5.0          3.6           1.4          0.2  setosa
+```
+
+If you enable versioning, you can load a particular version of a dataset. Given a catalog entry
+
+```yaml
+example_train_x:
+  type: CSVLocalDataSet
+  filepath: data/02_intermediate/example_train_x.csv
+  versioned: true
+```
+
+and having run the pipeline at least once, you may specify which version to load like so:
+
+```python
+catalog.load("example_train_x", version="2019-12-13T15.08.09.255Z")
 ```
 
 When you have finished, you can exit IPython by typing:
@@ -140,6 +170,21 @@ df.head()
 ```
 
 ![](./images/jupyter_notebook_workflow_loading_data.png)
+
+If you enable versioning, you also have the option of loading a particular version of a dataset. Given a catalog entry
+
+```yaml
+example_train_x:
+  type: CSVLocalDataSet
+  filepath: data/02_intermediate/example_train_x.csv
+  versioned: true
+```
+
+and having run the pipeline at least once, you can specify which version to load like so:
+
+```python
+catalog.load("example_train_x", version="2019-12-13T15.08.09.255Z")
+```
 
 ### Saving `DataCatalog` in Jupyter
 

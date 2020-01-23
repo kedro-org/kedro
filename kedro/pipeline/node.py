@@ -428,9 +428,8 @@ class Node:
         return self._decorated_func(inputs[node_input])
 
     def _run_with_list(self, inputs: Dict[str, Any], node_inputs: List[str]):
-        all_available = set(node_inputs).issubset(inputs.keys())
-        if len(node_inputs) != len(inputs) or not all_available:
-            # This can be split in future into two cases, one successful
+        # Node inputs and provided run inputs should completely overlap
+        if set(node_inputs) != set(inputs.keys()):
             raise ValueError(
                 "Node {} expected {} input(s) {}, "
                 "but got the following {} input(s) instead: {}.".format(
@@ -445,9 +444,8 @@ class Node:
         return self._decorated_func(*[inputs[item] for item in node_inputs])
 
     def _run_with_dict(self, inputs: Dict[str, Any], node_inputs: Dict[str, str]):
-        all_available = set(node_inputs.values()).issubset(inputs.keys())
-        if len(set(node_inputs.values())) != len(inputs) or not all_available:
-            # This can be split in future into two cases, one successful
+        # Node inputs and provided run inputs should completely overlap
+        if set(node_inputs.values()) != set(inputs.keys()):
             raise ValueError(
                 "Node {} expected {} input(s) {}, "
                 "but got the following {} input(s) instead: {}.".format(

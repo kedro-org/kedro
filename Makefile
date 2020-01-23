@@ -24,6 +24,12 @@ test:
 e2e-tests:
 	behave
 
+pip-compile:
+	pip-compile -q -o -
+
+secret-scan:
+	trufflehog --regex --max_depth 1 --exclude_paths trufflehog-ignore.txt .
+
 SPHINXPROJ = Kedro
 
 build-docs:

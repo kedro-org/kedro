@@ -166,7 +166,7 @@ class HDFS3DataSet(AbstractVersionedDataSet):
             driver_core_backing_store=0,
             **self._save_args,
         ) as store:
-            store[self._key] = data
+            store.put(self._key, data, format="table")
             # pylint: disable=protected-access
             binary_data = store._handle.get_file_image()
 

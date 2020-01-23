@@ -92,10 +92,9 @@ class ParquetGCSDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_parquet.html
                 All defaults are preserved.
-            save_args: Pandas options for saving Parquet files.
+            save_args: Additional saving options for `pyarrow.parquet.write_table`.
                 Here you can find all available arguments:
-                https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_parquet.html
-                All defaults are preserved, but "index", which is set to False.
+                https://arrow.apache.org/docs/python/generated/pyarrow.parquet.write_table.html?highlight=write_table#pyarrow.parquet.write_table
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``

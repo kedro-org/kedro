@@ -36,7 +36,7 @@ from pandas.util.testing import assert_frame_equal
 from s3fs import S3FileSystem
 from shapely.geometry import Point
 
-from kedro.contrib.io.geojson_local.geojson_local import GeoJSONDataSet
+from kedro.contrib.io.geojson.geojson_dataset import GeoJSONDataSet
 from kedro.io import DataSetError
 from kedro.io.core import Version, generate_timestamp
 
@@ -51,9 +51,9 @@ def save_version(request):
     return request.param or generate_timestamp()
 
 
-@pytest.fixture()
+@pytest.fixture
 def filepath(tmp_path):
-    return str(tmp_path / "some" / "dir" / "test.geojson")
+    return str(tmp_path / "test.geojson")
 
 
 @pytest.fixture(params=[None])
@@ -74,9 +74,9 @@ def dummy_dataframe():
     )
 
 
-@pytest.fixture(params=[{"driver": "GeoJSON"}])
-def geojson_data_set(filepath, request):
-    return GeoJSONDataSet(filepath=filepath, save_args=save_args, load_args=load_args)
+@pytest.fixture
+def geojson_data_set(filepath, load_args, save_args):
+    return GeoJSONDataSet(filepath=filepath, load_args=load_args, save_args=save_args)
 
 
 @pytest.fixture
@@ -112,7 +112,7 @@ class TestGeoJSONDataSet:
     def test_load_extra_params(self, geojson_data_set, load_args):
         """Test overriding default save args"""
         for k, v in load_args.items():
-            assert geojson_data_set.save_args[k] == v
+            assert geojson_data_set._load_args[k] == v
 
     @pytest.mark.parametrize(
         "save_args", [{"driver": "ESRI Shapefile"}, {"driver": "GPKG", "layer": "test"}]
@@ -120,10 +120,10 @@ class TestGeoJSONDataSet:
     def test_save_extra_params(self, geojson_data_set, save_args):
         """Test overriding default save args"""
         for k, v in save_args.items():
-            assert geojson_data_set.save_args[k] == v
+            assert geojson_data_set._save_args[k] == v
 
-    @pytest.marl.parametrize(
-        "filepath.instance_type",
+    @pytest.mark.parametrize(
+        "filepath,instance_type",
         [
             ("s3://bucket/file.geojson", S3FileSystem),
             ("/tmp/test.geojson", LocalFileSystem),
@@ -137,7 +137,7 @@ class TestGeoJSONDataSet:
         assert isinstance(geojson_data_set._fs, instance_type)
 
         if geojson_data_set._protocol == "https":
-            path = filepath.strip("://")[-1]
+            path = filepath.split("://")[-1]
         else:
             path = geojson_data_set._fs._strip_protocol(filepath)
 
@@ -153,27 +153,45 @@ class TestGeoJSONDataSet:
 
 
 class TestGeoJSONDataSetVersioned:
-    def test_save_and_load(
-        self, versioned_geojson_data_set, dummy_dataframe, filepath, save_version
-    ):
+    def test_version_str_repr(self, load_version, save_version):
+        """Test that version is in string representation of the class instance
+        when applicable."""
+        filepath = "test.geojson"
+        ds = GeoJSONDataSet(filepath=filepath)
+        ds_versioned = GeoJSONDataSet(
+            filepath=filepath, version=Version(load_version, save_version)
+        )
+        assert filepath in str(ds)
+        assert "version" not in str(ds)
+
+        assert filepath in str(ds_versioned)
+        ver_str = "version=Version(load={}, save='{}')".format(
+            load_version, save_version
+        )
+        assert ver_str in str(ds_versioned)
+        assert "GeoJSONDataSet" in str(ds_versioned)
+        assert "GeoJSONDataSet" in str(ds)
+        assert "protocol" in str(ds_versioned)
+        assert "protocol" in str(ds)
+
+    def test_save_and_load(self, versioned_geojson_data_set, dummy_dataframe):
         """Test that saved and reloaded data matches the original one for
         the versioned data set."""
+        print(versioned_geojson_data_set._describe())
         versioned_geojson_data_set.save(dummy_dataframe)
-        path = PurePosixPath(filepath)
-        assert (path / save_version / path.name).is_file()
         reloaded_df = versioned_geojson_data_set.load()
+        print(reloaded_df._describe())
         assert_frame_equal(reloaded_df, dummy_dataframe)
 
     def test_no_versions(self, versioned_geojson_data_set):
         """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for GeoJSONLocalDataSet\(.+\)"
+        pattern = r"Did not find any versions for GeoJSONDataSet\(.+\)"
         with pytest.raises(DataSetError, match=pattern):
             versioned_geojson_data_set.load()
 
     def test_exists(self, versioned_geojson_data_set, dummy_dataframe):
         """Test `exists` method invocation for versioned data set."""
         assert not versioned_geojson_data_set.exists()
-
         versioned_geojson_data_set.save(dummy_dataframe)
         assert versioned_geojson_data_set.exists()
 
@@ -182,7 +200,7 @@ class TestGeoJSONDataSetVersioned:
         version."""
         versioned_geojson_data_set.save(dummy_dataframe)
         pattern = (
-            r"Save path \`.+\` for GeoJSONLocalDataSet\(.+\) must not "
+            r"Save path \`.+\` for GeoJSONDataSet\(.+\) must not "
             r"exist if versioning is enabled"
         )
         with pytest.raises(DataSetError, match=pattern):
@@ -201,113 +219,9 @@ class TestGeoJSONDataSetVersioned:
         the subsequent load path."""
         pattern = (
             r"Save version `{0}` did not match load version `{1}` "
-            r"for GeoJSONLocalDataSet\(.+\)".format(save_version, load_version)
+            r"for GeoJSONDataSet\(.+\)".format(save_version, load_version)
         )
         with pytest.warns(UserWarning, match=pattern):
-            versioned_geojson_data_set.save(dummy_dataframe)
-
-    def test_version_str_repr(self, load_version, save_version):
-        """Test that version is in string representation of the class instance
-        when applicable."""
-        filepath = "test.geojson"
-        ds = GeoJSONDataSet(filepath=filepath)
-        ds_versioned = GeoJSONDataSet(
-            filepath=filepath, version=Version(load_version, save_version)
-        )
-        assert filepath in str(ds)
-        assert "version" not in str(ds)
-
-        assert filepath in str(ds_versioned)
-        ver_str = "version=Version(load={}, save='{}')".format(
-            load_version, save_version
-        )
-        assert ver_str in str(ds_versioned)
-        assert "GEOJSONDataSet" in str(ds_versioned)
-        assert "GEOJSONDataSet" in str(ds)
-        assert "protocol" in str(ds_versioned)
-        assert "protocol" in str(ds)
-
-    def test_sequential_save_and_load(self, dummy_dataframe, filepath):
-        """Tests if the correct load version is logged when two datasets are saved
-        sequentially."""
-
-        dataset1 = GeoJSONDataSet(
-            filepath=filepath,
-            save_args={"driver": "GeoJSON"},
-            version=Version(None, "2000-01-01"),
-        )
-
-        dataset2 = GeoJSONDataSet(
-            filepath=filepath,
-            save_args={"driver": "GeoJSON"},
-            version=Version(None, "2001-01-01"),
-        )
-
-        dataset1.save(dummy_dataframe)
-        last_save_version1 = dataset1.get_last_save_version()
-
-        dataset2.save(dummy_dataframe)
-        last_save_version2 = dataset2.get_last_save_version()
-
-        dataset2.load()
-        last_load_version = dataset2.get_last_load_version()
-        assert last_save_version2 == last_load_version
-        assert last_save_version1 != last_save_version2
-
-    def test_sequential_load_from_disk(
-        self, dummy_dataframe, filepath, versioned_geojson_data_set
-    ):
-        """Tests if the correct load version is logged when two versions are saved in
-        disk."""
-        save_version_1 = "2019-01-01T23.00.00.000Z"
-        save_version_2 = "2019-01-01T23.59.59.999Z"
-        GeoJSONDataSet(
-            filepath=filepath,
-            save_args={"driver": "GeoJSON"},
-            version=Version(None, save_version_1),
-        ).save(dummy_dataframe)
-        GeoJSONDataSet(
-            filepath=filepath,
-            save_args={"driver": "GeoJSON"},
-            version=Version(None, save_version_2),
-        ).save(dummy_dataframe)
-
-        versioned_geojson_data_set.load()
-        last_load_version = versioned_geojson_data_set.get_last_load_version()
-
-        assert last_load_version == save_version_2
-
-    @pytest.mark.parametrize(
-        "load_version, save_version",
-        [("2019-01-01T23.59.59.999Z", "2019-01-01T23.59.59.999Z")],
-        indirect=True,
-    )
-    def test_save_and_load_with_version(
-        self, dummy_dataframe, load_version, save_version, versioned_geojson_data_set
-    ):
-        """Tests if the correct load and save versions are logged when specified."""
-        versioned_geojson_data_set.save(dummy_dataframe)
-        last_save_version = versioned_geojson_data_set.get_last_save_version()
-        versioned_geojson_data_set.load()
-        last_load_version = versioned_geojson_data_set.get_last_load_version()
-        assert load_version == last_load_version
-        assert save_version == last_save_version
-
-    def test_save_versioned_after_unversioned(
-        self, geojson_data_set, versioned_geojson_data_set, dummy_dataframe
-    ):
-        """
-        Check the error when saving versioned dataset if unversioned path already exists
-        """
-        geojson_data_set.save(dummy_dataframe)
-
-        assert versioned_geojson_data_set.exists() is False
-
-        pattern = (
-            r"Save path \`.+\` for GeoJSONLocalDataSet\(.+\) must not "
-            r"exist if versioning is enabled"
-        )
-        with pytest.raises(DataSetError, match=pattern):
             versioned_geojson_data_set.save(dummy_dataframe)
 
     def test_http_filesystem_no_versioning(self):

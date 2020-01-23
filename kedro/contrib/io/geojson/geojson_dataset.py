@@ -26,7 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""GeoJSONLocalDataSet loads and saves data to a local geojson file. The
+"""GeoJSONDataSet loads and saves data to a local geojson file. The
 underlying functionality is supported by geopandas, so it supports all
 allowed geopandas (pandas) options for loading and saving geosjon files.
 """
@@ -84,7 +84,7 @@ class GeoJSONDataSet(AbstractVersionedDataSet):
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``GeoJSONLocalDataSet`` pointing to a concrete
+        """Creates a new instance of ``GeoJSONDataSet`` pointing to a fsspec
         filepath.
 
         Args:
@@ -129,13 +129,14 @@ class GeoJSONDataSet(AbstractVersionedDataSet):
 
     def _load(self) -> Union[gpd.GeoDataFrame, Dict[str, gpd.GeoDataFrame]]:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        with self._fs.open(load_path, mode="r") as fs_file:
+        with self._fs.open(load_path, mode="rb") as fs_file:
             return gpd.read_file(fs_file, **self._load_args)
 
     def _save(self, data: gpd.GeoDataFrame) -> None:
         save_path = get_filepath_str(self._get_load_path(), self._protocol)
-        with self._fs.open(save_path, mode="w") as fs_file:
+        with self._fs.open(save_path, mode="wb") as fs_file:
             data.to_file(fs_file, **self._save_args)
+        self.invalidate_cache()
 
     def _exists(self) -> bool:
         try:

@@ -9,7 +9,7 @@ See [geopandas.GeoDataFrame](http://geopandas.org/reference/geopandas.GeoDataFra
 ```python
 import geopandas as gpd
 from kedro.contrib.io.geojson_local import GeoJSONLocalDataSet
-my_gdf = data = gpd.GeoDataFrame({'col1': [1, 2], 
+my_gdf = data = gpd.GeoDataFrame({'col1': [1, 2],
                                   'col2': [4, 5],
                                   'col3': [5, 6]},
                                   geometry=[Point(1,1), Point(2,4)])

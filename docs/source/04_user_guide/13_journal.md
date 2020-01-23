@@ -36,7 +36,7 @@ You will observe `run_id`, a unique timestamp used to identify a pipeline run, i
 
 ### Dataset journal record
 
-A dataset journal record tracks versioned dataset `load` and `save` operations, it is tied to the dataset name and `run_id`. The `version` attribute stores the exact timestamp used by the `load` or `save` operation. Dataset journal currently records `load` and `save` operations only for the datasets with enabled versioning. Please see [Versioning section](./07_advanced_io.md#versioning) for more information about data versioning feature and the list of currently supported datasets.
+A dataset journal record tracks versioned dataset `load` and `save` operations, it is tied to the dataset name and `run_id`. The `version` attribute stores the exact timestamp used by the `load` or `save` operation. Dataset journal currently records `load` and `save` operations only for the datasets with enabled versioning. Please see [Versioning section](./08_advanced_io.md#versioning) for more information about data versioning feature and the list of currently supported datasets.
 
 The dataset journal record has the following JSON format:
 

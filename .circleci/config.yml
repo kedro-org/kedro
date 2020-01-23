@@ -36,7 +36,6 @@ utils:
       pre-commit install --install-hooks
       pre-commit install --hook-type pre-push
 
-
   linters: &linters
     name: Run pylint and flake8
     command: |
@@ -52,8 +51,7 @@ utils:
     command: |
       make e2e-tests
 
-  build_docs: &build_docs
-    # NOTE: doesn't work on python 3.5
+  build_docs: &build_docs # NOTE: doesn't work on python 3.5
     name: Build documentation
     command: |
       make build-docs
@@ -62,6 +60,16 @@ utils:
     name: Check for legal compliance
     command: |
       make legal
+
+  pip_compile: &pip_compile
+    name: pip-compile requirements file
+    command: |
+      make pip-compile
+
+  secret_scan: &secret_scan
+    name: Scan for secrets
+    command: |
+      make secret-scan
 
   steps_unit_tests: &steps_unit_tests
     steps:
@@ -86,13 +94,26 @@ utils:
       - run: *setup_requirements
       - run: *e2e_tests
 
-  steps_build_docs: &steps_build_docs
-    # NOTE: requires python3.6+
+  steps_build_docs: &steps_build_docs # NOTE: requires python3.6+
     steps:
       - checkout
       - run: *setup_conda
       - run: *setup_requirements
       - run: *build_docs
+
+  steps_pip_compile: &steps_pip_compile
+    steps:
+      - checkout
+      - run: *setup_conda
+      - run: *setup_requirements
+      - run: *pip_compile
+
+  steps_secret_scan: &steps_secret_scan
+    steps:
+      - checkout
+      - run: *setup_conda
+      - run: *setup_requirements
+      - run: *secret_scan
 
 jobs:
   unit_tests_35:
@@ -150,9 +171,19 @@ jobs:
       - image: *py37
     <<: *steps_build_docs
 
+  pip_compile:
+    docker:
+      - image: *py37
+    <<: *steps_pip_compile
+
+  secret_scan:
+    docker:
+      - image: *py37
+    <<: *steps_secret_scan
+
   all_circleci_checks_succeeded:
     docker:
-      - image: circleci/python  # any light-weight image
+      - image: circleci/python # any light-weight image
 
     steps:
       - run:
@@ -174,6 +205,8 @@ workflows:
       - linters_37
       - e2e_tests_37
       - docs_37
+      - pip_compile
+      - secret_scan
       - all_circleci_checks_succeeded:
           requires:
             - unit_tests_35
@@ -187,3 +220,5 @@ workflows:
             - linters_37
             - e2e_tests_37
             - docs_37
+            - pip_compile
+            - secret_scan

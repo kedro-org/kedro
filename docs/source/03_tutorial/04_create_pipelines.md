@@ -403,7 +403,9 @@ test_size: 0.2
 random_state: 3
 ```
 
-These are the parameters fed into the `DataCatalog` when the pipeline is executed. Alternatively, the parameters specified in `parameters.yml` can also be referenced using `params:` prefix in the nodes. For example, you could pass `test_size` and `random_state` parameters as follows:
+These are the parameters fed into the `DataCatalog` when the pipeline is executed. You can learn more about parameters in our [user guide](../04_user_guide/03_configuration.md#parameters), where we give a full explanation on how they work.
+
+Alternatively, the parameters specified in `parameters.yml` can also be referenced using `params:` prefix in the nodes. For example, you could pass `test_size` and `random_state` parameters as follows:
 
 ```python
 # in src/kedro_tutorial/pipelines/data_science/nodes.py:

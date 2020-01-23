@@ -32,7 +32,7 @@ Feature: build-reqs target in new project
   Scenario: Execute build-reqs target
     Given I have prepared a config file with example code
     And I have run a non-interactive kedro new
-    And I have removed kedro from the requirements
+    And I have updated kedro requirements
     And I have executed the kedro command "build-reqs"
     When I add scrapy>=1.7.3 to the requirements
     When I execute the kedro command "build-reqs"

@@ -38,14 +38,20 @@ from collections import namedtuple
 from datetime import datetime, timezone
 from glob import iglob
 from pathlib import Path, PurePath
+from threading import Lock
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 from urllib.parse import urlparse
 from warnings import warn
+
+from fsspec.utils import infer_storage_options
 
 from kedro.utils import load_obj
 
 VERSIONED_FLAG_KEY = "versioned"
 VERSION_KEY = "version"
+HTTP_PROTOCOLS = ("http", "https")
+PROTOCOL_DELIMITER = "://"
+THREAD_UNSAFE_DATASETS = ("HDFDataSet", "CachedDataSet")
 
 
 class DataSetError(Exception):
@@ -110,6 +116,7 @@ class AbstractDataSet(abc.ABC):
         >>>         return dict(param1=self._param1, param2=self._param2)
     """
 
+    # pylint: disable=too-many-arguments
     @classmethod
     def from_config(
         cls: Type,
@@ -117,6 +124,7 @@ class AbstractDataSet(abc.ABC):
         config: Dict[str, Any],
         load_version: str = None,
         save_version: str = None,
+        lock: Lock = None,
     ) -> "AbstractDataSet":
         """Create a data set instance using the configuration provided.
 
@@ -129,6 +137,7 @@ class AbstractDataSet(abc.ABC):
             save_version: Version string to be used for ``save`` operation if
                 the data set is versioned. Has no effect on the data set
                 if versioning was not enabled.
+            lock: threading.Lock instance.
 
         Returns:
             An instance of an ``AbstractDataSet`` subclass.
@@ -148,8 +157,16 @@ class AbstractDataSet(abc.ABC):
                 "for DataSet `{}`:\n{}".format(name, str(ex))
             )
 
+        class_obj_name = class_obj.__name__
         try:
-            data_set = class_obj(**config)  # type: ignore
+            if class_obj_name in THREAD_UNSAFE_DATASETS:
+                if lock is None:
+                    warn(
+                        "{} dataset instance is not thread-safe.".format(class_obj_name)
+                    )
+                data_set = class_obj(**config, lock=lock)  # type: ignore
+            else:
+                data_set = class_obj(**config)  # type: ignore
         except TypeError as err:
             raise DataSetError(
                 "\n{}.\nDataSet '{}' must only contain "
@@ -326,6 +343,12 @@ class AbstractDataSet(abc.ABC):
 
     def _release(self) -> None:
         pass
+
+    def _copy(self, **overwrite_params) -> "AbstractDataSet":
+        dataset_copy = copy.deepcopy(self)
+        for name, value in overwrite_params.items():
+            setattr(dataset_copy, name, value)
+        return dataset_copy
 
 
 def generate_timestamp() -> str:
@@ -592,3 +615,48 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
                 str(self), str(exc)
             )
             raise DataSetError(message) from exc
+
+
+def get_protocol_and_path(filepath: str, version: Version = None) -> Tuple[str, str]:
+    """Parses filepath on protocol and path.
+
+    Args:
+        filepath: raw filepath e.g.: `gcs://bucket/test.json`.
+        version: instance of ``kedro.io.core.Version`` or None.
+
+    Returns:
+            Protocol and path.
+
+    Raises:
+            DataSetError: when protocol is http(s) and version is not None.
+            Note: HTTP(s) dataset doesn't support versioning.
+    """
+    options_dict = infer_storage_options(filepath)
+    path = options_dict["path"]
+    protocol = options_dict["protocol"]
+
+    if protocol in HTTP_PROTOCOLS:
+        if version:
+            raise DataSetError(
+                "HTTP(s) DataSet doesn't support versioning. "
+                "Please remove version flag from the dataset configuration."
+            )
+        path = path.split(PROTOCOL_DELIMITER, 1)[-1]
+
+    return protocol, path
+
+
+def get_filepath_str(path: PurePath, protocol: str) -> str:
+    """Returns filepath. Returns full filepath (with protocol) if protocol is HTTP(s).
+
+    Args:
+        path: filepath without protocol.
+        protocol: protocol.
+
+    Returns:
+        Filepath string.
+    """
+    path = str(path)
+    if protocol in HTTP_PROTOCOLS:
+        path = "".join((protocol, PROTOCOL_DELIMITER, path))
+    return path

@@ -22,9 +22,11 @@ kedro.contrib.io
       kedro.contrib.io.azure.CSVBlobDataSet
       kedro.contrib.io.azure.JSONBlobDataSet
       kedro.contrib.io.bioinformatics.BioSequenceLocalDataSet
+      kedro.contrib.io.bioinformatics.BioSequenceDataSet
       kedro.contrib.io.cached.CachedDataSet
       kedro.contrib.io.feather.FeatherLocalDataSet
       kedro.contrib.io.matplotlib.MatplotlibWriter
+      kedro.contrib.io.matplotlib.MatplotlibLocalWriter
       kedro.contrib.io.matplotlib.MatplotlibS3Writer
       kedro.contrib.io.parquet.ParquetS3DataSet
       kedro.contrib.io.pyspark.SparkDataSet
@@ -33,6 +35,7 @@ kedro.contrib.io
       kedro.contrib.io.gcs.CSVGCSDataSet
       kedro.contrib.io.gcs.JSONGCSDataSet
       kedro.contrib.io.gcs.ParquetGCSDataSet
+      kedro.contrib.io.gcs.GBQTableDataSet
 
 
    .. rubric:: DataSet Transformers

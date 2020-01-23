@@ -32,7 +32,7 @@ This will recursively scan for configuration files firstly in `conf/base/` and t
 * ANY of the following is true:
   * filename starts with `catalog` OR
   * file is located in a sub-directory whose name is prefixed with `catalog`
-* AND file extension is one of the following: `yaml`, `yml`, `json`, `ini`, `pickle`, `xml`, `properties` or `shellvars`
+* AND file extension is one of the following: `yaml`, `yml`, `json`, `ini`, `pickle`, `xml` or `properties`
 
 Configuration information from files stored in `base` or `local` that match these rules is merged at runtime and returned in the form of a config dictionary:
 

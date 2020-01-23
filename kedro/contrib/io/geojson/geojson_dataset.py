@@ -133,7 +133,7 @@ class GeoJSONDataSet(AbstractVersionedDataSet):
             return gpd.read_file(fs_file, **self._load_args)
 
     def _save(self, data: gpd.GeoDataFrame) -> None:
-        save_path = get_filepath_str(self._get_load_path(), self._protocol)
+        save_path = get_filepath_str(self._get_save_path(), self._protocol)
         with self._fs.open(save_path, mode="wb") as fs_file:
             data.to_file(fs_file, **self._save_args)
         self.invalidate_cache()

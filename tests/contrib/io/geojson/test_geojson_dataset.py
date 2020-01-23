@@ -177,10 +177,8 @@ class TestGeoJSONDataSetVersioned:
     def test_save_and_load(self, versioned_geojson_data_set, dummy_dataframe):
         """Test that saved and reloaded data matches the original one for
         the versioned data set."""
-        print(versioned_geojson_data_set._describe())
         versioned_geojson_data_set.save(dummy_dataframe)
         reloaded_df = versioned_geojson_data_set.load()
-        print(reloaded_df._describe())
         assert_frame_equal(reloaded_df, dummy_dataframe)
 
     def test_no_versions(self, versioned_geojson_data_set):

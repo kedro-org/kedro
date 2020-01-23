@@ -2,7 +2,8 @@
 
 ## Major features and improvements
 
-
+* Added the following datasets:
+  - `GeoJSONLocalDataset` dataset in `contrib` for working with GeoJSON local files and Geopandas.
 ## Bug fixes and other changes
 
 * Fixed a bug in the `invalidate_cache` method of `ParquetGCSDataSet` and `CSVGCSDataSet`.
@@ -14,6 +15,7 @@
 ## Thanks for supporting contributions
 
 [Jonas Kemper](https://github.com/jonasrk)
+[Luis Blanche](https://github/LuisBlanche)
 
 # Release 0.15.5
 

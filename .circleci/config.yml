@@ -66,6 +66,11 @@ utils:
     command: |
       make pip-compile
 
+  secret_scan: &secret_scan
+    name: Scan for secrets
+    command: |
+      make secret-scan
+
   steps_unit_tests: &steps_unit_tests
     steps:
       - checkout
@@ -102,6 +107,13 @@ utils:
       - run: *setup_conda
       - run: *setup_requirements
       - run: *pip_compile
+
+  steps_secret_scan: &steps_secret_scan
+    steps:
+      - checkout
+      - run: *setup_conda
+      - run: *setup_requirements
+      - run: *secret_scan
 
 jobs:
   unit_tests_35:
@@ -164,6 +176,11 @@ jobs:
       - image: *py37
     <<: *steps_pip_compile
 
+  secret_scan:
+    docker:
+      - image: *py37
+    <<: *steps_secret_scan
+
   all_circleci_checks_succeeded:
     docker:
       - image: circleci/python # any light-weight image
@@ -189,6 +206,7 @@ workflows:
       - e2e_tests_37
       - docs_37
       - pip_compile
+      - secret_scan
       - all_circleci_checks_succeeded:
           requires:
             - unit_tests_35
@@ -203,3 +221,4 @@ workflows:
             - e2e_tests_37
             - docs_37
             - pip_compile
+            - secret_scan

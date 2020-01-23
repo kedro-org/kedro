@@ -36,8 +36,7 @@ from gcsfs import GCSFileSystem
 from pandas.testing import assert_frame_equal
 from s3fs.core import S3FileSystem
 
-from kedro.io import DataSetError, HDFDataSet
-from kedro.io.core import Version
+from kedro.io import AbstractDataSet, DataSetError, HDFDataSet, Version
 
 HDF_KEY = "data"
 
@@ -50,14 +49,14 @@ def filepath_hdf(tmp_path):
 @pytest.fixture
 def hdf_data_set(filepath_hdf, load_args, save_args):
     return HDFDataSet(
-        filepath=filepath_hdf, key=HDF_KEY, load_args=load_args, save_args=save_args
+        filepath=filepath_hdf, key=HDF_KEY, load_args=load_args, save_args=save_args,
     )
 
 
 @pytest.fixture
 def versioned_hdf_data_set(filepath_hdf, load_version, save_version):
     return HDFDataSet(
-        filepath=filepath_hdf, key=HDF_KEY, version=Version(load_version, save_version)
+        filepath=filepath_hdf, key=HDF_KEY, version=Version(load_version, save_version),
     )
 
 
@@ -141,6 +140,28 @@ class TestHDFDataSet:
         reloaded = hdf_data_set.load()
         assert_frame_equal(df, reloaded)
 
+    def test_lock_usage(self, dummy_dataframe, filepath_hdf, mocker):
+        mocked_lock = mocker.MagicMock()
+        ds = HDFDataSet(filepath=filepath_hdf, key=HDF_KEY, lock=mocked_lock)
+        ds.save(dummy_dataframe)
+        calls = [mocker.call.__enter__(), mocker.call.__exit__(None, None, None)]
+        mocked_lock.assert_has_calls(calls)
+
+        mocked_lock.reset_mock()
+        ds.load()
+        mocked_lock.assert_has_calls(calls)
+
+    def test_instance_creation_from_config_without_lock(self):
+        config = {
+            "type": "HDFDataSet",
+            "filepath": "data/03_primary/saved.hdf",
+            "key": "test",
+        }
+        pattern = r"HDFDataSet dataset instance is not thread\-safe\."
+
+        with pytest.warns(UserWarning, match=pattern):
+            AbstractDataSet.from_config(name="Testing", config=config, lock=None)
+
 
 class TestHDFDataSetVersioned:
     def test_version_str_repr(self, load_version, save_version):
@@ -149,7 +170,7 @@ class TestHDFDataSetVersioned:
         filepath = "test.h5"
         ds = HDFDataSet(filepath=filepath, key=HDF_KEY)
         ds_versioned = HDFDataSet(
-            filepath=filepath, key=HDF_KEY, version=Version(load_version, save_version)
+            filepath=filepath, key=HDF_KEY, version=Version(load_version, save_version),
         )
         assert filepath in str(ds)
         assert "version" not in str(ds)

@@ -5,7 +5,6 @@ azure-storage-queue>=1.1.0, <2.0
 behave==1.2.6
 biopython>=1.73, <2.0
 black==v19.10.b0; python_version >= '3.6'
-codacy-coverage
 dask[complete]>=2.6.0, <3.0
 flake8>=3.5,<4.0
 gcsfs>=0.3.0, <1.0
@@ -29,4 +28,5 @@ pytest-cov>=2.5, <3.0
 pytest-mock>=1.7.1,<2.0
 pytest>=3.9, <4.0
 requests-mock>=1.6.0, <2.0.0
+trufflehog>=2.0.99
 wheel==0.32.2

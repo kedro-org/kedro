@@ -38,6 +38,7 @@ from collections import namedtuple
 from datetime import datetime, timezone
 from glob import iglob
 from pathlib import Path, PurePath
+from threading import Lock
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 from urllib.parse import urlparse
 from warnings import warn
@@ -50,6 +51,7 @@ VERSIONED_FLAG_KEY = "versioned"
 VERSION_KEY = "version"
 HTTP_PROTOCOLS = ("http", "https")
 PROTOCOL_DELIMITER = "://"
+THREAD_UNSAFE_DATASETS = ("HDFDataSet", "CachedDataSet")
 
 
 class DataSetError(Exception):
@@ -114,6 +116,7 @@ class AbstractDataSet(abc.ABC):
         >>>         return dict(param1=self._param1, param2=self._param2)
     """
 
+    # pylint: disable=too-many-arguments
     @classmethod
     def from_config(
         cls: Type,
@@ -121,6 +124,7 @@ class AbstractDataSet(abc.ABC):
         config: Dict[str, Any],
         load_version: str = None,
         save_version: str = None,
+        lock: Lock = None,
     ) -> "AbstractDataSet":
         """Create a data set instance using the configuration provided.
 
@@ -133,6 +137,7 @@ class AbstractDataSet(abc.ABC):
             save_version: Version string to be used for ``save`` operation if
                 the data set is versioned. Has no effect on the data set
                 if versioning was not enabled.
+            lock: threading.Lock instance.
 
         Returns:
             An instance of an ``AbstractDataSet`` subclass.
@@ -152,8 +157,16 @@ class AbstractDataSet(abc.ABC):
                 "for DataSet `{}`:\n{}".format(name, str(ex))
             )
 
+        class_obj_name = class_obj.__name__
         try:
-            data_set = class_obj(**config)  # type: ignore
+            if class_obj_name in THREAD_UNSAFE_DATASETS:
+                if lock is None:
+                    warn(
+                        "{} dataset instance is not thread-safe.".format(class_obj_name)
+                    )
+                data_set = class_obj(**config, lock=lock)  # type: ignore
+            else:
+                data_set = class_obj(**config)  # type: ignore
         except TypeError as err:
             raise DataSetError(
                 "\n{}.\nDataSet '{}' must only contain "

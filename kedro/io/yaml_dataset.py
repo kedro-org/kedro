@@ -26,17 +26,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``HDFDataSet`` loads/saves data from/to a hdf file using an underlying
-filesystem (e.g.: local, S3, GCS). It uses pandas.HDFStore to handle the hdf file.
+"""``YAMLDataSet`` loads/saves data from/to a YAML file using an underlying
+filesystem (e.g.: local, S3, GCS). It uses PyYAML to handle the YAML file.
 """
-from contextlib import contextmanager
 from copy import deepcopy
 from pathlib import PurePosixPath
-from threading import Lock
-from typing import Any, Dict
+from typing import Any, Dict, Union
 
 import fsspec
 import pandas as pd
+import yaml
 
 from kedro.io.core import (
     AbstractVersionedDataSet,
@@ -46,62 +45,49 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
-HDFSTORE_DRIVER = "H5FD_CORE"
 
-
-class HDFDataSet(AbstractVersionedDataSet):
-    """``HDFDataSet`` loads/saves data from/to a hdf file using an underlying
-    filesystem (e.g. local, S3, GCS). It uses pandas.HDFStore to handle the hdf file.
+class YAMLDataSet(AbstractVersionedDataSet):
+    """``YAMLDataSet`` loads/saves data from/to a YAML file using an underlying
+    filesystem (e.g.: local, S3, GCS). It uses PyYAML to handle the YAML file.
 
     Example:
     ::
 
-        >>> from kedro.io.hdf_dataset import HDFDataSet
-        >>> import pandas as pd
+        >>> from kedro.io.yaml_dataset import YAMLDataSet
         >>>
-        >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        >>>                      'col3': [5, 6]})
+        >>> data = {'col1': [1, 2], 'col2': [4, 5], 'col3': [5, 6]}
         >>>
-        >>> # data_set = HDFDataSet(filepath="gcs://bucket/test.hdf", key='data')
-        >>> data_set = HDFDataSet(filepath="test.h5", key='data')
+        >>> # data_set = YAMLDataSet(filepath="gcs://bucket/test.yaml")
+        >>> data_set = YAMLDataSet(filepath="test.yaml")
         >>> data_set.save(data)
         >>> reloaded = data_set.load()
-        >>> assert data.equals(reloaded)
+        >>> assert data == reloaded
 
     """
 
-    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
-    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_SAVE_ARGS = {"default_flow_style": False}  # type: Dict[str, Any]
 
     # pylint: disable=too-many-arguments
     def __init__(
         self,
         filepath: str,
-        key: str,
-        load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
-        lock: Lock = None,
     ) -> None:
-        """Creates a new instance of ``HDFDataSet`` pointing to a concrete hdf file
+        """Creates a new instance of ``YAMLDataSet`` pointing to a concrete YAML file
         on a specific filesystem.
 
         Args:
-            filepath: Filepath to a hdf file prefixed with a protocol like `s3://`.
+            filepath: Filepath to a YAML file prefixed with a protocol like `s3://`.
                 If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.
-            key: Identifier to the group in the HDF store.
-            load_args: PyTables options for loading hdf files.
-                You can find all available arguments at:
-                https://www.pytables.org/usersguide/libref/top_level.html#tables.open_file
-                All defaults are preserved.
-            save_args: PyTables options for saving hdf files.
-                You can find all available arguments at:
-                https://www.pytables.org/usersguide/libref/top_level.html#tables.open_file
-                All defaults are preserved.
+            save_args: PyYAML options for saving YAML files (arguments passed
+                into ```yaml.dump``). Here you can find all available arguments:
+                https://pyyaml.org/wiki/PyYAMLDocumentation
+                All defaults are preserved, but "default_flow_style", which is set to False.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -110,13 +96,9 @@ class HDFDataSet(AbstractVersionedDataSet):
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Extra arguments to pass into underlying filesystem class.
                 E.g. for ``GCSFileSystem`` class: `{"project": "my-project", ...}`.
-            lock: threading.Lock instance that is used to make `load` and `save`
-                operations thread-safe.
         """
         _fs_args = deepcopy(fs_args) or {}
         _credentials = deepcopy(credentials) or {}
-        self._key = key
-        self._lock = lock
 
         protocol, path = get_protocol_and_path(filepath, version)
 
@@ -130,10 +112,7 @@ class HDFDataSet(AbstractVersionedDataSet):
             glob_function=self._fs.glob,
         )
 
-        # Handle default load and save arguments
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
+        # Handle default save arguments
         self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
             self._save_args.update(save_args)
@@ -141,49 +120,25 @@ class HDFDataSet(AbstractVersionedDataSet):
     def _describe(self) -> Dict[str, Any]:
         return dict(
             filepath=self._filepath,
-            key=self._key,
             protocol=self._protocol,
-            load_args=self._load_args,
             save_args=self._save_args,
             version=self._version,
         )
 
-    def _load(self) -> pd.DataFrame:
+    def _load(self) -> Dict:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
-        with self._fs.open(load_path, mode="rb") as fs_file:
-            binary_data = fs_file.read()
+        with self._fs.open(load_path, mode="r") as fs_file:
+            return yaml.safe_load(fs_file)
 
-        with _optional_lock(self._lock):
-            # Set driver_core_backing_store to False to disable saving
-            # contents of the in-memory h5file to disk
-            with pd.HDFStore(
-                "in-memory-load-file",
-                mode="r",
-                driver=HDFSTORE_DRIVER,
-                driver_core_backing_store=0,
-                driver_core_image=binary_data,
-                **self._load_args,
-            ) as store:
-                return store[self._key]
-
-    def _save(self, data: pd.DataFrame) -> None:
+    def _save(self, data: Union[Dict, pd.DataFrame]) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
-        with _optional_lock(self._lock):
-            with pd.HDFStore(
-                "in-memory-save-file",
-                mode="w",
-                driver=HDFSTORE_DRIVER,
-                driver_core_backing_store=0,
-                **self._save_args,
-            ) as store:
-                store.put(self._key, data, format="table")
-                # pylint: disable=protected-access
-                binary_data = store._handle.get_file_image()
+        if isinstance(data, pd.DataFrame):
+            data = data.to_dict()
 
-        with self._fs.open(save_path, mode="wb") as fs_file:
-            fs_file.write(binary_data)
+        with self._fs.open(save_path, mode="w") as fs_file:
+            yaml.dump(data, fs_file, **self._save_args)
 
         self.invalidate_cache()
 
@@ -202,12 +157,3 @@ class HDFDataSet(AbstractVersionedDataSet):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
-
-
-@contextmanager
-def _optional_lock(lock):
-    if lock:
-        with lock:
-            yield
-    else:
-        yield

@@ -39,13 +39,14 @@ Feature: Run Project
     When I execute the kedro command "run"
     Then I should get a successful exit code
     And the console log should show that 4 nodes were run
+    And "local" environment was used
 
   Scenario: Run default python entry point without example code
     Given I have prepared a config file without example code
     And I have run a non-interactive kedro new
     When I execute the kedro command "run"
     Then I should get an error exit code
-    And "local" environment was used
+    And I should get an error message including "Pipeline contains no nodes"
 
   Scenario: Run kedro run with config file
     Given I have prepared a config file with example code

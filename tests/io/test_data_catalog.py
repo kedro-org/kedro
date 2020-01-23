@@ -81,6 +81,19 @@ def sane_config(filepath):
 
 
 @pytest.fixture
+def sane_config_with_nested_creds(sane_config):
+    sane_config["catalog"]["cars"]["credentials"] = {
+        "nested": {"credentials": "other_credentials"},
+        "key": "secret",
+    }
+    sane_config["credentials"]["other_credentials"] = {
+        "aws_access_key_id": "OTHER_FAKE_ACCESS_KEY",
+        "aws_secret_access_key": "OTHER_FAKE_SECRET_KEY",
+    }
+    return sane_config
+
+
+@pytest.fixture
 def data_set(filepath):
     return CSVLocalDataSet(filepath=filepath, save_args={"index": False})
 
@@ -335,7 +348,7 @@ class TestDataCatalogFromConfig:
     def test_missing_credentials(self, sane_config):
         """Check the error if credentials can't be located"""
         sane_config["catalog"]["cars"]["credentials"] = "missing"
-        with pytest.raises(KeyError, match=r"Unable to find credentials"):
+        with pytest.raises(KeyError, match=r"Unable to find credentials \'missing\'"):
             DataCatalog.from_config(**sane_config)
 
     def test_link_credentials(self, sane_config, mocker):
@@ -354,6 +367,27 @@ class TestDataCatalogFromConfig:
         }
         mock_client.assert_called_once_with(client_kwargs=expected_client_kwargs)
 
+    def test_nested_credentials(self, sane_config_with_nested_creds, mocker):
+        mock_client = mocker.patch("kedro.io.csv_s3.S3FileSystem")
+        DataCatalog.from_config(**sane_config_with_nested_creds)
+
+        expected_client_kwargs = {
+            "nested": {
+                "credentials": {
+                    "aws_access_key_id": "OTHER_FAKE_ACCESS_KEY",
+                    "aws_secret_access_key": "OTHER_FAKE_SECRET_KEY",
+                }
+            },
+            "key": "secret",
+        }
+        mock_client.assert_called_once_with(client_kwargs=expected_client_kwargs)
+
+    def test_missing_nested_credentials(self, sane_config_with_nested_creds):
+        del sane_config_with_nested_creds["credentials"]["other_credentials"]
+        pattern = "Unable to find credentials 'other_credentials'"
+        with pytest.raises(KeyError, match=pattern):
+            DataCatalog.from_config(**sane_config_with_nested_creds)
+
     def test_idempotent_catalog(self, sane_config):
         """Test that data catalog instantiations are idempotent"""
         _ = DataCatalog.from_config(**sane_config)  # NOQA
@@ -362,9 +396,22 @@ class TestDataCatalogFromConfig:
 
     def test_error_dataset_init(self, bad_config):
         """Check the error when trying to instantiate erroneous data set"""
-        pattern = r"Failed to instantiate DataSet \'bad\' " r"of type `.*BadDataSet`"
+        pattern = r"Failed to instantiate DataSet \'bad\' of type `.*BadDataSet`"
         with pytest.raises(DataSetError, match=pattern):
             DataCatalog.from_config(bad_config, None)
+
+    def test_config_thread_unsafe_dataset(self):
+        data_set_name = "HDFDataSet"
+        config = {
+            "catalog": {
+                "boats": {"type": data_set_name, "filepath": "test.h5", "key": "data"}
+            }
+        }
+        catalog = DataCatalog.from_config(**config)
+        assert data_set_name in str(catalog._data_sets["boats"])
+        # Check that lock was set for HDFDataSet dataset
+        assert catalog._data_sets["boats"]._lock is not None
+        assert not catalog._data_sets["boats"]._lock.locked()
 
 
 class TestDataCatalogVersioned:

@@ -33,7 +33,13 @@ import pytest
 import yaml
 
 from kedro.contrib.io.cached import CachedDataSet
-from kedro.io import CSVLocalDataSet, DataCatalog, DataSetError, MemoryDataSet
+from kedro.io import (
+    AbstractDataSet,
+    CSVLocalDataSet,
+    DataCatalog,
+    DataSetError,
+    MemoryDataSet,
+)
 
 YML_CONFIG = """
 test_ds:
@@ -165,3 +171,25 @@ class TestCachedDataset:
             DataSetError, match=r"Data for MemoryDataSet has not been saved yet"
         ):
             _ = cached_ds.load()
+
+    def test_thread_unsafe_ds_creation_from_config_without_lock(self):
+        config = {
+            "type": "kedro.contrib.io.cached.CachedDataSet",
+            "dataset": {
+                "type": "HDFDataSet",
+                "filepath": "data/03_primary/saved.hdf",
+                "key": "test",
+            },
+        }
+        msgs = [
+            "CachedDataSet dataset instance is not thread-safe.",
+            "HDFDataSet dataset instance is not thread-safe.",
+        ]
+
+        with pytest.warns(None) as records:
+            AbstractDataSet.from_config(name="Testing", config=config, lock=None)
+
+        assert len(records) == 2
+        for idx, record in enumerate(records):
+            assert str(record.message) == msgs[idx]
+            assert issubclass(record.category, UserWarning)

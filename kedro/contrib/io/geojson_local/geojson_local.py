@@ -31,17 +31,25 @@ underlying functionality is supported by geopandas, so it supports all
 allowed geopandas (pandas) options for loading and saving geosjon files.
 """
 import copy
-from pathlib import Path
+from pathlib import PurePosixPath
 from typing import Any, Dict, Union
 
+import fsspec
 import geopandas as gpd
 
-from kedro.io.core import AbstractVersionedDataSet, Version, is_remote_path
+from kedro.io.core import (
+    AbstractVersionedDataSet,
+    DataSetError,
+    Version,
+    get_filepath_str,
+    get_protocol_and_path,
+)
 
 
-class GeoJSONLocalDataSet(AbstractVersionedDataSet):
-    """``GeoJSONLocalDataSet`` loads and saves data to a local geojson file. The
-    underlying functionality is supported by geopandas, so it supports all
+class GeoJSONDataSet(AbstractVersionedDataSet):
+    """``GeoJSONDataSet`` loads and saves data to a geojson file using an underlying filesystem
+    (eg: local, S3, GCS).
+    The underlying functionality is supported by geopandas, so it supports all
     allowed geopandas (pandas) options for loading and saving geosjon files.
 
     Example:
@@ -49,10 +57,12 @@ class GeoJSONLocalDataSet(AbstractVersionedDataSet):
 
         >>> import geopandas as gpd
         >>> from shapely.geometry import Point
-        >>>
+        >>> from kedro.io.contrib import GeoJSONDataSet
         >>> data = gpd.GeoDataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]}, geometry=[Point(1,1), Point(2,4)])
-        >>> data_set = GeoJSONLocalDataSet(filepath="test.geojson",
+        >>> # data_set = GeoJSONDataSet(filepath="gcs://bucket/test.geojson",
+        >>>                                save_args=None)
+        >>> data_set = GeoJSONDataSet(filepath="test.geojson",
         >>>                                save_args=None)
         >>> data_set.save(data)
         >>> reloaded = data_set.load()
@@ -64,45 +74,51 @@ class GeoJSONLocalDataSet(AbstractVersionedDataSet):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {"driver": "GeoJSON"}  # type: Dict[str, Any]
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         filepath: str,
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
         version: Version = None,
+        credentials: Dict[str, Any] = None,
+        fs_args: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``GeoJSONLocalDataSet`` pointing to a concrete
         filepath.
 
         Args:
 
-            filepath: path to a geojson file.
-
+            filepath: path to a geojson file. Should be a ``fsspec```
+                protocol path
             load_args: GeoPandas options for loading GeoJSON files.
                 Here you can find all available arguments:
-
             save_args: GeoPandas options for saving geojson files.
                 Here you can find all available arguments:
                 The default_save_arg driver is 'GeoJSON', all others preserved.
-
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
-
-        Raises:
-            ValueError: If 'filepath' looks like a remote path.
+            credentials: credentials required to access the underlying filesystem.
+                Eg. for ``GCFileSystem`` it would look like `{'token': None}`.
+            fs_args: Extra args to pass into the underlying filesystem
+                Eg. for ``GCFileSystem`` it would look like `{'project': 'my-project' , ...}`.
 
 
         """
-        super().__init__(Path(filepath), version)
+        _fs_args = copy.deepcopy(fs_args) or {}
+        _credentials = copy.deepcopy(credentials) or {}
+        protocol, path = get_protocol_and_path(filepath, version)
+        self._protocol = protocol
+        self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
 
-        if is_remote_path(filepath):
-            raise ValueError(
-                "{} seems to be a remote file, which is not supported by {}".format(
-                    filepath, self.__class__.__name__
-                )
-            )
-            # Handle default load and save arguments
+        super().__init__(
+            filepath=PurePosixPath(path),
+            version=version,
+            exists_function=self._fs.exists,
+            glob_function=self._fs.glob,
+        )
+
         self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args is not None:
             self._load_args.update(load_args)
@@ -112,22 +128,35 @@ class GeoJSONLocalDataSet(AbstractVersionedDataSet):
             self._save_args.update(save_args)
 
     def _load(self) -> Union[gpd.GeoDataFrame, Dict[str, gpd.GeoDataFrame]]:
-        load_path = Path(self._get_load_path())
-        return gpd.read_file(load_path, **self._load_args)
+        load_path = get_filepath_str(self._get_load_path(), self._protocol)
+        with self._fs.open(load_path, mode="r") as fs_file:
+            return gpd.read_file(fs_file, **self._load_args)
 
     def _save(self, data: gpd.GeoDataFrame) -> None:
-        save_path = Path(self._get_save_path())
-        save_path.parent.mkdir(parents=True, exist_ok=True)
-        data.to_file(save_path, **self._save_args)
+        save_path = get_filepath_str(self._get_load_path(), self._protocol)
+        with self._fs.open(save_path, mode="w") as fs_file:
+            data.to_file(fs_file, **self._save_args)
 
     def _exists(self) -> bool:
-        path = self._get_load_path()
-        return Path(path).is_file()
+        try:
+            load_path = get_filepath_str(self._get_load_path(), self._protocol)
+        except DataSetError:
+            return False
+        return self._fs.exists(load_path)
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
             filepath=self._filepath,
+            protocol=self._protocol,
             load_args=self._load_args,
             save_args=self._save_args,
             version=self._version,
         )
+
+    def _release(self) -> None:
+        self.invalidate_cache()
+
+    def invalidate_cache(self) -> None:
+        """Invalidate underlying filesystem cache."""
+        filepath = get_filepath_str(self._filepath, self._protocol)
+        self._fs.invalidate_cache(filepath)

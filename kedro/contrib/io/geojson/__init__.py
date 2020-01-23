@@ -27,3 +27,5 @@
 # limitations under the License.
 """``GeoJSONLocalDataset`` is an ``AbstractVersionedDataSet`` to save and load GeoJSON files.
 """
+
+from .geojson_dataset import GeoJSONDataSet  # NOQA

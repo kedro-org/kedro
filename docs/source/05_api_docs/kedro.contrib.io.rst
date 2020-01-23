@@ -35,7 +35,7 @@ kedro.contrib.io
       kedro.contrib.io.gcs.CSVGCSDataSet
       kedro.contrib.io.gcs.JSONGCSDataSet
       kedro.contrib.io.gcs.ParquetGCSDataSet
-      kedro.contrib.io.geojson_local.GeoJSONLocalDataSet
+      kedro.contrib.io.geojson.GeoJSONDataSet
       kedro.contrib.io.gcs.GBQTableDataSet
 
 

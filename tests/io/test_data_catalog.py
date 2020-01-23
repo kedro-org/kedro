@@ -400,6 +400,19 @@ class TestDataCatalogFromConfig:
         with pytest.raises(DataSetError, match=pattern):
             DataCatalog.from_config(bad_config, None)
 
+    def test_config_thread_unsafe_dataset(self):
+        data_set_name = "HDFDataSet"
+        config = {
+            "catalog": {
+                "boats": {"type": data_set_name, "filepath": "test.h5", "key": "data"}
+            }
+        }
+        catalog = DataCatalog.from_config(**config)
+        assert data_set_name in str(catalog._data_sets["boats"])
+        # Check that lock was set for HDFDataSet dataset
+        assert catalog._data_sets["boats"]._lock is not None
+        assert not catalog._data_sets["boats"]._lock.locked()
+
 
 class TestDataCatalogVersioned:
     def test_from_sane_config_versioned(self, sane_config, dummy_dataframe):

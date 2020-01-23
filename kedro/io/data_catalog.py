@@ -34,6 +34,7 @@ relaying load and save functions to the underlying data sets.
 import copy
 import logging
 from functools import partial
+from threading import Lock
 from typing import Any, Dict, Iterable, List, Optional, Type, Union
 from warnings import warn
 
@@ -292,10 +293,11 @@ class DataCatalog:
                 )
             )
 
+        lock = Lock()
         for ds_name, ds_config in catalog.items():
             ds_config = _resolve_credentials(ds_config, credentials)
             data_sets[ds_name] = AbstractDataSet.from_config(
-                ds_name, ds_config, load_versions.get(ds_name), save_version
+                ds_name, ds_config, load_versions.get(ds_name), save_version, lock
             )
         return cls(data_sets=data_sets, journal=journal)
 

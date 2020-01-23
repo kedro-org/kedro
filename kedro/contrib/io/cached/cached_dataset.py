@@ -31,7 +31,6 @@ This module contains ``CachedDataSet``, a dataset wrapper which caches in memory
 so that the user avoids io operations with slow storage media
 """
 import logging
-from threading import Lock
 from typing import Any, Dict, Union
 
 from kedro.io import AbstractDataSet, MemoryDataSet, Version
@@ -56,14 +55,9 @@ class CachedDataSet(AbstractDataSet):
     class as shown above.
     """
 
-    def __init__(
-        self,
-        dataset: Union[AbstractDataSet, Dict],
-        version: Version = None,
-        lock: Lock = None,
-    ):
+    def __init__(self, dataset: Union[AbstractDataSet, Dict], version: Version = None):
         if isinstance(dataset, Dict):
-            self._dataset = self._from_config(dataset, version, lock)
+            self._dataset = self._from_config(dataset, version)
         elif isinstance(dataset, AbstractDataSet):
             self._dataset = dataset
         else:
@@ -78,7 +72,7 @@ class CachedDataSet(AbstractDataSet):
         self._dataset.release()
 
     @staticmethod
-    def _from_config(config, version, lock):
+    def _from_config(config, version):
         if VERSIONED_FLAG_KEY in config:
             raise ValueError(
                 "Cached datasets should specify that they are versioned in the "
@@ -87,9 +81,9 @@ class CachedDataSet(AbstractDataSet):
         if version:
             config[VERSIONED_FLAG_KEY] = True
             return AbstractDataSet.from_config(
-                "_cached", config, version.load, version.save, lock=lock
+                "_cached", config, version.load, version.save
             )
-        return AbstractDataSet.from_config("_cached", config, lock=lock)
+        return AbstractDataSet.from_config("_cached", config)
 
     def _describe(self) -> Dict[str, Any]:
         return {

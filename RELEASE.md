@@ -11,6 +11,7 @@
   - `HDFDataSet` dataset for working with hdf files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
   - `YAMLDataSet` dataset for working with yaml files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
   - `MatplotlibWriter` dataset in `contrib` for saving matplotlib objects to image file(s) that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `NetworkXDataSet` dataset in `contrib` for working with graphs (JSON format) via NetworkX that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
   - `BioSequenceDataSet` dataset in `contrib` for working with bio-sequence objects that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
 * Enabled loading a particular version of a dataset in Jupyter Notebooks and ipython, using `catalog.load("dataset_name", version="<2019-12-13T15.08.09.255Z>")`.
 * Added http(s) protocol support for `JSONDataSet`.

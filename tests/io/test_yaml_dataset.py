@@ -62,19 +62,12 @@ def dummy_data():
     return {"col1": 1, "col2": 2, "col3": 3}
 
 
-def two_dicts_equal(dict_1, dict_2):
-    different_keys = dict_1.keys() - dict_2.keys()
-    different_data = dict_1.items() - dict_2.items()
-
-    return not (different_keys or different_data)
-
-
 class TestYAMLDataSet:
     def test_save_and_load(self, yaml_data_set, dummy_data):
         """Test saving and reloading the data set."""
         yaml_data_set.save(dummy_data)
         reloaded = yaml_data_set.load()
-        assert two_dicts_equal(dummy_data, reloaded)
+        assert dummy_data == reloaded
 
     def test_exists(self, yaml_data_set, dummy_data):
         """Test `exists` method invocation for both existing and
@@ -167,7 +160,7 @@ class TestYAMLDataSetVersioned:
         the versioned data set."""
         versioned_yaml_data_set.save(dummy_data)
         reloaded = versioned_yaml_data_set.load()
-        assert two_dicts_equal(dummy_data, reloaded)
+        assert dummy_data == reloaded
 
     def test_no_versions(self, versioned_yaml_data_set):
         """Check the error if no versions are available for load."""

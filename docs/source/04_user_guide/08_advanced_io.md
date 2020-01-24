@@ -226,6 +226,7 @@ Currently the following datasets support versioning:
 - `YAMLDataSet`
 - `kedro.contrib.io.azure.CSVBlobDataSet`
 - `kedro.contrib.io.feather.FeatherLocalDataSet`
+- `kedro.contrib.io.networkx.NetworkXDataSet`
 - `kedro.contrib.io.networkx.NetworkXLocalDataSet`
 - `kedro.contrib.io.parquet.ParquetS3DataSet`
 - `kedro.contrib.io.pyspark.SparkDataSet`

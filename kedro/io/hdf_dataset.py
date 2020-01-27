@@ -31,6 +31,7 @@ filesystem (e.g.: local, S3, GCS). It uses pandas.HDFStore to handle the hdf fil
 """
 from copy import deepcopy
 from pathlib import PurePosixPath
+from threading import Lock
 from typing import Any, Dict
 
 import fsspec
@@ -68,6 +69,9 @@ class HDFDataSet(AbstractVersionedDataSet):
 
     """
 
+    # _lock is a class attribute that will be shared across all the instances.
+    # It is used to make dataset safe for threads.
+    _lock = Lock()
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
@@ -148,31 +152,33 @@ class HDFDataSet(AbstractVersionedDataSet):
         with self._fs.open(load_path, mode="rb") as fs_file:
             binary_data = fs_file.read()
 
-        # Set driver_core_backing_store to False to disable saving
-        # contents of the in-memory h5file to disk
-        with pd.HDFStore(
-            "in-memory-load-file",
-            mode="r",
-            driver=HDFSTORE_DRIVER,
-            driver_core_backing_store=0,
-            driver_core_image=binary_data,
-            **self._load_args,
-        ) as store:
-            return store[self._key]
+        with HDFDataSet._lock:
+            # Set driver_core_backing_store to False to disable saving
+            # contents of the in-memory h5file to disk
+            with pd.HDFStore(
+                "in-memory-load-file",
+                mode="r",
+                driver=HDFSTORE_DRIVER,
+                driver_core_backing_store=0,
+                driver_core_image=binary_data,
+                **self._load_args,
+            ) as store:
+                return store[self._key]
 
     def _save(self, data: pd.DataFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
-        with pd.HDFStore(
-            "in-memory-save-file",
-            mode="w",
-            driver=HDFSTORE_DRIVER,
-            driver_core_backing_store=0,
-            **self._save_args,
-        ) as store:
-            store.put(self._key, data, format="table")
-            # pylint: disable=protected-access
-            binary_data = store._handle.get_file_image()
+        with HDFDataSet._lock:
+            with pd.HDFStore(
+                "in-memory-save-file",
+                mode="w",
+                driver=HDFSTORE_DRIVER,
+                driver_core_backing_store=0,
+                **self._save_args,
+            ) as store:
+                store.put(self._key, data, format="table")
+                # pylint: disable=protected-access
+                binary_data = store._handle.get_file_image()
 
         with self._fs.open(save_path, mode="wb") as fs_file:
             fs_file.write(binary_data)

@@ -209,6 +209,7 @@ Currently the following datasets support versioning:
 - `CSVLocalDataSet`
 - `CSVDataSet`
 - `CSVS3DataSet`
+- `HDFDataSet`
 - `HDFLocalDataSet`
 - `HDFS3DataSet`
 - `JSONLocalDataSet`
@@ -218,10 +219,14 @@ Currently the following datasets support versioning:
 - `PickleLocalDataSet`
 - `PickleS3DataSet`
 - `PickleDataSet`
+- `TextDataSet`
 - `TextLocalDataSet`
+- `ExcelDataSet`
 - `ExcelLocalDataSet`
+- `YAMLDataSet`
 - `kedro.contrib.io.azure.CSVBlobDataSet`
 - `kedro.contrib.io.feather.FeatherLocalDataSet`
+- `kedro.contrib.io.networkx.NetworkXDataSet`
 - `kedro.contrib.io.networkx.NetworkXLocalDataSet`
 - `kedro.contrib.io.parquet.ParquetS3DataSet`
 - `kedro.contrib.io.pyspark.SparkDataSet`
@@ -296,14 +301,25 @@ my_partitioned_dataset:
 
 Here is an exhaustive list of the arguments supported by `PartitionedDataSet`:
 
-| Argument | Required | Supported types | Description |
-| :------: | :------: | :-------------: | ----------- |
-| `path`   | Yes | `str` | Path to the folder containing partitioned data. If path starts with the protocol (e.g., `s3://`) then the corresponding `fsspec` concrete filesystem implementation will be used. If protocol is not specified, local filesystem will be used |
-| `dataset` | Yes |`str`, `Type[AbstractDataSet]`, `Dict[str, Any]` | Underlying dataset definition, for more details see [the section below](#dataset-definition) |
-| `credentials` | No | `Dict[str, Any]` | Protocol-specific options that will be passed to `fsspec.filesystem` call, for more details see [the section below](#partitioned-dataset-credentials) |
-| `load_args` | No | `Dict[str, Any]` | Keyword arguments to be passed into `find()` method of the corresponding filesystem implementation |
-| `filepath_arg` | No<br/>(defauls to `filepath`) | `str` | Argument name of the underlying dataset initializer that will contain a path to an individual partition |
-| `filename_suffix` | No<br/>(defauls to an empty string) | `str` | If specified, partitions that don't end with this string will be ignored |
+```eval_rst
++-------------------+-------------------------------+--------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Argument          | Required                      | Supported types                                  | Description                                                                                                                                                                                                                                   |
++===================+===============================+==================================================+===============================================================================================================================================================================================================================================+
+| `path`            | Yes                           | `str`                                            | Path to the folder containing partitioned data. If path starts with the protocol (e.g., `s3://`) then the corresponding `fsspec` concrete filesystem implementation will be used. If protocol is not specified, local filesystem will be used |
++-------------------+-------------------------------+--------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| `dataset`         | Yes                           | `str`, `Type[AbstractDataSet]`, `Dict[str, Any]` | Underlying dataset definition, for more details see [the section below](#dataset-definition)                                                                                                                                                  |
++-------------------+-------------------------------+--------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| `credentials`     | No                            | `Dict[str, Any]`                                 | Protocol-specific options that will be passed to `fsspec.filesystemcall`, for more details see [the section below](#partitioned-dataset-credentials)                                                                                          |
++-------------------+-------------------------------+--------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| `load_args`       | No                            | `Dict[str, Any]`                                 | Keyword arguments to be passed into `find()` method of the corresponding filesystem implementation                                                                                                                                            |
++-------------------+-------------------------------+--------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| `filepath_arg`    | No                            | `str`                                            | Argument name of the underlying dataset initializer that will contain a path to an individual partition                                                                                                                                       |
+|                   | (defaults to `filepath`)      |                                                  |                                                                                                                                                                                                                                               |
++-------------------+-------------------------------+--------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| `filename_suffix` | No                            | `str`                                            | If specified, partitions that don't end with this string will be ignored                                                                                                                                                                      |
+|                   | (defaults to an empty string) |                                                  |                                                                                                                                                                                                                                               |
++-------------------+-------------------------------+--------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+```
 
 #### Dataset definition
 
@@ -324,12 +340,28 @@ Full notation allows you to specify a dictionary with the full underlying datase
 
 Credentials dictionary is special in a sense that it may contain credentials for both `PartitionedDataSet` itself _and_ the underlying dataset that is used for partition load and save. Here is the full list of possible scenarios:
 
-| Scenario | Example `credentials` dictionary | Description |
-| :------: | :------------------------------: | ----------- |
-| `credentials` is `None` or an empty dictionary | `None` | Credentials are not passed to the underlying dataset or the filesystem |
-| `credentials` dictionary does not have `dataset_credentials` key | `{"foo": "bar"}` | The whole contents of `credentials` dictionary is passed to both the underlying dataset (`CSVS3DataSet(..., credentials={"foo": "bar"})`) and the filesystem (`fsspec.filesystem(..., foo="bar")`) |
-| `credentials` dictionary has a non-empty `dataset_credentials` key | `{"foo": "bar", "dataset_credentials": {"baz": "qux"}}` | The contents of the `dataset_credentials` key is passed to the dataset: `CSVS3DataSet(..., credentials={"baz": "qux"})`, all other keys (if any) are passed to the filesystem: `fsspec.filesystem(..., foo="bar")` |
-| `credentials` dictionary has an empty `dataset_credentials` key | `{"foo": "bar", "dataset_credentials": None}` | No credentials are passed to the dataset, all keys except `dataset_credentials` are passed to the filesystem: `fsspec.filesystem(..., foo="bar")` |
+```eval_rst
++-----------------------------------+---------------------------------------------------------+----------------------------------------------------------------+
+| Scenario                          | Example `credentials` dictionary                        | Description                                                    |
++-----------------------------------+---------------------------------------------------------+----------------------------------------------------------------+
+| `credentials` is `None` or an     | `None`                                                  | Credentials are not passed to the underlying dataset or the    |
+| empty dictionary                  |                                                         | filesystem                                                     |
++-----------------------------------+---------------------------------------------------------+----------------------------------------------------------------+
+| `credentials` dictionary does not | `{"foo": "bar"}`                                        | The whole contents of `credentials` dictionary is passed to    |
+| have `dataset_credentials` key    |                                                         | both the underlying dataset,                                   |
+|                                   |                                                         | (`CSVS3DataSet(..., credentials={"foo": "bar"})`), and the     |
+|                                   |                                                         | filesystem, (`fsspec.filesystem(..., foo="bar")`)              |
++-----------------------------------+---------------------------------------------------------+----------------------------------------------------------------+
+| `credentials` dictionary has a    | `{"foo": "bar", "dataset_credentials": {"baz": "qux"}}` | The contents of the `dataset_credentials` key is passed to the |
+| non-empty `dataset_credentials`   |                                                         | dataset, `CSVS3DataSet(..., credentials={"baz": "qux"})`, all  |
+| key                               |                                                         | other keys (if any) are passed to the filesystem,              |
+|                                   |                                                         | `fsspec.filesystem(..., foo="bar")`                            |
++-----------------------------------+---------------------------------------------------------+----------------------------------------------------------------+
+| `credentials` dictionary has an   | `{"foo": "bar", "dataset_credentials": None}`           | No credentials are passed to the dataset, all keys except      |
+| empty `dataset_credentials` key   |                                                         | `dataset_credentials` are passed to the filesystem,            |
+|                                   |                                                         | `fsspec.filesystem(..., foo="bar")`                            |
++-----------------------------------+---------------------------------------------------------+----------------------------------------------------------------+
+```
 
 ### Partitioned dataset load
 

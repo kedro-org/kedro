@@ -42,7 +42,9 @@ from .csv_http import CSVHTTPDataSet  # NOQA
 from .csv_local import CSVLocalDataSet  # NOQA
 from .csv_s3 import CSVS3DataSet  # NOQA
 from .data_catalog import DataCatalog  # NOQA
+from .excel_dataset import ExcelDataSet  # NOQA
 from .excel_local import ExcelLocalDataSet  # NOQA
+from .hdf_dataset import HDFDataSet  # NOQA
 from .hdf_local import HDFLocalDataSet  # NOQA
 from .hdf_s3 import HDFS3DataSet  # NOQA
 from .json_dataset import JSONDataSet  # NOQA
@@ -57,5 +59,7 @@ from .pickle_local import PickleLocalDataSet  # NOQA
 from .pickle_s3 import PickleS3DataSet  # NOQA
 from .sql import SQLQueryDataSet  # NOQA
 from .sql import SQLTableDataSet  # NOQA
+from .text_dataset import TextDataSet  # NOQA
 from .text_local import TextLocalDataSet  # NOQA
 from .transformers import AbstractTransformer  # NOQA
+from .yaml_dataset import YAMLDataSet  # NOQA

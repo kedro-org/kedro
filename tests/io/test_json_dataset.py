@@ -30,6 +30,7 @@ from pathlib import PurePosixPath
 
 import pandas as pd
 import pytest
+from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from pandas.testing import assert_frame_equal
@@ -114,12 +115,20 @@ class TestJSONDataSet:
             ("file:///tmp/test.json", LocalFileSystem),
             ("/tmp/test.json", LocalFileSystem),
             ("gcs://bucket/file.json", GCSFileSystem),
+            ("https://example.com/file.json", HTTPFileSystem),
         ],
     )
     def test_protocol_usage(self, filepath, instance_type):
         data_set = JSONDataSet(filepath=filepath)
         assert isinstance(data_set._fs, instance_type)
-        assert str(data_set._filepath) == data_set._fs._strip_protocol(filepath)
+
+        # _strip_protocol() doesn't strip http(s) protocol
+        if data_set._protocol == "https":
+            path = filepath.split("://")[-1]
+        else:
+            path = data_set._fs._strip_protocol(filepath)
+
+        assert str(data_set._filepath) == path
         assert isinstance(data_set._filepath, PurePosixPath)
 
     def test_catalog_release(self, mocker):
@@ -199,3 +208,11 @@ class TestJSONDataSetVersioned:
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_json_data_set.save(dummy_dataframe)
+
+    def test_http_filesystem_no_versioning(self):
+        pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
+
+        with pytest.raises(DataSetError, match=pattern):
+            JSONDataSet(
+                filepath="https://example.com/file.json", version=Version(None, None)
+            )

@@ -8,9 +8,7 @@ repos:
       rev: v2.2.3
       hooks:
           - id: trailing-whitespace
-            stages: [commit, manual]
           - id: end-of-file-fixer
-            stages: [commit, manual]
           - id: check-yaml # Checks yaml files for parseable syntax.
             exclude: "^kedro/template/"
           - id: check-json # Checks json files for parseable syntax.
@@ -19,7 +17,6 @@ repos:
           - id: check-merge-conflict # Check for files that contain merge conflict strings.
           - id: debug-statements # Check for debugger imports and py37+ `breakpoint()` calls in python source.
             exclude: "^kedro/template/"
-          - id: detect-private-key # Detects the presence of private keys
           - id: requirements-txt-fixer # Sorts entries in requirements.txt
           - id: flake8
             exclude: "^kedro/template/"
@@ -117,3 +114,8 @@ repos:
             language: system
             pass_filenames: false
             entry: python -m tools.min_version 3.6 lint-imports
+          - id: secret_scan
+            name: "Secret scan"
+            language: system
+            pass_filenames: false
+            entry: make secret-scan

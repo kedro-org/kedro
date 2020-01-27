@@ -47,6 +47,7 @@ class NetworkXLocalDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
 
     Example:
     ::
+
         >>> from kedro.contrib.io.networkx import NetworkXLocalDataSet
         >>> import networkx as nx
         >>> graph = nx.complete_graph(100)
@@ -54,6 +55,7 @@ class NetworkXLocalDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
         >>> graph_dataset.save(graph)
         >>> reloaded = graph_dataset.load()
         >>> assert nx.is_isomorphic(graph, reloaded)
+
     """
 
     def __init__(
@@ -64,6 +66,7 @@ class NetworkXLocalDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
         version: Version = None,
     ) -> None:
         """Creates a new instance of ``NetworkXLocalDataSet``.
+
         Args:
             filepath: The path to the NetworkX graph JSON file.
             load_args: Arguments passed on to ```networkx.node_link_graph``.

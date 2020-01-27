@@ -25,6 +25,7 @@ Data Sets
     kedro.io.CSVHTTPDataSet
     kedro.io.CSVS3DataSet
     kedro.io.CSVDataSet
+    kedro.io.HDFDataSet
     kedro.io.HDFLocalDataSet
     kedro.io.HDFS3DataSet
     kedro.io.JSONLocalDataSet
@@ -39,8 +40,11 @@ Data Sets
     kedro.io.PickleDataSet
     kedro.io.SQLTableDataSet
     kedro.io.SQLQueryDataSet
+    kedro.io.TextDataSet
     kedro.io.TextLocalDataSet
+    kedro.io.ExcelDataSet
     kedro.io.ExcelLocalDataSet
+    kedro.io.YAMLDataSet
 
 Additional ``AbstractDataSet`` implementations can be found in ``kedro.contrib.io``.
 

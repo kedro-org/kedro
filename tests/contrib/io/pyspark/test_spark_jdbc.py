@@ -110,7 +110,7 @@ def test_save_args(spark_jdbc_args_save_load):
 
 
 def test_except_bad_credentials(spark_jdbc_args_credentials_with_empty_password):
-    pattern = r"Credential property `password` cannot be empty\(.+\)"
+    pattern = r"Credential property `password` cannot be empty(.+\"
     with pytest.raises(DataSetError, match=pattern):
         mock_save(spark_jdbc_args_credentials_with_empty_password)
 

@@ -22,6 +22,7 @@
 * Fixed a bug in the `invalidate_cache` method of `ParquetGCSDataSet` and `CSVGCSDataSet`.
 * `--load-version` now won't break if version value contains a colon.
 * Enabled running `node`s with duplicate inputs.
+* Improved error message when empty credentials are passed into `SparkJDBCDataSet`.
 * Fixed bug that caused an empty project to fail unexpectedly with ImportError in `template/.../pipeline.py`
 * Fixed bug related to saving dataframe with categorical variables in table mode using HDFS3DataSet.
 * Fixed bug that caused unexpected behavior when using `from_nodes` and `to_nodes` in pipelines using transcoding.
@@ -33,7 +34,7 @@
 * `kedro.contrib.io.bioinformatics.sequence_dataset.py` was renamed to `kedro.contrib.io.bioinformatics.biosequence_local_dataset.py`.
 
 ## Thanks for supporting contributions
-[Jonas Kemper](https://github.com/jonasrk), [Yuhao Zhu](https://github.com/yhzqb), [Balazs Konig](https://github.com/BalazsKonigQB), [Pedro Abreu](https://github.com/PedroAbreuQB)
+[Jonas Kemper](https://github.com/jonasrk), [Yuhao Zhu](https://github.com/yhzqb), [Balazs Konig](https://github.com/BalazsKonigQB), [Pedro Abreu](https://github.com/PedroAbreuQB), [Tam-Sanh Nguyen](https://github.com/tamsanh), [Peter Zhao](https://github.com/zxpeter)
 
 # Release 0.15.5
 

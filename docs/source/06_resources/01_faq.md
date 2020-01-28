@@ -126,7 +126,7 @@ Kedro is built for Python 3.5, 3.6 and 3.7.
 
 ## How do I upgrade Kedro?
 
-We use [Semantic Versioning](http://semver.org/). The best way to safely upgrade is to check our [release notes](https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md) for any notable breaking changes.
+We use [Semantic Versioning](http://semver.org/). The best way to safely upgrade is to check our [release notes](https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md) for any notable breaking changes. Please also follow the steps in the migration guide if one is included for a particular release.
 
 Once Kedro is installed, you can check your version as follows:
 
@@ -139,6 +139,8 @@ To later upgrade Kedro to a different version, simply run:
 ```
 pip install kedro -U
 ```
+
+When migrating an existing project to a newer Kedro version, make sure you also update the `project_version` in your `ProjectContext`, which is found in `src/<package_name>/run.py`.
 
 ## What best practice should I follow to avoid leaking confidential data?
 

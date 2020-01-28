@@ -48,7 +48,8 @@ def filepath_hdf(tmp_path):
 
 
 @pytest.fixture
-def hdf_data_set(filepath_hdf, load_args, save_args):
+def hdf_data_set(filepath_hdf, load_args, save_args, mocker):
+    HDFDataSet._lock = mocker.MagicMock()
     return HDFDataSet(
         filepath=filepath_hdf, key=HDF_KEY, load_args=load_args, save_args=save_args
     )
@@ -140,6 +141,20 @@ class TestHDFDataSet:
         hdf_data_set.save(df)
         reloaded = hdf_data_set.load()
         assert_frame_equal(df, reloaded)
+
+    def test_thread_lock_usage(self, hdf_data_set, dummy_dataframe, mocker):
+        """Test thread lock usage. """
+        # pylint: disable=no-member
+        mocked_lock = HDFDataSet._lock
+        mocked_lock.assert_not_called()
+
+        hdf_data_set.save(dummy_dataframe)
+        calls = [mocker.call.__enter__(), mocker.call.__exit__(None, None, None)]
+        mocked_lock.assert_has_calls(calls)
+
+        mocked_lock.reset_mock()
+        hdf_data_set.load()
+        mocked_lock.assert_has_calls(calls)
 
 
 class TestHDFDataSetVersioned:

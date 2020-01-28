@@ -37,6 +37,8 @@ kedro.contrib.io
       kedro.contrib.io.gcs.ParquetGCSDataSet
       kedro.contrib.io.geojson.GeoJSONDataSet
       kedro.contrib.io.gcs.GBQTableDataSet
+      kedro.contrib.io.networkx.NetworkXDataSet
+      kedro.contrib.io.networkx.NetworkXLocalDataSet
 
 
    .. rubric:: DataSet Transformers

@@ -28,7 +28,7 @@
 * Fixed bug that caused unexpected behavior when using `from_nodes` and `to_nodes` in pipelines using transcoding.
 * Credentials nested in the dataset config are now also resolved correctly.
 * Bumped minimum required pandas version to 0.24.0 to make use of `pandas.DataFrame.to_numpy` (recommended alternative to `pandas.DataFrame.values`).
-* Corrected invalid python code in data catalog documentation.
+* Docs improvements.
 
 ## Breaking changes to the API
 * Existing `MatplotlibWriter` dataset in `contrib` was renamed to `MatplotlibLocalWriter`.

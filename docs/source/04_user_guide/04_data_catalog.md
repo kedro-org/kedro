@@ -274,7 +274,7 @@ from kedro.versioning import Journal
 class ProjectContext(KedroContext):
 
     ...
-    def _create_catalog(self, *args, **kwargs:
+    def _create_catalog(self, *args, **kwargs):
         catalog = super()._create_catalog(*args, **kwargs)
         profile_time = ProfileTimeTransformer()  # instantiate a built-in transformer
         catalog.add_transfomer(profile_time) # apply it to the catalog
@@ -375,7 +375,7 @@ class ProjectContext(KedroContext):
 
     ...
 
-    def _create_catalog(self, *args, **kwargs:
+    def _create_catalog(self, *args, **kwargs):
         catalog = super()._create_catalog(*args, **kwargs)
 
         profile_time = ProfileTimeTransformer()

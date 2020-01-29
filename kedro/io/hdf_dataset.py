@@ -29,7 +29,6 @@
 """``HDFDataSet`` loads/saves data from/to a hdf file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses pandas.HDFStore to handle the hdf file.
 """
-from contextlib import contextmanager
 from copy import deepcopy
 from pathlib import PurePosixPath
 from threading import Lock
@@ -70,6 +69,9 @@ class HDFDataSet(AbstractVersionedDataSet):
 
     """
 
+    # _lock is a class attribute that will be shared across all the instances.
+    # It is used to make dataset safe for threads.
+    _lock = Lock()
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
@@ -83,7 +85,6 @@ class HDFDataSet(AbstractVersionedDataSet):
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
-        lock: Lock = None,
     ) -> None:
         """Creates a new instance of ``HDFDataSet`` pointing to a concrete hdf file
         on a specific filesystem.
@@ -109,14 +110,11 @@ class HDFDataSet(AbstractVersionedDataSet):
             credentials: Credentials required to get access to the underlying filesystem.
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Extra arguments to pass into underlying filesystem class.
-                E.g. for ``GCSFileSystem`` class: `{"project": "my-project", ...}`.
-            lock: threading.Lock instance that is used to make `load` and `save`
-                operations thread-safe.
+                E.g. for ``GCSFileSystem`` class: `{"project": "my-project", ...}`
         """
         _fs_args = deepcopy(fs_args) or {}
         _credentials = deepcopy(credentials) or {}
         self._key = key
-        self._lock = lock
 
         protocol, path = get_protocol_and_path(filepath, version)
 
@@ -154,7 +152,7 @@ class HDFDataSet(AbstractVersionedDataSet):
         with self._fs.open(load_path, mode="rb") as fs_file:
             binary_data = fs_file.read()
 
-        with _optional_lock(self._lock):
+        with HDFDataSet._lock:
             # Set driver_core_backing_store to False to disable saving
             # contents of the in-memory h5file to disk
             with pd.HDFStore(
@@ -170,7 +168,7 @@ class HDFDataSet(AbstractVersionedDataSet):
     def _save(self, data: pd.DataFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
-        with _optional_lock(self._lock):
+        with HDFDataSet._lock:
             with pd.HDFStore(
                 "in-memory-save-file",
                 mode="w",
@@ -202,12 +200,3 @@ class HDFDataSet(AbstractVersionedDataSet):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
-
-
-@contextmanager
-def _optional_lock(lock):
-    if lock:
-        with lock:
-            yield
-    else:
-        yield

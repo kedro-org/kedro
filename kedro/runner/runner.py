@@ -31,7 +31,6 @@ implementations.
 
 import logging
 from abc import ABC, abstractmethod
-from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, Iterable
 
 from kedro.io import AbstractDataSet, DataCatalog
@@ -178,8 +177,8 @@ def run_node(node: Node, catalog: DataCatalog) -> Node:
         The node argument.
 
     """
-    with ThreadPoolExecutor() as pool:
-        inputs = dict(pool.map(lambda name: (name, catalog.load(name)), node.inputs))
-        outputs = node.run(inputs)
-        list(pool.map(lambda item: catalog.save(*item), outputs.items()))  # type: ignore
+    inputs = {name: catalog.load(name) for name in node.inputs}
+    outputs = node.run(inputs)
+    for name, data in outputs.items():
+        catalog.save(name, data)
     return node

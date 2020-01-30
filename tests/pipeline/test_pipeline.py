@@ -814,7 +814,6 @@ def test_pipeline_to_json(input_data):
 
 
 class TestTransformPipeline:
-    # pylint: disable=protected-access
     def test_transform_dataset_names(self):
         """
         Rename some datasets, test string, list and dict formats.
@@ -879,6 +878,33 @@ class TestTransformPipeline:
         )
         assert pipeline.nodes[0]._inputs == ["C_new", "PREFIX.D"]
         assert pipeline.nodes[0]._outputs == ["E_new", "PREFIX.F"]
+
+    def test_transform_params_prefix_and_parameters(self):
+        """
+        Test that transform should skip `params:` and `parameters`: str, list and dict.
+        """
+        raw_pipeline = Pipeline(
+            [
+                node(identity, "parameters", "params:B", name="node1"),
+                node(biconcat, ["params:C", "D"], ["parameters", "F"], name="node2"),
+                node(
+                    biconcat,
+                    {"input1": "params:H", "input2": "parameters"},
+                    {"K": "L"},
+                    name="node3",
+                ),
+            ]
+        )
+        pipeline = raw_pipeline.transform(prefix="PREFIX")
+        nodes = list(sorted(pipeline.nodes))
+        assert nodes[0]._inputs == "parameters"
+        assert nodes[0]._outputs == "params:B"
+
+        assert nodes[1]._inputs == ["params:C", "PREFIX.D"]
+        assert nodes[1]._outputs == ["parameters", "PREFIX.F"]
+
+        assert nodes[2]._inputs == {"input1": "params:H", "input2": "parameters"}
+        assert nodes[2]._outputs == {"K": "PREFIX.L"}
 
     def test_dataset_transcoding(self):
         raw_pipeline = Pipeline([node(biconcat, ["C@pandas", "D"], ["E@spark", "F"])])

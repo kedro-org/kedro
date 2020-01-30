@@ -306,6 +306,13 @@ final_pipeline3 = cook_pipeline.transform(datasets={"grilled_meat": "new_name"})
      lunch_pipeline.transform(datasets={"food": "new_name")
 ```
 
+Note that `Pipeline.transform()` will skip prefixing when node inputs and outputs contain parameter references (`params:` and `parameters`).
+Example:
+```python
+transformed_pipeline = Pipeline([node(node_func, ["input", "params:x"], None)]).transform(prefix="new")
+# `transformed_pipeline` will be `Pipeline([node(node_func, ["new.input", "params:x"], None)])`
+```
+
 ## Using a modular pipeline twice
 Consider the example:
 

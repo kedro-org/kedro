@@ -44,6 +44,7 @@ import kedro
 from kedro.pipeline.node import Node, _to_list
 
 TRANSCODING_SEPARATOR = "@"
+PARAMETER_KEYWORDS = ("params:", "parameters")
 
 
 def _transcode_split(element: str) -> Tuple[str, str]:
@@ -768,7 +769,8 @@ class Pipeline:
             datasets: A map of the existing dataset name to the new one.
                 Both input and output datasets can be replaced this way.
             prefix: A prefix to give to all dataset names,
-                except those explicitly named with the `datasets` parameter.
+                except those explicitly named with the `datasets` parameter,
+                and parameter references (`params:` and `parameters`).
 
         Raises:
             ValueError: invalid dataset names are given.
@@ -782,6 +784,8 @@ class Pipeline:
         used_dataset_names = set()
 
         def _prefix(name):
+            if any(param in name for param in PARAMETER_KEYWORDS):
+                return name
             return "{}.{}".format(prefix, name) if prefix else name
 
         def _map_and_prefix(name):

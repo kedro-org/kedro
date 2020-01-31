@@ -373,7 +373,7 @@ CONSISTENCY_WARNING = (
 
 def parse_dataset_definition(
     config: Dict[str, Any], load_version: str = None, save_version: str = None
-) -> Tuple[Type[AbstractDataSet], Dict]:
+) -> Tuple[Type[AbstractDataSet], Dict[str, Any]]:
     """Parse and instantiate a dataset class using the configuration provided.
 
     Args:
@@ -409,6 +409,7 @@ def parse_dataset_definition(
             )
         except AttributeError:
             raise DataSetError("Class `{}` not found.".format(class_obj))
+
     if not issubclass(class_obj, AbstractDataSet):
         raise DataSetError(
             "DataSet type `{}.{}` is invalid: all data set types must extend "

@@ -13,6 +13,7 @@
   - `MatplotlibWriter` dataset in `contrib` for saving matplotlib objects to image file(s) that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
   - `NetworkXDataSet` dataset in `contrib` for working with graphs (JSON format) via NetworkX that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
   - `BioSequenceDataSet` dataset in `contrib` for working with bio-sequence objects that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `IncrementalDataSet` dataset, which inherits from `PartitionedDataSet` and also remembers the last processed partition.
 * Enabled loading a particular version of a dataset in Jupyter Notebooks and ipython, using `catalog.load("dataset_name", version="<2019-12-13T15.08.09.255Z>")`.
 * Added http(s) protocol support for `JSONDataSet`.
 * Added property `run_id` on `ProjectContext`, used for versioning using the [`Journal`](https://kedro.readthedocs.io/en/latest/04_user_guide/13_journal.html). To customise your journal `run_id` you can override the private method `_get_run_id()`.
@@ -23,12 +24,14 @@
 * `--load-version` now won't break if version value contains a colon.
 * Enabled running `node`s with duplicate inputs.
 * Improved error message when empty credentials are passed into `SparkJDBCDataSet`.
-* Fixed bug that caused an empty project to fail unexpectedly with ImportError in `template/.../pipeline.py`
+* Fixed bug that caused an empty project to fail unexpectedly with ImportError in `template/.../pipeline.py`.
 * Fixed bug related to saving dataframe with categorical variables in table mode using HDFS3DataSet.
 * Fixed bug that caused unexpected behavior when using `from_nodes` and `to_nodes` in pipelines using transcoding.
 * Credentials nested in the dataset config are now also resolved correctly.
 * Bumped minimum required pandas version to 0.24.0 to make use of `pandas.DataFrame.to_numpy` (recommended alternative to `pandas.DataFrame.values`).
 * `Pipeline.transform` skips modifying node inputs/outputs containing `params:` or `parameters` keywords.
+* Support for `dataset_credentials` key in the credentials for `PartitionedDataSet` is now deprecated. The dataset credentials should be specified explicitly inside the dataset config.
+* Datasets can have a new `confirm` function which is called after a successful node function execution if the node contains `confirms` argument with such dataset name.
 
 ## Breaking changes to the API
 * Existing `MatplotlibWriter` dataset in `contrib` was renamed to `MatplotlibLocalWriter`.
@@ -42,7 +45,7 @@
 
 ## Major features and improvements
 * New CLI commands and command flags:
-  - Load mulitple `kedro run` CLI flags from a configuration file with the `--config` flag (e.g. `kedro run --config run_config.yml`)
+  - Load multiple `kedro run` CLI flags from a configuration file with the `--config` flag (e.g. `kedro run --config run_config.yml`)
   - Run parametrised pipeline runs with the `--params` flag (e.g. `kedro run --params param1:value1,param2:value2`).
   - Lint your project code using the `kedro lint` command, your project is linted with [`black`](https://github.com/psf/black) (Python 3.6+), [`flake8`](https://gitlab.com/pycqa/flake8) and [`isort`](https://github.com/timothycrosley/isort).
 * Load specific environments with Jupyter notebooks using `KEDRO_ENV` which will globally set `run`, `jupyter notebook` and `jupyter lab` commands using environment variables.

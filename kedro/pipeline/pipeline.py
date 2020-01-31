@@ -109,6 +109,14 @@ class OutputNotUniqueError(Exception):
     pass
 
 
+class ConfirmNotUniqueError(Exception):
+    """Raised when two or more nodes that are part of the same pipeline
+    attempt to confirm the same dataset.
+    """
+
+    pass
+
+
 class Pipeline:
     """A ``Pipeline`` defined as a collection of ``Node`` objects. This class
     treats nodes as part of a graph representation and provides inputs,
@@ -145,6 +153,9 @@ class Pipeline:
                 possible due to the existence of a circular dependency.
             OutputNotUniqueError:
                 When multiple ``Node`` instances produce the same output.
+            ConfirmNotUniqueError:
+                When multiple ``Node`` instances attempt to confirm the same
+                dataset.
         Example:
         ::
 
@@ -193,6 +204,7 @@ class Pipeline:
         self._name = name
         self._nodes_by_name = {node.name: node for node in nodes}
         _validate_unique_outputs(nodes)
+        _validate_unique_confirms(nodes)
 
         # input -> nodes with input
         self._nodes_by_input = defaultdict(set)  # type: Dict[str, Set[Node]]
@@ -861,16 +873,24 @@ def _validate_duplicate_nodes(nodes: List[Node]):
 
 
 def _validate_unique_outputs(nodes: List[Node]) -> None:
-    outputs_list = list(chain.from_iterable(node.outputs for node in nodes))
-    outputs_list = [_get_transcode_compatible_name(o) for o in outputs_list]
-    counter_list = Counter(outputs_list)
-    counter_set = Counter(set(outputs_list))
-    diff = counter_list - counter_set
-    if diff:
+    outputs = chain.from_iterable(node.outputs for node in nodes)
+    outputs = map(_get_transcode_compatible_name, outputs)
+    duplicates = [key for key, value in Counter(outputs).items() if value > 1]
+    if duplicates:
         raise OutputNotUniqueError(
-            "Output(s) {} are returned by "
-            "more than one nodes. Node "
-            "outputs must be unique.".format(sorted(diff.keys()))
+            "Output(s) {} are returned by more than one nodes. Node "
+            "outputs must be unique.".format(sorted(duplicates))
+        )
+
+
+def _validate_unique_confirms(nodes: List[Node]) -> None:
+    confirms = chain.from_iterable(node.confirms for node in nodes)
+    confirms = map(_get_transcode_compatible_name, confirms)
+    duplicates = [key for key, value in Counter(confirms).items() if value > 1]
+    if duplicates:
+        raise ConfirmNotUniqueError(
+            "{} datasets are confirmed by more than one node. Node "
+            "confirms must be unique.".format(sorted(duplicates))
         )
 
 

@@ -35,6 +35,7 @@ Data Sets
     kedro.io.ParquetDataSet
     kedro.io.ParquetLocalDataSet
     kedro.io.PartitionedDataSet
+    kedro.io.IncrementalDataSet
     kedro.io.PickleLocalDataSet
     kedro.io.PickleS3DataSet
     kedro.io.PickleDataSet

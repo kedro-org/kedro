@@ -41,6 +41,7 @@ from kedro.io.core import (
     AbstractDataSet,
     AbstractVersionedDataSet,
     DataSetAlreadyExistsError,
+    DataSetError,
     DataSetNotFoundError,
     Version,
     generate_timestamp,
@@ -622,3 +623,20 @@ class DataCatalog:
             other._default_transformers,  # pylint: disable=protected-access
             other._journal,  # pylint: disable=protected-access
         )
+
+    def confirm(self, name: str) -> None:
+        """Confirm a DataSet by its name"""
+        self._logger.info("Confirming DataSet '%s'", name)
+
+        if name not in self._data_sets:
+            raise DataSetNotFoundError(
+                "DataSet '{}' not found in the catalog".format(name)
+            )
+        data_set = self._data_sets[name]
+
+        if hasattr(data_set, "confirm"):
+            data_set.confirm()  # type: ignore
+        else:
+            raise DataSetError(
+                "DataSet '{}' does not have 'confirm' method".format(name)
+            )

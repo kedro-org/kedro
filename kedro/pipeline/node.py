@@ -51,7 +51,8 @@ class Node:
         *,
         name: str = None,
         tags: Union[str, Iterable[str]] = None,
-        decorators: Iterable[Callable] = None
+        decorators: Iterable[Callable] = None,
+        confirms: Union[str, List[str]] = None
     ):
         """Create a node in the pipeline by providing a function to be called
         along with variable names for inputs and/or outputs.
@@ -73,6 +74,11 @@ class Node:
                 logs or any other visualisations.
             tags: Optional set of tags to be applied to the node.
             decorators: Optional list of decorators to be applied to the node.
+            confirms: Optional name or the list of the names of the datasets
+                that should be confirmed. This will result in calling
+                ``confirm()`` method of the corresponding data set instance.
+                Specified dataset names do not necessarily need to be present
+                in the node ``inputs`` or ``outputs``.
 
         Raises:
             ValueError: Raised in the following cases:
@@ -123,6 +129,7 @@ class Node:
 
         self._validate_unique_outputs()
         self._validate_inputs_dif_than_outputs()
+        self._confirms = confirms
 
     def _copy(self, **overwrite_params):
         """
@@ -135,6 +142,7 @@ class Node:
             "name": self._name,
             "tags": self._tags,
             "decorators": self._decorators,
+            "confirms": self._confirms,
         }
         params.update(overwrite_params)
         return Node(**params)
@@ -270,6 +278,15 @@ class Node:
 
         """
         return _to_list(self._outputs)
+
+    @property
+    def confirms(self) -> List[str]:
+        """Return dataset names to confirm as a list.
+
+        Returns:
+            Dataset names to confirm as a list.
+        """
+        return _to_list(self._confirms)
 
     @property
     def _decorated_func(self):
@@ -570,7 +587,8 @@ def node(  # pylint: disable=missing-type-doc
     outputs: Union[None, str, List[str], Dict[str, str]],
     *,
     name: str = None,
-    tags: Iterable[str] = None
+    tags: Iterable[str] = None,
+    confirms: Union[str, List[str]] = None
 ) -> Node:
     """Create a node in the pipeline by providing a function to be called
     along with variable names for inputs and/or outputs.
@@ -591,6 +609,11 @@ def node(  # pylint: disable=missing-type-doc
         name: Optional node name to be used when displaying the node in logs or
             any other visualisations.
         tags: Optional set of tags to be applied to the node.
+        confirms: Optional name or the list of the names of the datasets
+            that should be confirmed. This will result in calling ``confirm()``
+            method of the corresponding data set instance. Specified dataset
+            names do not necessarily need to be present in the node ``inputs``
+            or ``outputs``.
 
     Returns:
         A Node object with mapped inputs, outputs and function.
@@ -621,7 +644,7 @@ def node(  # pylint: disable=missing-type-doc
         >>>          ['train_boats2017', 'test_boats2017'])
         >>> ]
     """
-    return Node(func, inputs, outputs, name=name, tags=tags)
+    return Node(func, inputs, outputs, name=name, tags=tags, confirms=confirms)
 
 
 def _dict_inputs_to_list(func: Callable[[Any], Any], inputs: Dict[str, str]):

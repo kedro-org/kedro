@@ -181,4 +181,6 @@ def run_node(node: Node, catalog: DataCatalog) -> Node:
     outputs = node.run(inputs)
     for name, data in outputs.items():
         catalog.save(name, data)
+    for name in node.confirms:
+        catalog.confirm(name)
     return node

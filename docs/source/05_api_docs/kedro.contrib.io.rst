@@ -30,6 +30,7 @@ kedro.contrib.io
       kedro.contrib.io.matplotlib.MatplotlibS3Writer
       kedro.contrib.io.parquet.ParquetS3DataSet
       kedro.contrib.io.pyspark.SparkDataSet
+      kedro.contrib.io.pyspark.SparkHiveDataSet
       kedro.contrib.io.pyspark.SparkJDBCDataSet
       kedro.contrib.io.yaml_local.YAMLLocalDataSet
       kedro.contrib.io.gcs.CSVGCSDataSet

@@ -1,21 +1,37 @@
+import os
 from uuid import uuid4
 from typing import List
+
+from kedro.io import JSONLocalDataSet
+from kedro.io.core import DataSetError
+
+NODE_STATE_FILE_PATH = os.getcwd() + '/data/01_raw/node_state.json'
 
 
 class IdempotentStateStorage:
 
     def __init__(self, state=None):
-        self.state = state if state else {
-            # Keyed by node names, values are the current node's key
-            # and the input node keys.
-            # {
-            #   "key": "asdf-asdf-sadf",
-            #   "inputs": {
-            #       "node1": "qwer-qwer-qwer",
-            #       "node2": "zxcv-zxcv-zxcv"
-            #   }
-            # }
-        }
+        self.state = state if state else self._load_state()
+
+    def _load_state(self):
+        try:
+            initial_state = JSONLocalDataSet(filepath=NODE_STATE_FILE_PATH).load()
+        except DataSetError:
+            initial_state = {
+                # Keyed by node names, values are the current node's key
+                # and the input node keys.
+                # {
+                #   "key": "asdf-asdf-sadf",
+                #   "inputs": {
+                #       "node1": "qwer-qwer-qwer",
+                #       "node2": "zxcv-zxcv-zxcv"
+                #   }
+                # }
+            }
+        return initial_state
+
+    def save_state(self):
+        JSONLocalDataSet(filepath=NODE_STATE_FILE_PATH).save(self.state)
 
     @staticmethod
     def generate_key():

@@ -1,7 +1,8 @@
 import pytest
 import random
+import os
 
-from kedro.contrib.idempotent.idempotent_state_storage import IdempotentStateStorage
+from kedro.contrib.idempotent.idempotent_state_storage import IdempotentStateStorage, NODE_STATE_FILE_PATH
 
 
 @pytest.fixture
@@ -59,3 +60,18 @@ class TestIdempotentStateStorage:
         updated_state = storage.update_key('node3', ['node2'])
         assert updated_state['node3']['inputs']['node2'] == updated_state['node2']['key']
         assert not updated_state['node3']['inputs'].get('node1', None)
+
+
+class TestIdempotentStateStorageIO:
+    def test_initial_state(self):
+        os.remove(NODE_STATE_FILE_PATH)
+        storage = IdempotentStateStorage()
+        assert storage.state == {}
+
+    def test_state_and_load(self):
+        initial_state = state_storage_no_update()
+        storage = IdempotentStateStorage(initial_state)
+        storage.save_state()
+
+        storage = IdempotentStateStorage()
+        assert storage.state == initial_state

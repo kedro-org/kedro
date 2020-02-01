@@ -1,5 +1,4 @@
-import os
-from datetime import datetime
+from uuid import uuid4
 from typing import List
 
 
@@ -20,14 +19,15 @@ class IdempotentStateStorage:
 
     @staticmethod
     def generate_key():
-        return datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+        return str(uuid4())
 
     def update_key(self, node: str, inputs: List[str]):
         self.state[node]['key'] = IdempotentStateStorage.generate_key()
-        self.state[node]['inputs'] = dict([
-            self.state.get(target_input, {}).get('key')
+        self.state[node]['inputs'] = {
+            target_input: self.state.get(target_input, {}).get('key')
             for target_input in inputs
-        ])
+        }
+        return self.state
 
     def node_inputs_have_changed(self, node, inputs: List[str]):
         expect_input_items = self.state[node]['inputs'].items()

@@ -16,5 +16,5 @@ class IdempotentNode(Node):
         return ret
 
     @staticmethod
-    def generate_idempotency_id(name):
+    def generate_idempotency_id():
         return str(uuid4())

@@ -1,2 +1,11 @@
 [tool.black]
-exclude="/template/"
+exclude = "/template/"
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+line_length = 88
+known_first_party = ["features", "kedro", "tests"]
+default_section = "THIRDPARTY"

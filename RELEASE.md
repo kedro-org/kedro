@@ -32,6 +32,7 @@
 * Fixed bug that caused unexpected behavior when using `from_nodes` and `to_nodes` in pipelines using transcoding.
 * Credentials nested in the dataset config are now also resolved correctly.
 * Bumped minimum required pandas version to 0.24.0 to make use of `pandas.DataFrame.to_numpy` (recommended alternative to `pandas.DataFrame.values`).
+* Docs improvements.
 * `Pipeline.transform` skips modifying node inputs/outputs containing `params:` or `parameters` keywords.
 * Support for `dataset_credentials` key in the credentials for `PartitionedDataSet` is now deprecated. The dataset credentials should be specified explicitly inside the dataset config.
 * Datasets can have a new `confirm` function which is called after a successful node function execution if the node contains `confirms` argument with such dataset name.

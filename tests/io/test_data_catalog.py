@@ -430,7 +430,7 @@ class TestDataCatalogFromConfig:
         catalog = {
             "ds_to_confirm": {
                 "type": "IncrementalDataSet",
-                "dataset": "CSVDataSet",
+                "dataset": "kedro.extras.datasets.pandas.CSVDataSet",
                 "path": str(tmp_path),
             }
         }

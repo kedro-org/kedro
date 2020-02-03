@@ -30,5 +30,4 @@
 in JSON format using ``NetworkX``.
 """
 
-from .networkx_dataset import NetworkXDataSet  # NOQA
 from .networkx_local import NetworkXLocalDataSet  # NOQA

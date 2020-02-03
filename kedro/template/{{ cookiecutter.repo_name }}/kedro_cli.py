@@ -201,7 +201,7 @@ def cli():
     type=str,
     default=None,
     multiple=False,
-    envvar="KEDRO_ENV",
+    envvar=KEDRO_ENV_VAR,
     help=ENV_ARG_HELP,
 )
 @click.option("--tag", "-t", type=str, multiple=True, help=TAG_ARG_HELP)

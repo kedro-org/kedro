@@ -648,3 +648,12 @@ def get_filepath_str(path: PurePath, protocol: str) -> str:
     if protocol in HTTP_PROTOCOLS:
         path = "".join((protocol, PROTOCOL_DELIMITER, path))
     return path
+
+
+def validate_on_forbidden_chars(**kwargs):
+    """Validate that string values do not include white-spaces or ;"""
+    for key, value in kwargs.items():
+        if " " in value or ";" in value:
+            raise DataSetError(
+                "Neither white-space nor semicolon are allowed in `{}`.".format(key)
+            )

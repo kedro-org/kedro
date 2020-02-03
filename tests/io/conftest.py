@@ -46,13 +46,3 @@ def load_version(request):
 @fixture(params=[None])
 def save_version(request):
     return request.param or generate_timestamp()
-
-
-@fixture(params=[None])
-def load_args(request):
-    return request.param
-
-
-@fixture(params=[None])
-def save_args(request):
-    return request.param

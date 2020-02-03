@@ -19,3 +19,4 @@ kedro
   kedro.contrib
   kedro.cli
   kedro.versioning
+  kedro.extras.datasets

@@ -2,22 +2,25 @@
 
 ## Major features and improvements
 * Added the following datasets:
-  - `DaskParquetDataSet` in `kedro.contrib.io.dask` for handling parquet datasets using Dask dataframes.
-  - `PickleDataSet` dataset for working with Pickle files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
-  - `CSVDataSet` dataset for working with CSV files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
-  - `ParquetDataSet` dataset for working with Parquet files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
-  - `TextDataSet` dataset for working with text files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
-  - `ExcelDataSet` dataset for working with Excel files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
-  - `HDFDataSet` dataset for working with hdf files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
-  - `YAMLDataSet` dataset for working with yaml files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
-  - `MatplotlibWriter` dataset in `contrib` for saving matplotlib objects to image file(s) that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
-  - `NetworkXDataSet` dataset in `contrib` for working with graphs (JSON format) via NetworkX that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
-  - `BioSequenceDataSet` dataset in `contrib` for working with bio-sequence objects that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `ParquetDataSet` in `kedro.extras.datasets.dask` for handling parquet datasets using Dask dataframes.
+  - `PickleDataSet` dataset in `kedro.extras.datasets.pickle` for working with Pickle files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `CSVDataSet` dataset in `kedro.extras.datasets.pandas` for working with CSV files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `ParquetDataSet` dataset in `kedro.extras.datasets.pandas` for working with Parquet files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `TextDataSet` dataset in `kedro.extras.datasets.text` for working with text files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `ExcelDataSet` dataset in `kedro.extras.datasets.pandas` for working with Excel files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `HDFDataSet` dataset in `kedro.extras.datasets.pandas` for working with hdf files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `YAMLDataSet` dataset in `kedro.extras.datasets.yaml` for working with yaml files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `MatplotlibWriter` dataset in `kedro.extras.datasets.matplotlib` for saving matplotlib objects to image file(s) that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `NetworkXDataSet` dataset in `kedro.extras.datasets.networkx` for working with graphs (JSON format) via NetworkX that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `BioSequenceDataSet` dataset in `kedro.extras.datasets.biosequence` for working with bio-sequence objects that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `GBQTableDataSet` dataset in `kedro.extras.datasets.pandas` for working with Google BigQuery.
   - `IncrementalDataSet` dataset, which inherits from `PartitionedDataSet` and also remembers the last processed partition.
 * Enabled loading a particular version of a dataset in Jupyter Notebooks and ipython, using `catalog.load("dataset_name", version="<2019-12-13T15.08.09.255Z>")`.
 * Added http(s) protocol support for `JSONDataSet`.
 * Added property `run_id` on `ProjectContext`, used for versioning using the [`Journal`](https://kedro.readthedocs.io/en/latest/04_user_guide/13_journal.html). To customise your journal `run_id` you can override the private method `_get_run_id()`.
 * Added the ability to install all optional kedro dependencies via `pip install "kedro[all]"`.
+* `JSONDataSet`, `CSVBlobDataSet`, `JSONBlobDataSet`, `SQLQueryDataSet` and `SQLTableDataSet` datasets copied to `kedro.extras.datasets.pandas`.
+* `SparkDataSet`, `SparkHiveDataSet` and `SparkJDBCDataSet` datasets copied to `kedro.extras.datasets.spark`.
 
 ## Bug fixes and other changes
 * Fixed a bug in the `invalidate_cache` method of `ParquetGCSDataSet` and `CSVGCSDataSet`.

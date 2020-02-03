@@ -25,6 +25,7 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import logging
 import re
 from pathlib import Path
 
@@ -41,6 +42,7 @@ from kedro.io import (
     ParquetLocalDataSet,
     PartitionedDataSet,
 )
+from kedro.io.data_catalog import CREDENTIALS_KEY
 
 
 @pytest.fixture
@@ -173,24 +175,13 @@ class TestPartitionedDataSetLocal:
     @pytest.mark.parametrize(
         "credentials,expected_pds_creds,expected_dataset_creds",
         [
+            ({"cred": "common"}, {"cred": "common"}, {"cred": "common"}),
             (
-                {"cred_key1": "cred_value1"},
-                {"cred_key1": "cred_value1"},
-                {"cred_key1": "cred_value1"},
+                {"cred": "common", "dataset_credentials": {"ds": "only"}},
+                {"cred": "common"},
+                {"ds": "only"},
             ),
-            (
-                {
-                    "cred_key1": "cred_value1",
-                    "dataset_credentials": {"cred_key2": "cred_value2"},
-                },
-                {"cred_key1": "cred_value1"},
-                {"cred_key2": "cred_value2"},
-            ),
-            (
-                {"dataset_credentials": {"cred_key2": "cred_value2"}},
-                {},
-                {"cred_key2": "cred_value2"},
-            ),
+            ({"dataset_credentials": {"ds": "only"}}, {}, {"ds": "only"}),
             (
                 {"cred_key1": "cred_value1", "dataset_credentials": None},
                 {"cred_key1": "cred_value1"},
@@ -208,7 +199,9 @@ class TestPartitionedDataSetLocal:
         assert mocked_filesystem.call_count == 2
         mocked_filesystem.assert_called_with("file", **expected_pds_creds)
         if expected_dataset_creds:
-            assert pds._dataset_config["credentials"] == expected_dataset_creds
+            assert pds._dataset_config[CREDENTIALS_KEY] == expected_dataset_creds
+        else:
+            assert CREDENTIALS_KEY not in pds._dataset_config
 
         str_repr = str(pds)
 
@@ -305,6 +298,71 @@ class TestPartitionedDataSetLocal:
         )
         with pytest.warns(UserWarning, match=re.escape(pattern)):
             PartitionedDataSet(**pds_config)
+
+    def test_credentials_log_warning(self, caplog):
+        """Check that the warning is logged if the dataset credentials will overwrite
+        the top-level ones"""
+        pds = PartitionedDataSet(
+            path=str(Path.cwd()),
+            dataset={"type": CSVLocalDataSet, "credentials": {"secret": "dataset"}},
+            credentials={"secret": "global"},
+        )
+        log_message = (
+            "Top-level credentials will not propagate into the underlying dataset "
+            "since credentials were explicitly defined in the dataset config."
+        )
+        assert caplog.record_tuples == [("kedro.io.core", logging.WARNING, log_message)]
+        assert pds._dataset_config["credentials"] == {"secret": "dataset"}
+
+    @pytest.mark.parametrize(
+        "pds_config,expected_dataset_creds",
+        [
+            (
+                {
+                    "dataset": "CSVLocalDataSet",
+                    "credentials": {
+                        "secret": "global",
+                        "dataset_credentials": {"secret": "dataset"},
+                    },
+                },
+                {"secret": "dataset"},
+            ),
+            (
+                {
+                    "dataset": {
+                        "type": CSVLocalDataSet,
+                        "credentials": {"secret": "expected"},
+                    },
+                    "credentials": {
+                        "secret": "global",
+                        "dataset_credentials": {"secret": "other"},
+                    },
+                },
+                {"secret": "expected"},
+            ),
+            (
+                {
+                    "dataset": {"type": CSVLocalDataSet, "credentials": None},
+                    "credentials": {
+                        "secret": "global",
+                        "dataset_credentials": {"secret": "other"},
+                    },
+                },
+                None,
+            ),
+        ],
+    )
+    def test_dataset_creds_deprecated(self, pds_config, expected_dataset_creds):
+        """Check that the deprecation warning is emitted if dataset credentials
+        were specified the old way (using `dataset_credentials` key)"""
+        pattern = (
+            "Support for `dataset_credentials` key in the credentials is now "
+            "deprecated and will be removed in the next version. Please specify "
+            "the dataset credentials explicitly inside the dataset config."
+        )
+        with pytest.warns(DeprecationWarning, match=re.escape(pattern)):
+            pds = PartitionedDataSet(path=str(Path.cwd()), **pds_config)
+        assert pds._dataset_config["credentials"] == expected_dataset_creds
 
 
 BUCKET_NAME = "fake_bucket_name"
@@ -406,15 +464,3 @@ class TestPartitionedDataSetS3:
             assert "dataset_config" in str(pds)
         else:
             assert "dataset_config" not in str(pds)
-
-    @pytest.mark.parametrize("credentials", ["foo", [1, 2, 3], {"bar": "baz"}])
-    def test_credentials_not_allowed_in_dataset_config(self, credentials):
-        dataset = {"type": "CSVS3DataSet", "credentials": credentials}
-        pattern = (
-            "Credentials for the underlying dataset must not be "
-            "specified explicitly in dataset configuration"
-        )
-        with pytest.raises(DataSetError, match=pattern) as exc_info:
-            PartitionedDataSet("s3://any", dataset)
-        error_message = str(exc_info.value)
-        assert "PartitionedDataSet" in error_message

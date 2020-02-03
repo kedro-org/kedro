@@ -25,6 +25,7 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import logging
 import re
 from pathlib import Path
 from typing import Any
@@ -282,6 +283,29 @@ class TestDataCatalog:
         with pytest.raises(AttributeError, match=pattern):
             data_catalog_from_config.datasets.cars = None
 
+    def test_confirm(self, mocker, caplog):
+        """Confirm the dataset"""
+        mock_ds = mocker.Mock()
+        data_catalog = DataCatalog(data_sets={"mocked": mock_ds})
+        data_catalog.confirm("mocked")
+        mock_ds.confirm.assert_called_once_with()
+        assert caplog.record_tuples == [
+            ("kedro.io.data_catalog", logging.INFO, "Confirming DataSet 'mocked'")
+        ]
+
+    @pytest.mark.parametrize(
+        "dataset_name,error_pattern",
+        [
+            ("missing", "DataSet 'missing' not found in the catalog"),
+            ("test", "DataSet 'test' does not have 'confirm' method"),
+        ],
+    )
+    def test_bad_confirm(self, data_catalog, dataset_name, error_pattern):
+        """Test confirming a non existent dataset or one that
+        does not have `confirm` method"""
+        with pytest.raises(DataSetError, match=re.escape(error_pattern)):
+            data_catalog.confirm(dataset_name)
+
 
 class TestDataCatalogFromConfig:
     def test_from_sane_config(self, data_catalog_from_config, dummy_dataframe):
@@ -399,6 +423,41 @@ class TestDataCatalogFromConfig:
         pattern = r"Failed to instantiate DataSet \'bad\' of type `.*BadDataSet`"
         with pytest.raises(DataSetError, match=pattern):
             DataCatalog.from_config(bad_config, None)
+
+    def test_confirm(self, tmp_path, caplog, mocker):
+        """Confirm the dataset"""
+        mock_confirm = mocker.patch("kedro.io.IncrementalDataSet.confirm")
+        catalog = {
+            "ds_to_confirm": {
+                "type": "IncrementalDataSet",
+                "dataset": "CSVDataSet",
+                "path": str(tmp_path),
+            }
+        }
+        data_catalog = DataCatalog.from_config(catalog=catalog)
+        data_catalog.confirm("ds_to_confirm")
+        assert caplog.record_tuples == [
+            (
+                "kedro.io.data_catalog",
+                logging.INFO,
+                "Confirming DataSet 'ds_to_confirm'",
+            )
+        ]
+        mock_confirm.assert_called_once_with()
+
+    @pytest.mark.parametrize(
+        "dataset_name,pattern",
+        [
+            ("missing", "DataSet 'missing' not found in the catalog"),
+            ("boats", "DataSet 'boats' does not have 'confirm' method"),
+        ],
+    )
+    def test_bad_confirm(self, sane_config, dataset_name, pattern):
+        """Test confirming non existent dataset or the one that
+        does not have `confirm` method"""
+        data_catalog = DataCatalog.from_config(**sane_config)
+        with pytest.raises(DataSetError, match=re.escape(pattern)):
+            data_catalog.confirm(dataset_name)
 
 
 class TestDataCatalogVersioned:

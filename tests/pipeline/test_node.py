@@ -183,6 +183,20 @@ class TestValidNode:
         )
         assert dummy_node.outputs == ["output2", "output1", "last node"]
 
+    @pytest.mark.parametrize(
+        "confirms_arg,expected",
+        [
+            (None, []),
+            ([], []),
+            ("foo", ["foo"]),
+            (["foo"], ["foo"]),
+            (["foo", "bar"], ["foo", "bar"]),
+        ],
+    )
+    def test_confirms(self, confirms_arg, expected):
+        dummy_node = node(identity, "input", None, confirms=confirms_arg)
+        assert dummy_node.confirms == expected
+
 
 class TestNodeComparisons:
     def test_node_equals(self):

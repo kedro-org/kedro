@@ -31,6 +31,7 @@
 from .csv_blob_dataset import CSVBlobDataSet  # NOQA
 from .csv_dataset import CSVDataSet  # NOQA
 from .excel_dataset import ExcelDataSet  # NOQA
+from .feather_dataset import FeatherDataSet  # NOQA
 from .gbq_dataset import GBQTableDataSet  # NOQA
 from .hdf_dataset import HDFDataSet  # NOQA
 from .json_blob_dataset import JSONBlobDataSet  # NOQA

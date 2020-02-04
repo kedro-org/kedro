@@ -14,6 +14,7 @@
   - `NetworkXDataSet` dataset in `kedro.extras.datasets.networkx` for working with graphs (JSON format) via NetworkX that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
   - `BioSequenceDataSet` dataset in `kedro.extras.datasets.biosequence` for working with bio-sequence objects that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
   - `GBQTableDataSet` dataset in `kedro.extras.datasets.pandas` for working with Google BigQuery.
+  - `FeatherDataSet` dataset in `kedro.extras.datasets.pandas` for working with feather files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
   - `IncrementalDataSet` dataset, which inherits from `PartitionedDataSet` and also remembers the last processed partition.
 * Enabled loading a particular version of a dataset in Jupyter Notebooks and ipython, using `catalog.load("dataset_name", version="<2019-12-13T15.08.09.255Z>")`.
 * Added http(s) protocol support for `JSONDataSet`.

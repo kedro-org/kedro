@@ -373,7 +373,7 @@ CONSISTENCY_WARNING = (
 
 def parse_dataset_definition(
     config: Dict[str, Any], load_version: str = None, save_version: str = None
-) -> Tuple[Type[AbstractDataSet], Dict]:
+) -> Tuple[Type[AbstractDataSet], Dict[str, Any]]:
     """Parse and instantiate a dataset class using the configuration provided.
 
     Args:
@@ -409,6 +409,7 @@ def parse_dataset_definition(
             )
         except AttributeError:
             raise DataSetError("Class `{}` not found.".format(class_obj))
+
     if not issubclass(class_obj, AbstractDataSet):
         raise DataSetError(
             "DataSet type `{}.{}` is invalid: all data set types must extend "
@@ -647,3 +648,12 @@ def get_filepath_str(path: PurePath, protocol: str) -> str:
     if protocol in HTTP_PROTOCOLS:
         path = "".join((protocol, PROTOCOL_DELIMITER, path))
     return path
+
+
+def validate_on_forbidden_chars(**kwargs):
+    """Validate that string values do not include white-spaces or ;"""
+    for key, value in kwargs.items():
+        if " " in value or ";" in value:
+            raise DataSetError(
+                "Neither white-space nor semicolon are allowed in `{}`.".format(key)
+            )

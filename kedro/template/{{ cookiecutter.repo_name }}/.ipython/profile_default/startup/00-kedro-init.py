@@ -1,7 +1,7 @@
 import logging.config
-from pathlib import Path
-import sys
 import os
+import sys
+from pathlib import Path
 
 from IPython.core.magic import register_line_magic
 

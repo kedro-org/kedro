@@ -36,6 +36,7 @@ from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline, node
 from kedro.pipeline.pipeline import (
     CircularDependencyError,
+    ConfirmNotUniqueError,
     OutputNotUniqueError,
     _get_transcode_compatible_name,
     _transcode_join,
@@ -270,7 +271,7 @@ def input_data(request):
     return request.getfixturevalue(request.param)
 
 
-class TestValidPipeline:
+class TestValidPipeline:  # pylint: disable=too-many-public-methods
     def test_nodes(self, str_node_inputs_list):
         nodes = str_node_inputs_list["nodes"]
         pipeline = Pipeline(nodes)
@@ -466,6 +467,14 @@ class TestValidPipeline:
         assert node1.tags == {"node1", "p1", "p2"}
         assert node2.tags == {"p1", "p2"}
 
+    def test_node_unique_confirms(self):
+        """Test that unique dataset confirms don't break pipeline concatenation"""
+        pipeline1 = Pipeline([node(identity, "input1", "output1", confirms="output1")])
+        pipeline2 = Pipeline([node(identity, "input2", "output2", confirms="other")])
+        pipeline3 = Pipeline([node(identity, "input3", "output3")])
+        master = pipeline1 + pipeline2 + pipeline3
+        assert len(master.nodes) == 3
+
 
 def pipeline_with_circle():
     return [
@@ -547,6 +556,15 @@ class TestInvalidPipeline:
         )
         with pytest.raises(OutputNotUniqueError, match=r"\['output'\]"):
             pipeline1 + new_pipeline  # pylint: disable=pointless-statement
+
+    def test_duplicate_node_confirms(self):
+        """Test that non-unique dataset confirms break pipeline concatenation"""
+        pipeline1 = Pipeline([node(identity, "input1", "output1", confirms="other")])
+        pipeline2 = Pipeline(
+            [node(identity, "input2", "output2", confirms=["other", "output2"])]
+        )
+        with pytest.raises(ConfirmNotUniqueError, match=r"\['other'\]"):
+            pipeline1 + pipeline2  # pylint: disable=pointless-statement
 
 
 @pytest.fixture
@@ -811,148 +829,3 @@ def test_pipeline_to_json(input_data):
         assert all(node_output in json_rep for node_output in pipeline_node.outputs)
 
     assert kedro.__version__ in json_rep
-
-
-class TestTransformPipeline:
-    # pylint: disable=protected-access
-    def test_transform_dataset_names(self):
-        """
-        Rename some datasets, test string, list and dict formats.
-        """
-        raw_pipeline = Pipeline(
-            [
-                node(identity, "A", "B", name="node1"),
-                node(biconcat, ["C", "D"], ["E", "F"], name="node2"),
-                node(
-                    biconcat, {"input1": "H", "input2": "J"}, {"K": "L"}, name="node3"
-                ),
-            ]
-        )
-
-        pipeline = raw_pipeline.transform(
-            datasets={name: name + "_new" for name in ["A", "B", "D", "E", "H", "L"]}
-        )
-
-        # make sure the order is correct
-        nodes = list(sorted(pipeline.nodes, key=lambda item: item.name))
-        assert nodes[0]._inputs == "A_new"
-        assert nodes[0]._outputs == "B_new"
-
-        assert nodes[1]._inputs == ["C", "D_new"]
-        assert nodes[1]._outputs == ["E_new", "F"]
-
-        assert nodes[2]._inputs == {"input1": "H_new", "input2": "J"}
-        assert nodes[2]._outputs == {"K": "L_new"}
-
-    def test_prefix_dataset_names(self):
-        """
-        Simple prefixing for dataset of all formats: str, list and dict
-        """
-        raw_pipeline = Pipeline(
-            [
-                node(identity, "A", "B", name="node1"),
-                node(biconcat, ["C", "D"], ["E", "F"], name="node2"),
-                node(
-                    biconcat, {"input1": "H", "input2": "J"}, {"K": "L"}, name="node3"
-                ),
-            ]
-        )
-        pipeline = raw_pipeline.transform(prefix="PREFIX")
-        nodes = list(sorted(pipeline.nodes, key=lambda item: item.name))
-        assert nodes[0]._inputs == "PREFIX.A"
-        assert nodes[0]._outputs == "PREFIX.B"
-
-        assert nodes[1]._inputs == ["PREFIX.C", "PREFIX.D"]
-        assert nodes[1]._outputs == ["PREFIX.E", "PREFIX.F"]
-
-        assert nodes[2]._inputs == {"input1": "PREFIX.H", "input2": "PREFIX.J"}
-        assert nodes[2]._outputs == {"K": "PREFIX.L"}
-
-    def test_prefixing_and_renaming(self):
-        """
-        Prefixing and renaming at the same time.
-        Explicitly renamed  datasets should not be prefixed anymore.
-        """
-        raw_pipeline = Pipeline([node(biconcat, ["C", "D"], ["E", "F"])])
-        pipeline = raw_pipeline.transform(
-            prefix="PREFIX", datasets={"C": "C_new", "E": "E_new"}
-        )
-        assert pipeline.nodes[0]._inputs == ["C_new", "PREFIX.D"]
-        assert pipeline.nodes[0]._outputs == ["E_new", "PREFIX.F"]
-
-    def test_dataset_transcoding(self):
-        raw_pipeline = Pipeline([node(biconcat, ["C@pandas", "D"], ["E@spark", "F"])])
-        pipeline = raw_pipeline.transform(prefix="PREFIX", datasets={"C": "C_new"})
-
-        assert pipeline.nodes[0]._inputs == ["C_new@pandas", "PREFIX.D"]
-        assert pipeline.nodes[0]._outputs == ["PREFIX.E@spark", "PREFIX.F"]
-
-    def test_empty_input(self):
-        raw_pipeline = Pipeline([node(constant_output, None, ["A", "B"])])
-
-        pipeline = raw_pipeline.transform(prefix="PREFIX", datasets={"A": "A_new"})
-        assert pipeline.nodes[0]._inputs is None
-        assert pipeline.nodes[0]._outputs == ["A_new", "PREFIX.B"]
-
-    def test_empty_output(self):
-        raw_pipeline = Pipeline([node(biconcat, ["A", "B"], None)])
-
-        pipeline = raw_pipeline.transform(prefix="PREFIX", datasets={"A": "A_new"})
-        assert pipeline.nodes[0]._inputs == ["A_new", "PREFIX.B"]
-        assert pipeline.nodes[0]._outputs is None
-
-    @pytest.mark.parametrize(
-        "func, inputs, outputs, dataset_map, expected_missing",
-        [
-            # Testing inputs
-            (identity, "A", "OUT", {"A": "A_new", "B": "C", "D": "E"}, ["B", "D"]),
-            (biconcat, ["A", "B"], "OUT", {"C": "D"}, ["C"]),
-            (biconcat, {"input1": "A", "input2": "B"}, "OUT", {"C": "D"}, ["C"]),
-            # Testing outputs
-            (identity, "IN", "A", {"A": "A_new", "B": "C", "D": "E"}, ["B", "D"]),
-            (identity, "IN", ["A", "B"], {"C": "D"}, ["C"]),
-            (identity, "IN", {"input1": "A", "input2": "B"}, {"C": "D"}, ["C"]),
-            # Mix of both
-            (identity, "A", "B", {"A": "A_new", "B": "B_new", "C": "D"}, ["C"]),
-            (identity, ["A"], ["B"], {"A": "A_new", "B": "B_new", "C": "D"}, ["C"]),
-            (
-                identity,
-                {"input1": "A"},
-                {"out1": "B"},
-                {"A": "A_new", "B": "B_new", "C": "D"},
-                ["C"],
-            ),
-        ],
-    )
-    def test_missing_dataset_name(
-        self, func, inputs, outputs, dataset_map, expected_missing
-    ):  # pylint: disable=too-many-arguments
-        raw_pipeline = Pipeline([node(func, inputs, outputs)])
-
-        with pytest.raises(ValueError, match=r"Failed to map datasets:") as e:
-            raw_pipeline.transform(prefix="PREFIX", datasets=dataset_map)
-
-        assert repr(expected_missing) in str(e.value)
-
-    def test_node_properties_preserved(self):
-        """
-        Check that we don't loose any valuable properties on node cloning.
-        Also an explicitly defined name should get prefixed.
-        """
-        raw_pipeline = Pipeline([node(identity, "A", "B", name="node1", tags=["tag1"])])
-        raw_pipeline = raw_pipeline.decorate(lambda: None)
-        pipeline = raw_pipeline.transform(prefix="PREFIX")
-
-        assert pipeline.nodes[0].name == "PREFIX.node1"
-        assert pipeline.nodes[0].tags == {"tag1"}
-        assert len(pipeline.nodes[0]._decorators) == 1
-
-    def test_default_node_name_is_untouched(self):
-        """
-        Check that we don't loose any valuable properties on node cloning.
-        Default node name should not get prefixed.
-        """
-        raw_pipeline = Pipeline([node(identity, "A", "B")])
-        pipeline = raw_pipeline.transform(prefix="PREFIX")
-
-        assert not pipeline.nodes[0].name.startswith("PREFIX.")

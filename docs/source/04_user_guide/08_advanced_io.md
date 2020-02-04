@@ -233,6 +233,7 @@ Currently the following datasets support versioning:
 - `kedro.contrib.io.gcs.JSONGCSDataSet`
 - `kedro.contrib.io.gcs.CSVGCSDataSet`
 - `kedro.contrib.io.gcs.ParquetGCSDataSet`
+- `kedro.extras.datasets.pandas.FeatherDataSet`
 
 ## Partitioned dataset
 

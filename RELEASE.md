@@ -4,32 +4,44 @@
 
 
 * Added the following datasets:
-  - `DaskParquetDataSet` in `kedro.contrib.io.dask` for handling parquet datasets using Dask dataframes.
-  - `PickleDataSet` dataset for working with Pickle files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
-  - `CSVDataSet` dataset for working with CSV files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
-  - `ParquetDataSet` dataset for working with Parquet files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
-  - `TextDataSet` dataset for working with text files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
-  - `ExcelDataSet` dataset for working with Excel files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
-  - `HDFDataSet` dataset for working with hdf files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
-  - `YAMLDataSet` dataset for working with yaml files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
-  - `MatplotlibWriter` dataset in `contrib` for saving matplotlib objects to image file(s) that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
-  - `NetworkXDataSet` dataset in `contrib` for working with graphs (JSON format) via NetworkX that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
-  - `BioSequenceDataSet` dataset in `contrib` for working with bio-sequence objects that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+
+  - `ParquetDataSet` in `kedro.extras.datasets.dask` for handling parquet datasets using Dask dataframes.
+  - `PickleDataSet` dataset in `kedro.extras.datasets.pickle` for working with Pickle files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `CSVDataSet` dataset in `kedro.extras.datasets.pandas` for working with CSV files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `ParquetDataSet` dataset in `kedro.extras.datasets.pandas` for working with Parquet files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `TextDataSet` dataset in `kedro.extras.datasets.text` for working with text files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `ExcelDataSet` dataset in `kedro.extras.datasets.pandas` for working with Excel files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `HDFDataSet` dataset in `kedro.extras.datasets.pandas` for working with hdf files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `YAMLDataSet` dataset in `kedro.extras.datasets.yaml` for working with yaml files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `MatplotlibWriter` dataset in `kedro.extras.datasets.matplotlib` for saving matplotlib objects to image file(s) that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `NetworkXDataSet` dataset in `kedro.extras.datasets.networkx` for working with graphs (JSON format) via NetworkX that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `BioSequenceDataSet` dataset in `kedro.extras.datasets.biosequence` for working with bio-sequence objects that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `GBQTableDataSet` dataset in `kedro.extras.datasets.pandas` for working with Google BigQuery.
+  - `FeatherDataSet` dataset in `kedro.extras.datasets.pandas` for working with feather files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `IncrementalDataSet` dataset, which inherits from `PartitionedDataSet` and also remembers the last processed partition.
   - `GeoJSONDataSet`dataset in `contrib` for working with geospatial data that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+
 * Enabled loading a particular version of a dataset in Jupyter Notebooks and ipython, using `catalog.load("dataset_name", version="<2019-12-13T15.08.09.255Z>")`.
 * Added http(s) protocol support for `JSONDataSet`.
 * Added property `run_id` on `ProjectContext`, used for versioning using the [`Journal`](https://kedro.readthedocs.io/en/latest/04_user_guide/13_journal.html). To customise your journal `run_id` you can override the private method `_get_run_id()`.
 * Added the ability to install all optional kedro dependencies via `pip install "kedro[all]"`.
+* `JSONDataSet`, `CSVBlobDataSet`, `JSONBlobDataSet`, `SQLQueryDataSet` and `SQLTableDataSet` datasets copied to `kedro.extras.datasets.pandas`.
+* `SparkDataSet`, `SparkHiveDataSet` and `SparkJDBCDataSet` datasets copied to `kedro.extras.datasets.spark`.
 
 ## Bug fixes and other changes
 * Fixed a bug in the `invalidate_cache` method of `ParquetGCSDataSet` and `CSVGCSDataSet`.
 * `--load-version` now won't break if version value contains a colon.
 * Enabled running `node`s with duplicate inputs.
 * Improved error message when empty credentials are passed into `SparkJDBCDataSet`.
-* Fixed bug that caused an empty project to fail unexpectedly with ImportError in `template/.../pipeline.py`
+* Fixed bug that caused an empty project to fail unexpectedly with ImportError in `template/.../pipeline.py`.
 * Fixed bug related to saving dataframe with categorical variables in table mode using HDFS3DataSet.
 * Fixed bug that caused unexpected behavior when using `from_nodes` and `to_nodes` in pipelines using transcoding.
 * Credentials nested in the dataset config are now also resolved correctly.
+* Bumped minimum required pandas version to 0.24.0 to make use of `pandas.DataFrame.to_numpy` (recommended alternative to `pandas.DataFrame.values`).
+* Docs improvements.
+* `Pipeline.transform` skips modifying node inputs/outputs containing `params:` or `parameters` keywords.
+* Support for `dataset_credentials` key in the credentials for `PartitionedDataSet` is now deprecated. The dataset credentials should be specified explicitly inside the dataset config.
+* Datasets can have a new `confirm` function which is called after a successful node function execution if the node contains `confirms` argument with such dataset name.
 
 ## Breaking changes to the API
 * Existing `MatplotlibWriter` dataset in `contrib` was renamed to `MatplotlibLocalWriter`.
@@ -37,15 +49,13 @@
 * `kedro.contrib.io.bioinformatics.sequence_dataset.py` was renamed to `kedro.contrib.io.bioinformatics.biosequence_local_dataset.py`.
 
 ## Thanks for supporting contributions
-
-[Jonas Kemper](https://github.com/jonasrk), [Yuhao Zhu](https://github.com/yhzqb), [Balazs Konig](https://github.com/BalazsKonigQB), [Pedro Abreu](https://github.com/PedroAbreuQB), [Tam-Sanh Nguyen](https://github.com/tamsanh), [Peter Zhao](https://github.com/zxpeter), [Luis Blanche](https://github/LuisBlanche)
-
+[Jonas Kemper](https://github.com/jonasrk), [Yuhao Zhu](https://github.com/yhzqb), [Balazs Konig](https://github.com/BalazsKonigQB), [Pedro Abreu](https://github.com/PedroAbreuQB), [Tam-Sanh Nguyen](https://github.com/tamsanh), [Peter Zhao](https://github.com/zxpeter), [Deepyaman Datta](https://github.com/deepyaman), [Luis Blanche](https://github/LuisBlanche)
 
 # Release 0.15.5
 
 ## Major features and improvements
 * New CLI commands and command flags:
-  - Load mulitple `kedro run` CLI flags from a configuration file with the `--config` flag (e.g. `kedro run --config run_config.yml`)
+  - Load multiple `kedro run` CLI flags from a configuration file with the `--config` flag (e.g. `kedro run --config run_config.yml`)
   - Run parametrised pipeline runs with the `--params` flag (e.g. `kedro run --params param1:value1,param2:value2`).
   - Lint your project code using the `kedro lint` command, your project is linted with [`black`](https://github.com/psf/black) (Python 3.6+), [`flake8`](https://gitlab.com/pycqa/flake8) and [`isort`](https://github.com/timothycrosley/isort).
 * Load specific environments with Jupyter notebooks using `KEDRO_ENV` which will globally set `run`, `jupyter notebook` and `jupyter lab` commands using environment variables.
@@ -84,7 +94,7 @@
 * `kedro jupyter` now gives the default kernel a sensible name.
 * `Pipeline.name` has been deprecated in favour of `Pipeline.tags`.
 * Reuse pipelines within a Kedro project using `Pipeline.transform`, it simplifies dataset and node renaming.
-* Added Jupyter Notebook line magic (`%run_viz`) to run `kedro viz` in a Notebook cell (requires [`kedro-viz`](https://github.com/quantumblacklabs/kedro-viz) version `3.0.0` or later).
+* Added Jupyter Notebook line magic (`%run_viz`) to run `kedro viz` in a Notebook cell (requires [`kedro-viz`](https://github.com/quantumblacklabs/kedro-viz) version 3.0.0 or later).
 * Added the following datasets:
   - `NetworkXLocalDataSet` in `kedro.contrib.io.networkx` to load and save local graphs (JSON format) via NetworkX. (by [@josephhaaga](https://github.com/josephhaaga))
   - `SparkHiveDataSet` in `kedro.contrib.io.pyspark.SparkHiveDataSet` allowing usage of Spark and insert/upsert on non-transactional Hive tables.
@@ -143,7 +153,7 @@
 ## Major features and improvements
 * Extended `versioning` support to cover the tracking of environment setup, code and datasets.
 * Added the following datasets:
-  - `FeatherLocalDataSet` in `contrib` for usage with Pandas. (by [@mdomarsaleem](https://github.com/mdomarsaleem))
+  - `FeatherLocalDataSet` in `contrib` for usage with pandas. (by [@mdomarsaleem](https://github.com/mdomarsaleem))
 * Added `get_last_load_version` and `get_last_save_version` to `AbstractVersionedDataSet`.
 * Implemented `__call__` method on `Node` to allow for users to execute `my_node(input1=1, input2=2)` as an alternative to `my_node.run(dict(input1=1, input2=2))`.
 * Added new `--from-inputs` run argument.
@@ -177,7 +187,7 @@
 * Added the following datasets:
   -  `CSVHTTPDataSet` to load CSV using HTTP(s) links.
   - `JSONBlobDataSet` to load json (-delimited) files from Azure Blob Storage.
-  - `ParquetS3DataSet` in `contrib` for usage with Pandas. (by [@mmchougule](https://github.com/mmchougule))
+  - `ParquetS3DataSet` in `contrib` for usage with pandas. (by [@mmchougule](https://github.com/mmchougule))
   - `CachedDataSet` in `contrib` which will cache data in memory to avoid io/network operations. It will clear the cache once a dataset is no longer needed by a pipeline. (by [@tsanikgr](https://github.com/tsanikgr))
   - `YAMLLocalDataSet` in `contrib` to load and save local YAML files. (by [@Minyus](https://github.com/Minyus))
 

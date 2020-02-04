@@ -31,8 +31,6 @@
 import copy
 from typing import Any, Dict, Optional
 
-from kedro.io.core import DataSetError
-
 
 # pylint: disable=too-few-public-methods
 class DefaultArgumentsMixIn:
@@ -54,12 +52,3 @@ class DefaultArgumentsMixIn:
         self._save_args = copy.deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
             self._save_args.update(save_args)
-
-
-def validate_on_forbidden_chars(**kwargs):
-    """Validate that string values do not include white-spaces or ;"""
-    for key, value in kwargs.items():
-        if " " in value or ";" in value:
-            raise DataSetError(
-                "Neither white-space nor semicolon are allowed in `{}`.".format(key)
-            )

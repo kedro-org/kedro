@@ -20,3 +20,4 @@ kedro
   kedro.cli
   kedro.versioning
   kedro.extras.datasets
+  kedro.extras.decorators

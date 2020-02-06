@@ -22,6 +22,8 @@
 * Added the ability to install all optional kedro dependencies via `pip install "kedro[all]"`.
 * `JSONDataSet`, `CSVBlobDataSet`, `JSONBlobDataSet`, `SQLQueryDataSet` and `SQLTableDataSet` datasets copied to `kedro.extras.datasets.pandas`.
 * `SparkDataSet`, `SparkHiveDataSet` and `SparkJDBCDataSet` datasets copied to `kedro.extras.datasets.spark`.
+* `kedro.contrib.decorators.retry.py` copied to `kedro.extras.decorators.retry_node.py`.
+* `kedro.contrib.decorators.memory_profiler.py` copied to `kedro.extras.decorators.memory_profiler.py`.
 * Datasets to be deprecated:
   - `FeatherLocalDataSet`
   - `BioSequenceLocalDataSet`

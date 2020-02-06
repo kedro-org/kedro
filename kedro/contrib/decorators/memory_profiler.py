@@ -33,6 +33,7 @@ be used as ``Node`` decorators. See ``kedro.pipeline.node.decorate``
 import logging
 from functools import wraps
 from typing import Callable
+from warnings import warn
 
 from kedro.pipeline.decorators import _func_full_name
 
@@ -43,6 +44,12 @@ except ImportError as error:
         "{}: `pip install kedro[memory_profiler]` to get the required "
         "memory-profiler dependencies.".format(error)
     )
+
+warn(
+    "`kedro.contrib.decorators.memory_profiler` will be deprecated in future releases. "
+    "Please refer to replacement decorator in kedro.extras.decorators.",
+    DeprecationWarning,
+)
 
 
 def mem_profile(func: Callable) -> Callable:

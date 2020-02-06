@@ -46,6 +46,11 @@
   - `PickleLocalDataSet`
   - `PickleS3DataSet`
   - `TextLocalDataSet`
+* Deprecated decorators:
+  - `kedro.contrib.decorators.memory_profiler`
+  - `kedro.contrib.decorators.retry`
+  - `kedro.contrib.decorators.pyspark.spark_to_pandas`
+  - `kedro.contrib.decorators.pyspark.pandas_to_spark`
 
 ## Bug fixes and other changes
 * Fixed a bug in the `invalidate_cache` method of `ParquetGCSDataSet` and `CSVGCSDataSet`.

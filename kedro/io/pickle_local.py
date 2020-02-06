@@ -37,7 +37,12 @@ import pickle
 from pathlib import Path
 from typing import Any, Dict
 
-from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
+from kedro.io.core import (
+    AbstractVersionedDataSet,
+    DataSetError,
+    Version,
+    deprecation_warning,
+)
 
 try:
     import joblib
@@ -117,6 +122,7 @@ class PickleLocalDataSet(AbstractVersionedDataSet):
             ImportError: If 'backend' could not be imported.
 
         """
+        deprecation_warning(self.__class__.__name__)
         super().__init__(Path(filepath), version)
 
         if backend not in ["pickle", "joblib"]:

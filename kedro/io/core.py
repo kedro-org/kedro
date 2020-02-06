@@ -34,17 +34,19 @@ import abc
 import copy
 import logging
 import os
+import warnings
 from collections import namedtuple
 from datetime import datetime, timezone
 from glob import iglob
 from pathlib import Path, PurePath
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 from urllib.parse import urlparse
-from warnings import warn
 
 from fsspec.utils import infer_storage_options
 
 from kedro.utils import load_obj
+
+warnings.simplefilter("default", DeprecationWarning)
 
 VERSIONED_FLAG_KEY = "versioned"
 VERSION_KEY = "version"
@@ -576,7 +578,7 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
 
         load_version = self._lookup_load_version()
         if load_version != self._last_save_version:
-            warn(
+            warnings.warn(
                 CONSISTENCY_WARNING.format(
                     self._last_save_version, load_version, str(self)
                 )
@@ -657,3 +659,12 @@ def validate_on_forbidden_chars(**kwargs):
             raise DataSetError(
                 "Neither white-space nor semicolon are allowed in `{}`.".format(key)
             )
+
+
+def deprecation_warning(class_name):
+    """Log deprecation warning."""
+    warnings.warn(
+        "{} will be deprecated in future releases. Please refer "
+        "to replacement datasets in kedro.extras.datasets.".format(class_name),
+        DeprecationWarning,
+    )

@@ -37,7 +37,12 @@ from typing import Any, Dict
 
 from s3fs.core import S3FileSystem
 
-from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
+from kedro.io.core import (
+    AbstractVersionedDataSet,
+    DataSetError,
+    Version,
+    deprecation_warning,
+)
 
 
 class PickleS3DataSet(AbstractVersionedDataSet):
@@ -109,6 +114,7 @@ class PickleS3DataSet(AbstractVersionedDataSet):
             s3fs_args: S3FileSystem options. You can see all available arguments at:
                 https://s3fs.readthedocs.io/en/latest/api.html#s3fs.core.S3FileSystem
         """
+        deprecation_warning(self.__class__.__name__)
         _credentials = copy.deepcopy(credentials) or {}
         _s3fs_args = copy.deepcopy(s3fs_args) or {}
         _s3 = S3FileSystem(client_kwargs=_credentials, **_s3fs_args)

@@ -24,6 +24,7 @@
 * `SparkDataSet`, `SparkHiveDataSet` and `SparkJDBCDataSet` datasets copied to `kedro.extras.datasets.spark`.
 * `kedro.contrib.decorators.retry.py` copied to `kedro.extras.decorators.retry_node.py`.
 * `kedro.contrib.decorators.memory_profiler.py` copied to `kedro.extras.decorators.memory_profiler.py`.
+* `kedro.contrib.io.transformers.transformers.py` copied to `kedro.extras.transformers.time_profiler.py`.
 * Datasets to be deprecated:
   - `FeatherLocalDataSet`
   - `BioSequenceLocalDataSet`
@@ -51,6 +52,8 @@
   - `kedro.contrib.decorators.retry`
   - `kedro.contrib.decorators.pyspark.spark_to_pandas`
   - `kedro.contrib.decorators.pyspark.pandas_to_spark`
+* Transformers to be deprecated:
+  - `kedro.contrib.io.transformers.transformers`
 
 ## Bug fixes and other changes
 * Fixed a bug in the `invalidate_cache` method of `ParquetGCSDataSet` and `CSVGCSDataSet`.

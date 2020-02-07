@@ -21,3 +21,4 @@ kedro
   kedro.versioning
   kedro.extras.datasets
   kedro.extras.decorators
+  kedro.extras.transformers

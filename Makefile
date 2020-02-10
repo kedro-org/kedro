@@ -1,4 +1,5 @@
-install: build-docs
+install:
+	build-docs
 	rm -rf kedro/html
 	cp -r docs/build/html kedro
 	pip install .

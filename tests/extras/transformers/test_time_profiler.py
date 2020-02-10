@@ -25,41 +25,47 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""``Transformers`` modify the loading and saving of ``DataSets`` in a
-``DataCatalog``.
-"""
-import logging
-import time
-from typing import Any, Callable
-from warnings import warn
 
-from kedro.io import AbstractTransformer
+from typing import Any, Dict
 
-warn(
-    "`kedro.contrib.io.transformers.transformers` will be deprecated in future releases. "
-    "Please refer to replacement in kedro.extras.transformers.time_profiler",
-    DeprecationWarning,
-)
+import pytest
+
+from kedro.extras.transformers import ProfileTimeTransformer
+from kedro.io import AbstractDataSet, DataCatalog
 
 
-class ProfileTimeTransformer(AbstractTransformer):
-    """ A transformer that logs the runtime of data set load and save calls """
+class FakeDataSet(AbstractDataSet):
+    def __init__(self, data):
+        self.log = []
+        self.data = data
 
-    @property
-    def _logger(self):
-        return logging.getLogger("ProfileTimeTransformer")
+    def _load(self) -> Any:
+        self.log.append(("load", self.data))
+        return self.data
 
-    def load(self, data_set_name: str, load: Callable[[], Any]) -> Any:
-        start = time.time()
-        data = load()
-        self._logger.info(
-            "Loading %s took %0.3f seconds", data_set_name, time.time() - start
-        )
-        return data
+    def _save(self, data: Any) -> None:
+        self.log.append(("save", data))
+        self.data = data
 
-    def save(self, data_set_name: str, save: Callable[[Any], None], data: Any) -> None:
-        start = time.time()
-        save(data)
-        self._logger.info(
-            "Saving %s took %0.3f seconds", data_set_name, time.time() - start
-        )
+    def _describe(self) -> Dict[str, Any]:
+        return {"data": self.data}
+
+
+@pytest.fixture
+def fake_data_set():
+    return FakeDataSet(123)
+
+
+@pytest.fixture
+def catalog(fake_data_set):
+    return DataCatalog({"test": fake_data_set})
+
+
+class TestTransformers:
+    def test_timing(self, catalog, caplog):
+        catalog.add_transformer(ProfileTimeTransformer())
+
+        catalog.save("test", 42)
+        assert "Saving test took" in caplog.text
+        assert catalog.load("test") == 42
+        assert "Loading test took" in caplog.text

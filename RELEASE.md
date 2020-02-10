@@ -27,6 +27,38 @@
 * Added the ability to install all optional kedro dependencies via `pip install "kedro[all]"`.
 * `JSONDataSet`, `CSVBlobDataSet`, `JSONBlobDataSet`, `SQLQueryDataSet` and `SQLTableDataSet` datasets copied to `kedro.extras.datasets.pandas`.
 * `SparkDataSet`, `SparkHiveDataSet` and `SparkJDBCDataSet` datasets copied to `kedro.extras.datasets.spark`.
+* `kedro.contrib.decorators.retry.py` copied to `kedro.extras.decorators.retry_node.py`.
+* `kedro.contrib.decorators.memory_profiler.py` copied to `kedro.extras.decorators.memory_profiler.py`.
+* `kedro.contrib.io.transformers.transformers.py` copied to `kedro.extras.transformers.time_profiler.py`.
+* Datasets to be deprecated:
+  - `FeatherLocalDataSet`
+  - `BioSequenceLocalDataSet`
+  - `CSVGCSDataSet`
+  - `JSONGCSDataSet`
+  - `ParquetGCSDataSet`
+  - `MatplotlibLocalWriter`
+  - `MatplotlibS3Writer`
+  - `NetworkXLocalDataSet`
+  - `ParquetS3DataSet`
+  - `YAMLLocalDataSet`
+  - `CSVHTTPDataSet`
+  - `CSVLocalDataSet`
+  - `CSVS3DataSet`
+  - `ExcelLocalDataSet`
+  - `HDFLocalDataSet`
+  - `HDFS3DataSet`
+  - `JSONLocalDataSet`
+  - `ParquetLocalDataSet`
+  - `PickleLocalDataSet`
+  - `PickleS3DataSet`
+  - `TextLocalDataSet`
+* Deprecated decorators:
+  - `kedro.contrib.decorators.memory_profiler`
+  - `kedro.contrib.decorators.retry`
+  - `kedro.contrib.decorators.pyspark.spark_to_pandas`
+  - `kedro.contrib.decorators.pyspark.pandas_to_spark`
+* Transformers to be deprecated:
+  - `kedro.contrib.io.transformers.transformers`
 
 ## Bug fixes and other changes
 * Fixed a bug in the `invalidate_cache` method of `ParquetGCSDataSet` and `CSVGCSDataSet`.

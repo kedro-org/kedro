@@ -35,6 +35,7 @@ from typing import Any, Dict, List, Union
 from matplotlib.pyplot import figure
 
 from kedro.io import AbstractDataSet, DataSetError
+from kedro.io.core import deprecation_warning
 
 
 class MatplotlibLocalWriter(AbstractDataSet):
@@ -86,6 +87,7 @@ class MatplotlibLocalWriter(AbstractDataSet):
             save_args: Save args passed to `plt.savefig`. See
                 https://matplotlib.org/api/_as_gen/matplotlib.pyplot.savefig.html
         """
+        deprecation_warning(self.__class__.__name__)
         self._filepath = Path(filepath)
         self._load_args = load_args if load_args else dict()
         self._save_args = save_args if save_args else dict()

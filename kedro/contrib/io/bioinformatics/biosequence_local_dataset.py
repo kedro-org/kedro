@@ -37,6 +37,7 @@ from Bio import SeqIO
 
 from kedro.contrib.io import DefaultArgumentsMixIn
 from kedro.io import AbstractDataSet
+from kedro.io.core import deprecation_warning
 
 
 class BioSequenceLocalDataSet(DefaultArgumentsMixIn, AbstractDataSet):
@@ -95,6 +96,7 @@ class BioSequenceLocalDataSet(DefaultArgumentsMixIn, AbstractDataSet):
                 Handle by default is equal to ``filepath``.
 
         """
+        deprecation_warning(self.__class__.__name__)
         self._filepath = filepath
         super().__init__(load_args, save_args)
 

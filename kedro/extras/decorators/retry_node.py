@@ -35,13 +35,6 @@ import logging
 from functools import wraps
 from time import sleep
 from typing import Callable, Type
-from warnings import warn
-
-warn(
-    "`kedro.contrib.decorators.retry` will be deprecated in future releases. "
-    "Please refer to replacement decorator in kedro.extras.decorators.",
-    DeprecationWarning,
-)
 
 
 def retry(

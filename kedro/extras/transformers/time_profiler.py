@@ -25,21 +25,16 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 """``Transformers`` modify the loading and saving of ``DataSets`` in a
 ``DataCatalog``.
 """
+
 import logging
 import time
 from typing import Any, Callable
-from warnings import warn
 
 from kedro.io import AbstractTransformer
-
-warn(
-    "`kedro.contrib.io.transformers.transformers` will be deprecated in future releases. "
-    "Please refer to replacement in kedro.extras.transformers.time_profiler",
-    DeprecationWarning,
-)
 
 
 class ProfileTimeTransformer(AbstractTransformer):

@@ -225,7 +225,10 @@ class TestPartitionedDataSetLocal:
             with pytest.raises(DataSetError, match=pattern) as exc_info:
                 df_loader()
             error_message = str(exc_info.value)
-            assert "Invalid parquet file. Corrupt footer." in error_message
+            assert (
+                "Either the file is corrupted or this is not a parquet file"
+                in error_message
+            )
             assert str(partition) in error_message
 
     @pytest.mark.parametrize(

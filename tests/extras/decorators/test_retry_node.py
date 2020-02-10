@@ -25,41 +25,23 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""``Transformers`` modify the loading and saving of ``DataSets`` in a
-``DataCatalog``.
-"""
-import logging
-import time
-from typing import Any, Callable
-from warnings import warn
+import pytest
 
-from kedro.io import AbstractTransformer
-
-warn(
-    "`kedro.contrib.io.transformers.transformers` will be deprecated in future releases. "
-    "Please refer to replacement in kedro.extras.transformers.time_profiler",
-    DeprecationWarning,
-)
+from kedro.extras.decorators.retry_node import retry
+from kedro.pipeline import node
 
 
-class ProfileTimeTransformer(AbstractTransformer):
-    """ A transformer that logs the runtime of data set load and save calls """
+def test_retry():
+    def _bigger(obj):
+        obj["value"] += 1
+        if obj["value"] >= 0:
+            return True
+        raise ValueError("Value less than 0")
 
-    @property
-    def _logger(self):
-        return logging.getLogger("ProfileTimeTransformer")
+    decorated = node(_bigger, "in", "out").decorate(retry())
 
-    def load(self, data_set_name: str, load: Callable[[], Any]) -> Any:
-        start = time.time()
-        data = load()
-        self._logger.info(
-            "Loading %s took %0.3f seconds", data_set_name, time.time() - start
-        )
-        return data
+    with pytest.raises(ValueError, match=r"Value less than 0"):
+        decorated.run({"in": {"value": -3}})
 
-    def save(self, data_set_name: str, save: Callable[[Any], None], data: Any) -> None:
-        start = time.time()
-        save(data)
-        self._logger.info(
-            "Saving %s took %0.3f seconds", data_set_name, time.time() - start
-        )
+    decorated2 = node(_bigger, "in", "out").decorate(retry(n_times=2))
+    assert decorated2.run({"in": {"value": -3}})

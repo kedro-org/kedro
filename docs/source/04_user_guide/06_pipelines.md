@@ -601,6 +601,8 @@ Kedro has options to modify pipeline runs. Here is a list of CLI arguments suppo
 +------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
 | kedro run --params param_key1:value1,param_key2:2.0  | Does a parametrised kedro run with {"param_key1": "value1", "param_key2": 2}    | Yes                       |
 +------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+| kedro run --env env_name                             | Run the pipeline in the env_name environment. Defaults to local if not provided | No                        |
++------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
 | kedro run --config config.yml                        | Specify all command line options in a configuration file called config.yml      | No                        |
 +------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
 ```

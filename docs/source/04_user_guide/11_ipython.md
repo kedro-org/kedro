@@ -16,6 +16,7 @@ To reload these at any point (e.g., if you update `catalog.yml`), use the [line 
 
 ![](./images/jupyter_notebook_loading_context.png)
 
+It also loads the environment specified in the `KEDRO_ENV` environment variable if specified, otherwise it defaults to `local`. Instructions for setting the environment variable can be found in the [configuration](./03_configuration.md#additional-configuration-environments) section.
 
 ## Working with `context`
 With `context`, you can access the following variables and methods

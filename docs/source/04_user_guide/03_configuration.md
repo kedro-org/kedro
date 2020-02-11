@@ -62,6 +62,13 @@ env = "test"
 
 > *Note*: If, for some reason, your project does not have any other environments apart from `base`, i.e. no `local` environment to default to, the recommended course of action is to use the approach above, namely customise your `ProjectContext` to take `env="base"` in the constructor.
 
+If you set the `KEDRO_ENV` environment variable to the name of your environment, Kedro will load that environment for your `kedro run`, `kedro ipython`, `kedro jupyter notebook` and `kedro jupyter lab` sessions.
+
+```bash
+export KEDRO_ENV=test
+```
+
+> *Note*: If you specify both the `KEDRO_ENV` environment variable and provide the `--env` argument to a CLI command, the CLI argument takes precedence.
 
 ## Templating configuration
 

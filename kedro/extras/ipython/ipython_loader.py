@@ -34,7 +34,6 @@ it when working with Jupyter Notebooks and IPython sessions.
 import contextlib
 import pathlib
 import typing
-from warnings import warn
 
 
 def locate_ipython_startup_dir(
@@ -122,11 +121,6 @@ def run_startup_scripts(startup_dir: pathlib.Path):
 
 def main():
     """Locate IPython startup directory and run all Python scripts in it."""
-    warn(
-        "This script will be deprecated in future releases. Please refer "
-        "to replacement script in kedro/extras/ipython/.",
-        DeprecationWarning,
-    )
     startup_dir = locate_ipython_startup_dir()
     if startup_dir:
         run_startup_scripts(startup_dir)

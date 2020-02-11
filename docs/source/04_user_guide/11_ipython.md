@@ -261,7 +261,7 @@ There are optional extra scripts that can help improve your Kedro experience for
 
 ### IPython loader
 
-The script `extras/ipython_loader.py` helps to locate IPython startup directory and run all Python scripts in it when working with Jupyter notebooks and IPython sessions. It should work identically not just within a Kedro project, but also with any project that contains IPython startup scripts.
+The script `kedro/extras/ipython/ipython_loader.py` helps to locate IPython startup directory and run all Python scripts in it when working with Jupyter notebooks and IPython sessions. It should work identically not just within a Kedro project, but also with any project that contains IPython startup scripts.
 
 This script will automatically locate `.ipython/profile_default/startup` directory starting from the current working directory and going up the directory tree. If the directory was found, all Python scripts in it are be executed.
 
@@ -273,7 +273,7 @@ To install this script simply download it into your default IPython config direc
 
 ```bash
 mkdir -p ~/.ipython/profile_default/startup
-wget -O ~/.ipython/profile_default/startup/ipython_loader.py https://raw.githubusercontent.com/quantumblacklabs/kedro/master/extras/ipython_loader.py
+wget -O ~/.ipython/profile_default/startup/ipython_loader.py https://raw.githubusercontent.com/quantumblacklabs/kedro/master/kedro/extras/ipython/ipython_loader.py
 ```
 
 #### Prerequisites

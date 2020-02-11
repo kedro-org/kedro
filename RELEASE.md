@@ -22,9 +22,11 @@
 * Added the ability to install all optional kedro dependencies via `pip install "kedro[all]"`.
 * `JSONDataSet`, `CSVBlobDataSet`, `JSONBlobDataSet`, `SQLQueryDataSet` and `SQLTableDataSet` datasets copied to `kedro.extras.datasets.pandas`.
 * `SparkDataSet`, `SparkHiveDataSet` and `SparkJDBCDataSet` datasets copied to `kedro.extras.datasets.spark`.
-* `kedro.contrib.decorators.retry.py` copied to `kedro.extras.decorators.retry_node.py`.
-* `kedro.contrib.decorators.memory_profiler.py` copied to `kedro.extras.decorators.memory_profiler.py`.
-* `kedro.contrib.io.transformers.transformers.py` copied to `kedro.extras.transformers.time_profiler.py`.
+* `kedro/contrib/decorators/retry.py` copied to `kedro/extras/decorators/retry_node.py`.
+* `kedro/contrib/decorators/memory_profiler.py` copied to `kedro/extras/decorators/memory_profiler.py`.
+* `kedro/contrib/io/transformers/transformers.py` copied to `kedro/extras/transformers/time_profiler.py`.
+* `kedro/contrib/colors/logging/color_logger.py` copied to `kedro/extras/logging/color_logger.py`.
+* `extras/ipython_loader.py` copied to `kedro/extras/ipython/ipython_loader.py`.
 * Datasets to be deprecated:
   - `FeatherLocalDataSet`
   - `BioSequenceLocalDataSet`
@@ -47,7 +49,7 @@
   - `PickleLocalDataSet`
   - `PickleS3DataSet`
   - `TextLocalDataSet`
-* Deprecated decorators:
+* Decorators to be deprecated:
   - `kedro.contrib.decorators.memory_profiler`
   - `kedro.contrib.decorators.retry`
   - `kedro.contrib.decorators.pyspark.spark_to_pandas`

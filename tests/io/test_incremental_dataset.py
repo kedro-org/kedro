@@ -97,9 +97,7 @@ class TestIncrementalDataSetLocal:
         loaded = pds.load()
         assert loaded.keys() == partitioned_data_pandas.keys()
         for partition_id, data in loaded.items():
-            assert_frame_equal(
-                data, partitioned_data_pandas[partition_id],
-            )
+            assert_frame_equal(data, partitioned_data_pandas[partition_id])
 
         checkpoint_path = local_csvs / pds.DEFAULT_CHECKPOINT_FILENAME
         assert not checkpoint_path.exists()
@@ -225,7 +223,7 @@ class TestIncrementalDataSetLocal:
         assert loaded.keys() == expected_partitions
 
     @pytest.mark.parametrize(
-        "forced_checkpoint", ["p04/data.csv", "p10/data.csv", "p100/data.csv"],
+        "forced_checkpoint", ["p04/data.csv", "p10/data.csv", "p100/data.csv"]
     )
     def test_force_checkpoint_no_partitions(self, forced_checkpoint, local_csvs):
         """Test that forcing the checkpoint to certain values results in no
@@ -442,7 +440,7 @@ class TestPartitionedDataSetS3:
         ],
     )
     def test_force_checkpoint_no_checkpoint_file(
-        self, forced_checkpoint, expected_partitions, mocked_csvs_in_s3,
+        self, forced_checkpoint, expected_partitions, mocked_csvs_in_s3
     ):
         """Test how forcing checkpoint value affects the available partitions
         in S3 if the checkpoint file does not exist"""
@@ -485,7 +483,7 @@ class TestPartitionedDataSetS3:
         # create checkpoint and assert that it exists
         IncrementalDataSet(mocked_csvs_in_s3, DATASET).confirm()
         checkpoint_path = "{}/{}".format(
-            mocked_csvs_in_s3, IncrementalDataSet.DEFAULT_CHECKPOINT_FILENAME,
+            mocked_csvs_in_s3, IncrementalDataSet.DEFAULT_CHECKPOINT_FILENAME
         )
         checkpoint_value = TextDataSet(checkpoint_path).load()
         assert checkpoint_value == "p04/data.csv"
@@ -498,7 +496,7 @@ class TestPartitionedDataSetS3:
         assert loaded.keys() == expected_partitions
 
     @pytest.mark.parametrize(
-        "forced_checkpoint", ["p04/data.csv", "p10/data.csv", "p100/data.csv"],
+        "forced_checkpoint", ["p04/data.csv", "p10/data.csv", "p100/data.csv"]
     )
     def test_force_checkpoint_no_partitions(self, forced_checkpoint, mocked_csvs_in_s3):
         """Test that forcing the checkpoint to certain values results in no

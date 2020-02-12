@@ -58,8 +58,8 @@ def spark_hive_session(replace_spark_default_getorcreate):
             .enableHiveSupport()
             .getOrCreate()
         )
-        spark.sql("create database default_1")
-        spark.sql("create database default_2")
+        spark.sql("create database if not exists default_1")
+        spark.sql("create database if not exists default_2")
         _write_hive(spark, _generate_spark_df_one(), "default_1", "table_1")
         yield spark
         spark.stop()

@@ -110,6 +110,12 @@ to the context initializer. Items must be separated by comma, keys - by colon,
 example: param1:value1,param2:value2. Each parameter is split by the first comma,
 so parameter values are allowed to contain colons, parameter keys are not."""
 
+JUPYTER_IP_HELP = "IP address of the Jupyter server."
+JUPYTER_ALL_KERNELS_HELP = "Display all available Python kernels."
+JUPYTER_IDLE_TIMEOUT_HELP = """When a notebook is closed, Jupyter server will
+terminate its kernel after so many seconds of inactivity. This does not affect
+any open notebooks."""
+
 
 def _split_string(ctx, param, value):
     return [item for item in value.split(",") if item]
@@ -412,16 +418,23 @@ def activate_nbstripout():
 
 
 def _build_jupyter_command(
-    base: str, ip: str, all_kernels: bool, args: Iterable[str]
+    base: str, ip: str, all_kernels: bool, args: Iterable[str], idle_timeout: int
 ) -> List[str]:
-    cmd = [base, "--ip", ip]
+    cmd = [
+        base,
+        "--ip",
+        ip,
+        "--MappingKernelManager.cull_idle_timeout={}".format(idle_timeout),
+        "--MappingKernelManager.cull_interval={}".format(idle_timeout),
+    ]
 
     if not all_kernels:
         project_name = "{{ cookiecutter.project_name }}"
         kernel_name = re.sub(r"[^\w]+", "", project_name).strip() or "Kedro"
 
         cmd += [
-            "--NotebookApp.kernel_spec_manager_class=kedro.cli.jupyter.SingleKernelSpecManager",
+            "--NotebookApp.kernel_spec_manager_class="
+            "kedro.cli.jupyter.SingleKernelSpecManager",
             "--KernelSpecManager.default_kernel_name='{}'".format(kernel_name),
         ]
 
@@ -448,8 +461,11 @@ def jupyter():
 
 
 @forward_command(jupyter, "notebook", forward_help=True)
-@click.option("--ip", type=str, default="127.0.0.1")
-@click.option("--all-kernels", is_flag=True, default=False)
+@click.option("--ip", type=str, default="127.0.0.1", help=JUPYTER_IP_HELP)
+@click.option(
+    "--all-kernels", is_flag=True, default=False, help=JUPYTER_ALL_KERNELS_HELP
+)
+@click.option("--idle-timeout", type=int, default=30, help=JUPYTER_IDLE_TIMEOUT_HELP)
 @click.option(
     "--env",
     "-e",
@@ -459,13 +475,13 @@ def jupyter():
     envvar=KEDRO_ENV_VAR,
     help=ENV_ARG_HELP,
 )
-def jupyter_notebook(ip, all_kernels, env, args):
+def jupyter_notebook(ip, all_kernels, env, idle_timeout, args):
     """Open Jupyter Notebook with project specific variables loaded."""
     if "-h" not in args and "--help" not in args:
         ipython_message(all_kernels)
 
     arguments = _build_jupyter_command(
-        "notebook", ip=ip, all_kernels=all_kernels, args=args
+        "notebook", ip=ip, all_kernels=all_kernels, args=args, idle_timeout=idle_timeout
     )
 
     python_call_kwargs = _build_jupyter_env(env)
@@ -473,8 +489,11 @@ def jupyter_notebook(ip, all_kernels, env, args):
 
 
 @forward_command(jupyter, "lab", forward_help=True)
-@click.option("--ip", type=str, default="127.0.0.1")
-@click.option("--all-kernels", is_flag=True, default=False)
+@click.option("--ip", type=str, default="127.0.0.1", help=JUPYTER_IP_HELP)
+@click.option(
+    "--all-kernels", is_flag=True, default=False, help=JUPYTER_ALL_KERNELS_HELP
+)
+@click.option("--idle-timeout", type=int, default=30, help=JUPYTER_IDLE_TIMEOUT_HELP)
 @click.option(
     "--env",
     "-e",
@@ -484,12 +503,14 @@ def jupyter_notebook(ip, all_kernels, env, args):
     envvar=KEDRO_ENV_VAR,
     help=ENV_ARG_HELP,
 )
-def jupyter_lab(ip, all_kernels, env, args):
+def jupyter_lab(ip, all_kernels, env, idle_timeout, args):
     """Open Jupyter Lab with project specific variables loaded."""
     if "-h" not in args and "--help" not in args:
         ipython_message(all_kernels)
 
-    arguments = _build_jupyter_command("lab", ip=ip, all_kernels=all_kernels, args=args)
+    arguments = _build_jupyter_command(
+        "lab", ip=ip, all_kernels=all_kernels, args=args, idle_timeout=idle_timeout
+    )
 
     python_call_kwargs = _build_jupyter_env(env)
     python_call("jupyter", arguments, **python_call_kwargs)

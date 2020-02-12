@@ -143,6 +143,11 @@ Then you should navigate to the `notebooks` folder and create a notebook.
 
 > *Note:* The only kernel available by default has a name of the current project. If you need to access all available kernels, add `--all-kernels` to the command above.
 
+### Idle notebooks
+
+If you close the notebook and its kernel is idle, it will be automatically terminated by the Jupyter server after 30 seconds of inactivity. However, if the notebook kernel is busy, it won't be automatically terminated by the server.
+
+You can change the timeout by passing `--idle-timeout=<integer>` option to `kedro jupyter notebook` or `kedro jupyter lab` call. If you set `--idle-timeout=0`, this will disable automatic termination of idle notebook kernels.
 
 ### What if I cannot run `kedro jupyter notebook`?
 

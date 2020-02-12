@@ -512,7 +512,10 @@ class TestJupyterNotebookCommand:
                 "notebook",
                 "--ip",
                 "127.0.0.1",
-                "--NotebookApp.kernel_spec_manager_class=kedro.cli.jupyter.SingleKernelSpecManager",
+                "--MappingKernelManager.cull_idle_timeout=30",
+                "--MappingKernelManager.cull_interval=30",
+                "--NotebookApp.kernel_spec_manager_class="
+                "kedro.cli.jupyter.SingleKernelSpecManager",
                 "--KernelSpecManager.default_kernel_name='TestProject'",
             ],
         )
@@ -531,7 +534,10 @@ class TestJupyterNotebookCommand:
                 "notebook",
                 "--ip",
                 "0.0.0.0",
-                "--NotebookApp.kernel_spec_manager_class=kedro.cli.jupyter.SingleKernelSpecManager",
+                "--MappingKernelManager.cull_idle_timeout=30",
+                "--MappingKernelManager.cull_interval=30",
+                "--NotebookApp.kernel_spec_manager_class="
+                "kedro.cli.jupyter.SingleKernelSpecManager",
                 "--KernelSpecManager.default_kernel_name='TestProject'",
             ],
         )
@@ -543,7 +549,14 @@ class TestJupyterNotebookCommand:
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_called_once_with(True)
         python_call_mock.assert_called_once_with(
-            "jupyter", ["notebook", "--ip", "127.0.0.1"]
+            "jupyter",
+            [
+                "notebook",
+                "--ip",
+                "127.0.0.1",
+                "--MappingKernelManager.cull_idle_timeout=30",
+                "--MappingKernelManager.cull_interval=30",
+            ],
         )
 
     @pytest.mark.parametrize("help_flag", ["-h", "--help"])
@@ -592,7 +605,10 @@ class TestJupyterLabCommand:
                 "lab",
                 "--ip",
                 "127.0.0.1",
-                "--NotebookApp.kernel_spec_manager_class=kedro.cli.jupyter.SingleKernelSpecManager",
+                "--MappingKernelManager.cull_idle_timeout=30",
+                "--MappingKernelManager.cull_interval=30",
+                "--NotebookApp.kernel_spec_manager_class="
+                "kedro.cli.jupyter.SingleKernelSpecManager",
                 "--KernelSpecManager.default_kernel_name='TestProject'",
             ],
         )
@@ -611,7 +627,10 @@ class TestJupyterLabCommand:
                 "lab",
                 "--ip",
                 "0.0.0.0",
-                "--NotebookApp.kernel_spec_manager_class=kedro.cli.jupyter.SingleKernelSpecManager",
+                "--MappingKernelManager.cull_idle_timeout=30",
+                "--MappingKernelManager.cull_interval=30",
+                "--NotebookApp.kernel_spec_manager_class="
+                "kedro.cli.jupyter.SingleKernelSpecManager",
                 "--KernelSpecManager.default_kernel_name='TestProject'",
             ],
         )
@@ -623,7 +642,14 @@ class TestJupyterLabCommand:
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_called_once_with(True)
         python_call_mock.assert_called_once_with(
-            "jupyter", ["lab", "--ip", "127.0.0.1"]
+            "jupyter",
+            [
+                "lab",
+                "--ip",
+                "127.0.0.1",
+                "--MappingKernelManager.cull_idle_timeout=30",
+                "--MappingKernelManager.cull_interval=30",
+            ],
         )
 
     @pytest.mark.parametrize("help_flag", ["-h", "--help"])

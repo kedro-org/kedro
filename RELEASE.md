@@ -72,6 +72,7 @@
 * Support for `dataset_credentials` key in the credentials for `PartitionedDataSet` is now deprecated. The dataset credentials should be specified explicitly inside the dataset config.
 * Datasets can have a new `confirm` function which is called after a successful node function execution if the node contains `confirms` argument with such dataset name.
 * When closed, Jupyter notebook kernels are automatically terminated after 30 seconds of inactivity by default. Use `--idle-timeout` option to update it.
+* Added `kedro-viz` to the Kedro project template `requirements.txt` file.
 
 ## Breaking changes to the API
 * Existing `MatplotlibWriter` dataset in `contrib` was renamed to `MatplotlibLocalWriter`.

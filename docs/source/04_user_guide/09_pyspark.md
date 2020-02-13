@@ -21,6 +21,7 @@ from pyspark.sql import SparkSession
 
 # ...
 
+
 class ProjectContext(KedroContext):
     # ...
     def __init__(
@@ -29,7 +30,7 @@ class ProjectContext(KedroContext):
         env: str = None,
         extra_params: Dict[str, Any] = None,
     ):
-         super().__init__(project_path, env, extra_params)
+        super().__init__(project_path, env, extra_params)
         self._spark_session = None
         self.init_spark_session()
 
@@ -57,8 +58,9 @@ class ProjectContext(KedroContext):
 
     project_name = "kedro"
     project_version = "0.15.5"
-# ...
 
+
+# ...
 ```
 
 Create `conf/base/spark.yml` and specify the parameters as follows:
@@ -93,7 +95,6 @@ spark_ds = SparkDataSet(
     file_format="csv",
     load_args={"header": True, "inferSchema": True},
     save_args={"sep": "|", "header": True},
-
 )
 catalog = DataCatalog({"weather": spark_ds})
 
@@ -141,7 +142,7 @@ Continuing from the example of the previous section, since `catalog.load("weathe
 from kedro.pipeline import Pipeline, node
 
 def my_node(weather):
-   weather.show()  # weather is a pyspark.sql.DataFrame
+    weather.show()  # weather is a pyspark.sql.DataFrame
 
 class ProjectContext(KedroContext):
 
@@ -151,5 +152,4 @@ class ProjectContext(KedroContext):
     def pipeline(self) -> Pipeline:  # requires import from user code
         return Pipeline([node(my_node, "weather", None)])
 # ...
-
 ```

@@ -90,7 +90,6 @@ def create_pipeline(**kwargs):
             ),
         ]
     )
-
 ```
 
 It's important to note that here `companies` and `shuttles` refer to the datasets defined in `conf/base/catalog.yml`. Their contents will be loaded and served as inputs to the `preprocess_companies` and `preprocess_shuttles` functions.
@@ -209,6 +208,7 @@ We need to add a function to join together the three dataframes into a single ma
 ```python
 import pandas as pd
 
+
 def create_master_table(
     shuttles: pd.DataFrame, companies: pd.DataFrame, reviews: pd.DataFrame
 ) -> pd.DataFrame:
@@ -257,7 +257,7 @@ node(
     func=create_master_table,
     inputs=["preprocessed_shuttles", "preprocessed_companies", "reviews"],
     outputs="master_table",
-    name="master_table"
+    name="master_table",
 ),
 ```
 By adding this code to the project, you are telling Kedro that the function `create_master_table` should be called with the data loaded from datasets `preprocessed_shuttles`, `preprocessed_companies`, and `reviews` and the output should be saved to dataset `master_table`.
@@ -410,6 +410,7 @@ Alternatively, the parameters specified in `parameters.yml` can also be referenc
 ```python
 # in src/kedro_tutorial/pipelines/data_science/nodes.py:
 
+
 def split_data(data: pd.DataFrame, test_size: str, random_state: str) -> List:
     """
     Arguments now accepts `test_size` and `random_state` rather than `parameters: Dict`.
@@ -432,6 +433,7 @@ def split_data(data: pd.DataFrame, test_size: str, random_state: str) -> List:
 
 
 # in src/kedro_tutorial/pipelines/data_science/pipeline.py:
+
 
 def create_pipeline(**kwargs) -> Dict[str, Pipeline]:
     return Pipeline(
@@ -639,6 +641,7 @@ def create_pipeline(**kwargs) -> Dict[str, Pipeline]:
         tags=["de_tag"],
     )
 
+
 # src/kedro_tutorial/pipelines/data_science/pipeline.py
 def create_pipeline(**kwargs) -> Dict[str, Pipeline]:
     return Pipeline(
@@ -649,7 +652,11 @@ def create_pipeline(**kwargs) -> Dict[str, Pipeline]:
                 outputs=["X_train", "X_test", "y_train", "y_test"],
             ),
             node(func=train_model, inputs=["X_train", "y_train"], outputs="regressor"),
-            node(func=evaluate_model, inputs=["regressor", "X_test", "y_test"], outputs=None),
+            node(
+                func=evaluate_model,
+                inputs=["regressor", "X_test", "y_test"],
+                outputs=None,
+            ),
         ],
         tags=["ds_tag"],
     )
@@ -679,10 +686,7 @@ kedro run --tag=ds_tag --tag=de_tag
 
 ```python
 node(
-    train_model,
-    ["X_train", "y_train"],
-    "regressor",
-    tags=["my-regressor-node"],
+    train_model, ["X_train", "y_train"], "regressor", tags=["my-regressor-node"],
 )
 ```
 
@@ -707,6 +711,7 @@ from typing import Callable
 import time
 import logging
 
+
 def log_running_time(func: Callable) -> Callable:
     """Decorator for logging node execution time.
 
@@ -717,6 +722,7 @@ def log_running_time(func: Callable) -> Callable:
             Decorator for logging the running time.
 
     """
+
     @wraps(func)
     def with_time(*args, **kwargs):
         log = logging.getLogger(__name__)
@@ -726,6 +732,7 @@ def log_running_time(func: Callable) -> Callable:
         elapsed = t_end - t_start
         log.info("Running %r took %.2f seconds", func.__name__, elapsed)
         return result
+
     return with_time
 ```
 
@@ -735,6 +742,7 @@ And apply it to each data engineering function by prepending `@log_running_time`
 @log_running_time
 def preprocess_companies(companies: pd.DataFrame) -> pd.DataFrame:
     ...
+
 
 @log_running_time
 def preprocess_shuttles(shuttles: pd.DataFrame) -> pd.DataFrame:

@@ -19,19 +19,21 @@ def mean(xs, n):
 
 
 def mean_sos(xs, n):
-    return sum(x*x for x in xs) / n
+    return sum(x ** 2 for x in xs) / n
 
 
 def variance(m, m2):
     return m2 - m * m
 
 
-pipeline = Pipeline([
-    node(len, 'xs', 'n'),
-    node(mean, ['xs', 'n'], 'm', name='mean node'),
-    node(mean_sos, ['xs', 'n'], 'm2', name='mean sos'),
-    node(variance, ['m', 'm2'], 'v', name='variance node')
-])
+pipeline = Pipeline(
+    [
+        node(len, "xs", "n"),
+        node(mean, ["xs", "n"], "m", name="mean node"),
+        node(mean_sos, ["xs", "n"], "m2", name="mean sos"),
+        node(variance, ["m", "m2"], "v", name="variance node"),
+    ]
+)
 ```
 
 `describe` can be used to understand what nodes are part of the pipeline:
@@ -63,7 +65,8 @@ You can also tag your ``Pipeline`` by providing `tags` argument, which will tag 
 
 ```python
 pipeline = Pipeline(
-    [node(..., name="node1"), node(..., name="node2", tags="node_tag")], tags="pipeline_tag"
+    [node(..., name="node1"), node(..., name="node2", tags="node_tag")],
+    tags="pipeline_tag",
 )
 ```
 
@@ -75,23 +78,15 @@ You can merge multiple pipelines as shown below. Note that, in this case, `pipel
 
 
 ```python
-pipeline_de = Pipeline([
-    node(len, 'xs', 'n'),
-    node(mean, ['xs', 'n'], 'm')
-])
+pipeline_de = Pipeline([node(len, "xs", "n"), node(mean, ["xs", "n"], "m")])
 
-pipeline_ds = Pipeline([
-    node(mean_sos, ['xs', 'n'], 'm2'),
-    node(variance, ['m', 'm2'], 'v')
-])
+pipeline_ds = Pipeline(
+    [node(mean_sos, ["xs", "n"], "m2"), node(variance, ["m", "m2"], "v")]
+)
 
-last_node = node(print, 'v', None)
+last_node = node(print, "v", None)
 
-pipeline_all = Pipeline([
-    pipeline_de,
-    pipeline_ds,
-    last_node
-])
+pipeline_all = Pipeline([pipeline_de, pipeline_ds, last_node])
 print(pipeline_all.describe())
 ```
 
@@ -189,9 +184,9 @@ from .nodes import node1_func, node2_func  # importing its own node functions
 
 
 def create_pipeline():
-    node1 = node(func=node1_func, inputs='a', outputs='b')
-    node2 = node(func=node2_func, inputs='c', outputs='d')
-    node3 = node(func=add, inputs=['b', 'd'], outputs='sum')
+    node1 = node(func=node1_func, inputs="a", outputs="b")
+    node2 = node(func=node2_func, inputs="c", outputs="d")
+    node3 = node(func=add, inputs=["b", "d"], outputs="sum")
     return Pipeline([node1, node2, node3])
 ```
 
@@ -204,17 +199,17 @@ from typing import Dict
 
 from kedro.pipeline import Pipeline
 
-from new_kedro_project.pipelines import modular_pipeline_1 as mp1, modular_pipeline_2 as mp2
+from new_kedro_project.pipelines import (
+    modular_pipeline_1 as mp1,
+    modular_pipeline_2 as mp2,
+)
+
 
 def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
     pipeline1 = mp1.create_pipeline()
     pipeline2 = mp2.create_pipeline()
     pipeline_all = pipeline_1 + pipeline_2
-    return {
-        "mp1": pipeline_1,
-        "mp2": pipeline_2,
-        "__default__": pipeline_all
-    }
+    return {"mp1": pipeline_1, "mp2": pipeline_2, "__default__": pipeline_all}
 ```
 
 > *Note:* To find out how you can run a pipeline by its name, please navigate to [this section](#running-a-pipeline-by-name).
@@ -302,30 +297,34 @@ But the names might be different, requiring manual fixes to be applied to the pi
 Alternative solution would be to `transform` an existing pipeline. Consider this example:
 
 ```python
-cook_pipeline = Pipeline([
-    node(defrost, 'frozen_meat', 'meat'),
-    node(grill, 'meat', 'grilled_meat'),
-])
+cook_pipeline = Pipeline(
+    [node(defrost, "frozen_meat", "meat"), node(grill, "meat", "grilled_meat"),]
+)
 
-lunch_pipeline = Pipeline([
-    node(eat, 'food', None),
-])
+lunch_pipeline = Pipeline([node(eat, "food", None),])
 ```
 
 A simple `cook_pipeline + lunch_pipeline` doesn't work, `food` input needs to be mapped to `grilled_meat` output.
 That's how it can be done, all three resulting pipelines do the job equally fine:
 
 ```python
-final_pipeline1 = cook_pipeline.transform(datasets={"grilled_meat": "food"}) + lunch_pipeline
-final_pipeline2 = cook_pipeline + lunch_pipeline.transform(datasets={"food": "grilled_meat"})
-final_pipeline3 = cook_pipeline.transform(datasets={"grilled_meat": "new_name"}) + \
-     lunch_pipeline.transform(datasets={"food": "new_name")
+final_pipeline1 = (
+    cook_pipeline.transform(datasets={"grilled_meat": "food"}) + lunch_pipeline
+)
+final_pipeline2 = cook_pipeline + lunch_pipeline.transform(
+    datasets={"food": "grilled_meat"}
+)
+final_pipeline3 = cook_pipeline.transform(
+    datasets={"grilled_meat": "new_name"}
+) + lunch_pipeline.transform(datasets={"food": "new_name"})
 ```
 
 Note that `Pipeline.transform()` will skip prefixing when node inputs and outputs contain parameter references (`params:` and `parameters`).
 Example:
 ```python
-transformed_pipeline = Pipeline([node(node_func, ["input", "params:x"], None)]).transform(prefix="new")
+transformed_pipeline = Pipeline(
+    [node(node_func, ["input", "params:x"], None)]
+).transform(prefix="new")
 # `transformed_pipeline` will be `Pipeline([node(node_func, ["new.input", "params:x"], None)])`
 ```
 
@@ -333,17 +332,15 @@ transformed_pipeline = Pipeline([node(node_func, ["input", "params:x"], None)]).
 Consider the example:
 
 ```python
-cook_pipeline = Pipeline([
-    node(defrost, "frozen_meat", "meat", name="defrost_node"),
-    node(grill, "meat", "grilled_meat"),
-])
+cook_pipeline = Pipeline(
+    [
+        node(defrost, "frozen_meat", "meat", name="defrost_node"),
+        node(grill, "meat", "grilled_meat"),
+    ]
+)
 
-breakfast_pipeline = Pipeline([
-    node(eat_breakfast, "breakfast_food", None),
-])
-lunch_pipeline = Pipeline([
-    node(eat_lunch, "lunch_food", None),
-])
+breakfast_pipeline = Pipeline([node(eat_breakfast, "breakfast_food", None),])
+lunch_pipeline = Pipeline([node(eat_lunch, "lunch_food", None),])
 ```
 Now we need to "defrost" two different types of food and feed it to different pipelines.
 But we can't use the `cook_pipeline` twice, the internal dataset names will conflict.
@@ -357,9 +354,7 @@ pipeline = (
         datasets={"grilled_meat": "breakfast_food"}, prefix="breakfast"
     )
     + breakfast_pipeline
-    + cook_pipeline.transform(
-        datasets={"grilled_meat": "lunch_food"}, prefix="lunch"
-    )
+    + cook_pipeline.transform(datasets={"grilled_meat": "lunch_food"}, prefix="lunch")
     + lunch_pipeline
 )
 ```
@@ -381,9 +376,7 @@ In this case we have a pipeline consisting of a single node with no input and ou
 
 ```python
 try:
-    Pipeline([
-        node(lambda: print('!'), None, None)
-    ])
+    Pipeline([node(lambda: print("!"), None, None)])
 except Exception as e:
     print(e)
 ```
@@ -403,10 +396,12 @@ The first node captures the relationship of how to calculate `y` from `x` and th
 
 ```python
 try:
-    Pipeline([
-        node(lambda x: x+1, 'x', 'y', name='first node'),
-        node(lambda y: y-1, 'y', 'x', name='second node')
-    ])
+    Pipeline(
+        [
+            node(lambda x: x + 1, "x", "y", name="first node"),
+            node(lambda y: y - 1, "y", "x", name="second node"),
+        ]
+    )
 except Exception as e:
     print(e)
 ```
@@ -615,12 +610,13 @@ You can also combine these options together, so the command `kedro run --from-no
 You can apply decorators on whole pipelines, the same way you apply decorators on single nodes. For example, if you want to apply the decorators defined in the earlier section to all pipeline nodes simultaneously, you can do so as follows:
 
 ```python
-hello_pipeline = Pipeline([
-    node(say_hello, 'name1', None),
-    node(say_hello, 'name2', None)
-]).decorate(apply_g, apply_h)
+hello_pipeline = Pipeline(
+    [node(say_hello, "name1", None), node(say_hello, "name2", None)]
+).decorate(apply_g, apply_h)
 
-SequentialRunner().run(hello_pipeline, DataCatalog({}, dict(name1="Kedro", name2="Python")))
+SequentialRunner().run(
+    hello_pipeline, DataCatalog({}, dict(name1="Kedro", name2="Python"))
+)
 ```
 
 `Output`:
@@ -642,9 +638,7 @@ By using `DataCatalog` from the IO module we are still able to write pure functi
 Through `DataCatalog`, we can control where inputs are loaded from, where intermediate variables get persisted and ultimately the location to which output variables are written:
 
 ```python
-io = DataCatalog(dict(
-    xs=MemoryDataSet()
-))
+io = DataCatalog(dict(xs=MemoryDataSet()))
 ```
 
 ```python
@@ -658,7 +652,7 @@ Out[10]: ['xs']
 ```
 
 ```python
-io.save('xs', [1, 2, 3])
+io.save("xs", [1, 2, 3])
 ```
 
 ```python
@@ -682,12 +676,14 @@ def save(value):
     with open("./data/07_model_output/variance.pickle", "wb") as f:
         pickle.dump(value, f)
 
+
 def load():
     with open("./data/07_model_output/variance.pickle", "rb") as f:
         return pickle.load(f)
 
+
 pickler = LambdaDataSet(load=load, save=save)
-io.add('v', pickler)
+io.add("v", pickler)
 ```
 
 It is important to make sure that the data catalog variable name `v` matches the name `v` in the pipeline definition.
@@ -695,11 +691,11 @@ It is important to make sure that the data catalog variable name `v` matches the
 Next we can confirm that this `LambdaDataSet` works:
 
 ```python
-io.save('v', 5)
+io.save("v", 5)
 ```
 
 ```python
-io.load('v')
+io.load("v")
 ```
 
 `Ouput`:
@@ -722,7 +718,7 @@ Out[13]: {}
 Because the output has been persisted to a local file we don't see it directly, but it can be retrieved from the catalog:
 
 ```python
-io.load('v')
+io.load("v")
 ```
 
 `Ouput`:
@@ -765,7 +761,7 @@ Outputs: v
 One way to specify a partial pipeline is by providing a set of pre-calculated inputs which should serve as a start of the partial pipeline. For example, in order to fetch the partial pipeline running from input `m2` downstream you can specify it like this:
 
 ```python
-print(pipeline.from_inputs('m2').describe())
+print(pipeline.from_inputs("m2").describe())
 ```
 
 `Output`:
@@ -784,7 +780,7 @@ Outputs: v
 Specifying that the partial pipeline from inputs `m` and `xs` is needed will result in the following pipeline:
 
 ```python
-print(pipeline.from_inputs('m', 'xs').describe())
+print(pipeline.from_inputs("m", "xs").describe())
 ```
 
 `Output`:
@@ -809,7 +805,7 @@ As it can been seen from the pipeline description, adding `m` in the `from_input
 Another way of selecting a partial pipeline is by specifying the nodes which should be used as a start of the new pipeline. For example you can do as follows:
 
 ```python
-print(pipeline.from_nodes('mean node').describe())
+print(pipeline.from_nodes("mean node").describe())
 ```
 
 `Output`:
@@ -838,7 +834,7 @@ kedro run --from-nodes="mean node"
 Similarly, you can specify the nodes which should be used as an end of the new pipeline. For example, you can do as follows:
 
 ```python
-print(pipeline.to_nodes('mean node').describe())
+print(pipeline.to_nodes("mean node").describe())
 ```
 
 `Output`:
@@ -878,7 +874,7 @@ kedro run --from-nodes A,D --to-nodes X,Y,Z
 One can also create a partial pipeline from the nodes that have specific tags attached to them. In order to construct a partial pipeline out of nodes that have both tag `t1` *AND* tag `t2`, you can run the following:
 
 ```python
-print(pipeline.only_nodes_with_tags('t1', 't2').describe())
+print(pipeline.only_nodes_with_tags("t1", "t2").describe())
 ```
 
 `Output`:
@@ -895,7 +891,9 @@ Outputs: None
 To construct a partial pipeline out of nodes that have tag `t1` *OR* tag `t2`, please execute the following:
 
 ```python
-partial_pipeline = pipeline.only_nodes_with_tags('t1') + pipeline.only_nodes_with_tags('t2')
+partial_pipeline = pipeline.only_nodes_with_tags("t1") + pipeline.only_nodes_with_tags(
+    "t2"
+)
 print(partial_pipeline.describe())
 ```
 
@@ -914,7 +912,7 @@ Outputs: None
 Sometimes you might need to run only some of the nodes in a pipeline. To do that, you can do as follows:
 
 ```python
-print(pipeline.only_nodes('mean node', 'mean sos').describe())
+print(pipeline.only_nodes("mean node", "mean sos").describe())
 ```
 
 `Output`:
@@ -947,7 +945,6 @@ node(
     ),
     name="node1",
 ),
-
 ```
 
 and then run the following command in your terminal window:
@@ -993,16 +990,13 @@ To demonstrate this, let us save the intermediate output `n` using a `JSONLocalD
 
 ```python
 n_json = JSONLocalDataSet(filepath="./data/07_model_output/len.json")
-io = DataCatalog(dict(
-    xs=MemoryDataSet([1, 2, 3]),
-    n=n_json,
-))
+io = DataCatalog(dict(xs=MemoryDataSet([1, 2, 3]), n=n_json))
 ```
 
 Because `n` was not saved previously, checking for its existence returns `False`:
 
 ```python
-io.exists('n')
+io.exists("n")
 ```
 
 `Output`:
@@ -1024,7 +1018,7 @@ Out[16]: {'v': 0.666666666666667}
 ```
 
 ```python
-io.exists('n')
+io.exists("n")
 ```
 
 `Output`:

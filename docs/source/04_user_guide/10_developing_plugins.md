@@ -84,7 +84,7 @@ def to_json():
 And have the following entry_points config in `setup.py`:
 ```python
 entry_points={
-    'kedro.project_commands': ['kedrojson = kedrojson.plugin:commands'],
+    "kedro.project_commands": ["kedrojson = kedrojson.plugin:commands"],
 }
 ```
 

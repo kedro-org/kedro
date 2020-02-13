@@ -31,7 +31,7 @@ def add(x, y):
 The add function has two inputs `x` and `y` and a single output. A new node can now be created with this function:
 
 ```python
-adder_node = node(func=add, inputs=['a', 'b'], outputs='sum')
+adder_node = node(func=add, inputs=["a", "b"], outputs="sum")
 adder_node
 ```
 
@@ -44,10 +44,10 @@ Out[1]: Node(add, ['a', 'b'], 'sum', None)
 You can also add labels to nodes which will be used to describe them in logs:
 
 ```python
-adder_node = node(func=add, inputs=['a', 'b'], outputs='sum')
+adder_node = node(func=add, inputs=["a", "b"], outputs="sum")
 print(str(adder_node))
 
-adder_node = node(func=add, inputs=['a', 'b'], outputs='sum', name='adding_a_and_b')
+adder_node = node(func=add, inputs=["a", "b"], outputs="sum", name="adding_a_and_b")
 print(str(adder_node))
 ```
 
@@ -146,6 +146,7 @@ def apply_f(func: Callable) -> Callable:
     @wraps(func)
     def with_f(*args, **kwargs):
         return func(*["f({})".format(a) for a in args], **kwargs)
+
     return with_f
 
 
@@ -153,6 +154,7 @@ def apply_g(func: Callable) -> Callable:
     @wraps(func)
     def with_g(*args, **kwargs):
         return func(*["g({})".format(a) for a in args], **kwargs)
+
     return with_g
 
 
@@ -160,6 +162,7 @@ def apply_h(func: Callable) -> Callable:
     @wraps(func)
     def with_h(*args, **kwargs):
         return func(*["h({})".format(a) for a in args], **kwargs)
+
     return with_h
 ```
 
@@ -171,7 +174,7 @@ def say_hello(name):
     print("Hello {}!".format(name))
 
 
-hello_node = node(say_hello, 'name', None)
+hello_node = node(say_hello, "name", None)
 hello_node.run(dict(name="Kedro"))
 ```
 
@@ -186,7 +189,7 @@ Out[3]: {}
 If you want to apply an additional decorator to the same function, but just for another node:
 
 ```python
-hello_node_wrapped = node(apply_g(say_hello), 'name', None)
+hello_node_wrapped = node(apply_g(say_hello), "name", None)
 
 hello_node.run(dict(name="Kedro"))
 hello_node_wrapped.run(dict(name="Kedro"))
@@ -205,7 +208,7 @@ Out[4]: {}
 You can also provide a list of decorators as shown here:
 
 ```python
-hello_wrapped = node(apply_g(apply_h(say_hello)), 'name', None)
+hello_wrapped = node(apply_g(apply_h(say_hello)), "name", None)
 hello_decorated = hello_node.decorate(apply_g, apply_h)
 
 hello_wrapped.run(dict(name="Kedro"))

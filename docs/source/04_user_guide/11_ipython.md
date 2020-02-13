@@ -74,7 +74,8 @@ def reload_kedro(project_path, line=None):
         parameters = context.params
         # ...
         logging.info("Defined global variable `context`, `catalog` and `parameters`")
-
+    except:
+        pass
 ```
 
 ## Working with IPython
@@ -219,7 +220,8 @@ catalog.save("my_dataset", my_dict)
 
 ```python
 parameters = context.params  # type: Dict
-parameters["example_test_data_ratio"]  # returns the value of 'example_test_data_ratio' key from 'conf/base/parameters.yml'
+parameters["example_test_data_ratio"]
+# returns the value of 'example_test_data_ratio' key from 'conf/base/parameters.yml'
 ```
 
 > Note: You need to reload Kedro variables by calling `%reload_kedro` and re-run the code snippet from above if you change the contents of `parameters.yml`.

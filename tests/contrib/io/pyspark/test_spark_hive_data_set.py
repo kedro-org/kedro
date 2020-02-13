@@ -50,20 +50,24 @@ def spark_hive_session(replace_spark_default_getorcreate):
     default_cwd = os.getcwd()
     with TemporaryDirectory(TESTSPARKDIR) as tmpdir:
         os.chdir(tmpdir)
-        spark = (
-            SparkSession.builder.config(
-                "spark.local.dir", (Path(tmpdir) / "spark_local").absolute()
+        try:
+            spark = (
+                SparkSession.builder.config(
+                    "spark.local.dir", (Path(tmpdir) / "spark_local").absolute()
+                )
+                .config(
+                    "spark.sql.warehouse.dir", (Path(tmpdir) / "warehouse").absolute()
+                )
+                .enableHiveSupport()
+                .getOrCreate()
             )
-            .config("spark.sql.warehouse.dir", (Path(tmpdir) / "warehouse").absolute())
-            .enableHiveSupport()
-            .getOrCreate()
-        )
-        spark.sql("create database default_1")
-        spark.sql("create database default_2")
-        _write_hive(spark, _generate_spark_df_one(), "default_1", "table_1")
-        yield spark
-        spark.stop()
-        os.chdir(default_cwd)
+            spark.sql("create database if not exists default_1")
+            spark.sql("create database if not exists default_2")
+            _write_hive(spark, _generate_spark_df_one(), "default_1", "table_1")
+            yield spark
+            spark.stop()
+        finally:
+            os.chdir(default_cwd)
 
     SparkSession.builder.getOrCreate = UseTheSparkSessionFixtureOrMock
 

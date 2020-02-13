@@ -67,7 +67,6 @@ def create_sample_csv():
 
 @contextmanager
 def chdir(path: Path) -> Iterator:
-    # pylint: disable=W9014
     """Context manager to help execute code in a different directory.
 
     Args:

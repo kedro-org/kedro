@@ -131,7 +131,7 @@ class Pipeline:
         *,
         name: str = None,
         tags: Union[str, Iterable[str]] = None
-    ):  # pylint: disable=missing-type-doc
+    ):
         """Initialise ``Pipeline`` with a list of ``Node`` instances.
 
         Args:

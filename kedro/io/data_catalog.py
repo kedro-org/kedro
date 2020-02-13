@@ -618,10 +618,10 @@ class DataCatalog:
             self._default_transformers,
             self._journal,
         ) == (
-            other._data_sets,  # pylint: disable=protected-access
-            other._transformers,  # pylint: disable=protected-access
-            other._default_transformers,  # pylint: disable=protected-access
-            other._journal,  # pylint: disable=protected-access
+            other._data_sets,
+            other._transformers,
+            other._default_transformers,
+            other._journal,
         )
 
     def confirm(self, name: str) -> None:

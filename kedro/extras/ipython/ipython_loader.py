@@ -92,6 +92,7 @@ def run_startup_scripts(startup_dir: pathlib.Path):
         startup_dir: Path to IPython startup directory.
 
     """
+    # pylint: disable=import-outside-toplevel
     import logging
     from sys import stdout
 

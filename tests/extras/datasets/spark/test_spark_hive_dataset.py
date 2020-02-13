@@ -138,7 +138,7 @@ def _generate_spark_df_upsert_expected():
 
 class TestSparkHiveDataSet:
     def test_cant_pickle(self):
-        import pickle
+        import pickle  # pylint: disable=import-outside-toplevel
 
         with pytest.raises(pickle.PicklingError):
             pickle.dumps(

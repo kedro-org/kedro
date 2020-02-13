@@ -150,19 +150,22 @@ class AbstractRunner(ABC):
         self, pipeline: Pipeline, done_nodes: Iterable[Node]
     ) -> None:
         remaining_nodes = set(pipeline.nodes) - set(done_nodes)
-        command = "kedro run"
 
+        postfix = ""
         if done_nodes:
-            node_names = [n.name for n in remaining_nodes]
-            resume_pipeline = pipeline.only_nodes(*node_names)
+            node_names = (n.name for n in remaining_nodes)
+            resume_p = pipeline.only_nodes(*node_names)
 
-            command += " --from-inputs {}".format(",".join(resume_pipeline.inputs()))
+            start_p = resume_p.only_nodes_with_inputs(*resume_p.inputs())
+            start_node_names = (n.name for n in start_p.nodes)
+            postfix += '  --from-nodes "{}"'.format(",".join(start_node_names))
 
         self._logger.warning(
             "There are %d nodes that have not run.\n"
-            "You can resume the pipeline run with the following command:\n%s",
+            "You can resume the pipeline run by adding the following "
+            "argument to your previous command:\n%s",
             len(remaining_nodes),
-            command,
+            postfix,
         )
 
 

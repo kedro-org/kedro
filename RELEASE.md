@@ -1,4 +1,4 @@
-# Release 0.15.6
+# Upcoming
 
 ## Major features and improvements
 * Added the following datasets:
@@ -71,6 +71,7 @@
 * `Pipeline.transform` skips modifying node inputs/outputs containing `params:` or `parameters` keywords.
 * Support for `dataset_credentials` key in the credentials for `PartitionedDataSet` is now deprecated. The dataset credentials should be specified explicitly inside the dataset config.
 * Datasets can have a new `confirm` function which is called after a successful node function execution if the node contains `confirms` argument with such dataset name.
+* Make the resume prompt on pipeline run failure use `--from-nodes` instead of `--from-inputs` to avoid unnecessarily re-running nodes that had already executed.
 * When closed, Jupyter notebook kernels are automatically terminated after 30 seconds of inactivity by default. Use `--idle-timeout` option to update it.
 * Added `kedro-viz` to the Kedro project template `requirements.txt` file.
 

@@ -44,8 +44,8 @@ For contributors, if you would like to submit a new dataset, you will have to ex
 In order to enable versioning, you need to update the `catalog.yml` config file and set the `versioned` attribute to `true` for the given dataset. If this is a custom dataset, the implementation must also:
   1. extend `kedro.io.core.AbstractVersionedDataSet` AND
   2. add `version` namedtuple as an argument to its `__init__` method AND
-  3. call `super().__init__()` with positional arguments `filepath`, `version`, and, optionally, with a `glob` and an `exists` functions if it uses non-local filesystem (see [kedro.io.CSVLocalDataSet](/kedro.io.CSVLocalDataSet) and [kedro.io.CSVS3DataSet](/kedro.io.CSVS3DataSet) for examples) AND
-  4. modify its `_describe`, `_load` and `_save` methods respectively to support versioning (see [`kedro.io.CSVLocalDataSet`](/kedro.io.CSVLocalDataSet) for an example implementation)
+  3. call `super().__init__()` with positional arguments `filepath`, `version`, and, optionally, with a `glob` and an `exists` functions if it uses non-local filesystem (see [kedro.extras.datasets.pandas.CSVDataSet](/kedro.extras.datasets.pandas.CSVDataSet) as an example) AND
+  4. modify its `_describe`, `_load` and `_save` methods respectively to support versioning (see [`kedro.extras.datasets.pandas.CSVDataSet`](/kedro.extras.datasets.pandas.CSVDataSet) for an example implementation)
 
 An example dataset could look similar to the below:
 
@@ -101,25 +101,25 @@ The easiest way to version a specific dataset is to change the corresponding ent
 For example, if the following dataset was defined in the `catalog.yml`:
 
 ```yaml
-cars.csv:
-  type: CSVLocalDataSet
-  filepath: data/01_raw/company/cars.csv
+cars:
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/company/car_data.csv
   versioned: true
 ```
 
-the `DataCatalog` will create a versioned `CSVLocalDataSet` called `cars.csv`. The actual csv file location will look like `data/01_raw/company/cars.csv/<version>/cars.csv`, where `<version>` corresponds to a global save version string formatted as `YYYY-MM-DDThh.mm.ss.sssZ`. Every time the `DataCatalog` is instantiated, it generates a new global save version, which is propagated to all versioned datasets it contains.
+the `DataCatalog` will create a versioned `CSVDataSet` called `cars`. The actual csv file location will look like `data/01_raw/company/car_data.csv/<version>/car_data.csv`, where `<version>` corresponds to a global save version string formatted as `YYYY-MM-DDThh.mm.ss.sssZ`. Every time the `DataCatalog` is instantiated, it generates a new global save version, which is propagated to all versioned datasets it contains.
 
-> **Important:** the `DataCatalog` does not re-generate save versions between instantiations. Therefore, if you call `catalog.save('cars.csv', some_data)` twice, then the second call will fail, since it tries to overwrite a versioned dataset using the same save version. This limitation does not apply to `load` operation.
+> **Important:** the `DataCatalog` does not re-generate save versions between instantiations. Therefore, if you call `catalog.save('cars', some_data)` twice, then the second call will fail, since it tries to overwrite a versioned dataset using the same save version. To mitigate this, reload your data catalog by calling `%reload_kedro` line magic. This limitation does not apply to `load` operation.
 
 By default, the `DataCatalog` will load the latest version of the dataset. However, it is also possible to specify an exact load version. In order to do that, you can pass a dictionary with exact load versions to `DataCatalog.from_config`:
 
 ```python
-load_versions = {"cars.csv": "2019-02-13T14.35.36.518Z"}
+load_versions = {"cars": "2019-02-13T14.35.36.518Z"}
 io = DataCatalog.from_config(catalog_config, credentials, load_versions=load_versions)
-cars = io.load("cars.csv")
+cars = io.load("cars")
 ```
 
-The last row in the example above would attempt to load a CSV file from `data/01_raw/company/cars.csv/2019-02-13T14.35.36.518Z/cars.csv`.
+The last row in the example above would attempt to load a CSV file from `data/01_raw/company/car_data.csv/2019-02-13T14.35.36.518Z/car_data.csv`.
 
 > `load_versions` configuration has an effect only if a dataset versioning has been enabled in the catalog config file - see the example above.
 
@@ -130,7 +130,8 @@ The last row in the example above would attempt to load a CSV file from `data/01
 Although we recommend enabling versioning using the `catalog.yml` config file as described in the section above, you may require more control over load and save versions of a specific dataset. To achieve this you can instantiate `Version` and pass it as a parameter to the dataset initialisation:
 
 ```python
-from kedro.io import CSVLocalDataSet, DataCatalog, Version
+from kedro.io import DataCatalog, Version
+from kedro.extras.datasets.pandas import CSVDataSet
 import pandas as pd
 
 data1 = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
@@ -139,8 +140,10 @@ version = Version(
     load=None,  # load the latest available version
     save=None,  # generate save version automatically on each save operation
 )
-test_data_set = CSVLocalDataSet(
+
+test_data_set = CSVDataSet(
     filepath="data/01_raw/test.csv", save_args={"index": False}, version=version,
+
 )
 io = DataCatalog({"test_data_set": test_data_set})
 
@@ -161,8 +164,10 @@ version = Version(
     load="my_exact_version",  # load exact version
     save="my_exact_version",  # save to exact version
 )
-test_data_set = CSVLocalDataSet(
+
+test_data_set = CSVDataSet(
     filepath="data/01_raw/test.csv", save_args={"index": False}, version=version,
+
 )
 io = DataCatalog({"test_data_set": test_data_set})
 
@@ -184,8 +189,10 @@ version = Version(
     load="exact_load_version",  # load exact version
     save="exact_save_version",  # save to exact version
 )
-test_data_set = CSVLocalDataSet(
+
+test_data_set = CSVDataSet(
     filepath="data/01_raw/test.csv", save_args={"index": False}, version=version,
+
 )
 io = DataCatalog({"test_data_set": test_data_set})
 
@@ -200,34 +207,21 @@ reloaded = io.load("test_data_set")
 
 Currently the following datasets support versioning:
 
-- `CSVLocalDataSet`
-- `CSVDataSet`
-- `CSVS3DataSet`
-- `HDFDataSet`
-- `HDFLocalDataSet`
-- `HDFS3DataSet`
-- `JSONLocalDataSet`
-- `JSONDataSet`
-- `ParquetDataSet`
-- `ParquetLocalDataSet`
-- `PickleLocalDataSet`
-- `PickleS3DataSet`
-- `PickleDataSet`
-- `TextDataSet`
-- `TextLocalDataSet`
-- `ExcelDataSet`
-- `ExcelLocalDataSet`
-- `YAMLDataSet`
-- `kedro.contrib.io.azure.CSVBlobDataSet`
-- `kedro.contrib.io.feather.FeatherLocalDataSet`
-- `kedro.contrib.io.networkx.NetworkXDataSet`
-- `kedro.contrib.io.networkx.NetworkXLocalDataSet`
-- `kedro.contrib.io.parquet.ParquetS3DataSet`
-- `kedro.contrib.io.pyspark.SparkDataSet`
-- `kedro.contrib.io.gcs.JSONGCSDataSet`
-- `kedro.contrib.io.gcs.CSVGCSDataSet`
-- `kedro.contrib.io.gcs.ParquetGCSDataSet`
+- `kedro.extras.datasets.matplotlib.Matplotlib`
+- `kedro.extras.datasets.networkx.NetworkXDataSet`
+- `kedro.extras.datasets.pandas.CSVBlobDataSet`
+- `kedro.extras.datasets.pandas.CSVDataSet`
+- `kedro.extras.datasets.pandas.ExcelDataSet`
 - `kedro.extras.datasets.pandas.FeatherDataSet`
+- `kedro.extras.datasets.pandas.HDFDataSet`
+- `kedro.extras.datasets.pandas.JSONDataSet`
+- `kedro.extras.datasets.pandas.ParquetDataSet`
+- `kedro.extras.datasets.pickle.PickleDataSet`
+- `kedro.extras.datasets.text.TextDataSet`
+- `kedro.extras.datasets.spark.SparkDataSet`
+- `kedro.extras.datasets.yaml.YAMLDataSet`
+
+> _Note:_ Although, HTTPs is a supported file system in the dataset implementations, it does not support versioning.
 
 ## Partitioned dataset
 
@@ -250,7 +244,7 @@ This is the reason why Kedro provides a built-in [PartitionedDataSet](/kedro.io.
 my_partitioned_dataset:
   type: "PartitionedDataSet"
   path: "s3://my-bucket-name/path/to/folder"  # path to the location of partitions
-  dataset: "CSVDataSet"  # shorthand notation for the dataset which will handle individual partitions
+  dataset: "pandas.CSVDataSet"  # shorthand notation for the dataset which will handle individual partitions
   credentials: "my_credentials"
   load_args:
     load_arg1: "value1"
@@ -282,7 +276,7 @@ my_partitioned_dataset:
   type: "PartitionedDataSet"
   path: "s3://my-bucket-name/path/to/folder"
   dataset:  # full dataset config notation
-    type: "kedro.extras.datasets.pandas.CSVDataSet"  # supports any importable fully qualified class path
+    type: "pandas.CSVDataSet"
     load_args:
       delimiter: ","
     save_args:
@@ -298,23 +292,24 @@ my_partitioned_dataset:
 Here is an exhaustive list of the arguments supported by `PartitionedDataSet`:
 
 ```eval_rst
-+-------------------+-------------------------------+--------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Argument          | Required                      | Supported types                                  | Description                                                                                                                                                                                                                                   |
-+===================+===============================+==================================================+===============================================================================================================================================================================================================================================+
-| `path`            | Yes                           | `str`                                            | Path to the folder containing partitioned data. If path starts with the protocol (e.g., `s3://`) then the corresponding `fsspec` concrete filesystem implementation will be used. If protocol is not specified, local filesystem will be used |
-+-------------------+-------------------------------+--------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| `dataset`         | Yes                           | `str`, `Type[AbstractDataSet]`, `Dict[str, Any]` | Underlying dataset definition, for more details see [the section below](#dataset-definition)                                                                                                                                                  |
-+-------------------+-------------------------------+--------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| `credentials`     | No                            | `Dict[str, Any]`                                 | Protocol-specific options that will be passed to `fsspec.filesystemcall`, for more details see [the section below](#partitioned-dataset-credentials)                                                                                          |
-+-------------------+-------------------------------+--------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| `load_args`       | No                            | `Dict[str, Any]`                                 | Keyword arguments to be passed into `find()` method of the corresponding filesystem implementation                                                                                                                                            |
-+-------------------+-------------------------------+--------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| `filepath_arg`    | No                            | `str`                                            | Argument name of the underlying dataset initializer that will contain a path to an individual partition                                                                                                                                       |
-|                   | (defaults to `filepath`)      |                                                  |                                                                                                                                                                                                                                               |
-+-------------------+-------------------------------+--------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| `filename_suffix` | No                            | `str`                                            | If specified, partitions that don't end with this string will be ignored                                                                                                                                                                      |
-|                   | (defaults to an empty string) |                                                  |                                                                                                                                                                                                                                               |
-+-------------------+-------------------------------+--------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
++-------------------------+--------------------------------+--------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Argument                | Required                       | Supported types                                  | Description                                                                                                                                                                                                                                               |
++=========================+================================+==================================================+===========================================================================================================================================================================================================================================================+
+| :code:`path`            | Yes                            | :code:`str`                                      | Path to the folder containing partitioned data. If path starts with the protocol (e.g., :code:`s3://`) then the corresponding :code:`fsspec` concrete filesystem implementation will be used. If protocol is not specified, local filesystem will be used |
++-------------------------+--------------------------------+--------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| :code:`dataset`         | Yes                            | :code:`str`,  :code:`Type[AbstractDataSet]`,     | Underlying dataset definition, for more details see [the section below](#dataset-definition)                                                                                                                                                              |
+|                         |                                | :code:`Dict[str, Any]`                           |                                                                                                                                                                                                                                                           |
++-------------------------+--------------------------------+--------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| :code:`credentials`     | No                             | :code:`Dict[str, Any]`                           | Protocol-specific options that will be passed to :code:`fsspec.filesystemcall`, for more details see [the section below](#partitioned-dataset-credentials)                                                                                                |
++-------------------------+--------------------------------+--------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| :code:`load_args`       | No                             | :code:`Dict[str, Any]`                           | Keyword arguments to be passed into :code:`find()` method of the corresponding filesystem implementation                                                                                                                                                  |
++-------------------------+--------------------------------+--------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| :code:`filepath_arg`    | No                             | :code:`str`                                      | Argument name of the underlying dataset initializer that will contain a path to an individual partition                                                                                                                                                   |
+|                         | (defaults to :code:`filepath`) |                                                  |                                                                                                                                                                                                                                                           |
++-------------------------+--------------------------------+--------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| :code:`filename_suffix` | No                             | :code:`str`                                      | If specified, partitions that don't end with this string will be ignored                                                                                                                                                                                  |
+|                         | (defaults to an empty string)  |                                                  |                                                                                                                                                                                                                                                           |
++-------------------------+--------------------------------+--------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 ```
 
 #### Dataset definition
@@ -323,7 +318,7 @@ Dataset definition should be passed into the `dataset` argument of the `Partitio
 
 ##### Shorthand notation
 
-Requires you to only specify a class of the underlying dataset either as a string (e.g. `CSVDataSet` or a fully qualified class path like `kedro.extras.datasets.pandas.CSVDataSet`) or as a class object that is a subclass of the [AbstractDataSet](/kedro.io.AbstractDataSet).
+Requires you to only specify a class of the underlying dataset either as a string (e.g. `pandas.CSVDataSet` or a fully qualified class path like `kedro.extras.datasets.pandas.CSVDataSet`) or as a class object that is a subclass of the [AbstractDataSet](/kedro.io.AbstractDataSet).
 
 ##### Full notation
 
@@ -341,27 +336,29 @@ Credentials management for `PartitionedDataSet` is somewhat special in a sense t
 Here is the full list of possible scenarios:
 
 ```eval_rst
-+-------------------+--------------------+------------------------------------------------------------------+----------------------------------------------------------------------------+
-| Top-level         | Underlying dataset | Example `PartitionedDataSet` definition                          | Description                                                                |
-| credentials       | credentials        |                                                                  |                                                                            |
-+-------------------+--------------------+------------------------------------------------------------------+----------------------------------------------------------------------------+
-| Undefined         | Undefined          | PartitionedDataSet(path="s3://bucket-name/path/to/folder",       | Credentials are not passed to the underlying dataset or the filesystem     |
-|                   |                    | dataset="CSVDataSet")                                            |                                                                            |
-+-------------------+--------------------+------------------------------------------------------------------+----------------------------------------------------------------------------+
-| Undefined         | Specified          | PartitionedDataSet(path="s3://bucket-name/path/to/folder",       | Underlying dataset credentials are passed to the `CSVDataSet` constructor, |
-|                   |                    | dataset={"type": "CSVDataSet", "credentials": {"secret": True}}) | filesystem is instantiated without credentials                             |
-+-------------------+--------------------+------------------------------------------------------------------+----------------------------------------------------------------------------+
-| Specified         | Undefined          | PartitionedDataSet(path="s3://bucket-name/path/to/folder",       | Top-level credentials are passed to the underlying `CSVDataSet`            |
-|                   |                    | dataset="CSVDataSet", credentials={"secret": True})              | constructor and the filesystem                                             |
-+-------------------+--------------------+------------------------------------------------------------------+----------------------------------------------------------------------------+
-| Specified         | `None`             | PartitionedDataSet(path="s3://bucket-name/path/to/folder",       | Top-level credentials are passed to the filesystem, `CSVDataSet` is        |
-|                   |                    | dataset={"type": "CSVDataSet", "credentials": None},             | instantiated without credentials - this way you can stop the top-level     |
-|                   |                    | credentials={"dataset_secret": True})                            | credentials from propagating into the dataset config                       |
-+-------------------+--------------------+------------------------------------------------------------------+----------------------------------------------------------------------------+
-| Specified         | Specified          | PartitionedDataSet(path="s3://bucket-name/path/to/folder",       | Top-level credentials are passed to the filesystem, underlying dataset     |
-|                   |                    | dataset={"type": "CSVDataSet", "credentials":                    | credentials are passed to the `CSVDataSet` constructor                     |
-|                   |                    | {"dataset_secret": True}}, credentials={"secret": True})         |                                                                            |
-+-------------------+--------------------+------------------------------------------------------------------+----------------------------------------------------------------------------+
++-------------------+--------------------+--------------------------------------------------------------------+----------------------------------------------------------------------------+
+| Top-level         | Underlying dataset | Example :code:`PartitionedDataSet` definition                      | Description                                                                |
+| credentials       | credentials        |                                                                    |                                                                            |
++===================+====================+====================================================================+============================================================================+
+| Undefined         | Undefined          | :code:`PartitionedDataSet(path="s3://bucket-name/path/to/folder",` | Credentials are not passed to the underlying dataset or the filesystem     |
+|                   |                    | :code:`dataset="CSVDataSet")`                                      |                                                                            |
++-------------------+--------------------+--------------------------------------------------------------------+----------------------------------------------------------------------------+
+| Undefined         | Specified          | :code:`PartitionedDataSet(path="s3://bucket-name/path/to/folder",` | Underlying dataset credentials are passed to the :code:`CSVDataSet`        |
+|                   |                    | :code:`dataset={"type": "CSVDataSet",`                             | constructor, filesystem is instantiated without credentials                |
+|                   |                    | :code:`"credentials": {"secret": True}})`                          |                                                                            |
++-------------------+--------------------+--------------------------------------------------------------------+----------------------------------------------------------------------------+
+| Specified         | Undefined          | :code:`PartitionedDataSet(path="s3://bucket-name/path/to/folder",` | Top-level credentials are passed to the underlying :code:`CSVDataSet`      |
+|                   |                    | :code:`dataset="CSVDataSet", credentials={"secret": True})`        | constructor and the filesystem                                             |
++-------------------+--------------------+--------------------------------------------------------------------+----------------------------------------------------------------------------+
+| Specified         | :code:`None`       | :code:`PartitionedDataSet(path="s3://bucket-name/path/to/folder",` | Top-level credentials are passed to the filesystem, :code:`CSVDataSet` is  |
+|                   |                    | :code:`dataset={"type": "CSVDataSet", "credentials": None},`       | instantiated without credentials - this way you can stop the top-level     |
+|                   |                    | :code:`credentials={"dataset_secret": True})`                      | credentials from propagating into the dataset config                       |
++-------------------+--------------------+--------------------------------------------------------------------+----------------------------------------------------------------------------+
+| Specified         | Specified          | :code:`PartitionedDataSet(path="s3://bucket-name/path/to/folder",` | Top-level credentials are passed to the filesystem, underlying dataset     |
+|                   |                    | :code:`dataset={"type": "CSVDataSet",`                             | credentials are passed to the :code:`CSVDataSet` constructor               |
+|                   |                    | :code:`"credentials":{"dataset_secret": True}},`                   |                                                                            |
+|                   |                    | :code:`credentials={"secret": True})`                              |                                                                            |
++-------------------+--------------------+--------------------------------------------------------------------+----------------------------------------------------------------------------+
 ```
 
 ### Partitioned dataset load
@@ -420,7 +417,7 @@ As you can see from the example above, on load `PartitionedDataSet` _does not_ a
 new_partitioned_dataset:
   type: "PartitionedDataSet"
   path: "s3://my-bucket-name"
-  dataset: "CSVDataSet"
+  dataset: "pandas.CSVDataSet"
   filename_suffix: ".csv"
 ```
 
@@ -535,7 +532,7 @@ Here are 2 important notes about the confirmation operation:
 my_partitioned_dataset:
   type: "IncrementalDataSet"
   path: "s3://my-bucket-name/path/to/folder"
-  dataset: "CSVDataSet"
+  dataset: "pandas.CSVDataSet"
   checkpoint:
     # update the filepath and load_args, but keep the dataset type unchanged
     filepath: "gcs://other-bucket/CHECKPOINT"
@@ -552,7 +549,7 @@ Along with the standard dataset attributes, `checkpoint` config also accepts 2 s
 my_partitioned_dataset:
   type: "IncrementalDataSet"
   path: "s3://my-bucket-name/path/to/folder"
-  dataset: "CSVDataSet"
+  dataset: "pandas.CSVDataSet"
   checkpoint:
     comparison_func: "my_module.path.to.custom_comparison_function"  # the path must be importable
 ```
@@ -563,7 +560,7 @@ my_partitioned_dataset:
 my_partitioned_dataset:
   type: "IncrementalDataSet"
   path: "s3://my-bucket-name/path/to/folder"
-  dataset: "CSVDataSet"
+  dataset: "pandas.CSVDataSet"
   checkpoint:
     force_checkpoint: "2020-01-01/data.csv"
 ```
@@ -574,7 +571,7 @@ my_partitioned_dataset:
 my_partitioned_dataset:
   type: "IncrementalDataSet"
   path: "s3://my-bucket-name/path/to/folder"
-  dataset: "CSVDataSet"
+  dataset: "pandas.CSVDataSet"
   checkpoint: "2020-01-01/data.csv"
 ```
 
@@ -584,6 +581,6 @@ my_partitioned_dataset:
 my_partitioned_dataset:
   type: "IncrementalDataSet"
   path: "s3://my-bucket-name/path/to/folder"
-  dataset: "CSVDataSet"
+  dataset: "pandas.CSVDataSet"
   checkpoint: ""
 ```

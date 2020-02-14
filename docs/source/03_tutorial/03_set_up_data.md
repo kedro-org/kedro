@@ -20,6 +20,9 @@ The spaceflight tutorial has three files and uses two data formats: `.csv` and `
 
 Here is an example of how you can [download the files from GitHub](https://www.quora.com/How-do-I-download-something-from-GitHub) to `data/01_raw` directory inside your project using [cURL](https://curl.haxx.se/download.html) in a Unix terminal:
 
+<details>
+<summary><b>Click to expand</b></summary>
+
 ```bash
 # reviews
 curl -o data/01_raw/reviews.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/reviews.csv
@@ -28,8 +31,12 @@ curl -o data/01_raw/companies.csv https://raw.githubusercontent.com/quantumblack
 # shuttles
 curl -o data/01_raw/shuttles.xlsx https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/shuttles.xlsx
 ```
+</details>
 
 Or through using [Wget](https://www.gnu.org/software/wget/):
+
+<details>
+<summary><b>Click to expand</b></summary>
 
 ```bash
 # reviews
@@ -39,22 +46,31 @@ wget -O data/01_raw/companies.csv https://raw.githubusercontent.com/quantumblack
 # shuttles
 wget -O data/01_raw/shuttles.xlsx https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/shuttles.xlsx
 ```
+</details>
 
 Alternatively, if you are a Windows user, try [Wget for Windows](https://eternallybored.org/misc/wget/) and the following commands instead:
+
+<details>
+<summary><b>Click to expand</b></summary>
 
 ```bat
 wget -O data\01_raw\reviews.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/reviews.csv
 wget -O data\01_raw\companies.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/companies.csv
 wget -O data\01_raw\shuttles.xlsx https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/shuttles.xlsx
 ```
+</details>
 
 or [cURL for Windows](https://curl.haxx.se/windows/):
+
+<details>
+<summary><b>Click to expand</b></summary>
 
 ```bat
 curl -o data\01_raw\reviews.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/reviews.csv
 curl -o data\01_raw\companies.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/companies.csv
 curl -o data\01_raw\shuttles.xlsx https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/shuttles.xlsx
 ```
+</details>
 
 
 ## Reference all datasets
@@ -68,17 +84,17 @@ All Kedro projects have a `conf/base/catalog.yml` file where users register the 
 * Type of data
 * Versioning
 
-Kedro supports a number of different data types, such as `csv`, which is implemented by `CSVLocalDataSet`. The full list of supported datasets can be found in the [API documentation](../kedro.io.rst#data-sets).
+Kedro supports a number of different data types. The full list of supported datasets can be found in the API documentation. Kedro uses [`fssspec`](https://filesystem-spec.readthedocs.io/en/latest/) to read data from a variety of data stores including local file systems, network file systems, cloud object stores and HDFS.
 
 Let’s start this process by registering the `csv` datasets by copying the following to the end of the `conf/base/catalog.yml` file:
 
 ```yaml
 companies:
-  type: CSVLocalDataSet
+  type: pandas.CSVDataSet
   filepath: data/01_raw/companies.csv
 
 reviews:
-  type: CSVLocalDataSet
+  type: pandas.CSVDataSet
   filepath: data/01_raw/reviews.csv
 ```
 
@@ -115,7 +131,7 @@ Or, if you are a Windows user:
 mkdir src\kedro_tutorial\io && type nul > src\kedro_tutorial\io\__init__.py
 ```
 
-Creating new custom dataset implementations is done by creating a class that extends and implements all methods from `AbstractDataSet`. To implement a class that will allow you to load and save Excel files, you need to create the file `src/kedro_tutorial/io/xls_local.py` by running in your Unix terminal:
+Creating new custom dataset implementations is done by creating a class that extends and implements all methods from `kedro.io.AbstractDataSet`. To implement a class that will allow you to load and save Excel files, you need to create the file `src/kedro_tutorial/io/xls_local.py` by running the following in your Unix terminal:
 
 ```bash
 touch src/kedro_tutorial/io/xls_local.py
@@ -128,7 +144,7 @@ type nul > src\kedro_tutorial\io\xls_local.py
 and paste the following into the newly created file:
 
 ```python
-"""ExcelLocalDataSet loads and saves data to a local Excel file. The
+"""ExcelDataSet loads and saves data to a local Excel file. The
 underlying functionality is supported by pandas, so it supports all
 allowed pandas options for loading and saving Excel files.
 """
@@ -139,9 +155,8 @@ import pandas as pd
 
 from kedro.io import AbstractDataSet
 
-
-class ExcelLocalDataSet(AbstractDataSet):
-    """``ExcelLocalDataSet`` loads and saves data to a local Excel file. The
+class ExcelDataSet(AbstractDataSet):
+    """``ExcelDataSet`` loads and saves data to a local Excel file. The
     underlying functionality is supported by pandas, so it supports all
     allowed pandas options for loading and saving Excel files.
 
@@ -152,7 +167,7 @@ class ExcelLocalDataSet(AbstractDataSet):
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
-        >>> data_set = ExcelLocalDataSet(filepath="test.xlsx",
+        >>> data_set = ExcelDataSet(filepath="test.xlsx",
         >>>                              load_args={'sheet_name':"Sheet1"},
         >>>                              save_args=None)
         >>> data_set.save(data)
@@ -177,7 +192,7 @@ class ExcelLocalDataSet(AbstractDataSet):
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``ExcelLocalDataSet`` pointing to a concrete
+        """Creates a new instance of ``ExcelDataSet`` pointing to a concrete
         filepath.
 
         Args:
@@ -225,15 +240,23 @@ class ExcelLocalDataSet(AbstractDataSet):
         return isfile(self._filepath)
 ```
 
-And update the `conf/base/catalog.yml` file by adding the following:
+> _Note:_ This dataset will only work with Excel files on local file systems as it does not have an integration with [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/), a tool that we use to abstract file storage.
+
+Update the `conf/base/catalog.yml` file by adding the following full import path:
 
 ```yaml
 shuttles:
-  type: kedro_tutorial.io.xls_local.ExcelLocalDataSet
+  type: kedro_tutorial.io.xls_local.ExcelDataSet
   filepath: data/01_raw/shuttles.xlsx
 ```
 
-> *Note:* The `type` specified is `kedro_tutorial.io.xls_local.ExcelLocalDataSet` which points Kedro to use the custom dataset implementation. To use Kedro's internal support for reading Excel datasets, you can simply specify `ExcelLocalDataSet`, which is implemented as in the code above.
+The `type` specified is `kedro_tutorial.io.xls_local.ExcelDataSet` which points Kedro to use the custom dataset implementation. To use Kedro's internal support for reading Excel datasets, you can simply specify `pandas.ExcelDataSet`, which is implemented as in the code below:
+
+```yaml
+shuttles:
+  type: pandas.ExcelDataSet
+  filepath: data/01_raw/shuttles.xlsx
+```
 
 A good way to test that everything works as expected is by trying to load the dataset within a new `kedro ipython` session:
 
@@ -243,4 +266,4 @@ context.catalog.load("shuttles").head()
 
 ### Contributing a custom dataset implementation
 
-Kedro users create many custom dataset implementations while working on real-world projects, and it makes sense that they should be able to share their work with each other. That is why Kedro has a `kedro.contrib` sub-package, where users can add new custom dataset implementations to help others in our community. Sharing your custom datasets implementations is possibly the easiest way to contribute back to Kedro and if you are interested in doing so, you can check out the Kedro contribution guide on the [GitHub repo](https://github.com/quantumblacklabs/kedro).
+Kedro users create many custom dataset implementations while working on real-world projects, and it makes sense that they should be able to share their work with each other. That is why Kedro has a `kedro.extras.datasets` sub-package, where users can add new custom dataset implementations to help others in our community. Sharing your custom datasets implementations is possibly the easiest way to contribute back to Kedro and if you are interested in doing so, you can check out the Kedro [contribution guide](https://github.com/quantumblacklabs/kedro/blob/develop/CONTRIBUTING.md) on the GitHub repo.

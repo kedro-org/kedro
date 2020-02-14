@@ -62,24 +62,24 @@ Use the `notebooks` folder for experimental code and move the code to `src/` as 
 A `kedro` project consists of the following main components:
 
 ```eval_rst
-+--------------+----------------------------------------------------------------------+
-| Component    | Description                                                          |
-+==============+======================================================================+
-| Data Catalog | A collection of datasets that can be used to form the data pipeline. |
-|              | Each dataset provides :code:`load` and :code:`save` capabilities for |
-|              | a specific data type, e.g. :code:`CSVS3DataSet` loads and saves data |
-|              | to a csv file in S3.                                                 |
-+--------------+----------------------------------------------------------------------+
-| Pipeline     | A collection of nodes. A pipeline takes care of node dependencies    |
-|              | and execution order.                                                 |
-+--------------+----------------------------------------------------------------------+
-| Node         | A Python function which executes some business logic, e.g. data      |
-|              | cleaning, dropping columns, validation, model training, scoring, etc.|
-+--------------+----------------------------------------------------------------------+
-| Runner       | An object that runs the :code:`kedro` pipeline using the specified   |
-|              | data catalog. Currently :code:`kedro` supports 2 runner types:       |
-|              | :code:`SequentialRunner` and :code:`ParallelRunner`.                 |
-+--------------+----------------------------------------------------------------------+
++--------------+-----------------------------------------------------------------------------+
+| Component    | Description                                                                 |
++==============+=============================================================================+
+| Data Catalog | A collection of datasets that can be used to form the data pipeline.        |
+|              | Each dataset provides :code:`load` and :code:`save` capabilities for        |
+|              | a specific data type, e.g. :code:`pandas.CSVDataSet` loads and saves data   |
+|              | to a CSV file.                                                              |
++--------------+-----------------------------------------------------------------------------+
+| Pipeline     | A collection of nodes. A pipeline takes care of node dependencies           |
+|              | and execution order.                                                        |
++--------------+-----------------------------------------------------------------------------+
+| Node         | A Python function which executes some business logic, e.g. data             |
+|              | cleaning, dropping columns, validation, model training, scoring, etc.       |
++--------------+-----------------------------------------------------------------------------+
+| Runner       | An object that runs the :code:`kedro` pipeline using the specified          |
+|              | data catalog. Currently :code:`kedro` supports 2 runner types:              |
+|              | :code:`SequentialRunner` and :code:`ParallelRunner`.                        |
++--------------+-----------------------------------------------------------------------------+
 ```
 
 

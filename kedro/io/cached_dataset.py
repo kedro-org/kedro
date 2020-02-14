@@ -32,10 +32,9 @@ so that the user avoids io operations with slow storage media
 """
 import logging
 from typing import Any, Dict, Union
-from warnings import warn
 
-from kedro.io import AbstractDataSet, MemoryDataSet, Version
-from kedro.io.core import VERSIONED_FLAG_KEY
+from kedro.io.core import VERSIONED_FLAG_KEY, AbstractDataSet, Version
+from kedro.io.memory_data_set import MemoryDataSet
 
 
 class CachedDataSet(AbstractDataSet):
@@ -46,10 +45,10 @@ class CachedDataSet(AbstractDataSet):
     ::
 
         >>> test_ds:
-        >>>    type: kedro.contrib.io.cached.CachedDataSet
+        >>>    type: CachedDataSet
         >>>    versioned: true
         >>>    dataset:
-        >>>       type: CSVLocalDataSet
+        >>>       type: pandas.CSVDataSet
         >>>       filepath: example.csv
 
     Please note that if your dataset is versioned, this should be indicated in the wrapper
@@ -57,11 +56,6 @@ class CachedDataSet(AbstractDataSet):
     """
 
     def __init__(self, dataset: Union[AbstractDataSet, Dict], version: Version = None):
-        warn(
-            "kedro.contrib.io.cached.CachedDataSet will be deprecated in future releases. "
-            "Please refer to replacement dataset in kedro.io.",
-            DeprecationWarning,
-        )
         if isinstance(dataset, Dict):
             self._dataset = self._from_config(dataset, version)
         elif isinstance(dataset, AbstractDataSet):

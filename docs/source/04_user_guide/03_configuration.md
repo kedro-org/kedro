@@ -72,10 +72,10 @@ export KEDRO_ENV=test
 
 ## Templating configuration
 
-Kedro also provides an extension [TemplatedConfigLoader](/kedro.contrib.config.templated_config.TemplatedConfigLoader) class that allows to template values in your configuration files. `TemplatedConfigLoader` is available in `contrib`, to apply templating to your `ProjectContext` in `src/<project-name>/run.py`, you will need to overwrite the `_create_config_loader` method as follows:
+Kedro also provides an extension [TemplatedConfigLoader](/kedro.config.TemplatedConfigLoader) class that allows to template values in your configuration files. `TemplatedConfigLoader` is available in `kedro.config`, to apply templating to your `ProjectContext` in `src/<project-name>/run.py`, you will need to overwrite the `_create_config_loader` method as follows:
 
 ```python
-from kedro.contrib.config import TemplatedConfigLoader  # new import
+from kedro.config import TemplatedConfigLoader  # new import
 
 
 class ProjectContext(KedroContext):
@@ -97,8 +97,8 @@ bucket_name: "my_s3_bucket"
 key_prefix: "my/key/prefix/"
 
 datasets:
-    csv: "CSVS3DataSet"
-    spark: "SparkDataSet"
+    csv: "pandas.CSVDataSet"
+    spark: "spark.SparkDataSet"
 
 folders:
     raw: "01_raw"
@@ -114,7 +114,10 @@ The contents of the dictionary resulting from `globals_pattern` get merged with 
     "bucket_name": "another_bucket_name",
     "non_string_key": 10,
     "key_prefix": "my/key/prefix",
-    "datasets": {"csv": "CSVS3DataSet", "spark": "SparkDataSet"},
+    "datasets": {
+        "csv": "pandas.CSVDataSet",
+        "spark": "spark.SparkDataSet"
+    },
     "folders": {
         "raw": "01_raw",
         "int": "02_intermediate",
@@ -134,9 +137,7 @@ raw_boat_data:
 
 raw_car_data:
     type: "${datasets.csv}"
-    filepath: "data/${key_prefix}/${folders.raw}/cars.csv"
-    bucket_name: "${bucket_name}"
-    file_format: "${non.existent.key|parquet}"  # default to 'parquet' if the key is not found in the global dict
+    filepath: "s3://${bucket_name}/data/${key_prefix}/${folders.raw}/${filename|cars.csv}"  # default to 'cars.csv' if the 'filename' key is not found in the global dict
 ```
 
 > Note: `TemplatedConfigLoader` uses `jmespath` package in the background to extract elements from global dictionary. For more information about JMESPath syntax please see: https://github.com/jmespath/jmespath.py.

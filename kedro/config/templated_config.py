@@ -32,11 +32,10 @@ with the values from the passed dictionary.
 import re
 from copy import deepcopy
 from typing import Any, Dict, Iterable, Optional, Union
-from warnings import warn
 
 import jmespath
 
-from kedro.config import ConfigLoader
+from kedro.config.config import ConfigLoader
 
 IDENTIFIER_PATTERN = re.compile(
     r"""\$\{
@@ -69,7 +68,7 @@ class TemplatedConfigLoader(ConfigLoader):
     ::
 
         >>> from kedro.context import KedroContext, load_context
-        >>> from kedro.contrib.config import TemplatedConfigLoader
+        >>> from kedro.config import TemplatedConfigLoader
         >>>
         >>>
         >>> class MyNewContext(KedroContext):
@@ -78,7 +77,7 @@ class TemplatedConfigLoader(ConfigLoader):
         >>>         return TemplatedConfigLoader(
         >>>             conf_paths,
         >>>             globals_pattern="*globals.yml",
-        >>>             globals_dict={"param1": "CSVLocalDataSet"}
+        >>>             globals_dict={"param1": "pandas.CSVDataSet"}
         >>>         )
         >>>
         >>> my_context = load_context(Path.cwd(), env=env)
@@ -101,8 +100,8 @@ class TemplatedConfigLoader(ConfigLoader):
         environment: "dev"
 
         datasets:
-            csv: "CSVS3DataSet"
-            spark: "SparkDataSet"
+            csv: "pandas.CSVDataSet"
+            spark: "spark.SparkDataSet"
 
         folders:
             raw: "01_raw"
@@ -121,14 +120,13 @@ class TemplatedConfigLoader(ConfigLoader):
 
         raw_car_data:
             type: "${datasets.csv}"
-            filepath: "data/${environment}/${folders.raw}/cars.csv"
-            bucket_name: "${bucket}"
-            file_format: "${car_file_format|parquet}"
+            filepath: "s3://${bucket}/data/${environment}/${folders.raw}/cars.csv"
 
     This uses ``jmespath`` in the background. For more information see:
     https://github.com/jmespath/jmespath.py and http://jmespath.org/.
     """
 
+    # pylint: disable=missing-type-doc
     def __init__(
         self,
         conf_paths: Union[str, Iterable[str]],
@@ -149,11 +147,7 @@ class TemplatedConfigLoader(ConfigLoader):
                 obtained from the globals_pattern. In case of duplicate keys, the
                 ``globals_dict`` keys take precedence.
         """
-        warn(
-            "kedro.contrib.config.TemplatedConfigLoader will be deprecated in "
-            "future releases. Please refer to replacement in kedro.config.",
-            DeprecationWarning,
-        )
+
         super().__init__(conf_paths)
 
         self._arg_dict = super().get(globals_pattern) if globals_pattern else {}

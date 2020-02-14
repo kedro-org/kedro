@@ -33,3 +33,4 @@ configuration from different file formats.
 
 from .config import ConfigLoader  # NOQA
 from .config import MissingConfigException  # NOQA
+from .templated_config import TemplatedConfigLoader  # NOQA

@@ -12,3 +12,4 @@ kedro.config
       :template: autosummary/class.rst
 
       kedro.config.ConfigLoader
+      kedro.config.TemplatedConfigLoader

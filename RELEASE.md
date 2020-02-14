@@ -61,6 +61,7 @@
   - `kedro.contrib.decorators.pyspark.pandas_to_spark`
 * Transformers to be deprecated:
   - `kedro.contrib.io.transformers.transformers`
+* Kedro CLI arguments `--node` and `--tag` support comma-separated values, alternative methods will be deprecated in future releases.
 * Config loaders to be deprecated:
   - `kedro.contrib.config.TemplatedConfigLoader`
 

@@ -679,7 +679,7 @@ kedro run
 or:
 
 ```bash
-kedro run --tag=ds_tag --tag=de_tag
+kedro run --tag=ds_tag,de_tag
 ```
 
 > *Note:* You can also attach tags to the individual nodes by passing the `tags` keyword to the `node()` function, and these are used in addition to any tags specified at the pipeline level. To tag a node as `my-regressor-node`:

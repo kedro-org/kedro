@@ -584,7 +584,7 @@ Kedro has options to modify pipeline runs. Here is a list of CLI arguments suppo
 +======================================================+=================================================================================+===========================+
 | kedro run --pipeline de                              | Run the whole pipeline by its name                                              | No                        |
 +------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| kedro run --node debug_me --node debug_me_too        | Run only nodes with specified names                                             | Yes                       |
+| kedro run --node debug_me,debug_me_too               | Run only nodes with specified names                                             | Yes                       |
 +------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
 | kedro run --from-nodes node1,node2                   | A list of node names which should be used as a starting point                   | No                        |
 +------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
@@ -592,7 +592,7 @@ Kedro has options to modify pipeline runs. Here is a list of CLI arguments suppo
 +------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
 | kedro run --from-inputs dataset1,dataset2            | A list of dataset names which should be used as a starting point                | No                        |
 +------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| kedro run --tag some_tag1 --tag some_tag2            | Run only nodes which have any of these tags attached                            | Yes                       |
+| kedro run --tag some_tag1,some_tag2                  | Run only nodes which have any of these tags attached                            | Yes                       |
 +------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
 | kedro run --params param_key1:value1,param_key2:2.0  | Does a parametrised kedro run with {"param_key1": "value1", "param_key2": 2}    | Yes                       |
 +------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
@@ -956,7 +956,7 @@ kedro run --node=node1
 You may specify multiple names like so:
 
 ```bash
-kedro run --node=node1 --node=node2
+kedro run --node=node1,node2
 ```
 
 > *Note:* The run will only succeed if all the inputs required by those nodes already exist, i.e. already produced or present in the data catalog.

@@ -36,8 +36,9 @@ import sys
 import webbrowser
 from collections import Counter
 from glob import iglob
+from itertools import chain
 from pathlib import Path
-from typing import Any, Dict, Iterable, List
+from typing import Any, Dict, Iterable, List, Tuple
 
 import anyconfig
 import click
@@ -181,6 +182,10 @@ def _config_file_callback(ctx, param, value):
     return value
 
 
+def _get_values_as_tuple(values: Iterable[str]) -> Tuple[str]:
+    return tuple(chain.from_iterable(value.split(",") for value in values))
+
+
 @click.group(context_settings=CONTEXT_SETTINGS, name=__file__)
 def cli():
     """Command line tools for manipulating a Kedro project."""
@@ -253,6 +258,9 @@ def run(
     if parallel:
         runner = "ParallelRunner"
     runner_class = load_obj(runner, "kedro.runner") if runner else SequentialRunner
+
+    tag = _get_values_as_tuple(tag) if tag else tag
+    node_names = _get_values_as_tuple(node_names) if node_names else node_names
 
     context = load_context(Path.cwd(), env=env, extra_params=params)
     context.run(

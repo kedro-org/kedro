@@ -90,11 +90,11 @@ Let’s start this process by registering the `csv` datasets by copying the foll
 
 ```yaml
 companies:
-  type: pandas.CSVDataSet
+  type: CSVLocalDataSet
   filepath: data/01_raw/companies.csv
 
 reviews:
-  type: pandas.CSVDataSet
+  type: CSVLocalDataSet
   filepath: data/01_raw/reviews.csv
 ```
 

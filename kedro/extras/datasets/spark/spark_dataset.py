@@ -26,7 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``AbstractDataSet`` implementation to access Spark data frames using
+"""``AbstractDataSet`` implementation to access Spark dataframes using
 ``pyspark``
 """
 
@@ -108,7 +108,7 @@ class KedroHdfsInsecureClient(InsecureClient):
 
 
 class SparkDataSet(AbstractVersionedDataSet):
-    """``SparkDataSet`` loads and saves Spark data frames.
+    """``SparkDataSet`` loads and saves Spark dataframes.
 
     Example:
     ::
@@ -149,11 +149,11 @@ class SparkDataSet(AbstractVersionedDataSet):
         """Creates a new instance of ``SparkDataSet``.
 
         Args:
-            filepath: path to a Spark data frame. When using Databricks
+            filepath: Path to a Spark dataframe. When using Databricks
                 and working with data written to mount path points,
                 specify ``filepath``s for (versioned) ``SparkDataSet``s
                 starting with ``/dbfs/mnt``.
-            file_format: file format used during load and save
+            file_format: File format used during load and save
                 operations. These are formats supported by the running
                 SparkContext include parquet, csv. For a list of supported
                 formats please refer to Apache Spark documentation at

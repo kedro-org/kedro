@@ -205,15 +205,33 @@ class TestRunCommand:
             ParallelRunner,
         )
 
+    @pytest.mark.parametrize(
+        "config_addition,expected",
+        [
+            ({}, {}),
+            ({"params": {"foo": "baz"}}, {"foo": "baz"}),
+            ({"params": "foo:baz"}, {"foo": "baz"}),
+            ({"params": {"foo": "123.45", "baz": "678"}}, {"foo": 123.45, "baz": 678}),
+        ],
+    )
     @pytest.mark.parametrize("config_flag", ["--config", "-c"])
     def test_run_with_config(
-        self, config_flag, fake_kedro_cli, fake_load_context, fake_run_config, mocker
+        self,
+        config_addition,
+        expected,
+        config_flag,
+        fake_kedro_cli,
+        fake_load_context,
+        fake_run_config,
+        mocker,
     ):
+        config = anyconfig.load(fake_run_config)
+        config["run"].update(config_addition)
+        anyconfig.dump(config, fake_run_config)
         result = CliRunner().invoke(
             fake_kedro_cli.cli, ["run", config_flag, fake_run_config]
         )
         assert not result.exit_code
-
         fake_load_context.return_value.run.assert_called_once_with(
             tags=("tag1", "tag2"),
             runner=mocker.ANY,
@@ -223,6 +241,9 @@ class TestRunCommand:
             from_inputs=[],
             load_versions={},
             pipeline_name="pipeline1",
+        )
+        fake_load_context.assert_called_once_with(
+            Path.cwd(), env=None, extra_params=expected
         )
 
     def test_run_env_environment_var(

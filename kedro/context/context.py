@@ -28,11 +28,14 @@
 """This module provides context for Kedro project."""
 
 import abc
+import importlib
+import inspect
 import logging
 import logging.config
 import os
 import sys
 from copy import deepcopy
+from functools import partial
 from pathlib import Path
 from typing import Any, Dict, Iterable, Union
 from warnings import warn
@@ -44,6 +47,7 @@ from kedro.config import ConfigLoader, MissingConfigException
 from kedro.io import DataCatalog
 from kedro.io.core import generate_timestamp
 from kedro.pipeline import Pipeline
+from kedro.pipeline.node import Node
 from kedro.runner import AbstractRunner, SequentialRunner
 from kedro.utils import load_obj
 from kedro.versioning import Journal
@@ -503,6 +507,142 @@ class KedroContext(abc.ABC):
         easily determine the latest version.
         """
         return generate_timestamp()
+
+    def load_node_inputs(self, node_name: str, import_full_module: bool = True):
+        """
+        Loads all inputs of a node into the namespace from which this function was called.
+        This function is designed for being used in kedro ipython to debug nodes: after
+        running this function you should be able to feed the function code into the
+        interpreter line by line.
+        Caution: this function alters the namespace from which it was called (its parent namespace)
+        Args:
+            node_name: Name of the node to load inputs from
+            import_full_module: If True, also imports all names defined within the
+                node function's module. This is useful to not have to define function
+                dependencies
+
+        Raises:
+            ValueError: If the pipeline does not contain a node named node_name
+
+        Returns:
+            Nothing, but the function alters the parent namespace
+        """
+        # Load the pipeline and find the node
+        try:
+            pipeline = self._get_pipeline()
+        except NotImplementedError:
+            pipeline = self.pipeline
+        sub_pipeline = pipeline.only_nodes(node_name)
+        pipeline_nodes = sub_pipeline.nodes
+        if not pipeline_nodes:
+            raise ValueError(
+                "Pipeline does not contain a node named {}".format(node_name)
+            )
+        node = pipeline_nodes[0]
+
+        catalog = self._get_catalog()
+        # Get both the dataset names and dataset contents of the node
+        node_args, node_kwargs = Node._process_inputs_for_bind(node.inputs)
+        node_loaded_args = [catalog.load(dataset_name) for dataset_name in node_args]
+        node_loaded_kwargs = {
+            key: catalog.load(dataset_name) for key, dataset_name in node_kwargs.items()
+        }
+        node_func = node._decorated_func
+
+        # Retrieve the globals from the parent namespace, this is what we will use to
+        # alter the parent's namespace
+        caller_globals = dict(inspect.getmembers(inspect.stack()[1][0]))["f_globals"]
+
+        # Import all names that are defined in the module,
+        # so that all references and dependencies within
+        # the function code are defined
+        if import_full_module:
+            logging.info(
+                "Setting all objects from function's module: ({})".format(
+                    node_func.__module__
+                )
+            )
+            function_module = importlib.import_module(node_func.__module__)
+            for obj_name in dir(function_module):
+                if obj_name.startswith("__"):
+                    continue
+                else:
+                    logging.info("Setting `{}`".format(obj_name))
+                    caller_globals[obj_name] = getattr(function_module, obj_name)
+
+        # If the node was called using a partial function, also load the partial parameters
+        if isinstance(node_func, partial):
+            partial_args = node_func.args
+            node_args = (
+                                ["parameter_from_functools_partial"] * len(partial_args)
+                        ) + node_args
+            node_loaded_args = list(partial_args) + node_args
+            partial_kwargs = node_func.keywords
+            for key, value in partial_kwargs.items():
+                node_kwargs[key] = "partial_parameter:{}".format(value)
+                node_loaded_kwargs[key] = value
+            node_func = node_func.func
+
+        # Bind the node inputs to the parametes of the function
+        bound_signature_parameters = (
+            inspect.signature(node_func, follow_wrapped=False)
+                .bind(*node_args, **node_kwargs)
+                .signature.parameters
+        )
+        bound_params_dataset_names = (
+            inspect.signature(node_func, follow_wrapped=False)
+                .bind(*node_args, **node_kwargs)
+                .arguments
+        )
+        bound_params_dataset_content = (
+            inspect.signature(node_func, follow_wrapped=False)
+                .bind(*node_loaded_args, **node_loaded_kwargs)
+                .arguments
+        )
+
+        # We load the argument details to be able to identify *args and **kwargs
+        argspec = inspect.getfullargspec(node_func)
+
+        for parameter_name, parameter_value in bound_signature_parameters.items():
+            # If the parameter was specified as a node input, load the dataset
+            if parameter_name in bound_params_dataset_content.keys():
+                loaded_dataset = bound_params_dataset_content[parameter_name]
+                dataset_name = bound_params_dataset_names[parameter_name]
+                logging.info(
+                    "Loading dataset `{}` into `{}`".format(
+                        dataset_name, parameter_name
+                    )
+                )
+                caller_globals[parameter_name] = loaded_dataset
+            # If the parameter was not specified and had a default value, load the default value
+            elif parameter_value.default is not inspect._empty:
+                default_param_value = parameter_value.default
+                logging.info(
+                    "Set `{}` to its default value: {}".format(
+                        parameter_name, default_param_value
+                    )
+                )
+                caller_globals[parameter_name] = default_param_value
+            # If the parameter was not specified in inputs and does not have a default values
+            # they might be the *args or **kwargs. In that case we load an empty list or
+            # dictionary for them
+            else:
+                if parameter_name == argspec.varargs:
+                    logging.info(
+                        "Set `{}` (*args parameter) to [] (empty list)"
+                        " since it was not specified".format(
+                            parameter_name
+                        )
+                    )
+                    caller_globals[parameter_name] = []
+                if parameter_name == argspec.varkw:
+                    logging.info(
+                        "Set `"
+                        + parameter_name
+                        + "` (**kwrgs parameter) to {} (empty dictionary)"
+                          " since it was not specified"
+                    )
+                    caller_globals[parameter_name] = {}
 
 
 def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:

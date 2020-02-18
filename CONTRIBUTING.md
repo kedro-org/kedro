@@ -35,7 +35,7 @@ If you're unsure where to begin contributing to Kedro, please start by looking t
 We focus on three areas for contribution: `core`, [`contrib`](/kedro/contrib/) or `plugin`:
 - `core` refers to the primary Kedro library
 - [`contrib`](/kedro/contrib/) refers to features that could be added to `core` that do not introduce too many depencies or require new Kedro CLI commands to be created e.g. adding a new dataset to the `io` data management module
-- [`plugin`](https://kedro.readthedocs.io/en/latest/04_user_guide/10_developing_plugins.html) refers to new functionality that requires a Kedro CLI command e.g. adding in Airflow functionality
+- [`plugin`](https://kedro.readthedocs.io/en/stable/04_user_guide/10_developing_plugins.html) refers to new functionality that requires a Kedro CLI command e.g. adding in Airflow functionality
 
 Typically, we only accept small contributions for the `core` Kedro library but accept new features as `plugin`s or additions to the [`contrib`](/kedro/contrib/) module. We regularly review [`contrib`](/kedro/contrib/) and may migrate modules to `core` if they prove to be essential for the functioning of the framework or if we believe that they are used by most projects.
 
@@ -109,7 +109,7 @@ You can add new work to `contrib` if you do not need to create a new Kedro CLI c
 
 ## `plugin` contribution process
 
-See the [`plugin` development documentation](https://kedro.readthedocs.io/en/latest/04_user_guide/10_developing_plugins.html) for guidance on how to design and develop a Kedro `plugin`.
+See the [`plugin` development documentation](https://kedro.readthedocs.io/en/stable/04_user_guide/10_developing_plugins.html) for guidance on how to design and develop a Kedro `plugin`.
 
 ## CI / CD and running checks locally
 To run E2E tests you need to install the test requirements which includes `behave`.

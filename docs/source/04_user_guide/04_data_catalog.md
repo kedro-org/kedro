@@ -306,7 +306,7 @@ for loading, so the first node should output a `pyspark.sql.DataFrame`, while th
 Transformers intercept the load and save operations on Kedro `DataSet`s. Use cases that transformers enable include:
  - Performing data validation,
  - Tracking operation performance,
- - And, converting a data format (although we would recommend [Transcoding](https://kedro.readthedocs.io/en/latest/04_user_guide/04_data_catalog.html#transcoding-datasets) for this).
+ - And, converting a data format (although we would recommend [Transcoding](https://kedro.readthedocs.io/en/stable/04_user_guide/04_data_catalog.html#transcoding-datasets) for this).
 
 ### Applying built-in transformers
 

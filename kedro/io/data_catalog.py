@@ -77,7 +77,7 @@ def _get_credentials(
         raise KeyError(
             "Unable to find credentials '{}': check your data "
             "catalog and credentials configuration. See "
-            "https://kedro.readthedocs.io/en/latest/kedro.io.DataCatalog.html "
+            "https://kedro.readthedocs.io/en/stable/kedro.io.DataCatalog.html "
             "for an example.".format(credentials_name)
         )
 

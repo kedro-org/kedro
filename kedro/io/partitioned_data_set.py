@@ -134,7 +134,7 @@ class PartitionedDataSet(AbstractDataSet):
                 **Note:** ``dataset_credentials`` key has now been deprecated
                 and should not be specified.
                 All possible credentials management scenarios are documented here:
-                https://kedro.readthedocs.io/en/latest/04_user_guide/08_advanced_io.html#partitioned-dataset-credentials
+                https://kedro.readthedocs.io/en/stable/04_user_guide/08_advanced_io.html#partitioned-dataset-credentials
             load_args: Keyword arguments to be passed into ``find()`` method of
                 the filesystem implementation.
 
@@ -357,7 +357,7 @@ class IncrementalDataSet(PartitionedDataSet):
                 with the corresponding dataset definition including ``filepath``
                 (unlike ``dataset`` argument). Checkpoint configuration is
                 described here:
-                https://kedro.readthedocs.io/en/latest/04_user_guide/08_advanced_io.html#checkpoint-configuration
+                https://kedro.readthedocs.io/en/stable/04_user_guide/08_advanced_io.html#checkpoint-configuration
                 Credentials for the checkpoint can be explicitly specified
                 in this configuration.
             filepath_arg: Underlying dataset initializer argument that will
@@ -372,7 +372,7 @@ class IncrementalDataSet(PartitionedDataSet):
                 the dataset or the checkpoint configuration contains explicit
                 credentials spec, then such spec will take precedence.
                 All possible credentials management scenarios are documented here:
-                https://kedro.readthedocs.io/en/latest/04_user_guide/08_advanced_io.html#partitioned-dataset-credentials
+                https://kedro.readthedocs.io/en/stable/04_user_guide/08_advanced_io.html#partitioned-dataset-credentials
             load_args: Keyword arguments to be passed into ``find()`` method of
                 the filesystem implementation.
 

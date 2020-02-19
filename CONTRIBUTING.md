@@ -121,7 +121,7 @@ make install-test-requirements
 make install-pre-commit
 ```
 
-> **_NOTE:_** If Spark/PySpark/Hive tests for datasets are failing it might be due to the lack of Java>8 support from Spark. You can try using `export JAVA_HOME=$(/usr/libexec/java_home -v 1.8)` which works under MacOS or other workarounds. [Reference](https://stackoverflow.com/questions/53583199/pyspark-error-unsupported-class-file-major-version-55)
+> _Note:_ If Spark/PySpark/Hive tests for datasets are failing it might be due to the lack of Java>8 support from Spark. You can try using `export JAVA_HOME=$(/usr/libexec/java_home -v 1.8)` which works under MacOS or other workarounds. [Reference](https://stackoverflow.com/questions/53583199/pyspark-error-unsupported-class-file-major-version-55)
 
 ### Running checks locally
 

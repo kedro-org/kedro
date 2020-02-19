@@ -122,19 +122,17 @@ def _split_string(ctx, param, value):
     return [item for item in value.split(",") if item]
 
 
-def _convert_text_to_numeric(value):
+def _try_convert_to_numeric(value):
     try:
         value = float(value)
     except ValueError:
-        pass
-    else:
-        value = int(value) if value.is_integer() else value
-    return value
+        return value
+    return int(value) if value.is_integer() else value
 
 
 def _split_params(ctx, param, value):
     if isinstance(value, dict):
-        return {k: _convert_text_to_numeric(v) for k, v in value.items()}
+        return {k: _try_convert_to_numeric(v) for k, v in value.items()}
     result = {}
     for item in _split_string(ctx, param, value):
         item = item.split(":", 1)
@@ -150,7 +148,7 @@ def _split_params(ctx, param, value):
                 "an empty string.".format(param.name)
             )
         value = item[1].strip()
-        result[key] = _convert_text_to_numeric(value)
+        result[key] = _try_convert_to_numeric(value)
     return result
 
 

@@ -18,7 +18,7 @@ from kedro.io import *
 io = DataCatalog(data_sets=dict())  # empty catalog
 
 try:
-    cars_df = io.load('cars')
+    cars_df = io.load("cars")
 except DataSetError:
     print("Error raised.")
 ```
@@ -114,9 +114,9 @@ the `DataCatalog` will create a versioned `CSVLocalDataSet` called `cars.csv`. T
 By default, the `DataCatalog` will load the latest version of the dataset. However, it is also possible to specify an exact load version. In order to do that, you can pass a dictionary with exact load versions to `DataCatalog.from_config`:
 
 ```python
-load_versions = {'cars.csv': '2019-02-13T14.35.36.518Z'}
+load_versions = {"cars.csv": "2019-02-13T14.35.36.518Z"}
 io = DataCatalog.from_config(catalog_config, credentials, load_versions=load_versions)
-cars = io.load('cars.csv')
+cars = io.load("cars.csv")
 ```
 
 The last row in the example above would attempt to load a CSV file from `data/01_raw/company/cars.csv/2019-02-13T14.35.36.518Z/cars.csv`.
@@ -140,9 +140,7 @@ version = Version(
     save=None,  # generate save version automatically on each save operation
 )
 test_data_set = CSVLocalDataSet(
-    filepath="data/01_raw/test.csv",
-    save_args={"index": False},
-    version=version,
+    filepath="data/01_raw/test.csv", save_args={"index": False}, version=version,
 )
 io = DataCatalog({"test_data_set": test_data_set})
 
@@ -160,13 +158,11 @@ assert data2.equals(reloaded)
 
 ```python
 version = Version(
-    load="my_exact_version",   # load exact version
-    save="my_exact_version",   # save to exact version
+    load="my_exact_version",  # load exact version
+    save="my_exact_version",  # save to exact version
 )
 test_data_set = CSVLocalDataSet(
-    filepath="data/01_raw/test.csv",
-    save_args={"index": False},
-    version=version,
+    filepath="data/01_raw/test.csv", save_args={"index": False}, version=version,
 )
 io = DataCatalog({"test_data_set": test_data_set})
 
@@ -186,12 +182,10 @@ io.save("test_data_set", data2)
 ```python
 version = Version(
     load="exact_load_version",  # load exact version
-    save="exact_save_version"   # save to exact version
+    save="exact_save_version",  # save to exact version
 )
 test_data_set = CSVLocalDataSet(
-    filepath="data/01_raw/test.csv",
-    save_args={"index": False},
-    version=version,
+    filepath="data/01_raw/test.csv", save_args={"index": False}, version=version,
 )
 io = DataCatalog({"test_data_set": test_data_set})
 
@@ -275,7 +269,7 @@ my_partitioned_dataset = PartitionedDataSet(
     path="s3://my-bucket-name/path/to/folder",
     dataset=CSVDataSet,
     credentials=my_credentials,
-    load_args={"load_arg1": "value1", "load_arg2": "value2"}
+    load_args={"load_arg1": "value1", "load_arg2": "value2"},
 )
 ```
 
@@ -400,7 +394,8 @@ def concat_partitions(partitioned_input: Dict[str, Callable[[], Any]]) -> pd.Dat
 
     for partition_key, partition_load_func in sorted(partitioned_input.items()):
         partition_data = partition_load_func()  # load the actual partition data
-        result = pd.concat([result, partition_data], ignore_index=True, sort=True)  # concat with existing result
+        # concat with existing result
+        result = pd.concat([result, partition_data], ignore_index=True, sort=True)
 
     return result
 ```
@@ -451,8 +446,10 @@ def create_partitions() -> Dict[str, Any]:
         Dictionary with the partitions to create.
     """
     return {
-        "part/foo": pd.DataFrame({"data": [1, 2]}),  # create a file "s3://my-bucket-name/part/foo.csv"
-        "part/bar.csv": pd.DataFrame({"data": [3, 4]}),  # create a file "s3://my-bucket-name/part/bar.csv.csv"
+        # create a file "s3://my-bucket-name/part/foo.csv"
+        "part/foo": pd.DataFrame({"data": [1, 2]}),
+        # create a file "s3://my-bucket-name/part/bar.csv.csv"
+        "part/bar.csv": pd.DataFrame({"data": [3, 4]}),
     }
 ```
 
@@ -498,6 +495,7 @@ Alternatively, confirmation can be deferred to one of nodes downstream, allowing
 
 ```python
 from kedro.pipeline import Pipeline, node
+
 Pipeline(
     [
         node(

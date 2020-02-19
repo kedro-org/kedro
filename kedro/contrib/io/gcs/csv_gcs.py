@@ -114,7 +114,7 @@ class CSVGCSDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
         _credentials = deepcopy(credentials) or {}
         _gcsfs_args = deepcopy(gcsfs_args) or {}
         _gcs = gcsfs.GCSFileSystem(project=project, token=_credentials, **_gcsfs_args)
-        path = _gcs._strip_protocol(filepath)  # pylint: disable=protected-access
+        path = _gcs._strip_protocol(filepath)
         path = PurePosixPath("{}/{}".format(bucket_name, path) if bucket_name else path)
         super().__init__(
             filepath=path,

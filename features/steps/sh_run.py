@@ -65,6 +65,7 @@ def run(
     """
     if isinstance(cmd, str) and split:
         cmd = shlex.split(cmd)
+    # pylint: disable=subprocess-run-check
     result = subprocess.run(
         cmd, input="", stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs
     )

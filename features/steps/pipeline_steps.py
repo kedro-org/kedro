@@ -215,7 +215,8 @@ def node_tagged_with(context, node_name, tags):
     sys.path.append(
         str(context.root_project_dir / "src" / context.project_name.replace("-", "_"))
     )
-    import pipeline  # pylint: disable=import-error,useless-suppression
+    # pylint: disable=import-error,import-outside-toplevel
+    import pipeline
 
     # pylint: disable=no-member
     context.project_pipeline = pipeline.create_pipelines()["__default__"]

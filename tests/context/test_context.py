@@ -171,8 +171,9 @@ bad_pipeline_middle = Pipeline(
 
 expected_message_middle = (
     "There are 2 nodes that have not run.\n"
-    "You can resume the pipeline run with the following command:\n"
-    "kedro run --from-inputs trains"
+    "You can resume the pipeline run by adding the following "
+    "argument to your previous command:\n"
+    '  --from-nodes "nodes3"'
 )
 
 
@@ -188,8 +189,8 @@ bad_pipeline_head = Pipeline(
 
 expected_message_head = (
     "There are 4 nodes that have not run.\n"
-    "You can resume the pipeline run with the following command:\n"
-    "kedro run"
+    "You can resume the pipeline run by adding the following "
+    "argument to your previous command:\n"
 )
 
 

@@ -48,6 +48,7 @@ NODE_TAG = "node"
 def call(cmd: List[str], **kwargs):  # pragma: no cover
     """Run a subprocess command and exit if it fails."""
     print(" ".join(shlex.quote(c) for c in cmd))
+    # pylint: disable=subprocess-run-check
     res = subprocess.run(cmd, **kwargs).returncode
     if res:
         sys.exit(res)

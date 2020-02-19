@@ -118,7 +118,7 @@ class PickleS3DataSet(AbstractVersionedDataSet):
         _credentials = copy.deepcopy(credentials) or {}
         _s3fs_args = copy.deepcopy(s3fs_args) or {}
         _s3 = S3FileSystem(client_kwargs=_credentials, **_s3fs_args)
-        path = _s3._strip_protocol(filepath)  # pylint: disable=protected-access
+        path = _s3._strip_protocol(filepath)
         path = PurePosixPath("{}/{}".format(bucket_name, path) if bucket_name else path)
 
         super().__init__(

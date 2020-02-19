@@ -163,11 +163,11 @@ class DataCatalog:
         Example:
         ::
 
-            >>> from kedro.io import CSVLocalDataSet
+            >>> from kedro.extras.datasets.pandas import CSVDataSet
             >>>
-            >>> cars = CSVLocalDataSet(filepath="cars.csv",
-            >>>                        load_args=None,
-            >>>                        save_args={"index": False})
+            >>> cars = CSVDataSet(filepath="cars.csv",
+            >>>                   load_args=None,
+            >>>                   save_args={"index": False})
             >>> io = DataCatalog(data_sets={'cars': cars})
         """
         self._data_sets = dict(data_sets or {})
@@ -249,16 +249,15 @@ class DataCatalog:
 
             >>> config = {
             >>>     "cars": {
-            >>>         "type": "CSVLocalDataSet",
+            >>>         "type": "pandas.CSVDataSet",
             >>>         "filepath": "cars.csv",
             >>>         "save_args": {
             >>>             "index": False
             >>>         }
             >>>     },
             >>>     "boats": {
-            >>>         "type": "CSVS3DataSet",
-            >>>         "filepath": "boats.csv",
-            >>>         "bucket_name": "mck-147789798-bucket",
+            >>>         "type": "pandas.CSVDataSet",
+            >>>         "filepath": "s3://mck-147789798-bucket/boats.csv",
             >>>         "credentials": "boats_credentials"
             >>>         "save_args": {
             >>>             "index": False
@@ -268,8 +267,10 @@ class DataCatalog:
             >>>
             >>> credentials = {
             >>>     "boats_credentials": {
-            >>>         "aws_access_key_id": "<your key id>",
-            >>>         "aws_secret_access_key": "<your secret>"
+            >>>         "client_kwargs": {
+            >>>             "aws_access_key_id": "<your key id>",
+            >>>             "aws_secret_access_key": "<your secret>"
+            >>>         }
             >>>      }
             >>> }
             >>>
@@ -333,11 +334,12 @@ class DataCatalog:
         Example:
         ::
 
-            >>> from kedro.io import CSVLocalDataSet, DataCatalog
+            >>> from kedro.io import DataCatalog
+            >>> from kedro.extras.datasets.pandas import CSVDataSet
             >>>
-            >>> cars = CSVLocalDataSet(filepath="cars.csv",
-            >>>                        load_args=None,
-            >>>                        save_args={"index": False})
+            >>> cars = CSVDataSet(filepath="cars.csv",
+            >>>                   load_args=None,
+            >>>                   save_args={"index": False})
             >>> io = DataCatalog(data_sets={'cars': cars})
             >>>
             >>> df = io.load("cars")
@@ -380,11 +382,11 @@ class DataCatalog:
 
             >>> import pandas as pd
             >>>
-            >>> from kedro.io import CSVLocalDataSet
+            >>> from kedro.extras.datasets.pandas import CSVDataSet
             >>>
-            >>> cars = CSVLocalDataSet(filepath="cars.csv",
-            >>>                        load_args=None,
-            >>>                        save_args={"index": False})
+            >>> cars = CSVDataSet(filepath="cars.csv",
+            >>>                   load_args=None,
+            >>>                   save_args={"index": False})
             >>> io = DataCatalog(data_sets={'cars': cars})
             >>>
             >>> df = pd.DataFrame({'col1': [1, 2],
@@ -466,13 +468,13 @@ class DataCatalog:
         Example:
         ::
 
-            >>> from kedro.io import CSVLocalDataSet
+            >>> from kedro.extras.datasets.pandas import CSVDataSet
             >>>
             >>> io = DataCatalog(data_sets={
-            >>>                   'cars': CSVLocalDataSet(filepath="cars.csv")
+            >>>                   'cars': CSVDataSet(filepath="cars.csv")
             >>>                  })
             >>>
-            >>> io.add("boats", CSVLocalDataSet(filepath="boats.csv"))
+            >>> io.add("boats", CSVDataSet(filepath="boats.csv"))
         """
         if data_set_name in self._data_sets:
             if replace:
@@ -503,14 +505,14 @@ class DataCatalog:
         Example:
         ::
 
-            >>> from kedro.io import CSVLocalDataSet, ParquetLocalDataSet
+            >>> from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
             >>>
             >>> io = DataCatalog(data_sets={
-            >>>                   "cars": CSVLocalDataSet(filepath="cars.csv")
+            >>>                   "cars": CSVDataSet(filepath="cars.csv")
             >>>                  })
             >>> additional = {
-            >>>     "planes": ParquetLocalDataSet("planes.parq"),
-            >>>     "boats": CSVLocalDataSet(filepath="boats.csv")
+            >>>     "planes": ParquetDataSet("planes.parq"),
+            >>>     "boats": CSVDataSet(filepath="boats.csv")
             >>> }
             >>>
             >>> io.add_all(additional)
@@ -618,10 +620,10 @@ class DataCatalog:
             self._default_transformers,
             self._journal,
         ) == (
-            other._data_sets,  # pylint: disable=protected-access
-            other._transformers,  # pylint: disable=protected-access
-            other._default_transformers,  # pylint: disable=protected-access
-            other._journal,  # pylint: disable=protected-access
+            other._data_sets,
+            other._transformers,
+            other._default_transformers,
+            other._journal,
         )
 
     def confirm(self, name: str) -> None:

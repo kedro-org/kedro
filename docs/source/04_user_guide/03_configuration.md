@@ -22,9 +22,9 @@ Kedro-specific configuration (e.g., `DataCatalog` configuration for IO) is loade
 ```python
 from kedro.config import ConfigLoader
 
-conf_paths = ['conf/base', 'conf/local']
+conf_paths = ["conf/base", "conf/local"]
 conf_loader = ConfigLoader(conf_paths)
-conf_catalog = conf_loader.get('catalog*', 'catalog*/**')
+conf_catalog = conf_loader.get("catalog*", "catalog*/**")
 ```
 
 This will recursively scan for configuration files firstly in `conf/base/` and then in `conf/local/` directory according to the following rules:
@@ -62,25 +62,31 @@ env = "test"
 
 > *Note*: If, for some reason, your project does not have any other environments apart from `base`, i.e. no `local` environment to default to, the recommended course of action is to use the approach above, namely customise your `ProjectContext` to take `env="base"` in the constructor.
 
+If you set the `KEDRO_ENV` environment variable to the name of your environment, Kedro will load that environment for your `kedro run`, `kedro ipython`, `kedro jupyter notebook` and `kedro jupyter lab` sessions.
+
+```bash
+export KEDRO_ENV=test
+```
+
+> *Note*: If you specify both the `KEDRO_ENV` environment variable and provide the `--env` argument to a CLI command, the CLI argument takes precedence.
 
 ## Templating configuration
 
-Kedro also provides an extension [TemplatedConfigLoader](/kedro.contrib.config.templated_config.TemplatedConfigLoader) class that allows to template values in your configuration files. `TemplatedConfigLoader` is available in `contrib`, to apply templating to your `ProjectContext` in `src/<project-name>/run.py`, you will need to overwrite the `_create_config_loader` method as follows:
+Kedro also provides an extension [TemplatedConfigLoader](/kedro.config.TemplatedConfigLoader) class that allows to template values in your configuration files. `TemplatedConfigLoader` is available in `kedro.config`, to apply templating to your `ProjectContext` in `src/<project-name>/run.py`, you will need to overwrite the `_create_config_loader` method as follows:
 
 ```python
-from kedro.contrib.config import TemplatedConfigLoader  # new import
+from kedro.config import TemplatedConfigLoader  # new import
 
 
 class ProjectContext(KedroContext):
-
     def _create_config_loader(self, conf_paths: Iterable[str]) -> TemplatedConfigLoader:
         return TemplatedConfigLoader(
             conf_paths,
             globals_pattern="*globals.yml",  # read the globals dictionary from project config
             globals_dict={  # extra keys to add to the globals dictionary, take precedence over globals_pattern
                 "bucket_name": "another_bucket_name",
-                "non_string_key": 10
-            }
+                "non_string_key": 10,
+            },
         )
 ```
 
@@ -91,8 +97,8 @@ bucket_name: "my_s3_bucket"
 key_prefix: "my/key/prefix/"
 
 datasets:
-    csv: "CSVS3DataSet"
-    spark: "SparkDataSet"
+    csv: "pandas.CSVDataSet"
+    spark: "spark.SparkDataSet"
 
 folders:
     raw: "01_raw"
@@ -109,15 +115,15 @@ The contents of the dictionary resulting from `globals_pattern` get merged with 
     "non_string_key": 10,
     "key_prefix": "my/key/prefix",
     "datasets": {
-        "csv": "CSVS3DataSet",
-        "spark": "SparkDataSet"
+        "csv": "pandas.CSVDataSet",
+        "spark": "spark.SparkDataSet"
     },
     "folders": {
         "raw": "01_raw",
         "int": "02_intermediate",
         "pri": "03_primary",
-        "fea": "04_features"
-    }
+        "fea": "04_features",
+    },
 }
 ```
 
@@ -131,9 +137,7 @@ raw_boat_data:
 
 raw_car_data:
     type: "${datasets.csv}"
-    filepath: "data/${key_prefix}/${folders.raw}/cars.csv"
-    bucket_name: "${bucket_name}"
-    file_format: "${non.existent.key|parquet}"  # default to 'parquet' if the key is not found in the global dict
+    filepath: "s3://${bucket_name}/data/${key_prefix}/${folders.raw}/${filename|cars.csv}"  # default to 'cars.csv' if the 'filename' key is not found in the global dict
 ```
 
 > Note: `TemplatedConfigLoader` uses `jmespath` package in the background to extract elements from global dictionary. For more information about JMESPath syntax please see: https://github.com/jmespath/jmespath.py.
@@ -210,8 +214,13 @@ learning_rate: 0.01
 def increase_volume(volume, step):
     return volume + step
 
+
 # in pipeline definition
-node(func=increase_volume, inputs=["input_volume", "params:step_size"], outputs="output_volume")
+node(
+    func=increase_volume,
+    inputs=["input_volume", "params:step_size"],
+    outputs="output_volume",
+)
 ```
 
 You can also group your parameters into nested structures and, using the same method above, load them by top-level key:
@@ -232,8 +241,13 @@ def train_model(data, model):
     iterations = model["number_of_train_iterations"]
     ...
 
+
 # in pipeline definition
-node(func=train_model, inputs=["input_data", "params:model_params"], outputs="output_data")
+node(
+    func=train_model,
+    inputs=["input_data", "params:model_params"],
+    outputs="output_data",
+)
 ```
 
 Alternatively, you can also pass `parameters` to the node inputs and get access to the entire collection of values inside the node function.
@@ -243,8 +257,11 @@ def increase_volume(volume, params):
     step = params["step_size"]
     return volume + step
 
+
 # in pipeline definition
-node(func=increase_volume, inputs=["input_volume", "parameters"], outputs="output_volume")
+node(
+    func=increase_volume, inputs=["input_volume", "parameters"], outputs="output_volume"
+)
 ```
 
 In both cases, what happened under the hood is that the parameters had been added to the Data Catalog through the method `add_feed_dict()` (Relevant API documentation: [DataCatalog](/kedro.io.DataCatalog)), where they live as `MemoryDataSet`s. This method is also what the `KedroContext` class uses when instantiating the catalog.

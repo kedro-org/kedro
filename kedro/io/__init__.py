@@ -31,6 +31,7 @@ number of data sets. At core of the library is ``AbstractDataSet``
 which allows implementation of various ``AbstractDataSet``s.
 """
 
+from .cached_dataset import CachedDataSet  # NOQA
 from .core import AbstractDataSet  # NOQA
 from .core import AbstractVersionedDataSet  # NOQA
 from .core import DataSetAlreadyExistsError  # NOQA
@@ -41,6 +42,7 @@ from .csv_http import CSVHTTPDataSet  # NOQA
 from .csv_local import CSVLocalDataSet  # NOQA
 from .csv_s3 import CSVS3DataSet  # NOQA
 from .data_catalog import DataCatalog  # NOQA
+from .data_catalog_with_default import DataCatalogWithDefault  # NOQA
 from .excel_local import ExcelLocalDataSet  # NOQA
 from .hdf_local import HDFLocalDataSet  # NOQA
 from .hdf_s3 import HDFS3DataSet  # NOQA

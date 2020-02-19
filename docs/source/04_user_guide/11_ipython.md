@@ -16,6 +16,7 @@ To reload these at any point (e.g., if you update `catalog.yml`), use the [line 
 
 ![](./images/jupyter_notebook_loading_context.png)
 
+It also loads the environment specified in the `KEDRO_ENV` environment variable if specified, otherwise it defaults to `local`. Instructions for setting the environment variable can be found in the [configuration](./03_configuration.md#additional-configuration-environments) section.
 
 ## Working with `context`
 With `context`, you can access the following variables and methods
@@ -73,7 +74,8 @@ def reload_kedro(project_path, line=None):
         parameters = context.params
         # ...
         logging.info("Defined global variable `context`, `catalog` and `parameters`")
-
+    except:
+        pass
 ```
 
 ## Working with IPython
@@ -142,6 +144,11 @@ Then you should navigate to the `notebooks` folder and create a notebook.
 
 > *Note:* The only kernel available by default has a name of the current project. If you need to access all available kernels, add `--all-kernels` to the command above.
 
+### Idle notebooks
+
+If you close the notebook and its kernel is idle, it will be automatically terminated by the Jupyter server after 30 seconds of inactivity. However, if the notebook kernel is busy, it won't be automatically terminated by the server.
+
+You can change the timeout by passing `--idle-timeout=<integer>` option to `kedro jupyter notebook` or `kedro jupyter lab` call. If you set `--idle-timeout=0`, this will disable automatic termination of idle notebook kernels.
 
 ### What if I cannot run `kedro jupyter notebook`?
 
@@ -213,7 +220,8 @@ catalog.save("my_dataset", my_dict)
 
 ```python
 parameters = context.params  # type: Dict
-parameters["example_test_data_ratio"]  # returns the value of 'example_test_data_ratio' key from 'conf/base/parameters.yml'
+parameters["example_test_data_ratio"]
+# returns the value of 'example_test_data_ratio' key from 'conf/base/parameters.yml'
 ```
 
 > Note: You need to reload Kedro variables by calling `%reload_kedro` and re-run the code snippet from above if you change the contents of `parameters.yml`.
@@ -261,7 +269,7 @@ There are optional extra scripts that can help improve your Kedro experience for
 
 ### IPython loader
 
-The script `extras/ipython_loader.py` helps to locate IPython startup directory and run all Python scripts in it when working with Jupyter notebooks and IPython sessions. It should work identically not just within a Kedro project, but also with any project that contains IPython startup scripts.
+The script `kedro/extras/ipython/ipython_loader.py` helps to locate IPython startup directory and run all Python scripts in it when working with Jupyter notebooks and IPython sessions. It should work identically not just within a Kedro project, but also with any project that contains IPython startup scripts.
 
 This script will automatically locate `.ipython/profile_default/startup` directory starting from the current working directory and going up the directory tree. If the directory was found, all Python scripts in it are be executed.
 
@@ -273,7 +281,7 @@ To install this script simply download it into your default IPython config direc
 
 ```bash
 mkdir -p ~/.ipython/profile_default/startup
-wget -O ~/.ipython/profile_default/startup/ipython_loader.py https://raw.githubusercontent.com/quantumblacklabs/kedro/master/extras/ipython_loader.py
+wget -O ~/.ipython/profile_default/startup/ipython_loader.py https://raw.githubusercontent.com/quantumblacklabs/kedro/master/kedro/extras/ipython/ipython_loader.py
 ```
 
 #### Prerequisites

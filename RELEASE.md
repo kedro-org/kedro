@@ -1,4 +1,4 @@
-# Release 0.15.6
+# Upcoming release
 
 ## Major features and improvements
 
@@ -27,9 +27,14 @@
 * Added the ability to install all optional kedro dependencies via `pip install "kedro[all]"`.
 * `JSONDataSet`, `CSVBlobDataSet`, `JSONBlobDataSet`, `SQLQueryDataSet` and `SQLTableDataSet` datasets copied to `kedro.extras.datasets.pandas`.
 * `SparkDataSet`, `SparkHiveDataSet` and `SparkJDBCDataSet` datasets copied to `kedro.extras.datasets.spark`.
-* `kedro.contrib.decorators.retry.py` copied to `kedro.extras.decorators.retry_node.py`.
-* `kedro.contrib.decorators.memory_profiler.py` copied to `kedro.extras.decorators.memory_profiler.py`.
-* `kedro.contrib.io.transformers.transformers.py` copied to `kedro.extras.transformers.time_profiler.py`.
+* `kedro/contrib/decorators/retry.py` copied to `kedro/extras/decorators/retry_node.py`.
+* `kedro/contrib/decorators/memory_profiler.py` copied to `kedro/extras/decorators/memory_profiler.py`.
+* `kedro/contrib/io/transformers/transformers.py` copied to `kedro/extras/transformers/time_profiler.py`.
+* `kedro/contrib/colors/logging/color_logger.py` copied to `kedro/extras/logging/color_logger.py`.
+* `extras/ipython_loader.py` copied to `kedro/extras/ipython/ipython_loader.py`.
+* `kedro/contrib/io/cached/cached_dataset.py` copied to `kedro/io/cached_dataset.py`.
+* `kedro/contrib/io/catalog_with_default/data_catalog_with_default.py` copied to `kedro/io/data_catalog_with_default.py`.
+* `kedro/contrib/config/templated_config.py` copied to `kedro/config/templated_config.py`.
 * Datasets to be deprecated:
   - `FeatherLocalDataSet`
   - `BioSequenceLocalDataSet`
@@ -52,13 +57,18 @@
   - `PickleLocalDataSet`
   - `PickleS3DataSet`
   - `TextLocalDataSet`
-* Deprecated decorators:
+  - `kedro.contrib.io.cached.CachedDataSet`
+  - `kedro.contrib.io.catalog_with_default.DataCatalogWithDefault`
+* Decorators to be deprecated:
   - `kedro.contrib.decorators.memory_profiler`
   - `kedro.contrib.decorators.retry`
   - `kedro.contrib.decorators.pyspark.spark_to_pandas`
   - `kedro.contrib.decorators.pyspark.pandas_to_spark`
 * Transformers to be deprecated:
   - `kedro.contrib.io.transformers.transformers`
+* Kedro CLI arguments `--node` and `--tag` support comma-separated values, alternative methods will be deprecated in future releases.
+* Config loaders to be deprecated:
+  - `kedro.contrib.config.TemplatedConfigLoader`
 
 ## Bug fixes and other changes
 * Fixed a bug in the `invalidate_cache` method of `ParquetGCSDataSet` and `CSVGCSDataSet`.
@@ -74,6 +84,9 @@
 * `Pipeline.transform` skips modifying node inputs/outputs containing `params:` or `parameters` keywords.
 * Support for `dataset_credentials` key in the credentials for `PartitionedDataSet` is now deprecated. The dataset credentials should be specified explicitly inside the dataset config.
 * Datasets can have a new `confirm` function which is called after a successful node function execution if the node contains `confirms` argument with such dataset name.
+* Make the resume prompt on pipeline run failure use `--from-nodes` instead of `--from-inputs` to avoid unnecessarily re-running nodes that had already executed.
+* When closed, Jupyter notebook kernels are automatically terminated after 30 seconds of inactivity by default. Use `--idle-timeout` option to update it.
+* Added `kedro-viz` to the Kedro project template `requirements.txt` file.
 
 ## Breaking changes to the API
 * Existing `MatplotlibWriter` dataset in `contrib` was renamed to `MatplotlibLocalWriter`.

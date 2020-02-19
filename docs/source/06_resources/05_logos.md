@@ -1,4 +1,4 @@
-# Image and icons
+# Images and icons
 
 ## White background
 

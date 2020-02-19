@@ -16,7 +16,6 @@ class ProjectContext(KedroContext):
     def _setup_logging(self) -> None:
         # Custom logging configuration here
         pass
-
 ```
 
 The configuration should comply with the guidelines from the `logging` library. Find more about it [here](https://docs.python.org/3/library/logging.html).
@@ -28,8 +27,8 @@ After configuring the logging using the example above, `kedro` will start emitti
 ```python
 import logging
 log = logging.getLogger(__name__)
-log.warning('Issue warning')
-log.info('Send information')
+log.warning("Issue warning")
+log.info("Send information")
 ```
 
 ## Logging for `anyconfig`

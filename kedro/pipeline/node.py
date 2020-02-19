@@ -42,7 +42,6 @@ class Node:
     run user-provided functions as part of Kedro pipelines.
     """
 
-    # pylint: disable=missing-type-doc
     def __init__(
         self,
         func: Callable,
@@ -165,12 +164,12 @@ class Node:
     def __eq__(self, other):
         if not isinstance(other, Node):
             return NotImplemented
-        return self._unique_key == other._unique_key  # pylint: disable=protected-access
+        return self._unique_key == other._unique_key
 
     def __lt__(self, other):
         if not isinstance(other, Node):
             return NotImplemented
-        return self._unique_key < other._unique_key  # pylint: disable=protected-access
+        return self._unique_key < other._unique_key
 
     def __hash__(self):
         return hash(self._unique_key)
@@ -581,7 +580,7 @@ def _node_error_message(msg) -> str:
     ).format(msg)
 
 
-def node(  # pylint: disable=missing-type-doc
+def node(
     func: Callable,
     inputs: Union[None, str, List[str], Dict[str, str]],
     outputs: Union[None, str, List[str], Dict[str, str]],

@@ -30,6 +30,7 @@
 which is not registered in the catalog.
 """
 from typing import Any, Callable, Dict, Optional
+from warnings import warn
 
 from kedro.io import AbstractDataSet, DataCatalog
 from kedro.versioning import Journal
@@ -80,6 +81,12 @@ class DataCatalogWithDefault(DataCatalog):
             >>> # load the file in data/raw/cars.csv
             >>> df = io.load("cars.csv")
         """
+        warn(
+            "kedro.contrib.io.catalog_with_default.DataCatalogWithDefault "
+            "will be deprecated in future releases. Please refer to "
+            "replacement dataset in kedro.io.",
+            DeprecationWarning,
+        )
         super().__init__(data_sets)
 
         if not callable(default):

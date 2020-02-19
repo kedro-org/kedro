@@ -19,19 +19,21 @@ def mean(xs, n):
 
 
 def mean_sos(xs, n):
-    return sum(x*x for x in xs) / n
+    return sum(x ** 2 for x in xs) / n
 
 
 def variance(m, m2):
     return m2 - m * m
 
 
-pipeline = Pipeline([
-    node(len, 'xs', 'n'),
-    node(mean, ['xs', 'n'], 'm', name='mean node'),
-    node(mean_sos, ['xs', 'n'], 'm2', name='mean sos'),
-    node(variance, ['m', 'm2'], 'v', name='variance node')
-])
+pipeline = Pipeline(
+    [
+        node(len, "xs", "n"),
+        node(mean, ["xs", "n"], "m", name="mean node"),
+        node(mean_sos, ["xs", "n"], "m2", name="mean sos"),
+        node(variance, ["m", "m2"], "v", name="variance node"),
+    ]
+)
 ```
 
 `describe` can be used to understand what nodes are part of the pipeline:
@@ -63,7 +65,8 @@ You can also tag your ``Pipeline`` by providing `tags` argument, which will tag 
 
 ```python
 pipeline = Pipeline(
-    [node(..., name="node1"), node(..., name="node2", tags="node_tag")], tags="pipeline_tag"
+    [node(..., name="node1"), node(..., name="node2", tags="node_tag")],
+    tags="pipeline_tag",
 )
 ```
 
@@ -75,23 +78,15 @@ You can merge multiple pipelines as shown below. Note that, in this case, `pipel
 
 
 ```python
-pipeline_de = Pipeline([
-    node(len, 'xs', 'n'),
-    node(mean, ['xs', 'n'], 'm')
-])
+pipeline_de = Pipeline([node(len, "xs", "n"), node(mean, ["xs", "n"], "m")])
 
-pipeline_ds = Pipeline([
-    node(mean_sos, ['xs', 'n'], 'm2'),
-    node(variance, ['m', 'm2'], 'v')
-])
+pipeline_ds = Pipeline(
+    [node(mean_sos, ["xs", "n"], "m2"), node(variance, ["m", "m2"], "v")]
+)
 
-last_node = node(print, 'v', None)
+last_node = node(print, "v", None)
 
-pipeline_all = Pipeline([
-    pipeline_de,
-    pipeline_ds,
-    last_node
-])
+pipeline_all = Pipeline([pipeline_de, pipeline_ds, last_node])
 print(pipeline_all.describe())
 ```
 
@@ -142,26 +137,94 @@ nodes[0].inputs
 Out[6]: ['xs']
 ```
 
-## Modular pipelines
+## Developing modular pipelines
 
-As your Kedro project evolves and gets more sophisticated, you may find out that a single (_"master"_) pipeline does not fit the purpose of discoverability anymore due to its complexity. Also, it may be quite hard to port any reusable parts of the original pipeline into a different project. The solution would be to split the pipeline into several logically isolated reusable components, i.e. _modular pipelines_.
+> *Note:* Although Kedro does not enforce the structure below, we strongly encourage following it when developing your modular pipelines. Future versions of Kedro may assume this structure, which would make your modular pipelines compatible with newer versions of Kedro.
+
+### What are modular pipelines?
+
+Modular pipelines allow you to develop and maintain smaller pipelines. As your Kedro project evolves and gets more sophisticated, you may find out that a single (“master”) pipeline does not fit the purpose of discoverability anymore due to its complexity. Also, it may be quite hard to port any reusable parts of the original pipeline into a different project. The solution would be to split the pipeline into several logically isolated reusable components, i.e. modular pipelines.
 
 Modular pipelines serve the following main purposes:
+* Discoverability: A modular pipeline represents a logically isolated unit of work that is much easier to develop, test and maintain
+* Portability: The proposed internal structure of a modular pipeline makes it easy to copy the pipeline between projects
+* Generalisability: A way to create reusable analytics code in future, depending on what you put in the modular pipeline
 
-1. **Discoverability:** modular pipeline represents a logically isolated unit of work that is much easier to develop, test and maintain
-2. **Portability:** the proposed internal structure of a modular pipeline makes it easy to copy the pipeline between projects
+### How do we construct modular pipelines?
 
-### Modular pipeline structure
+#### Structure
 
-> *Note:* Although Kedro does not enforce the structure from below, we strongly encourage to follow it when developing your modular pipelines. Future versions of Kedro may assume this structure, which would make your modular pipelines compatible with new Kedro features out of box.
+Modular pipelines can contain any logic that can be reused. Let's look at a generic example using:
+- `src/new_kedro_project/pipelines/modular_pipeline_1` - A directory for modular pipeline 1
+- `src/new_kedro_project/pipelines/modular_pipeline_2` - A directory for modular pipeline 2
 
-Here is the proposed structure of Kedro project pipelines:
+Requirements for modular pipelines:
+* Each modular pipeline should be placed in a Python module, like `src/new_kedro_project/pipelines/modular_pipeline_1`, and `src/new_kedro_project/pipelines` should be a Python package
+* A modular pipeline must expose a function called `create_pipeline` at the top-level of its package and calling `create_pipeline` with no arguments should return an instance of a [Pipeline](/kedro.pipeline.Pipeline):
 
-* modular pipelines:
-  - `src/new_kedro_project/pipelines/data_engineering` - Data Engineering pipeline
-  - `src/new_kedro_project/pipelines/data_science` - Data Science pipeline
-* master (or `__default__`) pipeline:
-  - `src/new_kedro_project/pipeline.py` - combines 2 modular pipelines from the above
+```python
+import new_kedro_project.pipelines.modular_pipeline_1 as mp1
+
+pipeline1 = mp1.create_pipeline()
+```
+
+#### Ease of use and portability
+
+Here is a list of recommendations for developing a modular pipeline:
+
+* A modular pipeline should include a `README.md`, with all the information regarding the execution of the pipeline for the end users
+* A modular pipeline _may_ have external dependencies specified in `requirements.txt`. These dependencies are _not_ currently installed by the [`kedro install`](https://kedro.readthedocs.io/en/latest/06_resources/03_commands_reference.html#kedro-install) command, so the users of your pipeline would have to run `pip install -r src/<python_package>/pipelines/<pipeline_name>/requirements.txt`
+* To ensure portability, modular pipelines should use relative imports when accessing their own objects and absolute imports otherwise. Look at an example from `src/new_kedro_project/pipelines/modular_pipeline_1/pipeline.py` below:
+
+```python
+from external_package import add  # importing from external package
+from kedro.pipeline import node, Pipeline
+
+from .nodes import node1_func, node2_func  # importing its own node functions
+
+
+def create_pipeline():
+    node1 = node(func=node1_func, inputs="a", outputs="b")
+    node2 = node(func=node2_func, inputs="c", outputs="d")
+    node3 = node(func=add, inputs=["b", "d"], outputs="sum")
+    return Pipeline([node1, node2, node3])
+```
+
+* Modular pipelines should _not_ depend on the main Python package (`new_kedro_project` in this example) as it would break the portability to another project
+* Modular pipelines should be stitched together in a master (or `__default__`) pipeline located in `src/new_kedro_project/pipeline.py`. In our example, this pipeline combines `modular_pipeline_1` and `modular_pipeline_2`.
+* Master pipeline should import and instantiate modular pipelines as shown in this example from `src/new_kedro_project/pipeline.py`:
+
+```python
+from typing import Dict
+
+from kedro.pipeline import Pipeline
+
+from new_kedro_project.pipelines import (
+    modular_pipeline_1 as mp1,
+    modular_pipeline_2 as mp2,
+)
+
+
+def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
+    pipeline1 = mp1.create_pipeline()
+    pipeline2 = mp2.create_pipeline()
+    pipeline_all = pipeline_1 + pipeline_2
+    return {"mp1": pipeline_1, "mp2": pipeline_2, "__default__": pipeline_all}
+```
+
+> *Note:* To find out how you can run a pipeline by its name, please navigate to [this section](#running-a-pipeline-by-name).
+
+
+### A modular pipeline example template
+
+Linking all of these concepts together, here is an example of a modular pipeline structure which combines all of these concepts within a Kedro project:
+
+* The modular pipelines:
+  - `src/new_kedro_project/pipelines/data_engineering` - A pipeline that imputes missing data and discovers outlier data points
+  - `src/new_kedro_project/pipelines/feature_engineering` - A pipeline that generates temporal features while aggregating data and performs a train/test split on the data
+  - `src/new_kedro_project/pipelines/modelling` - A pipeline that fits models, does hyperparameter search and reports on model performance
+* A master (or `__default__`) pipeline:
+  - `src/new_kedro_project/pipeline.py` - combines 3 modular pipelines from the above
 
 ```console
 new-kedro-project
@@ -182,7 +245,13 @@ new-kedro-project
 │   │   │   │   ├── pipeline.py
 │   │   │   │   ├── requirements.txt
 │   │   │   │   └── README.md
-│   │   │   ├── data_science
+│   │   │   ├── feature_engineering
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── nodes.py
+│   │   │   │   ├── pipeline.py
+│   │   │   │   ├── requirements.txt
+│   │   │   │   └── README.md
+│   │   │   ├── modelling
 │   │   │   │   ├── __init__.py
 │   │   │   │   ├── nodes.py
 │   │   │   │   ├── pipeline.py
@@ -203,64 +272,6 @@ new-kedro-project
 ├── kedro_cli.py
 └── setup.cfg
 ```
-
-### Requirements
-
-Here is a list of requirements to make your pipeline modular:
-
-1. Each modular pipeline should be placed in a Python module `src/<python_package>/pipelines/<pipeline_name>`
-2. `src/<python_package>/pipelines` should be a Python package itself
-3. Modular pipeline must expose a function called `create_pipeline` at the top level of its package. Calling `create_pipeline` with no arguments should return an instance of a [Pipeline](/kedro.pipeline.Pipeline):
-
-```python
-import new_kedro_project.pipelines.data_engineering as de
-
-de_pipeline = de.create_pipeline()  # type: kedro.pipeline.Pipeline
-```
-
-### Best practice
-
-This is a list of recommendations for developing modular pipeline. They are not enforced by Kedro at this stage, however this may change in future versions.
-
-* A modular pipeline should include a `README.md` as a main documentation source for the end users with all the information regarding the execution of the pipeline
-* A modular pipeline _may_ have external dependencies specified in `requirements.txt`. Those, however, are _not_ currently installed by `kedro install` command, so the users of your pipeline would have to run `pip install -r src/<python_package>/pipelines/<pipeline_name>/requirements.txt`
-* To ensure portability, modular pipeline should use relative imports when accessing its own objects and absolute imports otherwise. Example from `src/<python_package>/pipelines/data_engineering/pipeline.py`:
-
-```python
-from external_package import add  # importing from external package
-from kedro.pipeline import node, Pipeline
-
-from .nodes import node1_func, node2_func  # importing its own node functions
-
-
-def create_pipeline():
-    node1 = node(func=node1_func, inputs='a', outputs='b')
-    node2 = node(func=node2_func, inputs='c', outputs='d')
-    node3 = node(func=add, inputs=['b', 'd'], outputs='sum')
-    return Pipeline([node1, node2, node3])
-```
-
-* Modular pipelines should _not_ depend on the main Python package (`new_kedro_project` in this example) as it would break the portability to another project
-* Master pipeline should import and instantiate modular pipelines as shown in this example from `src/<python_package>/pipeline.py`:
-
-```python
-from typing import Dict
-
-from kedro.pipeline import Pipeline
-
-from new_kedro_project.pipelines import data_engineering as de, data_science as ds
-
-def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
-    data_engineering_pipeline = de.create_pipeline()
-    data_science_pipeline = ds.create_pipeline()
-    pipeline_all = data_engineering_pipeline + data_science_pipeline
-    return {
-        "de": data_engineering_pipeline,
-        "__default__": pipeline_all
-    }
-```
-
-> *Note:* To find out how you can run a pipeline by its name, please navigate to [this section](#running-a-pipeline-by-name).
 
 ### Configuration
 
@@ -286,30 +297,34 @@ But the names might be different, requiring manual fixes to be applied to the pi
 Alternative solution would be to `transform` an existing pipeline. Consider this example:
 
 ```python
-cook_pipeline = Pipeline([
-    node(defrost, 'frozen_meat', 'meat'),
-    node(grill, 'meat', 'grilled_meat'),
-])
+cook_pipeline = Pipeline(
+    [node(defrost, "frozen_meat", "meat"), node(grill, "meat", "grilled_meat"),]
+)
 
-lunch_pipeline = Pipeline([
-    node(eat, 'food', None),
-])
+lunch_pipeline = Pipeline([node(eat, "food", None),])
 ```
 
 A simple `cook_pipeline + lunch_pipeline` doesn't work, `food` input needs to be mapped to `grilled_meat` output.
 That's how it can be done, all three resulting pipelines do the job equally fine:
 
 ```python
-final_pipeline1 = cook_pipeline.transform(datasets={"grilled_meat": "food"}) + lunch_pipeline
-final_pipeline2 = cook_pipeline + lunch_pipeline.transform(datasets={"food": "grilled_meat"})
-final_pipeline3 = cook_pipeline.transform(datasets={"grilled_meat": "new_name"}) + \
-     lunch_pipeline.transform(datasets={"food": "new_name")
+final_pipeline1 = (
+    cook_pipeline.transform(datasets={"grilled_meat": "food"}) + lunch_pipeline
+)
+final_pipeline2 = cook_pipeline + lunch_pipeline.transform(
+    datasets={"food": "grilled_meat"}
+)
+final_pipeline3 = cook_pipeline.transform(
+    datasets={"grilled_meat": "new_name"}
+) + lunch_pipeline.transform(datasets={"food": "new_name"})
 ```
 
 Note that `Pipeline.transform()` will skip prefixing when node inputs and outputs contain parameter references (`params:` and `parameters`).
 Example:
 ```python
-transformed_pipeline = Pipeline([node(node_func, ["input", "params:x"], None)]).transform(prefix="new")
+transformed_pipeline = Pipeline(
+    [node(node_func, ["input", "params:x"], None)]
+).transform(prefix="new")
 # `transformed_pipeline` will be `Pipeline([node(node_func, ["new.input", "params:x"], None)])`
 ```
 
@@ -317,17 +332,15 @@ transformed_pipeline = Pipeline([node(node_func, ["input", "params:x"], None)]).
 Consider the example:
 
 ```python
-cook_pipeline = Pipeline([
-    node(defrost, "frozen_meat", "meat", name="defrost_node"),
-    node(grill, "meat", "grilled_meat"),
-])
+cook_pipeline = Pipeline(
+    [
+        node(defrost, "frozen_meat", "meat", name="defrost_node"),
+        node(grill, "meat", "grilled_meat"),
+    ]
+)
 
-breakfast_pipeline = Pipeline([
-    node(eat_breakfast, "breakfast_food", None),
-])
-lunch_pipeline = Pipeline([
-    node(eat_lunch, "lunch_food", None),
-])
+breakfast_pipeline = Pipeline([node(eat_breakfast, "breakfast_food", None),])
+lunch_pipeline = Pipeline([node(eat_lunch, "lunch_food", None),])
 ```
 Now we need to "defrost" two different types of food and feed it to different pipelines.
 But we can't use the `cook_pipeline` twice, the internal dataset names will conflict.
@@ -341,9 +354,7 @@ pipeline = (
         datasets={"grilled_meat": "breakfast_food"}, prefix="breakfast"
     )
     + breakfast_pipeline
-    + cook_pipeline.transform(
-        datasets={"grilled_meat": "lunch_food"}, prefix="lunch"
-    )
+    + cook_pipeline.transform(datasets={"grilled_meat": "lunch_food"}, prefix="lunch")
     + lunch_pipeline
 )
 ```
@@ -365,9 +376,7 @@ In this case we have a pipeline consisting of a single node with no input and ou
 
 ```python
 try:
-    Pipeline([
-        node(lambda: print('!'), None, None)
-    ])
+    Pipeline([node(lambda: print("!"), None, None)])
 except Exception as e:
     print(e)
 ```
@@ -387,10 +396,12 @@ The first node captures the relationship of how to calculate `y` from `x` and th
 
 ```python
 try:
-    Pipeline([
-        node(lambda x: x+1, 'x', 'y', name='first node'),
-        node(lambda y: y-1, 'y', 'x', name='second node')
-    ])
+    Pipeline(
+        [
+            node(lambda x: x + 1, "x", "y", name="first node"),
+            node(lambda y: y - 1, "y", "x", name="second node"),
+        ]
+    )
 except Exception as e:
     print(e)
 ```
@@ -573,7 +584,7 @@ Kedro has options to modify pipeline runs. Here is a list of CLI arguments suppo
 +======================================================+=================================================================================+===========================+
 | kedro run --pipeline de                              | Run the whole pipeline by its name                                              | No                        |
 +------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| kedro run --node debug_me --node debug_me_too        | Run only nodes with specified names                                             | Yes                       |
+| kedro run --node debug_me,debug_me_too               | Run only nodes with specified names                                             | Yes                       |
 +------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
 | kedro run --from-nodes node1,node2                   | A list of node names which should be used as a starting point                   | No                        |
 +------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
@@ -581,9 +592,11 @@ Kedro has options to modify pipeline runs. Here is a list of CLI arguments suppo
 +------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
 | kedro run --from-inputs dataset1,dataset2            | A list of dataset names which should be used as a starting point                | No                        |
 +------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| kedro run --tag some_tag1 --tag some_tag2            | Run only nodes which have any of these tags attached                            | Yes                       |
+| kedro run --tag some_tag1,some_tag2                  | Run only nodes which have any of these tags attached                            | Yes                       |
 +------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
 | kedro run --params param_key1:value1,param_key2:2.0  | Does a parametrised kedro run with {"param_key1": "value1", "param_key2": 2}    | Yes                       |
++------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+| kedro run --env env_name                             | Run the pipeline in the env_name environment. Defaults to local if not provided | No                        |
 +------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
 | kedro run --config config.yml                        | Specify all command line options in a configuration file called config.yml      | No                        |
 +------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
@@ -597,12 +610,13 @@ You can also combine these options together, so the command `kedro run --from-no
 You can apply decorators on whole pipelines, the same way you apply decorators on single nodes. For example, if you want to apply the decorators defined in the earlier section to all pipeline nodes simultaneously, you can do so as follows:
 
 ```python
-hello_pipeline = Pipeline([
-    node(say_hello, 'name1', None),
-    node(say_hello, 'name2', None)
-]).decorate(apply_g, apply_h)
+hello_pipeline = Pipeline(
+    [node(say_hello, "name1", None), node(say_hello, "name2", None)]
+).decorate(apply_g, apply_h)
 
-SequentialRunner().run(hello_pipeline, DataCatalog({}, dict(name1="Kedro", name2="Python")))
+SequentialRunner().run(
+    hello_pipeline, DataCatalog({}, dict(name1="Kedro", name2="Python"))
+)
 ```
 
 `Output`:
@@ -624,9 +638,7 @@ By using `DataCatalog` from the IO module we are still able to write pure functi
 Through `DataCatalog`, we can control where inputs are loaded from, where intermediate variables get persisted and ultimately the location to which output variables are written:
 
 ```python
-io = DataCatalog(dict(
-    xs=MemoryDataSet()
-))
+io = DataCatalog(dict(xs=MemoryDataSet()))
 ```
 
 ```python
@@ -640,7 +652,7 @@ Out[10]: ['xs']
 ```
 
 ```python
-io.save('xs', [1, 2, 3])
+io.save("xs", [1, 2, 3])
 ```
 
 ```python
@@ -664,12 +676,14 @@ def save(value):
     with open("./data/07_model_output/variance.pickle", "wb") as f:
         pickle.dump(value, f)
 
+
 def load():
     with open("./data/07_model_output/variance.pickle", "rb") as f:
         return pickle.load(f)
 
+
 pickler = LambdaDataSet(load=load, save=save)
-io.add('v', pickler)
+io.add("v", pickler)
 ```
 
 It is important to make sure that the data catalog variable name `v` matches the name `v` in the pipeline definition.
@@ -677,11 +691,11 @@ It is important to make sure that the data catalog variable name `v` matches the
 Next we can confirm that this `LambdaDataSet` works:
 
 ```python
-io.save('v', 5)
+io.save("v", 5)
 ```
 
 ```python
-io.load('v')
+io.load("v")
 ```
 
 `Ouput`:
@@ -704,7 +718,7 @@ Out[13]: {}
 Because the output has been persisted to a local file we don't see it directly, but it can be retrieved from the catalog:
 
 ```python
-io.load('v')
+io.load("v")
 ```
 
 `Ouput`:
@@ -747,7 +761,7 @@ Outputs: v
 One way to specify a partial pipeline is by providing a set of pre-calculated inputs which should serve as a start of the partial pipeline. For example, in order to fetch the partial pipeline running from input `m2` downstream you can specify it like this:
 
 ```python
-print(pipeline.from_inputs('m2').describe())
+print(pipeline.from_inputs("m2").describe())
 ```
 
 `Output`:
@@ -766,7 +780,7 @@ Outputs: v
 Specifying that the partial pipeline from inputs `m` and `xs` is needed will result in the following pipeline:
 
 ```python
-print(pipeline.from_inputs('m', 'xs').describe())
+print(pipeline.from_inputs("m", "xs").describe())
 ```
 
 `Output`:
@@ -791,7 +805,7 @@ As it can been seen from the pipeline description, adding `m` in the `from_input
 Another way of selecting a partial pipeline is by specifying the nodes which should be used as a start of the new pipeline. For example you can do as follows:
 
 ```python
-print(pipeline.from_nodes('mean node').describe())
+print(pipeline.from_nodes("mean node").describe())
 ```
 
 `Output`:
@@ -820,7 +834,7 @@ kedro run --from-nodes="mean node"
 Similarly, you can specify the nodes which should be used as an end of the new pipeline. For example, you can do as follows:
 
 ```python
-print(pipeline.to_nodes('mean node').describe())
+print(pipeline.to_nodes("mean node").describe())
 ```
 
 `Output`:
@@ -860,7 +874,7 @@ kedro run --from-nodes A,D --to-nodes X,Y,Z
 One can also create a partial pipeline from the nodes that have specific tags attached to them. In order to construct a partial pipeline out of nodes that have both tag `t1` *AND* tag `t2`, you can run the following:
 
 ```python
-print(pipeline.only_nodes_with_tags('t1', 't2').describe())
+print(pipeline.only_nodes_with_tags("t1", "t2").describe())
 ```
 
 `Output`:
@@ -877,7 +891,9 @@ Outputs: None
 To construct a partial pipeline out of nodes that have tag `t1` *OR* tag `t2`, please execute the following:
 
 ```python
-partial_pipeline = pipeline.only_nodes_with_tags('t1') + pipeline.only_nodes_with_tags('t2')
+partial_pipeline = pipeline.only_nodes_with_tags("t1") + pipeline.only_nodes_with_tags(
+    "t2"
+)
 print(partial_pipeline.describe())
 ```
 
@@ -896,7 +912,7 @@ Outputs: None
 Sometimes you might need to run only some of the nodes in a pipeline. To do that, you can do as follows:
 
 ```python
-print(pipeline.only_nodes('mean node', 'mean sos').describe())
+print(pipeline.only_nodes("mean node", "mean sos").describe())
 ```
 
 `Output`:
@@ -929,7 +945,6 @@ node(
     ),
     name="node1",
 ),
-
 ```
 
 and then run the following command in your terminal window:
@@ -941,7 +956,7 @@ kedro run --node=node1
 You may specify multiple names like so:
 
 ```bash
-kedro run --node=node1 --node=node2
+kedro run --node=node1,node2
 ```
 
 > *Note:* The run will only succeed if all the inputs required by those nodes already exist, i.e. already produced or present in the data catalog.
@@ -975,16 +990,13 @@ To demonstrate this, let us save the intermediate output `n` using a `JSONLocalD
 
 ```python
 n_json = JSONLocalDataSet(filepath="./data/07_model_output/len.json")
-io = DataCatalog(dict(
-    xs=MemoryDataSet([1, 2, 3]),
-    n=n_json,
-))
+io = DataCatalog(dict(xs=MemoryDataSet([1, 2, 3]), n=n_json))
 ```
 
 Because `n` was not saved previously, checking for its existence returns `False`:
 
 ```python
-io.exists('n')
+io.exists("n")
 ```
 
 `Output`:
@@ -1006,7 +1018,7 @@ Out[16]: {'v': 0.666666666666667}
 ```
 
 ```python
-io.exists('n')
+io.exists("n")
 ```
 
 `Output`:

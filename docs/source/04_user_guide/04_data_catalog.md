@@ -138,16 +138,8 @@ In the example above `catalog.yml` contains references to credentials keys `dev_
 CSVS3DataSet(
     bucket_name="test_bucket",
     filepath="data/02_intermediate/company/motorbikes.csv",
-    load_args=dict(
-        sep=",",
-        skiprows=5,
-        skipfooter=1,
-        na_values=["#NA", "NA"],
-    ),
-    credentials=dict(
-        aws_access_key_id="token",
-        aws_secret_access_key="key",
-    )
+    load_args=dict(sep=",", skiprows=5, skipfooter=1, na_values=["#NA", "NA"],),
+    credentials=dict(aws_access_key_id="token", aws_secret_access_key="key"),
 )
 ```
 
@@ -274,10 +266,11 @@ from kedro.versioning import Journal
 class ProjectContext(KedroContext):
 
     ...
+
     def _create_catalog(self, *args, **kwargs):
         catalog = super()._create_catalog(*args, **kwargs)
         profile_time = ProfileTimeTransformer()  # instantiate a built-in transformer
-        catalog.add_transfomer(profile_time) # apply it to the catalog
+        catalog.add_transfomer(profile_time)  # apply it to the catalog
         return catalog
 ```
 
@@ -366,7 +359,6 @@ class ProfileMemoryTransformer(AbstractTransformer):
 Finally, you need to update `ProjectContext._create_catalog` method definition to apply your custom transformer:
 
 ```python
-
 ...
 from .memory_profile import ProfileMemoryTransformer  # new import
 
@@ -381,8 +373,10 @@ class ProjectContext(KedroContext):
         profile_time = ProfileTimeTransformer()
         catalog.add_transformer(profile_time)
 
-        profile_memory = ProfileMemoryTransformer()  # instantiate our custom transformer
-        # as memory tracking is quite time-consuming, for the demonstration purposes
+        # instantiate our custom transformer
+        profile_memory = ProfileMemoryTransformer()
+
+        # as memory tracking is quite time-consuming, for demonstration purposes
         # let's apply profile_memory only to the master_table
         catalog.add_transformer(profile_memory, "master_table")
         return catalog
@@ -437,15 +431,30 @@ The code API allows you to configure data sources in code. This can also be used
 In a file like `catalog.py`, you can generate the Data Catalog. This will allow everyone in the project to review all the available data sources. In the following, we are using the pre-built CSV loader, which is documented in the API reference documentation: [CSVLocalDataSet](/kedro.io.CSVLocalDataSet)
 
 ```python
-from kedro.io import DataCatalog, CSVLocalDataSet, SQLTableDataSet, SQLQueryDataSet, ParquetLocalDataSet
+from kedro.io import (
+    DataCatalog,
+    CSVLocalDataSet,
+    SQLTableDataSet,
+    SQLQueryDataSet,
+    ParquetLocalDataSet,
+)
 
-io = DataCatalog({
-  'bikes': CSVLocalDataSet(filepath='../data/01_raw/bikes.csv'),
-  'cars': CSVLocalDataSet(filepath='../data/01_raw/cars.csv', load_args=dict(sep=',')), # additional arguments
-  'cars_table': SQLTableDataSet(table_name="cars", credentials=dict(con="sqlite:///kedro.db")),
-  'scooters_query': SQLQueryDataSet(sql="select * from cars where gear=4", credentials=dict(con="sqlite:///kedro.db")),
-  'ranked': ParquetLocalDataSet(filepath="ranked.parquet")
-})
+io = DataCatalog(
+    {
+        "bikes": CSVLocalDataSet(filepath="../data/01_raw/bikes.csv"),
+        "cars": CSVLocalDataSet(
+            filepath="../data/01_raw/cars.csv", load_args=dict(sep=",")
+        ),
+        "cars_table": SQLTableDataSet(
+            table_name="cars", credentials=dict(con="sqlite:///kedro.db")
+        ),
+        "scooters_query": SQLQueryDataSet(
+            sql="select * from cars where gear=4",
+            credentials=dict(con="sqlite:///kedro.db"),
+        ),
+        "ranked": ParquetLocalDataSet(filepath="ranked.parquet"),
+    }
+)
 ```
 
 > *Note:* When using `SQLTableDataSet` or `SQLQueryDataSet` you must provide a `con` key containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) database connection string. In the example above we pass it as part of `credentials` argument. Alternative to `credentials` would be to put `con` into `load_args` and `save_args` (`SQLTableDataSet` only).
@@ -455,8 +464,8 @@ io = DataCatalog({
 Each dataset can be accessed by its name.
 
 ```python
-cars = io.load('cars') # data is now loaded as a DataFrame in 'cars'
-gear = cars['gear'].values
+cars = io.load("cars")  # data is now loaded as a DataFrame in 'cars'
+gear = cars["gear"].values
 ```
 
 ### Behind the scenes
@@ -488,9 +497,9 @@ Saving data can be completed with a similar API.
 from kedro.io import MemoryDataSet
 
 memory = MemoryDataSet(data=None)
-io.add('cars_cache', memory)
-io.save('cars_cache', 'Memory can store anything.')
-io.load('car_cache')
+io.add("cars_cache", memory)
+io.save("cars_cache", "Memory can store anything.")
+io.load("car_cache")
 ```
 
 ### Saving data to a SQL database for querying
@@ -506,8 +515,8 @@ try:
 except FileNotFoundError:
     pass
 
-io.save('cars_table', cars)
-ranked = io.load('scooters_query')[['brand', 'mpg']]
+io.save("cars_table", cars)
+ranked = io.load("scooters_query")[["brand", "mpg"]]
 ```
 
 ### Saving data in parquet
@@ -515,7 +524,7 @@ ranked = io.load('scooters_query')[['brand', 'mpg']]
 Finally we can save the processed data in Parquet format.
 
 ```python
-io.save('ranked', ranked)
+io.save("ranked", ranked)
 ```
 
 > *Note:* Saving `None` to a dataset is not allowed!

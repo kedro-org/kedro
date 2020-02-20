@@ -330,8 +330,23 @@ class TestDataCatalogFromConfig:
         sane_config["catalog"]["boats"][
             "type"
         ] = "kedro.invalid_module_name.io.CSVLocalDataSet"
-        with pytest.raises(DataSetError, match=r"Cannot import module"):
+
+        error_msg = "Class `kedro.invalid_module_name.io.CSVLocalDataSet` not found"
+        with pytest.raises(DataSetError, match=re.escape(error_msg)):
             DataCatalog.from_config(**sane_config)
+
+    def test_config_relative_import(self, sane_config):
+        """Check the error if the type points to a relative import"""
+        sane_config["catalog"]["boats"]["type"] = ".CSVLocalDataSetInvalid"
+
+        pattern = "`type` class path does not support relative paths"
+        with pytest.raises(DataSetError, match=re.escape(pattern)):
+            DataCatalog.from_config(**sane_config)
+
+    def test_config_import_extras(self, sane_config):
+        """Test kedro.extras.datasets default path to the dataset class"""
+        sane_config["catalog"]["boats"]["type"] = "pandas.CSVDataSet"
+        assert DataCatalog.from_config(**sane_config)
 
     def test_config_missing_class(self, sane_config):
         """Check the error if the type points to nonexistent class"""

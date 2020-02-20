@@ -64,6 +64,10 @@
 * Kedro CLI arguments `--node` and `--tag` support comma-separated values, alternative methods will be deprecated in future releases.
 * Config loaders to be deprecated:
   - `kedro.contrib.config.TemplatedConfigLoader`
+* Modify `DataCatalog`'s load order for datasets, now trying to load them in the following order:
+  - `kedro.io`
+  - `kedro.extras.datasets`
+  - import path, specified in `type`
 
 ## Bug fixes and other changes
 * Fixed a bug in the `invalidate_cache` method of `ParquetGCSDataSet` and `CSVGCSDataSet`.

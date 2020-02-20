@@ -237,8 +237,7 @@ class TestPartitionedDataSetLocal:
             ("UndefinedDatasetType", "Class `UndefinedDatasetType` not found"),
             (
                 "missing.module.UndefinedDatasetType",
-                r"Cannot import module when trying to load type `missing\."
-                r"module\.UndefinedDatasetType`",
+                r"Class `missing\.module\.UndefinedDatasetType` not found",
             ),
             (
                 FakeDataSet,

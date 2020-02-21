@@ -87,6 +87,7 @@
 * Make the resume prompt on pipeline run failure use `--from-nodes` instead of `--from-inputs` to avoid unnecessarily re-running nodes that had already executed.
 * When closed, Jupyter notebook kernels are automatically terminated after 30 seconds of inactivity by default. Use `--idle-timeout` option to update it.
 * Added `kedro-viz` to the Kedro project template `requirements.txt` file.
+* Removed the `results` and `references` folder from the project template.
 
 ## Breaking changes to the API
 * Existing `MatplotlibWriter` dataset in `contrib` was renamed to `MatplotlibLocalWriter`.

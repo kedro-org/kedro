@@ -234,8 +234,6 @@ new-kedro-project
 ├── docs/
 ├── logs/
 ├── notebooks/
-├── references/
-├── results/
 ├── src
 │   ├── new_kedro_project
 │   │   ├── pipelines

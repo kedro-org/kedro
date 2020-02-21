@@ -68,6 +68,7 @@
   - `kedro.io`
   - `kedro.extras.datasets`
   - import path, specified in `type`
+* Updated contribution process in CONTRIBUTING.md.
 
 ## Bug fixes and other changes
 * Fixed a bug in the `invalidate_cache` method of `ParquetGCSDataSet` and `CSVGCSDataSet`.

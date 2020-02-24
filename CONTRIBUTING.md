@@ -32,12 +32,12 @@ If you have new ideas for Kedro functionality then please open a [GitHub issue](
 
 If you're unsure where to begin contributing to Kedro, please start by looking through the `good first issues` and `help wanted issues` on [GitHub](https://github.com/quantumblacklabs/kedro/issues).
 
-We focus on three areas for contribution: `core`, [`contrib`](/kedro/contrib/) or `plugin`:
+We focus on three areas for contribution: `core`, [`extras`](/kedro/extras/) or `plugin`:
 - `core` refers to the primary Kedro library
-- [`contrib`](/kedro/contrib/) refers to features that could be added to `core` that do not introduce too many depencies or require new Kedro CLI commands to be created e.g. adding a new dataset to the `io` data management module
-- [`plugin`](https://kedro.readthedocs.io/en/latest/04_user_guide/10_developing_plugins.html) refers to new functionality that requires a Kedro CLI command e.g. adding in Airflow functionality
+- [`extras`](/kedro/extras/) refers to features that could be added to `core` that do not introduce too many depencies or require new Kedro CLI commands to be created e.g. adding a new dataset to the `kedro.extras.dataset` data management module. All the datasets are placed under `kedro.extras.datasets` to separate heavy depencies (e.g Pandas) from Kedro `core` components.
+- [`plugin`](https://kedro.readthedocs.io/en/stable/04_user_guide/10_developing_plugins.html) refers to new functionality that requires a Kedro CLI command e.g. adding in Airflow functionality
 
-Typically, we only accept small contributions for the `core` Kedro library but accept new features as `plugin`s or additions to the [`contrib`](/kedro/contrib/) module. We regularly review [`contrib`](/kedro/contrib/) and may migrate modules to `core` if they prove to be essential for the functioning of the framework or if we believe that they are used by most projects.
+Typically, we only accept small contributions for the `core` Kedro library but accept new features as `plugin`s or additions to the [`extras`](/kedro/extras/) module. We regularly review [`extras`](/kedro/extras/) and may migrate modules to `core` if they prove to be essential for the functioning of the framework.
 
 ## Your first contribution
 
@@ -71,13 +71,12 @@ There is an automated check to verify that it exists. The check will highlight a
 ### Branching conventions
 We use a branching model that helps us keep track of branches in a logical, consistent way. All branches should have the hyphen-separated convention of: `<type-of-change>/<short-description-of-change>` e.g. `contrib/io-dataset`
 
-| Types of changes | Description                                                                  |
-| ---------------- | ---------------------------------------------------------------------------- |
-| `contrib`        | Changes under `contrib/` and has no side-effects to other `contrib/` modules |
-| `docs`           | Changes to the documentation under `docs/source/`                            |
-| `feature`        | Non-breaking change which adds functionality                                 |
-| `fix`            | Non-breaking change which fixes an issue                                     |
-| `tests`          | Changes to project unit `tests/` and / or integration `features/` tests      |
+| Types of changes | Description                                                             |
+| ---------------- | ----------------------------------------------------------------------- |
+| `docs`           | Changes to the documentation under `docs/source/`                       |
+| `feature`        | Non-breaking change which adds functionality                            |
+| `fix`            | Non-breaking change which fixes an issue                                |
+| `tests`          | Changes to project unit `tests/` and / or integration `features/` tests |
 
 ## `core` contribution process
 
@@ -92,13 +91,13 @@ Small contributions are accepted for the `core` library:
 
  > _Note:_ We will work with you to complete your contribution but we reserve the right to takeover abandoned PRs.
 
-## `contrib` contribution process
+## `extras` contribution process
 
-You can add new work to `contrib` if you do not need to create a new Kedro CLI command:
+You can add new work to `extras` if you do not need to create a new Kedro CLI command:
 
  1. Create an [issue](https://github.com/quantumblacklabs/kedro/issues) describing your contribution.
  2. Fork the project by clicking **Fork** in the top-right corner of the [Kedro GitHub repository](https://github.com/quantumblacklabs/kedro) and then choosing the target account the repository will be forked to.
- 3. Work in [`contrib`](/kedro/contrib/) and create a feature branch on your forked repository and push all your local changes to that feature branch.
+ 3. Work in [`extras`](/kedro/extras/) and create a feature branch on your forked repository and push all your local changes to that feature branch.
  4. Before submitting a pull request, please ensure that unit, e2e tests and linting are passing for your changes by running `make test`, `make e2e-tests` and `make lint` locally, have a look at the section [Running checks locally](/CONTRIBUTING.md#running-checks-locally) below.
  5. Include a `README.md` with instructions on how to use your contribution.
  6. Open a PR against the `quantumblacklabs:develop` branch from your feature branch and reference your issue in the PR description (e.g., `Resolves #<issue-number>`).
@@ -109,7 +108,7 @@ You can add new work to `contrib` if you do not need to create a new Kedro CLI c
 
 ## `plugin` contribution process
 
-See the [`plugin` development documentation](https://kedro.readthedocs.io/en/latest/04_user_guide/10_developing_plugins.html) for guidance on how to design and develop a Kedro `plugin`.
+See the [`plugin` development documentation](https://kedro.readthedocs.io/en/stable/04_user_guide/10_developing_plugins.html) for guidance on how to design and develop a Kedro `plugin`.
 
 ## CI / CD and running checks locally
 To run E2E tests you need to install the test requirements which includes `behave`.

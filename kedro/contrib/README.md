@@ -1,5 +1,7 @@
 # Kedro contrib
 
+**NOTE**: `kedro.contrib` modules are deprecated and are migrated into `kedro.extras`.
+
 The contrib directory is meant to contain user contributions, these
 contributions might get merged into core Kedro at some point in the future.
 

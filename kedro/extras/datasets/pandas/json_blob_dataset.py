@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,10 +26,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" ``JSONBlobDataSet`` implementation to access JSON(L) files directly from
-Microsoft's Azure blob storage.
+""" ``JSONBlobDataSet`` implementation to access JSON files directly from
+Microsoft's Azure Blob Storage.
 """
 import io
+from copy import deepcopy
 from typing import Any, Dict
 
 import pandas as pd
@@ -40,9 +41,9 @@ from kedro.io.core import AbstractDataSet
 
 class JSONBlobDataSet(AbstractDataSet):
     # pylint: disable=too-many-instance-attributes
-    """``JSONBlobDataSet`` loads and saves json(line-delimited) files in Microsoft's Azure
-    blob storage. It uses Azure storage SDK to read and write in Azure and
-    pandas to handle the json(l) file locally.
+    """``JSONBlobDataSet`` loads and saves JSON files in Microsoft's Azure
+    Blob Storage. It uses the Azure Storage SDK to read and write in Azure and
+    pandas to handle the JSON file locally.
 
     Example:
     ::
@@ -64,15 +65,8 @@ class JSONBlobDataSet(AbstractDataSet):
         >>> assert data.equals(reloaded)
     """
 
-    def _describe(self) -> Dict[str, Any]:
-        return dict(
-            filepath=self._filepath,
-            container_name=self._container_name,
-            blob_to_bytes_args=self._blob_to_bytes_args,
-            blob_from_bytes_args=self._blob_from_bytes_args,
-            load_args=self._load_args,
-            save_args=self._save_args,
-        )
+    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -87,44 +81,58 @@ class JSONBlobDataSet(AbstractDataSet):
         save_args: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``JSONBlobDataSet`` pointing to a
-        concrete json(l) file on Azure blob storage.
+        concrete JSON file on Azure Blob Storage.
 
         Args:
-            filepath: path to a azure blob of a json(l) file.
+            filepath: Path to an Azure Blob of a JSON file.
             container_name: Azure container name.
             credentials: Credentials (``account_name`` and
-                ``account_key`` or ``sas_token``) to access the Azure blob storage
-            encoding: Default utf-8. Defines encoding of json files downloaded as binary streams.
+                ``account_key`` or ``sas_token``) to access the Azure Blob Storage.
+            encoding: Default utf-8. Defines encoding of JSON files downloaded as binary streams.
             blob_to_bytes_args: Any additional arguments to pass to Azure's
                 ``get_blob_to_bytes`` method:
                 https://docs.microsoft.com/en-us/python/api/azure.storage.blob.baseblobservice.baseblobservice?view=azure-python#get-blob-to-bytes
             blob_from_bytes_args: Any additional arguments to pass to Azure's
                 ``create_blob_from_bytes`` method:
                 https://docs.microsoft.com/en-us/python/api/azure.storage.blob.blockblobservice.blockblobservice?view=azure-python#create-blob-from-bytes
-            load_args: Pandas options for loading json(l) files.
+            load_args: Pandas options for loading JSON files.
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_json.html
                 All defaults are preserved.
-            save_args: Pandas options for saving json(l) files.
+            save_args: Pandas options for saving JSON files.
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_json.html
                 All defaults are preserved, but "index", which is set to False.
 
         """
-        self._save_args = {**save_args} if save_args else {}
-        self._load_args = load_args if load_args else {}
+        _credentials = deepcopy(credentials) or {}
         self._filepath = filepath
         self._encoding = encoding
         self._container_name = container_name
-        self._credentials = credentials if credentials else {}
-        self._blob_to_bytes_args = blob_to_bytes_args if blob_to_bytes_args else {}
-        self._blob_from_bytes_args = (
-            blob_from_bytes_args if blob_from_bytes_args else {}
+        self._blob_to_bytes_args = deepcopy(blob_to_bytes_args) or {}
+        self._blob_from_bytes_args = deepcopy(blob_from_bytes_args) or {}
+        self._blob_service = BlockBlobService(**_credentials)
+
+        # Handle default load and save arguments
+        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
+        if load_args is not None:
+            self._load_args.update(load_args)
+        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
+        if save_args is not None:
+            self._save_args.update(save_args)
+
+    def _describe(self) -> Dict[str, Any]:
+        return dict(
+            filepath=self._filepath,
+            container_name=self._container_name,
+            blob_to_bytes_args=self._blob_to_bytes_args,
+            blob_from_bytes_args=self._blob_from_bytes_args,
+            load_args=self._load_args,
+            save_args=self._save_args,
         )
 
     def _load(self) -> pd.DataFrame:
-        blob_service = BlockBlobService(**self._credentials)
-        blob = blob_service.get_blob_to_bytes(
+        blob = self._blob_service.get_blob_to_bytes(
             container_name=self._container_name,
             blob_name=self._filepath,
             **self._blob_to_bytes_args
@@ -133,8 +141,7 @@ class JSONBlobDataSet(AbstractDataSet):
         return pd.read_json(bytes_stream, encoding=self._encoding, **self._load_args)
 
     def _save(self, data: pd.DataFrame) -> None:
-        blob_service = BlockBlobService(**self._credentials)
-        blob_service.create_blob_from_bytes(
+        self._blob_service.create_blob_from_bytes(
             container_name=self._container_name,
             blob_name=self._filepath,
             blob=data.to_json(**self._save_args).encode(self._encoding),

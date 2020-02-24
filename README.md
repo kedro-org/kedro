@@ -32,7 +32,7 @@ Kedro is a development workflow framework that implements software engineering b
 pip install kedro
 ```
 
-See more detailed installation instructions, including how to setup Python virtual environments, in our [installation guide](https://kedro.readthedocs.io/en/latest/02_getting_started/02_install.html) and get started with our ["Hello Word"](https://kedro.readthedocs.io/en/latest/02_getting_started/04_hello_world.html) example.
+See more detailed installation instructions, including how to setup Python virtual environments, in our [installation guide](https://kedro.readthedocs.io/en/stable/02_getting_started/02_install.html) and get started with our ["Hello Word"](https://kedro.readthedocs.io/en/stable/02_getting_started/04_hello_world.html) example.
 
 
 ## Why does Kedro exist?
@@ -66,20 +66,20 @@ Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) a
 
 ## How do I use Kedro?
 
-Our [documentation](https://kedro.readthedocs.io/en/latest/) explains:
+Our [documentation](https://kedro.readthedocs.io/en/stable/) explains:
 
-- Best-practice on how to [get started using Kedro](https://kedro.readthedocs.io/en/latest/02_getting_started/01_prerequisites.html)
-- A ["Hello World" data and ML pipeline example](https://kedro.readthedocs.io/en/latest/02_getting_started/04_hello_world.html) based on the **Iris dataset**
-- A two-hour [Spaceflights tutorial](https://kedro.readthedocs.io/en/latest/03_tutorial/01_workflow.html) that teaches you beginner to intermediate functionality
-- How to [use the CLI](https://kedro.readthedocs.io/en/latest/06_resources/03_commands_reference.html) offered by `kedro_cli.py` (`kedro new`, `kedro run`, ...)
-- An overview of [Kedro architecture](https://kedro.readthedocs.io/en/latest/06_resources/02_architecture_overview.html)
-- [Frequently asked questions (FAQs)](https://kedro.readthedocs.io/en/latest/06_resources/01_faq.html)
+- Best-practice on how to [get started using Kedro](https://kedro.readthedocs.io/en/stable/02_getting_started/01_prerequisites.html)
+- A ["Hello World" data and ML pipeline example](https://kedro.readthedocs.io/en/stable/02_getting_started/04_hello_world.html) based on the **Iris dataset**
+- A two-hour [Spaceflights tutorial](https://kedro.readthedocs.io/en/stable/03_tutorial/01_workflow.html) that teaches you beginner to intermediate functionality
+- How to [use the CLI](https://kedro.readthedocs.io/en/stable/06_resources/03_commands_reference.html) offered by `kedro_cli.py` (`kedro new`, `kedro run`, ...)
+- An overview of [Kedro architecture](https://kedro.readthedocs.io/en/stable/06_resources/02_architecture_overview.html)
+- [Frequently asked questions (FAQs)](https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html)
 
-Documentation for the latest stable release can be found [here](https://kedro.readthedocs.io/en/latest/). You can also run `kedro docs` from your CLI and open the documentation for your current version of Kedro in a browser.
+Documentation for the latest stable release can be found [here](https://kedro.readthedocs.io/en/stable/). You can also run `kedro docs` from your CLI and open the documentation for your current version of Kedro in a browser.
 
 > *Note:* The CLI is a convenient tool for being able to run `kedro` commands but you can also invoke the Kedro CLI as a Python module with `python -m kedro`
 
-*Note:* Read our [FAQs](https://kedro.readthedocs.io/en/latest/06_resources/01_faq.html#how-does-kedro-compare-to-other-projects) to learn how we differ from workflow managers like Airflow and Luigi.
+*Note:* Read our [FAQs](https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#how-does-kedro-compare-to-other-projects) to learn how we differ from workflow managers like Airflow and Luigi.
 
 
 ## Can I contribute?
@@ -89,7 +89,7 @@ Yes! Want to help build Kedro? Check out our guide to [contributing](https://git
 
 ## Where can I learn more?
 
-There is a growing community around Kedro. Have a look at our [FAQs](https://kedro.readthedocs.io/en/latest/06_resources/01_faq.html#where-can-i-learn-more) to find projects using Kedro and links to articles, podcasts and talks.
+There is a growing community around Kedro. Have a look at our [FAQs](https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#where-can-i-learn-more) to find projects using Kedro and links to articles, podcasts and talks.
 
 
 ## What licence do you use?

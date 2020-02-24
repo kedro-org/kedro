@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@
 """Example code for the nodes in the example pipeline. This code is meant
 just for illustrating basic Kedro features.
 
-PLEASE DELETE THIS FILE ONCE YOU START WORKING ON YOUR OWN PROJECT!
+Delete this when you start working on your own Kedro project.
 """
 # pylint: disable=invalid-name
 

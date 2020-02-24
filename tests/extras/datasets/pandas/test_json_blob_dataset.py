@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,10 +28,9 @@
 
 # pylint: disable=unused-argument
 
-from unittest.mock import patch
-
 import pandas as pd
 import pytest
+from pandas.testing import assert_frame_equal
 
 from kedro.extras.datasets.pandas import JSONBlobDataSet
 from kedro.io import DataSetError
@@ -63,8 +62,10 @@ def blob_json_data_set():
     return make_data_set
 
 
-@patch("kedro.extras.datasets.pandas.json_blob_dataset.BlockBlobService")
-def test_pass_credentials_load(blob_service, blob_json_data_set):
+def test_pass_credentials_load(blob_json_data_set, mocker):
+    blob_service = mocker.patch(
+        "kedro.extras.datasets.pandas.json_blob_dataset.BlockBlobService"
+    )
     try:
         blob_json_data_set().load()
     except DataSetError:
@@ -76,18 +77,20 @@ def test_pass_credentials_load(blob_service, blob_json_data_set):
     )
 
 
-@patch("kedro.extras.datasets.pandas.json_blob_dataset.BlockBlobService")
-def test_pass_credentials_save(blob_service, blob_json_data_set, dummy_dataframe):
+def test_pass_credentials_save(blob_json_data_set, dummy_dataframe, mocker):
+    blob_service = mocker.patch(
+        "kedro.extras.datasets.pandas.json_blob_dataset.BlockBlobService"
+    )
     blob_json_data_set().save(dummy_dataframe)
     blob_service.assert_called_with(
         account_name="ACCOUNT_NAME", account_key="ACCOUNT_KEY"
     )
 
 
-@patch(
-    "kedro.extras.datasets.pandas.json_blob_dataset.BlockBlobService.get_blob_to_bytes"
-)
-def test_load_blob_args(get_blob_mock, blob_json_data_set):
+def test_load_blob_args(blob_json_data_set, mocker):
+    get_blob_mock = mocker.patch(
+        "kedro.extras.datasets.pandas.json_blob_dataset.BlockBlobService.get_blob_to_bytes"
+    )
     try:
         blob_json_data_set().load()
     except DataSetError:
@@ -114,15 +117,14 @@ def mock_load_func():
     return mocked
 
 
-@patch(
-    "kedro.extras.datasets.pandas.json_blob_dataset.BlockBlobService.get_blob_to_bytes",
-    new_callable=mock_load_func,
-)
-def test_load(get_blob_mock, blob_json_data_set):
-    result = blob_json_data_set().load()[["name", "age"]]
+def test_load(blob_json_data_set, mocker):
+    mocker.patch(
+        "kedro.extras.datasets.pandas.json_blob_dataset.BlockBlobService.get_blob_to_bytes",
+        new_callable=mock_load_func,
+    )
+    result = blob_json_data_set().load()
     expected = pd.DataFrame({"name": ["tom", "bob"], "age": [3, 4]})
-    expected = expected[["name", "age"]]
-    assert result.equals(expected)
+    assert_frame_equal(result, expected)
 
 
 class BlobMockDelimited:
@@ -143,21 +145,20 @@ def mock_load_delimited_func():
     return mocked
 
 
-@patch(
-    "kedro.extras.datasets.pandas.json_blob_dataset.BlockBlobService.get_blob_to_bytes",
-    new_callable=mock_load_delimited_func,
-)
-def test_load_delimited(get_blob_mock, blob_json_data_set):
-    result = blob_json_data_set(load_args={"lines": True}).load()[["name", "age"]]
+def test_load_delimited(blob_json_data_set, mocker):
+    mocker.patch(
+        "kedro.extras.datasets.pandas.json_blob_dataset.BlockBlobService.get_blob_to_bytes",
+        new_callable=mock_load_delimited_func,
+    )
+    result = blob_json_data_set(load_args={"lines": True}).load()
     expected = pd.DataFrame({"name": ["tom", "bob"], "age": [3, 4]})
-    expected = expected[["name", "age"]]
-    assert result.equals(expected)
+    assert_frame_equal(result, expected)
 
 
-@patch(
-    "kedro.extras.datasets.pandas.json_blob_dataset.BlockBlobService.create_blob_from_bytes"
-)
-def test_save_blob_args(blob_from_mock, blob_json_data_set, dummy_dataframe):
+def test_save_blob_args(blob_json_data_set, dummy_dataframe, mocker):
+    blob_from_mock = mocker.patch(
+        "kedro.extras.datasets.pandas.json_blob_dataset.BlockBlobService.create_blob_from_bytes"
+    )
     blob_json_data_set().save(dummy_dataframe)
     blob_from_mock.assert_called_with(
         container_name=TEST_CONTAINER_NAME,

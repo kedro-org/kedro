@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -365,12 +365,14 @@ class Version(namedtuple("Version", ["load", "save"])):
     __slots__ = ()
 
 
-CONSISTENCY_WARNING = (
+_CONSISTENCY_WARNING = (
     "Save version `{}` did not match load version `{}` for {}. This is strongly "
     "discouraged due to inconsistencies it may cause between `save` and "
     "`load` operations. Please refrain from setting exact load version for "
     "intermediate data sets where possible to avoid this warning."
 )
+
+_DEFAULT_PACKAGES = ["kedro.io.", "kedro.extras.datasets.", ""]
 
 
 def parse_dataset_definition(
@@ -401,15 +403,18 @@ def parse_dataset_definition(
         raise DataSetError("`type` is missing from DataSet catalog configuration")
 
     class_obj = config.pop("type")
-
     if isinstance(class_obj, str):
-        try:
-            class_obj = load_obj(class_obj, "kedro.io")
-        except ImportError:
+        if len(class_obj.strip(".")) != len(class_obj):
             raise DataSetError(
-                "Cannot import module when trying to load type `{}`.".format(class_obj)
+                "`type` class path does not support relative "
+                "paths or paths ending with a dot."
             )
-        except AttributeError:
+
+        class_paths = (prefix + class_obj for prefix in _DEFAULT_PACKAGES)
+        trials = (_load_obj(class_path) for class_path in class_paths)
+        try:
+            class_obj = next(obj for obj in trials if obj is not None)
+        except StopIteration:
             raise DataSetError("Class `{}` not found.".format(class_obj))
 
     if not issubclass(class_obj, AbstractDataSet):
@@ -431,6 +436,14 @@ def parse_dataset_definition(
         config[VERSION_KEY] = Version(load_version, save_version)
 
     return class_obj, config
+
+
+def _load_obj(class_path: str) -> Optional[object]:
+    try:
+        class_obj = load_obj(class_path)
+    except (ImportError, AttributeError, ValueError):
+        return None
+    return class_obj
 
 
 def _local_exists(filepath: str) -> bool:
@@ -579,7 +592,7 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
         load_version = self._lookup_load_version()
         if load_version != self._last_save_version:
             warnings.warn(
-                CONSISTENCY_WARNING.format(
+                _CONSISTENCY_WARNING.format(
                     self._last_save_version, load_version, str(self)
                 )
             )

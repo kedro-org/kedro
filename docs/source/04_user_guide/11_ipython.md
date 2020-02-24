@@ -97,7 +97,7 @@ catalog.load("example_iris_data").head()
 ```
 
 ```bash
-kedro.io.data_catalog - INFO - Loading data from `example_iris_data` (CSVLocalDataSet)...
+kedro.io.data_catalog - INFO - Loading data from `example_iris_data` (CSVDataSet)...
 
    sepal_length  sepal_width  petal_length  petal_width species
 0           5.1          3.5           1.4          0.2  setosa
@@ -111,7 +111,7 @@ If you enable versioning, you can load a particular version of a dataset. Given 
 
 ```yaml
 example_train_x:
-  type: CSVLocalDataSet
+  type: pandas.CSVDataSet
   filepath: data/02_intermediate/example_train_x.csv
   versioned: true
 ```
@@ -182,7 +182,7 @@ If you enable versioning, you also have the option of loading a particular versi
 
 ```yaml
 example_train_x:
-  type: CSVLocalDataSet
+  type: pandas.CSVDataSet
   filepath: data/02_intermediate/example_train_x.csv
   versioned: true
 ```
@@ -201,7 +201,7 @@ Let's put the following dataset entry in `conf/base/catalog.yml`:
 
 ```yaml
 my_dataset:
-  type: JSONLocalDataSet
+  type: pandas.JSONDataSet
   filepath: data/01_raw/my_dataset.json
 ```
 

@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``AbstractDataSet`` implementation to access Spark data frames using
+"""``AbstractDataSet`` implementation to access Spark dataframes using
 ``pyspark`` on Apache Hive
 """
 
@@ -51,7 +51,7 @@ class StagedHiveDataSet:
     currently present in that table.
 
     Once initialised, the ``staged_data`` ``DataFrame`` can be queried and underlying tables used to
-    define the initial data frame can be modified without affecting ``staged_data``.
+    define the initial dataframe can be modified without affecting ``staged_data``.
 
     Upon exiting this object it will drop the redundant staged table.
     """
@@ -99,7 +99,7 @@ class StagedHiveDataSet:
 
 
 class SparkHiveDataSet(AbstractDataSet):
-    """``SparkHiveDataSet`` loads and saves Spark data frames stored on Hive.
+    """``SparkHiveDataSet`` loads and saves Spark dataframes stored on Hive.
     This data set also handles some incompatible file types such as using partitioned parquet on
     hive which will not normally allow upserts to existing data without a complete replacement
     of the existing file/partition.

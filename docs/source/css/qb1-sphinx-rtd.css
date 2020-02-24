@@ -306,9 +306,6 @@ h1, h2, .rst-content .toctree-wrapper p.caption, h3, h4, h5, h6, legend {
     font-size: 1.4625rem;
 }
 
-.wy-body-for-nav .headerlink {
-    display: none !important;
-}
 
 .wy-body-for-nav p {
     font-size: 100%;

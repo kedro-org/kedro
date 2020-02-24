@@ -150,25 +150,14 @@ class SQLTableDataSet(AbstractDataSet):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {"index": False}  # type: Dict[str, Any]
 
-    def _describe(self) -> Dict[str, Any]:
-        load_args = self._load_args.copy()
-        save_args = self._save_args.copy()
-        del load_args["table_name"]
-        del load_args["con"]
-        del save_args["name"]
-        del save_args["con"]
-        return dict(
-            table_name=self._load_args["table_name"],
-            load_args=load_args,
-            save_args=save_args,
-        )
-
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         table_name: str,
         credentials: Dict[str, Any],
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
+        layer: str = None,
     ) -> None:
         """Creates a new ``SQLTableDataSet``.
 
@@ -195,10 +184,11 @@ class SQLTableDataSet(AbstractDataSet):
                 To find all supported connection string formats, see here:
                 https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls
                 It has ``index=False`` in the default parameters.
+            layer: The data layer according to the data engineering convention:
+                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
 
         Raises:
             DataSetError: When either ``table_name`` or ``con`` is empty.
-
         """
 
         if not table_name:
@@ -209,6 +199,8 @@ class SQLTableDataSet(AbstractDataSet):
                 "`con` argument cannot be empty. Please "
                 "provide a SQLAlchemy connection string."
             )
+
+        self._layer = layer
 
         # Handle default load and save arguments
         self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
@@ -222,6 +214,20 @@ class SQLTableDataSet(AbstractDataSet):
         self._save_args["name"] = table_name
 
         self._load_args["con"] = self._save_args["con"] = credentials["con"]
+
+    def _describe(self) -> Dict[str, Any]:
+        load_args = self._load_args.copy()
+        save_args = self._save_args.copy()
+        del load_args["table_name"]
+        del load_args["con"]
+        del save_args["name"]
+        del save_args["con"]
+        return dict(
+            table_name=self._load_args["table_name"],
+            load_args=load_args,
+            save_args=save_args,
+            layer=self._layer,
+        )
 
     def _load(self) -> pd.DataFrame:
         try:
@@ -281,14 +287,12 @@ class SQLQueryDataSet(AbstractDataSet):
 
     """
 
-    def _describe(self) -> Dict[str, Any]:
-        load_args = self._load_args.copy()
-        del load_args["sql"]
-        del load_args["con"]
-        return dict(sql=self._load_args["sql"], load_args=load_args)
-
     def __init__(
-        self, sql: str, credentials: Dict[str, Any], load_args: Dict[str, Any] = None
+        self,
+        sql: str,
+        credentials: Dict[str, Any],
+        load_args: Dict[str, Any] = None,
+        layer: str = None,
     ) -> None:
         """Creates a new ``SQLQueryDataSet``.
 
@@ -306,10 +310,11 @@ class SQLQueryDataSet(AbstractDataSet):
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_sql_query.html
                 To find all supported connection string formats, see here:
                 https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls
+            layer: The data layer according to the data engineering convention:
+                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
 
         Raises:
             DataSetError: When either ``sql`` or ``con`` parameters is emtpy.
-
         """
 
         if not sql:
@@ -331,9 +336,15 @@ class SQLQueryDataSet(AbstractDataSet):
             else default_load_args
         )
 
+        self._layer = layer
         self._load_args["sql"] = sql
-
         self._load_args["con"] = credentials["con"]
+
+    def _describe(self) -> Dict[str, Any]:
+        load_args = self._load_args.copy()
+        del load_args["sql"]
+        del load_args["con"]
+        return dict(sql=self._load_args["sql"], load_args=load_args, layer=self._layer)
 
     def _load(self) -> pd.DataFrame:
         try:

@@ -79,6 +79,7 @@ class JSONBlobDataSet(AbstractDataSet):
         blob_to_bytes_args: Dict[str, Any] = None,
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
+        layer: str = None,
     ) -> None:
         """Creates a new instance of ``JSONBlobDataSet`` pointing to a
         concrete JSON file on Azure Blob Storage.
@@ -103,7 +104,8 @@ class JSONBlobDataSet(AbstractDataSet):
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_json.html
                 All defaults are preserved, but "index", which is set to False.
-
+            layer: The data layer according to the data engineering convention:
+                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
         """
         _credentials = deepcopy(credentials) or {}
         self._filepath = filepath
@@ -112,6 +114,7 @@ class JSONBlobDataSet(AbstractDataSet):
         self._blob_to_bytes_args = deepcopy(blob_to_bytes_args) or {}
         self._blob_from_bytes_args = deepcopy(blob_from_bytes_args) or {}
         self._blob_service = BlockBlobService(**_credentials)
+        self._layer = layer
 
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
@@ -129,6 +132,7 @@ class JSONBlobDataSet(AbstractDataSet):
             blob_from_bytes_args=self._blob_from_bytes_args,
             load_args=self._load_args,
             save_args=self._save_args,
+            layer=self._layer,
         )
 
     def _load(self) -> pd.DataFrame:

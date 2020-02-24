@@ -64,6 +64,7 @@
 * Kedro CLI arguments `--node` and `--tag` support comma-separated values, alternative methods will be deprecated in future releases.
 * Config loaders to be deprecated:
   - `kedro.contrib.config.TemplatedConfigLoader`
+* Added `layer` attribute for datasets in `kedro.extras.datasets` to specify the name of a layer according to a data engineering convention.
 * Modify `DataCatalog`'s load order for datasets, now trying to load them in the following order:
   - `kedro.io`
   - `kedro.extras.datasets`

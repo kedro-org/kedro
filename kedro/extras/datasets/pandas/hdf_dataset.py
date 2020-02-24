@@ -85,6 +85,7 @@ class HDFDataSet(AbstractVersionedDataSet):
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        layer: str = None,
     ) -> None:
         """Creates a new instance of ``HDFDataSet`` pointing to a concrete hdf file
         on a specific filesystem.
@@ -111,10 +112,11 @@ class HDFDataSet(AbstractVersionedDataSet):
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Extra arguments to pass into underlying filesystem class.
                 E.g. for ``GCSFileSystem`` class: `{"project": "my-project", ...}`
+            layer: The data layer according to the data engineering convention:
+                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
         """
         _fs_args = deepcopy(fs_args) or {}
         _credentials = deepcopy(credentials) or {}
-        self._key = key
 
         protocol, path = get_protocol_and_path(filepath, version)
 
@@ -127,6 +129,9 @@ class HDFDataSet(AbstractVersionedDataSet):
             exists_function=self._fs.exists,
             glob_function=self._fs.glob,
         )
+
+        self._layer = layer
+        self._key = key
 
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
@@ -144,6 +149,7 @@ class HDFDataSet(AbstractVersionedDataSet):
             load_args=self._load_args,
             save_args=self._save_args,
             version=self._version,
+            layer=self._layer,
         )
 
     def _load(self) -> pd.DataFrame:

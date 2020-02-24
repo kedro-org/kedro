@@ -75,6 +75,7 @@ class TextDataSet(AbstractVersionedDataSet):
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        layer: str = None,
     ) -> None:
         """Creates a new instance of ``TextDataSet`` pointing to a concrete text file
         on a specific filesystem.
@@ -98,6 +99,8 @@ class TextDataSet(AbstractVersionedDataSet):
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Extra arguments to pass into underlying filesystem class.
                 E.g. for ``GCSFileSystem`` class: `{"project": "my-project", ...}`.
+            layer: The data layer according to the data engineering convention:
+                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
         """
         _fs_args = deepcopy(fs_args) or {}
         _credentials = deepcopy(credentials) or {}
@@ -114,6 +117,8 @@ class TextDataSet(AbstractVersionedDataSet):
             glob_function=self._fs.glob,
         )
 
+        self._layer = layer
+
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args is not None:
@@ -129,6 +134,7 @@ class TextDataSet(AbstractVersionedDataSet):
             load_args=self._load_args,
             save_args=self._save_args,
             version=self._version,
+            layer=self._layer,
         )
 
     def _load(self) -> str:

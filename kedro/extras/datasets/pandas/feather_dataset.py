@@ -82,6 +82,7 @@ class FeatherDataSet(AbstractVersionedDataSet):
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        layer: str = None,
     ) -> None:
         """Creates a new instance of ``FeatherDataSet`` pointing to a concrete
         filepath.
@@ -103,6 +104,8 @@ class FeatherDataSet(AbstractVersionedDataSet):
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Extra arguments to pass into underlying filesystem class.
                 E.g. for ``GCSFileSystem`` class: `{"project": "my-project", ...}`.
+            layer: The data layer according to the data engineering convention:
+                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
         """
         _fs_args = deepcopy(fs_args) or {}
         _credentials = deepcopy(credentials) or {}
@@ -119,6 +122,8 @@ class FeatherDataSet(AbstractVersionedDataSet):
             glob_function=self._fs.glob,
         )
 
+        self._layer = layer
+
         # Handle default load argument
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args is not None:
@@ -130,6 +135,7 @@ class FeatherDataSet(AbstractVersionedDataSet):
             protocol=self._protocol,
             load_args=self._load_args,
             version=self._version,
+            layer=self._layer,
         )
 
     def _load(self) -> pd.DataFrame:

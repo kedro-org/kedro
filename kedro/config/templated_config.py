@@ -126,7 +126,6 @@ class TemplatedConfigLoader(ConfigLoader):
     https://github.com/jmespath/jmespath.py and http://jmespath.org/.
     """
 
-    # pylint: disable=missing-type-doc
     def __init__(
         self,
         conf_paths: Union[str, Iterable[str]],

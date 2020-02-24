@@ -132,7 +132,7 @@ def _try_convert_to_numeric(value):
 
 def _split_params(ctx, param, value):
     if isinstance(value, dict):
-        return {k: _try_convert_to_numeric(v) for k, v in value.items()}
+        return value
     result = {}
     for item in _split_string(ctx, param, value):
         item = item.split(":", 1)

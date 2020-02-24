@@ -215,7 +215,7 @@ class TestRunCommand:
 
     @pytest.mark.parametrize("config_flag", ["--config", "-c"])
     def test_run_with_config(
-        self, config_flag, fake_kedro_cli, fake_load_context, fake_run_config, mocker,
+        self, config_flag, fake_kedro_cli, fake_load_context, fake_run_config, mocker
     ):
         result = CliRunner().invoke(
             fake_kedro_cli.cli, ["run", config_flag, fake_run_config]

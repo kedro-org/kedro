@@ -69,6 +69,7 @@
   - `kedro.extras.datasets`
   - import path, specified in `type`
 * Updated contribution process in CONTRIBUTING.md.
+* Added an optional `copy_mode` flag to `CachedDataSet` and `MemoryDataSet` to specify (`deepcopy`, `copy` or `assign`) the copy mode to use when loading and saving.
 
 ## Bug fixes and other changes
 * Added the option to set/overwrite params in `config.yaml` using YAML dict style instead of string cli formatting only.

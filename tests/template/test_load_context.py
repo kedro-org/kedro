@@ -47,6 +47,16 @@ class TestLoadContext:
         assert str(fake_repo_path.resolve() / "src") in sys.path
         assert os.getcwd() == str(fake_repo_path.resolve())
 
+    def test_valid_context_with_env(self, mocker, monkeypatch, fake_repo_path):
+        """Test getting project context when Kedro config environment is specified in the environment variable."""
+        # Disable logging.config.dictConfig in KedroContext._setup_logging as
+        # it changes logging.config and affects other unit tests
+        mocker.patch("logging.config.dictConfig")
+        mocker.patch("kedro.config.config.ConfigLoader.get")
+        monkeypatch.setenv("KEDRO_ENV", "my_fake_env")
+        result = load_context(str(fake_repo_path))
+        assert result.env == "my_fake_env"
+
     def test_invalid_path(self, tmp_path):
         """Test for loading context from an invalid path. """
         other_path = tmp_path / "other"

@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -76,6 +76,7 @@ class BioSequenceDataSet(AbstractDataSet):
         save_args: Dict[str, Any] = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        layer: str = None,
     ) -> None:
         """
         Creates a new instance of ``BioSequenceDataSet`` pointing
@@ -92,6 +93,8 @@ class BioSequenceDataSet(AbstractDataSet):
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Extra arguments to pass into underlying filesystem class.
                 E.g. for ``GCSFileSystem`` class: `{"project": "my-project", ...}`.
+            layer: The data layer according to the data engineering convention:
+                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
 
         Note: Here you can find all supported file formats: https://biopython.org/wiki/SeqIO
         """
@@ -101,6 +104,7 @@ class BioSequenceDataSet(AbstractDataSet):
 
         protocol, path = get_protocol_and_path(filepath)
 
+        self._layer = layer
         self._filepath = PurePosixPath(path)
         self._protocol = protocol
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
@@ -119,6 +123,7 @@ class BioSequenceDataSet(AbstractDataSet):
             protocol=self._protocol,
             load_args=self._load_args,
             save_args=self._save_args,
+            layer=self._layer,
         )
 
     def _load(self) -> List:

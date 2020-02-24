@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -165,3 +165,8 @@ class TestCachedDataset:
             DataSetError, match=r"Data for MemoryDataSet has not been saved yet"
         ):
             _ = cached_ds.load()
+
+    def test_copy_mode(self, mocker):
+        mocked_memory_data_set = mocker.patch("kedro.io.cached_dataset.MemoryDataSet")
+        CachedDataSet(MemoryDataSet(), copy_mode="assign")
+        mocked_memory_data_set.assert_called_once_with(copy_mode="assign")

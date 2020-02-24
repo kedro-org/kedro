@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -88,12 +88,14 @@ class MatplotlibWriter(AbstractDataSet):
 
     """
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         filepath: str,
         fs_args: Dict[str, Any] = None,
         credentials: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
+        layer: str = None,
     ) -> None:
         """Creates a new instance of ``MatplotlibWriter``.
 
@@ -108,10 +110,13 @@ class MatplotlibWriter(AbstractDataSet):
                 `{'client_kwargs': {'aws_access_key_id': '<id>', 'aws_secret_access_key': '<key>'}}`
             save_args: Save args passed to `plt.savefig`. See
                 https://matplotlib.org/api/_as_gen/matplotlib.pyplot.savefig.html
+            layer: The data layer according to the data engineering convention:
+                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
         """
         _credentials = copy.deepcopy(credentials) or {}
         self._fs_args = copy.deepcopy(fs_args) or {}
         self._save_args = save_args or {}
+        self._layer = layer
 
         protocol, path = get_protocol_and_path(filepath)
 
@@ -125,6 +130,7 @@ class MatplotlibWriter(AbstractDataSet):
             protocol=self._protocol,
             fs_args=self._fs_args,
             save_args=self._save_args,
+            layer=self._layer,
         )
 
     def _load(self) -> None:

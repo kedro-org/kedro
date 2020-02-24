@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ def _get_credentials(
         raise KeyError(
             "Unable to find credentials '{}': check your data "
             "catalog and credentials configuration. See "
-            "https://kedro.readthedocs.io/en/latest/kedro.io.DataCatalog.html "
+            "https://kedro.readthedocs.io/en/stable/kedro.io.DataCatalog.html "
             "for an example.".format(credentials_name)
         )
 

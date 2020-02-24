@@ -2,7 +2,7 @@
 
 # Kedro documentation style guide
 
-This is the style guide we have used to create [documentation about Kedro](https://kedro.readthedocs.io/en/latest/).
+This is the style guide we have used to create [documentation about Kedro](https://kedro.readthedocs.io/en/stable/).
 
 When you are writing documentation for your own project, you may find it useful to follow these rules. We will also ask anyone kind enough to contribute to the Kedro documentation to follow our preferred style to maintain consistency and simplicity. However, we are not over-proscriptive and are happy to take contributions regardless, as long as you are happy if we edit your text to follow these rules.
 
@@ -24,7 +24,7 @@ If you are in doubt, take a look at how we've written the Kedro documentation. I
 
 ## How do I build your documentation?
 
-If you have installed Kedro, the documentation can be found by running `kedro docs` from the command line or following [this link](https://kedro.readthedocs.io/en/latest/).
+If you have installed Kedro, the documentation can be found by running `kedro docs` from the command line or following [this link](https://kedro.readthedocs.io/en/stable/).
 
 If you make changes to our documentation, which is stored in the `docs/` folder of your Kedro installation, you can rebuild them within a Unix-like environment (with `pandoc` installed) with:
 

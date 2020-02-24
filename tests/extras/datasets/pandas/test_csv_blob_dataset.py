@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,11 +29,10 @@
 # pylint: disable=unused-argument
 
 import io
-from unittest.mock import patch
 
 import pandas as pd
 import pytest
-from pandas.util.testing import assert_frame_equal
+from pandas.testing import assert_frame_equal
 
 from kedro.extras.datasets.pandas import CSVBlobDataSet
 from kedro.io import DataSetError, Version
@@ -146,16 +145,16 @@ class TestCSVBlobDataSetVersioned:
         expected = pd.read_csv(io.StringIO(BlobMock().content))
         assert_frame_equal(result, expected)
 
-    @patch(
-        "kedro.extras.datasets.pandas.csv_blob_dataset.BlockBlobService.list_blob_names",
-        return_value=[],
-    )
-    @patch(
-        "kedro.extras.datasets.pandas.csv_blob_dataset.BlockBlobService.exists",
-        return_value=False,
-    )
-    def test_no_versions(self, exists_mock, list_mock, versioned_blob_csv_data_set):
+    def test_no_versions(self, versioned_blob_csv_data_set, mocker):
         """Check the error if no versions are available for load."""
+        mocker.patch(
+            "kedro.extras.datasets.pandas.csv_blob_dataset.BlockBlobService.list_blob_names",
+            return_value=[],
+        )
+        mocker.patch(
+            "kedro.extras.datasets.pandas.csv_blob_dataset.BlockBlobService.exists",
+            return_value=False,
+        )
         pattern = r"Did not find any versions for CSVBlobDataSet\(.+\)"
         with pytest.raises(VersionNotFoundError, match=pattern):
             versioned_blob_csv_data_set.load()
@@ -199,17 +198,17 @@ class TestCSVBlobDataSetVersioned:
         load_mock.side_effect = VersionNotFoundError
         assert not versioned_blob_csv_data_set.exists()
 
-    @patch(
-        "kedro.extras.datasets.pandas.csv_blob_dataset.BlockBlobService.exists",
-        return_value=True,
-    )
-    @patch("kedro.extras.datasets.pandas.CSVBlobDataSet._get_load_path")
     def test_prevent_override(
-        self, load_mock, exists_mock, versioned_blob_csv_data_set, dummy_dataframe
+        self, versioned_blob_csv_data_set, dummy_dataframe, mocker
     ):
         """Check the error when attempting to override the data set if the
         corresponding csv file for a given save version already exists in S3.
         """
+        mocker.patch(
+            "kedro.extras.datasets.pandas.csv_blob_dataset.BlockBlobService.exists",
+            return_value=True,
+        )
+        mocker.patch("kedro.extras.datasets.pandas.CSVBlobDataSet._get_load_path")
         pattern = (
             r"Save path \`.+\` for CSVBlobDataSet\(.+\) must not exist "
             r"if versioning is enabled"
@@ -271,8 +270,10 @@ class TestCSVBlobDataSetVersioned:
         assert ver_str in str(ds_versioned)
 
 
-@patch("kedro.extras.datasets.pandas.csv_blob_dataset.BlockBlobService")
-def test_pass_credentials_load(blob_service, blob_csv_data_set):
+def test_pass_credentials_load(blob_csv_data_set, mocker):
+    blob_service = mocker.patch(
+        "kedro.extras.datasets.pandas.csv_blob_dataset.BlockBlobService"
+    )
     try:
         blob_csv_data_set().load()
     except DataSetError:
@@ -284,18 +285,20 @@ def test_pass_credentials_load(blob_service, blob_csv_data_set):
     )
 
 
-@patch("kedro.extras.datasets.pandas.csv_blob_dataset.BlockBlobService")
-def test_pass_credentials_save(blob_service, blob_csv_data_set, dummy_dataframe):
+def test_pass_credentials_save(blob_csv_data_set, dummy_dataframe, mocker):
+    blob_service = mocker.patch(
+        "kedro.extras.datasets.pandas.csv_blob_dataset.BlockBlobService"
+    )
     blob_csv_data_set().save(dummy_dataframe)
     blob_service.assert_called_with(
         account_name="ACCOUNT_NAME", account_key="ACCOUNT_KEY"
     )
 
 
-@patch(
-    "kedro.extras.datasets.pandas.csv_blob_dataset.BlockBlobService.get_blob_to_text"
-)
-def test_load_blob_args(get_blob_mock, blob_csv_data_set):
+def test_load_blob_args(blob_csv_data_set, mocker):
+    get_blob_mock = mocker.patch(
+        "kedro.extras.datasets.pandas.csv_blob_dataset.BlockBlobService.get_blob_to_text"
+    )
     try:
         blob_csv_data_set().load()
     except DataSetError:
@@ -322,21 +325,20 @@ def mock_load_func():
     return mocked
 
 
-@patch(
-    "kedro.extras.datasets.pandas.csv_blob_dataset.BlockBlobService.get_blob_to_text",
-    new_callable=mock_load_func,
-)
-def test_load(get_blob_mock, blob_csv_data_set):
-    result = blob_csv_data_set().load()[["name", "age"]]
+def test_load(blob_csv_data_set, mocker):
+    mocker.patch(
+        "kedro.extras.datasets.pandas.csv_blob_dataset.BlockBlobService.get_blob_to_text",
+        new_callable=mock_load_func,
+    )
+    result = blob_csv_data_set().load()
     expected = pd.DataFrame({"name": ["tom", "bob"], "age": [3, 4]})
-    expected = expected[["name", "age"]]
-    assert_frame_equal(result, expected)
+    assert_frame_equal(result.sort_index(axis=1), expected.sort_index(axis=1))
 
 
-@patch(
-    "kedro.extras.datasets.pandas.csv_blob_dataset.BlockBlobService.create_blob_from_text"
-)
-def test_save_blob_args(blob_from_mock, blob_csv_data_set, dummy_dataframe):
+def test_save_blob_args(blob_csv_data_set, dummy_dataframe, mocker):
+    blob_from_mock = mocker.patch(
+        "kedro.extras.datasets.pandas.csv_blob_dataset.BlockBlobService.create_blob_from_text"
+    )
     blob_csv_data_set().save(dummy_dataframe)
     blob_from_mock.assert_called_with(
         container_name=TEST_CONTAINER_NAME,

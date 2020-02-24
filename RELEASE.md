@@ -23,7 +23,7 @@
 
 * Enabled loading a particular version of a dataset in Jupyter Notebooks and ipython, using `catalog.load("dataset_name", version="<2019-12-13T15.08.09.255Z>")`.
 * Added http(s) protocol support for `JSONDataSet`.
-* Added property `run_id` on `ProjectContext`, used for versioning using the [`Journal`](https://kedro.readthedocs.io/en/latest/04_user_guide/13_journal.html). To customise your journal `run_id` you can override the private method `_get_run_id()`.
+* Added property `run_id` on `ProjectContext`, used for versioning using the [`Journal`](https://kedro.readthedocs.io/en/stable/04_user_guide/13_journal.html). To customise your journal `run_id` you can override the private method `_get_run_id()`.
 * Added the ability to install all optional kedro dependencies via `pip install "kedro[all]"`.
 * `JSONDataSet`, `CSVBlobDataSet`, `JSONBlobDataSet`, `SQLQueryDataSet` and `SQLTableDataSet` datasets copied to `kedro.extras.datasets.pandas`.
 * `SparkDataSet`, `SparkHiveDataSet` and `SparkJDBCDataSet` datasets copied to `kedro.extras.datasets.spark`.
@@ -69,8 +69,16 @@
 * Kedro CLI arguments `--node` and `--tag` support comma-separated values, alternative methods will be deprecated in future releases.
 * Config loaders to be deprecated:
   - `kedro.contrib.config.TemplatedConfigLoader`
+* Added `layer` attribute for datasets in `kedro.extras.datasets` to specify the name of a layer according to a data engineering convention.
+* Modify `DataCatalog`'s load order for datasets, now trying to load them in the following order:
+  - `kedro.io`
+  - `kedro.extras.datasets`
+  - import path, specified in `type`
+* Updated contribution process in CONTRIBUTING.md.
+* Added an optional `copy_mode` flag to `CachedDataSet` and `MemoryDataSet` to specify (`deepcopy`, `copy` or `assign`) the copy mode to use when loading and saving.
 
 ## Bug fixes and other changes
+* Added the option to set/overwrite params in `config.yaml` using YAML dict style instead of string cli formatting only.
 * Fixed a bug in the `invalidate_cache` method of `ParquetGCSDataSet` and `CSVGCSDataSet`.
 * `--load-version` now won't break if version value contains a colon.
 * Enabled running `node`s with duplicate inputs.
@@ -87,6 +95,7 @@
 * Make the resume prompt on pipeline run failure use `--from-nodes` instead of `--from-inputs` to avoid unnecessarily re-running nodes that had already executed.
 * When closed, Jupyter notebook kernels are automatically terminated after 30 seconds of inactivity by default. Use `--idle-timeout` option to update it.
 * Added `kedro-viz` to the Kedro project template `requirements.txt` file.
+* Removed the `results` and `references` folder from the project template.
 
 ## Breaking changes to the API
 * Existing `MatplotlibWriter` dataset in `contrib` was renamed to `MatplotlibLocalWriter`.
@@ -94,7 +103,7 @@
 * `kedro.contrib.io.bioinformatics.sequence_dataset.py` was renamed to `kedro.contrib.io.bioinformatics.biosequence_local_dataset.py`.
 
 ## Thanks for supporting contributions
-[Jonas Kemper](https://github.com/jonasrk), [Yuhao Zhu](https://github.com/yhzqb), [Balazs Konig](https://github.com/BalazsKonigQB), [Pedro Abreu](https://github.com/PedroAbreuQB), [Tam-Sanh Nguyen](https://github.com/tamsanh), [Peter Zhao](https://github.com/zxpeter), [Deepyaman Datta](https://github.com/deepyaman), [Luis Blanche](https://github/LuisBlanche)
+[Jonas Kemper](https://github.com/jonasrk), [Yuhao Zhu](https://github.com/yhzqb), [Balazs Konig](https://github.com/BalazsKonigQB), [Pedro Abreu](https://github.com/PedroAbreuQB), [Tam-Sanh Nguyen](https://github.com/tamsanh), [Peter Zhao](https://github.com/zxpeter), [Deepyaman Datta](https://github.com/deepyaman), [Florian Roessler](https://github.com/fdroessler/), [Luis Blanche](https://github/LuisBlanche)
 
 # Release 0.15.5
 

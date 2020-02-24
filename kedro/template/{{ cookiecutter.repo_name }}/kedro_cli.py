@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -122,7 +122,17 @@ def _split_string(ctx, param, value):
     return [item for item in value.split(",") if item]
 
 
+def _try_convert_to_numeric(value):
+    try:
+        value = float(value)
+    except ValueError:
+        return value
+    return int(value) if value.is_integer() else value
+
+
 def _split_params(ctx, param, value):
+    if isinstance(value, dict):
+        return value
     result = {}
     for item in _split_string(ctx, param, value):
         item = item.split(":", 1)
@@ -138,13 +148,7 @@ def _split_params(ctx, param, value):
                 "an empty string.".format(param.name)
             )
         value = item[1].strip()
-        try:
-            value = float(value)
-        except ValueError:
-            pass
-        else:
-            value = int(value) if value.is_integer() else value
-        result[key] = value
+        result[key] = _try_convert_to_numeric(value)
     return result
 
 

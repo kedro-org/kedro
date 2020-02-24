@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -75,6 +75,7 @@ class YAMLDataSet(AbstractVersionedDataSet):
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        layer: str = None,
     ) -> None:
         """Creates a new instance of ``YAMLDataSet`` pointing to a concrete YAML file
         on a specific filesystem.
@@ -96,6 +97,8 @@ class YAMLDataSet(AbstractVersionedDataSet):
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Extra arguments to pass into underlying filesystem class.
                 E.g. for ``GCSFileSystem`` class: `{"project": "my-project", ...}`.
+            layer: The data layer according to the data engineering convention:
+                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
         """
         _fs_args = deepcopy(fs_args) or {}
         _credentials = deepcopy(credentials) or {}
@@ -112,6 +115,8 @@ class YAMLDataSet(AbstractVersionedDataSet):
             glob_function=self._fs.glob,
         )
 
+        self._layer = layer
+
         # Handle default save arguments
         self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
@@ -123,6 +128,7 @@ class YAMLDataSet(AbstractVersionedDataSet):
             protocol=self._protocol,
             save_args=self._save_args,
             version=self._version,
+            layer=self._layer,
         )
 
     def _load(self) -> Dict:

@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""kedro.contrib is the place for all contributions from third parties.
-Some of this functionality might be included in the core package in the future.
+
+"""``kedro.contrib`` is the place for all contributions from third parties.
+This module will be deprecated in future releases and replaced with
+``kedro.extras``.
 """

@@ -29,8 +29,6 @@ getting-started     # Parent directory of the template
 ├── docs            # Project documentation
 ├── logs            # Project output logs (not committed to version control)
 ├── notebooks       # Project related Jupyter notebooks
-├── references      # Sharable project references (tables, pdfs, etc.)
-├── results         # Shareable results
 └── src             # Project source code
 ```
 

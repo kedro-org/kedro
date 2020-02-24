@@ -4,7 +4,7 @@
 
 In this tutorial we explain how to work with `PySpark` in a Kedro pipeline.
 
-Relevant API documentation: [SparkDataSet](/kedro.contrib.io.pyspark.SparkDataSet), [SparkJDBCDataSet](/kedro.contrib.io.pyspark.SparkJDBCDataSet)
+Relevant API documentation: [SparkDataSet](/kedro.extras.datasets.spark.SparkDataSet), [SparkJDBCDataSet](/kedro.extras.datasets.spark.SparkJDBCDataSet) and [SparkHiveDataSet](/kedro.extras.datasets.spark.SparkHiveDataSet)
 
 ## Initialising a `SparkSession`
 
@@ -76,7 +76,6 @@ spark.jars.excludes: joda-time:joda-time
 
 Since `SparkSession` is a [singleton](https://python-3-patterns-idioms-test.readthedocs.io/en/latest/Singleton.html), the next time you call `SparkSession.builder.getOrCreate()` you will be provided with the same `SparkSession` you initialised at your app's entry point.
 
-
 ## Creating a `SparkDataSet`
 
 Having created a `SparkSession`, you can load your data using `PySpark`'s [DataFrameReader](https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrameReader).
@@ -88,7 +87,7 @@ To do so, please use the provided [SparkDataSet](/kedro.contrib.io.pyspark.Spark
 ```python
 import pyspark.sql
 from kedro.io import DataCatalog
-from kedro.contrib.io.pyspark import SparkDataSet
+from kedro.extras.datasets.spark import SparkDataSet
 
 spark_ds = SparkDataSet(
     filepath="s3a://your_bucket/data/01_raw/weather*",
@@ -107,7 +106,7 @@ assert isinstance(df, pyspark.sql.DataFrame)
 In `catalog.yml`:
 ```yaml
 weather:
-  type: kedro.contrib.io.pyspark.SparkDataSet
+  type: spark.SparkDataSet
   filepath: s3a://your_bucket/data/01_raw/weather*
   file_format: csv
   load_args:

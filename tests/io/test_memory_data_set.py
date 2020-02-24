@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,12 +26,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import re
+
 # pylint: disable=unused-argument
 import numpy as np
 import pandas as pd
 import pytest
 
 from kedro.io import DataSetError, MemoryDataSet
+from kedro.io.memory_data_set import _copy_with_mode, _infer_copy_mode
 
 
 def _update_data(data, idx, jdx, value):
@@ -77,6 +80,16 @@ def memory_data_set(input_data):
     return MemoryDataSet(data=input_data)
 
 
+@pytest.fixture
+def mocked_infer_mode(mocker):
+    return mocker.patch("kedro.io.memory_data_set._infer_copy_mode")
+
+
+@pytest.fixture
+def mocked_copy_with_mode(mocker):
+    return mocker.patch("kedro.io.memory_data_set._copy_with_mode")
+
+
 class TestMemoryDataSet:
     def test_load(self, memory_data_set, input_data):
         """Test basic load"""
@@ -87,12 +100,44 @@ class TestMemoryDataSet:
         loaded_data = MemoryDataSet(None).load()
         assert loaded_data is None
 
-    def test_save(self, memory_data_set, input_data, new_data):
+    def test_load_infer_mode(
+        self, memory_data_set, input_data, mocked_infer_mode, mocked_copy_with_mode
+    ):
+        """Test load calls infer_mode and copy_mode_with"""
+        memory_data_set.load()
+        assert mocked_infer_mode.call_count == 1
+        assert mocked_copy_with_mode.call_count == 1
+
+        assert mocked_infer_mode.call_args
+        assert mocked_infer_mode.call_args[0]
+        assert _check_equals(mocked_infer_mode.call_args[0][0], input_data)
+        assert mocked_copy_with_mode.call_args
+        assert mocked_copy_with_mode.call_args[0]
+        assert _check_equals(mocked_copy_with_mode.call_args[0][0], input_data)
+
+    def test_save(
+        self, memory_data_set, input_data, new_data,
+    ):
         """Test overriding the data set"""
         memory_data_set.save(data=new_data)
         reloaded = memory_data_set.load()
         assert not _check_equals(reloaded, input_data)
         assert _check_equals(reloaded, new_data)
+
+    def test_save_infer_mode(
+        self, memory_data_set, new_data, mocked_infer_mode, mocked_copy_with_mode,
+    ):
+        """Test save calls infer_mode and copy_mode_with"""
+        memory_data_set.save(data=new_data)
+        assert mocked_infer_mode.call_count == 1
+        assert mocked_copy_with_mode.call_count == 1
+
+        assert mocked_infer_mode.call_args
+        assert mocked_infer_mode.call_args[0]
+        assert _check_equals(mocked_infer_mode.call_args[0][0], new_data)
+        assert mocked_copy_with_mode.call_args
+        assert mocked_copy_with_mode.call_args[0]
+        assert _check_equals(mocked_copy_with_mode.call_args[0][0], new_data)
 
     def test_load_modify_original_data(self, memory_data_set, input_data):
         """Check that the data set object is not updated when the original
@@ -157,3 +202,55 @@ class TestMemoryDataSet:
 
         data_set.save(new_data)
         assert data_set.exists()
+
+
+@pytest.mark.parametrize("data", [["a", "b"], [{"a": "b"}, {"c": "d"}]])
+def test_copy_mode_assign(data):
+    """Test _copy_with_mode with assign"""
+    copied_data = _copy_with_mode(data, copy_mode="assign")
+    assert copied_data is data
+
+
+@pytest.mark.parametrize("data", [[{"a": "b"}], [["a"]]])
+def test_copy_mode_copy(data):
+    """Test _copy_with_mode with copy"""
+    copied_data = _copy_with_mode(data, copy_mode="copy")
+    assert copied_data is not data
+    assert copied_data == data
+    assert copied_data[0] is data[0]
+
+
+@pytest.mark.parametrize("data", [[{"a": "b"}], [["a"]]])
+def test_copy_mode_deepcopy(data):
+    """Test _copy_with_mode with deepcopy"""
+    copied_data = _copy_with_mode(data, copy_mode="deepcopy")
+    assert copied_data is not data
+    assert copied_data == data
+    assert copied_data[0] is not data[0]
+
+
+def test_copy_mode_invalid_string():
+    """Test _copy_with_mode with invalid string"""
+    pattern = "Invalid copy mode: alice. Possible values are: deepcopy, copy, assign."
+    with pytest.raises(DataSetError, match=re.escape(pattern)):
+        _copy_with_mode(None, copy_mode="alice")
+
+
+def test_infer_mode_copy(input_data):
+    copy_mode = _infer_copy_mode(input_data)
+    assert copy_mode == "copy"
+
+
+@pytest.mark.parametrize("data", [["a", "b"], [["a", "b"]], {"a": "b"}, [{"a": "b"}]])
+def test_infer_mode_deepcopy(data):
+    copy_mode = _infer_copy_mode(data)
+    assert copy_mode == "deepcopy"
+
+
+def test_infer_mode_assign():
+    class DataFrame:  # pylint: disable=too-few-public-methods
+        pass
+
+    data = DataFrame()
+    copy_mode = _infer_copy_mode(data)
+    assert copy_mode == "assign"

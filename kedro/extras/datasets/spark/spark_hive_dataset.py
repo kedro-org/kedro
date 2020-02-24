@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``AbstractDataSet`` implementation to access Spark data frames using
+"""``AbstractDataSet`` implementation to access Spark dataframes using
 ``pyspark`` on Apache Hive
 """
 
@@ -51,7 +51,7 @@ class StagedHiveDataSet:
     currently present in that table.
 
     Once initialised, the ``staged_data`` ``DataFrame`` can be queried and underlying tables used to
-    define the initial data frame can be modified without affecting ``staged_data``.
+    define the initial dataframe can be modified without affecting ``staged_data``.
 
     Upon exiting this object it will drop the redundant staged table.
     """
@@ -98,8 +98,9 @@ class StagedHiveDataSet:
         )
 
 
+# pylint: disable=too-many-instance-attributes
 class SparkHiveDataSet(AbstractDataSet):
-    """``SparkHiveDataSet`` loads and saves Spark data frames stored on Hive.
+    """``SparkHiveDataSet`` loads and saves Spark dataframes stored on Hive.
     This data set also handles some incompatible file types such as using partitioned parquet on
     hive which will not normally allow upserts to existing data without a complete replacement
     of the existing file/partition.
@@ -135,16 +136,14 @@ class SparkHiveDataSet(AbstractDataSet):
         >>> reloaded.take(4)
     """
 
-    def _describe(self) -> Dict[str, Any]:
-        return dict(
-            database=self._database,
-            table=self._table,
-            write_mode=self._write_mode,
-            table_pk=self._table_pk,
-        )
-
+    # pylint: disable=too-many-arguments
     def __init__(
-        self, database: str, table: str, write_mode: str, table_pk: List[str] = None
+        self,
+        database: str,
+        table: str,
+        write_mode: str,
+        table_pk: List[str] = None,
+        layer: str = None,
     ) -> None:
         """Creates a new instance of ``SparkHiveDataSet``.
 
@@ -153,13 +152,16 @@ class SparkHiveDataSet(AbstractDataSet):
             table: The name of the table within the database.
             write_mode: ``insert``, ``upsert`` or ``overwrite`` are supported.
             table_pk: If performing an upsert, this identifies the primary key columns used to
-                resolve preexisting data. Is required for ``write_mode="upsert"``
+                resolve preexisting data. Is required for ``write_mode="upsert"``.
+            layer: The data layer according to the data engineering convention:
+                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
 
         Raises:
             DataSetError: Invalid configuration supplied
         """
         self._database = database
         self._table = table
+        self._layer = layer
         self._stage_table = "_temp_" + table
         self._valid_write_modes = ["insert", "upsert", "overwrite"]
         if write_mode not in self._valid_write_modes:
@@ -189,6 +191,15 @@ class SparkHiveDataSet(AbstractDataSet):
                     table=self._table,
                 )
             )
+
+    def _describe(self) -> Dict[str, Any]:
+        return dict(
+            database=self._database,
+            table=self._table,
+            write_mode=self._write_mode,
+            table_pk=self._table_pk,
+            layer=self._layer,
+        )
 
     @staticmethod
     def _get_spark() -> SparkSession:

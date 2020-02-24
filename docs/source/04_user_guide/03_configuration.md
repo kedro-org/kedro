@@ -179,9 +179,9 @@ except MissingConfigException:
 
 Parameters can then be used on their own or fed in as function inputs, as described in [this section](#using-parameters) below.
 
-### Specifying extra parameters
+### Specifying parameters at runtime
 
-Kedro also allows you to specify extra parameters for `kedro run` CLI command. To do that, you need to add the `--params` command line option and specify a comma-separated list of key-value pairs that will be added to [KedroContext](/kedro.context.KedroContext) parameters and made available to pipeline nodes. Each key-value pair is split on the first colon. Here is an example of triggering Kedro run with extra parameters specified:
+Kedro also allows you to specify runtime parameters for `kedro run` CLI command. To do that, you need to add the `--params` command line option and specify a comma-separated list of key-value pairs that will be added to [KedroContext](/kedro.context.KedroContext) parameters and made available to pipeline nodes. Each key-value pair is split on the first colon. Here is an example of triggering Kedro run with extra parameters specified:
 
 ```bash
 kedro run --params param_key1:value1,param_key2:2.0  # this will add {"param_key1": "value1", "param_key2": 2} to parameters dictionary
@@ -308,7 +308,7 @@ Credentials configuration can then be used on its own or fed into the `DataCatal
 
 ### AWS credentials
 
-When working with AWS S3-backed datasets (e.g., `kedro.io.CSVS3DataSet`), you are not required to store AWS credentials in the project configuration files. Instead, you can specify them using environment variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and, optionally, `AWS_SESSION_TOKEN`. Please refer to the [official documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html) for more details.
+When working with AWS credentials on datasets, you are not required to store AWS credentials in the project configuration files. Instead, you can specify them using environment variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and, optionally, `AWS_SESSION_TOKEN`. Please refer to the [official documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html) for more details.
 
 ## Configuring `kedro run` arguments
 

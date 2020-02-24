@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``AbstractDataSet`` implementation to access Spark data frames using
+"""``AbstractDataSet`` implementation to access Spark dataframes using
 ``pyspark``
 """
 
@@ -108,7 +108,7 @@ class KedroHdfsInsecureClient(InsecureClient):
 
 
 class SparkDataSet(AbstractVersionedDataSet):
-    """``SparkDataSet`` loads and saves Spark data frames.
+    """``SparkDataSet`` loads and saves Spark dataframes.
 
     Example:
     ::
@@ -145,15 +145,16 @@ class SparkDataSet(AbstractVersionedDataSet):
         save_args: Dict[str, Any] = None,
         version: Version = None,
         credentials: Dict[str, Any] = None,
+        layer: str = None,
     ) -> None:
         """Creates a new instance of ``SparkDataSet``.
 
         Args:
-            filepath: path to a Spark data frame. When using Databricks
+            filepath: Path to a Spark dataframe. When using Databricks
                 and working with data written to mount path points,
                 specify ``filepath``s for (versioned) ``SparkDataSet``s
                 starting with ``/dbfs/mnt``.
-            file_format: file format used during load and save
+            file_format: File format used during load and save
                 operations. These are formats supported by the running
                 SparkContext include parquet, csv. For a list of supported
                 formats please refer to Apache Spark documentation at
@@ -179,6 +180,8 @@ class SparkDataSet(AbstractVersionedDataSet):
                 prefix is ``s3a://`` or ``s3n://``. Optional keyword arguments passed to
                 ``hdfs.client.InsecureClient`` if ``filepath`` prefix is ``hdfs://``.
                 Ignored otherwise.
+            layer: The data layer according to the data engineering convention:
+                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
         """
         credentials = deepcopy(credentials) or {}
         fs_prefix, filepath = _split_filepath(filepath)
@@ -223,6 +226,8 @@ class SparkDataSet(AbstractVersionedDataSet):
             glob_function=glob_function,
         )
 
+        self._layer = layer
+
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args is not None:
@@ -241,6 +246,7 @@ class SparkDataSet(AbstractVersionedDataSet):
             load_args=self._load_args,
             save_args=self._save_args,
             version=self._version,
+            layer=self._layer,
         )
 
     @staticmethod

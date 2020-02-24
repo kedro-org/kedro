@@ -138,6 +138,14 @@ class TestRunCommand:
         )
         return config_path
 
+    @staticmethod
+    @pytest.fixture()
+    def fake_run_config_with_params(fake_run_config, request):
+        config = anyconfig.load(fake_run_config)
+        config["run"].update(request.param)
+        anyconfig.dump(config, fake_run_config)
+        return fake_run_config
+
     def test_run_successfully(self, fake_kedro_cli, fake_load_context, mocker):
         result = CliRunner().invoke(fake_kedro_cli.cli, ["run"])
         assert not result.exit_code
@@ -213,7 +221,6 @@ class TestRunCommand:
             fake_kedro_cli.cli, ["run", config_flag, fake_run_config]
         )
         assert not result.exit_code
-
         fake_load_context.return_value.run.assert_called_once_with(
             tags=("tag1", "tag2"),
             runner=mocker.ANY,
@@ -223,6 +230,42 @@ class TestRunCommand:
             from_inputs=[],
             load_versions={},
             pipeline_name="pipeline1",
+        )
+
+    @pytest.mark.parametrize(
+        "fake_run_config_with_params,expected",
+        [
+            ({}, {}),
+            ({"params": {"foo": "baz"}}, {"foo": "baz"}),
+            ({"params": "foo:baz"}, {"foo": "baz"}),
+            ({"params": {"foo": "123.45", "baz": "678", "bar": 9}}, {"foo": "123.45", "baz": "678", "bar": 9}),
+        ],
+        indirect=["fake_run_config_with_params"],
+    )
+    def test_run_with_params_in_config(
+        self,
+        expected,
+        fake_kedro_cli,
+        fake_load_context,
+        fake_run_config_with_params,
+        mocker,
+    ):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["run", "-c", fake_run_config_with_params]
+        )
+        assert not result.exit_code
+        fake_load_context.return_value.run.assert_called_once_with(
+            tags=("tag1", "tag2"),
+            runner=mocker.ANY,
+            node_names=("node1", "node2"),
+            from_nodes=[],
+            to_nodes=[],
+            from_inputs=[],
+            load_versions={},
+            pipeline_name="pipeline1",
+        )
+        fake_load_context.assert_called_once_with(
+            Path.cwd(), env=mocker.ANY, extra_params=expected
         )
 
     def test_run_env_environment_var(

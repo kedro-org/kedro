@@ -30,9 +30,8 @@
 from pathlib import Path
 
 import pytest
-
-from kedro.extras.ipython import ipython_loader
-from kedro.extras.ipython.ipython_loader import locate_ipython_startup_dir
+from tools.ipython import ipython_loader
+from tools.ipython.ipython_loader import locate_ipython_startup_dir
 
 
 @pytest.fixture

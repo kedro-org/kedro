@@ -26,7 +26,7 @@
 * `kedro/contrib/decorators/memory_profiler.py` copied to `kedro/extras/decorators/memory_profiler.py`.
 * `kedro/contrib/io/transformers/transformers.py` copied to `kedro/extras/transformers/time_profiler.py`.
 * `kedro/contrib/colors/logging/color_logger.py` copied to `kedro/extras/logging/color_logger.py`.
-* `extras/ipython_loader.py` copied to `kedro/extras/ipython/ipython_loader.py`.
+* `extras/ipython_loader.py` copied to `tools/ipython/ipython_loader.py`.
 * `kedro/contrib/io/cached/cached_dataset.py` copied to `kedro/io/cached_dataset.py`.
 * `kedro/contrib/io/catalog_with_default/data_catalog_with_default.py` copied to `kedro/io/data_catalog_with_default.py`.
 * `kedro/contrib/config/templated_config.py` copied to `kedro/config/templated_config.py`.

@@ -1,10 +1,7 @@
 # Upcoming release
 
 ## Major features and improvements
-
-
 * Added the following datasets:
-
   - `ParquetDataSet` in `kedro.extras.datasets.dask` for handling parquet datasets using Dask dataframes.
   - `PickleDataSet` dataset in `kedro.extras.datasets.pickle` for working with Pickle files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
   - `CSVDataSet` dataset in `kedro.extras.datasets.pandas` for working with CSV files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
@@ -19,7 +16,7 @@
   - `GBQTableDataSet` dataset in `kedro.extras.datasets.pandas` for working with Google BigQuery.
   - `FeatherDataSet` dataset in `kedro.extras.datasets.pandas` for working with feather files that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
   - `IncrementalDataSet` dataset, which inherits from `PartitionedDataSet` and also remembers the last processed partition.
-  - `GeoJSONDataSet`dataset in `contrib` for working with geospatial data that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `GeoJSONDataSet`dataset in `kedro.extras.datasets.geojson` for working with geospatial data that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
 
 * Enabled loading a particular version of a dataset in Jupyter Notebooks and ipython, using `catalog.load("dataset_name", version="<2019-12-13T15.08.09.255Z>")`.
 * Added http(s) protocol support for `JSONDataSet`.

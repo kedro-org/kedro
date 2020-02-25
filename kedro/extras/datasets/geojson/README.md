@@ -3,7 +3,6 @@
 ``GeoJSONDataSet`` loads and saves data to a local yaml file using ``geopandas``.
 See [geopandas.GeoDataFrame](http://geopandas.org/reference/geopandas.GeoDataFrame.html) for details.
 
-
 #### Example use:
 
 ```python
@@ -23,6 +22,8 @@ assert data.equals(reloaded)
 
 ```yaml
 example_geojson_data:
-  type: kedro.contrib.io.geojson_local.GeoJSONDataSet
+  type: geojson.GeoJSONDataSet
   filepath: data/08_reporting/test.geojson
 ```
+
+Contributed by (Luis Blanche)[https://github.com/lblanche].

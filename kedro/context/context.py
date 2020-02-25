@@ -48,8 +48,6 @@ from kedro.runner import AbstractRunner, SequentialRunner
 from kedro.utils import load_obj
 from kedro.versioning import Journal
 
-KEDRO_ENV_VAR = "KEDRO_ENV"
-
 
 def _version_mismatch_error(context_version) -> str:
     return (
@@ -561,6 +559,10 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
             "Changing the current working directory to %s", str(project_path)
         )
         os.chdir(str(project_path))  # Move to project root
+
+    # update kwargs with env from the environment variable (defaults to None if not set)
+    # need to do this because some CLI command (e.g `kedro run`) defaults to passing in `env=None`
+    kwargs["env"] = kwargs.get("env") or os.getenv("KEDRO_ENV")
 
     # Instantiate the context after changing the cwd for logging to be properly configured.
     context = context_class(project_path, **kwargs)

@@ -1,5 +1,4 @@
 import logging.config
-import os
 import sys
 from pathlib import Path
 
@@ -19,7 +18,7 @@ def reload_kedro(path, line=None):
 
     try:
         import kedro.config.default_logger
-        from kedro.context import KEDRO_ENV_VAR, load_context
+        from kedro.context import load_context
         from kedro.cli.jupyter import collect_line_magic
     except ImportError:
         logging.error(
@@ -31,8 +30,7 @@ def reload_kedro(path, line=None):
     try:
         path = path or project_path
         logging.debug("Loading the context from %s", str(path))
-
-        context = load_context(path, env=os.getenv(KEDRO_ENV_VAR))
+        context = load_context(path)
         catalog = context.catalog
 
         # remove cached user modules

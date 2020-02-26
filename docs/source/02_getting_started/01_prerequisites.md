@@ -6,59 +6,84 @@ Kedro supports macOS, Linux and Windows (7 / 8 / 10 and Windows Server 2016+). I
 
 In order to work effectively with Kedro projects, we highly recommend you download and install [Anaconda](https://www.anaconda.com/download/#macos) (Python 3.x version) and [Java](https://www.oracle.com/technetwork/java/javase/downloads/index.html) (if using PySpark).
 
+# Working with virtual environments
 
-### Windows
+> The main purpose of Python virtual environments is to create an isolated environment for Python projects. This means that each project can have its own dependencies, regardless of what dependencies every other project has. Read more about Python Virtual Environments [**here**](https://realpython.com/python-virtual-environments-a-primer/).
 
-You will require admin rights to complete the installation of the following tools on your machine:
+Follow the instructions that best suit your Python installation preference. Virtual environment setups for `conda`, `venv` and `pipenv` are presented here:
+ - `conda` used with an Anaconda (Python 3.7 version) installation
+ - `venv` or `pipenv` used when Anaconda is not preferred
 
-* [Anaconda](https://www.anaconda.com/download/#windows) (Python 3.x version)
-* [Java](https://www.oracle.com/technetwork/java/javase/downloads/index.html) (if using PySpark)
+## Anaconda
 
-## Python virtual environments
-
-Python's virtual environments can be used to isolate the dependencies of different individual projects, avoiding Python version conflicts. They also prevent permission issues for non-administrator users.
-For more information, please refer to this [guide](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
-
-### Using `conda`
-
-We recommend creating your virtual environment using [`conda`](https://conda.io/docs/), a package and environment manager program bundled with Anaconda.
-
-#### Create an environment with `conda`
-
-Use [`conda create`](https://conda.io/docs/user-guide/tasks/manage-environments.html#id1) to create a python 3.6  environment called `environment_name` by running:
+Let us create a new Python virtual environment using `conda`:
 
 ```bash
-conda create --name environment_name python=3.6
+conda create --name kedro-environment python=3.7 -y
 ```
 
-#### Activate an environment with `conda`
+This will create an isolated environment with Python 3.7.
 
-Use [`conda activate`](https://conda.io/docs/user-guide/tasks/manage-environments.html#activating-an-environment) to activate an environment called `environment_name` by running:
+To activate it, run:
 
 ```bash
-conda activate environment_name
+conda activate kedro-environment
 ```
 
-When you want to deactivate the environment you are using with Kedro, you can use [`conda deactivate`](https://conda.io/docs/user-guide/tasks/manage-environments.html#id6):
+To exit the environment you can run:
 
 ```bash
-conda deactivate
+deactivate kedro-environment
 ```
 
-#### Other `conda` commands
+### `venv`
 
-To list all existing `conda` environments:
+If you are using Python 3.0+, then you should already have the `venv` module from the standard library installed. However, for completeness you can install `venv` with:
 
 ```bash
-conda env list
+pip install virtualenv
 ```
 
-To delete an environment:
+Create a directory for your virtual environment with:
 
 ```bash
-conda remove --name environment_name --all
+mkdir kedro-environment && cd kedro-environment
 ```
 
-### Alternatives to `conda`
+This will create a `kedro-environment` directory for your `virtualenv` in your current working directory.
 
-If you prefer an alternative environment manager such as [`venv`](https://docs.python.org/3/library/venv.html), [`pyenv`](https://github.com/pyenv/pyenv), etc, please read their respective documentation.
+Create a new virtual environment in this directory by running:
+
+```bash
+python -m venv env/kedro-environment  # macOS / Linux
+python -m venv env\kedro-environment  # Windows
+```
+
+We can activate this virtual environment with:
+
+```bash
+source env/bin/activate # macOS / Linux
+.\env\Scripts\activate  # Windows
+```
+
+To exit the environment you can run:
+
+```bash
+deactivate
+```
+
+### `pipenv`
+
+You will need to install `pipenv` with:
+
+```bash
+pip install pipenv
+```
+
+Then create a directory for the virtual environment and change to this working directory with:
+
+```bash
+mkdir kedro-environment && cd kedro-environment
+```
+
+Once all the dependencies are installed you can run `pipenv shell` which will start a session with the correct virtual environment activated. To exit the shell session using `exit`.

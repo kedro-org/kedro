@@ -1,8 +1,12 @@
-# Upcoming Release
+# 0.15.7
 
 ## Major features and improvements
 
+* Added in documentation on how to contribute a custom AbstractDataSet implementation
+
 ## Bug fixes and other changes
+
+* Fixed the link to the Kedro banner image in the documentation.
 
 ## Breaking changes to the API
 

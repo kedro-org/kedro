@@ -7,10 +7,12 @@
 ## Bug fixes and other changes
 
 * Fixed the link to the Kedro banner image in the documentation.
+* Updated contribution process in `CONTRIBUTING.md` - added Developer Workflow
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
+[Mani Sarkar](https://github.com/neomatrix369)
 
 # 0.15.6
 

@@ -11,6 +11,7 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
+[Priyanka Shanbhag](https://github.com/priyanka1414)
 
 # 0.15.6
 

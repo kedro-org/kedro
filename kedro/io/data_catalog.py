@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,8 +39,11 @@ from warnings import warn
 
 from kedro.io.core import (
     AbstractDataSet,
+    AbstractVersionedDataSet,
     DataSetAlreadyExistsError,
+    DataSetError,
     DataSetNotFoundError,
+    Version,
     generate_timestamp,
 )
 from kedro.io.memory_data_set import MemoryDataSet
@@ -51,7 +54,9 @@ CATALOG_KEY = "catalog"
 CREDENTIALS_KEY = "credentials"
 
 
-def _get_credentials(credentials_name: str, credentials: Dict) -> Dict:
+def _get_credentials(
+    credentials_name: str, credentials: Dict[str, Any]
+) -> Dict[str, Any]:
     """Return a set of credentials from the provided credentials dict.
 
     Args:
@@ -72,9 +77,34 @@ def _get_credentials(credentials_name: str, credentials: Dict) -> Dict:
         raise KeyError(
             "Unable to find credentials '{}': check your data "
             "catalog and credentials configuration. See "
-            "https://kedro.readthedocs.io/en/latest/kedro.io.DataCatalog.html "
+            "https://kedro.readthedocs.io/en/stable/kedro.io.DataCatalog.html "
             "for an example.".format(credentials_name)
         )
+
+
+def _resolve_credentials(
+    config: Dict[str, Any], credentials: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Return the dataset configuration where credentials are resolved using
+    credentials dictionary provided.
+
+    Args:
+        config: Original dataset config, which may contain unresolved credentials.
+        credentials: A dictionary with all credentials.
+
+    Returns:
+        The dataset config, where all the credentials are successfully resolved.
+    """
+    config = copy.deepcopy(config)
+
+    def _map_value(key: str, value: Any) -> Any:
+        if key == CREDENTIALS_KEY and isinstance(value, str):
+            return _get_credentials(value, credentials)
+        if isinstance(value, dict):
+            return {k: _map_value(k, v) for k, v in value.items()}
+        return value
+
+    return {k: _map_value(k, v) for k, v in config.items()}
 
 
 class _FrozenDatasets:
@@ -133,11 +163,11 @@ class DataCatalog:
         Example:
         ::
 
-            >>> from kedro.io import CSVLocalDataSet
+            >>> from kedro.extras.datasets.pandas import CSVDataSet
             >>>
-            >>> cars = CSVLocalDataSet(filepath="cars.csv",
-            >>>                        load_args=None,
-            >>>                        save_args={"index": False})
+            >>> cars = CSVDataSet(filepath="cars.csv",
+            >>>                   load_args=None,
+            >>>                   save_args={"index": False})
             >>> io = DataCatalog(data_sets={'cars': cars})
         """
         self._data_sets = dict(data_sets or {})
@@ -219,16 +249,15 @@ class DataCatalog:
 
             >>> config = {
             >>>     "cars": {
-            >>>         "type": "CSVLocalDataSet",
+            >>>         "type": "pandas.CSVDataSet",
             >>>         "filepath": "cars.csv",
             >>>         "save_args": {
             >>>             "index": False
             >>>         }
             >>>     },
             >>>     "boats": {
-            >>>         "type": "CSVS3DataSet",
-            >>>         "filepath": "boats.csv",
-            >>>         "bucket_name": "mck-147789798-bucket",
+            >>>         "type": "pandas.CSVDataSet",
+            >>>         "filepath": "s3://mck-147789798-bucket/boats.csv",
             >>>         "credentials": "boats_credentials"
             >>>         "save_args": {
             >>>             "index": False
@@ -238,8 +267,10 @@ class DataCatalog:
             >>>
             >>> credentials = {
             >>>     "boats_credentials": {
-            >>>         "aws_access_key_id": "<your key id>",
-            >>>         "aws_secret_access_key": "<your secret>"
+            >>>         "client_kwargs": {
+            >>>             "aws_access_key_id": "<your key id>",
+            >>>             "aws_secret_access_key": "<your secret>"
+            >>>         }
             >>>      }
             >>> }
             >>>
@@ -264,27 +295,34 @@ class DataCatalog:
             )
 
         for ds_name, ds_config in catalog.items():
-            if CREDENTIALS_KEY in ds_config:
-                ds_config[CREDENTIALS_KEY] = _get_credentials(
-                    ds_config.pop(CREDENTIALS_KEY), credentials  # credentials name
-                )
+            ds_config = _resolve_credentials(ds_config, credentials)
             data_sets[ds_name] = AbstractDataSet.from_config(
                 ds_name, ds_config, load_versions.get(ds_name), save_version
             )
         return cls(data_sets=data_sets, journal=journal)
 
-    def _get_transformed_dataset_function(self, data_set_name, operation):
+    def _get_transformed_dataset_function(
+        self, data_set_name: str, operation: str, version: Version = None
+    ):
         data_set = self._data_sets[data_set_name]
+        if version and isinstance(data_set, AbstractVersionedDataSet):
+            # we only want to return a similar-looking dataset,
+            # not modify the one stored in the current catalog
+            data_set = data_set._copy(  # pylint: disable=protected-access
+                _version=version
+            )
+
         func = getattr(data_set, operation)
         for transformer in reversed(self._transformers[data_set_name]):
             func = partial(getattr(transformer, operation), data_set_name, func)
         return func
 
-    def load(self, name: str) -> Any:
+    def load(self, name: str, version: str = None) -> Any:
         """Loads a registered data set.
 
         Args:
             name: A data set to be loaded.
+            version: Optional version to be loaded.
 
         Returns:
             The loaded data as configured.
@@ -296,11 +334,12 @@ class DataCatalog:
         Example:
         ::
 
-            >>> from kedro.io import CSVLocalDataSet, DataCatalog
+            >>> from kedro.io import DataCatalog
+            >>> from kedro.extras.datasets.pandas import CSVDataSet
             >>>
-            >>> cars = CSVLocalDataSet(filepath="cars.csv",
-            >>>                        load_args=None,
-            >>>                        save_args={"index": False})
+            >>> cars = CSVDataSet(filepath="cars.csv",
+            >>>                   load_args=None,
+            >>>                   save_args={"index": False})
             >>> io = DataCatalog(data_sets={'cars': cars})
             >>>
             >>> df = io.load("cars")
@@ -314,13 +353,16 @@ class DataCatalog:
             "Loading data from `%s` (%s)...", name, type(self._data_sets[name]).__name__
         )
 
-        func = self._get_transformed_dataset_function(name, "load")
+        version = Version(version, None) if version else None
+        func = self._get_transformed_dataset_function(name, "load", version)
         result = func()
 
-        version = self._data_sets[name].get_last_load_version()
+        load_version = (
+            version.load if version else self._data_sets[name].get_last_load_version()
+        )
         # Log only if versioning is enabled for the data set
-        if self._journal and version:
-            self._journal.log_catalog(name, "load", version)
+        if self._journal and load_version:
+            self._journal.log_catalog(name, "load", load_version)
         return result
 
     def save(self, name: str, data: Any) -> None:
@@ -340,11 +382,11 @@ class DataCatalog:
 
             >>> import pandas as pd
             >>>
-            >>> from kedro.io import CSVLocalDataSet
+            >>> from kedro.extras.datasets.pandas import CSVDataSet
             >>>
-            >>> cars = CSVLocalDataSet(filepath="cars.csv",
-            >>>                        load_args=None,
-            >>>                        save_args={"index": False})
+            >>> cars = CSVDataSet(filepath="cars.csv",
+            >>>                   load_args=None,
+            >>>                   save_args={"index": False})
             >>> io = DataCatalog(data_sets={'cars': cars})
             >>>
             >>> df = pd.DataFrame({'col1': [1, 2],
@@ -426,13 +468,13 @@ class DataCatalog:
         Example:
         ::
 
-            >>> from kedro.io import CSVLocalDataSet
+            >>> from kedro.extras.datasets.pandas import CSVDataSet
             >>>
             >>> io = DataCatalog(data_sets={
-            >>>                   'cars': CSVLocalDataSet(filepath="cars.csv")
+            >>>                   'cars': CSVDataSet(filepath="cars.csv")
             >>>                  })
             >>>
-            >>> io.add("boats", CSVLocalDataSet(filepath="boats.csv"))
+            >>> io.add("boats", CSVDataSet(filepath="boats.csv"))
         """
         if data_set_name in self._data_sets:
             if replace:
@@ -463,14 +505,14 @@ class DataCatalog:
         Example:
         ::
 
-            >>> from kedro.io import CSVLocalDataSet, ParquetLocalDataSet
+            >>> from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
             >>>
             >>> io = DataCatalog(data_sets={
-            >>>                   "cars": CSVLocalDataSet(filepath="cars.csv")
+            >>>                   "cars": CSVDataSet(filepath="cars.csv")
             >>>                  })
             >>> additional = {
-            >>>     "planes": ParquetLocalDataSet("planes.parq"),
-            >>>     "boats": CSVLocalDataSet(filepath="boats.csv")
+            >>>     "planes": ParquetDataSet("planes.parq"),
+            >>>     "boats": CSVDataSet(filepath="boats.csv")
             >>> }
             >>>
             >>> io.add_all(additional)
@@ -578,8 +620,25 @@ class DataCatalog:
             self._default_transformers,
             self._journal,
         ) == (
-            other._data_sets,  # pylint: disable=protected-access
-            other._transformers,  # pylint: disable=protected-access
-            other._default_transformers,  # pylint: disable=protected-access
-            other._journal,  # pylint: disable=protected-access
+            other._data_sets,
+            other._transformers,
+            other._default_transformers,
+            other._journal,
         )
+
+    def confirm(self, name: str) -> None:
+        """Confirm a DataSet by its name"""
+        self._logger.info("Confirming DataSet '%s'", name)
+
+        if name not in self._data_sets:
+            raise DataSetNotFoundError(
+                "DataSet '{}' not found in the catalog".format(name)
+            )
+        data_set = self._data_sets[name]
+
+        if hasattr(data_set, "confirm"):
+            data_set.confirm()  # type: ignore
+        else:
+            raise DataSetError(
+                "DataSet '{}' does not have 'confirm' method".format(name)
+            )

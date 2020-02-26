@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@
 which is not registered in the catalog.
 """
 from typing import Any, Callable, Dict, Optional
+from warnings import warn
 
 from kedro.io import AbstractDataSet, DataCatalog
 from kedro.versioning import Journal
@@ -80,6 +81,12 @@ class DataCatalogWithDefault(DataCatalog):
             >>> # load the file in data/raw/cars.csv
             >>> df = io.load("cars.csv")
         """
+        warn(
+            "kedro.contrib.io.catalog_with_default.DataCatalogWithDefault "
+            "will be deprecated in future releases. Please refer to "
+            "replacement dataset in kedro.io.",
+            DeprecationWarning,
+        )
         super().__init__(data_sets)
 
         if not callable(default):
@@ -91,11 +98,13 @@ class DataCatalogWithDefault(DataCatalog):
         self._default = default
         self._remember = remember
 
-    def load(self, name: str) -> Any:
+    def load(self, name: str, version: str = None) -> Any:
         """Loads a registered data set
 
         Args:
             name: A data set to be loaded.
+            version: Optional version to be loaded.
+
 
         Returns:
             The loaded data as configured.

@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -42,7 +42,6 @@ class Node:
     run user-provided functions as part of Kedro pipelines.
     """
 
-    # pylint: disable=missing-type-doc
     def __init__(
         self,
         func: Callable,
@@ -51,7 +50,8 @@ class Node:
         *,
         name: str = None,
         tags: Union[str, Iterable[str]] = None,
-        decorators: Iterable[Callable] = None
+        decorators: Iterable[Callable] = None,
+        confirms: Union[str, List[str]] = None
     ):
         """Create a node in the pipeline by providing a function to be called
         along with variable names for inputs and/or outputs.
@@ -73,6 +73,11 @@ class Node:
                 logs or any other visualisations.
             tags: Optional set of tags to be applied to the node.
             decorators: Optional list of decorators to be applied to the node.
+            confirms: Optional name or the list of the names of the datasets
+                that should be confirmed. This will result in calling
+                ``confirm()`` method of the corresponding data set instance.
+                Specified dataset names do not necessarily need to be present
+                in the node ``inputs`` or ``outputs``.
 
         Raises:
             ValueError: Raised in the following cases:
@@ -123,6 +128,7 @@ class Node:
 
         self._validate_unique_outputs()
         self._validate_inputs_dif_than_outputs()
+        self._confirms = confirms
 
     def _copy(self, **overwrite_params):
         """
@@ -135,6 +141,7 @@ class Node:
             "name": self._name,
             "tags": self._tags,
             "decorators": self._decorators,
+            "confirms": self._confirms,
         }
         params.update(overwrite_params)
         return Node(**params)
@@ -157,12 +164,12 @@ class Node:
     def __eq__(self, other):
         if not isinstance(other, Node):
             return NotImplemented
-        return self._unique_key == other._unique_key  # pylint: disable=protected-access
+        return self._unique_key == other._unique_key
 
     def __lt__(self, other):
         if not isinstance(other, Node):
             return NotImplemented
-        return self._unique_key < other._unique_key  # pylint: disable=protected-access
+        return self._unique_key < other._unique_key
 
     def __hash__(self):
         return hash(self._unique_key)
@@ -270,6 +277,15 @@ class Node:
 
         """
         return _to_list(self._outputs)
+
+    @property
+    def confirms(self) -> List[str]:
+        """Return dataset names to confirm as a list.
+
+        Returns:
+            Dataset names to confirm as a list.
+        """
+        return _to_list(self._confirms)
 
     @property
     def _decorated_func(self):
@@ -428,9 +444,8 @@ class Node:
         return self._decorated_func(inputs[node_input])
 
     def _run_with_list(self, inputs: Dict[str, Any], node_inputs: List[str]):
-        all_available = set(node_inputs).issubset(inputs.keys())
-        if len(node_inputs) != len(inputs) or not all_available:
-            # This can be split in future into two cases, one successful
+        # Node inputs and provided run inputs should completely overlap
+        if set(node_inputs) != set(inputs.keys()):
             raise ValueError(
                 "Node {} expected {} input(s) {}, "
                 "but got the following {} input(s) instead: {}.".format(
@@ -445,9 +460,8 @@ class Node:
         return self._decorated_func(*[inputs[item] for item in node_inputs])
 
     def _run_with_dict(self, inputs: Dict[str, Any], node_inputs: Dict[str, str]):
-        all_available = set(node_inputs.values()).issubset(inputs.keys())
-        if len(set(node_inputs.values())) != len(inputs) or not all_available:
-            # This can be split in future into two cases, one successful
+        # Node inputs and provided run inputs should completely overlap
+        if set(node_inputs.values()) != set(inputs.keys()):
             raise ValueError(
                 "Node {} expected {} input(s) {}, "
                 "but got the following {} input(s) instead: {}.".format(
@@ -566,13 +580,14 @@ def _node_error_message(msg) -> str:
     ).format(msg)
 
 
-def node(  # pylint: disable=missing-type-doc
+def node(
     func: Callable,
     inputs: Union[None, str, List[str], Dict[str, str]],
     outputs: Union[None, str, List[str], Dict[str, str]],
     *,
     name: str = None,
-    tags: Iterable[str] = None
+    tags: Iterable[str] = None,
+    confirms: Union[str, List[str]] = None
 ) -> Node:
     """Create a node in the pipeline by providing a function to be called
     along with variable names for inputs and/or outputs.
@@ -593,6 +608,11 @@ def node(  # pylint: disable=missing-type-doc
         name: Optional node name to be used when displaying the node in logs or
             any other visualisations.
         tags: Optional set of tags to be applied to the node.
+        confirms: Optional name or the list of the names of the datasets
+            that should be confirmed. This will result in calling ``confirm()``
+            method of the corresponding data set instance. Specified dataset
+            names do not necessarily need to be present in the node ``inputs``
+            or ``outputs``.
 
     Returns:
         A Node object with mapped inputs, outputs and function.
@@ -623,7 +643,7 @@ def node(  # pylint: disable=missing-type-doc
         >>>          ['train_boats2017', 'test_boats2017'])
         >>> ]
     """
-    return Node(func, inputs, outputs, name=name, tags=tags)
+    return Node(func, inputs, outputs, name=name, tags=tags, confirms=confirms)
 
 
 def _dict_inputs_to_list(func: Callable[[Any], Any], inputs: Dict[str, str]):

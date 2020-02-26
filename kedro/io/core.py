@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,18 +34,24 @@ import abc
 import copy
 import logging
 import os
+import warnings
 from collections import namedtuple
 from datetime import datetime, timezone
 from glob import iglob
 from pathlib import Path, PurePath
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 from urllib.parse import urlparse
-from warnings import warn
+
+from fsspec.utils import infer_storage_options
 
 from kedro.utils import load_obj
 
+warnings.simplefilter("default", DeprecationWarning)
+
 VERSIONED_FLAG_KEY = "versioned"
 VERSION_KEY = "version"
+HTTP_PROTOCOLS = ("http", "https")
+PROTOCOL_DELIMITER = "://"
 
 
 class DataSetError(Exception):
@@ -327,6 +333,12 @@ class AbstractDataSet(abc.ABC):
     def _release(self) -> None:
         pass
 
+    def _copy(self, **overwrite_params) -> "AbstractDataSet":
+        dataset_copy = copy.deepcopy(self)
+        for name, value in overwrite_params.items():
+            setattr(dataset_copy, name, value)
+        return dataset_copy
+
 
 def generate_timestamp() -> str:
     """Generate the timestamp to be used by versioning.
@@ -353,17 +365,19 @@ class Version(namedtuple("Version", ["load", "save"])):
     __slots__ = ()
 
 
-CONSISTENCY_WARNING = (
+_CONSISTENCY_WARNING = (
     "Save version `{}` did not match load version `{}` for {}. This is strongly "
     "discouraged due to inconsistencies it may cause between `save` and "
     "`load` operations. Please refrain from setting exact load version for "
     "intermediate data sets where possible to avoid this warning."
 )
 
+_DEFAULT_PACKAGES = ["kedro.io.", "kedro.extras.datasets.", ""]
+
 
 def parse_dataset_definition(
     config: Dict[str, Any], load_version: str = None, save_version: str = None
-) -> Tuple[Type[AbstractDataSet], Dict]:
+) -> Tuple[Type[AbstractDataSet], Dict[str, Any]]:
     """Parse and instantiate a dataset class using the configuration provided.
 
     Args:
@@ -389,16 +403,20 @@ def parse_dataset_definition(
         raise DataSetError("`type` is missing from DataSet catalog configuration")
 
     class_obj = config.pop("type")
-
     if isinstance(class_obj, str):
-        try:
-            class_obj = load_obj(class_obj, "kedro.io")
-        except ImportError:
+        if len(class_obj.strip(".")) != len(class_obj):
             raise DataSetError(
-                "Cannot import module when trying to load type `{}`.".format(class_obj)
+                "`type` class path does not support relative "
+                "paths or paths ending with a dot."
             )
-        except AttributeError:
+
+        class_paths = (prefix + class_obj for prefix in _DEFAULT_PACKAGES)
+        trials = (_load_obj(class_path) for class_path in class_paths)
+        try:
+            class_obj = next(obj for obj in trials if obj is not None)
+        except StopIteration:
             raise DataSetError("Class `{}` not found.".format(class_obj))
+
     if not issubclass(class_obj, AbstractDataSet):
         raise DataSetError(
             "DataSet type `{}.{}` is invalid: all data set types must extend "
@@ -418,6 +436,14 @@ def parse_dataset_definition(
         config[VERSION_KEY] = Version(load_version, save_version)
 
     return class_obj, config
+
+
+def _load_obj(class_path: str) -> Optional[object]:
+    try:
+        class_obj = load_obj(class_path)
+    except (ImportError, AttributeError, ValueError):
+        return None
+    return class_obj
 
 
 def _local_exists(filepath: str) -> bool:
@@ -565,8 +591,8 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
 
         load_version = self._lookup_load_version()
         if load_version != self._last_save_version:
-            warn(
-                CONSISTENCY_WARNING.format(
+            warnings.warn(
+                _CONSISTENCY_WARNING.format(
                     self._last_save_version, load_version, str(self)
                 )
             )
@@ -592,3 +618,66 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
                 str(self), str(exc)
             )
             raise DataSetError(message) from exc
+
+
+def get_protocol_and_path(filepath: str, version: Version = None) -> Tuple[str, str]:
+    """Parses filepath on protocol and path.
+
+    Args:
+        filepath: raw filepath e.g.: `gcs://bucket/test.json`.
+        version: instance of ``kedro.io.core.Version`` or None.
+
+    Returns:
+            Protocol and path.
+
+    Raises:
+            DataSetError: when protocol is http(s) and version is not None.
+            Note: HTTP(s) dataset doesn't support versioning.
+    """
+    options_dict = infer_storage_options(filepath)
+    path = options_dict["path"]
+    protocol = options_dict["protocol"]
+
+    if protocol in HTTP_PROTOCOLS:
+        if version:
+            raise DataSetError(
+                "HTTP(s) DataSet doesn't support versioning. "
+                "Please remove version flag from the dataset configuration."
+            )
+        path = path.split(PROTOCOL_DELIMITER, 1)[-1]
+
+    return protocol, path
+
+
+def get_filepath_str(path: PurePath, protocol: str) -> str:
+    """Returns filepath. Returns full filepath (with protocol) if protocol is HTTP(s).
+
+    Args:
+        path: filepath without protocol.
+        protocol: protocol.
+
+    Returns:
+        Filepath string.
+    """
+    path = str(path)
+    if protocol in HTTP_PROTOCOLS:
+        path = "".join((protocol, PROTOCOL_DELIMITER, path))
+    return path
+
+
+def validate_on_forbidden_chars(**kwargs):
+    """Validate that string values do not include white-spaces or ;"""
+    for key, value in kwargs.items():
+        if " " in value or ";" in value:
+            raise DataSetError(
+                "Neither white-space nor semicolon are allowed in `{}`.".format(key)
+            )
+
+
+def deprecation_warning(class_name):
+    """Log deprecation warning."""
+    warnings.warn(
+        "{} will be deprecated in future releases. Please refer "
+        "to replacement datasets in kedro.extras.datasets.".format(class_name),
+        DeprecationWarning,
+    )

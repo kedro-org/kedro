@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ class MockGCSFileSystem(gcs_mocks.BasicGCSFileSystemMock):
         self.tmp_path = tmp_path
 
     @contextmanager
-    def open(self, filepath, *args, **kwargs):  # pylint: disable=unused-argument
+    def open(self, filepath, *args, **kwargs):
         path = self.files.get(str(filepath))
         mode = kwargs.get("mode", "r")
         if path:

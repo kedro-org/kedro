@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ so that the user avoids io operations with slow storage media
 """
 import logging
 from typing import Any, Dict, Union
+from warnings import warn
 
 from kedro.io import AbstractDataSet, MemoryDataSet, Version
 from kedro.io.core import VERSIONED_FLAG_KEY
@@ -56,6 +57,11 @@ class CachedDataSet(AbstractDataSet):
     """
 
     def __init__(self, dataset: Union[AbstractDataSet, Dict], version: Version = None):
+        warn(
+            "kedro.contrib.io.cached.CachedDataSet will be deprecated in future releases. "
+            "Please refer to replacement dataset in kedro.io.",
+            DeprecationWarning,
+        )
         if isinstance(dataset, Dict):
             self._dataset = self._from_config(dataset, version)
         elif isinstance(dataset, AbstractDataSet):

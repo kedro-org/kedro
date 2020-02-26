@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ import kedro
 from kedro.pipeline.node import Node, _to_list
 
 TRANSCODING_SEPARATOR = "@"
+PARAMETER_KEYWORDS = ("params:", "parameters")
 
 
 def _transcode_split(element: str) -> Tuple[str, str]:
@@ -108,6 +109,14 @@ class OutputNotUniqueError(Exception):
     pass
 
 
+class ConfirmNotUniqueError(Exception):
+    """Raised when two or more nodes that are part of the same pipeline
+    attempt to confirm the same dataset.
+    """
+
+    pass
+
+
 class Pipeline:
     """A ``Pipeline`` defined as a collection of ``Node`` objects. This class
     treats nodes as part of a graph representation and provides inputs,
@@ -122,7 +131,7 @@ class Pipeline:
         *,
         name: str = None,
         tags: Union[str, Iterable[str]] = None
-    ):  # pylint: disable=missing-type-doc
+    ):
         """Initialise ``Pipeline`` with a list of ``Node`` instances.
 
         Args:
@@ -144,6 +153,9 @@ class Pipeline:
                 possible due to the existence of a circular dependency.
             OutputNotUniqueError:
                 When multiple ``Node`` instances produce the same output.
+            ConfirmNotUniqueError:
+                When multiple ``Node`` instances attempt to confirm the same
+                dataset.
         Example:
         ::
 
@@ -192,6 +204,7 @@ class Pipeline:
         self._name = name
         self._nodes_by_name = {node.name: node for node in nodes}
         _validate_unique_outputs(nodes)
+        _validate_unique_confirms(nodes)
 
         # input -> nodes with input
         self._nodes_by_input = defaultdict(set)  # type: Dict[str, Set[Node]]
@@ -673,7 +686,7 @@ class Pipeline:
         """
 
         res = self.only_nodes(*node_names)
-        res += self.from_inputs(*res.all_outputs())
+        res += self.from_inputs(*map(_get_transcode_compatible_name, res.all_outputs()))
         return res
 
     def to_nodes(self, *node_names: str) -> "Pipeline":
@@ -694,7 +707,7 @@ class Pipeline:
         """
 
         res = self.only_nodes(*node_names)
-        res += self.to_outputs(*res.all_inputs())
+        res += self.to_outputs(*map(_get_transcode_compatible_name, res.all_inputs()))
         return res
 
     def only_nodes_with_tags(self, *tags: str) -> "Pipeline":
@@ -768,7 +781,8 @@ class Pipeline:
             datasets: A map of the existing dataset name to the new one.
                 Both input and output datasets can be replaced this way.
             prefix: A prefix to give to all dataset names,
-                except those explicitly named with the `datasets` parameter.
+                except those explicitly named with the `datasets` parameter,
+                and parameter references (`params:` and `parameters`).
 
         Raises:
             ValueError: invalid dataset names are given.
@@ -782,6 +796,8 @@ class Pipeline:
         used_dataset_names = set()
 
         def _prefix(name):
+            if any(param in name for param in PARAMETER_KEYWORDS):
+                return name
             return "{}.{}".format(prefix, name) if prefix else name
 
         def _map_and_prefix(name):
@@ -857,16 +873,24 @@ def _validate_duplicate_nodes(nodes: List[Node]):
 
 
 def _validate_unique_outputs(nodes: List[Node]) -> None:
-    outputs_list = list(chain.from_iterable(node.outputs for node in nodes))
-    outputs_list = [_get_transcode_compatible_name(o) for o in outputs_list]
-    counter_list = Counter(outputs_list)
-    counter_set = Counter(set(outputs_list))
-    diff = counter_list - counter_set
-    if diff:
+    outputs = chain.from_iterable(node.outputs for node in nodes)
+    outputs = map(_get_transcode_compatible_name, outputs)
+    duplicates = [key for key, value in Counter(outputs).items() if value > 1]
+    if duplicates:
         raise OutputNotUniqueError(
-            "Output(s) {} are returned by "
-            "more than one nodes. Node "
-            "outputs must be unique.".format(sorted(diff.keys()))
+            "Output(s) {} are returned by more than one nodes. Node "
+            "outputs must be unique.".format(sorted(duplicates))
+        )
+
+
+def _validate_unique_confirms(nodes: List[Node]) -> None:
+    confirms = chain.from_iterable(node.confirms for node in nodes)
+    confirms = map(_get_transcode_compatible_name, confirms)
+    duplicates = [key for key, value in Counter(confirms).items() if value > 1]
+    if duplicates:
+        raise ConfirmNotUniqueError(
+            "{} datasets are confirmed by more than one node. Node "
+            "confirms must be unique.".format(sorted(duplicates))
         )
 
 

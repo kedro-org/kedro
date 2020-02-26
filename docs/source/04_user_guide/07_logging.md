@@ -1,6 +1,6 @@
 # Logging
 
-> *Note:* This documentation is based on `Kedro 0.15.5`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.6`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 Kedro uses, and facilitates the use of Python’s `logging` library, by providing a default logging configuration. This can be found in `conf/base/logging.yml` in every project generated using Kedro’s CLI `kedro new` command.
 
@@ -16,7 +16,6 @@ class ProjectContext(KedroContext):
     def _setup_logging(self) -> None:
         # Custom logging configuration here
         pass
-
 ```
 
 The configuration should comply with the guidelines from the `logging` library. Find more about it [here](https://docs.python.org/3/library/logging.html).
@@ -28,8 +27,8 @@ After configuring the logging using the example above, `kedro` will start emitti
 ```python
 import logging
 log = logging.getLogger(__name__)
-log.warning('Issue warning')
-log.info('Send information')
+log.warning("Issue warning")
+log.info("Send information")
 ```
 
 ## Logging for `anyconfig`

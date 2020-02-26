@@ -1,6 +1,6 @@
 # Working with Databricks
 
-> *Note:* This documentation is based on `Kedro 0.15.5`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.6`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 ## Databricks Connect (recommended)
 We recommend using [Databricks Connect](https://pypi.org/project/databricks-connect/) to easily execute your Kedro pipeline on a Databricks cluster.
@@ -32,6 +32,7 @@ Add your username and token to the environment variables of your running Databri
 
 ```python
 import os
+
 os.environ["GITHUB_USER"] = "YOUR_USERNAME"
 os.environ["GITHUB_TOKEN"] = "YOUR_TOKEN"
 ```
@@ -54,12 +55,13 @@ You'll need to add the `src` directory to path using:
 import sys
 import os.path
 
-sys.path.append(os.path.abspath("./src")
+sys.path.append(os.path.abspath("./src"))
 ```
 
 Then, import and execute the `run` module to run your pipeline:
 ```python
 import your_project.run as run
+
 run.run_package()
 ```
 

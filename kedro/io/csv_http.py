@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,7 +38,12 @@ import pandas as pd
 import requests
 from requests.auth import AuthBase
 
-from kedro.io.core import AbstractDataSet, DataSetError, DataSetNotFoundError
+from kedro.io.core import (
+    AbstractDataSet,
+    DataSetError,
+    DataSetNotFoundError,
+    deprecation_warning,
+)
 
 
 class CSVHTTPDataSet(AbstractDataSet):
@@ -77,6 +82,7 @@ class CSVHTTPDataSet(AbstractDataSet):
                 All defaults are preserved.
 
         """
+        deprecation_warning(self.__class__.__name__)
         super().__init__()
         self._fileurl = fileurl
         self._auth_backend = auth

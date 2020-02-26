@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@
 """Example code for the nodes in the example pipeline. This code is meant
 just for illustrating basic Kedro features.
 
-PLEASE DELETE THIS FILE ONCE YOU START WORKING ON YOUR OWN PROJECT!
+Delete this when you start working on your own Kedro project.
 """
 # pylint: disable=invalid-name
 
@@ -50,8 +50,8 @@ def train_model(
     """
     num_iter = parameters["example_num_train_iter"]
     lr = parameters["example_learning_rate"]
-    X = train_x.values
-    Y = train_y.values
+    X = train_x.to_numpy()
+    Y = train_y.to_numpy()
 
     # Add bias to the features
     bias = np.ones((X.shape[0], 1))
@@ -78,7 +78,7 @@ def train_model(
 def predict(model: np.ndarray, test_x: pd.DataFrame) -> np.ndarray:
     """Node for making predictions given a pre-trained model and a test set.
     """
-    X = test_x.values
+    X = test_x.to_numpy()
 
     # Add bias to the features
     bias = np.ones((X.shape[0], 1))
@@ -96,7 +96,7 @@ def report_accuracy(predictions: np.ndarray, test_y: pd.DataFrame) -> None:
     previous node. Notice that this function has no outputs, except logging.
     """
     # Get true class index
-    target = np.argmax(test_y.values, axis=1)
+    target = np.argmax(test_y.to_numpy(), axis=1)
     # Calculate accuracy of predictions
     accuracy = np.sum(predictions == target) / target.shape[0]
     # Log the accuracy of the model

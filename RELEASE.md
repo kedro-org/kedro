@@ -1,8 +1,140 @@
+# 0.15.6
+
+## Major features and improvements
+> _TL;DR_ We're launching [`kedro.extras`](https://github.com/quantumblacklabs/kedro/tree/master/extras), the new home for our revamped series of datasets, decorators and dataset transformers. The datasets in [`kedro.extras.datasets`](https://github.com/quantumblacklabs/kedro/tree/master/extras/datasets) use [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to access a variety of data stores including local file systems, network file systems, cloud object stores (including S3 and GCP), and Hadoop, read more about this [**here**](https://kedro.readthedocs.io/en/latest/04_user_guide/04_data_catalog.html#specifying-the-location-of-the-dataset). The change will allow [#178](https://github.com/quantumblacklabs/kedro/issues/178) to happen in the next major release of Kedro.
+
+An example of this new system can be seen below, loading the CSV `SparkDataSet` from S3:
+
+```yaml
+weather:
+  type: spark.SparkDataSet  # Observe the specified type, this  affects all datasets
+  filepath: s3a://your_bucket/data/01_raw/weather*  # filepath uses fsspec to indicate the file storage system
+  credentials: dev_s3
+  file_format: csv
+```
+
+You can also load data incrementally whenever it is dumped into a directory with the extension to [`PartionedDataSet`](https://kedro.readthedocs.io/en/latest/04_user_guide/08_advanced_io.html#partitioned-dataset), a feature that allows you to load a directory of files. The [`IncrementalDataSet`](https://kedro.readthedocs.io/en/stable/04_user_guide/08_advanced_io.html#incremental-loads-with-incrementaldataset) stores the information about the last processed partition in a `checkpoint`, read more about this feature [**here**](https://kedro.readthedocs.io/en/stable/04_user_guide/08_advanced_io.html#incremental-loads-with-incrementaldataset).
+
+### New features
+
+* Added `layer` attribute for datasets in `kedro.extras.datasets` to specify the name of a layer according to [data engineering convention](https://kedro.readthedocs.io/en/latest/06_resources/01_faq.html#what-is-data-engineering-convention), this feature will be passed to [`kedro-viz`](https://github.com/quantumblacklabs/kedro-viz) in future releases.
+* Enabled loading a particular version of a dataset in Jupyter Notebooks and iPython, using `catalog.load("dataset_name", version="<2019-12-13T15.08.09.255Z>")`.
+* Added property `run_id` on `ProjectContext`, used for versioning using the [`Journal`](https://kedro.readthedocs.io/en/stable/04_user_guide/13_journal.html). To customise your journal `run_id` you can override the private method `_get_run_id()`.
+* Added the ability to install all optional kedro dependencies via `pip install "kedro[all]"`.
+* Modified the `DataCatalog`'s load order for datasets, loading order is the following:
+  - `kedro.io`
+  - `kedro.extras.datasets`
+  - Import path, specified in `type`
+* Added an optional `copy_mode` flag to `CachedDataSet` and `MemoryDataSet` to specify (`deepcopy`, `copy` or `assign`) the copy mode to use when loading and saving.
+
+### New Datasets
+
+| Type                 | Description                                                                                                                                      | Location                            |
+|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------|
+| `ParquetDataSet`     | Handles parquet datasets using Dask                                                                                                              | `kedro.extras.datasets.dask`        |
+| `PickleDataSet`      | Work with Pickle files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem         | `kedro.extras.datasets.pickle`      |
+| `CSVDataSet`         | Work with CSV files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem            | `kedro.extras.datasets.pandas`      |
+| `TextDataSet`        | Work with text files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem           | `kedro.extras.datasets.pandas`      |
+| `ExcelDataSet`       | Work with Excel files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem          | `kedro.extras.datasets.pandas`      |
+| `HDFDataSet`         | Work with HDF using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem                  | `kedro.extras.datasets.pandas`      |
+| `YAMLDataSet`        | Work with YAML files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem           | `kedro.extras.datasets.yaml`        |
+| `MatplotlibWriter`   | Save with Matplotlib images using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem    | `kedro.extras.datasets.matplotlib`  |
+| `NetworkXDataSet`    | Work with NetworkX files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem       | `kedro.extras.datasets.networkx`    |
+| `BioSequenceDataSet` | Work with bio-sequence objects using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem | `kedro.extras.datasets.biosequence` |
+| `GBQTableDataSet`    | Work with Google BigQuery                                                                                                                        | `kedro.extras.datasets.pandas`      |
+| `FeatherDataSet`     | Work with feather files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem        | `kedro.extras.datasets.pandas`      |
+| `IncrementalDataSet` | Inherit from `PartitionedDataSet` and remembers the last processed partition                                                                     | `kedro.io`                          |
+
+### Files with a new location
+
+| Type                                                                                             | New Location                                 |
+|--------------------------------------------------------------------------------------------------|----------------------------------------------|
+| `JSONDataSet`                                                                                    | `kedro.extras.datasets.pandas`               |
+| `CSVBlobDataSet`                                                                                 | `kedro.extras.datasets.pandas`               |
+| `JSONBlobDataSet`                                                                                | `kedro.extras.datasets.pandas`               |
+| `SQLTableDataSet`                                                                                | `kedro.extras.datasets.pandas`               |
+| `SQLQueryDataSet`                                                                                | `kedro.extras.datasets.pandas`               |
+| `SparkDataSet`                                                                                   | `kedro.extras.datasets.spark`                |
+| `SparkHiveDataSet`                                                                               | `kedro.extras.datasets.spark`                |
+| `SparkJDBCDataSet`                                                                               | `kedro.extras.datasets.spark`                |
+| `kedro/contrib/decorators/retry.py`                                                              | `kedro/extras/decorators/retry_node.py`      |
+| `kedro/contrib/decorators/memory_profiler.py`                                                    | `kedro/extras/decorators/memory_profiler.py` |
+| `kedro/contrib/io/transformers/transformers.py`                                                  | `kedro/extras/transformers/time_profiler.py` |
+| `kedro/contrib/colors/logging/color_logger.py`                                                   | `kedro/extras/logging/color_logger.py`       |
+| `extras/ipython_loader.py`                                                                       | `tools/ipython/ipython_loader.py`            |
+| `kedro/contrib/io/cached/cached_dataset.py`                                                      | `kedro/io/cached_dataset.py`                 |
+| `kedro/contrib/io/catalog_with_default/data_catalog_with_default.py`                             | `kedro/io/data_catalog_with_default.py`      |
+| `kedro/contrib/config/templated_config.py`                                                       | `kedro/config/templated_config.py`           |
+
+## Upcoming deprecations
+
+| Category                  | Type                                                           |
+|---------------------------|----------------------------------------------------------------|
+| **Datasets**              | `BioSequenceLocalDataSet`                                      |
+|                           | `CSVGCSDataSet`                                                |
+|                           | `CSVHTTPDataSet`                                               |
+|                           | `CSVLocalDataSet`                                              |
+|                           | `CSVS3DataSet`                                                 |
+|                           | `ExcelLocalDataSet`                                            |
+|                           | `FeatherLocalDataSet`                                          |
+|                           | `JSONGCSDataSet`                                               |
+|                           | `JSONLocalDataSet`                                             |
+|                           | `HDFLocalDataSet`                                              |
+|                           | `HDFS3DataSet`                                                 |
+|                           | `kedro.contrib.io.cached.CachedDataSet`                        |
+|                           | `kedro.contrib.io.catalog_with_default.DataCatalogWithDefault` |
+|                           | `MatplotlibLocalWriter`                                        |
+|                           | `MatplotlibS3Writer`                                           |
+|                           | `NetworkXLocalDataSet`                                         |
+|                           | `ParquetGCSDataSet`                                            |
+|                           | `ParquetLocalDataSet`                                          |
+|                           | `ParquetS3DataSet`                                             |
+|                           | `PickleLocalDataSet`                                           |
+|                           | `PickleS3DataSet`                                              |
+|                           | `TextLocalDataSet`                                             |
+|                           | `YAMLLocalDataSet`                                             |
+| **Decorators**            | `kedro.contrib.decorators.memory_profiler`                     |
+|                           | `kedro.contrib.decorators.retry`                               |
+|                           | `kedro.contrib.decorators.pyspark.spark_to_pandas`             |
+|                           | `kedro.contrib.decorators.pyspark.pandas_to_spark`             |
+| **Transformers**          | `kedro.contrib.io.transformers.transformers`                   |
+| **Configuration Loaders** | `kedro.contrib.config.TemplatedConfigLoader`                   |
+
+## Bug fixes and other changes
+* Added the option to set/overwrite params in `config.yaml` using YAML dict style instead of string CLI formatting only.
+* Kedro CLI arguments `--node` and `--tag` support comma-separated values, alternative methods will be deprecated in future releases.
+* Fixed a bug in the `invalidate_cache` method of `ParquetGCSDataSet` and `CSVGCSDataSet`.
+* `--load-version` now won't break if version value contains a colon.
+* Enabled running `node`s with duplicate inputs.
+* Improved error message when empty credentials are passed into `SparkJDBCDataSet`.
+* Fixed bug that caused an empty project to fail unexpectedly with ImportError in `template/.../pipeline.py`.
+* Fixed bug related to saving dataframe with categorical variables in table mode using `HDFS3DataSet`.
+* Fixed bug that caused unexpected behavior when using `from_nodes` and `to_nodes` in pipelines using transcoding.
+* Credentials nested in the dataset config are now also resolved correctly.
+* Bumped minimum required pandas version to 0.24.0 to make use of `pandas.DataFrame.to_numpy` (recommended alternative to `pandas.DataFrame.values`).
+* Docs improvements.
+* `Pipeline.transform` skips modifying node inputs/outputs containing `params:` or `parameters` keywords.
+* Support for `dataset_credentials` key in the credentials for `PartitionedDataSet` is now deprecated. The dataset credentials should be specified explicitly inside the dataset config.
+* Datasets can have a new `confirm` function which is called after a successful node function execution if the node contains `confirms` argument with such dataset name.
+* Make the resume prompt on pipeline run failure use `--from-nodes` instead of `--from-inputs` to avoid unnecessarily re-running nodes that had already executed.
+* When closed, Jupyter notebook kernels are automatically terminated after 30 seconds of inactivity by default. Use `--idle-timeout` option to update it.
+* Added `kedro-viz` to the Kedro project template `requirements.txt` file.
+* Removed the `results` and `references` folder from the project template.
+* Updated contribution process in `CONTRIBUTING.md`.
+
+## Breaking changes to the API
+* Existing `MatplotlibWriter` dataset in `contrib` was renamed to `MatplotlibLocalWriter`.
+* `kedro/contrib/io/matplotlib/matplotlib_writer.py` was renamed to `kedro/contrib/io/matplotlib/matplotlib_local_writer.py`.
+* `kedro.contrib.io.bioinformatics.sequence_dataset.py` was renamed to `kedro.contrib.io.bioinformatics.biosequence_local_dataset.py`.
+
+## Thanks for supporting contributions
+[Andrii Ivaniuk](https://github.com/andrii-ivaniuk), [Jonas Kemper](https://github.com/jonasrk), [Yuhao Zhu](https://github.com/yhzqb), [Balazs Konig](https://github.com/BalazsKonigQB), [Pedro Abreu](https://github.com/PedroAbreuQB), [Tam-Sanh Nguyen](https://github.com/tamsanh), [Peter Zhao](https://github.com/zxpeter), [Deepyaman Datta](https://github.com/deepyaman), [Florian Roessler](https://github.com/fdroessler/), [Miguel Rodriguez Gutierrez](https://github.com/MigQ2)
+
 # Release 0.15.5
 
 ## Major features and improvements
 * New CLI commands and command flags:
-  - Load mulitple `kedro run` CLI flags from a configuration file with the `--config` flag (e.g. `kedro run --config run_config.yml`)
+  - Load multiple `kedro run` CLI flags from a configuration file with the `--config` flag (e.g. `kedro run --config run_config.yml`)
   - Run parametrised pipeline runs with the `--params` flag (e.g. `kedro run --params param1:value1,param2:value2`).
   - Lint your project code using the `kedro lint` command, your project is linted with [`black`](https://github.com/psf/black) (Python 3.6+), [`flake8`](https://gitlab.com/pycqa/flake8) and [`isort`](https://github.com/timothycrosley/isort).
 * Load specific environments with Jupyter notebooks using `KEDRO_ENV` which will globally set `run`, `jupyter notebook` and `jupyter lab` commands using environment variables.
@@ -41,7 +173,7 @@
 * `kedro jupyter` now gives the default kernel a sensible name.
 * `Pipeline.name` has been deprecated in favour of `Pipeline.tags`.
 * Reuse pipelines within a Kedro project using `Pipeline.transform`, it simplifies dataset and node renaming.
-* Added Jupyter Notebook line magic (`%run_viz`) to run `kedro viz` in a Notebook cell (requires [`kedro-viz`](https://github.com/quantumblacklabs/kedro-viz) version `3.0.0` or later).
+* Added Jupyter Notebook line magic (`%run_viz`) to run `kedro viz` in a Notebook cell (requires [`kedro-viz`](https://github.com/quantumblacklabs/kedro-viz) version 3.0.0 or later).
 * Added the following datasets:
   - `NetworkXLocalDataSet` in `kedro.contrib.io.networkx` to load and save local graphs (JSON format) via NetworkX. (by [@josephhaaga](https://github.com/josephhaaga))
   - `SparkHiveDataSet` in `kedro.contrib.io.pyspark.SparkHiveDataSet` allowing usage of Spark and insert/upsert on non-transactional Hive tables.
@@ -100,7 +232,7 @@
 ## Major features and improvements
 * Extended `versioning` support to cover the tracking of environment setup, code and datasets.
 * Added the following datasets:
-  - `FeatherLocalDataSet` in `contrib` for usage with Pandas. (by [@mdomarsaleem](https://github.com/mdomarsaleem))
+  - `FeatherLocalDataSet` in `contrib` for usage with pandas. (by [@mdomarsaleem](https://github.com/mdomarsaleem))
 * Added `get_last_load_version` and `get_last_save_version` to `AbstractVersionedDataSet`.
 * Implemented `__call__` method on `Node` to allow for users to execute `my_node(input1=1, input2=2)` as an alternative to `my_node.run(dict(input1=1, input2=2))`.
 * Added new `--from-inputs` run argument.
@@ -134,7 +266,7 @@
 * Added the following datasets:
   -  `CSVHTTPDataSet` to load CSV using HTTP(s) links.
   - `JSONBlobDataSet` to load json (-delimited) files from Azure Blob Storage.
-  - `ParquetS3DataSet` in `contrib` for usage with Pandas. (by [@mmchougule](https://github.com/mmchougule))
+  - `ParquetS3DataSet` in `contrib` for usage with pandas. (by [@mmchougule](https://github.com/mmchougule))
   - `CachedDataSet` in `contrib` which will cache data in memory to avoid io/network operations. It will clear the cache once a dataset is no longer needed by a pipeline. (by [@tsanikgr](https://github.com/tsanikgr))
   - `YAMLLocalDataSet` in `contrib` to load and save local YAML files. (by [@Minyus](https://github.com/Minyus))
 

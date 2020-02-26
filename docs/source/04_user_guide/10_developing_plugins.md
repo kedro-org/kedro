@@ -1,6 +1,6 @@
 # Developing Kedro plugins
 
-> *Note:* This documentation is based on `Kedro 0.15.5`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.6`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 The functionality of Kedro can be extended using its `plugin` framework, which is designed to reduce the complexity involved in creating new features for Kedro while allowing you to inject additional commands into the CLI. Plugins are developed as separate Python packages that exist outside of any Kedro project.
 
@@ -84,7 +84,7 @@ def to_json():
 And have the following entry_points config in `setup.py`:
 ```python
 entry_points={
-    'kedro.project_commands': ['kedrojson = kedrojson.plugin:commands'],
+    "kedro.project_commands": ["kedrojson = kedrojson.plugin:commands"],
 }
 ```
 
@@ -98,3 +98,7 @@ kedro to_json
 - [Kedro-Docker](https://github.com/quantumblacklabs/kedro-docker), a tool for packaging and shipping Kedro projects within containers
 - [Kedro-Airflow](https://github.com/quantumblacklabs/kedro-airflow), a tool for converting your Kedro project into an Airflow project
 - [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz), a tool for visualising your Kedro pipelines
+
+## Community-developed plugins
+
+- [Kedro-Pandas-Profiling](https://github.com/BrickFrog/kedro-pandas-profiling) by [Justin Malloy](https://github.com/BrickFrog), a simple plugin that uses [Pandas-Profiling](https://github.com/pandas-profiling/pandas-profiling) to profile datasets in the Kedro catalog

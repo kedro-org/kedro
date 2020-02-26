@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ used as ``Node`` decorators. See ``kedro.pipeline.node.decorate``
 """
 from functools import wraps
 from typing import Callable
+from warnings import warn
 
 import pandas as pd
 
@@ -42,6 +43,12 @@ except ImportError as error:
         "{}: `pip install kedro[pyspark]` to get the required "
         "dependencies".format(error)
     )
+
+warn(
+    "`kedro.contrib.decorators.pyspark` will be deprecated in future releases. "
+    "Please refer to Transcoding in the Kedro documentation for an alternative method.",
+    DeprecationWarning,
+)
 
 
 def pandas_to_spark(spark: SparkSession) -> Callable:

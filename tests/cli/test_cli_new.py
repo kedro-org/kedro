@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,8 +39,8 @@ import yaml
 from kedro import __version__ as version
 from kedro.cli.cli import TEMPLATE_PATH, _fix_user_path, _get_default_config, cli
 
-FILES_IN_TEMPLATE_NO_EXAMPLE = 38
-FILES_IN_TEMPLATE_WITH_EXAMPLE = 47
+FILES_IN_TEMPLATE_NO_EXAMPLE = 36
+FILES_IN_TEMPLATE_WITH_EXAMPLE = 45
 
 
 # pylint: disable=too-many-arguments

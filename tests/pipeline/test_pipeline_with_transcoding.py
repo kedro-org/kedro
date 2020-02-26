@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -273,6 +273,32 @@ class TestComplexPipelineWithTranscoding:
                       +---+
 
     """
+
+    # pylint: disable=too-many-public-methods
+
+    def test_from_nodes_transcoded_names(self, complex_pipeline):
+        """New pipelines contain all nodes that depend on node8 downstream."""
+        from_nodes_pipeline = complex_pipeline.from_nodes("node8")
+        nodes = {node.name for node in from_nodes_pipeline.nodes}
+
+        assert nodes == {
+            "node1",
+            "node2",
+            "node3",
+            "node4",
+            "node5",
+            "node6",
+            "node7",
+            "node8",
+            "node10",
+        }
+
+    def test_to_nodes_transcoded_names(self, complex_pipeline):
+        """New pipelines contain all nodes that depend on node7 upstream."""
+        to_nodes_pipeline = complex_pipeline.to_nodes("node7")
+        nodes = {node.name for node in to_nodes_pipeline.nodes}
+
+        assert nodes == {"node7", "node8", "node9"}
 
     def test_only_nodes_with_inputs(self, complex_pipeline):
         p = complex_pipeline.only_nodes_with_inputs("H@node2")

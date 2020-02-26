@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -102,6 +102,18 @@ class TestValidNode:
         with pytest.raises(TypeError, match=pattern):
             dummy_node("in1", input2="in2")
 
+    def test_run_with_duplicate_inputs_list(self):
+        dummy_node = node(func=biconcat, inputs=["input1", "input1"], outputs="output")
+        actual = dummy_node.run(dict(input1="in1"))
+        assert actual == {"output": "in1in1"}
+
+    def test_run_with_duplicate_inputs_dict(self):
+        dummy_node = node(
+            func=biconcat, inputs={"input1": "in1", "input2": "in1"}, outputs="output"
+        )
+        actual = dummy_node.run(dict(in1="hello"))
+        assert actual == {"output": "hellohello"}
+
     def test_no_input(self):
         assert "constant_output(None) -> [output1]" in str(
             node(constant_output, None, "output1")
@@ -170,6 +182,20 @@ class TestValidNode:
             ["output2", "output1", "last node"],
         )
         assert dummy_node.outputs == ["output2", "output1", "last node"]
+
+    @pytest.mark.parametrize(
+        "confirms_arg,expected",
+        [
+            (None, []),
+            ([], []),
+            ("foo", ["foo"]),
+            (["foo"], ["foo"]),
+            (["foo", "bar"], ["foo", "bar"]),
+        ],
+    )
+    def test_confirms(self, confirms_arg, expected):
+        dummy_node = node(identity, "input", None, confirms=confirms_arg)
+        assert dummy_node.confirms == expected
 
 
 class TestNodeComparisons:

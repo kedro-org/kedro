@@ -1,127 +1,50 @@
 # Here you can define all your data sets by using simple YAML syntax.
 #
-# Documentation for this file format can be found in the kedro docs under `Accessing data`
-# You can access the kedro docs by running `kedro docs`
-{% if cookiecutter.include_example == "True" %}
+# Documentation for this file format can be found in "The Data Catalog"
+# Link: https://kedro.readthedocs.io/en/stable/04_user_guide/04_data_catalog.html
+#
+# We support interacting with a variety of data stores including local file systems, cloud, network and HDFS
 #
 # An example data set definition can look as follows:
 #
-#cars.csv:
-#  type: CSVLocalDataSet # https://kedro.readthedocs.io/en/latest/kedro.io.CSVLocalDataSet.html
-#  filepath: data/01_raw/company/cars.csv
-#  load_args: # https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_csv.html
-#    sep: ','
-#    skiprows: 0
-#    # skipfooter: 1
-#    # engine: python  # Some of the features including skipfooter is only available in python engine
-#    engine: c  # This is a faster option
-#    na_values: ['#NA', 'NA']
-#  save_args: # https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_csv.html
-#    index: False
-#    date_format: '%Y-%m-%d %H:%M'
-#    decimal: '.'
+#bikes:
+#  type: pandas.CSVDataSet
+#  filepath: "data/01_raw/bikes.csv"
 #
-#cars.csv.s3:
-#  type: CSVS3DataSet # https://kedro.readthedocs.io/en/latest/kedro.io.CSVS3DataSet.html
-#  filepath: data/02_intermediate/company/cars.csv
-#  bucket_name: my_bucket
-#  credentials: dev_s3
-#  load_args: # https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_csv.html
-#    sep: ','
-#    skiprows: 5
-#    skipfooter: 1
-#    na_values: ['#NA', 'NA']
-#    index: False
-#  save_args: # https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_csv.html
-#    index: False
-#    date_format: '%Y-%m-%d %H:%M'
-#    decimal: '.'
-#
-#cars.hdf:
-#  type: HDFLocalDataSet  # https://kedro.readthedocs.io/en/latest/kedro.io.HDFLocalDataSet.html
-#  filepath: data/02_intermediate/cars.hdf
-#  key: name
-#  load_args:  # https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_hdf.html
-#    columns: ['engine', 'name']
-#  save_args:  # https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_hdf.html
-#    mode: 'w'  # Overwrite even when the file already exists
-#    # mode: 'a'  # Appends or creates a file
-#    # mode: '+r'  # Appends an existing file
-#    dropna: True
-#
-#cars.hdf.s3:
-#  type: HDFS3DataSet  # https://kedro.readthedocs.io/en/latest/kedro.io.HDFS3DataSet.html
-#  filepath: data/02_intermediate/cars.hdf
-#  bucket_name: my_bucket
-#  key: hdf_key
+#weather:
+#  type: spark.SparkDataSet
+#  filepath: s3a://your_bucket/data/01_raw/weather*
+#  file_format: csv
 #  credentials: dev_s3
 #  load_args:
+#    header: True
+#    inferSchema: True
 #  save_args:
+#    sep: '|'
+#    header: True
 #
-#cars.parquet:
-#  type: ParquetLocalDataSet  # https://kedro.readthedocs.io/en/latest/kedro.io.ParquetLocalDataSet.html
-#  filepath: data/02_intermediate/cars.parquet
+#scooters:
+#  type: pandas.SQLTableDataSet
+#  credentials: scooters_credentials
+#  table_name: scooters
 #  load_args:
-#    columns: ['name', 'gear','disp', 'wt']
-#  save_args:
-#     compression: 'GZIP'
-#
-#cars.sql:
-#  type: SQLTableDataSet  # https://kedro.readthedocs.io/en/latest/kedro.io.SQLTableDataSet.html
-#  credentials: dev_postgres
-#  table_name: cars
-#  load_args:  # https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_sql_table.html
 #    index_col: ['name']
 #    columns: ['name', 'gear']
-#  save_args:  # https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_sql.html
+#  save_args:
 #    if_exists: 'replace'
 #    # if_exists: 'fail'
 #    # if_exists: 'append'
 #
-#cars.sql.query:
-#  type: SQLQueryDataSet  # https://kedro.readthedocs.io/en/latest/kedro.io.SQLQueryDataSet.html
-#  credentials: dev_postgres
-#  sql: 'select * from cars where gear=4'
-#  load_args:  # https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_sql_query.html
-#    index_col: ['name']
+# The Data Catalog supports being able to reference the same file using two different DataSet implementations
+# (transcoding), templating and a way to reuse arguments that are frequently repeated. See more here:
+# https://kedro.readthedocs.io/en/stable/04_user_guide/04_data_catalog.html
+{% if cookiecutter.include_example == "True" %}
 #
-#car_model.pkl:
-#  type: PickleLocalDataSet
-#  filepath: data/06_models/car_model.pkl
-#  backend: pickle
-#
-## Templating and reuse
-#
-#_csv: &csv
-#  type: kedro.contrib.io.pyspark.spark_data_set.SparkDataSet
-#  file_format: 'csv'
-#  load_args:
-#    header: True
-#    inferSchema: False
-#
-#raw_banana_trials:
-#  <<: *csv
-#  filepath: "s3a://supermarket/01_raw/Banana/trials.csv"
-#
-## Transcoding
-#
-#cars@parquet:
-#  type: ParquetLocalDataSet  # https://kedro.readthedocs.io/en/latest/kedro.io.ParquetLocalDataSet.html
-#  filepath: data/02_intermediate/cars.parquet
-#  load_args:
-#    columns: ['name', 'gear','disp', 'wt']
-#  save_args:
-#     compression: 'GZIP'
-#
-#cars@spark:
-#  type: kedro.contrib.io.pyspark.SparkDataSet  # https://kedro.readthedocs.io/en/latest/kedro.contrib.io.pyspark.SparkDataSet.html
-#  filepath: data/02_intermediate/cars.parquet
-
-
-
-# This is a data set used by the example pipeline provided with the projected
+# This is a data set used by the "Hello World" example pipeline provided with the project
 # template. Please feel free to remove it once you remove the example pipeline.
+
 example_iris_data:
   type: CSVLocalDataSet
   filepath: data/01_raw/iris.csv
+
 {% endif %}

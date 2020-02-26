@@ -1,6 +1,6 @@
 # Journal
 
-> *Note:* This documentation is based on `Kedro 0.15.5`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.6`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 ## Overview
 Journal in Kedro allows you to save the history of pipeline. This functionality helps you reproduce results and gives you an ability to investigate failures in your workflow.
@@ -16,7 +16,7 @@ A context journal record captures all the necessary information to reproduce the
     "run_id": "2019-10-01T09.15.57.289Z",
     "project_path": "<path-to-project>/src/kedro-tutorial",
     "env": "local",
-    "kedro_version": "0.15.5",
+    "kedro_version": "0.15.6",
     "tags": [],
     "from_nodes": [],
     "to_nodes": [],
@@ -36,7 +36,7 @@ You will observe `run_id`, a unique timestamp used to identify a pipeline run, i
 
 ### Dataset journal record
 
-A dataset journal record tracks versioned dataset `load` and `save` operations, it is tied to the dataset name and `run_id`. The `version` attribute stores the exact timestamp used by the `load` or `save` operation. Dataset journal currently records `load` and `save` operations only for the datasets with enabled versioning. Please see [Versioning section](./07_advanced_io.md#versioning) for more information about data versioning feature and the list of currently supported datasets.
+A dataset journal record tracks versioned dataset `load` and `save` operations, it is tied to the dataset name and `run_id`. The `version` attribute stores the exact timestamp used by the `load` or `save` operation. Dataset journal currently records `load` and `save` operations only for the datasets with enabled versioning. Please see [Versioning section](./08_advanced_io.md#versioning) for more information about data versioning feature and the list of currently supported datasets.
 
 The dataset journal record has the following JSON format:
 

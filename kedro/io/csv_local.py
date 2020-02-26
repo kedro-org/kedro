@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,7 +36,12 @@ from typing import Any, Dict
 
 import pandas as pd
 
-from kedro.io.core import AbstractVersionedDataSet, Version, is_remote_path
+from kedro.io.core import (
+    AbstractVersionedDataSet,
+    Version,
+    deprecation_warning,
+    is_remote_path,
+)
 
 
 class CSVLocalDataSet(AbstractVersionedDataSet):
@@ -93,6 +98,7 @@ class CSVLocalDataSet(AbstractVersionedDataSet):
         Raises:
             ValueError: If 'filepath' looks like a remote path.
         """
+        deprecation_warning(self.__class__.__name__)
         super().__init__(Path(filepath), version)
 
         if is_remote_path(filepath):

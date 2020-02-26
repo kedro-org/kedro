@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ it when working with Jupyter Notebooks and IPython sessions.
 import contextlib
 import pathlib
 import typing
+from warnings import warn
 
 
 def locate_ipython_startup_dir(
@@ -92,6 +93,7 @@ def run_startup_scripts(startup_dir: pathlib.Path):
         startup_dir: Path to IPython startup directory.
 
     """
+    # pylint: disable=import-outside-toplevel
     import logging
     from sys import stdout
 
@@ -121,6 +123,11 @@ def run_startup_scripts(startup_dir: pathlib.Path):
 
 def main():
     """Locate IPython startup directory and run all Python scripts in it."""
+    warn(
+        "This script will be deprecated in future releases. Please refer "
+        "to replacement script in kedro/extras/ipython/.",
+        DeprecationWarning,
+    )
     startup_dir = locate_ipython_startup_dir()
     if startup_dir:
         run_startup_scripts(startup_dir)

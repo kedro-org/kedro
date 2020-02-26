@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,5 +29,5 @@
 
 """``AbstractDataSet`` implementation to save matplotlib objects as image files."""
 
+from .matplotlib_local_writer import MatplotlibLocalWriter  # NOQA
 from .matplotlib_s3_writer import MatplotlibS3Writer  # NOQA
-from .matplotlib_writer import MatplotlibWriter  # NOQA

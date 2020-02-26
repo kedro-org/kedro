@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,7 +37,12 @@ import gcsfs
 import pandas as pd
 
 from kedro.contrib.io import DefaultArgumentsMixIn
-from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
+from kedro.io.core import (
+    AbstractVersionedDataSet,
+    DataSetError,
+    Version,
+    deprecation_warning,
+)
 
 
 class JSONGCSDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
@@ -105,10 +110,11 @@ class JSONGCSDataSet(DefaultArgumentsMixIn, AbstractVersionedDataSet):
             gcsfs_args: Extra arguments to pass into ``GCSFileSystem``. See
                 https://gcsfs.readthedocs.io/en/latest/api.html#gcsfs.core.GCSFileSystem
         """
+        deprecation_warning(self.__class__.__name__)
         _credentials = deepcopy(credentials) or {}
         _gcsfs_args = deepcopy(gcsfs_args) or {}
         _gcs = gcsfs.GCSFileSystem(project=project, token=_credentials, **_gcsfs_args)
-        path = _gcs._strip_protocol(filepath)  # pylint: disable=protected-access
+        path = _gcs._strip_protocol(filepath)
         path = PurePosixPath("{}/{}".format(bucket_name, path) if bucket_name else path)
 
         super().__init__(

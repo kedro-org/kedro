@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,14 +26,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import gc
-import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
 import pytest
 from psutil import Popen
 from pyspark import SparkContext
-from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 
 from kedro.contrib.io.pyspark.spark_hive_data_set import SparkHiveDataSet
@@ -44,26 +43,30 @@ TESTSPARKDIR = "test_spark_dir"
 
 
 # clean up pyspark after the test module finishes
-@pytest.fixture(scope="module", autouse=True)
+@pytest.fixture(scope="module")
 def spark_hive_session(replace_spark_default_getorcreate):
     SparkSession.builder.getOrCreate = replace_spark_default_getorcreate
-    default_cwd = os.getcwd()
     with TemporaryDirectory(TESTSPARKDIR) as tmpdir:
-        os.chdir(tmpdir)
         spark = (
             SparkSession.builder.config(
                 "spark.local.dir", (Path(tmpdir) / "spark_local").absolute()
             )
             .config("spark.sql.warehouse.dir", (Path(tmpdir) / "warehouse").absolute())
+            .config(
+                "javax.jdo.option.ConnectionURL",
+                "jdbc:derby:;databaseName={metastore_db_path};create=true".format(
+                    metastore_db_path=(Path(tmpdir) / "warehouse_db").absolute()
+                ),
+            )
             .enableHiveSupport()
             .getOrCreate()
         )
-        spark.sql("create database default_1")
-        spark.sql("create database default_2")
-        _write_hive(spark, _generate_spark_df_one(), "default_1", "table_1")
         yield spark
+
+        # This fixture should be a dependency of other fixtures dealing with spark hive data
+        # in this module so that it always exits last and stops the spark session
+        # after tests are finished.
         spark.stop()
-        os.chdir(default_cwd)
 
     SparkSession.builder.getOrCreate = UseTheSparkSessionFixtureOrMock
 
@@ -82,6 +85,29 @@ def spark_hive_session(replace_spark_default_getorcreate):
             pass
 
 
+@pytest.fixture(scope="module", autouse=True)
+def spark_test_databases(spark_hive_session):
+    """ Setup spark test databases for all tests in this module
+    """
+    dataset = _generate_spark_df_one()
+    dataset.createOrReplaceTempView("tmp")
+    databases = ["default_1", "default_2"]
+
+    # Setup the databases and test table before testing
+    for database in databases:
+        spark_hive_session.sql("create database {database}".format(database=database))
+    spark_hive_session.sql("use default_1")
+    spark_hive_session.sql("create table table_1 as select * from tmp")
+
+    yield spark_hive_session
+
+    # Drop the databases after testing
+    for database in databases:
+        spark_hive_session.sql(
+            "drop database {database} cascade".format(database=database)
+        )
+
+
 def assert_df_equal(expected, result):
     def indexRDD(data_frame):
         return data_frame.rdd.zipWithIndex().map(lambda x: (x[1], x[0]))
@@ -95,12 +121,6 @@ def assert_df_equal(expected, result):
         .take(1)
         == []
     )
-
-
-def _write_hive(spark_session: SparkSession, dataset: DataFrame, database, table):
-    dataset.createOrReplaceTempView("tmp")
-    spark_session.sql("use " + database)
-    spark_session.sql("create table {table} as select * from tmp".format(table=table))
 
 
 def _generate_spark_df_one():
@@ -138,7 +158,7 @@ def _generate_spark_df_upsert_expected():
 
 class TestSparkHiveDataSet:
     def test_cant_pickle(self):
-        import pickle
+        import pickle  # pylint: disable=import-outside-toplevel
 
         with pytest.raises(pickle.PicklingError):
             pickle.dumps(

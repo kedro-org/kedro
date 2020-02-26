@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -43,6 +43,13 @@ def spark_jdbc_args():
 def spark_jdbc_args_credentials(spark_jdbc_args):
     args = spark_jdbc_args
     args.update({"credentials": {"user": "dummy_user", "password": "dummy_pw"}})
+    return args
+
+
+@pytest.fixture
+def spark_jdbc_args_credentials_with_empty_password(spark_jdbc_args):
+    args = spark_jdbc_args
+    args.update({"credentials": {"user": "dummy_user", "password": None}})
     return args
 
 
@@ -100,6 +107,12 @@ def test_save_args(spark_jdbc_args_save_load):
     data.write.jdbc.assert_called_with(
         "dummy_url", "dummy_table", properties={"driver": "dummy_driver"}
     )
+
+
+def test_except_bad_credentials(spark_jdbc_args_credentials_with_empty_password):
+    pattern = r"Credential property `password` cannot be empty(.+)"
+    with pytest.raises(DataSetError, match=pattern):
+        mock_save(spark_jdbc_args_credentials_with_empty_password)
 
 
 @mock.patch("kedro.contrib.io.pyspark.spark_jdbc.SparkSession.builder.getOrCreate")

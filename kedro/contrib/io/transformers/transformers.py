@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,8 +31,15 @@
 import logging
 import time
 from typing import Any, Callable
+from warnings import warn
 
 from kedro.io import AbstractTransformer
+
+warn(
+    "`kedro.contrib.io.transformers.transformers` will be deprecated in future releases. "
+    "Please refer to replacement in kedro.extras.transformers.time_profiler",
+    DeprecationWarning,
+)
 
 
 class ProfileTimeTransformer(AbstractTransformer):

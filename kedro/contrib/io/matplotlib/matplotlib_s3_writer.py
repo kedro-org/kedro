@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ from matplotlib.pyplot import figure
 from s3fs import S3FileSystem
 
 from kedro.io import AbstractDataSet, DataSetError
+from kedro.io.core import deprecation_warning
 
 
 class MatplotlibS3Writer(AbstractDataSet):
@@ -101,7 +102,7 @@ class MatplotlibS3Writer(AbstractDataSet):
             save_args: Save args passed to `plt.savefig`. See
                 https://matplotlib.org/api/_as_gen/matplotlib.pyplot.savefig.html
         """
-
+        deprecation_warning(self.__class__.__name__)
         _credentials = copy.deepcopy(credentials) or {}
 
         self._s3fs_args = copy.deepcopy(s3fs_args) or {}

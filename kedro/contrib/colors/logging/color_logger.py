@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@
 
 
 import logging
+from warnings import warn
 
 import click
 
@@ -83,6 +84,11 @@ class ColorHandler(logging.StreamHandler):
     """
 
     def __init__(self, stream=None, colors=None):
+        warn(
+            "ColorHandler will be deprecated in future releases. Please refer "
+            "to replacement logging in kedro.extras.logging.",
+            DeprecationWarning,
+        )
         logging.StreamHandler.__init__(self, stream)
         colors = colors or {}
         self.colors = {

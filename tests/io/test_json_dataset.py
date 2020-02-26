@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,8 +30,10 @@ from pathlib import PurePosixPath
 
 import pandas as pd
 import pytest
+from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
+from pandas.testing import assert_frame_equal
 from s3fs.core import S3FileSystem
 
 from kedro.io import DataSetError, JSONDataSet
@@ -75,7 +77,7 @@ class TestJSONDataSet:
         """Test saving and reloading the data set."""
         json_data_set.save(dummy_dataframe)
         reloaded = json_data_set.load()
-        assert dummy_dataframe.equals(reloaded)
+        assert_frame_equal(dummy_dataframe, reloaded)
 
     def test_exists(self, json_data_set, dummy_dataframe):
         """Test `exists` method invocation for both existing and
@@ -110,17 +112,23 @@ class TestJSONDataSet:
         "filepath,instance_type",
         [
             ("s3://bucket/file.json", S3FileSystem),
+            ("file:///tmp/test.json", LocalFileSystem),
             ("/tmp/test.json", LocalFileSystem),
             ("gcs://bucket/file.json", GCSFileSystem),
+            ("https://example.com/file.json", HTTPFileSystem),
         ],
     )
     def test_protocol_usage(self, filepath, instance_type):
         data_set = JSONDataSet(filepath=filepath)
         assert isinstance(data_set._fs, instance_type)
-        assert str(data_set._filepath) == data_set._fs._strip_protocol(filepath)
 
-    def test_filepath(self):
-        data_set = JSONDataSet(filepath="/tmp/test.json")
+        # _strip_protocol() doesn't strip http(s) protocol
+        if data_set._protocol == "https":
+            path = filepath.split("://")[-1]
+        else:
+            path = data_set._fs._strip_protocol(filepath)
+
+        assert str(data_set._filepath) == path
         assert isinstance(data_set._filepath, PurePosixPath)
 
     def test_catalog_release(self, mocker):
@@ -158,7 +166,7 @@ class TestJSONDataSetVersioned:
         the versioned data set."""
         versioned_json_data_set.save(dummy_dataframe)
         reloaded_df = versioned_json_data_set.load()
-        assert dummy_dataframe.equals(reloaded_df)
+        assert_frame_equal(dummy_dataframe, reloaded_df)
 
     def test_no_versions(self, versioned_json_data_set):
         """Check the error if no versions are available for load."""
@@ -200,3 +208,11 @@ class TestJSONDataSetVersioned:
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_json_data_set.save(dummy_dataframe)
+
+    def test_http_filesystem_no_versioning(self):
+        pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
+
+        with pytest.raises(DataSetError, match=pattern):
+            JSONDataSet(
+                filepath="https://example.com/file.json", version=Version(None, None)
+            )

@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,31 +25,25 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Pipeline construction."""
+
+"""Construction of the master pipeline.
+"""
 
 from typing import Dict
-
 from kedro.pipeline import Pipeline
-from {{ cookiecutter.python_package }}.pipelines import data_engineering as de
-from {{ cookiecutter.python_package }}.pipelines import data_science as ds
 
 {% if cookiecutter.include_example == "True" %}
-{% endif %}
-# Here you can define your data-driven pipeline by importing your functions
-# and adding them to the pipeline as follows:
-#
-# from nodes.data_wrangling import clean_data, compute_features
-#
-# pipeline = Pipeline([
-#     node(clean_data, 'customers', 'prepared_customers'),
-#     node(compute_features, 'prepared_customers', ['X_train', 'Y_train'])
-# ])
-#
-# Once you have your pipeline defined, you can run it from the root of your
-# project by calling:
-#
-# $ kedro run
 
+###########################################################################
+# Here you can find an example pipeline, made of two modular pipelines.
+#
+# Delete this when you start working on your own Kedro project as
+# well as pipelines/data_science AND pipelines/data_engineering
+# -------------------------------------------------------------------------
+
+from {{ cookiecutter.python_package }}.pipelines import data_engineering as de
+from {{ cookiecutter.python_package }}.pipelines import data_science as ds
+{% endif %}
 
 def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
     """Create the project's pipeline.
@@ -62,17 +56,13 @@ def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
 
     """
 {% if cookiecutter.include_example == "True" %}
-    ###########################################################################
-    # Here you can find an example pipeline, made of two modular pipelines.
-    #
-    # PLEASE DELETE THIS PIPELINE ONCE YOU START WORKING ON YOUR OWN PROJECT AS
-    # WELL AS pipelines/data_science AND pipelines/data_engineering
-    # -------------------------------------------------------------------------
+
     data_engineering_pipeline = de.create_pipeline()
     data_science_pipeline = ds.create_pipeline()
 
     return {
         "de": data_engineering_pipeline,
+        "ds": data_science_pipeline,
         "__default__": data_engineering_pipeline + data_science_pipeline,
     }
 {% else %}

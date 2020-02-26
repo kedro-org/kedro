@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,3 +33,4 @@ configuration from different file formats.
 
 from .config import ConfigLoader  # NOQA
 from .config import MissingConfigException  # NOQA
+from .templated_config import TemplatedConfigLoader  # NOQA

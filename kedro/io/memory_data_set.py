@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -64,35 +64,32 @@ class MemoryDataSet(AbstractDataSet):
 
     """
 
-    def __init__(self, data: Any = _EMPTY):
+    def __init__(self, data: Any = _EMPTY, copy_mode: str = None):
         """Creates a new instance of ``MemoryDataSet`` pointing to the
         provided Python object.
 
         Args:
             data: Python object containing the data.
+            copy_mode: The copy mode used to copy the data. Possible
+                values are: "deepcopy", "copy" and "assign". If not
+                provided, it is inferred based on the data type.
         """
         self._data = _EMPTY
+        self._copy_mode = copy_mode
         if data is not _EMPTY:
             self._save(data)
 
     def _load(self) -> Any:
         if self._data is _EMPTY:
             raise DataSetError("Data for MemoryDataSet has not been saved yet.")
-        if isinstance(self._data, (pd.DataFrame, np.ndarray)):
-            data = self._data.copy()
-        elif type(self._data).__name__ == "DataFrame":
-            data = self._data
-        else:
-            data = copy.deepcopy(self._data)
+
+        copy_mode = self._copy_mode or _infer_copy_mode(self._data)
+        data = _copy_with_mode(self._data, copy_mode=copy_mode)
         return data
 
     def _save(self, data: Any):
-        if isinstance(data, (pd.DataFrame, np.ndarray)):
-            self._data = data.copy()
-        elif type(data).__name__ == "DataFrame":
-            self._data = data
-        else:
-            self._data = copy.deepcopy(data)
+        copy_mode = self._copy_mode or _infer_copy_mode(data)
+        self._data = _copy_with_mode(data, copy_mode=copy_mode)
 
     def _exists(self) -> bool:
         return self._data is not _EMPTY
@@ -106,3 +103,52 @@ class MemoryDataSet(AbstractDataSet):
         # the string representation of datasets leaves out __init__
         # arguments that are empty/None, equivalent here is _EMPTY
         return dict(data=None)  # pragma: no cover
+
+
+def _infer_copy_mode(data: Any) -> str:
+    """Infers the copy mode to use given the data type.
+
+    Args:
+        data: The data whose type will be used to infer the copy mode.
+
+    Returns:
+        One of "copy", "assign" or "deepcopy" as the copy mode to use.
+    """
+    if isinstance(data, (pd.DataFrame, np.ndarray)):
+        copy_mode = "copy"
+    elif type(data).__name__ == "DataFrame":
+        copy_mode = "assign"
+    else:
+        copy_mode = "deepcopy"
+    return copy_mode
+
+
+def _copy_with_mode(data: Any, copy_mode: str) -> Any:
+    """Returns the copied data using the copy mode specified.
+    If no copy mode is provided, then it is inferred based on the type of the data.
+
+    Args:
+        data: The data to copy.
+        copy_mode: The copy mode to use, one of "deepcopy", "copy" and "assign".
+
+    Raises:
+        DataSetError: If copy_mode is specified, but isn't valid
+            (i.e: not one of deepcopy, copy, assign)
+
+    Returns:
+        The data copied according to the specified copy mode.
+    """
+    if copy_mode == "deepcopy":
+        copied_data = copy.deepcopy(data)
+    elif copy_mode == "copy":
+        copied_data = data.copy()
+    elif copy_mode == "assign":
+        copied_data = data
+    else:
+        raise DataSetError(
+            "Invalid copy mode: {}. Possible values are: deepcopy, copy, assign.".format(
+                copy_mode
+            )
+        )
+
+    return copied_data

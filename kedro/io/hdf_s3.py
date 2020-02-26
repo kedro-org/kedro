@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ from typing import Any, Dict
 import pandas as pd
 from s3fs import S3FileSystem
 
-from kedro.io.core import AbstractVersionedDataSet, Version
+from kedro.io.core import AbstractVersionedDataSet, Version, deprecation_warning
 
 HDFSTORE_DRIVER = "H5FD_CORE"
 
@@ -110,10 +110,11 @@ class HDFS3DataSet(AbstractVersionedDataSet):
                 https://s3fs.readthedocs.io/en/latest/api.html#s3fs.core.S3FileSystem
 
         """
+        deprecation_warning(self.__class__.__name__)
         _credentials = copy.deepcopy(credentials) or {}
         _s3fs_args = copy.deepcopy(s3fs_args) or {}
         _s3 = S3FileSystem(client_kwargs=_credentials, **_s3fs_args)
-        path = _s3._strip_protocol(filepath)  # pylint: disable=protected-access
+        path = _s3._strip_protocol(filepath)
         path = PurePosixPath("{}/{}".format(bucket_name, path) if bucket_name else path)
 
         super().__init__(
@@ -166,7 +167,7 @@ class HDFS3DataSet(AbstractVersionedDataSet):
             driver_core_backing_store=0,
             **self._save_args,
         ) as store:
-            store[self._key] = data
+            store.put(self._key, data, format="table")
             # pylint: disable=protected-access
             binary_data = store._handle.get_file_image()
 

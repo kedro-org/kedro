@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ NODE_TAG = "node"
 def call(cmd: List[str], **kwargs):  # pragma: no cover
     """Run a subprocess command and exit if it fails."""
     print(" ".join(shlex.quote(c) for c in cmd))
+    # pylint: disable=subprocess-run-check
     res = subprocess.run(cmd, **kwargs).returncode
     if res:
         sys.exit(res)

@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -69,6 +69,7 @@ def before_all(context):
     context.pip = str(bin_dir / "pip")
     context.python = str(bin_dir / "python")
     context.kedro = str(bin_dir / "kedro")
+    context.requirements_path = Path("requirements.txt").resolve()
 
     # clone the environment, remove any condas and venvs and insert our venv
     context.env = os.environ.copy()

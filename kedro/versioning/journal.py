@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ def _git_sha(proj_dir: Union[str, Path] = None) -> Optional[str]:
     """
     proj_dir = str(proj_dir or Path.cwd())
     try:
-        res = subprocess.check_output(  # pylint: disable=unexpected-keyword-arg
+        res = subprocess.check_output(
             ["git", "rev-parse", "--short", "HEAD"], cwd=proj_dir
         )
         return res.decode().strip()

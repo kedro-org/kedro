@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ class TestTextLocalDataSet:
 
     def test_filepath_expanduser(self):
         txt_dataset = TextLocalDataSet(filepath="~")
-        assert "~" not in str(txt_dataset._filepath)  # pylint: disable=protected-access
+        assert "~" not in str(txt_dataset._filepath)
 
 
 class TestTextLocalDataSetVersioned:

@@ -5,10 +5,12 @@ azure-storage-queue>=1.1.0, <2.0
 behave==1.2.6
 biopython>=1.73, <2.0
 black==v19.10.b0; python_version >= '3.6'
-codacy-coverage
+dask[complete]>=2.6.0, <3.0
 flake8>=3.5,<4.0
 gcsfs>=0.3.0, <1.0
+gitdb2==3.0.0 # pin trufflehog dependency to get it working for now https://github.com/dxa4481/truffleHog/issues/200
 hdfs>=2.5.8, <3.0
+import-linter==1.0; python_version >= '3.6'
 joblib==0.12.3
 jupyter_client>=5.1.0, <6.0
 matplotlib>=3.0.3, <4.0
@@ -18,12 +20,14 @@ mypy<=1.0
 nbconvert>=5.3.1, <6.0
 nbformat>=4.4.0, <5.0
 networkx>=2.4, <3.0
+pandas-gbq>=0.12.0, <1.0
 pre-commit>=1.17.0, <2.0.0
 psutil==5.4.7
-pylint>=2.3.1, <2.4.0 # 2.4.1 doesn't work for Python 3.5, and requires investigation.
+pylint>=2.4.4, <3.0
 pyspark>=2.2.0, <3.0
 pytest-cov>=2.5, <3.0
 pytest-mock>=1.7.1,<2.0
 pytest>=3.9, <4.0
 requests-mock>=1.6.0, <2.0.0
+trufflehog>=2.0.99
 wheel==0.32.2

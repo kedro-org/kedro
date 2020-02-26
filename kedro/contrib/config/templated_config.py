@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ with the values from the passed dictionary.
 import re
 from copy import deepcopy
 from typing import Any, Dict, Iterable, Optional, Union
+from warnings import warn
 
 import jmespath
 
@@ -128,7 +129,6 @@ class TemplatedConfigLoader(ConfigLoader):
     https://github.com/jmespath/jmespath.py and http://jmespath.org/.
     """
 
-    # pylint: disable=missing-type-doc
     def __init__(
         self,
         conf_paths: Union[str, Iterable[str]],
@@ -149,7 +149,11 @@ class TemplatedConfigLoader(ConfigLoader):
                 obtained from the globals_pattern. In case of duplicate keys, the
                 ``globals_dict`` keys take precedence.
         """
-
+        warn(
+            "kedro.contrib.config.TemplatedConfigLoader will be deprecated in "
+            "future releases. Please refer to replacement in kedro.config.",
+            DeprecationWarning,
+        )
         super().__init__(conf_paths)
 
         self._arg_dict = super().get(globals_pattern) if globals_pattern else {}

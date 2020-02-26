@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -106,9 +106,9 @@ class SparkHiveDataSet(AbstractDataSet):
 
     This DataSet has some key assumptions:
     - Schemas do not change during the pipeline run (defined PKs must be present for the
-        duration of the pipeline)
+    duration of the pipeline)
     - Tables are not being externally modified during upserts. The upsert method is NOT ATOMIC
-        to external changes to the target table while executing.
+    to external changes to the target table while executing.
 
     Example:
     ::

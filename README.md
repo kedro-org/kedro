@@ -11,6 +11,7 @@
 | Documentation Build | [![Documentation](https://readthedocs.org/projects/kedro/badge/?version=latest)](https://kedro.readthedocs.io/) |
 | License | [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) |
 | Code Style | [![Code Style: Black](https://img.shields.io/badge/code%20style-black-black.svg)](https://github.com/ambv/black) |
+| Questions | [![Questions: Stackoverflow "kedro"](https://img.shields.io/badge/stackoverflow%20tag-kedro-yellow)](https://stackoverflow.com/questions/tagged/kedro) |
 
 
 ## What is Kedro?
@@ -31,7 +32,8 @@ Kedro is a development workflow framework that implements software engineering b
 pip install kedro
 ```
 
-See more detailed installation instructions, including how to setup Python virtual environments, in our [installation guide](https://kedro.readthedocs.io/en/latest/02_getting_started/02_install.html) and get started with our ["Hello Word"](https://kedro.readthedocs.io/en/latest/02_getting_started/04_hello_world.html) example.
+See more detailed installation instructions, including how to setup Python virtual environments, in our [installation guide](https://kedro.readthedocs.io/en/stable/02_getting_started/02_install.html) and get started with our ["Hello Word"](https://kedro.readthedocs.io/en/stable/02_getting_started/04_hello_world.html) example.
+
 
 ## Why does Kedro exist?
 
@@ -45,6 +47,7 @@ Kedro is built upon our collective best-practice (and mistakes) trying to delive
 Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) and [Nikolaos Tsaousis](https://github.com/tsanikgr) to solve challenges they faced in their project work. This work was later turned into a product thanks to the following contributors:
 [Ivan Danov](https://github.com/idanov), [Dmitrii Deriabin](https://github.com/DmitryDeryabin), [Gordon Wrigley](https://github.com/tolomea), [Yetunde Dada](https://github.com/yetudada), [Nasef Khan](https://github.com/nakhan98), [Kiyohito Kunii](https://github.com/921kiyo), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae), [Peteris Erins](https://github.com/Pet3ris), [Lorena Balan](https://github.com/lorenabalan), [Richard Westenra](https://github.com/richardwestenra) and [Anton Kirilenko](https://github.com/Flid).
 
+
 ## What are the main features of Kedro?
 
 ![Kedro-Viz Pipeline Visualisation](https://raw.githubusercontent.com/quantumblacklabs/kedro/master/img/pipeline_visualisation.png)
@@ -54,33 +57,39 @@ Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) a
 | Feature | What is this? |
 |----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Project Template | A standard, modifiable and easy-to-use project template based on [Cookiecutter Data Science](https://github.com/drivendata/cookiecutter-data-science/). |
-| Data Catalog | A series of lightweight data connectors used for saving and loading data across many different file formats and file systems including local storage, AWS, Azure Blob and Google Cloud Storage. The Data Catalog also includes data and model versioning for file-based systems. Used with a Python or YAML API. |
+| Data Catalog | A series of lightweight data connectors used for saving and loading data across many different file formats and file systems including local and network file systems, cloud object stores, and HDFS. The Data Catalog also includes data and model versioning for file-based systems. Used with a Python or YAML API. |
 | Pipeline Abstraction | Automatic resolution of dependencies between pure Python functions and data pipeline visualisation using [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz). |
 | The Journal | An ability to reproduce pipeline runs with saved pipeline run results. |
-| Coding Standards | Test-driven development using `pytest`, produce well-documented code using [Sphinx](http://www.sphinx-doc.org/en/master/) and make use of the standard Python logging library. |
+| Coding Standards | Test-driven development using [`pytest`](https://github.com/pytest-dev/pytest), produce well-documented code using [Sphinx](http://www.sphinx-doc.org/en/master/), create linted code with support for [`flake8`](https://github.com/PyCQA/flake8), [`isort`](https://github.com/timothycrosley/isort) and [`black`](https://github.com/psf/black) and make use of the standard Python logging library. |
 | Flexible Deployment | Deployment strategies that include the use of Docker with [Kedro-Docker](https://github.com/quantumblacklabs/kedro-docker), conversion of Kedro pipelines into Airflow DAGs with [Kedro-Airflow](https://github.com/quantumblacklabs/kedro-airflow), leveraging a REST API endpoint with Kedro-Server _(coming soon)_ and serving Kedro pipelines as a Python package. Kedro can be deployed locally, on-premise and cloud (AWS, Azure and Google Cloud Platform) servers, or clusters (EMR, EC2, Azure HDinsight and Databricks). |
 
 
 ## How do I use Kedro?
 
-Our [documentation](https://kedro.readthedocs.io/en/latest/) explains:
+Our [documentation](https://kedro.readthedocs.io/en/stable/) explains:
 
-- Best-practice on how to [get started using Kedro](https://kedro.readthedocs.io/en/latest/02_getting_started/01_prerequisites.html)
-- A ["Hello World" data and ML pipeline example](https://kedro.readthedocs.io/en/latest/02_getting_started/04_hello_world.html) based on the **Iris dataset**
-- A two-hour [Spaceflights tutorial](https://kedro.readthedocs.io/en/latest/03_tutorial/01_workflow.html) that teaches you beginner to intermediate functionality
-- How to [use the CLI](https://kedro.readthedocs.io/en/latest/06_resources/03_commands_reference.html) offered by `kedro_cli.py` (`kedro new`, `kedro run`, ...)
-- An overview of [Kedro architecture](https://kedro.readthedocs.io/en/latest/06_resources/02_architecture_overview.html)
-- [Frequently asked questions (FAQs)](https://kedro.readthedocs.io/en/latest/06_resources/01_faq.html)
+- Best-practice on how to [get started using Kedro](https://kedro.readthedocs.io/en/stable/02_getting_started/01_prerequisites.html)
+- A ["Hello World" data and ML pipeline example](https://kedro.readthedocs.io/en/stable/02_getting_started/04_hello_world.html) based on the **Iris dataset**
+- A two-hour [Spaceflights tutorial](https://kedro.readthedocs.io/en/stable/03_tutorial/01_workflow.html) that teaches you beginner to intermediate functionality
+- How to [use the CLI](https://kedro.readthedocs.io/en/stable/06_resources/03_commands_reference.html) offered by `kedro_cli.py` (`kedro new`, `kedro run`, ...)
+- An overview of [Kedro architecture](https://kedro.readthedocs.io/en/stable/06_resources/02_architecture_overview.html)
+- [Frequently asked questions (FAQs)](https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html)
 
-Documentation for the latest stable release can be found [here](https://kedro.readthedocs.io/en/latest/). You can also run `kedro docs` from your CLI and open the documentation for your current version of Kedro in a browser.
+Documentation for the latest stable release can be found [here](https://kedro.readthedocs.io/en/stable/). You can also run `kedro docs` from your CLI and open the documentation for your current version of Kedro in a browser.
 
 > *Note:* The CLI is a convenient tool for being able to run `kedro` commands but you can also invoke the Kedro CLI as a Python module with `python -m kedro`
 
-*Note:* Read our [FAQs](https://kedro.readthedocs.io/en/latest/06_resources/01_faq.html#how-does-kedro-compare-to-other-projects) to learn how we differ from workflow managers like Airflow and Luigi.
+*Note:* Read our [FAQs](https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#how-does-kedro-compare-to-other-projects) to learn how we differ from workflow managers like Airflow and Luigi.
+
 
 ## Can I contribute?
 
 Yes! Want to help build Kedro? Check out our guide to [contributing](https://github.com/quantumblacklabs/kedro/blob/master/CONTRIBUTING.md).
+
+
+## Where can I learn more?
+
+There is a growing community around Kedro. Have a look at our [FAQs](https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#where-can-i-learn-more) to find projects using Kedro and links to articles, podcasts and talks.
 
 
 ## What licence do you use?

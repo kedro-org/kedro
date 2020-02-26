@@ -1,6 +1,6 @@
 # Working with IPython and Jupyter Notebooks / Lab
 
-> *Note:* This documentation is based on `Kedro 0.15.5`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.6`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 This section follows the ["Hello World" example](../02_getting_started/04_hello_world.md) and demonstrates how to effectively use IPython and Jupyter Notebooks / Lab.
 
@@ -16,6 +16,7 @@ To reload these at any point (e.g., if you update `catalog.yml`), use the [line 
 
 ![](./images/jupyter_notebook_loading_context.png)
 
+It also loads the environment specified in the `KEDRO_ENV` environment variable if specified, otherwise it defaults to `local`. Instructions for setting the environment variable can be found in the [configuration](./03_configuration.md#additional-configuration-environments) section.
 
 ## Working with `context`
 With `context`, you can access the following variables and methods
@@ -29,16 +30,31 @@ With `context`, you can access the following variables and methods
 ### Additional parameters for `context.run()`
 If you want to parameterize the run, you can also specify the following optional arguments for `context.run()`:
 
-| Argument name | Accepted types | Description |
-| :--------: | :--------: | :----------- |
-| `tags` | `Iterable[str]` | Construct the pipeline using only nodes which have this tag attached. A node is included in the resulting pipeline if it contains _any_ of those tags |
-| `runner` | `AbstractRunner` | An instance of Kedro [AbstractRunner](/kedro.runner.AbstractRunner); for example, can be an instance of a [ParallelRunner](/kedro.runner.ParallelRunner) |
-| `node_names` | `Iterable[str]` | Run only nodes with specified names |
-| `from_nodes` | `Iterable[str]` | A list of node names which should be used as a starting point |
-| `to_nodes`   | `Iterable[str]` | A list of node names which should be used as an end point |
-| `from_inputs` | `Iterable[str]` | A list of dataset names which should be used as a starting point |
-| `load_versions` | `Dict[str, str]` | A mapping of a dataset name to a specific dataset version (timestamp) for loading - this applies to the versioned datasets only |
-| `pipeline_name` | `str` | Name of the modular pipeline to run - must be one of those returned by `create_pipelines` function from `src/<package_name>/pipeline.py` |
+```eval_rst
++---------------+----------------+-------------------------------------------------------------------------------+
+| Argument name | Accepted types | Description                                                                   |
++===============+================+===============================================================================+
+| tags          | Iterable[str]  | Construct the pipeline using only nodes which have this tag attached.         |
+|               |                | A node is included in the resulting pipeline if it contains any of those tags |
++---------------+----------------+-------------------------------------------------------------------------------+
+| runner        | AbstractRunner | An instance of Kedro [AbstractRunner](/kedro.runner.AbstractRunner);          |
+|               |                | can be an instance of a [ParallelRunner](/kedro.runner.ParallelRunner)        |
++---------------+----------------+-------------------------------------------------------------------------------+
+| node_names    | Iterable[str]  | Run only nodes with specified names                                           |
++---------------+----------------+-------------------------------------------------------------------------------+
+| from_nodes    | Iterable[str]  | A list of node names which should be used as a starting point                 |
++---------------+----------------+-------------------------------------------------------------------------------+
+| to_nodes      | Iterable[str]  | A list of node names which should be used as an end point                     |
++---------------+----------------+-------------------------------------------------------------------------------+
+| from_inputs   | Iterable[str]  | A list of dataset names which should be used as a starting point              |
++---------------+----------------+-------------------------------------------------------------------------------+
+| load_versions | Dict[str, str] | A mapping of a dataset name to a specific dataset version (timestamp)         |
+|               |                | for loading - this applies to the versioned datasets only                     |
++---------------+----------------+-------------------------------------------------------------------------------+
+| pipeline_name | str            | Name of the modular pipeline to run - must be one of those returned           |
+|               |                | by create_pipelines function from src/<package_name>/pipeline.py              |
++---------------+----------------+-------------------------------------------------------------------------------+
+```
 
 This list of options is fully compatible with the list of CLI options for `kedro run` command. In fact, `kedro run` is calling `context.run()` behind the scenes.
 
@@ -58,7 +74,8 @@ def reload_kedro(project_path, line=None):
         parameters = context.params
         # ...
         logging.info("Defined global variable `context`, `catalog` and `parameters`")
-
+    except:
+        pass
 ```
 
 ## Working with IPython
@@ -80,7 +97,7 @@ catalog.load("example_iris_data").head()
 ```
 
 ```bash
-kedro.io.data_catalog - INFO - Loading data from `example_iris_data` (CSVLocalDataSet)...
+kedro.io.data_catalog - INFO - Loading data from `example_iris_data` (CSVDataSet)...
 
    sepal_length  sepal_width  petal_length  petal_width species
 0           5.1          3.5           1.4          0.2  setosa
@@ -88,6 +105,21 @@ kedro.io.data_catalog - INFO - Loading data from `example_iris_data` (CSVLocalDa
 2           4.7          3.2           1.3          0.2  setosa
 3           4.6          3.1           1.5          0.2  setosa
 4           5.0          3.6           1.4          0.2  setosa
+```
+
+If you enable versioning, you can load a particular version of a dataset. Given a catalog entry
+
+```yaml
+example_train_x:
+  type: pandas.CSVDataSet
+  filepath: data/02_intermediate/example_train_x.csv
+  versioned: true
+```
+
+and having run the pipeline at least once, you may specify which version to load like so:
+
+```python
+catalog.load("example_train_x", version="2019-12-13T15.08.09.255Z")
 ```
 
 When you have finished, you can exit IPython by typing:
@@ -112,6 +144,11 @@ Then you should navigate to the `notebooks` folder and create a notebook.
 
 > *Note:* The only kernel available by default has a name of the current project. If you need to access all available kernels, add `--all-kernels` to the command above.
 
+### Idle notebooks
+
+If you close the notebook and its kernel is idle, it will be automatically terminated by the Jupyter server after 30 seconds of inactivity. However, if the notebook kernel is busy, it won't be automatically terminated by the server.
+
+You can change the timeout by passing `--idle-timeout=<integer>` option to `kedro jupyter notebook` or `kedro jupyter lab` call. If you set `--idle-timeout=0`, this will disable automatic termination of idle notebook kernels.
 
 ### What if I cannot run `kedro jupyter notebook`?
 
@@ -141,6 +178,21 @@ df.head()
 
 ![](./images/jupyter_notebook_workflow_loading_data.png)
 
+If you enable versioning, you also have the option of loading a particular version of a dataset. Given a catalog entry
+
+```yaml
+example_train_x:
+  type: pandas.CSVDataSet
+  filepath: data/02_intermediate/example_train_x.csv
+  versioned: true
+```
+
+and having run the pipeline at least once, you can specify which version to load like so:
+
+```python
+catalog.load("example_train_x", version="2019-12-13T15.08.09.255Z")
+```
+
 ### Saving `DataCatalog` in Jupyter
 
 Saving operation in the example below is analogous to the load.
@@ -149,7 +201,7 @@ Let's put the following dataset entry in `conf/base/catalog.yml`:
 
 ```yaml
 my_dataset:
-  type: JSONLocalDataSet
+  type: pandas.JSONDataSet
   filepath: data/01_raw/my_dataset.json
 ```
 
@@ -168,7 +220,8 @@ catalog.save("my_dataset", my_dict)
 
 ```python
 parameters = context.params  # type: Dict
-parameters["example_test_data_ratio"]  # returns the value of 'example_test_data_ratio' key from 'conf/base/parameters.yml'
+parameters["example_test_data_ratio"]
+# returns the value of 'example_test_data_ratio' key from 'conf/base/parameters.yml'
 ```
 
 > Note: You need to reload Kedro variables by calling `%reload_kedro` and re-run the code snippet from above if you change the contents of `parameters.yml`.
@@ -216,9 +269,9 @@ There are optional extra scripts that can help improve your Kedro experience for
 
 ### IPython loader
 
-The script `extras/ipython_loader.py` helps to locate IPython startup directory and run all Python scripts in it when working with Jupyter notebooks and IPython sessions. It should work identically not just within a Kedro project, but also with any project that contains IPython startup scripts.
+The script `tools/ipython/ipython_loader.py` helps to locate IPython startup directory and run all Python scripts in it when working with Jupyter notebooks and IPython sessions. It should work identically not just within a Kedro project, but also with any project that contains IPython startup scripts.
 
-This script will automatically locate `.ipython/profile_default/startup` directory starting from the current working directory and going up the directory tree. If the directory was found, all Python scripts in it are be executed.
+This script will automatically locate `.ipython/profile_default/startup` directory starting from the current working directory and going up the directory tree. If the directory was found, all Python scripts in it are executed.
 
 > *Note:* This script will only run startup scripts from the first encountered `.ipython/profile_default/startup` directory. All consecutive `.ipython` directories higher up in the directory tree will be disregarded.
 
@@ -228,7 +281,7 @@ To install this script simply download it into your default IPython config direc
 
 ```bash
 mkdir -p ~/.ipython/profile_default/startup
-wget -O ~/.ipython/profile_default/startup/ipython_loader.py https://raw.githubusercontent.com/quantumblacklabs/kedro/master/extras/ipython_loader.py
+wget -O ~/.ipython/profile_default/startup/ipython_loader.py https://raw.githubusercontent.com/quantumblacklabs/kedro/master/tools/ipython/ipython_loader.py
 ```
 
 #### Prerequisites

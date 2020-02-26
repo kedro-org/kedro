@@ -1,4 +1,4 @@
-# Copyright 2018-2019 QuantumBlack Visual Analytics Limited
+# Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -338,7 +338,6 @@ def test_save_blob_args(blob_from_mock, blob_csv_data_set, dummy_dataframe):
     )
 
 
-# pylint: disable=protected-access
 def test_load_extra_params(blob_csv_data_set):
     expected_keys = ["option"]
     data_set = blob_csv_data_set(load_args={"option": "value"})
@@ -346,7 +345,6 @@ def test_load_extra_params(blob_csv_data_set):
         assert expected_key in data_set._load_args.keys()
 
 
-# pylint: disable=protected-access
 def test_save_with_extra_params(blob_csv_data_set):
     expected_keys = ["index", "option"]
     data_set = blob_csv_data_set(save_args={"option": "value"})

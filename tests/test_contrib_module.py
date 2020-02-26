@@ -32,8 +32,5 @@ even if we don't have any modules in the contrib package.
 
 from types import ModuleType
 
-from kedro import contrib
-
-
 def test_can_import_contrib():
     assert isinstance(contrib, ModuleType)

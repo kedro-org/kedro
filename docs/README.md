@@ -1,4 +1,4 @@
-![Kedro Logo Banner](https://github.com/quantumblacklabs/kedro/blob/master/img/kedro_banner.jpg)
+![Kedro Logo Banner](https://github.com/quantumblacklabs/kedro/blob/develop/img/kedro_banner.png)
 
 # Kedro documentation style guide
 

@@ -1,4 +1,4 @@
-# Upcoming release
+# 0.15.6
 
 ## Major features and improvements
 > _TL;DR_ We're launching [`kedro.extras`](https://github.com/quantumblacklabs/kedro/tree/master/extras), the new home for our revamped series of datasets, decorators and dataset transformers. The datasets in [`kedro.extras.datasets`](https://github.com/quantumblacklabs/kedro/tree/master/extras/datasets) use [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to access a variety of data stores including local file systems, network file systems, cloud object stores (including S3 and GCP), and Hadoop, read more about this [**here**](https://kedro.readthedocs.io/en/latest/04_user_guide/04_data_catalog.html#specifying-the-location-of-the-dataset). The change will allow [#178](https://github.com/quantumblacklabs/kedro/issues/178) to happen in the next major release of Kedro.

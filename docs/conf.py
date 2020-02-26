@@ -214,10 +214,7 @@ KEDRO_MODULES = [
     "kedro.io",
     "kedro.pipeline",
     "kedro.runner",
-    "kedro.config",
-    "kedro.contrib.io",
-    "kedro.contrib.colors.logging",
-    "kedro.contrib.decorators",
+    "kedro.config"
 ]
 
 

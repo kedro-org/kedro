@@ -267,3 +267,5 @@ context.catalog.load("shuttles").head()
 ### Contributing a custom dataset implementation
 
 Kedro users create many custom dataset implementations while working on real-world projects, and it makes sense that they should be able to share their work with each other. That is why Kedro has a `kedro.extras.datasets` sub-package, where users can add new custom dataset implementations to help others in our community. Sharing your custom datasets implementations is possibly the easiest way to contribute back to Kedro and if you are interested in doing so, you can check out the Kedro [contribution guide](https://github.com/quantumblacklabs/kedro/blob/develop/CONTRIBUTING.md) on the GitHub repo.
+
+For a complete guide on how to create and contribute a custom dataset, please read [this article](../04_user_guide/14_create_a_new_dataset.md).

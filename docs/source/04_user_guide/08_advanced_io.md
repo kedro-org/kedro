@@ -36,7 +36,7 @@ parts_df = parts.load()
 
 However, we recommend using a `DataCatalog` instead (for more details, see [this section](../04_user_guide/04_data_catalog.md) in the User Guide) as it has been designed to make all datasets available to project members.
 
-For contributors, if you would like to submit a new dataset, you will have to extend `AbstractDataSet`.
+For contributors, if you would like to submit a new dataset, you will have to extend `AbstractDataSet`. For a complete guide, please read [Creating a new dataset](./14_create_a_new_dataset.md).
 
 
 ## Versioning

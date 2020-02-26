@@ -1,8 +1,10 @@
-# Upcoming Release
+# 0.15.7
 
 ## Major features and improvements
 
 ## Bug fixes and other changes
+
+Fix the link to the Kedro logo image in the documentation.
 
 ## Breaking changes to the API
 

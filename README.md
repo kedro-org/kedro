@@ -14,7 +14,7 @@
 | Questions | [![Questions: Stackoverflow "kedro"](https://img.shields.io/badge/stackoverflow%20tag-kedro-yellow)](https://stackoverflow.com/questions/tagged/kedro) |
 
 
-## What is Kedro?
+## Hello - learn about what is Kedro
 
 > "The centre of your data pipeline."
 

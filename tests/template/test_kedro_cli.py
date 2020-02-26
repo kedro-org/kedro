@@ -37,6 +37,7 @@ import anyconfig
 import pytest
 from click.testing import CliRunner
 
+from kedro.context import KEDRO_ENV_VAR
 from kedro.runner import ParallelRunner, SequentialRunner
 
 
@@ -237,10 +238,7 @@ class TestRunCommand:
             ({}, {}),
             ({"params": {"foo": "baz"}}, {"foo": "baz"}),
             ({"params": "foo:baz"}, {"foo": "baz"}),
-            (
-                {"params": {"foo": "123.45", "baz": "678", "bar": 9}},
-                {"foo": "123.45", "baz": "678", "bar": 9},
-            ),
+            ({"params": {"foo": "123.45", "baz": "678", "bar": 9}}, {"foo": "123.45", "baz": "678", "bar": 9}),
         ],
         indirect=["fake_run_config_with_params"],
     )
@@ -268,6 +266,17 @@ class TestRunCommand:
         )
         fake_load_context.assert_called_once_with(
             Path.cwd(), env=mocker.ANY, extra_params=expected
+        )
+
+    def test_run_env_environment_var(
+        self, fake_kedro_cli, fake_load_context, fake_repo_path, monkeypatch, mocker
+    ):
+        monkeypatch.setenv("KEDRO_ENV", "my_special_env")
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["run"])
+        assert not result.exit_code
+
+        fake_load_context.assert_called_once_with(
+            Path.cwd(), env="my_special_env", extra_params=mocker.ANY
         )
 
     @pytest.mark.parametrize(
@@ -605,7 +614,6 @@ class TestJupyterNotebookCommand:
     def test_env(
         self, env_flag, fake_kedro_cli, python_call_mock, default_jupyter_options
     ):
-        """This tests passing an environment variable to the jupyter subprocess."""
         result = CliRunner().invoke(
             fake_kedro_cli.cli, ["jupyter", "notebook", env_flag, "my_special_env"]
         )
@@ -614,8 +622,21 @@ class TestJupyterNotebookCommand:
         args, kwargs = python_call_mock.call_args
         assert args == default_jupyter_options
         assert "env" in kwargs
-        assert "KEDRO_ENV" in kwargs["env"]
-        assert kwargs["env"]["KEDRO_ENV"] == "my_special_env"
+        assert KEDRO_ENV_VAR in kwargs["env"]
+        assert kwargs["env"][KEDRO_ENV_VAR] == "my_special_env"
+
+    def test_env_environment_variable(
+        self, fake_kedro_cli, python_call_mock, monkeypatch, default_jupyter_options
+    ):
+        monkeypatch.setenv("KEDRO_ENV", "my_special_env")
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["jupyter", "notebook"])
+        assert not result.exit_code
+
+        args, kwargs = python_call_mock.call_args
+        assert args == default_jupyter_options
+        assert "env" in kwargs
+        assert KEDRO_ENV_VAR in kwargs["env"]
+        assert kwargs["env"][KEDRO_ENV_VAR] == "my_special_env"
 
 
 class TestJupyterLabCommand:
@@ -686,7 +707,6 @@ class TestJupyterLabCommand:
     def test_env(
         self, env_flag, fake_kedro_cli, python_call_mock, default_jupyter_options
     ):
-        """This tests passing an environment variable to the jupyter subprocess."""
         result = CliRunner().invoke(
             fake_kedro_cli.cli, ["jupyter", "lab", env_flag, "my_special_env"]
         )
@@ -695,8 +715,21 @@ class TestJupyterLabCommand:
         args, kwargs = python_call_mock.call_args
         assert args == default_jupyter_options
         assert "env" in kwargs
-        assert "KEDRO_ENV" in kwargs["env"]
-        assert kwargs["env"]["KEDRO_ENV"] == "my_special_env"
+        assert KEDRO_ENV_VAR in kwargs["env"]
+        assert kwargs["env"][KEDRO_ENV_VAR] == "my_special_env"
+
+    def test_env_environment_variable(
+        self, fake_kedro_cli, python_call_mock, monkeypatch, default_jupyter_options
+    ):
+        monkeypatch.setenv("KEDRO_ENV", "my_special_env")
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["jupyter", "lab"])
+        assert not result.exit_code
+
+        args, kwargs = python_call_mock.call_args
+        assert args == default_jupyter_options
+        assert "env" in kwargs
+        assert KEDRO_ENV_VAR in kwargs["env"]
+        assert kwargs["env"][KEDRO_ENV_VAR] == "my_special_env"
 
 
 class TestConvertNotebookCommand:

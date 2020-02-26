@@ -41,7 +41,7 @@ from kedro.io import (
     MemoryDataSet,
 )
 from kedro.pipeline import Pipeline, node
-from kedro.runner import SequentialRunner
+from kedro.runner import SequentialRunner, run_node
 
 
 @pytest.fixture
@@ -224,6 +224,21 @@ class LoggingDataSet(AbstractDataSet):
 
     def _describe(self) -> Dict[str, Any]:
         return {}
+
+
+def test_run_node():
+    log = []
+    fake_catalog =  DataCatalog(
+            {
+                "in": LoggingDataSet(log, "in", "stuff"),
+                "middle": LoggingDataSet(log, "middle"),
+                "out": LoggingDataSet(log, "out"),
+            }
+        )
+    mock_node = node(lambda x: "FAKE", "in", "out")
+    run_node(mock_node, fake_catalog)
+    assert fake_catalog.datasets.out.value == "FAKE"
+    assert fake_catalog.datasets.out.log == [("load", "in")]
 
 
 class TestSequentialRunnerRelease:

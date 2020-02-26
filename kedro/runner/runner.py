@@ -31,6 +31,7 @@ implementations.
 
 import logging
 from abc import ABC, abstractmethod
+from concurrent.futures.thread import ThreadPoolExecutor
 from typing import Any, Dict, Iterable
 
 from kedro.io import AbstractDataSet, DataCatalog
@@ -180,10 +181,14 @@ def run_node(node: Node, catalog: DataCatalog) -> Node:
         The node argument.
 
     """
-    inputs = {name: catalog.load(name) for name in node.inputs}
+    with ThreadPoolExecutor() as executor:
+        all_catalogs = executor.map(catalog.load, node.inputs)
+    inputs = dict(zip(node.inputs, all_catalogs))
     outputs = node.run(inputs)
-    for name, data in outputs.items():
-        catalog.save(name, data)
+
+    with ThreadPoolExecutor() as executor:
+        executor.map(catalog.save, outputs.keys(), outputs.values())
+
     for name in node.confirms:
         catalog.confirm(name)
     return node

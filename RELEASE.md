@@ -1,3 +1,13 @@
+# Upcoming Release
+
+## Major features and improvements
+
+## Bug fixes and other changes
+
+## Breaking changes to the API
+
+## Thanks for supporting contributions
+
 # 0.15.7
 
 ## Major features and improvements

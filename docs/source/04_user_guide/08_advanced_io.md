@@ -47,6 +47,8 @@ In order to enable versioning, you need to update the `catalog.yml` config file 
   3. call `super().__init__()` with positional arguments `filepath`, `version`, and, optionally, with a `glob` and an `exists` functions if it uses non-local filesystem (see [kedro.extras.datasets.pandas.CSVDataSet](/kedro.extras.datasets.pandas.CSVDataSet) as an example) AND
   4. modify its `_describe`, `_load` and `_save` methods respectively to support versioning (see [`kedro.extras.datasets.pandas.CSVDataSet`](/kedro.extras.datasets.pandas.CSVDataSet) for an example implementation)
 
+ >*Note:* If a new version of a dataset is created mid-run, for instance by an external system adding new files, it will not interfere in the current run, i.e. the load version stays the same throughout subsequent loads.
+
 An example dataset could look similar to the below:
 
 ```python

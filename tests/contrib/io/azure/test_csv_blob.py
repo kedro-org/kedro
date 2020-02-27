@@ -105,7 +105,7 @@ class TestCSVBlobDataSetVersioned:
         """Test that saving saves with a correct version"""
         mocker.patch.object(
             versioned_blob_csv_data_set,
-            "_lookup_load_version",
+            "resolve_load_version",
             return_value=save_version,
         )
         mocker.patch.object(
@@ -126,7 +126,7 @@ class TestCSVBlobDataSetVersioned:
         mocked_load_version = "mocked_load_version"
         mocker.patch.object(
             versioned_blob_csv_data_set,
-            "_lookup_load_version",
+            "resolve_load_version",
             return_value=mocked_load_version,
         )
         get_blob_mock = mocker.patch.object(
@@ -175,7 +175,7 @@ class TestCSVBlobDataSetVersioned:
             versioned_blob_csv_data_set._blob_service, "exists", return_value=False
         )
         load_mock = mocker.patch.object(
-            versioned_blob_csv_data_set, "_lookup_load_version"
+            versioned_blob_csv_data_set, "resolve_load_version"
         )
         versioned_blob_csv_data_set.save(dummy_dataframe)
         load_mock.return_value = save_version
@@ -192,7 +192,7 @@ class TestCSVBlobDataSetVersioned:
             versioned_blob_csv_data_set._blob_service, "exists", return_value=False
         )
         load_mock = mocker.patch.object(
-            versioned_blob_csv_data_set, "_lookup_load_version"
+            versioned_blob_csv_data_set, "resolve_load_version"
         )
         versioned_blob_csv_data_set.save(dummy_dataframe)
         load_mock.side_effect = VersionNotFoundError
@@ -228,12 +228,12 @@ class TestCSVBlobDataSetVersioned:
         )
         mocker.patch.object(
             versioned_blob_csv_data_set,
-            "_lookup_load_version",
+            "resolve_load_version",
             return_value=load_version,
         )
         mocker.patch.object(
             versioned_blob_csv_data_set,
-            "_lookup_save_version",
+            "resolve_save_version",
             return_value=save_version,
         )
         pattern = (

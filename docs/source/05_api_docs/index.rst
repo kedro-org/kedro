@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 
-.. image:: https://raw.githubusercontent.com/quantumblacklabs/kedro/master/img/kedro_banner.jpg
+.. image:: https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/img/kedro_banner.png
     :alt: Kedro logo
     :class: kedro-logo
 
@@ -34,10 +34,6 @@ Welcome to Kedro's API docs and tutorials!
 .. image:: https://img.shields.io/badge/code%20style-black-black.svg
     :target: https://github.com/ambv/black
     :alt: Code style is Black
-
-.. image:: https://pepy.tech/badge/kedro
-    :target: https://pepy.tech/project/kedro
-    :alt: Downloads
 
 .. toctree::
    :maxdepth: 2
@@ -84,6 +80,7 @@ Welcome to Kedro's API docs and tutorials!
    04_user_guide/11_ipython
    04_user_guide/12_working_with_databricks
    04_user_guide/13_journal
+   04_user_guide/14_create_a_new_dataset
 
 .. toctree::
    :maxdepth: 2

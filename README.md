@@ -1,4 +1,4 @@
-![Kedro Logo Banner](https://raw.githubusercontent.com/quantumblacklabs/kedro/master/img/kedro_banner.jpg)
+![Kedro Logo Banner](https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/img/kedro_banner.png)
 
 -----------------
 
@@ -50,7 +50,7 @@ Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) a
 
 ## What are the main features of Kedro?
 
-![Kedro-Viz Pipeline Visualisation](https://raw.githubusercontent.com/quantumblacklabs/kedro/master/img/pipeline_visualisation.png)
+![Kedro-Viz Pipeline Visualisation](https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/img/pipeline_visualisation.png)
 *A pipeline visualisation generated using [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz)*
 
 

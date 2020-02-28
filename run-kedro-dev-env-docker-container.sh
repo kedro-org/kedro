@@ -6,12 +6,14 @@ set -o pipefail
 
 IMAGE_NAME=${IMAGE_NAME:-kedro}
 IMAGE_VERSION=${IMAGE_VERSION:-$(cat docker/version.txt)}
+DOCKER_USER_NAME=${DOCKER_USER_NAME:-neomatrix369}
 DOCKER_FULL_TAG_NAME="${DOCKER_USER_NAME}/${IMAGE_NAME}"
 
 mkdir -p .cache
 
 PYTHON_VERSION=${PYTHON_VERSION:-"3.7"}
 
+echo "Running Kedro developer environment docker container"
 docker run -it                                      \
            --rm                                     \
            --volume $(pwd):/home/kedro/             \

@@ -50,3 +50,9 @@ install-pre-commit: install-test-requirements
 uninstall-pre-commit:
 	pre-commit uninstall
 	pre-commit uninstall --hook-type pre-push
+
+build-dev-docker-image:
+	cd docker; ./build-docker-image-for-kedro-dev-env.sh
+
+run-dev-docker-container:
+	./run-kedro-dev-env-docker-container.sh

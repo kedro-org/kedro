@@ -177,13 +177,13 @@ class TestCSVLocalDataSetVersioned:
         )
 
         dataset1.save(dummy_dataframe)
-        last_save_version1 = dataset1.get_last_save_version()
+        last_save_version1 = dataset1.resolve_save_version()
 
         dataset2.save(dummy_dataframe)
-        last_save_version2 = dataset2.get_last_save_version()
+        last_save_version2 = dataset2.resolve_save_version()
 
         dataset2.load()
-        last_load_version = dataset2.get_last_load_version()
+        last_load_version = dataset2.resolve_load_version()
         assert last_save_version2 == last_load_version
         assert last_save_version1 != last_save_version2
 
@@ -206,7 +206,7 @@ class TestCSVLocalDataSetVersioned:
         ).save(dummy_dataframe)
 
         versioned_csv_data_set.load()
-        last_load_version = versioned_csv_data_set.get_last_load_version()
+        last_load_version = versioned_csv_data_set.resolve_load_version()
 
         assert last_load_version == save_version_2
 
@@ -220,9 +220,9 @@ class TestCSVLocalDataSetVersioned:
     ):
         """Tests if the correct load and save versions are logged when specified."""
         versioned_csv_data_set.save(dummy_dataframe)
-        last_save_version = versioned_csv_data_set.get_last_save_version()
+        last_save_version = versioned_csv_data_set.resolve_save_version()
         versioned_csv_data_set.load()
-        last_load_version = versioned_csv_data_set.get_last_load_version()
+        last_load_version = versioned_csv_data_set.resolve_load_version()
         assert load_version == last_load_version
         assert save_version == last_save_version
 

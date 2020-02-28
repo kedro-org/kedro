@@ -238,7 +238,10 @@ class TestRunCommand:
             ({}, {}),
             ({"params": {"foo": "baz"}}, {"foo": "baz"}),
             ({"params": "foo:baz"}, {"foo": "baz"}),
-            ({"params": {"foo": "123.45", "baz": "678", "bar": 9}}, {"foo": "123.45", "baz": "678", "bar": 9}),
+            (
+                {"params": {"foo": "123.45", "baz": "678", "bar": 9}},
+                {"foo": "123.45", "baz": "678", "bar": 9},
+            ),
         ],
         indirect=["fake_run_config_with_params"],
     )

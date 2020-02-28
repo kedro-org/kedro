@@ -77,6 +77,26 @@ make test
 make build-docs
 ```
 
+### Developer Environment via Docker container
+
+You can build your own docker image and run the container isolation from your development environment. This is to facilite development work with `Kedro` (since we all have disparate environments) and we would like to develop in a clean and isolated environment just to be productive, efficient and effective.
+
+You can do this using the `make` commands at the root of the project folder:
+
+```
+make build-dev-docker-image
+```
+
+```
+make run-dev-docker-container
+```
+
+The above will help build the docker image (one-off) and then run the container each time we want to.
+
+The setup takes care of additional packages you may add to the environment, the packages are cached in the `.cache` folder (see [shell script](run-kedro-dev-env-docker-container.sh) to see how this is done in `docker`).
+
+_This is a simple start of such development methods, obviously this does not have all the necessary checks and balances - hence please feel free to add on top of it depending on your own experience and what will add ease to the development process for everyone else._
+
 ### Guidelines
 
  - Aim for cross-platform compatibility on Windows, macOS and Linux

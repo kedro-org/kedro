@@ -1,3 +1,18 @@
+# Upcoming Release
+
+## Major features and improvements
+
+## Bug fixes and other changes
+* Fixed a bug where a new version created mid-run by an external system caused inconsistencies in the load versions used in the current run.
+
+## Breaking changes to the API
+* Made `invalidate_cache` method on datasets private.
+* `get_last_load_version` and `get_last_save_version` methods are no longer available on ``AbstractDataSet``.
+* `get_last_load_version` and `get_last_save_version` have been renamed to `resolve_load_version` and `resolve_save_version` on ``AbstractVersionedDataSet``, the results of which are cached.
+* The `release()` method on datasets extending ``AbstractVersionedDataSet`` clears the cached load and save version. All custom datasets must call `super()._release()` inside `_release()`.
+
+## Thanks for supporting contributions
+
 # 0.15.7
 
 ## Major features and improvements

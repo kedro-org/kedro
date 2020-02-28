@@ -81,8 +81,8 @@ class Journal:
         Args:
             dataset_name: Name of dataset being logged.
             operation: Operation on dataset, one of {'save', 'load'}.
-            version: Dataset version corresponding to operation (i.e. if operation
-                is 'save' then this is 'save_version').
+            version: Dataset version corresponding to operation (i.e if operation
+                is "save" then this is "save_version").
 
         """
         record_data = {

@@ -120,7 +120,7 @@ class CSVBlobDataSet(AbstractVersionedDataSet):
             container_name=_container_name,
         )
         exists_function = partial(
-            _exists_blob, blob_service=_blob_service, container_name=_container_name,
+            _exists_blob, blob_service=_blob_service, container_name=_container_name
         )
 
         super().__init__(

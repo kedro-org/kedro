@@ -160,7 +160,7 @@ class MatplotlibWriter(AbstractDataSet):
             full_key_path = get_filepath_str(self._filepath, self._protocol)
             self._save_to_fs(full_key_path=full_key_path, plot=data)
 
-        self.invalidate_cache()
+        self._invalidate_cache()
 
     def _save_to_fs(self, full_key_path: str, plot: figure):
         bytes_buffer = io.BytesIO()
@@ -174,9 +174,10 @@ class MatplotlibWriter(AbstractDataSet):
         return self._fs.exists(load_path)
 
     def _release(self) -> None:
-        self.invalidate_cache()
+        super()._release()
+        self._invalidate_cache()
 
-    def invalidate_cache(self) -> None:
+    def _invalidate_cache(self) -> None:
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)

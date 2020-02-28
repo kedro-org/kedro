@@ -47,7 +47,7 @@ from kedro.io import (
     ParquetLocalDataSet,
 )
 from kedro.io.core import generate_timestamp
-from kedro.versioning.journal import Journal
+from kedro.versioning import Journal
 
 
 @pytest.fixture
@@ -237,14 +237,14 @@ class TestDataCatalog:
         """Check the the error when calling `exists`
         on unregistered data set"""
         pattern = r"DataSet \'wrong_key\' not found in the catalog"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DataSetNotFoundError, match=pattern):
             data_catalog.exists("wrong_key")
 
     def test_release_unregistered(self, data_catalog):
         """Check the the error when calling `release`
         on unregistered data set"""
         pattern = r"DataSet \'wrong_key\' not found in the catalog"
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DataSetNotFoundError, match=pattern):
             data_catalog.release("wrong_key")
 
     def test_multi_catalog_list(self, multi_catalog):

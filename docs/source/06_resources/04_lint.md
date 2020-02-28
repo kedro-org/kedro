@@ -1,6 +1,6 @@
 # Linting your Kedro project
 
-> *Note:* This documentation is based on `Kedro 0.15.6`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.7`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 > *Note:* The following suggestions would require installing the  `pylint` package, subject to GPL licence.
 

@@ -1,6 +1,6 @@
 # The Data Catalog
 
-> *Note:* This documentation is based on `Kedro 0.15.6`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.7`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 This section introduces `catalog.yml`, the project-shareable Data Catalog. The file is located in `conf/base` and is a registry of all data sources available for use by a project; it manages loading and saving of data.
 
@@ -332,7 +332,7 @@ class ProjectContext(KedroContext):
     def _create_catalog(self, *args, **kwargs):
         catalog = super()._create_catalog(*args, **kwargs)
         profile_time = ProfileTimeTransformer()  # instantiate a built-in transformer
-        catalog.add_transfomer(profile_time)  # apply it to the catalog
+        catalog.add_transformer(profile_time)  # apply it to the catalog
         return catalog
 ```
 

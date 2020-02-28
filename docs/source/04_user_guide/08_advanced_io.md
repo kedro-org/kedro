@@ -1,6 +1,6 @@
 # Advanced IO
 
-> *Note:* This documentation is based on `Kedro 0.15.6`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.7`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 In this tutorial, you will learn about advanced uses of the [Kedro IO](/kedro.io.rst) module and understand the underlying implementation.
 
@@ -36,7 +36,7 @@ parts_df = parts.load()
 
 However, we recommend using a `DataCatalog` instead (for more details, see [this section](../04_user_guide/04_data_catalog.md) in the User Guide) as it has been designed to make all datasets available to project members.
 
-For contributors, if you would like to submit a new dataset, you will have to extend `AbstractDataSet`.
+For contributors, if you would like to submit a new dataset, you will have to extend `AbstractDataSet`. For a complete guide, please read [Creating a new dataset](./14_create_a_new_dataset.md).
 
 
 ## Versioning
@@ -46,6 +46,8 @@ In order to enable versioning, you need to update the `catalog.yml` config file 
   2. add `version` namedtuple as an argument to its `__init__` method AND
   3. call `super().__init__()` with positional arguments `filepath`, `version`, and, optionally, with a `glob` and an `exists` functions if it uses non-local filesystem (see [kedro.extras.datasets.pandas.CSVDataSet](/kedro.extras.datasets.pandas.CSVDataSet) as an example) AND
   4. modify its `_describe`, `_load` and `_save` methods respectively to support versioning (see [`kedro.extras.datasets.pandas.CSVDataSet`](/kedro.extras.datasets.pandas.CSVDataSet) for an example implementation)
+
+ >*Note:* If a new version of a dataset is created mid-run, for instance by an external system adding new files, it will not interfere in the current run, i.e. the load version stays the same throughout subsequent loads.
 
 An example dataset could look similar to the below:
 

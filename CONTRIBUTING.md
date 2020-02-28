@@ -45,6 +45,37 @@ Working on your first pull request? You can learn how from these resources:
 * [First timers only](https://www.firsttimersonly.com/)
 * [How to contribute to an open source project on GitHub](https://egghead.io/courses/how-to-contribute-to-an-open-source-project-on-github)
 
+### Developer Workflow
+
+#### First time (one-off)
+
+Ensure you have done these:
+
+- [ ] Read through the pre-requisites in the [ReadTheDocs documentation](https://kedro.readthedocs.io/en/stable/02_getting_started/01_prerequisites.html).
+- [ ] Run the below commands:
+```
+make install-test-requirements
+make install-pre-commit
+```
+- [ ] Once the above commands have executed successfully, do a sanity check to ensure that `kedro` works in your environment:
+```
+make test
+make build-docs
+```
+
+#### Then onwards (code or documentation changes)
+
+If you picked up a code or documentation related issue, before pushing the branch to the repo and creating a Pull Request please do the below:
+
+- [ ] for code changes:
+```
+make test
+```
+
+- [ ] for documentation related changes:
+```
+make build-docs
+```
 
 ### Guidelines
 

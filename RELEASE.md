@@ -9,6 +9,7 @@
 * Documentation improvements.
 * Updated contribution process in `CONTRIBUTING.md` - added Developer Workflow.
 * Fixed a bug where `PartitionedDataSet` and `IncrementalDataSet` were not working with `s3a` or `s3n` protocol.
+* Added facility to create an isolated Kedro development environment with the help of Docker containers
 
 ## Breaking changes to the API
 * Made `invalidate_cache` method on datasets private.

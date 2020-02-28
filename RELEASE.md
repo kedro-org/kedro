@@ -4,6 +4,7 @@
 
 ## Bug fixes and other changes
 * Fixed a bug where a new version created mid-run by an external system caused inconsistencies in the load versions used in the current run.
+* Documentation improvements.
 
 ## Breaking changes to the API
 * Made `invalidate_cache` method on datasets private.
@@ -12,7 +13,7 @@
 * The `release()` method on datasets extending ``AbstractVersionedDataSet`` clears the cached load and save version. All custom datasets must call `super()._release()` inside `_release()`.
 
 ## Thanks for supporting contributions
-[Priyanka Shanbhag](https://github.com/priyanka1414)
+[@foolsgold](https://github.com/foolsgold), [Priyanka Shanbhag](https://github.com/priyanka1414)
 
 # 0.15.7
 

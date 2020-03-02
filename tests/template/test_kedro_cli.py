@@ -366,7 +366,7 @@ class TestLintCommand:
             ),
         ]
         if sys.version_info[:2] >= (3, 6):
-            expected_calls.append(mocker.call("black", files))  # pragma: no cover
+            expected_calls.insert(0, mocker.call("black", files))  # pragma: no cover
 
         assert python_call_mock.call_args_list == expected_calls
 
@@ -382,7 +382,7 @@ class TestLintCommand:
             ),
         ]
         if sys.version_info[:2] >= (3, 6):
-            expected_calls.append(mocker.call("black", files))  # pragma: no cover
+            expected_calls.insert(0, mocker.call("black", files))  # pragma: no cover
 
         assert python_call_mock.call_args_list == expected_calls
 

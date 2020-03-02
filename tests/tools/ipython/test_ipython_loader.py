@@ -179,3 +179,9 @@ class TestRunStartupScripts:
             script_path
         )
         assert caplog.records[0].message == expected_message
+
+    def test_no_dir_ipython_loader_main(self, mocker):
+        mocker.patch("pathlib.Path.cwd", return_value="/")
+        mocker.spy(ipython_loader, "run_startup_scripts")
+        ipython_loader.main()
+        ipython_loader.run_startup_scripts.assert_not_called()

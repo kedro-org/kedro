@@ -385,6 +385,7 @@ class TestFormatObject:
             ({"key": "${a}"}, {"a": "A"}, {"key": "A"}),
             ({"${a}": "value"}, {"a": "A"}, {"A": "value"}),
             ({"${a|D}": "value"}, {}, {"D": "value"}),
+            ({1: "${a}"}, {"a": "A"}, {1: "A"}),
         ],
     )
     def test_simple_replace(self, val, format_dict, expected):

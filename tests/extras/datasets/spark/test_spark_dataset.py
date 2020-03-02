@@ -411,7 +411,7 @@ class TestSparkDataSetVersionedDBFS:
 
         expected_calls = [
             mocker.call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME))
-        ] * 2
+        ]
         assert mocked_glob.call_args_list == expected_calls
 
         assert reloaded.exceptAll(sample_spark_df).count() == 0
@@ -453,7 +453,7 @@ class TestSparkDataSetVersionedDBFS:
 
         expected_calls = [
             mocker.call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME))
-        ] * 3
+        ] * 2
         assert mocked_glob.call_args_list == expected_calls
 
 
@@ -501,10 +501,10 @@ class TestSparkDataSetVersionedS3:
     def test_save(self, versioned_dataset_s3, version, mocker):
         mocked_spark_df = mocker.Mock()
 
-        # need _lookup_load_version() call to return a load version that
+        # need resolve_load_version() call to return a load version that
         # matches save version due to consistency check in versioned_dataset_s3.save()
         mocker.patch.object(
-            versioned_dataset_s3, "_lookup_load_version", return_value=version.save
+            versioned_dataset_s3, "resolve_load_version", return_value=version.save
         )
 
         versioned_dataset_s3.save(mocked_spark_df)
@@ -635,10 +635,10 @@ class TestSparkDataSetVersionedHdfs:
             filepath="hdfs://{}".format(HDFS_PREFIX), version=version
         )
 
-        # need _lookup_load_version() call to return a load version that
+        # need resolve_load_version() call to return a load version that
         # matches save version due to consistency check in versioned_hdfs.save()
         mocker.patch.object(
-            versioned_hdfs, "_lookup_load_version", return_value=version.save
+            versioned_hdfs, "resolve_load_version", return_value=version.save
         )
 
         mocked_spark_df = mocker.Mock()

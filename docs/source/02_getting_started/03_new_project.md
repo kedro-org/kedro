@@ -5,7 +5,7 @@ We recommend that you create projects according to the Kedro default project tem
 Projects can be created interactively or by referencing a configuration file.
 
 ## Create a new project interactively
-First, select the directory in which you want to work, and if you are using `conda`, make sure you have the [correct environment](../02_getting_started/01_prerequisites.md#Python-virtual-environments) activated:
+First, select the directory in which you want to work, and if you are using `conda`, make sure you have the [correct environment](../02_getting_started/01_prerequisites.md#anaconda) activated:
 
 ```bash
 conda activate environment_name

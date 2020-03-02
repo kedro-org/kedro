@@ -153,7 +153,7 @@ class FeatherDataSet(AbstractVersionedDataSet):
         with self._fs.open(save_path, mode="wb") as fs_file:
             fs_file.write(buf.getvalue())
 
-        self.invalidate_cache()
+        self._invalidate_cache()
 
     def _exists(self) -> bool:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
@@ -161,9 +161,10 @@ class FeatherDataSet(AbstractVersionedDataSet):
         return self._fs.exists(load_path)
 
     def _release(self) -> None:
-        self.invalidate_cache()
+        super()._release()
+        self._invalidate_cache()
 
-    def invalidate_cache(self) -> None:
+    def _invalidate_cache(self) -> None:
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)

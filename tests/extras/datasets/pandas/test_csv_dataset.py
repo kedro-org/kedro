@@ -38,7 +38,7 @@ from s3fs.core import S3FileSystem
 
 from kedro.extras.datasets.pandas import CSVDataSet
 from kedro.io import DataSetError
-from kedro.io.core import Version, get_filepath_str
+from kedro.io.core import Version, generate_timestamp, get_filepath_str
 
 
 @pytest.fixture
@@ -161,6 +161,30 @@ class TestCSVDataSetVersioned:
         versioned_csv_data_set.save(dummy_dataframe)
         reloaded_df = versioned_csv_data_set.load()
         assert_frame_equal(dummy_dataframe, reloaded_df)
+
+    def test_multiple_loads(
+        self, versioned_csv_data_set, dummy_dataframe, filepath_csv
+    ):
+        """Test that if a new version is created mid-run, by an
+        external system, it won't be loaded in the current run."""
+        versioned_csv_data_set.save(dummy_dataframe)
+        versioned_csv_data_set.load()
+        v1 = versioned_csv_data_set.resolve_load_version()
+
+        # force-drop a newer version into the same location
+        v_new = generate_timestamp()
+        CSVDataSet(filepath=filepath_csv, version=Version(v_new, v_new)).save(
+            dummy_dataframe
+        )
+
+        versioned_csv_data_set.load()
+        v2 = versioned_csv_data_set.resolve_load_version()
+
+        assert v2 == v1  # v2 should not be v_new!
+        ds_new = CSVDataSet(filepath=filepath_csv, version=Version(None, None))
+        assert (
+            ds_new.resolve_load_version() == v_new
+        )  # new version is discoverable by a new instance
 
     def test_no_versions(self, versioned_csv_data_set):
         """Check the error if no versions are available for load."""

@@ -1,6 +1,6 @@
 # Developing Kedro plugins
 
-> *Note:* This documentation is based on `Kedro 0.15.5`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.7`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 The functionality of Kedro can be extended using its `plugin` framework, which is designed to reduce the complexity involved in creating new features for Kedro while allowing you to inject additional commands into the CLI. Plugins are developed as separate Python packages that exist outside of any Kedro project.
 

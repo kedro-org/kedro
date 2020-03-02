@@ -55,7 +55,7 @@ from {{ cookiecutter.python_package }} import __version__ as release
 # -- Project information -----------------------------------------------------
 
 project = "{{ cookiecutter.python_package }}"
-copyright = "2018-2019, QuantumBlack Visual Analytics Limited"
+copyright = "2020, QuantumBlack Visual Analytics Limited"
 author = "QuantumBlack"
 
 # The short X.Y version.

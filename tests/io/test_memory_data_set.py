@@ -115,9 +115,7 @@ class TestMemoryDataSet:
         assert mocked_copy_with_mode.call_args[0]
         assert _check_equals(mocked_copy_with_mode.call_args[0][0], input_data)
 
-    def test_save(
-        self, memory_data_set, input_data, new_data,
-    ):
+    def test_save(self, memory_data_set, input_data, new_data):
         """Test overriding the data set"""
         memory_data_set.save(data=new_data)
         reloaded = memory_data_set.load()
@@ -125,7 +123,7 @@ class TestMemoryDataSet:
         assert _check_equals(reloaded, new_data)
 
     def test_save_infer_mode(
-        self, memory_data_set, new_data, mocked_infer_mode, mocked_copy_with_mode,
+        self, memory_data_set, new_data, mocked_infer_mode, mocked_copy_with_mode
     ):
         """Test save calls infer_mode and copy_mode_with"""
         memory_data_set.save(data=new_data)

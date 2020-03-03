@@ -59,6 +59,16 @@ class TestLoadContext:
         result = load_context(str(fake_repo_path))
         assert result.env == "my_fake_env"
 
+    def test_loading_valid_context_twice(self, mocker, fake_repo_path):
+        """Test getting project context twice."""
+        mocker.patch("logging.config.dictConfig")
+        load_context(str(fake_repo_path))
+        result = load_context(str(fake_repo_path))
+        assert result.project_name == "Test Project"
+        assert result.project_version == kedro.__version__
+        assert str(fake_repo_path.resolve() / "src") in sys.path
+        assert os.getcwd() == str(fake_repo_path.resolve())
+
     def test_invalid_path(self, tmp_path):
         """Test for loading context from an invalid path. """
         other_path = tmp_path / "other"

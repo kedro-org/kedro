@@ -44,7 +44,7 @@
 # template. Please feel free to remove it once you remove the example pipeline.
 
 example_iris_data:
-  type: CSVLocalDataSet
+  type: pandas.CSVDataSet
   filepath: data/01_raw/iris.csv
 
 {% endif %}

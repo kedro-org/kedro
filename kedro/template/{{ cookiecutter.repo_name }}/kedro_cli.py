@@ -294,7 +294,6 @@ def test(args):
 @click.argument("files", type=click.Path(exists=True), nargs=-1)
 def lint(files):
     """Run flake8, isort and (on Python >=3.6) black."""
-    # pylint: disable=unused-import
     if not files:
         files = ("src/tests", "src/{{ cookiecutter.python_package }}")
 
@@ -304,15 +303,15 @@ def lint(files):
     except ImportError as exc:
         raise KedroCliError(NO_DEPENDENCY_MESSAGE.format(exc.name))
 
-    python_call("flake8", ("--max-line-length=88",) + files)
-    python_call("isort", ("-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + files)
-
     if sys.version_info[:2] >= (3, 6):
         try:
             import black
         except ImportError:
             raise KedroCliError(NO_DEPENDENCY_MESSAGE.format("black"))
         python_call("black", files)
+
+    python_call("flake8", ("--max-line-length=88",) + files)
+    python_call("isort", ("-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + files)
 
 
 @cli.command()

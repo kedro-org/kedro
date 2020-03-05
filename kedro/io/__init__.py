@@ -57,5 +57,9 @@ from .pickle_local import PickleLocalDataSet  # NOQA
 from .pickle_s3 import PickleS3DataSet  # NOQA
 from .sql import SQLQueryDataSet  # NOQA
 from .sql import SQLTableDataSet  # NOQA
+from .tensorflow_model_data_set import (  # NOQA
+    TensorFlowModelDataset,
+    TensorFlowModelVersionedDataset,
+)
 from .text_local import TextLocalDataSet  # NOQA
 from .transformers import AbstractTransformer  # NOQA

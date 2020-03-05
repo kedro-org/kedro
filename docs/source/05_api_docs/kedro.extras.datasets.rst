@@ -14,6 +14,7 @@ Data Sets
 
     kedro.extras.datasets.biosequence.BioSequenceDataSet
     kedro.extras.datasets.dask.ParquetDataSet
+    kedro.extras.datasets.geopandas.GeoJSONDataSet
     kedro.extras.datasets.matplotlib.MatplotlibWriter
     kedro.extras.datasets.networkx.NetworkXDataSet
     kedro.extras.datasets.pandas.CSVBlobDataSet
@@ -21,7 +22,6 @@ Data Sets
     kedro.extras.datasets.pandas.ExcelDataSet
     kedro.extras.datasets.pandas.FeatherDataSet
     kedro.extras.datasets.pandas.GBQTableDataSet
-    kedro.extras.datasets.geojson.GeoJSONDataSet
     kedro.extras.datasets.pandas.HDFDataSet
     kedro.extras.datasets.pandas.JSONBlobDataSet
     kedro.extras.datasets.pandas.JSONDataSet

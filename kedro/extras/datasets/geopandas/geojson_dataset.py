@@ -47,17 +47,18 @@ from kedro.io.core import (
 
 
 class GeoJSONDataSet(AbstractVersionedDataSet):
-    """``GeoJSONDataSet`` loads and saves data to a geojson file using an underlying filesystem
+    """``GeoJSONDataSet`` loads/saves data to a GeoJSON file using an underlying filesystem
     (eg: local, S3, GCS).
     The underlying functionality is supported by geopandas, so it supports all
-    allowed geopandas (pandas) options for loading and saving geosjon files.
+    allowed geopandas (pandas) options for loading and saving GeoJSON files.
 
     Example:
     ::
 
         >>> import geopandas as gpd
         >>> from shapely.geometry import Point
-        >>> from kedro.io.contrib import GeoJSONDataSet
+        >>> from kedro.extras.datasets.geopandas import GeoJSONDataSet
+        >>>
         >>> data = gpd.GeoDataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]}, geometry=[Point(1,1), Point(2,4)])
         >>> # data_set = GeoJSONDataSet(filepath="gcs://bucket/test.geojson",
@@ -84,17 +85,21 @@ class GeoJSONDataSet(AbstractVersionedDataSet):
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``GeoJSONDataSet`` pointing to a fsspec
-        filepath.
+        """Creates a new instance of ``GeoJSONDataSet`` pointing to a concrete GeoJSON file
+        on a specific filesystem fsspec.
 
         Args:
 
-            filepath: path to a geojson file. Should be a ``fsspec```
-                protocol path
+            filepath: Filepath to a GeoJSON file prefixed with a protocol like `s3://`.
+                If prefix is not provided `file` protocol (local filesystem) will be used.
+                The prefix should be any protocol supported by ``fsspec``.
+                Note: `http(s)` doesn't support versioning.
             load_args: GeoPandas options for loading GeoJSON files.
                 Here you can find all available arguments:
+                https://geopandas.org/reference/geopandas.read_file.html
             save_args: GeoPandas options for saving geojson files.
                 Here you can find all available arguments:
+                https://geopandas.org/reference.html#geopandas.GeoDataFrame.to_file
                 The default_save_arg driver is 'GeoJSON', all others preserved.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
@@ -103,8 +108,6 @@ class GeoJSONDataSet(AbstractVersionedDataSet):
                 Eg. for ``GCFileSystem`` it would look like `{'token': None}`.
             fs_args: Extra args to pass into the underlying filesystem
                 Eg. for ``GCFileSystem`` it would look like `{'project': 'my-project' , ...}`.
-
-
         """
         _fs_args = copy.deepcopy(fs_args) or {}
         _credentials = copy.deepcopy(credentials) or {}

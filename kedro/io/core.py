@@ -411,6 +411,7 @@ def parse_dataset_definition(
             )
 
         class_paths = (prefix + class_obj for prefix in _DEFAULT_PACKAGES)
+
         trials = (_load_obj(class_path) for class_path in class_paths)
         try:
             class_obj = next(obj for obj in trials if obj is not None)
@@ -441,8 +442,14 @@ def parse_dataset_definition(
 def _load_obj(class_path: str) -> Optional[object]:
     try:
         class_obj = load_obj(class_path)
-    except (ImportError, AttributeError, ValueError):
+    except ImportError as error:
+        if error.name in class_path:
+            return None
+        # class_obj was successfully loaded, but some dependencies are missing.
+        raise DataSetError("{} for {}".format(error, class_path))
+    except (AttributeError, ValueError):
         return None
+
     return class_obj
 
 

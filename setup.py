@@ -101,6 +101,7 @@ extras_require = {
     "memory_profiler": ["memory_profiler>=0.50.0, <1.0"],
 }
 
+extras_require["pandas"] = [*extras_require["azure"], *extras_require["gbq"]]
 extras_require["all"] = sorted(chain.from_iterable(extras_require.values()))
 
 setup(

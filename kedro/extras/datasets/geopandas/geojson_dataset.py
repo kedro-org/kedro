@@ -73,7 +73,7 @@ class GeoJSONDataSet(AbstractVersionedDataSet):
     """
 
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
-    DEFAULT_SAVE_ARGS = {"driver": "GeoJSON"}  # type: Dict[str, Any]
+    DEFAULT_SAVE_ARGS = {"driver": "GeoJSON"}
 
     # pylint: disable=too-many-arguments
     def __init__(

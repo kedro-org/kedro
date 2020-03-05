@@ -99,6 +99,7 @@ extras_require = {
     "matplotlib": ["matplotlib>=3.0.3, <4.0"],
     "networkx": ["networkx>=2.4, <3.0"],
     "memory_profiler": ["memory_profiler>=0.50.0, <1.0"],
+    "geopandas": ["geopandas<=0.6.0, <1.0"],
 }
 
 extras_require["pandas"] = [*extras_require["azure"], *extras_require["gbq"]]

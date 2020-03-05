@@ -1,6 +1,7 @@
 # Upcoming Release
 
 ## Major features and improvements
+* Added a `GeoJSONDataSet`dataset in `kedro.extras.datasets.geopandas` for working with geospatial data that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
 
 ## Bug fixes and other changes
 * Fixed a bug where a new version created mid-run by an external system caused inconsistencies in the load versions used in the current run.
@@ -13,7 +14,7 @@
 * The `release()` method on datasets extending ``AbstractVersionedDataSet`` clears the cached load and save version. All custom datasets must call `super()._release()` inside `_release()`.
 
 ## Thanks for supporting contributions
-[@foolsgold](https://github.com/foolsgold), [Priyanka Shanbhag](https://github.com/priyanka1414)
+[@foolsgold](https://github.com/foolsgold), [Priyanka Shanbhag](https://github.com/priyanka1414), [Luis Blanche](https://github.com/LuisBlanche)
 
 # 0.15.8
 

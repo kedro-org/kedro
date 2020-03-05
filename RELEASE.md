@@ -16,6 +16,20 @@
 ## Thanks for supporting contributions
 [@foolsgold](https://github.com/foolsgold), [Priyanka Shanbhag](https://github.com/priyanka1414), [Luis Blanche](https://github.com/LuisBlanche)
 
+# 0.15.8
+
+## Major features and improvements
+
+## Bug fixes and other changes
+
+* Added the additional libraries to our `requirements.txt` so `pandas.CSVDataSet` class works out of box with `pip install kedro`.
+* Added `pandas` to our `extra_requires` in `setup.py`.
+* Improved the error message when dependencies of a `DataSet` class are missing.
+
+## Breaking changes to the API
+
+## Thanks for supporting contributions
+
 # 0.15.7
 
 ## Major features and improvements
@@ -64,7 +78,7 @@ You can also load data incrementally whenever it is dumped into a directory with
 ### New Datasets
 
 | Type                 | Description                                                                                                                                      | Location                            |
-|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------|
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------- |
 | `ParquetDataSet`     | Handles parquet datasets using Dask                                                                                                              | `kedro.extras.datasets.dask`        |
 | `PickleDataSet`      | Work with Pickle files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem         | `kedro.extras.datasets.pickle`      |
 | `CSVDataSet`         | Work with CSV files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem            | `kedro.extras.datasets.pandas`      |
@@ -81,29 +95,29 @@ You can also load data incrementally whenever it is dumped into a directory with
 
 ### Files with a new location
 
-| Type                                                                                             | New Location                                 |
-|--------------------------------------------------------------------------------------------------|----------------------------------------------|
-| `JSONDataSet`                                                                                    | `kedro.extras.datasets.pandas`               |
-| `CSVBlobDataSet`                                                                                 | `kedro.extras.datasets.pandas`               |
-| `JSONBlobDataSet`                                                                                | `kedro.extras.datasets.pandas`               |
-| `SQLTableDataSet`                                                                                | `kedro.extras.datasets.pandas`               |
-| `SQLQueryDataSet`                                                                                | `kedro.extras.datasets.pandas`               |
-| `SparkDataSet`                                                                                   | `kedro.extras.datasets.spark`                |
-| `SparkHiveDataSet`                                                                               | `kedro.extras.datasets.spark`                |
-| `SparkJDBCDataSet`                                                                               | `kedro.extras.datasets.spark`                |
-| `kedro/contrib/decorators/retry.py`                                                              | `kedro/extras/decorators/retry_node.py`      |
-| `kedro/contrib/decorators/memory_profiler.py`                                                    | `kedro/extras/decorators/memory_profiler.py` |
-| `kedro/contrib/io/transformers/transformers.py`                                                  | `kedro/extras/transformers/time_profiler.py` |
-| `kedro/contrib/colors/logging/color_logger.py`                                                   | `kedro/extras/logging/color_logger.py`       |
-| `extras/ipython_loader.py`                                                                       | `tools/ipython/ipython_loader.py`            |
-| `kedro/contrib/io/cached/cached_dataset.py`                                                      | `kedro/io/cached_dataset.py`                 |
-| `kedro/contrib/io/catalog_with_default/data_catalog_with_default.py`                             | `kedro/io/data_catalog_with_default.py`      |
-| `kedro/contrib/config/templated_config.py`                                                       | `kedro/config/templated_config.py`           |
+| Type                                                                 | New Location                                 |
+| -------------------------------------------------------------------- | -------------------------------------------- |
+| `JSONDataSet`                                                        | `kedro.extras.datasets.pandas`               |
+| `CSVBlobDataSet`                                                     | `kedro.extras.datasets.pandas`               |
+| `JSONBlobDataSet`                                                    | `kedro.extras.datasets.pandas`               |
+| `SQLTableDataSet`                                                    | `kedro.extras.datasets.pandas`               |
+| `SQLQueryDataSet`                                                    | `kedro.extras.datasets.pandas`               |
+| `SparkDataSet`                                                       | `kedro.extras.datasets.spark`                |
+| `SparkHiveDataSet`                                                   | `kedro.extras.datasets.spark`                |
+| `SparkJDBCDataSet`                                                   | `kedro.extras.datasets.spark`                |
+| `kedro/contrib/decorators/retry.py`                                  | `kedro/extras/decorators/retry_node.py`      |
+| `kedro/contrib/decorators/memory_profiler.py`                        | `kedro/extras/decorators/memory_profiler.py` |
+| `kedro/contrib/io/transformers/transformers.py`                      | `kedro/extras/transformers/time_profiler.py` |
+| `kedro/contrib/colors/logging/color_logger.py`                       | `kedro/extras/logging/color_logger.py`       |
+| `extras/ipython_loader.py`                                           | `tools/ipython/ipython_loader.py`            |
+| `kedro/contrib/io/cached/cached_dataset.py`                          | `kedro/io/cached_dataset.py`                 |
+| `kedro/contrib/io/catalog_with_default/data_catalog_with_default.py` | `kedro/io/data_catalog_with_default.py`      |
+| `kedro/contrib/config/templated_config.py`                           | `kedro/config/templated_config.py`           |
 
 ## Upcoming deprecations
 
 | Category                  | Type                                                           |
-|---------------------------|----------------------------------------------------------------|
+| ------------------------- | -------------------------------------------------------------- |
 | **Datasets**              | `BioSequenceLocalDataSet`                                      |
 |                           | `CSVGCSDataSet`                                                |
 |                           | `CSVHTTPDataSet`                                               |

@@ -427,6 +427,17 @@ class TestDataCatalogFromConfig:
         with pytest.raises(KeyError, match=pattern):
             DataCatalog.from_config(**sane_config_with_nested_creds)
 
+    def test_missing_dependency(self, sane_config, mocker):
+        """Test that dependency is missing."""
+        pattern = "dependency issue"
+
+        import_error = ImportError(pattern)
+        import_error.name = pattern  # import_error.name cannot be None
+
+        mocker.patch("kedro.io.core.load_obj", side_effect=import_error)
+        with pytest.raises(DataSetError, match=pattern):
+            DataCatalog.from_config(**sane_config)
+
     def test_idempotent_catalog(self, sane_config):
         """Test that data catalog instantiations are idempotent"""
         _ = DataCatalog.from_config(**sane_config)  # NOQA

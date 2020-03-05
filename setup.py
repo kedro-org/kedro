@@ -102,6 +102,7 @@ extras_require = {
     "geopandas": ["geopandas<=0.6.0, <1.0"],
 }
 
+extras_require["pandas"] = [*extras_require["azure"], *extras_require["gbq"]]
 extras_require["all"] = sorted(chain.from_iterable(extras_require.values()))
 
 setup(

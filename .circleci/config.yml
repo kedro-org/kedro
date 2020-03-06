@@ -1,168 +1,158 @@
-version: 2
+version: 2.1
 
-images:
-  - &py35 quantumblacklabs/kedro_builder:3.5
-  - &py36 quantumblacklabs/kedro_builder:3.6
-  - &py37 quantumblacklabs/kedro_builder:3.7
+executors:
+  py35:
+    docker:
+      - image: quantumblacklabs/kedro_builder:3.5
+  py36:
+    docker:
+      - image: quantumblacklabs/kedro_builder:3.6
+  py37:
+    docker:
+      - image: quantumblacklabs/kedro_builder:3.7
 
-utils:
-  setup_conda: &setup_conda
-    name: Activate conda environment
-    command: |
-      echo ". /home/circleci/miniconda/etc/profile.d/conda.sh" >> $BASH_ENV
-      echo "conda deactivate; conda activate kedro_builder" >> $BASH_ENV
+commands:
+  setup_conda:
+    description: Activate conda environment
+    steps:
+      - run:
+          name: Run conda.sh
+          command: echo ". /home/circleci/miniconda/etc/profile.d/conda.sh" >> $BASH_ENV
+      - run:
+          name: Activate conda environment
+          command: echo "conda deactivate; conda activate kedro_builder" >> $BASH_ENV
 
-  setup_requirements: &setup_requirements
-    name: Install PIP dependencies
-    command: |
-      # echo python version for debugging
-      echo "Python version: $(python --version 2>&1)"
+  setup_requirements:
+    description: Install PIP dependencies
+    steps:
+      - run:
+          name: Echo python version for debugging
+          command: 'echo "Python version: $(python --version 2>&1)"'
+      - run:
+          name: Install pip setuptools
+          command: make install-pip-setuptools
+      - run:
+          name: Install requirements
+          command: pip install -r requirements.txt -U
+      - run:
+          name: Install venv for some pre-commit hooks
+          command: conda install -y virtualenv
+      - run:
+          name: Install test requirements
+          command: pip install -r test_requirements.txt -U
 
-      # Install pip setuptools
-      make install-pip-setuptools
+  setup_pre_commit:
+    description: Install pre-commit hooks
+    steps:
+      - run:
+          name: Install pre-commit hooks
+          command: pre-commit install --install-hooks
+      - run:
+          name: Run pre-commit hooks
+          command: pre-commit install --hook-type pre-push
 
-      # Install requirements
-      pip install -r requirements.txt -U
-
-      # venv is required for some pre-commit hooks
-      conda install -y virtualenv
-
-      # Install test requirements
-      pip install -r test_requirements.txt -U
-
-  setup_pre_commit: &setup_pre_commit
-    name: Install pre-commit hooks
-    command: |
-      pre-commit install --install-hooks
-      pre-commit install --hook-type pre-push
-
-  linters: &linters
-    name: Run pylint and flake8
-    command: |
-      make lint
-
-  unit_tests: &unit_tests
-    name: Run tests
-    command: |
-      make test
-
-  e2e_tests: &e2e_tests
-    name: Run all end to end tests
-    command: |
-      make e2e-tests
-
-  build_docs: &build_docs # NOTE: doesn't work on python 3.5
-    name: Build documentation
-    command: |
-      make build-docs
-
-  check_legal: &check_legal
-    name: Check for legal compliance
-    command: |
-      make legal
-
-  pip_compile: &pip_compile
-    name: pip-compile requirements file
-    command: |
-      make pip-compile
-
-  steps_unit_tests: &steps_unit_tests
+  unit_tests:
+    description: Run unit tests
     steps:
       - checkout
-      - run: *setup_conda
-      - run: *setup_requirements
-      - run: *unit_tests
+      - setup_conda
+      - setup_requirements
+      - run:
+          name: Run unit tests
+          command: make test
 
-  steps_linters: &steps_linters
+  lint:
+    description: Run linters
     steps:
       - checkout
-      - run: *setup_conda
-      - run: *setup_requirements
-      - run: *setup_pre_commit
-      - run: *linters
-      - run: *check_legal
+      - setup_conda
+      - setup_requirements
+      - setup_pre_commit
+      - run:
+          name: Run linters
+          command: make lint
+      - run:
+          name: Check legal headers
+          command: make legal
 
-  steps_e2e_tests: &steps_e2e_tests
+  e2e_tests:
+    description: Run all end to end tests
     steps:
       - checkout
-      - run: *setup_conda
-      - run: *setup_requirements
-      - run: *e2e_tests
+      - setup_conda
+      - setup_requirements
+      - run:
+          name: Run e2e tests
+          command: make e2e-tests
 
-  steps_build_docs: &steps_build_docs # NOTE: requires python3.6+
+  build_docs:  # NOTE: requires python3.6+
+    description: Build docs
     steps:
       - checkout
-      - run: *setup_conda
-      - run: *setup_requirements
-      - run: *build_docs
+      - setup_conda
+      - setup_requirements
+      - run:
+          name: Build docs
+          command: make build-docs
 
-  steps_pip_compile: &steps_pip_compile
+  pip_compile:
+    description: Pip-compile requirements file
     steps:
       - checkout
-      - run: *setup_conda
-      - run: *setup_requirements
-      - run: *pip_compile
+      - setup_conda
+      - setup_requirements
+      - run:
+          name: Pip-compile requirements file
+          command: make pip-compile
 
 jobs:
   unit_tests_35:
-    docker:
-      - image: *py35
-    <<: *steps_unit_tests
+    executor: py35
+    steps: [unit_tests]
 
   linters_35:
-    docker:
-      - image: *py35
-    <<: *steps_linters
+    executor: py35
+    steps: [lint]
 
   e2e_tests_35:
-    docker:
-      - image: *py35
-    <<: *steps_e2e_tests
+    executor: py35
+    steps: [e2e_tests]
 
   unit_tests_36:
-    docker:
-      - image: *py36
-    <<: *steps_unit_tests
+    executor: py36
+    steps: [unit_tests]
 
   linters_36:
-    docker:
-      - image: *py36
-    <<: *steps_linters
+    executor: py36
+    steps: [lint]
 
   e2e_tests_36:
-    docker:
-      - image: *py36
-    <<: *steps_e2e_tests
+    executor: py36
+    steps: [e2e_tests]
 
   docs_36:
-    docker:
-      - image: *py36
-    <<: *steps_build_docs
+    executor: py36
+    steps: [build_docs]
 
   unit_tests_37:
-    docker:
-      - image: *py37
-    <<: *steps_unit_tests
+    executor: py37
+    steps: [unit_tests]
 
   linters_37:
-    docker:
-      - image: *py37
-    <<: *steps_linters
+    executor: py37
+    steps: [lint]
 
   e2e_tests_37:
-    docker:
-      - image: *py37
-    <<: *steps_e2e_tests
+    executor: py37
+    steps: [e2e_tests]
 
   docs_37:
-    docker:
-      - image: *py37
-    <<: *steps_build_docs
+    executor: py37
+    steps: [build_docs]
 
   pip_compile:
-    docker:
-      - image: *py37
-    <<: *steps_pip_compile
+    executor: py37
+    steps: [pip_compile]
 
   all_circleci_checks_succeeded:
     docker:

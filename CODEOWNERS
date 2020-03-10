@@ -1,24 +1,2 @@
-*                                       @idanov @tsanikgr
-
-kedro/*                                 @idanov @tsanikgr
-kedro/contrib/*                         @idanov @tsanikgr
-template/*                              @idanov @tsanikgr
-
-Makefile                                @idanov @tsanikgr
-requirements.txt                        @idanov @tsanikgr
-tools/*                                 @idanov @tsanikgr
-
-tests/*                                 @nakhan98
-features/*                              @nakhan98
-behave.ini                              @nakhan98
-.pylintrc                               @nakhan98
-.coveragerc                             @nakhan98
-
-CODEOWNERS                              @idanov
-CONTRIBUTING.md                         @idanov
-README.md                               @idanov
-RELEASE.md                              @idanov
-LICENSE.md                              @idanov
-legal_header.txt                        @idanov
-
-kedro/contrib/io/cached                 @tsanikgr
+*                                       @idanov
+docs/                                   @yetudada

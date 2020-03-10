@@ -6,7 +6,8 @@
 ## Bug fixes and other changes
 * Fixed a bug where a new version created mid-run by an external system caused inconsistencies in the load versions used in the current run.
 * Documentation improvements.
-* Updated contribution process in `CONTRIBUTING.md` - added Developer Workflow
+* Updated contribution process in `CONTRIBUTING.md` - added Developer Workflow.
+* Fixed a bug where `PartitionedDataSet` and `IncrementalDataSet` were not working with `s3a` or `s3n` protocol.
 
 ## Breaking changes to the API
 * Made `invalidate_cache` method on datasets private.

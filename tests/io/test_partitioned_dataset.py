@@ -414,6 +414,25 @@ class TestPartitionedDataSetS3:
             df = load_func()
             assert_frame_equal(df, partitioned_data_pandas[partition_id])
 
+    def test_load_s3a(self, mocked_csvs_in_s3, partitioned_data_pandas, mocker):
+        s3a_path = "s3a://{}".format(mocked_csvs_in_s3.split("://", 1)[1])
+        # any type is fine as long as it passes isinstance check
+        # since _dataset_type is mocked later anyways
+        pds = PartitionedDataSet(s3a_path, "CSVS3DataSet")
+        assert pds._protocol == "s3a"
+
+        mocked_ds = mocker.patch.object(pds, "_dataset_type")
+        mocked_ds.__name__ = "mocked"
+        loaded_partitions = pds.load()
+
+        assert loaded_partitions.keys() == partitioned_data_pandas.keys()
+        assert mocked_ds.call_count == len(loaded_partitions)
+        expected = [
+            mocker.call(filepath="{}/{}".format(s3a_path, partition_id))
+            for partition_id in loaded_partitions
+        ]
+        mocked_ds.assert_has_calls(expected, any_order=True)
+
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
     def test_save(self, dataset, mocked_csvs_in_s3):
         pds = PartitionedDataSet(mocked_csvs_in_s3, dataset)
@@ -428,6 +447,25 @@ class TestPartitionedDataSetS3:
         assert part_id in loaded_partitions
         reloaded_data = loaded_partitions[part_id]()
         assert_frame_equal(reloaded_data, original_data)
+
+    def test_save_s3a(self, mocked_csvs_in_s3, mocker):
+        """Test that save works in case of s3a protocol"""
+        s3a_path = "s3a://{}".format(mocked_csvs_in_s3.split("://", 1)[1])
+        # any type is fine as long as it passes isinstance check
+        # since _dataset_type is mocked later anyways
+        pds = PartitionedDataSet(s3a_path, "CSVS3DataSet", filename_suffix=".csv")
+        assert pds._protocol == "s3a"
+
+        mocked_ds = mocker.patch.object(pds, "_dataset_type")
+        mocked_ds.__name__ = "mocked"
+        new_partition = "new/data"
+        data = "data"
+
+        pds.save({new_partition: data})
+        mocked_ds.assert_called_once_with(
+            filepath="{}/{}.csv".format(s3a_path, new_partition)
+        )
+        mocked_ds.return_value.save.assert_called_once_with(data)
 
     @pytest.mark.parametrize("dataset", ["CSVS3DataSet", "HDFS3DataSet"])
     def test_exists(self, dataset, mocked_csvs_in_s3):

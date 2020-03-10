@@ -9,7 +9,6 @@ dask[complete]>=2.6.0, <3.0
 flake8>=3.5,<4.0
 gcsfs>=0.3.0, <1.0
 geopandas>=0.6.0, <1.0
-gitdb2==3.0.0 # pin trufflehog dependency to get it working for now https://github.com/dxa4481/truffleHog/issues/200
 hdfs>=2.5.8, <3.0
 import-linter==1.0; python_version >= '3.6'
 joblib==0.12.3
@@ -30,5 +29,5 @@ pytest-cov>=2.5, <3.0
 pytest-mock>=1.7.1,<2.0
 pytest>=3.9, <4.0
 requests-mock>=1.6.0, <2.0.0
-trufflehog>=2.0.99
+trufflehog>=2.1.0, <3.0
 wheel==0.32.2

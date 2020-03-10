@@ -173,7 +173,7 @@ class SparkHiveDataSet(AbstractDataSet):
             raise DataSetError("table_pk must be set to utilise upsert read mode")
         self._table_pk = table_pk
         # self._table_columns is set up in _save() to speed up initialization
-        self._table_columns = []
+        self._table_columns = []  # type: List[str]
 
     @staticmethod
     def _get_spark() -> SparkSession:

@@ -5,6 +5,7 @@
 
 ## Bug fixes and other changes
 * Fixed a bug where a new version created mid-run by an external system caused inconsistencies in the load versions used in the current run.
+* Sped up initialization of `SparkHiveDataSet`
 * Documentation improvements.
 
 ## Breaking changes to the API
@@ -14,7 +15,7 @@
 * The `release()` method on datasets extending ``AbstractVersionedDataSet`` clears the cached load and save version. All custom datasets must call `super()._release()` inside `_release()`.
 
 ## Thanks for supporting contributions
-[@foolsgold](https://github.com/foolsgold), [Priyanka Shanbhag](https://github.com/priyanka1414), [Luis Blanche](https://github.com/LuisBlanche)
+[@foolsgold](https://github.com/foolsgold), [Priyanka Shanbhag](https://github.com/priyanka1414), [Luis Blanche](https://github.com/LuisBlanche), [Miguel Rodriguez Gutierrez](https://github.com/MigQ2)
 
 # 0.15.8
 

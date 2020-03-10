@@ -173,23 +173,6 @@ class SparkHiveDataSet(AbstractDataSet):
             raise DataSetError("table_pk must be set to utilise upsert read mode")
         self._table_pk = table_pk
 
-        self._table_columns = self._load().columns if self._exists() else None
-
-        if (
-            self._table_pk
-            and self._exists()
-            and set(self._table_pk) - set(self._table_columns)
-        ):
-            raise DataSetError(
-                "columns [{colnames}] selected as PK not found in table {database}.{table}".format(
-                    colnames=", ".join(
-                        sorted(set(self._table_pk) - set(self._table_columns))
-                    ),
-                    database=self._database,
-                    table=self._table,
-                )
-            )
-
     @staticmethod
     def _get_spark() -> SparkSession:
         return SparkSession.builder.getOrCreate()
@@ -221,7 +204,25 @@ class SparkHiveDataSet(AbstractDataSet):
         )
 
     def _save(self, data: DataFrame) -> None:
-        if not self._exists():
+        table_exists = self._exists()
+        self._table_columns = self._load().columns if table_exists else None
+
+        if (
+            self._table_pk
+            and table_exists
+            and set(self._table_pk) - set(self._table_columns)
+        ):
+            raise DataSetError(
+                "columns [{colnames}] selected as PK not found in table {database}.{table}".format(
+                    colnames=", ".join(
+                        sorted(set(self._table_pk) - set(self._table_columns))
+                    ),
+                    database=self._database,
+                    table=self._table,
+                )
+            )
+
+        if not table_exists:
             self._create_empty_hive_table(data)
             self._table_columns = data.columns
         self._validate_save(data)

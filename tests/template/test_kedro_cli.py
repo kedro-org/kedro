@@ -38,6 +38,9 @@ import pytest
 from click.testing import CliRunner
 
 from kedro.context import KEDRO_ENV_VAR
+from kedro.extras.datasets.pandas import CSVDataSet
+from kedro.io.data_catalog import DataCatalog
+from kedro.io.memory_data_set import MemoryDataSet
 from kedro.runner import ParallelRunner, SequentialRunner
 
 
@@ -812,3 +815,90 @@ class TestConvertNotebookCommand:
                 mocker.call(Path("/path/2"), output_prefix / "2.py"),
             ]
         )
+
+
+class TestCatalogListCommand:
+    PIPELINE_NAME = "pipeline"
+
+    @staticmethod
+    @pytest.fixture
+    def fake_load_context(mocker, fake_kedro_cli):
+        context = mocker.MagicMock()
+        return mocker.patch.object(fake_kedro_cli, "load_context", return_value=context)
+
+    def test_list_all_pipelines(self, fake_kedro_cli, fake_load_context, mocker):
+        yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
+        mocked_context = fake_load_context.return_value
+        mocked_context.pipelines.keys.return_value = (self.PIPELINE_NAME,)
+        mocked_context.catalog.list.return_value = []
+        mocked_pl_obj = mocked_context.pipelines.get.return_value
+        mocked_pl_obj.data_sets.return_value = set()
+
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["catalog", "list"])
+
+        assert not result.exit_code
+        assert mocked_context.pipelines.keys.call_count == 1
+        mocked_context.pipelines.get.assert_called_once_with(self.PIPELINE_NAME)
+
+        expected_dict = {
+            "DataSets in 'pipeline' pipeline": {}
+        }
+        yaml_dump_mock.assert_called_once_with(expected_dict)
+
+    def test_list_specific_pipelines(self, fake_kedro_cli, fake_load_context):
+        mocked_context = fake_load_context.return_value
+
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["catalog", "list", "--pipeline", self.PIPELINE_NAME]
+        )
+
+        assert not result.exit_code
+        assert not mocked_context.pipelines.keys.called
+        mocked_context.pipelines.get.assert_called_once_with(self.PIPELINE_NAME)
+
+    def test_not_found_pipeline(self, fake_kedro_cli, fake_load_context):
+        mocked_context = fake_load_context.return_value
+        mocked_context.pipelines.get.return_value = None
+        mocked_context.pipelines.keys.return_value = (self.PIPELINE_NAME,)
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["catalog", "list", "--pipeline", "fake"]
+        )
+        assert result.exit_code
+        expected_output = "Error: fake pipeline not found! Existing pipelines: {}\n".format(
+            self.PIPELINE_NAME
+        )
+        assert result.output == expected_output
+
+    def test_no_param_datasets_in_respose(
+        self, fake_kedro_cli, fake_load_context, mocker
+    ):
+        yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
+        mocked_context = fake_load_context.return_value
+        catalog_data_sets = {
+            "iris_data": CSVDataSet("test.csv"),
+            "parameters": MemoryDataSet(),
+            "params:data_ratio": MemoryDataSet(),
+            "intermediate": MemoryDataSet(),
+            "not_used": CSVDataSet("test2.csv")
+        }
+
+        pl_obj_data_sets = set(catalog_data_sets.keys()).difference(["not_used"])
+        mocked_context.catalog = DataCatalog(data_sets=catalog_data_sets)
+        mocked_context.pipelines.keys.return_value = (self.PIPELINE_NAME,)
+        mocked_pl_obj = mocked_context.pipelines.get.return_value
+        mocked_pl_obj.data_sets.return_value = pl_obj_data_sets
+
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["catalog", "list"])
+
+        assert not result.exit_code
+        # 'parameters' and 'params:data_ratio' should not appear in the response
+        expected_dict = {
+            "DataSets in 'pipeline' pipeline": {
+                "Datasets mentioned in pipeline": {
+                    "CSVDataSet": ["iris_data"],
+                    "MemoryDataSet": ["intermediate"]
+                },
+                "Datasets not mentioned in pipeline": {"CSVDataSet": ["not_used"]}
+            }
+        }
+        yaml_dump_mock.assert_called_once_with(expected_dict)

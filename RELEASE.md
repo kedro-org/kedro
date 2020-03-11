@@ -1,6 +1,7 @@
 # Upcoming Release
 
 ## Major features and improvements
+* Added new CLI command `kedro catalog list`.
 * Added a `GeoJSONDataSet`dataset in `kedro.extras.datasets.geopandas` for working with geospatial data that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
 
 ## Bug fixes and other changes

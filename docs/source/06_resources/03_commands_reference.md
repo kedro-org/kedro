@@ -90,6 +90,9 @@ Typically output cells of Jupyter Notebook should not be tracked by git, especia
 
 This command adds a `git hook` which clears all notebook output cells before committing anything to `git`.  This needs to run only once per local repository.
 
+### `kedro catalog list`
+This command shows datasets per pipeline per type. The result includes datasets that are/aren't used by a specific pipeline. It also accept optional `--pipeline` argument that allows specifying pipeline name(s) (comma-separated value) for which the datasets should be shown, e.g. `kedro catalog list --pipeline "ds,de"`.
+
 ## Using Python
 You can also invoke the Kedro CLI as a Python module:
 

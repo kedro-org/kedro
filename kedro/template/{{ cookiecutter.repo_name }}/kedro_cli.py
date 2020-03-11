@@ -34,7 +34,8 @@ import shutil
 import subprocess
 import sys
 import webbrowser
-from collections import Counter
+import yaml
+from collections import Counter, defaultdict
 from glob import iglob
 from itertools import chain
 from pathlib import Path
@@ -52,7 +53,6 @@ from kedro.cli.utils import (
     python_call,
 )
 from kedro.context import KEDRO_ENV_VAR, load_context
-from kedro.runner import SequentialRunner
 from kedro.utils import load_obj
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
@@ -119,7 +119,7 @@ any open notebooks."""
 
 
 def _split_string(ctx, param, value):
-    return [item for item in value.split(",") if item]
+    return [item.strip() for item in value.split(",") if item]
 
 
 def _try_convert_to_numeric(value):
@@ -259,9 +259,10 @@ def run(
             "Both --parallel and --runner options cannot be used together. "
             "Please use either --parallel or --runner."
         )
+    runner = runner or "SequentialRunner"
     if parallel:
         runner = "ParallelRunner"
-    runner_class = load_obj(runner, "kedro.runner") if runner else SequentialRunner
+    runner_class = load_obj(runner, "kedro.runner")
 
     tag = _get_values_as_tuple(tag) if tag else tag
     node_names = _get_values_as_tuple(node_names) if node_names else node_names
@@ -616,6 +617,73 @@ def ipython_message(all_kernels=True):
         secho("(restart with --all-kernels to get access to others)", fg="yellow")
 
     secho("-" * 79, fg="cyan")
+
+
+@cli.group()
+def catalog():
+    """Commands for catalog."""
+
+
+@catalog.command("list")
+@click.option(
+    "--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP,
+)
+@click.option(
+    "--pipeline", type=str, default="", help=PIPELINE_ARG_HELP, callback=_split_string
+)
+def list_datasets(pipeline, env):
+    """Show datasets per type."""
+    title = "DataSets in '{}' pipeline"
+    not_mentioned = "Datasets not mentioned in pipeline"
+    mentioned = "Datasets mentioned in pipeline"
+
+    context = load_context(Path.cwd(), env=env)
+    datasets_meta = context.catalog._data_sets
+    catalog_ds = set(context.catalog.list())
+
+    pipelines = pipeline or context.pipelines.keys()
+
+    result = {}
+    for pipeline in pipelines:
+        pl_obj = context.pipelines.get(pipeline)
+        if pl_obj:
+            pipeline_ds = pl_obj.data_sets()
+        else:
+            existing_pls = ", ".join(sorted(context.pipelines.keys()))
+            raise KedroCliError(
+                "{} pipeline not found! Existing pipelines: {}".format(
+                    pipeline, existing_pls
+                )
+            )
+
+        unused_ds = catalog_ds - pipeline_ds
+        default_ds = pipeline_ds - catalog_ds
+        used_ds = catalog_ds - unused_ds
+
+        unused_by_type = _map_type_to_datasets(unused_ds, datasets_meta)
+        used_by_type = _map_type_to_datasets(used_ds, datasets_meta)
+
+        if default_ds:
+            used_by_type["DefaultDataSet"].extend(default_ds)
+
+        data = ((not_mentioned, dict(unused_by_type)), (mentioned, dict(used_by_type)))
+        result[title.format(pipeline)] = {key: value for key, value in data if value}
+
+    secho(yaml.dump(result))
+
+
+def _map_type_to_datasets(datasets, datasets_meta):
+    """Build dictionary with a dataset type as a key and list of
+    datasets of the specific type as a value.
+    """
+    mapping = defaultdict(list)
+    for ds in datasets:
+        is_param = ds.startswith("params:") or ds == "parameters"
+        if not is_param:
+            ds_type = datasets_meta[ds].__class__.__name__
+            if ds not in mapping[ds_type]:
+                mapping[ds_type].append(ds)
+    return mapping
 
 
 if __name__ == "__main__":

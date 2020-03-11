@@ -257,14 +257,14 @@ class TestSparkHiveDataSet:
         with pytest.raises(
             DataSetError,
             match=r"columns \[column_doesnt_exist\] selected as PK not "
-            r"found in table default_1\.table_1",
+            r"found in table default_1\.test_invalid_pk_provided",
         ):
             SparkHiveDataSet(
                 database="default_1",
-                table="table_1",
+                table="test_invalid_pk_provided",
                 write_mode="upsert",
                 table_pk=["column_doesnt_exist"],
-            )
+            ).save(_generate_spark_df_one())
 
     def test_invalid_write_mode_provided(self):
         with pytest.raises(

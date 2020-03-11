@@ -419,6 +419,25 @@ class TestPartitionedDataSetS3:
         assert pds._checkpoint.exists()
         assert pds._read_checkpoint() == max(partitioned_data_pandas)
 
+    def test_load_and_confirm_s3a(
+        self, mocked_csvs_in_s3, partitioned_data_pandas, mocker
+    ):
+        s3a_path = "s3a://{}".format(mocked_csvs_in_s3.split("://", 1)[1])
+        pds = IncrementalDataSet(s3a_path, DATASET)
+        assert pds._protocol == "s3a"
+        assert pds._checkpoint._protocol == "s3"
+
+        mocked_ds = mocker.patch.object(pds, "_dataset_type")
+        mocked_ds.__name__ = "mocked"
+        loaded = pds.load()
+
+        assert loaded.keys() == partitioned_data_pandas.keys()
+        assert not pds._checkpoint.exists()
+        assert pds._read_checkpoint() is None
+        pds.confirm()
+        assert pds._checkpoint.exists()
+        assert pds._read_checkpoint() == max(partitioned_data_pandas)
+
     @pytest.mark.parametrize(
         "forced_checkpoint,expected_partitions",
         [

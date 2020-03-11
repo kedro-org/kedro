@@ -5,8 +5,10 @@
 
 ## Bug fixes and other changes
 * Fixed a bug where a new version created mid-run by an external system caused inconsistencies in the load versions used in the current run.
-* Sped up initialization of `SparkHiveDataSet`
 * Documentation improvements.
+* Updated contribution process in `CONTRIBUTING.md` - added Developer Workflow.
+* Fixed a bug where `PartitionedDataSet` and `IncrementalDataSet` were not working with `s3a` or `s3n` protocol.
+* Sped up initialization of `SparkHiveDataSet`
 
 ## Breaking changes to the API
 * Made `invalidate_cache` method on datasets private.
@@ -15,7 +17,7 @@
 * The `release()` method on datasets extending ``AbstractVersionedDataSet`` clears the cached load and save version. All custom datasets must call `super()._release()` inside `_release()`.
 
 ## Thanks for supporting contributions
-[@foolsgold](https://github.com/foolsgold), [Priyanka Shanbhag](https://github.com/priyanka1414), [Luis Blanche](https://github.com/LuisBlanche), [Miguel Rodriguez Gutierrez](https://github.com/MigQ2)
+[@foolsgold](https://github.com/foolsgold), [Mani Sarkar](https://github.com/neomatrix369), [Priyanka Shanbhag](https://github.com/priyanka1414), [Luis Blanche](https://github.com/LuisBlanche), [Miguel Rodriguez Gutierrez](https://github.com/MigQ2)
 
 # 0.15.8
 
@@ -40,12 +42,10 @@
 ## Bug fixes and other changes
 
 * Fixed the link to the Kedro banner image in the documentation.
-* Updated contribution process in `CONTRIBUTING.md` - added Developer Workflow
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Mani Sarkar](https://github.com/neomatrix369)
 
 # 0.15.6
 

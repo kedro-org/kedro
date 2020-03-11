@@ -82,7 +82,7 @@ def geojson_data_set(filepath, load_args, save_args):
 @pytest.fixture
 def versioned_geojson_data_set(filepath, load_version, save_version):
     return GeoJSONDataSet(
-        filepath=filepath, version=Version(load_version, save_version),
+        filepath=filepath, version=Version(load_version, save_version)
     )
 
 

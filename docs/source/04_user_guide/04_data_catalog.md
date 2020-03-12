@@ -172,7 +172,7 @@ us_corn_yield_data:
   type: kedro.extras.api.APIDataSet
   url: https://quickstats.nass.usda.gov
   params:
-    key: API_KEY
+    key: SOME_TOKEN
     format: JSON
     commodity_desc: CORN
     statisticcat_des: YIELD

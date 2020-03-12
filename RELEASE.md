@@ -15,6 +15,7 @@
 * `get_last_load_version` and `get_last_save_version` methods are no longer available on `AbstractDataSet`.
 * `get_last_load_version` and `get_last_save_version` have been renamed to `resolve_load_version` and `resolve_save_version` on ``AbstractVersionedDataSet``, the results of which are cached.
 * The `release()` method on datasets extending ``AbstractVersionedDataSet`` clears the cached load and save version. All custom datasets must call `super()._release()` inside `_release()`.
+* Removed `KEDRO_ENV_VAR` from `kedro.context` to speed up the CLI run time. To make `kedro` work with project templates generated with earlier versions of Kedro, remove all instances of `KEDRO_ENV_VAR` from `kedro_cli.py`.
 
 ## Thanks for supporting contributions
 [@foolsgold](https://github.com/foolsgold), [Mani Sarkar](https://github.com/neomatrix369), [Priyanka Shanbhag](https://github.com/priyanka1414), [Luis Blanche](https://github.com/LuisBlanche)

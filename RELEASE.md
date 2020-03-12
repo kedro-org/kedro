@@ -80,6 +80,7 @@ You can also load data incrementally whenever it is dumped into a directory with
 
 | Type                 | Description                                                                                                                                      | Location                            |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------- |
+| `APIDataSet`         | Handles API requests using python [`requests`](https://requests.readthedocs.io/en/master/)                                                       | `kedro.extras.datasets.api`         |
 | `ParquetDataSet`     | Handles parquet datasets using Dask                                                                                                              | `kedro.extras.datasets.dask`        |
 | `PickleDataSet`      | Work with Pickle files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem         | `kedro.extras.datasets.pickle`      |
 | `CSVDataSet`         | Work with CSV files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem            | `kedro.extras.datasets.pandas`      |

@@ -33,3 +33,4 @@ Data Sets
     kedro.extras.datasets.spark.SparkJDBCDataSet
     kedro.extras.datasets.text.TextDataSet
     kedro.extras.datasets.yaml.YAMLDataSet
+    kedro.extras.datasets.api.APIDataSet

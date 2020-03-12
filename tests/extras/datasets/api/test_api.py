@@ -44,7 +44,7 @@ TEST_TEXT_RESPONSE_DATA = "This is a response."
 TEST_JSON_RESPONSE_DATA = [{"key": "value"}]
 
 TEST_PARAMS = {"param": "value"}
-TEST_URL_WITH_PARAMS = f"{TEST_URL}?param=value"
+TEST_URL_WITH_PARAMS = TEST_URL + "?param=value"
 
 TEST_HEADERS = {"key": "value"}
 

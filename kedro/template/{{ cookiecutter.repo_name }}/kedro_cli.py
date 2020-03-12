@@ -52,7 +52,8 @@ from kedro.cli.utils import (
     forward_command,
     python_call,
 )
-from kedro.context import KEDRO_ENV_VAR, load_context
+from kedro.context import load_context
+from kedro.runner import SequentialRunner
 from kedro.utils import load_obj
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
@@ -211,13 +212,7 @@ def cli():
 )
 @click.option("--parallel", "-p", is_flag=True, multiple=False, help=PARALLEL_ARG_HELP)
 @click.option(
-    "--env",
-    "-e",
-    type=str,
-    default=None,
-    multiple=False,
-    envvar=KEDRO_ENV_VAR,
-    help=ENV_ARG_HELP,
+    "--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP,
 )
 @click.option("--tag", "-t", type=str, multiple=True, help=TAG_ARG_HELP)
 @click.option(
@@ -456,12 +451,12 @@ def _build_jupyter_command(
 def _build_jupyter_env(kedro_env: str) -> Dict[str, Any]:
     """Build the environment dictionary that gets injected into the subprocess running
     Jupyter. Since the subprocess has access only to the environment variables passed
-    in, we need to copy the current environment and add ``KEDRO_ENV_VAR``.
+    in, we need to copy the current environment and add ``KEDRO_ENV``.
     """
     if not kedro_env:
         return {}
     jupyter_env = os.environ.copy()
-    jupyter_env[KEDRO_ENV_VAR] = kedro_env
+    jupyter_env["KEDRO_ENV"] = kedro_env
     return {"env": jupyter_env}
 
 
@@ -479,13 +474,7 @@ def jupyter():
 )
 @click.option("--idle-timeout", type=int, default=30, help=JUPYTER_IDLE_TIMEOUT_HELP)
 @click.option(
-    "--env",
-    "-e",
-    type=str,
-    default=None,
-    multiple=False,
-    envvar=KEDRO_ENV_VAR,
-    help=ENV_ARG_HELP,
+    "--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP,
 )
 def jupyter_notebook(ip, all_kernels, env, idle_timeout, args):
     """Open Jupyter Notebook with project specific variables loaded."""
@@ -507,13 +496,7 @@ def jupyter_notebook(ip, all_kernels, env, idle_timeout, args):
 )
 @click.option("--idle-timeout", type=int, default=30, help=JUPYTER_IDLE_TIMEOUT_HELP)
 @click.option(
-    "--env",
-    "-e",
-    type=str,
-    default=None,
-    multiple=False,
-    envvar=KEDRO_ENV_VAR,
-    help=ENV_ARG_HELP,
+    "--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP,
 )
 def jupyter_lab(ip, all_kernels, env, idle_timeout, args):
     """Open Jupyter Lab with project specific variables loaded."""

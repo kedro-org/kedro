@@ -28,7 +28,6 @@
 
 """Behave environment setup commands."""
 
-import glob
 import os
 import shutil
 import stat
@@ -87,11 +86,7 @@ def before_all(context):
     # install Kedro
     call([context.python, "-m", "pip", "install", "-U", "pip"])
     call([context.pip, "install", "--upgrade", "setuptools"])
-    for wheel_path in Path("dist").glob("*.whl"):
-        wheel_path.unlink()
-    call([context.pip, "install", "wheel"])
-    call([context.python, "setup.py", "clean", "--all", "bdist_wheel"])
-    call([context.pip, "install", "-U"] + glob.glob("dist/*.whl"))
+    call([context.pip, "install", ".[all]"])
 
 
 def after_all(context):

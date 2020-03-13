@@ -592,4 +592,4 @@ io.save("ranked", ranked)
 > *Note:* Saving `None` to a dataset is not allowed!
 
 ### Creating your own dataset
-More specialised datasets can be found in `contrib/io`. [Creating new datasets](../03_tutorial/03_set_up_data.md#creating-custom-datasets) is the easiest way to contribute to the Kedro project.
+All datasets can be found in `kedro/extras/datasets`. [Creating new datasets](../03_tutorial/03_set_up_data.md#creating-custom-datasets) is the easiest way to contribute to the Kedro project.

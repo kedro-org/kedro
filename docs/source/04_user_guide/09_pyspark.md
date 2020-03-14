@@ -80,7 +80,7 @@ Since `SparkSession` is a [singleton](https://python-3-patterns-idioms-test.read
 
 Having created a `SparkSession`, you can load your data using `PySpark`'s [DataFrameReader](https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrameReader).
 
-To do so, please use the provided [SparkDataSet](/kedro.contrib.io.pyspark.SparkDataSet):
+To do so, please use the provided [SparkDataSet](/kedro.extras.datasets.spark.SparkDataSet):
 
 ### Code API
 

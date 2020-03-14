@@ -16,7 +16,6 @@ kedro
   kedro.pipeline
   kedro.runner
   kedro.context
-  kedro.contrib
   kedro.cli
   kedro.versioning
   kedro.extras.datasets

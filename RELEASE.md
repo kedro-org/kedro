@@ -16,6 +16,23 @@
 * `get_last_load_version` and `get_last_save_version` have been renamed to `resolve_load_version` and `resolve_save_version` on ``AbstractVersionedDataSet``, the results of which are cached.
 * The `release()` method on datasets extending ``AbstractVersionedDataSet`` clears the cached load and save version. All custom datasets must call `super()._release()` inside `_release()`.
 * Removed `KEDRO_ENV_VAR` from `kedro.context` to speed up the CLI run time. To make `kedro` work with project templates generated with earlier versions of Kedro, remove all instances of `KEDRO_ENV_VAR` from `kedro_cli.py`.
+* Deleted obsoleted datasets from `kedro.io`.
+* Deleted `kedro.contrib` and `extras` folders.
+
+### Migration guide from Kedro 0.15.* to Upcoming Release
+#### Migration for datasets
+
+Since all the datasets (from `kedro.io` and `kedro.contrib.io`) were moved to `kedro/extras/datasets` you must update the type of all datasets in `<project>/conf/base/catalog.yml` file.
+Here how it should be changed: `type: <SomeDataSet>` -> `type: <subfolder of kedro/extras/datasets>.<SomeDataSet>` (e.g. `type: CSVDataSet` -> `type: pandas.CSVDataSet`).
+
+In addition, all the specific datasets like `CSVLocalDataSet`, `CSVS3DataSet` etc. were deprecated. In addition, all the specific datasets like `CSVLocalDataSet`, `CSVS3DataSet` etc. were deprecated. Instead, you must use generalized datasets like `CSVDataSet`.
+E.g. `type: CSVS3DataSet` -> `type: pandas.CSVDataSet`.
+
+Note: No changes required if you are using your custom dataset.
+
+#### Migration for decorators, color logger, transformers etc.
+Since some modules were moved to other locations you need to update import paths appropriately.
+The list of moved files you can find in `0.15.6` release notes under `Files with a new location` section.
 
 ## Thanks for supporting contributions
 [@foolsgold](https://github.com/foolsgold), [Mani Sarkar](https://github.com/neomatrix369), [Priyanka Shanbhag](https://github.com/priyanka1414), [Luis Blanche](https://github.com/LuisBlanche)

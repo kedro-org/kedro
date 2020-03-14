@@ -33,7 +33,6 @@ saving functionality provided by ``kedro.io``.
 import abc
 import copy
 import logging
-import os
 import warnings
 from collections import namedtuple
 from datetime import datetime, timezone
@@ -41,7 +40,6 @@ from functools import lru_cache
 from glob import iglob
 from pathlib import Path, PurePath
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
-from urllib.parse import urlparse
 
 from fsspec.utils import infer_storage_options
 
@@ -447,14 +445,6 @@ def _local_exists(filepath: str) -> bool:
     return filepath.exists() or any(par.is_file() for par in filepath.parents)
 
 
-def is_remote_path(filepath: str) -> bool:
-    """Check if the given path looks like a remote URL (has scheme)."""
-    # Get rid of Windows-specific "C:\" start,
-    # which is treated as a URL scheme.
-    _, filepath = os.path.splitdrive(filepath)
-    return bool(urlparse(filepath).scheme)
-
-
 class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
     """
     ``AbstractVersionedDataSet`` is the base class for all versioned data set
@@ -668,12 +658,3 @@ def validate_on_forbidden_chars(**kwargs):
             raise DataSetError(
                 "Neither white-space nor semicolon are allowed in `{}`.".format(key)
             )
-
-
-def deprecation_warning(class_name):
-    """Log deprecation warning."""
-    warnings.warn(
-        "{} will be deprecated in future releases. Please refer "
-        "to replacement datasets in kedro.extras.datasets.".format(class_name),
-        DeprecationWarning,
-    )

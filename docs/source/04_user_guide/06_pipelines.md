@@ -625,7 +625,7 @@ Hello f(h(g(Python)))!
 Out[9]: {}
 ```
 
-Decorators can be useful for monitoring your pipeline. Kedro currently has 1 built-in decorator: `log_time`, which will log the time taken for executing your node. You can find it in `kedro.pipeline.decorators`. Other decorators can be found in `kedro.contrib.decorators`, for which you will need to install the required dependencies.
+Decorators can be useful for monitoring your pipeline. Kedro currently has 1 built-in decorator: `log_time`, which will log the time taken for executing your node. You can find it in `kedro.pipeline.decorators`. Other decorators can be found in `kedro.extras.decorators`, for which you will need to install the required dependencies.
 
 ## Running pipelines with IO
 

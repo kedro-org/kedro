@@ -41,7 +41,7 @@ from pandas.util.testing import assert_frame_equal
 from kedro import __version__
 from kedro.config import MissingConfigException
 from kedro.context import KedroContext, KedroContextError
-from kedro.io import CSVLocalDataSet
+from kedro.extras.datasets.pandas import CSVDataSet
 from kedro.io.core import Version, generate_timestamp
 from kedro.pipeline import Pipeline, node
 from kedro.runner import ParallelRunner, SequentialRunner
@@ -95,9 +95,9 @@ def base_config(tmp_path):
     trains_filepath = str(tmp_path / "trains.csv")
 
     return {
-        "trains": {"type": "CSVLocalDataSet", "filepath": trains_filepath},
+        "trains": {"type": "pandas.CSVDataSet", "filepath": trains_filepath},
         "cars": {
-            "type": "CSVLocalDataSet",
+            "type": "pandas.CSVDataSet",
             "filepath": cars_filepath,
             "save_args": {"index": True},
         },
@@ -110,13 +110,13 @@ def local_config(tmp_path):
     boats_filepath = str(tmp_path / "boats.csv")
     return {
         "cars": {
-            "type": "CSVLocalDataSet",
+            "type": "pandas.CSVDataSet",
             "filepath": cars_filepath,
             "save_args": {"index": False},
             "versioned": True,
         },
         "boats": {
-            "type": "CSVLocalDataSet",
+            "type": "pandas.CSVDataSet",
             "filepath": boats_filepath,
             "versioned": True,
         },
@@ -301,9 +301,9 @@ class TestKedroContext:
         assert params["param1"] == 1
         assert db_conf["prod"]["url"] == "postgresql://user:pass@url_prod/db"
 
-        assert catalog["trains"]["type"] == "CSVLocalDataSet"
-        assert catalog["cars"]["type"] == "CSVLocalDataSet"
-        assert catalog["boats"]["type"] == "CSVLocalDataSet"
+        assert catalog["trains"]["type"] == "pandas.CSVDataSet"
+        assert catalog["cars"]["type"] == "pandas.CSVDataSet"
+        assert catalog["boats"]["type"] == "pandas.CSVDataSet"
         assert not catalog["cars"]["save_args"]["index"]
 
     def test_default_env(self, dummy_context):
@@ -513,7 +513,7 @@ class TestKedroContextRun:
 
         old_save_version = generate_timestamp()
         old_df = pd.DataFrame({"col1": [0, 0], "col2": [0, 0], "col3": [0, 0]})
-        old_csv_data_set = CSVLocalDataSet(
+        old_csv_data_set = CSVDataSet(
             filepath=filepath,
             save_args={"sep": ","},
             version=Version(None, old_save_version),
@@ -521,7 +521,7 @@ class TestKedroContextRun:
         old_csv_data_set.save(old_df)
 
         new_save_version = generate_timestamp()
-        new_csv_data_set = CSVLocalDataSet(
+        new_csv_data_set = CSVDataSet(
             filepath=filepath,
             save_args={"sep": ","},
             version=Version(None, new_save_version),

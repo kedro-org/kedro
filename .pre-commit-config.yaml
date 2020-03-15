@@ -52,13 +52,6 @@ repos:
             files: ^features/
             entry: pylint --disable=missing-docstring,no-name-in-module
             stages: [commit]
-          - id: pylint-quick-extras
-            name: "Quick PyLint on extras/*"
-            language: system
-            types: [file, python]
-            files: ^extras/
-            entry: pylint
-            stages: [commit]
           - id: pylint-quick-tests
             name: "Quick PyLint on tests/*"
             language: system
@@ -80,12 +73,6 @@ repos:
             pass_filenames: false
             stages: [manual]
             entry: pylint --disable=missing-docstring,no-name-in-module features
-          - id: pylint-extras
-            name: "PyLint on extras/*"
-            language: system
-            pass_filenames: false
-            stages: [manual]
-            entry: pylint extras
           - id: pylint-tests
             name: "PyLint on tests/*"
             language: system
@@ -97,7 +84,7 @@ repos:
             name: "Black"
             language: system
             pass_filenames: false
-            entry: python -m tools.min_version 3.6 "black kedro extras features tests"
+            entry: python -m tools.min_version 3.6 "black kedro features tests"
           - id: legal
             name: "Licence check"
             language: system

@@ -29,6 +29,7 @@
 
 import json
 
+import matplotlib
 import matplotlib.pyplot as plt
 import pytest
 import s3fs
@@ -44,6 +45,8 @@ CREDENTIALS = {"client_kwargs": AWS_CREDENTIALS}
 KEY_PATH = "matplotlib"
 COLOUR_LIST = ["blue", "green", "red"]
 FULL_PATH = "s3://{}/{}".format(BUCKET_NAME, KEY_PATH)
+
+matplotlib.use("Agg")  # Disable interactive mode
 
 
 @pytest.fixture

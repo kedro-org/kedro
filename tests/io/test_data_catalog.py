@@ -27,6 +27,7 @@
 # limitations under the License.
 import logging
 import re
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -34,17 +35,15 @@ import pandas as pd
 import pytest
 from pandas.util.testing import assert_frame_equal
 
+from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
 from kedro.io import (
     AbstractDataSet,
-    CSVLocalDataSet,
-    CSVS3DataSet,
     DataCatalog,
     DataSetAlreadyExistsError,
     DataSetError,
     DataSetNotFoundError,
     LambdaDataSet,
     MemoryDataSet,
-    ParquetLocalDataSet,
 )
 from kedro.io.core import generate_timestamp
 from kedro.versioning import Journal
@@ -64,18 +63,19 @@ def dummy_dataframe():
 def sane_config(filepath):
     return {
         "catalog": {
-            "boats": {"type": "CSVLocalDataSet", "filepath": filepath},
+            "boats": {"type": "pandas.CSVDataSet", "filepath": filepath},
             "cars": {
-                "type": "CSVS3DataSet",
-                "filepath": "test_file.csv",
-                "bucket_name": "test_bucket",
+                "type": "pandas.CSVDataSet",
+                "filepath": "s3://test_bucket/test_file.csv",
                 "credentials": "s3_credentials",
             },
         },
         "credentials": {
             "s3_credentials": {
-                "aws_access_key_id": "FAKE_ACCESS_KEY",
-                "aws_secret_access_key": "FAKE_SECRET_KEY",
+                "client_kwargs": {
+                    "aws_access_key_id": "FAKE_ACCESS_KEY",
+                    "aws_secret_access_key": "FAKE_SECRET_KEY",
+                }
             }
         },
     }
@@ -84,25 +84,27 @@ def sane_config(filepath):
 @pytest.fixture
 def sane_config_with_nested_creds(sane_config):
     sane_config["catalog"]["cars"]["credentials"] = {
-        "nested": {"credentials": "other_credentials"},
+        "client_kwargs": {"credentials": "other_credentials"},
         "key": "secret",
     }
     sane_config["credentials"]["other_credentials"] = {
-        "aws_access_key_id": "OTHER_FAKE_ACCESS_KEY",
-        "aws_secret_access_key": "OTHER_FAKE_SECRET_KEY",
+        "client_kwargs": {
+            "aws_access_key_id": "OTHER_FAKE_ACCESS_KEY",
+            "aws_secret_access_key": "OTHER_FAKE_SECRET_KEY",
+        }
     }
     return sane_config
 
 
 @pytest.fixture
 def data_set(filepath):
-    return CSVLocalDataSet(filepath=filepath, save_args={"index": False})
+    return CSVDataSet(filepath=filepath, save_args={"index": False})
 
 
 @pytest.fixture
 def multi_catalog(mocker):
-    csv = CSVLocalDataSet(filepath="abc.csv")
-    parq = ParquetLocalDataSet(filepath="xyz.parq")
+    csv = CSVDataSet(filepath="abc.csv")
+    parq = ParquetDataSet(filepath="xyz.parq")
     journal = mocker.Mock()
     return DataCatalog({"abc": csv, "xyz": parq}, journal=journal)
 
@@ -182,7 +184,7 @@ class TestDataCatalog:
     def test_load_error(self, data_catalog):
         """Check the error when attempting to load a data set
         from nonexistent source"""
-        pattern = r"Failed while loading data from data set CSVLocalDataSet"
+        pattern = r"Failed while loading data from data set CSVDataSet"
         with pytest.raises(DataSetError, match=pattern):
             data_catalog.load("test")
 
@@ -260,16 +262,14 @@ class TestDataCatalog:
 
     def test_datasets_on_init(self, data_catalog_from_config):
         """Check datasets are loaded correctly on construction"""
-        assert isinstance(data_catalog_from_config.datasets.boats, CSVLocalDataSet)
-        assert isinstance(data_catalog_from_config.datasets.cars, CSVS3DataSet)
+        assert isinstance(data_catalog_from_config.datasets.boats, CSVDataSet)
+        assert isinstance(data_catalog_from_config.datasets.cars, CSVDataSet)
 
     def test_datasets_on_add(self, data_catalog_from_config):
         """Check datasets are updated correctly after adding"""
-        data_catalog_from_config.add("new_dataset", CSVLocalDataSet("some_path"))
-        assert isinstance(
-            data_catalog_from_config.datasets.new_dataset, CSVLocalDataSet
-        )
-        assert isinstance(data_catalog_from_config.datasets.boats, CSVLocalDataSet)
+        data_catalog_from_config.add("new_dataset", CSVDataSet("some_path"))
+        assert isinstance(data_catalog_from_config.datasets.new_dataset, CSVDataSet)
+        assert isinstance(data_catalog_from_config.datasets.boats, CSVDataSet)
 
     def test_adding_datasets_not_allowed(self, data_catalog_from_config):
         """Check error if user tries to update the datasets attribute"""
@@ -329,15 +329,15 @@ class TestDataCatalogFromConfig:
         """Check the error if the type points to nonexistent module"""
         sane_config["catalog"]["boats"][
             "type"
-        ] = "kedro.invalid_module_name.io.CSVLocalDataSet"
+        ] = "kedro.invalid_module_name.io.CSVDataSet"
 
-        error_msg = "Class `kedro.invalid_module_name.io.CSVLocalDataSet` not found"
+        error_msg = "Class `kedro.invalid_module_name.io.CSVDataSet` not found"
         with pytest.raises(DataSetError, match=re.escape(error_msg)):
             DataCatalog.from_config(**sane_config)
 
     def test_config_relative_import(self, sane_config):
         """Check the error if the type points to a relative import"""
-        sane_config["catalog"]["boats"]["type"] = ".CSVLocalDataSetInvalid"
+        sane_config["catalog"]["boats"]["type"] = ".CSVDataSetInvalid"
 
         pattern = "`type` class path does not support relative paths"
         with pytest.raises(DataSetError, match=re.escape(pattern)):
@@ -350,11 +350,11 @@ class TestDataCatalogFromConfig:
 
     def test_config_missing_class(self, sane_config):
         """Check the error if the type points to nonexistent class"""
-        sane_config["catalog"]["boats"]["type"] = "kedro.io.CSVLocalDataSetInvalid"
+        sane_config["catalog"]["boats"]["type"] = "kedro.io.CSVDataSetInvalid"
 
         pattern = (
             "An exception occurred when parsing config for DataSet `boats`:\n"
-            "Class `kedro.io.CSVLocalDataSetInvalid` not found"
+            "Class `kedro.io.CSVDataSetInvalid` not found"
         )
         with pytest.raises(DataSetError, match=re.escape(pattern)):
             DataCatalog.from_config(**sane_config)
@@ -375,7 +375,7 @@ class TestDataCatalogFromConfig:
         sane_config["catalog"]["boats"]["save_and_load_args"] = False
         pattern = (
             r"DataSet 'boats' must only contain arguments valid for "
-            r"the constructor of `.*CSVLocalDataSet`"
+            r"the constructor of `.*CSVDataSet`"
         )
         with pytest.raises(DataSetError, match=pattern):
             DataCatalog.from_config(**sane_config)
@@ -392,34 +392,33 @@ class TestDataCatalogFromConfig:
 
     def test_link_credentials(self, sane_config, mocker):
         """Test credentials being linked to the relevant data set"""
-        mock_client = mocker.patch("kedro.io.csv_s3.S3FileSystem")
+        mock_client = mocker.patch("kedro.extras.datasets.pandas.csv_dataset.fsspec")
+        config = deepcopy(sane_config)
+        del config["catalog"]["boats"]
 
-        DataCatalog.from_config(**sane_config)
+        DataCatalog.from_config(**config)
 
-        expected_client_kwargs = {
-            "aws_access_key_id": sane_config["credentials"]["s3_credentials"][
-                "aws_access_key_id"
-            ],
-            "aws_secret_access_key": sane_config["credentials"]["s3_credentials"][
-                "aws_secret_access_key"
-            ],
-        }
-        mock_client.assert_called_once_with(client_kwargs=expected_client_kwargs)
+        expected_client_kwargs = sane_config["credentials"]["s3_credentials"]
+        mock_client.filesystem.assert_called_with("s3", **expected_client_kwargs)
 
     def test_nested_credentials(self, sane_config_with_nested_creds, mocker):
-        mock_client = mocker.patch("kedro.io.csv_s3.S3FileSystem")
-        DataCatalog.from_config(**sane_config_with_nested_creds)
+        mock_client = mocker.patch("kedro.extras.datasets.pandas.csv_dataset.fsspec")
+        config = deepcopy(sane_config_with_nested_creds)
+        del config["catalog"]["boats"]
+        DataCatalog.from_config(**config)
 
         expected_client_kwargs = {
-            "nested": {
+            "client_kwargs": {
                 "credentials": {
-                    "aws_access_key_id": "OTHER_FAKE_ACCESS_KEY",
-                    "aws_secret_access_key": "OTHER_FAKE_SECRET_KEY",
+                    "client_kwargs": {
+                        "aws_access_key_id": "OTHER_FAKE_ACCESS_KEY",
+                        "aws_secret_access_key": "OTHER_FAKE_SECRET_KEY",
+                    }
                 }
             },
             "key": "secret",
         }
-        mock_client.assert_called_once_with(client_kwargs=expected_client_kwargs)
+        mock_client.filesystem.assert_called_once_with("s3", **expected_client_kwargs)
 
     def test_missing_nested_credentials(self, sane_config_with_nested_creds):
         del sane_config_with_nested_creds["credentials"]["other_credentials"]
@@ -456,7 +455,7 @@ class TestDataCatalogFromConfig:
         catalog = {
             "ds_to_confirm": {
                 "type": "IncrementalDataSet",
-                "dataset": "kedro.extras.datasets.pandas.CSVDataSet",
+                "dataset": "pandas.CSVDataSet",
                 "path": str(tmp_path),
             }
         }

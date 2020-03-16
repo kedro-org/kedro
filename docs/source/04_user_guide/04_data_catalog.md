@@ -126,10 +126,10 @@ trucks:
     categories: list
     index: 'name'
   save_args:
-     compression: 'GZIP'
-     file_scheme: 'hive'
-     has_nulls: false
-     partition_on: ['name']
+    compression: 'GZIP'
+    file_scheme: 'hive'
+    has_nulls: false
+    partition_on: ['name']
 
 # Example 9: Load / saves a Spark table on S3, using specified load and save arguments
 

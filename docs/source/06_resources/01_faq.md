@@ -137,7 +137,7 @@ You can find a list of Kedro projects in the [`kedro-examples`](https://github.c
 
 ## What version of Python does Kedro use?
 
-Kedro is built for Python 3.5, 3.6 and 3.7.
+Kedro is built for Python 3.5, 3.6, 3.7 and 3.8.
 
 ## How do I upgrade Kedro?
 

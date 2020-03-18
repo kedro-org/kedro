@@ -211,9 +211,7 @@ def cli():
     "--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP
 )
 @click.option("--parallel", "-p", is_flag=True, multiple=False, help=PARALLEL_ARG_HELP)
-@click.option(
-    "--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP,
-)
+@click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
 @click.option("--tag", "-t", type=str, multiple=True, help=TAG_ARG_HELP)
 @click.option(
     "--load-version",
@@ -473,9 +471,7 @@ def jupyter():
     "--all-kernels", is_flag=True, default=False, help=JUPYTER_ALL_KERNELS_HELP
 )
 @click.option("--idle-timeout", type=int, default=30, help=JUPYTER_IDLE_TIMEOUT_HELP)
-@click.option(
-    "--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP,
-)
+@click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
 def jupyter_notebook(ip, all_kernels, env, idle_timeout, args):
     """Open Jupyter Notebook with project specific variables loaded."""
     if "-h" not in args and "--help" not in args:
@@ -495,9 +491,7 @@ def jupyter_notebook(ip, all_kernels, env, idle_timeout, args):
     "--all-kernels", is_flag=True, default=False, help=JUPYTER_ALL_KERNELS_HELP
 )
 @click.option("--idle-timeout", type=int, default=30, help=JUPYTER_IDLE_TIMEOUT_HELP)
-@click.option(
-    "--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP,
-)
+@click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
 def jupyter_lab(ip, all_kernels, env, idle_timeout, args):
     """Open Jupyter Lab with project specific variables loaded."""
     if "-h" not in args and "--help" not in args:
@@ -608,9 +602,7 @@ def catalog():
 
 
 @catalog.command("list")
-@click.option(
-    "--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP,
-)
+@click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
 @click.option(
     "--pipeline", type=str, default="", help=PIPELINE_ARG_HELP, callback=_split_string
 )

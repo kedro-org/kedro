@@ -84,7 +84,19 @@ def before_all(context):
     context.env["PIP_CONFIG_FILE"] = str(pip_conf_path)
 
     # install Kedro
-    call([context.python, "-m", "pip", "install", "-U", "pip"])
+    # these versions should match what's in the Makefile
+    call(
+        [
+            context.python,
+            "-m",
+            "pip",
+            "install",
+            "-U",
+            "pip>=18.0, <19.0",
+            "setuptools>=38.0, <39.0",
+            "wheel",
+        ]
+    )
     call([context.pip, "install", "--upgrade", "setuptools"])
     call([context.pip, "install", ".[all]"])
 

@@ -42,6 +42,7 @@ from kedro.runner import ParallelRunner
 from tests.conftest import skip_if_py38
 
 if sys.version_info < (3, 8):
+    # pylint: disable=import-error
     from pyspark.sql import SparkSession
     from pyspark.sql.functions import col  # pylint: disable=no-name-in-module
     from pyspark.sql.types import IntegerType, StringType, StructField, StructType

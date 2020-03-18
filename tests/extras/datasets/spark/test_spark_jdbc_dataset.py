@@ -34,7 +34,9 @@ from kedro.io import DataSetError
 from tests.conftest import skip_if_py38
 
 if sys.version_info < (3, 8):
-    from kedro.extras.datasets.spark import SparkJDBCDataSet
+    from kedro.extras.datasets.spark import (  # pylint: disable=import-error
+        SparkJDBCDataSet,
+    )
 else:
     SparkJDBCDataSet = mock.ANY
 

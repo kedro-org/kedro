@@ -38,6 +38,7 @@ from kedro.io import DataSetError
 from tests.conftest import UseTheSparkSessionFixtureOrMock, skip_if_py38
 
 if sys.version_info < (3, 8):
+    # pylint: disable=import-error
     from pyspark import SparkContext
     from pyspark.sql import SparkSession
     from pyspark.sql.types import IntegerType, StringType, StructField, StructType

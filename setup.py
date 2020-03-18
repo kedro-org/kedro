@@ -85,20 +85,13 @@ extras_require = {
         "tornado>=4.2, <6.0",
         "ipykernel>=4.8.1, <5.0",
     ],
-    "spark": ["pyspark>=2.2.0, <3.0", "hdfs>=2.5.8, <3.0", "s3fs>=0.3.0, <1.0"],
     "notebook_templates": ["nbconvert>=5.3.1, <6.0", "nbformat>=4.4.0, <5.0"],
+    "memory_profiler": ["memory_profiler>=0.50.0, <1.0"],
     "bioinformatics": ["biopython>=1.73, <2.0"],
     "dask": ["dask[complete]>=2.6.0, <3.0"],
-    "gcs": ["gcsfs>=0.3.0, <1.0"],
-    "s3": ["s3fs>=0.3.0, <1.0"],
+    "geopandas": ["geopandas<=0.6.0, <1.0"],
     "matplotlib": ["matplotlib>=3.0.3, <4.0"],
     "networkx": ["networkx>=2.4, <3.0"],
-    "memory_profiler": ["memory_profiler>=0.50.0, <1.0"],
-    "geopandas": ["geopandas<=0.6.0, <1.0"],
-    "tables": [
-        "tables>=3.4.4, <3.6; python_version < '3.6'",
-        "tables>=3.6; python_version >= '3.6'",
-    ],
     "pandas": [
         "pandas>=0.24.0, <1.0",
         "azure-storage-blob>=1.1.0, <2.0",
@@ -109,10 +102,13 @@ extras_require = {
         "pyarrow>=0.12.0, <1.0.0",
         "xlrd>=1.0.0, <2.0",
         "xlsxwriter>=1.0.0, <2.0",
+        "tables>=3.4.4, <3.6; python_version < '3.6'",
+        "tables>=3.6; python_version >= '3.6'",
     ],
+    "spark": ["pyspark>=2.2.0, <3.0", "hdfs>=2.5.8, <3.0", "s3fs>=0.3.0, <1.0"],
 }
 
-extras_require["all"] = sorted(chain.from_iterable(extras_require.values()))
+extras_require["all"] = sorted(set(chain.from_iterable(extras_require.values())))
 
 setup(
     name=name,

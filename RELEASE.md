@@ -3,12 +3,14 @@
 ## Major features and improvements
 * Added new CLI command `kedro catalog list`.
 * Added a `GeoJSONDataSet`dataset in `kedro.extras.datasets.geopandas` for working with geospatial data that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+* Enabled Python 3.8 compatibility. _Please note that a Spark workflow may be unreliable for this Python version as `pyspark` is not fully-compatible with 3.8 yet._
 
 ## Bug fixes and other changes
 * Fixed a bug where a new version created mid-run by an external system caused inconsistencies in the load versions used in the current run.
 * Documentation improvements.
 * Updated contribution process in `CONTRIBUTING.md` - added Developer Workflow.
 * Fixed a bug where `PartitionedDataSet` and `IncrementalDataSet` were not working with `s3a` or `s3n` protocol.
+* Documented installation of development version of Kedro in the [FAQ section](https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#how-can-i-use-development-version-of-kedro).
 
 ## Breaking changes to the API
 * Made `invalidate_cache` method on datasets private.
@@ -25,10 +27,10 @@
 Since all the datasets (from `kedro.io` and `kedro.contrib.io`) were moved to `kedro/extras/datasets` you must update the type of all datasets in `<project>/conf/base/catalog.yml` file.
 Here how it should be changed: `type: <SomeDataSet>` -> `type: <subfolder of kedro/extras/datasets>.<SomeDataSet>` (e.g. `type: CSVDataSet` -> `type: pandas.CSVDataSet`).
 
-In addition, all the specific datasets like `CSVLocalDataSet`, `CSVS3DataSet` etc. were deprecated. In addition, all the specific datasets like `CSVLocalDataSet`, `CSVS3DataSet` etc. were deprecated. Instead, you must use generalized datasets like `CSVDataSet`.
+In addition, all the specific datasets like `CSVLocalDataSet`, `CSVS3DataSet` etc. were deprecated. Instead, you must use generalized datasets like `CSVDataSet`.
 E.g. `type: CSVS3DataSet` -> `type: pandas.CSVDataSet`.
 
-Note: No changes required if you are using your custom dataset.
+> Note: No changes required if you are using your custom dataset.
 
 #### Migration for decorators, color logger, transformers etc.
 Since some modules were moved to other locations you need to update import paths appropriately.

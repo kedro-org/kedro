@@ -25,24 +25,36 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import sys
 import tempfile
 from pathlib import Path
 
+import mock
 import pandas as pd
 import pytest
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import col  # pylint: disable=no-name-in-module
-from pyspark.sql.types import IntegerType, StringType, StructField, StructType
-from pyspark.sql.utils import AnalysisException
 
 from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
 from kedro.extras.datasets.pickle import PickleDataSet
-from kedro.extras.datasets.spark import SparkDataSet
 from kedro.io import DataCatalog, DataSetError, Version
 from kedro.io.core import generate_timestamp
 from kedro.pipeline import Pipeline, node
 from kedro.runner import ParallelRunner
+from tests.conftest import skip_if_py38
+
+if sys.version_info < (3, 8):
+    # pylint: disable=import-error
+    from pyspark.sql import SparkSession
+    from pyspark.sql.functions import col  # pylint: disable=no-name-in-module
+    from pyspark.sql.types import IntegerType, StringType, StructField, StructType
+    from pyspark.sql.utils import AnalysisException
+    from kedro.extras.datasets.spark import SparkDataSet
+else:
+    SparkSession = mock.ANY
+    SparkDataSet = mock.ANY
+    col = mock.ANY
+    IntegerType = StringType = StructField = StructType = mock.ANY
+    AnalysisException = mock.ANY
+
 
 FOLDER_NAME = "fake_folder"
 FILENAME = "test.parquet"
@@ -143,6 +155,7 @@ def spark_out(tmp_path):
     return SparkDataSet(filepath=str(tmp_path / "output"))
 
 
+@skip_if_py38
 class TestSparkDataSet:
     def test_load_parquet(self, tmp_path, sample_pandas_df):
         temp_path = str(tmp_path / "data")
@@ -334,6 +347,7 @@ class TestSparkDataSet:
             runner.run(pipeline, catalog)
 
 
+@skip_if_py38
 class TestSparkDataSetVersionedLocal:
     def test_no_version(self, versioned_dataset_local):
         pattern = r"Did not find any versions for SparkDataSet\(.+\)"
@@ -399,6 +413,7 @@ class TestSparkDataSetVersionedLocal:
             versioned_local.save(sample_spark_df)
 
 
+@skip_if_py38
 class TestSparkDataSetVersionedDBFS:
     def test_load_latest(  # pylint: disable=too-many-arguments
         self, mocker, versioned_dataset_dbfs, version, tmp_path, sample_spark_df
@@ -457,6 +472,7 @@ class TestSparkDataSetVersionedDBFS:
         assert mocked_glob.call_args_list == expected_calls
 
 
+@skip_if_py38
 class TestSparkDataSetVersionedS3:
     def test_no_version(self, versioned_dataset_s3):
         pattern = r"Did not find any versions for SparkDataSet\(.+\)"
@@ -569,6 +585,7 @@ class TestSparkDataSetVersionedS3:
         assert "version=" not in str(dataset_s3)
 
 
+@skip_if_py38
 class TestSparkDataSetVersionedHdfs:
     def test_no_version(self, mocker, version):
         hdfs_walk = mocker.patch(

@@ -459,6 +459,7 @@ class KedroContext(abc.ABC):
 
         save_version = self._get_save_version()
         run_id = self.run_id or save_version
+        runner = runner or SequentialRunner()
 
         record_data = {
             "run_id": run_id,
@@ -473,6 +474,7 @@ class KedroContext(abc.ABC):
             "load_versions": load_versions,
             "pipeline_name": pipeline_name,
             "extra_params": self._extra_params,
+            "runner": type(runner).__name__,
         }
         journal = Journal(record_data)
 
@@ -481,7 +483,6 @@ class KedroContext(abc.ABC):
         )
 
         # Run the runner
-        runner = runner or SequentialRunner()
         return runner.run(filtered_pipeline, catalog)
 
     def _get_run_id(

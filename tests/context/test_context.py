@@ -44,7 +44,7 @@ from kedro.context import KedroContext, KedroContextError
 from kedro.extras.datasets.pandas import CSVDataSet
 from kedro.io.core import Version, generate_timestamp
 from kedro.pipeline import Pipeline, node
-from kedro.runner import ParallelRunner, SequentialRunner
+from kedro.runner import DryRunner, ParallelRunner, SequentialRunner
 
 
 def _get_local_logging_config():
@@ -414,6 +414,15 @@ class TestKedroContextRun:  # pylint: disable=too-many-public-methods
         log_msgs = [record.getMessage() for record in caplog.records]
         log_names = [record.name for record in caplog.records]
         assert "kedro.runner.parallel_runner" in log_names
+        assert "Pipeline execution completed successfully." in log_msgs
+
+    def test_dry_run_arg(self, dummy_context, dummy_dataframe, caplog):
+        dummy_context.catalog.save("cars", dummy_dataframe)
+        dummy_context.run(runner=DryRunner())
+
+        log_msgs = [record.getMessage() for record in caplog.records]
+        log_names = [record.name for record in caplog.records]
+        assert "kedro.runner.dry_runner" in log_names
         assert "Pipeline execution completed successfully." in log_msgs
 
     def test_run_with_node_names(self, dummy_context, dummy_dataframe, caplog):

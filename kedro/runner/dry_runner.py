@@ -25,12 +25,43 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-"""``kedro.runner`` provides runners that are able
-to execute ``Pipeline`` instances.
+"""``DryRunner`` is an ``AbstractRunner`` implementation. It can be used to list which
+nodes would be run without actually executing anything.
 """
 
-from .dry_runner import DryRunner  # NOQA
-from .parallel_runner import ParallelRunner  # NOQA
-from .runner import AbstractRunner, run_node  # NOQA
-from .sequential_runner import SequentialRunner  # NOQA
+from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
+from kedro.pipeline import Pipeline
+from kedro.runner.runner import AbstractRunner
+
+
+class DryRunner(AbstractRunner):
+    """``DryRunner`` is an ``AbstractRunner`` implementation. It can be used to list which
+    nodes would be run without actually executing anything.
+    """
+
+    def create_default_data_set(self, ds_name: str) -> AbstractDataSet:
+        """Factory method for creating the default data set for the runner.
+
+        Args:
+            ds_name: Name of the missing data set
+
+        Returns:
+            An instance of an implementation of AbstractDataSet to be used
+            for all unregistered data sets.
+
+        """
+        return MemoryDataSet()
+
+    def _run(self, pipeline: Pipeline, catalog: DataCatalog) -> None:
+        """The method implementing dry pipeline running.
+
+        Args:
+            pipeline: The ``Pipeline`` to run.
+            catalog: The ``DataCatalog`` from which to fetch data.
+        """
+        nodes = pipeline.nodes
+        self._logger.info(
+            "Wet run would execute %d nodes:\n%s",
+            len(nodes),
+            "\n".join(map(str, nodes)),
+        )

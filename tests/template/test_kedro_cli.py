@@ -40,7 +40,7 @@ from click.testing import CliRunner
 from kedro.extras.datasets.pandas import CSVDataSet
 from kedro.io.data_catalog import DataCatalog
 from kedro.io.memory_data_set import MemoryDataSet
-from kedro.runner import ParallelRunner, SequentialRunner
+from kedro.runner import DryRunner, ParallelRunner, SequentialRunner
 
 
 @pytest.fixture(autouse=True)
@@ -213,6 +213,19 @@ class TestRunCommand:
         assert isinstance(
             fake_load_context.return_value.run.call_args_list[0][1]["runner"],
             ParallelRunner,
+        )
+
+    def test_run_successfully_dry_via_name(
+        self, fake_kedro_cli, fake_load_context
+    ):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["run", "--runner=DryRunner"]
+        )
+
+        assert not result.exit_code
+        assert isinstance(
+            fake_load_context.return_value.run.call_args_list[0][1]["runner"],
+            DryRunner,
         )
 
     @pytest.mark.parametrize("config_flag", ["--config", "-c"])

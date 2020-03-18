@@ -37,9 +37,15 @@ import os
 import sys
 from subprocess import Popen
 
+import mock
 import pytest
-from pyspark import SparkContext
-from pyspark.sql import SparkSession
+
+if sys.version_info < (3, 8):
+    from pyspark import SparkContext
+    from pyspark.sql import SparkSession
+else:
+    SparkContext = mock.Mock()
+    SparkSession = mock.Mock()
 
 the_real_getOrCreate = None
 
@@ -93,3 +99,8 @@ def preserve_system_context():
 
     if os.getcwd() != old_cwd:
         os.chdir(old_cwd)
+
+
+skip_if_py38 = pytest.mark.skipif(
+    sys.version_info >= (3, 8), reason="Dependency not compatible with Python 3.8 yet"
+)

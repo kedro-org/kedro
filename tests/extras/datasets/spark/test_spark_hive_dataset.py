@@ -26,18 +26,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import gc
+import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+import mock
 import pytest
 from psutil import Popen
-from pyspark import SparkContext
-from pyspark.sql import SparkSession
-from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 
-from kedro.extras.datasets.spark import SparkHiveDataSet
 from kedro.io import DataSetError
-from tests.conftest import UseTheSparkSessionFixtureOrMock
+from tests.conftest import UseTheSparkSessionFixtureOrMock, skip_if_py38
+
+if sys.version_info < (3, 8):
+    from pyspark import SparkContext
+    from pyspark.sql import SparkSession
+    from pyspark.sql.types import IntegerType, StringType, StructField, StructType
+    from kedro.extras.datasets.spark import SparkHiveDataSet
+else:
+    SparkContext = SparkSession = mock.ANY
+    IntegerType = StringType = StructField = StructType = mock.ANY
+    AnalysisException = mock.ANY
+    SparkHiveDataSet = mock.ANY
+
 
 TESTSPARKDIR = "test_spark_dir"
 
@@ -156,6 +166,7 @@ def _generate_spark_df_upsert_expected():
     return SparkSession.builder.getOrCreate().createDataFrame(data, schema).coalesce(1)
 
 
+@skip_if_py38
 class TestSparkHiveDataSet:
     def test_cant_pickle(self):
         import pickle  # pylint: disable=import-outside-toplevel

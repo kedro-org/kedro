@@ -122,7 +122,7 @@ setup(
     long_description=readme,
     long_description_content_type="text/markdown",
     url="https://github.com/quantumblacklabs/kedro",
-    python_requires=">=3.5, <3.8",
+    python_requires=">=3.5, <3.9",
     packages=find_packages(exclude=["docs*", "tests*", "tools*", "features*"]),
     include_package_data=True,
     tests_require=test_requires,
@@ -137,6 +137,7 @@ setup(
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
     ],
     extras_require=extras_require,
 )

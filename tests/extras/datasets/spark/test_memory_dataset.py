@@ -27,12 +27,22 @@
 # limitations under the License.
 
 # pylint: disable=no-name-in-module
+import sys
+
+import mock
 import pytest
-from pyspark.sql import DataFrame as SparkDataFrame
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, when
 
 from kedro.io import MemoryDataSet
+from tests.conftest import skip_if_py38
+
+if sys.version_info < (3, 8):
+    from pyspark.sql import SparkSession
+    from pyspark.sql import DataFrame as SparkDataFrame
+    from pyspark.sql.functions import col, when
+else:
+    SparkSession = mock.ANY
+    col = when = mock.ANY
+    SparkDataFrame = mock.ANY
 
 
 def _update_spark_df(data, idx, jdx, value):
@@ -64,6 +74,7 @@ def memory_data_set(spark_data_frame):
     return MemoryDataSet(data=spark_data_frame)
 
 
+@skip_if_py38
 def test_load_modify_original_data(memory_data_set, spark_data_frame):
     """Check that the data set object is not updated when the original
     SparkDataFrame is changed."""
@@ -71,6 +82,7 @@ def test_load_modify_original_data(memory_data_set, spark_data_frame):
     assert not _check_equals(memory_data_set.load(), spark_data_frame)
 
 
+@skip_if_py38
 def test_save_modify_original_data(spark_data_frame):
     """Check that the data set object is not updated when the original
     SparkDataFrame is changed."""
@@ -81,6 +93,7 @@ def test_save_modify_original_data(spark_data_frame):
     assert not _check_equals(memory_data_set.load(), spark_data_frame)
 
 
+@skip_if_py38
 def test_load_returns_same_spark_object(memory_data_set, spark_data_frame):
     """Test that consecutive loads point to the same object in case of
     a SparkDataFrame"""
@@ -91,6 +104,7 @@ def test_load_returns_same_spark_object(memory_data_set, spark_data_frame):
     assert loaded_data is reloaded_data
 
 
+@skip_if_py38
 def test_str_representation(memory_data_set):
     """Test string representation of the data set"""
     assert "MemoryDataSet(data=<DataFrame>)" in str(memory_data_set)

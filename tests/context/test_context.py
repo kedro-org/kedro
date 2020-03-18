@@ -376,8 +376,8 @@ class TestKedroContext:
         assert len(dummy_context.pipelines["__default__"].nodes) == 4
 
 
-@pytest.mark.usefixtures("config_dir")  # pylint: disable=too-many-public-methods
-class TestKedroContextRun:
+@pytest.mark.usefixtures("config_dir")
+class TestKedroContextRun:  # pylint: disable=too-many-public-methods
     def test_run_output(self, dummy_context, dummy_dataframe):
         dummy_context.catalog.save("cars", dummy_dataframe)
         outputs = dummy_context.run()

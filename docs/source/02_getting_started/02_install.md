@@ -6,6 +6,8 @@ We recommend installing Kedro in a new virtual environment for *each* of your pr
 pip install kedro
 ```
 
+> *Note:* To install development version of Kedro, follow [these steps](../06_resources/01_faq.md#how-can-i-use-development-version-of-kedro).
+
 To check that Kedro is installed:
 
 ```bash

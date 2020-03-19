@@ -5,6 +5,7 @@
 * Added a `GeoJSONDataSet`dataset in `kedro.extras.datasets.geopandas` for working with geospatial data that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
 * Added support of Pandas 1.x.
 * Enabled Python 3.8 compatibility. _Please note that a Spark workflow may be unreliable for this Python version as `pyspark` is not fully-compatible with 3.8 yet._
+* Added the ability to specify nested parameter values inside your node inputs, e.g. `node(func, "params:a.b", None)`
 
 ## Bug fixes and other changes
 * Fixed a bug where a new version created mid-run by an external system caused inconsistencies in the load versions used in the current run.

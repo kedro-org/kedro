@@ -324,9 +324,29 @@ class KedroContext(abc.ABC):
         params = self.params
         feed_dict = {"parameters": params}
 
-        for param_name, param_value in params.items():
+        def _add_param_to_feed_dict(param_name, param_value):
+            """This recursively adds parameter paths to the `feed_dict`,
+            whenever `param_value` is a dictionary itself, so that users can
+            specify specific nested parameters in their node inputs.
+
+            Example:
+
+                >>> param_name = "a"
+                >>> param_value = {"b": 1}
+                >>> _add_param_to_feed_dict(param_name, param_value)
+                >>> assert feed_dict["params:a"] == {"b": 1}
+                >>> assert feed_dict["params:a.b"] == 1
+            """
             key = "params:{}".format(param_name)
             feed_dict[key] = param_value
+
+            if isinstance(param_value, dict):
+                for key, val in param_value.items():
+                    _add_param_to_feed_dict("{}.{}".format(param_name, key), val)
+
+        for param_name, param_value in params.items():
+            _add_param_to_feed_dict(param_name, param_value)
+
         return feed_dict
 
     def _get_config_credentials(self) -> Dict[str, Any]:

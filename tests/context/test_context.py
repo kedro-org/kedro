@@ -137,7 +137,7 @@ def config_dir(tmp_path, base_config, local_config, env):
     env_logging = tmp_path / "conf" / str(env) / "logging.yml"
     parameters = tmp_path / "conf" / "base" / "parameters.json"
     db_config_path = tmp_path / "conf" / "base" / "db.ini"
-    project_parameters = dict(param1=1, param2=2)
+    project_parameters = {"param1": 1, "param2": 2, "param3": {"param4": 3}}
     _write_yaml(proj_catalog, base_config)
     _write_yaml(env_catalog, local_config)
     _write_yaml(env_credentials, local_config)
@@ -275,8 +275,16 @@ class TestKedroContext:
     )
     def test_params(self, dummy_context, extra_params):
         extra_params = extra_params or {}
-        expected = dict(param1=1, param2=2, **extra_params)
+        expected = {"param1": 1, "param2": 2, "param3": {"param4": 3}, **extra_params}
         assert dummy_context.params == expected
+
+    @pytest.mark.parametrize(
+        "param,expected",
+        [("params:param3", {"param4": 3}), ("params:param3.param4", 3)],
+    )
+    def test_nested_params(self, param, expected, dummy_context):
+        param = dummy_context.catalog.load(param)
+        assert param == expected
 
     @pytest.mark.parametrize(
         "extra_params",

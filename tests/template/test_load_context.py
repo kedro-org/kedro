@@ -26,7 +26,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import sys
 
 import pytest
@@ -45,7 +44,6 @@ class TestLoadContext:
         assert result.project_name == "Test Project"
         assert result.project_version == kedro.__version__
         assert str(fake_repo_path.resolve() / "src") in sys.path
-        assert os.getcwd() == str(fake_repo_path.resolve())
 
     def test_valid_context_with_env(self, mocker, monkeypatch, fake_repo_path):
         """Test getting project context when Kedro config environment is specified in the environment variable."""

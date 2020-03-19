@@ -3,16 +3,16 @@ version: 2.1
 executors:
   py35:
     docker:
-      - image: quantumblacklabs/kedro_builder:3.5
+      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.5
   py36:
     docker:
-      - image: quantumblacklabs/kedro_builder:3.6
+      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.6
   py37:
     docker:
-      - image: quantumblacklabs/kedro_builder:3.7
+      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.7
   py38:
     docker:
-      - image: quantumblacklabs/kedro_builder:3.8
+      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.8
 
 
 commands:

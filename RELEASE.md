@@ -3,6 +3,7 @@
 ## Major features and improvements
 * Added new CLI command `kedro catalog list`.
 * Added a `GeoJSONDataSet`dataset in `kedro.extras.datasets.geopandas` for working with geospatial data that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+* Added support of Pandas 1.x.
 * Enabled Python 3.8 compatibility. _Please note that a Spark workflow may be unreliable for this Python version as `pyspark` is not fully-compatible with 3.8 yet._
 
 ## Bug fixes and other changes

@@ -93,7 +93,7 @@ extras_require = {
     "matplotlib": ["matplotlib>=3.0.3, <4.0"],
     "networkx": ["networkx>=2.4, <3.0"],
     "pandas": [
-        "pandas>=0.24.0, <1.0",
+        "pandas>=0.24.0, <2.0",
         "azure-storage-blob>=1.1.0, <2.0",
         "azure-storage-file>=1.1.0, <2.0",
         "azure-storage-queue>=1.1.0, <2.0",

@@ -180,7 +180,7 @@ bad_pipeline_middle = Pipeline(
         node(bad_node, "trains", "ships", name="nodes3"),
         node(identity, "ships", "planes", name="node4"),
     ],
-    name="bad_pipeline",
+    tags="bad_pipeline",
 )
 
 expected_message_middle = (
@@ -198,7 +198,7 @@ bad_pipeline_head = Pipeline(
         node(identity, "trains", "ships", name="nodes3"),
         node(identity, "ships", "planes", name="node4"),
     ],
-    name="bad_pipeline",
+    tags="bad_pipeline",
 )
 
 expected_message_head = (
@@ -220,7 +220,7 @@ class DummyContext(KedroContext):
                 node(identity, "trains", "ships", name="node3"),
                 node(identity, "ships", "planes", name="node4"),
             ],
-            name="pipeline",
+            tags="pipeline",
         )
         return {"__default__": pipeline}
 
@@ -244,7 +244,7 @@ class DummyContextWithPipelinePropertyOnly(KedroContext):
                 node(identity, "trains", "ships", name="node3"),
                 node(identity, "ships", "planes", name="node4"),
             ],
-            name="pipeline",
+            tags="pipeline",
         )
 
 

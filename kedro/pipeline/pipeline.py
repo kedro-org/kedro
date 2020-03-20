@@ -32,10 +32,9 @@ produced outputs and execution order.
 """
 import copy
 import json
-import warnings
 from collections import Counter, defaultdict
 from itertools import chain
-from typing import Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
+from typing import Callable, Dict, Iterable, List, Set, Tuple, Union
 
 from toposort import CircularDependencyError as ToposortCircleError
 from toposort import toposort
@@ -129,7 +128,6 @@ class Pipeline:
         self,
         nodes: Iterable[Union[Node, "Pipeline"]],
         *,
-        name: str = None,
         tags: Union[str, Iterable[str]] = None
     ):
         """Initialise ``Pipeline`` with a list of ``Node`` instances.
@@ -139,9 +137,6 @@ class Pipeline:
                 provide pipelines among the list of nodes, those pipelines will
                 be expanded and all their nodes will become part of this
                 new pipeline.
-            name: (DEPRECATED, use `tags` method instead) The name of the pipeline.
-                If specified, this name will be used to tag all of the nodes
-                in the pipeline.
             tags: Optional set of tags to be applied to all the pipeline nodes.
 
         Raises:
@@ -191,17 +186,8 @@ class Pipeline:
         _validate_transcoded_inputs_outputs(nodes)
         _tags = set(_to_list(tags))
 
-        if name:
-            warnings.warn(
-                "`name` parameter is deprecated for the `Pipeline`"
-                " constructor, use `Pipeline.tag` method instead",
-                DeprecationWarning,
-            )
-            _tags.add(name)
-
         nodes = [n.tag(_tags) for n in nodes]
 
-        self._name = name
         self._nodes_by_name = {node.name: node for node in nodes}
         _validate_unique_outputs(nodes)
         _validate_unique_confirms(nodes)
@@ -365,33 +351,15 @@ class Pipeline:
 
         str_representation = (
             "#### Pipeline execution order ####\n"
-            "Name: {0}\n"
-            "Inputs: {1}\n\n"
-            "{2}\n\n"
-            "Outputs: {3}\n"
+            "Inputs: {0}\n\n"
+            "{1}\n\n"
+            "Outputs: {2}\n"
             "##################################"
         )
 
         return str_representation.format(
-            self._name,
-            set_to_string(self.inputs()),
-            nodes_as_string,
-            set_to_string(self.outputs()),
+            set_to_string(self.inputs()), nodes_as_string, set_to_string(self.outputs())
         )
-
-    @property
-    def name(self) -> Optional[str]:
-        """(DEPRECATED, use `Pipeline.tag` method instead) Get the pipeline name.
-
-        Returns:
-            The name of the pipeline as provided in the constructor.
-
-        """
-        warnings.warn(
-            "`Pipeline.name` is deprecated, use `Pipeline.tag` method instead.",
-            DeprecationWarning,
-        )
-        return self._name
 
     @property
     def node_dependencies(self) -> Dict[Node, Set[Node]]:

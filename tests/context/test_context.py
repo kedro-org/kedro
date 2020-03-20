@@ -30,8 +30,8 @@ import configparser
 import json
 import os
 import re
-from pathlib import Path
-from typing import Dict
+from pathlib import Path, PureWindowsPath
+from typing import Any, Dict
 
 import pandas as pd
 import pytest
@@ -41,6 +41,7 @@ from pandas.util.testing import assert_frame_equal
 from kedro import __version__
 from kedro.config import MissingConfigException
 from kedro.context import KedroContext, KedroContextError
+from kedro.context.context import _expand_path, _is_relative_path
 from kedro.extras.datasets.pandas import CSVDataSet
 from kedro.io.core import Version, generate_timestamp
 from kedro.pipeline import Pipeline, node
@@ -64,6 +65,12 @@ def _get_local_logging_config():
                 "formatter": "simple",
                 "stream": "ext://sys.stdout",
             }
+        },
+        "info_file_handler": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "level": "INFO",
+            "formatter": "simple",
+            "filename": "logs/info.log",
         },
     }
 
@@ -108,6 +115,8 @@ def base_config(tmp_path):
 def local_config(tmp_path):
     cars_filepath = str(tmp_path / "cars.csv")
     boats_filepath = str(tmp_path / "boats.csv")
+    # use one dataset with a relative filepath
+    horses_filepath = "horses.csv"
     return {
         "cars": {
             "type": "pandas.CSVDataSet",
@@ -118,6 +127,11 @@ def local_config(tmp_path):
         "boats": {
             "type": "pandas.CSVDataSet",
             "filepath": boats_filepath,
+            "versioned": True,
+        },
+        "horses": {
+            "type": "pandas.CSVDataSet",
+            "filepath": horses_filepath,
             "versioned": True,
         },
     }
@@ -137,7 +151,7 @@ def config_dir(tmp_path, base_config, local_config, env):
     env_logging = tmp_path / "conf" / str(env) / "logging.yml"
     parameters = tmp_path / "conf" / "base" / "parameters.json"
     db_config_path = tmp_path / "conf" / "base" / "db.ini"
-    project_parameters = dict(param1=1, param2=2)
+    project_parameters = {"param1": 1, "param2": 2, "param3": {"param4": 3}}
     _write_yaml(proj_catalog, base_config)
     _write_yaml(env_catalog, local_config)
     _write_yaml(env_credentials, local_config)
@@ -258,6 +272,19 @@ class TestKedroContext:
     def test_project_path(self, dummy_context, tmp_path):
         assert str(dummy_context.project_path) == str(tmp_path.resolve())
 
+    def test_get_catalog_always_using_absolute_path(self, dummy_context):
+        conf_catalog = dummy_context.config_loader.get("catalog*")
+
+        # even though the raw configuration uses relative path
+        assert conf_catalog["horses"]["filepath"] == "horses.csv"
+
+        # the catalog and its dataset should be loaded using absolute path
+        # based on the project path
+        catalog = dummy_context._get_catalog()
+        ds_path = catalog._data_sets["horses"]._filepath
+        assert ds_path.is_absolute()
+        assert str(ds_path) == str(dummy_context._project_path / "horses.csv")
+
     def test_catalog(self, dummy_context, dummy_dataframe):
         dummy_context.catalog.save("cars", dummy_dataframe)
         reloaded_df = dummy_context.catalog.load("cars")
@@ -275,8 +302,16 @@ class TestKedroContext:
     )
     def test_params(self, dummy_context, extra_params):
         extra_params = extra_params or {}
-        expected = dict(param1=1, param2=2, **extra_params)
+        expected = {"param1": 1, "param2": 2, "param3": {"param4": 3}, **extra_params}
         assert dummy_context.params == expected
+
+    @pytest.mark.parametrize(
+        "param,expected",
+        [("params:param3", {"param4": 3}), ("params:param3.param4", 3)],
+    )
+    def test_nested_params(self, param, expected, dummy_context):
+        param = dummy_context.catalog.load(param)
+        assert param == expected
 
     @pytest.mark.parametrize(
         "extra_params",
@@ -374,6 +409,14 @@ class TestKedroContext:
     def test_pipelines(self, dummy_context):
         assert len(dummy_context.pipelines) == 1
         assert len(dummy_context.pipelines["__default__"].nodes) == 4
+
+    def test_setup_logging_using_absolute_path(self, tmp_path, mocker):
+        mocked_dict_config = mocker.patch("logging.config.dictConfig")
+        dummy_context = DummyContext(str(tmp_path))
+        called_args = mocked_dict_config.call_args[0][0]
+        assert called_args["info_file_handler"]["filename"] == str(
+            dummy_context._project_path / "logs" / "info.log"
+        )
 
 
 @pytest.mark.usefixtures("config_dir")
@@ -683,3 +726,95 @@ class TestKedroContextRun:  # pylint: disable=too-many-public-methods
             if record.name == "kedro.journal"
         )
         assert json.loads(log_msg)["run_id"] == run_id
+
+
+@pytest.mark.parametrize(
+    "path_string,expected",
+    [
+        # remote paths shouldn't be relative paths
+        ("s3://", False),
+        ("gcp://path/to/file.json", False),
+        # windows absolute path shouldn't relative paths
+        ("C:\\path\\to\\file.json", False),
+        ("C:", False),
+        ("C:/Windows/", False),
+        # posix absolute path shouldn't be relative paths
+        ("/tmp/logs/info.log", False),
+        ("/usr/share", False),
+        # test relative paths
+        ("data/01_raw/data.json", True),
+        ("logs/info.log", True),
+        ("logs\\error.txt", True),
+        ("data", True),
+    ],
+)
+def test_is_relative_path(path_string: str, expected: bool):
+    assert _is_relative_path(path_string) == expected
+
+
+def test_expand_path_raises_value_error_on_relative_project_path():
+    with pytest.raises(ValueError) as excinfo:
+        _expand_path(project_path=Path("relative/path"), conf_dictionary={})
+
+    assert (
+        str(excinfo.value)
+        == "project_path must be an absolute path. Received: relative/path"
+    )
+
+
+@pytest.mark.parametrize(
+    "project_path,input_conf,expected",
+    [
+        (
+            Path("/tmp"),
+            {"handler": {"filename": "logs/info.log"}},
+            {"handler": {"filename": "/tmp/logs/info.log"}},
+        ),
+        (
+            Path("/User/kedro"),
+            {"my_dataset": {"filepath": "data/01_raw/dataset.json"}},
+            {"my_dataset": {"filepath": "/User/kedro/data/01_raw/dataset.json"}},
+        ),
+        (
+            PureWindowsPath("C:\\kedro"),
+            {"my_dataset": {"path": "data\\01_raw\\dataset.json"}},
+            {"my_dataset": {"path": "C:\\kedro\\data\\01_raw\\dataset.json"}},
+        ),
+        # test: the function shouldn't modify paths for key not associated with filepath
+        (
+            Path("/User/kedro"),
+            {"my_dataset": {"fileurl": "relative/url"}},
+            {"my_dataset": {"fileurl": "relative/url"}},
+        ),
+    ],
+)
+def test_expand_path_for_all_known_filepath_keys(
+    project_path: Path, input_conf: Dict[str, Any], expected: Dict[str, Any]
+):
+    assert _expand_path(project_path, input_conf) == expected
+
+
+@pytest.mark.parametrize(
+    "project_path,input_conf,expected",
+    [
+        (
+            Path("/tmp"),
+            {"handler": {"filename": "/usr/local/logs/info.log"}},
+            {"handler": {"filename": "/usr/local/logs/info.log"}},
+        ),
+        (
+            Path("/User/kedro"),
+            {"my_dataset": {"filepath": "s3://data/01_raw/dataset.json"}},
+            {"my_dataset": {"filepath": "s3://data/01_raw/dataset.json"}},
+        ),
+        (
+            PureWindowsPath("D:\\kedro"),
+            {"my_dataset": {"path": "C:\\data\\01_raw\\dataset.json"}},
+            {"my_dataset": {"path": "C:\\data\\01_raw\\dataset.json"}},
+        ),
+    ],
+)
+def test_expand_path_not_changing_non_relative_path(
+    project_path: Path, input_conf: Dict[str, Any], expected: Dict[str, Any]
+):
+    assert _expand_path(project_path, input_conf) == expected

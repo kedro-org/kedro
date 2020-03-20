@@ -26,7 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pylint: disable=no-name-in-module
+# pylint: disable=no-name-in-module,import-error
 import sys
 
 import mock

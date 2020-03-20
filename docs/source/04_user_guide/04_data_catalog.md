@@ -51,7 +51,7 @@ Here is an example data config `catalog.yml`:
 
 bikes:
   type: pandas.CSVDataSet
-  filepath: "data/01_raw/bikes.csv"
+  filepath: data/01_raw/bikes.csv
 
 # Example 2: Loads and saves a CSV on a local file system, using specified load and save arguments
 
@@ -63,7 +63,7 @@ cars:
   save_args:
     index: False
     date_format: '%Y-%m-%d %H:%M'
-    decimal: '.'
+    decimal: .
 
 # Example 3: Loads a CSV file from a specific S3 bucket, using credentials and load arguments
 
@@ -75,7 +75,7 @@ motorbikes:
     sep: ','
     skiprows: 5
     skipfooter: 1
-    na_values: ['#NA', 'NA']
+    na_values: ['#NA', NA]
 
 # Example 4: Loads / saves a pickle file from / to a local file system
 
@@ -111,9 +111,9 @@ skateboards:
   filepath: data/02_intermediate/skateboards.hdf
   key: name
   load_args:
-    columns: ['brand', 'length']
+    columns: [brand, length]
   save_args:
-    mode: 'w'  # Overwrite even when the file already exists
+    mode: w  # Overwrite even when the file already exists
     dropna: True
 
 # Example 8: Loads / saves a parquet file on local file system storage, using specified load and save arguments
@@ -122,14 +122,14 @@ trucks:
   type: pandas.ParquetDataSet
   filepath: data/02_intermediate/trucks.parquet
   load_args:
-    columns: ['name', 'gear','disp', 'wt']
+    columns: [name, gear, disp, wt]
     categories: list
-    index: 'name'
+    index: name
   save_args:
-     compression: 'GZIP'
-     file_scheme: 'hive'
-     has_nulls: false
-     partition_on: ['name']
+    compression: GZIP
+    file_scheme: hive
+    has_nulls: False
+    partition_on: [name]
 
 # Example 9: Load / saves a Spark table on S3, using specified load and save arguments
 
@@ -152,19 +152,19 @@ scooters:
   credentials: scooters_credentials
   table_name: scooters
   load_args:
-    index_col: ['name']
-    columns: ['name', 'gear']
+    index_col: [name]
+    columns: [name, gear]
   save_args:
-    if_exists: 'replace'
+    if_exists: replace
 
 # Example 11: Load a SQL table with credentials, a database connection, and applies a SQL query to the table
 
 scooters_query:
   type: pandas.SQLQueryDataSet
   credentials: scooters_credentials
-  sql: 'select * from cars where gear=4'
+  sql: select * from cars where gear=4
   load_args:
-    index_col: ['name']
+    index_col: [name]
 ```
 
 > *Note:* When using [`pandas.SQLTableDataSet`](/kedro.extras.datasets.pandas.SQLTableDataSet) or [`pandas.SQLQueryDataSet`](/kedro.extras.datasets.pandas.SQLQueryDataSet) you must provide a database connection string. In the example above we pass it using `scooters_credentials` key from the credentials (see the details in [Feeding in credentials](#feeding-in-credentials) section below). `scooters_credentials` must have a top-level key `con` containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. Alternative to credentials would be to explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataSet` only).
@@ -217,21 +217,21 @@ _csv: &csv
   file_format: csv
   load_args:
     sep: ','
-    na_values: ['#NA', 'NA']
+    na_values: ['#NA', NA]
     header: True
     inferSchema: False
 
 cars:
   <<: *csv
-  filepath: 's3a://data/01_raw/cars.csv'
+  filepath: s3a://data/01_raw/cars.csv
 
 trucks:
   <<: *csv
-  filepath: 's3a://data/01_raw/trucks.csv'
+  filepath: s3a://data/01_raw/trucks.csv
 
 bikes:
   <<: *csv
-  filepath: 's3a://data/01_raw/bikes.csv'
+  filepath: s3a://data/01_raw/bikes.csv
   load_args:
     header: False
 ```
@@ -252,10 +252,10 @@ _csv: &csv
 
 airplanes:
   <<: *csv
-  filepath: 's3a://data/01_raw/airplanes.csv'
+  filepath: s3a://data/01_raw/airplanes.csv
   load_args:
     <<: *csv_load_args
-    sep: ';'
+    sep: ;
 ```
 
 In this example the default `csv` configuration is inserted into `airplanes` and then the `load_args` block is overridden. Normally that would replace the whole dictionary. In order to extend `load_args` the defaults for that block are then re-inserted.
@@ -275,7 +275,7 @@ To enable transcoding, you will need to define two `DataCatalog` entries for the
 my_dataframe@spark:
   type: spark.SparkDataSet
   filepath: data/02_intermediate/data.parquet
-  file_format: 'parquet'
+  file_format: parquet
 
 my_dataframe@pandas:
   type: pandas.ParquetDataSet
@@ -470,7 +470,7 @@ Consider the following versioned dataset defined in the `catalog.yml`:
 cars.csv:
   type: pandas.CSVDataSet
   filepath: data/01_raw/company/cars.csv
-  versioned: true
+  versioned: True
 ```
 
 The `DataCatalog` will create a versioned `CSVDataSet` called `cars.csv`. The actual csv file location will look like `data/01_raw/company/cars.csv/<version>/cars.csv`, where `<version>` corresponds to a global save version string formatted as `YYYY-MM-DDThh.mm.ss.sssZ`.

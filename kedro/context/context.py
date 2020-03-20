@@ -35,6 +35,7 @@ import sys
 from copy import deepcopy
 from pathlib import Path
 from typing import Any, Dict, Iterable, Union
+from urllib.parse import urlparse
 from warnings import warn
 
 import yaml
@@ -56,6 +57,104 @@ def _version_mismatch_error(context_version) -> str:
         "https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md "
         "for how to migrate your Kedro project."
     ).format(context_version, __version__)
+
+
+def _is_relative_path(path_string: str) -> bool:
+    """Checks whether a path string is a relative path.
+
+    Example:
+    ::
+        >>> _is_relative_path("data/01_raw") == True
+        >>> _is_relative_path("logs/info.log") == True
+        >>> _is_relative_path("/tmp/data/01_raw") == False
+        >>> _is_relative_path(r"C:\\logs\\info.log") == False
+        >>> _is_relative_path(r"\\logs\\'info.log") == False
+        >>> _is_relative_path("c:/logs/info.log") == False
+        >>> _is_relative_path("s3://logs/info.log") == False
+
+    Args:
+        path_string: The path string to check.
+    Returns:
+        Whether the string is a relative path.
+    """
+    drive, filepath = os.path.splitdrive(path_string)
+
+    is_full_windows_path_with_drive = bool(drive)
+    if is_full_windows_path_with_drive:
+        return False
+
+    is_remote_path = bool(urlparse(filepath).scheme)
+    if is_remote_path:
+        return False
+
+    is_absolute_path = Path(filepath).is_absolute()
+    if is_absolute_path:
+        return False
+
+    return True
+
+
+def _expand_path(project_path: Path, conf_dictionary: Dict[str, Any]) -> Dict[str, Any]:
+    """Turn all relative paths inside ``conf_dictionary`` into absolute paths by appending them to
+    ``project_path``. This is a hack to make sure that we don't have to change user's
+    working directory for logging and datasets to work. It is important for non-standard workflows
+    such as IPython notebook where users don't go through `kedro run` or `run.py` entrypoints.
+
+    Example:
+    ::
+        >>> conf = _expand_path(
+        >>>     project_path=Path("/path/to/my/project"),
+        >>>     conf_dictionary={
+        >>>         "handlers": {
+        >>>             "info_file_handler": {
+        >>>                 "filename": "logs/info.log"
+        >>>             }
+        >>>         }
+        >>>     }
+        >>> )
+        >>> print(conf['handlers']['info_file_handler']['filename'])
+        "/path/to/my/project/logs/info.log"
+
+    Args:
+        project_path: The root directory to prepend to relative path to make absolute path.
+        conf_dictionary: The configuration containing paths to expand.
+    Returns:
+        A dictionary containing only absolute paths.
+    Raises:
+        ValueError: If the provided ``project_path`` is not an absolute path.
+    """
+    if not project_path.is_absolute():
+        raise ValueError(
+            "project_path must be an absolute path. Received: {}".format(project_path)
+        )
+
+    # only check a few conf keys that are known to specify a path string as value
+    conf_keys_with_filepath = (
+        "filename",
+        "filepath",
+        "path",
+    )
+
+    for conf_key, conf_value in conf_dictionary.items():
+
+        # if the conf_value is another dictionary, absolutify its paths first.
+        if isinstance(conf_value, dict):
+            conf_dictionary[conf_key] = _expand_path(project_path, conf_value)
+            continue
+
+        # if the conf_value is not a dictionary nor a string, skip
+        if not isinstance(conf_value, str):
+            continue
+
+        # if the conf_value is a string but the conf_key isn't one associated with filepath, skip
+        if conf_key not in conf_keys_with_filepath:
+            continue
+
+        if _is_relative_path(conf_value):
+            conf_value_absolute_path = str(project_path / conf_value)
+            conf_dictionary[conf_key] = conf_value_absolute_path
+
+    return conf_dictionary
 
 
 class KedroContext(abc.ABC):
@@ -238,6 +337,10 @@ class KedroContext(abc.ABC):
 
         """
         conf_catalog = self.config_loader.get("catalog*", "catalog*/**")
+        # turn relative paths in conf_catalog into absolute paths before initializing the catalog
+        conf_catalog = _expand_path(
+            project_path=self.project_path, conf_dictionary=conf_catalog
+        )
         conf_creds = self._get_config_credentials()
         catalog = self._create_catalog(
             conf_catalog, conf_creds, save_version, journal, load_versions
@@ -317,6 +420,10 @@ class KedroContext(abc.ABC):
     def _setup_logging(self) -> None:
         """Register logging specified in logging directory."""
         conf_logging = self.config_loader.get("logging*", "logging*/**")
+        # turn relative paths in logging config into absolute path before initialising loggers
+        conf_logging = _expand_path(
+            project_path=self.project_path, conf_dictionary=conf_logging
+        )
         logging.config.dictConfig(conf_logging)
 
     def _get_feed_dict(self) -> Dict[str, Any]:
@@ -324,9 +431,29 @@ class KedroContext(abc.ABC):
         params = self.params
         feed_dict = {"parameters": params}
 
-        for param_name, param_value in params.items():
+        def _add_param_to_feed_dict(param_name, param_value):
+            """This recursively adds parameter paths to the `feed_dict`,
+            whenever `param_value` is a dictionary itself, so that users can
+            specify specific nested parameters in their node inputs.
+
+            Example:
+
+                >>> param_name = "a"
+                >>> param_value = {"b": 1}
+                >>> _add_param_to_feed_dict(param_name, param_value)
+                >>> assert feed_dict["params:a"] == {"b": 1}
+                >>> assert feed_dict["params:a.b"] == 1
+            """
             key = "params:{}".format(param_name)
             feed_dict[key] = param_value
+
+            if isinstance(param_value, dict):
+                for key, val in param_value.items():
+                    _add_param_to_feed_dict("{}.{}".format(param_name, key), val)
+
+        for param_name, param_value in params.items():
+            _add_param_to_feed_dict(param_name, param_value)
+
         return feed_dict
 
     def _get_config_credentials(self) -> Dict[str, Any]:
@@ -553,12 +680,6 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
         )
 
     context_class = load_obj(context_path)
-
-    if os.getcwd() != str(project_path):
-        logging.getLogger(__name__).warning(
-            "Changing the current working directory to %s", str(project_path)
-        )
-        os.chdir(str(project_path))  # Move to project root
 
     # update kwargs with env from the environment variable (defaults to None if not set)
     # need to do this because some CLI command (e.g `kedro run`) defaults to passing in `env=None`

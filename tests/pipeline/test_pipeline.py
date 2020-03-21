@@ -449,13 +449,6 @@ class TestValidPipeline:  # pylint: disable=too-many-public-methods
         """Empty pipeline is possible"""
         Pipeline([])
 
-    def test_pipeline_name_is_deprecated(self):
-        with pytest.warns(DeprecationWarning, match=r"`name` parameter is deprecated"):
-            pipeline = Pipeline([], name="p_name")
-
-        with pytest.warns(DeprecationWarning, match=r"`Pipeline\.name` is deprecated"):
-            assert pipeline.name == "p_name"
-
     def test_initialized_with_tags(self):
         pipeline = Pipeline(
             [node(identity, "A", "B", tags=["node1", "p1"]), node(identity, "B", "C")],
@@ -659,7 +652,7 @@ class TestComplexPipeline:
         assert len(subpipeline.outputs()) == 2
 
         pipeline = Pipeline(
-            [node(identity, "C", "D", name="connecting_node"), subpipeline], name="main"
+            [node(identity, "C", "D", name="connecting_node"), subpipeline], tags="main"
         )
 
         assert len(pipeline.nodes) == 1 + len(nodes)
@@ -693,7 +686,6 @@ class TestPipelineDescribe:
         desc = description.split("\n")
         test_desc = [
             "#### Pipeline execution order ####",
-            "Name: None",
             "Inputs: input1, input2",
             "",
             "node1",
@@ -714,7 +706,6 @@ class TestPipelineDescribe:
         desc = description.split("\n")
         test_desc = [
             "#### Pipeline execution order ####",
-            "Name: None",
             "Inputs: input1, input2",
             "",
             "node1: biconcat([input1,input2]) -> [input3]",

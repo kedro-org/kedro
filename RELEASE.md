@@ -23,6 +23,7 @@
 * Removed `KEDRO_ENV_VAR` from `kedro.context` to speed up the CLI run time. To make `kedro` work with project templates generated with earlier versions of Kedro, remove all instances of `KEDRO_ENV_VAR` from `kedro_cli.py`.
 * Deleted obsoleted datasets from `kedro.io`.
 * Deleted `kedro.contrib` and `extras` folders.
+* `Pipeline.name` has been removed in favour of `Pipeline.tag()`.
 
 ### Migration guide from Kedro 0.15.* to Upcoming Release
 #### Migration for datasets

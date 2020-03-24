@@ -2,6 +2,7 @@
 azure-storage-blob>=1.1.0, <2.0
 azure-storage-file>=1.1.0, <2.0
 azure-storage-queue>=1.1.0, <2.0
+bandit>=1.6.2, <2.0
 behave==1.2.6
 biopython>=1.73, <2.0
 black==v19.10.b0; python_version >= '3.6'

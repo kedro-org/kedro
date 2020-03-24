@@ -154,7 +154,7 @@ class PickleDataSet(AbstractVersionedDataSet):
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, mode="rb") as fs_file:
-            return pickle.loads(fs_file.read(), **self._load_args)
+            return pickle.loads(fs_file.read(), **self._load_args)  # nosec
 
     def _save(self, data: Any) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)

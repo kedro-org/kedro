@@ -106,3 +106,9 @@ repos:
             types: [file, python]
             exclude: ^kedro/template/
             entry: isort
+          - id: bandit
+            name: "Bandit security check"
+            language: system
+            types: [file, python]
+            exclude: ^kedro/template/|^tests/
+            entry: bandit -ll

@@ -62,6 +62,12 @@ commands:
       - setup_conda
       - setup_requirements
       - run:
+          # Since recently Spark installation for some reason does not have permissions to execute
+          # /home/circleci/miniconda/envs/kedro_builder/lib/python3.X/site-packages/pyspark/bin/spark-class.
+          # So fixing it manually here.
+          name: Fix Spark permissions
+          command: sudo chmod -R u+x /home/circleci/miniconda/envs/kedro_builder/lib/
+      - run:
           name: Run unit tests
           command: make test
 

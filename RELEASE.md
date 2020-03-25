@@ -7,6 +7,7 @@
 * Enabled Python 3.8 compatibility. _Please note that a Spark workflow may be unreliable for this Python version as `pyspark` is not fully-compatible with 3.8 yet._
 * Fixed `load_context` changing user's current working directory.
 * Added the ability to specify nested parameter values inside your node inputs, e.g. `node(func, "params:a.b", None)`
+* Improved error handling when making a typo on the command line. We now suggest some of the possible commands you meant to type, in `git`-style.
 
 ## Bug fixes and other changes
 * Fixed a bug where a new version created mid-run by an external system caused inconsistencies in the load versions used in the current run.

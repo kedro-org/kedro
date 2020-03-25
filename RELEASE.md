@@ -20,7 +20,7 @@
 * `get_last_load_version` and `get_last_save_version` methods are no longer available on `AbstractDataSet`.
 * `get_last_load_version` and `get_last_save_version` have been renamed to `resolve_load_version` and `resolve_save_version` on ``AbstractVersionedDataSet``, the results of which are cached.
 * The `release()` method on datasets extending ``AbstractVersionedDataSet`` clears the cached load and save version. All custom datasets must call `super()._release()` inside `_release()`.
-* Removed `KEDRO_ENV_VAR` from `kedro.context` to speed up the CLI run time. To make `kedro` work with project templates generated with earlier versions of Kedro, remove all instances of `KEDRO_ENV_VAR` from `kedro_cli.py`.
+* Removed `KEDRO_ENV_VAR` from `kedro.context` to speed up the CLI run time.
 * Deleted obsoleted datasets from `kedro.io`.
 * Deleted `kedro.contrib` and `extras` folders.
 * `Pipeline.name` has been removed in favour of `Pipeline.tag()`.
@@ -40,6 +40,15 @@ E.g. `type: CSVS3DataSet` -> `type: pandas.CSVDataSet`.
 #### Migration for decorators, color logger, transformers etc.
 Since some modules were moved to other locations you need to update import paths appropriately.
 The list of moved files you can find in `0.15.6` release notes under `Files with a new location` section.
+
+#### Migration for kedro env environment variable
+> Note: If you haven't made significant changes to your `kedro_cli.py`, it may be easier to simply copy the updated `kedro_cli.py` `.ipython/profile_default/startup/00-kedro-init.py` and from GitHub or a newly generated project into your old project.
+
+* We've removed `KEDRO_ENV_VAR` from `kedro.context`. To get your existing project template working, you'll need to remove all instances of `KEDRO_ENV_VAR` from your project template:
+  - From the imports in `kedro_cli.py` and `.ipython/profile_default/startup/00-kedro-init.py`: `from kedro.context import KEDRO_ENV_VAR, load_context` -> `from kedro.context import load_context`
+  - Remove the `envvar=KEDRO_ENV_VAR` line from the click options in `run`, `jupyter_notebook` and `jupyter_lab` in `kedro_cli.py`
+  - Replace `KEDRO_ENV_VAR` with `"KEDRO_ENV"` in `_build_jupyter_env`
+  - Replace `context = load_context(path, env=os.getenv(KEDRO_ENV_VAR))` with `context = load_context(path)` in `.ipython/profile_default/startup/00-kedro-init.py`
 
 ## Thanks for supporting contributions
 [@foolsgold](https://github.com/foolsgold), [Mani Sarkar](https://github.com/neomatrix369), [Priyanka Shanbhag](https://github.com/priyanka1414), [Luis Blanche](https://github.com/LuisBlanche), [Deepyaman Datta](https://github.com/deepyaman)

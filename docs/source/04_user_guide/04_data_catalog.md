@@ -98,7 +98,7 @@ rockets:
 # Example 6: Save an image created with Matplotlib on Google Cloud Storage
 
 results_plot:
-  type: matplotlib.MatplotLibWriter
+  type: matplotlib.MatplotlibWriter
   filepath: gcs://your_bucket/data/08_results/plots/output_1.jpeg
   fs_args:
     project: my-project

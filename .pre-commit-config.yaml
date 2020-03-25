@@ -79,12 +79,11 @@ repos:
             pass_filenames: false
             stages: [manual]
             entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments tests
-          # We need to make some exceptions for 3.5, that's why it's a custom runner.
           - id: black
             name: "Black"
             language: system
             pass_filenames: false
-            entry: python -m tools.min_version 3.6 "black kedro features tests"
+            entry: black kedro features tests
           - id: legal
             name: "Licence check"
             language: system
@@ -94,7 +93,7 @@ repos:
             name: "Import Linter"
             language: system
             pass_filenames: false
-            entry: python -m tools.min_version 3.6 lint-imports
+            entry: lint-imports
           - id: secret_scan
             name: "Secret scan"
             language: system

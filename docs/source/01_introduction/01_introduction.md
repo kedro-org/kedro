@@ -19,7 +19,7 @@ You can also check out the resources section for answers to [frequently asked qu
 We have designed the documentation in general, and the tutorial in particular, for beginners to get started creating their own Kedro projects in Python. If you have elementary knowledge using Python then you might find the Kedro learning curve more challenging.  However, we have simplified the tutorial by providing all Python functions required to create your data pipelines.
 
 >
-> *Note:* There are a number of excellent online resources for learning Python, but be aware that you should choose those that reference Python 3, as Kedro is built for Python 3.5+. There are many curated lists of online resources, such as:
+> *Note:* There are a number of excellent online resources for learning Python, but be aware that you should choose those that reference Python 3, as Kedro is built for Python 3.6+. There are many curated lists of online resources, such as:
 >
 > - [Official Python programming language website](https://www.python.org/)
 > - [List of free programming books and tutorials](https://github.com/EbookFoundation/free-programming-books/blob/master/free-programming-books.md#python)

@@ -24,6 +24,7 @@
 * Deleted obsoleted datasets from `kedro.io`.
 * Deleted `kedro.contrib` and `extras` folders.
 * `Pipeline.name` has been removed in favour of `Pipeline.tag()`.
+* Python 3.5 is no longer supported by the current and all future versions of Kedro.
 
 ### Migration guide from Kedro 0.15.* to Upcoming Release
 #### Migration for datasets

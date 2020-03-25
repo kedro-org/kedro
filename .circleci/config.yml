@@ -1,9 +1,6 @@
 version: 2.1
 
 executors:
-  py35:
-    docker:
-      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.5
   py36:
     docker:
       - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.6
@@ -116,18 +113,6 @@ commands:
           command: make pip-compile
 
 jobs:
-  unit_tests_35:
-    executor: py35
-    steps: [unit_tests]
-
-  linters_35:
-    executor: py35
-    steps: [lint]
-
-  e2e_tests_35:
-    executor: py35
-    steps: [e2e_tests]
-
   unit_tests_36:
     executor: py36
     steps: [unit_tests]
@@ -172,8 +157,16 @@ jobs:
     executor: py38
     steps: [e2e_tests]
 
-  pip_compile:
+  pip_compile_36:
+    executor: py36
+    steps: [pip_compile]
+
+  pip_compile_37:
     executor: py37
+    steps: [pip_compile]
+
+  pip_compile_38:
+    executor: py38
     steps: [pip_compile]
 
   all_circleci_checks_succeeded:
@@ -189,9 +182,6 @@ workflows:
   version: 2
   regular:
     jobs:
-      - unit_tests_35
-      - linters_35
-      - e2e_tests_35
       - unit_tests_36
       - linters_36
       - e2e_tests_36
@@ -203,12 +193,11 @@ workflows:
       - unit_tests_38
       - linters_38
       - e2e_tests_38
-      - pip_compile
+      - pip_compile_36
+      - pip_compile_37
+      - pip_compile_38
       - all_circleci_checks_succeeded:
           requires:
-            - unit_tests_35
-            - linters_35
-            - e2e_tests_35
             - unit_tests_36
             - linters_36
             - e2e_tests_36
@@ -220,4 +209,6 @@ workflows:
             - unit_tests_38
             - linters_38
             - e2e_tests_38
-            - pip_compile
+            - pip_compile_36
+            - pip_compile_37
+            - pip_compile_38

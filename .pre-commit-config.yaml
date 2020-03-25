@@ -18,6 +18,7 @@ repos:
           - id: debug-statements # Check for debugger imports and py37+ `breakpoint()` calls in python source.
             exclude: "^kedro/template/"
           - id: requirements-txt-fixer # Sorts entries in requirements.txt
+            exclude: "^kedro/template/"
           - id: flake8
             exclude: "^kedro/template/"
 

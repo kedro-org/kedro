@@ -106,10 +106,17 @@ class GeoJSONDataSet(AbstractVersionedDataSet):
                 None, the latest version will be loaded. If its ``save``
             credentials: credentials required to access the underlying filesystem.
                 Eg. for ``GCFileSystem`` it would look like `{'token': None}`.
-            fs_args: Extra args to pass into the underlying filesystem
-                Eg. for ``GCFileSystem`` it would look like `{'project': 'my-project' , ...}`.
+            fs_args: Extra arguments to pass into underlying filesystem class constructor
+                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``), as well as
+                to pass to the filesystem's `open` method through nested keys
+                `open_args_load` and `open_args_save`.
+                Here you can find all available arguments for `open`:
+                https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
+                All defaults are preserved, except `mode`, which is set to `wb` when saving.
         """
         _fs_args = copy.deepcopy(fs_args) or {}
+        _fs_open_args_load = _fs_args.pop("open_args_load", {})
+        _fs_open_args_save = _fs_args.pop("open_args_save", {})
         _credentials = copy.deepcopy(credentials) or {}
         protocol, path = get_protocol_and_path(filepath, version)
         self._protocol = protocol
@@ -130,14 +137,18 @@ class GeoJSONDataSet(AbstractVersionedDataSet):
         if save_args is not None:
             self._save_args.update(save_args)
 
+        _fs_open_args_save.setdefault("mode", "wb")
+        self._fs_open_args_load = _fs_open_args_load
+        self._fs_open_args_save = _fs_open_args_save
+
     def _load(self) -> Union[gpd.GeoDataFrame, Dict[str, gpd.GeoDataFrame]]:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        with self._fs.open(load_path, mode="rb") as fs_file:
+        with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return gpd.read_file(fs_file, **self._load_args)
 
     def _save(self, data: gpd.GeoDataFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
-        with self._fs.open(save_path, mode="wb") as fs_file:
+        with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
             data.to_file(fs_file, **self._save_args)
         self.invalidate_cache()
 

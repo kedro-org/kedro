@@ -53,8 +53,8 @@ def filepath_json(tmp_path):
 
 
 @pytest.fixture
-def networkx_data_set(filepath_json):
-    return NetworkXDataSet(filepath=filepath_json)
+def networkx_data_set(filepath_json, fs_args):
+    return NetworkXDataSet(filepath=filepath_json, fs_args=fs_args)
 
 
 @pytest.fixture
@@ -82,6 +82,8 @@ class TestNetworkXDataSet:
         networkx_data_set.save(dummy_graph_data)
         reloaded = networkx_data_set.load()
         assert dummy_graph_data.nodes(data=True) == reloaded.nodes(data=True)
+        assert networkx_data_set._fs_open_args_load == {"mode": "r"}
+        assert networkx_data_set._fs_open_args_save == {"mode": "w"}
 
     def test_load_missing_file(self, networkx_data_set):
         """Check the error when trying to load missing file."""
@@ -121,6 +123,17 @@ class TestNetworkXDataSet:
             attrs=ATTRS,
         )
         assert dummy_graph_data.nodes(data=True) == reloaded.nodes(data=True)
+
+    @pytest.mark.parametrize(
+        "fs_args",
+        [{"open_args_load": {"mode": "rb", "compression": "gzip"}}],
+        indirect=True,
+    )
+    def test_open_extra_args(self, networkx_data_set, fs_args):
+        assert networkx_data_set._fs_open_args_load == fs_args["open_args_load"]
+        assert networkx_data_set._fs_open_args_save == {
+            "mode": "w"
+        }  # default unchanged
 
     def test_exists(self, networkx_data_set, dummy_graph_data):
         """Test `exists` method invocation."""

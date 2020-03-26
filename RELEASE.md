@@ -8,6 +8,7 @@
 * Fixed `load_context` changing user's current working directory.
 * Added the ability to specify nested parameter values inside your node inputs, e.g. `node(func, "params:a.b", None)`
 * Improved error handling when making a typo on the command line. We now suggest some of the possible commands you meant to type, in `git`-style.
+* Added the ability to specify extra arguments, e.g. `encoding` or `compression`, for `fsspec.spec.AbstractFileSystem.open()` calls when loading/saving a dataset. See Example 3 under [docs](https://kedro.readthedocs.io/en/stable/04_user_guide/04_data_catalog.html#using-the-data-catalog-with-the-yaml-api).
 
 ## Bug fixes and other changes
 * Fixed a bug where a new version created mid-run by an external system caused inconsistencies in the load versions used in the current run.
@@ -26,6 +27,7 @@
 * Deleted `kedro.contrib` and `extras` folders.
 * `Pipeline.name` has been removed in favour of `Pipeline.tag()`.
 * Python 3.5 is no longer supported by the current and all future versions of Kedro.
+* ``TextDataSet`` no longer has `load_args` and `save_args`. These can instead be specified under `open_args_load` or `open_args_save` in `fs_args`.
 
 ### Migration guide from Kedro 0.15.* to Upcoming Release
 #### Migration for datasets

@@ -47,8 +47,10 @@ def filepath_feather(tmp_path):
 
 
 @pytest.fixture
-def feather_data_set(filepath_feather, load_args):
-    return FeatherDataSet(filepath=filepath_feather, load_args=load_args)
+def feather_data_set(filepath_feather, load_args, fs_args):
+    return FeatherDataSet(
+        filepath=filepath_feather, load_args=load_args, fs_args=fs_args
+    )
 
 
 @pytest.fixture
@@ -69,6 +71,8 @@ class TestFeatherDataSet:
         feather_data_set.save(dummy_dataframe)
         reloaded = feather_data_set.load()
         assert_frame_equal(dummy_dataframe, reloaded)
+        assert feather_data_set._fs_open_args_load == {}
+        assert feather_data_set._fs_open_args_save == {"mode": "wb"}
 
     def test_exists(self, feather_data_set, dummy_dataframe):
         """Test `exists` method invocation for both existing and
@@ -90,6 +94,15 @@ class TestFeatherDataSet:
         pattern = r"Failed while loading data from data set FeatherDataSet\(.*\)"
         with pytest.raises(DataSetError, match=pattern):
             feather_data_set.load()
+
+    @pytest.mark.parametrize(
+        "fs_args",
+        [{"open_args_load": {"mode": "rb", "compression": "gzip"}}],
+        indirect=True,
+    )
+    def test_open_extra_args(self, feather_data_set, fs_args):
+        assert feather_data_set._fs_open_args_load == fs_args["open_args_load"]
+        assert feather_data_set._fs_open_args_save == {"mode": "wb"}
 
     @pytest.mark.parametrize(
         "filepath,instance_type",

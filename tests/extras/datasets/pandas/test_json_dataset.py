@@ -47,8 +47,13 @@ def filepath_json(tmp_path):
 
 
 @pytest.fixture
-def json_data_set(filepath_json, load_args, save_args):
-    return JSONDataSet(filepath=filepath_json, load_args=load_args, save_args=save_args)
+def json_data_set(filepath_json, load_args, save_args, fs_args):
+    return JSONDataSet(
+        filepath=filepath_json,
+        load_args=load_args,
+        save_args=save_args,
+        fs_args=fs_args,
+    )
 
 
 @pytest.fixture
@@ -69,6 +74,8 @@ class TestJSONDataSet:
         json_data_set.save(dummy_dataframe)
         reloaded = json_data_set.load()
         assert_frame_equal(dummy_dataframe, reloaded)
+        assert json_data_set._fs_open_args_load == {"mode": "r"}
+        assert json_data_set._fs_open_args_save == {"mode": "w"}
 
     def test_exists(self, json_data_set, dummy_dataframe):
         """Test `exists` method invocation for both existing and
@@ -92,6 +99,15 @@ class TestJSONDataSet:
         """Test overriding the default save arguments."""
         for key, value in save_args.items():
             assert json_data_set._save_args[key] == value
+
+    @pytest.mark.parametrize(
+        "fs_args",
+        [{"open_args_load": {"mode": "rb", "compression": "gzip"}}],
+        indirect=True,
+    )
+    def test_open_extra_args(self, json_data_set, fs_args):
+        assert json_data_set._fs_open_args_load == fs_args["open_args_load"]
+        assert json_data_set._fs_open_args_save == {"mode": "w"}  # default unchanged
 
     def test_load_missing_file(self, json_data_set):
         """Check the error when trying to load missing file."""

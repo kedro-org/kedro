@@ -39,6 +39,7 @@ from Bio import SeqIO
 from kedro.io.core import AbstractDataSet, get_filepath_str, get_protocol_and_path
 
 
+# pylint: disable=too-many-instance-attributes
 class BioSequenceDataSet(AbstractDataSet):
     r"""``BioSequenceDataSet`` loads and saves data to a sequence file.
 
@@ -91,8 +92,14 @@ class BioSequenceDataSet(AbstractDataSet):
                 E.g. `{"format": "fasta"}`.
             credentials: Credentials required to get access to the underlying filesystem.
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
-            fs_args: Extra arguments to pass into underlying filesystem class.
-                E.g. for ``GCSFileSystem`` class: `{"project": "my-project", ...}`.
+            fs_args: Extra arguments to pass into underlying filesystem class constructor
+                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``), as well as
+                to pass to the filesystem's `open` method through nested keys
+                `open_args_load` and `open_args_save`.
+                Here you can find all available arguments for `open`:
+                https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
+                All defaults are preserved, except `mode`, which is set to `r` when loading
+                and to `w` when saving.
             layer: The data layer according to the data engineering convention:
                 https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
 
@@ -100,6 +107,8 @@ class BioSequenceDataSet(AbstractDataSet):
         """
 
         _fs_args = deepcopy(fs_args) or {}
+        _fs_open_args_load = _fs_args.pop("open_args_load", {})
+        _fs_open_args_save = _fs_args.pop("open_args_save", {})
         _credentials = deepcopy(credentials) or {}
 
         protocol, path = get_protocol_and_path(filepath)
@@ -117,6 +126,11 @@ class BioSequenceDataSet(AbstractDataSet):
         if save_args is not None:
             self._save_args.update(save_args)
 
+        _fs_open_args_load.setdefault("mode", "r")
+        _fs_open_args_save.setdefault("mode", "w")
+        self._fs_open_args_load = _fs_open_args_load
+        self._fs_open_args_save = _fs_open_args_save
+
     def _describe(self) -> Dict[str, Any]:
         return dict(
             filepath=self._filepath,
@@ -128,13 +142,13 @@ class BioSequenceDataSet(AbstractDataSet):
 
     def _load(self) -> List:
         load_path = get_filepath_str(self._filepath, self._protocol)
-        with self._fs.open(load_path, mode="r") as fs_file:
+        with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return list(SeqIO.parse(handle=fs_file, **self._load_args))
 
     def _save(self, data: List) -> None:
         save_path = get_filepath_str(self._filepath, self._protocol)
 
-        with self._fs.open(save_path, mode="w") as fs_file:
+        with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
             SeqIO.write(data, handle=fs_file, **self._save_args)
 
     def _exists(self) -> bool:

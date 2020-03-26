@@ -49,9 +49,12 @@ def filepath_parquet(tmp_path):
 
 
 @pytest.fixture
-def parquet_data_set(filepath_parquet, load_args, save_args):
+def parquet_data_set(filepath_parquet, load_args, save_args, fs_args):
     return ParquetDataSet(
-        filepath=filepath_parquet, load_args=load_args, save_args=save_args
+        filepath=filepath_parquet,
+        load_args=load_args,
+        save_args=save_args,
+        fs_args=fs_args,
     )
 
 
@@ -82,6 +85,7 @@ class TestParquetDataSet:
         parquet_data_set.save(dummy_dataframe)
         reloaded = parquet_data_set.load()
         assert_frame_equal(dummy_dataframe, reloaded)
+        assert parquet_data_set._fs_open_args_load == {}
 
     def test_exists(self, parquet_data_set, dummy_dataframe):
         """Test `exists` method invocation for both existing and
@@ -105,6 +109,14 @@ class TestParquetDataSet:
         """Test overriding the default save arguments."""
         for key, value in save_args.items():
             assert parquet_data_set._save_args[key] == value
+
+    @pytest.mark.parametrize(
+        "fs_args",
+        [{"open_args_load": {"mode": "r", "compression": "gzip"}}],
+        indirect=True,
+    )
+    def test_open_extra_args(self, parquet_data_set, fs_args):
+        assert parquet_data_set._fs_open_args_load == fs_args["open_args_load"]
 
     def test_load_missing_file(self, parquet_data_set):
         """Check the error when trying to load missing file."""

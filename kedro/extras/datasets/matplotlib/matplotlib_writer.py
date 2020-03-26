@@ -103,8 +103,12 @@ class MatplotlibWriter(AbstractDataSet):
             filepath: Key path to a matplot object file(s) prefixed with a protocol like `s3://`.
                 If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
-            fs_args: Extra arguments to pass into underlying filesystem class.
-                E.g. for ``GCSFileSystem`` class: `{"project": "my-project", ...}`
+            fs_args: Extra arguments to pass into underlying filesystem class constructor
+                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``), as well as
+                to pass to the filesystem's `open` method through nested key `open_args_save`.
+                Here you can find all available arguments for `open`:
+                https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
+                All defaults are preserved, except `mode`, which is set to `wb` when saving.
             credentials: Credentials required to get access to the underlying filesystem.
                 E.g. for ``S3FileSystem`` it should look like:
                 `{'client_kwargs': {'aws_access_key_id': '<id>', 'aws_secret_access_key': '<key>'}}`
@@ -114,8 +118,12 @@ class MatplotlibWriter(AbstractDataSet):
                 https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
         """
         _credentials = copy.deepcopy(credentials) or {}
-        self._fs_args = copy.deepcopy(fs_args) or {}
-        self._save_args = save_args or {}
+        _fs_args = copy.deepcopy(fs_args) or {}
+        _fs_open_args_save = _fs_args.pop("open_args_save", {})
+        _fs_open_args_save.setdefault("mode", "wb")
+        self._fs_args = _fs_args
+        self._fs_open_args_save = _fs_open_args_save
+        self._save_args = copy.deepcopy(save_args) or {}
         self._layer = layer
 
         protocol, path = get_protocol_and_path(filepath)
@@ -166,7 +174,7 @@ class MatplotlibWriter(AbstractDataSet):
         bytes_buffer = io.BytesIO()
         plot.savefig(bytes_buffer, **self._save_args)
 
-        with self._fs.open(full_key_path, mode="wb") as fs_file:
+        with self._fs.open(full_key_path, **self._fs_open_args_save) as fs_file:
             fs_file.write(bytes_buffer.getvalue())
 
     def _exists(self) -> bool:

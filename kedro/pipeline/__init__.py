@@ -30,5 +30,6 @@
 data-driven pipelines.
 """
 
+from .modular_pipeline import pipeline  # NOQA
 from .node import node  # NOQA
 from .pipeline import Pipeline  # NOQA

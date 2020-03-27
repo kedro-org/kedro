@@ -43,7 +43,6 @@ import kedro
 from kedro.pipeline.node import Node, _to_list
 
 TRANSCODING_SEPARATOR = "@"
-PARAMETER_KEYWORDS = ("params:", "parameters")
 
 
 def _transcode_split(element: str) -> Tuple[str, str]:
@@ -70,25 +69,7 @@ def _transcode_split(element: str) -> Tuple[str, str]:
     return tuple(split_name)  # type: ignore
 
 
-def _transcode_join(parts: Tuple[str, str]) -> str:
-    """Join the name parts using the transcoding separator.
-    If the transcoding part is missing, the resulting name wil not have it as well.
-
-    Raises:
-        ValueError: wrong number of parts have been provided.
-
-    Returns:
-        Node input/output name.
-    """
-    if not parts or len(parts) > 2:
-        raise ValueError("1 or 2 parts are expected: {}".format(parts))
-    if len(parts) == 1 or not parts[1]:
-        return parts[0]
-
-    return TRANSCODING_SEPARATOR.join(parts)
-
-
-def _get_transcode_compatible_name(element: str) -> str:
+def _strip_transcoding(element: str) -> str:
     """Strip out the transcoding separator and anything that follows.
 
     Returns:
@@ -196,13 +177,13 @@ class Pipeline:
         self._nodes_by_input = defaultdict(set)  # type: Dict[str, Set[Node]]
         for node in nodes:
             for input_ in node.inputs:
-                self._nodes_by_input[_get_transcode_compatible_name(input_)].add(node)
+                self._nodes_by_input[_strip_transcoding(input_)].add(node)
 
         # output -> node with output
         self._nodes_by_output = {}  # type: Dict[str, Node]
         for node in nodes:
             for output in node.outputs:
-                self._nodes_by_output[_get_transcode_compatible_name(output)] = node
+                self._nodes_by_output[_strip_transcoding(output)] = node
 
         self._nodes = nodes
         self._topo_sorted_nodes = _topologically_sorted(self.node_dependencies)
@@ -259,12 +240,10 @@ class Pipeline:
         return set.union(set(), *[node.outputs for node in self.nodes])
 
     def _remove_intermediates(self, datasets: Set[str]) -> Set[str]:
-        intermediate = {
-            _get_transcode_compatible_name(i) for i in self.all_inputs()
-        } & {_get_transcode_compatible_name(o) for o in self.all_outputs()}
-        return {
-            d for d in datasets if _get_transcode_compatible_name(d) not in intermediate
+        intermediate = {_strip_transcoding(i) for i in self.all_inputs()} & {
+            _strip_transcoding(o) for o in self.all_outputs()
         }
+        return {d for d in datasets if _strip_transcoding(d) not in intermediate}
 
     def inputs(self) -> Set[str]:
         """The names of free inputs that must be provided at runtime so that
@@ -300,7 +279,7 @@ class Pipeline:
         return self.all_outputs() | self.all_inputs()
 
     def _transcode_compatible_names(self):
-        return {_get_transcode_compatible_name(ds) for ds in self.data_sets()}
+        return {_strip_transcoding(ds) for ds in self.data_sets()}
 
     def describe(self, names_only: bool = True) -> str:
         """Obtain the order of execution and expected free input variables in
@@ -375,9 +354,7 @@ class Pipeline:
         }  # type: Dict[Node, Set[Node]]
         for parent in self._nodes:
             for output in parent.outputs:
-                for child in self._nodes_by_input[
-                    _get_transcode_compatible_name(output)
-                ]:
+                for child in self._nodes_by_input[_strip_transcoding(output)]:
                     dependencies[child].add(parent)
 
         return dependencies
@@ -457,14 +434,10 @@ class Pipeline:
 
         relevant_nodes = set()
         for input_ in datasets:
-            if _get_transcode_compatible_name(input_) == input_:
-                relevant_nodes.update(
-                    self._nodes_by_input[_get_transcode_compatible_name(input_)]
-                )
+            if _strip_transcoding(input_) == input_:
+                relevant_nodes.update(self._nodes_by_input[_strip_transcoding(input_)])
             else:
-                for node_ in self._nodes_by_input[
-                    _get_transcode_compatible_name(input_)
-                ]:
+                for node_ in self._nodes_by_input[_strip_transcoding(input_)]:
                     if input_ in node_.inputs:
                         relevant_nodes.add(node_)
         return relevant_nodes
@@ -494,12 +467,10 @@ class Pipeline:
 
         relevant_nodes = set()
         for output in datasets:
-            if _get_transcode_compatible_name(output) in self._nodes_by_output:
-                node_with_output = self._nodes_by_output[
-                    _get_transcode_compatible_name(output)
-                ]
+            if _strip_transcoding(output) in self._nodes_by_output:
+                node_with_output = self._nodes_by_output[_strip_transcoding(output)]
                 if (
-                    _get_transcode_compatible_name(output) == output
+                    _strip_transcoding(output) == output
                     or output in node_with_output.outputs
                 ):
                     relevant_nodes.add(node_with_output)
@@ -565,7 +536,7 @@ class Pipeline:
 
             next_nodes = set(
                 chain.from_iterable(
-                    self._nodes_by_input[_get_transcode_compatible_name(input_)]
+                    self._nodes_by_input[_strip_transcoding(input_)]
                     for input_ in starting
                 )
             )
@@ -629,9 +600,9 @@ class Pipeline:
             starting = inputs
 
             next_nodes = {
-                self._nodes_by_output[_get_transcode_compatible_name(output)]
+                self._nodes_by_output[_strip_transcoding(output)]
                 for output in starting
-                if _get_transcode_compatible_name(output) in self._nodes_by_output
+                if _strip_transcoding(output) in self._nodes_by_output
             }
 
         return Pipeline(result)
@@ -654,7 +625,7 @@ class Pipeline:
         """
 
         res = self.only_nodes(*node_names)
-        res += self.from_inputs(*map(_get_transcode_compatible_name, res.all_outputs()))
+        res += self.from_inputs(*map(_strip_transcoding, res.all_outputs()))
         return res
 
     def to_nodes(self, *node_names: str) -> "Pipeline":
@@ -675,7 +646,7 @@ class Pipeline:
         """
 
         res = self.only_nodes(*node_names)
-        res += self.to_outputs(*map(_get_transcode_compatible_name, res.all_inputs()))
+        res += self.to_outputs(*map(_strip_transcoding, res.all_inputs()))
         return res
 
     def only_nodes_with_tags(self, *tags: str) -> "Pipeline":
@@ -739,86 +710,6 @@ class Pipeline:
 
         return json.dumps(pipeline_versioned)
 
-    def transform(
-        self, datasets: Dict[str, str] = None, prefix: str = None
-    ) -> "Pipeline":
-        """Create a copy of the pipeline and its nodes,
-        with some dataset names modified.
-
-        Args:
-            datasets: A map of the existing dataset name to the new one.
-                Both input and output datasets can be replaced this way.
-            prefix: A prefix to give to all dataset names,
-                except those explicitly named with the `datasets` parameter,
-                and parameter references (`params:` and `parameters`).
-
-        Raises:
-            ValueError: invalid dataset names are given.
-
-        Returns:
-            A new ``Pipeline`` object with the new nodes, modified as requested.
-        """
-        # pylint: disable=protected-access
-        datasets = datasets or {}
-        new_nodes = []
-        used_dataset_names = set()
-
-        def _prefix(name):
-            if any(param in name for param in PARAMETER_KEYWORDS):
-                return name
-            return "{}.{}".format(prefix, name) if prefix else name
-
-        def _map_and_prefix(name):
-            if name in datasets:
-                used_dataset_names.add(name)
-                return datasets[name]
-
-            base_name, transcode_name = _transcode_split(name)
-
-            if base_name in datasets:
-                used_dataset_names.add(base_name)
-                base_name = datasets[base_name]
-                return _transcode_join((base_name, transcode_name))
-
-            return _prefix(name)
-
-        def _process_dataset_names(names: Union[None, str, List[str], Dict[str, str]]):
-            if names is None:
-                return None
-            if isinstance(names, str):
-                return _map_and_prefix(names)  # type: ignore
-            if isinstance(names, list):
-                return [
-                    _map_and_prefix(name) for name in names  # type: ignore
-                ]
-            if isinstance(names, dict):
-                return {
-                    key: _map_and_prefix(value)  # type: ignore
-                    for key, value in names.items()
-                }
-
-            raise ValueError(  # pragma: no cover
-                "Unexpected input {} of type {}".format(names, type(names))
-            )
-
-        for node in self.nodes:
-            new_nodes.append(
-                node._copy(
-                    inputs=_process_dataset_names(node._inputs),
-                    outputs=_process_dataset_names(node._outputs),
-                    name=_prefix(node._name) if node._name else None,
-                )
-            )
-
-        unused_dataset_names = set(datasets) - used_dataset_names
-
-        if unused_dataset_names:
-            raise ValueError(
-                "Failed to map datasets: {}".format(sorted(unused_dataset_names))
-            )
-
-        return Pipeline(new_nodes)
-
 
 def _validate_no_node_list(nodes: Iterable[Union[Node, Pipeline]]):
     if nodes is None:
@@ -842,7 +733,7 @@ def _validate_duplicate_nodes(nodes: List[Node]):
 
 def _validate_unique_outputs(nodes: List[Node]) -> None:
     outputs = chain.from_iterable(node.outputs for node in nodes)
-    outputs = map(_get_transcode_compatible_name, outputs)
+    outputs = map(_strip_transcoding, outputs)
     duplicates = [key for key, value in Counter(outputs).items() if value > 1]
     if duplicates:
         raise OutputNotUniqueError(
@@ -853,7 +744,7 @@ def _validate_unique_outputs(nodes: List[Node]) -> None:
 
 def _validate_unique_confirms(nodes: List[Node]) -> None:
     confirms = chain.from_iterable(node.confirms for node in nodes)
-    confirms = map(_get_transcode_compatible_name, confirms)
+    confirms = map(_strip_transcoding, confirms)
     duplicates = [key for key, value in Counter(confirms).items() if value > 1]
     if duplicates:
         raise ConfirmNotUniqueError(
@@ -875,7 +766,7 @@ def _validate_transcoded_inputs_outputs(nodes: List[Node]) -> None:
 
     invalid = set()
     for dataset_name in all_inputs_outputs:
-        name = _get_transcode_compatible_name(dataset_name)
+        name = _strip_transcoding(dataset_name)
         if name != dataset_name and name in all_inputs_outputs:
             invalid.add(name)
 

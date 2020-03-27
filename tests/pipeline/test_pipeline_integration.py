@@ -27,7 +27,7 @@
 # limitations under the License.
 
 from kedro.io import DataCatalog
-from kedro.pipeline import Pipeline, node
+from kedro.pipeline import Pipeline, node, pipeline
 from kedro.runner import SequentialRunner
 
 
@@ -56,18 +56,19 @@ class TestTransformPipelineIntegration:
         lunch_pipeline = Pipeline([node(eat, "food", "output")])
 
         pipeline1 = (
-            cook_pipeline.transform(datasets={"grilled_meat": "food"}) + lunch_pipeline
+            pipeline(cook_pipeline, outputs={"grilled_meat": "food"}) + lunch_pipeline
         )
-        pipeline2 = cook_pipeline + lunch_pipeline.transform(
-            datasets={"food": "grilled_meat"}
-        )
-        pipeline3 = cook_pipeline.transform(
-            datasets={"grilled_meat": "NEW_NAME"}
-        ) + lunch_pipeline.transform(datasets={"food": "NEW_NAME"})
 
-        for pipeline in [pipeline1, pipeline2, pipeline3]:
+        pipeline2 = cook_pipeline + pipeline(
+            lunch_pipeline, inputs={"food": "grilled_meat"}
+        )
+        pipeline3 = pipeline(
+            cook_pipeline, outputs={"grilled_meat": "NEW_NAME"}
+        ) + pipeline(lunch_pipeline, inputs={"food": "NEW_NAME"})
+
+        for pipe in [pipeline1, pipeline2, pipeline3]:
             catalog = DataCatalog({}, feed_dict={"frozen_meat": "frozen_meat_data"})
-            result = SequentialRunner().run(pipeline, catalog)
+            result = SequentialRunner().run(pipe, catalog)
             assert result == {"output": "frozen_meat_data_defrosted_grilled_done"}
 
     def test_reuse_same_pipeline(self):
@@ -87,13 +88,15 @@ class TestTransformPipelineIntegration:
 
         # We are using two different mechanisms here for breakfast and lunch,
         # renaming and prefixing pipelines differently.
-        pipeline = (
-            cook_pipeline.transform(
-                datasets={"grilled_meat": "breakfast_food"}, prefix="breakfast"
+        pipe = (
+            pipeline(
+                cook_pipeline,
+                outputs={"grilled_meat": "breakfast_food"},
+                namespace="breakfast",
             )
             + breakfast_pipeline
-            + cook_pipeline.transform(prefix="lunch")
-            + lunch_pipeline.transform(datasets={"lunch_food": "lunch.grilled_meat"})
+            + pipeline(cook_pipeline, namespace="lunch")
+            + pipeline(lunch_pipeline, inputs={"lunch_food": "lunch.grilled_meat"})
         )
         catalog = DataCatalog(
             {},
@@ -102,7 +105,7 @@ class TestTransformPipelineIntegration:
                 "lunch.frozen_meat": "lunch_frozen_meat",
             },
         )
-        result = SequentialRunner().run(pipeline, catalog)
+        result = SequentialRunner().run(pipe, catalog)
         assert result == {
             "breakfast_output": "breakfast_frozen_meat_defrosted_grilled_done",
             "lunch_output": "lunch_frozen_meat_defrosted_grilled_done",

@@ -47,9 +47,12 @@ def filepath_excel(tmp_path):
 
 
 @pytest.fixture
-def excel_data_set(filepath_excel, load_args, save_args):
+def excel_data_set(filepath_excel, load_args, save_args, fs_args):
     return ExcelDataSet(
-        filepath=filepath_excel, load_args=load_args, save_args=save_args
+        filepath=filepath_excel,
+        load_args=load_args,
+        save_args=save_args,
+        fs_args=fs_args,
     )
 
 
@@ -71,6 +74,8 @@ class TestExcelDataSet:
         excel_data_set.save(dummy_dataframe)
         reloaded = excel_data_set.load()
         assert_frame_equal(dummy_dataframe, reloaded)
+        assert excel_data_set._fs_open_args_load == {}
+        assert excel_data_set._fs_open_args_save == {"mode": "wb"}
 
     def test_exists(self, excel_data_set, dummy_dataframe):
         """Test `exists` method invocation for both existing and
@@ -94,6 +99,15 @@ class TestExcelDataSet:
         """Test overriding the default save arguments."""
         for key, value in save_args.items():
             assert excel_data_set._save_args[key] == value
+
+    @pytest.mark.parametrize(
+        "fs_args",
+        [{"open_args_load": {"mode": "rb", "compression": "gzip"}}],
+        indirect=True,
+    )
+    def test_open_extra_args(self, excel_data_set, fs_args):
+        assert excel_data_set._fs_open_args_load == fs_args["open_args_load"]
+        assert excel_data_set._fs_open_args_save == {"mode": "wb"}  # default unchanged
 
     def test_load_missing_file(self, excel_data_set):
         """Check the error when trying to load missing file."""

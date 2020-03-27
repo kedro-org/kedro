@@ -298,16 +298,11 @@ def lint(check_only, files):
     try:
         import flake8
         import isort
+        import black
     except ImportError as exc:
         raise KedroCliError(NO_DEPENDENCY_MESSAGE.format(exc.name))
 
-    if sys.version_info[:2] >= (3, 6):
-        try:
-            import black
-        except ImportError:
-            raise KedroCliError(NO_DEPENDENCY_MESSAGE.format("black"))
-        python_call("black", ("--check",) + files if check_only else files)
-
+    python_call("black", ("--check",) + files if check_only else files)
     python_call("flake8", ("--max-line-length=88",) + files)
 
     check_flag = ("-c",) if check_only else ()

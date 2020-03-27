@@ -19,9 +19,9 @@ Welcome to Kedro's API docs and tutorials!
     :target: https://opensource.org/licenses/Apache-2.0
     :alt: License is Apache 2.0
 
-.. image:: https://img.shields.io/badge/python-3.5%20%7C%203.6%20%7C%203.7-blue.svg
+.. image:: https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue.svg
     :target: https://pypi.org/project/kedro/
-    :alt: Python version 3.5, 3.6, 3.7
+    :alt: Python version 3.6, 3.7, 3.8
 
 .. image:: https://badge.fury.io/py/kedro.svg
     :target: https://pypi.org/project/kedro/

@@ -5,13 +5,13 @@ azure-storage-queue>=1.1.0, <2.0
 bandit>=1.6.2, <2.0
 behave==1.2.6
 biopython>=1.73, <2.0
-black==v19.10.b0; python_version >= '3.6'
+black==v19.10.b0
 dask[complete]>=2.6.0, <3.0
 flake8>=3.5,<4.0
 gcsfs>=0.3.0, <1.0
 geopandas>=0.6.0, <1.0
 hdfs>=2.5.8, <3.0
-import-linter==1.0; python_version >= '3.6'
+import-linter==1.0
 joblib>=0.14
 jupyter_client>=5.1.0, <6.0
 matplotlib>=3.0.3, <4.0
@@ -34,8 +34,7 @@ pytest>=3.9, <4.0
 requests-mock>=1.6.0, <2.0.0
 s3fs>=0.3.0, <1.0  # Needs to be at least 0.3.0 to make use of `cachable` attribute on S3FileSystem
 SQLAlchemy>=1.2.0, <2.0
-tables>=3.4.4, <3.6; python_version < '3.6'  # 3.6.0 breaks on install, HDF5 library not found
-tables>=3.6; python_version >= '3.6'
+tables>=3.6
 trufflehog>=2.1.0, <3.0
 wheel==0.32.2
 xlrd>=1.0.0, <2.0

@@ -25,7 +25,6 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import sys
 from functools import partial, update_wrapper, wraps
 from typing import Callable
 
@@ -217,10 +216,8 @@ class TestNodeComparisons:
 
     def test_node_invalid_less_than(self):
         n = node(identity, "input1", "output1", name="a node")
-        pattern_36_37 = "'<' not supported between instances of 'Node' and 'str'"
-        pattern_35 = "unorderable types"
+        pattern = "'<' not supported between instances of 'Node' and 'str'"
 
-        pattern = pattern_35 if sys.version_info[:2] == (3, 5) else pattern_36_37
         with pytest.raises(TypeError, match=pattern):
             n < "hello"  # pylint: disable=pointless-statement
 

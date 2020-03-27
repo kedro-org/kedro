@@ -83,7 +83,7 @@ This [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.ht
 Copy the code from cells [tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) with `node` tag into Python files under `src/<package_name>/nodes/` in a Kedro project.
 
 ### `kedro lint`
-Lint your project code using the `kedro lint` command. Your project is linted with [`black`](https://github.com/psf/black) (Python 3.6+), [`flake8`](https://gitlab.com/pycqa/flake8) and [`isort`](https://github.com/timothycrosley/isort).
+Lint your project code using the `kedro lint` command. Your project is linted with [`black`](https://github.com/psf/black), [`flake8`](https://gitlab.com/pycqa/flake8) and [`isort`](https://github.com/timothycrosley/isort).
 
 ### `kedro activate-nbstripout`
 Typically output cells of Jupyter Notebook should not be tracked by git, especially if they contain sensitive information.

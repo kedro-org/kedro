@@ -28,6 +28,7 @@ Data Sets
     kedro.extras.datasets.pandas.ParquetDataSet
     kedro.extras.datasets.pandas.SQLQueryDataSet
     kedro.extras.datasets.pandas.SQLTableDataSet
+    kedro.extras.datasets.pickle.PickleDataSet
     kedro.extras.datasets.spark.SparkDataSet
     kedro.extras.datasets.spark.SparkHiveDataSet
     kedro.extras.datasets.spark.SparkJDBCDataSet

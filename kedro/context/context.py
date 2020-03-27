@@ -129,11 +129,7 @@ def _expand_path(project_path: Path, conf_dictionary: Dict[str, Any]) -> Dict[st
         )
 
     # only check a few conf keys that are known to specify a path string as value
-    conf_keys_with_filepath = (
-        "filename",
-        "filepath",
-        "path",
-    )
+    conf_keys_with_filepath = ("filename", "filepath", "path")
 
     for conf_key, conf_value in conf_dictionary.items():
 

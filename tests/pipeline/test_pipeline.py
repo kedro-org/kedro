@@ -38,8 +38,7 @@ from kedro.pipeline.pipeline import (
     CircularDependencyError,
     ConfirmNotUniqueError,
     OutputNotUniqueError,
-    _get_transcode_compatible_name,
-    _transcode_join,
+    _strip_transcoding,
     _transcode_split,
 )
 from kedro.runner import SequentialRunner
@@ -56,18 +55,8 @@ class TestTranscodeHelpers:
         with pytest.raises(ValueError):
             _transcode_split("abc@def@ghi")
 
-    def test_join_no_transcode_part(self):
-        assert _transcode_join(("abc", "")) == "abc"
-
-    def test_join_with_transcode_part(self):
-        assert _transcode_join(("abc", "def")) == "abc@def"
-
-    def test_join_too_many_parts(self):
-        with pytest.raises(ValueError):
-            _transcode_join(("a", "b", "c"))  # type: ignore
-
     def test_get_transcode_compatible_name(self):
-        assert _get_transcode_compatible_name("abc@def") == "abc"
+        assert _strip_transcoding("abc@def") == "abc"
 
 
 # Different dummy func based on the number of arguments

@@ -94,23 +94,26 @@ class TestValidParallelRunner:
         data_set = ParallelRunner().create_default_data_set("")
         assert isinstance(data_set, _SharedMemoryDataSet)
 
-    def test_parallel_run(self, fan_out_fan_in, catalog):
+    @pytest.mark.parametrize("is_async", [False, True])
+    def test_parallel_run(self, is_async, fan_out_fan_in, catalog):
         catalog.add_feed_dict(dict(A=42))
-        result = ParallelRunner().run(fan_out_fan_in, catalog)
+        result = ParallelRunner(is_async=is_async).run(fan_out_fan_in, catalog)
         assert "Z" in result
         assert len(result["Z"]) == 3
         assert result["Z"] == (42, 42, 42)
 
-    def test_memory_data_set_input(self, fan_out_fan_in):
+    @pytest.mark.parametrize("is_async", [False, True])
+    def test_memory_data_set_input(self, is_async, fan_out_fan_in):
         pipeline = Pipeline([fan_out_fan_in])
         catalog = DataCatalog({"A": MemoryDataSet("42")})
-        result = ParallelRunner().run(pipeline, catalog)
+        result = ParallelRunner(is_async=is_async).run(pipeline, catalog)
         assert "Z" in result
         assert len(result["Z"]) == 3
         assert result["Z"] == ("42", "42", "42")
 
 
 class TestMaxWorkers:
+    @pytest.mark.parametrize("is_async", [False, True])
     @pytest.mark.parametrize(
         "cpu_cores, user_specified_number, expected_number",
         [
@@ -125,6 +128,7 @@ class TestMaxWorkers:
     )
     def test_specified_max_workers_bellow_cpu_cores_count(
         self,
+        is_async,
         mocker,
         fan_out_fan_in,
         catalog,
@@ -145,9 +149,9 @@ class TestMaxWorkers:
         )
 
         catalog.add_feed_dict(dict(A=42))
-        result = ParallelRunner(max_workers=user_specified_number).run(
-            fan_out_fan_in, catalog
-        )
+        result = ParallelRunner(
+            max_workers=user_specified_number, is_async=is_async
+        ).run(fan_out_fan_in, catalog)
         assert result == {"Z": (42, 42, 42)}
 
         executor_cls_mock.assert_called_once_with(max_workers=expected_number)
@@ -157,37 +161,38 @@ class TestMaxWorkers:
             ParallelRunner(max_workers=-1)
 
 
+@pytest.mark.parametrize("is_async", [False, True])
 class TestInvalidParallelRunner:
-    def test_task_validation(self, fan_out_fan_in, catalog):
+    def test_task_validation(self, is_async, fan_out_fan_in, catalog):
         """ParallelRunner cannot serialize the lambda function."""
         catalog.add_feed_dict(dict(A=42))
         pipeline = Pipeline([fan_out_fan_in, node(lambda x: x, "Z", "X")])
         with pytest.raises(AttributeError):
-            ParallelRunner().run(pipeline, catalog)
+            ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
-    def test_task_exception(self, fan_out_fan_in, catalog):
+    def test_task_exception(self, is_async, fan_out_fan_in, catalog):
         catalog.add_feed_dict(feed_dict=dict(A=42))
         pipeline = Pipeline([fan_out_fan_in, node(exception_fn, "Z", "X")])
         with pytest.raises(Exception, match="test exception"):
-            ParallelRunner().run(pipeline, catalog)
+            ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
-    def test_memory_data_set_output(self, fan_out_fan_in):
+    def test_memory_data_set_output(self, is_async, fan_out_fan_in):
         """ParallelRunner does not support output to externally
         created MemoryDataSets.
         """
         pipeline = Pipeline([fan_out_fan_in])
         catalog = DataCatalog({"C": MemoryDataSet()}, dict(A=42))
         with pytest.raises(AttributeError, match="['C']"):
-            ParallelRunner().run(pipeline, catalog)
+            ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
-    def test_node_returning_none(self):
+    def test_node_returning_none(self, is_async):
         pipeline = Pipeline([node(identity, "A", "B"), node(return_none, "B", "C")])
         catalog = DataCatalog({"A": MemoryDataSet("42")})
         pattern = "Saving `None` to a `DataSet` is not allowed"
         with pytest.raises(DataSetError, match=pattern):
-            ParallelRunner().run(pipeline, catalog)
+            ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
-    def test_data_set_not_serializable(self, fan_out_fan_in):
+    def test_data_set_not_serializable(self, is_async, fan_out_fan_in):
         """Data set A cannot be serializable because _load and _save are not
         defined in global scope.
         """
@@ -203,7 +208,7 @@ class TestInvalidParallelRunner:
 
         pipeline = Pipeline([fan_out_fan_in])
         with pytest.raises(AttributeError, match="['A']"):
-            ParallelRunner().run(pipeline, catalog)
+            ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
 
 @log_time
@@ -224,17 +229,22 @@ def decorated_fan_out_fan_in():
     )
 
 
+@pytest.mark.parametrize("is_async", [False, True])
 class TestParallelRunnerDecorator:
-    def test_decorate_pipeline(self, fan_out_fan_in, catalog):
+    def test_decorate_pipeline(self, is_async, fan_out_fan_in, catalog):
         catalog.add_feed_dict(dict(A=42))
-        result = ParallelRunner().run(fan_out_fan_in.decorate(log_time), catalog)
+        result = ParallelRunner(is_async=is_async).run(
+            fan_out_fan_in.decorate(log_time), catalog
+        )
         assert "Z" in result
         assert len(result["Z"]) == 3
         assert result["Z"] == (42, 42, 42)
 
-    def test_decorated_nodes(self, decorated_fan_out_fan_in, catalog):
+    def test_decorated_nodes(self, is_async, decorated_fan_out_fan_in, catalog):
         catalog.add_feed_dict(dict(A=42))
-        result = ParallelRunner().run(decorated_fan_out_fan_in, catalog)
+        result = ParallelRunner(is_async=is_async).run(
+            decorated_fan_out_fan_in, catalog
+        )
         assert "Z" in result
         assert len(result["Z"]) == 3
         assert result["Z"] == (42, 42, 42)
@@ -266,9 +276,10 @@ ParallelRunnerManager.register(  # pylint: disable=no-member
 )
 
 
+@pytest.mark.parametrize("is_async", [False, True])
 class TestParallelRunnerRelease:
-    def test_dont_release_inputs_and_outputs(self):
-        runner = ParallelRunner()
+    def test_dont_release_inputs_and_outputs(self, is_async):
+        runner = ParallelRunner(is_async=is_async)
         log = runner._manager.list()
 
         pipeline = Pipeline(
@@ -286,8 +297,8 @@ class TestParallelRunnerRelease:
         # we don't want to see release in or out in here
         assert list(log) == [("load", "in"), ("load", "middle"), ("release", "middle")]
 
-    def test_release_at_earliest_opportunity(self):
-        runner = ParallelRunner()
+    def test_release_at_earliest_opportunity(self, is_async):
+        runner = ParallelRunner(is_async=is_async)
         log = runner._manager.list()
 
         pipeline = Pipeline(
@@ -313,8 +324,8 @@ class TestParallelRunnerRelease:
             ("release", "second"),
         ]
 
-    def test_count_multiple_loads(self):
-        runner = ParallelRunner()
+    def test_count_multiple_loads(self, is_async):
+        runner = ParallelRunner(is_async=is_async)
         log = runner._manager.list()
 
         pipeline = Pipeline(
@@ -336,8 +347,8 @@ class TestParallelRunnerRelease:
             ("release", "dataset"),
         ]
 
-    def test_release_transcoded(self):
-        runner = ParallelRunner()
+    def test_release_transcoded(self, is_async):
+        runner = ParallelRunner(is_async=is_async)
         log = runner._manager.list()
 
         pipeline = Pipeline(

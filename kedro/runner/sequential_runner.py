@@ -44,6 +44,16 @@ class SequentialRunner(AbstractRunner):
     topological sort of provided nodes.
     """
 
+    def __init__(self, is_async: bool = False):
+        """Instantiates the runner classs.
+
+            Args:
+                is_async: If True, the node inputs and outputs are loaded and saved
+                    asynchronously with threads. Defaults to False.
+
+        """
+        super().__init__(is_async=is_async)
+
     def create_default_data_set(self, ds_name: str) -> AbstractDataSet:
         """Factory method for creating the default data set for the runner.
 
@@ -74,7 +84,7 @@ class SequentialRunner(AbstractRunner):
 
         for exec_index, node in enumerate(nodes):
             try:
-                run_node(node, catalog)
+                run_node(node, catalog, self._is_async)
                 done_nodes.add(node)
             except Exception:
                 self._suggest_resume_scenario(pipeline, done_nodes)

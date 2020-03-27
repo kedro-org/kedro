@@ -49,9 +49,12 @@ def filepath_biosequence(tmp_path):
 
 
 @pytest.fixture
-def biosequence_data_set(filepath_biosequence):
+def biosequence_data_set(filepath_biosequence, fs_args):
     return BioSequenceDataSet(
-        filepath=filepath_biosequence, load_args=LOAD_ARGS, save_args=SAVE_ARGS
+        filepath=filepath_biosequence,
+        load_args=LOAD_ARGS,
+        save_args=SAVE_ARGS,
+        fs_args=fs_args,
     )
 
 
@@ -69,6 +72,8 @@ class TestBioSequenceDataSet:
         assert dummy_data[0].id, reloaded[0].id
         assert dummy_data[0].seq, reloaded[0].seq
         assert len(dummy_data) == len(reloaded)
+        assert biosequence_data_set._fs_open_args_load == {"mode": "r"}
+        assert biosequence_data_set._fs_open_args_save == {"mode": "w"}
 
     def test_exists(self, biosequence_data_set, dummy_data):
         """Test `exists` method invocation for both existing and
@@ -84,6 +89,17 @@ class TestBioSequenceDataSet:
 
         for key, value in SAVE_ARGS.items():
             assert biosequence_data_set._save_args[key] == value
+
+    @pytest.mark.parametrize(
+        "fs_args",
+        [{"open_args_load": {"mode": "rb", "compression": "gzip"}}],
+        indirect=True,
+    )
+    def test_open_extra_args(self, biosequence_data_set, fs_args):
+        assert biosequence_data_set._fs_open_args_load == fs_args["open_args_load"]
+        assert biosequence_data_set._fs_open_args_save == {
+            "mode": "w"
+        }  # default unchanged
 
     def test_load_missing_file(self, biosequence_data_set):
         """Check the error when trying to load missing file."""

@@ -75,8 +75,10 @@ def dummy_dataframe():
 
 
 @pytest.fixture
-def geojson_data_set(filepath, load_args, save_args):
-    return GeoJSONDataSet(filepath=filepath, load_args=load_args, save_args=save_args)
+def geojson_data_set(filepath, load_args, save_args, fs_args):
+    return GeoJSONDataSet(
+        filepath=filepath, load_args=load_args, save_args=save_args, fs_args=fs_args
+    )
 
 
 @pytest.fixture
@@ -92,6 +94,8 @@ class TestGeoJSONDataSet:
         geojson_data_set.save(dummy_dataframe)
         reloaded_df = geojson_data_set.load()
         assert_frame_equal(reloaded_df, dummy_dataframe)
+        assert geojson_data_set._fs_open_args_load == {}
+        assert geojson_data_set._fs_open_args_save == {"mode": "wb"}
 
     @pytest.mark.parametrize("geojson_data_set", [{"index": False}], indirect=True)
     def test_load_missing_file(self, geojson_data_set):
@@ -121,6 +125,15 @@ class TestGeoJSONDataSet:
         """Test overriding default save args"""
         for k, v in save_args.items():
             assert geojson_data_set._save_args[k] == v
+
+    @pytest.mark.parametrize(
+        "fs_args",
+        [{"open_args_load": {"mode": "rb", "compression": "gzip"}}],
+        indirect=True,
+    )
+    def test_open_extra_args(self, geojson_data_set, fs_args):
+        assert geojson_data_set._fs_open_args_load == fs_args["open_args_load"]
+        assert geojson_data_set._fs_open_args_save == {"mode": "wb"}
 
     @pytest.mark.parametrize(
         "filepath,instance_type",

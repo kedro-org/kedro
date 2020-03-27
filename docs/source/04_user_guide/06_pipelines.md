@@ -533,6 +533,52 @@ kedro run --runner=ParallelRunner
 
 > *Note:* You cannot use both `--parallel` and `--runner` flags at the same time (e.g. `kedro run --parallel --runner=SequentialRunner` raises an exception).
 
+#### Using a custom runner
+
+If the built-in runners don't meet your requirements, you can define your own runner in your project instead. For example, suppose you want to add a dry runner to list which nodes that would be run as opposed to actually executing them, you can define it as follows (courtesy of [AntonyMilneQB](https://github.com/AntonyMilneQB])):
+
+```python
+# in your_project/src/your_project/runner.py
+from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
+from kedro.pipeline import Pipeline
+from kedro.runner.runner import AbstractRunner
+
+
+class DryRunner(AbstractRunner):
+    """``DryRunner`` is an ``AbstractRunner`` implementation. It can be used to list which
+    nodes would be run without actually executing anything.
+    """
+
+    def create_default_data_set(self, ds_name: str) -> AbstractDataSet:
+        """Factory method for creating the default data set for the runner.
+        Args:
+            ds_name: Name of the missing data set
+        Returns:
+            An instance of an implementation of AbstractDataSet to be used
+            for all unregistered data sets.
+        """
+        return MemoryDataSet()
+
+    def _run(self, pipeline: Pipeline, catalog: DataCatalog) -> None:
+        """The method implementing dry pipeline running.
+        Args:
+            pipeline: The ``Pipeline`` to run.
+            catalog: The ``DataCatalog`` from which to fetch data.
+        """
+        nodes = pipeline.nodes
+        self._logger.info(
+            "Actual run would execute %d nodes:\n%s",
+            len(nodes),
+            "\n".join(map(str, nodes)),
+        )
+```
+
+And use it with `kedro run` through the `--runner` flag:
+
+```console
+$ kedro run --runner=src.your_project.runner.DryRunner
+```
+
 ### Asynchronous loading and saving
 When processing a node, both `SequentialRunner` and `ParallelRunner` perform the following steps in order:
 

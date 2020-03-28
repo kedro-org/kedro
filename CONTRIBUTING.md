@@ -45,6 +45,37 @@ Working on your first pull request? You can learn how from these resources:
 * [First timers only](https://www.firsttimersonly.com/)
 * [How to contribute to an open source project on GitHub](https://egghead.io/courses/how-to-contribute-to-an-open-source-project-on-github)
 
+### Developer Workflow
+
+#### First time (one-off)
+
+Ensure you have done these:
+
+- [ ] Read through the pre-requisites in the [ReadTheDocs documentation](https://kedro.readthedocs.io/en/stable/02_getting_started/01_prerequisites.html).
+- [ ] Run the below commands:
+```
+make install-test-requirements
+make install-pre-commit
+```
+- [ ] Once the above commands have executed successfully, do a sanity check to ensure that `kedro` works in your environment:
+```
+make test
+make build-docs
+```
+
+#### Then onwards (code or documentation changes)
+
+If you picked up a code or documentation related issue, before pushing the branch to the repo and creating a Pull Request please do the below:
+
+- [ ] for code changes:
+```
+make test
+```
+
+- [ ] for documentation related changes:
+```
+make build-docs
+```
 
 ### Guidelines
 
@@ -52,7 +83,7 @@ Working on your first pull request? You can learn how from these resources:
  - We use [Anaconda](https://www.anaconda.com/distribution/) as a preferred virtual environment
  - We use [SemVer](https://semver.org/) for versioning
 
-Our code is designed to be compatible with Python 3.5 onwards and our style guidelines are (in cascading order):
+Our code is designed to be compatible with Python 3.6 onwards and our style guidelines are (in cascading order):
 
 * [PEP 8 conventions](https://www.python.org/dev/peps/pep-0008/) for all Python code
 * [Google docstrings](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) for code comments
@@ -161,8 +192,6 @@ make build-docs
 ```
 
 This command will only work on Unix-like systems and requires `pandoc` to be installed.
-
-> ❗ Running `make build-docs` in a Python 3.5 environment may sometimes yield multiple warning messages like the following: `MemoryDataSet.md: WARNING: document isn't included in any toctree`. You can simply ignore them or switch to Python 3.6+ when building documentation.
 
 ## Hints on pre-commit usage
 The checks will automatically run on all the changed files on each commit.

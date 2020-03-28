@@ -29,6 +29,7 @@
 
 import json
 
+import matplotlib
 import matplotlib.pyplot as plt
 import pytest
 import s3fs
@@ -44,6 +45,8 @@ CREDENTIALS = {"client_kwargs": AWS_CREDENTIALS}
 KEY_PATH = "matplotlib"
 COLOUR_LIST = ["blue", "green", "red"]
 FULL_PATH = "s3://{}/{}".format(BUCKET_NAME, KEY_PATH)
+
+matplotlib.use("Agg")  # Disable interactive mode
 
 
 @pytest.fixture
@@ -114,8 +117,10 @@ def s3fs_cleanup():
 
 
 @pytest.fixture
-def plot_writer(mocked_s3_bucket):  # pylint: disable=unused-argument
-    return MatplotlibWriter(filepath=FULL_PATH, credentials=CREDENTIALS)
+def plot_writer(mocked_s3_bucket, fs_args):  # pylint: disable=unused-argument
+    return MatplotlibWriter(
+        filepath=FULL_PATH, credentials=CREDENTIALS, fs_args=fs_args
+    )
 
 
 def test_save_data(tmp_path, mock_single_plot, plot_writer, mocked_s3_bucket):
@@ -131,6 +136,7 @@ def test_save_data(tmp_path, mock_single_plot, plot_writer, mocked_s3_bucket):
     mocked_s3_bucket.download_file(BUCKET_NAME, KEY_PATH, str(download_path))
 
     assert actual_filepath.read_bytes() == download_path.read_bytes()
+    assert plot_writer._fs_open_args_save == {"mode": "wb"}
 
 
 def test_list_save(tmp_path, mock_list_plot, plot_writer, mocked_s3_bucket):
@@ -206,6 +212,13 @@ def test_fs_args(tmp_path, mock_single_plot, mocked_encrypted_s3_bucket):
     mocked_encrypted_s3_bucket.download_file(BUCKET_NAME, KEY_PATH, str(download_path))
 
     assert actual_filepath.read_bytes() == download_path.read_bytes()
+
+
+@pytest.mark.parametrize(
+    "fs_args", [{"open_args_save": {"mode": "w", "compression": "gzip"}}], indirect=True
+)
+def test_open_extra_args(plot_writer, fs_args):
+    assert plot_writer._fs_open_args_save == fs_args["open_args_save"]
 
 
 def test_load_fail(plot_writer):

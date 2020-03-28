@@ -5,7 +5,7 @@
 | Theme | Status |
 |------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Latest Release | [![PyPI version](https://badge.fury.io/py/kedro.svg)](https://pypi.org/project/kedro/) |
-| Python Version | [![Python Version](https://img.shields.io/badge/python-3.5%20%7C%203.6%20%7C%203.7-blue.svg)](https://pypi.org/project/kedro/) |
+| Python Version | [![Python Version](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue.svg)](https://pypi.org/project/kedro/) |
 | `master` Branch Build | [![CircleCI](https://circleci.com/gh/quantumblacklabs/kedro/tree/master.svg?style=shield)](https://circleci.com/gh/quantumblacklabs/kedro/tree/master) |
 | `develop` Branch Build | [![CircleCI](https://circleci.com/gh/quantumblacklabs/kedro/tree/develop.svg?style=shield)](https://circleci.com/gh/quantumblacklabs/kedro/tree/develop) |
 | Documentation Build | [![Documentation](https://readthedocs.org/projects/kedro/badge/?version=latest)](https://kedro.readthedocs.io/) |
@@ -33,19 +33,6 @@ pip install kedro
 ```
 
 See more detailed installation instructions, including how to setup Python virtual environments, in our [installation guide](https://kedro.readthedocs.io/en/stable/02_getting_started/02_install.html) and get started with our ["Hello Word"](https://kedro.readthedocs.io/en/stable/02_getting_started/04_hello_world.html) example.
-
-
-## Why does Kedro exist?
-
-Kedro is built upon our collective best-practice (and mistakes) trying to deliver real-world ML applications that have vast amounts of dirty data. We developed Kedro to achieve the following:
-
- - **Collaboration** on an analytics codebase when different team members have varied exposure to software engineering best-practice
- - Focussing on **maintainable data and ML pipelines** as the standard, instead of a singular activity of deploying models in production
- - A way to inspire the creation of **reusable analytics code** so that we never start from scratch when working on a new project
- - **Efficient use of time** because we're able to quickly move from experimentation into production
-
-Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) and [Nikolaos Tsaousis](https://github.com/tsanikgr) to solve challenges they faced in their project work. This work was later turned into a product thanks to the following contributors:
-[Ivan Danov](https://github.com/idanov), [Dmitrii Deriabin](https://github.com/DmitryDeryabin), [Gordon Wrigley](https://github.com/tolomea), [Yetunde Dada](https://github.com/yetudada), [Nasef Khan](https://github.com/nakhan98), [Kiyohito Kunii](https://github.com/921kiyo), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae), [Peteris Erins](https://github.com/Pet3ris), [Lorena Balan](https://github.com/lorenabalan), [Richard Westenra](https://github.com/richardwestenra) and [Anton Kirilenko](https://github.com/Flid).
 
 
 ## What are the main features of Kedro?
@@ -81,6 +68,36 @@ Documentation for the latest stable release can be found [here](https://kedro.re
 
 *Note:* Read our [FAQs](https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#how-does-kedro-compare-to-other-projects) to learn how we differ from workflow managers like Airflow and Luigi.
 
+
+## Why does Kedro exist?
+
+Kedro is built upon our collective best-practice (and mistakes) trying to deliver real-world ML applications that have vast amounts of raw unvetted data. We developed Kedro to achieve the following:
+
+ - **Collaboration** on an analytics codebase when different team members have varied exposure to software engineering best-practice
+ - Focussing on **maintainable data and ML pipelines** as the standard, instead of a singular activity of deploying models in production
+ - A way to inspire the creation of **reusable analytics code** so that we never start from scratch when working on a new project
+ - **Efficient use of time** because we're able to quickly move from experimentation into production
+
+## The humans behind Kedro
+
+Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) and [Nikolaos Tsaousis](https://github.com/tsanikgr) to solve challenges they faced in their project work.
+Their work was later turned into an internal product by [Peteris Erins](https://github.com/Pet3ris), [Ivan Danov](https://github.com/idanov), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae) and [Nikolaos Tsaousis](https://github.com/tsanikgr).
+
+Currently the core Kedro team consists of:
+* [Yetunde Dada](https://github.com/yetudada)
+* [Ivan Danov](https://github.com/idanov)
+* [Richard Westenra](https://github.com/richardwestenra)
+* [Dmitrii Deriabin](https://github.com/DmitryDeryabin)
+* [Lorena Balan](https://github.com/lorenabalan)
+* [Kiyohito Kunii](https://github.com/921kiyo)
+* [Zain Patel](https://github.com/mzjp2)
+* [Lim Hoang](https://github.com/limdauto)
+* [Andrii Ivaniuk](https://github.com/andrii-ivaniuk)
+
+Former core team members with significant contributions are:
+[Gordon Wrigley](https://github.com/tolomea), [Nasef Khan](https://github.com/nakhan98) and [Anton Kirilenko](https://github.com/Flid).
+
+And last but not least, all the open-source contributers whose work went into all Kedro [releases](https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md).
 
 ## Can I contribute?
 

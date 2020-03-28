@@ -37,7 +37,9 @@ import anyconfig
 import pytest
 from click.testing import CliRunner
 
-from kedro.context import KEDRO_ENV_VAR
+from kedro.extras.datasets.pandas import CSVDataSet
+from kedro.io.data_catalog import DataCatalog
+from kedro.io.memory_data_set import MemoryDataSet
 from kedro.runner import ParallelRunner, SequentialRunner
 
 
@@ -238,7 +240,10 @@ class TestRunCommand:
             ({}, {}),
             ({"params": {"foo": "baz"}}, {"foo": "baz"}),
             ({"params": "foo:baz"}, {"foo": "baz"}),
-            ({"params": {"foo": "123.45", "baz": "678", "bar": 9}}, {"foo": "123.45", "baz": "678", "bar": 9}),
+            (
+                {"params": {"foo": "123.45", "baz": "678", "bar": 9}},
+                {"foo": "123.45", "baz": "678", "bar": 9},
+            ),
         ],
         indirect=["fake_run_config_with_params"],
     )
@@ -266,17 +271,6 @@ class TestRunCommand:
         )
         fake_load_context.assert_called_once_with(
             Path.cwd(), env=mocker.ANY, extra_params=expected
-        )
-
-    def test_run_env_environment_var(
-        self, fake_kedro_cli, fake_load_context, fake_repo_path, monkeypatch, mocker
-    ):
-        monkeypatch.setenv("KEDRO_ENV", "my_special_env")
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["run"])
-        assert not result.exit_code
-
-        fake_load_context.assert_called_once_with(
-            Path.cwd(), env="my_special_env", extra_params=mocker.ANY
         )
 
     @pytest.mark.parametrize(
@@ -357,13 +351,12 @@ class TestLintCommand:
 
         files = ("src/tests", "src/fake_package")
         expected_calls = [
+            mocker.call("black", files),
             mocker.call("flake8", ("--max-line-length=88",) + files),
             mocker.call(
                 "isort", ("-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + files
             ),
         ]
-        if sys.version_info[:2] >= (3, 6):
-            expected_calls.append(mocker.call("black", files))  # pragma: no cover
 
         assert python_call_mock.call_args_list == expected_calls
 
@@ -373,13 +366,12 @@ class TestLintCommand:
 
         files = ("kedro",)
         expected_calls = [
+            mocker.call("black", files),
             mocker.call("flake8", ("--max-line-length=88",) + files),
             mocker.call(
                 "isort", ("-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + files
             ),
         ]
-        if sys.version_info[:2] >= (3, 6):
-            expected_calls.append(mocker.call("black", files))  # pragma: no cover
 
         assert python_call_mock.call_args_list == expected_calls
 
@@ -614,6 +606,7 @@ class TestJupyterNotebookCommand:
     def test_env(
         self, env_flag, fake_kedro_cli, python_call_mock, default_jupyter_options
     ):
+        """This tests passing an environment variable to the jupyter subprocess."""
         result = CliRunner().invoke(
             fake_kedro_cli.cli, ["jupyter", "notebook", env_flag, "my_special_env"]
         )
@@ -622,21 +615,7 @@ class TestJupyterNotebookCommand:
         args, kwargs = python_call_mock.call_args
         assert args == default_jupyter_options
         assert "env" in kwargs
-        assert KEDRO_ENV_VAR in kwargs["env"]
-        assert kwargs["env"][KEDRO_ENV_VAR] == "my_special_env"
-
-    def test_env_environment_variable(
-        self, fake_kedro_cli, python_call_mock, monkeypatch, default_jupyter_options
-    ):
-        monkeypatch.setenv("KEDRO_ENV", "my_special_env")
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["jupyter", "notebook"])
-        assert not result.exit_code
-
-        args, kwargs = python_call_mock.call_args
-        assert args == default_jupyter_options
-        assert "env" in kwargs
-        assert KEDRO_ENV_VAR in kwargs["env"]
-        assert kwargs["env"][KEDRO_ENV_VAR] == "my_special_env"
+        assert kwargs["env"]["KEDRO_ENV"] == "my_special_env"
 
 
 class TestJupyterLabCommand:
@@ -707,6 +686,7 @@ class TestJupyterLabCommand:
     def test_env(
         self, env_flag, fake_kedro_cli, python_call_mock, default_jupyter_options
     ):
+        """This tests passing an environment variable to the jupyter subprocess."""
         result = CliRunner().invoke(
             fake_kedro_cli.cli, ["jupyter", "lab", env_flag, "my_special_env"]
         )
@@ -715,21 +695,7 @@ class TestJupyterLabCommand:
         args, kwargs = python_call_mock.call_args
         assert args == default_jupyter_options
         assert "env" in kwargs
-        assert KEDRO_ENV_VAR in kwargs["env"]
-        assert kwargs["env"][KEDRO_ENV_VAR] == "my_special_env"
-
-    def test_env_environment_variable(
-        self, fake_kedro_cli, python_call_mock, monkeypatch, default_jupyter_options
-    ):
-        monkeypatch.setenv("KEDRO_ENV", "my_special_env")
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["jupyter", "lab"])
-        assert not result.exit_code
-
-        args, kwargs = python_call_mock.call_args
-        assert args == default_jupyter_options
-        assert "env" in kwargs
-        assert KEDRO_ENV_VAR in kwargs["env"]
-        assert kwargs["env"][KEDRO_ENV_VAR] == "my_special_env"
+        assert kwargs["env"]["KEDRO_ENV"] == "my_special_env"
 
 
 class TestConvertNotebookCommand:
@@ -809,3 +775,88 @@ class TestConvertNotebookCommand:
                 mocker.call(Path("/path/2"), output_prefix / "2.py"),
             ]
         )
+
+
+class TestCatalogListCommand:
+    PIPELINE_NAME = "pipeline"
+
+    @staticmethod
+    @pytest.fixture
+    def fake_load_context(mocker, fake_kedro_cli):
+        context = mocker.MagicMock()
+        return mocker.patch.object(fake_kedro_cli, "load_context", return_value=context)
+
+    def test_list_all_pipelines(self, fake_kedro_cli, fake_load_context, mocker):
+        yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
+        mocked_context = fake_load_context.return_value
+        mocked_context.pipelines.keys.return_value = (self.PIPELINE_NAME,)
+        mocked_context.catalog.list.return_value = []
+        mocked_pl_obj = mocked_context.pipelines.get.return_value
+        mocked_pl_obj.data_sets.return_value = set()
+
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["catalog", "list"])
+
+        assert not result.exit_code
+        assert mocked_context.pipelines.keys.call_count == 1
+        mocked_context.pipelines.get.assert_called_once_with(self.PIPELINE_NAME)
+
+        expected_dict = {"DataSets in 'pipeline' pipeline": {}}
+        yaml_dump_mock.assert_called_once_with(expected_dict)
+
+    def test_list_specific_pipelines(self, fake_kedro_cli, fake_load_context):
+        mocked_context = fake_load_context.return_value
+
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["catalog", "list", "--pipeline", self.PIPELINE_NAME]
+        )
+
+        assert not result.exit_code
+        assert not mocked_context.pipelines.keys.called
+        mocked_context.pipelines.get.assert_called_once_with(self.PIPELINE_NAME)
+
+    def test_not_found_pipeline(self, fake_kedro_cli, fake_load_context):
+        mocked_context = fake_load_context.return_value
+        mocked_context.pipelines.get.return_value = None
+        mocked_context.pipelines.keys.return_value = (self.PIPELINE_NAME,)
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["catalog", "list", "--pipeline", "fake"]
+        )
+        assert result.exit_code
+        expected_output = "Error: fake pipeline not found! Existing pipelines: {}\n".format(
+            self.PIPELINE_NAME
+        )
+        assert result.output == expected_output
+
+    def test_no_param_datasets_in_respose(
+        self, fake_kedro_cli, fake_load_context, mocker
+    ):
+        yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
+        mocked_context = fake_load_context.return_value
+        catalog_data_sets = {
+            "iris_data": CSVDataSet("test.csv"),
+            "parameters": MemoryDataSet(),
+            "params:data_ratio": MemoryDataSet(),
+            "intermediate": MemoryDataSet(),
+            "not_used": CSVDataSet("test2.csv"),
+        }
+
+        pl_obj_data_sets = set(catalog_data_sets.keys()).difference(["not_used"])
+        mocked_context.catalog = DataCatalog(data_sets=catalog_data_sets)
+        mocked_context.pipelines.keys.return_value = (self.PIPELINE_NAME,)
+        mocked_pl_obj = mocked_context.pipelines.get.return_value
+        mocked_pl_obj.data_sets.return_value = pl_obj_data_sets
+
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["catalog", "list"])
+
+        assert not result.exit_code
+        # 'parameters' and 'params:data_ratio' should not appear in the response
+        expected_dict = {
+            "DataSets in 'pipeline' pipeline": {
+                "Datasets mentioned in pipeline": {
+                    "CSVDataSet": ["iris_data"],
+                    "MemoryDataSet": ["intermediate"],
+                },
+                "Datasets not mentioned in pipeline": {"CSVDataSet": ["not_used"]},
+            }
+        }
+        yaml_dump_mock.assert_called_once_with(expected_dict)

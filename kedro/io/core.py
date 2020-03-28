@@ -33,14 +33,13 @@ saving functionality provided by ``kedro.io``.
 import abc
 import copy
 import logging
-import os
 import warnings
 from collections import namedtuple
 from datetime import datetime, timezone
+from functools import lru_cache
 from glob import iglob
 from pathlib import Path, PurePath
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
-from urllib.parse import urlparse
 
 from fsspec.utils import infer_storage_options
 
@@ -177,12 +176,6 @@ class AbstractDataSet(abc.ABC):
     def _logger(self) -> logging.Logger:
         return logging.getLogger(__name__)
 
-    def get_last_load_version(self) -> Optional[str]:
-        """Versioned datasets should override this property to return last loaded
-        version"""
-        # pylint: disable=no-self-use
-        return None  # pragma: no cover
-
     def load(self) -> Any:
         """Loads data by delegation to the provided load method.
 
@@ -207,12 +200,6 @@ class AbstractDataSet(abc.ABC):
                 str(self), str(exc)
             )
             raise DataSetError(message) from exc
-
-    def get_last_save_version(self) -> Optional[str]:
-        """Versioned datasets should override this property to return last saved
-        version."""
-        # pylint: disable=no-self-use
-        return None  # pragma: no cover
 
     def save(self, data: Any) -> None:
         """Saves data by delegation to the provided save method.
@@ -318,7 +305,7 @@ class AbstractDataSet(abc.ABC):
         """Release any cached data.
 
         Raises:
-            DataSetError: when underlying exists method raises error.
+            DataSetError: when underlying release method raises error.
 
         """
         try:
@@ -411,6 +398,7 @@ def parse_dataset_definition(
             )
 
         class_paths = (prefix + class_obj for prefix in _DEFAULT_PACKAGES)
+
         trials = (_load_obj(class_path) for class_path in class_paths)
         try:
             class_obj = next(obj for obj in trials if obj is not None)
@@ -441,22 +429,26 @@ def parse_dataset_definition(
 def _load_obj(class_path: str) -> Optional[object]:
     try:
         class_obj = load_obj(class_path)
-    except (ImportError, AttributeError, ValueError):
+    except ModuleNotFoundError as error:
+        if error.name in class_path:
+            return None
+        # class_obj was successfully loaded, but some dependencies are missing.
+        raise DataSetError(
+            "{e} for {dataset}. Please see the documentation on how to install relevant "
+            "dependencies for {dataset}"
+            "https://kedro.readthedocs.io/en/stable/02_getting_started/02_install.html#optional-dependencies".format(  # pylint: disable=line-too-long
+                e=error, dataset=class_path
+            )
+        )
+    except (AttributeError, ValueError):
         return None
+
     return class_obj
 
 
 def _local_exists(filepath: str) -> bool:
     filepath = Path(filepath)
     return filepath.exists() or any(par.is_file() for par in filepath.parents)
-
-
-def is_remote_path(filepath: str) -> bool:
-    """Check if the given path looks like a remote URL (has scheme)."""
-    # Get rid of Windows-specific "C:\" start,
-    # which is treated as a URL scheme.
-    _, filepath = os.path.splitdrive(filepath)
-    return bool(urlparse(filepath).scheme)
 
 
 class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
@@ -520,13 +512,10 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
         self._version = version
         self._exists_function = exists_function or _local_exists
         self._glob_function = glob_function or iglob
-        self._last_load_version = None  # type: Optional[str]
-        self._last_save_version = None  # type: Optional[str]
 
-    def get_last_load_version(self) -> Optional[str]:
-        return self._last_load_version
-
-    def _lookup_load_version(self) -> Optional[str]:
+    @lru_cache(maxsize=None)
+    def resolve_load_version(self) -> Optional[str]:
+        """Compute and cache the version the dataset should be loaded with."""
         if not self._version:
             return None
         if self._version.load:
@@ -552,13 +541,12 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
             # When versioning is disabled, load from original filepath
             return self._filepath
 
-        load_version = self._last_load_version or self._lookup_load_version()
+        load_version = self.resolve_load_version()
         return self._get_versioned_path(load_version)  # type: ignore
 
-    def get_last_save_version(self) -> Optional[str]:
-        return self._last_save_version
-
-    def _lookup_save_version(self) -> Optional[str]:
+    @lru_cache(maxsize=None)
+    def resolve_save_version(self) -> Optional[str]:
+        """Compute and cache the version the dataset should be saved with."""
         if not self._version:
             return None
         return self._version.save or generate_timestamp()
@@ -568,8 +556,9 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
             # When versioning is disabled, return original filepath
             return self._filepath
 
-        save_version = self._last_save_version or self._lookup_save_version()
+        save_version = self.resolve_save_version()
         versioned_path = self._get_versioned_path(save_version)  # type: ignore
+
         if self._exists_function(str(versioned_path)):
             raise DataSetError(
                 "Save path `{}` for {} must not exist if versioning "
@@ -582,19 +571,17 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
         return self._filepath / version / self._filepath.name
 
     def load(self) -> Any:
-        self._last_load_version = self._lookup_load_version()
+        self.resolve_load_version()  # Make sure last load version is set
         return super().load()
 
     def save(self, data: Any) -> None:
-        self._last_save_version = self._lookup_save_version()
+        save_version = self.resolve_save_version()  # Make sure last save version is set
         super().save(data)
 
-        load_version = self._lookup_load_version()
-        if load_version != self._last_save_version:
+        load_version = self.resolve_load_version()
+        if load_version != save_version:
             warnings.warn(
-                _CONSISTENCY_WARNING.format(
-                    self._last_save_version, load_version, str(self)
-                )
+                _CONSISTENCY_WARNING.format(save_version, load_version, str(self))
             )
 
     def exists(self) -> bool:
@@ -619,6 +606,11 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
             )
             raise DataSetError(message) from exc
 
+    def _release(self) -> None:
+        super()._release()
+        self.resolve_load_version.cache_clear()
+        self.resolve_save_version.cache_clear()
+
 
 def get_protocol_and_path(filepath: str, version: Version = None) -> Tuple[str, str]:
     """Parses filepath on protocol and path.
@@ -628,11 +620,11 @@ def get_protocol_and_path(filepath: str, version: Version = None) -> Tuple[str, 
         version: instance of ``kedro.io.core.Version`` or None.
 
     Returns:
-            Protocol and path.
+        Protocol and path.
 
     Raises:
-            DataSetError: when protocol is http(s) and version is not None.
-            Note: HTTP(s) dataset doesn't support versioning.
+        DataSetError: when protocol is http(s) and version is not None.
+        Note: HTTP(s) dataset doesn't support versioning.
     """
     options_dict = infer_storage_options(filepath)
     path = options_dict["path"]
@@ -672,12 +664,3 @@ def validate_on_forbidden_chars(**kwargs):
             raise DataSetError(
                 "Neither white-space nor semicolon are allowed in `{}`.".format(key)
             )
-
-
-def deprecation_warning(class_name):
-    """Log deprecation warning."""
-    warnings.warn(
-        "{} will be deprecated in future releases. Please refer "
-        "to replacement datasets in kedro.extras.datasets.".format(class_name),
-        DeprecationWarning,
-    )

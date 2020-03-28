@@ -32,9 +32,6 @@
 import copy
 from typing import Any, Dict
 
-import numpy as np
-import pandas as pd
-
 from kedro.io.core import AbstractDataSet, DataSetError
 
 _EMPTY = object()
@@ -114,7 +111,17 @@ def _infer_copy_mode(data: Any) -> str:
     Returns:
         One of "copy", "assign" or "deepcopy" as the copy mode to use.
     """
-    if isinstance(data, (pd.DataFrame, np.ndarray)):
+    # pylint: disable=import-outside-toplevel
+    try:
+        import pandas as pd
+    except ImportError:  # pragma: no cover
+        pd = None  # pragma: no cover
+    try:
+        import numpy as np
+    except ImportError:  # pragma: no cover
+        np = None  # pragma: no cover
+
+    if pd and isinstance(data, pd.DataFrame) or np and isinstance(data, np.ndarray):
         copy_mode = "copy"
     elif type(data).__name__ == "DataFrame":
         copy_mode = "assign"

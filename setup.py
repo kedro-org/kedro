@@ -85,23 +85,29 @@ extras_require = {
         "tornado>=4.2, <6.0",
         "ipykernel>=4.8.1, <5.0",
     ],
-    "pyspark": ["pyspark>=2.2.0, <3.0", "hdfs>=2.5.8, <3.0"],
     "notebook_templates": ["nbconvert>=5.3.1, <6.0", "nbformat>=4.4.0, <5.0"],
-    "azure": [
+    "memory_profiler": ["memory_profiler>=0.50.0, <1.0"],
+    "bioinformatics": ["biopython>=1.73, <2.0"],
+    "dask": ["dask[complete]>=2.6.0, <3.0"],
+    "geopandas": ["geopandas<=0.6.0, <1.0"],
+    "matplotlib": ["matplotlib>=3.0.3, <4.0"],
+    "networkx": ["networkx>=2.4, <3.0"],
+    "pandas": [
+        "pandas>=0.24.0, <2.0",
         "azure-storage-blob>=1.1.0, <2.0",
         "azure-storage-file>=1.1.0, <2.0",
         "azure-storage-queue>=1.1.0, <2.0",
+        "pandas-gbq>=0.12.0, <1.0",
+        "SQLAlchemy>=1.2.0, <2.0",
+        "pyarrow>=0.12.0, <1.0.0",
+        "xlrd>=1.0.0, <2.0",
+        "xlsxwriter>=1.0.0, <2.0",
+        "tables>=3.6",
     ],
-    "bioinformatics": ["biopython>=1.73, <2.0"],
-    "dask": ["dask[complete]>=2.6.0, <3.0"],
-    "gcs": ["gcsfs>=0.3.0, <1.0"],
-    "gbq": ["pandas-gbq>=0.12.0, <1.0"],
-    "matplotlib": ["matplotlib>=3.0.3, <4.0"],
-    "networkx": ["networkx>=2.4, <3.0"],
-    "memory_profiler": ["memory_profiler>=0.50.0, <1.0"],
+    "spark": ["pyspark>=2.2.0, <3.0", "hdfs>=2.5.8, <3.0", "s3fs>=0.3.0, <0.4.1"],
 }
 
-extras_require["all"] = sorted(chain.from_iterable(extras_require.values()))
+extras_require["all"] = sorted(set(chain.from_iterable(extras_require.values())))
 
 setup(
     name=name,
@@ -111,7 +117,7 @@ setup(
     long_description=readme,
     long_description_content_type="text/markdown",
     url="https://github.com/quantumblacklabs/kedro",
-    python_requires=">=3.5, <3.8",
+    python_requires=">=3.6, <3.9",
     packages=find_packages(exclude=["docs*", "tests*", "tools*", "features*"]),
     include_package_data=True,
     tests_require=test_requires,
@@ -123,9 +129,9 @@ setup(
     keywords="pipelines, machine learning, data pipelines, data science, data engineering",
     classifiers=[
         "Development Status :: 4 - Beta",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
     ],
     extras_require=extras_require,
 )

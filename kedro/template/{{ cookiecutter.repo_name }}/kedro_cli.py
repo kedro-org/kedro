@@ -34,7 +34,8 @@ import shutil
 import subprocess
 import sys
 import webbrowser
-from collections import Counter
+import yaml
+from collections import Counter, defaultdict
 from glob import iglob
 from itertools import chain
 from pathlib import Path
@@ -51,7 +52,7 @@ from kedro.cli.utils import (
     forward_command,
     python_call,
 )
-from kedro.context import KEDRO_ENV_VAR, load_context
+from kedro.context import load_context
 from kedro.runner import SequentialRunner
 from kedro.utils import load_obj
 
@@ -119,7 +120,7 @@ any open notebooks."""
 
 
 def _split_string(ctx, param, value):
-    return [item for item in value.split(",") if item]
+    return [item.strip() for item in value.split(",") if item]
 
 
 def _try_convert_to_numeric(value):
@@ -210,15 +211,7 @@ def cli():
     "--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP
 )
 @click.option("--parallel", "-p", is_flag=True, multiple=False, help=PARALLEL_ARG_HELP)
-@click.option(
-    "--env",
-    "-e",
-    type=str,
-    default=None,
-    multiple=False,
-    envvar=KEDRO_ENV_VAR,
-    help=ENV_ARG_HELP,
-)
+@click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
 @click.option("--tag", "-t", type=str, multiple=True, help=TAG_ARG_HELP)
 @click.option(
     "--load-version",
@@ -259,9 +252,10 @@ def run(
             "Both --parallel and --runner options cannot be used together. "
             "Please use either --parallel or --runner."
         )
+    runner = runner or "SequentialRunner"
     if parallel:
         runner = "ParallelRunner"
-    runner_class = load_obj(runner, "kedro.runner") if runner else SequentialRunner
+    runner_class = load_obj(runner, "kedro.runner")
 
     tag = _get_values_as_tuple(tag) if tag else tag
     node_names = _get_values_as_tuple(node_names) if node_names else node_names
@@ -294,25 +288,19 @@ def test(args):
 @click.argument("files", type=click.Path(exists=True), nargs=-1)
 def lint(files):
     """Run flake8, isort and (on Python >=3.6) black."""
-    # pylint: disable=unused-import
     if not files:
         files = ("src/tests", "src/{{ cookiecutter.python_package }}")
 
     try:
         import flake8
         import isort
+        import black
     except ImportError as exc:
         raise KedroCliError(NO_DEPENDENCY_MESSAGE.format(exc.name))
 
+    python_call("black", files)
     python_call("flake8", ("--max-line-length=88",) + files)
     python_call("isort", ("-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + files)
-
-    if sys.version_info[:2] >= (3, 6):
-        try:
-            import black
-        except ImportError:
-            raise KedroCliError(NO_DEPENDENCY_MESSAGE.format("black"))
-        python_call("black", files)
 
 
 @cli.command()
@@ -456,12 +444,12 @@ def _build_jupyter_command(
 def _build_jupyter_env(kedro_env: str) -> Dict[str, Any]:
     """Build the environment dictionary that gets injected into the subprocess running
     Jupyter. Since the subprocess has access only to the environment variables passed
-    in, we need to copy the current environment and add ``KEDRO_ENV_VAR``.
+    in, we need to copy the current environment and add ``KEDRO_ENV``.
     """
     if not kedro_env:
         return {}
     jupyter_env = os.environ.copy()
-    jupyter_env[KEDRO_ENV_VAR] = kedro_env
+    jupyter_env["KEDRO_ENV"] = kedro_env
     return {"env": jupyter_env}
 
 
@@ -478,15 +466,7 @@ def jupyter():
     "--all-kernels", is_flag=True, default=False, help=JUPYTER_ALL_KERNELS_HELP
 )
 @click.option("--idle-timeout", type=int, default=30, help=JUPYTER_IDLE_TIMEOUT_HELP)
-@click.option(
-    "--env",
-    "-e",
-    type=str,
-    default=None,
-    multiple=False,
-    envvar=KEDRO_ENV_VAR,
-    help=ENV_ARG_HELP,
-)
+@click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
 def jupyter_notebook(ip, all_kernels, env, idle_timeout, args):
     """Open Jupyter Notebook with project specific variables loaded."""
     if "-h" not in args and "--help" not in args:
@@ -506,15 +486,7 @@ def jupyter_notebook(ip, all_kernels, env, idle_timeout, args):
     "--all-kernels", is_flag=True, default=False, help=JUPYTER_ALL_KERNELS_HELP
 )
 @click.option("--idle-timeout", type=int, default=30, help=JUPYTER_IDLE_TIMEOUT_HELP)
-@click.option(
-    "--env",
-    "-e",
-    type=str,
-    default=None,
-    multiple=False,
-    envvar=KEDRO_ENV_VAR,
-    help=ENV_ARG_HELP,
-)
+@click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
 def jupyter_lab(ip, all_kernels, env, idle_timeout, args):
     """Open Jupyter Lab with project specific variables loaded."""
     if "-h" not in args and "--help" not in args:
@@ -617,6 +589,71 @@ def ipython_message(all_kernels=True):
         secho("(restart with --all-kernels to get access to others)", fg="yellow")
 
     secho("-" * 79, fg="cyan")
+
+
+@cli.group()
+def catalog():
+    """Commands for catalog."""
+
+
+@catalog.command("list")
+@click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
+@click.option(
+    "--pipeline", type=str, default="", help=PIPELINE_ARG_HELP, callback=_split_string
+)
+def list_datasets(pipeline, env):
+    """Show datasets per type."""
+    title = "DataSets in '{}' pipeline"
+    not_mentioned = "Datasets not mentioned in pipeline"
+    mentioned = "Datasets mentioned in pipeline"
+
+    context = load_context(Path.cwd(), env=env)
+    datasets_meta = context.catalog._data_sets
+    catalog_ds = set(context.catalog.list())
+
+    pipelines = pipeline or context.pipelines.keys()
+
+    result = {}
+    for pipeline in pipelines:
+        pl_obj = context.pipelines.get(pipeline)
+        if pl_obj:
+            pipeline_ds = pl_obj.data_sets()
+        else:
+            existing_pls = ", ".join(sorted(context.pipelines.keys()))
+            raise KedroCliError(
+                "{} pipeline not found! Existing pipelines: {}".format(
+                    pipeline, existing_pls
+                )
+            )
+
+        unused_ds = catalog_ds - pipeline_ds
+        default_ds = pipeline_ds - catalog_ds
+        used_ds = catalog_ds - unused_ds
+
+        unused_by_type = _map_type_to_datasets(unused_ds, datasets_meta)
+        used_by_type = _map_type_to_datasets(used_ds, datasets_meta)
+
+        if default_ds:
+            used_by_type["DefaultDataSet"].extend(default_ds)
+
+        data = ((not_mentioned, dict(unused_by_type)), (mentioned, dict(used_by_type)))
+        result[title.format(pipeline)] = {key: value for key, value in data if value}
+
+    secho(yaml.dump(result))
+
+
+def _map_type_to_datasets(datasets, datasets_meta):
+    """Build dictionary with a dataset type as a key and list of
+    datasets of the specific type as a value.
+    """
+    mapping = defaultdict(list)
+    for ds in datasets:
+        is_param = ds.startswith("params:") or ds == "parameters"
+        if not is_param:
+            ds_type = datasets_meta[ds].__class__.__name__
+            if ds not in mapping[ds_type]:
+                mapping[ds_type].append(ds)
+    return mapping
 
 
 if __name__ == "__main__":

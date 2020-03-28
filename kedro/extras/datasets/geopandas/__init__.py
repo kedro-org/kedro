@@ -25,15 +25,7 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-"""Kedro is a framework that makes it easy to build robust and scalable
-data pipelines by providing uniform project templates, data abstraction,
-configuration and pipeline assembly.
+"""``GeoJSONLocalDataset`` is an ``AbstractVersionedDataSet`` to save and load GeoJSON files.
 """
 
-__version__ = "0.15.8"
-
-
-import logging
-
-logging.getLogger(__name__).addHandler(logging.NullHandler())
+from .geojson_dataset import GeoJSONDataSet  # NOQA

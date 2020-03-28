@@ -47,8 +47,8 @@ def filepath_yaml(tmp_path):
 
 
 @pytest.fixture
-def yaml_data_set(filepath_yaml, save_args):
-    return YAMLDataSet(filepath=filepath_yaml, save_args=save_args)
+def yaml_data_set(filepath_yaml, save_args, fs_args):
+    return YAMLDataSet(filepath=filepath_yaml, save_args=save_args, fs_args=fs_args)
 
 
 @pytest.fixture
@@ -69,6 +69,8 @@ class TestYAMLDataSet:
         yaml_data_set.save(dummy_data)
         reloaded = yaml_data_set.load()
         assert dummy_data == reloaded
+        assert yaml_data_set._fs_open_args_load == {"mode": "r"}
+        assert yaml_data_set._fs_open_args_save == {"mode": "w"}
 
     def test_exists(self, yaml_data_set, dummy_data):
         """Test `exists` method invocation for both existing and
@@ -84,6 +86,15 @@ class TestYAMLDataSet:
         """Test overriding the default save arguments."""
         for key, value in save_args.items():
             assert yaml_data_set._save_args[key] == value
+
+    @pytest.mark.parametrize(
+        "fs_args",
+        [{"open_args_load": {"mode": "rb", "compression": "gzip"}}],
+        indirect=True,
+    )
+    def test_open_extra_args(self, yaml_data_set, fs_args):
+        assert yaml_data_set._fs_open_args_load == fs_args["open_args_load"]
+        assert yaml_data_set._fs_open_args_save == {"mode": "w"}  # default unchanged
 
     def test_load_missing_file(self, yaml_data_set):
         """Check the error when trying to load missing file."""

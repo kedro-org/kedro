@@ -289,17 +289,21 @@ class TestSparkDataSet:
         with pytest.raises(DataSetError, match="Other Exception"):
             spark_data_set.exists()
 
-    def test_parallel_runner(self, spark_in, spark_out):
+    @pytest.mark.parametrize("is_async", [False, True])
+    def test_parallel_runner(self, is_async, spark_in, spark_out):
         """Test ParallelRunner with SparkDataSet load and save.
         """
         catalog = DataCatalog(data_sets={"spark_in": spark_in, "spark_out": spark_out})
         pipeline = Pipeline([node(identity, "spark_in", "spark_out")])
-        runner = ParallelRunner()
+        runner = ParallelRunner(is_async=is_async)
         result = runner.run(pipeline, catalog)
         # 'spark_out' is saved in 'tmp_path/input', so the result of run should be empty
-        assert not result
+        assert result == {}
 
-    def test_parallel_runner_with_pickle_dataset(self, tmp_path, spark_in, spark_out):
+    @pytest.mark.parametrize("is_async", [False, True])
+    def test_parallel_runner_with_pickle_dataset(
+        self, is_async, tmp_path, spark_in, spark_out
+    ):
         """Test ParallelRunner with SparkDataSet -> PickleDataSet -> SparkDataSet .
         """
         pickle_data = PickleDataSet(filepath=str(tmp_path / "data.pkl"))
@@ -316,15 +320,16 @@ class TestSparkDataSet:
                 node(identity, "pickle", "spark_out"),
             ]
         )
-        runner = ParallelRunner()
+        runner = ParallelRunner(is_async=is_async)
 
         pattern = r"Failed while saving data to data set PickleDataSet"
 
         with pytest.raises(DataSetError, match=pattern):
             runner.run(pipeline, catalog)
 
+    @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_runner_with_memory_dataset(
-        self, spark_in, spark_out, sample_spark_df
+        self, is_async, spark_in, spark_out, sample_spark_df
     ):
         """Run ParallelRunner with SparkDataSet -> MemoryDataSet -> SparkDataSet.
         """
@@ -335,7 +340,7 @@ class TestSparkDataSet:
                 node(identity, "memory", "spark_out"),
             ]
         )
-        runner = ParallelRunner()
+        runner = ParallelRunner(is_async=is_async)
 
         pattern = (
             r"{0} cannot be serialized. ParallelRunner implicit memory datasets "
@@ -343,6 +348,7 @@ class TestSparkDataSet:
                 str(sample_spark_df.__class__)
             )
         )
+
         with pytest.raises(DataSetError, match=pattern):
             runner.run(pipeline, catalog)
 

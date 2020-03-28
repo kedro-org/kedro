@@ -31,7 +31,7 @@ import pytest
 
 import kedro
 from kedro.pipeline import Pipeline, node
-from kedro.pipeline.pipeline import OutputNotUniqueError, _get_transcode_compatible_name
+from kedro.pipeline.pipeline import OutputNotUniqueError, _strip_transcoding
 
 
 # Different dummy func based on the number of arguments
@@ -405,11 +405,11 @@ class TestComplexPipelineWithTranscoding:
 class TestGetTranscodeCompatibleName:
     def test_get_transcode_compatible_name(self):
         dataset_name = "mydata@pandas"
-        assert _get_transcode_compatible_name(dataset_name) == "mydata"
+        assert _strip_transcoding(dataset_name) == "mydata"
 
     def test_get_transcode_compatible_name_no_separator(self):
         dataset_name = "mydata"
-        assert _get_transcode_compatible_name(dataset_name) == dataset_name
+        assert _strip_transcoding(dataset_name) == dataset_name
 
     def test_get_transcode_compatible_name_multiple_separators(self):
         dataset_name = "mydata@formA@formB"
@@ -417,4 +417,4 @@ class TestGetTranscodeCompatibleName:
         pattern += "found 2 instead: 'mydata@formA@formB'"
 
         with pytest.raises(ValueError, match=pattern):
-            _get_transcode_compatible_name(dataset_name)
+            _strip_transcoding(dataset_name)

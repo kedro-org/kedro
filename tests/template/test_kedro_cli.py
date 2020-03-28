@@ -351,13 +351,12 @@ class TestLintCommand:
 
         files = ("src/tests", "src/fake_package")
         expected_calls = [
+            mocker.call("black", files),
             mocker.call("flake8", ("--max-line-length=88",) + files),
             mocker.call(
                 "isort", ("-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + files
             ),
         ]
-        if sys.version_info[:2] >= (3, 6):
-            expected_calls.insert(0, mocker.call("black", files))  # pragma: no cover
 
         assert python_call_mock.call_args_list == expected_calls
 
@@ -367,13 +366,12 @@ class TestLintCommand:
 
         files = ("kedro",)
         expected_calls = [
+            mocker.call("black", files),
             mocker.call("flake8", ("--max-line-length=88",) + files),
             mocker.call(
                 "isort", ("-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + files
             ),
         ]
-        if sys.version_info[:2] >= (3, 6):
-            expected_calls.insert(0, mocker.call("black", files))  # pragma: no cover
 
         assert python_call_mock.call_args_list == expected_calls
 

@@ -101,7 +101,7 @@ class ParallelRunner(AbstractRunner):
     be used to run the ``Pipeline`` in parallel groups formed by toposort.
     """
 
-    def __init__(self, max_workers: int = None):
+    def __init__(self, max_workers: int = None, is_async: bool = False):
         """
         Instantiates the runner by creating a Manager.
 
@@ -109,10 +109,13 @@ class ParallelRunner(AbstractRunner):
             max_workers: Number of worker processes to spawn. If not set,
                 calculated automatically based on the pipeline configuration
                 and CPU core count.
+            is_async: If True, the node inputs and outputs are loaded and saved
+                    asynchronously with threads. Defaults to False.
 
         Raises:
             ValueError: bad parameters passed
         """
+        super().__init__(is_async=is_async)
         self._manager = ParallelRunnerManager()
         self._manager.start()
 
@@ -249,7 +252,7 @@ class ParallelRunner(AbstractRunner):
                 ready = {n for n in todo_nodes if node_dependencies[n] <= done_nodes}
                 todo_nodes -= ready
                 for node in ready:
-                    futures.add(pool.submit(run_node, node, catalog))
+                    futures.add(pool.submit(run_node, node, catalog, self._is_async))
                 if not futures:
                     assert not todo_nodes, (todo_nodes, done_nodes, ready, done)
                     break

@@ -65,7 +65,19 @@ cars:
     date_format: '%Y-%m-%d %H:%M'
     decimal: .
 
-# Example 3: Loads a CSV file from a specific S3 bucket, using credentials and load arguments
+# Example 3: Loads and saves a compressed CSV on a local file system
+
+boats:
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/company/boats.csv.gz
+  load_args:
+    sep: ','
+    compression: 'gzip'
+  fs_args:
+    open_args_load:
+      mode: 'rb'
+
+# Example 4: Loads a CSV file from a specific S3 bucket, using credentials and load arguments
 
 motorbikes:
   type: pandas.CSVDataSet
@@ -77,14 +89,14 @@ motorbikes:
     skipfooter: 1
     na_values: ['#NA', NA]
 
-# Example 4: Loads / saves a pickle file from / to a local file system
+# Example 5: Loads / saves a pickle file from / to a local file system
 
 airplanes:
   type: pickle.PickleDataSet
   filepath: data/06_models/airplanes.pkl
   backend: pickle
 
-# Example 5: Loads an excel file from Google Cloud Storage
+# Example 6: Loads an excel file from Google Cloud Storage
 
 rockets:
   type: pandas.ExcelDataSet
@@ -95,7 +107,7 @@ rockets:
   save_args:
     sheet_name: Sheet1
 
-# Example 6: Save an image created with Matplotlib on Google Cloud Storage
+# Example 7: Save an image created with Matplotlib on Google Cloud Storage
 
 results_plot:
   type: matplotlib.MatplotLibWriter
@@ -104,7 +116,7 @@ results_plot:
     project: my-project
   credentials: my_gcp_credentials
 
-# Example 7: Loads / saves an HDF file on local file system storage, using specified load and save arguments
+# Example 8: Loads / saves an HDF file on local file system storage, using specified load and save arguments
 
 skateboards:
   type: pandas.HDFDataSet
@@ -116,7 +128,7 @@ skateboards:
     mode: w  # Overwrite even when the file already exists
     dropna: True
 
-# Example 8: Loads / saves a parquet file on local file system storage, using specified load and save arguments
+# Example 9: Loads / saves a parquet file on local file system storage, using specified load and save arguments
 
 trucks:
   type: pandas.ParquetDataSet
@@ -131,7 +143,7 @@ trucks:
     has_nulls: False
     partition_on: [name]
 
-# Example 9: Load / saves a Spark table on S3, using specified load and save arguments
+# Example 10: Load / saves a Spark table on S3, using specified load and save arguments
 
 weather:
   type: spark.SparkDataSet
@@ -145,7 +157,7 @@ weather:
     sep: '|'
     header: True
 
-# Example 10: Loads / saves a SQL table using credentials, a database connection, using specified load and save arguments
+# Example 11: Loads / saves a SQL table using credentials, a database connection, using specified load and save arguments
 
 scooters:
   type: pandas.SQLTableDataSet
@@ -157,7 +169,7 @@ scooters:
   save_args:
     if_exists: replace
 
-# Example 11: Load a SQL table with credentials, a database connection, and applies a SQL query to the table
+# Example 12: Load a SQL table with credentials, a database connection, and applies a SQL query to the table
 
 scooters_query:
   type: pandas.SQLQueryDataSet

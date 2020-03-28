@@ -45,7 +45,7 @@ These dependency sets are listed below.
 +--------------------+-------------+-------------------------------+-----------------------------------------+
 | Dataset            | biosequence | biosquence.BioSequenceDataSet | pip install "kedro[bioinformatics]"     |
 +--------------------+-------------+-------------------------------+-----------------------------------------+
-|                    | dask        | dask.ParquetDataSet           | pip install "kedro[dask]                |
+|                    | dask        | dask.ParquetDataSet           | pip install "kedro[dask]"               |
 |                    +-------------+-------------------------------+-----------------------------------------+
 |                    | geopandas   | geopandas.GeoJSONDataSet      | pip install "kedro[geopandas]"          |
 |                    +-------------+-------------------------------+-----------------------------------------+

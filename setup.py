@@ -104,7 +104,7 @@ extras_require = {
         "xlsxwriter>=1.0.0, <2.0",
         "tables>=3.6",
     ],
-    "spark": ["pyspark>=2.2.0, <3.0", "hdfs>=2.5.8, <3.0", "s3fs>=0.3.0, <1.0"],
+    "spark": ["pyspark>=2.2.0, <3.0", "hdfs>=2.5.8, <3.0", "s3fs>=0.3.0, <0.4.1"],
 }
 
 extras_require["all"] = sorted(set(chain.from_iterable(extras_require.values())))

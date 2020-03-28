@@ -33,6 +33,7 @@ import operator
 from copy import deepcopy
 from functools import lru_cache
 from typing import Any, Callable, Dict, List, Tuple, Type, Union
+from urllib.parse import urlparse
 from warnings import warn
 
 import fsspec
@@ -55,7 +56,7 @@ S3_PROTOCOLS = ("s3", "s3a", "s3n")
 
 
 class PartitionedDataSet(AbstractDataSet):
-    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-instance-attributes,protected-access
     """``PartitionedDataSet`` loads and saves partitioned file-like data using the
     underlying dataset definition. For filesystem level operations it uses `fsspec`:
     https://github.com/intake/filesystem_spec.
@@ -185,11 +186,17 @@ class PartitionedDataSet(AbstractDataSet):
         protocol = "s3" if self._protocol in S3_PROTOCOLS else self._protocol
         return fsspec.filesystem(protocol, **self._credentials)
 
+    @property
+    def _normalized_path(self) -> str:
+        if self._protocol in S3_PROTOCOLS:
+            return urlparse(self._path)._replace(scheme="s3").geturl()
+        return self._path
+
     @lru_cache(maxsize=None)
     def _list_partitions(self) -> List[str]:
         return [
             path
-            for path in self._filesystem.find(self._path, **self._load_args)
+            for path in self._filesystem.find(self._normalized_path, **self._load_args)
             if path.endswith(self._filename_suffix)
         ]
 
@@ -207,9 +214,7 @@ class PartitionedDataSet(AbstractDataSet):
         return full_path
 
     def _path_to_partition(self, path: str) -> str:
-        dir_path = self._filesystem._strip_protocol(  # pylint: disable=protected-access
-            self._path
-        )
+        dir_path = self._filesystem._strip_protocol(self._normalized_path)
         path = path.split(dir_path, 1).pop().lstrip(self._sep)
         if self._filename_suffix and path.endswith(self._filename_suffix):
             path = path[: -len(self._filename_suffix)]
@@ -256,7 +261,7 @@ class PartitionedDataSet(AbstractDataSet):
     def invalidate_cache(self):
         """Invalidate `_list_partitions` method and underlying filesystem caches."""
         self._list_partitions.cache_clear()
-        self._filesystem.invalidate_cache(self._path)
+        self._filesystem.invalidate_cache(self._normalized_path)
 
     def _exists(self) -> bool:
         return bool(self._list_partitions())
@@ -409,7 +414,7 @@ class IncrementalDataSet(PartitionedDataSet):
             )
 
         default_checkpoint_path = self._sep.join(
-            [self._path.rstrip(self._sep), self.DEFAULT_CHECKPOINT_FILENAME]
+            [self._normalized_path.rstrip(self._sep), self.DEFAULT_CHECKPOINT_FILENAME]
         )
         default_config = {
             "type": self.DEFAULT_CHECKPOINT_TYPE,
@@ -444,11 +449,11 @@ class IncrementalDataSet(PartitionedDataSet):
             partition_id = self._path_to_partition(partition)
             return self._comparison_func(partition_id, checkpoint)
 
-        return [
+        return sorted(
             part
-            for part in sorted(self._filesystem.find(self._path, **self._load_args))
+            for part in self._filesystem.find(self._normalized_path, **self._load_args)
             if _is_valid_partition(part)
-        ]
+        )
 
     @property
     def _checkpoint(self) -> AbstractDataSet:

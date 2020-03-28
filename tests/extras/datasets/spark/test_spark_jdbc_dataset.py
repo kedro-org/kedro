@@ -25,13 +25,20 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import sys
 from unittest import mock
 
 import pytest
 
-from kedro.extras.datasets.spark import SparkJDBCDataSet
 from kedro.io import DataSetError
+from tests.conftest import skip_if_py38
+
+if sys.version_info < (3, 8):
+    from kedro.extras.datasets.spark import (  # pylint: disable=import-error
+        SparkJDBCDataSet,
+    )
+else:
+    SparkJDBCDataSet = mock.ANY
 
 
 @pytest.fixture
@@ -63,6 +70,7 @@ def spark_jdbc_args_save_load(spark_jdbc_args):
     return args
 
 
+@skip_if_py38
 def test_missing_url():
     error_message = (
         "`url` argument cannot be empty. Please provide a JDBC"
@@ -72,6 +80,7 @@ def test_missing_url():
         SparkJDBCDataSet(url=None, table="dummy_table")
 
 
+@skip_if_py38
 def test_missing_table():
     error_message = (
         "`table` argument cannot be empty. Please provide"
@@ -88,11 +97,13 @@ def mock_save(arg_dict):
     return mock_data
 
 
+@skip_if_py38
 def test_save(spark_jdbc_args):
     data = mock_save(spark_jdbc_args)
     data.write.jdbc.assert_called_with("dummy_url", "dummy_table")
 
 
+@skip_if_py38
 def test_save_credentials(spark_jdbc_args_credentials):
     data = mock_save(spark_jdbc_args_credentials)
     data.write.jdbc.assert_called_with(
@@ -102,6 +113,7 @@ def test_save_credentials(spark_jdbc_args_credentials):
     )
 
 
+@skip_if_py38
 def test_save_args(spark_jdbc_args_save_load):
     data = mock_save(spark_jdbc_args_save_load)
     data.write.jdbc.assert_called_with(
@@ -109,6 +121,7 @@ def test_save_args(spark_jdbc_args_save_load):
     )
 
 
+@skip_if_py38
 def test_except_bad_credentials(spark_jdbc_args_credentials_with_none_password):
     pattern = r"Credential property `password` cannot be None(.+)"
     with pytest.raises(DataSetError, match=pattern):
@@ -125,12 +138,14 @@ def mock_load(mock_get_or_create, arg_dict):
     return spark
 
 
+@skip_if_py38
 def test_load(spark_jdbc_args):
     # pylint: disable=no-value-for-parameter
     spark = mock_load(arg_dict=spark_jdbc_args)
     spark.read.jdbc.assert_called_with("dummy_url", "dummy_table")
 
 
+@skip_if_py38
 def test_load_credentials(spark_jdbc_args_credentials):
     # pylint: disable=no-value-for-parameter
     spark = mock_load(arg_dict=spark_jdbc_args_credentials)
@@ -141,6 +156,7 @@ def test_load_credentials(spark_jdbc_args_credentials):
     )
 
 
+@skip_if_py38
 def test_load_args(spark_jdbc_args_save_load):
     # pylint: disable=no-value-for-parameter
     spark = mock_load(arg_dict=spark_jdbc_args_save_load)

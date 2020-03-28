@@ -55,9 +55,7 @@ def partitioned_data_pandas():
 
 @pytest.fixture
 def local_csvs(tmp_path, partitioned_data_pandas):
-    # tmp_path on Python 3.5 is a pathlib2.Path instance, which cannot be
-    # handled directly by Path instance, hence interim conversion to string
-    local_dir = Path(str(tmp_path / "csvs"))
+    local_dir = Path(tmp_path / "csvs")
     local_dir.mkdir()
 
     for k, data in partitioned_data_pandas.items():
@@ -413,6 +411,25 @@ class TestPartitionedDataSetS3:
         for partition_id, data in loaded.items():
             assert_frame_equal(data, partitioned_data_pandas[partition_id])
 
+        assert not pds._checkpoint.exists()
+        assert pds._read_checkpoint() is None
+        pds.confirm()
+        assert pds._checkpoint.exists()
+        assert pds._read_checkpoint() == max(partitioned_data_pandas)
+
+    def test_load_and_confirm_s3a(
+        self, mocked_csvs_in_s3, partitioned_data_pandas, mocker
+    ):
+        s3a_path = "s3a://{}".format(mocked_csvs_in_s3.split("://", 1)[1])
+        pds = IncrementalDataSet(s3a_path, DATASET)
+        assert pds._protocol == "s3a"
+        assert pds._checkpoint._protocol == "s3"
+
+        mocked_ds = mocker.patch.object(pds, "_dataset_type")
+        mocked_ds.__name__ = "mocked"
+        loaded = pds.load()
+
+        assert loaded.keys() == partitioned_data_pandas.keys()
         assert not pds._checkpoint.exists()
         assert pds._read_checkpoint() is None
         pds.confirm()

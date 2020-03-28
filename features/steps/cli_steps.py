@@ -290,7 +290,7 @@ def create_project_from_config_file(context):
     """Behave step to run kedro new given the config I previously created.
     """
     res = run([context.kedro, "new", "-c", str(context.config_file)], env=context.env)
-    assert res.returncode == OK_EXIT_CODE
+    assert res.returncode == OK_EXIT_CODE, res
 
 
 @given("I have deleted the credentials file")
@@ -349,8 +349,9 @@ def exec_kedro_run_with_tag(context, cmd, tags):
 @when("I ask the CLI for a version")
 def get_kedro_version(context):
     """Behave step to run `kedro -V`."""
-    context.version_str = run([context.kedro, "-V"], env=context.env).stdout
-    assert context.version_str  # check non-empty
+    res = run([context.kedro, "-V"], env=context.env)
+    context.version_str = res.stdout
+    assert context.version_str, res  # check non-empty
 
 
 @when("I ask the CLI for a version using python -m")
@@ -415,7 +416,7 @@ def update_kedro_req(context: behave.runner.Context):
 
     if reqs_path.is_file():
         old_reqs = reqs_path.read_text()
-        new_reqs = re.sub(r"#?kedro==.*\n", kedro_reqs, old_reqs)
+        new_reqs = re.sub(r"#?kedro\[pandas\]==.*\n", kedro_reqs, old_reqs)
         assert not old_reqs == new_reqs
         reqs_path.write_text(new_reqs)
 

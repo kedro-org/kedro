@@ -37,3 +37,7 @@ Feature: Test target in new project
   Scenario: Execute successful test in new project
     When I execute the kedro command "test"
     Then I should get a successful exit code
+
+  Scenario: Execute successful lint in new project
+    When I execute the kedro command "lint"
+    Then I should get a successful exit code

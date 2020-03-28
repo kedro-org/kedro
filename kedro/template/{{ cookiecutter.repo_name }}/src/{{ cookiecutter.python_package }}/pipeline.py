@@ -30,9 +30,12 @@
 """
 
 from typing import Dict
+
 from kedro.pipeline import Pipeline
 
-{% if cookiecutter.include_example == "True" %}
+{% if cookiecutter.include_example == "True" -%}
+from {{ cookiecutter.python_package }}.pipelines import data_engineering as de
+from {{ cookiecutter.python_package }}.pipelines import data_science as ds
 
 ###########################################################################
 # Here you can find an example pipeline, made of two modular pipelines.
@@ -41,9 +44,6 @@ from kedro.pipeline import Pipeline
 # well as pipelines/data_science AND pipelines/data_engineering
 # -------------------------------------------------------------------------
 
-from {{ cookiecutter.python_package }}.pipelines import data_engineering as de
-from {{ cookiecutter.python_package }}.pipelines import data_science as ds
-{% endif %}
 
 def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
     """Create the project's pipeline.
@@ -55,7 +55,6 @@ def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
         A mapping from a pipeline name to a ``Pipeline`` object.
 
     """
-{% if cookiecutter.include_example == "True" %}
 
     data_engineering_pipeline = de.create_pipeline()
     data_science_pipeline = ds.create_pipeline()
@@ -65,8 +64,18 @@ def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
         "ds": data_science_pipeline,
         "__default__": data_engineering_pipeline + data_science_pipeline,
     }
-{% else %}
-    return {
-        "__default__": Pipeline([])
-    }
-{% endif %}
+{% else -%}
+
+def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
+    """Create the project's pipeline.
+
+    Args:
+        kwargs: Ignore any additional arguments added in the future.
+
+    Returns:
+        A mapping from a pipeline name to a ``Pipeline`` object.
+
+    """
+
+    return {"__default__": Pipeline([])}
+{% endif -%}

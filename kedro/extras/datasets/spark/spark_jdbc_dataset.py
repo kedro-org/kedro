@@ -31,7 +31,7 @@
 from copy import deepcopy
 from typing import Any, Dict
 
-from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql import DataFrame, SparkSession  # pylint: disable=import-error
 
 from kedro.io.core import AbstractDataSet, DataSetError
 

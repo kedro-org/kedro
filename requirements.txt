@@ -1,7 +1,7 @@
 anyconfig>=0.9.7, <1.0
 click<8.0
 cookiecutter>=1.6.0, <2.0
-fsspec>=0.5.1, <1.0
+fsspec>=0.5.1, <0.7.0  # There is a breaking change in 0.7.0
 jmespath>=0.9.5, <1.0
 pip-tools>=4.0.0, <5.0.0
 python-json-logger>=0.1.9, <1.0

@@ -431,7 +431,7 @@ class TestDataCatalogFromConfig:
         """Test that dependency is missing."""
         pattern = "dependency issue"
 
-        import_error = ImportError(pattern)
+        import_error = ModuleNotFoundError(pattern)
         import_error.name = pattern  # import_error.name cannot be None
 
         mocker.patch("kedro.io.core.load_obj", side_effect=import_error)

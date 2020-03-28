@@ -426,11 +426,17 @@ def parse_dataset_definition(
 def _load_obj(class_path: str) -> Optional[object]:
     try:
         class_obj = load_obj(class_path)
-    except ImportError as error:
+    except ModuleNotFoundError as error:
         if error.name in class_path:
             return None
         # class_obj was successfully loaded, but some dependencies are missing.
-        raise DataSetError("{} for {}".format(error, class_path))
+        raise DataSetError(
+            "{e} for {dataset}. Please see the documentation on how to install relevant "
+            "dependencies for {dataset}"
+            "https://kedro.readthedocs.io/en/stable/02_getting_started/02_install.html#optional-dependencies".format(  # pylint: disable=line-too-long
+                e=error, dataset=class_path
+            )
+        )
     except (AttributeError, ValueError):
         return None
 

@@ -19,6 +19,7 @@
 * Updated contribution process in `CONTRIBUTING.md` - added Developer Workflow.
 * Fixed a bug where `PartitionedDataSet` and `IncrementalDataSet` were not working with `s3a` or `s3n` protocol.
 * Documented installation of development version of Kedro in the [FAQ section](https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#how-can-i-use-development-version-of-kedro).
+* Added the option for contributors to run Kedro tests locally without Spark installation with `make test-no-spark`.
 
 ## Breaking changes to the API
 * Made `invalidate_cache` method on datasets private.

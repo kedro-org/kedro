@@ -535,7 +535,7 @@ kedro run --runner=ParallelRunner
 
 #### Using a custom runner
 
-If the built-in runners don't meet your requirements, you can define your own runner in your project instead. For example, suppose you want to add a dry runner to list which nodes that would be run as opposed to actually executing them, you can define it as follows (courtesy of [AntonyMilneQB](https://github.com/AntonyMilneQB])):
+If the built-in runners don't meet your requirements, you can define your own runner in your project instead. For example, you may want to add a dry runner, a runner which lists which nodes would be run instead of executing them. You can define it in the following way (courtesy of [AntonyMilneQB](https://github.com/AntonyMilneQB])):
 
 ```python
 # in your_project/src/your_project/runner.py

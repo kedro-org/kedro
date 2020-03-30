@@ -535,7 +535,7 @@ kedro run --runner=ParallelRunner
 
 #### Using a custom runner
 
-If the built-in runners do not meet your requirements, you can define your own runner in your project instead. For example, you may want to add a dry runner, a runner which lists which nodes would be run instead of executing them. You can define it in the following way (courtesy of [AntonyMilneQB](https://github.com/AntonyMilneQB])):
+If the built-in runners do not meet your requirements, you can define your own runner in your project instead. For example, you may want to add a dry runner, which lists which nodes would be run instead of executing them. You can define it in the following way:
 
 ```python
 # in <project-name>/src/<package-name>/runner.py
@@ -563,6 +563,12 @@ class DryRunner(AbstractRunner):
 
     def _run(self, pipeline: Pipeline, catalog: DataCatalog) -> None:
         """The method implementing dry pipeline running.
+        Example logs output using this implementation:
+
+            kedro.runner.dry_runner - INFO - Actual run would execute 3 nodes:
+            node3: identity([A]) -> [B]
+            node2: identity([C]) -> [D]
+            node1: identity([D]) -> [E]
 
         Args:
             pipeline: The ``Pipeline`` to run.

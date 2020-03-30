@@ -535,10 +535,10 @@ kedro run --runner=ParallelRunner
 
 #### Using a custom runner
 
-If the built-in runners don't meet your requirements, you can define your own runner in your project instead. For example, you may want to add a dry runner, a runner which lists which nodes would be run instead of executing them. You can define it in the following way (courtesy of [AntonyMilneQB](https://github.com/AntonyMilneQB])):
+If the built-in runners do not meet your requirements, you can define your own runner in your project instead. For example, you may want to add a dry runner, a runner which lists which nodes would be run instead of executing them. You can define it in the following way (courtesy of [AntonyMilneQB](https://github.com/AntonyMilneQB])):
 
 ```python
-# in your_project/src/your_project/runner.py
+# in <project-name>/src/<package-name>/runner.py
 from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
 from kedro.pipeline import Pipeline
 from kedro.runner.runner import AbstractRunner
@@ -551,19 +551,23 @@ class DryRunner(AbstractRunner):
 
     def create_default_data_set(self, ds_name: str) -> AbstractDataSet:
         """Factory method for creating the default data set for the runner.
+
         Args:
             ds_name: Name of the missing data set
         Returns:
             An instance of an implementation of AbstractDataSet to be used
             for all unregistered data sets.
+
         """
         return MemoryDataSet()
 
     def _run(self, pipeline: Pipeline, catalog: DataCatalog) -> None:
         """The method implementing dry pipeline running.
+
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
+
         """
         nodes = pipeline.nodes
         self._logger.info(
@@ -576,7 +580,7 @@ class DryRunner(AbstractRunner):
 And use it with `kedro run` through the `--runner` flag:
 
 ```console
-$ kedro run --runner=src.your_project.runner.DryRunner
+$ kedro run --runner=src.<package-name>.runner.DryRunner
 ```
 
 ### Asynchronous loading and saving

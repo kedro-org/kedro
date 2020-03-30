@@ -21,6 +21,9 @@ lint:
 test:
 	pytest tests
 
+test-no-spark:
+	pytest tests --cov-config pyproject_no_spark.toml --ignore tests/extras/datasets/spark
+
 e2e-tests:
 	behave
 

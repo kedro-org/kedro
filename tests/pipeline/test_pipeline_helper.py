@@ -328,3 +328,27 @@ class TestPipelineHelper:
         pattern = r"Failed to map datasets and/or parameters: parameters"
         with pytest.raises(ModularPipelineError, match=pattern):
             pipeline(raw_pipeline, parameters={"parameters": "some_yaml_dataset"})
+
+    def test_bad_inputs_mapping(self):
+        raw_pipeline = Pipeline(
+            [
+                node(biconcat, ["A", "params:alpha"], "AA", name="node1"),
+                node(biconcat, ["AA", "parameters"], "BB", name="node2"),
+            ]
+        )
+
+        pattern = "Inputs should be free inputs to the pipeline"
+        with pytest.raises(ModularPipelineError, match=pattern):
+            pipeline(raw_pipeline, inputs={"AA": "CC"})
+
+    def test_bad_outputs_mapping(self):
+        raw_pipeline = Pipeline(
+            [
+                node(biconcat, ["A", "params:alpha"], "AA", name="node1"),
+                node(biconcat, ["AA", "parameters"], "BB", name="node2"),
+            ]
+        )
+
+        pattern = "Outputs can't contain free inputs to the pipeline"
+        with pytest.raises(ModularPipelineError, match=pattern):
+            pipeline(raw_pipeline, outputs={"A": "C"})

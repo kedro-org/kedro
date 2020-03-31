@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # Copyright 2020 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,27 +28,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-This file contains the fixtures that are reusable by any tests within
-this directory. You don't need to import the fixtures as pytest will
-discover them automatically. More info here:
-https://docs.pytest.org/en/latest/fixture.html
-"""
-import os
-import sys
+set -e
 
-import pytest
+print_sep="=============================="
 
+eval_command() {
+    local title="$1"
+    local command="$2"
 
-@pytest.fixture(autouse=True)
-def preserve_system_context():
-    """
-    Revert some changes to the application context tests do to isolate them.
-    """
-    old_path = sys.path.copy()
-    old_cwd = os.getcwd()
-    yield
-    sys.path = old_path
+    echo "$print_sep $title $print_sep"
+    eval "$command"
+    echo
+}
 
-    if os.getcwd() != old_cwd:
-        os.chdir(old_cwd)
+eval_command CONDA "conda info 2>/dev/null || echo \"Conda not found\""
+eval_command PYTHON "which python && python -V"
+eval_command PIP "python -m pip -V"
+eval_command PYLINT "python -m pylint --version"
+eval_command PYTEST "python -m pytest --version"
+eval_command BLACK "python -m black --version"
+eval_command BEHAVE "python -m behave --version"
+eval_command MYPY "python -m mypy --version"
+eval_command FLAKE8 "python -m flake8 --version"
+eval_command ISORT "python -m isort --version"
+eval_command PRE-COMMIT "python -m pre_commit --version"
+eval_command SPARK "python -c \\
+  \"import pyspark; print(f'PySpark: {pyspark.__version__}')\" 2>/dev/null && \\
+  spark-submit --version || echo \"Spark not found\""
+eval_command SPHINX "python -m sphinx --version 2>/dev/null || echo \"Sphinx not found\""
+eval_command KEDRO "python -m kedro info 2>/dev/null || echo \"Kedro not found\""

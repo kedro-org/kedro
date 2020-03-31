@@ -33,7 +33,7 @@ import logging.config
 import os
 import sys
 from copy import deepcopy
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from typing import Any, Dict, Iterable, Union
 from urllib.parse import urlparse
 from warnings import warn
@@ -77,17 +77,17 @@ def _is_relative_path(path_string: str) -> bool:
     Returns:
         Whether the string is a relative path.
     """
-    drive, filepath = os.path.splitdrive(path_string)
-
-    is_full_windows_path_with_drive = bool(drive)
+    # os.path.splitdrive does not reliably work on non-Windows systems
+    # breaking the coverage, using PureWindowsPath instead
+    is_full_windows_path_with_drive = bool(PureWindowsPath(path_string).drive)
     if is_full_windows_path_with_drive:
         return False
 
-    is_remote_path = bool(urlparse(filepath).scheme)
+    is_remote_path = bool(urlparse(path_string).scheme)
     if is_remote_path:
         return False
 
-    is_absolute_path = Path(filepath).is_absolute()
+    is_absolute_path = Path(path_string).is_absolute()
     if is_absolute_path:
         return False
 

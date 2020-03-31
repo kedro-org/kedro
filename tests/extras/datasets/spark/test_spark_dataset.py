@@ -40,6 +40,7 @@ from pyspark.sql.utils import AnalysisException
 from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
 from kedro.extras.datasets.pickle import PickleDataSet
 from kedro.extras.datasets.spark import SparkDataSet
+from kedro.extras.datasets.spark.spark_dataset import _dbfs_glob, _get_dbutils
 from kedro.io import DataCatalog, DataSetError, Version
 from kedro.io.core import generate_timestamp
 from kedro.pipeline import Pipeline, node
@@ -142,6 +143,14 @@ def spark_in(tmp_path, sample_spark_df):
 @pytest.fixture
 def spark_out(tmp_path):
     return SparkDataSet(filepath=str(tmp_path / "output"))
+
+
+class FileInfo:
+    def __init__(self, path):
+        self.path = "dbfs:" + path
+
+    def isDir(self):
+        return "." not in self.path.split("/")[-1]
 
 
 class TestSparkDataSet:
@@ -462,6 +471,76 @@ class TestSparkDataSetVersionedDBFS:
             mocker.call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME))
         ] * 2
         assert mocked_glob.call_args_list == expected_calls
+
+    def test_dbfs_glob(self, mocker):
+        dbutils_mock = mocker.Mock()
+        dbutils_mock.fs.ls.return_value = [
+            FileInfo("/tmp/file/date1"),
+            FileInfo("/tmp/file/date2"),
+            FileInfo("/tmp/file/file.csv"),
+            FileInfo("/tmp/file/"),
+        ]
+        pattern = "/tmp/file/*/file"
+        expected = ["/dbfs/tmp/file/date1/file", "/dbfs/tmp/file/date2/file"]
+
+        result = _dbfs_glob(pattern, dbutils_mock)
+        assert result == expected
+        dbutils_mock.fs.ls.assert_called_once_with("/tmp/file")
+
+    def test_ds_init_no_dbutils(self, mocker):
+        get_dbutils_mock = mocker.patch(
+            "kedro.extras.datasets.spark.spark_dataset._get_dbutils", return_value=None
+        )
+
+        data_set = SparkDataSet(filepath="/dbfs/tmp/data")
+
+        get_dbutils_mock.assert_called_once()
+        assert data_set._glob_function.__name__ == "iglob"
+
+    def test_ds_init_dbutils_available(self, mocker):
+        get_dbutils_mock = mocker.patch(
+            "kedro.extras.datasets.spark.spark_dataset._get_dbutils",
+            return_value="mock",
+        )
+
+        data_set = SparkDataSet(filepath="/dbfs/tmp/data")
+
+        get_dbutils_mock.assert_called_once()
+        assert data_set._glob_function.__class__.__name__ == "partial"
+        assert data_set._glob_function.func.__name__ == "_dbfs_glob"
+        assert data_set._glob_function.keywords == {
+            "dbutils": get_dbutils_mock.return_value
+        }
+
+    def test_get_dbutils_from_globals(self, mocker):
+        mocker.patch(
+            "kedro.extras.datasets.spark.spark_dataset.globals",
+            return_value={"dbutils": "dbutils_from_globals"},
+        )
+        assert _get_dbutils("spark") == "dbutils_from_globals"
+
+    def test_get_dbutils_from_pyspark(self, mocker):
+        dbutils_mock = mocker.Mock()
+        dbutils_mock.DBUtils.return_value = "dbutils_from_pyspark"
+        mocker.patch.dict("sys.modules", {"pyspark.dbutils": dbutils_mock})
+        assert _get_dbutils("spark") == "dbutils_from_pyspark"
+        dbutils_mock.DBUtils.assert_called_once_with("spark")
+
+    def test_get_dbutils_from_ipython(self, mocker):
+        ipython_mock = mocker.Mock()
+        ipython_mock.get_ipython.return_value.user_ns = {
+            "dbutils": "dbutils_from_ipython"
+        }
+        mocker.patch.dict("sys.modules", {"IPython": ipython_mock})
+        assert _get_dbutils("spark") == "dbutils_from_ipython"
+        ipython_mock.get_ipython.assert_called_once_with()
+
+    def test_get_dbutils_no_modules(self, mocker):
+        mocker.patch(
+            "kedro.extras.datasets.spark.spark_dataset.globals", return_value={}
+        )
+        mocker.patch.dict("sys.modules", {})
+        assert _get_dbutils("spark") is None
 
 
 class TestSparkDataSetVersionedS3:

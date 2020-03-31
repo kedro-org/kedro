@@ -27,9 +27,6 @@ commands:
     description: Install PIP dependencies
     steps:
       - run:
-          name: Echo python version for debugging
-          command: 'echo "Python version: $(python --version 2>&1)"'
-      - run:
           name: Install pip setuptools
           command: make install-pip-setuptools
       - run:
@@ -41,6 +38,18 @@ commands:
       - run:
           name: Install test requirements
           command: pip install -r test_requirements.txt -U
+      - run:
+          # Since recently Spark installation for some reason does not have enough permissions to execute
+          # /home/circleci/miniconda/envs/kedro_builder/lib/python3.X/site-packages/pyspark/bin/spark-class.
+          # So fixing it manually here.
+          name: Fix Spark permissions
+          command: sudo chmod -R u+x /home/circleci/miniconda/envs/kedro_builder/lib/
+      - run:
+          name: Print Python environment
+          command: make print-python-env
+      - run:
+          name: Pip freeze
+          command: pip freeze
 
   setup_pre_commit:
     description: Install pre-commit hooks
@@ -58,12 +67,6 @@ commands:
       - checkout
       - setup_conda
       - setup_requirements
-      - run:
-          # Since recently Spark installation for some reason does not have permissions to execute
-          # /home/circleci/miniconda/envs/kedro_builder/lib/python3.X/site-packages/pyspark/bin/spark-class.
-          # So fixing it manually here.
-          name: Fix Spark permissions
-          command: sudo chmod -R u+x /home/circleci/miniconda/envs/kedro_builder/lib/
       - run:
           name: Run unit tests
           command: make test
@@ -92,7 +95,7 @@ commands:
           name: Run e2e tests
           command: make e2e-tests
 
-  build_docs:  # NOTE: requires python3.6+
+  build_docs:
     description: Build docs
     steps:
       - checkout

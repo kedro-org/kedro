@@ -31,6 +31,7 @@ implementations.
 
 import logging
 from abc import ABC, abstractmethod
+from concurrent.futures import ALL_COMPLETED, ThreadPoolExecutor, as_completed, wait
 from typing import Any, Dict, Iterable
 
 from kedro.io import AbstractDataSet, DataCatalog
@@ -42,6 +43,16 @@ class AbstractRunner(ABC):
     """``AbstractRunner`` is the base class for all ``Pipeline`` runner
     implementations.
     """
+
+    def __init__(self, is_async: bool = False):
+        """Instantiates the runner classs.
+
+            Args:
+                is_async: If True, the node inputs and outputs are loaded and saved
+                    asynchronously with threads. Defaults to False.
+
+        """
+        self._is_async = is_async
 
     @property
     def _logger(self):
@@ -79,6 +90,10 @@ class AbstractRunner(ABC):
         for ds_name in unregistered_ds:
             catalog.add(ds_name, self.create_default_data_set(ds_name))
 
+        if self._is_async:
+            self._logger.info(
+                "Asynchronous mode is enabled for loading and saving data"
+            )
         self._run(pipeline, catalog)
 
         self._logger.info("Pipeline execution completed successfully.")
@@ -169,21 +184,58 @@ class AbstractRunner(ABC):
         )
 
 
-def run_node(node: Node, catalog: DataCatalog) -> Node:
+def run_node(node: Node, catalog: DataCatalog, is_async: bool = False) -> Node:
     """Run a single `Node` with inputs from and outputs to the `catalog`.
 
     Args:
         node: The ``Node`` to run.
         catalog: A ``DataCatalog`` containing the node's inputs and outputs.
+        is_async: If True, the node inputs and outputs are loaded and saved
+                    asynchronously with threads. Defaults to False.
 
     Returns:
         The node argument.
 
     """
-    inputs = {name: catalog.load(name) for name in node.inputs}
-    outputs = node.run(inputs)
-    for name, data in outputs.items():
-        catalog.save(name, data)
+    if is_async:
+        node = _run_node_async(node, catalog)
+    else:
+        node = _run_node_sequential(node, catalog)
+
     for name in node.confirms:
         catalog.confirm(name)
+    return node
+
+
+def _run_node_sequential(node: Node, catalog: DataCatalog) -> Node:
+    inputs = {}
+    for name in node.inputs:
+        inputs[name] = catalog.load(name)
+
+    outputs = node.run(inputs)
+
+    for name, data in outputs.items():
+        catalog.save(name, data)
+    return node
+
+
+def _run_node_async(node: Node, catalog: DataCatalog) -> Node:
+    with ThreadPoolExecutor() as pool:
+        inputs = {
+            name: pool.submit(catalog.load, name) for name in node.inputs
+        }  # Python dict is thread-safe
+        wait(inputs.values(), return_when=ALL_COMPLETED)
+        inputs = {key: value.result() for key, value in inputs.items()}
+
+        outputs = node.run(inputs)
+
+        save_futures = set()
+
+        for name, data in outputs.items():
+            save_futures.add(pool.submit(catalog.save, name, data))
+
+        for future in as_completed(save_futures):
+            exception = future.exception()
+            if exception:
+                raise exception
     return node

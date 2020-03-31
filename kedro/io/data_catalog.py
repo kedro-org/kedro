@@ -632,7 +632,14 @@ class DataCatalog:
         )
 
     def confirm(self, name: str) -> None:
-        """Confirm a DataSet by its name"""
+        """Confirm a dataset by its name.
+
+        Args:
+            name: Name of the dataset.
+        Raises:
+            DataSetError: When the dataset does not have `confirm` method.
+
+        """
         self._logger.info("Confirming DataSet '%s'", name)
         data_set = self._get_dataset(name)
 

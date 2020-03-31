@@ -533,6 +533,92 @@ kedro run --runner=ParallelRunner
 
 > *Note:* You cannot use both `--parallel` and `--runner` flags at the same time (e.g. `kedro run --parallel --runner=SequentialRunner` raises an exception).
 
+#### Using a custom runner
+
+If the built-in runners do not meet your requirements, you can define your own runner in your project instead. For example, you may want to add a dry runner, which lists which nodes would be run instead of executing them. You can define it in the following way:
+
+```python
+# in <project-name>/src/<package-name>/runner.py
+from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
+from kedro.pipeline import Pipeline
+from kedro.runner.runner import AbstractRunner
+
+
+class DryRunner(AbstractRunner):
+    """``DryRunner`` is an ``AbstractRunner`` implementation. It can be used to list which
+    nodes would be run without actually executing anything.
+    """
+
+    def create_default_data_set(self, ds_name: str) -> AbstractDataSet:
+        """Factory method for creating the default data set for the runner.
+
+        Args:
+            ds_name: Name of the missing data set
+        Returns:
+            An instance of an implementation of AbstractDataSet to be used
+            for all unregistered data sets.
+
+        """
+        return MemoryDataSet()
+
+    def _run(self, pipeline: Pipeline, catalog: DataCatalog) -> None:
+        """The method implementing dry pipeline running.
+        Example logs output using this implementation:
+
+            kedro.runner.dry_runner - INFO - Actual run would execute 3 nodes:
+            node3: identity([A]) -> [B]
+            node2: identity([C]) -> [D]
+            node1: identity([D]) -> [E]
+
+        Args:
+            pipeline: The ``Pipeline`` to run.
+            catalog: The ``DataCatalog`` from which to fetch data.
+
+        """
+        nodes = pipeline.nodes
+        self._logger.info(
+            "Actual run would execute %d nodes:\n%s",
+            len(nodes),
+            "\n".join(map(str, nodes)),
+        )
+```
+
+And use it with `kedro run` through the `--runner` flag:
+
+```console
+$ kedro run --runner=src.<package-name>.runner.DryRunner
+```
+
+### Asynchronous loading and saving
+When processing a node, both `SequentialRunner` and `ParallelRunner` perform the following steps in order:
+
+1. Load data based on node input(s)
+2. Execute node function with the input(s)
+3. Save the output(s)
+
+If a node has multiple inputs or outputs (e.g., `node(func, ["a", "b", "c"], ["d", "e", "f"])`), you can reduce load and save time by using asynchronous mode. You can enable it by passing an extra boolean flag to the runner's constructor in `src/<project-package>/run.py` as follows:
+
+```python
+from kedro.runner import SequentialRunner
+
+class ProjectContext(KedroContext):
+    def run(self, *args, **kwargs):
+        kwargs["runner"] = SequentialRunner(is_async=True)
+        # or ParallelRunner(is_async=True). By default, `is_async` is False.
+        return super().run(*args, **kwargs)
+```
+
+Once you enabled the asynchronous mode and ran `kedro run` from the command line, you should see the following logging message:
+
+```bash
+...
+2020-03-24 09:20:01,482 - kedro.runner.sequential_runner - INFO - Asynchronous mode is enabled for loading and saving data
+2020-03-24 09:20:01,483 - kedro.io.data_catalog - INFO - Loading data from `example_iris_data` (CSVDataSet)...
+...
+```
+
+> *Note:* All the datasets used in the run have to be [thread-safe](https://www.quora.com/What-is-thread-safety-in-Python) in order for asynchronous loading/saving to work properly.
+
 ### Running a pipeline by name
 
 To run the pipeline by its name, you need to add your new pipeline to `create_pipelines()` function `src/<python_package>/pipeline.py` as below:

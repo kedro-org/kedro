@@ -41,7 +41,7 @@ import webbrowser
 from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Union
+from typing import Any, Callable, Dict, List
 
 import click
 import pkg_resources
@@ -240,6 +240,32 @@ def _create_project(config_path: str, verbose: bool):
         _handle_exception("Failed to generate project.")
 
 
+def _get_user_input(
+    text: str, default: Any = None, check_input: Callable = None
+) -> Any:
+    """Get user input and validate it.
+
+    Args:
+        text: Text to display in command line prompt.
+        default: Default value for the input.
+        check_input: Function to apply to check user input.
+
+    Returns:
+        Processed user value.
+
+    """
+
+    while True:
+        value = click.prompt(text, default=default)
+        if check_input:
+            try:
+                check_input(value)
+            except KedroCliError as exc:
+                click.secho(str(exc), fg="red", err=True)
+                continue
+        return value
+
+
 def _get_config_from_prompts() -> Dict:
     """Ask user to provide necessary inputs.
 
@@ -247,39 +273,6 @@ def _get_config_from_prompts() -> Dict:
         Resulting config dictionary.
 
     """
-
-    def _get_user_input(
-        text: str,
-        default: Any = None,
-        assert_or_check_funcs: Union[Callable, List[Callable]] = None,
-    ) -> Any:
-        """Get user input and validate it.
-
-        Args:
-            text: Text to display in command line prompt.
-            default: Default value for the input.
-            assert_or_check_funcs: List of functions to apply to user input.
-                Value is overridden by function output if the latter is
-                not None.
-
-        Returns:
-            Processed user value.
-
-        """
-        if callable(assert_or_check_funcs):
-            assert_or_check_funcs = [assert_or_check_funcs]
-        else:
-            assert_or_check_funcs = assert_or_check_funcs or []
-        while True:
-            try:
-                value = click.prompt(text, default=default)
-                for _func in assert_or_check_funcs:
-                    _func(value)
-            except KedroCliError as exc:
-                click.secho(str(exc), fg="red", err=True)
-            else:
-                break
-        return value
 
     # set output directory to the current directory
     output_dir = os.path.abspath(os.path.curdir)
@@ -303,7 +296,9 @@ def _get_config_from_prompts() -> Dict:
         "Lowercase is recommended.",
     )
     repo_name = _get_user_input(
-        repo_name_prompt, normalized_project_name, _assert_repo_name_ok
+        repo_name_prompt,
+        default=normalized_project_name,
+        check_input=_assert_repo_name_ok,
     )
 
     # get python package_name
@@ -316,7 +311,7 @@ def _get_config_from_prompts() -> Dict:
         "or underscore.",
     )
     python_package = _get_user_input(
-        pkg_name_prompt, default_pkg_name, _assert_pkg_name_ok
+        pkg_name_prompt, default=default_pkg_name, check_input=_assert_pkg_name_ok
     )
 
     # option for whether iris example code is included in the project

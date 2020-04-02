@@ -28,4 +28,5 @@
 
 """``AbstractDataSet`` implementation to save matplotlib objects as image files."""
 
+from .matplotlib_versioned_writer import MatplotlibVersionedWriter  # NOQA
 from .matplotlib_writer import MatplotlibWriter  # NOQA

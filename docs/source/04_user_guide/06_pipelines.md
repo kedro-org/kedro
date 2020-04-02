@@ -290,9 +290,11 @@ As a modular pipeline developer, you may not know how your pipeline will be inte
 
 ## Connecting existing pipelines
 
-When two existing pipelines need to work together, they should be connected by the datasets.
-But the names might be different, requiring manual fixes to be applied to the pipeline itself.
-Alternative solution would be to `transform` an existing pipeline. Consider this example:
+When two existing pipelines need to work together, they should be connected by the input and output datasets. But the names might be different, requiring manual fixes to be applied to the pipeline itself. Alternative solution would be to use `pipeline()`, the modular pipelines connector.
+
+You can think of `pipeline()` as a fairly symmetric version of `node()`. It takes in the underlying pipeline, inputs, outputs, and returns a ``Pipeline`` object, similarly to how `node()` accepts underlying function, inputs, outputs, and returns a ``Node`` object.
+
+Consider this example:
 
 ```python
 cook_pipeline = Pipeline(
@@ -302,29 +304,33 @@ cook_pipeline = Pipeline(
 lunch_pipeline = Pipeline([node(eat, "food", None),])
 ```
 
-A simple `cook_pipeline + lunch_pipeline` doesn't work, `food` input needs to be mapped to `grilled_meat` output.
-That's how it can be done, all three resulting pipelines do the job equally fine:
+A simple `cook_pipeline + lunch_pipeline` doesn't work, `grilled_meat` output in the `cook_pipeline` needs to be mapped to the `food` input in the `lunch_pipeline`. This can be done in any of the following three (equivalent) ways:
 
 ```python
+from kedro.pipeline import pipeline
+
 final_pipeline1 = (
-    cook_pipeline.transform(datasets={"grilled_meat": "food"}) + lunch_pipeline
+    pipeline(cook_pipeline, outputs={"grilled_meat": "food"}) + lunch_pipeline
 )
-final_pipeline2 = cook_pipeline + lunch_pipeline.transform(
-    datasets={"food": "grilled_meat"}
+final_pipeline2 = cook_pipeline + pipeline(
+    lunch_pipeline, inputs={"food": "grilled_meat"}
 )
-final_pipeline3 = cook_pipeline.transform(
-    datasets={"grilled_meat": "new_name"}
-) + lunch_pipeline.transform(datasets={"food": "new_name"})
+final_pipeline3 = pipeline(
+    cook_pipeline, outputs={"grilled_meat": "new_name"}
+) + pipeline(lunch_pipeline, inputs={"food": "new_name"})
 ```
 
-Note that `Pipeline.transform()` will skip prefixing when node inputs and outputs contain parameter references (`params:` and `parameters`).
-Example:
+Remember you can pass ``Pipeline`` objects in the constructor as well, like in the example below. This approach is cleaner and more idiomatic when you are combining multiple modular pipelines together.
 ```python
-transformed_pipeline = Pipeline(
-    [node(node_func, ["input", "params:x"], None)]
-).transform(prefix="new")
-# `transformed_pipeline` will be `Pipeline([node(node_func, ["new.input", "params:x"], None)])`
+final_pipeline = Pipeline([
+    pipeline(cook_pipeline, outputs={"grilled_meat": "new_name"}),
+    pipeline(lunch_pipeline, inputs={"food": "new_name"}),
+    node(...),
+    ...
+])
 ```
+
+>*Note:* `inputs` should correspond to the pipeline free inputs, while `outputs` are either leaf or intermediary outputs.
 
 ## Using a modular pipeline twice
 Consider the example:
@@ -340,28 +346,49 @@ cook_pipeline = Pipeline(
 breakfast_pipeline = Pipeline([node(eat_breakfast, "breakfast_food", None),])
 lunch_pipeline = Pipeline([node(eat_lunch, "lunch_food", None),])
 ```
-Now we need to "defrost" two different types of food and feed it to different pipelines.
-But we can't use the `cook_pipeline` twice, the internal dataset names will conflict.
-We might try to call `transform` and rename all datasets,
-but the conflicting explicitly set `name="defrost_node"` remains.
+Now we need to "defrost" two different types of food and feed it to different pipelines. But we can't use the `cook_pipeline` twice, the internal dataset names will conflict. We might try to call `pipeline()` and map all datasets, but the conflicting explicitly set `name="defrost_node"` remains.
 
 The right solution is:
 ```python
-pipeline = (
-    cook_pipeline.transform(
-        datasets={"grilled_meat": "breakfast_food"}, prefix="breakfast"
-    )
+final_pipeline = (
+    pipeline(cook_pipeline, outputs={"grilled_meat": "breakfast_food"}, namespace="breakfast")
     + breakfast_pipeline
-    + cook_pipeline.transform(datasets={"grilled_meat": "lunch_food"}, prefix="lunch")
+    + pipeline(cook_pipeline, outputs={"grilled_meat": "lunch_food"}, namespace="lunch")
     + lunch_pipeline
 )
 ```
-`prefix="lunch"` renames all datasets and nodes, prefixing them with `"lunch."`,
-except those datasets that we rename explicitly (`grilled_meat`).
+`namespace="lunch"` renames all datasets and nodes, prefixing them with `"lunch."`, except those datasets that we rename explicitly in the mapping (i.e `grilled_meat`).
 
-The resulting pipeline now has two separate nodes, `breakfast.defrost_node` and
-`lunch.defrost_node`. Also two separate datasets `breakfast.meat` and `lunch.meat`
-connect the nodes inside the pipelines, causing no confusion between them.
+The resulting pipeline now has two separate nodes, `breakfast.defrost_node` and `lunch.defrost_node`. Also two separate datasets `breakfast.meat` and `lunch.meat` connect the nodes inside the pipelines, causing no confusion between them.
+
+Note that `pipeline()` will skip prefixing when node inputs and outputs contain parameter references (`params:` and `parameters`).
+Example:
+```python
+raw_pipeline = Pipeline([node(node_func, ["input", "params:x"], "output")])
+final_pipeline = pipeline(raw_pipeline, namespace="new")
+# `final_pipeline` will be `Pipeline([node(node_func, ["new.input", "params:x"], "new.output")])`
+```
+
+## Using a modular pipeline with different parameters
+
+Similarly to how you map inputs and outputs, you can map parameter values. Let's say you have two almost identical pipelines, only differing by one parameter, that you want to run on the same set of inputs.
+
+```python
+alpha_pipeline = Pipeline([
+    node(node_func1, ["input1", "input2", "params:alpha"], "intermediary_output"),
+    node(node_func2, "intermediary_output", "output")
+])
+beta_pipeline = pipeline(
+    alpha_pipeline,
+    inputs={"input1": "input1", "input2": "input2"},
+    parameters={"params:alpha": "params:beta"},
+    namespace="beta"
+)
+
+final_pipeline = alpha_pipeline + beta_pipeline
+```
+
+This way, the value of parameter `alpha` is replaced with the value of parameter `beta`, assuming they both live in your parameters configuration (`parameters.yml`). Namespacing ensures that outputs are not overwritten, so intermediary and final outputs are prefixed, i.e. `beta.intermediary_output`, `beta.output`.
 
 ## Bad pipelines
 
@@ -532,6 +559,62 @@ kedro run --runner=ParallelRunner
 ```
 
 > *Note:* You cannot use both `--parallel` and `--runner` flags at the same time (e.g. `kedro run --parallel --runner=SequentialRunner` raises an exception).
+
+#### Using a custom runner
+
+If the built-in runners do not meet your requirements, you can define your own runner in your project instead. For example, you may want to add a dry runner, which lists which nodes would be run instead of executing them. You can define it in the following way:
+
+```python
+# in <project-name>/src/<package-name>/runner.py
+from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
+from kedro.pipeline import Pipeline
+from kedro.runner.runner import AbstractRunner
+
+
+class DryRunner(AbstractRunner):
+    """``DryRunner`` is an ``AbstractRunner`` implementation. It can be used to list which
+    nodes would be run without actually executing anything.
+    """
+
+    def create_default_data_set(self, ds_name: str) -> AbstractDataSet:
+        """Factory method for creating the default data set for the runner.
+
+        Args:
+            ds_name: Name of the missing data set
+        Returns:
+            An instance of an implementation of AbstractDataSet to be used
+            for all unregistered data sets.
+
+        """
+        return MemoryDataSet()
+
+    def _run(self, pipeline: Pipeline, catalog: DataCatalog) -> None:
+        """The method implementing dry pipeline running.
+        Example logs output using this implementation:
+
+            kedro.runner.dry_runner - INFO - Actual run would execute 3 nodes:
+            node3: identity([A]) -> [B]
+            node2: identity([C]) -> [D]
+            node1: identity([D]) -> [E]
+
+        Args:
+            pipeline: The ``Pipeline`` to run.
+            catalog: The ``DataCatalog`` from which to fetch data.
+
+        """
+        nodes = pipeline.nodes
+        self._logger.info(
+            "Actual run would execute %d nodes:\n%s",
+            len(nodes),
+            "\n".join(map(str, nodes)),
+        )
+```
+
+And use it with `kedro run` through the `--runner` flag:
+
+```console
+$ kedro run --runner=src.<package-name>.runner.DryRunner
+```
 
 ### Asynchronous loading and saving
 When processing a node, both `SequentialRunner` and `ParallelRunner` perform the following steps in order:

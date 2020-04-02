@@ -25,28 +25,32 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+"""This module provides an utility function to retrieve the global hook_manager singleton
+in a Kedro's execution process.
 """
-This file contains the fixtures that are reusable by any tests within
-this directory. You don't need to import the fixtures as pytest will
-discover them automatically. More info here:
-https://docs.pytest.org/en/latest/fixture.html
-"""
-import os
-import sys
+# pylint: disable=global-statement,invalid-name
+from pluggy import PluginManager
 
-import pytest
+from .specs import DataCatalogSpecs, NodeSpecs, PipelineSpecs
+
+_HOOK_NAMESPACE = "kedro"
+_hook_manager = None
 
 
-@pytest.fixture(autouse=True)
-def preserve_system_context():
+def _create_hook_manager() -> PluginManager:
+    """Create a new PluginManager instance and register Kedro's hook specs.
     """
-    Revert some changes to the application context tests do to isolate them.
-    """
-    old_path = sys.path.copy()
-    old_cwd = os.getcwd()
-    yield
-    sys.path = old_path
+    manager = PluginManager(_HOOK_NAMESPACE)
+    manager.add_hookspecs(NodeSpecs)
+    manager.add_hookspecs(PipelineSpecs)
+    manager.add_hookspecs(DataCatalogSpecs)
+    return manager
 
-    if os.getcwd() != old_cwd:
-        os.chdir(old_cwd)
+
+def get_hook_manager():
+    """Create or return the global _hook_manager singleton instance.
+    """
+    global _hook_manager
+    if _hook_manager is None:
+        _hook_manager = _create_hook_manager()
+    return _hook_manager

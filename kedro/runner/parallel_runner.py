@@ -221,13 +221,14 @@ class ParallelRunner(AbstractRunner):
         return min(required_processes, self._max_workers)
 
     def _run(  # pylint: disable=too-many-locals,useless-suppression
-        self, pipeline: Pipeline, catalog: DataCatalog
+        self, pipeline: Pipeline, catalog: DataCatalog, run_id: str = None
     ) -> None:
         """The abstract interface for running pipelines.
 
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
+            run_id: The id of the run.
 
         Raises:
             AttributeError: when the provided pipeline is not suitable for
@@ -252,7 +253,9 @@ class ParallelRunner(AbstractRunner):
                 ready = {n for n in todo_nodes if node_dependencies[n] <= done_nodes}
                 todo_nodes -= ready
                 for node in ready:
-                    futures.add(pool.submit(run_node, node, catalog, self._is_async))
+                    futures.add(
+                        pool.submit(run_node, node, catalog, self._is_async, run_id)
+                    )
                 if not futures:
                     assert not todo_nodes, (todo_nodes, done_nodes, ready, done)
                     break

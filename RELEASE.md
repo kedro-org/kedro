@@ -11,6 +11,7 @@
 * Added an option to enable asynchronous loading inputs and saving outputs in both `SequentialRunner(is_asyc=True)` and `ParallelRunner(is_asyc=True)` class.
 * Added the following datasets:
   - `GeoJSONDataSet`dataset in `kedro.extras.datasets.geopandas` for working with geospatial data that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `MatplotlibVersionedWriter`dataset in `kedro.extras.datasets.matplotlib` to support versioning of Matplotlib charts.
 * Added instruction in the documentation on how to create a custom runner.
 
 ## Bug fixes and other changes
@@ -61,7 +62,7 @@ The list of moved files you can find in `0.15.6` release notes under `Files with
   - Replace `context = load_context(path, env=os.getenv(KEDRO_ENV_VAR))` with `context = load_context(path)` in `.ipython/profile_default/startup/00-kedro-init.py`
 
 ## Thanks for supporting contributions
-[@foolsgold](https://github.com/foolsgold), [Mani Sarkar](https://github.com/neomatrix369), [Priyanka Shanbhag](https://github.com/priyanka1414), [Luis Blanche](https://github.com/LuisBlanche), [Deepyaman Datta](https://github.com/deepyaman), [Antony Milne](https://github.com/AntonyMilneQB)
+[@foolsgold](https://github.com/foolsgold), [Mani Sarkar](https://github.com/neomatrix369), [Priyanka Shanbhag](https://github.com/priyanka1414), [Luis Blanche](https://github.com/LuisBlanche), [Deepyaman Datta](https://github.com/deepyaman), [Antony Milne](https://github.com/AntonyMilneQB), [Tomasz Kaczmarczyk](https://github.com/TomaszKaczmarczyk)
 
 # 0.15.8
 

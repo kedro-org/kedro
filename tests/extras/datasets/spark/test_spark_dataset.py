@@ -319,7 +319,7 @@ class TestSparkDataSet:
         )
         runner = ParallelRunner(is_async=is_async)
 
-        pattern = r"Failed while saving data to data set PickleDataSet"
+        pattern = r".* was not serialized due to: .*"
 
         with pytest.raises(DataSetError, match=pattern):
             runner.run(pipeline, catalog)

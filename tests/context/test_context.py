@@ -719,7 +719,9 @@ class TestKedroContextRun:  # pylint: disable=too-many-public-methods
         dummy_context.catalog.save("cars", dummy_dataframe)
         dummy_context.run()
 
-        mocked_get_run_id.assert_called_once_with()
+        assert (
+            mocked_get_run_id.call_count == 3
+        )  # once during run, and twice for each `.catalog`
         log_msg = next(
             record.getMessage()
             for record in caplog.records

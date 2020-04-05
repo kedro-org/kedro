@@ -345,31 +345,37 @@ class TestTestCommand:
 
 
 class TestLintCommand:
-    def test_bare_lint(self, fake_kedro_cli, python_call_mock, mocker):
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["lint"])
+    @pytest.mark.parametrize("check_only", [False, True])
+    def test_bare_lint(self, fake_kedro_cli, python_call_mock, check_only, mocker):
+        check_flag = ("-c",) if check_only else ()
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["lint", *check_flag])
         assert not result.exit_code
 
         files = ("src/tests", "src/fake_package")
         expected_calls = [
-            mocker.call("black", files),
+            mocker.call("black", ("--check",) + files if check_only else files),
             mocker.call("flake8", ("--max-line-length=88",) + files),
             mocker.call(
-                "isort", ("-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + files
+                "isort",
+                (*check_flag, "-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + files,
             ),
         ]
 
         assert python_call_mock.call_args_list == expected_calls
 
-    def test_file_lint(self, fake_kedro_cli, python_call_mock, mocker):
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["lint", "kedro"])
+    @pytest.mark.parametrize("check_only", [False, True])
+    def test_file_lint(self, fake_kedro_cli, python_call_mock, check_only, mocker):
+        check_flag = ("-c",) if check_only else ()
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["lint", *check_flag, "kedro"])
         assert not result.exit_code
 
         files = ("kedro",)
         expected_calls = [
-            mocker.call("black", files),
+            mocker.call("black", ("--check",) + files if check_only else files),
             mocker.call("flake8", ("--max-line-length=88",) + files),
             mocker.call(
-                "isort", ("-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + files
+                "isort",
+                (*check_flag, "-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + files,
             ),
         ]
 

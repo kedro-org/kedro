@@ -4,6 +4,18 @@
 
 ## Bug fixes and other changes
 
+* Pinned `fsspec>=0.5.1, <0.7.0` and `s3fs>=0.3.0, <0.4.1` to fix incompatibility issues with their latest release.
+
+## Breaking changes to the API
+
+## Thanks for supporting contributions
+
+# 0.15.8
+
+## Major features and improvements
+
+## Bug fixes and other changes
+
 * Added the additional libraries to our `requirements.txt` so `pandas.CSVDataSet` class works out of box with `pip install kedro`.
 * Added `pandas` to our `extra_requires` in `setup.py`.
 * Improved the error message when dependencies of a `DataSet` class are missing.

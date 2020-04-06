@@ -148,9 +148,6 @@ def pipeline(
 
     def _map_transcode_base(name: str):
         base_name, transcode_suffix = _transcode_split(name)
-        if not transcode_suffix:
-            return mapping[base_name]
-
         return TRANSCODING_SEPARATOR.join((mapping[base_name], transcode_suffix))
 
     def _rename(name: str):

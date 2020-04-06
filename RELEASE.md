@@ -11,6 +11,8 @@
 * Added an option to enable asynchronous loading inputs and saving outputs in both `SequentialRunner(is_asyc=True)` and `ParallelRunner(is_asyc=True)` class.
 * Added the following datasets:
   - `GeoJSONDataSet`dataset in `kedro.extras.datasets.geopandas` for working with geospatial data that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+* Added instruction in the documentation on how to create a custom runner.
+* Added `joblib` backend support to `pickle.PickleDataSet`.
 
 ## Bug fixes and other changes
 * Fixed a bug where a new version created mid-run by an external system caused inconsistencies in the load versions used in the current run.
@@ -18,6 +20,9 @@
 * Updated contribution process in `CONTRIBUTING.md` - added Developer Workflow.
 * Fixed a bug where `PartitionedDataSet` and `IncrementalDataSet` were not working with `s3a` or `s3n` protocol.
 * Documented installation of development version of Kedro in the [FAQ section](https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#how-can-i-use-development-version-of-kedro).
+* Implemented custom glob function for `SparkDataSet` when running on Databricks.
+* Added the option for contributors to run Kedro tests locally without Spark installation with `make test-no-spark`.
+* Bug in `SparkDataSet` not allowing for loading data from DBFS in a Windows machine using Databricks-connect.
 
 ## Breaking changes to the API
 * Made `invalidate_cache` method on datasets private.
@@ -58,7 +63,7 @@ The list of moved files you can find in `0.15.6` release notes under `Files with
   - Replace `context = load_context(path, env=os.getenv(KEDRO_ENV_VAR))` with `context = load_context(path)` in `.ipython/profile_default/startup/00-kedro-init.py`
 
 ## Thanks for supporting contributions
-[@foolsgold](https://github.com/foolsgold), [Mani Sarkar](https://github.com/neomatrix369), [Priyanka Shanbhag](https://github.com/priyanka1414), [Luis Blanche](https://github.com/LuisBlanche), [Deepyaman Datta](https://github.com/deepyaman)
+[@foolsgold](https://github.com/foolsgold), [Mani Sarkar](https://github.com/neomatrix369), [Priyanka Shanbhag](https://github.com/priyanka1414), [Luis Blanche](https://github.com/LuisBlanche), [Deepyaman Datta](https://github.com/deepyaman), [Antony Milne](https://github.com/AntonyMilneQB)
 
 # 0.15.8
 

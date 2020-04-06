@@ -69,7 +69,7 @@ class DataCatalogSpecs:
                 for each dataset in the catalog.
             run_id: The id of the run for which the catalog is loaded.
         """
-        pass  # pragma: no cover
+        pass
 
 
 class NodeSpecs:
@@ -94,7 +94,7 @@ class NodeSpecs:
             is_async: Whether the node was run in ``async`` mode.
             run_id: The id of the run.
         """
-        pass  # pragma: no cover
+        pass
 
     @hook_spec
     def after_node_run(  # pylint: disable=too-many-arguments
@@ -118,7 +118,7 @@ class NodeSpecs:
             is_async: Whether the node was run in ``async`` mode.
             run_id: The id of the run.
         """
-        pass  # pragma: no cover
+        pass
 
 
 class PipelineSpecs:
@@ -151,7 +151,7 @@ class PipelineSpecs:
             pipeline: The ``Pipeline`` that will be run.
             catalog: The ``DataCatalog`` to be used during the run.
         """
-        pass  # pragma: no cover
+        pass
 
     @hook_spec
     def after_pipeline_run(
@@ -180,4 +180,4 @@ class PipelineSpecs:
             pipeline: The ``Pipeline`` that was run.
             catalog: The ``DataCatalog`` used during the run.
         """
-        pass  # pragma: no cover
+        pass

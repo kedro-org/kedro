@@ -12,6 +12,7 @@
 * Added the following datasets:
   - `GeoJSONDataSet`dataset in `kedro.extras.datasets.geopandas` for working with geospatial data that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
 * Added instruction in the documentation on how to create a custom runner.
+* Added `Hooks`, which is a new mechanism for extending Kedro.
 * Added `joblib` backend support to `pickle.PickleDataSet`.
 
 ## Bug fixes and other changes

@@ -1,4 +1,4 @@
-# 0.15.8
+# 0.15.9
 
 ## Major features and improvements
 

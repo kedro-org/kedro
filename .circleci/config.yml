@@ -1,18 +1,15 @@
 version: 2.1
 
 executors:
-  py35:
-    docker:
-      - image: quantumblacklabs/kedro_builder:3.5
   py36:
     docker:
-      - image: quantumblacklabs/kedro_builder:3.6
+      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.6
   py37:
     docker:
-      - image: quantumblacklabs/kedro_builder:3.7
+      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.7
   py38:
     docker:
-      - image: quantumblacklabs/kedro_builder:3.8
+      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.8
 
 
 commands:
@@ -30,9 +27,6 @@ commands:
     description: Install PIP dependencies
     steps:
       - run:
-          name: Echo python version for debugging
-          command: 'echo "Python version: $(python --version 2>&1)"'
-      - run:
           name: Install pip setuptools
           command: make install-pip-setuptools
       - run:
@@ -44,6 +38,18 @@ commands:
       - run:
           name: Install test requirements
           command: pip install -r test_requirements.txt -U
+      - run:
+          # Since recently Spark installation for some reason does not have enough permissions to execute
+          # /home/circleci/miniconda/envs/kedro_builder/lib/python3.X/site-packages/pyspark/bin/spark-class.
+          # So fixing it manually here.
+          name: Fix Spark permissions
+          command: sudo chmod -R u+x /home/circleci/miniconda/envs/kedro_builder/lib/
+      - run:
+          name: Print Python environment
+          command: make print-python-env
+      - run:
+          name: Pip freeze
+          command: pip freeze
 
   setup_pre_commit:
     description: Install pre-commit hooks
@@ -89,7 +95,7 @@ commands:
           name: Run e2e tests
           command: make e2e-tests
 
-  build_docs:  # NOTE: requires python3.6+
+  build_docs:
     description: Build docs
     steps:
       - checkout
@@ -110,18 +116,6 @@ commands:
           command: make pip-compile
 
 jobs:
-  unit_tests_35:
-    executor: py35
-    steps: [unit_tests]
-
-  linters_35:
-    executor: py35
-    steps: [lint]
-
-  e2e_tests_35:
-    executor: py35
-    steps: [e2e_tests]
-
   unit_tests_36:
     executor: py36
     steps: [unit_tests]
@@ -156,7 +150,13 @@ jobs:
 
   unit_tests_38:
     executor: py38
-    steps: [unit_tests]
+    steps:
+      - checkout
+      - setup_conda
+      - setup_requirements
+      - run:
+          name: Run unit tests without Spark
+          command: make test-no-spark
 
   linters_38:
     executor: py38
@@ -166,8 +166,16 @@ jobs:
     executor: py38
     steps: [e2e_tests]
 
-  pip_compile:
+  pip_compile_36:
+    executor: py36
+    steps: [pip_compile]
+
+  pip_compile_37:
     executor: py37
+    steps: [pip_compile]
+
+  pip_compile_38:
+    executor: py38
     steps: [pip_compile]
 
   all_circleci_checks_succeeded:
@@ -183,9 +191,6 @@ workflows:
   version: 2
   regular:
     jobs:
-      - unit_tests_35
-      - linters_35
-      - e2e_tests_35
       - unit_tests_36
       - linters_36
       - e2e_tests_36
@@ -197,12 +202,11 @@ workflows:
       - unit_tests_38
       - linters_38
       - e2e_tests_38
-      - pip_compile
+      - pip_compile_36
+      - pip_compile_37
+      - pip_compile_38
       - all_circleci_checks_succeeded:
           requires:
-            - unit_tests_35
-            - linters_35
-            - e2e_tests_35
             - unit_tests_36
             - linters_36
             - e2e_tests_36
@@ -214,4 +218,6 @@ workflows:
             - unit_tests_38
             - linters_38
             - e2e_tests_38
-            - pip_compile
+            - pip_compile_36
+            - pip_compile_37
+            - pip_compile_38

@@ -1,6 +1,6 @@
 # Frequently asked questions
 
-> *Note:* This documentation is based on `Kedro 0.15.8`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.9`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 ## What is Kedro?
 
@@ -135,9 +135,9 @@ You can find a list of Kedro projects in the [`kedro-examples`](https://github.c
 +----------------+---------------------------------------------------------------------------------------------------+
 ```
 
-## What version of Python does Kedro use?
+## What version of Python does Kedro support?
 
-Kedro is built for Python 3.5, 3.6, 3.7 and 3.8.
+Kedro is built for Python 3.6, 3.7 and 3.8.
 
 ## How do I upgrade Kedro?
 

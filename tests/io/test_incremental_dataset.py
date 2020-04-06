@@ -55,9 +55,7 @@ def partitioned_data_pandas():
 
 @pytest.fixture
 def local_csvs(tmp_path, partitioned_data_pandas):
-    # tmp_path on Python 3.5 is a pathlib2.Path instance, which cannot be
-    # handled directly by Path instance, hence interim conversion to string
-    local_dir = Path(str(tmp_path / "csvs"))
+    local_dir = Path(tmp_path / "csvs")
     local_dir.mkdir()
 
     for k, data in partitioned_data_pandas.items():

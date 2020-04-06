@@ -36,9 +36,8 @@ from tools.ipython.ipython_loader import locate_ipython_startup_dir
 
 @pytest.fixture
 def dummy_project_dir(tmp_path):
-    # wrap in str is needed for Python 3.5
-    # since tmp_path is not directly compatible with Path in that version
-    root = Path(str(tmp_path)).resolve() / "dummy_project"
+    # need to resolve tmp_path for tests to pass on MacOS
+    root = Path(tmp_path / "dummy_project").resolve()
     root.mkdir()
     startup_path = root / ".ipython" / "profile_default" / "startup"
     startup_path.mkdir(parents=True)

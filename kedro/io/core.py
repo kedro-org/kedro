@@ -429,18 +429,24 @@ def parse_dataset_definition(
 def _load_obj(class_path: str) -> Optional[object]:
     try:
         class_obj = load_obj(class_path)
-    except ImportError as error:
+    except ModuleNotFoundError as error:
         if error.name in class_path:
             return None
         # class_obj was successfully loaded, but some dependencies are missing.
-        raise DataSetError("{} for {}".format(error, class_path))
+        raise DataSetError(
+            "{e} for {dataset}. Please see the documentation on how to install relevant "
+            "dependencies for {dataset}"
+            "https://kedro.readthedocs.io/en/stable/02_getting_started/02_install.html#optional-dependencies".format(  # pylint: disable=line-too-long
+                e=error, dataset=class_path
+            )
+        )
     except (AttributeError, ValueError):
         return None
 
     return class_obj
 
 
-def _local_exists(filepath: str) -> bool:
+def _local_exists(filepath: str) -> bool:  # SKIP_IF_NO_SPARK
     filepath = Path(filepath)
     return filepath.exists() or any(par.is_file() for par in filepath.parents)
 
@@ -594,7 +600,7 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
             return self._exists()
         except VersionNotFoundError:
             return False
-        except Exception as exc:
+        except Exception as exc:  # SKIP_IF_NO_SPARK
             message = "Failed during exists check for data set {}.\n{}".format(
                 str(self), str(exc)
             )

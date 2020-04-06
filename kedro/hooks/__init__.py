@@ -25,24 +25,6 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-"""
-Black and import-linter need python 3.6+, but Kedro should work on 3.5 too.
-That's why we run the relevant commands conditionally on CI/precommit.
-
-If python version is 3.5 - just exit with 0 status.
-"""
-import shlex
-import subprocess
-import sys
-
-if __name__ == "__main__":
-    required_version = tuple(int(x) for x in sys.argv[1].strip().split("."))
-    current_version = sys.version_info[:2]
-
-    if current_version < required_version:
-        print("Python version is too low, exiting")
-        sys.exit(0)
-
-    run_cmd = shlex.split(sys.argv[2])
-    subprocess.run(run_cmd, check=True)
+"""``kedro.hooks`` provides primitives to use hooks to extend KedroContext's behaviour"""
+from .manager import get_hook_manager  # NOQA
+from .markers import hook_impl  # NOQA

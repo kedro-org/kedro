@@ -93,7 +93,7 @@ extras_require = {
     "matplotlib": ["matplotlib>=3.0.3, <4.0"],
     "networkx": ["networkx>=2.4, <3.0"],
     "pandas": [
-        "pandas>=0.24.0, <1.0",
+        "pandas>=0.24.0, <2.0",
         "azure-storage-blob>=1.1.0, <2.0",
         "azure-storage-file>=1.1.0, <2.0",
         "azure-storage-queue>=1.1.0, <2.0",
@@ -102,10 +102,9 @@ extras_require = {
         "pyarrow>=0.12.0, <1.0.0",
         "xlrd>=1.0.0, <2.0",
         "xlsxwriter>=1.0.0, <2.0",
-        "tables>=3.4.4, <3.6; python_version < '3.6'",
-        "tables>=3.6; python_version >= '3.6'",
+        "tables>=3.6",
     ],
-    "spark": ["pyspark>=2.2.0, <3.0", "hdfs>=2.5.8, <3.0", "s3fs>=0.3.0, <1.0"],
+    "spark": ["pyspark>=2.2.0, <3.0", "hdfs>=2.5.8, <3.0", "s3fs>=0.3.0, <0.4.1"],
 }
 
 extras_require["all"] = sorted(set(chain.from_iterable(extras_require.values())))
@@ -118,7 +117,7 @@ setup(
     long_description=readme,
     long_description_content_type="text/markdown",
     url="https://github.com/quantumblacklabs/kedro",
-    python_requires=">=3.5, <3.9",
+    python_requires=">=3.6, <3.9",
     packages=find_packages(exclude=["docs*", "tests*", "tools*", "features*"]),
     include_package_data=True,
     tests_require=test_requires,
@@ -130,7 +129,6 @@ setup(
     keywords="pipelines, machine learning, data pipelines, data science, data engineering",
     classifiers=[
         "Development Status :: 4 - Beta",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",

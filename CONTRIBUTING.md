@@ -83,7 +83,7 @@ make build-docs
  - We use [Anaconda](https://www.anaconda.com/distribution/) as a preferred virtual environment
  - We use [SemVer](https://semver.org/) for versioning
 
-Our code is designed to be compatible with Python 3.5 onwards and our style guidelines are (in cascading order):
+Our code is designed to be compatible with Python 3.6 onwards and our style guidelines are (in cascading order):
 
 * [PEP 8 conventions](https://www.python.org/dev/peps/pep-0008/) for all Python code
 * [Google docstrings](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) for code comments
@@ -192,8 +192,6 @@ make build-docs
 ```
 
 This command will only work on Unix-like systems and requires `pandoc` to be installed.
-
-> ❗ Running `make build-docs` in a Python 3.5 environment may sometimes yield multiple warning messages like the following: `MemoryDataSet.md: WARNING: document isn't included in any toctree`. You can simply ignore them or switch to Python 3.6+ when building documentation.
 
 ## Hints on pre-commit usage
 The checks will automatically run on all the changed files on each commit.

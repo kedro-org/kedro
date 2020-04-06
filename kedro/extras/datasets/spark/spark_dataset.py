@@ -33,7 +33,7 @@
 from copy import deepcopy
 from fnmatch import fnmatch
 from functools import partial
-from pathlib import PurePosixPath
+from pathlib import PurePath, PurePosixPath
 from typing import Any, Dict, List, Optional, Tuple
 from warnings import warn
 
@@ -268,9 +268,11 @@ class SparkDataSet(AbstractVersionedDataSet):
             path = PurePosixPath(filepath)
 
         else:
-            path = PurePosixPath(filepath)
+            path = PurePath(filepath)  # type: ignore
 
             if filepath.startswith("/dbfs"):
+                # Use PosixPath if the filepath references DBFS
+                path = PurePosixPath(filepath)
                 dbutils = _get_dbutils(self._get_spark())
                 if dbutils:
                     glob_function = partial(_dbfs_glob, dbutils=dbutils)

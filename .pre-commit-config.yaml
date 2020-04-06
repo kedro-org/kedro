@@ -95,11 +95,11 @@ repos:
             language: system
             pass_filenames: false
             entry: lint-imports
-#          - id: secret_scan
-#            name: "Secret scan"
-#            language: system
-#            pass_filenames: false
-#            entry: make secret-scan
+          - id: secret_scan
+            name: "Secret scan"
+            language: system
+            pass_filenames: false
+            entry: make secret-scan
           - id: isort
             name: "Sort imports"
             language: system

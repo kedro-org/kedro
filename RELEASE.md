@@ -22,6 +22,7 @@
 * Documented installation of development version of Kedro in the [FAQ section](https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#how-can-i-use-development-version-of-kedro).
 * Implemented custom glob function for `SparkDataSet` when running on Databricks.
 * Added the option for contributors to run Kedro tests locally without Spark installation with `make test-no-spark`.
+* Bug in `SparkDataSet` not allowing for loading data from DBFS in a Windows machine using Databricks-connect.
 
 ## Breaking changes to the API
 * Made `invalidate_cache` method on datasets private.

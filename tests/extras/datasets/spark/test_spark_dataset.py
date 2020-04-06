@@ -28,7 +28,7 @@
 
 # pylint: disable=import-error
 import tempfile
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 
 import pandas as pd
 import pytest
@@ -541,6 +541,24 @@ class TestSparkDataSetVersionedDBFS:
         )
         mocker.patch.dict("sys.modules", {})
         assert _get_dbutils("spark") is None
+
+    @pytest.mark.parametrize(
+        "os_name,path_class", [("nt", PureWindowsPath), ("posix", PurePosixPath)]
+    )
+    def test_regular_path_in_different_os(self, os_name, path_class, mocker):
+        """Check that class of filepath depends on OS for regular path."""
+        mocker.patch("os.name", os_name)
+        data_set = SparkDataSet(filepath="/some/path")
+        assert isinstance(data_set._filepath, path_class)
+
+    @pytest.mark.parametrize(
+        "os_name,path_class", [("nt", PurePosixPath), ("posix", PurePosixPath)]
+    )
+    def test_dbfs_path_in_different_os(self, os_name, path_class, mocker):
+        """Check that class of filepath doesn't depend on OS if it references DBFS."""
+        mocker.patch("os.name", os_name)
+        data_set = SparkDataSet(filepath="/dbfs/some/path")
+        assert isinstance(data_set._filepath, path_class)
 
 
 class TestSparkDataSetVersionedS3:

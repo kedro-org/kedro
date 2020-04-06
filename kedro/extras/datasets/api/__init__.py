@@ -31,4 +31,4 @@ and returns them into either as string or json Dict.
 It uses the python requests library: https://requests.readthedocs.io/en/master/
 """
 
-from .api import APIDataSet  # NOQA
+from .api_dataset import APIDataSet  # NOQA

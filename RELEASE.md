@@ -14,6 +14,12 @@
 * Added instruction in the documentation on how to create a custom runner.
 * Added `joblib` backend support to `pickle.PickleDataSet`.
 
+## New Datasets
+
+| Type                 | Description                                                                                                                                      | Location                            |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------- |
+| `APIDataSet`         | Handles API requests using python [`requests`](https://requests.readthedocs.io/en/master/)                                                       | `kedro.extras.datasets.api`         |
+
 ## Bug fixes and other changes
 * Fixed a bug where a new version created mid-run by an external system caused inconsistencies in the load versions used in the current run.
 * Documentation improvements.
@@ -63,7 +69,7 @@ The list of moved files you can find in `0.15.6` release notes under `Files with
   - Replace `context = load_context(path, env=os.getenv(KEDRO_ENV_VAR))` with `context = load_context(path)` in `.ipython/profile_default/startup/00-kedro-init.py`
 
 ## Thanks for supporting contributions
-[@foolsgold](https://github.com/foolsgold), [Mani Sarkar](https://github.com/neomatrix369), [Priyanka Shanbhag](https://github.com/priyanka1414), [Luis Blanche](https://github.com/LuisBlanche), [Deepyaman Datta](https://github.com/deepyaman), [Antony Milne](https://github.com/AntonyMilneQB)
+[@foolsgold](https://github.com/foolsgold), [Mani Sarkar](https://github.com/neomatrix369), [Priyanka Shanbhag](https://github.com/priyanka1414), [Luis Blanche](https://github.com/LuisBlanche), [Deepyaman Datta](https://github.com/deepyaman), [Antony Milne](https://github.com/AntonyMilneQB), [Panos Psimatikas](https://github.com/ppsimatikas)
 
 # 0.15.9
 

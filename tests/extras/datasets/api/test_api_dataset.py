@@ -26,16 +26,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pylint: disable=no-member,unused-argument
+# pylint: disable=no-member
 import socket
-import unittest
 
 import pytest
 import requests
 import requests_mock
 
 from kedro.extras.datasets.api import APIDataSet
-from kedro.io.core import DataSetError, DataSetNotFoundError
+from kedro.io.core import DataSetError
 
 POSSIBLE_METHODS = ["GET", "OPTIONS", "HEAD", "POST", "PUT", "PATCH", "DELETE"]
 
@@ -49,10 +48,10 @@ TEST_URL_WITH_PARAMS = TEST_URL + "?param=value"
 TEST_HEADERS = {"key": "value"}
 
 
-@requests_mock.Mocker()
-class TestAPIDataSet(unittest.TestCase):
-    def test_successfully_load_with_text_response(self, requests_mocker):
-        for method in POSSIBLE_METHODS:
+@pytest.mark.parametrize("method", POSSIBLE_METHODS)
+class TestAPIDataSet:
+    def test_successfully_load_with_text_response(self, method):
+        with requests_mock.Mocker() as requests_mocker:
             api_data_set = APIDataSet(
                 url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
             )
@@ -66,8 +65,8 @@ class TestAPIDataSet(unittest.TestCase):
             response = api_data_set.load()
             assert response == TEST_TEXT_RESPONSE_DATA
 
-    def test_successfully_load_with_json_response(self, requests_mocker):
-        for method in POSSIBLE_METHODS:
+    def test_successfully_load_with_json_response(self, method):
+        with requests_mock.Mocker() as requests_mocker:
             api_data_set = APIDataSet(
                 url=TEST_URL,
                 method=method,
@@ -85,26 +84,8 @@ class TestAPIDataSet(unittest.TestCase):
             response = api_data_set.load()
             assert response == TEST_JSON_RESPONSE_DATA
 
-    def test_resource_not_found(self, requests_mocker):
-        for method in POSSIBLE_METHODS:
-            api_data_set = APIDataSet(
-                url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
-            )
-            requests_mocker.register_uri(
-                method,
-                TEST_URL_WITH_PARAMS,
-                headers=TEST_HEADERS,
-                text="Nope, not found",
-                status_code=requests.codes.NOT_FOUND,
-            )
-
-            with pytest.raises(
-                DataSetNotFoundError, match="The server returned 404 for"
-            ):
-                api_data_set.load()
-
-    def test_http_error(self, requests_mocker):
-        for method in POSSIBLE_METHODS:
+    def test_http_error(self, method):
+        with requests_mock.Mocker() as requests_mocker:
             api_data_set = APIDataSet(
                 url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
             )
@@ -119,8 +100,8 @@ class TestAPIDataSet(unittest.TestCase):
             with pytest.raises(DataSetError, match="Failed to fetch data"):
                 api_data_set.load()
 
-    def test_socket_error(self, requests_mocker):
-        for method in POSSIBLE_METHODS:
+    def test_socket_error(self, method):
+        with requests_mock.Mocker() as requests_mocker:
             api_data_set = APIDataSet(
                 url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
             )
@@ -129,38 +110,20 @@ class TestAPIDataSet(unittest.TestCase):
             with pytest.raises(DataSetError, match="Failed to connect"):
                 api_data_set.load()
 
-    def test_read_only_mode(self, requests_mocker):
+    def test_read_only_mode(self, method):
         """
         Saving is disabled on the data set.
         """
-        for method in POSSIBLE_METHODS:
-            api_data_set = APIDataSet(url=TEST_URL, method=method)
-            with pytest.raises(DataSetError, match="is a read only data set type"):
-                api_data_set.save({})
+        api_data_set = APIDataSet(url=TEST_URL, method=method)
+        with pytest.raises(DataSetError, match="is a read only data set type"):
+            api_data_set.save({})
 
-    def test_exists_not_found(self, requests_mocker):
-        """
-        The remote server returns 404, we should report that it doesn't exist.
-        """
-        for method in POSSIBLE_METHODS:
-            api_data_set = APIDataSet(
-                url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
-            )
-            requests_mocker.register_uri(
-                method,
-                TEST_URL_WITH_PARAMS,
-                headers=TEST_HEADERS,
-                text="Nope, not found",
-                status_code=requests.codes.NOT_FOUND,
-            )
-            assert not api_data_set.exists()
-
-    def test_exists_http_error(self, requests_mocker):
+    def test_exists_http_error(self, method):
         """
         In case of an unexpected HTTP error,
         ``exists()`` should not silently catch it.
         """
-        for method in POSSIBLE_METHODS:
+        with requests_mock.Mocker() as requests_mocker:
             api_data_set = APIDataSet(
                 url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
             )
@@ -174,12 +137,12 @@ class TestAPIDataSet(unittest.TestCase):
             with pytest.raises(DataSetError, match="Failed to fetch data"):
                 api_data_set.exists()
 
-    def test_exists_ok(self, requests_mocker):
+    def test_exists_ok(self, method):
         """
         If the file actually exists and server responds 200,
         ``exists()`` should return True
         """
-        for method in POSSIBLE_METHODS:
+        with requests_mock.Mocker() as requests_mocker:
             api_data_set = APIDataSet(
                 url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
             )

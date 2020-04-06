@@ -32,12 +32,12 @@ It uses the python requests library: https://requests.readthedocs.io/en/master/
 """
 import copy
 import socket
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Tuple, Union
 
 import requests
 from requests.auth import AuthBase
 
-from kedro.io.core import AbstractDataSet, DataSetError, DataSetNotFoundError
+from kedro.io.core import AbstractDataSet, DataSetError
 
 
 class APIDataSet(AbstractDataSet):
@@ -70,13 +70,13 @@ class APIDataSet(AbstractDataSet):
         self,
         url: str,
         method: str = "GET",
-        data: Optional[Optional[Union[Dict[str, Any], List[Any]]]] = None,
-        params: Optional[Dict[str, Any]] = None,
-        headers: Optional[Dict[str, Any]] = None,
-        auth: Optional[Union[Tuple[str], AuthBase]] = None,
+        data: Any = None,
+        params: Dict[str, Any] = None,
+        headers: Dict[str, Any] = None,
+        auth: Union[Tuple[str], AuthBase] = None,
         timeout: int = 60,
         json: bool = False,
-        load_args: Optional[Dict[str, Any]] = None,
+        load_args: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``APIDataSet`` to fetch data from an API endpoint.
 
@@ -93,7 +93,7 @@ class APIDataSet(AbstractDataSet):
                 or ``AuthBase``, ``HTTPBasicAuth`` instance for more complex cases.
             timeout: The wait time in seconds for a response, defaults to 1 minute.
                 https://requests.readthedocs.io/en/master/user/quickstart/#timeouts
-            json: If true it will return the API response as json in python Dict format,
+            json: If true it will return the API response as JSON in Python Dict format,
                 else it will return pure text.
             load_args: Extra requests.request options.
                 Here you can find all available arguments:
@@ -102,7 +102,7 @@ class APIDataSet(AbstractDataSet):
 
         """
         super().__init__()
-        self._request_args = {
+        self._request_args: Dict[str, Any] = {
             "url": url,
             "method": method,
             "data": data,
@@ -122,34 +122,23 @@ class APIDataSet(AbstractDataSet):
             response = requests.request(**self._request_args)
             response.raise_for_status()
         except requests.exceptions.HTTPError as exc:
-            if (
-                exc.response.status_code
-                == requests.codes.NOT_FOUND  # pylint: disable=no-member
-            ):
-                raise DataSetNotFoundError(
-                    "The server returned 404 for {}".format(self._request_args["url"])
-                )
-
             raise DataSetError("Failed to fetch data", exc)
         except socket.error:
             raise DataSetError("Failed to connect to the remote server")
 
         return response
 
-    def _load(self) -> Union[str, Dict[str, Any], List[Any]]:
+    def _load(self) -> Union[str, Any]:
         response = self._execute_request()
         return response.json() if self._json else response.text
 
-    def _save(self, data: Union[Dict[str, Any], List[Any]]) -> None:
+    def _save(self, data: Any) -> None:
         raise DataSetError(
             "{} is a read only data set type".format(self.__class__.__name__)
         )
 
     def _exists(self) -> bool:
-        try:
-            response = self._execute_request()
-        except DataSetNotFoundError:
-            return False
+        response = self._execute_request()
 
         # NOTE: we don't access the actual content here, which might be large.
         return response.status_code == requests.codes.OK  # pylint: disable=no-member

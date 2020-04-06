@@ -1,6 +1,6 @@
 # Working with IPython and Jupyter Notebooks / Lab
 
-> *Note:* This documentation is based on `Kedro 0.15.8`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.9`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 This section follows the ["Hello World" example](../02_getting_started/04_hello_world.md) and demonstrates how to effectively use IPython and Jupyter Notebooks / Lab.
 

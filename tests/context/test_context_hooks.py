@@ -91,7 +91,7 @@ def local_config(tmp_path):
     }
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def config_dir(tmp_path, local_config, local_logging_config):
     catalog = tmp_path / "conf" / "base" / "catalog.yml"
     credentials = tmp_path / "conf" / "local" / "credentials.yml"
@@ -116,7 +116,7 @@ def identity(x: str):
 
 
 @pytest.fixture
-def test_dataframe():
+def dummy_dataframe():
     return pd.DataFrame({"test": [1, 2]})
 
 
@@ -126,13 +126,11 @@ class LoggingHooks:
     """
 
     handler_name = "hooks_handler"
-    logs_queue = None
 
-    def __init__(self):
+    def __init__(self, logs_queue):
         self.logger = logging.getLogger("hooks_handler")
         self.logger.handlers = []
-        LoggingHooks.logs_queue = Queue()
-        self.logger.addHandler(QueueHandler(LoggingHooks.logs_queue))
+        self.logger.addHandler(QueueHandler(logs_queue))
 
     @hook_impl
     def after_catalog_created(
@@ -220,13 +218,18 @@ class LoggingHooks:
 
 
 @pytest.fixture
-def logging_hooks():
-    return LoggingHooks()
+def logs_queue():
+    return Queue()
+
+
+@pytest.fixture
+def logging_hooks(logs_queue):
+    return LoggingHooks(logs_queue)
 
 
 @pytest.fixture
 def context_with_hooks(tmp_path, mocker, logging_hooks):
-    class TestContextWithHooks(KedroContext):
+    class DummyContextWithHooks(KedroContext):
         project_name = "test hooks"
         project_version = __version__
         hooks = (logging_hooks,)
@@ -245,10 +248,9 @@ def context_with_hooks(tmp_path, mocker, logging_hooks):
             return {"__default__": pipeline}
 
     mocker.patch("logging.config.dictConfig")
-    return TestContextWithHooks(str(tmp_path), env="local")
+    return DummyContextWithHooks(str(tmp_path), env="local")
 
 
-@pytest.mark.usefixtures("config_dir")
 class TestKedroContextHooks:
     @staticmethod
     def _assert_hook_call_record_has_expected_parameters(
@@ -261,14 +263,9 @@ class TestKedroContextHooks:
     def test_calling_register_hooks_multiple_times_should_not_raise(
         self, context_with_hooks
     ):
-        raised = False
-        try:
-            context_with_hooks._register_hooks()
-            context_with_hooks._register_hooks()
-        except ValueError:  # pragma: no cover
-            raised = True
-        finally:
-            assert not raised
+        context_with_hooks._register_hooks()
+        context_with_hooks._register_hooks()
+        assert True  # if we get to this statement, it means the previous repeated calls don't raise
 
     def test_hooks_are_registered_when_context_is_created(
         self, tmp_path, mocker, logging_hooks, hook_manager
@@ -301,11 +298,11 @@ class TestKedroContextHooks:
         assert record.run_id == "mocked context with hooks run id"
 
     def test_before_and_after_pipeline_run_hooks_are_called(
-        self, context_with_hooks, test_dataframe, caplog
+        self, context_with_hooks, dummy_dataframe, caplog
     ):
 
-        context_with_hooks.catalog.save("cars", test_dataframe)
-        context_with_hooks.catalog.save("boats", test_dataframe)
+        context_with_hooks.catalog.save("cars", dummy_dataframe)
+        context_with_hooks.catalog.save("boats", dummy_dataframe)
         context_with_hooks.run()
 
         # test before pipeline run hook
@@ -335,9 +332,9 @@ class TestKedroContextHooks:
         assert call_record.pipeline.describe() == context_with_hooks.pipeline.describe()
 
     def test_before_and_after_node_run_hooks_are_called_with_sequential_runner(
-        self, context_with_hooks, test_dataframe, caplog
+        self, context_with_hooks, dummy_dataframe, caplog
     ):
-        context_with_hooks.catalog.save("cars", test_dataframe)
+        context_with_hooks.catalog.save("cars", dummy_dataframe)
         context_with_hooks.run(node_names=["node1"])
 
         # test before node run hook
@@ -350,7 +347,7 @@ class TestKedroContextHooks:
             call_record, ["node", "catalog", "inputs", "is_async", "run_id"]
         )
         # sanity check a couple of important parameters
-        assert call_record.inputs["cars"].to_dict() == test_dataframe.to_dict()
+        assert call_record.inputs["cars"].to_dict() == dummy_dataframe.to_dict()
         assert call_record.run_id == context_with_hooks.run_id
 
         # test after node run hook
@@ -363,11 +360,11 @@ class TestKedroContextHooks:
             call_record, ["node", "catalog", "inputs", "outputs", "is_async", "run_id"]
         )
         # sanity check a couple of important parameters
-        assert call_record.outputs["planes"].to_dict() == test_dataframe.to_dict()
+        assert call_record.outputs["planes"].to_dict() == dummy_dataframe.to_dict()
         assert call_record.run_id == context_with_hooks.run_id
 
     def test_before_and_after_node_run_hooks_are_called_with_parallel_runner(
-        self, context_with_hooks, test_dataframe
+        self, context_with_hooks, dummy_dataframe, logs_queue
     ):
         log_records = []
 
@@ -375,10 +372,10 @@ class TestKedroContextHooks:
             def handle(self, record):
                 log_records.append(record)
 
-        logs_queue_listener = QueueListener(LoggingHooks.logs_queue, LogHandler())
+        logs_queue_listener = QueueListener(logs_queue, LogHandler())
         logs_queue_listener.start()
-        context_with_hooks.catalog.save("cars", test_dataframe)
-        context_with_hooks.catalog.save("boats", test_dataframe)
+        context_with_hooks.catalog.save("cars", dummy_dataframe)
+        context_with_hooks.catalog.save("boats", dummy_dataframe)
         context_with_hooks.run(runner=ParallelRunner(), node_names=["node1", "node2"])
         logs_queue_listener.stop()
 

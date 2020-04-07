@@ -133,5 +133,4 @@ class APIDataSet(AbstractDataSet):
     def _exists(self) -> bool:
         response = self._execute_request()
 
-        # NOTE: we don't access the actual content here, which might be large.
-        return response.status_code == requests.codes.OK  # pylint: disable=no-member
+        return response.ok

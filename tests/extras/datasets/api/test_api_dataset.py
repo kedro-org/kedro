@@ -50,65 +50,66 @@ TEST_HEADERS = {"key": "value"}
 
 @pytest.mark.parametrize("method", POSSIBLE_METHODS)
 class TestAPIDataSet:
-    def test_successfully_load_with_text_response(self, method):
-        with requests_mock.Mocker() as requests_mocker:
-            api_data_set = APIDataSet(
-                url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
-            )
-            requests_mocker.register_uri(
-                method,
-                TEST_URL_WITH_PARAMS,
-                headers=TEST_HEADERS,
-                text=TEST_TEXT_RESPONSE_DATA,
-            )
+    @pytest.fixture
+    def requests_mocker(self):
+        with requests_mock.Mocker() as mock:
+            yield mock
 
-            response = api_data_set.load()
-            assert response == TEST_TEXT_RESPONSE_DATA
+    def test_successfully_load_with_text_response(self, requests_mocker, method):
+        api_data_set = APIDataSet(
+            url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
+        )
+        requests_mocker.register_uri(
+            method,
+            TEST_URL_WITH_PARAMS,
+            headers=TEST_HEADERS,
+            text=TEST_TEXT_RESPONSE_DATA,
+        )
 
-    def test_successfully_load_with_json_response(self, method):
-        with requests_mock.Mocker() as requests_mocker:
-            api_data_set = APIDataSet(
-                url=TEST_URL,
-                method=method,
-                params=TEST_PARAMS,
-                headers=TEST_HEADERS,
-                json=True,
-            )
-            requests_mocker.register_uri(
-                method,
-                TEST_URL_WITH_PARAMS,
-                headers=TEST_HEADERS,
-                json=TEST_JSON_RESPONSE_DATA,
-            )
+        response = api_data_set.load()
+        assert response == TEST_TEXT_RESPONSE_DATA
 
-            response = api_data_set.load()
-            assert response == TEST_JSON_RESPONSE_DATA
+    def test_successfully_load_with_json_response(self, requests_mocker, method):
+        api_data_set = APIDataSet(
+            url=TEST_URL,
+            method=method,
+            params=TEST_PARAMS,
+            headers=TEST_HEADERS,
+            json=True,
+        )
+        requests_mocker.register_uri(
+            method,
+            TEST_URL_WITH_PARAMS,
+            headers=TEST_HEADERS,
+            json=TEST_JSON_RESPONSE_DATA,
+        )
 
-    def test_http_error(self, method):
-        with requests_mock.Mocker() as requests_mocker:
-            api_data_set = APIDataSet(
-                url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
-            )
-            requests_mocker.register_uri(
-                method,
-                TEST_URL_WITH_PARAMS,
-                headers=TEST_HEADERS,
-                text="Nope, not found",
-                status_code=requests.codes.FORBIDDEN,
-            )
+        response = api_data_set.load()
+        assert response == TEST_JSON_RESPONSE_DATA
 
-            with pytest.raises(DataSetError, match="Failed to fetch data"):
-                api_data_set.load()
+    def test_http_error(self, requests_mocker, method):
+        api_data_set = APIDataSet(
+            url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
+        )
+        requests_mocker.register_uri(
+            method,
+            TEST_URL_WITH_PARAMS,
+            headers=TEST_HEADERS,
+            text="Nope, not found",
+            status_code=requests.codes.FORBIDDEN,
+        )
 
-    def test_socket_error(self, method):
-        with requests_mock.Mocker() as requests_mocker:
-            api_data_set = APIDataSet(
-                url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
-            )
-            requests_mocker.register_uri(method, TEST_URL_WITH_PARAMS, exc=socket.error)
+        with pytest.raises(DataSetError, match="Failed to fetch data"):
+            api_data_set.load()
 
-            with pytest.raises(DataSetError, match="Failed to connect"):
-                api_data_set.load()
+    def test_socket_error(self, requests_mocker, method):
+        api_data_set = APIDataSet(
+            url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
+        )
+        requests_mocker.register_uri(method, TEST_URL_WITH_PARAMS, exc=socket.error)
+
+        with pytest.raises(DataSetError, match="Failed to connect"):
+            api_data_set.load()
 
     def test_read_only_mode(self, method):
         """
@@ -118,39 +119,37 @@ class TestAPIDataSet:
         with pytest.raises(DataSetError, match="is a read only data set type"):
             api_data_set.save({})
 
-    def test_exists_http_error(self, method):
+    def test_exists_http_error(self, requests_mocker, method):
         """
         In case of an unexpected HTTP error,
         ``exists()`` should not silently catch it.
         """
-        with requests_mock.Mocker() as requests_mocker:
-            api_data_set = APIDataSet(
-                url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
-            )
-            requests_mocker.register_uri(
-                method,
-                TEST_URL_WITH_PARAMS,
-                headers=TEST_HEADERS,
-                text="Nope, not found",
-                status_code=requests.codes.FORBIDDEN,
-            )
-            with pytest.raises(DataSetError, match="Failed to fetch data"):
-                api_data_set.exists()
+        api_data_set = APIDataSet(
+            url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
+        )
+        requests_mocker.register_uri(
+            method,
+            TEST_URL_WITH_PARAMS,
+            headers=TEST_HEADERS,
+            text="Nope, not found",
+            status_code=requests.codes.FORBIDDEN,
+        )
+        with pytest.raises(DataSetError, match="Failed to fetch data"):
+            api_data_set.exists()
 
-    def test_exists_ok(self, method):
+    def test_exists_ok(self, requests_mocker, method):
         """
         If the file actually exists and server responds 200,
         ``exists()`` should return True
         """
-        with requests_mock.Mocker() as requests_mocker:
-            api_data_set = APIDataSet(
-                url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
-            )
-            requests_mocker.register_uri(
-                method,
-                TEST_URL_WITH_PARAMS,
-                headers=TEST_HEADERS,
-                text=TEST_TEXT_RESPONSE_DATA,
-            )
+        api_data_set = APIDataSet(
+            url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
+        )
+        requests_mocker.register_uri(
+            method,
+            TEST_URL_WITH_PARAMS,
+            headers=TEST_HEADERS,
+            text=TEST_TEXT_RESPONSE_DATA,
+        )
 
-            assert api_data_set.exists()
+        assert api_data_set.exists()

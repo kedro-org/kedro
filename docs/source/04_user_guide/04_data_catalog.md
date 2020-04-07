@@ -177,6 +177,19 @@ scooters_query:
   sql: select * from cars where gear=4
   load_args:
     index_col: [name]
+
+# Example 13: Load data from an API endpoint, example US corn yield data from USDA
+
+us_corn_yield_data:
+  type: api.APIDataSet
+  url: https://quickstats.nass.usda.gov
+  params:
+    key: SOME_TOKEN
+    format: JSON
+    commodity_desc: CORN
+    statisticcat_des: YIELD
+    agg_level_desc: STATE
+    year: 2000
 ```
 
 > *Note:* When using [`pandas.SQLTableDataSet`](/kedro.extras.datasets.pandas.SQLTableDataSet) or [`pandas.SQLQueryDataSet`](/kedro.extras.datasets.pandas.SQLQueryDataSet) you must provide a database connection string. In the example above we pass it using `scooters_credentials` key from the credentials (see the details in [Feeding in credentials](#feeding-in-credentials) section below). `scooters_credentials` must have a top-level key `con` containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. Alternative to credentials would be to explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataSet` only).

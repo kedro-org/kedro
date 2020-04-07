@@ -10,7 +10,8 @@
 * Added the ability to specify extra arguments, e.g. `encoding` or `compression`, for `fsspec.spec.AbstractFileSystem.open()` calls when loading/saving a dataset. See Example 3 under [docs](https://kedro.readthedocs.io/en/stable/04_user_guide/04_data_catalog.html#using-the-data-catalog-with-the-yaml-api).
 * Added an option to enable asynchronous loading inputs and saving outputs in both `SequentialRunner(is_asyc=True)` and `ParallelRunner(is_asyc=True)` class.
 * Added the following datasets:
-  - `GeoJSONDataSet`dataset in `kedro.extras.datasets.geopandas` for working with geospatial data that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `GeoJSONDataSet` in `kedro.extras.datasets.geopandas` for working with geospatial data that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `APIDataSet` in `kedro.extras.datasets.api` for handling API requests using [`requests`](https://requests.readthedocs.io/en/master/).
 * Added Memory profiler transformer.
 * Added instruction in the documentation on how to create a custom runner.
 * Added `Hooks`, which is a new mechanism for extending Kedro.
@@ -65,7 +66,7 @@ The list of moved files you can find in `0.15.6` release notes under `Files with
   - Replace `context = load_context(path, env=os.getenv(KEDRO_ENV_VAR))` with `context = load_context(path)` in `.ipython/profile_default/startup/00-kedro-init.py`
 
 ## Thanks for supporting contributions
-[@foolsgold](https://github.com/foolsgold), [Mani Sarkar](https://github.com/neomatrix369), [Priyanka Shanbhag](https://github.com/priyanka1414), [Luis Blanche](https://github.com/LuisBlanche), [Deepyaman Datta](https://github.com/deepyaman), [Antony Milne](https://github.com/AntonyMilneQB)
+[@foolsgold](https://github.com/foolsgold), [Mani Sarkar](https://github.com/neomatrix369), [Priyanka Shanbhag](https://github.com/priyanka1414), [Luis Blanche](https://github.com/LuisBlanche), [Deepyaman Datta](https://github.com/deepyaman), [Antony Milne](https://github.com/AntonyMilneQB), [Panos Psimatikas](https://github.com/ppsimatikas)
 
 # 0.15.9
 

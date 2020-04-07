@@ -12,6 +12,7 @@
 * Added the following datasets:
   - `GeoJSONDataSet`dataset in `kedro.extras.datasets.geopandas` for working with geospatial data that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
 * Added instruction in the documentation on how to create a custom runner.
+* Added `Hooks`, which is a new mechanism for extending Kedro.
 * Added `joblib` backend support to `pickle.PickleDataSet`.
 
 ## Bug fixes and other changes
@@ -64,6 +65,18 @@ The list of moved files you can find in `0.15.6` release notes under `Files with
 
 ## Thanks for supporting contributions
 [@foolsgold](https://github.com/foolsgold), [Mani Sarkar](https://github.com/neomatrix369), [Priyanka Shanbhag](https://github.com/priyanka1414), [Luis Blanche](https://github.com/LuisBlanche), [Deepyaman Datta](https://github.com/deepyaman), [Antony Milne](https://github.com/AntonyMilneQB)
+
+# 0.15.9
+
+## Major features and improvements
+
+## Bug fixes and other changes
+
+* Pinned `fsspec>=0.5.1, <0.7.0` and `s3fs>=0.3.0, <0.4.1` to fix incompatibility issues with their latest release.
+
+## Breaking changes to the API
+
+## Thanks for supporting contributions
 
 # 0.15.8
 

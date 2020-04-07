@@ -62,14 +62,14 @@ from kedro.hooks.specs import DataCatalogSpecs, NodeSpecs, PipelineSpecs
     ],
 )
 def test_hook_manager_can_call_hooks_defined_in_specs(
-    hook_specs, hook_name, hook_params, mocker
+    hook_specs, hook_name, hook_params
 ):
     """Tests to make sure that the hook manager can call all hooks defined by specs.
     """
     hook_manager = _create_hook_manager()
     hook = getattr(hook_manager.hook, hook_name)
     assert hook.spec.namespace == hook_specs
-    kwargs = {param: mocker.MagicMock() for param in hook_params}
+    kwargs = {param: None for param in hook_params}
     result = hook(**kwargs)
     # since there hasn't been any hook implementation, the result should be empty
     # but it shouldn't have raised
@@ -78,6 +78,7 @@ def test_hook_manager_can_call_hooks_defined_in_specs(
 
 def test_hook_manager_cannot_call_non_existent_hook():
     hook_manager = _create_hook_manager()
-    with pytest.raises(AttributeError) as excinfo:
+    with pytest.raises(
+        AttributeError, match="'_HookRelay' object has no attribute 'i_do_not_exist'"
+    ):
         hook_manager.hook.i_do_not_exist()  # pylint: disable=no-member
-    assert "'_HookRelay' object has no attribute 'i_do_not_exist'" in str(excinfo.value)

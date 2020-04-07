@@ -12,6 +12,7 @@
 * Added the following datasets:
   - `GeoJSONDataSet` in `kedro.extras.datasets.geopandas` for working with geospatial data that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
   - `APIDataSet` in `kedro.extras.datasets.api` for handling API requests using [`requests`](https://requests.readthedocs.io/en/master/).
+* Added Memory profiler transformer.
 * Added instruction in the documentation on how to create a custom runner.
 * Added `Hooks`, which is a new mechanism for extending Kedro.
 * Added `joblib` backend support to `pickle.PickleDataSet`.

@@ -28,7 +28,6 @@
 
 import importlib
 import logging
-import re
 from time import sleep
 
 import pytest
@@ -76,8 +75,8 @@ def test_mem_profile_old_versions(caplog, mocker):
 def test_import_error(mocker):
     mocker.patch.dict("sys.modules", {"memory_profiler": None})
     pattern = (
-        "`pip install kedro[memory_profiler]` to get the required "
-        "memory-profiler dependencies"
+        r".*`pip install kedro\[profilers\]` to get the required "
+        "memory profiler dependencies"
     )
-    with pytest.raises(ImportError, match=re.escape(pattern)):
+    with pytest.raises(ImportError, match=pattern):
         importlib.reload(memory_profiler)

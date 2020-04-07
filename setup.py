@@ -86,7 +86,7 @@ extras_require = {
         "ipykernel>=4.8.1, <5.0",
     ],
     "notebook_templates": ["nbconvert>=5.3.1, <6.0", "nbformat>=4.4.0, <5.0"],
-    "memory_profiler": ["memory_profiler>=0.50.0, <1.0"],
+    "profilers": ["memory_profiler>=0.50.0, <1.0"],
     "bioinformatics": ["biopython>=1.73, <2.0"],
     "dask": ["dask[complete]>=2.6.0, <3.0"],
     "geopandas": ["geopandas<=0.6.0, <1.0"],

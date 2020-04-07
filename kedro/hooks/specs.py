@@ -132,22 +132,23 @@ class PipelineSpecs:
 
         Args:
             run_params: The params needed for the given run.
-                Should be identical to the data logged by Journal.
-                # @fixme: this needs to be modelled explicitly as code, instead of comment
-                Schema: {
-                    "run_id": str,
-                    "project_path": str,
-                    "env": str,
-                    "kedro_version": str,
-                    "tags": Optional[List[str]],
-                    "from_nodes": Optional[List[str]],
-                    "to_nodes": Optional[List[str]],
-                    "node_names": Optional[List[str]],
-                    "from_inputs": Optional[List[str]],
-                    "load_versions": Optional[List[str]],
-                    "pipeline_name": str,
-                    "extra_params": Optional[Dict[str, Any]],
-                }
+                Should be identical to the data logged by Journal with the following schema::
+
+                   {
+                     "run_id": str
+                     "project_path": str,
+                     "env": str,
+                     "kedro_version": str,
+                     "tags": Optional[List[str]],
+                     "from_nodes": Optional[List[str]],
+                     "to_nodes": Optional[List[str]],
+                     "node_names": Optional[List[str]],
+                     "from_inputs": Optional[List[str]],
+                     "load_versions": Optional[List[str]],
+                     "pipeline_name": str,
+                     "extra_params": Optional[Dict[str, Any]]
+                   }
+
             pipeline: The ``Pipeline`` that will be run.
             catalog: The ``DataCatalog`` to be used during the run.
         """
@@ -161,22 +162,23 @@ class PipelineSpecs:
 
         Args:
             run_params: The params needed for the given run.
-                Should be identical to the data logged by Journal.
-                # @fixme: this needs to be modelled explicitly as code, instead of comment
-                Schema: {
-                    "run_id": str,
-                    "project_path": str,
-                    "env": str,
-                    "kedro_version": str,
-                    "tags": Optional[List[str]],
-                    "from_nodes": Optional[List[str]],
-                    "to_nodes": Optional[List[str]],
-                    "node_names": Optional[List[str]],
-                    "from_inputs": Optional[List[str]],
-                    "load_versions": Optional[List[str]],
-                    "pipeline_name": str,
-                    "extra_params": Optional[Dict[str, Any]],
-                }
+                Should be identical to the data logged by Journal with the following schema::
+
+                   {
+                     "run_id": str
+                     "project_path": str,
+                     "env": str,
+                     "kedro_version": str,
+                     "tags": Optional[List[str]],
+                     "from_nodes": Optional[List[str]],
+                     "to_nodes": Optional[List[str]],
+                     "node_names": Optional[List[str]],
+                     "from_inputs": Optional[List[str]],
+                     "load_versions": Optional[List[str]],
+                     "pipeline_name": str,
+                     "extra_params": Optional[Dict[str, Any]]
+                   }
+
             pipeline: The ``Pipeline`` that was run.
             catalog: The ``DataCatalog`` used during the run.
         """

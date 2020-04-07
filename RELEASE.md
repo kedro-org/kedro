@@ -10,16 +10,11 @@
 * Added the ability to specify extra arguments, e.g. `encoding` or `compression`, for `fsspec.spec.AbstractFileSystem.open()` calls when loading/saving a dataset. See Example 3 under [docs](https://kedro.readthedocs.io/en/stable/04_user_guide/04_data_catalog.html#using-the-data-catalog-with-the-yaml-api).
 * Added an option to enable asynchronous loading inputs and saving outputs in both `SequentialRunner(is_asyc=True)` and `ParallelRunner(is_asyc=True)` class.
 * Added the following datasets:
-  - `GeoJSONDataSet`dataset in `kedro.extras.datasets.geopandas` for working with geospatial data that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `GeoJSONDataSet` in `kedro.extras.datasets.geopandas` for working with geospatial data that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `APIDataSet` in `kedro.extras.datasets.api` for handling API requests using [`requests`](https://requests.readthedocs.io/en/master/).
 * Added instruction in the documentation on how to create a custom runner.
 * Added `Hooks`, which is a new mechanism for extending Kedro.
 * Added `joblib` backend support to `pickle.PickleDataSet`.
-
-## New Datasets
-
-| Type                 | Description                                                                                                                                      | Location                            |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------- |
-| `APIDataSet`         | Handles API requests using python [`requests`](https://requests.readthedocs.io/en/master/)                                                       | `kedro.extras.datasets.api`         |
 
 ## Bug fixes and other changes
 * Fixed a bug where a new version created mid-run by an external system caused inconsistencies in the load versions used in the current run.
@@ -145,7 +140,6 @@ You can also load data incrementally whenever it is dumped into a directory with
 
 | Type                 | Description                                                                                                                                      | Location                            |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------- |
-| `APIDataSet`         | Handles API requests using python [`requests`](https://requests.readthedocs.io/en/master/)                                                       | `kedro.extras.datasets.api`         |
 | `ParquetDataSet`     | Handles parquet datasets using Dask                                                                                                              | `kedro.extras.datasets.dask`        |
 | `PickleDataSet`      | Work with Pickle files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem         | `kedro.extras.datasets.pickle`      |
 | `CSVDataSet`         | Work with CSV files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem            | `kedro.extras.datasets.pandas`      |

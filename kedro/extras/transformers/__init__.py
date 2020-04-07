@@ -28,4 +28,5 @@
 
 """``AbstractTransformer`` implementations to modify ``DataSet`` I/O."""
 
+from .memory_profiler import ProfileMemoryTransformer  # NOQA
 from .time_profiler import ProfileTimeTransformer  # NOQA

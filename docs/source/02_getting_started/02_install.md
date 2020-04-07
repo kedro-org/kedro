@@ -69,7 +69,8 @@ These dependency sets are listed below.
 |                    |             | spark.SparkHiveDataSet        |                                         |
 |                    |             | spark.SparkJDBCDataSet        |                                         |
 +--------------------+-------------+-------------------------------+-----------------------------------------+
-| Decorators         |             | mem_profile                   | pip install "kedro[memory_profiler]"    |
+| Decorators         |             | mem_profile                   | pip install "kedro[profilers]"          |
+| Transformers       |             | ProfileMemoryTransformer      |                                         |
 +--------------------+-------------+-------------------------------+-----------------------------------------+
 | Documentation      |             |                               | pip install "kedro[docs]"               |
 +--------------------+-------------+-------------------------------+-----------------------------------------+

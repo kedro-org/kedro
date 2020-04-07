@@ -126,8 +126,7 @@ class SparkHiveDataSet(AbstractDataSet):
         >>>
         >>> data = [('Alex', 31), ('Bob', 12), ('Clarke', 65), ('Dave', 29)]
         >>>
-        >>> spark_df = SparkSession.builder.getOrCreate()\
-        >>>                        .createDataFrame(data, schema)
+        >>> spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
         >>>
         >>> data_set = SparkHiveDataSet(database="test_database", table="test_table",
         >>>                             write_mode="overwrite")

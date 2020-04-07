@@ -27,7 +27,7 @@
 # limitations under the License.
 
 """``AbstractDataSet`` implementation to access Spark dataframes using
-``pyspark`` on Apache Hive
+``pyspark`` on Apache Hive.
 """
 
 import pickle

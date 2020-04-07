@@ -181,7 +181,7 @@ scooters_query:
 # Example 13: Load data from an API endpoint, example US corn yield data from USDA
 
 us_corn_yield_data:
-  type: kedro.extras.api.APIDataSet
+  type: api.APIDataSet
   url: https://quickstats.nass.usda.gov
   params:
     key: SOME_TOKEN

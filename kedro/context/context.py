@@ -635,7 +635,7 @@ class KedroContext(abc.ABC):
         # Run the runner
         runner = runner or SequentialRunner()
         self._hook_manager.hook.before_pipeline_run(  # pylint: disable=no-member
-            run_params=record_data, pipeline=filtered_pipeline, catalog=catalog,
+            run_params=record_data, pipeline=filtered_pipeline, catalog=catalog
         )
         run_result = runner.run(filtered_pipeline, catalog, run_id)
         self._hook_manager.hook.after_pipeline_run(  # pylint: disable=no-member

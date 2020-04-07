@@ -156,7 +156,7 @@ class PipelineSpecs:
 
     @hook_spec
     def after_pipeline_run(
-        self, run_params: Dict[str, Any], pipeline: Pipeline, catalog: DataCatalog,
+        self, run_params: Dict[str, Any], pipeline: Pipeline, catalog: DataCatalog
     ) -> None:
         """Hook to be invoked after a pipeline runs.
 

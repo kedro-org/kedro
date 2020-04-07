@@ -234,7 +234,7 @@ class TestCommandCollection:
     def test_not_found_closet_match_singular(self, cli_runner, mocker):
         """Check that calling a nonexistent command with a close match has the proper wording"""
         patched_difflib = mocker.patch(
-            "kedro.cli.utils.difflib.get_close_matches", return_value=["suggestion_1"],
+            "kedro.cli.utils.difflib.get_close_matches", return_value=["suggestion_1"]
         )
 
         cmd_collection = CommandCollection(("Commands", [stub_cli, cli]))

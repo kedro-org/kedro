@@ -26,6 +26,7 @@
 * Implemented custom glob function for `SparkDataSet` when running on Databricks.
 * Added the option for contributors to run Kedro tests locally without Spark installation with `make test-no-spark`.
 * Bug in `SparkDataSet` not allowing for loading data from DBFS in a Windows machine using Databricks-connect.
+* Added option to lint the project without applying the formatting changes (`kedro lint --check-only`).
 
 ## Breaking changes to the API
 * Made `invalidate_cache` method on datasets private.

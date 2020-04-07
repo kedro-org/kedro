@@ -160,7 +160,9 @@ class CommandCollection(click.CommandCollection):
                     error_msg += "\n\nDid you mean this?"
                 else:
                     error_msg += "\n\nDid you mean one of these?\n"
-                error_msg += textwrap.indent("\n".join(matches), " " * 4)  # type: ignore
+                error_msg += textwrap.indent(
+                    "\n".join(matches), " " * 4  # type: ignore
+                )
 
             raise click.exceptions.UsageError(error_msg, error.ctx)
 

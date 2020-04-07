@@ -345,31 +345,45 @@ class TestTestCommand:
 
 
 class TestLintCommand:
-    def test_bare_lint(self, fake_kedro_cli, python_call_mock, mocker):
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["lint"])
+    @pytest.mark.parametrize("files", [(), ("kedro",)])
+    def test_lint(self, fake_kedro_cli, python_call_mock, files, mocker):
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["lint", *files])
         assert not result.exit_code
 
-        files = ("src/tests", "src/fake_package")
+        expected_files = files or ("src/tests", "src/fake_package")
         expected_calls = [
-            mocker.call("black", files),
-            mocker.call("flake8", ("--max-line-length=88",) + files),
+            mocker.call("black", expected_files),
+            mocker.call("flake8", ("--max-line-length=88",) + expected_files),
             mocker.call(
-                "isort", ("-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + files
+                "isort",
+                ("-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + expected_files,
             ),
         ]
 
         assert python_call_mock.call_args_list == expected_calls
 
-    def test_file_lint(self, fake_kedro_cli, python_call_mock, mocker):
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["lint", "kedro"])
+    @pytest.mark.parametrize(
+        "check_flag,files",
+        [
+            ("-c", ()),
+            ("--check-only", ()),
+            ("-c", ("kedro",)),
+            ("--check-only", ("kedro",)),
+        ],
+    )
+    def test_lint_check_only(
+        self, fake_kedro_cli, python_call_mock, check_flag, mocker, files
+    ):
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["lint", check_flag, *files])
         assert not result.exit_code
 
-        files = ("kedro",)
+        expected_files = files or ("src/tests", "src/fake_package")
         expected_calls = [
-            mocker.call("black", files),
-            mocker.call("flake8", ("--max-line-length=88",) + files),
+            mocker.call("black", ("--check",) + expected_files),
+            mocker.call("flake8", ("--max-line-length=88",) + expected_files),
             mocker.call(
-                "isort", ("-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + files
+                "isort",
+                ("-c", "-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + expected_files,
             ),
         ]
 

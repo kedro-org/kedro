@@ -112,6 +112,9 @@ to the context initializer. Items must be separated by comma, keys - by colon,
 example: param1:value1,param2:value2. Each parameter is split by the first comma,
 so parameter values are allowed to contain colons, parameter keys are not."""
 
+LINT_CHECK_ONLY_HELP = """Check the files for style guide violations, unsorted /
+unformatted imports, and unblackened Python code without modifying the files."""
+
 JUPYTER_IP_HELP = "IP address of the Jupyter server."
 JUPYTER_ALL_KERNELS_HELP = "Display all available Python kernels."
 JUPYTER_IDLE_TIMEOUT_HELP = """When a notebook is closed, Jupyter server will
@@ -285,8 +288,9 @@ def test(args):
 
 
 @cli.command()
+@click.option("-c", "--check-only", is_flag=True, help=LINT_CHECK_ONLY_HELP)
 @click.argument("files", type=click.Path(exists=True), nargs=-1)
-def lint(files):
+def lint(files, check_only):
     """Run flake8, isort and (on Python >=3.6) black."""
     if not files:
         files = ("src/tests", "src/{{ cookiecutter.python_package }}")
@@ -298,9 +302,13 @@ def lint(files):
     except ImportError as exc:
         raise KedroCliError(NO_DEPENDENCY_MESSAGE.format(exc.name))
 
-    python_call("black", files)
+    python_call("black", ("--check",) + files if check_only else files)
     python_call("flake8", ("--max-line-length=88",) + files)
-    python_call("isort", ("-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + files)
+
+    check_flag = ("-c",) if check_only else ()
+    python_call(
+        "isort", (*check_flag, "-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + files
+    )
 
 
 @cli.command()

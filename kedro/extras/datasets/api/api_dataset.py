@@ -30,7 +30,6 @@
 and returns them into either as string or json Dict.
 It uses the python requests library: https://requests.readthedocs.io/en/master/
 """
-import copy
 import socket
 from typing import Any, Dict, Tuple, Union
 
@@ -76,7 +75,6 @@ class APIDataSet(AbstractDataSet):
         auth: Union[Tuple[str], AuthBase] = None,
         timeout: int = 60,
         json: bool = False,
-        load_args: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``APIDataSet`` to fetch data from an API endpoint.
 
@@ -95,10 +93,6 @@ class APIDataSet(AbstractDataSet):
                 https://requests.readthedocs.io/en/master/user/quickstart/#timeouts
             json: If true it will return the API response as JSON in Python Dict format,
                 else it will return pure text.
-            load_args: Extra requests.request options.
-                Here you can find all available arguments:
-                https://requests.readthedocs.io/en/master/api/#requests.request
-                All defaults are preserved.
 
         """
         super().__init__()
@@ -112,12 +106,11 @@ class APIDataSet(AbstractDataSet):
             "timeout": timeout,
         }
         self._json = json
-        self._load_args = copy.deepcopy(load_args or {})
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(**self._request_args, json=self._json, load_args=self._load_args)
+        return dict(**self._request_args, json=self._json)
 
-    def _execute_request(self):
+    def _execute_request(self) -> requests.Response:
         try:
             response = requests.request(**self._request_args)
             response.raise_for_status()
@@ -128,7 +121,7 @@ class APIDataSet(AbstractDataSet):
 
         return response
 
-    def _load(self) -> Union[str, Any]:
+    def _load(self) -> Any:
         response = self._execute_request()
         return response.json() if self._json else response.text
 

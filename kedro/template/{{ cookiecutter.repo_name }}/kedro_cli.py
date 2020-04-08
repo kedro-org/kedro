@@ -190,7 +190,7 @@ def _config_file_callback(ctx, param, value):
     return value
 
 
-def _get_values_as_tuple(values: Iterable[str]) -> Tuple[str]:
+def _get_values_as_tuple(values: Iterable[str]) -> Tuple[str, ...]:
     return tuple(chain.from_iterable(value.split(",") for value in values))
 
 

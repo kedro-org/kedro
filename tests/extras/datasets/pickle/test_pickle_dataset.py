@@ -48,9 +48,12 @@ def filepath_pickle(tmp_path):
 
 
 @pytest.fixture
-def pickle_data_set(filepath_pickle, load_args, save_args):
+def pickle_data_set(filepath_pickle, load_args, save_args, fs_args):
     return PickleDataSet(
-        filepath=filepath_pickle, load_args=load_args, save_args=save_args
+        filepath=filepath_pickle,
+        load_args=load_args,
+        save_args=save_args,
+        fs_args=fs_args,
     )
 
 
@@ -72,6 +75,8 @@ class TestPickleDataSet:
         pickle_data_set.save(dummy_dataframe)
         reloaded = pickle_data_set.load()
         assert_frame_equal(dummy_dataframe, reloaded)
+        assert pickle_data_set._fs_open_args_load == {}
+        assert pickle_data_set._fs_open_args_save == {"mode": "wb"}
 
     def test_exists(self, pickle_data_set, dummy_dataframe):
         """Test `exists` method invocation for both existing and
@@ -93,6 +98,15 @@ class TestPickleDataSet:
         """Test overriding the default save arguments."""
         for key, value in save_args.items():
             assert pickle_data_set._save_args[key] == value
+
+    @pytest.mark.parametrize(
+        "fs_args",
+        [{"open_args_load": {"mode": "rb", "compression": "gzip"}}],
+        indirect=True,
+    )
+    def test_open_extra_args(self, pickle_data_set, fs_args):
+        assert pickle_data_set._fs_open_args_load == fs_args["open_args_load"]
+        assert pickle_data_set._fs_open_args_save == {"mode": "wb"}  # default unchanged
 
     def test_load_missing_file(self, pickle_data_set):
         """Check the error when trying to load missing file."""
@@ -131,21 +145,21 @@ class TestPickleDataSet:
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
     def test_unserializable_data(self, pickle_data_set, dummy_dataframe, mocker):
-        mocker.patch("pickle.dumps", side_effect=pickle.PickleError)
-        pattern = (
-            r".+ cannot be serialized\. PickleDataSet can only be used with "
-            r"serializable data"
-        )
+        mocker.patch("pickle.dump", side_effect=pickle.PickleError)
+        pattern = r".+ was not serialized due to:.*"
 
         with pytest.raises(DataSetError, match=pattern):
             pickle_data_set.save(dummy_dataframe)
 
-    def test_non_serialisation_error(self, pickle_data_set, dummy_dataframe, mocker):
-        pattern = "Some Error"
-        mocker.patch("pickle.dumps", side_effect=ValueError(pattern))
+    def test_invalid_backend(self):
+        pattern = r"'backend' should be one of \['pickle', 'joblib'\], got 'invalid'\."
+        with pytest.raises(ValueError, match=pattern):
+            PickleDataSet(filepath="test.pkl", backend="invalid")
 
-        with pytest.raises(DataSetError, match=pattern):
-            pickle_data_set.save(dummy_dataframe)
+    def test_no_joblib(self, mocker):
+        mocker.patch.object(PickleDataSet, "BACKENDS", {"joblib": None})
+        with pytest.raises(ImportError):
+            PickleDataSet(filepath="test.pkl", backend="joblib")
 
 
 class TestPickleDataSetVersioned:
@@ -169,6 +183,8 @@ class TestPickleDataSetVersioned:
         assert "PickleDataSet" in str(ds)
         assert "protocol" in str(ds_versioned)
         assert "protocol" in str(ds)
+        assert "backend" in str(ds_versioned)
+        assert "backend" in str(ds)
 
     def test_save_and_load(self, versioned_pickle_data_set, dummy_dataframe):
         """Test that saved and reloaded data matches the original one for

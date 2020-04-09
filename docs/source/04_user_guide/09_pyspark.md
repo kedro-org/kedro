@@ -1,6 +1,6 @@
 # Working with PySpark
 
-> *Note:* This documentation is based on `Kedro 0.15.8`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.15.9`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 In this tutorial we explain how to work with `PySpark` in a Kedro pipeline.
 
@@ -57,7 +57,7 @@ class ProjectContext(KedroContext):
         self._spark_session.sparkContext.setLogLevel("WARN")
 
     project_name = "kedro"
-    project_version = "0.15.8"
+    project_version = "0.15.9"
 
 
 # ...
@@ -80,7 +80,7 @@ Since `SparkSession` is a [singleton](https://python-3-patterns-idioms-test.read
 
 Having created a `SparkSession`, you can load your data using `PySpark`'s [DataFrameReader](https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrameReader).
 
-To do so, please use the provided [SparkDataSet](/kedro.contrib.io.pyspark.SparkDataSet):
+To do so, please use the provided [SparkDataSet](/kedro.extras.datasets.spark.SparkDataSet):
 
 ### Code API
 

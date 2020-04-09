@@ -26,11 +26,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pylint: disable=no-name-in-module
+# pylint: disable=import-error
 import pytest
 from pyspark.sql import DataFrame as SparkDataFrame
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, when
+from pyspark.sql.functions import col, when  # pylint: disable=no-name-in-module
 
 from kedro.io import MemoryDataSet
 

@@ -29,6 +29,7 @@
 from pathlib import PurePosixPath
 
 import pandas as pd
+import pyarrow.parquet as pq
 import pytest
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
@@ -49,9 +50,12 @@ def filepath_parquet(tmp_path):
 
 
 @pytest.fixture
-def parquet_data_set(filepath_parquet, load_args, save_args):
+def parquet_data_set(filepath_parquet, load_args, save_args, fs_args):
     return ParquetDataSet(
-        filepath=filepath_parquet, load_args=load_args, save_args=save_args
+        filepath=filepath_parquet,
+        load_args=load_args,
+        save_args=save_args,
+        fs_args=fs_args,
     )
 
 
@@ -77,11 +81,18 @@ class TestParquetDataSet:
 
         mock_fs.assert_called_once_with("file", **credentials)
 
-    def test_save_and_load(self, parquet_data_set, dummy_dataframe):
+    def test_save_and_load(self, tmp_path, dummy_dataframe):
         """Test saving and reloading the data set."""
-        parquet_data_set.save(dummy_dataframe)
-        reloaded = parquet_data_set.load()
+        filepath = str(tmp_path / FILENAME)
+        data_set = ParquetDataSet(filepath=filepath)
+        data_set.save(dummy_dataframe)
+        reloaded = data_set.load()
         assert_frame_equal(dummy_dataframe, reloaded)
+        assert data_set._fs_open_args_load == {}
+
+        files = [child.is_file() for child in tmp_path.iterdir()]
+        assert all(files)
+        assert len(files) == 1
 
     def test_exists(self, parquet_data_set, dummy_dataframe):
         """Test `exists` method invocation for both existing and
@@ -105,6 +116,14 @@ class TestParquetDataSet:
         """Test overriding the default save arguments."""
         for key, value in save_args.items():
             assert parquet_data_set._save_args[key] == value
+
+    @pytest.mark.parametrize(
+        "fs_args",
+        [{"open_args_load": {"mode": "r", "compression": "gzip"}}],
+        indirect=True,
+    )
+    def test_open_extra_args(self, parquet_data_set, fs_args):
+        assert parquet_data_set._fs_open_args_load == fs_args["open_args_load"]
 
     def test_load_missing_file(self, parquet_data_set):
         """Check the error when trying to load missing file."""
@@ -146,6 +165,55 @@ class TestParquetDataSet:
         if protocol != "https://":
             filepath = path + FILENAME
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
+
+    def test_read_partitioned_file(self, mocker, tmp_path, dummy_dataframe):
+        """Test read partitioned parquet file from local directory."""
+        pq_ds_mock = mocker.patch(
+            "pyarrow.parquet.ParquetDataset", wraps=pq.ParquetDataset
+        )
+        dummy_dataframe.to_parquet(str(tmp_path), partition_cols=["col2"])
+        data_set = ParquetDataSet(filepath=str(tmp_path))
+
+        reloaded = data_set.load()
+        # Sort by columns because reading partitioned file results
+        # in different columns order
+        reloaded = reloaded.sort_index(axis=1)
+        # dtype for partition column is 'category'
+        assert_frame_equal(
+            dummy_dataframe, reloaded, check_dtype=False, check_categorical=False
+        )
+        pq_ds_mock.assert_called_once()
+
+    def test_write_to_dir(self, dummy_dataframe, tmp_path):
+        data_set = ParquetDataSet(filepath=str(tmp_path))
+        pattern = "Saving ParquetDataSet to a directory is not supported"
+
+        with pytest.raises(DataSetError, match=pattern):
+            data_set.save(dummy_dataframe)
+
+    def test_read_from_non_local_dir(self, mocker):
+        fs_mock = mocker.patch("fsspec.filesystem").return_value
+        fs_mock.isdir.return_value = True
+        pq_ds_mock = mocker.patch("pyarrow.parquet.ParquetDataset")
+
+        data_set = ParquetDataSet(filepath="s3://bucket/dir")
+
+        data_set.load()
+        fs_mock.isdir.assert_called_once()
+        assert not fs_mock.open.called
+        pq_ds_mock.assert_called_once_with("bucket/dir", filesystem=fs_mock)
+        pq_ds_mock().read().to_pandas.assert_called_once_with()
+
+    def test_read_from_file(self, mocker):
+        fs_mock = mocker.patch("fsspec.filesystem").return_value
+        fs_mock.isdir.return_value = False
+        mocker.patch("pandas.read_parquet")
+
+        data_set = ParquetDataSet(filepath="/tmp/test.parquet")
+
+        data_set.load()
+        fs_mock.isdir.assert_called_once()
+        fs_mock.open.assert_called_once()
 
 
 class TestParquetDataSetVersioned:

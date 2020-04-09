@@ -74,7 +74,7 @@ class _SharedMemoryDataSet:
             # Checks if the error is due to serialisation or not
             try:
                 pickle.dumps(data)
-            except Exception:
+            except Exception:  # SKIP_IF_NO_SPARK
                 raise DataSetError(
                     "{} cannot be serialized. ParallelRunner implicit memory datasets "
                     "can only be used with serializable data".format(
@@ -101,7 +101,7 @@ class ParallelRunner(AbstractRunner):
     be used to run the ``Pipeline`` in parallel groups formed by toposort.
     """
 
-    def __init__(self, max_workers: int = None):
+    def __init__(self, max_workers: int = None, is_async: bool = False):
         """
         Instantiates the runner by creating a Manager.
 
@@ -109,10 +109,13 @@ class ParallelRunner(AbstractRunner):
             max_workers: Number of worker processes to spawn. If not set,
                 calculated automatically based on the pipeline configuration
                 and CPU core count.
+            is_async: If True, the node inputs and outputs are loaded and saved
+                    asynchronously with threads. Defaults to False.
 
         Raises:
             ValueError: bad parameters passed
         """
+        super().__init__(is_async=is_async)
         self._manager = ParallelRunnerManager()
         self._manager.start()
 
@@ -218,13 +221,14 @@ class ParallelRunner(AbstractRunner):
         return min(required_processes, self._max_workers)
 
     def _run(  # pylint: disable=too-many-locals,useless-suppression
-        self, pipeline: Pipeline, catalog: DataCatalog
+        self, pipeline: Pipeline, catalog: DataCatalog, run_id: str = None
     ) -> None:
         """The abstract interface for running pipelines.
 
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
+            run_id: The id of the run.
 
         Raises:
             AttributeError: when the provided pipeline is not suitable for
@@ -249,7 +253,9 @@ class ParallelRunner(AbstractRunner):
                 ready = {n for n in todo_nodes if node_dependencies[n] <= done_nodes}
                 todo_nodes -= ready
                 for node in ready:
-                    futures.add(pool.submit(run_node, node, catalog))
+                    futures.add(
+                        pool.submit(run_node, node, catalog, self._is_async, run_id)
+                    )
                 if not futures:
                     assert not todo_nodes, (todo_nodes, done_nodes, ready, done)
                     break

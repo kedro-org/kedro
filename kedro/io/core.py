@@ -33,7 +33,6 @@ saving functionality provided by ``kedro.io``.
 import abc
 import copy
 import logging
-import os
 import warnings
 from collections import namedtuple
 from datetime import datetime, timezone
@@ -41,7 +40,6 @@ from functools import lru_cache
 from glob import iglob
 from pathlib import Path, PurePath
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
-from urllib.parse import urlparse
 
 from fsspec.utils import infer_storage_options
 
@@ -431,28 +429,26 @@ def parse_dataset_definition(
 def _load_obj(class_path: str) -> Optional[object]:
     try:
         class_obj = load_obj(class_path)
-    except ImportError as error:
+    except ModuleNotFoundError as error:
         if error.name in class_path:
             return None
         # class_obj was successfully loaded, but some dependencies are missing.
-        raise DataSetError("{} for {}".format(error, class_path))
+        raise DataSetError(
+            "{e} for {dataset}. Please see the documentation on how to install relevant "
+            "dependencies for {dataset}"
+            "https://kedro.readthedocs.io/en/stable/02_getting_started/02_install.html#optional-dependencies".format(  # pylint: disable=line-too-long
+                e=error, dataset=class_path
+            )
+        )
     except (AttributeError, ValueError):
         return None
 
     return class_obj
 
 
-def _local_exists(filepath: str) -> bool:
+def _local_exists(filepath: str) -> bool:  # SKIP_IF_NO_SPARK
     filepath = Path(filepath)
     return filepath.exists() or any(par.is_file() for par in filepath.parents)
-
-
-def is_remote_path(filepath: str) -> bool:
-    """Check if the given path looks like a remote URL (has scheme)."""
-    # Get rid of Windows-specific "C:\" start,
-    # which is treated as a URL scheme.
-    _, filepath = os.path.splitdrive(filepath)
-    return bool(urlparse(filepath).scheme)
 
 
 class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
@@ -604,7 +600,7 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
             return self._exists()
         except VersionNotFoundError:
             return False
-        except Exception as exc:
+        except Exception as exc:  # SKIP_IF_NO_SPARK
             message = "Failed during exists check for data set {}.\n{}".format(
                 str(self), str(exc)
             )
@@ -668,12 +664,3 @@ def validate_on_forbidden_chars(**kwargs):
             raise DataSetError(
                 "Neither white-space nor semicolon are allowed in `{}`.".format(key)
             )
-
-
-def deprecation_warning(class_name):
-    """Log deprecation warning."""
-    warnings.warn(
-        "{} will be deprecated in future releases. Please refer "
-        "to replacement datasets in kedro.extras.datasets.".format(class_name),
-        DeprecationWarning,
-    )

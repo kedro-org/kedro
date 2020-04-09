@@ -25,6 +25,8 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# pylint: disable=import-error
 import gc
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -37,7 +39,7 @@ from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 
 from kedro.extras.datasets.spark import SparkHiveDataSet
 from kedro.io import DataSetError
-from tests.conftest import UseTheSparkSessionFixtureOrMock
+from tests.extras.datasets.spark.conftest import UseTheSparkSessionFixtureOrMock
 
 TESTSPARKDIR = "test_spark_dir"
 

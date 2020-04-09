@@ -1,20 +1,86 @@
 # Upcoming Release
 
 ## Major features and improvements
+* Added new CLI command `kedro catalog list`.
+* Added support of Pandas 1.x.
+* Enabled Python 3.8 compatibility. _Please note that a Spark workflow may be unreliable for this Python version as `pyspark` is not fully-compatible with 3.8 yet._
+* Fixed `load_context` changing user's current working directory.
+* Added the ability to specify nested parameter values inside your node inputs, e.g. `node(func, "params:a.b", None)`
+* Improved error handling when making a typo on the command line. We now suggest some of the possible commands you meant to type, in `git`-style.
+* Added the ability to specify extra arguments, e.g. `encoding` or `compression`, for `fsspec.spec.AbstractFileSystem.open()` calls when loading/saving a dataset. See Example 3 under [docs](https://kedro.readthedocs.io/en/stable/04_user_guide/04_data_catalog.html#using-the-data-catalog-with-the-yaml-api).
+* Added an option to enable asynchronous loading inputs and saving outputs in both `SequentialRunner(is_asyc=True)` and `ParallelRunner(is_asyc=True)` class.
+* Added the following datasets:
+  - `GeoJSONDataSet` in `kedro.extras.datasets.geopandas` for working with geospatial data that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
+  - `APIDataSet` in `kedro.extras.datasets.api` for handling API requests using [`requests`](https://requests.readthedocs.io/en/master/).
+* Added Memory profiler transformer.
+* Added instruction in the documentation on how to create a custom runner.
+* Added `Hooks`, which is a new mechanism for extending Kedro.
+* Added `joblib` backend support to `pickle.PickleDataSet`.
 
 ## Bug fixes and other changes
 * Fixed a bug where a new version created mid-run by an external system caused inconsistencies in the load versions used in the current run.
 * Documentation improvements.
-* New TensorFlow 2.X model save and load support with TensorFlowModelDataset and TensorFlowModelVersionedDataset.
+* Updated contribution process in `CONTRIBUTING.md` - added Developer Workflow.
+* Fixed a bug where `PartitionedDataSet` and `IncrementalDataSet` were not working with `s3a` or `s3n` protocol.
+* Documented installation of development version of Kedro in the [FAQ section](https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#how-can-i-use-development-version-of-kedro).
+* Implemented custom glob function for `SparkDataSet` when running on Databricks.
+* Added the option for contributors to run Kedro tests locally without Spark installation with `make test-no-spark`.
+* Added ability to read partitioned parquet file from a directory in `pandas.ParquetDataSet`.
+* Bug in `SparkDataSet` not allowing for loading data from DBFS in a Windows machine using Databricks-connect.
+* Added option to lint the project without applying the formatting changes (`kedro lint --check-only`).
 
 ## Breaking changes to the API
 * Made `invalidate_cache` method on datasets private.
 * `get_last_load_version` and `get_last_save_version` methods are no longer available on `AbstractDataSet`.
 * `get_last_load_version` and `get_last_save_version` have been renamed to `resolve_load_version` and `resolve_save_version` on ``AbstractVersionedDataSet``, the results of which are cached.
 * The `release()` method on datasets extending ``AbstractVersionedDataSet`` clears the cached load and save version. All custom datasets must call `super()._release()` inside `_release()`.
+* Removed `KEDRO_ENV_VAR` from `kedro.context` to speed up the CLI run time.
+* Deleted obsoleted datasets from `kedro.io`.
+* Deleted `kedro.contrib` and `extras` folders.
+* `Pipeline.name` has been removed in favour of `Pipeline.tag()`.
+* Python 3.5 is no longer supported by the current and all future versions of Kedro.
+* ``TextDataSet`` no longer has `load_args` and `save_args`. These can instead be specified under `open_args_load` or `open_args_save` in `fs_args`.
+* Dropped `Pipeline.transform()` in favour of `kedro.pipeline.modular_pipeline.pipeline()` helper function.
+* Made constant `PARAMETER_KEYWORDS` private, and moved it from `kedro.pipeline.pipeline` to `kedro.pipeline.modular_pipeline`.
+
+### Migration guide from Kedro 0.15.* to Upcoming Release
+#### Migration for datasets
+
+Since all the datasets (from `kedro.io` and `kedro.contrib.io`) were moved to `kedro/extras/datasets` you must update the type of all datasets in `<project>/conf/base/catalog.yml` file.
+Here how it should be changed: `type: <SomeDataSet>` -> `type: <subfolder of kedro/extras/datasets>.<SomeDataSet>` (e.g. `type: CSVDataSet` -> `type: pandas.CSVDataSet`).
+
+In addition, all the specific datasets like `CSVLocalDataSet`, `CSVS3DataSet` etc. were deprecated. Instead, you must use generalized datasets like `CSVDataSet`.
+E.g. `type: CSVS3DataSet` -> `type: pandas.CSVDataSet`.
+
+> Note: No changes required if you are using your custom dataset.
+
+#### Migration for decorators, color logger, transformers etc.
+Since some modules were moved to other locations you need to update import paths appropriately.
+The list of moved files you can find in `0.15.6` release notes under `Files with a new location` section.
+
+#### Migration for kedro env environment variable
+> Note: If you haven't made significant changes to your `kedro_cli.py`, it may be easier to simply copy the updated `kedro_cli.py` `.ipython/profile_default/startup/00-kedro-init.py` and from GitHub or a newly generated project into your old project.
+
+* We've removed `KEDRO_ENV_VAR` from `kedro.context`. To get your existing project template working, you'll need to remove all instances of `KEDRO_ENV_VAR` from your project template:
+  - From the imports in `kedro_cli.py` and `.ipython/profile_default/startup/00-kedro-init.py`: `from kedro.context import KEDRO_ENV_VAR, load_context` -> `from kedro.context import load_context`
+  - Remove the `envvar=KEDRO_ENV_VAR` line from the click options in `run`, `jupyter_notebook` and `jupyter_lab` in `kedro_cli.py`
+  - Replace `KEDRO_ENV_VAR` with `"KEDRO_ENV"` in `_build_jupyter_env`
+  - Replace `context = load_context(path, env=os.getenv(KEDRO_ENV_VAR))` with `context = load_context(path)` in `.ipython/profile_default/startup/00-kedro-init.py`
 
 ## Thanks for supporting contributions
-[@foolsgold](https://github.com/foolsgold), [Priyanka Shanbhag](https://github.com/priyanka1414), [@w0rdsm1th](https://github.com/w0rdsm1th)
+[@foolsgold](https://github.com/foolsgold), [Mani Sarkar](https://github.com/neomatrix369), [Priyanka Shanbhag](https://github.com/priyanka1414), [Luis Blanche](https://github.com/LuisBlanche), [Deepyaman Datta](https://github.com/deepyaman), [Antony Milne](https://github.com/AntonyMilneQB), [Panos Psimatikas](https://github.com/ppsimatikas)
+
+# 0.15.9
+
+## Major features and improvements
+
+## Bug fixes and other changes
+
+* Pinned `fsspec>=0.5.1, <0.7.0` and `s3fs>=0.3.0, <0.4.1` to fix incompatibility issues with their latest release.
+
+## Breaking changes to the API
+
+## Thanks for supporting contributions
 
 # 0.15.8
 
@@ -39,12 +105,10 @@
 ## Bug fixes and other changes
 
 * Fixed the link to the Kedro banner image in the documentation.
-* Updated contribution process in `CONTRIBUTING.md` - added Developer Workflow
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Mani Sarkar](https://github.com/neomatrix369)
 
 # 0.15.6
 

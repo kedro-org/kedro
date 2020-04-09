@@ -12,11 +12,11 @@ kedro
   :template: autosummary/module.rst
 
   kedro.config
+  kedro.hooks
   kedro.io
   kedro.pipeline
   kedro.runner
   kedro.context
-  kedro.contrib
   kedro.cli
   kedro.versioning
   kedro.extras.datasets

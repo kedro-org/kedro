@@ -25,12 +25,11 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from unittest import mock
 
 import pytest
 
-from kedro.extras.datasets.spark import SparkJDBCDataSet
+from kedro.extras.datasets.spark import SparkJDBCDataSet  # pylint: disable=import-error
 from kedro.io import DataSetError
 
 

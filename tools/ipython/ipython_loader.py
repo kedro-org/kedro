@@ -108,7 +108,7 @@ def run_startup_scripts(startup_dir: pathlib.Path):
                 compiled = compile(
                     script.read_text(encoding="utf-8"), str(script), "exec"
                 )
-                exec(compiled, globals())  # pylint: disable=exec-used
+                exec(compiled, globals())  # pylint: disable=exec-used # nosec
             except Exception as err:  # pylint: disable=broad-except
                 logging.error(
                     "Startup script `%s` failed:\n%s: %s",

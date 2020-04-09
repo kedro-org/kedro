@@ -209,6 +209,45 @@ class TestCommandCollection:
         """Test calling nonexistent command."""
         assert invoke_result.exit_code == 2
         assert "No such command" in invoke_result.output
+        assert "Did you mean one of these" not in invoke_result.output
+
+    def test_not_found_closest_match(self, cli_runner, mocker):
+        """Check that calling a nonexistent command with a close match returns the close match"""
+        patched_difflib = mocker.patch(
+            "kedro.cli.utils.difflib.get_close_matches",
+            return_value=["suggestion_1", "suggestion_2"],
+        )
+
+        cmd_collection = CommandCollection(("Commands", [stub_cli, cli]))
+        invoke_result = cli_runner.invoke(cmd_collection, ["not_found"])
+
+        patched_difflib.assert_called_once_with(
+            "not_found", mocker.ANY, mocker.ANY, mocker.ANY
+        )
+
+        assert invoke_result.exit_code == 2
+        assert "No such command" in invoke_result.output
+        assert "Did you mean one of these?" in invoke_result.output
+        assert "suggestion_1" in invoke_result.output
+        assert "suggestion_2" in invoke_result.output
+
+    def test_not_found_closet_match_singular(self, cli_runner, mocker):
+        """Check that calling a nonexistent command with a close match has the proper wording"""
+        patched_difflib = mocker.patch(
+            "kedro.cli.utils.difflib.get_close_matches", return_value=["suggestion_1"]
+        )
+
+        cmd_collection = CommandCollection(("Commands", [stub_cli, cli]))
+        invoke_result = cli_runner.invoke(cmd_collection, ["not_found"])
+
+        patched_difflib.assert_called_once_with(
+            "not_found", mocker.ANY, mocker.ANY, mocker.ANY
+        )
+
+        assert invoke_result.exit_code == 2
+        assert "No such command" in invoke_result.output
+        assert "Did you mean this?" in invoke_result.output
+        assert "suggestion_1" in invoke_result.output
 
     @mark.parametrize("invoke_result", [[]], indirect=True)
     def test_help(self, invoke_result):

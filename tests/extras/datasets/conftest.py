@@ -56,3 +56,8 @@ def load_args(request):
 @fixture(params=[None])
 def save_args(request):
     return request.param
+
+
+@fixture(params=[None])
+def fs_args(request):
+    return request.param

@@ -27,11 +27,13 @@
 # limitations under the License.
 
 """Utilities for use with click."""
+import difflib
 import json
 import re
 import shlex
 import subprocess
 import sys
+import textwrap
 from itertools import chain
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Sequence, Tuple, Union
@@ -41,6 +43,8 @@ import click
 from click import ClickException, style
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
+MAX_SUGGESTIONS = 3
+CUTOFF = 0.5
 
 NODE_TAG = "node"
 
@@ -138,6 +142,29 @@ class CommandCollection(click.CommandCollection):
         )
         self.params = sources[0].params
         self.callback = sources[0].callback
+
+    def resolve_command(self, ctx: click.core.Context, args: List):
+        try:
+            return super().resolve_command(ctx, args)
+        except click.exceptions.UsageError as error:
+            error_msg = str(error)
+            original_command_name = click.utils.make_str(args[0])
+            existing_commands = self.list_commands(ctx)
+
+            matches = difflib.get_close_matches(
+                original_command_name, existing_commands, MAX_SUGGESTIONS, CUTOFF
+            )
+
+            if matches:
+                if len(matches) == 1:
+                    error_msg += "\n\nDid you mean this?"
+                else:
+                    error_msg += "\n\nDid you mean one of these?\n"
+                error_msg += textwrap.indent(
+                    "\n".join(matches), " " * 4  # type: ignore
+                )
+
+            raise click.exceptions.UsageError(error_msg, error.ctx)
 
     def format_commands(
         self, ctx: click.core.Context, formatter: click.formatting.HelpFormatter

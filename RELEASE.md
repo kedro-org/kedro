@@ -25,6 +25,7 @@
 * Documented installation of development version of Kedro in the [FAQ section](https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#how-can-i-use-development-version-of-kedro).
 * Implemented custom glob function for `SparkDataSet` when running on Databricks.
 * Added the option for contributors to run Kedro tests locally without Spark installation with `make test-no-spark`.
+* Added ability to read partitioned parquet file from a directory in `pandas.ParquetDataSet`.
 * Bug in `SparkDataSet` not allowing for loading data from DBFS in a Windows machine using Databricks-connect.
 * Added option to lint the project without applying the formatting changes (`kedro lint --check-only`).
 

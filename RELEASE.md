@@ -8,7 +8,7 @@
 * Added the ability to specify nested parameter values inside your node inputs, e.g. `node(func, "params:a.b", None)`
 * Improved error handling when making a typo on the command line. We now suggest some of the possible commands you meant to type, in `git`-style.
 * Added the ability to specify extra arguments, e.g. `encoding` or `compression`, for `fsspec.spec.AbstractFileSystem.open()` calls when loading/saving a dataset. See Example 3 under [docs](https://kedro.readthedocs.io/en/stable/04_user_guide/04_data_catalog.html#using-the-data-catalog-with-the-yaml-api).
-* Added an option to enable asynchronous loading inputs and saving outputs in both `SequentialRunner(is_asyc=True)` and `ParallelRunner(is_asyc=True)` class.
+* Added an option to enable asynchronous loading inputs and saving outputs in both `SequentialRunner(is_async=True)` and `ParallelRunner(is_async=True)` class.
 * Added the following datasets:
   - `GeoJSONDataSet` in `kedro.extras.datasets.geopandas` for working with geospatial data that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
   - `APIDataSet` in `kedro.extras.datasets.api` for handling API requests using [`requests`](https://requests.readthedocs.io/en/master/).

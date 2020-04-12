@@ -28,6 +28,7 @@
 import logging
 import re
 from copy import deepcopy
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -45,7 +46,7 @@ from kedro.io import (
     LambdaDataSet,
     MemoryDataSet,
 )
-from kedro.io.core import generate_timestamp
+from kedro.io.core import VERSION_FORMAT, generate_timestamp
 from kedro.versioning import Journal
 
 
@@ -489,7 +490,15 @@ class TestDataCatalogVersioned:
     def test_from_sane_config_versioned(self, sane_config, dummy_dataframe):
         """Test load and save of versioned data sets from config"""
         sane_config["catalog"]["boats"]["versioned"] = True
-        version = generate_timestamp()
+
+        # Decompose `generate_timestamp` to keep `current_ts` reference.
+        current_ts = datetime.now(tz=timezone.utc)
+        fmt = (
+            "{d.year:04d}-{d.month:02d}-{d.day:02d}T{d.hour:02d}"
+            ".{d.minute:02d}.{d.second:02d}.{ms:03d}Z"
+        )
+        version = fmt.format(d=current_ts, ms=current_ts.microsecond // 1000)
+
         journal = Journal({"run_id": "fake-id", "project_path": "fake-path"})
         catalog = DataCatalog.from_config(
             **sane_config,
@@ -510,6 +519,14 @@ class TestDataCatalogVersioned:
 
         reloaded_df_version = catalog.load("boats", version=version)
         assert_frame_equal(reloaded_df_version, dummy_dataframe)
+
+        # Verify that `VERSION_FORMAT` can help regenerate `current_ts`.
+        assert datetime.strptime(
+            catalog.datasets.boats.resolve_load_version(),  # pylint: disable=no-member
+            VERSION_FORMAT,
+        ) == current_ts.replace(
+            microsecond=current_ts.microsecond // 1000 * 1000, tzinfo=None
+        )
 
     @pytest.mark.parametrize("versioned", [True, False])
     def test_from_sane_config_versioned_warn(self, caplog, sane_config, versioned):

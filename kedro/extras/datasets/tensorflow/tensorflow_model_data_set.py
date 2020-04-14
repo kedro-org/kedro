@@ -35,111 +35,28 @@ from typing import Any, Dict
 import fsspec
 import tensorflow as tf
 
-from kedro.io import AbstractDataSet, AbstractVersionedDataSet, Version
-from kedro.io.core import get_protocol_and_path
+from kedro.io.core import (
+    AbstractVersionedDataSet,
+    DataSetError,
+    Version,
+    get_filepath_str,
+    get_protocol_and_path,
+)
 
 
-class TensorFlowModelDataset(AbstractDataSet):
+class TensorFlowModelDataset(AbstractVersionedDataSet):
     """``TensorflowModelDataset`` loads and saves TensorFlow models.
 
-    The underlying functionality is supported by TensorFlow 2.X load_model and save_model methods, so it supports all
-    allowed pandas options for loading and saving Excel files.
+    The underlying functionality is supported by, and passes input arguments through to,
+    TensorFlow 2.X load_model and save_model methods.
 
         Example:
     ::
 
-        >>> from kedro.io import TensorFlowModelDataset
+        >>> from kedro.extras.datasets.tensorflow import TensorFlowModelDataset
         >>> import tensorflow as tf
         >>> import numpy as np
         >>> data_set = TensorFlowModelDataset("saved_model_path")
-        >>> model = tf.keras.Model()
-        >>> predictions = model.predict([...])
-        >>> data_set.save(model)
-        >>> loaded_model = data_set.load()
-        >>> new_predictions = loaded_model.predict([...])
-        >>> np.testing.assert_allclose(predictions, new_predictions, rtol=1e-6, atol=1e-6)
-
-    """
-
-    DEFAULT_LOAD_ARGS = dict(custom_objects=None, compile=True)  # type: Dict[str, Any]
-
-    DEFAULT_SAVE_ARGS = dict(
-        overwrite=True,
-        include_optimizer=True,
-        save_format="tf",
-        signatures=None,
-        options=None,
-    )  # type: Dict[str, Any]
-
-    def __init__(
-        self,
-        filepath: str,
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
-    ) -> None:
-        """
-        Args:
-            filepath: Filepath to a TensorFlow model directory prefixed with a protocol like `s3://`.
-                If prefix is not provided `file` protocol (local filesystem) will be used.
-                The prefix should be any protocol supported by ``fsspec``.
-                Note: `http(s)` doesn't support versioning.
-            load_args: TensorFlow options for loading models.
-                custom_objects: Optional dictionary mapping names (strings) to custom classes or functions to be
-                considered during deserialization.
-                compile: Boolean, whether to compile the model after loading.
-                Here you can find all available arguments:
-                https://www.tensorflow.org/api_docs/python/tf/keras/models/load_model
-                All defaults are preserved.
-            save_args: TensorFlow options for saving models.
-                Here you can find all available arguments:
-                https://www.tensorflow.org/api_docs/python/tf/keras/models/save_model
-                All defaults are preserved, except for "index", which is set to False.
-                In TF this defaults to 'tf' in TF 2.X, and 'h5' in TF 1.X.
-        """
-        super().__init__()
-
-        self._filepath = filepath
-        self._data = None
-
-        # Handle default load and save arguments
-        self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-        self._save_args = copy.deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args is not None:
-            self._save_args.update(save_args)
-
-    def _load(self) -> None:
-        return tf.keras.models.load_model(self._filepath, **self._load_args)
-
-    def _save(self, data: tf.keras.Model) -> None:
-        tf.keras.models.save_model(data, self._filepath, **self._save_args)
-
-    def _exists(self) -> bool:
-        return Path(self._filepath).is_dir()
-
-    def _describe(self) -> Dict[str, Any]:
-        # todo(aleks) - could also expose model.summary()
-        return dict(
-            filepath=self._filepath,
-            load_args=self._load_args,
-            save_args=self._save_args,
-        )
-
-
-class TensorFlowModelVersionedDataset(AbstractVersionedDataSet):
-    """``TensorflowModelVersionedDataset`` loads and saves TensorFlow models.
-
-    The underlying functionality is supported by TensorFlow 2.X load_model and save_model methods, so it supports all
-    allowed pandas options for loading and saving Excel files.
-
-        Example:
-    ::
-
-        >>> from kedro.io import TensorFlowModelDataset
-        >>> import tensorflow as tf
-        >>> import numpy as np
-        >>> data_set = TensorFlowModelVersionedDataset("saved_model_path")
         >>> model = tf.keras.Model()
         >>> predictions = model.predict([...])
         >>> data_set.save(model)
@@ -160,13 +77,13 @@ class TensorFlowModelVersionedDataset(AbstractVersionedDataSet):
     )  # type: Dict[str, Any]
 
     def __init__(
-        self,
-        filepath: str,
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
-        version: Version = None,
-        credentials: Dict[str, Any] = None,
-        fs_args: Dict[str, Any] = None,
+            self,
+            filepath: str,
+            load_args: Dict[str, Any] = None,
+            save_args: Dict[str, Any] = None,
+            version: Version = None,
+            credentials: Dict[str, Any] = None,
+            fs_args: Dict[str, Any] = None,
     ) -> None:
         """
         Args:
@@ -202,7 +119,11 @@ class TensorFlowModelVersionedDataset(AbstractVersionedDataSet):
         self._protocol = protocol
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
         super().__init__(
-            PurePath(filepath), version, exists_function=lambda x: Path(x).is_dir(),
+            PurePath(filepath),
+            version,
+            # exists_function=lambda x: Path(x).is_dir(),
+            # exists_function=self._fs.isdir,
+            exists_function=self._fs.exists,
         )
 
         self._data = None
@@ -223,9 +144,17 @@ class TensorFlowModelVersionedDataset(AbstractVersionedDataSet):
         save_path = Path(self._get_save_path())
         tf.keras.models.save_model(data, str(save_path), **self._save_args)
 
+    # original commit
+    # def _exists(self) -> bool:
+    #     path = Path(self._get_load_path())
+    #     return path.is_dir()
+
     def _exists(self) -> bool:
-        path = Path(self._get_load_path())
-        return path.is_dir()
+        try:
+            load_path = get_filepath_str(self._get_load_path(), self._protocol)
+        except DataSetError:
+            return False
+        return self._fs.exists(load_path)
 
     def _describe(self) -> Dict[str, Any]:
         # todo(aleks) - could also expose model.summary()

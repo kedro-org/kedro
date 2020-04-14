@@ -200,7 +200,7 @@ def run_node(
         node: The ``Node`` to run.
         catalog: A ``DataCatalog`` containing the node's inputs and outputs.
         is_async: If True, the node inputs and outputs are loaded and saved
-                    asynchronously with threads. Defaults to False.
+            asynchronously with threads. Defaults to False.
         run_id: The id of the pipeline run
 
     Returns:

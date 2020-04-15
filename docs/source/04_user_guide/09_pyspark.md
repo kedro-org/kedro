@@ -31,14 +31,11 @@ class ProjectContext(KedroContext):
         extra_params: Dict[str, Any] = None,
     ):
         super().__init__(project_path, env, extra_params)
-        self._spark_session = None
         self.init_spark_session()
 
     def init_spark_session(self, yarn=True) -> None:
         """Initialises a SparkSession using the config defined in project's conf folder."""
 
-        if self._spark_session:
-            return self._spark_session
         parameters = self.config_loader.get("spark*", "spark*/**")
         spark_conf = SparkConf().setAll(parameters.items())
 
@@ -50,11 +47,11 @@ class ProjectContext(KedroContext):
             .config(conf=spark_conf)
         )
         if yarn:
-            self._spark_session = spark_session_conf.master("yarn").getOrCreate()
+            _spark_session = spark_session_conf.master("yarn").getOrCreate()
         else:
-            self._spark_session = spark_session_conf.getOrCreate()
+            _spark_session = spark_session_conf.getOrCreate()
 
-        self._spark_session.sparkContext.setLogLevel("WARN")
+        _spark_session.sparkContext.setLogLevel("WARN")
 
     project_name = "kedro"
     project_version = "0.15.9"
@@ -74,7 +71,7 @@ spark.jars.excludes: joda-time:joda-time
 ```
 
 
-Since `SparkSession` is a [singleton](https://python-3-patterns-idioms-test.readthedocs.io/en/latest/Singleton.html), the next time you call `SparkSession.builder.getOrCreate()` you will be provided with the same `SparkSession` you initialised at your app's entry point.
+Since `SparkSession` is a [singleton](https://python-3-patterns-idioms-test.readthedocs.io/en/latest/Singleton.html), the next time you call `SparkSession.builder.getOrCreate()` you will be provided with the same `SparkSession` you initialised at your app's entry point. We don't recommend storing the session on the context object, as it cannot be deep-copied and therefore prevents the context from being initialised for some plugins.
 
 ## Creating a `SparkDataSet`
 

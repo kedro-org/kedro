@@ -26,6 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import sys
 from pathlib import Path
 
@@ -51,9 +52,11 @@ class TestLoadContext:
         assert str(fake_repo_path.resolve() / "src") in sys.path
 
     def test_valid_context_with_env(self, mocker, monkeypatch, fake_repo_path):
-        """Test getting project context when Kedro config environment is
-        specified in the environment variable.
-        """
+        """Test getting project context when Kedro config environment is specified
+        in the environment variable."""
+        # Disable logging.config.dictConfig in KedroContext._setup_logging as
+        # it changes logging.config and affects other unit tests
+        mocker.patch("logging.config.dictConfig")
         mocker.patch("kedro.config.config.ConfigLoader.get")
         monkeypatch.setenv("KEDRO_ENV", "my_fake_env")
         result = load_context(str(fake_repo_path))

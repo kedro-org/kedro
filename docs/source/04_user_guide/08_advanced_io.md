@@ -209,7 +209,7 @@ reloaded = io.load("test_data_set")
 
 Currently the following datasets support versioning:
 
-- `kedro.extras.datasets.matplotlib.Matplotlib`
+- `kedro.extras.datasets.matplotlib.MatplotlibWriter`
 - `kedro.extras.datasets.networkx.NetworkXDataSet`
 - `kedro.extras.datasets.pandas.CSVBlobDataSet`
 - `kedro.extras.datasets.pandas.CSVDataSet`

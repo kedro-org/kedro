@@ -62,6 +62,7 @@ class TestLoadContext:
         result = load_context(str(fake_repo_path))
         assert result.env == "my_fake_env"
 
+    @pytest.mark.skip
     def test_loading_valid_context_twice(self, mocker, fake_repo_path):
         """Test getting project context twice."""
         mocker.patch("logging.config.dictConfig")

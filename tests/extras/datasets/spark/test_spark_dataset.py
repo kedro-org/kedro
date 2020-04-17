@@ -504,6 +504,7 @@ class TestSparkDataSetVersionedDBFS:
 
 
 class TestSparkDataSetVersionedS3:
+    @pytest.mark.skip
     def test_no_version(self, versioned_dataset_s3):
         pattern = r"Did not find any versions for SparkDataSet\(.+\)"
         with pytest.raises(DataSetError, match=pattern):

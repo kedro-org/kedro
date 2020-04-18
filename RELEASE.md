@@ -12,6 +12,7 @@
 * Added the following datasets:
   - `GeoJSONDataSet` in `kedro.extras.datasets.geopandas` for working with geospatial data that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
   - `APIDataSet` in `kedro.extras.datasets.api` for handling API requests using [`requests`](https://requests.readthedocs.io/en/master/).
+  - `HoloviewsWriter` in `kedro.extras.datasets.holoviews` for persisting Holoviews images using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem
 * Added Memory profiler transformer.
 * Added instruction in the documentation on how to create a custom runner.
 * Added `Hooks`, which is a new mechanism for extending Kedro.
@@ -69,7 +70,7 @@ The list of moved files you can find in `0.15.6` release notes under `Files with
   - Replace `context = load_context(path, env=os.getenv(KEDRO_ENV_VAR))` with `context = load_context(path)` in `.ipython/profile_default/startup/00-kedro-init.py`
 
 ## Thanks for supporting contributions
-[@foolsgold](https://github.com/foolsgold), [Mani Sarkar](https://github.com/neomatrix369), [Priyanka Shanbhag](https://github.com/priyanka1414), [Luis Blanche](https://github.com/LuisBlanche), [Deepyaman Datta](https://github.com/deepyaman), [Antony Milne](https://github.com/AntonyMilneQB), [Panos Psimatikas](https://github.com/ppsimatikas), [Tam-Sanh Nguyen](https://github.com/tamsanh), [Tomasz Kaczmarczyk](https://github.com/TomaszKaczmarczyk)
+[@foolsgold](https://github.com/foolsgold), [Mani Sarkar](https://github.com/neomatrix369), [Priyanka Shanbhag](https://github.com/priyanka1414), [Luis Blanche](https://github.com/LuisBlanche), [Deepyaman Datta](https://github.com/deepyaman), [Antony Milne](https://github.com/AntonyMilneQB), [Panos Psimatikas](https://github.com/ppsimatikas), [Tam-Sanh Nguyen](https://github.com/tamsanh), [Tomasz Kaczmarczyk](https://github.com/TomaszKaczmarczyk), [Marcus Gawronsky](https://github.com/marcusinthesky)
 
 # 0.15.9
 

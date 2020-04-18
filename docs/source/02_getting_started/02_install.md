@@ -51,6 +51,8 @@ These dependency sets are listed below.
 |                    +-------------+-------------------------------+-----------------------------------------+
 |                    | matplotlib  | matplotlib.MatplotlibWriter   | pip install "kedro[matplotlib]"         |
 |                    +-------------+-------------------------------+-----------------------------------------+
+|                    | holoviews   | holoviews.HoloviewsWriter     | pip install "kedro[holoviews]"         |
+|                    +-------------+-------------------------------+-----------------------------------------+
 |                    | networkx    | networkx.NetworkXDataSet      | pip install "kedro[networkx]"           |
 |                    +-------------+-------------------------------+-----------------------------------------+
 |                    | pandas      | pandas.CSVBlobDataSet         | pip install "kedro[pandas]"             |

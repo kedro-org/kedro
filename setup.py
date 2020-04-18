@@ -91,6 +91,7 @@ extras_require = {
     "dask": ["dask[complete]>=2.6.0, <3.0"],
     "geopandas": ["geopandas<=0.6.0, <1.0"],
     "matplotlib": ["matplotlib>=3.0.3, <4.0"],
+    "holoviews": ["holoviews>=1.13.2"],
     "networkx": ["networkx>=2.4, <3.0"],
     "pandas": [
         "pandas>=0.24.0, <2.0",

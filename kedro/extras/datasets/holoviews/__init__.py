@@ -26,6 +26,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``kedro.extras.datasets`` is where you can find all of Kedro's data connectors.
-These data connectors are implementations of the ``AbstractDataSet``.
-"""
+"""``AbstractDataSet`` implementation to save matplotlib objects as image files."""
+
+from .holoviews_writer import HoloviewsWriter  # NOQA

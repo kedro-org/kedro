@@ -31,11 +31,13 @@
 filesystem (e.g. local, S3, GCS)."""
 
 from copy import deepcopy
-from pathlib import Path, PurePosixPath
+from pathlib import PurePosixPath
 from typing import Any, Dict
+import io
 
 import fsspec
 import holoviews as hv
+from holoviews.element.chart import Chart
 from kedro.io import AbstractVersionedDataSet
 from kedro.io.core import DataSetError, Version, get_filepath_str, get_protocol_and_path
 
@@ -104,13 +106,15 @@ class HoloviewsWriter(AbstractVersionedDataSet):
             layer: The data layer according to the data engineering convention:
                 https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
         """
-        _fs_args = deepcopy(fs_args) or {}
         _credentials = deepcopy(credentials) or {}
+        _fs_args = deepcopy(fs_args) or {}
+        _fs_open_args_save = _fs_args.pop("open_args_save", {})
+        _fs_open_args_save.setdefault("mode", "wb")
 
         protocol, path = get_protocol_and_path(filepath, version)
-
+        self._fs_args = _fs_args
         self._protocol = protocol
-        self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
+        self._fs = fsspec.filesystem(self._protocol, **_credentials, **self._fs_args)
 
         super().__init__(
             filepath=PurePosixPath(path),
@@ -119,12 +123,10 @@ class HoloviewsWriter(AbstractVersionedDataSet):
             glob_function=self._fs.glob,
         )
 
+        self._fs_open_args_save = _fs_open_args_save
         self._layer = layer
 
-        # Handle default load and save arguments
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
+        # Handle default save arguments
         self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
             self._save_args.update(save_args)
@@ -133,36 +135,33 @@ class HoloviewsWriter(AbstractVersionedDataSet):
         return dict(
             filepath=self._filepath,
             protocol=self._protocol,
-            load_args=self._load_args,
+            fs_args=self._fs_args,
             save_args=self._save_args,
             version=self._version,
             layer=self._layer,
         )
 
-    def _load(self) -> str:
-        load_path = get_filepath_str(self._get_load_path(), self._protocol)
+    def _load(self) -> None:
+        raise DataSetError(
+            "Loading not supported for `{}`".format(self.__class__.__name__)
+        )
 
-        if str(load_path).endswith(".png"):
-            return hv.RGB.load_image(load_path, **self._load_args)
-        else:
-            raise NotImplementedError(
-                "There is no way to convert from an\
-                                    arbitrary saved image format to a plot."
-            )
+    def _save(self, data: Chart) -> None:
+        save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
-    def _save(self, plot: str) -> None:
-        save_path = Path(get_filepath_str(self._get_save_path(), self._protocol))
-        save_path.parent.mkdir(parents=True, exist_ok=True)
-        hv.save(plot, save_path, **self._save_args)
+        self._save_to_fs(full_key_path=save_path, plot=data)
 
         self._invalidate_cache()
 
-    def _exists(self) -> bool:
-        try:
-            load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        except DataSetError:
-            return False
+    def _save_to_fs(self, full_key_path: str, plot: Chart):
+        bytes_buffer = io.BytesIO()
+        hv.save(plot, bytes_buffer, **self._save_args)
 
+        with self._fs.open(full_key_path, **self._fs_open_args_save) as fs_file:
+            fs_file.write(bytes_buffer.getvalue())
+
+    def _exists(self) -> bool:
+        load_path = get_filepath_str(self._get_load_path(), self._protocol)
         return self._fs.exists(load_path)
 
     def _release(self) -> None:

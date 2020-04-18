@@ -16,8 +16,6 @@ get_git_branch() {
     echo $(git rev-parse --abbrev-ref HEAD)
 }
 
-SOURCES_FOLDER=kedro
-TESTS_FOLDER=tests
 TEST_REPORT_FILE="."
 delete_the_old_test_report() {
     TEST_REPORTS_FOLDER=".test-run-reports"
@@ -36,12 +34,17 @@ delete_the_old_coverage_report_folder_and_create_a_new_one() {
 }
 
 test_run_exit_code=0
+SOURCES_FOLDER=kedro
+TESTS_FOLDER=tests
+TARGET_TEST_FOLDERS="$@"
+TARGET_TEST_FOLDERS="${TARGET_TEST_FOLDERS:-"${TESTS_FOLDER}/"}"
 run_test_runner() {
     echo ""; echo "~~~ Running tests with coverage on branch '$(get_git_branch)'"
     set -x
-    pytest --cov-report html:${COVERAGE_REPORT_FOLDER} \
-           --cov=${SOURCES_FOLDER} ${TESTS_FOLDER}/    \
-           --html="${TEST_REPORT_FILE}"                \
+    pytest --cov-config default_coverage_report.toml     \
+           --cov-report html:${COVERAGE_REPORT_FOLDER}   \
+           --cov=${SOURCES_FOLDER} ${TARGET_TEST_FOLDERS} \
+           --html="${TEST_REPORT_FILE}"                  \
            || test_run_exit_code="$?" && true
     set +x
     echo ""; echo "~~~ The test report file created: ${TEST_REPORT_FILE}";

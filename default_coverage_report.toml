@@ -1,0 +1,11 @@
+[tool.coverage.report]
+fail_under = 100
+show_missing = true
+omit = [
+  "tests/*",
+  "kedro/template/*",
+  "kedro/__main__.py",
+  "kedro/__init__.py",
+  "kedro/*/__init__.py",
+]
+exclude_lines = ["pragma: no cover", "raise NotImplementedError"]

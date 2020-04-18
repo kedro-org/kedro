@@ -28,7 +28,6 @@
 
 
 import json
-from copy import deepcopy
 from pathlib import PosixPath
 
 import holoviews as hv
@@ -124,10 +123,7 @@ class TestHoloviewsWriter:
         self, tmp_path, mock_single_plot, plot_writer, mocked_s3_bucket, save_args
     ):
         """Test saving single holoviews plot to S3."""
-        actual_plot = deepcopy(mock_single_plot)
-        test_plot = deepcopy(mock_single_plot)
-
-        plot_writer.save(actual_plot)
+        plot_writer.save(mock_single_plot)
 
         download_path = tmp_path / "downloaded_image.html"
 

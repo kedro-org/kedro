@@ -521,12 +521,14 @@ class TestDataCatalogVersioned:
         assert_frame_equal(reloaded_df_version, dummy_dataframe)
 
         # Verify that `VERSION_FORMAT` can help regenerate `current_ts`.
-        assert datetime.strptime(
+        actual_timestamp = datetime.strptime(
             catalog.datasets.boats.resolve_load_version(),  # pylint: disable=no-member
             VERSION_FORMAT,
-        ) == current_ts.replace(
+        )
+        expected_timestamp = current_ts.replace(
             microsecond=current_ts.microsecond // 1000 * 1000, tzinfo=None
         )
+        assert actual_timestamp == expected_timestamp
 
     @pytest.mark.parametrize("versioned", [True, False])
     def test_from_sane_config_versioned_warn(self, caplog, sane_config, versioned):

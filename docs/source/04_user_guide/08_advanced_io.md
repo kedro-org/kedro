@@ -460,7 +460,7 @@ def create_partitions() -> Dict[str, Any]:
 
 [IncrementalDataSet](/kedro.io.IncrementalDataSet) is a subclass of `PartitionedDataSet`, which stores the information about the last processed partition in the so-called `checkpoint`. `IncrementalDataSet` addresses the use case when partitions have to be processed incrementally, i.e. each subsequent pipeline run should only process the partitions which were not processed by the previous runs.
 
-This checkpoint, by default, is persisted to the location of the data partitions. For example, for `IncrementalDataSet` instantiated with path `s3://my-bucket-name/path/to/folder` the checkpoint will be saved to `s3://my-bucket-name/path/to/folder/CHECKPOINT`, unless checkpoint configuration is [explicitly overwritten](#checkpoint-configuration).
+This checkpoint, by default, is persisted to the location of the data partitions. For example, for `IncrementalDataSet` instantiated with path `s3://my-bucket-name/path/to/folder` the checkpoint will be saved to `s3://my-bucket-name/path/to/folder/CHECKPOINT`, unless the checkpoint configuration is [explicitly overwritten](#checkpoint-configuration).
 
 > *Note:* The checkpoint file is only created _after_ the partitioned dataset is explicitly [confirmed](#incremental-dataset-confirm).
 
@@ -492,7 +492,7 @@ node(
 )
 ```
 
-Alternatively, confirmation can be deferred to one of nodes downstream, allowing to implement extra validations before the loaded partitions are considered successfully processed:
+Alternatively, confirmation can be deferred to one of the nodes downstream, allowing you to implement extra validations before the loaded partitions are considered successfully processed:
 
 ```python
 from kedro.pipeline import Pipeline, node
@@ -524,7 +524,7 @@ Pipeline(
 ```
 
 Here are 2 important notes about the confirmation operation:
-1. Confirming partitioned dataset does not affect any subsequent loads within the same run. All downstream nodes that input the same partitioned dataset as input, will all receive the _same_ partitions. Partitions that are created externally during the run will also not affect the dataset loads and won't appear in the list of loaded partitions until the next run or until the dataset object is [released](/kedro.io.IncrementalDataSet#kedro.io.IncrementalDataSet.release).
+1. Confirming a partitioned dataset does not affect any subsequent loads within the same run. All downstream nodes that input the same partitioned dataset as input will all receive the _same_ partitions. Partitions that are created externally during the run will also not affect the dataset loads and won't appear in the list of loaded partitions until the next run or until the dataset object is [released](/kedro.io.IncrementalDataSet#kedro.io.IncrementalDataSet.release).
 2. A pipeline cannot contain more than one node confirming the same dataset.
 
 
@@ -547,7 +547,7 @@ my_partitioned_dataset:
 #### Special checkpoint config keys
 
 Along with the standard dataset attributes, `checkpoint` config also accepts 2 special optional keys:
-* `comparison_func` (defaults to `operator.gt`) - fully qualified import path to the function that will be used to compare a partition ID with the checkpoint value, to determine if a partition should be processed. Such function must accept 2 positional string arguments - partition ID and checkpoint value, and return `True` if such partition is considered to be past the checkpoint. Specifying your own `comparison_func` may be useful if you need to customise checkpoint filtration mechanism - for example, you may want to implement windowed loading, where you always want to load the partitions representing the last calendar month. See the example config specifying a custom comparison function:
+* `comparison_func` (defaults to `operator.gt`) - fully qualified import path to the function that will be used to compare a partition ID with the checkpoint value, to determine if a partition should be processed. Such function must accept 2 positional string arguments - partition ID and checkpoint value, and return `True` if such partition is considered to be past the checkpoint. Specifying your own `comparison_func` may be useful if you need to customise the checkpoint filtration mechanism - for example, you may want to implement windowed loading, where you always want to load the partitions representing the last calendar month. See the example config specifying a custom comparison function:
 
 ```yaml
 my_partitioned_dataset:

@@ -16,6 +16,7 @@
 * Added instruction in the documentation on how to create a custom runner.
 * Added `Hooks`, which is a new mechanism for extending Kedro.
 * Added `joblib` backend support to `pickle.PickleDataSet`.
+* Added versioning support to MatplotlibWriter dataset.
 
 ## Bug fixes and other changes
 * Fixed a bug where a new version created mid-run by an external system caused inconsistencies in the load versions used in the current run.
@@ -68,7 +69,7 @@ The list of moved files you can find in `0.15.6` release notes under `Files with
   - Replace `context = load_context(path, env=os.getenv(KEDRO_ENV_VAR))` with `context = load_context(path)` in `.ipython/profile_default/startup/00-kedro-init.py`
 
 ## Thanks for supporting contributions
-[@foolsgold](https://github.com/foolsgold), [Mani Sarkar](https://github.com/neomatrix369), [Priyanka Shanbhag](https://github.com/priyanka1414), [Luis Blanche](https://github.com/LuisBlanche), [Deepyaman Datta](https://github.com/deepyaman), [Antony Milne](https://github.com/AntonyMilneQB), [Panos Psimatikas](https://github.com/ppsimatikas)
+[@foolsgold](https://github.com/foolsgold), [Mani Sarkar](https://github.com/neomatrix369), [Priyanka Shanbhag](https://github.com/priyanka1414), [Luis Blanche](https://github.com/LuisBlanche), [Deepyaman Datta](https://github.com/deepyaman), [Antony Milne](https://github.com/AntonyMilneQB), [Panos Psimatikas](https://github.com/ppsimatikas), [Tam-Sanh Nguyen](https://github.com/tamsanh), [Tomasz Kaczmarczyk](https://github.com/TomaszKaczmarczyk)
 
 # 0.15.9
 
@@ -242,7 +243,7 @@ You can also load data incrementally whenever it is dumped into a directory with
 ## Thanks for supporting contributions
 [Andrii Ivaniuk](https://github.com/andrii-ivaniuk), [Jonas Kemper](https://github.com/jonasrk), [Yuhao Zhu](https://github.com/yhzqb), [Balazs Konig](https://github.com/BalazsKonigQB), [Pedro Abreu](https://github.com/PedroAbreuQB), [Tam-Sanh Nguyen](https://github.com/tamsanh), [Peter Zhao](https://github.com/zxpeter), [Deepyaman Datta](https://github.com/deepyaman), [Florian Roessler](https://github.com/fdroessler/), [Miguel Rodriguez Gutierrez](https://github.com/MigQ2)
 
-# Release 0.15.5
+# 0.15.5
 
 ## Major features and improvements
 * New CLI commands and command flags:
@@ -279,7 +280,7 @@ You can also load data incrementally whenever it is dumped into a directory with
 ## Thanks for supporting contributions
 [Sheldon Tsen](https://github.com/sheldontsen-qb), [@roumail](https://github.com/roumail), [Karlson Lee](https://github.com/i25959341), [Waylon Walker](https://github.com/WaylonWalker), [Deepyaman Datta](https://github.com/deepyaman), [Giovanni](https://github.com/plauto), [Zain Patel](https://github.com/mzjp2)
 
-# Release 0.15.4
+# 0.15.4
 
 ## Major features and improvements
 * `kedro jupyter` now gives the default kernel a sensible name.
@@ -306,12 +307,12 @@ You can also load data incrementally whenever it is dumped into a directory with
 ## Thanks for supporting contributions
 [Joseph Haaga](https://github.com/josephhaaga), [Deepyaman Datta](https://github.com/deepyaman), [Joost Duisters](https://github.com/JoostDuisters), [Zain Patel](https://github.com/mzjp2), [Tom Vigrass](https://github.com/tomvigrass)
 
-# Release 0.15.3
+# 0.15.3
 
 ## Bug Fixes and other changes
 * Narrowed the requirements for `PyTables` so that we maintain support for Python 3.5.
 
-# Release 0.15.2
+# 0.15.2
 
 ## Major features and improvements
 * Added `--load-version`, a `kedro run` argument that allows you run the pipeline with a particular load version of a dataset.
@@ -339,7 +340,7 @@ You can also load data incrementally whenever it is dumped into a directory with
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman), [Luciano Issoe](https://github.com/Lucianois), [Joost Duisters](https://github.com/JoostDuisters), [Zain Patel](https://github.com/mzjp2), [William Ashford](https://github.com/williamashfordQB), [Karlson Lee](https://github.com/i25959341)
 
-# Release 0.15.1
+# 0.15.1
 
 ## Major features and improvements
 * Extended `versioning` support to cover the tracking of environment setup, code and datasets.
@@ -364,7 +365,7 @@ You can also load data incrementally whenever it is dumped into a directory with
 ## Thanks for supporting contributions
 [Omar Saleem](https://github.com/mdomarsaleem), [Mariana Silva](https://github.com/marianansilva), [Anil Choudhary](https://github.com/aniryou), [Craig](https://github.com/cfranklin11)
 
-# Release 0.15.0
+# 0.15.0
 
 ## Major features and improvements
 * Added `KedroContext` base class which holds the configuration and Kedro's main functionality (catalog, pipeline, config, runner).
@@ -452,7 +453,7 @@ These steps should have brought your project to Kedro 0.15.0. There might be som
 ## Thanks for supporting contributions
 [Dmitry Vukolov](https://github.com/dvukolov), [Jo Stichbury](https://github.com/stichbury), [Angus Williams](https://github.com/awqb), [Deepyaman Datta](https://github.com/deepyaman), [Mayur Chougule](https://github.com/mmchougule), [Marat Kopytjuk](https://github.com/kopytjuk), [Evan Miller](https://github.com/evanmiller29), [Yusuke Minami](https://github.com/Minyus)
 
-# Release 0.14.3
+# 0.14.3
 
 ## Major features and improvements
 * Tab completion for catalog datasets in `ipython` or `jupyter` sessions. (Thank you [@datajoely](https://github.com/datajoely) and [@WaylonWalker](https://github.com/WaylonWalker))
@@ -473,7 +474,7 @@ These steps should have brought your project to Kedro 0.15.0. There might be som
 ## Thanks for supporting contributions
 [Joel Schwarzmann](https://github.com/datajoely), [Alex Kalmikov](https://github.com/kalexqb)
 
-# Release 0.14.2
+# 0.14.2
 
 ## Major features and improvements
 * Added Data Set transformer support in the form of AbstractTransformer and DataCatalog.add_transformer.
@@ -487,7 +488,7 @@ These steps should have brought your project to Kedro 0.15.0. There might be som
 
 [Darren Gallagher](https://github.com/dazzag24), [Zain Patel](https://github.com/mzjp2)
 
-# Release 0.14.1
+# 0.14.1
 
 ## Major features and improvements
 * New I/O module `HDFS3DataSet`.
@@ -501,7 +502,7 @@ These steps should have brought your project to Kedro 0.15.0. There might be som
 None
 
 
-# Release 0.14.0:
+# 0.14.0
 
 The initial release of Kedro.
 

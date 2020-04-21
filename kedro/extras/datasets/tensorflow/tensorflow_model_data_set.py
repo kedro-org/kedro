@@ -135,6 +135,11 @@ class TensorFlowModelDataset(AbstractVersionedDataSet):
         self._save_args = copy.deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
             self._save_args.update(save_args)
+            
+        _fs_open_args_load.setdefault("mode", "r")
+        _fs_open_args_save.setdefault("mode", "w")
+        self._fs_open_args_load = _fs_open_args_load
+        self._fs_open_args_save = _fs_open_args_save
 
     def _load(self) -> None:
         load_path = Path(self._get_load_path())

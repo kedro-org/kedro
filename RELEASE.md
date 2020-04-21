@@ -34,6 +34,7 @@
 * Added ability to read partitioned parquet file from a directory in `pandas.ParquetDataSet`.
 * Bug in `SparkDataSet` not allowing for loading data from DBFS in a Windows machine using Databricks-connect.
 * Added option to lint the project without applying the formatting changes (`kedro lint --check-only`).
+* Enabled branch code coverage both on local machine and CI/CD (run `make test-coverage`)
 
 ## Breaking changes to the API
 * Made `invalidate_cache` method on datasets private.
@@ -49,6 +50,10 @@
 * Dropped `Pipeline.transform()` in favour of `kedro.pipeline.modular_pipeline.pipeline()` helper function.
 * Made constant `PARAMETER_KEYWORDS` private, and moved it from `kedro.pipeline.pipeline` to `kedro.pipeline.modular_pipeline`.
 * Removed `CSVBlobDataSet` and `JSONBlobDataSet` as redundant.
+
+## Thanks for supporting contributions
+[Mani Sarkar](https://github.com/neomatrix369)
+
 
 ### Migration guide from Kedro 0.15.* to Upcoming Release
 #### Migration for datasets

@@ -142,7 +142,7 @@ class TensorFlowModelDataset(AbstractVersionedDataSet):
         self._fs_open_args_save = _fs_open_args_save
 
     def _load(self) -> None:
-        load_path = Path(self._get_load_path())
+        load_path = get_filepath_str(self._get_load_path(), self._protocol)
         return tf.keras.models.load_model(str(load_path), **self._load_args)
 
     def _save(self, data: tf.keras.Model) -> None:

@@ -38,7 +38,6 @@ from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
 
 from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
-from kedro.extras.datasets.pickle import PickleDataSet
 from kedro.extras.datasets.spark import SparkDataSet
 from kedro.extras.datasets.spark.spark_dataset import _dbfs_glob, _get_dbutils
 from kedro.io import DataCatalog, DataSetError, Version
@@ -138,11 +137,6 @@ def spark_in(tmp_path, sample_spark_df):
     spark_in = SparkDataSet(filepath=str(tmp_path / "input"))
     spark_in.save(sample_spark_df)
     return spark_in
-
-
-@pytest.fixture
-def spark_out(tmp_path):
-    return SparkDataSet(filepath=str(tmp_path / "output"))
 
 
 class FileInfo:
@@ -287,67 +281,14 @@ class TestSparkDataSet:
             spark_data_set.exists()
 
     @pytest.mark.parametrize("is_async", [False, True])
-    def test_parallel_runner(self, is_async, spark_in, spark_out):
-        """Test ParallelRunner with SparkDataSet load and save.
+    def test_parallel_runner(self, is_async, spark_in):
+        """Test ParallelRunner with SparkDataSet fails.
         """
-        catalog = DataCatalog(data_sets={"spark_in": spark_in, "spark_out": spark_out})
+        catalog = DataCatalog(data_sets={"spark_in": spark_in})
         pipeline = Pipeline([node(identity, "spark_in", "spark_out")])
-        runner = ParallelRunner(is_async=is_async)
-        result = runner.run(pipeline, catalog)
-        # 'spark_out' is saved in 'tmp_path/input', so the result of run should be empty
-        assert result == {}
-
-    @pytest.mark.parametrize("is_async", [False, True])
-    def test_parallel_runner_with_pickle_dataset(
-        self, is_async, tmp_path, spark_in, spark_out
-    ):
-        """Test ParallelRunner with SparkDataSet -> PickleDataSet -> SparkDataSet .
-        """
-        pickle_data = PickleDataSet(filepath=str(tmp_path / "data.pkl"))
-        catalog = DataCatalog(
-            data_sets={
-                "spark_in": spark_in,
-                "pickle": pickle_data,
-                "spark_out": spark_out,
-            }
-        )
-        pipeline = Pipeline(
-            [
-                node(identity, "spark_in", "pickle"),
-                node(identity, "pickle", "spark_out"),
-            ]
-        )
-        runner = ParallelRunner(is_async=is_async)
-
-        pattern = r".* was not serialized due to: .*"
-
-        with pytest.raises(DataSetError, match=pattern):
-            runner.run(pipeline, catalog)
-
-    @pytest.mark.parametrize("is_async", [False, True])
-    def test_parallel_runner_with_memory_dataset(
-        self, is_async, spark_in, spark_out, sample_spark_df
-    ):
-        """Run ParallelRunner with SparkDataSet -> MemoryDataSet -> SparkDataSet.
-        """
-        catalog = DataCatalog(data_sets={"spark_in": spark_in, "spark_out": spark_out})
-        pipeline = Pipeline(
-            [
-                node(identity, "spark_in", "memory"),
-                node(identity, "memory", "spark_out"),
-            ]
-        )
-        runner = ParallelRunner(is_async=is_async)
-
-        pattern = (
-            r"{0} cannot be serialized. ParallelRunner implicit memory datasets "
-            r"can only be used with serializable data".format(
-                str(sample_spark_df.__class__)
-            )
-        )
-
-        with pytest.raises(DataSetError, match=pattern):
-            runner.run(pipeline, catalog)
+        pattern = r"The following data_sets cannot be serialized: \['spark_in'\]"
+        with pytest.raises(AttributeError, match=pattern):
+            ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
 
 class TestSparkDataSetVersionedLocal:

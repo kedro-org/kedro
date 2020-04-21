@@ -26,11 +26,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``kedro.runner`` provides runners that are able
-to execute ``Pipeline`` instances.
-"""
 
-from .parallel_runner import ParallelRunner  # NOQA
-from .runner import AbstractRunner, run_node  # NOQA
-from .sequential_runner import SequentialRunner  # NOQA
-from .thread_runner import ThreadRunner  # NOQA
+Feature: Custom Kedro project
+    Background:
+        Given I have prepared a config file with example code
+        And I have run a non-interactive kedro new
+
+    Scenario: Update the source directory to be nested
+        When I move the package to "src/nested"
+        And Source directory is updated to "src/nested" in kedro.yml
+        And I execute the kedro command "run"
+        Then I should get a successful exit code
+
+    Scenario: Update the source directory to be outside of src
+        When I move the package to "."
+        And Source directory is updated to "." in kedro.yml
+        And I execute the kedro command "run"
+        Then I should get a successful exit code

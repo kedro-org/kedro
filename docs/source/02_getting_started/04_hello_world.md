@@ -75,8 +75,8 @@ A `kedro` project consists of the following main components:
 |              | cleaning, dropping columns, validation, model training, scoring, etc.       |
 +--------------+-----------------------------------------------------------------------------+
 | Runner       | An object that runs the :code:`kedro` pipeline using the specified          |
-|              | data catalog. Currently :code:`kedro` supports 2 runner types:              |
-|              | :code:`SequentialRunner` and :code:`ParallelRunner`.                        |
+|              | data catalog. Currently :code:`kedro` supports 3 runner types:              |
+|              | :code:`SequentialRunner`, :code:`ParallelRunner` and :code:`ThreadRunner`.  |
 +--------------+-----------------------------------------------------------------------------+
 ```
 

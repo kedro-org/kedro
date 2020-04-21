@@ -62,6 +62,17 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 PROJ_PATH = Path(__file__).resolve().parent
 os.environ["IPYTHONDIR"] = str(PROJ_PATH / ".ipython")
 
+with open(PROJ_PATH / ".kedro.yml") as kedro_yml:
+    kedro_yaml = yaml.safe_load(kedro_yml)
+
+SOURCE_DIR = kedro_yaml.get("source_dir", "src")
+if Path(SOURCE_DIR).is_absolute() or ".." in SOURCE_DIR:
+    raise KedroCliError(
+        "'source_dir' in '.kedro.yml' has to be a relative path to your project root, "
+        "and cannot be an absolute path or start with '..'. "
+        "A path is considered absolute if it has both a root and (if the flavour allows) "
+        "a drive."
+    )
 
 NO_DEPENDENCY_MESSAGE = """{0} is not installed. Please make sure {0} is in
 src/requirements.txt and run `kedro install`."""
@@ -93,6 +104,7 @@ with --runner."""
 OPEN_ARG_HELP = """Open the documentation in your default browser after building."""
 
 RUNNER_ARG_HELP = """Specify a runner that you want to run the pipeline with.
+Available runners: `SequentialRunner`, `ParallelRunner` and `ThreadRunner`.
 This option cannot be used together with --parallel."""
 
 CONVERT_ALL_HELP = """Extract the nodes from all notebooks in the Kedro project directory,
@@ -120,6 +132,8 @@ JUPYTER_ALL_KERNELS_HELP = "Display all available Python kernels."
 JUPYTER_IDLE_TIMEOUT_HELP = """When a notebook is closed, Jupyter server will
 terminate its kernel after so many seconds of inactivity. This does not affect
 any open notebooks."""
+
+SIMPLE_PIPELINE_HELP = """Show list of all pipelines in the project."""
 
 
 def _split_string(ctx, param, value):
@@ -316,7 +330,7 @@ def install():
     """Install project dependencies from both requirements.txt
     and environment.yml (optional)."""
 
-    if (Path.cwd() / "src" / "environment.yml").is_file():
+    if (Path.cwd() / SOURCE_DIR / "environment.yml").is_file():
         call(["conda", "install", "--file", "src/environment.yml", "--yes"])
 
     pip_command = ["install", "-U", "-r", "src/requirements.txt"]
@@ -339,8 +353,8 @@ def ipython(args):
 @cli.command()
 def package():
     """Package the project as a Python egg and wheel."""
-    call([sys.executable, "setup.py", "clean", "--all", "bdist_egg"], cwd="src")
-    call([sys.executable, "setup.py", "clean", "--all", "bdist_wheel"], cwd="src")
+    call([sys.executable, "setup.py", "clean", "--all", "bdist_egg"], cwd=SOURCE_DIR)
+    call([sys.executable, "setup.py", "clean", "--all", "bdist_wheel"], cwd=SOURCE_DIR)
 
 
 @cli.command("build-docs")
@@ -380,10 +394,10 @@ def build_docs(open_docs):
 @cli.command("build-reqs")
 def build_reqs():
     """Build the project dependency requirements."""
-    requirements_path = Path.cwd() / "src" / "requirements.in"
+    requirements_path = Path.cwd() / SOURCE_DIR / "requirements.in"
     if not requirements_path.is_file():
         secho("No requirements.in found. Copying contents from requirements.txt...")
-        contents = (Path.cwd() / "src" / "requirements.txt").read_text()
+        contents = (Path.cwd() / SOURCE_DIR / "requirements.txt").read_text()
         requirements_path.write_text(contents)
     python_call("piptools", ["compile", str(requirements_path)])
     secho(
@@ -560,7 +574,7 @@ def convert_notebook(all_flag, overwrite_flag, filepath):
         secho("Converting notebook '{}'...".format(str(notebook)))
         output_path = (
             kedro_project_path
-            / "src"
+            / SOURCE_DIR
             / kedro_package_name
             / "nodes"
             / "{}.py".format(notebook.stem)
@@ -646,6 +660,43 @@ def list_datasets(pipeline, env):
 
         data = ((not_mentioned, dict(unused_by_type)), (mentioned, dict(used_by_type)))
         result[title.format(pipeline)] = {key: value for key, value in data if value}
+
+    secho(yaml.dump(result))
+
+
+@cli.group("pipeline")
+def pl():
+    """Commands for pipeline."""
+
+
+@pl.command("list")
+@click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
+@click.option("--simple", is_flag=True, multiple=False, help=SIMPLE_PIPELINE_HELP)
+@click.argument("pl_names", metavar="[PIPELINE_NAME]...", nargs=-1)
+def list_pipelines_and_nodes(pl_names, simple, env):
+    """Show detailed information about pipelines."""
+    context = load_context(Path.cwd(), env=env)
+    project_pipelines = context.pipelines
+    if simple:
+        secho(yaml.dump(sorted(project_pipelines.keys())))
+        return
+
+    pipelines = set(pl_names) or project_pipelines.keys()
+
+    result = {}
+    for pl_name in pipelines:
+        pl_obj = project_pipelines.get(pl_name)
+        if not pl_obj:
+            existing_pls = ", ".join(sorted(project_pipelines.keys()))
+            raise KedroCliError(
+                "{} pipeline not found. Existing pipelines: {}".format(
+                    pl_name, existing_pls
+                )
+            )
+
+        result[pl_name] = [
+            "{} ({})".format(node.short_name, node._func_name) for node in pl_obj.nodes
+        ]
 
     secho(yaml.dump(result))
 

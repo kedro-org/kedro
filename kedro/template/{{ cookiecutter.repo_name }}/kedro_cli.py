@@ -62,6 +62,17 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 PROJ_PATH = Path(__file__).resolve().parent
 os.environ["IPYTHONDIR"] = str(PROJ_PATH / ".ipython")
 
+with open(PROJ_PATH / ".kedro.yml") as kedro_yml:
+    kedro_yaml = yaml.safe_load(kedro_yml)
+
+SOURCE_DIR = kedro_yaml.get("source_dir", "src")
+if Path(SOURCE_DIR).is_absolute() or ".." in SOURCE_DIR:
+    raise KedroCliError(
+        "'source_dir' in '.kedro.yml' has to be a relative path to your project root, "
+        "and cannot be an absolute path or start with '..'. "
+        "A path is considered absolute if it has both a root and (if the flavour allows) "
+        "a drive."
+    )
 
 NO_DEPENDENCY_MESSAGE = """{0} is not installed. Please make sure {0} is in
 src/requirements.txt and run `kedro install`."""
@@ -316,7 +327,7 @@ def install():
     """Install project dependencies from both requirements.txt
     and environment.yml (optional)."""
 
-    if (Path.cwd() / "src" / "environment.yml").is_file():
+    if (Path.cwd() / SOURCE_DIR / "environment.yml").is_file():
         call(["conda", "install", "--file", "src/environment.yml", "--yes"])
 
     pip_command = ["install", "-U", "-r", "src/requirements.txt"]
@@ -339,8 +350,8 @@ def ipython(args):
 @cli.command()
 def package():
     """Package the project as a Python egg and wheel."""
-    call([sys.executable, "setup.py", "clean", "--all", "bdist_egg"], cwd="src")
-    call([sys.executable, "setup.py", "clean", "--all", "bdist_wheel"], cwd="src")
+    call([sys.executable, "setup.py", "clean", "--all", "bdist_egg"], cwd=SOURCE_DIR)
+    call([sys.executable, "setup.py", "clean", "--all", "bdist_wheel"], cwd=SOURCE_DIR)
 
 
 @cli.command("build-docs")
@@ -380,10 +391,10 @@ def build_docs(open_docs):
 @cli.command("build-reqs")
 def build_reqs():
     """Build the project dependency requirements."""
-    requirements_path = Path.cwd() / "src" / "requirements.in"
+    requirements_path = Path.cwd() / SOURCE_DIR / "requirements.in"
     if not requirements_path.is_file():
         secho("No requirements.in found. Copying contents from requirements.txt...")
-        contents = (Path.cwd() / "src" / "requirements.txt").read_text()
+        contents = (Path.cwd() / SOURCE_DIR / "requirements.txt").read_text()
         requirements_path.write_text(contents)
     python_call("piptools", ["compile", str(requirements_path)])
     secho(
@@ -560,7 +571,7 @@ def convert_notebook(all_flag, overwrite_flag, filepath):
         secho("Converting notebook '{}'...".format(str(notebook)))
         output_path = (
             kedro_project_path
-            / "src"
+            / SOURCE_DIR
             / kedro_package_name
             / "nodes"
             / "{}.py".format(notebook.stem)

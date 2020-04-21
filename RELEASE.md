@@ -16,7 +16,8 @@
 * Added instruction in the documentation on how to create a custom runner.
 * Added `Hooks`, which is a new mechanism for extending Kedro.
 * Added `joblib` backend support to `pickle.PickleDataSet`.
-* Added versioning support to MatplotlibWriter dataset.
+* Added versioning support to `MatplotlibWriter` dataset.
+* Allowed the source directory to be configurable in `.kedro.yml`.
 
 ## Bug fixes and other changes
 * Fixed a bug where a new version created mid-run by an external system caused inconsistencies in the load versions used in the current run.

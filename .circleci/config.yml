@@ -71,7 +71,7 @@ commands:
           name: Run unit tests
           command: make test
       - store_artifacts:
-          path: .coverage-reports/
+          path: .coverage-reports/**/*.*
 
   lint:
     description: Run linters
@@ -159,8 +159,6 @@ jobs:
       - run:
           name: Run unit tests without Spark
           command: make test-no-spark
-      - store_artifacts:
-          path: .coverage-reports/
 
   linters_38:
     executor: py38

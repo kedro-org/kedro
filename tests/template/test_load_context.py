@@ -26,7 +26,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import sys
 from pathlib import Path
 
@@ -62,16 +61,27 @@ class TestLoadContext:
         result = load_context(str(fake_repo_path))
         assert result.env == "my_fake_env"
 
-    @pytest.mark.skip
     def test_loading_valid_context_twice(self, mocker, fake_repo_path):
         """Test getting project context twice."""
         mocker.patch("logging.config.dictConfig")
+
+        # first time
         load_context(str(fake_repo_path))
-        result = load_context(str(fake_repo_path))
-        assert result.project_name == "Test Project"
-        assert result.project_version == kedro.__version__
+        result_first_time = load_context(str(fake_repo_path))
+        assert result_first_time.project_name == "Test Project"
+        assert result_first_time.project_version == kedro.__version__
         assert str(fake_repo_path.resolve() / "src") in sys.path
-        assert os.getcwd() == str(fake_repo_path.resolve())
+
+        # second time
+        try:
+            result_second_time = load_context(str(fake_repo_path))
+            assert result_first_time.project_path == result_second_time.project_path
+            assert result_first_time.project_version == result_second_time.project_version
+            assert str(fake_repo_path.resolve() / "src") in sys.path
+        except KedroContextError as kce:
+            print("FAILED: Should have loaded the context twice successfuly, "
+                  "and not got this exception:", kce)
+            assert 0
 
     def test_invalid_path(self, tmp_path):
         """Test for loading context from an invalid path. """

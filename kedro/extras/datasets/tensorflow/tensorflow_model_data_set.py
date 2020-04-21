@@ -129,6 +129,8 @@ class TensorFlowModelDataset(AbstractVersionedDataSet):
             # exists_function=self._fs.isdir,
             exists_function=self._fs.exists,
         )
+        
+        self._layer = layer
 
 
         # Handle default load and save arguments

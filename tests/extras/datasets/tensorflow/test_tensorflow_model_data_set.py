@@ -123,11 +123,8 @@ def dummy_tf_base_model(dummy_x_train, dummy_y_train):
 
 @pytest.fixture
 def dummy_tf_subclassed_model(dummy_x_train, dummy_y_train):
-    """
-    demonstrate that own class models cannot be saved using HDF5 format but can using TF format
-    :param dummy_x_train:
-    :param dummy_y_train:
-    :return:
+    """Demonstrate that own class models cannot be saved
+    using HDF5 format but can using TF format
     """
 
     class MyModel(tf.keras.Model):

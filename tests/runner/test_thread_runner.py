@@ -27,22 +27,15 @@
 # limitations under the License.
 
 # pylint: disable=no-member
-from concurrent.futures.process import ProcessPoolExecutor
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict
 
 import pytest
 
-from kedro.io import (
-    AbstractDataSet,
-    DataCatalog,
-    DataSetError,
-    LambdaDataSet,
-    MemoryDataSet,
-)
+from kedro.io import AbstractDataSet, DataCatalog, DataSetError, MemoryDataSet
 from kedro.pipeline import Pipeline, node
 from kedro.pipeline.decorators import log_time
-from kedro.runner import ParallelRunner
-from kedro.runner.parallel_runner import ParallelRunnerManager, _SharedMemoryDataSet
+from kedro.runner import ThreadRunner
 
 
 def source():
@@ -70,10 +63,6 @@ def return_none(arg):
     return arg
 
 
-def return_not_serializable(arg):  # pylint: disable=unused-argument
-    return lambda x: x
-
-
 @pytest.fixture
 def catalog():
     return DataCatalog()
@@ -92,141 +81,72 @@ def fan_out_fan_in():
     )
 
 
-class TestValidParallelRunner:
+class TestValidThreadRunner:
     def test_create_default_data_set(self):
-        # data_set is a proxy to a dataset in another process.
-        data_set = ParallelRunner().create_default_data_set("")
-        assert isinstance(data_set, _SharedMemoryDataSet)
+        data_set = ThreadRunner().create_default_data_set("")
+        assert isinstance(data_set, MemoryDataSet)
 
-    @pytest.mark.parametrize("is_async", [False, True])
-    def test_parallel_run(self, is_async, fan_out_fan_in, catalog):
+    def test_thread_run(self, fan_out_fan_in, catalog):
         catalog.add_feed_dict(dict(A=42))
-        result = ParallelRunner(is_async=is_async).run(fan_out_fan_in, catalog)
+        result = ThreadRunner().run(fan_out_fan_in, catalog)
         assert "Z" in result
-        assert len(result["Z"]) == 3
         assert result["Z"] == (42, 42, 42)
 
-    @pytest.mark.parametrize("is_async", [False, True])
-    def test_memory_data_set_input(self, is_async, fan_out_fan_in):
-        pipeline = Pipeline([fan_out_fan_in])
+    def test_memory_data_set_input(self, fan_out_fan_in):
         catalog = DataCatalog({"A": MemoryDataSet("42")})
-        result = ParallelRunner(is_async=is_async).run(pipeline, catalog)
+        result = ThreadRunner().run(fan_out_fan_in, catalog)
         assert "Z" in result
-        assert len(result["Z"]) == 3
         assert result["Z"] == ("42", "42", "42")
 
 
 class TestMaxWorkers:
-    @pytest.mark.parametrize("is_async", [False, True])
     @pytest.mark.parametrize(
-        "cpu_cores, user_specified_number, expected_number",
+        "user_specified_number, expected_number",
         [
-            # The pipeline only needs 3 processes, no need for more
-            (4, 6, 3),
-            (4, None, 3),
-            # We need 3 processes, but only 2 CPU cores available
-            (2, None, 2),
-            # Even though we have 1 CPU core, allow user to use more.
-            (1, 2, 2),
+            # The pipeline only needs 3 threads, no need for more
+            (6, 3),
+            (None, 3),
         ],
     )
     def test_specified_max_workers_bellow_cpu_cores_count(
-        self,
-        is_async,
-        mocker,
-        fan_out_fan_in,
-        catalog,
-        cpu_cores,
-        user_specified_number,
-        expected_number,
+        self, mocker, fan_out_fan_in, catalog, user_specified_number, expected_number,
     ):  # pylint: disable=too-many-arguments
         """
-        The system has 2 cores, but we initialize the runner with max_workers=4.
-        `fan_out_fan_in` pipeline needs 3 processes.
+        We initialize the runner with max_workers=4.
+        `fan_out_fan_in` pipeline needs 3 threads.
         A pool with 3 workers should be used.
         """
-        mocker.patch("os.cpu_count", return_value=cpu_cores)
-
         executor_cls_mock = mocker.patch(
-            "kedro.runner.parallel_runner.ProcessPoolExecutor",
-            wraps=ProcessPoolExecutor,
+            "kedro.runner.thread_runner.ThreadPoolExecutor", wraps=ThreadPoolExecutor,
         )
 
         catalog.add_feed_dict(dict(A=42))
-        result = ParallelRunner(
-            max_workers=user_specified_number, is_async=is_async
-        ).run(fan_out_fan_in, catalog)
+        result = ThreadRunner(max_workers=user_specified_number).run(
+            fan_out_fan_in, catalog
+        )
         assert result == {"Z": (42, 42, 42)}
 
         executor_cls_mock.assert_called_once_with(max_workers=expected_number)
 
     def test_init_with_negative_process_count(self):
-        with pytest.raises(ValueError):
-            ParallelRunner(max_workers=-1)
+        pattern = "max_workers should be positive"
+        with pytest.raises(ValueError, match=pattern):
+            ThreadRunner(max_workers=-1)
 
 
-@pytest.mark.parametrize("is_async", [False, True])
-class TestInvalidParallelRunner:
-    def test_task_validation(self, is_async, fan_out_fan_in, catalog):
-        """ParallelRunner cannot serialize the lambda function."""
-        catalog.add_feed_dict(dict(A=42))
-        pipeline = Pipeline([fan_out_fan_in, node(lambda x: x, "Z", "X")])
-        with pytest.raises(AttributeError):
-            ParallelRunner(is_async=is_async).run(pipeline, catalog)
-
-    def test_task_exception(self, is_async, fan_out_fan_in, catalog):
+class TestInvalidThreadRunner:
+    def test_task_exception(self, fan_out_fan_in, catalog):
         catalog.add_feed_dict(feed_dict=dict(A=42))
         pipeline = Pipeline([fan_out_fan_in, node(exception_fn, "Z", "X")])
         with pytest.raises(Exception, match="test exception"):
-            ParallelRunner(is_async=is_async).run(pipeline, catalog)
+            ThreadRunner().run(pipeline, catalog)
 
-    def test_memory_data_set_output(self, is_async, fan_out_fan_in):
-        """ParallelRunner does not support output to externally
-        created MemoryDataSets.
-        """
-        pipeline = Pipeline([fan_out_fan_in])
-        catalog = DataCatalog({"C": MemoryDataSet()}, dict(A=42))
-        with pytest.raises(AttributeError, match="['C']"):
-            ParallelRunner(is_async=is_async).run(pipeline, catalog)
-
-    def test_node_returning_none(self, is_async):
+    def test_node_returning_none(self):
         pipeline = Pipeline([node(identity, "A", "B"), node(return_none, "B", "C")])
         catalog = DataCatalog({"A": MemoryDataSet("42")})
         pattern = "Saving `None` to a `DataSet` is not allowed"
         with pytest.raises(DataSetError, match=pattern):
-            ParallelRunner(is_async=is_async).run(pipeline, catalog)
-
-    def test_data_set_not_serializable(self, is_async, fan_out_fan_in):
-        """Data set A cannot be serializable because _load and _save are not
-        defined in global scope.
-        """
-
-        def _load():
-            return 0  # pragma: no cover
-
-        def _save(arg):
-            assert arg == 0  # pragma: no cover
-
-        # Data set A cannot be serialized
-        catalog = DataCatalog({"A": LambdaDataSet(load=_load, save=_save)})
-
-        pipeline = Pipeline([fan_out_fan_in])
-        with pytest.raises(AttributeError, match="['A']"):
-            ParallelRunner(is_async=is_async).run(pipeline, catalog)
-
-    def test_memory_dataset_not_serializable(self, is_async, catalog):
-        """Memory dataset cannot be serializable because of data it stores.
-        """
-        data = return_not_serializable(None)
-        pipeline = Pipeline([node(return_not_serializable, "A", "B")])
-        catalog.add_feed_dict(feed_dict=dict(A=42))
-        pattern = (
-            r"{0} cannot be serialized. ParallelRunner implicit memory datasets "
-            r"can only be used with serializable data".format(str(data.__class__))
-        )
-
-        with pytest.raises(DataSetError, match=pattern):
-            ParallelRunner(is_async=is_async).run(pipeline, catalog)
+            ThreadRunner().run(pipeline, catalog)
 
 
 @log_time
@@ -247,22 +167,17 @@ def decorated_fan_out_fan_in():
     )
 
 
-@pytest.mark.parametrize("is_async", [False, True])
-class TestParallelRunnerDecorator:
-    def test_decorate_pipeline(self, is_async, fan_out_fan_in, catalog):
+class TestThreadRunnerDecorator:
+    def test_decorate_pipeline(self, fan_out_fan_in, catalog):
         catalog.add_feed_dict(dict(A=42))
-        result = ParallelRunner(is_async=is_async).run(
-            fan_out_fan_in.decorate(log_time), catalog
-        )
+        result = ThreadRunner().run(fan_out_fan_in.decorate(log_time), catalog)
         assert "Z" in result
         assert len(result["Z"]) == 3
         assert result["Z"] == (42, 42, 42)
 
-    def test_decorated_nodes(self, is_async, decorated_fan_out_fan_in, catalog):
+    def test_decorated_nodes(self, decorated_fan_out_fan_in, catalog):
         catalog.add_feed_dict(dict(A=42))
-        result = ParallelRunner(is_async=is_async).run(
-            decorated_fan_out_fan_in, catalog
-        )
+        result = ThreadRunner().run(decorated_fan_out_fan_in, catalog)
         assert "Z" in result
         assert len(result["Z"]) == 3
         assert result["Z"] == (42, 42, 42)
@@ -289,35 +204,28 @@ class LoggingDataSet(AbstractDataSet):
         return {}
 
 
-ParallelRunnerManager.register(  # pylint: disable=no-member
-    "LoggingDataSet", LoggingDataSet
-)
-
-
-@pytest.mark.parametrize("is_async", [False, True])
-class TestParallelRunnerRelease:
-    def test_dont_release_inputs_and_outputs(self, is_async):
-        runner = ParallelRunner(is_async=is_async)
-        log = runner._manager.list()
+class TestThreadRunnerRelease:
+    def test_dont_release_inputs_and_outputs(self):
+        log = []
 
         pipeline = Pipeline(
             [node(identity, "in", "middle"), node(identity, "middle", "out")]
         )
         catalog = DataCatalog(
             {
-                "in": runner._manager.LoggingDataSet(log, "in", "stuff"),
-                "middle": runner._manager.LoggingDataSet(log, "middle"),
-                "out": runner._manager.LoggingDataSet(log, "out"),
+                "in": LoggingDataSet(log, "in", "stuff"),
+                "middle": LoggingDataSet(log, "middle"),
+                "out": LoggingDataSet(log, "out"),
             }
         )
-        ParallelRunner().run(pipeline, catalog)
+        ThreadRunner().run(pipeline, catalog)
 
         # we don't want to see release in or out in here
         assert list(log) == [("load", "in"), ("load", "middle"), ("release", "middle")]
 
-    def test_release_at_earliest_opportunity(self, is_async):
-        runner = ParallelRunner(is_async=is_async)
-        log = runner._manager.list()
+    def test_release_at_earliest_opportunity(self):
+        runner = ThreadRunner()
+        log = []
 
         pipeline = Pipeline(
             [
@@ -328,8 +236,8 @@ class TestParallelRunnerRelease:
         )
         catalog = DataCatalog(
             {
-                "first": runner._manager.LoggingDataSet(log, "first"),
-                "second": runner._manager.LoggingDataSet(log, "second"),
+                "first": LoggingDataSet(log, "first"),
+                "second": LoggingDataSet(log, "second"),
             }
         )
         runner.run(pipeline, catalog)
@@ -342,9 +250,9 @@ class TestParallelRunnerRelease:
             ("release", "second"),
         ]
 
-    def test_count_multiple_loads(self, is_async):
-        runner = ParallelRunner(is_async=is_async)
-        log = runner._manager.list()
+    def test_count_multiple_loads(self):
+        runner = ThreadRunner()
+        log = []
 
         pipeline = Pipeline(
             [
@@ -353,9 +261,7 @@ class TestParallelRunnerRelease:
                 node(sink, "dataset", None, name="fred"),
             ]
         )
-        catalog = DataCatalog(
-            {"dataset": runner._manager.LoggingDataSet(log, "dataset")}
-        )
+        catalog = DataCatalog({"dataset": LoggingDataSet(log, "dataset")})
         runner.run(pipeline, catalog)
 
         # we want to the release after both the loads
@@ -365,9 +271,8 @@ class TestParallelRunnerRelease:
             ("release", "dataset"),
         ]
 
-    def test_release_transcoded(self, is_async):
-        runner = ParallelRunner(is_async=is_async)
-        log = runner._manager.list()
+    def test_release_transcoded(self):
+        log = []
 
         pipeline = Pipeline(
             [node(source, None, "ds@save"), node(sink, "ds@load", None)]
@@ -379,7 +284,7 @@ class TestParallelRunnerRelease:
             }
         )
 
-        ParallelRunner().run(pipeline, catalog)
+        ThreadRunner().run(pipeline, catalog)
 
         # we want to see both datasets being released
         assert list(log) == [("release", "save"), ("load", "load"), ("release", "load")]

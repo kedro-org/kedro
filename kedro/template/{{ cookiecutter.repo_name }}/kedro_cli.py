@@ -104,6 +104,7 @@ with --runner."""
 OPEN_ARG_HELP = """Open the documentation in your default browser after building."""
 
 RUNNER_ARG_HELP = """Specify a runner that you want to run the pipeline with.
+Available runners: `SequentialRunner`, `ParallelRunner` and `ThreadRunner`.
 This option cannot be used together with --parallel."""
 
 CONVERT_ALL_HELP = """Extract the nodes from all notebooks in the Kedro project directory,

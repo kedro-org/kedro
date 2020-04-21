@@ -297,6 +297,10 @@ class SparkDataSet(AbstractVersionedDataSet):
         self._file_format = file_format
         self._fs_prefix = fs_prefix
 
+    def __getstate__(self):
+        # SparkDataSet cannot be used with ParallelRunner
+        raise AttributeError("{} cannot be serialized!".format(self.__class__.__name__))
+
     def _describe(self) -> Dict[str, Any]:
         return dict(
             filepath=self._fs_prefix + str(self._filepath),

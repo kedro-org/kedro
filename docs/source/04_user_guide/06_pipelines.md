@@ -560,6 +560,38 @@ kedro run --runner=ParallelRunner
 
 > *Note:* You cannot use both `--parallel` and `--runner` flags at the same time (e.g. `kedro run --parallel --runner=SequentialRunner` raises an exception).
 
+> *Note:* `SparkDataSet` doesn't work correctly with `ParallelRunner`.
+
+In case you want to get some sort of concurrency for the pipeline with `SparkDataSet` you can use `ThreadRunner`. It uses threading for concurrent execution whereas `ParallelRunner` uses multiprocessing.
+
+You should use the following command to run the pipeline using `ThreadRunner`:
+
+```bash
+kedro run --runner=ThreadRunner
+```
+
+`Output`:
+
+```console
+
+...
+2020-04-07 13:29:15,934 - kedro.io.data_catalog - INFO - Loading data from `spark_data_2` (SparkDataSet)...
+2020-04-07 13:29:15,934 - kedro.io.data_catalog - INFO - Loading data from `spark_data_1` (SparkDataSet)...
+2020-04-07 13:29:19,256 - kedro.pipeline.node - INFO - Running node: report_accuracy([spark_data_2]) -> [spark_data_2_output]
+2020-04-07 13:29:19,256 - kedro.pipeline.node - INFO - Running node: split_data([spark_data_1]) -> [spark_data_1_output]
+2020-04-07 13:29:20,355 - kedro.io.data_catalog - INFO - Saving data to `spark_data_2_output` (SparkDataSet)...
+2020-04-07 13:29:20,356 - kedro.io.data_catalog - INFO - Saving data to `spark_data_1_output` (SparkDataSet)...
+20/04/07 13:29:20 WARN MemoryManager: Total allocation exceeds 95.00% (906,992,014 bytes) of heap memory
+Scaling row group sizes to 96.54% for 7 writers
+20/04/07 13:29:20 WARN MemoryManager: Total allocation exceeds 95.00% (906,992,014 bytes) of heap memory
+Scaling row group sizes to 84.47% for 8 writers
+20/04/07 13:29:20 WARN MemoryManager: Total allocation exceeds 95.00% (906,992,014 bytes) of heap memory
+Scaling row group sizes to 96.54% for 7 writers
+2020-04-07 13:29:20,840 - kedro.runner.thread_runner - INFO - Pipeline execution completed successfully.
+```
+
+> *Note:* `ThreadRunner` doesn't support asynchronous inputs loading and outputs saving.
+
 #### Using a custom runner
 
 If the built-in runners do not meet your requirements, you can define your own runner in your project instead. For example, you may want to add a dry runner, which lists which nodes would be run instead of executing them. You can define it in the following way:

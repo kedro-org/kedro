@@ -113,6 +113,8 @@ class TensorFlowModelDataset(AbstractVersionedDataSet):
                 E.g. for ``GCSFileSystem`` class: `{project: 'my-project', ...}`
         """
         _fs_args = copy.deepcopy(fs_args) or {}
+        _fs_open_args_load = _fs_args.pop("open_args_load", {})
+        _fs_open_args_save = _fs_args.pop("open_args_save", {})
         _credentials = copy.deepcopy(credentials) or {}
         protocol, path = get_protocol_and_path(filepath, version)
 

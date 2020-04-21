@@ -47,6 +47,7 @@ from kedro.utils import load_obj
 
 warnings.simplefilter("default", DeprecationWarning)
 
+VERSION_FORMAT = "%Y-%m-%dT%H.%M.%S.%fZ"
 VERSIONED_FLAG_KEY = "versioned"
 VERSION_KEY = "version"
 HTTP_PROTOCOLS = ("http", "https")
@@ -334,12 +335,8 @@ def generate_timestamp() -> str:
         String representation of the current timestamp.
 
     """
-    current_ts = datetime.now(tz=timezone.utc)
-    fmt = (
-        "{d.year:04d}-{d.month:02d}-{d.day:02d}T{d.hour:02d}"
-        ".{d.minute:02d}.{d.second:02d}.{ms:03d}Z"
-    )
-    return fmt.format(d=current_ts, ms=current_ts.microsecond // 1000)
+    current_ts = datetime.now(tz=timezone.utc).strftime(VERSION_FORMAT)
+    return current_ts[:-4] + current_ts[-1:]  # Don't keep microseconds
 
 
 class Version(namedtuple("Version", ["load", "save"])):

@@ -19,7 +19,7 @@ lint:
 	pre-commit run -a --hook-stage manual
 
 test:
-	pytest tests
+	@./test-coverage.sh
 
 test-coverage:
 	@./test-coverage.sh

@@ -133,6 +133,8 @@ JUPYTER_IDLE_TIMEOUT_HELP = """When a notebook is closed, Jupyter server will
 terminate its kernel after so many seconds of inactivity. This does not affect
 any open notebooks."""
 
+SIMPLE_PIPELINE_HELP = """Show list of all pipelines in the project."""
+
 
 def _split_string(ctx, param, value):
     return [item.strip() for item in value.split(",") if item]
@@ -658,6 +660,43 @@ def list_datasets(pipeline, env):
 
         data = ((not_mentioned, dict(unused_by_type)), (mentioned, dict(used_by_type)))
         result[title.format(pipeline)] = {key: value for key, value in data if value}
+
+    secho(yaml.dump(result))
+
+
+@cli.group("pipeline")
+def pl():
+    """Commands for pipeline."""
+
+
+@pl.command("list")
+@click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
+@click.option("--simple", is_flag=True, multiple=False, help=SIMPLE_PIPELINE_HELP)
+@click.argument("pl_names", metavar="[PIPELINE_NAME]...", nargs=-1)
+def list_pipelines_and_nodes(pl_names, simple, env):
+    """Show detailed information about pipelines."""
+    context = load_context(Path.cwd(), env=env)
+    project_pipelines = context.pipelines
+    if simple:
+        secho(yaml.dump(sorted(project_pipelines.keys())))
+        return
+
+    pipelines = set(pl_names) or project_pipelines.keys()
+
+    result = {}
+    for pl_name in pipelines:
+        pl_obj = project_pipelines.get(pl_name)
+        if not pl_obj:
+            existing_pls = ", ".join(sorted(project_pipelines.keys()))
+            raise KedroCliError(
+                "{} pipeline not found. Existing pipelines: {}".format(
+                    pl_name, existing_pls
+                )
+            )
+
+        result[pl_name] = [
+            "{} ({})".format(node.short_name, node._func_name) for node in pl_obj.nodes
+        ]
 
     secho(yaml.dump(result))
 

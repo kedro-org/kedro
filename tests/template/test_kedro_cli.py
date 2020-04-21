@@ -40,6 +40,7 @@ from click.testing import CliRunner
 from kedro.extras.datasets.pandas import CSVDataSet
 from kedro.io.data_catalog import DataCatalog
 from kedro.io.memory_data_set import MemoryDataSet
+from kedro.pipeline import Pipeline, node
 from kedro.runner import ParallelRunner, SequentialRunner
 
 
@@ -874,3 +875,81 @@ class TestCatalogListCommand:
             }
         }
         yaml_dump_mock.assert_called_once_with(expected_dict)
+
+
+@pytest.fixture
+def pipelines():
+    def func_1(a):
+        return a  # pragma: no cover
+
+    def func_2(a):
+        return a  # pragma: no cover
+
+    def func_3(a):
+        return a  # pragma: no cover
+
+    return {
+        "pipeline_a": Pipeline(
+            [node(func_1, "bob_in", "bob_out"), node(func_2, "bob_out", "result")]
+        ),
+        "pipeline_b": Pipeline([node(func_3, "bob_in", "bob_out")]),
+    }
+
+
+class TestPipelineListCommand:
+    @staticmethod
+    @pytest.fixture(autouse=True)
+    def fake_load_context(mocker, fake_kedro_cli):
+        context = mocker.MagicMock()
+        return mocker.patch.object(fake_kedro_cli, "load_context", return_value=context)
+
+    def test_show_list_of_pipelines(self, fake_kedro_cli, fake_load_context, pipelines, mocker):
+        yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
+        mocked_context = fake_load_context.return_value
+        mocked_context.pipelines = pipelines
+
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["pipeline", "list", "--simple"])
+
+        assert not result.exit_code
+        yaml_dump_mock.assert_called_once_with(sorted(pipelines.keys()))
+
+    def test_show_specific_pipelines(
+        self, fake_kedro_cli, fake_load_context, pipelines, mocker
+    ):
+        yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
+        mocked_context = fake_load_context.return_value
+        mocked_context.pipelines = pipelines
+
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["pipeline", "list", "pipeline_b"]
+        )
+
+        assert not result.exit_code
+        expected_dict = {"pipeline_b": ["Func 3 (func_3)"]}
+        yaml_dump_mock.assert_called_once_with(expected_dict)
+
+    def test_describe_all_pipelines(
+        self, fake_kedro_cli, fake_load_context, pipelines, mocker
+    ):
+        yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
+        mocked_context = fake_load_context.return_value
+        mocked_context.pipelines = pipelines
+
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["pipeline", "list"]
+        )
+
+        assert not result.exit_code
+        expected_dict = {"pipeline_a": ["Func 1 (func_1)", "Func 2 (func_2)"], "pipeline_b": ["Func 3 (func_3)"]}
+        yaml_dump_mock.assert_called_once_with(expected_dict)
+
+    def test_not_found_pipeline(self, fake_kedro_cli, fake_load_context):
+        mocked_context = fake_load_context.return_value
+        mocked_context.pipelines = {"pipeline_a": None, "pipeline_c": None}
+
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["pipeline", "list", "fake"]
+        )
+        assert result.exit_code
+        expected_output = "Error: fake pipeline not found. Existing pipelines: pipeline_a, pipeline_c\n"
+        assert result.output == expected_output

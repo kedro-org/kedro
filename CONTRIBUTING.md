@@ -77,6 +77,25 @@ make test
 make build-docs
 ```
 
+#### Test run reports and coverage reports
+
+These commands generate test run reports and coverage reports:
+
+```
+make test
+or
+make test-coverage
+```
+
+Look for the test run report and the test coverage reports in these folders in the project root folder:
+
+```
+.coverage-reports
+.test-run-reports
+```
+
+The reports are stored in the sub-folders inside both of the above folders. Sub-folders are named by the `git` branch the tests are run on.
+
 ### Guidelines
 
  - Aim for cross-platform compatibility on Windows, macOS and Linux

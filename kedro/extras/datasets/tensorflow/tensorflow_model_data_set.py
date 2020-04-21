@@ -110,6 +110,8 @@ class TensorFlowModelDataset(AbstractVersionedDataSet):
             credentials: Credentials required to get access to the underlying filesystem.
                 E.g. for ``GCSFileSystem`` it should look like `{'token': None}`.
             fs_args: Extra arguments to pass into underlying filesystem class.
+            layer: The data layer according to the data engineering convention:
+                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
                 E.g. for ``GCSFileSystem`` class: `{project: 'my-project', ...}`
         """
         _fs_args = copy.deepcopy(fs_args) or {}

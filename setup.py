@@ -124,7 +124,7 @@ setup(
     install_requires=requires,
     author="QuantumBlack Labs",
     entry_points={"console_scripts": ["kedro = kedro.cli:main"]},
-    package_data={name: ["py.typed"] + template_files + doc_html_files},
+    package_data={name: ["py.typed", "test_requirements.txt"] + template_files + doc_html_files},
     zip_safe=False,
     keywords="pipelines, machine learning, data pipelines, data science, data engineering",
     classifiers=[

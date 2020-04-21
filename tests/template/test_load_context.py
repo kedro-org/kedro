@@ -66,7 +66,6 @@ class TestLoadContext:
         mocker.patch("logging.config.dictConfig")
 
         # first time
-        load_context(str(fake_repo_path))
         result_first_time = load_context(str(fake_repo_path))
         assert result_first_time.project_name == "Test Project"
         assert result_first_time.project_version == kedro.__version__
@@ -79,7 +78,7 @@ class TestLoadContext:
             assert result_first_time.project_version == result_second_time.project_version
             assert str(fake_repo_path.resolve() / "src") in sys.path
         except KedroContextError as kce:
-            print("FAILED: Should have loaded the context twice successfuly, "
+            print("FAILED: Should have loaded the context twice successfully, "
                   "and not got this exception:", kce)
             assert 0
 

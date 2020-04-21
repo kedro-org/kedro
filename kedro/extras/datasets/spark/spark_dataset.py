@@ -106,7 +106,7 @@ def _get_dbutils(spark: SparkSession) -> Optional[Any]:
     except ImportError:
         try:
             import IPython  # pylint: disable=import-error,import-outside-toplevel
-        except ImportError:
+        except ImportError:  # pragma: no cover
             pass
         else:
             ipython = IPython.get_ipython()

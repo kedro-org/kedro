@@ -71,7 +71,7 @@ commands:
           name: Run unit tests
           command: make test
       - store_artifacts:
-          path: .coverage-reports/**/*.*
+          path: .coverage-reports/
 
   lint:
     description: Run linters

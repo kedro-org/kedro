@@ -8,4 +8,4 @@ omit = [
   "kedro/__init__.py",
   "kedro/*/__init__.py",
 ]
-exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
+exclude_lines = ["pragma: no cover", "raise NotImplementedError", "pass"]

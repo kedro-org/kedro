@@ -128,7 +128,6 @@ class TensorFlowModelDataset(AbstractVersionedDataSet):
             exists_function=self._fs.exists,
         )
 
-        self._data = None
 
         # Handle default load and save arguments
         self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)

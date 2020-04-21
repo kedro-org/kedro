@@ -84,6 +84,7 @@ class TensorFlowModelDataset(AbstractVersionedDataSet):
             version: Version = None,
             credentials: Dict[str, Any] = None,
             fs_args: Dict[str, Any] = None,
+            layer: str = None,
     ) -> None:
         """
         Args:

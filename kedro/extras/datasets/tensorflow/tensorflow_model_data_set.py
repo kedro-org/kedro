@@ -173,4 +173,5 @@ class TensorFlowModelDataset(AbstractVersionedDataSet):
             load_args=self._load_args,
             save_args=self._save_args,
             version=self._version,
+            layer=self._layer,
         )

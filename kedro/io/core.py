@@ -41,8 +41,6 @@ from glob import iglob
 from pathlib import Path, PurePath
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
-from fsspec.utils import infer_storage_options
-
 from kedro.utils import load_obj
 
 warnings.simplefilter("default", DeprecationWarning)
@@ -427,7 +425,7 @@ def _load_obj(class_path: str) -> Optional[object]:
     try:
         class_obj = load_obj(class_path)
     except ModuleNotFoundError as error:
-        if error.name in class_path:
+        if error.name is None or error.name in class_path:
             return None
         # class_obj was successfully loaded, but some dependencies are missing.
         raise DataSetError(
@@ -623,6 +621,9 @@ def get_protocol_and_path(filepath: str, version: Version = None) -> Tuple[str, 
         DataSetError: when protocol is http(s) and version is not None.
         Note: HTTP(s) dataset doesn't support versioning.
     """
+    # pylint: disable=import-outside-toplevel
+    from fsspec.utils import infer_storage_options  # for performance reasons
+
     options_dict = infer_storage_options(filepath)
     path = options_dict["path"]
     protocol = options_dict["protocol"]

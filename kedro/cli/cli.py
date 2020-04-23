@@ -46,7 +46,6 @@ from typing import Any, Callable, Dict, List
 import click
 import pkg_resources
 import yaml
-from cookiecutter.main import cookiecutter
 
 import kedro.config.default_logger  # noqa
 from kedro import __version__ as version
@@ -203,6 +202,9 @@ def _create_project(config_path: str, verbose: bool):
             should contain the project_name, output_dir and repo_name.
         verbose: Extensive debug terminal logs.
     """
+    # pylint: disable=import-outside-toplevel
+    from cookiecutter.main import cookiecutter  # for performance reasons
+
     try:
         if config_path:
             config = _parse_config(config_path, verbose)

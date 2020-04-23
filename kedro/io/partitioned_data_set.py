@@ -36,9 +36,6 @@ from typing import Any, Callable, Dict, List, Tuple, Type, Union
 from urllib.parse import urlparse
 from warnings import warn
 
-import fsspec
-from fsspec.utils import infer_storage_options
-
 from kedro.io.core import (
     VERSION_KEY,
     VERSIONED_FLAG_KEY,
@@ -142,6 +139,9 @@ class PartitionedDataSet(AbstractDataSet):
         Raises:
             DataSetError: If versioning is enabled for the underlying dataset.
         """
+        # pylint: disable=import-outside-toplevel
+        from fsspec.utils import infer_storage_options  # for performance reasons
+
         super().__init__()
 
         self._path = path
@@ -182,7 +182,10 @@ class PartitionedDataSet(AbstractDataSet):
         self.invalidate_cache()
 
     @property
-    def _filesystem(self) -> fsspec.AbstractFileSystem:
+    def _filesystem(self):
+        # for performance reasons
+        import fsspec  # pylint: disable=import-outside-toplevel
+
         protocol = "s3" if self._protocol in S3_PROTOCOLS else self._protocol
         return fsspec.filesystem(protocol, **self._credentials)
 

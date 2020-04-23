@@ -42,6 +42,7 @@ class ProjectContext(KedroContext):
     """
 
     project_name = "{{ cookiecutter.project_name }}"
+    # `project_version` is the version of kedro used to generate the project
     project_version = "{{ cookiecutter.kedro_version }}"
 
     def _get_pipelines(self) -> Dict[str, Pipeline]:

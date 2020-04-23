@@ -12,6 +12,7 @@ kedro
   :template: autosummary/module.rst
 
   kedro.config
+  kedro.hooks
   kedro.io
   kedro.pipeline
   kedro.runner

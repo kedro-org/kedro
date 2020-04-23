@@ -406,6 +406,37 @@ def do_git_reset_hard(context):
         check_run("git reset --hard HEAD")
 
 
+@when('I move the package to "{new_source_dir}"')
+def move_package(context: behave.runner.Context, new_source_dir):
+    """Move the project package to a new directory.
+    """
+    current_src_path = context.root_project_dir / "src"
+    new_src_path = context.root_project_dir / "new_source_dir"
+
+    cmd = [
+        "mkdir",
+        str(new_source_dir),
+        ";",
+        "mv",
+        str(current_src_path / context.package_name),
+        str(new_src_path),
+    ]
+    context.result = run(cmd, env=context.env, cwd=str(context.root_project_dir))
+
+
+@when('Source directory is updated to "{new_source_dir}" in kedro.yml')
+def udpate_kedro_yml(context: behave.runner.Context, new_source_dir):
+    """Update `source_dir` in .kedro.yml file.
+    """
+
+    kedro_yml_path = context.root_project_dir / ".kedro.yml"
+    kedro_yml_path.write_text(
+        "context_path: {}.run.ProjectContext\nsource_dir: {}\n".format(
+            str(context.package_name), new_source_dir
+        )
+    )
+
+
 @given("I have updated kedro requirements")
 def update_kedro_req(context: behave.runner.Context):
     """Replace kedro as a standalone requirement with a line

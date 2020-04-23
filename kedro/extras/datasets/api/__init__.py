@@ -26,14 +26,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from kedro.extras.transformers import ProfileTimeTransformer
+"""``APIDataSet`` loads the data from HTTP(S) APIs
+and returns them into either as string or json Dict.
+It uses the python requests library: https://requests.readthedocs.io/en/master/
+"""
 
-
-class TestTransformers:
-    def test_timing(self, catalog, caplog):
-        catalog.add_transformer(ProfileTimeTransformer())
-
-        catalog.save("test", 42)
-        assert "Saving test took" in caplog.text
-        assert catalog.load("test") == 42
-        assert "Loading test took" in caplog.text
+from .api_dataset import APIDataSet  # NOQA

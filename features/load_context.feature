@@ -26,14 +26,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from kedro.extras.transformers import ProfileTimeTransformer
 
+Feature: Custom Kedro project
+    Background:
+        Given I have prepared a config file with example code
+        And I have run a non-interactive kedro new
 
-class TestTransformers:
-    def test_timing(self, catalog, caplog):
-        catalog.add_transformer(ProfileTimeTransformer())
+    Scenario: Update the source directory to be nested
+        When I move the package to "src/nested"
+        And Source directory is updated to "src/nested" in kedro.yml
+        And I execute the kedro command "run"
+        Then I should get a successful exit code
 
-        catalog.save("test", 42)
-        assert "Saving test took" in caplog.text
-        assert catalog.load("test") == 42
-        assert "Loading test took" in caplog.text
+    Scenario: Update the source directory to be outside of src
+        When I move the package to "."
+        And Source directory is updated to "." in kedro.yml
+        And I execute the kedro command "run"
+        Then I should get a successful exit code

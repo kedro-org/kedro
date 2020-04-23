@@ -282,6 +282,7 @@ def _get_config_from_prompts() -> Dict:
         "Project Name:",
         "Please enter a human readable name for your new project.",
         "Spaces and punctuation are allowed.",
+        start="",
     )
 
     project_name = _get_user_input(project_name_prompt, default="New Kedro Project")
@@ -489,22 +490,25 @@ def _show_example_config():
 
 def _print_kedro_new_success_message(result):
     click.secho(
-        "Change directory to the project generated in " + str(result.resolve()),
+        "\nChange directory to the project generated in {}".format(
+            str(result.resolve())
+        ),
         fg="green",
     )
     click.secho(
-        "A best-practice setup includes initialising git and creating "
+        "\nA best-practice setup includes initialising git and creating "
         "a virtual environment before running `kedro install` to install "
         "project-specific dependencies. Refer to the Kedro documentation: "
         "https://kedro.readthedocs.io/"
     )
 
 
-def _get_prompt_text(title, *text):
+def _get_prompt_text(title, *text, start: str = "\n"):
     title = title.strip().title()
     title = click.style(title + "\n" + "=" * len(title), bold=True)
-    prompt_text = [title] + list(text)
-    return "\n".join(str(x).strip() for x in prompt_text) + "\n"
+    prompt_lines = [title] + list(text)
+    prompt_text = "\n".join(str(line).strip() for line in prompt_lines)
+    return "{}{}\n".format(start, prompt_text)
 
 
 def get_project_context(key: str = "context", **kwargs) -> Any:

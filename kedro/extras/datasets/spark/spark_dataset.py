@@ -33,7 +33,7 @@
 from copy import deepcopy
 from fnmatch import fnmatch
 from functools import partial
-from pathlib import PurePosixPath
+from pathlib import PurePath, PurePosixPath
 from typing import Any, Dict, List, Optional, Tuple
 from warnings import warn
 
@@ -268,9 +268,11 @@ class SparkDataSet(AbstractVersionedDataSet):
             path = PurePosixPath(filepath)
 
         else:
-            path = PurePosixPath(filepath)
+            path = PurePath(filepath)  # type: ignore
 
             if filepath.startswith("/dbfs"):
+                # Use PosixPath if the filepath references DBFS
+                path = PurePosixPath(filepath)
                 dbutils = _get_dbutils(self._get_spark())
                 if dbutils:
                     glob_function = partial(_dbfs_glob, dbutils=dbutils)
@@ -294,6 +296,10 @@ class SparkDataSet(AbstractVersionedDataSet):
 
         self._file_format = file_format
         self._fs_prefix = fs_prefix
+
+    def __getstate__(self):
+        # SparkDataSet cannot be used with ParallelRunner
+        raise AttributeError("{} cannot be serialized!".format(self.__class__.__name__))
 
     def _describe(self) -> Dict[str, Any]:
         return dict(

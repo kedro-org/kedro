@@ -31,16 +31,16 @@ in a Kedro's execution process.
 # pylint: disable=global-statement,invalid-name
 from pluggy import PluginManager
 
+from .markers import HOOK_NAMESPACE
 from .specs import DataCatalogSpecs, NodeSpecs, PipelineSpecs
 
-_HOOK_NAMESPACE = "kedro"
 _hook_manager = None
 
 
 def _create_hook_manager() -> PluginManager:
     """Create a new PluginManager instance and register Kedro's hook specs.
     """
-    manager = PluginManager(_HOOK_NAMESPACE)
+    manager = PluginManager(HOOK_NAMESPACE)
     manager.add_hookspecs(NodeSpecs)
     manager.add_hookspecs(PipelineSpecs)
     manager.add_hookspecs(DataCatalogSpecs)

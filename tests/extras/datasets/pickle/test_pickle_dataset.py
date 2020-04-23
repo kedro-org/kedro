@@ -145,21 +145,21 @@ class TestPickleDataSet:
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
     def test_unserializable_data(self, pickle_data_set, dummy_dataframe, mocker):
-        mocker.patch("pickle.dumps", side_effect=pickle.PickleError)
-        pattern = (
-            r".+ cannot be serialized\. PickleDataSet can only be used with "
-            r"serializable data"
-        )
+        mocker.patch("pickle.dump", side_effect=pickle.PickleError)
+        pattern = r".+ was not serialized due to:.*"
 
         with pytest.raises(DataSetError, match=pattern):
             pickle_data_set.save(dummy_dataframe)
 
-    def test_non_serialisation_error(self, pickle_data_set, dummy_dataframe, mocker):
-        pattern = "Some Error"
-        mocker.patch("pickle.dumps", side_effect=ValueError(pattern))
+    def test_invalid_backend(self):
+        pattern = r"'backend' should be one of \['pickle', 'joblib'\], got 'invalid'\."
+        with pytest.raises(ValueError, match=pattern):
+            PickleDataSet(filepath="test.pkl", backend="invalid")
 
-        with pytest.raises(DataSetError, match=pattern):
-            pickle_data_set.save(dummy_dataframe)
+    def test_no_joblib(self, mocker):
+        mocker.patch.object(PickleDataSet, "BACKENDS", {"joblib": None})
+        with pytest.raises(ImportError):
+            PickleDataSet(filepath="test.pkl", backend="joblib")
 
 
 class TestPickleDataSetVersioned:
@@ -183,6 +183,8 @@ class TestPickleDataSetVersioned:
         assert "PickleDataSet" in str(ds)
         assert "protocol" in str(ds_versioned)
         assert "protocol" in str(ds)
+        assert "backend" in str(ds_versioned)
+        assert "backend" in str(ds)
 
     def test_save_and_load(self, versioned_pickle_data_set, dummy_dataframe):
         """Test that saved and reloaded data matches the original one for

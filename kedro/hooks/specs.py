@@ -69,7 +69,7 @@ class DataCatalogSpecs:
                 for each dataset in the catalog.
             run_id: The id of the run for which the catalog is loaded.
         """
-        pass  # pragma: no cover
+        pass
 
 
 class NodeSpecs:
@@ -94,7 +94,7 @@ class NodeSpecs:
             is_async: Whether the node was run in ``async`` mode.
             run_id: The id of the run.
         """
-        pass  # pragma: no cover
+        pass
 
     @hook_spec
     def after_node_run(  # pylint: disable=too-many-arguments
@@ -118,7 +118,7 @@ class NodeSpecs:
             is_async: Whether the node was run in ``async`` mode.
             run_id: The id of the run.
         """
-        pass  # pragma: no cover
+        pass
 
 
 class PipelineSpecs:
@@ -132,52 +132,54 @@ class PipelineSpecs:
 
         Args:
             run_params: The params needed for the given run.
-                Should be identical to the data logged by Journal.
-                # @fixme: this needs to be modelled explicitly as code, instead of comment
-                Schema: {
-                    "run_id": str,
-                    "project_path": str,
-                    "env": str,
-                    "kedro_version": str,
-                    "tags": Optional[List[str]],
-                    "from_nodes": Optional[List[str]],
-                    "to_nodes": Optional[List[str]],
-                    "node_names": Optional[List[str]],
-                    "from_inputs": Optional[List[str]],
-                    "load_versions": Optional[List[str]],
-                    "pipeline_name": str,
-                    "extra_params": Optional[Dict[str, Any]],
-                }
+                Should be identical to the data logged by Journal with the following schema::
+
+                   {
+                     "run_id": str
+                     "project_path": str,
+                     "env": str,
+                     "kedro_version": str,
+                     "tags": Optional[List[str]],
+                     "from_nodes": Optional[List[str]],
+                     "to_nodes": Optional[List[str]],
+                     "node_names": Optional[List[str]],
+                     "from_inputs": Optional[List[str]],
+                     "load_versions": Optional[List[str]],
+                     "pipeline_name": str,
+                     "extra_params": Optional[Dict[str, Any]]
+                   }
+
             pipeline: The ``Pipeline`` that will be run.
             catalog: The ``DataCatalog`` to be used during the run.
         """
-        pass  # pragma: no cover
+        pass
 
     @hook_spec
     def after_pipeline_run(
-        self, run_params: Dict[str, Any], pipeline: Pipeline, catalog: DataCatalog,
+        self, run_params: Dict[str, Any], pipeline: Pipeline, catalog: DataCatalog
     ) -> None:
         """Hook to be invoked after a pipeline runs.
 
         Args:
             run_params: The params needed for the given run.
-                Should be identical to the data logged by Journal.
-                # @fixme: this needs to be modelled explicitly as code, instead of comment
-                Schema: {
-                    "run_id": str,
-                    "project_path": str,
-                    "env": str,
-                    "kedro_version": str,
-                    "tags": Optional[List[str]],
-                    "from_nodes": Optional[List[str]],
-                    "to_nodes": Optional[List[str]],
-                    "node_names": Optional[List[str]],
-                    "from_inputs": Optional[List[str]],
-                    "load_versions": Optional[List[str]],
-                    "pipeline_name": str,
-                    "extra_params": Optional[Dict[str, Any]],
-                }
+                Should be identical to the data logged by Journal with the following schema::
+
+                   {
+                     "run_id": str
+                     "project_path": str,
+                     "env": str,
+                     "kedro_version": str,
+                     "tags": Optional[List[str]],
+                     "from_nodes": Optional[List[str]],
+                     "to_nodes": Optional[List[str]],
+                     "node_names": Optional[List[str]],
+                     "from_inputs": Optional[List[str]],
+                     "load_versions": Optional[List[str]],
+                     "pipeline_name": str,
+                     "extra_params": Optional[Dict[str, Any]]
+                   }
+
             pipeline: The ``Pipeline`` that was run.
             catalog: The ``DataCatalog`` used during the run.
         """
-        pass  # pragma: no cover
+        pass

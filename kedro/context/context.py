@@ -635,7 +635,7 @@ class KedroContext(abc.ABC):
         # Run the runner
         runner = runner or SequentialRunner()
         self._hook_manager.hook.before_pipeline_run(  # pylint: disable=no-member
-            run_params=record_data, pipeline=filtered_pipeline, catalog=catalog,
+            run_params=record_data, pipeline=filtered_pipeline, catalog=catalog
         )
         run_result = runner.run(filtered_pipeline, catalog, run_id)
         self._hook_manager.hook.after_pipeline_run(  # pylint: disable=no-member
@@ -683,14 +683,6 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
 
     """
     project_path = Path(project_path).expanduser().resolve()
-    src_path = str(project_path / "src")
-
-    if src_path not in sys.path:
-        sys.path.insert(0, src_path)
-
-    if "PYTHONPATH" not in os.environ:
-        os.environ["PYTHONPATH"] = src_path
-
     kedro_yaml = project_path / ".kedro.yml"
 
     try:
@@ -705,6 +697,25 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
         )
     except Exception:
         raise KedroContextError("Failed to parse '.kedro.yml' file")
+
+    src_prefix = Path(kedro_yaml_content.get("source_dir", "src"))
+    if src_prefix.is_absolute() or ".." in str(src_prefix):
+        raise KedroContextError(
+            "'source_dir' in '.kedro.yml' has to be a relative path to your project root, "
+            "and cannot be an absolute path or contain '..'. "
+            "A path is considered absolute if it has both a root and (if the flavour allows) "
+            "a drive."
+        )
+
+    src_path = project_path / src_prefix
+    if not src_path.exists():
+        raise KedroContextError("Source path '{}' cannot be found.".format(src_path))
+
+    if src_path not in sys.path:
+        sys.path.insert(0, str(src_path))
+
+    if "PYTHONPATH" not in os.environ:
+        os.environ["PYTHONPATH"] = str(src_path)
 
     try:
         context_path = kedro_yaml_content["context_path"]
@@ -721,7 +732,7 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
     kwargs["env"] = kwargs.get("env") or os.getenv("KEDRO_ENV")
 
     # Instantiate the context after changing the cwd for logging to be properly configured.
-    context = context_class(project_path, **kwargs)
+    context = context_class(project_path=project_path, **kwargs)
     return context
 
 

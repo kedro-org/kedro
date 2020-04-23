@@ -33,3 +33,4 @@ to execute ``Pipeline`` instances.
 from .parallel_runner import ParallelRunner  # NOQA
 from .runner import AbstractRunner, run_node  # NOQA
 from .sequential_runner import SequentialRunner  # NOQA
+from .thread_runner import ThreadRunner  # NOQA

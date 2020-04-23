@@ -89,10 +89,14 @@ class ParquetDataSet(AbstractVersionedDataSet):
             filepath: Filepath to a Parquet file prefixed with a protocol like `s3://`.
                 If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
+                It can also be a path to a directory. If the directory is
+                provided then it can be used for reading partitioned parquet files.
                 Note: `http(s)` doesn't support versioning.
-            load_args: Pandas options for loading Parquet files.
-                Here you can find all available arguments:
-                https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_parquet.html
+            load_args: Additional options for loading Parquet file(s).
+                Here you can find all available arguments when reading single file:
+                https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_parquet.html
+                Here you can find all available arguments when reading partitioned datasets:
+                https://arrow.apache.org/docs/python/generated/pyarrow.parquet.ParquetDataset.html#pyarrow.parquet.ParquetDataset.read
                 All defaults are preserved.
             save_args: Additional saving options for `pyarrow.parquet.write_table`.
                 Here you can find all available arguments:
@@ -152,16 +156,34 @@ class ParquetDataSet(AbstractVersionedDataSet):
     def _load(self) -> pd.DataFrame:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
-        with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
-            return pd.read_parquet(fs_file, **self._load_args)
+        if self._fs.isdir(load_path):
+            # It doesn't work at least on S3 if root folder was created manually
+            # https://issues.apache.org/jira/browse/ARROW-7867
+            data = (
+                pq.ParquetDataset(load_path, filesystem=self._fs)
+                .read(**self._load_args)
+                .to_pandas()
+            )
+        else:
+            with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
+                data = pd.read_parquet(fs_file, **self._load_args)
+
+        return data
 
     def _save(self, data: pd.DataFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
-        table = pa.Table.from_pandas(data)
-        pq.write_table(
-            table=table, where=save_path, filesystem=self._fs, **self._save_args
-        )
+        try:
+            table = pa.Table.from_pandas(data)
+            pq.write_table(
+                table=table, where=save_path, filesystem=self._fs, **self._save_args
+            )
+        except IsADirectoryError as err:
+            raise DataSetError(
+                "Saving {} to a directory is not supported. \n{}".format(
+                    self.__class__.__name__, str(err)
+                )
+            )
 
         self._invalidate_cache()
 

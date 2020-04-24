@@ -27,22 +27,19 @@ Kedro is a development workflow framework that implements software engineering b
 
 ## How do I install Kedro?
 
-`kedro` is a Python package. To install it, simply run:
+`kedro` is a Python package. To install it from the Python Package Index (PyPI) simply run:
 
 ```
 pip install kedro
 ```
 
-See more detailed installation instructions, including how to setup Python virtual environments, in our [installation guide](https://kedro.readthedocs.io/en/stable/02_getting_started/02_install.html) and get started with our ["Hello Word"](https://kedro.readthedocs.io/en/stable/02_getting_started/04_hello_world.html) example.
-
-### Conda package
-
-It is also possible to install `kedro` using `Conda` with the `conda-forge` channel. With `conda` already installed, simply run:
+It is also possible to install `kedro` using `conda`, a package and environment manager program bundled with Anaconda. With [`conda`](https://kedro.readthedocs.io/en/stable/02_getting_started/01_prerequisites.html#python-virtual-environments) already installed, simply run:
 
 ```
 conda install -c conda-forge kedro
 ```
 
+See more detailed installation instructions, including how to setup Python virtual environments, in our [installation guide](https://kedro.readthedocs.io/en/stable/02_getting_started/02_install.html) and get started with our ["Hello Word"](https://kedro.readthedocs.io/en/stable/02_getting_started/04_hello_world.html) example.
 
 ## What are the main features of Kedro?
 

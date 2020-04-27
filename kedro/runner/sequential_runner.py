@@ -67,12 +67,15 @@ class SequentialRunner(AbstractRunner):
         """
         return MemoryDataSet()
 
-    def _run(self, pipeline: Pipeline, catalog: DataCatalog) -> None:
+    def _run(
+        self, pipeline: Pipeline, catalog: DataCatalog, run_id: str = None
+    ) -> None:
         """The method implementing sequential pipeline running.
 
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
+            run_id: The id of the run.
 
         Raises:
             Exception: in case of any downstream node failure.
@@ -84,7 +87,7 @@ class SequentialRunner(AbstractRunner):
 
         for exec_index, node in enumerate(nodes):
             try:
-                run_node(node, catalog, self._is_async)
+                run_node(node, catalog, self._is_async, run_id)
                 done_nodes.add(node)
             except Exception:
                 self._suggest_resume_scenario(pipeline, done_nodes)

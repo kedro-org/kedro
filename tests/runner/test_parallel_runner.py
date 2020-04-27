@@ -70,6 +70,10 @@ def return_none(arg):
     return arg
 
 
+def return_not_serializable(arg):  # pylint: disable=unused-argument
+    return lambda x: x
+
+
 @pytest.fixture
 def catalog():
     return DataCatalog()
@@ -208,6 +212,20 @@ class TestInvalidParallelRunner:
 
         pipeline = Pipeline([fan_out_fan_in])
         with pytest.raises(AttributeError, match="['A']"):
+            ParallelRunner(is_async=is_async).run(pipeline, catalog)
+
+    def test_memory_dataset_not_serializable(self, is_async, catalog):
+        """Memory dataset cannot be serializable because of data it stores.
+        """
+        data = return_not_serializable(None)
+        pipeline = Pipeline([node(return_not_serializable, "A", "B")])
+        catalog.add_feed_dict(feed_dict=dict(A=42))
+        pattern = (
+            r"{0} cannot be serialized. ParallelRunner implicit memory datasets "
+            r"can only be used with serializable data".format(str(data.__class__))
+        )
+
+        with pytest.raises(DataSetError, match=pattern):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
 

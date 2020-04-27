@@ -14,3 +14,4 @@ kedro.runner
       kedro.runner.AbstractRunner
       kedro.runner.SequentialRunner
       kedro.runner.ParallelRunner
+      kedro.runner.ThreadRunner

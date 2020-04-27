@@ -32,8 +32,9 @@
 
 from copy import deepcopy
 from fnmatch import fnmatch
-from pathlib import Path, PurePosixPath
-from typing import Any, Dict, List, Tuple
+from functools import partial
+from pathlib import PurePath, PurePosixPath
+from typing import Any, Dict, List, Optional, Tuple
 from warnings import warn
 
 from hdfs import HdfsError, InsecureClient
@@ -61,8 +62,57 @@ def _split_filepath(filepath: str) -> Tuple[str, str]:
     return "", split_[0]
 
 
-def _strip_dbfs_prefix(path: str) -> str:
-    return path[len("/dbfs") :] if path.startswith("/dbfs") else path
+def _strip_dbfs_prefix(path: str, prefix: str = "/dbfs") -> str:
+    return path[len(prefix) :] if path.startswith(prefix) else path
+
+
+def _dbfs_glob(pattern: str, dbutils: Any) -> List[str]:
+    """Perform a custom glob search in DBFS using the provided pattern.
+    It is assumed that version paths are managed by Kedro only.
+
+    Args:
+        pattern: Glob pattern to search for.
+        dbutils: dbutils instance to operate with DBFS.
+
+    Returns:
+            List of DBFS paths prefixed with '/dbfs' that satisfy the glob pattern.
+    """
+    pattern = _strip_dbfs_prefix(pattern)
+    prefix = _parse_glob_pattern(pattern)
+    matched = set()
+    filename = pattern.split("/")[-1]
+
+    for file_info in dbutils.fs.ls(prefix):
+        if file_info.isDir():
+            path = str(
+                PurePosixPath(_strip_dbfs_prefix(file_info.path, "dbfs:")) / filename
+            )
+            if fnmatch(path, pattern):
+                path = "/dbfs" + path
+                matched.add(path)
+    return sorted(matched)
+
+
+def _get_dbutils(spark: SparkSession) -> Optional[Any]:
+    """Get the instance of 'dbutils' or None if the one could not be found."""
+    dbutils = globals().get("dbutils")
+    if dbutils:
+        return dbutils
+
+    try:
+        from pyspark.dbutils import DBUtils  # pylint: disable=import-outside-toplevel
+
+        dbutils = DBUtils(spark)
+    except ImportError:
+        try:
+            import IPython  # pylint: disable=import-error,import-outside-toplevel
+        except ImportError:
+            pass
+        else:
+            ipython = IPython.get_ipython()
+            dbutils = ipython.user_ns.get("dbutils") if ipython else None
+
+    return dbutils
 
 
 class KedroHdfsInsecureClient(InsecureClient):
@@ -185,6 +235,8 @@ class SparkDataSet(AbstractVersionedDataSet):
         """
         credentials = deepcopy(credentials) or {}
         fs_prefix, filepath = _split_filepath(filepath)
+        exists_function = None
+        glob_function = None
 
         if fs_prefix in ("s3a://", "s3n://"):
             if fs_prefix == "s3n://":
@@ -216,8 +268,14 @@ class SparkDataSet(AbstractVersionedDataSet):
             path = PurePosixPath(filepath)
 
         else:
-            exists_function = glob_function = None  # type: ignore
-            path = Path(filepath)  # type: ignore
+            path = PurePath(filepath)  # type: ignore
+
+            if filepath.startswith("/dbfs"):
+                # Use PosixPath if the filepath references DBFS
+                path = PurePosixPath(filepath)
+                dbutils = _get_dbutils(self._get_spark())
+                if dbutils:
+                    glob_function = partial(_dbfs_glob, dbutils=dbutils)
 
         super().__init__(
             filepath=path,
@@ -238,6 +296,10 @@ class SparkDataSet(AbstractVersionedDataSet):
 
         self._file_format = file_format
         self._fs_prefix = fs_prefix
+
+    def __getstate__(self):
+        # SparkDataSet cannot be used with ParallelRunner
+        raise AttributeError("{} cannot be serialized!".format(self.__class__.__name__))
 
     def _describe(self) -> Dict[str, Any]:
         return dict(

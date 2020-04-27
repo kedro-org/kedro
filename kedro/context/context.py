@@ -33,8 +33,8 @@ import logging.config
 import os
 import sys
 from copy import deepcopy
-from pathlib import Path
-from typing import Any, Dict, Iterable, Union
+from pathlib import Path, PureWindowsPath
+from typing import Any, Dict, Iterable, Tuple, Union
 from urllib.parse import urlparse
 from warnings import warn
 
@@ -42,6 +42,7 @@ import yaml
 
 from kedro import __version__
 from kedro.config import ConfigLoader, MissingConfigException
+from kedro.hooks import get_hook_manager
 from kedro.io import DataCatalog
 from kedro.io.core import generate_timestamp
 from kedro.pipeline import Pipeline
@@ -77,17 +78,17 @@ def _is_relative_path(path_string: str) -> bool:
     Returns:
         Whether the string is a relative path.
     """
-    drive, filepath = os.path.splitdrive(path_string)
-
-    is_full_windows_path_with_drive = bool(drive)
+    # os.path.splitdrive does not reliably work on non-Windows systems
+    # breaking the coverage, using PureWindowsPath instead
+    is_full_windows_path_with_drive = bool(PureWindowsPath(path_string).drive)
     if is_full_windows_path_with_drive:
         return False
 
-    is_remote_path = bool(urlparse(filepath).scheme)
+    is_remote_path = bool(urlparse(path_string).scheme)
     if is_remote_path:
         return False
 
-    is_absolute_path = Path(filepath).is_absolute()
+    is_absolute_path = Path(path_string).is_absolute()
     if is_absolute_path:
         return False
 
@@ -161,6 +162,7 @@ class KedroContext(abc.ABC):
     Attributes:
        CONF_ROOT: Name of root directory containing project configuration.
        Default name is "conf".
+       hooks: The list of hooks provided by user to extend KedroContext's execution.
 
     Example:
     ::
@@ -176,6 +178,9 @@ class KedroContext(abc.ABC):
     """
 
     CONF_ROOT = "conf"
+
+    # Registry for user-defined hooks to be overwritten by a project context.
+    hooks: Tuple = ()
 
     def __init__(
         self,
@@ -207,6 +212,9 @@ class KedroContext(abc.ABC):
         self.env = env or "local"
         self._extra_params = deepcopy(extra_params)
         self._setup_logging()
+
+        # setup hooks
+        self._register_hooks()
 
     @property
     @abc.abstractmethod
@@ -254,6 +262,17 @@ class KedroContext(abc.ABC):
             A dictionary of defined pipelines.
         """
         return self._get_pipelines()
+
+    def _register_hooks(self) -> None:
+        """Register all hooks as specified in ``hooks`` with the global ``hook_manager``.
+        """
+        self._hook_manager = get_hook_manager()
+        for hooks_collection in self.hooks:
+            # Sometimes users might create more than one context instance, in which case
+            # hooks have already been registered, so we perform a simple check here
+            # to avoid an error being raised and break user's workflow.
+            if not self._hook_manager.is_registered(hooks_collection):
+                self._hook_manager.register(hooks_collection)
 
     def _get_pipeline(self, name: str = None) -> Pipeline:
         name = name or "__default__"
@@ -341,7 +360,17 @@ class KedroContext(abc.ABC):
         catalog = self._create_catalog(
             conf_catalog, conf_creds, save_version, journal, load_versions
         )
-        catalog.add_feed_dict(self._get_feed_dict())
+        feed_dict = self._get_feed_dict()
+        catalog.add_feed_dict(feed_dict)
+        self._hook_manager.hook.after_catalog_created(  # pylint: disable=no-member
+            catalog=catalog,
+            conf_catalog=conf_catalog,
+            conf_creds=conf_creds,
+            feed_dict=feed_dict,
+            save_version=save_version,
+            load_versions=load_versions,
+            run_id=self.run_id,
+        )
         return catalog
 
     def _create_catalog(  # pylint: disable=no-self-use,too-many-arguments
@@ -605,7 +634,17 @@ class KedroContext(abc.ABC):
 
         # Run the runner
         runner = runner or SequentialRunner()
-        return runner.run(filtered_pipeline, catalog)
+        self._hook_manager.hook.before_pipeline_run(  # pylint: disable=no-member
+            run_params=record_data, pipeline=filtered_pipeline, catalog=catalog
+        )
+        run_result = runner.run(filtered_pipeline, catalog, run_id)
+        self._hook_manager.hook.after_pipeline_run(  # pylint: disable=no-member
+            run_params=record_data,
+            run_result=run_result,
+            pipeline=filtered_pipeline,
+            catalog=catalog,
+        )
+        return run_result
 
     def _get_run_id(
         self, *args, **kwargs  # pylint: disable=unused-argument
@@ -644,14 +683,6 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
 
     """
     project_path = Path(project_path).expanduser().resolve()
-    src_path = str(project_path / "src")
-
-    if src_path not in sys.path:
-        sys.path.insert(0, src_path)
-
-    if "PYTHONPATH" not in os.environ:
-        os.environ["PYTHONPATH"] = src_path
-
     kedro_yaml = project_path / ".kedro.yml"
 
     try:
@@ -666,6 +697,25 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
         )
     except Exception:
         raise KedroContextError("Failed to parse '.kedro.yml' file")
+
+    src_prefix = Path(kedro_yaml_content.get("source_dir", "src"))
+    if src_prefix.is_absolute() or ".." in str(src_prefix):
+        raise KedroContextError(
+            "'source_dir' in '.kedro.yml' has to be a relative path to your project root, "
+            "and cannot be an absolute path or contain '..'. "
+            "A path is considered absolute if it has both a root and (if the flavour allows) "
+            "a drive."
+        )
+
+    src_path = project_path / src_prefix
+    if not src_path.exists():
+        raise KedroContextError("Source path '{}' cannot be found.".format(src_path))
+
+    if src_path not in sys.path:
+        sys.path.insert(0, str(src_path))
+
+    if "PYTHONPATH" not in os.environ:
+        os.environ["PYTHONPATH"] = str(src_path)
 
     try:
         context_path = kedro_yaml_content["context_path"]
@@ -682,7 +732,7 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
     kwargs["env"] = kwargs.get("env") or os.getenv("KEDRO_ENV")
 
     # Instantiate the context after changing the cwd for logging to be properly configured.
-    context = context_class(project_path, **kwargs)
+    context = context_class(project_path=project_path, **kwargs)
     return context
 
 

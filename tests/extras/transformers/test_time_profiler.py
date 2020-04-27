@@ -26,39 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any, Dict
-
-import pytest
-
 from kedro.extras.transformers import ProfileTimeTransformer
-from kedro.io import AbstractDataSet, DataCatalog
-
-
-class FakeDataSet(AbstractDataSet):
-    def __init__(self, data):
-        self.log = []
-        self.data = data
-
-    def _load(self) -> Any:
-        self.log.append(("load", self.data))
-        return self.data
-
-    def _save(self, data: Any) -> None:
-        self.log.append(("save", data))
-        self.data = data
-
-    def _describe(self) -> Dict[str, Any]:
-        return {"data": self.data}
-
-
-@pytest.fixture
-def fake_data_set():
-    return FakeDataSet(123)
-
-
-@pytest.fixture
-def catalog(fake_data_set):
-    return DataCatalog({"test": fake_data_set})
 
 
 class TestTransformers:

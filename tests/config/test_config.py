@@ -85,7 +85,7 @@ def base_config(tmp_path):
     return {
         "trains": {"type": "MemoryDataSet"},
         "cars": {
-            "type": "CSVLocalDataSet",
+            "type": "pandas.CSVDataSet",
             "filepath": filepath,
             "save_args": {"index": True},
         },
@@ -97,7 +97,7 @@ def local_config(tmp_path):
     filepath = str(tmp_path / "cars.csv")
     return {
         "cars": {
-            "type": "CSVLocalDataSet",
+            "type": "pandas.CSVDataSet",
             "filepath": filepath,
             "save_args": {"index": False},
         },
@@ -156,7 +156,7 @@ class TestConfigLoader:
         assert db_conf["prod"]["url"] == "postgresql://user:pass@url_prod/db"
 
         assert catalog["trains"]["type"] == "MemoryDataSet"
-        assert catalog["cars"]["type"] == "CSVLocalDataSet"
+        assert catalog["cars"]["type"] == "pandas.CSVDataSet"
         assert catalog["boats"]["type"] == "MemoryDataSet"
         assert not catalog["cars"]["save_args"]["index"]
 
@@ -194,7 +194,7 @@ class TestConfigLoader:
         """Test loading the config from subdirectories"""
         catalog = ConfigLoader(str(tmp_path / "base")).get("catalog*", "catalog*/**")
         assert catalog.keys() == {"cars", "trains", "nested"}
-        assert catalog["cars"]["type"] == "CSVLocalDataSet"
+        assert catalog["cars"]["type"] == "pandas.CSVDataSet"
         assert catalog["cars"]["save_args"]["index"] is True
         assert catalog["nested"]["type"] == "MemoryDataSet"
 

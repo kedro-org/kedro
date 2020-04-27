@@ -34,6 +34,7 @@ from abc import ABC, abstractmethod
 from concurrent.futures import ALL_COMPLETED, ThreadPoolExecutor, as_completed, wait
 from typing import Any, Dict, Iterable
 
+from kedro.hooks import get_hook_manager
 from kedro.io import AbstractDataSet, DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
@@ -58,13 +59,16 @@ class AbstractRunner(ABC):
     def _logger(self):
         return logging.getLogger(self.__module__)
 
-    def run(self, pipeline: Pipeline, catalog: DataCatalog) -> Dict[str, Any]:
+    def run(
+        self, pipeline: Pipeline, catalog: DataCatalog, run_id: str = None
+    ) -> Dict[str, Any]:
         """Run the ``Pipeline`` using the ``DataSet``s provided by ``catalog``
         and save results back to the same objects.
 
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
+            run_id: The id of the run.
 
         Raises:
             ValueError: Raised when ``Pipeline`` inputs cannot be satisfied.
@@ -94,7 +98,7 @@ class AbstractRunner(ABC):
             self._logger.info(
                 "Asynchronous mode is enabled for loading and saving data"
             )
-        self._run(pipeline, catalog)
+        self._run(pipeline, catalog, run_id)
 
         self._logger.info("Pipeline execution completed successfully.")
 
@@ -136,13 +140,16 @@ class AbstractRunner(ABC):
         return self.run(to_rerun, catalog)
 
     @abstractmethod  # pragma: no cover
-    def _run(self, pipeline: Pipeline, catalog: DataCatalog) -> None:
+    def _run(
+        self, pipeline: Pipeline, catalog: DataCatalog, run_id: str = None
+    ) -> None:
         """The abstract interface for running pipelines, assuming that the
         inputs have already been checked and normalized by run().
 
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
+            run_id: The id of the run.
 
         """
         pass
@@ -184,50 +191,75 @@ class AbstractRunner(ABC):
         )
 
 
-def run_node(node: Node, catalog: DataCatalog, is_async: bool = False) -> Node:
+def run_node(
+    node: Node, catalog: DataCatalog, is_async: bool = False, run_id: str = None
+) -> Node:
     """Run a single `Node` with inputs from and outputs to the `catalog`.
 
     Args:
         node: The ``Node`` to run.
         catalog: A ``DataCatalog`` containing the node's inputs and outputs.
         is_async: If True, the node inputs and outputs are loaded and saved
-                    asynchronously with threads. Defaults to False.
+            asynchronously with threads. Defaults to False.
+        run_id: The id of the pipeline run
 
     Returns:
         The node argument.
 
     """
     if is_async:
-        node = _run_node_async(node, catalog)
+        node = _run_node_async(node, catalog, run_id)
     else:
-        node = _run_node_sequential(node, catalog)
+        node = _run_node_sequential(node, catalog, run_id)
 
     for name in node.confirms:
         catalog.confirm(name)
     return node
 
 
-def _run_node_sequential(node: Node, catalog: DataCatalog) -> Node:
-    inputs = {}
-    for name in node.inputs:
-        inputs[name] = catalog.load(name)
-
+def _run_node_sequential(node: Node, catalog: DataCatalog, run_id: str = None) -> Node:
+    inputs = {name: catalog.load(name) for name in node.inputs}
+    hook_manager = get_hook_manager()
+    is_async = False
+    hook_manager.hook.before_node_run(  # pylint: disable=no-member
+        node=node, catalog=catalog, inputs=inputs, is_async=is_async, run_id=run_id
+    )
     outputs = node.run(inputs)
+    hook_manager.hook.after_node_run(  # pylint: disable=no-member
+        node=node,
+        catalog=catalog,
+        inputs=inputs,
+        outputs=outputs,
+        is_async=is_async,
+        run_id=run_id,
+    )
 
     for name, data in outputs.items():
         catalog.save(name, data)
     return node
 
 
-def _run_node_async(node: Node, catalog: DataCatalog) -> Node:
+def _run_node_async(node: Node, catalog: DataCatalog, run_id: str = None) -> Node:
     with ThreadPoolExecutor() as pool:
         inputs = {
             name: pool.submit(catalog.load, name) for name in node.inputs
         }  # Python dict is thread-safe
         wait(inputs.values(), return_when=ALL_COMPLETED)
         inputs = {key: value.result() for key, value in inputs.items()}
-
+        hook_manager = get_hook_manager()
+        is_async = True
+        hook_manager.hook.before_node_run(  # pylint: disable=no-member
+            node=node, catalog=catalog, inputs=inputs, is_async=is_async, run_id=run_id
+        )
         outputs = node.run(inputs)
+        hook_manager.hook.after_node_run(  # pylint: disable=no-member
+            node=node,
+            catalog=catalog,
+            inputs=inputs,
+            outputs=outputs,
+            is_async=is_async,
+            run_id=run_id,
+        )
 
         save_futures = set()
 

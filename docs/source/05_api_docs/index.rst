@@ -81,6 +81,7 @@ Welcome to Kedro's API docs and tutorials!
    04_user_guide/12_working_with_databricks
    04_user_guide/13_journal
    04_user_guide/14_create_a_new_dataset
+   04_user_guide/15_hooks
 
 .. toctree::
    :maxdepth: 2

@@ -795,7 +795,7 @@ def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
 
 This decorator is commonly used and Kedro already includes it as a built-in decorator called `kedro.pipeline.decorators.log_time`.
 
-Another extra decorator is `kedro.extras.decorators.memory_profiler.mem_profile`, which will log the maximum memory usage of your node.
+Another extra decorator is `kedro.extras.decorators.mem_profile`, which will log the maximum memory usage of your node.
 
 
 ## Kedro runners

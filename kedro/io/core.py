@@ -33,6 +33,7 @@ saving functionality provided by ``kedro.io``.
 import abc
 import copy
 import logging
+import re
 import warnings
 from collections import namedtuple
 from datetime import datetime, timezone
@@ -40,8 +41,7 @@ from functools import lru_cache
 from glob import iglob
 from pathlib import Path, PurePath
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
-
-from fsspec.utils import infer_storage_options
+from urllib.parse import urlsplit
 
 from kedro.utils import load_obj
 
@@ -52,6 +52,7 @@ VERSIONED_FLAG_KEY = "versioned"
 VERSION_KEY = "version"
 HTTP_PROTOCOLS = ("http", "https")
 PROTOCOL_DELIMITER = "://"
+CLOUD_PROTOCOLS = ("s3", "gcs", "gs", "adl", "abfs")
 
 
 class DataSetError(Exception):
@@ -427,7 +428,7 @@ def _load_obj(class_path: str) -> Optional[object]:
     try:
         class_obj = load_obj(class_path)
     except ModuleNotFoundError as error:
-        if error.name in class_path:
+        if error.name is None or error.name in class_path:
             return None
         # class_obj was successfully loaded, but some dependencies are missing.
         raise DataSetError(
@@ -609,6 +610,44 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
         self.resolve_save_version.cache_clear()
 
 
+def _parse_filepath(filepath: str) -> Dict[str, str]:
+    """Split filepath on protocol and path. Based on `fsspec.utils.infer_storage_options`.
+
+    Args:
+        filepath: Either local absolute file path or URL (s3://bucket/file.csv)
+
+    Returns:
+        Parsed filepath.
+    """
+    if (
+        re.match(r"^[a-zA-Z]:[\\/]", filepath)
+        or re.match(r"^[a-zA-Z0-9]+://", filepath) is None
+    ):
+        return {"protocol": "file", "path": filepath}
+
+    parsed_path = urlsplit(filepath)
+    protocol = parsed_path.scheme or "file"
+
+    if protocol in HTTP_PROTOCOLS:
+        return {"protocol": protocol, "path": filepath}
+
+    path = parsed_path.path
+    if protocol == "file":
+        windows_path = re.match(r"^/([a-zA-Z])[:|]([\\/].*)$", path)
+        if windows_path:
+            path = "{}:{}".format(*windows_path.groups())
+
+    options = {"protocol": protocol, "path": path}
+
+    if parsed_path.netloc:
+        if protocol in CLOUD_PROTOCOLS:
+            host_with_port = parsed_path.netloc.rsplit("@", 1)[-1]
+            host = host_with_port.rsplit(":", 1)[0]
+            options["path"] = host + options["path"]
+
+    return options
+
+
 def get_protocol_and_path(filepath: str, version: Version = None) -> Tuple[str, str]:
     """Parses filepath on protocol and path.
 
@@ -623,7 +662,7 @@ def get_protocol_and_path(filepath: str, version: Version = None) -> Tuple[str, 
         DataSetError: when protocol is http(s) and version is not None.
         Note: HTTP(s) dataset doesn't support versioning.
     """
-    options_dict = infer_storage_options(filepath)
+    options_dict = _parse_filepath(filepath)
     path = options_dict["path"]
     protocol = options_dict["protocol"]
 

@@ -20,6 +20,7 @@
 * Added new CLI command `kedro pipeline list`.
 * Added versioning support to MatplotlibWriter dataset.
 * Allowed the source directory to be configurable in `.kedro.yml`.
+* Improve the CLI speed by up to 50%.
 
 ## Bug fixes and other changes
 * Fixed a bug where a new version created mid-run by an external system caused inconsistencies in the load versions used in the current run.

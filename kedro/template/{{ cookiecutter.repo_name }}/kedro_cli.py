@@ -41,7 +41,7 @@ from itertools import chain
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Tuple
 
-import anyconfig
+
 import click
 from click import secho, style
 from kedro.cli import main as kedro_main
@@ -194,6 +194,9 @@ def _config_file_callback(ctx, param, value):
     """Config file callback, that replaces command line options with config file
     values. If command line options are passed, they override config file values.
     """
+    # for performance reasons
+    import anyconfig  # pylint: disable=import-outside-toplevel
+
     ctx.default_map = ctx.default_map or {}
     section = ctx.info_name
 

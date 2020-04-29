@@ -38,12 +38,13 @@ from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
 
 from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
+from kedro.extras.datasets.pickle import PickleDataSet
 from kedro.extras.datasets.spark import SparkDataSet
 from kedro.extras.datasets.spark.spark_dataset import _dbfs_glob, _get_dbutils
 from kedro.io import DataCatalog, DataSetError, Version
 from kedro.io.core import generate_timestamp
 from kedro.pipeline import Pipeline, node
-from kedro.runner import ParallelRunner
+from kedro.runner import ParallelRunner, SequentialRunner
 
 FOLDER_NAME = "fake_folder"
 FILENAME = "test.parquet"
@@ -767,3 +768,49 @@ class TestSparkDataSetVersionedHdfs:
         dataset_hdfs = SparkDataSet(filepath="hdfs://{}".format(HDFS_PREFIX))
         assert "filepath=hdfs://" in str(dataset_hdfs)
         assert "version=" not in str(dataset_hdfs)
+
+
+@pytest.fixture
+def data_catalog(tmp_path):
+    source_path = str(Path(__file__).parent / "data/test.parquet")
+    spark_in = SparkDataSet(source_path)
+    spark_out = SparkDataSet(str(tmp_path / "spark_data"))
+    pickle_ds = PickleDataSet(str(tmp_path / "pickle/test.pkl"))
+
+    return DataCatalog(
+        {"spark_in": spark_in, "spark_out": spark_out, "pickle_ds": pickle_ds}
+    )
+
+
+@pytest.mark.parametrize("is_async", [False, True])
+class TestDataFlowSequentialRunner:
+    def test_spark_load_save(self, is_async, data_catalog):
+        """SparkDataSet(load) -> node -> Spark (save)."""
+        pipeline = Pipeline([node(identity, "spark_in", "spark_out")])
+        SequentialRunner(is_async=is_async).run(pipeline, data_catalog)
+
+        save_path = Path(data_catalog._data_sets["spark_out"]._filepath)
+        files = list(save_path.glob("*.parquet"))
+        assert len(files) > 0
+
+    def test_spark_pickle(self, is_async, data_catalog):
+        """SparkDataSet(load) -> node -> PickleDataSet (save)"""
+        pipeline = Pipeline([node(identity, "spark_in", "pickle_ds")])
+        pattern = ".* was not serialized due to.*"
+        with pytest.raises(DataSetError, match=pattern):
+            SequentialRunner(is_async=is_async).run(pipeline, data_catalog)
+
+    def test_spark_memory_spark(self, is_async, data_catalog):
+        """SparkDataSet(load) -> node -> MemoryDataSet (save and then load) ->
+        node -> SparkDataSet (save)"""
+        pipeline = Pipeline(
+            [
+                node(identity, "spark_in", "memory_ds"),
+                node(identity, "memory_ds", "spark_out"),
+            ]
+        )
+        SequentialRunner(is_async=is_async).run(pipeline, data_catalog)
+
+        save_path = Path(data_catalog._data_sets["spark_out"]._filepath)
+        files = list(save_path.glob("*.parquet"))
+        assert len(files) > 0

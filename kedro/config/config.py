@@ -34,8 +34,6 @@ from pathlib import Path
 from typing import AbstractSet, Any, Dict, Iterable, List, Set, Union
 from warnings import warn
 
-import anyconfig
-
 SUPPORTED_EXTENSIONS = [
     ".yml",
     ".yaml",
@@ -206,6 +204,9 @@ def _load_config(config_files: List[Path]) -> Dict[str, Any]:
         Resulting configuration dictionary.
 
     """
+    # for performance reasons
+    import anyconfig  # pylint: disable=import-outside-toplevel
+
     config = {}
     keys_by_filepath = {}  # type: Dict[Path, AbstractSet[str]]
 

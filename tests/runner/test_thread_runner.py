@@ -108,7 +108,7 @@ class TestMaxWorkers:
             (None, 3),
         ],
     )
-    def test_specified_max_workers_bellow_cpu_cores_count(
+    def test_specified_max_workers(
         self, mocker, fan_out_fan_in, catalog, user_specified_number, expected_number,
     ):  # pylint: disable=too-many-arguments
         """

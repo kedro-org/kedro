@@ -38,7 +38,7 @@ from s3fs.core import S3FileSystem
 
 from kedro.extras.datasets.pandas import CSVDataSet
 from kedro.io import DataSetError
-from kedro.io.core import Version, generate_timestamp, get_filepath_str
+from kedro.io.core import Version, generate_timestamp
 
 
 @pytest.fixture
@@ -247,10 +247,3 @@ class TestCSVDataSetVersioned:
             CSVDataSet(
                 filepath="https://example.com/file.csv", version=Version(None, None)
             )
-
-
-class TestCoreFunction:
-    def test_get_filepath_str(self):
-        path = get_filepath_str(PurePosixPath("example.com/test.csv"), "http")
-        assert isinstance(path, str)
-        assert path == "http://example.com/test.csv"

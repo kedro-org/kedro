@@ -29,6 +29,7 @@
 """``TensorflowModelDataset`` is a data set implementation which can save and load TensorFlow models.
 """
 import copy
+import tempfile
 from pathlib import Path, PurePath
 from typing import Any, Dict
 
@@ -77,14 +78,14 @@ class TensorFlowModelDataset(AbstractVersionedDataSet):
     )  # type: Dict[str, Any]
 
     def __init__(
-            self,
-            filepath: str,
-            load_args: Dict[str, Any] = None,
-            save_args: Dict[str, Any] = None,
-            version: Version = None,
-            credentials: Dict[str, Any] = None,
-            fs_args: Dict[str, Any] = None,
-            layer: str = None,
+        self,
+        filepath: str,
+        load_args: Dict[str, Any] = None,
+        save_args: Dict[str, Any] = None,
+        version: Version = None,
+        credentials: Dict[str, Any] = None,
+        fs_args: Dict[str, Any] = None,
+        layer: str = None,
     ) -> None:
         """
         Args:
@@ -124,15 +125,11 @@ class TensorFlowModelDataset(AbstractVersionedDataSet):
         self._protocol = protocol
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
         super().__init__(
-            PurePath(filepath),
-            version,
-            # exists_function=lambda x: Path(x).is_dir(),
-            # exists_function=self._fs.isdir,
-            exists_function=self._fs.exists,
+            PurePath(filepath), version, exists_function=self._fs.exists,
         )
-        
-        self._layer = layer
 
+        self._layer = layer
+        self._tmp_prefix = "kedro_tensorflow_tmp"  # temp named directory prefix pattern
 
         # Handle default load and save arguments
         self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
@@ -141,24 +138,33 @@ class TensorFlowModelDataset(AbstractVersionedDataSet):
         self._save_args = copy.deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
             self._save_args.update(save_args)
-            
-        _fs_open_args_load.setdefault("mode", "r")
-        _fs_open_args_save.setdefault("mode", "w")
+
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
 
-    def _load(self) -> None:
+    def _load(self) -> tf.keras.Model:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        return tf.keras.models.load_model(str(load_path), **self._load_args)
+
+        with tempfile.TemporaryDirectory(prefix=self._tmp_prefix) as tmp:
+            # tmp_path = str(Path(tmp))
+
+            # first use fsspec to get TF model directory from ArbitraryFileSystem and save to local tempfile directory
+            self._fs.get(load_path, tmp, recursive=True, **self._fs_open_args_load)
+
+            # then pass the local temporary directory path to keras.load_model
+            return tf.keras.models.load_model(tmp, **self._load_args)
 
     def _save(self, data: tf.keras.Model) -> None:
-        save_path = Path(self._get_save_path())
-        tf.keras.models.save_model(data, str(save_path), **self._save_args)
+        save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
-    # original commit
-    # def _exists(self) -> bool:
-    #     path = Path(self._get_load_path())
-    #     return path.is_dir()
+        with tempfile.TemporaryDirectory(prefix=self._tmp_prefix) as tmp:
+            # tmp_path = str(Path(tmp))
+
+            # first use keras.load_model to save TF model directory to local tempfile directory
+            tf.keras.models.save_model(data, tmp, **self._save_args)
+
+            # then use fsspec to take from local tempfile directory and put in ArbitraryFileSystem
+            self._fs.put(tmp, save_path, recursive=True, **self._fs_open_args_save)
 
     def _exists(self) -> bool:
         try:
@@ -168,7 +174,6 @@ class TensorFlowModelDataset(AbstractVersionedDataSet):
         return self._fs.exists(load_path)
 
     def _describe(self) -> Dict[str, Any]:
-        # todo(aleks) - could also expose model.summary()
         return dict(
             filepath=str(self._filepath),
             load_args=self._load_args,

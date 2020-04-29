@@ -30,12 +30,10 @@ from pathlib import PurePosixPath
 
 import numpy as np
 import pytest
+import tensorflow as tf
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
-import s3fs
-import tensorflow as tf
-from moto import mock_s3
 from s3fs import S3FileSystem
 
 from kedro.extras.datasets.tensorflow import TensorFlowModelDataset
@@ -51,7 +49,7 @@ AWS_CREDENTIALS = dict(
 
 @pytest.fixture
 def filepath(tmp_path):
-    return str(tmp_path / "test.tf")
+    return str(tmp_path / "test_tf")
 
 
 @pytest.fixture(params=[None])
@@ -144,8 +142,12 @@ def dummy_tf_subclassed_model(dummy_x_train, dummy_y_train):
 
 
 class TestTensorFlowModelDataset:
+    """
+    no versioning passed to creator
+    """
+
     def test_save_and_load(
-            self, tensorflow_model_data_set, dummy_tf_base_model, dummy_x_test
+        self, tensorflow_model_data_set, dummy_tf_base_model, dummy_x_test
     ):
         """Test saving and reloading the data set."""
         predictions = dummy_tf_base_model.predict(dummy_x_test)
@@ -196,12 +198,12 @@ class TestTensorFlowModelDataset:
         np.testing.assert_allclose(predictions, new_predictions, rtol=1e-6, atol=1e-6)
 
     def test_unused_subclass_model_hdf5_save_format(
-            self,
-            dummy_tf_subclassed_model,
-            dummy_x_train,
-            dummy_y_train,
-            dummy_x_test,
-            filepath,
+        self,
+        dummy_tf_subclassed_model,
+        dummy_x_train,
+        dummy_y_train,
+        dummy_x_test,
+        filepath,
     ):
         """Test TensorflowModelDataset cannot save subclassed user models in HDF5 format
 
@@ -258,26 +260,28 @@ class TestTensorFlowModelDataset:
 
 class TestTensorFlowModelDatasetVersioned:
     """
+    Test suite with versioning argument passed into TensorFlowModelDataset creator
     Test cases adapted from
     tests.io.test_json_dataset.TestJSONDataSetVersioned
     tests.io.test_excel_local.TestExcelLocalDataSetVersioned
     """
+
     @pytest.mark.parametrize(
         "load_version,save_version",
         [
             (
-                    "A",
-                    "A",
+                "A",
+                "A",
             ),  # long version names can fail on Win machines due to 260 max filepath
             (
-                    None,
-                    None,
+                None,
+                None,
             ),  # passing None default behaviour of generating timestamp for current time
         ],
         indirect=True,
     )
     def test_save_and_load(
-            self, filepath, dummy_tf_base_model, dummy_x_test, load_version, save_version,
+        self, filepath, dummy_tf_base_model, dummy_x_test, load_version, save_version,
     ):
         """Test saving and reloading the versioned data set."""
 
@@ -295,18 +299,18 @@ class TestTensorFlowModelDatasetVersioned:
         "load_version,save_version",
         [
             (
-                    "A",
-                    "A",
+                "A",
+                "A",
             ),  # long version names can fail on Win machines due to 260 max filepath
             (
-                    None,
-                    None,
+                None,
+                None,
             ),  # passing None default behaviour of generating timestamp for current time
         ],
         indirect=True,
     )
     def test_prevent_overwrite(
-            self, dummy_tf_base_model, filepath, load_version, save_version,
+        self, dummy_tf_base_model, filepath, load_version, save_version,
     ):
         """Check the error when attempting to override the data set if the
         corresponding file for a given save version already exists."""
@@ -325,8 +329,8 @@ class TestTensorFlowModelDatasetVersioned:
         "load_version,save_version",
         [
             (
-                    "A",
-                    "B",
+                "A",
+                "B",
             ),  # long version names can fail on Win machines due to 260 max filepath
             # default versioning format in kedro.io.core.generate_timestamp()
             ("2019-01-01T23.59.59.999Z", "2019-01-02T00.00.00.000Z"),
@@ -334,7 +338,7 @@ class TestTensorFlowModelDatasetVersioned:
         indirect=True,
     )
     def test_save_version_warning(
-            self, filepath, load_version, save_version, dummy_tf_base_model
+        self, filepath, load_version, save_version, dummy_tf_base_model
     ):
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
@@ -344,9 +348,7 @@ class TestTensorFlowModelDatasetVersioned:
 
         pattern = (
             r"Save version `{0}` did not match load version `{1}` "
-            r"for TensorFlowModelDataset\(.+\)".format(
-                save_version, load_version
-            )
+            r"for TensorFlowModelDataset\(.+\)".format(save_version, load_version)
         )
         with pytest.warns(UserWarning, match=pattern):
             incompatible_version_data_set.save(dummy_tf_base_model)

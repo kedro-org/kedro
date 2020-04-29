@@ -105,9 +105,9 @@ extras_require = {
         "tables>=3.6",
     ],
     "spark": ["pyspark>=2.2.0, <3.0", "hdfs>=2.5.8, <3.0", "s3fs>=0.3.0, <0.4.1"],
-    # only TensorFlow V2 supported for saving and loading. V1 requires HDF5 and serializes differently
     "tensorflow": [
-        "tensorflow>=2.0.0, <=2.1.0",
+        # currently only TensorFlow V2 supported for saving and loading. V1 requires HDF5 and serializes differently
+        "tensorflow>=2.0.0, <3.0",
     ]
 }
 

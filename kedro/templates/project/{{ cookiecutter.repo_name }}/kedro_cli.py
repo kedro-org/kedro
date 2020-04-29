@@ -34,6 +34,7 @@ import shutil
 import subprocess
 import sys
 import webbrowser
+
 import yaml
 from collections import Counter, defaultdict
 from glob import iglob
@@ -45,6 +46,7 @@ from typing import Any, Dict, Iterable, List, Tuple
 import click
 from click import secho, style
 from kedro.cli import main as kedro_main
+from kedro.cli.pipeline import pipeline as pipeline_group
 from kedro.cli.utils import (
     KedroCliError,
     call,
@@ -53,7 +55,6 @@ from kedro.cli.utils import (
     python_call,
 )
 from kedro.context import load_context
-from kedro.runner import SequentialRunner
 from kedro.utils import load_obj
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
@@ -62,7 +63,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 PROJ_PATH = Path(__file__).resolve().parent
 os.environ["IPYTHONDIR"] = str(PROJ_PATH / ".ipython")
 
-with open(PROJ_PATH / ".kedro.yml") as kedro_yml:
+with (PROJ_PATH / ".kedro.yml").open("r") as kedro_yml:
     kedro_yaml = yaml.safe_load(kedro_yml)
 
 SOURCE_DIR = kedro_yaml.get("source_dir", "src")
@@ -133,11 +134,19 @@ JUPYTER_IDLE_TIMEOUT_HELP = """When a notebook is closed, Jupyter server will
 terminate its kernel after so many seconds of inactivity. This does not affect
 any open notebooks."""
 
-SIMPLE_PIPELINE_HELP = """Show list of all pipelines in the project."""
+KEDRO_PACKAGE_NAME = "{{ cookiecutter.python_package }}"
+DEFAULT_PACKAGE_PATH = Path(SOURCE_DIR) / KEDRO_PACKAGE_NAME
+
+
+def _env_option(func_=None, **kwargs):
+    default_args = dict(type=str, default=None, help=ENV_ARG_HELP)
+    kwargs = {**default_args, **kwargs}
+    opt = click.option("--env", "-e", **kwargs)
+    return opt(func_) if func_ else opt
 
 
 def _split_string(ctx, param, value):
-    return [item.strip() for item in value.split(",") if item]
+    return [item.strip() for item in value.split(",") if item.strip()]
 
 
 def _try_convert_to_numeric(value):
@@ -231,7 +240,7 @@ def cli():
     "--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP
 )
 @click.option("--parallel", "-p", is_flag=True, multiple=False, help=PARALLEL_ARG_HELP)
-@click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
+@_env_option
 @click.option("--tag", "-t", type=str, multiple=True, help=TAG_ARG_HELP)
 @click.option(
     "--load-version",
@@ -309,8 +318,7 @@ def test(args):
 @click.argument("files", type=click.Path(exists=True), nargs=-1)
 def lint(files, check_only):
     """Run flake8, isort and (on Python >=3.6) black."""
-    if not files:
-        files = ("src/tests", "src/{{ cookiecutter.python_package }}")
+    files = files or ("src/tests", str(DEFAULT_PACKAGE_PATH))
 
     try:
         import flake8
@@ -374,9 +382,7 @@ def build_docs(open_docs):
     """Build the project documentation."""
     python_call("pip", ["install", "src/[docs]"])
     python_call("pip", ["install", "-r", "src/requirements.txt"])
-    python_call(
-        "ipykernel", ["install", "--user", "--name={{ cookiecutter.python_package }}"]
-    )
+    python_call("ipykernel", ["install", "--user", f"--name={KEDRO_PACKAGE_NAME}"])
     shutil.rmtree("docs/build", ignore_errors=True)
     call(
         [
@@ -384,7 +390,7 @@ def build_docs(open_docs):
             "--module-first",
             "-o",
             "docs/source",
-            "src/{{ cookiecutter.python_package }}",
+            str(DEFAULT_PACKAGE_PATH),
         ]
     )
     call(["sphinx-build", "-M", "html", "docs/source", "docs/build", "-a"])
@@ -491,7 +497,7 @@ def jupyter():
     "--all-kernels", is_flag=True, default=False, help=JUPYTER_ALL_KERNELS_HELP
 )
 @click.option("--idle-timeout", type=int, default=30, help=JUPYTER_IDLE_TIMEOUT_HELP)
-@click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
+@_env_option
 def jupyter_notebook(ip, all_kernels, env, idle_timeout, args):
     """Open Jupyter Notebook with project specific variables loaded."""
     if "-h" not in args and "--help" not in args:
@@ -511,7 +517,7 @@ def jupyter_notebook(ip, all_kernels, env, idle_timeout, args):
     "--all-kernels", is_flag=True, default=False, help=JUPYTER_ALL_KERNELS_HELP
 )
 @click.option("--idle-timeout", type=int, default=30, help=JUPYTER_IDLE_TIMEOUT_HELP)
-@click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
+@_env_option
 def jupyter_lab(ip, all_kernels, env, idle_timeout, args):
     """Open Jupyter Lab with project specific variables loaded."""
     if "-h" not in args and "--help" not in args:
@@ -554,7 +560,6 @@ def convert_notebook(all_flag, overwrite_flag, filepath):
         sys.exit(1)
 
     kedro_project_path = context.project_path
-    kedro_package_name = "{{cookiecutter.python_package}}"
 
     if all_flag:
         # pathlib glob does not ignore hidden directories,
@@ -578,7 +583,7 @@ def convert_notebook(all_flag, overwrite_flag, filepath):
         output_path = (
             kedro_project_path
             / SOURCE_DIR
-            / kedro_package_name
+            / KEDRO_PACKAGE_NAME
             / "nodes"
             / "{}.py".format(notebook.stem)
         )
@@ -622,7 +627,7 @@ def catalog():
 
 
 @catalog.command("list")
-@click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
+@_env_option
 @click.option(
     "--pipeline", type=str, default="", help=PIPELINE_ARG_HELP, callback=_split_string
 )
@@ -667,43 +672,6 @@ def list_datasets(pipeline, env):
     secho(yaml.dump(result))
 
 
-@cli.group("pipeline")
-def pl():
-    """Commands for pipeline."""
-
-
-@pl.command("list")
-@click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
-@click.option("--simple", is_flag=True, multiple=False, help=SIMPLE_PIPELINE_HELP)
-@click.argument("pl_names", metavar="[PIPELINE_NAME]...", nargs=-1)
-def list_pipelines_and_nodes(pl_names, simple, env):
-    """Show detailed information about pipelines."""
-    context = load_context(Path.cwd(), env=env)
-    project_pipelines = context.pipelines
-    if simple:
-        secho(yaml.dump(sorted(project_pipelines.keys())))
-        return
-
-    pipelines = set(pl_names) or project_pipelines.keys()
-
-    result = {}
-    for pl_name in pipelines:
-        pl_obj = project_pipelines.get(pl_name)
-        if not pl_obj:
-            existing_pls = ", ".join(sorted(project_pipelines.keys()))
-            raise KedroCliError(
-                "{} pipeline not found. Existing pipelines: {}".format(
-                    pl_name, existing_pls
-                )
-            )
-
-        result[pl_name] = [
-            "{} ({})".format(node.short_name, node._func_name) for node in pl_obj.nodes
-        ]
-
-    secho(yaml.dump(result))
-
-
 def _map_type_to_datasets(datasets, datasets_meta):
     """Build dictionary with a dataset type as a key and list of
     datasets of the specific type as a value.
@@ -716,6 +684,9 @@ def _map_type_to_datasets(datasets, datasets_meta):
             if ds not in mapping[ds_type]:
                 mapping[ds_type].append(ds)
     return mapping
+
+
+cli.add_command(pipeline_group)
 
 
 if __name__ == "__main__":

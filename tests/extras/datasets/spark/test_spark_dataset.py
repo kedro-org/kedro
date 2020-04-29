@@ -481,7 +481,7 @@ class TestSparkDataSetVersionedDBFS:
         mocker.patch(
             "kedro.extras.datasets.spark.spark_dataset.globals", return_value={}
         )
-        mocker.patch.dict("sys.modules", {})
+        mocker.patch.dict("sys.modules", {"pyspark": None, "IPython": None})
         assert _get_dbutils("spark") is None
 
     @pytest.mark.parametrize(

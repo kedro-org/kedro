@@ -432,11 +432,10 @@ def _load_obj(class_path: str) -> Optional[object]:
             return None
         # class_obj was successfully loaded, but some dependencies are missing.
         raise DataSetError(
-            "{e} for {dataset}. Please see the documentation on how to install relevant "
-            "dependencies for {dataset}"
-            "https://kedro.readthedocs.io/en/stable/02_getting_started/02_install.html#optional-dependencies".format(  # pylint: disable=line-too-long
-                e=error, dataset=class_path
-            )
+            f"{error} for {class_path}. Please see the documentation on how to "
+            f"install relevant dependencies for {class_path}:\n"
+            f"https://kedro.readthedocs.io/en/stable/02_getting_started/"
+            f"02_install.html#optional-dependencies"
         )
     except (AttributeError, ValueError):
         return None

@@ -245,6 +245,20 @@ class KedroContext(abc.ABC):
         )
 
     @property
+    @abc.abstractmethod
+    def package_name(self) -> str:
+        """Abstract property for Kedro project package name.
+
+        Returns:
+            Name of Kedro project package.
+
+        """
+        raise NotImplementedError(
+            "`{}` is a subclass of KedroContext and it must implement "
+            "the `package_name` property".format(self.__class__.__name__)
+        )
+
+    @property
     def pipeline(self) -> Pipeline:
         """Read-only property for an instance of Pipeline.
 
@@ -328,7 +342,10 @@ class KedroContext(abc.ABC):
                 extra parameters passed at initialization.
         """
         try:
-            params = self.config_loader.get("parameters*", "parameters*/**")
+            # '**/parameters*' reads modular pipeline configs
+            params = self.config_loader.get(
+                "parameters*", "parameters*/**", "**/parameters*"
+            )
         except MissingConfigException as exc:
             warn(
                 "Parameters not found in your Kedro project config.\n{}".format(
@@ -351,8 +368,10 @@ class KedroContext(abc.ABC):
             DataCatalog defined in `catalog.yml`.
 
         """
-        conf_catalog = self.config_loader.get("catalog*", "catalog*/**")
-        # turn relative paths in conf_catalog into absolute paths before initializing the catalog
+        # '**/catalog*' reads modular pipeline configs
+        conf_catalog = self.config_loader.get("catalog*", "catalog*/**", "**/catalog*")
+        # turn relative paths in conf_catalog into absolute paths
+        # before initializing the catalog
         conf_catalog = _expand_path(
             project_path=self.project_path, conf_dictionary=conf_catalog
         )

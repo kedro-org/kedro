@@ -48,6 +48,7 @@
 * ``TextDataSet`` no longer has `load_args` and `save_args`. These can instead be specified under `open_args_load` or `open_args_save` in `fs_args`.
 * Dropped `Pipeline.transform()` in favour of `kedro.pipeline.modular_pipeline.pipeline()` helper function.
 * Made constant `PARAMETER_KEYWORDS` private, and moved it from `kedro.pipeline.pipeline` to `kedro.pipeline.modular_pipeline`.
+* Removed `CSVBlobDataSet` and `JSONBlobDataSet` as redundant.
 
 ### Migration guide from Kedro 0.15.* to Upcoming Release
 #### Migration for datasets

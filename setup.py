@@ -94,9 +94,6 @@ extras_require = {
     "networkx": ["networkx>=2.4, <3.0"],
     "pandas": [
         "pandas>=0.24.0, <2.0",
-        "azure-storage-blob>=1.1.0, <2.0",
-        "azure-storage-file>=1.1.0, <2.0",
-        "azure-storage-queue>=1.1.0, <2.0",
         "pandas-gbq>=0.12.0, <1.0",
         "SQLAlchemy>=1.2.0, <2.0",
         "pyarrow>=0.12.0, <1.0.0",

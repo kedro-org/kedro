@@ -1,7 +1,5 @@
 -r requirements.txt
-azure-storage-blob>=1.1.0, <2.0
-azure-storage-file>=1.1.0, <2.0
-azure-storage-queue>=1.1.0, <2.0
+adlfs>=0.2.4, <0.3
 bandit>=1.6.2, <2.0
 behave==1.2.6
 biopython>=1.73, <2.0

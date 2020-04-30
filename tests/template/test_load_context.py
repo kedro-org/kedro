@@ -108,7 +108,7 @@ class TestLoadContext:
 
     @pytest.mark.parametrize("source_dir", ["src", "./src", "./src/"])
     def test_kedro_yml_valid_source_dir(
-        self, mocker, monkeypatch, fake_repo_path, source_dir
+        self, monkeypatch, fake_repo_path, source_dir
     ):
         """Test for loading context from an valid source dir. """
         monkeypatch.delenv(

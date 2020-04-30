@@ -3,7 +3,7 @@ fail_under = 100
 show_missing = true
 omit = [
   "tests/*",
-  "kedro/template/*",
+  "kedro/templates/*",
   "kedro/__main__.py",
   "kedro/__init__.py",
   "kedro/*/__init__.py",

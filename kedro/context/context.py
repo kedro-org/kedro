@@ -684,6 +684,29 @@ class KedroContext(abc.ABC):
         return generate_timestamp()
 
 
+def validate_source_path(source_path: Path, project_path: Path):
+    """Validate the source path exists and is relative to the project path.
+
+    Args:
+        source_path: Absolute source path.
+        project_path: Path to the Kedro project.
+
+    Raises:
+        KedroContextError: Either source_path is not relative to project_path or
+            source_path does not exist.
+
+    """
+    try:
+        source_path.relative_to(project_path)
+    except ValueError:
+        raise KedroContextError(
+            f"Source path '{source_path}' has to be relative to "
+            f"your project root '{project_path}'."
+        )
+    if not source_path.exists():
+        raise KedroContextError(f"Source path '{source_path}' cannot be found.")
+
+
 def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
     """Loads the KedroContext object of a Kedro Project based on the path specified
     in `.kedro.yml`.
@@ -717,20 +740,11 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
     except Exception:
         raise KedroContextError("Failed to parse '.kedro.yml' file")
 
-    src_prefix = Path(kedro_yaml_content.get("source_dir", "src"))
-    if src_prefix.is_absolute() or ".." in str(src_prefix):
-        raise KedroContextError(
-            "'source_dir' in '.kedro.yml' has to be a relative path to your project root, "
-            "and cannot be an absolute path or contain '..'. "
-            "A path is considered absolute if it has both a root and (if the flavour allows) "
-            "a drive."
-        )
+    src_prefix = Path(kedro_yaml_content.get("source_dir", "src")).expanduser()
+    src_path = (project_path / src_prefix).resolve()
+    validate_source_path(src_path, project_path)
 
-    src_path = project_path / src_prefix
-    if not src_path.exists():
-        raise KedroContextError("Source path '{}' cannot be found.".format(src_path))
-
-    if src_path not in sys.path:
+    if str(src_path) not in sys.path:
         sys.path.insert(0, str(src_path))
 
     if "PYTHONPATH" not in os.environ:

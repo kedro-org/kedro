@@ -331,13 +331,17 @@ class TestTestCommand:
         assert not result.exit_code
         python_call_mock.assert_called_once_with("pytest", ("--random-arg", "value"))
 
-    def test_pytest_not_installed(self, fake_kedro_cli, python_call_mock, mocker):
+    def test_pytest_not_installed(
+        self, fake_kedro_cli, python_call_mock, mocker, fake_repo_path
+    ):
         mocker.patch.dict("sys.modules", {"pytest": None})
 
         result = CliRunner().invoke(
             fake_kedro_cli.cli, ["test", "--random-arg", "value"]
         )
-        expected_message = fake_kedro_cli.NO_DEPENDENCY_MESSAGE.format("pytest")
+        expected_message = fake_kedro_cli.NO_DEPENDENCY_MESSAGE.format(
+            module="pytest", src=str(fake_repo_path / "src")
+        )
 
         assert result.exit_code
         assert expected_message in result.stdout
@@ -346,11 +350,16 @@ class TestTestCommand:
 
 class TestLintCommand:
     @pytest.mark.parametrize("files", [(), ("kedro",)])
-    def test_lint(self, fake_kedro_cli, python_call_mock, files, mocker):
+    def test_lint(
+        self, fake_kedro_cli, python_call_mock, files, mocker, fake_repo_path
+    ):
         result = CliRunner().invoke(fake_kedro_cli.cli, ["lint", *files])
         assert not result.exit_code
 
-        expected_files = files or ("src/tests", "src/fake_package")
+        expected_files = files or (
+            str(fake_repo_path / "src/tests"),
+            str(fake_repo_path / "src/fake_package"),
+        )
         expected_calls = [
             mocker.call("black", expected_files),
             mocker.call("flake8", ("--max-line-length=88",) + expected_files),
@@ -372,12 +381,21 @@ class TestLintCommand:
         ],
     )
     def test_lint_check_only(
-        self, fake_kedro_cli, python_call_mock, check_flag, mocker, files
+        self,
+        fake_kedro_cli,
+        python_call_mock,
+        check_flag,
+        mocker,
+        files,
+        fake_repo_path,
     ):
         result = CliRunner().invoke(fake_kedro_cli.cli, ["lint", check_flag, *files])
         assert not result.exit_code
 
-        expected_files = files or ("src/tests", "src/fake_package")
+        expected_files = files or (
+            str(fake_repo_path / "src/tests"),
+            str(fake_repo_path / "src/fake_package"),
+        )
         expected_calls = [
             mocker.call("black", ("--check",) + expected_files),
             mocker.call("flake8", ("--max-line-length=88",) + expected_files),
@@ -391,12 +409,14 @@ class TestLintCommand:
 
     @pytest.mark.parametrize("module_name", ["flake8", "isort"])
     def test_import_not_installed(
-        self, fake_kedro_cli, python_call_mock, module_name, mocker
+        self, fake_kedro_cli, python_call_mock, module_name, mocker, fake_repo_path
     ):
         mocker.patch.dict("sys.modules", {module_name: None})
 
         result = CliRunner().invoke(fake_kedro_cli.cli, ["lint"])
-        expected_message = fake_kedro_cli.NO_DEPENDENCY_MESSAGE.format(module_name)
+        expected_message = fake_kedro_cli.NO_DEPENDENCY_MESSAGE.format(
+            module=module_name, src=str(fake_repo_path / "src")
+        )
 
         assert result.exit_code
         assert expected_message in result.stdout
@@ -404,28 +424,38 @@ class TestLintCommand:
 
 
 class TestInstallCommand:
-    def test_happy_path(self, python_call_mock, call_mock, fake_kedro_cli):
+    def test_happy_path(
+        self, python_call_mock, call_mock, fake_kedro_cli, fake_repo_path
+    ):
         result = CliRunner().invoke(fake_kedro_cli.cli, ["install"])
         assert not result.exit_code
         python_call_mock.assert_called_once_with(
-            "pip", ["install", "-U", "-r", "src/requirements.txt"]
+            "pip", ["install", "-U", "-r", str(fake_repo_path / "src/requirements.txt")]
         )
         call_mock.assert_not_called()
 
-    def test_with_env_file(self, python_call_mock, call_mock, fake_kedro_cli, mocker):
+    def test_with_env_file(
+        self, python_call_mock, call_mock, fake_kedro_cli, mocker, fake_repo_path
+    ):
         # Pretend env file exists:
         mocker.patch.object(Path, "is_file", return_value=True)
 
         result = CliRunner().invoke(fake_kedro_cli.cli, ["install"])
         assert not result.exit_code, result.stdout
         python_call_mock.assert_called_once_with(
-            "pip", ["install", "-U", "-r", "src/requirements.txt"]
+            "pip", ["install", "-U", "-r", str(fake_repo_path / "src/requirements.txt")]
         )
         call_mock.assert_called_once_with(
-            ["conda", "install", "--file", "src/environment.yml", "--yes"]
+            [
+                "conda",
+                "install",
+                "--file",
+                str(fake_repo_path / "src/environment.yml"),
+                "--yes",
+            ]
         )
 
-    def test_windows(self, fake_kedro_cli, mocker):
+    def test_windows(self, fake_kedro_cli, mocker, fake_repo_path):
         mock_subprocess = mocker.patch.object(fake_kedro_cli, "subprocess")
         # pretend we are on Windows
         mocker.patch.object(fake_kedro_cli, "os").name = "nt"
@@ -440,7 +470,7 @@ class TestInstallCommand:
             "install",
             "-U",
             "-r",
-            "src/requirements.txt",
+            str(fake_repo_path / "src/requirements.txt"),
         ]
         mock_subprocess.Popen.assert_called_once_with(
             command, creationflags=mock_subprocess.CREATE_NEW_CONSOLE
@@ -465,25 +495,27 @@ class TestIpythonCommand:
 
 
 class TestPackageCommand:
-    def test_happy_path(self, call_mock, fake_kedro_cli, mocker):
+    def test_happy_path(self, call_mock, fake_kedro_cli, mocker, fake_repo_path):
         result = CliRunner().invoke(fake_kedro_cli.cli, ["package"])
         assert not result.exit_code, result.stdout
         call_mock.assert_has_calls(
             [
                 mocker.call(
                     [sys.executable, "setup.py", "clean", "--all", "bdist_egg"],
-                    cwd="src",
+                    cwd=str(fake_repo_path / "src"),
                 ),
                 mocker.call(
                     [sys.executable, "setup.py", "clean", "--all", "bdist_wheel"],
-                    cwd="src",
+                    cwd=str(fake_repo_path / "src"),
                 ),
             ]
         )
 
 
 class TestBuildDocsCommand:
-    def test_happy_path(self, call_mock, python_call_mock, fake_kedro_cli, mocker):
+    def test_happy_path(
+        self, call_mock, python_call_mock, fake_kedro_cli, mocker, fake_repo_path
+    ):
         fake_rmtree = mocker.patch("shutil.rmtree")
 
         result = CliRunner().invoke(fake_kedro_cli.cli, ["build-docs"])
@@ -496,7 +528,7 @@ class TestBuildDocsCommand:
                         "--module-first",
                         "-o",
                         "docs/source",
-                        "src/fake_package",
+                        str(fake_repo_path / "src/fake_package"),
                     ]
                 ),
                 mocker.call(
@@ -506,8 +538,11 @@ class TestBuildDocsCommand:
         )
         python_call_mock.assert_has_calls(
             [
-                mocker.call("pip", ["install", "src/[docs]"]),
-                mocker.call("pip", ["install", "-r", "src/requirements.txt"]),
+                mocker.call("pip", ["install", str(fake_repo_path / "src/[docs]")]),
+                mocker.call(
+                    "pip",
+                    ["install", "-r", str(fake_repo_path / "src/requirements.txt")],
+                ),
                 mocker.call("ipykernel", ["install", "--user", "--name=fake_package"]),
             ]
         )
@@ -523,7 +558,9 @@ class TestBuildDocsCommand:
 
 
 class TestBuildReqsCommand:
-    def test_requirements_file_exists(self, python_call_mock, fake_kedro_cli, mocker):
+    def test_requirements_file_exists(
+        self, python_call_mock, fake_kedro_cli, mocker, fake_repo_path
+    ):
         # File exists:
         mocker.patch.object(Path, "is_file", return_value=True)
 
@@ -532,11 +569,11 @@ class TestBuildReqsCommand:
         assert "Requirements built!" in result.stdout
 
         python_call_mock.assert_called_once_with(
-            "piptools", ["compile", str(Path.cwd() / "src" / "requirements.in")]
+            "piptools", ["compile", str(fake_repo_path / "src" / "requirements.in")]
         )
 
     def test_requirements_file_doesnt_exist(
-        self, python_call_mock, fake_kedro_cli, mocker
+        self, python_call_mock, fake_kedro_cli, mocker, fake_repo_path
     ):
         # File does not exist:
         mocker.patch.object(Path, "is_file", return_value=False)
@@ -547,7 +584,7 @@ class TestBuildReqsCommand:
         assert not result.exit_code, result.stdout
         assert "Requirements built!" in result.stdout
         python_call_mock.assert_called_once_with(
-            "piptools", ["compile", str(Path.cwd() / "src" / "requirements.in")]
+            "piptools", ["compile", str(fake_repo_path / "src" / "requirements.in")]
         )
         fake_writer.assert_called_once_with("fake requirements")
 
@@ -745,7 +782,7 @@ class TestConvertNotebookCommand:
         )
         assert not result.exit_code, result.stdout
 
-        output_prefix = fake_repo_path.resolve() / "src" / "fake_package" / "nodes"
+        output_prefix = fake_repo_path / "src" / "fake_package" / "nodes"
         fake_export_nodes.assert_called_once_with(
             tmp_file_path.resolve(), output_prefix / "{}.py".format(tmp_file_path.stem)
         )
@@ -782,7 +819,7 @@ class TestConvertNotebookCommand:
         result = CliRunner().invoke(fake_kedro_cli.cli, ["jupyter", "convert", "--all"])
         assert not result.exit_code, result.stdout
 
-        output_prefix = (fake_repo_path / "src" / "fake_package" / "nodes").resolve()
+        output_prefix = fake_repo_path / "src" / "fake_package" / "nodes"
         fake_export_nodes.assert_has_calls(
             [
                 mocker.call(Path("/path/1"), output_prefix / "1.py"),

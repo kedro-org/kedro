@@ -39,7 +39,7 @@ from pandas.util.testing import assert_frame_equal
 
 from kedro import __version__ as kedro_version
 from kedro.config import MissingConfigException
-from kedro.context import KedroContext, KedroContextError
+from kedro.context import KedroContext, KedroContextError, validate_source_path
 from kedro.context.context import _expand_path, _is_relative_path
 from kedro.extras.datasets.pandas import CSVDataSet
 from kedro.io.core import Version, generate_timestamp
@@ -822,3 +822,33 @@ def test_expand_path_not_changing_non_relative_path(
     project_path: Path, input_conf: Dict[str, Any], expected: Dict[str, Any]
 ):
     assert _expand_path(project_path, input_conf) == expected
+
+
+class TestValidateSourcePath:
+    @pytest.mark.parametrize(
+        "source_dir", [".", "src", "./src", "src/nested", "src/nested/nested"]
+    )
+    def test_valid_source_path(self, tmp_path, source_dir):
+        source_path = (tmp_path / source_dir).resolve()
+        source_path.mkdir(parents=True, exist_ok=True)
+        validate_source_path(source_path, tmp_path.resolve())
+
+    @pytest.mark.parametrize("source_dir", ["..", "src/../..", "~"])
+    def test_invalid_source_path(self, tmp_path, source_dir):
+        source_dir = Path(source_dir).expanduser()
+        source_path = (tmp_path / source_dir).resolve()
+        source_path.mkdir(parents=True, exist_ok=True)
+
+        pattern = (
+            f"Source path '{source_path}' has to be relative to your project root "
+            f"'{tmp_path.resolve()}'"
+        )
+        with pytest.raises(KedroContextError, match=pattern):
+            validate_source_path(source_path, tmp_path.resolve())
+
+    def test_non_existent_source_path(self, tmp_path):
+        source_path = (tmp_path / "non_existent").resolve()
+
+        pattern = f"Source path '{source_path}' cannot be found."
+        with pytest.raises(KedroContextError, match=pattern):
+            validate_source_path(source_path, tmp_path.resolve())

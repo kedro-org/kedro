@@ -54,7 +54,8 @@ from kedro.cli.utils import (
     forward_command,
     python_call,
 )
-from kedro.context import load_context
+from kedro.context import load_context, validate_source_path
+
 from kedro.utils import load_obj
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
@@ -66,17 +67,14 @@ os.environ["IPYTHONDIR"] = str(PROJ_PATH / ".ipython")
 with (PROJ_PATH / ".kedro.yml").open("r") as kedro_yml:
     kedro_yaml = yaml.safe_load(kedro_yml)
 
-SOURCE_DIR = kedro_yaml.get("source_dir", "src")
-if Path(SOURCE_DIR).is_absolute() or ".." in SOURCE_DIR:
-    raise KedroCliError(
-        "'source_dir' in '.kedro.yml' has to be a relative path to your project root, "
-        "and cannot be an absolute path or start with '..'. "
-        "A path is considered absolute if it has both a root and (if the flavour allows) "
-        "a drive."
-    )
+SOURCE_DIR = Path(kedro_yaml.get("source_dir", "src")).expanduser()
+SOURCE_PATH = (PROJ_PATH / SOURCE_DIR).resolve()
+validate_source_path(SOURCE_PATH, PROJ_PATH)
 
-NO_DEPENDENCY_MESSAGE = """{0} is not installed. Please make sure {0} is in
-src/requirements.txt and run `kedro install`."""
+KEDRO_PACKAGE_NAME = "{{ cookiecutter.python_package }}"
+
+NO_DEPENDENCY_MESSAGE = """{module} is not installed. Please make sure {module} is in
+{src}/requirements.txt and run `kedro install`."""
 
 TAG_ARG_HELP = """Construct the pipeline using only nodes which have this tag
 attached. Option can be used multiple times, what results in a
@@ -133,9 +131,6 @@ JUPYTER_ALL_KERNELS_HELP = "Display all available Python kernels."
 JUPYTER_IDLE_TIMEOUT_HELP = """When a notebook is closed, Jupyter server will
 terminate its kernel after so many seconds of inactivity. This does not affect
 any open notebooks."""
-
-KEDRO_PACKAGE_NAME = "{{ cookiecutter.python_package }}"
-DEFAULT_PACKAGE_PATH = Path(SOURCE_DIR) / KEDRO_PACKAGE_NAME
 
 
 def _env_option(func_=None, **kwargs):
@@ -308,7 +303,9 @@ def test(args):
     try:
         import pytest  # pylint: disable=unused-import
     except ImportError:
-        raise KedroCliError(NO_DEPENDENCY_MESSAGE.format("pytest"))
+        raise KedroCliError(
+            NO_DEPENDENCY_MESSAGE.format(module="pytest", src=str(SOURCE_PATH))
+        )
     else:
         python_call("pytest", args)
 
@@ -318,14 +315,16 @@ def test(args):
 @click.argument("files", type=click.Path(exists=True), nargs=-1)
 def lint(files, check_only):
     """Run flake8, isort and (on Python >=3.6) black."""
-    files = files or ("src/tests", str(DEFAULT_PACKAGE_PATH))
+    files = files or (str(SOURCE_PATH / "tests"), str(SOURCE_PATH / KEDRO_PACKAGE_NAME))
 
     try:
         import flake8
         import isort
         import black
     except ImportError as exc:
-        raise KedroCliError(NO_DEPENDENCY_MESSAGE.format(exc.name))
+        raise KedroCliError(
+            NO_DEPENDENCY_MESSAGE.format(module=exc.name, src=str(SOURCE_PATH))
+        )
 
     python_call("black", ("--check",) + files if check_only else files)
     python_call("flake8", ("--max-line-length=88",) + files)
@@ -341,10 +340,18 @@ def install():
     """Install project dependencies from both requirements.txt
     and environment.yml (optional)."""
 
-    if (Path.cwd() / SOURCE_DIR / "environment.yml").is_file():
-        call(["conda", "install", "--file", "src/environment.yml", "--yes"])
+    if (SOURCE_PATH / "environment.yml").is_file():
+        call(
+            [
+                "conda",
+                "install",
+                "--file",
+                str(SOURCE_PATH / "environment.yml"),
+                "--yes",
+            ]
+        )
 
-    pip_command = ["install", "-U", "-r", "src/requirements.txt"]
+    pip_command = ["install", "-U", "-r", str(SOURCE_PATH / "requirements.txt")]
 
     if os.name == "posix":
         python_call("pip", pip_command)
@@ -364,8 +371,14 @@ def ipython(args):
 @cli.command()
 def package():
     """Package the project as a Python egg and wheel."""
-    call([sys.executable, "setup.py", "clean", "--all", "bdist_egg"], cwd=SOURCE_DIR)
-    call([sys.executable, "setup.py", "clean", "--all", "bdist_wheel"], cwd=SOURCE_DIR)
+    call(
+        [sys.executable, "setup.py", "clean", "--all", "bdist_egg"],
+        cwd=str(SOURCE_PATH),
+    )
+    call(
+        [sys.executable, "setup.py", "clean", "--all", "bdist_wheel"],
+        cwd=str(SOURCE_PATH),
+    )
 
 
 @cli.command("build-docs")
@@ -380,8 +393,8 @@ def package():
 )
 def build_docs(open_docs):
     """Build the project documentation."""
-    python_call("pip", ["install", "src/[docs]"])
-    python_call("pip", ["install", "-r", "src/requirements.txt"])
+    python_call("pip", ["install", str(SOURCE_PATH / "[docs]")])
+    python_call("pip", ["install", "-r", str(SOURCE_PATH / "requirements.txt")])
     python_call("ipykernel", ["install", "--user", f"--name={KEDRO_PACKAGE_NAME}"])
     shutil.rmtree("docs/build", ignore_errors=True)
     call(
@@ -390,7 +403,7 @@ def build_docs(open_docs):
             "--module-first",
             "-o",
             "docs/source",
-            str(DEFAULT_PACKAGE_PATH),
+            str(SOURCE_PATH / KEDRO_PACKAGE_NAME),
         ]
     )
     call(["sphinx-build", "-M", "html", "docs/source", "docs/build", "-a"])
@@ -403,10 +416,10 @@ def build_docs(open_docs):
 @cli.command("build-reqs")
 def build_reqs():
     """Build the project dependency requirements."""
-    requirements_path = Path.cwd() / SOURCE_DIR / "requirements.in"
+    requirements_path = SOURCE_PATH / "requirements.in"
     if not requirements_path.is_file():
         secho("No requirements.in found. Copying contents from requirements.txt...")
-        contents = (Path.cwd() / SOURCE_DIR / "requirements.txt").read_text()
+        contents = (SOURCE_PATH / "requirements.txt").read_text()
         requirements_path.write_text(contents)
     python_call("piptools", ["compile", str(requirements_path)])
     secho(
@@ -432,7 +445,9 @@ def activate_nbstripout():
     try:
         import nbstripout  # pylint: disable=unused-import
     except ImportError:
-        raise KedroCliError(NO_DEPENDENCY_MESSAGE.format("nbstripout"))
+        raise KedroCliError(
+            NO_DEPENDENCY_MESSAGE.format(module="nbstripout", src=str(SOURCE_PATH))
+        )
 
     try:
         res = subprocess.run(
@@ -544,14 +559,12 @@ def convert_notebook(all_flag, overwrite_flag, filepath):
     """Convert selected or all notebooks found in a Kedro project
     to Kedro code, by exporting code from the appropriately-tagged cells:
     Cells tagged as `node` will be copied over to a Python file matching
-    the name of the notebook, under `src/<package_name>/nodes`.
+    the name of the notebook, under `<source_dir>/<package_name>/nodes`.
     *Note*: Make sure your notebooks have unique names!
     FILEPATH: Path(s) to exact notebook file(s) to be converted. Both
     relative and absolute paths are accepted.
     Should not be provided if --all flag is already present.
     """
-    context = load_context(Path.cwd())
-
     if not filepath and not all_flag:
         secho(
             "Please specify a notebook filepath "
@@ -559,13 +572,11 @@ def convert_notebook(all_flag, overwrite_flag, filepath):
         )
         sys.exit(1)
 
-    kedro_project_path = context.project_path
-
     if all_flag:
         # pathlib glob does not ignore hidden directories,
         # whereas Python glob does, which is more useful in
         # ensuring checkpoints will not be included
-        pattern = kedro_project_path / "**" / "*.ipynb"
+        pattern = PROJ_PATH / "**" / "*.ipynb"
         notebooks = sorted(Path(p) for p in iglob(str(pattern), recursive=True))
     else:
         notebooks = [Path(f) for f in filepath]
@@ -581,11 +592,7 @@ def convert_notebook(all_flag, overwrite_flag, filepath):
     for notebook in notebooks:
         secho("Converting notebook '{}'...".format(str(notebook)))
         output_path = (
-            kedro_project_path
-            / SOURCE_DIR
-            / KEDRO_PACKAGE_NAME
-            / "nodes"
-            / "{}.py".format(notebook.stem)
+            SOURCE_PATH / KEDRO_PACKAGE_NAME / "nodes" / f"{notebook.stem}.py"
         )
 
         if output_path.is_file():

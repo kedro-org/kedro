@@ -27,6 +27,7 @@
 # limitations under the License.
 
 import sys
+from pathlib import Path
 
 import pytest
 
@@ -107,7 +108,7 @@ class TestLoadContext:
         "source_dir", ["../", "../src/", "./src/../..", "/User/user/root_project"]
     )
     def test_kedro_yml_invalid_source_dir_pattern(self, fake_repo_path, source_dir):
-        """Test for invalid pattern for source_dir (either absolute or starts with '..').
+        """Test for invalid pattern for source_dir that is not relative to the project path.
         """
         kedro_yml_path = fake_repo_path / ".kedro.yml"
         kedro_yml_path.write_text(
@@ -115,8 +116,12 @@ class TestLoadContext:
                 source_dir
             )
         )
+        source_path = (fake_repo_path / Path(source_dir).expanduser()).resolve()
 
-        pattern = r"'source\_dir' in '\.kedro\.yml' has to be a relative path"
+        pattern = (
+            f"Source path '{source_path}' has to be relative to your project root "
+            f"'{fake_repo_path.resolve()}'"
+        )
         with pytest.raises(KedroContextError, match=pattern):
             load_context(str(fake_repo_path))
 

@@ -70,6 +70,8 @@ If you picked up a code or documentation related issue, before pushing the branc
 - [ ] for code changes:
 ```
 make test
+or
+make test-coverage       # to get html generated test-run and coverage reports
 ```
 
 - [ ] for documentation related changes:
@@ -79,11 +81,9 @@ make build-docs
 
 #### Test run reports and coverage reports
 
-These commands generate test run reports and coverage reports:
+This command generates test run reports and coverage reports (html format):
 
 ```
-make test
-or
 make test-coverage
 ```
 
@@ -93,6 +93,8 @@ Look for the test run report and the test coverage reports in these folders in t
 .coverage-reports
 .test-run-reports
 ```
+
+Note: `make test` will run the tests and generate a terminal-only text coverage report both on the local machine and on CircleCI.
 
 The reports are stored in the sub-folders inside both of the above folders. Sub-folders are named by the `git` branch the tests are run on.
 

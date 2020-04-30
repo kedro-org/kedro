@@ -19,10 +19,10 @@ lint:
 	pre-commit run -a --hook-stage manual
 
 test:
-	@./test-coverage.sh
+	pytest tests --cov-config default_coverage_report.toml --cov=kedro
 
 test-coverage:
-	@./test-coverage.sh
+	@./tools/test-coverage.sh
 
 test-no-spark:
 	pytest tests --cov-config pyproject_no_spark.toml --ignore tests/extras/datasets/spark

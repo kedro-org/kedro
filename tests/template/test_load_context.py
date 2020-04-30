@@ -75,11 +75,16 @@ class TestLoadContext:
         try:
             result_second_time = load_context(str(fake_repo_path))
             assert result_first_time.project_path == result_second_time.project_path
-            assert result_first_time.project_version == result_second_time.project_version
+            assert (
+                result_first_time.project_version == result_second_time.project_version
+            )
             assert str(fake_repo_path.resolve() / "src") in sys.path
         except KedroContextError as kce:
-            print("FAILED: Should have loaded the context twice successfully, "
-                  "and not got this exception:", kce)
+            print(
+                "FAILED: Should have loaded the context twice successfully, "
+                "and not got this exception:",
+                kce,
+            )
             assert 0
 
     def test_invalid_path(self, tmp_path):
@@ -107,9 +112,7 @@ class TestLoadContext:
             load_context(str(fake_repo_path))
 
     @pytest.mark.parametrize("source_dir", ["src", "./src", "./src/"])
-    def test_kedro_yml_valid_source_dir(
-        self, monkeypatch, fake_repo_path, source_dir
-    ):
+    def test_kedro_yml_valid_source_dir(self, monkeypatch, fake_repo_path, source_dir):
         """Test for loading context from an valid source dir. """
         monkeypatch.delenv(
             "PYTHONPATH"

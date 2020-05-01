@@ -65,4 +65,4 @@ delete_the_old_coverage_report_folder_and_create_a_new_one
 run_test_runner
 print_finish_time
 
-exit ${test_run_exit_code=0}
+exit ${test_run_exit_code}

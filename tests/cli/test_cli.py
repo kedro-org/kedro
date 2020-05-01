@@ -39,6 +39,7 @@ from kedro.cli.cli import _init_plugins, cli, load_entry_points
 from kedro.cli.utils import (
     CommandCollection,
     KedroCliError,
+    _clean_pycache,
     export_nodes,
     forward_command,
     get_pkg_version,
@@ -423,6 +424,26 @@ class TestCliUtils:
         pattern = "Provided filepath is not a Jupyter notebook"
         with raises(KedroCliError, match=pattern):
             export_nodes(random_file, output_path)
+
+    def test_clean_pycache(self, tmp_path, mocker):
+        """Test `clean_pycache` utility function"""
+        source = Path(tmp_path)
+        pycache2 = Path(source / "nested1" / "nested2" / "__pycache__").resolve()
+        pycache2.mkdir(parents=True)
+        pycache1 = Path(source / "nested1" / "__pycache__").resolve()
+        pycache1.mkdir()
+        pycache = Path(source / "__pycache__").resolve()
+        pycache.mkdir()
+
+        mocked_rmtree = mocker.patch("shutil.rmtree")
+        _clean_pycache(source)
+
+        expected_calls = [
+            mocker.call(pycache, ignore_errors=True),
+            mocker.call(pycache1, ignore_errors=True),
+            mocker.call(pycache2, ignore_errors=True),
+        ]
+        assert mocked_rmtree.mock_calls == expected_calls
 
 
 @mark.usefixtures("dummy_context")

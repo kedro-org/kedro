@@ -34,6 +34,7 @@ import shutil
 import subprocess
 import sys
 import webbrowser
+
 import yaml
 from collections import Counter, defaultdict
 from glob import iglob
@@ -45,6 +46,7 @@ from typing import Any, Dict, Iterable, List, Tuple
 import click
 from click import secho, style
 from kedro.cli import main as kedro_main
+from kedro.cli.pipeline import pipeline as pipeline_group
 from kedro.cli.utils import (
     KedroCliError,
     call,
@@ -52,8 +54,8 @@ from kedro.cli.utils import (
     forward_command,
     python_call,
 )
-from kedro.context import load_context
-from kedro.runner import SequentialRunner
+from kedro.context import load_context, validate_source_path
+
 from kedro.utils import load_obj
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
@@ -62,20 +64,17 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 PROJ_PATH = Path(__file__).resolve().parent
 os.environ["IPYTHONDIR"] = str(PROJ_PATH / ".ipython")
 
-with open(PROJ_PATH / ".kedro.yml") as kedro_yml:
+with (PROJ_PATH / ".kedro.yml").open("r") as kedro_yml:
     kedro_yaml = yaml.safe_load(kedro_yml)
 
-SOURCE_DIR = kedro_yaml.get("source_dir", "src")
-if Path(SOURCE_DIR).is_absolute() or ".." in SOURCE_DIR:
-    raise KedroCliError(
-        "'source_dir' in '.kedro.yml' has to be a relative path to your project root, "
-        "and cannot be an absolute path or start with '..'. "
-        "A path is considered absolute if it has both a root and (if the flavour allows) "
-        "a drive."
-    )
+SOURCE_DIR = Path(kedro_yaml.get("source_dir", "src")).expanduser()
+SOURCE_PATH = (PROJ_PATH / SOURCE_DIR).resolve()
+validate_source_path(SOURCE_PATH, PROJ_PATH)
 
-NO_DEPENDENCY_MESSAGE = """{0} is not installed. Please make sure {0} is in
-src/requirements.txt and run `kedro install`."""
+KEDRO_PACKAGE_NAME = "{{ cookiecutter.python_package }}"
+
+NO_DEPENDENCY_MESSAGE = """{module} is not installed. Please make sure {module} is in
+{src}/requirements.txt and run `kedro install`."""
 
 TAG_ARG_HELP = """Construct the pipeline using only nodes which have this tag
 attached. Option can be used multiple times, what results in a
@@ -133,11 +132,16 @@ JUPYTER_IDLE_TIMEOUT_HELP = """When a notebook is closed, Jupyter server will
 terminate its kernel after so many seconds of inactivity. This does not affect
 any open notebooks."""
 
-SIMPLE_PIPELINE_HELP = """Show list of all pipelines in the project."""
+
+def _env_option(func_=None, **kwargs):
+    default_args = dict(type=str, default=None, help=ENV_ARG_HELP)
+    kwargs = {**default_args, **kwargs}
+    opt = click.option("--env", "-e", **kwargs)
+    return opt(func_) if func_ else opt
 
 
 def _split_string(ctx, param, value):
-    return [item.strip() for item in value.split(",") if item]
+    return [item.strip() for item in value.split(",") if item.strip()]
 
 
 def _try_convert_to_numeric(value):
@@ -231,7 +235,7 @@ def cli():
     "--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP
 )
 @click.option("--parallel", "-p", is_flag=True, multiple=False, help=PARALLEL_ARG_HELP)
-@click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
+@_env_option
 @click.option("--tag", "-t", type=str, multiple=True, help=TAG_ARG_HELP)
 @click.option(
     "--load-version",
@@ -299,7 +303,9 @@ def test(args):
     try:
         import pytest  # pylint: disable=unused-import
     except ImportError:
-        raise KedroCliError(NO_DEPENDENCY_MESSAGE.format("pytest"))
+        raise KedroCliError(
+            NO_DEPENDENCY_MESSAGE.format(module="pytest", src=str(SOURCE_PATH))
+        )
     else:
         python_call("pytest", args)
 
@@ -309,15 +315,16 @@ def test(args):
 @click.argument("files", type=click.Path(exists=True), nargs=-1)
 def lint(files, check_only):
     """Run flake8, isort and (on Python >=3.6) black."""
-    if not files:
-        files = ("src/tests", "src/{{ cookiecutter.python_package }}")
+    files = files or (str(SOURCE_PATH / "tests"), str(SOURCE_PATH / KEDRO_PACKAGE_NAME))
 
     try:
         import flake8
         import isort
         import black
     except ImportError as exc:
-        raise KedroCliError(NO_DEPENDENCY_MESSAGE.format(exc.name))
+        raise KedroCliError(
+            NO_DEPENDENCY_MESSAGE.format(module=exc.name, src=str(SOURCE_PATH))
+        )
 
     python_call("black", ("--check",) + files if check_only else files)
     python_call("flake8", ("--max-line-length=88",) + files)
@@ -333,10 +340,18 @@ def install():
     """Install project dependencies from both requirements.txt
     and environment.yml (optional)."""
 
-    if (Path.cwd() / SOURCE_DIR / "environment.yml").is_file():
-        call(["conda", "install", "--file", "src/environment.yml", "--yes"])
+    if (SOURCE_PATH / "environment.yml").is_file():
+        call(
+            [
+                "conda",
+                "install",
+                "--file",
+                str(SOURCE_PATH / "environment.yml"),
+                "--yes",
+            ]
+        )
 
-    pip_command = ["install", "-U", "-r", "src/requirements.txt"]
+    pip_command = ["install", "-U", "-r", str(SOURCE_PATH / "requirements.txt")]
 
     if os.name == "posix":
         python_call("pip", pip_command)
@@ -356,8 +371,14 @@ def ipython(args):
 @cli.command()
 def package():
     """Package the project as a Python egg and wheel."""
-    call([sys.executable, "setup.py", "clean", "--all", "bdist_egg"], cwd=SOURCE_DIR)
-    call([sys.executable, "setup.py", "clean", "--all", "bdist_wheel"], cwd=SOURCE_DIR)
+    call(
+        [sys.executable, "setup.py", "clean", "--all", "bdist_egg"],
+        cwd=str(SOURCE_PATH),
+    )
+    call(
+        [sys.executable, "setup.py", "clean", "--all", "bdist_wheel"],
+        cwd=str(SOURCE_PATH),
+    )
 
 
 @cli.command("build-docs")
@@ -372,11 +393,9 @@ def package():
 )
 def build_docs(open_docs):
     """Build the project documentation."""
-    python_call("pip", ["install", "src/[docs]"])
-    python_call("pip", ["install", "-r", "src/requirements.txt"])
-    python_call(
-        "ipykernel", ["install", "--user", "--name={{ cookiecutter.python_package }}"]
-    )
+    python_call("pip", ["install", str(SOURCE_PATH / "[docs]")])
+    python_call("pip", ["install", "-r", str(SOURCE_PATH / "requirements.txt")])
+    python_call("ipykernel", ["install", "--user", f"--name={KEDRO_PACKAGE_NAME}"])
     shutil.rmtree("docs/build", ignore_errors=True)
     call(
         [
@@ -384,7 +403,7 @@ def build_docs(open_docs):
             "--module-first",
             "-o",
             "docs/source",
-            "src/{{ cookiecutter.python_package }}",
+            str(SOURCE_PATH / KEDRO_PACKAGE_NAME),
         ]
     )
     call(["sphinx-build", "-M", "html", "docs/source", "docs/build", "-a"])
@@ -397,10 +416,10 @@ def build_docs(open_docs):
 @cli.command("build-reqs")
 def build_reqs():
     """Build the project dependency requirements."""
-    requirements_path = Path.cwd() / SOURCE_DIR / "requirements.in"
+    requirements_path = SOURCE_PATH / "requirements.in"
     if not requirements_path.is_file():
         secho("No requirements.in found. Copying contents from requirements.txt...")
-        contents = (Path.cwd() / SOURCE_DIR / "requirements.txt").read_text()
+        contents = (SOURCE_PATH / "requirements.txt").read_text()
         requirements_path.write_text(contents)
     python_call("piptools", ["compile", str(requirements_path)])
     secho(
@@ -426,7 +445,9 @@ def activate_nbstripout():
     try:
         import nbstripout  # pylint: disable=unused-import
     except ImportError:
-        raise KedroCliError(NO_DEPENDENCY_MESSAGE.format("nbstripout"))
+        raise KedroCliError(
+            NO_DEPENDENCY_MESSAGE.format(module="nbstripout", src=str(SOURCE_PATH))
+        )
 
     try:
         res = subprocess.run(
@@ -491,7 +512,7 @@ def jupyter():
     "--all-kernels", is_flag=True, default=False, help=JUPYTER_ALL_KERNELS_HELP
 )
 @click.option("--idle-timeout", type=int, default=30, help=JUPYTER_IDLE_TIMEOUT_HELP)
-@click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
+@_env_option
 def jupyter_notebook(ip, all_kernels, env, idle_timeout, args):
     """Open Jupyter Notebook with project specific variables loaded."""
     if "-h" not in args and "--help" not in args:
@@ -511,7 +532,7 @@ def jupyter_notebook(ip, all_kernels, env, idle_timeout, args):
     "--all-kernels", is_flag=True, default=False, help=JUPYTER_ALL_KERNELS_HELP
 )
 @click.option("--idle-timeout", type=int, default=30, help=JUPYTER_IDLE_TIMEOUT_HELP)
-@click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
+@_env_option
 def jupyter_lab(ip, all_kernels, env, idle_timeout, args):
     """Open Jupyter Lab with project specific variables loaded."""
     if "-h" not in args and "--help" not in args:
@@ -538,14 +559,12 @@ def convert_notebook(all_flag, overwrite_flag, filepath):
     """Convert selected or all notebooks found in a Kedro project
     to Kedro code, by exporting code from the appropriately-tagged cells:
     Cells tagged as `node` will be copied over to a Python file matching
-    the name of the notebook, under `src/<package_name>/nodes`.
+    the name of the notebook, under `<source_dir>/<package_name>/nodes`.
     *Note*: Make sure your notebooks have unique names!
     FILEPATH: Path(s) to exact notebook file(s) to be converted. Both
     relative and absolute paths are accepted.
     Should not be provided if --all flag is already present.
     """
-    context = load_context(Path.cwd())
-
     if not filepath and not all_flag:
         secho(
             "Please specify a notebook filepath "
@@ -553,14 +572,11 @@ def convert_notebook(all_flag, overwrite_flag, filepath):
         )
         sys.exit(1)
 
-    kedro_project_path = context.project_path
-    kedro_package_name = "{{cookiecutter.python_package}}"
-
     if all_flag:
         # pathlib glob does not ignore hidden directories,
         # whereas Python glob does, which is more useful in
         # ensuring checkpoints will not be included
-        pattern = kedro_project_path / "**" / "*.ipynb"
+        pattern = PROJ_PATH / "**" / "*.ipynb"
         notebooks = sorted(Path(p) for p in iglob(str(pattern), recursive=True))
     else:
         notebooks = [Path(f) for f in filepath]
@@ -576,11 +592,7 @@ def convert_notebook(all_flag, overwrite_flag, filepath):
     for notebook in notebooks:
         secho("Converting notebook '{}'...".format(str(notebook)))
         output_path = (
-            kedro_project_path
-            / SOURCE_DIR
-            / kedro_package_name
-            / "nodes"
-            / "{}.py".format(notebook.stem)
+            SOURCE_PATH / KEDRO_PACKAGE_NAME / "nodes" / f"{notebook.stem}.py"
         )
 
         if output_path.is_file():
@@ -622,7 +634,7 @@ def catalog():
 
 
 @catalog.command("list")
-@click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
+@_env_option
 @click.option(
     "--pipeline", type=str, default="", help=PIPELINE_ARG_HELP, callback=_split_string
 )
@@ -667,43 +679,6 @@ def list_datasets(pipeline, env):
     secho(yaml.dump(result))
 
 
-@cli.group("pipeline")
-def pl():
-    """Commands for pipeline."""
-
-
-@pl.command("list")
-@click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_ARG_HELP)
-@click.option("--simple", is_flag=True, multiple=False, help=SIMPLE_PIPELINE_HELP)
-@click.argument("pl_names", metavar="[PIPELINE_NAME]...", nargs=-1)
-def list_pipelines_and_nodes(pl_names, simple, env):
-    """Show detailed information about pipelines."""
-    context = load_context(Path.cwd(), env=env)
-    project_pipelines = context.pipelines
-    if simple:
-        secho(yaml.dump(sorted(project_pipelines.keys())))
-        return
-
-    pipelines = set(pl_names) or project_pipelines.keys()
-
-    result = {}
-    for pl_name in pipelines:
-        pl_obj = project_pipelines.get(pl_name)
-        if not pl_obj:
-            existing_pls = ", ".join(sorted(project_pipelines.keys()))
-            raise KedroCliError(
-                "{} pipeline not found. Existing pipelines: {}".format(
-                    pl_name, existing_pls
-                )
-            )
-
-        result[pl_name] = [
-            "{} ({})".format(node.short_name, node._func_name) for node in pl_obj.nodes
-        ]
-
-    secho(yaml.dump(result))
-
-
 def _map_type_to_datasets(datasets, datasets_meta):
     """Build dictionary with a dataset type as a key and list of
     datasets of the specific type as a value.
@@ -716,6 +691,9 @@ def _map_type_to_datasets(datasets, datasets_meta):
             if ds not in mapping[ds_type]:
                 mapping[ds_type].append(ds)
     return mapping
+
+
+cli.add_command(pipeline_group)
 
 
 if __name__ == "__main__":

@@ -25,12 +25,12 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-"""``kedro.context`` provides functionality for loading Kedro
-project context.
 """
+This is a boilerplate test file for pipeline '{{ cookiecutter.pipeline_name }}'
+generated using Kedro {{ cookiecutter.kedro_version }}.
+Please add your pipeline tests here.
 
-from .context import KedroContext  # NOQA
-from .context import KedroContextError  # NOQA
-from .context import load_context  # NOQA
-from .context import validate_source_path  # NOQA
+Kedro recommends using `pytest` framework, more info about it can be found
+in the official documentation:
+https://docs.pytest.org/en/latest/getting-started.html
+"""

@@ -26,11 +26,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``kedro.context`` provides functionality for loading Kedro
-project context.
+"""
+This is a boilerplate pipeline '{{ cookiecutter.pipeline_name }}'
+generated using Kedro {{ cookiecutter.kedro_version }}
 """
 
-from .context import KedroContext  # NOQA
-from .context import KedroContextError  # NOQA
-from .context import load_context  # NOQA
-from .context import validate_source_path  # NOQA
+from kedro.pipeline import Pipeline, node
+
+
+def create_pipeline(**kwargs):
+    return Pipeline([])

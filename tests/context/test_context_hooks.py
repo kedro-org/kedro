@@ -231,6 +231,7 @@ def logging_hooks(logs_queue):
 def context_with_hooks(tmp_path, mocker, logging_hooks):
     class DummyContextWithHooks(KedroContext):
         project_name = "test hooks"
+        package_name = "test_hooks"
         project_version = __version__
         hooks = (logging_hooks,)
 

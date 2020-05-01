@@ -60,13 +60,11 @@ These dependency sets are listed below.
 |                    +-------------+-------------------------------+-----------------------------------------+
 |                    | networkx    | networkx.NetworkXDataSet      | pip install "kedro[networkx]"           |
 |                    +-------------+-------------------------------+-----------------------------------------+
-|                    | pandas      | pandas.CSVBlobDataSet         | pip install "kedro[pandas]"             |
-|                    |             | pandas.CSVDataSet             |                                         |
+|                    | pandas      | pandas.CSVDataSet             | pip install "kedro[pandas]"             |
 |                    |             | pandas.ExcelDataSet           |                                         |
 |                    |             | pandas.FeatherDataSet         |                                         |
 |                    |             | pandas.GBQTableDataSet        |                                         |
 |                    |             | pandas.HDFDateSet             |                                         |
-|                    |             | pandas.JSONBlobDataSet        |                                         |
 |                    |             | pandas.JSONDataSet            |                                         |
 |                    |             | pandas.ParquetDataSet         |                                         |
 |                    |             | pandas.SQLQueryDataSet        |                                         |

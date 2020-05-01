@@ -49,11 +49,11 @@ import yaml
 
 import kedro.config.default_logger  # noqa
 from kedro import __version__ as version
-from kedro.cli.utils import CommandCollection, KedroCliError
+from kedro.cli.utils import CommandCollection, KedroCliError, _clean_pycache
 from kedro.context import load_context
 
-KEDRO_PATH = os.path.dirname(kedro.__file__)
-TEMPLATE_PATH = os.path.join(KEDRO_PATH, "template")
+KEDRO_PATH = Path(kedro.__file__).parent
+TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 _VERBOSE = True
@@ -181,19 +181,6 @@ def docs():
     webbrowser.open(index_path)
 
 
-def _clean_pycache(project_path):
-    # Since template is part of the Kedro package __pycache__ is generated.
-    # This method recursively cleans all __pycache__ folders.
-    to_delete = [
-        filename.resolve()
-        for filename in project_path.rglob("**/*")
-        if str(filename).endswith("__pycache__")
-    ]
-
-    for file in to_delete:  # pragma: no cover
-        shutil.rmtree(str(file))
-
-
 def _create_project(config_path: str, verbose: bool):
     """Implementation of the kedro new cli command.
 
@@ -215,7 +202,7 @@ def _create_project(config_path: str, verbose: bool):
 
         result_path = Path(
             cookiecutter(
-                TEMPLATE_PATH,
+                str(TEMPLATE_PATH),
                 output_dir=config["output_dir"],
                 no_input=True,
                 extra_context=config,
@@ -383,15 +370,15 @@ def _check_config_ok(config_path: str, config: Dict[str, Any]) -> Dict[str, Any]
         _show_example_config()
         raise KedroCliError(config_path + " is empty")
 
-    required_in_config = _get_default_config().keys()
+    missing_keys = _get_default_config().keys() - config.keys()
 
-    for var in required_in_config:
-        if var not in config:
-            click.echo("\n" + config_path + ":")
-            click.echo(yaml.dump(config, default_flow_style=False))
-            _show_example_config()
+    if missing_keys:
+        click.echo(f"\n{config_path}:")
+        click.echo(yaml.dump(config, default_flow_style=False))
+        _show_example_config()
 
-            raise KedroCliError("[" + var + "] not found in " + config_path)
+        missing_keys_str = ", ".join(str(k) for k in missing_keys)
+        raise KedroCliError(f"[{missing_keys_str}] not found in {config_path}")
 
     config["output_dir"] = _fix_user_path(config["output_dir"])
     _assert_output_dir_ok(config["output_dir"])
@@ -402,10 +389,9 @@ def _check_config_ok(config_path: str, config: Dict[str, Any]) -> Dict[str, Any]
 
 
 def _get_default_config():
-    default_config_path = os.path.join(TEMPLATE_PATH, "default_config.yml")
-    with open(default_config_path) as default_config_file:
-        default_config = yaml.safe_load(default_config_file)
-    return default_config
+    default_config_path = TEMPLATE_PATH / "default_config.yml"
+    with default_config_path.open() as default_config_file:
+        return yaml.safe_load(default_config_file)
 
 
 def _assert_output_dir_ok(output_dir: str):
@@ -446,8 +432,7 @@ def _assert_pkg_name_ok(pkg_name: str):
         raise KedroCliError(message)
     if not re.match(r"^\w+$", pkg_name[1:]):
         message = (
-            base_message + " It must contain only letters, "
-            "digits, and/or underscores."
+            base_message + " It must contain only letters, digits, and/or underscores."
         )
         raise KedroCliError(message)
 
@@ -594,9 +579,7 @@ def load_entry_points(name: str) -> List[str]:
         try:
             entry_point_commands.append(entry_point.load())
         except Exception:  # pylint: disable=broad-except
-            _handle_exception(
-                "Loading {} commands from {}".format(name, str(entry_point)), end=False
-            )
+            _handle_exception(f"Loading {name} commands from {entry_point}", end=False)
     return entry_point_commands
 
 
@@ -631,13 +614,12 @@ def main():  # pragma: no cover
             project_groups.extend(load_entry_points("project"))
             project_groups.append(kedro_cli.cli)
         except Exception:  # pylint: disable=broad-except
-            _handle_exception(
-                "Cannot load commands from {}".format(str(kedro_cli_path))
-            )
-    CommandCollection(
+            _handle_exception(f"Cannot load commands from {kedro_cli_path}")
+    cli_collection = CommandCollection(
         ("Global commands", global_groups),
         ("Project specific commands", project_groups),
-    )()
+    )
+    cli_collection()
 
 
 def _handle_exception(msg, end=True):
@@ -647,7 +629,7 @@ def _handle_exception(msg, end=True):
     else:
         etype, value, _ = sys.exc_info()
         click.secho(
-            "".join(*traceback.format_exception_only(etype, value))
+            "".join(traceback.format_exception_only(etype, value))
             + "Run with --verbose to see the full exception",
             fg="yellow",
         )

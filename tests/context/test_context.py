@@ -28,7 +28,6 @@
 
 import configparser
 import json
-import os
 import re
 from pathlib import Path, PureWindowsPath
 from typing import Any, Dict
@@ -38,9 +37,9 @@ import pytest
 import yaml
 from pandas.util.testing import assert_frame_equal
 
-from kedro import __version__
+from kedro import __version__ as kedro_version
 from kedro.config import MissingConfigException
-from kedro.context import KedroContext, KedroContextError
+from kedro.context import KedroContext, KedroContextError, validate_source_path
 from kedro.context.context import _expand_path, _is_relative_path
 from kedro.extras.datasets.pandas import CSVDataSet
 from kedro.io.core import Version, generate_timestamp
@@ -210,7 +209,8 @@ expected_message_head = (
 
 class DummyContext(KedroContext):
     project_name = "bob"
-    project_version = __version__
+    project_version = kedro_version
+    package_name = "bob"
 
     def _get_pipelines(self) -> Dict[str, Pipeline]:
         pipeline = Pipeline(
@@ -233,7 +233,8 @@ class DummyContextWithPipelinePropertyOnly(KedroContext):
     # pylint: disable=abstract-method
 
     project_name = "bob_old"
-    project_version = __version__
+    project_version = kedro_version
+    package_name = "bob_old"
 
     @property
     def pipeline(self) -> Pipeline:
@@ -263,14 +264,11 @@ def dummy_context(tmp_path, mocker, env, extra_params):
 
 @pytest.mark.usefixtures("config_dir")
 class TestKedroContext:
-    def test_project_name(self, dummy_context):
+    def test_attributes(self, tmp_path, dummy_context):
         assert dummy_context.project_name == "bob"
-
-    def test_project_version(self, dummy_context):
-        assert dummy_context.project_version == __version__
-
-    def test_project_path(self, dummy_context, tmp_path):
-        assert str(dummy_context.project_path) == str(tmp_path.resolve())
+        assert dummy_context.project_version == kedro_version
+        assert isinstance(dummy_context.project_path, Path)
+        assert dummy_context.project_path == tmp_path.resolve()
 
     def test_get_catalog_always_using_absolute_path(self, dummy_context):
         conf_catalog = dummy_context.config_loader.get("catalog*")
@@ -354,6 +352,7 @@ class TestKedroContext:
 
         class _DummyContext(KedroContext):
             project_name = "bob"
+            package_name = "bob"
             project_version = invalid_version
 
             def _get_pipelines(self) -> Dict[str, Pipeline]:
@@ -362,19 +361,19 @@ class TestKedroContext:
         pattern = (
             r"Your Kedro project version {} does not match "
             r"Kedro package version {} you are running. ".format(
-                invalid_version, __version__
+                invalid_version, kedro_version
             )
         )
         with pytest.raises(KedroContextError, match=pattern):
             _DummyContext(str(tmp_path))
 
     @pytest.mark.parametrize("env", ["custom_env"], indirect=True)
-    def test_custom_env(self, dummy_context):
-        assert dummy_context.env == "custom_env"
+    def test_custom_env(self, dummy_context, env):
+        assert dummy_context.env == env
 
     def test_missing_parameters(self, tmp_path, mocker):
         parameters = tmp_path / "conf" / "base" / "parameters.json"
-        os.remove(str(parameters))
+        parameters.unlink()
 
         # Disable logging.config.dictConfig in KedroContext._setup_logging as
         # it changes logging.config and affects other unit tests
@@ -388,7 +387,7 @@ class TestKedroContext:
 
     def test_missing_credentials(self, tmp_path, mocker):
         env_credentials = tmp_path / "conf" / "local" / "credentials.yml"
-        os.remove(str(env_credentials))
+        env_credentials.unlink()
 
         # Disable logging.config.dictConfig in KedroContext._setup_logging as
         # it changes logging.config and affects other unit tests
@@ -545,7 +544,8 @@ class TestKedroContextRun:  # pylint: disable=too-many-public-methods
     def test_run_load_versions(self, tmp_path, dummy_context, dummy_dataframe, mocker):
         class DummyContext(KedroContext):
             project_name = "bob"
-            project_version = __version__
+            package_name = "bob"
+            project_version = kedro_version
 
             def _get_pipelines(self) -> Dict[str, Pipeline]:
                 return {"__default__": Pipeline([node(identity, "cars", "boats")])}
@@ -579,7 +579,8 @@ class TestKedroContextRun:  # pylint: disable=too-many-public-methods
     def test_run_with_empty_pipeline(self, tmp_path, mocker):
         class DummyContext(KedroContext):
             project_name = "bob"
-            project_version = __version__
+            package_name = "bob"
+            project_version = kedro_version
 
             def _get_pipelines(self) -> Dict[str, Pipeline]:
                 return {"__default__": Pipeline([])}
@@ -587,7 +588,7 @@ class TestKedroContextRun:  # pylint: disable=too-many-public-methods
         mocker.patch("logging.config.dictConfig")
         dummy_context = DummyContext(str(tmp_path))
         assert dummy_context.project_name == "bob"
-        assert dummy_context.project_version == __version__
+        assert dummy_context.project_version == kedro_version
         pattern = "Pipeline contains no nodes"
         with pytest.raises(KedroContextError, match=pattern):
             dummy_context.run()
@@ -610,7 +611,8 @@ class TestKedroContextRun:  # pylint: disable=too-many-public-methods
     ):
         class BadContext(KedroContext):
             project_name = "fred"
-            project_version = __version__
+            package_name = "fred"
+            project_version = kedro_version
 
             def _get_pipelines(self) -> Dict[str, Pipeline]:
                 return {"__default__": context_pipeline}
@@ -820,3 +822,33 @@ def test_expand_path_not_changing_non_relative_path(
     project_path: Path, input_conf: Dict[str, Any], expected: Dict[str, Any]
 ):
     assert _expand_path(project_path, input_conf) == expected
+
+
+class TestValidateSourcePath:
+    @pytest.mark.parametrize(
+        "source_dir", [".", "src", "./src", "src/nested", "src/nested/nested"]
+    )
+    def test_valid_source_path(self, tmp_path, source_dir):
+        source_path = (tmp_path / source_dir).resolve()
+        source_path.mkdir(parents=True, exist_ok=True)
+        validate_source_path(source_path, tmp_path.resolve())
+
+    @pytest.mark.parametrize("source_dir", ["..", "src/../..", "~"])
+    def test_invalid_source_path(self, tmp_path, source_dir):
+        source_dir = Path(source_dir).expanduser()
+        source_path = (tmp_path / source_dir).resolve()
+        source_path.mkdir(parents=True, exist_ok=True)
+
+        pattern = (
+            f"Source path '{source_path}' has to be relative to your project root "
+            f"'{tmp_path.resolve()}'"
+        )
+        with pytest.raises(KedroContextError, match=pattern):
+            validate_source_path(source_path, tmp_path.resolve())
+
+    def test_non_existent_source_path(self, tmp_path):
+        source_path = (tmp_path / "non_existent").resolve()
+
+        pattern = f"Source path '{source_path}' cannot be found."
+        with pytest.raises(KedroContextError, match=pattern):
+            validate_source_path(source_path, tmp_path.resolve())

@@ -17,13 +17,11 @@ Data Sets
     kedro.extras.datasets.geopandas.GeoJSONDataSet
     kedro.extras.datasets.matplotlib.MatplotlibWriter
     kedro.extras.datasets.networkx.NetworkXDataSet
-    kedro.extras.datasets.pandas.CSVBlobDataSet
     kedro.extras.datasets.pandas.CSVDataSet
     kedro.extras.datasets.pandas.ExcelDataSet
     kedro.extras.datasets.pandas.FeatherDataSet
     kedro.extras.datasets.pandas.GBQTableDataSet
     kedro.extras.datasets.pandas.HDFDataSet
-    kedro.extras.datasets.pandas.JSONBlobDataSet
     kedro.extras.datasets.pandas.JSONDataSet
     kedro.extras.datasets.pandas.ParquetDataSet
     kedro.extras.datasets.pandas.SQLQueryDataSet

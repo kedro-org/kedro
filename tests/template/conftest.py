@@ -47,7 +47,7 @@ def fake_root_dir():
 
 @pytest.fixture(scope="session")
 def fake_repo_path(fake_root_dir):
-    return fake_root_dir / TEST_REPO_NAME
+    return fake_root_dir.resolve() / TEST_REPO_NAME
 
 
 @pytest.fixture(scope="session")

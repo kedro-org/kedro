@@ -211,7 +211,6 @@ Currently the following datasets support versioning:
 
 - `kedro.extras.datasets.matplotlib.MatplotlibWriter`
 - `kedro.extras.datasets.networkx.NetworkXDataSet`
-- `kedro.extras.datasets.pandas.CSVBlobDataSet`
 - `kedro.extras.datasets.pandas.CSVDataSet`
 - `kedro.extras.datasets.pandas.ExcelDataSet`
 - `kedro.extras.datasets.pandas.FeatherDataSet`

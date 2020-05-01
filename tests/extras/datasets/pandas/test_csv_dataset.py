@@ -30,6 +30,7 @@ from pathlib import PurePosixPath
 
 import pandas as pd
 import pytest
+from adlfs import AzureBlobFileSystem
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
@@ -113,17 +114,18 @@ class TestCSVDataSet:
             csv_data_set.load()
 
     @pytest.mark.parametrize(
-        "filepath,instance_type",
+        "filepath,instance_type,credentials",
         [
-            ("s3://bucket/file.csv", S3FileSystem),
-            ("file:///tmp/test.csv", LocalFileSystem),
-            ("/tmp/test.csv", LocalFileSystem),
-            ("gcs://bucket/file.csv", GCSFileSystem),
-            ("https://example.com/file.csv", HTTPFileSystem),
+            ("s3://bucket/file.csv", S3FileSystem, {}),
+            ("file:///tmp/test.csv", LocalFileSystem, {}),
+            ("/tmp/test.csv", LocalFileSystem, {}),
+            ("gcs://bucket/file.csv", GCSFileSystem, {}),
+            ("https://example.com/file.csv", HTTPFileSystem, {}),
+            ("abfs://bucket/file.csv", AzureBlobFileSystem, {"account_name": "test"}),
         ],
     )
-    def test_protocol_usage(self, filepath, instance_type):
-        data_set = CSVDataSet(filepath=filepath)
+    def test_protocol_usage(self, filepath, instance_type, credentials):
+        data_set = CSVDataSet(filepath=filepath, credentials=credentials)
         assert isinstance(data_set._fs, instance_type)
 
         # _strip_protocol() doesn't strip http(s) protocol

@@ -10,17 +10,17 @@ repos:
           - id: trailing-whitespace
           - id: end-of-file-fixer
           - id: check-yaml # Checks yaml files for parseable syntax.
-            exclude: "^kedro/template/"
+            exclude: "^kedro/templates/"
           - id: check-json # Checks json files for parseable syntax.
           - id: check-added-large-files
           - id: check-case-conflict # Check for files that would conflict in case-insensitive filesystems
           - id: check-merge-conflict # Check for files that contain merge conflict strings.
           - id: debug-statements # Check for debugger imports and py37+ `breakpoint()` calls in python source.
-            exclude: "^kedro/template/"
+            exclude: "^kedro/templates/"
           - id: requirements-txt-fixer # Sorts entries in requirements.txt
-            exclude: "^kedro/template/"
+            exclude: "^kedro/templates/"
           - id: flake8
-            exclude: "^kedro/template/"
+            exclude: "^kedro/templates/"
 
     - repo: https://github.com/pre-commit/mirrors-mypy
       rev: v0.720
@@ -29,7 +29,7 @@ repos:
             args: [--allow-redefinition, --ignore-missing-imports]
             exclude: |
                 (?x)(
-                  ^kedro/template/|
+                  ^kedro/templates/|
                   ^docs/
                 )
 
@@ -43,7 +43,7 @@ repos:
             language: system
             types: [file, python]
             files: ^kedro/
-            exclude: ^kedro/template/
+            exclude: ^kedro/templates/
             entry: pylint --disable=unnecessary-pass
             stages: [commit]
           - id: pylint-quick-features
@@ -104,11 +104,11 @@ repos:
             name: "Sort imports"
             language: system
             types: [file, python]
-            exclude: ^kedro/template/
+            exclude: ^kedro/templates/
             entry: isort
           - id: bandit
             name: "Bandit security check"
             language: system
             types: [file, python]
-            exclude: ^kedro/template/|^tests/
+            exclude: ^kedro/templates/|^tests/
             entry: bandit -ll

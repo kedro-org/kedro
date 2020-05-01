@@ -2,7 +2,7 @@
 fail_under = 100
 show_missing = true
 omit = [
-  "kedro/template*",
+  "kedro/templates/*",
   "kedro/extras/datasets/spark/*",
   "tests/extras/datasets/spark/*",
   "kedro/hooks/specs.py"

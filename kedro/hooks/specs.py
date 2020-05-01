@@ -91,6 +91,8 @@ class NodeSpecs:
             node: The ``Node`` to run.
             catalog: A ``DataCatalog`` containing the node's inputs and outputs.
             inputs: The dictionary of inputs dataset.
+                The keys are dataset names and the values are the actual loaded input data,
+                not the dataset instance.
             is_async: Whether the node was run in ``async`` mode.
             run_id: The id of the run.
         """
@@ -114,7 +116,11 @@ class NodeSpecs:
             node: The ``Node`` that ran.
             catalog: A ``DataCatalog`` containing the node's inputs and outputs.
             inputs: The dictionary of inputs dataset.
+                The keys are dataset names and the values are the actual loaded input data,
+                not the dataset instance.
             outputs: The dictionary of outputs dataset.
+                The keys are dataset names and the values are the actual computed output data,
+                not the dataset instance.
             is_async: Whether the node was run in ``async`` mode.
             run_id: The id of the run.
         """

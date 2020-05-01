@@ -71,8 +71,8 @@ class TestLoadContext:
         try:
             # second time
             load_context(str(fake_repo_path))
-        except KedroContextError as kce:
-            pytest.fail(
+        except KedroContextError as kce:  # pragma: no cover
+            pytest.fail(  # pragma: no cover
                 "FAILED: Should have loaded the context twice successfully, "
                 "and not got this exception: " + str(kce)
             )

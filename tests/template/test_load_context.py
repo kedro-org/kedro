@@ -76,7 +76,6 @@ class TestLoadContext:
                 "FAILED: Should have loaded the context twice successfully, "
                 "and not got this exception:" + str(kce)
             )
-            assert 0
 
     def test_invalid_path(self, tmp_path):
         """Test for loading context from an invalid path. """

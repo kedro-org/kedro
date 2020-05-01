@@ -92,7 +92,7 @@ def before_all(context):
             "pip",
             "install",
             "-U",
-            "pip>=18.0, <21.0",
+            "pip>=20.0, <21.0",
             "setuptools>=38.0, <47.0",
             "wheel",
         ]

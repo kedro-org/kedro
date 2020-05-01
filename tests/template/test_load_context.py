@@ -74,7 +74,7 @@ class TestLoadContext:
         except KedroContextError as kce:
             pytest.fail(
                 "FAILED: Should have loaded the context twice successfully, "
-                "and not got this exception:" + str(kce)
+                "and not got this exception: " + str(kce)
             )
 
     def test_invalid_path(self, tmp_path):

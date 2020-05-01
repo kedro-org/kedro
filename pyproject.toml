@@ -14,7 +14,6 @@ default_section = "THIRDPARTY"
 fail_under = 100
 show_missing = true
 omit = [
-  "tests/*",
   "kedro/hooks/specs.py",
   "kedro/templates/*",
   "kedro/__main__.py",

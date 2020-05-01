@@ -19,7 +19,7 @@ lint:
 	pre-commit run -a --hook-stage manual
 
 test:
-	pytest tests --cov-config default_coverage_report.toml --cov=kedro
+	pytest tests --cov=kedro
 
 test-coverage:
 	@./tools/test-coverage.sh

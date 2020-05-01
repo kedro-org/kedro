@@ -13,5 +13,12 @@ default_section = "THIRDPARTY"
 [tool.coverage.report]
 fail_under = 100
 show_missing = true
-omit = ["kedro/templates/*", "kedro/hooks/specs.py"]
-exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
+omit = [
+  "tests/*",
+  "kedro/hooks/specs.py",
+  "kedro/templates/*",
+  "kedro/__main__.py",
+  "kedro/__init__.py",
+  "kedro/*/__init__.py",
+]
+exclude_lines = ["pragma: no cover", "raise NotImplementedError", "pass"]

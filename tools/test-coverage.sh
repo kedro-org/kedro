@@ -37,7 +37,7 @@ test_run_exit_code=0
 SOURCES_FOLDER=kedro
 TESTS_FOLDER=tests
 TARGET_TEST_FOLDERS="$@"
-TARGET_TEST_FOLDERS="${TARGET_TEST_FOLDERS:-"${TESTS_FOLDER}/"}"
+TARGET_TEST_FOLDERS="${TARGET_TEST_FOLDERS:-${TESTS_FOLDER}}"
 run_test_runner() {
     echo ""; echo "~~~ Running tests with coverage on branch '$(get_git_branch)'"
     set -x

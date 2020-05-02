@@ -583,3 +583,34 @@ class TestDataCatalogVersioned:
 
         with pytest.raises(DataSetError):
             catalog.load("boats", version="first")
+
+
+class TestCatalogCaching:
+    def test_caching_enabled_all(self, multi_catalog):
+        multi_catalog.enable_caching()
+        for dataset in multi_catalog._data_sets.values():
+            assert isinstance(dataset, AbstractDataSet)
+
+    def test_caching_enabled_some(self, multi_catalog):
+        multi_catalog.enable_caching(["abc"])
+        assert not isinstance(multi_catalog._data_sets["abc"], CSVDataSet)
+        assert isinstance(multi_catalog._data_sets["xyz"], ParquetDataSet)
+
+    def test_caching_enabled_threshold(self, multi_catalog):
+        multi_catalog.enable_caching(["abc", "abc", "xyz"], count_threshold=2)
+        assert not isinstance(multi_catalog._data_sets["abc"], CSVDataSet)
+        assert isinstance(multi_catalog._data_sets["xyz"], ParquetDataSet)
+
+    def test_not_caching_memory_dataset(self, multi_catalog):
+        multi_catalog.add("memory", MemoryDataSet(5))
+        multi_catalog.enable_caching()
+        assert isinstance(multi_catalog._data_sets["memory"], MemoryDataSet)
+
+    def test_not_caching_cached_dataset(self, multi_catalog):
+        multi_catalog.enable_caching()
+        multi_catalog.enable_caching()
+        assert isinstance(multi_catalog._data_sets["abc"]._dataset, CSVDataSet)
+
+    def test_caching_copy_mode(self, multi_catalog):
+        multi_catalog.enable_caching(copy_mode="assign")
+        assert multi_catalog._data_sets["abc"]._cache._copy_mode == "assign"

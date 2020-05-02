@@ -33,10 +33,12 @@ relaying load and save functions to the underlying data sets.
 """
 import copy
 import logging
+from collections import Counter
 from functools import partial
 from typing import Any, Callable, Dict, Iterable, List, Optional, Type, Union
 from warnings import warn
 
+from kedro.io.cached_dataset import CachedDataSet
 from kedro.io.core import (
     AbstractDataSet,
     AbstractVersionedDataSet,
@@ -649,3 +651,40 @@ class DataCatalog:
             raise DataSetError(
                 "DataSet '{}' does not have 'confirm' method".format(name)
             )
+
+    def enable_caching(
+        self,
+        datasets: Iterable[str] = None,
+        count_threshold: float = 1,
+        copy_mode: str = None,
+    ):
+        """Wrap the selected datasets with a :class:`~kedro.io.CachedDataSet`, so that after
+        the first load/save data is loaded from memory instead of the actual dataset.
+
+        If working with `kedro` pipelines`, the following code will enable caching only if
+        a dataset is an input to 2 or more nodes, or a dataset is the output of a node and the
+        input of at least one downstream node
+
+        ::
+
+            >>> pipe_datasets = chain.from_iterable(
+            >>>     node.inputs + node.outputs for node in
+            >>>     pipeline.nodes
+            >>> )
+            >>> catalog.enable_caching(pipe_datasets, count_threshold=2)
+
+        Args:
+            datasets: The names of the datasets to enable caching for
+            count_threshold: Enable caching only if a dataset appears at least this many times
+                in `datasets`
+            copy_mode: The copy mode used to copy the data. Possible
+                    values are: "deepcopy", "copy" and "assign". If not
+                    provided, it is inferred based on the data type.
+        """
+        counter = Counter(datasets or self._data_sets.keys())
+        for name, dataset in self._data_sets.items():
+            if (
+                not isinstance(dataset, (CachedDataSet, MemoryDataSet))
+                and counter.get(name, 0) >= count_threshold
+            ):
+                self._data_sets[name] = CachedDataSet(dataset, copy_mode=copy_mode)

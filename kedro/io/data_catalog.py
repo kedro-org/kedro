@@ -661,7 +661,7 @@ class DataCatalog:
         """Wrap the selected datasets with a :class:`~kedro.io.CachedDataSet`, so that after
         the first load/save data is loaded from memory instead of the actual dataset.
 
-        If working with `kedro` pipelines`, the following code will enable caching only if
+        If working with `kedro` pipelines, the following code will enable caching only if
         a dataset is an input to 2 or more nodes, or a dataset is the output of a node and the
         input of at least one downstream node
 

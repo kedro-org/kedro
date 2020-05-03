@@ -682,9 +682,14 @@ class DataCatalog:
                     provided, it is inferred based on the data type.
         """
         counter = Counter(datasets or self._data_sets.keys())
-        for name, dataset in self._data_sets.items():
+        for name, count in counter.items():
             if (
-                not isinstance(dataset, (CachedDataSet, MemoryDataSet))
-                and counter.get(name, 0) >= count_threshold
+                name in self._data_sets
+                and not isinstance(
+                    self._data_sets[name], (CachedDataSet, MemoryDataSet)
+                )
+                and count >= count_threshold
             ):
-                self._data_sets[name] = CachedDataSet(dataset, copy_mode=copy_mode)
+                self._data_sets[name] = CachedDataSet(
+                    self._data_sets[name], copy_mode=copy_mode
+                )

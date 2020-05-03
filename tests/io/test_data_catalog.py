@@ -614,3 +614,7 @@ class TestCatalogCaching:
     def test_caching_copy_mode(self, multi_catalog):
         multi_catalog.enable_caching(copy_mode="assign")
         assert multi_catalog._data_sets["abc"]._cache._copy_mode == "assign"
+
+    def test_unknown_dataset(self, multi_catalog):
+        multi_catalog.enable_caching(datasets=["abc", "bad"])
+        assert not isinstance(multi_catalog._data_sets["abc"], MemoryDataSet)

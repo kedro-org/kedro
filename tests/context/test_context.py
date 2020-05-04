@@ -731,6 +731,26 @@ class TestKedroContextRun:  # pylint: disable=too-many-public-methods
         )
         assert json.loads(log_msg)["run_id"] == run_id
 
+    @pytest.mark.parametrize(
+        "ctx_project_name",
+        ["project_name", "Project name ", "_Project--name-", "--Project-_\n ~-namE__"],
+    )
+    def test_default_package_name(self, tmp_path, mocker, ctx_project_name):
+        """Test default package name derived by ProjectContext"""
+        mocker.patch("logging.config.dictConfig")
+
+        expected_package_name = "project_name"
+
+        class DummyContextNoPkgName(KedroContext):
+            project_name = ctx_project_name
+            project_version = kedro_version
+
+            def _get_pipelines(self):  # pragma: no cover
+                return {"__default__": Pipeline([])}
+
+        dummy_context = DummyContextNoPkgName(tmp_path)
+        assert dummy_context.package_name == expected_package_name
+
 
 @pytest.mark.parametrize(
     "path_string,expected",

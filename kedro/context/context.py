@@ -31,6 +31,7 @@ import abc
 import logging
 import logging.config
 import os
+import re
 import sys
 from copy import deepcopy
 from pathlib import Path, PureWindowsPath
@@ -245,18 +246,16 @@ class KedroContext(abc.ABC):
         )
 
     @property
-    @abc.abstractmethod
     def package_name(self) -> str:
-        """Abstract property for Kedro project package name.
+        """Property for Kedro project package name.
 
         Returns:
             Name of Kedro project package.
 
         """
-        raise NotImplementedError(
-            "`{}` is a subclass of KedroContext and it must implement "
-            "the `package_name` property".format(self.__class__.__name__)
-        )
+        normalized_project_name = re.sub(r"[^A-Za-z0-9]+", "_", self.project_name)
+        normalized_project_name = normalized_project_name.strip("_").lower()
+        return normalized_project_name
 
     @property
     def pipeline(self) -> Pipeline:

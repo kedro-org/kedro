@@ -78,7 +78,6 @@ class NetworkXDataSet(AbstractVersionedDataSet):
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
-        layer: str = None,
     ) -> None:
         """Creates a new instance of ``NetworkXDataSet``.
 
@@ -104,8 +103,6 @@ class NetworkXDataSet(AbstractVersionedDataSet):
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `r` when loading
                 and to `w` when saving.
-            layer: The data layer according to the data engineering convention:
-                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
         """
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
@@ -114,7 +111,6 @@ class NetworkXDataSet(AbstractVersionedDataSet):
 
         protocol, path = get_protocol_and_path(filepath, version)
 
-        self._layer = layer
         self._protocol = protocol
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
 
@@ -166,7 +162,6 @@ class NetworkXDataSet(AbstractVersionedDataSet):
             load_args=self._load_args,
             save_args=self._save_args,
             version=self._version,
-            layer=self._layer,
         )
 
     def _release(self) -> None:

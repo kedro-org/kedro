@@ -81,7 +81,6 @@ class ParquetDataSet(AbstractDataSet):
         save_args: Dict[str, Any] = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
-        layer: str = None,
     ) -> None:
         """Creates a new instance of ``ParquetDataSet`` pointing to concrete
         parquet files.
@@ -97,13 +96,10 @@ class ParquetDataSet(AbstractDataSet):
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Optional parameters to the backend file system driver:
                 https://docs.dask.org/en/latest/remote-data-services.html#optional-parameters
-            layer: The data layer according to the data engineering convention:
-                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
         """
         self._filepath = filepath
         self._fs_args = deepcopy(fs_args) or {}
         self._credentials = deepcopy(credentials) or {}
-        self._layer = layer
 
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
@@ -129,7 +125,6 @@ class ParquetDataSet(AbstractDataSet):
             filepath=self._filepath,
             load_args=self._load_args,
             save_args=self._save_args,
-            layer=self._layer,
         )
 
     def _load(self) -> dd.DataFrame:

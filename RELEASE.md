@@ -55,6 +55,7 @@
 * Dropped `Pipeline.transform()` in favour of `kedro.pipeline.modular_pipeline.pipeline()` helper function.
 * Made constant `PARAMETER_KEYWORDS` private, and moved it from `kedro.pipeline.pipeline` to `kedro.pipeline.modular_pipeline`.
 * Removed `CSVBlobDataSet` and `JSONBlobDataSet` as redundant.
+* Layers are no longer part of the dataset object, as they've moved to the `DataCatalog`.
 
 ### Migration guide from Kedro 0.15.* to Upcoming Release
 #### Migration for datasets

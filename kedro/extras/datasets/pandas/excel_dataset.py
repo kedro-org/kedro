@@ -81,7 +81,6 @@ class ExcelDataSet(AbstractVersionedDataSet):
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
-        layer: str = None,
     ) -> None:
         """Creates a new instance of ``ExcelDataSet`` pointing to a concrete Excel file
         on a specific filesystem.
@@ -118,8 +117,6 @@ class ExcelDataSet(AbstractVersionedDataSet):
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `wb` when saving.
-            layer: The data layer according to the data engineering convention:
-                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
         """
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
@@ -137,8 +134,6 @@ class ExcelDataSet(AbstractVersionedDataSet):
             exists_function=self._fs.exists,
             glob_function=self._fs.glob,
         )
-
-        self._layer = layer
 
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
@@ -164,7 +159,6 @@ class ExcelDataSet(AbstractVersionedDataSet):
             save_args=self._save_args,
             writer_args=self._writer_args,
             version=self._version,
-            layer=self._layer,
         )
 
     def _load(self) -> pd.DataFrame:

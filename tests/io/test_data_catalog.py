@@ -69,6 +69,7 @@ def sane_config(filepath):
                 "type": "pandas.CSVDataSet",
                 "filepath": "s3://test_bucket/test_file.csv",
                 "credentials": "s3_credentials",
+                "layer": "raw",
             },
         },
         "credentials": {
@@ -306,6 +307,12 @@ class TestDataCatalog:
         does not have `confirm` method"""
         with pytest.raises(DataSetError, match=re.escape(error_pattern)):
             data_catalog.confirm(dataset_name)
+
+    def test_layers(self, data_catalog, data_catalog_from_config):
+        """Test dataset layers are correctly parsed"""
+        assert data_catalog.layers is None
+        # only one dataset is assigned a layer in the config
+        assert data_catalog_from_config.layers == {"raw": {"cars"}}
 
 
 class TestDataCatalogFromConfig:

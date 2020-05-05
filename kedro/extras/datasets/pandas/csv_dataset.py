@@ -78,7 +78,6 @@ class CSVDataSet(AbstractVersionedDataSet):
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
-        layer: str = None,
     ) -> None:
         """Creates a new instance of ``CSVDataSet`` pointing to a concrete CSV file
         on a specific filesystem.
@@ -110,8 +109,6 @@ class CSVDataSet(AbstractVersionedDataSet):
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `r` when loading
                 and to `w` when saving.
-            layer: The data layer according to the data engineering convention:
-                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
         """
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
@@ -129,8 +126,6 @@ class CSVDataSet(AbstractVersionedDataSet):
             exists_function=self._fs.exists,
             glob_function=self._fs.glob,
         )
-
-        self._layer = layer
 
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
@@ -152,7 +147,6 @@ class CSVDataSet(AbstractVersionedDataSet):
             load_args=self._load_args,
             save_args=self._save_args,
             version=self._version,
-            layer=self._layer,
         )
 
     def _load(self) -> pd.DataFrame:

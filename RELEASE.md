@@ -23,6 +23,12 @@
 * Allowed the source directory to be configurable in `.kedro.yml`.
 * Improve the CLI speed by up to 50%.
 
+### New Datasets
+
+| Type              | Description                                                                                                                                      | Location                            |
+| ----------------- | ------------------------------------- | -------------------------------- |
+| `ImageDataSet`    | Work with image files using `Pillow`  | `kedro.extras.datasets.pillow`   |
+
 ## Bug fixes and other changes
 * Fixed a bug where a new version created mid-run by an external system caused inconsistencies in the load versions used in the current run.
 * Documentation improvements.

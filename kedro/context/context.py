@@ -31,6 +31,7 @@ import abc
 import logging
 import logging.config
 import os
+import re
 import sys
 from copy import deepcopy
 from pathlib import Path, PureWindowsPath
@@ -46,6 +47,7 @@ from kedro.hooks import get_hook_manager
 from kedro.io import DataCatalog
 from kedro.io.core import generate_timestamp
 from kedro.pipeline import Pipeline
+from kedro.pipeline.pipeline import _transcode_split
 from kedro.runner import AbstractRunner, SequentialRunner
 from kedro.utils import load_obj
 from kedro.versioning import Journal
@@ -154,6 +156,30 @@ def _expand_path(project_path: Path, conf_dictionary: Dict[str, Any]) -> Dict[st
     return conf_dictionary
 
 
+def _validate_layers_for_transcoding(catalog: DataCatalog) -> None:
+    """Check that transcoded names that correspond to
+    the same dataset also belong to the same layer.
+    """
+
+    def _find_conflicts():
+        base_names_to_layer = {}
+        for current_layer, dataset_names in catalog.layers.items():
+            for name in dataset_names:
+                base_name, _ = _transcode_split(name)
+                known_layer = base_names_to_layer.setdefault(base_name, current_layer)
+                if current_layer != known_layer:
+                    yield name
+                else:
+                    base_names_to_layer[base_name] = current_layer
+
+    conflicting_datasets = sorted(_find_conflicts())
+    if conflicting_datasets:
+        error_str = ", ".join(conflicting_datasets)
+        raise ValueError(
+            f"Transcoded datasets should have the same layer. Mismatch found for: {error_str}"
+        )
+
+
 class KedroContext(abc.ABC):
     """``KedroContext`` is the base class which holds the configuration and
     Kedro's main functionality. Project-specific context class should extend
@@ -245,18 +271,16 @@ class KedroContext(abc.ABC):
         )
 
     @property
-    @abc.abstractmethod
     def package_name(self) -> str:
-        """Abstract property for Kedro project package name.
+        """Property for Kedro project package name.
 
         Returns:
             Name of Kedro project package.
 
         """
-        raise NotImplementedError(
-            "`{}` is a subclass of KedroContext and it must implement "
-            "the `package_name` property".format(self.__class__.__name__)
-        )
+        normalized_project_name = re.sub(r"[^A-Za-z0-9]+", "_", self.project_name)
+        normalized_project_name = normalized_project_name.strip("_").lower()
+        return normalized_project_name
 
     @property
     def pipeline(self) -> Pipeline:
@@ -381,6 +405,8 @@ class KedroContext(abc.ABC):
         )
         feed_dict = self._get_feed_dict()
         catalog.add_feed_dict(feed_dict)
+        if catalog.layers:
+            _validate_layers_for_transcoding(catalog)
         self._hook_manager.hook.after_catalog_created(  # pylint: disable=no-member
             catalog=catalog,
             conf_catalog=conf_catalog,

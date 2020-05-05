@@ -70,6 +70,8 @@ These dependency sets are listed below.
 |                    |             | pandas.SQLQueryDataSet        |                                         |
 |                    |             | pandas.SQLTableDataSet        |                                         |
 |                    +-------------+-------------------------------+-----------------------------------------+
+|                    | pillow      | pillow.ImageDataSet           | pip install "kedro[pillow]"             |
+|                    +-------------+-------------------------------+-----------------------------------------+
 |                    | spark       | spark.SparkDataSet            | pip install "kedro[spark]"              |
 |                    |             | spark.SparkHiveDataSet        |                                         |
 |                    |             | spark.SparkJDBCDataSet        |                                         |

@@ -90,7 +90,6 @@ class PickleDataSet(AbstractVersionedDataSet):
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
-        layer: str = None,
     ) -> None:
         """Creates a new instance of ``PickleDataSet`` pointing to a concrete Pickle
         file on a specific filesystem. ``PickleDataSet`` supports two backends to
@@ -125,8 +124,6 @@ class PickleDataSet(AbstractVersionedDataSet):
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `wb` when saving.
-            layer: The data layer according to the data engineering convention:
-                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
 
         Raises:
             ValueError: If ``backend`` is not one of ['pickle', 'joblib'].
@@ -163,7 +160,6 @@ class PickleDataSet(AbstractVersionedDataSet):
         )
 
         self._backend = backend
-        self._layer = layer
 
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
@@ -185,7 +181,6 @@ class PickleDataSet(AbstractVersionedDataSet):
             load_args=self._load_args,
             save_args=self._save_args,
             version=self._version,
-            layer=self._layer,
         )
 
     def _load(self) -> Any:

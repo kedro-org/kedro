@@ -101,6 +101,7 @@ extras_require = {
         "xlsxwriter>=1.0.0, <2.0",
         "tables>=3.6",
     ],
+    "pillow": ["Pillow>=7.1.2, <7.2"],
     "spark": ["pyspark>=2.2.0, <3.0", "hdfs>=2.5.8, <3.0", "s3fs>=0.3.0, <0.4.1"],
 }
 
@@ -121,7 +122,9 @@ setup(
     install_requires=requires,
     author="QuantumBlack Labs",
     entry_points={"console_scripts": ["kedro = kedro.cli:main"]},
-    package_data={name: ["py.typed", "test_requirements.txt"] + template_files + doc_html_files},
+    package_data={
+        name: ["py.typed", "test_requirements.txt"] + template_files + doc_html_files
+    },
     zip_safe=False,
     keywords="pipelines, machine learning, data pipelines, data science, data engineering",
     classifiers=[

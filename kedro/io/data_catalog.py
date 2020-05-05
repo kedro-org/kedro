@@ -33,8 +33,9 @@ relaying load and save functions to the underlying data sets.
 """
 import copy
 import logging
+from collections import defaultdict
 from functools import partial
-from typing import Any, Callable, Dict, Iterable, List, Optional, Type, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Type, Union
 from warnings import warn
 
 from kedro.io.core import (
@@ -140,6 +141,7 @@ class DataCatalog:
         transformers: Dict[str, List[AbstractTransformer]] = None,
         default_transformers: List[AbstractTransformer] = None,
         journal: Journal = None,
+        layers: Dict[str, Set[str]] = None,
     ) -> None:
         """``DataCatalog`` stores instances of ``AbstractDataSet``
         implementations to provide ``load`` and ``save`` capabilities from
@@ -156,6 +158,10 @@ class DataCatalog:
             default_transformers: A list of transformers to be applied to any
                 new data sets.
             journal: Instance of Journal.
+            layers: A dictionary of data set layers. It maps a layer name
+                to a set of data set names, according to the
+                data engineering convention. For more details, see
+                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
         Raises:
             DataSetNotFoundError: When transformers are passed for a non
                 existent data set.
@@ -172,6 +178,7 @@ class DataCatalog:
         """
         self._data_sets = dict(data_sets or {})
         self.datasets = _FrozenDatasets(self._data_sets)
+        self.layers = layers
 
         self._transformers = {k: list(v) for k, v in (transformers or {}).items()}
         self._default_transformers = list(default_transformers or [])
@@ -294,12 +301,19 @@ class DataCatalog:
                 )
             )
 
+        layers = defaultdict(set)  # type: Dict[str, Set[str]]
         for ds_name, ds_config in catalog.items():
+            ds_layer = ds_config.pop("layer", None)
+            if ds_layer is not None:
+                layers[ds_layer].add(ds_name)
+
             ds_config = _resolve_credentials(ds_config, credentials)
             data_sets[ds_name] = AbstractDataSet.from_config(
                 ds_name, ds_config, load_versions.get(ds_name), save_version
             )
-        return cls(data_sets=data_sets, journal=journal)
+
+        dataset_layers = layers or None
+        return cls(data_sets=data_sets, journal=journal, layers=dataset_layers)
 
     def _get_dataset(
         self, data_set_name: str, version: Version = None

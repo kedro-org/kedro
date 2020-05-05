@@ -260,7 +260,7 @@ def input_data(request):
     return request.getfixturevalue(request.param)
 
 
-class TestValidPipeline:  # pylint: disable=too-many-public-methods
+class TestValidPipeline:
     def test_nodes(self, str_node_inputs_list):
         nodes = str_node_inputs_list["nodes"]
         pipeline = Pipeline(nodes)

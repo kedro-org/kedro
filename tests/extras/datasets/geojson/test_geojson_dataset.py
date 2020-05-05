@@ -119,7 +119,7 @@ class TestGeoJSONDataSet:
             assert geojson_data_set._load_args[k] == v
 
     @pytest.mark.parametrize(
-        "save_args", [{"driver": "ESRI Shapefile"}, {"driver": "GPKG", "layer": "test"}]
+        "save_args", [{"driver": "ESRI Shapefile"}, {"driver": "GPKG"}]
     )
     def test_save_extra_params(self, geojson_data_set, save_args):
         """Test overriding default save args"""

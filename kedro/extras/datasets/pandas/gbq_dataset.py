@@ -77,7 +77,6 @@ class GBQTableDataSet(AbstractDataSet):
         credentials: Union[Dict[str, Any], Credentials] = None,
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
-        layer: str = None,
     ) -> None:
         """Creates a new instance of ``GBQTableDataSet``.
 
@@ -100,8 +99,6 @@ class GBQTableDataSet(AbstractDataSet):
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_gbq.html
                 All defaults are preserved, but "progress_bar", which is set to False.
-            layer: The data layer according to the data engineering convention:
-                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
 
         Raises:
             DataSetError: When ``load_args['location']`` and ``save_args['location']``
@@ -121,7 +118,6 @@ class GBQTableDataSet(AbstractDataSet):
         if isinstance(credentials, dict):
             credentials = Credentials(**credentials)
 
-        self._layer = layer
         self._dataset = dataset
         self._table_name = table_name
         self._project_id = project
@@ -138,7 +134,6 @@ class GBQTableDataSet(AbstractDataSet):
             table_name=self._table_name,
             load_args=self._load_args,
             save_args=self._save_args,
-            layer=self._layer,
         )
 
     def _load(self) -> pd.DataFrame:

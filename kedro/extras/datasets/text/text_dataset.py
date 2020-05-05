@@ -70,7 +70,6 @@ class TextDataSet(AbstractVersionedDataSet):
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
-        layer: str = None,
     ) -> None:
         """Creates a new instance of ``TextDataSet`` pointing to a concrete text file
         on a specific filesystem.
@@ -94,8 +93,6 @@ class TextDataSet(AbstractVersionedDataSet):
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `r` when loading
                 and to `w` when saving.
-            layer: The data layer according to the data engineering convention:
-                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
         """
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
@@ -114,8 +111,6 @@ class TextDataSet(AbstractVersionedDataSet):
             glob_function=self._fs.glob,
         )
 
-        self._layer = layer
-
         _fs_open_args_load.setdefault("mode", "r")
         _fs_open_args_save.setdefault("mode", "w")
         self._fs_open_args_load = _fs_open_args_load
@@ -123,10 +118,7 @@ class TextDataSet(AbstractVersionedDataSet):
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
-            filepath=self._filepath,
-            protocol=self._protocol,
-            version=self._version,
-            layer=self._layer,
+            filepath=self._filepath, protocol=self._protocol, version=self._version,
         )
 
     def _load(self) -> str:

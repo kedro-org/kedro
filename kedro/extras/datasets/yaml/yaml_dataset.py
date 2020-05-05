@@ -75,7 +75,6 @@ class YAMLDataSet(AbstractVersionedDataSet):
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
-        layer: str = None,
     ) -> None:
         """Creates a new instance of ``YAMLDataSet`` pointing to a concrete YAML file
         on a specific filesystem.
@@ -103,8 +102,6 @@ class YAMLDataSet(AbstractVersionedDataSet):
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `r` when loading
                 and to `w` when saving.
-            layer: The data layer according to the data engineering convention:
-                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
         """
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
@@ -123,8 +120,6 @@ class YAMLDataSet(AbstractVersionedDataSet):
             glob_function=self._fs.glob,
         )
 
-        self._layer = layer
-
         # Handle default save arguments
         self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
@@ -141,7 +136,6 @@ class YAMLDataSet(AbstractVersionedDataSet):
             protocol=self._protocol,
             save_args=self._save_args,
             version=self._version,
-            layer=self._layer,
         )
 
     def _load(self) -> Dict:

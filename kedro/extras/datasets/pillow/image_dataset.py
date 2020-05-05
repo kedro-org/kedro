@@ -26,16 +26,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``ExcelDataSet`` loads/saves data from/to a Excel file using an underlying
-filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Excel file.
+"""``ImageDataSet`` loads/saves image data as `numpy` from an underlying
+filesystem (e.g.: local, S3, GCS). It uses Pillow to handle image file.
 """
 from copy import deepcopy
-from io import BytesIO
 from pathlib import PurePosixPath
 from typing import Any, Dict
 
 import fsspec
-import pandas as pd
+from PIL import Image
 
 from kedro.io.core import (
     AbstractVersionedDataSet,
@@ -46,64 +45,45 @@ from kedro.io.core import (
 )
 
 
-# pylint: disable=too-many-instance-attributes
-class ExcelDataSet(AbstractVersionedDataSet):
-    """``ExcelDataSet`` loads/saves data from/to a Excel file using an underlying
-    filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Excel file.
+class ImageDataSet(AbstractVersionedDataSet):
+    """``ImageDataSet`` loads/saves image data as `numpy` from an underlying
+    filesystem (e.g.: local, S3, GCS). It uses Pillow to handle image file.
 
     Example:
     ::
 
-        >>> from kedro.extras.datasets.pandas import ExcelDataSet
-        >>> import pandas as pd
+        >>> from kedro.extras.datasets.pillow import ImageDataSet
         >>>
-        >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        >>>                      'col3': [5, 6]})
-        >>>
-        >>> # data_set = ExcelDataSet(filepath="gcs://bucket/test.xlsx")
-        >>> data_set = ExcelDataSet(filepath="test.xlsx")
-        >>> data_set.save(data)
-        >>> reloaded = data_set.load()
-        >>> assert data.equals(reloaded)
+        >>> # data_set = ImageDataSet(filepath="gcs://bucket/test.png")
+        >>> data_set = ImageDataSet(filepath="test.png")
+        >>> image = data_set.load()
+        >>> image.show()
 
     """
 
-    DEFAULT_LOAD_ARGS = {"engine": "xlrd"}
-    DEFAULT_SAVE_ARGS = {"index": False}
+    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments,too-many-locals
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         filepath: str,
-        engine: str = "xlsxwriter",
-        load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``ExcelDataSet`` pointing to a concrete Excel file
+        """Creates a new instance of ``ImageDataSet`` pointing to a concrete image file
         on a specific filesystem.
 
         Args:
-            filepath: Filepath to a Excel file prefixed with a protocol like `s3://`.
+            filepath: Filepath to an image file prefixed with a protocol like `s3://`.
                 If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.
-            engine: The engine used to write to excel files. The default
-                engine is 'xlsxwriter'.
-            load_args: Pandas options for loading Excel files.
+            save_args: Pillow options for saving image files.
                 Here you can find all available arguments:
-                https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_excel.html
-                All defaults are preserved, but "engine", which is set to "xlrd".
-            save_args: Pandas options for saving Excel files.
-                Here you can find all available arguments:
-                https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_excel.html
-                All defaults are preserved, but "index", which is set to False.
-                If you would like to specify options for the `ExcelWriter`,
-                you can include them under "writer" key. Here you can
-                find all available arguments:
-                https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.ExcelWriter.html
+                https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save
+                All defaults are preserved.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -116,7 +96,8 @@ class ExcelDataSet(AbstractVersionedDataSet):
                 `open_args_load` and `open_args_save`.
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
-                All defaults are preserved, except `mode`, which is set to `wb` when saving.
+                All defaults are preserved, except `mode`, which is set to `r` when loading
+                and to `w` when saving.
         """
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
@@ -135,18 +116,12 @@ class ExcelDataSet(AbstractVersionedDataSet):
             glob_function=self._fs.glob,
         )
 
-        # Handle default load and save arguments
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args is not None:
-            self._load_args.update(load_args)
-
+        # Handle default save argument
         self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        self._writer_args = {"engine": engine}  # type: Dict[str, Any]
         if save_args is not None:
-            writer_args = save_args.pop("writer", {})  # type: Dict[str, Any]
-            self._writer_args.update(writer_args)
             self._save_args.update(save_args)
 
+        _fs_open_args_load.setdefault("mode", "rb")
         _fs_open_args_save.setdefault("mode", "wb")
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
@@ -155,28 +130,21 @@ class ExcelDataSet(AbstractVersionedDataSet):
         return dict(
             filepath=self._filepath,
             protocol=self._protocol,
-            load_args=self._load_args,
             save_args=self._save_args,
-            writer_args=self._writer_args,
             version=self._version,
         )
 
-    def _load(self) -> pd.DataFrame:
+    def _load(self) -> Image:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
-            return pd.read_excel(fs_file, **self._load_args)
+            return Image.open(fs_file).copy()
 
-    def _save(self, data: pd.DataFrame) -> None:
-        output = BytesIO()
+    def _save(self, data: Image) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
-        # pylint: disable=abstract-class-instantiated
-        with pd.ExcelWriter(output, **self._writer_args) as writer:
-            data.to_excel(writer, **self._save_args)
-
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
-            fs_file.write(output.getvalue())
+            data.save(fs_file, **self._save_args)
 
         self._invalidate_cache()
 

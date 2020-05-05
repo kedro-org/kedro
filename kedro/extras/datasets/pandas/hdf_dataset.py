@@ -86,7 +86,6 @@ class HDFDataSet(AbstractVersionedDataSet):
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
-        layer: str = None,
     ) -> None:
         """Creates a new instance of ``HDFDataSet`` pointing to a concrete hdf file
         on a specific filesystem.
@@ -118,8 +117,6 @@ class HDFDataSet(AbstractVersionedDataSet):
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set `wb` when saving.
-            layer: The data layer according to the data engineering convention:
-                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
         """
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
@@ -138,7 +135,6 @@ class HDFDataSet(AbstractVersionedDataSet):
             glob_function=self._fs.glob,
         )
 
-        self._layer = layer
         self._key = key
 
         # Handle default load and save arguments
@@ -161,7 +157,6 @@ class HDFDataSet(AbstractVersionedDataSet):
             load_args=self._load_args,
             save_args=self._save_args,
             version=self._version,
-            layer=self._layer,
         )
 
     def _load(self) -> pd.DataFrame:

@@ -104,7 +104,7 @@ folders:
     raw: "01_raw"
     int: "02_intermediate"
     pri: "03_primary"
-    fea: "04_features"
+    fea: "04_feature"
 ```
 
 The contents of the dictionary resulting from `globals_pattern` get merged with the `globals_dict` dictionary. In case of conflicts, the keys from the `globals_dict` dictionary take precedence. The resulting global dictionary prepared by `TemplatedConfigLoader` will look like this:
@@ -122,7 +122,7 @@ The contents of the dictionary resulting from `globals_pattern` get merged with 
         "raw": "01_raw",
         "int": "02_intermediate",
         "pri": "03_primary",
-        "fea": "04_features",
+        "fea": "04_feature",
     },
 }
 ```

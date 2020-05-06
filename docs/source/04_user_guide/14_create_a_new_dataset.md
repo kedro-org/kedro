@@ -16,7 +16,7 @@ data
 │   └── pokemon-images-and-types
 ├── 02_intermediate
 ├── 03_primary
-├── 04_features
+├── 04_feature
 ├── 05_model_input
 ├── 06_models
 ├── 07_model_output

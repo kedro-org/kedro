@@ -5,11 +5,14 @@
 
 A function decorator which catches exceptions from the wrapped function at most `n_times`, after which it bundles and propagates them. By default, all exceptions are caught, but you can narrow your scope using the `exceptions` argument. You can also specify the time delay (in seconds) between a failure and the next retry, using the `delay_sec` parameter.
 
-
 ## Memory Profiler
 
 A function decorator which profiles the memory used when executing the function. The logged memory is collected by taking memory snapshots every 100ms, and includes memory used by children processes. The implementation uses the `memory_profiler` Python package under the hood.
  >*Note*: This decorator will only work with functions taking at least 0.5s to execute, due to a bug in the `memory_profiler` package (see https://github.com/pythonprofilers/memory_profiler/issues/216).
+
+## Validate Inputs
+
+A function decorator which is basically `validate_arguments` from `pydantic` but allows you to choose which input arguments to validate. See [here](https://pydantic-docs.helpmanual.io/usage/types/) for supported types.
 
 ### Build tools
 

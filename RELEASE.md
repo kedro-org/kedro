@@ -23,6 +23,12 @@
 * Allowed the source directory to be configurable in `.kedro.yml`.
 * Improve the CLI speed by up to 50%.
 
+### New Datasets
+
+| Type              | Description                                                                                                                                      | Location                            |
+| ----------------- | ------------------------------------- | -------------------------------- |
+| `ImageDataSet`    | Work with image files using `Pillow`  | `kedro.extras.datasets.pillow`   |
+
 ## Bug fixes and other changes
 * Fixed a bug where a new version created mid-run by an external system caused inconsistencies in the load versions used in the current run.
 * Documentation improvements.
@@ -34,6 +40,7 @@
 * Added ability to read partitioned parquet file from a directory in `pandas.ParquetDataSet`.
 * Bug in `SparkDataSet` not allowing for loading data from DBFS in a Windows machine using Databricks-connect.
 * Added option to lint the project without applying the formatting changes (`kedro lint --check-only`).
+* Improved the error message for `DataSetNotFoundError` to suggest possible dataset names user meant to type.
 
 ## Breaking changes to the API
 * Made `invalidate_cache` method on datasets private.
@@ -49,6 +56,7 @@
 * Dropped `Pipeline.transform()` in favour of `kedro.pipeline.modular_pipeline.pipeline()` helper function.
 * Made constant `PARAMETER_KEYWORDS` private, and moved it from `kedro.pipeline.pipeline` to `kedro.pipeline.modular_pipeline`.
 * Removed `CSVBlobDataSet` and `JSONBlobDataSet` as redundant.
+* Layers are no longer part of the dataset object, as they've moved to the `DataCatalog`.
 
 ### Migration guide from Kedro 0.15.* to Upcoming Release
 #### Migration for datasets

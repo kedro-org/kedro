@@ -91,10 +91,10 @@ class APIDataSet(AbstractDataSet):
                 or ``AuthBase``, ``HTTPBasicAuth`` instance for more complex cases.
             timeout: The wait time in seconds for a response, defaults to 1 minute.
                 https://requests.readthedocs.io/en/master/user/quickstart/#timeouts
-            attribute: The attribute of response to return. Normally it's either `text`, which returns
-                pure text,`json`, which returns JSON in Python Dict format, `content`, which returns
-                a raw content, or `` (empty string), which returns the reponse object itself.
-                Defaults to `text`.
+            attribute: The attribute of response to return. Normally it's either `text`, which
+                returns pure text,`json`, which returns JSON in Python Dict format, `content`,
+                which returns a raw content, or `` (empty string), which returns the reponse
+                object itself. Defaults to `text`.
 
         """
         super().__init__()
@@ -126,13 +126,14 @@ class APIDataSet(AbstractDataSet):
     def _load(self) -> Any:
         response = self._execute_request()
         if not self._attribute:
-            return response
+            output = response
         elif self._attribute == "json":
-            return response.json()
+            output = response.json()
         elif hasattr(response, self._attribute):
-            return getattr(response, self._attribute)
+            output = getattr(response, self._attribute)
         else:
             raise DataSetError("Response has no attribute: {}".format(self._attribute))
+        return output
 
     def _save(self, data: Any) -> None:
         raise DataSetError(

@@ -174,3 +174,16 @@ def test_successfully_load_with_response_itself():
     response = api_data_set.load()
     content = response.content
     assert content[1:4] == b"PNG"  # part of PNG file signature
+
+
+def test_attribute_not_found():
+    attribute = "wrong_attribute"
+    api_data_set = APIDataSet(
+        url="https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/img/kedro_banner.png",
+        method="GET",
+        attribute=attribute,
+    )
+    pattern = r"Response has no attribute: {}".format(attribute)
+
+    with pytest.raises(DataSetError, match=pattern):
+        api_data_set.load()

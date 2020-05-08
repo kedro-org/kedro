@@ -75,7 +75,7 @@ class TestAPIDataSet:
             method=method,
             params=TEST_PARAMS,
             headers=TEST_HEADERS,
-            json=True,
+            attribute="json",
         )
         requests_mocker.register_uri(
             method,
@@ -153,3 +153,24 @@ class TestAPIDataSet:
         )
 
         assert api_data_set.exists()
+
+
+def test_successfully_load_with_content_response():
+    api_data_set = APIDataSet(
+        url="https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/img/kedro_banner.png",
+        method="GET",
+        attribute="content",
+    )
+    content = api_data_set.load()
+    assert content[1:4] == b"PNG"  # part of PNG file signature
+
+
+def test_successfully_load_with_response_itself():
+    api_data_set = APIDataSet(
+        url="https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/img/pipeline_visualisation.png",
+        method="GET",
+        attribute="",
+    )
+    response = api_data_set.load()
+    content = response.content
+    assert content[1:4] == b"PNG"  # part of PNG file signature

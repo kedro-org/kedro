@@ -74,7 +74,7 @@ class APIDataSet(AbstractDataSet):
         headers: Dict[str, Any] = None,
         auth: Union[Tuple[str], AuthBase] = None,
         timeout: int = 60,
-        json: bool = False,
+        attribute: str = "text",
     ) -> None:
         """Creates a new instance of ``APIDataSet`` to fetch data from an API endpoint.
 
@@ -91,8 +91,10 @@ class APIDataSet(AbstractDataSet):
                 or ``AuthBase``, ``HTTPBasicAuth`` instance for more complex cases.
             timeout: The wait time in seconds for a response, defaults to 1 minute.
                 https://requests.readthedocs.io/en/master/user/quickstart/#timeouts
-            json: If true it will return the API response as JSON in Python Dict format,
-                else it will return pure text.
+            attribute: The attribute of response to return. Normally it's either `text`, which returns
+                pure text,`json`, which returns JSON in Python Dict format, `content`, which returns
+                a raw content, or `` (empty string), which returns the reponse object itself.
+                Defaults to `text`.
 
         """
         super().__init__()
@@ -105,10 +107,10 @@ class APIDataSet(AbstractDataSet):
             "auth": auth,
             "timeout": timeout,
         }
-        self._json = json
+        self._attribute = attribute
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(**self._request_args, json=self._json)
+        return dict(**self._request_args, attribute=self._attribute)
 
     def _execute_request(self) -> requests.Response:
         try:
@@ -123,7 +125,14 @@ class APIDataSet(AbstractDataSet):
 
     def _load(self) -> Any:
         response = self._execute_request()
-        return response.json() if self._json else response.text
+        if not self._attribute:
+            return response
+        elif self._attribute == "json":
+            return response.json()
+        elif hasattr(response, self._attribute):
+            return getattr(response, self._attribute)
+        else:
+            raise DataSetError("Response has no attribute: {}".format(self._attribute))
 
     def _save(self, data: Any) -> None:
         raise DataSetError(

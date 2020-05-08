@@ -167,7 +167,7 @@ def test_successfully_load_with_content_response():
 
 def test_successfully_load_with_response_itself():
     api_data_set = APIDataSet(
-        url="https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/img/pipeline_visualisation.png",
+        url="https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/img/kedro_banner.png",
         method="GET",
         attribute="",
     )

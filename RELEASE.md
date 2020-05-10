@@ -41,6 +41,7 @@
 * Bug in `SparkDataSet` not allowing for loading data from DBFS in a Windows machine using Databricks-connect.
 * Added option to lint the project without applying the formatting changes (`kedro lint --check-only`).
 * Enabled branch code coverage both on local machine and CI/CD (run `make test-coverage`)
+* Improved the error message for `DataSetNotFoundError` to suggest possible dataset names user meant to type.
 
 ## Breaking changes to the API
 * Made `invalidate_cache` method on datasets private.

@@ -238,15 +238,24 @@ class TestDataCatalog:
         assert result is False
 
     def test_exists_unregistered(self, data_catalog):
-        """Check the the error when calling `exists`
-        on unregistered data set"""
+        """Check the error when calling `exists` on unregistered data set"""
         pattern = r"DataSet \'wrong_key\' not found in the catalog"
-        with pytest.raises(DataSetNotFoundError, match=pattern):
+        with pytest.raises(DataSetNotFoundError, match=pattern) as e:
             data_catalog.exists("wrong_key")
 
+        assert "did you mean" not in str(e.value)
+
+    def test_exists_unregistered_typo(self, data_catalog):
+        """Check the error when calling `exists` on mistyped data set"""
+        pattern = (
+            r"DataSet \'text\' not found in the catalog"
+            r" - did you mean one of these instead\: test"
+        )
+        with pytest.raises(DataSetNotFoundError, match=pattern):
+            data_catalog.exists("text")
+
     def test_release_unregistered(self, data_catalog):
-        """Check the the error when calling `release`
-        on unregistered data set"""
+        """Check the error when calling `release` on unregistered data set"""
         pattern = r"DataSet \'wrong_key\' not found in the catalog"
         with pytest.raises(DataSetNotFoundError, match=pattern):
             data_catalog.release("wrong_key")

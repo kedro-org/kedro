@@ -94,7 +94,7 @@ Look for the test run report and the test coverage reports in these folders in t
 .test-run-reports
 ```
 
-Note: `make test` will run the tests and generate a terminal-only text coverage report both on the local machine and on CircleCI.
+Note: `make test` will run the tests and generates a terminal text coverage report, along with an xml coverage report for every run both on the local machine and on CircleCI.
 
 The reports are stored in the sub-folders inside both of the above folders. Sub-folders are named by the `git` branch the tests are run on.
 

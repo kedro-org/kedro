@@ -39,10 +39,10 @@ TARGET_TEST_FOLDERS="${TARGET_TEST_FOLDERS:-${TESTS_FOLDER}}"
 run_test_runner() {
     echo ""; echo "~~~ Running tests with coverage on branch '${CURRENT_GIT_BRANCH}'"
     set -x
-    pytest --cov-config default_coverage_report.toml     \
-           --cov-report html:${COVERAGE_REPORT_FOLDER}   \
+    pytest --cov-config pyproject.toml                    \
+           --cov-report html:${COVERAGE_REPORT_FOLDER}    \
            --cov=${SOURCES_FOLDER} ${TARGET_TEST_FOLDERS} \
-           --html="${TEST_REPORT_FILE}"                  \
+           --html="${TEST_REPORT_FILE}"                   \
            || test_run_exit_code="$?" && true
     set +x
     echo ""; echo "~~~ The test report file created: ${TEST_REPORT_FILE}";

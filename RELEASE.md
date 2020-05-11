@@ -69,6 +69,36 @@ E.g. `type: CSVS3DataSet` -> `type: pandas.CSVDataSet`.
 
 > Note: No changes required if you are using your custom dataset.
 
+#### Migration for Pipeline.transform()
+`Pipeline.transform()` has been dropped in favour of the `pipeline()` constructor. The following changes apply:
+- Remember to import `from kedro.pipeline import pipeline`
+- The `prefix` argument has been renamed to `namespace`
+- And `datasets` has been broken down into more granular arguments:
+  - `inputs`: Independent inputs to the pipeline
+  - `outputs`: Any output created in the pipeline, whether an intermediary dataset or a leaf output
+  - `parameters`: `params:...` or `parameters`
+
+As an example, code that used to look like this with the `Pipeline.transform()` constructor:
+```python
+result = my_pipeline.transform(
+    datasets={"input": "new_input", "output": "new_output", "params:x": "params:y"},
+    prefix="pre"
+)
+```
+
+When used with the new `pipeline()` constructor, becomes:
+```python
+from kedro.pipeline import pipeline
+
+result = pipeline(
+    my_pipeline,
+    inputs={"input": "new_input"},
+    outputs={"output": "new_output"},
+    parameters={"params:x": "params:y"},
+    namespace="pre"
+)
+```
+
 #### Migration for decorators, color logger, transformers etc.
 Since some modules were moved to other locations you need to update import paths appropriately.
 The list of moved files you can find in `0.15.6` release notes under `Files with a new location` section.

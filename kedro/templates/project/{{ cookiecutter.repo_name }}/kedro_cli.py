@@ -591,9 +591,7 @@ def convert_notebook(all_flag, overwrite_flag, filepath):
 
     for notebook in notebooks:
         secho("Converting notebook '{}'...".format(str(notebook)))
-        output_path = (
-            SOURCE_PATH / KEDRO_PACKAGE_NAME / "nodes" / f"{notebook.stem}.py"
-        )
+        output_path = SOURCE_PATH / KEDRO_PACKAGE_NAME / "nodes" / f"{notebook.stem}.py"
 
         if output_path.is_file():
             overwrite = overwrite_flag or click.confirm(

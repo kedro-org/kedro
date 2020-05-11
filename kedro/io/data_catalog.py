@@ -32,6 +32,7 @@ sets. Then it will act as a single point of reference for your calls,
 relaying load and save functions to the underlying data sets.
 """
 import copy
+import difflib
 import logging
 from collections import defaultdict
 from functools import partial
@@ -319,9 +320,14 @@ class DataCatalog:
         self, data_set_name: str, version: Version = None
     ) -> AbstractDataSet:
         if data_set_name not in self._data_sets:
-            raise DataSetNotFoundError(
-                "DataSet '{}' not found in the catalog".format(data_set_name)
-            )
+            error_msg = f"DataSet '{data_set_name}' not found in the catalog"
+
+            matches = difflib.get_close_matches(data_set_name, self._data_sets.keys())
+            if matches:
+                suggestions = ", ".join(matches)  # type: ignore
+                error_msg += f" - did you mean one of these instead: {suggestions}"
+
+            raise DataSetNotFoundError(error_msg)
 
         data_set = self._data_sets[data_set_name]
         if version and isinstance(data_set, AbstractVersionedDataSet):

@@ -30,7 +30,7 @@
 from pathlib import Path
 from typing import Dict
 
-from kedro.context import KedroContext, load_context
+from kedro.context import KedroContext, load_package_context
 from kedro.pipeline import Pipeline
 
 from {{ cookiecutter.python_package }}.pipeline import create_pipelines
@@ -51,13 +51,14 @@ class ProjectContext(KedroContext):
 
 
 def run_package():
-    # entry point for running pip-install projects
-    # using `<project_package>` command
-    project_context = load_context(Path.cwd())
+    # Entry point for running a Kedro project packaged with `kedro package`
+    # using `python -m <project_package>.run` command.
+    project_context = load_package_context(
+        project_path=Path.cwd(),
+        package_name=Path(__file__).resolve().parent.name
+    )
     project_context.run()
 
 
 if __name__ == "__main__":
-    # entry point for running pip-installed projects
-    # using `python -m <project_package>.run` command
     run_package()

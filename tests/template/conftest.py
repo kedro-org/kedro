@@ -36,7 +36,13 @@ import yaml
 
 from kedro.cli.cli import _create_project
 
-TEST_REPO_NAME = "fake_repo"
+_FAKE_REPO_NAME = "fake_repo"
+_FAKE_PACKAGE_NAME = "fake_package"
+
+
+@pytest.fixture
+def fake_package_name():
+    return _FAKE_PACKAGE_NAME
 
 
 @pytest.fixture(scope="session")
@@ -47,7 +53,7 @@ def fake_root_dir():
 
 @pytest.fixture(scope="session")
 def fake_repo_path(fake_root_dir):
-    return fake_root_dir.resolve() / TEST_REPO_NAME
+    return fake_root_dir.resolve() / _FAKE_REPO_NAME
 
 
 @pytest.fixture(scope="session")
@@ -55,8 +61,8 @@ def fake_repo_config_path(fake_root_dir):
     repo_config = {
         "output_dir": str(fake_root_dir),
         "project_name": "Test Project",
-        "repo_name": TEST_REPO_NAME,
-        "python_package": "fake_package",
+        "repo_name": _FAKE_REPO_NAME,
+        "python_package": _FAKE_PACKAGE_NAME,
         "include_example": True,
     }
     config_path = fake_root_dir / "repo_config.yml"

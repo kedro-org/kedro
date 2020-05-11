@@ -22,6 +22,7 @@ Functions
     :template: autosummary/base.rst
 
     kedro.context.load_context
+    kedro.context.load_package_context
 
 
 Errors

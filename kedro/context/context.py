@@ -735,10 +735,56 @@ def validate_source_path(source_path: Path, project_path: Path):
         raise KedroContextError(f"Source path '{source_path}' cannot be found.")
 
 
+def load_package_context(
+    project_path: Path, package_name: str, **kwargs
+) -> KedroContext:
+    """Loads the KedroContext object of a Kedro project package,
+    as output by `kedro package` and installed via `pip`.
+    This function is only intended to be used in a project's `run.py`.
+    If you are looking to load KedroContext object for any other workflow,
+    you might want to use ``load_context`` instead.
+
+    Args:
+        project_path: Path to the Kedro project, i.e. where `conf/` resides.
+        package_name: Name of the installed Kedro project package.
+        kwargs: Optional kwargs for ``ProjectContext`` class in `run.py`.
+
+    Returns:
+        Instance of ``KedroContext`` class defined in Kedro project.
+
+    Raises:
+        KedroContextError: Either '.kedro.yml' was not found
+            or loaded context has package conflict.
+    """
+    context_path = f"{package_name}.run.ProjectContext"
+    try:
+        context_class = load_obj(context_path)
+    except ModuleNotFoundError:
+        raise KedroContextError(
+            f"Cannot load context object from {context_path} for package {package_name}."
+        )
+
+    # update kwargs with env from the environment variable (defaults to None if not set)
+    # need to do this because some CLI command (e.g `kedro run`) defaults to passing in `env=None`
+    kwargs["env"] = kwargs.get("env") or os.getenv("KEDRO_ENV")
+
+    # Instantiate the context after changing the cwd for logging to be properly configured.
+    context = context_class(project_path=project_path, **kwargs)
+    return context
+
+
 def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
-    """Loads the KedroContext object of a Kedro Project based on the path specified
-    in `.kedro.yml`.
-    This function will change the current working directory to the project path.
+    """Loads the KedroContext object of a Kedro Project.
+    This is the default way to load the KedroContext object for normal workflows such as
+    CLI, Jupyter Notebook, Plugins, etc. It assumes the following project structure
+    under the given project_path::
+
+       <project_path>
+           |__ <src_dir>
+           |__ .kedro.yml
+           |__ kedro_cli.py
+
+    The name of the <scr_dir> is `src` by default and configurable in `.kedro.yml`.
 
     Args:
         project_path: Path to the Kedro project.

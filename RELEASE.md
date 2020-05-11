@@ -21,12 +21,13 @@
 * Added versioning support to MatplotlibWriter dataset.
 * Allowed the source directory to be configurable in `.kedro.yml`.
 * Improve the CLI speed by up to 50%.
+* All modules in `kedro.cli` and `kedro.context` have been moved into `kedro.framework.cli` and `kedro.framework.context` respectively. `kedro.cli` and `kedro.context` will be deprecated in future releases.
 
 ### New Datasets
 
-| Type              | Description                                                                                                                                      | Location                            |
-| ----------------- | ------------------------------------- | -------------------------------- |
-| `ImageDataSet`    | Work with image files using `Pillow`  | `kedro.extras.datasets.pillow`   |
+| Type           | Description                          | Location                       |
+| -------------- | ------------------------------------ | ------------------------------ |
+| `ImageDataSet` | Work with image files using `Pillow` | `kedro.extras.datasets.pillow` |
 
 ## Bug fixes and other changes
 * Fixed a bug where a new version created mid-run by an external system caused inconsistencies in the load versions used in the current run.

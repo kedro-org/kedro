@@ -489,7 +489,7 @@ class KedroContext(abc.ABC):
 
     def _setup_logging(self) -> None:
         """Register logging specified in logging directory."""
-        conf_logging = self.config_loader.get("logging*", "logging*/**")
+        conf_logging = self.config_loader.get("logging*", "logging*/**", "**/logging*")
         # turn relative paths in logging config into absolute path before initialising loggers
         conf_logging = _expand_path(
             project_path=self.project_path, conf_dictionary=conf_logging
@@ -529,7 +529,9 @@ class KedroContext(abc.ABC):
     def _get_config_credentials(self) -> Dict[str, Any]:
         """Getter for credentials specified in credentials directory."""
         try:
-            conf_creds = self.config_loader.get("credentials*", "credentials*/**")
+            conf_creds = self.config_loader.get(
+                "credentials*", "credentials*/**", "**/credentials*"
+            )
         except MissingConfigException as exc:
             warn(
                 "Credentials not found in your Kedro project config.\n{}".format(

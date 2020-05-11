@@ -55,7 +55,7 @@ def pipelines_to_create(request):
 
 @pytest.fixture(scope="module")
 def fake_root_dir():
-    # using tempfile as tmp_path fixture doesn't support session scope
+    # using tempfile as tmp_path fixture doesn't support module scope
     with tempfile.TemporaryDirectory() as tmp_root:
         yield Path(tmp_root).resolve()
 
@@ -112,7 +112,7 @@ def fake_kedro_cli(dummy_project):  # pylint: disable=unused-argument
 
 
 @pytest.fixture(autouse=True)
-def cleanup_pipeline(pipelines_to_create, dummy_project):
+def cleanup_pipelines(pipelines_to_create, dummy_project):
     yield
 
     # remove created pipeline files after the test
@@ -121,7 +121,7 @@ def cleanup_pipeline(pipelines_to_create, dummy_project):
         shutil.rmtree(str(pipe_path))
 
         confs = dummy_project / "conf"
-        for each in confs.glob(f"*/{pipeline}"):  # clean all config envs
+        for each in confs.glob(f"*/pipelines/{pipeline}"):  # clean all config envs
             shutil.rmtree(str(each))
 
         tests = dummy_project / "src" / "tests" / "pipelines" / pipeline
@@ -175,7 +175,9 @@ class TestPipelineCreateCommand:
 
             # config
             conf_env = env or "base"
-            conf_dir = (dummy_project / "conf" / conf_env / pipeline_name).resolve()
+            conf_dir = (
+                dummy_project / "conf" / conf_env / "pipelines" / pipeline_name
+            ).resolve()
             expected_configs = {"catalog.yml", "parameters.yml"}
             actual_configs = {f.name for f in conf_dir.iterdir()}
             assert actual_configs == expected_configs
@@ -207,7 +209,7 @@ class TestPipelineCreateCommand:
         for pipeline_name in pipelines_to_create:
             assert f"Creating a pipeline `{pipeline_name}`: OK" in result.output
 
-            conf_dirs = list((dummy_project / "conf").glob(f"*/{pipeline_name}"))
+            conf_dirs = list((dummy_project / "conf").rglob(pipeline_name))
             assert conf_dirs == []  # no configs created for the pipeline
 
             test_dir = dummy_project / "src" / "tests" / "pipelines" / pipeline_name
@@ -227,24 +229,21 @@ class TestPipelineCreateCommand:
         assert result.exit_code == 0
 
         # write pipeline catalog
+        pipe_conf_dir = (
+            dummy_project / "conf" / "base" / "pipelines" / pipelines_to_create[0]
+        )
         catalog_dict = {
             "ds_from_pipeline": {
                 "type": "pandas.CSVDataSet",
                 "filepath": "data/01_raw/iris.csv",
             }
         }
-        catalog = (
-            dummy_project / "conf" / "base" / pipelines_to_create[0] / "catalog.yml"
-        )
-        with catalog.open("w") as f:
+        with (pipe_conf_dir / "catalog.yml").open("w") as f:
             yaml.dump(catalog_dict, f)
 
         # write pipeline parameters
         params_dict = {"params_from_pipeline": {"p1": [1, 2, 3], "p2": None}}
-        params = (
-            dummy_project / "conf" / "base" / pipelines_to_create[0] / "parameters.yml"
-        )
-        with params.open("w") as f:
+        with (pipe_conf_dir / "parameters.yml").open("w") as f:
             yaml.dump(params_dict, f)
 
         ctx = load_context(Path.cwd())
@@ -259,7 +258,14 @@ class TestPipelineCreateCommand:
         pipeline_name = pipelines_to_create[0]
 
         # touch pipeline
-        catalog = dummy_project / "conf" / "base" / pipeline_name / "catalog.yml"
+        catalog = (
+            dummy_project
+            / "conf"
+            / "base"
+            / "pipelines"
+            / pipeline_name
+            / "catalog.yml"
+        )
         catalog.parent.mkdir(parents=True)
         catalog.touch()
 

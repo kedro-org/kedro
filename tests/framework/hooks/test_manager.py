@@ -27,8 +27,8 @@
 # limitations under the License.
 import pytest
 
-from kedro.hooks.manager import _create_hook_manager
-from kedro.hooks.specs import DataCatalogSpecs, NodeSpecs, PipelineSpecs
+from kedro.framework.hooks.manager import _create_hook_manager
+from kedro.framework.hooks.specs import DataCatalogSpecs, NodeSpecs, PipelineSpecs
 
 
 @pytest.mark.parametrize(

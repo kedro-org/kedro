@@ -46,7 +46,7 @@ from typing import Any, Dict, Iterable, List, Tuple
 import click
 from click import secho, style
 from kedro.cli import main as kedro_main
-from kedro.cli.pipeline import pipeline as pipeline_group
+from kedro.framework.cli.pipeline import pipeline as pipeline_group
 from kedro.cli.utils import (
     KedroCliError,
     call,

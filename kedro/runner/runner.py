@@ -34,7 +34,7 @@ from abc import ABC, abstractmethod
 from concurrent.futures import ALL_COMPLETED, ThreadPoolExecutor, as_completed, wait
 from typing import Any, Dict, Iterable
 
-from kedro.hooks import get_hook_manager
+from kedro.framework.hooks import get_hook_manager
 from kedro.io import AbstractDataSet, DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node

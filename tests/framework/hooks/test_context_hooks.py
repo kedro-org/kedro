@@ -36,10 +36,10 @@ import pytest
 import yaml
 
 from kedro import __version__
-from kedro.context import KedroContext
-from kedro.context.context import _expand_path
-from kedro.hooks import hook_impl
-from kedro.hooks.manager import _create_hook_manager
+from kedro.framework.context import KedroContext
+from kedro.framework.context.context import _expand_path
+from kedro.framework.hooks import hook_impl
+from kedro.framework.hooks.manager import _create_hook_manager
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node, node
@@ -105,8 +105,10 @@ def config_dir(tmp_path, local_config, local_logging_config):
 def hook_manager(monkeypatch):
     # re-create the global hook manager after every test
     hook_manager = _create_hook_manager()
-    monkeypatch.setattr("kedro.hooks.get_hook_manager", lambda: hook_manager)
-    monkeypatch.setattr("kedro.context.context.get_hook_manager", lambda: hook_manager)
+    monkeypatch.setattr("kedro.framework.hooks.get_hook_manager", lambda: hook_manager)
+    monkeypatch.setattr(
+        "kedro.framework.context.context.get_hook_manager", lambda: hook_manager
+    )
     monkeypatch.setattr("kedro.runner.runner.get_hook_manager", lambda: hook_manager)
     return hook_manager
 

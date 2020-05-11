@@ -19,7 +19,7 @@ To elaborate, first, let's look at the two sides that comprise a hook:
 
 ### Hook specification
 
-A hook specification is defined by Kedro as a particular point in Kedro's execution where users can inject additional behaviours. Currently, the following hook specifications are provided by Kedro in [kedro.hooks](/kedro.hooks):
+A hook specification is defined by Kedro as a particular point in Kedro's execution where users can inject additional behaviours. Currently, the following hook specifications are provided by Kedro in [kedro.framework.hooks](/kedro.framework.hooks):
 
 * `after_catalog_created`
 * `before_node_run`
@@ -32,11 +32,11 @@ The naming convention for hooks is `<before/after>_<noun>_<past_participle>`, in
 * `<before/after>` and `<past_participle>` refers to when the hook executed, e.g. `before <something> was run` or `after <something> was created`.
 * `<noun>` refers to the relevant component in the Kedro execution timeline for which this hook adds extra behaviour, e.g. `catalog`, `node` and `pipeline`.
 
-To view their full signatures, please visit [kedro.hooks](/kedro.hooks). As a user, you can inject additional behaviours by providing implementation for these specifications.
+To view their full signatures, please visit [kedro.framework.hooks](/kedro.framework.hooks). As a user, you can inject additional behaviours by providing implementation for these specifications.
 
 ### Hook implementation
 
-A hook implementation should have the same name as the specification and provide a concrete implementation with a subset of the specification's parameters. For example, the full signature of the [`after_data_catalog_created`](/kedro.hooks.specs.DataCatalogSpecs) hook specification is:
+A hook implementation should have the same name as the specification and provide a concrete implementation with a subset of the specification's parameters. For example, the full signature of the [`after_data_catalog_created`](/kedro.framework.hooks.specs.DataCatalogSpecs) hook specification is:
 
 ```python
 @hook_spec
@@ -56,7 +56,7 @@ However, if you just want to use this hook to add transformer for a data catalog
 
 ```python
 # <your_project>/src/<your_project>/hooks.py
-from kedro.hooks import hook_impl
+from kedro.framework.hooks import hook_impl
 from kedro.extras.transformers.time_profiler import ProfileTimeTransformer
 
 

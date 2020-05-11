@@ -43,7 +43,7 @@ import yaml
 
 from kedro import __version__
 from kedro.config import ConfigLoader, MissingConfigException
-from kedro.hooks import get_hook_manager
+from kedro.framework.hooks import get_hook_manager
 from kedro.io import DataCatalog
 from kedro.io.core import generate_timestamp
 from kedro.pipeline import Pipeline
@@ -309,8 +309,10 @@ class KedroContext(abc.ABC):
             # Sometimes users might create more than one context instance, in which case
             # hooks have already been registered, so we perform a simple check here
             # to avoid an error being raised and break user's workflow.
-            if not self._hook_manager.is_registered(hooks_collection):
-                self._hook_manager.register(hooks_collection)
+            if not self._hook_manager.is_registered(
+                hooks_collection
+            ):  # pragma: no cover
+                self._hook_manager.register(hooks_collection)  # pragma: no cover
 
     def _get_pipeline(self, name: str = None) -> Pipeline:
         name = name or "__default__"

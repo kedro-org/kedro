@@ -38,9 +38,9 @@ from click.testing import CliRunner
 from pandas import DataFrame
 
 from kedro.cli.cli import cli
-from kedro.cli.pipeline import _sync_dirs
 from kedro.context import load_context
 from kedro.extras.datasets.pandas import CSVDataSet
+from kedro.framework.cli.pipeline import _sync_dirs
 
 REPO_NAME = "dummy_project"
 PACKAGE_NAME = "dummy_package"

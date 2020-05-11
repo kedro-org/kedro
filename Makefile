@@ -19,7 +19,7 @@ lint:
 	pre-commit run -a --hook-stage manual
 
 test:
-	pytest tests
+	pytest tests --cov-config pyproject.toml
 
 test-no-spark:
 	pytest tests --cov-config pyproject_no_spark.toml --ignore tests/extras/datasets/spark

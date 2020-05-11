@@ -230,7 +230,7 @@ def _copy_pipeline_tests(pipeline_name: str, result_path: Path, package_dir: Pat
 
 
 def _copy_pipeline_configs(
-    pipeline_name: str,
+    pipe_name: str,
     result_path: Path,
     context: KedroContext,
     skip_config: bool,
@@ -241,7 +241,7 @@ def _copy_pipeline_configs(
     try:
         if not skip_config:
             config_target = (
-                context.project_path / context.CONF_ROOT / env / pipeline_name
+                context.project_path / context.CONF_ROOT / env / "pipelines" / pipe_name
             )
             _sync_dirs(config_source, config_target)
     finally:

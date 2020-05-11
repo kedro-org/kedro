@@ -1,7 +1,7 @@
 # Upcoming Release
 
 ## Major features and improvements
-* Added new CLI commands:
+* Added new CLI commands (only available for the projects created using Kedro 0.16.0 or later):
   - `kedro catalog list`
   - `kedro pipeline create`
 * Added support of Pandas 1.x.
@@ -18,7 +18,6 @@
 * Added instruction in the documentation on how to create a custom runner.
 * Added `Hooks`, which is a new mechanism for extending Kedro.
 * Added `joblib` backend support to `pickle.PickleDataSet`.
-* Added new CLI command `kedro pipeline list`.
 * Added versioning support to MatplotlibWriter dataset.
 * Allowed the source directory to be configurable in `.kedro.yml`.
 * Improve the CLI speed by up to 50%.

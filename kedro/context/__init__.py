@@ -33,5 +33,4 @@ project context.
 from .context import KedroContext  # NOQA
 from .context import KedroContextError  # NOQA
 from .context import load_context  # NOQA
-from .context import load_package_context  # NOQA
 from .context import validate_source_path  # NOQA

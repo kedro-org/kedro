@@ -32,7 +32,9 @@ from pathlib import Path
 import pytest
 
 import kedro
-from kedro.context import KedroContextError, load_context, load_package_context
+from kedro.context import KedroContextError, load_context
+from kedro.framework.context import KedroContextError as FrameworkKedroContextError
+from kedro.framework.context import load_package_context
 
 
 @pytest.fixture(autouse=True)
@@ -169,7 +171,7 @@ class TestLoadPackageContext:
             rf"Cannot load context object from {fake_package_name}.run.ProjectContext "
             rf"for package {fake_package_name}."
         )
-        with pytest.raises(KedroContextError, match=pattern):
+        with pytest.raises(FrameworkKedroContextError, match=pattern):
             load_package_context(
                 project_path=fake_repo_path, package_name=fake_package_name
             )

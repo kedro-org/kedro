@@ -24,13 +24,19 @@ A hook specification is defined by Kedro as a particular point in Kedro's execut
 * `after_catalog_created`
 * `before_node_run`
 * `after_node_run`
+* `on_node_error`
 * `before_pipeline_run`
 * `after_pipeline_run`
+* `on_pipeline_error`
 
-The naming convention for hooks is `<before/after>_<noun>_<past_participle>`, in which:
+The naming convention for non-error hooks is `<before/after>_<noun>_<past_participle>`, in which:
 
 * `<before/after>` and `<past_participle>` refers to when the hook executed, e.g. `before <something> was run` or `after <something> was created`.
 * `<noun>` refers to the relevant component in the Kedro execution timeline for which this hook adds extra behaviour, e.g. `catalog`, `node` and `pipeline`.
+
+The naming convention for error hooks is `on_<noun>_error`, in which:
+
+* `<noun>` refers to the relevant component in the Kedro execution timeline that throws the error.
 
 To view their full signatures, please visit [kedro.framework.hooks](/kedro.framework.hooks). As a user, you can inject additional behaviours by providing implementation for these specifications.
 

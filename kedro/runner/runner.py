@@ -224,7 +224,18 @@ def _run_node_sequential(node: Node, catalog: DataCatalog, run_id: str = None) -
     hook_manager.hook.before_node_run(  # pylint: disable=no-member
         node=node, catalog=catalog, inputs=inputs, is_async=is_async, run_id=run_id
     )
-    outputs = node.run(inputs)
+    try:
+        outputs = node.run(inputs)
+    except Exception as error:
+        hook_manager.hook.on_node_error(  # pylint: disable=no-member
+            error=error,
+            node=node,
+            catalog=catalog,
+            inputs=inputs,
+            is_async=is_async,
+            run_id=run_id,
+        )
+        raise error
     hook_manager.hook.after_node_run(  # pylint: disable=no-member
         node=node,
         catalog=catalog,
@@ -251,7 +262,18 @@ def _run_node_async(node: Node, catalog: DataCatalog, run_id: str = None) -> Nod
         hook_manager.hook.before_node_run(  # pylint: disable=no-member
             node=node, catalog=catalog, inputs=inputs, is_async=is_async, run_id=run_id
         )
-        outputs = node.run(inputs)
+        try:
+            outputs = node.run(inputs)
+        except Exception as error:
+            hook_manager.hook.on_node_error(  # pylint: disable=no-member
+                error=error,
+                node=node,
+                catalog=catalog,
+                inputs=inputs,
+                is_async=is_async,
+                run_id=run_id,
+            )
+            raise error
         hook_manager.hook.after_node_run(  # pylint: disable=no-member
             node=node,
             catalog=catalog,

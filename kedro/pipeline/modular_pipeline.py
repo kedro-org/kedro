@@ -96,7 +96,6 @@ def _validate_datasets_exist(
         )
 
 
-# pylint: disable=too-many-locals
 def pipeline(
     pipe: Pipeline,
     *,

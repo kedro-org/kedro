@@ -619,6 +619,8 @@ class KedroContext(abc.ABC):
         Raises:
             KedroContextError: If the resulting ``Pipeline`` is empty
                 or incorrect tags are provided.
+            Exception: Any uncaught exception will be re-raised
+                after being passed to``on_pipeline_error``.
         Returns:
             Any node outputs that cannot be processed by the ``DataCatalog``.
             These are returned in a dictionary, where the keys are defined
@@ -684,7 +686,18 @@ class KedroContext(abc.ABC):
         self._hook_manager.hook.before_pipeline_run(  # pylint: disable=no-member
             run_params=record_data, pipeline=filtered_pipeline, catalog=catalog
         )
-        run_result = runner.run(filtered_pipeline, catalog, run_id)
+
+        try:
+            run_result = runner.run(filtered_pipeline, catalog, run_id)
+        except Exception as error:
+            self._hook_manager.hook.on_pipeline_error(  # pylint: disable=no-member
+                error=error,
+                run_params=record_data,
+                pipeline=filtered_pipeline,
+                catalog=catalog,
+            )
+            raise error
+
         self._hook_manager.hook.after_pipeline_run(  # pylint: disable=no-member
             run_params=record_data,
             run_result=run_result,

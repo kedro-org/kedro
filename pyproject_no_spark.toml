@@ -5,6 +5,6 @@ omit = [
   "kedro/templates/*",
   "kedro/extras/datasets/spark/*",
   "tests/extras/datasets/spark/*",
-  "kedro/hooks/specs.py"
+  "kedro/framework/hooks/specs.py"
 ]
 exclude_lines = ["pragma: no cover", "raise NotImplementedError", "SKIP_IF_NO_SPARK"]

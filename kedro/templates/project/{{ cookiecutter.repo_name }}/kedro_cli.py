@@ -46,7 +46,7 @@ from typing import Any, Dict, Iterable, List, Tuple
 import click
 from click import secho, style
 from kedro.cli import main as kedro_main
-from kedro.cli.pipeline import pipeline as pipeline_group
+from kedro.framework.cli.pipeline import pipeline as pipeline_group
 from kedro.cli.utils import (
     KedroCliError,
     call,
@@ -591,9 +591,7 @@ def convert_notebook(all_flag, overwrite_flag, filepath):
 
     for notebook in notebooks:
         secho("Converting notebook '{}'...".format(str(notebook)))
-        output_path = (
-            SOURCE_PATH / KEDRO_PACKAGE_NAME / "nodes" / f"{notebook.stem}.py"
-        )
+        output_path = SOURCE_PATH / KEDRO_PACKAGE_NAME / "nodes" / f"{notebook.stem}.py"
 
         if output_path.is_file():
             overwrite = overwrite_flag or click.confirm(

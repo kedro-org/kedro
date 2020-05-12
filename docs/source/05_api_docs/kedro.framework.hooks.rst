@@ -1,9 +1,9 @@
-kedro.hooks
-============
+kedro.framework.hooks
+=====================
 
 .. rubric:: Description
 
-.. automodule:: kedro.hooks
+.. automodule:: kedro.framework.hooks
 
 Data Catalog Hooks
 -------------------
@@ -12,7 +12,7 @@ Data Catalog Hooks
     :toctree:
     :template: autosummary/class.rst
 
-    kedro.hooks.specs.DataCatalogSpecs
+    kedro.framework.hooks.specs.DataCatalogSpecs
 
 Node Hooks
 -------------------
@@ -21,7 +21,7 @@ Node Hooks
     :toctree:
     :template: autosummary/class.rst
 
-    kedro.hooks.specs.NodeSpecs
+    kedro.framework.hooks.specs.NodeSpecs
 
 Pipeline Hooks
 -------------------
@@ -30,4 +30,4 @@ Pipeline Hooks
     :toctree:
     :template: autosummary/class.rst
 
-    kedro.hooks.specs.PipelineSpecs
+    kedro.framework.hooks.specs.PipelineSpecs

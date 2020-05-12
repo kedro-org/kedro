@@ -26,40 +26,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Application entry point."""
-from pathlib import Path
-from typing import Dict
+"""
+This file contains the fixtures that are reusable by any tests within
+this directory. You don't need to import the fixtures as pytest will
+discover them automatically. More info here:
+https://docs.pytest.org/en/latest/fixture.html
+"""
 
-from kedro.context import KedroContext
-from kedro.framework.context import load_package_context
-from kedro.pipeline import Pipeline
+from os import makedirs
 
-from {{ cookiecutter.python_package }}.pipeline import create_pipelines
+from click.testing import CliRunner
+from pytest import fixture
 
-
-class ProjectContext(KedroContext):
-    """Users can override the remaining methods from the parent class here,
-    or create new ones (e.g. as required by plugins)
-    """
-
-    project_name = "{{ cookiecutter.project_name }}"
-    # `project_version` is the version of kedro used to generate the project
-    project_version = "{{ cookiecutter.kedro_version }}"
-    package_name = "{{ cookiecutter.python_package }}"
-
-    def _get_pipelines(self) -> Dict[str, Pipeline]:
-        return create_pipelines()
+MOCKED_HOME = "user/path/"
 
 
-def run_package():
-    # Entry point for running a Kedro project packaged with `kedro package`
-    # using `python -m <project_package>.run` command.
-    project_context = load_package_context(
-        project_path=Path.cwd(),
-        package_name=Path(__file__).resolve().parent.name
-    )
-    project_context.run()
+@fixture(name="cli_runner")
+def cli_runner_fixture():
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        makedirs(MOCKED_HOME)
+        yield runner
 
 
-if __name__ == "__main__":
-    run_package()
+@fixture
+def entry_points(mocker):
+    return mocker.patch("pkg_resources.iter_entry_points")
+
+
+@fixture
+def entry_point(mocker, entry_points):
+    ep = mocker.MagicMock()
+    entry_points.return_value = [ep]
+    return ep

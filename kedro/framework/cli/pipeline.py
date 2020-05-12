@@ -37,9 +37,9 @@ import yaml
 from click import secho
 
 import kedro
-from kedro.cli.cli import _assert_pkg_name_ok, _handle_exception
-from kedro.cli.utils import KedroCliError, _clean_pycache
-from kedro.context import KedroContext, load_context
+from kedro.framework.cli.cli import _assert_pkg_name_ok, _handle_exception
+from kedro.framework.cli.utils import KedroCliError, _clean_pycache
+from kedro.framework.context import KedroContext, load_context
 
 ENV_HELP = "Kedro configuration environment name. Defaults to `local`."
 
@@ -49,17 +49,13 @@ def pipeline():
     """Commands for working with pipelines."""
 
 
-def _check_pipeline_names(ctx, param, value):  # pylint: disable=unused-argument
-    if not value:
-        secho("No pipeline names provided, exiting.", fg="yellow")
-        ctx.exit(0)
-    for each in value:
-        _assert_pkg_name_ok(each)
+def _check_pipeline_name(ctx, param, value):  # pylint: disable=unused-argument
+    _assert_pkg_name_ok(value)
     return value
 
 
 @pipeline.command("create")
-@click.argument("names", nargs=-1, callback=_check_pipeline_names)
+@click.argument("name", nargs=1, callback=_check_pipeline_name)
 @click.option(
     "--skip-config",
     is_flag=True,
@@ -72,7 +68,7 @@ def _check_pipeline_names(ctx, param, value):  # pylint: disable=unused-argument
     default=None,
     help="Environment to create pipeline configuration in. Defaults to `base`.",
 )
-def create_pipeline(names, skip_config, env):
+def create_pipeline(name, skip_config, env):
     """Create new modular pipeline(s) by providing the new pipeline names
     as space separated arguments."""
     try:
@@ -86,14 +82,13 @@ def create_pipeline(names, skip_config, env):
     package_dir = _get_project_package_dir(context)
     output_dir = package_dir / "pipelines"
 
-    for pipe_name in names:
-        result_path = _create_pipeline(pipe_name, context.project_version, output_dir)
-        _copy_pipeline_tests(pipe_name, result_path, package_dir)
-        _copy_pipeline_configs(pipe_name, result_path, context, skip_config, env=env)
-        secho()
+    result_path = _create_pipeline(name, context.project_version, output_dir)
+    _copy_pipeline_tests(name, result_path, package_dir)
+    _copy_pipeline_configs(name, result_path, context, skip_config, env=env)
+    secho(f"\nPipeline `{name}` was successfully created.\n", fg="green")
 
     secho(
-        f"To be able to run new pipelines, you will need to add them "
+        f"To be able to run the pipeline `{name}`, you will need to add it "
         f"to `create_pipelines()` in `{package_dir / 'pipeline.py'}`.",
         fg="yellow",
     )
@@ -144,7 +139,7 @@ def _create_pipeline(name: str, kedro_version: str, output_dir: Path) -> Path:
     template_path = Path(kedro.__file__).parent / "templates" / "pipeline"
     cookie_context = {"pipeline_name": name, "kedro_version": kedro_version}
 
-    secho(f"Creating a pipeline `{name}`: ", nl=False)
+    secho(f"Creating the pipeline `{name}`: ", nl=False)
 
     try:
         result_path = cookiecutter(
@@ -212,7 +207,7 @@ def _sync_dirs(source: Path, target: Path, prefix: str = ""):
             _sync_dirs(source_path, target_path, prefix=double_prefix)
 
 
-def _get_project_package_dir(context: KedroContext):
+def _get_project_package_dir(context: KedroContext) -> Path:
     # import the module of the current Kedro project
     project_package = import_module(context.package_name)
     # locate the directory of the project Python package
@@ -230,7 +225,7 @@ def _copy_pipeline_tests(pipeline_name: str, result_path: Path, package_dir: Pat
 
 
 def _copy_pipeline_configs(
-    pipeline_name: str,
+    pipe_name: str,
     result_path: Path,
     context: KedroContext,
     skip_config: bool,
@@ -241,7 +236,7 @@ def _copy_pipeline_configs(
     try:
         if not skip_config:
             config_target = (
-                context.project_path / context.CONF_ROOT / env / pipeline_name
+                context.project_path / context.CONF_ROOT / env / "pipelines" / pipe_name
             )
             _sync_dirs(config_source, config_target)
     finally:

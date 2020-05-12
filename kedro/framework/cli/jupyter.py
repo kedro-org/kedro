@@ -26,40 +26,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Application entry point."""
-from pathlib import Path
-from typing import Dict
-
-from kedro.context import KedroContext
-from kedro.framework.context import load_package_context
-from kedro.pipeline import Pipeline
-
-from {{ cookiecutter.python_package }}.pipeline import create_pipelines
+"""A collection of helper functions to integrate with Jupyter/IPython.
+"""
 
 
-class ProjectContext(KedroContext):
-    """Users can override the remaining methods from the parent class here,
-    or create new ones (e.g. as required by plugins)
+from jupyter_client.kernelspec import NATIVE_KERNEL_NAME, KernelSpecManager
+from traitlets import Unicode
+
+from kedro.framework.cli import load_entry_points
+
+
+def collect_line_magic():
+    """Interface function for collecting line magic functions from plugin entry points.
+    """
+    return load_entry_points("line_magic")
+
+
+class SingleKernelSpecManager(KernelSpecManager):
+    """A custom KernelSpec manager to be used by Kedro projects.
+    It limits the kernels to the default one only,
+    to make it less confusing for users, and gives it a sensible name.
     """
 
-    project_name = "{{ cookiecutter.project_name }}"
-    # `project_version` is the version of kedro used to generate the project
-    project_version = "{{ cookiecutter.kedro_version }}"
-    package_name = "{{ cookiecutter.python_package }}"
-
-    def _get_pipelines(self) -> Dict[str, Pipeline]:
-        return create_pipelines()
-
-
-def run_package():
-    # Entry point for running a Kedro project packaged with `kedro package`
-    # using `python -m <project_package>.run` command.
-    project_context = load_package_context(
-        project_path=Path.cwd(),
-        package_name=Path(__file__).resolve().parent.name
+    default_kernel_name = Unicode(
+        "Kedro", config=True, help="Alternative name for the default kernel"
     )
-    project_context.run()
+    whitelist = [NATIVE_KERNEL_NAME]
 
+    def get_kernel_spec(self, kernel_name):
+        """
+        This function will only be called by Jupyter to get a KernelSpec
+        for the default kernel.
+        We replace the name by something sensible here.
+        """
+        kernelspec = super().get_kernel_spec(kernel_name)
 
-if __name__ == "__main__":
-    run_package()
+        if kernel_name == NATIVE_KERNEL_NAME:
+            kernelspec.display_name = self.default_kernel_name
+
+        return kernelspec

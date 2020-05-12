@@ -26,18 +26,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-This file has been deprecated. Please add additional tests in
-`test_load_context_framework.py` instead.
-"""
-
 import sys
 from pathlib import Path
 
 import pytest
 
 import kedro
-from kedro.context import KedroContextError, load_context
+from kedro.framework.context import (
+    KedroContextError,
+    load_context,
+    load_package_context,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -90,7 +89,7 @@ class TestLoadContext:
 
     @pytest.mark.parametrize("source_dir", ["src", "./src", "./src/"])
     def test_kedro_yml_valid_source_dir(
-        self, mocker, monkeypatch, fake_repo_path, source_dir
+        self, mocker, monkeypatch, fake_repo_path, source_dir, fake_package_name
     ):
         """Test for loading context from an valid source dir. """
         monkeypatch.delenv(
@@ -99,9 +98,7 @@ class TestLoadContext:
 
         kedro_yml_path = fake_repo_path / ".kedro.yml"
         kedro_yml_path.write_text(
-            "context_path: fake_package.run.ProjectContext\nsource_dir: {}\n".format(
-                source_dir
-            )
+            f"context_path: {fake_package_name}.run.ProjectContext\nsource_dir: {source_dir}\n"
         )
 
         result = load_context(str(fake_repo_path))
@@ -112,14 +109,14 @@ class TestLoadContext:
     @pytest.mark.parametrize(
         "source_dir", ["../", "../src/", "./src/../..", "/User/user/root_project"]
     )
-    def test_kedro_yml_invalid_source_dir_pattern(self, fake_repo_path, source_dir):
+    def test_kedro_yml_invalid_source_dir_pattern(
+        self, fake_repo_path, source_dir, fake_package_name
+    ):
         """Test for invalid pattern for source_dir that is not relative to the project path.
         """
         kedro_yml_path = fake_repo_path / ".kedro.yml"
         kedro_yml_path.write_text(
-            "context_path: fake_package.run.ProjectContext\nsource_dir: {}\n".format(
-                source_dir
-            )
+            f"context_path: {fake_package_name}.run.ProjectContext\nsource_dir: {source_dir}\n"
         )
         source_path = (fake_repo_path / Path(source_dir).expanduser()).resolve()
 
@@ -130,15 +127,13 @@ class TestLoadContext:
         with pytest.raises(KedroContextError, match=pattern):
             load_context(str(fake_repo_path))
 
-    def test_source_path_does_not_exist(self, fake_repo_path):
+    def test_source_path_does_not_exist(self, fake_repo_path, fake_package_name):
         """Test for a valid source_dir pattern, but it does not exist.
         """
         kedro_yml_path = fake_repo_path / ".kedro.yml"
         source_dir = "non_existent"
         kedro_yml_path.write_text(
-            "context_path: fake_package.run.ProjectContext\nsource_dir: {}\n".format(
-                source_dir
-            )
+            f"context_path: {fake_package_name}.run.ProjectContext\nsource_dir: {source_dir}\n"
         )
         non_existent_path = (fake_repo_path / source_dir).expanduser().resolve()
 
@@ -146,14 +141,39 @@ class TestLoadContext:
         with pytest.raises(KedroContextError, match=pattern):
             load_context(str(fake_repo_path))
 
-    def test_kedro_yml_missing_source_dir(self, fake_repo_path):
+    def test_kedro_yml_missing_source_dir(self, fake_repo_path, fake_package_name):
         """If source dir is missing (it is by default), `src` is used to import package
            due to backward compatibility.
         """
         kedro_yml_path = fake_repo_path / ".kedro.yml"
-        kedro_yml_path.write_text("context_path: fake_package.run.ProjectContext\n")
+        kedro_yml_path.write_text(
+            f"context_path: {fake_package_name}.run.ProjectContext\n"
+        )
 
         result = load_context(str(fake_repo_path))
         assert result.project_name == "Test Project"
         assert result.project_version == kedro.__version__
         assert str(fake_repo_path.resolve() / "src") in sys.path
+
+
+class TestLoadPackageContext:
+    """Test loading context for running a Kedro project package
+    """
+
+    def test_load_valid_package_context(self, fake_repo_path, fake_package_name):
+        result = load_package_context(
+            project_path=fake_repo_path, package_name=fake_package_name
+        )
+        assert result.project_name == "Test Project"
+        assert result.project_version == kedro.__version__
+
+    def test_load_invalid_package_context(self, fake_repo_path):
+        fake_package_name = "i-dont-exist"
+        pattern = (
+            rf"Cannot load context object from {fake_package_name}.run.ProjectContext "
+            rf"for package {fake_package_name}."
+        )
+        with pytest.raises(KedroContextError, match=pattern):
+            load_package_context(
+                project_path=fake_repo_path, package_name=fake_package_name
+            )

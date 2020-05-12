@@ -1,7 +1,7 @@
 # Upcoming Release
 
 ## Major features and improvements
-* Added new CLI commands:
+* Added new CLI commands (only available for the projects created using Kedro 0.16.0 or later):
   - `kedro catalog list`
   - `kedro pipeline create`
 * Added support of Pandas 1.x.
@@ -18,16 +18,16 @@
 * Added instruction in the documentation on how to create a custom runner.
 * Added `Hooks`, which is a new mechanism for extending Kedro.
 * Added `joblib` backend support to `pickle.PickleDataSet`.
-* Added new CLI command `kedro pipeline list`.
 * Added versioning support to MatplotlibWriter dataset.
 * Allowed the source directory to be configurable in `.kedro.yml`.
 * Improve the CLI speed by up to 50%.
+* All modules in `kedro.cli` and `kedro.context` have been moved into `kedro.framework.cli` and `kedro.framework.context` respectively. `kedro.cli` and `kedro.context` will be deprecated in future releases.
 
 ### New Datasets
 
-| Type              | Description                                                                                                                                      | Location                            |
-| ----------------- | ------------------------------------- | -------------------------------- |
-| `ImageDataSet`    | Work with image files using `Pillow`  | `kedro.extras.datasets.pillow`   |
+| Type           | Description                          | Location                       |
+| -------------- | ------------------------------------ | ------------------------------ |
+| `ImageDataSet` | Work with image files using `Pillow` | `kedro.extras.datasets.pillow` |
 
 ## Bug fixes and other changes
 * Fixed a bug where a new version created mid-run by an external system caused inconsistencies in the load versions used in the current run.
@@ -68,6 +68,36 @@ In addition, all the specific datasets like `CSVLocalDataSet`, `CSVS3DataSet` et
 E.g. `type: CSVS3DataSet` -> `type: pandas.CSVDataSet`.
 
 > Note: No changes required if you are using your custom dataset.
+
+#### Migration for Pipeline.transform()
+`Pipeline.transform()` has been dropped in favour of the `pipeline()` constructor. The following changes apply:
+- Remember to import `from kedro.pipeline import pipeline`
+- The `prefix` argument has been renamed to `namespace`
+- And `datasets` has been broken down into more granular arguments:
+  - `inputs`: Independent inputs to the pipeline
+  - `outputs`: Any output created in the pipeline, whether an intermediary dataset or a leaf output
+  - `parameters`: `params:...` or `parameters`
+
+As an example, code that used to look like this with the `Pipeline.transform()` constructor:
+```python
+result = my_pipeline.transform(
+    datasets={"input": "new_input", "output": "new_output", "params:x": "params:y"},
+    prefix="pre"
+)
+```
+
+When used with the new `pipeline()` constructor, becomes:
+```python
+from kedro.pipeline import pipeline
+
+result = pipeline(
+    my_pipeline,
+    inputs={"input": "new_input"},
+    outputs={"output": "new_output"},
+    parameters={"params:x": "params:y"},
+    namespace="pre"
+)
+```
 
 #### Migration for decorators, color logger, transformers etc.
 Since some modules were moved to other locations you need to update import paths appropriately.

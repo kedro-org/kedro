@@ -26,40 +26,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Application entry point."""
-from pathlib import Path
-from typing import Dict
+"""``kedro.context`` provides functionality for loading Kedro
+project context.
+"""
 
-from kedro.context import KedroContext
-from kedro.framework.context import load_package_context
-from kedro.pipeline import Pipeline
-
-from {{ cookiecutter.python_package }}.pipeline import create_pipelines
-
-
-class ProjectContext(KedroContext):
-    """Users can override the remaining methods from the parent class here,
-    or create new ones (e.g. as required by plugins)
-    """
-
-    project_name = "{{ cookiecutter.project_name }}"
-    # `project_version` is the version of kedro used to generate the project
-    project_version = "{{ cookiecutter.kedro_version }}"
-    package_name = "{{ cookiecutter.python_package }}"
-
-    def _get_pipelines(self) -> Dict[str, Pipeline]:
-        return create_pipelines()
-
-
-def run_package():
-    # Entry point for running a Kedro project packaged with `kedro package`
-    # using `python -m <project_package>.run` command.
-    project_context = load_package_context(
-        project_path=Path.cwd(),
-        package_name=Path(__file__).resolve().parent.name
-    )
-    project_context.run()
-
-
-if __name__ == "__main__":
-    run_package()
+from .context import KedroContext  # NOQA
+from .context import KedroContextError  # NOQA
+from .context import load_context  # NOQA
+from .context import load_package_context  # NOQA
+from .context import validate_source_path  # NOQA

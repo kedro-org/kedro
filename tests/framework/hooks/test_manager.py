@@ -27,8 +27,8 @@
 # limitations under the License.
 import pytest
 
-from kedro.hooks.manager import _create_hook_manager
-from kedro.hooks.specs import DataCatalogSpecs, NodeSpecs, PipelineSpecs
+from kedro.framework.hooks.manager import _create_hook_manager
+from kedro.framework.hooks.specs import DataCatalogSpecs, NodeSpecs, PipelineSpecs
 
 
 @pytest.mark.parametrize(
@@ -57,8 +57,18 @@ from kedro.hooks.specs import DataCatalogSpecs, NodeSpecs, PipelineSpecs
             "after_node_run",
             ("node", "catalog", "inputs", "outputs", "is_async", "run_id"),
         ),
+        (
+            NodeSpecs,
+            "on_node_error",
+            ("error", "node", "catalog", "inputs", "is_async", "run_id"),
+        ),
         (PipelineSpecs, "before_pipeline_run", ("run_params", "pipeline", "catalog")),
         (PipelineSpecs, "after_pipeline_run", ("run_params", "pipeline", "catalog")),
+        (
+            PipelineSpecs,
+            "on_pipeline_error",
+            ("error", "run_params", "pipeline", "catalog"),
+        ),
     ],
 )
 def test_hook_manager_can_call_hooks_defined_in_specs(

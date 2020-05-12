@@ -161,7 +161,7 @@ Running `kedro pipeline create` does _not_ automatically add a corresponding ent
 
 > *Note:* In contrast, project configuration from `conf/base/pipelines/<pipeline_name>` is automatically discoverable by [KedroContext](/kedro.context.KedroContext) and therefore requires no manual change.
 
-You will need to specify at least one pipeline name argument when calling `kedro pipeline create <your-pipeline-name-here>` (multiple pipeline name arguments are also allowed). Every pipeline name must adhere to generic Python module naming rules:
+You will need to specify exactly one pipeline name argument when calling `kedro pipeline create <your-pipeline-name-here>`. The pipeline name must adhere to generic Python module naming rules:
 1. Can only contain alphanumeric characters and underscores (`A-Za-z0-9_`)
 2. Must start with a letter or underscore
 3. Must be at least 2 characters long
@@ -294,7 +294,7 @@ new-kedro-project
 
 Nested configuration in modular pipelines is _not_ supported by Kedro. It means that putting config files (like `catalog.yml`) in `src/<python_package>/pipelines/<pipeline_name>/conf` will have no effect on the Kedro project configuration.
 
-The recommended way to apply the changes to project catalog and/or parameters is by creating `catalog.yml` and/or `parameters.yml` in `conf/base/pipelines/<pipeline_name>`, which is done automatically if you created your pipeline by calling [`kedro pipeline run`](#how-do-i-create-modular-pipelines). If you plan to manually hand-off your modular pipeline to another project, we also recommend documenting the configuration used by the pipeline in the `README.md` of your modular pipeline. For example, you may copy your configuration into the modular pipeline location before the pipeline hand off and instruct the users to copy `catalog.yml` into their top-level configuration like that:
+The recommended way to apply the changes to project catalog and/or parameters is by creating `catalog.yml` and/or `parameters.yml` in `conf/base/pipelines/<pipeline_name>`, which is done automatically if you created your pipeline by calling [`kedro pipeline create`](#how-do-i-create-modular-pipelines). If you plan to manually hand-off your modular pipeline to another project, we also recommend documenting the configuration used by the pipeline in the `README.md` of your modular pipeline. For example, you may copy your configuration into the modular pipeline location before the pipeline hand off and instruct the users to copy `catalog.yml` into their top-level configuration like that:
 
 ```bash
 mkdir -p conf/base/pipelines/data_engineering  # create a separate folder for the pipeline configs

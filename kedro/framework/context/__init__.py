@@ -26,11 +26,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``kedro.context`` provides functionality for loading Kedro
+"""``kedro.framework.context`` provides functionality for loading Kedro
 project context.
 """
 
 from .context import KedroContext  # NOQA
 from .context import KedroContextError  # NOQA
 from .context import load_context  # NOQA
+from .context import load_package_context  # NOQA
 from .context import validate_source_path  # NOQA

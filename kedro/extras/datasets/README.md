@@ -1,66 +1,18 @@
-# Datasets #
+# Datasets
 
-```pandas```
+Welcome to `kedro.extras.datasets`, the home of Kedro's data connectors. Here you will find `AbstractDataSet` implementations created by QuantumBlack and external contributors.
 
-| Dataset Name | Saving Mechanism | Creator |
-| --- | --- | --- |
-| ```CSVDataSet``` | ```pandas``` | QuantumBlack |
-| ```CSVBlobDataSet``` | ```pandas``` | QuantumBlack |
-| ```ExcelDataSet``` | ```pandas``` | QuantumBlack |
-| ```FeatherDataSet``` | ```pandas``` | QuantumBlack |
-| ```GBQDataSet``` | ```pandas``` | QuantumBlack |
-| ```HDFDataSet``` | ```pandas``` | QuantumBlack |
-| ```JsonBlobDataSet``` | ```pandas``` | QuantumBlack |
-| ```JsonDataSet``` | ```pandas``` | QuantumBlack |
-| ```ParquetDataset``` | ```pandas``` | QuantumBlack |
-| ```SQLDataSet``` | ```pandas``` | QuantumBlack |
+## What `AbstractDataSet` implementations are supported?
 
-```biosequence```
+We support a range of data descriptions, including CSV, Excel, Parquet, Feather, HDF5, JSON, Pickle, SQL Tables, SQL Queries, Spark DataFrames and more. We even allow support for working with images.
 
-| Dataset Name | Saving Mechanism | Creator |
-| --- | --- | --- |
-| ```BiosequenceDataSet``` | ```biosequence``` | QuantumBlack |
+These data descriptions are supported with the APIs of `pandas`, `spark`, `networkx`, `matplotlib`, `yaml` and more.
 
-```dask```
+[The Data Catalog](https://kedro.readthedocs.io/en/stable/04_user_guide/04_data_catalog.html#the-data-catalog) allows you to work with a range of file formats on local file systems, network file systems, cloud object stores, and Hadoop.
 
-| Dataset Name | Saving Mechanism | Creator |
-| --- | --- | --- |
-| ```ParquetDataset``` | ```dask``` | QuantumBlack |
+Here is a full list of [supported data descriptions and APIs](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.html).
 
-```matplotlib```
+## How can I create my own `AbstractDataSet` implementation?
 
-| Dataset Name | Saving Mechanism | Creator |
-| --- | --- | --- |
-| ```MatplotlibWriter``` | ```matplotlib``` | QuantumBlack |
 
-```netowrkx```
-
-| Dataset Name | Saving Mechanism | Creator |
-| --- | --- | --- |
-| ```NetworkxDataSet``` | ```networkx``` | QuantumBlack |
-
-```pickle```
-
-| Dataset Name | Saving Mechanism | Creator |
-| --- | --- | --- |
-| ```PickleDataset``` | ```pickle``` | QuantumBlack |
-
-```spark```
-
-| Dataset Name | Saving Mechanism | Creator |
-| --- | --- | --- |
-| ```SparkDataSet``` | ```spark``` | QuantumBlack |
-| ```SparkHiveDataSet``` | ```spark``` | QuantumBlack |
-| ```SparkJdbcDataSet``` | ```spark``` | QuantumBlack |
-
-```text```
-
-| Dataset Name | Saving Mechanism | Creator |
-| --- | --- | --- |
-| ```TextDataSet``` | ```text``` | QuantumBlack |
-
-```yaml```
-
-| Dataset Name | Saving Mechanism | Creator |
-| --- | --- | --- |
-| ```YamlDataSet``` | ```yaml``` | QuantumBlack |
+Take a look at our [instructions on how to create your own `AbstractDataSet` implementation](https://kedro.readthedocs.io/en/stable/04_user_guide/14_create_a_new_dataset.html).

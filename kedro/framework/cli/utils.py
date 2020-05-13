@@ -35,6 +35,8 @@ import shutil
 import subprocess
 import sys
 import textwrap
+import warnings
+from contextlib import contextmanager
 from itertools import chain
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Sequence, Tuple, Union
@@ -228,3 +230,11 @@ def _clean_pycache(path: Path):
 
     for each in to_delete:
         shutil.rmtree(each, ignore_errors=True)
+
+
+@contextmanager
+def _filter_deprecation_warnings():
+    """Temporarily suppress all DeprecationWarnings."""
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=DeprecationWarning)
+        yield

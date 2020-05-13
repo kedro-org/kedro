@@ -36,10 +36,10 @@ import pytest
 import yaml
 
 from kedro import __version__
-from kedro.context import KedroContext
-from kedro.context.context import _expand_path
-from kedro.hooks import hook_impl
-from kedro.hooks.manager import _create_hook_manager
+from kedro.framework.context import KedroContext
+from kedro.framework.context.context import _expand_path
+from kedro.framework.hooks import hook_impl
+from kedro.framework.hooks.manager import _create_hook_manager
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node, node
@@ -105,14 +105,24 @@ def config_dir(tmp_path, local_config, local_logging_config):
 def hook_manager(monkeypatch):
     # re-create the global hook manager after every test
     hook_manager = _create_hook_manager()
-    monkeypatch.setattr("kedro.hooks.get_hook_manager", lambda: hook_manager)
-    monkeypatch.setattr("kedro.context.context.get_hook_manager", lambda: hook_manager)
+    monkeypatch.setattr("kedro.framework.hooks.get_hook_manager", lambda: hook_manager)
+    monkeypatch.setattr(
+        "kedro.framework.context.context.get_hook_manager", lambda: hook_manager
+    )
     monkeypatch.setattr("kedro.runner.runner.get_hook_manager", lambda: hook_manager)
     return hook_manager
 
 
 def identity(x: str):
     return x
+
+
+def broken_node():
+    raise ValueError("broken")
+
+
+def assert_exceptions_equal(e1: Exception, e2: Exception):
+    assert isinstance(e1, type(e2)) and str(e1) == str(e2)
 
 
 @pytest.fixture
@@ -199,6 +209,28 @@ class LoggingHooks:
         )
 
     @hook_impl
+    def on_node_error(
+        self,
+        error: Exception,
+        node: Node,
+        catalog: DataCatalog,
+        inputs: Dict[str, Any],
+        is_async: bool,
+        run_id: str,
+    ):
+        self.logger.info(
+            "Node error",
+            extra={
+                "error": error,
+                "node": node,
+                "catalog": catalog,
+                "inputs": inputs,
+                "is_async": is_async,
+                "run_id": run_id,
+            },
+        )
+
+    @hook_impl
     def before_pipeline_run(
         self, run_params: Dict[str, Any], pipeline: Pipeline, catalog: DataCatalog
     ) -> None:
@@ -214,6 +246,24 @@ class LoggingHooks:
         self.logger.info(
             "Ran pipeline",
             extra={"pipeline": pipeline, "run_params": run_params, "catalog": catalog},
+        )
+
+    @hook_impl
+    def on_pipeline_error(
+        self,
+        error: Exception,
+        run_params: Dict[str, Any],
+        pipeline: Pipeline,
+        catalog: DataCatalog,
+    ) -> None:
+        self.logger.info(
+            "Pipeline error",
+            extra={
+                "error": error,
+                "run_params": run_params,
+                "pipeline": pipeline,
+                "catalog": catalog,
+            },
         )
 
 
@@ -249,7 +299,29 @@ def context_with_hooks(tmp_path, mocker, logging_hooks):
             return {"__default__": pipeline}
 
     mocker.patch("logging.config.dictConfig")
-    return DummyContextWithHooks(str(tmp_path), env="local")
+    return DummyContextWithHooks(tmp_path, env="local")
+
+
+@pytest.fixture
+def broken_context_with_hooks(tmp_path, mocker, logging_hooks):
+    class BrokenContextWithHooks(KedroContext):
+        project_name = "broken-context"
+        package_name = "broken"
+        project_version = __version__
+        hooks = (logging_hooks,)
+
+        def _get_pipelines(self) -> Dict[str, Pipeline]:
+            pipeline = Pipeline(
+                [
+                    node(broken_node, None, "A", name="node1"),
+                    node(broken_node, None, "B", name="node2"),
+                ],
+                tags="pipeline",
+            )
+            return {"__default__": pipeline}
+
+    mocker.patch("logging.config.dictConfig")
+    return BrokenContextWithHooks(tmp_path, env="local")
 
 
 class TestKedroContextHooks:
@@ -332,6 +404,40 @@ class TestKedroContextHooks:
         )
         assert call_record.pipeline.describe() == context_with_hooks.pipeline.describe()
 
+    def test_on_pipeline_error_hook_is_called(self, broken_context_with_hooks, caplog):
+        with pytest.raises(ValueError, match="broken"):
+            broken_context_with_hooks.run()
+
+        on_pipeline_error_calls = [
+            record
+            for record in caplog.records
+            if record.funcName == "on_pipeline_error"
+        ]
+        assert len(on_pipeline_error_calls) == 1
+        call_record = on_pipeline_error_calls[0]
+        self._assert_hook_call_record_has_expected_parameters(
+            call_record, ["error", "run_params", "pipeline", "catalog"]
+        )
+        expected_error = ValueError("broken")
+        assert_exceptions_equal(call_record.error, expected_error)
+
+    def test_on_node_error_hook_is_called_with_sequential_runner(
+        self, broken_context_with_hooks, caplog
+    ):
+        with pytest.raises(ValueError, match="broken"):
+            broken_context_with_hooks.run(node_names=["node1"])
+
+        on_node_error_calls = [
+            record for record in caplog.records if record.funcName == "on_node_error"
+        ]
+        assert len(on_node_error_calls) == 1
+        call_record = on_node_error_calls[0]
+        self._assert_hook_call_record_has_expected_parameters(
+            call_record, ["error", "node", "catalog", "inputs", "is_async", "run_id"]
+        )
+        expected_error = ValueError("broken")
+        assert_exceptions_equal(call_record.error, expected_error)
+
     def test_before_and_after_node_run_hooks_are_called_with_sequential_runner(
         self, context_with_hooks, dummy_dataframe, caplog
     ):
@@ -363,6 +469,36 @@ class TestKedroContextHooks:
         # sanity check a couple of important parameters
         assert call_record.outputs["planes"].to_dict() == dummy_dataframe.to_dict()
         assert call_record.run_id == context_with_hooks.run_id
+
+    def test_on_node_error_hook_is_called_with_parallel_runner(
+        self, broken_context_with_hooks, logs_queue
+    ):
+        log_records = []
+
+        class LogHandler(logging.Handler):  # pylint: disable=abstract-method
+            def handle(self, record):
+                log_records.append(record)
+
+        logs_queue_listener = QueueListener(logs_queue, LogHandler())
+        logs_queue_listener.start()
+        with pytest.raises(ValueError, match="broken"):
+            broken_context_with_hooks.run(
+                runner=ParallelRunner(max_workers=2), node_names=["node1", "node2"]
+            )
+        logs_queue_listener.stop()
+
+        on_node_error_records = [
+            r for r in log_records if r.funcName == "on_node_error"
+        ]
+        assert len(on_node_error_records) == 2
+
+        for call_record in on_node_error_records:
+            self._assert_hook_call_record_has_expected_parameters(
+                call_record,
+                ["error", "node", "catalog", "inputs", "is_async", "run_id"],
+            )
+            expected_error = ValueError("broken")
+            assert_exceptions_equal(call_record.error, expected_error)
 
     def test_before_and_after_node_run_hooks_are_called_with_parallel_runner(
         self, context_with_hooks, dummy_dataframe, logs_queue

@@ -31,4 +31,15 @@
 This module implements commands available from the kedro CLI.
 """
 
+import warnings
+
 from kedro.cli.cli import get_project_context, load_entry_points, main  # NOQA
+
+warnings.simplefilter("default", DeprecationWarning)
+
+warnings.warn(
+    "All the modules in `kedro.cli` have been moved to `kedro.framework.cli`, and "
+    "`kedro.cli` will be removed in Kedro 0.17.0. Please update import paths "
+    "from `kedro.cli` to `kedro.framework.cli` in your Kedro project.",
+    DeprecationWarning,
+)

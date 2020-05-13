@@ -236,15 +236,20 @@ class TestPipelineHelper:
         assert resulting_pipeline.nodes[0].tags == {"tag1"}
         assert len(resulting_pipeline.nodes[0]._decorators) == 1
 
-    def test_default_node_name_is_untouched(self):
-        """
-        Check that we don't loose any valuable properties on node cloning.
-        Default node name should not get prefixed.
-        """
+    def test_default_node_name_is_namespaced(self):
+        """Check that auto-generated node names are also namespaced"""
         raw_pipeline = Pipeline([node(identity, "A", "B")])
-        resulting_pipeline = pipeline(raw_pipeline, namespace="PREFIX")
+        first_layer_nested_pipe = pipeline(raw_pipeline, namespace="PREFIX")
+        resulting_node = first_layer_nested_pipe.nodes[0]
 
-        assert not resulting_pipeline.nodes[0].name.startswith("PREFIX.")
+        assert resulting_node.name.startswith("PREFIX.")
+        assert resulting_node.namespace == "PREFIX"
+
+        second_layer_nested_pipe = pipeline(first_layer_nested_pipe, namespace="PRE")
+        resulting_node = second_layer_nested_pipe.nodes[0]
+
+        assert resulting_node.name.startswith("PRE.")
+        assert resulting_node.namespace == "PRE.PREFIX"
 
     def test_expose_intermediate_output(self):
         """Check that we don't namespace an intermediary dataset, anywhere it

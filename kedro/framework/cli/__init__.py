@@ -27,8 +27,7 @@
 # limitations under the License.
 
 """kedro is a CLI for creating Kedro projects.
-
-This module implements commands available from the Kedro CLI.
+This module implements commands available from the kedro CLI.
 """
 
 from .cli import get_project_context, load_entry_points, main  # NOQA

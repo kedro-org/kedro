@@ -30,7 +30,18 @@
 project context.
 """
 
+import warnings
+
 from .context import KedroContext  # NOQA
 from .context import KedroContextError  # NOQA
 from .context import load_context  # NOQA
 from .context import validate_source_path  # NOQA
+
+warnings.simplefilter("default", DeprecationWarning)
+
+warnings.warn(
+    "All the modules in `kedro.context` have been moved to `kedro.framework.context`, and "
+    "`kedro.context` will be removed in Kedro 0.17.0. Please update import paths "
+    "from `kedro.context` to `kedro.framework.context` in your Kedro project.",
+    DeprecationWarning,
+)

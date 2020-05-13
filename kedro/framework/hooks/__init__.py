@@ -25,6 +25,6 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""``kedro.hooks`` provides primitives to use hooks to extend KedroContext's behaviour"""
+"""``kedro.framework.hooks`` provides primitives to use hooks to extend KedroContext's behaviour"""
 from .manager import get_hook_manager  # NOQA
 from .markers import hook_impl  # NOQA

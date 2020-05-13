@@ -26,9 +26,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""kedro is a CLI for creating Kedro projects.
-
-This module implements commands available from the kedro CLI.
+"""This file has been deprecated and will be deleted in 0.17.0.
+Please make any additional changes in `kedro.framework.cli.cli.py` instead.
 """
 import importlib
 import os

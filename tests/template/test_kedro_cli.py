@@ -601,7 +601,7 @@ class TestJupyterNotebookCommand:
                 "--MappingKernelManager.cull_idle_timeout=30",
                 "--MappingKernelManager.cull_interval=30",
                 "--NotebookApp.kernel_spec_manager_class="
-                "kedro.cli.jupyter.SingleKernelSpecManager",
+                "kedro.framework.cli.jupyter.SingleKernelSpecManager",
                 "--KernelSpecManager.default_kernel_name='TestProject'",
             ],
         )
@@ -623,7 +623,7 @@ class TestJupyterNotebookCommand:
                 "--MappingKernelManager.cull_idle_timeout=30",
                 "--MappingKernelManager.cull_interval=30",
                 "--NotebookApp.kernel_spec_manager_class="
-                "kedro.cli.jupyter.SingleKernelSpecManager",
+                "kedro.framework.cli.jupyter.SingleKernelSpecManager",
                 "--KernelSpecManager.default_kernel_name='TestProject'",
             ],
         )
@@ -681,7 +681,7 @@ class TestJupyterLabCommand:
                 "--MappingKernelManager.cull_idle_timeout=30",
                 "--MappingKernelManager.cull_interval=30",
                 "--NotebookApp.kernel_spec_manager_class="
-                "kedro.cli.jupyter.SingleKernelSpecManager",
+                "kedro.framework.cli.jupyter.SingleKernelSpecManager",
                 "--KernelSpecManager.default_kernel_name='TestProject'",
             ],
         )
@@ -703,7 +703,7 @@ class TestJupyterLabCommand:
                 "--MappingKernelManager.cull_idle_timeout=30",
                 "--MappingKernelManager.cull_interval=30",
                 "--NotebookApp.kernel_spec_manager_class="
-                "kedro.cli.jupyter.SingleKernelSpecManager",
+                "kedro.framework.cli.jupyter.SingleKernelSpecManager",
                 "--KernelSpecManager.default_kernel_name='TestProject'",
             ],
         )

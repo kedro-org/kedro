@@ -40,7 +40,7 @@ This script is automatically invoked at IPython kernel startup when calling `ked
 
 #### `ProjectContext`
 
-Project specific context class that extends `kedro.context.KedroContext` abstract class. `ProjectContext` contains the information about the current project name, Kedro version used to generate the project, and concrete pipeline definition.
+Project specific context class that extends `kedro.framework.context.KedroContext` abstract class. `ProjectContext` contains the information about the current project name, Kedro version used to generate the project, and concrete pipeline definition.
 
 ### Framework
 

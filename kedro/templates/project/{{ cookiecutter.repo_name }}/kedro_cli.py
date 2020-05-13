@@ -45,16 +45,16 @@ from typing import Any, Dict, Iterable, List, Tuple
 
 import click
 from click import secho, style
-from kedro.cli import main as kedro_main
+from kedro.framework.cli import main as kedro_main
 from kedro.framework.cli.pipeline import pipeline as pipeline_group
-from kedro.cli.utils import (
+from kedro.framework.cli.utils import (
     KedroCliError,
     call,
     export_nodes,
     forward_command,
     python_call,
 )
-from kedro.context import load_context, validate_source_path
+from kedro.framework.context import load_context, validate_source_path
 
 from kedro.utils import load_obj
 
@@ -480,7 +480,7 @@ def _build_jupyter_command(
 
         cmd += [
             "--NotebookApp.kernel_spec_manager_class="
-            "kedro.cli.jupyter.SingleKernelSpecManager",
+            "kedro.framework.cli.jupyter.SingleKernelSpecManager",
             "--KernelSpecManager.default_kernel_name='{}'".format(kernel_name),
         ]
 

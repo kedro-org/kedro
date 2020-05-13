@@ -25,7 +25,9 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This module provides context for Kedro project."""
+"""This file has been deprecated and will be deleted in 0.17.0.
+Please make any additional changes in `kedro.framework.context.context.py` instead.
+"""
 
 import abc
 import logging

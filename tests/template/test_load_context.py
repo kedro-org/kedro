@@ -26,9 +26,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-This file has been deprecated. Please add additional tests in
-`test_load_context_framework.py` instead.
+"""This file has been deprecated and will be deleted in 0.17.0. Please add additional tests in
+`tests.template.test_load_context_framework.py` instead.
 """
 
 import sys

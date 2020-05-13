@@ -34,7 +34,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from kedro.cli.cli import _create_project
+from kedro.framework.cli.cli import _create_project
 
 _FAKE_REPO_NAME = "fake_repo"
 _FAKE_PACKAGE_NAME = "fake_package"

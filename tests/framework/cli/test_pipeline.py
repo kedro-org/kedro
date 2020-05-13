@@ -356,44 +356,11 @@ class TestPipelineCreateCommand:
 
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
-class TestPipelineListCommand:
-    def test_show_list_of_pipelines(
-        self, fake_kedro_cli, yaml_dump_mock, pipelines_dict
-    ):
-        result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["pipeline", "list", "--simple"]
-        )
+def test_list_pipelines(fake_kedro_cli, yaml_dump_mock, pipelines_dict):
+    result = CliRunner().invoke(fake_kedro_cli.cli, ["pipeline", "list"])
 
-        assert not result.exit_code
-        yaml_dump_mock.assert_called_once_with(sorted(pipelines_dict.keys()))
-
-    def test_show_specific_pipelines(
-        self, fake_kedro_cli, yaml_dump_mock, pipelines_dict
-    ):
-        pipe_name = "de"
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["pipeline", "list", pipe_name])
-
-        assert not result.exit_code
-        expected_dict = {pipe_name: pipelines_dict[pipe_name]}
-        yaml_dump_mock.assert_called_once_with(expected_dict)
-
-    def test_describe_all_pipelines(
-        self, fake_kedro_cli, yaml_dump_mock, pipelines_dict
-    ):
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["pipeline", "list"])
-
-        assert not result.exit_code
-        yaml_dump_mock.assert_called_once_with(pipelines_dict)
-
-    def test_not_found_pipeline(self, fake_kedro_cli):
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["pipeline", "list", "missing"])
-
-        assert result.exit_code
-        expected_output = (
-            "Error: missing pipeline not found. Existing pipelines: "
-            "__default__, de, ds\n"
-        )
-        assert result.output == expected_output
+    assert not result.exit_code
+    yaml_dump_mock.assert_called_once_with(sorted(pipelines_dict.keys()))
 
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")

@@ -73,8 +73,7 @@ def _check_pipeline_name(ctx, param, value):  # pylint: disable=unused-argument
     help="Environment to create pipeline configuration in. Defaults to `base`.",
 )
 def create_pipeline(name, skip_config, env):
-    """Create new modular pipeline(s) by providing the new pipeline names
-    as space separated arguments."""
+    """Create a new modular pipeline by providing the new pipeline name as an argument."""
     try:
         context = load_context(Path.cwd(), env=env)
     except Exception:  # pylint: disable=broad-except
@@ -100,40 +99,11 @@ def create_pipeline(name, skip_config, env):
 
 @pipeline.command("list")
 @click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_HELP)
-@click.option(
-    "--simple",
-    is_flag=True,
-    multiple=False,
-    help="Show list of all pipelines in the project.",
-)
-@click.argument("names", nargs=-1)
-def list_pipelines_and_nodes(names, simple, env):
-    """Show detailed information about project pipeline(s) by providing
-    the pipeline names as space separated arguments."""
+def list_pipelines(env):
+    """List all pipelines defined in your pipeline.py file."""
     context = load_context(Path.cwd(), env=env)
     project_pipelines = context.pipelines
-    if simple:
-        secho(yaml.dump(sorted(project_pipelines)))
-        return
-
-    names = sorted(set(names) or project_pipelines.keys())
-
-    result = {}
-    for pipe_name in names:
-        pipe_obj = project_pipelines.get(pipe_name)
-        if not pipe_obj:
-            existing_pipelines = ", ".join(sorted(project_pipelines))
-            raise KedroCliError(
-                f"{pipe_name} pipeline not found. "
-                f"Existing pipelines: {existing_pipelines}"
-            )
-
-        result[pipe_name] = [
-            f"{node.short_name} ({node._func_name})"  # pylint: disable=protected-access
-            for node in pipe_obj.nodes
-        ]
-
-    secho(yaml.dump(result))
+    secho(yaml.dump(sorted(project_pipelines)))
 
 
 @pipeline.command("describe")

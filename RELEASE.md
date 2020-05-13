@@ -23,6 +23,7 @@
 * Allowed the source directory to be configurable in `.kedro.yml`.
 * Improve the CLI speed by up to 50%.
 * All modules in `kedro.cli` and `kedro.context` have been moved into `kedro.framework.cli` and `kedro.framework.context` respectively. `kedro.cli` and `kedro.context` will be deprecated in future releases.
+* Added `namespace` property on ``Node``.
 
 ### New Datasets
 

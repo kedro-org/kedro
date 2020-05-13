@@ -33,11 +33,11 @@ import inspect
 import logging
 from collections import Counter
 from functools import reduce
-from typing import Any, Callable, Dict, Iterable, List, Set, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Union
 from warnings import warn
 
 
-class Node:
+class Node:  # pylint: disable=too-many-instance-attributes
     """``Node`` is an auxiliary class facilitating the operations required to
     run user-provided functions as part of Kedro pipelines.
     """
@@ -51,7 +51,8 @@ class Node:
         name: str = None,
         tags: Union[str, Iterable[str]] = None,
         decorators: Iterable[Callable] = None,
-        confirms: Union[str, List[str]] = None
+        confirms: Union[str, List[str]] = None,
+        namespace: str = None,
     ):
         """Create a node in the pipeline by providing a function to be called
         along with variable names for inputs and/or outputs.
@@ -78,6 +79,7 @@ class Node:
                 ``confirm()`` method of the corresponding data set instance.
                 Specified dataset names do not necessarily need to be present
                 in the node ``inputs`` or ``outputs``.
+            namespace: Optional node namespace.
 
         Raises:
             ValueError: Raised in the following cases:
@@ -123,6 +125,7 @@ class Node:
         self._inputs = inputs
         self._outputs = outputs
         self._name = name
+        self._namespace = namespace
         self._tags = set(_to_list(tags))
         self._decorators = list(decorators or [])
 
@@ -139,6 +142,7 @@ class Node:
             "inputs": self._inputs,
             "outputs": self._outputs,
             "name": self._name,
+            "namespace": self._namespace,
             "tags": self._tags,
             "decorators": self._decorators,
             "confirms": self._confirms,
@@ -239,7 +243,10 @@ class Node:
         Returns:
             Node's name if provided or the name of its function.
         """
-        return self._name or str(self)
+        node_name = self._name or str(self)
+        if self.namespace:
+            return f"{self.namespace}.{node_name}"
+        return node_name
 
     @property
     def short_name(self) -> str:
@@ -252,6 +259,15 @@ class Node:
             return self._name
 
         return self._func_name.replace("_", " ").title()
+
+    @property
+    def namespace(self) -> Optional[str]:
+        """Node's namespace.
+
+        Returns:
+            String representing node's namespace, typically from outer to inner scopes.
+        """
+        return self._namespace
 
     @property
     def inputs(self) -> List[str]:
@@ -587,7 +603,7 @@ def node(
     *,
     name: str = None,
     tags: Iterable[str] = None,
-    confirms: Union[str, List[str]] = None
+    confirms: Union[str, List[str]] = None,
 ) -> Node:
     """Create a node in the pipeline by providing a function to be called
     along with variable names for inputs and/or outputs.

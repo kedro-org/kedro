@@ -102,7 +102,7 @@ def pipeline(
     inputs: Dict[str, str] = None,
     outputs: Dict[str, str] = None,
     parameters: Dict[str, str] = None,
-    namespace: str = None
+    namespace: str = None,
 ) -> Pipeline:
     """Create a copy of the pipeline and its nodes,
     with some dataset names and node names modified.
@@ -185,10 +185,16 @@ def pipeline(
         )
 
     def _copy_node(node: Node) -> Node:
+        new_namespace = node.namespace
+        if namespace:
+            new_namespace = (
+                f"{namespace}.{node.namespace}" if node.namespace else namespace
+            )
+
         return node._copy(
             inputs=_process_dataset_names(node._inputs),
             outputs=_process_dataset_names(node._outputs),
-            name=_prefix(node._name) if node._name else None,
+            namespace=new_namespace,
         )
 
     new_nodes = [_copy_node(n) for n in pipe.nodes]

@@ -138,6 +138,25 @@ def patch_log(mocker):
     mocker.patch("logging.config.dictConfig")
 
 
+@pytest.fixture
+def yaml_dump_mock(mocker):
+    return mocker.patch("yaml.dump", return_value="Result YAML")
+
+
+@pytest.fixture
+def pipelines_dict():
+    pipelines = {
+        "de": ["Split Data (split_data)"],
+        "ds": [
+            "Train Model (train_model)",
+            "Predict (predict)",
+            "Report Accuracy (report_accuracy)",
+        ],
+    }
+    pipelines["__default__"] = pipelines["de"] + pipelines["ds"]
+    return pipelines
+
+
 LETTER_ERROR = "It must contain only letters, digits, and/or underscores."
 FIRST_CHAR_ERROR = "It must start with a letter or underscore."
 TOO_SHORT_ERROR = "It must be at least 2 characters long."
@@ -338,23 +357,6 @@ class TestPipelineCreateCommand:
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
 class TestPipelineListCommand:
-    @pytest.fixture
-    def yaml_dump_mock(self, mocker):
-        return mocker.patch("yaml.dump", return_value="Result YAML")
-
-    @pytest.fixture
-    def pipelines_dict(self):
-        pipelines = {
-            "de": ["Split Data (split_data)"],
-            "ds": [
-                "Train Model (train_model)",
-                "Predict (predict)",
-                "Report Accuracy (report_accuracy)",
-            ],
-        }
-        pipelines["__default__"] = pipelines["de"] + pipelines["ds"]
-        return pipelines
-
     def test_show_list_of_pipelines(
         self, fake_kedro_cli, yaml_dump_mock, pipelines_dict
     ):
@@ -390,6 +392,33 @@ class TestPipelineListCommand:
         expected_output = (
             "Error: missing pipeline not found. Existing pipelines: "
             "__default__, de, ds\n"
+        )
+        assert result.output == expected_output
+
+
+@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
+class TestPipelineDescribeCommand:
+    @pytest.mark.parametrize("pipeline_name", ["de", "ds", "__default__"])
+    def test_describe_pipeline(
+        self, fake_kedro_cli, yaml_dump_mock, pipeline_name, pipelines_dict
+    ):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["pipeline", "describe", pipeline_name]
+        )
+
+        assert not result.exit_code
+        expected_dict = {"Nodes": pipelines_dict[pipeline_name]}
+        yaml_dump_mock.assert_called_once_with(expected_dict)
+
+    def test_not_found_pipeline(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["pipeline", "describe", "missing"]
+        )
+
+        assert result.exit_code
+        expected_output = (
+            "Error: `missing` pipeline not found. Existing pipelines: "
+            "[__default__, de, ds]\n"
         )
         assert result.output == expected_output
 

@@ -136,6 +136,28 @@ def list_pipelines_and_nodes(names, simple, env):
     secho(yaml.dump(result))
 
 
+@pipeline.command("describe")
+@click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_HELP)
+@click.argument("name", nargs=1)
+def describe_pipeline(name, env):
+    """Describe a pipeline by providing the pipeline name as an argument."""
+    context = load_context(Path.cwd(), env=env)
+    pipeline_obj = context.pipelines.get(name)
+    if not pipeline_obj:
+        existing_pipelines = ", ".join(sorted(context.pipelines.keys()))
+        raise KedroCliError(
+            f"`{name}` pipeline not found. Existing pipelines: [{existing_pipelines}]"
+        )
+
+    result = {}
+    result["Nodes"] = [
+        f"{node.short_name} ({node._func_name})"  # pylint: disable=protected-access
+        for node in pipeline_obj.nodes
+    ]
+
+    secho(yaml.dump(result))
+
+
 def _create_pipeline(name: str, kedro_version: str, output_dir: Path) -> Path:
     with _filter_deprecation_warnings():
         # pylint: disable=import-outside-toplevel

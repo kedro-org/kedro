@@ -4,6 +4,7 @@
 * Added new CLI commands (only available for the projects created using Kedro 0.16.0 or later):
   - `kedro catalog list`
   - `kedro pipeline create`
+  - `kedro pipeline describe` to describe a specific pipeline
 * Added support of Pandas 1.x.
 * Enabled Python 3.8 compatibility. _Please note that a Spark workflow may be unreliable for this Python version as `pyspark` is not fully-compatible with 3.8 yet._
 * Fixed `load_context` changing user's current working directory.

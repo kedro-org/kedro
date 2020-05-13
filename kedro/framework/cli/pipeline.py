@@ -38,7 +38,11 @@ from click import secho
 
 import kedro
 from kedro.framework.cli.cli import _assert_pkg_name_ok, _handle_exception
-from kedro.framework.cli.utils import KedroCliError, _clean_pycache
+from kedro.framework.cli.utils import (
+    KedroCliError,
+    _clean_pycache,
+    _filter_deprecation_warnings,
+)
 from kedro.framework.context import KedroContext, load_context
 
 ENV_HELP = "Kedro configuration environment name. Defaults to `local`."
@@ -133,8 +137,9 @@ def list_pipelines_and_nodes(names, simple, env):
 
 
 def _create_pipeline(name: str, kedro_version: str, output_dir: Path) -> Path:
-    # pylint: disable=import-outside-toplevel
-    from cookiecutter.main import cookiecutter
+    with _filter_deprecation_warnings():
+        # pylint: disable=import-outside-toplevel
+        from cookiecutter.main import cookiecutter
 
     template_path = Path(kedro.__file__).parent / "templates" / "pipeline"
     cookie_context = {"pipeline_name": name, "kedro_version": kedro_version}

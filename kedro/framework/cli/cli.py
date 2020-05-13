@@ -49,7 +49,12 @@ import yaml
 
 import kedro.config.default_logger  # noqa
 from kedro import __version__ as version
-from kedro.framework.cli.utils import CommandCollection, KedroCliError, _clean_pycache
+from kedro.framework.cli.utils import (
+    CommandCollection,
+    KedroCliError,
+    _clean_pycache,
+    _filter_deprecation_warnings,
+)
 from kedro.framework.context import load_context
 
 KEDRO_PATH = Path(kedro.__file__).parent
@@ -189,8 +194,9 @@ def _create_project(config_path: str, verbose: bool):
             should contain the project_name, output_dir and repo_name.
         verbose: Extensive debug terminal logs.
     """
-    # pylint: disable=import-outside-toplevel
-    from cookiecutter.main import cookiecutter  # for performance reasons
+    with _filter_deprecation_warnings():
+        # pylint: disable=import-outside-toplevel
+        from cookiecutter.main import cookiecutter  # for performance reasons
 
     try:
         if config_path:

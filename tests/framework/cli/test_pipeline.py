@@ -27,9 +27,6 @@
 # limitations under the License.
 
 import shutil
-import sys
-import tempfile
-from importlib import import_module
 from pathlib import Path
 
 import pytest
@@ -38,71 +35,11 @@ from click.testing import CliRunner
 from pandas import DataFrame
 
 from kedro.extras.datasets.pandas import CSVDataSet
-from kedro.framework.cli.cli import cli
 from kedro.framework.cli.pipeline import _sync_dirs
 from kedro.framework.context import load_context
 
-REPO_NAME = "dummy_project"
 PACKAGE_NAME = "dummy_package"
 PIPELINE_NAME = "my_pipeline"
-
-
-@pytest.fixture(scope="module")
-def fake_root_dir():
-    # using tempfile as tmp_path fixture doesn't support module scope
-    with tempfile.TemporaryDirectory() as tmp_root:
-        yield Path(tmp_root).resolve()
-
-
-@pytest.fixture(scope="module")
-def dummy_config(fake_root_dir):
-    config = {
-        "project_name": "Dummy Project",
-        "repo_name": REPO_NAME,
-        "python_package": PACKAGE_NAME,
-        "include_example": True,
-        "output_dir": str(fake_root_dir),
-    }
-
-    config_path = fake_root_dir / "dummy_config.yml"
-    with config_path.open("w") as f:
-        yaml.dump(config, f)
-
-    return config_path
-
-
-@pytest.fixture(scope="module")
-def dummy_project(fake_root_dir, dummy_config):
-    CliRunner().invoke(cli, ["new", "-c", str(dummy_config)])
-    project_path = fake_root_dir / REPO_NAME
-    src_path = project_path / "src"
-
-    # NOTE: Here we load a couple of modules, as they would be imported in
-    # the code and tests.
-    # It's safe to remove the new entries from path due to the python
-    # module caching mechanism. Any `reload` on it will not work though.
-    old_path = sys.path.copy()
-    sys.path = [str(project_path), str(src_path)] + sys.path
-
-    import_module("kedro_cli")
-    import_module(PACKAGE_NAME)
-
-    sys.path = old_path
-
-    yield project_path
-
-    del sys.modules["kedro_cli"]
-    del sys.modules[PACKAGE_NAME]
-
-
-@pytest.fixture(scope="module")
-def fake_kedro_cli(dummy_project):  # pylint: disable=unused-argument
-    """
-    A small helper to pass kedro_cli into tests without importing.
-    It only becomes available after `dummy_project` fixture is applied,
-    that's why it can't be done on module level.
-    """
-    yield import_module("kedro_cli")
 
 
 @pytest.fixture(autouse=True)
@@ -126,16 +63,6 @@ def cleanup_pipelines(dummy_project):
 
         tests = dummy_project / "src" / "tests" / "pipelines" / pipeline
         shutil.rmtree(str(tests))
-
-
-@pytest.fixture
-def chdir_to_dummy_project(dummy_project, monkeypatch):
-    monkeypatch.chdir(str(dummy_project))
-
-
-@pytest.fixture
-def patch_log(mocker):
-    mocker.patch("logging.config.dictConfig")
 
 
 @pytest.fixture

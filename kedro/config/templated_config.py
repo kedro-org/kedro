@@ -67,7 +67,7 @@ class TemplatedConfigLoader(ConfigLoader):
     Example:
     ::
 
-        >>> from kedro.context import KedroContext, load_context
+        >>> from kedro.framework.context import KedroContext, load_context
         >>> from kedro.config import TemplatedConfigLoader
         >>>
         >>>

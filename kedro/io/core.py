@@ -37,11 +37,15 @@ import re
 import warnings
 from collections import namedtuple
 from datetime import datetime, timezone
-from functools import lru_cache
+from functools import partial
 from glob import iglob
+from operator import attrgetter
 from pathlib import Path, PurePath
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 from urllib.parse import urlsplit
+
+from cachetools import Cache, cachedmethod
+from cachetools.keys import hashkey
 
 from kedro.utils import load_obj
 
@@ -509,17 +513,15 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
         self._version = version
         self._exists_function = exists_function or _local_exists
         self._glob_function = glob_function or iglob
+        # 1 entry for load version, 1 for save version
+        self._version_cache = Cache(maxsize=2)
 
-    @lru_cache(maxsize=None)
-    def resolve_load_version(self) -> Optional[str]:
-        """Compute and cache the version the dataset should be loaded with."""
-        if not self._version:
-            return None
-        if self._version.load:
-            return self._version.load
-
+    # 'key' is set to prevent cache key overlapping for load and save:
+    # https://cachetools.readthedocs.io/en/stable/#cachetools.cachedmethod
+    @cachedmethod(cache=attrgetter("_version_cache"), key=partial(hashkey, "load"))
+    def _fetch_latest_load_version(self) -> str:
         # When load version is unpinned, fetch the most recent existing
-        # version from the given path
+        # version from the given path.
         pattern = str(self._get_versioned_path("*"))
         version_paths = sorted(self._glob_function(pattern), reverse=True)
         most_recent = next(
@@ -527,11 +529,24 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
         )
 
         if not most_recent:
-            raise VersionNotFoundError(
-                "Did not find any versions for {}".format(str(self))
-            )
+            raise VersionNotFoundError(f"Did not find any versions for {self}")
 
         return PurePath(most_recent).parent.name
+
+    # 'key' is set to prevent cache key overlapping for load and save:
+    # https://cachetools.readthedocs.io/en/stable/#cachetools.cachedmethod
+    @cachedmethod(cache=attrgetter("_version_cache"), key=partial(hashkey, "save"))
+    def _fetch_latest_save_version(self) -> str:  # pylint: disable=no-self-use
+        """Generate and cache the current save version"""
+        return generate_timestamp()
+
+    def resolve_load_version(self) -> Optional[str]:
+        """Compute the version the dataset should be loaded with."""
+        if not self._version:
+            return None
+        if self._version.load:
+            return self._version.load
+        return self._fetch_latest_load_version()
 
     def _get_load_path(self) -> PurePath:
         if not self._version:
@@ -541,12 +556,13 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
         load_version = self.resolve_load_version()
         return self._get_versioned_path(load_version)  # type: ignore
 
-    @lru_cache(maxsize=None)
     def resolve_save_version(self) -> Optional[str]:
-        """Compute and cache the version the dataset should be saved with."""
+        """Compute the version the dataset should be saved with."""
         if not self._version:
             return None
-        return self._version.save or generate_timestamp()
+        if self._version.save:
+            return self._version.save
+        return self._fetch_latest_save_version()
 
     def _get_save_path(self) -> PurePath:
         if not self._version:
@@ -572,6 +588,7 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
         return super().load()
 
     def save(self, data: Any) -> None:
+        self._version_cache.clear()
         save_version = self.resolve_save_version()  # Make sure last save version is set
         super().save(data)
 
@@ -605,8 +622,7 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
 
     def _release(self) -> None:
         super()._release()
-        self.resolve_load_version.cache_clear()
-        self.resolve_save_version.cache_clear()
+        self._version_cache.clear()
 
 
 def _parse_filepath(filepath: str) -> Dict[str, str]:

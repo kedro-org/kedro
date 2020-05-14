@@ -18,8 +18,8 @@ def reload_kedro(path, line=None):
 
     try:
         import kedro.config.default_logger
-        from kedro.context import load_context
-        from kedro.cli.jupyter import collect_line_magic
+        from kedro.framework.context import load_context
+        from kedro.framework.cli.jupyter import collect_line_magic
     except ImportError:
         logging.error(
             "Kedro appears not to be installed in your current environment "

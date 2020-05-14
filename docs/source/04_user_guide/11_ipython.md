@@ -156,7 +156,7 @@ In certain cases, you may not be able to run `kedro jupyter notebook` and have t
 
 ```python
 from pathlib import Path
-from kedro.context import load_context
+from kedro.framework.context import load_context
 
 current_dir = Path.cwd()  # this points to 'notebooks/' folder
 proj_path = current_dir.parent  # point back to the root of the project

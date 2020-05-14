@@ -29,32 +29,30 @@
 """Command line tools for manipulating a Kedro project.
 Intended to be invoked via `kedro`."""
 import os
-import re
 import shutil
 import subprocess
 import sys
 import webbrowser
 
 import yaml
-from collections import Counter, defaultdict
-from glob import iglob
 from itertools import chain
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Tuple
+from typing import Dict, Iterable, Tuple
 
 
 import click
 from click import secho, style
-from kedro.cli import main as kedro_main
+from kedro.framework.cli import main as kedro_main
+from kedro.framework.cli.catalog import catalog as catalog_group
+from kedro.framework.cli.jupyter import jupyter as jupyter_group
 from kedro.framework.cli.pipeline import pipeline as pipeline_group
-from kedro.cli.utils import (
+from kedro.framework.cli.utils import (
     KedroCliError,
     call,
-    export_nodes,
     forward_command,
     python_call,
 )
-from kedro.context import load_context, validate_source_path
+from kedro.framework.context import load_context, validate_source_path
 
 from kedro.utils import load_obj
 
@@ -106,12 +104,6 @@ RUNNER_ARG_HELP = """Specify a runner that you want to run the pipeline with.
 Available runners: `SequentialRunner`, `ParallelRunner` and `ThreadRunner`.
 This option cannot be used together with --parallel."""
 
-CONVERT_ALL_HELP = """Extract the nodes from all notebooks in the Kedro project directory,
-including sub-folders."""
-
-OVERWRITE_HELP = """If Python file already exists for the equivalent notebook,
-overwrite its contents."""
-
 LOAD_VERSION_HELP = """Specify a particular dataset version (timestamp) for loading."""
 
 CONFIG_FILE_HELP = """Specify a YAML configuration file to load the run
@@ -125,12 +117,6 @@ so parameter values are allowed to contain colons, parameter keys are not."""
 
 LINT_CHECK_ONLY_HELP = """Check the files for style guide violations, unsorted /
 unformatted imports, and unblackened Python code without modifying the files."""
-
-JUPYTER_IP_HELP = "IP address of the Jupyter server."
-JUPYTER_ALL_KERNELS_HELP = "Display all available Python kernels."
-JUPYTER_IDLE_TIMEOUT_HELP = """When a notebook is closed, Jupyter server will
-terminate its kernel after so many seconds of inactivity. This does not affect
-any open notebooks."""
 
 
 def _env_option(func_=None, **kwargs):
@@ -463,149 +449,6 @@ def activate_nbstripout():
     call(["nbstripout", "--install"])
 
 
-def _build_jupyter_command(
-    base: str, ip: str, all_kernels: bool, args: Iterable[str], idle_timeout: int
-) -> List[str]:
-    cmd = [
-        base,
-        "--ip",
-        ip,
-        "--MappingKernelManager.cull_idle_timeout={}".format(idle_timeout),
-        "--MappingKernelManager.cull_interval={}".format(idle_timeout),
-    ]
-
-    if not all_kernels:
-        project_name = "{{ cookiecutter.project_name }}"
-        kernel_name = re.sub(r"[^\w]+", "", project_name).strip() or "Kedro"
-
-        cmd += [
-            "--NotebookApp.kernel_spec_manager_class="
-            "kedro.cli.jupyter.SingleKernelSpecManager",
-            "--KernelSpecManager.default_kernel_name='{}'".format(kernel_name),
-        ]
-
-    return cmd + list(args)
-
-
-def _build_jupyter_env(kedro_env: str) -> Dict[str, Any]:
-    """Build the environment dictionary that gets injected into the subprocess running
-    Jupyter. Since the subprocess has access only to the environment variables passed
-    in, we need to copy the current environment and add ``KEDRO_ENV``.
-    """
-    if not kedro_env:
-        return {}
-    jupyter_env = os.environ.copy()
-    jupyter_env["KEDRO_ENV"] = kedro_env
-    return {"env": jupyter_env}
-
-
-@cli.group()
-def jupyter():
-    """Open Jupyter Notebook / Lab with project specific variables loaded, or
-    convert notebooks into Kedro code.
-    """
-
-
-@forward_command(jupyter, "notebook", forward_help=True)
-@click.option("--ip", type=str, default="127.0.0.1", help=JUPYTER_IP_HELP)
-@click.option(
-    "--all-kernels", is_flag=True, default=False, help=JUPYTER_ALL_KERNELS_HELP
-)
-@click.option("--idle-timeout", type=int, default=30, help=JUPYTER_IDLE_TIMEOUT_HELP)
-@_env_option
-def jupyter_notebook(ip, all_kernels, env, idle_timeout, args):
-    """Open Jupyter Notebook with project specific variables loaded."""
-    if "-h" not in args and "--help" not in args:
-        ipython_message(all_kernels)
-
-    arguments = _build_jupyter_command(
-        "notebook", ip=ip, all_kernels=all_kernels, args=args, idle_timeout=idle_timeout
-    )
-
-    python_call_kwargs = _build_jupyter_env(env)
-    python_call("jupyter", arguments, **python_call_kwargs)
-
-
-@forward_command(jupyter, "lab", forward_help=True)
-@click.option("--ip", type=str, default="127.0.0.1", help=JUPYTER_IP_HELP)
-@click.option(
-    "--all-kernels", is_flag=True, default=False, help=JUPYTER_ALL_KERNELS_HELP
-)
-@click.option("--idle-timeout", type=int, default=30, help=JUPYTER_IDLE_TIMEOUT_HELP)
-@_env_option
-def jupyter_lab(ip, all_kernels, env, idle_timeout, args):
-    """Open Jupyter Lab with project specific variables loaded."""
-    if "-h" not in args and "--help" not in args:
-        ipython_message(all_kernels)
-
-    arguments = _build_jupyter_command(
-        "lab", ip=ip, all_kernels=all_kernels, args=args, idle_timeout=idle_timeout
-    )
-
-    python_call_kwargs = _build_jupyter_env(env)
-    python_call("jupyter", arguments, **python_call_kwargs)
-
-
-@jupyter.command("convert")
-@click.option("--all", "all_flag", is_flag=True, help=CONVERT_ALL_HELP)
-@click.option("-y", "overwrite_flag", is_flag=True, help=OVERWRITE_HELP)
-@click.argument(
-    "filepath",
-    type=click.Path(exists=True, dir_okay=False, resolve_path=True),
-    required=False,
-    nargs=-1,
-)
-def convert_notebook(all_flag, overwrite_flag, filepath):
-    """Convert selected or all notebooks found in a Kedro project
-    to Kedro code, by exporting code from the appropriately-tagged cells:
-    Cells tagged as `node` will be copied over to a Python file matching
-    the name of the notebook, under `<source_dir>/<package_name>/nodes`.
-    *Note*: Make sure your notebooks have unique names!
-    FILEPATH: Path(s) to exact notebook file(s) to be converted. Both
-    relative and absolute paths are accepted.
-    Should not be provided if --all flag is already present.
-    """
-    if not filepath and not all_flag:
-        secho(
-            "Please specify a notebook filepath "
-            "or add '--all' to convert all notebooks."
-        )
-        sys.exit(1)
-
-    if all_flag:
-        # pathlib glob does not ignore hidden directories,
-        # whereas Python glob does, which is more useful in
-        # ensuring checkpoints will not be included
-        pattern = PROJ_PATH / "**" / "*.ipynb"
-        notebooks = sorted(Path(p) for p in iglob(str(pattern), recursive=True))
-    else:
-        notebooks = [Path(f) for f in filepath]
-
-    counter = Counter(n.stem for n in notebooks)
-    non_unique_names = [name for name, counts in counter.items() if counts > 1]
-    if non_unique_names:
-        raise KedroCliError(
-            "Found non-unique notebook names! "
-            "Please rename the following: {}".format(", ".join(non_unique_names))
-        )
-
-    for notebook in notebooks:
-        secho("Converting notebook '{}'...".format(str(notebook)))
-        output_path = SOURCE_PATH / KEDRO_PACKAGE_NAME / "nodes" / f"{notebook.stem}.py"
-
-        if output_path.is_file():
-            overwrite = overwrite_flag or click.confirm(
-                "Output file {} already exists. Overwrite?".format(str(output_path)),
-                default=False,
-            )
-            if overwrite:
-                export_nodes(notebook, output_path)
-        else:
-            export_nodes(notebook, output_path)
-
-    secho("Done!")
-
-
 def ipython_message(all_kernels=True):
     """Show a message saying how we have configured the IPython env."""
     ipy_vars = ["startup_error", "context"]
@@ -626,72 +469,9 @@ def ipython_message(all_kernels=True):
     secho("-" * 79, fg="cyan")
 
 
-@cli.group()
-def catalog():
-    """Commands for catalog."""
-
-
-@catalog.command("list")
-@_env_option
-@click.option(
-    "--pipeline", type=str, default="", help=PIPELINE_ARG_HELP, callback=_split_string
-)
-def list_datasets(pipeline, env):
-    """Show datasets per type."""
-    title = "DataSets in '{}' pipeline"
-    not_mentioned = "Datasets not mentioned in pipeline"
-    mentioned = "Datasets mentioned in pipeline"
-
-    context = load_context(Path.cwd(), env=env)
-    datasets_meta = context.catalog._data_sets
-    catalog_ds = set(context.catalog.list())
-
-    pipelines = pipeline or context.pipelines.keys()
-
-    result = {}
-    for pipeline in pipelines:
-        pl_obj = context.pipelines.get(pipeline)
-        if pl_obj:
-            pipeline_ds = pl_obj.data_sets()
-        else:
-            existing_pls = ", ".join(sorted(context.pipelines.keys()))
-            raise KedroCliError(
-                "{} pipeline not found! Existing pipelines: {}".format(
-                    pipeline, existing_pls
-                )
-            )
-
-        unused_ds = catalog_ds - pipeline_ds
-        default_ds = pipeline_ds - catalog_ds
-        used_ds = catalog_ds - unused_ds
-
-        unused_by_type = _map_type_to_datasets(unused_ds, datasets_meta)
-        used_by_type = _map_type_to_datasets(used_ds, datasets_meta)
-
-        if default_ds:
-            used_by_type["DefaultDataSet"].extend(default_ds)
-
-        data = ((not_mentioned, dict(unused_by_type)), (mentioned, dict(used_by_type)))
-        result[title.format(pipeline)] = {key: value for key, value in data if value}
-
-    secho(yaml.dump(result))
-
-
-def _map_type_to_datasets(datasets, datasets_meta):
-    """Build dictionary with a dataset type as a key and list of
-    datasets of the specific type as a value.
-    """
-    mapping = defaultdict(list)
-    for ds in datasets:
-        is_param = ds.startswith("params:") or ds == "parameters"
-        if not is_param:
-            ds_type = datasets_meta[ds].__class__.__name__
-            if ds not in mapping[ds_type]:
-                mapping[ds_type].append(ds)
-    return mapping
-
-
 cli.add_command(pipeline_group)
+cli.add_command(catalog_group)
+cli.add_command(jupyter_group)
 
 
 if __name__ == "__main__":

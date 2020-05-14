@@ -429,6 +429,18 @@ class TestNames:
         assert n.name == "name"
         assert n.short_name == "name"
 
+    def test_namespaced(self):
+        n = node(identity, ["in"], ["out"], namespace="namespace")
+        assert str(n) == "identity([in]) -> [out]"
+        assert n.name == "namespace.identity([in]) -> [out]"
+        assert n.short_name == "Identity"
+
+    def test_named_and_namespaced(self):
+        n = node(identity, ["in"], ["out"], name="name", namespace="namespace")
+        assert str(n) == "name: identity([in]) -> [out]"
+        assert n.name == "namespace.name"
+        assert n.short_name == "name"
+
     def test_function(self):
         n = node(identity, ["in"], ["out"])
         assert str(n) == "identity([in]) -> [out]"

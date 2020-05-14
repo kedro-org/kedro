@@ -49,4 +49,4 @@ def preserve_system_context():
     sys.path = old_path
 
     if os.getcwd() != old_cwd:
-        os.chdir(old_cwd)
+        os.chdir(old_cwd)  # pragma: no cover

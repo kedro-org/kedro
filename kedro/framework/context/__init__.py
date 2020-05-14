@@ -26,7 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``kedro.context`` provides functionality for loading Kedro
+"""``kedro.framework.context`` provides functionality for loading Kedro
 project context.
 """
 

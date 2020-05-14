@@ -159,7 +159,7 @@ For projects created using Kedro version 0.16.0 or later, Kedro ships a [project
 
 Running `kedro pipeline create` does _not_ automatically add a corresponding entry in `src/<python_package>/pipeline.py` at the moment, so in order to make your new pipeline runnable (by `kedro run --pipeline <pipeline_name>` CLI command, for example), you need to modify `src/<python_package>/pipeline.py` yourself as described in [this section](#ease-of-use-and-portability) below.
 
-> *Note:* In contrast, project configuration from `conf/base/pipelines/<pipeline_name>` is automatically discoverable by [KedroContext](/kedro.context.KedroContext) and therefore requires no manual change.
+> *Note:* In contrast, project configuration from `conf/base/pipelines/<pipeline_name>` is automatically discoverable by [KedroContext](/kedro.framework.context.KedroContext) and therefore requires no manual change.
 
 You will need to specify exactly one pipeline name argument when calling `kedro pipeline create <your-pipeline-name-here>`. The pipeline name must adhere to generic Python module naming rules:
 1. Can only contain alphanumeric characters and underscores (`A-Za-z0-9_`)

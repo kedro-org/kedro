@@ -26,7 +26,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Utilities for use with click."""
+"""This file has been deprecated and will be deleted in 0.17.0.
+Please make any additional changes in `kedro.framework.cli.utils.py` instead.
+"""
 import difflib
 import json
 import re

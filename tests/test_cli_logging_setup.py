@@ -47,6 +47,6 @@ def test_cli_logging_setup():
     assert len(intersection) == 3
 
     # check cli logger is set up correctly
-    cli_handlers = to_names(logging.getLogger("kedro.cli").handlers)
+    cli_handlers = to_names(logging.getLogger("kedro.framework.cli").handlers)
     assert len(cli_handlers) == 1
     assert "console" in cli_handlers

@@ -38,10 +38,14 @@ from click import secho
 
 import kedro
 from kedro.framework.cli.cli import _assert_pkg_name_ok, _handle_exception
-from kedro.framework.cli.utils import KedroCliError, _clean_pycache
 from kedro.framework.context import KedroContext, load_context
 
-ENV_HELP = "Kedro configuration environment name. Defaults to `local`."
+from .utils import (
+    KedroCliError,
+    _clean_pycache,
+    _filter_deprecation_warnings,
+    env_option,
+)
 
 
 @click.group()
@@ -61,22 +65,15 @@ def _check_pipeline_name(ctx, param, value):  # pylint: disable=unused-argument
     is_flag=True,
     help="Skip creation of config files for the new pipeline(s).",
 )
-@click.option(
-    "--env",
-    "-e",
-    type=str,
-    default=None,
-    help="Environment to create pipeline configuration in. Defaults to `base`.",
-)
+@env_option(help="Environment to create pipeline configuration in. Defaults to `base`.")
 def create_pipeline(name, skip_config, env):
-    """Create new modular pipeline(s) by providing the new pipeline names
-    as space separated arguments."""
+    """Create a new modular pipeline by providing the new pipeline name as an argument."""
     try:
         context = load_context(Path.cwd(), env=env)
-    except Exception:  # pylint: disable=broad-except
+    except Exception as err:  # pylint: disable=broad-except
         _handle_exception(
             f"Unable to load Kedro context with environment `{env}`. "
-            f"Make sure it exists in the project configuration."
+            f"Make sure it exists in the project configuration.\nError: {err}"
         )
 
     package_dir = _get_project_package_dir(context)
@@ -95,46 +92,40 @@ def create_pipeline(name, skip_config, env):
 
 
 @pipeline.command("list")
-@click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_HELP)
-@click.option(
-    "--simple",
-    is_flag=True,
-    multiple=False,
-    help="Show list of all pipelines in the project.",
-)
-@click.argument("names", nargs=-1)
-def list_pipelines_and_nodes(names, simple, env):
-    """Show detailed information about project pipeline(s) by providing
-    the pipeline names as space separated arguments."""
+@env_option
+def list_pipelines(env):
+    """List all pipelines defined in your pipeline.py file."""
     context = load_context(Path.cwd(), env=env)
     project_pipelines = context.pipelines
-    if simple:
-        secho(yaml.dump(sorted(project_pipelines)))
-        return
+    secho(yaml.dump(sorted(project_pipelines)))
 
-    names = sorted(set(names) or project_pipelines.keys())
+
+@pipeline.command("describe")
+@env_option
+@click.argument("name", nargs=1)
+def describe_pipeline(name, env):
+    """Describe a pipeline by providing the pipeline name as an argument."""
+    context = load_context(Path.cwd(), env=env)
+    pipeline_obj = context.pipelines.get(name)
+    if not pipeline_obj:
+        existing_pipelines = ", ".join(sorted(context.pipelines.keys()))
+        raise KedroCliError(
+            f"`{name}` pipeline not found. Existing pipelines: [{existing_pipelines}]"
+        )
 
     result = {}
-    for pipe_name in names:
-        pipe_obj = project_pipelines.get(pipe_name)
-        if not pipe_obj:
-            existing_pipelines = ", ".join(sorted(project_pipelines))
-            raise KedroCliError(
-                f"{pipe_name} pipeline not found. "
-                f"Existing pipelines: {existing_pipelines}"
-            )
-
-        result[pipe_name] = [
-            f"{node.short_name} ({node._func_name})"  # pylint: disable=protected-access
-            for node in pipe_obj.nodes
-        ]
+    result["Nodes"] = [
+        f"{node.short_name} ({node._func_name})"  # pylint: disable=protected-access
+        for node in pipeline_obj.nodes
+    ]
 
     secho(yaml.dump(result))
 
 
 def _create_pipeline(name: str, kedro_version: str, output_dir: Path) -> Path:
-    # pylint: disable=import-outside-toplevel
-    from cookiecutter.main import cookiecutter
+    with _filter_deprecation_warnings():
+        # pylint: disable=import-outside-toplevel
+        from cookiecutter.main import cookiecutter
 
     template_path = Path(kedro.__file__).parent / "templates" / "pipeline"
     cookie_context = {"pipeline_name": name, "kedro_version": kedro_version}

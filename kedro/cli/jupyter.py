@@ -26,7 +26,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""A collection of helper functions to integrate with Jupyter/IPython.
+"""This file has been deprecated and will be deleted in 0.17.0.
+Please make any additional changes in `kedro.framework.cli.jupyter.py` instead.
 """
 
 

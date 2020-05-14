@@ -344,7 +344,7 @@ Transformers are applied at the `DataCatalog` level. To apply the built-in `Prof
 ```python
 from typing import Dict, Any
 
-from kedro.context import KedroContext
+from kedro.framework.context import KedroContext
 from kedro.extras.transformers import ProfileTimeTransformer  # new import
 from kedro.io import DataCatalog
 from kedro.versioning import Journal

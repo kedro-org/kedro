@@ -253,7 +253,8 @@ class Node:  # pylint: disable=too-many-instance-attributes
         """Node's name.
 
         Returns:
-            Returns a short user-friendly name that is not guaranteed to be unique.
+            Returns a short, user-friendly name that is not guaranteed to be unique.
+            The namespace is stripped out of the node name.
         """
         if self._name:
             return self._name
@@ -604,6 +605,7 @@ def node(
     name: str = None,
     tags: Iterable[str] = None,
     confirms: Union[str, List[str]] = None,
+    namespace: str = None,
 ) -> Node:
     """Create a node in the pipeline by providing a function to be called
     along with variable names for inputs and/or outputs.
@@ -629,6 +631,7 @@ def node(
             method of the corresponding data set instance. Specified dataset
             names do not necessarily need to be present in the node ``inputs``
             or ``outputs``.
+        namespace: Optional node namespace.
 
     Returns:
         A Node object with mapped inputs, outputs and function.
@@ -659,7 +662,15 @@ def node(
         >>>          ['train_boats2017', 'test_boats2017'])
         >>> ]
     """
-    return Node(func, inputs, outputs, name=name, tags=tags, confirms=confirms)
+    return Node(
+        func,
+        inputs,
+        outputs,
+        name=name,
+        tags=tags,
+        confirms=confirms,
+        namespace=namespace,
+    )
 
 
 def _dict_inputs_to_list(func: Callable[[Any], Any], inputs: Dict[str, str]):

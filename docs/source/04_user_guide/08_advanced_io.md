@@ -408,7 +408,7 @@ As you can see from the example above, on load `PartitionedDataSet` _does not_ a
 >
 > Example 2: if `path="s3://my-bucket-name/folder"` and `filename_suffix=".csv"` and partition is stored in `s3://my-bucket-name/folder/2019-12-04/data.csv` then its Partition ID is `2019-12-04/data`.
 
-> *Note:* `PartitionedDataSet` implements caching on load operation, which means that if multiple nodes consume the same `PartitionedDataSet`, they will all receive the same partition dictionary even if some new partitions were added to the folder after the first load has been completed. This is done deliberately to guarantee the consistency of load operations between the nodes and avoid race conditions. You can reset cache by calling `.invalidate_cache()` method of the partitioned dataset object.
+> *Note:* `PartitionedDataSet` implements caching on load operation, which means that if multiple nodes consume the same `PartitionedDataSet`, they will all receive the same partition dictionary even if some new partitions were added to the folder after the first load has been completed. This is done deliberately to guarantee the consistency of load operations between the nodes and avoid race conditions. You can reset the cache by calling `release()` method of the partitioned dataset object.
 
 ### Partitioned dataset save
 

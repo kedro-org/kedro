@@ -141,8 +141,10 @@ class TestCSVDataSet:
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.csv"
         data_set = CSVDataSet(filepath=filepath)
+        assert data_set._version_cache.currsize == 0  # no cache if unversioned
         data_set.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
+        assert data_set._version_cache.currsize == 0
 
 
 class TestCSVDataSetVersioned:
@@ -222,26 +224,27 @@ class TestCSVDataSetVersioned:
         ds_new = CSVDataSet(filepath=filepath_csv, version=Version(None, None))
         assert ds_new.resolve_load_version() == second_load_version
 
-    def test_invalidate_version_cache(self, dummy_dataframe, filepath_csv):
-        """Test that version cache invalidation in one instance doesn't affect others"""
+    def test_release_instance_cache(self, dummy_dataframe, filepath_csv):
+        """Test that cache invalidation does not affect other instances"""
         ds_a = CSVDataSet(filepath=filepath_csv, version=Version(None, None))
+        assert ds_a._version_cache.currsize == 0
         ds_a.save(dummy_dataframe)  # create a version
-        ds_a_save_version = ds_a.resolve_save_version()
-        ds_a_load_version = ds_a.resolve_load_version()
+        assert ds_a._version_cache.currsize == 2
 
         ds_b = CSVDataSet(filepath=filepath_csv, version=Version(None, None))
-        ds_b_save_version = ds_b.resolve_save_version()
-        ds_b_load_version = ds_b.resolve_load_version()
+        assert ds_b._version_cache.currsize == 0
+        ds_b.resolve_save_version()
+        assert ds_b._version_cache.currsize == 1
+        ds_b.resolve_load_version()
+        assert ds_b._version_cache.currsize == 2
 
-        ds_a.save(dummy_dataframe)  # create a new version
+        ds_a.release()
 
-        # dataset A has been updated
-        assert ds_a.resolve_save_version() > ds_a_save_version
-        assert ds_a.resolve_load_version() > ds_a_load_version
+        # dataset A cache is cleared
+        assert ds_a._version_cache.currsize == 0
 
-        # dataset B versions are unaffected
-        assert ds_b.resolve_save_version() == ds_b_save_version
-        assert ds_b.resolve_load_version() == ds_b_load_version
+        # dataset B cache is unaffected
+        assert ds_b._version_cache.currsize == 2
 
     def test_no_versions(self, versioned_csv_data_set):
         """Check the error if no versions are available for load."""

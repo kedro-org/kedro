@@ -44,6 +44,7 @@
 * Bug in `SparkDataSet` not allowing for loading data from DBFS in a Windows machine using Databricks-connect.
 * Added option to lint the project without applying the formatting changes (`kedro lint --check-only`).
 * Improved the error message for `DataSetNotFoundError` to suggest possible dataset names user meant to type.
+* Replaced `functools.lru_cache` with `cachetools.cachedmethod` in `PartitionedDataSet` and `IncrementalDataSet` for per-instance cache invalidation.
 
 ## Breaking changes to the API
 * Made `invalidate_cache` method on datasets private.
@@ -60,6 +61,7 @@
 * Made constant `PARAMETER_KEYWORDS` private, and moved it from `kedro.pipeline.pipeline` to `kedro.pipeline.modular_pipeline`.
 * Removed `CSVBlobDataSet` and `JSONBlobDataSet` as redundant.
 * Layers are no longer part of the dataset object, as they've moved to the `DataCatalog`.
+* `PartitionedDataSet` and `IncrementalDataSet` method `invalidate_cache` was made private: `_invalidate_caches`.
 
 ### Migration guide from Kedro 0.15.* to Upcoming Release
 #### Migration for datasets

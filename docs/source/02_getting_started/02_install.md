@@ -33,7 +33,12 @@ If you do not see the graphic displayed, or have any issues with your installati
 
 ### Optional dependencies
 
+Kedro has optional dependency sets required to work with a specific functionality.
+
+For example, having installed only Kedro core you will need to install the `spark` dependency set to work with `Spark` datasets.
+
 The core library of Kedro has minimal requirements so that you can construct your ideal workflow with the tools that you need. You can install Kedro with all dependencies, including `Pandas`, `NumPy`, `PySpark` etc. as follows:
+
 
 ```bash
 pip install "kedro[all]"    # Install all dependencies

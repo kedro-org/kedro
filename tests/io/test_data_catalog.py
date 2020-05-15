@@ -474,10 +474,14 @@ class TestDataCatalogFromConfig:
         """Test that dependency is missing."""
         pattern = "dependency issue"
 
-        import_error = ModuleNotFoundError(pattern)
-        import_error.name = pattern  # import_error.name cannot be None
+        # pylint: disable=unused-argument,inconsistent-return-statements
+        def dummy_load(obj_path, *args, **kwargs):
+            if obj_path == "kedro.extras.datasets.pandas.CSVDataSet":
+                raise AttributeError(pattern)
+            if obj_path == "kedro.extras.datasets.pandas.__all__":
+                return ["CSVDataSet"]
 
-        mocker.patch("kedro.io.core.load_obj", side_effect=import_error)
+        mocker.patch("kedro.io.core.load_obj", side_effect=dummy_load)
         with pytest.raises(DataSetError, match=pattern):
             DataCatalog.from_config(**sane_config)
 

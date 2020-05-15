@@ -28,4 +28,9 @@
 
 """``AbstractDataSet`` implementation to read/write from/to a sequence file."""
 
-from .biosequence_dataset import BioSequenceDataSet  # NOQA
+__all__ = ["BioSequenceDataSet"]
+
+from contextlib import suppress
+
+with suppress(ImportError):
+    from .biosequence_dataset import BioSequenceDataSet  # NOQA

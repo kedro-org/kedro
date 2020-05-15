@@ -28,4 +28,9 @@
 
 """``AbstractDataSet`` implementation to load/save data from/to a Pickle file."""
 
-from .pickle_dataset import PickleDataSet  # NOQA
+__all__ = ["PickleDataSet"]
+
+from contextlib import suppress
+
+with suppress(ImportError):
+    from .pickle_dataset import PickleDataSet  # NOQA

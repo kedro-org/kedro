@@ -25,6 +25,8 @@
 * Improve the CLI speed by up to 50%.
 * All modules in `kedro.cli` and `kedro.context` have been moved into `kedro.framework.cli` and `kedro.framework.context` respectively. `kedro.cli` and `kedro.context` will be deprecated in future releases.
 * Added `namespace` property on ``Node``.
+* Added the ability to install dependencies for a given dataset with more granularity, e.g. `pip install "kedro[pandas.ParquetDataSet]"`.
+* Removed the requirement to have all dependencies for a dataset module to use only a subset of the datasets within.
 
 ### New Datasets
 

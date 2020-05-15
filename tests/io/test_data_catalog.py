@@ -266,6 +266,33 @@ class TestDataCatalog:
         assert "abc" in entries
         assert "xyz" in entries
 
+    def test_multi_catalog_list_regex(self, multi_catalog):
+        """Test that regex patterns filter data sets accordingly"""
+        assert multi_catalog.list(regex_search="^a") == ["abc"]
+        assert multi_catalog.list(regex_search="a|x") == ["abc", "xyz"]
+        assert multi_catalog.list(regex_search="^(?!(a|x))") == []
+        assert multi_catalog.list(regex_search="def") == []
+
+    def test_multi_catalog_list_bad_regex(self, multi_catalog):
+        """Test that bad regex is caught accordingly"""
+        pattern = "Invalid pattern regular expression provided"
+        with pytest.raises(SyntaxError, match=pattern):
+            multi_catalog.list("((")
+
+    def test_multi_catalog_list_get_objects(self, multi_catalog):
+        """Test that both regular and filtered listing works with the `get_objects` parameter"""
+        entries = multi_catalog.list(get_objects=True)
+        assert isinstance(entries, dict)
+        assert "abc" in entries.keys()
+        assert "xyz" in entries.keys()
+        assert isinstance(entries["abc"], CSVDataSet)
+        assert isinstance(entries["xyz"], ParquetDataSet)
+        entries_filtered = multi_catalog.list(get_objects=True, regex_search="a")
+        assert "xyz" not in entries_filtered.keys()
+        assert "abc" in entries_filtered.keys()
+        assert len(entries_filtered) == 1
+        assert isinstance(entries_filtered["abc"], CSVDataSet)
+
     def test_eq(self, multi_catalog, data_catalog):
         assert multi_catalog == multi_catalog  # pylint: disable=comparison-with-itself
         assert multi_catalog == multi_catalog.shallow_copy()

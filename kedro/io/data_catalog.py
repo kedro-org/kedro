@@ -34,6 +34,7 @@ relaying load and save functions to the underlying data sets.
 import copy
 import difflib
 import logging
+import re
 from collections import defaultdict
 from functools import partial
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Type, Union
@@ -615,15 +616,45 @@ class DataCatalog:
                 )
             self._transformers[data_set_name].append(transformer)
 
-    def list(self) -> List[str]:
-        """List of ``DataSet`` names registered in the catalog.
+    def list(
+        self, regex_search: Optional[str] = None, get_objects: bool = False
+    ) -> Union[List[str], Dict[str, AbstractDataSet]]:
+        """
+        List of ``DataSet`` names registered in the catalog if called with
+        default arguments. Additional facility to limit dataset returned by
+        a regular expression name as well as retrieving a dictionary of dataset
+        name / object pairs.
+
+        Args:
+            regex_search: An optional regular expression which can be provided
+                to limit the data sets returned by a particular pattern
+            get_objects: An optional flag to rerun a dictionary with the actual
+            ``DataSet`` objects in addition to the names as keys
 
         Returns:
-            A List of ``DataSet`` names, corresponding to the entries that are
-            registered in the current catalog object.
+            A list of ``DataSet`` names or a dictionary of name/object pairs
+            depending on the arguments provided
 
+        Raises:
+            SyntaxError: When invalid regex filter is provided
         """
-        return list(self._data_sets.keys())
+
+        if regex_search is not None:
+            try:
+                pattern = re.compile(regex_search, flags=re.IGNORECASE)
+                working_data_sets = {
+                    k: v for k, v in self._data_sets.items() if pattern.search(k)
+                }
+            except re.error:
+                raise SyntaxError(
+                    f"Invalid pattern regular expression provided: '{regex_search}'",
+                )
+        else:
+            working_data_sets = self._data_sets
+
+        if get_objects:
+            return working_data_sets
+        return list(working_data_sets.keys())
 
     def shallow_copy(self) -> "DataCatalog":
         """Returns a shallow copy of the current object.

@@ -38,14 +38,14 @@ from click import secho
 
 import kedro
 from kedro.framework.cli.cli import _assert_pkg_name_ok, _handle_exception
-from kedro.framework.cli.utils import (
+from kedro.framework.context import KedroContext, load_context
+
+from .utils import (
     KedroCliError,
     _clean_pycache,
     _filter_deprecation_warnings,
+    env_option,
 )
-from kedro.framework.context import KedroContext, load_context
-
-ENV_HELP = "Kedro configuration environment name. Defaults to `local`."
 
 
 @click.group()
@@ -65,21 +65,15 @@ def _check_pipeline_name(ctx, param, value):  # pylint: disable=unused-argument
     is_flag=True,
     help="Skip creation of config files for the new pipeline(s).",
 )
-@click.option(
-    "--env",
-    "-e",
-    type=str,
-    default=None,
-    help="Environment to create pipeline configuration in. Defaults to `base`.",
-)
+@env_option(help="Environment to create pipeline configuration in. Defaults to `base`.")
 def create_pipeline(name, skip_config, env):
     """Create a new modular pipeline by providing the new pipeline name as an argument."""
     try:
         context = load_context(Path.cwd(), env=env)
-    except Exception:  # pylint: disable=broad-except
+    except Exception as err:  # pylint: disable=broad-except
         _handle_exception(
             f"Unable to load Kedro context with environment `{env}`. "
-            f"Make sure it exists in the project configuration."
+            f"Make sure it exists in the project configuration.\nError: {err}"
         )
 
     package_dir = _get_project_package_dir(context)
@@ -98,7 +92,7 @@ def create_pipeline(name, skip_config, env):
 
 
 @pipeline.command("list")
-@click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_HELP)
+@env_option
 def list_pipelines(env):
     """List all pipelines defined in your pipeline.py file."""
     context = load_context(Path.cwd(), env=env)
@@ -107,7 +101,7 @@ def list_pipelines(env):
 
 
 @pipeline.command("describe")
-@click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_HELP)
+@env_option
 @click.argument("name", nargs=1)
 def describe_pipeline(name, env):
     """Describe a pipeline by providing the pipeline name as an argument."""

@@ -106,16 +106,44 @@ class TestPartitionedDataSetLocal:
         reloaded_data = loaded_partitions[part_id]()
         assert_frame_equal(reloaded_data, original_data)
 
-    @pytest.mark.parametrize("dataset", LOCAL_DATASET_DEFINITION)
-    def test_save_invalidates_cache(self, dataset, local_csvs):
-        pds = PartitionedDataSet(str(local_csvs), dataset)
+    def test_save_invalidates_cache(self, local_csvs, mocker):
+        """Test that save calls invalidate partition cache"""
+        pds = PartitionedDataSet(str(local_csvs), "pandas.CSVDataSet")
+        mocked_fs_invalidate = mocker.patch.object(pds._filesystem, "invalidate_cache")
         first_load = pds.load()
+        assert pds._partition_cache.currsize == 1
+        mocked_fs_invalidate.assert_not_called()
 
+        # save clears cache
         data = pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
-        part_id = "new/data.csv"
-        pds.save({part_id: data})
-        assert part_id not in first_load
-        assert part_id in pds.load()
+        new_partition = "new/data.csv"
+        pds.save({new_partition: data})
+        assert pds._partition_cache.currsize == 0
+        # it seems that `_filesystem.invalidate_cache` calls itself inside,
+        # resulting in not one, but 2 mock calls
+        # hence using `assert_any_call` instead of `assert_called_once_with`
+        mocked_fs_invalidate.assert_any_call(pds._normalized_path)
+
+        # new load returns new partition too
+        second_load = pds.load()
+        assert new_partition not in first_load
+        assert new_partition in second_load
+
+    def test_release_instance_cache(self, local_csvs):
+        """Test that cache invalidation does not affect other instances"""
+        ds_a = PartitionedDataSet(str(local_csvs), "pandas.CSVDataSet")
+        ds_a.load()
+        ds_b = PartitionedDataSet(str(local_csvs), "pandas.CSVDataSet")
+        ds_b.load()
+
+        assert ds_a._partition_cache.currsize == 1
+        assert ds_b._partition_cache.currsize == 1
+
+        # invalidate cache of the dataset A
+        ds_a.release()
+        assert ds_a._partition_cache.currsize == 0
+        # cache of the dataset B is unaffected
+        assert ds_b._partition_cache.currsize == 1
 
     @pytest.mark.parametrize("dataset", ["pandas.CSVDataSet", "pandas.ParquetDataSet"])
     def test_exists(self, local_csvs, dataset):

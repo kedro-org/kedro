@@ -28,7 +28,6 @@
 
 """Utilities for use with click."""
 import difflib
-import json
 import re
 import shlex
 import shutil
@@ -39,8 +38,7 @@ import warnings
 from contextlib import contextmanager
 from itertools import chain
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Sequence, Tuple, Union
-from warnings import warn
+from typing import Iterable, List, Sequence, Tuple, Union
 
 import click
 from click import ClickException, style
@@ -49,7 +47,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 MAX_SUGGESTIONS = 3
 CUTOFF = 0.5
 
-NODE_TAG = "node"
+ENV_HELP = "Kedro configuration environment name. Defaults to `local`."
 
 
 def call(cmd: List[str], **kwargs):  # pragma: no cover
@@ -74,42 +72,6 @@ def find_stylesheets() -> Iterable[str]:  # pragma: no cover
         str(css_path / "qb1-sphinx-rtd.css"),
         str(css_path / "theme-overrides.css"),
     )
-
-
-def _append_source_code(cell: Dict[str, Any], path: Path) -> None:
-    source_code = "".join(cell["source"]).strip() + "\n"
-    with path.open(mode="a") as file_:
-        file_.write(source_code)
-
-
-def export_nodes(filepath: Path, output_path: Path) -> None:
-    """Copy code from Jupyter cells into nodes in src/<package_name>/nodes/,
-    under filename with same name as notebook.
-
-    Args:
-        filepath: Path to Jupyter notebook file
-        output_path: Path where notebook cells' source code will be exported
-    Raises:
-        KedroCliError: When provided a filepath that cannot be read as a
-            Jupyer notebook and loaded into json format.
-    """
-    try:
-        content = json.loads(filepath.read_text())
-    except json.JSONDecodeError:
-        raise KedroCliError(f"Provided filepath is not a Jupyter notebook: {filepath}")
-
-    cells = [
-        cell
-        for cell in content["cells"]
-        if cell["cell_type"] == "code" and NODE_TAG in cell["metadata"].get("tags", {})
-    ]
-
-    if cells:
-        output_path.write_text("")
-        for cell in cells:
-            _append_source_code(cell, output_path)
-    else:
-        warn(f"Skipping notebook '{filepath}' - no nodes to export.")
 
 
 def forward_command(group, name=None, forward_help=False):
@@ -230,6 +192,36 @@ def _clean_pycache(path: Path):
 
     for each in to_delete:
         shutil.rmtree(each, ignore_errors=True)
+
+
+def split_string(ctx, param, value):  # pylint: disable=unused-argument
+    """Split string by comma."""
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
+def env_option(func_=None, **kwargs):
+    """Add `--env` CLI option to a function."""
+    default_args = dict(type=str, default=None, help=ENV_HELP)
+    kwargs = {**default_args, **kwargs}
+    opt = click.option("--env", "-e", **kwargs)
+    return opt(func_) if func_ else opt
+
+
+def ipython_message(all_kernels=True):
+    """Show a message saying how we have configured the IPython env."""
+    ipy_vars = ["startup_error", "context"]
+    click.secho("-" * 79, fg="cyan")
+    click.secho("Starting a Kedro session with the following variables in scope")
+    click.secho(", ".join(ipy_vars), fg="green")
+    line_magic = style("%reload_kedro", fg="green")
+    click.secho(f"Use the line magic {line_magic} to refresh them")
+    click.secho("or to see the error message if they are undefined")
+
+    if not all_kernels:
+        click.secho("The choice of kernels is limited to the default one.", fg="yellow")
+        click.secho("(restart with --all-kernels to get access to others)", fg="yellow")
+
+    click.secho("-" * 79, fg="cyan")
 
 
 @contextmanager

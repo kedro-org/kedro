@@ -9,5 +9,4 @@ pip-tools>=5.0.0, <6.0
 pluggy>=0.13.0, <1.0.0
 python-json-logger>=0.1.9, <1.0
 PyYAML>=4.2, <6.0
-requests>=2.20.0, <3.0
 toposort>=1.5, <2.0  # Needs to be at least 1.5 to be able to raise CircularDependencyError

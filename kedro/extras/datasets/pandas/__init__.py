@@ -28,11 +28,34 @@
 
 """``AbstractDataSet`` implementations that produce pandas DataFrames."""
 
-from .csv_dataset import CSVDataSet  # NOQA
-from .excel_dataset import ExcelDataSet  # NOQA
-from .feather_dataset import FeatherDataSet  # NOQA
-from .gbq_dataset import GBQTableDataSet  # NOQA
-from .hdf_dataset import HDFDataSet  # NOQA
-from .json_dataset import JSONDataSet  # NOQA
-from .parquet_dataset import ParquetDataSet  # NOQA
-from .sql_dataset import SQLQueryDataSet, SQLTableDataSet  # NOQA
+__all__ = [
+    "CSVDataSet",
+    "ExcelDataSet",
+    "FeatherDataSet",
+    "GBQTableDataSet",
+    "ExcelDataSet",
+    "HDFDataSet",
+    "JSONDataSet",
+    "ParquetDataSet",
+    "SQLQueryDataSet",
+    "SQLTableDataSet",
+]
+
+from contextlib import suppress
+
+with suppress(ImportError):
+    from .csv_dataset import CSVDataSet  # NOQA
+with suppress(ImportError):
+    from .excel_dataset import ExcelDataSet  # NOQA
+with suppress(ImportError):
+    from .feather_dataset import FeatherDataSet  # NOQA
+with suppress(ImportError):
+    from .gbq_dataset import GBQTableDataSet  # NOQA
+with suppress(ImportError):
+    from .hdf_dataset import HDFDataSet  # NOQA
+with suppress(ImportError):
+    from .json_dataset import JSONDataSet  # NOQA
+with suppress(ImportError):
+    from .parquet_dataset import ParquetDataSet  # NOQA
+with suppress(ImportError):
+    from .sql_dataset import SQLQueryDataSet, SQLTableDataSet  # NOQA

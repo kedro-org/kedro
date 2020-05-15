@@ -27,5 +27,9 @@
 # limitations under the License.
 
 """``AbstractDataSet`` implementation to load/save data from/to a text file."""
+__all__ = ["TextDataSet"]
 
-from .text_dataset import TextDataSet  # NOQA
+from contextlib import suppress
+
+with suppress(ImportError):
+    from .text_dataset import TextDataSet  # NOQA

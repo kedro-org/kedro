@@ -28,6 +28,13 @@
 
 """Provides I/O modules for Apache Spark."""
 
-from .spark_dataset import SparkDataSet  # NOQA
-from .spark_hive_dataset import SparkHiveDataSet  # NOQA
-from .spark_jdbc_dataset import SparkJDBCDataSet  # NOQA
+__all__ = ["SparkDataSet", "SparkHiveDataSet", "SparkJDBCDataSet"]
+
+from contextlib import suppress
+
+with suppress(ImportError):
+    from .spark_dataset import SparkDataSet  # NOQA
+with suppress(ImportError):
+    from .spark_hive_dataset import SparkHiveDataSet  # NOQA
+with suppress(ImportError):
+    from .spark_jdbc_dataset import SparkJDBCDataSet  # NOQA

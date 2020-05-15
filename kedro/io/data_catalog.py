@@ -642,13 +642,14 @@ class DataCatalog:
         if regex_search is not None:
             try:
                 pattern = re.compile(regex_search, flags=re.IGNORECASE)
-                working_data_sets = {
-                    k: v for k, v in self._data_sets.items() if pattern.search(k)
-                }
             except re.error:
                 raise SyntaxError(
                     f"Invalid pattern regular expression provided: '{regex_search}'",
                 )
+            working_data_sets = {
+                k: v for k, v in self._data_sets.items() if pattern.search(k)
+            }
+
         else:
             working_data_sets = self._data_sets
 

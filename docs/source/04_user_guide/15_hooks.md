@@ -62,8 +62,9 @@ However, if you just want to use this hook to add transformer for a data catalog
 
 ```python
 # <your_project>/src/<your_project>/hooks.py
-from kedro.framework.hooks import hook_impl
 from kedro.extras.transformers.time_profiler import ProfileTimeTransformer
+from kedro.framework.hooks import hook_impl
+from kedro.io import DataCatalog
 
 
 class TransformerHooks:
@@ -92,11 +93,13 @@ class ProjectContext(KedroContext):
     project_name = "kedro-tutorial"
     project_version = "0.16.0"
 
-    hooks = [
+    hooks = (
         # register the collection of your hook implementations here.
         # Note that we are using an instance here, not a class. It could also be a module.
-        TransformerHooks()
-    ]
+        TransformerHooks(),
+    )
+    # You can add more than one hook by simply listing them
+    # in a tuple.`hooks = (Hook1(), Hook2())`
 
     def _get_pipelines(self) -> Dict[str, Pipeline]:
         return create_pipelines()

@@ -26,7 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``AbstractTransformer`` implementations to modify ``DataSet`` I/O."""
+"""``kedro.extras.transformers`` is the home of Kedro's dataset transformers."""
 
 from .memory_profiler import ProfileMemoryTransformer  # NOQA
 from .time_profiler import ProfileTimeTransformer  # NOQA

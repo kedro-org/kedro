@@ -26,8 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``APIDataSet`` loads the data from HTTP(S) APIs
-and returns them into either as string or json Dict.
+"""``APIDataSet`` loads the data from HTTP(S) APIs.
 It uses the python requests library: https://requests.readthedocs.io/en/master/
 """
 import socket
@@ -40,8 +39,7 @@ from kedro.io.core import AbstractDataSet, DataSetError
 
 
 class APIDataSet(AbstractDataSet):
-    """``APIDataSet`` loads the data from HTTP(S) APIs
-    and returns them into either as string or json Dict.
+    """``APIDataSet`` loads the data from HTTP(S) APIs.
     It uses the python requests library: https://requests.readthedocs.io/en/master/
 
     Example:
@@ -74,7 +72,6 @@ class APIDataSet(AbstractDataSet):
         headers: Dict[str, Any] = None,
         auth: Union[Tuple[str], AuthBase] = None,
         timeout: int = 60,
-        json: bool = False,
     ) -> None:
         """Creates a new instance of ``APIDataSet`` to fetch data from an API endpoint.
 
@@ -91,8 +88,6 @@ class APIDataSet(AbstractDataSet):
                 or ``AuthBase``, ``HTTPBasicAuth`` instance for more complex cases.
             timeout: The wait time in seconds for a response, defaults to 1 minute.
                 https://requests.readthedocs.io/en/master/user/quickstart/#timeouts
-            json: If true it will return the API response as JSON in Python Dict format,
-                else it will return pure text.
 
         """
         super().__init__()
@@ -105,10 +100,9 @@ class APIDataSet(AbstractDataSet):
             "auth": auth,
             "timeout": timeout,
         }
-        self._json = json
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(**self._request_args, json=self._json)
+        return dict(**self._request_args)
 
     def _execute_request(self) -> requests.Response:
         try:
@@ -121,9 +115,8 @@ class APIDataSet(AbstractDataSet):
 
         return response
 
-    def _load(self) -> Any:
-        response = self._execute_request()
-        return response.json() if self._json else response.text
+    def _load(self) -> requests.Response:
+        return self._execute_request()
 
     def _save(self, data: Any) -> None:
         raise DataSetError(

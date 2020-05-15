@@ -55,7 +55,7 @@ class TestAPIDataSet:
         with requests_mock.Mocker() as mock:
             yield mock
 
-    def test_successfully_load_with_text_response(self, requests_mocker, method):
+    def test_successfully_load_with_response(self, requests_mocker, method):
         api_data_set = APIDataSet(
             url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
         )
@@ -67,25 +67,8 @@ class TestAPIDataSet:
         )
 
         response = api_data_set.load()
-        assert response == TEST_TEXT_RESPONSE_DATA
-
-    def test_successfully_load_with_json_response(self, requests_mocker, method):
-        api_data_set = APIDataSet(
-            url=TEST_URL,
-            method=method,
-            params=TEST_PARAMS,
-            headers=TEST_HEADERS,
-            json=True,
-        )
-        requests_mocker.register_uri(
-            method,
-            TEST_URL_WITH_PARAMS,
-            headers=TEST_HEADERS,
-            json=TEST_JSON_RESPONSE_DATA,
-        )
-
-        response = api_data_set.load()
-        assert response == TEST_JSON_RESPONSE_DATA
+        assert isinstance(response, requests.Response)
+        assert response.text == TEST_TEXT_RESPONSE_DATA
 
     def test_http_error(self, requests_mocker, method):
         api_data_set = APIDataSet(

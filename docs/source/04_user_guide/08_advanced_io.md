@@ -88,6 +88,8 @@ my_dataset:
   type: <path-to-my-own-dataset>.MyOwnDataSet
   filepath: data/01_raw/my_data.csv
   versioned: true
+  param1: <param1-value>
+  param2: <param2-value>
 ```
 
 ### `version` namedtuple

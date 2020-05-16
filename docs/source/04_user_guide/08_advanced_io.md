@@ -73,6 +73,10 @@ class MyOwnDataSet(AbstractVersionedDataSet):
         save_path = self._get_save_path()
         df.to_csv(save_path)
 
+    def _exists(self) -> bool:
+        path = self._get_load_path()
+        return path.is_file()
+        
     def _describe(self):
         return dict(version=self._version, param1=self._param1, param2=self._param2)
 ```

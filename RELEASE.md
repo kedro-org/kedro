@@ -25,6 +25,8 @@
 * Improve the CLI speed by up to 50%.
 * All modules in `kedro.cli` and `kedro.context` have been moved into `kedro.framework.cli` and `kedro.framework.context` respectively. `kedro.cli` and `kedro.context` will be deprecated in future releases.
 * Added `namespace` property on ``Node``.
+* Added the ability to install dependencies for a given dataset with more granularity, e.g. `pip install "kedro[pandas.ParquetDataSet]"`.
+* Removed the requirement to have all dependencies for a dataset module to use only a subset of the datasets within.
 
 ### New Datasets
 
@@ -106,7 +108,7 @@ result = pipeline(
 
 #### Migration for decorators, color logger, transformers etc.
 Since some modules were moved to other locations you need to update import paths appropriately.
-The list of moved files you can find in `0.15.6` release notes under `Files with a new location` section.
+You can find the list of moved files in the [`0.15.6` release notes](https://github.com/quantumblacklabs/kedro/releases/tag/0.15.6) under the section titled `Files with a new location`.
 
 #### Migration for kedro env environment variable
 > Note: If you haven't made significant changes to your `kedro_cli.py`, it may be easier to simply copy the updated `kedro_cli.py` `.ipython/profile_default/startup/00-kedro-init.py` and from GitHub or a newly generated project into your old project.

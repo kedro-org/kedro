@@ -11,4 +11,5 @@ kedro.extras.transformers
       :toctree:
       :template: autosummary/base.rst
 
+      kedro.extras.transformers.memory_profiler.ProfileMemoryTransformer
       kedro.extras.transformers.time_profiler.ProfileTimeTransformer

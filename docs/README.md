@@ -15,12 +15,10 @@ Please follow these simple rules:
 * Use sentence case in titles. We prefer this, _"Sentence case only has one capital except for names like Kedro"_ and not this, _"Title Case Means Capitalise Every Word"_
 * Mark code blocks with the appropriate language to enable [syntax highlighting](https://support.codebasehq.com/articles/tips-tricks/syntax-highlighting-in-markdown)
 * We use a `bash` lexer for all codeblocks that represent the terminal, and we don't include the prompt
-* Bullet points start with capitals and do not end with full-stops
-* Prefer to use symbols for bullets instead of numbers unless you are specifically giving a sequence of instructions
 * Keep your sentences short and easy to read
 * Do not plagiarise other authors. Link to their text and credit them
 
-If you are in doubt, take a look at how we've written the Kedro documentation. If you are unsure of something, just do what you can in your documentation contribution, and note any queries. We can always iterate the submission with you when you create a pull request.
+If you are in doubt, take a look at how we've written the Kedro documentation and our (slightly more extensive) [internal style guide](./meta/style_guide.md). If you are unsure of something, just do what you can in your documentation contribution, and note any queries. We can always iterate the submission with you when you create a pull request.
 
 ## How do I build your documentation?
 

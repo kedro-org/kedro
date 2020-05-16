@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -55,7 +55,7 @@ class TestAPIDataSet:
         with requests_mock.Mocker() as mock:
             yield mock
 
-    def test_successfully_load_with_text_response(self, requests_mocker, method):
+    def test_successfully_load_with_response(self, requests_mocker, method):
         api_data_set = APIDataSet(
             url=TEST_URL, method=method, params=TEST_PARAMS, headers=TEST_HEADERS
         )
@@ -67,25 +67,8 @@ class TestAPIDataSet:
         )
 
         response = api_data_set.load()
-        assert response == TEST_TEXT_RESPONSE_DATA
-
-    def test_successfully_load_with_json_response(self, requests_mocker, method):
-        api_data_set = APIDataSet(
-            url=TEST_URL,
-            method=method,
-            params=TEST_PARAMS,
-            headers=TEST_HEADERS,
-            json=True,
-        )
-        requests_mocker.register_uri(
-            method,
-            TEST_URL_WITH_PARAMS,
-            headers=TEST_HEADERS,
-            json=TEST_JSON_RESPONSE_DATA,
-        )
-
-        response = api_data_set.load()
-        assert response == TEST_JSON_RESPONSE_DATA
+        assert isinstance(response, requests.Response)
+        assert response.text == TEST_TEXT_RESPONSE_DATA
 
     def test_http_error(self, requests_mocker, method):
         api_data_set = APIDataSet(

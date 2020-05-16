@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -429,19 +429,28 @@ def parse_dataset_definition(
 
 
 def _load_obj(class_path: str) -> Optional[object]:
+    mod_path, _, class_name = class_path.rpartition(".")
+    try:
+        available_classes = load_obj(f"{mod_path}.__all__")
+    # ModuleNotFoundError: When `load_obj` can't find `mod_path` (e.g `kedro.io.pandas`)
+    #                      this is because we try a combination of all prefixes.
+    # AttributeError: When `load_obj` manages to load `mod_path` but it doesn't have an
+    #                 `__all__` attribute -- either because it's a custom or a kedro.io dataset
+    except (ModuleNotFoundError, AttributeError, ValueError):
+        available_classes = None
+
     try:
         class_obj = load_obj(class_path)
-    except ModuleNotFoundError as error:
-        if error.name is None or error.name in class_path:
-            return None
-        # class_obj was successfully loaded, but some dependencies are missing.
-        raise DataSetError(
-            f"{error} for {class_path}. Please see the documentation on how to "
-            f"install relevant dependencies for {class_path}:\n"
-            f"https://kedro.readthedocs.io/en/stable/02_getting_started/"
-            f"02_install.html#optional-dependencies"
-        )
-    except (AttributeError, ValueError):
+    except (ModuleNotFoundError, ValueError):
+        return None
+    except AttributeError as error:
+        if available_classes and class_name in available_classes:
+            raise DataSetError(
+                f"{error} Please see the documentation on how to "
+                f"install relevant dependencies for {class_path}:\n"
+                f"https://kedro.readthedocs.io/en/stable/02_getting_started/"
+                f"02_install.html#optional-dependencies"
+            )
         return None
 
     return class_obj

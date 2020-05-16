@@ -11,24 +11,25 @@ In order to work effectively with Kedro projects, we highly recommend you downlo
 > The main purpose of Python virtual environments is to create an isolated environment for Python projects. This means that each project can have its own dependencies, regardless of what dependencies every other project has. Read more about Python Virtual Environments [here](https://realpython.com/python-virtual-environments-a-primer/).
 
 Follow the instructions that best suit your Python installation preference from below:
+
  - `conda` environment with Python 3.7
- - `venv` or `pipenv` used when Anaconda is not preferred (these will use your global Python interpreter)
+ - `venv` or `pipenv` used when you prefer not to use `conda` and instead use your global Python interpreter.
 
-### Anaconda
+### `conda`
 
-Follow [this guide](https://docs.conda.io/projects/conda/en/latest/user-guide/install/) to install `conda` on your computer. Once it's done, let us create a new Python virtual environment using `conda`:
+Follow [this guide](https://docs.conda.io/projects/conda/en/latest/user-guide/install/) to install `conda` on your computer. Once it's done, you can create a new Python virtual environment using `conda`:
 
 ```bash
 conda create --name kedro-environment python=3.7 -y
 ```
 
-This will create an isolated Python 3.7 environment. To activate it, run:
+This will create an isolated Python 3.7 environment. To activate it:
 
 ```bash
 conda activate kedro-environment
 ```
 
-To exit the environment you can run:
+To exit the environment:
 
 ```bash
 conda deactivate kedro-environment
@@ -36,15 +37,15 @@ conda deactivate kedro-environment
 
 > *Note:* Unlike `venv` or `pipenv`, `conda` virtual environment is not dependent on your current working directory and can be activated from anywhere.
 
-### `venv`
+### `venv` (instead of `conda`)
 
-If you are using Python 3, then you should already have the `venv` module installed with the standard library. However, for completeness you can install `venv` with:
+If you are using Python 3, then you should already have the `venv` module installed with the standard library. However, for completeness you can install `venv`:
 
 ```bash
 pip install virtualenv
 ```
 
-Create a directory for your virtual environment with:
+Create a directory for your virtual environment:
 
 ```bash
 mkdir kedro-environment && cd kedro-environment
@@ -64,13 +65,13 @@ source env/bin/activate # macOS / Linux
 .\env\Scripts\activate  # Windows
 ```
 
-To exit the environment you can run:
+To exit the environment:
 
 ```bash
 deactivate
 ```
 
-### `pipenv`
+### `pipenv` (instead of `conda`)
 
 You will need to install `pipenv` with:
 
@@ -78,10 +79,16 @@ You will need to install `pipenv` with:
 pip install pipenv
 ```
 
-Then create a directory for the virtual environment and change to this working directory with:
+Then create a directory for the virtual environment and change to this working directory:
 
 ```bash
 mkdir kedro-environment && cd kedro-environment
 ```
 
-Once all the dependencies are installed you can run `pipenv shell` which will start a session with the correct virtual environment activated. To exit the shell session call `exit`.
+Once all the dependencies are installed you can run `pipenv shell` which will start a session with the correct virtual environment activated.
+
+To exit the shell session:
+
+```bash
+exit
+```

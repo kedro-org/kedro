@@ -637,6 +637,14 @@ class DataCatalog:
 
         Raises:
             SyntaxError: When invalid regex filter is provided
+
+        Example:
+        ::
+            >>> io = DataCatalog()
+            >>> # get data sets where the substring 'raw' is present
+            >>> raw_data = io.list(regex_search='raw')
+            >>> # get data sets which start with 'prm' or 'feat'
+            >>> feat_eng_data = io.list(regex_search='^(prm|feat)')
         """
 
         if regex_search is not None:
@@ -644,7 +652,7 @@ class DataCatalog:
                 pattern = re.compile(regex_search, flags=re.IGNORECASE)
             except re.error:
                 raise SyntaxError(
-                    f"Invalid pattern regular expression provided: '{regex_search}'",
+                    f"Invalid pattern regular expression provided: '{regex_search}'"
                 )
             working_data_sets = {
                 k: v for k, v in self._data_sets.items() if pattern.search(k)

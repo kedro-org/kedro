@@ -640,6 +640,7 @@ class DataCatalog:
 
         Example:
         ::
+
             >>> io = DataCatalog()
             >>> # get data sets where the substring 'raw' is present
             >>> raw_data = io.list(regex_search='raw')

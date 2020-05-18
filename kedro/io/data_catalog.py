@@ -636,7 +636,7 @@ class DataCatalog:
             depending on the arguments provided
 
         Raises:
-            SyntaxError: When invalid regex filter is provided
+            SyntaxError: When an invalid regex filter is provided.
 
         Example:
         ::

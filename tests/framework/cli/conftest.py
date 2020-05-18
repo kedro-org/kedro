@@ -83,6 +83,11 @@ def fake_package_path(fake_root_dir):
 
 
 @fixture(scope="module")
+def fake_repo_path(fake_root_dir):
+    return fake_root_dir.resolve() / REPO_NAME
+
+
+@fixture(scope="module")
 def dummy_config(fake_root_dir):
     config = {
         "project_name": "Dummy Project",

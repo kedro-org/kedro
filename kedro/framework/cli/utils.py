@@ -41,6 +41,7 @@ from pathlib import Path
 from typing import Iterable, List, Sequence, Tuple, Union
 
 import click
+import yaml
 from click import ClickException, style
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
@@ -230,3 +231,20 @@ def _filter_deprecation_warnings():
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=DeprecationWarning)
         yield
+
+
+def get_source_dir(project_path: Path) -> Path:
+    """Returns project source path.
+
+    Args:
+        project_path: The path to the project root.
+
+    Returns:
+        The absolute path to the project source directory.
+    """
+    with (project_path / ".kedro.yml").open("r") as kedro_yml:
+        kedro_yaml = yaml.safe_load(kedro_yml)
+
+    source_dir = Path(kedro_yaml.get("source_dir", "src")).expanduser()
+    source_path = (project_path / source_dir).resolve()
+    return source_path

@@ -34,9 +34,8 @@ import click
 import yaml
 from click import secho
 
+from kedro.framework.cli.utils import KedroCliError, env_option, split_string
 from kedro.framework.context import load_context
-
-from .utils import KedroCliError, env_option, split_string
 
 
 @click.group()

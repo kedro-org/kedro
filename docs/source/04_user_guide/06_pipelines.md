@@ -1155,10 +1155,13 @@ Outputs: v
 ##################################
 ```
 
-To demonstrate this, let us save the intermediate output `n` using a `JSONLocalDataSet`.
+To demonstrate this, let us save the intermediate output `n` using a `JSONDataSet`.
 
 ```python
-n_json = JSONLocalDataSet(filepath="./data/07_model_output/len.json")
+from kedro.extras.datasets.pandas import JSONDataSet
+from kedro.io import DataCatalog, MemoryDataSet
+
+n_json = JSONDataSet(filepath="./data/07_model_output/len.json")
 io = DataCatalog(dict(xs=MemoryDataSet([1, 2, 3]), n=n_json))
 ```
 

@@ -38,14 +38,13 @@ from click import secho
 
 import kedro
 from kedro.framework.cli.cli import _assert_pkg_name_ok, _handle_exception
-from kedro.framework.context import KedroContext, load_context
-
-from .utils import (
+from kedro.framework.cli.utils import (
     KedroCliError,
     _clean_pycache,
     _filter_deprecation_warnings,
     env_option,
 )
+from kedro.framework.context import KedroContext, load_context
 
 
 @click.group()

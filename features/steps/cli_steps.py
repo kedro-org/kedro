@@ -460,7 +460,7 @@ def update_kedro_req(context: behave.runner.Context):
 
     if reqs_path.is_file():
         old_reqs = reqs_path.read_text()
-        new_reqs = re.sub(r"#?kedro\[pandas\]==.*\n", kedro_reqs, old_reqs)
+        new_reqs = re.sub(r"#?kedro\[pandas.CSVDataSet\]==.*\n", kedro_reqs, old_reqs)
         assert not old_reqs == new_reqs
         reqs_path.write_text(new_reqs)
 

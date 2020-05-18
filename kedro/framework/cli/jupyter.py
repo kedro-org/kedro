@@ -40,22 +40,21 @@ from typing import Any, Dict, Iterable, List
 from warnings import warn
 
 import click
-import yaml
 from click import secho
 from jupyter_client.kernelspec import NATIVE_KERNEL_NAME, KernelSpecManager
 from traitlets import Unicode
 
 from kedro.framework.cli import load_entry_points
 from kedro.framework.cli.cli import _handle_exception
-from kedro.framework.context import load_context
-
-from .utils import (
+from kedro.framework.cli.utils import (
     KedroCliError,
     env_option,
     forward_command,
+    get_source_dir,
     ipython_message,
     python_call,
 )
+from kedro.framework.context import load_context
 
 JUPYTER_IP_HELP = "IP address of the Jupyter server."
 JUPYTER_ALL_KERNELS_HELP = "Display all available Python kernels."
@@ -123,7 +122,7 @@ def jupyter():
 @env_option
 def jupyter_notebook(ip_address, all_kernels, env, idle_timeout, args):
     """Open Jupyter Notebook with project specific variables loaded."""
-    context = _load_context(env)
+    context = _load_project_context(env=env)
     if "-h" not in args and "--help" not in args:
         ipython_message(all_kernels)
 
@@ -149,7 +148,7 @@ def jupyter_notebook(ip_address, all_kernels, env, idle_timeout, args):
 @env_option
 def jupyter_lab(ip_address, all_kernels, env, idle_timeout, args):
     """Open Jupyter Lab with project specific variables loaded."""
-    context = _load_context(env)
+    context = _load_project_context(env=env)
     if "-h" not in args and "--help" not in args:
         ipython_message(all_kernels)
 
@@ -187,15 +186,11 @@ def convert_notebook(all_flag, overwrite_flag, filepath, env):
     relative and absolute paths are accepted.
     Should not be provided if --all flag is already present.
     """
-    context = _load_context(env)
+    context = _load_project_context(env=env)
     project_path = context.project_path
     os.environ["IPYTHONDIR"] = str(project_path / ".ipython")
 
-    with (project_path / ".kedro.yml").open("r") as kedro_yml:
-        kedro_yaml = yaml.safe_load(kedro_yml)
-
-    source_dir = Path(kedro_yaml.get("source_dir", "src")).expanduser()
-    source_path = (project_path / source_dir).resolve()
+    source_path = get_source_dir(project_path)
 
     if not filepath and not all_flag:
         secho(
@@ -279,10 +274,12 @@ def _build_jupyter_env(kedro_env: str) -> Dict[str, Any]:
     return {"env": jupyter_env}
 
 
-def _load_context(env: str = None):
+def _load_project_context(**kwargs):
+    """Returns project context."""
     try:
-        return load_context(Path.cwd(), env=env)
+        return load_context(Path.cwd(), **kwargs)
     except Exception as err:  # pylint: disable=broad-except
+        env = kwargs.get("env")
         _handle_exception(
             f"Unable to load Kedro context with environment `{env}`. "
             f"Make sure it exists in the project configuration.\nError: {err}"

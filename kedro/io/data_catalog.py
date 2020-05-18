@@ -627,13 +627,13 @@ class DataCatalog:
 
         Args:
             regex_search: An optional regular expression which can be provided
-                to limit the data sets returned by a particular pattern
+                to limit the data sets returned by a particular pattern.
             get_objects: An optional flag to rerun a dictionary with the actual
-            ``DataSet`` objects in addition to the names as keys
+            ``DataSet`` objects in addition to the names as keys.
 
         Returns:
             A list of ``DataSet`` names or a dictionary of name/object pairs
-            depending on the arguments provided
+            depending on the arguments provided.
 
         Raises:
             SyntaxError: When an invalid regex filter is provided.

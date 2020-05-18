@@ -35,8 +35,9 @@
 * Added an option to enable asynchronous loading inputs and saving outputs in both `SequentialRunner(is_async=True)` and `ParallelRunner(is_async=True)` class.
 * Added `MemoryProfiler` transformer.
 * Removed the requirement to have all dependencies for a dataset module to use only a subset of the datasets within.
-* Added support for `pandas>=1.0`
+* Added support for `pandas>=1.0`.
 * Enabled Python 3.8 compatibility. _Please note that a Spark workflow may be unreliable for this Python version as `pyspark` is not fully-compatible with 3.8 yet._
+* Renamed "features" layer to "feature" layer to be consistent with (most) other layers and the [relevant FAQ](https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention).
 
 ## Bug fixes and other changes
 * Fixed a bug where a new version created mid-run by an external system caused inconsistencies in the load versions used in the current run.

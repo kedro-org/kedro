@@ -101,6 +101,7 @@ class AbstractDataSet(abc.ABC):
 
     Example:
     ::
+    
         >>> from pathlib import Path, PurePosixPath
         >>> import pandas as pd
         >>> from kedro.io import AbstractDataSet
@@ -124,8 +125,9 @@ class AbstractDataSet(abc.ABC):
         >>>     def _describe(self):
         >>>         return dict(param1=self._param1, param2=self._param2)
 
-    Example catalog.yml specification
+    Example catalog.yml specification:
     ::
+    
         my_dataset:
             type: <path-to-my-own-dataset>.MyOwnDataSet
             filepath: data/01_raw/my_data.csv
@@ -508,8 +510,9 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
         >>>     def _describe(self):
         >>>         return dict(version=self._version, param1=self._param1, param2=self._param2)
 
-    Example catalog.yml specification
+    Example catalog.yml specification:
     ::
+    
         my_dataset:
             type: <path-to-my-own-dataset>.MyOwnDataSet
             filepath: data/01_raw/my_data.csv

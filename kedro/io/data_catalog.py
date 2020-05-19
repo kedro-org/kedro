@@ -641,6 +641,8 @@ class DataCatalog:
             >>> raw_data = io.list(regex_search='raw')
             >>> # get data sets which start with 'prm' or 'feat'
             >>> feat_eng_data = io.list(regex_search='^(prm|feat)')
+            >>> # get data sets which end with 'time_series'
+            >>> models = io.list(regex_search='.+time_series$')
         """
 
         if regex_search is not None:

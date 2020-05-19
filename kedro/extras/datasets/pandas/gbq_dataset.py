@@ -41,7 +41,6 @@ from google.oauth2.credentials import Credentials
 from kedro.io.core import AbstractDataSet, DataSetError, validate_on_forbidden_chars
 
 
-# pylint: disable=too-many-instance-attributes
 class GBQTableDataSet(AbstractDataSet):
     """``GBQTableDataSet`` loads and saves data from/to Google BigQuery.
     It uses pandas-gbq to read and write from/to BigQuery table.

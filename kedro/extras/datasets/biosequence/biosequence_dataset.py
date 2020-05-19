@@ -39,7 +39,6 @@ from Bio import SeqIO
 from kedro.io.core import AbstractDataSet, get_filepath_str, get_protocol_and_path
 
 
-# pylint: disable=too-many-instance-attributes
 class BioSequenceDataSet(AbstractDataSet):
     r"""``BioSequenceDataSet`` loads and saves data to a sequence file.
 

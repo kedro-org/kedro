@@ -78,7 +78,7 @@ def project_group():
 def test(args):
     """Run the test suite."""
     try:
-        # pylint: disable=import-outside-toplevel
+        # pylint: disable=import-outside-toplevel, unused-import
         import pytest  # noqa
     except ImportError:
         context = _load_project_context()
@@ -103,7 +103,7 @@ def lint(files, check_only):
     )
 
     try:
-        # pylint: disable=import-outside-toplevel
+        # pylint: disable=import-outside-toplevel, unused-import
         import flake8  # noqa
         import isort  # noqa
         import black  # noqa
@@ -246,7 +246,7 @@ def activate_nbstripout():
     )
 
     try:
-        # pylint: disable=import-outside-toplevel
+        # pylint: disable=import-outside-toplevel, unused-import
         import nbstripout  # noqa
     except ImportError:
         raise KedroCliError(

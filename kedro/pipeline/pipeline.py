@@ -103,8 +103,6 @@ class Pipeline:
     outputs and execution order.
     """
 
-    # pylint: disable=too-many-public-methods
-
     def __init__(
         self,
         nodes: Iterable[Union[Node, "Pipeline"]],

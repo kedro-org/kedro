@@ -48,7 +48,6 @@ from kedro.io.core import (
 HDFSTORE_DRIVER = "H5FD_CORE"
 
 
-# pylint: disable=too-many-instance-attributes
 class HDFDataSet(AbstractVersionedDataSet):
     """``HDFDataSet`` loads/saves data from/to a hdf file using an underlying
     filesystem (e.g. local, S3, GCS). It uses pandas.HDFStore to handle the hdf file.

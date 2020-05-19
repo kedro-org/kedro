@@ -106,16 +106,16 @@ class AbstractDataSet(abc.ABC):
         >>> import pandas as pd
         >>>
         >>> class MyOwnDataSet(AbstractDataSet):
-        >>>     def __init__(self, param1, param2=True):
+        >>>     def __init__(self, filepath, param1, param2=True):
+        >>>         self._filepath = PurePosixPath(filepath)
         >>>         self._param1 = param1
         >>>         self._param2 = param2
         >>>
         >>>     def _load(self) -> pd.DataFrame:
-        >>>         print("Dummy load: {}".format(self._param1))
-        >>>         return pd.DataFrame()
+        >>>         return pd.read_csv(self._filepath)
         >>>
         >>>     def _save(self, df: pd.DataFrame) -> None:
-        >>>         print("Dummy save: {}".format(self._param2))
+        >>>         df.to_csv(str(self._filepath))
         >>>
         >>>     def _describe(self):
         >>>         return dict(param1=self._param1, param2=self._param2)

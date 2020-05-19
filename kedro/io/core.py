@@ -102,23 +102,37 @@ class AbstractDataSet(abc.ABC):
     Example:
     ::
 
-        >>> from kedro.io import AbstractDataSet
+        >>> from pathlib import Path, PurePosixPath
         >>> import pandas as pd
+        >>> from kedro.io import AbstractDataSet
+        >>>
         >>>
         >>> class MyOwnDataSet(AbstractDataSet):
-        >>>     def __init__(self, param1, param2):
+        >>>     def __init__(self, filepath, param1, param2=True):
+        >>>         self._filepath = PurePosixPath(filepath)
         >>>         self._param1 = param1
         >>>         self._param2 = param2
         >>>
         >>>     def _load(self) -> pd.DataFrame:
-        >>>         print("Dummy load: {}".format(self._param1))
-        >>>         return pd.DataFrame()
+        >>>         return pd.read_csv(self._filepath)
         >>>
         >>>     def _save(self, df: pd.DataFrame) -> None:
-        >>>         print("Dummy save: {}".format(self._param2))
+        >>>         df.to_csv(str(self._filepath))
+        >>>
+        >>>     def _exists(self) -> bool:
+        >>>         return Path(self._filepath).exists()
         >>>
         >>>     def _describe(self):
         >>>         return dict(param1=self._param1, param2=self._param2)
+
+    Example catalog.yml specification:
+    ::
+
+        my_dataset:
+            type: <path-to-my-own-dataset>.MyOwnDataSet
+            filepath: data/01_raw/my_data.csv
+            param1: <param1-value> # param1 is a required argument
+            # param2 will be True by default
     """
 
     @classmethod
@@ -470,13 +484,14 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
     Example:
     ::
 
-        >>> from kedro.io import AbstractVersionedDataSet
+        >>> from pathlib import Path, PurePosixPath
         >>> import pandas as pd
+        >>> from kedro.io import AbstractVersionedDataSet
         >>>
         >>>
         >>> class MyOwnDataSet(AbstractVersionedDataSet):
-        >>>     def __init__(self, param1, param2, filepath, version):
-        >>>         super().__init__(filepath, version)
+        >>>     def __init__(self, filepath, version, param1, param2=True):
+        >>>         super().__init__(PurePosixPath(filepath), version)
         >>>         self._param1 = param1
         >>>         self._param2 = param2
         >>>
@@ -490,10 +505,20 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
         >>>
         >>>     def _exists(self) -> bool:
         >>>         path = self._get_load_path()
-        >>>         return path.is_file()
+        >>>         return Path(path).exists()
         >>>
         >>>     def _describe(self):
         >>>         return dict(version=self._version, param1=self._param1, param2=self._param2)
+
+    Example catalog.yml specification:
+    ::
+
+        my_dataset:
+            type: <path-to-my-own-dataset>.MyOwnDataSet
+            filepath: data/01_raw/my_data.csv
+            versioned: true
+            param1: <param1-value> # param1 is a required argument
+            # param2 will be True by default
     """
 
     # pylint: disable=abstract-method

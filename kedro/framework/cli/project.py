@@ -125,8 +125,10 @@ def lint(files, check_only):
 def install():
     """Install project dependencies from both requirements.txt
     and environment.yml (optional)."""
-    context = _load_project_context()
-    source_path = get_source_dir(context.project_path)
+    # we cannot use `context.project_path` as in other commands since
+    # context instantiation might break due to missing dependencies
+    # we attempt to install here
+    source_path = get_source_dir(Path.cwd())
 
     if (source_path / "environment.yml").is_file():
         call(

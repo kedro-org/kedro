@@ -61,7 +61,7 @@ from kedro.io import AbstractVersionedDataSet
 
 class MyOwnDataSet(AbstractVersionedDataSet):
     def __init__(self, filepath, version,  param1, param2=True):
-        super().__init__(PurePath(filepath), version)
+        super().__init__(PurePosixPath(filepath), version)
         self._param1 = param1
         self._param2 = param2
 

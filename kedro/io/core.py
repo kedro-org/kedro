@@ -117,6 +117,9 @@ class AbstractDataSet(abc.ABC):
         >>>     def _save(self, df: pd.DataFrame) -> None:
         >>>         df.to_csv(str(self._filepath))
         >>>
+        >>>     def _exists(self) -> bool:
+        >>>         return path._filepath.is_file()
+        >>>
         >>>     def _describe(self):
         >>>         return dict(    Example catalog.yml specification
 

@@ -52,7 +52,7 @@ In order to enable versioning, you need to update the `catalog.yml` config file 
 An example dataset could look similar to the below:
 
 ```python
-from pathlib import Path
+from pathlib import PurePath
 
 import pandas as pd
 
@@ -60,8 +60,8 @@ from kedro.io import AbstractVersionedDataSet
 
 
 class MyOwnDataSet(AbstractVersionedDataSet):
-    def __init__(self, param1, param2, filepath, version):
-        super().__init__(Path(filepath), version)
+    def __init__(self, filepath, version,  param1, param2=True):
+        super().__init__(PurePath(filepath), version)
         self._param1 = param1
         self._param2 = param2
 
@@ -88,8 +88,8 @@ my_dataset:
   type: <path-to-my-own-dataset>.MyOwnDataSet
   filepath: data/01_raw/my_data.csv
   versioned: true
-  param1: <param1-value>
-  param2: <param2-value>
+  param1: <param1-value> # param1 is a required argument
+  # param2 will be True by default
 ```
 
 ### `version` namedtuple

@@ -505,7 +505,7 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
         >>>
         >>>     def _describe(self):
         >>>         return dict(version=self._version, param1=self._param1, param2=self._param2)
-    
+
     Example catalog.yml specification
     ::
         my_dataset:

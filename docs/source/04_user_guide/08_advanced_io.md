@@ -52,7 +52,7 @@ In order to enable versioning, you need to update the `catalog.yml` config file 
 An example dataset could look similar to the below:
 
 ```python
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 
 import pandas as pd
 
@@ -75,7 +75,8 @@ class MyOwnDataSet(AbstractVersionedDataSet):
 
     def _exists(self) -> bool:
         path = self._get_load_path()
-        return path.is_file()
+        return Path(path).exists()
+        
     def _describe(self):
         return dict(version=self._version, param1=self._param1, param2=self._param2)
 ```

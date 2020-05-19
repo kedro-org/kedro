@@ -28,6 +28,7 @@
 
 """Command line tools for manipulating a Kedro project.
 Intended to be invoked via `kedro`."""
+import json
 import os
 from itertools import chain
 from pathlib import Path
@@ -120,6 +121,11 @@ def _reformat_load_versions(  # pylint: disable=unused-argument
 
 
 def _split_params(ctx, param, value):
+    try:
+        value = json.loads(value)
+    except json.JSONDecodeError:
+        if value:
+            logger.info("Not a JSON entry.")
     if isinstance(value, dict):
         return value
     result = {}

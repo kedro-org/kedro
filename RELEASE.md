@@ -45,6 +45,7 @@
   * Added instruction in the documentation on how to create a custom runner).
   * Updated contribution process in `CONTRIBUTING.md` - added Developer Workflow.
   * Documented installation of development version of Kedro in the [FAQ section](https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#how-can-i-use-development-version-of-kedro).
+  * Added missing `_exists` method to `MyOwnDataSet` example in 04_user_guide/08_advanced_io.
 * Fixed a bug where `PartitionedDataSet` and `IncrementalDataSet` were not working with `s3a` or `s3n` protocol.
 * Added ability to read partitioned parquet file from a directory in `pandas.ParquetDataSet`.
 * Replaced `functools.lru_cache` with `cachetools.cachedmethod` in `PartitionedDataSet` and `IncrementalDataSet` for per-instance cache invalidation.
@@ -55,7 +56,6 @@
 * Added option to lint the project without applying the formatting changes (`kedro lint --check-only`).
 * Improved the error message for `DataSetNotFoundError` to suggest possible dataset names user meant to type.
 * Replaced `functools.lru_cache` with `cachetools.cachedmethod` in `PartitionedDataSet` and `IncrementalDataSet` for per-instance cache invalidation.
-* Added missing `_exists` method to `MyOwnDataSet` example in 04_user_guide/08_advanced_io.
 
 ## Breaking changes to the API
 ### Datasets

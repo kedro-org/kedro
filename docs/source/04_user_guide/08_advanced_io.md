@@ -52,7 +52,7 @@ In order to enable versioning, you need to update the `catalog.yml` config file 
 An example dataset could look similar to the below:
 
 ```python
-from pathlib import PurePath
+from pathlib import PurePosixPath
 
 import pandas as pd
 

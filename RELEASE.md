@@ -56,7 +56,6 @@
 * Added option to lint the project without applying the formatting changes (`kedro lint --check-only`).
 * Improved the error message for `DataSetNotFoundError` to suggest possible dataset names user meant to type.
 * Replaced `functools.lru_cache` with `cachetools.cachedmethod` in `PartitionedDataSet` and `IncrementalDataSet` for per-instance cache invalidation.
-* Added missing `_exists` method to `MyOwnDataSet` example in 04_user_guide/08_advanced_io.
 
 ## Breaking changes to the API
 ### Datasets

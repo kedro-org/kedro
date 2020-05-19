@@ -106,7 +106,7 @@ class AbstractDataSet(abc.ABC):
         >>> import pandas as pd
         >>>
         >>> class MyOwnDataSet(AbstractDataSet):
-        >>>     def __init__(self, param1, param2):
+        >>>     def __init__(self, param1, param2=True):
         >>>         self._param1 = param1
         >>>         self._param2 = param2
         >>>
@@ -475,7 +475,7 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
         >>>
         >>>
         >>> class MyOwnDataSet(AbstractVersionedDataSet):
-        >>>     def __init__(self, param1, param2, filepath, version):
+        >>>     def __init__(self, param1, param2=True, filepath, version):
         >>>         super().__init__(PurePosixPath(filepath), version)
         >>>         self._param1 = param1
         >>>         self._param2 = param2
@@ -494,6 +494,15 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
         >>>
         >>>     def _describe(self):
         >>>         return dict(version=self._version, param1=self._param1, param2=self._param2)
+    
+    Example catalog.yml specification
+    ::
+        my_dataset:
+            type: <path-to-my-own-dataset>.MyOwnDataSet
+            filepath: data/01_raw/my_data.csv
+            versioned: true
+            param1: <param1-value> # param1 is a required argument
+        # param2 will be True by default
     """
 
     # pylint: disable=abstract-method

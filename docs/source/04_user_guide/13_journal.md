@@ -24,6 +24,7 @@ A context journal record captures all the necessary information to reproduce the
     "from_inputs": [],
     "load_versions": {},
     "pipeline_name": null,
+    "extra_params": {},
     "git_sha": "48dd0d3"
 }
 ```

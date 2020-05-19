@@ -107,7 +107,7 @@ class TemplatedConfigLoader(ConfigLoader):
             raw: "01_raw"
             int: "02_intermediate"
             pri: "03_primary"
-            fea: "04_features"
+            fea: "04_feature"
 
 
     `catalog.yml`

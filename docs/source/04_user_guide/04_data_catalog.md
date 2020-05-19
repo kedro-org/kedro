@@ -515,8 +515,8 @@ The code API allows you to configure data sources in code. This can also be used
 In a file like `catalog.py`, you can generate the Data Catalog. This will allow everyone in the project to review all the available data sources. In the following, we are using the pre-built CSV loader, which is documented in the [API reference documentation](/kedro.extras.datasets)
 
 ```python
-from kedro.io import (
-    DataCatalog,
+from kedro.io import DataCatalog
+from kedro.extras.datasets.pandas import (
     CSVDataSet,
     SQLTableDataSet,
     SQLQueryDataSet,

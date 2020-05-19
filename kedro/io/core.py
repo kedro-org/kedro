@@ -118,7 +118,15 @@ class AbstractDataSet(abc.ABC):
         >>>         df.to_csv(str(self._filepath))
         >>>
         >>>     def _describe(self):
-        >>>         return dict(param1=self._param1, param2=self._param2)
+        >>>         return dict(    Example catalog.yml specification
+
+    Example catalog.yml specification
+    ::
+        my_dataset:
+            type: <path-to-my-own-dataset>.MyOwnDataSet
+            filepath: data/01_raw/my_data.csv
+            param1: <param1-value> # param1 is a required argument
+            # param2 will be True by defaultparam1=self._param1, param2=self._param2)
     """
 
     @classmethod
@@ -502,7 +510,7 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
             filepath: data/01_raw/my_data.csv
             versioned: true
             param1: <param1-value> # param1 is a required argument
-        # param2 will be True by default
+            # param2 will be True by default
     """
 
     # pylint: disable=abstract-method

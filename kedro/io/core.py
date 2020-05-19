@@ -102,8 +102,9 @@ class AbstractDataSet(abc.ABC):
     Example:
     ::
         >>> from pathlib import PurePosixPath
-        >>> from kedro.io import AbstractDataSet
         >>> import pandas as pd
+        >>> from kedro.io import AbstractDataSet
+        >>>
         >>>
         >>> class MyOwnDataSet(AbstractDataSet):
         >>>     def __init__(self, filepath, param1, param2=True):
@@ -482,8 +483,8 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
     ::
 
         >>> from pathlib import PurePosixPath
-        >>> from kedro.io import AbstractVersionedDataSet
         >>> import pandas as pd
+        >>> from kedro.io import AbstractVersionedDataSet
         >>>
         >>>
         >>> class MyOwnDataSet(AbstractVersionedDataSet):

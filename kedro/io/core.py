@@ -129,7 +129,7 @@ class AbstractDataSet(abc.ABC):
             type: <path-to-my-own-dataset>.MyOwnDataSet
             filepath: data/01_raw/my_data.csv
             param1: <param1-value> # param1 is a required argument
-            # param2 will be True by defaultparam1=self._param1, param2=self._param2)
+            # param2 will be True by default
     """
 
     @classmethod

@@ -476,7 +476,7 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
         >>>
         >>> class MyOwnDataSet(AbstractVersionedDataSet):
         >>>     def __init__(self, param1, param2, filepath, version):
-        >>>         super().__init__(filepath, version)
+        >>>         super().__init__(PurePosixPath(filepath), version)
         >>>         self._param1 = param1
         >>>         self._param2 = param2
         >>>

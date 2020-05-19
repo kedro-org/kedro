@@ -119,7 +119,7 @@ class AbstractDataSet(abc.ABC):
         >>>         df.to_csv(str(self._filepath))
         >>>
         >>>     def _exists(self) -> bool:
-        >>>         return path._filepath.is_file()
+        >>>         return self._filepath.is_file()
         >>>
         >>>     def _describe(self):
         >>>         return dict(param1=self._param1, param2=self._param2)

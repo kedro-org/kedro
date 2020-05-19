@@ -616,24 +616,19 @@ class DataCatalog:
                 )
             self._transformers[data_set_name].append(transformer)
 
-    def list(
-        self, regex_search: Optional[str] = None, get_objects: bool = False
-    ) -> Union[List[str], Dict[str, AbstractDataSet]]:
+    def list(self, regex_search: Optional[str] = None) -> List[str]:
         """
         List of ``DataSet`` names registered in the catalog if called with
-        default arguments. Additional facility to limit dataset returned by
-        a regular expression name as well as retrieving a dictionary of dataset
-        name / object pairs.
+        default arguments, this can be filtered by providing an optional regular
+        expression which will only return matching keys.
 
         Args:
             regex_search: An optional regular expression which can be provided
                 to limit the data sets returned by a particular pattern.
-            get_objects: An optional flag to rerun a dictionary with the actual
-            ``DataSet`` objects in addition to the names as keys.
-
         Returns:
-            A list of ``DataSet`` names or a dictionary of name/object pairs
-            depending on the arguments provided.
+            A list of ``DataSet`` names available which match the
+            `regex_search` criteria if provided. All data sets are returned
+            by default.
 
         Raises:
             SyntaxError: When an invalid regex filter is provided.
@@ -662,8 +657,6 @@ class DataCatalog:
         else:
             working_data_sets = self._data_sets
 
-        if get_objects:
-            return working_data_sets
         return list(working_data_sets.keys())
 
     def shallow_copy(self) -> "DataCatalog":

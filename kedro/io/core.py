@@ -121,7 +121,7 @@ class AbstractDataSet(abc.ABC):
         >>>         return path._filepath.is_file()
         >>>
         >>>     def _describe(self):
-        >>>         return dict(    Example catalog.yml specification
+        >>>         return dict(param1=self._param1, param2=self._param2)
 
     Example catalog.yml specification
     ::

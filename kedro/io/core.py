@@ -101,7 +101,7 @@ class AbstractDataSet(abc.ABC):
 
     Example:
     ::
-        >>> from pathlib import PurePosixPath
+        >>> from pathlib import Path, PurePosixPath
         >>> import pandas as pd
         >>> from kedro.io import AbstractDataSet
         >>>
@@ -119,7 +119,7 @@ class AbstractDataSet(abc.ABC):
         >>>         df.to_csv(str(self._filepath))
         >>>
         >>>     def _exists(self) -> bool:
-        >>>         return self._filepath.is_file()
+        >>>         return Path(self._filepath).exists()
         >>>
         >>>     def _describe(self):
         >>>         return dict(param1=self._param1, param2=self._param2)
@@ -482,7 +482,7 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
     Example:
     ::
 
-        >>> from pathlib import PurePosixPath
+        >>> from pathlib import Path, PurePosixPath
         >>> import pandas as pd
         >>> from kedro.io import AbstractVersionedDataSet
         >>>
@@ -503,7 +503,7 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
         >>>
         >>>     def _exists(self) -> bool:
         >>>         path = self._get_load_path()
-        >>>         return path.is_file()
+        >>>         return Path(path).exists()
         >>>
         >>>     def _describe(self):
         >>>         return dict(version=self._version, param1=self._param1, param2=self._param2)

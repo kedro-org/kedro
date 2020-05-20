@@ -618,9 +618,9 @@ class DataCatalog:
 
     def list(self, regex_search: Optional[str] = None) -> List[str]:
         """
-        List of ``DataSet`` names registered in the catalog if called with
-        default arguments, this can be filtered by providing an optional regular
-        expression which will only return matching keys.
+        List of all ``DataSet`` names registered in the catalog.
+        This can be filtered by providing an optional regular expression 
+        which will only return matching keys.
 
         Args:
             regex_search: An optional regular expression which can be provided

@@ -218,6 +218,7 @@ Currently the following datasets support versioning:
 - `kedro.extras.datasets.pandas.JSONDataSet`
 - `kedro.extras.datasets.pandas.ParquetDataSet`
 - `kedro.extras.datasets.pickle.PickleDataSet`
+- `kedro.extras.datasets.pillow.ImageDataSet`
 - `kedro.extras.datasets.text.TextDataSet`
 - `kedro.extras.datasets.spark.SparkDataSet`
 - `kedro.extras.datasets.yaml.YAMLDataSet`

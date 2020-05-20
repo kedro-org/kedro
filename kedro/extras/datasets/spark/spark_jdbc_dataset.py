@@ -84,7 +84,6 @@ class SparkJDBCDataSet(AbstractDataSet):
         credentials: Dict[str, Any] = None,
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
-        layer: str = None,
     ) -> None:
         """Creates a new ``SparkJDBCDataSet``.
 
@@ -104,8 +103,6 @@ class SparkJDBCDataSet(AbstractDataSet):
                 with the JDBC URL and the name of the table. To find all
                 supported arguments, see here:
                 https://spark.apache.org/docs/latest/api/python/pyspark.sql.html?highlight=jdbc#pyspark.sql.DataFrameWriter.jdbc
-            layer: The data layer according to the data engineering convention:
-                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
 
         Raises:
             DataSetError: When either ``url`` or ``table`` is empty or
@@ -128,7 +125,6 @@ class SparkJDBCDataSet(AbstractDataSet):
 
         self._url = url
         self._table = table
-        self._layer = layer
 
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
@@ -171,11 +167,7 @@ class SparkJDBCDataSet(AbstractDataSet):
             save_args = {**save_args, "properties": save_properties}
 
         return dict(
-            url=self._url,
-            table=self._table,
-            load_args=load_args,
-            save_args=save_args,
-            layer=self._layer,
+            url=self._url, table=self._table, load_args=load_args, save_args=save_args,
         )
 
     @staticmethod

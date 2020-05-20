@@ -274,8 +274,6 @@ class TestComplexPipelineWithTranscoding:
 
     """
 
-    # pylint: disable=too-many-public-methods
-
     def test_from_nodes_transcoded_names(self, complex_pipeline):
         """New pipelines contain all nodes that depend on node8 downstream."""
         from_nodes_pipeline = complex_pipeline.from_nodes("node8")

@@ -69,6 +69,7 @@ def sane_config(filepath):
                 "type": "pandas.CSVDataSet",
                 "filepath": "s3://test_bucket/test_file.csv",
                 "credentials": "s3_credentials",
+                "layer": "raw",
             },
         },
         "credentials": {
@@ -237,15 +238,24 @@ class TestDataCatalog:
         assert result is False
 
     def test_exists_unregistered(self, data_catalog):
-        """Check the the error when calling `exists`
-        on unregistered data set"""
+        """Check the error when calling `exists` on unregistered data set"""
         pattern = r"DataSet \'wrong_key\' not found in the catalog"
-        with pytest.raises(DataSetNotFoundError, match=pattern):
+        with pytest.raises(DataSetNotFoundError, match=pattern) as e:
             data_catalog.exists("wrong_key")
 
+        assert "did you mean" not in str(e.value)
+
+    def test_exists_unregistered_typo(self, data_catalog):
+        """Check the error when calling `exists` on mistyped data set"""
+        pattern = (
+            r"DataSet \'text\' not found in the catalog"
+            r" - did you mean one of these instead\: test"
+        )
+        with pytest.raises(DataSetNotFoundError, match=pattern):
+            data_catalog.exists("text")
+
     def test_release_unregistered(self, data_catalog):
-        """Check the the error when calling `release`
-        on unregistered data set"""
+        """Check the error when calling `release` on unregistered data set"""
         pattern = r"DataSet \'wrong_key\' not found in the catalog"
         with pytest.raises(DataSetNotFoundError, match=pattern):
             data_catalog.release("wrong_key")
@@ -306,6 +316,12 @@ class TestDataCatalog:
         does not have `confirm` method"""
         with pytest.raises(DataSetError, match=re.escape(error_pattern)):
             data_catalog.confirm(dataset_name)
+
+    def test_layers(self, data_catalog, data_catalog_from_config):
+        """Test dataset layers are correctly parsed"""
+        assert data_catalog.layers is None
+        # only one dataset is assigned a layer in the config
+        assert data_catalog_from_config.layers == {"raw": {"cars"}}
 
 
 class TestDataCatalogFromConfig:

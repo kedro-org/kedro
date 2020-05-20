@@ -21,10 +21,11 @@ nbformat>=4.4.0, <5.0
 networkx>=2.4, <3.0
 pandas-gbq>=0.12.0, <1.0
 pandas>=0.24.0, <2.0  # Needs to be at least 0.24.0 to make use of `pandas.DataFrame.to_numpy` (recommended alternative to `pandas.DataFrame.values`)
+Pillow>=7.1.2, <7.2
 pre-commit>=1.17.0, <2.0.0
 psutil==5.6.6
 pyarrow>=0.12.0, <1.0.0
-pydantic
+pydantic>=1.5, <1.6.0
 pylint>=2.4.4, <2.5.0 # Pylint 2.5.0 introduces a regression: https://github.com/PyCQA/pylint/issues/3524
 pyspark>=2.2.0, <3.0; python_version < '3.8'
 pytest-cov>=2.5, <3.0

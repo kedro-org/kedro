@@ -58,7 +58,7 @@ repos:
             language: system
             types: [file, python]
             files: ^tests/
-            entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments
+            entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments,too-many-public-methods
             stages: [commit]
 
           # The same pylint checks, but running on all files. It's for manual run with `make lint`
@@ -79,7 +79,7 @@ repos:
             language: system
             pass_filenames: false
             stages: [manual]
-            entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments tests
+            entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments,too-many-public-methods tests
           - id: black
             name: "Black"
             language: system

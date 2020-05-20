@@ -42,7 +42,7 @@ CONNECTION = "sqlite:///kedro.db"
 SQL_QUERY = "SELECT * FROM table_a"
 FAKE_CONN_STR = "some_sql://scott:tiger@localhost/foo"
 ERROR_PREFIX = (
-    r"A module\/driver is missing when connecting to your " r"SQL server\.(.|\n)*"
+    r"A module\/driver is missing when connecting to your SQL server\.(.|\n)*"
 )
 
 
@@ -128,9 +128,7 @@ class TestSQLTableDataSetLoad:
     )
     def test_load_unknown_sql(self, table_data_set):
         """Check the error when unknown sql dialect is provided"""
-        pattern = (
-            r"The SQL dialect in your connection is not supported " r"by SQLAlchemy"
-        )
+        pattern = r"The SQL dialect in your connection is not supported by SQLAlchemy"
         with pytest.raises(DataSetError, match=pattern):
             table_data_set.load()
 
@@ -170,9 +168,7 @@ class TestSQLTableDataSetSave:
     )
     def test_save_unknown_sql(self, table_data_set, dummy_dataframe):
         """Check the error when unknown sql dialect is provided"""
-        pattern = (
-            r"The SQL dialect in your connection is not supported " r"by SQLAlchemy"
-        )
+        pattern = r"The SQL dialect in your connection is not supported by SQLAlchemy"
         with pytest.raises(DataSetError, match=pattern):
             table_data_set.save(dummy_dataframe)
 
@@ -249,7 +245,7 @@ class TestSQLQueryDataSet:
 
     def test_empty_query_error(self):
         """Check the error when instantiating with empty query"""
-        pattern = r"`sql` argument cannot be empty\. " r"Please provide a sql query"
+        pattern = r"`sql` argument cannot be empty\. Please provide a sql query"
         with pytest.raises(DataSetError, match=pattern):
             SQLQueryDataSet(sql="", credentials=dict(con=CONNECTION))
 
@@ -300,9 +296,7 @@ class TestSQLQueryDataSet:
     def test_load_unknown_sql(self, query_data_set):
         """Check the error when unknown SQL dialect is provided
         in the connection string"""
-        pattern = (
-            r"The SQL dialect in your connection is not supported " r"by SQLAlchemy"
-        )
+        pattern = r"The SQL dialect in your connection is not supported by SQLAlchemy"
         with pytest.raises(DataSetError, match=pattern):
             query_data_set.load()
 

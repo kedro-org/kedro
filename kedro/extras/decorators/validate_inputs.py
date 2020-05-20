@@ -27,8 +27,8 @@
 # limitations under the License.
 
 """
-This module contains the validate decorator, which can be used as
-``Node`` decorators to validate node inputs of choice. See ``kedro.pipeline.node.decorate``
+This module contains the `validate` decorator, which can be used as a
+``Node`` decorator to validate node inputs of choice. See ``kedro.pipeline.node.decorate``
 """
 
 from inspect import Parameter, signature

@@ -43,7 +43,7 @@ def validate(*arguments: Any) -> Callable[[Callable[..., RT]], Callable[..., RT]
     """Creates a decorator for validating function inputs according to their types.
     For a list of supported types please refer to:
     https://pydantic-docs.helpmanual.io/usage/types/
-    for types which inherit from `pydantic.BaseModel` it evaluates the functions
+    For types which inherit from `pydantic.BaseModel` it evaluates the functions
     with the inputs casted to their model.
 
     Returns:

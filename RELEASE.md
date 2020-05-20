@@ -1,4 +1,4 @@
-# Upcoming Release
+# 0.16.0
 
 ## Major features and improvements
 ### CLI

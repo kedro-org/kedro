@@ -51,6 +51,15 @@ def myfn():
 
     return test
 
+@pytest.fixture
+def my_fn_with_no_type_hinting():
+    def test(
+        a, df, c
+    ):  # pylint: disable=unused-argument
+        return a, df, c
+
+    return test
+
 
 @pytest.mark.parametrize(
     "arguments,inputs",
@@ -64,6 +73,18 @@ def test_parse_type_and_validate(myfn, arguments, inputs):
     a = validate(*arguments)(myfn)(*inputs)
     if "a" in arguments:
         assert a.shuffle is True
+
+@pytest.mark.parametrize(
+    "arguments,inputs",
+    [
+        (["a"], ({"frc": 0.5, "shuffle": "Y"}, 2.0, 1)),
+        (["c"], (2.0, 1, [])),
+        (["a", "c"], ({"frc": 0.5, "shuffle": True}, 2.0, "a")),
+    ],
+)
+def test_do_nothing_because_no_type_hinting(my_fn_with_no_type_hinting, arguments, inputs):
+    ans = validate(*arguments)(my_fn_with_no_type_hinting)(*inputs)
+    assert all([an==inp for an, inp in zip(ans, inputs)])
 
 
 @pytest.mark.parametrize(

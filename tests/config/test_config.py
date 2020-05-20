@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -85,7 +85,7 @@ def base_config(tmp_path):
     return {
         "trains": {"type": "MemoryDataSet"},
         "cars": {
-            "type": "CSVLocalDataSet",
+            "type": "pandas.CSVDataSet",
             "filepath": filepath,
             "save_args": {"index": True},
         },
@@ -97,7 +97,7 @@ def local_config(tmp_path):
     filepath = str(tmp_path / "cars.csv")
     return {
         "cars": {
-            "type": "CSVLocalDataSet",
+            "type": "pandas.CSVDataSet",
             "filepath": filepath,
             "save_args": {"index": False},
         },
@@ -156,7 +156,7 @@ class TestConfigLoader:
         assert db_conf["prod"]["url"] == "postgresql://user:pass@url_prod/db"
 
         assert catalog["trains"]["type"] == "MemoryDataSet"
-        assert catalog["cars"]["type"] == "CSVLocalDataSet"
+        assert catalog["cars"]["type"] == "pandas.CSVDataSet"
         assert catalog["boats"]["type"] == "MemoryDataSet"
         assert not catalog["cars"]["save_args"]["index"]
 
@@ -194,7 +194,7 @@ class TestConfigLoader:
         """Test loading the config from subdirectories"""
         catalog = ConfigLoader(str(tmp_path / "base")).get("catalog*", "catalog*/**")
         assert catalog.keys() == {"cars", "trains", "nested"}
-        assert catalog["cars"]["type"] == "CSVLocalDataSet"
+        assert catalog["cars"]["type"] == "pandas.CSVDataSet"
         assert catalog["cars"]["save_args"]["index"] is True
         assert catalog["nested"]["type"] == "MemoryDataSet"
 

@@ -12,7 +12,13 @@ This will create documentation based on the code structure of your project. Docu
 
 ## Package your project
 
-You can package your project by running `kedro package` from the command line. This will create one `.egg` file  and one `.whl` file within the `src/dist/` folder of your project, which are Python packaging formats. For further information about packaging for Python, documentation is provided [here](https://packaging.python.org/overview/).
+You can package your project by running `kedro package` from the command line. This will create one `.egg` file and one `.whl` file within the `src/dist/` folder of your project, which are Python packaging formats for binary distribution. For further information about packaging for Python, documentation is provided [here](https://packaging.python.org/overview/).
+
+After packaging your project, you can move the `.egg` and `.whl` files to your execution environment and install them accordingly using `pip install <path/to/your/wheel/file>`. For example, if you name your project as `kedro-spaceflights` and your package `kedro_spaceflights`, this `pip` installation will allow you to run your Kedro project with `python -m kedro_spaceflights.run`. There is also an executable `kedro-spaceflights` located in the `bin` directory of your Python installation location.
+
+Please note that this packaging method only contains Python source code of your Kedro pipeline, not any of the `conf/`, `data/` and `logs/` directories. To successfully run the packaged project, you still need to be inside a directory that contain these sub-directories. This allows you to distribute the same source code but run it with different configuration, data and logging location in different environments.
+
+> *Note:* `data/` folder is optional if your pipeline(s) don't load or save any local data.
 
 ## Manage project dependencies
 

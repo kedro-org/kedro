@@ -37,7 +37,7 @@ loggers:
         handlers: [console]
         propagate: no
 
-    kedro.cli:
+    kedro.framework.cli:
         level: WARNING
         handlers: [console]
         propagate: no

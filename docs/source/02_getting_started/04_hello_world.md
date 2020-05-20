@@ -1,10 +1,10 @@
 # A "Hello World" example
 
-To learn how basic Kedro projects work, you can [create a project interactively](./03_new_project.md#create-a-new-project-interactively) and explore it as you read this section. Feel free to name your project as you like, but this guide will assume the project is named `getting-started`.
+To learn how basic Kedro projects work, [create a project interactively](./03_new_project.md#create-a-new-project-interactively) and explore it as you read this section. Feel free to name your project as you like, but this guide will assume the project is named `getting-started`.
 
-Be sure to enter `Y` to include Kedro's example so your new project template contains the well-known [Iris dataset](https://archive.ics.uci.edu/ml/datasets/iris), to get you started.
+Be sure to enter `Y` to include Kedro's example so your new project template contains the well-known [Iris dataset](https://archive.ics.uci.edu/ml/datasets/iris) to get you started.
 
-The Iris dataset, generated in 1936 by the British statistician and biologist Ronald Fisher, is a simple, but frequently-referenced dataset. It contains 150 samples in total, comprising 50 samples of 3 different species of Iris plant (Iris Setosa, Iris Versicolour and Iris Virginica). For each sample, the flower measurements are recorded for the sepal length, sepal width, petal length and petal width.
+>The Iris dataset, generated in 1936 by the British statistician and biologist Ronald Fisher, is a simple, but frequently-referenced dataset. It contains 150 samples in total, comprising 50 samples of 3 different species of Iris plant (Iris Setosa, Iris Versicolour and Iris Virginica). For each sample, the flower measurements are recorded for the sepal length, sepal width, petal length and petal width.
 
 ![](images/iris_measurements.png)
 
@@ -75,8 +75,8 @@ A `kedro` project consists of the following main components:
 |              | cleaning, dropping columns, validation, model training, scoring, etc.       |
 +--------------+-----------------------------------------------------------------------------+
 | Runner       | An object that runs the :code:`kedro` pipeline using the specified          |
-|              | data catalog. Currently :code:`kedro` supports 2 runner types:              |
-|              | :code:`SequentialRunner` and :code:`ParallelRunner`.                        |
+|              | data catalog. Currently :code:`kedro` supports 3 runner types:              |
+|              | :code:`SequentialRunner`, :code:`ParallelRunner` and :code:`ThreadRunner`.  |
 +--------------+-----------------------------------------------------------------------------+
 ```
 

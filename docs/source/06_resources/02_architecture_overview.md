@@ -1,6 +1,6 @@
 # Kedro architecture overview
 
-> *Note:* This documentation is based on `Kedro 0.15.9`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.0`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 Here is a diagram showing high-level architecture of Kedro library:
 
@@ -28,7 +28,11 @@ A Python file located in `src/<python_package>/run.py`, which by default contain
 
 #### `.kedro.yml`
 
-YAML configuration file that must contain `context_path` top-level key pointing to the absolute path to context class implementation (default is `<python_project>.run.ProjectContext`). This file must be located at the root of the project, since it is used to detect the project root by other Kedro components.
+`.kedro.yml` identifies the project root, which is used by other Kedro components and contains the following configuration entries:
+- `source_dir`: (Optional) The directory of the source path relative to the project root path. Default directory is `src/` and when customised the path should be separated by a forward slash (e.g `src/<path_to_src>/`)
+- `context_path`: A top-level key pointing to the absolute path of the context class implementation (default is `<python_project>.run.ProjectContext`)
+
+`.kedro.yml` must be located at the root of the project.
 
 #### `00-kedro-init.py`
 
@@ -36,7 +40,7 @@ This script is automatically invoked at IPython kernel startup when calling `ked
 
 #### `ProjectContext`
 
-Project specific context class that extends `kedro.context.KedroContext` abstract class. `ProjectContext` contains the information about the current project name, Kedro version used to generate the project, and concrete pipeline definition.
+Project specific context class that extends `kedro.framework.context.KedroContext` abstract class. `ProjectContext` contains the information about the current project name, Kedro version used to generate the project, and concrete pipeline definition.
 
 ### Framework
 

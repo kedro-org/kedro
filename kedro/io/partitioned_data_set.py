@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -31,12 +31,11 @@ underlying dataset definition. It also uses `fsspec` for filesystem level operat
 """
 import operator
 from copy import deepcopy
-from functools import lru_cache
 from typing import Any, Callable, Dict, List, Tuple, Type, Union
+from urllib.parse import urlparse
 from warnings import warn
 
-import fsspec
-from fsspec.utils import infer_storage_options
+from cachetools import Cache, cachedmethod
 
 from kedro.io.core import (
     VERSION_KEY,
@@ -55,7 +54,7 @@ S3_PROTOCOLS = ("s3", "s3a", "s3n")
 
 
 class PartitionedDataSet(AbstractDataSet):
-    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-instance-attributes,protected-access
     """``PartitionedDataSet`` loads and saves partitioned file-like data using the
     underlying dataset definition. For filesystem level operations it uses `fsspec`:
     https://github.com/intake/filesystem_spec.
@@ -141,11 +140,15 @@ class PartitionedDataSet(AbstractDataSet):
         Raises:
             DataSetError: If versioning is enabled for the underlying dataset.
         """
+        # pylint: disable=import-outside-toplevel
+        from fsspec.utils import infer_storage_options  # for performance reasons
+
         super().__init__()
 
         self._path = path
         self._filename_suffix = filename_suffix
         self._protocol = infer_storage_options(self._path)["protocol"]
+        self._partition_cache = Cache(maxsize=1)
 
         dataset = dataset if isinstance(dataset, dict) else {"type": dataset}
         self._dataset_type, self._dataset_config = parse_dataset_definition(dataset)
@@ -178,18 +181,27 @@ class PartitionedDataSet(AbstractDataSet):
         self._load_args = deepcopy(load_args) or {}
         self._sep = self._filesystem.sep
         # since some filesystem implementations may implement a global cache
-        self.invalidate_cache()
+        self._invalidate_caches()
 
     @property
-    def _filesystem(self) -> fsspec.AbstractFileSystem:
+    def _filesystem(self):
+        # for performance reasons
+        import fsspec  # pylint: disable=import-outside-toplevel
+
         protocol = "s3" if self._protocol in S3_PROTOCOLS else self._protocol
         return fsspec.filesystem(protocol, **self._credentials)
 
-    @lru_cache(maxsize=None)
+    @property
+    def _normalized_path(self) -> str:
+        if self._protocol in S3_PROTOCOLS:
+            return urlparse(self._path)._replace(scheme="s3").geturl()
+        return self._path
+
+    @cachedmethod(cache=operator.attrgetter("_partition_cache"))
     def _list_partitions(self) -> List[str]:
         return [
             path
-            for path in self._filesystem.find(self._path, **self._load_args)
+            for path in self._filesystem.find(self._normalized_path, **self._load_args)
             if path.endswith(self._filename_suffix)
         ]
 
@@ -207,9 +219,7 @@ class PartitionedDataSet(AbstractDataSet):
         return full_path
 
     def _path_to_partition(self, path: str) -> str:
-        dir_path = self._filesystem._strip_protocol(  # pylint: disable=protected-access
-            self._path
-        )
+        dir_path = self._filesystem._strip_protocol(self._normalized_path)
         path = path.split(dir_path, 1).pop().lstrip(self._sep)
         if self._filename_suffix and path.endswith(self._filename_suffix):
             path = path[: -len(self._filename_suffix)]
@@ -239,7 +249,7 @@ class PartitionedDataSet(AbstractDataSet):
             kwargs[self._filepath_arg] = self._join_protocol(partition)
             dataset = self._dataset_type(**kwargs)  # type: ignore
             dataset.save(partition_data)
-        self.invalidate_cache()
+        self._invalidate_caches()
 
     def _describe(self) -> Dict[str, Any]:
         clean_dataset_config = (
@@ -253,16 +263,16 @@ class PartitionedDataSet(AbstractDataSet):
             dataset_config=clean_dataset_config,
         )
 
-    def invalidate_cache(self):
-        """Invalidate `_list_partitions` method and underlying filesystem caches."""
-        self._list_partitions.cache_clear()
-        self._filesystem.invalidate_cache(self._path)
+    def _invalidate_caches(self):
+        self._partition_cache.clear()
+        self._filesystem.invalidate_cache(self._normalized_path)
 
     def _exists(self) -> bool:
         return bool(self._list_partitions())
 
     def _release(self) -> None:
-        self.invalidate_cache()
+        super()._release()
+        self._invalidate_caches()
 
 
 def _split_credentials(
@@ -409,7 +419,7 @@ class IncrementalDataSet(PartitionedDataSet):
             )
 
         default_checkpoint_path = self._sep.join(
-            [self._path.rstrip(self._sep), self.DEFAULT_CHECKPOINT_FILENAME]
+            [self._normalized_path.rstrip(self._sep), self.DEFAULT_CHECKPOINT_FILENAME]
         )
         default_config = {
             "type": self.DEFAULT_CHECKPOINT_TYPE,
@@ -426,7 +436,7 @@ class IncrementalDataSet(PartitionedDataSet):
 
         return {**default_config, **checkpoint_config}
 
-    @lru_cache(maxsize=None)
+    @cachedmethod(cache=operator.attrgetter("_partition_cache"))
     def _list_partitions(self) -> List[str]:
         checkpoint = self._read_checkpoint()
         checkpoint_path = self._filesystem._strip_protocol(  # pylint: disable=protected-access
@@ -444,11 +454,11 @@ class IncrementalDataSet(PartitionedDataSet):
             partition_id = self._path_to_partition(partition)
             return self._comparison_func(partition_id, checkpoint)
 
-        return [
+        return sorted(
             part
-            for part in sorted(self._filesystem.find(self._path, **self._load_args))
+            for part in self._filesystem.find(self._normalized_path, **self._load_args)
             if _is_valid_partition(part)
-        ]
+        )
 
     @property
     def _checkpoint(self) -> AbstractDataSet:

@@ -10,7 +10,7 @@ clean:
 	pre-commit clean || true
 
 install-pip-setuptools:
-	python -m pip install -U "pip>=18.0, <19.0" "setuptools>=38.0, <39.0" wheel
+	python -m pip install -U "pip>=20.0, <21.0" "setuptools>=38.0, <47.0" wheel
 
 legal:
 	python tools/license_and_headers.py
@@ -19,7 +19,10 @@ lint:
 	pre-commit run -a --hook-stage manual
 
 test:
-	pytest tests
+	pytest tests --cov-config pyproject.toml
+
+test-no-spark:
+	pytest tests --cov-config pyproject_no_spark.toml --ignore tests/extras/datasets/spark
 
 e2e-tests:
 	behave
@@ -50,3 +53,6 @@ install-pre-commit: install-test-requirements
 uninstall-pre-commit:
 	pre-commit uninstall
 	pre-commit uninstall --hook-type pre-push
+
+print-python-env:
+	@./tools/print_env.sh

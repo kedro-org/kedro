@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -32,9 +32,11 @@ sets. Then it will act as a single point of reference for your calls,
 relaying load and save functions to the underlying data sets.
 """
 import copy
+import difflib
 import logging
+from collections import defaultdict
 from functools import partial
-from typing import Any, Dict, Iterable, List, Optional, Type, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Type, Union
 from warnings import warn
 
 from kedro.io.core import (
@@ -140,6 +142,7 @@ class DataCatalog:
         transformers: Dict[str, List[AbstractTransformer]] = None,
         default_transformers: List[AbstractTransformer] = None,
         journal: Journal = None,
+        layers: Dict[str, Set[str]] = None,
     ) -> None:
         """``DataCatalog`` stores instances of ``AbstractDataSet``
         implementations to provide ``load`` and ``save`` capabilities from
@@ -156,6 +159,10 @@ class DataCatalog:
             default_transformers: A list of transformers to be applied to any
                 new data sets.
             journal: Instance of Journal.
+            layers: A dictionary of data set layers. It maps a layer name
+                to a set of data set names, according to the
+                data engineering convention. For more details, see
+                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
         Raises:
             DataSetNotFoundError: When transformers are passed for a non
                 existent data set.
@@ -172,6 +179,7 @@ class DataCatalog:
         """
         self._data_sets = dict(data_sets or {})
         self.datasets = _FrozenDatasets(self._data_sets)
+        self.layers = layers
 
         self._transformers = {k: list(v) for k, v in (transformers or {}).items()}
         self._default_transformers = list(default_transformers or [])
@@ -257,7 +265,7 @@ class DataCatalog:
             >>>     },
             >>>     "boats": {
             >>>         "type": "pandas.CSVDataSet",
-            >>>         "filepath": "s3://mck-147789798-bucket/boats.csv",
+            >>>         "filepath": "s3://aws-bucket-name/boats.csv",
             >>>         "credentials": "boats_credentials"
             >>>         "save_args": {
             >>>             "index": False
@@ -294,16 +302,33 @@ class DataCatalog:
                 )
             )
 
+        layers = defaultdict(set)  # type: Dict[str, Set[str]]
         for ds_name, ds_config in catalog.items():
+            ds_layer = ds_config.pop("layer", None)
+            if ds_layer is not None:
+                layers[ds_layer].add(ds_name)
+
             ds_config = _resolve_credentials(ds_config, credentials)
             data_sets[ds_name] = AbstractDataSet.from_config(
                 ds_name, ds_config, load_versions.get(ds_name), save_version
             )
-        return cls(data_sets=data_sets, journal=journal)
 
-    def _get_transformed_dataset_function(
-        self, data_set_name: str, operation: str, version: Version = None
-    ):
+        dataset_layers = layers or None
+        return cls(data_sets=data_sets, journal=journal, layers=dataset_layers)
+
+    def _get_dataset(
+        self, data_set_name: str, version: Version = None
+    ) -> AbstractDataSet:
+        if data_set_name not in self._data_sets:
+            error_msg = f"DataSet '{data_set_name}' not found in the catalog"
+
+            matches = difflib.get_close_matches(data_set_name, self._data_sets.keys())
+            if matches:
+                suggestions = ", ".join(matches)  # type: ignore
+                error_msg += f" - did you mean one of these instead: {suggestions}"
+
+            raise DataSetNotFoundError(error_msg)
+
         data_set = self._data_sets[data_set_name]
         if version and isinstance(data_set, AbstractVersionedDataSet):
             # we only want to return a similar-looking dataset,
@@ -312,6 +337,11 @@ class DataCatalog:
                 _version=version
             )
 
+        return data_set
+
+    def _get_transformed_dataset_function(
+        self, data_set_name: str, operation: str, data_set: AbstractDataSet
+    ) -> Callable:
         func = getattr(data_set, operation)
         for transformer in reversed(self._transformers[data_set_name]):
             func = partial(getattr(transformer, operation), data_set_name, func)
@@ -322,7 +352,8 @@ class DataCatalog:
 
         Args:
             name: A data set to be loaded.
-            version: Optional version to be loaded.
+            version: Optional argument for concrete data version to be loaded.
+            Works only with versioned datasets.
 
         Returns:
             The loaded data as configured.
@@ -344,25 +375,25 @@ class DataCatalog:
             >>>
             >>> df = io.load("cars")
         """
-        if name not in self._data_sets:
-            raise DataSetNotFoundError(
-                "DataSet '{}' not found in the catalog".format(name)
-            )
+        load_version = Version(version, None) if version else None
+        dataset = self._get_dataset(name, version=load_version)
 
         self._logger.info(
-            "Loading data from `%s` (%s)...", name, type(self._data_sets[name]).__name__
+            "Loading data from `%s` (%s)...", name, type(dataset).__name__
         )
 
-        version = Version(version, None) if version else None
-        func = self._get_transformed_dataset_function(name, "load", version)
+        func = self._get_transformed_dataset_function(name, "load", dataset)
         result = func()
 
-        load_version = (
-            version.load if version else self._data_sets[name].get_last_load_version()
+        version = (
+            dataset.resolve_load_version()
+            if isinstance(dataset, AbstractVersionedDataSet)
+            else None
         )
+
         # Log only if versioning is enabled for the data set
-        if self._journal and load_version:
-            self._journal.log_catalog(name, "load", load_version)
+        if self._journal and version:
+            self._journal.log_catalog(name, "load", version)
         return result
 
     def save(self, name: str, data: Any) -> None:
@@ -394,19 +425,19 @@ class DataCatalog:
             >>>                    'col3': [5, 6]})
             >>> io.save("cars", df)
         """
-        if name not in self._data_sets:
-            raise DataSetNotFoundError(
-                "DataSet '{}' not found in the catalog".format(name)
-            )
+        dataset = self._get_dataset(name)
 
-        self._logger.info(
-            "Saving data to `%s` (%s)...", name, type(self._data_sets[name]).__name__
-        )
+        self._logger.info("Saving data to `%s` (%s)...", name, type(dataset).__name__)
 
-        func = self._get_transformed_dataset_function(name, "save")
+        func = self._get_transformed_dataset_function(name, "save", dataset)
         func(data)
 
-        version = self._data_sets[name].get_last_save_version()
+        version = (
+            dataset.resolve_save_version()
+            if isinstance(dataset, AbstractVersionedDataSet)
+            else None
+        )
+
         # Log only if versioning is enabled for the data set
         if self._journal and version:
             self._journal.log_catalog(name, "save", version)
@@ -426,10 +457,8 @@ class DataCatalog:
             DataSetNotFoundError: When a data set with the given name
                 has not yet been registered.
         """
-        if name in self._data_sets:
-            return self._data_sets[name].exists()
-
-        raise DataSetNotFoundError("DataSet '{}' not found in the catalog".format(name))
+        dataset = self._get_dataset(name)
+        return dataset.exists()
 
     def release(self, name: str):
         """Release any cached data associated with a data set
@@ -441,12 +470,8 @@ class DataCatalog:
             DataSetNotFoundError: When a data set with the given name
                 has not yet been registered.
         """
-        if name not in self._data_sets:
-            raise DataSetNotFoundError(
-                "DataSet '{}' not found in the catalog".format(name)
-            )
-
-        self._data_sets[name].release()
+        dataset = self._get_dataset(name)
+        dataset.release()
 
     def add(
         self, data_set_name: str, data_set: AbstractDataSet, replace: bool = False
@@ -627,14 +652,16 @@ class DataCatalog:
         )
 
     def confirm(self, name: str) -> None:
-        """Confirm a DataSet by its name"""
-        self._logger.info("Confirming DataSet '%s'", name)
+        """Confirm a dataset by its name.
 
-        if name not in self._data_sets:
-            raise DataSetNotFoundError(
-                "DataSet '{}' not found in the catalog".format(name)
-            )
-        data_set = self._data_sets[name]
+        Args:
+            name: Name of the dataset.
+        Raises:
+            DataSetError: When the dataset does not have `confirm` method.
+
+        """
+        self._logger.info("Confirming DataSet '%s'", name)
+        data_set = self._get_dataset(name)
 
         if hasattr(data_set, "confirm"):
             data_set.confirm()  # type: ignore

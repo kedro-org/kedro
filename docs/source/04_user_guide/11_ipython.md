@@ -1,6 +1,6 @@
 # Working with IPython and Jupyter Notebooks / Lab
 
-> *Note:* This documentation is based on `Kedro 0.15.9`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.0`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 This section follows the ["Hello World" example](../02_getting_started/04_hello_world.md) and demonstrates how to effectively use IPython and Jupyter Notebooks / Lab.
 
@@ -156,7 +156,7 @@ In certain cases, you may not be able to run `kedro jupyter notebook` and have t
 
 ```python
 from pathlib import Path
-from kedro.context import load_context
+from kedro.framework.context import load_context
 
 current_dir = Path.cwd()  # this points to 'notebooks/' folder
 proj_path = current_dir.parent  # point back to the root of the project

@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -28,6 +28,13 @@
 
 """Provides I/O modules for Apache Spark."""
 
-from .spark_dataset import SparkDataSet  # NOQA
-from .spark_hive_dataset import SparkHiveDataSet  # NOQA
-from .spark_jdbc_dataset import SparkJDBCDataSet  # NOQA
+__all__ = ["SparkDataSet", "SparkHiveDataSet", "SparkJDBCDataSet"]
+
+from contextlib import suppress
+
+with suppress(ImportError):
+    from .spark_dataset import SparkDataSet  # NOQA
+with suppress(ImportError):
+    from .spark_hive_dataset import SparkHiveDataSet  # NOQA
+with suppress(ImportError):
+    from .spark_jdbc_dataset import SparkJDBCDataSet  # NOQA

@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -32,13 +32,14 @@
 
 from copy import deepcopy
 from fnmatch import fnmatch
-from pathlib import Path, PurePosixPath
-from typing import Any, Dict, List, Tuple
+from functools import partial
+from pathlib import PurePath, PurePosixPath
+from typing import Any, Dict, List, Optional, Tuple
 from warnings import warn
 
 from hdfs import HdfsError, InsecureClient
-from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql.utils import AnalysisException
+from pyspark.sql import DataFrame, SparkSession  # pylint: disable=import-error
+from pyspark.sql.utils import AnalysisException  # pylint: disable=import-error
 from s3fs import S3FileSystem
 
 from kedro.io.core import AbstractVersionedDataSet, Version
@@ -61,8 +62,57 @@ def _split_filepath(filepath: str) -> Tuple[str, str]:
     return "", split_[0]
 
 
-def _strip_dbfs_prefix(path: str) -> str:
-    return path[len("/dbfs") :] if path.startswith("/dbfs") else path
+def _strip_dbfs_prefix(path: str, prefix: str = "/dbfs") -> str:
+    return path[len(prefix) :] if path.startswith(prefix) else path
+
+
+def _dbfs_glob(pattern: str, dbutils: Any) -> List[str]:
+    """Perform a custom glob search in DBFS using the provided pattern.
+    It is assumed that version paths are managed by Kedro only.
+
+    Args:
+        pattern: Glob pattern to search for.
+        dbutils: dbutils instance to operate with DBFS.
+
+    Returns:
+            List of DBFS paths prefixed with '/dbfs' that satisfy the glob pattern.
+    """
+    pattern = _strip_dbfs_prefix(pattern)
+    prefix = _parse_glob_pattern(pattern)
+    matched = set()
+    filename = pattern.split("/")[-1]
+
+    for file_info in dbutils.fs.ls(prefix):
+        if file_info.isDir():
+            path = str(
+                PurePosixPath(_strip_dbfs_prefix(file_info.path, "dbfs:")) / filename
+            )
+            if fnmatch(path, pattern):
+                path = "/dbfs" + path
+                matched.add(path)
+    return sorted(matched)
+
+
+def _get_dbutils(spark: SparkSession) -> Optional[Any]:
+    """Get the instance of 'dbutils' or None if the one could not be found."""
+    dbutils = globals().get("dbutils")
+    if dbutils:
+        return dbutils
+
+    try:
+        from pyspark.dbutils import DBUtils  # pylint: disable=import-outside-toplevel
+
+        dbutils = DBUtils(spark)
+    except ImportError:
+        try:
+            import IPython  # pylint: disable=import-error,import-outside-toplevel
+        except ImportError:
+            pass
+        else:
+            ipython = IPython.get_ipython()
+            dbutils = ipython.user_ns.get("dbutils") if ipython else None
+
+    return dbutils
 
 
 class KedroHdfsInsecureClient(InsecureClient):
@@ -145,7 +195,6 @@ class SparkDataSet(AbstractVersionedDataSet):
         save_args: Dict[str, Any] = None,
         version: Version = None,
         credentials: Dict[str, Any] = None,
-        layer: str = None,
     ) -> None:
         """Creates a new instance of ``SparkDataSet``.
 
@@ -180,11 +229,11 @@ class SparkDataSet(AbstractVersionedDataSet):
                 prefix is ``s3a://`` or ``s3n://``. Optional keyword arguments passed to
                 ``hdfs.client.InsecureClient`` if ``filepath`` prefix is ``hdfs://``.
                 Ignored otherwise.
-            layer: The data layer according to the data engineering convention:
-                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
         """
         credentials = deepcopy(credentials) or {}
         fs_prefix, filepath = _split_filepath(filepath)
+        exists_function = None
+        glob_function = None
 
         if fs_prefix in ("s3a://", "s3n://"):
             if fs_prefix == "s3n://":
@@ -216,8 +265,14 @@ class SparkDataSet(AbstractVersionedDataSet):
             path = PurePosixPath(filepath)
 
         else:
-            exists_function = glob_function = None  # type: ignore
-            path = Path(filepath)  # type: ignore
+            path = PurePath(filepath)  # type: ignore
+
+            if filepath.startswith("/dbfs"):
+                # Use PosixPath if the filepath references DBFS
+                path = PurePosixPath(filepath)
+                dbutils = _get_dbutils(self._get_spark())
+                if dbutils:
+                    glob_function = partial(_dbfs_glob, dbutils=dbutils)
 
         super().__init__(
             filepath=path,
@@ -225,8 +280,6 @@ class SparkDataSet(AbstractVersionedDataSet):
             exists_function=exists_function,
             glob_function=glob_function,
         )
-
-        self._layer = layer
 
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
@@ -239,6 +292,10 @@ class SparkDataSet(AbstractVersionedDataSet):
         self._file_format = file_format
         self._fs_prefix = fs_prefix
 
+    def __getstate__(self):
+        # SparkDataSet cannot be used with ParallelRunner
+        raise AttributeError("{} cannot be serialized!".format(self.__class__.__name__))
+
     def _describe(self) -> Dict[str, Any]:
         return dict(
             filepath=self._fs_prefix + str(self._filepath),
@@ -246,7 +303,6 @@ class SparkDataSet(AbstractVersionedDataSet):
             load_args=self._load_args,
             save_args=self._save_args,
             version=self._version,
-            layer=self._layer,
         )
 
     @staticmethod

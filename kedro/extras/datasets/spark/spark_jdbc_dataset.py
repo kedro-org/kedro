@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -31,7 +31,7 @@
 from copy import deepcopy
 from typing import Any, Dict
 
-from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql import DataFrame, SparkSession  # pylint: disable=import-error
 
 from kedro.io.core import AbstractDataSet, DataSetError
 
@@ -84,7 +84,6 @@ class SparkJDBCDataSet(AbstractDataSet):
         credentials: Dict[str, Any] = None,
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
-        layer: str = None,
     ) -> None:
         """Creates a new ``SparkJDBCDataSet``.
 
@@ -104,8 +103,6 @@ class SparkJDBCDataSet(AbstractDataSet):
                 with the JDBC URL and the name of the table. To find all
                 supported arguments, see here:
                 https://spark.apache.org/docs/latest/api/python/pyspark.sql.html?highlight=jdbc#pyspark.sql.DataFrameWriter.jdbc
-            layer: The data layer according to the data engineering convention:
-                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
 
         Raises:
             DataSetError: When either ``url`` or ``table`` is empty or
@@ -128,7 +125,6 @@ class SparkJDBCDataSet(AbstractDataSet):
 
         self._url = url
         self._table = table
-        self._layer = layer
 
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
@@ -171,11 +167,7 @@ class SparkJDBCDataSet(AbstractDataSet):
             save_args = {**save_args, "properties": save_properties}
 
         return dict(
-            url=self._url,
-            table=self._table,
-            load_args=load_args,
-            save_args=save_args,
-            layer=self._layer,
+            url=self._url, table=self._table, load_args=load_args, save_args=save_args,
         )
 
     @staticmethod

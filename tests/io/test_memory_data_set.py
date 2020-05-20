@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -115,9 +115,7 @@ class TestMemoryDataSet:
         assert mocked_copy_with_mode.call_args[0]
         assert _check_equals(mocked_copy_with_mode.call_args[0][0], input_data)
 
-    def test_save(
-        self, memory_data_set, input_data, new_data,
-    ):
+    def test_save(self, memory_data_set, input_data, new_data):
         """Test overriding the data set"""
         memory_data_set.save(data=new_data)
         reloaded = memory_data_set.load()
@@ -125,7 +123,7 @@ class TestMemoryDataSet:
         assert _check_equals(reloaded, new_data)
 
     def test_save_infer_mode(
-        self, memory_data_set, new_data, mocked_infer_mode, mocked_copy_with_mode,
+        self, memory_data_set, new_data, mocked_infer_mode, mocked_copy_with_mode
     ):
         """Test save calls infer_mode and copy_mode_with"""
         memory_data_set.save(data=new_data)

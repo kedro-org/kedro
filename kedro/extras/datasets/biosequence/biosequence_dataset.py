@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -76,7 +76,6 @@ class BioSequenceDataSet(AbstractDataSet):
         save_args: Dict[str, Any] = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
-        layer: str = None,
     ) -> None:
         """
         Creates a new instance of ``BioSequenceDataSet`` pointing
@@ -91,20 +90,25 @@ class BioSequenceDataSet(AbstractDataSet):
                 E.g. `{"format": "fasta"}`.
             credentials: Credentials required to get access to the underlying filesystem.
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
-            fs_args: Extra arguments to pass into underlying filesystem class.
-                E.g. for ``GCSFileSystem`` class: `{"project": "my-project", ...}`.
-            layer: The data layer according to the data engineering convention:
-                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
+            fs_args: Extra arguments to pass into underlying filesystem class constructor
+                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``), as well as
+                to pass to the filesystem's `open` method through nested keys
+                `open_args_load` and `open_args_save`.
+                Here you can find all available arguments for `open`:
+                https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
+                All defaults are preserved, except `mode`, which is set to `r` when loading
+                and to `w` when saving.
 
         Note: Here you can find all supported file formats: https://biopython.org/wiki/SeqIO
         """
 
         _fs_args = deepcopy(fs_args) or {}
+        _fs_open_args_load = _fs_args.pop("open_args_load", {})
+        _fs_open_args_save = _fs_args.pop("open_args_save", {})
         _credentials = deepcopy(credentials) or {}
 
         protocol, path = get_protocol_and_path(filepath)
 
-        self._layer = layer
         self._filepath = PurePosixPath(path)
         self._protocol = protocol
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
@@ -117,24 +121,28 @@ class BioSequenceDataSet(AbstractDataSet):
         if save_args is not None:
             self._save_args.update(save_args)
 
+        _fs_open_args_load.setdefault("mode", "r")
+        _fs_open_args_save.setdefault("mode", "w")
+        self._fs_open_args_load = _fs_open_args_load
+        self._fs_open_args_save = _fs_open_args_save
+
     def _describe(self) -> Dict[str, Any]:
         return dict(
             filepath=self._filepath,
             protocol=self._protocol,
             load_args=self._load_args,
             save_args=self._save_args,
-            layer=self._layer,
         )
 
     def _load(self) -> List:
         load_path = get_filepath_str(self._filepath, self._protocol)
-        with self._fs.open(load_path, mode="r") as fs_file:
+        with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return list(SeqIO.parse(handle=fs_file, **self._load_args))
 
     def _save(self, data: List) -> None:
         save_path = get_filepath_str(self._filepath, self._protocol)
 
-        with self._fs.open(save_path, mode="w") as fs_file:
+        with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
             SeqIO.write(data, handle=fs_file, **self._save_args)
 
     def _exists(self) -> bool:

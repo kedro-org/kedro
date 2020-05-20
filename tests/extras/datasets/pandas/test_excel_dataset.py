@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -47,9 +47,12 @@ def filepath_excel(tmp_path):
 
 
 @pytest.fixture
-def excel_data_set(filepath_excel, load_args, save_args):
+def excel_data_set(filepath_excel, load_args, save_args, fs_args):
     return ExcelDataSet(
-        filepath=filepath_excel, load_args=load_args, save_args=save_args
+        filepath=filepath_excel,
+        load_args=load_args,
+        save_args=save_args,
+        fs_args=fs_args,
     )
 
 
@@ -71,6 +74,8 @@ class TestExcelDataSet:
         excel_data_set.save(dummy_dataframe)
         reloaded = excel_data_set.load()
         assert_frame_equal(dummy_dataframe, reloaded)
+        assert excel_data_set._fs_open_args_load == {}
+        assert excel_data_set._fs_open_args_save == {"mode": "wb"}
 
     def test_exists(self, excel_data_set, dummy_dataframe):
         """Test `exists` method invocation for both existing and
@@ -94,6 +99,15 @@ class TestExcelDataSet:
         """Test overriding the default save arguments."""
         for key, value in save_args.items():
             assert excel_data_set._save_args[key] == value
+
+    @pytest.mark.parametrize(
+        "fs_args",
+        [{"open_args_load": {"mode": "rb", "compression": "gzip"}}],
+        indirect=True,
+    )
+    def test_open_extra_args(self, excel_data_set, fs_args):
+        assert excel_data_set._fs_open_args_load == fs_args["open_args_load"]
+        assert excel_data_set._fs_open_args_save == {"mode": "wb"}  # default unchanged
 
     def test_load_missing_file(self, excel_data_set):
         """Check the error when trying to load missing file."""

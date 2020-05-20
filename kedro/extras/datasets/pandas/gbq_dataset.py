@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -41,7 +41,6 @@ from google.oauth2.credentials import Credentials
 from kedro.io.core import AbstractDataSet, DataSetError, validate_on_forbidden_chars
 
 
-# pylint: disable=too-many-instance-attributes
 class GBQTableDataSet(AbstractDataSet):
     """``GBQTableDataSet`` loads and saves data from/to Google BigQuery.
     It uses pandas-gbq to read and write from/to BigQuery table.
@@ -77,7 +76,6 @@ class GBQTableDataSet(AbstractDataSet):
         credentials: Union[Dict[str, Any], Credentials] = None,
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
-        layer: str = None,
     ) -> None:
         """Creates a new instance of ``GBQTableDataSet``.
 
@@ -100,8 +98,6 @@ class GBQTableDataSet(AbstractDataSet):
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_gbq.html
                 All defaults are preserved, but "progress_bar", which is set to False.
-            layer: The data layer according to the data engineering convention:
-                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
 
         Raises:
             DataSetError: When ``load_args['location']`` and ``save_args['location']``
@@ -121,7 +117,6 @@ class GBQTableDataSet(AbstractDataSet):
         if isinstance(credentials, dict):
             credentials = Credentials(**credentials)
 
-        self._layer = layer
         self._dataset = dataset
         self._table_name = table_name
         self._project_id = project
@@ -138,11 +133,10 @@ class GBQTableDataSet(AbstractDataSet):
             table_name=self._table_name,
             load_args=self._load_args,
             save_args=self._save_args,
-            layer=self._layer,
         )
 
     def _load(self) -> pd.DataFrame:
-        sql = "select * from {}.{}".format(self._dataset, self._table_name)
+        sql = "select * from {}.{}".format(self._dataset, self._table_name)  # nosec
         return pd.read_gbq(
             sql,
             project_id=self._project_id,

@@ -1,0 +1,4 @@
+{
+    "pipeline_name": "default",
+    "kedro_version": "{{ cookiecutter.kedro_version }}"
+}

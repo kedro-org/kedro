@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -28,7 +28,6 @@
 
 """Behave environment setup commands."""
 
-import glob
 import os
 import shutil
 import stat
@@ -85,13 +84,21 @@ def before_all(context):
     context.env["PIP_CONFIG_FILE"] = str(pip_conf_path)
 
     # install Kedro
-    call([context.python, "-m", "pip", "install", "-U", "pip"])
+    # these versions should match what's in the Makefile
+    call(
+        [
+            context.python,
+            "-m",
+            "pip",
+            "install",
+            "-U",
+            "pip>=20.0, <21.0",
+            "setuptools>=38.0, <47.0",
+            "wheel",
+        ]
+    )
     call([context.pip, "install", "--upgrade", "setuptools"])
-    for wheel_path in Path("dist").glob("*.whl"):
-        wheel_path.unlink()
-    call([context.pip, "install", "wheel"])
-    call([context.python, "setup.py", "clean", "--all", "bdist_wheel"])
-    call([context.pip, "install", "-U"] + glob.glob("dist/*.whl"))
+    call([context.pip, "install", ".[all]"])
 
 
 def after_all(context):

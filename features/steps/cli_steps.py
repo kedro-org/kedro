@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -290,7 +290,7 @@ def create_project_from_config_file(context):
     """Behave step to run kedro new given the config I previously created.
     """
     res = run([context.kedro, "new", "-c", str(context.config_file)], env=context.env)
-    assert res.returncode == OK_EXIT_CODE
+    assert res.returncode == OK_EXIT_CODE, res
 
 
 @given("I have deleted the credentials file")
@@ -324,10 +324,23 @@ def exec_kedro_target(context, command):
     context.result = run(cmd, env=context.env, cwd=str(context.root_project_dir))
 
 
-@when("I execute the project")
+@when("I delete assets not needed for running installed packages")
+def delete_unnecessary_assets(context):
+    """Delete .kedro.yml as it is not needed when executing installed project package.
+    """
+    kedro_yaml = context.root_project_dir / ".kedro.yml"
+    kedro_yaml.unlink()
+
+
+@when("I execute the installed project package")
 def exec_project(context):
     """Execute installed Kedro project target."""
     cmd = [str(context.bin_dir / context.project_name)]
+    # N.B.: prior to the introduction of load_package_context, this test was passing
+    # accidentally because it was executing the installed project package at the
+    # same directory as project root, so a lot of things were available on Path.cwd().
+    # We take care to delete with `delete_unnecessary_assets` to simulate the behaviour
+    # of a installed package in a fresh environment.
     context.result = run(cmd, env=context.env, cwd=str(context.root_project_dir))
 
 
@@ -349,8 +362,9 @@ def exec_kedro_run_with_tag(context, cmd, tags):
 @when("I ask the CLI for a version")
 def get_kedro_version(context):
     """Behave step to run `kedro -V`."""
-    context.version_str = run([context.kedro, "-V"], env=context.env).stdout
-    assert context.version_str  # check non-empty
+    res = run([context.kedro, "-V"], env=context.env)
+    context.version_str = res.stdout
+    assert context.version_str, res  # check non-empty
 
 
 @when("I ask the CLI for a version using python -m")
@@ -405,6 +419,37 @@ def do_git_reset_hard(context):
         check_run("git reset --hard HEAD")
 
 
+@when('I move the package to "{new_source_dir}"')
+def move_package(context: behave.runner.Context, new_source_dir):
+    """Move the project package to a new directory.
+    """
+    current_src_path = context.root_project_dir / "src"
+    new_src_path = context.root_project_dir / "new_source_dir"
+
+    cmd = [
+        "mkdir",
+        str(new_source_dir),
+        ";",
+        "mv",
+        str(current_src_path / context.package_name),
+        str(new_src_path),
+    ]
+    context.result = run(cmd, env=context.env, cwd=str(context.root_project_dir))
+
+
+@when('Source directory is updated to "{new_source_dir}" in kedro.yml')
+def udpate_kedro_yml(context: behave.runner.Context, new_source_dir):
+    """Update `source_dir` in .kedro.yml file.
+    """
+
+    kedro_yml_path = context.root_project_dir / ".kedro.yml"
+    kedro_yml_path.write_text(
+        "context_path: {}.run.ProjectContext\nsource_dir: {}\n".format(
+            str(context.package_name), new_source_dir
+        )
+    )
+
+
 @given("I have updated kedro requirements")
 def update_kedro_req(context: behave.runner.Context):
     """Replace kedro as a standalone requirement with a line
@@ -415,7 +460,7 @@ def update_kedro_req(context: behave.runner.Context):
 
     if reqs_path.is_file():
         old_reqs = reqs_path.read_text()
-        new_reqs = re.sub(r"#?kedro==.*\n", kedro_reqs, old_reqs)
+        new_reqs = re.sub(r"#?kedro\[pandas.CSVDataSet\]==.*\n", kedro_reqs, old_reqs)
         assert not old_reqs == new_reqs
         reqs_path.write_text(new_reqs)
 

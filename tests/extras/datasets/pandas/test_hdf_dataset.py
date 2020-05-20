@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -49,10 +49,14 @@ def filepath_hdf(tmp_path):
 
 
 @pytest.fixture
-def hdf_data_set(filepath_hdf, load_args, save_args, mocker):
+def hdf_data_set(filepath_hdf, load_args, save_args, mocker, fs_args):
     HDFDataSet._lock = mocker.MagicMock()
     return HDFDataSet(
-        filepath=filepath_hdf, key=HDF_KEY, load_args=load_args, save_args=save_args
+        filepath=filepath_hdf,
+        key=HDF_KEY,
+        load_args=load_args,
+        save_args=save_args,
+        fs_args=fs_args,
     )
 
 
@@ -74,6 +78,8 @@ class TestHDFDataSet:
         hdf_data_set.save(dummy_dataframe)
         reloaded = hdf_data_set.load()
         assert_frame_equal(dummy_dataframe, reloaded)
+        assert hdf_data_set._fs_open_args_load == {}
+        assert hdf_data_set._fs_open_args_save == {"mode": "wb"}
 
     def test_exists(self, hdf_data_set, dummy_dataframe):
         """Test `exists` method invocation for both existing and
@@ -97,6 +103,15 @@ class TestHDFDataSet:
         """Test overriding the default save arguments."""
         for key, value in save_args.items():
             assert hdf_data_set._save_args[key] == value
+
+    @pytest.mark.parametrize(
+        "fs_args",
+        [{"open_args_load": {"mode": "rb", "compression": "gzip"}}],
+        indirect=True,
+    )
+    def test_open_extra_args(self, hdf_data_set, fs_args):
+        assert hdf_data_set._fs_open_args_load == fs_args["open_args_load"]
+        assert hdf_data_set._fs_open_args_save == {"mode": "wb"}  # default unchanged
 
     def test_load_missing_file(self, hdf_data_set):
         """Check the error when trying to load missing file."""

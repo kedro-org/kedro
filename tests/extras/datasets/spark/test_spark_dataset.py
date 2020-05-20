@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,15 +19,16 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pylint: disable=import-error
 import tempfile
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 
 import pandas as pd
 import pytest
@@ -39,10 +40,11 @@ from pyspark.sql.utils import AnalysisException
 from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
 from kedro.extras.datasets.pickle import PickleDataSet
 from kedro.extras.datasets.spark import SparkDataSet
+from kedro.extras.datasets.spark.spark_dataset import _dbfs_glob, _get_dbutils
 from kedro.io import DataCatalog, DataSetError, Version
 from kedro.io.core import generate_timestamp
 from kedro.pipeline import Pipeline, node
-from kedro.runner import ParallelRunner
+from kedro.runner import ParallelRunner, SequentialRunner
 
 FOLDER_NAME = "fake_folder"
 FILENAME = "test.parquet"
@@ -138,9 +140,12 @@ def spark_in(tmp_path, sample_spark_df):
     return spark_in
 
 
-@pytest.fixture
-def spark_out(tmp_path):
-    return SparkDataSet(filepath=str(tmp_path / "output"))
+class FileInfo:
+    def __init__(self, path):
+        self.path = "dbfs:" + path
+
+    def isDir(self):
+        return "." not in self.path.split("/")[-1]
 
 
 class TestSparkDataSet:
@@ -276,62 +281,15 @@ class TestSparkDataSet:
         with pytest.raises(DataSetError, match="Other Exception"):
             spark_data_set.exists()
 
-    def test_parallel_runner(self, spark_in, spark_out):
-        """Test ParallelRunner with SparkDataSet load and save.
+    @pytest.mark.parametrize("is_async", [False, True])
+    def test_parallel_runner(self, is_async, spark_in):
+        """Test ParallelRunner with SparkDataSet fails.
         """
-        catalog = DataCatalog(data_sets={"spark_in": spark_in, "spark_out": spark_out})
+        catalog = DataCatalog(data_sets={"spark_in": spark_in})
         pipeline = Pipeline([node(identity, "spark_in", "spark_out")])
-        runner = ParallelRunner()
-        result = runner.run(pipeline, catalog)
-        # 'spark_out' is saved in 'tmp_path/input', so the result of run should be empty
-        assert not result
-
-    def test_parallel_runner_with_pickle_dataset(self, tmp_path, spark_in, spark_out):
-        """Test ParallelRunner with SparkDataSet -> PickleDataSet -> SparkDataSet .
-        """
-        pickle_data = PickleDataSet(filepath=str(tmp_path / "data.pkl"))
-        catalog = DataCatalog(
-            data_sets={
-                "spark_in": spark_in,
-                "pickle": pickle_data,
-                "spark_out": spark_out,
-            }
-        )
-        pipeline = Pipeline(
-            [
-                node(identity, "spark_in", "pickle"),
-                node(identity, "pickle", "spark_out"),
-            ]
-        )
-        runner = ParallelRunner()
-
-        pattern = r"Failed while saving data to data set PickleDataSet"
-
-        with pytest.raises(DataSetError, match=pattern):
-            runner.run(pipeline, catalog)
-
-    def test_parallel_runner_with_memory_dataset(
-        self, spark_in, spark_out, sample_spark_df
-    ):
-        """Run ParallelRunner with SparkDataSet -> MemoryDataSet -> SparkDataSet.
-        """
-        catalog = DataCatalog(data_sets={"spark_in": spark_in, "spark_out": spark_out})
-        pipeline = Pipeline(
-            [
-                node(identity, "spark_in", "memory"),
-                node(identity, "memory", "spark_out"),
-            ]
-        )
-        runner = ParallelRunner()
-
-        pattern = (
-            r"{0} cannot be serialized. ParallelRunner implicit memory datasets "
-            r"can only be used with serializable data".format(
-                str(sample_spark_df.__class__)
-            )
-        )
-        with pytest.raises(DataSetError, match=pattern):
-            runner.run(pipeline, catalog)
+        pattern = r"The following data_sets cannot be serialized: \['spark_in'\]"
+        with pytest.raises(AttributeError, match=pattern):
+            ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
 
 class TestSparkDataSetVersionedLocal:
@@ -411,7 +369,7 @@ class TestSparkDataSetVersionedDBFS:
 
         expected_calls = [
             mocker.call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME))
-        ] * 2
+        ]
         assert mocked_glob.call_args_list == expected_calls
 
         assert reloaded.exceptAll(sample_spark_df).count() == 0
@@ -453,8 +411,96 @@ class TestSparkDataSetVersionedDBFS:
 
         expected_calls = [
             mocker.call("/dbfs" + str(tmp_path / FILENAME / "*" / FILENAME))
-        ] * 3
+        ] * 2
         assert mocked_glob.call_args_list == expected_calls
+
+    def test_dbfs_glob(self, mocker):
+        dbutils_mock = mocker.Mock()
+        dbutils_mock.fs.ls.return_value = [
+            FileInfo("/tmp/file/date1"),
+            FileInfo("/tmp/file/date2"),
+            FileInfo("/tmp/file/file.csv"),
+            FileInfo("/tmp/file/"),
+        ]
+        pattern = "/tmp/file/*/file"
+        expected = ["/dbfs/tmp/file/date1/file", "/dbfs/tmp/file/date2/file"]
+
+        result = _dbfs_glob(pattern, dbutils_mock)
+        assert result == expected
+        dbutils_mock.fs.ls.assert_called_once_with("/tmp/file")
+
+    def test_ds_init_no_dbutils(self, mocker):
+        get_dbutils_mock = mocker.patch(
+            "kedro.extras.datasets.spark.spark_dataset._get_dbutils", return_value=None
+        )
+
+        data_set = SparkDataSet(filepath="/dbfs/tmp/data")
+
+        get_dbutils_mock.assert_called_once()
+        assert data_set._glob_function.__name__ == "iglob"
+
+    def test_ds_init_dbutils_available(self, mocker):
+        get_dbutils_mock = mocker.patch(
+            "kedro.extras.datasets.spark.spark_dataset._get_dbutils",
+            return_value="mock",
+        )
+
+        data_set = SparkDataSet(filepath="/dbfs/tmp/data")
+
+        get_dbutils_mock.assert_called_once()
+        assert data_set._glob_function.__class__.__name__ == "partial"
+        assert data_set._glob_function.func.__name__ == "_dbfs_glob"
+        assert data_set._glob_function.keywords == {
+            "dbutils": get_dbutils_mock.return_value
+        }
+
+    def test_get_dbutils_from_globals(self, mocker):
+        mocker.patch(
+            "kedro.extras.datasets.spark.spark_dataset.globals",
+            return_value={"dbutils": "dbutils_from_globals"},
+        )
+        assert _get_dbutils("spark") == "dbutils_from_globals"
+
+    def test_get_dbutils_from_pyspark(self, mocker):
+        dbutils_mock = mocker.Mock()
+        dbutils_mock.DBUtils.return_value = "dbutils_from_pyspark"
+        mocker.patch.dict("sys.modules", {"pyspark.dbutils": dbutils_mock})
+        assert _get_dbutils("spark") == "dbutils_from_pyspark"
+        dbutils_mock.DBUtils.assert_called_once_with("spark")
+
+    def test_get_dbutils_from_ipython(self, mocker):
+        ipython_mock = mocker.Mock()
+        ipython_mock.get_ipython.return_value.user_ns = {
+            "dbutils": "dbutils_from_ipython"
+        }
+        mocker.patch.dict("sys.modules", {"IPython": ipython_mock})
+        assert _get_dbutils("spark") == "dbutils_from_ipython"
+        ipython_mock.get_ipython.assert_called_once_with()
+
+    def test_get_dbutils_no_modules(self, mocker):
+        mocker.patch(
+            "kedro.extras.datasets.spark.spark_dataset.globals", return_value={}
+        )
+        mocker.patch.dict("sys.modules", {"pyspark": None, "IPython": None})
+        assert _get_dbutils("spark") is None
+
+    @pytest.mark.parametrize(
+        "os_name,path_class", [("nt", PureWindowsPath), ("posix", PurePosixPath)]
+    )
+    def test_regular_path_in_different_os(self, os_name, path_class, mocker):
+        """Check that class of filepath depends on OS for regular path."""
+        mocker.patch("os.name", os_name)
+        data_set = SparkDataSet(filepath="/some/path")
+        assert isinstance(data_set._filepath, path_class)
+
+    @pytest.mark.parametrize(
+        "os_name,path_class", [("nt", PurePosixPath), ("posix", PurePosixPath)]
+    )
+    def test_dbfs_path_in_different_os(self, os_name, path_class, mocker):
+        """Check that class of filepath doesn't depend on OS if it references DBFS."""
+        mocker.patch("os.name", os_name)
+        data_set = SparkDataSet(filepath="/dbfs/some/path")
+        assert isinstance(data_set._filepath, path_class)
 
 
 class TestSparkDataSetVersionedS3:
@@ -501,10 +547,10 @@ class TestSparkDataSetVersionedS3:
     def test_save(self, versioned_dataset_s3, version, mocker):
         mocked_spark_df = mocker.Mock()
 
-        # need _lookup_load_version() call to return a load version that
+        # need resolve_load_version() call to return a load version that
         # matches save version due to consistency check in versioned_dataset_s3.save()
         mocker.patch.object(
-            versioned_dataset_s3, "_lookup_load_version", return_value=version.save
+            versioned_dataset_s3, "resolve_load_version", return_value=version.save
         )
 
         versioned_dataset_s3.save(mocked_spark_df)
@@ -635,10 +681,10 @@ class TestSparkDataSetVersionedHdfs:
             filepath="hdfs://{}".format(HDFS_PREFIX), version=version
         )
 
-        # need _lookup_load_version() call to return a load version that
+        # need resolve_load_version() call to return a load version that
         # matches save version due to consistency check in versioned_hdfs.save()
         mocker.patch.object(
-            versioned_hdfs, "_lookup_load_version", return_value=version.save
+            versioned_hdfs, "resolve_load_version", return_value=version.save
         )
 
         mocked_spark_df = mocker.Mock()
@@ -722,3 +768,49 @@ class TestSparkDataSetVersionedHdfs:
         dataset_hdfs = SparkDataSet(filepath="hdfs://{}".format(HDFS_PREFIX))
         assert "filepath=hdfs://" in str(dataset_hdfs)
         assert "version=" not in str(dataset_hdfs)
+
+
+@pytest.fixture
+def data_catalog(tmp_path):
+    source_path = str(Path(__file__).parent / "data/test.parquet")
+    spark_in = SparkDataSet(source_path)
+    spark_out = SparkDataSet(str(tmp_path / "spark_data"))
+    pickle_ds = PickleDataSet(str(tmp_path / "pickle/test.pkl"))
+
+    return DataCatalog(
+        {"spark_in": spark_in, "spark_out": spark_out, "pickle_ds": pickle_ds}
+    )
+
+
+@pytest.mark.parametrize("is_async", [False, True])
+class TestDataFlowSequentialRunner:
+    def test_spark_load_save(self, is_async, data_catalog):
+        """SparkDataSet(load) -> node -> Spark (save)."""
+        pipeline = Pipeline([node(identity, "spark_in", "spark_out")])
+        SequentialRunner(is_async=is_async).run(pipeline, data_catalog)
+
+        save_path = Path(data_catalog._data_sets["spark_out"]._filepath)
+        files = list(save_path.glob("*.parquet"))
+        assert len(files) > 0
+
+    def test_spark_pickle(self, is_async, data_catalog):
+        """SparkDataSet(load) -> node -> PickleDataSet (save)"""
+        pipeline = Pipeline([node(identity, "spark_in", "pickle_ds")])
+        pattern = ".* was not serialized due to.*"
+        with pytest.raises(DataSetError, match=pattern):
+            SequentialRunner(is_async=is_async).run(pipeline, data_catalog)
+
+    def test_spark_memory_spark(self, is_async, data_catalog):
+        """SparkDataSet(load) -> node -> MemoryDataSet (save and then load) ->
+        node -> SparkDataSet (save)"""
+        pipeline = Pipeline(
+            [
+                node(identity, "spark_in", "memory_ds"),
+                node(identity, "memory_ds", "spark_out"),
+            ]
+        )
+        SequentialRunner(is_async=is_async).run(pipeline, data_catalog)
+
+        save_path = Path(data_catalog._data_sets["spark_out"]._filepath)
+        files = list(save_path.glob("*.parquet"))
+        assert len(files) > 0

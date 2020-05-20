@@ -1,6 +1,6 @@
 # Working with PySpark
 
-> *Note:* This documentation is based on `Kedro 0.15.9`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.0`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 In this tutorial we explain how to work with `PySpark` in a Kedro pipeline.
 
@@ -31,14 +31,11 @@ class ProjectContext(KedroContext):
         extra_params: Dict[str, Any] = None,
     ):
         super().__init__(project_path, env, extra_params)
-        self._spark_session = None
         self.init_spark_session()
 
     def init_spark_session(self, yarn=True) -> None:
         """Initialises a SparkSession using the config defined in project's conf folder."""
 
-        if self._spark_session:
-            return self._spark_session
         parameters = self.config_loader.get("spark*", "spark*/**")
         spark_conf = SparkConf().setAll(parameters.items())
 
@@ -50,14 +47,14 @@ class ProjectContext(KedroContext):
             .config(conf=spark_conf)
         )
         if yarn:
-            self._spark_session = spark_session_conf.master("yarn").getOrCreate()
+            _spark_session = spark_session_conf.master("yarn").getOrCreate()
         else:
-            self._spark_session = spark_session_conf.getOrCreate()
+            _spark_session = spark_session_conf.getOrCreate()
 
-        self._spark_session.sparkContext.setLogLevel("WARN")
+        _spark_session.sparkContext.setLogLevel("WARN")
 
     project_name = "kedro"
-    project_version = "0.15.9"
+    project_version = "0.16.0"
 
 
 # ...
@@ -74,13 +71,13 @@ spark.jars.excludes: joda-time:joda-time
 ```
 
 
-Since `SparkSession` is a [singleton](https://python-3-patterns-idioms-test.readthedocs.io/en/latest/Singleton.html), the next time you call `SparkSession.builder.getOrCreate()` you will be provided with the same `SparkSession` you initialised at your app's entry point.
+Since `SparkSession` is a [singleton](https://python-3-patterns-idioms-test.readthedocs.io/en/latest/Singleton.html), the next time you call `SparkSession.builder.getOrCreate()` you will be provided with the same `SparkSession` you initialised at your app's entry point. We don't recommend storing the session on the context object, as it cannot be deep-copied and therefore prevents the context from being initialised for some plugins.
 
 ## Creating a `SparkDataSet`
 
 Having created a `SparkSession`, you can load your data using `PySpark`'s [DataFrameReader](https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrameReader).
 
-To do so, please use the provided [SparkDataSet](/kedro.contrib.io.pyspark.SparkDataSet):
+To do so, please use the provided [SparkDataSet](/kedro.extras.datasets.spark.SparkDataSet):
 
 ### Code API
 
@@ -152,3 +149,19 @@ class ProjectContext(KedroContext):
         return Pipeline([node(my_node, "weather", None)])
 # ...
 ```
+
+## Tips for maximising concurrency using `ThreadRunner`
+
+Under the hood, every Kedro node that performs a Spark action (e.g. `save`, `collect`) is submitted to the Spark cluster as a Spark job through the same `SparkSession` instance. These jobs may be running concurrently if they were submitted by different threads. In order to do that, you will need to run your Kedro pipeline with the [ThreadRunner](/kedro.runner.ThreadRunner):
+
+```bash
+kedro run --runner=ThreadRunner
+```
+
+To further increase the concurrency level, if you are using Spark >= 0.8, you can also give each node a roughly equal share of the Spark cluster by turning on fair sharing and therefore giving them a roughly equal chance of being executed concurrently. By default, they are executed in a FIFO manner, which means if a job takes up too much resources, it could hold up the execution of other jobs. In order to turn on fair sharing, put the following in your `conf/base/spark.yml` file, which was created in the [Initialising a `SparkSession`](#initialising-a-sparksession) section:
+
+```yaml
+spark.scheduler.mode: FAIR
+```
+
+For more information, please visit Spark documentation on [jobs scheduling within an application](https://spark.apache.org/docs/latest/job-scheduling.html#scheduling-within-an-application).

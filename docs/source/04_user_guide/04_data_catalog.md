@@ -1,6 +1,6 @@
 # The Data Catalog
 
-> *Note:* This documentation is based on `Kedro 0.15.9`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.0`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 This section introduces `catalog.yml`, the project-shareable Data Catalog. The file is located in `conf/base` and is a registry of all data sources available for use by a project; it manages loading and saving of data.
 
@@ -51,7 +51,7 @@ Here is an example data config `catalog.yml`:
 
 bikes:
   type: pandas.CSVDataSet
-  filepath: "data/01_raw/bikes.csv"
+  filepath: data/01_raw/bikes.csv
 
 # Example 2: Loads and saves a CSV on a local file system, using specified load and save arguments
 
@@ -63,9 +63,21 @@ cars:
   save_args:
     index: False
     date_format: '%Y-%m-%d %H:%M'
-    decimal: '.'
+    decimal: .
 
-# Example 3: Loads a CSV file from a specific S3 bucket, using credentials and load arguments
+# Example 3: Loads and saves a compressed CSV on a local file system
+
+boats:
+  type: pandas.CSVDataSet
+  filepath: data/01_raw/company/boats.csv.gz
+  load_args:
+    sep: ','
+    compression: 'gzip'
+  fs_args:
+    open_args_load:
+      mode: 'rb'
+
+# Example 4: Loads a CSV file from a specific S3 bucket, using credentials and load arguments
 
 motorbikes:
   type: pandas.CSVDataSet
@@ -75,16 +87,16 @@ motorbikes:
     sep: ','
     skiprows: 5
     skipfooter: 1
-    na_values: ['#NA', 'NA']
+    na_values: ['#NA', NA]
 
-# Example 4: Loads / saves a pickle file from / to a local file system
+# Example 5: Loads / saves a pickle file from / to a local file system
 
 airplanes:
   type: pickle.PickleDataSet
   filepath: data/06_models/airplanes.pkl
   backend: pickle
 
-# Example 5: Loads an excel file from Google Cloud Storage
+# Example 6: Loads an excel file from Google Cloud Storage
 
 rockets:
   type: pandas.ExcelDataSet
@@ -95,43 +107,43 @@ rockets:
   save_args:
     sheet_name: Sheet1
 
-# Example 6: Save an image created with Matplotlib on Google Cloud Storage
+# Example 7: Save an image created with Matplotlib on Google Cloud Storage
 
 results_plot:
-  type: matplotlib.MatplotLibWriter
+  type: matplotlib.MatplotlibWriter
   filepath: gcs://your_bucket/data/08_results/plots/output_1.jpeg
   fs_args:
     project: my-project
   credentials: my_gcp_credentials
 
-# Example 7: Loads / saves an HDF file on local file system storage, using specified load and save arguments
+# Example 8: Loads / saves an HDF file on local file system storage, using specified load and save arguments
 
 skateboards:
   type: pandas.HDFDataSet
   filepath: data/02_intermediate/skateboards.hdf
   key: name
   load_args:
-    columns: ['brand', 'length']
+    columns: [brand, length]
   save_args:
-    mode: 'w'  # Overwrite even when the file already exists
+    mode: w  # Overwrite even when the file already exists
     dropna: True
 
-# Example 8: Loads / saves a parquet file on local file system storage, using specified load and save arguments
+# Example 9: Loads / saves a parquet file on local file system storage, using specified load and save arguments
 
 trucks:
   type: pandas.ParquetDataSet
   filepath: data/02_intermediate/trucks.parquet
   load_args:
-    columns: ['name', 'gear','disp', 'wt']
+    columns: [name, gear, disp, wt]
     categories: list
-    index: 'name'
+    index: name
   save_args:
-     compression: 'GZIP'
-     file_scheme: 'hive'
-     has_nulls: false
-     partition_on: ['name']
+    compression: GZIP
+    file_scheme: hive
+    has_nulls: False
+    partition_on: [name]
 
-# Example 9: Load / saves a Spark table on S3, using specified load and save arguments
+# Example 10: Load / saves a Spark table on S3, using specified load and save arguments
 
 weather:
   type: spark.SparkDataSet
@@ -145,26 +157,39 @@ weather:
     sep: '|'
     header: True
 
-# Example 10: Loads / saves a SQL table using credentials, a database connection, using specified load and save arguments
+# Example 11: Loads / saves a SQL table using credentials, a database connection, using specified load and save arguments
 
 scooters:
   type: pandas.SQLTableDataSet
   credentials: scooters_credentials
   table_name: scooters
   load_args:
-    index_col: ['name']
-    columns: ['name', 'gear']
+    index_col: [name]
+    columns: [name, gear]
   save_args:
-    if_exists: 'replace'
+    if_exists: replace
 
-# Example 11: Load a SQL table with credentials, a database connection, and applies a SQL query to the table
+# Example 12: Load a SQL table with credentials, a database connection, and applies a SQL query to the table
 
 scooters_query:
   type: pandas.SQLQueryDataSet
   credentials: scooters_credentials
-  sql: 'select * from cars where gear=4'
+  sql: select * from cars where gear=4
   load_args:
-    index_col: ['name']
+    index_col: [name]
+
+# Example 13: Load data from an API endpoint, example US corn yield data from USDA
+
+us_corn_yield_data:
+  type: api.APIDataSet
+  url: https://quickstats.nass.usda.gov
+  params:
+    key: SOME_TOKEN
+    format: JSON
+    commodity_desc: CORN
+    statisticcat_des: YIELD
+    agg_level_desc: STATE
+    year: 2000
 ```
 
 > *Note:* When using [`pandas.SQLTableDataSet`](/kedro.extras.datasets.pandas.SQLTableDataSet) or [`pandas.SQLQueryDataSet`](/kedro.extras.datasets.pandas.SQLQueryDataSet) you must provide a database connection string. In the example above we pass it using `scooters_credentials` key from the credentials (see the details in [Feeding in credentials](#feeding-in-credentials) section below). `scooters_credentials` must have a top-level key `con` containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. Alternative to credentials would be to explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataSet` only).
@@ -217,21 +242,21 @@ _csv: &csv
   file_format: csv
   load_args:
     sep: ','
-    na_values: ['#NA', 'NA']
+    na_values: ['#NA', NA]
     header: True
     inferSchema: False
 
 cars:
   <<: *csv
-  filepath: 's3a://data/01_raw/cars.csv'
+  filepath: s3a://data/01_raw/cars.csv
 
 trucks:
   <<: *csv
-  filepath: 's3a://data/01_raw/trucks.csv'
+  filepath: s3a://data/01_raw/trucks.csv
 
 bikes:
   <<: *csv
-  filepath: 's3a://data/01_raw/bikes.csv'
+  filepath: s3a://data/01_raw/bikes.csv
   load_args:
     header: False
 ```
@@ -252,10 +277,10 @@ _csv: &csv
 
 airplanes:
   <<: *csv
-  filepath: 's3a://data/01_raw/airplanes.csv'
+  filepath: s3a://data/01_raw/airplanes.csv
   load_args:
     <<: *csv_load_args
-    sep: ';'
+    sep: ;
 ```
 
 In this example the default `csv` configuration is inserted into `airplanes` and then the `load_args` block is overridden. Normally that would replace the whole dictionary. In order to extend `load_args` the defaults for that block are then re-inserted.
@@ -275,7 +300,7 @@ To enable transcoding, you will need to define two `DataCatalog` entries for the
 my_dataframe@spark:
   type: spark.SparkDataSet
   filepath: data/02_intermediate/data.parquet
-  file_format: 'parquet'
+  file_format: parquet
 
 my_dataframe@pandas:
   type: pandas.ParquetDataSet
@@ -314,26 +339,28 @@ The use case of _tracking operation performance_ by applying built-in transforme
 
 Transformers are applied at the `DataCatalog` level. To apply the built-in `ProfileTimeTransformer`, you need to:
 1. Navigate to `src/<package_name>/run.py`
-2. Override `_create_catalog` method for your `ProjectContext` class using the following:
+2. Apply `ProfileTimeTransformer` in the hook implementation `TransformerHooks.after_catalog_created`.
+3. Register the hook in your `ProjectContext` as follow:
 
 ```python
-from typing import Dict, Any
+from pathlib import Path
+from typing import Dict
 
-from kedro.context import KedroContext
-from kedro.extras.transformers import ProfileTimeTransformer  # new import
-from kedro.io import DataCatalog
-from kedro.versioning import Journal
+from kedro.extras.transformers import ProfileTimeTransformer # new import
+from kedro.framework.context import KedroContext, load_package_context
+from kedro.framework.hooks import hook_impl # new import
+from kedro.io import DataCatalog # new import
 
+
+class TransformerHooks:
+    @hook_impl
+    def after_catalog_created(self, catalog: DataCatalog) -> None:
+        catalog.add_transformer(ProfileTimeTransformer())
 
 class ProjectContext(KedroContext):
 
     ...
-
-    def _create_catalog(self, *args, **kwargs):
-        catalog = super()._create_catalog(*args, **kwargs)
-        profile_time = ProfileTimeTransformer()  # instantiate a built-in transformer
-        catalog.add_transformer(profile_time)  # apply it to the catalog
-        return catalog
+    hooks = (TransformerHooks(),)
 ```
 
 Once complete, rerun the pipeline from the terminal and you should see the following logging output:
@@ -418,33 +445,28 @@ class ProfileMemoryTransformer(AbstractTransformer):
         )
 ```
 
-Finally, you need to update `ProjectContext._create_catalog` method definition to apply your custom transformer:
+Finally, you need to update `TransformerHooks` to apply your custom transformer:
 
 ```python
 ...
-from .memory_profile import ProfileMemoryTransformer  # new import
+from .memory_profile import ProfileMemoryTransformer # new import
 
+class TransformerHooks:
+    @hook_impl
+    def after_catalog_created(self, catalog: DataCatalog) -> None:
+        catalog.add_transformer(ProfileTimeTransformer())
+
+        # as memory tracking is quite time-consuming, for demonstration purposes
+        # let's apply profile_memory only to the master_table
+        catalog.add_transformer(ProfileMemoryTransformer(), "master_table")
 
 class ProjectContext(KedroContext):
 
     ...
-
-    def _create_catalog(self, *args, **kwargs):
-        catalog = super()._create_catalog(*args, **kwargs)
-
-        profile_time = ProfileTimeTransformer()
-        catalog.add_transformer(profile_time)
-
-        # instantiate our custom transformer
-        profile_memory = ProfileMemoryTransformer()
-
-        # as memory tracking is quite time-consuming, for demonstration purposes
-        # let's apply profile_memory only to the master_table
-        catalog.add_transformer(profile_memory, "master_table")
-        return catalog
+    hooks = (TransformerHooks(),)
 ```
 
-And rerun the pipeline:
+And re-run the pipeline:
 
 ```console
 $ kedro run
@@ -470,7 +492,7 @@ Consider the following versioned dataset defined in the `catalog.yml`:
 cars.csv:
   type: pandas.CSVDataSet
   filepath: data/01_raw/company/cars.csv
-  versioned: true
+  versioned: True
 ```
 
 The `DataCatalog` will create a versioned `CSVDataSet` called `cars.csv`. The actual csv file location will look like `data/01_raw/company/cars.csv/<version>/cars.csv`, where `<version>` corresponds to a global save version string formatted as `YYYY-MM-DDThh.mm.ss.sssZ`.
@@ -493,8 +515,8 @@ The code API allows you to configure data sources in code. This can also be used
 In a file like `catalog.py`, you can generate the Data Catalog. This will allow everyone in the project to review all the available data sources. In the following, we are using the pre-built CSV loader, which is documented in the [API reference documentation](/kedro.extras.datasets)
 
 ```python
-from kedro.io import (
-    DataCatalog,
+from kedro.io import DataCatalog
+from kedro.extras.datasets.pandas import (
     CSVDataSet,
     SQLTableDataSet,
     SQLQueryDataSet,
@@ -592,4 +614,4 @@ io.save("ranked", ranked)
 > *Note:* Saving `None` to a dataset is not allowed!
 
 ### Creating your own dataset
-More specialised datasets can be found in `contrib/io`. [Creating new datasets](../03_tutorial/03_set_up_data.md#creating-custom-datasets) is the easiest way to contribute to the Kedro project.
+All datasets can be found in `kedro/extras/datasets`. [Creating new datasets](../03_tutorial/03_set_up_data.md#creating-custom-datasets) is the easiest way to contribute to the Kedro project.

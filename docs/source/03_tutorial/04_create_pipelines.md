@@ -518,7 +518,7 @@ Make sure to include the import at the top of the file:
 from kedro_tutorial.pipelines.data_science import pipeline as ds
 ```
 
-The first node of the `ds_pipeline` outputs 4 objects: `X_train`, `X_test`, `y_train`, `y_test`, which are not registered in `conf/base/catalog.yml`. (If you recall, if a dataset is not specified in the catalog, Kedro will automatically save it in memory using the `MemoryDataSet`). Normally you would add dataset definitions of your model features into `conf/base/catalog.yml` with the save location in `data/04_features/`.
+The first node of the `ds_pipeline` outputs 4 objects: `X_train`, `X_test`, `y_train`, `y_test`, which are not registered in `conf/base/catalog.yml`. (If you recall, if a dataset is not specified in the catalog, Kedro will automatically save it in memory using the `MemoryDataSet`). Normally you would add dataset definitions of your model features into `conf/base/catalog.yml` with the save location in `data/04_feature/`.
 
 The two pipelines are merged together in `de_pipeline + ds_pipeline` into a project default pipeline using `__default__` key. Default pipeline containing all nodes from both original pipelines will be executed when you invoke the following:
 
@@ -795,7 +795,7 @@ def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
 
 This decorator is commonly used and Kedro already includes it as a built-in decorator called `kedro.pipeline.decorators.log_time`.
 
-Another built-in decorator is `kedro.pipeline.decorators.mem_profile`, which will log the maximum memory usage of your node.
+Another extra decorator is `kedro.extras.decorators.memory_profiler.mem_profile`, which will log the maximum memory usage of your node.
 
 
 ## Kedro runners

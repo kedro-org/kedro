@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -38,8 +38,7 @@ from kedro.pipeline.pipeline import (
     CircularDependencyError,
     ConfirmNotUniqueError,
     OutputNotUniqueError,
-    _get_transcode_compatible_name,
-    _transcode_join,
+    _strip_transcoding,
     _transcode_split,
 )
 from kedro.runner import SequentialRunner
@@ -56,18 +55,8 @@ class TestTranscodeHelpers:
         with pytest.raises(ValueError):
             _transcode_split("abc@def@ghi")
 
-    def test_join_no_transcode_part(self):
-        assert _transcode_join(("abc", "")) == "abc"
-
-    def test_join_with_transcode_part(self):
-        assert _transcode_join(("abc", "def")) == "abc@def"
-
-    def test_join_too_many_parts(self):
-        with pytest.raises(ValueError):
-            _transcode_join(("a", "b", "c"))  # type: ignore
-
     def test_get_transcode_compatible_name(self):
-        assert _get_transcode_compatible_name("abc@def") == "abc"
+        assert _strip_transcoding("abc@def") == "abc"
 
 
 # Different dummy func based on the number of arguments
@@ -271,7 +260,7 @@ def input_data(request):
     return request.getfixturevalue(request.param)
 
 
-class TestValidPipeline:  # pylint: disable=too-many-public-methods
+class TestValidPipeline:
     def test_nodes(self, str_node_inputs_list):
         nodes = str_node_inputs_list["nodes"]
         pipeline = Pipeline(nodes)
@@ -448,13 +437,6 @@ class TestValidPipeline:  # pylint: disable=too-many-public-methods
     def test_empty_case(self):
         """Empty pipeline is possible"""
         Pipeline([])
-
-    def test_pipeline_name_is_deprecated(self):
-        with pytest.warns(DeprecationWarning, match=r"`name` parameter is deprecated"):
-            pipeline = Pipeline([], name="p_name")
-
-        with pytest.warns(DeprecationWarning, match=r"`Pipeline\.name` is deprecated"):
-            assert pipeline.name == "p_name"
 
     def test_initialized_with_tags(self):
         pipeline = Pipeline(
@@ -659,7 +641,7 @@ class TestComplexPipeline:
         assert len(subpipeline.outputs()) == 2
 
         pipeline = Pipeline(
-            [node(identity, "C", "D", name="connecting_node"), subpipeline], name="main"
+            [node(identity, "C", "D", name="connecting_node"), subpipeline], tags="main"
         )
 
         assert len(pipeline.nodes) == 1 + len(nodes)
@@ -693,7 +675,6 @@ class TestPipelineDescribe:
         desc = description.split("\n")
         test_desc = [
             "#### Pipeline execution order ####",
-            "Name: None",
             "Inputs: input1, input2",
             "",
             "node1",
@@ -714,7 +695,6 @@ class TestPipelineDescribe:
         desc = description.split("\n")
         test_desc = [
             "#### Pipeline execution order ####",
-            "Name: None",
             "Inputs: input1, input2",
             "",
             "node1: biconcat([input1,input2]) -> [input3]",

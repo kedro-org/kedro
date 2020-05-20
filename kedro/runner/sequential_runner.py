@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -44,6 +44,16 @@ class SequentialRunner(AbstractRunner):
     topological sort of provided nodes.
     """
 
+    def __init__(self, is_async: bool = False):
+        """Instantiates the runner classs.
+
+            Args:
+                is_async: If True, the node inputs and outputs are loaded and saved
+                    asynchronously with threads. Defaults to False.
+
+        """
+        super().__init__(is_async=is_async)
+
     def create_default_data_set(self, ds_name: str) -> AbstractDataSet:
         """Factory method for creating the default data set for the runner.
 
@@ -57,12 +67,15 @@ class SequentialRunner(AbstractRunner):
         """
         return MemoryDataSet()
 
-    def _run(self, pipeline: Pipeline, catalog: DataCatalog) -> None:
+    def _run(
+        self, pipeline: Pipeline, catalog: DataCatalog, run_id: str = None
+    ) -> None:
         """The method implementing sequential pipeline running.
 
         Args:
             pipeline: The ``Pipeline`` to run.
             catalog: The ``DataCatalog`` from which to fetch data.
+            run_id: The id of the run.
 
         Raises:
             Exception: in case of any downstream node failure.
@@ -74,7 +87,7 @@ class SequentialRunner(AbstractRunner):
 
         for exec_index, node in enumerate(nodes):
             try:
-                run_node(node, catalog)
+                run_node(node, catalog, self._is_async, run_id)
                 done_nodes.add(node)
             except Exception:
                 self._suggest_resume_scenario(pipeline, done_nodes)

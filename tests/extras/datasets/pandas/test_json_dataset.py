@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -30,6 +30,7 @@ from pathlib import PurePosixPath
 
 import pandas as pd
 import pytest
+from adlfs import AzureBlobFileSystem
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
@@ -47,8 +48,13 @@ def filepath_json(tmp_path):
 
 
 @pytest.fixture
-def json_data_set(filepath_json, load_args, save_args):
-    return JSONDataSet(filepath=filepath_json, load_args=load_args, save_args=save_args)
+def json_data_set(filepath_json, load_args, save_args, fs_args):
+    return JSONDataSet(
+        filepath=filepath_json,
+        load_args=load_args,
+        save_args=save_args,
+        fs_args=fs_args,
+    )
 
 
 @pytest.fixture
@@ -69,6 +75,8 @@ class TestJSONDataSet:
         json_data_set.save(dummy_dataframe)
         reloaded = json_data_set.load()
         assert_frame_equal(dummy_dataframe, reloaded)
+        assert json_data_set._fs_open_args_load == {"mode": "r"}
+        assert json_data_set._fs_open_args_save == {"mode": "w"}
 
     def test_exists(self, json_data_set, dummy_dataframe):
         """Test `exists` method invocation for both existing and
@@ -93,6 +101,15 @@ class TestJSONDataSet:
         for key, value in save_args.items():
             assert json_data_set._save_args[key] == value
 
+    @pytest.mark.parametrize(
+        "fs_args",
+        [{"open_args_load": {"mode": "rb", "compression": "gzip"}}],
+        indirect=True,
+    )
+    def test_open_extra_args(self, json_data_set, fs_args):
+        assert json_data_set._fs_open_args_load == fs_args["open_args_load"]
+        assert json_data_set._fs_open_args_save == {"mode": "w"}  # default unchanged
+
     def test_load_missing_file(self, json_data_set):
         """Check the error when trying to load missing file."""
         pattern = r"Failed while loading data from data set JSONDataSet\(.*\)"
@@ -100,17 +117,18 @@ class TestJSONDataSet:
             json_data_set.load()
 
     @pytest.mark.parametrize(
-        "filepath,instance_type",
+        "filepath,instance_type,credentials",
         [
-            ("s3://bucket/file.json", S3FileSystem),
-            ("file:///tmp/test.json", LocalFileSystem),
-            ("/tmp/test.json", LocalFileSystem),
-            ("gcs://bucket/file.json", GCSFileSystem),
-            ("https://example.com/file.json", HTTPFileSystem),
+            ("s3://bucket/file.json", S3FileSystem, {}),
+            ("file:///tmp/test.json", LocalFileSystem, {}),
+            ("/tmp/test.json", LocalFileSystem, {}),
+            ("gcs://bucket/file.json", GCSFileSystem, {}),
+            ("https://example.com/file.json", HTTPFileSystem, {}),
+            ("abfs://bucket/file.csv", AzureBlobFileSystem, {"account_name": "test"}),
         ],
     )
-    def test_protocol_usage(self, filepath, instance_type):
-        data_set = JSONDataSet(filepath=filepath)
+    def test_protocol_usage(self, filepath, instance_type, credentials):
+        data_set = JSONDataSet(filepath=filepath, credentials=credentials)
         assert isinstance(data_set._fs, instance_type)
 
         # _strip_protocol() doesn't strip http(s) protocol

@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -47,8 +47,8 @@ def filepath_txt(tmp_path):
 
 
 @pytest.fixture
-def txt_data_set(filepath_txt, load_args, save_args):
-    return TextDataSet(filepath=filepath_txt, load_args=load_args, save_args=save_args)
+def txt_data_set(filepath_txt, fs_args):
+    return TextDataSet(filepath=filepath_txt, fs_args=fs_args)
 
 
 @pytest.fixture
@@ -64,6 +64,8 @@ class TestTextDataSet:
         txt_data_set.save(STRING)
         reloaded = txt_data_set.load()
         assert STRING == reloaded
+        assert txt_data_set._fs_open_args_load == {"mode": "r"}
+        assert txt_data_set._fs_open_args_save == {"mode": "w"}
 
     def test_exists(self, txt_data_set):
         """Test `exists` method invocation for both existing and
@@ -73,20 +75,13 @@ class TestTextDataSet:
         assert txt_data_set.exists()
 
     @pytest.mark.parametrize(
-        "load_args", [{"k1": "v1", "index": "value"}], indirect=True
+        "fs_args",
+        [{"open_args_load": {"mode": "rb", "compression": "gzip"}}],
+        indirect=True,
     )
-    def test_load_extra_params(self, txt_data_set, load_args):
-        """Test overriding the default load arguments."""
-        for key, value in load_args.items():
-            assert txt_data_set._load_args[key] == value
-
-    @pytest.mark.parametrize(
-        "save_args", [{"k1": "v1", "index": "value"}], indirect=True
-    )
-    def test_save_extra_params(self, txt_data_set, save_args):
-        """Test overriding the default save arguments."""
-        for key, value in save_args.items():
-            assert txt_data_set._save_args[key] == value
+    def test_open_extra_args(self, txt_data_set, fs_args):
+        assert txt_data_set._fs_open_args_load == fs_args["open_args_load"]
+        assert txt_data_set._fs_open_args_save == {"mode": "w"}  # default unchanged
 
     def test_load_missing_file(self, txt_data_set):
         """Check the error when trying to load missing file."""
@@ -146,11 +141,6 @@ class TestTextDataSetVersioned:
         assert "TextDataSet" in str(ds)
         assert "protocol" in str(ds_versioned)
         assert "protocol" in str(ds)
-        # Default save_args
-        assert "save_args={'mode': w}" in str(ds)
-        assert "save_args={'mode': w}" in str(ds_versioned)
-        assert "load_args={'mode': r}" in str(ds)
-        assert "load_args={'mode': r}" in str(ds_versioned)
 
     def test_save_and_load(self, versioned_txt_data_set):
         """Test that saved and reloaded data matches the original one for

@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,46 +19,14 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any, Dict
-
-import pytest
-
 from kedro.extras.transformers import ProfileTimeTransformer
-from kedro.io import AbstractDataSet, DataCatalog
-
-
-class FakeDataSet(AbstractDataSet):
-    def __init__(self, data):
-        self.log = []
-        self.data = data
-
-    def _load(self) -> Any:
-        self.log.append(("load", self.data))
-        return self.data
-
-    def _save(self, data: Any) -> None:
-        self.log.append(("save", data))
-        self.data = data
-
-    def _describe(self) -> Dict[str, Any]:
-        return {"data": self.data}
-
-
-@pytest.fixture
-def fake_data_set():
-    return FakeDataSet(123)
-
-
-@pytest.fixture
-def catalog(fake_data_set):
-    return DataCatalog({"test": fake_data_set})
 
 
 class TestTransformers:

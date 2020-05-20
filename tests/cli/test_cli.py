@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -39,6 +39,7 @@ from kedro.cli.cli import _init_plugins, cli, load_entry_points
 from kedro.cli.utils import (
     CommandCollection,
     KedroCliError,
+    _clean_pycache,
     export_nodes,
     forward_command,
     get_pkg_version,
@@ -209,6 +210,45 @@ class TestCommandCollection:
         """Test calling nonexistent command."""
         assert invoke_result.exit_code == 2
         assert "No such command" in invoke_result.output
+        assert "Did you mean one of these" not in invoke_result.output
+
+    def test_not_found_closest_match(self, cli_runner, mocker):
+        """Check that calling a nonexistent command with a close match returns the close match"""
+        patched_difflib = mocker.patch(
+            "kedro.cli.utils.difflib.get_close_matches",
+            return_value=["suggestion_1", "suggestion_2"],
+        )
+
+        cmd_collection = CommandCollection(("Commands", [stub_cli, cli]))
+        invoke_result = cli_runner.invoke(cmd_collection, ["not_found"])
+
+        patched_difflib.assert_called_once_with(
+            "not_found", mocker.ANY, mocker.ANY, mocker.ANY
+        )
+
+        assert invoke_result.exit_code == 2
+        assert "No such command" in invoke_result.output
+        assert "Did you mean one of these?" in invoke_result.output
+        assert "suggestion_1" in invoke_result.output
+        assert "suggestion_2" in invoke_result.output
+
+    def test_not_found_closet_match_singular(self, cli_runner, mocker):
+        """Check that calling a nonexistent command with a close match has the proper wording"""
+        patched_difflib = mocker.patch(
+            "kedro.cli.utils.difflib.get_close_matches", return_value=["suggestion_1"]
+        )
+
+        cmd_collection = CommandCollection(("Commands", [stub_cli, cli]))
+        invoke_result = cli_runner.invoke(cmd_collection, ["not_found"])
+
+        patched_difflib.assert_called_once_with(
+            "not_found", mocker.ANY, mocker.ANY, mocker.ANY
+        )
+
+        assert invoke_result.exit_code == 2
+        assert "No such command" in invoke_result.output
+        assert "Did you mean this?" in invoke_result.output
+        assert "suggestion_1" in invoke_result.output
 
     @mark.parametrize("invoke_result", [[]], indirect=True)
     def test_help(self, invoke_result):
@@ -384,6 +424,26 @@ class TestCliUtils:
         pattern = "Provided filepath is not a Jupyter notebook"
         with raises(KedroCliError, match=pattern):
             export_nodes(random_file, output_path)
+
+    def test_clean_pycache(self, tmp_path, mocker):
+        """Test `clean_pycache` utility function"""
+        source = Path(tmp_path)
+        pycache2 = Path(source / "nested1" / "nested2" / "__pycache__").resolve()
+        pycache2.mkdir(parents=True)
+        pycache1 = Path(source / "nested1" / "__pycache__").resolve()
+        pycache1.mkdir()
+        pycache = Path(source / "__pycache__").resolve()
+        pycache.mkdir()
+
+        mocked_rmtree = mocker.patch("shutil.rmtree")
+        _clean_pycache(source)
+
+        expected_calls = [
+            mocker.call(pycache, ignore_errors=True),
+            mocker.call(pycache1, ignore_errors=True),
+            mocker.call(pycache2, ignore_errors=True),
+        ]
+        assert mocked_rmtree.mock_calls == expected_calls
 
 
 @mark.usefixtures("dummy_context")

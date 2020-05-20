@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,16 +19,15 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""kedro is a CLI for creating Kedro projects.
-
-This module implements commands available from the kedro CLI.
+"""This file has been deprecated and will be deleted in 0.17.0.
+Please make any additional changes in `kedro.framework.cli.cli.py` instead.
 """
 import importlib
 import os
@@ -41,20 +40,19 @@ import webbrowser
 from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Union
+from typing import Any, Callable, Dict, List
 
 import click
 import pkg_resources
 import yaml
-from cookiecutter.main import cookiecutter
 
 import kedro.config.default_logger  # noqa
 from kedro import __version__ as version
-from kedro.cli.utils import CommandCollection, KedroCliError
+from kedro.cli.utils import CommandCollection, KedroCliError, _clean_pycache
 from kedro.context import load_context
 
-KEDRO_PATH = os.path.dirname(kedro.__file__)
-TEMPLATE_PATH = os.path.join(KEDRO_PATH, "template")
+KEDRO_PATH = Path(kedro.__file__).parent
+TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 _VERBOSE = True
@@ -182,19 +180,6 @@ def docs():
     webbrowser.open(index_path)
 
 
-def _clean_pycache(project_path):
-    # Since template is part of the Kedro package __pycache__ is generated.
-    # This method recursively cleans all __pycache__ folders.
-    to_delete = [
-        filename.resolve()
-        for filename in project_path.rglob("**/*")
-        if str(filename).endswith("__pycache__")
-    ]
-
-    for file in to_delete:  # pragma: no cover
-        shutil.rmtree(str(file))
-
-
 def _create_project(config_path: str, verbose: bool):
     """Implementation of the kedro new cli command.
 
@@ -203,6 +188,9 @@ def _create_project(config_path: str, verbose: bool):
             should contain the project_name, output_dir and repo_name.
         verbose: Extensive debug terminal logs.
     """
+    # pylint: disable=import-outside-toplevel
+    from cookiecutter.main import cookiecutter  # for performance reasons
+
     try:
         if config_path:
             config = _parse_config(config_path, verbose)
@@ -213,7 +201,7 @@ def _create_project(config_path: str, verbose: bool):
 
         result_path = Path(
             cookiecutter(
-                TEMPLATE_PATH,
+                str(TEMPLATE_PATH),
                 output_dir=config["output_dir"],
                 no_input=True,
                 extra_context=config,
@@ -240,6 +228,32 @@ def _create_project(config_path: str, verbose: bool):
         _handle_exception("Failed to generate project.")
 
 
+def _get_user_input(
+    text: str, default: Any = None, check_input: Callable = None
+) -> Any:
+    """Get user input and validate it.
+
+    Args:
+        text: Text to display in command line prompt.
+        default: Default value for the input.
+        check_input: Function to apply to check user input.
+
+    Returns:
+        Processed user value.
+
+    """
+
+    while True:
+        value = click.prompt(text, default=default)
+        if check_input:
+            try:
+                check_input(value)
+            except KedroCliError as exc:
+                click.secho(str(exc), fg="red", err=True)
+                continue
+        return value
+
+
 def _get_config_from_prompts() -> Dict:
     """Ask user to provide necessary inputs.
 
@@ -247,39 +261,6 @@ def _get_config_from_prompts() -> Dict:
         Resulting config dictionary.
 
     """
-
-    def _get_user_input(
-        text: str,
-        default: Any = None,
-        assert_or_check_funcs: Union[Callable, List[Callable]] = None,
-    ) -> Any:
-        """Get user input and validate it.
-
-        Args:
-            text: Text to display in command line prompt.
-            default: Default value for the input.
-            assert_or_check_funcs: List of functions to apply to user input.
-                Value is overridden by function output if the latter is
-                not None.
-
-        Returns:
-            Processed user value.
-
-        """
-        if callable(assert_or_check_funcs):
-            assert_or_check_funcs = [assert_or_check_funcs]
-        else:
-            assert_or_check_funcs = assert_or_check_funcs or []
-        while True:
-            try:
-                value = click.prompt(text, default=default)
-                for _func in assert_or_check_funcs:
-                    _func(value)
-            except KedroCliError as exc:
-                click.secho(str(exc), fg="red", err=True)
-            else:
-                break
-        return value
 
     # set output directory to the current directory
     output_dir = os.path.abspath(os.path.curdir)
@@ -289,6 +270,7 @@ def _get_config_from_prompts() -> Dict:
         "Project Name:",
         "Please enter a human readable name for your new project.",
         "Spaces and punctuation are allowed.",
+        start="",
     )
 
     project_name = _get_user_input(project_name_prompt, default="New Kedro Project")
@@ -303,7 +285,9 @@ def _get_config_from_prompts() -> Dict:
         "Lowercase is recommended.",
     )
     repo_name = _get_user_input(
-        repo_name_prompt, normalized_project_name, _assert_repo_name_ok
+        repo_name_prompt,
+        default=normalized_project_name,
+        check_input=_assert_repo_name_ok,
     )
 
     # get python package_name
@@ -316,7 +300,7 @@ def _get_config_from_prompts() -> Dict:
         "or underscore.",
     )
     python_package = _get_user_input(
-        pkg_name_prompt, default_pkg_name, _assert_pkg_name_ok
+        pkg_name_prompt, default=default_pkg_name, check_input=_assert_pkg_name_ok
     )
 
     # option for whether iris example code is included in the project
@@ -385,15 +369,15 @@ def _check_config_ok(config_path: str, config: Dict[str, Any]) -> Dict[str, Any]
         _show_example_config()
         raise KedroCliError(config_path + " is empty")
 
-    required_in_config = _get_default_config().keys()
+    missing_keys = _get_default_config().keys() - config.keys()
 
-    for var in required_in_config:
-        if var not in config:
-            click.echo("\n" + config_path + ":")
-            click.echo(yaml.dump(config, default_flow_style=False))
-            _show_example_config()
+    if missing_keys:
+        click.echo(f"\n{config_path}:")
+        click.echo(yaml.dump(config, default_flow_style=False))
+        _show_example_config()
 
-            raise KedroCliError("[" + var + "] not found in " + config_path)
+        missing_keys_str = ", ".join(str(k) for k in missing_keys)
+        raise KedroCliError(f"[{missing_keys_str}] not found in {config_path}")
 
     config["output_dir"] = _fix_user_path(config["output_dir"])
     _assert_output_dir_ok(config["output_dir"])
@@ -404,10 +388,9 @@ def _check_config_ok(config_path: str, config: Dict[str, Any]) -> Dict[str, Any]
 
 
 def _get_default_config():
-    default_config_path = os.path.join(TEMPLATE_PATH, "default_config.yml")
-    with open(default_config_path) as default_config_file:
-        default_config = yaml.safe_load(default_config_file)
-    return default_config
+    default_config_path = TEMPLATE_PATH / "default_config.yml"
+    with default_config_path.open() as default_config_file:
+        return yaml.safe_load(default_config_file)
 
 
 def _assert_output_dir_ok(output_dir: str):
@@ -448,8 +431,7 @@ def _assert_pkg_name_ok(pkg_name: str):
         raise KedroCliError(message)
     if not re.match(r"^\w+$", pkg_name[1:]):
         message = (
-            base_message + " It must contain only letters, "
-            "digits, and/or underscores."
+            base_message + " It must contain only letters, digits, and/or underscores."
         )
         raise KedroCliError(message)
 
@@ -494,22 +476,25 @@ def _show_example_config():
 
 def _print_kedro_new_success_message(result):
     click.secho(
-        "Change directory to the project generated in " + str(result.resolve()),
+        "\nChange directory to the project generated in {}".format(
+            str(result.resolve())
+        ),
         fg="green",
     )
     click.secho(
-        "A best-practice setup includes initialising git and creating "
+        "\nA best-practice setup includes initialising git and creating "
         "a virtual environment before running `kedro install` to install "
         "project-specific dependencies. Refer to the Kedro documentation: "
         "https://kedro.readthedocs.io/"
     )
 
 
-def _get_prompt_text(title, *text):
+def _get_prompt_text(title, *text, start: str = "\n"):
     title = title.strip().title()
     title = click.style(title + "\n" + "=" * len(title), bold=True)
-    prompt_text = [title] + list(text)
-    return "\n".join(str(x).strip() for x in prompt_text) + "\n"
+    prompt_lines = [title] + list(text)
+    prompt_text = "\n".join(str(line).strip() for line in prompt_lines)
+    return "{}{}\n".format(start, prompt_text)
 
 
 def get_project_context(key: str = "context", **kwargs) -> Any:
@@ -593,9 +578,7 @@ def load_entry_points(name: str) -> List[str]:
         try:
             entry_point_commands.append(entry_point.load())
         except Exception:  # pylint: disable=broad-except
-            _handle_exception(
-                "Loading {} commands from {}".format(name, str(entry_point)), end=False
-            )
+            _handle_exception(f"Loading {name} commands from {entry_point}", end=False)
     return entry_point_commands
 
 
@@ -630,13 +613,12 @@ def main():  # pragma: no cover
             project_groups.extend(load_entry_points("project"))
             project_groups.append(kedro_cli.cli)
         except Exception:  # pylint: disable=broad-except
-            _handle_exception(
-                "Cannot load commands from {}".format(str(kedro_cli_path))
-            )
-    CommandCollection(
+            _handle_exception(f"Cannot load commands from {kedro_cli_path}")
+    cli_collection = CommandCollection(
         ("Global commands", global_groups),
         ("Project specific commands", project_groups),
-    )()
+    )
+    cli_collection()
 
 
 def _handle_exception(msg, end=True):
@@ -646,7 +628,7 @@ def _handle_exception(msg, end=True):
     else:
         etype, value, _ = sys.exc_info()
         click.secho(
-            "".join(*traceback.format_exception_only(etype, value))
+            "".join(traceback.format_exception_only(etype, value))
             + "Run with --verbose to see the full exception",
             fg="yellow",
         )

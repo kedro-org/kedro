@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -27,15 +27,15 @@
 # limitations under the License.
 
 """``AbstractDataSet`` implementation to access Spark dataframes using
-``pyspark`` on Apache Hive
+``pyspark`` on Apache Hive.
 """
 
 import pickle
 import uuid
 from typing import Any, Dict, List
 
-from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql.functions import (  # pylint: disable=no-name-in-module
+from pyspark.sql import DataFrame, SparkSession  # pylint: disable=import-error
+from pyspark.sql.functions import (  # pylint: disable=import-error,no-name-in-module
     coalesce,
     col,
     lit,
@@ -75,15 +75,16 @@ class StagedHiveDataSet:
 
     def __enter__(self):
         self._data.createOrReplaceTempView("tmp")
+
         self._spark_session.sql(
-            "create table {stage_database_name}.{stage_table_name} as select * from tmp".format(
-                stage_database_name=self._stage_database_name,
+            "create table {stage_db_name}.{stage_table_name} as select * from tmp".format(  # nosec
+                stage_db_name=self._stage_database_name,
                 stage_table_name=self._stage_table_name,
             )
         ).take(1)
         self.staged_data = self._spark_session.sql(
-            "select * from {stage_database_name}.{stage_table_name}".format(
-                stage_database_name=self._stage_database_name,
+            "select * from {stage_db_name}.{stage_table_name}".format(  # nosec
+                stage_db_name=self._stage_database_name,
                 stage_table_name=self._stage_table_name,
             )
         )
@@ -91,14 +92,13 @@ class StagedHiveDataSet:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._spark_session.sql(
-            "drop table {stage_database_name}.{stage_table_name}".format(
-                stage_database_name=self._stage_database_name,
+            "drop table {stage_db_name}.{stage_table_name}".format(
+                stage_db_name=self._stage_database_name,
                 stage_table_name=self._stage_table_name,
             )
         )
 
 
-# pylint: disable=too-many-instance-attributes
 class SparkHiveDataSet(AbstractDataSet):
     """``SparkHiveDataSet`` loads and saves Spark dataframes stored on Hive.
     This data set also handles some incompatible file types such as using partitioned parquet on
@@ -125,8 +125,7 @@ class SparkHiveDataSet(AbstractDataSet):
         >>>
         >>> data = [('Alex', 31), ('Bob', 12), ('Clarke', 65), ('Dave', 29)]
         >>>
-        >>> spark_df = SparkSession.builder.getOrCreate()\
-        >>>                        .createDataFrame(data, schema)
+        >>> spark_df = SparkSession.builder.getOrCreate().createDataFrame(data, schema)
         >>>
         >>> data_set = SparkHiveDataSet(database="test_database", table="test_table",
         >>>                             write_mode="overwrite")
@@ -138,12 +137,7 @@ class SparkHiveDataSet(AbstractDataSet):
 
     # pylint: disable=too-many-arguments
     def __init__(
-        self,
-        database: str,
-        table: str,
-        write_mode: str,
-        table_pk: List[str] = None,
-        layer: str = None,
+        self, database: str, table: str, write_mode: str, table_pk: List[str] = None,
     ) -> None:
         """Creates a new instance of ``SparkHiveDataSet``.
 
@@ -153,15 +147,12 @@ class SparkHiveDataSet(AbstractDataSet):
             write_mode: ``insert``, ``upsert`` or ``overwrite`` are supported.
             table_pk: If performing an upsert, this identifies the primary key columns used to
                 resolve preexisting data. Is required for ``write_mode="upsert"``.
-            layer: The data layer according to the data engineering convention:
-                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
 
         Raises:
             DataSetError: Invalid configuration supplied
         """
         self._database = database
         self._table = table
-        self._layer = layer
         self._stage_table = "_temp_" + table
         self._valid_write_modes = ["insert", "upsert", "overwrite"]
         if write_mode not in self._valid_write_modes:
@@ -198,7 +189,6 @@ class SparkHiveDataSet(AbstractDataSet):
             table=self._table,
             write_mode=self._write_mode,
             table_pk=self._table_pk,
-            layer=self._layer,
         )
 
     @staticmethod
@@ -208,12 +198,12 @@ class SparkHiveDataSet(AbstractDataSet):
     def _create_empty_hive_table(self, data):
         data.createOrReplaceTempView("tmp")
         self._get_spark().sql(
-            "create table {database}.{table} select * from tmp limit 1".format(
+            "create table {database}.{table} select * from tmp limit 1".format(  # nosec
                 table=self._table, database=self._database
             )
         )
         self._get_spark().sql(
-            "truncate table {database}.{table}".format(
+            "truncate table {database}.{table}".format(  # nosec
                 database=self._database, table=self._table
             )
         )
@@ -226,7 +216,7 @@ class SparkHiveDataSet(AbstractDataSet):
                 )
             )
         return self._get_spark().sql(
-            "select * from {database}.{table}".format(
+            "select * from {database}.{table}".format(  # nosec
                 database=self._database, table=self._table
             )
         )
@@ -246,7 +236,7 @@ class SparkHiveDataSet(AbstractDataSet):
     def _insert_save(self, data: DataFrame) -> None:
         data.createOrReplaceTempView("tmp")
         self._get_spark().sql(
-            "insert into {database}.{table} select {columns} from tmp".format(
+            "insert into {database}.{table} select {columns} from tmp".format(  # nosec
                 database=self._database,
                 table=self._table,
                 columns=", ".join(self._table_columns),
@@ -282,7 +272,7 @@ class SparkHiveDataSet(AbstractDataSet):
         self._get_spark().sql(
             "truncate table {database}.{table}".format(
                 database=self._database, table=self._table
-            )
+            )  # nosec
         )
         self._insert_save(data)
 

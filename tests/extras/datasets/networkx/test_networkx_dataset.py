@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -53,8 +53,8 @@ def filepath_json(tmp_path):
 
 
 @pytest.fixture
-def networkx_data_set(filepath_json):
-    return NetworkXDataSet(filepath=filepath_json)
+def networkx_data_set(filepath_json, fs_args):
+    return NetworkXDataSet(filepath=filepath_json, fs_args=fs_args)
 
 
 @pytest.fixture
@@ -82,6 +82,8 @@ class TestNetworkXDataSet:
         networkx_data_set.save(dummy_graph_data)
         reloaded = networkx_data_set.load()
         assert dummy_graph_data.nodes(data=True) == reloaded.nodes(data=True)
+        assert networkx_data_set._fs_open_args_load == {"mode": "r"}
+        assert networkx_data_set._fs_open_args_save == {"mode": "w"}
 
     def test_load_missing_file(self, networkx_data_set):
         """Check the error when trying to load missing file."""
@@ -121,6 +123,17 @@ class TestNetworkXDataSet:
             attrs=ATTRS,
         )
         assert dummy_graph_data.nodes(data=True) == reloaded.nodes(data=True)
+
+    @pytest.mark.parametrize(
+        "fs_args",
+        [{"open_args_load": {"mode": "rb", "compression": "gzip"}}],
+        indirect=True,
+    )
+    def test_open_extra_args(self, networkx_data_set, fs_args):
+        assert networkx_data_set._fs_open_args_load == fs_args["open_args_load"]
+        assert networkx_data_set._fs_open_args_save == {
+            "mode": "w"
+        }  # default unchanged
 
     def test_exists(self, networkx_data_set, dummy_graph_data):
         """Test `exists` method invocation."""

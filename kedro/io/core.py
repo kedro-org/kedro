@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -37,11 +37,15 @@ import re
 import warnings
 from collections import namedtuple
 from datetime import datetime, timezone
-from functools import lru_cache
+from functools import partial
 from glob import iglob
+from operator import attrgetter
 from pathlib import Path, PurePath
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 from urllib.parse import urlsplit
+
+from cachetools import Cache, cachedmethod
+from cachetools.keys import hashkey
 
 from kedro.utils import load_obj
 
@@ -98,23 +102,37 @@ class AbstractDataSet(abc.ABC):
     Example:
     ::
 
-        >>> from kedro.io import AbstractDataSet
+        >>> from pathlib import Path, PurePosixPath
         >>> import pandas as pd
+        >>> from kedro.io import AbstractDataSet
+        >>>
         >>>
         >>> class MyOwnDataSet(AbstractDataSet):
-        >>>     def __init__(self, param1, param2):
+        >>>     def __init__(self, filepath, param1, param2=True):
+        >>>         self._filepath = PurePosixPath(filepath)
         >>>         self._param1 = param1
         >>>         self._param2 = param2
         >>>
         >>>     def _load(self) -> pd.DataFrame:
-        >>>         print("Dummy load: {}".format(self._param1))
-        >>>         return pd.DataFrame()
+        >>>         return pd.read_csv(self._filepath)
         >>>
         >>>     def _save(self, df: pd.DataFrame) -> None:
-        >>>         print("Dummy save: {}".format(self._param2))
+        >>>         df.to_csv(str(self._filepath))
+        >>>
+        >>>     def _exists(self) -> bool:
+        >>>         return Path(self._filepath).exists()
         >>>
         >>>     def _describe(self):
         >>>         return dict(param1=self._param1, param2=self._param2)
+
+    Example catalog.yml specification:
+    ::
+
+        my_dataset:
+            type: <path-to-my-own-dataset>.MyOwnDataSet
+            filepath: data/01_raw/my_data.csv
+            param1: <param1-value> # param1 is a required argument
+            # param2 will be True by default
     """
 
     @classmethod
@@ -425,19 +443,28 @@ def parse_dataset_definition(
 
 
 def _load_obj(class_path: str) -> Optional[object]:
+    mod_path, _, class_name = class_path.rpartition(".")
+    try:
+        available_classes = load_obj(f"{mod_path}.__all__")
+    # ModuleNotFoundError: When `load_obj` can't find `mod_path` (e.g `kedro.io.pandas`)
+    #                      this is because we try a combination of all prefixes.
+    # AttributeError: When `load_obj` manages to load `mod_path` but it doesn't have an
+    #                 `__all__` attribute -- either because it's a custom or a kedro.io dataset
+    except (ModuleNotFoundError, AttributeError, ValueError):
+        available_classes = None
+
     try:
         class_obj = load_obj(class_path)
-    except ModuleNotFoundError as error:
-        if error.name is None or error.name in class_path:
-            return None
-        # class_obj was successfully loaded, but some dependencies are missing.
-        raise DataSetError(
-            f"{error} for {class_path}. Please see the documentation on how to "
-            f"install relevant dependencies for {class_path}:\n"
-            f"https://kedro.readthedocs.io/en/stable/02_getting_started/"
-            f"02_install.html#optional-dependencies"
-        )
-    except (AttributeError, ValueError):
+    except (ModuleNotFoundError, ValueError):
+        return None
+    except AttributeError as error:
+        if available_classes and class_name in available_classes:
+            raise DataSetError(
+                f"{error} Please see the documentation on how to "
+                f"install relevant dependencies for {class_path}:\n"
+                f"https://kedro.readthedocs.io/en/stable/02_getting_started/"
+                f"02_install.html#optional-dependencies"
+            )
         return None
 
     return class_obj
@@ -457,13 +484,14 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
     Example:
     ::
 
-        >>> from kedro.io import AbstractVersionedDataSet
+        >>> from pathlib import Path, PurePosixPath
         >>> import pandas as pd
+        >>> from kedro.io import AbstractVersionedDataSet
         >>>
         >>>
         >>> class MyOwnDataSet(AbstractVersionedDataSet):
-        >>>     def __init__(self, param1, param2, filepath, version):
-        >>>         super().__init__(filepath, version)
+        >>>     def __init__(self, filepath, version, param1, param2=True):
+        >>>         super().__init__(PurePosixPath(filepath), version)
         >>>         self._param1 = param1
         >>>         self._param2 = param2
         >>>
@@ -477,13 +505,21 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
         >>>
         >>>     def _exists(self) -> bool:
         >>>         path = self._get_load_path()
-        >>>         return path.is_file()
+        >>>         return Path(path).exists()
         >>>
         >>>     def _describe(self):
         >>>         return dict(version=self._version, param1=self._param1, param2=self._param2)
-    """
 
-    # pylint: disable=abstract-method
+    Example catalog.yml specification:
+    ::
+
+        my_dataset:
+            type: <path-to-my-own-dataset>.MyOwnDataSet
+            filepath: data/01_raw/my_data.csv
+            versioned: true
+            param1: <param1-value> # param1 is a required argument
+            # param2 will be True by default
+    """
 
     def __init__(
         self,
@@ -509,17 +545,15 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
         self._version = version
         self._exists_function = exists_function or _local_exists
         self._glob_function = glob_function or iglob
+        # 1 entry for load version, 1 for save version
+        self._version_cache = Cache(maxsize=2)
 
-    @lru_cache(maxsize=None)
-    def resolve_load_version(self) -> Optional[str]:
-        """Compute and cache the version the dataset should be loaded with."""
-        if not self._version:
-            return None
-        if self._version.load:
-            return self._version.load
-
+    # 'key' is set to prevent cache key overlapping for load and save:
+    # https://cachetools.readthedocs.io/en/stable/#cachetools.cachedmethod
+    @cachedmethod(cache=attrgetter("_version_cache"), key=partial(hashkey, "load"))
+    def _fetch_latest_load_version(self) -> str:
         # When load version is unpinned, fetch the most recent existing
-        # version from the given path
+        # version from the given path.
         pattern = str(self._get_versioned_path("*"))
         version_paths = sorted(self._glob_function(pattern), reverse=True)
         most_recent = next(
@@ -527,11 +561,24 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
         )
 
         if not most_recent:
-            raise VersionNotFoundError(
-                "Did not find any versions for {}".format(str(self))
-            )
+            raise VersionNotFoundError(f"Did not find any versions for {self}")
 
         return PurePath(most_recent).parent.name
+
+    # 'key' is set to prevent cache key overlapping for load and save:
+    # https://cachetools.readthedocs.io/en/stable/#cachetools.cachedmethod
+    @cachedmethod(cache=attrgetter("_version_cache"), key=partial(hashkey, "save"))
+    def _fetch_latest_save_version(self) -> str:  # pylint: disable=no-self-use
+        """Generate and cache the current save version"""
+        return generate_timestamp()
+
+    def resolve_load_version(self) -> Optional[str]:
+        """Compute the version the dataset should be loaded with."""
+        if not self._version:
+            return None
+        if self._version.load:
+            return self._version.load
+        return self._fetch_latest_load_version()
 
     def _get_load_path(self) -> PurePath:
         if not self._version:
@@ -541,12 +588,13 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
         load_version = self.resolve_load_version()
         return self._get_versioned_path(load_version)  # type: ignore
 
-    @lru_cache(maxsize=None)
     def resolve_save_version(self) -> Optional[str]:
-        """Compute and cache the version the dataset should be saved with."""
+        """Compute the version the dataset should be saved with."""
         if not self._version:
             return None
-        return self._version.save or generate_timestamp()
+        if self._version.save:
+            return self._version.save
+        return self._fetch_latest_save_version()
 
     def _get_save_path(self) -> PurePath:
         if not self._version:
@@ -572,6 +620,7 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
         return super().load()
 
     def save(self, data: Any) -> None:
+        self._version_cache.clear()
         save_version = self.resolve_save_version()  # Make sure last save version is set
         super().save(data)
 
@@ -605,8 +654,7 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
 
     def _release(self) -> None:
         super()._release()
-        self.resolve_load_version.cache_clear()
-        self.resolve_save_version.cache_clear()
+        self._version_cache.clear()
 
 
 def _parse_filepath(filepath: str) -> Dict[str, str]:

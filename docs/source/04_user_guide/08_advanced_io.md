@@ -52,7 +52,7 @@ In order to enable versioning, you need to update the `catalog.yml` config file 
 An example dataset could look similar to the below:
 
 ```python
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import pandas as pd
 
@@ -60,8 +60,8 @@ from kedro.io import AbstractVersionedDataSet
 
 
 class MyOwnDataSet(AbstractVersionedDataSet):
-    def __init__(self, param1, param2, filepath, version):
-        super().__init__(Path(filepath), version)
+    def __init__(self, filepath, version,  param1, param2=True):
+        super().__init__(PurePosixPath(filepath), version)
         self._param1 = param1
         self._param2 = param2
 
@@ -72,6 +72,10 @@ class MyOwnDataSet(AbstractVersionedDataSet):
     def _save(self, df: pd.DataFrame) -> None:
         save_path = self._get_save_path()
         df.to_csv(save_path)
+
+    def _exists(self) -> bool:
+        path = self._get_load_path()
+        return Path(path).exists()
 
     def _describe(self):
         return dict(version=self._version, param1=self._param1, param2=self._param2)
@@ -84,6 +88,8 @@ my_dataset:
   type: <path-to-my-own-dataset>.MyOwnDataSet
   filepath: data/01_raw/my_data.csv
   versioned: true
+  param1: <param1-value> # param1 is a required argument
+  # param2 will be True by default
 ```
 
 ### `version` namedtuple
@@ -408,7 +414,7 @@ As you can see from the example above, on load `PartitionedDataSet` _does not_ a
 >
 > Example 2: if `path="s3://my-bucket-name/folder"` and `filename_suffix=".csv"` and partition is stored in `s3://my-bucket-name/folder/2019-12-04/data.csv` then its Partition ID is `2019-12-04/data`.
 
-> *Note:* `PartitionedDataSet` implements caching on load operation, which means that if multiple nodes consume the same `PartitionedDataSet`, they will all receive the same partition dictionary even if some new partitions were added to the folder after the first load has been completed. This is done deliberately to guarantee the consistency of load operations between the nodes and avoid race conditions. You can reset cache by calling `.invalidate_cache()` method of the partitioned dataset object.
+> *Note:* `PartitionedDataSet` implements caching on load operation, which means that if multiple nodes consume the same `PartitionedDataSet`, they will all receive the same partition dictionary even if some new partitions were added to the folder after the first load has been completed. This is done deliberately to guarantee the consistency of load operations between the nodes and avoid race conditions. You can reset the cache by calling `release()` method of the partitioned dataset object.
 
 ### Partitioned dataset save
 

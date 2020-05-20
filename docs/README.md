@@ -6,21 +6,55 @@ This is the style guide we have used to create [documentation about Kedro](https
 
 When you are writing documentation for your own project, you may find it useful to follow these rules. We will also ask anyone kind enough to contribute to the Kedro documentation to follow our preferred style to maintain consistency and simplicity. However, we are not over-proscriptive and are happy to take contributions regardless, as long as you are happy if we edit your text to follow these rules.
 
-## Guidelines
+## Style guidelines
 
-Please follow these simple rules:
+Please follow these simple rules. Where it's not obvious what the style should be, it's worth consulting the [Microsoft style guide](https://docs.microsoft.com/en-gb/style-guide/welcome/).
 
+>If you are unsure of something, just do what you can in your documentation
+>contribution, and note any queries. We can always iterate the submission
+>with you when you create a pull request.:
+
+### Language
 * Use [UK English](https://www.britishcouncilfoundation.id/en/english/articles/british-and-american-english)
+
+### Formatting
 * Use Markdown formatting. If you are unsure of this, here is a useful [Cheatsheet and sandbox](https://daringfireball.net/projects/markdown/dingus)
-* Use sentence case in titles. We prefer this, _"Sentence case only has one capital except for names like Kedro"_ and not this, _"Title Case Means Capitalise Every Word"_
 * Mark code blocks with the appropriate language to enable [syntax highlighting](https://support.codebasehq.com/articles/tips-tricks/syntax-highlighting-in-markdown)
 * We use a `bash` lexer for all codeblocks that represent the terminal, and we don't include the prompt
-* Bullet points start with capitals and do not end with full-stops
-* Prefer to use symbols for bullets instead of numbers unless you are specifically giving a sequence of instructions
+
+### Links
+* Make hyperlink descriptions descriptive. [Musings on vegan cookery](LINK) is good. [Musings](LINK) is less helpful. Don't write "For musings on vegan cookery, see [here](LINK).
+
+### Capitalisation
+* Only capitalise proper nouns e.g. names of QuantumBlack products, other tools and services. See Kedro lexicon, above, for additional guidance.
+* Don't capitalise cloud, internet, machine learning, advanced analytics etc. as per Microsoft style guide https://docs.microsoft.com/en-us/style-guide/a-z-word-list-term-collections/i/internet-intranet-extranet and https://docs.microsoft.com/en-us/style-guide/a-z-word-list-term-collections/term-collections/cloud-computing-terms.
+* Follow sentence case, which capitalises only the first word of a title/subtitle. We prefer this, _"Sentence case only has one capital except for names like Kedro"_ and not this, _"Title Case Means Capitalise Every Word"_
+
+### Bullets
+* Capitalise the first word.
+* Don't put a period at the end unless it's a full sentence and go for consistency within a block of bullets, if you have some bullets with full sentences and others without.
+* Don't use numbered bullets except for a sequence of activities or where you have to refer back to one of them in the text (or a diagram).
+
+### Kedro lexicon
+
+* Name of our product: Kedro and Kedro-Viz (note capitalisation).
+* We are QuantumBlack Labs.
+* Use journal and pipeline as these aren't proper nouns. Tend to lower case except if there is a precedent (see next bullet).
+* Use Hooks (not hooks, except where it's a necessary part of your code example). We are taking our lead from React here, so capitalising despite it not seeming consistent with other rules.
+* Use dataset (not data set, or data-set) for a generic dataset.
+ * Use capitalised DataSet when talking about a specific Kedro dataset class e.g. CSVDataSet.
+* Use data catalog for a generic data catalog.
+ * Use Data Catalog to talk about the [Kedro Data Catalog](https://github.com/quantumblacklabs/private-kedro/blob/develop/docs/source/04_user_guide/04_data_catalog.md).
+
+### Style
 * Keep your sentences short and easy to read
 * Do not plagiarise other authors. Link to their text and credit them
+* Avoid colloquialisms that may not translate to other regions/languages.
+* Use imperatives to make instructions, or second person.
+  * For example "Complete the configuration steps" or "You should complete the configuration steps". Don't use the passive "The configuration steps should be completed" (see next bullet).
+* Avoid passive tense. What is passive tense? If you can add "by zombies" to the end of any sentence, it is passive.
+  * For example: "The configuration steps should be completed." will also read OK as "The configuration should be completed BY ZOMBIES". Instead, you'd write "You should complete the configuration steps" or simply "Complete the configuration steps".
 
-If you are in doubt, take a look at how we've written the Kedro documentation. If you are unsure of something, just do what you can in your documentation contribution, and note any queries. We can always iterate the submission with you when you create a pull request.
 
 ## How do I build your documentation?
 

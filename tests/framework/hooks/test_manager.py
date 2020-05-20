@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -27,8 +27,8 @@
 # limitations under the License.
 import pytest
 
-from kedro.hooks.manager import _create_hook_manager
-from kedro.hooks.specs import DataCatalogSpecs, NodeSpecs, PipelineSpecs
+from kedro.framework.hooks.manager import _create_hook_manager
+from kedro.framework.hooks.specs import DataCatalogSpecs, NodeSpecs, PipelineSpecs
 
 
 @pytest.mark.parametrize(
@@ -57,8 +57,18 @@ from kedro.hooks.specs import DataCatalogSpecs, NodeSpecs, PipelineSpecs
             "after_node_run",
             ("node", "catalog", "inputs", "outputs", "is_async", "run_id"),
         ),
+        (
+            NodeSpecs,
+            "on_node_error",
+            ("error", "node", "catalog", "inputs", "is_async", "run_id"),
+        ),
         (PipelineSpecs, "before_pipeline_run", ("run_params", "pipeline", "catalog")),
         (PipelineSpecs, "after_pipeline_run", ("run_params", "pipeline", "catalog")),
+        (
+            PipelineSpecs,
+            "on_pipeline_error",
+            ("error", "run_params", "pipeline", "catalog"),
+        ),
     ],
 )
 def test_hook_manager_can_call_hooks_defined_in_specs(

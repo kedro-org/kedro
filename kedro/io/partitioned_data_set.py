@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -31,10 +31,11 @@ underlying dataset definition. It also uses `fsspec` for filesystem level operat
 """
 import operator
 from copy import deepcopy
-from functools import lru_cache
 from typing import Any, Callable, Dict, List, Tuple, Type, Union
 from urllib.parse import urlparse
 from warnings import warn
+
+from cachetools import Cache, cachedmethod
 
 from kedro.io.core import (
     VERSION_KEY,
@@ -147,6 +148,7 @@ class PartitionedDataSet(AbstractDataSet):
         self._path = path
         self._filename_suffix = filename_suffix
         self._protocol = infer_storage_options(self._path)["protocol"]
+        self._partition_cache = Cache(maxsize=1)
 
         dataset = dataset if isinstance(dataset, dict) else {"type": dataset}
         self._dataset_type, self._dataset_config = parse_dataset_definition(dataset)
@@ -179,7 +181,7 @@ class PartitionedDataSet(AbstractDataSet):
         self._load_args = deepcopy(load_args) or {}
         self._sep = self._filesystem.sep
         # since some filesystem implementations may implement a global cache
-        self.invalidate_cache()
+        self._invalidate_caches()
 
     @property
     def _filesystem(self):
@@ -195,7 +197,7 @@ class PartitionedDataSet(AbstractDataSet):
             return urlparse(self._path)._replace(scheme="s3").geturl()
         return self._path
 
-    @lru_cache(maxsize=None)
+    @cachedmethod(cache=operator.attrgetter("_partition_cache"))
     def _list_partitions(self) -> List[str]:
         return [
             path
@@ -247,7 +249,7 @@ class PartitionedDataSet(AbstractDataSet):
             kwargs[self._filepath_arg] = self._join_protocol(partition)
             dataset = self._dataset_type(**kwargs)  # type: ignore
             dataset.save(partition_data)
-        self.invalidate_cache()
+        self._invalidate_caches()
 
     def _describe(self) -> Dict[str, Any]:
         clean_dataset_config = (
@@ -261,16 +263,16 @@ class PartitionedDataSet(AbstractDataSet):
             dataset_config=clean_dataset_config,
         )
 
-    def invalidate_cache(self):
-        """Invalidate `_list_partitions` method and underlying filesystem caches."""
-        self._list_partitions.cache_clear()
+    def _invalidate_caches(self):
+        self._partition_cache.clear()
         self._filesystem.invalidate_cache(self._normalized_path)
 
     def _exists(self) -> bool:
         return bool(self._list_partitions())
 
     def _release(self) -> None:
-        self.invalidate_cache()
+        super()._release()
+        self._invalidate_caches()
 
 
 def _split_credentials(
@@ -434,7 +436,7 @@ class IncrementalDataSet(PartitionedDataSet):
 
         return {**default_config, **checkpoint_config}
 
-    @lru_cache(maxsize=None)
+    @cachedmethod(cache=operator.attrgetter("_partition_cache"))
     def _list_partitions(self) -> List[str]:
         checkpoint = self._read_checkpoint()
         checkpoint_path = self._filesystem._strip_protocol(  # pylint: disable=protected-access

@@ -1,9 +1,9 @@
-kedro.cli
-=========
+kedro.framework.cli
+===================
 
 .. rubric:: Description
 
-.. automodule:: kedro.cli
+.. automodule:: kedro.framework.cli
 
    .. rubric:: Functions
 
@@ -11,4 +11,4 @@ kedro.cli
        :toctree:
        :template: autosummary/base.rst
 
-       kedro.cli.get_project_context
+       kedro.framework.cli.get_project_context

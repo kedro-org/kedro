@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -324,10 +324,23 @@ def exec_kedro_target(context, command):
     context.result = run(cmd, env=context.env, cwd=str(context.root_project_dir))
 
 
-@when("I execute the project")
+@when("I delete assets not needed for running installed packages")
+def delete_unnecessary_assets(context):
+    """Delete .kedro.yml as it is not needed when executing installed project package.
+    """
+    kedro_yaml = context.root_project_dir / ".kedro.yml"
+    kedro_yaml.unlink()
+
+
+@when("I execute the installed project package")
 def exec_project(context):
     """Execute installed Kedro project target."""
     cmd = [str(context.bin_dir / context.project_name)]
+    # N.B.: prior to the introduction of load_package_context, this test was passing
+    # accidentally because it was executing the installed project package at the
+    # same directory as project root, so a lot of things were available on Path.cwd().
+    # We take care to delete with `delete_unnecessary_assets` to simulate the behaviour
+    # of a installed package in a fresh environment.
     context.result = run(cmd, env=context.env, cwd=str(context.root_project_dir))
 
 
@@ -447,7 +460,7 @@ def update_kedro_req(context: behave.runner.Context):
 
     if reqs_path.is_file():
         old_reqs = reqs_path.read_text()
-        new_reqs = re.sub(r"#?kedro\[pandas\]==.*\n", kedro_reqs, old_reqs)
+        new_reqs = re.sub(r"#?kedro\[pandas.CSVDataSet\]==.*\n", kedro_reqs, old_reqs)
         assert not old_reqs == new_reqs
         reqs_path.write_text(new_reqs)
 

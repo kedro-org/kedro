@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -29,172 +29,55 @@
 """Command line tools for manipulating a Kedro project.
 Intended to be invoked via `kedro`."""
 import os
-import re
-import shutil
-import subprocess
-import sys
-import webbrowser
-
-import yaml
-from collections import Counter, defaultdict
-from glob import iglob
 from itertools import chain
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Tuple
-
+from typing import Dict, Iterable, Tuple
 
 import click
-from click import secho, style
-from kedro.cli import main as kedro_main
-from kedro.cli.pipeline import pipeline as pipeline_group
-from kedro.cli.utils import (
-    KedroCliError,
-    call,
-    export_nodes,
-    forward_command,
-    python_call,
-)
-from kedro.context import load_context, validate_source_path
-
+from kedro.framework.cli import main as kedro_main
+from kedro.framework.cli.catalog import catalog as catalog_group
+from kedro.framework.cli.jupyter import jupyter as jupyter_group
+from kedro.framework.cli.pipeline import pipeline as pipeline_group
+from kedro.framework.cli.project import project_group
+from kedro.framework.cli.utils import KedroCliError, env_option, split_string
+from kedro.framework.context import load_context
 from kedro.utils import load_obj
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 # get our package onto the python path
 PROJ_PATH = Path(__file__).resolve().parent
-os.environ["IPYTHONDIR"] = str(PROJ_PATH / ".ipython")
-
-with (PROJ_PATH / ".kedro.yml").open("r") as kedro_yml:
-    kedro_yaml = yaml.safe_load(kedro_yml)
-
-SOURCE_DIR = Path(kedro_yaml.get("source_dir", "src")).expanduser()
-SOURCE_PATH = (PROJ_PATH / SOURCE_DIR).resolve()
-validate_source_path(SOURCE_PATH, PROJ_PATH)
-
-KEDRO_PACKAGE_NAME = "{{ cookiecutter.python_package }}"
-
-NO_DEPENDENCY_MESSAGE = """{module} is not installed. Please make sure {module} is in
-{src}/requirements.txt and run `kedro install`."""
-
-TAG_ARG_HELP = """Construct the pipeline using only nodes which have this tag
-attached. Option can be used multiple times, what results in a
-pipeline constructed from nodes having any of those tags."""
-
-PIPELINE_ARG_HELP = """Name of the modular pipeline to run.
-If not set, the project pipeline is run by default."""
 
 ENV_ARG_HELP = """Run the pipeline in a configured environment. If not specified,
 pipeline will run using environment `local`."""
-
-NODE_ARG_HELP = """Run only nodes with specified names."""
-
-FROM_NODES_HELP = """A list of node names which should be used as a starting point."""
-
-TO_NODES_HELP = """A list of node names which should be used as an end point."""
-
 FROM_INPUTS_HELP = (
     """A list of dataset names which should be used as a starting point."""
 )
-
-PARALLEL_ARG_HELP = """Run the pipeline using the `ParallelRunner`.
-If not specified, use the `SequentialRunner`. This flag cannot be used together
-with --runner."""
-
-OPEN_ARG_HELP = """Open the documentation in your default browser after building."""
-
+FROM_NODES_HELP = """A list of node names which should be used as a starting point."""
+TO_NODES_HELP = """A list of node names which should be used as an end point."""
+NODE_ARG_HELP = """Run only nodes with specified names."""
 RUNNER_ARG_HELP = """Specify a runner that you want to run the pipeline with.
 Available runners: `SequentialRunner`, `ParallelRunner` and `ThreadRunner`.
 This option cannot be used together with --parallel."""
-
-CONVERT_ALL_HELP = """Extract the nodes from all notebooks in the Kedro project directory,
-including sub-folders."""
-
-OVERWRITE_HELP = """If Python file already exists for the equivalent notebook,
-overwrite its contents."""
-
+PARALLEL_ARG_HELP = """Run the pipeline using the `ParallelRunner`.
+If not specified, use the `SequentialRunner`. This flag cannot be used together
+with --runner."""
+TAG_ARG_HELP = """Construct the pipeline using only nodes which have this tag
+attached. Option can be used multiple times, what results in a
+pipeline constructed from nodes having any of those tags."""
 LOAD_VERSION_HELP = """Specify a particular dataset version (timestamp) for loading."""
-
 CONFIG_FILE_HELP = """Specify a YAML configuration file to load the run
 command arguments from. If command line arguments are provided, they will
 override the loaded ones."""
-
+PIPELINE_ARG_HELP = """Name of the modular pipeline to run.
+If not set, the project pipeline is run by default."""
 PARAMS_ARG_HELP = """Specify extra parameters that you want to pass
 to the context initializer. Items must be separated by comma, keys - by colon,
 example: param1:value1,param2:value2. Each parameter is split by the first comma,
 so parameter values are allowed to contain colons, parameter keys are not."""
 
-LINT_CHECK_ONLY_HELP = """Check the files for style guide violations, unsorted /
-unformatted imports, and unblackened Python code without modifying the files."""
 
-JUPYTER_IP_HELP = "IP address of the Jupyter server."
-JUPYTER_ALL_KERNELS_HELP = "Display all available Python kernels."
-JUPYTER_IDLE_TIMEOUT_HELP = """When a notebook is closed, Jupyter server will
-terminate its kernel after so many seconds of inactivity. This does not affect
-any open notebooks."""
-
-
-def _env_option(func_=None, **kwargs):
-    default_args = dict(type=str, default=None, help=ENV_ARG_HELP)
-    kwargs = {**default_args, **kwargs}
-    opt = click.option("--env", "-e", **kwargs)
-    return opt(func_) if func_ else opt
-
-
-def _split_string(ctx, param, value):
-    return [item.strip() for item in value.split(",") if item.strip()]
-
-
-def _try_convert_to_numeric(value):
-    try:
-        value = float(value)
-    except ValueError:
-        return value
-    return int(value) if value.is_integer() else value
-
-
-def _split_params(ctx, param, value):
-    if isinstance(value, dict):
-        return value
-    result = {}
-    for item in _split_string(ctx, param, value):
-        item = item.split(":", 1)
-        if len(item) != 2:
-            ctx.fail(
-                "Invalid format of `{}` option: Item `{}` must contain a key and "
-                "a value separated by `:`.".format(param.name, item[0])
-            )
-        key = item[0].strip()
-        if not key:
-            ctx.fail(
-                "Invalid format of `{}` option: Parameter key cannot be "
-                "an empty string.".format(param.name)
-            )
-        value = item[1].strip()
-        result[key] = _try_convert_to_numeric(value)
-    return result
-
-
-def _reformat_load_versions(ctx, param, value) -> Dict[str, str]:
-    """Reformat data structure from tuple to dictionary for `load-version`.
-        E.g ('dataset1:time1', 'dataset2:time2') -> {"dataset1": "time1", "dataset2": "time2"}.
-    """
-    load_version_separator = ":"
-    load_versions_dict = {}
-
-    for load_version in value:
-        load_version_list = load_version.split(load_version_separator, 1)
-        if len(load_version_list) != 2:
-            raise ValueError(
-                "Expected the form of `load_version` to be "
-                "`dataset_name:YYYY-MM-DDThh.mm.ss.sssZ`,"
-                "found {} instead".format(load_version)
-            )
-        load_versions_dict[load_version_list[0]] = load_version_list[1]
-
-    return load_versions_dict
-
-
-def _config_file_callback(ctx, param, value):
+def _config_file_callback(ctx, param, value):  # pylint: disable=unused-argument
     """Config file callback, that replaces command line options with config file
     values. If command line options are passed, they override config file values.
     """
@@ -215,6 +98,57 @@ def _get_values_as_tuple(values: Iterable[str]) -> Tuple[str, ...]:
     return tuple(chain.from_iterable(value.split(",") for value in values))
 
 
+def _reformat_load_versions(  # pylint: disable=unused-argument
+    ctx, param, value
+) -> Dict[str, str]:
+    """Reformat data structure from tuple to dictionary for `load-version`.
+        E.g ('dataset1:time1', 'dataset2:time2') -> {"dataset1": "time1", "dataset2": "time2"}.
+    """
+    load_versions_dict = {}
+
+    for load_version in value:
+        load_version_list = load_version.split(":", 1)
+        if len(load_version_list) != 2:
+            raise KedroCliError(
+                f"Expected the form of `load_version` to be "
+                f"`dataset_name:YYYY-MM-DDThh.mm.ss.sssZ`,"
+                f"found {load_version} instead"
+            )
+        load_versions_dict[load_version_list[0]] = load_version_list[1]
+
+    return load_versions_dict
+
+
+def _split_params(ctx, param, value):
+    if isinstance(value, dict):
+        return value
+    result = {}
+    for item in split_string(ctx, param, value):
+        item = item.split(":", 1)
+        if len(item) != 2:
+            ctx.fail(
+                f"Invalid format of `{param.name}` option: Item `{item[0]}` must contain "
+                f"a key and a value separated by `:`."
+            )
+        key = item[0].strip()
+        if not key:
+            ctx.fail(
+                f"Invalid format of `{param.name}` option: Parameter key "
+                f"cannot be an empty string."
+            )
+        value = item[1].strip()
+        result[key] = _try_convert_to_numeric(value)
+    return result
+
+
+def _try_convert_to_numeric(value):
+    try:
+        value = float(value)
+    except ValueError:
+        return value
+    return int(value) if value.is_integer() else value
+
+
 @click.group(context_settings=CONTEXT_SETTINGS, name=__file__)
 def cli():
     """Command line tools for manipulating a Kedro project."""
@@ -222,20 +156,20 @@ def cli():
 
 @cli.command()
 @click.option(
-    "--from-inputs", type=str, default="", help=FROM_INPUTS_HELP, callback=_split_string
+    "--from-inputs", type=str, default="", help=FROM_INPUTS_HELP, callback=split_string
 )
 @click.option(
-    "--from-nodes", type=str, default="", help=FROM_NODES_HELP, callback=_split_string
+    "--from-nodes", type=str, default="", help=FROM_NODES_HELP, callback=split_string
 )
 @click.option(
-    "--to-nodes", type=str, default="", help=TO_NODES_HELP, callback=_split_string
+    "--to-nodes", type=str, default="", help=TO_NODES_HELP, callback=split_string
 )
 @click.option("--node", "-n", "node_names", type=str, multiple=True, help=NODE_ARG_HELP)
 @click.option(
     "--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP
 )
 @click.option("--parallel", "-p", is_flag=True, multiple=False, help=PARALLEL_ARG_HELP)
-@_env_option
+@env_option
 @click.option("--tag", "-t", type=str, multiple=True, help=TAG_ARG_HELP)
 @click.option(
     "--load-version",
@@ -297,403 +231,12 @@ def run(
     )
 
 
-@forward_command(cli, forward_help=True)
-def test(args):
-    """Run the test suite."""
-    try:
-        import pytest  # pylint: disable=unused-import
-    except ImportError:
-        raise KedroCliError(
-            NO_DEPENDENCY_MESSAGE.format(module="pytest", src=str(SOURCE_PATH))
-        )
-    else:
-        python_call("pytest", args)
-
-
-@cli.command()
-@click.option("-c", "--check-only", is_flag=True, help=LINT_CHECK_ONLY_HELP)
-@click.argument("files", type=click.Path(exists=True), nargs=-1)
-def lint(files, check_only):
-    """Run flake8, isort and (on Python >=3.6) black."""
-    files = files or (str(SOURCE_PATH / "tests"), str(SOURCE_PATH / KEDRO_PACKAGE_NAME))
-
-    try:
-        import flake8
-        import isort
-        import black
-    except ImportError as exc:
-        raise KedroCliError(
-            NO_DEPENDENCY_MESSAGE.format(module=exc.name, src=str(SOURCE_PATH))
-        )
-
-    python_call("black", ("--check",) + files if check_only else files)
-    python_call("flake8", ("--max-line-length=88",) + files)
-
-    check_flag = ("-c",) if check_only else ()
-    python_call(
-        "isort", (*check_flag, "-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + files
-    )
-
-
-@cli.command()
-def install():
-    """Install project dependencies from both requirements.txt
-    and environment.yml (optional)."""
-
-    if (SOURCE_PATH / "environment.yml").is_file():
-        call(
-            [
-                "conda",
-                "install",
-                "--file",
-                str(SOURCE_PATH / "environment.yml"),
-                "--yes",
-            ]
-        )
-
-    pip_command = ["install", "-U", "-r", str(SOURCE_PATH / "requirements.txt")]
-
-    if os.name == "posix":
-        python_call("pip", pip_command)
-    else:
-        command = [sys.executable, "-m", "pip"] + pip_command
-        subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_CONSOLE)
-
-
-@forward_command(cli, forward_help=True)
-def ipython(args):
-    """Open IPython with project specific variables loaded."""
-    if "-h" not in args and "--help" not in args:
-        ipython_message()
-    call(["ipython"] + list(args))
-
-
-@cli.command()
-def package():
-    """Package the project as a Python egg and wheel."""
-    call(
-        [sys.executable, "setup.py", "clean", "--all", "bdist_egg"],
-        cwd=str(SOURCE_PATH),
-    )
-    call(
-        [sys.executable, "setup.py", "clean", "--all", "bdist_wheel"],
-        cwd=str(SOURCE_PATH),
-    )
-
-
-@cli.command("build-docs")
-@click.option(
-    "--open",
-    "-o",
-    "open_docs",
-    is_flag=True,
-    multiple=False,
-    default=False,
-    help=OPEN_ARG_HELP,
-)
-def build_docs(open_docs):
-    """Build the project documentation."""
-    python_call("pip", ["install", str(SOURCE_PATH / "[docs]")])
-    python_call("pip", ["install", "-r", str(SOURCE_PATH / "requirements.txt")])
-    python_call("ipykernel", ["install", "--user", f"--name={KEDRO_PACKAGE_NAME}"])
-    shutil.rmtree("docs/build", ignore_errors=True)
-    call(
-        [
-            "sphinx-apidoc",
-            "--module-first",
-            "-o",
-            "docs/source",
-            str(SOURCE_PATH / KEDRO_PACKAGE_NAME),
-        ]
-    )
-    call(["sphinx-build", "-M", "html", "docs/source", "docs/build", "-a"])
-    if open_docs:
-        docs_page = (Path.cwd() / "docs" / "build" / "html" / "index.html").as_uri()
-        secho("Opening {}".format(docs_page))
-        webbrowser.open(docs_page)
-
-
-@cli.command("build-reqs")
-def build_reqs():
-    """Build the project dependency requirements."""
-    requirements_path = SOURCE_PATH / "requirements.in"
-    if not requirements_path.is_file():
-        secho("No requirements.in found. Copying contents from requirements.txt...")
-        contents = (SOURCE_PATH / "requirements.txt").read_text()
-        requirements_path.write_text(contents)
-    python_call("piptools", ["compile", str(requirements_path)])
-    secho(
-        (
-            "Requirements built! Please update requirements.in "
-            "if you'd like to make a change in your project's dependencies, "
-            "and re-run build-reqs to generate the new requirements.txt."
-        )
-    )
-
-
-@cli.command("activate-nbstripout")
-def activate_nbstripout():
-    """Install the nbstripout git hook to automatically clean notebooks."""
-    secho(
-        (
-            "Notebook output cells will be automatically cleared before committing"
-            " to git."
-        ),
-        fg="yellow",
-    )
-
-    try:
-        import nbstripout  # pylint: disable=unused-import
-    except ImportError:
-        raise KedroCliError(
-            NO_DEPENDENCY_MESSAGE.format(module="nbstripout", src=str(SOURCE_PATH))
-        )
-
-    try:
-        res = subprocess.run(
-            ["git", "rev-parse", "--git-dir"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        if res.returncode:
-            raise KedroCliError("Not a git repository. Run `git init` first.")
-    except FileNotFoundError:
-        raise KedroCliError("Git executable not found. Install Git first.")
-
-    call(["nbstripout", "--install"])
-
-
-def _build_jupyter_command(
-    base: str, ip: str, all_kernels: bool, args: Iterable[str], idle_timeout: int
-) -> List[str]:
-    cmd = [
-        base,
-        "--ip",
-        ip,
-        "--MappingKernelManager.cull_idle_timeout={}".format(idle_timeout),
-        "--MappingKernelManager.cull_interval={}".format(idle_timeout),
-    ]
-
-    if not all_kernels:
-        project_name = "{{ cookiecutter.project_name }}"
-        kernel_name = re.sub(r"[^\w]+", "", project_name).strip() or "Kedro"
-
-        cmd += [
-            "--NotebookApp.kernel_spec_manager_class="
-            "kedro.cli.jupyter.SingleKernelSpecManager",
-            "--KernelSpecManager.default_kernel_name='{}'".format(kernel_name),
-        ]
-
-    return cmd + list(args)
-
-
-def _build_jupyter_env(kedro_env: str) -> Dict[str, Any]:
-    """Build the environment dictionary that gets injected into the subprocess running
-    Jupyter. Since the subprocess has access only to the environment variables passed
-    in, we need to copy the current environment and add ``KEDRO_ENV``.
-    """
-    if not kedro_env:
-        return {}
-    jupyter_env = os.environ.copy()
-    jupyter_env["KEDRO_ENV"] = kedro_env
-    return {"env": jupyter_env}
-
-
-@cli.group()
-def jupyter():
-    """Open Jupyter Notebook / Lab with project specific variables loaded, or
-    convert notebooks into Kedro code.
-    """
-
-
-@forward_command(jupyter, "notebook", forward_help=True)
-@click.option("--ip", type=str, default="127.0.0.1", help=JUPYTER_IP_HELP)
-@click.option(
-    "--all-kernels", is_flag=True, default=False, help=JUPYTER_ALL_KERNELS_HELP
-)
-@click.option("--idle-timeout", type=int, default=30, help=JUPYTER_IDLE_TIMEOUT_HELP)
-@_env_option
-def jupyter_notebook(ip, all_kernels, env, idle_timeout, args):
-    """Open Jupyter Notebook with project specific variables loaded."""
-    if "-h" not in args and "--help" not in args:
-        ipython_message(all_kernels)
-
-    arguments = _build_jupyter_command(
-        "notebook", ip=ip, all_kernels=all_kernels, args=args, idle_timeout=idle_timeout
-    )
-
-    python_call_kwargs = _build_jupyter_env(env)
-    python_call("jupyter", arguments, **python_call_kwargs)
-
-
-@forward_command(jupyter, "lab", forward_help=True)
-@click.option("--ip", type=str, default="127.0.0.1", help=JUPYTER_IP_HELP)
-@click.option(
-    "--all-kernels", is_flag=True, default=False, help=JUPYTER_ALL_KERNELS_HELP
-)
-@click.option("--idle-timeout", type=int, default=30, help=JUPYTER_IDLE_TIMEOUT_HELP)
-@_env_option
-def jupyter_lab(ip, all_kernels, env, idle_timeout, args):
-    """Open Jupyter Lab with project specific variables loaded."""
-    if "-h" not in args and "--help" not in args:
-        ipython_message(all_kernels)
-
-    arguments = _build_jupyter_command(
-        "lab", ip=ip, all_kernels=all_kernels, args=args, idle_timeout=idle_timeout
-    )
-
-    python_call_kwargs = _build_jupyter_env(env)
-    python_call("jupyter", arguments, **python_call_kwargs)
-
-
-@jupyter.command("convert")
-@click.option("--all", "all_flag", is_flag=True, help=CONVERT_ALL_HELP)
-@click.option("-y", "overwrite_flag", is_flag=True, help=OVERWRITE_HELP)
-@click.argument(
-    "filepath",
-    type=click.Path(exists=True, dir_okay=False, resolve_path=True),
-    required=False,
-    nargs=-1,
-)
-def convert_notebook(all_flag, overwrite_flag, filepath):
-    """Convert selected or all notebooks found in a Kedro project
-    to Kedro code, by exporting code from the appropriately-tagged cells:
-    Cells tagged as `node` will be copied over to a Python file matching
-    the name of the notebook, under `<source_dir>/<package_name>/nodes`.
-    *Note*: Make sure your notebooks have unique names!
-    FILEPATH: Path(s) to exact notebook file(s) to be converted. Both
-    relative and absolute paths are accepted.
-    Should not be provided if --all flag is already present.
-    """
-    if not filepath and not all_flag:
-        secho(
-            "Please specify a notebook filepath "
-            "or add '--all' to convert all notebooks."
-        )
-        sys.exit(1)
-
-    if all_flag:
-        # pathlib glob does not ignore hidden directories,
-        # whereas Python glob does, which is more useful in
-        # ensuring checkpoints will not be included
-        pattern = PROJ_PATH / "**" / "*.ipynb"
-        notebooks = sorted(Path(p) for p in iglob(str(pattern), recursive=True))
-    else:
-        notebooks = [Path(f) for f in filepath]
-
-    counter = Counter(n.stem for n in notebooks)
-    non_unique_names = [name for name, counts in counter.items() if counts > 1]
-    if non_unique_names:
-        raise KedroCliError(
-            "Found non-unique notebook names! "
-            "Please rename the following: {}".format(", ".join(non_unique_names))
-        )
-
-    for notebook in notebooks:
-        secho("Converting notebook '{}'...".format(str(notebook)))
-        output_path = (
-            SOURCE_PATH / KEDRO_PACKAGE_NAME / "nodes" / f"{notebook.stem}.py"
-        )
-
-        if output_path.is_file():
-            overwrite = overwrite_flag or click.confirm(
-                "Output file {} already exists. Overwrite?".format(str(output_path)),
-                default=False,
-            )
-            if overwrite:
-                export_nodes(notebook, output_path)
-        else:
-            export_nodes(notebook, output_path)
-
-    secho("Done!")
-
-
-def ipython_message(all_kernels=True):
-    """Show a message saying how we have configured the IPython env."""
-    ipy_vars = ["startup_error", "context"]
-    secho("-" * 79, fg="cyan")
-    secho("Starting a Kedro session with the following variables in scope")
-    secho(", ".join(ipy_vars), fg="green")
-    secho(
-        "Use the line magic {} to refresh them".format(
-            style("%reload_kedro", fg="green")
-        )
-    )
-    secho("or to see the error message if they are undefined")
-
-    if not all_kernels:
-        secho("The choice of kernels is limited to the default one.", fg="yellow")
-        secho("(restart with --all-kernels to get access to others)", fg="yellow")
-
-    secho("-" * 79, fg="cyan")
-
-
-@cli.group()
-def catalog():
-    """Commands for catalog."""
-
-
-@catalog.command("list")
-@_env_option
-@click.option(
-    "--pipeline", type=str, default="", help=PIPELINE_ARG_HELP, callback=_split_string
-)
-def list_datasets(pipeline, env):
-    """Show datasets per type."""
-    title = "DataSets in '{}' pipeline"
-    not_mentioned = "Datasets not mentioned in pipeline"
-    mentioned = "Datasets mentioned in pipeline"
-
-    context = load_context(Path.cwd(), env=env)
-    datasets_meta = context.catalog._data_sets
-    catalog_ds = set(context.catalog.list())
-
-    pipelines = pipeline or context.pipelines.keys()
-
-    result = {}
-    for pipeline in pipelines:
-        pl_obj = context.pipelines.get(pipeline)
-        if pl_obj:
-            pipeline_ds = pl_obj.data_sets()
-        else:
-            existing_pls = ", ".join(sorted(context.pipelines.keys()))
-            raise KedroCliError(
-                "{} pipeline not found! Existing pipelines: {}".format(
-                    pipeline, existing_pls
-                )
-            )
-
-        unused_ds = catalog_ds - pipeline_ds
-        default_ds = pipeline_ds - catalog_ds
-        used_ds = catalog_ds - unused_ds
-
-        unused_by_type = _map_type_to_datasets(unused_ds, datasets_meta)
-        used_by_type = _map_type_to_datasets(used_ds, datasets_meta)
-
-        if default_ds:
-            used_by_type["DefaultDataSet"].extend(default_ds)
-
-        data = ((not_mentioned, dict(unused_by_type)), (mentioned, dict(used_by_type)))
-        result[title.format(pipeline)] = {key: value for key, value in data if value}
-
-    secho(yaml.dump(result))
-
-
-def _map_type_to_datasets(datasets, datasets_meta):
-    """Build dictionary with a dataset type as a key and list of
-    datasets of the specific type as a value.
-    """
-    mapping = defaultdict(list)
-    for ds in datasets:
-        is_param = ds.startswith("params:") or ds == "parameters"
-        if not is_param:
-            ds_type = datasets_meta[ds].__class__.__name__
-            if ds not in mapping[ds_type]:
-                mapping[ds_type].append(ds)
-    return mapping
-
-
 cli.add_command(pipeline_group)
+cli.add_command(catalog_group)
+cli.add_command(jupyter_group)
+
+for command in project_group.commands.values():
+    cli.add_command(command)
 
 
 if __name__ == "__main__":

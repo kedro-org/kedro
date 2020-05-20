@@ -6,7 +6,7 @@ jupyter>=1.0.0, <2.0
 jupyter_client>=5.1.0, <6.0
 jupyterlab==0.31.1
 {% if cookiecutter.include_example == "True" -%}
-kedro[pandas]=={{ cookiecutter.kedro_version }}
+kedro[pandas.CSVDataSet]=={{ cookiecutter.kedro_version }}
 {% else -%}
 kedro=={{ cookiecutter.kedro_version }}
 {% endif -%}

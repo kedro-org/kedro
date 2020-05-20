@@ -78,7 +78,7 @@ class CachedDataSet(AbstractDataSet):
                 ValueError: If the provided dataset is not a valid dict/YAML
                     representation of a dataset or an actual dataset.
         """
-        if isinstance(dataset, Dict):
+        if isinstance(dataset, dict):
             self._dataset = self._from_config(dataset, version)
         elif isinstance(dataset, AbstractDataSet):
             self._dataset = dataset

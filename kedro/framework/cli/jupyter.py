@@ -165,7 +165,6 @@ def jupyter_lab(ip_address, all_kernels, env, idle_timeout, args):
     python_call("jupyter", arguments, **python_call_kwargs)
 
 
-# pylint: disable=too-many-locals
 @jupyter.command("convert")
 @click.option("--all", "all_flag", is_flag=True, help=CONVERT_ALL_HELP)
 @click.option("-y", "overwrite_flag", is_flag=True, help=OVERWRITE_HELP)

@@ -29,7 +29,7 @@
 For more information, please see
 [Pluggy's documentation](https://pluggy.readthedocs.io/en/stable/#marking-hooks).
 """
-# pylint: disable=invalid-name
+
 import pluggy
 
 HOOK_NAMESPACE = "kedro"

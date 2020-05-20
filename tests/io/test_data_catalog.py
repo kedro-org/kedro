@@ -272,11 +272,12 @@ class TestDataCatalog:
         assert multi_catalog.list(regex_search="a|x") == ["abc", "xyz"]
         assert multi_catalog.list(regex_search="^(?!(a|x))") == []
         assert multi_catalog.list(regex_search="def") == []
+        assert multi_catalog.list(regex_search="") == []
 
     def test_multi_catalog_list_bad_regex(self, multi_catalog):
         """Test that bad regex is caught accordingly"""
         escaped_regex = r"\(\("
-        pattern = f"Invalid regular expression pattern provided: `{escaped_regex}`"
+        pattern = f"Invalid regular expression provided: `{escaped_regex}`"
         with pytest.raises(SyntaxError, match=pattern):
             multi_catalog.list("((")
 

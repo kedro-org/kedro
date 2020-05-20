@@ -619,7 +619,7 @@ class DataCatalog:
     def list(self, regex_search: Optional[str] = None) -> List[str]:
         """
         List of all ``DataSet`` names registered in the catalog.
-        This can be filtered by providing an optional regular expression 
+        This can be filtered by providing an optional regular expression
         which will only return matching keys.
 
         Args:
@@ -645,21 +645,18 @@ class DataCatalog:
             >>> models = io.list(regex_search='.+time_series$')
         """
 
-        if regex_search is not None:
-            try:
-                pattern = re.compile(regex_search, flags=re.IGNORECASE)
-            except re.error:
-                raise SyntaxError(
-                    f"Invalid pattern regular expression provided: `{regex_search}`"
-                )
-            working_data_sets = {
-                k: v for k, v in self._data_sets.items() if pattern.search(k)
-            }
+        if regex_search is None:
+            return list(self._data_sets.keys())
 
-        else:
-            working_data_sets = self._data_sets
-
-        return list(working_data_sets.keys())
+        try:
+            if regex_search.strip() == "":
+                logging.warning("The empty string will not match any data sets")
+                return []
+            pattern = re.compile(regex_search, flags=re.IGNORECASE)
+            matching_data_sets = [x for x in self._data_sets if pattern.search(x)]
+            return matching_data_sets
+        except re.error:
+            raise SyntaxError(f"Invalid regular expression provided: `{regex_search}`")
 
     def shallow_copy(self) -> "DataCatalog":
         """Returns a shallow copy of the current object.

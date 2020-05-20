@@ -276,7 +276,7 @@ class TestDataCatalog:
     def test_multi_catalog_list_bad_regex(self, multi_catalog):
         """Test that bad regex is caught accordingly"""
         escaped_regex = r"\(\("
-        pattern = f"Invalid pattern regular expression provided: `{escaped_regex}`"
+        pattern = f"Invalid regular expression pattern provided: `{escaped_regex}`"
         with pytest.raises(SyntaxError, match=pattern):
             multi_catalog.list("((")
 

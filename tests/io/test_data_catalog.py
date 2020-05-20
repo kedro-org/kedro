@@ -266,13 +266,19 @@ class TestDataCatalog:
         assert "abc" in entries
         assert "xyz" in entries
 
-    def test_multi_catalog_list_regex(self, multi_catalog):
+    @pytest.mark.parametrize(
+        "pattern,expected",
+        [
+            ("^a", ["abc"]),
+            ("a|x", ["abc", "xyz"]),
+            ("^(?!(a|x))", []),
+            ("def", []),
+            ("", []),
+        ],
+    )
+    def test_multi_catalog_list_regex(self, multi_catalog, pattern, expected):
         """Test that regex patterns filter data sets accordingly"""
-        assert multi_catalog.list(regex_search="^a") == ["abc"]
-        assert multi_catalog.list(regex_search="a|x") == ["abc", "xyz"]
-        assert multi_catalog.list(regex_search="^(?!(a|x))") == []
-        assert multi_catalog.list(regex_search="def") == []
-        assert multi_catalog.list(regex_search="") == []
+        assert multi_catalog.list(regex_search=pattern) == expected
 
     def test_multi_catalog_list_bad_regex(self, multi_catalog):
         """Test that bad regex is caught accordingly"""

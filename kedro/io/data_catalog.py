@@ -627,7 +627,7 @@ class DataCatalog:
                 to limit the data sets returned by a particular pattern.
         Returns:
             A list of ``DataSet`` names available which match the
-            `regex_search` criteria if provided. All data sets are returned
+            `regex_search` criteria (if provided). All data set names are returned
             by default.
 
         Raises:

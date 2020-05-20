@@ -56,7 +56,7 @@
 * Added option to lint the project without applying the formatting changes (`kedro lint --check-only`).
 * Improved the error message for `DataSetNotFoundError` to suggest possible dataset names user meant to type.
 * Replaced `functools.lru_cache` with `cachetools.cachedmethod` in `PartitionedDataSet` and `IncrementalDataSet` for per-instance cache invalidation.
-* Introduced regex filtering and `*DataSet` object access via arguments to the `DataCatalog.list` function.
+* Introduced regex filtering to the `DataCatalog.list()` function.
 
 ## Breaking changes to the API
 ### Datasets

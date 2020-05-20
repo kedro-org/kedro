@@ -1,6 +1,16 @@
 # Upcoming Release
 
 ## Major features and improvements
+
+## Bug fixes and other changes
+
+## Breaking changes to the API
+
+## Thanks for supporting contributions
+
+# 0.16.0
+
+## Major features and improvements
 ### CLI
 * Added new CLI commands (only available for the projects created using Kedro 0.16.0 or later):
   - `kedro catalog list` to list datasets in your catalog

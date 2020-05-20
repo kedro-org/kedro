@@ -1,68 +1,90 @@
 # Upcoming Release
 
 ## Major features and improvements
+
+## Bug fixes and other changes
+* Introduced regex filtering to the `DataCatalog.list()` method.
+
+## Breaking changes to the API
+
+## Thanks for supporting contributions
+
+# 0.16.0
+
+## Major features and improvements
+### CLI
 * Added new CLI commands (only available for the projects created using Kedro 0.16.0 or later):
   - `kedro catalog list` to list datasets in your catalog
   - `kedro pipeline list` to list pipelines
   - `kedro pipeline describe` to describe a specific pipeline
   - `kedro pipeline create` to create a modular pipeline
-* Added support of Pandas 1.x.
-* Enabled Python 3.8 compatibility. _Please note that a Spark workflow may be unreliable for this Python version as `pyspark` is not fully-compatible with 3.8 yet._
-* Fixed `load_context` changing user's current working directory.
-* Added the ability to specify nested parameter values inside your node inputs, e.g. `node(func, "params:a.b", None)`
-* Improved error handling when making a typo on the command line. We now suggest some of the possible commands you meant to type, in `git`-style.
-* Added the ability to specify extra arguments, e.g. `encoding` or `compression`, for `fsspec.spec.AbstractFileSystem.open()` calls when loading/saving a dataset. See Example 3 under [docs](https://kedro.readthedocs.io/en/stable/04_user_guide/04_data_catalog.html#using-the-data-catalog-with-the-yaml-api).
-* Added an option to enable asynchronous loading inputs and saving outputs in both `SequentialRunner(is_async=True)` and `ParallelRunner(is_async=True)` class.
-* Added the following datasets:
-  - `GeoJSONDataSet` in `kedro.extras.datasets.geopandas` for working with geospatial data that uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem.
-  - `APIDataSet` in `kedro.extras.datasets.api` for handling API requests using [`requests`](https://requests.readthedocs.io/en/master/).
-* Added Memory profiler transformer.
-* Added instruction in the documentation on how to create a custom runner.
+* Improved the CLI speed by up to 50%.
+* Improved error handling when making a typo on the CLI. We now suggest some of the possible commands you meant to type, in `git`-style.
+
+### Framework
+* All modules in `kedro.cli` and `kedro.context` have been moved into `kedro.framework.cli` and `kedro.framework.context` respectively. `kedro.cli` and `kedro.context` will be removed in future releases.
 * Added `Hooks`, which is a new mechanism for extending Kedro.
-* Added `joblib` backend support to `pickle.PickleDataSet`.
-* Added versioning support to MatplotlibWriter dataset.
+* Fixed `load_context` changing user's current working directory.
 * Allowed the source directory to be configurable in `.kedro.yml`.
-* Improve the CLI speed by up to 50%.
-* All modules in `kedro.cli` and `kedro.context` have been moved into `kedro.framework.cli` and `kedro.framework.context` respectively. `kedro.cli` and `kedro.context` will be deprecated in future releases.
-* Added `namespace` property on ``Node``.
+* Added the ability to specify nested parameter values inside your node inputs, e.g. `node(func, "params:a.b", None)`
+### DataSets
+* Added the following new datasets.
 
-### New Datasets
+| Type                       | Description                                 | Location                                         |
+| -------------------------- | ------------------------------------------- | ------------------------------------------------ |
+| `pillow.ImageDataSet`      | Work with image files using `Pillow`        | `kedro.extras.datasets.pillow`                   |
+| `geopandas.GeoJSONDataSet` | Work with geospatial data using `GeoPandas` | `kedro.extras.datasets.geopandas.GeoJSONDataSet` |
+| `api.APIDataSet`           | Work with data from HTTP(S) API requests    | `kedro.extras.datasets.api.APIDataSet`           |
 
-| Type           | Description                          | Location                       |
-| -------------- | ------------------------------------ | ------------------------------ |
-| `ImageDataSet` | Work with image files using `Pillow` | `kedro.extras.datasets.pillow` |
+* Added `joblib` backend support to `pickle.PickleDataSet`.
+* Added versioning support to `MatplotlibWriter` dataset.
+* Added the ability to install dependencies for a given dataset with more granularity, e.g. `pip install "kedro[pandas.ParquetDataSet]"`.
+* Added the ability to specify extra arguments, e.g. `encoding` or `compression`, for `fsspec.spec.AbstractFileSystem.open()` calls when loading/saving a dataset. See Example 3 under [docs](https://kedro.readthedocs.io/en/stable/04_user_guide/04_data_catalog.html#using-the-data-catalog-with-the-yaml-api).
+
+### Other
+* Added `namespace` property on ``Node``, related to the modular pipeline where the node belongs.
+* Added an option to enable asynchronous loading inputs and saving outputs in both `SequentialRunner(is_async=True)` and `ParallelRunner(is_async=True)` class.
+* Added `MemoryProfiler` transformer.
+* Removed the requirement to have all dependencies for a dataset module to use only a subset of the datasets within.
+* Added support for `pandas>=1.0`.
+* Enabled Python 3.8 compatibility. _Please note that a Spark workflow may be unreliable for this Python version as `pyspark` is not fully-compatible with 3.8 yet._
+* Renamed "features" layer to "feature" layer to be consistent with (most) other layers and the [relevant FAQ](https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention).
 
 ## Bug fixes and other changes
 * Fixed a bug where a new version created mid-run by an external system caused inconsistencies in the load versions used in the current run.
-* Documentation improvements.
-* Updated contribution process in `CONTRIBUTING.md` - added Developer Workflow.
+* Documentation improvements
+  * Added instruction in the documentation on how to create a custom runner).
+  * Updated contribution process in `CONTRIBUTING.md` - added Developer Workflow.
+  * Documented installation of development version of Kedro in the [FAQ section](https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#how-can-i-use-development-version-of-kedro).
+  * Added missing `_exists` method to `MyOwnDataSet` example in 04_user_guide/08_advanced_io.
 * Fixed a bug where `PartitionedDataSet` and `IncrementalDataSet` were not working with `s3a` or `s3n` protocol.
-* Documented installation of development version of Kedro in the [FAQ section](https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#how-can-i-use-development-version-of-kedro).
-* Implemented custom glob function for `SparkDataSet` when running on Databricks.
-* Added the option for contributors to run Kedro tests locally without Spark installation with `make test-no-spark`.
 * Added ability to read partitioned parquet file from a directory in `pandas.ParquetDataSet`.
-* Bug in `SparkDataSet` not allowing for loading data from DBFS in a Windows machine using Databricks-connect.
-* Added option to lint the project without applying the formatting changes (`kedro lint --check-only`).
-* Improved the error message for `DataSetNotFoundError` to suggest possible dataset names user meant to type.
 * Replaced `functools.lru_cache` with `cachetools.cachedmethod` in `PartitionedDataSet` and `IncrementalDataSet` for per-instance cache invalidation.
-* Introduced regex filtering and `*DataSet` object access via arguments of `DataCatalog.list()` function.
+* Implemented custom glob function for `SparkDataSet` when running on Databricks.
+* Fixed a bug in `SparkDataSet` not allowing for loading data from DBFS in a Windows machine using Databricks-connect.
+* Improved the error message for `DataSetNotFoundError` to suggest possible dataset names user meant to type.
+* Added the option for contributors to run Kedro tests locally without Spark installation with `make test-no-spark`.
+* Added option to lint the project without applying the formatting changes (`kedro lint --check-only`).
 
 ## Breaking changes to the API
+### Datasets
+* Deleted obsolete datasets from `kedro.io`.
+* Deleted `kedro.contrib` and `extras` folders.
+* Deleted obsolete `CSVBlobDataSet` and `JSONBlobDataSet` dataset types.
 * Made `invalidate_cache` method on datasets private.
 * `get_last_load_version` and `get_last_save_version` methods are no longer available on `AbstractDataSet`.
 * `get_last_load_version` and `get_last_save_version` have been renamed to `resolve_load_version` and `resolve_save_version` on ``AbstractVersionedDataSet``, the results of which are cached.
 * The `release()` method on datasets extending ``AbstractVersionedDataSet`` clears the cached load and save version. All custom datasets must call `super()._release()` inside `_release()`.
-* Removed `KEDRO_ENV_VAR` from `kedro.context` to speed up the CLI run time.
-* Deleted obsoleted datasets from `kedro.io`.
-* Deleted `kedro.contrib` and `extras` folders.
-* `Pipeline.name` has been removed in favour of `Pipeline.tag()`.
-* Python 3.5 is no longer supported by the current and all future versions of Kedro.
 * ``TextDataSet`` no longer has `load_args` and `save_args`. These can instead be specified under `open_args_load` or `open_args_save` in `fs_args`.
+* `PartitionedDataSet` and `IncrementalDataSet` method `invalidate_cache` was made private: `_invalidate_caches`.
+
+### Other
+* Removed `KEDRO_ENV_VAR` from `kedro.context` to speed up the CLI run time.
+* `Pipeline.name` has been removed in favour of `Pipeline.tag()`.
 * Dropped `Pipeline.transform()` in favour of `kedro.pipeline.modular_pipeline.pipeline()` helper function.
 * Made constant `PARAMETER_KEYWORDS` private, and moved it from `kedro.pipeline.pipeline` to `kedro.pipeline.modular_pipeline`.
-* Removed `CSVBlobDataSet` and `JSONBlobDataSet` as redundant.
 * Layers are no longer part of the dataset object, as they've moved to the `DataCatalog`.
-* `PartitionedDataSet` and `IncrementalDataSet` method `invalidate_cache` was made private: `_invalidate_caches`.
+* Python 3.5 is no longer supported by the current and all future versions of Kedro.
 
 ### Migration guide from Kedro 0.15.* to Upcoming Release
 #### Migration for datasets
@@ -107,7 +129,7 @@ result = pipeline(
 
 #### Migration for decorators, color logger, transformers etc.
 Since some modules were moved to other locations you need to update import paths appropriately.
-The list of moved files you can find in `0.15.6` release notes under `Files with a new location` section.
+You can find the list of moved files in the [`0.15.6` release notes](https://github.com/quantumblacklabs/kedro/releases/tag/0.15.6) under the section titled `Files with a new location`.
 
 #### Migration for kedro env environment variable
 > Note: If you haven't made significant changes to your `kedro_cli.py`, it may be easier to simply copy the updated `kedro_cli.py` `.ipython/profile_default/startup/00-kedro-init.py` and from GitHub or a newly generated project into your old project.
@@ -123,7 +145,7 @@ The list of moved files you can find in `0.15.6` release notes under `Files with
  We have upgraded `pip-tools` which is used by `kedro build-reqs` to 5.x. This `pip-tools` version requires `pip>=20.0`. To upgrade `pip`, please refer to [their documentation](https://pip.pypa.io/en/stable/installing/#upgrading-pip).
 
 ## Thanks for supporting contributions
-[@foolsgold](https://github.com/foolsgold), [Mani Sarkar](https://github.com/neomatrix369), [Priyanka Shanbhag](https://github.com/priyanka1414), [Luis Blanche](https://github.com/LuisBlanche), [Deepyaman Datta](https://github.com/deepyaman), [Antony Milne](https://github.com/AntonyMilneQB), [Panos Psimatikas](https://github.com/ppsimatikas), [Tam-Sanh Nguyen](https://github.com/tamsanh), [Tomasz Kaczmarczyk](https://github.com/TomaszKaczmarczyk), [Kody Fischer](https://github.com/Klio-Foxtrot187)
+[@foolsgold](https://github.com/foolsgold), [Mani Sarkar](https://github.com/neomatrix369), [Priyanka Shanbhag](https://github.com/priyanka1414), [Luis Blanche](https://github.com/LuisBlanche), [Deepyaman Datta](https://github.com/deepyaman), [Antony Milne](https://github.com/AntonyMilneQB), [Panos Psimatikas](https://github.com/ppsimatikas), [Tam-Sanh Nguyen](https://github.com/tamsanh), [Tomasz Kaczmarczyk](https://github.com/TomaszKaczmarczyk), [Kody Fischer](https://github.com/Klio-Foxtrot187), [Waylon Walker](https://github.com/waylonwalker)
 
 # 0.15.9
 

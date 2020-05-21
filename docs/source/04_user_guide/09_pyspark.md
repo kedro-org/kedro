@@ -1,6 +1,6 @@
 # Working with PySpark
 
-> *Note:* This documentation is based on `Kedro 0.16.0`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 In this tutorial we explain how to work with `PySpark` in a Kedro pipeline.
 
@@ -54,7 +54,7 @@ class ProjectContext(KedroContext):
         _spark_session.sparkContext.setLogLevel("WARN")
 
     project_name = "kedro"
-    project_version = "0.16.0"
+    project_version = "0.16.1"
 
 
 # ...

@@ -1,3 +1,15 @@
+# Upcoming Release
+
+## Major features and improvements
+
+## Bug fixes and other changes
+* Sped up initialization of `spark.SparkHiveDataSet`.
+
+## Breaking changes to the API
+
+## Thanks for supporting contributions
+[Miguel Rodriguez Gutierrez](https://github.com/MigQ2)
+
 # 0.16.1
 
 ## Major features and improvements

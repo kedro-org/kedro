@@ -4,10 +4,12 @@
 
 ## Bug fixes and other changes
 * Fixed deprecation warnings from `kedro.cli` and `kedro.context` when running `kedro jupyter notebook`
+* Sped up initialization of `spark.SparkHiveDataSet`.
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
+[Miguel Rodriguez Gutierrez](https://github.com/MigQ2)
 
 # 0.16.0
 

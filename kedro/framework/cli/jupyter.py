@@ -100,6 +100,10 @@ class SingleKernelSpecManager(KernelSpecManager):
         return kernelspec
 
 
+def _update_ipython_dir(project_path: Path) -> None:
+    os.environ["IPYTHONDIR"] = str(project_path / ".ipython")
+
+
 @click.group()
 def jupyter():
     """Open Jupyter Notebook / Lab with project specific variables loaded, or
@@ -126,6 +130,7 @@ def jupyter_notebook(ip_address, all_kernels, env, idle_timeout, args):
     if "-h" not in args and "--help" not in args:
         ipython_message(all_kernels)
 
+    _update_ipython_dir(context.project_path)
     arguments = _build_jupyter_command(
         "notebook",
         ip_address=ip_address,
@@ -152,6 +157,7 @@ def jupyter_lab(ip_address, all_kernels, env, idle_timeout, args):
     if "-h" not in args and "--help" not in args:
         ipython_message(all_kernels)
 
+    _update_ipython_dir(context.project_path)
     arguments = _build_jupyter_command(
         "lab",
         ip_address=ip_address,
@@ -187,7 +193,7 @@ def convert_notebook(all_flag, overwrite_flag, filepath, env):
     """
     context = _load_project_context(env=env)
     project_path = context.project_path
-    os.environ["IPYTHONDIR"] = str(project_path / ".ipython")
+    _update_ipython_dir(project_path)
 
     source_path = get_source_dir(project_path)
 

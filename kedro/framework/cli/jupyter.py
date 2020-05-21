@@ -260,7 +260,7 @@ def _build_jupyter_command(  # pylint: disable=too-many-arguments
 
         cmd += [
             "--NotebookApp.kernel_spec_manager_class="
-            "kedro.cli.jupyter.SingleKernelSpecManager",
+            "kedro.framework.cli.jupyter.SingleKernelSpecManager",
             f"--KernelSpecManager.default_kernel_name='{kernel_name}'",
         ]
 

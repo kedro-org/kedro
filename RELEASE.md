@@ -3,6 +3,7 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Fixed deprecation warnings from `kedro.cli` and `kedro.context` when running `kedro jupyter notebook`
 
 ## Breaking changes to the API
 

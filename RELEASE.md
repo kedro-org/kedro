@@ -3,7 +3,9 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+
 * Introduced regex filtering to the `DataCatalog.list()` method.
+* Fixed deprecation warnings from `kedro.cli` and `kedro.context` when running `kedro jupyter notebook`
 
 ## Breaking changes to the API
 

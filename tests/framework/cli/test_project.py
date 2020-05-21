@@ -416,8 +416,7 @@ class TestBuildReqsCommand:
         self, python_call_mock, fake_kedro_cli, mocker, fake_repo_path
     ):
         # File does not exist:
-        # 'is_file' is called multiple times in different places
-        mocker.patch.object(Path, "is_file", side_effect=[True, True, False])
+        mocker.patch.object(Path, "is_file", return_value=False)
         mocker.patch.object(Path, "read_text", return_value="fake requirements")
         fake_writer = mocker.patch.object(Path, "write_text")
 

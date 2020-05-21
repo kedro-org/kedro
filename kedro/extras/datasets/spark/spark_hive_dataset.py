@@ -76,26 +76,16 @@ class StagedHiveDataSet:
     def __enter__(self):
         self._data.createOrReplaceTempView("tmp")
 
+        _table = f"{self._stage_database_name}.{self._stage_table_name}"
         self._spark_session.sql(
-            "create table {stage_db_name}.{stage_table_name} as select * from tmp".format(  # nosec
-                stage_db_name=self._stage_database_name,
-                stage_table_name=self._stage_table_name,
-            )
+            f"create table {_table} as select * from tmp"  # nosec
         ).take(1)
-        self.staged_data = self._spark_session.sql(
-            "select * from {stage_db_name}.{stage_table_name}".format(  # nosec
-                stage_db_name=self._stage_database_name,
-                stage_table_name=self._stage_table_name,
-            )
-        )
+        self.staged_data = self._spark_session.sql(f"select * from {_table}")  # nosec
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._spark_session.sql(
-            "drop table {stage_db_name}.{stage_table_name}".format(
-                stage_db_name=self._stage_database_name,
-                stage_table_name=self._stage_table_name,
-            )
+            f"drop table {self._stage_database_name}.{self._stage_table_name}"  # nosec
         )
 
 
@@ -151,37 +141,24 @@ class SparkHiveDataSet(AbstractDataSet):
         Raises:
             DataSetError: Invalid configuration supplied
         """
+        valid_write_modes = ["insert", "upsert", "overwrite"]
+        if write_mode not in valid_write_modes:
+            valid_modes = ", ".join(valid_write_modes)
+            raise DataSetError(
+                f"Invalid `write_mode` provided: {write_mode}. "
+                f"`write_mode` must be one of: {valid_modes}"
+            )
+        if write_mode == "upsert" and not table_pk:
+            raise DataSetError("`table_pk` must be set to utilise `upsert` read mode")
+
+        self._write_mode = write_mode
+        self._table_pk = table_pk or []
         self._database = database
         self._table = table
         self._stage_table = "_temp_" + table
-        self._valid_write_modes = ["insert", "upsert", "overwrite"]
-        if write_mode not in self._valid_write_modes:
-            raise DataSetError(
-                "Invalid write_mode provided: {invalid}. Write_mode must be one of {valid}".format(
-                    invalid=write_mode, valid=self._valid_write_modes
-                )
-            )
-        self._write_mode = write_mode
-        if self._write_mode == "upsert" and not table_pk:
-            raise DataSetError("table_pk must be set to utilise upsert read mode")
-        self._table_pk = table_pk
 
-        self._table_columns = self._load().columns if self._exists() else None
-
-        if (
-            self._table_pk
-            and self._exists()
-            and set(self._table_pk) - set(self._table_columns)
-        ):
-            raise DataSetError(
-                "columns [{colnames}] selected as PK not found in table {database}.{table}".format(
-                    colnames=", ".join(
-                        sorted(set(self._table_pk) - set(self._table_columns))
-                    ),
-                    database=self._database,
-                    table=self._table,
-                )
-            )
+        # self._table_columns is set up in _save() to speed up initialization
+        self._table_columns = []  # type: List[str]
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
@@ -198,33 +175,34 @@ class SparkHiveDataSet(AbstractDataSet):
     def _create_empty_hive_table(self, data):
         data.createOrReplaceTempView("tmp")
         self._get_spark().sql(
-            "create table {database}.{table} select * from tmp limit 1".format(  # nosec
-                table=self._table, database=self._database
-            )
+            f"create table {self._database}.{self._table} select * from tmp limit 1"  # nosec
         )
-        self._get_spark().sql(
-            "truncate table {database}.{table}".format(  # nosec
-                database=self._database, table=self._table
-            )
-        )
+        self._get_spark().sql(f"truncate table {self._database}.{self._table}")  # nosec
 
     def _load(self) -> DataFrame:
         if not self._exists():
             raise DataSetError(
-                "requested table not found: {database}.{table}".format(
-                    database=self._database, table=self._table
-                )
+                f"Requested table not found: {self._database}.{self._table}"
             )
         return self._get_spark().sql(
-            "select * from {database}.{table}".format(  # nosec
-                database=self._database, table=self._table
-            )
+            f"select * from {self._database}.{self._table}"  # nosec
         )
 
     def _save(self, data: DataFrame) -> None:
         if not self._exists():
             self._create_empty_hive_table(data)
             self._table_columns = data.columns
+        else:
+            self._table_columns = self._load().columns
+            if self._write_mode == "upsert":
+                non_existent_columns = set(self._table_pk) - set(self._table_columns)
+                if non_existent_columns:
+                    colnames = ", ".join(sorted(non_existent_columns))
+                    raise DataSetError(
+                        f"Columns [{colnames}] selected as primary key(s) not found in "
+                        f"table {self._database}.{self._table}"
+                    )
+
         self._validate_save(data)
         write_methods = {
             "insert": self._insert_save,
@@ -235,12 +213,9 @@ class SparkHiveDataSet(AbstractDataSet):
 
     def _insert_save(self, data: DataFrame) -> None:
         data.createOrReplaceTempView("tmp")
+        columns = ", ".join(self._table_columns)
         self._get_spark().sql(
-            "insert into {database}.{table} select {columns} from tmp".format(  # nosec
-                database=self._database,
-                table=self._table,
-                columns=", ".join(self._table_columns),
-            )
+            f"insert into {self._database}.{self._table} select {columns} from tmp"  # nosec
         )
 
     def _upsert_save(self, data: DataFrame) -> None:
@@ -252,15 +227,13 @@ class SparkHiveDataSet(AbstractDataSet):
             )
             upsert_dataset = joined_data.select(
                 [  # type: ignore
-                    coalesce(
-                        "new.{}".format(col_name), "old.{}".format(col_name)
-                    ).alias(col_name)
+                    coalesce(f"new.{col_name}", f"old.{col_name}").alias(col_name)
                     for col_name in set(data.columns)
                     - set(self._table_pk)  # type: ignore
                 ]
                 + self._table_pk
             )
-            temporary_persisted_tbl_name = "temp_{}".format(uuid.uuid4().int)
+            temporary_persisted_tbl_name = f"temp_{uuid.uuid4().int}"
             with StagedHiveDataSet(
                 upsert_dataset,
                 stage_database_name=self._database,
@@ -269,11 +242,7 @@ class SparkHiveDataSet(AbstractDataSet):
                 self._overwrite_save(temp_table.staged_data)
 
     def _overwrite_save(self, data: DataFrame) -> None:
-        self._get_spark().sql(
-            "truncate table {database}.{table}".format(
-                database=self._database, table=self._table
-            )  # nosec
-        )
+        self._get_spark().sql(f"truncate table {self._database}.{self._table}")  # nosec
         self._insert_save(data)
 
     def _validate_save(self, data: DataFrame):
@@ -283,11 +252,9 @@ class SparkHiveDataSet(AbstractDataSet):
             new_cols = data_dtypes - hive_dtypes
             missing_cols = hive_dtypes - data_dtypes
             raise DataSetError(
-                "dataset does not match hive table schema.\n"
-                "Present on insert only: {new_cols}\n"
-                "Present on schema only: {missing_cols}".format(
-                    new_cols=sorted(new_cols), missing_cols=sorted(missing_cols)
-                )
+                f"Dataset does not match hive table schema.\n"
+                f"Present on insert only: {sorted(new_cols)}\n"
+                f"Present on schema only: {sorted(missing_cols)}"
             )
 
     def _exists(self) -> bool:
@@ -297,7 +264,7 @@ class SparkHiveDataSet(AbstractDataSet):
             .filter(col("databaseName") == lit(self._database))
             .take(1)
         ):
-            self._get_spark().sql("use {database}".format(database=self._database))
+            self._get_spark().sql(f"use {self._database}")
             if (
                 self._get_spark()
                 .sql("show tables")

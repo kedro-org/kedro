@@ -1,6 +1,6 @@
 # Pipelines
 
-> *Note:* This documentation is based on `Kedro 0.16.0`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 >
 > In this section we introduce the concept of a pipeline.
 
@@ -152,7 +152,7 @@ Modular pipelines serve the following main purposes:
 
 ### How do I create modular pipelines?
 
-For projects created using Kedro version 0.16.0 or later, Kedro ships a [project-specific CLI command](./10_developing_plugins.md#global-and-project-commands) `kedro pipeline create <pipeline_name>`, which does the following for you:
+For projects created using Kedro version 0.16.1 or later, Kedro ships a [project-specific CLI command](./10_developing_plugins.md#global-and-project-commands) `kedro pipeline create <pipeline_name>`, which does the following for you:
 1. Adds a new modular pipeline in a `src/<python_package>/pipelines/<pipeline_name>/` directory
 2. Creates boilerplate configuration files, `catalog.yml` and `parameters.yml`, in `conf/<env>/pipelines/<pipeline_name>/`, where `<env>` defaults to `base`
 3. Makes a placeholder for the pipeline unit tests in `src/tests/pipelines/<pipeline_name>/`

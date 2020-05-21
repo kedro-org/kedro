@@ -96,7 +96,7 @@ def default_jupyter_options(command, address="127.0.0.1", all_kernels=False):
     if not all_kernels:
         cmd += [
             "--NotebookApp.kernel_spec_manager_class="
-            "kedro.cli.jupyter.SingleKernelSpecManager",
+            "kedro.framework.cli.jupyter.SingleKernelSpecManager",
             "--KernelSpecManager.default_kernel_name='DummyProject'",
         ]
 

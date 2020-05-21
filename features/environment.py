@@ -40,7 +40,7 @@ from features.steps.util import create_new_venv
 
 def before_all(context):
     """Environment preparation before other cli tests are run.
-    Installs kedro by running pip in the top level directory.
+    Installs (core) kedro by running pip in the top level directory.
     """
 
     def call(cmd):
@@ -98,7 +98,7 @@ def before_all(context):
         ]
     )
     call([context.pip, "install", "--upgrade", "setuptools"])
-    call([context.pip, "install", ".[all]"])
+    call([context.pip, "install", "."])
 
 
 def after_all(context):

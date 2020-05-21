@@ -3,9 +3,8 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
-
+* Fixed deprecation warnings from `kedro.cli` and `kedro.context` when running `kedro jupyter notebook`.
 * Introduced regex filtering to the `DataCatalog.list()` method.
-* Fixed deprecation warnings from `kedro.cli` and `kedro.context` when running `kedro jupyter notebook`
 
 ## Breaking changes to the API
 
@@ -67,7 +66,6 @@
 * Improved the error message for `DataSetNotFoundError` to suggest possible dataset names user meant to type.
 * Added the option for contributors to run Kedro tests locally without Spark installation with `make test-no-spark`.
 * Added option to lint the project without applying the formatting changes (`kedro lint --check-only`).
-* Introduced regex filtering and `*DataSet` object access via arguments of `DataCatalog.list` function.
 
 ## Breaking changes to the API
 ### Datasets

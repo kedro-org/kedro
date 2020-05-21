@@ -4,11 +4,12 @@
 
 ## Bug fixes and other changes
 * Sped up initialization of `spark.SparkHiveDataSet`.
+* Introduced regex filtering to the `DataCatalog.list()` method.
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Miguel Rodriguez Gutierrez](https://github.com/MigQ2)
+[Miguel Rodriguez Gutierrez](https://github.com/MigQ2), [Joel Schwarzmann](https://github.com/datajoely)
 
 # 0.16.1
 
@@ -16,7 +17,6 @@
 
 ## Bug fixes and other changes
 * Fixed deprecation warnings from `kedro.cli` and `kedro.context` when running `kedro jupyter notebook`.
-* Introduced regex filtering to the `DataCatalog.list()` method.
 * Fixed a bug where `catalog` and `context` were not available in Jupyter Lab and Notebook.
 * Fixed a bug where `kedro build-reqs` would fail if you didn't have your project dependencies installed.
 

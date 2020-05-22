@@ -5,6 +5,7 @@
 ## Bug fixes and other changes
 * Sped up initialization of `spark.SparkHiveDataSet`.
 * Introduced regex filtering to the `DataCatalog.list()` method.
+* Add missing `pillow.ImageDataSet` entry to the documentation.
 
 ## Breaking changes to the API
 

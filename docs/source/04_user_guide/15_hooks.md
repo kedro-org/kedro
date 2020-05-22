@@ -93,9 +93,9 @@ from your_project.hooks import TransformerHooks
 
 class ProjectContext(KedroContext):
     project_name = "kedro-tutorial"
-    project_version = "0.16.0"
+    project_version = "0.16.1"
 
-    hooks = [
+    hooks = (
         # register the collection of your Hook implementations here.
         # Note that we are using an instance here, not a class. It could also be a module.
         TransformerHooks(),

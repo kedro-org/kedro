@@ -52,7 +52,6 @@ except ImportError:  # pragma: no cover
     joblib = None
 
 
-# pylint: disable=too-many-instance-attributes
 class PickleDataSet(AbstractVersionedDataSet):
     """``PickleDataSet`` loads/saves data from/to a Pickle file using an underlying
     filesystem (e.g.: local, S3, GCS). The underlying functionality is supported by
@@ -197,7 +196,7 @@ class PickleDataSet(AbstractVersionedDataSet):
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
             try:
                 self.BACKENDS[self._backend].dump(data, fs_file, **self._save_args)
-            except Exception as err:  # pylint: disable=broad-except
+            except Exception as err:
                 raise DataSetError(
                     "{} was not serialized due to: {}".format(
                         str(data.__class__), str(err)

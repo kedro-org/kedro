@@ -521,8 +521,6 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
             # param2 will be True by default
     """
 
-    # pylint: disable=abstract-method
-
     def __init__(
         self,
         filepath: PurePath,

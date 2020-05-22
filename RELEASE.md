@@ -1,6 +1,33 @@
 # Upcoming Release
 
 ## Major features and improvements
+
+## Bug fixes and other changes
+* Sped up initialization of `spark.SparkHiveDataSet`.
+* Introduced regex filtering to the `DataCatalog.list()` method.
+* Add missing `pillow.ImageDataSet` entry to the documentation.
+
+## Breaking changes to the API
+
+## Thanks for supporting contributions
+[Miguel Rodriguez Gutierrez](https://github.com/MigQ2), [Joel Schwarzmann](https://github.com/datajoely)
+
+# 0.16.1
+
+## Major features and improvements
+
+## Bug fixes and other changes
+* Fixed deprecation warnings from `kedro.cli` and `kedro.context` when running `kedro jupyter notebook`.
+* Fixed a bug where `catalog` and `context` were not available in Jupyter Lab and Notebook.
+* Fixed a bug where `kedro build-reqs` would fail if you didn't have your project dependencies installed.
+
+## Breaking changes to the API
+
+## Thanks for supporting contributions
+
+# 0.16.0
+
+## Major features and improvements
 ### CLI
 * Added new CLI commands (only available for the projects created using Kedro 0.16.0 or later):
   - `kedro catalog list` to list datasets in your catalog

@@ -78,7 +78,7 @@ def project_group():
 def test(args):
     """Run the test suite."""
     try:
-        # pylint: disable=import-outside-toplevel
+        # pylint: disable=import-outside-toplevel, unused-import
         import pytest  # noqa
     except ImportError:
         context = _load_project_context()
@@ -103,7 +103,7 @@ def lint(files, check_only):
     )
 
     try:
-        # pylint: disable=import-outside-toplevel
+        # pylint: disable=import-outside-toplevel, unused-import
         import flake8  # noqa
         import isort  # noqa
         import black  # noqa
@@ -215,8 +215,10 @@ def build_docs(open_docs):
 @project_group.command("build-reqs")
 def build_reqs():
     """Build the project dependency requirements."""
-    context = _load_project_context()
-    source_path = get_source_dir(context.project_path)
+    # we cannot use `context.project_path` as in other commands since
+    # context instantiation might break due to missing dependencies
+    # we attempt to install here
+    source_path = get_source_dir(Path.cwd())
     requirements_path = source_path / "requirements.in"
     if not requirements_path.is_file():
         secho("No requirements.in found. Copying contents from requirements.txt...")
@@ -246,7 +248,7 @@ def activate_nbstripout():
     )
 
     try:
-        # pylint: disable=import-outside-toplevel
+        # pylint: disable=import-outside-toplevel, unused-import
         import nbstripout  # noqa
     except ImportError:
         raise KedroCliError(

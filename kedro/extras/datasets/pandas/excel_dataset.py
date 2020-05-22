@@ -46,7 +46,6 @@ from kedro.io.core import (
 )
 
 
-# pylint: disable=too-many-instance-attributes
 class ExcelDataSet(AbstractVersionedDataSet):
     """``ExcelDataSet`` loads/saves data from/to a Excel file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Excel file.
@@ -71,7 +70,7 @@ class ExcelDataSet(AbstractVersionedDataSet):
     DEFAULT_LOAD_ARGS = {"engine": "xlrd"}
     DEFAULT_SAVE_ARGS = {"index": False}
 
-    # pylint: disable=too-many-arguments,too-many-locals
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         filepath: str,

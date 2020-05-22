@@ -1,4 +1,4 @@
-![Kedro Logo Banner](https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/img/kedro_banner.png)
+![Kedro Logo Banner](https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/static/img/kedro_banner.png)
 
 -----------------
 
@@ -43,7 +43,7 @@ See more detailed installation instructions, including how to setup Python virtu
 
 ## What are the main features of Kedro?
 
-![Kedro-Viz Pipeline Visualisation](https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/img/pipeline_visualisation.png)
+![Kedro-Viz Pipeline Visualisation](https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/static/img/pipeline_visualisation.png)
 *A pipeline visualisation generated using [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz)*
 
 

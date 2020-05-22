@@ -1,6 +1,6 @@
 # Setting up PyCharm
 
-> *Note:* This documentation is based on `Kedro 0.15.9`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 This section will present a quick guide on how to configure [PyCharm](https://www.jetbrains.com/pycharm/) as a development environment for working on Kedro projects.
 
@@ -117,3 +117,17 @@ Click **OK** and then select **Remote Run** from the toolbar and click **Run** t
 ![](images/pycharm_remote_run.png)
 
 To remotely debug, click the debugger button as [described above](#debugging).
+
+## Configuring the Kedro catalog validation schema
+
+You can enable the Kedro catalog validation schema in your PyCharm IDE to enable real-time validation, autocompletion and see information about the different fields in your `catalog` as you write it. To enable this, open a `catalog.yml` file and you should see "No JSON Schema" in the bottom right corner of your window. Click it and select "Edit Schema Mapping".
+
+![](images/pycharm_edit_schema_mapping.png)
+
+Add a new mapping using the "+" button in the top left of the window and select the name you want for it. Enter this URL `https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/static/jsonschema/kedro-catalog-schema-0.16.json` in the "Schema URL" field and select "JSON Schema Version 7" in the "Schema version" field.
+
+Add the following file path pattern to the mapping: `conf/**/*catalog*`.
+
+![](images/pycharm_catalog_schema_mapping.png)
+
+> Different schemas for different Kedro versions can be found [here](https://github.com/quantumblacklabs/kedro/tree/develop/static/jsonschema).

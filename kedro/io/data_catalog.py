@@ -34,6 +34,7 @@ relaying load and save functions to the underlying data sets.
 import copy
 import difflib
 import logging
+import re
 from collections import defaultdict
 from functools import partial
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Type, Union
@@ -615,15 +616,47 @@ class DataCatalog:
                 )
             self._transformers[data_set_name].append(transformer)
 
-    def list(self) -> List[str]:
-        """List of ``DataSet`` names registered in the catalog.
-
-        Returns:
-            A List of ``DataSet`` names, corresponding to the entries that are
-            registered in the current catalog object.
-
+    def list(self, regex_search: Optional[str] = None) -> List[str]:
         """
-        return list(self._data_sets.keys())
+        List of all ``DataSet`` names registered in the catalog.
+        This can be filtered by providing an optional regular expression
+        which will only return matching keys.
+
+        Args:
+            regex_search: An optional regular expression which can be provided
+                to limit the data sets returned by a particular pattern.
+        Returns:
+            A list of ``DataSet`` names available which match the
+            `regex_search` criteria (if provided). All data set names are returned
+            by default.
+
+        Raises:
+            SyntaxError: When an invalid regex filter is provided.
+
+        Example:
+        ::
+
+            >>> io = DataCatalog()
+            >>> # get data sets where the substring 'raw' is present
+            >>> raw_data = io.list(regex_search='raw')
+            >>> # get data sets which start with 'prm' or 'feat'
+            >>> feat_eng_data = io.list(regex_search='^(prm|feat)')
+            >>> # get data sets which end with 'time_series'
+            >>> models = io.list(regex_search='.+time_series$')
+        """
+
+        if regex_search is None:
+            return list(self._data_sets.keys())
+
+        if not regex_search.strip():
+            logging.warning("The empty string will not match any data sets")
+            return []
+
+        try:
+            pattern = re.compile(regex_search, flags=re.IGNORECASE)
+        except re.error:
+            raise SyntaxError(f"Invalid regular expression provided: `{regex_search}`")
+        return [dset_name for dset_name in self._data_sets if pattern.search(dset_name)]
 
     def shallow_copy(self) -> "DataCatalog":
         """Returns a shallow copy of the current object.

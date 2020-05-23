@@ -103,6 +103,23 @@
 * Python 3.5 is no longer supported by the current and all future versions of Kedro.
 
 ### Migration guide from Kedro 0.15.* to Upcoming Release
+
+#### project_version
+
+When migrating from any kedro version is it important to update the `project_version` attribute of your `ProjectContext`, typically found in `src/<project_name>/run.py`.
+
+``` diff
+# src/<project_name>/run.py
+class ProjectContext(KedroContext):
+    """Users can override the remaining methods from the parent class here,
+    or create new ones (e.g. as required by plugins)
+    """
+
+    project_name = "<project_name>"
+-   project_version = "0.15.9"
++   project_version = "0.16.1"
+```
+
 #### Migration for datasets
 
 Since all the datasets (from `kedro.io` and `kedro.contrib.io`) were moved to `kedro/extras/datasets` you must update the type of all datasets in `<project>/conf/base/catalog.yml` file.

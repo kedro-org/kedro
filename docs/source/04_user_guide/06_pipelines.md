@@ -768,7 +768,7 @@ Kedro has options to modify pipeline runs. Here is a list of CLI arguments suppo
 +---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
 | :code:`kedro run --tag some_tag1,some_tag2`                               | Run only nodes which have any of these tags attached                            | Yes                       |
 +---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| :code:`kedro run --load-version="some_dataset:YYYY-MM-DDThh.mm.ss.sssZ"`  | Specify a particular dataset version (timestamp) for loading    | Yes                       |
+| :code:`kedro run --load-version="some_dataset:YYYY-MM-DDThh.mm.ss.sssZ"`  | Specify a particular dataset version (timestamp) for loading                    | Yes                       |
 +---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
 | :code:`kedro run --pipeline de`                                           | Run the whole pipeline by its name                                              | No                        |
 +---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+

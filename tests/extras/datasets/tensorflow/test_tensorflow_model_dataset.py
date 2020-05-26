@@ -315,8 +315,8 @@ class TestTensorFlowModelDatasetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            r"Save version `{0}` did not match load version `{1}` "
-            r"for TensorFlowModelDataset\(.+\)".format(save_version, load_version)
+            rf"Save version `{save_version}` did not match load version `{load_version}` "
+            rf"for TensorFlowModelDataset\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_tf_model_dataset.save(dummy_tf_base_model)

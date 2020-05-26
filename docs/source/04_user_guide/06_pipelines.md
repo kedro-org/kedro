@@ -751,23 +751,29 @@ Kedro has options to modify pipeline runs. Here is a list of CLI arguments suppo
 +--------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
 | CLI command                                                  | Description                                                                     | Multiple options allowed? |
 +==============================================================+=================================================================================+===========================+
-| :code:`kedro run --pipeline de`                              | Run the whole pipeline by its name                                              | No                        |
-+--------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| :code:`kedro run --node debug_me,debug_me_too`               | Run only nodes with specified names                                             | Yes                       |
+| :code:`kedro run --from-inputs dataset1,dataset2`            | A list of dataset names which should be used as a starting point                | No                        |
 +--------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
 | :code:`kedro run --from-nodes node1,node2`                   | A list of node names which should be used as a starting point                   | No                        |
 +--------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
 | :code:`kedro run --to-nodes node3,node4`                     | A list of node names which should be used as an end point                       | No                        |
 +--------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| :code:`kedro run --from-inputs dataset1,dataset2`            | A list of dataset names which should be used as a starting point                | No                        |
+| :code:`kedro run --node debug_me,debug_me_too`               | Run only nodes with specified names                                             | Yes                       |
 +--------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| :code:`kedro run --tag some_tag1,some_tag2`                  | Run only nodes which have any of these tags attached                            | Yes                       |
+| :code:`kedro run --runner runner_name`                       | Run the pipeline with a specific runner. Cannot be used together with --parallel| No                        |
 +--------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| :code:`kedro run --params param_key1:value1,param_key2:2.0`  | Does a parametrised kedro run with {"param_key1": "value1", "param_key2": 2}    | Yes                       |
+| :code:`kedro run --parallel`                                 | Run the pipeline using the `ParallelRunner`. If not specified, use the `SequentialRunner`. Cannot be used together with --runner | No                        |
 +--------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
 | :code:`kedro run --env env_name`                             | Run the pipeline in the env_name environment. Defaults to local if not provided | No                        |
 +--------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+| :code:`kedro run --tag some_tag1,some_tag2`                  | Run only nodes which have any of these tags attached                            | Yes                       |
++--------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+| :code:`kedro run --load-version="some_dataset:YYYY-MM-DDThh.mm.ss.sssZ"`  | Specify a particular dataset version (timestamp) for loading    | Yes                       |
++--------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+| :code:`kedro run --pipeline de`                              | Run the whole pipeline by its name                                              | No                        |
++--------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
 | :code:`kedro run --config config.yml`                        | Specify all command line options in a configuration file called config.yml      | No                        |
++--------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+| :code:`kedro run --params param_key1:value1,param_key2:2.0`  | Does a parametrised kedro run with {"param_key1": "value1", "param_key2": 2}    | Yes                       |
 +--------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
 ```
 

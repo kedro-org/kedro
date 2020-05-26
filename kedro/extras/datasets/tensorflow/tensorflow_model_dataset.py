@@ -129,11 +129,10 @@ class TensorFlowModelDataset(AbstractVersionedDataSet):
         if save_args is not None:
             self._save_args.update(save_args)
 
-        self._tmpfile_callable = (
-            tempfile.NamedTemporaryFile
-            if self._save_args.get("save_format") == "h5"
-            else tempfile.TemporaryDirectory
-        )  # type: Callable
+        if self._save_args.get("save_format") == "h5":
+            self._tmpfile_callable = tempfile.NamedTemporaryFile  # type: Callable
+        else:
+            self._tmpfile_callable = tempfile.TemporaryDirectory
 
     def _load(self) -> tf.keras.Model:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)

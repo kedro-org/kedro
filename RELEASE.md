@@ -6,6 +6,7 @@
 * Sped up initialization of `spark.SparkHiveDataSet`.
 * Introduced regex filtering to the `DataCatalog.list()` method.
 * Add missing `pillow.ImageDataSet` entry to the documentation.
+* Non-alphanumeric characters (except underscore) in dataset name are replaced with `__` in `DataCatalog.datasets`, for ease of access to transcoded datasets.
 
 ## Breaking changes to the API
 

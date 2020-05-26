@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -34,9 +34,15 @@ from pathlib import Path
 import pytest
 import yaml
 
-from kedro.cli.cli import _create_project
+from kedro.framework.cli.cli import _create_project
 
-TEST_REPO_NAME = "fake_repo"
+_FAKE_REPO_NAME = "fake_repo"
+_FAKE_PACKAGE_NAME = "fake_package"
+
+
+@pytest.fixture
+def fake_package_name():
+    return _FAKE_PACKAGE_NAME
 
 
 @pytest.fixture(scope="session")
@@ -47,7 +53,7 @@ def fake_root_dir():
 
 @pytest.fixture(scope="session")
 def fake_repo_path(fake_root_dir):
-    return fake_root_dir / TEST_REPO_NAME
+    return fake_root_dir.resolve() / _FAKE_REPO_NAME
 
 
 @pytest.fixture(scope="session")
@@ -55,8 +61,8 @@ def fake_repo_config_path(fake_root_dir):
     repo_config = {
         "output_dir": str(fake_root_dir),
         "project_name": "Test Project",
-        "repo_name": TEST_REPO_NAME,
-        "python_package": "fake_package",
+        "repo_name": _FAKE_REPO_NAME,
+        "python_package": _FAKE_PACKAGE_NAME,
         "include_example": True,
     }
     config_path = fake_root_dir / "repo_config.yml"

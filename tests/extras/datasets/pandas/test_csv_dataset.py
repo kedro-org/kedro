@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -30,6 +30,7 @@ from pathlib import PurePosixPath
 
 import pandas as pd
 import pytest
+from adlfs import AzureBlobFileSystem
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
@@ -113,17 +114,18 @@ class TestCSVDataSet:
             csv_data_set.load()
 
     @pytest.mark.parametrize(
-        "filepath,instance_type",
+        "filepath,instance_type,credentials",
         [
-            ("s3://bucket/file.csv", S3FileSystem),
-            ("file:///tmp/test.csv", LocalFileSystem),
-            ("/tmp/test.csv", LocalFileSystem),
-            ("gcs://bucket/file.csv", GCSFileSystem),
-            ("https://example.com/file.csv", HTTPFileSystem),
+            ("s3://bucket/file.csv", S3FileSystem, {}),
+            ("file:///tmp/test.csv", LocalFileSystem, {}),
+            ("/tmp/test.csv", LocalFileSystem, {}),
+            ("gcs://bucket/file.csv", GCSFileSystem, {}),
+            ("https://example.com/file.csv", HTTPFileSystem, {}),
+            ("abfs://bucket/file.csv", AzureBlobFileSystem, {"account_name": "test"}),
         ],
     )
-    def test_protocol_usage(self, filepath, instance_type):
-        data_set = CSVDataSet(filepath=filepath)
+    def test_protocol_usage(self, filepath, instance_type, credentials):
+        data_set = CSVDataSet(filepath=filepath, credentials=credentials)
         assert isinstance(data_set._fs, instance_type)
 
         # _strip_protocol() doesn't strip http(s) protocol
@@ -139,8 +141,10 @@ class TestCSVDataSet:
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.csv"
         data_set = CSVDataSet(filepath=filepath)
+        assert data_set._version_cache.currsize == 0  # no cache if unversioned
         data_set.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
+        assert data_set._version_cache.currsize == 0
 
 
 class TestCSVDataSetVersioned:
@@ -198,6 +202,49 @@ class TestCSVDataSetVersioned:
         assert (
             ds_new.resolve_load_version() == v_new
         )  # new version is discoverable by a new instance
+
+    def test_multiple_saves(self, dummy_dataframe, filepath_csv):
+        """Test multiple cycles of save followed by load for the same dataset"""
+        ds_versioned = CSVDataSet(filepath=filepath_csv, version=Version(None, None))
+
+        # first save
+        ds_versioned.save(dummy_dataframe)
+        first_save_version = ds_versioned.resolve_save_version()
+        first_load_version = ds_versioned.resolve_load_version()
+        assert first_load_version == first_save_version
+
+        # second save
+        ds_versioned.save(dummy_dataframe)
+        second_save_version = ds_versioned.resolve_save_version()
+        second_load_version = ds_versioned.resolve_load_version()
+        assert second_load_version == second_save_version
+        assert second_load_version > first_load_version
+
+        # another dataset
+        ds_new = CSVDataSet(filepath=filepath_csv, version=Version(None, None))
+        assert ds_new.resolve_load_version() == second_load_version
+
+    def test_release_instance_cache(self, dummy_dataframe, filepath_csv):
+        """Test that cache invalidation does not affect other instances"""
+        ds_a = CSVDataSet(filepath=filepath_csv, version=Version(None, None))
+        assert ds_a._version_cache.currsize == 0
+        ds_a.save(dummy_dataframe)  # create a version
+        assert ds_a._version_cache.currsize == 2
+
+        ds_b = CSVDataSet(filepath=filepath_csv, version=Version(None, None))
+        assert ds_b._version_cache.currsize == 0
+        ds_b.resolve_save_version()
+        assert ds_b._version_cache.currsize == 1
+        ds_b.resolve_load_version()
+        assert ds_b._version_cache.currsize == 2
+
+        ds_a.release()
+
+        # dataset A cache is cleared
+        assert ds_a._version_cache.currsize == 0
+
+        # dataset B cache is unaffected
+        assert ds_b._version_cache.currsize == 2
 
     def test_no_versions(self, versioned_csv_data_set):
         """Check the error if no versions are available for load."""

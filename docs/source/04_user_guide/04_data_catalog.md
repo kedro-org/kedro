@@ -1,6 +1,6 @@
 # The Data Catalog
 
-> *Note:* This documentation is based on `Kedro 0.15.9`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 This section introduces `catalog.yml`, the project-shareable Data Catalog. The file is located in `conf/base` and is a registry of all data sources available for use by a project; it manages loading and saving of data.
 
@@ -339,26 +339,28 @@ The use case of _tracking operation performance_ by applying built-in transforme
 
 Transformers are applied at the `DataCatalog` level. To apply the built-in `ProfileTimeTransformer`, you need to:
 1. Navigate to `src/<package_name>/run.py`
-2. Override `_create_catalog` method for your `ProjectContext` class using the following:
+2. Apply `ProfileTimeTransformer` in the hook implementation `TransformerHooks.after_catalog_created`.
+3. Register the hook in your `ProjectContext` as follow:
 
 ```python
-from typing import Dict, Any
+from pathlib import Path
+from typing import Dict
 
-from kedro.context import KedroContext
-from kedro.extras.transformers import ProfileTimeTransformer  # new import
-from kedro.io import DataCatalog
-from kedro.versioning import Journal
+from kedro.extras.transformers import ProfileTimeTransformer # new import
+from kedro.framework.context import KedroContext, load_package_context
+from kedro.framework.hooks import hook_impl # new import
+from kedro.io import DataCatalog # new import
 
+
+class TransformerHooks:
+    @hook_impl
+    def after_catalog_created(self, catalog: DataCatalog) -> None:
+        catalog.add_transformer(ProfileTimeTransformer())
 
 class ProjectContext(KedroContext):
 
     ...
-
-    def _create_catalog(self, *args, **kwargs):
-        catalog = super()._create_catalog(*args, **kwargs)
-        profile_time = ProfileTimeTransformer()  # instantiate a built-in transformer
-        catalog.add_transformer(profile_time)  # apply it to the catalog
-        return catalog
+    hooks = (TransformerHooks(),)
 ```
 
 Once complete, rerun the pipeline from the terminal and you should see the following logging output:
@@ -443,33 +445,28 @@ class ProfileMemoryTransformer(AbstractTransformer):
         )
 ```
 
-Finally, you need to update `ProjectContext._create_catalog` method definition to apply your custom transformer:
+Finally, you need to update `TransformerHooks` to apply your custom transformer:
 
 ```python
 ...
-from .memory_profile import ProfileMemoryTransformer  # new import
+from .memory_profile import ProfileMemoryTransformer # new import
 
+class TransformerHooks:
+    @hook_impl
+    def after_catalog_created(self, catalog: DataCatalog) -> None:
+        catalog.add_transformer(ProfileTimeTransformer())
+
+        # as memory tracking is quite time-consuming, for demonstration purposes
+        # let's apply profile_memory only to the master_table
+        catalog.add_transformer(ProfileMemoryTransformer(), "master_table")
 
 class ProjectContext(KedroContext):
 
     ...
-
-    def _create_catalog(self, *args, **kwargs):
-        catalog = super()._create_catalog(*args, **kwargs)
-
-        profile_time = ProfileTimeTransformer()
-        catalog.add_transformer(profile_time)
-
-        # instantiate our custom transformer
-        profile_memory = ProfileMemoryTransformer()
-
-        # as memory tracking is quite time-consuming, for demonstration purposes
-        # let's apply profile_memory only to the master_table
-        catalog.add_transformer(profile_memory, "master_table")
-        return catalog
+    hooks = (TransformerHooks(),)
 ```
 
-And rerun the pipeline:
+And re-run the pipeline:
 
 ```console
 $ kedro run
@@ -518,8 +515,8 @@ The code API allows you to configure data sources in code. This can also be used
 In a file like `catalog.py`, you can generate the Data Catalog. This will allow everyone in the project to review all the available data sources. In the following, we are using the pre-built CSV loader, which is documented in the [API reference documentation](/kedro.extras.datasets)
 
 ```python
-from kedro.io import (
-    DataCatalog,
+from kedro.io import DataCatalog
+from kedro.extras.datasets.pandas import (
     CSVDataSet,
     SQLTableDataSet,
     SQLQueryDataSet,

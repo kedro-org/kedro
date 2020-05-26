@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -36,6 +36,12 @@ from setuptools import find_packages, setup
 
 name = "kedro"
 here = path.abspath(path.dirname(__file__))
+
+
+PANDAS = "pandas>=0.24, <2.0"
+SPARK = "pyspark>=2.2.0, <3.0"
+HDFS = "hdfs>=2.5.8, <3.0"
+S3FS = "s3fs>=0.3.0, <0.4.1"
 
 # get package version
 with open(path.join(here, name, "__init__.py"), encoding="utf-8") as f:
@@ -68,11 +74,49 @@ for pattern in ["**/*", "**/.*", "**/.*/**", "**/.*/.**"]:
     template_files.extend(
         [
             name.replace("kedro/", "", 1)
-            for name in glob("kedro/template/" + pattern, recursive=True)
+            for name in glob("kedro/templates/" + pattern, recursive=True)
         ]
     )
 
+
+def _collect_requirements(requires):
+    return sorted(set(chain.from_iterable(requires.values())))
+
+
+api_require = {"api.APIDataSet": ["requests>=2.20.0, <3.0"]}
+biosequence_require = {"biosequence.BioSequenceDataSet": ["biopython>=1.73, <2.0"]}
+dask_require = {"dask.ParquetDataSet": ["dask[complete]>=2.6.0, <3.0"]}
+geopandas_require = {"geopandas.GeoJSONDataSet": ["geopandas<=0.6.0, <1.0"]}
+matplotlib_require = {"matplotlib.MatplotlibWriter": ["matplotlib>=3.0.3, <4.0"]}
+networkx_require = {"networkx.NetworkXDataSet": ["networkx>=2.4, <3.0"]}
+pandas_require = {
+    "pandas.CSVDataSet": [PANDAS],
+    "pandas.ExcelDataSet": [PANDAS, "xlrd>=1.0.0, <2.0", "xlsxwriter>=1.0.0, <2.0"],
+    "pandas.FeatherDataSet": [PANDAS],
+    "pandas.GBQTableDataSet": [PANDAS, "pandas-gbq>=0.12.0, <1.0"],
+    "pandas.HDFDataSet": [PANDAS, "tables>=3.6, <4.0"],
+    "pandas.JSONDataSet": [PANDAS],
+    "pandas.ParquetDataSet": [PANDAS, "pyarrow>=0.12.0, <1.0.0"],
+    "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy>=1.2.0, <2.0"],
+}
+pillow_require = {"pillow.ImageDataSet": ["Pillow>=7.1.2, <7.2"]}
+spark_require = {
+    "spark.SparkDataSet": [PANDAS, HDFS, S3FS],
+    "spark.SparkHiveDataSet": [PANDAS, HDFS, S3FS],
+    "spark.SparkJDBCDataSet": [PANDAS, HDFS, S3FS],
+}
+tensorflow_required = {
+    "tensorflow.TensorflowModelDataset": [
+        # currently only TensorFlow V2 supported for saving and loading.
+        # V1 requires HDF5 and serializes differently
+        "tensorflow>=2.0.0, <3.0",
+    ]
+}
+
 extras_require = {
+    "api": _collect_requirements(api_require),
+    "biosequence": _collect_requirements(biosequence_require),
+    "dask": _collect_requirements(dask_require),
     "docs": [
         "sphinx>=1.8.4, <2.0",
         "sphinx_rtd_theme==0.4.3",
@@ -85,33 +129,28 @@ extras_require = {
         "tornado>=4.2, <6.0",
         "ipykernel>=4.8.1, <5.0",
     ],
+    "geopandas": _collect_requirements(geopandas_require),
+    "matplotlib": _collect_requirements(matplotlib_require),
+    "networkx": _collect_requirements(networkx_require),
     "notebook_templates": ["nbconvert>=5.3.1, <6.0", "nbformat>=4.4.0, <5.0"],
+    "pandas": _collect_requirements(pandas_require),
+    "pillow": _collect_requirements(pillow_require),
     "profilers": ["memory_profiler>=0.50.0, <1.0"],
-    "bioinformatics": ["biopython>=1.73, <2.0"],
-    "dask": ["dask[complete]>=2.6.0, <3.0"],
-    "geopandas": ["geopandas<=0.6.0, <1.0"],
-    "matplotlib": ["matplotlib>=3.0.3, <4.0"],
-    "networkx": ["networkx>=2.4, <3.0"],
-    "pandas": [
-        "pandas>=0.24.0, <2.0",
-        "azure-storage-blob>=1.1.0, <2.0",
-        "azure-storage-file>=1.1.0, <2.0",
-        "azure-storage-queue>=1.1.0, <2.0",
-        "pandas-gbq>=0.12.0, <1.0",
-        "SQLAlchemy>=1.2.0, <2.0",
-        "pyarrow>=0.12.0, <1.0.0",
-        "xlrd>=1.0.0, <2.0",
-        "xlsxwriter>=1.0.0, <2.0",
-        "tables>=3.6",
-    ],
-    "spark": ["pyspark>=2.2.0, <3.0", "hdfs>=2.5.8, <3.0", "s3fs>=0.3.0, <0.4.1"],
-    "tensorflow": [
-        # currently only TensorFlow V2 supported for saving and loading. V1 requires HDF5 and serializes differently
-        "tensorflow>=2.0.0, <3.0",
-    ]
+    "spark": _collect_requirements(spark_require),
+    "tensorflow": _collect_requirements(tensorflow_required),
+    **api_require,
+    **biosequence_require,
+    **dask_require,
+    **geopandas_require,
+    **matplotlib_require,
+    **networkx_require,
+    **pandas_require,
+    **pillow_require,
+    **spark_require,
+    **tensorflow_required,
 }
 
-extras_require["all"] = sorted(set(chain.from_iterable(extras_require.values())))
+extras_require["all"] = _collect_requirements(extras_require)
 
 setup(
     name=name,
@@ -127,8 +166,10 @@ setup(
     tests_require=test_requires,
     install_requires=requires,
     author="QuantumBlack Labs",
-    entry_points={"console_scripts": ["kedro = kedro.cli:main"]},
-    package_data={name: ["py.typed", "test_requirements.txt"] + template_files + doc_html_files},
+    entry_points={"console_scripts": ["kedro = kedro.framework.cli:main"]},
+    package_data={
+        name: ["py.typed", "test_requirements.txt"] + template_files + doc_html_files
+    },
     zip_safe=False,
     keywords="pipelines, machine learning, data pipelines, data science, data engineering",
     classifiers=[

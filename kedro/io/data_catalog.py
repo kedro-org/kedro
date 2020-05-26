@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -32,9 +32,12 @@ sets. Then it will act as a single point of reference for your calls,
 relaying load and save functions to the underlying data sets.
 """
 import copy
+import difflib
 import logging
+import re
+from collections import defaultdict
 from functools import partial
-from typing import Any, Callable, Dict, Iterable, List, Optional, Type, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Type, Union
 from warnings import warn
 
 from kedro.io.core import (
@@ -140,6 +143,7 @@ class DataCatalog:
         transformers: Dict[str, List[AbstractTransformer]] = None,
         default_transformers: List[AbstractTransformer] = None,
         journal: Journal = None,
+        layers: Dict[str, Set[str]] = None,
     ) -> None:
         """``DataCatalog`` stores instances of ``AbstractDataSet``
         implementations to provide ``load`` and ``save`` capabilities from
@@ -156,6 +160,10 @@ class DataCatalog:
             default_transformers: A list of transformers to be applied to any
                 new data sets.
             journal: Instance of Journal.
+            layers: A dictionary of data set layers. It maps a layer name
+                to a set of data set names, according to the
+                data engineering convention. For more details, see
+                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
         Raises:
             DataSetNotFoundError: When transformers are passed for a non
                 existent data set.
@@ -172,6 +180,7 @@ class DataCatalog:
         """
         self._data_sets = dict(data_sets or {})
         self.datasets = _FrozenDatasets(self._data_sets)
+        self.layers = layers
 
         self._transformers = {k: list(v) for k, v in (transformers or {}).items()}
         self._default_transformers = list(default_transformers or [])
@@ -294,20 +303,32 @@ class DataCatalog:
                 )
             )
 
+        layers = defaultdict(set)  # type: Dict[str, Set[str]]
         for ds_name, ds_config in catalog.items():
+            ds_layer = ds_config.pop("layer", None)
+            if ds_layer is not None:
+                layers[ds_layer].add(ds_name)
+
             ds_config = _resolve_credentials(ds_config, credentials)
             data_sets[ds_name] = AbstractDataSet.from_config(
                 ds_name, ds_config, load_versions.get(ds_name), save_version
             )
-        return cls(data_sets=data_sets, journal=journal)
+
+        dataset_layers = layers or None
+        return cls(data_sets=data_sets, journal=journal, layers=dataset_layers)
 
     def _get_dataset(
         self, data_set_name: str, version: Version = None
     ) -> AbstractDataSet:
         if data_set_name not in self._data_sets:
-            raise DataSetNotFoundError(
-                "DataSet '{}' not found in the catalog".format(data_set_name)
-            )
+            error_msg = f"DataSet '{data_set_name}' not found in the catalog"
+
+            matches = difflib.get_close_matches(data_set_name, self._data_sets.keys())
+            if matches:
+                suggestions = ", ".join(matches)  # type: ignore
+                error_msg += f" - did you mean one of these instead: {suggestions}"
+
+            raise DataSetNotFoundError(error_msg)
 
         data_set = self._data_sets[data_set_name]
         if version and isinstance(data_set, AbstractVersionedDataSet):
@@ -595,15 +616,47 @@ class DataCatalog:
                 )
             self._transformers[data_set_name].append(transformer)
 
-    def list(self) -> List[str]:
-        """List of ``DataSet`` names registered in the catalog.
-
-        Returns:
-            A List of ``DataSet`` names, corresponding to the entries that are
-            registered in the current catalog object.
-
+    def list(self, regex_search: Optional[str] = None) -> List[str]:
         """
-        return list(self._data_sets.keys())
+        List of all ``DataSet`` names registered in the catalog.
+        This can be filtered by providing an optional regular expression
+        which will only return matching keys.
+
+        Args:
+            regex_search: An optional regular expression which can be provided
+                to limit the data sets returned by a particular pattern.
+        Returns:
+            A list of ``DataSet`` names available which match the
+            `regex_search` criteria (if provided). All data set names are returned
+            by default.
+
+        Raises:
+            SyntaxError: When an invalid regex filter is provided.
+
+        Example:
+        ::
+
+            >>> io = DataCatalog()
+            >>> # get data sets where the substring 'raw' is present
+            >>> raw_data = io.list(regex_search='raw')
+            >>> # get data sets which start with 'prm' or 'feat'
+            >>> feat_eng_data = io.list(regex_search='^(prm|feat)')
+            >>> # get data sets which end with 'time_series'
+            >>> models = io.list(regex_search='.+time_series$')
+        """
+
+        if regex_search is None:
+            return list(self._data_sets.keys())
+
+        if not regex_search.strip():
+            logging.warning("The empty string will not match any data sets")
+            return []
+
+        try:
+            pattern = re.compile(regex_search, flags=re.IGNORECASE)
+        except re.error:
+            raise SyntaxError(f"Invalid regular expression provided: `{regex_search}`")
+        return [dset_name for dset_name in self._data_sets if pattern.search(dset_name)]
 
     def shallow_copy(self) -> "DataCatalog":
         """Returns a shallow copy of the current object.

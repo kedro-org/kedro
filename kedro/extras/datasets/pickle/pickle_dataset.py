@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -52,7 +52,6 @@ except ImportError:  # pragma: no cover
     joblib = None
 
 
-# pylint: disable=too-many-instance-attributes
 class PickleDataSet(AbstractVersionedDataSet):
     """``PickleDataSet`` loads/saves data from/to a Pickle file using an underlying
     filesystem (e.g.: local, S3, GCS). The underlying functionality is supported by
@@ -90,7 +89,6 @@ class PickleDataSet(AbstractVersionedDataSet):
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
-        layer: str = None,
     ) -> None:
         """Creates a new instance of ``PickleDataSet`` pointing to a concrete Pickle
         file on a specific filesystem. ``PickleDataSet`` supports two backends to
@@ -125,8 +123,6 @@ class PickleDataSet(AbstractVersionedDataSet):
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `wb` when saving.
-            layer: The data layer according to the data engineering convention:
-                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
 
         Raises:
             ValueError: If ``backend`` is not one of ['pickle', 'joblib'].
@@ -163,7 +159,6 @@ class PickleDataSet(AbstractVersionedDataSet):
         )
 
         self._backend = backend
-        self._layer = layer
 
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
@@ -185,7 +180,6 @@ class PickleDataSet(AbstractVersionedDataSet):
             load_args=self._load_args,
             save_args=self._save_args,
             version=self._version,
-            layer=self._layer,
         )
 
     def _load(self) -> Any:
@@ -202,7 +196,7 @@ class PickleDataSet(AbstractVersionedDataSet):
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
             try:
                 self.BACKENDS[self._backend].dump(data, fs_file, **self._save_args)
-            except Exception as err:  # pylint: disable=broad-except
+            except Exception as err:
                 raise DataSetError(
                     "{} was not serialized due to: {}".format(
                         str(data.__class__), str(err)

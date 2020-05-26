@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -157,7 +157,6 @@ class SQLTableDataSet(AbstractDataSet):
         credentials: Dict[str, Any],
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
-        layer: str = None,
     ) -> None:
         """Creates a new ``SQLTableDataSet``.
 
@@ -184,8 +183,6 @@ class SQLTableDataSet(AbstractDataSet):
                 To find all supported connection string formats, see here:
                 https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls
                 It has ``index=False`` in the default parameters.
-            layer: The data layer according to the data engineering convention:
-                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
 
         Raises:
             DataSetError: When either ``table_name`` or ``con`` is empty.
@@ -199,8 +196,6 @@ class SQLTableDataSet(AbstractDataSet):
                 "`con` argument cannot be empty. Please "
                 "provide a SQLAlchemy connection string."
             )
-
-        self._layer = layer
 
         # Handle default load and save arguments
         self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
@@ -226,7 +221,6 @@ class SQLTableDataSet(AbstractDataSet):
             table_name=self._load_args["table_name"],
             load_args=load_args,
             save_args=save_args,
-            layer=self._layer,
         )
 
     def _load(self) -> pd.DataFrame:
@@ -288,11 +282,7 @@ class SQLQueryDataSet(AbstractDataSet):
     """
 
     def __init__(
-        self,
-        sql: str,
-        credentials: Dict[str, Any],
-        load_args: Dict[str, Any] = None,
-        layer: str = None,
+        self, sql: str, credentials: Dict[str, Any], load_args: Dict[str, Any] = None,
     ) -> None:
         """Creates a new ``SQLQueryDataSet``.
 
@@ -310,8 +300,6 @@ class SQLQueryDataSet(AbstractDataSet):
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_sql_query.html
                 To find all supported connection string formats, see here:
                 https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls
-            layer: The data layer according to the data engineering convention:
-                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
 
         Raises:
             DataSetError: When either ``sql`` or ``con`` parameters is emtpy.
@@ -336,7 +324,6 @@ class SQLQueryDataSet(AbstractDataSet):
             else default_load_args
         )
 
-        self._layer = layer
         self._load_args["sql"] = sql
         self._load_args["con"] = credentials["con"]
 
@@ -344,7 +331,7 @@ class SQLQueryDataSet(AbstractDataSet):
         load_args = self._load_args.copy()
         del load_args["sql"]
         del load_args["con"]
-        return dict(sql=self._load_args["sql"], load_args=load_args, layer=self._layer)
+        return dict(sql=self._load_args["sql"], load_args=load_args)
 
     def _load(self) -> pd.DataFrame:
         try:

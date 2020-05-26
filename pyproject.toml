@@ -1,5 +1,5 @@
 [tool.black]
-exclude = "/template/"
+exclude = "/templates/"
 
 [tool.isort]
 multi_line_output = 3
@@ -13,5 +13,5 @@ default_section = "THIRDPARTY"
 [tool.coverage.report]
 fail_under = 100
 show_missing = true
-omit = ["kedro/template*", "kedro/hooks/specs.py"]
+omit = ["kedro/templates/*", "kedro/framework/hooks/specs.py"]
 exclude_lines = ["pragma: no cover", "raise NotImplementedError"]

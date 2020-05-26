@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -69,6 +69,7 @@ def sane_config(filepath):
                 "type": "pandas.CSVDataSet",
                 "filepath": "s3://test_bucket/test_file.csv",
                 "credentials": "s3_credentials",
+                "layer": "raw",
             },
         },
         "credentials": {
@@ -237,15 +238,24 @@ class TestDataCatalog:
         assert result is False
 
     def test_exists_unregistered(self, data_catalog):
-        """Check the the error when calling `exists`
-        on unregistered data set"""
+        """Check the error when calling `exists` on unregistered data set"""
         pattern = r"DataSet \'wrong_key\' not found in the catalog"
-        with pytest.raises(DataSetNotFoundError, match=pattern):
+        with pytest.raises(DataSetNotFoundError, match=pattern) as e:
             data_catalog.exists("wrong_key")
 
+        assert "did you mean" not in str(e.value)
+
+    def test_exists_unregistered_typo(self, data_catalog):
+        """Check the error when calling `exists` on mistyped data set"""
+        pattern = (
+            r"DataSet \'text\' not found in the catalog"
+            r" - did you mean one of these instead\: test"
+        )
+        with pytest.raises(DataSetNotFoundError, match=pattern):
+            data_catalog.exists("text")
+
     def test_release_unregistered(self, data_catalog):
-        """Check the the error when calling `release`
-        on unregistered data set"""
+        """Check the error when calling `release` on unregistered data set"""
         pattern = r"DataSet \'wrong_key\' not found in the catalog"
         with pytest.raises(DataSetNotFoundError, match=pattern):
             data_catalog.release("wrong_key")
@@ -255,6 +265,27 @@ class TestDataCatalog:
         entries = multi_catalog.list()
         assert "abc" in entries
         assert "xyz" in entries
+
+    @pytest.mark.parametrize(
+        "pattern,expected",
+        [
+            ("^a", ["abc"]),
+            ("a|x", ["abc", "xyz"]),
+            ("^(?!(a|x))", []),
+            ("def", []),
+            ("", []),
+        ],
+    )
+    def test_multi_catalog_list_regex(self, multi_catalog, pattern, expected):
+        """Test that regex patterns filter data sets accordingly"""
+        assert multi_catalog.list(regex_search=pattern) == expected
+
+    def test_multi_catalog_list_bad_regex(self, multi_catalog):
+        """Test that bad regex is caught accordingly"""
+        escaped_regex = r"\(\("
+        pattern = f"Invalid regular expression provided: `{escaped_regex}`"
+        with pytest.raises(SyntaxError, match=pattern):
+            multi_catalog.list("((")
 
     def test_eq(self, multi_catalog, data_catalog):
         assert multi_catalog == multi_catalog  # pylint: disable=comparison-with-itself
@@ -306,6 +337,12 @@ class TestDataCatalog:
         does not have `confirm` method"""
         with pytest.raises(DataSetError, match=re.escape(error_pattern)):
             data_catalog.confirm(dataset_name)
+
+    def test_layers(self, data_catalog, data_catalog_from_config):
+        """Test dataset layers are correctly parsed"""
+        assert data_catalog.layers is None
+        # only one dataset is assigned a layer in the config
+        assert data_catalog_from_config.layers == {"raw": {"cars"}}
 
 
 class TestDataCatalogFromConfig:
@@ -431,10 +468,14 @@ class TestDataCatalogFromConfig:
         """Test that dependency is missing."""
         pattern = "dependency issue"
 
-        import_error = ModuleNotFoundError(pattern)
-        import_error.name = pattern  # import_error.name cannot be None
+        # pylint: disable=unused-argument,inconsistent-return-statements
+        def dummy_load(obj_path, *args, **kwargs):
+            if obj_path == "kedro.extras.datasets.pandas.CSVDataSet":
+                raise AttributeError(pattern)
+            if obj_path == "kedro.extras.datasets.pandas.__all__":
+                return ["CSVDataSet"]
 
-        mocker.patch("kedro.io.core.load_obj", side_effect=import_error)
+        mocker.patch("kedro.io.core.load_obj", side_effect=dummy_load)
         with pytest.raises(DataSetError, match=pattern):
             DataCatalog.from_config(**sane_config)
 
@@ -504,7 +545,7 @@ class TestDataCatalogVersioned:
             **sane_config,
             load_versions={"boats": version},
             save_version=version,
-            journal=journal
+            journal=journal,
         )
 
         assert catalog._journal == journal

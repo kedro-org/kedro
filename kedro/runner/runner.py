@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -34,7 +34,7 @@ from abc import ABC, abstractmethod
 from concurrent.futures import ALL_COMPLETED, ThreadPoolExecutor, as_completed, wait
 from typing import Any, Dict, Iterable
 
-from kedro.hooks import get_hook_manager
+from kedro.framework.hooks import get_hook_manager
 from kedro.io import AbstractDataSet, DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
@@ -224,7 +224,18 @@ def _run_node_sequential(node: Node, catalog: DataCatalog, run_id: str = None) -
     hook_manager.hook.before_node_run(  # pylint: disable=no-member
         node=node, catalog=catalog, inputs=inputs, is_async=is_async, run_id=run_id
     )
-    outputs = node.run(inputs)
+    try:
+        outputs = node.run(inputs)
+    except Exception as error:
+        hook_manager.hook.on_node_error(  # pylint: disable=no-member
+            error=error,
+            node=node,
+            catalog=catalog,
+            inputs=inputs,
+            is_async=is_async,
+            run_id=run_id,
+        )
+        raise error
     hook_manager.hook.after_node_run(  # pylint: disable=no-member
         node=node,
         catalog=catalog,
@@ -251,7 +262,18 @@ def _run_node_async(node: Node, catalog: DataCatalog, run_id: str = None) -> Nod
         hook_manager.hook.before_node_run(  # pylint: disable=no-member
             node=node, catalog=catalog, inputs=inputs, is_async=is_async, run_id=run_id
         )
-        outputs = node.run(inputs)
+        try:
+            outputs = node.run(inputs)
+        except Exception as error:
+            hook_manager.hook.on_node_error(  # pylint: disable=no-member
+                error=error,
+                node=node,
+                catalog=catalog,
+                inputs=inputs,
+                is_async=is_async,
+                run_id=run_id,
+            )
+            raise error
         hook_manager.hook.after_node_run(  # pylint: disable=no-member
             node=node,
             catalog=catalog,

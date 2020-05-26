@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,18 +19,21 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This module provides context for Kedro project."""
+"""This file has been deprecated and will be deleted in 0.17.0.
+Please make any additional changes in `kedro.framework.context.context.py` instead.
+"""
 
 import abc
 import logging
 import logging.config
 import os
+import re
 import sys
 from copy import deepcopy
 from pathlib import Path, PureWindowsPath
@@ -42,10 +45,11 @@ import yaml
 
 from kedro import __version__
 from kedro.config import ConfigLoader, MissingConfigException
-from kedro.hooks import get_hook_manager
+from kedro.framework.hooks import get_hook_manager
 from kedro.io import DataCatalog
 from kedro.io.core import generate_timestamp
 from kedro.pipeline import Pipeline
+from kedro.pipeline.pipeline import _transcode_split
 from kedro.runner import AbstractRunner, SequentialRunner
 from kedro.utils import load_obj
 from kedro.versioning import Journal
@@ -154,6 +158,30 @@ def _expand_path(project_path: Path, conf_dictionary: Dict[str, Any]) -> Dict[st
     return conf_dictionary
 
 
+def _validate_layers_for_transcoding(catalog: DataCatalog) -> None:
+    """Check that transcoded names that correspond to
+    the same dataset also belong to the same layer.
+    """
+
+    def _find_conflicts():
+        base_names_to_layer = {}
+        for current_layer, dataset_names in catalog.layers.items():
+            for name in dataset_names:
+                base_name, _ = _transcode_split(name)
+                known_layer = base_names_to_layer.setdefault(base_name, current_layer)
+                if current_layer != known_layer:
+                    yield name
+                else:
+                    base_names_to_layer[base_name] = current_layer
+
+    conflicting_datasets = sorted(_find_conflicts())
+    if conflicting_datasets:
+        error_str = ", ".join(conflicting_datasets)
+        raise ValueError(
+            f"Transcoded datasets should have the same layer. Mismatch found for: {error_str}"
+        )
+
+
 class KedroContext(abc.ABC):
     """``KedroContext`` is the base class which holds the configuration and
     Kedro's main functionality. Project-specific context class should extend
@@ -245,6 +273,18 @@ class KedroContext(abc.ABC):
         )
 
     @property
+    def package_name(self) -> str:
+        """Property for Kedro project package name.
+
+        Returns:
+            Name of Kedro project package.
+
+        """
+        normalized_project_name = re.sub(r"[^A-Za-z0-9]+", "_", self.project_name)
+        normalized_project_name = normalized_project_name.strip("_").lower()
+        return normalized_project_name
+
+    @property
     def pipeline(self) -> Pipeline:
         """Read-only property for an instance of Pipeline.
 
@@ -271,8 +311,10 @@ class KedroContext(abc.ABC):
             # Sometimes users might create more than one context instance, in which case
             # hooks have already been registered, so we perform a simple check here
             # to avoid an error being raised and break user's workflow.
-            if not self._hook_manager.is_registered(hooks_collection):
-                self._hook_manager.register(hooks_collection)
+            if not self._hook_manager.is_registered(
+                hooks_collection
+            ):  # pragma: no cover
+                self._hook_manager.register(hooks_collection)  # pragma: no cover
 
     def _get_pipeline(self, name: str = None) -> Pipeline:
         name = name or "__default__"
@@ -328,7 +370,10 @@ class KedroContext(abc.ABC):
                 extra parameters passed at initialization.
         """
         try:
-            params = self.config_loader.get("parameters*", "parameters*/**")
+            # '**/parameters*' reads modular pipeline configs
+            params = self.config_loader.get(
+                "parameters*", "parameters*/**", "**/parameters*"
+            )
         except MissingConfigException as exc:
             warn(
                 "Parameters not found in your Kedro project config.\n{}".format(
@@ -351,8 +396,10 @@ class KedroContext(abc.ABC):
             DataCatalog defined in `catalog.yml`.
 
         """
-        conf_catalog = self.config_loader.get("catalog*", "catalog*/**")
-        # turn relative paths in conf_catalog into absolute paths before initializing the catalog
+        # '**/catalog*' reads modular pipeline configs
+        conf_catalog = self.config_loader.get("catalog*", "catalog*/**", "**/catalog*")
+        # turn relative paths in conf_catalog into absolute paths
+        # before initializing the catalog
         conf_catalog = _expand_path(
             project_path=self.project_path, conf_dictionary=conf_catalog
         )
@@ -362,6 +409,8 @@ class KedroContext(abc.ABC):
         )
         feed_dict = self._get_feed_dict()
         catalog.add_feed_dict(feed_dict)
+        if catalog.layers:
+            _validate_layers_for_transcoding(catalog)
         self._hook_manager.hook.after_catalog_created(  # pylint: disable=no-member
             catalog=catalog,
             conf_catalog=conf_catalog,
@@ -572,6 +621,8 @@ class KedroContext(abc.ABC):
         Raises:
             KedroContextError: If the resulting ``Pipeline`` is empty
                 or incorrect tags are provided.
+            Exception: Any uncaught exception will be re-raised
+                after being passed to``on_pipeline_error``.
         Returns:
             Any node outputs that cannot be processed by the ``DataCatalog``.
             These are returned in a dictionary, where the keys are defined
@@ -637,7 +688,18 @@ class KedroContext(abc.ABC):
         self._hook_manager.hook.before_pipeline_run(  # pylint: disable=no-member
             run_params=record_data, pipeline=filtered_pipeline, catalog=catalog
         )
-        run_result = runner.run(filtered_pipeline, catalog, run_id)
+
+        try:
+            run_result = runner.run(filtered_pipeline, catalog, run_id)
+        except Exception as error:
+            self._hook_manager.hook.on_pipeline_error(  # pylint: disable=no-member
+                error=error,
+                run_params=record_data,
+                pipeline=filtered_pipeline,
+                catalog=catalog,
+            )
+            raise error
+
         self._hook_manager.hook.after_pipeline_run(  # pylint: disable=no-member
             run_params=record_data,
             run_result=run_result,
@@ -665,10 +727,41 @@ class KedroContext(abc.ABC):
         return generate_timestamp()
 
 
+def validate_source_path(source_path: Path, project_path: Path):
+    """Validate the source path exists and is relative to the project path.
+
+    Args:
+        source_path: Absolute source path.
+        project_path: Path to the Kedro project.
+
+    Raises:
+        KedroContextError: Either source_path is not relative to project_path or
+            source_path does not exist.
+
+    """
+    try:
+        source_path.relative_to(project_path)
+    except ValueError:
+        raise KedroContextError(
+            f"Source path '{source_path}' has to be relative to "
+            f"your project root '{project_path}'."
+        )
+    if not source_path.exists():
+        raise KedroContextError(f"Source path '{source_path}' cannot be found.")
+
+
 def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
-    """Loads the KedroContext object of a Kedro Project based on the path specified
-    in `.kedro.yml`.
-    This function will change the current working directory to the project path.
+    """Loads the KedroContext object of a Kedro Project.
+    This is the default way to load the KedroContext object for normal workflows such as
+    CLI, Jupyter Notebook, Plugins, etc. It assumes the following project structure
+    under the given project_path::
+
+       <project_path>
+           |__ <src_dir>
+           |__ .kedro.yml
+           |__ kedro_cli.py
+
+    The name of the <scr_dir> is `src` by default and configurable in `.kedro.yml`.
 
     Args:
         project_path: Path to the Kedro project.
@@ -698,20 +791,11 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
     except Exception:
         raise KedroContextError("Failed to parse '.kedro.yml' file")
 
-    src_prefix = Path(kedro_yaml_content.get("source_dir", "src"))
-    if src_prefix.is_absolute() or ".." in str(src_prefix):
-        raise KedroContextError(
-            "'source_dir' in '.kedro.yml' has to be a relative path to your project root, "
-            "and cannot be an absolute path or contain '..'. "
-            "A path is considered absolute if it has both a root and (if the flavour allows) "
-            "a drive."
-        )
+    src_prefix = Path(kedro_yaml_content.get("source_dir", "src")).expanduser()
+    src_path = (project_path / src_prefix).resolve()
+    validate_source_path(src_path, project_path)
 
-    src_path = project_path / src_prefix
-    if not src_path.exists():
-        raise KedroContextError("Source path '{}' cannot be found.".format(src_path))
-
-    if src_path not in sys.path:
+    if str(src_path) not in sys.path:
         sys.path.insert(0, str(src_path))
 
     if "PYTHONPATH" not in os.environ:

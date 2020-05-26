@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -28,7 +28,6 @@
 
 import configparser
 import json
-import os
 import re
 from pathlib import Path, PureWindowsPath
 from typing import Any, Dict
@@ -38,10 +37,14 @@ import pytest
 import yaml
 from pandas.util.testing import assert_frame_equal
 
-from kedro import __version__
+from kedro import __version__ as kedro_version
 from kedro.config import MissingConfigException
-from kedro.context import KedroContext, KedroContextError
-from kedro.context.context import _expand_path, _is_relative_path
+from kedro.context import KedroContext, KedroContextError, validate_source_path
+from kedro.context.context import (
+    _expand_path,
+    _is_relative_path,
+    _validate_layers_for_transcoding,
+)
 from kedro.extras.datasets.pandas import CSVDataSet
 from kedro.io.core import Version, generate_timestamp
 from kedro.pipeline import Pipeline, node
@@ -128,6 +131,7 @@ def local_config(tmp_path):
             "type": "pandas.CSVDataSet",
             "filepath": boats_filepath,
             "versioned": True,
+            "layer": "raw",
         },
         "horses": {
             "type": "pandas.CSVDataSet",
@@ -210,7 +214,8 @@ expected_message_head = (
 
 class DummyContext(KedroContext):
     project_name = "bob"
-    project_version = __version__
+    project_version = kedro_version
+    package_name = "bob"
 
     def _get_pipelines(self) -> Dict[str, Pipeline]:
         pipeline = Pipeline(
@@ -233,7 +238,8 @@ class DummyContextWithPipelinePropertyOnly(KedroContext):
     # pylint: disable=abstract-method
 
     project_name = "bob_old"
-    project_version = __version__
+    project_version = kedro_version
+    package_name = "bob_old"
 
     @property
     def pipeline(self) -> Pipeline:
@@ -263,14 +269,11 @@ def dummy_context(tmp_path, mocker, env, extra_params):
 
 @pytest.mark.usefixtures("config_dir")
 class TestKedroContext:
-    def test_project_name(self, dummy_context):
+    def test_attributes(self, tmp_path, dummy_context):
         assert dummy_context.project_name == "bob"
-
-    def test_project_version(self, dummy_context):
-        assert dummy_context.project_version == __version__
-
-    def test_project_path(self, dummy_context, tmp_path):
-        assert str(dummy_context.project_path) == str(tmp_path.resolve())
+        assert dummy_context.project_version == kedro_version
+        assert isinstance(dummy_context.project_path, Path)
+        assert dummy_context.project_path == tmp_path.resolve()
 
     def test_get_catalog_always_using_absolute_path(self, dummy_context):
         conf_catalog = dummy_context.config_loader.get("catalog*")
@@ -285,7 +288,17 @@ class TestKedroContext:
         assert ds_path.is_absolute()
         assert str(ds_path) == str(dummy_context._project_path / "horses.csv")
 
+    def test_get_catalog_validates_layers(self, dummy_context, mocker):
+        mock_validate = mocker.patch(
+            "kedro.context.context._validate_layers_for_transcoding"
+        )
+
+        catalog = dummy_context._get_catalog()
+
+        mock_validate.assert_called_once_with(catalog)
+
     def test_catalog(self, dummy_context, dummy_dataframe):
+        assert dummy_context.catalog.layers == {"raw": {"boats"}}
         dummy_context.catalog.save("cars", dummy_dataframe)
         reloaded_df = dummy_context.catalog.load("cars")
         assert_frame_equal(reloaded_df, dummy_dataframe)
@@ -354,6 +367,7 @@ class TestKedroContext:
 
         class _DummyContext(KedroContext):
             project_name = "bob"
+            package_name = "bob"
             project_version = invalid_version
 
             def _get_pipelines(self) -> Dict[str, Pipeline]:
@@ -362,19 +376,19 @@ class TestKedroContext:
         pattern = (
             r"Your Kedro project version {} does not match "
             r"Kedro package version {} you are running. ".format(
-                invalid_version, __version__
+                invalid_version, kedro_version
             )
         )
         with pytest.raises(KedroContextError, match=pattern):
             _DummyContext(str(tmp_path))
 
     @pytest.mark.parametrize("env", ["custom_env"], indirect=True)
-    def test_custom_env(self, dummy_context):
-        assert dummy_context.env == "custom_env"
+    def test_custom_env(self, dummy_context, env):
+        assert dummy_context.env == env
 
     def test_missing_parameters(self, tmp_path, mocker):
         parameters = tmp_path / "conf" / "base" / "parameters.json"
-        os.remove(str(parameters))
+        parameters.unlink()
 
         # Disable logging.config.dictConfig in KedroContext._setup_logging as
         # it changes logging.config and affects other unit tests
@@ -388,7 +402,7 @@ class TestKedroContext:
 
     def test_missing_credentials(self, tmp_path, mocker):
         env_credentials = tmp_path / "conf" / "local" / "credentials.yml"
-        os.remove(str(env_credentials))
+        env_credentials.unlink()
 
         # Disable logging.config.dictConfig in KedroContext._setup_logging as
         # it changes logging.config and affects other unit tests
@@ -420,7 +434,7 @@ class TestKedroContext:
 
 
 @pytest.mark.usefixtures("config_dir")
-class TestKedroContextRun:  # pylint: disable=too-many-public-methods
+class TestKedroContextRun:
     def test_run_output(self, dummy_context, dummy_dataframe):
         dummy_context.catalog.save("cars", dummy_dataframe)
         outputs = dummy_context.run()
@@ -545,7 +559,8 @@ class TestKedroContextRun:  # pylint: disable=too-many-public-methods
     def test_run_load_versions(self, tmp_path, dummy_context, dummy_dataframe, mocker):
         class DummyContext(KedroContext):
             project_name = "bob"
-            project_version = __version__
+            package_name = "bob"
+            project_version = kedro_version
 
             def _get_pipelines(self) -> Dict[str, Pipeline]:
                 return {"__default__": Pipeline([node(identity, "cars", "boats")])}
@@ -579,7 +594,8 @@ class TestKedroContextRun:  # pylint: disable=too-many-public-methods
     def test_run_with_empty_pipeline(self, tmp_path, mocker):
         class DummyContext(KedroContext):
             project_name = "bob"
-            project_version = __version__
+            package_name = "bob"
+            project_version = kedro_version
 
             def _get_pipelines(self) -> Dict[str, Pipeline]:
                 return {"__default__": Pipeline([])}
@@ -587,7 +603,7 @@ class TestKedroContextRun:  # pylint: disable=too-many-public-methods
         mocker.patch("logging.config.dictConfig")
         dummy_context = DummyContext(str(tmp_path))
         assert dummy_context.project_name == "bob"
-        assert dummy_context.project_version == __version__
+        assert dummy_context.project_version == kedro_version
         pattern = "Pipeline contains no nodes"
         with pytest.raises(KedroContextError, match=pattern):
             dummy_context.run()
@@ -610,7 +626,8 @@ class TestKedroContextRun:  # pylint: disable=too-many-public-methods
     ):
         class BadContext(KedroContext):
             project_name = "fred"
-            project_version = __version__
+            package_name = "fred"
+            project_version = kedro_version
 
             def _get_pipelines(self) -> Dict[str, Pipeline]:
                 return {"__default__": context_pipeline}
@@ -729,6 +746,26 @@ class TestKedroContextRun:  # pylint: disable=too-many-public-methods
         )
         assert json.loads(log_msg)["run_id"] == run_id
 
+    @pytest.mark.parametrize(
+        "ctx_project_name",
+        ["project_name", "Project name ", "_Project--name-", "--Project-_\n ~-namE__"],
+    )
+    def test_default_package_name(self, tmp_path, mocker, ctx_project_name):
+        """Test default package name derived by ProjectContext"""
+        mocker.patch("logging.config.dictConfig")
+
+        expected_package_name = "project_name"
+
+        class DummyContextNoPkgName(KedroContext):
+            project_name = ctx_project_name
+            project_version = kedro_version
+
+            def _get_pipelines(self):  # pragma: no cover
+                return {"__default__": Pipeline([])}
+
+        dummy_context = DummyContextNoPkgName(tmp_path)
+        assert dummy_context.package_name == expected_package_name
+
 
 @pytest.mark.parametrize(
     "path_string,expected",
@@ -820,3 +857,74 @@ def test_expand_path_not_changing_non_relative_path(
     project_path: Path, input_conf: Dict[str, Any], expected: Dict[str, Any]
 ):
     assert _expand_path(project_path, input_conf) == expected
+
+
+@pytest.mark.parametrize(
+    "layers",
+    [
+        {"raw": {"A"}, "interm": {"B", "C"}},
+        {"raw": {"A"}, "interm": {"B@2", "B@1"}},
+        {"raw": {"C@1"}, "interm": {"A", "B@1", "B@2", "B@3"}},
+    ],
+)
+def test_validate_layers(layers, mocker):
+    mock_catalog = mocker.MagicMock()
+    mock_catalog.layers = layers
+
+    _validate_layers_for_transcoding(mock_catalog)  # it shouldn't raise any error
+
+
+@pytest.mark.parametrize(
+    "layers,conflicting_datasets",
+    [
+        ({"raw": {"A", "B@1"}, "interm": {"B@2"}}, ["B@2"]),
+        ({"raw": {"A"}, "interm": {"B@1", "B@2"}, "prm": {"B@3"}}, ["B@3"]),
+        (
+            {
+                "raw": {"A@1"},
+                "interm": {"B@1", "B@2"},
+                "prm": {"B@3", "B@4"},
+                "other": {"A@2"},
+            },
+            ["A@2", "B@3", "B@4"],
+        ),
+    ],
+)
+def test_validate_layers_error(layers, conflicting_datasets, mocker):
+    mock_catalog = mocker.MagicMock()
+    mock_catalog.layers = layers
+    error_str = ", ".join(conflicting_datasets)
+
+    pattern = f"Transcoded datasets should have the same layer. Mismatch found for: {error_str}"
+    with pytest.raises(ValueError, match=re.escape(pattern)):
+        _validate_layers_for_transcoding(mock_catalog)
+
+
+class TestValidateSourcePath:
+    @pytest.mark.parametrize(
+        "source_dir", [".", "src", "./src", "src/nested", "src/nested/nested"]
+    )
+    def test_valid_source_path(self, tmp_path, source_dir):
+        source_path = (tmp_path / source_dir).resolve()
+        source_path.mkdir(parents=True, exist_ok=True)
+        validate_source_path(source_path, tmp_path.resolve())
+
+    @pytest.mark.parametrize("source_dir", ["..", "src/../..", "~"])
+    def test_invalid_source_path(self, tmp_path, source_dir):
+        source_dir = Path(source_dir).expanduser()
+        source_path = (tmp_path / source_dir).resolve()
+        source_path.mkdir(parents=True, exist_ok=True)
+
+        pattern = (
+            f"Source path '{source_path}' has to be relative to your project root "
+            f"'{tmp_path.resolve()}'"
+        )
+        with pytest.raises(KedroContextError, match=pattern):
+            validate_source_path(source_path, tmp_path.resolve())
+
+    def test_non_existent_source_path(self, tmp_path):
+        source_path = (tmp_path / "non_existent").resolve()
+
+        pattern = f"Source path '{source_path}' cannot be found."
+        with pytest.raises(KedroContextError, match=pattern):
+            validate_source_path(source_path, tmp_path.resolve())

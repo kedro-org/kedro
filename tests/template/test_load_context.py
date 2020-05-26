@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,14 +19,19 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""This file has been deprecated and will be deleted in 0.17.0. Please add additional tests in
+`tests.template.test_load_context_framework.py` instead.
+"""
+
 import sys
+from pathlib import Path
 
 import pytest
 
@@ -107,7 +112,7 @@ class TestLoadContext:
         "source_dir", ["../", "../src/", "./src/../..", "/User/user/root_project"]
     )
     def test_kedro_yml_invalid_source_dir_pattern(self, fake_repo_path, source_dir):
-        """Test for invalid pattern for source_dir (either absolute or starts with '..').
+        """Test for invalid pattern for source_dir that is not relative to the project path.
         """
         kedro_yml_path = fake_repo_path / ".kedro.yml"
         kedro_yml_path.write_text(
@@ -115,8 +120,12 @@ class TestLoadContext:
                 source_dir
             )
         )
+        source_path = (fake_repo_path / Path(source_dir).expanduser()).resolve()
 
-        pattern = r"'source\_dir' in '\.kedro\.yml' has to be a relative path"
+        pattern = (
+            f"Source path '{source_path}' has to be relative to your project root "
+            f"'{fake_repo_path.resolve()}'"
+        )
         with pytest.raises(KedroContextError, match=pattern):
             load_context(str(fake_repo_path))
 

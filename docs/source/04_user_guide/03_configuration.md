@@ -1,6 +1,6 @@
 # Configuration
 
-> *Note:* This documentation is based on `Kedro 0.15.9`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 >
 > This section contains detailed information about configuration.
 
@@ -104,7 +104,7 @@ folders:
     raw: "01_raw"
     int: "02_intermediate"
     pri: "03_primary"
-    fea: "04_features"
+    fea: "04_feature"
 ```
 
 The contents of the dictionary resulting from `globals_pattern` get merged with the `globals_dict` dictionary. In case of conflicts, the keys from the `globals_dict` dictionary take precedence. The resulting global dictionary prepared by `TemplatedConfigLoader` will look like this:
@@ -122,7 +122,7 @@ The contents of the dictionary resulting from `globals_pattern` get merged with 
         "raw": "01_raw",
         "int": "02_intermediate",
         "pri": "03_primary",
-        "fea": "04_features",
+        "fea": "04_feature",
     },
 }
 ```
@@ -175,13 +175,13 @@ except MissingConfigException:
     parameters = {}
 ```
 
-> *Note:* `kedro.context.KedroContext` class uses the approach above to load project parameters.
+> *Note:* `kedro.framework.context.KedroContext` class uses the approach above to load project parameters.
 
 Parameters can then be used on their own or fed in as function inputs, as described in [this section](#using-parameters) below.
 
 ### Specifying parameters at runtime
 
-Kedro also allows you to specify runtime parameters for `kedro run` CLI command. To do that, you need to add the `--params` command line option and specify a comma-separated list of key-value pairs that will be added to [KedroContext](/kedro.context.KedroContext) parameters and made available to pipeline nodes. Each key-value pair is split on the first colon. Here is an example of triggering Kedro run with extra parameters specified:
+Kedro also allows you to specify runtime parameters for `kedro run` CLI command. To do that, you need to add the `--params` command line option and specify a comma-separated list of key-value pairs that will be added to [KedroContext](/kedro.framework.context.KedroContext) parameters and made available to pipeline nodes. Each key-value pair is split on the first colon. Here is an example of triggering Kedro run with extra parameters specified:
 
 ```bash
 kedro run --params param_key1:value1,param_key2:2.0  # this will add {"param_key1": "value1", "param_key2": 2} to parameters dictionary
@@ -302,7 +302,7 @@ except MissingConfigException:
     credentials = {}
 ```
 
-> *Note:* `kedro.context.KedroContext` class uses the approach above to load project credentials.
+> *Note:* `kedro.framework.context.KedroContext` class uses the approach above to load project credentials.
 
 Credentials configuration can then be used on its own or fed into the `DataCatalog` as described in [this section](./04_data_catalog.md#feeding-in-credentials).
 

@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -218,7 +218,7 @@ class TestSparkHiveDataSet:
     def test_upsert_config_err(self):
         # no pk provided should prompt config error
         with pytest.raises(
-            DataSetError, match="table_pk must be set to utilise upsert read mode"
+            DataSetError, match="`table_pk` must be set to utilise `upsert` read mode"
         ):
             SparkHiveDataSet(database="default_1", table="table_1", write_mode="upsert")
 
@@ -256,22 +256,25 @@ class TestSparkHiveDataSet:
         )
 
     def test_invalid_pk_provided(self):
+        dataset = SparkHiveDataSet(
+            database="default_1",
+            table="table_1",
+            write_mode="upsert",
+            table_pk=["column_doesnt_exist"],
+        )
         with pytest.raises(
             DataSetError,
-            match=r"columns \[column_doesnt_exist\] selected as PK not "
+            match=r"Columns \[column_doesnt_exist\] selected as primary key\(s\) not "
             r"found in table default_1\.table_1",
         ):
-            SparkHiveDataSet(
-                database="default_1",
-                table="table_1",
-                write_mode="upsert",
-                table_pk=["column_doesnt_exist"],
-            )
+            dataset.save(_generate_spark_df_one())
 
     def test_invalid_write_mode_provided(self):
-        with pytest.raises(
-            DataSetError, match="Invalid write_mode provided: not_a_write_mode"
-        ):
+        pattern = (
+            r"Invalid `write_mode` provided: not_a_write_mode\. "
+            r"`write_mode` must be one of: insert, upsert, overwrite"
+        )
+        with pytest.raises(DataSetError, match=pattern):
             SparkHiveDataSet(
                 database="default_1",
                 table="table_1",
@@ -291,7 +294,7 @@ class TestSparkHiveDataSet:
         )
         with pytest.raises(
             DataSetError,
-            match=r"dataset does not match hive table schema\.\n"
+            match=r"Dataset does not match hive table schema\.\n"
             r"Present on insert only: \[\('age', 'int'\)\]\n"
             r"Present on schema only: \[\('additional_column_on_hive', 'int'\)\]",
         ):
@@ -312,6 +315,6 @@ class TestSparkHiveDataSet:
         )
         with pytest.raises(
             DataSetError,
-            match="requested table not found: default_1.table_doesnt_exist",
+            match="Requested table not found: default_1.table_doesnt_exist",
         ):
             dataset.load()

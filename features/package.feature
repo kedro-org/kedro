@@ -37,7 +37,8 @@ Feature: Package target in new project
     When I execute the kedro command "package"
     Then I should get a successful exit code
     When I install the project's python package
-    And I execute the project
+    And I delete assets not needed for running installed packages
+    And I execute the installed project package
     Then I should get a successful exit code
 
   Scenario: Install package after running kedro build-reqs
@@ -47,5 +48,6 @@ Feature: Package target in new project
    When I execute the kedro command "package"
    Then I should get a successful exit code
    When I install the project's python package
-   And I execute the project
+   And I delete assets not needed for running installed packages
+   And I execute the installed project package
    Then I should get a successful exit code

@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,18 +19,21 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Utilities for use with click."""
+"""This file has been deprecated and will be deleted in 0.17.0.
+Please make any additional changes in `kedro.framework.cli.utils.py` instead.
+"""
 import difflib
 import json
 import re
 import shlex
+import shutil
 import subprocess
 import sys
 import textwrap
@@ -93,9 +96,7 @@ def export_nodes(filepath: Path, output_path: Path) -> None:
     try:
         content = json.loads(filepath.read_text())
     except json.JSONDecodeError:
-        raise KedroCliError(
-            "Provided filepath is not a Jupyter notebook: {}".format(filepath)
-        )
+        raise KedroCliError(f"Provided filepath is not a Jupyter notebook: {filepath}")
 
     cells = [
         cell
@@ -108,7 +109,7 @@ def export_nodes(filepath: Path, output_path: Path) -> None:
         for cell in cells:
             _append_source_code(cell, output_path)
     else:
-        warn("Skipping notebook '{}' - no nodes to export.".format(filepath))
+        warn(f"Skipping notebook '{filepath}' - no nodes to export.")
 
 
 def forward_command(group, name=None, forward_help=False):
@@ -128,12 +129,30 @@ def forward_command(group, name=None, forward_help=False):
     return wrapit
 
 
+def _suggest_cli_command(
+    original_command_name: str, existing_command_names: Iterable[str]
+) -> str:
+    matches = difflib.get_close_matches(
+        original_command_name, existing_command_names, MAX_SUGGESTIONS, CUTOFF
+    )
+
+    if not matches:
+        return ""
+
+    if len(matches) == 1:
+        suggestion = "\n\nDid you mean this?"
+    else:
+        suggestion = "\n\nDid you mean one of these?\n"
+    suggestion += textwrap.indent("\n".join(matches), " " * 4)  # type: ignore
+    return suggestion
+
+
 class CommandCollection(click.CommandCollection):
     """Modified from the Click one to still run the source groups function."""
 
     def __init__(self, *groups: Tuple[str, Sequence[click.core.MultiCommand]]):
         self.groups = groups
-        sources = list(chain.from_iterable(groups for title, groups in groups))
+        sources = list(chain.from_iterable(cli_groups for title, cli_groups in groups))
         help_strs = [source.help for source in sources if source.help]
         super().__init__(
             sources=sources,
@@ -147,33 +166,19 @@ class CommandCollection(click.CommandCollection):
         try:
             return super().resolve_command(ctx, args)
         except click.exceptions.UsageError as error:
-            error_msg = str(error)
             original_command_name = click.utils.make_str(args[0])
-            existing_commands = self.list_commands(ctx)
-
-            matches = difflib.get_close_matches(
-                original_command_name, existing_commands, MAX_SUGGESTIONS, CUTOFF
+            existing_command_names = self.list_commands(ctx)
+            error.message += _suggest_cli_command(
+                original_command_name, existing_command_names
             )
-
-            if matches:
-                if len(matches) == 1:
-                    error_msg += "\n\nDid you mean this?"
-                else:
-                    error_msg += "\n\nDid you mean one of these?\n"
-                error_msg += textwrap.indent(
-                    "\n".join(matches), " " * 4  # type: ignore
-                )
-
-            raise click.exceptions.UsageError(error_msg, error.ctx)
+            raise
 
     def format_commands(
         self, ctx: click.core.Context, formatter: click.formatting.HelpFormatter
     ):
         for title, groups in self.groups:
             for group in groups:
-                formatter.write(
-                    click.style("\n{} from {}".format(title, group.name), fg="green")
-                )
+                formatter.write(click.style(f"\n{title} from {group.name}", fg="green"))
                 group.format_commands(ctx, formatter)
 
 
@@ -191,22 +196,18 @@ def get_pkg_version(reqs_path: (Union[str, Path]), package_name: str) -> str:
         KedroCliError: If the file specified in ``reqs_path`` does not exist
             or ``package_name`` was not found in that file.
     """
-    if isinstance(reqs_path, str):
-        reqs_path = Path(reqs_path)
-    reqs_path = reqs_path.absolute()
+    reqs_path = Path(reqs_path).absolute()
     if not reqs_path.is_file():
-        raise KedroCliError(
-            "Given path `{0}` is not a regular file.".format(str(reqs_path))
-        )
+        raise KedroCliError(f"Given path `{reqs_path}` is not a regular file.")
 
     pattern = re.compile(package_name + r"([^\w]|$)")
-    with open(str(reqs_path), "r") as reqs_file:
+    with reqs_path.open("r") as reqs_file:
         for req_line in reqs_file:
             req_line = req_line.strip()
             if pattern.search(req_line):
                 return req_line
-    msg = "Cannot find `{0}` package in `{1}`.".format(package_name, str(reqs_path))
-    raise KedroCliError(msg)
+
+    raise KedroCliError(f"Cannot find `{package_name}` package in `{reqs_path}`.")
 
 
 class KedroCliError(ClickException):
@@ -217,3 +218,15 @@ class KedroCliError(ClickException):
 
     def format_message(self):
         return style(self.message, fg="red")  # pragma: no cover
+
+
+def _clean_pycache(path: Path):
+    """Recursively clean all __pycache__ folders from `path`.
+
+    Args:
+        path: Existing local directory to clean __pycache__ folders from.
+    """
+    to_delete = [each.resolve() for each in path.rglob("__pycache__")]
+
+    for each in to_delete:
+        shutil.rmtree(each, ignore_errors=True)

@@ -1,6 +1,6 @@
 # Developing Kedro plugins
 
-> *Note:* This documentation is based on `Kedro 0.15.9`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 The functionality of Kedro can be extended using its `plugin` framework, which is designed to reduce the complexity involved in creating new features for Kedro while allowing you to inject additional commands into the CLI. Plugins are developed as separate Python packages that exist outside of any Kedro project.
 
@@ -8,7 +8,7 @@ The functionality of Kedro can be extended using its `plugin` framework, which i
 
 Kedro uses various entry points in the [`pkg_resources` entry_point system](https://setuptools.readthedocs.io/en/latest/setuptools.html#dynamic-discovery-of-services-and-plugins) to provide plugin functionality.
 
-While running, plugins may request information about the current project by calling `kedro.cli.get_project_context()`.
+While running, plugins may request information about the current project by calling `kedro.framework.cli.get_project_context()`.
 
 This function provides access to the verbose flag via the key `verbose` and to anything returned by the project's `KedroContext`. The returned instance of `ProjectContext(KedroContext)` class must contain at least the following properties and methods:
 * `project_version`: the version of Kedro the project was created with, or `None` if the project was not created with `kedro new`.
@@ -20,7 +20,7 @@ This function provides access to the verbose flag via the key `verbose` and to a
 >*Note*: Plugins may require additional keys to be added to `ProjectContext` in `run.py`.
 
 
->*Note*: `kedro.cli.get_project_context(key)`, where `key` is `get_config`, `create_catalog`, `create_pipeline`, `template_version`, `project_name` and `project_path`, is deprecated as of `Kedro 0.15.0`, and will be removed for future versions.
+>*Note*: `kedro.framework.cli.get_project_context(key)`, where `key` is `get_config`, `create_catalog`, `create_pipeline`, `template_version`, `project_name` and `project_path`, is deprecated as of `Kedro 0.15.0`, and will be removed for future versions.
 ## Initialisation
 
 If the plugin needs to do initialisation prior to Kedro starting, it can declare the `entry_point` key `kedro.init`. This entry point must refer to a function that currently has no arguments, but for future proofing you should declare it with `**kwargs`.
@@ -65,7 +65,7 @@ A simple plugin that prints the pipeline as JSON might look like:
 
 ```python
 import click
-from kedro.cli import get_project_context
+from kedro.framework.cli import get_project_context
 
 
 @click.group(name="JSON")

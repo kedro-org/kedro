@@ -102,7 +102,7 @@
 * Layers are no longer part of the dataset object, as they've moved to the `DataCatalog`.
 * Python 3.5 is no longer supported by the current and all future versions of Kedro.
 
-### Migration guide from Kedro 0.15.* to Upcoming Release
+### Migration guide from Kedro 0.15.* to 0.16.*
 
 #### General Migration
 

@@ -105,7 +105,12 @@
 * Layers are no longer part of the dataset object, as they've moved to the `DataCatalog`.
 * Python 3.5 is no longer supported by the current and all future versions of Kedro.
 
-### Migration guide from Kedro 0.15.* to Upcoming Release
+### Migration guide from Kedro 0.15.* to 0.16.*
+
+#### General Migration
+
+**reminder** [How do I upgrade Kedro](https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#how-do-i-upgrade-kedro) covers a few key things to remember when updating any kedro version.
+
 #### Migration for datasets
 
 Since all the datasets (from `kedro.io` and `kedro.contrib.io`) were moved to `kedro/extras/datasets` you must update the type of all datasets in `<project>/conf/base/catalog.yml` file.
@@ -150,7 +155,7 @@ result = pipeline(
 Since some modules were moved to other locations you need to update import paths appropriately.
 You can find the list of moved files in the [`0.15.6` release notes](https://github.com/quantumblacklabs/kedro/releases/tag/0.15.6) under the section titled `Files with a new location`.
 
-#### Migration for kedro env environment variable
+#### Migration for CLI and KEDRO_ENV environment variable
 > Note: If you haven't made significant changes to your `kedro_cli.py`, it may be easier to simply copy the updated `kedro_cli.py` `.ipython/profile_default/startup/00-kedro-init.py` and from GitHub or a newly generated project into your old project.
 
 * We've removed `KEDRO_ENV_VAR` from `kedro.context`. To get your existing project template working, you'll need to remove all instances of `KEDRO_ENV_VAR` from your project template:

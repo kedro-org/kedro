@@ -114,6 +114,12 @@ class _FrozenDatasets:
     """Helper class to access underlying loaded datasets"""
 
     def __init__(self, datasets):
+        # Non-alphanumeric characters (except underscore) in dataset name
+        # are replaced with `__`, for easy access to transcoded/prefixed datasets.
+        datasets = {
+            re.sub("[^0-9a-zA-Z_]+", "__", key): value
+            for key, value in datasets.items()
+        }
         self.__dict__.update(**datasets)
 
     # Don't allow users to add/change attributes on the fly

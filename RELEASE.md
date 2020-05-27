@@ -104,21 +104,9 @@
 
 ### Migration guide from Kedro 0.15.* to Upcoming Release
 
-#### project_version
+#### General Migration
 
-When migrating from any kedro version is it important to update the `project_version` attribute of your `ProjectContext`, typically found in `src/<project_name>/run.py`.
-
-``` diff
-# src/<project_name>/run.py
-class ProjectContext(KedroContext):
-    """Users can override the remaining methods from the parent class here,
-    or create new ones (e.g. as required by plugins)
-    """
-
-    project_name = "<project_name>"
--   project_version = "0.15.9"
-+   project_version = "0.16.1"
-```
+**reminder** [How do I upgrade Kedro](https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#how-do-i-upgrade-kedro) covers a few key things to remember when updating any kedro version.
 
 #### Migration for datasets
 

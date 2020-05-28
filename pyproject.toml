@@ -10,6 +10,9 @@ line_length = 88
 known_first_party = ["features", "kedro", "tests"]
 default_section = "THIRDPARTY"
 
+[tool.coverage.run]
+branch = true
+
 [tool.coverage.report]
 fail_under = 100
 show_missing = true

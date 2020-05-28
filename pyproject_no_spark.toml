@@ -1,3 +1,6 @@
+[tool.coverage.run]
+branch = true
+
 [tool.coverage.report]
 fail_under = 100
 show_missing = true

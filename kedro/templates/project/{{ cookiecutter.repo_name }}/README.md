@@ -13,7 +13,8 @@ Take a look at the [documentation](https://kedro.readthedocs.io) to get started.
 ## Rules and guidelines
 
 In order to get the best out of the template:
- * Please don't remove any lines from the `.gitignore` file provided
+
+ * Please don't remove any lines from the `.gitignore` file we provide
  * Make sure your results can be reproduced by following a data engineering convention, e.g. the one we suggest [here](https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention)
  * Don't commit any data to your repository
  * Don't commit any credentials or local configuration to your repository
@@ -21,7 +22,7 @@ In order to get the best out of the template:
 
 ## Installing dependencies
 
-Dependencies should be declared in `src/requirements.txt` for pip installation and `src/environment.yml` for conda installation.
+Declare any dependencies in `src/requirements.txt` for `pip` installation and `src/environment.yml` for `conda` installation.
 
 To install them, run:
 
@@ -48,7 +49,7 @@ kedro test
 To configure the coverage threshold, please have a look at the file `.coveragerc`.
 
 
-### Working with Kedro from notebooks
+## Working with Kedro from notebooks
 
 In order to use notebooks in your Kedro project, you need to install Jupyter:
 
@@ -83,7 +84,7 @@ kedro ipython
 Running Jupyter or IPython this way provides the following variables in
 scope: `proj_dir`, `proj_name`, `conf`, `io`, `parameters` and `startup_error`.
 
-#### Converting notebook cells to nodes in a Kedro project
+### Converting notebook cells to nodes in a Kedro project
 
 Once you are happy with a notebook, you may want to move your code over into the Kedro project structure for the next stage in your development. This is done through a mixture of [cell tagging](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) and Kedro CLI commands.
 
@@ -98,7 +99,7 @@ Alternatively, you may want to transform all your notebooks in one go. To this e
 kedro jupyter convert --all
 ```
 
-#### Ignoring notebook output cells in `git`
+### Ignoring notebook output cells in `git`
 
 In order to automatically strip out all output cell contents before committing to `git`, you can run `kedro activate-nbstripout`. This will add a hook in `.git/config` which will run `nbstripout` before anything is committed to `git`.
 

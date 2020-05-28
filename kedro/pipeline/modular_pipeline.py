@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -96,14 +96,13 @@ def _validate_datasets_exist(
         )
 
 
-# pylint: disable=too-many-locals
 def pipeline(
     pipe: Pipeline,
     *,
     inputs: Dict[str, str] = None,
     outputs: Dict[str, str] = None,
     parameters: Dict[str, str] = None,
-    namespace: str = None
+    namespace: str = None,
 ) -> Pipeline:
     """Create a copy of the pipeline and its nodes,
     with some dataset names and node names modified.
@@ -186,10 +185,16 @@ def pipeline(
         )
 
     def _copy_node(node: Node) -> Node:
+        new_namespace = node.namespace
+        if namespace:
+            new_namespace = (
+                f"{namespace}.{node.namespace}" if node.namespace else namespace
+            )
+
         return node._copy(
             inputs=_process_dataset_names(node._inputs),
             outputs=_process_dataset_names(node._outputs),
-            name=_prefix(node._name) if node._name else None,
+            namespace=new_namespace,
         )
 
     new_nodes = [_copy_node(n) for n in pipe.nodes]

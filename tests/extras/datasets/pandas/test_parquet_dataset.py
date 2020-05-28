@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -29,6 +29,7 @@
 from pathlib import PurePosixPath
 
 import pandas as pd
+import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
 from fsspec.implementations.http import HTTPFileSystem
@@ -116,6 +117,7 @@ class TestParquetDataSet:
         """Test overriding the default save arguments."""
         for key, value in save_args.items():
             assert parquet_data_set._save_args[key] == value
+        assert parquet_data_set._from_pandas_args == {}
 
     @pytest.mark.parametrize(
         "fs_args",
@@ -214,6 +216,26 @@ class TestParquetDataSet:
         data_set.load()
         fs_mock.isdir.assert_called_once()
         fs_mock.open.assert_called_once()
+
+    # pylint: disable=unused-argument
+    @pytest.mark.parametrize(
+        "save_args", [{"from_pandas": {"preserve_index": False}}], indirect=True
+    )
+    def test_from_pandas_args(
+        self, parquet_data_set, dummy_dataframe, save_args, mocker
+    ):
+        from_pandas_mock = mocker.patch(
+            "kedro.extras.datasets.pandas.parquet_dataset.pa", wraps=pa
+        )
+        from_pandas_args = {"preserve_index": False}
+
+        parquet_data_set.save(dummy_dataframe)
+
+        assert parquet_data_set._save_args == {}
+        assert parquet_data_set._from_pandas_args == from_pandas_args
+        from_pandas_mock.Table.from_pandas.assert_called_once_with(
+            dummy_dataframe, **from_pandas_args
+        )
 
 
 class TestParquetDataSetVersioned:

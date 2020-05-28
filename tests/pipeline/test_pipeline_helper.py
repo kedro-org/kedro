@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -236,15 +236,20 @@ class TestPipelineHelper:
         assert resulting_pipeline.nodes[0].tags == {"tag1"}
         assert len(resulting_pipeline.nodes[0]._decorators) == 1
 
-    def test_default_node_name_is_untouched(self):
-        """
-        Check that we don't loose any valuable properties on node cloning.
-        Default node name should not get prefixed.
-        """
+    def test_default_node_name_is_namespaced(self):
+        """Check that auto-generated node names are also namespaced"""
         raw_pipeline = Pipeline([node(identity, "A", "B")])
-        resulting_pipeline = pipeline(raw_pipeline, namespace="PREFIX")
+        first_layer_nested_pipe = pipeline(raw_pipeline, namespace="PREFIX")
+        resulting_node = first_layer_nested_pipe.nodes[0]
 
-        assert not resulting_pipeline.nodes[0].name.startswith("PREFIX.")
+        assert resulting_node.name.startswith("PREFIX.")
+        assert resulting_node.namespace == "PREFIX"
+
+        second_layer_nested_pipe = pipeline(first_layer_nested_pipe, namespace="PRE")
+        resulting_node = second_layer_nested_pipe.nodes[0]
+
+        assert resulting_node.name.startswith("PRE.")
+        assert resulting_node.namespace == "PRE.PREFIX"
 
     def test_expose_intermediate_output(self):
         """Check that we don't namespace an intermediary dataset, anywhere it

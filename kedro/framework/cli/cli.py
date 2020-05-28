@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -49,7 +49,12 @@ import yaml
 
 import kedro.config.default_logger  # noqa
 from kedro import __version__ as version
-from kedro.framework.cli.utils import CommandCollection, KedroCliError, _clean_pycache
+from kedro.framework.cli.utils import (
+    CommandCollection,
+    KedroCliError,
+    _clean_pycache,
+    _filter_deprecation_warnings,
+)
 from kedro.framework.context import load_context
 
 KEDRO_PATH = Path(kedro.__file__).parent
@@ -189,8 +194,9 @@ def _create_project(config_path: str, verbose: bool):
             should contain the project_name, output_dir and repo_name.
         verbose: Extensive debug terminal logs.
     """
-    # pylint: disable=import-outside-toplevel
-    from cookiecutter.main import cookiecutter  # for performance reasons
+    with _filter_deprecation_warnings():
+        # pylint: disable=import-outside-toplevel
+        from cookiecutter.main import cookiecutter  # for performance reasons
 
     try:
         if config_path:

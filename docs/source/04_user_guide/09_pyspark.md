@@ -1,6 +1,6 @@
 # Working with PySpark
 
-> *Note:* This documentation is based on `Kedro 0.15.9`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 In this tutorial we explain how to work with `PySpark` in a Kedro pipeline.
 
@@ -54,7 +54,7 @@ class ProjectContext(KedroContext):
         _spark_session.sparkContext.setLogLevel("WARN")
 
     project_name = "kedro"
-    project_version = "0.15.9"
+    project_version = "0.16.1"
 
 
 # ...
@@ -149,3 +149,19 @@ class ProjectContext(KedroContext):
         return Pipeline([node(my_node, "weather", None)])
 # ...
 ```
+
+## Tips for maximising concurrency using `ThreadRunner`
+
+Under the hood, every Kedro node that performs a Spark action (e.g. `save`, `collect`) is submitted to the Spark cluster as a Spark job through the same `SparkSession` instance. These jobs may be running concurrently if they were submitted by different threads. In order to do that, you will need to run your Kedro pipeline with the [ThreadRunner](/kedro.runner.ThreadRunner):
+
+```bash
+kedro run --runner=ThreadRunner
+```
+
+To further increase the concurrency level, if you are using Spark >= 0.8, you can also give each node a roughly equal share of the Spark cluster by turning on fair sharing and therefore giving them a roughly equal chance of being executed concurrently. By default, they are executed in a FIFO manner, which means if a job takes up too much resources, it could hold up the execution of other jobs. In order to turn on fair sharing, put the following in your `conf/base/spark.yml` file, which was created in the [Initialising a `SparkSession`](#initialising-a-sparksession) section:
+
+```yaml
+spark.scheduler.mode: FAIR
+```
+
+For more information, please visit Spark documentation on [jobs scheduling within an application](https://spark.apache.org/docs/latest/job-scheduling.html#scheduling-within-an-application).

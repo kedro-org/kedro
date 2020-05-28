@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -28,26 +28,27 @@
 
 """Utilities for use with click."""
 import difflib
-import json
 import re
 import shlex
 import shutil
 import subprocess
 import sys
 import textwrap
+import warnings
+from contextlib import contextmanager
 from itertools import chain
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Sequence, Tuple, Union
-from warnings import warn
+from typing import Iterable, List, Sequence, Tuple, Union
 
 import click
+import yaml
 from click import ClickException, style
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 MAX_SUGGESTIONS = 3
 CUTOFF = 0.5
 
-NODE_TAG = "node"
+ENV_HELP = "Kedro configuration environment name. Defaults to `local`."
 
 
 def call(cmd: List[str], **kwargs):  # pragma: no cover
@@ -72,42 +73,6 @@ def find_stylesheets() -> Iterable[str]:  # pragma: no cover
         str(css_path / "qb1-sphinx-rtd.css"),
         str(css_path / "theme-overrides.css"),
     )
-
-
-def _append_source_code(cell: Dict[str, Any], path: Path) -> None:
-    source_code = "".join(cell["source"]).strip() + "\n"
-    with path.open(mode="a") as file_:
-        file_.write(source_code)
-
-
-def export_nodes(filepath: Path, output_path: Path) -> None:
-    """Copy code from Jupyter cells into nodes in src/<package_name>/nodes/,
-    under filename with same name as notebook.
-
-    Args:
-        filepath: Path to Jupyter notebook file
-        output_path: Path where notebook cells' source code will be exported
-    Raises:
-        KedroCliError: When provided a filepath that cannot be read as a
-            Jupyer notebook and loaded into json format.
-    """
-    try:
-        content = json.loads(filepath.read_text())
-    except json.JSONDecodeError:
-        raise KedroCliError(f"Provided filepath is not a Jupyter notebook: {filepath}")
-
-    cells = [
-        cell
-        for cell in content["cells"]
-        if cell["cell_type"] == "code" and NODE_TAG in cell["metadata"].get("tags", {})
-    ]
-
-    if cells:
-        output_path.write_text("")
-        for cell in cells:
-            _append_source_code(cell, output_path)
-    else:
-        warn(f"Skipping notebook '{filepath}' - no nodes to export.")
 
 
 def forward_command(group, name=None, forward_help=False):
@@ -228,3 +193,58 @@ def _clean_pycache(path: Path):
 
     for each in to_delete:
         shutil.rmtree(each, ignore_errors=True)
+
+
+def split_string(ctx, param, value):  # pylint: disable=unused-argument
+    """Split string by comma."""
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
+def env_option(func_=None, **kwargs):
+    """Add `--env` CLI option to a function."""
+    default_args = dict(type=str, default=None, help=ENV_HELP)
+    kwargs = {**default_args, **kwargs}
+    opt = click.option("--env", "-e", **kwargs)
+    return opt(func_) if func_ else opt
+
+
+def ipython_message(all_kernels=True):
+    """Show a message saying how we have configured the IPython env."""
+    ipy_vars = ["startup_error", "context"]
+    click.secho("-" * 79, fg="cyan")
+    click.secho("Starting a Kedro session with the following variables in scope")
+    click.secho(", ".join(ipy_vars), fg="green")
+    line_magic = style("%reload_kedro", fg="green")
+    click.secho(f"Use the line magic {line_magic} to refresh them")
+    click.secho("or to see the error message if they are undefined")
+
+    if not all_kernels:
+        click.secho("The choice of kernels is limited to the default one.", fg="yellow")
+        click.secho("(restart with --all-kernels to get access to others)", fg="yellow")
+
+    click.secho("-" * 79, fg="cyan")
+
+
+@contextmanager
+def _filter_deprecation_warnings():
+    """Temporarily suppress all DeprecationWarnings."""
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=DeprecationWarning)
+        yield
+
+
+def get_source_dir(project_path: Path) -> Path:
+    """Returns project source path.
+
+    Args:
+        project_path: The path to the project root.
+
+    Returns:
+        The absolute path to the project source directory.
+    """
+    with (project_path / ".kedro.yml").open("r") as kedro_yml:
+        kedro_yaml = yaml.safe_load(kedro_yml)
+
+    source_dir = Path(kedro_yaml.get("source_dir", "src")).expanduser()
+    source_path = (project_path / source_dir).resolve()
+    return source_path

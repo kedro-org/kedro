@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -30,11 +30,9 @@
 from pathlib import Path
 from typing import Dict
 
-from kedro.context import KedroContext, load_context
-from kedro.pipeline import Pipeline
-
 from {{ cookiecutter.python_package }}.pipeline import create_pipelines
-
+from kedro.framework.context import KedroContext, load_package_context
+from kedro.pipeline import Pipeline
 
 class ProjectContext(KedroContext):
     """Users can override the remaining methods from the parent class here,
@@ -51,13 +49,14 @@ class ProjectContext(KedroContext):
 
 
 def run_package():
-    # entry point for running pip-install projects
-    # using `<project_package>` command
-    project_context = load_context(Path.cwd())
+    # Entry point for running a Kedro project packaged with `kedro package`
+    # using `python -m <project_package>.run` command.
+    project_context = load_package_context(
+        project_path=Path.cwd(),
+        package_name=Path(__file__).resolve().parent.name
+    )
     project_context.run()
 
 
 if __name__ == "__main__":
-    # entry point for running pip-installed projects
-    # using `python -m <project_package>.run` command
     run_package()

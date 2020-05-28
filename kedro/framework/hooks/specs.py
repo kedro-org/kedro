@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -126,6 +126,32 @@ class NodeSpecs:
         """
         pass
 
+    @hook_spec
+    def on_node_error(
+        self,
+        error: Exception,
+        node: Node,
+        catalog: DataCatalog,
+        inputs: Dict[str, Any],
+        is_async: bool,
+        run_id: str,
+    ):
+        """Hook to be invoked if a node run throws an uncaught error.
+        The signature of this error hook should match the signature of ``before_node_run``
+        along with the error that was raised.
+
+        Args:
+            error: The uncaught exception thrown during the node run.
+            node: The ``Node`` to run.
+            catalog: A ``DataCatalog`` containing the node's inputs and outputs.
+            inputs: The dictionary of inputs dataset.
+                The keys are dataset names and the values are the actual loaded input data,
+                not the dataset instance.
+            is_async: Whether the node was run in ``async`` mode.
+            run_id: The id of the run.
+        """
+        pass
+
 
 class PipelineSpecs:
     """Namespace that defines all specifications for a pipeline's lifecycle hooks."""
@@ -137,7 +163,7 @@ class PipelineSpecs:
         """Hook to be invoked before a pipeline runs.
 
         Args:
-            run_params: The params needed for the given run.
+            run_params: The params used to run the pipeline.
                 Should be identical to the data logged by Journal with the following schema::
 
                    {
@@ -167,7 +193,7 @@ class PipelineSpecs:
         """Hook to be invoked after a pipeline runs.
 
         Args:
-            run_params: The params needed for the given run.
+            run_params: The params used to run the pipeline.
                 Should be identical to the data logged by Journal with the following schema::
 
                    {
@@ -186,6 +212,42 @@ class PipelineSpecs:
                    }
 
             pipeline: The ``Pipeline`` that was run.
+            catalog: The ``DataCatalog`` used during the run.
+        """
+        pass
+
+    @hook_spec
+    def on_pipeline_error(
+        self,
+        error: Exception,
+        run_params: Dict[str, Any],
+        pipeline: Pipeline,
+        catalog: DataCatalog,
+    ):
+        """Hook to be invoked if a pipeline run throws an uncaught Exception.
+        The signature of this error hook should match the signature of ``before_pipeline_run``
+        along with the error that was raised.
+
+        Args:
+            error: The uncaught exception thrown during the pipeline run.
+            run_params: The params used to run the pipeline.
+                Should be identical to the data logged by Journal with the following schema::
+
+                   {
+                     "run_id": str
+                     "project_path": str,
+                     "env": str,
+                     "kedro_version": str,
+                     "tags": Optional[List[str]],
+                     "from_nodes": Optional[List[str]],
+                     "to_nodes": Optional[List[str]],
+                     "node_names": Optional[List[str]],
+                     "from_inputs": Optional[List[str]],
+                     "load_versions": Optional[List[str]],
+                     "pipeline_name": str,
+                     "extra_params": Optional[Dict[str, Any]]
+                   }
+            pipeline: The ``Pipeline`` that will was run.
             catalog: The ``DataCatalog`` used during the run.
         """
         pass

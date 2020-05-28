@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,7 +19,7 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
@@ -37,11 +37,14 @@ import yaml
 from click import secho
 
 import kedro
-from kedro.cli.cli import _assert_pkg_name_ok, _handle_exception
-from kedro.cli.utils import KedroCliError, _clean_pycache
-from kedro.context import KedroContext, load_context
-
-ENV_HELP = "Kedro configuration environment name. Defaults to `local`."
+from kedro.framework.cli.cli import _assert_pkg_name_ok, _handle_exception
+from kedro.framework.cli.utils import (
+    KedroCliError,
+    _clean_pycache,
+    _filter_deprecation_warnings,
+    env_option,
+)
+from kedro.framework.context import KedroContext, load_context
 
 
 @click.group()
@@ -49,102 +52,84 @@ def pipeline():
     """Commands for working with pipelines."""
 
 
-def _check_pipeline_names(ctx, param, value):  # pylint: disable=unused-argument
-    if not value:
-        secho("No pipeline names provided, exiting.", fg="yellow")
-        ctx.exit(0)
-    for each in value:
-        _assert_pkg_name_ok(each)
+def _check_pipeline_name(ctx, param, value):  # pylint: disable=unused-argument
+    _assert_pkg_name_ok(value)
     return value
 
 
 @pipeline.command("create")
-@click.argument("names", nargs=-1, callback=_check_pipeline_names)
+@click.argument("name", nargs=1, callback=_check_pipeline_name)
 @click.option(
     "--skip-config",
     is_flag=True,
     help="Skip creation of config files for the new pipeline(s).",
 )
-@click.option(
-    "--env",
-    "-e",
-    type=str,
-    default=None,
-    help="Environment to create pipeline configuration in. Defaults to `base`.",
-)
-def create_pipeline(names, skip_config, env):
-    """Create new modular pipeline(s) by providing the new pipeline names
-    as space separated arguments."""
+@env_option(help="Environment to create pipeline configuration in. Defaults to `base`.")
+def create_pipeline(name, skip_config, env):
+    """Create a new modular pipeline by providing the new pipeline name as an argument."""
     try:
         context = load_context(Path.cwd(), env=env)
-    except Exception:  # pylint: disable=broad-except
+    except Exception as err:  # pylint: disable=broad-except
         _handle_exception(
             f"Unable to load Kedro context with environment `{env}`. "
-            f"Make sure it exists in the project configuration."
+            f"Make sure it exists in the project configuration.\nError: {err}"
         )
 
     package_dir = _get_project_package_dir(context)
     output_dir = package_dir / "pipelines"
 
-    for pipe_name in names:
-        result_path = _create_pipeline(pipe_name, context.project_version, output_dir)
-        _copy_pipeline_tests(pipe_name, result_path, package_dir)
-        _copy_pipeline_configs(pipe_name, result_path, context, skip_config, env=env)
-        secho()
+    result_path = _create_pipeline(name, context.project_version, output_dir)
+    _copy_pipeline_tests(name, result_path, package_dir)
+    _copy_pipeline_configs(name, result_path, context, skip_config, env=env)
+    secho(f"\nPipeline `{name}` was successfully created.\n", fg="green")
 
     secho(
-        f"To be able to run new pipelines, you will need to add them "
+        f"To be able to run the pipeline `{name}`, you will need to add it "
         f"to `create_pipelines()` in `{package_dir / 'pipeline.py'}`.",
         fg="yellow",
     )
 
 
 @pipeline.command("list")
-@click.option("--env", "-e", type=str, default=None, multiple=False, help=ENV_HELP)
-@click.option(
-    "--simple",
-    is_flag=True,
-    multiple=False,
-    help="Show list of all pipelines in the project.",
-)
-@click.argument("names", nargs=-1)
-def list_pipelines_and_nodes(names, simple, env):
-    """Show detailed information about project pipeline(s) by providing
-    the pipeline names as space separated arguments."""
+@env_option
+def list_pipelines(env):
+    """List all pipelines defined in your pipeline.py file."""
     context = load_context(Path.cwd(), env=env)
     project_pipelines = context.pipelines
-    if simple:
-        secho(yaml.dump(sorted(project_pipelines)))
-        return
+    secho(yaml.dump(sorted(project_pipelines)))
 
-    names = sorted(set(names) or project_pipelines.keys())
+
+@pipeline.command("describe")
+@env_option
+@click.argument("name", nargs=1)
+def describe_pipeline(name, env):
+    """Describe a pipeline by providing the pipeline name as an argument."""
+    context = load_context(Path.cwd(), env=env)
+    pipeline_obj = context.pipelines.get(name)
+    if not pipeline_obj:
+        existing_pipelines = ", ".join(sorted(context.pipelines.keys()))
+        raise KedroCliError(
+            f"`{name}` pipeline not found. Existing pipelines: [{existing_pipelines}]"
+        )
 
     result = {}
-    for pipe_name in names:
-        pipe_obj = project_pipelines.get(pipe_name)
-        if not pipe_obj:
-            existing_pipelines = ", ".join(sorted(project_pipelines))
-            raise KedroCliError(
-                f"{pipe_name} pipeline not found. "
-                f"Existing pipelines: {existing_pipelines}"
-            )
-
-        result[pipe_name] = [
-            f"{node.short_name} ({node._func_name})"  # pylint: disable=protected-access
-            for node in pipe_obj.nodes
-        ]
+    result["Nodes"] = [
+        f"{node.short_name} ({node._func_name})"  # pylint: disable=protected-access
+        for node in pipeline_obj.nodes
+    ]
 
     secho(yaml.dump(result))
 
 
 def _create_pipeline(name: str, kedro_version: str, output_dir: Path) -> Path:
-    # pylint: disable=import-outside-toplevel
-    from cookiecutter.main import cookiecutter
+    with _filter_deprecation_warnings():
+        # pylint: disable=import-outside-toplevel
+        from cookiecutter.main import cookiecutter
 
     template_path = Path(kedro.__file__).parent / "templates" / "pipeline"
     cookie_context = {"pipeline_name": name, "kedro_version": kedro_version}
 
-    secho(f"Creating a pipeline `{name}`: ", nl=False)
+    secho(f"Creating the pipeline `{name}`: ", nl=False)
 
     try:
         result_path = cookiecutter(
@@ -212,7 +197,7 @@ def _sync_dirs(source: Path, target: Path, prefix: str = ""):
             _sync_dirs(source_path, target_path, prefix=double_prefix)
 
 
-def _get_project_package_dir(context: KedroContext):
+def _get_project_package_dir(context: KedroContext) -> Path:
     # import the module of the current Kedro project
     project_package = import_module(context.package_name)
     # locate the directory of the project Python package
@@ -230,7 +215,7 @@ def _copy_pipeline_tests(pipeline_name: str, result_path: Path, package_dir: Pat
 
 
 def _copy_pipeline_configs(
-    pipeline_name: str,
+    pipe_name: str,
     result_path: Path,
     context: KedroContext,
     skip_config: bool,
@@ -241,7 +226,7 @@ def _copy_pipeline_configs(
     try:
         if not skip_config:
             config_target = (
-                context.project_path / context.CONF_ROOT / env / pipeline_name
+                context.project_path / context.CONF_ROOT / env / "pipelines" / pipe_name
             )
             _sync_dirs(config_source, config_target)
     finally:

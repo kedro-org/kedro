@@ -12,6 +12,7 @@ Data Sets
     :toctree:
     :template: autosummary/class.rst
 
+    kedro.extras.datasets.api.APIDataSet
     kedro.extras.datasets.biosequence.BioSequenceDataSet
     kedro.extras.datasets.dask.ParquetDataSet
     kedro.extras.datasets.geopandas.GeoJSONDataSet
@@ -27,9 +28,9 @@ Data Sets
     kedro.extras.datasets.pandas.SQLQueryDataSet
     kedro.extras.datasets.pandas.SQLTableDataSet
     kedro.extras.datasets.pickle.PickleDataSet
+    kedro.extras.datasets.pillow.ImageDataSet
     kedro.extras.datasets.spark.SparkDataSet
     kedro.extras.datasets.spark.SparkHiveDataSet
     kedro.extras.datasets.spark.SparkJDBCDataSet
     kedro.extras.datasets.text.TextDataSet
     kedro.extras.datasets.yaml.YAMLDataSet
-    kedro.extras.datasets.api.APIDataSet

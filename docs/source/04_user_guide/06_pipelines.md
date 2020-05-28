@@ -1,6 +1,6 @@
 # Pipelines
 
-> *Note:* This documentation is based on `Kedro 0.15.9`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 >
 > In this section we introduce the concept of a pipeline.
 
@@ -150,22 +150,41 @@ Modular pipelines serve the following main purposes:
 * Portability: The proposed internal structure of a modular pipeline makes it easy to copy the pipeline between projects
 * Generalisability: A way to create reusable analytics code in future, depending on what you put in the modular pipeline
 
-### How do we construct modular pipelines?
+### How do I create modular pipelines?
 
-#### Structure
+For projects created using Kedro version 0.16.1 or later, Kedro ships a [project-specific CLI command](./10_developing_plugins.md#global-and-project-commands) `kedro pipeline create <pipeline_name>`, which does the following for you:
+1. Adds a new modular pipeline in a `src/<python_package>/pipelines/<pipeline_name>/` directory
+2. Creates boilerplate configuration files, `catalog.yml` and `parameters.yml`, in `conf/<env>/pipelines/<pipeline_name>/`, where `<env>` defaults to `base`
+3. Makes a placeholder for the pipeline unit tests in `src/tests/pipelines/<pipeline_name>/`
+
+Running `kedro pipeline create` does _not_ automatically add a corresponding entry in `src/<python_package>/pipeline.py` at the moment, so in order to make your new pipeline runnable (by `kedro run --pipeline <pipeline_name>` CLI command, for example), you need to modify `src/<python_package>/pipeline.py` yourself as described in [this section](#ease-of-use-and-portability) below.
+
+> *Note:* In contrast, project configuration from `conf/base/pipelines/<pipeline_name>` is automatically discoverable by [KedroContext](/kedro.framework.context.KedroContext) and therefore requires no manual change.
+
+You will need to specify exactly one pipeline name argument when calling `kedro pipeline create <your-pipeline-name-here>`. The pipeline name must adhere to generic Python module naming rules:
+1. Can only contain alphanumeric characters and underscores (`A-Za-z0-9_`)
+2. Must start with a letter or underscore
+3. Must be at least 2 characters long
+
+For the full list of available CLI options, you can always run `kedro pipeline create --help` for more information.
+
+> *Note:* Since `kedro pipeline` is a group of project specific commands, those will only show up when your current working directory is the project root. If you see an error message like `Error: No such command 'pipeline'`, this indicates that your working directory does not point to a valid Kedro project.
+
+
+### Modular pipeline structure
 
 Modular pipelines can contain any logic that can be reused. Let's look at a generic example using:
 - `src/new_kedro_project/pipelines/modular_pipeline_1` - A directory for modular pipeline 1
 - `src/new_kedro_project/pipelines/modular_pipeline_2` - A directory for modular pipeline 2
 
 Requirements for modular pipelines:
-* Each modular pipeline should be placed in a Python module, like `src/new_kedro_project/pipelines/modular_pipeline_1`, and `src/new_kedro_project/pipelines` should be a Python package
+* Each modular pipeline should be placed in a Python module, like `src/new_kedro_project/pipelines/modular_pipeline_1`
 * A modular pipeline must expose a function called `create_pipeline` at the top-level of its package and calling `create_pipeline` with no arguments should return an instance of a [Pipeline](/kedro.pipeline.Pipeline):
 
 ```python
-import new_kedro_project.pipelines.modular_pipeline_1 as mp1
+import <project-name>.pipelines.my_modular_pipeline_1 as my_modular_pipeline_1
 
-pipeline1 = mp1.create_pipeline()
+pipeline = my_modular_pipeline_1.create_pipeline()
 ```
 
 #### Ease of use and portability
@@ -173,7 +192,7 @@ pipeline1 = mp1.create_pipeline()
 Here is a list of recommendations for developing a modular pipeline:
 
 * A modular pipeline should include a `README.md`, with all the information regarding the execution of the pipeline for the end users
-* A modular pipeline _may_ have external dependencies specified in `requirements.txt`. These dependencies are _not_ currently installed by the [`kedro install`](https://kedro.readthedocs.io/en/stable/06_resources/03_commands_reference.html#kedro-install) command, so the users of your pipeline would have to run `pip install -r src/<python_package>/pipelines/<pipeline_name>/requirements.txt`
+* A modular pipeline _may_ have external dependencies specified in `requirements.txt`. These dependencies are _not_ currently installed by the [`kedro install`](../06_resources/03_commands_reference.md#kedro-install) command, so the users of your pipeline would have to run `pip install -r src/<python_package>/pipelines/<pipeline_name>/requirements.txt`
 * To ensure portability, modular pipelines should use relative imports when accessing their own objects and absolute imports otherwise. Look at an example from `src/new_kedro_project/pipelines/modular_pipeline_1/pipeline.py` below:
 
 ```python
@@ -208,8 +227,8 @@ from new_kedro_project.pipelines import (
 def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
     pipeline1 = mp1.create_pipeline()
     pipeline2 = mp2.create_pipeline()
-    pipeline_all = pipeline_1 + pipeline_2
-    return {"mp1": pipeline_1, "mp2": pipeline_2, "__default__": pipeline_all}
+    pipeline_all = pipeline1 + pipeline2
+    return {"mp1": pipeline1, "mp2": pipeline2, "__default__": pipeline_all}
 ```
 
 > *Note:* To find out how you can run a pipeline by its name, please navigate to [this section](#running-a-pipeline-by-name).
@@ -273,9 +292,9 @@ new-kedro-project
 
 ### Configuration
 
-Nested configuration in modular pipelines is _not_ currently supported by Kedro. It means that putting config files (like `catalog.yml`) in `src/<python_package>/pipelines/<pipeline_name>/conf` will have no effect on Kedro project configuration.
+Nested configuration in modular pipelines is _not_ supported by Kedro. It means that putting config files (like `catalog.yml`) in `src/<python_package>/pipelines/<pipeline_name>/conf` will have no effect on the Kedro project configuration.
 
-The recommended way to apply the changes to project catalog or any other project configuration is to document those changes in the `README.md` of your modular pipeline. For example, you may instruct the users to copy `catalog.yml` into their top-level configuration like that:
+The recommended way to apply the changes to project catalog and/or parameters is by creating `catalog.yml` and/or `parameters.yml` in `conf/base/pipelines/<pipeline_name>`, which is done automatically if you created your pipeline by calling [`kedro pipeline create`](#how-do-i-create-modular-pipelines). If you plan to manually hand-off your modular pipeline to another project, we also recommend documenting the configuration used by the pipeline in the `README.md` of your modular pipeline. For example, you may copy your configuration into the modular pipeline location before the pipeline hand off and instruct the users to copy `catalog.yml` into their top-level configuration like that:
 
 ```bash
 mkdir -p conf/base/pipelines/data_engineering  # create a separate folder for the pipeline configs
@@ -343,25 +362,32 @@ cook_pipeline = Pipeline(
     ]
 )
 
-breakfast_pipeline = Pipeline([node(eat_breakfast, "breakfast_food", None),])
-lunch_pipeline = Pipeline([node(eat_lunch, "lunch_food", None),])
+eat_breakfast_pipeline = Pipeline([node(eat_breakfast, "breakfast_food", None)])
+eat_lunch_pipeline = Pipeline([node(eat_lunch, "lunch_food", None)])
 ```
 Now we need to "defrost" two different types of food and feed it to different pipelines. But we can't use the `cook_pipeline` twice, the internal dataset names will conflict. We might try to call `pipeline()` and map all datasets, but the conflicting explicitly set `name="defrost_node"` remains.
 
 The right solution is:
 ```python
+cook_breakfast_pipeline = pipeline(
+    cook_pipeline, outputs={"grilled_meat": "breakfast_food"}, namespace="breakfast"
+)
+cook_lunch_pipeline = pipeline(
+    cook_pipeline, outputs={"grilled_meat": "lunch_food"}, namespace="lunch"
+)
+
 final_pipeline = (
-    pipeline(cook_pipeline, outputs={"grilled_meat": "breakfast_food"}, namespace="breakfast")
-    + breakfast_pipeline
-    + pipeline(cook_pipeline, outputs={"grilled_meat": "lunch_food"}, namespace="lunch")
-    + lunch_pipeline
+    cook_breakfast_pipeline
+    + eat_breakfast_pipeline
+    + cook_lunch_pipeline
+    + eat_lunch_pipeline
 )
 ```
 `namespace="lunch"` renames all datasets and nodes, prefixing them with `"lunch."`, except those datasets that we rename explicitly in the mapping (i.e `grilled_meat`).
 
 The resulting pipeline now has two separate nodes, `breakfast.defrost_node` and `lunch.defrost_node`. Also two separate datasets `breakfast.meat` and `lunch.meat` connect the nodes inside the pipelines, causing no confusion between them.
 
-Note that `pipeline()` will skip prefixing when node inputs and outputs contain parameter references (`params:` and `parameters`).
+Note that `pipeline()` will skip prefixing when node inputs contain parameter references (`params:` and `parameters`).
 Example:
 ```python
 raw_pipeline = Pipeline([node(node_func, ["input", "params:x"], "output")])
@@ -562,7 +588,7 @@ kedro run --runner=ParallelRunner
 
 > *Note:* `SparkDataSet` doesn't work correctly with `ParallelRunner`.
 
-In case you want to get some sort of concurrency for the pipeline with `SparkDataSet` you can use `ThreadRunner`. It uses threading for concurrent execution whereas `ParallelRunner` uses multiprocessing.
+In case you want to get some sort of concurrency for the pipeline with `SparkDataSet` you can use `ThreadRunner`. It uses threading for concurrent execution whereas `ParallelRunner` uses multiprocessing. For more information on how to maximise concurrency when using Kedro with PySpark, please visit our [Working with PySpark](./09_pyspark.md) guide.
 
 You should use the following command to run the pipeline using `ThreadRunner`:
 
@@ -597,7 +623,7 @@ Scaling row group sizes to 96.54% for 7 writers
 If the built-in runners do not meet your requirements, you can define your own runner in your project instead. For example, you may want to add a dry runner, which lists which nodes would be run instead of executing them. You can define it in the following way:
 
 ```python
-# in <project-name>/src/<package-name>/runner.py
+# in <project-name>/src/<python_package>/runner.py
 from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
 from kedro.pipeline import Pipeline
 from kedro.runner.runner import AbstractRunner
@@ -645,7 +671,7 @@ class DryRunner(AbstractRunner):
 And use it with `kedro run` through the `--runner` flag:
 
 ```console
-$ kedro run --runner=src.<package-name>.runner.DryRunner
+$ kedro run --runner=src.<python_package>.runner.DryRunner
 ```
 
 ### Asynchronous loading and saving
@@ -722,27 +748,34 @@ kedro run --pipeline my_pipeline
 Kedro has options to modify pipeline runs. Here is a list of CLI arguments supported out of the box:
 
 ```eval_rst
-+--------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| CLI command                                                  | Description                                                                     | Multiple options allowed? |
-+==============================================================+=================================================================================+===========================+
-| :code:`kedro run --pipeline de`                              | Run the whole pipeline by its name                                              | No                        |
-+--------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| :code:`kedro run --node debug_me,debug_me_too`               | Run only nodes with specified names                                             | Yes                       |
-+--------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| :code:`kedro run --from-nodes node1,node2`                   | A list of node names which should be used as a starting point                   | No                        |
-+--------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| :code:`kedro run --to-nodes node3,node4`                     | A list of node names which should be used as an end point                       | No                        |
-+--------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| :code:`kedro run --from-inputs dataset1,dataset2`            | A list of dataset names which should be used as a starting point                | No                        |
-+--------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| :code:`kedro run --tag some_tag1,some_tag2`                  | Run only nodes which have any of these tags attached                            | Yes                       |
-+--------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| :code:`kedro run --params param_key1:value1,param_key2:2.0`  | Does a parametrised kedro run with {"param_key1": "value1", "param_key2": 2}    | Yes                       |
-+--------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| :code:`kedro run --env env_name`                             | Run the pipeline in the env_name environment. Defaults to local if not provided | No                        |
-+--------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| :code:`kedro run --config config.yml`                        | Specify all command line options in a configuration file called config.yml      | No                        |
-+--------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
++---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+| CLI command                                                               | Description                                                                     | Multiple options allowed? |
++===========================================================================+=================================================================================+===========================+
+| :code:`kedro run --from-inputs dataset1,dataset2`                         | A list of dataset names which should be used as a starting point                | No                        |
++---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+| :code:`kedro run --from-nodes node1,node2`                                | A list of node names which should be used as a starting point                   | No                        |
++---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+| :code:`kedro run --to-nodes node3,node4`                                  | A list of node names which should be used as an end point                       | No                        |
++---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+| :code:`kedro run --node debug_me,debug_me_too`                            | Run only nodes with specified names                                             | Yes                       |
++---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+| :code:`kedro run --runner runner_name`                                    | Run the pipeline with a specific runner. Cannot be used together with --parallel| No                        |
++---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+| :code:`kedro run --parallel`                                              | Run the pipeline using the `ParallelRunner`. If not specified, use the          | No                        |
+|                                                                           | `SequentialRunner`. Cannot be used together with --runner                       |                           |
++---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+| :code:`kedro run --env env_name`                                          | Run the pipeline in the env_name environment. Defaults to local if not provided | No                        |
++---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+| :code:`kedro run --tag some_tag1,some_tag2`                               | Run only nodes which have any of these tags attached                            | Yes                       |
++---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+| :code:`kedro run --load-version="some_dataset:YYYY-MM-DDThh.mm.ss.sssZ"`  | Specify a particular dataset version (timestamp) for loading                    | Yes                       |
++---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+| :code:`kedro run --pipeline de`                                           | Run the whole pipeline by its name                                              | No                        |
++---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+| :code:`kedro run --config config.yml`                                     | Specify all command line options in a configuration file called config.yml      | No                        |
++---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
+| :code:`kedro run --params param_key1:value1,param_key2:2.0`               | Does a parametrised kedro run with {"param_key1": "value1", "param_key2": 2}    | Yes                       |
++---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
 ```
 
 You can also combine these options together, so the command `kedro run --from-nodes split --to-nodes predict, report` will run all the nodes from `split` to `predict` and `report`. And this functionality is extended to the `kedro run --config config.yml` command which allows you to [specify run commands in a configuration file](./03_configuration.md#configuring-kedro-run-arguments). And note, a parameterized run is best used for dynamic parameters, i.e. running the same pipeline with different inputs, for static parameters that do not change we recommend following this [methodology](./03_configuration.md#parameters).
@@ -1129,10 +1162,13 @@ Outputs: v
 ##################################
 ```
 
-To demonstrate this, let us save the intermediate output `n` using a `JSONLocalDataSet`.
+To demonstrate this, let us save the intermediate output `n` using a `JSONDataSet`.
 
 ```python
-n_json = JSONLocalDataSet(filepath="./data/07_model_output/len.json")
+from kedro.extras.datasets.pandas import JSONDataSet
+from kedro.io import DataCatalog, MemoryDataSet
+
+n_json = JSONDataSet(filepath="./data/07_model_output/len.json")
 io = DataCatalog(dict(xs=MemoryDataSet([1, 2, 3]), n=n_json))
 ```
 

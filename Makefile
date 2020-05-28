@@ -19,7 +19,7 @@ lint:
 	pre-commit run -a --hook-stage manual
 
 test:
-	pytest tests
+	pytest tests --cov-config pyproject.toml
 
 test-coverage:
 	@./tools/test-coverage.sh

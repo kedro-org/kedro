@@ -229,6 +229,7 @@ Currently the following datasets support versioning:
 - `kedro.extras.datasets.spark.SparkDataSet`
 - `kedro.extras.datasets.yaml.YAMLDataSet`
 - `kedro.extras.datasets.api.APIDataSet`
+- `kedro.extras.datasets.tensorflow.TensorFlowModelDataset`
 
 > _Note:_ Although, HTTPs is a supported file system in the dataset implementations, it does not support versioning.
 

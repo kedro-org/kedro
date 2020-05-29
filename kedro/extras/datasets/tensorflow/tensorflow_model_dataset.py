@@ -48,11 +48,10 @@ from kedro.io.core import (
 
 class TensorFlowModelDataset(AbstractVersionedDataSet):
     """``TensorflowModelDataset`` loads and saves TensorFlow models.
-
     The underlying functionality is supported by, and passes input arguments through to,
     TensorFlow 2.X load_model and save_model methods.
 
-        Example:
+    Example:
     ::
 
         >>> from kedro.extras.datasets.tensorflow import TensorFlowModelDataset
@@ -83,7 +82,8 @@ class TensorFlowModelDataset(AbstractVersionedDataSet):
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
     ) -> None:
-        """
+        """Creates a new instance of ``TensorFlowModelDataset``.
+
         Args:
             filepath: Filepath to a TensorFlow model directory prefixed with a protocol
                 like `s3://`. If prefix is not provided `file` protocol (local filesystem)

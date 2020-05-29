@@ -88,6 +88,7 @@ biosequence_require = {"biosequence.BioSequenceDataSet": ["biopython>=1.73, <2.0
 dask_require = {"dask.ParquetDataSet": ["dask[complete]>=2.6.0, <3.0"]}
 geopandas_require = {"geopandas.GeoJSONDataSet": ["geopandas<=0.6.0, <1.0"]}
 matplotlib_require = {"matplotlib.MatplotlibWriter": ["matplotlib>=3.0.3, <4.0"]}
+holoviews_require = {"holoviews.HoloviewsWriter": ["holoviews>=1.13.0, <1.14"]}
 networkx_require = {"networkx.NetworkXDataSet": ["networkx>=2.4, <3.0"]}
 pandas_require = {
     "pandas.CSVDataSet": [PANDAS],
@@ -124,6 +125,7 @@ extras_require = {
     ],
     "geopandas": _collect_requirements(geopandas_require),
     "matplotlib": _collect_requirements(matplotlib_require),
+    "holoviews": _collect_requirements(holoviews_require),
     "networkx": _collect_requirements(networkx_require),
     "notebook_templates": ["nbconvert>=5.3.1, <6.0", "nbformat>=4.4.0, <5.0"],
     "pandas": _collect_requirements(pandas_require),
@@ -135,6 +137,7 @@ extras_require = {
     **dask_require,
     **geopandas_require,
     **matplotlib_require,
+    **holoviews_require,
     **networkx_require,
     **pandas_require,
     **pillow_require,

@@ -1,6 +1,11 @@
 # Upcoming Release
 
 ## Major features and improvements
+* Added the following new datasets.
+
+| Type                        | Description                                          | Location                          |
+| --------------------------- | ---------------------------------------------------- | --------------------------------- |
+| `holoviews.HoloviewsWriter` | Works with `Holoviews` objects (saves as image file) | `kedro.extras.datasets.holoviews` |
 
 ## Bug fixes and other changes
 * Sped up initialization of `spark.SparkHiveDataSet`.

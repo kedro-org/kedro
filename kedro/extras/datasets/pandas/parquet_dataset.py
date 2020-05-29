@@ -97,9 +97,14 @@ class ParquetDataSet(AbstractVersionedDataSet):
                 Here you can find all available arguments when reading partitioned datasets:
                 https://arrow.apache.org/docs/python/generated/pyarrow.parquet.ParquetDataset.html#pyarrow.parquet.ParquetDataset.read
                 All defaults are preserved.
-            save_args: Additional saving options for `pyarrow.parquet.write_table`.
-                Here you can find all available arguments:
+            save_args: Additional saving options for `pyarrow.parquet.write_table` and
+                `pyarrow.Table.from_pandas`.
+                Here you can find all available arguments for `write_table()`:
                 https://arrow.apache.org/docs/python/generated/pyarrow.parquet.write_table.html?highlight=write_table#pyarrow.parquet.write_table
+                The arguments for `from_pandas()` should be passed through a nested
+                key: `from_pandas`. E.g.: `save_args = {"from_pandas": {"preserve_index": False}}`
+                Here you can find all available arguments for `from_pandas()`:
+                https://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table.from_pandas
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -130,12 +135,15 @@ class ParquetDataSet(AbstractVersionedDataSet):
             glob_function=self._fs.glob,
         )
 
+        self._from_pandas_args = {}  # type: Dict[str, Any]
+
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args is not None:
             self._load_args.update(load_args)
         self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
+            self._from_pandas_args.update(save_args.pop("from_pandas", {}))
             self._save_args.update(save_args)
 
     def _describe(self) -> Dict[str, Any]:
@@ -168,7 +176,7 @@ class ParquetDataSet(AbstractVersionedDataSet):
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         try:
-            table = pa.Table.from_pandas(data)
+            table = pa.Table.from_pandas(data, **self._from_pandas_args)
             pq.write_table(
                 table=table, where=save_path, filesystem=self._fs, **self._save_args
             )

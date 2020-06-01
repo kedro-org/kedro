@@ -106,6 +106,7 @@ spark_require = {
     "spark.SparkHiveDataSet": [PANDAS, HDFS, S3FS],
     "spark.SparkJDBCDataSet": [PANDAS, HDFS, S3FS],
 }
+yaml_require = {"yaml.YAMLDataSet": [PANDAS, "PyYAML>=4.2, <6.0"]}
 
 extras_require = {
     "api": _collect_requirements(api_require),
@@ -132,6 +133,7 @@ extras_require = {
     "pillow": _collect_requirements(pillow_require),
     "profilers": ["memory_profiler>=0.50.0, <1.0"],
     "spark": _collect_requirements(spark_require),
+    "yaml": _collect_requirements(yaml_require),
     **api_require,
     **biosequence_require,
     **dask_require,
@@ -142,6 +144,7 @@ extras_require = {
     **pandas_require,
     **pillow_require,
     **spark_require,
+    **yaml_require,
 }
 
 extras_require["all"] = _collect_requirements(extras_require)

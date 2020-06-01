@@ -247,7 +247,7 @@ class TestTensorFlowModelDataset:
         fs_mock = mocker.patch("fsspec.filesystem")
         TensorFlowModelDataset("test.tf", fs_args=fs_args)
 
-        fs_mock.assert_called_once_with("file", storage_option="value")
+        fs_mock.assert_called_once_with("file", auto_mkdir=True, storage_option="value")
 
     def test_exists_with_exception(self, tf_model_dataset, mocker):
         """Test `exists` method invocation when `get_filepath_str` raises an exception."""

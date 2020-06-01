@@ -110,7 +110,7 @@ class TensorFlowModelDataset(AbstractVersionedDataSet):
         _credentials = copy.deepcopy(credentials) or {}
         protocol, path = get_protocol_and_path(filepath, version)
         if protocol == "file":
-            _fs_args["auto_mkdir"] = True
+            _fs_args.setdefault("auto_mkdir", True)
 
         self._protocol = protocol
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)

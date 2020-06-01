@@ -1,5 +1,5 @@
 -r requirements.txt
-adlfs>=0.2.4, <0.3.1
+adlfs>=0.2.4, <0.3
 bandit>=1.6.2, <2.0
 behave==1.2.6
 biopython>=1.73, <2.0

@@ -277,8 +277,11 @@ def logging_hooks(logs_queue):
     return LoggingHooks(logs_queue)
 
 
-@pytest.fixture
-def context_with_hooks(tmp_path, mocker, logging_hooks):
+def _create_context_with_hooks(tmp_path, mocker, logging_hooks):
+    """Create a context with some Hooks registered.
+    We do this in a function to support both calling it directly as well as as part of a fixture.
+    """
+
     class DummyContextWithHooks(KedroContext):
         project_name = "test hooks"
         package_name = "test_hooks"
@@ -300,6 +303,11 @@ def context_with_hooks(tmp_path, mocker, logging_hooks):
 
     mocker.patch("logging.config.dictConfig")
     return DummyContextWithHooks(tmp_path, env="local")
+
+
+@pytest.fixture
+def context_with_hooks(tmp_path, mocker, logging_hooks):
+    return _create_context_with_hooks(tmp_path, mocker, logging_hooks)
 
 
 @pytest.fixture
@@ -343,11 +351,10 @@ class TestKedroContextHooks:
     def test_hooks_are_registered_when_context_is_created(
         self, tmp_path, mocker, logging_hooks, hook_manager
     ):
-        # assert hooks are not registered before context is created
         assert not hook_manager.is_registered(logging_hooks)
 
         # create the context
-        context_with_hooks(tmp_path, mocker, logging_hooks)
+        _create_context_with_hooks(tmp_path, mocker, logging_hooks)
 
         # assert hooks are registered after context is created
         assert hook_manager.is_registered(logging_hooks)

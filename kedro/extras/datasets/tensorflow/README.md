@@ -5,9 +5,11 @@ The underlying functionality is supported by, and passes input arguments to Tens
 
 #### Example use:
 ```python
-from kedro.extras.datasets.tensorflow import TensorFlowModelDataset
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
+
+from kedro.extras.datasets.tensorflow import TensorFlowModelDataset
+
 data_set = TensorFlowModelDataset("tf_model_dirname")
 model = tf.keras.Model()
 predictions = model.predict([...])

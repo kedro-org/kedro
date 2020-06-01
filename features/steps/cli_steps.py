@@ -461,7 +461,7 @@ def update_kedro_req(context: behave.runner.Context):
     if reqs_path.is_file():
         old_reqs = reqs_path.read_text()
         new_reqs = re.sub(r"#?kedro\[pandas.CSVDataSet\]==.*\n", kedro_reqs, old_reqs)
-        assert not old_reqs == new_reqs
+        assert old_reqs != new_reqs
         reqs_path.write_text(new_reqs)
 
 
@@ -711,3 +711,15 @@ def check_cell_conversion(context: behave.runner.Context):
         / "hello_world.py"
     )
     assert "Hello World!" in converted_file.read_text()
+
+
+@then("{path} must not exist")
+def check_path_doesnt_exist(context: behave.runner.Context, path: str):
+    path = context.root_project_dir / path
+    assert not path.exists()
+
+
+@then("{filepath} file must exist")
+def check_file_exists(context: behave.runner.Context, filepath: str):
+    filepath = context.root_project_dir / filepath
+    assert filepath.is_file()

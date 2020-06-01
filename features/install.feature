@@ -25,29 +25,21 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
-Feature: Package target in new project
-
+Feature: install target in new project
   Background:
     Given I have prepared a config file with example code
     And I have run a non-interactive kedro new
-    And I have executed the kedro command "install --no-build-reqs"
 
-  Scenario: Install package
-    When I execute the kedro command "package"
+  Scenario: Execute install target
+    Then src/requirements.in must not exist
+    When I execute the kedro command "install"
     Then I should get a successful exit code
-    When I install the project's python package
-    And I delete assets not needed for running installed packages
-    And I execute the installed project package
-    Then I should get a successful exit code
+    And src/requirements.in file must exist
 
-  Scenario: Install package after running kedro build-reqs
-   Given I have updated kedro requirements
-   When I execute the kedro command "build-reqs"
-   Then I should get a successful exit code
-   When I execute the kedro command "package"
-   Then I should get a successful exit code
-   When I install the project's python package
-   And I delete assets not needed for running installed packages
-   And I execute the installed project package
-   Then I should get a successful exit code
+  Scenario: Execute install target without compiled requirements
+    Then src/requirements.in must not exist
+    When I execute the kedro command "install --no-build-reqs"
+    Then I should get a successful exit code
+    And src/requirements.in must not exist

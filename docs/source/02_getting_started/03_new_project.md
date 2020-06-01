@@ -60,11 +60,15 @@ Having created a new project, you may want to set up a new `git` repository by c
 git init
 ```
 
-### Specify project-specific dependencies
+### Amend project-specific dependencies
 
-Once you have created a generic new project, you can update its dependencies to those required by the project. The project template bundles some typical dependencies, in `src/requirements.txt`.
+#### Using `kedro build-reqs`
 
-To add or remove dependencies on your first use, either edit `src/requirements.txt` as is, or run:
+Once you have created a new project, you can update its dependencies. The generic project template bundles some typical dependencies, in `src/requirements.txt`.
+
+On the first use of your project, if you want to add or remove dependencies, edit `src/requirements.txt`.
+
+Then run the following:
 
 ```bash
 kedro build-reqs
@@ -72,17 +76,20 @@ kedro build-reqs
 
 The `build-reqs` command will:
 
-* `pip-compile` requirements from `src/requirements.in`. If the `src/requirements.in` file is non-existent, Kedro will generate it from the contents of `requirements.txt`).
-* Regenerate `src/requirements.txt` to specify a list of pinned project dependencies (those with a strict version).
+1. Generate `src/requirements.in` from the contents of `src/requirements.txt`
+2. `pip-compile` the requirements listed in `src/requirements.in`
+3. Regenerate `src/requirements.txt` to specify a list of pinned project dependencies (those with a strict version).
 
-> Note: Whenever you need to update the project requirements, update `requirements.in` (not `src/requirements.txt`) and run `kedro build-reqs` again.
+> Note: `src/requirements.in` contains "source" requirements, while `src/requirements.txt` contains the compiled version of those and requires no manual updates. To further update the project requirements, you should modify `src/requirements.in` (not `src/requirements.txt`) and re-run `kedro build-reqs`.
 
 If your project has `conda` dependencies, you can create a `src/environment.yml` file and list them there.
 
-### Install project-specific dependencies
+#### Using `kedro install`
 
 To install the project-specific dependencies, run the following command:
 
 ```bash
 kedro install
 ```
+
+> Note: `kedro install` automatically compiles project dependencies by running `kedro build-reqs` behind the scenes before the installation if the `src/requirements.in` file doesn't exist. To skip the compilation step and install requirements as-is, run `kedro install --no-build-reqs`. To force the compilation even if `src/requirements.in` exists, run `kedro install --build-reqs`.

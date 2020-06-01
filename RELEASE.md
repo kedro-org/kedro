@@ -6,6 +6,10 @@
 | Type                                | Description                                                                                                           | Location                           |
 | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
 | `tensorflow.TensorFlowModelDataset` | Works with `TensorFlow` models using [TensorFlow 2.X](https://www.tensorflow.org/api_docs/python/tf/keras/Model#save) | `kedro.extras.datasets.tensorflow` |
+| `holoviews.HoloviewsWriter`         | Works with `Holoviews` objects (saves as image file)                                                                  | `kedro.extras.datasets.holoviews`  |
+
+### CLI
+* `kedro install` will now compile project dependencies (by running `kedro build-reqs` behind the scenes) before the installation if the `src/requirements.in` file doesn't exist.
 
 ## Bug fixes and other changes
 * Sped up initialization of `spark.SparkHiveDataSet`.
@@ -14,6 +18,8 @@
 * Add missing `pillow.ImageDataSet` entry to the documentation.
 * Non-alphanumeric characters (except underscore) in dataset name are replaced with `__` in `DataCatalog.datasets`, for ease of access to transcoded datasets.
 * Added [find-kedro](https://github.com/WaylonWalker/find-kedro) and [kedro-static-viz](https://github.com/WaylonWalker/kedro-static-viz) to the list of community plugins.
+* All unrecognized CLI options in `kedro build-reqs` command are now passed to [pip-compile](https://github.com/jazzband/pip-tools#example-usage-for-pip-compile) call (e.g. `kedro build-reqs --generate-hashes`).
+* `kedro build-reqs` is now called with `-q` option and will no longer print out compiled requirements to the console for security reasons.
 
 ## Breaking changes to the API
 

@@ -17,6 +17,7 @@ Data Sets
     kedro.extras.datasets.dask.ParquetDataSet
     kedro.extras.datasets.geopandas.GeoJSONDataSet
     kedro.extras.datasets.matplotlib.MatplotlibWriter
+    kedro.extras.datasets.holoviews.HoloviewsWriter
     kedro.extras.datasets.networkx.NetworkXDataSet
     kedro.extras.datasets.pandas.CSVDataSet
     kedro.extras.datasets.pandas.ExcelDataSet

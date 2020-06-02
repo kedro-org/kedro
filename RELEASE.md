@@ -24,7 +24,7 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Miguel Rodriguez Gutierrez](https://github.com/MigQ2), [Joel Schwarzmann](https://github.com/datajoely)
+[Miguel Rodriguez Gutierrez](https://github.com/MigQ2), [Joel Schwarzmann](https://github.com/datajoely), [w0rdsm1th](https://github.com/w0rdsm1th)
 
 # 0.16.1
 

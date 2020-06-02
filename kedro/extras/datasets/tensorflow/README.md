@@ -11,10 +11,13 @@ import tensorflow as tf
 from kedro.extras.datasets.tensorflow import TensorFlowModelDataset
 
 data_set = TensorFlowModelDataset("tf_model_dirname")
+
 model = tf.keras.Model()
 predictions = model.predict([...])
+
 data_set.save(model)
 loaded_model = data_set.load()
+
 new_predictions = loaded_model.predict([...])
 np.testing.assert_allclose(predictions, new_predictions, rtol=1e-6, atol=1e-6)
 ```

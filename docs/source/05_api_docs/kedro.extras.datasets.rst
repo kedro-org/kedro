@@ -33,5 +33,6 @@ Data Sets
     kedro.extras.datasets.spark.SparkDataSet
     kedro.extras.datasets.spark.SparkHiveDataSet
     kedro.extras.datasets.spark.SparkJDBCDataSet
+    kedro.extras.datasets.tensorflow.TensorFlowModelDataset
     kedro.extras.datasets.text.TextDataSet
     kedro.extras.datasets.yaml.YAMLDataSet

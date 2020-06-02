@@ -106,6 +106,13 @@ spark_require = {
     "spark.SparkHiveDataSet": [PANDAS, HDFS, S3FS],
     "spark.SparkJDBCDataSet": [PANDAS, HDFS, S3FS],
 }
+tensorflow_required = {
+    "tensorflow.TensorflowModelDataset": [
+        # currently only TensorFlow V2 supported for saving and loading.
+        # V1 requires HDF5 and serializes differently
+        "tensorflow>=2.0.0, <3.0",
+    ]
+}
 yaml_require = {"yaml.YAMLDataSet": [PANDAS, "PyYAML>=4.2, <6.0"]}
 
 extras_require = {
@@ -133,6 +140,7 @@ extras_require = {
     "pillow": _collect_requirements(pillow_require),
     "profilers": ["memory_profiler>=0.50.0, <1.0"],
     "spark": _collect_requirements(spark_require),
+    "tensorflow": _collect_requirements(tensorflow_required),
     "yaml": _collect_requirements(yaml_require),
     **api_require,
     **biosequence_require,
@@ -144,6 +152,7 @@ extras_require = {
     **pandas_require,
     **pillow_require,
     **spark_require,
+    **tensorflow_required,
     **yaml_require,
 }
 

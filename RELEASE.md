@@ -3,9 +3,11 @@
 ## Major features and improvements
 * Added the following new datasets.
 
-| Type                        | Description                                          | Location                          |
-| --------------------------- | ---------------------------------------------------- | --------------------------------- |
-| `holoviews.HoloviewsWriter` | Works with `Holoviews` objects (saves as image file) | `kedro.extras.datasets.holoviews` |
+| Type                                | Description                                                                                                           | Location                           |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| `tensorflow.TensorFlowModelDataset` | Works with `TensorFlow` models using [TensorFlow 2.X](https://www.tensorflow.org/api_docs/python/tf/keras/Model#save) | `kedro.extras.datasets.tensorflow` |
+| `holoviews.HoloviewsWriter`         | Works with `Holoviews` objects (saves as image file)                                                                  | `kedro.extras.datasets.holoviews`  |
+
 ### CLI
 * `kedro install` will now compile project dependencies (by running `kedro build-reqs` behind the scenes) before the installation if the `src/requirements.in` file doesn't exist.
 
@@ -22,7 +24,7 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Miguel Rodriguez Gutierrez](https://github.com/MigQ2), [Joel Schwarzmann](https://github.com/datajoely)
+[Miguel Rodriguez Gutierrez](https://github.com/MigQ2), [Joel Schwarzmann](https://github.com/datajoely), [w0rdsm1th](https://github.com/w0rdsm1th)
 
 # 0.16.1
 

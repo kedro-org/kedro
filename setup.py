@@ -113,6 +113,7 @@ tensorflow_required = {
         "tensorflow>=2.0.0, <3.0",
     ]
 }
+yaml_require = {"yaml.YAMLDataSet": [PANDAS, "PyYAML>=4.2, <6.0"]}
 
 extras_require = {
     "api": _collect_requirements(api_require),
@@ -140,6 +141,7 @@ extras_require = {
     "profilers": ["memory_profiler>=0.50.0, <1.0"],
     "spark": _collect_requirements(spark_require),
     "tensorflow": _collect_requirements(tensorflow_required),
+    "yaml": _collect_requirements(yaml_require),
     **api_require,
     **biosequence_require,
     **dask_require,
@@ -151,6 +153,7 @@ extras_require = {
     **pillow_require,
     **spark_require,
     **tensorflow_required,
+    **yaml_require,
 }
 
 extras_require["all"] = _collect_requirements(extras_require)

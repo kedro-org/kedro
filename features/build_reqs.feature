@@ -29,6 +29,7 @@
 
 Feature: build-reqs target in new project
 
+  @fresh_venv
   Scenario: Execute build-reqs target
     Given I have prepared a config file with example code
     And I have run a non-interactive kedro new

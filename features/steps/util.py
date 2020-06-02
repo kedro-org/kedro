@@ -32,7 +32,6 @@
 import os
 import re
 import tempfile
-import venv
 from contextlib import contextmanager
 from pathlib import Path
 from time import sleep, time
@@ -126,18 +125,6 @@ def wait_for(
     raise WaitForException(
         "func: %s, didn't return within specified timeout: %d" % (func, timeout_)
     )
-
-
-def create_new_venv() -> Path:
-    """Create a new venv.
-
-    Returns:
-        path to created venv
-    """
-    # Create venv
-    venv_dir = Path(tempfile.mkdtemp())
-    venv.main([str(venv_dir)])
-    return venv_dir
 
 
 def get_logline_count(logfile: str) -> int:

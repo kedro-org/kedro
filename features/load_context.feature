@@ -31,6 +31,7 @@ Feature: Custom Kedro project
     Background:
         Given I have prepared a config file with example code
         And I have run a non-interactive kedro new
+        And I have executed the kedro command "install"
 
     Scenario: Update the source directory to be nested
         When I move the package to "src/nested"

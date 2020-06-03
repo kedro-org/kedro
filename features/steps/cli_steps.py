@@ -423,18 +423,11 @@ def do_git_reset_hard(context):
 def move_package(context: behave.runner.Context, new_source_dir):
     """Move the project package to a new directory.
     """
-    current_src_path = context.root_project_dir / "src"
-    new_src_path = context.root_project_dir / "new_source_dir"
+    current_src_path = (context.root_project_dir / "src").resolve()
+    new_src_path = (context.root_project_dir / new_source_dir).resolve()
 
-    cmd = [
-        "mkdir",
-        str(new_source_dir),
-        ";",
-        "mv",
-        str(current_src_path / context.package_name),
-        str(new_src_path),
-    ]
-    context.result = run(cmd, env=context.env, cwd=str(context.root_project_dir))
+    new_src_path.mkdir(exist_ok=True)
+    shutil.move(str(current_src_path / context.package_name), str(new_src_path))
 
 
 @when('Source directory is updated to "{new_source_dir}" in kedro.yml')

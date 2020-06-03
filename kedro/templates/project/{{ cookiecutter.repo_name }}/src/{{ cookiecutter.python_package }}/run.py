@@ -30,9 +30,11 @@
 from pathlib import Path
 from typing import Dict
 
-from {{ cookiecutter.python_package }}.pipeline import create_pipelines
 from kedro.framework.context import KedroContext, load_package_context
 from kedro.pipeline import Pipeline
+
+from {{ cookiecutter.python_package }}.pipeline import create_pipelines
+
 
 class ProjectContext(KedroContext):
     """Users can override the remaining methods from the parent class here,
@@ -52,8 +54,7 @@ def run_package():
     # Entry point for running a Kedro project packaged with `kedro package`
     # using `python -m <project_package>.run` command.
     project_context = load_package_context(
-        project_path=Path.cwd(),
-        package_name=Path(__file__).resolve().parent.name
+        project_path=Path.cwd(), package_name=Path(__file__).resolve().parent.name
     )
     project_context.run()
 

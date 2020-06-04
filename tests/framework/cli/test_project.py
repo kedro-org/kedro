@@ -412,6 +412,17 @@ class TestIpythonCommand:
         assert result.exit_code
         assert expected_output in result.output
 
+    def test_fail_no_ipython(self, fake_kedro_cli, mocker):
+        mocker.patch.dict("sys.modules", {"IPython": None})
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["ipython"])
+
+        assert result.exit_code
+        error = (
+            "Module `IPython` not found. Make sure to install required project "
+            "dependencies by running the `kedro install` command first."
+        )
+        assert error in result.output
+
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
 class TestPackageCommand:

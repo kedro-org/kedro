@@ -42,6 +42,7 @@ from click import secho
 from kedro.framework.cli.cli import _handle_exception
 from kedro.framework.cli.utils import (
     KedroCliError,
+    _check_module_importable,
     call,
     env_option,
     forward_command,
@@ -182,6 +183,7 @@ def install(compile_flag):
 def ipython(env, args):
     """Open IPython with project specific variables loaded."""
     context = _load_project_context(env=env)
+    _check_module_importable("IPython")
     os.environ["IPYTHONDIR"] = str(context.project_path / ".ipython")
     if env:
         os.environ["KEDRO_ENV"] = env

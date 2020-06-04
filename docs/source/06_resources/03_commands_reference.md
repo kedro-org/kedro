@@ -84,6 +84,8 @@ To reload these at any point in your notebook (e.g. if you updated `catalog.yml`
 
 This [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#line-magics) can be also used to see the error message if any of the variables above are undefined.
 
+> *Note:* If you get an error message `Module ``<module_name>`` not found. Make sure to install required project dependencies by running ``kedro install`` command first.` when running any of those commands, it indicates that some Jupyter or IPython dependencies are not installed in your environment. To resolve this you will need to a) make sure the corresponding dependency is present in `src/requirements.in` (`src/requirements.txt` if not compiled), b) run [`kedro install`](#kedro-install) command from your terminal.
+
 ### `kedro jupyter convert`
 Copy the code from cells [tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) with `node` tag into Python files under `src/<package_name>/nodes/` in a Kedro project.
 

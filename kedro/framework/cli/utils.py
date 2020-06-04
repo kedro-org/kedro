@@ -36,6 +36,7 @@ import sys
 import textwrap
 import warnings
 from contextlib import contextmanager
+from importlib import import_module
 from itertools import chain
 from pathlib import Path
 from typing import Iterable, List, Sequence, Tuple, Union
@@ -255,3 +256,13 @@ def get_source_dir(project_path: Path) -> Path:
     source_dir = Path(kedro_yaml.get("source_dir", "src")).expanduser()
     source_path = (project_path / source_dir).resolve()
     return source_path
+
+
+def _check_module_importable(module_name: str) -> None:
+    try:
+        import_module(module_name)
+    except ImportError:
+        raise KedroCliError(
+            f"Module `{module_name}` not found. Make sure to install required project "
+            f"dependencies by running the `kedro install` command first."
+        )

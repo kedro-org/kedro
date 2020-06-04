@@ -48,6 +48,7 @@ from kedro.framework.cli import load_entry_points
 from kedro.framework.cli.cli import _handle_exception
 from kedro.framework.cli.utils import (
     KedroCliError,
+    _check_module_importable,
     env_option,
     forward_command,
     get_source_dir,
@@ -126,6 +127,7 @@ def jupyter():
 @env_option
 def jupyter_notebook(ip_address, all_kernels, env, idle_timeout, args):
     """Open Jupyter Notebook with project specific variables loaded."""
+    _check_module_importable("jupyter_core")
     context = _load_project_context(env=env)
     if "-h" not in args and "--help" not in args:
         ipython_message(all_kernels)
@@ -153,6 +155,7 @@ def jupyter_notebook(ip_address, all_kernels, env, idle_timeout, args):
 @env_option
 def jupyter_lab(ip_address, all_kernels, env, idle_timeout, args):
     """Open Jupyter Lab with project specific variables loaded."""
+    _check_module_importable("jupyter_core")
     context = _load_project_context(env=env)
     if "-h" not in args and "--help" not in args:
         ipython_message(all_kernels)

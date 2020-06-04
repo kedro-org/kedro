@@ -22,8 +22,9 @@
 * All unrecognized CLI options in `kedro build-reqs` command are now passed to [pip-compile](https://github.com/jazzband/pip-tools#example-usage-for-pip-compile) call (e.g. `kedro build-reqs --generate-hashes`).
 * `kedro build-reqs` is now called with `-q` option and will no longer print out compiled requirements to the console for security reasons.
 * Linted project template :sparkles: :cake: :sparkles:
-* Documentation improvements
-  * Correct bad DataEngineerOne link
+* Documentation improvements:
+  - Corrected bad DataEngineerOne link
+* Improved error message when running `kedro jupyter notebook`, `kedro jupyter lab` or `kedro ipython` with Jupyter/IPython dependencies not being installed.
 
 ## Breaking changes to the API
 

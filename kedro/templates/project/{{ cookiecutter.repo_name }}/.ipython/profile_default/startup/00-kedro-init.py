@@ -2,7 +2,7 @@ import logging.config
 import sys
 from pathlib import Path
 
-from IPython.core.magic import register_line_magic
+from IPython.core.magic import register_line_magic, needs_local_scope
 
 # Find the project root (./../../../)
 startup_error = None
@@ -49,7 +49,7 @@ def reload_kedro(path, line=None):
         logging.info("Defined global variable `context` and `catalog`")
 
         for line_magic in collect_line_magic():
-            register_line_magic(line_magic)
+            register_line_magic(needs_local_scope(line_magic))
             logging.info("Registered line magic `%s`", line_magic.__name__)
     except Exception as err:
         startup_error = err

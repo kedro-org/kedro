@@ -39,5 +39,5 @@ Feature: Test target in new project
     Then I should get a successful exit code
 
   Scenario: Execute successful lint in new project
-    When I execute the kedro command "lint"
+    When I execute the kedro command "lint --check-only"
     Then I should get a successful exit code

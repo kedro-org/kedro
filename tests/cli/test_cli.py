@@ -114,7 +114,7 @@ class DummyContext:
 
 
 @fixture
-def dummy_context(mocker):
+def mocked_load_context(mocker):
     return mocker.patch("kedro.cli.cli.load_context", return_value=DummyContext())
 
 
@@ -446,7 +446,7 @@ class TestCliUtils:
         assert mocked_rmtree.mock_calls == expected_calls
 
 
-@mark.usefixtures("dummy_context")
+@mark.usefixtures("mocked_load_context")
 class TestGetProjectContext:
     def _deprecation_msg(self, key):
         msg_dict = {
@@ -471,8 +471,15 @@ class TestGetProjectContext:
         )
         return msg
 
-    def test_context(self):
+    def test_get_context_without_project_path(self, mocked_load_context):
         dummy_context = get_project_context("context")
+        mocked_load_context.assert_called_once_with(Path.cwd())
+        assert isinstance(dummy_context, DummyContext)
+
+    def test_get_context_with_project_path(self, tmpdir, mocked_load_context):
+        dummy_project_path = tmpdir.mkdir("dummy_project")
+        dummy_context = get_project_context("context", project_path=dummy_project_path)
+        mocked_load_context.assert_called_once_with(dummy_project_path)
         assert isinstance(dummy_context, DummyContext)
 
     def test_get_config(self, tmp_path):

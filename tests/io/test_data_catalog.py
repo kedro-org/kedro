@@ -266,6 +266,27 @@ class TestDataCatalog:
         assert "abc" in entries
         assert "xyz" in entries
 
+    @pytest.mark.parametrize(
+        "pattern,expected",
+        [
+            ("^a", ["abc"]),
+            ("a|x", ["abc", "xyz"]),
+            ("^(?!(a|x))", []),
+            ("def", []),
+            ("", []),
+        ],
+    )
+    def test_multi_catalog_list_regex(self, multi_catalog, pattern, expected):
+        """Test that regex patterns filter data sets accordingly"""
+        assert multi_catalog.list(regex_search=pattern) == expected
+
+    def test_multi_catalog_list_bad_regex(self, multi_catalog):
+        """Test that bad regex is caught accordingly"""
+        escaped_regex = r"\(\("
+        pattern = f"Invalid regular expression provided: `{escaped_regex}`"
+        with pytest.raises(SyntaxError, match=pattern):
+            multi_catalog.list("((")
+
     def test_eq(self, multi_catalog, data_catalog):
         assert multi_catalog == multi_catalog  # pylint: disable=comparison-with-itself
         assert multi_catalog == multi_catalog.shallow_copy()
@@ -524,7 +545,7 @@ class TestDataCatalogVersioned:
             **sane_config,
             load_versions={"boats": version},
             save_version=version,
-            journal=journal
+            journal=journal,
         )
 
         assert catalog._journal == journal
@@ -603,3 +624,16 @@ class TestDataCatalogVersioned:
 
         with pytest.raises(DataSetError):
             catalog.load("boats", version="first")
+
+    def test_replacing_non_alphanumeric_characters(self):
+        """Test replacing non alphanumeric characters in datasets names"""
+        csv = CSVDataSet(filepath="abc.csv")
+        datasets = {"ds1@spark": csv, "ds2_spark": csv, "ds3.csv": csv}
+
+        catalog = DataCatalog(data_sets=datasets)
+        assert "ds1@spark" not in catalog.datasets.__dict__
+        assert "ds3.csv" not in catalog.datasets.__dict__
+
+        assert "ds2_spark" in catalog.datasets.__dict__
+        assert "ds1__spark" in catalog.datasets.__dict__
+        assert "ds3__csv" in catalog.datasets.__dict__

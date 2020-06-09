@@ -36,13 +36,13 @@ import sys
 import textwrap
 import warnings
 from contextlib import contextmanager
+from importlib import import_module
 from itertools import chain
 from pathlib import Path
 from typing import Iterable, List, Sequence, Tuple, Union
 
 import click
 import yaml
-from click import ClickException, style
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 MAX_SUGGESTIONS = 3
@@ -52,12 +52,20 @@ ENV_HELP = "Kedro configuration environment name. Defaults to `local`."
 
 
 def call(cmd: List[str], **kwargs):  # pragma: no cover
-    """Run a subprocess command and exit if it fails."""
-    print(" ".join(shlex.quote(c) for c in cmd))
+    """Run a subprocess command and raise if it fails.
+
+    Args:
+        cmd: List of command parts.
+        **kwargs: Optional keyword arguments passed to `subprocess.run`.
+
+    Raises:
+        click.exceptions.Exit: If `subprocess.run` returns non-zero code.
+    """
+    click.echo(" ".join(shlex.quote(c) for c in cmd))
     # pylint: disable=subprocess-run-check
-    res = subprocess.run(cmd, **kwargs).returncode
-    if res:
-        sys.exit(res)
+    code = subprocess.run(cmd, **kwargs).returncode
+    if code:
+        raise click.exceptions.Exit(code=code)
 
 
 def python_call(module: str, arguments: Iterable[str], **kwargs):  # pragma: no cover
@@ -173,14 +181,14 @@ def get_pkg_version(reqs_path: (Union[str, Path]), package_name: str) -> str:
     raise KedroCliError(f"Cannot find `{package_name}` package in `{reqs_path}`.")
 
 
-class KedroCliError(ClickException):
+class KedroCliError(click.exceptions.ClickException):
     """Exceptions generated from the Kedro CLI.
 
     Users should pass an appropriate message at the constructor.
     """
 
     def format_message(self):
-        return style(self.message, fg="red")  # pragma: no cover
+        return click.style(self.message, fg="red")  # pragma: no cover
 
 
 def _clean_pycache(path: Path):
@@ -214,7 +222,7 @@ def ipython_message(all_kernels=True):
     click.secho("-" * 79, fg="cyan")
     click.secho("Starting a Kedro session with the following variables in scope")
     click.secho(", ".join(ipy_vars), fg="green")
-    line_magic = style("%reload_kedro", fg="green")
+    line_magic = click.style("%reload_kedro", fg="green")
     click.secho(f"Use the line magic {line_magic} to refresh them")
     click.secho("or to see the error message if they are undefined")
 
@@ -248,3 +256,13 @@ def get_source_dir(project_path: Path) -> Path:
     source_dir = Path(kedro_yaml.get("source_dir", "src")).expanduser()
     source_path = (project_path / source_dir).resolve()
     return source_path
+
+
+def _check_module_importable(module_name: str) -> None:
+    try:
+        import_module(module_name)
+    except ImportError:
+        raise KedroCliError(
+            f"Module `{module_name}` not found. Make sure to install required project "
+            f"dependencies by running the `kedro install` command first."
+        )

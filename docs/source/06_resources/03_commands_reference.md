@@ -56,8 +56,13 @@ Calls the `run()` method of the `ProjectContext` defined in `run.py` (`src/proje
 
 To make sure the project is shareable and reproducible, you should maintain the `kedro run` program definitions in the `kedro_cli.py` to point to the entry point in your project.
 
+### `kedro build-reqs`
+Build the project dependency requirements. This command will run [`pip-compile`](https://github.com/jazzband/pip-tools#example-usage-for-pip-compile) on `src/requirements.in` file. If the file doesn't exist, Kedro will create it by copying the contents from `src/requirements.txt`. `kedro build-reqs` also accepts and passes through CLI options accepted by `pip-compile`. For example, `kedro build-reqs --generate-hashes` will call `pip-compile --generate-hashes src/requirements.in`.
+
 ### `kedro install`
-Install all package dependencies specified in `requirements.txt`
+Install all package dependencies specified in `src/requirements.txt`. `kedro install` will also compile your project dependencies (by running [`kedro build-reqs`](#kedro-build-reqs) behind the scenes) the first time you run `kedro install`. If you don't want Kedro to compile the requirements (for performance reasons, for example), run `kedro install --no-build-reqs`. To recompile the requirements, run `kedro install --build-reqs`. We recommend recompiling your requirements every time you update `src/requirements.in` file.
+
+> *Note:* As project dependencies may evolve very quickly, we strongly recommend working with compiled requirements, which is the default behaviour of `kedro install`, as mentioned above. This helps to keep your development environment reproducible, ensures compatibility between the dependencies and prevents version conflicts, which are often hard to debug.
 
 ### `kedro test`
 Run all `pytest` unit tests found in `src/tests`, including coverage (see the file `.coveragerc`).
@@ -78,6 +83,8 @@ Every time you start or restart a notebook kernel, a startup script (`<project-r
 To reload these at any point in your notebook (e.g. if you updated `catalog.yml`) use the line magic `%reload_kedro`.
 
 This [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#line-magics) can be also used to see the error message if any of the variables above are undefined.
+
+> *Note:* If you get an error message `Module ``<module_name>`` not found. Make sure to install required project dependencies by running ``kedro install`` command first.` when running any of those commands, it indicates that some Jupyter or IPython dependencies are not installed in your environment. To resolve this you will need to a) make sure the corresponding dependency is present in `src/requirements.in` (`src/requirements.txt` if not compiled), b) run [`kedro install`](#kedro-install) command from your terminal.
 
 ### `kedro jupyter convert`
 Copy the code from cells [tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) with `node` tag into Python files under `src/<package_name>/nodes/` in a Kedro project.

@@ -170,6 +170,17 @@ class TestJupyterNotebookCommand:
         assert result.exit_code
         assert expected_output in result.output
 
+    def test_fail_no_jupyter_core(self, fake_kedro_cli, mocker):
+        mocker.patch.dict("sys.modules", {"jupyter_core": None})
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["jupyter", "notebook"])
+
+        assert result.exit_code
+        error = (
+            "Module `jupyter_core` not found. Make sure to install required project "
+            "dependencies by running the `kedro install` command first."
+        )
+        assert error in result.output
+
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
 class TestJupyterLabCommand:
@@ -215,6 +226,17 @@ class TestJupyterLabCommand:
         assert args == default_jupyter_options("lab")
         assert "env" in kwargs
         assert kwargs["env"]["KEDRO_ENV"] == "base"
+
+    def test_fail_no_jupyter_core(self, fake_kedro_cli, mocker):
+        mocker.patch.dict("sys.modules", {"jupyter_core": None})
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["jupyter", "lab"])
+
+        assert result.exit_code
+        error = (
+            "Module `jupyter_core` not found. Make sure to install required project "
+            "dependencies by running the `kedro install` command first."
+        )
+        assert error in result.output
 
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")

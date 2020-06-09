@@ -504,14 +504,18 @@ def _get_prompt_text(title, *text, start: str = "\n"):
     return "{}{}\n".format(start, prompt_text)
 
 
-def get_project_context(key: str = "context", **kwargs) -> Any:
+def get_project_context(
+    key: str = "context", project_path: Path = None, **kwargs
+) -> Any:
     """Gets the context value from context associated with the key.
 
     Args:
         key: Optional key to get associated value from Kedro context.
-        Supported keys are "verbose" and "context", and it defaults to "context".
+            Supported keys are "verbose" and "context", and it defaults to "context".
+        project_path: Optional path to where the project root is to load the context.
+            If omitted, the current working directory will be used.
         kwargs: Optional custom arguments defined by users, which will be passed into
-        the constructor of the projects KedroContext subclass.
+            the constructor of the projects KedroContext subclass.
 
     Returns:
         Requested value from Kedro context dictionary or the default if the key
@@ -546,7 +550,8 @@ def get_project_context(key: str = "context", **kwargs) -> Any:
 
         return msg
 
-    context = load_context(Path.cwd(), **kwargs)
+    project_path = project_path or Path.cwd()
+    context = load_context(project_path, **kwargs)
     # Dictionary to be compatible with existing Plugins. Future plugins should
     # retrieve necessary Kedro project properties from context
     value = {

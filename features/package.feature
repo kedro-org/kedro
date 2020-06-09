@@ -31,7 +31,7 @@ Feature: Package target in new project
   Background:
     Given I have prepared a config file with example code
     And I have run a non-interactive kedro new
-    And I have executed the kedro command "install"
+    And I have executed the kedro command "install --no-build-reqs"
 
   Scenario: Install package
     When I execute the kedro command "package"

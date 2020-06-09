@@ -38,7 +38,7 @@ _EMPTY = object()
 
 
 class MemoryDataSet(AbstractDataSet):
-    """``MemoryDataSet`` loads and saves data from/to an in-memory\
+    """``MemoryDataSet`` loads and saves data from/to an in-memory
     Python object.
 
     Example:

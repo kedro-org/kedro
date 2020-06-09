@@ -29,6 +29,7 @@
 from pathlib import PurePosixPath
 
 import pandas as pd
+import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
 from fsspec.implementations.http import HTTPFileSystem
@@ -116,6 +117,7 @@ class TestParquetDataSet:
         """Test overriding the default save arguments."""
         for key, value in save_args.items():
             assert parquet_data_set._save_args[key] == value
+        assert parquet_data_set._from_pandas_args == {}
 
     @pytest.mark.parametrize(
         "fs_args",
@@ -214,6 +216,26 @@ class TestParquetDataSet:
         data_set.load()
         fs_mock.isdir.assert_called_once()
         fs_mock.open.assert_called_once()
+
+    # pylint: disable=unused-argument
+    @pytest.mark.parametrize(
+        "save_args", [{"from_pandas": {"preserve_index": False}}], indirect=True
+    )
+    def test_from_pandas_args(
+        self, parquet_data_set, dummy_dataframe, save_args, mocker
+    ):
+        from_pandas_mock = mocker.patch(
+            "kedro.extras.datasets.pandas.parquet_dataset.pa", wraps=pa
+        )
+        from_pandas_args = {"preserve_index": False}
+
+        parquet_data_set.save(dummy_dataframe)
+
+        assert parquet_data_set._save_args == {}
+        assert parquet_data_set._from_pandas_args == from_pandas_args
+        from_pandas_mock.Table.from_pandas.assert_called_once_with(
+            dummy_dataframe, **from_pandas_args
+        )
 
 
 class TestParquetDataSetVersioned:

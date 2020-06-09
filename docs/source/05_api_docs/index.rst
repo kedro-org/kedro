@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 
-.. image:: https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/img/kedro_banner.png
+.. image:: https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/static/img/kedro_banner.png
     :alt: Kedro logo
     :class: kedro-logo
 
@@ -82,6 +82,7 @@ Welcome to Kedro's API docs and tutorials!
    04_user_guide/13_journal
    04_user_guide/14_create_a_new_dataset
    04_user_guide/15_hooks
+   04_user_guide/16_debugging
 
 .. toctree::
    :maxdepth: 2

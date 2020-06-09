@@ -34,6 +34,7 @@ import subprocess
 import sys
 import webbrowser
 from pathlib import Path
+from typing import Any, Sequence
 
 import click
 from click import secho
@@ -41,6 +42,7 @@ from click import secho
 from kedro.framework.cli.cli import _handle_exception
 from kedro.framework.cli.utils import (
     KedroCliError,
+    _check_module_importable,
     call,
     env_option,
     forward_command,
@@ -57,7 +59,7 @@ unformatted imports, and unblackened Python code without modifying the files."""
 OPEN_ARG_HELP = """Open the documentation in your default browser after building."""
 
 
-def _load_project_context(**kwargs):
+def _load_project_context(**kwargs: Any):
     """Returns project context."""
     try:
         return load_context(Path.cwd(), **kwargs)
@@ -69,6 +71,24 @@ def _load_project_context(**kwargs):
         )
 
 
+def _build_reqs(source_path: Path, args: Sequence[str] = ()):
+    """Run `pip-compile requirements.in` command.
+
+    Args:
+        source_path: Path to the project `src` folder.
+        args: Optional arguments for `pip-compile` call, e.g. `--generate-hashes`.
+
+    """
+    requirements_in = source_path / "requirements.in"
+
+    if not requirements_in.is_file():
+        secho("No requirements.in found. Copying contents from requirements.txt...")
+        requirements_txt = source_path / "requirements.txt"
+        shutil.copyfile(str(requirements_txt), str(requirements_in))
+
+    python_call("piptools", ["compile", "-q", *args, str(requirements_in)])
+
+
 @click.group()
 def project_group():
     """Collection of project commands."""
@@ -78,7 +98,7 @@ def project_group():
 def test(args):
     """Run the test suite."""
     try:
-        # pylint: disable=import-outside-toplevel, unused-import
+        # pylint: disable=import-outside-toplevel,unused-import
         import pytest  # noqa
     except ImportError:
         context = _load_project_context()
@@ -122,32 +142,40 @@ def lint(files, check_only):
 
 
 @project_group.command()
-def install():
+@click.option(
+    "--build-reqs/--no-build-reqs",
+    "compile_flag",
+    default=None,
+    help="Run `pip-compile` on project requirements before install. "
+    "By default runs only if `src/requirements.in` file doesn't exist.",
+)
+def install(compile_flag):
     """Install project dependencies from both requirements.txt
     and environment.yml (optional)."""
     # we cannot use `context.project_path` as in other commands since
     # context instantiation might break due to missing dependencies
     # we attempt to install here
     source_path = get_source_dir(Path.cwd())
+    environment_yml = source_path / "environment.yml"
+    requirements_in = source_path / "requirements.in"
+    requirements_txt = source_path / "requirements.txt"
 
-    if (source_path / "environment.yml").is_file():
-        call(
-            [
-                "conda",
-                "install",
-                "--file",
-                str(source_path / "environment.yml"),
-                "--yes",
-            ]
-        )
+    if environment_yml.is_file():
+        call(["conda", "install", "--file", str(environment_yml), "--yes"])
 
-    pip_command = ["install", "-U", "-r", str(source_path / "requirements.txt")]
+    default_compile = bool(compile_flag is None and not requirements_in.is_file())
+    do_compile = compile_flag or default_compile
+    if do_compile:
+        _build_reqs(source_path)
+
+    pip_command = ["install", "-U", "-r", str(requirements_txt)]
 
     if os.name == "posix":
         python_call("pip", pip_command)
     else:
         command = [sys.executable, "-m", "pip"] + pip_command
         subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_CONSOLE)
+    secho("Requirements installed!", fg="green")
 
 
 @forward_command(project_group, forward_help=True)
@@ -155,6 +183,7 @@ def install():
 def ipython(env, args):
     """Open IPython with project specific variables loaded."""
     context = _load_project_context(env=env)
+    _check_module_importable("IPython")
     os.environ["IPYTHONDIR"] = str(context.project_path / ".ipython")
     if env:
         os.environ["KEDRO_ENV"] = env
@@ -212,25 +241,19 @@ def build_docs(open_docs):
         webbrowser.open(docs_page)
 
 
-@project_group.command("build-reqs")
-def build_reqs():
+@forward_command(project_group, name="build-reqs")
+def build_reqs(args):
     """Build the project dependency requirements."""
     # we cannot use `context.project_path` as in other commands since
     # context instantiation might break due to missing dependencies
     # we attempt to install here
     source_path = get_source_dir(Path.cwd())
-    requirements_path = source_path / "requirements.in"
-    if not requirements_path.is_file():
-        secho("No requirements.in found. Copying contents from requirements.txt...")
-        contents = (source_path / "requirements.txt").read_text()
-        requirements_path.write_text(contents)
-    python_call("piptools", ["compile", str(requirements_path)])
+    _build_reqs(source_path, args)
     secho(
-        (
-            "Requirements built! Please update requirements.in "
-            "if you'd like to make a change in your project's dependencies, "
-            "and re-run build-reqs to generate the new requirements.txt."
-        )
+        "Requirements built! Please update requirements.in "
+        "if you'd like to make a change in your project's dependencies, "
+        "and re-run build-reqs to generate the new requirements.txt.",
+        fg="green",
     )
 
 

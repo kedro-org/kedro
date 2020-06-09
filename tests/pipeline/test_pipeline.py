@@ -289,6 +289,33 @@ class TestValidPipeline:
         names = map(lambda node_: node_.name, partial.nodes)
         assert sorted(names) == sorted(target_list)
 
+    @pytest.mark.parametrize(
+        "target_namespace,expected_namespaces",
+        [
+            ("katie", ["katie", "katie.lisa", "katie.lisa.john"]),
+            ("lisa", ["lisa", "lisa.john"]),
+            ("john", ["john"]),
+            ("katie.lisa", ["katie.lisa", "katie.lisa.john"]),
+            ("katie.lisa.john", ["katie.lisa.john"]),
+        ],
+    )
+    def test_only_nodes_with_namespace(self, target_namespace, expected_namespaces):
+        pipeline = Pipeline(
+            [
+                node(identity, "A", "B", namespace="katie"),
+                node(identity, "B", "C", namespace="lisa"),
+                node(identity, "C", "D", namespace="john"),
+                node(identity, "D", "E", namespace="katie.lisa"),
+                node(identity, "E", "F", namespace="lisa.john"),
+                node(identity, "F", "G", namespace="katie.lisa.john"),
+            ]
+        )
+        resulting_pipeline = pipeline.only_nodes_with_namespaces(target_namespace)
+        for actual_node, expected_namespace in zip(
+            sorted(resulting_pipeline.nodes), expected_namespaces
+        ):
+            assert actual_node.namespace == expected_namespace
+
     def test_free_input(self, input_data):
         nodes = input_data["nodes"]
         inputs = input_data["free_inputs"]
@@ -498,6 +525,13 @@ class TestInvalidPipeline:
         full = Pipeline(pipeline_list_with_lists["nodes"])
         with pytest.raises(ValueError, match=pattern):
             full.only_nodes(*target_node_names)
+
+    @pytest.mark.parametrize("namespace", ["katie", None])
+    def test_only_nodes_with_namespace_empty(self, namespace):
+        pipeline = Pipeline([node(identity, "A", "B", namespace=namespace)])
+        pattern = r"Pipeline does not contain nodes"
+        with pytest.raises(ValueError, match=pattern):
+            pipeline.only_nodes_with_namespaces("non_existent")
 
     def test_duplicate_names(self):
         pattern = r"Pipeline nodes must have unique names\. The following "

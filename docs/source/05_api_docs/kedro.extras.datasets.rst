@@ -17,6 +17,7 @@ Data Sets
     kedro.extras.datasets.dask.ParquetDataSet
     kedro.extras.datasets.geopandas.GeoJSONDataSet
     kedro.extras.datasets.matplotlib.MatplotlibWriter
+    kedro.extras.datasets.holoviews.HoloviewsWriter
     kedro.extras.datasets.networkx.NetworkXDataSet
     kedro.extras.datasets.pandas.CSVDataSet
     kedro.extras.datasets.pandas.ExcelDataSet
@@ -28,8 +29,10 @@ Data Sets
     kedro.extras.datasets.pandas.SQLQueryDataSet
     kedro.extras.datasets.pandas.SQLTableDataSet
     kedro.extras.datasets.pickle.PickleDataSet
+    kedro.extras.datasets.pillow.ImageDataSet
     kedro.extras.datasets.spark.SparkDataSet
     kedro.extras.datasets.spark.SparkHiveDataSet
     kedro.extras.datasets.spark.SparkJDBCDataSet
+    kedro.extras.datasets.tensorflow.TensorFlowModelDataset
     kedro.extras.datasets.text.TextDataSet
     kedro.extras.datasets.yaml.YAMLDataSet

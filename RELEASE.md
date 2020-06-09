@@ -1,9 +1,49 @@
+# Upcoming Release
+
+## Major features and improvements
+* Added the following new datasets.
+
+| Type                                | Description                                                                                                           | Location                           |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| `tensorflow.TensorFlowModelDataset` | Works with `TensorFlow` models using [TensorFlow 2.X](https://www.tensorflow.org/api_docs/python/tf/keras/Model#save) | `kedro.extras.datasets.tensorflow` |
+| `holoviews.HoloviewsWriter`         | Works with `Holoviews` objects (saves as image file)                                                                  | `kedro.extras.datasets.holoviews`  |
+
+* `kedro install` will now compile project dependencies (by running `kedro build-reqs` behind the scenes) before the installation if the `src/requirements.in` file doesn't exist.
+* Added `only_nodes_with_namespaces` in `Pipeline` class to filter only nodes with a specified namespace.
+
+## Bug fixes and other changes
+* Sped up initialization of `spark.SparkHiveDataSet`.
+* Introduced regex filtering to the `DataCatalog.list()` method.
+* Added support of options for building pyarrow table in `pandas.ParquetDataSet`.
+* Add missing `pillow.ImageDataSet` entry to the documentation.
+* Non-alphanumeric characters (except underscore) in dataset name are replaced with `__` in `DataCatalog.datasets`, for ease of access to transcoded datasets.
+* Added [find-kedro](https://github.com/WaylonWalker/find-kedro) and [kedro-static-viz](https://github.com/WaylonWalker/kedro-static-viz) to the list of community plugins.
+* Fixed the bug in IPython startup script ([issue 298](https://github.com/quantumblacklabs/kedro/issues/298)).
+* All unrecognized CLI options in `kedro build-reqs` command are now passed to [pip-compile](https://github.com/jazzband/pip-tools#example-usage-for-pip-compile) call (e.g. `kedro build-reqs --generate-hashes`).
+* `kedro build-reqs` is now called with `-q` option and will no longer print out compiled requirements to the console for security reasons.
+* Linted project template :sparkles: :cake: :sparkles:
+* Documentation improvements:
+  - Corrected bad DataEngineerOne link
+* Improved error message when running `kedro jupyter notebook`, `kedro jupyter lab` or `kedro ipython` with Jupyter/IPython dependencies not being installed.
+* Fixed `%run_viz` line magic for showing kedro viz inside a Jupyter notebook. For the fix to be applied on existing Kedro project, please see the migration guide.
+
+## Breaking changes to the API
+
+### Migration guide from Kedro 0.16.1 to 0.16.2
+
+#### Guide to apply the fix for `%run_viz` line magic in existing project
+
+Even though this release ships a fix for project generated with `kedro==0.16.2`, after upgrading, you will still need to make a change in your existing project if it was generated with `kedro>=0.16.0,<=0.16.1` for the fix to take effect. Specifically, please change the content of your project's IPython init script located at `.ipython/profile_default/startup/00-kedro-init.py` with the content of [this file](https://github.com/quantumblacklabs/kedro/blob/0.16.2/kedro/templates/project/%7B%7B%20cookiecutter.repo_name%20%7D%7D/.ipython/profile_default/startup/00-kedro-init.py). You will also need `kedro-viz>=3.3.1`.
+
+## Thanks for supporting contributions
+[Miguel Rodriguez Gutierrez](https://github.com/MigQ2), [Joel Schwarzmann](https://github.com/datajoely), [w0rdsm1th](https://github.com/w0rdsm1th), [Deepyaman Datta](https://github.com/deepyaman), [Tam-Sanh Nguyen](https://github.com/tamsanh)
+
 # 0.16.1
 
 ## Major features and improvements
 
 ## Bug fixes and other changes
-* Fixed deprecation warnings from `kedro.cli` and `kedro.context` when running `kedro jupyter notebook`
+* Fixed deprecation warnings from `kedro.cli` and `kedro.context` when running `kedro jupyter notebook`.
 * Fixed a bug where `catalog` and `context` were not available in Jupyter Lab and Notebook.
 * Fixed a bug where `kedro build-reqs` would fail if you didn't have your project dependencies installed.
 
@@ -88,7 +128,12 @@
 * Layers are no longer part of the dataset object, as they've moved to the `DataCatalog`.
 * Python 3.5 is no longer supported by the current and all future versions of Kedro.
 
-### Migration guide from Kedro 0.15.* to Upcoming Release
+### Migration guide from Kedro 0.15.* to 0.16.*
+
+#### General Migration
+
+**reminder** [How do I upgrade Kedro](https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#how-do-i-upgrade-kedro) covers a few key things to remember when updating any kedro version.
+
 #### Migration for datasets
 
 Since all the datasets (from `kedro.io` and `kedro.contrib.io`) were moved to `kedro/extras/datasets` you must update the type of all datasets in `<project>/conf/base/catalog.yml` file.
@@ -133,7 +178,7 @@ result = pipeline(
 Since some modules were moved to other locations you need to update import paths appropriately.
 You can find the list of moved files in the [`0.15.6` release notes](https://github.com/quantumblacklabs/kedro/releases/tag/0.15.6) under the section titled `Files with a new location`.
 
-#### Migration for kedro env environment variable
+#### Migration for CLI and KEDRO_ENV environment variable
 > Note: If you haven't made significant changes to your `kedro_cli.py`, it may be easier to simply copy the updated `kedro_cli.py` `.ipython/profile_default/startup/00-kedro-init.py` and from GitHub or a newly generated project into your old project.
 
 * We've removed `KEDRO_ENV_VAR` from `kedro.context`. To get your existing project template working, you'll need to remove all instances of `KEDRO_ENV_VAR` from your project template:

@@ -237,3 +237,21 @@ Go to the **Debugging** section in VS Code and select the newly created remote d
 You will need to set a breakpoint in VS Code as described [above](#debugging) and start the debugger by clicking the green play triangle:
 
 > *Note:* You can find more information on debugging in VS Code [here](https://code.visualstudio.com/docs/python/debugging)
+
+## Configuring the Kedro catalog validation schema
+
+You can enable the Kedro catalog validation schema in your VSCode IDE to enable real-time validation, autocompletion and see information about the different fields in your `catalog` as you write it. To enable this, make sure you have the [YAML plugin](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) installed.
+
+Enter the following in your `settings.json` file:
+
+```json
+{
+  "yaml.schemas": {
+    "https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/static/jsonschema/kedro-catalog-0.16.json": "conf/**/*catalog*"
+  }
+}
+```
+
+and start editing your `catalog` files.
+
+> Different schemas for different Kedro versions can be found [here](https://github.com/quantumblacklabs/kedro/tree/develop/static/jsonschema).

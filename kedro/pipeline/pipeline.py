@@ -97,7 +97,7 @@ class ConfirmNotUniqueError(Exception):
     pass
 
 
-class Pipeline:
+class Pipeline:  # pylint: disable=too-many-public-methods
     """A ``Pipeline`` defined as a collection of ``Node`` objects. This class
     treats nodes as part of a graph representation and provides inputs,
     outputs and execution order.
@@ -405,6 +405,33 @@ class Pipeline:
             )
 
         nodes = [self._nodes_by_name[name] for name in node_names]
+        return Pipeline(nodes)
+
+    def only_nodes_with_namespaces(self, node_namespace: str) -> "Pipeline":
+        """Create a new ``Pipeline`` which will contain only the specified
+        nodes by namespace.
+
+        Args:
+            node_namespace: One node namespace.
+
+        Raises:
+            ValueError: When pipeline contains no pipeline with the specified namespace.
+
+        Returns:
+            A new ``Pipeline`` with nodes starting with a specified namespace.
+
+        """
+        nodes = [
+            n
+            for n in self.nodes
+            if n.namespace and n.namespace.startswith(node_namespace)
+        ]
+        if not nodes:
+            raise ValueError(
+                "Pipeline does not contain nodes with namespace(s) {}.".format(
+                    list(node_namespace)
+                )
+            )
         return Pipeline(nodes)
 
     def _get_nodes_with_inputs_transcode_compatible(

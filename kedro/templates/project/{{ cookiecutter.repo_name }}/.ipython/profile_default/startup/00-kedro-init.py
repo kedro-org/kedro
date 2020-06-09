@@ -2,7 +2,7 @@ import logging.config
 import sys
 from pathlib import Path
 
-from IPython.core.magic import register_line_magic
+from IPython.core.magic import register_line_magic, needs_local_scope
 
 # Find the project root (./../../../)
 startup_error = None
@@ -29,21 +29,27 @@ def reload_kedro(path, line=None):
 
     try:
         path = path or project_path
-        logging.debug("Loading the context from %s", str(path))
-        context = load_context(path)
-        catalog = context.catalog
 
         # remove cached user modules
-        package_name = context.__module__.split(".")[0]
-        to_remove = [mod for mod in sys.modules if mod.startswith(package_name)]
+        context = load_context(path)
+        to_remove = [mod for mod in sys.modules if mod.startswith(context.package_name)]
+        # `del` is used instead of `reload()` because: If the new version of a module does not
+        # define a name that was defined by the old version, the old definition remains.
         for module in to_remove:
             del sys.modules[module]
+
+        logging.debug("Loading the context from %s", str(path))
+        # Reload context to fix `pickle` related error (it is unable to serialize reloaded objects)
+        # Some details can be found here:
+        # https://modwsgi.readthedocs.io/en/develop/user-guides/issues-with-pickle-module.html#packing-and-script-reloading
+        context = load_context(path)
+        catalog = context.catalog
 
         logging.info("** Kedro project %s", str(context.project_name))
         logging.info("Defined global variable `context` and `catalog`")
 
         for line_magic in collect_line_magic():
-            register_line_magic(line_magic)
+            register_line_magic(needs_local_scope(line_magic))
             logging.info("Registered line magic `%s`", line_magic.__name__)
     except Exception as err:
         startup_error = err

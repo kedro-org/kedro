@@ -38,7 +38,7 @@ name = "kedro"
 here = path.abspath(path.dirname(__file__))
 
 
-PANDAS = "pandas>=0.24, <2.0"
+PANDAS = "pandas>=0.24, <1.0.4"  # https://github.com/pandas-dev/pandas/issues/34467
 SPARK = "pyspark>=2.2.0, <3.0"
 HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.4.1"
@@ -88,6 +88,7 @@ biosequence_require = {"biosequence.BioSequenceDataSet": ["biopython>=1.73, <2.0
 dask_require = {"dask.ParquetDataSet": ["dask[complete]>=2.6.0, <3.0"]}
 geopandas_require = {"geopandas.GeoJSONDataSet": ["geopandas<=0.6.0, <1.0"]}
 matplotlib_require = {"matplotlib.MatplotlibWriter": ["matplotlib>=3.0.3, <4.0"]}
+holoviews_require = {"holoviews.HoloviewsWriter": ["holoviews>=1.13.0, <1.14"]}
 networkx_require = {"networkx.NetworkXDataSet": ["networkx>=2.4, <3.0"]}
 pandas_require = {
     "pandas.CSVDataSet": [PANDAS],
@@ -105,6 +106,14 @@ spark_require = {
     "spark.SparkHiveDataSet": [PANDAS, HDFS, S3FS],
     "spark.SparkJDBCDataSet": [PANDAS, HDFS, S3FS],
 }
+tensorflow_required = {
+    "tensorflow.TensorflowModelDataset": [
+        # currently only TensorFlow V2 supported for saving and loading.
+        # V1 requires HDF5 and serializes differently
+        "tensorflow>=2.0.0, <3.0",
+    ]
+}
+yaml_require = {"yaml.YAMLDataSet": [PANDAS, "PyYAML>=4.2, <6.0"]}
 
 extras_require = {
     "api": _collect_requirements(api_require),
@@ -124,21 +133,27 @@ extras_require = {
     ],
     "geopandas": _collect_requirements(geopandas_require),
     "matplotlib": _collect_requirements(matplotlib_require),
+    "holoviews": _collect_requirements(holoviews_require),
     "networkx": _collect_requirements(networkx_require),
     "notebook_templates": ["nbconvert>=5.3.1, <6.0", "nbformat>=4.4.0, <5.0"],
     "pandas": _collect_requirements(pandas_require),
     "pillow": _collect_requirements(pillow_require),
     "profilers": ["memory_profiler>=0.50.0, <1.0"],
     "spark": _collect_requirements(spark_require),
+    "tensorflow": _collect_requirements(tensorflow_required),
+    "yaml": _collect_requirements(yaml_require),
     **api_require,
     **biosequence_require,
     **dask_require,
     **geopandas_require,
     **matplotlib_require,
+    **holoviews_require,
     **networkx_require,
     **pandas_require,
     **pillow_require,
     **spark_require,
+    **tensorflow_required,
+    **yaml_require,
 }
 
 extras_require["all"] = _collect_requirements(extras_require)

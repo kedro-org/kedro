@@ -29,9 +29,11 @@
 
 Feature: build-docs target in new project
 
+  @fresh_venv
   Scenario: Execute build-docs target
     Given I have prepared a config file with example code
     And I have run a non-interactive kedro new
+    Given I have executed the kedro command "install"
     When I execute the kedro command "build-docs"
     Then I should get a successful exit code
     And docs should be generated

@@ -8,8 +8,8 @@
 | `tensorflow.TensorFlowModelDataset` | Works with `TensorFlow` models using [TensorFlow 2.X](https://www.tensorflow.org/api_docs/python/tf/keras/Model#save) | `kedro.extras.datasets.tensorflow` |
 | `holoviews.HoloviewsWriter`         | Works with `Holoviews` objects (saves as image file)                                                                  | `kedro.extras.datasets.holoviews`  |
 
-### CLI
 * `kedro install` will now compile project dependencies (by running `kedro build-reqs` behind the scenes) before the installation if the `src/requirements.in` file doesn't exist.
+* Added `only_nodes_with_namespaces` in `Pipeline` class to filter only nodes with a specified namespace.
 
 ## Bug fixes and other changes
 * Sped up initialization of `spark.SparkHiveDataSet`.

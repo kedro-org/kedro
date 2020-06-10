@@ -29,6 +29,7 @@
 
 ## Breaking changes to the API
 * Deleted the deprecated `kedro.cli` and `kedro.context` modules in favor of `kedro.framework.cli` and `kedro.framework.context` respectively.
+* The pipeline-specific `catalog.yml` file is no longer automatically created for modular pipelines when doing `kedro pipeline create`.
 
 ### Migration guide from Kedro 0.16.1 to 0.16.2
 

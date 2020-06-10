@@ -28,6 +28,7 @@
 * Fixed `%run_viz` line magic for showing kedro viz inside a Jupyter notebook. For the fix to be applied on existing Kedro project, please see the migration guide.
 
 ## Breaking changes to the API
+* Deleted the deprecated `kedro.cli` and `kedro.context` modules in favor of `kedro.framework.cli` and `kedro.framework.context` respectively.
 
 ### Migration guide from Kedro 0.16.1 to 0.16.2
 

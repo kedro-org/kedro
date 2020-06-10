@@ -27,6 +27,7 @@
   - Corrected bad DataEngineerOne link
 * Improved error message when running `kedro jupyter notebook`, `kedro jupyter lab` or `kedro ipython` with Jupyter/IPython dependencies not being installed.
 * Fixed `%run_viz` line magic for showing kedro viz inside a Jupyter notebook. For the fix to be applied on existing Kedro project, please see the migration guide.
+* Cleanup S3 cache in SparkDataSet.
 
 ## Breaking changes to the API
 

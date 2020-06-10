@@ -244,7 +244,7 @@ class SparkDataSet(AbstractVersionedDataSet):
                 )
             _s3 = S3FileSystem(client_kwargs=credentials)
             exists_function = _s3.exists
-            glob_function = _s3.glob
+            glob_function = partial(_s3.glob, refresh=True)
             path = PurePosixPath(filepath)
 
         elif fs_prefix == "hdfs://" and version:
@@ -261,7 +261,7 @@ class SparkDataSet(AbstractVersionedDataSet):
 
             _hdfs_client = KedroHdfsInsecureClient(**credentials)
             exists_function = _hdfs_client.hdfs_exists
-            glob_function = _hdfs_client.hdfs_glob
+            glob_function = _hdfs_client.hdfs_glob  # type: ignore
             path = PurePosixPath(filepath)
 
         else:

@@ -291,6 +291,10 @@ class TestSparkDataSet:
         with pytest.raises(AttributeError, match=pattern):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
+    def test_s3_glob_refresh(self):
+        spark_dataset = SparkDataSet(filepath="s3a://bucket/data")
+        assert spark_dataset._glob_function.keywords == {"refresh": True}
+
 
 class TestSparkDataSetVersionedLocal:
     def test_no_version(self, versioned_dataset_local):

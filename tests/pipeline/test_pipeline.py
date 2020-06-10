@@ -310,7 +310,7 @@ class TestValidPipeline:
                 node(identity, "F", "G", namespace="katie.lisa.john"),
             ]
         )
-        resulting_pipeline = pipeline.only_nodes_with_namespaces(target_namespace)
+        resulting_pipeline = pipeline.only_nodes_with_namespace(target_namespace)
         for actual_node, expected_namespace in zip(
             sorted(resulting_pipeline.nodes), expected_namespaces
         ):
@@ -531,7 +531,7 @@ class TestInvalidPipeline:
         pipeline = Pipeline([node(identity, "A", "B", namespace=namespace)])
         pattern = r"Pipeline does not contain nodes"
         with pytest.raises(ValueError, match=pattern):
-            pipeline.only_nodes_with_namespaces("non_existent")
+            pipeline.only_nodes_with_namespace("non_existent")
 
     def test_duplicate_names(self):
         pattern = r"Pipeline nodes must have unique names\. The following "

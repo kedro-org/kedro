@@ -10,7 +10,7 @@
 | `holoviews.HoloviewsWriter`         | Works with `Holoviews` objects (saves as image file)                                                                  | `kedro.extras.datasets.holoviews`  |
 
 * `kedro install` will now compile project dependencies (by running `kedro build-reqs` behind the scenes) before the installation if the `src/requirements.in` file doesn't exist.
-* Added `only_nodes_with_namespaces` in `Pipeline` class to filter only nodes with a specified namespace.
+* Added `only_nodes_with_namespace` in `Pipeline` class to filter only nodes with a specified namespace.
 
 ## Bug fixes and other changes
 * Sped up initialization of `spark.SparkHiveDataSet`.

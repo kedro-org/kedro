@@ -4,7 +4,8 @@
 * Added the following new datasets.
 
 | Type                                | Description                                                                                                           | Location                           |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------- | -----------------------------------|
+| `pandas.AppendableExcelDataSet`     | Works with `Excel` file opened in append mode                                                                         | `kedro.extras.datasets.pandas`     |
 | `tensorflow.TensorFlowModelDataset` | Works with `TensorFlow` models using [TensorFlow 2.X](https://www.tensorflow.org/api_docs/python/tf/keras/Model#save) | `kedro.extras.datasets.tensorflow` |
 | `holoviews.HoloviewsWriter`         | Works with `Holoviews` objects (saves as image file)                                                                  | `kedro.extras.datasets.holoviews`  |
 

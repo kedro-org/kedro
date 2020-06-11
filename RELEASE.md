@@ -12,6 +12,7 @@
 * `kedro install` will now compile project dependencies (by running `kedro build-reqs` behind the scenes) before the installation if the `src/requirements.in` file doesn't exist.
 * Added `only_nodes_with_namespace` in `Pipeline` class to filter only nodes with a specified namespace.
 * Added the `kedro pipeline delete` command to help delete unwanted or unused pipelines (it won't remove references to the pipeline in your `create_pipelines()` code).
+* Added the `kedro pipeline package` command to help package up a modular pipeline. It will bundle up the pipeline source code, tests, and parameters configuration into a .whl file.
 
 ## Bug fixes and other changes
 * Sped up initialization of `spark.SparkHiveDataSet`.

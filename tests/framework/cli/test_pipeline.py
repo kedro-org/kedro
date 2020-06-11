@@ -28,6 +28,7 @@
 
 import shutil
 from pathlib import Path
+from zipfile import ZipFile
 
 import pytest
 import yaml
@@ -63,6 +64,14 @@ def cleanup_pipelines(dummy_project):
 
         tests = dummy_project / "src" / "tests" / "pipelines" / pipeline
         shutil.rmtree(str(tests))
+
+
+@pytest.fixture
+def cleanup_dist(dummy_project):
+    yield
+    dist_dir = dummy_project / "src" / "dist"
+    if dist_dir.exists():
+        shutil.rmtree(str(dist_dir))
 
 
 @pytest.fixture(params=["base"])
@@ -362,7 +371,7 @@ class TestPipelineDeleteCommand:
         assert not conf_path.exists()
 
     def test_delete_pipeline_fail(self, dummy_project, fake_kedro_cli, mocker):
-        conf_path = dummy_project / "conf" / "base" / "pipelines" / PIPELINE_NAME
+        source_path = dummy_project / "src" / PACKAGE_NAME / "pipelines" / PIPELINE_NAME
 
         mocker.patch(
             "kedro.framework.cli.pipeline.shutil.rmtree",
@@ -373,7 +382,7 @@ class TestPipelineDeleteCommand:
         )
 
         assert result.exit_code, result.output
-        assert f"Deleting `{conf_path}`: FAILED" in result.output
+        assert f"Deleting `{source_path}`: FAILED" in result.output
 
     @pytest.mark.parametrize(
         "bad_name,error_message",
@@ -498,6 +507,175 @@ class TestPipelineDescribeCommand:
             "[__default__, de, ds]\n"
         )
         assert result.output == expected_output
+
+
+@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log", "cleanup_dist")
+class TestPipelinePackageCommand:
+    @pytest.mark.parametrize(
+        "alias_opt,package_name,success_message",
+        [
+            ([], PIPELINE_NAME, f"Pipeline `{PIPELINE_NAME}` packaged!"),
+            (
+                ["--alias", "alternative"],
+                "alternative",
+                f"Pipeline `{PIPELINE_NAME}` packaged as `alternative`!",
+            ),
+        ],
+    )
+    def test_package_pipeline(
+        self, dummy_project, fake_kedro_cli, alias_opt, package_name, success_message
+    ):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["pipeline", "create", PIPELINE_NAME]
+        )
+        assert result.exit_code == 0
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["pipeline", "package", PIPELINE_NAME] + alias_opt
+        )
+
+        assert result.exit_code == 0
+        assert success_message in result.output
+
+        wheel_location = dummy_project / "src" / "dist"
+        assert f"Location: {wheel_location}" in result.output
+
+        wheel_file = wheel_location / f"{package_name}-0.1-py3-none-any.whl"
+        assert wheel_file.is_file()
+        assert len(list((wheel_location).iterdir())) == 1
+
+        wheel_contents = set(ZipFile(str(wheel_file)).namelist())
+        expected_files = {
+            f"{package_name}/__init__.py",
+            f"{package_name}/README.md",
+            f"{package_name}/nodes.py",
+            f"{package_name}/pipeline.py",
+            f"{package_name}/config/parameters.yml",
+            "tests/__init__.py",
+            "tests/test_pipeline.py",
+        }
+        assert expected_files <= wheel_contents
+
+    @pytest.mark.parametrize("existing_dir", [True, False])
+    def test_pipeline_package_to_destination(
+        self, fake_kedro_cli, existing_dir, tmp_path,
+    ):
+        destination = (tmp_path / "in" / "here").resolve()
+        if existing_dir:
+            destination.mkdir(parents=True)
+
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["pipeline", "create", PIPELINE_NAME]
+        )
+        assert result.exit_code == 0
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli,
+            ["pipeline", "package", PIPELINE_NAME, "--destination", str(destination)],
+        )
+
+        assert result.exit_code == 0
+        success_message = (
+            f"Pipeline `{PIPELINE_NAME}` packaged! Location: {destination}"
+        )
+        assert success_message in result.output
+
+        wheel_file = destination / f"{PIPELINE_NAME}-0.1-py3-none-any.whl"
+        assert wheel_file.is_file()
+
+        wheel_contents = set(ZipFile(str(wheel_file)).namelist())
+        expected_files = {
+            f"{PIPELINE_NAME}/__init__.py",
+            f"{PIPELINE_NAME}/README.md",
+            f"{PIPELINE_NAME}/nodes.py",
+            f"{PIPELINE_NAME}/pipeline.py",
+            f"{PIPELINE_NAME}/config/parameters.yml",
+            "tests/__init__.py",
+            "tests/test_pipeline.py",
+        }
+        assert expected_files <= wheel_contents
+
+    def test_pipeline_package_overwrites_wheel(
+        self, fake_kedro_cli, tmp_path,
+    ):
+        destination = (tmp_path / "in" / "here").resolve()
+        destination.mkdir(parents=True)
+        wheel_file = destination / f"{PIPELINE_NAME}-0.1-py3-none-any.whl"
+        wheel_file.touch()
+
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["pipeline", "create", PIPELINE_NAME]
+        )
+        assert result.exit_code == 0
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli,
+            ["pipeline", "package", PIPELINE_NAME, "--destination", str(destination)],
+        )
+        assert result.exit_code == 0
+
+        warning_message = f"Package file {wheel_file} will be overwritten!"
+        success_message = (
+            f"Pipeline `{PIPELINE_NAME}` packaged! Location: {destination}"
+        )
+        assert warning_message in result.output
+        assert success_message in result.output
+
+        assert wheel_file.is_file()
+        wheel_contents = set(ZipFile(str(wheel_file)).namelist())
+        expected_files = {
+            f"{PIPELINE_NAME}/__init__.py",
+            f"{PIPELINE_NAME}/README.md",
+            f"{PIPELINE_NAME}/nodes.py",
+            f"{PIPELINE_NAME}/pipeline.py",
+            f"{PIPELINE_NAME}/config/parameters.yml",
+            "tests/__init__.py",
+            "tests/test_pipeline.py",
+        }
+        assert expected_files <= wheel_contents
+
+    @pytest.mark.parametrize(
+        "bad_alias,error_message",
+        [
+            ("bad name", LETTER_ERROR),
+            ("bad%name", LETTER_ERROR),
+            ("1bad", FIRST_CHAR_ERROR),
+            ("a", TOO_SHORT_ERROR),
+        ],
+    )
+    def test_package_pipeline_bad_alias(self, fake_kedro_cli, bad_alias, error_message):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli,
+            ["pipeline", "package", PIPELINE_NAME, "--alias", bad_alias],
+        )
+        assert result.exit_code
+        assert error_message in result.output
+
+    def test_package_pipeline_no_config(self, dummy_project, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["pipeline", "create", PIPELINE_NAME, "--skip-config"]
+        )
+        assert result.exit_code == 0
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["pipeline", "package", PIPELINE_NAME]
+        )
+
+        assert result.exit_code == 0
+        assert f"Pipeline `{PIPELINE_NAME}` packaged!" in result.output
+        wheel_file = (
+            dummy_project / "src" / "dist" / f"{PIPELINE_NAME}-0.1-py3-none-any.whl"
+        )
+        assert wheel_file.is_file()
+        assert len(list((dummy_project / "src" / "dist").iterdir())) == 1
+
+        wheel_contents = set(ZipFile(str(wheel_file)).namelist())
+        expected_files = {
+            f"{PIPELINE_NAME}/__init__.py",
+            f"{PIPELINE_NAME}/README.md",
+            f"{PIPELINE_NAME}/nodes.py",
+            f"{PIPELINE_NAME}/pipeline.py",
+            "tests/__init__.py",
+            "tests/test_pipeline.py",
+        }
+        assert expected_files <= wheel_contents
+        assert f"{PIPELINE_NAME}/config/parameters.yml" not in wheel_contents
 
 
 class TestSyncDirs:

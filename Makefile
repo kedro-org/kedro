@@ -1,6 +1,6 @@
 install: build-docs
-	rm -rf kedro/html
-	cp -r docs/build/html kedro
+	rm -rf kedro/framework/html
+	cp -r docs/build/html kedro/framework
 	pip install .
 
 clean:

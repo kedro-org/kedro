@@ -4,12 +4,15 @@
 * Added the following new datasets.
 
 | Type                                | Description                                                                                                           | Location                           |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------- | -----------------------------------|
+| `pandas.AppendableExcelDataSet`     | Works with `Excel` file opened in append mode                                                                         | `kedro.extras.datasets.pandas`     |
 | `tensorflow.TensorFlowModelDataset` | Works with `TensorFlow` models using [TensorFlow 2.X](https://www.tensorflow.org/api_docs/python/tf/keras/Model#save) | `kedro.extras.datasets.tensorflow` |
 | `holoviews.HoloviewsWriter`         | Works with `Holoviews` objects (saves as image file)                                                                  | `kedro.extras.datasets.holoviews`  |
 
 * `kedro install` will now compile project dependencies (by running `kedro build-reqs` behind the scenes) before the installation if the `src/requirements.in` file doesn't exist.
-* Added `only_nodes_with_namespaces` in `Pipeline` class to filter only nodes with a specified namespace.
+* Added `only_nodes_with_namespace` in `Pipeline` class to filter only nodes with a specified namespace.
+* Added the `kedro pipeline delete` command to help delete unwanted or unused pipelines (it won't remove references to the pipeline in your `create_pipelines()` code).
+* Added the `kedro pipeline package` command to help package up a modular pipeline. It will bundle up the pipeline source code, tests, and parameters configuration into a .whl file.
 
 ## Bug fixes and other changes
 * Sped up initialization of `spark.SparkHiveDataSet`.
@@ -26,6 +29,7 @@
   - Corrected bad DataEngineerOne link
 * Improved error message when running `kedro jupyter notebook`, `kedro jupyter lab` or `kedro ipython` with Jupyter/IPython dependencies not being installed.
 * Fixed `%run_viz` line magic for showing kedro viz inside a Jupyter notebook. For the fix to be applied on existing Kedro project, please see the migration guide.
+* Cleanup S3 cache in SparkDataSet.
 
 ## Breaking changes to the API
 * Deleted the deprecated `kedro.cli` and `kedro.context` modules in favor of `kedro.framework.cli` and `kedro.framework.context` respectively.

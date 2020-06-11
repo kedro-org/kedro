@@ -407,7 +407,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         nodes = [self._nodes_by_name[name] for name in node_names]
         return Pipeline(nodes)
 
-    def only_nodes_with_namespaces(self, node_namespace: str) -> "Pipeline":
+    def only_nodes_with_namespace(self, node_namespace: str) -> "Pipeline":
         """Create a new ``Pipeline`` which will contain only the specified
         nodes by namespace.
 

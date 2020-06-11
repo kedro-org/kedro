@@ -93,6 +93,7 @@ networkx_require = {"networkx.NetworkXDataSet": ["networkx>=2.4, <3.0"]}
 pandas_require = {
     "pandas.CSVDataSet": [PANDAS],
     "pandas.ExcelDataSet": [PANDAS, "xlrd>=1.0.0, <2.0", "xlsxwriter>=1.0.0, <2.0"],
+    "pandas.AppendableExcelDataSet": [PANDAS, "openpyxl>=3.0.3, <4.0"],
     "pandas.FeatherDataSet": [PANDAS],
     "pandas.GBQTableDataSet": [PANDAS, "pandas-gbq>=0.12.0, <1.0"],
     "pandas.HDFDataSet": [PANDAS, "tables>=3.6, <4.0"],

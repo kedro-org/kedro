@@ -86,7 +86,7 @@ class TestHoloviewsWriter:
         fs_mock = mocker.patch("fsspec.filesystem")
         writer = HoloviewsWriter(str(tmp_path), fs_args)
 
-        fs_mock.assert_called_once_with("file", storage_option="value")
+        fs_mock.assert_called_once_with("file", auto_mkdir=True, storage_option="value")
         assert writer._fs_open_args_save == fs_args["open_args_save"]
 
     def test_load_fail(self, hv_writer):
@@ -122,7 +122,11 @@ class TestHoloviewsWriter:
             ("/tmp/test.png", LocalFileSystem, {}),
             ("gcs://bucket/file.png", GCSFileSystem, {}),
             ("https://example.com/file.png", HTTPFileSystem, {}),
-            ("abfs://bucket/file.png", AzureBlobFileSystem, {"account_name": "test"}),
+            (
+                "abfs://bucket/file.png",
+                AzureBlobFileSystem,
+                {"account_name": "test", "account_key": "test"},
+            ),
         ],
     )
     def test_protocol_usage(self, filepath, instance_type, credentials):

@@ -30,10 +30,10 @@
 import json
 from pathlib import PosixPath
 
+import boto3
 import matplotlib
 import matplotlib.pyplot as plt
 import pytest
-import s3fs
 from moto import mock_s3
 from s3fs import S3FileSystem
 
@@ -41,8 +41,7 @@ from kedro.extras.datasets.matplotlib import MatplotlibWriter
 from kedro.io import DataSetError, Version
 
 BUCKET_NAME = "test_bucket"
-AWS_CREDENTIALS = dict(aws_access_key_id="testing", aws_secret_access_key="testing")
-CREDENTIALS = {"client_kwargs": AWS_CREDENTIALS}
+AWS_CREDENTIALS = {"key": "testing", "secret": "testing"}
 KEY_PATH = "matplotlib"
 COLOUR_LIST = ["blue", "green", "red"]
 FULL_PATH = "s3://{}/{}".format(BUCKET_NAME, KEY_PATH)
@@ -80,7 +79,7 @@ def mock_dict_plot():
 def mocked_s3_bucket():
     """Create a bucket for testing using moto."""
     with mock_s3():
-        conn = s3fs.core.boto3.client("s3", **AWS_CREDENTIALS)
+        conn = boto3.client("s3")
         conn.create_bucket(Bucket=BUCKET_NAME)
         yield conn
 
@@ -104,7 +103,7 @@ def mocked_encrypted_s3_bucket():
     bucket_policy = json.dumps(bucket_policy)
 
     with mock_s3():
-        conn = s3fs.core.boto3.client("s3", **AWS_CREDENTIALS)
+        conn = boto3.client("s3")
         conn.create_bucket(Bucket=BUCKET_NAME)
         conn.put_bucket_policy(Bucket=BUCKET_NAME, Policy=bucket_policy)
         yield conn
@@ -123,7 +122,7 @@ def plot_writer(
 ):  # pylint: disable=unused-argument
     return MatplotlibWriter(
         filepath=FULL_PATH,
-        credentials=CREDENTIALS,
+        credentials=AWS_CREDENTIALS,
         fs_args=fs_args,
         save_args=save_args,
     )
@@ -198,7 +197,7 @@ class TestMatplotlibWriter:
         normal_encryped_writer = MatplotlibWriter(
             fs_args={"s3_additional_kwargs": {"ServerSideEncryption": "AES256"}},
             filepath=FULL_PATH,
-            credentials=CREDENTIALS,
+            credentials=AWS_CREDENTIALS,
         )
 
         normal_encryped_writer.save(mock_single_plot)

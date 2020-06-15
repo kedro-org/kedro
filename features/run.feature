@@ -36,6 +36,7 @@ Feature: Run Project
 
     Given I have prepared a config file with example code
     And I have run a non-interactive kedro new
+    And I have updated kedro requirements
     And I have executed the kedro command "install"
     When I execute the kedro command "run"
     Then I should get a successful exit code
@@ -45,6 +46,7 @@ Feature: Run Project
   Scenario: Run default python entry point without example code
     Given I have prepared a config file without example code
     And I have run a non-interactive kedro new
+    And I have updated kedro requirements
     And I have executed the kedro command "install"
     When I execute the kedro command "run"
     Then I should get an error exit code
@@ -54,6 +56,7 @@ Feature: Run Project
     Given I have prepared a config file with example code
     And I have run a non-interactive kedro new
     And I have prepared a run_config file with config options
+    And I have updated kedro requirements
     And I have executed the kedro command "install"
     When I execute the kedro command "run --config run_config.yml"
     Then I should get a successful exit code
@@ -63,6 +66,7 @@ Feature: Run Project
     Given I have prepared a config file with example code
     And I have run a non-interactive kedro new
     And I have prepared a run_config file with config options
+    And I have updated kedro requirements
     And I have executed the kedro command "install"
     When I execute the kedro command "run --config run_config.yml --pipeline __default__"
     Then I should get a successful exit code

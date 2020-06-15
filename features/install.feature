@@ -31,6 +31,7 @@ Feature: install target in new project
   Background:
     Given I have prepared a config file with example code
     And I have run a non-interactive kedro new
+    And I have updated kedro requirements
 
   Scenario: Execute install target
     Then src/requirements.in must not exist

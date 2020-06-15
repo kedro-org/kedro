@@ -450,10 +450,14 @@ def update_kedro_req(context: behave.runner.Context):
     """
     reqs_path = context.root_project_dir / "src" / "requirements.txt"
     kedro_reqs = "-r {}\n".format(str(context.requirements_path))
+    kedro_with_pandas_reqs = kedro_reqs + "pandas\n"
 
     if reqs_path.is_file():
         old_reqs = reqs_path.read_text()
-        new_reqs = re.sub(r"#?kedro\[pandas.CSVDataSet\]==.*\n", kedro_reqs, old_reqs)
+        new_reqs = re.sub(
+            r"#?kedro\[pandas.CSVDataSet\]==.*\n", kedro_with_pandas_reqs, old_reqs
+        )
+        new_reqs = re.sub(r"#?kedro==.*\n", kedro_reqs, new_reqs)
         assert old_reqs != new_reqs
         reqs_path.write_text(new_reqs)
 

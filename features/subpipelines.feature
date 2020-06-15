@@ -9,6 +9,7 @@ Feature: Run subpipelines
     And I have defined a node "node_3" tagged with "apple", "orange", "banana", "cherry"
     And I have defined a node "node_4" tagged with "apple", "cherry"
     And I have set the project log level to "DEBUG"
+    And I have updated kedro requirements
     And I have executed the kedro command "install"
 
   Scenario: Run subpipeline of four nodes using two tags with discrete ranges

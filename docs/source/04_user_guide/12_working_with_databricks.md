@@ -1,6 +1,6 @@
 # Working with Databricks
 
-> *Note:* This documentation is based on `Kedro 0.16.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 ## Databricks Connect (recommended)
 We recommend using [Databricks Connect](https://pypi.org/project/databricks-connect/) to easily execute your Kedro pipeline on a Databricks cluster.

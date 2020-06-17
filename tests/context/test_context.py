@@ -29,7 +29,7 @@
 import configparser
 import json
 import re
-from pathlib import Path, PureWindowsPath
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any, Dict
 
 import pandas as pd
@@ -792,12 +792,12 @@ def test_is_relative_path(path_string: str, expected: bool):
 
 
 def test_expand_path_raises_value_error_on_relative_project_path():
+    path = Path("relative/path")
     with pytest.raises(ValueError) as excinfo:
-        _expand_path(project_path=Path("relative/path"), conf_dictionary={})
+        _expand_path(project_path=path, conf_dictionary={})
 
     assert (
-        str(excinfo.value)
-        == "project_path must be an absolute path. Received: relative/path"
+        str(excinfo.value) == f"project_path must be an absolute path. Received: {path}"
     )
 
 
@@ -805,12 +805,12 @@ def test_expand_path_raises_value_error_on_relative_project_path():
     "project_path,input_conf,expected",
     [
         (
-            Path("/tmp"),
+            PurePosixPath("/tmp"),
             {"handler": {"filename": "logs/info.log"}},
             {"handler": {"filename": "/tmp/logs/info.log"}},
         ),
         (
-            Path("/User/kedro"),
+            PurePosixPath("/User/kedro"),
             {"my_dataset": {"filepath": "data/01_raw/dataset.json"}},
             {"my_dataset": {"filepath": "/User/kedro/data/01_raw/dataset.json"}},
         ),
@@ -821,7 +821,7 @@ def test_expand_path_raises_value_error_on_relative_project_path():
         ),
         # test: the function shouldn't modify paths for key not associated with filepath
         (
-            Path("/User/kedro"),
+            PurePosixPath("/User/kedro"),
             {"my_dataset": {"fileurl": "relative/url"}},
             {"my_dataset": {"fileurl": "relative/url"}},
         ),
@@ -837,12 +837,12 @@ def test_expand_path_for_all_known_filepath_keys(
     "project_path,input_conf,expected",
     [
         (
-            Path("/tmp"),
+            PurePosixPath("/tmp"),
             {"handler": {"filename": "/usr/local/logs/info.log"}},
             {"handler": {"filename": "/usr/local/logs/info.log"}},
         ),
         (
-            Path("/User/kedro"),
+            PurePosixPath("/User/kedro"),
             {"my_dataset": {"filepath": "s3://data/01_raw/dataset.json"}},
             {"my_dataset": {"filepath": "s3://data/01_raw/dataset.json"}},
         ),
@@ -915,7 +915,7 @@ class TestValidateSourcePath:
         source_path = (tmp_path / source_dir).resolve()
         source_path.mkdir(parents=True, exist_ok=True)
 
-        pattern = (
+        pattern = re.escape(
             f"Source path '{source_path}' has to be relative to your project root "
             f"'{tmp_path.resolve()}'"
         )
@@ -925,6 +925,6 @@ class TestValidateSourcePath:
     def test_non_existent_source_path(self, tmp_path):
         source_path = (tmp_path / "non_existent").resolve()
 
-        pattern = f"Source path '{source_path}' cannot be found."
+        pattern = re.escape(f"Source path '{source_path}' cannot be found.")
         with pytest.raises(KedroContextError, match=pattern):
             validate_source_path(source_path, tmp_path.resolve())

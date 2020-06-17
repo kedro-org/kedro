@@ -36,7 +36,7 @@ import os
 import re
 import sys
 from copy import deepcopy
-from pathlib import Path, PureWindowsPath
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any, Dict, Iterable, Tuple, Union
 from urllib.parse import urlparse
 from warnings import warn
@@ -92,7 +92,7 @@ def _is_relative_path(path_string: str) -> bool:
     if is_remote_path:
         return False
 
-    is_absolute_path = Path(path_string).is_absolute()
+    is_absolute_path = PurePosixPath(path_string).is_absolute()
     if is_absolute_path:
         return False
 

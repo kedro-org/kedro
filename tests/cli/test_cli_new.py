@@ -331,25 +331,24 @@ class TestNewFromConfig:
 
     def test_output_dir_with_tilde_in_path(self, mocker):
         """Check the error if the output directory contains "~" ."""
-        home_dir = os.path.join("/home", "directory")
+        home_dir = str(Path("/home") / "directory")
         output_dir = os.path.join("~", "here")
 
         expected = os.path.join(home_dir, "here")
 
         mocker.patch.dict("os.environ", {"HOME": home_dir, "USERPROFILE": home_dir})
-        actual = _fix_user_path(output_dir)
-        assert actual == expected
+        actual = Path(_fix_user_path(output_dir))
+        assert str(actual).lstrip(actual.drive) == expected
 
     def test_output_dir_with_relative_path(self, mocker):
         """Check the error if the output directory contains a relative path."""
-        home_dir = os.path.join("/home", "directory")
+        home_dir = str(Path("/home") / "directory")
         current_dir = os.path.join(home_dir, "current", "directory")
         output_dir = os.path.join("path", "to", "here")
 
         expected = os.path.join(current_dir, output_dir)
 
-        mocker.patch.dict("os.environ", {"HOME": home_dir, "USERPROFILE": home_dir})
-        mocker.patch("os.getcwd", return_value=current_dir)
+        mocker.patch("os.path.abspath", return_value=expected)
         actual = _fix_user_path(output_dir)
         assert actual == expected
 

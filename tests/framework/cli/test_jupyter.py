@@ -26,7 +26,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import json
-import sys
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
@@ -208,9 +207,7 @@ class TestJupyterLabCommand:
 
     @pytest.mark.parametrize("help_flag", ["-h", "--help"])
     def test_help(self, help_flag, fake_kedro_cli, fake_ipython_message):
-        result = CliRunner().invoke(
-            fake_kedro_cli.cli, [sys.executable, "-m", "jupyter", "lab", help_flag]
-        )
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["jupyter", "lab", help_flag])
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_not_called()
 

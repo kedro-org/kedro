@@ -38,7 +38,7 @@ from shapely.geometry import Point
 
 from kedro.extras.datasets.geopandas import GeoJSONDataSet
 from kedro.io import DataSetError
-from kedro.io.core import Version, generate_timestamp
+from kedro.io.core import PROTOCOL_DELIMITER, Version, generate_timestamp
 
 
 @pytest.fixture(params=[None])
@@ -149,10 +149,7 @@ class TestGeoJSONDataSet:
         geojson_data_set = GeoJSONDataSet(filepath=filepath)
         assert isinstance(geojson_data_set._fs, instance_type)
 
-        if geojson_data_set._protocol == "https":
-            path = filepath.split("://")[-1]
-        else:
-            path = geojson_data_set._fs._strip_protocol(filepath)
+        path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
 
         assert str(geojson_data_set._filepath) == path
         assert isinstance(geojson_data_set._filepath, PurePosixPath)

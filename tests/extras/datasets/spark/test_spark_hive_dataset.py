@@ -48,27 +48,34 @@ TESTSPARKDIR = "test_spark_dir"
 @pytest.fixture(scope="module")
 def spark_hive_session(replace_spark_default_getorcreate):
     SparkSession.builder.getOrCreate = replace_spark_default_getorcreate
-    with TemporaryDirectory(TESTSPARKDIR) as tmpdir:
-        spark = (
-            SparkSession.builder.config(
-                "spark.local.dir", (Path(tmpdir) / "spark_local").absolute()
+    try:
+        with TemporaryDirectory(TESTSPARKDIR) as tmpdir:
+            spark = (
+                SparkSession.builder.config(
+                    "spark.local.dir", (Path(tmpdir) / "spark_local").absolute()
+                )
+                .config(
+                    "spark.sql.warehouse.dir", (Path(tmpdir) / "warehouse").absolute()
+                )
+                .config(
+                    "javax.jdo.option.ConnectionURL",
+                    "jdbc:derby:;databaseName={metastore_db_path};create=true".format(
+                        metastore_db_path=(Path(tmpdir) / "warehouse_db").absolute()
+                    ),
+                )
+                .enableHiveSupport()
+                .getOrCreate()
             )
-            .config("spark.sql.warehouse.dir", (Path(tmpdir) / "warehouse").absolute())
-            .config(
-                "javax.jdo.option.ConnectionURL",
-                "jdbc:derby:;databaseName={metastore_db_path};create=true".format(
-                    metastore_db_path=(Path(tmpdir) / "warehouse_db").absolute()
-                ),
-            )
-            .enableHiveSupport()
-            .getOrCreate()
-        )
-        yield spark
+            yield spark
 
-        # This fixture should be a dependency of other fixtures dealing with spark hive data
-        # in this module so that it always exits last and stops the spark session
-        # after tests are finished.
-        spark.stop()
+            # This fixture should be a dependency of other fixtures dealing with spark hive data
+            # in this module so that it always exits last and stops the spark session
+            # after tests are finished.
+            spark.stop()
+    except PermissionError:  # pragma: no cover
+        # On Windows machine TemporaryDirectory can't be removed because some
+        # files are still used by Java process.
+        pass
 
     SparkSession.builder.getOrCreate = UseTheSparkSessionFixtureOrMock
 

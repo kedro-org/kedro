@@ -161,22 +161,21 @@ class MatplotlibWriter(AbstractVersionedDataSet):
         )
 
     def _save(self, data: Union[figure, List[figure], Dict[str, figure]]) -> None:
-        save_path = get_filepath_str(self._get_save_path(), self._protocol)
+        save_path = self._get_save_path()
 
         if isinstance(data, list):
             for index, plot in enumerate(data):
-                full_key_path = self._fs.pathsep.join(
-                    [save_path, "{}.png".format(index)]
+                full_key_path = get_filepath_str(
+                    save_path / f"{index}.png", self._protocol
                 )
                 self._save_to_fs(full_key_path=full_key_path, plot=plot)
-
         elif isinstance(data, dict):
             for plot_name, plot in data.items():
-                full_key_path = self._fs.pathsep.join([save_path, plot_name])
+                full_key_path = get_filepath_str(save_path / plot_name, self._protocol)
                 self._save_to_fs(full_key_path=full_key_path, plot=plot)
-
         else:
-            self._save_to_fs(full_key_path=save_path, plot=data)
+            full_key_path = get_filepath_str(save_path, self._protocol)
+            self._save_to_fs(full_key_path=full_key_path, plot=data)
 
         self._invalidate_cache()
 

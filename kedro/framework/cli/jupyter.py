@@ -195,10 +195,9 @@ def convert_notebook(all_flag, overwrite_flag, filepath, env):
     Should not be provided if --all flag is already present.
     """
     context = _load_project_context(env=env)
-    project_path = context.project_path
-    _update_ipython_dir(project_path)
+    _update_ipython_dir(context.project_path)
 
-    source_path = get_source_dir(project_path)
+    source_path = get_source_dir(context.project_path)
 
     if not filepath and not all_flag:
         secho(
@@ -211,7 +210,7 @@ def convert_notebook(all_flag, overwrite_flag, filepath, env):
         # pathlib glob does not ignore hidden directories,
         # whereas Python glob does, which is more useful in
         # ensuring checkpoints will not be included
-        pattern = project_path / "**" / "*.ipynb"
+        pattern = context.project_path / "**" / "*.ipynb"
         notebooks = sorted(Path(p) for p in iglob(str(pattern), recursive=True))
     else:
         notebooks = [Path(f) for f in filepath]
@@ -224,11 +223,14 @@ def convert_notebook(all_flag, overwrite_flag, filepath, env):
             f"Found non-unique notebook names! Please rename the following: {names}"
         )
 
+    output_dir = source_path / context.package_name / "nodes"
+    if not output_dir.is_dir():
+        output_dir.mkdir()
+        (output_dir / "__init__.py").touch()
+
     for notebook in notebooks:
         secho(f"Converting notebook '{notebook}'...")
-        output_path = (
-            source_path / context.package_name / "nodes" / f"{notebook.stem}.py"
-        )
+        output_path = output_dir / f"{notebook.stem}.py"
 
         if output_path.is_file():
             overwrite = overwrite_flag or click.confirm(
@@ -239,7 +241,7 @@ def convert_notebook(all_flag, overwrite_flag, filepath, env):
         else:
             _export_nodes(notebook, output_path)
 
-    secho("Done!")
+    secho("Done!", color="green")
 
 
 def _build_jupyter_command(  # pylint: disable=too-many-arguments

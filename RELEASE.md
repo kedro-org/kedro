@@ -3,6 +3,7 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Removed `/src/nodes` directory from the project template and made `kedro jupyter convert` create it on the fly if necessary.
 
 ## Breaking changes to the API
 

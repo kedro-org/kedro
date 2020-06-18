@@ -263,7 +263,7 @@ class AbstractDataSet(abc.ABC):
                 text = ", ".join(
                     fmt.format(key, _to_str(value))  # 2
                     for key, value in sorted_dict
-                    if value or isinstance(value, bool)
+                    if value != {} and value is not None
                 )  # 3
 
                 return text if is_root else "{" + text + "}"  # 1

@@ -13,7 +13,7 @@ Call the project **`Kedro Tutorial`** and keep the default naming by pressing en
 
 ### Install project dependencies
 
-Within your [virtual environment](../02_getting_started/03_new_project.md#using-kedro-install) and your project's root directory, you can install project dependencies by running:
+Within your virtual environment and your project's root directory, you can install project dependencies by running:
 
 ```bash
 kedro install

@@ -40,12 +40,6 @@ from kedro.extras.datasets.tensorflow import TensorFlowModelDataset
 from kedro.io import DataSetError
 from kedro.io.core import PROTOCOL_DELIMITER, Version
 
-AWS_MODEL_DIR_NAME = "test_tf_model"
-AWS_BUCKET_NAME = "test_bucket"
-AWS_CREDENTIALS = dict(
-    aws_access_key_id="FAKE_ACCESS_KEY", aws_secret_access_key="FAKE_SECRET_KEY"
-)
-
 
 @pytest.fixture
 def filepath(tmp_path):

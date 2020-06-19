@@ -38,7 +38,7 @@ from s3fs import S3FileSystem
 
 from kedro.extras.datasets.tensorflow import TensorFlowModelDataset
 from kedro.io import DataSetError
-from kedro.io.core import Version
+from kedro.io.core import PROTOCOL_DELIMITER, Version
 
 
 @pytest.fixture
@@ -210,11 +210,7 @@ class TestTensorFlowModelDataset:
         data_set = TensorFlowModelDataset(filepath=filepath)
         assert isinstance(data_set._fs, instance_type)
 
-        # _strip_protocol() doesn't strip http(s) protocol
-        if data_set._protocol == "https":
-            path = filepath.split("://")[-1]
-        else:
-            path = data_set._fs._strip_protocol(filepath)
+        path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
 
         assert str(data_set._filepath) == path
         assert isinstance(data_set._filepath, PurePosixPath)

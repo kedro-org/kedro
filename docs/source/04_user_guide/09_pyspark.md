@@ -2,28 +2,34 @@
 
 > *Note:* This documentation is based on `Kedro 0.16.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
-In this tutorial we explain how to work with `PySpark` in a Kedro pipeline.
+This page outlines some best practices when building a Kedro pipeline with [`PySpark`](https://spark.apache.org/docs/latest/api/python/index.html). It assumes a basic understanding of both Kedro and `PySpark`.
 
-Relevant API documentation: [SparkDataSet](/kedro.extras.datasets.spark.SparkDataSet), [SparkJDBCDataSet](/kedro.extras.datasets.spark.SparkJDBCDataSet) and [SparkHiveDataSet](/kedro.extras.datasets.spark.SparkHiveDataSet)
+## Centralise Spark configuration in `conf/base/spark.yml`
 
-## Initialising a `SparkSession`
+Spark allows you to specify many different [configuration options](https://spark.apache.org/docs/latest/configuration.html). We recommend storing all of these options in a file located at `conf/base/spark.yml`. Below is an example of the content of the file to specify the `maxResultSize` of the Spark's driver and to use the `FAIR` scheduler:
 
-Before any `PySpark` operations are performed, you should initialise your `SparkSession`, typically in your application's entry point before running the pipeline.
+```yaml
+spark.driver.maxResultSize: 3g
+spark.scheduler.mode: FAIR
+```
 
-For example, if you are using Kedro's project template, then you could add `init_spark_session()` method to the `ProjectContext` class in `src/<your_project_name>/run.py` as follows:
+>_Note:_ Optimal configuration for Spark depends on the setup of your Spark cluster.
+
+## Initialise a `SparkSession` in `ProjectContext`
+
+Before any `PySpark` operations are performed, you should initialise your [`SparkSession`](https://spark.apache.org/docs/latest/sql-getting-started.html#starting-point-sparksession) in your `ProjectContext`, which is the entrypoint for your Kedro project. This ensures that a `SparkSession` has been initialised before the Kedro pipeline is run.
+
+Below is an example implementation to initialise the `SparkSession` in `<project-name>/src/<package-name>/run.py` by reading configuration from the `spark.yml` configuration file created in the previous section:
 
 ```python
-import getpass
 from typing import Any, Dict, Union
 
 from pyspark import SparkConf
 from pyspark.sql import SparkSession
 
-# ...
-
 
 class ProjectContext(KedroContext):
-    # ...
+
     def __init__(
         self,
         project_path: Union[Path, str],
@@ -33,53 +39,60 @@ class ProjectContext(KedroContext):
         super().__init__(project_path, env, extra_params)
         self.init_spark_session()
 
-    def init_spark_session(self, yarn=True) -> None:
+    def init_spark_session(self) -> None:
         """Initialises a SparkSession using the config defined in project's conf folder."""
 
+        # Load the spark configuration in spark.yaml using the config loader
         parameters = self.config_loader.get("spark*", "spark*/**")
         spark_conf = SparkConf().setAll(parameters.items())
 
+        # Initialise the spark session
         spark_session_conf = (
-            SparkSession.builder.appName(
-                "{}_{}".format(self.project_name, getpass.getuser())
-            )
+            SparkSession.builder
+            .appName(self.project_name)
             .enableHiveSupport()
             .config(conf=spark_conf)
         )
-        if yarn:
-            _spark_session = spark_session_conf.master("yarn").getOrCreate()
-        else:
-            _spark_session = spark_session_conf.getOrCreate()
-
+        _spark_session = spark_session_conf.getOrCreate()
         _spark_session.sparkContext.setLogLevel("WARN")
+
+    def _get_pipelines(self) -> Dict[str, Pipeline]:
+        return create_pipelines()
 
     project_name = "kedro"
     project_version = "0.16.2"
-
-
-# ...
 ```
 
-Create `conf/base/spark.yml` and specify the parameters as follows:
+You should modify this code to adapt it to your cluster's setup, e.g. setting master to `yarn` if you are running Spark on [YARN](https://spark.apache.org/docs/latest/running-on-yarn.html).
+
+Call `SparkSession.builder.getOrCreate()` to obtain the `SparkSession` anywhere in your pipeline. `SparkSession.builder.getOrCreate()` is a global [singleton](https://python-3-patterns-idioms-test.readthedocs.io/en/latest/Singleton.html).
+
+We don't recommend storing the session on the context object, as it cannot be serialised and therefore prevents the context from being initialised for some plugins.
+
+## Use Kedro's built-in Spark datasets to load and save raw data
+
+We recommend using Kedro's built-in Spark datasets to load raw data into Spark's [DataFrame](https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrame), as well as to write them back to storage. Some of our built-in Spark datasets include:
+
+* [spark.SparkDataSet](/kedro.extras.datasets.spark.SparkDataSet)
+* [spark.SparkJDBCDataSet](/kedro.extras.datasets.spark.SparkJDBCDataSet)
+* [spark.SparkHiveDataSet](/kedro.extras.datasets.spark.SparkHiveDataSet)
+
+The example below illustrates how to use `spark.SparkDataSet` to read a CSV file located in S3 into a `DataFrame` in `<projec-namet>/conf/base/catalog.yml`:
 
 ```yaml
-spark.driver.maxResultSize: 3g
-spark.hadoop.fs.s3a.impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-spark.sql.execution.arrow.enabled: true
-spark.jars.packages: org.apache.hadoop:hadoop-aws:2.7.5
-spark.jars.excludes: joda-time:joda-time
+weather:
+  type: spark.SparkDataSet
+  filepath: s3a://your_bucket/data/01_raw/weather*
+  file_format: csv
+  load_args:
+    header: True
+    inferSchema: True
+  save_args:
+    sep: '|'
+    header: True
 ```
 
-
-Since `SparkSession` is a [singleton](https://python-3-patterns-idioms-test.readthedocs.io/en/latest/Singleton.html), the next time you call `SparkSession.builder.getOrCreate()` you will be provided with the same `SparkSession` you initialised at your app's entry point. We don't recommend storing the session on the context object, as it cannot be deep-copied and therefore prevents the context from being initialised for some plugins.
-
-## Creating a `SparkDataSet`
-
-Having created a `SparkSession`, you can load your data using `PySpark`'s [DataFrameReader](https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrameReader).
-
-To do so, please use the provided [SparkDataSet](/kedro.extras.datasets.spark.SparkDataSet):
-
-### Code API
+Or using the Python API:
 
 ```python
 import pyspark.sql
@@ -98,57 +111,62 @@ df = catalog.load("weather")
 assert isinstance(df, pyspark.sql.DataFrame)
 ```
 
-### YAML API
+## Use `MemoryDataSet` for intermediary `DataFrame`
 
-In `catalog.yml`:
-```yaml
-weather:
-  type: spark.SparkDataSet
-  filepath: s3a://your_bucket/data/01_raw/weather*
-  file_format: csv
-  load_args:
-    header: True
-    inferSchema: True
-  save_args:
-    sep: '|'
-    header: True
-```
+For nodes operating on `DataFrame` that doesn't need to perform Spark actions such as writing the `DataFrame` to storage, we recommend using the default `MemoryDataSet` to hold the `DataFrame`. In other words, there is no need to specify it in the `DataCatalog` or `catalog.yml`. This allows you to take advantage of Spark's optimiser and lazy evaluation.
 
-In `run.py`:
+## Use `MemoryDataSet` with `copy_mode="assign"` for non-`DataFrame` Spark objects
+
+Sometimes, you might want to use Spark objects that aren't `DataFrame` as inputs and outputs in your pipeline. For example, suppose you have a `train_model` node to train a classifier using Spark ML's [`RandomForrestClassifier`](https://spark.apache.org/docs/latest/ml-classification-regression.html#random-forest-classifier) and a `predict` node to make predictions using this classifier. In this scenario, the `train_model` node will output a `RandomForestClassifier` object, which then becomes the input for the `predict` node. Below is the code for this pipeline:
 
 ```python
-import pyspark.sql
-from kedro.io import DataCatalog
-from kedro.config import ConfigLoader
+from typing import Any, Dict
 
-config = ConfigLoader(["conf/base", "conf/local"])
-catalog = DataCatalog.from_config(
-    config.get("catalog*", "catalog*/**"),
-    config.get("credentials*", "credentials*/**"),
-)
-df = catalog.load("weather")
-assert isinstance(df, pyspark.sql.DataFrame)
-```
-
-## Working with PySpark and Kedro pipelines
-
-Continuing from the example of the previous section, since `catalog.load("weather")` returns a `pyspark.sql.DataFrame`, any Kedro pipeline nodes which have `weather` as an input will be provided with a `PySpark` dataframe:
-
-```python
 from kedro.pipeline import Pipeline, node
+from pyspark.ml.classification import RandomForestClassifier
+from pyspark.sql import DataFrame
 
-def my_node(weather):
-    weather.show()  # weather is a pyspark.sql.DataFrame
 
-class ProjectContext(KedroContext):
+def train_model(training_data: DataFrame) -> RandomForestClassifier:
+    """Node for training a random forest model to classify the data.
+    """
+    classifier = RandomForestClassifier(numTrees=10)
+    return classifier.fit(training_data)
 
-    # ...
 
-    @property
-    def pipeline(self) -> Pipeline:  # requires import from user code
-        return Pipeline([node(my_node, "weather", None)])
-# ...
+def predict(model: RandomForestClassifier, testing_data: DataFrame) -> DataFrame:
+    """Node for making predictions given a pre-trained model and a testing dataset.
+    """
+    predictions = model.transform(testing_data)
+    return predictions
+
+
+def create_pipeline(**kwargs):
+    return Pipeline(
+        [
+            node(
+                train_model,
+                inputs=["training_data"],
+                outputs="example_classifier",
+            ),
+            node(
+                predict,
+                inputs=dict(model="example_classifier", testing_data="testing_data"),
+                outputs="example_predictions",
+            )
+        ]
+    )
 ```
+
+To make the pipeline work, you will need to specify `example_classifier` as follows in the `catalog.yml`:
+
+```yaml
+example_classifier:
+  type: MemoryDataSet
+  copy_mode: assign
+```
+
+The `assign` copy mode ensures that the `MemoryDataSet` will be assigned the Spark object itself, not a [deep copy](https://docs.python.org/3/library/copy.html) version of it, since deep copy doesn't work with Spark object generally.
 
 ## Tips for maximising concurrency using `ThreadRunner`
 

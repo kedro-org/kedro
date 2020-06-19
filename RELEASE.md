@@ -1,4 +1,4 @@
-# Upcoming release
+# Upcoming 0.17.0 release
 
 ## Major features and improvements
 
@@ -9,6 +9,18 @@
 * Bumped maximum supported `s3fs` version to 0.5 (`S3FileSystem` interface has changed since 0.4.1 version).
 * Deleted the deprecated `kedro.cli` and `kedro.context` modules in favor of `kedro.framework.cli` and `kedro.framework.context` respectively.
 * The pipeline-specific `catalog.yml` file is no longer automatically created for modular pipelines when doing `kedro pipeline create`.
+
+## Thanks for supporting contributions
+
+# Upcoming 0.16.3 release
+
+## Major features and improvements
+
+## Bug fixes and other changes
+* Removed `/src/nodes` directory from the project template and made `kedro jupyter convert` create it on the fly if necessary.
+* Fixed a bug in `MatplotlibWriter` which prevented saving lists and dictionaries of plots locally on Windows.
+
+## Breaking changes to the API
 
 ## Thanks for supporting contributions
 

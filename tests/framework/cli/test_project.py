@@ -233,6 +233,7 @@ class TestInstallCommand:
     ):
         """Test that the requirements are compiled by default
         if requirements.in doesn't exist"""
+        mocker.patch("kedro.framework.cli.project.os").name = "posix"
         result = CliRunner().invoke(fake_kedro_cli.cli, ["install"])
         assert not result.exit_code, result.output
         assert "Requirements installed!" in result.output
@@ -253,6 +254,7 @@ class TestInstallCommand:
     ):
         """Test that the requirements are compiled if requirements.in exists
         and --build-reqs CLI option is specified"""
+        mocker.patch("kedro.framework.cli.project.os").name = "posix"
         mocker.patch.object(Path, "is_file", return_value=True)
         result = CliRunner().invoke(fake_kedro_cli.cli, ["install", "--build-reqs"])
         assert not result.exit_code, result.output
@@ -272,6 +274,7 @@ class TestInstallCommand:
     ):
         """Test that the requirements aren't compiled by default
         if requirements.in exists"""
+        mocker.patch("kedro.framework.cli.project.os").name = "posix"
         mocker.patch.object(Path, "is_file", return_value=True)
         result = CliRunner().invoke(fake_kedro_cli.cli, ["install"])
         assert not result.exit_code, result.output
@@ -284,10 +287,11 @@ class TestInstallCommand:
         fake_copyfile.assert_not_called()
 
     def test_install_no_compile_force(
-        self, python_call_mock, fake_kedro_cli, fake_repo_path, fake_copyfile
+        self, python_call_mock, fake_kedro_cli, fake_repo_path, fake_copyfile, mocker
     ):
         """Test that the requirements aren't compiled if requirements.in doesn't exist
         and --no-build-reqs CLI option is specified"""
+        mocker.patch("kedro.framework.cli.project.os").name = "posix"
         result = CliRunner().invoke(fake_kedro_cli.cli, ["install", "--no-build-reqs"])
         assert not result.exit_code, result.output
         assert "Requirements installed!" in result.output
@@ -307,6 +311,7 @@ class TestInstallCommand:
         fake_repo_path,
         fake_copyfile,
     ):
+        mocker.patch("kedro.framework.cli.project.os").name = "posix"
         # Pretend env file exists:
         mocker.patch.object(Path, "is_file", return_value=True)
 

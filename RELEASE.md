@@ -3,7 +3,9 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
-*  Bumped maximum required `fsspec` version to 0.8.
+* Removed `/src/nodes` directory from the project template and made `kedro jupyter convert` create it on the fly if necessary.
+* Fixed a bug in `MatplotlibWriter` which prevented saving lists and dictionaries of plots locally on Windows.
+* Bumped maximum required `fsspec` version to 0.8.
 
 ## Breaking changes to the API
 * Bumped maximum supported `s3fs` version to 0.5 (`S3FileSystem` interface has changed since 0.4.1 version).

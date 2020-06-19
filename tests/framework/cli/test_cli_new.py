@@ -44,8 +44,8 @@ from kedro.framework.cli.cli import (
     cli,
 )
 
-FILES_IN_TEMPLATE_NO_EXAMPLE = 37
-FILES_IN_TEMPLATE_WITH_EXAMPLE = 46
+FILES_IN_TEMPLATE_NO_EXAMPLE = 36
+FILES_IN_TEMPLATE_WITH_EXAMPLE = 45
 
 
 # pylint: disable=too-many-arguments
@@ -334,28 +334,26 @@ class TestNewFromConfig:
         assert result.exit_code != 0
         assert "that cannot start any token" in result.output
 
-    def test_output_dir_with_tilde_in_path(self, mocker):
-        """Check the error if the output directory contains "~" ."""
-        home_dir = os.path.join("/home", "directory")
+    def test_output_dir_with_tilde_in_path(self):
+        """Check no error if the output directory contains "~" ."""
+        home_dir = Path.home()
         output_dir = os.path.join("~", "here")
 
-        expected = os.path.join(home_dir, "here")
+        expected = str(home_dir / "here")
 
-        mocker.patch.dict("os.environ", {"HOME": home_dir, "USERPROFILE": home_dir})
         actual = _fix_user_path(output_dir)
         assert actual == expected
 
     def test_output_dir_with_relative_path(self, mocker):
-        """Check the error if the output directory contains a relative path."""
-        home_dir = os.path.join("/home", "directory")
-        current_dir = os.path.join(home_dir, "current", "directory")
+        """Check no error if the output directory contains a relative path."""
+        home_dir = Path.home()
+        current_dir = home_dir / "current/directory"
         output_dir = os.path.join("path", "to", "here")
 
-        expected = os.path.join(current_dir, output_dir)
+        expected = str(current_dir / output_dir)
 
-        mocker.patch.dict("os.environ", {"HOME": home_dir, "USERPROFILE": home_dir})
-        mocker.patch("os.getcwd", return_value=current_dir)
-        actual = _fix_user_path(output_dir)
+        mocker.patch("os.path.abspath", return_value=expected)
+        actual = _fix_user_path(str(output_dir))
         assert actual == expected
 
     def test_missing_output_dir(self, cli_runner):

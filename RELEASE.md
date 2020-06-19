@@ -1,4 +1,14 @@
-# Upcoming release
+# Upcoming 0.17.0 release
+
+## Major features and improvements
+
+## Bug fixes and other changes
+
+## Breaking changes to the API
+
+## Thanks for supporting contributions
+
+# Upcoming 0.16.3 release
 
 ## Major features and improvements
 

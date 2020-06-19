@@ -26,7 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import json
-import shutil
+import sys
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
@@ -208,7 +208,9 @@ class TestJupyterLabCommand:
 
     @pytest.mark.parametrize("help_flag", ["-h", "--help"])
     def test_help(self, help_flag, fake_kedro_cli, fake_ipython_message):
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["jupyter", "lab", help_flag])
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, [sys.executable, "-m", "jupyter", "lab", help_flag]
+        )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_not_called()
 
@@ -237,22 +239,16 @@ class TestJupyterLabCommand:
         assert error in result.output
 
 
-@pytest.fixture
-def cleanup_nodes_dir(fake_package_path):
-    yield
-    nodes_dir = fake_package_path / "nodes"
-    if nodes_dir.exists():
-        shutil.rmtree(str(nodes_dir))
-
-
-@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log", "cleanup_nodes_dir")
+@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
 class TestConvertNotebookCommand:
+    @staticmethod
     @pytest.fixture
-    def fake_export_nodes(self, mocker):
+    def fake_export_nodes(mocker):
         return mocker.patch("kedro.framework.cli.jupyter._export_nodes")
 
+    @staticmethod
     @pytest.fixture
-    def tmp_file_path(self):
+    def tmp_file_path():
         with NamedTemporaryFile() as f:
             yield Path(f.name)
 
@@ -271,17 +267,15 @@ class TestConvertNotebookCommand:
         """
         mocker.patch.object(Path, "is_file", return_value=True)
         mocker.patch("click.confirm", return_value=True)
-        output_dir = fake_package_path / "nodes"
-        assert not output_dir.exists()
 
         result = CliRunner().invoke(
             fake_kedro_cli.cli, ["jupyter", "convert", str(tmp_file_path)]
         )
         assert not result.exit_code, result.stdout
 
-        assert (output_dir / "__init__.py").is_file()
+        output_prefix = fake_package_path / "nodes"
         fake_export_nodes.assert_called_once_with(
-            tmp_file_path.resolve(), output_dir / f"{tmp_file_path.stem}.py"
+            tmp_file_path.resolve(), output_prefix / f"{tmp_file_path.stem}.py"
         )
 
     def test_convert_one_file_do_not_overwrite(
@@ -304,23 +298,23 @@ class TestConvertNotebookCommand:
     def test_convert_all_files(
         self, mocker, fake_kedro_cli, fake_export_nodes, fake_package_path
     ):
-        """Trying to convert all files, the output files already exist."""
+        """
+        Trying to convert all files, the output files already exist.
+        """
         mocker.patch.object(Path, "is_file", return_value=True)
         mocker.patch("click.confirm", return_value=True)
         mocker.patch(
             "kedro.framework.cli.jupyter.iglob", return_value=["/path/1", "/path/2"]
         )
-        output_dir = fake_package_path / "nodes"
-        assert not output_dir.exists()
 
         result = CliRunner().invoke(fake_kedro_cli.cli, ["jupyter", "convert", "--all"])
         assert not result.exit_code, result.stdout
 
-        assert (output_dir / "__init__.py").is_file()
+        output_prefix = fake_package_path / "nodes"
         fake_export_nodes.assert_has_calls(
             [
-                mocker.call(Path("/path/1"), output_dir / "1.py"),
-                mocker.call(Path("/path/2"), output_dir / "2.py"),
+                mocker.call(Path("/path/1"), output_prefix / "1.py"),
+                mocker.call(Path("/path/2"), output_prefix / "2.py"),
             ]
         )
 
@@ -349,53 +343,41 @@ class TestConvertNotebookCommand:
         assert result.output == expected_output
 
     def test_convert_one_file(
-        self, fake_kedro_cli, fake_export_nodes, tmp_file_path, fake_package_path,
+        self,
+        mocker,
+        fake_kedro_cli,
+        fake_export_nodes,
+        tmp_file_path,
+        fake_package_path,
     ):
         """Trying to convert one file, the output file doesn't exist."""
-        output_dir = fake_package_path / "nodes"
-        assert not output_dir.exists()
+        mocker.patch("click.confirm", return_value=True)
 
         result = CliRunner().invoke(
             fake_kedro_cli.cli, ["jupyter", "convert", str(tmp_file_path)]
         )
         assert not result.exit_code, result.stdout
 
-        assert (output_dir / "__init__.py").is_file()
+        output_prefix = fake_package_path / "nodes"
         fake_export_nodes.assert_called_once_with(
-            tmp_file_path.resolve(), output_dir / f"{tmp_file_path.stem}.py"
+            tmp_file_path.resolve(), output_prefix / f"{tmp_file_path.stem}.py"
         )
 
-    def test_convert_one_file_nodes_directory_exists(
-        self, fake_kedro_cli, fake_export_nodes, tmp_file_path, fake_package_path
-    ):
-        """User-created nodes/ directory is used as is."""
-        output_dir = fake_package_path / "nodes"
-        assert not output_dir.exists()
-        output_dir.mkdir()
 
-        result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["jupyter", "convert", str(tmp_file_path)]
-        )
-        assert not result.exit_code, result.stdout
+@pytest.fixture
+def project_path(tmp_path):
+    temp = Path(str(tmp_path))
+    return Path(temp / "some/path/to/my_project")
 
-        assert not (output_dir / "__init__.py").is_file()
-        fake_export_nodes.assert_called_once_with(
-            tmp_file_path.resolve(), output_dir / f"{tmp_file_path.stem}.py"
-        )
+
+@pytest.fixture
+def nodes_path(project_path):
+    path = project_path / "src/my_project/nodes"
+    path.mkdir(parents=True)
+    return path
 
 
 class TestExportNodes:
-    @pytest.fixture
-    def project_path(self, tmp_path):
-        temp = Path(str(tmp_path))
-        return Path(temp / "some/path/to/my_project")
-
-    @pytest.fixture
-    def nodes_path(self, project_path):
-        path = project_path / "src/my_project/nodes"
-        path.mkdir(parents=True)
-        return path
-
     def test_export_nodes(self, project_path, nodes_path):
         nodes = json.dumps(
             {

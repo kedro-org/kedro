@@ -162,11 +162,14 @@ class TestMatplotlibWriter:
         plot_writer.save(mock_list_plot)
 
         for index in range(5):
+
             download_path = tmp_path / "downloaded_image.png"
             actual_filepath = tmp_path / "locally_saved.png"
 
             mock_list_plot[index].savefig(str(actual_filepath))
+
             _key_path = "{}/{}.png".format(KEY_PATH, index)
+
             mocked_s3_bucket.download_file(BUCKET_NAME, _key_path, str(download_path))
 
             assert actual_filepath.read_bytes() == download_path.read_bytes()

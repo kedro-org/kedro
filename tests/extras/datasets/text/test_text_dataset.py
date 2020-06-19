@@ -36,7 +36,7 @@ from s3fs.core import S3FileSystem
 
 from kedro.extras.datasets.text import TextDataSet
 from kedro.io import DataSetError
-from kedro.io.core import PROTOCOL_DELIMITER, Version
+from kedro.io.core import Version
 
 STRING = "Write to text file."
 
@@ -103,7 +103,11 @@ class TestTextDataSet:
         data_set = TextDataSet(filepath=filepath)
         assert isinstance(data_set._fs, instance_type)
 
-        path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
+        # _strip_protocol() doesn't strip http(s) protocol
+        if data_set._protocol == "https":
+            path = filepath.split("://")[-1]
+        else:
+            path = data_set._fs._strip_protocol(filepath)
 
         assert str(data_set._filepath) == path
         assert isinstance(data_set._filepath, PurePosixPath)

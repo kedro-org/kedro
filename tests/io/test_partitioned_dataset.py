@@ -175,7 +175,7 @@ class TestPartitionedDataSetLocal:
         path = str(Path.cwd())
         pds = PartitionedDataSet(path, dataset)
 
-        assert f"path={path}" in str(pds)
+        assert "path={}".format(path) in str(pds)
         assert "dataset_type=CSVDataSet" in str(pds)
         if isinstance(dataset, dict) and dataset.keys() - {"type"}:
             assert "dataset_config" in str(pds)
@@ -293,7 +293,7 @@ class TestPartitionedDataSetLocal:
     def test_no_partitions(self, tmpdir):
         pds = PartitionedDataSet(str(tmpdir), "pandas.CSVDataSet")
 
-        pattern = re.escape(f"No partitions found in `{tmpdir}`")
+        pattern = "No partitions found in `{}`".format(str(tmpdir))
         with pytest.raises(DataSetError, match=pattern):
             pds.load()
 
@@ -319,8 +319,8 @@ class TestPartitionedDataSetLocal:
     )
     def test_filepath_arg_warning(self, pds_config, filepath_arg):
         pattern = (
-            f"`{filepath_arg}` key must not be specified in the dataset definition as it "
-            f"will be overwritten by partition path"
+            "`{}` key must not be specified in the dataset definition as it "
+            "will be overwritten by partition path".format(filepath_arg)
         )
         with pytest.warns(UserWarning, match=re.escape(pattern)):
             PartitionedDataSet(**pds_config)
@@ -415,9 +415,11 @@ def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas):
     prefix = "csvs"
     for key, data in partitioned_data_pandas.items():
         mocked_s3_bucket.put_object(
-            Bucket=BUCKET_NAME, Key=f"{prefix}/{key}", Body=data.to_csv(index=False),
+            Bucket=BUCKET_NAME,
+            Key="{}/{}".format(prefix, key),
+            Body=data.to_csv(index=False),
         )
-    return f"s3://{BUCKET_NAME}/{prefix}"
+    return "s3://{}/{}".format(BUCKET_NAME, prefix)
 
 
 class TestPartitionedDataSetS3:
@@ -437,8 +439,7 @@ class TestPartitionedDataSetS3:
             assert_frame_equal(df, partitioned_data_pandas[partition_id])
 
     def test_load_s3a(self, mocked_csvs_in_s3, partitioned_data_pandas, mocker):
-        path = mocked_csvs_in_s3.split("://", 1)[1]
-        s3a_path = f"s3a://{path}"
+        s3a_path = "s3a://{}".format(mocked_csvs_in_s3.split("://", 1)[1])
         # any type is fine as long as it passes isinstance check
         # since _dataset_type is mocked later anyways
         pds = PartitionedDataSet(s3a_path, "pandas.CSVDataSet")
@@ -451,7 +452,7 @@ class TestPartitionedDataSetS3:
         assert loaded_partitions.keys() == partitioned_data_pandas.keys()
         assert mocked_ds.call_count == len(loaded_partitions)
         expected = [
-            mocker.call(filepath=f"{s3a_path}/{partition_id}")
+            mocker.call(filepath="{}/{}".format(s3a_path, partition_id))
             for partition_id in loaded_partitions
         ]
         mocked_ds.assert_has_calls(expected, any_order=True)
@@ -473,8 +474,7 @@ class TestPartitionedDataSetS3:
 
     def test_save_s3a(self, mocked_csvs_in_s3, mocker):
         """Test that save works in case of s3a protocol"""
-        path = mocked_csvs_in_s3.split("://", 1)[1]
-        s3a_path = f"s3a://{path}"
+        s3a_path = "s3a://{}".format(mocked_csvs_in_s3.split("://", 1)[1])
         # any type is fine as long as it passes isinstance check
         # since _dataset_type is mocked later anyways
         pds = PartitionedDataSet(s3a_path, "pandas.CSVDataSet", filename_suffix=".csv")
@@ -486,7 +486,9 @@ class TestPartitionedDataSetS3:
         data = "data"
 
         pds.save({new_partition: data})
-        mocked_ds.assert_called_once_with(filepath=f"{s3a_path}/{new_partition}.csv")
+        mocked_ds.assert_called_once_with(
+            filepath="{}/{}.csv".format(s3a_path, new_partition)
+        )
         mocked_ds.return_value.save.assert_called_once_with(data)
 
     @pytest.mark.parametrize("dataset", ["pandas.CSVDataSet", "pandas.HDFDataSet"])
@@ -517,10 +519,10 @@ class TestPartitionedDataSetS3:
 
     @pytest.mark.parametrize("dataset", S3_DATASET_DEFINITION)
     def test_describe(self, dataset):
-        path = f"s3://{BUCKET_NAME}/foo/bar"
+        path = "s3://{}/foo/bar".format(BUCKET_NAME)
         pds = PartitionedDataSet(path, dataset)
 
-        assert f"path={path}" in str(pds)
+        assert "path={}".format(path) in str(pds)
         assert "dataset_type=CSVDataSet" in str(pds)
         if isinstance(dataset, dict) and dataset.keys() - {"type"}:
             assert "dataset_config" in str(pds)

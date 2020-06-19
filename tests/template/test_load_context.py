@@ -26,7 +26,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import re
 import sys
 from pathlib import Path
 
@@ -121,7 +120,7 @@ class TestLoadContext:
         )
         source_path = (fake_repo_path / Path(source_dir).expanduser()).resolve()
 
-        pattern = re.escape(
+        pattern = (
             f"Source path '{source_path}' has to be relative to your project root "
             f"'{fake_repo_path.resolve()}'"
         )
@@ -138,7 +137,7 @@ class TestLoadContext:
         )
         non_existent_path = (fake_repo_path / source_dir).expanduser().resolve()
 
-        pattern = re.escape(f"Source path '{non_existent_path}' cannot be found")
+        pattern = r"Source path '{}' cannot be found".format(non_existent_path)
         with pytest.raises(KedroContextError, match=pattern):
             load_context(str(fake_repo_path))
 

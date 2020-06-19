@@ -38,7 +38,7 @@ from s3fs.core import S3FileSystem
 
 from kedro.extras.datasets.pandas import HDFDataSet
 from kedro.io import DataSetError
-from kedro.io.core import PROTOCOL_DELIMITER, Version
+from kedro.io.core import Version
 
 HDF_KEY = "data"
 
@@ -133,7 +133,11 @@ class TestHDFDataSet:
         data_set = HDFDataSet(filepath=filepath, key=HDF_KEY)
         assert isinstance(data_set._fs, instance_type)
 
-        path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
+        # _strip_protocol() doesn't strip http(s) protocol
+        if data_set._protocol == "https":
+            path = filepath.split("://")[-1]
+        else:
+            path = data_set._fs._strip_protocol(filepath)
 
         assert str(data_set._filepath) == path
         assert isinstance(data_set._filepath, PurePosixPath)

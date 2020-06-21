@@ -1,42 +1,44 @@
-# Creating a new project
+# Create a new project
 
-We recommend that you create projects according to the Kedro default project template, which is ideal for analytics projects and comes with a default folder structure for storing datasets, folders for notebooks, configuration and source code.
-
-Projects can be created interactively or by referencing a configuration file.
-
-> You can also work with a Kedro project that has already been created. In this case, you don’t need to create a new Kedro project, but can use `git clone` to clone the existing project.
+Once you have [installed Kedro](./02_install.md), you can create a new project by answering a series of questions, or by using settings recorded in a configuration file.
 
 ## Create a new project interactively
-First, select the directory in which you want to work, and if you are using `conda`, make sure you have the [correct environment](../02_getting_started/01_prerequisites.md#conda) activated:
 
-```bash
-conda activate environment_name
-```
-You are then ready to create a new project.
-
-Call `kedro new` to create a new project in your current working directory (`<current_dir>/<repo_name>/`):
+Create a new project in your current working directory:
 
 ```bash
 kedro new
 ```
 
-You will need to provide the following variables:
+You will be asked to enter each of the following variables in turn. Once you have entered text for the first option (the project's name), you will be offered a default choice for the other options:
 
-* `project_name` - A human readable name for your new project
-* `repo_name` - A name for the directory that holds your project repository
-* `python_package` - A Python package name for your project package (see [Python package naming conventions](https://www.python.org/dev/peps/pep-0008/#package-and-module-names))
-* `include_example` - Confirms or rejects the inclusion of example code. If you enter `Y` to include an example then your new project template contains a small example to get you going. See the [Hello World example](../02_getting_started/04_hello_world.md) for further details
+| Option            | Example           | Description                                                                                                                                                          |
+| ----------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `project_name`    | `Getting Started` | A human-readable name for your new project                                                                                                                           |
+| `repo_name`       | `getting-started` | Directory that holds your project repository                                                                                                                         |
+| `python_package`  | `getting_started` | A name for the Python package name in your project (short, all-lowercase)                                                                                            |
+| `include_example` | `Y`/`n`           | Confirms or rejects the inclusion of [example code](../02_getting_started/04_hello_kedro.md). If you enter `Y` , your new project template contains a small example. |
 
+The output lists the directory in which to find the project.
+
+### Initialise a `git` repository
+
+Having created your new project, if you are using `git`, you may want to set up a new repository by calling:
+
+```bash
+git init
+```
 
 ## Create a new project from a configuration file
 
-You can also create a new project from a configuration file by running:
+You can create a new project from a configuration file if you prefer. The file must contain:
 
-```bash
-kedro new --config config.yml
-```
+-   `project_name`
+-   `repo_name`
+-   `python_package`
+-   `include_example` (Boolean value) option as described [above](../02_getting_started/03_new_project.md#Create-a-new-project-interactively).
 
-The configuration file (`config.yml`) must contain the `project_name`, `repo_name`, `python_package` and `include_example` (Boolean value) variables as described [above](../02_getting_started/03_new_project.md#Create-a-new-project-interactively) as well as `output_dir` - path to the directory where the project folder will be created.
+The configuration file must also specify an `output_dir` for the path in which to create the project directory. This path can be set to `~` for your home directory, or `.` for the current working directory.
 
 Here is an example `config.yml`, which assumes that a directory named `~/code` already exists:
 
@@ -48,48 +50,8 @@ python_package: getting_started
 include_example: true
 ```
 
-`output_dir` can be set to `~` for home directory, or `.` for the current working directory.
-
-## Working with your new project
-
-### Initialise a `git` repository
-
-Having created a new project, you may want to set up a new `git` repository by calling:
+To create the new project:
 
 ```bash
-git init
+kedro new --config config.yml
 ```
-
-### Amend project-specific dependencies
-
-#### Using `kedro build-reqs`
-
-Once you have created a new project, you can update its dependencies. The generic project template bundles some typical dependencies, in `src/requirements.txt`.
-
-On the first use of your project, if you want to add or remove dependencies, edit `src/requirements.txt`.
-
-Then run the following:
-
-```bash
-kedro build-reqs
-```
-
-The `build-reqs` command will:
-
-1. Generate `src/requirements.in` from the contents of `src/requirements.txt`
-2. `pip-compile` the requirements listed in `src/requirements.in`
-3. Regenerate `src/requirements.txt` to specify a list of pinned project dependencies (those with a strict version).
-
-> Note: `src/requirements.in` contains "source" requirements, while `src/requirements.txt` contains the compiled version of those and requires no manual updates. To further update the project requirements, you should modify `src/requirements.in` (not `src/requirements.txt`) and re-run `kedro build-reqs`.
-
-If your project has `conda` dependencies, you can create a `src/environment.yml` file and list them there.
-
-#### Using `kedro install`
-
-To install the project-specific dependencies, run the following command:
-
-```bash
-kedro install
-```
-
-> Note: `kedro install` automatically compiles project dependencies by running `kedro build-reqs` behind the scenes before the installation if the `src/requirements.in` file doesn't exist. To skip the compilation step and install requirements as-is, run `kedro install --no-build-reqs`. To force the compilation even if `src/requirements.in` exists, run `kedro install --build-reqs`.

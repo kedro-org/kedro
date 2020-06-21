@@ -3,10 +3,13 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Documentation improvements:
+  - Added [kedro-wings](https://github.com/tamsanh/kedro-wings) and [kedro-great](https://github.com/tamsanh/kedro-great) to the list of community plugins.
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
+[Tam-Sanh Nguyen](https://github.com/tamsanh)
 
 # Upcoming 0.16.3 release
 

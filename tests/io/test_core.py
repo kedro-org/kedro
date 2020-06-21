@@ -29,13 +29,13 @@
 from decimal import Decimal
 from fractions import Fraction
 from pathlib import PurePosixPath
+from typing import Any, List
 
 import pytest
 
 from kedro.io.core import AbstractDataSet, _parse_filepath, get_filepath_str
 
-
-FALSE_BUILTINS = [  # List from https://docs.python.org/3/library/stdtypes.html#truth-value-testing
+FALSE_BUILTINS : List[Any] = [  # List from https://docs.python.org/3/library/stdtypes.html#truth-value-testing
     None,
     False,
     0,

@@ -177,10 +177,7 @@ class TestPartitionedDataSetLocal:
 
         assert "path={}".format(path) in str(pds)
         assert "dataset_type=CSVDataSet" in str(pds)
-        if isinstance(dataset, dict) and dataset.keys() - {"type"}:
-            assert "dataset_config" in str(pds)
-        else:
-            assert "dataset_config" not in str(pds)
+        assert "dataset_config" in str(pds)
 
     def test_load_args(self, mocker):
         fake_partition_name = "fake_partition"
@@ -524,7 +521,4 @@ class TestPartitionedDataSetS3:
 
         assert "path={}".format(path) in str(pds)
         assert "dataset_type=CSVDataSet" in str(pds)
-        if isinstance(dataset, dict) and dataset.keys() - {"type"}:
-            assert "dataset_config" in str(pds)
-        else:
-            assert "dataset_config" not in str(pds)
+        assert "dataset_config" in str(pds)

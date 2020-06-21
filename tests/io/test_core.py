@@ -52,7 +52,7 @@ FALSE_BUILTINS: List = [  # List from https://docs.python.org/3/library/stdtypes
 ]
 
 
-class MyDataSet(AbstractDataSet):  # pragma: no-cover
+class MyDataSet(AbstractDataSet):
     def __init__(self, var=None):
         self.var = var
 
@@ -60,10 +60,10 @@ class MyDataSet(AbstractDataSet):  # pragma: no-cover
         return dict(var=self.var)
 
     def _load(self):
-        pass
+        pass  # pragma: no-cover
 
     def _save(self, data):
-        pass
+        pass  # pragma: no-cover
 
 
 class TestCoreFunctions:

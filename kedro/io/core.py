@@ -252,7 +252,7 @@ class AbstractDataSet(abc.ABC):
             1. The root level (i.e. the DataSet.__init__ arguments) are
             formatted like DataSet(key=value).
             2. Dictionaries have the keys alphabetically sorted recursively.
-            3. Empty dictionaries and None values are not shown.
+            3. None values are not shown.
             """
 
             fmt = "{}={}" if is_root else "'{}': {}"  # 1
@@ -263,8 +263,8 @@ class AbstractDataSet(abc.ABC):
                 text = ", ".join(
                     fmt.format(key, _to_str(value))  # 2
                     for key, value in sorted_dict
-                    if value or isinstance(value, bool)
-                )  # 3
+                    if value is not None  # 3
+                )
 
                 return text if is_root else "{" + text + "}"  # 1
 

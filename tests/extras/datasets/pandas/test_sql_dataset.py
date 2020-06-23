@@ -309,5 +309,5 @@ class TestSQLQueryDataSet:
     def test_str_representation_sql(self, query_data_set):
         """Test the data set instance string representation"""
         str_repr = str(query_data_set)
-        assert "SQLQueryDataSet(load_args={{}}, sql={})".format(SQL_QUERY) in str_repr
+        assert f"SQLQueryDataSet(load_args={{}}, sql={SQL_QUERY})" in str_repr
         assert CONNECTION not in str_repr

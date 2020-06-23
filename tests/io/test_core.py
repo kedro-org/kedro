@@ -36,8 +36,8 @@ import pytest
 from kedro.io.core import AbstractDataSet, _parse_filepath, get_filepath_str
 
 # List sourced from https://docs.python.org/3/library/stdtypes.html#truth-value-testing.
+# Excludes None, as None values are not shown in the str representation.
 FALSE_BUILTINS: List[Any] = [
-    None,
     False,
     0,
     0.0,
@@ -68,7 +68,7 @@ class MyDataSet(AbstractDataSet):
 
 
 class TestCoreFunctions:
-    @pytest.mark.parametrize("var", [1, True] + FALSE_BUILTINS[1:])  # None is not shown
+    @pytest.mark.parametrize("var", [1, True] + FALSE_BUILTINS)
     def test_str_representation(self, var):
         assert str(MyDataSet(var)) == f"MyDataSet(var={var})"
 

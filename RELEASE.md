@@ -15,10 +15,12 @@
 ## Bug fixes and other changes
 * Removed `/src/nodes` directory from the project template and made `kedro jupyter convert` create it on the fly if necessary.
 * Fixed a bug in `MatplotlibWriter` which prevented saving lists and dictionaries of plots locally on Windows.
+* Fixed `DataSet` string representation for falsy values.
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
+[Deepyaman Datta](https://github.com/deepyaman)
 
 # Release 0.16.2
 

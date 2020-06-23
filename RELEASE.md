@@ -3,13 +3,10 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
-* Documentation improvements:
-  - Added [kedro-wings](https://github.com/tamsanh/kedro-wings) and [kedro-great](https://github.com/tamsanh/kedro-great) to the list of community plugins.
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Tam-Sanh Nguyen](https://github.com/tamsanh)
 
 # Upcoming 0.16.3 release
 
@@ -18,10 +15,13 @@
 ## Bug fixes and other changes
 * Removed `/src/nodes` directory from the project template and made `kedro jupyter convert` create it on the fly if necessary.
 * Fixed a bug in `MatplotlibWriter` which prevented saving lists and dictionaries of plots locally on Windows.
+* Documentation improvements:
+  - Added [kedro-wings](https://github.com/tamsanh/kedro-wings) and [kedro-great](https://github.com/tamsanh/kedro-great) to the list of community plugins.
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
+[Tam-Sanh Nguyen](https://github.com/tamsanh)
 
 # Release 0.16.2
 

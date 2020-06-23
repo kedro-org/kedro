@@ -139,7 +139,10 @@ def info():
     type=click.Path(exists=True),
     help="Non-interactive mode, using a configuration yaml file.",
 )
-def new(config):
+@click.option(
+    "--starter", "-s", help="A starter template with which to bootstrap the project.",
+)
+def new(config, starter):
     """Create a new kedro project, either interactively or from a
     configuration file.
 
@@ -169,8 +172,26 @@ def new(config):
                     the above parameters (project_name, repo_name,
                     python_package, include_example) and output_dir - the
                     parent directory for the new project directory.
+
+    \b
+    ``kedro new --starter=<path-to-starter>``
+    Create a new project from a starter template. The starter template could be located
+    in a local directory or a git repository.
+
     """
-    _create_project(config, _VERBOSE)
+    if starter:
+        template_path = starter
+        should_prompt_for_example = False
+    else:
+        template_path = TEMPLATE_PATH
+        should_prompt_for_example = True
+
+    _create_project(
+        config_path=config,
+        verbose=_VERBOSE,
+        template_path=template_path,
+        should_prompt_for_example=should_prompt_for_example,
+    )
 
 
 @cli.command(short_help="See the kedro API docs and introductory tutorial.")
@@ -186,36 +207,51 @@ def docs():
     webbrowser.open(index_path)
 
 
-def _create_project(config_path: str, verbose: bool):
+def _create_project(
+    config_path: str,
+    verbose: bool,
+    template_path: Path = TEMPLATE_PATH,
+    should_prompt_for_example: bool = True,
+):
     """Implementation of the kedro new cli command.
 
     Args:
         config_path: In non-interactive mode, the path of the config.yml which
             should contain the project_name, output_dir and repo_name.
+        template_path: The path to the cookiecutter template to create the project.
+            It could either be a local directory or a remote VCS repository
+            supported by cookiecutter. For more details, please see:
+            https://cookiecutter.readthedocs.io/en/latest/usage.html#generate-your-project
+        should_prompt_for_example: Whether to display a prompt to generate an example pipeline.
+            N.B.: this should only be here until the start project is complete and the
+            starters with example are all located in public repositories.
         verbose: Extensive debug terminal logs.
     """
     with _filter_deprecation_warnings():
         # pylint: disable=import-outside-toplevel
         from cookiecutter.main import cookiecutter  # for performance reasons
+        from cookiecutter.exceptions import RepositoryNotFound
 
     try:
         if config_path:
             config = _parse_config(config_path, verbose)
             config = _check_config_ok(config_path, config)
         else:
-            config = _get_config_from_prompts()
+            config = _get_config_from_prompts(should_prompt_for_example)
         config.setdefault("kedro_version", version)
 
         result_path = Path(
             cookiecutter(
-                str(TEMPLATE_PATH),
+                str(template_path),
                 output_dir=config["output_dir"],
                 no_input=True,
                 extra_context=config,
             )
         )
 
-        if not config["include_example"]:
+        # If user was prompted to generate an example but chooses not to,
+        # Remove all placeholder directories.
+        if should_prompt_for_example and not config["include_example"]:
             (result_path / "data" / "01_raw" / "iris.csv").unlink()
 
             pipelines_dir = result_path / "src" / config["python_package"] / "pipelines"
@@ -230,6 +266,8 @@ def _create_project(config_path: str, verbose: bool):
         _print_kedro_new_success_message(result_path)
     except click.exceptions.Abort:  # pragma: no cover
         _handle_exception("User interrupt.")
+    except RepositoryNotFound:
+        _handle_exception(f"Kedro project template not found at {template_path}")
     # we don't want the user to see a stack trace on the cli
     except Exception:  # pylint: disable=broad-except
         _handle_exception("Failed to generate project.")
@@ -261,8 +299,11 @@ def _get_user_input(
         return value
 
 
-def _get_config_from_prompts() -> Dict:
+def _get_config_from_prompts(should_prompt_for_example: bool = True) -> Dict:
     """Ask user to provide necessary inputs.
+
+    Args:
+        should_prompt_for_example: Whether to include a prompt for example.
 
     Returns:
         Resulting config dictionary.
@@ -311,12 +352,15 @@ def _get_config_from_prompts() -> Dict:
     )
 
     # option for whether iris example code is included in the project
-    code_example_prompt = _get_prompt_text(
-        "Generate Example Pipeline:",
-        "Do you want to generate an example pipeline in your project?",
-        "Good for first-time users. (default=N)",
-    )
-    include_example = click.confirm(code_example_prompt, default=False)
+    if should_prompt_for_example:
+        code_example_prompt = _get_prompt_text(
+            "Generate Example Pipeline:",
+            "Do you want to generate an example pipeline in your project?",
+            "Good for first-time users. (default=N)",
+        )
+        include_example = click.confirm(code_example_prompt, default=False)
+    else:
+        include_example = False
 
     return {
         "output_dir": output_dir,

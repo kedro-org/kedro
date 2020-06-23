@@ -31,6 +31,7 @@
 
 import json
 import os
+import shutil
 from pathlib import Path
 
 import pytest
@@ -402,3 +403,44 @@ def test_default_config_up_to_date():
     default_config_keys = _get_default_config().keys()
 
     assert set(cookie_keys) == set(default_config_keys)
+
+
+class TestNewWithStarter:
+
+    repo_name = "project-test"
+    package_name = "package_test"
+    project_name = "Test"
+
+    def test_new_with_valid_starter(self, cli_runner, tmpdir):
+        starter_path = tmpdir / "starter"
+        shutil.copytree(TEMPLATE_PATH, str(starter_path))
+
+        result = _invoke(
+            cli_runner,
+            ["-v", "new", "--starter", starter_path],
+            project_name=self.project_name,
+            python_package=self.package_name,
+            repo_name=self.repo_name,
+        )
+        _assert_template_ok(
+            result,
+            FILES_IN_TEMPLATE_WITH_EXAMPLE,
+            repo_name=self.repo_name,
+            project_name=self.project_name,
+            package_name=self.package_name,
+        )
+
+    def test_new_with_invalid_starter_path_should_raise(self, cli_runner):
+        invalid_starter_path = "/foo/bar"
+        result = _invoke(
+            cli_runner,
+            ["-v", "new", "--starter", invalid_starter_path],
+            project_name=self.project_name,
+            python_package=self.package_name,
+            repo_name=self.repo_name,
+        )
+        assert result.exit_code != 0
+        assert (
+            f"Kedro project template not found at {invalid_starter_path}"
+            in result.output
+        )

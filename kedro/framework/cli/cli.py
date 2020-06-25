@@ -74,6 +74,13 @@ v{}
     version
 )
 
+# pylint: disable=line-too-long
+_STARTER_ALIASES = {
+    "pyspark": "git+https://github.com/quantumblacklabs/kedro-starter-pyspark.git",
+    "pyspark-with-example": "git+https://github.com/quantumblacklabs/kedro-starter-pyspark-with-example.git",
+    "iris-example": "git+https://github.com/quantumblacklabs/kedro-starter-iris-example.git",
+}
+
 
 @click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")
 @click.version_option(version, "--version", "-V", help="Show version and exit")
@@ -140,7 +147,9 @@ def info():
     help="Non-interactive mode, using a configuration yaml file.",
 )
 @click.option(
-    "--starter", "-s", help="A starter template with which to bootstrap the project.",
+    "--starter",
+    "-s",
+    help="Specify the starter template to use when creating the project.",
 )
 def new(config, starter):
     """Create a new kedro project, either interactively or from a
@@ -174,11 +183,12 @@ def new(config, starter):
                     parent directory for the new project directory.
 
     \b
-    ``kedro new --starter=<path-to-starter>``
-    Create a new project from a starter template. The starter template could be located
-    in a local directory or a git repository.
-
+    ``kedro new --starter <starter>``
+    Create a new project from a starter template. The starter can be either the path to
+    a local directory, a URL to a remote VCS repository supported by `cookiecutter` or
+    one of the aliases listed in ``kedro starter list``.
     """
+    starter = _STARTER_ALIASES.get(starter, starter)
     if starter:
         template_path = starter
         should_prompt_for_example = False

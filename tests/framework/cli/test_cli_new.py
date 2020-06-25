@@ -74,8 +74,7 @@ def _assert_template_ok(
     output_dir=".",
     package_name=None,
 ):
-    print(result.output)
-    assert result.exit_code == 0
+    assert result.exit_code == 0, result.output
     assert "Change directory to the project generated in" in result.output
 
     if repo_name:
@@ -417,7 +416,7 @@ class TestNewWithStarter:
 
         result = _invoke(
             cli_runner,
-            ["-v", "new", "--starter", starter_path],
+            ["-v", "new", "--starter", str(starter_path)],
             project_name=self.project_name,
             python_package=self.package_name,
             repo_name=self.repo_name,
@@ -444,3 +443,26 @@ class TestNewWithStarter:
             f"Kedro project template not found at {invalid_starter_path}"
             in result.output
         )
+
+    @pytest.mark.parametrize(
+        "alias,expected_starter",
+        [
+            (
+                "pyspark-with-example",
+                "git+https://github.com/quantumblacklabs/kedro-starter-pyspark-with-example.git",
+            ),
+        ],
+    )
+    def test_new_with_starter_alias(self, alias, expected_starter, cli_runner, mocker):
+        mocked_cookie = mocker.patch("cookiecutter.main.cookiecutter")
+        _invoke(
+            cli_runner,
+            ["new", "--starter", alias],
+            project_name=self.project_name,
+            python_package=self.package_name,
+            repo_name=self.repo_name,
+        )
+        actual_starter = mocked_cookie.call_args[0][0]
+        actual_context = mocked_cookie.call_args[1]["extra_context"]
+        assert actual_starter == expected_starter
+        assert actual_context["include_example"] is False

@@ -11,6 +11,7 @@
 # Upcoming 0.16.3 release
 
 ## Major features and improvements
+* Added the `--starter` option to `kedro new` to create a new project from a local, remote or aliased starter template.
 
 ## Bug fixes and other changes
 * Removed `/src/nodes` directory from the project template and made `kedro jupyter convert` create it on the fly if necessary.

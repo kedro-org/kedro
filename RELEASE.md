@@ -11,6 +11,7 @@
 # Upcoming 0.16.3 release
 
 ## Major features and improvements
+* Added `json.JSONDataSet`
 
 ## Bug fixes and other changes
 * Removed `/src/nodes` directory from the project template and made `kedro jupyter convert` create it on the fly if necessary.
@@ -21,7 +22,7 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Deepyaman Datta](https://github.com/deepyaman)
+[Deepyaman Datta](https://github.com/deepyaman), [Tam-Sanh Nguyen](https://github.com/tamsanh)
 
 # Release 0.16.2
 

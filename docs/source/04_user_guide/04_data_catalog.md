@@ -208,9 +208,8 @@ Let's assume that the project contains the file `conf/local/credentials.yml` wit
 
 ```yaml
 dev_s3:
-  client_kwargs:
-    aws_access_key_id: token
-    aws_secret_access_key: key
+  key: token
+  secret: key
 
 scooters_credentials:
   con: sqlite:///kedro.db
@@ -225,7 +224,7 @@ In the example above `catalog.yml` contains references to credentials keys `dev_
 CSVDataSet(
     filepath="s3://test_bucket/data/02_intermediate/company/motorbikes.csv",
     load_args=dict(sep=",", skiprows=5, skipfooter=1, na_values=["#NA", "NA"],),
-    credentials=dict(client_kwargs=dict(aws_access_key_id="token", aws_secret_access_key="key")),
+    credentials=dict(key="token", secret="key"),
 )
 ```
 

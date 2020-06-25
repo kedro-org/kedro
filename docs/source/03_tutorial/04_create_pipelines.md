@@ -314,7 +314,7 @@ For this example, we will use a [`LinearRegression`](https://scikit-learn.org/st
 You can start by updating the dependencies in `src/requirements.txt` with the following:
 
 ```text
-scikit-learn==0.20.2
+scikit-learn==0.23.1
 ```
 
 You can find out more about requirements files [here](https://pip.pypa.io/en/stable/user_guide/#requirements-files).

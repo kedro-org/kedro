@@ -284,13 +284,13 @@ def _install_files(
     type=str,
     default="",
     callback=_check_pipeline_name,
-    help="Alternative name to package under",
+    help="Alternative name to package under.",
 )
 @click.option(
     "-d",
     "--destination",
     type=click.Path(resolve_path=True, file_okay=False),
-    help="Location where to create the wheel file. Defaults to `src/dist`",
+    help="Location where to create the wheel file. Defaults to `src/dist`.",
 )
 @click.argument("name", nargs=1)
 def package_pipeline(name, env, alias, destination):

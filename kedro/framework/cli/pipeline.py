@@ -35,6 +35,7 @@ from importlib import import_module
 from pathlib import Path
 from textwrap import indent
 from typing import Tuple
+from zipfile import ZipFile
 
 import click
 import yaml
@@ -47,6 +48,7 @@ from kedro.framework.cli.utils import (
     _filter_deprecation_warnings,
     call,
     env_option,
+    python_call,
 )
 from kedro.framework.context import KedroContext, load_context
 
@@ -114,7 +116,7 @@ def create_pipeline(name, skip_config, env):
     help="Environment to delete pipeline configuration from. Defaults to `base`."
 )
 @click.option(
-    "-y", "--yes", is_flag=True, help="Confirm deletion of pipeline non-interactively.",
+    "-y", "--yes", is_flag=True, help="Confirm deletion of pipeline non-interactively."
 )
 def delete_pipeline(name, env, yes):
     """Delete a modular pipeline by providing the pipeline name as an argument."""
@@ -185,6 +187,94 @@ def describe_pipeline(name, env):
     click.echo(yaml.dump(result))
 
 
+@pipeline.command("pull")
+@click.argument("package_path", nargs=1)
+@env_option(
+    help="Environment to install the pipeline configuration to. Defaults to `base`."
+)
+@click.option(
+    "--alias",
+    type=str,
+    default="",
+    callback=_check_pipeline_name,
+    help="Alternative name to unpackage under.",
+)
+def pull_package(package_path, env, alias):
+    """Pull a modular pipeline package, unpack it and install the files to corresponding
+    locations.
+    """
+    # pylint: disable=import-outside-toplevel
+    import fsspec
+    from kedro.io.core import get_protocol_and_path
+
+    protocol, _ = get_protocol_and_path(package_path)
+    filesystem = fsspec.filesystem(protocol)
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_dir_path = Path(temp_dir).resolve()
+        if package_path.endswith(".whl") and filesystem.exists(package_path):
+            with filesystem.open(package_path) as fs_file:
+                ZipFile(fs_file).extractall(temp_dir_path)
+        else:
+            python_call(
+                "pip",
+                ["download", "--no-deps", "--dest", str(temp_dir_path), package_path],
+            )
+            wheel_file = list(temp_dir_path.glob("*.whl"))
+            # `--no-deps` should fetch only one wheel file, and CLI should fail if that's
+            # not the case.
+            if len(wheel_file) != 1:
+                file_names = [wf.name for wf in wheel_file]
+                raise KedroCliError(
+                    f"More than 1 or no wheel files found: {str(file_names)}. "
+                    "There has to be exactly one distribution file."
+                )
+            ZipFile(wheel_file[0]).extractall(temp_dir_path)
+
+        dist_info_file = list(temp_dir_path.glob("*.dist-info"))
+        if len(dist_info_file) != 1:
+            raise KedroCliError(
+                f"More than 1 or no dist-info files found from {package_path}. "
+                "There has to be exactly one dist-info directory."
+            )
+        # Extract package name, based on the naming convention for wheel files
+        # https://www.python.org/dev/peps/pep-0427/#file-name-convention
+        package_name = dist_info_file[0].stem.split("-")[0]
+
+        _clean_pycache(temp_dir_path)
+        _install_files(package_name, temp_dir_path, env, alias)
+
+
+def _install_files(
+    package_name: str, source_path: Path, env: str = None, alias: str = None
+):
+    env = env or "base"
+    context = load_context(Path.cwd(), env=env)
+
+    package_source, test_source, conf_source = _get_source_paths(
+        source_path, package_name
+    )
+
+    pipeline_name = alias or package_name
+    package_dest, test_dest, conf_dest = _get_pipeline_artifacts(
+        context, pipeline_name=pipeline_name, env=env
+    )
+
+    if conf_source.is_dir():
+        _sync_dirs(conf_source, conf_dest)
+        # `config` was packaged under `package_name` directory with `kedro pipeline package`.
+        # Since `config` was already synced, we don't want to send it again
+        # when syncing the package, so we remove it.
+        shutil.rmtree(str(conf_source))
+
+    if test_source.is_dir():
+        _sync_dirs(test_source, test_dest)
+
+    # Sync everything under package directory, except `config` since we already sent it.
+    if package_source.is_dir():
+        _sync_dirs(package_source, package_dest)
+
+
 @pipeline.command("package")
 @env_option(
     help="Environment where the pipeline configuration lives. Defaults to `base`."
@@ -250,12 +340,7 @@ def _generate_wheel_file(
         temp_dir_path = Path(temp_dir).resolve()
 
         # Copy source folders
-        target_paths = (
-            temp_dir_path / package_name,
-            temp_dir_path / "tests",
-            # package_data (non-python files) needs to live inside one of the packages
-            temp_dir_path / package_name / "config",
-        )
+        target_paths = _get_source_paths(temp_dir_path, package_name)
         for source, target in zip(source_paths, target_paths):
             if source.is_dir():
                 _sync_dirs(source, target)
@@ -383,6 +468,14 @@ def _get_pipeline_artifacts(
         context.project_path / context.CONF_ROOT / env / "pipelines" / pipeline_name,
     )
     return artifacts
+
+
+def _get_source_paths(source_path: Path, package_name: str):
+    package_path = source_path / package_name
+    test_path = source_path / "tests"
+    # package_data (non-python files) needs to live inside one of the packages
+    conf_path = source_path / package_name / "config"
+    return package_path, test_path, conf_path
 
 
 def _copy_pipeline_tests(pipeline_name: str, result_path: Path, package_dir: Path):

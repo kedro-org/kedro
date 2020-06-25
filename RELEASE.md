@@ -11,6 +11,7 @@
 # Upcoming 0.16.3 release
 
 ## Major features and improvements
+* Added the `kedro pipeline pull` CLI command to extract a packaged modular pipeline, and place the contents in a Kedro project.
 * Added the `--starter` option to `kedro new` to create a new project from a local, remote or aliased starter template.
 
 ## Bug fixes and other changes

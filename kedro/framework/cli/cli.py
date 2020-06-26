@@ -151,7 +151,10 @@ def info():
     "-s",
     help="Specify the starter template to use when creating the project.",
 )
-def new(config, starter):
+@click.option(
+    "--checkout", help="A tag, branch or commit to checkout in the starter repository.",
+)
+def new(config, starter, checkout):
     """Create a new kedro project, either interactively or from a
     configuration file.
 
@@ -187,8 +190,17 @@ def new(config, starter):
     Create a new project from a starter template. The starter can be either the path to
     a local directory, a URL to a remote VCS repository supported by `cookiecutter` or
     one of the aliases listed in ``kedro starter list``.
+
+    \b
+    ``kedro new --starter <starter> --checkout <checkout>``
+    Create a new project from a starter template and a particular tag, branch or commit
+    in the starter repository.
+
     """
     starter = _STARTER_ALIASES.get(starter, starter)
+    if checkout and not starter:
+        raise KedroCliError("Cannot use the --checkout flag without a --starter value.")
+
     if starter:
         template_path = starter
         should_prompt_for_example = False
@@ -201,6 +213,7 @@ def new(config, starter):
         verbose=_VERBOSE,
         template_path=template_path,
         should_prompt_for_example=should_prompt_for_example,
+        checkout=checkout,
     )
 
 
@@ -222,12 +235,14 @@ def _create_project(
     verbose: bool,
     template_path: Path = TEMPLATE_PATH,
     should_prompt_for_example: bool = True,
+    checkout: str = None,
 ):
     """Implementation of the kedro new cli command.
 
     Args:
         config_path: In non-interactive mode, the path of the config.yml which
             should contain the project_name, output_dir and repo_name.
+        verbose: Extensive debug terminal logs.
         template_path: The path to the cookiecutter template to create the project.
             It could either be a local directory or a remote VCS repository
             supported by cookiecutter. For more details, please see:
@@ -235,7 +250,9 @@ def _create_project(
         should_prompt_for_example: Whether to display a prompt to generate an example pipeline.
             N.B.: this should only be here until the start project is complete and the
             starters with example are all located in public repositories.
-        verbose: Extensive debug terminal logs.
+        checkout: The tag, branch or commit in the starter repository to checkout.
+            Maps directly to cookiecutter's --checkout argument.
+            If the value is invalid, cookiecutter will use the default branch.
     """
     with _filter_deprecation_warnings():
         # pylint: disable=import-outside-toplevel
@@ -256,6 +273,7 @@ def _create_project(
                 output_dir=config["output_dir"],
                 no_input=True,
                 extra_context=config,
+                checkout=checkout,
             )
         )
 

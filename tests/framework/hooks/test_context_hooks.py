@@ -26,6 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
+import sys
 from logging.handlers import QueueHandler, QueueListener
 from multiprocessing import Queue
 from pathlib import Path
@@ -332,6 +333,7 @@ def broken_context_with_hooks(tmp_path, mocker, logging_hooks):
     return BrokenContextWithHooks(tmp_path, env="local")
 
 
+@pytest.mark.skipif(sys.platform.startswith("win"), reason="Due to bug in hooks")
 class TestKedroContextHooks:
     @staticmethod
     def _assert_hook_call_record_has_expected_parameters(

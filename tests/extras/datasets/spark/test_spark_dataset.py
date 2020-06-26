@@ -27,6 +27,7 @@
 # limitations under the License.
 
 # pylint: disable=import-error
+import sys
 import tempfile
 from pathlib import Path, PurePosixPath
 
@@ -362,6 +363,9 @@ class TestSparkDataSetVersionedLocal:
             versioned_local.save(sample_spark_df)
 
 
+@pytest.mark.skipif(
+    sys.platform.startswith("win"), reason="DBFS doesn't work on Windows"
+)
 class TestSparkDataSetVersionedDBFS:
     def test_load_latest(  # pylint: disable=too-many-arguments
         self, mocker, versioned_dataset_dbfs, version, tmp_path, sample_spark_df

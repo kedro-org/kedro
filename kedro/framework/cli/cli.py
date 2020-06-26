@@ -149,12 +149,13 @@ def info():
 @click.option(
     "--starter",
     "-s",
+    "starter_name",
     help="Specify the starter template to use when creating the project.",
 )
 @click.option(
     "--checkout", help="A tag, branch or commit to checkout in the starter repository.",
 )
-def new(config, starter, checkout):
+def new(config, starter_name, checkout):
     """Create a new kedro project, either interactively or from a
     configuration file.
 
@@ -197,12 +198,11 @@ def new(config, starter, checkout):
     in the starter repository.
 
     """
-    starter = _STARTER_ALIASES.get(starter, starter)
-    if checkout and not starter:
+    if checkout and not starter_name:
         raise KedroCliError("Cannot use the --checkout flag without a --starter value.")
 
-    if starter:
-        template_path = starter
+    if starter_name:
+        template_path = _STARTER_ALIASES.get(starter_name, starter_name)
         should_prompt_for_example = False
     else:
         template_path = TEMPLATE_PATH
@@ -228,6 +228,26 @@ def docs():
     )
     click.echo("Opening " + index_path)
     webbrowser.open(index_path)
+
+
+@cli.group()
+def starter():
+    """Commands for working with project starters."""
+
+
+@starter.command("list")
+def list_starters():
+    """List all official project starters available."""
+
+    def _get_clickable_link(git_link):
+        prefix = re.escape("git+")
+        return re.sub(rf"^{prefix}", "", git_link)
+
+    output = [
+        {alias: _get_clickable_link(url)}
+        for alias, url in sorted(_STARTER_ALIASES.items())
+    ]
+    click.echo(yaml.safe_dump(output))
 
 
 def _create_project(

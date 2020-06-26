@@ -13,6 +13,7 @@
 ## Major features and improvements
 * Added the `kedro pipeline pull` CLI command to extract a packaged modular pipeline, and place the contents in a Kedro project.
 * Added the `--starter` option to `kedro new` to create a new project from a local, remote or aliased starter template.
+* Added the `kedro starter list` CLI command to list all starter templates that can be used to bootstrap a new Kedro project.
 
 ## Bug fixes and other changes
 * Removed `/src/nodes` directory from the project template and made `kedro jupyter convert` create it on the fly if necessary.

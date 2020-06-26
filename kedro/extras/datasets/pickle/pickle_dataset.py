@@ -95,8 +95,8 @@ class PickleDataSet(AbstractVersionedDataSet):
         serialize/deserialize objects: `pickle` and `joblib`.
 
         Args:
-            filepath: Filepath to a Pickle file prefixed with a protocol like `s3://`.
-                If prefix is not provided, `file` protocol (local filesystem) will be used.
+            filepath: Filepath in POSIX format to a Pickle file prefixed with a protocol like
+                `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.
             backend: Backend to use, must be one of ['pickle', 'joblib']. Defaults to 'pickle'.

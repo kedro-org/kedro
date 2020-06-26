@@ -37,7 +37,7 @@ import yaml
 
 from kedro import __version__
 from kedro.framework.context import KedroContext
-from kedro.framework.context.context import _expand_path
+from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import hook_impl
 from kedro.framework.hooks.manager import _create_hook_manager
 from kedro.io import DataCatalog
@@ -369,7 +369,7 @@ class TestKedroContextHooks:
         assert record.getMessage() == "Catalog created"
         assert record.catalog == catalog
         assert record.conf_creds == config_loader.get("credentials*")
-        assert record.conf_catalog == _expand_path(
+        assert record.conf_catalog == _convert_paths_to_absolute_posix(
             project_path=context_with_hooks.project_path,
             conf_dictionary=config_loader.get("catalog*"),
         )

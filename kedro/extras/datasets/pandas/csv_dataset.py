@@ -83,7 +83,7 @@ class CSVDataSet(AbstractVersionedDataSet):
         on a specific filesystem.
 
         Args:
-            filepath: Filepath to a CSV file prefixed with a protocol like `s3://`.
+            filepath: Filepath in POSIX format to a CSV file prefixed with a protocol like `s3://`.
                 If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.

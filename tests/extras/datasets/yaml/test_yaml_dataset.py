@@ -43,7 +43,7 @@ from kedro.io.core import PROTOCOL_DELIMITER, Version
 
 @pytest.fixture
 def filepath_yaml(tmp_path):
-    return str(tmp_path / "test.yaml")
+    return (tmp_path / "test.yaml").as_posix()
 
 
 @pytest.fixture

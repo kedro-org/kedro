@@ -3,8 +3,12 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+*  Bumped maximum required `fsspec` version to 0.8.
 
 ## Breaking changes to the API
+* Bumped maximum supported `s3fs` version to 0.5 (`S3FileSystem` interface has changed since 0.4.1 version).
+* Deleted the deprecated `kedro.cli` and `kedro.context` modules in favor of `kedro.framework.cli` and `kedro.framework.context` respectively.
+* The pipeline-specific `catalog.yml` file is no longer automatically created for modular pipelines when doing `kedro pipeline create`.
 
 ## Thanks for supporting contributions
 

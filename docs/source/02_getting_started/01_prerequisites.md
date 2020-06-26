@@ -8,12 +8,15 @@ In order to work effectively with Kedro projects, we highly recommend you downlo
 
 ## Working with virtual environments
 
-> The main purpose of Python virtual environments is to create an isolated environment for Python projects. This means that each project can have its own dependencies, regardless of what dependencies every other project has. Read more about Python Virtual Environments [here](https://realpython.com/python-virtual-environments-a-primer/).
+The main purpose of Python virtual environments is to create an isolated environment for Python projects. This means that each project can have its own dependencies, regardless of what dependencies every other project has.
+
+> Read more about Python Virtual Environments [here](https://realpython.com/python-virtual-environments-a-primer/).
 
 Follow the instructions that best suit your Python installation preference from below:
 
- - `conda` environment with Python 3.7
- - `venv` or `pipenv` used when you prefer not to use `conda` and instead use your global Python interpreter.
+-   `conda` environment with Python 3.7
+    OR
+-   `venv` or `pipenv` if you prefer not to use `conda` and instead use your global Python interpreter
 
 ### `conda`
 
@@ -35,7 +38,7 @@ To exit the environment:
 conda deactivate kedro-environment
 ```
 
-> *Note:* Unlike `venv` or `pipenv`, `conda` virtual environment is not dependent on your current working directory and can be activated from anywhere.
+> *Note:* The `conda` virtual environment is not dependent on your current working directory (unlike `venv` or `pipenv`) and it can be activated from any directory.
 
 ### `venv` (instead of `conda`)
 

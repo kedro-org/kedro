@@ -49,9 +49,8 @@ Welcome to Kedro's API docs and tutorials!
    02_getting_started/01_prerequisites
    02_getting_started/02_install
    02_getting_started/03_new_project
-   02_getting_started/04_hello_world
+   02_getting_started/04_hello_kedro
    02_getting_started/05_starters
-
 
 .. toctree::
    :maxdepth: 2

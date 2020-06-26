@@ -29,7 +29,8 @@
 import configparser
 import json
 import re
-from pathlib import Path, PurePosixPath, PureWindowsPath
+from pathlib import Path, PurePath, PurePosixPath, PureWindowsPath
+from time import sleep
 from typing import Any, Dict
 
 import pandas as pd
@@ -41,7 +42,7 @@ from kedro import __version__ as kedro_version
 from kedro.config import MissingConfigException
 from kedro.context import KedroContext, KedroContextError, validate_source_path
 from kedro.context.context import (
-    _expand_path,
+    _convert_paths_to_absolute_posix,
     _is_relative_path,
     _validate_layers_for_transcoding,
 )
@@ -101,8 +102,8 @@ def _write_dummy_ini(filepath: Path):
 
 @pytest.fixture
 def base_config(tmp_path):
-    cars_filepath = str(tmp_path / "cars.csv")
-    trains_filepath = str(tmp_path / "trains.csv")
+    cars_filepath = (tmp_path / "cars.csv").as_posix()
+    trains_filepath = (tmp_path / "trains.csv").as_posix()
 
     return {
         "trains": {"type": "pandas.CSVDataSet", "filepath": trains_filepath},
@@ -116,8 +117,8 @@ def base_config(tmp_path):
 
 @pytest.fixture
 def local_config(tmp_path):
-    cars_filepath = str(tmp_path / "cars.csv")
-    boats_filepath = str(tmp_path / "boats.csv")
+    cars_filepath = (tmp_path / "cars.csv").as_posix()
+    boats_filepath = (tmp_path / "boats.csv").as_posix()
     # use one dataset with a relative filepath
     horses_filepath = "horses.csv"
     return {
@@ -285,8 +286,11 @@ class TestKedroContext:
         # based on the project path
         catalog = dummy_context._get_catalog()
         ds_path = catalog._data_sets["horses"]._filepath
-        assert ds_path.is_absolute()
-        assert str(ds_path) == str(dummy_context._project_path / "horses.csv")
+        assert PurePath(ds_path.as_posix()).is_absolute()
+        assert (
+            ds_path.as_posix()
+            == (dummy_context._project_path / "horses.csv").as_posix()
+        )
 
     def test_get_catalog_validates_layers(self, dummy_context, mocker):
         mock_validate = mocker.patch(
@@ -428,8 +432,9 @@ class TestKedroContext:
         mocked_dict_config = mocker.patch("logging.config.dictConfig")
         dummy_context = DummyContext(str(tmp_path))
         called_args = mocked_dict_config.call_args[0][0]
-        assert called_args["info_file_handler"]["filename"] == str(
-            dummy_context._project_path / "logs" / "info.log"
+        assert (
+            called_args["info_file_handler"]["filename"]
+            == (dummy_context._project_path / "logs" / "info.log").as_posix()
         )
 
 
@@ -567,7 +572,7 @@ class TestKedroContextRun:
 
         mocker.patch("logging.config.dictConfig")
         dummy_context = DummyContext(str(tmp_path))
-        filepath = str(dummy_context.project_path / "cars.csv")
+        filepath = (dummy_context.project_path / "cars.csv").as_posix()
 
         old_save_version = generate_timestamp()
         old_df = pd.DataFrame({"col1": [0, 0], "col2": [0, 0], "col3": [0, 0]})
@@ -578,6 +583,7 @@ class TestKedroContextRun:
         )
         old_csv_data_set.save(old_df)
 
+        sleep(0.5)
         new_save_version = generate_timestamp()
         new_csv_data_set = CSVDataSet(
             filepath=filepath,
@@ -791,10 +797,10 @@ def test_is_relative_path(path_string: str, expected: bool):
     assert _is_relative_path(path_string) == expected
 
 
-def test_expand_path_raises_value_error_on_relative_project_path():
+def test_convert_paths_raises_error_on_relative_project_path():
     path = Path("relative/path")
     with pytest.raises(ValueError) as excinfo:
-        _expand_path(project_path=path, conf_dictionary={})
+        _convert_paths_to_absolute_posix(project_path=path, conf_dictionary={})
 
     assert (
         str(excinfo.value) == f"project_path must be an absolute path. Received: {path}"
@@ -816,8 +822,8 @@ def test_expand_path_raises_value_error_on_relative_project_path():
         ),
         (
             PureWindowsPath("C:\\kedro"),
-            {"my_dataset": {"path": "data\\01_raw\\dataset.json"}},
-            {"my_dataset": {"path": "C:\\kedro\\data\\01_raw\\dataset.json"}},
+            {"my_dataset": {"path": "data/01_raw/dataset.json"}},
+            {"my_dataset": {"path": "C:/kedro/data/01_raw/dataset.json"}},
         ),
         # test: the function shouldn't modify paths for key not associated with filepath
         (
@@ -827,10 +833,10 @@ def test_expand_path_raises_value_error_on_relative_project_path():
         ),
     ],
 )
-def test_expand_path_for_all_known_filepath_keys(
+def test_convert_paths_to_absolute_posix_for_all_known_filepath_keys(
     project_path: Path, input_conf: Dict[str, Any], expected: Dict[str, Any]
 ):
-    assert _expand_path(project_path, input_conf) == expected
+    assert _convert_paths_to_absolute_posix(project_path, input_conf) == expected
 
 
 @pytest.mark.parametrize(
@@ -846,17 +852,28 @@ def test_expand_path_for_all_known_filepath_keys(
             {"my_dataset": {"filepath": "s3://data/01_raw/dataset.json"}},
             {"my_dataset": {"filepath": "s3://data/01_raw/dataset.json"}},
         ),
+    ],
+)
+def test_convert_paths_to_absolute_posix_not_changing_non_relative_path(
+    project_path: Path, input_conf: Dict[str, Any], expected: Dict[str, Any]
+):
+    assert _convert_paths_to_absolute_posix(project_path, input_conf) == expected
+
+
+@pytest.mark.parametrize(
+    "project_path,input_conf,expected",
+    [
         (
             PureWindowsPath("D:\\kedro"),
-            {"my_dataset": {"path": "C:\\data\\01_raw\\dataset.json"}},
-            {"my_dataset": {"path": "C:\\data\\01_raw\\dataset.json"}},
+            {"my_dataset": {"path": r"C:\data\01_raw\dataset.json"}},
+            {"my_dataset": {"path": "C:/data/01_raw/dataset.json"}},
         ),
     ],
 )
-def test_expand_path_not_changing_non_relative_path(
+def test_convert_paths_to_absolute_posix_converts_full_windows_path_to_posix(
     project_path: Path, input_conf: Dict[str, Any], expected: Dict[str, Any]
 ):
-    assert _expand_path(project_path, input_conf) == expected
+    assert _convert_paths_to_absolute_posix(project_path, input_conf) == expected
 
 
 @pytest.mark.parametrize(

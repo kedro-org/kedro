@@ -233,6 +233,15 @@ def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
 
 > *Note:* To find out how you can run a pipeline by its name, please navigate to [this section](#running-a-pipeline-by-name).
 
+### How do I package a modular pipeline?
+
+Since Kedro 0.16.2 you can package a modular pipeline by executing `kedro pipeline package <pipeline_name>` command, which will generate a new [wheel file](https://pythonwheels.com/) for it. By default, the wheel file will be saved into `src/dist` directory inside your project, however this can be changed using `--destination` (`-d`) option.
+
+When packaging your modular pipeline, Kedro will also automatically include all configuration parameters from `conf/<env>/pipelines/<pipeline_name>` and pipeline tests from `tests/pipelines/<pipeline_name>`, where `<env>` defaults to `base`. If you need to capture the parameters from a different config environment, run `kedro pipeline package --env <env_name> <pipeline_name>`.
+
+> Note that Kedro _will not_ package the catalog config files even if those are present in `conf/<env>/pipelines/<pipeline_name>`.
+
+If you plan to publish your packaged modular pipeline to some Python package repository like [PyPI](https://pypi.org/), you need to make sure that your modular pipeline name doesn't clash with any of the existing packages in that repository. However, there is no need to rename any of your source files if that is the case. Simply alias your package with a new name by running `kedro pipeline package --alias <new_package_name> <pipeline_name>`.
 
 ### A modular pipeline example template
 

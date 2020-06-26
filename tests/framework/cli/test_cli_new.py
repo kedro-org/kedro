@@ -31,6 +31,7 @@
 
 import json
 import os
+import shutil
 from pathlib import Path
 
 import pytest
@@ -73,8 +74,7 @@ def _assert_template_ok(
     output_dir=".",
     package_name=None,
 ):
-    print(result.output)
-    assert result.exit_code == 0
+    assert result.exit_code == 0, result.output
     assert "Change directory to the project generated in" in result.output
 
     if repo_name:
@@ -402,3 +402,109 @@ def test_default_config_up_to_date():
     default_config_keys = _get_default_config().keys()
 
     assert set(cookie_keys) == set(default_config_keys)
+
+
+class TestNewWithStarter:
+
+    repo_name = "project-test"
+    package_name = "package_test"
+    project_name = "Test"
+
+    def test_new_with_valid_starter(self, cli_runner, tmpdir):
+        starter_path = tmpdir / "starter"
+        shutil.copytree(TEMPLATE_PATH, str(starter_path))
+
+        result = _invoke(
+            cli_runner,
+            ["-v", "new", "--starter", str(starter_path)],
+            project_name=self.project_name,
+            python_package=self.package_name,
+            repo_name=self.repo_name,
+        )
+        _assert_template_ok(
+            result,
+            FILES_IN_TEMPLATE_WITH_EXAMPLE,
+            repo_name=self.repo_name,
+            project_name=self.project_name,
+            package_name=self.package_name,
+        )
+
+    def test_new_with_invalid_starter_path_should_raise(self, cli_runner):
+        invalid_starter_path = "/foo/bar"
+        result = _invoke(
+            cli_runner,
+            ["-v", "new", "--starter", invalid_starter_path],
+            project_name=self.project_name,
+            python_package=self.package_name,
+            repo_name=self.repo_name,
+        )
+        assert result.exit_code != 0
+        assert (
+            f"Kedro project template not found at {invalid_starter_path}"
+            in result.output
+        )
+
+    @pytest.mark.parametrize(
+        "alias,expected_starter",
+        [
+            (
+                "pyspark-with-example",
+                "git+https://github.com/quantumblacklabs/kedro-starter-pyspark-with-example.git",
+            ),
+        ],
+    )
+    def test_new_with_starter_alias(self, alias, expected_starter, cli_runner, mocker):
+        mocked_cookie = mocker.patch("cookiecutter.main.cookiecutter")
+        _invoke(
+            cli_runner,
+            ["new", "--starter", alias],
+            project_name=self.project_name,
+            python_package=self.package_name,
+            repo_name=self.repo_name,
+        )
+        actual_starter = mocked_cookie.call_args[0][0]
+        actual_context = mocked_cookie.call_args[1]["extra_context"]
+        assert actual_starter == expected_starter
+        assert actual_context["include_example"] is False
+
+    def test_new_starter_with_checkout(self, cli_runner, mocker):
+        starter_path = "some-starter"
+        checkout_version = "some-version"
+        output_dir = str(Path.cwd())
+        mocked_cookiecutter = mocker.patch("cookiecutter.main.cookiecutter")
+        mocked_cookiecutter.return_value = starter_path
+        result = _invoke(
+            cli_runner,
+            ["new", "--starter", starter_path, "--checkout", checkout_version],
+            project_name=self.project_name,
+            python_package=self.package_name,
+            repo_name=self.repo_name,
+        )
+        assert result.exit_code == 0, result.output
+        mocked_cookiecutter.assert_called_once_with(
+            starter_path,
+            checkout=checkout_version,
+            extra_context={
+                "include_example": False,
+                "kedro_version": version,
+                "output_dir": output_dir,
+                "project_name": self.project_name,
+                "python_package": self.package_name,
+                "repo_name": self.repo_name,
+            },
+            no_input=True,
+            output_dir=output_dir,
+        )
+
+    def test_checkout_flag_without_starter(self, cli_runner):
+        result = _invoke(
+            cli_runner,
+            ["new", "--checkout", "some-version"],
+            project_name=self.project_name,
+            python_package=self.package_name,
+            repo_name=self.repo_name,
+        )
+        assert result.exit_code != 0
+        assert (
+            "Cannot use the --checkout flag without a --starter value." in result.output
+        )

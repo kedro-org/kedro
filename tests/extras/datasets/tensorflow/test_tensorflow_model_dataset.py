@@ -49,7 +49,7 @@ AWS_CREDENTIALS = dict(
 
 @pytest.fixture
 def filepath(tmp_path):
-    return str(tmp_path / "test_tf")
+    return (tmp_path / "test_tf").as_posix()
 
 
 @pytest.fixture

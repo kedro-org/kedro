@@ -21,11 +21,12 @@
 * Fixed broken versioning for Windows paths.
 * Fixed `DataSet` string representation for falsy values.
 * Improved the error message when duplicate nodes are passed to the `Pipeline` initializer.
+* Added a `json` parameter to `APIDataSet` for the convenience of generating requests with JSON bodies.
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Deepyaman Datta](https://github.com/deepyaman)
+[Deepyaman Datta](https://github.com/deepyaman), [DataEngineerOne](http://youtube.com/DataEngineerOne)
 
 # Release 0.16.2
 

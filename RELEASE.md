@@ -18,6 +18,7 @@
 ## Bug fixes and other changes
 * Removed `/src/nodes` directory from the project template and made `kedro jupyter convert` create it on the fly if necessary.
 * Fixed a bug in `MatplotlibWriter` which prevented saving lists and dictionaries of plots locally on Windows.
+* Closed all pyplot windows after saving in `MatplotlibWriter`.
 * Documentation improvements:
   - Added [kedro-wings](https://github.com/tamsanh/kedro-wings) and [kedro-great](https://github.com/tamsanh/kedro-great) to the list of community plugins.
 * Fixed broken versioning for Windows paths.

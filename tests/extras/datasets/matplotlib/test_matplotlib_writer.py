@@ -53,6 +53,7 @@ matplotlib.use("Agg")  # Disable interactive mode
 @pytest.fixture
 def mock_single_plot():
     plt.plot([1, 2, 3], [4, 5, 6])
+    plt.close("all")
     return plt
 
 
@@ -63,6 +64,7 @@ def mock_list_plot():
     for index in range(5):  # pylint: disable=unused-variable
         plots_list.append(plt.figure())
         plt.plot([1, 2, 3], [4, 5, 6], color=colour)
+    plt.close("all")
     return plots_list
 
 
@@ -72,7 +74,7 @@ def mock_dict_plot():
     for colour in COLOUR_LIST:
         plots_dict[colour] = plt.figure()
         plt.plot([1, 2, 3], [4, 5, 6], color=colour)
-        plt.close()
+    plt.close("all")
     return plots_dict
 
 
@@ -137,6 +139,12 @@ def versioned_plot_writer(tmp_path, load_version, save_version):
     )
 
 
+@pytest.fixture(autouse=True)
+def cleanup_plt():
+    yield
+    plt.close("all")
+
+
 class TestMatplotlibWriter:
     @pytest.mark.parametrize("save_args", [{"k1": "v1"}], indirect=True)
     def test_save_data(
@@ -148,7 +156,7 @@ class TestMatplotlibWriter:
         download_path = tmp_path / "downloaded_image.png"
         actual_filepath = tmp_path / "locally_saved.png"
 
-        plt.savefig(str(actual_filepath))
+        mock_single_plot.savefig(str(actual_filepath))
 
         mocked_s3_bucket.download_file(BUCKET_NAME, KEY_PATH, str(download_path))
 

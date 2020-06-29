@@ -105,3 +105,5 @@ kedro to_json
 - [find-kedro](https://github.com/WaylonWalker/find-kedro) by [Waylon Walker](https://github.com/WaylonWalker), automatically construct pipelines using pytest style pattern matching
 - [kedro-static-viz](https://github.com/WaylonWalker/kedro-static-viz) by [Waylon Walker](https://github.com/WaylonWalker), generates a static kedro viz site (html, css, js)
 - [steel-toes](https://github.com/WaylonWalker/steel-toes) by [Waylon Walker](https://github.com/WaylonWalker), prevents stepping on toes by automatically **branching** data paths
+- [kedro-wings](https://github.com/tamsanh/kedro-wings) by [Tam-Sanh Nguyen](https://github.com/tamsanh), simplifies and speeds pipeline creation by auto-generating catalog datasets.
+- [kedro-great](https://github.com/tamsanh/kedro-great) by [Tam-Sanh Nguyen](https://github.com/tamsanh), integrates kedro with [Great Expectations](https://greatexpectations.io), enabling catalog based expectation generation and data validation on pipeline run.

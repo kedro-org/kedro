@@ -64,8 +64,8 @@ python -m venv env\kedro-environment  # Windows
 We can activate this virtual environment with:
 
 ```bash
-source env/bin/activate # macOS / Linux
-.\env\Scripts\activate  # Windows
+source env/kedro-environment/bin/activate # macOS / Linux
+.\env\kedro-environment\Scripts\activate  # Windows
 ```
 
 To exit the environment:

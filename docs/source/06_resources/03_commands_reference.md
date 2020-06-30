@@ -101,7 +101,14 @@ This command adds a `git hook` which clears all notebook output cells before com
 This command shows datasets per pipeline per type. The result includes datasets that are/aren't used by a specific pipeline. It also accept optional `--pipeline` argument that allows specifying pipeline name(s) (comma-separated value) for which the datasets should be shown, e.g. `kedro catalog list --pipeline "ds,de"`.
 
 ### `kedro pipeline list`
-This command shows a list of nodes for every pipeline in your project. `kedro pipeline list <pipeline_1> <pipeline_2> ...` will show a list of nodes for each pipeline you specify. `kedro pipeline list --simple` will show a list of all pipelines in your project.
+This command shows a list of all pipelines in your project.
+
+### `kedro pipeline create`
+
+This command creates a new modular pipeline in your project. More details in [this section](../04_user_guide/06_pipelines.md#how-do-i-create-modular-pipelines).
+
+### `kedro pipeline package <pipeline_name>`
+This command packages a modular pipeline into a [wheel file](https://pythonwheels.com/). More details in [this section](../04_user_guide/06_pipelines.md#how-do-i-package-a-modular-pipeline).
 
 ## Using Python
 You can also invoke the Kedro CLI as a Python module:

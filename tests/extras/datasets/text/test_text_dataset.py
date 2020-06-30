@@ -43,7 +43,7 @@ STRING = "Write to text file."
 
 @pytest.fixture
 def filepath_txt(tmp_path):
-    return str(tmp_path / "test.txt")
+    return (tmp_path / "test.txt").as_posix()
 
 
 @pytest.fixture

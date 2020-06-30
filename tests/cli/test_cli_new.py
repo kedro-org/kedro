@@ -68,7 +68,6 @@ def _assert_template_ok(
     output_dir=".",
     package_name=None,
 ):
-    print(result.output)
     assert result.exit_code == 0
     assert "Change directory to the project generated in" in result.output
 

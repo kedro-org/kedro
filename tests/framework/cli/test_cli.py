@@ -34,7 +34,12 @@ from pytest import fixture, mark, raises, warns
 
 from kedro import __version__ as version
 from kedro.framework.cli import get_project_context
-from kedro.framework.cli.cli import _init_plugins, cli, load_entry_points
+from kedro.framework.cli.cli import (
+    _STARTER_ALIASES,
+    _init_plugins,
+    cli,
+    load_entry_points,
+)
 from kedro.framework.cli.utils import (
     CommandCollection,
     KedroCliError,
@@ -172,6 +177,14 @@ class TestCliCommands:
         args, _ = patched_browser.call_args
         for each in ("file://", join("kedro", "framework", "html", "index.html")):
             assert each in args[0]
+
+    def test_starter_list(self, cli_runner):
+        """Check that `kedro starter list` prints out all starter aliases."""
+        result = cli_runner.invoke(cli, ["starter", "list"])
+
+        assert result.exit_code == 0, result.output
+        for alias in _STARTER_ALIASES:
+            assert alias in result.output
 
 
 class TestCommandCollection:

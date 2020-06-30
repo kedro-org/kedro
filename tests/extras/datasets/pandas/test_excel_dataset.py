@@ -43,7 +43,7 @@ from kedro.io.core import PROTOCOL_DELIMITER, Version
 
 @pytest.fixture
 def filepath_excel(tmp_path):
-    return str(tmp_path / "test.xlsx")
+    return (tmp_path / "test.xlsx").as_posix()
 
 
 @pytest.fixture

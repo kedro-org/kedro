@@ -90,8 +90,8 @@ class GeoJSONDataSet(AbstractVersionedDataSet):
 
         Args:
 
-            filepath: Filepath to a GeoJSON file prefixed with a protocol like `s3://`.
-                If prefix is not provided `file` protocol (local filesystem) will be used.
+            filepath: Filepath in POSIX format to a GeoJSON file prefixed with a protocol like
+                `s3://`. If prefix is not provided `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.
             load_args: GeoPandas options for loading GeoJSON files.

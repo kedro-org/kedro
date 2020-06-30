@@ -86,7 +86,7 @@ class ParquetDataSet(AbstractDataSet):
         parquet files.
 
         Args:
-            filepath: Path to a parquet file
+            filepath: Filepath in POSIX format to a parquet file
                 parquet collection or the directory of a multipart parquet.
             load_args: Additional loading options `dask.dataframe.read_parquet`:
                 https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.read_parquet

@@ -87,8 +87,8 @@ class FeatherDataSet(AbstractVersionedDataSet):
         filepath.
 
         Args:
-            filepath: Filepath to a feather file prefixed with a protocol like `s3://`.
-                If prefix is not provided, `file` protocol (local filesystem) will be used.
+            filepath: Filepath in POSIX format to a feather file prefixed with a protocol like
+                `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.
             load_args: Pandas options for loading feather files.

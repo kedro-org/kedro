@@ -28,7 +28,7 @@
 
 
 import json
-from pathlib import PosixPath
+from pathlib import Path
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -53,6 +53,7 @@ matplotlib.use("Agg")  # Disable interactive mode
 @pytest.fixture
 def mock_single_plot():
     plt.plot([1, 2, 3], [4, 5, 6])
+    plt.close("all")
     return plt
 
 
@@ -63,6 +64,7 @@ def mock_list_plot():
     for index in range(5):  # pylint: disable=unused-variable
         plots_list.append(plt.figure())
         plt.plot([1, 2, 3], [4, 5, 6], color=colour)
+    plt.close("all")
     return plots_list
 
 
@@ -72,7 +74,7 @@ def mock_dict_plot():
     for colour in COLOUR_LIST:
         plots_dict[colour] = plt.figure()
         plt.plot([1, 2, 3], [4, 5, 6], color=colour)
-        plt.close()
+    plt.close("all")
     return plots_dict
 
 
@@ -131,10 +133,16 @@ def plot_writer(
 
 @pytest.fixture
 def versioned_plot_writer(tmp_path, load_version, save_version):
-    filepath = str(tmp_path / "matplotlib.png")
+    filepath = (tmp_path / "matplotlib.png").as_posix()
     return MatplotlibWriter(
         filepath=filepath, version=Version(load_version, save_version)
     )
+
+
+@pytest.fixture(autouse=True)
+def cleanup_plt():
+    yield
+    plt.close("all")
 
 
 class TestMatplotlibWriter:
@@ -148,7 +156,7 @@ class TestMatplotlibWriter:
         download_path = tmp_path / "downloaded_image.png"
         actual_filepath = tmp_path / "locally_saved.png"
 
-        plt.savefig(str(actual_filepath))
+        mock_single_plot.savefig(str(actual_filepath))
 
         mocked_s3_bucket.download_file(BUCKET_NAME, KEY_PATH, str(download_path))
 
@@ -323,7 +331,7 @@ class TestMatplotlibWriterVersioned:
         versioned_plot_writer.save(mock_single_plot)
 
         test_path = tmp_path / "test_image.png"
-        actual_filepath = PosixPath(versioned_plot_writer._get_load_path())
+        actual_filepath = Path(versioned_plot_writer._get_load_path().as_posix())
 
         plt.savefig(str(test_path))
 
@@ -340,7 +348,7 @@ class TestMatplotlibWriterVersioned:
             versioned_filepath = str(versioned_plot_writer._get_load_path())
 
             mock_list_plot[index].savefig(str(test_path))
-            actual_filepath = PosixPath("{}/{}.png".format(versioned_filepath, index))
+            actual_filepath = Path("{}/{}.png".format(versioned_filepath, index))
 
             assert actual_filepath.read_bytes() == test_path.read_bytes()
 
@@ -354,6 +362,6 @@ class TestMatplotlibWriterVersioned:
             versioned_filepath = str(versioned_plot_writer._get_load_path())
 
             mock_dict_plot[colour].savefig(str(test_path))
-            actual_filepath = PosixPath("{}/{}".format(versioned_filepath, colour))
+            actual_filepath = Path("{}/{}".format(versioned_filepath, colour))
 
             assert actual_filepath.read_bytes() == test_path.read_bytes()

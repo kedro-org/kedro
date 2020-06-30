@@ -50,6 +50,10 @@ include_example: true
 
 `output_dir` can be set to `~` for home directory, or `.` for the current working directory.
 
+## Create a new project using starters
+
+Kedro supports using custom starter templates to create your project via the `--starter` flag. To learn more about this feature, please read the guide to [creating new projects with Kedro Starters](./05_starters.md).
+
 ## Working with your new project
 
 ### Initialise a `git` repository

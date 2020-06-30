@@ -32,7 +32,7 @@ Please follow these simple rules. Where it's not obvious what the style should b
 
 ### Bullets
 * Capitalise the first word.
-* Don't put a period at the end unless it's a full sentence and go for consistency within a block of bullets, if you have some bullets with full sentences and others without.
+* Don't put a period at the end unless it's a full sentence. Aim for consistency within a block of bullets, if you have some bullets with full sentences and others without.
 * Don't use numbered bullets except for a sequence of activities or where you have to refer back to one of them in the text (or a diagram).
 
 ### Kedro lexicon

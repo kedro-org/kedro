@@ -2,9 +2,7 @@
 
 Kedro supports macOS, Linux and Windows (7 / 8 / 10 and Windows Server 2016+). If you encounter any problems on these platforms, please check the [FAQ](../06_resources/01_faq.md), and / or the Kedro community support on [Stack Overflow](https://stackoverflow.com/questions/tagged/kedro).
 
-### macOS / Linux
-
-In order to work effectively with Kedro projects, we highly recommend you download and install [Anaconda](https://www.anaconda.com/download/#macos) (Python 3.x version) and [Java](https://www.oracle.com/technetwork/java/javase/downloads/index.html) (if using PySpark).
+In order to work effectively with Kedro projects, we highly recommend you download and install [Anaconda](https://www.anaconda.com/download/#macos) (Python 3.x version). If you are using PySpark, you will also need to install [Java](https://www.oracle.com/technetwork/java/javase/downloads/index.html). If you are a Windows user, you will need admin rights to complete their installation.
 
 ## Working with virtual environments
 

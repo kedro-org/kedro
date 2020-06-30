@@ -2,30 +2,10 @@
 
 In this example, we introduce the most basic elements of a Kedro project with a small amount of code to illustrate them.
 
-A `kedro` project consists of the following main components:
 
-```eval_rst
-+--------------+-----------------------------------------------------------------------------+
-| Component    | Description                                                                 |
-+==============+=============================================================================+
-| Node         | Wraps a Python function that typically executes some business logic,        |
-|              | e.g. data cleaning, dropping columns, validation, model training, scoring.  |
-+--------------+-----------------------------------------------------------------------------+
-| Pipeline     | A pipeline takes care of the dependencies and execution order for a         |
-|              | collection of nodes.                                                        |
-+--------------+-----------------------------------------------------------------------------+
-| Data Catalog | A collection of datasets that can be used to form the data pipeline.        |
-|              | Each dataset provides :code:`load` and :code:`save` capabilities for        |
-|              | a specific data type, e.g. :code:`pandas.CSVDataSet` loads and saves data   |
-|              | to a CSV file.                                                              |
-+--------------+-----------------------------------------------------------------------------+
-| Runner       | An object that runs the pipeline using the specified data catalog.          |
-|              | Kedro provides 3 runner types:                                              |
-|              | :code:`SequentialRunner`, :code:`ParallelRunner` and :code:`ThreadRunner`.  |
-+--------------+-----------------------------------------------------------------------------+
-```
 
-You can copy the code in one chunk from [the bottom of this page](#Hello_Kedro!), but we have split it into pieces in the following sections in order to discuss it step-by-step.
+You can copy the code in one chunk from the bottom of this page. We have split it into pieces in the following sections in order to discuss it step-by-step.
+<!-- TO DO or from the `kedro-examples` repository-->
 
 ## Node
 
@@ -36,20 +16,27 @@ Here, the `return_greeting` function is wrapped by a node called `return_greetin
 ```python
 from kedro.pipeline import node
 
-# Prepare nodes
 def return_greeting():
+    # Prepare first node
     return "Hello"
 
-return_greeting_node = node(return_greeting, inputs=None, outputs="my_salutation")
+
+return_greeting_node = node(
+    func=return_greeting, inputs=None, outputs="my_salutation"
+)
 ```
 
 The `join_statements` function is wrapped by a node called `join_statements_node`, which names a single input (`my_salutation`) and a single output (`my_message`):
 
 ```python
 def join_statements(greeting):
+    # Prepare second node
     return f"{greeting} Kedro!"
 
-join_statements_node = node(join_statements, inputs="my_salutation", outputs="my_message")
+
+join_statements_node = node(
+    join_statements, inputs="my_salutation", outputs="my_message"
+)
 ```
 
 Note that `my_salutation` is the output of `return_greeting_node` and also the input of `join_statements_node`.
@@ -64,9 +51,7 @@ In this example the pipeline executes `return_greeting_node` before it executes 
 from kedro.pipeline import Pipeline
 
 # Assemble nodes into a pipeline
-pipeline = Pipeline([
-    return_greeting_node, join_statements_node
-])
+pipeline = Pipeline([return_greeting_node, join_statements_node])
 ```
 
 ## DataCatalog
@@ -77,9 +62,7 @@ A `DataCatalog` is a Kedro concept. It is the registry of all data sources that 
 from kedro.io import DataCatalog, MemoryDataSet
 
 # Prepare a data catalog
-data_catalog = DataCatalog({
-    "example_data": MemoryDataSet()
-})
+data_catalog = DataCatalog({"example_data": MemoryDataSet()})
 ```
 
 Kedro provides a [number of different built-in datasets](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.html#data-sets) for different file types and file systems so you don’t have to write the logic for reading/writing data.
@@ -94,30 +77,32 @@ from kedro.pipeline import node, Pipeline
 from kedro.runner import SequentialRunner
 
 # Prepare a data catalog
-data_catalog = DataCatalog({
-    "example_data": MemoryDataSet()
-})
+data_catalog = DataCatalog({"example_data": MemoryDataSet()})
 
 
-# Prepare nodes
 def return_greeting():
+    # Prepare first node
     return "Hello"
 
-return_greeting_node = node(return_greeting, inputs=None, outputs="my_salutation")
+
+return_greeting_node = node(
+    return_greeting, inputs=None, outputs="my_salutation"
+)
+
 
 def join_statements(greeting):
+    # Prepare second node
     return f"{greeting} Kedro!"
 
-join_statements_node = node(join_statements, inputs="my_salutation", outputs="my_message")
 
+join_statements_node = node(
+    join_statements, inputs="my_salutation", outputs="my_message"
+)
 
 # Assemble nodes into a pipeline
-pipeline = Pipeline([
-    return_greeting_node, join_statements_node
-])
+pipeline = Pipeline([return_greeting_node, join_statements_node])
 
-
-# Create a runner
+# Create a runner to run the pipeline
 runner = SequentialRunner()
 
 # Run the pipeline
@@ -126,7 +111,7 @@ runner.run(pipeline, data_catalog)
 
 ## Runner
 
-The Runner runs the pipeline, and Kedro resolves the order in which the nodes are executed:
+The Runner is an object that runs the pipeline. Kedro resolves the order in which the nodes are executed:
 
 1.  Kedro first executes `return_greeting_node`.
 2.  The node runs `return_greeting`, which takes no input but outputs the string "Hello".

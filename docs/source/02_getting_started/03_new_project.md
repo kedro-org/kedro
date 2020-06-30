@@ -60,7 +60,7 @@ kedro new --config config.yml
 
 ## Create a new project using starters
 
-Kedro supports using custom starter templates to create your project via the `--starter` flag. To learn more about this feature, please read the guide to [creating new projects with Kedro Starters](./05_starters.md).
+Kedro supports using custom starter templates to create your project via the `--starter` flag. To learn more about this feature, please read the guide to [creating new projects with Kedro Starters](./06_starters.md).
 
 ## Working with your new project
 

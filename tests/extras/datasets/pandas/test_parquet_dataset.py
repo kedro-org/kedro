@@ -47,7 +47,7 @@ FILENAME = "test.parquet"
 
 @pytest.fixture
 def filepath_parquet(tmp_path):
-    return (tmp_path / FILENAME).as_posix()
+    return str(tmp_path / FILENAME)
 
 
 @pytest.fixture
@@ -84,7 +84,7 @@ class TestParquetDataSet:
 
     def test_save_and_load(self, tmp_path, dummy_dataframe):
         """Test saving and reloading the data set."""
-        filepath = (tmp_path / FILENAME).as_posix()
+        filepath = str(tmp_path / FILENAME)
         data_set = ParquetDataSet(filepath=filepath)
         data_set.save(dummy_dataframe)
         reloaded = data_set.load()
@@ -170,7 +170,7 @@ class TestParquetDataSet:
             "pyarrow.parquet.ParquetDataset", wraps=pq.ParquetDataset
         )
         dummy_dataframe.to_parquet(str(tmp_path), partition_cols=["col2"])
-        data_set = ParquetDataSet(filepath=tmp_path.as_posix())
+        data_set = ParquetDataSet(filepath=str(tmp_path))
 
         reloaded = data_set.load()
         # Sort by columns because reading partitioned file results
@@ -183,7 +183,7 @@ class TestParquetDataSet:
         pq_ds_mock.assert_called_once()
 
     def test_write_to_dir(self, dummy_dataframe, tmp_path):
-        data_set = ParquetDataSet(filepath=tmp_path.as_posix())
+        data_set = ParquetDataSet(filepath=str(tmp_path))
         pattern = "Saving ParquetDataSet to a directory is not supported"
 
         with pytest.raises(DataSetError, match=pattern):

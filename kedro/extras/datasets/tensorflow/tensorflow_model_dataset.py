@@ -85,8 +85,8 @@ class TensorFlowModelDataset(AbstractVersionedDataSet):
         """Creates a new instance of ``TensorFlowModelDataset``.
 
         Args:
-            filepath: Filepath in POSIX format to a TensorFlow model directory prefixed with a
-                protocol like `s3://`. If prefix is not provided `file` protocol (local filesystem)
+            filepath: Filepath to a TensorFlow model directory prefixed with a protocol
+                like `s3://`. If prefix is not provided `file` protocol (local filesystem)
                 will be used. The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.
             load_args: TensorFlow options for loading models.

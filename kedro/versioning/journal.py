@@ -106,8 +106,7 @@ def _git_sha(proj_dir: Union[str, Path] = None) -> Optional[str]:
             ["git", "rev-parse", "--short", "HEAD"], cwd=proj_dir
         )
         return res.decode().strip()
-    # `subprocess.check_output()` raises `NotADirectoryError` on Windows
-    except (subprocess.CalledProcessError, FileNotFoundError, NotADirectoryError):
+    except (subprocess.CalledProcessError, FileNotFoundError):
         logging.getLogger(__name__).warning("Unable to git describe %s", proj_dir)
     return None
 

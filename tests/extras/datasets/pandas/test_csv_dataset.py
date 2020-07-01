@@ -27,7 +27,6 @@
 # limitations under the License.
 
 from pathlib import PurePosixPath
-from time import sleep
 
 import pandas as pd
 import pytest
@@ -45,7 +44,7 @@ from kedro.io.core import PROTOCOL_DELIMITER, Version, generate_timestamp
 
 @pytest.fixture
 def filepath_csv(tmp_path):
-    return (tmp_path / "test.csv").as_posix()
+    return str(tmp_path / "test.csv")
 
 
 @pytest.fixture
@@ -189,7 +188,6 @@ class TestCSVDataSetVersioned:
         versioned_csv_data_set.load()
         v1 = versioned_csv_data_set.resolve_load_version()
 
-        sleep(0.5)
         # force-drop a newer version into the same location
         v_new = generate_timestamp()
         CSVDataSet(filepath=filepath_csv, version=Version(v_new, v_new)).save(
@@ -216,7 +214,6 @@ class TestCSVDataSetVersioned:
         assert first_load_version == first_save_version
 
         # second save
-        sleep(0.5)
         ds_versioned.save(dummy_dataframe)
         second_save_version = ds_versioned.resolve_save_version()
         second_load_version = ds_versioned.resolve_load_version()

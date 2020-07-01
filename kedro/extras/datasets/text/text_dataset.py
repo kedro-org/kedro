@@ -74,7 +74,7 @@ class TextDataSet(AbstractVersionedDataSet):
         on a specific filesystem.
 
         Args:
-            filepath: Filepath in POSIX format to a text file prefixed with a protocol like `s3://`.
+            filepath: Filepath to a text file prefixed with a protocol like `s3://`.
                 If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.

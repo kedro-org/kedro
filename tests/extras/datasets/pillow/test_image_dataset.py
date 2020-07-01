@@ -27,7 +27,6 @@
 # limitations under the License.
 
 from pathlib import Path, PurePosixPath
-from time import sleep
 
 import pytest
 from fsspec.implementations.http import HTTPFileSystem
@@ -42,7 +41,7 @@ from kedro.io.core import PROTOCOL_DELIMITER, Version, generate_timestamp
 
 @pytest.fixture
 def filepath_png(tmp_path):
-    return (tmp_path / "test.png").as_posix()
+    return str(tmp_path / "test.png")
 
 
 @pytest.fixture
@@ -174,9 +173,6 @@ class TestImageDataSetVersioned:
         versioned_image_dataset.save(image_object)
         v1 = versioned_image_dataset.resolve_load_version()
 
-        # Sometimes for some reason `v1 == v_new` on Windows.
-        # `sleep()` was added to fix this.
-        sleep(0.5)
         # force-drop a newer version into the same location
         v_new = generate_timestamp()
         ImageDataSet(filepath=filepath_png, version=Version(v_new, v_new)).save(

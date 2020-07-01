@@ -36,7 +36,7 @@ from kedro.io import DataSetError
 
 @pytest.fixture
 def filepath(tmp_path):
-    return (tmp_path / "test.xlsx").as_posix()
+    return str(tmp_path / "test.xlsx")
 
 
 @pytest.fixture(scope="module")
@@ -54,7 +54,7 @@ def setup_excel_dataset(path):
 @pytest.fixture
 def appendable_excel_dataset(filepath, save_args, load_args):
     return AppendableExcelDataSet(
-        filepath=filepath, load_args=load_args, save_args=save_args
+        filepath=str(filepath), load_args=load_args, save_args=save_args
     )
 
 
@@ -63,7 +63,7 @@ class TestAppendableExcelDataSet:
         """Test saving and reloading the data set."""
         excel_dataset, excel_df = setup_excel_dataset(filepath)
         appendable_excel_dataset = AppendableExcelDataSet(
-            filepath=filepath,
+            filepath=str(filepath),
             load_args={"sheet_name": "test"},
             save_args={"sheet_name": "test"},
         )
@@ -90,9 +90,9 @@ class TestAppendableExcelDataSet:
     def test_exists(self, filepath):
         """Test `exists` method invocation for both existing and
         nonexistent data set."""
-        appendable_excel_dataset = AppendableExcelDataSet(filepath)
+        appendable_excel_dataset = AppendableExcelDataSet(str(filepath))
         assert not appendable_excel_dataset.exists()
-        setup_excel_dataset(filepath)
+        setup_excel_dataset(str(filepath))
         assert appendable_excel_dataset.exists()
 
     @pytest.mark.parametrize(

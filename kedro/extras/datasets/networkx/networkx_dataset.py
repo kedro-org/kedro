@@ -82,7 +82,7 @@ class NetworkXDataSet(AbstractVersionedDataSet):
         """Creates a new instance of ``NetworkXDataSet``.
 
         Args:
-            filepath: Filepath in POSIX format to the NetworkX graph JSON file.
+            filepath: The path to the NetworkX graph JSON file.
             load_args: Arguments passed on to ```networkx.node_link_graph``.
                 See the details in
                 https://networkx.github.io/documentation/networkx-1.9.1/reference/generated/networkx.readwrite.json_graph.node_link_graph.html

@@ -43,7 +43,7 @@ from kedro.io.core import PROTOCOL_DELIMITER, Version
 
 @pytest.fixture
 def filepath_feather(tmp_path):
-    return (tmp_path / "test.feather").as_posix()
+    return str(tmp_path / "test.feather")
 
 
 @pytest.fixture

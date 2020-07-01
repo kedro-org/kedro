@@ -103,9 +103,9 @@ class MatplotlibWriter(AbstractVersionedDataSet):
         """Creates a new instance of ``MatplotlibWriter``.
 
         Args:
-            filepath: Filepath in POSIX format to a matplot object file(s) prefixed with a protocol
-                like `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be
-                used. The prefix should be any protocol supported by ``fsspec``.
+            filepath: Key path to a matplot object file(s) prefixed with a protocol like `s3://`.
+                If prefix is not provided, `file` protocol (local filesystem) will be used.
+                The prefix should be any protocol supported by ``fsspec``.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``), as well as
                 to pass to the filesystem's `open` method through nested key `open_args_save`.

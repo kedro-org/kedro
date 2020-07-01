@@ -28,7 +28,6 @@ The are two ways of defining a Data Catalog through the use of YAML configuratio
 ## Specifying the location of the dataset
 
 Kedro relies on [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) for reading and saving data from a variety of data stores including local file systems, network file systems, cloud object stores, and Hadoop. When specifying a storage location in `filepath:`, a URL should be provided using the general form `protocol://path/to/data`.  If no protocol is provided, the local file system is assumed (same as ``file://``).
-> *Note:* all the `filepath`s will be automatically converted to POSIX format but it is recommended to use POSIX format by default (e.g. Windows path: `C:/users/kedro/project/data/01_raw/bikes.csv`).
 
 The following prepends are available:
 - **Local or Network File System**: `file://` - the local file system is default in the absence of any protocol, it also permits relative paths.

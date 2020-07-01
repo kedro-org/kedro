@@ -82,8 +82,8 @@ class BioSequenceDataSet(AbstractDataSet):
         to a concrete filepath.
 
         Args:
-            filepath: Filepath in POSIX format to sequence file prefixed with a protocol like
-                `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be used.
+            filepath: path to sequence file prefixed with a protocol like `s3://`.
+                If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
             load_args: Options for parsing sequence files by Biopython ``SeqIO.parse()``.
             save_args: file format supported by Biopython ``SeqIO.write()``.

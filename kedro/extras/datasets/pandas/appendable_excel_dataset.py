@@ -30,7 +30,7 @@
 It uses pandas to handle the Excel file.
 """
 from copy import deepcopy
-from pathlib import Path, PurePosixPath
+from pathlib import Path, PurePath
 from typing import Any, Dict
 
 import pandas as pd
@@ -81,7 +81,7 @@ class AppendableExcelDataSet(AbstractDataSet):
         Excel file to be opened in append mode.
 
         Args:
-            filepath: Filepath in POSIX format to an existing local Excel file.
+            filepath: Filepath to an existing local Excel file.
             load_args: Pandas options for loading Excel files.
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_excel.html
@@ -96,7 +96,7 @@ class AppendableExcelDataSet(AbstractDataSet):
                 https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.ExcelWriter.html
                 Note: `mode` option of `ExcelWriter` is set to `a` and it can not be overridden.
         """
-        self._filepath = PurePosixPath(filepath)
+        self._filepath = PurePath(filepath)
 
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
@@ -136,4 +136,4 @@ class AppendableExcelDataSet(AbstractDataSet):
             )
 
     def _exists(self) -> bool:
-        return Path(self._filepath.as_posix()).is_file()
+        return Path(self._filepath).is_file()

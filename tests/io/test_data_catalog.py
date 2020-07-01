@@ -52,7 +52,7 @@ from kedro.versioning import Journal
 
 @pytest.fixture
 def filepath(tmp_path):
-    return (tmp_path / "some" / "dir" / "test.csv").as_posix()
+    return str(tmp_path / "some" / "dir" / "test.csv")
 
 
 @pytest.fixture

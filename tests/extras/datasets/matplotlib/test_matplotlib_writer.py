@@ -28,7 +28,7 @@
 
 
 import json
-from pathlib import Path
+from pathlib import PosixPath
 
 import boto3
 import matplotlib
@@ -130,7 +130,7 @@ def plot_writer(
 
 @pytest.fixture
 def versioned_plot_writer(tmp_path, load_version, save_version):
-    filepath = (tmp_path / "matplotlib.png").as_posix()
+    filepath = str(tmp_path / "matplotlib.png")
     return MatplotlibWriter(
         filepath=filepath, version=Version(load_version, save_version)
     )
@@ -322,7 +322,7 @@ class TestMatplotlibWriterVersioned:
         versioned_plot_writer.save(mock_single_plot)
 
         test_path = tmp_path / "test_image.png"
-        actual_filepath = Path(versioned_plot_writer._get_load_path().as_posix())
+        actual_filepath = PosixPath(versioned_plot_writer._get_load_path())
 
         plt.savefig(str(test_path))
 
@@ -339,7 +339,7 @@ class TestMatplotlibWriterVersioned:
             versioned_filepath = str(versioned_plot_writer._get_load_path())
 
             mock_list_plot[index].savefig(str(test_path))
-            actual_filepath = Path("{}/{}.png".format(versioned_filepath, index))
+            actual_filepath = PosixPath("{}/{}.png".format(versioned_filepath, index))
 
             assert actual_filepath.read_bytes() == test_path.read_bytes()
 
@@ -353,6 +353,6 @@ class TestMatplotlibWriterVersioned:
             versioned_filepath = str(versioned_plot_writer._get_load_path())
 
             mock_dict_plot[colour].savefig(str(test_path))
-            actual_filepath = Path("{}/{}".format(versioned_filepath, colour))
+            actual_filepath = PosixPath("{}/{}".format(versioned_filepath, colour))
 
             assert actual_filepath.read_bytes() == test_path.read_bytes()

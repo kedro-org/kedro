@@ -44,7 +44,7 @@ from kedro.io.core import PROTOCOL_DELIMITER, Version
 
 @pytest.fixture
 def filepath_pickle(tmp_path):
-    return (tmp_path / "test.pkl").as_posix()
+    return str(tmp_path / "test.pkl")
 
 
 @pytest.fixture

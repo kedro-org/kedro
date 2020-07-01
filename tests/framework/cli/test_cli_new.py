@@ -466,3 +466,45 @@ class TestNewWithStarter:
         actual_context = mocked_cookie.call_args[1]["extra_context"]
         assert actual_starter == expected_starter
         assert actual_context["include_example"] is False
+
+    def test_new_starter_with_checkout(self, cli_runner, mocker):
+        starter_path = "some-starter"
+        checkout_version = "some-version"
+        output_dir = str(Path.cwd())
+        mocked_cookiecutter = mocker.patch("cookiecutter.main.cookiecutter")
+        mocked_cookiecutter.return_value = starter_path
+        result = _invoke(
+            cli_runner,
+            ["new", "--starter", starter_path, "--checkout", checkout_version],
+            project_name=self.project_name,
+            python_package=self.package_name,
+            repo_name=self.repo_name,
+        )
+        assert result.exit_code == 0, result.output
+        mocked_cookiecutter.assert_called_once_with(
+            starter_path,
+            checkout=checkout_version,
+            extra_context={
+                "include_example": False,
+                "kedro_version": version,
+                "output_dir": output_dir,
+                "project_name": self.project_name,
+                "python_package": self.package_name,
+                "repo_name": self.repo_name,
+            },
+            no_input=True,
+            output_dir=output_dir,
+        )
+
+    def test_checkout_flag_without_starter(self, cli_runner):
+        result = _invoke(
+            cli_runner,
+            ["new", "--checkout", "some-version"],
+            project_name=self.project_name,
+            python_package=self.package_name,
+            repo_name=self.repo_name,
+        )
+        assert result.exit_code != 0
+        assert (
+            "Cannot use the --checkout flag without a --starter value." in result.output
+        )

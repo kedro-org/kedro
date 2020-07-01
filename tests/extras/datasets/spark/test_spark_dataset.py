@@ -27,8 +27,9 @@
 # limitations under the License.
 
 # pylint: disable=import-error
+import sys
 import tempfile
-from pathlib import Path, PurePosixPath, PureWindowsPath
+from pathlib import Path, PurePosixPath
 
 import pandas as pd
 import pytest
@@ -96,12 +97,14 @@ def version():
 
 @pytest.fixture
 def versioned_dataset_local(tmp_path, version):
-    return SparkDataSet(filepath=str(tmp_path / FILENAME), version=version)
+    return SparkDataSet(filepath=(tmp_path / FILENAME).as_posix(), version=version)
 
 
 @pytest.fixture
 def versioned_dataset_dbfs(tmp_path, version):
-    return SparkDataSet(filepath="/dbfs" + str(tmp_path / FILENAME), version=version)
+    return SparkDataSet(
+        filepath="/dbfs" + (tmp_path / FILENAME).as_posix(), version=version
+    )
 
 
 @pytest.fixture
@@ -133,7 +136,7 @@ def identity(arg):
 
 @pytest.fixture
 def spark_in(tmp_path, sample_spark_df):
-    spark_in = SparkDataSet(filepath=str(tmp_path / "input"))
+    spark_in = SparkDataSet(filepath=(tmp_path / "input").as_posix())
     spark_in.save(sample_spark_df)
     return spark_in
 
@@ -148,7 +151,7 @@ class FileInfo:
 
 class TestSparkDataSet:
     def test_load_parquet(self, tmp_path, sample_pandas_df):
-        temp_path = str(tmp_path / "data")
+        temp_path = (tmp_path / "data").as_posix()
         local_parquet_set = ParquetDataSet(filepath=temp_path)
         local_parquet_set.save(sample_pandas_df)
         spark_data_set = SparkDataSet(filepath=temp_path)
@@ -161,7 +164,7 @@ class TestSparkDataSet:
         # ParquetDataSet
         temp_dir = Path(str(tmp_path / "test_data"))
         spark_data_set = SparkDataSet(
-            filepath=str(temp_dir), save_args={"compression": "none"}
+            filepath=temp_dir.as_posix(), save_args={"compression": "none"}
         )
         spark_df = sample_spark_df.coalesce(1)
         spark_data_set.save(spark_df)
@@ -170,14 +173,14 @@ class TestSparkDataSet:
             f for f in temp_dir.iterdir() if f.is_file() and f.name.startswith("part")
         ][0]
 
-        local_parquet_data_set = ParquetDataSet(filepath=str(single_parquet))
+        local_parquet_data_set = ParquetDataSet(filepath=single_parquet.as_posix())
 
         pandas_df = local_parquet_data_set.load()
 
         assert pandas_df[pandas_df["name"] == "Bob"]["age"].iloc[0] == 12
 
     def test_load_options_csv(self, tmp_path, sample_pandas_df):
-        filepath = str(tmp_path / "data")
+        filepath = (tmp_path / "data").as_posix()
         local_csv_data_set = CSVDataSet(filepath=filepath)
         local_csv_data_set.save(sample_pandas_df)
         spark_data_set = SparkDataSet(
@@ -192,7 +195,7 @@ class TestSparkDataSet:
         # CSVDataSet
         temp_dir = Path(str(tmp_path / "test_data"))
         spark_data_set = SparkDataSet(
-            filepath=str(temp_dir),
+            filepath=temp_dir.as_posix(),
             file_format="csv",
             save_args={"sep": "|", "header": True},
         )
@@ -204,7 +207,7 @@ class TestSparkDataSet:
         ][0]
 
         csv_local_data_set = CSVDataSet(
-            filepath=str(single_csv_file), load_args={"sep": "|"}
+            filepath=single_csv_file.as_posix(), load_args={"sep": "|"}
         )
         pandas_df = csv_local_data_set.load()
 
@@ -212,17 +215,16 @@ class TestSparkDataSet:
 
     def test_str_representation(self):
         with tempfile.NamedTemporaryFile() as temp_data_file:
+            filepath = Path(temp_data_file.name).as_posix()
             spark_data_set = SparkDataSet(
-                filepath=temp_data_file.name,
-                file_format="csv",
-                load_args={"header": True},
+                filepath=filepath, file_format="csv", load_args={"header": True},
             )
             assert "SparkDataSet" in str(spark_data_set)
-            assert "filepath={}".format(temp_data_file.name) in str(spark_data_set)
+            assert "filepath={}".format(filepath) in str(spark_data_set)
 
     def test_save_overwrite_fail(self, tmp_path, sample_spark_df):
         # Writes a data frame twice and expects it to fail.
-        filepath = str(tmp_path / "test_data")
+        filepath = (tmp_path / "test_data").as_posix()
         spark_data_set = SparkDataSet(filepath=filepath)
         spark_data_set.save(sample_spark_df)
 
@@ -231,7 +233,7 @@ class TestSparkDataSet:
 
     def test_save_overwrite_mode(self, tmp_path, sample_spark_df):
         # Writes a data frame in overwrite mode.
-        filepath = str(tmp_path / "test_data")
+        filepath = (tmp_path / "test_data").as_posix()
         spark_data_set = SparkDataSet(
             filepath=filepath, save_args={"mode": "overwrite"}
         )
@@ -246,7 +248,7 @@ class TestSparkDataSet:
 
         filepath = Path(str(tmp_path / "test_data"))
         spark_data_set = SparkDataSet(
-            filepath=str(filepath),
+            filepath=filepath.as_posix(),
             save_args={"mode": "overwrite", "partitionBy": ["name"]},
         )
 
@@ -258,7 +260,7 @@ class TestSparkDataSet:
 
     @pytest.mark.parametrize("file_format", ["csv", "parquet"])
     def test_exists(self, file_format, tmp_path, sample_spark_df):
-        filepath = str(tmp_path / "test_data")
+        filepath = (tmp_path / "test_data").as_posix()
         spark_data_set = SparkDataSet(filepath=filepath, file_format=file_format)
 
         assert not spark_data_set.exists()
@@ -309,7 +311,7 @@ class TestSparkDataSetVersionedLocal:
     def test_load_exact(self, tmp_path, sample_spark_df):
         ts = generate_timestamp()
         ds_local = SparkDataSet(
-            filepath=str(tmp_path / FILENAME), version=Version(ts, ts)
+            filepath=(tmp_path / FILENAME).as_posix(), version=Version(ts, ts)
         )
 
         ds_local.save(sample_spark_df)
@@ -326,13 +328,13 @@ class TestSparkDataSetVersionedLocal:
             versioned_dataset_local
         )
 
-        dataset_local = SparkDataSet(filepath=str(tmp_path / FILENAME))
+        dataset_local = SparkDataSet(filepath=(tmp_path / FILENAME).as_posix())
         assert "version=" not in str(dataset_local)
 
     def test_save_version_warning(self, tmp_path, sample_spark_df):
         exact_version = Version("2019-01-01T23.59.59.999Z", "2019-01-02T00.00.00.000Z")
         ds_local = SparkDataSet(
-            filepath=str(tmp_path / FILENAME), version=exact_version
+            filepath=(tmp_path / FILENAME).as_posix(), version=exact_version
         )
 
         pattern = (
@@ -344,7 +346,7 @@ class TestSparkDataSetVersionedLocal:
 
     def test_prevent_overwrite(self, tmp_path, version, sample_spark_df):
         versioned_local = SparkDataSet(
-            filepath=str(tmp_path / FILENAME),
+            filepath=(tmp_path / FILENAME).as_posix(),
             version=version,
             # second save should fail even in overwrite mode
             save_args={"mode": "overwrite"},
@@ -359,6 +361,9 @@ class TestSparkDataSetVersionedLocal:
             versioned_local.save(sample_spark_df)
 
 
+@pytest.mark.skipif(
+    sys.platform.startswith("win"), reason="DBFS doesn't work on Windows"
+)
 class TestSparkDataSetVersionedDBFS:
     def test_load_latest(  # pylint: disable=too-many-arguments
         self, mocker, versioned_dataset_dbfs, version, tmp_path, sample_spark_df
@@ -486,23 +491,19 @@ class TestSparkDataSetVersionedDBFS:
         mocker.patch.dict("sys.modules", {"pyspark": None, "IPython": None})
         assert _get_dbutils("spark") is None
 
-    @pytest.mark.parametrize(
-        "os_name,path_class", [("nt", PureWindowsPath), ("posix", PurePosixPath)]
-    )
-    def test_regular_path_in_different_os(self, os_name, path_class, mocker):
+    @pytest.mark.parametrize("os_name", ["nt", "posix"])
+    def test_regular_path_in_different_os(self, os_name, mocker):
         """Check that class of filepath depends on OS for regular path."""
         mocker.patch("os.name", os_name)
         data_set = SparkDataSet(filepath="/some/path")
-        assert isinstance(data_set._filepath, path_class)
+        assert isinstance(data_set._filepath, PurePosixPath)
 
-    @pytest.mark.parametrize(
-        "os_name,path_class", [("nt", PurePosixPath), ("posix", PurePosixPath)]
-    )
-    def test_dbfs_path_in_different_os(self, os_name, path_class, mocker):
+    @pytest.mark.parametrize("os_name", ["nt", "posix"])
+    def test_dbfs_path_in_different_os(self, os_name, mocker):
         """Check that class of filepath doesn't depend on OS if it references DBFS."""
         mocker.patch("os.name", os_name)
         data_set = SparkDataSet(filepath="/dbfs/some/path")
-        assert isinstance(data_set._filepath, path_class)
+        assert isinstance(data_set._filepath, PurePosixPath)
 
 
 class TestSparkDataSetVersionedS3:
@@ -774,10 +775,10 @@ class TestSparkDataSetVersionedHdfs:
 
 @pytest.fixture
 def data_catalog(tmp_path):
-    source_path = str(Path(__file__).parent / "data/test.parquet")
-    spark_in = SparkDataSet(source_path)
-    spark_out = SparkDataSet(str(tmp_path / "spark_data"))
-    pickle_ds = PickleDataSet(str(tmp_path / "pickle/test.pkl"))
+    source_path = Path(__file__).parent / "data/test.parquet"
+    spark_in = SparkDataSet(source_path.as_posix())
+    spark_out = SparkDataSet((tmp_path / "spark_data").as_posix())
+    pickle_ds = PickleDataSet((tmp_path / "pickle/test.pkl").as_posix())
 
     return DataCatalog(
         {"spark_in": spark_in, "spark_out": spark_out, "pickle_ds": pickle_ds}
@@ -791,7 +792,7 @@ class TestDataFlowSequentialRunner:
         pipeline = Pipeline([node(identity, "spark_in", "spark_out")])
         SequentialRunner(is_async=is_async).run(pipeline, data_catalog)
 
-        save_path = Path(data_catalog._data_sets["spark_out"]._filepath)
+        save_path = Path(data_catalog._data_sets["spark_out"]._filepath.as_posix())
         files = list(save_path.glob("*.parquet"))
         assert len(files) > 0
 
@@ -813,6 +814,6 @@ class TestDataFlowSequentialRunner:
         )
         SequentialRunner(is_async=is_async).run(pipeline, data_catalog)
 
-        save_path = Path(data_catalog._data_sets["spark_out"]._filepath)
+        save_path = Path(data_catalog._data_sets["spark_out"]._filepath.as_posix())
         files = list(save_path.glob("*.parquet"))
         assert len(files) > 0

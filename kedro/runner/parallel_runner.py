@@ -30,6 +30,7 @@ be used to run the ``Pipeline`` in parallel groups formed by toposort.
 """
 import os
 import pickle
+import sys
 from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
 from itertools import chain
@@ -42,6 +43,9 @@ from kedro.io import DataCatalog, DataSetError, MemoryDataSet
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 from kedro.runner.runner import AbstractRunner, run_node
+
+# see https://github.com/python/cpython/blob/master/Lib/concurrent/futures/process.py#L114
+_MAX_WINDOWS_WORKERS = 61
 
 
 class _SharedMemoryDataSet:
@@ -108,7 +112,8 @@ class ParallelRunner(AbstractRunner):
         Args:
             max_workers: Number of worker processes to spawn. If not set,
                 calculated automatically based on the pipeline configuration
-                and CPU core count.
+                and CPU core count. On windows machines, the max_workers value
+                cannot be larger than 61 and will be set to min(61, max_workers).
             is_async: If True, the node inputs and outputs are loaded and saved
                     asynchronously with threads. Defaults to False.
 
@@ -119,12 +124,16 @@ class ParallelRunner(AbstractRunner):
         self._manager = ParallelRunnerManager()
         self._manager.start()
 
-        if max_workers is not None and max_workers <= 0:
-            raise ValueError("max_workers should be positive")
+        # This code comes from the concurrent.futures library
+        # https://github.com/python/cpython/blob/master/Lib/concurrent/futures/process.py#L588
+        if max_workers is None:
+            # NOTE: `os.cpu_count` might return None in some weird cases.
+            # https://github.com/python/cpython/blob/3.7/Modules/posixmodule.c#L11431
+            max_workers = os.cpu_count() or 1
+            if sys.platform == "win32":
+                max_workers = min(_MAX_WINDOWS_WORKERS, max_workers)
 
-        # NOTE: `os.cpu_count` might return None in some weird cases.
-        # https://github.com/python/cpython/blob/3.7/Modules/posixmodule.c#L11431
-        self._max_workers = max_workers or os.cpu_count() or 1
+        self._max_workers = max_workers
 
     def __del__(self):
         self._manager.shutdown()

@@ -235,13 +235,68 @@ def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
 
 ### How do I package a modular pipeline?
 
-Since Kedro 0.16.2 you can package a modular pipeline by executing `kedro pipeline package <pipeline_name>` command, which will generate a new [wheel file](https://pythonwheels.com/) for it. By default, the wheel file will be saved into `src/dist` directory inside your project, however this can be changed using `--destination` (`-d`) option.
+Since Kedro 0.16.2 you can package a modular pipeline by executing `kedro pipeline package <pipeline_name>` command, which will generate a new [wheel file](https://pythonwheels.com/) for it. By default, the wheel file will be saved into the `src/dist` directory inside your project, however this can be changed using the `--destination` (`-d`) option.
 
 When packaging your modular pipeline, Kedro will also automatically include all configuration parameters from `conf/<env>/pipelines/<pipeline_name>` and pipeline tests from `tests/pipelines/<pipeline_name>`, where `<env>` defaults to `base`. If you need to capture the parameters from a different config environment, run `kedro pipeline package --env <env_name> <pipeline_name>`.
 
 > Note that Kedro _will not_ package the catalog config files even if those are present in `conf/<env>/pipelines/<pipeline_name>`.
 
 If you plan to publish your packaged modular pipeline to some Python package repository like [PyPI](https://pypi.org/), you need to make sure that your modular pipeline name doesn't clash with any of the existing packages in that repository. However, there is no need to rename any of your source files if that is the case. Simply alias your package with a new name by running `kedro pipeline package --alias <new_package_name> <pipeline_name>`.
+
+### How do I distribute a modular pipeline?
+
+Once you have [packaged your modular pipeline](#how-do-i-package-a-modular-pipeline), you can make it available to other developers for reuse:
+
+```eval_rst
++-------------------------------------+--------------------------------------+--------------------+--------------------+
+| Distribution type                   | Description                          | Subscription model | Access model       |
++=====================================+======================================+====================+====================+
+| `PyPI <https://pypi.org/>`_         | PyPI is the most popular repository  | Free               | Public             |
+|                                     | of Python packages                   |                    |                    |
++-------------------------------------+--------------------------------------+--------------------+--------------------+
+| Private PyPI server like            | There are a number of private PyPI   | Paid               | Private            |
+| `JFrog Artifactory                  | server offerings on the market with  |                    | (you control the   |
+| <https://jfrog.com/artifactory/>`_, | the hosting included. This option is |                    | access)            |
+| `AWS CodeArtifact                   | identical to PyPI, however the users |                    |                    |
+| <https://aws.amazon.com/            | will need to obtain access           |                    |                    |
+| codeartifact/>`_, etc.              | credentials before they can pull     |                    |                    |
+|                                     | your modular pipeline                |                    |                    |
++-------------------------------------+--------------------------------------+--------------------+--------------------+
+| Object storage like `AWS S3         | Kedro also allows you to store the   | Paid               | Private or public  |
+| <https://aws.amazon.com/s3/>`_,     | wheel file for your modular pipeline |                    | (depends on the    |
+| `Azure Blob Storage                 | as a regular binary file using       |                    | access control     |
+| <https://azure.microsoft.com/en-gb/ | almost any protocol (except          |                    | settings)          |
+| services/storage/blobs/>`_, etc.    | read-only protocols like             |                    |                    |
+|                                     | :code:`http`) supported by `fsspec   |                    |                    |
+|                                     | <https://pypi.org/project/fsspec/>`_ |                    |                    |
+|                                     | library                              |                    |                    |
++-------------------------------------+--------------------------------------+--------------------+--------------------+
+```
+
+#### Publishing the wheel file using `twine`
+
+The [twine](https://pypi.org/project/twine/) package can help publish wheel files to a public or private PyPI server. For either option you need credentials that allow you to publish. If you are working with PyPI, you will need to [register](https://pypi.org/account/register/) first.
+
+> Note: `twine upload` attempts to publish to PyPI by default. If you are publishing to a different repository, you need to [configure the endpoint](https://twine.readthedocs.io/en/latest/#twine-upload) using one of the available options before executing the steps below.
+
+Once you have [generated the publish credentials](https://pypi.org/help/#apitoken):
+
+1. Install `twine` as a regular Python package: `pip install twine`
+2. Run the command `twine upload src/dist/<package-name>-<package-version>-py3-none-any.whl`
+3. Provide the login and password for the repository when prompted by `twine`
+
+If you would like to automate the publishing process, the credentials can also be specified using `twine upload` [CLI options](https://twine.readthedocs.io/en/latest/#twine-upload) or the corresponding [environment variables](https://twine.readthedocs.io/en/latest/#environment-variables).
+
+#### Uploading the wheel file to the object storage
+
+The resulting wheel file for your modular pipeline is a regular file, therefore it can be published to the object storage using standard tools like [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-services-s3-commands.html), [Azure CLI](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-cli), [gsutil](https://cloud.google.com/storage/docs/uploading-objects#gsutil) or similar.
+
+For example, the process of publishing of the packaged pipeline to AWS S3 would look like this:
+
+1. Install AWS CLI: `pip install awscli`
+2. [Configure AWS credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)
+3. [Create a new S3 bucket](https://docs.aws.amazon.com/cli/latest/reference/s3/mb.html) or skip if you already have one
+4. Copy the wheel file to S3: `aws s3 cp src/dist/<package-name>-<package-version>-py3-none-any.whl s3://<bucket-name>/path/to/folder/` - this will create (or overwrite) a file in `s3://<bucket-name>/path/to/folder/<package-name>-<package-version>-py3-none-any.whl`
 
 ### A modular pipeline example template
 

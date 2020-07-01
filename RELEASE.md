@@ -26,11 +26,13 @@
 * Fixed broken versioning for Windows paths.
 * Fixed `DataSet` string representation for falsy values.
 * Improved the error message when duplicate nodes are passed to the `Pipeline` initializer.
+* Fixed a bug where `kedro docs` would fail because the built docs were located in a different directory.
+* Fixed a bug where `ParallelRunner` would fail on Windows machines whose reported CPU count exceeded 61.
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Tam-Sanh Nguyen](https://github.com/tamsanh), [Deepyaman Datta](https://github.com/deepyaman)
+[Deepyaman Datta](https://github.com/deepyaman), [Tam-Sanh Nguyen](https://github.com/tamsanh)
 
 # Release 0.16.2
 

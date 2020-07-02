@@ -51,11 +51,11 @@ The Kedro team maintains the following starters:
 +----------------------+------------------------------------------------------------------------+-------------------------------------------------------------------------------------------+
 | Alias                | Link to starter                                                        | Description                                                                               |
 +======================+========================================================================+===========================================================================================+
-| iris-example         | https://github.com/quantumblacklabs/kedro-starter-iris-example         | Provide an example iris-classification pipeline built with Kedro                          |
+| pandas-iris          | https://github.com/quantumblacklabs/kedro-starter-pandas-iris          | Provide an example iris-classification pipeline built with Kedro                          |
 +----------------------+------------------------------------------------------------------------+-------------------------------------------------------------------------------------------+
 | pyspark              | https://github.com/quantumblacklabs/kedro-starter-pyspark              | Provide initial configuration and initialisation code for a Kedro pipeline using PySpark  |
 +----------------------+------------------------------------------------------------------------+-------------------------------------------------------------------------------------------+
-| pyspark-with-example | https://github.com/quantumblacklabs/kedro-starter-pyspark-with-example | Provide all features in the basic PySpark starter, plus an example pipeline to train      |
+| pyspark-iris         | https://github.com/quantumblacklabs/kedro-starter-pyspark-iris         | Provide all features in the basic PySpark starter, plus an example pipeline to train      |
 |                      |                                                                        | a machine learning model with Spark primitives                                            |
 +----------------------+------------------------------------------------------------------------+-------------------------------------------------------------------------------------------+
 ```

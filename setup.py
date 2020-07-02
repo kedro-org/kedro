@@ -66,7 +66,8 @@ with open(path.join(here, "README.md"), encoding="utf-8") as f:
     readme = f.read()
 
 doc_html_files = [
-    name.replace("kedro/", "", 1) for name in glob("kedro/html/**/*", recursive=True)
+    name.replace("kedro/", "", 1)
+    for name in glob("kedro/framework/html/**/*", recursive=True)
 ]
 
 template_files = []

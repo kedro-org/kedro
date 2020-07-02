@@ -42,7 +42,11 @@ from kedro.io import (
 from kedro.pipeline import Pipeline, node
 from kedro.pipeline.decorators import log_time
 from kedro.runner import ParallelRunner
-from kedro.runner.parallel_runner import ParallelRunnerManager, _SharedMemoryDataSet
+from kedro.runner.parallel_runner import (
+    _MAX_WINDOWS_WORKERS,
+    ParallelRunnerManager,
+    _SharedMemoryDataSet,
+)
 
 
 def source():
@@ -160,9 +164,15 @@ class TestMaxWorkers:
 
         executor_cls_mock.assert_called_once_with(max_workers=expected_number)
 
-    def test_init_with_negative_process_count(self):
-        with pytest.raises(ValueError):
-            ParallelRunner(max_workers=-1)
+    def test_max_worker_windows(self, mocker):
+        """The ProcessPoolExecutor on Python 3.7+
+        has a quirk with the max worker number on Windows
+        and requires it to be <=61"""
+        mocker.patch("os.cpu_count", return_value=100)
+        mocker.patch("sys.platform", "win32")
+
+        parallel_runner = ParallelRunner()
+        assert parallel_runner._max_workers == _MAX_WINDOWS_WORKERS
 
 
 @pytest.mark.parametrize("is_async", [False, True])

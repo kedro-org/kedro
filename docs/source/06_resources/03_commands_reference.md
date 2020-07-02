@@ -104,11 +104,13 @@ This command shows datasets per pipeline per type. The result includes datasets 
 This command shows a list of all pipelines in your project.
 
 ### `kedro pipeline create`
-
 This command creates a new modular pipeline in your project. More details in [this section](../04_user_guide/06_pipelines.md#how-do-i-create-modular-pipelines).
 
 ### `kedro pipeline package <pipeline_name>`
 This command packages a modular pipeline into a [wheel file](https://pythonwheels.com/). More details in [this section](../04_user_guide/06_pipelines.md#how-do-i-package-a-modular-pipeline).
+
+### `kedro pipeline delete <pipeline_name>`
+This command removes an existing modular pipeline from your project.
 
 ## Using Python
 You can also invoke the Kedro CLI as a Python module:

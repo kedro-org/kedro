@@ -18,15 +18,21 @@
 ## Bug fixes and other changes
 * Removed `/src/nodes` directory from the project template and made `kedro jupyter convert` create it on the fly if necessary.
 * Fixed a bug in `MatplotlibWriter` which prevented saving lists and dictionaries of plots locally on Windows.
+* Closed all pyplot windows after saving in `MatplotlibWriter`.
+* Documentation improvements:
+  - Added [kedro-wings](https://github.com/tamsanh/kedro-wings) and [kedro-great](https://github.com/tamsanh/kedro-great) to the list of community plugins.
 * Fixed broken versioning for Windows paths.
 * Fixed `DataSet` string representation for falsy values.
 * Improved the error message when duplicate nodes are passed to the `Pipeline` initializer.
+* Fixed a bug where `kedro docs` would fail because the built docs were located in a different directory.
+* Fixed a bug where `ParallelRunner` would fail on Windows machines whose reported CPU count exceeded 61.
+* Fixed an issue with saving TensorFlow model to `h5` file on Windows.
 * Added a `json` parameter to `APIDataSet` for the convenience of generating requests with JSON bodies.
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Deepyaman Datta](https://github.com/deepyaman), [DataEngineerOne](http://youtube.com/DataEngineerOne)
+[Deepyaman Datta](https://github.com/deepyaman), [Tam-Sanh Nguyen](https://github.com/tamsanh), [DataEngineerOne](http://youtube.com/DataEngineerOne)
 
 # Release 0.16.2
 

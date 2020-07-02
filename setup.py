@@ -104,9 +104,9 @@ pandas_require = {
 }
 pillow_require = {"pillow.ImageDataSet": ["Pillow~=7.1.2"]}
 spark_require = {
-    "spark.SparkDataSet": [PANDAS, HDFS, S3FS],
-    "spark.SparkHiveDataSet": [PANDAS, HDFS, S3FS],
-    "spark.SparkJDBCDataSet": [PANDAS, HDFS, S3FS],
+    "spark.SparkDataSet": [SPARK, HDFS, S3FS],
+    "spark.SparkHiveDataSet": [SPARK, HDFS, S3FS],
+    "spark.SparkJDBCDataSet": [SPARK, HDFS, S3FS],
 }
 tensorflow_required = {
     "tensorflow.TensorflowModelDataset": [

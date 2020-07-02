@@ -31,8 +31,8 @@ TensorFlow models.
 """
 import copy
 import tempfile
-from pathlib import PurePosixPath
-from typing import Any, Callable, Dict
+from pathlib import PurePath, PurePosixPath
+from typing import Any, Dict
 
 import fsspec
 import tensorflow as tf
@@ -44,6 +44,8 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
+
+TEMPORARY_H5_FILE = "tmp_tensorflow_model.h5"
 
 
 class TensorFlowModelDataset(AbstractVersionedDataSet):
@@ -131,41 +133,36 @@ class TensorFlowModelDataset(AbstractVersionedDataSet):
         if save_args is not None:
             self._save_args.update(save_args)
 
-        if self._save_args.get("save_format") == "h5":
-            self._tmpfile_callable = tempfile.NamedTemporaryFile  # type: Callable
-        else:
-            self._tmpfile_callable = tempfile.TemporaryDirectory
+        self._is_h5 = self._save_args.get("save_format") == "h5"
 
     def _load(self) -> tf.keras.Model:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
-        with self._tmpfile_callable(prefix=self._tmp_prefix) as tmp:
-            # first use fsspec to get TF model directory/file from ArbitraryFileSystem
-            # and save to local tempfile directory/file
-            path, is_dir = (tmp, True) if isinstance(tmp, str) else (tmp.name, False)
-
-            if is_dir:
-                self._fs.get(load_path, path, recursive=True)
-            else:
+        with tempfile.TemporaryDirectory(prefix=self._tmp_prefix) as path:
+            if self._is_h5:
+                path = str(PurePath(path) / TEMPORARY_H5_FILE)
                 self._fs.copy(load_path, path)
+            else:
+                self._fs.get(load_path, path, recursive=True)
 
-            # then pass the local temporary directory path to keras.load_model
+            # Pass the local temporary directory/file path to keras.load_model
             return tf.keras.models.load_model(path, **self._load_args)
 
     def _save(self, data: tf.keras.Model) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
-        with self._tmpfile_callable(prefix=self._tmp_prefix) as tmp:
-            # first use keras.load_model to save TF model directory to local tempfile directory
-            path, is_dir = (tmp, True) if isinstance(tmp, str) else (tmp.name, False)
+        with tempfile.TemporaryDirectory(prefix=self._tmp_prefix) as path:
+            if self._is_h5:
+                path = str(PurePath(path) / TEMPORARY_H5_FILE)
+
             tf.keras.models.save_model(data, path, **self._save_args)
 
-            # then use fsspec to take from local tempfile directory/file and
+            # Use fsspec to take from local tempfile directory/file and
             # put in ArbitraryFileSystem
-            if is_dir:
-                self._fs.put(path, save_path, recursive=True)
-            else:
+            if self._is_h5:
                 self._fs.copy(path, save_path)
+            else:
+                self._fs.put(path, save_path, recursive=True)
 
     def _exists(self) -> bool:
         try:

@@ -448,8 +448,8 @@ class TestNewWithStarter:
         "alias,expected_starter",
         [
             (
-                "pyspark-with-example",
-                "git+https://github.com/quantumblacklabs/kedro-starter-pyspark-with-example.git",
+                "pyspark-iris",
+                "git+https://github.com/quantumblacklabs/kedro-starter-pyspark-iris.git",
             ),
         ],
     )

@@ -76,9 +76,9 @@ v{}
 
 # pylint: disable=line-too-long
 _STARTER_ALIASES = {
+    "pandas-iris": "git+https://github.com/quantumblacklabs/kedro-starter-pandas-iris.git",
     "pyspark": "git+https://github.com/quantumblacklabs/kedro-starter-pyspark.git",
-    "pyspark-with-example": "git+https://github.com/quantumblacklabs/kedro-starter-pyspark-with-example.git",
-    "iris-example": "git+https://github.com/quantumblacklabs/kedro-starter-iris-example.git",
+    "pyspark-iris": "git+https://github.com/quantumblacklabs/kedro-starter-pyspark-iris.git",
 }
 
 

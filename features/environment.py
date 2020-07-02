@@ -31,16 +31,55 @@
 import os
 import shutil
 import stat
+import subprocess
+import sys
 import tempfile
 import venv
 from pathlib import Path
 from typing import Set
+
+import clonevirtualenv
 
 from features.steps.sh_run import run
 
 _PATHS_TO_REMOVE = set()  # type: Set[Path]
 
 FRESH_VENV_TAG = "fresh_venv"
+
+
+# monkeypatch https://github.com/edwardgeorge/virtualenv-clone/blob/master/clonevirtualenv.py#L50
+# work on Windows by passing in required environment variables to the underlying Python subprocess
+def _fake_virtualenv_sys(venv_path):
+    "Obtain Python version and path info from a virtualenv."
+    env_bin_dir = "Scripts" if sys.platform.startswith("win") else "bin"
+
+    executable = os.path.join(venv_path, env_bin_dir, "python")
+    # Must use "executable" as the first argument rather than as the
+    # keyword argument "executable" to get correct value from sys.path
+    pipe = subprocess.Popen(
+        [
+            executable,
+            "-c",
+            "import sys;"
+            + "print (sys.version[:3]);"
+            + 'print ("\\n".join(sys.path));',
+        ],
+        # Windows requires PYTHONHASHSEED to be set to initialise Python
+        # and requires the PATH variable to be set
+        env={"PYTHONHASHSEED": "1", "PATH": ""},
+        stdout=subprocess.PIPE,
+    )
+    stdout, _ = pipe.communicate()
+    assert not pipe.returncode and stdout, stdout
+    lines = stdout.decode("utf-8").splitlines()
+    python_version = lines[0]
+    sys_path = list(filter(bool, lines[1:]))
+    return python_version, sys_path
+
+
+clonevirtualenv._virtualenv_sys = (  # pylint: disable=protected-access
+    _fake_virtualenv_sys
+)
 
 
 def call(cmd, env):
@@ -67,12 +106,8 @@ def after_all(context):
 def before_scenario(context, scenario):
     if FRESH_VENV_TAG in scenario.tags:
         new_venv_dir = _create_tmp_dir() / "temp"
-
         # need to use virtualenv-clone instead of just a bare copy to resolve sys.paths and the like
-        call(
-            ["virtualenv-clone", str(context.base_venv_dir), str(new_venv_dir)],
-            env=context.env,
-        )
+        clonevirtualenv.clone_virtualenv(str(context.base_venv_dir), str(new_venv_dir))
 
         context = _setup_context_with_venv(context, new_venv_dir)
     context.temp_dir = Path(tempfile.mkdtemp())
@@ -167,7 +202,6 @@ def _setup_base_venv(context):
         ],
         env=context.env,
     )
-    call([context.pip, "install", "virtualenv-clone"], env=context.env)
     call([context.pip, "install", "."], env=context.env)
 
     return context
@@ -175,11 +209,9 @@ def _setup_base_venv(context):
 
 def _setup_kedro_install_venv(context):
     kedro_install_venv_dir = _create_tmp_dir() / "ked-install"
-
     # need to use virtualenv-clone instead of just a bare copy to resolve sys.paths and the like
-    call(
-        ["virtualenv-clone", str(context.base_venv_dir), str(kedro_install_venv_dir)],
-        env=context.env,
+    clonevirtualenv.clone_virtualenv(
+        str(context.base_venv_dir), str(kedro_install_venv_dir)
     )
     context.kedro_install_venv_dir = kedro_install_venv_dir
     context = _setup_context_with_venv(context, kedro_install_venv_dir)

@@ -28,6 +28,7 @@
 * Improved the error message when duplicate nodes are passed to the `Pipeline` initializer.
 * Fixed a bug where `kedro docs` would fail because the built docs were located in a different directory.
 * Fixed a bug where `ParallelRunner` would fail on Windows machines whose reported CPU count exceeded 61.
+* Fixed an issue with saving TensorFlow model to `h5` file on Windows.
 
 ## Breaking changes to the API
 

@@ -14,7 +14,6 @@ executors:
     docker:
       - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.8
 
-
 commands:
   setup_conda:
     description: Activate conda environment
@@ -223,7 +222,7 @@ commands:
           name: Install dependencies
           command: |
             conda activate kedro_builder
-            cat *requirements.txt | Select-String -Pattern behave,psutil,requests[^\-],^pandas[^\-],cachetools,toposort,yaml | %{ $_ -Replace  "#.*", "" } > e2e.txt
+            cat *requirements.txt | Select-String -Pattern behave,virtualenv-clone,psutil,requests[^\-],^pandas[^\-],cachetools,toposort,yaml | %{ $_ -Replace  "#.*", "" } > e2e.txt
             pip install -r e2e.txt
             choco install make
       - run:
@@ -406,7 +405,6 @@ jobs:
       - win_pip_compile:
           # Save cache only for Python 3.7. There is no need to save it for each Python.
           cache_save: true
-
 
   win_pip_compile_38:
     executor:

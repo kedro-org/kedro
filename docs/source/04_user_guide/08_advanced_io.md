@@ -215,6 +215,7 @@ reloaded = io.load("test_data_set")
 
 Currently the following datasets support versioning:
 
+- `kedro.extras.datasets.json.JSONDataSet`
 - `kedro.extras.datasets.matplotlib.MatplotlibWriter`
 - `kedro.extras.datasets.holoviews.HoloviewsWriter`
 - `kedro.extras.datasets.networkx.NetworkXDataSet`

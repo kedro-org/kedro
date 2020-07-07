@@ -72,7 +72,6 @@ class TestAPIDataSet:
         assert response.text == TEST_TEXT_RESPONSE_DATA
 
     def test_successful_json_load_with_response(self, requests_mocker, method):
-
         api_data_set = APIDataSet(
             url=TEST_URL,
             method=method,

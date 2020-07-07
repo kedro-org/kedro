@@ -30,12 +30,13 @@
 * Fixed a bug where `kedro docs` would fail because the built docs were located in a different directory.
 * Fixed a bug where `ParallelRunner` would fail on Windows machines whose reported CPU count exceeded 61.
 * Fixed an issue with saving TensorFlow model to `h5` file on Windows.
+* Added a `json` parameter to `APIDataSet` for the convenience of generating requests with JSON bodies.
 * Fixed dependencies for `SparkDataSet` to include spark.
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Deepyaman Datta](https://github.com/deepyaman), [Tam-Sanh Nguyen](https://github.com/tamsanh)
+[Deepyaman Datta](https://github.com/deepyaman), [Tam-Sanh Nguyen](https://github.com/tamsanh), [DataEngineerOne](http://youtube.com/DataEngineerOne)
 
 # Release 0.16.2
 

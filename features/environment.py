@@ -34,6 +34,7 @@ import stat
 import subprocess
 import sys
 import tempfile
+import time
 import venv
 from pathlib import Path
 from typing import Set
@@ -45,6 +46,9 @@ from features.steps.sh_run import run
 _PATHS_TO_REMOVE = set()  # type: Set[Path]
 
 FRESH_VENV_TAG = "fresh_venv"
+# Used in rmtree in after_scenario and after_all
+# When doing a couple of test runs, no more than 10 retries were necessary for rmtree to succeed.
+MAX_RETRIES = 12
 
 
 # monkeypatch https://github.com/edwardgeorge/virtualenv-clone/blob/master/clonevirtualenv.py#L50
@@ -126,7 +130,16 @@ def rmtree(top):
         for root, _, files in os.walk(str(top), topdown=False):
             for name in files:
                 os.chmod(os.path.join(root, name), stat.S_IWUSR)
-    shutil.rmtree(str(top))
+
+    times_retried = 0
+    while times_retried < MAX_RETRIES:
+        try:
+            shutil.rmtree(top)
+            break
+        except Exception as err:  # pylint: disable=broad-except
+            print(err)
+            times_retried += 1
+            time.sleep(2)
 
 
 def _setup_context_with_venv(context, venv_dir):

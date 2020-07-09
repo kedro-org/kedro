@@ -457,3 +457,9 @@ workflows:
             - pip_compile_36
             - pip_compile_37
             - pip_compile_38
+            - win_pip_compile_36
+            - win_pip_compile_37
+            - win_pip_compile_38
+            - win_unit_tests_36
+            - win_unit_tests_37
+            - win_unit_tests_38

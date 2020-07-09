@@ -188,7 +188,7 @@ def _create_new_venv() -> Path:
 
 def _create_tmp_dir() -> Path:
     """Create a temp directory and add it to _PATHS_TO_REMOVE"""
-    tmp_dir = Path(tempfile.mkdtemp())
+    tmp_dir = Path(tempfile.mkdtemp()).resolve()
     _PATHS_TO_REMOVE.add(tmp_dir)
     return tmp_dir
 

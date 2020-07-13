@@ -1,6 +1,6 @@
 # Pipelines
 
-> *Note:* This documentation is based on `Kedro 0.16.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.3`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 >
 > In this section we introduce the concept of a pipeline.
 
@@ -235,7 +235,7 @@ def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
 
 ### How do I package a modular pipeline?
 
-Since Kedro 0.16.2 you can package a modular pipeline by executing `kedro pipeline package <pipeline_name>` command, which will generate a new [wheel file](https://pythonwheels.com/) for it. By default, the wheel file will be saved into the `src/dist` directory inside your project, however this can be changed using the `--destination` (`-d`) option.
+Since Kedro 0.16.3 you can package a modular pipeline by executing `kedro pipeline package <pipeline_name>` command, which will generate a new [wheel file](https://pythonwheels.com/) for it. By default, the wheel file will be saved into the `src/dist` directory inside your project, however this can be changed using the `--destination` (`-d`) option.
 
 When packaging your modular pipeline, Kedro will also automatically include all configuration parameters from `conf/<env>/pipelines/<pipeline_name>` and pipeline tests from `tests/pipelines/<pipeline_name>`, where `<env>` defaults to `base`. If you need to capture the parameters from a different config environment, run `kedro pipeline package --env <env_name> <pipeline_name>`.
 

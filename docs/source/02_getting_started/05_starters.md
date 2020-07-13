@@ -1,6 +1,6 @@
 # Creating new projects with Kedro Starters
 
-> *Note:* This documentation is based on `Kedro 0.16.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.3`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 When creating a new project, sometimes you might want to customise the starting boilerplate provided by `kedro new` to adapt to different use cases. For example, you might want to:
 

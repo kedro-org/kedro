@@ -93,7 +93,7 @@ from your_project.hooks import TransformerHooks
 
 class ProjectContext(KedroContext):
     project_name = "kedro-tutorial"
-    project_version = "0.16.2"
+    project_version = "0.16.3"
 
     hooks = (
         # register the collection of your Hook implementations here.

@@ -114,6 +114,10 @@ def before_scenario(context, scenario):
         clonevirtualenv.clone_virtualenv(str(context.base_venv_dir), str(new_venv_dir))
 
         context = _setup_context_with_venv(context, new_venv_dir)
+    elif os.name != "posix":
+        # On Windows virtual env cloning doesn't work properly.
+        # This is a temporary workaround to make several tests pass.
+        context = _setup_kedro_install_venv(context)
     context.temp_dir = Path(tempfile.mkdtemp())
 
 

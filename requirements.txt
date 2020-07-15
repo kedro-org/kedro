@@ -9,5 +9,5 @@ pip-tools~=5.0
 pluggy~=0.13.0
 python-json-logger~=0.1.9
 PyYAML>=4.2, <6.0
-setuptools>=38.0, <47.0
+setuptools>=38.0
 toposort~=1.5  # Needs to be at least 1.5 to be able to raise CircularDependencyError

@@ -17,6 +17,7 @@ body.wy-body-for-nav {
     font-size: 1.6rem;
     background: rgb(250, 250, 250) !important;
     color: black;
+    position: relative;
 }
 
 .wy-side-nav-search {

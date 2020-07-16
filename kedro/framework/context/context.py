@@ -48,7 +48,8 @@ from kedro.io import DataCatalog
 from kedro.io.core import generate_timestamp
 from kedro.pipeline import Pipeline
 from kedro.pipeline.pipeline import _transcode_split
-from kedro.runner import AbstractRunner, SequentialRunner
+from kedro.runner.runner import AbstractRunner
+from kedro.runner.sequential_runner import SequentialRunner
 from kedro.utils import load_obj
 from kedro.versioning import Journal
 

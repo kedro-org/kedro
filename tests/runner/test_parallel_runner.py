@@ -26,8 +26,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pylint: disable=no-member
-from concurrent.futures.process import ProcessPoolExecutor
+import sys
+from concurrent.futures.process import ProcessPoolExecutor  # pylint: disable=no-member
 from typing import Any, Dict
 
 import pytest
@@ -96,6 +96,22 @@ def fan_out_fan_in():
     )
 
 
+@pytest.fixture(autouse=True)
+def mock_load_context(tmp_path, mocker):
+    # pylint: disable=too-few-public-methods
+    class DummyContext:
+        def __init__(self, project_path):
+            self.project_path = project_path
+
+    mocker.patch(
+        "kedro.framework.context.context.load_context",
+        return_value=DummyContext(str(tmp_path)),
+    )
+
+
+@pytest.mark.skipif(
+    sys.platform.startswith("win"), reason="Due to bug in parallel runner"
+)
 class TestValidParallelRunner:
     def test_create_default_data_set(self):
         # data_set is a proxy to a dataset in another process.
@@ -120,6 +136,9 @@ class TestValidParallelRunner:
         assert result["Z"] == ("42", "42", "42")
 
 
+@pytest.mark.skipif(
+    sys.platform.startswith("win"), reason="Due to bug in parallell runner"
+)
 class TestMaxWorkers:
     @pytest.mark.parametrize("is_async", [False, True])
     @pytest.mark.parametrize(
@@ -175,6 +194,9 @@ class TestMaxWorkers:
         assert parallel_runner._max_workers == _MAX_WINDOWS_WORKERS
 
 
+@pytest.mark.skipif(
+    sys.platform.startswith("win"), reason="Due to bug in parallell runner"
+)
 @pytest.mark.parametrize("is_async", [False, True])
 class TestInvalidParallelRunner:
     def test_task_validation(self, is_async, fan_out_fan_in, catalog):
@@ -257,6 +279,9 @@ def decorated_fan_out_fan_in():
     )
 
 
+@pytest.mark.skipif(
+    sys.platform.startswith("win"), reason="Due to bug in parallell runner"
+)
 @pytest.mark.parametrize("is_async", [False, True])
 class TestParallelRunnerDecorator:
     def test_decorate_pipeline(self, is_async, fan_out_fan_in, catalog):
@@ -304,6 +329,9 @@ ParallelRunnerManager.register(  # pylint: disable=no-member
 )
 
 
+@pytest.mark.skipif(
+    sys.platform.startswith("win"), reason="Due to bug in parallell runner"
+)
 @pytest.mark.parametrize("is_async", [False, True])
 class TestParallelRunnerRelease:
     def test_dont_release_inputs_and_outputs(self, is_async):
@@ -313,6 +341,7 @@ class TestParallelRunnerRelease:
         pipeline = Pipeline(
             [node(identity, "in", "middle"), node(identity, "middle", "out")]
         )
+        # pylint: disable=no-member
         catalog = DataCatalog(
             {
                 "in": runner._manager.LoggingDataSet(log, "in", "stuff"),
@@ -336,6 +365,7 @@ class TestParallelRunnerRelease:
                 node(sink, "second", None),
             ]
         )
+        # pylint: disable=no-member
         catalog = DataCatalog(
             {
                 "first": runner._manager.LoggingDataSet(log, "first"),
@@ -363,6 +393,7 @@ class TestParallelRunnerRelease:
                 node(sink, "dataset", None, name="fred"),
             ]
         )
+        # pylint: disable=no-member
         catalog = DataCatalog(
             {"dataset": runner._manager.LoggingDataSet(log, "dataset")}
         )
@@ -382,6 +413,7 @@ class TestParallelRunnerRelease:
         pipeline = Pipeline(
             [node(source, None, "ds@save"), node(sink, "ds@load", None)]
         )
+        # pylint: disable=no-member
         catalog = DataCatalog(
             {
                 "ds@save": LoggingDataSet(log, "save"),

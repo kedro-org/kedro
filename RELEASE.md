@@ -8,6 +8,18 @@
 
 ## Thanks for supporting contributions
 
+# Upcoming 0.16.4 release
+* Fixed a bug for using `ParallelRunner` on Windows.
+
+## Major features and improvements
+
+## Bug fixes and other changes
+
+## Breaking changes to the API
+
+## Thanks for supporting contributions
+
+
 # Release 0.16.3
 
 ## Major features and improvements

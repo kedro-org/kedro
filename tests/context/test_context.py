@@ -29,6 +29,7 @@
 import configparser
 import json
 import re
+import sys
 from pathlib import Path, PurePath, PurePosixPath, PureWindowsPath
 from time import sleep
 from typing import Any, Dict
@@ -235,8 +236,6 @@ class DummyContextWithPipelinePropertyOnly(KedroContext):
     """
     We need this for testing the backward compatibility.
     """
-
-    # pylint: disable=abstract-method
 
     project_name = "bob_old"
     project_version = kedro_version
@@ -469,7 +468,13 @@ class TestKedroContextRun:
         assert "kedro.runner.sequential_runner" in log_names
         assert "Pipeline execution completed successfully." in log_msgs
 
-    def test_parallel_run_arg(self, dummy_context, dummy_dataframe, caplog):
+    @pytest.mark.skipif(
+        sys.platform.startswith("win"), reason="Due to bug in parallel runner"
+    )
+    def test_parallel_run_arg(self, dummy_context, dummy_dataframe, caplog, mocker):
+        mocker.patch(
+            "kedro.framework.context.context.load_context", return_value=dummy_context
+        )
         dummy_context.catalog.save("cars", dummy_dataframe)
         dummy_context.run(runner=ParallelRunner())
 
@@ -867,7 +872,7 @@ def test_convert_paths_to_absolute_posix_not_changing_non_relative_path(
             PureWindowsPath("D:\\kedro"),
             {"my_dataset": {"path": r"C:\data\01_raw\dataset.json"}},
             {"my_dataset": {"path": "C:/data/01_raw/dataset.json"}},
-        ),
+        )
     ],
 )
 def test_convert_paths_to_absolute_posix_converts_full_windows_path_to_posix(

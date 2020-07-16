@@ -313,6 +313,10 @@ h1, h2, .rst-content .toctree-wrapper p.caption, h3, h4, h5, h6, legend {
     line-height: 1.5;
 }
 
+.wy-body-for-nav p + details {
+    margin: -10px 0 15px;
+}
+
 .wy-body-for-nav blockquote {
     margin: 1em 0;
     padding-left: 1em;

@@ -1,30 +1,79 @@
-# Kedro Spaceflights tutorial
+# Set up the spaceflights project
 
-In this tutorial, we will follow the [Kedro workflow](./01_workflow.md#development-workflow) and walk you through the steps necessary to convert an empty template into a working project. Our project will be based on the following scenario:
-
-> _It is 2160 and the space tourism industry is booming. Globally, there are thousands of space shuttle companies taking tourists to the Moon and back. You have been able to source amenities offered in each space shuttle, customer reviews and company information. You want to construct a model for predicting the price for each trip to the Moon and the corresponding return flight._
+In this section, we discuss the project set-up phase, which is the first part of the [standard development workflow](./01_spaceflights_tutorial.md#kedro-project-development-workflow). The set-up steps are as follows:
 
 
-## Creating the tutorial project
+* Create a new project
+* Install dependencies
+* Configure the project
 
-Run `kedro new` from your chosen working directory to create an empty template project, following the interactive prompts to set the project's name, repository / folder name and Python package name, [as previously described](../02_getting_started/03_new_project.md).
 
-Call the project **`Kedro Tutorial`** and keep the default naming by pressing enter when prompted. Choose `N` to create a project template _without_ the Iris dataset example. Alternatively, you can create a new project from a [configuration file](../02_getting_started/03_new_project.md#create-a-new-project-from-a-configuration-file).
+## Create a new project
 
-### Install project dependencies
+Navigate to your chosen working directory and run the following to [create a new project using the interactive prompts](../02_get_started/03_new_project.md):
 
-Within your [virtual environment](../02_getting_started/03_new_project.md#using-kedro-install) and your project's root directory, you can install project dependencies by running:
+```bash
+kedro new
+```
+
+Feel free to name your project as you like, but this guide will assume the project is named **`Kedro Tutorial`**.
+
+Keep the default names for the `repo_name` and `python_package` when prompted.
+
+Choose `N` at the final prompt, so you create a project template _without_ the Iris dataset example.
+
+## Install project dependencies
+
+Up to this point, we haven't discussed project dependencies, so now is a good time to introduce them. Specifying a project's dependencies in Kedro makes it easier for others to run your project; it avoids version conflicts by use of the same Python packages.
+
+The generic project template bundles some typical dependencies, in `src/requirements.txt`.
+
+```text
+black==v19.10b0 # Used for formatting code with `kedro lint`
+flake8>=3.7.9, <4.0 # Used for linting code with `kedro lint`
+ipython>=7.0.0, <8.0 # Used for an IPython session with `kedro ipython`
+isort>=4.3.21, <5.0 # Used for linting code with `kedro lint`
+jupyter>=1.0.0, <2.0 # Used to open a Kedro-session in Jupyter Notebook & Lab
+jupyter_client>=5.1.0, <6.0 # Used to open a Kedro-session in Jupyter Notebook & Lab
+jupyterlab==0.31.1 # Used to open a Kedro-session in Jupyter Lab
+kedro==0.16.3
+nbstripout==0.3.3 # Strips the output of a Jupyter Notebook and writes the outputless version to the original file
+pytest-cov>=2.5, <3.0 # Produces test coverage reports
+pytest-mock>=1.7.1,<2.0 # Wrapper around the mock package for easier use with pytest
+pytest>=3.4, <4.0 # Testing framework for Python code
+wheel==0.32.2 # The reference implementation of the Python wheel packaging standard
+```
+
+These dependencies may be sufficient for your project, in which case you can move to the next section and use [`kedro install`](#kedro-install).
+
+> Note: If your project has `conda` dependencies, you can create a `src/environment.yml` file and list them there.
+
+### Add and remove project-specific dependencies
+If you need to, you can add or remove dependencies. For a new project, edit `src/requirements.txt` and then run the following:
+
+```bash
+kedro build-reqs
+```
+
+## `kedro install`
+
+To install the project-specific dependencies, navigate to the root directory of the project and run:
 
 ```bash
 kedro install
 ```
+You can find further information in our [advanced documentation about working with dependencies](../04_kedro_project_setup/01_dependencies.md).
 
-### Project configuration
+## Configure the project
 
-The project template has a default configuration, but you should reconfigure it as follows:
+You need to configure the credentials within your project's `conf` folder:
 
-* Move `credentials.yml` from `conf/base/` to `conf/local/`
-  - To do this in the terminal, type the following from within the project's root directory: `mv ./conf/base/credentials.yml ./conf/local/`.
-* [optional] Add in any credentials to `conf/local/credentials.yml` that you would need to load specific data sources like usernames and passwords. Some examples are given within the file to illustrate how you store credentials.
-* [optional] Set up local configuration. Additional information can be found in the section on [configuration](../04_user_guide/03_configuration.md) in the user guide.
-* [optional] Set up [logging](../04_user_guide/07_logging.md).
+* Move `credentials.yml` from `conf/base/` to `conf/local/`. To do this in the terminal, type the following from within the project's root directory:
+
+```bash
+mv ./conf/base/credentials.yml ./conf/local/`.
+```
+
+* You may optionally add in any credentials to `conf/local/credentials.yml` that you would need to load specific data sources like usernames and passwords. Some examples are given within the file to illustrate how you store credentials. Additional information can be found in the [advanced documentation on configuration](../04_kedro_project_setup/02_configuration.md).
+
+At this stage of the workflow, you may also want to [set up logging](../08_logging/01_logging.md), but we do not use it in this tutorial.

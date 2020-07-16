@@ -26,7 +26,7 @@ Choose **Existing environment** and navigate your way to find your existing envi
 # macOS / Linux
 which python
 # Windows
-python -c 'import sys; print(sys.executable)'
+python -c "import sys; print(sys.executable)"
 ```
 
 Paste the interpreter path into the file picker and click **OK**: <br />
@@ -59,7 +59,7 @@ Create a **Run / Debug Configuration** for `kedro run` and get the path to the K
 which kedro
 
 # Windows (in `cmd`)
-python -c 'import sys, os.path; print(os.path.join(os.path.dirname(sys.executable), "kedro"))'
+python -c "import sys, os.path; print(os.path.join(os.path.dirname(sys.executable), 'Lib\site-packages\kedro\__main__.py'))"
 ```
 
 Edit the new Run configuration as follows:

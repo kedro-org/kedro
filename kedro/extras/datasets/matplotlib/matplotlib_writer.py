@@ -36,7 +36,7 @@ from pathlib import PurePosixPath
 from typing import Any, Dict, List, Union
 
 import fsspec
-from matplotlib.pyplot import figure
+import matplotlib.pyplot as plt
 
 from kedro.io.core import (
     AbstractVersionedDataSet,
@@ -62,15 +62,15 @@ class MatplotlibWriter(AbstractVersionedDataSet):
         >>> single_plot_writer = MatplotlibWriter(
         >>>     filepath="matplot_lib_single_plot.png"
         >>> )
-        >>> single_plot_writer.save(plt)
         >>> plt.close()
+        >>> single_plot_writer.save(plt)
         >>>
         >>> # Saving dictionary of plots
         >>> plots_dict = dict()
         >>> for colour in ["blue", "green", "red"]:
         >>>     plots_dict[colour] = plt.figure()
         >>>     plt.plot([1, 2, 3], [4, 5, 6], color=colour)
-        >>>     plt.close()
+        >>> plt.close("all")
         >>> dict_plot_writer = MatplotlibWriter(
         >>>     filepath="matplotlib_dict"
         >>> )
@@ -81,7 +81,7 @@ class MatplotlibWriter(AbstractVersionedDataSet):
         >>> for index in range(5):
         >>>     plots_list.append(plt.figure())
         >>>     plt.plot([1,2,3],[4,5,6])
-        >>>     plt.close()
+        >>> plt.close("all")
         >>> list_plot_writer = MatplotlibWriter(
         >>>     filepath="matplotlib_list"
         >>> )
@@ -103,9 +103,9 @@ class MatplotlibWriter(AbstractVersionedDataSet):
         """Creates a new instance of ``MatplotlibWriter``.
 
         Args:
-            filepath: Key path to a matplot object file(s) prefixed with a protocol like `s3://`.
-                If prefix is not provided, `file` protocol (local filesystem) will be used.
-                The prefix should be any protocol supported by ``fsspec``.
+            filepath: Filepath in POSIX format to a matplot object file(s) prefixed with a protocol
+                like `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be
+                used. The prefix should be any protocol supported by ``fsspec``.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``), as well as
                 to pass to the filesystem's `open` method through nested key `open_args_save`.
@@ -161,7 +161,9 @@ class MatplotlibWriter(AbstractVersionedDataSet):
             "Loading not supported for `{}`".format(self.__class__.__name__)
         )
 
-    def _save(self, data: Union[figure, List[figure], Dict[str, figure]]) -> None:
+    def _save(
+        self, data: Union[plt.figure, List[plt.figure], Dict[str, plt.figure]]
+    ) -> None:
         save_path = self._get_save_path()
 
         if isinstance(data, list):
@@ -178,9 +180,11 @@ class MatplotlibWriter(AbstractVersionedDataSet):
             full_key_path = get_filepath_str(save_path, self._protocol)
             self._save_to_fs(full_key_path=full_key_path, plot=data)
 
+        plt.close("all")
+
         self._invalidate_cache()
 
-    def _save_to_fs(self, full_key_path: str, plot: figure):
+    def _save_to_fs(self, full_key_path: str, plot: plt.figure):
         bytes_buffer = io.BytesIO()
         plot.savefig(bytes_buffer, **self._save_args)
 

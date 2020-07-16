@@ -44,7 +44,7 @@ from kedro.io.core import PROTOCOL_DELIMITER, Version
 
 @pytest.fixture
 def filepath_json(tmp_path):
-    return str(tmp_path / "test.json")
+    return (tmp_path / "test.json").as_posix()
 
 
 @pytest.fixture

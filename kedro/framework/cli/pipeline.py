@@ -39,6 +39,7 @@ from zipfile import ZipFile
 
 import click
 import yaml
+from setuptools.dist import Distribution
 
 import kedro
 from kedro.framework.cli.cli import _assert_pkg_name_ok, _handle_exception
@@ -251,7 +252,7 @@ def _install_files(
     env = env or "base"
     context = load_context(Path.cwd(), env=env)
 
-    package_source, test_source, conf_source = _get_source_paths(
+    package_source, test_source, conf_source = _get_package_artifacts(
         source_path, package_name
     )
 
@@ -292,14 +293,27 @@ def _install_files(
     type=click.Path(resolve_path=True, file_okay=False),
     help="Location where to create the wheel file. Defaults to `src/dist`.",
 )
+@click.option(
+    "-v",
+    "--version",
+    type=str,
+    default="0.1",
+    show_default=True,
+    help="Version to package under.",
+)
 @click.argument("name", nargs=1)
-def package_pipeline(name, env, alias, destination):
+def package_pipeline(name, env, alias, destination, version):
     """Package up a pipeline for easy distribution. A .whl file
     will be created in a `<source_dir>/dist/`."""
     context = load_context(Path.cwd(), env=env)
 
     result_path = _package_pipeline(
-        name, context, package_name=alias, destination=destination, env=env
+        name,
+        context,
+        package_name=alias,
+        destination=destination,
+        env=env,
+        version=version,
     )
 
     as_alias = f" as `{alias}`" if alias else ""
@@ -307,25 +321,23 @@ def package_pipeline(name, env, alias, destination):
     click.secho(message, fg="green")
 
 
-def _package_pipeline(
+def _package_pipeline(  # pylint: disable=too-many-arguments
     name: str,
     context: KedroContext,
     package_name: str = None,
     destination: str = None,
     env: str = None,
+    version: str = None,
 ) -> Path:
     package_dir = _get_project_package_dir(context)
     env = env or "base"
     package_name = package_name or name
+    version = version or "0.1"
 
-    # Artifacts to package
-    source_paths = _get_pipeline_artifacts(context, pipeline_name=name, env=env)
-
+    artifacts_to_package = _get_pipeline_artifacts(context, pipeline_name=name, env=env)
     destination = Path(destination) if destination else package_dir.parent / "dist"
-    package_file = destination / f"{package_name}-0.1-py3-none-any.whl"
-    if package_file.is_file():
-        click.secho(f"Package file {package_file} will be overwritten!", fg="yellow")
-    _generate_wheel_file(package_name, destination, source_paths)
+
+    _generate_wheel_file(package_name, destination, artifacts_to_package, version)
 
     _clean_pycache(package_dir)
     _clean_pycache(context.project_path)
@@ -333,34 +345,39 @@ def _package_pipeline(
     return destination
 
 
+def _get_wheel_name(**kwargs):
+    # https://stackoverflow.com/questions/51939257/how-do-you-get-the-filename-of-a-python-wheel-when-running-setup-py
+    dist = Distribution(attrs=kwargs)
+    bdist_wheel_cmd = dist.get_command_obj("bdist_wheel")
+    bdist_wheel_cmd.ensure_finalized()
+
+    distname = bdist_wheel_cmd.wheel_dist_name
+    tag = "-".join(bdist_wheel_cmd.get_tag())
+    return f"{distname}-{tag}.whl"
+
+
 def _generate_wheel_file(
-    package_name: str, destination: Path, source_paths: Tuple[Path, ...]
+    package_name: str, destination: Path, source_paths: Tuple[Path, ...], version: str
 ) -> None:
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_dir_path = Path(temp_dir).resolve()
 
         # Copy source folders
-        target_paths = _get_source_paths(temp_dir_path, package_name)
+        target_paths = _get_package_artifacts(temp_dir_path, package_name)
         for source, target in zip(source_paths, target_paths):
             if source.is_dir():
                 _sync_dirs(source, target)
 
         # Build a setup.py on the fly
-        setup_file = temp_dir_path / "setup.py"
-        package_data = {
-            package_name: [
-                "README.md",
-                "config/parameters*",
-                "config/**/parameters*",
-                "config/parameters*/**",
-            ]
-        }
-        setup_file_context = dict(
-            name=package_name, version="0.1", package_data=json.dumps(package_data)
-        )
-        setup_file.write_text(_SETUP_PY_TEMPLATE.format(**setup_file_context))
+        setup_file = _generate_setup_file(package_name, version, temp_dir_path)
 
-        # python setup.py bdist_wheel --dist-dir src/dist
+        package_file = destination / _get_wheel_name(name=package_name, version=version)
+        if package_file.is_file():
+            click.secho(
+                f"Package file {package_file} will be overwritten!", fg="yellow"
+            )
+
+        # python setup.py bdist_wheel --dist-dir <destination>
         call(
             [
                 sys.executable,
@@ -371,6 +388,23 @@ def _generate_wheel_file(
             ],
             cwd=temp_dir,
         )
+
+
+def _generate_setup_file(package_name: str, version: str, output_dir: Path) -> Path:
+    setup_file = output_dir / "setup.py"
+    package_data = {
+        package_name: [
+            "README.md",
+            "config/parameters*",
+            "config/**/parameters*",
+            "config/parameters*/**",
+        ]
+    }
+    setup_file_context = dict(
+        name=package_name, version=version, package_data=json.dumps(package_data)
+    )
+    setup_file.write_text(_SETUP_PY_TEMPLATE.format(**setup_file_context))
+    return setup_file
 
 
 def _create_pipeline(name: str, kedro_version: str, output_dir: Path) -> Path:
@@ -459,8 +493,8 @@ def _get_project_package_dir(context: KedroContext) -> Path:
 
 def _get_pipeline_artifacts(
     context: KedroContext, pipeline_name: str, env: str
-) -> Tuple[Path, ...]:
-    """Returns in order: source_path, tests_path, config_path"""
+) -> Tuple[Path, Path, Path]:
+    """From existing project, returns in order: source_path, tests_path, config_path"""
     package_dir = _get_project_package_dir(context)
     artifacts = (
         package_dir / "pipelines" / pipeline_name,
@@ -470,12 +504,17 @@ def _get_pipeline_artifacts(
     return artifacts
 
 
-def _get_source_paths(source_path: Path, package_name: str):
-    package_path = source_path / package_name
-    test_path = source_path / "tests"
-    # package_data (non-python files) needs to live inside one of the packages
-    conf_path = source_path / package_name / "config"
-    return package_path, test_path, conf_path
+def _get_package_artifacts(
+    source_path: Path, package_name: str
+) -> Tuple[Path, Path, Path]:
+    """From existing unpacked wheel, returns in order: source_path, tests_path, config_path"""
+    artifacts = (
+        source_path / package_name,
+        source_path / "tests",
+        # package_data (non-python files) needs to live inside one of the packages
+        source_path / package_name / "config",
+    )
+    return artifacts
 
 
 def _copy_pipeline_tests(pipeline_name: str, result_path: Path, package_dir: Path):

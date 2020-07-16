@@ -43,6 +43,19 @@ Feature: Run Project
     And the console log should show that 4 nodes were run
     And "local" environment was used
 
+  Scenario: Run parallel runner with default python entry point with example code
+    Given I have prepared a config file with example code
+    And I have run a non-interactive kedro new
+    And I have updated kedro requirements
+    And I have executed the kedro command "install"
+    When I execute the kedro command "run --parallel"
+    Then I should get a successful exit code
+    And the console log should show that "split_data" was run
+    And the console log should show that "train_model" was run
+    And the console log should show that "predict" was run
+    And the console log should show that "report_accuracy" was run
+    And "local" environment was used
+
   Scenario: Run default python entry point without example code
     Given I have prepared a config file without example code
     And I have run a non-interactive kedro new

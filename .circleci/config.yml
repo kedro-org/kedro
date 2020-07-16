@@ -14,7 +14,6 @@ executors:
     docker:
       - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.8
 
-
 commands:
   setup_conda:
     description: Activate conda environment
@@ -211,7 +210,9 @@ commands:
           command: setx /m HDF5_DISABLE_VERSION_CHECK 1
       - run:
           name: Run unit tests
-          command: conda activate kedro_builder; pytest .\tests --ignore .\tests\framework\hooks\test_context_hooks.py  --cov-config pyproject.toml
+          command: |
+            conda activate kedro_builder
+            pytest .\tests --no-cov
 
   win_e2e_tests:
     description: Run all end to end tests
@@ -221,7 +222,7 @@ commands:
           name: Install dependencies
           command: |
             conda activate kedro_builder
-            cat *requirements.txt | Select-String -Pattern behave,psutil,requests[^\-],^pandas[^\-],cachetools,toposort,yaml | %{ $_ -Replace  "#.*", "" } > e2e.txt
+            cat *requirements.txt | Select-String -Pattern behave,virtualenv-clone,psutil,requests[^\-],^pandas[^\-],cachetools,toposort,yaml | %{ $_ -Replace  "#.*", "" } > e2e.txt
             pip install -r e2e.txt
             choco install make
       - run:
@@ -359,7 +360,9 @@ jobs:
           command: setx /m HDF5_DISABLE_VERSION_CHECK 1
       - run:
           name: Run unit tests without Spark
-          command: conda activate kedro_builder; pytest .\tests --ignore .\tests\framework\hooks\test_context_hooks.py --ignore .\tests\extras\datasets\spark  --cov-config pyproject_no_spark.toml
+          command: |
+            conda activate kedro_builder
+            pytest .\tests --ignore .\tests\extras\datasets\spark --no-cov
 
   win_e2e_tests_36:
     executor:
@@ -402,7 +405,6 @@ jobs:
       - win_pip_compile:
           # Save cache only for Python 3.7. There is no need to save it for each Python.
           cache_save: true
-
 
   win_pip_compile_38:
     executor:
@@ -455,3 +457,9 @@ workflows:
             - pip_compile_36
             - pip_compile_37
             - pip_compile_38
+            - win_pip_compile_36
+            - win_pip_compile_37
+            - win_pip_compile_38
+            - win_unit_tests_36
+            - win_unit_tests_37
+            - win_unit_tests_38

@@ -40,7 +40,7 @@ from datetime import datetime, timezone
 from functools import partial
 from glob import iglob
 from operator import attrgetter
-from pathlib import Path, PurePath
+from pathlib import Path, PurePath, PurePosixPath
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 from urllib.parse import urlsplit
 
@@ -120,7 +120,7 @@ class AbstractDataSet(abc.ABC):
         >>>         df.to_csv(str(self._filepath))
         >>>
         >>>     def _exists(self) -> bool:
-        >>>         return Path(self._filepath).exists()
+        >>>         return Path(self._filepath.as_posix()).exists()
         >>>
         >>>     def _describe(self):
         >>>         return dict(param1=self._param1, param2=self._param2)
@@ -505,7 +505,7 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
         >>>
         >>>     def _exists(self) -> bool:
         >>>         path = self._get_load_path()
-        >>>         return Path(path).exists()
+        >>>         return Path(path.as_posix()).exists()
         >>>
         >>>     def _describe(self):
         >>>         return dict(version=self._version, param1=self._param1, param2=self._param2)
@@ -523,7 +523,7 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
 
     def __init__(
         self,
-        filepath: PurePath,
+        filepath: PurePosixPath,
         version: Optional[Version],
         exists_function: Callable[[str], bool] = None,
         glob_function: Callable[[str], List[str]] = None,
@@ -531,7 +531,7 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
         """Creates a new instance of ``AbstractVersionedDataSet``.
 
         Args:
-            filepath: Path to file.
+            filepath: Filepath in POSIX format to a file.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -580,7 +580,7 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
             return self._version.load
         return self._fetch_latest_load_version()
 
-    def _get_load_path(self) -> PurePath:
+    def _get_load_path(self) -> PurePosixPath:
         if not self._version:
             # When versioning is disabled, load from original filepath
             return self._filepath
@@ -596,7 +596,7 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
             return self._version.save
         return self._fetch_latest_save_version()
 
-    def _get_save_path(self) -> PurePath:
+    def _get_save_path(self) -> PurePosixPath:
         if not self._version:
             # When versioning is disabled, return original filepath
             return self._filepath
@@ -612,7 +612,7 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
 
         return versioned_path
 
-    def _get_versioned_path(self, version: str) -> PurePath:
+    def _get_versioned_path(self, version: str) -> PurePosixPath:
         return self._filepath / version / self._filepath.name
 
     def load(self) -> Any:
@@ -734,7 +734,7 @@ def get_filepath_str(path: PurePath, protocol: str) -> str:
     Returns:
         Filepath string.
     """
-    path = str(path)
+    path = path.as_posix()
     if protocol in HTTP_PROTOCOLS:
         path = "".join((protocol, PROTOCOL_DELIMITER, path))
     return path

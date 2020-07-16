@@ -92,8 +92,10 @@ exclude_patterns = [
     "modules.rst",
     "source",
     "README.md",
+    "07_extend_kedro/02_transformers.md",
+    "07_extend_kedro/03_decorators.md",
+    "11_faq/03_glossary.md"
 ]
-
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -396,8 +398,8 @@ def _prepare_build_dir(app, config):
     build_root = Path(app.srcdir)
     build_out = Path(app.outdir)
     copy_tree(str(here / "source"), str(build_root))
-    copy_tree(str(build_root / "05_api_docs"), str(build_root))
-    shutil.rmtree(str(build_root / "05_api_docs"))
+    copy_tree(str(build_root / "13_api_docs"), str(build_root))
+    shutil.rmtree(str(build_root / "13_api_docs"))
     shutil.rmtree(str(build_out), ignore_errors=True)
     copy_tree(str(build_root / "css"), str(build_out / "_static" / "css"))
     shutil.rmtree(str(build_root / "css"))

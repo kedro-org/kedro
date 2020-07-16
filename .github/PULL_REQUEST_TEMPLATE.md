@@ -6,10 +6,10 @@
 
 ## Checklist
 
-- [ ] Read the [contributing](../CONTRIBUTING.md) guidelines
+- [ ] Read the [contributing](https://github.com/quantumblacklabs/kedro/blob/master/CONTRIBUTING.md) guidelines
 - [ ] Opened this PR as a 'Draft Pull Request' if it is work-in-progress
 - [ ] Updated the documentation to reflect the code changes
-- [ ] Added a description of this change and added my name to the list of supporting contributions in the [`RELEASE.md`](../RELEASE.md) file
+- [ ] Added a description of this change and added my name to the list of supporting contributions in the [`RELEASE.md`](https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md) file
 - [ ] Added tests to cover my changes
 
 ## Notice

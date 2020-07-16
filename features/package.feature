@@ -41,6 +41,7 @@ Feature: Package target in new project
     And I execute the installed project package
     Then I should get a successful exit code
 
+  @fresh_venv
   Scenario: Install package after running kedro build-reqs
    Given I have updated kedro requirements
    When I execute the kedro command "build-reqs"

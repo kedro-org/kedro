@@ -45,7 +45,7 @@ HDF_KEY = "data"
 
 @pytest.fixture
 def filepath_hdf(tmp_path):
-    return str(tmp_path / "test.h5")
+    return (tmp_path / "test.h5").as_posix()
 
 
 @pytest.fixture

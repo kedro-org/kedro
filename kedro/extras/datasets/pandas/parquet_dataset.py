@@ -30,7 +30,7 @@
 filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Parquet file.
 """
 from copy import deepcopy
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 from typing import Any, Dict
 
 import fsspec
@@ -85,8 +85,8 @@ class ParquetDataSet(AbstractVersionedDataSet):
         on a specific filesystem.
 
         Args:
-            filepath: Filepath to a Parquet file prefixed with a protocol like `s3://`.
-                If prefix is not provided, `file` protocol (local filesystem) will be used.
+            filepath: Filepath in POSIX format to a Parquet file prefixed with a protocol like
+                `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 It can also be a path to a directory. If the directory is
                 provided then it can be used for reading partitioned parquet files.
@@ -177,17 +177,15 @@ class ParquetDataSet(AbstractVersionedDataSet):
     def _save(self, data: pd.DataFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
-        try:
-            table = pa.Table.from_pandas(data, **self._from_pandas_args)
-            pq.write_table(
-                table=table, where=save_path, filesystem=self._fs, **self._save_args
-            )
-        except IsADirectoryError as err:
+        if Path(save_path).is_dir():
             raise DataSetError(
-                "Saving {} to a directory is not supported. \n{}".format(
-                    self.__class__.__name__, str(err)
-                )
+                f"Saving {self.__class__.__name__} to a directory is not supported."
             )
+
+        table = pa.Table.from_pandas(data, **self._from_pandas_args)
+        pq.write_table(
+            table=table, where=save_path, filesystem=self._fs, **self._save_args
+        )
 
         self._invalidate_cache()
 

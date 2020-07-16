@@ -48,7 +48,8 @@ from kedro.io import DataCatalog
 from kedro.io.core import generate_timestamp
 from kedro.pipeline import Pipeline
 from kedro.pipeline.pipeline import _transcode_split
-from kedro.runner import AbstractRunner, SequentialRunner
+from kedro.runner.runner import AbstractRunner
+from kedro.runner.sequential_runner import SequentialRunner
 from kedro.utils import load_obj
 from kedro.versioning import Journal
 
@@ -97,15 +98,18 @@ def _is_relative_path(path_string: str) -> bool:
     return True
 
 
-def _expand_path(project_path: Path, conf_dictionary: Dict[str, Any]) -> Dict[str, Any]:
-    """Turn all relative paths inside ``conf_dictionary`` into absolute paths by appending them to
-    ``project_path``. This is a hack to make sure that we don't have to change user's
-    working directory for logging and datasets to work. It is important for non-standard workflows
-    such as IPython notebook where users don't go through `kedro run` or `run.py` entrypoints.
+def _convert_paths_to_absolute_posix(
+    project_path: Path, conf_dictionary: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Turn all relative paths inside ``conf_dictionary`` into absolute paths by appending them
+    to ``project_path`` and convert absolute Windows paths to POSIX format. This is a hack to
+    make sure that we don't have to change user's working directory for logging and datasets to
+    work. It is important for non-standard workflows such as IPython notebook where users don't go
+    through `kedro run` or `run.py` entrypoints.
 
     Example:
     ::
-        >>> conf = _expand_path(
+        >>> conf = _convert_paths_to_absolute_posix(
         >>>     project_path=Path("/path/to/my/project"),
         >>>     conf_dictionary={
         >>>         "handlers": {
@@ -138,7 +142,9 @@ def _expand_path(project_path: Path, conf_dictionary: Dict[str, Any]) -> Dict[st
 
         # if the conf_value is another dictionary, absolutify its paths first.
         if isinstance(conf_value, dict):
-            conf_dictionary[conf_key] = _expand_path(project_path, conf_value)
+            conf_dictionary[conf_key] = _convert_paths_to_absolute_posix(
+                project_path, conf_value
+            )
             continue
 
         # if the conf_value is not a dictionary nor a string, skip
@@ -150,8 +156,12 @@ def _expand_path(project_path: Path, conf_dictionary: Dict[str, Any]) -> Dict[st
             continue
 
         if _is_relative_path(conf_value):
-            conf_value_absolute_path = str(project_path / conf_value)
+            # Absolute local path should be in POSIX format
+            conf_value_absolute_path = (project_path / conf_value).as_posix()
             conf_dictionary[conf_key] = conf_value_absolute_path
+        elif PureWindowsPath(conf_value).drive:
+            # Convert absolute Windows path to POSIX format
+            conf_dictionary[conf_key] = PureWindowsPath(conf_value).as_posix()
 
     return conf_dictionary
 
@@ -396,7 +406,7 @@ class KedroContext(abc.ABC):
         conf_catalog = self.config_loader.get("catalog*", "catalog*/**", "**/catalog*")
         # turn relative paths in conf_catalog into absolute paths
         # before initializing the catalog
-        conf_catalog = _expand_path(
+        conf_catalog = _convert_paths_to_absolute_posix(
             project_path=self.project_path, conf_dictionary=conf_catalog
         )
         conf_creds = self._get_config_credentials()
@@ -491,7 +501,7 @@ class KedroContext(abc.ABC):
         """Register logging specified in logging directory."""
         conf_logging = self.config_loader.get("logging*", "logging*/**", "**/logging*")
         # turn relative paths in logging config into absolute path before initialising loggers
-        conf_logging = _expand_path(
+        conf_logging = _convert_paths_to_absolute_posix(
             project_path=self.project_path, conf_dictionary=conf_logging
         )
         logging.config.dictConfig(conf_logging)

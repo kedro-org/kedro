@@ -30,7 +30,6 @@
 
 import itertools
 import json
-import re
 import shlex
 import shutil
 from pathlib import Path
@@ -449,15 +448,20 @@ def update_kedro_req(context: behave.runner.Context):
     that includes all of kedro's dependencies (-r kedro/requirements.txt)
     """
     reqs_path = context.root_project_dir / "src" / "requirements.txt"
-    kedro_reqs = "-r {}\n".format(str(context.requirements_path))
+    kedro_reqs = "-r {}\n".format(context.requirements_path.as_posix())
     kedro_with_pandas_reqs = kedro_reqs + "pandas\n"
 
     if reqs_path.is_file():
-        old_reqs = reqs_path.read_text()
-        new_reqs = re.sub(
-            r"#?kedro\[pandas.CSVDataSet\]==.*\n", kedro_with_pandas_reqs, old_reqs
-        )
-        new_reqs = re.sub(r"#?kedro==.*\n", kedro_reqs, new_reqs)
+        old_reqs = reqs_path.read_text().splitlines()
+        new_reqs = []
+        for req in old_reqs:
+            if req.startswith("kedro[pandas.CSVDataSet]=="):
+                new_reqs.append(kedro_with_pandas_reqs)
+            elif req.startswith("kedro=="):
+                new_reqs.append(kedro_reqs)
+            else:
+                new_reqs.append(req)
+        new_reqs = "\n".join(new_reqs)
         assert old_reqs != new_reqs
         reqs_path.write_text(new_reqs)
 

@@ -26,6 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
+import sys
 from logging.handlers import QueueHandler, QueueListener
 from multiprocessing import Queue
 from pathlib import Path
@@ -37,7 +38,7 @@ import yaml
 
 from kedro import __version__
 from kedro.framework.context import KedroContext
-from kedro.framework.context.context import _expand_path
+from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import hook_impl
 from kedro.framework.hooks.manager import _create_hook_manager
 from kedro.io import DataCatalog
@@ -140,7 +141,12 @@ class LoggingHooks:
     def __init__(self, logs_queue):
         self.logger = logging.getLogger("hooks_handler")
         self.logger.handlers = []
-        self.logger.addHandler(QueueHandler(logs_queue))
+
+        self.queue = logs_queue
+        self.queue_handler = QueueHandler(self.queue)
+        # We need this queue listener to prevent pytest from hanging on Windows.
+        self.queue_listener = QueueListener(self.queue)
+        self.logger.addHandler(self.queue_handler)
 
     @hook_impl
     def after_catalog_created(
@@ -307,11 +313,19 @@ def _create_context_with_hooks(tmp_path, mocker, logging_hooks):
 
 @pytest.fixture
 def context_with_hooks(tmp_path, mocker, logging_hooks):
-    return _create_context_with_hooks(tmp_path, mocker, logging_hooks)
+    logging_hooks.queue_listener.start()
+    yield _create_context_with_hooks(tmp_path, mocker, logging_hooks)
+    logging_hooks.queue_listener.stop()
 
 
 @pytest.fixture
 def broken_context_with_hooks(tmp_path, mocker, logging_hooks):
+    logging_hooks.queue_listener.start()
+    yield _create_broken_context_with_hooks(tmp_path, mocker, logging_hooks)
+    logging_hooks.queue_listener.stop()
+
+
+def _create_broken_context_with_hooks(tmp_path, mocker, logging_hooks):
     class BrokenContextWithHooks(KedroContext):
         project_name = "broken-context"
         package_name = "broken"
@@ -369,7 +383,7 @@ class TestKedroContextHooks:
         assert record.getMessage() == "Catalog created"
         assert record.catalog == catalog
         assert record.conf_creds == config_loader.get("credentials*")
-        assert record.conf_catalog == _expand_path(
+        assert record.conf_catalog == _convert_paths_to_absolute_posix(
             project_path=context_with_hooks.project_path,
             conf_dictionary=config_loader.get("catalog*"),
         )
@@ -477,8 +491,11 @@ class TestKedroContextHooks:
         assert call_record.outputs["planes"].to_dict() == dummy_dataframe.to_dict()
         assert call_record.run_id == context_with_hooks.run_id
 
+    @pytest.mark.skipif(
+        sys.platform.startswith("win"), reason="Due to bug in parallel runner"
+    )
     def test_on_node_error_hook_is_called_with_parallel_runner(
-        self, broken_context_with_hooks, logs_queue
+        self, tmp_path, mocker, logging_hooks
     ):
         log_records = []
 
@@ -486,8 +503,16 @@ class TestKedroContextHooks:
             def handle(self, record):
                 log_records.append(record)
 
-        logs_queue_listener = QueueListener(logs_queue, LogHandler())
+        broken_context_with_hooks = _create_broken_context_with_hooks(
+            tmp_path, mocker, logging_hooks
+        )
+        mocker.patch(
+            "kedro.framework.context.context.load_context",
+            return_value=broken_context_with_hooks,
+        )
+        logs_queue_listener = QueueListener(logging_hooks.queue, LogHandler())
         logs_queue_listener.start()
+
         with pytest.raises(ValueError, match="broken"):
             broken_context_with_hooks.run(
                 runner=ParallelRunner(max_workers=2), node_names=["node1", "node2"]
@@ -507,8 +532,11 @@ class TestKedroContextHooks:
             expected_error = ValueError("broken")
             assert_exceptions_equal(call_record.error, expected_error)
 
+    @pytest.mark.skipif(
+        sys.platform.startswith("win"), reason="Due to bug in parallel runner"
+    )
     def test_before_and_after_node_run_hooks_are_called_with_parallel_runner(
-        self, context_with_hooks, dummy_dataframe, logs_queue
+        self, tmp_path, mocker, logging_hooks, dummy_dataframe
     ):
         log_records = []
 
@@ -516,7 +544,12 @@ class TestKedroContextHooks:
             def handle(self, record):
                 log_records.append(record)
 
-        logs_queue_listener = QueueListener(logs_queue, LogHandler())
+        context_with_hooks = _create_context_with_hooks(tmp_path, mocker, logging_hooks)
+        mocker.patch(
+            "kedro.framework.context.context.load_context",
+            return_value=context_with_hooks,
+        )
+        logs_queue_listener = QueueListener(logging_hooks.queue, LogHandler())
         logs_queue_listener.start()
         context_with_hooks.catalog.save("cars", dummy_dataframe)
         context_with_hooks.catalog.save("boats", dummy_dataframe)

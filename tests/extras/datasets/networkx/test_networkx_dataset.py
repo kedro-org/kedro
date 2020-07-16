@@ -50,7 +50,7 @@ ATTRS = {
 
 @pytest.fixture
 def filepath_json(tmp_path):
-    return str(tmp_path / "some_dir" / "test.json")
+    return (tmp_path / "some_dir" / "test.json").as_posix()
 
 
 @pytest.fixture

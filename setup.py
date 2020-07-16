@@ -66,7 +66,8 @@ with open(path.join(here, "README.md"), encoding="utf-8") as f:
     readme = f.read()
 
 doc_html_files = [
-    name.replace("kedro/", "", 1) for name in glob("kedro/html/**/*", recursive=True)
+    name.replace("kedro/", "", 1)
+    for name in glob("kedro/framework/html/**/*", recursive=True)
 ]
 
 template_files = []
@@ -103,9 +104,9 @@ pandas_require = {
 }
 pillow_require = {"pillow.ImageDataSet": ["Pillow~=7.1.2"]}
 spark_require = {
-    "spark.SparkDataSet": [PANDAS, HDFS, S3FS],
-    "spark.SparkHiveDataSet": [PANDAS, HDFS, S3FS],
-    "spark.SparkJDBCDataSet": [PANDAS, HDFS, S3FS],
+    "spark.SparkDataSet": [SPARK, HDFS, S3FS],
+    "spark.SparkHiveDataSet": [SPARK, HDFS, S3FS],
+    "spark.SparkJDBCDataSet": [SPARK, HDFS, S3FS],
 }
 tensorflow_required = {
     "tensorflow.TensorflowModelDataset": [

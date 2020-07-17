@@ -362,9 +362,13 @@ class TestKedroContextHooks:
         context_with_hooks._register_hooks()
         assert True  # if we get to this statement, it means the previous repeated calls don't raise
 
+    @pytest.mark.parametrize("num_plugins", [0, 2])
     def test_hooks_are_registered_when_context_is_created(
-        self, tmp_path, mocker, logging_hooks, hook_manager
+        self, tmp_path, mocker, logging_hooks, hook_manager, num_plugins, caplog,
     ):
+        load_setuptools_entrypoints = mocker.patch.object(
+            hook_manager, "load_setuptools_entrypoints", return_value=num_plugins,
+        )
         assert not hook_manager.is_registered(logging_hooks)
 
         # create the context
@@ -372,6 +376,12 @@ class TestKedroContextHooks:
 
         # assert hooks are registered after context is created
         assert hook_manager.is_registered(logging_hooks)
+        load_setuptools_entrypoints.assert_called_once_with("kedro.hooks")
+
+        if num_plugins:
+            log_messages = [record.getMessage() for record in caplog.records]
+            expected_msg = f"Registered hooks from {num_plugins} installed plugin(s)"
+            assert expected_msg in log_messages
 
     def test_after_catalog_created_hook_is_called(self, context_with_hooks, caplog):
         catalog = context_with_hooks.catalog

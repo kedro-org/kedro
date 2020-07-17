@@ -221,7 +221,7 @@ def create_new_env(context, env_name):
     env_path.mkdir()
 
     for config_name in ("catalog", "parameters", "credentials"):
-        path = env_path / "{}.yml".format(config_name)
+        path = env_path / f"{config_name}.yml"
         with path.open("w") as config_file:
             yaml.dump({}, config_file, default_flow_style=False)
 
@@ -263,6 +263,14 @@ def install_project_package_via_pip(context):
     dist_dir = context.root_project_dir / "src" / "dist"
     (whl_file,) = dist_dir.glob("*.whl")
     run([context.pip, "install", str(whl_file)], env=context.env)
+
+
+@given("I have installed the test plugin")
+def install_test_plugin(context):
+    """Install a python package using pip."""
+    plugin_dir = Path(__file__).parent / "test_plugin"
+    res = run([context.pip, "install", "-e", str(plugin_dir)], env=context.env)
+    assert res.returncode == OK_EXIT_CODE, res
 
 
 @given("I have initialized a git repository")
@@ -312,7 +320,7 @@ def add_proj_dir_to_staging(context):
 def commit_changes_to_git(context):
     """Commit changes to git"""
     with util.chdir(context.root_project_dir):
-        check_run("git commit -m 'Change {time}'".format(time=time()))
+        check_run(f"git commit -m 'Change {time()}'")
 
 
 @when('I execute the kedro command "{command}"')
@@ -436,9 +444,8 @@ def udpate_kedro_yml(context: behave.runner.Context, new_source_dir):
 
     kedro_yml_path = context.root_project_dir / ".kedro.yml"
     kedro_yml_path.write_text(
-        "context_path: {}.run.ProjectContext\nsource_dir: {}\n".format(
-            str(context.package_name), new_source_dir
-        )
+        f"context_path: {context.package_name}.run.ProjectContext\n"
+        f"source_dir: {new_source_dir}\n"
     )
 
 
@@ -448,7 +455,7 @@ def update_kedro_req(context: behave.runner.Context):
     that includes all of kedro's dependencies (-r kedro/requirements.txt)
     """
     reqs_path = context.root_project_dir / "src" / "requirements.txt"
-    kedro_reqs = "-r {}\n".format(context.requirements_path.as_posix())
+    kedro_reqs = f"-r {context.requirements_path.as_posix()}\n"
     kedro_with_pandas_reqs = kedro_reqs + "pandas\n"
 
     if reqs_path.is_file():
@@ -518,13 +525,13 @@ def check_pipeline_not_empty(context):
 
 @then("the console log should show that {number} nodes were run")
 def check_one_node_run(context, number):
-    expected_log_line = "Completed {number} out of {number} tasks".format(number=number)
+    expected_log_line = f"Completed {number} out of {number} tasks"
     assert expected_log_line in context.result.stdout
 
 
 @then('the console log should show that "{node}" was run')
 def check_correct_nodes_run(context, node):
-    expected_log_line = "Running node: {node}".format(node=node)
+    expected_log_line = f"Running node: {node}"
     assert expected_log_line in context.result.stdout
 
 
@@ -533,9 +540,11 @@ def check_status_code(context):
     if context.result.returncode != OK_EXIT_CODE:
         print(context.result.stdout)
         print(context.result.stderr)
-        assert False, "Expected exit code {} but got {}".format(
-            OK_EXIT_CODE, context.result.returncode
+
+        error_msg = (
+            f"Expected exit code {OK_EXIT_CODE} but got {context.result.returncode}"
         )
+        assert False, error_msg
 
 
 @then("I should get an error exit code")
@@ -543,9 +552,12 @@ def check_failed_status_code(context):
     if context.result.returncode == OK_EXIT_CODE:
         print(context.result.stdout)
         print(context.result.stderr)
-        assert False, "Expected exit code other than {} but got {}".format(
-            OK_EXIT_CODE, context.result.returncode
+
+        error_msg = (
+            f"Expected exit code other than {OK_EXIT_CODE} "
+            f"but got {context.result.returncode}"
         )
+        assert False, error_msg
 
 
 @then("the relevant packages should be created")
@@ -561,7 +573,7 @@ def check_python_packages_created(context):
 @then('"{env}" environment was used')
 def check_environment_used(context, env):
     env_path = context.root_project_dir / "conf" / env
-    assert env_path.exists(), 'Environment "{}" does not exist'.format(env)
+    assert env_path.exists(), f'Environment "{env}" does not exist'
 
     if isinstance(context.result, ChildTerminatingPopen):
         stdout = context.result.stdout.read().decode()
@@ -570,12 +582,12 @@ def check_environment_used(context, env):
         stdout = context.result.stdout
 
     for config_name in ("catalog", "parameters", "credentials"):
-        path = env_path.joinpath("{}.yml".format(config_name))
+        path = env_path.joinpath(f"{config_name}.yml")
         if path.exists():
-            msg = "Loading: {}".format(str(path.resolve()))
+            msg = f"Loading: {path.resolve()}"
             assert msg in stdout, (
                 "Expected the following message segment to be printed on stdout: "
-                "{0}, but got:\n{1}".format(msg, stdout)
+                f"{msg}, but got:\n{stdout}"
             )
 
 
@@ -591,7 +603,7 @@ def check_message_printed(context, msg):
 
     assert msg in stdout, (
         "Expected the following message segment to be printed on stdout: "
-        "{exp_msg},\nbut got {actual_msg}".format(exp_msg=msg, actual_msg=stdout)
+        f"{msg},\nbut got {stdout}"
     )
 
 
@@ -607,7 +619,7 @@ def check_error_message_printed(context, msg):
 
     assert msg in stderr, (
         "Expected the following message segment to be printed on stderr: "
-        "{exp_msg},\nbut got {actual_msg}".format(exp_msg=msg, actual_msg=stderr)
+        f"{msg},\nbut got {stderr}"
     )
 
 

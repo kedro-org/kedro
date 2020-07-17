@@ -37,6 +37,36 @@ Global commands use the `entry_point` key `kedro.global_commands`. Project comma
 
 We use the following command convention: `kedro <plugin-name> <command>`. With `kedro <plugin-name>` acting as a top-level command group. Note, this is a suggested way of structuring your plugin and is not necessary for your plugin to work.
 
+### Hooks
+
+You can develop hook implementations and have them automatically registered to the `KedroContext` when the plugin is installed. To enable this for your custom plugin, simply add the following entry in your `setup.py`:
+
+```python
+setup(
+    ...
+    entry_points={"kedro.hooks": ["plugin_name = plugin_name.plugin:hooks"]},
+)
+```
+
+where `plugin.py` is the module where you declare hook implementations:
+
+```python
+import logging
+
+from kedro.framework.hooks import hook_impl
+
+
+class MyHooks:
+    @hook_impl
+    def after_catalog_created(self, catalog):  # pylint: disable=unused-argument
+        logging.info("Reached after_catalog_created hook")
+
+
+hooks = MyHooks()
+```
+
+> Note: Here, `hooks` should be an instance of the class defining the hooks.
+
 ## Working with `click`
 
 Commands must be provided as [`click` `Groups`](https://click.palletsprojects.com/en/7.x/api/#click.Group)

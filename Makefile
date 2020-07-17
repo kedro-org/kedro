@@ -4,7 +4,7 @@ install: build-docs
 	pip install .
 
 clean:
-	rm -rf build dist docs/build kedro/html pip-wheel-metadata .mypy_cache .pytest_cache
+	rm -rf build dist docs/build kedro/html pip-wheel-metadata .mypy_cache .pytest_cache features/steps/test_plugin/test_plugin.egg-info
 	find . -regex ".*/__pycache__" -exec rm -rf {} +
 	find . -regex ".*\.egg-info" -exec rm -rf {} +
 	pre-commit clean || true

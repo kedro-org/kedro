@@ -94,7 +94,7 @@ exclude_patterns = [
     "README.md",
     "07_extend_kedro/02_transformers.md",
     "07_extend_kedro/03_decorators.md",
-    "11_faq/03_glossary.md"
+    "11_faq/03_glossary.md",
 ]
 
 # The name of the Pygments (syntax highlighting) style to use.

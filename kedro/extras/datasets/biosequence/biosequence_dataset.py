@@ -111,6 +111,9 @@ class BioSequenceDataSet(AbstractDataSet):
 
         self._filepath = PurePosixPath(path)
         self._protocol = protocol
+        if protocol == "file":
+            _fs_args.setdefault("auto_mkdir", True)
+
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
 
         # Handle default load and save arguments

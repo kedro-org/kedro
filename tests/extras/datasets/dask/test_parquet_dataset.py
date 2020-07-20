@@ -29,12 +29,12 @@
 # pylint: disable=no-member
 
 
+import boto3
 import dask.dataframe as dd
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
-import s3fs
 from moto import mock_s3
 from pandas.util.testing import assert_frame_equal
 from s3fs import S3FileSystem
@@ -44,9 +44,7 @@ from kedro.io import DataSetError
 
 FILE_NAME = "test.parquet"
 BUCKET_NAME = "test_bucket"
-AWS_CREDENTIALS = dict(
-    aws_access_key_id="FAKE_ACCESS_KEY", aws_secret_access_key="FAKE_SECRET_KEY"
-)
+AWS_CREDENTIALS = {"key": "FAKE_ACCESS_KEY", "secret": "FAKE_SECRET_KEY"}
 
 # Pathlib cannot be used since it strips out the second slash from "s3://"
 S3_PATH = "s3://{}/{}".format(BUCKET_NAME, FILE_NAME)
@@ -56,7 +54,7 @@ S3_PATH = "s3://{}/{}".format(BUCKET_NAME, FILE_NAME)
 def mocked_s3_bucket():
     """Create a bucket for testing using moto."""
     with mock_s3():
-        conn = s3fs.core.boto3.client("s3", **AWS_CREDENTIALS)
+        conn = boto3.client("s3")
         conn.create_bucket(Bucket=BUCKET_NAME)
         yield conn
 
@@ -87,7 +85,7 @@ def mocked_s3_object(tmp_path, mocked_s3_bucket, dummy_dd_dataframe: dd.DataFram
 def s3_data_set(load_args, save_args):
     return ParquetDataSet(
         filepath=S3_PATH,
-        credentials={"client_kwargs": AWS_CREDENTIALS},
+        credentials=AWS_CREDENTIALS,
         load_args=load_args,
         save_args=save_args,
     )
@@ -114,13 +112,10 @@ class TestParquetDataSet:
             ).load().compute()
 
     @pytest.mark.parametrize(
-        "bad_credentials",
-        [{"aws_access_key_id": None, "aws_secret_access_key": None}, {}, None],
+        "bad_credentials", [{"key": None, "secret": None}],
     )
     def test_empty_credentials_load(self, bad_credentials):
-        parquet_data_set = ParquetDataSet(
-            filepath=S3_PATH, credentials={"client_kwargs": bad_credentials}
-        )
+        parquet_data_set = ParquetDataSet(filepath=S3_PATH, credentials=bad_credentials)
         pattern = r"Failed while loading data from data set ParquetDataSet\(.+\)"
         with pytest.raises(DataSetError, match=pattern):
             parquet_data_set.load().compute()
@@ -128,19 +123,17 @@ class TestParquetDataSet:
     def test_pass_credentials(self, mocker):
         """Test that AWS credentials are passed successfully into boto3
         client instantiation on creating S3 connection."""
-        mocker.patch("s3fs.core.boto3.Session.client")
-        s3_data_set = ParquetDataSet(
-            filepath=S3_PATH, credentials={"client_kwargs": AWS_CREDENTIALS}
-        )
+        client_mock = mocker.patch("botocore.session.Session.create_client")
+        s3_data_set = ParquetDataSet(filepath=S3_PATH, credentials=AWS_CREDENTIALS)
         pattern = r"Failed while loading data from data set ParquetDataSet\(.+\)"
         with pytest.raises(DataSetError, match=pattern):
             s3_data_set.load().compute()
 
-        assert s3fs.core.boto3.Session.client.call_count == 1
-        args, kwargs = s3fs.core.boto3.Session.client.call_args_list[0]
+        assert client_mock.call_count == 1
+        args, kwargs = client_mock.call_args_list[0]
         assert args == ("s3",)
-        for k, v in AWS_CREDENTIALS.items():
-            assert kwargs[k] == v
+        assert kwargs["aws_access_key_id"] == AWS_CREDENTIALS["key"]
+        assert kwargs["aws_secret_access_key"] == AWS_CREDENTIALS["secret"]
 
     @pytest.mark.usefixtures("mocked_s3_bucket")
     def test_save_data(self, s3_data_set):

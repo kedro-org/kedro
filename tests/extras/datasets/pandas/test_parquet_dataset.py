@@ -80,7 +80,7 @@ class TestParquetDataSet:
 
         ParquetDataSet(filepath=FILENAME, credentials=credentials)
 
-        mock_fs.assert_called_once_with("file", **credentials)
+        mock_fs.assert_called_once_with("file", auto_mkdir=True, **credentials)
 
     def test_save_and_load(self, tmp_path, dummy_dataframe):
         """Test saving and reloading the data set."""

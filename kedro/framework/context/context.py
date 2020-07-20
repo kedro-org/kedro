@@ -53,6 +53,8 @@ from kedro.runner.sequential_runner import SequentialRunner
 from kedro.utils import load_obj
 from kedro.versioning import Journal
 
+_PLUGIN_HOOKS = "kedro.hooks"  # entry-point to load hooks from for installed plugins
+
 
 def _version_mismatch_error(context_version) -> str:
     return (
@@ -250,7 +252,7 @@ class KedroContext(abc.ABC):
         self._setup_logging()
 
         # setup hooks
-        self._register_hooks()
+        self._register_hooks(auto=True)
 
     @property
     @abc.abstractmethod
@@ -311,10 +313,20 @@ class KedroContext(abc.ABC):
         """
         return self._get_pipelines()
 
-    def _register_hooks(self) -> None:
-        """Register all hooks as specified in ``hooks`` with the global ``hook_manager``.
+    def _register_hooks(self, auto: bool = False) -> None:
+        """Register all hooks as specified in ``hooks`` with the global ``hook_manager``,
+        and, optionally, from installed plugins.
+
+        Args:
+            auto: An optional flag to enable auto-discovery and registration of plugin hooks.
         """
         self._hook_manager = get_hook_manager()
+
+        if auto:
+            found = self._hook_manager.load_setuptools_entrypoints(_PLUGIN_HOOKS)
+            if found:
+                logging.info("Registered hooks from %d installed plugin(s)", found)
+
         for hooks_collection in self.hooks:
             # Sometimes users might create more than one context instance, in which case
             # hooks have already been registered, so we perform a simple check here

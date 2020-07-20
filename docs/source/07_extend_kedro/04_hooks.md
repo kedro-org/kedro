@@ -79,7 +79,7 @@ class TransformerHooks:
 > * To declare a Hook implementation, use the `@hook_impl` decorator
 > * You only need to make use of a subset of arguments defined in the corresponding specification
 > * Group related Hook implementations under a namespace, preferably a class
-> * You can register more than one implementations for the same specification. They will be called in FIFO (first-in, first-out) order.
+> * You can register more than one implementations for the same specification. They will be called in LIFO (last-in, first-out) order.
 
 
 #### Registering your Hook implementations with Kedro
@@ -108,6 +108,10 @@ class ProjectContext(KedroContext):
 ```
 
 This ensures that the `after_data_catalog_created` implementation above will be called automatically after every time a data catalog is created.
+
+Kedro also has auto-discovery on by default, meaning that any installed plugins that declare a hooks entry-point will be registered. To learn more about how to enable this for your custom plugin, see our [plugin development guide](05_plugins.md#Hooks).
+
+>Note: Auto-discovered hooks will run *after* the ones specified in ``ProjectContext.hooks``.
 
 ## Under the hood
 

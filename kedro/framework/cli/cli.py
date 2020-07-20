@@ -134,7 +134,7 @@ def info():
         click.echo("Installed plugins:")
         for plugin_name, plugin_version in sorted(plugin_versions.items()):
             hooks = ",".join(sorted(plugin_hooks[plugin_name]))
-            click.echo("{}: {} (hooks:{})".format(plugin_name, plugin_version, hooks))
+            click.echo(f"{plugin_name}: {plugin_version} (hooks:{hooks})")
     else:
         click.echo("No plugins installed")
 
@@ -693,7 +693,7 @@ def _init_plugins():
             init_hook = entry_point.load()
             init_hook()
         except Exception:  # pylint: disable=broad-except
-            _handle_exception("Initializing {}".format(str(entry_point)), end=False)
+            _handle_exception(f"Initializing {entry_point}", end=False)
 
 
 def main():  # pragma: no cover

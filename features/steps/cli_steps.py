@@ -455,16 +455,13 @@ def update_kedro_req(context: behave.runner.Context):
     that includes all of kedro's dependencies (-r kedro/requirements.txt)
     """
     reqs_path = context.root_project_dir / "src" / "requirements.txt"
-    kedro_reqs = f"-r {context.requirements_path.as_posix()}\n"
-    kedro_with_pandas_reqs = kedro_reqs + "pandas\n"
+    kedro_reqs = f"-r {context.requirements_path.as_posix()}"
 
     if reqs_path.is_file():
         old_reqs = reqs_path.read_text().splitlines()
         new_reqs = []
         for req in old_reqs:
-            if req.startswith("kedro[pandas.CSVDataSet]=="):
-                new_reqs.append(kedro_with_pandas_reqs)
-            elif req.startswith("kedro=="):
+            if req.startswith("kedro=="):
                 new_reqs.append(kedro_reqs)
             else:
                 new_reqs.append(req)

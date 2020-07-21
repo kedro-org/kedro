@@ -222,7 +222,7 @@ commands:
           name: Install dependencies
           command: |
             conda activate kedro_builder
-            cat *requirements.txt | Select-String -Pattern behave,virtualenv-clone,psutil,requests[^\-],^pandas[^\-],cachetools,toposort,yaml | %{ $_ -Replace  "#.*", "" } > e2e.txt
+            cat *requirements.txt | Select-String -Pattern behave,psutil,requests[^\-],^pandas[^\-],cachetools,toposort,yaml | %{ $_ -Replace  "#.*", "" } > e2e.txt
             pip install -r e2e.txt
             choco install make
       - run:
@@ -463,3 +463,6 @@ workflows:
             - win_unit_tests_36
             - win_unit_tests_37
             - win_unit_tests_38
+            - win_e2e_tests_36
+            - win_e2e_tests_37
+            - win_e2e_tests_38

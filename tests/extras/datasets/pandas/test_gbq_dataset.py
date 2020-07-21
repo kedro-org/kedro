@@ -135,7 +135,6 @@ class TestGBQDataSet:
 
     def test_save_load_data(self, gbq_dataset, dummy_dataframe, mocker):
         """Test saving and reloading the data set."""
-        sql = "select * from {}.{}".format(DATASET, TABLE_NAME)
         table_id = "{}.{}".format(DATASET, TABLE_NAME)
         mocked_read_gbq = mocker.patch(
             "kedro.extras.datasets.pandas.gbq_dataset.pd.read_gbq"
@@ -150,7 +149,7 @@ class TestGBQDataSet:
             table_id, project_id=PROJECT, credentials=None, progress_bar=False
         )
         mocked_read_gbq.assert_called_once_with(
-            sql, project_id=PROJECT, credentials=None
+            project_id=PROJECT, credentials=None, **gbq_dataset._load_args
         )
         assert_frame_equal(dummy_dataframe, loaded_data)
 

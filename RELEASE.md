@@ -15,11 +15,12 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Modified `GBQTableDataSet` to load customized results using customized queries from Google Big Query tables.
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-
+[Ajay Bisht](https://github.com/ajb7)
 
 # Release 0.16.3
 

@@ -140,6 +140,7 @@ class GBQTableDataSet(AbstractDataSet):
         if "query" not in self._load_args:
             self._load_args["query"] = sql
 
+        self._load_args["query"] = str(self._load_args["query"])
         if self._load_args["query"].strip() == "":
             self._load_args["query"] = sql
 

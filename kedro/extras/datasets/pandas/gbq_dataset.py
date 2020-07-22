@@ -136,18 +136,12 @@ class GBQTableDataSet(AbstractDataSet):
         )
 
     def _load(self) -> pd.DataFrame:
+        sql = "select * from {}.{}".format(self._dataset, self._table_name)  # nosec
         if "query" not in self._load_args:
-            self._load_args["query"] = "select * from {}.{}".format(  # nosec
-                self._dataset, self._table_name
-            )
+            self._load_args["query"] = sql
 
         if self._load_args["query"].strip() == "":
-            raise DataSetError(
-                "`load_args['query']` cannot be blank. "
-                "The `query` defines the custom query to be executed in BigQuery, "
-                "therefore should have a value representing query. `query` argument"
-                " is optional and hence can be left out instead of keeping it blank."
-            )
+            self._load_args["query"] = sql
 
         return pd.read_gbq(
             project_id=self._project_id,

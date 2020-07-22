@@ -461,7 +461,7 @@ def update_kedro_req(context: behave.runner.Context):
         old_reqs = reqs_path.read_text().splitlines()
         new_reqs = []
         for req in old_reqs:
-            if req.startswith("kedro=="):
+            if req.startswith("kedro"):
                 new_reqs.append(kedro_reqs)
             else:
                 new_reqs.append(req)

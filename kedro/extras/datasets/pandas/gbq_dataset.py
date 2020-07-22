@@ -138,17 +138,17 @@ class GBQTableDataSet(AbstractDataSet):
     def _load(self) -> pd.DataFrame:
         sql = "select * from {}.{}".format(self._dataset, self._table_name)  # nosec
         if "query" not in self._load_args:
-            self._load_args["query"] = sql
+            self._load_args.update({"query": sql})
 
         self._load_args["query"] = str(self._load_args["query"])
-        if self._load_args["query"].strip() == "":
-            self._load_args["query"] = sql
-
-        return pd.read_gbq(
-            project_id=self._project_id,
-            credentials=self._credentials,
-            **self._load_args
-        )
+        try:
+            return pd.read_gbq(
+                project_id=self._project_id,
+                credentials=self._credentials,
+                **self._load_args
+            )
+        except ValueError:
+            raise ValueError()
 
     def _save(self, data: pd.DataFrame) -> None:
         data.to_gbq(

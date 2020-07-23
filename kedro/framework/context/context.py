@@ -313,6 +313,24 @@ class KedroContext(abc.ABC):
         """
         return self._get_pipelines()
 
+    def _register_hooks_setuptools(self):
+        """Register pluggy hooks from setuptools entrypoints."""
+        already_registered = self._hook_manager.get_plugins()
+        found = self._hook_manager.load_setuptools_entrypoints(_PLUGIN_HOOKS)
+
+        if found:
+            plugininfo = self._hook_manager.list_plugin_distinfo()
+            plugin_names = sorted(
+                f"{dist.project_name}-{dist.version}"
+                for plugin, dist in plugininfo
+                if plugin not in already_registered
+            )
+            logging.info(
+                "Registered hooks from %d installed plugin(s): %s",
+                found,
+                ", ".join(plugin_names),
+            )
+
     def _register_hooks(self, auto: bool = False) -> None:
         """Register all hooks as specified in ``hooks`` with the global ``hook_manager``,
         and, optionally, from installed plugins.
@@ -323,9 +341,7 @@ class KedroContext(abc.ABC):
         self._hook_manager = get_hook_manager()
 
         if auto:
-            found = self._hook_manager.load_setuptools_entrypoints(_PLUGIN_HOOKS)
-            if found:
-                logging.info("Registered hooks from %d installed plugin(s)", found)
+            self._register_hooks_setuptools()
 
         for hooks_collection in self.hooks:
             # Sometimes users might create more than one context instance, in which case

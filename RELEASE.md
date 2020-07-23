@@ -19,7 +19,7 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-
+[Deepyaman Datta](https://github.com/deepyaman)
 
 # Release 0.16.3
 

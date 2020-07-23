@@ -293,7 +293,7 @@ class TestKedroContext:
 
     def test_get_catalog_validates_layers(self, dummy_context, mocker):
         mock_validate = mocker.patch(
-            "kedro.context.context._validate_layers_for_transcoding"
+            "kedro.framework.context.context._validate_layers_for_transcoding"
         )
 
         catalog = dummy_context._get_catalog()
@@ -706,7 +706,7 @@ class TestKedroContextRun:
         self, mocker, dummy_context, dummy_dataframe, extra_params
     ):
         mocker.patch("logging.config.dictConfig")
-        mock_journal = mocker.patch("kedro.context.context.Journal")
+        mock_journal = mocker.patch("kedro.framework.context.context.Journal")
         dummy_context.catalog.save("cars", dummy_dataframe)
         dummy_context.run()
 

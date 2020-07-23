@@ -10,7 +10,7 @@ In the next few chapters, you will learn how to [install Kedro](../02_get_starte
 
 Once you are set up, to get a feel for Kedro, we suggest working through our examples, including:
 
--   A typical "Hello World" example, for an [entry-level description of the main concepts](../02_get_started/04_hello_kedro.md)
+-   A typical "Hello World" example, for an [entry-level description of the main concepts](../02_get_started/03_hello_kedro.md)
 -   A first [example using the familiar Iris dataset](../02_get_started/05_example_project.md) to introduce the Kedro project template
 -   The more detailed ["spaceflights" tutorial](../03_tutorial/01_spaceflights_tutorial.md) to give you hands-on experience as you learn about Kedro
 

@@ -1,8 +1,6 @@
 # Use Kedro with IPython and Jupyter Notebooks/Lab
 
-> *Note:* This documentation is based on `Kedro 0.16.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
-
-This section follows the ["Hello World" example](../02_get_started/04_hello_kedro.md) and demonstrates how to effectively use IPython and Jupyter Notebooks / Lab.
+This section follows the [Iris dataset example](../02_get_started/05_example_project.md) and demonstrates how to effectively use IPython and Jupyter Notebooks / Lab.
 
 ## Startup script
 
@@ -90,7 +88,7 @@ kedro ipython
 
 ### Loading `DataCatalog` in IPython
 
-In accordance with the ["Hello World" example](../02_get_started/04_hello_kedro.md), you can load a dataset of [Iris test example](https://archive.ics.uci.edu/ml/datasets/iris) inside the IPython console, by simply executing the following:
+In accordance with the [Iris dataset example](../02_get_started/05_example_project.md), you can load a dataset of [Iris test example](https://archive.ics.uci.edu/ml/datasets/iris) inside the IPython console, by simply executing the following:
 
 ```python
 catalog.load("example_iris_data").head()

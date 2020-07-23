@@ -9,6 +9,7 @@
 * Bumped maximum supported `s3fs` version to 0.5 (`S3FileSystem` interface has changed since 0.4.1 version).
 * Deleted the deprecated `kedro.cli` and `kedro.context` modules in favor of `kedro.framework.cli` and `kedro.framework.context` respectively.
 * The pipeline-specific `catalog.yml` file is no longer automatically created for modular pipelines when doing `kedro pipeline create`.
+* Removed `include_examples` from `kedro new`. It has been replaced with Kedro starter.
 
 ## Thanks for supporting contributions
 

@@ -1,8 +1,10 @@
 # A "Hello World" example
 
-In this example, we introduce the most basic elements of a Kedro project with a small amount of code to illustrate them.
+It is time to introduce the most basic elements of Kedro. We have split a small example into pieces to discuss each of the concepts with code.
 
-You can copy the code in one chunk from the bottom of this page. We have split it into pieces in the following sections in order to discuss it step-by-step. You can also find the example code on the [`kedro-examples` Github repository](https://github.com/quantumblacklabs/kedro-examples).
+You can copy the example as one chunk of code from the bottom of this page, or find it on the [`kedro-examples` Github repository](https://github.com/quantumblacklabs/kedro-examples).
+
+> Note: We do not create a Kedro project in this first example, but illustrate the concepts within a single `.py` file.
 
 
 ## Node
@@ -65,6 +67,19 @@ data_catalog = DataCatalog({"example_data": MemoryDataSet()})
 
 Kedro provides a [number of different built-in datasets](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.html#data-sets) for different file types and file systems so you don’t have to write the logic for reading/writing data.
 
+
+## Runner
+
+The Runner is an object that runs the pipeline. Kedro resolves the order in which the nodes are executed:
+
+1.  Kedro first executes `return_greeting_node`.
+2.  The node runs `return_greeting`, which takes no input but outputs the string "Hello".
+3.  The output string is stored in the `MemoryDataSet` named `example_data` with the key `my_salutation`.
+4.  Kedro then executes the second node, `join_statements_node`.
+5.  The node loads `my_salutation` from `example_data` and injects it into the `join_statements` function.
+6.  The function joins the input salutation with "Kedro!" to form the output string "Hello Kedro!"
+7.  The output string is stored within `example_data` as `my_message`.
+
 ## Hello Kedro!
 
 It's now time to stitch the code together. Here is the full example:
@@ -106,15 +121,3 @@ runner = SequentialRunner()
 # Run the pipeline
 runner.run(pipeline, data_catalog)
 ```
-
-## Runner
-
-The Runner is an object that runs the pipeline. Kedro resolves the order in which the nodes are executed:
-
-1.  Kedro first executes `return_greeting_node`.
-2.  The node runs `return_greeting`, which takes no input but outputs the string "Hello".
-3.  The output string is stored in the `MemoryDataSet` named `example_data` with the key `my_salutation`.
-4.  Kedro then executes the second node, `join_statements_node`.
-5.  The node loads `my_salutation` from `example_data` and injects it into the `join_statements` function.
-6.  The function joins the input salutation with "Kedro!" to form the output string "Hello Kedro!"
-7.  The output string is stored within `example_data` as `my_message`.

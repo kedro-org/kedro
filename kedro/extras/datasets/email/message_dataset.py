@@ -26,16 +26,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``ExcelDataSet`` loads/saves data from/to a Excel file using an underlying
-filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Excel file.
+"""``MessageDataSet`` loads/saves an email message from/to a file
+using an underlying filesystem (e.g.: local, S3, GCS). It uses the
+``email`` package in the standard library to manage email messages.
 """
 from copy import deepcopy
-from io import BytesIO
+from email.generator import Generator
+from email.message import Message
+from email.parser import Parser
+from email.policy import default
 from pathlib import PurePosixPath
 from typing import Any, Dict
 
 import fsspec
-import pandas as pd
 
 from kedro.io.core import (
     AbstractVersionedDataSet,
@@ -46,63 +49,74 @@ from kedro.io.core import (
 )
 
 
-class ExcelDataSet(AbstractVersionedDataSet):
-    """``ExcelDataSet`` loads/saves data from/to a Excel file using an underlying
-    filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Excel file.
+class MessageDataSet(
+    AbstractVersionedDataSet
+):  # pylint: disable=too-many-instance-attributes
+    """``MessageDataSet`` loads/saves an email message from/to a file
+    using an underlying filesystem (e.g.: local, S3, GCS). It uses the
+    ``email`` package in the standard library to manage email messages.
 
     Example:
     ::
 
-        >>> from kedro.extras.datasets.pandas import ExcelDataSet
-        >>> import pandas as pd
+        >>> from email.message import EmailMessage
         >>>
-        >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
-        >>>                      'col3': [5, 6]})
+        >>> from kedro.extras.datasets.email import MessageDataSet
         >>>
-        >>> # data_set = ExcelDataSet(filepath="gcs://bucket/test.xlsx")
-        >>> data_set = ExcelDataSet(filepath="test.xlsx")
-        >>> data_set.save(data)
+        >>> string_to_write = "what would you do if you were invisable for one day????"
+        >>>
+        >>> # Create a text/plain message
+        >>> msg = EmailMessage()
+        >>> msg.set_content(string_to_write)
+        >>> msg["Subject"] = "invisibility"
+        >>> msg["From"] = '"sin studly17"'
+        >>> msg["To"] = '"strong bad"'
+        >>>
+        >>> # data_set = MessageDataSet(filepath="gcs://bucket/test")
+        >>> data_set = MessageDataSet(filepath="test")
+        >>> data_set.save(msg)
         >>> reloaded = data_set.load()
-        >>> assert data.equals(reloaded)
+        >>> assert msg.__dict__ == reloaded.__dict__
 
     """
 
-    DEFAULT_LOAD_ARGS = {"engine": "xlrd"}
-    DEFAULT_SAVE_ARGS = {"index": False}
+    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
     # pylint: disable=too-many-arguments
     def __init__(
         self,
         filepath: str,
-        engine: str = "xlsxwriter",
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``ExcelDataSet`` pointing to a concrete Excel file
+        """Creates a new instance of ``MessageDataSet`` pointing to a concrete text file
         on a specific filesystem.
 
         Args:
-            filepath: Filepath in POSIX format to a Excel file prefixed with a protocol like
-                `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be used.
+            filepath: Filepath in POSIX format to a text file prefixed with a protocol like `s3://`.
+                If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.
-            engine: The engine used to write to excel files. The default
-                engine is 'xlsxwriter'.
-            load_args: Pandas options for loading Excel files.
-                Here you can find all available arguments:
-                https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_excel.html
-                All defaults are preserved, but "engine", which is set to "xlrd".
-            save_args: Pandas options for saving Excel files.
-                Here you can find all available arguments:
-                https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_excel.html
-                All defaults are preserved, but "index", which is set to False.
-                If you would like to specify options for the `ExcelWriter`,
-                you can include them under the "writer" key. Here you can
+            load_args: ``email`` options for parsing email messages (arguments passed
+                into ``email.parser.Parser.parse``). Here you can find all available arguments:
+                https://docs.python.org/3/library/email.parser.html#email.parser.Parser.parse
+                If you would like to specify options for the `Parser`,
+                you can include them under the "parser" key. Here you can
                 find all available arguments:
-                https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.ExcelWriter.html
+                https://docs.python.org/3/library/email.parser.html#email.parser.Parser
+                All defaults are preserved, but "policy", which is set to ``email.policy.default``.
+            save_args: ``email`` options for generating MIME documents (arguments passed into
+                ``email.generator.Generator.flatten``). Here you can find all available arguments:
+                https://docs.python.org/3/library/email.generator.html#email.generator.Generator.flatten
+                If you would like to specify options for the `Generator`,
+                you can include them under the "generator" key. Here you can
+                find all available arguments:
+                https://docs.python.org/3/library/email.generator.html#email.generator.Generator
+                All defaults are preserved.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -115,7 +129,8 @@ class ExcelDataSet(AbstractVersionedDataSet):
                 `open_args_load` and `open_args_save`.
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
-                All defaults are preserved, except `mode`, which is set to `wb` when saving.
+                All defaults are preserved, except `mode`, which is set to `r` when loading
+                and to `w` when saving.
         """
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
@@ -136,18 +151,22 @@ class ExcelDataSet(AbstractVersionedDataSet):
 
         # Handle default load arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
+        self._parser_args = {"policy": default}  # type: Dict[str, Any]
         if load_args is not None:
+            parser_args = load_args.pop("parser", {})  # type: Dict[str, Any]
+            self._parser_args.update(parser_args)
             self._load_args.update(load_args)
 
         # Handle default save arguments
         self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        self._writer_args = {"engine": engine}  # type: Dict[str, Any]
+        self._generator_args = {}  # type: Dict[str, Any]
         if save_args is not None:
-            writer_args = save_args.pop("writer", {})  # type: Dict[str, Any]
-            self._writer_args.update(writer_args)
+            generator_args = save_args.pop("generator", {})  # type: Dict[str, Any]
+            self._generator_args.update(generator_args)
             self._save_args.update(save_args)
 
-        _fs_open_args_save.setdefault("mode", "wb")
+        _fs_open_args_load.setdefault("mode", "r")
+        _fs_open_args_save.setdefault("mode", "w")
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
 
@@ -156,27 +175,23 @@ class ExcelDataSet(AbstractVersionedDataSet):
             filepath=self._filepath,
             protocol=self._protocol,
             load_args=self._load_args,
+            parser_args=self._parser_args,
             save_args=self._save_args,
-            writer_args=self._writer_args,
+            generator_args=self._generator_args,
             version=self._version,
         )
 
-    def _load(self) -> pd.DataFrame:
+    def _load(self) -> Message:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
-            return pd.read_excel(fs_file, **self._load_args)
+            return Parser(**self._parser_args).parse(fs_file, **self._load_args)
 
-    def _save(self, data: pd.DataFrame) -> None:
-        output = BytesIO()
+    def _save(self, data: Message) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
-        # pylint: disable=abstract-class-instantiated
-        with pd.ExcelWriter(output, **self._writer_args) as writer:
-            data.to_excel(writer, **self._save_args)
-
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
-            fs_file.write(output.getvalue())
+            Generator(fs_file, **self._generator_args).flatten(data, **self._save_args)
 
         self._invalidate_cache()
 

@@ -314,28 +314,43 @@ class KedroContext(abc.ABC):
         """
         return self._get_pipelines()
 
+    def _register_hooks_setuptools(self):
+        """Register pluggy hooks from setuptools entrypoints."""
+        already_registered = self._hook_manager.get_plugins()
+        found = self._hook_manager.load_setuptools_entrypoints(_PLUGIN_HOOKS)
+
+        if found:  # pragma: no cover
+            plugininfo = self._hook_manager.list_plugin_distinfo()
+            plugin_names = sorted(
+                f"{dist.project_name}-{dist.version}"
+                for plugin, dist in plugininfo
+                if plugin not in already_registered
+            )
+            logging.info(
+                "Registered hooks from %d installed plugin(s): %s",
+                found,
+                ", ".join(plugin_names),
+            )
+
     def _register_hooks(self, auto: bool = False) -> None:
-        """Register all hooks as specified in ``hooks`` with the global ``hook_manager``,
-        and, optionally, from installed plugins.
+        """Register all hooks as specified in ``hooks`` with the global
+        ``hook_manager``, and, optionally, from installed plugins.
 
         Args:
-            auto: An optional flag to enable auto-discovery and registration of plugin hooks.
+            auto: An optional flag to enable auto-discovery and registration
+                of plugin hooks.
         """
         self._hook_manager = get_hook_manager()
 
         if auto:
-            found = self._hook_manager.load_setuptools_entrypoints(_PLUGIN_HOOKS)
-            if found:  # pragma: no cover
-                logging.info("Registered hooks from %d installed plugin(s)", found)
+            self._register_hooks_setuptools()
 
-        for hooks_collection in self.hooks:
+        for hooks_collection in self.hooks:  # pragma: no cover
             # Sometimes users might create more than one context instance, in which case
             # hooks have already been registered, so we perform a simple check here
             # to avoid an error being raised and break user's workflow.
-            if not self._hook_manager.is_registered(
-                hooks_collection
-            ):  # pragma: no cover
-                self._hook_manager.register(hooks_collection)  # pragma: no cover
+            if not self._hook_manager.is_registered(hooks_collection):
+                self._hook_manager.register(hooks_collection)
 
     def _get_pipeline(self, name: str = None) -> Pipeline:
         name = name or "__default__"

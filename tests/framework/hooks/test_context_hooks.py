@@ -380,7 +380,7 @@ class TestKedroContextHooks:
 
         if num_plugins:
             log_messages = [record.getMessage() for record in caplog.records]
-            expected_msg = f"Registered hooks from {num_plugins} installed plugin(s)"
+            expected_msg = f"Registered hooks from {num_plugins} installed plugin(s): "
             assert expected_msg in log_messages
 
     def test_after_catalog_created_hook_is_called(self, context_with_hooks, caplog):

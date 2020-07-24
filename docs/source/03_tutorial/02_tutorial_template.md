@@ -10,7 +10,7 @@ In this section, we discuss the project set-up phase, which is the first part of
 
 ## Create a new project
 
-Navigate to your chosen working directory and run the following to [create a new project using the interactive prompts](../02_get_started/03_new_project.md):
+Navigate to your chosen working directory and run the following to [create a new blank Kedro project](../02_get_started/04_new_project.md) using the default interactive prompts:
 
 ```bash
 kedro new
@@ -19,8 +19,6 @@ kedro new
 Feel free to name your project as you like, but this guide will assume the project is named **`Kedro Tutorial`**.
 
 Keep the default names for the `repo_name` and `python_package` when prompted.
-
-Choose `N` at the final prompt, so you create a project template _without_ the Iris dataset example.
 
 ## Install project dependencies
 

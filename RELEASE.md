@@ -9,6 +9,12 @@
 ## Thanks for supporting contributions
 
 # Upcoming 0.16.4 release
+* Added the following new datasets.
+
+| Type             | Description                                                                                             | Location                      |
+| ---------------- | ------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| `MessageDataSet` | Manage email messages using [the Python standard library](https://docs.python.org/3/library/email.html) | `kedro.extras.datasets.email` |
+
 * Fixed a bug for using `ParallelRunner` on Windows.
 * Enabled auto-discovery of hooks implementations coming from installed plugins.
 
@@ -19,7 +25,7 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-
+[Deepyaman Datta](https://github.com/deepyaman)
 
 # Release 0.16.3
 
@@ -28,7 +34,11 @@
 * Added the `--version` option to `kedro pipeline package` to allow specifying alternative versions to package under.
 * Added the `--starter` option to `kedro new` to create a new project from a local, remote or aliased starter template.
 * Added the `kedro starter list` CLI command to list all starter templates that can be used to bootstrap a new Kedro project.
-* Added `json.JSONDataSet`
+* Added the following new datasets.
+
+| Type          | Description                                                                                           | Location                     |
+| ------------- | ----------------------------------------------------------------------------------------------------- | ---------------------------- |
+| `JSONDataSet` | Work with JSON files using [the Python standard library](https://docs.python.org/3/library/json.html) | `kedro.extras.datasets.json` |
 
 ## Bug fixes and other changes
 * Removed `/src/nodes` directory from the project template and made `kedro jupyter convert` create it on the fly if necessary.
@@ -55,11 +65,11 @@
 ## Major features and improvements
 * Added the following new datasets.
 
-| Type                                | Description                                                                                                           | Location                           |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| `pandas.AppendableExcelDataSet`     | Works with `Excel` file opened in append mode                                                                         | `kedro.extras.datasets.pandas`     |
-| `tensorflow.TensorFlowModelDataset` | Works with `TensorFlow` models using [TensorFlow 2.X](https://www.tensorflow.org/api_docs/python/tf/keras/Model#save) | `kedro.extras.datasets.tensorflow` |
-| `holoviews.HoloviewsWriter`         | Works with `Holoviews` objects (saves as image file)                                                                  | `kedro.extras.datasets.holoviews`  |
+| Type                     | Description                                                                                                          | Location                           |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| `AppendableExcelDataSet` | Work with `Excel` files opened in append mode                                                                        | `kedro.extras.datasets.pandas`     |
+| `TensorFlowModelDataset` | Work with `TensorFlow` models using [TensorFlow 2.X](https://www.tensorflow.org/api_docs/python/tf/keras/Model#save) | `kedro.extras.datasets.tensorflow` |
+| `HoloviewsWriter`        | Work with `Holoviews` objects (saves as image file)                                                                  | `kedro.extras.datasets.holoviews`  |
 
 * `kedro install` will now compile project dependencies (by running `kedro build-reqs` behind the scenes) before the installation if the `src/requirements.in` file doesn't exist.
 * Added `only_nodes_with_namespace` in `Pipeline` class to filter only nodes with a specified namespace.
@@ -131,11 +141,11 @@ Even though this release ships a fix for project generated with `kedro==0.16.2`,
 ### DataSets
 * Added the following new datasets.
 
-| Type                       | Description                                 | Location                                         |
-| -------------------------- | ------------------------------------------- | ------------------------------------------------ |
-| `pillow.ImageDataSet`      | Work with image files using `Pillow`        | `kedro.extras.datasets.pillow`                   |
-| `geopandas.GeoJSONDataSet` | Work with geospatial data using `GeoPandas` | `kedro.extras.datasets.geopandas.GeoJSONDataSet` |
-| `api.APIDataSet`           | Work with data from HTTP(S) API requests    | `kedro.extras.datasets.api.APIDataSet`           |
+| Type             | Description                                 | Location                          |
+| ---------------- | ------------------------------------------- | --------------------------------- |
+| `ImageDataSet`   | Work with image files using `Pillow`        | `kedro.extras.datasets.pillow`    |
+| `GeoJSONDataSet` | Work with geospatial data using `GeoPandas` | `kedro.extras.datasets.geopandas` |
+| `APIDataSet`     | Work with data from HTTP(S) API requests    | `kedro.extras.datasets.api`       |
 
 * Added `joblib` backend support to `pickle.PickleDataSet`.
 * Added versioning support to `MatplotlibWriter` dataset.

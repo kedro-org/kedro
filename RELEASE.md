@@ -20,7 +20,7 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Vijay Sajjanar](https://github.com/vjkr), [Deepyaman Datta](https://github.com/deepyaman)
+[Vijay Sajjanar](https://github.com/vjkr), [Deepyaman Datta](https://github.com/deepyaman), [Sebastian Bertoli](https://github.com/sebastianbertoli)
 
 # Release 0.16.3
 

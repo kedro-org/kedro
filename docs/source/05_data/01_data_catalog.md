@@ -12,7 +12,7 @@ Kedro uses configuration to make your code reproducible when it has to reference
 
 You can copy this file and reference additional locations for the same datasets. For instance, you can use the `catalog.yml` file in `conf/base/` to register the locations of datasets that would run in production while copying and updating a second version of `catalog.yml` that can be placed in `conf/local/` to register the locations of sample datasets on the local computer that you are using for prototyping your data pipeline.
 
-There is built-in functionality for `conf/local/` to overwrite `conf/base/` detailed [here](../04_kedro_project_setup/02_configuration.md). This means that a dataset called `cars` could exist in the `catalog.yml` files in `conf/base/` and `code/local/`. In code, in `src`, you would only call a dataset named `cars` and Kedro would detect which definition of `cars` dataset to use to run your pipeline - `cars` definition from `code/local/catalog.yml` would take precedence in this case.
+There is built-in functionality for `conf/local/` to overwrite `conf/base/` detailed [here](../04_kedro_project_setup/02_configuration.md). This means that a dataset called `cars` could exist in the `catalog.yml` files in `conf/base/` and `conf/local/`. In code, in `src`, you would only call a dataset named `cars` and Kedro would detect which definition of `cars` dataset to use to run your pipeline - `cars` definition from `conf/local/catalog.yml` would take precedence in this case.
 
 The Data Catalog also works with the `credentials.yml` in `conf/local/`, allowing you to specify usernames and passwords that are required to load certain datasets.
 
@@ -23,7 +23,7 @@ The are two ways of defining a Data Catalog through the use of YAML configuratio
  - Location of the dataset using `fsspec`, detailed in the next section
  - Credentials needed in order to access the dataset
  - Load and saving arguments
- - Whether or not you want a [dataset or ML model to be versioned](./08_advanced_io.md#versioning) when you run your data pipeline
+ - Whether or not you want a [dataset or ML model to be versioned](02_kedro_io.md#versioning) when you run your data pipeline
 
 ## Specifying the location of the dataset
 
@@ -503,7 +503,7 @@ kedro run --load-version="cars.csv:YYYY-MM-DDThh.mm.ss.sssZ"
 ```
 where `--load-version` is dataset name and version timestamp separated by `:`.
 
-This section shows just the very basics of versioning. You can learn more about how this feature can be used in [Advanced IO](./08_advanced_io.md#versioning).
+This section shows just the very basics of versioning. You can learn more about how this feature can be used in [Kedro IO](02_kedro_io.md#versioning).
 
 ## Using the Data Catalog with the Code API
 

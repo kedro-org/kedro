@@ -15,11 +15,12 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Documentation improvements
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Deepyaman Datta](https://github.com/deepyaman)
+[Vijay Sajjanar](https://github.com/vjkr), [Deepyaman Datta](https://github.com/deepyaman)
 
 # Release 0.16.3
 

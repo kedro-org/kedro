@@ -57,10 +57,7 @@ def run(
         "chmod 754 local/file"
 
     Returns:
-        Result with attributes args, returncode, stdout and
-        stderr. By default, stdout and stderr are not captured, and those
-        attributes will be None. Pass stdout=PIPE and/or stderr=PIPE in order
-        to capture them.
+        Result with attributes args, returncode, stdout and stderr.
 
     """
     if isinstance(cmd, str) and split:

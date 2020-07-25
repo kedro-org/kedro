@@ -77,7 +77,7 @@ We recommend using Kedro's built-in Spark datasets to load raw data into Spark's
 * [spark.SparkJDBCDataSet](/kedro.extras.datasets.spark.SparkJDBCDataSet)
 * [spark.SparkHiveDataSet](/kedro.extras.datasets.spark.SparkHiveDataSet)
 
-The example below illustrates how to use `spark.SparkDataSet` to read a CSV file located in S3 into a `DataFrame` in `<projec-namet>/conf/base/catalog.yml`:
+The example below illustrates how to use `spark.SparkDataSet` to read a CSV file located in S3 into a `DataFrame` in `<projec-name>/conf/base/catalog.yml`:
 
 ```yaml
 weather:

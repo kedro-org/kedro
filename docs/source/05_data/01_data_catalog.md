@@ -503,7 +503,7 @@ kedro run --load-version="cars.csv:YYYY-MM-DDThh.mm.ss.sssZ"
 ```
 where `--load-version` is dataset name and version timestamp separated by `:`.
 
-This section shows just the very basics of versioning. You can learn more about how this feature can be used in [Advanced IO](./08_advanced_io.md#versioning).
+This section shows just the very basics of versioning. You can learn more about how this feature can be used in [Kedro IO](02_kedro_io.md#versioning).
 
 ## Using the Data Catalog with the Code API
 

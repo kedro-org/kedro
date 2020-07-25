@@ -26,7 +26,7 @@ kedro info
 
 You should see an ASCII art graphic and the Kedro version number. For example:
 
-![Kedro ASCII graphic](../meta/images/kedro_graphic.png)
+![](../meta/images/kedro_graphic.png)
 
 If you do not see the graphic displayed, or have any issues with your installation, see the [frequently asked questions](../11_faq/01_faq.md) or Kedro community support on [Stack Overflow](https://stackoverflow.com/questions/tagged/kedro).
 

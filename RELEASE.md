@@ -15,11 +15,12 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Documentation improvements
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-
+[Vijay Sajjanar](https://github.com/vjkr)
 
 # Release 0.16.3
 

@@ -83,6 +83,7 @@ The Runner is an object that runs the pipeline. Kedro resolves the order in whic
 It's now time to stitch the code together. Here is the full example:
 
 ```python
+"""Content of hello_kedro.py"""
 from kedro.io import DataCatalog, MemoryDataSet
 from kedro.pipeline import node, Pipeline
 from kedro.runner import SequentialRunner
@@ -117,5 +118,12 @@ pipeline = Pipeline([return_greeting_node, join_statements_node])
 runner = SequentialRunner()
 
 # Run the pipeline
-runner.run(pipeline, data_catalog)
+print(runner.run(pipeline, data_catalog))
+```
+
+Then open a terminal and run the following command:
+
+```sh
+> python hello_kedro.py
+{'my_message': 'Hello Kedro!'}
 ```

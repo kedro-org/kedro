@@ -140,7 +140,7 @@ Small contributions are accepted for the `core` library:
 2. Create a feature branch on your forked repository and push all your local changes to that feature branch. Your feature branch should branch off from:
    a. `master` if you intend for it to be a non-breaking, backwards-compatible change.
    b. `develop` if you intend for it to be a breaking change
-3. Before submitting a pull request (PR), please ensure that unit, end-to-end tests and linting are passing for your changes by running `maketest`, `make e2e-tests` and `make lint` locally, have a look at the section [Running checks locally](/CONTRIBUTING.md#running-checks-locally)below.
+3. Before submitting a pull request (PR), please ensure that unit, end-to-end tests and linting are passing for your changes by running `make test`, `make e2e-tests` and `make lint` locally, have a look at the section [Running checks locally](/CONTRIBUTING.md#running-checks-locally)below.
 4. Determine if your change is [backwards compatible](#Backwards_compatibility):
    a. For backwards compatible changes, open a PR against the `quantumblacklabs:master` branch from your feature branch.
    b. For changes that are NOT backwards compatible, open a PR against the `quantumblacklabs:develop` branch from your feature branch.

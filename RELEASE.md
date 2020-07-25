@@ -11,15 +11,16 @@
 # Upcoming 0.16.4 release
 * Fixed a bug for using `ParallelRunner` on Windows.
 * Enabled auto-discovery of hooks implementations coming from installed plugins.
-* Removed image description text
+
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Documentation improvements
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-https://github.com/vjkr
+[Vijay Sajjanar](https://github.com/vjkr)
 
 # Release 0.16.3
 

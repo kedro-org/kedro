@@ -254,13 +254,13 @@ This is the reason why Kedro provides a built-in [PartitionedDataSet](/kedro.io.
 # conf/base/catalog.yml
 
 my_partitioned_dataset:
-  type: "PartitionedDataSet"
-  path: "s3://my-bucket-name/path/to/folder"  # path to the location of partitions
-  dataset: "pandas.CSVDataSet"  # shorthand notation for the dataset which will handle individual partitions
-  credentials: "my_credentials"
+  type: PartitionedDataSet
+  path: s3://my-bucket-name/path/to/folder  # path to the location of partitions
+  dataset: pandas.CSVDataSet  # shorthand notation for the dataset which will handle individual partitions
+  credentials: my_credentials
   load_args:
-    load_arg1: "value1"
-    load_arg2: "value2"
+    load_arg1: value1
+    load_arg2: value2
 ```
 
 > Note: As any other dataset `PartitionedDataSet` can also be instantiated programmatically in Python:
@@ -285,19 +285,19 @@ Alternatively, if you need more granular configuration of the underlying dataset
 # conf/base/catalog.yml
 
 my_partitioned_dataset:
-  type: "PartitionedDataSet"
-  path: "s3://my-bucket-name/path/to/folder"
+  type: PartitionedDataSet
+  path: s3://my-bucket-name/path/to/folder
   dataset:  # full dataset config notation
-    type: "pandas.CSVDataSet"
+    type: pandas.CSVDataSet
     load_args:
       delimiter: ","
     save_args:
       index: false
-  credentials: "my_credentials"
+  credentials: my_credentials
   load_args:
-    load_arg1: "value1"
-    load_arg2: "value2"
-  filepath_arg: "filepath"  # the argument of the dataset to pass the filepath to
+    load_arg1: value1
+    load_arg2: value2
+  filepath_arg: filepath  # the argument of the dataset to pass the filepath to
   filename_suffix: ".csv"
 ```
 

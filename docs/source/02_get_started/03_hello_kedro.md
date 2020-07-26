@@ -124,6 +124,7 @@ print(runner.run(pipeline, data_catalog))
 Then open a terminal and run the following command:
 
 ```sh
-> python hello_kedro.py
-{'my_message': 'Hello Kedro!'}
+python hello_kedro.py
 ```
+
+You should see `{'my_message': 'Hello Kedro!'}` printed to the console.

@@ -14,7 +14,7 @@ However, you may prefer to get up and running more swiftly so we provide the ful
 
 When building a Kedro project, you will typically follow a standard development workflow:
 
-![Graphic for a typical Kedro project development workflow](../meta/images/typical_workflow.png)
+![](../meta/images/typical_workflow.png)
 
 ### 1. Set up the project template
 

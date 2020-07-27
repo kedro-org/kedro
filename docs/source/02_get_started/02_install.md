@@ -32,4 +32,4 @@ If you do not see the graphic displayed, or have any issues with your installati
 
 ## Install a development version
 
-You can try out a development version of Kedro direct from the [Kedro Github repository](https://github.com/quantumblacklabs/kedro) by following [these steps](../11_faq/01_faq.md#how-can-i-use-development-version-of-kedro).
+You can try out a development version of Kedro direct from the [Kedro Github repository](https://github.com/quantumblacklabs/kedro) by following [these steps](../11_faq/01_faq.md#how-can-i-use-a-development-version-of-kedro).

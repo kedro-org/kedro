@@ -117,9 +117,6 @@ from kedro_tutorial.pipelines.data_engineering.nodes import (
 )
 ```
 
-
-
-
 ### Update the project pipeline
 
 Next, update the project's pipeline in `src/kedro_tutorial/pipeline.py` to add the data engineering pipeline:

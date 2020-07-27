@@ -254,13 +254,13 @@ This is the reason why Kedro provides a built-in [PartitionedDataSet](/kedro.io.
 # conf/base/catalog.yml
 
 my_partitioned_dataset:
-  type: "PartitionedDataSet"
-  path: "s3://my-bucket-name/path/to/folder"  # path to the location of partitions
-  dataset: "pandas.CSVDataSet"  # shorthand notation for the dataset which will handle individual partitions
-  credentials: "my_credentials"
+  type: PartitionedDataSet
+  path: s3://my-bucket-name/path/to/folder  # path to the location of partitions
+  dataset: pandas.CSVDataSet  # shorthand notation for the dataset which will handle individual partitions
+  credentials: my_credentials
   load_args:
-    load_arg1: "value1"
-    load_arg2: "value2"
+    load_arg1: value1
+    load_arg2: value2
 ```
 
 > Note: As any other dataset `PartitionedDataSet` can also be instantiated programmatically in Python:
@@ -285,19 +285,19 @@ Alternatively, if you need more granular configuration of the underlying dataset
 # conf/base/catalog.yml
 
 my_partitioned_dataset:
-  type: "PartitionedDataSet"
-  path: "s3://my-bucket-name/path/to/folder"
+  type: PartitionedDataSet
+  path: s3://my-bucket-name/path/to/folder
   dataset:  # full dataset config notation
-    type: "pandas.CSVDataSet"
+    type: pandas.CSVDataSet
     load_args:
       delimiter: ","
     save_args:
       index: false
-  credentials: "my_credentials"
+  credentials: my_credentials
   load_args:
-    load_arg1: "value1"
-    load_arg2: "value2"
-  filepath_arg: "filepath"  # the argument of the dataset to pass the filepath to
+    load_arg1: value1
+    load_arg2: value2
+  filepath_arg: filepath  # the argument of the dataset to pass the filepath to
   filename_suffix: ".csv"
 ```
 
@@ -413,9 +413,9 @@ As you can see from the example above, on load `PartitionedDataSet` _does not_ a
 
 > *Note:* Partition ID _does not_ represent the whole partition path, but only a part of it that is unique for a given partition _and_ filename suffix:
 >
-> Example 1: if `path="s3://my-bucket-name/folder"` and partition is stored in `s3://my-bucket-name/folder/2019-12-04/data.csv` then its Partition ID is `2019-12-04/data.csv`.
+> Example 1: if `path=s3://my-bucket-name/folder` and partition is stored in `s3://my-bucket-name/folder/2019-12-04/data.csv` then its Partition ID is `2019-12-04/data.csv`.
 >
-> Example 2: if `path="s3://my-bucket-name/folder"` and `filename_suffix=".csv"` and partition is stored in `s3://my-bucket-name/folder/2019-12-04/data.csv` then its Partition ID is `2019-12-04/data`.
+> Example 2: if `path=s3://my-bucket-name/folder` and `filename_suffix=".csv"` and partition is stored in `s3://my-bucket-name/folder/2019-12-04/data.csv` then its Partition ID is `2019-12-04/data`.
 
 > *Note:* `PartitionedDataSet` implements caching on load operation, which means that if multiple nodes consume the same `PartitionedDataSet`, they will all receive the same partition dictionary even if some new partitions were added to the folder after the first load has been completed. This is done deliberately to guarantee the consistency of load operations between the nodes and avoid race conditions. You can reset the cache by calling `release()` method of the partitioned dataset object.
 
@@ -427,9 +427,9 @@ As you can see from the example above, on load `PartitionedDataSet` _does not_ a
 # conf/base/catalog.yml
 
 new_partitioned_dataset:
-  type: "PartitionedDataSet"
-  path: "s3://my-bucket-name"
-  dataset: "pandas.CSVDataSet"
+  type: PartitionedDataSet
+  path: s3://my-bucket-name
+  dataset: pandas.CSVDataSet
   filename_suffix: ".csv"
 ```
 
@@ -542,12 +542,12 @@ Here are 2 important notes about the confirmation operation:
 
 ```yaml
 my_partitioned_dataset:
-  type: "IncrementalDataSet"
-  path: "s3://my-bucket-name/path/to/folder"
-  dataset: "pandas.CSVDataSet"
+  type: IncrementalDataSet
+  path: s3://my-bucket-name/path/to/folder
+  dataset: pandas.CSVDataSet
   checkpoint:
     # update the filepath and load_args, but keep the dataset type unchanged
-    filepath: "gcs://other-bucket/CHECKPOINT"
+    filepath: gcs://other-bucket/CHECKPOINT
     load_args:
       k1: v1
 ```
@@ -559,40 +559,40 @@ Along with the standard dataset attributes, `checkpoint` config also accepts 2 s
 
 ```yaml
 my_partitioned_dataset:
-  type: "IncrementalDataSet"
-  path: "s3://my-bucket-name/path/to/folder"
-  dataset: "pandas.CSVDataSet"
+  type: IncrementalDataSet
+  path: s3://my-bucket-name/path/to/folder
+  dataset: pandas.CSVDataSet
   checkpoint:
-    comparison_func: "my_module.path.to.custom_comparison_function"  # the path must be importable
+    comparison_func: my_module.path.to.custom_comparison_function  # the path must be importable
 ```
 
 * `force_checkpoint` - if set, partitioned dataset will use this value as the checkpoint instead of loading the corresponding checkpoint file. This might be useful if you need to rollback the processing steps and reprocess some (or all) of the available partitions. See the example config forcing the checkpoint value:
 
 ```yaml
 my_partitioned_dataset:
-  type: "IncrementalDataSet"
-  path: "s3://my-bucket-name/path/to/folder"
-  dataset: "pandas.CSVDataSet"
+  type: IncrementalDataSet
+  path: s3://my-bucket-name/path/to/folder
+  dataset: pandas.CSVDataSet
   checkpoint:
-    force_checkpoint: "2020-01-01/data.csv"
+    force_checkpoint: 2020-01-01/data.csv
 ```
 
 > *Note:* Specification of `force_checkpoint` is also supported via the shorthand notation as follows:
 
 ```yaml
 my_partitioned_dataset:
-  type: "IncrementalDataSet"
-  path: "s3://my-bucket-name/path/to/folder"
-  dataset: "pandas.CSVDataSet"
-  checkpoint: "2020-01-01/data.csv"
+  type: IncrementalDataSet
+  path: s3://my-bucket-name/path/to/folder
+  dataset: pandas.CSVDataSet
+  checkpoint: 2020-01-01/data.csv
 ```
 
 > *Note:* If you need to force the partitioned dataset to load all available partitions, set `checkpoint` to an empty string:
 
 ```yaml
 my_partitioned_dataset:
-  type: "IncrementalDataSet"
-  path: "s3://my-bucket-name/path/to/folder"
-  dataset: "pandas.CSVDataSet"
+  type: IncrementalDataSet
+  path: s3://my-bucket-name/path/to/folder
+  dataset: pandas.CSVDataSet
   checkpoint: ""
 ```

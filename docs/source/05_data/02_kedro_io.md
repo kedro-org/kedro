@@ -293,7 +293,7 @@ my_partitioned_dataset:
       delimiter: ","
     save_args:
       index: false
-  credentials: my_credential
+  credentials: my_credentials
   load_args:
     load_arg1: value1
     load_arg2: value2

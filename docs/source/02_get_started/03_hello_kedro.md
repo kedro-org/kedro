@@ -123,7 +123,7 @@ print(runner.run(pipeline, data_catalog))
 
 Then open a terminal and run the following command:
 
-```sh
+```bash
 python hello_kedro.py
 ```
 

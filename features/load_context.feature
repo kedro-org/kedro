@@ -50,5 +50,5 @@ Feature: Custom Kedro project
         Given I have installed the test plugin
         When I execute the kedro command "run"
         Then I should get a successful exit code
-        And I should get a message including "Registered hooks from 1 installed plugin(s)"
+        And I should get a message including "Registered hooks from 1 installed plugin(s): test-plugin-0.1"
         And I should get a message including "Reached after_catalog_created hook"

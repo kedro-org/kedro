@@ -560,7 +560,7 @@ The following steps happened behind the scenes when `load` was called:
 - The `load` method of this dataset was called
 - This `load` method delegated the loading to the underlying pandas `read_csv` function
 
-#### Viewing the available data sources
+### Viewing the available data sources
 
 If you forget what data was assigned, you can always review the `DataCatalog`.
 

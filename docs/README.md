@@ -57,17 +57,23 @@ Please follow these simple rules. Where it's not obvious what the style should b
   * For example: "The configuration steps should be completed." will also read OK as "The configuration should be completed BY ZOMBIES". Instead, you'd write "You should complete the configuration steps" or simply "Complete the configuration steps".
 
 
-## How do I build your documentation?
+## How do I build the Kedro documentation?
 
-If you have installed Kedro, the documentation can be found by running `kedro docs` from the command line or following [this link](https://kedro.readthedocs.io/en/stable/).
+If you have installed Kedro, you can build the documentation by running the following from the command line:
 
-If you make changes to our documentation, which is stored in the `docs/` folder of your Kedro installation, you can rebuild them within a Unix-like environment (with `pandoc` installed) with:
+```bash
+kedro docs
+```
+
+The resulting HTML files can be found in `docs/build/html/`.
+
+You can also find the [Kedro documentation online](https://kedro.readthedocs.io/en/stable/).
+
+If you make changes to the markdown for the Kedro documentation, which is stored in the `docs/` folder of the Kedro repository, you can rebuild it within a Unix-like environment (with `pandoc` installed) from the top-level Kedro installation folder:
 
 ```bash
 make build-docs
 ```
-
-We use the [Sphinx](https://www.sphinx-doc.org) framework to build our documentation. The resulting HTML files can be found in `docs/build/html/`.
 
 If you are a Windows user, you can still contribute to the documentation, but you cannot rebuild it. This is fine! As long as you have made an effort to verify that your Markdown is rendering correctly, and you have followed our basic guidelines above, we will be happy to take your final draft as a pull request and rebuild it for you.
 

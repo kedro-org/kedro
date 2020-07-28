@@ -48,8 +48,8 @@ Welcome to Kedro's documentation!
 
    02_get_started/01_prerequisites
    02_get_started/02_install
-   02_get_started/03_new_project
-   02_get_started/04_hello_kedro
+   02_get_started/03_hello_kedro
+   02_get_started/04_new_project
    02_get_started/05_example_project
    02_get_started/06_starters
 

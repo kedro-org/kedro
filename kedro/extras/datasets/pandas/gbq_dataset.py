@@ -137,8 +137,8 @@ class GBQTableDataSet(AbstractDataSet):
 
     def _load(self) -> pd.DataFrame:
         sql = "select * from {}.{}".format(self._dataset, self._table_name)  # nosec
+        self._load_args.setdefault("query", sql)
         return pd.read_gbq(
-            sql,
             project_id=self._project_id,
             credentials=self._credentials,
             **self._load_args

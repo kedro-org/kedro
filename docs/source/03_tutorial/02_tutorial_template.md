@@ -10,7 +10,7 @@ In this section, we discuss the project set-up phase, which is the first part of
 
 ## Create a new project
 
-Navigate to your chosen working directory and run the following to [create a new project using the interactive prompts](../02_get_started/03_new_project.md):
+Navigate to your chosen working directory and run the following to [create a new project using the interactive prompts](../02_get_started/04_new_project.md):
 
 ```bash
 kedro new
@@ -71,7 +71,7 @@ You need to configure the credentials within your project's `conf` folder:
 * Move `credentials.yml` from `conf/base/` to `conf/local/`. To do this in the terminal, type the following from within the project's root directory:
 
 ```bash
-mv ./conf/base/credentials.yml ./conf/local/`.
+mv conf/base/credentials.yml conf/local/
 ```
 
 * You may optionally add in any credentials to `conf/local/credentials.yml` that you would need to load specific data sources like usernames and passwords. Some examples are given within the file to illustrate how you store credentials. Additional information can be found in the [advanced documentation on configuration](../04_kedro_project_setup/02_configuration.md).

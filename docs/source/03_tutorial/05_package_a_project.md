@@ -10,6 +10,7 @@ The `build-docs` command creates documentation based on the code structure of yo
 
 Kedro uses the [Sphinx](https://www.sphinx-doc.org) framework, so if you want to customise your documentation, please refer to `docs/source/conf.py` and the [corresponding section of the Sphinx documentation](http://www.sphinx-doc.org/en/master/usage/configuration.html).
 
+
 ## Package your project
 
 To package your project, run the following in your project's root directory:

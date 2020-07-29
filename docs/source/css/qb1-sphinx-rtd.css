@@ -108,7 +108,7 @@ body.wy-body-for-nav {
 .wy-body-for-nav .wy-menu-vertical {
     width: 300px;
     margin: 0;
-    padding: 0 20px;
+    padding: 0px 20px 64px 20px;
     overflow-y: auto;
     height: 100%;
 }

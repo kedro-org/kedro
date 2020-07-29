@@ -133,7 +133,7 @@ def _setup_kedro_install_venv(context):
             "pip",
             "install",
             "-U",
-            "pip>=20.0",
+            "pip>=20.0,<20.2",
             "setuptools>=38.0",
             "wheel",
         ],

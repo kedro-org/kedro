@@ -8,7 +8,7 @@ This section covers the third part of the [standard development workflow](./01_s
 
 ## Data engineering pipeline
 
-You previously registered the raw datasets for your Kedro project, so you can now create nodes to pre-process two of the datasets ([companies.csv](https://github.com/quantumblacklabs/kedro/tree/develop/docs/source/03_tutorial/data/companies.csv) and [shuttles.xlsx](https://github.com/quantumblacklabs/kedro/tree/develop/docs/source/03_tutorial/data/shuttles.xlsx) to prepare the data for modelling.
+You previously registered the raw datasets for your Kedro project, so you can now create nodes to pre-process two of the datasets ([companies.csv](https://github.com/quantumblacklabs/kedro-examples/blob/master/kedro-tutorial/data/01_raw/companies.csv) and [shuttles.xlsx](https://github.com/quantumblacklabs/kedro-examples/blob/master/kedro-tutorial/data/01_raw/shuttles.xlsx) to prepare the data for modelling.
 
 ### Node functions
 

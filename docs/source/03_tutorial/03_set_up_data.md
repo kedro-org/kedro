@@ -27,11 +27,11 @@ Using [cURL in a Unix terminal](https://curl.haxx.se/download.html):
 
 ```bash
 # reviews
-curl -o data/01_raw/reviews.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/reviews.csv
+curl -o data/01_raw/reviews.csv https://raw.githubusercontent.com/quantumblacklabs/kedro-examples/master/kedro-tutorial/data/01_raw/reviews.csv
 # companies
-curl -o data/01_raw/companies.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/companies.csv
+curl -o data/01_raw/companies.csv https://raw.githubusercontent.com/quantumblacklabs/kedro-examples/master/kedro-tutorial/data/01_raw/companies.csv
 # shuttles
-curl -o data/01_raw/shuttles.xlsx https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/shuttles.xlsx
+curl -o data/01_raw/shuttles.xlsx https://raw.githubusercontent.com/quantumblacklabs/kedro-examples/master/kedro-tutorial/data/01_raw/shuttles.xlsx
 ```
 </details>
 
@@ -41,9 +41,9 @@ Using [cURL for Windows](https://curl.haxx.se/windows/):
 <summary><b>Click to expand</b></summary>
 
 ```bat
-curl -o data\01_raw\reviews.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/reviews.csv
-curl -o data\01_raw\companies.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/companies.csv
-curl -o data\01_raw\shuttles.xlsx https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/shuttles.xlsx
+curl -o data\01_raw\reviews.csv https://raw.githubusercontent.com/quantumblacklabs/kedro-examples/master/kedro-tutorial/data/01_raw/reviews.csv
+curl -o data\01_raw\companies.csv https://raw.githubusercontent.com/quantumblacklabs/kedro-examples/master/kedro-tutorial/data/01_raw/companies.csv
+curl -o data\01_raw\shuttles.xlsx https://raw.githubusercontent.com/quantumblacklabs/kedro-examples/master/kedro-tutorial/data/01_raw/shuttles.xlsx
 ```
 </details>
 
@@ -54,11 +54,11 @@ Using [Wget in a Unix terminal](https://www.gnu.org/software/wget/):
 
 ```bash
 # reviews
-wget -O data/01_raw/reviews.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/reviews.csv
+wget -O data/01_raw/reviews.csv https://raw.githubusercontent.com/quantumblacklabs/kedro-examples/master/kedro-tutorial/data/01_raw/reviews.csv
 # companies
-wget -O data/01_raw/companies.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/companies.csv
+wget -O data/01_raw/companies.csv https://raw.githubusercontent.com/quantumblacklabs/kedro-examples/master/kedro-tutorial/data/01_raw/companies.csv
 # shuttles
-wget -O data/01_raw/shuttles.xlsx https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/shuttles.xlsx
+wget -O data/01_raw/shuttles.xlsx https://raw.githubusercontent.com/quantumblacklabs/kedro-examples/master/kedro-tutorial/data/01_raw/shuttles.xlsx
 ```
 </details>
 
@@ -68,9 +68,9 @@ Using [Wget for Windows](https://eternallybored.org/misc/wget/):
 <summary><b>Click to expand</b></summary>
 
 ```bat
-wget -O data\01_raw\reviews.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/reviews.csv
-wget -O data\01_raw\companies.csv https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/companies.csv
-wget -O data\01_raw\shuttles.xlsx https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/docs/source/03_tutorial/data/shuttles.xlsx
+wget -O data\01_raw\reviews.csv https://raw.githubusercontent.com/quantumblacklabs/kedro-examples/master/kedro-tutorial/data/01_raw/reviews.csv
+wget -O data\01_raw\companies.csv https://raw.githubusercontent.com/quantumblacklabs/kedro-examples/master/kedro-tutorial/data/01_raw/companies.csv
+wget -O data\01_raw\shuttles.xlsx https://raw.githubusercontent.com/quantumblacklabs/kedro-examples/master/kedro-tutorial/data/01_raw/shuttles.xlsx
 ```
 </details>
 

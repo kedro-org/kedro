@@ -16,6 +16,7 @@
 ## Bug fixes and other changes
 * Fixed a bug for using `ParallelRunner` on Windows.
 * Modified `GBQTableDataSet` to load customized results using customized queries from Google Big Query tables.
+* Added option to run asynchronously via the Kedro CLI.
 * Documentation improvements.
 
 ## Breaking changes to the API

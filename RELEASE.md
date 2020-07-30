@@ -8,7 +8,7 @@
 
 ## Thanks for supporting contributions
 
-# Upcoming 0.16.4 release
+# Release 0.16.4
 
 ## Major features and improvements
 * Added the following new datasets.
@@ -21,8 +21,9 @@
 * Enabled auto-discovery of hooks implementations coming from installed plugins.
 
 ## Bug fixes and other changes
+* Fixed a bug for using `ParallelRunner` on Windows.
 * Modified `GBQTableDataSet` to load customized results using customized queries from Google Big Query tables.
-* Documentation improvements
+* Documentation improvements.
 
 ## Breaking changes to the API
 

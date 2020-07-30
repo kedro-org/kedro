@@ -1,6 +1,6 @@
 # The Data Catalog
 
-> *Note:* This documentation is based on `Kedro 0.16.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 This section introduces `catalog.yml`, the project-shareable Data Catalog. The file is located in `conf/base` and is a registry of all data sources available for use by a project; it manages loading and saving of data.
 
@@ -12,7 +12,7 @@ Kedro uses configuration to make your code reproducible when it has to reference
 
 You can copy this file and reference additional locations for the same datasets. For instance, you can use the `catalog.yml` file in `conf/base/` to register the locations of datasets that would run in production while copying and updating a second version of `catalog.yml` that can be placed in `conf/local/` to register the locations of sample datasets on the local computer that you are using for prototyping your data pipeline.
 
-There is built-in functionality for `conf/local/` to overwrite `conf/base/` detailed [here](../04_kedro_project_setup/02_configuration.md). This means that a dataset called `cars` could exist in the `catalog.yml` files in `conf/base/` and `code/local/`. In code, in `src`, you would only call a dataset named `cars` and Kedro would detect which definition of `cars` dataset to use to run your pipeline - `cars` definition from `code/local/catalog.yml` would take precedence in this case.
+There is built-in functionality for `conf/local/` to overwrite `conf/base/` detailed [here](../04_kedro_project_setup/02_configuration.md). This means that a dataset called `cars` could exist in the `catalog.yml` files in `conf/base/` and `conf/local/`. In code, in `src`, you would only call a dataset named `cars` and Kedro would detect which definition of `cars` dataset to use to run your pipeline - `cars` definition from `conf/local/catalog.yml` would take precedence in this case.
 
 The Data Catalog also works with the `credentials.yml` in `conf/local/`, allowing you to specify usernames and passwords that are required to load certain datasets.
 
@@ -23,7 +23,7 @@ The are two ways of defining a Data Catalog through the use of YAML configuratio
  - Location of the dataset using `fsspec`, detailed in the next section
  - Credentials needed in order to access the dataset
  - Load and saving arguments
- - Whether or not you want a [dataset or ML model to be versioned](./08_advanced_io.md#versioning) when you run your data pipeline
+ - Whether or not you want a [dataset or ML model to be versioned](02_kedro_io.md#versioning) when you run your data pipeline
 
 ## Specifying the location of the dataset
 
@@ -503,15 +503,15 @@ kedro run --load-version="cars.csv:YYYY-MM-DDThh.mm.ss.sssZ"
 ```
 where `--load-version` is dataset name and version timestamp separated by `:`.
 
-This section shows just the very basics of versioning. You can learn more about how this feature can be used in [Advanced IO](./08_advanced_io.md#versioning).
+This section shows just the very basics of versioning. You can learn more about how this feature can be used in [Kedro IO](02_kedro_io.md#versioning).
 
 ## Using the Data Catalog with the Code API
 
 The code API allows you to configure data sources in code. This can also be used to operate the IO module within notebooks.
 
-## Configuring a Data Catalog
+### Configuring a Data Catalog
 
-In a file like `catalog.py`, you can generate the Data Catalog. This will allow everyone in the project to review all the available data sources. In the following, we are using the pre-built CSV loader, which is documented in the [API reference documentation](/kedro.extras.datasets)
+In a file like `catalog.py`, you can construct a `DataCatalog` object programmatically. In the following, we are using a number of pre-built data loaders documented in the [API reference documentation](/kedro.extras.datasets).
 
 ```python
 from kedro.io import DataCatalog
@@ -542,7 +542,7 @@ io = DataCatalog(
 
 > *Note:* When using `SQLTableDataSet` or `SQLQueryDataSet` you must provide a `con` key containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) database connection string. In the example above we pass it as part of `credentials` argument. Alternative to `credentials` would be to put `con` into `load_args` and `save_args` (`SQLTableDataSet` only).
 
-## Loading datasets
+### Loading datasets
 
 Each dataset can be accessed by its name.
 
@@ -551,7 +551,7 @@ cars = io.load("cars")  # data is now loaded as a DataFrame in 'cars'
 gear = cars["gear"].values
 ```
 
-### Behind the scenes
+#### Behind the scenes
 
 The following steps happened behind the scenes when `load` was called:
 
@@ -568,13 +568,13 @@ If you forget what data was assigned, you can always review the `DataCatalog`.
 io.list()
 ```
 
-## Saving data
+### Saving data
 
 Saving data can be completed with a similar API.
 
 > *Note:* This use is not recommended unless you are prototyping in notebooks.
 
-### Saving data to memory
+#### Saving data to memory
 
 ```python
 from kedro.io import MemoryDataSet
@@ -585,7 +585,7 @@ io.save("cars_cache", "Memory can store anything.")
 io.load("car_cache")
 ```
 
-### Saving data to a SQL database for querying
+#### Saving data to a SQL database for querying
 
 At this point we may want to put the data in a SQLite database to run queries on it. Let's use that to rank scooters by their mpg.
 
@@ -602,7 +602,7 @@ io.save("cars_table", cars)
 ranked = io.load("scooters_query")[["brand", "mpg"]]
 ```
 
-### Saving data in parquet
+#### Saving data in Parquet
 
 Finally we can save the processed data in Parquet format.
 

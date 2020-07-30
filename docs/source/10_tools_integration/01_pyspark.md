@@ -1,6 +1,6 @@
 # Build a Kedro pipeline with PySpark
 
-> *Note:* This documentation is based on `Kedro 0.16.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 This page outlines some best practices when building a Kedro pipeline with [`PySpark`](https://spark.apache.org/docs/latest/api/python/index.html). It assumes a basic understanding of both Kedro and `PySpark`.
 
@@ -60,7 +60,7 @@ class ProjectContext(KedroContext):
         return create_pipelines()
 
     project_name = "kedro"
-    project_version = "0.16.2"
+    project_version = "0.16.4"
 ```
 
 You should modify this code to adapt it to your cluster's setup, e.g. setting master to `yarn` if you are running Spark on [YARN](https://spark.apache.org/docs/latest/running-on-yarn.html).
@@ -77,7 +77,7 @@ We recommend using Kedro's built-in Spark datasets to load raw data into Spark's
 * [spark.SparkJDBCDataSet](/kedro.extras.datasets.spark.SparkJDBCDataSet)
 * [spark.SparkHiveDataSet](/kedro.extras.datasets.spark.SparkHiveDataSet)
 
-The example below illustrates how to use `spark.SparkDataSet` to read a CSV file located in S3 into a `DataFrame` in `<projec-namet>/conf/base/catalog.yml`:
+The example below illustrates how to use `spark.SparkDataSet` to read a CSV file located in S3 into a `DataFrame` in `<project-name>/conf/base/catalog.yml`:
 
 ```yaml
 weather:

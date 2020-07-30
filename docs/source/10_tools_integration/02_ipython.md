@@ -1,5 +1,7 @@
 # Use Kedro with IPython and Jupyter Notebooks/Lab
 
+> *Note:* This documentation is based on `Kedro 0.16.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+
 This section follows the [Iris dataset example](../02_get_started/05_example_project.md) and demonstrates how to effectively use IPython and Jupyter Notebooks / Lab.
 
 ## Startup script

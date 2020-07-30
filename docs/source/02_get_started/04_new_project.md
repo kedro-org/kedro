@@ -1,18 +1,10 @@
 # Create a new project
 
-In this guide, we explain how to create a new Kedro project.
+Once you have [installed Kedro](./02_install.md), you can create a new project by answering a series of questions, or by using settings recorded in a configuration file.
 
-> Note: We assume that you have [installed Kedro](../02_get_started/02_install.md).
+## Create a new project interactively
 
-You can create a blank Kedro project, or use a Kedro starter to provide a template to build upon, covered in more detail in the next example, based on the [Iris dataset](../02_get_started/05_example_project).
-
-## Create a new blank project
-
-You can create a new project in the console, either using the default and providing a set of variables when prompted, or by using a configuration file to provide the variables.
-
-### Create a new blank project interactively
-
-To create a new blank project in your current working directory:
+Create a new project in your current working directory:
 
 ```bash
 kedro new
@@ -21,34 +13,34 @@ kedro new
 You will be asked to enter each of the following variables in turn. Once you have entered text for the first option (the project's name), you will be offered a default choice for the other options:
 
 ```eval_rst
-+------------------------+---------------------+----------------------------------------------------+
-| Option                 | Example             | Description                                        |
-+========================+=====================+====================================================+
-| :code:`project_name`   | :code:`Get Started` | A human-readable name for your new project         |
-+------------------------+---------------------+----------------------------------------------------+
-| :code:`repo_name`      | :code:`get-started` | Directory that holds your project repository       |
-+------------------------+---------------------+----------------------------------------------------+
-| :code:`python_package` | :code:`get_started` | A name for the Python package name in your project |
-|                        |                     | (short, all-lowercase)                             |
-+------------------------+---------------------+----------------------------------------------------+
++------------------------+---------------------+----------------------------------------------------------------------------+
+| Option                 | Example             | Description                                                                |
++========================+=====================+============================================================================+
+| :code:`project_name`   | :code:`Get Started` | A human-readable name for your new project                                 |
++------------------------+---------------------+----------------------------------------------------------------------------+
+| :code:`repo_name`      | :code:`get-started` | Directory that holds your project repository                               |
++------------------------+---------------------+----------------------------------------------------------------------------+
+| :code:`python_package` | :code:`get_started` | A name for the Python package name in your project (short, all-lowercase)  |
++------------------------+---------------------+----------------------------------------------------------------------------+
+| :code:`include_example`| :code:`Y/n`         | Confirms or rejects the inclusion of the Iris example code                 |
+|                        |                     | Your new project template contains a small example if you enter :code:`Y`  |
++------------------------+---------------------+----------------------------------------------------------------------------+
+
 ```
+
 
 The output lists the directory in which to find the project.
 
-### Create a new blank project from a configuration file
+## Create a new project from a configuration file
 
-You can create a new blank project by providing the same variable via a configuration file `config.yml`:
-
-```bash
-kedro new --config config.yml
-```
-
-The configuration file must contain:
+You can create a new project from a configuration file if you prefer. The file must contain:
 
 -   `project_name`
 -   `repo_name`
 -   `python_package`
--   `output_dir` (the path in which to create the project directory)
+-   `include_example` (Boolean value) option to confirm or reject the inclusion of the [Iris example code](../02_get_started/05_example_project.md)
+
+The configuration file must also specify an `output_dir` for the path in which to create the project directory. This path can be set to `~` for your home directory, or `.` for the current working directory.
 
 Here is an example `config.yml`, which assumes that a directory named `~/code` already exists:
 
@@ -57,13 +49,25 @@ output_dir: ~/code
 project_name: Get Started
 repo_name: get-started
 python_package: get_started
+include_example: true
 ```
 
 `output_dir` can be set to `~` for home directory, or `.` for the current working directory.
 
+To create the new project:
 
-## Create a new project based on a Kedro starter
+```bash
+kedro new --config config.yml
+```
 
-Kedro starters are used to create template projects that contain code to run as-is, or to adapt and extend. The Kedro starter projects make a useful alternative to creating a blank project, particularly if you are new to Kedro and want a pre-populated example project to explore.
+## Initialise a `git` repository
 
-To create a new project using a Kedro starter, use the `--starter` flag with `kedro new`. The following page about the [Iris dataset example](./05_example_project.md) will walk you through the process, and we provide a guide on [how to create a project with a Kedro starter](./06_starters.md) for additional detail.
+Having created your new project, if you are using `git`, you may want to set up a new repository by calling:
+
+```bash
+git init
+```
+
+## Create a new project using starters
+
+Kedro supports using custom starter templates to create your project via the `--starter` flag. To learn more about this feature, please read the guide to [creating new projects with Kedro Starters](./06_starters.md).

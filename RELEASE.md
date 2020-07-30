@@ -13,18 +13,20 @@
 
 ## Thanks for supporting contributions
 
-# Upcoming 0.16.4 release
-* Fixed a bug for using `ParallelRunner` on Windows.
-* Enabled auto-discovery of hooks implementations coming from installed plugins.
+# Release 0.16.4
 
 ## Major features and improvements
+* Enabled auto-discovery of hooks implementations coming from installed plugins.
 
 ## Bug fixes and other changes
+* Fixed a bug for using `ParallelRunner` on Windows.
+* Modified `GBQTableDataSet` to load customized results using customized queries from Google Big Query tables.
+* Documentation improvements.
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-
+[Ajay Bisht](https://github.com/ajb7), [Vijay Sajjanar](https://github.com/vjkr), [Deepyaman Datta](https://github.com/deepyaman), [Sebastian Bertoli](https://github.com/sebastianbertoli), [Shahil Mawjee](https://github.com/s-mawjee), [Louis Guitton](https://github.com/louisguitton), [Emanuel Ferm](https://github.com/eferm)
 
 # Release 0.16.3
 

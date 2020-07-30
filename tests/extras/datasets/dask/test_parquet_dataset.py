@@ -111,9 +111,7 @@ class TestParquetDataSet:
                 },
             ).load().compute()
 
-    @pytest.mark.parametrize(
-        "bad_credentials", [{"key": None, "secret": None}],
-    )
+    @pytest.mark.parametrize("bad_credentials", [{"key": None, "secret": None}])
     def test_empty_credentials_load(self, bad_credentials):
         parquet_data_set = ParquetDataSet(filepath=S3_PATH, credentials=bad_credentials)
         pattern = r"Failed while loading data from data set ParquetDataSet\(.+\)"

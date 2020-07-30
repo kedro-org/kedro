@@ -62,6 +62,8 @@ This option cannot be used together with --parallel."""
 PARALLEL_ARG_HELP = """Run the pipeline using the `ParallelRunner`.
 If not specified, use the `SequentialRunner`. This flag cannot be used together
 with --runner."""
+ASYNC_ARG_HELP = """Load and save node inputs and outputs asynchronously
+with threads. If not specified, load and save datasets synchronously."""
 TAG_ARG_HELP = """Construct the pipeline using only nodes which have this tag
 attached. Option can be used multiple times, what results in a
 pipeline constructed from nodes having any of those tags."""
@@ -169,6 +171,9 @@ def cli():
     "--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP
 )
 @click.option("--parallel", "-p", is_flag=True, multiple=False, help=PARALLEL_ARG_HELP)
+@click.option(
+    "--async", "-a", "is_async", is_flag=True, multiple=False, help=ASYNC_ARG_HELP
+)
 @env_option
 @click.option("--tag", "-t", type=str, multiple=True, help=TAG_ARG_HELP)
 @click.option(
@@ -195,6 +200,7 @@ def run(
     env,
     parallel,
     runner,
+    is_async,
     node_names,
     to_nodes,
     from_nodes,
@@ -221,7 +227,7 @@ def run(
     context = load_context(Path.cwd(), env=env, extra_params=params)
     context.run(
         tags=tag,
-        runner=runner_class(),
+        runner=runner_class(is_async=is_async),
         node_names=node_names,
         from_nodes=from_nodes,
         to_nodes=to_nodes,

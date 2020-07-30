@@ -20,8 +20,6 @@ Feel free to name your project as you like, but this guide will assume the proje
 
 Keep the default names for the `repo_name` and `python_package` when prompted.
 
-Choose `N` at the final prompt, so you create a project template _without_ the Iris dataset example.
-
 ## Install project dependencies
 
 Up to this point, we haven't discussed project dependencies, so now is a good time to introduce them. Specifying a project's dependencies in Kedro makes it easier for others to run your project; it avoids version conflicts by use of the same Python packages.

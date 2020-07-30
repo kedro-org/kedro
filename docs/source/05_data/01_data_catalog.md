@@ -509,9 +509,9 @@ This section shows just the very basics of versioning. You can learn more about 
 
 The code API allows you to configure data sources in code. This can also be used to operate the IO module within notebooks.
 
-## Configuring a Data Catalog
+### Configuring a Data Catalog
 
-In a file like `catalog.py`, you can generate the Data Catalog. This will allow everyone in the project to review all the available data sources. In the following, we are using the pre-built CSV loader, which is documented in the [API reference documentation](/kedro.extras.datasets)
+In a file like `catalog.py`, you can construct a `DataCatalog` object programmatically. In the following, we are using a number of pre-built data loaders documented in the [API reference documentation](/kedro.extras.datasets).
 
 ```python
 from kedro.io import DataCatalog
@@ -542,7 +542,7 @@ io = DataCatalog(
 
 > *Note:* When using `SQLTableDataSet` or `SQLQueryDataSet` you must provide a `con` key containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) database connection string. In the example above we pass it as part of `credentials` argument. Alternative to `credentials` would be to put `con` into `load_args` and `save_args` (`SQLTableDataSet` only).
 
-## Loading datasets
+### Loading datasets
 
 Each dataset can be accessed by its name.
 
@@ -551,7 +551,7 @@ cars = io.load("cars")  # data is now loaded as a DataFrame in 'cars'
 gear = cars["gear"].values
 ```
 
-### Behind the scenes
+#### Behind the scenes
 
 The following steps happened behind the scenes when `load` was called:
 
@@ -568,13 +568,13 @@ If you forget what data was assigned, you can always review the `DataCatalog`.
 io.list()
 ```
 
-## Saving data
+### Saving data
 
 Saving data can be completed with a similar API.
 
 > *Note:* This use is not recommended unless you are prototyping in notebooks.
 
-### Saving data to memory
+#### Saving data to memory
 
 ```python
 from kedro.io import MemoryDataSet
@@ -585,7 +585,7 @@ io.save("cars_cache", "Memory can store anything.")
 io.load("car_cache")
 ```
 
-### Saving data to a SQL database for querying
+#### Saving data to a SQL database for querying
 
 At this point we may want to put the data in a SQLite database to run queries on it. Let's use that to rank scooters by their mpg.
 
@@ -602,7 +602,7 @@ io.save("cars_table", cars)
 ranked = io.load("scooters_query")[["brand", "mpg"]]
 ```
 
-### Saving data in parquet
+#### Saving data in Parquet
 
 Finally we can save the processed data in Parquet format.
 

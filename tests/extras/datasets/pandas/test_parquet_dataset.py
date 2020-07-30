@@ -40,14 +40,14 @@ from s3fs.core import S3FileSystem
 
 from kedro.extras.datasets.pandas import ParquetDataSet
 from kedro.io import DataSetError
-from kedro.io.core import Version
+from kedro.io.core import PROTOCOL_DELIMITER, Version
 
 FILENAME = "test.parquet"
 
 
 @pytest.fixture
 def filepath_parquet(tmp_path):
-    return str(tmp_path / FILENAME)
+    return (tmp_path / FILENAME).as_posix()
 
 
 @pytest.fixture
@@ -84,7 +84,7 @@ class TestParquetDataSet:
 
     def test_save_and_load(self, tmp_path, dummy_dataframe):
         """Test saving and reloading the data set."""
-        filepath = str(tmp_path / FILENAME)
+        filepath = (tmp_path / FILENAME).as_posix()
         data_set = ParquetDataSet(filepath=filepath)
         data_set.save(dummy_dataframe)
         reloaded = data_set.load()
@@ -147,11 +147,7 @@ class TestParquetDataSet:
         data_set = ParquetDataSet(filepath=filepath)
         assert isinstance(data_set._fs, instance_type)
 
-        # _strip_protocol() doesn't strip http(s) protocol
-        if data_set._protocol == "https":
-            path = filepath.split("://")[-1]
-        else:
-            path = data_set._fs._strip_protocol(filepath)
+        path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
 
         assert str(data_set._filepath) == path
         assert isinstance(data_set._filepath, PurePosixPath)
@@ -174,7 +170,7 @@ class TestParquetDataSet:
             "pyarrow.parquet.ParquetDataset", wraps=pq.ParquetDataset
         )
         dummy_dataframe.to_parquet(str(tmp_path), partition_cols=["col2"])
-        data_set = ParquetDataSet(filepath=str(tmp_path))
+        data_set = ParquetDataSet(filepath=tmp_path.as_posix())
 
         reloaded = data_set.load()
         # Sort by columns because reading partitioned file results
@@ -187,7 +183,7 @@ class TestParquetDataSet:
         pq_ds_mock.assert_called_once()
 
     def test_write_to_dir(self, dummy_dataframe, tmp_path):
-        data_set = ParquetDataSet(filepath=str(tmp_path))
+        data_set = ParquetDataSet(filepath=tmp_path.as_posix())
         pattern = "Saving ParquetDataSet to a directory is not supported"
 
         with pytest.raises(DataSetError, match=pattern):

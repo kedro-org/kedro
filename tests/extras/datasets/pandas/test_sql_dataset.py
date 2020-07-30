@@ -210,8 +210,8 @@ class TestSQLTableDataSet:
         """Test the data set instance string representation"""
         str_repr = str(table_data_set)
         assert (
-            "SQLTableDataSet(save_args={'index': False}, table_name=%s)" % TABLE_NAME
-            in str_repr
+            "SQLTableDataSet(load_args={}, save_args={'index': False}, "
+            f"table_name={TABLE_NAME})" in str_repr
         )
         assert CONNECTION not in str(str_repr)
 
@@ -309,5 +309,5 @@ class TestSQLQueryDataSet:
     def test_str_representation_sql(self, query_data_set):
         """Test the data set instance string representation"""
         str_repr = str(query_data_set)
-        assert "SQLQueryDataSet(sql={})".format(SQL_QUERY) in str_repr
+        assert f"SQLQueryDataSet(load_args={{}}, sql={SQL_QUERY})" in str_repr
         assert CONNECTION not in str_repr

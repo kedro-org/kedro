@@ -30,6 +30,7 @@
 `tests.template.test_load_context_framework.py` instead.
 """
 
+import re
 import sys
 from pathlib import Path
 
@@ -98,9 +99,7 @@ class TestLoadContext:
 
         kedro_yml_path = fake_repo_path / ".kedro.yml"
         kedro_yml_path.write_text(
-            "context_path: fake_package.run.ProjectContext\nsource_dir: {}\n".format(
-                source_dir
-            )
+            f"context_path: fake_package.run.ProjectContext\nsource_dir: {source_dir}\n"
         )
 
         result = load_context(str(fake_repo_path))
@@ -116,13 +115,11 @@ class TestLoadContext:
         """
         kedro_yml_path = fake_repo_path / ".kedro.yml"
         kedro_yml_path.write_text(
-            "context_path: fake_package.run.ProjectContext\nsource_dir: {}\n".format(
-                source_dir
-            )
+            f"context_path: fake_package.run.ProjectContext\nsource_dir: {source_dir}\n"
         )
         source_path = (fake_repo_path / Path(source_dir).expanduser()).resolve()
 
-        pattern = (
+        pattern = re.escape(
             f"Source path '{source_path}' has to be relative to your project root "
             f"'{fake_repo_path.resolve()}'"
         )
@@ -135,13 +132,11 @@ class TestLoadContext:
         kedro_yml_path = fake_repo_path / ".kedro.yml"
         source_dir = "non_existent"
         kedro_yml_path.write_text(
-            "context_path: fake_package.run.ProjectContext\nsource_dir: {}\n".format(
-                source_dir
-            )
+            f"context_path: fake_package.run.ProjectContext\nsource_dir: {source_dir}\n"
         )
         non_existent_path = (fake_repo_path / source_dir).expanduser().resolve()
 
-        pattern = r"Source path '{}' cannot be found".format(non_existent_path)
+        pattern = re.escape(f"Source path '{non_existent_path}' cannot be found")
         with pytest.raises(KedroContextError, match=pattern):
             load_context(str(fake_repo_path))
 

@@ -1,16 +1,16 @@
 install: build-docs
-	rm -rf kedro/html
-	cp -r docs/build/html kedro
+	rm -rf kedro/framework/html
+	cp -r docs/build/html kedro/framework
 	pip install .
 
 clean:
-	rm -rf build dist docs/build kedro/html pip-wheel-metadata .mypy_cache .pytest_cache
+	rm -rf build dist docs/build kedro/html pip-wheel-metadata .mypy_cache .pytest_cache features/steps/test_plugin/test_plugin.egg-info
 	find . -regex ".*/__pycache__" -exec rm -rf {} +
 	find . -regex ".*\.egg-info" -exec rm -rf {} +
 	pre-commit clean || true
 
 install-pip-setuptools:
-	python -m pip install -U "pip>=20.0, <21.0" "setuptools>=38.0, <47.0" wheel
+	python -m pip install -U "pip>=20.0,<20.2" "setuptools>=38.0" wheel
 
 legal:
 	python tools/license_and_headers.py

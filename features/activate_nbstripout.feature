@@ -31,6 +31,7 @@ Feature: Activate_nbstripout target in new project
   Scenario: Check nbstripout git post commit hook functionality
     Given I have prepared a config file with example code
     And I have run a non-interactive kedro new
+    And I have updated kedro requirements
     And I have executed the kedro command "install"
     And I have added a test jupyter notebook
     And I have initialized a git repository

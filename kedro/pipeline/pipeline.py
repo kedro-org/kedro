@@ -107,12 +107,12 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         self,
         nodes: Iterable[Union[Node, "Pipeline"]],
         *,
-        tags: Union[str, Iterable[str]] = None
+        tags: Union[str, Iterable[str]] = None,
     ):
         """Initialise ``Pipeline`` with a list of ``Node`` instances.
 
         Args:
-            nodes: The list of nodes the ``Pipeline`` will be made of. If you
+            nodes: The iterable of nodes the ``Pipeline`` will be made of. If you
                 provide pipelines among the list of nodes, those pipelines will
                 be expanded and all their nodes will become part of this
                 new pipeline.
@@ -155,13 +155,19 @@ class Pipeline:  # pylint: disable=too-many-public-methods
             >>>
 
         """
-        _validate_no_node_list(nodes)
+        if nodes is None:
+            raise ValueError(
+                "`nodes` argument of `Pipeline` is None. It must be an "
+                "iterable of nodes and/or pipelines instead."
+            )
+        nodes = list(nodes)  # in case it's a generator
+        _validate_duplicate_nodes(nodes)
+
         nodes = list(
             chain.from_iterable(
                 [[n] if isinstance(n, Node) else n.nodes for n in nodes]
             )
         )
-        _validate_duplicate_nodes(nodes)
         _validate_transcoded_inputs_outputs(nodes)
         _tags = set(_to_list(tags))
 
@@ -407,7 +413,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         nodes = [self._nodes_by_name[name] for name in node_names]
         return Pipeline(nodes)
 
-    def only_nodes_with_namespaces(self, node_namespace: str) -> "Pipeline":
+    def only_nodes_with_namespace(self, node_namespace: str) -> "Pipeline":
         """Create a new ``Pipeline`` which will contain only the specified
         nodes by namespace.
 
@@ -736,23 +742,38 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         return json.dumps(pipeline_versioned)
 
 
-def _validate_no_node_list(nodes: Iterable[Union[Node, Pipeline]]):
-    if nodes is None:
-        raise ValueError(
-            "`nodes` argument of `Pipeline` is None. "
-            "Must be a list of nodes instead."
-        )
+def _validate_duplicate_nodes(nodes_or_pipes: Iterable[Union[Node, Pipeline]]):
+    seen_nodes = set()  # type: Set[str]
+    duplicates = defaultdict(set)  # type: Dict[Union[Pipeline, None], Set[str]]
 
+    def _check_node(node_: Node, pipeline_: Pipeline = None):
+        name = node_.name
+        if name in seen_nodes:
+            duplicates[pipeline_].add(name)
+        else:
+            seen_nodes.add(name)
 
-def _validate_duplicate_nodes(nodes: List[Node]):
-    names = [node.name for node in nodes]
-    duplicate = [key for key, value in Counter(names).items() if value > 1]
-    if duplicate:
+    for each in nodes_or_pipes:
+        if isinstance(each, Node):
+            _check_node(each)
+        elif isinstance(each, Pipeline):
+            for node in each.nodes:
+                _check_node(node, pipeline_=each)
+
+    if duplicates:
+        duplicates_info = ""
+
+        for pipeline, names in duplicates.items():
+            pipe_repr = (
+                "Free nodes" if pipeline is None else repr(pipeline).replace("\n", "")
+            )
+            nodes_repr = "\n".join(f"  - {name}" for name in sorted(names))
+            duplicates_info += f"{pipe_repr}:\n{nodes_repr}\n"
+
         raise ValueError(
-            "Pipeline nodes must have unique names. The "
-            "following node names appear more than once: {}\n"
-            "You can name your nodes using the last argument "
-            "of `node()`.".format(duplicate)
+            f"Pipeline nodes must have unique names. The following node names "
+            f"appear more than once:\n\n{duplicates_info}\nYou can name your "
+            f"nodes using the last argument of `node()`."
         )
 
 

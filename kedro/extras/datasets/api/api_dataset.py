@@ -30,7 +30,7 @@
 It uses the python requests library: https://requests.readthedocs.io/en/master/
 """
 import socket
-from typing import Any, Dict, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union
 
 import requests
 from requests.auth import AuthBase
@@ -71,6 +71,7 @@ class APIDataSet(AbstractDataSet):
         params: Dict[str, Any] = None,
         headers: Dict[str, Any] = None,
         auth: Union[Tuple[str], AuthBase] = None,
+        json: Union[List, Dict[str, Any]] = None,
         timeout: int = 60,
     ) -> None:
         """Creates a new instance of ``APIDataSet`` to fetch data from an API endpoint.
@@ -86,6 +87,9 @@ class APIDataSet(AbstractDataSet):
                 https://requests.readthedocs.io/en/master/user/quickstart/#custom-headers
             auth: Anything ``requests`` accepts. Normally it's either ``('login', 'password')``,
                 or ``AuthBase``, ``HTTPBasicAuth`` instance for more complex cases.
+            json: The request payload, used for POST, PUT, etc requests, passed in
+                to the json kwarg in the requests object.
+                https://requests.readthedocs.io/en/master/user/quickstart/#more-complicated-post-requests
             timeout: The wait time in seconds for a response, defaults to 1 minute.
                 https://requests.readthedocs.io/en/master/user/quickstart/#timeouts
 
@@ -98,6 +102,7 @@ class APIDataSet(AbstractDataSet):
             "params": params,
             "headers": headers,
             "auth": auth,
+            "json": json,
             "timeout": timeout,
         }
 

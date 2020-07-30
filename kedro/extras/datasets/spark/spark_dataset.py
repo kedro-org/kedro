@@ -33,7 +33,7 @@
 from copy import deepcopy
 from fnmatch import fnmatch
 from functools import partial
-from pathlib import PurePath, PurePosixPath
+from pathlib import PurePosixPath
 from typing import Any, Dict, List, Optional, Tuple
 from warnings import warn
 
@@ -199,7 +199,7 @@ class SparkDataSet(AbstractVersionedDataSet):
         """Creates a new instance of ``SparkDataSet``.
 
         Args:
-            filepath: Path to a Spark dataframe. When using Databricks
+            filepath: Filepath in POSIX format to a Spark dataframe. When using Databricks
                 and working with data written to mount path points,
                 specify ``filepath``s for (versioned) ``SparkDataSet``s
                 starting with ``/dbfs/mnt``.
@@ -244,7 +244,7 @@ class SparkDataSet(AbstractVersionedDataSet):
                 )
             _s3 = S3FileSystem(client_kwargs=credentials)
             exists_function = _s3.exists
-            glob_function = _s3.glob
+            glob_function = partial(_s3.glob, refresh=True)
             path = PurePosixPath(filepath)
 
         elif fs_prefix == "hdfs://" and version:
@@ -261,15 +261,13 @@ class SparkDataSet(AbstractVersionedDataSet):
 
             _hdfs_client = KedroHdfsInsecureClient(**credentials)
             exists_function = _hdfs_client.hdfs_exists
-            glob_function = _hdfs_client.hdfs_glob
+            glob_function = _hdfs_client.hdfs_glob  # type: ignore
             path = PurePosixPath(filepath)
 
         else:
-            path = PurePath(filepath)  # type: ignore
+            path = PurePosixPath(filepath)
 
             if filepath.startswith("/dbfs"):
-                # Use PosixPath if the filepath references DBFS
-                path = PurePosixPath(filepath)
                 dbutils = _get_dbutils(self._get_spark())
                 if dbutils:
                     glob_function = partial(_dbfs_glob, dbutils=dbutils)

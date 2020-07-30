@@ -25,7 +25,6 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import shutil
 from pathlib import Path
 
@@ -62,7 +61,28 @@ def cleanup_pipelines(dummy_project):
             shutil.rmtree(str(each))
 
         tests = dummy_project / "src" / "tests" / "pipelines" / pipeline
-        shutil.rmtree(str(tests))
+        if tests.is_dir():
+            shutil.rmtree(str(tests))
+
+
+@pytest.fixture(params=["base"])
+def make_pipelines(request, dummy_project, mocker):
+    source_path = dummy_project / "src" / PACKAGE_NAME / "pipelines" / PIPELINE_NAME
+    tests_path = dummy_project / "src" / "tests" / "pipelines" / PIPELINE_NAME
+    conf_path = dummy_project / "conf" / request.param / "pipelines" / PIPELINE_NAME
+
+    for path in (source_path, tests_path, conf_path):
+        path.mkdir(parents=True)
+
+    (conf_path / "parameters.yml").touch()
+    (tests_path / "test_pipe.py").touch()
+    (source_path / "pipe.py").touch()
+
+    yield
+    mocker.stopall()
+    shutil.rmtree(str(source_path), ignore_errors=True)
+    shutil.rmtree(str(tests_path), ignore_errors=True)
+    shutil.rmtree(str(conf_path), ignore_errors=True)
 
 
 @pytest.fixture
@@ -280,6 +300,169 @@ class TestPipelineCreateCommand:
         result = CliRunner().invoke(fake_kedro_cli.cli, cmd)
         assert result.exit_code
         assert f"Unable to load Kedro context with environment `{env}`" in result.output
+
+
+@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log", "make_pipelines")
+class TestPipelineDeleteCommand:
+    @pytest.mark.parametrize(
+        "make_pipelines,env,expected_conf",
+        [("base", None, "base"), ("local", "local", "local")],
+        indirect=["make_pipelines"],
+    )
+    def test_delete_pipeline(self, env, expected_conf, dummy_project, fake_kedro_cli):
+        options = ["--env", env] if env else []
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["pipeline", "delete", "-y", PIPELINE_NAME, *options]
+        )
+
+        source_path = dummy_project / "src" / PACKAGE_NAME / "pipelines" / PIPELINE_NAME
+        tests_path = dummy_project / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        conf_path = dummy_project / "conf" / expected_conf / "pipelines" / PIPELINE_NAME
+
+        assert f"Deleting `{source_path}`: OK" in result.output
+        assert f"Deleting `{tests_path}`: OK" in result.output
+        assert f"Deleting `{conf_path}`: OK" in result.output
+
+        assert f"Pipeline `{PIPELINE_NAME}` was successfully deleted." in result.output
+        assert (
+            f"If you added the pipeline `{PIPELINE_NAME}` to `create_pipelines()` in "
+            f"`{dummy_project / 'src' / PACKAGE_NAME / 'pipeline.py'}`, "
+            f"you will need to remove it.`"
+        ) in result.output
+
+        assert not source_path.exists()
+        assert not tests_path.exists()
+        assert not conf_path.exists()
+
+    def test_delete_pipeline_skip(self, dummy_project, fake_kedro_cli):
+        """Tests that delete pipeline handles missing or already deleted files gracefully"""
+        source_path = dummy_project / "src" / PACKAGE_NAME / "pipelines" / PIPELINE_NAME
+
+        shutil.rmtree(str(source_path))
+
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["pipeline", "delete", "-y", PIPELINE_NAME]
+        )
+        tests_path = dummy_project / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        conf_path = dummy_project / "conf" / "base" / "pipelines" / PIPELINE_NAME
+
+        assert f"Deleting `{source_path}`" not in result.output
+        assert f"Deleting `{tests_path}`: OK" in result.output
+        assert f"Deleting `{conf_path}`: OK" in result.output
+
+        assert f"Pipeline `{PIPELINE_NAME}` was successfully deleted." in result.output
+        assert (
+            f"If you added the pipeline `{PIPELINE_NAME}` to `create_pipelines()` in "
+            f"`{dummy_project / 'src' / PACKAGE_NAME / 'pipeline.py'}`, "
+            f"you will need to remove it.`"
+        ) in result.output
+
+        assert not source_path.exists()
+        assert not tests_path.exists()
+        assert not conf_path.exists()
+
+    def test_delete_pipeline_fail(self, dummy_project, fake_kedro_cli, mocker):
+        source_path = dummy_project / "src" / PACKAGE_NAME / "pipelines" / PIPELINE_NAME
+
+        mocker.patch(
+            "kedro.framework.cli.pipeline.shutil.rmtree",
+            side_effect=PermissionError("permission"),
+        )
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["pipeline", "delete", "-y", PIPELINE_NAME]
+        )
+
+        assert result.exit_code, result.output
+        assert f"Deleting `{source_path}`: FAILED" in result.output
+
+    @pytest.mark.parametrize(
+        "bad_name,error_message",
+        [
+            ("bad name", LETTER_ERROR),
+            ("bad%name", LETTER_ERROR),
+            ("1bad", FIRST_CHAR_ERROR),
+            ("a", TOO_SHORT_ERROR),
+        ],
+    )
+    def test_bad_pipeline_name(self, fake_kedro_cli, bad_name, error_message):
+        """Test error message when bad pipeline name was provided."""
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["pipeline", "delete", "-y", bad_name]
+        )
+        assert result.exit_code
+        assert error_message in result.output
+
+    def test_bad_env(self, fake_kedro_cli):
+        """Test error when provided conf environment does not exist."""
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli,
+            ["pipeline", "delete", "-y", "-e", "invalid_env", PIPELINE_NAME],
+        )
+        assert result.exit_code
+        assert (
+            "Unable to load Kedro context with environment `invalid_env`"
+            in result.output
+        )
+
+    @pytest.mark.parametrize("input_", ["n", "N", "random"])
+    def test_pipeline_delete_confirmation(self, dummy_project, fake_kedro_cli, input_):
+        """Test that user confirmation of deletion works"""
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["pipeline", "delete", PIPELINE_NAME], input=input_
+        )
+
+        source_path = dummy_project / "src" / PACKAGE_NAME / "pipelines" / PIPELINE_NAME
+        tests_path = dummy_project / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        conf_path = dummy_project / "conf" / "base" / "pipelines" / PIPELINE_NAME
+
+        assert (
+            "The following directories and everything within them will be removed"
+            in result.output
+        )
+        assert str(source_path) in result.output
+        assert str(tests_path) in result.output
+        assert str(conf_path) in result.output
+
+        assert (
+            f"Are you sure you want to delete pipeline `{PIPELINE_NAME}`"
+            in result.output
+        )
+        assert "Deletion aborted!" in result.output
+
+        assert source_path.is_dir()
+        assert tests_path.is_dir()
+        assert conf_path.is_dir()
+
+    @pytest.mark.parametrize("input_", ["n", "N", "random"])
+    def test_pipeline_delete_confirmation_skip(
+        self, dummy_project, fake_kedro_cli, input_
+    ):
+        """Test that user confirmation of deletion works when
+        some of the files are missing or already deleted
+        """
+
+        source_path = dummy_project / "src" / PACKAGE_NAME / "pipelines" / PIPELINE_NAME
+        shutil.rmtree(str(source_path))
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["pipeline", "delete", PIPELINE_NAME], input=input_
+        )
+
+        tests_path = dummy_project / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        conf_path = dummy_project / "conf" / "base" / "pipelines" / PIPELINE_NAME
+
+        assert (
+            "The following directories and everything within them will be removed"
+            in result.output
+        )
+        assert str(source_path) not in result.output
+        assert str(tests_path) in result.output
+        assert str(conf_path) in result.output
+
+        assert (
+            f"Are you sure you want to delete pipeline `{PIPELINE_NAME}`"
+            in result.output
+        )
+        assert "Deletion aborted!" in result.output
 
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")

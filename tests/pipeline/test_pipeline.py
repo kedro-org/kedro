@@ -25,6 +25,7 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import re
 from functools import wraps
 from itertools import chain
 from typing import Callable
@@ -310,7 +311,7 @@ class TestValidPipeline:
                 node(identity, "F", "G", namespace="katie.lisa.john"),
             ]
         )
-        resulting_pipeline = pipeline.only_nodes_with_namespaces(target_namespace)
+        resulting_pipeline = pipeline.only_nodes_with_namespace(target_namespace)
         for actual_node, expected_namespace in zip(
             sorted(resulting_pipeline.nodes), expected_namespaces
         ):
@@ -531,18 +532,43 @@ class TestInvalidPipeline:
         pipeline = Pipeline([node(identity, "A", "B", namespace=namespace)])
         pattern = r"Pipeline does not contain nodes"
         with pytest.raises(ValueError, match=pattern):
-            pipeline.only_nodes_with_namespaces("non_existent")
+            pipeline.only_nodes_with_namespace("non_existent")
 
-    def test_duplicate_names(self):
-        pattern = r"Pipeline nodes must have unique names\. The following "
-        pattern += r"node names appear more than once: \['same_name'\]"
-        with pytest.raises(ValueError, match=pattern):
+    def test_duplicate_free_nodes(self):
+        pattern = (
+            "Pipeline nodes must have unique names. The following node "
+            "names appear more than once:\n\nFree nodes:\n  - same_name"
+        )
+        with pytest.raises(ValueError, match=re.escape(pattern)):
             Pipeline(
                 [
                     node(identity, "in1", "out1", name="same_name"),
                     node(identity, "in2", "out2", name="same_name"),
                 ]
             )
+
+        pipeline = Pipeline([node(identity, "in1", "out1", name="same_name")])
+        another_node = node(identity, "in2", "out2", name="same_name")
+        with pytest.raises(ValueError, match=re.escape(pattern)):
+            # 'pipeline' passes the check, 'another_node' doesn't
+            Pipeline([pipeline, another_node])
+
+    def test_duplicate_nodes_in_pipelines(self):
+        pipeline = Pipeline(
+            [node(biconcat, ["input", "input1"], ["output", "output1"], name="node")]
+        )
+        pattern = (
+            r"Pipeline nodes must have unique names\. The following node "
+            r"names appear more than once\:\n\nPipeline\(\[.+\]\)\:\n  \- node"
+        )
+        with pytest.raises(ValueError, match=pattern):
+            # the first 'pipeline' passes the check, the second doesn't
+            Pipeline([pipeline, pipeline])
+
+        another_node = node(identity, "in1", "out1", name="node")
+        with pytest.raises(ValueError, match=pattern):
+            # 'another_node' passes the check, 'pipeline' doesn't
+            Pipeline([another_node, pipeline])
 
     def test_bad_combine(self):
         """Node cannot be combined to pipeline."""
@@ -559,7 +585,11 @@ class TestInvalidPipeline:
         new_pipeline = Pipeline(
             [node(biconcat, ["input", "input1"], ["output2"], name="a")]
         )
-        with pytest.raises(ValueError, match=r"\['a'\]"):
+        pattern = (
+            "Pipeline nodes must have unique names. The following node names "
+            "appear more than once:\n\nFree nodes:\n  - a"
+        )
+        with pytest.raises(ValueError, match=re.escape(pattern)):
             pipeline1 + new_pipeline  # pylint: disable=pointless-statement
 
     def test_conflicting_outputs(self):

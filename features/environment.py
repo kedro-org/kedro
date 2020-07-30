@@ -30,7 +30,6 @@
 
 import os
 import shutil
-import stat
 import tempfile
 import venv
 from pathlib import Path
@@ -55,43 +54,21 @@ def before_all(context):
     """Environment preparation before other cli tests are run.
     Installs (core) kedro by running pip in the top level directory.
     """
-    context = _setup_base_venv(context)
     context = _setup_kedro_install_venv(context)
 
 
 def after_all(context):
     for path in _PATHS_TO_REMOVE:
-        rmtree(path)
+        # ignore errors when attempting to remove already removed directories
+        shutil.rmtree(path, ignore_errors=True)
 
 
 def before_scenario(context, scenario):
     if FRESH_VENV_TAG in scenario.tags:
-        new_venv_dir = _create_tmp_dir() / "temp"
+        context = _setup_kedro_install_venv(context)
 
-        # need to use virtualenv-clone instead of just a bare copy to resolve sys.paths and the like
-        call(
-            ["virtualenv-clone", str(context.base_venv_dir), str(new_venv_dir)],
-            env=context.env,
-        )
-
-        context = _setup_context_with_venv(context, new_venv_dir)
-    context.temp_dir = Path(tempfile.mkdtemp())
-
-
-def after_scenario(context, scenario):
-    if FRESH_VENV_TAG in scenario.tags:
-        rmtree(context.venv_dir)
-        context = _setup_context_with_venv(context, context.kedro_install_venv_dir)
-    rmtree(context.temp_dir)
-
-
-def rmtree(top):
-    """This is for Windows machine to switch the permission."""
-    if os.name != "posix":
-        for root, _, files in os.walk(str(top), topdown=False):
-            for name in files:
-                os.chmod(os.path.join(root, name), stat.S_IWUSR)
-    shutil.rmtree(str(top))
+    context.temp_dir = Path(tempfile.mkdtemp()).resolve()
+    _PATHS_TO_REMOVE.add(context.temp_dir)
 
 
 def _setup_context_with_venv(context, venv_dir):
@@ -140,20 +117,15 @@ def _create_new_venv() -> Path:
 
 def _create_tmp_dir() -> Path:
     """Create a temp directory and add it to _PATHS_TO_REMOVE"""
-    tmp_dir = Path(tempfile.mkdtemp())
+    tmp_dir = Path(tempfile.mkdtemp()).resolve()
     _PATHS_TO_REMOVE.add(tmp_dir)
     return tmp_dir
 
 
-def _setup_base_venv(context):
-    # make a venv
-    venv_dir = _create_new_venv()
-
-    context.base_venv_dir = venv_dir
-    context = _setup_context_with_venv(context, venv_dir)
-
-    # install Kedro
-    # these versions should match what's in the Makefile
+def _setup_kedro_install_venv(context):
+    kedro_install_venv_dir = _create_new_venv()
+    context.kedro_install_venv_dir = kedro_install_venv_dir
+    context = _setup_context_with_venv(context, kedro_install_venv_dir)
     call(
         [
             context.python,
@@ -161,28 +133,12 @@ def _setup_base_venv(context):
             "pip",
             "install",
             "-U",
-            "pip>=20.0, <21.0",
-            "setuptools>=38.0, <47.0",
+            "pip>=20.0,<20.2",
+            "setuptools>=38.0",
             "wheel",
         ],
         env=context.env,
     )
-    call([context.pip, "install", "virtualenv-clone"], env=context.env)
-    call([context.pip, "install", "."], env=context.env)
-
-    return context
-
-
-def _setup_kedro_install_venv(context):
-    kedro_install_venv_dir = _create_tmp_dir() / "ked-install"
-
-    # need to use virtualenv-clone instead of just a bare copy to resolve sys.paths and the like
-    call(
-        ["virtualenv-clone", str(context.base_venv_dir), str(kedro_install_venv_dir)],
-        env=context.env,
-    )
-    context.kedro_install_venv_dir = kedro_install_venv_dir
-    context = _setup_context_with_venv(context, kedro_install_venv_dir)
     install_reqs = (
         Path(
             "kedro/templates/project/{{ cookiecutter.repo_name }}/src/requirements.txt"

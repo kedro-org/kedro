@@ -79,9 +79,10 @@ make build-docs
 
 ### Guidelines
 
- - Aim for cross-platform compatibility on Windows, macOS and Linux
- - We use [Anaconda](https://www.anaconda.com/distribution/) as a preferred virtual environment
- - We use [SemVer](https://semver.org/) for versioning
+* Aim for cross-platform compatibility on Windows, macOS and Linux
+* Aim for [backwards compatible](#Backwards-compatibility) changes where possible, and break compatibility only in exceptional cases
+* We use [Anaconda](https://www.anaconda.com/distribution/) as a preferred virtual environment
+* We use [SemVer](https://semver.org/) for versioning
 
 Our code is designed to be compatible with Python 3.6 onwards and our style guidelines are (in cascading order):
 
@@ -100,42 +101,73 @@ Please note that each code file should have a licence header, include the conten
 There is an automated check to verify that it exists. The check will highlight any issues and suggest a solution.
 
 ### Branching conventions
-We use a branching model that helps us keep track of branches in a logical, consistent way. All branches should have the hyphen-separated convention of: `<type-of-change>/<short-description-of-change>` e.g. `contrib/io-dataset`
+We use a branching model that helps us keep track of branches in a logical, consistent way. All branches should have the hyphen-separated convention of: `<type-of-change>/<short-description-of-change>` e.g. `feature/io-dataset`
 
 | Types of changes | Description                                                             |
 | ---------------- | ----------------------------------------------------------------------- |
 | `docs`           | Changes to the documentation under `docs/source/`                       |
-| `feature`        | Non-breaking change which adds functionality                            |
+| `feature`        | Change which adds or removes functionality                              |
 | `fix`            | Non-breaking change which fixes an issue                                |
 | `tests`          | Changes to project unit `tests/` and / or integration `features/` tests |
+
+### Backwards compatibility
+
+#### What is a breaking change?
+
+A breaking change is any change that modifies Kedro's public APIs. Examples include making a change to the signature of public functions or removing a module. Your change is **not** considered a breaking change if a user can upgrade their Kedro version and include your change without anything breaking in their project.
+
+A backwards-compatible change is any change that is not a breaking change.
+
+#### When should I make a breaking change?
+
+We aim to minimise the number of breaking changes to help keep the Kedro software stable and reduce the overhead for users as they migrate their projects. However, there are cases where a breaking change brings considerable value or increases the maintainability of the codebase. In these cases, breaking backwards compatibility can make sense.
+
+Before contributing a breaking change, you should create an [issue](https://github.com/quantumblacklabs/kedro/issues) describing the change and justify the value gained by breaking backwards compatibility.
+
+# Our release model
+
+All non-breaking changes go into `master`, from which a minor release can be deployed at any time. Any non-breaking change should branch off from `master` and be merged into `master`, as explained in the [contribution process](/CONTRIBUTING.md#core-contribution-process) below.
+
+All breaking changes go into `develop`, from which a major release can be deployed at any time. Any breaking change should branch off from `develop` and be merged into `develop`, as explained in the [contribution process](/CONTRIBUTING.md#core-contribution-process) below. The `develop` branch contains all commits from the `master` branch, but the `master` branch does not contain all the commits from `develop` until the next major release.
+
+![Kedro Gitflow Diagram](https://raw.githubusercontent.com/quantumblacklabs/kedro/master/static/img/kedro_gitflow.svg)
 
 ## `core` contribution process
 
 Small contributions are accepted for the `core` library:
 
- 1. Fork the project by clicking **Fork** in the top-right corner of the [Kedro GitHub repository](https://github.com/quantumblacklabs/kedro) and then choosing the target account the repository will be forked to.
- 2. Create a feature branch on your forked repository and push all your local changes to that feature branch.
- 3. Before submitting a pull request (PR), please ensure that unit, end-to-end tests and linting are passing for your changes by running `make test`, `make e2e-tests` and `make lint` locally, have a look at the section [Running checks locally](/CONTRIBUTING.md#running-checks-locally) below.
- 4. Open a PR against the `quantumblacklabs:develop` branch from your feature branch.
- 5. Update the PR according to the reviewer's comments.
- 6. Your PR will be merged by the Kedro team once all the comments are addressed.
+1. Fork the project by clicking **Fork** in the top-right corner of the [Kedro GitHub repository](https://github.com/quantumblacklabs/kedro)and then choosing the target account the repository will be forked to.
+2. Create a feature branch on your forked repository and push all your local changes to that feature branch. Your feature branch should branch off from:
+   a. `master` if you intend for it to be a non-breaking, backwards-compatible change.
+   b. `develop` if you intend for it to be a breaking change
+3. Before submitting a pull request (PR), please ensure that unit, end-to-end tests and linting are passing for your changes by running `make test`, `make e2e-tests` and `make lint` locally, have a look at the section [Running checks locally](/CONTRIBUTING.md#running-checks-locally)below.
+4. Determine if your change is [backwards compatible](#Backwards_compatibility):
+   a. For backwards compatible changes, open a PR against the `quantumblacklabs:master` branch from your feature branch.
+   b. For changes that are NOT backwards compatible, open a PR against the `quantumblacklabs:develop` branch from your feature branch.
+5. Await reviewer comments.
+6. Update the PR according to the reviewer's comments.
+7. Your PR will be merged by the Kedro team once all the comments are addressed.
 
- > _Note:_ We will work with you to complete your contribution but we reserve the right to takeover abandoned PRs.
+> _Note:_ We will work with you to complete your contribution but we reserve the right to take over abandoned PRs.
 
 ## `extras` contribution process
 
 You can add new work to `extras` if you do not need to create a new Kedro CLI command:
 
- 1. Create an [issue](https://github.com/quantumblacklabs/kedro/issues) describing your contribution.
- 2. Fork the project by clicking **Fork** in the top-right corner of the [Kedro GitHub repository](https://github.com/quantumblacklabs/kedro) and then choosing the target account the repository will be forked to.
- 3. Work in [`extras`](/kedro/extras/) and create a feature branch on your forked repository and push all your local changes to that feature branch.
- 4. Before submitting a pull request, please ensure that unit, e2e tests and linting are passing for your changes by running `make test`, `make e2e-tests` and `make lint` locally, have a look at the section [Running checks locally](/CONTRIBUTING.md#running-checks-locally) below.
- 5. Include a `README.md` with instructions on how to use your contribution.
- 6. Open a PR against the `quantumblacklabs:develop` branch from your feature branch and reference your issue in the PR description (e.g., `Resolves #<issue-number>`).
- 7. Update the PR according to the reviewer's comments.
- 8. Your PR will be merged by the Kedro team once all the comments are addressed.
+1. Create an [issue](https://github.com/quantumblacklabs/kedro/issues) describing your contribution.
+2. Fork the project by clicking **Fork** in the top-right corner of the [Kedro GitHub repository](https://github.com/quantumblacklabs/kedro)and then choosing the target account the repository will be forked to.
+3. Work in [`extras`](/kedro/extras/) and create a feature branch on your forked repository and push all your local changes to that featurebranch.
+4. Before submitting a pull request, please ensure that unit, e2e tests and linting are passing for your changes by running `make test`,`make e2e-tests` and `make lint` locally, have a look at the section [Running checks locally](/CONTRIBUTING.md#running-checks-locally) below.
+5. Include a `README.md` with instructions on how to use your contribution.
+6. Determine if your change is [backwards compatible](#Backwards_compatibility):
+    a. For backwards compatible changes, open a PR against the `quantumblacklabs:master` branch from your feature branch.
+    b. For changes that are NOT backwards compatible, open a PR against the `quantumblacklabs:develop` branch from your feature branch.
+7. Reference your issue in the PR description (e.g., `Resolves #<issue-number>`).
+8. Await review comments.
+9. Update the PR according to the reviewer's comments.
+10. Your PR will be merged by the Kedro team once all the comments are addressed.
 
- > _Note:_ We will work with you to complete your contribution but we reserve the right to takeover abandoned PRs.
+> _Note:_ We will work with you to complete your contribution but we reserve the right to take over abandoned PRs.
 
 ## `plugin` contribution process
 

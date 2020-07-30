@@ -38,7 +38,7 @@ from shapely.geometry import Point
 
 from kedro.extras.datasets.geopandas import GeoJSONDataSet
 from kedro.io import DataSetError
-from kedro.io.core import Version, generate_timestamp
+from kedro.io.core import PROTOCOL_DELIMITER, Version, generate_timestamp
 
 
 @pytest.fixture(params=[None])
@@ -53,7 +53,7 @@ def save_version(request):
 
 @pytest.fixture
 def filepath(tmp_path):
-    return str(tmp_path / "test.geojson")
+    return (tmp_path / "test.geojson").as_posix()
 
 
 @pytest.fixture(params=[None])
@@ -136,7 +136,7 @@ class TestGeoJSONDataSet:
         assert geojson_data_set._fs_open_args_save == {"mode": "wb"}
 
     @pytest.mark.parametrize(
-        "filepath,instance_type",
+        "path,instance_type",
         [
             ("s3://bucket/file.geojson", S3FileSystem),
             ("/tmp/test.geojson", LocalFileSystem),
@@ -145,14 +145,11 @@ class TestGeoJSONDataSet:
             ("https://example.com/file.geojson", HTTPFileSystem),
         ],
     )
-    def test_protocol_usage(self, filepath, instance_type):
-        geojson_data_set = GeoJSONDataSet(filepath=filepath)
+    def test_protocol_usage(self, path, instance_type):
+        geojson_data_set = GeoJSONDataSet(filepath=path)
         assert isinstance(geojson_data_set._fs, instance_type)
 
-        if geojson_data_set._protocol == "https":
-            path = filepath.split("://")[-1]
-        else:
-            path = geojson_data_set._fs._strip_protocol(filepath)
+        path = path.split(PROTOCOL_DELIMITER, 1)[-1]
 
         assert str(geojson_data_set._filepath) == path
         assert isinstance(geojson_data_set._filepath, PurePosixPath)

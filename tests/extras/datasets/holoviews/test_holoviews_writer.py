@@ -38,11 +38,12 @@ from s3fs.core import S3FileSystem
 
 from kedro.extras.datasets.holoviews import HoloviewsWriter
 from kedro.io import DataSetError, Version
+from kedro.io.core import PROTOCOL_DELIMITER
 
 
 @pytest.fixture
 def filepath_png(tmp_path):
-    return str(tmp_path / "test.png")
+    return (tmp_path / "test.png").as_posix()
 
 
 @pytest.fixture(scope="module")
@@ -65,7 +66,7 @@ class TestHoloviewsWriter:
         """Test saving Holoviews object."""
         hv_writer.save(dummy_hv_object)
 
-        actual_filepath = Path(hv_writer._filepath)
+        actual_filepath = Path(hv_writer._filepath.as_posix())
         test_filepath = tmp_path / "locally_saved.png"
         hv.save(dummy_hv_object, test_filepath)
 
@@ -129,11 +130,7 @@ class TestHoloviewsWriter:
         data_set = HoloviewsWriter(filepath=filepath, credentials=credentials)
         assert isinstance(data_set._fs, instance_type)
 
-        # _strip_protocol() doesn't strip http(s) protocol
-        if data_set._protocol == "https":
-            path = filepath.split("://")[-1]
-        else:
-            path = data_set._fs._strip_protocol(filepath)
+        path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
 
         assert str(data_set._filepath) == path
         assert isinstance(data_set._filepath, PurePosixPath)
@@ -209,7 +206,7 @@ class TestHoloviewsWriterVersioned:
         versioned_hv_writer.save(dummy_hv_object)
 
         test_filepath = tmp_path / "test_image.png"
-        actual_filepath = Path(versioned_hv_writer._get_load_path())
+        actual_filepath = Path(versioned_hv_writer._get_load_path().as_posix())
 
         hv.save(dummy_hv_object, test_filepath)
 

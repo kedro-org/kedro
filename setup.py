@@ -39,7 +39,7 @@ here = path.abspath(path.dirname(__file__))
 
 
 PANDAS = "pandas>=0.24, <1.0.4"  # https://github.com/pandas-dev/pandas/issues/34467
-SPARK = "pyspark>=2.2.0, <3.0"
+SPARK = "pyspark~=2.2"
 HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.4.1"
 
@@ -66,7 +66,8 @@ with open(path.join(here, "README.md"), encoding="utf-8") as f:
     readme = f.read()
 
 doc_html_files = [
-    name.replace("kedro/", "", 1) for name in glob("kedro/html/**/*", recursive=True)
+    name.replace("kedro/", "", 1)
+    for name in glob("kedro/framework/html/**/*", recursive=True)
 ]
 
 template_files = []
@@ -83,34 +84,35 @@ def _collect_requirements(requires):
     return sorted(set(chain.from_iterable(requires.values())))
 
 
-api_require = {"api.APIDataSet": ["requests>=2.20.0, <3.0"]}
-biosequence_require = {"biosequence.BioSequenceDataSet": ["biopython>=1.73, <2.0"]}
-dask_require = {"dask.ParquetDataSet": ["dask[complete]>=2.6.0, <3.0"]}
-geopandas_require = {"geopandas.GeoJSONDataSet": ["geopandas<=0.6.0, <1.0"]}
+api_require = {"api.APIDataSet": ["requests~=2.20"]}
+biosequence_require = {"biosequence.BioSequenceDataSet": ["biopython~=1.73"]}
+dask_require = {"dask.ParquetDataSet": ["dask[complete]~=2.6"]}
+geopandas_require = {"geopandas.GeoJSONDataSet": ["geopandas>=0.6.0, <1.0"]}
 matplotlib_require = {"matplotlib.MatplotlibWriter": ["matplotlib>=3.0.3, <4.0"]}
-holoviews_require = {"holoviews.HoloviewsWriter": ["holoviews>=1.13.0, <1.14"]}
-networkx_require = {"networkx.NetworkXDataSet": ["networkx>=2.4, <3.0"]}
+holoviews_require = {"holoviews.HoloviewsWriter": ["holoviews~=1.13.0"]}
+networkx_require = {"networkx.NetworkXDataSet": ["networkx~=2.4"]}
 pandas_require = {
     "pandas.CSVDataSet": [PANDAS],
-    "pandas.ExcelDataSet": [PANDAS, "xlrd>=1.0.0, <2.0", "xlsxwriter>=1.0.0, <2.0"],
+    "pandas.ExcelDataSet": [PANDAS, "xlrd~=1.0", "xlsxwriter~=1.0"],
+    "pandas.AppendableExcelDataSet": [PANDAS, "openpyxl>=3.0.3, <4.0"],
     "pandas.FeatherDataSet": [PANDAS],
     "pandas.GBQTableDataSet": [PANDAS, "pandas-gbq>=0.12.0, <1.0"],
-    "pandas.HDFDataSet": [PANDAS, "tables>=3.6, <4.0"],
+    "pandas.HDFDataSet": [PANDAS, "tables~=3.6"],
     "pandas.JSONDataSet": [PANDAS],
     "pandas.ParquetDataSet": [PANDAS, "pyarrow>=0.12.0, <1.0.0"],
-    "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy>=1.2.0, <2.0"],
+    "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy~=1.2"],
 }
-pillow_require = {"pillow.ImageDataSet": ["Pillow>=7.1.2, <7.2"]}
+pillow_require = {"pillow.ImageDataSet": ["Pillow~=7.1.2"]}
 spark_require = {
-    "spark.SparkDataSet": [PANDAS, HDFS, S3FS],
-    "spark.SparkHiveDataSet": [PANDAS, HDFS, S3FS],
-    "spark.SparkJDBCDataSet": [PANDAS, HDFS, S3FS],
+    "spark.SparkDataSet": [SPARK, HDFS, S3FS],
+    "spark.SparkHiveDataSet": [SPARK, HDFS, S3FS],
+    "spark.SparkJDBCDataSet": [SPARK, HDFS, S3FS],
 }
 tensorflow_required = {
     "tensorflow.TensorflowModelDataset": [
         # currently only TensorFlow V2 supported for saving and loading.
         # V1 requires HDF5 and serializes differently
-        "tensorflow>=2.0.0, <3.0",
+        "tensorflow~=2.0",
     ]
 }
 yaml_require = {"yaml.YAMLDataSet": [PANDAS, "PyYAML>=4.2, <6.0"]}
@@ -127,7 +129,7 @@ extras_require = {
         "recommonmark==0.5.0",
         "sphinx-autodoc-typehints==1.6.0",
         "sphinx_copybutton==0.2.5",
-        "jupyter_client>=5.1.0, <6.0",
+        "jupyter_client~=5.1",
         "tornado>=4.2, <6.0",
         "ipykernel>=4.8.1, <5.0",
     ],
@@ -135,7 +137,7 @@ extras_require = {
     "matplotlib": _collect_requirements(matplotlib_require),
     "holoviews": _collect_requirements(holoviews_require),
     "networkx": _collect_requirements(networkx_require),
-    "notebook_templates": ["nbconvert>=5.3.1, <6.0", "nbformat>=4.4.0, <5.0"],
+    "notebook_templates": ["nbconvert>=5.3.1, <6.0", "nbformat~=4.4"],
     "pandas": _collect_requirements(pandas_require),
     "pillow": _collect_requirements(pillow_require),
     "profilers": ["memory_profiler>=0.50.0, <1.0"],

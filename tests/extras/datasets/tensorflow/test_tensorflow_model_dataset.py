@@ -25,20 +25,19 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# pylint: disable=import-outside-toplevel
 
 from pathlib import PurePosixPath
 
 import numpy as np
 import pytest
-import tensorflow as tf
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from s3fs import S3FileSystem
 
-from kedro.extras.datasets.tensorflow import TensorFlowModelDataset
 from kedro.io import DataSetError
-from kedro.io.core import Version
+from kedro.io.core import PROTOCOL_DELIMITER, Version
 
 AWS_MODEL_DIR_NAME = "test_tf_model"
 AWS_BUCKET_NAME = "test_bucket"
@@ -47,9 +46,37 @@ AWS_CREDENTIALS = dict(
 )
 
 
+# In this test module, we wrap tensorflow and TensorFlowModelDataset imports into a module-scoped
+# fixtures to avoid them being evaluated immediately when a new test process is spawned.
+# Specifically:
+#   - ParallelRunner spawns a new subprocess.
+#   - pytest coverage is initialised on every new subprocess to update the global coverage
+#     statistics.
+#   - Coverage has to import the tests including tensorflow tests, which then import tensorflow.
+#   - tensorflow in eager mode triggers the remove_function method in
+#     tensorflow/python/eager/context.py, which acquires a threading.Lock.
+#   - Using a mutex/condition variable after fork (from the child process) is unsafe:
+#   it can lead to deadlocks" and can lead to segfault.
+#
+# So tl;dr is pytest-coverage importing of tensorflow creates a potential deadlock within
+# a subprocess spawned by the parallel runner, so we wrap the import inside fixtures.
+@pytest.fixture(scope="module")
+def tf():
+    import tensorflow as tf
+
+    return tf
+
+
+@pytest.fixture(scope="module")
+def tensorflow_model_dataset():
+    from kedro.extras.datasets.tensorflow import TensorFlowModelDataset
+
+    return TensorFlowModelDataset
+
+
 @pytest.fixture
 def filepath(tmp_path):
-    return str(tmp_path / "test_tf")
+    return (tmp_path / "test_tf").as_posix()
 
 
 @pytest.fixture
@@ -68,21 +95,23 @@ def dummy_x_test():
 
 
 @pytest.fixture
-def tf_model_dataset(filepath, load_args, save_args, fs_args):
-    return TensorFlowModelDataset(
+def tf_model_dataset(filepath, load_args, save_args, fs_args, tensorflow_model_dataset):
+    return tensorflow_model_dataset(
         filepath=filepath, load_args=load_args, save_args=save_args, fs_args=fs_args
     )
 
 
 @pytest.fixture
-def versioned_tf_model_dataset(filepath, load_version, save_version):
-    return TensorFlowModelDataset(
+def versioned_tf_model_dataset(
+    filepath, load_version, save_version, tensorflow_model_dataset
+):
+    return tensorflow_model_dataset(
         filepath=filepath, version=Version(load_version, save_version)
     )
 
 
 @pytest.fixture
-def dummy_tf_base_model(dummy_x_train, dummy_y_train):
+def dummy_tf_base_model(dummy_x_train, dummy_y_train, tf):
     # dummy 1 layer model as used in TF tests, see
     # https://github.com/tensorflow/tensorflow/blob/8de272b3f3b73bea8d947c5f15143a9f1cfcfc6f/tensorflow/python/keras/models_test.py#L342
     inputs = tf.keras.Input(shape=(2, 1))
@@ -100,11 +129,10 @@ def dummy_tf_base_model(dummy_x_train, dummy_y_train):
 
 
 @pytest.fixture
-def dummy_tf_subclassed_model(dummy_x_train, dummy_y_train):
+def dummy_tf_subclassed_model(dummy_x_train, dummy_y_train, tf):
     """Demonstrate that own class models cannot be saved
     using HDF5 format but can using TF format
     """
-
     # pylint: disable=too-many-ancestors
     class MyModel(tf.keras.Model):
         def __init__(self):
@@ -112,6 +140,7 @@ def dummy_tf_subclassed_model(dummy_x_train, dummy_y_train):
             self.dense1 = tf.keras.layers.Dense(4, activation=tf.nn.relu)
             self.dense2 = tf.keras.layers.Dense(5, activation=tf.nn.softmax)
 
+        # pylint: disable=unused-argument
         def call(self, inputs, training=None, mask=None):  # pragma: no cover
             x = self.dense1(inputs)
             return self.dense2(x)
@@ -151,9 +180,11 @@ class TestTensorFlowModelDataset:
         tf_model_dataset.save(dummy_tf_base_model)
         assert tf_model_dataset.exists()
 
-    def test_hdf5_save_format(self, dummy_tf_base_model, dummy_x_test, filepath):
+    def test_hdf5_save_format(
+        self, dummy_tf_base_model, dummy_x_test, filepath, tensorflow_model_dataset
+    ):
         """Test TensorflowModelDataset can save TF graph models in HDF5 format"""
-        hdf5_dataset = TensorFlowModelDataset(
+        hdf5_dataset = tensorflow_model_dataset(
             filepath=filepath, save_args={"save_format": "h5"}
         )
 
@@ -171,6 +202,7 @@ class TestTensorFlowModelDataset:
         dummy_y_train,
         dummy_x_test,
         filepath,
+        tensorflow_model_dataset,
     ):
         """Test TensorflowModelDataset cannot save subclassed user models in HDF5 format
 
@@ -181,7 +213,7 @@ class TestTensorFlowModelDataset:
         That's because a subclassed model needs to be called on some data in order to
         create its weights.
         """
-        hdf5_data_set = TensorFlowModelDataset(
+        hdf5_data_set = tensorflow_model_dataset(
             filepath=filepath, save_args={"save_format": "h5"}
         )
         # demonstrating is a working model
@@ -209,18 +241,14 @@ class TestTensorFlowModelDataset:
             ("https://example.com/test_tf", HTTPFileSystem),
         ],
     )
-    def test_protocol_usage(self, filepath, instance_type):
+    def test_protocol_usage(self, filepath, instance_type, tensorflow_model_dataset):
         """Test that can be instantiated with mocked arbitrary file systems.
 
         """
-        data_set = TensorFlowModelDataset(filepath=filepath)
+        data_set = tensorflow_model_dataset(filepath=filepath)
         assert isinstance(data_set._fs, instance_type)
 
-        # _strip_protocol() doesn't strip http(s) protocol
-        if data_set._protocol == "https":
-            path = filepath.split("://")[-1]
-        else:
-            path = data_set._fs._strip_protocol(filepath)
+        path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
 
         assert str(data_set._filepath) == path
         assert isinstance(data_set._filepath, PurePosixPath)
@@ -233,19 +261,19 @@ class TestTensorFlowModelDataset:
         for key, value in load_args.items():
             assert tf_model_dataset._load_args[key] == value
 
-    def test_catalog_release(self, mocker):
+    def test_catalog_release(self, mocker, tensorflow_model_dataset):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.tf"
-        data_set = TensorFlowModelDataset(filepath=filepath)
+        data_set = tensorflow_model_dataset(filepath=filepath)
         assert data_set._version_cache.currsize == 0  # no cache if unversioned
         data_set.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
         assert data_set._version_cache.currsize == 0
 
     @pytest.mark.parametrize("fs_args", [{"storage_option": "value"}])
-    def test_fs_args(self, fs_args, mocker):
+    def test_fs_args(self, fs_args, mocker, tensorflow_model_dataset):
         fs_mock = mocker.patch("fsspec.filesystem")
-        TensorFlowModelDataset("test.tf", fs_args=fs_args)
+        tensorflow_model_dataset("test.tf", fs_args=fs_args)
 
         fs_mock.assert_called_once_with("file", auto_mkdir=True, storage_option="value")
 
@@ -321,11 +349,11 @@ class TestTensorFlowModelDatasetVersioned:
         with pytest.warns(UserWarning, match=pattern):
             versioned_tf_model_dataset.save(dummy_tf_base_model)
 
-    def test_http_filesystem_no_versioning(self):
+    def test_http_filesystem_no_versioning(self, tensorflow_model_dataset):
         pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
 
         with pytest.raises(DataSetError, match=pattern):
-            TensorFlowModelDataset(
+            tensorflow_model_dataset(
                 filepath="https://example.com/file.tf", version=Version(None, None)
             )
 

@@ -4,6 +4,7 @@ html, body.wy-body-for-nav {
     margin: 0;
     padding: 0;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     font-family: 'Titillium Web', sans-serif;
     font-weight: 400;
     line-height: 2rem;
@@ -13,10 +14,15 @@ html {
     font-size: 62.5%;
 }
 
+:focus {
+    outline-color: #006dff;
+}
+
 body.wy-body-for-nav {
     font-size: 1.6rem;
     background: rgb(250, 250, 250) !important;
-    color: black;
+    color: #1e1e21;
+    position: relative;
 }
 
 .wy-side-nav-search {
@@ -48,10 +54,9 @@ body.wy-body-for-nav {
     top: 0;
     bottom: 0;
     left: 0;
-    padding-bottom: 2em;
+    padding-bottom: 0;
     width: 300px;
     overflow-x: hidden;
-    overflow-y: auto;
     min-height: 100%;
     background: white;
     z-index: 200;
@@ -59,11 +64,12 @@ body.wy-body-for-nav {
 }
 
 .wy-body-for-nav .wy-side-scroll {
+    display: flex;
+    flex-direction: column;
     width: 100%;
     position: relative;
     overflow-x: initial;
     overflow-y: initial;
-    height: initial;
 }
 
 .wy-body-for-nav .wy-side-nav-search {
@@ -102,15 +108,22 @@ body.wy-body-for-nav {
 .wy-body-for-nav .wy-menu-vertical {
     width: 300px;
     margin: 0;
-    padding: 0 20px;
+    padding: 0px 20px 64px 20px;
+    overflow-y: auto;
+    height: 100%;
 }
 
 .wy-body-for-nav .wy-menu-vertical p.caption {
     margin: 1.5em 0 0.2em;
     padding: 0;
-    color: #666;
-    font-weight: bold;
     font-size: 2rem;
+    color: #161616;
+    font-weight: normal;
+    text-transform: none;
+}
+
+.wy-body-for-nav .wy-menu-vertical p.caption:first-child {
+    margin-top: 1em;
 }
 
 .wy-body-for-nav .wy-menu-vertical li.on a, .wy-body-for-nav .wy-menu-vertical li.current>a {
@@ -130,9 +143,9 @@ body.wy-body-for-nav {
 .wy-body-for-nav .wy-menu-vertical li a {
     display: block;
     margin: 0;
-    padding: 1.2rem 0 !important;
+    padding: 1.1rem 0 !important;
     font-size: 1.6rem;
-    line-height: 1;
+    line-height: 1.2;
     color: #222;
     background: none !important;
 }
@@ -140,6 +153,27 @@ body.wy-body-for-nav {
 .rst-content.style-external-links a.reference.external:after {
     color: inherit;
     opacity: 0.8;
+}
+
+.rst-content tt.literal, .rst-content tt.literal, .rst-content code.literal {
+    color: #e72000;
+}
+
+.highlight .nv {
+    color: #bd269e;
+}
+
+.highlight .c1,
+.highlight .sd {
+    color: #147087;
+}
+
+.highlight .nn {
+    color: #0e84b5;
+}
+
+.highlight .nn {
+    color: #0047bf;
 }
 
 .wy-body-for-nav .wy-menu-vertical a:hover {
@@ -200,8 +234,12 @@ body.wy-body-for-nav {
     margin-left: 6px;
 }
 
+.wy-body-for-nav .wy-breadcrumbs li.wy-breadcrumbs-aside {
+    margin-left: 24px;
+}
+
 .wy-body-for-nav .wy-nav-content .document {
-    padding: 3.2rem 3.2rem 2rem;
+    padding: 10.2rem 3.2rem 2rem;
     max-width: 100rem;
 }
 
@@ -233,48 +271,44 @@ body.wy-body-for-nav {
 
 .wy-body-for-nav .wy-menu-vertical li.current a {
     border-right: none;
+    font-weight: normal;
 }
 
-.wy-body-for-nav .toctree-l2 {
-    padding-left: 15px !important;
+.wy-body-for-nav .wy-menu-vertical li.current a.current {
+    font-weight: bold;
 }
 
-.wy-body-for-nav .toctree-l3 {
-    padding-left: 15px !important;
-}
-
-.wy-body-for-nav .toctree-l4 {
-     padding-left: 15px !important;
- }
-
+.wy-body-for-nav .toctree-l2,
+.wy-body-for-nav .toctree-l3,
+.wy-body-for-nav .toctree-l4,
 .wy-body-for-nav .toctree-l5 {
-    padding-left: 15px !important;
+    padding-left: 8px !important;
 }
 
-
-.wy-body-for-nav .toctree-l2.current > a, .wy-body-for-nav .toctree-l3.current > a,.wy-body-for-nav .toctree-l4.current > a {
-    font-weight: normal !important;
-}
 .wy-body-for-nav .toctree-l4  a {
     word-break: break-word;
-}
-
-.wy-body-for-nav b, .wy-body-for-nav strong {
-    font-weight: normal;
 }
 
 .wy-plain-list-disc li,
 .rst-content .section ul li,
 .rst-content .toctree-wrapper ul li,
 article ul li {
+    list-style: square;
     margin-top: 0.35em;
     margin-bottom: 0.35em;
 }
 
+.rst-content .toctree-wrapper ul li {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
 h1, h2, .rst-content .toctree-wrapper p.caption, h3, h4, h5, h6, legend {
     font-family: 'Titillium Web', sans-serif;
-    margin: 1em 0 0.3em;
+    margin: 1.2em 0 1em 0;
     line-height: 1.2em;
+    color: #272c2e;
+    font-weight: normal;
 }
 
 .wy-body-for-nav .document > div > .section > *:not(:empty):first-of-type {
@@ -282,16 +316,16 @@ h1, h2, .rst-content .toctree-wrapper p.caption, h3, h4, h5, h6, legend {
 }
 
 .wy-body-for-nav h1 {
-    font-size: 3.9rem;
+    font-size: 2.6rem;
     letter-spacing: -0.3px;
 }
 
 .wy-body-for-nav h2 {
-    font-size: 3.25rem;
+    font-size: 2.3rem;
 }
 
 .wy-body-for-nav h3 {
-    font-size: 2.6rem;
+    font-size: 2.1rem;
 }
 
 .wy-body-for-nav h4 {
@@ -306,11 +340,14 @@ h1, h2, .rst-content .toctree-wrapper p.caption, h3, h4, h5, h6, legend {
     font-size: 1.4625rem;
 }
 
-
 .wy-body-for-nav p {
     font-size: 100%;
-    margin: 0 0 15px 0;
-    line-height: 1.5;
+    margin: 0 0 1em 0;
+    line-height: 1.7;
+}
+
+.wy-body-for-nav p + details {
+    margin: -4px 0 15px;
 }
 
 .wy-body-for-nav blockquote {
@@ -318,6 +355,16 @@ h1, h2, .rst-content .toctree-wrapper p.caption, h3, h4, h5, h6, legend {
     padding-left: 1em;
     border-left: 4px solid #ddd;
     color: #6a6a6a;
+}
+
+footer span.commit code,
+footer span.commit .rst-content tt,
+.rst-content footer span.commit tt {
+    color: #6f7070;
+}
+
+.rst-content tt, .rst-content tt, .rst-content code {
+    padding: 0.16em 0.48em;
 }
 
 .wy-body-for-nav .rst-content a, .wy-body-for-nav footer a {
@@ -328,15 +375,32 @@ h1, h2, .rst-content .toctree-wrapper p.caption, h3, h4, h5, h6, legend {
 }
 
 .wy-body-for-nav .rst-content a:visited, .wy-body-for-nav footer a:visited {
-    color: #446b7f;
+    color: #447087;
+    text-decoration-color: #739eb4;
 }
 
+.wy-body-for-nav .rst-content .btn, .wy-body-for-nav footer .btn,
+.wy-body-for-nav .rst-content .btn:hover, .wy-body-for-nav footer .btn:hover,
+.wy-body-for-nav .rst-content .headerlink, .wy-body-for-nav .rst-content .headerlink:hover,
+.wy-body-for-nav .wy-breadcrumbs li a,
+.wy-nav-content .wy-breadcrumbs .fa-github, .wy-nav-content .wy-breadcrumbs .fa-github:hover {
+    text-decoration: none;
+}
+
+.wy-body-for-nav .rst-content a, .wy-body-for-nav footer a,
 .wy-body-for-nav .rst-content a:hover, .wy-body-for-nav footer a:hover {
     text-decoration: underline;
+    text-underline-position: under;
+    text-decoration-color: #b7d9f2;
 }
 
-.wy-body-for-nav .rst-content .btn:hover, .wy-body-for-nav footer .btn:hover {
-    text-decoration: none;
+.rst-content a code span {
+    text-decoration: underline;
+    text-decoration-color: #fff;
+}
+
+.rst-content a code {
+    border-bottom: 1px solid #ff8c8c;
 }
 
 .wy-body-for-nav .wy-nav-top {
@@ -399,4 +463,18 @@ h1, h2, .rst-content .toctree-wrapper p.caption, h3, h4, h5, h6, legend {
 .wy-body-for-nav .rst-versions {
     font-size: 16px;
     line-height: 1;
+}
+
+.wy-breadcrumbs {
+    position: fixed;
+    z-index: 2;
+}
+
+/* Offset target anchor to below the fixed header */
+:target:before {
+    display: block;
+    content: ' ';
+    width: 1px;
+    height: 60px;
+    margin-top: -80px;
 }

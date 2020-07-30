@@ -28,13 +28,16 @@
 """``ParallelRunner`` is an ``AbstractRunner`` implementation. It can
 be used to run the ``Pipeline`` in parallel groups formed by toposort.
 """
+import multiprocessing
 import os
 import pickle
+import sys
 from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
 from itertools import chain
 from multiprocessing.managers import BaseProxy, SyncManager  # type: ignore
 from multiprocessing.reduction import ForkingPickler
+from pathlib import Path
 from pickle import PicklingError
 from typing import Any, Iterable, Set
 
@@ -42,6 +45,9 @@ from kedro.io import DataCatalog, DataSetError, MemoryDataSet
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 from kedro.runner.runner import AbstractRunner, run_node
+
+# see https://github.com/python/cpython/blob/master/Lib/concurrent/futures/process.py#L114
+_MAX_WINDOWS_WORKERS = 61
 
 
 class _SharedMemoryDataSet:
@@ -96,6 +102,41 @@ ParallelRunnerManager.register(  # pylint: disable=no-member
 )
 
 
+def _run_node_synchronization(
+    node: Node, catalog: DataCatalog, is_async: bool = False, run_id: str = None
+) -> Node:
+    """Run a single `Node` with inputs from and outputs to the `catalog`.
+    `KedroContext` class is initialized in every subprocess because of Windows
+    (latest OSX with Python 3.8) limitation.
+    Windows has no "fork", so every subprocess is a brand new process created via "spawn",
+    and KedroContext needs to be created in every subprocess in order to make
+    KedroContext logging setup and hook manager work.
+
+    Args:
+        node: The ``Node`` to run.
+        catalog: A ``DataCatalog`` containing the node's inputs and outputs.
+        is_async: If True, the node inputs and outputs are loaded and saved
+            asynchronously with threads. Defaults to False.
+        run_id: The id of the pipeline run.
+
+    Returns:
+        The node argument.
+
+    """
+
+    if multiprocessing.get_start_method() == "spawn":  # type: ignore
+        # pylint: disable=import-outside-toplevel
+        import kedro.framework.context.context as context  # pragma: no cover
+
+        context.load_context(Path.cwd())  # pragma: no cover
+    # The hard-coded current working directory causes
+    # parallel runner to not work in notebook environment,
+    # but we will revisit this when we work on access `project_path`
+    # from within the runner and data in KedroContext
+    # See https://github.com/quantumblacklabs/private-kedro/issues/701.
+    return run_node(node, catalog, is_async, run_id)
+
+
 class ParallelRunner(AbstractRunner):
     """``ParallelRunner`` is an ``AbstractRunner`` implementation. It can
     be used to run the ``Pipeline`` in parallel groups formed by toposort.
@@ -108,7 +149,8 @@ class ParallelRunner(AbstractRunner):
         Args:
             max_workers: Number of worker processes to spawn. If not set,
                 calculated automatically based on the pipeline configuration
-                and CPU core count.
+                and CPU core count. On windows machines, the max_workers value
+                cannot be larger than 61 and will be set to min(61, max_workers).
             is_async: If True, the node inputs and outputs are loaded and saved
                     asynchronously with threads. Defaults to False.
 
@@ -119,12 +161,16 @@ class ParallelRunner(AbstractRunner):
         self._manager = ParallelRunnerManager()
         self._manager.start()
 
-        if max_workers is not None and max_workers <= 0:
-            raise ValueError("max_workers should be positive")
+        # This code comes from the concurrent.futures library
+        # https://github.com/python/cpython/blob/master/Lib/concurrent/futures/process.py#L588
+        if max_workers is None:
+            # NOTE: `os.cpu_count` might return None in some weird cases.
+            # https://github.com/python/cpython/blob/3.7/Modules/posixmodule.c#L11431
+            max_workers = os.cpu_count() or 1
+            if sys.platform == "win32":
+                max_workers = min(_MAX_WINDOWS_WORKERS, max_workers)
 
-        # NOTE: `os.cpu_count` might return None in some weird cases.
-        # https://github.com/python/cpython/blob/3.7/Modules/posixmodule.c#L11431
-        self._max_workers = max_workers or os.cpu_count() or 1
+        self._max_workers = max_workers
 
     def __del__(self):
         self._manager.shutdown()
@@ -254,7 +300,13 @@ class ParallelRunner(AbstractRunner):
                 todo_nodes -= ready
                 for node in ready:
                     futures.add(
-                        pool.submit(run_node, node, catalog, self._is_async, run_id)
+                        pool.submit(
+                            _run_node_synchronization,
+                            node,
+                            catalog,
+                            self._is_async,
+                            run_id,
+                        )
                     )
                 if not futures:
                     assert not todo_nodes, (todo_nodes, done_nodes, ready, done)

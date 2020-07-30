@@ -1,31 +1,92 @@
-# Upcoming Release
+# Upcoming 0.17.0 release
+
+## Major features and improvements
+
+## Bug fixes and other changes
+
+## Breaking changes to the API
+
+## Thanks for supporting contributions
+
+# Release 0.16.4
+
+## Major features and improvements
+* Enabled auto-discovery of hooks implementations coming from installed plugins.
+
+## Bug fixes and other changes
+* Fixed a bug for using `ParallelRunner` on Windows.
+* Modified `GBQTableDataSet` to load customized results using customized queries from Google Big Query tables.
+* Documentation improvements.
+
+## Breaking changes to the API
+
+## Thanks for supporting contributions
+[Ajay Bisht](https://github.com/ajb7), [Vijay Sajjanar](https://github.com/vjkr), [Deepyaman Datta](https://github.com/deepyaman), [Sebastian Bertoli](https://github.com/sebastianbertoli), [Shahil Mawjee](https://github.com/s-mawjee), [Louis Guitton](https://github.com/louisguitton), [Emanuel Ferm](https://github.com/eferm)
+
+# Release 0.16.3
+
+## Major features and improvements
+* Added the `kedro pipeline pull` CLI command to extract a packaged modular pipeline, and place the contents in a Kedro project.
+* Added the `--version` option to `kedro pipeline package` to allow specifying alternative versions to package under.
+* Added the `--starter` option to `kedro new` to create a new project from a local, remote or aliased starter template.
+* Added the `kedro starter list` CLI command to list all starter templates that can be used to bootstrap a new Kedro project.
+* Added `json.JSONDataSet`
+
+## Bug fixes and other changes
+* Removed `/src/nodes` directory from the project template and made `kedro jupyter convert` create it on the fly if necessary.
+* Fixed a bug in `MatplotlibWriter` which prevented saving lists and dictionaries of plots locally on Windows.
+* Closed all pyplot windows after saving in `MatplotlibWriter`.
+* Documentation improvements:
+  - Added [kedro-wings](https://github.com/tamsanh/kedro-wings) and [kedro-great](https://github.com/tamsanh/kedro-great) to the list of community plugins.
+* Fixed broken versioning for Windows paths.
+* Fixed `DataSet` string representation for falsy values.
+* Improved the error message when duplicate nodes are passed to the `Pipeline` initializer.
+* Fixed a bug where `kedro docs` would fail because the built docs were located in a different directory.
+* Fixed a bug where `ParallelRunner` would fail on Windows machines whose reported CPU count exceeded 61.
+* Fixed an issue with saving TensorFlow model to `h5` file on Windows.
+* Added a `json` parameter to `APIDataSet` for the convenience of generating requests with JSON bodies.
+* Fixed dependencies for `SparkDataSet` to include spark.
+
+## Breaking changes to the API
+
+## Thanks for supporting contributions
+[Deepyaman Datta](https://github.com/deepyaman), [Tam-Sanh Nguyen](https://github.com/tamsanh), [DataEngineerOne](http://youtube.com/DataEngineerOne)
+
+# Release 0.16.2
 
 ## Major features and improvements
 * Added the following new datasets.
 
 | Type                                | Description                                                                                                           | Location                           |
 | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| `pandas.AppendableExcelDataSet`     | Works with `Excel` file opened in append mode                                                                         | `kedro.extras.datasets.pandas`     |
 | `tensorflow.TensorFlowModelDataset` | Works with `TensorFlow` models using [TensorFlow 2.X](https://www.tensorflow.org/api_docs/python/tf/keras/Model#save) | `kedro.extras.datasets.tensorflow` |
 | `holoviews.HoloviewsWriter`         | Works with `Holoviews` objects (saves as image file)                                                                  | `kedro.extras.datasets.holoviews`  |
 
 * `kedro install` will now compile project dependencies (by running `kedro build-reqs` behind the scenes) before the installation if the `src/requirements.in` file doesn't exist.
-* Added `only_nodes_with_namespaces` in `Pipeline` class to filter only nodes with a specified namespace.
+* Added `only_nodes_with_namespace` in `Pipeline` class to filter only nodes with a specified namespace.
+* Added the `kedro pipeline delete` command to help delete unwanted or unused pipelines (it won't remove references to the pipeline in your `create_pipelines()` code).
+* Added the `kedro pipeline package` command to help package up a modular pipeline. It will bundle up the pipeline source code, tests, and parameters configuration into a .whl file.
 
 ## Bug fixes and other changes
-* Sped up initialization of `spark.SparkHiveDataSet`.
-* Introduced regex filtering to the `DataCatalog.list()` method.
-* Added support of options for building pyarrow table in `pandas.ParquetDataSet`.
-* Add missing `pillow.ImageDataSet` entry to the documentation.
-* Non-alphanumeric characters (except underscore) in dataset name are replaced with `__` in `DataCatalog.datasets`, for ease of access to transcoded datasets.
-* Added [find-kedro](https://github.com/WaylonWalker/find-kedro) and [kedro-static-viz](https://github.com/WaylonWalker/kedro-static-viz) to the list of community plugins.
-* Fixed the bug in IPython startup script ([issue 298](https://github.com/quantumblacklabs/kedro/issues/298)).
-* All unrecognized CLI options in `kedro build-reqs` command are now passed to [pip-compile](https://github.com/jazzband/pip-tools#example-usage-for-pip-compile) call (e.g. `kedro build-reqs --generate-hashes`).
-* `kedro build-reqs` is now called with `-q` option and will no longer print out compiled requirements to the console for security reasons.
-* Linted project template :sparkles: :cake: :sparkles:
+* Improvement in `DataCatalog`:
+  - Introduced regex filtering to the `DataCatalog.list()` method.
+  - Non-alphanumeric characters (except underscore) in dataset name are replaced with `__` in `DataCatalog.datasets`, for ease of access to transcoded datasets.
+* Improvement in Datasets:
+  - Improved initialization speed of `spark.SparkHiveDataSet`.
+  - Improved S3 cache in `spark.SparkDataSet`.
+  - Added support of options for building `pyarrow` table in `pandas.ParquetDataSet`.
+* Improvement in `kedro build-reqs` CLI command:
+  - `kedro build-reqs` is now called with `-q` option and will no longer print out compiled requirements to the console for security reasons.
+  - All unrecognized CLI options in `kedro build-reqs` command are now passed to [pip-compile](https://github.com/jazzband/pip-tools#example-usage-for-pip-compile) call (e.g. `kedro build-reqs --generate-hashes`).
+* Improvement in `kedro jupyter` CLI command:
+  - Improved error message when running `kedro jupyter notebook`, `kedro jupyter lab` or `kedro ipython` with Jupyter/IPython dependencies not being installed.
+  - Fixed `%run_viz` line magic for showing kedro viz inside a Jupyter notebook. For the fix to be applied on existing Kedro project, please see the migration guide.
+  - Fixed the bug in IPython startup script ([issue 298](https://github.com/quantumblacklabs/kedro/issues/298)).
 * Documentation improvements:
-  - Corrected bad DataEngineerOne link
-* Improved error message when running `kedro jupyter notebook`, `kedro jupyter lab` or `kedro ipython` with Jupyter/IPython dependencies not being installed.
-* Fixed `%run_viz` line magic for showing kedro viz inside a Jupyter notebook. For the fix to be applied on existing Kedro project, please see the migration guide.
+  - Updated community-generated content in FAQ.
+  - Added [find-kedro](https://github.com/WaylonWalker/find-kedro) and [kedro-static-viz](https://github.com/WaylonWalker/kedro-static-viz) to the list of community plugins.
+  - Add missing `pillow.ImageDataSet` entry to the documentation.
 
 ## Breaking changes to the API
 
@@ -36,7 +97,7 @@
 Even though this release ships a fix for project generated with `kedro==0.16.2`, after upgrading, you will still need to make a change in your existing project if it was generated with `kedro>=0.16.0,<=0.16.1` for the fix to take effect. Specifically, please change the content of your project's IPython init script located at `.ipython/profile_default/startup/00-kedro-init.py` with the content of [this file](https://github.com/quantumblacklabs/kedro/blob/0.16.2/kedro/templates/project/%7B%7B%20cookiecutter.repo_name%20%7D%7D/.ipython/profile_default/startup/00-kedro-init.py). You will also need `kedro-viz>=3.3.1`.
 
 ## Thanks for supporting contributions
-[Miguel Rodriguez Gutierrez](https://github.com/MigQ2), [Joel Schwarzmann](https://github.com/datajoely), [w0rdsm1th](https://github.com/w0rdsm1th), [Deepyaman Datta](https://github.com/deepyaman), [Tam-Sanh Nguyen](https://github.com/tamsanh)
+[Miguel Rodriguez Gutierrez](https://github.com/MigQ2), [Joel Schwarzmann](https://github.com/datajoely), [w0rdsm1th](https://github.com/w0rdsm1th), [Deepyaman Datta](https://github.com/deepyaman), [Tam-Sanh Nguyen](https://github.com/tamsanh), [Marcus Gawronsky](https://github.com/marcusinthesky)
 
 # 0.16.1
 

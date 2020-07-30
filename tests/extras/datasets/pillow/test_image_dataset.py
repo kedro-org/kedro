@@ -26,7 +26,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
+from time import sleep
 
 import pytest
 from fsspec.implementations.http import HTTPFileSystem
@@ -36,12 +37,12 @@ from s3fs.core import S3FileSystem
 
 from kedro.extras.datasets.pillow import ImageDataSet
 from kedro.io import DataSetError
-from kedro.io.core import Version, generate_timestamp
+from kedro.io.core import PROTOCOL_DELIMITER, Version, generate_timestamp
 
 
 @pytest.fixture
 def filepath_png(tmp_path):
-    return str(tmp_path / "test.png")
+    return (tmp_path / "test.png").as_posix()
 
 
 @pytest.fixture
@@ -58,7 +59,7 @@ def versioned_image_dataset(filepath_png, load_version, save_version):
 
 @pytest.fixture(scope="module")
 def image_object():
-    filepath = str(PurePosixPath(__file__).parent / "data/image.png")
+    filepath = str(Path(__file__).parent / "data/image.png")
     return Image.open(filepath).copy()
 
 
@@ -125,11 +126,7 @@ class TestImageDataSet:
         data_set = ImageDataSet(filepath=filepath)
         assert isinstance(data_set._fs, instance_type)
 
-        # _strip_protocol() doesn't strip http(s) protocol
-        if data_set._protocol == "https":
-            path = filepath.split("://")[-1]
-        else:
-            path = data_set._fs._strip_protocol(filepath)
+        path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
 
         assert str(data_set._filepath) == path
         assert isinstance(data_set._filepath, PurePosixPath)
@@ -177,6 +174,9 @@ class TestImageDataSetVersioned:
         versioned_image_dataset.save(image_object)
         v1 = versioned_image_dataset.resolve_load_version()
 
+        # Sometimes for some reason `v1 == v_new` on Windows.
+        # `sleep()` was added to fix this.
+        sleep(0.5)
         # force-drop a newer version into the same location
         v_new = generate_timestamp()
         ImageDataSet(filepath=filepath_png, version=Version(v_new, v_new)).save(

@@ -15,7 +15,7 @@ Take a look at the [documentation](https://kedro.readthedocs.io) to get started.
 In order to get the best out of the template:
 
  * Please don't remove any lines from the `.gitignore` file we provide
- * Make sure your results can be reproduced by following a data engineering convention, e.g. the one we suggest [here](https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention)
+ * Make sure your results can be reproduced by following a data engineering convention, e.g. the one we suggest [here](https://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#what-is-data-engineering-convention)
  * Don't commit any data to your repository
  * Don't commit any credentials or local configuration to your repository
  * Keep all credentials or local configuration in `conf/local/`

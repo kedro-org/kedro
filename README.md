@@ -44,7 +44,7 @@ You can also install `kedro` using `conda`, a package and environment manager pr
 conda install -c conda-forge kedro
 ```
 
-Our [Get Started guide](https://kedro.readthedocs.io/en/stable/02_getting_started/01_prerequisites.html) contains full installation instructions, and includes how to set up Python virtual environments.
+Our [Get Started guide](https://kedro.readthedocs.io/en/stable/02_get_started/01_prerequisites.html) contains full installation instructions, and includes how to set up Python virtual environments.
 
 We also recommend the [frequently asked questions](https://kedro.readthedocs.io/en/stable/11_faq/01_faq.html) and the [API reference documentation](https://kedro.readthedocs.io/en/stable/kedro.html) for additional information.
 
@@ -125,7 +125,7 @@ Yes! Want to help build Kedro? Check out our [guide to contributing to Kedro](ht
 
 ## Where can I learn more?
 
-There is a growing community around Kedro. Have a look at the [Kedro FAQs](https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#how-can-i-find-out-more-about-kedro) to find projects using Kedro and links to articles, podcasts and talks.
+There is a growing community around Kedro. Have a look at the [Kedro FAQs](https://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#how-can-i-find-out-more-about-kedro) to find projects using Kedro and links to articles, podcasts and talks.
 
 
 ## What licence do you use?

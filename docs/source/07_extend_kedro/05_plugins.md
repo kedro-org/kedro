@@ -83,7 +83,7 @@ When you are ready to submit your code:
    - All `project` commands should be provided as another `click` group
    - The `click` groups are declared through the [`pkg_resources` entry_point system](https://setuptools.readthedocs.io/en/latest/setuptools.html#dynamic-discovery-of-services-and-plugins)
  3. Include a `README.md` describing your `plugin`'s functionality and all dependencies that should be included
- 4. Use GitHub tagging to tag your plugin as a `kedro-plugin` so that we can find it
+ 4. Use GitHub tagging to tag your plugin as a `kedro-plugin` so that we can [find it](https://github.com/topics/kedro-hook)
 
 >*Note:* In future, we will feature a list of "Plugins by Contributors". Your plugin needs to have an [Apache 2.0 compatible license](https://www.apache.org/legal/resolved.html#category-a) to be considered for this list.
 
@@ -130,6 +130,7 @@ kedro to_json
 - [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz), a tool for visualising your Kedro pipelines
 
 ## Community-developed plugins
+_see the full list of plugins listed on the GitHub tag [kedro-hook](https://github.com/topics/kedro-hook)_
 
 - [Kedro-Pandas-Profiling](https://github.com/BrickFrog/kedro-pandas-profiling) by [Justin Malloy](https://github.com/BrickFrog), a simple plugin that uses [Pandas-Profiling](https://github.com/pandas-profiling/pandas-profiling) to profile datasets in the Kedro catalog
 - [find-kedro](https://github.com/WaylonWalker/find-kedro) by [Waylon Walker](https://github.com/WaylonWalker), automatically construct pipelines using pytest style pattern matching

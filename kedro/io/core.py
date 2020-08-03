@@ -462,8 +462,8 @@ def _load_obj(class_path: str) -> Optional[object]:
             raise DataSetError(
                 f"{error} Please see the documentation on how to "
                 f"install relevant dependencies for {class_path}:\n"
-                f"https://kedro.readthedocs.io/en/stable/02_getting_started/"
-                f"02_install.html#optional-dependencies"
+                f"https://kedro.readthedocs.io/en/stable/"
+                f"04_kedro_project_setup/01_dependencies.html"
             )
         return None
 

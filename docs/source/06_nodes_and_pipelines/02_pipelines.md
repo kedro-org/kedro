@@ -192,7 +192,7 @@ pipeline = my_modular_pipeline_1.create_pipeline()
 Here is a list of recommendations for developing a modular pipeline:
 
 * A modular pipeline should include a `README.md`, with all the information regarding the execution of the pipeline for the end users
-* A modular pipeline _may_ have external dependencies specified in `requirements.txt`. These dependencies are _not_ currently installed by the [`kedro install`](../06_resources/03_commands_reference.md#kedro-install) command, so the users of your pipeline would have to run `pip install -r src/<python_package>/pipelines/<pipeline_name>/requirements.txt`
+* A modular pipeline _may_ have external dependencies specified in `requirements.txt`. These dependencies are _not_ currently installed by the [`kedro install`](../09_development/03_commands_reference.md#kedro-install) command, so the users of your pipeline would have to run `pip install -r src/<python_package>/pipelines/<pipeline_name>/requirements.txt`
 * To ensure portability, modular pipelines should use relative imports when accessing their own objects and absolute imports otherwise. Look at an example from `src/new_kedro_project/pipelines/modular_pipeline_1/pipeline.py` below:
 
 ```python

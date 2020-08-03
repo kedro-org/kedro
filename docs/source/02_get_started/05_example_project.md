@@ -48,7 +48,7 @@ Kedro also creates the following hidden files and folders:
     ├── .gitignore      # Prevent staging of unnecessary files to `git`
     ├── .ipython        # IPython startup scripts
     ├── .isort.cfg      # Configuration file for the `isort` utility when doing `kedro lint`
-    └── .kedro.yml      # Identifies the project root and [contains configuration information](https://kedro.readthedocs.io/en/latest/06_resources/02_architecture_overview.html?#kedro-yml)
+    └── .kedro.yml      # Identifies the project root and [contains configuration information](https://kedro.readthedocs.io/en/latest/11_faq/02_architecture_overview.html#kedro-yml)
 ```
 
 ### `conf/`

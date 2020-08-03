@@ -8,7 +8,7 @@
 
 ## Virtual environments
 
-The main purpose of Python virtual environments is to create an isolated environment for a Python project to have its own dependencies, regardless of other projects.
+The main purpose of Python virtual environments is to create an isolated environment for a Python project to have its own dependencies, regardless of other projects. We recommend that you create a new virtual environment for *each* new Kedro project you create.
 
 > [Read more about Python Virtual Environments](https://realpython.com/python-virtual-environments-a-primer/).
 

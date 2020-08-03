@@ -1,7 +1,5 @@
 # Install Kedro
 
-We recommend that you install Kedro in a [new virtual environment](01_prerequisites.md#virtual-environments) for *each* new project you create.
-
 To install Kedro from the Python Package Index (PyPI) simply run:
 
 ```bash

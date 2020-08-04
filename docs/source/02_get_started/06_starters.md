@@ -1,6 +1,5 @@
 # Kedro starters
 
-
 Kedro starters are used to create projects that contain code to run as-is, or to adapt and extend. They provide pre-defined example code and configuration that can be reused, for example:
 
 * As example code for a typical Kedro project

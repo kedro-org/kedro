@@ -12,7 +12,9 @@ The Iris dataset can be used by a machine learning model to illustrate classific
 
 You must first [create a project](./04_new_project.md). Feel free to name your project as you like, but here we will assume the project's repository name is `getting-started`.
 
-> Be sure to enter `Y` at the final prompt, so your new project is pre-populated with the Iris dataset example.
+```bash
+kedro new --starter=pandas-iris
+```
 
 If you prefer, clone the example project from the [`kedro-examples` repository on Github](https://github.com/quantumblacklabs/kedro-examples)
 

@@ -30,8 +30,8 @@
 Feature: Jupyter targets in new project
 
   Background:
-    Given I have prepared a config file with example code
-    And I have run a non-interactive kedro new
+    Given I have prepared a config file
+    And I have run a non-interactive kedro new with starter
     And I have updated kedro requirements
     And I have executed the kedro command "install"
 

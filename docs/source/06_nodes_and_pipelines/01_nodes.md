@@ -230,4 +230,4 @@ Hello f(h(g(Kedro)))!
 Hello f(h(g(Kedro)))!
 ```
 
-Kedro comes with a few built-in decorators which are very useful when building your pipeline. You can learn more how to apply decorators to whole pipelines and the list of built-in decorators in [the next section](./06_pipelines.md#applying-decorators-on-pipelines).
+Kedro comes with a few built-in decorators which are very useful when building your pipeline. You can learn more how to apply decorators to whole pipelines and the list of built-in decorators in [the next section](./02_pipelines.html#applying-decorators-on-pipelines).

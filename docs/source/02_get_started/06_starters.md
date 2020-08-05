@@ -1,14 +1,12 @@
 # Kedro starters
 
+Kedro starters are used to create projects that contain code to run as-is, or to adapt and extend. They provide pre-defined example code and configuration that can be reused, for example:
 
-Kedro starters are used to create projects that contain code to run as-is, or to adapt and extend. They provide boilerplate projects that can be reused, for example:
-
-* To offer example code, or reusable boilerplate, for a typical Kedro project
+* As example code for a typical Kedro project
 * To add a `docker-compose` setup to launch Kedro next to a monitoring stack
 * To add deployment scripts and CI/CD setup for your targeted infrastructure
 
-
-A Kedro starter is a [Cookiecutter](https://cookiecutter.readthedocs.io/en/1.7.2/) template that contains the boilerplate code for a Kedro project. <!--You can create your own starters for reuse within a project or team, as described in the documentation about [how to create a Kedro starter](../07_extend_kedro/06_create_kedro_starters.md).-->
+A Kedro starter is a [Cookiecutter](https://cookiecutter.readthedocs.io/en/1.7.2/) template that contains the boilerplate code for a Kedro project. You can create your own starters for reuse within a project or team, as described in the documentation about [how to create a Kedro starter](../07_extend_kedro/06_create_kedro_starters.md).
 
 ## How to use Kedro starters
 
@@ -43,7 +41,7 @@ kedro starter list
 
 ## List of official starters
 
-The Kedro team maintains the following starters to bootstrap new Kedro projects.
+The Kedro team maintains the following starters to bootstrap new Kedro projects:
 
 * [Alias `pandas-iris`](https://github.com/quantumblacklabs/kedro-starter-pandas-iris): The [Kedro Iris dataset example project](./05_example_project.md).
 * [Alias `pyspark-iris`](https://github.com/quantumblacklabs/kedro-starter-pyspark-iris): An alternative Kedro Iris dataset example, using [PySpark](../10_tools_integration/01_pyspark.md)
@@ -51,7 +49,6 @@ The Kedro team maintains the following starters to bootstrap new Kedro projects.
 
 
 Each starter project encodes our [recommended Kedro best practices](../10_tools_integration/01_pyspark.md).
-
 
 ## Starter versioning
 
@@ -67,7 +64,7 @@ Under the hood, the value will be passed to the [`--checkout` flag in Cookiecutt
 
 ## Use a starter in interactive mode
 
-By default, when you create a new project using a starter, `kedro new` launches in [interactive mode](./03_new_project.md#create-a-new-blank-project-interactively). You will be prompted to provide the following variables:
+By default, when you create a new project using a starter, `kedro new` launches in [interactive mode](./04_new_project.md). You will be prompted to provide the following variables:
 
 * `project_name` - A human readable name for your new project
 * `repo_name` - A name for the directory that holds your project repository
@@ -77,7 +74,7 @@ This mode assumes that the starter doesn't require any additional configuration 
 
 ## Use a starter with a configuration file
 
-Kedro also allows you to [specify a configuration file](./03_new_project.md#Create-a-new-project-from-a-configuration-file) to create a project. Use the `--config` flag alongside the starter as follows:
+Kedro also allows you to [specify a configuration file](./04_new_project.md#Create-a-new-project-from-a-configuration-file) to create a project. Use the `--config` flag alongside the starter as follows:
 
 ```bash
 kedro new --config=my_kedro_pyspark_project.yml --starter=pyspark

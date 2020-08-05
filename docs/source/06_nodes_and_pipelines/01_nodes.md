@@ -1,10 +1,8 @@
 # Nodes
 
-> *Note:* This documentation is based on `Kedro 0.16.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
->
-> In this section we introduce the concept of a node.
+In this section we introduce the concept of a node, for which the relevant API documentation is [kedro.pipeline.node](/kedro.pipeline.node).
 
-Relevant API documentation: [node](/kedro.pipeline.node)
+> *Note:* This documentation is based on `Kedro 0.16.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 You will first need to import libraries from Kedro and other standard tools to run the code snippets demonstrated below.
 
@@ -113,7 +111,7 @@ To tag a node, you can simply specify the `tags` argument, as follows:
 node(func=add, inputs=["a", "b"], outputs="sum", name="adding_a_and_b", tags="node_tag")
 ```
 
-Moreover, you can [tag all nodes in a ``Pipeline``](./06_pipelines.md#tagging-pipeline-nodes). If the pipeline definition contains `tags=` argument, Kedro will attach the corresponding tag to every node within that pipeline.
+Moreover, you can [tag all nodes in a ``Pipeline``](../06_nodes_and_pipelines/02_pipelines.md#tagging-pipeline-nodes). If the pipeline definition contains the `tags=` argument, Kedro will attach the corresponding tag to every node within that pipeline.
 
 To run a pipeline using a tag:
 
@@ -139,95 +137,3 @@ Out[2]: {'sum': 5}
 ```
 
 > *Note:* It is also possible to call a node as a regular Python function: `adder_node(dict(a=2, b=3))`. This will call `adder_node.run(dict(a=2, b=3))` behind the scenes.
-
-
-## How to apply decorators to nodes
-
-You can apply [Python decorators](https://wiki.python.org/moin/PythonDecorators) to Kedro nodes (a decorator is a computation that runs before and after node execution). Here are example decorators that modify the first string argument of a given function:
-
-
-```python
-from functools import wraps
-from typing import Callable
-
-def apply_f(func: Callable) -> Callable:
-    @wraps(func)
-    def with_f(*args, **kwargs):
-        return func(*["f({})".format(a) for a in args], **kwargs)
-
-    return with_f
-
-
-def apply_g(func: Callable) -> Callable:
-    @wraps(func)
-    def with_g(*args, **kwargs):
-        return func(*["g({})".format(a) for a in args], **kwargs)
-
-    return with_g
-
-
-def apply_h(func: Callable) -> Callable:
-    @wraps(func)
-    def with_h(*args, **kwargs):
-        return func(*["h({})".format(a) for a in args], **kwargs)
-
-    return with_h
-```
-
-So if you want to create a function and make sure that `apply_f` is applied to every call of your function, including in Kedro nodes, you can do as follows:
-
-```python
-@apply_f
-def say_hello(name):
-    print("Hello {}!".format(name))
-
-
-hello_node = node(say_hello, "name", None)
-hello_node.run(dict(name="Kedro"))
-```
-
-`Output`:
-
-```console
-In [3]: hello_node.run(dict(name="Kedro"))
-Hello f(Kedro)!
-Out[3]: {}
-```
-
-If you want to apply an additional decorator to the same function, but just for another node:
-
-```python
-hello_node_wrapped = node(apply_g(say_hello), "name", None)
-
-hello_node.run(dict(name="Kedro"))
-hello_node_wrapped.run(dict(name="Kedro"))
-```
-
-`Output`:
-
-```console
-Hello f(Kedro)!
-Hello f(g(Kedro))!
-Out[4]: {}
-```
-
-### Applying multiple decorators to nodes
-
-You can also provide a list of decorators as shown here:
-
-```python
-hello_wrapped = node(apply_g(apply_h(say_hello)), "name", None)
-hello_decorated = hello_node.decorate(apply_g, apply_h)
-
-hello_wrapped.run(dict(name="Kedro"))
-hello_decorated.run(dict(name="Kedro"))
-```
-
-`Output`:
-
-```console
-Hello f(h(g(Kedro)))!
-Hello f(h(g(Kedro)))!
-```
-
-Kedro comes with a few built-in decorators which are very useful when building your pipeline. You can learn more how to apply decorators to whole pipelines and the list of built-in decorators in [the next section](./06_pipelines.md#applying-decorators-on-pipelines).

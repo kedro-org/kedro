@@ -5,14 +5,14 @@
 Hooks are a mechanism to add extra behaviour to Kedro's main execution in an easy and consistent manner. Some examples may include:
 
 * Adding a transformer after the data catalog is loaded
-* Adding data validation to the inputs, before a node runs, and to the outputs, after a node has run. This makes it possible to integrate with other tools like [Great-Expectations](https://docs.greatexpectations.io/en/latest/)
+* Adding data validation to the inputs before a node runs, and to the outputs after a node has run. This makes it possible to integrate with other tools like [Great-Expectations](https://docs.greatexpectations.io/en/latest/)
 * Adding machine learning metrics tracking, e.g. using [MLflow](https://mlflow.org/), throughout a pipeline run
 
 ## Concepts
 
 A Hook is comprised of a Hook specification and Hook implementation. To add Hooks to your project you will need to:
 
-* Provide a Hook implementation for an existing Hook specification defined by Kedro
+* Provide a Hook implementation for an existing Kedro-defined Hook specification
 * Register your Hook implementation in your `ProjectContext`
 
 
@@ -42,9 +42,11 @@ The naming convention for error hooks is `on_<noun>_error`, in which:
 
 ### Hook implementation
 
-You should provide an implementation for the specification that describes the point at which you want to inject additional behaviour.
+You should provide an implementation for the specification that describes the point at which you want to inject additional behaviour. The Hook implementation should have the same name as the specification. The Hook must provide a concrete implementation with a subset of the corresponding specification's parameters (you do not need to use them all).
 
-A Hook implementation should have the same name as the specification. It provides a concrete implementation with a subset of the specification's parameters. For example, the full signature of the [`after_data_catalog_created`](/kedro.framework.hooks.specs.DataCatalogSpecs) Hook specification is:
+To declare a Hook implementation, use the `@hook_impl` decorator.
+
+For example, the full signature of the [`after_data_catalog_created`](/kedro.framework.hooks.specs.DataCatalogSpecs) Hook specification is:
 
 ```python
 @hook_spec
@@ -76,15 +78,15 @@ class TransformerHooks:
         catalog.add_transformer(ProfileTimeTransformer())
 ```
 
-> * To declare a Hook implementation, use the `@hook_impl` decorator
-> * You only need to make use of a subset of arguments defined in the corresponding specification
-> * Group related Hook implementations under a namespace, preferably a class
-> * You can register more than one implementations for the same specification. They will be called in LIFO (last-in, first-out) order.
-
+We recommend that you group related Hook implementations under a namespace, preferably a class, within a `hooks.py` file in your project.
 
 #### Registering your Hook implementations with Kedro
 
-Hook implementations should be registered with Kedro through the `ProjectContext`:
+Hook implementations should be registered with Kedro through the `ProjectContext`.
+
+You can register more than one implementation for the same specification. They will be called in LIFO (last-in, first-out) order.
+
+The following example sets up a Hook so that the `after_data_catalog_created` implementation is called every time after a data catalog is created.
 
 ```python
 # <your_project>/src/<your_project>/run.py
@@ -107,11 +109,11 @@ class ProjectContext(KedroContext):
         return create_pipelines()
 ```
 
-This ensures that the `after_data_catalog_created` implementation above will be called automatically after every time a data catalog is created.
 
-Kedro also has auto-discovery on by default, meaning that any installed plugins that declare a hooks entry-point will be registered. To learn more about how to enable this for your custom plugin, see our [plugin development guide](05_plugins.md#Hooks).
 
->Note: Auto-discovered hooks will run *after* the ones specified in ``ProjectContext.hooks``.
+Kedro also has auto-discovery on by default, meaning that any installed plugins that declare a Hooks entry-point will be registered. To learn more about how to enable this for your custom plugin, see our [plugin development guide](../07_extend_kedro/05_plugins.md).
+
+>Note: Auto-discovered Hooks will run *after* the ones specified in `ProjectContext.hooks`.
 
 ## Under the hood
 

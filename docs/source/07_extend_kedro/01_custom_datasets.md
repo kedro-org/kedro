@@ -1,43 +1,39 @@
 # Custom datasets
 
-Kedro supports many [datasets](/kedro.extras.datasets) out of the box but you may be dealing with a particular proprietary data format or filesystem in your pipeline, or perhaps you have found a popular use-case for dataset that isn't supported by Kedro yet and want to contribute. This tutorial will help you understand what's involved in the process of creating a new dataset and contributing it to Kedro.
+Kedro supports many [datasets](/kedro.extras.datasets) out of the box, but you may find that you need to create a custom dataset. For example, you may need to handle a proprietary data format or filesystem in your pipeline, or perhaps you have found a particular use case for a dataset that Kedro does not support. This tutorial explains how to create a custom dataset to read and save image data.
 
 ## Scenario
 
-Suppose we are training a model to classify the type of a [Pokémon](https://en.wikipedia.org/wiki/Pok%C3%A9mon), e.g. Water, Fire, Bug, etc., based on its appearance. We will be using this [Kaggle dataset](https://www.kaggle.com/vishalsubbiah/pokemon-images-and-types), which contains ~2MB of Pokémon images as well as a CSV containing their corresponding types.
+In this example, we use a [Kaggle dataset of Pokémon images and types](https://www.kaggle.com/vishalsubbiah/pokemon-images-and-types) to train a model to classify the type of a given [Pokémon](https://en.wikipedia.org/wiki/Pok%C3%A9mon), e.g. Water, Fire, Bug, etc., based on its appearance. To train the model, we read the Pokémon images from PNG files into `numpy` arrays before further manipulation in the Kedro pipeline. To work with PNG images out of the box, in this example we create an `ImageDataSet` to read and save image data.
 
 ## Project setup
 
-Let's bootstrap our project with `kedro new` and name our project `kedro-pokemon`. Then download and save the dataset in `data/01_raw`. The `data` directory structure should be:
+We assume that you have already [installed Kedro](../02_get_started/02_install.md). Now [create a project](../02_get_started/04_new_project.md) (feel free to name your project as you like, but here we will assume the project's repository name is `kedro-pokemon`).
 
-```
-data
-├── 01_raw
-│   └── pokemon-images-and-types
-├── 02_intermediate
-├── 03_primary
-├── 04_feature
-├── 05_model_input
-├── 06_models
-├── 07_model_output
-└── 08_reporting
-```
+Log into your Kaggle account to [download the Pokémon dataset](https://www.kaggle.com/vishalsubbiah/pokemon-images-and-types/download) and unzip it into `data/01_raw`, within a subfolder named `pokemon-images-and-types`. The data comprises a single `pokemon.csv` file plus a subfolder of images.
 
-## Problem
-
-In order to train our model, we will need a mechanism to read the Pokémon images from `png` files into `numpy` arrays for further manipulation in our Kedro pipeline. As Kedro doesn't provide a dataset to work with PNG images out of the box, this is a good opportunity to create an `ImageDataSet` to facilitate the reading and saving of image data in our project. The dataset will use [Pillow](https://pillow.readthedocs.io/en/stable/) under the hood for generic image processing functionality so that it will work with many different image formats, not just PNG.
+The dataset will use [Pillow](https://pillow.readthedocs.io/en/stable/) for generic image processing functionality, to ensure that it can work with a range of different image formats, not just PNG.
 
 To install Pillow:
 
-```console
-$ pip install Pillow
+```bash
+pip install Pillow
 ```
 
-If you run into any installation problem, please head over to their [documentation](https://pillow.readthedocs.io/en/stable/installation.html) for more details.
+Consult the [Pillow documentation](https://pillow.readthedocs.io/en/stable/installation.html) if you experience problems with the installation.
 
 ## The anatomy of a dataset
 
-At the minimum, a valid Kedro dataset needs to subclass the base [AbstractDataSet](/kedro.io.AbstractDataSet) and provide an implementation for the `_load`, `_save` and `_describe` abstract methods. For example, a skeleton for our `ImageDataSet` might look like:
+At the minimum, a valid Kedro dataset needs to subclass the base [AbstractDataSet](/kedro.io.AbstractDataSet) and provide an implementation for the following abstract methods:
+
+* `_load`
+* `_save`
+* `_describe`
+
+Here is an example skeleton for `ImageDataSet`:
+
+<details>
+<summary><b>Click to expand</b></summary>
 
 ```python
 from typing import Any, Dict, List
@@ -80,11 +76,12 @@ class ImageDataSet(AbstractDataSet):
         """Returns a dict that describes the attributes of the dataset"""
         ...
 ```
+</details>
 
-We can place this dataset definition in `src/kedro_pokemon/io/datasets/image_dataset.py` to mimic the structure inside the Kedro's codebase:
+Create a subfolder called `extras` in `src/kedro_pokemon/`, and a `datasets` subfolder within that, to store the dataset definition `image_dataset.py` and mimic the structure inside Kedro's own codebase (including `__init__.py` to make Python treat those directories containing the file as packages that you can import from):
 
 ```
-src/kedro_pokemon/io
+src/kedro_pokemon/extras
 ├── __init__.py
 └── datasets
     ├── __init__.py
@@ -93,7 +90,12 @@ src/kedro_pokemon/io
 
 ## Implement the `_load` method with `fsspec`
 
-Under the hood, a lot of Kedro built-in datasets rely on [fsspec](https://filesystem-spec.readthedocs.io/en/latest/) to interface with various different data sources in a consistent manner. More information could be found [here](./04_data_catalog.html#specifying-the-location-of-the-dataset). In our scenario, it's particularly convenient to use `fsspec` in conjunction with `Pillow` to read an image's data so that the dataset could work flexibly not just with different image formats but also with different image locations, such as S3, GCP, local filesystems, etc. Below is an implementation of the `_load` method using `fsspec` and `Pillow` to read the data of a single image in a `numpy` array:
+Many of the built-in Kedro datasets rely on [fsspec](https://filesystem-spec.readthedocs.io/en/latest/) as a consistent interface to different data sources, as described earlier in the section about the [Data Catalog](./04_data_catalog.html#specifying-the-location-of-the-dataset). In this example, it's particularly convenient to use `fsspec` in conjunction with `Pillow` to read image data, since it allows the dataset to work flexibly with different image locations and formats.
+
+Here is the implementation of the `_load` method using `fsspec` and `Pillow` to read the data of a single image into a `numpy` array:
+
+<details>
+<summary><b>Click to expand</b></summary>
 
 ```python
 from pathlib import PurePosixPath
@@ -133,14 +135,15 @@ class ImageDataSet(AbstractDataSet):
             image = Image.open(f).convert('RGBA')
             return np.asarray(image)
 ```
+</details>
 
 To test this out, let's add a dataset to the data catalog to load [Pikachu's](https://en.wikipedia.org/wiki/Pikachu) image.
 
 ```yaml
 # in conf/base/catalog.yml
-
+kedro_pokemon.extras.datasets
 pikachu:
-  type: kedro_pokemon.io.datasets.image_dataset.ImageDataSet
+  type: kedro_pokemon.extras.datasets.image_dataset.ImageDataSet
   filepath: data/01_raw/pokemon-images-and-types/images/images/pikachu.png
   # Note: the duplicated `images` path is part of the original Kaggle dataset
 ```
@@ -158,7 +161,8 @@ In [3]: Image.fromarray(image).show()
 
 ## Implement the `_save` method with `fsspec`
 
-Similarly, we can use implement our `_save` method as follows:
+Similarly, we can implement the `_save` method as follows:
+
 
 ```python
 import numpy as np
@@ -205,9 +209,12 @@ class ImageDataSet(AbstractDataSet):
         )
 ```
 
-## Bringing it all together
+## The complete example
 
 Here is the full implementation of our basic `ImageDataSet`:
+
+<details>
+<summary><b>Click to expand</b></summary>
 
 ```python
 from pathlib import PurePosixPath
@@ -271,17 +278,20 @@ class ImageDataSet(AbstractDataSet):
             protocol=self._protocol
         )
 ```
+</details>
 
-## Integrating with `PartitionedDataSet`
+## Integration with `PartitionedDataSet`
 
-A keen reader might have noticed that up until now our `ImageDataSet` only works with one single image. What about loading all Pokemon images from the raw data directory for further processing? The answer is using a [PartitionDataSet](./07_kedro_io/01_advanced_io.html#partitioned-dataset).
+Currently, the `ImageDataSet` only works with a single image, but this example needs to load all Pokemon images from the raw data directory for further processing.
 
-`PartitionedDataSet` is a convenient way to load many separate data files of the same underlying dataset type in a directory. For example, in our Pokemon pipeline, to use `PartitionedDataSet` with our `ImageDataSet` to load all Pokemon PNG images, simply add this to the data catalog:
+Kedro's [`PartitionedDataSet`](./07_kedro_io/01_advanced_io.html#partitioned-dataset) is a convenient way to load multiple separate data files of the same underlying dataset type into a directory.
+
+To use `PartitionedDataSet` with `ImageDataSet` to load all Pokemon PNG images, add this to the data catalog YAML so that `PartitionedDataSet` loads all PNG files from the data directory using `ImageDataSet`:
 
 ```yaml
 pokemon:
   type: PartitionedDataSet
-  dataset: kedro_pokemon.io.datasets.image_dataset.ImageDataSet
+  dataset: kedro_pokemon.extras.datasets.image_dataset.ImageDataSet
   path: data/01_raw/pokemon-images-and-types/images/images
   filename_suffix: ".png"
 ```
@@ -294,26 +304,27 @@ In [2]: len(images)
 Out[2]: 721
 ```
 
-Verify the number of `.png` files in the data directory is indeed `721`:
+Verify the number of `.png` files in the data directory (it should be `721`):
 
 ```console
 $ ls -la data/01_raw/pokemon-images-and-types/images/images/*.png | wc -l
     721
 ```
 
-This proves that the `PartitionedDataSet` has helped us load all PNG files from the data directory using the underlying `ImageDataSet`. More importantly, we have enabled this capability just through updating a few lines of YAML. Pretty neat, right?
-
-## Adding Versioning
+## Versioning
 
 > *Note*: Versioning doesn't work with PartitionedDataSet. You can't use both of them at the same time.
 
-To add [Versioning](./04_kedro/01_advanced_io.md#versioning) support to our dataset, at the minimum, we need to extend the [AbstractVersionedDataSet](/kedro.io.AbstractVersionedDataSet) to:
+To add [Versioning](./05_data/02_kedro_io.md#versioning) support to the new dataset we need to extend the [AbstractVersionedDataSet](/kedro.io.AbstractVersionedDataSet) to:
 
-* Accept a `version` keyword argument as part of the constructor; and
-* Adapt the `_save` and `_load` method to use the versioned data path obtained from `_get_save_path` and `_get_load_path` accordingly.
+* Accept a `version` keyword argument as part of the constructor
+* Adapt the `_save` and `_load` method to use the versioned data path obtained from `_get_save_path` and `_get_load_path` respectively
 
-In our example, out of the box, the following implementation will load and save data to and from `data/01_raw/pokemon-images-and-types/images/images/pikachu.png/<version>/pikachu.png` with `version` being a datetime-formatted string `YYYY-MM-DDThh.mm.ss.sssZ` by default:
+The following amends the full implementation of our basic `ImageDataSet`. It now loads and saves data to and from a versioned subfolder (`data/01_raw/pokemon-images-and-types/images/images/pikachu.png/<version>/pikachu.png` with `version` being a datetime-formatted string `YYYY-MM-DDThh.mm.ss.sssZ` by default):
 
+
+<details>
+<summary><b>Click to expand</b></summary>
 
 ```python
 from pathlib import PurePosixPath
@@ -382,21 +393,26 @@ class ImageDataSet(AbstractVersionedDataSet):
             protocol=self._protocol
         )
 ```
+</details>
 
-To test it out, first enable versioning support in our data catalog:
+The graphic shows the differences between the original `ImageDataSet` and the versioned `ImageDataSet`:
+
+![Visual code diff graphic](../meta/images/diffs-graphic.png)
+
+To test the code, you need to enable versioning support in the data catalog:
 
 ```yaml
 # in conf/base/catalog.yml
 
 pikachu:
-  type: kedro_pokemon.io.datasets.image_dataset.ImageDataSet
+  type: kedro_pokemon.extras.datasets.image_dataset.ImageDataSet
   filepath: data/01_raw/pokemon-images-and-types/images/images/pikachu.png
   versioned: true
 ```
 
 > *Note*: Using an HTTP(S)-based `filepath` with `versioned: true` is NOT supported.
 
-And create an initial version of the data by creating a `2020-02-22T00.00.00.000Z` directory as an example first version:
+Create an initial version of the data by creating an example first version (e.g. `2020-02-22T00.00.00.000Z`):
 
 ```console
 $ mv data/01_raw/pokemon-images-and-types/images/images/pikachu.png data/01_raw/pokemon-images-and-types/images/images/pikachu.png.backup
@@ -412,7 +428,7 @@ data/01_raw/pokemon-images-and-types/images/images/pikachu.png
     └── pikachu.png
 ```
 
-Then launch an IPython shell to try loading and saving versioned data:
+Launch an IPython shell to test load/save of the versioned data:
 
 ```
 # loading works as Kedro automatically find the latest available version inside `pikachu.png` directory
@@ -421,13 +437,15 @@ In [1]: img = context.catalog.load('pikachu')
 In [2]: context.catalog.save('pikachu', data=img)
 ```
 
-If you inspect the content of the data directory, you might notice that a new version of the data was written with the `save` call. Try calling `save` a few more times on your dataset and observe the change in the data directory. That's a versioned dataset in action. Visit [here](./04_kedro_io/01_advanced_io.md#versioning) for a more in-depth documentation of the Versioning API.
+Inspect the content of the data directory to find a new version of the data, written by `save`.
 
-## Thread-safety consideration
+You may also want to consult the [in-depth documentation about the Versioning API](./05_data/kedro#versioning).
 
-Every Kedro dataset should work with both the [SequentialRunner](/kedro.runner.SequentialRunner) as well as the [ParallelRunner](/kedro.runner.ParallelRunner). Therefore, it must be fully serialisable by Python's [multiprocessing](https://docs.python.org/3/library/multiprocessing.html) package, i.e. data sets should not make use of lambda functions, nested functions, closures etc. If you are using custom decorators ensure they are using [`functools.wraps()`](https://docs.python.org/3/library/functools.html#functools.wraps).
+## Thread-safety
 
-To verify whether your dataset is serialisable by `multiprocessing`, try dumping it using `multiprocessing.reduction.ForkingPickler`:
+Every Kedro dataset should work with the [SequentialRunner](/kedro.runner.SequentialRunner) and the [ParallelRunner](/kedro.runner.ParallelRunner), so must be fully serialisable by the [Python multiprocessing package](https://docs.python.org/3/library/multiprocessing.html). This means that your datasets should not make use of lambda functions, nested functions, closures etc. If you are using custom decorators, you need to ensure that they are using [`functools.wraps()`](https://docs.python.org/3/library/functools.html#functools.wraps).
+
+To verify whether your dataset is serialisable by `multiprocessing`, use the console or an iPython session to try dumping it using `multiprocessing.reduction.ForkingPickler`:
 
 ```python
 dataset = context.catalog._data_sets['pokemon']
@@ -437,22 +455,22 @@ from multiprocessing.reduction import ForkingPickler
 ForkingPickler.dumps(dataset)
 ```
 
-## Handling credentials and different filesystems
+## How to handle credentials and different filesystems
 
-Kedro allows you to pass `credentials` as well as filesystem-specific `fs_args` parameters to your dataset if your use-case requires them. For example, if the Pokémon data reside in an S3 bucket, we can add the `credentials` and `fs_args` to the data catalog as follows:
+If your use case requires them, Kedro allows you to pass `credentials` and filesystem-specific `fs_args` parameters to your dataset. For example, if the Pokémon data sits in an S3 bucket, we can add the `credentials` and `fs_args` to the data catalog as follows:
 
 ```yaml
 # in conf/base/catalog.yml
 
 pikachu:
-  type: kedro_pokemon.io.datasets.image_dataset.ImageDataSet
+  type: kedro_pokemon.extras.datasets.image_dataset.ImageDataSet
   filepath: s3://data/01_raw/pokemon-images-and-types/images/images/pikachu.png
   credentials: <your_credentials>
   fs_args:
     arg_1: <value>
 ```
 
-These parameters are then passed to the dataset constructor so you can use them accordingly with `fsspec`:
+These parameters are then passed to the dataset constructor so you can use them with `fsspec`:
 
 ```python
 import fsspec
@@ -482,18 +500,18 @@ class ImageDataSet(AbstractDataSet):
     ...
 ```
 
-We provide additional examples of [how to use parameters through the data catalog's YAML API](./04_data_catalog.md#using-the-data-catalog-with-the-yaml-api). For an example of how to use these parameters in your dataset's constructor, please see the [SparkDataSet](/kedro.extras.datasets.spark.SparkDataSet)'s implementation.
+We provide additional examples of [how to use parameters through the data catalog's YAML API](../05_data/01_data_catalog.md#using-the-data-catalog-with-the-yaml-api). For an example of how to use these parameters in your dataset's constructor, please see the [SparkDataSet](/kedro.extras.datasets.spark.SparkDataSet)'s implementation.
 
 
 ## How to contribute a custom dataset implementation
 
-Kedro users create many custom dataset implementations while working on real-world projects, and it makes sense that they should be able to share their work with each other. That is why Kedro has a `kedro.extras.datasets` sub-package, where users can add new custom dataset implementations to help others in our community.
-
-One of the easiest ways to contribute back to Kedro is to share a custom dataset. If you are interested in doing so, you can check out the [Kedro contribution guide](https://github.com/quantumblacklabs/kedro/blob/develop/CONTRIBUTING.md) on the GitHub repo.
+One of the easiest ways to contribute back to Kedro is to share a custom dataset. Kedro has a `kedro.extras.datasets` sub-package where you can add a new custom dataset implementation to share it with others. You can find out more in the [Kedro contribution guide](https://github.com/quantumblacklabs/kedro/blob/develop/CONTRIBUTING.md) on Github.
 
 To contribute your custom dataset:
 
-1. Add your dataset package to `kedro/extras/datasets/`. For example, in our `ImageDataSet` example, the directory structure should be:
+1. Add your dataset package to `kedro/extras/datasets/`.
+
+For example, in our `ImageDataSet` example, the directory structure should be:
 
 ```
 kedro/extras/datasets/image
@@ -501,8 +519,8 @@ kedro/extras/datasets/image
 └── image_dataset.py
 ```
 
-2. If the dataset is complicated, create a `README.md` file explaining how your dataset works as well as document its API is encouraged.
+2. If the dataset is complex, create a `README.md` file to explain how it works and document its API.
 
-3. The dataset should be accompanied by full tests coverage, located at `tests/extras/datasets` accordingly.
+3. The dataset should be accompanied by full test coverage in `tests/extras/datasets`.
 
-4. Make a Pull Request against the `develop` branch in the [kedro](https://github.com/quantumblacklabs/kedro) repository. For more information, please read our [contributing](https://github.com/quantumblacklabs/kedro/blob/develop/CONTRIBUTING.md) guide.
+4. Make a pull request against the `master` branch of [Kedro's Github repository](https://github.com/quantumblacklabs/kedro).

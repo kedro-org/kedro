@@ -1,8 +1,8 @@
 # How to use Kedro on a Databricks cluster
 
+
 > *Note:* This documentation is based on `Kedro 0.16.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
-## Databricks Connect (recommended)
 We recommend that you use [Databricks Connect](https://pypi.org/project/databricks-connect/) to execute your Kedro pipeline on a Databricks cluster.
 
 Databricks Connect connects your favourite IDE (IntelliJ, Eclipse, [VS Code](../09_development/01_set_up_vscode.md) and [PyCharm](../09_development/02_set_up_pycharm.md)), notebook server (Zeppelin, Jupyter), and other custom applications to Databricks clusters to run Spark code.

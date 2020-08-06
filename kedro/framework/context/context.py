@@ -313,13 +313,15 @@ class KedroContext(abc.ABC):
         """
         return self._get_pipelines()
 
-    def _register_hooks_setuptools(self):
+    @staticmethod
+    def _register_hooks_setuptools():
         """Register pluggy hooks from setuptools entrypoints."""
-        already_registered = self._hook_manager.get_plugins()
-        found = self._hook_manager.load_setuptools_entrypoints(_PLUGIN_HOOKS)
+        hook_manager = get_hook_manager()
+        already_registered = hook_manager.get_plugins()
+        found = hook_manager.load_setuptools_entrypoints(_PLUGIN_HOOKS)
 
         if found:
-            plugininfo = self._hook_manager.list_plugin_distinfo()
+            plugininfo = hook_manager.list_plugin_distinfo()
             plugin_names = sorted(
                 f"{dist.project_name}-{dist.version}"
                 for plugin, dist in plugininfo
@@ -338,7 +340,7 @@ class KedroContext(abc.ABC):
         Args:
             auto: An optional flag to enable auto-discovery and registration of plugin hooks.
         """
-        self._hook_manager = get_hook_manager()
+        hook_manager = get_hook_manager()
 
         if auto:
             self._register_hooks_setuptools()
@@ -347,8 +349,8 @@ class KedroContext(abc.ABC):
             # Sometimes users might create more than one context instance, in which case
             # hooks have already been registered, so we perform a simple check here
             # to avoid an error being raised and break user's workflow.
-            if not self._hook_manager.is_registered(hooks_collection):
-                self._hook_manager.register(hooks_collection)
+            if not hook_manager.is_registered(hooks_collection):
+                hook_manager.register(hooks_collection)
 
     def _get_pipeline(self, name: str = None) -> Pipeline:
         name = name or "__default__"
@@ -445,7 +447,8 @@ class KedroContext(abc.ABC):
         catalog.add_feed_dict(feed_dict)
         if catalog.layers:
             _validate_layers_for_transcoding(catalog)
-        self._hook_manager.hook.after_catalog_created(  # pylint: disable=no-member
+        hook_manager = get_hook_manager()
+        hook_manager.hook.after_catalog_created(  # pylint: disable=no-member
             catalog=catalog,
             conf_catalog=conf_catalog,
             conf_creds=conf_creds,
@@ -721,14 +724,15 @@ class KedroContext(abc.ABC):
 
         # Run the runner
         runner = runner or SequentialRunner()
-        self._hook_manager.hook.before_pipeline_run(  # pylint: disable=no-member
+        hook_manager = get_hook_manager()
+        hook_manager.hook.before_pipeline_run(  # pylint: disable=no-member
             run_params=record_data, pipeline=filtered_pipeline, catalog=catalog
         )
 
         try:
             run_result = runner.run(filtered_pipeline, catalog, run_id)
         except Exception as error:
-            self._hook_manager.hook.on_pipeline_error(  # pylint: disable=no-member
+            hook_manager.hook.on_pipeline_error(  # pylint: disable=no-member
                 error=error,
                 run_params=record_data,
                 pipeline=filtered_pipeline,
@@ -736,7 +740,7 @@ class KedroContext(abc.ABC):
             )
             raise error
 
-        self._hook_manager.hook.after_pipeline_run(  # pylint: disable=no-member
+        hook_manager.hook.after_pipeline_run(  # pylint: disable=no-member
             run_params=record_data,
             run_result=run_result,
             pipeline=filtered_pipeline,

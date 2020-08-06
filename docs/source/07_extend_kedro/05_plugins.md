@@ -83,7 +83,7 @@ When you are ready to submit your code:
    - All `project` commands should be provided as another `click` group
    - The `click` groups are declared through the [`pkg_resources` entry_point system](https://setuptools.readthedocs.io/en/latest/setuptools.html#dynamic-discovery-of-services-and-plugins)
  3. Include a `README.md` describing your `plugin`'s functionality and all dependencies that should be included
- 4. Use GitHub tagging to tag your plugin as a `kedro-plugin` so that we can [find it](https://github.com/topics/kedro-hook)
+ 4. [Use GitHub tagging to tag your plugin](https://github.com/topics/kedro-hook) as a `kedro-plugin` so that we can find it
 
 >*Note:* In future, we will feature a list of "Plugins by Contributors". Your plugin needs to have an [Apache 2.0 compatible license](https://www.apache.org/legal/resolved.html#category-a) to be considered for this list.
 

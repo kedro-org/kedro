@@ -20,7 +20,7 @@ kedro new --starter=<path-to-starter>
 To create a project using the `PySpark` starter:
 
 ```bash
-kedro new --starter=https://github.com/quantumblack/kedro-starter-pyspark.git
+kedro new --starter=https://github.com/quantumblacklabs/kedro-starter-pyspark.git
 ```
 
 If no starter is provided to `kedro new`, the default Kedro template will be used, as documented in ["Creating a new project"](./04_new_project.md).

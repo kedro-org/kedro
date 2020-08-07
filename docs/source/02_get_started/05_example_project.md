@@ -31,7 +31,7 @@ The example project directory is set out as follows:
     ├── logs            # Project output logs (not committed to version control)
     ├── notebooks       # Project related Jupyter notebooks (can be used for experimental code before moving the code to src)
     ├── README.md       # Project README
-    ├── setup.cfg       # Configuration options for `pytest` when doing `kedro test`
+    ├── setup.cfg       # Configuration options for `pytest` when doing `kedro test` and for the `isort` utility when doing `kedro lint`
     └── src             # Project source code
 ```
 
@@ -42,7 +42,6 @@ Kedro also creates the following hidden files and folders:
     ├── .coveragerc     # Configuration file for the coverage reporting when doing `kedro test`
     ├── .gitignore      # Prevent staging of unnecessary files to `git`
     ├── .ipython        # IPython startup scripts
-    ├── .isort.cfg      # Configuration file for the `isort` utility when doing `kedro lint`
     └── .kedro.yml      # Identifies the project root and [contains configuration information](https://kedro.readthedocs.io/en/latest/11_faq/02_architecture_overview.html#kedro-yml)
 ```
 

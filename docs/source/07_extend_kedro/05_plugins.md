@@ -109,6 +109,7 @@ When you are ready to submit your code:
 - [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz), a tool for visualising your Kedro pipelines
 
 ## Community-developed plugins
+_see the full list of plugins listed on the GitHub tag [kedro-hook](https://github.com/topics/kedro-hook)_
 
 - [Kedro-Pandas-Profiling](https://github.com/BrickFrog/kedro-pandas-profiling) by [Justin Malloy](https://github.com/BrickFrog), a simple plugin that uses [Pandas-Profiling](https://github.com/pandas-profiling/pandas-profiling) to profile datasets in the Kedro catalog
 - [find-kedro](https://github.com/WaylonWalker/find-kedro) by [Waylon Walker](https://github.com/WaylonWalker), automatically construct pipelines using pytest style pattern matching

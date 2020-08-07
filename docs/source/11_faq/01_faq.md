@@ -1,5 +1,6 @@
 # Frequently asked questions
 
+
 The following lists a set of questions that we have been asked about Kedro in the past. If you have a different question which isn't answered here, please consider asking it over on [Stack Overflow](https://stackoverflow.com/questions/tagged/kedro).
 
 ## What is Kedro?

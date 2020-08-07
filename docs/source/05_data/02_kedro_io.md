@@ -1,10 +1,9 @@
 # Kedro IO
 
+
+In this tutorial, we cover advanced uses of the [Kedro IO](/kedro.io.rst) module to understand the underlying implementation. The relevant API documentation is [kedro.io.AbstractDataSet](/kedro.io.AbstractDataSet) and [kedro.io.DataSetError](/kedro.io.DataSetError).
+
 > *Note:* This documentation is based on `Kedro 0.16.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
-
-In this tutorial, you will learn about advanced uses of the [Kedro IO](/kedro.io.rst) module and understand the underlying implementation.
-
-Relevant API documentation: [AbstractDataSet](/kedro.io.AbstractDataSet), [DataSetError](/kedro.io.DataSetError)
 
 ## Error handling
 

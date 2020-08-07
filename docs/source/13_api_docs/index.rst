@@ -90,8 +90,11 @@ Welcome to Kedro's documentation!
    :caption: Extend Kedro
 
    07_extend_kedro/01_custom_datasets
+   07_extend_kedro/02_transformers
+   07_extend_kedro/03_decorators
    07_extend_kedro/04_hooks
    07_extend_kedro/05_plugins
+   07_extend_kedro/06_create_kedro_starters
 
 
 .. toctree::

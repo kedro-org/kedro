@@ -1,13 +1,8 @@
 # Iris dataset example project
 
-In this chapter we describe the project directory structure for a typical Kedro project.
+In this chapter we describe the directory structure of a typical Kedro project. We will use an example based on the familiar [Iris dataset](https://www.kaggle.com/uciml/iris).
 
-
-## Background
-
-This example uses the simple and familiar [Iris dataset](https://www.kaggle.com/uciml/iris).
-
-The Iris dataset was generated in 1936 by the British statistician and biologist Ronald Fisher. It contains 150 samples in total, comprising 50 samples of 3 different species of Iris plant (Iris Setosa, Iris Versicolour and Iris Virginica). For each sample, the flower measurements are recorded for the sepal length, sepal width, petal length and petal width, as illustrated in the following graphic.
+The dataset was generated in 1936 by the British statistician and biologist Ronald Fisher. It contains 150 samples in total, comprising 50 samples of 3 different species of Iris plant (Iris Setosa, Iris Versicolour and Iris Virginica). For each sample, the flower measurements are recorded for the sepal length, sepal width, petal length and petal width, as illustrated in the following graphic.
 
 ![](../meta/images/iris_measurements.png)
 
@@ -48,7 +43,7 @@ Kedro also creates the following hidden files and folders:
     ├── .gitignore      # Prevent staging of unnecessary files to `git`
     ├── .ipython        # IPython startup scripts
     ├── .isort.cfg      # Configuration file for the `isort` utility when doing `kedro lint`
-    └── .kedro.yml      # Identifies the project root and [contains configuration information](https://kedro.readthedocs.io/en/latest/06_resources/02_architecture_overview.html?#kedro-yml)
+    └── .kedro.yml      # Identifies the project root and [contains configuration information](https://kedro.readthedocs.io/en/latest/11_faq/02_architecture_overview.html#kedro-yml)
 ```
 
 ### `conf/`

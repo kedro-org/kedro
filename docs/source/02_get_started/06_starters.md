@@ -1,14 +1,13 @@
 # Kedro starters
 
 
-You can use Kedro starters to customise the boilerplate code provided by `kedro new`. This is useful when you need to adapt to different use cases, such as:
+Kedro starters are used to create projects that contain code to run as-is, or to adapt and extend. They provide pre-defined example code and configuration that can be reused, for example:
 
-* To add initial configuration, initialisation code and an example pipeline for PySpark
+* As example code for a typical Kedro project
 * To add a `docker-compose` setup to launch Kedro next to a monitoring stack
 * To add deployment scripts and CI/CD setup for your targeted infrastructure
 
-
-A Kedro starter is a [Cookiecutter](https://cookiecutter.readthedocs.io/en/1.7.2/) template that contains the boilerplate code for a Kedro project. Each starter encodes best practices and provides utilities to bootstrap a new Kedro project for a particular use case. For example, we have created a [`PySpark` starter](https://github.com/quantumblack/kedro-starter-pyspark), which contains initial configuration and initialisation code for PySpark according to our [recommended Kedro best practices](../10_tools_integration/01_pyspark.md).
+A Kedro starter is a [Cookiecutter](https://cookiecutter.readthedocs.io/en/1.7.2/) template that contains the boilerplate code for a Kedro project. You can create your own starters for reuse within a project or team, as described in the documentation about [how to create a Kedro starter](../07_extend_kedro/06_create_kedro_starters.md).
 
 ## How to use Kedro starters
 
@@ -22,7 +21,7 @@ kedro new --starter=<path-to-starter>
 To create a project using the `PySpark` starter:
 
 ```bash
-kedro new --starter=https://github.com/quantumblack/kedro-starter-pyspark.git
+kedro new --starter=https://github.com/quantumblacklabs/kedro-starter-pyspark.git
 ```
 
 If no starter is provided to `kedro new`, the default Kedro template will be used, as documented in ["Creating a new project"](./04_new_project.md).
@@ -43,11 +42,15 @@ kedro starter list
 
 ## List of official starters
 
-The Kedro team maintains the following starters:
+The Kedro team maintains the following starters to bootstrap new Kedro projects:
 
-* [Alias `pandas-iris`](https://github.com/quantumblacklabs/kedro-starter-pandas-iris): An example iris dataset classification pipeline built with Kedro
+* [Alias `pandas-iris`](https://github.com/quantumblacklabs/kedro-starter-pandas-iris): The [Kedro Iris dataset example project](./05_example_project.md).
+* [Alias `pyspark-iris`](https://github.com/quantumblacklabs/kedro-starter-pyspark-iris): An alternative Kedro Iris dataset example, using [PySpark](../10_tools_integration/01_pyspark.md)
 * [Alias `pyspark`](https://github.com/quantumblacklabs/kedro-starter-pyspark): The configuration and initialisation code for a [Kedro pipeline using PySpark](../10_tools_integration/01_pyspark.md)
-* [Alias `pyspark-iris`](https://github.com/quantumblacklabs/kedro-starter-pyspark-iris): An example iris dataset classification pipeline built with [Kedro and PySpark](../10_tools_integration/01_pyspark.md)
+
+
+Each starter project encodes our [recommended Kedro best practices](../10_tools_integration/01_pyspark.md).
+
 ## Starter versioning
 
 By default, Kedro will use the latest version available in the repository, but if you want to use a specific version of a starter, you can pass a `--checkout` argument to the command as follows:
@@ -62,7 +65,7 @@ Under the hood, the value will be passed to the [`--checkout` flag in Cookiecutt
 
 ## Use a starter in interactive mode
 
-By default, when you create a new project using a starter, `kedro new` launches in [interactive mode](./03_new_project.md#Create-a-new-project-interactively). You will be prompted to provide the following variables:
+By default, when you create a new project using a starter, `kedro new` launches in [interactive mode](./04_new_project.md). You will be prompted to provide the following variables:
 
 * `project_name` - A human readable name for your new project
 * `repo_name` - A name for the directory that holds your project repository
@@ -72,7 +75,7 @@ This mode assumes that the starter doesn't require any additional configuration 
 
 ## Use a starter with a configuration file
 
-Kedro also allows you to [specify a configuration file](./03_new_project.md#Create-a-new-project-from-a-configuration-file) to create a project. Use the `--config` flag alongside the starter as follows:
+Kedro also allows you to [specify a configuration file](./04_new_project.md#Create-a-new-project-from-a-configuration-file) to create a project. Use the `--config` flag alongside the starter as follows:
 
 ```bash
 kedro new --config=my_kedro_pyspark_project.yml --starter=pyspark

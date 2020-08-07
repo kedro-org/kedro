@@ -1,6 +1,6 @@
 # A "Hello World" example
 
-It is time to introduce the most basic elements of Kedro. We have split a small example into pieces to discuss each of the concepts with code.
+It is time to introduce the most basic elements of Kedro. We have split a small example into sections to discuss each of the concepts with code.
 
 You can copy the example as one chunk of code from the bottom of this page, or find it on the [`kedro-examples` Github repository](https://github.com/quantumblacklabs/kedro-examples).
 

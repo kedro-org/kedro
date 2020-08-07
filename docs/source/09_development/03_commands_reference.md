@@ -105,10 +105,10 @@ This command shows a list of all pipelines in your project.
 
 ### `kedro pipeline create`
 
-This command creates a new modular pipeline in your project. More details in [this section](../05_nodes_and_pipelines/02_pipelines.md#how-do-i-create-modular-pipelines).
+This command creates a new modular pipeline in your project. More details in [this section](../06_nodes_and_pipelines/02_pipelines.md#how-do-i-create-modular-pipelines).
 
 ### `kedro pipeline package <pipeline_name>`
-This command packages a modular pipeline into a [wheel file](https://pythonwheels.com/). More details in [this section](../05_nodes_and_pipelines/02_pipelines.md#how-do-i-package-a-modular-pipeline).
+This command packages a modular pipeline into a [wheel file](https://pythonwheels.com/). More details in [this section](../06_nodes_and_pipelines/02_pipelines.md#how-do-i-package-a-modular-pipeline).
 
 ## Using Python
 You can also invoke the Kedro CLI as a Python module:

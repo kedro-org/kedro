@@ -79,7 +79,7 @@
               },
               "layer": {
                 "type": "string",
-                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention"
+                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#what-is-data-engineering-convention"
               }
             }
           }
@@ -113,7 +113,7 @@
               },
               "layer": {
                 "type": "string",
-                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention"
+                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#what-is-data-engineering-convention"
               }
             }
           }
@@ -149,7 +149,7 @@
               },
               "layer": {
                 "type": "string",
-                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention\n\nNote: Here you can find all supported file formats: https://biopython.org/wiki/SeqIO"
+                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#what-is-data-engineering-convention\n\nNote: Here you can find all supported file formats: https://biopython.org/wiki/SeqIO"
               }
             }
           }
@@ -179,7 +179,7 @@
               },
               "layer": {
                 "type": "string",
-                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention"
+                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#what-is-data-engineering-convention"
               }
             }
           }
@@ -207,7 +207,7 @@
               },
               "layer": {
                 "type": "string",
-                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention"
+                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#what-is-data-engineering-convention"
               }
             }
           }
@@ -241,7 +241,7 @@
               },
               "layer": {
                 "type": "string",
-                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention"
+                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#what-is-data-engineering-convention"
               }
             }
           }
@@ -273,7 +273,7 @@
               },
               "layer": {
                 "type": "string",
-                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention"
+                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#what-is-data-engineering-convention"
               }
             }
           }
@@ -307,7 +307,7 @@
               },
               "layer": {
                 "type": "string",
-                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention"
+                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#what-is-data-engineering-convention"
               }
             }
           }
@@ -337,7 +337,7 @@
               },
               "layer": {
                 "type": "string",
-                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention"
+                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#what-is-data-engineering-convention"
               }
             }
           }
@@ -369,7 +369,7 @@
               },
               "layer": {
                 "type": "string",
-                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention"
+                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#what-is-data-engineering-convention"
               }
             }
           }
@@ -415,7 +415,7 @@
               },
               "layer": {
                 "type": "string",
-                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention"
+                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#what-is-data-engineering-convention"
               }
             }
           }
@@ -447,7 +447,7 @@
               },
               "layer": {
                 "type": "string",
-                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention"
+                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#what-is-data-engineering-convention"
               }
             }
           }
@@ -477,7 +477,7 @@
               },
               "layer": {
                 "type": "string",
-                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention"
+                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#what-is-data-engineering-convention"
               }
             }
           }
@@ -503,7 +503,7 @@
               },
               "layer": {
                 "type": "string",
-                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention"
+                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#what-is-data-engineering-convention"
               }
             }
           }
@@ -537,7 +537,7 @@
               },
               "layer": {
                 "type": "string",
-                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention"
+                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#what-is-data-engineering-convention"
               }
             }
           }
@@ -567,7 +567,7 @@
               },
               "layer": {
                 "type": "string",
-                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention"
+                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#what-is-data-engineering-convention"
               }
             }
           }
@@ -609,7 +609,7 @@
               },
               "layer": {
                 "type": "string",
-                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention"
+                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#what-is-data-engineering-convention"
               }
             }
           }
@@ -645,7 +645,7 @@
               },
               "layer": {
                 "type": "string",
-                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention"
+                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#what-is-data-engineering-convention"
               }
             }
           }
@@ -677,7 +677,7 @@
               },
               "layer": {
                 "type": "string",
-                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention"
+                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#what-is-data-engineering-convention"
               }
             }
           }
@@ -715,7 +715,7 @@
               },
               "layer": {
                 "type": "string",
-                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention"
+                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#what-is-data-engineering-convention"
               }
             }
           }
@@ -753,7 +753,7 @@
               },
               "layer": {
                 "type": "string",
-                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention"
+                "description": "The data layer according to the data engineering convention:\nhttps://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#what-is-data-engineering-convention"
               }
             }
           }

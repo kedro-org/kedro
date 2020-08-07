@@ -17,11 +17,12 @@
 * Fixed a bug for using `ParallelRunner` on Windows.
 * Modified `GBQTableDataSet` to load customized results using customized queries from Google Big Query tables.
 * Documentation improvements.
+* Absorbed `.isort.cfg` settings into `setup.cfg`
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Ajay Bisht](https://github.com/ajb7), [Vijay Sajjanar](https://github.com/vjkr), [Deepyaman Datta](https://github.com/deepyaman), [Sebastian Bertoli](https://github.com/sebastianbertoli), [Shahil Mawjee](https://github.com/s-mawjee), [Louis Guitton](https://github.com/louisguitton), [Emanuel Ferm](https://github.com/eferm)
+[Ajay Bisht](https://github.com/ajb7), [Vijay Sajjanar](https://github.com/vjkr), [Deepyaman Datta](https://github.com/deepyaman), [Sebastian Bertoli](https://github.com/sebastianbertoli), [Shahil Mawjee](https://github.com/s-mawjee), [Louis Guitton](https://github.com/louisguitton), [Emanuel Ferm](https://github.com/eferm), [Bas Nijholt](https://github.com/basnijholt)
 
 # Release 0.16.3
 

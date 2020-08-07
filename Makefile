@@ -10,7 +10,7 @@ clean:
 	pre-commit clean || true
 
 install-pip-setuptools:
-	python -m pip install -U "pip>=20.0,<20.2" "setuptools>=38.0" wheel
+	python -m pip install -U "pip>=20.0" "setuptools>=38.0" wheel
 
 legal:
 	python tools/license_and_headers.py

@@ -45,7 +45,7 @@ from kedro.framework.cli.cli import (
     cli,
 )
 
-FILES_IN_TEMPLATE = 36
+FILES_IN_TEMPLATE = 35
 
 
 # pylint: disable=too-many-arguments

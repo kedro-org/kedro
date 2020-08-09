@@ -1,15 +1,15 @@
 # Install Kedro
 
-To install Kedro from the Python Package Index (PyPI) simply run:
-
-```bash
-pip install kedro
-```
-
-It is also possible to install Kedro using `conda`:
+To install Kedro using `conda`:
 
 ```bash
 conda install -c conda-forge kedro
+```
+
+It is also possible to install Kedro without using `conda`, from the Python Package Index (PyPI):
+
+```bash
+pip install kedro
 ```
 
 Both approaches install the core Kedro module, which includes the CLI tool, project template, pipeline abstraction, framework, and support for configuration.

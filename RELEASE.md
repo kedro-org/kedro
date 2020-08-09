@@ -17,6 +17,7 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
+[Lovkush Agarwal](https://github.com/Lovkush-A)
 
 # Release 0.16.4
 

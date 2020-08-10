@@ -56,7 +56,7 @@ class MessageDataSet(
     using an underlying filesystem (e.g.: local, S3, GCS). It uses the
     ``email`` package in the standard library to manage email messages.
 
-    Note that ``MessageDataSet`` does not handle sending email messages.
+    Note that ``MessageDataSet`` doesn't handle sending email messages.
 
     Example:
     ::

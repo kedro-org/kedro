@@ -10,7 +10,7 @@ The Iris dataset can be used by a machine learning model to illustrate classific
 
 ## Create the example project
 
-You must first [create a project](./04_new_project.md). Feel free to name your project as you like, but here we will assume the project's repository name is `getting-started`.
+You must first [create a project](./04_new_project.md). Feel free to name your project as you like, but here we will assume the project's repository name is `get-started`.
 
 > Be sure to enter `Y` at the final prompt, so your new project is pre-populated with the Iris dataset example.
 
@@ -23,7 +23,7 @@ This example project illustrates a convenient starting point and some best-pract
 The example project directory is set out as follows:
 
 ```
-    getting-started     # Parent directory of the template
+    get-started         # Parent directory of the template
     ├── conf            # Project configuration files
     ├── data            # Local project data (not committed to version control)
     ├── docs            # Project documentation
@@ -38,7 +38,7 @@ The example project directory is set out as follows:
 Kedro also creates the following hidden files and folders:
 
 ```
-    getting-started
+    get-started
     ├── .coveragerc     # Configuration file for the coverage reporting when doing `kedro test`
     ├── .gitignore      # Prevent staging of unnecessary files to `git`
     ├── .ipython        # IPython startup scripts
@@ -76,7 +76,7 @@ The example project has a single file, `iris.csv`, that contains the Iris datase
 
 This subfolder contains the project's source code. It contains 2 subfolders:
 
--   `getting_started/` This is the Python package for your project
+-   `get_started/` This is the Python package for your project
 -   `tests/` The subfolder for unit tests for your project. Projects are preconfigured to run tests using `pytest` when you call `kedro test` from the project's root directory
 
 ## What best practice should I follow to avoid leaking confidential data?
@@ -94,7 +94,7 @@ This subfolder contains the project's source code. It contains 2 subfolders:
 Navigate to the root directory of the example project, and call `kedro run`:
 
 ```bash
-cd getting-started
+cd get-started
 kedro run
 ```
 
@@ -109,14 +109,14 @@ When it completes, you should see a log message similar to the following in your
 
 The example project contains two modular pipelines:
 
-- A `data_engineering` pipeline (`src/getting_started/pipelines/data_engineering/pipeline.py`) responsible for splitting the data into training and testing samples
+- A `data_engineering` pipeline (`src/get_started/pipelines/data_engineering/pipeline.py`) responsible for splitting the data into training and testing samples
 
-- A `data_science` pipeline (`src/getting_started/pipelines/data_science/pipeline.py`) responsible for model training, predictions and accuracy-reporting
+- A `data_science` pipeline (`src/get_started/pipelines/data_science/pipeline.py`) responsible for model training, predictions and accuracy-reporting
 
 
 **Data engineering node**
 
-This is the data engineering node function within `src/getting_started/pipelines/data_engineering/nodes.py`:
+This is the data engineering node function within `src/get_started/pipelines/data_engineering/nodes.py`:
 
 ```eval_rst
 +-----------------+----------------------------------------------------------------+--------------------------+

@@ -13,18 +13,18 @@ kedro new
 You will be asked to enter each of the following variables in turn. Once you have entered text for the first option (the project's name), you will be offered a default choice for the other options:
 
 ```eval_rst
-+------------------------+-------------------------+----------------------------------------------------------------------------+
-| Option                 | Example                 | Description                                                                |
-+========================+=========================+============================================================================+
-| :code:`project_name`   | :code:`Getting Started` | A human-readable name for your new project                                 |
-+------------------------+-------------------------+----------------------------------------------------------------------------+
-| :code:`repo_name`      | :code:`getting-started` | Directory that holds your project repository                               |
-+------------------------+-------------------------+----------------------------------------------------------------------------+
-| :code:`python_package` | :code:`getting_started` | A name for the Python package name in your project (short, all-lowercase)  |
-+------------------------+-------------------------+----------------------------------------------------------------------------+
-| :code:`include_example`| :code:`Y/n`             | Confirms or rejects the inclusion of the Iris example code                 |
-|                        |                         | Your new project template contains a small example if you enter :code:`Y`  |
-+------------------------+-------------------------+----------------------------------------------------------------------------+
++------------------------+---------------------+----------------------------------------------------------------------------+
+| Option                 | Example             | Description                                                                |
++========================+=====================+============================================================================+
+| :code:`project_name`   | :code:`Get Started` | A human-readable name for your new project                                 |
++------------------------+---------------------+----------------------------------------------------------------------------+
+| :code:`repo_name`      | :code:`get-started` | Directory that holds your project repository                               |
++------------------------+---------------------+----------------------------------------------------------------------------+
+| :code:`python_package` | :code:`get_started` | A name for the Python package name in your project (short, all-lowercase)  |
++------------------------+---------------------+----------------------------------------------------------------------------+
+| :code:`include_example`| :code:`Y/n`         | Confirms or rejects the inclusion of the Iris example code                 |
+|                        |                     | Your new project template contains a small example if you enter :code:`Y`  |
++------------------------+---------------------+----------------------------------------------------------------------------+
 
 ```
 

@@ -129,12 +129,8 @@ class TestRunCommand:
         assert not runner._is_async
 
     @pytest.mark.parametrize("async_flag", ["--async", "-a"])
-    def test_run_async(
-        self, async_flag, fake_kedro_cli, fake_load_context, fake_run_config, mocker
-    ):
-        result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["run", async_flag, fake_run_config]
-        )
+    def test_run_async(self, async_flag, fake_kedro_cli, fake_load_context, mocker):
+        result = CliRunner().invoke(fake_kedro_cli.cli, ["run", async_flag])
         assert not result.exit_code
 
         runner = fake_load_context.return_value.run.call_args_list[0][1]["runner"]

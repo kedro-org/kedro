@@ -13,10 +13,12 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Added option to run asynchronously via the Kedro CLI.
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
+[Deepyaman Datta](https://github.com/deepyaman)
 
 # Release 0.16.4
 
@@ -28,7 +30,7 @@
 * Modified `GBQTableDataSet` to load customized results using customized queries from Google Big Query tables.
 * Added option to run asynchronously via the Kedro CLI.
 * Documentation improvements.
-* Absorbed `.isort.cfg` settings into `setup.cfg`
+* Absorbed `.isort.cfg` settings into `setup.cfg`.
 
 ## Breaking changes to the API
 

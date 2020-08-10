@@ -80,10 +80,9 @@ class TestRunCommand:
             pipeline_name=None,
         )
 
-        assert isinstance(
-            fake_load_context.return_value.run.call_args_list[0][1]["runner"],
-            SequentialRunner,
-        )
+        runner = fake_load_context.return_value.run.call_args_list[0][1]["runner"]
+        assert isinstance(runner, SequentialRunner)
+        assert not runner._is_async
 
     def test_with_sequential_runner_and_parallel_flag(
         self, fake_kedro_cli, fake_load_context
@@ -91,16 +90,15 @@ class TestRunCommand:
         result = CliRunner().invoke(
             fake_kedro_cli.cli, ["run", "--parallel", "--runner=SequentialRunner"]
         )
-
         assert result.exit_code
         assert "Please use either --parallel or --runner" in result.stdout
+
         fake_load_context.return_value.run.assert_not_called()
 
     def test_run_successfully_parallel_via_flag(
         self, fake_kedro_cli, fake_load_context, mocker
     ):
         result = CliRunner().invoke(fake_kedro_cli.cli, ["run", "--parallel"])
-
         assert not result.exit_code
 
         fake_load_context.return_value.run.assert_called_once_with(
@@ -114,10 +112,9 @@ class TestRunCommand:
             pipeline_name=None,
         )
 
-        assert isinstance(
-            fake_load_context.return_value.run.call_args_list[0][1]["runner"],
-            ParallelRunner,
-        )
+        runner = fake_load_context.return_value.run.call_args_list[0][1]["runner"]
+        assert isinstance(runner, ParallelRunner)
+        assert not runner._is_async
 
     def test_run_successfully_parallel_via_name(
         self, fake_kedro_cli, fake_load_context
@@ -125,12 +122,24 @@ class TestRunCommand:
         result = CliRunner().invoke(
             fake_kedro_cli.cli, ["run", "--runner=ParallelRunner"]
         )
-
         assert not result.exit_code
-        assert isinstance(
-            fake_load_context.return_value.run.call_args_list[0][1]["runner"],
-            ParallelRunner,
+
+        runner = fake_load_context.return_value.run.call_args_list[0][1]["runner"]
+        assert isinstance(runner, ParallelRunner)
+        assert not runner._is_async
+
+    @pytest.mark.parametrize("async_flag", ["--async", "-a"])
+    def test_run_async(
+        self, async_flag, fake_kedro_cli, fake_load_context, fake_run_config, mocker
+    ):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["run", async_flag, fake_run_config]
         )
+        assert not result.exit_code
+
+        runner = fake_load_context.return_value.run.call_args_list[0][1]["runner"]
+        assert isinstance(runner, SequentialRunner)
+        assert runner._is_async
 
     @pytest.mark.parametrize("config_flag", ["--config", "-c"])
     def test_run_with_config(

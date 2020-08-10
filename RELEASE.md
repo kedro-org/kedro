@@ -17,7 +17,6 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Lovkush Agarwal](https://github.com/Lovkush-A)
 
 # Release 0.16.4
 
@@ -33,7 +32,7 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Ajay Bisht](https://github.com/ajb7), [Vijay Sajjanar](https://github.com/vjkr), [Deepyaman Datta](https://github.com/deepyaman), [Sebastian Bertoli](https://github.com/sebastianbertoli), [Shahil Mawjee](https://github.com/s-mawjee), [Louis Guitton](https://github.com/louisguitton), [Emanuel Ferm](https://github.com/eferm), [Bas Nijholt](https://github.com/basnijholt)
+[Ajay Bisht](https://github.com/ajb7), [Vijay Sajjanar](https://github.com/vjkr), [Deepyaman Datta](https://github.com/deepyaman), [Sebastian Bertoli](https://github.com/sebastianbertoli), [Shahil Mawjee](https://github.com/s-mawjee), [Louis Guitton](https://github.com/louisguitton), [Emanuel Ferm](https://github.com/eferm), [Bas Nijholt](https://github.com/basnijholt), [Lovkush Agarwal](https://github.com/Lovkush-A)
 
 # Release 0.16.3
 

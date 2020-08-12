@@ -43,19 +43,8 @@ rm -rf docs/build
 mkdir docs/build/
 cp -r docs/_templates docs/conf.py docs/*.svg docs/*.json  docs/build/
 
-sphinx-build -c docs/ -WETa -j auto -D language=en docs/build/ docs/build/html
+sphinx-build -c docs/ -WETan -j auto -D language=en docs/build/ docs/build/html
 
 # Clean up build artefacts
 rm -rf docs/build/html/_sources
-rm -rf docs/build/01_introduction
-rm -rf docs/build/02_get_started
-rm -rf docs/build/03_tutorial
-rm -rf docs/build/04_kedro_project_setup
-rm -rf docs/build/05_data
-rm -rf docs/build/06_nodes_and_pipelines
-rm -rf docs/build/07_extend_kedro
-rm -rf docs/build/08_logging
-rm -rf docs/build/09_development
-rm -rf docs/build/10_tools_integration
-rm -rf docs/build/11_faq
-rm -rf docs/build/12_resources
+rm -rf docs/build/[0-9][0-9]_*

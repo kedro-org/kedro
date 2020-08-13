@@ -311,7 +311,7 @@ When working with AWS credentials on datasets, you are not required to store AWS
 
 ## Configuring `kedro run` arguments
 
-The extensive list of CLI options for a `kedro run` is available [here](../06_nodes_and_pipelines/02_pipelines.md#modifying-a-kedro-run). Instead of specifying all the command line options to a `kedro run` via the CLI, you can specify a config file that contains the arguments, say `config.yml` and run:
+An extensive list of CLI options for a `kedro run` is available in the [Kedro CLI documentation](../09_development/03_commands_reference.md#run-the-project). However, instead of specifying all the command line options to a `kedro run` via the CLI, you can specify a config file that contains the arguments, say `config.yml` and run:
 
 ```console
 $ kedro run --config config.yml

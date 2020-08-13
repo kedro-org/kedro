@@ -360,7 +360,7 @@ class DataCatalog:
         Args:
             name: A data set to be loaded.
             version: Optional argument for concrete data version to be loaded.
-            Works only with versioned datasets.
+                Works only with versioned datasets.
 
         Returns:
             The loaded data as configured.

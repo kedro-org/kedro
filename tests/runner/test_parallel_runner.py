@@ -137,7 +137,7 @@ class TestValidParallelRunner:
 
 
 @pytest.mark.skipif(
-    sys.platform.startswith("win"), reason="Due to bug in parallell runner"
+    sys.platform.startswith("win"), reason="Due to bug in parallel runner"
 )
 class TestMaxWorkers:
     @pytest.mark.parametrize("is_async", [False, True])
@@ -195,7 +195,7 @@ class TestMaxWorkers:
 
 
 @pytest.mark.skipif(
-    sys.platform.startswith("win"), reason="Due to bug in parallell runner"
+    sys.platform.startswith("win"), reason="Due to bug in parallel runner"
 )
 @pytest.mark.parametrize("is_async", [False, True])
 class TestInvalidParallelRunner:
@@ -280,7 +280,7 @@ def decorated_fan_out_fan_in():
 
 
 @pytest.mark.skipif(
-    sys.platform.startswith("win"), reason="Due to bug in parallell runner"
+    sys.platform.startswith("win"), reason="Due to bug in parallel runner"
 )
 @pytest.mark.parametrize("is_async", [False, True])
 class TestParallelRunnerDecorator:
@@ -330,7 +330,7 @@ ParallelRunnerManager.register(  # pylint: disable=no-member
 
 
 @pytest.mark.skipif(
-    sys.platform.startswith("win"), reason="Due to bug in parallell runner"
+    sys.platform.startswith("win"), reason="Due to bug in parallel runner"
 )
 @pytest.mark.parametrize("is_async", [False, True])
 class TestParallelRunnerRelease:

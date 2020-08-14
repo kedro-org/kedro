@@ -53,52 +53,52 @@ class MissingConfigException(Exception):
 
 class ConfigLoader:
     """Recursively scan the directories specified in ``conf_paths`` for
-        configuration files with a ``yaml``, ``yml``, ``json``, ``ini``,
-        ``pickle``, ``xml`` or ``properties`` extension, load them,
-        and return them in the form of a config dictionary.
+    configuration files with a ``yaml``, ``yml``, ``json``, ``ini``,
+    ``pickle``, ``xml`` or ``properties`` extension, load them,
+    and return them in the form of a config dictionary.
 
-        When the same top-level key appears in any 2 config files located in
-        the same ``conf_path`` (sub)directory, a ``ValueError`` is raised.
+    When the same top-level key appears in any 2 config files located in
+    the same ``conf_path`` (sub)directory, a ``ValueError`` is raised.
 
-        When the same key appears in any 2 config files located in different
-        ``conf_path`` directories, the last processed config path takes
-        precedence and overrides this key.
+    When the same key appears in any 2 config files located in different
+    ``conf_path`` directories, the last processed config path takes
+    precedence and overrides this key.
 
-        For example, if your ``conf_path`` looks like this:
-        ::
+    For example, if your ``conf_path`` looks like this:
+    ::
 
-            .
-            `-- conf
-                |-- README.md
-                |-- base
-                |   |-- catalog.yml
-                |   |-- logging.yml
-                |   `-- experiment1
-                |       `-- parameters.yml
-                `-- local
-                    |-- catalog.yml
-                    |-- db.ini
-                    |-- experiment1
-                    |   |-- parameters.yml
-                    |   `-- model_parameters.yml
-                    `-- experiment2
-                        `-- parameters.yml
+        .
+        `-- conf
+            |-- README.md
+            |-- base
+            |   |-- catalog.yml
+            |   |-- logging.yml
+            |   `-- experiment1
+            |       `-- parameters.yml
+            `-- local
+                |-- catalog.yml
+                |-- db.ini
+                |-- experiment1
+                |   |-- parameters.yml
+                |   `-- model_parameters.yml
+                `-- experiment2
+                    `-- parameters.yml
 
 
-        You can access the different configurations as follows:
-        ::
+    You can access the different configurations as follows:
+    ::
 
-            >>> import logging.config
-            >>> from kedro.config import ConfigLoader
-            >>>
-            >>> conf_paths = ['conf/base', 'conf/local']
-            >>> conf_loader = ConfigLoader(conf_paths)
-            >>>
-            >>> conf_logging = conf_loader.get('logging*')
-            >>> logging.config.dictConfig(conf_logging)  # set logging conf
-            >>>
-            >>> conf_catalog = conf_loader.get('catalog*', 'catalog*/**')
-            >>> conf_params = conf_loader.get('**/parameters.yml')
+        >>> import logging.config
+        >>> from kedro.config import ConfigLoader
+        >>>
+        >>> conf_paths = ['conf/base', 'conf/local']
+        >>> conf_loader = ConfigLoader(conf_paths)
+        >>>
+        >>> conf_logging = conf_loader.get('logging*')
+        >>> logging.config.dictConfig(conf_logging)  # set logging conf
+        >>>
+        >>> conf_catalog = conf_loader.get('catalog*', 'catalog*/**')
+        >>> conf_params = conf_loader.get('**/parameters.yml')
 
     """
 

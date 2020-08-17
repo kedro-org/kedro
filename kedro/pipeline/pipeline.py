@@ -704,7 +704,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
 
         Args:
             decorators: Decorators to be applied on all node functions in
-            the pipeline. Decorators will be applied from right to left.
+                the pipeline, always applied from right to left.
 
         Returns:
             A new ``Pipeline`` object with all nodes decorated with the

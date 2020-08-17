@@ -63,6 +63,11 @@ make test
 make build-docs
 ```
 
+> *Note:* If the tests in `tests/extras/datasets/spark` are failing, and you are
+> not planning to work on Spark related features, then you can run a reduced
+> test suite that excludes them. Do this by executing the following command:
+> `make test-no-spark`.
+
 #### Then onwards (code or documentation changes)
 
 If you picked up a code or documentation related issue, before pushing the branch to the repo and creating a Pull Request please do the below:

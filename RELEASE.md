@@ -23,6 +23,8 @@
 
 ## Thanks for supporting contributions
 
+[Sebastian Bertoli](https://github.com/sebastianbertoli)
+
 # Release 0.16.4
 
 ## Major features and improvements

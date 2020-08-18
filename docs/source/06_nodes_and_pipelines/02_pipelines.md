@@ -223,8 +223,8 @@ def create_pipeline():
 </details>
 
 * Modular pipelines should _not_ depend on the main Python package (`new_kedro_project` in this example) as it would break the portability to another project
-* Modular pipelines should be stitched together in a master (or `__default__`) pipeline located in `src/new_kedro_project/pipeline.py`. In our example, this pipeline combines `modular_pipeline_1` and `modular_pipeline_2`.
-* Master pipeline should import and instantiate modular pipelines as shown in this example from `src/new_kedro_project/pipeline.py`:
+* Modular pipelines should be stitched together in a master (or `__default__`) pipeline located in `src/new_kedro_project/hooks.py`. In our example, this pipeline combines `modular_pipeline_1` and `modular_pipeline_2`.
+* Master pipeline should import and instantiate modular pipelines as shown in this example from `src/new_kedro_project/hooks.py`:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -232,6 +232,7 @@ def create_pipeline():
 ```python
 from typing import Dict
 
+from kedro.framework.hooks import hook_impl
 from kedro.pipeline import Pipeline
 
 from new_kedro_project.pipelines import (
@@ -240,11 +241,16 @@ from new_kedro_project.pipelines import (
 )
 
 
-def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
-    pipeline1 = mp1.create_pipeline()
-    pipeline2 = mp2.create_pipeline()
-    pipeline_all = pipeline1 + pipeline2
-    return {"mp1": pipeline1, "mp2": pipeline2, "__default__": pipeline_all}
+class ProjectHooks:
+    @hook_impl
+    def register_pipelines(self) -> Dict[str, Pipeline]:
+        pipeline1 = mp1.create_pipeline()
+        pipeline2 = mp2.create_pipeline()
+        pipeline_all = pipeline1 + pipeline2
+        return {"mp1": pipeline1, "mp2": pipeline2, "__default__": pipeline_all}
+
+
+project_hooks = ProjectHooks()
 ```
 </details>
 
@@ -269,7 +275,7 @@ Linking all of these concepts together, here is an example of a modular pipeline
   - `src/new_kedro_project/pipelines/feature_engineering` - A pipeline that generates temporal features while aggregating data and performs a train/test split on the data
   - `src/new_kedro_project/pipelines/modelling` - A pipeline that fits models, does hyperparameter search and reports on model performance
 * A master (or `__default__`) pipeline:
-  - `src/new_kedro_project/pipeline.py` - combines 3 modular pipelines from the above
+  - `src/new_kedro_project/hooks.py` - combines 3 modular pipelines from the above
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -306,7 +312,7 @@ new-kedro-project
 │   │   │   └── __init__.py
 │   │   ├── __init__.py
 │   │   ├── nodes.py
-│   │   ├── pipeline.py
+│   │   ├── hooks.py
 │   │   └── run.py
 │   ├── tests
 │   │   ├── __init__.py
@@ -756,36 +762,42 @@ Once you enabled the asynchronous mode and ran `kedro run` from the command line
 
 ### Running a pipeline by name
 
-To run the pipeline by its name, you need to add your new pipeline to `create_pipelines()` function `src/<python_package>/pipeline.py` as below:
+To run the pipeline by its name, you need to add your new pipeline to `register_pipelines()` function `src/<python_package>/hooks.py` as below:
 
 <details>
 <summary><b>Click to expand</b></summary>
 
 ```python
-def create_pipelines(**kwargs):
-    """Create the project's pipeline.
+from kedro.framework.hooks import hook_impl
 
-    Args:
-        kwargs: Ignore any additional arguments added in the future.
 
-    Returns:
-        Pipeline: The resulting pipeline.
+class ProjectHooks:
 
-    """
+    @hook_impl
+    def register_pipelines(self):
+        """Register the project's pipelines.
 
-    data_engineering_pipeline = de.create_pipeline()
-    data_science_pipeline = ds.create_pipeline()
-    my_pipeline = Pipeline(
-        [
-            # your definition goes here
-        ]
-    )
+        Returns:
+            A mapping from a pipeline name to a ``Pipeline`` object.
 
-    return {
-        "de": data_engineering_pipeline,
-        "my_pipeline": my_pipeline,
-        "__default__": data_engineering_pipeline + data_science_pipeline,
-    }
+        """
+
+        data_engineering_pipeline = de.create_pipeline()
+        data_science_pipeline = ds.create_pipeline()
+        my_pipeline = Pipeline(
+            [
+                # your definition goes here
+            ]
+        )
+
+        return {
+            "de": data_engineering_pipeline,
+            "my_pipeline": my_pipeline,
+            "__default__": data_engineering_pipeline + data_science_pipeline,
+        }
+
+
+project_hooks = ProjectHooks()
 ```
 </details>
 
@@ -795,7 +807,7 @@ Then from the command line, execute the following:
 kedro run --pipeline my_pipeline
 ```
 
-> *Note:* `kedro run` without `--pipeline` option runs `__default__` pipeline from the dictionary returned by `create_pipelines()`.
+> *Note:* `kedro run` without `--pipeline` option runs `__default__` pipeline from the dictionary returned by `register_pipelines()`.
 
 Further information about `kedro run` can be found in the [Kedro CLI documentation](../09_development/03_commands_reference.md#run-the-project).
 

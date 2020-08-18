@@ -32,6 +32,7 @@ A Python file located in `src/<python_package>/run.py`, which by default contain
 `.kedro.yml` identifies the project root, which is used by other Kedro components and contains the following configuration entries:
 - `source_dir`: (Optional) The directory of the source path relative to the project root path. Default directory is `src/` and when customised the path should be separated by a forward slash (e.g `src/<path_to_src>/`)
 - `context_path`: A top-level key pointing to the absolute path of the context class implementation (default is `<python_project>.run.ProjectContext`)
+- `hooks`: (Optional) A list of paths pointing to [Hooks](../07_extend_kedro/04_hooks.md) implementations to be registered with the project (default is `<python_project>.hooks.project_hooks`)
 
 `.kedro.yml` must be located at the root of the project.
 

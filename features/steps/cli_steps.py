@@ -331,14 +331,6 @@ def exec_kedro_target(context, command):
     context.result = run(cmd, env=context.env, cwd=str(context.root_project_dir))
 
 
-@when("I delete assets not needed for running installed packages")
-def delete_unnecessary_assets(context):
-    """Delete .kedro.yml as it is not needed when executing installed project package.
-    """
-    kedro_yaml = context.root_project_dir / ".kedro.yml"
-    kedro_yaml.unlink()
-
-
 @when("I execute the installed project package")
 def exec_project(context):
     """Execute installed Kedro project target."""
@@ -443,10 +435,11 @@ def udpate_kedro_yml(context: behave.runner.Context, new_source_dir):
     """
 
     kedro_yml_path = context.root_project_dir / ".kedro.yml"
-    kedro_yml_path.write_text(
-        f"context_path: {context.package_name}.run.ProjectContext\n"
-        f"source_dir: {new_source_dir}\n"
-    )
+
+    with kedro_yml_path.open("r+") as _f:
+        content = yaml.safe_load(_f)
+        content["source_dir"] = new_source_dir
+        yaml.safe_dump(content, _f)
 
 
 @given("I have updated kedro requirements")

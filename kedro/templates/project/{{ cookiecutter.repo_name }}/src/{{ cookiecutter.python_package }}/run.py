@@ -41,11 +41,6 @@ class ProjectContext(KedroContext):
     or create new ones (e.g. as required by plugins)
     """
 
-    project_name = "{{ cookiecutter.project_name }}"
-    # `project_version` is the version of kedro used to generate the project
-    project_version = "{{ cookiecutter.kedro_version }}"
-    package_name = "{{ cookiecutter.python_package }}"
-
     def _get_pipelines(self) -> Dict[str, Pipeline]:
         return create_pipelines()
 

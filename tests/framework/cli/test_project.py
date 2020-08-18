@@ -225,6 +225,11 @@ class TestLintCommand:
         assert expected_message in result.stdout
         python_call_mock.assert_not_called()
 
+    def test_pythonpath_env_var(self, fake_kedro_cli, mocker, fake_repo_path):
+        mocked_environ = mocker.patch("os.environ", {})
+        CliRunner().invoke(fake_kedro_cli.cli, ["lint"])
+        assert mocked_environ == {"PYTHONPATH": str(fake_repo_path / "src")}
+
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log", "fake_copyfile")
 class TestInstallCommand:

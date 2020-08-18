@@ -491,24 +491,24 @@ def check_created_project_structure(context):
 
 @then("the pipeline should contain no nodes")
 def check_empty_pipeline_exists(context):
-    """Check if the created `pipeline.py` contains no nodes"""
+    """Check if the created pipeline in `hooks.py` contains no nodes"""
     pipeline_file = (
         context.root_project_dir
         / "src"
         / context.project_name.replace("-", "_")
-        / "pipeline.py"
+        / "hooks.py"
     )
     assert '"__default__": Pipeline([])' in pipeline_file.read_text("utf-8")
 
 
 @then("the pipeline should contain nodes")
 def check_pipeline_not_empty(context):
-    """Check if the created `pipeline.py` contains nodes"""
+    """Check if the created pipeline in `hooks.py` contains nodes"""
     pipeline_file = (
         context.root_project_dir
         / "src"
         / context.project_name.replace("-", "_")
-        / "pipeline.py"
+        / "hooks.py"
     )
     assert "pipeline = Pipeline([])" not in pipeline_file.read_text("utf-8")
 

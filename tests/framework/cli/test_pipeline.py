@@ -127,7 +127,7 @@ class TestPipelineCreateCommand:
         assert result.exit_code == 0
         assert (
             f"To be able to run the pipeline `{PIPELINE_NAME}`, you will need "
-            f"to add it to `create_pipelines()`" in result.output
+            f"to add it to `register_pipelines()`" in result.output
         )
 
         # pipeline
@@ -161,7 +161,7 @@ class TestPipelineCreateCommand:
         assert result.exit_code == 0
         assert (
             f"To be able to run the pipeline `{PIPELINE_NAME}`, you will need "
-            f"to add it to `create_pipelines()`" in result.output
+            f"to add it to `register_pipelines()`" in result.output
         )
         assert f"Creating the pipeline `{PIPELINE_NAME}`: OK" in result.output
         assert f"Pipeline `{PIPELINE_NAME}` was successfully created." in result.output
@@ -325,8 +325,8 @@ class TestPipelineDeleteCommand:
 
         assert f"Pipeline `{PIPELINE_NAME}` was successfully deleted." in result.output
         assert (
-            f"If you added the pipeline `{PIPELINE_NAME}` to `create_pipelines()` in "
-            f"`{dummy_project / 'src' / PACKAGE_NAME / 'pipeline.py'}`, "
+            f"If you added the pipeline `{PIPELINE_NAME}` to `register_pipelines()` in "
+            f"`{dummy_project / 'src' / PACKAGE_NAME / 'hooks.py'}`, "
             f"you will need to remove it.`"
         ) in result.output
 
@@ -352,8 +352,8 @@ class TestPipelineDeleteCommand:
 
         assert f"Pipeline `{PIPELINE_NAME}` was successfully deleted." in result.output
         assert (
-            f"If you added the pipeline `{PIPELINE_NAME}` to `create_pipelines()` in "
-            f"`{dummy_project / 'src' / PACKAGE_NAME / 'pipeline.py'}`, "
+            f"If you added the pipeline `{PIPELINE_NAME}` to `register_pipelines()` in "
+            f"`{dummy_project / 'src' / PACKAGE_NAME / 'hooks.py'}`, "
             f"you will need to remove it.`"
         ) in result.output
 

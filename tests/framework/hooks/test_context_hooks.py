@@ -26,6 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
+import re
 import sys
 from logging.handlers import QueueHandler, QueueListener
 from multiprocessing import Queue
@@ -97,9 +98,11 @@ def config_dir(tmp_path, local_config, local_logging_config):
     catalog = tmp_path / "conf" / "base" / "catalog.yml"
     credentials = tmp_path / "conf" / "local" / "credentials.yml"
     logging = tmp_path / "conf" / "local" / "logging.yml"
+    kedro_yml = tmp_path / ".kedro.yml"
     _write_yaml(catalog, local_config)
     _write_yaml(credentials, {"dev_s3": "foo"})
     _write_yaml(logging, local_logging_config)
+    _write_yaml(kedro_yml, {})
 
 
 @pytest.fixture(autouse=True)
@@ -129,6 +132,15 @@ def assert_exceptions_equal(e1: Exception, e2: Exception):
 @pytest.fixture
 def dummy_dataframe():
     return pd.DataFrame({"test": [1, 2]})
+
+
+context_pipeline = Pipeline(
+    [
+        node(identity, "cars", "planes", name="node1"),
+        node(identity, "boats", "ships", name="node2"),
+    ],
+    tags="pipeline",
+)
 
 
 class LoggingHooks:
@@ -272,6 +284,17 @@ class LoggingHooks:
             },
         )
 
+    @hook_impl
+    def register_pipelines(self) -> Dict[str, Pipeline]:
+        self.logger.info("Registering pipelines")
+        return {"__default__": context_pipeline, "de": context_pipeline}
+
+
+class RegistrationHooks:
+    @hook_impl
+    def register_pipelines(self) -> Dict[str, Pipeline]:
+        return {"__default__": context_pipeline, "pipe": context_pipeline}
+
 
 @pytest.fixture
 def logs_queue():
@@ -295,27 +318,17 @@ def _create_kedro_yml(project_path, project_name, project_version, package_name)
         yaml.safe_dump(payload, _f)
 
 
-def _create_context_with_hooks(tmp_path, mocker, logging_hooks):
+def _create_context_with_hooks(tmp_path, mocker, context_hooks):
     """Create a context with some Hooks registered. We do this in a function
     to support both calling it directly as well as as part of a fixture.
     """
     _create_kedro_yml(tmp_path, "test hooks", __version__, "test_hooks")
 
     class DummyContextWithHooks(KedroContext):
-        hooks = (logging_hooks,)
+        hooks = tuple(context_hooks)
 
         def _get_run_id(self, *args, **kwargs) -> Union[None, str]:
             return "mocked context with hooks run id"
-
-        def _get_pipelines(self) -> Dict[str, Pipeline]:
-            pipeline = Pipeline(
-                [
-                    node(identity, "cars", "planes", name="node1"),
-                    node(identity, "boats", "ships", name="node2"),
-                ],
-                tags="pipeline",
-            )
-            return {"__default__": pipeline}
 
     mocker.patch("logging.config.dictConfig")
     return DummyContextWithHooks(str(tmp_path), env="local")
@@ -324,22 +337,30 @@ def _create_context_with_hooks(tmp_path, mocker, logging_hooks):
 @pytest.fixture
 def context_with_hooks(tmp_path, mocker, logging_hooks):
     logging_hooks.queue_listener.start()
-    yield _create_context_with_hooks(tmp_path, mocker, logging_hooks)
+    yield _create_context_with_hooks(tmp_path, mocker, [logging_hooks])
+    logging_hooks.queue_listener.stop()
+
+
+@pytest.fixture
+def context_with_duplicate_hooks(tmp_path, mocker, logging_hooks):
+    logging_hooks.queue_listener.start()
+    hooks = (logging_hooks, RegistrationHooks())
+    yield _create_context_with_hooks(tmp_path, mocker, hooks)
     logging_hooks.queue_listener.stop()
 
 
 @pytest.fixture
 def broken_context_with_hooks(tmp_path, mocker, logging_hooks):
     logging_hooks.queue_listener.start()
-    yield _create_broken_context_with_hooks(tmp_path, mocker, logging_hooks)
+    yield _create_broken_context_with_hooks(tmp_path, mocker, [logging_hooks])
     logging_hooks.queue_listener.stop()
 
 
-def _create_broken_context_with_hooks(tmp_path, mocker, logging_hooks):
+def _create_broken_context_with_hooks(tmp_path, mocker, context_hooks):
     _create_kedro_yml(tmp_path, "broken-context", __version__, "broken")
 
     class BrokenContextWithHooks(KedroContext):
-        hooks = (logging_hooks,)
+        hooks = tuple(context_hooks)
 
         def _get_pipelines(self) -> Dict[str, Pipeline]:
             pipeline = Pipeline(
@@ -381,7 +402,7 @@ class TestKedroContextHooks:
         assert not hook_manager.is_registered(logging_hooks)
 
         # create the context
-        _create_context_with_hooks(tmp_path, mocker, logging_hooks)
+        _create_context_with_hooks(tmp_path, mocker, [logging_hooks])
 
         # assert hooks are registered after context is created
         assert hook_manager.is_registered(logging_hooks)
@@ -523,7 +544,7 @@ class TestKedroContextHooks:
                 log_records.append(record)
 
         broken_context_with_hooks = _create_broken_context_with_hooks(
-            tmp_path, mocker, logging_hooks
+            tmp_path, mocker, [logging_hooks]
         )
         mocker.patch(
             "kedro.framework.context.context.load_context",
@@ -563,7 +584,9 @@ class TestKedroContextHooks:
             def handle(self, record):
                 log_records.append(record)
 
-        context_with_hooks = _create_context_with_hooks(tmp_path, mocker, logging_hooks)
+        context_with_hooks = _create_context_with_hooks(
+            tmp_path, mocker, [logging_hooks]
+        )
         mocker.patch(
             "kedro.framework.context.context.load_context",
             return_value=context_with_hooks,
@@ -592,3 +615,38 @@ class TestKedroContextHooks:
             assert record.getMessage() == "Ran node"
             assert record.node.name in ["node1", "node2"]
             assert set(record.outputs.keys()) <= {"planes", "ships"}
+
+    def test_register_pipelines_is_called(
+        self, context_with_hooks, dummy_dataframe, caplog
+    ):
+        context_with_hooks.catalog.save("cars", dummy_dataframe)
+        context_with_hooks.catalog.save("boats", dummy_dataframe)
+        context_with_hooks.run()
+
+        register_pipelines_calls = [
+            record
+            for record in caplog.records
+            if record.funcName == "register_pipelines"
+        ]
+        assert len(register_pipelines_calls) == 1
+        call_record = register_pipelines_calls[0]
+        self._assert_hook_call_record_has_expected_parameters(call_record, [])
+
+        expected_pipelines = {"__default__": context_pipeline, "de": context_pipeline}
+        assert context_with_hooks.pipelines == expected_pipelines
+
+    def test_register_pipelines_with_duplicate_entries(
+        self, context_with_duplicate_hooks, dummy_dataframe
+    ):
+        context_with_duplicate_hooks.catalog.save("cars", dummy_dataframe)
+        context_with_duplicate_hooks.catalog.save("boats", dummy_dataframe)
+
+        pattern = "Found duplicate pipeline entries. The following will be overwritten: __default__"
+        with pytest.warns(UserWarning, match=re.escape(pattern)):
+            context_with_duplicate_hooks.run()
+
+        # check that all pipeline dictionaries merged together correctly
+        expected_pipelines = {
+            key: context_pipeline for key in ("__default__", "de", "pipe")
+        }
+        assert context_with_duplicate_hooks.pipelines == expected_pipelines

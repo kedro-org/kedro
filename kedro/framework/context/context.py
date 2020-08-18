@@ -342,15 +342,20 @@ class KedroContext(abc.ABC):
         """
         hook_manager = get_hook_manager()
 
-        if auto:
-            self._register_hooks_setuptools()
+        # enrich with hooks specified in .kedro.yml
+        hooks_locations = self.static_data.get("hooks", [])
+        configured_hooks = tuple(load_obj(hook) for hook in hooks_locations)
 
-        for hooks_collection in self.hooks:
+        all_hooks = self.hooks + configured_hooks
+        for hooks_collection in all_hooks:
             # Sometimes users might create more than one context instance, in which case
             # hooks have already been registered, so we perform a simple check here
             # to avoid an error being raised and break user's workflow.
             if not hook_manager.is_registered(hooks_collection):
                 hook_manager.register(hooks_collection)
+
+        if auto:
+            self._register_hooks_setuptools()
 
     def _get_pipeline(self, name: str = None) -> Pipeline:
         name = name or "__default__"
@@ -360,22 +365,33 @@ class KedroContext(abc.ABC):
             return pipelines[name]
         except (TypeError, KeyError):
             raise KedroContextError(
-                "Failed to find the pipeline named '{}'. "
-                "It needs to be generated and returned "
-                "by the '_get_pipelines' function.".format(name)
+                f"Failed to find the pipeline named '{name}'. "
+                f"It needs to be generated and returned "
+                f"by the '_get_pipelines' function."
             )
 
-    def _get_pipelines(self) -> Dict[str, Pipeline]:
+    def _get_pipelines(self) -> Dict[str, Pipeline]:  # pylint: disable=no-self-use
         """Abstract method for a hook for changing the creation of a Pipeline instance.
 
         Returns:
             A dictionary of defined pipelines.
         """
-        # NOTE: This method is not `abc.abstractmethod` for backward compatibility.
-        raise NotImplementedError(
-            "`{}` is a subclass of KedroContext and it must implement "
-            "the `_get_pipelines` method".format(self.__class__.__name__)
+        hook_manager = get_hook_manager()
+        pipelines_dicts = (
+            hook_manager.hook.register_pipelines()  # pylint: disable=no-member
         )
+
+        pipelines = {}  # type: Dict[str, Pipeline]
+        for pipeline_collection in pipelines_dicts:
+            duplicate_keys = pipeline_collection.keys() & pipelines.keys()
+            if duplicate_keys:
+                warn(
+                    f"Found duplicate pipeline entries. "
+                    f"The following will be overwritten: {', '.join(duplicate_keys)}",
+                )
+            pipelines.update(pipeline_collection)
+
+        return pipelines
 
     @property
     def project_path(self) -> Path:
@@ -670,26 +686,7 @@ class KedroContext(abc.ABC):
         # Report project name
         logging.info("** Kedro project %s", self.project_path.name)
 
-        try:
-            pipeline = self._get_pipeline(name=pipeline_name)
-        except NotImplementedError:
-            common_migration_message = (
-                "`ProjectContext._get_pipeline(self, name)` method is expected. "
-                "Please refer to the 'Modular Pipelines' section of the documentation."
-            )
-            if pipeline_name:
-                raise KedroContextError(
-                    "The project is not fully migrated to use multiple pipelines. "
-                    + common_migration_message
-                )
-
-            warn(
-                "You are using the deprecated pipeline construction mechanism. "
-                + common_migration_message,
-                DeprecationWarning,
-            )
-            pipeline = self.pipeline
-
+        pipeline = self._get_pipeline(name=pipeline_name)
         filtered_pipeline = self._filter_pipeline(
             pipeline=pipeline,
             tags=tags,

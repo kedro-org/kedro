@@ -240,28 +240,6 @@ class DummyContext(KedroContext):
         return {"__default__": pipeline}
 
 
-class DummyContextWithPipelinePropertyOnly(KedroContext):
-    """
-    We need this for testing the backward compatibility.
-    """
-
-    # pylint: disable=abstract-method
-    def _get_pipelines(self):
-        raise NotImplementedError
-
-    @property
-    def pipeline(self) -> Pipeline:
-        return Pipeline(
-            [
-                node(identity, "cars", "boats", name="node1", tags=["tag1"]),
-                node(identity, "boats", "trains", name="node2"),
-                node(identity, "trains", "ships", name="node3"),
-                node(identity, "ships", "planes", name="node4"),
-            ],
-            tags="pipeline",
-        )
-
-
 @pytest.fixture(params=[None])
 def extra_params(request):
     return request.param
@@ -646,34 +624,6 @@ class TestKedroContextRun:
 
         with pytest.raises(KedroContextError, match="Failed to find the pipeline"):
             dummy_context.run(pipeline_name="invalid-name")
-
-    @pytest.mark.usefixtures("prepare_project_dir")
-    def test_without_get_pipeline_deprecated(self, tmp_path, dummy_dataframe):
-        """The old way of providing a `pipeline` context property is deprecated,
-        but still works, yielding a warning message."""
-        context = DummyContextWithPipelinePropertyOnly(tmp_path)
-        context.catalog.save("cars", dummy_dataframe)
-
-        pattern = "You are using the deprecated pipeline construction mechanism"
-        with pytest.warns(DeprecationWarning, match=pattern):
-            outputs = context.run()
-
-        pd.testing.assert_frame_equal(outputs["planes"], dummy_dataframe)
-
-    @pytest.mark.usefixtures("prepare_project_dir")
-    def test_without_get_pipeline_error(self, tmp_path, dummy_dataframe):
-        """
-        The old way of providing a `pipeline` context property is deprecated,
-        but still works, yielding a warning message.
-        If you try to run a sub-pipeline by name - it's an error.
-        """
-
-        context = DummyContextWithPipelinePropertyOnly(tmp_path)
-        context.catalog.save("cars", dummy_dataframe)
-
-        pattern = "The project is not fully migrated to use multiple pipelines"
-        with pytest.raises(KedroContextError, match=pattern):
-            context.run(pipeline_name="missing-pipeline")
 
     @pytest.mark.parametrize(
         "extra_params",

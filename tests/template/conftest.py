@@ -67,7 +67,7 @@ def fake_repo_config_path(fake_root_dir):
     }
     config_path = fake_root_dir / "repo_config.yml"
 
-    with open(str(config_path), "w") as fd:
+    with config_path.open("w") as fd:
         yaml.safe_dump(repo_config, fd)
 
     return config_path

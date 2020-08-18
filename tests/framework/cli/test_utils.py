@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,34 +19,42 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import re
 
-Feature: Package target in new project
+import pytest
+import yaml
 
-  Background:
-    Given I have prepared a config file with example code
-    And I have run a non-interactive kedro new
-    And I have executed the kedro command "install --no-build-reqs"
+from kedro.framework.cli.utils import get_source_dir
 
-  Scenario: Install package
-    When I execute the kedro command "package"
-    Then I should get a successful exit code
-    When I install the project's python package
-    And I execute the installed project package
-    Then I should get a successful exit code
 
-  @fresh_venv
-  Scenario: Install package after running kedro build-reqs
-   Given I have updated kedro requirements
-   When I execute the kedro command "build-reqs"
-   Then I should get a successful exit code
-   When I execute the kedro command "package"
-   Then I should get a successful exit code
-   When I install the project's python package
-   And I execute the installed project package
-   Then I should get a successful exit code
+@pytest.fixture(params=[None])
+def fake_kedro_yml(request, tmp_path):
+    kedro_yml = tmp_path / ".kedro.yml"
+    payload = request.param or dict()
+
+    with kedro_yml.open("w") as _f:
+        yaml.safe_dump(payload, _f)
+
+    return kedro_yml
+
+
+@pytest.mark.parametrize(
+    "fake_kedro_yml,expected_source_dir",
+    [(None, "src"), ({"source_dir": "some/nested/dir"}, "some/nested/dir")],
+    indirect=["fake_kedro_yml"],
+)
+def test_get_source_dir(tmp_path, fake_kedro_yml, expected_source_dir):
+    expected_source_dir = (tmp_path / expected_source_dir).resolve()
+    assert fake_kedro_yml.is_file()
+
+    pattern = "This function is now deprecated and will be removed in Kedro 0.17.0"
+    with pytest.warns(DeprecationWarning, match=re.escape(pattern)):
+        src_dir = get_source_dir(tmp_path)
+
+    assert src_dir == expected_source_dir

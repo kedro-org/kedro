@@ -26,56 +26,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Construction of the master pipeline.
-"""
-
+"""Project hooks."""
 from typing import Dict
 
+from kedro.framework.hooks import hook_impl
 from kedro.pipeline import Pipeline
+{%- if cookiecutter.include_example == "True" %}
 
-{% if cookiecutter.include_example == "True" -%}
 from {{ cookiecutter.python_package }}.pipelines import data_engineering as de
-from {{ cookiecutter.python_package }}.pipelines import data_science as ds
-
-###########################################################################
-# Here you can find an example pipeline, made of two modular pipelines.
-#
-# Delete this when you start working on your own Kedro project as
-# well as pipelines/data_science AND pipelines/data_engineering
-# -------------------------------------------------------------------------
+from {{ cookiecutter.python_package }}.pipelines import data_science as ds{%- endif %}
 
 
-def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
-    """Create the project's pipeline.
+class ProjectHooks:
+    @hook_impl
+    def register_pipelines(self) -> Dict[str, Pipeline]:
+        """Register the project's pipeline.
 
-    Args:
-        kwargs: Ignore any additional arguments added in the future.
+        Returns:
+            A mapping from a pipeline name to a ``Pipeline`` object.
 
-    Returns:
-        A mapping from a pipeline name to a ``Pipeline`` object.
+        """
+        {% if cookiecutter.include_example == "True" -%}
+        data_engineering_pipeline = de.create_pipeline()
+        data_science_pipeline = ds.create_pipeline()
 
-    """
+        return {
+            "de": data_engineering_pipeline,
+            "ds": data_science_pipeline,
+            "__default__": data_engineering_pipeline + data_science_pipeline,
+        }
+        {%- else -%}return {"__default__": Pipeline([])}{%- endif %}
 
-    data_engineering_pipeline = de.create_pipeline()
-    data_science_pipeline = ds.create_pipeline()
 
-    return {
-        "de": data_engineering_pipeline,
-        "ds": data_science_pipeline,
-        "__default__": data_engineering_pipeline + data_science_pipeline,
-    }
-{% else -%}
-
-def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
-    """Create the project's pipeline.
-
-    Args:
-        kwargs: Ignore any additional arguments added in the future.
-
-    Returns:
-        A mapping from a pipeline name to a ``Pipeline`` object.
-
-    """
-
-    return {"__default__": Pipeline([])}
-{% endif -%}
+project_hooks = ProjectHooks()

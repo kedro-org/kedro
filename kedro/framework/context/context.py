@@ -31,7 +31,6 @@ import abc
 import logging
 import logging.config
 import os
-import re
 import sys
 from copy import deepcopy
 from pathlib import Path, PurePosixPath, PureWindowsPath
@@ -241,12 +240,13 @@ class KedroContext(abc.ABC):
                 If specified, will update (and therefore take precedence over)
                 the parameters retrieved from the project configuration.
         """
+        self._project_path = Path(project_path).expanduser().resolve()
+        self._static_data = get_static_project_data(self._project_path)
 
         # check the match for major and minor version (skip patch version)
         if self.project_version.split(".")[:2] != __version__.split(".")[:2]:
             raise KedroContextError(_version_mismatch_error(self.project_version))
 
-        self._project_path = Path(project_path).expanduser().resolve()
         self.env = env or "local"
         self._extra_params = deepcopy(extra_params)
         self._setup_logging()
@@ -255,32 +255,34 @@ class KedroContext(abc.ABC):
         self._register_hooks(auto=True)
 
     @property
-    @abc.abstractmethod
+    def static_data(self) -> Dict[str, Any]:
+        """Read-only property for Kedro project static data.
+
+        Returns:
+            A dictionary with defined static project data.
+
+        """
+        return deepcopy(self._static_data)
+
+    @property
     def project_name(self) -> str:
-        """Abstract property for Kedro project name.
+        """Property for Kedro project name.
 
         Returns:
             Name of Kedro project.
 
         """
-        raise NotImplementedError(
-            "`{}` is a subclass of KedroContext and it must implement "
-            "the `project_name` property".format(self.__class__.__name__)
-        )
+        return self.static_data["project_name"]
 
     @property
-    @abc.abstractmethod
     def project_version(self) -> str:
-        """Abstract property for Kedro version.
+        """Property for Kedro version.
 
         Returns:
             Kedro version.
 
         """
-        raise NotImplementedError(
-            "`{}` is a subclass of KedroContext and it must implement "
-            "the `project_version` property".format(self.__class__.__name__)
-        )
+        return self.static_data["project_version"]
 
     @property
     def package_name(self) -> str:
@@ -290,9 +292,7 @@ class KedroContext(abc.ABC):
             Name of Kedro project package.
 
         """
-        normalized_project_name = re.sub(r"[^A-Za-z0-9]+", "_", self.project_name)
-        normalized_project_name = normalized_project_name.strip("_").lower()
-        return normalized_project_name
+        return self.static_data["package_name"]
 
     @property
     def pipeline(self) -> Pipeline:
@@ -342,15 +342,20 @@ class KedroContext(abc.ABC):
         """
         hook_manager = get_hook_manager()
 
-        if auto:
-            self._register_hooks_setuptools()
+        # enrich with hooks specified in .kedro.yml
+        hooks_locations = self.static_data.get("hooks", [])
+        configured_hooks = tuple(load_obj(hook) for hook in hooks_locations)
 
-        for hooks_collection in self.hooks:
+        all_hooks = self.hooks + configured_hooks
+        for hooks_collection in all_hooks:
             # Sometimes users might create more than one context instance, in which case
             # hooks have already been registered, so we perform a simple check here
             # to avoid an error being raised and break user's workflow.
             if not hook_manager.is_registered(hooks_collection):
                 hook_manager.register(hooks_collection)
+
+        if auto:
+            self._register_hooks_setuptools()
 
     def _get_pipeline(self, name: str = None) -> Pipeline:
         name = name or "__default__"
@@ -360,22 +365,33 @@ class KedroContext(abc.ABC):
             return pipelines[name]
         except (TypeError, KeyError):
             raise KedroContextError(
-                "Failed to find the pipeline named '{}'. "
-                "It needs to be generated and returned "
-                "by the '_get_pipelines' function.".format(name)
+                f"Failed to find the pipeline named '{name}'. "
+                f"It needs to be generated and returned "
+                f"by the '_get_pipelines' function."
             )
 
-    def _get_pipelines(self) -> Dict[str, Pipeline]:
+    def _get_pipelines(self) -> Dict[str, Pipeline]:  # pylint: disable=no-self-use
         """Abstract method for a hook for changing the creation of a Pipeline instance.
 
         Returns:
             A dictionary of defined pipelines.
         """
-        # NOTE: This method is not `abc.abstractmethod` for backward compatibility.
-        raise NotImplementedError(
-            "`{}` is a subclass of KedroContext and it must implement "
-            "the `_get_pipelines` method".format(self.__class__.__name__)
+        hook_manager = get_hook_manager()
+        pipelines_dicts = (
+            hook_manager.hook.register_pipelines()  # pylint: disable=no-member
         )
+
+        pipelines = {}  # type: Dict[str, Pipeline]
+        for pipeline_collection in pipelines_dicts:
+            duplicate_keys = pipeline_collection.keys() & pipelines.keys()
+            if duplicate_keys:
+                warn(
+                    f"Found duplicate pipeline entries. "
+                    f"The following will be overwritten: {', '.join(duplicate_keys)}",
+                )
+            pipelines.update(pipeline_collection)
+
+        return pipelines
 
     @property
     def project_path(self) -> Path:
@@ -670,26 +686,7 @@ class KedroContext(abc.ABC):
         # Report project name
         logging.info("** Kedro project %s", self.project_path.name)
 
-        try:
-            pipeline = self._get_pipeline(name=pipeline_name)
-        except NotImplementedError:
-            common_migration_message = (
-                "`ProjectContext._get_pipeline(self, name)` method is expected. "
-                "Please refer to the 'Modular Pipelines' section of the documentation."
-            )
-            if pipeline_name:
-                raise KedroContextError(
-                    "The project is not fully migrated to use multiple pipelines. "
-                    + common_migration_message
-                )
-
-            warn(
-                "You are using the deprecated pipeline construction mechanism. "
-                + common_migration_message,
-                DeprecationWarning,
-            )
-            pipeline = self.pipeline
-
+        pipeline = self._get_pipeline(name=pipeline_name)
         filtered_pipeline = self._filter_pipeline(
             pipeline=pipeline,
             tags=tags,
@@ -767,6 +764,42 @@ class KedroContext(abc.ABC):
         return generate_timestamp()
 
 
+def get_static_project_data(project_path: Union[str, Path]) -> Dict[str, Any]:
+    """Read static project data from `<project_path>/.kedro.yml` config file.
+
+    Args:
+        project_path: Local path to project root directory to look up `.kedro.yml` in.
+
+    Raises:
+        KedroContextError: `.kedro.yml` was not found or cannot be parsed.
+
+    Returns:
+        A mapping that contains static project data.
+    """
+    project_path = Path(project_path).expanduser().resolve()
+    kedro_yml = project_path / ".kedro.yml"
+
+    try:
+        with kedro_yml.open("r") as _f:
+            static_data = yaml.safe_load(_f)
+    except FileNotFoundError:
+        raise KedroContextError(
+            f"Could not find '.kedro.yml' in {project_path}. If you have "
+            f"created your project with Kedro version <0.15.0, make sure to "
+            f"update your project template. See "
+            f"https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md "
+            f"for how to migrate your Kedro project."
+        )
+    except Exception:
+        raise KedroContextError("Failed to parse '.kedro.yml' file")
+
+    source_dir = Path(static_data.get("source_dir", "src")).expanduser()
+    source_dir = (project_path / source_dir).resolve()
+    static_data["source_dir"] = source_dir
+
+    return static_data
+
+
 def validate_source_path(source_path: Path, project_path: Path):
     """Validate the source path exists and is relative to the project path.
 
@@ -820,10 +853,10 @@ def load_package_context(
         )
 
     # update kwargs with env from the environment variable (defaults to None if not set)
-    # need to do this because some CLI command (e.g `kedro run`) defaults to passing in `env=None`
+    # need to do this because some CLI command (e.g `kedro run`) defaults to passing
+    # in `env=None`
     kwargs["env"] = kwargs.get("env") or os.getenv("KEDRO_ENV")
 
-    # Instantiate the context after changing the cwd for logging to be properly configured.
     context = context_class(project_path=project_path, **kwargs)
     return context
 
@@ -854,46 +887,31 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
 
     """
     project_path = Path(project_path).expanduser().resolve()
-    kedro_yaml = project_path / ".kedro.yml"
+    static_data = get_static_project_data(project_path)
 
-    try:
-        with kedro_yaml.open("r") as kedro_yml:
-            kedro_yaml_content = yaml.safe_load(kedro_yml)
-    except FileNotFoundError:
-        raise KedroContextError(
-            "Could not find '.kedro.yml' in {}. If you have created your project "
-            "with Kedro version <0.15.0, make sure to update your project template. "
-            "See https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md "
-            "for how to migrate your Kedro project.".format(str(project_path))
-        )
-    except Exception:
-        raise KedroContextError("Failed to parse '.kedro.yml' file")
+    source_dir = static_data["source_dir"]
+    validate_source_path(source_dir, project_path)
 
-    src_prefix = Path(kedro_yaml_content.get("source_dir", "src")).expanduser()
-    src_path = (project_path / src_prefix).resolve()
-    validate_source_path(src_path, project_path)
-
-    if str(src_path) not in sys.path:
-        sys.path.insert(0, str(src_path))
-
-    if "PYTHONPATH" not in os.environ:
-        os.environ["PYTHONPATH"] = str(src_path)
-
-    try:
-        context_path = kedro_yaml_content["context_path"]
-    except (KeyError, TypeError):
+    if "context_path" not in static_data:
         raise KedroContextError(
             "'.kedro.yml' doesn't have a required `context_path` field. "
             "Please refer to the documentation."
         )
 
-    context_class = load_obj(context_path)
+    if str(source_dir) not in sys.path:
+        sys.path.insert(0, str(source_dir))
 
-    # update kwargs with env from the environment variable (defaults to None if not set)
-    # need to do this because some CLI command (e.g `kedro run`) defaults to passing in `env=None`
+    if "PYTHONPATH" not in os.environ:
+        os.environ["PYTHONPATH"] = str(source_dir)
+
+    context_class = load_obj(static_data["context_path"])
+
+    # update kwargs with env from the environment variable
+    # (defaults to None if not set)
+    # need to do this because some CLI command (e.g `kedro run`) defaults to
+    # passing in `env=None`
     kwargs["env"] = kwargs.get("env") or os.getenv("KEDRO_ENV")
 
-    # Instantiate the context after changing the cwd for logging to be properly configured.
     context = context_class(project_path=project_path, **kwargs)
     return context
 

@@ -157,6 +157,16 @@ class PipelineSpecs:
     """Namespace that defines all specifications for a pipeline's lifecycle hooks."""
 
     @hook_spec
+    def register_pipelines(self) -> Dict[str, Pipeline]:
+        """Hook to be invoked to register a project's pipelines.
+
+        Returns:
+            A mapping from a pipeline name to a ``Pipeline`` object.
+
+        """
+        pass
+
+    @hook_spec
     def before_pipeline_run(
         self, run_params: Dict[str, Any], pipeline: Pipeline, catalog: DataCatalog
     ) -> None:

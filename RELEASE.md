@@ -14,12 +14,16 @@
 # Upcoming Release 0.16.5
 
 ## Major features and improvements
+* Added `register_pipelines()`, a new hook to register a project's pipelines. The order of execution is: plugin hooks, `.kedro.yml` hooks, hooks in `ProjectContext.hooks`.
 
 ## Bug fixes and other changes
+* `project_name`, `project_version` and `package_name` now have to be defined in `.kedro.yml` for the projects generated using Kedro 0.16.5+.
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
+
+[Sebastian Bertoli](https://github.com/sebastianbertoli)
 
 # Release 0.16.4
 

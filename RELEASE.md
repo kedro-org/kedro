@@ -18,6 +18,7 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* `project_name`, `project_version` and `package_name` now have to be defined in `.kedro.yml` for the projects generated using Kedro 0.16.5+.
 
 ## Breaking changes to the API
 

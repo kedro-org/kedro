@@ -283,15 +283,25 @@ def logging_hooks(logs_queue):
     return LoggingHooks(logs_queue)
 
 
+def _create_kedro_yml(project_path, project_name, project_version, package_name):
+    kedro_yml = project_path / ".kedro.yml"
+    payload = {
+        "project_name": project_name,
+        "project_version": project_version,
+        "package_name": package_name,
+    }
+
+    with kedro_yml.open("w") as _f:
+        yaml.safe_dump(payload, _f)
+
+
 def _create_context_with_hooks(tmp_path, mocker, logging_hooks):
-    """Create a context with some Hooks registered.
-    We do this in a function to support both calling it directly as well as as part of a fixture.
+    """Create a context with some Hooks registered. We do this in a function
+    to support both calling it directly as well as as part of a fixture.
     """
+    _create_kedro_yml(tmp_path, "test hooks", __version__, "test_hooks")
 
     class DummyContextWithHooks(KedroContext):
-        project_name = "test hooks"
-        package_name = "test_hooks"
-        project_version = __version__
         hooks = (logging_hooks,)
 
         def _get_run_id(self, *args, **kwargs) -> Union[None, str]:
@@ -308,7 +318,7 @@ def _create_context_with_hooks(tmp_path, mocker, logging_hooks):
             return {"__default__": pipeline}
 
     mocker.patch("logging.config.dictConfig")
-    return DummyContextWithHooks(tmp_path, env="local")
+    return DummyContextWithHooks(str(tmp_path), env="local")
 
 
 @pytest.fixture
@@ -326,10 +336,9 @@ def broken_context_with_hooks(tmp_path, mocker, logging_hooks):
 
 
 def _create_broken_context_with_hooks(tmp_path, mocker, logging_hooks):
+    _create_kedro_yml(tmp_path, "broken-context", __version__, "broken")
+
     class BrokenContextWithHooks(KedroContext):
-        project_name = "broken-context"
-        package_name = "broken"
-        project_version = __version__
         hooks = (logging_hooks,)
 
         def _get_pipelines(self) -> Dict[str, Pipeline]:

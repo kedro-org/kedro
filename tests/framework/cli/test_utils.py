@@ -25,34 +25,36 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import re
 
-"""Application entry point."""
-from pathlib import Path
-from typing import Dict
+import pytest
+import yaml
 
-from kedro.framework.context import KedroContext, load_package_context
-from kedro.pipeline import Pipeline
-
-from {{ cookiecutter.python_package }}.pipeline import create_pipelines
+from kedro.framework.cli.utils import get_source_dir
 
 
-class ProjectContext(KedroContext):
-    """Users can override the remaining methods from the parent class here,
-    or create new ones (e.g. as required by plugins)
-    """
+@pytest.fixture(params=[None])
+def fake_kedro_yml(request, tmp_path):
+    kedro_yml = tmp_path / ".kedro.yml"
+    payload = request.param or dict()
 
-    def _get_pipelines(self) -> Dict[str, Pipeline]:
-        return create_pipelines()
+    with kedro_yml.open("w") as _f:
+        yaml.safe_dump(payload, _f)
 
-
-def run_package():
-    # Entry point for running a Kedro project packaged with `kedro package`
-    # using `python -m <project_package>.run` command.
-    project_context = load_package_context(
-        project_path=Path.cwd(), package_name=Path(__file__).resolve().parent.name
-    )
-    project_context.run()
+    return kedro_yml
 
 
-if __name__ == "__main__":
-    run_package()
+@pytest.mark.parametrize(
+    "fake_kedro_yml,expected_source_dir",
+    [(None, "src"), ({"source_dir": "some/nested/dir"}, "some/nested/dir")],
+    indirect=["fake_kedro_yml"],
+)
+def test_get_source_dir(tmp_path, fake_kedro_yml, expected_source_dir):
+    expected_source_dir = (tmp_path / expected_source_dir).resolve()
+    assert fake_kedro_yml.is_file()
+
+    pattern = "This function is now deprecated and will be removed in Kedro 0.17.0"
+    with pytest.warns(DeprecationWarning, match=re.escape(pattern)):
+        src_dir = get_source_dir(tmp_path)
+
+    assert src_dir == expected_source_dir

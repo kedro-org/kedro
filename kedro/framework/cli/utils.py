@@ -250,6 +250,11 @@ def get_source_dir(project_path: Path) -> Path:
     Returns:
         The absolute path to the project source directory.
     """
+    warnings.warn(
+        "This function is now deprecated and will be removed in Kedro 0.17.0.",
+        DeprecationWarning,
+    )
+
     with (project_path / ".kedro.yml").open("r") as kedro_yml:
         kedro_yaml = yaml.safe_load(kedro_yml)
 

@@ -36,6 +36,8 @@ A Python file located in `src/<python_package>/run.py`, which by default contain
 
 `.kedro.yml` must be located at the root of the project.
 
+> *Note:* Since Kedro 0.16.5, the `.kedro.yml` file is optional, instead a `pyproject.toml` file can be used with the same content under `[tool.kedro]` section.
+
 #### `00-kedro-init.py`
 
 This script is automatically invoked at IPython kernel startup when calling `kedro jupyter notebook`, `kedro jupyter lab` and `kedro ipython` CLI commands. `00-kedro-init.py` creates an instance of `ProjectContext` object, which can be used to interact with the current project right away.
@@ -68,7 +70,7 @@ A python function that instantiates the project context by calling `load_context
 
 #### `load_context()`
 
-A python function that locates Kedro project based on `.kedro.yml` and instantiates the project context.
+A python function that locates Kedro project based on `.kedro.yml` or `pyproject.toml` (if `.kedro.yml` doesn't exist) and instantiates the project context.
 
 #### `KedroContext`
 

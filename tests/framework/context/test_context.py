@@ -51,6 +51,7 @@ from kedro.framework.context.context import (
     _convert_paths_to_absolute_posix,
     _is_relative_path,
     _validate_layers_for_transcoding,
+    get_static_project_data,
 )
 from kedro.io.core import Version, generate_timestamp
 from kedro.pipeline import Pipeline, node
@@ -857,3 +858,89 @@ class TestValidateSourcePath:
         pattern = re.escape(f"Source path '{source_path}' cannot be found.")
         with pytest.raises(KedroContextError, match=pattern):
             validate_source_path(source_path, tmp_path.resolve())
+
+
+class TestGetStaticProjectData:
+    project_path = Path.cwd()
+
+    def test_no_config_files(self, mocker):
+        mocker.patch.object(Path, "is_file", return_value=False)
+
+        pattern = (
+            f"Could not find any of configuration files '.kedro.yml, pyproject.toml' "
+            f"in {self.project_path}"
+        )
+        with pytest.raises(KedroContextError, match=re.escape(pattern)):
+            get_static_project_data(self.project_path)
+
+    def test_kedro_yml_invalid_format(self, tmp_path):
+        """Test for loading context from an invalid path. """
+        kedro_yml_path = tmp_path / ".kedro.yml"
+        kedro_yml_path.write_text("!!")  # Invalid YAML
+        pattern = "Failed to parse '.kedro.yml' file"
+        with pytest.raises(KedroContextError, match=re.escape(pattern)):
+            get_static_project_data(str(tmp_path))
+
+    def test_toml_invalid_format(self, tmp_path):
+        """Test for loading context from an invalid path. """
+        toml_path = tmp_path / "pyproject.toml"
+        toml_path.write_text("!!")  # Invalid TOML
+        pattern = "Failed to parse 'pyproject.toml' file"
+        with pytest.raises(KedroContextError, match=re.escape(pattern)):
+            get_static_project_data(str(tmp_path))
+
+    def test_valid_yml_file_exists(self, mocker):
+        # Both yml and toml files exist
+        mocker.patch.object(Path, "is_file", return_value=True)
+        mocker.patch("anyconfig.load", return_value={})
+
+        static_data = get_static_project_data(self.project_path)
+
+        # Using default source directory
+        assert static_data == {
+            "source_dir": self.project_path / "src",
+            "config_file": self.project_path / ".kedro.yml",
+        }
+
+    def test_valid_toml_file(self, mocker):
+        # .kedro.yml doesn't exists
+        mocker.patch.object(Path, "is_file", side_effect=[False, True])
+        mocker.patch("anyconfig.load", return_value={"tool": {"kedro": {}}})
+
+        static_data = get_static_project_data(self.project_path)
+
+        # Using default source directory
+        assert static_data == {
+            "source_dir": self.project_path / "src",
+            "config_file": self.project_path / "pyproject.toml",
+        }
+
+    def test_toml_file_without_kedro_section(self, mocker):
+        mocker.patch.object(Path, "is_file", side_effect=[False, True])
+        mocker.patch("anyconfig.load", return_value={})
+
+        pattern = "There's no '[tool.kedro]' section in the 'pyproject.toml'."
+
+        with pytest.raises(KedroContextError, match=re.escape(pattern)):
+            get_static_project_data(self.project_path)
+
+    def test_source_dir_specified_in_yml(self, mocker):
+        mocker.patch.object(Path, "is_file", side_effect=[True, False])
+        source_dir = "test_dir"
+        mocker.patch("anyconfig.load", return_value={"source_dir": source_dir})
+
+        static_data = get_static_project_data(self.project_path)
+
+        assert static_data["source_dir"] == self.project_path / source_dir
+
+    def test_source_dir_specified_in_toml(self, mocker):
+        mocker.patch.object(Path, "is_file", side_effect=[False, True])
+        source_dir = "test_dir"
+        mocker.patch(
+            "anyconfig.load",
+            return_value={"tool": {"kedro": {"source_dir": source_dir}}},
+        )
+
+        static_data = get_static_project_data(self.project_path)
+
+        assert static_data["source_dir"] == self.project_path / source_dir

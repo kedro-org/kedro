@@ -60,9 +60,10 @@ class TemplatedConfigLoader(ConfigLoader):
     the config_loader method, making it return a ``TemplatedConfigLoader``
     object instead of a ``ConfigLoader`` object.
 
-    For this method to work, the context_path variable in `.kedro.yml` needs
-    to be pointing at this newly created class. The `run.py` script has an
-    extension of the ``KedroContext`` by default, called the ``ProjectContext``.
+    For this method to work, the context_path variable in `.kedro.yml` (if exists) or
+    in `pyproject.toml` under `[tool.kedro]` section needs to be pointing at this newly
+    created class. The `run.py` script has an extension of the ``KedroContext`` by default,
+    called the ``ProjectContext``.
 
     Example:
     ::

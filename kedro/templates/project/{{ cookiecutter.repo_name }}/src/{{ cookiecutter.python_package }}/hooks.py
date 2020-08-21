@@ -26,23 +26,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Construction of the master pipeline.
-"""
-
+"""Project hooks."""
 from typing import Dict
 
+from kedro.framework.hooks import hook_impl
 from kedro.pipeline import Pipeline
 
 
-def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
-    """Create the project's pipeline.
+class ProjectHooks:
+    @hook_impl
+    def register_pipelines(self) -> Dict[str, Pipeline]:
+        """Register the project's pipeline.
 
-    Args:
-        kwargs: Ignore any additional arguments added in the future.
+        Returns:
+            A mapping from a pipeline name to a ``Pipeline`` object.
 
-    Returns:
-        A mapping from a pipeline name to a ``Pipeline`` object.
+        """
 
-    """
+        return {"__default__": Pipeline([])}
 
-    return {"__default__": Pipeline([])}
+
+project_hooks = ProjectHooks()

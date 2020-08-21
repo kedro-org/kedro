@@ -52,7 +52,7 @@ If you want to parameterize the run, you can also specify the following optional
 |               |                | for loading - this applies to the versioned datasets only                     |
 +---------------+----------------+-------------------------------------------------------------------------------+
 | pipeline_name | str            | Name of the modular pipeline to run - must be one of those returned           |
-|               |                | by create_pipelines function from src/<package_name>/pipeline.py              |
+|               |                | by register_pipelines function from src/<package_name>/hooks.py               |
 +---------------+----------------+-------------------------------------------------------------------------------+
 ```
 

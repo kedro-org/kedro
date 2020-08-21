@@ -55,12 +55,6 @@ class ProjectContext(KedroContext):
         )
         _spark_session = spark_session_conf.getOrCreate()
         _spark_session.sparkContext.setLogLevel("WARN")
-
-    def _get_pipelines(self) -> Dict[str, Pipeline]:
-        return create_pipelines()
-
-    project_name = "kedro"
-    project_version = "0.16.4"
 ```
 
 You should modify this code to adapt it to your cluster's setup, e.g. setting master to `yarn` if you are running Spark on [YARN](https://spark.apache.org/docs/latest/running-on-yarn.html).

@@ -28,6 +28,7 @@
 
 import pandas as pd
 
+from kedro.framework.hooks import hook_impl
 from kedro.pipeline import Pipeline, node
 
 
@@ -39,52 +40,45 @@ def sum_dfs(dataframe1: pd.DataFrame, dataframe2: pd.DataFrame):
     return dataframe1 + dataframe2.values
 
 
-def create_pipelines(*tags: str):
-    example_pipeline = Pipeline(
-        [
-            node(
-                lambda x: x,
-                "A",
-                "B",
-                name="node_1",
-                tags=[
-                    "apple",
-                    "orange",
-                    "banana",
-                    "lemon",
-                    "grape",
-                    "coconut",
-                    "fresh strawberries!",
-                ],
-            ),
-            node(
-                sum_dfs,
-                ["B", "C"],
-                "D",
-                name="node_2",
-                tags=["apple", "orange", "lemon"],
-            ),
-            node(
-                identity,
-                "D",
-                "E",
-                name="node_3",
-                tags=["apple", "orange", "banana", "cherry"],
-            ),
-            node(identity, "D", "F", name="node_4", tags=["apple", "cherry"]),
-        ]
-    )
+class ProjectHooks:
+    @hook_impl
+    def register_pipelines(self):  # pylint: disable=no-self-use
+        example_pipeline = Pipeline(
+            [
+                node(
+                    lambda x: x,
+                    "A",
+                    "B",
+                    name="node_1",
+                    tags=[
+                        "apple",
+                        "orange",
+                        "banana",
+                        "lemon",
+                        "grape",
+                        "coconut",
+                        "fresh strawberries!",
+                    ],
+                ),
+                node(
+                    sum_dfs,
+                    ["B", "C"],
+                    "D",
+                    name="node_2",
+                    tags=["apple", "orange", "lemon"],
+                ),
+                node(
+                    identity,
+                    "D",
+                    "E",
+                    name="node_3",
+                    tags=["apple", "orange", "banana", "cherry"],
+                ),
+                node(identity, "D", "F", name="node_4", tags=["apple", "cherry"]),
+            ]
+        )
 
-    if tags:
-        pipeline = Pipeline([])
-        for tag in tags:
-            pipeline += example_pipeline.only_nodes_with_tags(tag)
-        if not pipeline.nodes:
-            raise ValueError(
-                "Not found any nodes having any of the following "
-                "tags attached: {}".format(", ".join(tags))
-            )
-    else:
-        pipeline = example_pipeline
+        return {"__default__": example_pipeline}
 
-    return {"__default__": pipeline}
+
+project_hooks = ProjectHooks()

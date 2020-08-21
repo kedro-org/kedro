@@ -38,7 +38,7 @@ from typing import Any, Dict, Iterable, Tuple, Union
 from urllib.parse import urlparse
 from warnings import warn
 
-import yaml
+import anyconfig
 
 from kedro import __version__
 from kedro.config import ConfigLoader, MissingConfigException
@@ -53,6 +53,9 @@ from kedro.utils import load_obj
 from kedro.versioning import Journal
 
 _PLUGIN_HOOKS = "kedro.hooks"  # entry-point to load hooks from for installed plugins
+
+# Kedro configuration files in the precedence order
+KEDRO_CONFIGS = (".kedro.yml", "pyproject.toml")
 
 
 def _version_mismatch_error(context_version) -> str:
@@ -342,7 +345,7 @@ class KedroContext(abc.ABC):
         """
         hook_manager = get_hook_manager()
 
-        # enrich with hooks specified in .kedro.yml
+        # enrich with hooks specified in .kedro.yml or pyproject.toml if .kedro.yml doesn't exist
         hooks_locations = self.static_data.get("hooks", [])
         configured_hooks = tuple(load_obj(hook) for hook in hooks_locations)
 
@@ -765,37 +768,61 @@ class KedroContext(abc.ABC):
 
 
 def get_static_project_data(project_path: Union[str, Path]) -> Dict[str, Any]:
-    """Read static project data from `<project_path>/.kedro.yml` config file.
+    """Read static project data from `<project_path>/.kedro.yml` config file if it
+    exists otherwise from `<project_path>/pyproject.toml` (under `[tool.kedro]` section).
 
     Args:
-        project_path: Local path to project root directory to look up `.kedro.yml` in.
+        project_path: Local path to project root directory to look up `.kedro.yml` or
+            `pyproject.toml` in.
 
     Raises:
-        KedroContextError: `.kedro.yml` was not found or cannot be parsed.
+        KedroContextError: Neither '.kedro.yml' nor `pyproject.toml` was found
+            or `[tool.kedro]` section is missing in `pyproject.toml`, or config file
+            cannot be parsed.
 
     Returns:
         A mapping that contains static project data.
     """
     project_path = Path(project_path).expanduser().resolve()
-    kedro_yml = project_path / ".kedro.yml"
 
-    try:
-        with kedro_yml.open("r") as _f:
-            static_data = yaml.safe_load(_f)
-    except FileNotFoundError:
+    config_paths = [
+        project_path / conf_file
+        for conf_file in KEDRO_CONFIGS
+        if (project_path / conf_file).is_file()
+    ]
+
+    if not config_paths:
+        configs = ", ".join(KEDRO_CONFIGS)
         raise KedroContextError(
-            f"Could not find '.kedro.yml' in {project_path}. If you have "
-            f"created your project with Kedro version <0.15.0, make sure to "
-            f"update your project template. See "
-            f"https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md "
+            f"Could not find any of configuration files '{configs}' in {project_path}. "
+            f"If you have created your project with Kedro "
+            f"version <0.15.0, make sure to update your project template. "
+            f"See https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md"
+            f"#migration-guide-from-kedro-014-to-kedro-0150 "
             f"for how to migrate your Kedro project."
         )
+
+    # First found wins
+    kedro_config = config_paths[0]
+    try:
+        static_data = anyconfig.load(kedro_config)
     except Exception:
-        raise KedroContextError("Failed to parse '.kedro.yml' file")
+        raise KedroContextError(f"Failed to parse '{kedro_config.name}' file.")
+
+    if kedro_config.suffix == ".toml":
+        try:
+            static_data = static_data["tool"]["kedro"]
+        except KeyError:
+            raise KedroContextError(
+                f"There's no '[tool.kedro]' section in the '{kedro_config.name}'. "
+                f"Please add '[tool.kedro]' section to the file with appropriate "
+                f"configuration parameters."
+            )
 
     source_dir = Path(static_data.get("source_dir", "src")).expanduser()
     source_dir = (project_path / source_dir).resolve()
     static_data["source_dir"] = source_dir
+    static_data["config_file"] = kedro_config
 
     return static_data
 
@@ -841,8 +868,9 @@ def load_package_context(
         Instance of ``KedroContext`` class defined in Kedro project.
 
     Raises:
-        KedroContextError: Either '.kedro.yml' was not found
-            or loaded context has package conflict.
+        KedroContextError: Neither '.kedro.yml' nor `pyproject.toml` was found
+            or `[tool.kedro]` section is missing in `pyproject.toml`, or loaded context
+            has package conflict.
     """
     context_path = f"{package_name}.run.ProjectContext"
     try:
@@ -871,8 +899,12 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
            |__ <src_dir>
            |__ .kedro.yml
            |__ kedro_cli.py
+           |__ pyproject.toml
 
-    The name of the <scr_dir> is `src` by default and configurable in `.kedro.yml`.
+    The name of the <scr_dir> is `src` by default. The `.kedro.yml` or `pyproject.toml` can
+    be used for configuration. If `.kedro.yml` exists, it will be used otherwise, `pyproject.toml`
+    will be treated as the configuration file (Kedro configuration should be under
+    `[tool.kedro]` section).
 
     Args:
         project_path: Path to the Kedro project.
@@ -882,8 +914,9 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
         Instance of ``KedroContext`` class defined in Kedro project.
 
     Raises:
-        KedroContextError: Either '.kedro.yml' was not found
-            or loaded context has package conflict.
+        KedroContextError: Neither '.kedro.yml' nor `pyproject.toml` was found
+            or `[tool.kedro]` section is missing in `pyproject.toml`, or loaded context
+            has package conflict.
 
     """
     project_path = Path(project_path).expanduser().resolve()
@@ -893,9 +926,10 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
     validate_source_path(source_dir, project_path)
 
     if "context_path" not in static_data:
+        conf_file = static_data["config_file"].name
         raise KedroContextError(
-            "'.kedro.yml' doesn't have a required `context_path` field. "
-            "Please refer to the documentation."
+            f"'{conf_file}' doesn't have a required `context_path` field. "
+            f"Please refer to the documentation."
         )
 
     if str(source_dir) not in sys.path:

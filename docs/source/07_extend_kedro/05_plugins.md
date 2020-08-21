@@ -60,7 +60,7 @@ While running, plugins may request information about the current project by call
 This function provides access to the verbose flag via the key `verbose` and to anything returned by the project's `KedroContext`. The returned instance of `ProjectContext(KedroContext)` class must contain at least the following properties and methods:
 
 * `project_version`: the version of Kedro the project was created with, or `None` if the project was not created with `kedro new`.
-* `project_path`: the path to the directory where `.kedro.yml` is located.
+* `project_path`: the path to the directory where either `.kedro.yml` or `pyproject.toml` is located.
 * `config_loader`: an instance of `kedro.config.ConfigLoader`.
 * `catalog`: an instance of `kedro.io.DataCatalog`.
 * `pipeline`: an instance of `kedro.pipeline.Pipeline`.

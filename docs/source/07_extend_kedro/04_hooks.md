@@ -13,7 +13,7 @@ Hooks are a mechanism to add extra behaviour to Kedro's main execution in an eas
 A Hook is comprised of a Hook specification and Hook implementation. To add Hooks to your project you will need to:
 
 * Provide a Hook implementation for an existing Kedro-defined Hook specification
-* Register your Hook implementation in your `ProjectContext` or `.kedro.yml`
+* Register your Hook implementation in the `ProjectContext`, `.kedro.yml`, or `pyproject.toml` under `[tool.kedro]` section if `.kedro.yml` doesn't exist.
 
 
 ### Hook specification
@@ -95,7 +95,7 @@ We recommend that you group related Hook implementations under a namespace, pref
 
 #### Registering your Hook implementations with Kedro
 
-Hook implementations should be registered with Kedro either through code, in `ProjectContext`, or using static configuration in `.kedro.yml`.
+Hook implementations should be registered with Kedro either through code, in `ProjectContext`, or using a static configuration in `.kedro.yml` (if it exists) otherwise in `pyproject.toml` under the `[tool.kedro]` section.
 
 You can register more than one implementation for the same specification. They will be called in LIFO (last-in, first-out) order.
 
@@ -107,8 +107,6 @@ from your_project.hooks import TransformerHooks
 
 
 class ProjectContext(KedroContext):
-    project_name = "kedro-tutorial"
-    project_version = "0.16.4"
 
     hooks = (
         # register the collection of your Hook implementations here.
@@ -127,10 +125,18 @@ hooks:
     - your_project.hooks.transformer_hooks
 ```
 
+If `.kedro.yml` doesn't exist you can use `pyproject.toml` instead as follows:
+
+```toml
+# <your_project>/pyproject.toml
+[tool.kedro]
+hooks=["your_project.hooks.transformer_hooks"]
+```
+
 
 Kedro also has auto-discovery enabled by default. This means that any installed plugins that declare a Hooks entry-point will be registered. To learn more about how to enable this for your custom plugin, see our [plugin development guide](../07_extend_kedro/05_plugins.md#hooks).
 
->Note: Auto-discovered Hooks will run *first*, followed by the ones specified in `.kedro.yml`, and finally `ProjectContext.hooks`.
+>Note: Auto-discovered Hooks will run *first*, followed by the ones specified in `.kedro.yml` or `pyproject.toml` (if `.kedro.yml` doesn't exist), and finally `ProjectContext.hooks`.
 
 ## Under the hood
 

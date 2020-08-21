@@ -30,9 +30,6 @@ from pyspark.sql import SparkSession
 
 class ProjectContext(KedroContext):
 
-    project_name = "kedro"
-    project_version = "0.16.4"
-
     def __init__(
         self,
         project_path: Union[Path, str],

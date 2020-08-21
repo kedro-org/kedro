@@ -110,13 +110,25 @@ def _resolve_credentials(
     return {k: _map_value(k, v) for k, v in config.items()}
 
 
+def _sub_nonword_chars(data_set_name: str) -> str:
+    """Replace non-word characters in data set names since Kedro 0.16.2.
+
+    Args:
+        data_set_name: The data set name registered in the data catalog.
+
+    Returns:
+        The name used in `DataCatalog.datasets`.
+    """
+    return re.sub(r"\W+", "__", data_set_name)
+
+
 class _FrozenDatasets:
     """Helper class to access underlying loaded datasets"""
 
     def __init__(self, datasets):
         # Non-word characters in dataset names are replaced with `__`
         # for easy access to transcoded/prefixed datasets.
-        datasets = {re.sub(r"\W+", "__", key): value for key, value in datasets.items()}
+        datasets = {_sub_nonword_chars(key): value for key, value in datasets.items()}
         self.__dict__.update(**datasets)
 
     # Don't allow users to add/change attributes on the fly

@@ -291,6 +291,8 @@ def create_project_with_starter(context):
             str(context.config_file),
             "--starter",
             "pandas-iris",
+            "--checkout",
+            "update-for-0.16.5",  # TODO: remove after 0.16.5 release
         ],
         env=context.env,
     )

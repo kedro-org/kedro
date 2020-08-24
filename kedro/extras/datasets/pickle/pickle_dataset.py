@@ -200,10 +200,8 @@ class PickleDataSet(AbstractVersionedDataSet):
                 self.BACKENDS[self._backend].dump(data, fs_file, **self._save_args)
             except Exception as err:
                 raise DataSetError(
-                    "{} was not serialized due to: {}".format(
-                        str(data.__class__), str(err)
-                    )
-                )
+                    f"{data.__class__} was not serialized due to: {err}"
+                ) from err
 
         self._invalidate_cache()
 

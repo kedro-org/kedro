@@ -366,12 +366,12 @@ class KedroContext(abc.ABC):
 
         try:
             return pipelines[name]
-        except (TypeError, KeyError):
+        except (TypeError, KeyError) as ex:
             raise KedroContextError(
                 f"Failed to find the pipeline named '{name}'. "
                 f"It needs to be generated and returned "
                 f"by the '_get_pipelines' function."
-            )
+            ) from ex
 
     def _get_pipelines(self) -> Dict[str, Pipeline]:  # pylint: disable=no-self-use
         """Abstract method for a hook for changing the creation of a Pipeline instance.
@@ -806,18 +806,18 @@ def get_static_project_data(project_path: Union[str, Path]) -> Dict[str, Any]:
     kedro_config = config_paths[0]
     try:
         static_data = anyconfig.load(kedro_config)
-    except Exception:
-        raise KedroContextError(f"Failed to parse '{kedro_config.name}' file.")
+    except Exception as ex:
+        raise KedroContextError(f"Failed to parse '{kedro_config.name}' file.") from ex
 
     if kedro_config.suffix == ".toml":
         try:
             static_data = static_data["tool"]["kedro"]
-        except KeyError:
+        except KeyError as ex:
             raise KedroContextError(
                 f"There's no '[tool.kedro]' section in the '{kedro_config.name}'. "
                 f"Please add '[tool.kedro]' section to the file with appropriate "
                 f"configuration parameters."
-            )
+            ) from ex
 
     source_dir = Path(static_data.get("source_dir", "src")).expanduser()
     source_dir = (project_path / source_dir).resolve()
@@ -841,11 +841,11 @@ def validate_source_path(source_path: Path, project_path: Path):
     """
     try:
         source_path.relative_to(project_path)
-    except ValueError:
+    except ValueError as ex:
         raise KedroContextError(
             f"Source path '{source_path}' has to be relative to "
             f"your project root '{project_path}'."
-        )
+        ) from ex
     if not source_path.exists():
         raise KedroContextError(f"Source path '{source_path}' cannot be found.")
 
@@ -875,10 +875,10 @@ def load_package_context(
     context_path = f"{package_name}.run.ProjectContext"
     try:
         context_class = load_obj(context_path)
-    except ModuleNotFoundError:
+    except ModuleNotFoundError as ex:
         raise KedroContextError(
             f"Cannot load context object from {context_path} for package {package_name}."
-        )
+        ) from ex
 
     # update kwargs with env from the environment variable (defaults to None if not set)
     # need to do this because some CLI command (e.g `kedro run`) defaults to passing

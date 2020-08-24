@@ -169,27 +169,22 @@ class AbstractDataSet(abc.ABC):
             )
         except Exception as ex:
             raise DataSetError(
-                "An exception occurred when parsing config "
-                "for DataSet `{}`:\n{}".format(name, str(ex))
-            )
+                f"An exception occurred when parsing config for "
+                f"DataSet `{name}`:\n{ex}"
+            ) from ex
 
         try:
             data_set = class_obj(**config)  # type: ignore
         except TypeError as err:
             raise DataSetError(
-                "\n{}.\nDataSet '{}' must only contain "
-                "arguments valid for the constructor "
-                "of `{}.{}`.".format(
-                    str(err), name, class_obj.__module__, class_obj.__qualname__
-                )
-            )
+                f"\n{err}.\nDataSet '{name}' must only contain arguments valid for the "
+                f"constructor of `{class_obj.__module__}.{class_obj.__qualname__}`."
+            ) from err
         except Exception as err:
             raise DataSetError(
-                "\n{}.\nFailed to instantiate DataSet "
-                "'{}' of type `{}.{}`.".format(
-                    str(err), name, class_obj.__module__, class_obj.__qualname__
-                )
-            )
+                f"\n{err}.\nFailed to instantiate DataSet '{name}' "
+                f"of type `{class_obj.__module__}.{class_obj.__qualname__}`."
+            ) from err
         return data_set
 
     @property
@@ -418,13 +413,13 @@ def parse_dataset_definition(
         trials = (_load_obj(class_path) for class_path in class_paths)
         try:
             class_obj = next(obj for obj in trials if obj is not None)
-        except StopIteration:
-            raise DataSetError("Class `{}` not found.".format(class_obj))
+        except StopIteration as ex:
+            raise DataSetError("Class `{}` not found.".format(class_obj)) from ex
 
     if not issubclass(class_obj, AbstractDataSet):
         raise DataSetError(
-            "DataSet type `{}.{}` is invalid: all data set types must extend "
-            "`AbstractDataSet`.".format(class_obj.__module__, class_obj.__qualname__)
+            f"DataSet type `{class_obj.__module__}.{class_obj.__qualname__}` "
+            f"is invalid: all data set types must extend `AbstractDataSet`."
         )
 
     if VERSION_KEY in config:
@@ -464,7 +459,7 @@ def _load_obj(class_path: str) -> Optional[object]:
                 f"install relevant dependencies for {class_path}:\n"
                 f"https://kedro.readthedocs.io/en/stable/"
                 f"04_kedro_project_setup/01_dependencies.html"
-            )
+            ) from error
         return None
 
     return class_obj

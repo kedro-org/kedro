@@ -226,18 +226,18 @@ class SQLTableDataSet(AbstractDataSet):
     def _load(self) -> pd.DataFrame:
         try:
             return pd.read_sql_table(**self._load_args)
-        except ImportError as import_error:
-            raise _get_missing_module_error(import_error)
-        except NoSuchModuleError:
-            raise _get_sql_alchemy_missing_error()
+        except ImportError as ex:
+            raise _get_missing_module_error(ex) from ex
+        except NoSuchModuleError as ex:
+            raise _get_sql_alchemy_missing_error() from ex
 
     def _save(self, data: pd.DataFrame) -> None:
         try:
             data.to_sql(**self._save_args)
-        except ImportError as import_error:
-            raise _get_missing_module_error(import_error)
-        except NoSuchModuleError:
-            raise _get_sql_alchemy_missing_error()
+        except ImportError as ex:
+            raise _get_missing_module_error(ex) from ex
+        except NoSuchModuleError as ex:
+            raise _get_sql_alchemy_missing_error() from ex
 
     def _exists(self) -> bool:
         eng = create_engine(self._load_args["con"])
@@ -336,10 +336,10 @@ class SQLQueryDataSet(AbstractDataSet):
     def _load(self) -> pd.DataFrame:
         try:
             return pd.read_sql_query(**self._load_args)
-        except ImportError as import_error:
-            raise _get_missing_module_error(import_error)
-        except NoSuchModuleError:
-            raise _get_sql_alchemy_missing_error()
+        except ImportError as ex:
+            raise _get_missing_module_error(ex) from ex
+        except NoSuchModuleError as ex:
+            raise _get_sql_alchemy_missing_error() from ex
 
     def _save(self, data: pd.DataFrame) -> None:
         raise DataSetError("`save` is not supported on SQLQueryDataSet")

@@ -40,9 +40,9 @@ try:
     from memory_profiler import memory_usage
 except ImportError as error:
     raise ImportError(
-        "{}: `pip install kedro[profilers]` to get the required "
-        "memory profiler dependencies.".format(error)
-    )
+        f"{error}: `pip install kedro[profilers]` to get the required "
+        f"memory profiler dependencies."
+    ) from error
 
 
 def mem_profile(func: Callable) -> Callable:

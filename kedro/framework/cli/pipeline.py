@@ -427,7 +427,7 @@ def _create_pipeline(name: str, kedro_version: str, output_dir: Path) -> Path:
     except Exception as ex:
         click.secho("FAILED", fg="red")
         cls = ex.__class__
-        raise KedroCliError(f"{cls.__module__}.{cls.__qualname__}: {ex}")
+        raise KedroCliError(f"{cls.__module__}.{cls.__qualname__}: {ex}") from ex
 
     click.secho("OK", fg="green")
     result_path = Path(result_path)
@@ -553,6 +553,6 @@ def _delete_dirs(*dirs):
         except Exception as ex:
             click.secho("FAILED", fg="red")
             cls = ex.__class__
-            raise KedroCliError(f"{cls.__module__}.{cls.__qualname__}: {ex}")
+            raise KedroCliError(f"{cls.__module__}.{cls.__qualname__}: {ex}") from ex
         else:
             click.secho("OK", fg="green")

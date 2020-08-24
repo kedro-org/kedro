@@ -262,8 +262,8 @@ def get_source_dir(project_path: Path) -> Path:
 def _check_module_importable(module_name: str) -> None:
     try:
         import_module(module_name)
-    except ImportError:
+    except ImportError as ex:
         raise KedroCliError(
             f"Module `{module_name}` not found. Make sure to install required project "
             f"dependencies by running the `kedro install` command first."
-        )
+        ) from ex

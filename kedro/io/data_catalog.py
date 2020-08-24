@@ -169,7 +169,7 @@ class DataCatalog:
             layers: A dictionary of data set layers. It maps a layer name
                 to a set of data set names, according to the
                 data engineering convention. For more details, see
-                https://kedro.readthedocs.io/en/stable/06_resources/01_faq.html#what-is-data-engineering-convention
+                https://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#what-is-data-engineering-convention
         Raises:
             DataSetNotFoundError: When transformers are passed for a non
                 existent data set.
@@ -360,7 +360,7 @@ class DataCatalog:
         Args:
             name: A data set to be loaded.
             version: Optional argument for concrete data version to be loaded.
-            Works only with versioned datasets.
+                Works only with versioned datasets.
 
         Returns:
             The loaded data as configured.

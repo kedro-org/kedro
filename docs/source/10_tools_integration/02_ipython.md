@@ -1,8 +1,8 @@
 # Use Kedro with IPython and Jupyter Notebooks/Lab
 
-> *Note:* This documentation is based on `Kedro 0.16.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
-This section follows the ["Hello World" example](../02_get_started/04_hello_kedro.md) and demonstrates how to effectively use IPython and Jupyter Notebooks / Lab.
+This section follows the [Iris dataset example](../02_get_started/05_example_project.md) and demonstrates how to effectively use IPython and Jupyter Notebooks / Lab.
 
 ## Startup script
 
@@ -16,7 +16,7 @@ To reload these at any point (e.g., if you update `catalog.yml`), use the [line 
 
 ![reload kedro line magic graphic](../meta/images/jupyter_notebook_loading_context.png)
 
-It also loads the environment specified in the `KEDRO_ENV` environment variable if specified, otherwise it defaults to `local`. Instructions for setting the environment variable can be found in the [configuration](./03_configuration.md#additional-configuration-environments) section.
+It also loads the environment specified in the `KEDRO_ENV` environment variable if specified, otherwise it defaults to `local`. Instructions for setting the environment variable can be found in the [configuration](../04_kedro_project_setup/02_configuration.md#additional-configuration-environments) section.
 
 ## Working with `context`
 With `context`, you can access the following variables and methods
@@ -52,7 +52,7 @@ If you want to parameterize the run, you can also specify the following optional
 |               |                | for loading - this applies to the versioned datasets only                     |
 +---------------+----------------+-------------------------------------------------------------------------------+
 | pipeline_name | str            | Name of the modular pipeline to run - must be one of those returned           |
-|               |                | by create_pipelines function from src/<package_name>/pipeline.py              |
+|               |                | by register_pipelines function from src/<package_name>/hooks.py               |
 +---------------+----------------+-------------------------------------------------------------------------------+
 ```
 
@@ -90,7 +90,7 @@ kedro ipython
 
 ### Loading `DataCatalog` in IPython
 
-In accordance with the ["Hello World" example](../02_get_started/04_hello_kedro.md), you can load a dataset of [Iris test example](https://archive.ics.uci.edu/ml/datasets/iris) inside the IPython console, by simply executing the following:
+In accordance with the [Iris dataset example](../02_get_started/05_example_project.md), you can load a dataset of [Iris test example](https://archive.ics.uci.edu/ml/datasets/iris) inside the IPython console, by simply executing the following:
 
 ```python
 catalog.load("example_iris_data").head()

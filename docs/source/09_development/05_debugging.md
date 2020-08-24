@@ -1,6 +1,6 @@
 # Debugging
 
-> *Note:* This documentation is based on `Kedro 0.16.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 ## Introduction
 
@@ -11,7 +11,7 @@ If you're running your Kedro pipeline from the CLI or you can't/don't want to ru
 
 This guide provides examples on how to instantiate a [post-mortem](https://docs.python.org/3/library/pdb.html#pdb.post_mortem) debugging session with [`pdb`](https://docs.python.org/3/library/pdb.html) using [Hooks](../07_extend_kedro/04_hooks.md) when an uncaught error occurs during a pipeline run. Note that [ipdb](https://pypi.org/project/ipdb/) could be integrated in the same manner.
 
-If you are looking for guides on how to setup debugging with IDEs, please visit the guide for [VSCode](./01_set_up_vscode.md#debugging) and [PyCharm](./02_setting_up_pycharm.md#debugging).
+If you are looking for guides on how to setup debugging with IDEs, please visit the guide for [VSCode](./01_set_up_vscode.md#debugging) and [PyCharm](./02_set_up_pycharm.md#debugging).
 
 ## Debugging Node
 

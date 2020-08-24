@@ -88,18 +88,18 @@ def _set_up_temp_logging(context):
 
 def _setup_template_files(context):
     curr_dir = Path(__file__).parent
-    pipeline_file = (
+    hooks_file = (
         context.root_project_dir
         / "src"
         / context.project_name.replace("-", "_")
-        / "pipeline.py"
+        / "hooks.py"
     )
 
     catalog_file = context.root_project_dir / "conf" / "base" / "catalog.yml"
 
-    if pipeline_file.exists():
-        pipeline_file.unlink()
-    copyfile(str(curr_dir / "pipeline_template.py"), str(pipeline_file))
+    if hooks_file.exists():
+        hooks_file.unlink()
+    copyfile(str(curr_dir / "hooks_template.py"), str(hooks_file))
 
     if catalog_file.exists():
         catalog_file.unlink()
@@ -130,7 +130,7 @@ def _add_external_packages(context):
         context.root_project_dir
         / "src"
         / context.project_name.replace("-", "_")
-        / "pipeline.py"
+        / "hooks.py"
     )
     with pipeline_file.open("at", encoding="utf-8") as _pf:
         _imports = "\n".join("import {}".format(p) for p in external_packages)
@@ -209,17 +209,17 @@ def create_template_with_pipeline(context):
 @given('I have defined a node "{node_name}" tagged with {tags:CSV}')
 def node_tagged_with(context, node_name, tags):
     """
-    Check tagging in `pipeline_template.py` is consistent with tagging
+    Check tagging in `hooks_template.py` is consistent with tagging
     descriptions in background steps
     """
     sys.path.append(
         str(context.root_project_dir / "src" / context.project_name.replace("-", "_"))
     )
     # pylint: disable=import-error,import-outside-toplevel
-    import pipeline
+    import hooks
 
     # pylint: disable=no-member
-    context.project_pipeline = pipeline.create_pipelines()["__default__"]
+    context.project_pipeline = hooks.project_hooks.register_pipelines()["__default__"]
     node_objs = [n for n in context.project_pipeline.nodes if n.name == node_name]
     assert node_objs
     assert set(tags) == node_objs[0].tags

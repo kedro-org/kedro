@@ -1,10 +1,9 @@
 # Configuration
 
-> *Note:* This documentation is based on `Kedro 0.16.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
->
-> This section contains detailed information about configuration.
 
-Relevant API documentation: [ConfigLoader](/kedro.config.ConfigLoader)
+This section contains detailed information about configuration, for which the relevant API documentation can be found in [kedro.config.ConfigLoader](/kedro.config.ConfigLoader)
+
+> *Note:* This documentation is based on `Kedro 0.16.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 ## Local and base configuration
 
@@ -304,7 +303,7 @@ except MissingConfigException:
 
 > *Note:* `kedro.framework.context.KedroContext` class uses the approach above to load project credentials.
 
-Credentials configuration can then be used on its own or fed into the `DataCatalog` as described in [this section](./04_data_catalog.md#feeding-in-credentials).
+Credentials configuration can then be used on its own or fed into the `DataCatalog` as described in [this section](../05_data/01_data_catalog.md#feeding-in-credentials).
 
 ### AWS credentials
 
@@ -312,7 +311,7 @@ When working with AWS credentials on datasets, you are not required to store AWS
 
 ## Configuring `kedro run` arguments
 
-The extensive list of CLI options for a `kedro run` is available [here](./06_pipelines.md#modifying-a-kedro-run). Instead of specifying all the command line options to a `kedro run` via the CLI, you can specify a config file that contains the arguments, say `config.yml` and run:
+An extensive list of CLI options for a `kedro run` is available in the [Kedro CLI documentation](../09_development/03_commands_reference.md#run-the-project). However, instead of specifying all the command line options to a `kedro run` via the CLI, you can specify a config file that contains the arguments, say `config.yml` and run:
 
 ```console
 $ kedro run --config config.yml

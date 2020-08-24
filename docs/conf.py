@@ -92,10 +92,63 @@ exclude_patterns = [
     "modules.rst",
     "source",
     "README.md",
-    "07_extend_kedro/02_transformers.md",
-    "07_extend_kedro/03_decorators.md",
     "11_faq/03_glossary.md",
 ]
+
+type_targets = {
+    "py:class": (
+        "object",
+        "bool",
+        "int",
+        "float",
+        "str",
+        "Any",
+        "Dict",
+        "typing.Dict",
+        "typing.Iterable",
+        "typing.List",
+        "typing.Tuple",
+        "typing.Type",
+        "typing.Set",
+        "kedro.config.config.ConfigLoader",
+        "kedro.io.core.AbstractDataSet",
+        "kedro.io.core.AbstractVersionedDataSet",
+        "kedro.io.core.DataSetError",
+        "kedro.io.core.Version",
+        "kedro.io.data_catalog.DataCatalog",
+        "kedro.io.transformers.AbstractTransformer",
+        "kedro.io.data_catalog_with_default.DataCatalogWithDefault",
+        "kedro.io.partitioned_data_set.PartitionedDataSet",
+        "kedro.pipeline.pipeline.Pipeline",
+        "kedro.runner.runner.AbstractRunner",
+        "kedro.runner.parallel_runner._SharedMemoryDataSet",
+        "kedro.versioning.journal.Journal",
+        "kedro.framework.context.context.KedroContext",
+        "abc.ABC",
+        "pathlib.Path",
+        "pathlib.PurePosixPath",
+        "requests.auth.AuthBase",
+        "google.oauth2.credentials.Credentials",
+        "Exception",
+    ),
+    "py:data": ("typing.Any", "typing.Callable", "typing.Union", "typing.Optional"),
+    "py:exc": (
+        "ValueError",
+        "MissingConfigException",
+        "DataSetError",
+        "ImportError",
+        "KedroCliError",
+        "Exception",
+        "TypeError",
+        "SyntaxError",
+        "CircularDependencyError",
+        "OutputNotUniqueError",
+        "ConfirmNotUniqueError",
+    ),
+}
+
+# https://stackoverflow.com/questions/61770698/sphinx-nit-picky-mode-but-only-for-links-i-explicitly-wrote
+nitpick_ignore = [(key, value) for key in type_targets for value in type_targets[key]]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"

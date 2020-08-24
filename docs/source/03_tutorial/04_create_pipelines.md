@@ -8,7 +8,7 @@ This section covers the third part of the [standard development workflow](./01_s
 
 ## Data engineering pipeline
 
-You previously registered the raw datasets for your Kedro project, so you can now create nodes to pre-process two of the datasets ([companies.csv](https://github.com/quantumblacklabs/kedro/tree/develop/docs/source/03_tutorial/data/companies.csv) and [shuttles.xlsx](https://github.com/quantumblacklabs/kedro/tree/develop/docs/source/03_tutorial/data/shuttles.xlsx) to prepare the data for modelling.
+You previously registered the raw datasets for your Kedro project, so you can now create nodes to pre-process two of the datasets ([companies.csv](https://github.com/quantumblacklabs/kedro-examples/blob/master/kedro-tutorial/data/01_raw/companies.csv) and [shuttles.xlsx](https://github.com/quantumblacklabs/kedro-examples/blob/master/kedro-tutorial/data/01_raw/shuttles.xlsx) to prepare the data for modelling.
 
 ### Node functions
 
@@ -117,12 +117,9 @@ from kedro_tutorial.pipelines.data_engineering.nodes import (
 )
 ```
 
-
-
-
 ### Update the project pipeline
 
-Next, update the project's pipeline in `src/kedro_tutorial/pipeline.py` to add the data engineering pipeline:
+Next, update the project's pipeline in `src/kedro_tutorial/hooks.py` to add the data engineering pipeline:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -130,27 +127,30 @@ Next, update the project's pipeline in `src/kedro_tutorial/pipeline.py` to add t
 ```python
 from typing import Dict
 
+from kedro.framework.hooks import hook_impl
 from kedro.pipeline import Pipeline
 
 from kedro_tutorial.pipelines.data_engineering import pipeline as de
 
 
-def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
-    """Create the project's pipeline.
+class ProjectHooks:
+    @hook_impl
+    def register_pipelines(self) -> Dict[str, Pipeline]:
+        """Register the project's pipeline.
 
-    Args:
-        kwargs: Ignore any additional arguments added in the future.
+        Returns:
+            A mapping from a pipeline name to a ``Pipeline`` object.
 
-    Returns:
-        A mapping from a pipeline name to a ``Pipeline`` object.
+        """
+        de_pipeline = de.create_pipeline()
 
-    """
-    de_pipeline = de.create_pipeline()
+        return {
+            "de": de_pipeline,
+            "__default__": de_pipeline,
+        }
 
-    return {
-        "de": de_pipeline,
-        "__default__": de_pipeline,
-    }
+
+project_hooks = ProjectHooks()
 ```
 </details>
 
@@ -472,14 +472,11 @@ def create_pipeline(**kwargs):
 
 ### Update the project pipeline
 
-Add the data science pipeline to the project by replacing the code in `create_pipelines` in `src/kedro_tutorial/pipeline.py` with the following:
+Add the data science pipeline to the project by replacing the code in `register_pipelines` in `src/kedro_tutorial/hooks.py` with the following:
 
 ```python
-def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
-    """Create the project's pipeline.
-
-    Args:
-        kwargs: Ignore any additional arguments added in the future.
+def register_pipelines(self) -> Dict[str, Pipeline]:
+    """Register the project's pipeline.
 
     Returns:
         A mapping from a pipeline name to a ``Pipeline`` object.

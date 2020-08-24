@@ -42,7 +42,8 @@ from pathlib import Path
 from typing import Iterable, List, Sequence, Tuple, Union
 
 import click
-import yaml
+
+from kedro.framework.context import get_static_project_data
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 MAX_SUGGESTIONS = 3
@@ -250,12 +251,12 @@ def get_source_dir(project_path: Path) -> Path:
     Returns:
         The absolute path to the project source directory.
     """
-    with (project_path / ".kedro.yml").open("r") as kedro_yml:
-        kedro_yaml = yaml.safe_load(kedro_yml)
+    warnings.warn(
+        "This function is now deprecated and will be removed in Kedro 0.17.0.",
+        DeprecationWarning,
+    )
 
-    source_dir = Path(kedro_yaml.get("source_dir", "src")).expanduser()
-    source_path = (project_path / source_dir).resolve()
-    return source_path
+    return get_static_project_data(project_path)["source_dir"]
 
 
 def _check_module_importable(module_name: str) -> None:

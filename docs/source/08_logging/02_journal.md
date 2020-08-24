@@ -1,8 +1,10 @@
 # Journal
 
-> *Note:* This documentation is based on `Kedro 0.16.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+
+> *Note:* This documentation is based on `Kedro 0.16.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 ## Overview
+
 Journal in Kedro allows you to save the history of pipeline. This functionality helps you reproduce results and gives you an ability to investigate failures in your workflow.
 Each pipeline run creates a log file formatted as `journal_YYYY-MM-DDThh.mm.ss.sssZ.log`, which is saved in the `logs/journals` directory. The log file contains two kinds of journal records.
 
@@ -16,7 +18,7 @@ A context journal record captures all the necessary information to reproduce the
     "run_id": "2019-10-01T09.15.57.289Z",
     "project_path": "<path-to-project>/src/kedro-tutorial",
     "env": "local",
-    "kedro_version": "0.16.2",
+    "kedro_version": "0.16.4",
     "tags": [],
     "from_nodes": [],
     "to_nodes": [],
@@ -37,7 +39,7 @@ You will observe `run_id`, a unique timestamp used to identify a pipeline run, i
 
 ### Dataset journal record
 
-A dataset journal record tracks versioned dataset `load` and `save` operations, it is tied to the dataset name and `run_id`. The `version` attribute stores the exact timestamp used by the `load` or `save` operation. Dataset journal currently records `load` and `save` operations only for the datasets with enabled versioning. Please see [Versioning section](./08_advanced_io.md#versioning) for more information about data versioning feature and the list of currently supported datasets.
+A dataset journal record tracks versioned dataset `load` and `save` operations, it is tied to the dataset name and `run_id`. The `version` attribute stores the exact timestamp used by the `load` or `save` operation. Dataset journal currently records `load` and `save` operations only for the datasets with enabled versioning. Please see [Versioning section](../05_data/02_kedro_io.md#versioning) for more information about data versioning feature and the list of currently supported datasets.
 
 The dataset journal record has the following JSON format:
 
@@ -51,7 +53,7 @@ The dataset journal record has the following JSON format:
 }
 ```
 
-> ❗While the context journal record is always logged at every run time of your pipeline, dataset journal record is only logged when `load` or `save` method is invoked for [versioned](./04_data_catalog.md#versioning-datasets-and-ml-models) dataset in `DataCatalog`.
+> ❗While the context journal record is always logged at every run time of your pipeline, dataset journal record is only logged when `load` or `save` method is invoked for [versioned](../05_data/01_data_catalog.md#versioning-datasets-and-ml-models) dataset in `DataCatalog`.
 
 ## Steps to manually reproduce your code and run the previous pipeline
 

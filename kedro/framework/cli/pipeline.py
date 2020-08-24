@@ -106,7 +106,7 @@ def create_pipeline(name, skip_config, env):
 
     click.secho(
         f"To be able to run the pipeline `{name}`, you will need to add it "
-        f"to `create_pipelines()` in `{package_dir / 'pipeline.py'}`.",
+        f"to `register_pipelines()` in `{package_dir / 'hooks.py'}`.",
         fg="yellow",
     )
 
@@ -150,8 +150,8 @@ def delete_pipeline(name, env, yes):
     _delete_dirs(*dirs)
     click.secho(f"\nPipeline `{name}` was successfully deleted.\n", fg="green")
     click.secho(
-        f"If you added the pipeline `{name}` to `create_pipelines()` in "
-        f"`{package_dir / 'pipeline.py'}`, you will need to remove it.`",
+        f"If you added the pipeline `{name}` to `register_pipelines()` in "
+        f"`{package_dir / 'hooks.py'}`, you will need to remove it.`",
         fg="yellow",
     )
 
@@ -159,7 +159,7 @@ def delete_pipeline(name, env, yes):
 @pipeline.command("list")
 @env_option
 def list_pipelines(env):
-    """List all pipelines defined in your pipeline.py file."""
+    """List all pipelines defined in your hooks.py file."""
     context = load_context(Path.cwd(), env=env)
     project_pipelines = context.pipelines
     click.echo(yaml.dump(sorted(project_pipelines)))

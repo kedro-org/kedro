@@ -48,8 +48,8 @@ Welcome to Kedro's documentation!
 
    02_get_started/01_prerequisites
    02_get_started/02_install
-   02_get_started/03_new_project
-   02_get_started/04_hello_kedro
+   02_get_started/03_hello_kedro
+   02_get_started/04_new_project
    02_get_started/05_example_project
    02_get_started/06_starters
 
@@ -90,8 +90,11 @@ Welcome to Kedro's documentation!
    :caption: Extend Kedro
 
    07_extend_kedro/01_custom_datasets
+   07_extend_kedro/02_transformers
+   07_extend_kedro/03_decorators
    07_extend_kedro/04_hooks
    07_extend_kedro/05_plugins
+   07_extend_kedro/06_create_kedro_starters
 
 
 .. toctree::

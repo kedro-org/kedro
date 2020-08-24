@@ -1,16 +1,16 @@
 # Pipelines
 
-> *Note:* This documentation is based on `Kedro 0.16.2`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
->
-> In this section we introduce the concept of a pipeline.
 
-Relevant API documentation: [Pipeline](/kedro.pipeline.Pipeline)
+To benefit from Kedro's automatic dependency resolution, nodes can be chained in a [pipeline](/kedro.pipeline.Pipeline). A pipeline is a list of nodes that use a shared set of variables.
 
-To benefit from Kedro's automatic dependency resolution, [nodes](./05_nodes.md#nodes) can be chained in a pipeline. A pipeline is a list of nodes that use a shared set of variables.
+> *Note:* This documentation is based on `Kedro 0.16.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 ## Building pipelines
 
 In the following example, we construct a simple pipeline that computes the variance of a set of numbers. In practice, pipelines can use more complicated node definitions and variables usually correspond to entire datasets:
+
+<details>
+<summary><b>Click to expand</b></summary>
 
 
 ```python
@@ -35,6 +35,7 @@ pipeline = Pipeline(
     ]
 )
 ```
+</details>
 
 `describe` can be used to understand what nodes are part of the pipeline:
 
@@ -76,6 +77,9 @@ Node `node1` will only be tagged with `pipeline_tag`, while `node2` will have bo
 
 You can merge multiple pipelines as shown below. Note that, in this case, `pipeline_de` and `pipeline_ds` are expanded to a list of their underlying nodes of nodes which are simply merged together:
 
+<details>
+<summary><b>Click to expand</b></summary>
+
 
 ```python
 pipeline_de = Pipeline([node(len, "xs", "n"), node(mean, ["xs", "n"], "m")])
@@ -106,11 +110,15 @@ print([v]) -> None
 Outputs: None
 ##################################
 ```
+</details>
+
 
 ### Fetching pipeline nodes
 
 Pipelines provide access to their nodes in a topological order for enabling custom functionality, e.g. custom visualisation of pipelines. Each node has information about its inputs and outputs:
 
+<details>
+<summary><b>Click to expand</b></summary>
 
 ```python
 nodes = pipeline.nodes
@@ -136,6 +144,7 @@ nodes[0].inputs
 ```console
 Out[6]: ['xs']
 ```
+</details>
 
 ## Developing modular pipelines
 
@@ -152,7 +161,7 @@ Modular pipelines serve the following main purposes:
 
 ### How do I create modular pipelines?
 
-For projects created using Kedro version 0.16.0 or later, Kedro ships a [project-specific CLI command](./10_developing_plugins.md#global-and-project-commands) `kedro pipeline create <pipeline_name>`, which does the following for you:
+For projects created using Kedro version 0.16.0 or later, Kedro ships a [project-specific CLI command](../07_extend_kedro/05_plugins.md#global-and-project-commands) `kedro pipeline create <pipeline_name>`, which does the following for you:
 1. Adds a new modular pipeline in a `src/<python_package>/pipelines/<pipeline_name>/` directory
 2. Creates boilerplate configuration files, `catalog.yml` and `parameters.yml`, in `conf/<env>/pipelines/<pipeline_name>/`, where `<env>` defaults to `base`
 3. Makes a placeholder for the pipeline unit tests in `src/tests/pipelines/<pipeline_name>/`
@@ -192,8 +201,11 @@ pipeline = my_modular_pipeline_1.create_pipeline()
 Here is a list of recommendations for developing a modular pipeline:
 
 * A modular pipeline should include a `README.md`, with all the information regarding the execution of the pipeline for the end users
-* A modular pipeline _may_ have external dependencies specified in `requirements.txt`. These dependencies are _not_ currently installed by the [`kedro install`](../06_resources/03_commands_reference.md#kedro-install) command, so the users of your pipeline would have to run `pip install -r src/<python_package>/pipelines/<pipeline_name>/requirements.txt`
+* A modular pipeline _may_ have external dependencies specified in `requirements.txt`. These dependencies are _not_ currently installed by the [`kedro install`](../04_kedro_project_setup/01_dependencies.md#kedro-install) command, so the users of your pipeline would have to run `pip install -r src/<python_package>/pipelines/<pipeline_name>/requirements.txt`
 * To ensure portability, modular pipelines should use relative imports when accessing their own objects and absolute imports otherwise. Look at an example from `src/new_kedro_project/pipelines/modular_pipeline_1/pipeline.py` below:
+
+<details>
+<summary><b>Click to expand</b></summary>
 
 ```python
 from external_package import add  # importing from external package
@@ -208,14 +220,19 @@ def create_pipeline():
     node3 = node(func=add, inputs=["b", "d"], outputs="sum")
     return Pipeline([node1, node2, node3])
 ```
+</details>
 
 * Modular pipelines should _not_ depend on the main Python package (`new_kedro_project` in this example) as it would break the portability to another project
-* Modular pipelines should be stitched together in a master (or `__default__`) pipeline located in `src/new_kedro_project/pipeline.py`. In our example, this pipeline combines `modular_pipeline_1` and `modular_pipeline_2`.
-* Master pipeline should import and instantiate modular pipelines as shown in this example from `src/new_kedro_project/pipeline.py`:
+* Modular pipelines should be stitched together in a master (or `__default__`) pipeline located in `src/new_kedro_project/hooks.py`. In our example, this pipeline combines `modular_pipeline_1` and `modular_pipeline_2`.
+* Master pipeline should import and instantiate modular pipelines as shown in this example from `src/new_kedro_project/hooks.py`:
+
+<details>
+<summary><b>Click to expand</b></summary>
 
 ```python
 from typing import Dict
 
+from kedro.framework.hooks import hook_impl
 from kedro.pipeline import Pipeline
 
 from new_kedro_project.pipelines import (
@@ -224,18 +241,24 @@ from new_kedro_project.pipelines import (
 )
 
 
-def create_pipelines(**kwargs) -> Dict[str, Pipeline]:
-    pipeline1 = mp1.create_pipeline()
-    pipeline2 = mp2.create_pipeline()
-    pipeline_all = pipeline1 + pipeline2
-    return {"mp1": pipeline1, "mp2": pipeline2, "__default__": pipeline_all}
+class ProjectHooks:
+    @hook_impl
+    def register_pipelines(self) -> Dict[str, Pipeline]:
+        pipeline1 = mp1.create_pipeline()
+        pipeline2 = mp2.create_pipeline()
+        pipeline_all = pipeline1 + pipeline2
+        return {"mp1": pipeline1, "mp2": pipeline2, "__default__": pipeline_all}
+
+
+project_hooks = ProjectHooks()
 ```
+</details>
 
 > *Note:* To find out how you can run a pipeline by its name, please navigate to [this section](#running-a-pipeline-by-name).
 
 ### How do I package a modular pipeline?
 
-Since Kedro 0.16.2 you can package a modular pipeline by executing `kedro pipeline package <pipeline_name>` command, which will generate a new [wheel file](https://pythonwheels.com/) for it. By default, the wheel file will be saved into `src/dist` directory inside your project, however this can be changed using `--destination` (`-d`) option.
+Since Kedro 0.16.4 you can package a modular pipeline by executing `kedro pipeline package <pipeline_name>` command, which will generate a new [wheel file](https://pythonwheels.com/) for it. By default, the wheel file will be saved into `src/dist` directory inside your project, however this can be changed using `--destination` (`-d`) option.
 
 When packaging your modular pipeline, Kedro will also automatically include all configuration parameters from `conf/<env>/pipelines/<pipeline_name>` and pipeline tests from `tests/pipelines/<pipeline_name>`, where `<env>` defaults to `base`. If you need to capture the parameters from a different config environment, run `kedro pipeline package --env <env_name> <pipeline_name>`.
 
@@ -252,7 +275,10 @@ Linking all of these concepts together, here is an example of a modular pipeline
   - `src/new_kedro_project/pipelines/feature_engineering` - A pipeline that generates temporal features while aggregating data and performs a train/test split on the data
   - `src/new_kedro_project/pipelines/modelling` - A pipeline that fits models, does hyperparameter search and reports on model performance
 * A master (or `__default__`) pipeline:
-  - `src/new_kedro_project/pipeline.py` - combines 3 modular pipelines from the above
+  - `src/new_kedro_project/hooks.py` - combines 3 modular pipelines from the above
+
+<details>
+<summary><b>Click to expand</b></summary>
 
 ```console
 new-kedro-project
@@ -286,7 +312,7 @@ new-kedro-project
 │   │   │   └── __init__.py
 │   │   ├── __init__.py
 │   │   ├── nodes.py
-│   │   ├── pipeline.py
+│   │   ├── hooks.py
 │   │   └── run.py
 │   ├── tests
 │   │   ├── __init__.py
@@ -298,6 +324,7 @@ new-kedro-project
 ├── kedro_cli.py
 └── setup.cfg
 ```
+</details>
 
 ### Configuration
 
@@ -520,6 +547,8 @@ From the command line, you can run the pipeline as follows:
 ```bash
 kedro run
 ```
+<details>
+<summary><b>Click to expand</b></summary>
 
 `Output`:
 
@@ -552,6 +581,7 @@ kedro run
 2019-04-26 17:19:01,892 - kedro.runner.sequential_runner - INFO - Completed 4 out of 4 tasks
 2019-04-26 17:19:01,892 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
 ```
+</details>
 
 which will run the pipeline using `SequentialRunner` by default. You can also explicitly use `SequentialRunner` as follows:
 
@@ -572,6 +602,9 @@ kedro run --runner=ParallelRunner
 ```
 
 `Output`:
+
+<details>
+<summary><b>Click to expand</b></summary>
 
 ```console
 
@@ -598,6 +631,7 @@ kedro run --runner=ParallelRunner
 2019-04-26 17:20:45,466 - new_kedro_project.nodes.example - INFO - Model accuracy on test set: 100.00%
 2019-04-26 17:20:45,494 - kedro.runner.parallel_runner - INFO - Pipeline execution completed successfully.
 ```
+</details>
 
 > *Note:* You cannot use both `--parallel` and `--runner` flags at the same time (e.g. `kedro run --parallel --runner=SequentialRunner` raises an exception).
 
@@ -613,8 +647,10 @@ kedro run --runner=ThreadRunner
 
 `Output`:
 
-```console
+<details>
+<summary><b>Click to expand</b></summary>
 
+```console
 ...
 2020-04-07 13:29:15,934 - kedro.io.data_catalog - INFO - Loading data from `spark_data_2` (SparkDataSet)...
 2020-04-07 13:29:15,934 - kedro.io.data_catalog - INFO - Loading data from `spark_data_1` (SparkDataSet)...
@@ -630,12 +666,16 @@ Scaling row group sizes to 84.47% for 8 writers
 Scaling row group sizes to 96.54% for 7 writers
 2020-04-07 13:29:20,840 - kedro.runner.thread_runner - INFO - Pipeline execution completed successfully.
 ```
+</details>
 
 > *Note:* `ThreadRunner` doesn't support asynchronous inputs loading and outputs saving.
 
 #### Using a custom runner
 
 If the built-in runners do not meet your requirements, you can define your own runner in your project instead. For example, you may want to add a dry runner, which lists which nodes would be run instead of executing them. You can define it in the following way:
+
+<details>
+<summary><b>Click to expand</b></summary>
 
 ```python
 # in <project-name>/src/<python_package>/runner.py
@@ -682,6 +722,7 @@ class DryRunner(AbstractRunner):
             "\n".join(map(str, nodes)),
         )
 ```
+</details>
 
 And use it with `kedro run` through the `--runner` flag:
 
@@ -721,34 +762,44 @@ Once you enabled the asynchronous mode and ran `kedro run` from the command line
 
 ### Running a pipeline by name
 
-To run the pipeline by its name, you need to add your new pipeline to `create_pipelines()` function `src/<python_package>/pipeline.py` as below:
+To run the pipeline by its name, you need to add your new pipeline to `register_pipelines()` function `src/<python_package>/hooks.py` as below:
+
+<details>
+<summary><b>Click to expand</b></summary>
 
 ```python
-def create_pipelines(**kwargs):
-    """Create the project's pipeline.
+from kedro.framework.hooks import hook_impl
 
-    Args:
-        kwargs: Ignore any additional arguments added in the future.
 
-    Returns:
-        Pipeline: The resulting pipeline.
+class ProjectHooks:
 
-    """
+    @hook_impl
+    def register_pipelines(self):
+        """Register the project's pipelines.
 
-    data_engineering_pipeline = de.create_pipeline()
-    data_science_pipeline = ds.create_pipeline()
-    my_pipeline = Pipeline(
-        [
-            # your definition goes here
-        ]
-    )
+        Returns:
+            A mapping from a pipeline name to a ``Pipeline`` object.
 
-    return {
-        "de": data_engineering_pipeline,
-        "my_pipeline": my_pipeline,
-        "__default__": data_engineering_pipeline + data_science_pipeline,
-    }
+        """
+
+        data_engineering_pipeline = de.create_pipeline()
+        data_science_pipeline = ds.create_pipeline()
+        my_pipeline = Pipeline(
+            [
+                # your definition goes here
+            ]
+        )
+
+        return {
+            "de": data_engineering_pipeline,
+            "my_pipeline": my_pipeline,
+            "__default__": data_engineering_pipeline + data_science_pipeline,
+        }
+
+
+project_hooks = ProjectHooks()
 ```
+</details>
 
 Then from the command line, execute the following:
 
@@ -756,69 +807,9 @@ Then from the command line, execute the following:
 kedro run --pipeline my_pipeline
 ```
 
-> *Note:* `kedro run` without `--pipeline` option runs `__default__` pipeline from the dictionary returned by `create_pipelines()`.
+> *Note:* `kedro run` without `--pipeline` option runs `__default__` pipeline from the dictionary returned by `register_pipelines()`.
 
-### Modifying a `kedro run`
-
-Kedro has options to modify pipeline runs. Here is a list of CLI arguments supported out of the box:
-
-```eval_rst
-+---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| CLI command                                                               | Description                                                                     | Multiple options allowed? |
-+===========================================================================+=================================================================================+===========================+
-| :code:`kedro run --from-inputs dataset1,dataset2`                         | A list of dataset names which should be used as a starting point                | No                        |
-+---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| :code:`kedro run --from-nodes node1,node2`                                | A list of node names which should be used as a starting point                   | No                        |
-+---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| :code:`kedro run --to-nodes node3,node4`                                  | A list of node names which should be used as an end point                       | No                        |
-+---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| :code:`kedro run --node debug_me,debug_me_too`                            | Run only nodes with specified names                                             | Yes                       |
-+---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| :code:`kedro run --runner runner_name`                                    | Run the pipeline with a specific runner. Cannot be used together with --parallel| No                        |
-+---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| :code:`kedro run --parallel`                                              | Run the pipeline using the `ParallelRunner`. If not specified, use the          | No                        |
-|                                                                           | `SequentialRunner`. Cannot be used together with --runner                       |                           |
-+---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| :code:`kedro run --env env_name`                                          | Run the pipeline in the env_name environment. Defaults to local if not provided | No                        |
-+---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| :code:`kedro run --tag some_tag1,some_tag2`                               | Run only nodes which have any of these tags attached                            | Yes                       |
-+---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| :code:`kedro run --load-version="some_dataset:YYYY-MM-DDThh.mm.ss.sssZ"`  | Specify a particular dataset version (timestamp) for loading                    | Yes                       |
-+---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| :code:`kedro run --pipeline de`                                           | Run the whole pipeline by its name                                              | No                        |
-+---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| :code:`kedro run --config config.yml`                                     | Specify all command line options in a configuration file called config.yml      | No                        |
-+---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| :code:`kedro run --params param_key1:value1,param_key2:2.0`               | Does a parametrised kedro run with {"param_key1": "value1", "param_key2": 2}    | Yes                       |
-+---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-```
-
-You can also combine these options together, so the command `kedro run --from-nodes split --to-nodes predict, report` will run all the nodes from `split` to `predict` and `report`. And this functionality is extended to the `kedro run --config config.yml` command which allows you to [specify run commands in a configuration file](./03_configuration.md#configuring-kedro-run-arguments). And note, a parameterized run is best used for dynamic parameters, i.e. running the same pipeline with different inputs, for static parameters that do not change we recommend following this [methodology](./03_configuration.md#parameters).
-
-
-### Applying decorators on pipelines
-
-You can apply decorators on whole pipelines, the same way you apply decorators on single nodes. For example, if you want to apply the decorators defined in the earlier section to all pipeline nodes simultaneously, you can do so as follows:
-
-```python
-hello_pipeline = Pipeline(
-    [node(say_hello, "name1", None), node(say_hello, "name2", None)]
-).decorate(apply_g, apply_h)
-
-SequentialRunner().run(
-    hello_pipeline, DataCatalog({}, dict(name1="Kedro", name2="Python"))
-)
-```
-
-`Output`:
-
-```console
-Hello f(h(g(Kedro)))!
-Hello f(h(g(Python)))!
-Out[9]: {}
-```
-
-Decorators can be useful for monitoring your pipeline. Kedro currently has 1 built-in decorator: `log_time`, which will log the time taken for executing your node. You can find it in `kedro.pipeline.decorators`. Other decorators can be found in `kedro.extras.decorators`, for which you will need to install the required dependencies.
+Further information about `kedro run` can be found in the [Kedro CLI documentation](../09_development/03_commands_reference.md#run-the-project).
 
 ## Running pipelines with IO
 

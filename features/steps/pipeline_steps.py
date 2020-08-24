@@ -215,7 +215,7 @@ def node_tagged_with(context, node_name, tags):
     sys.path.append(
         str(context.root_project_dir / "src" / context.project_name.replace("-", "_"))
     )
-    # pylint: disable=import-error,import-outside-toplevel
+    # pylint: disable=import-outside-toplevel
     import hooks
 
     # pylint: disable=no-member

@@ -167,7 +167,7 @@ class SparkJDBCDataSet(AbstractDataSet):
             save_args = {**save_args, "properties": save_properties}
 
         return dict(
-            url=self._url, table=self._table, load_args=load_args, save_args=save_args,
+            url=self._url, table=self._table, load_args=load_args, save_args=save_args
         )
 
     @staticmethod

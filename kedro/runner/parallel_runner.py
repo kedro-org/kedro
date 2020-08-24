@@ -80,13 +80,11 @@ class _SharedMemoryDataSet:
             # Checks if the error is due to serialisation or not
             try:
                 pickle.dumps(data)
-            except Exception:  # SKIP_IF_NO_SPARK
+            except Exception as exc:  # SKIP_IF_NO_SPARK
                 raise DataSetError(
-                    "{} cannot be serialized. ParallelRunner implicit memory datasets "
-                    "can only be used with serializable data".format(
-                        str(data.__class__)
-                    )
-                )
+                    f"{str(data.__class__)} cannot be serialized. ParallelRunner "
+                    "implicit memory datasets can only be used with serializable data"
+                ) from exc
             else:
                 raise exc
 

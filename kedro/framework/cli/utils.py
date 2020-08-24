@@ -137,10 +137,10 @@ class CommandCollection(click.CommandCollection):
     def resolve_command(self, ctx: click.core.Context, args: List):
         try:
             return super().resolve_command(ctx, args)
-        except click.exceptions.UsageError as error:
+        except click.exceptions.UsageError as exc:
             original_command_name = click.utils.make_str(args[0])
             existing_command_names = self.list_commands(ctx)
-            error.message += _suggest_cli_command(
+            exc.message += _suggest_cli_command(
                 original_command_name, existing_command_names
             )
             raise
@@ -262,8 +262,8 @@ def get_source_dir(project_path: Path) -> Path:
 def _check_module_importable(module_name: str) -> None:
     try:
         import_module(module_name)
-    except ImportError:
+    except ImportError as exc:
         raise KedroCliError(
             f"Module `{module_name}` not found. Make sure to install required project "
             f"dependencies by running the `kedro install` command first."
-        )
+        ) from exc

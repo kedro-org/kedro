@@ -123,7 +123,7 @@ class JournalFileHandler(logging.Handler):
             base_dir: Base directory for saving journals.
 
         """
-        super(JournalFileHandler, self).__init__()
+        super().__init__()
         self.base_dir = Path(base_dir).expanduser()
         self._file_handlers = {}  # type:Dict[str, logging.FileHandler]
 

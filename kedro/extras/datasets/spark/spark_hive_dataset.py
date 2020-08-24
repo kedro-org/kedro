@@ -125,9 +125,8 @@ class SparkHiveDataSet(AbstractDataSet):
         >>> reloaded.take(4)
     """
 
-    # pylint: disable=too-many-arguments
     def __init__(
-        self, database: str, table: str, write_mode: str, table_pk: List[str] = None,
+        self, database: str, table: str, write_mode: str, table_pk: List[str] = None
     ) -> None:
         """Creates a new instance of ``SparkHiveDataSet``.
 

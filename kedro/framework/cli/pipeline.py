@@ -206,6 +206,7 @@ def pull_package(package_path, env, alias):
     """
     # pylint: disable=import-outside-toplevel
     import fsspec
+
     from kedro.io.core import get_protocol_and_path
 
     protocol, _ = get_protocol_and_path(package_path)
@@ -424,10 +425,10 @@ def _create_pipeline(name: str, kedro_version: str, output_dir: Path) -> Path:
             no_input=True,
             extra_context=cookie_context,
         )
-    except Exception as ex:
+    except Exception as exc:
         click.secho("FAILED", fg="red")
-        cls = ex.__class__
-        raise KedroCliError(f"{cls.__module__}.{cls.__qualname__}: {ex}")
+        cls = exc.__class__
+        raise KedroCliError(f"{cls.__module__}.{cls.__qualname__}: {exc}") from exc
 
     click.secho("OK", fg="green")
     result_path = Path(result_path)
@@ -550,9 +551,9 @@ def _delete_dirs(*dirs):
         click.echo(f"Deleting `{dir_}`: ", nl=False)
         try:
             shutil.rmtree(dir_)
-        except Exception as ex:
+        except Exception as exc:
             click.secho("FAILED", fg="red")
-            cls = ex.__class__
-            raise KedroCliError(f"{cls.__module__}.{cls.__qualname__}: {ex}")
+            cls = exc.__class__
+            raise KedroCliError(f"{cls.__module__}.{cls.__qualname__}: {exc}") from exc
         else:
             click.secho("OK", fg="green")

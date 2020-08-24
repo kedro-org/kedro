@@ -105,7 +105,7 @@ def _get_dbutils(spark: SparkSession) -> Optional[Any]:
         dbutils = DBUtils(spark)
     except ImportError:
         try:
-            import IPython  # pylint: disable=import-error,import-outside-toplevel
+            import IPython  # pylint: disable=import-outside-toplevel
         except ImportError:
             pass
         else:

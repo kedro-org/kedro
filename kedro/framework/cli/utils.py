@@ -34,6 +34,7 @@ import shutil
 import subprocess
 import sys
 import textwrap
+import traceback
 import warnings
 from contextlib import contextmanager
 from importlib import import_module
@@ -89,7 +90,8 @@ def forward_command(group, name=None, forward_help=False):
 
     def wrapit(func):
         func = click.argument("args", nargs=-1, type=click.UNPROCESSED)(func)
-        func = group.command(
+        func = command_with_verbosity(
+            group,
             name=name,
             context_settings=dict(
                 ignore_unknown_options=True,
@@ -182,14 +184,56 @@ def get_pkg_version(reqs_path: (Union[str, Path]), package_name: str) -> str:
     raise KedroCliError(f"Cannot find `{package_name}` package in `{reqs_path}`.")
 
 
+def _update_verbose_flag(ctx, param, value):  # pylint: disable=unused-argument
+    KedroCliError.VERBOSE_ERROR = value
+
+
+def _click_verbose(func):
+    """Click option for enabling verbose mode.
+    """
+    return click.option(
+        "--verbose",
+        "-v",
+        is_flag=True,
+        callback=_update_verbose_flag,
+        help="See extensive logging and error stack traces.",
+    )(func)
+
+
+def command_with_verbosity(group: click.core.Group, *args, **kwargs):
+    """Custom command decorator with verbose flag added.
+    """
+
+    def decorator(func):
+        func = _click_verbose(func)
+        func = group.command(*args, **kwargs)(func)
+        return func
+
+    return decorator
+
+
 class KedroCliError(click.exceptions.ClickException):
     """Exceptions generated from the Kedro CLI.
 
     Users should pass an appropriate message at the constructor.
     """
 
-    def format_message(self):
-        return click.style(self.message, fg="red")  # pragma: no cover
+    VERBOSE_ERROR = False
+
+    def show(self, file=None):
+        if file is None:
+            # pylint: disable=protected-access
+            file = click._compat.get_text_stderr()
+        if self.VERBOSE_ERROR:
+            click.secho(traceback.format_exc(), nl=False, fg="yellow")
+        else:
+            etype, value, _ = sys.exc_info()
+            formatted_exception = "".join(traceback.format_exception_only(etype, value))
+            click.secho(
+                f"{formatted_exception}Run with --verbose to see the full exception",
+                fg="yellow",
+            )
+        click.secho(f"Error: {self.message}", fg="red", file=file)
 
 
 def _clean_pycache(path: Path):

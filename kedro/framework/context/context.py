@@ -944,7 +944,6 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
     # need to do this because some CLI command (e.g `kedro run`) defaults to
     # passing in `env=None`
     kwargs["env"] = kwargs.get("env") or os.getenv("KEDRO_ENV")
-
     context = context_class(project_path=project_path, **kwargs)
     return context
 

@@ -49,9 +49,7 @@ FILES_IN_TEMPLATE = 35
 
 
 # pylint: disable=too-many-arguments
-def _invoke(
-    cli_runner, args, project_name=None, repo_name=None, python_package=None,
-):
+def _invoke(cli_runner, args, project_name=None, repo_name=None, python_package=None):
 
     click_prompts = (project_name, repo_name, python_package)
     input_string = "\n".join(x or "" for x in click_prompts)
@@ -106,7 +104,7 @@ class TestInteractiveNew:
         project_name = "Test"
         result = _invoke(
             cli_runner,
-            ["-v", "new"],
+            ["new", "-v"],
             project_name=project_name,
             repo_name=self.repo_name,
         )
@@ -121,7 +119,7 @@ class TestInteractiveNew:
     def test_new_custom_dir(self, cli_runner):
         """Test that default package name does not change if custom
         repo name was specified."""
-        result = _invoke(cli_runner, ["new"], repo_name=self.repo_name,)
+        result = _invoke(cli_runner, ["new"], repo_name=self.repo_name)
         _assert_template_ok(
             result,
             FILES_IN_TEMPLATE,
@@ -131,7 +129,7 @@ class TestInteractiveNew:
 
     def test_new_correct_path(self, cli_runner):
         """Test new project creation with the default project name."""
-        result = _invoke(cli_runner, ["new"], repo_name=self.repo_name,)
+        result = _invoke(cli_runner, ["new"], repo_name=self.repo_name)
         _assert_template_ok(result, FILES_IN_TEMPLATE, repo_name=self.repo_name)
 
     def test_fail_if_dir_exists(self, cli_runner):
@@ -142,7 +140,7 @@ class TestInteractiveNew:
 
         old_contents = list(Path(self.repo_name).iterdir())
 
-        result = _invoke(cli_runner, ["-v", "new"], repo_name=self.repo_name,)
+        result = _invoke(cli_runner, ["new", "-v"], repo_name=self.repo_name)
 
         assert list(Path(self.repo_name).iterdir()) == old_contents
         assert "directory already exists" in result.output
@@ -151,7 +149,7 @@ class TestInteractiveNew:
     @pytest.mark.parametrize("repo_name", [".repo", "re!po", "-repo", "repo-"])
     def test_bad_repo_name(self, cli_runner, repo_name):
         """Check the error if the repository name is invalid."""
-        result = _invoke(cli_runner, ["new"], repo_name=repo_name,)
+        result = _invoke(cli_runner, ["new"], repo_name=repo_name)
         assert result.exit_code == 0
         assert "is not a valid repository name." in result.output
 
@@ -165,9 +163,7 @@ class TestInteractiveNew:
         assert "is not a valid Python package name." in result.output
 
 
-def _create_config_file(
-    config_path, project_name, repo_name, output_dir=None,
-):
+def _create_config_file(config_path, project_name, repo_name, output_dir=None):
     config = {
         "project_name": project_name,
         "repo_name": repo_name,
@@ -199,7 +195,7 @@ class TestNewFromConfig:
     def test_empty_config(self, cli_runner):
         """Check the error if the config file is empty."""
         open("touch", "a").close()
-        result = _invoke(cli_runner, ["-v", "new", "-c", "touch"])
+        result = _invoke(cli_runner, ["new", "-v", "-c", "touch"])
         assert result.exit_code != 0
         assert "is empty" in result.output
 
@@ -210,9 +206,9 @@ class TestNewFromConfig:
         _create_config_file(
             self.config_path, self.project_name, self.repo_name, output_dir
         )
-        result = _invoke(cli_runner, ["-v", "new", "--config", self.config_path])
+        result = _invoke(cli_runner, ["new", "-v", "--config", self.config_path])
         _assert_template_ok(
-            result, FILES_IN_TEMPLATE, self.repo_name, self.project_name, output_dir,
+            result, FILES_IN_TEMPLATE, self.repo_name, self.project_name, output_dir
         )
 
     def test_wrong_config(self, cli_runner):
@@ -222,8 +218,7 @@ class TestNewFromConfig:
             self.config_path, self.project_name, self.repo_name, output_dir
         )
 
-        result = _invoke(cli_runner, ["new", "-c", self.config_path])
-
+        result = _invoke(cli_runner, ["new", "-v", "-c", self.config_path])
         assert result.exit_code != 0
         assert "is not a valid output directory." in result.output
 
@@ -232,8 +227,7 @@ class TestNewFromConfig:
         Path(self.config_path).write_text(
             "output_dir: \nproject_name:\ttest\nrepo_name:\ttest1\n"
         )
-        result = _invoke(cli_runner, ["new", "-c", self.config_path])
-
+        result = _invoke(cli_runner, ["new", "-v", "-c", self.config_path])
         assert result.exit_code != 0
         assert "that cannot start any token" in result.output
 
@@ -265,7 +259,7 @@ class TestNewFromConfig:
         _create_config_file(
             self.config_path, self.project_name, self.repo_name, output_dir=None
         )  # output dir missing
-        result = _invoke(cli_runner, ["-v", "new", "--config", self.config_path])
+        result = _invoke(cli_runner, ["new", "-v", "--config", self.config_path])
 
         assert result.exit_code != 0
         assert "[output_dir] not found in" in result.output
@@ -298,7 +292,7 @@ class TestNewWithStarter:
 
         result = _invoke(
             cli_runner,
-            ["-v", "new", "--starter", str(starter_path)],
+            ["new", "-v", "--starter", str(starter_path)],
             project_name=self.project_name,
             python_package=self.package_name,
             repo_name=self.repo_name,
@@ -315,7 +309,7 @@ class TestNewWithStarter:
         invalid_starter_path = "/foo/bar"
         result = _invoke(
             cli_runner,
-            ["-v", "new", "--starter", invalid_starter_path],
+            ["new", "-v", "--starter", invalid_starter_path],
             project_name=self.project_name,
             python_package=self.package_name,
             repo_name=self.repo_name,
@@ -332,7 +326,7 @@ class TestNewWithStarter:
             (
                 "pyspark-iris",
                 "git+https://github.com/quantumblacklabs/kedro-starter-pyspark-iris.git",
-            ),
+            )
         ],
     )
     def test_new_with_starter_alias(self, alias, expected_starter, cli_runner, mocker):

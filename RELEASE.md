@@ -10,6 +10,7 @@
 * Deleted the deprecated `kedro.cli` and `kedro.context` modules in favor of `kedro.framework.cli` and `kedro.framework.context` respectively.
 * The pipeline-specific `catalog.yml` file is no longer automatically created for modular pipelines when doing `kedro pipeline create`.
 * Removed `include_examples` from `kedro new`. It has been replaced with Kedro starter.
+* Changed `--verbose` flag from a global command to a project-specific command flag (e.g `kedro --verbose new` becomes `kedro new --verbose`).
 
 ## Thanks for supporting contributions
 

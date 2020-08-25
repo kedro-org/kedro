@@ -496,7 +496,7 @@ class TestPipelineDescribeCommand:
             "Error: `missing` pipeline not found. Existing pipelines: "
             "[__default__, de, ds]\n"
         )
-        assert result.output == expected_output
+        assert expected_output in result.output
 
 
 class TestSyncDirs:

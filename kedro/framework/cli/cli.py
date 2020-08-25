@@ -34,7 +34,6 @@ import importlib
 import os
 import re
 import sys
-import traceback
 import warnings
 import webbrowser
 from collections import defaultdict
@@ -53,14 +52,13 @@ from kedro.framework.cli.utils import (
     KedroCliError,
     _clean_pycache,
     _filter_deprecation_warnings,
+    command_with_verbosity,
 )
 from kedro.framework.context import load_context
 
 KEDRO_PATH = Path(kedro.__file__).parent
 TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
-
-_VERBOSE = True
 
 LOGO = r"""
  _            _
@@ -82,21 +80,14 @@ _STARTER_ALIASES = {
 
 @click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")
 @click.version_option(version, "--version", "-V", help="Show version and exit")
-@click.option(
-    "--verbose",
-    "-v",
-    is_flag=True,
-    help="See extensive logging and error stack traces.",
-)
-def cli(verbose):
+def cli():
     """Kedro is a CLI for creating and using Kedro projects
     For more information, type ``kedro info``.
 
     When inside a Kedro project (created with `kedro new`) commands from
     the project's `kedro_cli.py` file will also be available here.
     """
-    global _VERBOSE  # pylint: disable=global-statement
-    _VERBOSE = verbose
+    pass
 
 
 ENTRY_POINT_GROUPS = {
@@ -137,7 +128,7 @@ def info():
         click.echo("No plugins installed")
 
 
-@cli.command(short_help="Create a new kedro project.")
+@command_with_verbosity(cli, short_help="Create a new kedro project.")
 @click.option(
     "--config",
     "-c",
@@ -153,7 +144,7 @@ def info():
 @click.option(
     "--checkout", help="A tag, branch or commit to checkout in the starter repository."
 )
-def new(config, starter_name, checkout):
+def new(config, starter_name, checkout, **kwargs):  # pylint: disable=unused-argument
     """Create a new kedro project, either interactively or from a
     configuration file.
 
@@ -203,13 +194,7 @@ def new(config, starter_name, checkout):
         template_path = _STARTER_ALIASES.get(starter_name, starter_name)
     else:
         template_path = TEMPLATE_PATH
-
-    _create_project(
-        config_path=config,
-        verbose=_VERBOSE,
-        template_path=template_path,
-        checkout=checkout,
-    )
+    _create_project(config_path=config, template_path=template_path, checkout=checkout)
 
 
 @cli.command(short_help="See the kedro API docs and introductory tutorial.")
@@ -246,17 +231,13 @@ def list_starters():
 
 
 def _create_project(
-    config_path: str,
-    verbose: bool,
-    template_path: Path = TEMPLATE_PATH,
-    checkout: str = None,
+    config_path: str, template_path: Path = TEMPLATE_PATH, checkout: str = None
 ):
     """Implementation of the kedro new cli command.
 
     Args:
         config_path: In non-interactive mode, the path of the config.yml which
             should contain the project_name, output_dir and repo_name.
-        verbose: Extensive debug terminal logs.
         template_path: The path to the cookiecutter template to create the project.
             It could either be a local directory or a remote VCS repository
             supported by cookiecutter. For more details, please see:
@@ -264,6 +245,8 @@ def _create_project(
         checkout: The tag, branch or commit in the starter repository to checkout.
             Maps directly to cookiecutter's --checkout argument.
             If the value is invalid, cookiecutter will use the default branch.
+    Raises:
+        KedroCliError: If it fails to generate a project.
     """
     with _filter_deprecation_warnings():
         # pylint: disable=import-outside-toplevel
@@ -272,7 +255,7 @@ def _create_project(
 
     try:
         if config_path:
-            config = _parse_config(config_path, verbose)
+            config = _parse_config(config_path)
             config = _check_config_ok(config_path, config)
         else:
             config = _get_config_from_prompts()
@@ -290,13 +273,15 @@ def _create_project(
 
         _clean_pycache(result_path)
         _print_kedro_new_success_message(result_path)
-    except click.exceptions.Abort:  # pragma: no cover
-        _handle_exception("User interrupt.")
-    except RepositoryNotFound:
-        _handle_exception(f"Kedro project template not found at {template_path}")
+    except click.exceptions.Abort as exc:  # pragma: no cover
+        raise KedroCliError("User interrupt.") from exc
+    except RepositoryNotFound as exc:
+        raise KedroCliError(
+            f"Kedro project template not found at {template_path}"
+        ) from exc
     # we don't want the user to see a stack trace on the cli
-    except Exception:  # pylint: disable=broad-except
-        _handle_exception("Failed to generate project.")
+    except Exception as exc:
+        raise KedroCliError("Failed to generate project.") from exc
 
 
 def _get_user_input(
@@ -382,12 +367,11 @@ def _get_config_from_prompts() -> Dict:
     }
 
 
-def _parse_config(config_path: str, verbose: bool) -> Dict:
+def _parse_config(config_path: str) -> Dict:
     """Parse the config YAML from its path.
 
     Args:
         config_path: The path of the config.yml file.
-        verbose: Print the config contents.
 
     Raises:
         Exception: If the file cannot be parsed.
@@ -400,7 +384,7 @@ def _parse_config(config_path: str, verbose: bool) -> Dict:
         with open(config_path, "r") as config_file:
             config = yaml.safe_load(config_file)
 
-        if verbose:
+        if KedroCliError.VERBOSE_ERROR:
             click.echo(config_path + ":")
             click.echo(yaml.dump(config, default_flow_style=False))
 
@@ -607,7 +591,7 @@ def get_project_context(
         "template_version": context.project_version,
         "project_name": context.project_name,
         "project_path": context.project_path,
-        "verbose": _VERBOSE,
+        "verbose": KedroCliError.VERBOSE_ERROR,
     }[key]
 
     if key not in ("verbose", "context"):
@@ -623,7 +607,7 @@ def load_entry_points(name: str) -> List[str]:
         name: The key value specified in ENTRY_POINT_GROUPS.
 
     Raises:
-        Exception: If loading an entry point failed.
+        KedroCliError: If loading an entry point failed.
 
     Returns:
         List of entry point commands.
@@ -634,8 +618,8 @@ def load_entry_points(name: str) -> List[str]:
     for entry_point in entry_points:
         try:
             entry_point_commands.append(entry_point.load())
-        except Exception:  # pylint: disable=broad-except
-            _handle_exception(f"Loading {name} commands from {entry_point}", end=False)
+        except Exception as exc:
+            raise KedroCliError(f"Loading {name} commands from {entry_point}") from exc
     return entry_point_commands
 
 
@@ -645,8 +629,8 @@ def _init_plugins():
         try:
             init_hook = entry_point.load()
             init_hook()
-        except Exception:  # pylint: disable=broad-except
-            _handle_exception(f"Initializing {entry_point}", end=False)
+        except Exception as exc:
+            raise KedroCliError(f"Initializing {entry_point}") from exc
 
 
 def main():  # pragma: no cover
@@ -669,29 +653,13 @@ def main():  # pragma: no cover
             kedro_cli = importlib.import_module("kedro_cli")
             project_groups.extend(load_entry_points("project"))
             project_groups.append(kedro_cli.cli)
-        except Exception:  # pylint: disable=broad-except
-            _handle_exception(f"Cannot load commands from {kedro_cli_path}")
+        except Exception as exc:
+            raise KedroCliError(f"Cannot load commands from {kedro_cli_path}") from exc
     cli_collection = CommandCollection(
         ("Global commands", global_groups),
         ("Project specific commands", project_groups),
     )
     cli_collection()
-
-
-def _handle_exception(msg, end=True):
-    """Pretty print the current exception then exit."""
-    if _VERBOSE:
-        click.secho(traceback.format_exc(), nl=False, fg="yellow")
-    else:
-        etype, value, _ = sys.exc_info()
-        click.secho(
-            "".join(traceback.format_exception_only(etype, value))
-            + "Run with --verbose to see the full exception",
-            fg="yellow",
-        )
-    if end:
-        raise KedroCliError(msg)
-    click.secho("Error: " + msg, fg="red")  # pragma: no cover
 
 
 if __name__ == "__main__":  # pragma: no cover

@@ -460,11 +460,11 @@ class DataCatalog:
         Returns:
             Whether the data set output exists.
 
-        Raises:
-            DataSetNotFoundError: When a data set with the given name
-                has not yet been registered.
         """
-        dataset = self._get_dataset(name)
+        try:
+            dataset = self._get_dataset(name)
+        except DataSetNotFoundError:
+            return False
         return dataset.exists()
 
     def release(self, name: str):

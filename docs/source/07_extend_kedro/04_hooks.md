@@ -50,6 +50,7 @@ The naming convention for error hooks is `on_<noun>_error`, in which:
 In addition, Kedro defines Hook specifications to register certain library components to be used with the project. This is where users can define their custom class implementations. Currently, the following Hook specifications are provided:
 
 * `register_pipelines`
+* `register_config_loader`
 
 The naming convention for registration hooks is `register_<library_component>`.
 

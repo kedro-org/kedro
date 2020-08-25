@@ -27,8 +27,9 @@
 # limitations under the License.
 
 """Project hooks."""
-from typing import Dict
+from typing import Dict, Iterable
 
+from kedro.config import ConfigLoader
 from kedro.framework.hooks import hook_impl
 from kedro.pipeline import Pipeline
 
@@ -44,6 +45,10 @@ class ProjectHooks:
         """
 
         return {"__default__": Pipeline([])}
+
+    @hook_impl
+    def register_config_loader(self, conf_paths: Iterable[str]) -> ConfigLoader:
+        return ConfigLoader(conf_paths)
 
 
 project_hooks = ProjectHooks()

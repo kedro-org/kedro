@@ -28,6 +28,7 @@
 
 import pandas as pd
 
+from kedro.config import ConfigLoader
 from kedro.framework.hooks import hook_impl
 from kedro.pipeline import Pipeline, node
 
@@ -79,6 +80,10 @@ class ProjectHooks:
         )
 
         return {"__default__": example_pipeline}
+
+    @hook_impl
+    def register_config_loader(self, conf_paths):  # pylint: disable=no-self-use
+        return ConfigLoader(conf_paths)
 
 
 project_hooks = ProjectHooks()

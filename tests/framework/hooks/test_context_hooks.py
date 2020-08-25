@@ -31,13 +31,14 @@ import sys
 from logging.handlers import QueueHandler, QueueListener
 from multiprocessing import Queue
 from pathlib import Path
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, Iterable, List, Union
 
 import pandas as pd
 import pytest
 import yaml
 
 from kedro import __version__
+from kedro.config import ConfigLoader
 from kedro.framework.context import KedroContext
 from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import hook_impl
@@ -289,6 +290,11 @@ class LoggingHooks:
         self.logger.info("Registering pipelines")
         return {"__default__": context_pipeline, "de": context_pipeline}
 
+    @hook_impl
+    def register_config_loader(self, conf_paths: Iterable[str]) -> ConfigLoader:
+        self.logger.info("Registering config loader", extra={"conf_paths": conf_paths})
+        return ConfigLoader(conf_paths)
+
 
 class RegistrationHooks:
     @hook_impl
@@ -376,15 +382,15 @@ def _create_broken_context_with_hooks(tmp_path, mocker, context_hooks):
     return BrokenContextWithHooks(tmp_path, env="local")
 
 
-class TestKedroContextHooks:
-    @staticmethod
-    def _assert_hook_call_record_has_expected_parameters(
-        call_record: logging.LogRecord, expected_parameters: List[str]
-    ):
-        """Assert the given call record has all expected parameters."""
-        for param in expected_parameters:
-            assert hasattr(call_record, param)
+def _assert_hook_call_record_has_expected_parameters(
+    call_record: logging.LogRecord, expected_parameters: List[str]
+):
+    """Assert the given call record has all expected parameters."""
+    for param in expected_parameters:
+        assert hasattr(call_record, param)
 
+
+class TestKedroContextHooks:
     def test_calling_register_hooks_multiple_times_should_not_raise(
         self, context_with_hooks
     ):
@@ -417,10 +423,13 @@ class TestKedroContextHooks:
         catalog = context_with_hooks.catalog
         config_loader = context_with_hooks.config_loader
         relevant_records = [
-            r for r in caplog.records if r.name == LoggingHooks.handler_name
+            r
+            for r in caplog.records
+            if r.name == LoggingHooks.handler_name
+            and r.getMessage() == "Catalog created"
         ]
+        assert len(relevant_records) == 1
         record = relevant_records[0]
-        assert record.getMessage() == "Catalog created"
         assert record.catalog == catalog
         assert record.conf_creds == config_loader.get("credentials*")
         assert record.conf_catalog == _convert_paths_to_absolute_posix(
@@ -448,7 +457,7 @@ class TestKedroContextHooks:
         assert len(before_pipeline_run_calls) == 1
         call_record = before_pipeline_run_calls[0]
         assert call_record.pipeline.describe() == context_with_hooks.pipeline.describe()
-        self._assert_hook_call_record_has_expected_parameters(
+        _assert_hook_call_record_has_expected_parameters(
             call_record, ["pipeline", "catalog", "run_params"]
         )
 
@@ -460,7 +469,7 @@ class TestKedroContextHooks:
         ]
         assert len(after_pipeline_run_calls) == 1
         call_record = after_pipeline_run_calls[0]
-        self._assert_hook_call_record_has_expected_parameters(
+        _assert_hook_call_record_has_expected_parameters(
             call_record, ["pipeline", "catalog", "run_params"]
         )
         assert call_record.pipeline.describe() == context_with_hooks.pipeline.describe()
@@ -476,7 +485,7 @@ class TestKedroContextHooks:
         ]
         assert len(on_pipeline_error_calls) == 1
         call_record = on_pipeline_error_calls[0]
-        self._assert_hook_call_record_has_expected_parameters(
+        _assert_hook_call_record_has_expected_parameters(
             call_record, ["error", "run_params", "pipeline", "catalog"]
         )
         expected_error = ValueError("broken")
@@ -493,7 +502,7 @@ class TestKedroContextHooks:
         ]
         assert len(on_node_error_calls) == 1
         call_record = on_node_error_calls[0]
-        self._assert_hook_call_record_has_expected_parameters(
+        _assert_hook_call_record_has_expected_parameters(
             call_record, ["error", "node", "catalog", "inputs", "is_async", "run_id"]
         )
         expected_error = ValueError("broken")
@@ -511,7 +520,7 @@ class TestKedroContextHooks:
         ]
         assert len(before_node_run_calls) == 1
         call_record = before_node_run_calls[0]
-        self._assert_hook_call_record_has_expected_parameters(
+        _assert_hook_call_record_has_expected_parameters(
             call_record, ["node", "catalog", "inputs", "is_async", "run_id"]
         )
         # sanity check a couple of important parameters
@@ -524,7 +533,7 @@ class TestKedroContextHooks:
         ]
         assert len(after_node_run_calls) == 1
         call_record = after_node_run_calls[0]
-        self._assert_hook_call_record_has_expected_parameters(
+        _assert_hook_call_record_has_expected_parameters(
             call_record, ["node", "catalog", "inputs", "outputs", "is_async", "run_id"]
         )
         # sanity check a couple of important parameters
@@ -565,7 +574,7 @@ class TestKedroContextHooks:
         assert len(on_node_error_records) == 2
 
         for call_record in on_node_error_records:
-            self._assert_hook_call_record_has_expected_parameters(
+            _assert_hook_call_record_has_expected_parameters(
                 call_record,
                 ["error", "node", "catalog", "inputs", "is_async", "run_id"],
             )
@@ -616,6 +625,8 @@ class TestKedroContextHooks:
             assert record.node.name in ["node1", "node2"]
             assert set(record.outputs.keys()) <= {"planes", "ships"}
 
+
+class TestRegistrationHooks:
     def test_register_pipelines_is_called(
         self, context_with_hooks, dummy_dataframe, caplog
     ):
@@ -630,7 +641,7 @@ class TestKedroContextHooks:
         ]
         assert len(register_pipelines_calls) == 1
         call_record = register_pipelines_calls[0]
-        self._assert_hook_call_record_has_expected_parameters(call_record, [])
+        _assert_hook_call_record_has_expected_parameters(call_record, [])
 
         expected_pipelines = {"__default__": context_pipeline, "de": context_pipeline}
         assert context_with_hooks.pipelines == expected_pipelines
@@ -650,3 +661,22 @@ class TestKedroContextHooks:
             key: context_pipeline for key in ("__default__", "de", "pipe")
         }
         assert context_with_duplicate_hooks.pipelines == expected_pipelines
+
+    def test_register_config_loader_is_called(self, context_with_hooks, caplog):
+        _ = context_with_hooks.config_loader
+
+        relevant_records = [
+            r for r in caplog.records if r.name == LoggingHooks.handler_name
+        ]
+        assert len(relevant_records) == 1
+        record = relevant_records[0]
+        assert record.getMessage() == "Registering config loader"
+        expected_conf_paths = [
+            str(
+                context_with_hooks.project_path / context_with_hooks.CONF_ROOT / "base"
+            ),
+            str(
+                context_with_hooks.project_path / context_with_hooks.CONF_ROOT / "local"
+            ),
+        ]
+        assert record.conf_paths == expected_conf_paths

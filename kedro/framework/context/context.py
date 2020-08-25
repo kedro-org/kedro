@@ -252,10 +252,10 @@ class KedroContext(abc.ABC):
 
         self.env = env or "local"
         self._extra_params = deepcopy(extra_params)
-        self._setup_logging()
 
-        # setup hooks
         self._register_hooks(auto=True)
+        # we need a ConfigLoader registered in order to be able to set up logging
+        self._setup_logging()
 
     @property
     def static_data(self) -> Dict[str, Any]:
@@ -521,7 +521,11 @@ class KedroContext(abc.ABC):
             Instance of `ConfigLoader`.
 
         """
-        return ConfigLoader(conf_paths)
+        hook_manager = get_hook_manager()
+        config_loader = hook_manager.hook.register_config_loader(  # pylint: disable=no-member
+            conf_paths=conf_paths
+        )
+        return config_loader or ConfigLoader(conf_paths)  # for backwards compatibility
 
     def _get_config_loader(self) -> ConfigLoader:
         """A hook for changing the creation of a ConfigLoader instance.

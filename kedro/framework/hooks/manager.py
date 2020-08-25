@@ -32,7 +32,7 @@ in a Kedro's execution process.
 from pluggy import PluginManager
 
 from .markers import HOOK_NAMESPACE
-from .specs import DataCatalogSpecs, NodeSpecs, PipelineSpecs
+from .specs import DataCatalogSpecs, NodeSpecs, PipelineSpecs, RegistrationSpecs
 
 _hook_manager = None
 
@@ -44,6 +44,7 @@ def _create_hook_manager() -> PluginManager:
     manager.add_hookspecs(NodeSpecs)
     manager.add_hookspecs(PipelineSpecs)
     manager.add_hookspecs(DataCatalogSpecs)
+    manager.add_hookspecs(RegistrationSpecs)
     return manager
 
 

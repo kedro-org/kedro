@@ -76,13 +76,13 @@ def _get_credentials(
     """
     try:
         return credentials[credentials_name]
-    except KeyError as ex:
+    except KeyError as exc:
         raise KeyError(
             f"Unable to find credentials '{credentials_name}': check your data "
-            f"catalog and credentials configuration. See "
-            f"https://kedro.readthedocs.io/en/stable/kedro.io.DataCatalog.html "
-            f"for an example."
-        ) from ex
+            "catalog and credentials configuration. See "
+            "https://kedro.readthedocs.io/en/stable/kedro.io.DataCatalog.html "
+            "for an example."
+        ) from exc
 
 
 def _resolve_credentials(
@@ -660,10 +660,11 @@ class DataCatalog:
 
         try:
             pattern = re.compile(regex_search, flags=re.IGNORECASE)
-        except re.error as ex:
+
+        except re.error as exc:
             raise SyntaxError(
                 f"Invalid regular expression provided: `{regex_search}`"
-            ) from ex
+            ) from exc
         return [dset_name for dset_name in self._data_sets if pattern.search(dset_name)]
 
     def shallow_copy(self) -> "DataCatalog":

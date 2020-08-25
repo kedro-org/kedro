@@ -129,11 +129,11 @@ class AppendableExcelDataSet(AbstractDataSet):
         try:
             with pd.ExcelWriter(str(self._filepath), **self._writer_args) as writer:
                 data.to_excel(writer, **self._save_args)
-        except FileNotFoundError as ex:
+        except FileNotFoundError as exc:
             raise DataSetError(
-                f"`{self._filepath}` Excel file not found. The file cannot be "
-                f"opened in append mode."
-            ) from ex
+                f"`{self._filepath}` Excel file not found. The file cannot be opened in "
+                f"append mode."
+            ) from exc
 
     def _exists(self) -> bool:
         return Path(self._filepath.as_posix()).is_file()

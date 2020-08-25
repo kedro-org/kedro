@@ -167,11 +167,11 @@ class AbstractDataSet(abc.ABC):
             class_obj, config = parse_dataset_definition(
                 config, load_version, save_version
             )
-        except Exception as ex:
+        except Exception as exc:
             raise DataSetError(
-                f"An exception occurred when parsing config for "
-                f"DataSet `{name}`:\n{ex}"
-            ) from ex
+                "An exception occurred when parsing config "
+                "for DataSet `{}`:\n{}".format(name, str(exc))
+            ) from exc
 
         try:
             data_set = class_obj(**config)  # type: ignore
@@ -413,8 +413,8 @@ def parse_dataset_definition(
         trials = (_load_obj(class_path) for class_path in class_paths)
         try:
             class_obj = next(obj for obj in trials if obj is not None)
-        except StopIteration as ex:
-            raise DataSetError("Class `{}` not found.".format(class_obj)) from ex
+        except StopIteration as exc:
+            raise DataSetError("Class `{}` not found.".format(class_obj)) from exc
 
     if not issubclass(class_obj, AbstractDataSet):
         raise DataSetError(
@@ -452,14 +452,14 @@ def _load_obj(class_path: str) -> Optional[object]:
         class_obj = load_obj(class_path)
     except (ModuleNotFoundError, ValueError):
         return None
-    except AttributeError as error:
+    except AttributeError as exc:
         if available_classes and class_name in available_classes:
             raise DataSetError(
-                f"{error} Please see the documentation on how to "
+                f"{exc} Please see the documentation on how to "
                 f"install relevant dependencies for {class_path}:\n"
                 f"https://kedro.readthedocs.io/en/stable/"
                 f"04_kedro_project_setup/01_dependencies.html"
-            ) from error
+            ) from exc
         return None
 
     return class_obj

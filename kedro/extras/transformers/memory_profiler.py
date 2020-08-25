@@ -37,11 +37,11 @@ from kedro.io import AbstractTransformer
 
 try:
     from memory_profiler import memory_usage
-except ImportError as error:
+except ImportError as exc:
     raise ImportError(
-        f"{error}: `pip install kedro[profilers]` to get the required "
-        f"memory profiler dependencies."
-    ) from error
+        f"{exc}: `pip install kedro[profilers]` to get the required "
+        "memory profiler dependencies."
+    ) from exc
 
 
 def _normalise_mem_usage(mem_usage):

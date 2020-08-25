@@ -850,9 +850,9 @@ def _topologically_sorted(node_dependencies) -> List[Set[Node]]:
 
     try:
         return list(toposort(node_dependencies))
-    except ToposortCircleError as error:
-        message = _circle_error_message(error.data)
-        raise CircularDependencyError(message) from error
+    except ToposortCircleError as exc:
+        message = _circle_error_message(exc.data)
+        raise CircularDependencyError(message) from exc
 
 
 class CircularDependencyError(Exception):

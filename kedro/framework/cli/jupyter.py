@@ -314,11 +314,10 @@ def _export_nodes(filepath: Path, output_path: Path) -> None:
     """
     try:
         content = json.loads(filepath.read_text())
-    except json.JSONDecodeError as ex:
+    except json.JSONDecodeError as exc:
         raise KedroCliError(
             f"Provided filepath is not a Jupyter notebook: {filepath}"
-        ) from ex
-
+        ) from exc
     cells = [
         cell
         for cell in content["cells"]

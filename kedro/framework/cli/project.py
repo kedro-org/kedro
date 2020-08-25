@@ -90,13 +90,13 @@ def test(args):
     """Run the test suite."""
     try:
         _check_module_importable("pytest")
-    except KedroCliError as ex:
+    except KedroCliError as exc:
         source_path = _get_source_path()
         raise KedroCliError(
             NO_DEPENDENCY_MESSAGE.format(module="pytest", src=str(source_path))
-        ) from ex
-
-    python_call("pytest", args)
+        ) from exc
+    else:
+        python_call("pytest", args)
 
 
 @project_group.command()
@@ -117,10 +117,10 @@ def lint(files, check_only):
     for module_name in ("flake8", "isort", "black"):
         try:
             _check_module_importable(module_name)
-        except KedroCliError as ex:
+        except KedroCliError as exc:
             raise KedroCliError(
                 NO_DEPENDENCY_MESSAGE.format(module=module_name, src=str(source_path))
-            ) from ex
+            ) from exc
 
     python_call("black", ("--check",) + files if check_only else files)
     python_call("flake8", ("--max-line-length=88",) + files)
@@ -260,10 +260,10 @@ def activate_nbstripout():
 
     try:
         _check_module_importable("nbstripout")
-    except KedroCliError as ex:
+    except KedroCliError as exc:
         raise KedroCliError(
             NO_DEPENDENCY_MESSAGE.format(module="nbstripout", src=str(source_path))
-        ) from ex
+        ) from exc
 
     try:
         res = subprocess.run(  # pylint: disable=subprocess-run-check
@@ -273,7 +273,7 @@ def activate_nbstripout():
         )
         if res.returncode:
             raise KedroCliError("Not a git repository. Run `git init` first.")
-    except FileNotFoundError as ex:
-        raise KedroCliError("Git executable not found. Install Git first.") from ex
+    except FileNotFoundError as exc:
+        raise KedroCliError("Git executable not found. Install Git first.") from exc
 
     call(["nbstripout", "--install"])

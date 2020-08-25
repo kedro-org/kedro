@@ -73,7 +73,6 @@ v{}
     version
 )
 
-# pylint: disable=line-too-long
 _STARTER_ALIASES = {
     "pandas-iris": "git+https://github.com/quantumblacklabs/kedro-starter-pandas-iris.git",
     "pyspark": "git+https://github.com/quantumblacklabs/kedro-starter-pyspark.git",
@@ -152,7 +151,7 @@ def info():
     help="Specify the starter template to use when creating the project.",
 )
 @click.option(
-    "--checkout", help="A tag, branch or commit to checkout in the starter repository.",
+    "--checkout", help="A tag, branch or commit to checkout in the starter repository."
 )
 def new(config, starter_name, checkout):
     """Create a new kedro project, either interactively or from a
@@ -268,8 +267,8 @@ def _create_project(
     """
     with _filter_deprecation_warnings():
         # pylint: disable=import-outside-toplevel
-        from cookiecutter.main import cookiecutter  # for performance reasons
         from cookiecutter.exceptions import RepositoryNotFound
+        from cookiecutter.main import cookiecutter  # for performance reasons
 
     try:
         if config_path:

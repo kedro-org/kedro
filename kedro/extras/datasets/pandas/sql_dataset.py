@@ -150,7 +150,6 @@ class SQLTableDataSet(AbstractDataSet):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {"index": False}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
     def __init__(
         self,
         table_name: str,
@@ -226,18 +225,18 @@ class SQLTableDataSet(AbstractDataSet):
     def _load(self) -> pd.DataFrame:
         try:
             return pd.read_sql_table(**self._load_args)
-        except ImportError as ex:
-            raise _get_missing_module_error(ex) from ex
-        except NoSuchModuleError as ex:
-            raise _get_sql_alchemy_missing_error() from ex
+        except ImportError as import_error:
+            raise _get_missing_module_error(import_error) from import_error
+        except NoSuchModuleError as exc:
+            raise _get_sql_alchemy_missing_error() from exc
 
     def _save(self, data: pd.DataFrame) -> None:
         try:
             data.to_sql(**self._save_args)
-        except ImportError as ex:
-            raise _get_missing_module_error(ex) from ex
-        except NoSuchModuleError as ex:
-            raise _get_sql_alchemy_missing_error() from ex
+        except ImportError as import_error:
+            raise _get_missing_module_error(import_error) from import_error
+        except NoSuchModuleError as exc:
+            raise _get_sql_alchemy_missing_error() from exc
 
     def _exists(self) -> bool:
         eng = create_engine(self._load_args["con"])
@@ -282,7 +281,7 @@ class SQLQueryDataSet(AbstractDataSet):
     """
 
     def __init__(
-        self, sql: str, credentials: Dict[str, Any], load_args: Dict[str, Any] = None,
+        self, sql: str, credentials: Dict[str, Any], load_args: Dict[str, Any] = None
     ) -> None:
         """Creates a new ``SQLQueryDataSet``.
 
@@ -336,10 +335,10 @@ class SQLQueryDataSet(AbstractDataSet):
     def _load(self) -> pd.DataFrame:
         try:
             return pd.read_sql_query(**self._load_args)
-        except ImportError as ex:
-            raise _get_missing_module_error(ex) from ex
-        except NoSuchModuleError as ex:
-            raise _get_sql_alchemy_missing_error() from ex
+        except ImportError as import_error:
+            raise _get_missing_module_error(import_error) from import_error
+        except NoSuchModuleError as exc:
+            raise _get_sql_alchemy_missing_error() from exc
 
     def _save(self, data: pd.DataFrame) -> None:
         raise DataSetError("`save` is not supported on SQLQueryDataSet")

@@ -879,7 +879,6 @@ def load_package_context(
         raise KedroContextError(
             f"Cannot load context object from {context_path} for package {package_name}."
         ) from exc
-
     # update kwargs with env from the environment variable (defaults to None if not set)
     # need to do this because some CLI command (e.g `kedro run`) defaults to passing
     # in `env=None`

@@ -18,7 +18,7 @@ kedro new
 
 Feel free to name your project as you like, but this guide will assume the project is named **`Kedro Tutorial`**.
 
-Keep the default names for the `repo_name` and `python_package` when prompted. Select `N` so the Iris dataset example code is not included in your project.
+Keep the default names for the `repo_name` and `python_package` when prompted.
 
 ## Install project dependencies
 

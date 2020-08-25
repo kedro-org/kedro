@@ -660,6 +660,7 @@ class DataCatalog:
 
         try:
             pattern = re.compile(regex_search, flags=re.IGNORECASE)
+
         except re.error as exc:
             raise SyntaxError(
                 f"Invalid regular expression provided: `{regex_search}`"

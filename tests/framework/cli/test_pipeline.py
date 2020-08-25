@@ -140,7 +140,7 @@ class TestPipelineCreateCommand:
         conf_dir = (
             dummy_project / "conf" / conf_env / "pipelines" / PIPELINE_NAME
         ).resolve()
-        expected_configs = {"catalog.yml", "parameters.yml"}
+        expected_configs = {"parameters.yml"}
         actual_configs = {f.name for f in conf_dir.iterdir()}
         assert actual_configs == expected_configs
 
@@ -233,9 +233,8 @@ class TestPipelineCreateCommand:
         result = CliRunner().invoke(fake_kedro_cli.cli, cmd)
 
         assert result.exit_code == 0
-        assert "catalog.yml`: SKIPPED" in result.output
         assert "__init__.py`: SKIPPED" in result.output
-        assert result.output.count("SKIPPED") == 2  # only 2 files skipped
+        assert result.output.count("SKIPPED") == 1  # only 1 file skipped
 
     def test_failed_copy(self, dummy_project, fake_kedro_cli, mocker):
         """Test the error if copying some file fails"""

@@ -33,7 +33,6 @@ This module implements commands available from the kedro CLI.
 import importlib
 import os
 import re
-import shutil
 import sys
 import traceback
 import warnings
@@ -182,7 +181,7 @@ def new(config, starter_name, checkout):
 
     * ``config.yml`` - The configuration YAML must contain at the top level
                     the above parameters (project_name, repo_name,
-                    python_package, include_example) and output_dir - the
+                    python_package) and output_dir - the
                     parent directory for the new project directory.
 
     \b
@@ -202,16 +201,13 @@ def new(config, starter_name, checkout):
 
     if starter_name:
         template_path = _STARTER_ALIASES.get(starter_name, starter_name)
-        should_prompt_for_example = False
     else:
         template_path = TEMPLATE_PATH
-        should_prompt_for_example = True
 
     _create_project(
         config_path=config,
         verbose=_VERBOSE,
         template_path=template_path,
-        should_prompt_for_example=should_prompt_for_example,
         checkout=checkout,
     )
 
@@ -253,7 +249,6 @@ def _create_project(
     config_path: str,
     verbose: bool,
     template_path: Path = TEMPLATE_PATH,
-    should_prompt_for_example: bool = True,
     checkout: str = None,
 ):
     """Implementation of the kedro new cli command.
@@ -266,9 +261,6 @@ def _create_project(
             It could either be a local directory or a remote VCS repository
             supported by cookiecutter. For more details, please see:
             https://cookiecutter.readthedocs.io/en/latest/usage.html#generate-your-project
-        should_prompt_for_example: Whether to display a prompt to generate an example pipeline.
-            N.B.: this should only be here until the start project is complete and the
-            starters with example are all located in public repositories.
         checkout: The tag, branch or commit in the starter repository to checkout.
             Maps directly to cookiecutter's --checkout argument.
             If the value is invalid, cookiecutter will use the default branch.
@@ -283,7 +275,7 @@ def _create_project(
             config = _parse_config(config_path, verbose)
             config = _check_config_ok(config_path, config)
         else:
-            config = _get_config_from_prompts(should_prompt_for_example)
+            config = _get_config_from_prompts()
         config.setdefault("kedro_version", version)
 
         result_path = Path(
@@ -295,19 +287,6 @@ def _create_project(
                 checkout=checkout,
             )
         )
-
-        # If user was prompted to generate an example but chooses not to,
-        # Remove all placeholder directories.
-        if should_prompt_for_example and not config["include_example"]:
-            (result_path / "data" / "01_raw" / "iris.csv").unlink()
-
-            pipelines_dir = result_path / "src" / config["python_package"] / "pipelines"
-
-            for dir_path in [
-                pipelines_dir / "data_engineering",
-                pipelines_dir / "data_science",
-            ]:
-                shutil.rmtree(str(dir_path))
 
         _clean_pycache(result_path)
         _print_kedro_new_success_message(result_path)
@@ -346,11 +325,8 @@ def _get_user_input(
         return value
 
 
-def _get_config_from_prompts(should_prompt_for_example: bool = True) -> Dict:
+def _get_config_from_prompts() -> Dict:
     """Ask user to provide necessary inputs.
-
-    Args:
-        should_prompt_for_example: Whether to include a prompt for example.
 
     Returns:
         Resulting config dictionary.
@@ -398,23 +374,11 @@ def _get_config_from_prompts(should_prompt_for_example: bool = True) -> Dict:
         pkg_name_prompt, default=default_pkg_name, check_input=_assert_pkg_name_ok
     )
 
-    # option for whether iris example code is included in the project
-    if should_prompt_for_example:
-        code_example_prompt = _get_prompt_text(
-            "Generate Example Pipeline:",
-            "Do you want to generate an example pipeline in your project?",
-            "Good for first-time users. (default=N)",
-        )
-        include_example = click.confirm(code_example_prompt, default=False)
-    else:
-        include_example = False
-
     return {
         "output_dir": output_dir,
         "project_name": project_name,
         "repo_name": repo_name,
         "python_package": python_package,
-        "include_example": include_example,
     }
 
 
@@ -481,7 +445,6 @@ def _check_config_ok(config_path: str, config: Dict[str, Any]) -> Dict[str, Any]
     _assert_output_dir_ok(config["output_dir"])
     _assert_repo_name_ok(config["repo_name"])
     _assert_pkg_name_ok(config["python_package"])
-    _assert_include_example_ok(config["include_example"])
     return config
 
 
@@ -540,15 +503,6 @@ def _assert_repo_name_ok(repo_name):
             "`{}` is not a valid repository name. It must contain "
             "only word symbols and/or hyphens, must also start and "
             "end with alphanumeric symbol.".format(repo_name)
-        )
-        raise KedroCliError(message)
-
-
-def _assert_include_example_ok(include_example):
-    if not isinstance(include_example, bool):
-        message = (
-            "`{}` value for `include_example` is invalid. It must be a boolean value "
-            "True or False.".format(include_example)
         )
         raise KedroCliError(message)
 

@@ -63,7 +63,6 @@ def fake_repo_config_path(fake_root_dir):
         "project_name": "Test Project",
         "repo_name": _FAKE_REPO_NAME,
         "python_package": _FAKE_PACKAGE_NAME,
-        "include_example": True,
     }
     config_path = fake_root_dir / "repo_config.yml"
 

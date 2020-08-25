@@ -555,5 +555,6 @@ def _delete_dirs(*dirs):
             click.secho("FAILED", fg="red")
             cls = exc.__class__
             raise KedroCliError(f"{cls.__module__}.{cls.__qualname__}: {exc}") from exc
+
         else:
             click.secho("OK", fg="green")

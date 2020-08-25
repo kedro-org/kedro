@@ -318,7 +318,6 @@ def _export_nodes(filepath: Path, output_path: Path) -> None:
         raise KedroCliError(
             f"Provided filepath is not a Jupyter notebook: {filepath}"
         ) from exc
-
     cells = [
         cell
         for cell in content["cells"]

@@ -31,10 +31,6 @@ from typing import Dict
 
 from kedro.framework.hooks import hook_impl
 from kedro.pipeline import Pipeline
-{%- if cookiecutter.include_example == "True" %}
-
-from {{ cookiecutter.python_package }}.pipelines import data_engineering as de
-from {{ cookiecutter.python_package }}.pipelines import data_science as ds{%- endif %}
 
 
 class ProjectHooks:
@@ -46,16 +42,8 @@ class ProjectHooks:
             A mapping from a pipeline name to a ``Pipeline`` object.
 
         """
-        {% if cookiecutter.include_example == "True" -%}
-        data_engineering_pipeline = de.create_pipeline()
-        data_science_pipeline = ds.create_pipeline()
 
-        return {
-            "de": data_engineering_pipeline,
-            "ds": data_science_pipeline,
-            "__default__": data_engineering_pipeline + data_science_pipeline,
-        }
-        {%- else -%}return {"__default__": Pipeline([])}{%- endif %}
+        return {"__default__": Pipeline([])}
 
 
 project_hooks = ProjectHooks()

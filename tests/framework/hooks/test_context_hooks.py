@@ -28,6 +28,7 @@
 import logging
 import re
 import sys
+from collections import namedtuple
 from logging.handlers import QueueHandler, QueueListener
 from multiprocessing import Queue
 from pathlib import Path
@@ -312,23 +313,29 @@ def logging_hooks(logs_queue):
     return LoggingHooks(logs_queue)
 
 
-def _create_kedro_yml(project_path, project_name, project_version, package_name):
+def _create_kedro_yml(
+    project_path, project_name, project_version, package_name, disable_hooks_for=None
+):
     kedro_yml = project_path / ".kedro.yml"
+    disable_hooks_for = disable_hooks_for or []
     payload = {
         "project_name": project_name,
         "project_version": project_version,
         "package_name": package_name,
+        "disable_hooks_for_plugins": disable_hooks_for,
     }
 
     with kedro_yml.open("w") as _f:
         yaml.safe_dump(payload, _f)
 
 
-def _create_context_with_hooks(tmp_path, mocker, context_hooks):
+def _create_context_with_hooks(tmp_path, mocker, context_hooks, disable_hooks_for=None):
     """Create a context with some Hooks registered. We do this in a function
     to support both calling it directly as well as as part of a fixture.
     """
-    _create_kedro_yml(tmp_path, "test hooks", __version__, "test_hooks")
+    _create_kedro_yml(
+        tmp_path, "test hooks", __version__, "test_hooks", disable_hooks_for
+    )
 
     class DummyContextWithHooks(KedroContext):
         hooks = tuple(context_hooks)
@@ -390,6 +397,9 @@ def _assert_hook_call_record_has_expected_parameters(
         assert hasattr(call_record, param)
 
 
+MockDistInfo = namedtuple("Distinfo", ["project_name", "version"])
+
+
 class TestKedroContextHooks:
     def test_calling_register_hooks_multiple_times_should_not_raise(
         self, context_with_hooks
@@ -398,13 +408,19 @@ class TestKedroContextHooks:
         context_with_hooks._register_hooks()
         assert True  # if we get to this statement, it means the previous repeated calls don't raise
 
-    @pytest.mark.parametrize("num_plugins", [0, 2])
+    @pytest.mark.parametrize("num_plugins", [0, 1])
     def test_hooks_are_registered_when_context_is_created(
-        self, tmp_path, mocker, logging_hooks, hook_manager, num_plugins, caplog,
+        self, tmp_path, mocker, logging_hooks, hook_manager, num_plugins, caplog
     ):
         load_setuptools_entrypoints = mocker.patch.object(
-            hook_manager, "load_setuptools_entrypoints", return_value=num_plugins,
+            hook_manager, "load_setuptools_entrypoints", return_value=num_plugins
         )
+
+        distinfo = [("plugin_obj_1", MockDistInfo("test-project-a", "0.1"))]
+        list_distinfo_mock = mocker.patch.object(
+            hook_manager, "list_plugin_distinfo", return_value=distinfo
+        )
+
         assert not hook_manager.is_registered(logging_hooks)
 
         # create the context
@@ -413,11 +429,45 @@ class TestKedroContextHooks:
         # assert hooks are registered after context is created
         assert hook_manager.is_registered(logging_hooks)
         load_setuptools_entrypoints.assert_called_once_with("kedro.hooks")
+        list_distinfo_mock.assert_called_once_with()
 
         if num_plugins:
             log_messages = [record.getMessage() for record in caplog.records]
-            expected_msg = f"Registered hooks from {num_plugins} installed plugin(s): "
+            plugin = f"{distinfo[0][1].project_name}-{distinfo[0][1].version}"
+            expected_msg = (
+                f"Registered hooks from {num_plugins} installed plugin(s): {plugin}"
+            )
             assert expected_msg in log_messages
+
+    def test_disabling_auto_discovered_hooks(
+        self, tmp_path, mocker, hook_manager, caplog
+    ):
+        mocker.patch.object(hook_manager, "load_setuptools_entrypoints", return_value=2)
+
+        distinfo = [
+            ("plugin_obj_1", MockDistInfo("test-project-a", "0.1")),
+            ("plugin_obj_2", MockDistInfo("test-project-b", "0.2")),
+        ]
+        list_distinfo_mock = mocker.patch.object(
+            hook_manager, "list_plugin_distinfo", return_value=distinfo
+        )
+
+        unregister_mock = mocker.patch.object(hook_manager, "unregister")
+
+        # create the context
+        _create_context_with_hooks(tmp_path, mocker, [], [distinfo[0][1].project_name])
+
+        list_distinfo_mock.assert_called_once_with()
+        unregister_mock.assert_called_once_with(plugin=distinfo[0][0])
+
+        log_messages = [record.getMessage() for record in caplog.records]
+        plugin = f"{distinfo[1][1].project_name}-{distinfo[1][1].version}"
+        expected_msg = f"Registered hooks from 1 installed plugin(s): {plugin}"
+        assert expected_msg in log_messages
+
+        plugin = f"{distinfo[0][1].project_name}-{distinfo[0][1].version}"
+        expected_msg = f"Hooks are disabled for plugin(s): {plugin}"
+        assert expected_msg in log_messages
 
     def test_after_catalog_created_hook_is_called(self, context_with_hooks, caplog):
         catalog = context_with_hooks.catalog

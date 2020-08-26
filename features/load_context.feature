@@ -52,3 +52,12 @@ Feature: Custom Kedro project
         Then I should get a successful exit code
         And I should get a message including "Registered hooks from 1 installed plugin(s): test-plugin-0.1"
         And I should get a message including "Reached after_catalog_created hook"
+
+    Scenario: Disable automatically registered plugin hooks
+        Given I have installed the test plugin
+        And I have disabled hooks for "test-plugin" plugin via config
+        When I execute the kedro command "run"
+        Then I should get a successful exit code
+        And I should not get a message including "Registered hooks from 1 installed plugin(s): test-plugin-0.1"
+        And I should not get a message including "Reached after_catalog_created hook"
+        And I should get a message including "Hooks are disabled for plugin(s): test-plugin-0.1"

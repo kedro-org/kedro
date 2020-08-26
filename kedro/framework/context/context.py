@@ -316,24 +316,40 @@ class KedroContext(abc.ABC):
         """
         return self._get_pipelines()
 
-    @staticmethod
-    def _register_hooks_setuptools():
+    def _register_hooks_setuptools(self):
         """Register pluggy hooks from setuptools entrypoints."""
         hook_manager = get_hook_manager()
         already_registered = hook_manager.get_plugins()
         found = hook_manager.load_setuptools_entrypoints(_PLUGIN_HOOKS)
+        disable_plugins = set(self.static_data.get("disable_hooks_for_plugins", []))
 
-        if found:
-            plugininfo = hook_manager.list_plugin_distinfo()
-            plugin_names = sorted(
-                f"{dist.project_name}-{dist.version}"
-                for plugin, dist in plugininfo
-                if plugin not in already_registered
+        # Get list of plugin/distinfo tuples for all setuptools registered plugins.
+        plugininfo = hook_manager.list_plugin_distinfo()
+        plugin_names = []
+        disabled_plugin_names = []
+        for plugin, dist in plugininfo:
+            if dist.project_name in disable_plugins:
+                # `unregister()` is used instead of `set_blocked()` because
+                # we want to disable hooks for specific plugin based on project
+                # name and not `entry_point` name. Also, we log project names with
+                # version for which hooks were registered.
+                hook_manager.unregister(plugin=plugin)
+                found -= 1
+                disabled_plugin_names.append(f"{dist.project_name}-{dist.version}")
+            elif plugin not in already_registered:
+                plugin_names.append(f"{dist.project_name}-{dist.version}")
+
+        if disabled_plugin_names:
+            logging.info(
+                "Hooks are disabled for plugin(s): %s",
+                ", ".join(sorted(disabled_plugin_names)),
             )
+
+        if plugin_names:
             logging.info(
                 "Registered hooks from %d installed plugin(s): %s",
                 found,
-                ", ".join(plugin_names),
+                ", ".join(sorted(plugin_names)),
             )
 
     def _register_hooks(self, auto: bool = False) -> None:

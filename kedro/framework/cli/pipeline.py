@@ -42,12 +42,13 @@ import yaml
 from setuptools.dist import Distribution
 
 import kedro
-from kedro.framework.cli.cli import _assert_pkg_name_ok, _handle_exception
+from kedro.framework.cli.cli import _assert_pkg_name_ok
 from kedro.framework.cli.utils import (
     KedroCliError,
     _clean_pycache,
     _filter_deprecation_warnings,
     call,
+    command_with_verbosity,
     env_option,
     python_call,
 )
@@ -78,7 +79,7 @@ def _check_pipeline_name(ctx, param, value):  # pylint: disable=unused-argument
     return value
 
 
-@pipeline.command("create")
+@command_with_verbosity(pipeline, "create")
 @click.argument("name", nargs=1, callback=_check_pipeline_name)
 @click.option(
     "--skip-config",
@@ -86,15 +87,17 @@ def _check_pipeline_name(ctx, param, value):  # pylint: disable=unused-argument
     help="Skip creation of config files for the new pipeline(s).",
 )
 @env_option(help="Environment to create pipeline configuration in. Defaults to `base`.")
-def create_pipeline(name, skip_config, env):
+def create_pipeline(
+    name, skip_config, env, **kwargs
+):  # pylint: disable=unused-argument
     """Create a new modular pipeline by providing the new pipeline name as an argument."""
     try:
         context = load_context(Path.cwd(), env=env)
-    except Exception as err:  # pylint: disable=broad-except
-        _handle_exception(
+    except Exception as exc:
+        raise KedroCliError(
             f"Unable to load Kedro context with environment `{env}`. "
-            f"Make sure it exists in the project configuration.\nError: {err}"
-        )
+            f"Make sure it exists in the project configuration.\nError: {exc}"
+        ) from exc
 
     package_dir = _get_project_package_dir(context)
     output_dir = package_dir / "pipelines"
@@ -111,7 +114,7 @@ def create_pipeline(name, skip_config, env):
     )
 
 
-@pipeline.command("delete")
+@command_with_verbosity(pipeline, "delete")
 @click.argument("name", nargs=1, callback=_check_pipeline_name)
 @env_option(
     help="Environment to delete pipeline configuration from. Defaults to `base`."
@@ -119,15 +122,15 @@ def create_pipeline(name, skip_config, env):
 @click.option(
     "-y", "--yes", is_flag=True, help="Confirm deletion of pipeline non-interactively."
 )
-def delete_pipeline(name, env, yes):
+def delete_pipeline(name, env, yes, **kwargs):  # pylint: disable=unused-argument
     """Delete a modular pipeline by providing the pipeline name as an argument."""
     try:
         context = load_context(Path.cwd(), env=env)
-    except Exception as err:  # pylint: disable=broad-except
-        _handle_exception(
+    except Exception as exc:
+        raise KedroCliError(
             f"Unable to load Kedro context with environment `{env}`. "
-            f"Make sure it exists in the project configuration.\nError: {err}"
-        )
+            f"Make sure it exists in the project configuration.\nError: {exc}"
+        ) from exc
 
     package_dir = _get_project_package_dir(context)
 
@@ -165,10 +168,10 @@ def list_pipelines(env):
     click.echo(yaml.dump(sorted(project_pipelines)))
 
 
-@pipeline.command("describe")
+@command_with_verbosity(pipeline, "describe")
 @env_option
 @click.argument("name", nargs=1)
-def describe_pipeline(name, env):
+def describe_pipeline(name, env, **kwargs):  # pylint: disable=unused-argument
     """Describe a pipeline by providing the pipeline name as an argument."""
     context = load_context(Path.cwd(), env=env)
     pipeline_obj = context.pipelines.get(name)
@@ -188,7 +191,7 @@ def describe_pipeline(name, env):
     click.echo(yaml.dump(result))
 
 
-@pipeline.command("pull")
+@command_with_verbosity(pipeline, "pull")
 @click.argument("package_path", nargs=1)
 @env_option(
     help="Environment to install the pipeline configuration to. Defaults to `base`."
@@ -200,7 +203,9 @@ def describe_pipeline(name, env):
     callback=_check_pipeline_name,
     help="Alternative name to unpackage under.",
 )
-def pull_package(package_path, env, alias):
+def pull_package(
+    package_path, env, alias, **kwargs
+):  # pylint: disable=unused-argument,too-many-locals
     """Pull a modular pipeline package, unpack it and install the files to corresponding
     locations.
     """
@@ -555,5 +560,6 @@ def _delete_dirs(*dirs):
             click.secho("FAILED", fg="red")
             cls = exc.__class__
             raise KedroCliError(f"{cls.__module__}.{cls.__qualname__}: {exc}") from exc
+
         else:
             click.secho("OK", fg="green")

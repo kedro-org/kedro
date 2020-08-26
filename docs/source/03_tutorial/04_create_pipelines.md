@@ -421,7 +421,7 @@ test_size: 0.2
 random_state: 3
 ```
 
-These are the parameters fed into the `DataCatalog` when the pipeline is executed. More information about [parameters](../04_kedro_project_setup/01_configuration.md#parameters) is available in later documentation for advanced usage.
+These are the parameters fed into the `DataCatalog` when the pipeline is executed. More information about [parameters](../04_kedro_project_setup/02_configuration.md#parameters) is available in later documentation for advanced usage.
 
 ### Register the dataset
 The next step is to register the dataset that will save the trained model, by adding the following definition to `conf/base/catalog.yml`:

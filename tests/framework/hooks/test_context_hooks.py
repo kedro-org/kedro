@@ -32,7 +32,7 @@ from collections import namedtuple
 from logging.handlers import QueueHandler, QueueListener
 from multiprocessing import Queue
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Union
+from typing import Any, Dict, Iterable, List, Optional, Union
 
 import pandas as pd
 import pytest
@@ -48,6 +48,7 @@ from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node, node
 from kedro.runner import ParallelRunner
+from kedro.versioning import Journal
 
 
 @pytest.fixture
@@ -296,8 +297,31 @@ class LoggingHooks:
         self.logger.info("Registering config loader", extra={"conf_paths": conf_paths})
         return ConfigLoader(conf_paths)
 
+    @hook_impl
+    def register_catalog(
+        self,
+        catalog: Optional[Dict[str, Dict[str, Any]]],
+        credentials: Dict[str, Dict[str, Any]],
+        load_versions: Dict[str, str],
+        save_version: str,
+        journal: Journal,
+    ) -> DataCatalog:
+        self.logger.info(
+            "Registering catalog",
+            extra={
+                "catalog": catalog,
+                "credentials": credentials,
+                "load_versions": load_versions,
+                "save_version": save_version,
+                "journal": journal,
+            },
+        )
+        return DataCatalog.from_config(
+            catalog, credentials, load_versions, save_version, journal
+        )
 
-class RegistrationHooks:
+
+class DuplicateHooks:
     @hook_impl
     def register_pipelines(self) -> Dict[str, Pipeline]:
         return {"__default__": context_pipeline, "pipe": context_pipeline}
@@ -357,7 +381,7 @@ def context_with_hooks(tmp_path, mocker, logging_hooks):
 @pytest.fixture
 def context_with_duplicate_hooks(tmp_path, mocker, logging_hooks):
     logging_hooks.queue_listener.start()
-    hooks = (logging_hooks, RegistrationHooks())
+    hooks = (logging_hooks, DuplicateHooks())
     yield _create_context_with_hooks(tmp_path, mocker, hooks)
     logging_hooks.queue_listener.stop()
 
@@ -730,3 +754,23 @@ class TestRegistrationHooks:
             ),
         ]
         assert record.conf_paths == expected_conf_paths
+
+    def test_register_catalog_is_called(self, context_with_hooks, caplog):
+        catalog = context_with_hooks.catalog
+        assert isinstance(catalog, DataCatalog)
+
+        relevant_records = [
+            r
+            for r in caplog.records
+            if r.name == LoggingHooks.handler_name
+            and r.getMessage() == "Registering catalog"
+        ]
+        assert len(relevant_records) == 1
+
+        record = relevant_records[0]
+        assert record.catalog.keys() == {"cars", "boats"}
+        assert record.credentials == {"dev_s3": "foo"}
+        # save_version is only passed during a run, not on the property getter
+        assert record.save_version is None
+        assert record.load_versions is None
+        assert record.journal is None

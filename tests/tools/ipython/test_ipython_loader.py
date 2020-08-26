@@ -30,6 +30,7 @@
 from pathlib import Path
 
 import pytest
+
 from tools.ipython import ipython_loader
 from tools.ipython.ipython_loader import locate_ipython_startup_dir
 

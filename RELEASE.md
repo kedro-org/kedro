@@ -14,8 +14,13 @@
 # Upcoming Release 0.16.5
 
 ## Major features and improvements
-* Added `register_pipelines()`, a new hook to register a project's pipelines. The order of execution is: plugin hooks, `.kedro.yml` hooks, hooks in `ProjectContext.hooks`.
 * Added support for `pyproject.toml` to configure Kedro. `pyproject.toml` is used if `.kedro.yml` doesn't exist (Kedro configuration should be under `[tool.kedro]` section).
+* Projects created with this version will have no `pipeline.py`, having been replaced by `hooks.py`.
+* Added a set of registration hooks, as the new way of registering library components with a Kedro project:
+    * `register_pipelines()`, to replace `_get_pipelines()`
+    * `register_config_loader(conf_paths)`, to replace `_create_config_loader()`
+These can be defined in `src/<package-name>/hooks.py` and added to `.kedro.yml` (or `pyproject.toml`). The order of execution is: plugin hooks, `.kedro.yml` hooks, hooks in `ProjectContext.hooks`.
+* Added ability to disable auto-registered Hooks using `.kedro.yml` (or `pyproject.toml`) configuration file.
 
 ## Bug fixes and other changes
 * `project_name`, `project_version` and `package_name` now have to be defined in `.kedro.yml` for the projects generated using Kedro 0.16.5+.

@@ -139,6 +139,27 @@ Kedro also has auto-discovery enabled by default. This means that any installed 
 
 >Note: Auto-discovered Hooks will run *first*, followed by the ones specified in `.kedro.yml` or `pyproject.toml` (if `.kedro.yml` doesn't exist), and finally `ProjectContext.hooks`.
 
+#### Disable auto-registered plugins' Hooks
+
+Auto-registered plugins' Hooks can be disabled via `.kedro.yml` or `pyproject.toml` as follows:
+
+```yaml
+# <your_project>/.kedro.yml
+disable_hooks_for_plugins:
+    - <plugin_name>
+    - ...
+```
+
+or
+
+```toml
+# <your_project>/pyproject.toml
+[tool.kedro]
+disable_hooks_for_plugins=["<plugin_name>", ]
+```
+
+where `<plugin_name>` is the name of an installed plugin for which the auto-registered Hooks must be disabled.
+
 ## Under the hood
 
 Under the hood, we use [pytest's pluggy](https://pluggy.readthedocs.io/en/latest/) to implement Kedro's Hook mechanism. We recommend reading their documentation if you have more questions about the underlying implementation.

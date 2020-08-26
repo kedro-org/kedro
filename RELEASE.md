@@ -24,6 +24,7 @@
     * `register_pipelines()`, to replace `_get_pipelines()`
     * `register_config_loader(conf_paths)`, to replace `_create_config_loader()`
 These can be defined in `src/<package-name>/hooks.py` and added to `.kedro.yml` (or `pyproject.toml`). The order of execution is: plugin hooks, `.kedro.yml` hooks, hooks in `ProjectContext.hooks`.
+* Added ability to disable auto-registered Hooks using `.kedro.yml` (or `pyproject.toml`) configuration file.
 
 ## Bug fixes and other changes
 * `project_name`, `project_version` and `package_name` now have to be defined in `.kedro.yml` for the projects generated using Kedro 0.16.5+.

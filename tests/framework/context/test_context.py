@@ -49,9 +49,11 @@ from kedro.framework.context.context import (
     _validate_layers_for_transcoding,
 )
 from kedro.framework.hooks import get_hook_manager, hook_impl
+from kedro.io import DataCatalog
 from kedro.io.core import Version, generate_timestamp
 from kedro.pipeline import Pipeline, node
 from kedro.runner import ParallelRunner, SequentialRunner
+from kedro.versioning import Journal
 
 
 def _get_local_logging_config():
@@ -242,6 +244,14 @@ def _create_pipelines():
 
 class RegistrationHooks:
     @hook_impl
+    def register_catalog(
+        self, catalog, credentials, load_versions, save_version, journal
+    ) -> DataCatalog:
+        return DataCatalog.from_config(
+            catalog, credentials, load_versions, save_version, journal
+        )
+
+    @hook_impl
     def register_config_loader(self, conf_paths) -> ConfigLoader:
         return ConfigLoader(conf_paths)
 
@@ -255,6 +265,18 @@ class DummyContext(KedroContext):
 
 
 class DummyContextNoHooks(KedroContext):
+    def _create_catalog(  # pylint: disable=no-self-use,too-many-arguments
+        self,
+        conf_catalog: Dict[str, Any],
+        conf_creds: Dict[str, Any],
+        save_version: str = None,
+        journal: Journal = None,
+        load_versions: Dict[str, str] = None,
+    ) -> DataCatalog:
+        return DataCatalog.from_config(
+            conf_catalog, conf_creds, load_versions, save_version, journal
+        )
+
     def _create_config_loader(  # pylint: disable=no-self-use
         self, conf_paths
     ) -> ConfigLoader:

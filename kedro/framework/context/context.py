@@ -508,12 +508,17 @@ class KedroContext(abc.ABC):
             DataCatalog defined in `catalog.yml`.
 
         """
-        return DataCatalog.from_config(
-            conf_catalog,
-            conf_creds,
+        hook_manager = get_hook_manager()
+        catalog = hook_manager.hook.register_catalog(  # pylint: disable=no-member
+            catalog=conf_catalog,
+            credentials=conf_creds,
+            load_versions=load_versions,
             save_version=save_version,
             journal=journal,
-            load_versions=load_versions,
+        )
+
+        return catalog or DataCatalog.from_config(  # for backwards compatibility
+            conf_catalog, conf_creds, load_versions, save_version, journal
         )
 
     @property

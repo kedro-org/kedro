@@ -15,7 +15,8 @@
 * Projects created with this version will have no `pipeline.py`, having been replaced by `hooks.py`.
 * Added a set of registration hooks, as the new way of registering library components with a Kedro project:
     * `register_pipelines()`, to replace `_get_pipelines()`
-    * `register_config_loader(conf_paths)`, to replace `_create_config_loader()`
+    * `register_config_loader()`, to replace `_create_config_loader()`
+    * `register_catalog()`, to replace `_create_catalog()`
 These can be defined in `src/<package-name>/hooks.py` and added to `.kedro.yml` (or `pyproject.toml`). The order of execution is: plugin hooks, `.kedro.yml` hooks, hooks in `ProjectContext.hooks`.
 * Added ability to disable auto-registered Hooks using `.kedro.yml` (or `pyproject.toml`) configuration file.
 

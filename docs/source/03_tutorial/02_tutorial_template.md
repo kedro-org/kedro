@@ -32,7 +32,7 @@ flake8>=3.7.9, <4.0 # Used for linting code with `kedro lint`
 ipython>=7.0.0, <8.0 # Used for an IPython session with `kedro ipython`
 isort>=4.3.21, <5.0 # Used for linting code with `kedro lint`
 jupyter>=1.0.0, <2.0 # Used to open a Kedro-session in Jupyter Notebook & Lab
-jupyter_client>=5.1.0, <6.0 # Used to open a Kedro-session in Jupyter Notebook & Lab
+jupyter_client>=5.1.0, <7.0 # Used to open a Kedro-session in Jupyter Notebook & Lab
 jupyterlab==0.31.1 # Used to open a Kedro-session in Jupyter Lab
 kedro==0.16.3
 nbstripout==0.3.3 # Strips the output of a Jupyter Notebook and writes the outputless version to the original file

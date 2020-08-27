@@ -13,7 +13,6 @@ holoviews~=1.13.0
 import-linter==1.0
 ipython~=7.0
 joblib>=0.14
-jupyter_client~=5.1
 matplotlib>=3.0.3, <4.0
 memory_profiler>=0.50.0, <1.0
 moto==1.3.7

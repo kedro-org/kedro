@@ -38,7 +38,7 @@ name = "kedro"
 here = path.abspath(path.dirname(__file__))
 
 
-PANDAS = "pandas>=0.24, <1.0.4"  # https://github.com/pandas-dev/pandas/issues/34467
+PANDAS = "pandas>=0.24"
 SPARK = "pyspark~=2.2"
 HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.5"

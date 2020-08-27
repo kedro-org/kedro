@@ -34,7 +34,7 @@ import tempfile
 from importlib import import_module
 from pathlib import Path
 from textwrap import indent
-from typing import Tuple
+from typing import NamedTuple, Tuple
 from zipfile import ZipFile
 
 import click
@@ -66,6 +66,11 @@ setup(
     package_data={package_data},
 )
 """
+
+PipelineArtifacts = NamedTuple(
+    "PipelineArtifacts",
+    [("pipeline_dir", Path), ("pipeline_tests", Path), ("pipeline_conf", Path)],
+)
 
 
 @click.group()
@@ -341,6 +346,8 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
     version = version or "0.1"
 
     artifacts_to_package = _get_pipeline_artifacts(context, pipeline_name=name, env=env)
+    # Check that pipeline directory exists and not empty
+    _validate_dir(artifacts_to_package.pipeline_dir)
     destination = Path(destination) if destination else package_dir.parent / "dist"
 
     _generate_wheel_file(package_name, destination, artifacts_to_package, version)
@@ -349,6 +356,13 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
     _clean_pycache(context.project_path)
 
     return destination
+
+
+def _validate_dir(path: Path) -> None:
+    if not path.is_dir():
+        raise KedroCliError(f"Directory '{path}' doesn't exist.")
+    if not list(path.iterdir()):
+        raise KedroCliError(f"'{path}' is an empty directory.")
 
 
 def _get_wheel_name(**kwargs):
@@ -499,10 +513,10 @@ def _get_project_package_dir(context: KedroContext) -> Path:
 
 def _get_pipeline_artifacts(
     context: KedroContext, pipeline_name: str, env: str
-) -> Tuple[Path, Path, Path]:
+) -> PipelineArtifacts:
     """From existing project, returns in order: source_path, tests_path, config_path"""
     package_dir = _get_project_package_dir(context)
-    artifacts = (
+    artifacts = PipelineArtifacts(
         package_dir / "pipelines" / pipeline_name,
         package_dir.parent / "tests" / "pipelines" / pipeline_name,
         context.project_path / context.CONF_ROOT / env / "pipelines" / pipeline_name,

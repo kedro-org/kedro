@@ -26,11 +26,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``AbstractDataSet`` implementation to load/save data from/to a text file."""
+"""``AbstractDataSet`` implementations for managing email messages."""
 
-__all__ = ["TextDataSet"]
+__all__ = ["EmailMessageDataSet"]
 
 from contextlib import suppress
 
 with suppress(ImportError):
-    from .text_dataset import TextDataSet  # NOQA
+    from .message_dataset import EmailMessageDataSet  # NOQA

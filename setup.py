@@ -38,7 +38,7 @@ name = "kedro"
 here = path.abspath(path.dirname(__file__))
 
 
-PANDAS = "pandas>=0.24, <1.0.4"  # https://github.com/pandas-dev/pandas/issues/34467
+PANDAS = "pandas>=0.24"
 SPARK = "pyspark~=2.2"
 HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.4.1"
@@ -129,7 +129,7 @@ extras_require = {
         "recommonmark==0.5.0",
         "sphinx-autodoc-typehints==1.6.0",
         "sphinx_copybutton==0.2.5",
-        "jupyter_client~=5.1",
+        "jupyter_client>=5.1, <7.0",
         "tornado>=4.2, <6.0",
         "ipykernel>=4.8.1, <5.0",
     ],

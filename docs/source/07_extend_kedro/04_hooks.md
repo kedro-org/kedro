@@ -51,6 +51,7 @@ In addition, Kedro defines Hook specifications to register certain library compo
 
 * `register_pipelines`
 * `register_config_loader`
+* `register_catalog`
 
 The naming convention for registration hooks is `register_<library_component>`.
 

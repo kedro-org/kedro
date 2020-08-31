@@ -31,12 +31,13 @@ For more information about these specifications, please visit
 [Pluggy's documentation](https://pluggy.readthedocs.io/en/stable/#specs)
 """
 # pylint: disable=too-many-arguments
-from typing import Any, Dict, Iterable
+from typing import Any, Dict, Iterable, Optional
 
 from kedro.config import ConfigLoader
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
+from kedro.versioning import Journal
 
 from .markers import hook_spec
 
@@ -275,5 +276,21 @@ class RegistrationSpecs:
 
         Returns:
             An instance of a ``ConfigLoader``.
+        """
+        pass
+
+    @hook_spec(firstresult=True)
+    def register_catalog(
+        self,
+        catalog: Optional[Dict[str, Dict[str, Any]]],
+        credentials: Dict[str, Dict[str, Any]],
+        load_versions: Dict[str, str],
+        save_version: str,
+        journal: Journal,
+    ) -> DataCatalog:
+        """Hook to be invoked to register a project's data catalog.
+
+        Returns:
+            An instance of a ``DataCatalog``.
         """
         pass

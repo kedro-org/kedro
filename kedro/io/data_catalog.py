@@ -313,9 +313,8 @@ class DataCatalog:
         missing_keys = load_versions.keys() - catalog.keys()
         if missing_keys:
             warn(
-                "`load_versions` keys [{}] are not found in the catalog.".format(
-                    ", ".join(sorted(missing_keys))
-                )
+                f"`load_versions` keys [{', '.join(sorted(missing_keys))}] "
+                f"are not found in the catalog."
             )
 
         layers = defaultdict(set)  # type: Dict[str, Set[str]]

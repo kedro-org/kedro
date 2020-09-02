@@ -575,7 +575,8 @@ class KedroContext(abc.ABC):
     def _setup_logging(self) -> None:
         """Register logging specified in logging directory."""
         conf_logging = self.config_loader.get("logging*", "logging*/**", "**/logging*")
-        # turn relative paths in logging config into absolute path before initialising loggers
+        # turn relative paths in logging config into absolute path
+        # before initialising loggers
         conf_logging = _convert_paths_to_absolute_posix(
             project_path=self.project_path, conf_dictionary=conf_logging
         )

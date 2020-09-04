@@ -10,7 +10,8 @@ clean:
 	pre-commit clean || true
 
 install-pip-setuptools:
-	python -m pip install -U "pip>=20.0" "setuptools>=38.0" wheel
+	# setuptools 50.0.3 broke 'make pip-compile' recipe, capping it for now
+	python -m pip install -U "pip>=20.0" "setuptools>=38.0,<50.0" wheel
 
 legal:
 	python tools/license_and_headers.py

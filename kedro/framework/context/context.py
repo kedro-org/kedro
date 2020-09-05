@@ -252,10 +252,10 @@ class KedroContext(abc.ABC):
 
         self.env = env or "local"
         self._extra_params = deepcopy(extra_params)
-        self._setup_logging()
 
-        # setup hooks
         self._register_hooks(auto=True)
+        # we need a ConfigLoader registered in order to be able to set up logging
+        self._setup_logging()
 
     @property
     def static_data(self) -> Dict[str, Any]:
@@ -316,24 +316,40 @@ class KedroContext(abc.ABC):
         """
         return self._get_pipelines()
 
-    @staticmethod
-    def _register_hooks_setuptools():
+    def _register_hooks_setuptools(self):
         """Register pluggy hooks from setuptools entrypoints."""
         hook_manager = get_hook_manager()
         already_registered = hook_manager.get_plugins()
         found = hook_manager.load_setuptools_entrypoints(_PLUGIN_HOOKS)
+        disable_plugins = set(self.static_data.get("disable_hooks_for_plugins", []))
 
-        if found:
-            plugininfo = hook_manager.list_plugin_distinfo()
-            plugin_names = sorted(
-                f"{dist.project_name}-{dist.version}"
-                for plugin, dist in plugininfo
-                if plugin not in already_registered
+        # Get list of plugin/distinfo tuples for all setuptools registered plugins.
+        plugininfo = hook_manager.list_plugin_distinfo()
+        plugin_names = []
+        disabled_plugin_names = []
+        for plugin, dist in plugininfo:
+            if dist.project_name in disable_plugins:
+                # `unregister()` is used instead of `set_blocked()` because
+                # we want to disable hooks for specific plugin based on project
+                # name and not `entry_point` name. Also, we log project names with
+                # version for which hooks were registered.
+                hook_manager.unregister(plugin=plugin)
+                found -= 1
+                disabled_plugin_names.append(f"{dist.project_name}-{dist.version}")
+            elif plugin not in already_registered:
+                plugin_names.append(f"{dist.project_name}-{dist.version}")
+
+        if disabled_plugin_names:
+            logging.info(
+                "Hooks are disabled for plugin(s): %s",
+                ", ".join(sorted(disabled_plugin_names)),
             )
+
+        if plugin_names:
             logging.info(
                 "Registered hooks from %d installed plugin(s): %s",
                 found,
-                ", ".join(plugin_names),
+                ", ".join(sorted(plugin_names)),
             )
 
     def _register_hooks(self, auto: bool = False) -> None:
@@ -492,12 +508,17 @@ class KedroContext(abc.ABC):
             DataCatalog defined in `catalog.yml`.
 
         """
-        return DataCatalog.from_config(
-            conf_catalog,
-            conf_creds,
+        hook_manager = get_hook_manager()
+        catalog = hook_manager.hook.register_catalog(  # pylint: disable=no-member
+            catalog=conf_catalog,
+            credentials=conf_creds,
+            load_versions=load_versions,
             save_version=save_version,
             journal=journal,
-            load_versions=load_versions,
+        )
+
+        return catalog or DataCatalog.from_config(  # for backwards compatibility
+            conf_catalog, conf_creds, load_versions, save_version, journal
         )
 
     @property
@@ -521,7 +542,11 @@ class KedroContext(abc.ABC):
             Instance of `ConfigLoader`.
 
         """
-        return ConfigLoader(conf_paths)
+        hook_manager = get_hook_manager()
+        config_loader = hook_manager.hook.register_config_loader(  # pylint: disable=no-member
+            conf_paths=conf_paths
+        )
+        return config_loader or ConfigLoader(conf_paths)  # for backwards compatibility
 
     def _get_config_loader(self) -> ConfigLoader:
         """A hook for changing the creation of a ConfigLoader instance.
@@ -550,7 +575,8 @@ class KedroContext(abc.ABC):
     def _setup_logging(self) -> None:
         """Register logging specified in logging directory."""
         conf_logging = self.config_loader.get("logging*", "logging*/**", "**/logging*")
-        # turn relative paths in logging config into absolute path before initialising loggers
+        # turn relative paths in logging config into absolute path
+        # before initialising loggers
         conf_logging = _convert_paths_to_absolute_posix(
             project_path=self.project_path, conf_dictionary=conf_logging
         )

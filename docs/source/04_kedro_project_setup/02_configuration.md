@@ -71,14 +71,15 @@ export KEDRO_ENV=test
 
 ## Templating configuration
 
-Kedro also provides an extension [TemplatedConfigLoader](/kedro.config.TemplatedConfigLoader) class that allows to template values in your configuration files. `TemplatedConfigLoader` is available in `kedro.config`, to apply templating to your `ProjectContext` in `src/<project-name>/run.py`, you will need to overwrite the `_create_config_loader` method as follows:
+Kedro also provides an extension [TemplatedConfigLoader](/kedro.config.TemplatedConfigLoader) class that allows to template values in your configuration files. `TemplatedConfigLoader` is available in `kedro.config`, to apply templating to your project, you will need to update the `register_config_loader` hook implementation in your `src/<project-name>/hooks.py`:
 
 ```python
 from kedro.config import TemplatedConfigLoader  # new import
 
 
-class ProjectContext(KedroContext):
-    def _create_config_loader(self, conf_paths: Iterable[str]) -> TemplatedConfigLoader:
+class ProjectHooks:
+    @hook_impl
+    def register_config_loader(self, conf_paths: Iterable[str]) -> ConfigLoader:
         return TemplatedConfigLoader(
             conf_paths,
             globals_pattern="*globals.yml",  # read the globals dictionary from project config

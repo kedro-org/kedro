@@ -50,6 +50,8 @@ The naming convention for error hooks is `on_<noun>_error`, in which:
 In addition, Kedro defines Hook specifications to register certain library components to be used with the project. This is where users can define their custom class implementations. Currently, the following Hook specifications are provided:
 
 * `register_pipelines`
+* `register_config_loader`
+* `register_catalog`
 
 The naming convention for registration hooks is `register_<library_component>`.
 
@@ -137,6 +139,27 @@ hooks=["your_project.hooks.transformer_hooks"]
 Kedro also has auto-discovery enabled by default. This means that any installed plugins that declare a Hooks entry-point will be registered. To learn more about how to enable this for your custom plugin, see our [plugin development guide](../07_extend_kedro/05_plugins.md#hooks).
 
 >Note: Auto-discovered Hooks will run *first*, followed by the ones specified in `.kedro.yml` or `pyproject.toml` (if `.kedro.yml` doesn't exist), and finally `ProjectContext.hooks`.
+
+#### Disable auto-registered plugins' Hooks
+
+Auto-registered plugins' Hooks can be disabled via `.kedro.yml` or `pyproject.toml` as follows:
+
+```yaml
+# <your_project>/.kedro.yml
+disable_hooks_for_plugins:
+    - <plugin_name>
+    - ...
+```
+
+or
+
+```toml
+# <your_project>/pyproject.toml
+[tool.kedro]
+disable_hooks_for_plugins=["<plugin_name>", ]
+```
+
+where `<plugin_name>` is the name of an installed plugin for which the auto-registered Hooks must be disabled.
 
 ## Under the hood
 

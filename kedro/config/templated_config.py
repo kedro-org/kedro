@@ -55,34 +55,25 @@ class TemplatedConfigLoader(ConfigLoader):
     wrapped in brackets like: ${...}, to be automatically formatted
     based on the configs.
 
-    The easiest way to use this class is by incorporating it into the
-    ``KedroContext``. This can be done by extending the ``KedroContext`` and overwriting
-    the config_loader method, making it return a ``TemplatedConfigLoader``
-    object instead of a ``ConfigLoader`` object.
-
-    For this method to work, the context_path variable in `.kedro.yml` (if exists) or
-    in `pyproject.toml` under `[tool.kedro]` section needs to be pointing at this newly
-    created class. The `run.py` script has an extension of the ``KedroContext`` by default,
-    called the ``ProjectContext``.
+    The easiest way to use this class is by registering it into the
+    ``KedroContext`` using hooks. This can be done by updating the
+    hook implementation `register_config_loader` in `hooks.py`, making it return
+    a ``TemplatedConfigLoader`` object instead of a ``ConfigLoader`` object.
 
     Example:
     ::
 
-        >>> from kedro.framework.context import KedroContext, load_context
         >>> from kedro.config import TemplatedConfigLoader
         >>>
         >>>
-        >>> class MyNewContext(KedroContext):
-        >>>
-        >>>     def _create_config_loader(self, conf_paths: Iterable[str]) -> TemplatedConfigLoader:
+        >>> class ProjectHooks:
+        >>>     @hook_impl
+        >>>     def register_config_loader(self, conf_paths: Iterable[str]) -> ConfigLoader:
         >>>         return TemplatedConfigLoader(
         >>>             conf_paths,
         >>>             globals_pattern="*globals.yml",
         >>>             globals_dict={"param1": "pandas.CSVDataSet"}
         >>>         )
-        >>>
-        >>> my_context = load_context(Path.cwd(), env=env)
-        >>> my_context.run(tags, runner, node_names, from_nodes, to_nodes)
 
     The contents of the dictionary resulting from the `globals_pattern` get
     merged with the ``globals_dict``. In case of conflicts, the keys in

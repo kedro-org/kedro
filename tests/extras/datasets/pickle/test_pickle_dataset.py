@@ -171,9 +171,7 @@ class TestPickleDataSetVersioned:
         assert "version" not in str(ds)
 
         assert filepath in str(ds_versioned)
-        ver_str = "version=Version(load={}, save='{}')".format(
-            load_version, save_version
-        )
+        ver_str = f"version=Version(load={load_version}, save='{save_version}')"
         assert ver_str in str(ds_versioned)
         assert "PickleDataSet" in str(ds_versioned)
         assert "PickleDataSet" in str(ds)

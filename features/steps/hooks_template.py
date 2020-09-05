@@ -28,7 +28,9 @@
 
 import pandas as pd
 
+from kedro.config import ConfigLoader
 from kedro.framework.hooks import hook_impl
+from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline, node
 
 
@@ -79,6 +81,18 @@ class ProjectHooks:
         )
 
         return {"__default__": example_pipeline}
+
+    @hook_impl
+    def register_config_loader(self, conf_paths):  # pylint: disable=no-self-use
+        return ConfigLoader(conf_paths)
+
+    @hook_impl
+    def register_catalog(  # pylint: disable=no-self-use, too-many-arguments
+        self, catalog, credentials, load_versions, save_version, journal
+    ):
+        return DataCatalog.from_config(
+            catalog, credentials, load_versions, save_version, journal
+        )
 
 
 project_hooks = ProjectHooks()

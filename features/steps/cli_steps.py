@@ -273,6 +273,17 @@ def install_test_plugin(context):
     assert res.returncode == OK_EXIT_CODE, res
 
 
+@given('I have disabled hooks for "{plugin}" plugin via config')
+def disable_plugin_hooks(context, plugin):
+    """Set `disable_hooks_for_plugins` in `.kedro.yml`."""
+    kedro_yml_path = context.root_project_dir / ".kedro.yml"
+
+    with kedro_yml_path.open("r+") as _f:
+        content = yaml.safe_load(_f)
+        content["disable_hooks_for_plugins"] = [plugin]
+        yaml.safe_dump(content, _f)
+
+
 @given("I have initialized a git repository")
 def init_git_repo(context):
     """Init git repo"""
@@ -593,6 +604,22 @@ def check_message_printed(context, msg):
 
     assert msg in stdout, (
         "Expected the following message segment to be printed on stdout: "
+        f"{msg},\nbut got {stdout}"
+    )
+
+
+@then('I should not get a message including "{msg}"')
+def check_message_not_printed(context, msg):
+    """Check that specified message is not printed to stdout."""
+
+    if isinstance(context.result, ChildTerminatingPopen):
+        stdout = context.result.stdout.read().decode()
+        context.result.terminate()
+    else:
+        stdout = context.result.stdout
+
+    assert msg not in stdout, (
+        "Expected the following message segment not to be printed on stdout: "
         f"{msg},\nbut got {stdout}"
     )
 

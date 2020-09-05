@@ -31,11 +31,13 @@ For more information about these specifications, please visit
 [Pluggy's documentation](https://pluggy.readthedocs.io/en/stable/#specs)
 """
 # pylint: disable=too-many-arguments
-from typing import Any, Dict
+from typing import Any, Dict, Iterable, Optional
 
+from kedro.config import ConfigLoader
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
+from kedro.versioning import Journal
 
 from .markers import hook_spec
 
@@ -157,16 +159,6 @@ class PipelineSpecs:
     """Namespace that defines all specifications for a pipeline's lifecycle hooks."""
 
     @hook_spec
-    def register_pipelines(self) -> Dict[str, Pipeline]:
-        """Hook to be invoked to register a project's pipelines.
-
-        Returns:
-            A mapping from a pipeline name to a ``Pipeline`` object.
-
-        """
-        pass
-
-    @hook_spec
     def before_pipeline_run(
         self, run_params: Dict[str, Any], pipeline: Pipeline, catalog: DataCatalog
     ) -> None:
@@ -259,5 +251,46 @@ class PipelineSpecs:
                    }
             pipeline: The ``Pipeline`` that will was run.
             catalog: The ``DataCatalog`` used during the run.
+        """
+        pass
+
+
+class RegistrationSpecs:
+    """Namespace that defines all specifications for hooks registering
+    library components with a Kedro project.
+    """
+
+    @hook_spec
+    def register_pipelines(self) -> Dict[str, Pipeline]:
+        """Hook to be invoked to register a project's pipelines.
+
+        Returns:
+            A mapping from a pipeline name to a ``Pipeline`` object.
+
+        """
+        pass
+
+    @hook_spec(firstresult=True)
+    def register_config_loader(self, conf_paths: Iterable[str]) -> ConfigLoader:
+        """Hook to be invoked to register a project's config loader.
+
+        Returns:
+            An instance of a ``ConfigLoader``.
+        """
+        pass
+
+    @hook_spec(firstresult=True)
+    def register_catalog(
+        self,
+        catalog: Optional[Dict[str, Dict[str, Any]]],
+        credentials: Dict[str, Dict[str, Any]],
+        load_versions: Dict[str, str],
+        save_version: str,
+        journal: Journal,
+    ) -> DataCatalog:
+        """Hook to be invoked to register a project's data catalog.
+
+        Returns:
+            An instance of a ``DataCatalog``.
         """
         pass

@@ -126,6 +126,14 @@ We aim to minimise the number of breaking changes to help keep the Kedro softwar
 
 Before contributing a breaking change, you should create an [issue](https://github.com/quantumblacklabs/kedro/issues) describing the change and justify the value gained by breaking backwards compatibility.
 
+### Deprecation policy
+Deprecation is the process of retiring old code that is no longer useful and eventually removing it completely. This allows us to maintain a cleaner codebase and progress with new functionality for users. The Kedro deprecation policy is as follows:
+
+* We reserve the right to remove deprecated public methods and properties in the next major release following the deprecation of any code.
+* Deprecations apply to all public APIs, classes, and methods.
+* Any public feature that is pending deprecation must raise a `DeprecationWarning` to indicate its upcoming removal.
+* All deprecations should be noted in the `RELEASE.md`.
+
 # Our release model
 
 All non-breaking changes go into `master`, from which a minor release can be deployed at any time. Any non-breaking change should branch off from `master` and be merged into `master`, as explained in the [contribution process](/CONTRIBUTING.md#core-contribution-process) below.

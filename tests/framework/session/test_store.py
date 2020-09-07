@@ -43,9 +43,11 @@ class BadStore:  # pylint: disable=too-few-public-methods
     """
 
 
+STORE_LOGGER_NAME = "kedro.framework.session.store"
+
+
 class TestBaseStore:
     def test_init(self, caplog):
-        caplog.set_level(logging.WARN, logger="kedro.framework.session.store")
         path = "fake_path"
         store = BaseSessionStore(path, FAKE_SESSION_ID)
         assert store == dict()
@@ -55,10 +57,14 @@ class TestBaseStore:
         expected_log_messages = [
             "`read()` not implemented for `BaseSessionStore`. Assuming empty store."
         ]
-        assert [rec.getMessage() for rec in caplog.records] == expected_log_messages
+        actual_log_messages = [
+            rec.getMessage()
+            for rec in caplog.records
+            if rec.name == STORE_LOGGER_NAME and rec.levelno == logging.WARN
+        ]
+        assert actual_log_messages == expected_log_messages
 
     def test_save(self, caplog):
-        caplog.set_level(logging.WARN, logger="kedro.framework.session.store")
         path = "fake_path"
         store = BaseSessionStore(path, FAKE_SESSION_ID)
         store.save()
@@ -68,7 +74,12 @@ class TestBaseStore:
             "`read()` not implemented for `BaseSessionStore`. Assuming empty store.",
             "`save()` not implemented for `BaseSessionStore`. Skipping the step.",
         ]
-        assert [rec.getMessage() for rec in caplog.records] == expected_log_messages
+        actual_log_messages = [
+            rec.getMessage()
+            for rec in caplog.records
+            if rec.name == STORE_LOGGER_NAME and rec.levelno == logging.WARN
+        ]
+        assert actual_log_messages == expected_log_messages
 
     @pytest.mark.parametrize(
         "config,expected_class",

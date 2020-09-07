@@ -72,6 +72,10 @@ class FakeException(Exception):
     """Fake exception class for testing purposes"""
 
 
+SESSION_LOGGER_NAME = "kedro.framework.session.session"
+STORE_LOGGER_NAME = "kedro.framework.session.store"
+
+
 @pytest.mark.usefixtures("mock_load_context")
 class TestKedroSession:
     @pytest.mark.parametrize("env", [None, "env1"])
@@ -117,10 +121,14 @@ class TestKedroSession:
             "`read()` not implemented for `BaseSessionStore`. Assuming empty store.",
             "`save()` not implemented for `BaseSessionStore`. Skipping the step.",
         ]
-        assert [rec.getMessage() for rec in caplog.records] == expected_log_messages
+        actual_log_messages = [
+            rec.getMessage()
+            for rec in caplog.records
+            if rec.name == STORE_LOGGER_NAME and rec.levelno == logging.WARN
+        ]
+        assert actual_log_messages == expected_log_messages
 
     def test_shelve_store(self, fake_project, fake_session_id, caplog):
-        caplog.set_level(logging.WARN, logger="kedro.framework.session.store")
         kedro_yml = fake_project / ".kedro.yml"
         shelve_location = fake_project / "nested" / "sessions"
         with kedro_yml.open("r+") as f:
@@ -137,9 +145,15 @@ class TestKedroSession:
         assert other._store._location == shelve_location / fake_session_id / "store"
         assert other._store._session_id == fake_session_id
         assert not shelve_location.is_dir()
+
         other.close()  # session data persisted
         assert shelve_location.is_dir()
-        assert not caplog.records
+        actual_log_messages = [
+            rec.getMessage()
+            for rec in caplog.records
+            if rec.name == STORE_LOGGER_NAME and rec.levelno == logging.WARN
+        ]
+        assert not actual_log_messages
 
     @pytest.mark.parametrize("fake_git_status", ["dirty", ""])
     @pytest.mark.parametrize("fake_commit_hash", ["fake_commit_hash"])
@@ -167,13 +181,21 @@ class TestKedroSession:
             NotADirectoryError,
         ],
     )
-    def test_git_describe_error(self, fake_project, exception, mocker):
+    def test_git_describe_error(self, fake_project, exception, mocker, caplog):
         """Test that git information is not added to the session store
         if call to git fails
         """
         mocker.patch("subprocess.check_output", side_effect=exception)
         session = KedroSession.create(fake_project)
         assert "git" not in session.store
+
+        expected_log_messages = [f"Unable to git describe {fake_project}"]
+        actual_log_messages = [
+            rec.getMessage()
+            for rec in caplog.records
+            if rec.name == SESSION_LOGGER_NAME and rec.levelno == logging.WARN
+        ]
+        assert actual_log_messages == expected_log_messages
 
     def test_log_error(self, fake_project):
         """Test logging the error by the session"""

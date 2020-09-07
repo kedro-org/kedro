@@ -41,7 +41,7 @@ You can create a new project from a configuration file if you prefer. The file m
 -   `python_package`
 -   `include_example` (Boolean value) option to confirm or reject the inclusion of the [Iris example code](../02_get_started/05_example_project.md)
 
-Here is an example `config.yml`, which assumes that a directory named `~/code` already exists:
+The `output_dir` can be set to wherever you want to create the project. For example, `~` for your home directory, or `.` for the current working directory. Here is an example `config.yml`, which assumes that a directory named `~/code` already exists:
 
 ```yaml
 output_dir: ~/code

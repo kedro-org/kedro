@@ -179,6 +179,12 @@ For the full list of available CLI options, you can always run `kedro pipeline c
 
 > *Note:* Since `kedro pipeline` is a group of project specific commands, those will only show up when your current working directory is the project root. If you see an error message like `Error: No such command 'pipeline'`, this indicates that your working directory does not point to a valid Kedro project.
 
+### How do I delete a modular pipeline?
+You can manually delete all the files that belong to a modular pipeline. However, Kedro also provides a CLI command to delete the following files automatically when you call `kedro pipeline delete <pipeline_name>`:
+
+* All the modular pipeline code in `src/<python_package>/pipelines/<pipeline_name>/`
+* Configuration files in `conf/<env>/pipelines/<pipeline_name>/`, where `<env>` defaults to `base`. If the files are located in a different config environment, run `kedro pipeline delete <pipeline_name> --env <env_name>`.
+*  Pipeline unit tests in `src/tests/pipelines/<pipeline_name>/`
 
 ### Modular pipeline structure
 
@@ -256,15 +262,50 @@ project_hooks = ProjectHooks()
 
 > *Note:* To find out how you can run a pipeline by its name, please navigate to [this section](#running-a-pipeline-by-name).
 
-### How do I package a modular pipeline?
+### How do I share a modular pipeline?
 
+#### Packaging a modular pipeline
 Since Kedro 0.16.4 you can package a modular pipeline by executing `kedro pipeline package <pipeline_name>` command, which will generate a new [wheel file](https://pythonwheels.com/) for it. By default, the wheel file will be saved into `src/dist` directory inside your project, however this can be changed using `--destination` (`-d`) option.
 
-When packaging your modular pipeline, Kedro will also automatically include all configuration parameters from `conf/<env>/pipelines/<pipeline_name>` and pipeline tests from `tests/pipelines/<pipeline_name>`, where `<env>` defaults to `base`. If you need to capture the parameters from a different config environment, run `kedro pipeline package --env <env_name> <pipeline_name>`.
+When packaging your modular pipeline, Kedro will also automatically package files from 3 locations :
+
+*  All the modular pipeline code in `src/<python_package>/pipelines/<pipeline_name>/`
+*  Parameters configuration files in `conf/<env>/pipelines/<pipeline_name>`,where `<env>` defaults to `base`. If you need to capture the parameters from a different config environment, run `kedro pipeline package --env <env_name> <pipeline_name>`
+*  Pipeline unit tests in `src/tests/pipelines/<pipeline_name>`
 
 > Note that Kedro _will not_ package the catalog config files even if those are present in `conf/<env>/pipelines/<pipeline_name>`.
 
 If you plan to publish your packaged modular pipeline to some Python package repository like [PyPI](https://pypi.org/), you need to make sure that your modular pipeline name doesn't clash with any of the existing packages in that repository. However, there is no need to rename any of your source files if that is the case. Simply alias your package with a new name by running `kedro pipeline package --alias <new_package_name> <pipeline_name>`.
+
+In addition to [PyPI](https://pypi.org/), you can also share the packaged wheel file directly, or via a cloud storage such as AWS S3.
+
+#### Pulling a modular pipeline
+
+You can pull a modular pipeline from a wheel file by executing `kedro pipeline pull <package_name>`. where `<package_name>` is either a package name on Pypi, or a path to the wheel file. Kedro will unpack the wheel file, and install the files in following locations in your Kedro project:
+
+*  All the modular pipeline code in `src/<python_package>/pipelines/<pipeline_name>/`
+*  Configuration files in `conf/<env>/pipelines/<pipeline_name>`, where `<env>` defaults to `base`. If you want to place the parameters from a different config environment, run `kedro pipeline pull <pipeline_name> --env <env_name>`
+*  Pipeline unit tests in `src/tests/pipelines/<pipeline_name>`
+
+You can pull a modular pipeline from different locations, including local, PyPI and a cloud storage. Here are CLI examples of pulling a modular pipeline.
+
+- Pulling a modular pipeline from a local directory
+
+```bash
+kedro pipeline pull <path-to-your-project-root>/src/dist/<pipeline_name>-0.1-py3-none-any.whl
+```
+
+- Pulling a modular pipeline from S3
+
+```bash
+kedro pipeline pull https://<bucket_name>.s3.<aws-region>.amazonaws.com/<pipline_name>-0.1-py3-none-any.whl
+```
+
+- Pulling a modular pipeline from PyPI
+
+```bash
+kedro pipeline pull <pypi-package-name>
+```
 
 ### A modular pipeline example template
 

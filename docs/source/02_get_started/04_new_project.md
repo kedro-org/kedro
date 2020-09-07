@@ -35,7 +35,7 @@ The output lists the directory in which to find the project.
 
 You can create a new project from a configuration file if you prefer. The file must contain:
 
--   `output_dir` The path in which to create the project directory. For example, the path can be `~` for your home directory, or `.` for the current working directory.
+-   `output_dir` The path in which to create the project directory
 -   `project_name`
 -   `repo_name`
 -   `python_package`

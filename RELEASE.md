@@ -34,7 +34,7 @@ These can be defined in `src/<package-name>/hooks.py` and added to `.kedro.yml` 
 
 ## Thanks for supporting contributions
 
-[Sebastian Bertoli](https://github.com/sebastianbertoli), [Deepyaman Datta](https://github.com/deepyaman)
+[Sebastian Bertoli](https://github.com/sebastianbertoli), [Deepyaman Datta](https://github.com/deepyaman), [Bhavya Merchant](bnmerchant)
 
 # Release 0.16.4
 

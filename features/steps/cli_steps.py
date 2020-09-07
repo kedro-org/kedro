@@ -273,6 +273,17 @@ def install_test_plugin(context):
     assert res.returncode == OK_EXIT_CODE, res
 
 
+@given('I have disabled hooks for "{plugin}" plugin via config')
+def disable_plugin_hooks(context, plugin):
+    """Set `disable_hooks_for_plugins` in `.kedro.yml`."""
+    kedro_yml_path = context.root_project_dir / ".kedro.yml"
+
+    with kedro_yml_path.open("r+") as _f:
+        content = yaml.safe_load(_f)
+        content["disable_hooks_for_plugins"] = [plugin]
+        yaml.safe_dump(content, _f)
+
+
 @given("I have initialized a git repository")
 def init_git_repo(context):
     """Init git repo"""
@@ -329,14 +340,6 @@ def exec_kedro_target(context, command):
     split_command = command.split()
     cmd = [context.kedro] + split_command
     context.result = run(cmd, env=context.env, cwd=str(context.root_project_dir))
-
-
-@when("I delete assets not needed for running installed packages")
-def delete_unnecessary_assets(context):
-    """Delete .kedro.yml as it is not needed when executing installed project package.
-    """
-    kedro_yaml = context.root_project_dir / ".kedro.yml"
-    kedro_yaml.unlink()
 
 
 @when("I execute the installed project package")
@@ -443,10 +446,11 @@ def udpate_kedro_yml(context: behave.runner.Context, new_source_dir):
     """
 
     kedro_yml_path = context.root_project_dir / ".kedro.yml"
-    kedro_yml_path.write_text(
-        f"context_path: {context.package_name}.run.ProjectContext\n"
-        f"source_dir: {new_source_dir}\n"
-    )
+
+    with kedro_yml_path.open("r+") as _f:
+        content = yaml.safe_load(_f)
+        content["source_dir"] = new_source_dir
+        yaml.safe_dump(content, _f)
 
 
 @given("I have updated kedro requirements")
@@ -498,24 +502,24 @@ def check_created_project_structure(context):
 
 @then("the pipeline should contain no nodes")
 def check_empty_pipeline_exists(context):
-    """Check if the created `pipeline.py` contains no nodes"""
+    """Check if the created pipeline in `hooks.py` contains no nodes"""
     pipeline_file = (
         context.root_project_dir
         / "src"
         / context.project_name.replace("-", "_")
-        / "pipeline.py"
+        / "hooks.py"
     )
     assert '"__default__": Pipeline([])' in pipeline_file.read_text("utf-8")
 
 
 @then("the pipeline should contain nodes")
 def check_pipeline_not_empty(context):
-    """Check if the created `pipeline.py` contains nodes"""
+    """Check if the created pipeline in `hooks.py` contains nodes"""
     pipeline_file = (
         context.root_project_dir
         / "src"
         / context.project_name.replace("-", "_")
-        / "pipeline.py"
+        / "hooks.py"
     )
     assert "pipeline = Pipeline([])" not in pipeline_file.read_text("utf-8")
 
@@ -600,6 +604,22 @@ def check_message_printed(context, msg):
 
     assert msg in stdout, (
         "Expected the following message segment to be printed on stdout: "
+        f"{msg},\nbut got {stdout}"
+    )
+
+
+@then('I should not get a message including "{msg}"')
+def check_message_not_printed(context, msg):
+    """Check that specified message is not printed to stdout."""
+
+    if isinstance(context.result, ChildTerminatingPopen):
+        stdout = context.result.stdout.read().decode()
+        context.result.terminate()
+    else:
+        stdout = context.result.stdout
+
+    assert msg not in stdout, (
+        "Expected the following message segment not to be printed on stdout: "
         f"{msg},\nbut got {stdout}"
     )
 
@@ -691,7 +711,7 @@ def check_docs_generated(context: behave.runner.Context):
         context.root_project_dir / "docs" / "build" / "html" / "index.html"
     ).read_text("utf-8")
     project_repo = context.project_name.replace("-", "_")
-    assert "Welcome to project’s %s API docs!" % project_repo in index_html
+    assert "Welcome to project %s’s API docs!" % project_repo in index_html
 
 
 @then("requirements should be generated")

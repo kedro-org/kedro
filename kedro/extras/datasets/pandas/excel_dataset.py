@@ -100,7 +100,7 @@ class ExcelDataSet(AbstractVersionedDataSet):
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_excel.html
                 All defaults are preserved, but "index", which is set to False.
                 If you would like to specify options for the `ExcelWriter`,
-                you can include them under "writer" key. Here you can
+                you can include them under the "writer" key. Here you can
                 find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.ExcelWriter.html
             version: If specified, should be an instance of
@@ -134,17 +134,16 @@ class ExcelDataSet(AbstractVersionedDataSet):
             glob_function=self._fs.glob,
         )
 
-        # Handle default load and save arguments
+        # Handle default load arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args is not None:
             self._load_args.update(load_args)
 
+        # Handle default save arguments
         self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        self._writer_args = {"engine": engine}  # type: Dict[str, Any]
         if save_args is not None:
-            writer_args = save_args.pop("writer", {})  # type: Dict[str, Any]
-            self._writer_args.update(writer_args)
             self._save_args.update(save_args)
+        self._writer_args = self._save_args.pop("writer", {"engine": engine})
 
         _fs_open_args_save.setdefault("mode", "wb")
         self._fs_open_args_load = _fs_open_args_load

@@ -67,7 +67,7 @@ def fake_repo_config_path(fake_root_dir):
     }
     config_path = fake_root_dir / "repo_config.yml"
 
-    with open(str(config_path), "w") as fd:
+    with config_path.open("w") as fd:
         yaml.safe_dump(repo_config, fd)
 
     return config_path
@@ -84,11 +84,10 @@ def fake_repo(fake_repo_path: Path, fake_repo_config_path: Path):
     old_path = sys.path.copy()
     sys.path = [str(fake_repo_path), str(fake_repo_path / "src")] + sys.path
 
-    import kedro_cli  # noqa: F401 pylint: disable=import-error,unused-import
-
     # `load_context` will try to `import fake_package`,
     # will fail without this line:
     import fake_package  # noqa: F401 pylint: disable=import-error,unused-import
+    import kedro_cli  # noqa: F401 pylint: disable=import-error,unused-import
 
     sys.path = old_path
 

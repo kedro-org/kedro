@@ -130,15 +130,14 @@ class PickleDataSet(AbstractVersionedDataSet):
         """
         if backend not in self.BACKENDS:
             raise ValueError(
-                "'backend' should be one of {}, got '{}'.".format(
-                    list(self.BACKENDS.keys()), backend
-                )
+                f"'backend' should be one of {list(self.BACKENDS.keys())}, "
+                f"got '{backend}'."
             )
 
         if not self.BACKENDS[backend]:
             raise ImportError(
-                "Selected backend '{}' could not be "
-                "imported. Make sure it is installed.".format(backend)
+                f"Selected backend '{backend}' could not be "
+                "imported. Make sure it is installed."
             )
 
         _fs_args = deepcopy(fs_args) or {}
@@ -196,12 +195,12 @@ class PickleDataSet(AbstractVersionedDataSet):
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
             try:
                 self.BACKENDS[self._backend].dump(data, fs_file, **self._save_args)
-            except Exception as err:
+            except Exception as exc:
                 raise DataSetError(
                     "{} was not serialized due to: {}".format(
-                        str(data.__class__), str(err)
+                        str(data.__class__), str(exc)
                     )
-                )
+                ) from exc
 
         self._invalidate_cache()
 

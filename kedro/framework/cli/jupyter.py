@@ -51,11 +51,10 @@ from kedro.framework.cli.utils import (
     _check_module_importable,
     env_option,
     forward_command,
-    get_source_dir,
     ipython_message,
     python_call,
 )
-from kedro.framework.context import load_context
+from kedro.framework.context import get_static_project_data, load_context
 
 JUPYTER_IP_HELP = "IP address of the Jupyter server."
 JUPYTER_ALL_KERNELS_HELP = "Display all available Python kernels."
@@ -68,6 +67,18 @@ including sub-folders."""
 
 OVERWRITE_HELP = """If Python file already exists for the equivalent notebook,
 overwrite its contents."""
+
+
+def _load_project_context(**kwargs):
+    """Returns project context."""
+    try:
+        return load_context(Path.cwd(), **kwargs)
+    except Exception as err:  # pylint: disable=broad-except
+        env = kwargs.get("env")
+        _handle_exception(
+            f"Unable to load Kedro context with environment `{env}`. "
+            f"Make sure it exists in the project configuration.\nError: {err}"
+        )
 
 
 def collect_line_magic():
@@ -127,8 +138,9 @@ def jupyter():
 @env_option
 def jupyter_notebook(ip_address, all_kernels, env, idle_timeout, args):
     """Open Jupyter Notebook with project specific variables loaded."""
-    _check_module_importable("jupyter_core")
     context = _load_project_context(env=env)
+    _check_module_importable("jupyter_core")
+
     if "-h" not in args and "--help" not in args:
         ipython_message(all_kernels)
 
@@ -155,8 +167,9 @@ def jupyter_notebook(ip_address, all_kernels, env, idle_timeout, args):
 @env_option
 def jupyter_lab(ip_address, all_kernels, env, idle_timeout, args):
     """Open Jupyter Lab with project specific variables loaded."""
-    _check_module_importable("jupyter_core")
     context = _load_project_context(env=env)
+    _check_module_importable("jupyter_core")
+
     if "-h" not in args and "--help" not in args:
         ipython_message(all_kernels)
 
@@ -184,7 +197,9 @@ def jupyter_lab(ip_address, all_kernels, env, idle_timeout, args):
     nargs=-1,
 )
 @env_option
-def convert_notebook(all_flag, overwrite_flag, filepath, env):
+def convert_notebook(  # pylint: disable=unused-argument,too-many-locals
+    all_flag, overwrite_flag, filepath, env
+):
     """Convert selected or all notebooks found in a Kedro project
     to Kedro code, by exporting code from the appropriately-tagged cells:
     Cells tagged as `node` will be copied over to a Python file matching
@@ -194,10 +209,12 @@ def convert_notebook(all_flag, overwrite_flag, filepath, env):
     relative and absolute paths are accepted.
     Should not be provided if --all flag is already present.
     """
-    context = _load_project_context(env=env)
-    _update_ipython_dir(context.project_path)
+    project_path = Path.cwd()
+    static_data = get_static_project_data(project_path)
+    source_path = static_data["source_dir"]
+    package_name = static_data["package_name"]
 
-    source_path = get_source_dir(context.project_path)
+    _update_ipython_dir(project_path)
 
     if not filepath and not all_flag:
         secho(
@@ -210,7 +227,7 @@ def convert_notebook(all_flag, overwrite_flag, filepath, env):
         # pathlib glob does not ignore hidden directories,
         # whereas Python glob does, which is more useful in
         # ensuring checkpoints will not be included
-        pattern = context.project_path / "**" / "*.ipynb"
+        pattern = project_path / "**" / "*.ipynb"
         notebooks = sorted(Path(p) for p in iglob(str(pattern), recursive=True))
     else:
         notebooks = [Path(f) for f in filepath]
@@ -223,7 +240,7 @@ def convert_notebook(all_flag, overwrite_flag, filepath, env):
             f"Found non-unique notebook names! Please rename the following: {names}"
         )
 
-    output_dir = source_path / context.package_name / "nodes"
+    output_dir = source_path / package_name / "nodes"
     if not output_dir.is_dir():
         output_dir.mkdir()
         (output_dir / "__init__.py").touch()
@@ -234,7 +251,7 @@ def convert_notebook(all_flag, overwrite_flag, filepath, env):
 
         if output_path.is_file():
             overwrite = overwrite_flag or click.confirm(
-                f"Output file {output_path} already exists. Overwrite?", default=False,
+                f"Output file {output_path} already exists. Overwrite?", default=False
             )
             if overwrite:
                 _export_nodes(notebook, output_path)
@@ -284,18 +301,6 @@ def _build_jupyter_env(kedro_env: str) -> Dict[str, Any]:
     return {"env": jupyter_env}
 
 
-def _load_project_context(**kwargs):
-    """Returns project context."""
-    try:
-        return load_context(Path.cwd(), **kwargs)
-    except Exception as err:  # pylint: disable=broad-except
-        env = kwargs.get("env")
-        _handle_exception(
-            f"Unable to load Kedro context with environment `{env}`. "
-            f"Make sure it exists in the project configuration.\nError: {err}"
-        )
-
-
 def _export_nodes(filepath: Path, output_path: Path) -> None:
     """Copy code from Jupyter cells into nodes in src/<package_name>/nodes/,
     under filename with same name as notebook.
@@ -309,8 +314,10 @@ def _export_nodes(filepath: Path, output_path: Path) -> None:
     """
     try:
         content = json.loads(filepath.read_text())
-    except json.JSONDecodeError:
-        raise KedroCliError(f"Provided filepath is not a Jupyter notebook: {filepath}")
+    except json.JSONDecodeError as exc:
+        raise KedroCliError(
+            f"Provided filepath is not a Jupyter notebook: {filepath}"
+        ) from exc
 
     cells = [
         cell

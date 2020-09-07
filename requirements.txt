@@ -4,10 +4,10 @@ click<8.0
 cookiecutter>=1.6.0, <1.7.0 # 1.7.1 release pinned python-slugify to be >=4.0.0, which conflicts with airflow subdependency in Kedro-airflow
 fsspec>=0.5.1, <0.7.0  # There is a breaking change in 0.7.0
 jmespath>=0.9.5, <1.0
-jupyter_client~=5.1
+jupyter_client>=5.1, < 7.0
 pip-tools~=5.0
 pluggy~=0.13.0
 python-json-logger~=0.1.9
 PyYAML>=4.2, <6.0
-setuptools>=38.0
+setuptools>=38.0,<50.0  # setuptools 50.0.3 broke 'make pip-compile' recipe, capping it for now
 toposort~=1.5  # Needs to be at least 1.5 to be able to raise CircularDependencyError

@@ -34,7 +34,7 @@ import tempfile
 from importlib import import_module
 from pathlib import Path
 from textwrap import indent
-from typing import Tuple
+from typing import NamedTuple, Tuple
 from zipfile import ZipFile
 
 import click
@@ -65,6 +65,11 @@ setup(
     package_data={package_data},
 )
 """
+
+PipelineArtifacts = NamedTuple(
+    "PipelineArtifacts",
+    [("pipeline_dir", Path), ("pipeline_tests", Path), ("pipeline_conf", Path)],
+)
 
 
 @click.group()
@@ -106,7 +111,7 @@ def create_pipeline(name, skip_config, env):
 
     click.secho(
         f"To be able to run the pipeline `{name}`, you will need to add it "
-        f"to `create_pipelines()` in `{package_dir / 'pipeline.py'}`.",
+        f"to `register_pipelines()` in `{package_dir / 'hooks.py'}`.",
         fg="yellow",
     )
 
@@ -150,8 +155,8 @@ def delete_pipeline(name, env, yes):
     _delete_dirs(*dirs)
     click.secho(f"\nPipeline `{name}` was successfully deleted.\n", fg="green")
     click.secho(
-        f"If you added the pipeline `{name}` to `create_pipelines()` in "
-        f"`{package_dir / 'pipeline.py'}`, you will need to remove it.`",
+        f"If you added the pipeline `{name}` to `register_pipelines()` in "
+        f"`{package_dir / 'hooks.py'}`, you will need to remove it.`",
         fg="yellow",
     )
 
@@ -159,7 +164,7 @@ def delete_pipeline(name, env, yes):
 @pipeline.command("list")
 @env_option
 def list_pipelines(env):
-    """List all pipelines defined in your pipeline.py file."""
+    """List all pipelines defined in your hooks.py file."""
     context = load_context(Path.cwd(), env=env)
     project_pipelines = context.pipelines
     click.echo(yaml.dump(sorted(project_pipelines)))
@@ -206,6 +211,7 @@ def pull_package(package_path, env, alias):
     """
     # pylint: disable=import-outside-toplevel
     import fsspec
+
     from kedro.io.core import get_protocol_and_path
 
     protocol, _ = get_protocol_and_path(package_path)
@@ -335,6 +341,8 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
     version = version or "0.1"
 
     artifacts_to_package = _get_pipeline_artifacts(context, pipeline_name=name, env=env)
+    # Check that pipeline directory exists and not empty
+    _validate_dir(artifacts_to_package.pipeline_dir)
     destination = Path(destination) if destination else package_dir.parent / "dist"
 
     _generate_wheel_file(package_name, destination, artifacts_to_package, version)
@@ -343,6 +351,13 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
     _clean_pycache(context.project_path)
 
     return destination
+
+
+def _validate_dir(path: Path) -> None:
+    if not path.is_dir():
+        raise KedroCliError(f"Directory '{path}' doesn't exist.")
+    if not list(path.iterdir()):
+        raise KedroCliError(f"'{path}' is an empty directory.")
 
 
 def _get_wheel_name(**kwargs):
@@ -424,10 +439,10 @@ def _create_pipeline(name: str, kedro_version: str, output_dir: Path) -> Path:
             no_input=True,
             extra_context=cookie_context,
         )
-    except Exception as ex:
+    except Exception as exc:
         click.secho("FAILED", fg="red")
-        cls = ex.__class__
-        raise KedroCliError(f"{cls.__module__}.{cls.__qualname__}: {ex}")
+        cls = exc.__class__
+        raise KedroCliError(f"{cls.__module__}.{cls.__qualname__}: {exc}") from exc
 
     click.secho("OK", fg="green")
     result_path = Path(result_path)
@@ -493,10 +508,10 @@ def _get_project_package_dir(context: KedroContext) -> Path:
 
 def _get_pipeline_artifacts(
     context: KedroContext, pipeline_name: str, env: str
-) -> Tuple[Path, Path, Path]:
+) -> PipelineArtifacts:
     """From existing project, returns in order: source_path, tests_path, config_path"""
     package_dir = _get_project_package_dir(context)
-    artifacts = (
+    artifacts = PipelineArtifacts(
         package_dir / "pipelines" / pipeline_name,
         package_dir.parent / "tests" / "pipelines" / pipeline_name,
         context.project_path / context.CONF_ROOT / env / "pipelines" / pipeline_name,
@@ -550,9 +565,9 @@ def _delete_dirs(*dirs):
         click.echo(f"Deleting `{dir_}`: ", nl=False)
         try:
             shutil.rmtree(dir_)
-        except Exception as ex:
+        except Exception as exc:
             click.secho("FAILED", fg="red")
-            cls = ex.__class__
-            raise KedroCliError(f"{cls.__module__}.{cls.__qualname__}: {ex}")
+            cls = exc.__class__
+            raise KedroCliError(f"{cls.__module__}.{cls.__qualname__}: {exc}") from exc
         else:
             click.secho("OK", fg="green")

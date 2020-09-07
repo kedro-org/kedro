@@ -41,12 +41,52 @@ The following prepends are available:
 
 `fsspec` also provides other file systems, such as SSH, FTP and WebHDFS. See the [documentation](https://filesystem-spec.readthedocs.io/en/latest/api.html#implementations) for more information.
 
+## Data Catalog `*_args` parameters
+
+Data Catalog accepts two different groups of `*_args` parameters that serve different purposes:
+- `fs_args`
+- `load_args` and `save_args`
+
+The `fs_args` is used to configure the interaction with a filesystem.
+All the top-level parameters of `fs_args` (except `open_args_load` and `open_args_save`) will be passed in an underlying filesystem class.
+
+Example 1: Provide the `project` value to the underlying filesystem class (`GCSFileSystem`) to interact with Google Cloud Storage (GCS).
+```yaml
+test_dataset:
+  type: ...
+  fs_args:
+    project: test_project
+```
+
+The `open_args_load` and `open_args_save` parameters are passed to the filesystem's `open` method to configure how a dataset file (on a specific filesystem) is opened during a load or save operation, respectively.
+
+Example 2: Load data from a local binary file using `utf-8` encoding.
+```yaml
+test_dataset:
+  type: ...
+  fs_args:
+    open_args_load:
+      mode: "rb"
+      encoding: "utf-8"
+```
+
+`load_args` and `save_args` configure how a third-party library (e.g. `pandas` for `CSVDataSet`) loads/saves data from/to a file.
+
+Example 3: Save data to a CSV file without row names (index) using `utf-8` encoding.
+```yaml
+test_dataset:
+  type: pandas.CSVDataSet
+  ...
+  save_args:
+    index: False
+    encoding: "utf-8"
+```
+
 ## Using the Data Catalog with the YAML API
 
 The YAML API allows you to configure your datasets in a YAML configuration file, `conf/base/catalog.yml` or `conf/local/catalog.yml`.
 
 Here are some examples of data configuration in a `catalog.yml`:
-
 
 Example 1: Loads / saves a CSV file from / to a local file system
 ```yaml
@@ -54,7 +94,6 @@ bikes:
   type: pandas.CSVDataSet
   filepath: data/01_raw/bikes.csv
 ```
-
 
 Example 2: Loads and saves a CSV on a local file system, using specified load and save arguments
 
@@ -70,6 +109,7 @@ cars:
     decimal: .
 
 ```
+
 Example 3: Loads and saves a compressed CSV on a local file system
 
 ```yaml

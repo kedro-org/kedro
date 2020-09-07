@@ -3,7 +3,7 @@ flake8>=3.7.9, <4.0
 ipython~=7.0
 isort>=4.3.21, <5.0
 jupyter~=1.0
-jupyter_client~=5.1
+jupyter_client>=5.1, < 7.0
 jupyterlab==0.31.1
 {% if cookiecutter.include_example == "True" -%}
 kedro[pandas.CSVDataSet]=={{ cookiecutter.kedro_version }}

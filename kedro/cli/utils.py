@@ -95,8 +95,10 @@ def export_nodes(filepath: Path, output_path: Path) -> None:
     """
     try:
         content = json.loads(filepath.read_text())
-    except json.JSONDecodeError:
-        raise KedroCliError(f"Provided filepath is not a Jupyter notebook: {filepath}")
+    except json.JSONDecodeError as exc:
+        raise KedroCliError(
+            f"Provided filepath is not a Jupyter notebook: {filepath}"
+        ) from exc
 
     cells = [
         cell
@@ -165,10 +167,10 @@ class CommandCollection(click.CommandCollection):
     def resolve_command(self, ctx: click.core.Context, args: List):
         try:
             return super().resolve_command(ctx, args)
-        except click.exceptions.UsageError as error:
+        except click.exceptions.UsageError as exc:
             original_command_name = click.utils.make_str(args[0])
             existing_command_names = self.list_commands(ctx)
-            error.message += _suggest_cli_command(
+            exc.message += _suggest_cli_command(
                 original_command_name, existing_command_names
             )
             raise

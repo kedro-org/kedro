@@ -11,18 +11,35 @@
 # Upcoming Release 0.16.5
 
 ## Major features and improvements
+* Added the following new datasets.
+
+| Type                        | Description                                                                                             | Location                      |
+| --------------------------- | ------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| `email.EmailMessageDataSet` | Manage email messages using [the Python standard library](https://docs.python.org/3/library/email.html) | `kedro.extras.datasets.email` |
+
+* Added support for `pyproject.toml` to configure Kedro. `pyproject.toml` is used if `.kedro.yml` doesn't exist (Kedro configuration should be under `[tool.kedro]` section).
+* Projects created with this version will have no `pipeline.py`, having been replaced by `hooks.py`.
+* Added a set of registration hooks, as the new way of registering library components with a Kedro project:
+    * `register_pipelines()`, to replace `_get_pipelines()`
+    * `register_config_loader()`, to replace `_create_config_loader()`
+    * `register_catalog()`, to replace `_create_catalog()`
+These can be defined in `src/<package-name>/hooks.py` and added to `.kedro.yml` (or `pyproject.toml`). The order of execution is: plugin hooks, `.kedro.yml` hooks, hooks in `ProjectContext.hooks`.
+* Added ability to disable auto-registered Hooks using `.kedro.yml` (or `pyproject.toml`) configuration file.
 
 ## Bug fixes and other changes
 * Documentation improvements.
+* `project_name`, `project_version` and `package_name` now have to be defined in `.kedro.yml` for the projects generated using Kedro 0.16.5+.
+* Packaging a modular pipeline raises an error if the pipeline directory is empty or non-existent.
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Sebastian Bertoli](https://github.com/sebastianbertoli), [Lovkush Agarwal](https://github.com/Lovkush-A)
+[Sebastian Bertoli](https://github.com/sebastianbertoli), [Deepyaman Datta](https://github.com/deepyaman), [Lovkush Agarwal](https://github.com/Lovkush-A)
 
 # Release 0.16.4
 
 ## Major features and improvements
+* Fixed a bug for using `ParallelRunner` on Windows.
 * Enabled auto-discovery of hooks implementations coming from installed plugins.
 
 ## Bug fixes and other changes
@@ -43,7 +60,11 @@
 * Added the `--version` option to `kedro pipeline package` to allow specifying alternative versions to package under.
 * Added the `--starter` option to `kedro new` to create a new project from a local, remote or aliased starter template.
 * Added the `kedro starter list` CLI command to list all starter templates that can be used to bootstrap a new Kedro project.
-* Added `json.JSONDataSet`
+* Added the following new datasets.
+
+| Type               | Description                                                                                           | Location                     |
+| ------------------ | ----------------------------------------------------------------------------------------------------- | ---------------------------- |
+| `json.JSONDataSet` | Work with JSON files using [the Python standard library](https://docs.python.org/3/library/json.html) | `kedro.extras.datasets.json` |
 
 ## Bug fixes and other changes
 * Removed `/src/nodes` directory from the project template and made `kedro jupyter convert` create it on the fly if necessary.
@@ -70,11 +91,11 @@
 ## Major features and improvements
 * Added the following new datasets.
 
-| Type                                | Description                                                                                                           | Location                           |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| `pandas.AppendableExcelDataSet`     | Works with `Excel` file opened in append mode                                                                         | `kedro.extras.datasets.pandas`     |
-| `tensorflow.TensorFlowModelDataset` | Works with `TensorFlow` models using [TensorFlow 2.X](https://www.tensorflow.org/api_docs/python/tf/keras/Model#save) | `kedro.extras.datasets.tensorflow` |
-| `holoviews.HoloviewsWriter`         | Works with `Holoviews` objects (saves as image file)                                                                  | `kedro.extras.datasets.holoviews`  |
+| Type                                | Description                                                                                                          | Location                           |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| `pandas.AppendableExcelDataSet`     | Work with `Excel` files opened in append mode                                                                        | `kedro.extras.datasets.pandas`     |
+| `tensorflow.TensorFlowModelDataset` | Work with `TensorFlow` models using [TensorFlow 2.X](https://www.tensorflow.org/api_docs/python/tf/keras/Model#save) | `kedro.extras.datasets.tensorflow` |
+| `holoviews.HoloviewsWriter`         | Work with `Holoviews` objects (saves as image file)                                                                  | `kedro.extras.datasets.holoviews`  |
 
 * `kedro install` will now compile project dependencies (by running `kedro build-reqs` behind the scenes) before the installation if the `src/requirements.in` file doesn't exist.
 * Added `only_nodes_with_namespace` in `Pipeline` class to filter only nodes with a specified namespace.
@@ -146,11 +167,11 @@ Even though this release ships a fix for project generated with `kedro==0.16.2`,
 ### DataSets
 * Added the following new datasets.
 
-| Type                       | Description                                 | Location                                         |
-| -------------------------- | ------------------------------------------- | ------------------------------------------------ |
-| `pillow.ImageDataSet`      | Work with image files using `Pillow`        | `kedro.extras.datasets.pillow`                   |
-| `geopandas.GeoJSONDataSet` | Work with geospatial data using `GeoPandas` | `kedro.extras.datasets.geopandas.GeoJSONDataSet` |
-| `api.APIDataSet`           | Work with data from HTTP(S) API requests    | `kedro.extras.datasets.api.APIDataSet`           |
+| Type                       | Description                                 | Location                          |
+| -------------------------- | ------------------------------------------- | --------------------------------- |
+| `pillow.ImageDataSet`      | Work with image files using `Pillow`        | `kedro.extras.datasets.pillow`    |
+| `geopandas.GeoJSONDataSet` | Work with geospatial data using `GeoPandas` | `kedro.extras.datasets.geopandas` |
+| `api.APIDataSet`           | Work with data from HTTP(S) API requests    | `kedro.extras.datasets.api`       |
 
 * Added `joblib` backend support to `pickle.PickleDataSet`.
 * Added versioning support to `MatplotlibWriter` dataset.
@@ -339,21 +360,21 @@ You can also load data incrementally whenever it is dumped into a directory with
 
 ### New Datasets
 
-| Type                 | Description                                                                                                                                      | Location                            |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------- |
-| `ParquetDataSet`     | Handles parquet datasets using Dask                                                                                                              | `kedro.extras.datasets.dask`        |
-| `PickleDataSet`      | Work with Pickle files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem         | `kedro.extras.datasets.pickle`      |
-| `CSVDataSet`         | Work with CSV files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem            | `kedro.extras.datasets.pandas`      |
-| `TextDataSet`        | Work with text files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem           | `kedro.extras.datasets.pandas`      |
-| `ExcelDataSet`       | Work with Excel files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem          | `kedro.extras.datasets.pandas`      |
-| `HDFDataSet`         | Work with HDF using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem                  | `kedro.extras.datasets.pandas`      |
-| `YAMLDataSet`        | Work with YAML files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem           | `kedro.extras.datasets.yaml`        |
-| `MatplotlibWriter`   | Save with Matplotlib images using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem    | `kedro.extras.datasets.matplotlib`  |
-| `NetworkXDataSet`    | Work with NetworkX files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem       | `kedro.extras.datasets.networkx`    |
-| `BioSequenceDataSet` | Work with bio-sequence objects using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem | `kedro.extras.datasets.biosequence` |
-| `GBQTableDataSet`    | Work with Google BigQuery                                                                                                                        | `kedro.extras.datasets.pandas`      |
-| `FeatherDataSet`     | Work with feather files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem        | `kedro.extras.datasets.pandas`      |
-| `IncrementalDataSet` | Inherit from `PartitionedDataSet` and remembers the last processed partition                                                                     | `kedro.io`                          |
+| Type                             | Description                                                                                                                                      | Location                            |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------- |
+| `dask.ParquetDataSet`            | Handles parquet datasets using Dask                                                                                                              | `kedro.extras.datasets.dask`        |
+| `pickle.PickleDataSet`           | Work with Pickle files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem         | `kedro.extras.datasets.pickle`      |
+| `pandas.CSVDataSet`              | Work with CSV files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem            | `kedro.extras.datasets.pandas`      |
+| `pandas.TextDataSet`             | Work with text files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem           | `kedro.extras.datasets.pandas`      |
+| `pandas.ExcelDataSet`            | Work with Excel files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem          | `kedro.extras.datasets.pandas`      |
+| `pandas.HDFDataSet`              | Work with HDF using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem                  | `kedro.extras.datasets.pandas`      |
+| `yaml.YAMLDataSet`               | Work with YAML files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem           | `kedro.extras.datasets.yaml`        |
+| `matplotlib.MatplotlibWriter`    | Save with Matplotlib images using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem    | `kedro.extras.datasets.matplotlib`  |
+| `networkx.NetworkXDataSet`       | Work with NetworkX files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem       | `kedro.extras.datasets.networkx`    |
+| `biosequence.BioSequenceDataSet` | Work with bio-sequence objects using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem | `kedro.extras.datasets.biosequence` |
+| `pandas.GBQTableDataSet`         | Work with Google BigQuery                                                                                                                        | `kedro.extras.datasets.pandas`      |
+| `pandas.FeatherDataSet`          | Work with feather files using [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to communicate with the underlying filesystem        | `kedro.extras.datasets.pandas`      |
+| `IncrementalDataSet`             | Inherit from `PartitionedDataSet` and remembers the last processed partition                                                                     | `kedro.io`                          |
 
 ### Files with a new location
 

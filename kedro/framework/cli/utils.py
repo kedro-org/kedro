@@ -42,7 +42,8 @@ from pathlib import Path
 from typing import Iterable, List, Sequence, Tuple, Union
 
 import click
-import yaml
+
+from kedro.framework.context import get_static_project_data
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 MAX_SUGGESTIONS = 3
@@ -136,10 +137,10 @@ class CommandCollection(click.CommandCollection):
     def resolve_command(self, ctx: click.core.Context, args: List):
         try:
             return super().resolve_command(ctx, args)
-        except click.exceptions.UsageError as error:
+        except click.exceptions.UsageError as exc:
             original_command_name = click.utils.make_str(args[0])
             existing_command_names = self.list_commands(ctx)
-            error.message += _suggest_cli_command(
+            exc.message += _suggest_cli_command(
                 original_command_name, existing_command_names
             )
             raise
@@ -250,19 +251,19 @@ def get_source_dir(project_path: Path) -> Path:
     Returns:
         The absolute path to the project source directory.
     """
-    with (project_path / ".kedro.yml").open("r") as kedro_yml:
-        kedro_yaml = yaml.safe_load(kedro_yml)
+    warnings.warn(
+        "This function is now deprecated and will be removed in Kedro 0.17.0.",
+        DeprecationWarning,
+    )
 
-    source_dir = Path(kedro_yaml.get("source_dir", "src")).expanduser()
-    source_path = (project_path / source_dir).resolve()
-    return source_path
+    return get_static_project_data(project_path)["source_dir"]
 
 
 def _check_module_importable(module_name: str) -> None:
     try:
         import_module(module_name)
-    except ImportError:
+    except ImportError as exc:
         raise KedroCliError(
             f"Module `{module_name}` not found. Make sure to install required project "
             f"dependencies by running the `kedro install` command first."
-        )
+        ) from exc

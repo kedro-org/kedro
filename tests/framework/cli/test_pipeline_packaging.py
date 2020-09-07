@@ -242,6 +242,28 @@ class TestPipelinePackageCommand:
         assert expected_files <= wheel_contents
         assert f"{PIPELINE_NAME}/config/parameters.yml" not in wheel_contents
 
+    def test_package_non_existing_pipeline_dir(self, dummy_project, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["pipeline", "package", "non_existing"]
+        )
+        assert result.exit_code == 1
+        pipeline_dir = (
+            dummy_project / "src" / PACKAGE_NAME / "pipelines" / "non_existing"
+        )
+        error_message = f"Error: Directory '{pipeline_dir}' doesn't exist."
+        assert error_message in result.output
+
+    def test_package_empty_pipeline_dir(self, dummy_project, fake_kedro_cli):
+        pipeline_dir = dummy_project / "src" / PACKAGE_NAME / "pipelines" / "empty_dir"
+        pipeline_dir.mkdir()
+
+        result = CliRunner().invoke(
+            fake_kedro_cli.cli, ["pipeline", "package", "empty_dir"]
+        )
+        assert result.exit_code == 1
+        error_message = f"Error: '{pipeline_dir}' is an empty directory."
+        assert error_message in result.output
+
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
 class TestPipelinePullCommand:
@@ -365,6 +387,7 @@ class TestPipelinePullCommand:
         """
         Test for pulling a wheel file with more than one dist-info directory.
         """
+        self.call_pipeline_create(fake_kedro_cli)
         self.call_pipeline_package(fake_kedro_cli)
         wheel_file = (
             dummy_project
@@ -483,57 +506,6 @@ class TestPipelinePullCommand:
 
     @pytest.mark.parametrize("env", [None, "local"])
     @pytest.mark.parametrize("alias", [None, "alias_path"])
-    def test_pull_pipeline_missing(self, fake_kedro_cli, dummy_project, env, alias):
-        """
-        Test for pulling a valid wheel file locally, but `pipeline.py` is missing from the wheel
-        file.
-        """
-        # pylint: disable=too-many-locals
-        self.call_pipeline_create(fake_kedro_cli)
-        package_path = (
-            dummy_project / "src" / PACKAGE_NAME / "pipelines" / PIPELINE_NAME
-        )
-        shutil.rmtree(package_path)
-        assert not package_path.exists()
-        self.call_pipeline_package(fake_kedro_cli)
-        self.call_pipeline_delete(fake_kedro_cli)
-
-        config_path = dummy_project / "conf" / "base" / "pipelines" / PIPELINE_NAME
-        test_path = dummy_project / "src" / "tests" / "pipelines" / PIPELINE_NAME
-        # Make sure the files actually deleted before pulling from the wheel file.
-        assert not test_path.exists()
-        assert not config_path.exists()
-
-        wheel_file = (
-            dummy_project
-            / "src"
-            / "dist"
-            / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
-        )
-        assert wheel_file.is_file()
-
-        options = ["-e", env] if env else []
-        options += ["--alias", alias] if alias else []
-        result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["pipeline", "pull", str(wheel_file), *options]
-        )
-        assert not result.exit_code
-
-        pipeline_name = alias or PIPELINE_NAME
-        source_dest = dummy_project / "src" / PACKAGE_NAME / "pipelines" / pipeline_name
-        config_env = env or "base"
-        config_dest = dummy_project / "conf" / config_env / "pipelines" / pipeline_name
-        test_dest = dummy_project / "src" / "tests" / "pipelines" / pipeline_name
-
-        assert not source_dest.exists()
-        assert not (config_dest / "parameters.yml").is_file()
-        assert {f.name for f in test_dest.iterdir()} == {
-            "__init__.py",
-            "test_pipeline.py",
-        }
-
-    @pytest.mark.parametrize("env", [None, "local"])
-    @pytest.mark.parametrize("alias", [None, "alias_path"])
     def test_pull_from_pypi(
         self, fake_kedro_cli, dummy_project, mocker, tmp_path, env, alias
     ):
@@ -625,6 +597,7 @@ class TestPipelinePullCommand:
         """
         # We mock the `pip download` call, and manually create a package wheel file
         # to simulate the pypi scenario instead
+        self.call_pipeline_create(fake_kedro_cli)
         self.call_pipeline_package(fake_kedro_cli, destination=tmp_path)
         self.call_pipeline_package(
             fake_kedro_cli, alias="another", destination=tmp_path

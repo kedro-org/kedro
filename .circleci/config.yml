@@ -222,8 +222,7 @@ commands:
           name: Install dependencies
           command: |
             conda activate kedro_builder
-            cat *requirements.txt | Select-String -Pattern behave,psutil,requests[^\-],^pandas[^\-],cachetools,toposort,yaml | %{ $_ -Replace  "#.*", "" } > e2e.txt
-            pip install -r e2e.txt
+            pip install -r features/windows_reqs.txt
             choco install make
       - run:
           name: Run e2e tests

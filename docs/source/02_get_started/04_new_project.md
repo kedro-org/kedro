@@ -1,6 +1,6 @@
 # Create a new project
 
-Once you have [installed Kedro](./02_install.md), you can create a new project interactively by answering a series of questions, or by using settings recorded in a configuration file.
+Once you have [installed Kedro](./02_install.md), you can create a new project by answering a series of questions, or by using settings recorded in a configuration file.
 
 ## Create a new project interactively
 

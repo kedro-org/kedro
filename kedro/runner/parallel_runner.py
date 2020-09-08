@@ -150,7 +150,7 @@ class ParallelRunner(AbstractRunner):
                 and CPU core count. On windows machines, the max_workers value
                 cannot be larger than 61 and will be set to min(61, max_workers).
             is_async: If True, the node inputs and outputs are loaded and saved
-                    asynchronously with threads. Defaults to False.
+                asynchronously with threads. Defaults to False.
 
         Raises:
             ValueError: bad parameters passed

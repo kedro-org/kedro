@@ -72,10 +72,12 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
   * [`kedro jupyter notebook`](#notebooks)
   * [`kedro lint`](#lint-your-project)
   * [`kedro package`](#deploy-the-project)
-  * [`kedro pipeline create`](#create-a-new-modular-pipeline-in-your-project)
+  * [`kedro pipeline create <pipeline_name>`](#create-a-new-modular-pipeline-in-your-project)
+  * [`kedro pipeline delete <pipeline_name>`](#delete-a-modular-pipeline)
+  * [`kedro pipeline describe <pipeline_name>`](#describe-a-pipeline)
   * [`kedro pipeline list`](#list-all-pipelines-in-your-project)
   * [`kedro pipeline package <pipeline_name>`](#package-a-modular-pipeline)
-  * [`kedro pipeline pull`](#pull-a-modular-pipeline)
+  * [`kedro pipeline pull <package_name>`](#pull-a-modular-pipeline)
   * [`kedro run`](#run-the-project)
   * [`kedro test`](#test-your-project)
 
@@ -289,22 +291,47 @@ kedro test
 
 ##### Create a new [modular pipeline](../06_nodes_and_pipelines/02_pipelines.md#developing-modular-pipelines) in your project
 ```bash
-kedro pipeline create
-```
-##### List all pipelines in your project
-
-```bash
-kedro pipeline list
+kedro pipeline create <pipeline_name>
 ```
 
 ##### Package a modular pipeline
-The following command packages a modular pipeline into a [wheel file](https://pythonwheels.com/):
+The following command packages all the files related to a modular pipeline into a [wheel file](https://pythonwheels.com/):
 
 ```bash
 kedro pipeline package <pipeline_name>
 ```
 
-Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/02_pipelines.md#how-do-i-package-a-modular-pipeline).
+Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/02_pipelines.md#packaging-a-modular-pipeline).
+
+##### Pull a modular pipeline in your project
+The following command pulls all the files related to a modular pipeline from either [Pypi](https://pypi.org/) or a storage location of a [wheel file](https://pythonwheels.com/).
+```bash
+kedro pipeline pull <package_name> (or path to a wheel file)
+```
+
+Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/02_pipelines.md#pulling-a-modular-pipeline).
+
+##### Delete a modular pipeline
+The following command deletes all the files related to a modular pipeline in your Kedro project.
+
+```bash
+kedro pipeline delete <pipeline_name>
+```
+
+Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/02_pipelines.md#how-do-i-delete-a-modular-pipeline).
+
+##### Describe a pipeline
+
+```bash
+kedro pipeline describe <pipeline_name>
+```
+The output includes all the nodes in the pipeline.
+
+##### List all pipelines in your project
+
+```bash
+kedro pipeline list
+```
 
 #### Datasets
 

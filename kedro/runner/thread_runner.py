@@ -29,6 +29,7 @@
 be used to run the ``Pipeline`` in parallel groups formed by toposort
 using threads.
 """
+import warnings
 from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from itertools import chain
@@ -46,7 +47,7 @@ class ThreadRunner(AbstractRunner):
     using threads.
     """
 
-    def __init__(self, max_workers: int = None):
+    def __init__(self, max_workers: int = None, is_async: bool = False):
         """
         Instantiates the runner.
 
@@ -54,11 +55,19 @@ class ThreadRunner(AbstractRunner):
             max_workers: Number of worker processes to spawn. If not set,
                 calculated automatically based on the pipeline configuration
                 and CPU core count.
+            is_async: If True, set to False, because `ThreadRunner`
+                doesn't support loading and saving the node inputs and
+                outputs asynchronously with threads. Defaults to False.
 
         Raises:
             ValueError: bad parameters passed
         """
-        # Doesn't support asynchronous inputs loading and outputs saving
+        if is_async:
+            warnings.warn(
+                "`ThreadRunner` doesn't support loading and saving the "
+                "node inputs and outputs asynchronously with threads. "
+                "Setting `is_async` to False."
+            )
         super().__init__(is_async=False)
 
         if max_workers is not None and max_workers <= 0:

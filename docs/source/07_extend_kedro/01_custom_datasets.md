@@ -90,7 +90,7 @@ src/kedro_pokemon/extras
 
 ## Implement the `_load` method with `fsspec`
 
-Many of the built-in Kedro datasets rely on [fsspec](https://filesystem-spec.readthedocs.io/en/latest/) as a consistent interface to different data sources, as described earlier in the section about the [Data Catalog](./04_data_catalog.html#specifying-the-location-of-the-dataset). In this example, it's particularly convenient to use `fsspec` in conjunction with `Pillow` to read image data, since it allows the dataset to work flexibly with different image locations and formats.
+Many of the built-in Kedro datasets rely on [fsspec](https://filesystem-spec.readthedocs.io/en/latest/) as a consistent interface to different data sources, as described earlier in the section about the [Data Catalog](../05_data/01_data_catalog.md#specifying-the-location-of-the-dataset). In this example, it's particularly convenient to use `fsspec` in conjunction with `Pillow` to read image data, since it allows the dataset to work flexibly with different image locations and formats.
 
 Here is the implementation of the `_load` method using `fsspec` and `Pillow` to read the data of a single image into a `numpy` array:
 
@@ -193,7 +193,7 @@ You can open the file to verify that the data was written back correctly.
 
 ## Implement the `_describe` method
 
-The `_describe` method is used for printing purposes. The convention in Kedro is for the method to return a dictionary describing the attributes of the dataset .
+The `_describe` method is used for printing purposes. The convention in Kedro is for the method to return a dictionary describing the attributes of the dataset.
 
 ```python
 from kedro.io import AbstractDataSet
@@ -284,7 +284,7 @@ class ImageDataSet(AbstractDataSet):
 
 Currently, the `ImageDataSet` only works with a single image, but this example needs to load all Pokemon images from the raw data directory for further processing.
 
-Kedro's [`PartitionedDataSet`](./07_kedro_io/01_advanced_io.html#partitioned-dataset) is a convenient way to load multiple separate data files of the same underlying dataset type into a directory.
+Kedro's [`PartitionedDataSet`](../05_data/02_kedro_io.md#partitioned-dataset) is a convenient way to load multiple separate data files of the same underlying dataset type into a directory.
 
 To use `PartitionedDataSet` with `ImageDataSet` to load all Pokemon PNG images, add this to the data catalog YAML so that `PartitionedDataSet` loads all PNG files from the data directory using `ImageDataSet`:
 
@@ -315,7 +315,8 @@ $ ls -la data/01_raw/pokemon-images-and-types/images/images/*.png | wc -l
 
 > *Note*: Versioning doesn't work with PartitionedDataSet. You can't use both of them at the same time.
 
-To add [Versioning](./05_data/02_kedro_io.md#versioning) support to the new dataset we need to extend the [AbstractVersionedDataSet](/kedro.io.AbstractVersionedDataSet) to:
+To add [Versioning](../05_data/02_kedro_io.md#versioning) support to the new dataset we need to extend the
+ [AbstractVersionedDataSet](/kedro.io.AbstractVersionedDataSet) to:
 
 * Accept a `version` keyword argument as part of the constructor
 * Adapt the `_save` and `_load` method to use the versioned data path obtained from `_get_save_path` and `_get_load_path` respectively
@@ -397,7 +398,7 @@ class ImageDataSet(AbstractVersionedDataSet):
 
 The graphic shows the differences between the original `ImageDataSet` and the versioned `ImageDataSet`:
 
-![Visual code diff graphic](../meta/images/diffs-graphic.png)
+![](../meta/images/diffs-graphic.png)
 
 To test the code, you need to enable versioning support in the data catalog:
 
@@ -439,7 +440,7 @@ In [2]: context.catalog.save('pikachu', data=img)
 
 Inspect the content of the data directory to find a new version of the data, written by `save`.
 
-You may also want to consult the [in-depth documentation about the Versioning API](./05_data/kedro#versioning).
+You may also want to consult the [in-depth documentation about the Versioning API](../05_data/02_kedro_io.md#versioning).
 
 ## Thread-safety
 
@@ -505,7 +506,8 @@ We provide additional examples of [how to use parameters through the data catalo
 
 ## How to contribute a custom dataset implementation
 
-One of the easiest ways to contribute back to Kedro is to share a custom dataset. Kedro has a `kedro.extras.datasets` sub-package where you can add a new custom dataset implementation to share it with others. You can find out more in the [Kedro contribution guide](https://github.com/quantumblacklabs/kedro/blob/develop/CONTRIBUTING.md) on Github.
+One of the easiest ways to contribute back to Kedro is to share a custom dataset. Kedro has a `kedro.extras.datasets` sub-package where you can add a new custom dataset implementation to share it with others. You can find out more in
+ the [Kedro contribution guide](https://github.com/quantumblacklabs/kedro/blob/master/CONTRIBUTING.md) on Github.
 
 To contribute your custom dataset:
 

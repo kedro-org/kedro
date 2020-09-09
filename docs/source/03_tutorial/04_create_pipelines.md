@@ -421,7 +421,7 @@ test_size: 0.2
 random_state: 3
 ```
 
-These are the parameters fed into the `DataCatalog` when the pipeline is executed. More information about [parameters](../04_kedro_project_setup/02_configuration.md#parameters) is available in later documentation for advanced usage.
+These are the parameters fed into the `DataCatalog` when the pipeline is executed. More information about [parameters](../04_kedro_project_setup/02_configuration.md#Parameters) is available in later documentation for advanced usage.
 
 ### Register the dataset
 The next step is to register the dataset that will save the trained model, by adding the following definition to `conf/base/catalog.yml`:
@@ -433,7 +433,9 @@ regressor:
   versioned: true
 ```
 
-> *Note:* Versioning is enabled for `regressor`, which means that the pickled output of the `regressor` will be versioned and saved every time the pipeline is run. This allows us to keep the history of the models built using this pipeline. Further details can be found in the [Versioning](../05_data/02_kedro_io.md#versioning).
+> *Note:* Versioning is enabled for `regressor`, which means that the pickled output of the `regressor` will be
+> versioned and saved every time the pipeline is run. This allows us to keep the history of the models built using
+> this pipeline. Further details can be found in the [Versioning](../05_data/02_kedro_io.md#versioning) section.
 
 ### Assemble the data science pipeline
 To create a pipeline for the price prediction model, add the following to the top of `src/kedro_tutorial/pipelines/data_science/pipeline.py`:

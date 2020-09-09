@@ -17,8 +17,9 @@ Here, the `return_greeting` function is wrapped by a node called `return_greetin
 ```python
 from kedro.pipeline import node
 
+
+# Prepare first node
 def return_greeting():
-    # Prepare first node
     return "Hello"
 
 
@@ -30,8 +31,8 @@ return_greeting_node = node(
 The `join_statements` function is wrapped by a node called `join_statements_node`, which names a single input (`my_salutation`) and a single output (`my_message`):
 
 ```python
+# Prepare second node
 def join_statements(greeting):
-    # Prepare second node
     return f"{greeting} Kedro!"
 
 
@@ -85,7 +86,7 @@ The Runner is an object that runs the pipeline. Kedro resolves the order in whic
 It's now time to stitch the code together. Here is the full example:
 
 ```python
-"""Content of hello_kedro.py"""
+"""Contents of hello_kedro.py"""
 from kedro.io import DataCatalog, MemoryDataSet
 from kedro.pipeline import node, Pipeline
 from kedro.runner import SequentialRunner
@@ -93,9 +94,8 @@ from kedro.runner import SequentialRunner
 # Prepare a data catalog
 data_catalog = DataCatalog({"example_data": MemoryDataSet()})
 
-
+# Prepare first node
 def return_greeting():
-    # Prepare first node
     return "Hello"
 
 
@@ -103,9 +103,8 @@ return_greeting_node = node(
     return_greeting, inputs=None, outputs="my_salutation"
 )
 
-
+# Prepare second node
 def join_statements(greeting):
-    # Prepare second node
     return f"{greeting} Kedro!"
 
 

@@ -106,16 +106,7 @@ def dummy_config(fake_root_dir):
 @fixture(scope="module")
 def dummy_project(fake_root_dir, dummy_config):
     CliRunner().invoke(
-        cli,
-        [
-            "new",
-            "-c",
-            str(dummy_config),
-            "--starter",
-            "pandas-iris",
-            "--checkout",
-            "update-for-0.16.5",  # TODO: remove after 0.16.5 release
-        ],
+        cli, ["new", "-c", str(dummy_config), "--starter", "pandas-iris"],
     )
     project_path = fake_root_dir / REPO_NAME
     src_path = project_path / "src"

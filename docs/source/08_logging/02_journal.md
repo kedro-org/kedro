@@ -1,7 +1,7 @@
 # Journal
 
 
-> *Note:* This documentation is based on `Kedro 0.16.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.5`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 ## Overview
 
@@ -18,7 +18,7 @@ A context journal record captures all the necessary information to reproduce the
     "run_id": "2019-10-01T09.15.57.289Z",
     "project_path": "<path-to-project>/src/kedro-tutorial",
     "env": "local",
-    "kedro_version": "0.16.4",
+    "kedro_version": "0.16.5",
     "tags": [],
     "from_nodes": [],
     "to_nodes": [],

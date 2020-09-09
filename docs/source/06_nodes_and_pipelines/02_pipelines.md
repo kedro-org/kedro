@@ -3,7 +3,7 @@
 
 To benefit from Kedro's automatic dependency resolution, nodes can be chained in a [pipeline](/kedro.pipeline.Pipeline). A pipeline is a list of nodes that use a shared set of variables.
 
-> *Note:* This documentation is based on `Kedro 0.16.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.5`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 ## Building pipelines
 

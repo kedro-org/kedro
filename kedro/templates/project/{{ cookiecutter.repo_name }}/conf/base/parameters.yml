@@ -2,6 +2,8 @@
 # Parameters for the example pipeline. Feel free to delete these once you
 # remove the example pipeline from hooks.py and the example nodes in
 # `src/pipelines/`
+# Documentation for this file format can be found in "Parameters"
+# Link: https://kedro.readthedocs.io/en/stable/04_kedro_project_setup/02_configuration.html#parameters
 example_test_data_ratio: 0.2
 example_num_train_iter: 10000
 example_learning_rate: 0.01

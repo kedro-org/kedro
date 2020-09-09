@@ -114,6 +114,8 @@ Currently the core Kedro team consists of:
 * [Lim Hoang](https://github.com/limdauto)
 * [Andrii Ivaniuk](https://github.com/andrii-ivaniuk)
 * [Jo Stichbury](https://github.com/stichbury)
+* [Laís Carvalho](https://github.com/laisbsc)
+* [Merel Theisen](https://github.com/MerelTheisenQB)
 
 Former core team members with significant contributions include: [Gordon Wrigley](https://github.com/tolomea), [Nasef Khan](https://github.com/nakhan98) and [Anton Kirilenko](https://github.com/Flid).
 

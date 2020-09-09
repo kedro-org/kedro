@@ -134,6 +134,20 @@ class TestMaxWorkers:
             ThreadRunner(max_workers=-1)
 
 
+class TestIsAsync:
+    def test_thread_run(self, fan_out_fan_in, catalog):
+        catalog.add_feed_dict(dict(A=42))
+        pattern = (
+            "`ThreadRunner` doesn't support loading and saving the "
+            "node inputs and outputs asynchronously with threads. "
+            "Setting `is_async` to False."
+        )
+        with pytest.warns(UserWarning, match=pattern):
+            result = ThreadRunner(is_async=True).run(fan_out_fan_in, catalog)
+        assert "Z" in result
+        assert result["Z"] == (42, 42, 42)
+
+
 class TestInvalidThreadRunner:
     def test_task_exception(self, fan_out_fan_in, catalog):
         catalog.add_feed_dict(feed_dict=dict(A=42))

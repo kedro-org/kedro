@@ -44,6 +44,7 @@ from kedro.framework.cli.utils import (
     KedroCliError,
     _check_module_importable,
     call,
+    command_with_verbosity,
     env_option,
     forward_command,
     ipython_message,
@@ -86,7 +87,7 @@ def project_group():
 
 
 @forward_command(project_group, forward_help=True)
-def test(args):
+def test(args, **kwargs):  # pylint: disable=unused-argument
     """Run the test suite."""
     try:
         _check_module_importable("pytest")
@@ -99,10 +100,10 @@ def test(args):
         python_call("pytest", args)
 
 
-@project_group.command()
+@command_with_verbosity(project_group)
 @click.option("-c", "--check-only", is_flag=True, help=LINT_CHECK_ONLY_HELP)
 @click.argument("files", type=click.Path(exists=True), nargs=-1)
-def lint(files, check_only):
+def lint(files, check_only, **kwargs):  # pylint: disable=unused-argument
     """Run flake8, isort and black."""
     static_data = get_static_project_data(Path.cwd())
     source_path = static_data["source_dir"]
@@ -170,7 +171,7 @@ def install(compile_flag):
 
 @forward_command(project_group, forward_help=True)
 @env_option
-def ipython(env, args):
+def ipython(env, args, **kwargs):  # pylint: disable=unused-argument
     """Open IPython with project specific variables loaded."""
     context = _load_project_context(env=env)
     _check_module_importable("IPython")
@@ -234,7 +235,7 @@ def build_docs(open_docs):
 
 
 @forward_command(project_group, name="build-reqs")
-def build_reqs(args):
+def build_reqs(args, **kwargs):  # pylint: disable=unused-argument
     """Build the project dependency requirements."""
     source_path = _get_source_path()
     _build_reqs(source_path, args)
@@ -246,8 +247,8 @@ def build_reqs(args):
     )
 
 
-@project_group.command("activate-nbstripout")
-def activate_nbstripout():
+@command_with_verbosity(project_group, "activate-nbstripout")
+def activate_nbstripout(**kwargs):  # pylint: disable=unused-argument
     """Install the nbstripout git hook to automatically clean notebooks."""
     source_path = _get_source_path()
     secho(

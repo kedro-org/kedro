@@ -905,7 +905,6 @@ def load_package_context(
         raise KedroContextError(
             f"Cannot load context object from {context_path} for package {package_name}."
         ) from exc
-
     # update kwargs with env from the environment variable (defaults to None if not set)
     # need to do this because some CLI command (e.g `kedro run`) defaults to passing
     # in `env=None`
@@ -971,7 +970,6 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
     # need to do this because some CLI command (e.g `kedro run`) defaults to
     # passing in `env=None`
     kwargs["env"] = kwargs.get("env") or os.getenv("KEDRO_ENV")
-
     context = context_class(project_path=project_path, **kwargs)
     return context
 

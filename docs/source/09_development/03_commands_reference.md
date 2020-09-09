@@ -54,7 +54,6 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
 
 * Global Kedro commands
   * [`kedro --help`](#get-help-on-kedro-commands)
-  * [`kedro --verbose`](#see-logging-and-error-stack-traces)
   * [`kedro --version`](#confirm-the-kedro-version)
   * [`kedro docs`](#open-the-kedro-documentation-in-your-browser)
   * [`kedro info`](#confirm-kedro-information)
@@ -124,13 +123,6 @@ the Kedro initiative at QuantumBlack.
 Installed plugins:
 kedro_viz: 3.4.0 (hooks:global,line_magic)
 
-```
-
-### See logging and error stack traces
-
-```bash
-kedro -v
-kedro --verbose
 ```
 
 ### Create a new Kedro project

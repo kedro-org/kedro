@@ -6,6 +6,8 @@ You can copy the example as one chunk of code from the bottom of this page.
 
 > Note: We do not create a Kedro project in this first example, but illustrate the concepts within a single `.py` file.
 
+> Note: We do not create a Kedro project in this first example, but illustrate the concepts within a single `.py` file.
+
 ## Node
 
 A `node` is a Kedro concept. It is a wrapper for a Python function that names the inputs and outputs of that function. It is the building block of a pipeline. Nodes can be linked when the output of one node is the input of another.
@@ -119,7 +121,6 @@ runner = SequentialRunner()
 # Run the pipeline
 print(runner.run(pipeline, data_catalog))
 ```
-
 Then open a terminal and run the following command:
 
 ```bash

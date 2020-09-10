@@ -15,7 +15,19 @@
 
 ## Thanks for supporting contributions
 
-# Upcoming Release 0.16.5
+
+# Upcoming 0.16.6 release
+
+## Major features and improvements
+
+## Bug fixes and other changes
+
+## Breaking changes to the API
+
+## Thanks for supporting contributions
+
+
+# Release 0.16.5
 
 ## Major features and improvements
 * Added the following new datasets.

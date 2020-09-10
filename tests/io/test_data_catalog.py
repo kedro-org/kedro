@@ -625,15 +625,18 @@ class TestDataCatalogVersioned:
         with pytest.raises(DataSetError):
             catalog.load("boats", version="first")
 
-    def test_replacing_non_alphanumeric_characters(self):
-        """Test replacing non alphanumeric characters in datasets names"""
+    def test_replacing_nonword_characters(self):
+        """Test replacing non-word characters in dataset names"""
         csv = CSVDataSet(filepath="abc.csv")
-        datasets = {"ds1@spark": csv, "ds2_spark": csv, "ds3.csv": csv}
+        datasets = {"ds1@spark": csv, "ds2_spark": csv, "ds3.csv": csv, "jalapeño": csv}
 
         catalog = DataCatalog(data_sets=datasets)
         assert "ds1@spark" not in catalog.datasets.__dict__
+        assert "ds2__spark" not in catalog.datasets.__dict__
         assert "ds3.csv" not in catalog.datasets.__dict__
+        assert "jalape__o" not in catalog.datasets.__dict__
 
-        assert "ds2_spark" in catalog.datasets.__dict__
         assert "ds1__spark" in catalog.datasets.__dict__
+        assert "ds2_spark" in catalog.datasets.__dict__
         assert "ds3__csv" in catalog.datasets.__dict__
+        assert "jalapeño" in catalog.datasets.__dict__

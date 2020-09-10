@@ -3,7 +3,7 @@
 
 To benefit from Kedro's automatic dependency resolution, nodes can be chained in a [pipeline](/kedro.pipeline.Pipeline). A pipeline is a list of nodes that use a shared set of variables.
 
-> *Note:* This documentation is based on `Kedro 0.16.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.5`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 ## Building pipelines
 
@@ -161,7 +161,7 @@ Modular pipelines serve the following main purposes:
 
 ### How do I create modular pipelines?
 
-For projects created using Kedro version 0.16.0 or later, Kedro ships a [project-specific CLI command](../07_extend_kedro/05_plugins.md#global-and-project-commands) `kedro pipeline create <pipeline_name>`, which does the following for you:
+For projects created using Kedro version 0.16.0 or later, Kedro ships a [project-specific CLI command](../09_development/03_commands_reference.md) `kedro pipeline create <pipeline_name>`, which does the following for you:
 1. Adds a new modular pipeline in a `src/<python_package>/pipelines/<pipeline_name>/` directory
 2. Creates boilerplate configuration files, `catalog.yml` and `parameters.yml`, in `conf/<env>/pipelines/<pipeline_name>/`, where `<env>` defaults to `base`
 3. Makes a placeholder for the pipeline unit tests in `src/tests/pipelines/<pipeline_name>/`
@@ -184,7 +184,7 @@ You can manually delete all the files that belong to a modular pipeline. However
 
 * All the modular pipeline code in `src/<python_package>/pipelines/<pipeline_name>/`
 * Configuration files in `conf/<env>/pipelines/<pipeline_name>/`, where `<env>` defaults to `base`. If the files are located in a different config environment, run `kedro pipeline delete <pipeline_name> --env <env_name>`.
-*  Pipeline unit tests in `src/tests/pipelines/<pipeline_name>/`
+* Pipeline unit tests in `src/tests/pipelines/<pipeline_name>/`
 
 ### Modular pipeline structure
 
@@ -207,7 +207,8 @@ pipeline = my_modular_pipeline_1.create_pipeline()
 Here is a list of recommendations for developing a modular pipeline:
 
 * A modular pipeline should include a `README.md`, with all the information regarding the execution of the pipeline for the end users
-* A modular pipeline _may_ have external dependencies specified in `requirements.txt`. These dependencies are _not_ currently installed by the [`kedro install`](../04_kedro_project_setup/01_dependencies.md#kedro-install) command, so the users of your pipeline would have to run `pip install -r src/<python_package>/pipelines/<pipeline_name>/requirements.txt`
+* A modular pipeline _may_ have external dependencies specified in `requirements.txt`. These dependencies are _not_
+ currently installed by the [`kedro install`](../09_development/03_commands_reference.md#Install-all-package-dependencies) command, so the users of your pipeline would have to run `pip install -r src/<python_package>/pipelines/<pipeline_name>/requirements.txt`
 * To ensure portability, modular pipelines should use relative imports when accessing their own objects and absolute imports otherwise. Look at an example from `src/new_kedro_project/pipelines/modular_pipeline_1/pipeline.py` below:
 
 <details>
@@ -265,7 +266,7 @@ project_hooks = ProjectHooks()
 ### How do I share a modular pipeline?
 
 #### Packaging a modular pipeline
-Since Kedro 0.16.4 you can package a modular pipeline by executing `kedro pipeline package <pipeline_name>` command, which will generate a new [wheel file](https://pythonwheels.com/) for it. By default, the wheel file will be saved into `src/dist` directory inside your project, however this can be changed using `--destination` (`-d`) option.
+Since Kedro 0.16.4 you can package a modular pipeline by executing `kedro pipeline package <pipeline_name>` command, which will generate a new [wheel file](https://pythonwheels.com/) for it. By default, the wheel file will be saved into `src/dist` directory inside your project, however this can be changed using the `--destination` (`-d`) option.
 
 When packaging your modular pipeline, Kedro will also automatically package files from 3 locations :
 

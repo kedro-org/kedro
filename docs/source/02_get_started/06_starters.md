@@ -1,6 +1,5 @@
 # Kedro starters
 
-
 Kedro starters are used to create projects that contain code to run as-is, or to adapt and extend. They provide pre-defined example code and configuration that can be reused, for example:
 
 * As example code for a typical Kedro project
@@ -65,7 +64,7 @@ Under the hood, the value will be passed to the [`--checkout` flag in Cookiecutt
 
 ## Use a starter in interactive mode
 
-By default, when you create a new project using a starter, `kedro new` launches in [interactive mode](./04_new_project.md). You will be prompted to provide the following variables:
+By default, when you create a new project using a starter, `kedro new` launches [by asking a few questions](./04_new_project.md#create-a-new-project-interactively). You will be prompted to provide the following variables:
 
 * `project_name` - A human readable name for your new project
 * `repo_name` - A name for the directory that holds your project repository

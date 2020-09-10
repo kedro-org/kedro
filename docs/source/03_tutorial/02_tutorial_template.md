@@ -10,7 +10,7 @@ In this section, we discuss the project set-up phase, which is the first part of
 
 ## Create a new project
 
-Navigate to your chosen working directory and run the following to [create a new empty Kedro project](../02_get_started/04_new_project.md) using the default interactive prompts:
+Navigate to your chosen working directory and run the following to [create a new empty Kedro project](../02_get_started/04_new_project.md#create-a-new-project-interactively) using the default interactive prompts:
 
 ```bash
 kedro new
@@ -34,7 +34,7 @@ isort>=4.3.21, <5.0 # Used for linting code with `kedro lint`
 jupyter>=1.0.0, <2.0 # Used to open a Kedro-session in Jupyter Notebook & Lab
 jupyter_client>=5.1.0, <7.0 # Used to open a Kedro-session in Jupyter Notebook & Lab
 jupyterlab==0.31.1 # Used to open a Kedro-session in Jupyter Lab
-kedro==0.16.3
+kedro==0.16.5
 nbstripout==0.3.3 # Strips the output of a Jupyter Notebook and writes the outputless version to the original file
 pytest-cov>=2.5, <3.0 # Produces test coverage reports
 pytest-mock>=1.7.1,<2.0 # Wrapper around the mock package for easier use with pytest

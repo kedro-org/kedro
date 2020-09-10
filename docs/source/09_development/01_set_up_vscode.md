@@ -1,17 +1,17 @@
 # Set up Visual Studio Code
 
 
-> *Note:* This documentation is based on `Kedro 0.16.4`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.5`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 Start by opening a new project directory in VS Code and installing the Python plugin under **Tools and languages**:
 
-![Tools and languages graphic](../meta/images/vscode_startup.png)
+![](../meta/images/vscode_startup.png)
 
 Python is an interpreted language; to run Python code you must tell VS Code which interpreter to use. From within VS Code, select a Python 3 interpreter by opening the **Command Palette** (`Cmd + Shift + P` for macOS), start typing the **Python: Select Interpreter** command to search, then select the command.
 
 At this stage, you should be able to see the `conda` environment that you have created. Select the environment:
 
-![Conda environment graphic](../meta/images/vscode_setup_interpreter.png)
+![](../meta/images/vscode_setup_interpreter.png)
 
 ### Advanced: For those using `venv` / `virtualenv`
 
@@ -95,7 +95,7 @@ We're going to need you to modify your `tasks.json`. To do this, go to **Termina
 
 To start a build, go to **Terminal > Run Build Task...** or press `Cmd + Shift + B` for macOS. You can run other tasks by going to **Terminal > Run** and choosing which task you want to run.
 
-![Terminal run graphic](../meta/images/vscode_run.png)
+![](../meta/images/vscode_run.png)
 
 
 ## Debugging
@@ -138,19 +138,19 @@ Edit the `launch.json` that opens in the editor with:
 
 To add a breakpoint in your `pipeline.py` script, for example, click on the left hand side of the line of code:
 
-![Click on code line graphic](../meta/images/vscode_set_breakpoint.png)
+![](../meta/images/vscode_set_breakpoint.png)
 
 Click on **Debug** button on the left pane:
 
-![Debug graphic](../meta/images/vscode_debug_button.png)
+![](../meta/images/vscode_debug_button.png)
 
 Then select the debug config **Python: Kedro Run** and click **Debug** (the green play button):
 
-![Debug config graphic](../meta/images/vscode_run_debug.png)
+![](../meta/images/vscode_run_debug.png)
 
 Execution should stop at the breakpoint:
 
-![Execution stopped at breakpoint graphic](../meta/images/vscode_breakpoint.png)
+![](../meta/images/vscode_breakpoint.png)
 
 ### Advanced: Remote Interpreter / Debugging
 
@@ -233,7 +233,7 @@ ssh -vNL 3000:127.0.0.1:3000 <your_username>@<remote_server>
 
 Go to the **Debugging** section in VS Code and select the newly created remote debugger profile:
 
-![Select Kedro remote debugger graphic](../meta/images/vscode_remote_debugger.png)
+![](../meta/images/vscode_remote_debugger.png)
 
 You will need to set a breakpoint in VS Code as described [above](#debugging) and start the debugger by clicking the green play triangle:
 
@@ -255,4 +255,4 @@ Enter the following in your `settings.json` file:
 
 and start editing your `catalog` files.
 
-> Different schemas for different Kedro versions can be found [here](https://github.com/quantumblacklabs/kedro/tree/develop/static/jsonschema).
+> Different schemas for different Kedro versions can be found [here](https://github.com/quantumblacklabs/kedro/tree/master/static/jsonschema).

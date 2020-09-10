@@ -3,6 +3,16 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+
+## Breaking changes to the API
+
+## Thanks for supporting contributions
+
+# Upcoming 0.16.6 release
+
+## Major features and improvements
+
+## Bug fixes and other changes
 * Improved handling of non-ASCII word characters in dataset names.
   - For example, a dataset named `jalapeño` will be accessible as `DataCatalog.datasets.jalapeño` rather than `DataCatalog.datasets.jalape__o`.
 
@@ -10,18 +20,6 @@
 
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman)
-
-
-# Upcoming 0.16.6 release
-
-## Major features and improvements
-
-## Bug fixes and other changes
-
-## Breaking changes to the API
-
-## Thanks for supporting contributions
-
 
 # Release 0.16.5
 

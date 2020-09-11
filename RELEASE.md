@@ -44,11 +44,12 @@ These can be defined in `src/<package-name>/hooks.py` and added to `.kedro.yml` 
 * Absorbed `.isort.cfg` settings into `setup.cfg`.
 * `project_name`, `project_version` and `package_name` now have to be defined in `.kedro.yml` for projects generated using Kedro 0.16.5+.
 * Packaging a modular pipeline raises an error if the pipeline directory is empty or non-existent.
+* Fixed `kedro install` for an Anaconda environment defined in `environment.yml'
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Deepyaman Datta](https://github.com/deepyaman), [Bas Nijholt](https://github.com/basnijholt), [Sebastian Bertoli](https://github.com/sebastianbertoli)
+[Deepyaman Datta](https://github.com/deepyaman), [Bas Nijholt](https://github.com/basnijholt), [Sebastian Bertoli](https://github.com/sebastianbertoli), [Bhavya Merchant](https://github.com/bnmerchant)
 
 # Release 0.16.4
 

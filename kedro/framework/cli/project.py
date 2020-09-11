@@ -152,7 +152,7 @@ def install(compile_flag):
     requirements_txt = source_path / "requirements.txt"
 
     if environment_yml.is_file():
-        call(["conda", "install", "--file", str(environment_yml), "--yes"])
+        call(["conda", "env", "update", "--file", str(environment_yml), "--prune"])
 
     default_compile = bool(compile_flag is None and not requirements_in.is_file())
     do_compile = compile_flag or default_compile

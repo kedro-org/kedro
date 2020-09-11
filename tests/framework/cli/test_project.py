@@ -333,10 +333,11 @@ class TestInstallCommand:
         call_mock.assert_called_once_with(
             [
                 "conda",
-                "install",
+                "env",
+                "update",
                 "--file",
                 str(fake_repo_path / "src/environment.yml"),
-                "--yes",
+                "--prune",
             ]
         )
         fake_copyfile.assert_not_called()

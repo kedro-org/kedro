@@ -39,8 +39,7 @@ from kedro.utils import load_obj
 
 
 class BaseSessionStore(UserDict):
-    """
-    ``BaseSessionStore`` is the base class for all session stores.
+    """``BaseSessionStore`` is the base class for all session stores.
     ``BaseSessionStore`` is an ephemeral store implementation that doesn't
     persist the session data.
     """
@@ -116,9 +115,7 @@ class BaseSessionStore(UserDict):
 
 
 class ShelveStore(BaseSessionStore):
-    """
-    Stores the session data on disk using `shelve` package.
-    """
+    """Stores the session data on disk using `shelve` package."""
 
     @property
     def _location(self) -> Path:

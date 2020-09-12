@@ -8,7 +8,22 @@
 
 ## Thanks for supporting contributions
 
-# Upcoming Release 0.16.5
+# Upcoming 0.16.6 release
+
+## Major features and improvements
+
+## Bug fixes and other changes
+* Improved handling of non-ASCII word characters in dataset names.
+  - For example, a dataset named `jalapeño` will be accessible as `DataCatalog.datasets.jalapeño` rather than `DataCatalog.datasets.jalape__o`.
+* Fixed `kedro install` for an Anaconda environment defined in `environment.yml`.
+* Improved documentation.
+
+## Breaking changes to the API
+
+## Thanks for supporting contributions
+[Deepyaman Datta](https://github.com/deepyaman), [Bhavya Merchant](https://github.com/bnmerchant), [Lovkush Agarwal](https://github.com/Lovkush-A)
+
+# Release 0.16.5
 
 ## Major features and improvements
 * Added the following new datasets.
@@ -27,14 +42,15 @@ These can be defined in `src/<package-name>/hooks.py` and added to `.kedro.yml` 
 * Added ability to disable auto-registered Hooks using `.kedro.yml` (or `pyproject.toml`) configuration file.
 
 ## Bug fixes and other changes
-* Documentation improvements.
-* `project_name`, `project_version` and `package_name` now have to be defined in `.kedro.yml` for the projects generated using Kedro 0.16.5+.
+* Added option to run asynchronously via the Kedro CLI.
+* Absorbed `.isort.cfg` settings into `setup.cfg`.
+* `project_name`, `project_version` and `package_name` now have to be defined in `.kedro.yml` for projects generated using Kedro 0.16.5+.
 * Packaging a modular pipeline raises an error if the pipeline directory is empty or non-existent.
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Sebastian Bertoli](https://github.com/sebastianbertoli), [Deepyaman Datta](https://github.com/deepyaman), [Lovkush Agarwal](https://github.com/Lovkush-A)
+[Deepyaman Datta](https://github.com/deepyaman), [Bas Nijholt](https://github.com/basnijholt), [Sebastian Bertoli](https://github.com/sebastianbertoli)
 
 # Release 0.16.4
 
@@ -46,12 +62,11 @@ These can be defined in `src/<package-name>/hooks.py` and added to `.kedro.yml` 
 * Fixed a bug for using `ParallelRunner` on Windows.
 * Modified `GBQTableDataSet` to load customized results using customized queries from Google Big Query tables.
 * Documentation improvements.
-* Absorbed `.isort.cfg` settings into `setup.cfg`
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Ajay Bisht](https://github.com/ajb7), [Vijay Sajjanar](https://github.com/vjkr), [Deepyaman Datta](https://github.com/deepyaman), [Sebastian Bertoli](https://github.com/sebastianbertoli), [Shahil Mawjee](https://github.com/s-mawjee), [Louis Guitton](https://github.com/louisguitton), [Emanuel Ferm](https://github.com/eferm), [Bas Nijholt](https://github.com/basnijholt)
+[Ajay Bisht](https://github.com/ajb7), [Vijay Sajjanar](https://github.com/vjkr), [Deepyaman Datta](https://github.com/deepyaman), [Sebastian Bertoli](https://github.com/sebastianbertoli), [Shahil Mawjee](https://github.com/s-mawjee), [Louis Guitton](https://github.com/louisguitton), [Emanuel Ferm](https://github.com/eferm)
 
 # Release 0.16.3
 

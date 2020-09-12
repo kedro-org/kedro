@@ -96,6 +96,7 @@ Kedro is built upon our collective best-practice (and mistakes) trying to delive
  - A way to inspire the creation of **reusable analytics code** so that we never start from scratch when working on a new project
  - **Efficient use of time** because we're able to quickly move from experimentation into production
 
+
 ## The humans behind Kedro
 
 Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) and [Nikolaos Tsaousis](https://github.com/tsanikgr) to solve challenges they faced in their project work.
@@ -113,10 +114,13 @@ Currently the core Kedro team consists of:
 * [Lim Hoang](https://github.com/limdauto)
 * [Andrii Ivaniuk](https://github.com/andrii-ivaniuk)
 * [Jo Stichbury](https://github.com/stichbury)
+* [Laís Carvalho](https://github.com/laisbsc)
+* [Merel Theisen](https://github.com/MerelTheisenQB)
 
 Former core team members with significant contributions include: [Gordon Wrigley](https://github.com/tolomea), [Nasef Khan](https://github.com/nakhan98) and [Anton Kirilenko](https://github.com/Flid).
 
 And last but not least, all the open-source contributors whose work went into all Kedro [releases](https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md).
+
 
 ## Can I contribute?
 
@@ -127,6 +131,20 @@ Yes! Want to help build Kedro? Check out our [guide to contributing to Kedro](ht
 
 There is a growing community around Kedro. Have a look at the [Kedro FAQs](https://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#how-can-i-find-out-more-about-kedro) to find projects using Kedro and links to articles, podcasts and talks.
 
+
+## Who is using Kedro?
+- [AI Singapore](https://makerspace.aisingapore.org/2020/08/leveraging-kedro-in-100e/)
+- [Caterpillar](https://www.caterpillar.com/)
+- [ElementAI](https://www.elementai.com/)
+- [Jungle Scout](https://www.junglescout.com/)
+- [MercadoLibre Argentina](https://www.mercadolibre.com.ar)
+- [Mosaic Data Science](https://www.youtube.com/watch?v=fCWGevB366g)
+- [NaranjaX](https://www.youtube.com/watch?v=_0kMmRfltEQ)
+- [Open Data Science LatAm](https://www.odsla.org/)
+- [Retrieva](https://tech.retrieva.jp/entry/2020/07/28/181414)
+- [Roche](https://www.roche.com/)
+- [UrbanLogiq](https://urbanlogiq.com/)
+- [XP](https://youtu.be/wgnGOVNkXqU?t=2210)
 
 ## What licence do you use?
 

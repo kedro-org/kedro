@@ -141,6 +141,10 @@ When you are ready to submit your code:
 
 > *Note:* See the full list of plugins using the GitHub tag [kedro-plugin](https://github.com/topics/kedro-plugin).
 
-- [Kedro-Pandas-Profiling](https://github.com/BrickFrog/kedro-pandas-profiling) by [Justin Malloy](https://github.com/BrickFrog), a simple plugin that uses [Pandas-Profiling](https://github.com/pandas-profiling/pandas-profiling) to profile datasets in the Kedro catalog
-- [find-kedro](https://github.com/WaylonWalker/find-kedro) by [Waylon Walker](https://github.com/WaylonWalker), automatically construct pipelines using pytest style pattern matching
-- [kedro-static-viz](https://github.com/WaylonWalker/kedro-static-viz) by [Waylon Walker](https://github.com/WaylonWalker), generates a static kedro viz site (html, css, js)
+- [Kedro-Pandas-Profiling](https://github.com/BrickFrog/kedro-pandas-profiling), by [Justin Malloy](https://github.com/BrickFrog), uses [Pandas Profiling](https://github.com/pandas-profiling/pandas-profiling) to profile datasets in the Kedro catalog
+- [find-kedro](https://github.com/WaylonWalker/find-kedro), by [Waylon Walker](https://github.com/WaylonWalker), automatically constructs pipelines using `pytest`-style pattern matching
+- [kedro-static-viz](https://github.com/WaylonWalker/kedro-static-viz), by [Waylon Walker](https://github.com/WaylonWalker), generates a static [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz) site (HTML, CSS, JS)
+- [steel-toes](https://github.com/WaylonWalker/steel-toes), by [Waylon Walker](https://github.com/WaylonWalker), prevents stepping on toes by automatically branching data paths
+- [kedro-wings](https://github.com/tamsanh/kedro-wings), by [Tam-Sanh Nguyen](https://github.com/tamsanh), simplifies and speeds up pipeline creation by auto-generating catalog datasets
+- [kedro-great](https://github.com/tamsanh/kedro-great), by [Tam-Sanh Nguyen](https://github.com/tamsanh), integrates Kedro with [Great Expectations](https://greatexpectations.io), enabling catalog-based expectation generation and data validation on pipeline run
+- [Kedro-Accelerator](https://github.com/deepyaman/kedro-accelerator), by [Deepyaman Datta](https://github.com/deepyaman), speeds up pipelines by parallelizing I/O in the background

@@ -69,7 +69,7 @@ This function provides access to the verbose flag via the key `verbose` and to a
 Plugins may require additional keys to be added to `ProjectContext` in `run.py`.
 
 
->*Note*: `kedro.framework.cli.get_project_context(key)`, where `key` is `get_config`, `create_catalog`, `create_pipeline`, `template_version`, `project_name` and `project_path`, is deprecated as of `Kedro 0.15.0`, and will be removed for future versions.
+> *Note:* `kedro.framework.cli.get_project_context(key)`, where `key` is `get_config`, `create_catalog`, `create_pipeline`, `template_version`, `project_name` and `project_path`, is deprecated as of `Kedro 0.15.0`, and will be removed for future versions.
 
 ## Initialisation
 
@@ -114,7 +114,7 @@ class MyHooks:
 hooks = MyHooks()
 ```
 
-> Note: Here, `hooks` should be an instance of the class defining the hooks.
+> *Note:* Here, `hooks` should be an instance of the class defining the hooks.
 
 ## Contributing process
 
@@ -128,7 +128,7 @@ When you are ready to submit your code:
 3. Include a `README.md` describing your plugin's functionality and all dependencies that should be included
 4. Use GitHub tagging to tag your plugin as a `kedro-plugin` so that we can find it
 
->*Note:* In future, we will feature a list of "Plugins by Contributors". Your plugin needs to have an [Apache 2.0 compatible license](https://www.apache.org/legal/resolved.html#category-a) to be considered for this list.
+> *Note:* In future, we will feature a list of "Plugins by Contributors". Your plugin needs to have an [Apache 2.0 compatible license](https://www.apache.org/legal/resolved.html#category-a) to be considered for this list.
 
 
 ## Supported Kedro plugins
@@ -138,7 +138,8 @@ When you are ready to submit your code:
 - [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz), a tool for visualising your Kedro pipelines
 
 ## Community-developed plugins
-_see the full list of plugins listed on the GitHub tag [kedro-hook](https://github.com/topics/kedro-hook)_
+
+> *Note:* See the full list of plugins using the GitHub tag [kedro-plugin](https://github.com/topics/kedro-plugin).
 
 - [Kedro-Pandas-Profiling](https://github.com/BrickFrog/kedro-pandas-profiling) by [Justin Malloy](https://github.com/BrickFrog), a simple plugin that uses [Pandas-Profiling](https://github.com/pandas-profiling/pandas-profiling) to profile datasets in the Kedro catalog
 - [find-kedro](https://github.com/WaylonWalker/find-kedro) by [Waylon Walker](https://github.com/WaylonWalker), automatically construct pipelines using pytest style pattern matching

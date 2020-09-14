@@ -93,6 +93,8 @@ class TransformerHooks:
         catalog.add_transformer(ProfileTimeTransformer())
 ```
 
+> Note: The name of a module that contains Hooks implementation is arbitrary and is not restricted to `hooks.py`.
+
 We recommend that you group related Hook implementations under a namespace, preferably a class, within a `hooks.py` file in your project.
 
 #### Registering your Hook implementations with Kedro
@@ -164,3 +166,190 @@ where `<plugin_name>` is the name of an installed plugin for which the auto-regi
 ## Under the hood
 
 Under the hood, we use [pytest's pluggy](https://pluggy.readthedocs.io/en/latest/) to implement Kedro's Hook mechanism. We recommend reading their documentation if you have more questions about the underlying implementation.
+
+## Hooks examples
+
+**Example 1:** Add data validation to the node's inputs and outputs using [Great Expectations](https://docs.greatexpectations.io/en/latest/).
+
+* Install dependencies:
+
+```console
+pip install great-expectations
+```
+
+* Implement `before_node_run` and `after_node_run` Hooks to validate inputs and outputs data respectively leveraging `Great Expectations`:
+
+```python
+# <your_project>/src/<your_project>/hooks.py
+from typing import Any, Dict
+
+from kedro.framework.hooks import hook_impl
+from kedro.io import DataCatalog
+
+import great_expectations as ge
+
+
+class DataValidationHooks:
+
+    # Map expectation to dataset
+    DATASET_EXPECTATION_MAPPING = {
+        "companies": "raw_companies_dataset_expectation",
+        "preprocessed_companies": "preprocessed_companies_dataset_expectation",
+    }
+
+    @hook_impl
+    def before_node_run(
+        self, catalog: DataCatalog, inputs: Dict[str, Any], run_id: str
+    ) -> None:
+        """ Validate inputs data to a node based on using great expectation
+        if an expectation suite is defined in ``DATASET_EXPECTATION_MAPPING``.
+        """
+        self._run_validation(catalog, inputs, run_id)
+
+    @hook_impl
+    def after_node_run(
+        self, catalog: DataCatalog, outputs: Dict[str, Any], run_id: str
+    ) -> None:
+        """ Validate outputs data from a node based on using great expectation
+        if an expectation suite is defined in ``DATASET_EXPECTATION_MAPPING``.
+        """
+        self._run_validation(catalog, outputs, run_id)
+
+    def _run_validation(self, catalog: DataCatalog, data: Dict[str, Any], run_id: str):
+        for dataset_name, dataset_value in data.items():
+            if dataset_name not in self.DATASET_EXPECTATION_MAPPING:
+                continue
+
+            dataset = catalog._get_dataset(dataset_name)
+            dataset_path = str(dataset._filepath)
+            expectation_suite = self.DATASET_EXPECTATION_MAPPING[dataset_name]
+
+            expectation_context = ge.data_context.DataContext()
+            batch = expectation_context.get_batch(
+                {"path": dataset_path, "datasource": "files_datasource"},
+                expectation_suite,
+            )
+            expectation_context.run_validation_operator(
+                "action_list_operator", assets_to_validate=[batch], run_id=run_id
+            )
+```
+
+* Register Hooks implementation, as described [above](#registering-your-hook-implementations-with-kedro) and run Kedro.
+
+`Great Expectations` example report:
+
+![](../meta/images/data_validation.png)
+
+**Example 2:** Add observability to your pipeline with [statsd](https://statsd.readthedocs.io/en/v3.3/configure.html) and visualise it using [Grafana](https://grafana.com/).
+
+* Install dependencies:
+
+```console
+pip install statsd
+```
+
+* Implement `before_node_run` and `after_node_run` Hooks to collect metrics (DataSet size and node execution time):
+
+```python
+# <your_project>/src/<your_project>/hooks.py
+import sys
+from typing import Any, Dict
+
+import statsd
+from kedro.framework.hooks import hook_impl
+from kedro.pipeline.node import Node
+
+
+class PipelineMonitoringHooks:
+    def __init__(self):
+        self._timers = {}
+        self._client = statsd.StatsClient(prefix="kedro")
+
+    @hook_impl
+    def before_node_run(self, node: Node) -> None:
+        node_timer = self._client.timer(node.name)
+        node_timer.start()
+        self._timers[node.short_name] = node_timer
+
+    @hook_impl
+    def after_node_run(self, node: Node, inputs: Dict[str, Any]) -> None:
+        self._timers[node.short_name].stop()
+        for dataset_name, dataset_value in inputs.items():
+            self._client.gauge(dataset_name + "_size", sys.getsizeof(dataset_value))
+
+    @hook_impl
+    def after_pipeline_run(self):
+        self._client.incr("run")
+```
+
+* Register Hooks implementation, as described [above](#registering-your-hook-implementations-with-kedro) and run Kedro.
+
+`Grafana` example page:
+
+![](../meta/images/pipeline_observability.png)
+
+**Example 3:** Add metrics tracking to your model with [MLflow](https://mlflow.org/).
+
+* Install dependencies:
+
+```console
+pip install mlflow
+```
+
+* Implement `before_pipeline_run`, `after_pipeline_run` and `after_node_run` Hooks to collect metrics using `MLflow`:
+
+```python
+# <your_project>/src/<your_project>/hooks.py
+from typing import Any, Dict
+
+import mlflow
+import mlflow.sklearn
+from kedro.framework.hooks import hook_impl
+from kedro.pipeline.node import Node
+
+
+class ModelTrackingHooks:
+    """Namespace for grouping all model-tracking hooks with MLflow together.
+    """
+
+    @hook_impl
+    def before_pipeline_run(self, run_params: Dict[str, Any]) -> None:
+        """Hook implementation to start an MLflow run
+        with the same run_id as the Kedro pipeline run.
+        """
+        mlflow.start_run(run_name=run_params["run_id"])
+        mlflow.log_params(run_params)
+
+    @hook_impl
+    def after_node_run(
+        self, node: Node, outputs: Dict[str, Any], inputs: Dict[str, Any]
+    ) -> None:
+        """Hook implementation to add model tracking after some node runs.
+        In this example, we will:
+        * Log the parameters after the data splitting node runs.
+        * Log the model after the model training node runs.
+        * Log the model's metrics after the model evaluating node runs.
+        """
+        if node._func_name == "split_data":
+            mlflow.log_params(
+                {"split_data_ratio": inputs["params:example_test_data_ratio"]}
+            )
+
+        elif node._func_name == "train_model":
+            model = outputs["example_model"]
+            mlflow.sklearn.log_model(model, "model")
+            mlflow.log_params(inputs["parameters"])
+
+    @hook_impl
+    def after_pipeline_run(self) -> None:
+        """Hook implementation to end the MLflow run
+        after the Kedro pipeline finishes.
+        """
+        mlflow.end_run()
+```
+
+* Register Hooks implementation, as described [above](#registering-your-hook-implementations-with-kedro) and run Kedro.
+
+`MLflow` example page:
+
+![](../meta/images/mlflow.png)

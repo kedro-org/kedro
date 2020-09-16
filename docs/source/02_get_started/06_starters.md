@@ -44,11 +44,11 @@ kedro starter list
 The Kedro team maintains the following starters to bootstrap new Kedro projects:
 
 * [Alias `pandas-iris`](https://github.com/quantumblacklabs/kedro-starter-pandas-iris): The [Kedro Iris dataset example project](./05_example_project.md).
-* [Alias `pyspark-iris`](https://github.com/quantumblacklabs/kedro-starter-pyspark-iris): An alternative Kedro Iris dataset example, using [PySpark](../10_tools_integration/01_pyspark.md)
-* [Alias `pyspark`](https://github.com/quantumblacklabs/kedro-starter-pyspark): The configuration and initialisation code for a [Kedro pipeline using PySpark](../10_tools_integration/01_pyspark.md)
+* [Alias `pyspark-iris`](https://github.com/quantumblacklabs/kedro-starter-pyspark-iris): An alternative Kedro Iris dataset example, using [PySpark](../11_tools_integration/01_pyspark.md)
+* [Alias `pyspark`](https://github.com/quantumblacklabs/kedro-starter-pyspark): The configuration and initialisation code for a [Kedro pipeline using PySpark](../11_tools_integration/01_pyspark.md)
 
 
-Each starter project encodes our [recommended Kedro best practices](../10_tools_integration/01_pyspark.md).
+Each starter project encodes our [recommended Kedro best practices](../11_tools_integration/01_pyspark.md).
 
 ## Starter versioning
 

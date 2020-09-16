@@ -2,7 +2,7 @@
 
 In this section, we discuss the data set-up phase, which is the second part of the [standard development workflow](./01_spaceflights_tutorial.md#kedro-project-development-workflow). The steps are as follows:
 
-* Add datasets to your `data/` folder, according to [data engineering convention](../11_faq/01_faq.md#what-is-data-engineering-convention)
+* Add datasets to your `data/` folder, according to [data engineering convention](../12_faq/01_faq.md#what-is-data-engineering-convention)
 * Register the datasets with the Data Catalog, which is the registry of all data sources available for use by the project `conf/base/catalog.yml`. This ensures that your code is reproducible when it references datasets in different locations and/or environments.
 
 You can find further information about [the Data Catalog](../05_data/01_data_catalog.md) in specific documentation covering advanced usage.

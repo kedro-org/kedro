@@ -39,7 +39,7 @@ The pipeline can be broken up into different layers to specify convention for ho
  makes it easier to collaborate with other team members because everyone has an idea of what type of data cleaning or
   processing has happened. It also makes it easier to collaborate with yourself in future because it makes your data
    easier to reproduce if you have done something wrong. You can read more about the [Data Engineering Convention
-   ](../11_faq/01_faq.md#what-is-data-engineering-convention) that we use.
+   ](../12_faq/01_faq.md#what-is-data-engineering-convention) that we use.
 
 Kedro-Viz makes it easy to visualise these data processing stages by adding a `layer` attribute to the datasets in the Data Catalog. We will be modifying `catalog.yml` with the following:
 

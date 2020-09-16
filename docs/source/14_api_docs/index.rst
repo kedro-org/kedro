@@ -117,24 +117,30 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
+   :caption: Deployment
+
+   10_deployment/01_single_machine
+
+.. toctree::
+   :maxdepth: 2
    :caption: Tools Integration
 
-   10_tools_integration/01_pyspark
-   10_tools_integration/02_ipython
-   10_tools_integration/03_databricks
+   11_tools_integration/01_pyspark
+   11_tools_integration/02_ipython
+   11_tools_integration/03_databricks
 
 .. toctree::
    :maxdepth: 2
    :caption: FAQs
 
-   11_faq/01_faq
-   11_faq/02_architecture_overview
+   12_faq/01_faq
+   12_faq/02_architecture_overview
 
 .. toctree::
    :maxdepth: 2
    :caption: Resources
 
-   12_resources/01_logos
+   13_resources/01_logos
 
 
 API Docs

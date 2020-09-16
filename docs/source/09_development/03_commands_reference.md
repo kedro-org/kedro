@@ -370,7 +370,7 @@ kedro ipython
 
 Every time you start or restart a notebook kernel, a startup script (`<project-root>/.ipython/profile_default/startup/00-kedro-init.py`) will add the following variables in scope:
 
-- `context`: An instance of `ProjectContext` class defined in `src/project-name/run.py` (Further details of how to use `context` can be found [in the IPython documentation](../10_tools_integration/02_ipython.md))
+- `context`: An instance of `ProjectContext` class defined in `src/project-name/run.py` (Further details of how to use `context` can be found [in the IPython documentation](../11_tools_integration/02_ipython.md))
 - `startup_error` (`Exception`)
 - `catalog`
 

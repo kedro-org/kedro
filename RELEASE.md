@@ -16,6 +16,7 @@
 * Improved handling of non-ASCII word characters in dataset names.
   - For example, a dataset named `jalapeño` will be accessible as `DataCatalog.datasets.jalapeño` rather than `DataCatalog.datasets.jalape__o`.
 * Fixed `kedro install` for an Anaconda environment defined in `environment.yml`.
+* Fixed backwards compatibility with templates generated with older Kedro versions <0.16.5. No longer need to update `.kedro.yml` to use `kedro lint` and `kedro jupyter notebook convert`.
 
 ## Breaking changes to the API
 
@@ -47,6 +48,13 @@ These can be defined in `src/<package-name>/hooks.py` and added to `.kedro.yml` 
 
 ## Breaking changes to the API
 * `project_name`, `project_version` and `package_name` now have to be defined in `.kedro.yml` for projects using Kedro 0.16.5+.
+
+## Migration Guide
+This release has accidentally broken the usage of `kedro lint` and `kedro jupyter notebook convert` on a project template generated with previous versions of Kedro (<=0.16.4). To amend this, please either upgrade to `kedro==0.16.6` or update `.kedro.yml` within your project root directory to include the following key:
+
+```yaml
+package_name: "<your_package_name>"
+```
 
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman), [Bas Nijholt](https://github.com/basnijholt), [Sebastian Bertoli](https://github.com/sebastianbertoli)

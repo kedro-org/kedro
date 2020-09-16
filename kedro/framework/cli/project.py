@@ -107,13 +107,13 @@ def lint(files, check_only, **kwargs):  # pylint: disable=unused-argument
     """Run flake8, isort and black."""
     static_data = get_static_project_data(Path.cwd())
     source_path = static_data["source_dir"]
-    package_name = static_data["package_name"]
+    package_name = static_data.get("package_name", _load_project_context().package_name)
     files = files or (str(source_path / "tests"), str(source_path / package_name))
 
     if "PYTHONPATH" not in os.environ:
         # isort needs the source path to be in the 'PYTHONPATH' environment
         # variable to treat it as a first-party import location
-        os.environ["PYTHONPATH"] = str(source_path)
+        os.environ["PYTHONPATH"] = str(source_path)  # pragma: no cover
 
     for module_name in ("flake8", "isort", "black"):
         try:
@@ -212,7 +212,7 @@ def build_docs(open_docs):
     """Build the project documentation."""
     static_data = get_static_project_data(Path.cwd())
     source_path = static_data["source_dir"]
-    package_name = static_data["package_name"]
+    package_name = static_data.get("package_name", _load_project_context().package_name)
 
     python_call("pip", ["install", str(source_path / "[docs]")])
     python_call("pip", ["install", "-r", str(source_path / "requirements.txt")])

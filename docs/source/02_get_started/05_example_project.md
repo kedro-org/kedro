@@ -70,7 +70,7 @@ By default, when Kedro creates `conf/local` folder, it is empty. However, Kedro 
 
 #### `data`
 
-The `data` folder contains a number of subfolders to store project data. We recommend that you put raw data into `raw` and move processed data to other subfolders according to [data engineering convention](../11_faq/01_faq.md#what-is-data-engineering-convention).
+The `data` folder contains a number of subfolders to store project data. We recommend that you put raw data into `raw` and move processed data to other subfolders according to [data engineering convention](../12_faq/01_faq.md#what-is-data-engineering-convention).
 
 The example project has a single file, `iris.csv`, that contains the Iris dataset. The subfolders of `data` are ignored by `git` through inclusion in `.gitignore` since data is more frequently stored elsewhere, such as a in an S3 bucket. However, if you are familiar with [`.gitignore`](https://help.github.com/en/github/using-git/ignoring-files) you can edit it, if you are confident that you need to manage your data in `git`.
 

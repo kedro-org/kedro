@@ -16,7 +16,7 @@ Once you are set up, to get a feel for Kedro, we suggest working through our exa
 -   The more detailed ["spaceflights" tutorial](../03_tutorial/01_spaceflights_tutorial.md) to give you hands-on experience as you learn about Kedro
 
 
-We also recommend the [frequently asked questions](../11_faq/01_faq.md) and the [API reference documentation](/kedro.rst) for additional information.
+We also recommend the [frequently asked questions](../12_faq/01_faq.md) and the [API reference documentation](/kedro.rst) for additional information.
 
 ## Assumptions
 

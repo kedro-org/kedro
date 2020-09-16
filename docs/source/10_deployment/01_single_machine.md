@@ -1,5 +1,4 @@
 # Single-machine deployment
-This topic explains how to deploy Kedro on a production server. There are three methods that can be used to deploy your Kedro pipelines:
 This topic explains how to deploy Kedro on a production server. You can use three alternative methods to deploy your Kedro pipelines:
 
 - Container based using [Kedro-Docker](https://github.com/quantumblacklabs/kedro-docker)

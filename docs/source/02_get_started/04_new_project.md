@@ -35,14 +35,13 @@ The output lists the directory in which to find the project.
 
 You can create a new project from a configuration file if you prefer. The file must contain:
 
+-   `output_dir` The path in which to create the project directory
 -   `project_name`
 -   `repo_name`
 -   `python_package`
 -   `include_example` (Boolean value) option to confirm or reject the inclusion of the [Iris example code](../02_get_started/05_example_project.md)
 
-The configuration file must also specify an `output_dir` for the path in which to create the project directory. This path can be set to `~` for your home directory, or `.` for the current working directory.
-
-Here is an example `config.yml`, which assumes that a directory named `~/code` already exists:
+The `output_dir` can be set to wherever you want to create the project. For example, `~` for your home directory, or `.` for the current working directory. Here is an example `config.yml`, which assumes that a directory named `~/code` already exists:
 
 ```yaml
 output_dir: ~/code
@@ -51,8 +50,6 @@ repo_name: get-started
 python_package: get_started
 include_example: true
 ```
-
-`output_dir` can be set to `~` for home directory, or `.` for the current working directory.
 
 To create the new project:
 

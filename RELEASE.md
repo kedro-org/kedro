@@ -50,9 +50,11 @@ These can be defined in `src/<package-name>/hooks.py` and added to `.kedro.yml` 
 * `project_name`, `project_version` and `package_name` now have to be defined in `.kedro.yml` for projects using Kedro 0.16.5+.
 
 ## Migration Guide
-This release has accidentally broken the usage of `kedro lint` and `kedro jupyter notebook convert` on a project template generated with previous versions of Kedro (<=0.16.4). To amend this, please either upgrade to `kedro==0.16.6` or update `.kedro.yml` within your project root directory to include the following key:
+This release has accidentally broken the usage of `kedro lint` and `kedro jupyter notebook convert` on a project template generated with previous versions of Kedro (<=0.16.4). To amend this, please either upgrade to `kedro==0.16.6` or update `.kedro.yml` within your project root directory to include the following keys:
 
 ```yaml
+project_name: "<your_project_name>"
+project_version: "kedro_version_of_the_project>"
 package_name: "<your_package_name>"
 ```
 

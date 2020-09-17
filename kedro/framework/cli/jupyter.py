@@ -216,7 +216,9 @@ def convert_notebook(
     project_path = Path.cwd()
     static_data = get_static_project_data(project_path)
     source_path = static_data["source_dir"]
-    package_name = static_data.get("package_name", _load_project_context().package_name)
+    package_name = (
+        static_data.get("package_name") or _load_project_context().package_name
+    )
 
     _update_ipython_dir(project_path)
 

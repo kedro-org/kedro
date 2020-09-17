@@ -92,7 +92,7 @@ exclude_patterns = [
     "modules.rst",
     "source",
     "README.md",
-    "11_faq/03_glossary.md",
+    "12_faq/03_glossary.md",
 ]
 
 type_targets = {
@@ -451,8 +451,8 @@ def _prepare_build_dir(app, config):
     build_root = Path(app.srcdir)
     build_out = Path(app.outdir)
     copy_tree(str(here / "source"), str(build_root))
-    copy_tree(str(build_root / "13_api_docs"), str(build_root))
-    shutil.rmtree(str(build_root / "13_api_docs"))
+    copy_tree(str(build_root / "14_api_docs"), str(build_root))
+    shutil.rmtree(str(build_root / "14_api_docs"))
     shutil.rmtree(str(build_out), ignore_errors=True)
     copy_tree(str(build_root / "css"), str(build_out / "_static" / "css"))
     shutil.rmtree(str(build_root / "css"))

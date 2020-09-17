@@ -116,6 +116,8 @@ Currently the core Kedro team consists of:
 * [Jo Stichbury](https://github.com/stichbury)
 * [Laís Carvalho](https://github.com/laisbsc)
 * [Merel Theisen](https://github.com/MerelTheisenQB)
+* [Gabriel Comym](https://github.com/GabrielComymQB)
+* [Liam Brummitt](https://github.com/bru5)
 
 Former core team members with significant contributions include: [Gordon Wrigley](https://github.com/tolomea), [Nasef Khan](https://github.com/nakhan98) and [Anton Kirilenko](https://github.com/Flid).
 

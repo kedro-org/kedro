@@ -679,7 +679,7 @@ kedro run --runner=ParallelRunner
 
 > *Note:* `SparkDataSet` doesn't work correctly with `ParallelRunner`.
 
-In case you want to get some sort of concurrency for the pipeline with `SparkDataSet` you can use `ThreadRunner`. It uses threading for concurrent execution whereas `ParallelRunner` uses multiprocessing. For more information on how to maximise concurrency when using Kedro with PySpark, please visit our guide on [how to build a Kedro pipeline with PySpark](../10_tools_integration/01_pyspark.md) guide.
+In case you want to get some sort of concurrency for the pipeline with `SparkDataSet` you can use `ThreadRunner`. It uses threading for concurrent execution whereas `ParallelRunner` uses multiprocessing. For more information on how to maximise concurrency when using Kedro with PySpark, please visit our guide on [how to build a Kedro pipeline with PySpark](../11_tools_integration/01_pyspark.md) guide.
 
 You should use the following command to run the pipeline using `ThreadRunner`:
 

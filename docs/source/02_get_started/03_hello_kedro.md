@@ -45,7 +45,7 @@ Note that `my_salutation` is the output of `return_greeting_node` and also the i
 
 ## Pipeline
 
-A pipeline organises the dependencies and execution order of a collection of nodes, and connect inputs and outputs while keeping your code modular. The pipeline determines the node execution order by resolving dependencies and does *not* necessarily run the nodes in the order in which they are passed in.
+A pipeline organises the dependencies and execution order of a collection of nodes, and connects inputs and outputs while keeping your code modular. The pipeline determines the node execution order by resolving dependencies and does *not* necessarily run the nodes in the order in which they are passed in.
 
 In this example the pipeline executes `return_greeting_node` before it executes `join_statements_node`:
 

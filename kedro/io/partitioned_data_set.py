@@ -31,6 +31,7 @@ underlying dataset definition. It also uses `fsspec` for filesystem level operat
 """
 import operator
 from copy import deepcopy
+from pathlib import Path
 from typing import Any, Callable, Dict, List, Tuple, Type, Union
 from urllib.parse import urlparse
 from warnings import warn
@@ -51,6 +52,13 @@ DATASET_CREDENTIALS_KEY = "dataset_credentials"
 CHECKPOINT_CREDENTIALS_KEY = "checkpoint_credentials"
 
 S3_PROTOCOLS = ("s3", "s3a", "s3n")
+
+
+def _grandparent(path: str) -> str:
+    path_obj = Path(path).resolve()
+    grandparent = path_obj.parent.parent
+    assert grandparent.name == path_obj.name
+    return str(grandparent)
 
 
 class PartitionedDataSet(AbstractDataSet):
@@ -152,13 +160,6 @@ class PartitionedDataSet(AbstractDataSet):
 
         dataset = dataset if isinstance(dataset, dict) else {"type": dataset}
         self._dataset_type, self._dataset_config = parse_dataset_definition(dataset)
-        if VERSION_KEY in self._dataset_config:
-            raise DataSetError(
-                "`{}` does not support versioning of the underlying dataset. "
-                "Please remove `{}` flag from the dataset definition.".format(
-                    self.__class__.__name__, VERSIONED_FLAG_KEY
-                )
-            )
 
         self._credentials, dataset_credentials = _split_credentials(credentials)
         if dataset_credentials:
@@ -200,7 +201,7 @@ class PartitionedDataSet(AbstractDataSet):
     @cachedmethod(cache=operator.attrgetter("_partition_cache"))
     def _list_partitions(self) -> List[str]:
         return [
-            path
+            _grandparent(path) if self._dataset_config.get(VERSION_KEY) else path
             for path in self._filesystem.find(self._normalized_path, **self._load_args)
             if path.endswith(self._filename_suffix)
         ]

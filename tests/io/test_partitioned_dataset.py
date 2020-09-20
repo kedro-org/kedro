@@ -61,6 +61,11 @@ def local_csvs(tmp_path, partitioned_data_pandas):
     return local_dir
 
 
+@pytest.fixture
+def filepath_csvs(tmp_path):
+    return str(tmp_path / "csvs")
+
+
 LOCAL_DATASET_DEFINITION = [
     "pandas.CSVDataSet",
     "kedro.extras.datasets.pandas.CSVDataSet",
@@ -274,17 +279,35 @@ class TestPartitionedDataSetLocal:
     @pytest.mark.parametrize(
         "dataset_config",
         [
-            {"type": CSVDataSet, "versioned": True},
-            {"type": "pandas.CSVDataSet", "versioned": True},
+            {**dataset_config, "versioned": True}
+            for dataset_config in LOCAL_DATASET_DEFINITION
+            if isinstance(dataset_config, dict)
         ],
     )
-    def test_versioned_dataset_not_allowed(self, dataset_config):
-        pattern = (
-            "`PartitionedDataSet` does not support versioning of the underlying "
-            "dataset. Please remove `versioned` flag from the dataset definition."
-        )
-        with pytest.raises(DataSetError, match=re.escape(pattern)):
-            PartitionedDataSet(str(Path.cwd()), dataset_config)
+    @pytest.mark.parametrize(
+        "suffix,expected_num_parts", [("", 5), (".csv", 3), ("p4", 1)]
+    )
+    def test_versioned_dataset_save_and_load(
+        self,
+        filepath_csvs,
+        dataset_config,
+        suffix,
+        expected_num_parts,
+        partitioned_data_pandas,
+    ):
+        """Test that saved and reloaded data matches the original one for
+        the versioned data set."""
+        PartitionedDataSet(filepath_csvs, dataset_config).save(partitioned_data_pandas)
+
+        pds = PartitionedDataSet(filepath_csvs, dataset_config, filename_suffix=suffix)
+        loaded_partitions = pds.load()
+
+        assert len(loaded_partitions.keys()) == expected_num_parts
+        for partition_id, load_func in loaded_partitions.items():
+            df = load_func()
+            assert_frame_equal(df, partitioned_data_pandas[partition_id + suffix])
+            if suffix:
+                assert not partition_id.endswith(suffix)
 
     def test_no_partitions(self, tmpdir):
         pds = PartitionedDataSet(str(tmpdir), "pandas.CSVDataSet")

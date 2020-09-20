@@ -144,9 +144,6 @@ class PartitionedDataSet(AbstractDataSet):
                 https://kedro.readthedocs.io/en/stable/04_user_guide/08_advanced_io.html#partitioned-dataset-credentials
             load_args: Keyword arguments to be passed into ``find()`` method of
                 the filesystem implementation.
-
-        Raises:
-            DataSetError: If versioning is enabled for the underlying dataset.
         """
         # pylint: disable=import-outside-toplevel
         from fsspec.utils import infer_storage_options  # for performance reasons

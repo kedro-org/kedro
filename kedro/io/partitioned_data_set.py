@@ -98,6 +98,7 @@ class PartitionedDataSet(AbstractDataSet):
         filepath_arg: str = "filepath",
         filename_suffix: str = "",
         credentials: Dict[str, Any] = None,
+        fs_args: Dict[str, Any] = None,
         load_args: Dict[str, Any] = None,
     ):
         """Creates a new instance of ``PartitionedDataSet``.
@@ -134,6 +135,8 @@ class PartitionedDataSet(AbstractDataSet):
                 and should not be specified.
                 All possible credentials management scenarios are documented here:
                 https://kedro.readthedocs.io/en/stable/04_user_guide/08_advanced_io.html#partitioned-dataset-credentials
+            fs_args: Extra arguments to pass into underlying filesystem class constructor
+                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``)
             load_args: Keyword arguments to be passed into ``find()`` method of
                 the filesystem implementation.
 
@@ -159,6 +162,8 @@ class PartitionedDataSet(AbstractDataSet):
                     self.__class__.__name__, VERSIONED_FLAG_KEY
                 )
             )
+
+        self._fs_args = deepcopy(fs_args) or {}
 
         self._credentials, dataset_credentials = _split_credentials(credentials)
         if dataset_credentials:
@@ -189,7 +194,7 @@ class PartitionedDataSet(AbstractDataSet):
         import fsspec  # pylint: disable=import-outside-toplevel
 
         protocol = "s3" if self._protocol in S3_PROTOCOLS else self._protocol
-        return fsspec.filesystem(protocol, **self._credentials)
+        return fsspec.filesystem(protocol, **self._credentials, **self._fs_args)
 
     @property
     def _normalized_path(self) -> str:
@@ -340,6 +345,7 @@ class IncrementalDataSet(PartitionedDataSet):
         filepath_arg: str = "filepath",
         filename_suffix: str = "",
         credentials: Dict[str, Any] = None,
+        fs_args: Dict[str, Any] = None,
         load_args: Dict[str, Any] = None,
     ):
 
@@ -383,6 +389,8 @@ class IncrementalDataSet(PartitionedDataSet):
                 credentials spec, then such spec will take precedence.
                 All possible credentials management scenarios are documented here:
                 https://kedro.readthedocs.io/en/stable/04_user_guide/08_advanced_io.html#partitioned-dataset-credentials
+            fs_args: Extra arguments to pass into underlying filesystem class constructor
+                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
             load_args: Keyword arguments to be passed into ``find()`` method of
                 the filesystem implementation.
 
@@ -391,7 +399,13 @@ class IncrementalDataSet(PartitionedDataSet):
         """
 
         super().__init__(
-            path, dataset, filepath_arg, filename_suffix, credentials, load_args
+            path,
+            dataset,
+            filepath_arg,
+            filename_suffix,
+            credentials,
+            fs_args,
+            load_args,
         )
 
         self._checkpoint_config = self._parse_checkpoint_config(checkpoint)

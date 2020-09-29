@@ -35,8 +35,9 @@ commands:
           name: Install requirements
           command: pip install -r requirements.txt -U
       - run:
+          # Virtualenv 20.0.20 broke pre-commit, capped for now
           name: Install venv for some pre-commit hooks
-          command: conda install -y virtualenv
+          command: conda install -y "virtualenv<20.0"
       - run:
           name: Install test requirements
           command: pip install -r test_requirements.txt -U

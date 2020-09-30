@@ -120,6 +120,7 @@ Welcome to Kedro's documentation!
    :caption: Deployment
 
    10_deployment/01_single_machine
+   10_deployment/02_distributed
    10_deployment/04_argo
 
 .. toctree::

@@ -120,7 +120,10 @@ Welcome to Kedro's documentation!
    :caption: Deployment
 
    10_deployment/01_single_machine
+   10_deployment/02_distributed
    10_deployment/04_argo
+   10_deployment/05_prefect
+   10_deployment/07_aws_batch
 
 .. toctree::
    :maxdepth: 2

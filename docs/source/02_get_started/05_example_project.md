@@ -57,7 +57,7 @@ For project-specific settings to share across different installations (for examp
 
 The folder contains three files for the example, but you can add others as you require:
 
--   `catalog.yml` - [Configures the Data Catalog](../05_data/01_data_catalog#using-the-data-catalog-within-kedro-configuration) with the file paths and load/save configuration required for different datasets
+-   `catalog.yml` - [Configures the Data Catalog](../05_data/01_data_catalog.md#using-the-data-catalog-within-kedro-configuration) with the file paths and load/save configuration required for different datasets
 -   `logging.yml` - Uses Python's default [`logging`](https://docs.python.org/3/library/logging.html) library to set up logging
 -   `parameters.yml` - Allows you to define parameters for machine learning experiments e.g. train / test split and number of iterations
 

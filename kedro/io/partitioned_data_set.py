@@ -55,7 +55,7 @@ S3_PROTOCOLS = ("s3", "s3a", "s3n")
 
 
 def _grandparent(path: str) -> str:
-    path_obj = Path(path).resolve()
+    path_obj = Path(path)
     grandparent = path_obj.parent.parent
     assert grandparent.name == path_obj.name
     return str(grandparent)

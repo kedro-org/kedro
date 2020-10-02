@@ -22,7 +22,7 @@ To use Argo Workflows, make sure you have the following prerequisites in place:
 - All node input/output DataSets must be configured in `catalog.yml` and refer to an external location (e.g. [AWS S3](../05_data/01_data_catalog.md#using-the-data-catalog-with-the-yaml-api)); you cannot use the `MemoryDataSet` either
 > _Note:_ Each node will run in its own container.
 
-## How to run Kedro pipeline using Argo Workflows
+## How to run your Kedro pipeline using Argo Workflows
 
 ### Containerize your Kedro project
 
@@ -73,11 +73,11 @@ def generate_argo_config(image, pipeline_name, env):
 def get_dependencies(dependencies):
     deps_dict = [
         {
-            "node": parent.name,
-            "name": clean_name(parent.name),
-            "deps": [clean_name(val.name) for val in children],
+            "node": node.name,
+            "name": clean_name(node.name),
+            "deps": [clean_name(val.name) for val in parent_nodes],
         }
-        for parent, children in dependencies.items()
+        for node, parent_nodes in dependencies.items()
     ]
     return deps_dict
 
@@ -187,7 +187,6 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: aws-secrets
-  namespace: default
 data:
   access_key_id: <AWS_ACCESS_KEY_ID value encoded with base64>
   secret_access_key: <AWS_SECRET_ACCESS_KEY value encoded with base64>
@@ -197,14 +196,14 @@ type: Opaque
 You can use the following command to encode AWS keys to base64:
 
 ```console
-$ echo <original_key> | base64
+$ echo -n <original_key> | base64
 ```
 
 Run the following commands to deploy the Kubernetes Secrets to the `default` namespace and check that it was created:
 
 ```console
 $ kubectl create -f secret.yml
-$ kubectl get secrets
+$ kubectl get secrets aws-secrets
 ```
 
 Now, you are ready to submit the Argo Workflows spec as follows:
@@ -216,10 +215,11 @@ $ argo submit --watch templates/argo-<project_name>.yml
 
 > _Note:_ The Argo Workflows should be submitted to the same namespace as the Kubernetes Secrets. Please refer to the Argo CLI help to get more details about the usage.
 
-In order to clean up your Kubernetes cluster you can use the following command:
+In order to clean up your Kubernetes cluster you can use the following commands:
 
 ```console
 $ kubectl delete pods --selector app=kedro-argo
+$ kubectl delete -f secret.yml
 ```
 
 ### Kedro-Argo plugin

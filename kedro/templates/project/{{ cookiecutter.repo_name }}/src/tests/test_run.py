@@ -36,6 +36,7 @@ named ``test_*`` which test a unit of logic.
 To run the tests, run ``kedro test``.
 """
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -44,7 +45,10 @@ from {{ cookiecutter.python_package }}.run import ProjectContext
 
 @pytest.fixture
 def project_context():
-    return ProjectContext(str(Path.cwd()))
+    # Don't configure the logging module. If it's configured, tests that
+    # check logs using the ``caplog`` fixture depend on execution order.
+    with patch.object(ProjectContext, "_setup_logging"):
+        return ProjectContext(str(Path.cwd()))
 
 
 class TestProjectContext:

@@ -150,4 +150,4 @@ These are the data science node functions within `pipelines/data_science/nodes.p
 ```
 
 
-The file `src/pipeline.py` creates and collates the project's modular pipelines into a single pipeline, resolving node execution order from the input and output data dependencies between the nodes.
+The file `src/hooks.py` creates and collates the project's modular pipelines into a single pipeline, resolving node execution order from the input and output data dependencies between the nodes.

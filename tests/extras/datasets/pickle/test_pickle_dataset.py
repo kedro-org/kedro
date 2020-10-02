@@ -148,7 +148,7 @@ class TestPickleDataSet:
             pickle_data_set.save(dummy_dataframe)
 
     def test_invalid_backend(self):
-        pattern = r"'backend' should be one of \['pickle', 'joblib'\], got 'invalid'\."
+        pattern = r"'backend' should be one of \['pickle', 'joblib', 'compress_pickle'\], got 'invalid'\."  # pylint: disable=line-too-long
         with pytest.raises(ValueError, match=pattern):
             PickleDataSet(filepath="test.pkl", backend="invalid")
 
@@ -156,6 +156,11 @@ class TestPickleDataSet:
         mocker.patch.object(PickleDataSet, "BACKENDS", {"joblib": None})
         with pytest.raises(ImportError):
             PickleDataSet(filepath="test.pkl", backend="joblib")
+
+    def test_no_compress_pickle(self, mocker):
+        mocker.patch.object(PickleDataSet, "BACKENDS", {"compress_pickle": None})
+        with pytest.raises(ImportError):
+            PickleDataSet(filepath="test.pkl", backend="compress_pickle")
 
 
 class TestPickleDataSetVersioned:

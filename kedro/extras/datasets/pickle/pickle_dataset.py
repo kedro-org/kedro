@@ -51,6 +51,11 @@ try:
 except ImportError:  # pragma: no cover
     joblib = None
 
+try:
+    import compress_pickle
+except ImportError:  # pragma: no cover
+    compress_pickle = None
+
 
 class PickleDataSet(AbstractVersionedDataSet):
     """``PickleDataSet`` loads/saves data from/to a Pickle file using an underlying
@@ -73,11 +78,19 @@ class PickleDataSet(AbstractVersionedDataSet):
         >>> reloaded = data_set.load()
         >>> assert data.equals(reloaded)
 
+        >>> # Add "compress_pickle[lz4]" to requirements.txt
+        >>> data_set = PickleDataSet(filepath="test.pickle.lz4",
+        >>>                          backend="compress_pickle",
+        >>>                          load_args={"compression":"lz4"},
+        >>>                          save_args={"compression":"lz4"})
+        >>> data_set.save(data)
+        >>> reloaded = data_set.load()
+        >>> assert data.equals(reloaded)
     """
 
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
-    BACKENDS = {"pickle": pickle, "joblib": joblib}
+    BACKENDS = {"pickle": pickle, "joblib": joblib, "compress_pickle": compress_pickle}
 
     # pylint: disable=too-many-arguments
     def __init__(

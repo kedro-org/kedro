@@ -337,15 +337,15 @@ def inconsistent_input_kwargs():
     [
         (
             inconsistent_input_size,
-            r"Inputs of function expected \[\'input1\'\], but got \[\'A\', \'B\'\]",
+            r"Inputs of function 'dummy_func_args' expected \[\'input1\'\], but got \[\'A\', \'B\'\]",
         ),
         (
             inconsistent_input_args,
-            r"Inputs of function expected \[\'args\'\], but got {\'a\': \'A\'}",
+            r"Inputs of function 'dummy_func_args' expected \[\'args\'\], but got {\'a\': \'A\'}",
         ),
         (
             inconsistent_input_kwargs,
-            r"Inputs of function expected \[\'kwargs\'\], but got A",
+            r"Inputs of function 'dummy_func_args' expected \[\'kwargs\'\], but got A",
         ),
     ],
 )

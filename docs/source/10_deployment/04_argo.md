@@ -8,7 +8,7 @@ We are interested in Argo Workflows, one of the 4 components of the Argo project
 
 Here are the main reasons to use Argo Workflows:
 
-- It is cloud agnostic and can run on any Kubernetes cluster
+- It is cloud-agnostic and can run on any Kubernetes cluster
 - It allows you to easily run and orchestrate compute intensive jobs in parallel on Kubernetes
 - It manages the dependencies between tasks using a directed acyclic graph (DAG)
 
@@ -19,22 +19,22 @@ To use Argo Workflows, make sure you have the following prerequisites in place:
 - Argo Workflows is [installed](https://github.com/argoproj/argo#quickstart) on your Kubernetes cluster
 - Argo CLI is [installed](https://github.com/argoproj/argo/releases) on you machine
 - A `name` attribute is set for each Kedro [node](/kedro.pipeline.node) since it is used to build a DAG
-- All node input/output DataSets must be configured in `catalog.yml` and refer to an external location (e.g. [AWS S3](../05_data/01_data_catalog.md#using-the-data-catalog-with-the-yaml-api)); you cannot use the `MemoryDataSet` either
+- All node input/output DataSets must be configured in `catalog.yml` and refer to an external location (e.g. [AWS S3](../05_data/01_data_catalog.md#using-the-data-catalog-with-the-yaml-api)); you cannot use the `MemoryDataSet` in your workflow
 > _Note:_ Each node will run in its own container.
 
 ## How to run your Kedro pipeline using Argo Workflows
 
-### Containerize your Kedro project
+### Containerise your Kedro project
 
 First, you need to containerise your Kedro project, using any preferred container solution (e.g. [`Docker`](https://www.docker.com/)), to build an image to use in Argo Workflows.
 
-For the purpose of this walk-through, we are going to assume a `Docker` workflow. We recommend the [`Kedro-Docker`](https://github.com/quantumblacklabs/kedro-docker) plugin to streamline the process, and [instructions are in the plugin's README.md](https://github.com/quantumblacklabs/kedro-docker/blob/master/README.md).
+For the purpose of this walk-through, we are going to assume a `Docker` workflow. We recommend the [`Kedro-Docker`](https://github.com/quantumblacklabs/kedro-docker) plugin to streamline the process. [Instructions for Kedro-Docker are in the plugin's README.md](https://github.com/quantumblacklabs/kedro-docker/blob/master/README.md).
 
 After you’ve built the Docker image for your project locally, [transfer the image to a container registry](./01_single_machine.md#how-to-use-container-registry).
 
 ### Create Argo Workflows spec
 
-In order to build Argo Workflows spec for your Kedro pipeline programmatically you can use the following Python script that should be stored in your project’s root directory:
+In order to build an Argo Workflows spec for your Kedro pipeline programmatically you can use the following Python script that should be stored in your project’s root directory:
 
 ```python
 # <project_root>/build_argo_spec.py
@@ -92,11 +92,11 @@ if __name__ == "__main__":
 
 The script accepts one required argument:
 
-- `image`: image transferred to the container registry,
+- `image`: image transferred to the container registry
 
-You can also specify two optional parameters:
+You can also specify two optional arguments:
 
-- `--pipeline`: pipeline name for which you want to build Argo Workflows spec
+- `--pipeline`: pipeline name for which you want to build an Argo Workflows spec
 - `--env`: Kedro configuration environment name, defaults to `local`
 
 Add the following Argo Workflows spec template to `<project_root>/templates/argo_spec.tmpl`:
@@ -160,7 +160,7 @@ spec:
       {% endfor %}
 ```
 
-> _Note:_ The `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` values should be stored in [Kubernetes Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) (an example Kubernetes Secrets spec is given below).
+> _Note:_ The `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` values should be stored in [Kubernetes Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) (an example Kubernetes Secrets spec is given [below](#submit-argo-workflows-spec-to-kubernetes)).
 
 The spec template is written with using [Jinja templating language](https://jinja.palletsprojects.com/en/2.11.x/) so you need to install the Jinja Python package:
 

@@ -261,37 +261,6 @@ us_corn_yield_data:
 
 > *Note:* When using [`pandas.SQLTableDataSet`](/kedro.extras.datasets.pandas.SQLTableDataSet) or [`pandas.SQLQueryDataSet`](/kedro.extras.datasets.pandas.SQLQueryDataSet) you must provide a database connection string. In the example above we pass it using `scooters_credentials` key from the credentials (see the details in [Feeding in credentials](#feeding-in-credentials) section below). `scooters_credentials` must have a top-level key `con` containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataSet` only).
 
-Example 14: Load data from Minio (S3 compatible Storage)
-
-Minio has a S3 Compatible API, if you have security concern, you may consider hosting the storage within your network.
-
-The easiest way to setup Minio is to run a docker.
-
-docker run -p 9000:9000 \
-  -e "MINIO_ACCESS_KEY=AKIAIOSFODNN7EXAMPLE" \
-  -e "MINIO_SECRET_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY" \
-  minio/minio server /data
-
-  You can then access Minio with http://localhost:9000, create bucket and add files like it is on S3.
-
-In your credentials.yml, you need to define the access key, token, and the endpoint_url
-```yaml
-dev_minio:
-  key: AKIAIOSFODNN7EXAMPLE # Assuming you use the default configuration
-  secret: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-  cleitn_kwargs:
-    endpoint_url : 'http://localhost:9000' # default for minio
-```
-
-Assume that you already have a bucket named "kedro-test" and a file "test.csv" get upload to the Minio server. You can simply define it in the Data Catalog and use it just like any other dataset.
-```yaml
-test:
-  type: pandas.CSVDataSet
-  filepath: s3://kedro-test/test.csv
-  credentials: dev_minio
-```
-
-Note that although the filepath use `s3`, it does not really mean your file is stored in s3, it simply tells kedro to use as a s3 endpoint. You should define the real URL in the `credentials` instead.
 
 ## Adding parameters
 
@@ -623,3 +592,32 @@ io.save("ranked", ranked)
 > *Note:* Saving `None` to a dataset is not allowed!
 
 # Using Minio (S3 API Compatible Storage) in Data Catalog
+Minio has a S3 Compatible API, if you have security concern, you may consider hosting the storage within your network.
+
+The easiest way to setup Minio is to run a docker.
+
+docker run -p 9000:9000 \
+  -e "MINIO_ACCESS_KEY=AKIAIOSFODNN7EXAMPLE" \
+  -e "MINIO_SECRET_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY" \
+  minio/minio server /data
+
+  You can then access Minio with http://localhost:9000, create bucket and add files like it is on S3.
+
+In your credentials.yml, you need to define the access key, token, and the endpoint_url
+```yaml
+dev_minio:
+  key: AKIAIOSFODNN7EXAMPLE # Assuming you use the default configuration
+  secret: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+  cleitn_kwargs:
+    endpoint_url : 'http://localhost:9000' # default for minio
+```
+
+Assume that you already have a bucket named "kedro-test" and a file "test.csv" get upload to the Minio server. You can simply define it in the Data Catalog and use it just like any other dataset.
+```yaml
+test:
+  type: pandas.CSVDataSet
+  filepath: s3://kedro-test/test.csv
+  credentials: dev_minio
+```
+
+Note that although the filepath use `s3`, it does not really mean your file is stored in s3, it simply tells kedro to use as a s3 endpoint. You should define the real URL in the `credentials` instead.

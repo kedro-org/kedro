@@ -18,7 +18,7 @@
 * Fixed `kedro install` for an Anaconda environment defined in `environment.yml`.
 * Fixed backwards compatibility with templates generated with older Kedro versions <0.16.5. No longer need to update `.kedro.yml` to use `kedro lint` and `kedro jupyter notebook convert`.
 * Improved documentation.
-* Add documentation using Minio with Kedro.
+* Added documentation using Minio with Kedro.
 
 ## Breaking changes to the API
 

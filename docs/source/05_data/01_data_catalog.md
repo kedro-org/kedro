@@ -35,6 +35,7 @@ The following prepends are available:
 - **Hadoop File System (HDFS)**: `hdfs://user@server:port/path/to/data` - Hadoop Distributed File System, for resilient, replicated files within a cluster.
 - **Amazon S3**: `s3://my-bucket-name/path/to/data` - Amazon S3 remote binary store, often used with Amazon EC2,
   using the library s3fs.
+- **S3 Compatible Storage**: `s3://my-bucket-name/path/_to/data` - e.g. Minio, using the s3fs library.
 - **Google Cloud Storage**: `gcs://` - Google Cloud Storage, typically used with Google Compute
   resource using gcsfs (in development).
 - **HTTP(s)**: ``http://`` or ``https://`` for reading data directly from HTTP web servers.
@@ -589,3 +590,34 @@ io.save("ranked", ranked)
 ```
 
 > *Note:* Saving `None` to a dataset is not allowed!
+
+# Using Minio (S3 API Compatible Storage) in Data Catalog
+Minio has a S3 Compatible API, if you have security concern, you may consider hosting the storage within your network.
+
+The easiest way to setup Minio is to run a docker.
+
+docker run -p 9000:9000 \
+  -e "MINIO_ACCESS_KEY=AKIAIOSFODNN7EXAMPLE" \
+  -e "MINIO_SECRET_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY" \
+  minio/minio server /data
+
+  You can then access Minio with http://localhost:9000, create bucket and add files like it is on S3.
+
+In your credentials.yml, you need to define the access key, token, and the endpoint_url
+```yaml
+dev_minio:
+  key: AKIAIOSFODNN7EXAMPLE # Assuming you use the default configuration
+  secret: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+  cleitn_kwargs:
+    endpoint_url : 'http://localhost:9000' # default for minio
+```
+
+Assume that you already have a bucket named "kedro-test" and a file "test.csv" get upload to the Minio server. You can simply define it in the Data Catalog and use it just like any other dataset.
+```yaml
+test:
+  type: pandas.CSVDataSet
+  filepath: s3://kedro-test/test.csv
+  credentials: dev_minio
+```
+
+Note that although the filepath use `s3`, it does not really mean your file is stored in s3, it simply tells kedro to use as a s3 endpoint. You should define the real URL in the `credentials` instead.

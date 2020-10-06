@@ -551,7 +551,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
                     func, follow_wrapped=False
                 ).parameters.keys()
                 raise TypeError(
-                    "Inputs of function '{}' expected {}, but got {}".format(
+                    "Inputs of '{}' expected {}, but got {}".format(
                         repr(func), str(list(func_args)), str(inputs)
                     )
                 ) from exc

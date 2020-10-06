@@ -3,8 +3,15 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+*  Bumped maximum required `fsspec` version to 0.8.
 
 ## Breaking changes to the API
+* `kedro.io.DataCatalog.exists()` returns `False` when the dataset does not exist, as opposed to raising an exception.
+* Bumped maximum supported `s3fs` version to 0.5 (`S3FileSystem` interface has changed since 0.4.1 version).
+* Deleted the deprecated `kedro.cli` and `kedro.context` modules in favor of `kedro.framework.cli` and `kedro.framework.context` respectively.
+* The pipeline-specific `catalog.yml` file is no longer automatically created for modular pipelines when doing `kedro pipeline create`.
+* Removed `include_examples` from `kedro new`. It has been replaced with Kedro starter.
+* Changed `--verbose` flag from a global command to a project-specific command flag (e.g `kedro --verbose new` becomes `kedro new --verbose`).
 
 ## Thanks for supporting contributions
 
@@ -22,7 +29,7 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Deepyaman Datta](https://github.com/deepyaman), [Bhavya Merchant](https://github.com/bnmerchant), [Lovkush Agarwal](https://github.com/Lovkush-A), [Varun Krishna S](https://github.com/vhawk19)
+[Deepyaman Datta](https://github.com/deepyaman), [Bhavya Merchant](https://github.com/bnmerchant), [Lovkush Agarwal](https://github.com/Lovkush-A), [Varun Krishna S](https://github.com/vhawk19), [Saran Balaji C](https://github.com/csaranbalaji)
 
 # Release 0.16.5
 

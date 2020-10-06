@@ -85,7 +85,7 @@ class TestCatalogListCommand:
             f"Error: fake pipeline not found! Existing "
             f"pipelines: {self.PIPELINE_NAME}\n"
         )
-        assert result.output == expected_output
+        assert expected_output in result.output
 
     def test_no_param_datasets_in_respose(
         self, fake_kedro_cli, fake_load_context, mocker

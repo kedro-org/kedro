@@ -63,7 +63,6 @@ def fake_repo_config_path(fake_root_dir):
         "project_name": "Test Project",
         "repo_name": _FAKE_REPO_NAME,
         "python_package": _FAKE_PACKAGE_NAME,
-        "include_example": True,
     }
     config_path = fake_root_dir / "repo_config.yml"
 
@@ -75,7 +74,7 @@ def fake_repo_config_path(fake_root_dir):
 
 @pytest.fixture(autouse=True, scope="session")
 def fake_repo(fake_repo_path: Path, fake_repo_config_path: Path):
-    _create_project(str(fake_repo_config_path), verbose=True)
+    _create_project(str(fake_repo_config_path))
 
     # NOTE: Here we load a couple of modules, as they would be imported in
     # the code and tests.

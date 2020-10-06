@@ -287,7 +287,7 @@ Assume that you already have a bucket named "kedro-test" and a file "test.csv" g
 ```yaml
 test:
   type: pandas.CSVDataSet
-  filepath: s3://kedro-test/test.csv
+  filepath: s3://your_bucket/test.csv
   credentials: dev_minio
 ```
 

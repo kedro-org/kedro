@@ -335,6 +335,7 @@ def inconsistent_input_kwargs():
 @pytest.mark.parametrize(
     "func, expected",
     [
+
         (
             inconsistent_input_size,
             r"Inputs of function 'identity' expected \[\'input1\'\], but got \[\'A\', \'B\'\]",
@@ -346,6 +347,10 @@ def inconsistent_input_kwargs():
         (
             inconsistent_input_kwargs,
             r"Inputs of function 'dummy_func_args' expected \[\'kwargs\'\], but got A",
+        ),
+        (
+            lambda : identity, ["A", "B",], ["C"],
+            r"Inputs of function '<lambda>' expected \[\'input1\'\], but got \[\'A\', \'B\'\]",
         ),
     ],
 )

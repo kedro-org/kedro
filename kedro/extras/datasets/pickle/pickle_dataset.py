@@ -28,8 +28,8 @@
 
 """``PickleDataSet`` loads/saves data from/to a Pickle file using an underlying
 filesystem (e.g.: local, S3, GCS). The underlying functionality is supported by
-the ``pickle`` and ``joblib`` libraries, so it supports all allowed options for
-loading and saving pickle files.
+the ``pickle``, ``joblib``, and ``compress_pickle`` libraries, so it supports
+all allowed options for loading and saving pickle files.
 """
 import pickle
 from copy import deepcopy

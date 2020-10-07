@@ -47,10 +47,16 @@ def filepath_pickle(tmp_path):
     return (tmp_path / "test.pkl").as_posix()
 
 
+@pytest.fixture(params=["pickle"])
+def backend(request):
+    return request.param
+
+
 @pytest.fixture
-def pickle_data_set(filepath_pickle, load_args, save_args, fs_args):
+def pickle_data_set(filepath_pickle, backend, load_args, save_args, fs_args):
     return PickleDataSet(
         filepath=filepath_pickle,
+        backend=backend,
         load_args=load_args,
         save_args=save_args,
         fs_args=fs_args,
@@ -70,6 +76,15 @@ def dummy_dataframe():
 
 
 class TestPickleDataSet:
+    @pytest.mark.parametrize(
+        "backend,load_args,save_args",
+        [
+            ("pickle", None, None),
+            ("joblib", None, None),
+            ("compress_pickle", {"compression": "lz4"}, {"compression": "lz4"}),
+        ],
+        indirect=True,
+    )
     def test_save_and_load(self, pickle_data_set, dummy_dataframe):
         """Test saving and reloading the data set."""
         pickle_data_set.save(dummy_dataframe)

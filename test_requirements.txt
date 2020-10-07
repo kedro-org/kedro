@@ -4,6 +4,7 @@ bandit>=1.6.2, <2.0
 behave==1.2.6
 biopython~=1.73
 black==v19.10.b0
+compress-pickle[lz4]~=1.2.0
 dask[complete]~=2.6
 flake8~=3.5
 gcsfs>=0.3.0, <0.7.0 # gcsfs 0.7.0 requires fsspec>=0.8.0, but we pin fsspec <0.7.0

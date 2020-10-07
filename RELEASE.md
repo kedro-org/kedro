@@ -18,7 +18,7 @@
 * Fixed `kedro install` for an Anaconda environment defined in `environment.yml`.
 * Fixed backwards compatibility with templates generated with older Kedro versions <0.16.5. No longer need to update `.kedro.yml` to use `kedro lint` and `kedro jupyter notebook convert`.
 * Improved documentation.
-* Added compress_pickle support to PickleDataSet.
+* Added support for `compress_pickle` backend to `PickleDataSet`.
 
 ## Breaking changes to the API
 

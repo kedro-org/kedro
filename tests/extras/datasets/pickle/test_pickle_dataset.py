@@ -163,7 +163,10 @@ class TestPickleDataSet:
             pickle_data_set.save(dummy_dataframe)
 
     def test_invalid_backend(self):
-        pattern = r"'backend' should be one of \['pickle', 'joblib', 'compress_pickle'\], got 'invalid'\."  # pylint: disable=line-too-long
+        pattern = (
+            r"'backend' should be one of \['pickle', 'joblib', 'compress_pickle'\], "
+            r"got 'invalid'\."
+        )
         with pytest.raises(ValueError, match=pattern):
             PickleDataSet(filepath="test.pkl", backend="invalid")
 

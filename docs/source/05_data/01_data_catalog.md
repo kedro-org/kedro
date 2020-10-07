@@ -398,7 +398,7 @@ Transformers are used to intercept the load and save operations on Kedro `DataSe
 
  - Data validation
  - Tracking operation performance
- - Data format conversion (although we would recommend [Transcoding](../05_data/01_data_catalog#transcoding-datasets) for this)
+ - Data format conversion (although we would recommend [Transcoding](#transcoding-datasets) for this)
 
 ### Applying built-in transformers
 

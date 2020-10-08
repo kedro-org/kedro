@@ -550,9 +550,17 @@ class Node:  # pylint: disable=too-many-instance-attributes
                 func_args = inspect.signature(
                     func, follow_wrapped=False
                 ).parameters.keys()
+                try:
+                    func_name = func.__name__
+                except AttributeError:
+                    func_name = repr(func)
+
+                if "functools.partial" in func_name:
+                    func_name = "<partial>"
+
                 raise TypeError(
                     "Inputs of '{}' expected {}, but got {}".format(
-                        repr(func), str(list(func_args)), str(inputs)
+                        func_name, str(list(func_args)), str(inputs)
                     )
                 ) from exc
 

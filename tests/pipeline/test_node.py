@@ -359,17 +359,15 @@ def partial_inconsistent_input_size():
         (
             inconsistent_input_args,
             (
-                r"Inputs of '"
-                r"<function inconsistent_input_args.<locals>.dummy_func_args"
-                r" at .*>' expected \[\'kwargs\'\], but got A"
+                r"Inputs of '<function dummy_func_args at .*>' "
+                r"expected \[\'args\'\], but got {\'a\': \'A\'}"
             ),
         ),
         (
             inconsistent_input_kwargs,
             (
-                r"Inputs of '"
-                r"<function inconsistent_input_kwargs.<locals>.dummy_func_args"
-                r" at .*>' expected \[\'kwargs\'\], but got A"
+                r"Inputs of '<function dummy_func_args at .*>' "
+                r"expected \[\'kwargs\'\], but got A"
             ),
         ),
         (

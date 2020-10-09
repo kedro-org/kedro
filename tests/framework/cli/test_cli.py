@@ -61,17 +61,17 @@ def stub_command():
 
 
 @forward_command(stub_cli, name="forwarded_command")
-def forwarded_command(args):
+def forwarded_command(args, **kwargs):  # pylint: disable=unused-argument
     print("fred", args)
 
 
 @forward_command(stub_cli, name="forwarded_help", forward_help=True)
-def forwarded_help(args):
+def forwarded_help(args, **kwargs):  # pylint: disable=unused-argument
     print("fred", args)
 
 
 @forward_command(stub_cli)
-def unnamed(args):
+def unnamed(args, **kwargs):  # pylint: disable=unused-argument
     print("fred", args)
 
 
@@ -418,8 +418,9 @@ class TestEntryPoints:
 
     def test_project_error_is_caught(self, entry_points, entry_point):
         entry_point.load.side_effect = Exception()
-        groups = load_entry_points("project")
-        assert groups == []
+        with raises(KedroCliError, match="Loading project commands"):
+            load_entry_points("project")
+
         entry_points.assert_called_once_with(group="kedro.project_commands")
 
     def test_global_groups(self, entry_points, entry_point):
@@ -430,8 +431,8 @@ class TestEntryPoints:
 
     def test_global_error_is_caught(self, entry_points, entry_point):
         entry_point.load.side_effect = Exception()
-        groups = load_entry_points("global")
-        assert groups == []
+        with raises(KedroCliError, match="Loading global commands from"):
+            load_entry_points("global")
         entry_points.assert_called_once_with(group="kedro.global_commands")
 
     def test_init(self, entry_points, entry_point):
@@ -441,5 +442,6 @@ class TestEntryPoints:
 
     def test_init_error_is_caught(self, entry_points, entry_point):
         entry_point.load.side_effect = Exception()
-        _init_plugins()
+        with raises(KedroCliError, match="Initializing"):
+            _init_plugins()
         entry_points.assert_called_once_with(group="kedro.init")

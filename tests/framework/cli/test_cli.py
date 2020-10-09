@@ -30,7 +30,7 @@ from pathlib import Path
 
 import click
 from mock import patch
-from pytest import fixture, mark, raises, warns
+from pytest import fixture, mark, raises
 
 from kedro import __version__ as version
 from kedro.framework.cli import get_project_context
@@ -332,29 +332,6 @@ class TestCliUtils:
 
 @mark.usefixtures("mocked_load_context")
 class TestGetProjectContext:
-    def _deprecation_msg(self, key):
-        msg_dict = {
-            "get_config": ["config_loader", "ConfigLoader"],
-            "create_catalog": ["catalog", "DataCatalog"],
-            "create_pipeline": ["pipeline", "Pipeline"],
-            "template_version": ["project_version", None],
-            "project_name": ["project_name", None],
-            "project_path": ["project_path", None],
-        }
-        attr, obj_name = msg_dict[key]
-        msg = r"\`get_project_context\(\"{}\"\)\` is now deprecated\. ".format(key)
-        if obj_name:
-            msg += (
-                r"This is still returning a function that returns \`{}\` "
-                r"instance\, however passed arguments have no effect anymore "
-                r"since Kedro 0.15.0\. ".format(obj_name)
-            )
-        msg += (
-            r"Please get \`KedroContext\` instance by calling "
-            r"\`get_project_context\(\)\` and use its \`{}\` attribute\.".format(attr)
-        )
-        return msg
-
     def test_get_context_without_project_path(self, mocked_load_context):
         dummy_context = get_project_context("context")
         mocked_load_context.assert_called_once_with(Path.cwd())
@@ -365,45 +342,6 @@ class TestGetProjectContext:
         dummy_context = get_project_context("context", project_path=dummy_project_path)
         mocked_load_context.assert_called_once_with(dummy_project_path)
         assert isinstance(dummy_context, DummyContext)
-
-    def test_get_config(self, tmp_path):
-        key = "get_config"
-        pattern = self._deprecation_msg(key)
-        with warns(DeprecationWarning, match=pattern):
-            config_loader = get_project_context(key)
-            assert config_loader(tmp_path) == "config_loader"
-
-    def test_create_catalog(self):
-        key = "create_catalog"
-        pattern = self._deprecation_msg(key)
-        with warns(DeprecationWarning, match=pattern):
-            catalog = get_project_context(key)
-            assert catalog("config") == "catalog"
-
-    def test_create_pipeline(self):
-        key = "create_pipeline"
-        pattern = self._deprecation_msg(key)
-        with warns(DeprecationWarning, match=pattern):
-            pipeline = get_project_context(key)
-            assert pipeline() == "pipeline"
-
-    def test_template_version(self):
-        key = "template_version"
-        pattern = self._deprecation_msg(key)
-        with warns(DeprecationWarning, match=pattern):
-            assert get_project_context(key) == "dummy_version"
-
-    def test_project_name(self):
-        key = "project_name"
-        pattern = self._deprecation_msg(key)
-        with warns(DeprecationWarning, match=pattern):
-            assert get_project_context(key) == "dummy_name"
-
-    def test_project_path(self):
-        key = "project_path"
-        pattern = self._deprecation_msg(key)
-        with warns(DeprecationWarning, match=pattern):
-            assert get_project_context(key) == "dummy_path"
 
     def test_verbose(self):
         assert not get_project_context("verbose")

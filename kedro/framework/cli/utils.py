@@ -44,8 +44,6 @@ from typing import Iterable, List, Sequence, Tuple, Union
 
 import click
 
-from kedro.framework.context import get_static_project_data
-
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 MAX_SUGGESTIONS = 3
 CUTOFF = 0.5
@@ -284,23 +282,6 @@ def _filter_deprecation_warnings():
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=DeprecationWarning)
         yield
-
-
-def get_source_dir(project_path: Path) -> Path:
-    """Returns project source path.
-
-    Args:
-        project_path: The path to the project root.
-
-    Returns:
-        The absolute path to the project source directory.
-    """
-    warnings.warn(
-        "This function is now deprecated and will be removed in Kedro 0.17.0.",
-        DeprecationWarning,
-    )
-
-    return get_static_project_data(project_path)["source_dir"]
 
 
 def _check_module_importable(module_name: str) -> None:

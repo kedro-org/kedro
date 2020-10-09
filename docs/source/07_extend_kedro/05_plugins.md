@@ -57,19 +57,9 @@ The `click Group` will be merged into the main CLI Group. In the process, the op
 
 While running, plugins may request information about the current project by calling `kedro.framework.cli.get_project_context()`.
 
-This function provides access to the verbose flag via the key `verbose` and to anything returned by the project's `KedroContext`. The returned instance of `ProjectContext(KedroContext)` class must contain at least the following properties and methods:
+This function provides access to the verbose flag via the key `verbose` and to the project's `KedroContext` object.
 
-* `project_version`: the version of Kedro the project was created with, or `None` if the project was not created with `kedro new`.
-* `project_path`: the path to the directory where either `.kedro.yml` or `pyproject.toml` is located.
-* `config_loader`: an instance of `kedro.config.ConfigLoader`.
-* `catalog`: an instance of `kedro.io.DataCatalog`.
-* `pipeline`: an instance of `kedro.pipeline.Pipeline`.
-
-
-Plugins may require additional keys to be added to `ProjectContext` in `run.py`.
-
-
-> *Note:* `kedro.framework.cli.get_project_context(key)`, where `key` is `get_config`, `create_catalog`, `create_pipeline`, `template_version`, `project_name` and `project_path`, is deprecated as of `Kedro 0.15.0`, and will be removed for future versions.
+> *Note:* The `load_context()` can be used instead of using `get_project_context()` to get project's `KedroContext` object.
 
 ## Initialisation
 

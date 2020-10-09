@@ -31,7 +31,7 @@ underlying dataset definition. It also uses `fsspec` for filesystem level operat
 """
 import operator
 from copy import deepcopy
-from typing import Any, Callable, Dict, List, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Type, Union
 from urllib.parse import urlparse
 from warnings import warn
 
@@ -130,8 +130,6 @@ class PartitionedDataSet(AbstractDataSet):
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.filesystem
                 and the dataset initializer. If the dataset config contains
                 explicit credentials spec, then such spec will take precedence.
-                **Note:** ``dataset_credentials`` key has now been deprecated
-                and should not be specified.
                 All possible credentials management scenarios are documented here:
                 https://kedro.readthedocs.io/en/stable/04_user_guide/08_advanced_io.html#partitioned-dataset-credentials
             load_args: Keyword arguments to be passed into ``find()`` method of
@@ -160,8 +158,7 @@ class PartitionedDataSet(AbstractDataSet):
                 )
             )
 
-        self._credentials, dataset_credentials = _split_credentials(credentials)
-        if dataset_credentials:
+        if credentials:
             if CREDENTIALS_KEY in self._dataset_config:
                 self._logger.warning(
                     "Top-level credentials will not propagate into the "
@@ -169,7 +166,9 @@ class PartitionedDataSet(AbstractDataSet):
                     "defined in the dataset config."
                 )
             else:
-                self._dataset_config[CREDENTIALS_KEY] = dataset_credentials
+                self._dataset_config[CREDENTIALS_KEY] = deepcopy(credentials)
+
+        self._credentials = deepcopy(credentials) or {}
 
         self._filepath_arg = filepath_arg
         if self._filepath_arg in self._dataset_config:
@@ -273,23 +272,6 @@ class PartitionedDataSet(AbstractDataSet):
     def _release(self) -> None:
         super()._release()
         self._invalidate_caches()
-
-
-def _split_credentials(
-    credentials: Union[Dict[str, Any], None]
-) -> Tuple[Dict[str, Any], Any]:
-    credentials = deepcopy(credentials) or {}
-    if DATASET_CREDENTIALS_KEY in credentials:
-        warn(
-            "Support for `{}` key in the credentials is now deprecated and will be "
-            "removed in the next version. Please specify the dataset credentials "
-            "explicitly inside the dataset config.".format(DATASET_CREDENTIALS_KEY),
-            DeprecationWarning,
-        )
-        dataset_credentials = credentials.pop(DATASET_CREDENTIALS_KEY)
-    else:
-        dataset_credentials = deepcopy(credentials)
-    return credentials, dataset_credentials
 
 
 class IncrementalDataSet(PartitionedDataSet):

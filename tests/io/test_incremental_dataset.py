@@ -295,11 +295,8 @@ class TestIncrementalDataSetLocal:
             ),
             (
                 {
-                    "dataset": DATASET,
-                    "credentials": {
-                        "cred": "common",
-                        "dataset_credentials": {"ds": "only"},
-                    },
+                    "dataset": {"type": DATASET, "credentials": {"ds": "only"}},
+                    "credentials": {"cred": "common"},
                 },
                 {"cred": "common"},
                 {"ds": "only"},
@@ -317,8 +314,7 @@ class TestIncrementalDataSetLocal:
             ),
             (
                 {
-                    "dataset": DATASET,
-                    "credentials": {"dataset_credentials": {"ds": "only"}},
+                    "dataset": {"type": DATASET, "credentials": {"ds": "only"}},
                     "checkpoint": {"credentials": {"cp": "only"}},
                 },
                 {},

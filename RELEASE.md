@@ -12,6 +12,9 @@
 * The pipeline-specific `catalog.yml` file is no longer automatically created for modular pipelines when doing `kedro pipeline create`.
 * Removed `include_examples` from `kedro new`. It has been replaced with Kedro starter.
 * Changed `--verbose` flag from a global command to a project-specific command flag (e.g `kedro --verbose new` becomes `kedro new --verbose`).
+* Dropped support of `dataset_credentials` key in credentials in PartitionedDataSet.
+* `get_source_dir()` was removed from `kedro/framework/cli/utils.py`.
+* Dropped support of `get_config`, `create_catalog`, `create_pipeline`, `template_version`, `project_name` and `project_path` keys by `get_project_context()` function (`kedro/framework/cli/cli.py`).
 
 ## Thanks for supporting contributions
 

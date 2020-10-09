@@ -34,7 +34,6 @@ import importlib
 import os
 import re
 import sys
-import warnings
 import webbrowser
 from collections import defaultdict
 from copy import deepcopy
@@ -554,48 +553,11 @@ def get_project_context(
         KedroCliError: When the key is not found and the default value was not
             specified.
     """
-
-    def _deprecation_msg(key):
-        msg_dict = {
-            "get_config": ["config_loader", "ConfigLoader"],
-            "create_catalog": ["catalog", "DataCatalog"],
-            "create_pipeline": ["pipeline", "Pipeline"],
-            "template_version": ["project_version", None],
-            "project_name": ["project_name", None],
-            "project_path": ["project_path", None],
-        }
-        attr, obj_name = msg_dict[key]
-        msg = '`get_project_context("{}")` is now deprecated. '.format(key)
-        if obj_name:
-            msg += (
-                "This is still returning a function that returns `{}` "
-                "instance, however passed arguments have no effect anymore "
-                "since Kedro 0.15.0. ".format(obj_name)
-            )
-        msg += (
-            "Please get `KedroContext` instance by calling `get_project_context()` "
-            "and use its `{}` attribute.".format(attr)
-        )
-
-        return msg
-
     project_path = project_path or Path.cwd()
     context = load_context(project_path, **kwargs)
     # Dictionary to be compatible with existing Plugins. Future plugins should
     # retrieve necessary Kedro project properties from context
-    value = {
-        "context": context,
-        "get_config": lambda project_path, env=None, **kw: context.config_loader,
-        "create_catalog": lambda config, **kw: context.catalog,
-        "create_pipeline": lambda **kw: context.pipeline,
-        "template_version": context.project_version,
-        "project_name": context.project_name,
-        "project_path": context.project_path,
-        "verbose": KedroCliError.VERBOSE_ERROR,
-    }[key]
-
-    if key not in ("verbose", "context"):
-        warnings.warn(_deprecation_msg(key), DeprecationWarning)
+    value = {"context": context, "verbose": KedroCliError.VERBOSE_ERROR}[key]
 
     return deepcopy(value)
 

@@ -11,7 +11,7 @@ The following sections are a guide on how to deploy a Kedro project to AWS Batch
 
 To use AWS Batch, make sure you have the following prerequisites in place:
 
-- An AWS account set up.
+- An [AWS account set up](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/).
 - A `name` attribute is set for each Kedro [node](/kedro.pipeline.node). Each node will run in its own Batch job, so having sensible node names will make it easier to `kedro run --node <node_name>`.
 - All node input/output `DataSets` must be configured in `catalog.yml` and refer to an external location (e.g. [AWS S3](../05_data/01_data_catalog.md#using-the-data-catalog-with-the-yaml-api)). A clean way to do this is to create a new configuration environment `conf/aws_batch` containing a `catalog.yml` file with the appropriate configuration, as illustrated below.
 

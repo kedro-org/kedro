@@ -235,6 +235,16 @@ class TestPartitionedDataSetLocal:
 
         _assert_not_in_repr(credentials)
 
+    def test_fs_args(self, mocker):
+        fs_args = {"foo": "bar"}
+
+        mocked_filesystem = mocker.patch("fsspec.filesystem")
+        path = str(Path.cwd())
+        PartitionedDataSet(path, "pandas.CSVDataSet", fs_args=fs_args)
+
+        assert mocked_filesystem.call_count == 2
+        mocked_filesystem.assert_called_with("file", **fs_args)
+
     @pytest.mark.parametrize("dataset", ["pandas.ParquetDataSet", ParquetDataSet])
     def test_invalid_dataset(self, dataset, local_csvs):
         pds = PartitionedDataSet(str(local_csvs), dataset)

@@ -275,7 +275,7 @@ dev_minio:
   key: token
   secret: key
   cleitn_kwargs:
-    endpoint_url : 'http://localhost:9000' 
+    endpoint_url : 'http://localhost:9000'
 ```
 > Note: The easiest way to setup Minio is to run a docker. After the following command, you can access to Minio server with http://localhost:9000 and create a bucket and add files as if it is on S3.
 

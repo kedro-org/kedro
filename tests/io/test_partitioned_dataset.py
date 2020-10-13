@@ -38,6 +38,7 @@ from pandas.util.testing import assert_frame_equal
 from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
 from kedro.io import DataSetError, PartitionedDataSet
 from kedro.io.data_catalog import CREDENTIALS_KEY
+from kedro.io.partitioned_data_set import KEY_PROPAGATION_WARNING
 
 
 @pytest.fixture
@@ -340,11 +341,10 @@ class TestPartitionedDataSetLocal:
             dataset={"type": CSVDataSet, "credentials": {"secret": "dataset"}},
             credentials={"secret": "global"},
         )
-        log_message = (
-            "Top-level credentials will not propagate into the "
-            "underlying dataset since credentials were explicitly "
-            "defined in the underlying dataset config."
-        )
+        log_message = KEY_PROPAGATION_WARNING % {
+            "keys": "credentials",
+            "target": "underlying dataset",
+        }
         assert caplog.record_tuples == [("kedro.io.core", logging.WARNING, log_message)]
         assert pds._dataset_config["credentials"] == {"secret": "dataset"}
 
@@ -356,11 +356,10 @@ class TestPartitionedDataSetLocal:
             dataset={"type": CSVDataSet, "fs_args": {"args": "dataset"}},
             fs_args={"args": "dataset"},
         )
-        log_message = (
-            "Top-level filesystem arguments will not propagate into the "
-            "underlying dataset since filesystem arguments were explicitly "
-            "defined in the underlying dataset config."
-        )
+        log_message = KEY_PROPAGATION_WARNING % {
+            "keys": "filesystem arguments",
+            "target": "underlying dataset",
+        }
         assert caplog.record_tuples == [("kedro.io.core", logging.WARNING, log_message)]
         assert pds._dataset_config["fs_args"] == {"args": "dataset"}
 

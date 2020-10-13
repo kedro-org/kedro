@@ -51,8 +51,8 @@ DATASET_CREDENTIALS_KEY = "dataset_credentials"
 CHECKPOINT_CREDENTIALS_KEY = "checkpoint_credentials"
 
 KEY_PROPAGATION_WARNING = (
-    "Top-level {keys} will not propagate into the {target} since "
-    "{keys} were explicitly defined in the {target} config."
+    "Top-level %(keys)s will not propagate into the %(target)s since "
+    "%(keys)s were explicitly defined in the %(target)s config."
 )
 
 S3_PROTOCOLS = ("s3", "s3a", "s3n")
@@ -172,9 +172,8 @@ class PartitionedDataSet(AbstractDataSet):
         if dataset_credentials:
             if CREDENTIALS_KEY in self._dataset_config:
                 self._logger.warning(
-                    KEY_PROPAGATION_WARNING.format(  # pylint: disable=logging-format-interpolation
-                        keys=CREDENTIALS_KEY, target="underlying dataset"
-                    )
+                    KEY_PROPAGATION_WARNING,
+                    {"keys": CREDENTIALS_KEY, "target": "underlying dataset"},
                 )
             else:
                 self._dataset_config[CREDENTIALS_KEY] = dataset_credentials
@@ -183,9 +182,8 @@ class PartitionedDataSet(AbstractDataSet):
         if self._fs_args:
             if "fs_args" in self._dataset_config:
                 self._logger.warning(
-                    KEY_PROPAGATION_WARNING.format(  # pylint: disable=logging-format-interpolation
-                        keys="filesystem arguments", target="underlying dataset"
-                    )
+                    KEY_PROPAGATION_WARNING,
+                    {"keys": "filesystem arguments", "target": "underlying dataset"},
                 )
             else:
                 self._dataset_config["fs_args"] = deepcopy(self._fs_args)
@@ -458,9 +456,8 @@ class IncrementalDataSet(PartitionedDataSet):
 
         if CREDENTIALS_KEY in default_config.keys() & checkpoint_config.keys():
             self._logger.warning(
-                KEY_PROPAGATION_WARNING.format(  # pylint: disable=logging-format-interpolation
-                    keys=CREDENTIALS_KEY, target="checkpoint"
-                )
+                KEY_PROPAGATION_WARNING,
+                {"keys": CREDENTIALS_KEY, "target": "checkpoint"},
             )
 
         return {**default_config, **checkpoint_config}

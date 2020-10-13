@@ -13,6 +13,8 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* `PartitionedDataSet` improvements:
+  - Supported passing arguments to the underlying filesystem.
 * Improved handling of non-ASCII word characters in dataset names.
   - For example, a dataset named `jalapeño` will be accessible as `DataCatalog.datasets.jalapeño` rather than `DataCatalog.datasets.jalape__o`.
 * Fixed `kedro install` for an Anaconda environment defined in `environment.yml`.
@@ -128,17 +130,17 @@ package_name: "<your_package_name>"
 * Added the `kedro pipeline package` command to help package up a modular pipeline. It will bundle up the pipeline source code, tests, and parameters configuration into a .whl file.
 
 ## Bug fixes and other changes
-* Improvement in `DataCatalog`:
+* `DataCatalog` improvements:
   - Introduced regex filtering to the `DataCatalog.list()` method.
   - Non-alphanumeric characters (except underscore) in dataset name are replaced with `__` in `DataCatalog.datasets`, for ease of access to transcoded datasets.
-* Improvement in Datasets:
+* Dataset improvements:
   - Improved initialization speed of `spark.SparkHiveDataSet`.
   - Improved S3 cache in `spark.SparkDataSet`.
   - Added support of options for building `pyarrow` table in `pandas.ParquetDataSet`.
-* Improvement in `kedro build-reqs` CLI command:
+* `kedro build-reqs` CLI command improvements:
   - `kedro build-reqs` is now called with `-q` option and will no longer print out compiled requirements to the console for security reasons.
   - All unrecognized CLI options in `kedro build-reqs` command are now passed to [pip-compile](https://github.com/jazzband/pip-tools#example-usage-for-pip-compile) call (e.g. `kedro build-reqs --generate-hashes`).
-* Improvement in `kedro jupyter` CLI command:
+* `kedro jupyter` CLI command improvements:
   - Improved error message when running `kedro jupyter notebook`, `kedro jupyter lab` or `kedro ipython` with Jupyter/IPython dependencies not being installed.
   - Fixed `%run_viz` line magic for showing kedro viz inside a Jupyter notebook. For the fix to be applied on existing Kedro project, please see the migration guide.
   - Fixed the bug in IPython startup script ([issue 298](https://github.com/quantumblacklabs/kedro/issues/298)).

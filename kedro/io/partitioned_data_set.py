@@ -50,6 +50,11 @@ from kedro.utils import load_obj
 DATASET_CREDENTIALS_KEY = "dataset_credentials"
 CHECKPOINT_CREDENTIALS_KEY = "checkpoint_credentials"
 
+KEY_PROPAGATION_WARNING = (
+    "Top-level {keys} will not propagate into the {target} since "
+    "{keys} were explicitly defined in the {target} config."
+)
+
 S3_PROTOCOLS = ("s3", "s3a", "s3n")
 
 
@@ -163,18 +168,27 @@ class PartitionedDataSet(AbstractDataSet):
                 )
             )
 
-        self._fs_args = deepcopy(fs_args) or {}
-
         self._credentials, dataset_credentials = _split_credentials(credentials)
         if dataset_credentials:
             if CREDENTIALS_KEY in self._dataset_config:
                 self._logger.warning(
-                    "Top-level credentials will not propagate into the "
-                    "underlying dataset since credentials were explicitly "
-                    "defined in the dataset config."
+                    KEY_PROPAGATION_WARNING.format(  # pylint: disable=logging-format-interpolation
+                        keys=CREDENTIALS_KEY, target="underlying dataset"
+                    )
                 )
             else:
                 self._dataset_config[CREDENTIALS_KEY] = dataset_credentials
+
+        self._fs_args = deepcopy(fs_args) or {}
+        if self._fs_args:
+            if "fs_args" in self._dataset_config:
+                self._logger.warning(
+                    KEY_PROPAGATION_WARNING.format(  # pylint: disable=logging-format-interpolation
+                        keys="filesystem arguments", target="underlying dataset"
+                    )
+                )
+            else:
+                self._dataset_config["fs_args"] = deepcopy(self._fs_args)
 
         self._filepath_arg = filepath_arg
         if self._filepath_arg in self._dataset_config:
@@ -444,8 +458,9 @@ class IncrementalDataSet(PartitionedDataSet):
 
         if CREDENTIALS_KEY in default_config.keys() & checkpoint_config.keys():
             self._logger.warning(
-                "Top-level credentials will not propagate into the checkpoint since "
-                "credentials were explicitly defined in the checkpoint config."
+                KEY_PROPAGATION_WARNING.format(  # pylint: disable=logging-format-interpolation
+                    keys=CREDENTIALS_KEY, target="checkpoint"
+                )
             )
 
         return {**default_config, **checkpoint_config}

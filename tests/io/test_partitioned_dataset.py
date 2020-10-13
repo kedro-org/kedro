@@ -240,10 +240,11 @@ class TestPartitionedDataSetLocal:
 
         mocked_filesystem = mocker.patch("fsspec.filesystem")
         path = str(Path.cwd())
-        PartitionedDataSet(path, "pandas.CSVDataSet", fs_args=fs_args)
+        pds = PartitionedDataSet(path, "pandas.CSVDataSet", fs_args=fs_args)
 
         assert mocked_filesystem.call_count == 2
         mocked_filesystem.assert_called_with("file", **fs_args)
+        assert pds._dataset_config["fs_args"] == fs_args
 
     @pytest.mark.parametrize("dataset", ["pandas.ParquetDataSet", ParquetDataSet])
     def test_invalid_dataset(self, dataset, local_csvs):
@@ -340,11 +341,28 @@ class TestPartitionedDataSetLocal:
             credentials={"secret": "global"},
         )
         log_message = (
-            "Top-level credentials will not propagate into the underlying dataset "
-            "since credentials were explicitly defined in the dataset config."
+            "Top-level credentials will not propagate into the "
+            "underlying dataset since credentials were explicitly "
+            "defined in the underlying dataset config."
         )
         assert caplog.record_tuples == [("kedro.io.core", logging.WARNING, log_message)]
         assert pds._dataset_config["credentials"] == {"secret": "dataset"}
+
+    def test_fs_args_log_warning(self, caplog):
+        """Check that the warning is logged if the dataset filesystem
+        arguments will overwrite the top-level ones"""
+        pds = PartitionedDataSet(
+            path=str(Path.cwd()),
+            dataset={"type": CSVDataSet, "fs_args": {"args": "dataset"}},
+            fs_args={"args": "dataset"},
+        )
+        log_message = (
+            "Top-level filesystem arguments will not propagate into the "
+            "underlying dataset since filesystem arguments were explicitly "
+            "defined in the underlying dataset config."
+        )
+        assert caplog.record_tuples == [("kedro.io.core", logging.WARNING, log_message)]
+        assert pds._dataset_config["fs_args"] == {"args": "dataset"}
 
     @pytest.mark.parametrize(
         "pds_config,expected_dataset_creds",

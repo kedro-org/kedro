@@ -163,6 +163,105 @@ disable_hooks_for_plugins=["<plugin_name>", ]
 
 where `<plugin_name>` is the name of an installed plugin for which the auto-registered Hooks must be disabled.
 
+## Common use cases
+
+### Use Hooks to extend a node's behaviour
+
+Prior to Kedro 0.16, to add extra behaviour before and after a node's execution, we recommended using [decorators](./03_decorators.md) on individual nodes. We also exposed a convenience method to apply decorators to [all nodes in a `Pipeline`](./03_decorators.md#how-to-apply-a-decorator-to-nodes).
+
+However, after the introduction of Hooks in 0.16, this capability is readily available through the [`before_node_run` and `after_node_run` Hooks](/kedro.framework.hooks#node-hooks). Furthermore, you can apply extra behaviour to not only an individual node or an entire Kedro pipeline, but also to a _subset_ of nodes based on their tags or namespaces. For example, let's say we want to add the following extra behaviours to a node:
+
+```python
+from kedro.pipeline.node import Node
+
+def say_hello(node: Node):
+    """An extra behaviour for a node to say hello before running.
+    """
+    print(f"Hello from {node.name}")
+```
+
+Then you can either add it to a single node based on the node's name:
+
+```python
+# <your_project>/src/<your_project>/hooks.py
+
+from kedro.framework.hooks import hook_impl
+from kedro.pipeline.node import Node
+
+
+class ProjectHooks:
+
+    @hook_impl
+    def before_node_run(self, node: Node):
+        # adding extra behaviour to a single node
+        if node.name == "hello":
+            say_hello(node)
+```
+
+Or add it to a group of nodes based on their tags:
+
+
+```python
+# <your_project>/src/<your_project>/hooks.py
+
+from kedro.framework.hooks import hook_impl
+from kedro.pipeline.node import Node
+
+
+class ProjectHooks:
+
+    @hook_impl
+    def before_node_run(self, node: Node):
+        if "hello" in node.tags:
+            say_hello(node)
+```
+
+Or add it to all nodes in the entire pipeline:
+
+```python
+# <your_project>/src/<your_project>/hooks.py
+
+from kedro.framework.hooks import hook_impl
+from kedro.pipeline.node import Node
+
+
+class ProjectHooks:
+
+    @hook_impl
+    def before_node_run(self, node: Node):
+        # adding extra behaviour to all nodes in the pipeline
+        say_hello(node)
+```
+
+If your use case takes advantage of a decorator, for example to retry a node's execution using a library such as [tenacity](https://tenacity.readthedocs.io/en/latest/), you can still decorate the node's function directly:
+
+```python
+from tenacity import retry
+
+@retry
+def my_flaky_node_function():
+    ...
+```
+
+Or applying it in the `before_node_run` Hook as follows:
+
+```python
+# <your_project>/src/<your_project>/hooks.py
+from tenacity import retry
+
+from kedro.framework.hooks import hook_impl
+from kedro.pipeline.node import Node
+
+
+class ProjectHooks:
+
+    @hook_impl
+    def before_node_run(self, node: Node):
+        # adding retrying behaviour to nodes tagged as flaky
+        if "flaky" in node.tags:
+            node.func = retry(node.func)
+```
+
 ## Under the hood
 
 Under the hood, we use [pytest's pluggy](https://pluggy.readthedocs.io/en/latest/) to implement Kedro's Hook mechanism. We recommend reading their documentation if you have more questions about the underlying implementation.

@@ -15,6 +15,7 @@
 * Dropped support of `dataset_credentials` key in credentials in PartitionedDataSet.
 * `get_source_dir()` was removed from `kedro/framework/cli/utils.py`.
 * Dropped support of `get_config`, `create_catalog`, `create_pipeline`, `template_version`, `project_name` and `project_path` keys by `get_project_context()` function (`kedro/framework/cli/cli.py`).
+* Added a `DeprecationWarning` to the decorator API for both `node` and `pipeline`. Added documentation to recommend using Hooks for extending node's behavior instead.
 
 ## Thanks for supporting contributions
 

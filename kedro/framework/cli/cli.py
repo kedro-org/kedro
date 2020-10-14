@@ -41,6 +41,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List
 
 import click
+import git
 import pkg_resources
 import yaml
 
@@ -243,13 +244,14 @@ def _create_project(
             https://cookiecutter.readthedocs.io/en/latest/usage.html#generate-your-project
         checkout: The tag, branch or commit in the starter repository to checkout.
             Maps directly to cookiecutter's --checkout argument.
-            If the value is invalid, cookiecutter will use the default branch.
+            If the value is not provided, cookiecutter will use the installed Kedro version
+            by default.
     Raises:
         KedroCliError: If it fails to generate a project.
     """
     with _filter_deprecation_warnings():
         # pylint: disable=import-outside-toplevel
-        from cookiecutter.exceptions import RepositoryNotFound
+        from cookiecutter.exceptions import RepositoryCloneFailed, RepositoryNotFound
         from cookiecutter.main import cookiecutter  # for performance reasons
 
     try:
@@ -260,6 +262,7 @@ def _create_project(
             config = _get_config_from_prompts()
         config.setdefault("kedro_version", version)
 
+        checkout = checkout or version
         result_path = Path(
             cookiecutter(
                 str(template_path),
@@ -278,9 +281,33 @@ def _create_project(
         raise KedroCliError(
             f"Kedro project template not found at {template_path}"
         ) from exc
+    except RepositoryCloneFailed as exc:
+        error_message = (
+            f"Kedro project template not found at {template_path} with tag {checkout}."
+        )
+        tags = _get_available_tags(str(template_path).replace("git+", ""))
+        if tags:
+            error_message += (
+                f" The following tags are available: {', '.join(tags.__iter__())}"
+            )
+        raise KedroCliError(error_message) from exc
     # we don't want the user to see a stack trace on the cli
     except Exception as exc:
         raise KedroCliError("Failed to generate project.") from exc
+
+
+def _get_available_tags(template_path: str) -> List:
+    try:
+        tags = git.cmd.Git().ls_remote("--tags", str(template_path)).split("\n")
+
+        unique_tags = {tag.split("/")[-1].replace("^{}", "") for tag in tags}
+        # Remove git ref "^{}" and duplicates. For example,
+        # tags: ['/tags/version', '/tags/version^{}']
+        # unique_tags: {'version'}
+
+    except git.GitCommandError:
+        return []
+    return sorted(unique_tags)
 
 
 def _get_user_input(

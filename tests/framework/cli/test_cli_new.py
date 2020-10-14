@@ -36,6 +36,7 @@ from pathlib import Path
 
 import pytest
 import yaml
+from cookiecutter.exceptions import RepositoryCloneFailed
 
 from kedro import __version__ as version
 from kedro.framework.cli.cli import (
@@ -367,6 +368,69 @@ class TestNewWithStarter:
             },
             no_input=True,
             output_dir=output_dir,
+        )
+
+    def test_new_starter_with_checkout_invalid_checkout(self, cli_runner, mocker):
+        starter_path = "some-starter"
+        checkout_version = "some-version"
+        mocked_cookiecutter = mocker.patch(
+            "cookiecutter.main.cookiecutter", side_effect=RepositoryCloneFailed
+        )
+        result = _invoke(
+            cli_runner,
+            ["new", "--starter", starter_path, "--checkout", checkout_version],
+            project_name=self.project_name,
+            python_package=self.package_name,
+            repo_name=self.repo_name,
+        )
+        assert result.exit_code
+        assert (
+            f"Kedro project template not found at {starter_path} with tag {checkout_version}"
+            in result.output
+        )
+        output_dir = str(Path.cwd())
+        mocked_cookiecutter.assert_called_once_with(
+            starter_path,
+            checkout=checkout_version,
+            extra_context={
+                "kedro_version": version,
+                "output_dir": output_dir,
+                "project_name": self.project_name,
+                "python_package": self.package_name,
+                "repo_name": self.repo_name,
+            },
+            no_input=True,
+            output_dir=output_dir,
+        )
+
+    @pytest.mark.parametrize("starter_path", ["some-starter", "git+some-starter"])
+    def test_new_starter_with_checkout_invalid_checkout_alternative_tags(
+        self, cli_runner, mocker, starter_path
+    ):
+        checkout_version = "some-version"
+        mocker.patch(
+            "cookiecutter.main.cookiecutter", side_effect=RepositoryCloneFailed
+        )
+        mocked_git = mocker.patch("kedro.framework.cli.cli.git")
+        alternative_tags = "version1\nversion2"
+        mocked_git.cmd.Git.return_value.ls_remote.return_value = alternative_tags
+
+        result = _invoke(
+            cli_runner,
+            ["new", "--starter", starter_path, "--checkout", checkout_version],
+            project_name=self.project_name,
+            python_package=self.package_name,
+            repo_name=self.repo_name,
+        )
+        assert result.exit_code
+        tags = sorted(set(alternative_tags.split("\n")))
+        pattern = (
+            f"Kedro project template not found at {starter_path} with tag {checkout_version}. "
+            f"The following tags are available: {', '.join(tags)}"
+        )
+        assert pattern in result.output
+        mocked_git.cmd.Git.return_value.ls_remote.assert_called_once_with(
+            "--tags", starter_path.replace("git+", "")
         )
 
     def test_checkout_flag_without_starter(self, cli_runner):

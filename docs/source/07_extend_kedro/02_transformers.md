@@ -6,7 +6,7 @@ Use cases for Kedro transformers include:
 
  - Data validation
  - Operation performance tracking
- - Data format conversion (although we would recommend [Transcoding](../05_data/01_data_catalog#transcoding-datasets) for this)
+ - Data format conversion (although we would recommend [Transcoding](../05_data/01_data_catalog.md#transcoding-datasets) for this)
 
 ### Develop your own dataset transformer
 
@@ -81,6 +81,7 @@ Next, you need to update `TransformerHooks` to apply your custom transformer. Ad
 
 <details>
 <summary><b>Click to expand</b></summary>
+
 ```python
 ...
 from .memory_profile import ProfileMemoryTransformer # new import

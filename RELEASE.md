@@ -23,7 +23,8 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Deepyaman Datta](https://github.com/deepyaman), [Bhavya Merchant](https://github.com/bnmerchant), [Lovkush Agarwal](https://github.com/Lovkush-A), [Waylon Walker](https://github.com/waylonwalker)
+[Deepyaman Datta](https://github.com/deepyaman), [Bhavya Merchant](https://github.com/bnmerchant), [Lovkush Agarwal](https://github.com/Lovkush-A), [Varun Krishna S](https://github.com/vhawk19), [Sebastian Bertoli](https://github.com/sebastianbertoli), [Waylon Walker](https://github.com/waylonwalker)
+
 
 # Release 0.16.5
 

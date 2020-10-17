@@ -274,8 +274,9 @@ Let's assume that the project contains the file `conf/local/credentials.yml` wit
 
 ```yaml
 dev_s3:
-  key: token
-  secret: key
+  client_kwargs:
+    aws_access_key_id: key
+    aws_secret_access_key: secret
 
 scooters_credentials:
   con: sqlite:///kedro.db
@@ -397,7 +398,7 @@ Transformers are used to intercept the load and save operations on Kedro `DataSe
 
  - Data validation
  - Tracking operation performance
- - Data format conversion (although we would recommend [Transcoding](../05_data/01_data_catalog#transcoding-datasets) for this)
+ - Data format conversion (although we would recommend [Transcoding](#transcoding-datasets) for this)
 
 ### Applying built-in transformers
 

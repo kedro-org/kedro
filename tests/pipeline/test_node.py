@@ -352,38 +352,33 @@ def partial_inconsistent_input_size():
         (
             inconsistent_input_size,
             (
-                r"Inputs of '<function identity at .*>' expected \[\'input1\'\], "
-                r"but got \[\'A\', \'B\'\]"
+                r"Inputs of 'identity' "
+                r"expected \[\'input1\'\], but got \[\'A\', \'B\'\]"
             ),
         ),
         (
             inconsistent_input_args,
             (
-                r"Inputs of '"
-                r"<function inconsistent_input_args.<locals>.dummy_func_args"
-                r" at .*>' expected \[\'kwargs\'\], but got A"
+                r"Inputs of 'dummy_func_args' "
+                r"expected \[\'args\'\], but got {\'a\': \'A\'}"
             ),
         ),
         (
             inconsistent_input_kwargs,
-            (
-                r"Inputs of '"
-                r"<function inconsistent_input_kwargs.<locals>.dummy_func_args"
-                r" at .*>' expected \[\'kwargs\'\], but got A"
-            ),
+            (r"Inputs of 'dummy_func_args' " r"expected \[\'kwargs\'\], but got A"),
         ),
         (
             lambda_inconsistent_input_size,
             (
-                r"Inputs of '<function <lambda> at .*>' "
+                r"Inputs of '<lambda>' "
                 r"expected \[\'input1\'\], but got \[\'A\', \'B\'\]"
             ),
         ),
         (
             partial_inconsistent_input_size,
             (
-                "Inputs of 'functools.partial(<function identity at .*>)' "
-                "expected ['input1'], but got ['A', B']"
+                r"Inputs of '<partial>' "
+                r"expected \[\'input1\'\], but got \[\'A\', \'B\'\]"
             ),
         ),
     ],

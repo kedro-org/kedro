@@ -198,20 +198,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
 
     @property
     def _func_name(self):
-        if hasattr(self._func, "__name__"):
-            return self._func.__name__
-
-        name = repr(self._func)
-        if "functools.partial" in name:
-            warn(
-                "The node producing outputs `{}` is made from a `partial` function. "
-                "Partial functions do not have a `__name__` attribute: consider using "
-                "`functools.update_wrapper` for better log messages.".format(
-                    self.outputs
-                )
-            )
-            name = "<partial>"
-        return name
+        return _get_readable_func_name(self._func, self.outputs)
 
     @property
     def tags(self) -> Set[str]:
@@ -550,13 +537,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
                 func_args = inspect.signature(
                     func, follow_wrapped=False
                 ).parameters.keys()
-                try:
-                    func_name = func.__name__
-                except AttributeError:
-                    func_name = repr(func)
-
-                if "functools.partial" in func_name:
-                    func_name = "<partial>"
+                func_name = _get_readable_func_name(func)
 
                 raise TypeError(
                     "Inputs of '{}' expected {}, but got {}".format(
@@ -704,3 +685,26 @@ def _to_list(element: Union[None, str, Iterable[str], Dict[str, str]]) -> List:
     if isinstance(element, dict):
         return sorted(element.values())
     return list(element)
+
+
+def _get_readable_func_name(
+        func: Callable, outputs: Union[None, str, List[str], Dict[str, str]] = None
+) -> str:
+    """Get a readable name of the function provided.
+
+    Returns:
+        str: readable name of the provided callable func.
+    """
+
+    if hasattr(func, "__name__"):
+        return func.__name__
+
+    name = repr(func)
+    if "functools.partial" in name and outputs is not None:
+        warn(
+            "The node producing outputs `{}` is made from a `partial` function. "
+            "Partial functions do not have a `__name__` attribute: consider using "
+            "`functools.update_wrapper` for better log messages.".format(outputs)
+        )
+        name = "<partial>"
+    return name

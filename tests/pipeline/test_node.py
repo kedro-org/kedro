@@ -332,7 +332,7 @@ def inconsistent_input_kwargs():
     return dummy_func_args, "A", "B"
 
 
-lambda_identity = lambda input1: input1
+lambda_identity = lambda input1: input1  # noqa: disable=E731
 
 
 def lambda_inconsistent_input_size():

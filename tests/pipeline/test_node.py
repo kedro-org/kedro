@@ -382,7 +382,7 @@ def partial_inconsistent_input_size():
         (
             partial_inconsistent_input_size,
             (
-                r"Inputs of 'functools.partial(<function identity at .*>)' "
+                r"Inputs of 'functools.partial\(\<function identity at .*\>\)' "
                 r"expected \[\'input1\'\], but got \[\'A\', \'B\'\]"
             ),
         ),

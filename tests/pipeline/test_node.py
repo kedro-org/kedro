@@ -349,7 +349,6 @@ def partial_inconsistent_input_size():
 @pytest.mark.parametrize(
     "func, expected",
     [
-
         (
             inconsistent_input_size,
             r"Inputs of '<function identity at .*>' expected \[\'input1\'\], but got \[\'A\', \'B\'\]",

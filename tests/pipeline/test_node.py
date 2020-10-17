@@ -367,7 +367,7 @@ def partial_inconsistent_input_size():
         ),
         (
             partial_inconsistent_input_size,
-            r"Inputs of '<partial>' expected \[\'input1\'\], but got \[\'A\', \'B\'\]",
+            r"Inputs of '<partial>' function expected \[\'input1\'\], but got \[\'A\', \'B\'\]",
         ),
     ],
 )

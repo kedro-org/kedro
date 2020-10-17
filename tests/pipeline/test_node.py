@@ -337,7 +337,7 @@ def inconsistent_input_kwargs():
     [
         (
             inconsistent_input_size,
-            r"Inputs of function 'dummy_func_args' expected \[\'input1\'\], but got \[\'A\', \'B\'\]",
+            r"Inputs of function 'identity' expected \[\'input1\'\], but got \[\'A\', \'B\'\]",
         ),
         (
             inconsistent_input_args,

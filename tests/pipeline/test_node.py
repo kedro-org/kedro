@@ -332,25 +332,43 @@ def inconsistent_input_kwargs():
     return dummy_func_args, "A", "B"
 
 
+lambda_identity = lambda input1: input1
+
+
+def lambda_inconsistent_input_size():
+    return lambda_identity, ["A", "B"], "C"
+
+
+partial_identity = partial(identity)
+
+
+def partial_inconsistent_input_size():
+    return partial_identity, ["A", "B"], "C"
+
+
 @pytest.mark.parametrize(
     "func, expected",
     [
 
         (
             inconsistent_input_size,
-            r"Inputs of function 'identity' expected \[\'input1\'\], but got \[\'A\', \'B\'\]",
+            r"Inputs of '<function identity at .*>' expected \[\'input1\'\], but got \[\'A\', \'B\'\]",
         ),
         (
             inconsistent_input_args,
-            r"Inputs of function 'dummy_func_args' expected \[\'args\'\], but got {\'a\': \'A\'}",
+            r"Inputs of '<function dummy_func_args at .*>' expected \[\'args\'\], but got {\'a\': \'A\'}",
         ),
         (
             inconsistent_input_kwargs,
-            r"Inputs of function 'dummy_func_args' expected \[\'kwargs\'\], but got A",
+            r"Inputs of '<function dummy_func_args at .*>' expected \[\'kwargs\'\], but got A",
         ),
         (
-            lambda : identity, ["A", "B",], ["C"],
-            r"Inputs of function '<lambda>' expected \[\'input1\'\], but got \[\'A\', \'B\'\]",
+            lambda_inconsistent_input_size,
+            r"Inputs of '<function <lambda> at .*>' expected \[\'input1\'\], but got \[\'A\', \'B\'\]",
+        ),
+        (
+            partial_inconsistent_input_size,
+            r"Inputs of 'functools.partial(<function identity at .*>)' expected \[\'input1\'\], but got \[\'A\', \'B\'\]",
         ),
     ],
 )

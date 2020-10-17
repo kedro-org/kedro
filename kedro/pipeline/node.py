@@ -540,7 +540,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
                 func_name = _get_readable_func_name(func)
 
                 raise TypeError(
-                    "Inputs of '{}' expected {}, but got {}".format(
+                    "Inputs of '{}' function expected {}, but got {}".format(
                         func_name, str(list(func_args)), str(inputs)
                     )
                 ) from exc
@@ -688,7 +688,7 @@ def _to_list(element: Union[None, str, Iterable[str], Dict[str, str]]) -> List:
 
 
 def _get_readable_func_name(
-        func: Callable, outputs: Union[None, str, List[str], Dict[str, str]] = None
+    func: Callable, outputs: Union[None, str, List[str], Dict[str, str]] = None
 ) -> str:
     """Get a readable name of the function provided.
 

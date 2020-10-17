@@ -351,38 +351,23 @@ def partial_inconsistent_input_size():
     [
         (
             inconsistent_input_size,
-            (
-                r"Inputs of 'identity' "
-                r"expected \[\'input1\'\], but got \[\'A\', \'B\'\]"
-            ),
+            r"Inputs of 'identity' expected \[\'input1\'\], but got \[\'A\', \'B\'\]",
         ),
         (
             inconsistent_input_args,
-            (
-                r"Inputs of '<function dummy_func_args at .*>' "
-                r"expected \[\'args\'\], but got {\'a\': \'A\'}"
-            ),
+            r"Inputs of 'dummy_func_args' expected \[\'args\'\], but got {\'a\': \'A\'}",
         ),
         (
             inconsistent_input_kwargs,
-            (
-                r"Inputs of '<function dummy_func_args at .*>' "
-                r"expected \[\'kwargs\'\], but got A"
-            ),
+            r"Inputs of 'dummy_func_args' expected \[\'kwargs\'\], but got A",
         ),
         (
             lambda_inconsistent_input_size,
-            (
-                r"Inputs of '<lambda>' "
-                r"expected \[\'input1\'\], but got \[\'A\', \'B\'\]"
-            ),
+            r"Inputs of '<lambda>' expected \[\'input1\'\], but got \[\'A\', \'B\'\]",
         ),
         (
             partial_inconsistent_input_size,
-            (
-                r"Inputs of '<partial>' "
-                r"expected \[\'input1\'\], but got \[\'A\', \'B\'\]"
-            ),
+            r"Inputs of '<partial>' expected \[\'input1\'\], but got \[\'A\', \'B\'\]",
         ),
     ],
 )

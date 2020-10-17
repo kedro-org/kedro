@@ -700,11 +700,12 @@ def _get_readable_func_name(
         return func.__name__
 
     name = repr(func)
-    if "functools.partial" in name and outputs is not None:
+    if "functools.partial" in name:
         warn(
             "The node producing outputs `{}` is made from a `partial` function. "
             "Partial functions do not have a `__name__` attribute: consider using "
             "`functools.update_wrapper` for better log messages.".format(outputs)
         )
         name = "<partial>"
+
     return name

@@ -122,7 +122,12 @@ For clarity, your pull request title should be descriptive and we ask you to fol
 * [Limit the pull request title to 50 characters](https://chris.beams.io/posts/git-commit/#limit-50)
 * [Capitalize the pull request title](https://chris.beams.io/posts/git-commit/#capitalize)
 * [Do not end the pull request title with a period](https://chris.beams.io/posts/git-commit/#end)
-* [Use the imperative mood in the pull request title](https://chris.beams.io/posts/git-commit/#imperative)
+For clarity, your pull request title should be descriptive and we ask you to follow some guidelines suggested by [Chris Beams](https://github.com/cbeams) in his post [How to Write a Git Commit Message](https://chris.beams.io/posts/git-commit/#seven-rules). In particular, for your pull request title, we suggest that you:
+
+* [Limit the length to 50 characters](https://chris.beams.io/posts/git-commit/#limit-50)
+* [Capitalise the first letter of the first word](https://chris.beams.io/posts/git-commit/#capitalize)
+* [Omit the period at the end](https://chris.beams.io/posts/git-commit/#end)
+* [Use the imperative tense](https://chris.beams.io/posts/git-commit/#imperative)
 
 ### Backwards compatibility
 

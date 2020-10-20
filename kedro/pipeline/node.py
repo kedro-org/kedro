@@ -198,7 +198,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
 
     @property
     def _func_name(self) -> str:
-        name = _get_readable_func_name(self._func, self.outputs)
+        name = _get_readable_func_name(self._func)
         if name == "<partial>":
             warn(
                 f"The node producing outputs `{self.outputs}` is made from a `partial` function. "

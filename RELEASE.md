@@ -4,6 +4,7 @@
 
 ## Bug fixes and other changes
 *  Bumped maximum required `fsspec` version to 0.8.
+* `before_node_run` can now overwrite node inputs by returning a dictionary with the corresponding updates.
 
 ## Breaking changes to the API
 * `kedro.io.DataCatalog.exists()` returns `False` when the dataset does not exist, as opposed to raising an exception.

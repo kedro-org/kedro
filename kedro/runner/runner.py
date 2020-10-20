@@ -217,13 +217,41 @@ def run_node(
     return node
 
 
-def _run_node_sequential(node: Node, catalog: DataCatalog, run_id: str = None) -> Node:
-    inputs = {name: catalog.load(name) for name in node.inputs}
+def _collect_inputs_from_hook(
+    node: Node,
+    catalog: DataCatalog,
+    inputs: Dict[str, Any],
+    is_async: bool,
+    run_id: str = None,
+) -> Dict[str, Any]:
+    inputs = inputs.copy()  # shallow copy to prevent in-place modification by the hook
     hook_manager = get_hook_manager()
-    is_async = False
-    hook_manager.hook.before_node_run(  # pylint: disable=no-member
-        node=node, catalog=catalog, inputs=inputs, is_async=is_async, run_id=run_id
+    hook_response = hook_manager.hook.before_node_run(  # pylint: disable=no-member
+        node=node, catalog=catalog, inputs=inputs, is_async=is_async, run_id=run_id,
     )
+
+    additional_inputs = {}
+    for response in hook_response:
+        if response is not None and not isinstance(response, dict):
+            response_type = type(response).__name__
+            raise TypeError(
+                f"`before_node_run` must return either None or a dictionary mapping "
+                f"dataset names to updated values, got `{response_type}` instead."
+            )
+        response = response or {}
+        additional_inputs.update(response)
+
+    return additional_inputs
+
+
+def _call_node_run(
+    node: Node,
+    catalog: DataCatalog,
+    inputs: Dict[str, Any],
+    is_async: bool,
+    run_id: str = None,
+) -> Dict[str, Any]:
+    hook_manager = get_hook_manager()
     try:
         outputs = node.run(inputs)
     except Exception as exc:
@@ -244,6 +272,19 @@ def _run_node_sequential(node: Node, catalog: DataCatalog, run_id: str = None) -
         is_async=is_async,
         run_id=run_id,
     )
+    return outputs
+
+
+def _run_node_sequential(node: Node, catalog: DataCatalog, run_id: str = None) -> Node:
+    inputs = {name: catalog.load(name) for name in node.inputs}
+    is_async = False
+
+    additional_inputs = _collect_inputs_from_hook(
+        node, catalog, inputs, is_async, run_id=run_id
+    )
+    inputs.update(additional_inputs)
+
+    outputs = _call_node_run(node, catalog, inputs, is_async, run_id=run_id)
 
     for name, data in outputs.items():
         catalog.save(name, data)
@@ -257,31 +298,13 @@ def _run_node_async(node: Node, catalog: DataCatalog, run_id: str = None) -> Nod
         }  # Python dict is thread-safe
         wait(inputs.values(), return_when=ALL_COMPLETED)
         inputs = {key: value.result() for key, value in inputs.items()}
-        hook_manager = get_hook_manager()
         is_async = True
-        hook_manager.hook.before_node_run(  # pylint: disable=no-member
-            node=node, catalog=catalog, inputs=inputs, is_async=is_async, run_id=run_id
+        additional_inputs = _collect_inputs_from_hook(
+            node, catalog, inputs, is_async, run_id=run_id
         )
-        try:
-            outputs = node.run(inputs)
-        except Exception as exc:
-            hook_manager.hook.on_node_error(  # pylint: disable=no-member
-                error=exc,
-                node=node,
-                catalog=catalog,
-                inputs=inputs,
-                is_async=is_async,
-                run_id=run_id,
-            )
-            raise exc
-        hook_manager.hook.after_node_run(  # pylint: disable=no-member
-            node=node,
-            catalog=catalog,
-            inputs=inputs,
-            outputs=outputs,
-            is_async=is_async,
-            run_id=run_id,
-        )
+        inputs.update(additional_inputs)
+
+        outputs = _call_node_run(node, catalog, inputs, is_async, run_id=run_id)
 
         save_futures = set()
 

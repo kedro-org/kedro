@@ -452,3 +452,38 @@ class ModelTrackingHooks:
 `MLflow` example page:
 
 ![](../meta/images/mlflow.png)
+
+**Example 4:** Modify node inputs using `before_node_run` hook.
+
+If the `before_node_run` hook is implemented _and_ returns a dictionary, that dictionary is used to update the corresponding node inputs.
+
+For example, if a pipeline contains a node named `my_node`, which takes 2 inputs: `first_input` and `second_input`, to overwrite the value of `first_input` that is passed to `my_node`, we can implement the following hook:
+
+```python
+from typing import Any, Dict, Optional
+
+from kedro.framework.hooks import hook_impl
+from kedro.pipeline.node import Node
+from kedro.io import DataCatalog
+
+class NodeInputReplacementHook:
+    @hook_impl
+    def before_node_run(
+        self, node: Node, catalog: DataCatalog
+    ) -> Optional[Dict[str, Any]]:
+        """Replace `first_input` for `my_node`
+        """
+        if node.name == "my_node":
+            # return the string filepath to the `first_input` dataset
+            # instead of the underlying data
+            dataset_name = "first_input"
+            filepath = catalog._get_dataset(dataset_name)._filepath
+            return {"first_input": filepath}  # `second_input` is not affected
+        return None
+```
+
+Node input overwrites implemented in `before_node_run` affect only a specific node and do not modify the corresponding datasets in the `DataCatalog`.
+
+> *Note:* In the example above, the `before_node_run` hook implementation must return datasets present in the `inputs` dictionary. If they are not in `inputs`, the node fails with the following error: `Node <name> expected X input(s) <expected_inputs>, but got the following Y input(s) instead: <actual_inputs>`.
+
+To apply the changes once you have implemented a new hook, you need to register it, as described [above](#registering-your-hook-implementations-with-kedro), and then run Kedro.

@@ -540,9 +540,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
                 func_name = _get_readable_func_name(func)
 
                 raise TypeError(
-                    "Inputs of '{}' function expected {}, but got {}".format(
-                        func_name, str(list(func_args)), str(inputs)
-                    )
+                    f"Inputs of '{func_name}' function expected {list(func_args)}, but got {inputs}"
                 ) from exc
 
     def _validate_unique_outputs(self):
@@ -701,11 +699,6 @@ def _get_readable_func_name(
 
     name = repr(func)
     if "functools.partial" in name:
-        warn(
-            "The node producing outputs `{}` is made from a `partial` function. "
-            "Partial functions do not have a `__name__` attribute: consider using "
-            "`functools.update_wrapper` for better log messages.".format(outputs)
-        )
         name = "<partial>"
 
     return name

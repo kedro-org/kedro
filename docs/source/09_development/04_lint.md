@@ -8,18 +8,18 @@ You can lint your project code to ensure code quality using the `kedro lint` com
 
 ```bash
 isort
-pylint -j 0 src/<your_project> kedro_cli.py
+pylint -j 0 src/<your_project>
 pylint -j 0 --disable=missing-docstring,redefined-outer-name src/tests
 ```
 
-Alternatively, you can opt to use it as a plugin to your Kedro project. To do this, add the following code snippet to `kedro_cli.py` in your project root directory:
+Alternatively, you can opt to use it as a plugin to your Kedro project. To do this, add the following code snippet to `cli.py` in your project package directory:
 
 ```python
 @cli.command()
 def lint():
     """Check the Python code quality."""
-    python_call("isort", ["-rc", "src/<your_project>", "src/tests", "kedro_cli.py"])
-    python_call("pylint", ["-j", "0", "src/<your_project>", "kedro_cli.py"])
+    python_call("isort", ["-rc", "src/<your_project>", "src/tests"])
+    python_call("pylint", ["-j", "0", "src/<your_project>"])
     python_call(
         "pylint",
         ["-j", "0", "--disable=missing-docstring,redefined-outer-name", "src/tests"],

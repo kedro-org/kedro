@@ -324,9 +324,10 @@ class LoggingDataSet(AbstractDataSet):
         return {}
 
 
-ParallelRunnerManager.register(  # pylint: disable=no-member
-    "LoggingDataSet", LoggingDataSet
-)
+if not sys.platform.startswith("win"):
+    ParallelRunnerManager.register(  # pylint: disable=no-member
+        "LoggingDataSet", LoggingDataSet
+    )
 
 
 @pytest.mark.skipif(

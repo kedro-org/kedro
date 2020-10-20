@@ -18,8 +18,25 @@
 * Dropped support of `get_config`, `create_catalog`, `create_pipeline`, `template_version`, `project_name` and `project_path` keys by `get_project_context()` function (`kedro/framework/cli/cli.py`).
 * Added a `DeprecationWarning` to the decorator API for both `node` and `pipeline`. Added documentation to recommend using Hooks for extending node's behavior instead.
 * `kedro new --starter` now defaults to fetching the starter template matching the installed Kedro version.
+* Renamed `kedro_cli.py` to `cli.py` and moved it inside the Python packge (`src/<package_name>/`).
 
 ## Thanks for supporting contributions
+
+### Migration guide from Kedro 0.16.* to 0.17.*
+
+#### General Migration
+
+**reminder** [How do I upgrade Kedro](https://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#how-do-i-upgrade-kedro) covers a few key things to remember when updating any kedro version.
+
+#### Migration for `kedro_cli.py`
+
+In your `.kedro.yml` file within the project root directory, add the following key:
+
+```yaml
+package_name: "<your_package_name>"
+```
+
+Rename `kedro_cli.py` file to `cli.py` and move it inside your Python package directory, i.e. `<project_root>/src/<package_name>`.
 
 # Upcoming 0.16.6 release
 

@@ -58,7 +58,6 @@ Here is the layout of the project as a Cookiecutter template:
     ├── conf                         # Project configuration files
     ├── data                         # Local project data (not committed to version control)
     ├── docs                         # Project documentation
-    ├── kedro_cli.py                 # A collection of Kedro command line interface (CLI) commands
     ├── logs                         # Project output logs (not committed to version control)
     ├── notebooks                    # Project related Jupyter notebooks (can be used for experimental code before moving the code to src)
     ├── README.md                    # Project README
@@ -66,7 +65,8 @@ Here is the layout of the project as a Cookiecutter template:
     └── src                          # Project source code
         └── {{ cookiecutter.python_package }}
            └── __init.py__
-           └── pipeline.py
+           └── cli.py                # A collection of Kedro command line interface (CLI) commands
+           └── hooks.py
            └── pipelines
            └── run.py
         ├── requirements.txt

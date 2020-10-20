@@ -103,8 +103,8 @@ def _get_values_as_tuple(values: Iterable[str]) -> Tuple[str, ...]:
 def _reformat_load_versions(  # pylint: disable=unused-argument
     ctx, param, value
 ) -> Dict[str, str]:
-    """Reformat data structure from tuple to dictionary for `load-version`.
-        E.g ('dataset1:time1', 'dataset2:time2') -> {"dataset1": "time1", "dataset2": "time2"}.
+    """Reformat data structure from tuple to dictionary for `load-version`, e.g:
+    ('dataset1:time1', 'dataset2:time2') -> {"dataset1": "time1", "dataset2": "time2"}.
     """
     load_versions_dict = {}
 
@@ -129,7 +129,8 @@ def _split_params(ctx, param, value):
         item = item.split(":", 1)
         if len(item) != 2:
             ctx.fail(
-                f"Invalid format of `{param.name}` option: Item `{item[0]}` must contain "
+                f"Invalid format of `{param.name}` option: "
+                f"Item `{item[0]}` must contain "
                 f"a key and a value separated by `:`."
             )
         key = item[0].strip()

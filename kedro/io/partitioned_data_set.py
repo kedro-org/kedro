@@ -102,9 +102,9 @@ class PartitionedDataSet(AbstractDataSet):
         dataset: Union[str, Type[AbstractDataSet], Dict[str, Any]],
         filepath_arg: str = "filepath",
         filename_suffix: str = "",
+        load_args: Dict[str, Any] = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
-        load_args: Dict[str, Any] = None,
     ):
         """Creates a new instance of ``PartitionedDataSet``.
 
@@ -131,6 +131,8 @@ class PartitionedDataSet(AbstractDataSet):
                 If unspecified, defaults to "filepath".
             filename_suffix: If specified, only partitions that end with this
                 string will be processed.
+            load_args: Keyword arguments to be passed into ``find()`` method of
+                the filesystem implementation.
             credentials: Protocol-specific options that will be passed to
                 ``fsspec.filesystem``
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.filesystem
@@ -142,8 +144,6 @@ class PartitionedDataSet(AbstractDataSet):
                 https://kedro.readthedocs.io/en/stable/04_user_guide/08_advanced_io.html#partitioned-dataset-credentials
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``)
-            load_args: Keyword arguments to be passed into ``find()`` method of
-                the filesystem implementation.
 
         Raises:
             DataSetError: If versioning is enabled for the underlying dataset.
@@ -356,9 +356,9 @@ class IncrementalDataSet(PartitionedDataSet):
         checkpoint: Union[str, Dict[str, Any]] = None,
         filepath_arg: str = "filepath",
         filename_suffix: str = "",
+        load_args: Dict[str, Any] = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
-        load_args: Dict[str, Any] = None,
     ):
 
         """Creates a new instance of ``IncrementalDataSet``.
@@ -393,6 +393,8 @@ class IncrementalDataSet(PartitionedDataSet):
                 If unspecified, defaults to "filepath".
             filename_suffix: If specified, only partitions that end with this
                 string will be processed.
+            load_args: Keyword arguments to be passed into ``find()`` method of
+                the filesystem implementation.
             credentials: Protocol-specific options that will be passed to
                 ``fsspec.filesystem``
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.filesystem,
@@ -403,8 +405,6 @@ class IncrementalDataSet(PartitionedDataSet):
                 https://kedro.readthedocs.io/en/stable/04_user_guide/08_advanced_io.html#partitioned-dataset-credentials
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
-            load_args: Keyword arguments to be passed into ``find()`` method of
-                the filesystem implementation.
 
         Raises:
             DataSetError: If versioning is enabled for the underlying dataset.
@@ -415,9 +415,9 @@ class IncrementalDataSet(PartitionedDataSet):
             dataset,
             filepath_arg,
             filename_suffix,
+            load_args,
             credentials,
             fs_args,
-            load_args,
         )
 
         self._checkpoint_config = self._parse_checkpoint_config(checkpoint)

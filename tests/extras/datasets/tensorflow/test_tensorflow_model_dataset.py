@@ -311,6 +311,30 @@ class TestTensorFlowModelDatasetVersioned:
         new_predictions = reloaded.predict(dummy_x_test)
         np.testing.assert_allclose(predictions, new_predictions, rtol=1e-6, atol=1e-6)
 
+    def test_hdf5_save_format(
+        self,
+        dummy_tf_base_model,
+        dummy_x_test,
+        filepath,
+        tensorflow_model_dataset,
+        load_version,
+        save_version,
+    ):
+        """Test versioned TensorflowModelDataset can save TF graph models in
+        HDF5 format"""
+        hdf5_dataset = tensorflow_model_dataset(
+            filepath=filepath,
+            save_args={"save_format": "h5"},
+            version=Version(load_version, save_version),
+        )
+
+        predictions = dummy_tf_base_model.predict(dummy_x_test)
+        hdf5_dataset.save(dummy_tf_base_model)
+
+        reloaded = hdf5_dataset.load()
+        new_predictions = reloaded.predict(dummy_x_test)
+        np.testing.assert_allclose(predictions, new_predictions, rtol=1e-6, atol=1e-6)
+
     def test_prevent_overwrite(self, dummy_tf_base_model, versioned_tf_model_dataset):
         """Check the error when attempting to override the data set if the
         corresponding file for a given save version already exists."""

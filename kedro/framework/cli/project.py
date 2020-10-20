@@ -125,10 +125,12 @@ def lint(files, check_only):
             ) from exc
 
     python_call("black", ("--check",) + files if check_only else files)
-    python_call("flake8", files)
+    python_call("flake8", ("--max-line-length=88",) + files)
 
     check_flag = ("-c",) if check_only else ()
-    python_call("isort", (*check_flag, "-rc") + files)
+    python_call(
+        "isort", (*check_flag, "-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + files
+    )
 
 
 @project_group.command()

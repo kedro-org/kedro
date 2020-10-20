@@ -93,8 +93,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
         if not callable(func):
             raise ValueError(
                 _node_error_message(
-                    "first argument must be a "
-                    "function, not `{}`.".format(type(func).__name__)
+                    f"first argument must be a function, not `{type(func).__name__}`."
                 )
             )
 
@@ -180,13 +179,13 @@ class Node:  # pylint: disable=too-many-instance-attributes
 
     def __str__(self):
         def _sorted_set_to_str(xset):
-            return "[{}]".format(",".join(sorted(xset)))
+            return f"[{','.join(sorted(xset))}]"
 
         out_str = _sorted_set_to_str(self.outputs) if self._outputs else "None"
         in_str = _sorted_set_to_str(self.inputs) if self._inputs else "None"
 
         prefix = self._name + ": " if self._name else ""
-        return prefix + "{}({}) -> {}".format(self._func_name, in_str, out_str)
+        return prefix + f"{self._func_name}({in_str}) -> {out_str}"
 
     def __repr__(self):  # pragma: no cover
         return "Node({}, {!r}, {!r}, {!r})".format(

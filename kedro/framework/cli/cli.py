@@ -520,7 +520,7 @@ def _assert_pkg_name_ok(pkg_name: str):
         KedroCliError: If package name violates the requirements.
     """
 
-    base_message = "`{}` is not a valid Python package name.".format(pkg_name)
+    base_message = f"`{pkg_name}` is not a valid Python package name."
     if not re.match(r"^[a-zA-Z_]", pkg_name):
         message = base_message + " It must start with a letter or underscore."
         raise KedroCliError(message)
@@ -574,9 +574,7 @@ def _show_example_config():
 
 def _print_kedro_new_success_message(result):
     click.secho(
-        "\nChange directory to the project generated in {}".format(
-            str(result.resolve())
-        ),
+        f"\nChange directory to the project generated in {str(result.resolve())}",
         fg="green",
     )
     click.secho(
@@ -592,7 +590,7 @@ def _get_prompt_text(title, *text, start: str = "\n"):
     title = click.style(title + "\n" + "=" * len(title), bold=True)
     prompt_lines = [title] + list(text)
     prompt_text = "\n".join(str(line).strip() for line in prompt_lines)
-    return "{}{}\n".format(start, prompt_text)
+    return f"{start}{prompt_text}\n"
 
 
 def get_project_context(
@@ -627,7 +625,7 @@ def get_project_context(
             "project_path": ["project_path", None],
         }
         attr, obj_name = msg_dict[key]
-        msg = '`get_project_context("{}")` is now deprecated. '.format(key)
+        msg = f'`get_project_context("{key}")` is now deprecated. '
         if obj_name:
             msg += (
                 "This is still returning a function that returns `{}` "

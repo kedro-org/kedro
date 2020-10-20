@@ -148,9 +148,7 @@ class TestCachedDataset:
 
     def test_pickle(self, cached_ds, caplog):
         _ = pickle.dumps(cached_ds)
-        assert caplog.records[0].message == "{}: clearing cache to pickle.".format(
-            cached_ds
-        )
+        assert caplog.records[0].message == f"{cached_ds}: clearing cache to pickle."
 
     def test_str(self):
         assert (

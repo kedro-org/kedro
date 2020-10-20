@@ -20,6 +20,7 @@
 * Improved documentation.
 * Fixed issue with saving a `TensorFlowModelDataset` in the HDF5 format with versioning enabled.
 * Added missing `run_result` argument in `after_pipeline_run` Hooks spec.
+* Convert all `.format()` strings to `f-strings`
 
 ## Breaking changes to the API
 

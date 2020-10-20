@@ -39,7 +39,7 @@ import behave
 import pandas as pd
 import yaml
 from behave import given, then, when
-from pandas.util.testing import assert_frame_equal
+from pandas.testing import assert_frame_equal
 
 import features.steps.util as util
 from features.steps.sh_run import run

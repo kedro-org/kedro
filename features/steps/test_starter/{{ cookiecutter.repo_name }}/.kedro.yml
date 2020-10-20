@@ -1,0 +1,6 @@
+context_path: {{ cookiecutter.python_package }}.run.ProjectContext
+project_name: "{{ cookiecutter.project_name }}"
+project_version: "{{ cookiecutter.kedro_version }}"
+package_name: "{{ cookiecutter.python_package }}"
+hooks:
+  - {{ cookiecutter.python_package }}.hooks.project_hooks

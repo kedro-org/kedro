@@ -105,8 +105,10 @@ def dummy_config(fake_root_dir):
 
 @fixture(scope="module")
 def dummy_project(fake_root_dir, dummy_config):
+    starter_path = Path(__file__).parents[3].resolve()
+    starter_path = starter_path / "features" / "steps" / "test_starter"
     CliRunner().invoke(
-        cli, ["new", "-c", str(dummy_config), "--starter", "pandas-iris"],
+        cli, ["new", "-c", str(dummy_config), "--starter", str(starter_path)],
     )
     project_path = fake_root_dir / REPO_NAME
     src_path = project_path / "src"

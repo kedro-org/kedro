@@ -294,6 +294,7 @@ def add_test_jupyter_nb(context):
 def create_project_with_starter(context):
     """Behave step to run kedro new given the config I previously created.
     """
+    starter_dir = Path(__file__).parent / "test_starter"
     res = run(
         [
             context.kedro,
@@ -301,7 +302,7 @@ def create_project_with_starter(context):
             "-c",
             str(context.config_file),
             "--starter",
-            "pandas-iris",
+            str(starter_dir),
         ],
         env=context.env,
     )
@@ -447,7 +448,7 @@ def move_package(context: behave.runner.Context, new_source_dir):
 
 
 @when('Source directory is updated to "{new_source_dir}" in kedro.yml')
-def udpate_kedro_yml(context: behave.runner.Context, new_source_dir):
+def update_kedro_yml(context: behave.runner.Context, new_source_dir):
     """Update `source_dir` in .kedro.yml file.
     """
 

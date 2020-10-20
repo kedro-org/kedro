@@ -85,7 +85,7 @@ class NodeSpecs:
         inputs: Dict[str, Any],
         is_async: bool,
         run_id: str,
-    ) -> None:
+    ) -> Optional[Dict[str, Any]]:
         """Hook to be invoked before a node runs.
         The arguments received are the same as those used by ``kedro.runner.run_node``
 
@@ -97,6 +97,11 @@ class NodeSpecs:
                 not the dataset instance.
             is_async: Whether the node was run in ``async`` mode.
             run_id: The id of the run.
+
+        Returns:
+            Either None or a dictionary mapping dataset name(s) to new value(s).
+                If returned, this dictionary will be used to update the node inputs,
+                which allows to overwrite the node inputs.
         """
         pass
 

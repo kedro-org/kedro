@@ -50,6 +50,10 @@ from kedro.pipeline.node import Node, node
 from kedro.runner import ParallelRunner
 from kedro.versioning import Journal
 
+SKIP_ON_WINDOWS = pytest.mark.skipif(
+    sys.platform.startswith("win"), reason="Due to bug in parallel runner"
+)
+
 
 @pytest.fixture
 def local_logging_config():
@@ -334,6 +338,34 @@ class DuplicateHooks:
     @hook_impl
     def register_pipelines(self) -> Dict[str, Pipeline]:
         return {"__default__": context_pipeline, "pipe": context_pipeline}
+
+
+class MockDatasetReplacement:  # pylint: disable=too-few-public-methods
+    pass
+
+
+class BeforeNodeRunHook:
+    """Should overwrite the `cars` dataset"""
+
+    @hook_impl
+    def register_pipelines(self) -> Dict[str, Pipeline]:
+        return {"__default__": context_pipeline}
+
+    @hook_impl
+    def before_node_run(self, node: Node):
+        return {"cars": MockDatasetReplacement()} if node.name == "node1" else None
+
+
+class BrokenBeforeNodeRunHook:
+    """Broken since `before_node_run` doesn't return a dictionary"""
+
+    @hook_impl
+    def register_pipelines(self) -> Dict[str, Pipeline]:
+        return {"__default__": context_pipeline}
+
+    @hook_impl
+    def before_node_run(self):
+        return MockDatasetReplacement()
 
 
 @pytest.fixture
@@ -623,9 +655,7 @@ class TestKedroContextHooks:
         assert call_record.outputs["planes"].to_dict() == dummy_dataframe.to_dict()
         assert call_record.run_id == context_with_hooks.run_id
 
-    @pytest.mark.skipif(
-        sys.platform.startswith("win"), reason="Due to bug in parallel runner"
-    )
+    @SKIP_ON_WINDOWS
     def test_on_node_error_hook_is_called_with_parallel_runner(
         self, tmp_path, mocker, logging_hooks
     ):
@@ -664,9 +694,7 @@ class TestKedroContextHooks:
             expected_error = ValueError("broken")
             assert_exceptions_equal(call_record.error, expected_error)
 
-    @pytest.mark.skipif(
-        sys.platform.startswith("win"), reason="Due to bug in parallel runner"
-    )
+    @SKIP_ON_WINDOWS
     def test_before_and_after_node_run_hooks_are_called_with_parallel_runner(
         self, tmp_path, mocker, logging_hooks, dummy_dataframe
     ):
@@ -707,6 +735,77 @@ class TestKedroContextHooks:
             assert record.getMessage() == "Ran node"
             assert record.node.name in ["node1", "node2"]
             assert set(record.outputs.keys()) <= {"planes", "ships"}
+
+
+class TestBeforeNodeRunHookWithInputUpdates:
+    """Test the behavior of `before_node_run_hook` when updating node inputs"""
+
+    @pytest.fixture(params=[BeforeNodeRunHook])
+    def context_with_before_node_run_hook(self, tmp_path, mocker, request):
+        hook_class = request.param
+        return _create_context_with_hooks(tmp_path, mocker, [hook_class()])
+
+    @pytest.mark.usefixtures("hook_manager")
+    def test_correct_input_update(
+        self, context_with_before_node_run_hook, dummy_dataframe
+    ):
+        catalog = context_with_before_node_run_hook.catalog
+        catalog.save("cars", dummy_dataframe)
+        catalog.save("boats", dummy_dataframe)
+
+        result = context_with_before_node_run_hook.run()
+        assert isinstance(result["planes"], MockDatasetReplacement)
+        assert isinstance(result["ships"], pd.DataFrame)
+
+    @SKIP_ON_WINDOWS
+    @pytest.mark.usefixtures("hook_manager")
+    def test_correct_input_update_parallel(
+        self, context_with_before_node_run_hook, dummy_dataframe
+    ):
+        catalog = context_with_before_node_run_hook.catalog
+        catalog.save("cars", dummy_dataframe)
+        catalog.save("boats", dummy_dataframe)
+
+        result = context_with_before_node_run_hook.run(runner=ParallelRunner())
+        assert isinstance(result["planes"], MockDatasetReplacement)
+        assert isinstance(result["ships"], pd.DataFrame)
+
+    @pytest.mark.parametrize(
+        "context_with_before_node_run_hook", [BrokenBeforeNodeRunHook], indirect=True
+    )
+    @pytest.mark.usefixtures("hook_manager")
+    def test_broken_input_update(
+        self, context_with_before_node_run_hook, dummy_dataframe
+    ):
+        catalog = context_with_before_node_run_hook.catalog
+        catalog.save("cars", dummy_dataframe)
+        catalog.save("boats", dummy_dataframe)
+
+        pattern = (
+            "`before_node_run` must return either None or a dictionary "
+            "mapping dataset names to updated values, got `MockDatasetReplacement`"
+        )
+        with pytest.raises(TypeError, match=re.escape(pattern)):
+            context_with_before_node_run_hook.run()
+
+    @pytest.mark.parametrize(
+        "context_with_before_node_run_hook", [BrokenBeforeNodeRunHook], indirect=True
+    )
+    @SKIP_ON_WINDOWS
+    @pytest.mark.usefixtures("hook_manager")
+    def test_broken_input_update_parallel(
+        self, context_with_before_node_run_hook, dummy_dataframe
+    ):
+        catalog = context_with_before_node_run_hook.catalog
+        catalog.save("cars", dummy_dataframe)
+        catalog.save("boats", dummy_dataframe)
+
+        pattern = (
+            "`before_node_run` must return either None or a dictionary "
+            "mapping dataset names to updated values, got `MockDatasetReplacement`"
+        )
+        with pytest.raises(TypeError, match=re.escape(pattern)):
+            context_with_before_node_run_hook.run(runner=ParallelRunner())
 
 
 class TestRegistrationHooks:

@@ -234,7 +234,7 @@ def some_action():
 > Tip: The notebook can contain multiple functions tagged as `node`, each of them will be exported into the resulting Python file
 
 * Save your Jupyter notebook to `notebooks/my_notebook.ipynb`
-* Run `kedro jupyter convert notebooks/my_notebook.ipynb` from the terminal to create a Python file `src/<package_name>/nodes/my_notebook.py` containing `convert_me` function definition
+* Run `kedro jupyter convert notebooks/my_notebook.ipynb` from the terminal to create a Python file `src/<package_name>/nodes/my_notebook.py` containing `some_action` function definition
 
 > Tip: You can also convert all your notebooks at once by calling `kedro jupyter convert --all`
 

@@ -3,8 +3,20 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+*  Bumped maximum required `fsspec` version to 0.8.
 
 ## Breaking changes to the API
+* `kedro.io.DataCatalog.exists()` returns `False` when the dataset does not exist, as opposed to raising an exception.
+* Bumped maximum supported `s3fs` version to 0.5 (`S3FileSystem` interface has changed since 0.4.1 version).
+* Deleted the deprecated `kedro.cli` and `kedro.context` modules in favor of `kedro.framework.cli` and `kedro.framework.context` respectively.
+* The pipeline-specific `catalog.yml` file is no longer automatically created for modular pipelines when doing `kedro pipeline create`.
+* Removed `include_examples` from `kedro new`. It has been replaced with Kedro starter.
+* Changed `--verbose` flag from a global command to a project-specific command flag (e.g `kedro --verbose new` becomes `kedro new --verbose`).
+* Dropped support of `dataset_credentials` key in credentials in PartitionedDataSet.
+* `get_source_dir()` was removed from `kedro/framework/cli/utils.py`.
+* Dropped support of `get_config`, `create_catalog`, `create_pipeline`, `template_version`, `project_name` and `project_path` keys by `get_project_context()` function (`kedro/framework/cli/cli.py`).
+* Added a `DeprecationWarning` to the decorator API for both `node` and `pipeline`. Added documentation to recommend using Hooks for extending node's behavior instead.
+* `kedro new --starter` now defaults to fetching the starter template matching the installed Kedro version.
 
 ## Thanks for supporting contributions
 
@@ -23,7 +35,7 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Deepyaman Datta](https://github.com/deepyaman), [Bhavya Merchant](https://github.com/bnmerchant), [Lovkush Agarwal](https://github.com/Lovkush-A), [Varun Krishna S](https://github.com/vhawk19), [Sebastian Bertoli](https://github.com/sebastianbertoli), [Daniel Petti](https://github.com/djpetti)
+[Deepyaman Datta](https://github.com/deepyaman), [Bhavya Merchant](https://github.com/bnmerchant), [Lovkush Agarwal](https://github.com/Lovkush-A), [Varun Krishna S](https://github.com/vhawk19), [Sebastian Bertoli](https://github.com/sebastianbertoli), [Daniel Petti](https://github.com/djpetti), [Saran Balaji C](https://github.com/csaranbalaji)
 
 # Release 0.16.5
 

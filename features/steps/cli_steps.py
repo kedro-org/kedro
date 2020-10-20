@@ -162,7 +162,18 @@ def _check_service_up(context: behave.runner.Context, url: str, string: str):
     assert context.result.poll() is None
 
 
-def _create_config_file(context, include_example):
+@given("I have prepared a run_config file with config options")
+def create_run_config_file(context):
+    curr_dir = Path(__file__).parent
+    run_config_file = context.root_project_dir / "run_config.yml"
+    shutil.copyfile(str(curr_dir / "e2e_test_cli_config.yml"), str(run_config_file))
+
+
+@given("I have prepared a config file")
+def create_config_file(context):
+    """Behave step to create a temporary config file
+    (given the existing temp directory) and store it in the context.
+    """
     context.config_file = context.temp_dir / "config.yml"
     context.project_name = "project-dummy"
     root_project_dir = context.temp_dir / context.project_name
@@ -173,33 +184,9 @@ def _create_config_file(context, include_example):
         "repo_name": context.project_name,
         "output_dir": str(context.temp_dir),
         "python_package": context.package_name,
-        "include_example": include_example,
     }
     with context.config_file.open("w") as config_file:
         yaml.dump(config, config_file, default_flow_style=False)
-
-
-@given("I have prepared a run_config file with config options")
-def create_run_config_file(context):
-    curr_dir = Path(__file__).parent
-    run_config_file = context.root_project_dir / "run_config.yml"
-    shutil.copyfile(str(curr_dir / "e2e_test_cli_config.yml"), str(run_config_file))
-
-
-@given("I have prepared a config file without example code")
-def create_config_file_no_example(context):
-    """Behave step to create a temporary config file
-    (given the existing temp directory) and store it in the context.
-    """
-    _create_config_file(context, include_example=False)
-
-
-@given("I have prepared a config file with example code")
-def create_config_file_with_example(context):
-    """Behave step to create a temporary config file
-    (given the existing temp directory) and store it in the context.
-    """
-    _create_config_file(context, include_example=True)
 
 
 @given('I have executed the kedro command "{command}"')
@@ -302,9 +289,28 @@ def add_test_jupyter_nb(context):
         test_nb_fh.write(TEST_JUPYTER_ORG)
 
 
-@given("I have run a non-interactive kedro new")
-@when("I run a non-interactive kedro new")
-def create_project_from_config_file(context):
+@given("I have run a non-interactive kedro new with starter")
+@when("I run a non-interactive kedro new with starter")
+def create_project_with_starter(context):
+    """Behave step to run kedro new given the config I previously created.
+    """
+    res = run(
+        [
+            context.kedro,
+            "new",
+            "-c",
+            str(context.config_file),
+            "--starter",
+            "pandas-iris",
+        ],
+        env=context.env,
+    )
+    assert res.returncode == OK_EXIT_CODE, res
+
+
+@given("I have run a non-interactive kedro new without starter")
+@when("I run a non-interactive kedro new without starter")
+def create_project_without_starter(context):
     """Behave step to run kedro new given the config I previously created.
     """
     res = run([context.kedro, "new", "-c", str(context.config_file)], env=context.env)
@@ -711,7 +717,7 @@ def check_docs_generated(context: behave.runner.Context):
         context.root_project_dir / "docs" / "build" / "html" / "index.html"
     ).read_text("utf-8")
     project_repo = context.project_name.replace("-", "_")
-    assert "Welcome to project %s’s API docs!" % project_repo in index_html
+    assert f"Welcome to project’s {project_repo} API docs!" in index_html, index_html
 
 
 @then("requirements should be generated")

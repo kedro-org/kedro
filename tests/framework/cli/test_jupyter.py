@@ -346,10 +346,10 @@ class TestConvertNotebookCommand:
             "Error: Found non-unique notebook names! Please rename the following: 1\n"
         )
         assert result.exit_code
-        assert result.output == expected_output
+        assert expected_output in result.output
 
     def test_convert_one_file(
-        self, fake_kedro_cli, fake_export_nodes, tmp_file_path, fake_package_path,
+        self, fake_kedro_cli, fake_export_nodes, tmp_file_path, fake_package_path
     ):
         """Trying to convert one file, the output file doesn't exist."""
         output_dir = fake_package_path / "nodes"

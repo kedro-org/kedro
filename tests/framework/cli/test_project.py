@@ -165,7 +165,7 @@ class TestLintCommand:
         )
         expected_calls = [
             mocker.call("black", expected_files),
-            mocker.call("flake8", expected_files),
+            mocker.call("flake8", ("--max-line-length=88",) + expected_files),
             mocker.call("isort", ("-rc",) + expected_files),
         ]
 
@@ -198,7 +198,7 @@ class TestLintCommand:
         )
         expected_calls = [
             mocker.call("black", ("--check",) + expected_files),
-            mocker.call("flake8", expected_files),
+            mocker.call("flake8", ("--max-line-length=88",) + expected_files),
             mocker.call("isort", ("-c", "-rc") + expected_files),
         ]
 

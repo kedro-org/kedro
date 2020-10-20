@@ -126,12 +126,10 @@ def lint(files, check_only, **kwargs):  # pylint: disable=unused-argument
             ) from exc
 
     python_call("black", ("--check",) + files if check_only else files)
-    python_call("flake8", ("--max-line-length=88",) + files)
+    python_call("flake8", files)
 
     check_flag = ("-c",) if check_only else ()
-    python_call(
-        "isort", (*check_flag, "-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + files
-    )
+    python_call("isort", (*check_flag, "-rc") + files)
 
 
 @project_group.command()

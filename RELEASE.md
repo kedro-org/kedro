@@ -3,7 +3,8 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
-*  Bumped maximum required `fsspec` version to 0.8.
+* Bumped maximum required `fsspec` version to 0.8.
+* Added minimal, black-compatible flake8 configuration to the project template.
 
 ## Breaking changes to the API
 * `kedro.io.DataCatalog.exists()` returns `False` when the dataset does not exist, as opposed to raising an exception.
@@ -19,6 +20,7 @@
 * `kedro new --starter` now defaults to fetching the starter template matching the installed Kedro version.
 
 ## Thanks for supporting contributions
+[Deepyaman Datta](https://github.com/deepyaman)
 
 # Upcoming 0.16.6 release
 

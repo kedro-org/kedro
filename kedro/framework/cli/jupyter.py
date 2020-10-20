@@ -45,10 +45,10 @@ from jupyter_client.kernelspec import NATIVE_KERNEL_NAME, KernelSpecManager
 from traitlets import Unicode
 
 from kedro.framework.cli import load_entry_points
-from kedro.framework.cli.cli import _handle_exception
 from kedro.framework.cli.utils import (
     KedroCliError,
     _check_module_importable,
+    command_with_verbosity,
     env_option,
     forward_command,
     ipython_message,
@@ -73,12 +73,12 @@ def _load_project_context(**kwargs):
     """Returns project context."""
     try:
         return load_context(Path.cwd(), **kwargs)
-    except Exception as err:  # pylint: disable=broad-except
+    except Exception as exc:  # pylint: disable=broad-except
         env = kwargs.get("env")
-        _handle_exception(
+        raise KedroCliError(
             f"Unable to load Kedro context with environment `{env}`. "
-            f"Make sure it exists in the project configuration.\nError: {err}"
-        )
+            f"Make sure it exists in the project configuration.\nError: {exc}"
+        ) from exc
 
 
 def collect_line_magic():
@@ -136,7 +136,9 @@ def jupyter():
 )
 @click.option("--idle-timeout", type=int, default=30, help=JUPYTER_IDLE_TIMEOUT_HELP)
 @env_option
-def jupyter_notebook(ip_address, all_kernels, env, idle_timeout, args):
+def jupyter_notebook(
+    ip_address, all_kernels, env, idle_timeout, args, **kwargs
+):  # pylint: disable=unused-argument
     """Open Jupyter Notebook with project specific variables loaded."""
     context = _load_project_context(env=env)
     _check_module_importable("jupyter_core")
@@ -165,7 +167,9 @@ def jupyter_notebook(ip_address, all_kernels, env, idle_timeout, args):
 )
 @click.option("--idle-timeout", type=int, default=30, help=JUPYTER_IDLE_TIMEOUT_HELP)
 @env_option
-def jupyter_lab(ip_address, all_kernels, env, idle_timeout, args):
+def jupyter_lab(
+    ip_address, all_kernels, env, idle_timeout, args, **kwargs
+):  # pylint: disable=unused-argument
     """Open Jupyter Lab with project specific variables loaded."""
     context = _load_project_context(env=env)
     _check_module_importable("jupyter_core")
@@ -187,7 +191,7 @@ def jupyter_lab(ip_address, all_kernels, env, idle_timeout, args):
     python_call("jupyter", arguments, **python_call_kwargs)
 
 
-@jupyter.command("convert")
+@command_with_verbosity(jupyter, "convert")
 @click.option("--all", "all_flag", is_flag=True, help=CONVERT_ALL_HELP)
 @click.option("-y", "overwrite_flag", is_flag=True, help=OVERWRITE_HELP)
 @click.argument(
@@ -197,9 +201,9 @@ def jupyter_lab(ip_address, all_kernels, env, idle_timeout, args):
     nargs=-1,
 )
 @env_option
-def convert_notebook(  # pylint: disable=unused-argument,too-many-locals
-    all_flag, overwrite_flag, filepath, env
-):
+def convert_notebook(
+    all_flag, overwrite_flag, filepath, env, **kwargs
+):  # pylint: disable=unused-argument, too-many-locals
     """Convert selected or all notebooks found in a Kedro project
     to Kedro code, by exporting code from the appropriately-tagged cells:
     Cells tagged as `node` will be copied over to a Python file matching
@@ -320,7 +324,6 @@ def _export_nodes(filepath: Path, output_path: Path) -> None:
         raise KedroCliError(
             f"Provided filepath is not a Jupyter notebook: {filepath}"
         ) from exc
-
     cells = [
         cell
         for cell in content["cells"]

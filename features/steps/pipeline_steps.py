@@ -146,7 +146,6 @@ def _create_template_project(context):
     # - project_name      (the simple project name == project-pipeline)
     # - temp_dir          (the directory containing the created project)
     # - root_project_dir  (the full path to the created project)
-    # - include_example   (the project contains code example)
 
     context.project_name = "project-pipeline"
     context.config_file = context.temp_dir / "config"
@@ -154,14 +153,11 @@ def _create_template_project(context):
     root_project_dir = context.temp_dir / context.project_name
     context.root_project_dir = root_project_dir
 
-    context.include_example = True
-
     config = {
         "project_name": context.project_name,
         "repo_name": context.project_name,
         "output_dir": str(context.temp_dir),
         "python_package": context.project_name.replace("-", "_"),
-        "include_example": context.include_example,
     }
 
     with context.config_file.open("w") as config_file:

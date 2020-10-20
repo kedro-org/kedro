@@ -275,4 +275,4 @@ class TestRunCommand:
             f"`dataset_name:YYYY-MM-DDThh.mm.ss.sssZ`,"
             f"found {load_version} instead\n"
         )
-        assert result.output == expected_output
+        assert expected_output in result.output

@@ -29,6 +29,7 @@ import logging
 import re
 from pathlib import Path
 
+import boto3
 import pandas as pd
 import pytest
 import s3fs
@@ -194,20 +195,7 @@ class TestPartitionedDataSetLocal:
 
     @pytest.mark.parametrize(
         "credentials,expected_pds_creds,expected_dataset_creds",
-        [
-            ({"cred": "common"}, {"cred": "common"}, {"cred": "common"}),
-            (
-                {"cred": "common", "dataset_credentials": {"ds": "only"}},
-                {"cred": "common"},
-                {"ds": "only"},
-            ),
-            ({"dataset_credentials": {"ds": "only"}}, {}, {"ds": "only"}),
-            (
-                {"cred_key1": "cred_value1", "dataset_credentials": None},
-                {"cred_key1": "cred_value1"},
-                None,
-            ),
-        ],
+        [({"cred": "common"}, {"cred": "common"}, {"cred": "common"}), (None, {}, {})],
     )
     def test_credentials(
         self, mocker, credentials, expected_pds_creds, expected_dataset_creds
@@ -337,17 +325,12 @@ class TestPartitionedDataSetLocal:
         assert pds._dataset_config["credentials"] == {"secret": "dataset"}
 
     @pytest.mark.parametrize(
-        "pds_config,expected_dataset_creds",
+        "pds_config,expected_ds_creds,global_creds",
         [
             (
-                {
-                    "dataset": "pandas.CSVDataSet",
-                    "credentials": {
-                        "secret": "global",
-                        "dataset_credentials": {"secret": "dataset"},
-                    },
-                },
-                {"secret": "dataset"},
+                {"dataset": "pandas.CSVDataSet", "credentials": {"secret": "global"}},
+                {"secret": "global"},
+                {"secret": "global"},
             ),
             (
                 {
@@ -355,36 +338,36 @@ class TestPartitionedDataSetLocal:
                         "type": CSVDataSet,
                         "credentials": {"secret": "expected"},
                     },
-                    "credentials": {
-                        "secret": "global",
-                        "dataset_credentials": {"secret": "other"},
-                    },
                 },
                 {"secret": "expected"},
+                {},
             ),
             (
                 {
                     "dataset": {"type": CSVDataSet, "credentials": None},
-                    "credentials": {
-                        "secret": "global",
-                        "dataset_credentials": {"secret": "other"},
-                    },
+                    "credentials": {"secret": "global"},
                 },
                 None,
+                {"secret": "global"},
+            ),
+            (
+                {
+                    "dataset": {
+                        "type": CSVDataSet,
+                        "credentials": {"secret": "expected"},
+                    },
+                    "credentials": {"secret": "global"},
+                },
+                {"secret": "expected"},
+                {"secret": "global"},
             ),
         ],
     )
-    def test_dataset_creds_deprecated(self, pds_config, expected_dataset_creds):
-        """Check that the deprecation warning is emitted if dataset credentials
-        were specified the old way (using `dataset_credentials` key)"""
-        pattern = (
-            "Support for `dataset_credentials` key in the credentials is now "
-            "deprecated and will be removed in the next version. Please specify "
-            "the dataset credentials explicitly inside the dataset config."
-        )
-        with pytest.warns(DeprecationWarning, match=re.escape(pattern)):
-            pds = PartitionedDataSet(path=str(Path.cwd()), **pds_config)
-        assert pds._dataset_config["credentials"] == expected_dataset_creds
+    def test_dataset_creds(self, pds_config, expected_ds_creds, global_creds):
+        """Check that global credentials do not interfere dataset credentials."""
+        pds = PartitionedDataSet(path=str(Path.cwd()), **pds_config)
+        assert pds._dataset_config["credentials"] == expected_ds_creds
+        assert pds._credentials == global_creds
 
 
 BUCKET_NAME = "fake_bucket_name"
@@ -401,7 +384,7 @@ S3_DATASET_DEFINITION = [
 def mocked_s3_bucket():
     """Create a bucket for testing using moto."""
     with mock_s3():
-        conn = s3fs.core.boto3.client("s3")
+        conn = boto3.client("s3")
         conn.create_bucket(Bucket=BUCKET_NAME)
         yield conn
 

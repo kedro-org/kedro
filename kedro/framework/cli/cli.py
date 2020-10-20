@@ -33,10 +33,7 @@ This module implements commands available from the kedro CLI.
 import importlib
 import os
 import re
-import shutil
 import sys
-import traceback
-import warnings
 import webbrowser
 from collections import defaultdict
 from copy import deepcopy
@@ -44,6 +41,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List
 
 import click
+import git
 import pkg_resources
 import yaml
 
@@ -54,14 +52,13 @@ from kedro.framework.cli.utils import (
     KedroCliError,
     _clean_pycache,
     _filter_deprecation_warnings,
+    command_with_verbosity,
 )
 from kedro.framework.context import load_context
 
 KEDRO_PATH = Path(kedro.__file__).parent
 TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
-
-_VERBOSE = True
 
 LOGO = r"""
  _            _
@@ -83,21 +80,14 @@ _STARTER_ALIASES = {
 
 @click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")
 @click.version_option(version, "--version", "-V", help="Show version and exit")
-@click.option(
-    "--verbose",
-    "-v",
-    is_flag=True,
-    help="See extensive logging and error stack traces.",
-)
-def cli(verbose):
+def cli():
     """Kedro is a CLI for creating and using Kedro projects
     For more information, type ``kedro info``.
 
     When inside a Kedro project (created with `kedro new`) commands from
     the project's `kedro_cli.py` file will also be available here.
     """
-    global _VERBOSE  # pylint: disable=global-statement
-    _VERBOSE = verbose
+    pass
 
 
 ENTRY_POINT_GROUPS = {
@@ -138,7 +128,7 @@ def info():
         click.echo("No plugins installed")
 
 
-@cli.command(short_help="Create a new kedro project.")
+@command_with_verbosity(cli, short_help="Create a new kedro project.")
 @click.option(
     "--config",
     "-c",
@@ -154,7 +144,7 @@ def info():
 @click.option(
     "--checkout", help="A tag, branch or commit to checkout in the starter repository."
 )
-def new(config, starter_name, checkout):
+def new(config, starter_name, checkout, **kwargs):  # pylint: disable=unused-argument
     """Create a new kedro project, either interactively or from a
     configuration file.
 
@@ -182,7 +172,7 @@ def new(config, starter_name, checkout):
 
     * ``config.yml`` - The configuration YAML must contain at the top level
                     the above parameters (project_name, repo_name,
-                    python_package, include_example) and output_dir - the
+                    python_package) and output_dir - the
                     parent directory for the new project directory.
 
     \b
@@ -202,18 +192,9 @@ def new(config, starter_name, checkout):
 
     if starter_name:
         template_path = _STARTER_ALIASES.get(starter_name, starter_name)
-        should_prompt_for_example = False
     else:
         template_path = TEMPLATE_PATH
-        should_prompt_for_example = True
-
-    _create_project(
-        config_path=config,
-        verbose=_VERBOSE,
-        template_path=template_path,
-        should_prompt_for_example=should_prompt_for_example,
-        checkout=checkout,
-    )
+    _create_project(config_path=config, template_path=template_path, checkout=checkout)
 
 
 @cli.command(short_help="See the kedro API docs and introductory tutorial.")
@@ -250,42 +231,38 @@ def list_starters():
 
 
 def _create_project(
-    config_path: str,
-    verbose: bool,
-    template_path: Path = TEMPLATE_PATH,
-    should_prompt_for_example: bool = True,
-    checkout: str = None,
+    config_path: str, template_path: Path = TEMPLATE_PATH, checkout: str = None
 ):
     """Implementation of the kedro new cli command.
 
     Args:
         config_path: In non-interactive mode, the path of the config.yml which
             should contain the project_name, output_dir and repo_name.
-        verbose: Extensive debug terminal logs.
         template_path: The path to the cookiecutter template to create the project.
             It could either be a local directory or a remote VCS repository
             supported by cookiecutter. For more details, please see:
             https://cookiecutter.readthedocs.io/en/latest/usage.html#generate-your-project
-        should_prompt_for_example: Whether to display a prompt to generate an example pipeline.
-            N.B.: this should only be here until the start project is complete and the
-            starters with example are all located in public repositories.
         checkout: The tag, branch or commit in the starter repository to checkout.
             Maps directly to cookiecutter's --checkout argument.
-            If the value is invalid, cookiecutter will use the default branch.
+            If the value is not provided, cookiecutter will use the installed Kedro version
+            by default.
+    Raises:
+        KedroCliError: If it fails to generate a project.
     """
     with _filter_deprecation_warnings():
         # pylint: disable=import-outside-toplevel
-        from cookiecutter.exceptions import RepositoryNotFound
+        from cookiecutter.exceptions import RepositoryCloneFailed, RepositoryNotFound
         from cookiecutter.main import cookiecutter  # for performance reasons
 
     try:
         if config_path:
-            config = _parse_config(config_path, verbose)
+            config = _parse_config(config_path)
             config = _check_config_ok(config_path, config)
         else:
-            config = _get_config_from_prompts(should_prompt_for_example)
+            config = _get_config_from_prompts()
         config.setdefault("kedro_version", version)
 
+        checkout = checkout or version
         result_path = Path(
             cookiecutter(
                 str(template_path),
@@ -296,28 +273,41 @@ def _create_project(
             )
         )
 
-        # If user was prompted to generate an example but chooses not to,
-        # Remove all placeholder directories.
-        if should_prompt_for_example and not config["include_example"]:
-            (result_path / "data" / "01_raw" / "iris.csv").unlink()
-
-            pipelines_dir = result_path / "src" / config["python_package"] / "pipelines"
-
-            for dir_path in [
-                pipelines_dir / "data_engineering",
-                pipelines_dir / "data_science",
-            ]:
-                shutil.rmtree(str(dir_path))
-
         _clean_pycache(result_path)
         _print_kedro_new_success_message(result_path)
-    except click.exceptions.Abort:  # pragma: no cover
-        _handle_exception("User interrupt.")
-    except RepositoryNotFound:
-        _handle_exception(f"Kedro project template not found at {template_path}")
+    except click.exceptions.Abort as exc:  # pragma: no cover
+        raise KedroCliError("User interrupt.") from exc
+    except RepositoryNotFound as exc:
+        raise KedroCliError(
+            f"Kedro project template not found at {template_path}"
+        ) from exc
+    except RepositoryCloneFailed as exc:
+        error_message = (
+            f"Kedro project template not found at {template_path} with tag {checkout}."
+        )
+        tags = _get_available_tags(str(template_path).replace("git+", ""))
+        if tags:
+            error_message += (
+                f" The following tags are available: {', '.join(tags.__iter__())}"
+            )
+        raise KedroCliError(error_message) from exc
     # we don't want the user to see a stack trace on the cli
-    except Exception:  # pylint: disable=broad-except
-        _handle_exception("Failed to generate project.")
+    except Exception as exc:
+        raise KedroCliError("Failed to generate project.") from exc
+
+
+def _get_available_tags(template_path: str) -> List:
+    try:
+        tags = git.cmd.Git().ls_remote("--tags", str(template_path)).split("\n")
+
+        unique_tags = {tag.split("/")[-1].replace("^{}", "") for tag in tags}
+        # Remove git ref "^{}" and duplicates. For example,
+        # tags: ['/tags/version', '/tags/version^{}']
+        # unique_tags: {'version'}
+
+    except git.GitCommandError:
+        return []
+    return sorted(unique_tags)
 
 
 def _get_user_input(
@@ -346,11 +336,8 @@ def _get_user_input(
         return value
 
 
-def _get_config_from_prompts(should_prompt_for_example: bool = True) -> Dict:
+def _get_config_from_prompts() -> Dict:
     """Ask user to provide necessary inputs.
-
-    Args:
-        should_prompt_for_example: Whether to include a prompt for example.
 
     Returns:
         Resulting config dictionary.
@@ -398,32 +385,19 @@ def _get_config_from_prompts(should_prompt_for_example: bool = True) -> Dict:
         pkg_name_prompt, default=default_pkg_name, check_input=_assert_pkg_name_ok
     )
 
-    # option for whether iris example code is included in the project
-    if should_prompt_for_example:
-        code_example_prompt = _get_prompt_text(
-            "Generate Example Pipeline:",
-            "Do you want to generate an example pipeline in your project?",
-            "Good for first-time users. (default=N)",
-        )
-        include_example = click.confirm(code_example_prompt, default=False)
-    else:
-        include_example = False
-
     return {
         "output_dir": output_dir,
         "project_name": project_name,
         "repo_name": repo_name,
         "python_package": python_package,
-        "include_example": include_example,
     }
 
 
-def _parse_config(config_path: str, verbose: bool) -> Dict:
+def _parse_config(config_path: str) -> Dict:
     """Parse the config YAML from its path.
 
     Args:
         config_path: The path of the config.yml file.
-        verbose: Print the config contents.
 
     Raises:
         Exception: If the file cannot be parsed.
@@ -436,7 +410,7 @@ def _parse_config(config_path: str, verbose: bool) -> Dict:
         with open(config_path, "r") as config_file:
             config = yaml.safe_load(config_file)
 
-        if verbose:
+        if KedroCliError.VERBOSE_ERROR:
             click.echo(config_path + ":")
             click.echo(yaml.dump(config, default_flow_style=False))
 
@@ -481,7 +455,6 @@ def _check_config_ok(config_path: str, config: Dict[str, Any]) -> Dict[str, Any]
     _assert_output_dir_ok(config["output_dir"])
     _assert_repo_name_ok(config["repo_name"])
     _assert_pkg_name_ok(config["python_package"])
-    _assert_include_example_ok(config["include_example"])
     return config
 
 
@@ -540,15 +513,6 @@ def _assert_repo_name_ok(repo_name):
             "`{}` is not a valid repository name. It must contain "
             "only word symbols and/or hyphens, must also start and "
             "end with alphanumeric symbol.".format(repo_name)
-        )
-        raise KedroCliError(message)
-
-
-def _assert_include_example_ok(include_example):
-    if not isinstance(include_example, bool):
-        message = (
-            "`{}` value for `include_example` is invalid. It must be a boolean value "
-            "True or False.".format(include_example)
         )
         raise KedroCliError(message)
 
@@ -616,48 +580,11 @@ def get_project_context(
         KedroCliError: When the key is not found and the default value was not
             specified.
     """
-
-    def _deprecation_msg(key):
-        msg_dict = {
-            "get_config": ["config_loader", "ConfigLoader"],
-            "create_catalog": ["catalog", "DataCatalog"],
-            "create_pipeline": ["pipeline", "Pipeline"],
-            "template_version": ["project_version", None],
-            "project_name": ["project_name", None],
-            "project_path": ["project_path", None],
-        }
-        attr, obj_name = msg_dict[key]
-        msg = '`get_project_context("{}")` is now deprecated. '.format(key)
-        if obj_name:
-            msg += (
-                "This is still returning a function that returns `{}` "
-                "instance, however passed arguments have no effect anymore "
-                "since Kedro 0.15.0. ".format(obj_name)
-            )
-        msg += (
-            "Please get `KedroContext` instance by calling `get_project_context()` "
-            "and use its `{}` attribute.".format(attr)
-        )
-
-        return msg
-
     project_path = project_path or Path.cwd()
     context = load_context(project_path, **kwargs)
     # Dictionary to be compatible with existing Plugins. Future plugins should
     # retrieve necessary Kedro project properties from context
-    value = {
-        "context": context,
-        "get_config": lambda project_path, env=None, **kw: context.config_loader,
-        "create_catalog": lambda config, **kw: context.catalog,
-        "create_pipeline": lambda **kw: context.pipeline,
-        "template_version": context.project_version,
-        "project_name": context.project_name,
-        "project_path": context.project_path,
-        "verbose": _VERBOSE,
-    }[key]
-
-    if key not in ("verbose", "context"):
-        warnings.warn(_deprecation_msg(key), DeprecationWarning)
+    value = {"context": context, "verbose": KedroCliError.VERBOSE_ERROR}[key]
 
     return deepcopy(value)
 
@@ -669,7 +596,7 @@ def load_entry_points(name: str) -> List[str]:
         name: The key value specified in ENTRY_POINT_GROUPS.
 
     Raises:
-        Exception: If loading an entry point failed.
+        KedroCliError: If loading an entry point failed.
 
     Returns:
         List of entry point commands.
@@ -680,8 +607,8 @@ def load_entry_points(name: str) -> List[str]:
     for entry_point in entry_points:
         try:
             entry_point_commands.append(entry_point.load())
-        except Exception:  # pylint: disable=broad-except
-            _handle_exception(f"Loading {name} commands from {entry_point}", end=False)
+        except Exception as exc:
+            raise KedroCliError(f"Loading {name} commands from {entry_point}") from exc
     return entry_point_commands
 
 
@@ -691,8 +618,8 @@ def _init_plugins():
         try:
             init_hook = entry_point.load()
             init_hook()
-        except Exception:  # pylint: disable=broad-except
-            _handle_exception(f"Initializing {entry_point}", end=False)
+        except Exception as exc:
+            raise KedroCliError(f"Initializing {entry_point}") from exc
 
 
 def main():  # pragma: no cover
@@ -715,29 +642,13 @@ def main():  # pragma: no cover
             kedro_cli = importlib.import_module("kedro_cli")
             project_groups.extend(load_entry_points("project"))
             project_groups.append(kedro_cli.cli)
-        except Exception:  # pylint: disable=broad-except
-            _handle_exception(f"Cannot load commands from {kedro_cli_path}")
+        except Exception as exc:
+            raise KedroCliError(f"Cannot load commands from {kedro_cli_path}") from exc
     cli_collection = CommandCollection(
         ("Global commands", global_groups),
         ("Project specific commands", project_groups),
     )
     cli_collection()
-
-
-def _handle_exception(msg, end=True):
-    """Pretty print the current exception then exit."""
-    if _VERBOSE:
-        click.secho(traceback.format_exc(), nl=False, fg="yellow")
-    else:
-        etype, value, _ = sys.exc_info()
-        click.secho(
-            "".join(traceback.format_exception_only(etype, value))
-            + "Run with --verbose to see the full exception",
-            fg="yellow",
-        )
-    if end:
-        raise KedroCliError(msg)
-    click.secho("Error: " + msg, fg="red")  # pragma: no cover
 
 
 if __name__ == "__main__":  # pragma: no cover

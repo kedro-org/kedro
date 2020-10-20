@@ -197,8 +197,15 @@ class Node:  # pylint: disable=too-many-instance-attributes
         return self.run(inputs=kwargs)
 
     @property
-    def _func_name(self):
-        return _get_readable_func_name(self._func, self.outputs)
+    def _func_name(self) -> str:
+        name = _get_readable_func_name(self._func, self.outputs)
+        if name == "<partial>":
+            warn(
+                f"The node producing outputs `{self.outputs}` is made from a `partial` function. "
+                "Partial functions do not have a `__name__` attribute: consider using "
+                "`functools.update_wrapper` for better log messages."
+            )
+        return name
 
     @property
     def tags(self) -> Set[str]:
@@ -685,10 +692,8 @@ def _to_list(element: Union[None, str, Iterable[str], Dict[str, str]]) -> List:
     return list(element)
 
 
-def _get_readable_func_name(
-    func: Callable, outputs: Union[None, str, List[str], Dict[str, str]] = None
-) -> str:
-    """Get a readable name of the function provided.
+def _get_readable_func_name(func: Callable) -> str:
+    """Get a user-friendly readable name of the function provided.
 
     Returns:
         str: readable name of the provided callable func.

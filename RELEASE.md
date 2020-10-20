@@ -13,7 +13,6 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
-* Added minimal, black-compatible flake8 configuration to the project template.
 * Improved handling of non-ASCII word characters in dataset names.
   - For example, a dataset named `jalapeño` will be accessible as `DataCatalog.datasets.jalapeño` rather than `DataCatalog.datasets.jalape__o`.
 * Fixed `kedro install` for an Anaconda environment defined in `environment.yml`.

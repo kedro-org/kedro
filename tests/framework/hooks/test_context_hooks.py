@@ -262,11 +262,20 @@ class LoggingHooks:
 
     @hook_impl
     def after_pipeline_run(
-        self, run_params: Dict[str, Any], pipeline: Pipeline, catalog: DataCatalog
+        self,
+        run_params: Dict[str, Any],
+        run_result: Dict[str, Any],
+        pipeline: Pipeline,
+        catalog: DataCatalog,
     ) -> None:
         self.logger.info(
             "Ran pipeline",
-            extra={"pipeline": pipeline, "run_params": run_params, "catalog": catalog},
+            extra={
+                "pipeline": pipeline,
+                "run_params": run_params,
+                "run_result": run_result,
+                "catalog": catalog,
+            },
         )
 
     @hook_impl

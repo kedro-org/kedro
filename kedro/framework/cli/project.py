@@ -126,12 +126,12 @@ def lint(files, check_only, **kwargs):  # pylint: disable=unused-argument
             ) from exc
 
     python_call("black", ("--check",) + files if check_only else files)
-    # put "max-line-length" back in as "pandas-iris" starter doesn't have "[flake8]"
-    # section in setup.cfg, which leads to failing flake8 checks (at least in e2e tests)
     python_call("flake8", ("--max-line-length=88",) + files)
 
     check_flag = ("-c",) if check_only else ()
-    python_call("isort", (*check_flag, "-rc") + files)
+    python_call(
+        "isort", (*check_flag, "-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + files
+    )
 
 
 @project_group.command()

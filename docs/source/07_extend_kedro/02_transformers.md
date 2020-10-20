@@ -1,4 +1,5 @@
 # Dataset transformers
+> _Note_: The transformer API will be deprecated in 0.18.0. We recommend using the `before_dataset_loaded`/`after_dataset_loaded` and `before_dataset_saved`/`after_dataset_saved` [Hooks](./04_hooks.md) to customise the dataset `load` and `save` methods where appropriate.
 
 As we describe in the [documentation about how Kedro works with data](../05_data/01_data_catalog.html#transforming-datasets), Kedro transformers intercept the load and save operations on Kedro `DataSet`s.
 

@@ -127,7 +127,7 @@ def dummy_tf_subclassed_model(dummy_x_train, dummy_y_train, tf):
     """Demonstrate that own class models cannot be saved
     using HDF5 format but can using TF format
     """
-    # pylint: disable=too-many-ancestors
+
     class MyModel(tf.keras.Model):
         def __init__(self):
             super().__init__()

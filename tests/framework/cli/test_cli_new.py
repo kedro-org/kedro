@@ -49,7 +49,6 @@ from kedro.framework.cli.cli import (
 FILES_IN_TEMPLATE = 35
 
 
-# pylint: disable=too-many-arguments
 def _invoke(cli_runner, args, project_name=None, repo_name=None, python_package=None):
 
     click_prompts = (project_name, repo_name, python_package)

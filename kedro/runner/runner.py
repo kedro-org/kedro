@@ -276,7 +276,18 @@ def _call_node_run(
 
 
 def _run_node_sequential(node: Node, catalog: DataCatalog, run_id: str = None) -> Node:
-    inputs = {name: catalog.load(name) for name in node.inputs}
+    inputs = {}
+    hook_manager = get_hook_manager()
+
+    for name in node.inputs:
+        hook_manager.hook.before_dataset_loaded(  # pylint: disable=no-member
+            dataset_name=name
+        )
+        inputs[name] = catalog.load(name)
+        hook_manager.hook.after_dataset_loaded(  # pylint: disable=no-member
+            dataset_name=name, data=inputs[name]
+        )
+
     is_async = False
 
     additional_inputs = _collect_inputs_from_hook(
@@ -287,15 +298,30 @@ def _run_node_sequential(node: Node, catalog: DataCatalog, run_id: str = None) -
     outputs = _call_node_run(node, catalog, inputs, is_async, run_id=run_id)
 
     for name, data in outputs.items():
+        hook_manager.hook.before_dataset_saved(  # pylint: disable=no-member
+            dataset_name=name, data=data
+        )
         catalog.save(name, data)
+        hook_manager.hook.after_dataset_saved(  # pylint: disable=no-member
+            dataset_name=name, data=data
+        )
     return node
 
 
 def _run_node_async(node: Node, catalog: DataCatalog, run_id: str = None) -> Node:
     with ThreadPoolExecutor() as pool:
-        inputs = {
-            name: pool.submit(catalog.load, name) for name in node.inputs
-        }  # Python dict is thread-safe
+        inputs = {}
+        hook_manager = get_hook_manager()
+
+        for name in node.inputs:
+            hook_manager.hook.before_dataset_loaded(  # pylint: disable=no-member
+                dataset_name=name
+            )
+            inputs[name] = pool.submit(catalog.load, name)
+            hook_manager.hook.after_dataset_loaded(  # pylint: disable=no-member
+                dataset_name=name, data=inputs[name]
+            )
+
         wait(inputs.values(), return_when=ALL_COMPLETED)
         inputs = {key: value.result() for key, value in inputs.items()}
         is_async = True
@@ -309,10 +335,16 @@ def _run_node_async(node: Node, catalog: DataCatalog, run_id: str = None) -> Nod
         save_futures = set()
 
         for name, data in outputs.items():
+            hook_manager.hook.before_dataset_saved(  # pylint: disable=no-member
+                dataset_name=name, data=data
+            )
             save_futures.add(pool.submit(catalog.save, name, data))
 
         for future in as_completed(save_futures):
             exception = future.exception()
             if exception:
                 raise exception
+            hook_manager.hook.after_dataset_saved(  # pylint: disable=no-member
+                dataset_name=name, data=data  # pylint: disable=undefined-loop-variable
+            )
     return node

@@ -17,6 +17,8 @@
 * `get_source_dir()` was removed from `kedro/framework/cli/utils.py`.
 * Dropped support of `get_config`, `create_catalog`, `create_pipeline`, `template_version`, `project_name` and `project_path` keys by `get_project_context()` function (`kedro/framework/cli/cli.py`).
 * Added a `DeprecationWarning` to the decorator API for both `node` and `pipeline`. Added documentation to recommend using Hooks for extending node's behavior instead.
+* Added a `DeprecationWarning` to the Transformers API when adding a transformer to the catalog. Added documentation to recommend using Hooks for customising the `load` and `save` methods.
+* Added `DatasetSpecs` with hooks to run before and after loading and saving datasets from/to the catalog.
 * `kedro new --starter` now defaults to fetching the starter template matching the installed Kedro version.
 * Renamed `kedro_cli.py` to `cli.py` and moved it inside the Python packge (`src/<package_name>/`).
 

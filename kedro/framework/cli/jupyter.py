@@ -73,7 +73,7 @@ def _load_project_context(**kwargs):
     """Returns project context."""
     try:
         return load_context(Path.cwd(), **kwargs)
-    except Exception as exc:  # pylint: disable=broad-except
+    except Exception as exc:
         env = kwargs.get("env")
         raise KedroCliError(
             f"Unable to load Kedro context with environment `{env}`. "

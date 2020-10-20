@@ -31,7 +31,10 @@ Kedro defines Hook specifications for particular execution points where users ca
 * `before_pipeline_run`
 * `after_pipeline_run`
 * `on_pipeline_error`
-
+* `before_dataset_loaded`
+* `after_dataset_loaded`
+* `before_dataset_saved`
+* `after_dataset_saved`
 
 The naming convention for non-error Hooks is `<before/after>_<noun>_<past_participle>`, in which:
 
@@ -260,6 +263,26 @@ class ProjectHooks:
         # adding retrying behaviour to nodes tagged as flaky
         if "flaky" in node.tags:
             node.func = retry(node.func)
+```
+### Use Hooks to customise the dataset load and save methods
+From Kedro 0.18.0 [Transformers](./02_transformers.md) will be deprecated and we recommend using the `before_dataset_loaded`/`after_dataset_loaded` and `before_dataset_saved`/`after_dataset_saved` Hooks to customise the dataset `load` and `save` methods where appropriate.
+
+For example, you can add logging about the dataset load runtime as follows:
+
+```python
+@property
+def _logger(self):
+    return logging.getLogger(self.__class__.__name__)
+
+@hook_impl
+def before_dataset_loaded(self, dataset_name: str) -> None:
+    start = time.time()
+    logging.info("Loading dataset %s started at %0.3f", dataset_name, start)
+
+@hook_impl
+def after_dataset_loaded(self, dataset_name: str, data: Any) -> None:
+    end = time.time()
+    logging.info("Loading dataset %s ended at %0.3f", dataset_name, end)
 ```
 
 ## Under the hood

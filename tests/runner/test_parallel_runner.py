@@ -27,7 +27,7 @@
 # limitations under the License.
 
 import sys
-from concurrent.futures.process import ProcessPoolExecutor  # pylint: disable=no-member
+from concurrent.futures.process import ProcessPoolExecutor
 from typing import Any, Dict
 
 import pytest
@@ -414,7 +414,6 @@ class TestParallelRunnerRelease:
         pipeline = Pipeline(
             [node(source, None, "ds@save"), node(sink, "ds@load", None)]
         )
-        # pylint: disable=no-member
         catalog = DataCatalog(
             {
                 "ds@save": LoggingDataSet(log, "save"),

@@ -190,7 +190,11 @@ class PipelineSpecs:
 
     @hook_spec
     def after_pipeline_run(
-        self, run_params: Dict[str, Any], pipeline: Pipeline, catalog: DataCatalog
+        self,
+        run_params: Dict[str, Any],
+        run_result: Dict[str, Any],
+        pipeline: Pipeline,
+        catalog: DataCatalog,
     ) -> None:
         """Hook to be invoked after a pipeline runs.
 
@@ -213,6 +217,7 @@ class PipelineSpecs:
                      "extra_params": Optional[Dict[str, Any]]
                    }
 
+            run_result: The output of ``Pipeline`` run.
             pipeline: The ``Pipeline`` that was run.
             catalog: The ``DataCatalog`` used during the run.
         """

@@ -78,6 +78,7 @@ _STARTER_ALIASES = {
     "pandas-iris": "git+https://github.com/quantumblacklabs/kedro-starter-pandas-iris.git",
     "pyspark": "git+https://github.com/quantumblacklabs/kedro-starter-pyspark.git",
     "pyspark-iris": "git+https://github.com/quantumblacklabs/kedro-starter-pyspark-iris.git",
+    "spaceflights": "git+https://github.com/quantumblacklabs/kedro-starter-spaceflights.git",
 }
 
 

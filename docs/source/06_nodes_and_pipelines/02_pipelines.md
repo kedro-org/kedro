@@ -353,7 +353,7 @@ new-kedro-project
 │   │   │   │   └── README.md
 │   │   │   └── __init__.py
 │   │   ├── __init__.py
-│   │   ├── nodes.py
+|   |   ├── cli.py
 │   │   ├── hooks.py
 │   │   └── run.py
 │   ├── tests
@@ -363,7 +363,6 @@ new-kedro-project
 │   └── setup.py
 ├── .kedro.yml
 ├── README.md
-├── kedro_cli.py
 └── setup.cfg
 ```
 </details>

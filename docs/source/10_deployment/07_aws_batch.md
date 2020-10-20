@@ -296,7 +296,7 @@ aws_batch:
 
 #### Update CLI implementation
 
-You're nearly there! Before being able to use the new runner, update the `run()` function in your `kedro_cli.py` file to make sure the runner class is instantiated correctly:
+You're nearly there! Before being able to use the new runner, update the `run()` function in your `cli.py` file to make sure the runner class is instantiated correctly:
 
 ```python
 def run(tag, env, parallel, ...):

@@ -25,10 +25,10 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# pylint: disable=unused-argument
 
 import sys
 import tempfile
+from importlib import import_module
 from pathlib import Path
 
 import pytest
@@ -72,8 +72,8 @@ def fake_repo_config_path(fake_root_dir):
     return config_path
 
 
-@pytest.fixture(autouse=True, scope="session")
-def fake_repo(fake_repo_path: Path, fake_repo_config_path: Path):
+@pytest.fixture(scope="session")
+def fake_project_cli(fake_repo_path: Path, fake_repo_config_path: Path):
     _create_project(str(fake_repo_config_path))
 
     # NOTE: Here we load a couple of modules, as they would be imported in
@@ -85,19 +85,8 @@ def fake_repo(fake_repo_path: Path, fake_repo_config_path: Path):
 
     # `load_context` will try to `import fake_package`,
     # will fail without this line:
-    import fake_package  # noqa: F401 pylint: disable=import-error,unused-import
-    import kedro_cli  # noqa: F401 pylint: disable=import-error,unused-import
+    import_module(_FAKE_PACKAGE_NAME)
+
+    yield import_module(f"{_FAKE_PACKAGE_NAME}.cli")
 
     sys.path = old_path
-
-
-@pytest.fixture(scope="session")
-def fake_kedro_cli(fake_repo):
-    """
-    A small helper to pass kedro_cli into tests without importing.
-    It only becomes available after `fake_repo` fixture is applied,
-    that's why it can't be done on module level.
-    """
-    import kedro_cli  # pylint: disable=import-error
-
-    return kedro_cli

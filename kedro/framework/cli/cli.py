@@ -33,7 +33,6 @@ This module implements commands available from the kedro CLI.
 import importlib
 import os
 import re
-import sys
 import webbrowser
 from collections import defaultdict
 from copy import deepcopy
@@ -54,22 +53,24 @@ from kedro.framework.cli.utils import (
     _filter_deprecation_warnings,
     command_with_verbosity,
 )
-from kedro.framework.context import load_context
+from kedro.framework.context.context import (
+    _add_src_to_path,
+    get_static_project_data,
+    load_context,
+)
 
 KEDRO_PATH = Path(kedro.__file__).parent
 TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
-LOGO = r"""
+LOGO = rf"""
  _            _
 | | _____  __| |_ __ ___
 | |/ / _ \/ _` | '__/ _ \
 |   <  __/ (_| | | | (_) |
 |_|\_\___|\__,_|_|  \___/
-v{}
-""".format(
-    version
-)
+v{version}
+"""
 
 _STARTER_ALIASES = {
     "pandas-iris": "git+https://github.com/quantumblacklabs/kedro-starter-pandas-iris.git",
@@ -85,7 +86,7 @@ def cli():
     For more information, type ``kedro info``.
 
     When inside a Kedro project (created with `kedro new`) commands from
-    the project's `kedro_cli.py` file will also be available here.
+    the project's `cli.py` file will also be available here.
     """
     pass
 
@@ -476,9 +477,9 @@ def _assert_output_dir_ok(output_dir: str):
     """
     if not os.path.exists(output_dir):
         message = (
-            "`{}` is not a valid output directory. "
-            "It must be a relative or absolute path "
-            "to an existing directory.".format(output_dir)
+            f"`{output_dir}` is not a valid output directory. "
+            f"It must be a relative or absolute path "
+            f"to an existing directory."
         )
         raise KedroCliError(message)
 
@@ -493,7 +494,7 @@ def _assert_pkg_name_ok(pkg_name: str):
         KedroCliError: If package name violates the requirements.
     """
 
-    base_message = "`{}` is not a valid Python package name.".format(pkg_name)
+    base_message = f"`{pkg_name}` is not a valid Python package name."
     if not re.match(r"^[a-zA-Z_]", pkg_name):
         message = base_message + " It must start with a letter or underscore."
         raise KedroCliError(message)
@@ -510,9 +511,9 @@ def _assert_pkg_name_ok(pkg_name: str):
 def _assert_repo_name_ok(repo_name):
     if not re.match(r"^\w+(-*\w+)*$", repo_name):
         message = (
-            "`{}` is not a valid repository name. It must contain "
-            "only word symbols and/or hyphens, must also start and "
-            "end with alphanumeric symbol.".format(repo_name)
+            f"`{repo_name}` is not a valid repository name. It must contain "
+            f"only word symbols and/or hyphens, must also start and "
+            f"end with alphanumeric symbol."
         )
         raise KedroCliError(message)
 
@@ -538,9 +539,7 @@ def _show_example_config():
 
 def _print_kedro_new_success_message(result):
     click.secho(
-        "\nChange directory to the project generated in {}".format(
-            str(result.resolve())
-        ),
+        f"\nChange directory to the project generated in {result.resolve()}",
         fg="green",
     )
     click.secho(
@@ -556,7 +555,7 @@ def _get_prompt_text(title, *text, start: str = "\n"):
     title = click.style(title + "\n" + "=" * len(title), bold=True)
     prompt_lines = [title] + list(text)
     prompt_text = "\n".join(str(line).strip() for line in prompt_lines)
-    return "{}{}\n".format(start, prompt_text)
+    return f"{start}{prompt_text}\n"
 
 
 def get_project_context(
@@ -623,7 +622,7 @@ def _init_plugins():
 
 
 def main():  # pragma: no cover
-    """Main entry point, look for a `kedro_cli.py` and if found add its
+    """Main entry point, look for a `cli.py` and if found add its
     commands to `kedro`'s then invoke the cli.
     """
     _init_plugins()
@@ -632,18 +631,26 @@ def main():  # pragma: no cover
     global_groups.extend(load_entry_points("global"))
     project_groups = []
 
-    # load project commands from kedro_cli.py
     path = Path.cwd()
-    kedro_cli_path = path / "kedro_cli.py"
+    kedro_yaml_path = path / ".kedro.yml"
 
-    if kedro_cli_path.exists():
+    if kedro_yaml_path.exists():
+        # load project commands from cli.py
+        static_data = get_static_project_data(path)
+        source_dir = static_data["source_dir"]
+        _add_src_to_path(source_dir, path)
+
+        package_name = static_data["package_name"]
         try:
-            sys.path.append(str(path))
-            kedro_cli = importlib.import_module("kedro_cli")
+            project_cli = importlib.import_module(f"{package_name}.cli")
             project_groups.extend(load_entry_points("project"))
-            project_groups.append(kedro_cli.cli)
+            project_groups.append(project_cli.cli)
         except Exception as exc:
-            raise KedroCliError(f"Cannot load commands from {kedro_cli_path}") from exc
+            project_cli_path = source_dir / package_name / "cli.py"
+            raise KedroCliError(
+                f"Cannot load commands from {project_cli_path}"
+            ) from exc
+
     cli_collection = CommandCollection(
         ("Global commands", global_groups),
         ("Project specific commands", project_groups),

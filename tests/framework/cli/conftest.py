@@ -70,24 +70,24 @@ def entry_point(mocker, entry_points):
     return ep
 
 
-@fixture(scope="module")
+@fixture(scope="session")
 def fake_root_dir():
     # using tempfile as tmp_path fixture doesn't support module scope
     with tempfile.TemporaryDirectory() as tmp_root:
         yield Path(tmp_root).resolve()
 
 
-@fixture(scope="module")
+@fixture(scope="session")
 def fake_package_path(fake_root_dir):
     return fake_root_dir.resolve() / REPO_NAME / "src" / PACKAGE_NAME
 
 
-@fixture(scope="module")
+@fixture(scope="session")
 def fake_repo_path(fake_root_dir):
     return fake_root_dir.resolve() / REPO_NAME
 
 
-@fixture(scope="module")
+@fixture(scope="session")
 def dummy_config(fake_root_dir):
     config = {
         "project_name": "Dummy Project",
@@ -103,47 +103,31 @@ def dummy_config(fake_root_dir):
     return config_path
 
 
-@fixture(scope="module")
-def dummy_project(fake_root_dir, dummy_config):
+@fixture(scope="session")
+def fake_project_cli(fake_repo_path: Path, dummy_config: Path):
     starter_path = Path(__file__).parents[3].resolve()
     starter_path = starter_path / "features" / "steps" / "test_starter"
     CliRunner().invoke(
         cli, ["new", "-c", str(dummy_config), "--starter", str(starter_path)],
     )
-    project_path = fake_root_dir / REPO_NAME
-    src_path = project_path / "src"
 
     # NOTE: Here we load a couple of modules, as they would be imported in
     # the code and tests.
     # It's safe to remove the new entries from path due to the python
     # module caching mechanism. Any `reload` on it will not work though.
     old_path = sys.path.copy()
-    sys.path = [str(project_path), str(src_path)] + sys.path
+    sys.path = [str(fake_repo_path), str(fake_repo_path / "src")] + sys.path
 
-    import_module("kedro_cli")
     import_module(PACKAGE_NAME)
+    yield import_module(f"{PACKAGE_NAME}.cli")
 
     sys.path = old_path
-
-    yield project_path
-
-    del sys.modules["kedro_cli"]
     del sys.modules[PACKAGE_NAME]
 
 
-@fixture(scope="module")
-def fake_kedro_cli(dummy_project):  # pylint: disable=unused-argument
-    """
-    A small helper to pass kedro_cli into tests without importing.
-    It only becomes available after `dummy_project` fixture is applied,
-    that's why it can't be done on module level.
-    """
-    yield import_module("kedro_cli")
-
-
 @fixture
-def chdir_to_dummy_project(dummy_project, monkeypatch):
-    monkeypatch.chdir(str(dummy_project))
+def chdir_to_dummy_project(fake_repo_path, monkeypatch):
+    monkeypatch.chdir(str(fake_repo_path))
 
 
 @fixture

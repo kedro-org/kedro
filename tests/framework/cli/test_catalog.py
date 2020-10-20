@@ -45,7 +45,7 @@ class TestCatalogListCommand:
             "kedro.framework.cli.catalog.load_context", return_value=context
         )
 
-    def test_list_all_pipelines(self, fake_kedro_cli, fake_load_context, mocker):
+    def test_list_all_pipelines(self, fake_project_cli, fake_load_context, mocker):
         yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
         mocked_context = fake_load_context.return_value
         mocked_context.pipelines.keys.return_value = (self.PIPELINE_NAME,)
@@ -53,7 +53,7 @@ class TestCatalogListCommand:
         mocked_pl_obj = mocked_context.pipelines.get.return_value
         mocked_pl_obj.data_sets.return_value = set()
 
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["catalog", "list"])
+        result = CliRunner().invoke(fake_project_cli.cli, ["catalog", "list"])
 
         assert not result.exit_code
         assert mocked_context.pipelines.keys.call_count == 1
@@ -62,23 +62,23 @@ class TestCatalogListCommand:
         expected_dict = {"DataSets in 'pipeline' pipeline": {}}
         yaml_dump_mock.assert_called_once_with(expected_dict)
 
-    def test_list_specific_pipelines(self, fake_kedro_cli, fake_load_context):
+    def test_list_specific_pipelines(self, fake_project_cli, fake_load_context):
         mocked_context = fake_load_context.return_value
 
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["catalog", "list", "--pipeline", self.PIPELINE_NAME]
+            fake_project_cli.cli, ["catalog", "list", "--pipeline", self.PIPELINE_NAME]
         )
 
         assert not result.exit_code
         assert not mocked_context.pipelines.keys.called
         mocked_context.pipelines.get.assert_called_once_with(self.PIPELINE_NAME)
 
-    def test_not_found_pipeline(self, fake_kedro_cli, fake_load_context):
+    def test_not_found_pipeline(self, fake_project_cli, fake_load_context):
         mocked_context = fake_load_context.return_value
         mocked_context.pipelines.get.return_value = None
         mocked_context.pipelines.keys.return_value = (self.PIPELINE_NAME,)
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["catalog", "list", "--pipeline", "fake"]
+            fake_project_cli.cli, ["catalog", "list", "--pipeline", "fake"]
         )
         assert result.exit_code
         expected_output = (
@@ -88,7 +88,7 @@ class TestCatalogListCommand:
         assert expected_output in result.output
 
     def test_no_param_datasets_in_respose(
-        self, fake_kedro_cli, fake_load_context, mocker
+        self, fake_project_cli, fake_load_context, mocker
     ):
         yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
         mocked_context = fake_load_context.return_value
@@ -106,7 +106,7 @@ class TestCatalogListCommand:
         mocked_pl_obj = mocked_context.pipelines.get.return_value
         mocked_pl_obj.data_sets.return_value = pl_obj_data_sets
 
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["catalog", "list"])
+        result = CliRunner().invoke(fake_project_cli.cli, ["catalog", "list"])
 
         assert not result.exit_code
         # 'parameters' and 'params:data_ratio' should not appear in the response

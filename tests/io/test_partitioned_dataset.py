@@ -279,9 +279,9 @@ class TestPartitionedDataSetLocal:
     @pytest.mark.parametrize(
         "dataset_config",
         [
-            {**dataset_config, "versioned": True}
-            for dataset_config in LOCAL_DATASET_DEFINITION
-            if isinstance(dataset_config, dict)
+            {**ds_config, "versioned": True}
+            for ds_config in LOCAL_DATASET_DEFINITION
+            if isinstance(ds_config, dict)
         ],
     )
     @pytest.mark.parametrize(

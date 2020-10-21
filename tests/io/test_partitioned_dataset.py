@@ -51,7 +51,7 @@ def partitioned_data_pandas():
 
 @pytest.fixture
 def local_csvs(tmp_path, partitioned_data_pandas):
-    local_dir = Path(str(tmp_path / "csvs"))
+    local_dir = tmp_path / "csvs"
     local_dir.mkdir()
 
     for k, data in partitioned_data_pandas.items():
@@ -309,6 +309,27 @@ class TestPartitionedDataSetLocal:
             if suffix:
                 assert not partition_id.endswith(suffix)
 
+    def test_malformed_versioned_path(self, tmp_path):
+        local_dir = tmp_path / "files"
+        local_dir.mkdir()
+
+        path = local_dir / "path/to/folder/new/partition/version/partition/file"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("content")
+
+        pds = PartitionedDataSet(
+            str(local_dir / "path/to/folder"),
+            {"type": "pandas.CSVDataSet", "versioned": True},
+        )
+
+        pattern = re.escape(
+            f"`{path}` is not a well-formed versioned path ending with "
+            "`filename/timestamp/filename` (got `version/partition/"
+            "file`)."
+        )
+        with pytest.raises(DataSetError, match=pattern):
+            pds.load()
+
     def test_no_partitions(self, tmpdir):
         pds = PartitionedDataSet(str(tmpdir), "pandas.CSVDataSet")
 
@@ -339,7 +360,7 @@ class TestPartitionedDataSetLocal:
     def test_filepath_arg_warning(self, pds_config, filepath_arg):
         pattern = (
             f"`{filepath_arg}` key must not be specified in the dataset definition as it "
-            f"will be overwritten by partition path"
+            "will be overwritten by partition path"
         )
         with pytest.warns(UserWarning, match=re.escape(pattern)):
             PartitionedDataSet(**pds_config)

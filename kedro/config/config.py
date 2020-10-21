@@ -228,7 +228,7 @@ def _load_config(config_files: List[Path]) -> Dict[str, Any]:
     for config_file in config_files:
         cfg = {
             k: v
-            for k, v in anyconfig.load(config_file).items()
+            for k, v in anyconfig.load(config_file, ac_template=True).items()
             if not k.startswith("_")
         }
         _check_dups(config_file, cfg)

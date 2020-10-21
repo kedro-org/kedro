@@ -323,7 +323,7 @@ class TestPartitionedDataSetLocal:
         )
 
         pattern = re.escape(
-            f"`{path}` is not a well-formed versioned path ending with "
+            f"`{path.as_posix()}` is not a well-formed versioned path ending with "
             "`filename/timestamp/filename` (got `version/partition/"
             "file`)."
         )

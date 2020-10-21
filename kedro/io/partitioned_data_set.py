@@ -31,7 +31,7 @@ underlying dataset definition. It also uses `fsspec` for filesystem level operat
 """
 import operator
 from copy import deepcopy
-from pathlib import Path
+from pathlib import PurePosixPath
 from typing import Any, Callable, Dict, List, Tuple, Type, Union
 from urllib.parse import urlparse
 from warnings import warn
@@ -55,7 +55,7 @@ S3_PROTOCOLS = ("s3", "s3a", "s3n")
 
 
 def _grandparent(path: str) -> str:
-    path_obj = Path(path)
+    path_obj = PurePosixPath(path)
     grandparent = path_obj.parents[1]
     assert grandparent.name == path_obj.name
     return str(grandparent)

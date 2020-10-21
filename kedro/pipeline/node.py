@@ -547,7 +547,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
                 func_name = _get_readable_func_name(func)
 
                 raise TypeError(
-                    f"Inputs of '{func_name}' function expected {list(func_args)},"
+                    f"Inputs of '{func_name}' function expected {list(func_args)}, "
                     f"but got {inputs}"
                 ) from exc
 

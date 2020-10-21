@@ -230,7 +230,7 @@ class TestConfigLoader:
         (tmp_path / "local").mkdir(exist_ok=True)
         catalog = ConfigLoader(conf_paths).get("catalog*.yml")
         assert catalog == {
-            "{speed}.{k}": v
+            f"{speed}.{k}": v
             for speed, (k, v) in product(["fast", "slow"], base_config.items())
         }
 

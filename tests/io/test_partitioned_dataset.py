@@ -38,6 +38,7 @@ from pandas.util.testing import assert_frame_equal
 from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
 from kedro.io import DataSetError, PartitionedDataSet
 from kedro.io.data_catalog import CREDENTIALS_KEY
+from kedro.io.partitioned_data_set import KEY_PROPAGATION_WARNING
 
 
 @pytest.fixture
@@ -235,6 +236,17 @@ class TestPartitionedDataSetLocal:
 
         _assert_not_in_repr(credentials)
 
+    def test_fs_args(self, mocker):
+        fs_args = {"foo": "bar"}
+
+        mocked_filesystem = mocker.patch("fsspec.filesystem")
+        path = str(Path.cwd())
+        pds = PartitionedDataSet(path, "pandas.CSVDataSet", fs_args=fs_args)
+
+        assert mocked_filesystem.call_count == 2
+        mocked_filesystem.assert_called_with("file", **fs_args)
+        assert pds._dataset_config["fs_args"] == fs_args
+
     @pytest.mark.parametrize("dataset", ["pandas.ParquetDataSet", ParquetDataSet])
     def test_invalid_dataset(self, dataset, local_csvs):
         pds = PartitionedDataSet(str(local_csvs), dataset)
@@ -329,12 +341,27 @@ class TestPartitionedDataSetLocal:
             dataset={"type": CSVDataSet, "credentials": {"secret": "dataset"}},
             credentials={"secret": "global"},
         )
-        log_message = (
-            "Top-level credentials will not propagate into the underlying dataset "
-            "since credentials were explicitly defined in the dataset config."
-        )
+        log_message = KEY_PROPAGATION_WARNING % {
+            "keys": "credentials",
+            "target": "underlying dataset",
+        }
         assert caplog.record_tuples == [("kedro.io.core", logging.WARNING, log_message)]
         assert pds._dataset_config["credentials"] == {"secret": "dataset"}
+
+    def test_fs_args_log_warning(self, caplog):
+        """Check that the warning is logged if the dataset filesystem
+        arguments will overwrite the top-level ones"""
+        pds = PartitionedDataSet(
+            path=str(Path.cwd()),
+            dataset={"type": CSVDataSet, "fs_args": {"args": "dataset"}},
+            fs_args={"args": "dataset"},
+        )
+        log_message = KEY_PROPAGATION_WARNING % {
+            "keys": "filesystem arguments",
+            "target": "underlying dataset",
+        }
+        assert caplog.record_tuples == [("kedro.io.core", logging.WARNING, log_message)]
+        assert pds._dataset_config["fs_args"] == {"args": "dataset"}
 
     @pytest.mark.parametrize(
         "pds_config,expected_dataset_creds",

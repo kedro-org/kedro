@@ -13,6 +13,7 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Fixed `TypeError` when converting dict inputs to a node made from a wrapped `partial` function.
 * `PartitionedDataSet` improvements:
   - Supported passing arguments to the underlying filesystem.
 * Improved handling of non-ASCII word characters in dataset names.

@@ -202,8 +202,8 @@ class Node:  # pylint: disable=too-many-instance-attributes
         if name == "<partial>":
             warn(
                 f"The node producing outputs `{self.outputs}` is made from a `partial` function. "
-                "Partial functions do not have a `__name__` attribute: consider using "
-                "`functools.update_wrapper` for better log messages."
+                f"Partial functions do not have a `__name__` attribute: consider using "
+                f"`functools.update_wrapper` for better log messages."
             )
         return name
 

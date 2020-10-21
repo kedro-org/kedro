@@ -486,3 +486,13 @@ class TestNames:
         assert str(n) == "identity([in]) -> [out]"
         assert n.name == "identity([in]) -> [out]"
         assert n.short_name == "Identity"
+
+    def test_updated_partial_dict_inputs(self):
+        n = node(
+            update_wrapper(partial(biconcat, input1=["in1"]), biconcat),
+            dict(input2="in2"),
+            ["out"],
+        )
+        assert str(n) == "biconcat([in2]) -> [out]"
+        assert n.name == "biconcat([in2]) -> [out]"
+        assert n.short_name == "Biconcat"

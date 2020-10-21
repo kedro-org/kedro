@@ -703,7 +703,7 @@ def _dict_inputs_to_list(func: Callable[[Any], Any], inputs: Dict[str, str]):
     """Convert a dict representation of the node inputs to a list , ensuring
     the appropriate order for binding them to the node's function.
     """
-    sig = inspect.signature(func).bind(**inputs)
+    sig = inspect.signature(func, follow_wrapped=False).bind(**inputs)
     # for deterministic behavior in python 3.5, sort kwargs inputs alphabetically
     return list(sig.args) + sorted(sig.kwargs.values())
 

@@ -47,6 +47,7 @@ Rename `kedro_cli.py` file to `cli.py` and move it inside your Python package di
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Fixed `TypeError` when converting dict inputs to a node made from a wrapped `partial` function.
 * Improved handling of non-ASCII word characters in dataset names.
   - For example, a dataset named `jalapeño` will be accessible as `DataCatalog.datasets.jalapeño` rather than `DataCatalog.datasets.jalape__o`.
 * Fixed `kedro install` for an Anaconda environment defined in `environment.yml`.
@@ -54,6 +55,7 @@ Rename `kedro_cli.py` file to `cli.py` and move it inside your Python package di
 * Improved documentation.
 * Fixed issue with saving a `TensorFlowModelDataset` in the HDF5 format with versioning enabled.
 * Added missing `run_result` argument in `after_pipeline_run` Hooks spec.
+* Added [kedro-starter-spaceflights](https://github.com/quantumblacklabs/kedro-starter-spaceflights/) alias for generating a project: `kedro new --starter spaceflights`.
 
 ## Breaking changes to the API
 

@@ -28,6 +28,7 @@
 
 import configparser
 import json
+from itertools import product
 from pathlib import Path
 from typing import Dict
 
@@ -58,10 +59,10 @@ def _get_local_logging_config():
     }
 
 
-def _write_yaml(filepath: Path, config: Dict):
+def _write_yaml(filepath: Path, config: Dict, preamble: str = "", postamble: str = ""):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     yaml_str = yaml.dump(config)
-    filepath.write_text(yaml_str)
+    filepath.write_text(preamble + yaml_str + postamble)
 
 
 def _write_json(filepath: Path, config: Dict):
@@ -138,6 +139,17 @@ def proj_catalog_nested(tmp_path):
     _write_yaml(path, {"nested": {"type": "MemoryDataSet"}})
 
 
+@pytest.fixture
+def proj_catalog_w_jinja2_for(tmp_path, base_config):
+    proj_catalog = tmp_path / "base" / "catalog.yml"
+    _write_yaml(
+        proj_catalog,
+        {"{{ speed }}." + k: v for k, v in base_config.items()},
+        "{% for speed in ['fast', 'slow'] %}\n",
+        "{% endfor %}\n",
+    )
+
+
 use_config_dir = pytest.mark.usefixtures("create_config_dir")
 use_proj_catalog = pytest.mark.usefixtures("proj_catalog")
 
@@ -211,6 +223,16 @@ class TestConfigLoader:
         )
         with pytest.raises(ValueError, match=pattern):
             ConfigLoader(conf_paths).get("catalog*", "catalog*/**")
+
+    @pytest.mark.usefixtures("proj_catalog_w_jinja2_for")
+    def test_load_base_config_w_jinja2_for(self, tmp_path, conf_paths, base_config):
+        """Test loading config files with Jinja2 templating"""
+        (tmp_path / "local").mkdir(exist_ok=True)
+        catalog = ConfigLoader(conf_paths).get("catalog*.yml")
+        assert catalog == {
+            "{speed}.{k}": v
+            for speed, (k, v) in product(["fast", "slow"], base_config.items())
+        }
 
     def test_ignore_hidden_keys(self, tmp_path):
         """Check that the config key starting with `_` are ignored and also

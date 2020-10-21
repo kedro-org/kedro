@@ -14,6 +14,8 @@
 
 ## Bug fixes and other changes
 * Fixed `TypeError` when converting dict inputs to a node made from a wrapped `partial` function.
+* `PartitionedDataSet` improvements:
+  - Supported versioning of the underlying dataset.
 * Improved handling of non-ASCII word characters in dataset names.
   - For example, a dataset named `jalapeño` will be accessible as `DataCatalog.datasets.jalapeño` rather than `DataCatalog.datasets.jalape__o`.
 * Fixed `kedro install` for an Anaconda environment defined in `environment.yml`.

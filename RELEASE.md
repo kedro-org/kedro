@@ -21,14 +21,16 @@
 * Fixed `kedro install` for an Anaconda environment defined in `environment.yml`.
 * Fixed backwards compatibility with templates generated with older Kedro versions <0.16.5. No longer need to update `.kedro.yml` to use `kedro lint` and `kedro jupyter notebook convert`.
 * Improved documentation.
+* Improved error messages for incorrect parameters passed into a node.
 * Fixed issue with saving a `TensorFlowModelDataset` in the HDF5 format with versioning enabled.
 * Added missing `run_result` argument in `after_pipeline_run` Hooks spec.
 * Added [kedro-starter-spaceflights](https://github.com/quantumblacklabs/kedro-starter-spaceflights/) alias for generating a project: `kedro new --starter spaceflights`.
+* Fixed a bug in IPython script that was causing context hooks to be registered twice. To apply this fix to a project generated with an older Kedro version, apply the same changes made in [this PR](https://github.com/quantumblacklabs/kedro-starter-pandas-iris/pull/16) to your `00-kedro-init.py` file.
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Deepyaman Datta](https://github.com/deepyaman), [Bhavya Merchant](https://github.com/bnmerchant), [Lovkush Agarwal](https://github.com/Lovkush-A), [Varun Krishna S](https://github.com/vhawk19), [Sebastian Bertoli](https://github.com/sebastianbertoli), [Daniel Petti](https://github.com/djpetti)
+[Deepyaman Datta](https://github.com/deepyaman), [Bhavya Merchant](https://github.com/bnmerchant), [Lovkush Agarwal](https://github.com/Lovkush-A), [Varun Krishna S](https://github.com/vhawk19), [Sebastian Bertoli](https://github.com/sebastianbertoli), [Daniel Petti](https://github.com/djpetti), [Waylon Walker](https://github.com/waylonwalker)
 
 # Release 0.16.5
 

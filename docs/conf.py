@@ -170,7 +170,7 @@ html_theme_options = {"collapse_navigation": False, "style_external_links": True
 
 html_context = {
     "display_github": True,
-    "github_url": "https://github.com/quantumblacklabs/kedro/tree/develop/docs/source",
+    "github_url": "https://github.com/quantumblacklabs/kedro/tree/master/docs/source",
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,

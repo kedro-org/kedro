@@ -265,7 +265,7 @@ class DummyContext(KedroContext):
 
 
 class DummyContextNoHooks(KedroContext):
-    def _create_catalog(  # pylint: disable=no-self-use,too-many-arguments
+    def _create_catalog(  # pylint: disable=too-many-arguments
         self,
         conf_catalog: Dict[str, Any],
         conf_creds: Dict[str, Any],
@@ -277,9 +277,7 @@ class DummyContextNoHooks(KedroContext):
             conf_catalog, conf_creds, load_versions, save_version, journal
         )
 
-    def _create_config_loader(  # pylint: disable=no-self-use
-        self, conf_paths
-    ) -> ConfigLoader:
+    def _create_config_loader(self, conf_paths) -> ConfigLoader:
         return TemplatedConfigLoader(conf_paths)
 
     def _get_pipelines(self) -> Dict[str, Pipeline]:

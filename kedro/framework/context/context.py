@@ -905,7 +905,6 @@ def load_package_context(
         raise KedroContextError(
             f"Cannot load context object from {context_path} for package {package_name}."
         ) from exc
-
     # update kwargs with env from the environment variable (defaults to None if not set)
     # need to do this because some CLI command (e.g `kedro run`) defaults to passing
     # in `env=None`
@@ -924,7 +923,6 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
        <project_path>
            |__ <src_dir>
            |__ .kedro.yml
-           |__ kedro_cli.py
            |__ pyproject.toml
 
     The name of the <scr_dir> is `src` by default. The `.kedro.yml` or `pyproject.toml` can
@@ -948,9 +946,6 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
     project_path = Path(project_path).expanduser().resolve()
     static_data = get_static_project_data(project_path)
 
-    source_dir = static_data["source_dir"]
-    validate_source_path(source_dir, project_path)
-
     if "context_path" not in static_data:
         conf_file = static_data["config_file"].name
         raise KedroContextError(
@@ -958,11 +953,8 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
             f"Please refer to the documentation."
         )
 
-    if str(source_dir) not in sys.path:
-        sys.path.insert(0, str(source_dir))
-
-    if "PYTHONPATH" not in os.environ:
-        os.environ["PYTHONPATH"] = str(source_dir)
+    source_dir = static_data["source_dir"]
+    _add_src_to_path(source_dir, project_path)
 
     context_class = load_obj(static_data["context_path"])
 
@@ -971,9 +963,17 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
     # need to do this because some CLI command (e.g `kedro run`) defaults to
     # passing in `env=None`
     kwargs["env"] = kwargs.get("env") or os.getenv("KEDRO_ENV")
-
     context = context_class(project_path=project_path, **kwargs)
     return context
+
+
+def _add_src_to_path(source_dir: Path, project_path: Path):
+    validate_source_path(source_dir, project_path)
+
+    if str(source_dir) not in sys.path:
+        sys.path.insert(0, str(source_dir))  # pragma: no cover
+    if "PYTHONPATH" not in os.environ:
+        os.environ["PYTHONPATH"] = str(source_dir)
 
 
 class KedroContextError(Exception):

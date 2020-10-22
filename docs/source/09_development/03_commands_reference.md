@@ -54,7 +54,6 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
 
 * Global Kedro commands
   * [`kedro --help`](#get-help-on-kedro-commands)
-  * [`kedro --verbose`](#see-logging-and-error-stack-traces)
   * [`kedro --version`](#confirm-the-kedro-version)
   * [`kedro docs`](#open-the-kedro-documentation-in-your-browser)
   * [`kedro info`](#confirm-kedro-information)
@@ -126,13 +125,6 @@ kedro_viz: 3.4.0 (hooks:global,line_magic)
 
 ```
 
-### See logging and error stack traces
-
-```bash
-kedro -v
-kedro --verbose
-```
-
 ### Create a new Kedro project
 
 ```bash
@@ -151,7 +143,7 @@ kedro docs
 
 Kedro's command line interface (CLI) allows you to associate a set of commands and dependencies with a target, which you can then execute from inside the project directory.
 
-The commands a project supports are specified in its `kedro_cli.py` file, which can be extended, either by modifying the file or by injecting commands into it via the [`plugin` framework](../07_extend_kedro/05_plugins.md).
+The commands a project supports are specified in its `cli.py` file, which can be extended, either by modifying the file or by injecting commands into it via the [`plugin` framework](../07_extend_kedro/05_plugins.md).
 
 ### Project setup
 

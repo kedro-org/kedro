@@ -41,7 +41,7 @@ here = path.abspath(path.dirname(__file__))
 PANDAS = "pandas>=0.24"
 SPARK = "pyspark~=2.2"
 HDFS = "hdfs>=2.5.8, <3.0"
-S3FS = "s3fs>=0.3.0, <0.4.1"
+S3FS = "s3fs>=0.3.0, <0.5"
 
 # get package version
 with open(path.join(here, name, "__init__.py"), encoding="utf-8") as f:

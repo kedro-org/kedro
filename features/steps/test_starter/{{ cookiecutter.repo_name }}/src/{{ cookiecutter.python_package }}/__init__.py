@@ -25,44 +25,7 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-"""This file has been deprecated and will be deleted in 0.17.0.
-Please make any additional changes in `kedro.framework.cli.jupyter.py` instead.
+"""{{ cookiecutter.project_name }}
 """
 
-
-from jupyter_client.kernelspec import NATIVE_KERNEL_NAME, KernelSpecManager
-from traitlets import Unicode
-
-from kedro.cli import load_entry_points
-
-
-def collect_line_magic():
-    """Interface function for collecting line magic functions from plugin entry points.
-    """
-    return load_entry_points("line_magic")
-
-
-class SingleKernelSpecManager(KernelSpecManager):
-    """A custom KernelSpec manager to be used by Kedro projects.
-    It limits the kernels to the default one only,
-    to make it less confusing for users, and gives it a sensible name.
-    """
-
-    default_kernel_name = Unicode(
-        "Kedro", config=True, help="Alternative name for the default kernel"
-    )
-    whitelist = [NATIVE_KERNEL_NAME]
-
-    def get_kernel_spec(self, kernel_name):
-        """
-        This function will only be called by Jupyter to get a KernelSpec
-        for the default kernel.
-        We replace the name by something sensible here.
-        """
-        kernelspec = super().get_kernel_spec(kernel_name)
-
-        if kernel_name == NATIVE_KERNEL_NAME:
-            kernelspec.display_name = self.default_kernel_name
-
-        return kernelspec
+__version__ = "0.1"

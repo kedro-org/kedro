@@ -18,7 +18,7 @@ kedro new
 
 Feel free to name your project as you like, but this guide will assume the project is named **`Kedro Tutorial`**.
 
-Keep the default names for the `repo_name` and `python_package` when prompted. Select `N` so the Iris dataset example code is not included in your project.
+Keep the default names for the `repo_name` and `python_package` when prompted.
 
 ## Install project dependencies
 
@@ -34,7 +34,7 @@ isort>=4.3.21, <5.0 # Used for linting code with `kedro lint`
 jupyter>=1.0.0, <2.0 # Used to open a Kedro-session in Jupyter Notebook & Lab
 jupyter_client>=5.1.0, <7.0 # Used to open a Kedro-session in Jupyter Notebook & Lab
 jupyterlab==0.31.1 # Used to open a Kedro-session in Jupyter Lab
-kedro==0.16.5
+kedro[pandas.CSVDataSet,pandas.ExcelDataSet]==0.16.5
 nbstripout==0.3.3 # Strips the output of a Jupyter Notebook and writes the outputless version to the original file
 pytest-cov>=2.5, <3.0 # Produces test coverage reports
 pytest-mock>=1.7.1,<2.0 # Wrapper around the mock package for easier use with pytest

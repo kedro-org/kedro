@@ -21,6 +21,7 @@
 * Fixed `kedro install` for an Anaconda environment defined in `environment.yml`.
 * Fixed backwards compatibility with templates generated with older Kedro versions <0.16.5. No longer need to update `.kedro.yml` to use `kedro lint` and `kedro jupyter notebook convert`.
 * Improved documentation.
+* Added documentation using MinIO with Kedro.
 * Improved error messages for incorrect parameters passed into a node.
 * Fixed issue with saving a `TensorFlowModelDataset` in the HDF5 format with versioning enabled.
 * Added missing `run_result` argument in `after_pipeline_run` Hooks spec.
@@ -30,7 +31,7 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Deepyaman Datta](https://github.com/deepyaman), [Bhavya Merchant](https://github.com/bnmerchant), [Lovkush Agarwal](https://github.com/Lovkush-A), [Varun Krishna S](https://github.com/vhawk19), [Sebastian Bertoli](https://github.com/sebastianbertoli), [Daniel Petti](https://github.com/djpetti), [Waylon Walker](https://github.com/waylonwalker)
+[Deepyaman Datta](https://github.com/deepyaman), [Bhavya Merchant](https://github.com/bnmerchant), [Lovkush Agarwal](https://github.com/Lovkush-A), [Varun Krishna S](https://github.com/vhawk19), [Sebastian Bertoli](https://github.com/sebastianbertoli), [noklam]https://github.com/noklam), [Daniel Petti](https://github.com/djpetti), [Waylon Walker](https://github.com/waylonwalker)
 
 # Release 0.16.5
 

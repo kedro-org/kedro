@@ -24,6 +24,7 @@
 * Fixed issue with saving a `TensorFlowModelDataset` in the HDF5 format with versioning enabled.
 * Added missing `run_result` argument in `after_pipeline_run` Hooks spec.
 * Added [kedro-starter-spaceflights](https://github.com/quantumblacklabs/kedro-starter-spaceflights/) alias for generating a project: `kedro new --starter spaceflights`.
+* Fixed a bug in IPython script that was causing context hooks to be registered twice. To apply this fix to a project generated with an older Kedro version, apply the same changes made in [this PR](https://github.com/quantumblacklabs/kedro-starter-pandas-iris/pull/16) to your `00-kedro-init.py` file.
 
 ## Breaking changes to the API
 

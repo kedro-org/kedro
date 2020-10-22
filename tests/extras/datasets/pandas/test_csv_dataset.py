@@ -122,7 +122,11 @@ class TestCSVDataSet:
             ("/tmp/test.csv", LocalFileSystem, {}),
             ("gcs://bucket/file.csv", GCSFileSystem, {}),
             ("https://example.com/file.csv", HTTPFileSystem, {}),
-            ("abfs://bucket/file.csv", AzureBlobFileSystem, {"account_name": "test"}),
+            (
+                "abfs://bucket/file.csv",
+                AzureBlobFileSystem,
+                {"account_name": "test", "account_key": "test"},
+            ),
         ],
     )
     def test_protocol_usage(self, filepath, instance_type, credentials):

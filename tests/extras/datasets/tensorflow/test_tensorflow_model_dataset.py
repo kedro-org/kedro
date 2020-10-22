@@ -39,12 +39,6 @@ from s3fs import S3FileSystem
 from kedro.io import DataSetError
 from kedro.io.core import PROTOCOL_DELIMITER, Version
 
-AWS_MODEL_DIR_NAME = "test_tf_model"
-AWS_BUCKET_NAME = "test_bucket"
-AWS_CREDENTIALS = dict(
-    aws_access_key_id="FAKE_ACCESS_KEY", aws_secret_access_key="FAKE_SECRET_KEY"
-)
-
 
 # In this test module, we wrap tensorflow and TensorFlowModelDataset imports into a module-scoped
 # fixtures to avoid them being evaluated immediately when a new test process is spawned.
@@ -133,7 +127,7 @@ def dummy_tf_subclassed_model(dummy_x_train, dummy_y_train, tf):
     """Demonstrate that own class models cannot be saved
     using HDF5 format but can using TF format
     """
-    # pylint: disable=too-many-ancestors
+
     class MyModel(tf.keras.Model):
         def __init__(self):
             super().__init__()

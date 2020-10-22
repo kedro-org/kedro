@@ -31,7 +31,10 @@ Kedro defines Hook specifications for particular execution points where users ca
 * `before_pipeline_run`
 * `after_pipeline_run`
 * `on_pipeline_error`
-
+* `before_dataset_loaded`
+* `after_dataset_loaded`
+* `before_dataset_saved`
+* `after_dataset_saved`
 
 The naming convention for non-error Hooks is `<before/after>_<noun>_<past_participle>`, in which:
 
@@ -162,6 +165,125 @@ disable_hooks_for_plugins=["<plugin_name>", ]
 ```
 
 where `<plugin_name>` is the name of an installed plugin for which the auto-registered Hooks must be disabled.
+
+## Common use cases
+
+### Use Hooks to extend a node's behaviour
+
+Prior to Kedro 0.16, to add extra behaviour before and after a node's execution, we recommended using [decorators](./03_decorators.md) on individual nodes. We also exposed a convenience method to apply decorators to [all nodes in a `Pipeline`](./03_decorators.md#how-to-apply-a-decorator-to-nodes).
+
+However, after the introduction of Hooks in 0.16, this capability is readily available through the [`before_node_run` and `after_node_run` Hooks](/kedro.framework.hooks#node-hooks). Furthermore, you can apply extra behaviour to not only an individual node or an entire Kedro pipeline, but also to a _subset_ of nodes based on their tags or namespaces. For example, let's say we want to add the following extra behaviours to a node:
+
+```python
+from kedro.pipeline.node import Node
+
+def say_hello(node: Node):
+    """An extra behaviour for a node to say hello before running.
+    """
+    print(f"Hello from {node.name}")
+```
+
+Then you can either add it to a single node based on the node's name:
+
+```python
+# <your_project>/src/<your_project>/hooks.py
+
+from kedro.framework.hooks import hook_impl
+from kedro.pipeline.node import Node
+
+
+class ProjectHooks:
+
+    @hook_impl
+    def before_node_run(self, node: Node):
+        # adding extra behaviour to a single node
+        if node.name == "hello":
+            say_hello(node)
+```
+
+Or add it to a group of nodes based on their tags:
+
+
+```python
+# <your_project>/src/<your_project>/hooks.py
+
+from kedro.framework.hooks import hook_impl
+from kedro.pipeline.node import Node
+
+
+class ProjectHooks:
+
+    @hook_impl
+    def before_node_run(self, node: Node):
+        if "hello" in node.tags:
+            say_hello(node)
+```
+
+Or add it to all nodes in the entire pipeline:
+
+```python
+# <your_project>/src/<your_project>/hooks.py
+
+from kedro.framework.hooks import hook_impl
+from kedro.pipeline.node import Node
+
+
+class ProjectHooks:
+
+    @hook_impl
+    def before_node_run(self, node: Node):
+        # adding extra behaviour to all nodes in the pipeline
+        say_hello(node)
+```
+
+If your use case takes advantage of a decorator, for example to retry a node's execution using a library such as [tenacity](https://tenacity.readthedocs.io/en/latest/), you can still decorate the node's function directly:
+
+```python
+from tenacity import retry
+
+@retry
+def my_flaky_node_function():
+    ...
+```
+
+Or applying it in the `before_node_run` Hook as follows:
+
+```python
+# <your_project>/src/<your_project>/hooks.py
+from tenacity import retry
+
+from kedro.framework.hooks import hook_impl
+from kedro.pipeline.node import Node
+
+
+class ProjectHooks:
+
+    @hook_impl
+    def before_node_run(self, node: Node):
+        # adding retrying behaviour to nodes tagged as flaky
+        if "flaky" in node.tags:
+            node.func = retry(node.func)
+```
+### Use Hooks to customise the dataset load and save methods
+From Kedro 0.18.0 [Transformers](./02_transformers.md) will be deprecated and we recommend using the `before_dataset_loaded`/`after_dataset_loaded` and `before_dataset_saved`/`after_dataset_saved` Hooks to customise the dataset `load` and `save` methods where appropriate.
+
+For example, you can add logging about the dataset load runtime as follows:
+
+```python
+@property
+def _logger(self):
+    return logging.getLogger(self.__class__.__name__)
+
+@hook_impl
+def before_dataset_loaded(self, dataset_name: str) -> None:
+    start = time.time()
+    logging.info("Loading dataset %s started at %0.3f", dataset_name, start)
+
+@hook_impl
+def after_dataset_loaded(self, dataset_name: str, data: Any) -> None:
+    end = time.time()
+    logging.info("Loading dataset %s ended at %0.3f", dataset_name, end)
+```
 
 ## Under the hood
 
@@ -353,3 +475,38 @@ class ModelTrackingHooks:
 `MLflow` example page:
 
 ![](../meta/images/mlflow.png)
+
+**Example 4:** Modify node inputs using `before_node_run` hook.
+
+If the `before_node_run` hook is implemented _and_ returns a dictionary, that dictionary is used to update the corresponding node inputs.
+
+For example, if a pipeline contains a node named `my_node`, which takes 2 inputs: `first_input` and `second_input`, to overwrite the value of `first_input` that is passed to `my_node`, we can implement the following hook:
+
+```python
+from typing import Any, Dict, Optional
+
+from kedro.framework.hooks import hook_impl
+from kedro.pipeline.node import Node
+from kedro.io import DataCatalog
+
+class NodeInputReplacementHook:
+    @hook_impl
+    def before_node_run(
+        self, node: Node, catalog: DataCatalog
+    ) -> Optional[Dict[str, Any]]:
+        """Replace `first_input` for `my_node`
+        """
+        if node.name == "my_node":
+            # return the string filepath to the `first_input` dataset
+            # instead of the underlying data
+            dataset_name = "first_input"
+            filepath = catalog._get_dataset(dataset_name)._filepath
+            return {"first_input": filepath}  # `second_input` is not affected
+        return None
+```
+
+Node input overwrites implemented in `before_node_run` affect only a specific node and do not modify the corresponding datasets in the `DataCatalog`.
+
+> *Note:* In the example above, the `before_node_run` hook implementation must return datasets present in the `inputs` dictionary. If they are not in `inputs`, the node fails with the following error: `Node <name> expected X input(s) <expected_inputs>, but got the following Y input(s) instead: <actual_inputs>`.
+
+To apply the changes once you have implemented a new hook, you need to register it, as described [above](#registering-your-hook-implementations-with-kedro), and then run Kedro.

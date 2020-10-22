@@ -26,20 +26,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""kedro is a CLI for creating Kedro projects.
-
-This module implements commands available from the kedro CLI.
 """
+This module contains an example test.
 
-import warnings
+Tests should be placed in ``src/tests``, in modules that mirror your
+project's structure, and in files named test_*.py. They are simply functions
+named ``test_*`` which test a unit of logic.
 
-from kedro.cli.cli import get_project_context, load_entry_points, main  # NOQA
+To run the tests, run ``kedro test``.
+"""
+from pathlib import Path
 
-warnings.simplefilter("default", DeprecationWarning)
+import pytest
 
-warnings.warn(
-    "All the modules in `kedro.cli` have been moved to `kedro.framework.cli`, and "
-    "`kedro.cli` will be removed in Kedro 0.17.0. Please update import paths "
-    "from `kedro.cli` to `kedro.framework.cli` in your Kedro project.",
-    DeprecationWarning,
-)
+from {{cookiecutter.python_package}}.run import ProjectContext
+
+
+@pytest.fixture
+def project_context():
+    return ProjectContext(str(Path.cwd()))
+
+
+class TestProjectContext:
+    def test_project_name(self, project_context):
+        assert project_context.project_name == "{{ cookiecutter.project_name }}"
+
+    def test_project_version(self, project_context):
+        assert project_context.project_version == "{{ cookiecutter.kedro_version }}"

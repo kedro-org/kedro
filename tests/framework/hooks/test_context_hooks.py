@@ -25,6 +25,7 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# pylint: disable=too-many-lines
 import logging
 import re
 import sys
@@ -49,6 +50,10 @@ from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node, node
 from kedro.runner import ParallelRunner
 from kedro.versioning import Journal
+
+SKIP_ON_WINDOWS = pytest.mark.skipif(
+    sys.platform.startswith("win"), reason="Due to bug in parallel runner"
+)
 
 
 @pytest.fixture
@@ -297,6 +302,28 @@ class LoggingHooks:
         )
 
     @hook_impl
+    def before_dataset_loaded(self, dataset_name: str,) -> None:
+        self.logger.info("Before dataset loaded", extra={"dataset_name": dataset_name})
+
+    @hook_impl
+    def after_dataset_loaded(self, dataset_name: str, data: Any) -> None:
+        self.logger.info(
+            "After dataset loaded", extra={"dataset_name": dataset_name, "data": data}
+        )
+
+    @hook_impl
+    def before_dataset_saved(self, dataset_name: str, data: Any) -> None:
+        self.logger.info(
+            "Before dataset saved", extra={"dataset_name": dataset_name, "data": data}
+        )
+
+    @hook_impl
+    def after_dataset_saved(self, dataset_name: str, data: Any) -> None:
+        self.logger.info(
+            "After dataset saved", extra={"dataset_name": dataset_name, "data": data}
+        )
+
+    @hook_impl
     def register_pipelines(self) -> Dict[str, Pipeline]:
         self.logger.info("Registering pipelines")
         return {"__default__": context_pipeline, "de": context_pipeline}
@@ -334,6 +361,34 @@ class DuplicateHooks:
     @hook_impl
     def register_pipelines(self) -> Dict[str, Pipeline]:
         return {"__default__": context_pipeline, "pipe": context_pipeline}
+
+
+class MockDatasetReplacement:  # pylint: disable=too-few-public-methods
+    pass
+
+
+class BeforeNodeRunHook:
+    """Should overwrite the `cars` dataset"""
+
+    @hook_impl
+    def register_pipelines(self) -> Dict[str, Pipeline]:
+        return {"__default__": context_pipeline}
+
+    @hook_impl
+    def before_node_run(self, node: Node):
+        return {"cars": MockDatasetReplacement()} if node.name == "node1" else None
+
+
+class BrokenBeforeNodeRunHook:
+    """Broken since `before_node_run` doesn't return a dictionary"""
+
+    @hook_impl
+    def register_pipelines(self) -> Dict[str, Pipeline]:
+        return {"__default__": context_pipeline}
+
+    @hook_impl
+    def before_node_run(self):
+        return MockDatasetReplacement()
 
 
 @pytest.fixture
@@ -623,9 +678,7 @@ class TestKedroContextHooks:
         assert call_record.outputs["planes"].to_dict() == dummy_dataframe.to_dict()
         assert call_record.run_id == context_with_hooks.run_id
 
-    @pytest.mark.skipif(
-        sys.platform.startswith("win"), reason="Due to bug in parallel runner"
-    )
+    @SKIP_ON_WINDOWS
     def test_on_node_error_hook_is_called_with_parallel_runner(
         self, tmp_path, mocker, logging_hooks
     ):
@@ -664,9 +717,7 @@ class TestKedroContextHooks:
             expected_error = ValueError("broken")
             assert_exceptions_equal(call_record.error, expected_error)
 
-    @pytest.mark.skipif(
-        sys.platform.startswith("win"), reason="Due to bug in parallel runner"
-    )
+    @SKIP_ON_WINDOWS
     def test_before_and_after_node_run_hooks_are_called_with_parallel_runner(
         self, tmp_path, mocker, logging_hooks, dummy_dataframe
     ):
@@ -707,6 +758,233 @@ class TestKedroContextHooks:
             assert record.getMessage() == "Ran node"
             assert record.node.name in ["node1", "node2"]
             assert set(record.outputs.keys()) <= {"planes", "ships"}
+
+    def test_before_and_after_dataset_loaded_hooks_are_called_with_sequential_runner(
+        self, context_with_hooks, dummy_dataframe, caplog
+    ):
+        context_with_hooks.catalog.save("cars", dummy_dataframe)
+        context_with_hooks.run(node_names=["node1"])
+
+        # test before dataset loaded hook
+        before_dataset_loaded_calls = [
+            record
+            for record in caplog.records
+            if record.funcName == "before_dataset_loaded"
+        ]
+        assert len(before_dataset_loaded_calls) == 1
+        call_record = before_dataset_loaded_calls[0]
+        _assert_hook_call_record_has_expected_parameters(call_record, ["dataset_name"])
+
+        assert call_record.dataset_name == "cars"
+
+        # test after dataset loaded hook
+        after_dataset_loaded_calls = [
+            record
+            for record in caplog.records
+            if record.funcName == "after_dataset_loaded"
+        ]
+        assert len(after_dataset_loaded_calls) == 1
+        call_record = after_dataset_loaded_calls[0]
+        _assert_hook_call_record_has_expected_parameters(
+            call_record, ["dataset_name", "data"]
+        )
+
+        assert call_record.dataset_name == "cars"
+        pd.testing.assert_frame_equal(call_record.data, dummy_dataframe)
+
+    @pytest.mark.skipif(
+        sys.platform.startswith("win"), reason="Due to bug in parallel runner"
+    )
+    def test_before_and_after_dataset_loaded_hooks_are_called_with_parallel_runner(
+        self, tmp_path, mocker, logging_hooks, dummy_dataframe
+    ):
+        log_records = []
+
+        class LogHandler(logging.Handler):  # pylint: disable=abstract-method
+            def handle(self, record):
+                log_records.append(record)
+
+        context_with_hooks = _create_context_with_hooks(
+            tmp_path, mocker, [logging_hooks]
+        )
+        mocker.patch(
+            "kedro.framework.context.context.load_context",
+            return_value=context_with_hooks,
+        )
+        logs_queue_listener = QueueListener(logging_hooks.queue, LogHandler())
+        logs_queue_listener.start()
+        context_with_hooks.catalog.save("cars", dummy_dataframe)
+        context_with_hooks.catalog.save("boats", dummy_dataframe)
+        context_with_hooks.run(runner=ParallelRunner(), node_names=["node1", "node2"])
+        logs_queue_listener.stop()
+
+        before_dataset_loaded_log_records = [
+            r for r in log_records if r.funcName == "before_dataset_loaded"
+        ]
+        assert len(before_dataset_loaded_log_records) == 2
+        for record in before_dataset_loaded_log_records:
+            assert record.getMessage() == "Before dataset loaded"
+            assert record.dataset_name in ["cars", "boats"]
+
+        after_dataset_loaded_log_records = [
+            r for r in log_records if r.funcName == "after_dataset_loaded"
+        ]
+        assert len(after_dataset_loaded_log_records) == 2
+        for record in after_dataset_loaded_log_records:
+            assert record.getMessage() == "After dataset loaded"
+            assert record.dataset_name in ["cars", "boats"]
+            pd.testing.assert_frame_equal(record.data, dummy_dataframe)
+
+    def test_before_and_after_dataset_saved_hooks_are_called_with_sequential_runner(
+        self, context_with_hooks, dummy_dataframe, caplog
+    ):
+        context_with_hooks.catalog.save("cars", dummy_dataframe)
+        context_with_hooks.run(node_names=["node1"])
+
+        # test before dataset saved hook
+        before_dataset_saved_calls = [
+            record
+            for record in caplog.records
+            if record.funcName == "before_dataset_saved"
+        ]
+        assert len(before_dataset_saved_calls) == 1
+        call_record = before_dataset_saved_calls[0]
+        _assert_hook_call_record_has_expected_parameters(
+            call_record, ["dataset_name", "data"]
+        )
+
+        assert call_record.dataset_name == "planes"
+        assert call_record.data.to_dict() == dummy_dataframe.to_dict()
+
+        # test after dataset saved hook
+        after_dataset_saved_calls = [
+            record
+            for record in caplog.records
+            if record.funcName == "after_dataset_saved"
+        ]
+        assert len(after_dataset_saved_calls) == 1
+        call_record = after_dataset_saved_calls[0]
+        _assert_hook_call_record_has_expected_parameters(
+            call_record, ["dataset_name", "data"]
+        )
+
+        assert call_record.dataset_name == "planes"
+        assert call_record.data.to_dict() == dummy_dataframe.to_dict()
+
+    @pytest.mark.skipif(
+        sys.platform.startswith("win"), reason="Due to bug in parallel runner"
+    )
+    def test_before_and_after_dataset_saved_hooks_are_called_with_parallel_runner(
+        self, tmp_path, mocker, logging_hooks, dummy_dataframe
+    ):
+        log_records = []
+
+        class LogHandler(logging.Handler):  # pylint: disable=abstract-method
+            def handle(self, record):
+                log_records.append(record)
+
+        context_with_hooks = _create_context_with_hooks(
+            tmp_path, mocker, [logging_hooks]
+        )
+        mocker.patch(
+            "kedro.framework.context.context.load_context",
+            return_value=context_with_hooks,
+        )
+        logs_queue_listener = QueueListener(logging_hooks.queue, LogHandler())
+        logs_queue_listener.start()
+        context_with_hooks.catalog.save("cars", dummy_dataframe)
+        context_with_hooks.catalog.save("boats", dummy_dataframe)
+        context_with_hooks.run(runner=ParallelRunner(), node_names=["node1", "node2"])
+        logs_queue_listener.stop()
+
+        before_dataset_saved_log_records = [
+            r for r in log_records if r.funcName == "before_dataset_saved"
+        ]
+        assert len(before_dataset_saved_log_records) == 2
+        for record in before_dataset_saved_log_records:
+            assert record.getMessage() == "Before dataset saved"
+            assert record.dataset_name in ["planes", "ships"]
+            assert record.data.to_dict() == dummy_dataframe.to_dict()
+
+        after_dataset_saved_log_records = [
+            r for r in log_records if r.funcName == "after_dataset_saved"
+        ]
+        assert len(after_dataset_saved_log_records) == 2
+        for record in after_dataset_saved_log_records:
+            assert record.getMessage() == "After dataset saved"
+            assert record.dataset_name in ["planes", "ships"]
+            assert record.data.to_dict() == dummy_dataframe.to_dict()
+
+
+class TestBeforeNodeRunHookWithInputUpdates:
+    """Test the behavior of `before_node_run_hook` when updating node inputs"""
+
+    @pytest.fixture(params=[BeforeNodeRunHook])
+    def context_with_before_node_run_hook(self, tmp_path, mocker, request):
+        hook_class = request.param
+        return _create_context_with_hooks(tmp_path, mocker, [hook_class()])
+
+    @pytest.mark.usefixtures("hook_manager")
+    def test_correct_input_update(
+        self, context_with_before_node_run_hook, dummy_dataframe
+    ):
+        catalog = context_with_before_node_run_hook.catalog
+        catalog.save("cars", dummy_dataframe)
+        catalog.save("boats", dummy_dataframe)
+
+        result = context_with_before_node_run_hook.run()
+        assert isinstance(result["planes"], MockDatasetReplacement)
+        assert isinstance(result["ships"], pd.DataFrame)
+
+    @SKIP_ON_WINDOWS
+    @pytest.mark.usefixtures("hook_manager")
+    def test_correct_input_update_parallel(
+        self, context_with_before_node_run_hook, dummy_dataframe
+    ):
+        catalog = context_with_before_node_run_hook.catalog
+        catalog.save("cars", dummy_dataframe)
+        catalog.save("boats", dummy_dataframe)
+
+        result = context_with_before_node_run_hook.run(runner=ParallelRunner())
+        assert isinstance(result["planes"], MockDatasetReplacement)
+        assert isinstance(result["ships"], pd.DataFrame)
+
+    @pytest.mark.parametrize(
+        "context_with_before_node_run_hook", [BrokenBeforeNodeRunHook], indirect=True
+    )
+    @pytest.mark.usefixtures("hook_manager")
+    def test_broken_input_update(
+        self, context_with_before_node_run_hook, dummy_dataframe
+    ):
+        catalog = context_with_before_node_run_hook.catalog
+        catalog.save("cars", dummy_dataframe)
+        catalog.save("boats", dummy_dataframe)
+
+        pattern = (
+            "`before_node_run` must return either None or a dictionary "
+            "mapping dataset names to updated values, got `MockDatasetReplacement`"
+        )
+        with pytest.raises(TypeError, match=re.escape(pattern)):
+            context_with_before_node_run_hook.run()
+
+    @pytest.mark.parametrize(
+        "context_with_before_node_run_hook", [BrokenBeforeNodeRunHook], indirect=True
+    )
+    @SKIP_ON_WINDOWS
+    @pytest.mark.usefixtures("hook_manager")
+    def test_broken_input_update_parallel(
+        self, context_with_before_node_run_hook, dummy_dataframe
+    ):
+        catalog = context_with_before_node_run_hook.catalog
+        catalog.save("cars", dummy_dataframe)
+        catalog.save("boats", dummy_dataframe)
+
+        pattern = (
+            "`before_node_run` must return either None or a dictionary "
+            "mapping dataset names to updated values, got `MockDatasetReplacement`"
+        )
+        with pytest.raises(TypeError, match=re.escape(pattern)):
+            context_with_before_node_run_hook.run(runner=ParallelRunner())
 
 
 class TestRegistrationHooks:

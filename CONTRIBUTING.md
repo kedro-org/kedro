@@ -99,7 +99,7 @@ def count_truthy(elements: List[Any]) -> int:
 
 > *Note:* We only accept contributions under the Apache 2.0 license and you should have permission to share the submitted code.
 
-Please note that each code file should have a licence header, include the content of [`legal_header.txt`](https://github.com/quantumblacklabs/kedro/blob/master/legal_header.txt).
+Please note that each code file should have a legal header, i.e. the content of [`LICENSE.md`](https://github.com/quantumblacklabs/kedro/blob/master/LICENSE.md).
 There is an automated check to verify that it exists. The check will highlight any issues and suggest a solution.
 
 ### Branching conventions

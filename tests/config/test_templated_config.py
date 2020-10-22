@@ -36,10 +36,10 @@ from kedro.config import TemplatedConfigLoader
 from kedro.config.templated_config import _format_object
 
 
-def _write_yaml(filepath: Path, config: Dict):
+def _write_yaml(filepath: Path, config: Dict, preamble: str = "", postamble: str = ""):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     yaml_str = yaml.dump(config)
-    filepath.write_text(yaml_str)
+    filepath.write_text(preamble + yaml_str + postamble)
 
 
 @pytest.fixture
@@ -81,6 +81,17 @@ def template_config():
 def proj_catalog_param(tmp_path, param_config):
     proj_catalog = tmp_path / "base" / "catalog.yml"
     _write_yaml(proj_catalog, param_config)
+
+
+@pytest.fixture
+def proj_catalog_param_w_jinja2_for(tmp_path, param_config):
+    proj_catalog = tmp_path / "base" / "catalog.yml"
+    _write_yaml(
+        proj_catalog,
+        param_config,
+        "{% for boat_type in ['house', 'paddle'] %}\n{{ boat_type }}.",
+        "{% endfor %}\n",
+    )
 
 
 @pytest.fixture
@@ -239,6 +250,26 @@ class TestTemplatedConfigLoader:
         assert catalog["boats"]["columns"]["name"] == "VARCHAR"
         assert catalog["boats"]["columns"]["top_speed"] == "FLOAT"
         assert catalog["boats"]["users"] == ["fred", "ron"]
+
+    @pytest.mark.usefixtures("proj_catalog_param_w_jinja2_for", "proj_catalog_globals")
+    def test_create_config_loader_w_jinja2_for(
+        self, project_context, tmp_path, conf_paths
+    ):
+        """Test parameterized config with globals yaml file"""
+        (tmp_path / "local").mkdir(exist_ok=True)
+
+        catalog = project_context._create_config_loader(conf_paths).get("catalog*.yml")
+
+        for boat_type in ["house", "paddle"]:
+            assert catalog[f"{boat_type}.boats"]["type"] == "SparkDataSet"
+            assert (
+                catalog[f"{boat_type}.boats"]["filepath"]
+                == "s3a://boat-and-car-bucket/01_raw/boats.csv"
+            )
+            assert catalog[f"{boat_type}.boats"]["columns"]["id"] == "VARCHAR"
+            assert catalog[f"{boat_type}.boats"]["columns"]["name"] == "VARCHAR"
+            assert catalog[f"{boat_type}.boats"]["columns"]["top_speed"] == "FLOAT"
+            assert catalog[f"{boat_type}.boats"]["users"] == ["fred", "ron"]
 
     @pytest.mark.usefixtures("proj_catalog_param")
     def test_catlog_parameterized_no_params(self, tmp_path, conf_paths):

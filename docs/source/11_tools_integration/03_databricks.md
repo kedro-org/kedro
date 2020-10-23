@@ -1,7 +1,7 @@
 # How to use Kedro on a Databricks cluster
 
 
-> *Note:* This documentation is based on `Kedro 0.16.5`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.6`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 In this tutorial we use [PySpark Iris Kedro Starter](https://github.com/quantumblacklabs/kedro-starter-pyspark-iris) to bootstrap a Kedro project using Spark.
 
@@ -38,7 +38,7 @@ conda create --name iris_databricks python=3.7 -y
 conda activate iris_databricks
 
 # install Kedro and create a new project
-pip install "kedro~=0.16.5"
+pip install "kedro~=0.16.6"
 # name your project Iris Databricks when prompted for it
 kedro new --starter pyspark-iris
 ```
@@ -309,10 +309,10 @@ In your newly created notebook put each code snippet from below into a separate 
 %sh rm -rf ~/projects/iris-databricks && git clone --single-branch --branch master https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/${GITHUB_USER}/<your-repo-name>.git ~/projects/iris-databricks
 ```
 
-* Install the latest version of Kedro compatible with version `0.16.5`
+* Install the latest version of Kedro compatible with version `0.16.6`
 
 ```console
-%pip install "kedro[spark.SparkDataSet]~=0.16.5"
+%pip install "kedro[spark.SparkDataSet]~=0.16.6"
 ```
 
 * Copy input data into DBFS

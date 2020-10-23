@@ -13,6 +13,7 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Enabled loading config files with Jinja2 templating.
 * Fixed `TypeError` when converting dict inputs to a node made from a wrapped `partial` function.
 * `PartitionedDataSet` improvements:
   - Supported passing arguments to the underlying filesystem.

@@ -252,10 +252,8 @@ class TestTemplatedConfigLoader:
         assert catalog["boats"]["users"] == ["fred", "ron"]
 
     @pytest.mark.usefixtures("proj_catalog_param_w_jinja2_for", "proj_catalog_globals")
-    def test_create_config_loader_w_jinja2_for(
-        self, tmp_path, conf_paths
-    ):
-        """Test parameterized config with globals yaml file"""
+    def test_catalog_parameterized_w_globals_w_jinja2_for(self, tmp_path, conf_paths):
+        """Test parameterized config with globals & Jinja2 templating"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
         catalog = TemplatedConfigLoader(conf_paths, globals_pattern="*globals.yml").get(
@@ -326,7 +324,9 @@ class TestTemplatedConfigLoader:
         assert catalog["planes"]["secret_tables"] == ["models", "pilots", "engines"]
 
     @pytest.mark.usefixtures("proj_catalog_param_mixed", "proj_catalog_globals")
-    def test_catalog_parameterized_w_dict_mixed(self, tmp_path, conf_paths, get_environ):
+    def test_catalog_parameterized_w_dict_mixed(
+        self, tmp_path, conf_paths, get_environ
+    ):
         """Test parameterized config with input from dictionary with values
         and globals.yml"""
         (tmp_path / "local").mkdir(exist_ok=True)

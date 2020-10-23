@@ -25,16 +25,27 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This file has been deprecated and will be deleted in 0.17.0.
-Please make any additional changes in `kedro.framework.context.context.py` instead.
-"""
-# flake8: NOQA
-# pylint: disable=unused-import,wildcard-import,unused-wildcard-import
 
-from kedro.framework.context import *
-from kedro.framework.context.context import (
-    _convert_paths_to_absolute_posix,
-    _is_relative_path,
-    _validate_layers_for_transcoding,
-    _version_mismatch_error,
-)
+"""Application entry point."""
+from pathlib import Path
+
+from kedro.framework.context import KedroContext, load_package_context
+
+
+class ProjectContext(KedroContext):
+    """Users can override the remaining methods from the parent class here,
+    or create new ones (e.g. as required by plugins)
+    """
+
+
+def run_package():
+    # Entry point for running a Kedro project packaged with `kedro package`
+    # using `python -m <project_package>.run` command.
+    project_context = load_package_context(
+        project_path=Path.cwd(), package_name=Path(__file__).resolve().parent.name
+    )
+    project_context.run()
+
+
+if __name__ == "__main__":
+    run_package()

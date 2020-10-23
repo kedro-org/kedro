@@ -19,7 +19,7 @@ The architecture diagram above is formed of the following building blocks:
 
 This section contains the building blocks that help accessing core components of the Kedro project (e.g., the data catalog or the pipeline).
 
-#### `kedro_cli.py`
+#### `cli.py`
 
 A Python file that contains project specific CLI commands (e.g., `kedro run`, `kedro test`, etc.). This file must be located at the root of the project.
 

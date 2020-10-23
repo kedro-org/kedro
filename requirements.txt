@@ -2,7 +2,8 @@ anyconfig~=0.9.7
 cachetools~=4.1
 click<8.0
 cookiecutter>=1.6.0, <1.7.0 # 1.7.1 release pinned python-slugify to be >=4.0.0, which conflicts with airflow subdependency in Kedro-airflow
-fsspec>=0.5.1, <0.7.0  # There is a breaking change in 0.7.0
+fsspec>=0.5.1, <0.8
+gitpython~=3.0
 jmespath>=0.9.5, <1.0
 jupyter_client>=5.1, < 7.0
 pip-tools~=5.0

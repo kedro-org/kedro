@@ -1,5 +1,5 @@
 [tool.black]
-exclude = "/templates/"
+exclude = "/templates/|^features/steps/test_starter"
 
 [tool.isort]
 multi_line_output = 3

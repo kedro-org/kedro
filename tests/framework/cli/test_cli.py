@@ -30,7 +30,7 @@ from pathlib import Path
 
 import click
 from mock import patch
-from pytest import fixture, mark, raises, warns
+from pytest import fixture, mark, raises
 
 from kedro import __version__ as version
 from kedro.framework.cli import get_project_context
@@ -61,17 +61,17 @@ def stub_command():
 
 
 @forward_command(stub_cli, name="forwarded_command")
-def forwarded_command(args):
+def forwarded_command(args, **kwargs):  # pylint: disable=unused-argument
     print("fred", args)
 
 
 @forward_command(stub_cli, name="forwarded_help", forward_help=True)
-def forwarded_help(args):
+def forwarded_help(args, **kwargs):  # pylint: disable=unused-argument
     print("fred", args)
 
 
 @forward_command(stub_cli)
-def unnamed(args):
+def unnamed(args, **kwargs):  # pylint: disable=unused-argument
     print("fred", args)
 
 
@@ -332,29 +332,6 @@ class TestCliUtils:
 
 @mark.usefixtures("mocked_load_context")
 class TestGetProjectContext:
-    def _deprecation_msg(self, key):
-        msg_dict = {
-            "get_config": ["config_loader", "ConfigLoader"],
-            "create_catalog": ["catalog", "DataCatalog"],
-            "create_pipeline": ["pipeline", "Pipeline"],
-            "template_version": ["project_version", None],
-            "project_name": ["project_name", None],
-            "project_path": ["project_path", None],
-        }
-        attr, obj_name = msg_dict[key]
-        msg = r"\`get_project_context\(\"{}\"\)\` is now deprecated\. ".format(key)
-        if obj_name:
-            msg += (
-                r"This is still returning a function that returns \`{}\` "
-                r"instance\, however passed arguments have no effect anymore "
-                r"since Kedro 0.15.0\. ".format(obj_name)
-            )
-        msg += (
-            r"Please get \`KedroContext\` instance by calling "
-            r"\`get_project_context\(\)\` and use its \`{}\` attribute\.".format(attr)
-        )
-        return msg
-
     def test_get_context_without_project_path(self, mocked_load_context):
         dummy_context = get_project_context("context")
         mocked_load_context.assert_called_once_with(Path.cwd())
@@ -365,45 +342,6 @@ class TestGetProjectContext:
         dummy_context = get_project_context("context", project_path=dummy_project_path)
         mocked_load_context.assert_called_once_with(dummy_project_path)
         assert isinstance(dummy_context, DummyContext)
-
-    def test_get_config(self, tmp_path):
-        key = "get_config"
-        pattern = self._deprecation_msg(key)
-        with warns(DeprecationWarning, match=pattern):
-            config_loader = get_project_context(key)
-            assert config_loader(tmp_path) == "config_loader"
-
-    def test_create_catalog(self):
-        key = "create_catalog"
-        pattern = self._deprecation_msg(key)
-        with warns(DeprecationWarning, match=pattern):
-            catalog = get_project_context(key)
-            assert catalog("config") == "catalog"
-
-    def test_create_pipeline(self):
-        key = "create_pipeline"
-        pattern = self._deprecation_msg(key)
-        with warns(DeprecationWarning, match=pattern):
-            pipeline = get_project_context(key)
-            assert pipeline() == "pipeline"
-
-    def test_template_version(self):
-        key = "template_version"
-        pattern = self._deprecation_msg(key)
-        with warns(DeprecationWarning, match=pattern):
-            assert get_project_context(key) == "dummy_version"
-
-    def test_project_name(self):
-        key = "project_name"
-        pattern = self._deprecation_msg(key)
-        with warns(DeprecationWarning, match=pattern):
-            assert get_project_context(key) == "dummy_name"
-
-    def test_project_path(self):
-        key = "project_path"
-        pattern = self._deprecation_msg(key)
-        with warns(DeprecationWarning, match=pattern):
-            assert get_project_context(key) == "dummy_path"
 
     def test_verbose(self):
         assert not get_project_context("verbose")
@@ -418,8 +356,9 @@ class TestEntryPoints:
 
     def test_project_error_is_caught(self, entry_points, entry_point):
         entry_point.load.side_effect = Exception()
-        groups = load_entry_points("project")
-        assert groups == []
+        with raises(KedroCliError, match="Loading project commands"):
+            load_entry_points("project")
+
         entry_points.assert_called_once_with(group="kedro.project_commands")
 
     def test_global_groups(self, entry_points, entry_point):
@@ -430,8 +369,8 @@ class TestEntryPoints:
 
     def test_global_error_is_caught(self, entry_points, entry_point):
         entry_point.load.side_effect = Exception()
-        groups = load_entry_points("global")
-        assert groups == []
+        with raises(KedroCliError, match="Loading global commands from"):
+            load_entry_points("global")
         entry_points.assert_called_once_with(group="kedro.global_commands")
 
     def test_init(self, entry_points, entry_point):
@@ -441,5 +380,6 @@ class TestEntryPoints:
 
     def test_init_error_is_caught(self, entry_points, entry_point):
         entry_point.load.side_effect = Exception()
-        _init_plugins()
+        with raises(KedroCliError, match="Initializing"):
+            _init_plugins()
         entry_points.assert_called_once_with(group="kedro.init")

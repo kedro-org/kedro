@@ -64,6 +64,7 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
   * [`kedro build-docs`](#build-the-project-documentation)
   * [`kedro build-reqs`](#build-the-projects-dependency-tree)
   * [`kedro catalog list`](#list-datasets-per-pipeline-per-type)
+  * [`kedro catalog create`](#create-a-data-catalog-yaml-configuration-file)
   * [`kedro install`](#install-all-package-dependencies)
   * [`kedro ipython`](#notebooks)
   * [`kedro jupyter convert`](#copy-tagged-cells)
@@ -327,7 +328,7 @@ kedro pipeline list
 
 #### Datasets
 
-#### List datasets per pipeline per type
+##### List datasets per pipeline per type
 ```bash
 kedro catalog list
 ```
@@ -339,6 +340,19 @@ The command also accepts an optional `--pipeline` argument that allows you to sp
 kedro catalog list --pipeline "ds,de"
 ```
 
+#### Data Catalog
+
+##### Create a Data Catalog YAML configuration file
+
+The following command creates a Data Catalog YAML configuration file with `MemoryDataSet` datasets for each dataset in a registered pipeline, if it is missing from the `DataCatalog`.
+
+```bash
+kedro catalog create --pipeline <pipeline_name>
+```
+
+The command also accepts an optional `--env` argument that allows you to specify a configuration environment (defaults to `base`).
+
+The command creates the following file: `<conf_root>/<env>/catalog/<pipeline_name>.yml`
 
 #### Notebooks
 

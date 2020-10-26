@@ -1,7 +1,7 @@
 # Kedro architecture overview
 
 
-> *Note:* This documentation is based on `Kedro 0.16.5`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.6`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 Here is a diagram showing high-level architecture of Kedro library:
 
@@ -36,7 +36,7 @@ A Python file located in `src/<python_package>/run.py`, which by default contain
 
 `.kedro.yml` must be located at the root of the project.
 
-> *Note:* Since Kedro 0.16.5, the `.kedro.yml` file is optional, instead a `pyproject.toml` file can be used with the same content under `[tool.kedro]` section.
+> *Note:* Since Kedro 0.16.6, the `.kedro.yml` file is optional, instead a `pyproject.toml` file can be used with the same content under `[tool.kedro]` section.
 
 #### `00-kedro-init.py`
 

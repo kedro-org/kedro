@@ -85,7 +85,7 @@ class NodeSpecs:
         inputs: Dict[str, Any],
         is_async: bool,
         run_id: str,
-    ) -> None:
+    ) -> Optional[Dict[str, Any]]:
         """Hook to be invoked before a node runs.
         The arguments received are the same as those used by ``kedro.runner.run_node``
 
@@ -97,6 +97,11 @@ class NodeSpecs:
                 not the dataset instance.
             is_async: Whether the node was run in ``async`` mode.
             run_id: The id of the run.
+
+        Returns:
+            Either None or a dictionary mapping dataset name(s) to new value(s).
+                If returned, this dictionary will be used to update the node inputs,
+                which allows to overwrite the node inputs.
         """
         pass
 
@@ -256,6 +261,52 @@ class PipelineSpecs:
                    }
             pipeline: The ``Pipeline`` that will was run.
             catalog: The ``DataCatalog`` used during the run.
+        """
+        pass
+
+
+class DatasetSpecs:
+    """Namespace that defines all specifications for a dataset's lifecycle hooks."""
+
+    @hook_spec
+    def before_dataset_loaded(self, dataset_name: str) -> None:
+        """Hook to be invoked before a dataset is loaded from the catalog.
+
+           Args:
+               dataset_name: name of the dataset to be loaded from the catalog.
+
+        """
+        pass
+
+    @hook_spec
+    def after_dataset_loaded(self, dataset_name: str, data: Any) -> None:
+        """Hook to be invoked after a dataset is loaded from the catalog.
+
+           Args:
+               dataset_name: name of the dataset that was loaded from the catalog.
+               data: the actual data that was loaded from the catalog.
+
+        """
+        pass
+
+    @hook_spec
+    def before_dataset_saved(self, dataset_name: str, data: Any) -> None:
+        """Hook to be invoked before a dataset is saved to the catalog.
+
+           Args:
+               dataset_name: name of the dataset to be saved to the catalog.
+               data: the actual data to be saved to the catalog.
+
+        """
+        pass
+
+    @hook_spec
+    def after_dataset_saved(self, dataset_name: str, data: Any) -> None:
+        """Hook to be invoked after a dataset is saved in the catalog.
+
+           Args:
+               dataset_name: name of the dataset that was saved to the catalog.
+               data: the actual data that was saved to the catalog.
         """
         pass
 

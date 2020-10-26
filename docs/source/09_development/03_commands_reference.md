@@ -54,7 +54,6 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
 
 * Global Kedro commands
   * [`kedro --help`](#get-help-on-kedro-commands)
-  * [`kedro --verbose`](#see-logging-and-error-stack-traces)
   * [`kedro --version`](#confirm-the-kedro-version)
   * [`kedro docs`](#open-the-kedro-documentation-in-your-browser)
   * [`kedro info`](#confirm-kedro-information)
@@ -65,6 +64,7 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
   * [`kedro build-docs`](#build-the-project-documentation)
   * [`kedro build-reqs`](#build-the-projects-dependency-tree)
   * [`kedro catalog list`](#list-datasets-per-pipeline-per-type)
+  * [`kedro catalog create`](#create-a-data-catalog-yaml-configuration-file)
   * [`kedro install`](#install-all-package-dependencies)
   * [`kedro ipython`](#notebooks)
   * [`kedro jupyter convert`](#copy-tagged-cells)
@@ -126,13 +126,6 @@ kedro_viz: 3.4.0 (hooks:global,line_magic)
 
 ```
 
-### See logging and error stack traces
-
-```bash
-kedro -v
-kedro --verbose
-```
-
 ### Create a new Kedro project
 
 ```bash
@@ -151,7 +144,7 @@ kedro docs
 
 Kedro's command line interface (CLI) allows you to associate a set of commands and dependencies with a target, which you can then execute from inside the project directory.
 
-The commands a project supports are specified in its `kedro_cli.py` file, which can be extended, either by modifying the file or by injecting commands into it via the [`plugin` framework](../07_extend_kedro/05_plugins.md).
+The commands a project supports are specified in its `cli.py` file, which can be extended, either by modifying the file or by injecting commands into it via the [`plugin` framework](../07_extend_kedro/04_plugins.md).
 
 ### Project setup
 
@@ -335,7 +328,7 @@ kedro pipeline list
 
 #### Datasets
 
-#### List datasets per pipeline per type
+##### List datasets per pipeline per type
 ```bash
 kedro catalog list
 ```
@@ -347,6 +340,19 @@ The command also accepts an optional `--pipeline` argument that allows you to sp
 kedro catalog list --pipeline "ds,de"
 ```
 
+#### Data Catalog
+
+##### Create a Data Catalog YAML configuration file
+
+The following command creates a Data Catalog YAML configuration file with `MemoryDataSet` datasets for each dataset in a registered pipeline, if it is missing from the `DataCatalog`.
+
+```bash
+kedro catalog create --pipeline <pipeline_name>
+```
+
+The command also accepts an optional `--env` argument that allows you to specify a configuration environment (defaults to `base`).
+
+The command creates the following file: `<conf_root>/<env>/catalog/<pipeline_name>.yml`
 
 #### Notebooks
 

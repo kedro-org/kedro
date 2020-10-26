@@ -1,12 +1,47 @@
 # Upcoming 0.17.0 release
 
 ## Major features and improvements
+* Added `kedro catalog create` command. It creates `<conf_root>/<env>/catalog/<pipeline_name>.yml` configuration file with `MemoryDataSet` datasets for each dataset in a registered pipeline if it is missing from Data Catalog.
 
 ## Bug fixes and other changes
+*  Bumped maximum required `fsspec` version to 0.8.
+* `before_node_run` can now overwrite node inputs by returning a dictionary with the corresponding updates.
+* Added minimal, black-compatible flake8 configuration to the project template.
 
 ## Breaking changes to the API
+* `kedro.io.DataCatalog.exists()` returns `False` when the dataset does not exist, as opposed to raising an exception.
+* Bumped maximum supported `s3fs` version to 0.5 (`S3FileSystem` interface has changed since 0.4.1 version).
+* Deleted the deprecated `kedro.cli` and `kedro.context` modules in favor of `kedro.framework.cli` and `kedro.framework.context` respectively.
+* The pipeline-specific `catalog.yml` file is no longer automatically created for modular pipelines when doing `kedro pipeline create`.
+* Removed `include_examples` from `kedro new`. It has been replaced with Kedro starter.
+* Changed `--verbose` flag from a global command to a project-specific command flag (e.g `kedro --verbose new` becomes `kedro new --verbose`).
+* Dropped support of `dataset_credentials` key in credentials in PartitionedDataSet.
+* `get_source_dir()` was removed from `kedro/framework/cli/utils.py`.
+* Dropped support of `get_config`, `create_catalog`, `create_pipeline`, `template_version`, `project_name` and `project_path` keys by `get_project_context()` function (`kedro/framework/cli/cli.py`).
+* Added a `DeprecationWarning` to the decorator API for both `node` and `pipeline`. Added documentation to recommend using Hooks for extending node's behavior instead.
+* Added a `DeprecationWarning` to the Transformers API when adding a transformer to the catalog. Added documentation to recommend using Hooks for customising the `load` and `save` methods.
+* Added `DatasetSpecs` with hooks to run before and after loading and saving datasets from/to the catalog.
+* `kedro new --starter` now defaults to fetching the starter template matching the installed Kedro version.
+* Renamed `kedro_cli.py` to `cli.py` and moved it inside the Python packge (`src/<package_name>/`).
 
 ## Thanks for supporting contributions
+[Deepyaman Datta](https://github.com/deepyaman)
+
+### Migration guide from Kedro 0.16.* to 0.17.*
+
+#### General Migration
+
+**reminder** [How do I upgrade Kedro](https://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#how-do-i-upgrade-kedro) covers a few key things to remember when updating any kedro version.
+
+#### Migration for `kedro_cli.py`
+
+In your `.kedro.yml` file within the project root directory, add the following key:
+
+```yaml
+package_name: "<your_package_name>"
+```
+
+Rename `kedro_cli.py` file to `cli.py` and move it inside your Python package directory, i.e. `<project_root>/src/<package_name>`.
 
 # Release 0.16.6
 
@@ -33,7 +68,7 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Deepyaman Datta](https://github.com/deepyaman), [Bhavya Merchant](https://github.com/bnmerchant), [Lovkush Agarwal](https://github.com/Lovkush-A), [Varun Krishna S](https://github.com/vhawk19), [Sebastian Bertoli](https://github.com/sebastianbertoli), [noklam](https://github.com/noklam), [Daniel Petti](https://github.com/djpetti), [Waylon Walker](https://github.com/waylonwalker)
+[Deepyaman Datta](https://github.com/deepyaman), [Bhavya Merchant](https://github.com/bnmerchant), [Lovkush Agarwal](https://github.com/Lovkush-A), [Varun Krishna S](https://github.com/vhawk19), [Sebastian Bertoli](https://github.com/sebastianbertoli), [noklam](https://github.com/noklam), [Daniel Petti](https://github.com/djpetti), [Waylon Walker](https://github.com/waylonwalker), [Saran Balaji C](https://github.com/csaranbalaji)
 
 # Release 0.16.5
 

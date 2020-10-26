@@ -19,7 +19,7 @@ The architecture diagram above is formed of the following building blocks:
 
 This section contains the building blocks that help accessing core components of the Kedro project (e.g., the data catalog or the pipeline).
 
-#### `kedro_cli.py`
+#### `cli.py`
 
 A Python file that contains project specific CLI commands (e.g., `kedro run`, `kedro test`, etc.). This file must be located at the root of the project.
 
@@ -32,7 +32,7 @@ A Python file located in `src/<python_package>/run.py`, which by default contain
 `.kedro.yml` identifies the project root, which is used by other Kedro components and contains the following configuration entries:
 - `source_dir`: (Optional) The directory of the source path relative to the project root path. Default directory is `src/` and when customised the path should be separated by a forward slash (e.g `src/<path_to_src>/`)
 - `context_path`: A top-level key pointing to the absolute path of the context class implementation (default is `<python_project>.run.ProjectContext`)
-- `hooks`: (Optional) A list of paths pointing to [Hooks](../07_extend_kedro/04_hooks.md) implementations to be registered with the project (default is `<python_project>.hooks.project_hooks`)
+- `hooks`: (Optional) A list of paths pointing to [Hooks](../07_extend_kedro/02_hooks.md) implementations to be registered with the project (default is `<python_project>.hooks.project_hooks`)
 
 `.kedro.yml` must be located at the root of the project.
 
@@ -60,7 +60,7 @@ A Python file that contains Kedro global CLI commands, i.e. the ones that do not
 
 #### `plugins`
 
-Any CLI command that is implemented by a [Kedro plugin](../07_extend_kedro/05_plugins.md) (e.g., [Kedro-Docker](https://github.com/quantumblacklabs/kedro-docker), [Kedro-Airflow](https://github.com/quantumblacklabs/kedro-airflow), [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz)).
+Any CLI command that is implemented by a [Kedro plugin](../07_extend_kedro/04_plugins.md) (e.g., [Kedro-Docker](https://github.com/quantumblacklabs/kedro-docker), [Kedro-Airflow](https://github.com/quantumblacklabs/kedro-airflow), [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz)).
 
 #### `get_project_context()`
 

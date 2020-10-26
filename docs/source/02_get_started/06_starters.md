@@ -6,7 +6,7 @@ Kedro starters are used to create projects that contain code to run as-is, or to
 * To add a `docker-compose` setup to launch Kedro next to a monitoring stack
 * To add deployment scripts and CI/CD setup for your targeted infrastructure
 
-A Kedro starter is a [Cookiecutter](https://cookiecutter.readthedocs.io/en/1.7.2/) template that contains the boilerplate code for a Kedro project. You can create your own starters for reuse within a project or team, as described in the documentation about [how to create a Kedro starter](../07_extend_kedro/06_create_kedro_starters.md).
+A Kedro starter is a [Cookiecutter](https://cookiecutter.readthedocs.io/en/1.7.2/) template that contains the boilerplate code for a Kedro project. You can create your own starters for reuse within a project or team, as described in the documentation about [how to create a Kedro starter](../07_extend_kedro/05_create_kedro_starters.md).
 
 ## How to use Kedro starters
 

@@ -9,7 +9,7 @@ If you're running your Kedro pipeline from the CLI or you can't/don't want to ru
 * If you have long running nodes or pipelines, inserting `print` statements and running them multiple times quickly becomes a time-consuming procedure.
 * Debugging nodes outside the `run` session isn't very helpful because getting access to the local scope within the `node` can be hard, especially if you're dealing with large data or memory datasets, where you need to chain a few nodes together or re-run your pipeline to produce the data for debugging purposes.
 
-This guide provides examples on how to instantiate a [post-mortem](https://docs.python.org/3/library/pdb.html#pdb.post_mortem) debugging session with [`pdb`](https://docs.python.org/3/library/pdb.html) using [Hooks](../07_extend_kedro/04_hooks.md) when an uncaught error occurs during a pipeline run. Note that [ipdb](https://pypi.org/project/ipdb/) could be integrated in the same manner.
+This guide provides examples on how to instantiate a [post-mortem](https://docs.python.org/3/library/pdb.html#pdb.post_mortem) debugging session with [`pdb`](https://docs.python.org/3/library/pdb.html) using [Hooks](../07_extend_kedro/02_hooks.md) when an uncaught error occurs during a pipeline run. Note that [ipdb](https://pypi.org/project/ipdb/) could be integrated in the same manner.
 
 If you are looking for guides on how to setup debugging with IDEs, please visit the guide for [VSCode](./01_set_up_vscode.md#debugging) and [PyCharm](./02_set_up_pycharm.md#debugging).
 

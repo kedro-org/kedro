@@ -1,4 +1,3 @@
-
 # Create a Kedro starter
 
 Kedro starters are used to create projects that contain code to run as-is, or to adapt and extend. A good example is the Iris dataset example of basic Kedro project layout, configuration and initialisation code. A team may find it useful to build Kedro starters to create reusable projects that bootstrap a common base and can be extended.

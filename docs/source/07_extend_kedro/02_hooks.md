@@ -141,7 +141,7 @@ hooks=["your_project.hooks.transformer_hooks"]
 ```
 
 
-Kedro also has auto-discovery enabled by default. This means that any installed plugins that declare a Hooks entry-point will be registered. To learn more about how to enable this for your custom plugin, see our [plugin development guide](../07_extend_kedro/05_plugins.md#hooks).
+Kedro also has auto-discovery enabled by default. This means that any installed plugins that declare a Hooks entry-point will be registered. To learn more about how to enable this for your custom plugin, see our [plugin development guide](04_plugins.md#hooks).
 
 >Note: Auto-discovered Hooks will run *first*, followed by the ones specified in `.kedro.yml` or `pyproject.toml` (if `.kedro.yml` doesn't exist), and finally `ProjectContext.hooks`.
 
@@ -170,7 +170,7 @@ where `<plugin_name>` is the name of an installed plugin for which the auto-regi
 
 ### Use Hooks to extend a node's behaviour
 
-Prior to Kedro 0.16, to add extra behaviour before and after a node's execution, we recommended using [decorators](./03_decorators.md) on individual nodes. We also exposed a convenience method to apply decorators to [all nodes in a `Pipeline`](./03_decorators.md#how-to-apply-a-decorator-to-nodes).
+Prior to Kedro 0.16, to add extra behaviour before and after a node's execution, we recommended using [decorators](07_decorators.md) on individual nodes. We also exposed a convenience method to apply decorators to [all nodes in a `Pipeline`](07_decorators.md#how-to-apply-a-decorator-to-nodes).
 
 However, after the introduction of Hooks in 0.16, this capability is readily available through the [`before_node_run` and `after_node_run` Hooks](/kedro.framework.hooks#node-hooks). Furthermore, you can apply extra behaviour to not only an individual node or an entire Kedro pipeline, but also to a _subset_ of nodes based on their tags or namespaces. For example, let's say we want to add the following extra behaviours to a node:
 
@@ -265,7 +265,7 @@ class ProjectHooks:
             node.func = retry(node.func)
 ```
 ### Use Hooks to customise the dataset load and save methods
-From Kedro 0.18.0 [Transformers](./02_transformers.md) will be deprecated and we recommend using the `before_dataset_loaded`/`after_dataset_loaded` and `before_dataset_saved`/`after_dataset_saved` Hooks to customise the dataset `load` and `save` methods where appropriate.
+From Kedro 0.18.0 [Transformers](06_transformers.md) will be deprecated and we recommend using the `before_dataset_loaded`/`after_dataset_loaded` and `before_dataset_saved`/`after_dataset_saved` Hooks to customise the dataset `load` and `save` methods where appropriate.
 
 For example, you can add logging about the dataset load runtime as follows:
 

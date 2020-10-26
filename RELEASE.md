@@ -1,6 +1,7 @@
 # Upcoming 0.17.0 release
 
 ## Major features and improvements
+* Added `kedro catalog create` command. It creates `<conf_root>/<env>/catalog/<pipeline_name>.yml` configuration file with `MemoryDataSet` datasets for each dataset in a registered pipeline if it is missing from Data Catalog.
 
 ## Bug fixes and other changes
 *  Bumped maximum required `fsspec` version to 0.8.

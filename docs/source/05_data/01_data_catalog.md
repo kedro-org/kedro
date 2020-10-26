@@ -281,9 +281,23 @@ dev_minio:
 
 `docker run -p 9000:9000 -e "MINIO_ACCESS_KEY=token" -e "MINIO_SECRET_KEY=key" minio/minio server /data`
 
+## Creating a Data Catalog YAML configuration file via CLI
+
+You can use [`kedro catalog create` command](../09_development/03_commands_reference.md#create-a-data-catalog-yaml-configuration-file) to create a Data Catalog YAML configuration.
+
+It creates a `<conf_root>/<env>/catalog/<pipeline_name>.yml` configuration file with `MemoryDataSet` datasets for each dataset in a registered pipeline if it is missing from the `DataCatalog`.
+
+```yaml
+# <conf_root>/<env>/catalog/<pipeline_name>.yml
+rockets:
+  type: MemoryDataSet
+scooters:
+  type: MemoryDataSet
+```
+
 ## Adding parameters
 
-You can [configure parameters](../04_kedro_project_setup/02_configuration.md#loading-parameters) for your project and [reference them](../04_kedro_project_setup/02_configuration.md#using-parameters) in your nodes. The way to do this is via `add_feed_dict()` method (Relevant API documentation: [DataCatalog](/kedro.io.DataCatalog)). You can use this method to add any other entry / metadata you wish on the `DataCatalog`.
+You can [configure parameters](../04_kedro_project_setup/02_configuration.md#loading-parameters) for your project and [reference them](../04_kedro_project_setup/02_configuration.md#using-parameters) in your nodes. Do this using the `add_feed_dict()` method ([API documentation](/kedro.io.DataCatalog)). You can use this method to add any other entry / metadata you wish on the `DataCatalog`.
 
 
 ## Feeding in credentials

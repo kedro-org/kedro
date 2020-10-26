@@ -141,7 +141,7 @@ To test this out, let's add a dataset to the data catalog to load [Pikachu's](ht
 
 ```yaml
 # in conf/base/catalog.yml
-kedro_pokemon.extras.datasets
+
 pikachu:
   type: kedro_pokemon.extras.datasets.image_dataset.ImageDataSet
   filepath: data/01_raw/pokemon-images-and-types/images/images/pikachu.png
@@ -289,6 +289,8 @@ Kedro's [`PartitionedDataSet`](../05_data/02_kedro_io.md#partitioned-dataset) is
 To use `PartitionedDataSet` with `ImageDataSet` to load all Pokemon PNG images, add this to the data catalog YAML so that `PartitionedDataSet` loads all PNG files from the data directory using `ImageDataSet`:
 
 ```yaml
+# in conf/base/catalog.yml
+
 pokemon:
   type: PartitionedDataSet
   dataset: kedro_pokemon.extras.datasets.image_dataset.ImageDataSet
@@ -506,8 +508,9 @@ We provide additional examples of [how to use parameters through the data catalo
 
 ## How to contribute a custom dataset implementation
 
-One of the easiest ways to contribute back to Kedro is to share a custom dataset. Kedro has a `kedro.extras.datasets` sub-package where you can add a new custom dataset implementation to share it with others. You can find out more in
- the [Kedro contribution guide](https://github.com/quantumblacklabs/kedro) on Github.
+```eval_rst
+One of the easiest ways to contribute back to Kedro is to share a custom dataset. Kedro has a :code:`kedro.extras.datasets` sub-package where you can add a new custom dataset implementation to share it with others. You can find out more in the `Kedro contribution guide <https://github.com/quantumblacklabs/kedro/blob/master/CONTRIBUTING.md>`_ on Github.
+```
 
 To contribute your custom dataset:
 

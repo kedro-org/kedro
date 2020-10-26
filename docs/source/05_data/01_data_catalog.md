@@ -1,6 +1,6 @@
 # The Data Catalog
 
-> *Note:* This documentation is based on `Kedro 0.16.5`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.6`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 This section introduces `catalog.yml`, the project-shareable Data Catalog. The file is located in `conf/base` and is a registry of all data sources available for use by a project; it manages loading and saving of data.
 
@@ -35,6 +35,7 @@ The following prepends are available:
 - **Hadoop File System (HDFS)**: `hdfs://user@server:port/path/to/data` - Hadoop Distributed File System, for resilient, replicated files within a cluster.
 - **Amazon S3**: `s3://my-bucket-name/path/to/data` - Amazon S3 remote binary store, often used with Amazon EC2,
   using the library s3fs.
+- **S3 Compatible Storage**: `s3://my-bucket-name/path/_to/data` - e.g. Minio, using the s3fs library.
 - **Google Cloud Storage**: `gcs://` - Google Cloud Storage, typically used with Google Compute
   resource using gcsfs (in development).
 - **HTTP(s)**: ``http://`` or ``https://`` for reading data directly from HTTP web servers.
@@ -260,6 +261,25 @@ us_corn_yield_data:
 
 > *Note:* When using [`pandas.SQLTableDataSet`](/kedro.extras.datasets.pandas.SQLTableDataSet) or [`pandas.SQLQueryDataSet`](/kedro.extras.datasets.pandas.SQLQueryDataSet) you must provide a database connection string. In the example above we pass it using `scooters_credentials` key from the credentials (see the details in [Feeding in credentials](#feeding-in-credentials) section below). `scooters_credentials` must have a top-level key `con` containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataSet` only).
 
+Example 14: Loading data from Minio (S3 API Compatible Storage)
+```yaml
+test:
+  type: pandas.CSVDataSet
+  filepath: s3://your_bucket/test.csv # assume `test.csv` is uploaded to the Minio server.
+  credentials: dev_minio
+```
+In `credentials.yml`, define the `key`, `secret` and the `endpoint_url` as follows:
+
+```yaml
+dev_minio:
+  key: token
+  secret: key
+  cleitn_kwargs:
+    endpoint_url : 'http://localhost:9000'
+```
+> Note: The easiest way to setup MinIO is to run a Docker image. After the following command, you can access to Minio server with http://localhost:9000 and create a bucket and add files as if it is on S3.
+
+`docker run -p 9000:9000 -e "MINIO_ACCESS_KEY=token" -e "MINIO_SECRET_KEY=key" minio/minio server /data`
 
 ## Adding parameters
 

@@ -506,3 +506,5 @@ except Exception as e:
     )
 
 fix_module_paths()
+
+copybutton_image_path = "_images/copy-button.svg"

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Community Support
+    url: https://discourse.kedro.community/
+    about: Please ask and answer questions here.
+  - name: Documentation
+    url: https://kedro.readthedocs.io/en/stable/
+    about: To learn more about how Kedro works.

@@ -202,10 +202,12 @@ def reload_kedro(project_path, line=None):
     global parameters
     try:
         # ...
-        context = load_context(path)
+        session = KedroSession.create(path)
+        _push_session(session)
+        context = session.context
         parameters = context.params
         # ...
-        logging.info("Defined global variable `context`, `catalog` and `parameters`")
+        logging.info("Defined global variable `context`, `session`, `catalog` and `parameters`")
     except:
         pass
 ```
@@ -306,11 +308,14 @@ In certain cases, you may not be able to run `kedro jupyter notebook`, which mea
 
 ```python
 from pathlib import Path
-from kedro.framework.context import load_context
+from kedro.framework.session import KedroSession
+from kedro.framework.session.session import _push_session
 
 current_dir = Path.cwd()  # this points to 'notebooks/' folder
 proj_path = current_dir.parent  # point back to the root of the project
-context = load_context(proj_path)
+session = KedroSession.create(proj_path)
+_push_session(session)
+context = session.context
 ```
 
 #### How can I reload the `context`, `catalog` and `startup_error` variables?

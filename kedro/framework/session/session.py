@@ -57,6 +57,7 @@ def get_current_session(silent: bool = False) -> Optional["KedroSession"]:
 
     Returns:
         KedroSession instance.
+
     """
     session = None
 
@@ -107,11 +108,20 @@ def _jsonify_cli_context(ctx: click.core.Context):
 
 class KedroSession:
     """``KedroSession`` is the object that is responsible for managing the lifecycle
-    of a Kedro project.
+    of a Kedro run.
+    - Use `KedroSession.create()` as a context manager to construct a new KedroSession with
+    session data provided (see the example below).
+    - Use `KedroSession(session_id=<id>)` to instantiate an existing session with a given
+    ID.
 
-    IMPORTANT: ``KedroSession`` is currently under development and is not
-    integrated into existing Kedro workflow. Its public (and private) interface
-    may change between minor releases without notice.
+    Example:
+    ::
+
+        >>> from kedro.framework.session import KedroSession
+        >>>
+        >>> with KedroSession.create() as session:
+        >>>     session.run()
+        >>>
     """
 
     def __init__(
@@ -131,13 +141,17 @@ class KedroSession:
         project_path: Union[Path, str] = None,
         save_on_close: bool = True,
         env: str = None,
+        extra_params: Dict[str, Any] = None,
     ) -> "KedroSession":
-        """Create a new instance of ``KedroSession``.
+        """Create a new instance of ``KedroSession`` with the session data.
 
         Args:
             project_path: Path to the project root directory.
             save_on_close: Whether or not to save the session when it's closed.
             env: Environment for the KedroContext.
+            extra_params: Optional dictionary containing extra project parameters
+            for underlying KedroContext. If specified, will update (and therefore take
+            precedence over) the parameters retrieved from the project configuration.
 
         Returns:
             A new ``KedroSession`` instance.
@@ -161,12 +175,14 @@ class KedroSession:
         if env:
             session_data["env"] = env
 
+        if extra_params:
+            session_data["extra_params"] = extra_params
+
         session._store.update(session_data)
         return session
 
     def _init_store(self) -> BaseSessionStore:
         static_data = get_static_project_data(self._project_path)
-
         config = deepcopy(static_data.get("session_store", {}))
         config.setdefault("path", (self._project_path / "sessions").as_posix())
         config["session_id"] = self.session_id
@@ -193,7 +209,8 @@ class KedroSession:
     def context(self) -> KedroContext:
         """An instance of the project context."""
         env = self.store.get("env")
-        context = load_context(project_path=self._project_path, env=env)
+        extra_params = self.store.get("extra_params") or {}
+        context = load_context(project_path=self._project_path, env=env, **extra_params)
         return context
 
     def close(self):
@@ -278,7 +295,7 @@ class KedroSession:
             "run_id": run_id,
             "project_path": self._project_path.as_posix(),
             "env": context.env,
-            "kedro_version": self.store["kedro_version"],
+            "kedro_version": self.store["project_version"],
             "tags": tags,
             "from_nodes": from_nodes,
             "to_nodes": to_nodes,
@@ -295,15 +312,15 @@ class KedroSession:
 
         # Run the runner
         runner = runner or SequentialRunner()
-        hook = get_hook_manager().hook
-        hook.before_pipeline_run(
+        hook_manager = get_hook_manager()
+        hook_manager.hook.before_pipeline_run(  # pylint: disable=no-member
             run_params=record_data, pipeline=filtered_pipeline, catalog=catalog
         )
 
         try:
             run_result = runner.run(filtered_pipeline, catalog, run_id)
         except Exception as error:
-            hook.on_pipeline_error(
+            hook_manager.hook.on_pipeline_error(
                 error=error,
                 run_params=record_data,
                 pipeline=filtered_pipeline,
@@ -311,7 +328,7 @@ class KedroSession:
             )
             raise
 
-        hook.after_pipeline_run(
+        hook_manager.hook.after_pipeline_run(
             run_params=record_data,
             run_result=run_result,
             pipeline=filtered_pipeline,

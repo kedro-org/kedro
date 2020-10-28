@@ -40,7 +40,7 @@ from kedro.framework.cli.jupyter import jupyter as jupyter_group
 from kedro.framework.cli.pipeline import pipeline as pipeline_group
 from kedro.framework.cli.project import project_group
 from kedro.framework.cli.utils import KedroCliError, env_option, split_string
-from kedro.framework.context import load_context
+from kedro.framework.session import KedroSession
 from kedro.utils import load_obj
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
@@ -223,17 +223,19 @@ def run(
     tag = _get_values_as_tuple(tag) if tag else tag
     node_names = _get_values_as_tuple(node_names) if node_names else node_names
 
-    context = load_context(Path.cwd(), env=env, extra_params=params)
-    context.run(
-        tags=tag,
-        runner=runner_class(is_async=is_async),
-        node_names=node_names,
-        from_nodes=from_nodes,
-        to_nodes=to_nodes,
-        from_inputs=from_inputs,
-        load_versions=load_version,
-        pipeline_name=pipeline,
-    )
+    with KedroSession.create(
+        project_path=Path.cwd(), env=env, extra_params=params
+    ) as session:
+        session.run(
+            tags=tag,
+            runner=runner_class(is_async=is_async),
+            node_names=node_names,
+            from_nodes=from_nodes,
+            to_nodes=to_nodes,
+            from_inputs=from_inputs,
+            load_versions=load_version,
+            pipeline_name=pipeline,
+        )
 
 
 cli.add_command(pipeline_group)

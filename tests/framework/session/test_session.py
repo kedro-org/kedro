@@ -61,7 +61,7 @@ def fake_project(tmp_path, mock_load_context):  # pylint: disable=unused-argumen
     (fake_project_dir / "src").mkdir(parents=True)
 
     kedro_yml_path = fake_project_dir / ".kedro.yml"
-    payload = {"kedro_version": _FAKE_KEDRO_VERSION}
+    payload = {"project_version": _FAKE_KEDRO_VERSION}
     with kedro_yml_path.open("w") as _f:
         yaml.safe_dump(payload, _f)
 
@@ -79,11 +79,18 @@ STORE_LOGGER_NAME = "kedro.framework.session.store"
 @pytest.mark.usefixtures("mock_load_context")
 class TestKedroSession:
     @pytest.mark.parametrize("env", [None, "env1"])
+    @pytest.mark.parametrize("extra_params", [None, {"key": "val"}])
     def test_create(
-        self, fake_project, mock_load_context, fake_session_id, mocker, env
+        self,
+        fake_project,
+        mock_load_context,
+        fake_session_id,
+        mocker,
+        env,
+        extra_params,
     ):
         mock_click_ctx = mocker.patch("click.get_current_context").return_value
-        session = KedroSession.create(fake_project, env=env)
+        session = KedroSession.create(fake_project, env=env, extra_params=extra_params)
 
         expected_cli_data = {
             "args": mock_click_ctx.args,
@@ -96,17 +103,53 @@ class TestKedroSession:
             "project_path": fake_project,
             "source_dir": fake_project / "src",
             "session_id": fake_session_id,
-            "kedro_version": _FAKE_KEDRO_VERSION,
+            "project_version": _FAKE_KEDRO_VERSION,
             "cli": expected_cli_data,
         }
         if env:
             expected_store["env"] = env
+        if extra_params:
+            expected_store["extra_params"] = extra_params
 
         assert session.store == expected_store
 
         mock_load_context.assert_not_called()
         assert session.context is mock_load_context.return_value
-        mock_load_context.assert_called_once_with(project_path=fake_project, env=env)
+        if extra_params:
+            mock_load_context.assert_called_once_with(
+                project_path=fake_project, env=env, **extra_params
+            )
+        else:
+            mock_load_context.assert_called_once_with(
+                project_path=fake_project, env=env
+            )
+
+    def test_create_no_env_extra_params(
+        self, fake_project, mock_load_context, fake_session_id, mocker
+    ):
+        mock_click_ctx = mocker.patch("click.get_current_context").return_value
+        session = KedroSession.create(fake_project)
+
+        expected_cli_data = {
+            "args": mock_click_ctx.args,
+            "params": mock_click_ctx.params,
+            "command_name": mock_click_ctx.command.name,
+            "command_path": mock_click_ctx.command_path,
+        }
+        expected_store = {
+            "config_file": fake_project / ".kedro.yml",
+            "project_path": fake_project,
+            "source_dir": fake_project / "src",
+            "session_id": fake_session_id,
+            "project_version": _FAKE_KEDRO_VERSION,
+            "cli": expected_cli_data,
+        }
+
+        assert session.store == expected_store
+
+        mock_load_context.assert_not_called()
+        assert session.context is mock_load_context.return_value
+        mock_load_context.assert_called_once_with(project_path=fake_project, env=None)
 
     def test_default_store(self, fake_project, fake_session_id, caplog):
         caplog.set_level(logging.WARN, logger="kedro.framework.session.store")

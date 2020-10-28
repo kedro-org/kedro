@@ -42,7 +42,7 @@ class ProjectContext(KedroContext):
 def run_package():
     # Entry point for running a Kedro project packaged with `kedro package`
     # using `python -m <project_package>.run` command.
-    os.chdir(Path(__file__)).resolve().parents[2]) # enables project to be ran from any directory
+    os.chdir(Path(__file__).resolve().parents[2]) # enables project to be run from any directory
     project_context = load_package_context(
         project_path=Path.cwd(), package_name=Path(__file__).resolve().parent.name
     )

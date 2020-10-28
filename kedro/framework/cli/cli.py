@@ -633,9 +633,9 @@ def main():  # pragma: no cover
     project_groups = []
 
     path = Path.cwd()
-    kedro_yaml_path = path / ".kedro.yml"
+    pyproject_toml = path / "pyproject.toml"
 
-    if kedro_yaml_path.exists():
+    if pyproject_toml.is_file():
         # load project commands from cli.py
         static_data = get_static_project_data(path)
         source_dir = static_data["source_dir"]

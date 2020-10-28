@@ -163,7 +163,11 @@ def _create_template_project(context):
     with context.config_file.open("w") as config_file:
         yaml.dump(config, config_file, default_flow_style=False)
 
-    res = run([context.kedro, "new", "-c", str(context.config_file)], env=context.env)
+    res = run(
+        [context.kedro, "new", "-c", str(context.config_file)],
+        env=context.env,
+        cwd=str(context.temp_dir),
+    )
     assert res.returncode == 0
 
     _setup_template_files(context)
@@ -204,18 +208,18 @@ def create_template_with_pipeline(context):
 
 @given('I have defined a node "{node_name}" tagged with {tags:CSV}')
 def node_tagged_with(context, node_name, tags):
-    """
-    Check tagging in `hooks_template.py` is consistent with tagging
+    """Check tagging in `hooks_template.py` is consistent with tagging
     descriptions in background steps
     """
     sys.path.append(
         str(context.root_project_dir / "src" / context.project_name.replace("-", "_"))
     )
     # pylint: disable=import-outside-toplevel
-    import hooks
+    from hooks import ProjectHooks
 
     # pylint: disable=no-member
-    context.project_pipeline = hooks.project_hooks.register_pipelines()["__default__"]
+    context.project_pipeline = ProjectHooks().register_pipelines()["__default__"]
+
     node_objs = [n for n in context.project_pipeline.nodes if n.name == node_name]
     assert node_objs
     assert set(tags) == node_objs[0].tags

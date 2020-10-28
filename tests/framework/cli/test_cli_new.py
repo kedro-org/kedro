@@ -46,7 +46,7 @@ from kedro.framework.cli.cli import (
     cli,
 )
 
-FILES_IN_TEMPLATE = 35
+FILES_IN_TEMPLATE = 36
 
 
 def _invoke(cli_runner, args, project_name=None, repo_name=None, python_package=None):

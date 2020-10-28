@@ -12,6 +12,7 @@ Base Classes
     :toctree:
     :template: autosummary/class.rst
 
+    kedro.framework.context.context.ProjectSettings
     kedro.framework.context.KedroContext
 
 Functions

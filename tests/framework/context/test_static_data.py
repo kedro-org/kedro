@@ -74,19 +74,11 @@ class TestGetStaticProjectData:
         mocker.patch.object(Path, "is_file", return_value=False)
 
         pattern = (
-            f"Could not find any of configuration files '.kedro.yml, pyproject.toml' "
+            f"Could not find the project configuration file 'pyproject.toml' "
             f"in {self.project_path}"
         )
         with pytest.raises(KedroContextError, match=re.escape(pattern)):
             get_static_project_data(self.project_path)
-
-    def test_kedro_yml_invalid_format(self, tmp_path):
-        """Test for loading context from an invalid path. """
-        kedro_yml_path = tmp_path / ".kedro.yml"
-        kedro_yml_path.write_text("!!")  # Invalid YAML
-        pattern = "Failed to parse '.kedro.yml' file"
-        with pytest.raises(KedroContextError, match=re.escape(pattern)):
-            get_static_project_data(str(tmp_path))
 
     def test_toml_invalid_format(self, tmp_path):
         """Test for loading context from an invalid path. """
@@ -96,22 +88,8 @@ class TestGetStaticProjectData:
         with pytest.raises(KedroContextError, match=re.escape(pattern)):
             get_static_project_data(str(tmp_path))
 
-    def test_valid_yml_file_exists(self, mocker):
-        # Both yml and toml files exist
-        mocker.patch.object(Path, "is_file", return_value=True)
-        mocker.patch("anyconfig.load", return_value={})
-
-        static_data = get_static_project_data(self.project_path)
-
-        # Using default source directory
-        assert static_data == {
-            "source_dir": self.project_path / "src",
-            "config_file": self.project_path / ".kedro.yml",
-        }
-
     def test_valid_toml_file(self, mocker):
-        # .kedro.yml doesn't exists
-        mocker.patch.object(Path, "is_file", side_effect=[False, True])
+        mocker.patch.object(Path, "is_file", side_effect=[True])
         mocker.patch("anyconfig.load", return_value={"tool": {"kedro": {}}})
 
         static_data = get_static_project_data(self.project_path)
@@ -123,7 +101,7 @@ class TestGetStaticProjectData:
         }
 
     def test_toml_file_without_kedro_section(self, mocker):
-        mocker.patch.object(Path, "is_file", side_effect=[False, True])
+        mocker.patch.object(Path, "is_file", side_effect=[True])
         mocker.patch("anyconfig.load", return_value={})
 
         pattern = "There's no '[tool.kedro]' section in the 'pyproject.toml'."
@@ -131,17 +109,8 @@ class TestGetStaticProjectData:
         with pytest.raises(KedroContextError, match=re.escape(pattern)):
             get_static_project_data(self.project_path)
 
-    def test_source_dir_specified_in_yml(self, mocker):
-        mocker.patch.object(Path, "is_file", side_effect=[True, False])
-        source_dir = "test_dir"
-        mocker.patch("anyconfig.load", return_value={"source_dir": source_dir})
-
-        static_data = get_static_project_data(self.project_path)
-
-        assert static_data["source_dir"] == self.project_path / source_dir
-
     def test_source_dir_specified_in_toml(self, mocker):
-        mocker.patch.object(Path, "is_file", side_effect=[False, True])
+        mocker.patch.object(Path, "is_file", side_effect=[True])
         source_dir = "test_dir"
         mocker.patch(
             "anyconfig.load",

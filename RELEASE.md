@@ -3,6 +3,7 @@
 ## Major features and improvements
 * Introduced `KedroSession` which is responsible for managing the lifecycle of a Kedro run.
 * Added `kedro catalog create` command. It creates `<conf_root>/<env>/catalog/<pipeline_name>.yml` configuration file with `MemoryDataSet` datasets for each dataset in a registered pipeline if it is missing from Data Catalog.
+* Added `settings.py` and `pyproject.toml` (to replace `.kedro.yml`) for project configuration, in line with Python best practice.
 
 ## Bug fixes and other changes
 *  Bumped maximum required `fsspec` version to 0.8.
@@ -24,6 +25,8 @@
 * Added `DatasetSpecs` with hooks to run before and after loading and saving datasets from/to the catalog.
 * `kedro new --starter` now defaults to fetching the starter template matching the installed Kedro version.
 * Renamed `kedro_cli.py` to `cli.py` and moved it inside the Python packge (`src/<package_name>/`).
+* Removed `.kedro.yml` from the project template and replaced it with `pyproject.toml`.
+* `KEDRO_CONFIGS` constant (residing in `kedro.framework.context.context`) has been removed.
 
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman)

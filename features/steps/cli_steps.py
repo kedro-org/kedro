@@ -37,6 +37,7 @@ from time import time
 
 import behave
 import requests
+import toml
 import yaml
 from behave import given, then, when
 
@@ -262,13 +263,13 @@ def install_test_plugin(context):
 
 @given('I have disabled hooks for "{plugin}" plugin via config')
 def disable_plugin_hooks(context, plugin):
-    """Set `disable_hooks_for_plugins` in `.kedro.yml`."""
-    kedro_yml_path = context.root_project_dir / ".kedro.yml"
-
-    with kedro_yml_path.open("r+") as _f:
-        content = yaml.safe_load(_f)
-        content["disable_hooks_for_plugins"] = [plugin]
-        yaml.safe_dump(content, _f)
+    """Set `disable_hooks_for_plugins` in `settings.py`."""
+    settings_path = (
+        context.root_project_dir / "src" / context.package_name / "settings.py"
+    )
+    to_add = f"""\nDISABLE_HOOKS_FOR_PLUGINS = ("{plugin}",)"""
+    with settings_path.open("a") as settings_file:
+        settings_file.write(to_add)
 
 
 @given("I have initialized a git repository")
@@ -305,6 +306,7 @@ def create_project_with_starter(context):
             str(starter_dir),
         ],
         env=context.env,
+        cwd=context.temp_dir,
     )
     assert res.returncode == OK_EXIT_CODE, res
 
@@ -314,7 +316,11 @@ def create_project_with_starter(context):
 def create_project_without_starter(context):
     """Behave step to run kedro new given the config I previously created.
     """
-    res = run([context.kedro, "new", "-c", str(context.config_file)], env=context.env)
+    res = run(
+        [context.kedro, "new", "-c", str(context.config_file)],
+        env=context.env,
+        cwd=context.temp_dir,
+    )
     assert res.returncode == OK_EXIT_CODE, res
 
 
@@ -379,7 +385,7 @@ def exec_kedro_run_with_tag(context, cmd, tags):
 @when("I ask the CLI for a version")
 def get_kedro_version(context):
     """Behave step to run `kedro -V`."""
-    res = run([context.kedro, "-V"], env=context.env)
+    res = run([context.kedro, "-V"], env=context.env, cwd=context.temp_dir)
     context.version_str = res.stdout
     assert context.version_str, res  # check non-empty
 
@@ -388,7 +394,7 @@ def get_kedro_version(context):
 def get_kedro_version_python(context):
     """Behave step to run `python -m kedro -V`."""
     cmd = [context.python, "-m", "kedro", "-V"]
-    context.version_str = run(cmd, env=context.env).stdout
+    context.version_str = run(cmd, env=context.env, cwd=context.temp_dir).stdout
     assert context.version_str  # check non-empty
 
 
@@ -438,8 +444,7 @@ def do_git_reset_hard(context):
 
 @when('I move the package to "{new_source_dir}"')
 def move_package(context: behave.runner.Context, new_source_dir):
-    """Move the project package to a new directory.
-    """
+    """Move the project package to a new directory."""
     current_src_path = (context.root_project_dir / "src").resolve()
     new_src_path = (context.root_project_dir / new_source_dir).resolve()
 
@@ -447,17 +452,14 @@ def move_package(context: behave.runner.Context, new_source_dir):
     shutil.move(str(current_src_path / context.package_name), str(new_src_path))
 
 
-@when('Source directory is updated to "{new_source_dir}" in kedro.yml')
-def update_kedro_yml(context: behave.runner.Context, new_source_dir):
-    """Update `source_dir` in .kedro.yml file.
-    """
-
-    kedro_yml_path = context.root_project_dir / ".kedro.yml"
-
-    with kedro_yml_path.open("r+") as _f:
-        content = yaml.safe_load(_f)
-        content["source_dir"] = new_source_dir
-        yaml.safe_dump(content, _f)
+@when('Source directory is updated to "{new_source_dir}" in pyproject.toml')
+def update_pyproject_toml(context: behave.runner.Context, new_source_dir):
+    """Update `source_dir` in pyproject.toml file."""
+    pyproject_toml_path = context.root_project_dir / "pyproject.toml"
+    content = toml.load(pyproject_toml_path)
+    content["tool"]["kedro"]["source_dir"] = new_source_dir
+    content_str = toml.dumps(content)
+    pyproject_toml_path.write_text(content_str)
 
 
 @given("I have updated kedro requirements")

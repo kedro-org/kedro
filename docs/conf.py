@@ -102,6 +102,7 @@ type_targets = {
         "int",
         "float",
         "str",
+        "tuple",
         "Any",
         "Dict",
         "typing.Dict",

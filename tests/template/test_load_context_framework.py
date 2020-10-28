@@ -30,8 +30,8 @@ import re
 import sys
 from pathlib import Path
 
-import anyconfig
 import pytest
+import toml
 
 from kedro import __version__ as kedro_version
 from kedro.framework.context import (
@@ -49,12 +49,14 @@ def mock_logging_config(mocker):
     mocker.patch("logging.config.dictConfig")
 
 
-def _create_kedro_config(project_path, payload, yml=True):
-    kedro_conf = project_path / ".kedro.yml" if yml else project_path / "pyproject.toml"
-    with kedro_conf.open("w") as fd:
-        anyconfig.dump(payload, fd)
+def _create_kedro_config(project_path, payload):
+    kedro_conf = project_path / "pyproject.toml"
+    kedro_conf.parent.mkdir(parents=True, exist_ok=True)
+    toml_str = toml.dumps(payload)
+    kedro_conf.write_text(toml_str)
 
 
+@pytest.mark.usefixtures("fake_project_cli")
 class TestLoadContext:
     def test_valid_context(self, fake_repo_path, mocker):
         """Test getting project context."""
@@ -82,20 +84,9 @@ class TestLoadContext:
         """Test for loading context from an invalid path. """
         other_path = tmp_path / "other"
         other_path.mkdir()
-        pattern = (
-            "Could not find any of configuration files '.kedro.yml, pyproject.toml'"
-        )
+        pattern = "Could not find the project configuration file 'pyproject.toml'"
         with pytest.raises(KedroContextError, match=re.escape(pattern)):
             load_context(str(other_path))
-
-    def test_kedro_yml_has_no_context_path(self, fake_repo_path):
-        """Test for loading context from an invalid path. """
-        payload = {"fake_key": "fake_value", "project_version": kedro_version}
-        _create_kedro_config(fake_repo_path, payload)
-
-        pattern = "'.kedro.yml' doesn't have a required `context_path` field"
-        with pytest.raises(KedroContextError, match=re.escape(pattern)):
-            load_context(str(fake_repo_path))
 
     def test_pyproject_toml_has_no_context_path(self, fake_repo_path):
         """Test for loading context from an invalid path. """
@@ -104,17 +95,15 @@ class TestLoadContext:
                 "kedro": {"fake_key": "fake_value", "project_version": kedro_version}
             }
         }
-        _create_kedro_config(fake_repo_path, payload, yml=False)
-
-        (fake_repo_path / ".kedro.yml").unlink()
+        _create_kedro_config(fake_repo_path, payload)
 
         pattern = "'pyproject.toml' doesn't have a required `context_path` field"
         with pytest.raises(KedroContextError, match=re.escape(pattern)):
             load_context(str(fake_repo_path))
 
     @pytest.mark.parametrize("source_dir", ["src", "./src", "./src/"])
-    def test_kedro_yml_valid_source_dir(
-        self, monkeypatch, fake_package_name, fake_repo_path, source_dir
+    def test_pyproject_toml_valid_source_dir(
+        self, monkeypatch, fake_package_name, fake_repo_path, source_dir,
     ):
         """Test for loading context from a valid source dir."""
         # test we are also adding source_dir to PYTHONPATH as well
@@ -122,10 +111,15 @@ class TestLoadContext:
 
         project_name = "Test Project"
         payload = {
-            "context_path": f"{fake_package_name}.run.ProjectContext",
-            "project_version": kedro_version,
-            "project_name": project_name,
-            "source_dir": source_dir,
+            "tool": {
+                "kedro": {
+                    "context_path": f"{fake_package_name}.run.ProjectContext",
+                    "project_version": kedro_version,
+                    "project_name": project_name,
+                    "package_name": fake_package_name,
+                    "source_dir": source_dir,
+                }
+            }
         }
         _create_kedro_config(fake_repo_path, payload)
 
@@ -137,16 +131,21 @@ class TestLoadContext:
     @pytest.mark.parametrize(
         "source_dir", ["../", "../src/", "./src/../..", "/User/user/root_project"]
     )
-    def test_kedro_yml_invalid_source_dir_pattern(
+    def test_pyproject_toml_invalid_source_dir_pattern(
         self, fake_repo_path, source_dir, fake_package_name
     ):
         """Test for invalid pattern for source_dir that is not relative to the project path.
         """
         payload = {
-            "context_path": f"{fake_package_name}.run.ProjectContext",
-            "source_dir": source_dir,
-            "project_version": kedro_version,
-            "project_name": "Test Project",
+            "tool": {
+                "kedro": {
+                    "context_path": f"{fake_package_name}.run.ProjectContext",
+                    "source_dir": source_dir,
+                    "project_version": kedro_version,
+                    "project_name": "Test Project",
+                    "package_name": fake_package_name,
+                }
+            }
         }
         _create_kedro_config(fake_repo_path, payload)
         source_path = (fake_repo_path / Path(source_dir).expanduser()).resolve()
@@ -163,10 +162,14 @@ class TestLoadContext:
         """
         source_dir = "non_existent"
         payload = {
-            "context_path": f"{fake_package_name}.run.ProjectContext",
-            "source_dir": source_dir,
-            "project_version": kedro_version,
-            "project_name": "Test Project",
+            "tool": {
+                "kedro": {
+                    "context_path": f"{fake_package_name}.run.ProjectContext",
+                    "source_dir": source_dir,
+                    "project_version": kedro_version,
+                    "project_name": "Test Project",
+                }
+            }
         }
         _create_kedro_config(fake_repo_path, payload)
         non_existent_path = (fake_repo_path / source_dir).expanduser().resolve()
@@ -175,15 +178,20 @@ class TestLoadContext:
         with pytest.raises(KedroContextError, match=re.escape(pattern)):
             load_context(str(fake_repo_path))
 
-    def test_kedro_yml_default_source_dir(self, fake_repo_path, fake_package_name):
+    def test_pyproject_toml_default_source_dir(self, fake_repo_path, fake_package_name):
         """If source dir is missing (it is by default), `src` is used to import package
            due to backward compatibility.
         """
         project_name = "Test Project"
         payload = {
-            "context_path": f"{fake_package_name}.run.ProjectContext",
-            "project_version": kedro_version,
-            "project_name": project_name,
+            "tool": {
+                "kedro": {
+                    "context_path": f"{fake_package_name}.run.ProjectContext",
+                    "project_version": kedro_version,
+                    "project_name": project_name,
+                    "package_name": fake_package_name,
+                }
+            }
         }
         _create_kedro_config(fake_repo_path, payload)
 

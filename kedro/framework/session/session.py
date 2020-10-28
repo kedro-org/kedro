@@ -38,6 +38,7 @@ from typing import Any, Dict, Iterable, Optional, Union
 import click
 
 from kedro.framework.context import KedroContext, get_static_project_data, load_context
+from kedro.framework.context.context import _get_project_settings
 from kedro.framework.hooks import get_hook_manager
 from kedro.framework.session.store import BaseSessionStore
 from kedro.io.core import generate_timestamp
@@ -182,8 +183,10 @@ class KedroSession:
         return session
 
     def _init_store(self) -> BaseSessionStore:
-        static_data = get_static_project_data(self._project_path)
-        config = deepcopy(static_data.get("session_store", {}))
+        project_metadata = get_static_project_data(self._project_path)
+        project_settings = _get_project_settings(project_metadata)
+
+        config = deepcopy(project_settings.session_store)
         config.setdefault("path", (self._project_path / "sessions").as_posix())
         config["session_id"] = self.session_id
         store = BaseSessionStore.from_config(config)

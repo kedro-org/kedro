@@ -37,12 +37,16 @@ from typing import Any, Dict, Iterable, List, Optional, Union
 
 import pandas as pd
 import pytest
+import toml
 import yaml
 
 from kedro import __version__
 from kedro.config import ConfigLoader
 from kedro.framework.context import KedroContext
-from kedro.framework.context.context import _convert_paths_to_absolute_posix
+from kedro.framework.context.context import (
+    ProjectSettings,
+    _convert_paths_to_absolute_posix,
+)
 from kedro.framework.hooks import hook_impl
 from kedro.framework.hooks.manager import _create_hook_manager
 from kedro.io import DataCatalog
@@ -82,6 +86,12 @@ def _write_yaml(filepath: Path, config: Dict):
     filepath.write_text(yaml_str)
 
 
+def _write_toml(filepath: Path, config: Dict):
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    toml_str = toml.dumps(config)
+    filepath.write_text(toml_str)
+
+
 @pytest.fixture
 def local_config(tmp_path):
     cars_filepath = str(tmp_path / "cars.csv")
@@ -106,11 +116,20 @@ def config_dir(tmp_path, local_config, local_logging_config):
     catalog = tmp_path / "conf" / "base" / "catalog.yml"
     credentials = tmp_path / "conf" / "local" / "credentials.yml"
     logging = tmp_path / "conf" / "local" / "logging.yml"
-    kedro_yml = tmp_path / ".kedro.yml"
+    pyproject_toml = tmp_path / "pyproject.toml"
     _write_yaml(catalog, local_config)
     _write_yaml(credentials, {"dev_s3": "foo"})
     _write_yaml(logging, local_logging_config)
-    _write_yaml(kedro_yml, {})
+    payload = {
+        "tool": {
+            "kedro": {
+                "project_version": __version__,
+                "project_name": "test hooks",
+                "package_name": "test_hooks",
+            }
+        }
+    }
+    _write_toml(pyproject_toml, payload)
 
 
 @pytest.fixture(autouse=True)
@@ -401,28 +420,16 @@ def logging_hooks(logs_queue):
     return LoggingHooks(logs_queue)
 
 
-def _create_kedro_yml(
-    project_path, project_name, project_version, package_name, disable_hooks_for=None
-):
-    kedro_yml = project_path / ".kedro.yml"
-    disable_hooks_for = disable_hooks_for or []
-    payload = {
-        "project_name": project_name,
-        "project_version": project_version,
-        "package_name": package_name,
-        "disable_hooks_for_plugins": disable_hooks_for,
-    }
-
-    with kedro_yml.open("w") as _f:
-        yaml.safe_dump(payload, _f)
-
-
 def _create_context_with_hooks(tmp_path, mocker, context_hooks, disable_hooks_for=None):
     """Create a context with some Hooks registered. We do this in a function
     to support both calling it directly as well as as part of a fixture.
     """
-    _create_kedro_yml(
-        tmp_path, "test hooks", __version__, "test_hooks", disable_hooks_for
+    disable_hooks_for = disable_hooks_for or ()
+    project_settings = ProjectSettings(tuple(disable_hooks_for), (), {})
+
+    mocker.patch(
+        "kedro.framework.context.context._get_project_settings",
+        return_value=project_settings,
     )
 
     class DummyContextWithHooks(KedroContext):
@@ -458,8 +465,6 @@ def broken_context_with_hooks(tmp_path, mocker, logging_hooks):
 
 
 def _create_broken_context_with_hooks(tmp_path, mocker, context_hooks):
-    _create_kedro_yml(tmp_path, "broken-context", __version__, "broken")
-
     class BrokenContextWithHooks(KedroContext):
         hooks = tuple(context_hooks)
 

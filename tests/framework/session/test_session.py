@@ -31,13 +31,14 @@ from pathlib import Path
 from time import sleep
 
 import pytest
-import yaml
+import toml
 
 from kedro.framework.session import KedroSession
 from kedro.framework.session.session import get_current_session
 from kedro.framework.session.store import BaseSessionStore, ShelveStore
 
 _FAKE_KEDRO_VERSION = "fake_kedro_version"
+_FAKE_PACKAGE_NAME = "fake_package"
 _FAKE_PIPELINE_NAME = "fake_pipeline"
 
 
@@ -60,10 +61,17 @@ def fake_project(tmp_path, mock_load_context):  # pylint: disable=unused-argumen
     fake_project_dir = Path(tmp_path) / "fake_project"
     (fake_project_dir / "src").mkdir(parents=True)
 
-    kedro_yml_path = fake_project_dir / ".kedro.yml"
-    payload = {"project_version": _FAKE_KEDRO_VERSION}
-    with kedro_yml_path.open("w") as _f:
-        yaml.safe_dump(payload, _f)
+    pyproject_toml_path = fake_project_dir / "pyproject.toml"
+    payload = {
+        "tool": {
+            "kedro": {
+                "project_version": _FAKE_KEDRO_VERSION,
+                "package_name": _FAKE_PACKAGE_NAME,
+            }
+        }
+    }
+    toml_str = toml.dumps(payload)
+    pyproject_toml_path.write_text(toml_str)
 
     return fake_project_dir
 
@@ -99,11 +107,12 @@ class TestKedroSession:
             "command_path": mock_click_ctx.command_path,
         }
         expected_store = {
-            "config_file": fake_project / ".kedro.yml",
+            "config_file": fake_project / "pyproject.toml",
             "project_path": fake_project,
             "source_dir": fake_project / "src",
             "session_id": fake_session_id,
             "project_version": _FAKE_KEDRO_VERSION,
+            "package_name": _FAKE_PACKAGE_NAME,
             "cli": expected_cli_data,
         }
         if env:
@@ -137,10 +146,11 @@ class TestKedroSession:
             "command_path": mock_click_ctx.command_path,
         }
         expected_store = {
-            "config_file": fake_project / ".kedro.yml",
+            "config_file": fake_project / "pyproject.toml",
             "project_path": fake_project,
             "source_dir": fake_project / "src",
             "session_id": fake_session_id,
+            "package_name": _FAKE_PACKAGE_NAME,
             "project_version": _FAKE_KEDRO_VERSION,
             "cli": expected_cli_data,
         }
@@ -171,16 +181,21 @@ class TestKedroSession:
         ]
         assert actual_log_messages == expected_log_messages
 
-    def test_shelve_store(self, fake_project, fake_session_id, caplog):
-        kedro_yml = fake_project / ".kedro.yml"
+    def test_shelve_store(self, fake_project, fake_session_id, caplog, mocker):
+        mocker.patch("pathlib.Path.is_file", return_value=True)
         shelve_location = fake_project / "nested" / "sessions"
-        with kedro_yml.open("r+") as f:
-            data = yaml.safe_load(f)
-            data["session_store"] = {
-                "type": "ShelveStore",
-                "path": shelve_location.as_posix(),
-            }
-            yaml.safe_dump(data, f)
+        session_store = {
+            "type": "ShelveStore",
+            "path": shelve_location.as_posix(),
+        }
+        fake_settings_module = mocker.Mock()
+        fake_settings_module.SESSION_STORE = session_store
+        fake_settings_module.DISABLE_HOOKS_FOR_PLUGINS = ()
+        fake_settings_module.HOOKS = ()
+        mocker.patch(
+            "kedro.framework.context.context.import_module",
+            return_value=fake_settings_module,
+        )
 
         other = KedroSession.create(fake_project)
         assert other._store.__class__ is ShelveStore

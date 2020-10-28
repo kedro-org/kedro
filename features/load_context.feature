@@ -36,13 +36,13 @@ Feature: Custom Kedro project
 
     Scenario: Update the source directory to be nested
         When I move the package to "src/nested"
-        And Source directory is updated to "src/nested" in kedro.yml
+        And Source directory is updated to "src/nested" in pyproject.toml
         And I execute the kedro command "run"
         Then I should get a successful exit code
 
     Scenario: Update the source directory to be outside of src
         When I move the package to "."
-        And Source directory is updated to "." in kedro.yml
+        And Source directory is updated to "." in pyproject.toml
         And I execute the kedro command "run"
         Then I should get a successful exit code
 

@@ -1,6 +1,8 @@
 # Create a new project
 
-Once you have [installed Kedro](./02_install.md), you can create a new project by answering a series of questions, or by using settings recorded in a configuration file.
+Once you have [installed Kedro](./02_install.md), you can create a new, empty project by answering a series of questions, or by using settings recorded in a configuration file.
+
+If you want to create a Kedro project that is populated with some template or example code, you can use Kedro starters by specifying the `--starter` flag. Read the guide to [creating new projects with Kedro Starters](./06_starters.md) for more information.
 
 ## Create a new project interactively
 
@@ -22,10 +24,6 @@ You will be asked to enter each of the following variables in turn. Once you hav
 +------------------------+---------------------+----------------------------------------------------------------------------+
 | :code:`python_package` | :code:`get_started` | A name for the Python package name in your project (short, all-lowercase)  |
 +------------------------+---------------------+----------------------------------------------------------------------------+
-| :code:`include_example`| :code:`Y/n`         | Confirms or rejects the inclusion of the Iris example code                 |
-|                        |                     | Your new project template contains a small example if you enter :code:`Y`  |
-+------------------------+---------------------+----------------------------------------------------------------------------+
-
 ```
 
 
@@ -39,7 +37,6 @@ You can create a new project from a configuration file if you prefer. The file m
 -   `project_name`
 -   `repo_name`
 -   `python_package`
--   `include_example` (Boolean value) option to confirm or reject the inclusion of the [Iris example code](../02_get_started/05_example_project.md)
 
 The `output_dir` can be set to wherever you want to create the project. For example, `~` for your home directory, or `.` for the current working directory. Here is an example `config.yml`, which assumes that a directory named `~/code` already exists:
 
@@ -48,7 +45,6 @@ output_dir: ~/code
 project_name: Get Started
 repo_name: get-started
 python_package: get_started
-include_example: true
 ```
 
 To create the new project:
@@ -64,7 +60,3 @@ Having created your new project, if you are using `git`, you may want to set up 
 ```bash
 git init
 ```
-
-## Create a new project using starters
-
-Kedro supports using custom starter templates to create your project via the `--starter` flag. To learn more about this feature, please read the guide to [creating new projects with Kedro Starters](./06_starters.md).

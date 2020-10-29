@@ -16,8 +16,6 @@ You must first [create a project](./04_new_project.md). Feel free to name your p
 kedro new --starter=pandas-iris
 ```
 
-If you prefer, clone the example project from the [`kedro-examples` repository on Github](https://github.com/quantumblacklabs/kedro-examples)
-
 ### Project directory structure
 
 This example project illustrates a convenient starting point and some best-practices. It follows the default Kedro project template and uses folders to store datasets, notebooks, configuration and source code. When you create your own projects, you can adapt the folder structure if you need to.

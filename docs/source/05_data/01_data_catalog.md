@@ -299,9 +299,6 @@ dev_abs:
   account_key: key
 ```
 
-> *Note:* When using Azure Blob Storage, you must install version 0.3.3 of `adlfs` - Dask interface to Azure-Datalake Storage - as newer versions are incompatible with `fsspec < 0.7.0`. Add `adlfs=0.3.3` to `src/requirements.in`. 
-
-
 
 ## Adding parameters
 

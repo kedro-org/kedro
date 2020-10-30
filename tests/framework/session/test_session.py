@@ -33,8 +33,7 @@ from time import sleep
 import pytest
 import toml
 
-from kedro.framework.session import KedroSession
-from kedro.framework.session.session import get_current_session
+from kedro.framework.session import KedroSession, get_current_session
 from kedro.framework.session.store import BaseSessionStore, ShelveStore
 
 _FAKE_KEDRO_VERSION = "fake_kedro_version"

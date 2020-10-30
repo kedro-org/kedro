@@ -241,7 +241,7 @@ kedro pipeline pull <link-to-modular-pipeline-wheel-file>
 The above command will take the bundled `.whl` file and do the following:
 
 * Place source code in `src/<package_name>/pipelines/<pipeline_name>`
-* Place parameters in `conf/base/pipelines/<pipeline_name>`
+* Place parameters in `conf/base/parameters/<pipeline_name>.yml`
 * Pull out tests and place in `src/tests/pipelines/<pipeline_name>`
 
 `kedro pipeline pull` works with PyPI, local and cloud storage:

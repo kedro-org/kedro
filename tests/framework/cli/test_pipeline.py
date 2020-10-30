@@ -25,6 +25,7 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 import shutil
 from pathlib import Path
 
@@ -35,10 +36,12 @@ from pandas import DataFrame
 
 from kedro.extras.datasets.pandas import CSVDataSet
 from kedro.framework.cli.pipeline import _sync_dirs
-from kedro.framework.context import load_context
+from kedro.framework.context import KedroContext, load_context
 
 PACKAGE_NAME = "dummy_package"
 PIPELINE_NAME = "my_pipeline"
+
+CONF_ROOT = KedroContext.CONF_ROOT
 
 
 @pytest.fixture(autouse=True)
@@ -56,9 +59,19 @@ def cleanup_pipelines(fake_repo_path, fake_package_path):
     for pipeline in created_pipelines:
         shutil.rmtree(str(pipes_path / pipeline))
 
-        confs = fake_repo_path / "conf"
-        for each in confs.glob(f"*/pipelines/{pipeline}"):  # clean all config envs
-            shutil.rmtree(str(each))
+        confs = fake_repo_path / CONF_ROOT
+        for each in confs.rglob(f"*{pipeline}*"):  # clean all pipeline config files
+            if each.is_file():
+                each.unlink()
+
+        dirs_to_delete = (
+            dirpath
+            for pattern in ("parameters", "catalog")
+            for dirpath in confs.rglob(pattern)
+            if dirpath.is_dir() and not any(dirpath.iterdir())
+        )
+        for dirpath in dirs_to_delete:
+            dirpath.rmdir()
 
         tests = fake_repo_path / "src" / "tests" / "pipelines" / pipeline
         if tests.is_dir():
@@ -69,12 +82,12 @@ def cleanup_pipelines(fake_repo_path, fake_package_path):
 def make_pipelines(request, fake_repo_path, fake_package_path, mocker):
     source_path = fake_package_path / "pipelines" / PIPELINE_NAME
     tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
-    conf_path = fake_repo_path / "conf" / request.param / "pipelines" / PIPELINE_NAME
+    conf_path = fake_repo_path / CONF_ROOT / request.param / "parameters"
 
     for path in (source_path, tests_path, conf_path):
-        path.mkdir(parents=True)
+        path.mkdir(parents=True, exist_ok=True)
 
-    (conf_path / "parameters.yml").touch()
+    (conf_path / f"{PIPELINE_NAME}.yml").touch()
     (tests_path / "test_pipe.py").touch()
     (source_path / "pipe.py").touch()
 
@@ -137,11 +150,9 @@ class TestPipelineCreateCommand:
 
         # config
         conf_env = env or "base"
-        conf_dir = (
-            fake_repo_path / "conf" / conf_env / "pipelines" / PIPELINE_NAME
-        ).resolve()
-        expected_configs = {"parameters.yml"}
-        actual_configs = {f.name for f in conf_dir.iterdir()}
+        conf_dir = (fake_repo_path / CONF_ROOT / conf_env).resolve()
+        actual_configs = list(conf_dir.glob(f"**/{PIPELINE_NAME}.yml"))
+        expected_configs = [conf_dir / "parameters" / f"{PIPELINE_NAME}.yml"]
         assert actual_configs == expected_configs
 
         # tests
@@ -166,7 +177,7 @@ class TestPipelineCreateCommand:
         assert f"Creating the pipeline `{PIPELINE_NAME}`: OK" in result.output
         assert f"Pipeline `{PIPELINE_NAME}` was successfully created." in result.output
 
-        conf_dirs = list((fake_repo_path / "conf").rglob(PIPELINE_NAME))
+        conf_dirs = list((fake_repo_path / CONF_ROOT).rglob(PIPELINE_NAME))
         assert conf_dirs == []  # no configs created for the pipeline
 
         test_dir = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
@@ -185,19 +196,23 @@ class TestPipelineCreateCommand:
         assert result.exit_code == 0
 
         # write pipeline catalog
-        pipe_conf_dir = fake_repo_path / "conf" / "base" / "pipelines" / PIPELINE_NAME
+        conf_dir = fake_repo_path / CONF_ROOT / "base"
         catalog_dict = {
             "ds_from_pipeline": {
                 "type": "pandas.CSVDataSet",
                 "filepath": "data/01_raw/iris.csv",
             }
         }
-        with (pipe_conf_dir / "catalog.yml").open("w") as f:
+        catalog_file = conf_dir / "catalog" / f"{PIPELINE_NAME}.yml"
+        catalog_file.parent.mkdir()
+        with catalog_file.open("w") as f:
             yaml.dump(catalog_dict, f)
 
         # write pipeline parameters
+        params_file = conf_dir / "parameters" / f"{PIPELINE_NAME}.yml"
+        assert params_file.is_file()
         params_dict = {"params_from_pipeline": {"p1": [1, 2, 3], "p2": None}}
-        with (pipe_conf_dir / "parameters.yml").open("w") as f:
+        with params_file.open("w") as f:
             yaml.dump(params_dict, f)
 
         ctx = load_context(Path.cwd())
@@ -207,19 +222,15 @@ class TestPipelineCreateCommand:
 
     def test_skip_copy(self, fake_repo_path, fake_project_cli):
         """Test skipping the copy of conf and test files if those already exist"""
-        # touch pipeline
-        catalog = (
-            fake_repo_path
-            / "conf"
-            / "base"
-            / "pipelines"
-            / PIPELINE_NAME
-            / "catalog.yml"
-        )
-        catalog.parent.mkdir(parents=True)
-        catalog.touch()
+        # create catalog and parameter files
+        for dirname in ("catalog", "parameters"):
+            path = (
+                fake_repo_path / CONF_ROOT / "base" / dirname / f"{PIPELINE_NAME}.yml"
+            )
+            path.parent.mkdir(exist_ok=True)
+            path.touch()
 
-        # touch test __init__.py
+        # create __init__.py in tests
         tests_init = (
             fake_repo_path
             / "src"
@@ -236,7 +247,8 @@ class TestPipelineCreateCommand:
 
         assert result.exit_code == 0
         assert "__init__.py`: SKIPPED" in result.output
-        assert result.output.count("SKIPPED") == 1  # only 1 file skipped
+        assert f"parameters{os.sep}{PIPELINE_NAME}.yml`: SKIPPED" in result.output
+        assert result.output.count("SKIPPED") == 2  # only 2 files skipped
 
     def test_failed_copy(self, fake_project_cli, fake_package_path, mocker):
         """Test the error if copying some file fails"""
@@ -320,23 +332,27 @@ class TestPipelineDeleteCommand:
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
         tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
-        conf_path = (
-            fake_repo_path / "conf" / expected_conf / "pipelines" / PIPELINE_NAME
+        params_path = (
+            fake_repo_path
+            / CONF_ROOT
+            / expected_conf
+            / "parameters"
+            / f"{PIPELINE_NAME}.yml"
         )
 
         assert f"Deleting `{source_path}`: OK" in result.output
         assert f"Deleting `{tests_path}`: OK" in result.output
-        assert f"Deleting `{conf_path}`: OK" in result.output
+        assert f"Deleting `{params_path}`: OK" in result.output
 
         assert f"Pipeline `{PIPELINE_NAME}` was successfully deleted." in result.output
         assert (
             f"If you added the pipeline `{PIPELINE_NAME}` to `register_pipelines()` in "
-            f"`{fake_package_path / 'hooks.py'}`, you will need to remove it.`"
+            f"`{fake_package_path / 'hooks.py'}`, you will need to remove it."
         ) in result.output
 
         assert not source_path.exists()
         assert not tests_path.exists()
-        assert not conf_path.exists()
+        assert not params_path.exists()
 
     def test_delete_pipeline_skip(
         self, fake_repo_path, fake_project_cli, fake_package_path
@@ -350,21 +366,23 @@ class TestPipelineDeleteCommand:
             fake_project_cli.cli, ["pipeline", "delete", "-y", PIPELINE_NAME]
         )
         tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
-        conf_path = fake_repo_path / "conf" / "base" / "pipelines" / PIPELINE_NAME
+        params_path = (
+            fake_repo_path / CONF_ROOT / "base" / "parameters" / f"{PIPELINE_NAME}.yml"
+        )
 
         assert f"Deleting `{source_path}`" not in result.output
         assert f"Deleting `{tests_path}`: OK" in result.output
-        assert f"Deleting `{conf_path}`: OK" in result.output
+        assert f"Deleting `{params_path}`: OK" in result.output
 
         assert f"Pipeline `{PIPELINE_NAME}` was successfully deleted." in result.output
         assert (
             f"If you added the pipeline `{PIPELINE_NAME}` to `register_pipelines()` in "
-            f"`{fake_package_path / 'hooks.py'}`, you will need to remove it.`"
+            f"`{fake_package_path / 'hooks.py'}`, you will need to remove it."
         ) in result.output
 
         assert not source_path.exists()
         assert not tests_path.exists()
-        assert not conf_path.exists()
+        assert not params_path.exists()
 
     def test_delete_pipeline_fail(self, fake_project_cli, fake_package_path, mocker):
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
@@ -397,6 +415,13 @@ class TestPipelineDeleteCommand:
         assert result.exit_code
         assert error_message in result.output
 
+    def test_pipeline_not_found(self, fake_project_cli):
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["pipeline", "delete", "-y", "non_existent"]
+        )
+        assert result.exit_code
+        assert "Pipeline `non_existent` not found." in result.output
+
     def test_bad_env(self, fake_project_cli):
         """Test error when provided conf environment does not exist."""
         result = CliRunner().invoke(
@@ -420,15 +445,14 @@ class TestPipelineDeleteCommand:
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
         tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
-        conf_path = fake_repo_path / "conf" / "base" / "pipelines" / PIPELINE_NAME
-
-        assert (
-            "The following directories and everything within them will be removed"
-            in result.output
+        params_path = (
+            fake_repo_path / CONF_ROOT / "base" / "parameters" / f"{PIPELINE_NAME}.yml"
         )
+
+        assert "The following paths will be removed:" in result.output
         assert str(source_path) in result.output
         assert str(tests_path) in result.output
-        assert str(conf_path) in result.output
+        assert str(params_path) in result.output
 
         assert (
             f"Are you sure you want to delete pipeline `{PIPELINE_NAME}`"
@@ -438,7 +462,7 @@ class TestPipelineDeleteCommand:
 
         assert source_path.is_dir()
         assert tests_path.is_dir()
-        assert conf_path.is_dir()
+        assert params_path.is_file()
 
     @pytest.mark.parametrize("input_", ["n", "N", "random"])
     def test_pipeline_delete_confirmation_skip(
@@ -455,21 +479,23 @@ class TestPipelineDeleteCommand:
         )
 
         tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
-        conf_path = fake_repo_path / "conf" / "base" / "pipelines" / PIPELINE_NAME
-
-        assert (
-            "The following directories and everything within them will be removed"
-            in result.output
+        params_path = (
+            fake_repo_path / CONF_ROOT / "base" / "parameters" / f"{PIPELINE_NAME}.yml"
         )
+
+        assert "The following paths will be removed:" in result.output
         assert str(source_path) not in result.output
         assert str(tests_path) in result.output
-        assert str(conf_path) in result.output
+        assert str(params_path) in result.output
 
         assert (
             f"Are you sure you want to delete pipeline `{PIPELINE_NAME}`"
             in result.output
         )
         assert "Deletion aborted!" in result.output
+
+        assert tests_path.is_dir()
+        assert params_path.is_file()
 
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")

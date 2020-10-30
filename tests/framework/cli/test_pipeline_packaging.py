@@ -34,12 +34,15 @@ from click import ClickException
 from click.testing import CliRunner
 
 from kedro.framework.cli.pipeline import _get_wheel_name
+from kedro.framework.context import KedroContext
 
 PIPELINE_NAME = "my_pipeline"
 
 LETTER_ERROR = "It must contain only letters, digits, and/or underscores."
 FIRST_CHAR_ERROR = "It must start with a letter or underscore."
 TOO_SHORT_ERROR = "It must be at least 2 characters long."
+
+CONF_ROOT = KedroContext.CONF_ROOT
 
 
 @pytest.fixture(autouse=True)
@@ -57,9 +60,19 @@ def cleanup_pipelines(fake_repo_path, fake_package_path):
     for pipeline in created_pipelines:
         shutil.rmtree(str(pipes_path / pipeline))
 
-        confs = fake_repo_path / "conf"
-        for each in confs.glob(f"*/pipelines/{pipeline}"):  # clean all config envs
-            shutil.rmtree(str(each))
+        confs = fake_repo_path / CONF_ROOT
+        for each in confs.rglob(f"*{pipeline}*"):  # clean all pipeline config files
+            if each.is_file():
+                each.unlink()
+
+        dirs_to_delete = (
+            dirpath
+            for pattern in ("parameters", "catalog")
+            for dirpath in confs.rglob(pattern)
+            if dirpath.is_dir() and not any(dirpath.iterdir())
+        )
+        for dirpath in dirs_to_delete:
+            dirpath.rmdir()
 
         tests = fake_repo_path / "src" / "tests" / "pipelines" / pipeline
         if tests.is_dir():
@@ -95,7 +108,7 @@ class TestPipelinePackageCommand:
             f"{package_name}/README.md",
             f"{package_name}/nodes.py",
             f"{package_name}/pipeline.py",
-            f"{package_name}/config/parameters.yml",
+            f"{package_name}/config/parameters/{package_name}.yml",
             "tests/__init__.py",
             "tests/test_pipeline.py",
         }
@@ -315,7 +328,7 @@ class TestPipelinePullCommand:
         self.call_pipeline_delete(fake_project_cli)
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
-        config_path = fake_repo_path / "conf" / "base" / "pipelines" / PIPELINE_NAME
+        config_path = fake_repo_path / CONF_ROOT / "base" / "pipelines" / PIPELINE_NAME
         test_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
         # Make sure the files actually deleted before pulling from the wheel file.
         assert not source_path.exists()
@@ -339,16 +352,21 @@ class TestPipelinePullCommand:
 
         pipeline_name = alias or PIPELINE_NAME
         source_dest = fake_package_path / "pipelines" / pipeline_name
-        config_env = env or "base"
-        config_dest = fake_repo_path / "conf" / config_env / "pipelines" / pipeline_name
         test_dest = fake_repo_path / "src" / "tests" / "pipelines" / pipeline_name
+        config_env = env or "base"
+        params_config = (
+            fake_repo_path
+            / CONF_ROOT
+            / config_env
+            / "parameters"
+            / f"{pipeline_name}.yml"
+        )
 
         self.assert_package_files_exist(source_dest)
-        assert (config_dest / "parameters.yml").is_file()
-        assert {f.name for f in test_dest.iterdir()} == {
-            "__init__.py",
-            "test_pipeline.py",
-        }
+        assert params_config.is_file()
+        actual_test_files = {f.name for f in test_dest.iterdir()}
+        extected_test_files = {"__init__.py", "test_pipeline.py"}
+        assert actual_test_files == extected_test_files
 
     @pytest.mark.parametrize("env", [None, "local"])
     @pytest.mark.parametrize("alias", [None, "alias_path"])
@@ -365,8 +383,10 @@ class TestPipelinePullCommand:
         self.call_pipeline_package(fake_project_cli, pipeline_name)
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
-        config_path = fake_repo_path / "conf" / "base" / "pipelines" / PIPELINE_NAME
         test_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        source_params_config = (
+            fake_repo_path / CONF_ROOT / "base" / "parameters" / f"{PIPELINE_NAME}.yml"
+        )
 
         wheel_file = (
             fake_repo_path
@@ -385,13 +405,19 @@ class TestPipelinePullCommand:
 
         pipeline_name = alias or pipeline_name
         source_dest = fake_package_path / "pipelines" / pipeline_name
-        config_env = env or "base"
-        config_dest = fake_repo_path / "conf" / config_env / "pipelines" / pipeline_name
         test_dest = fake_repo_path / "src" / "tests" / "pipelines" / pipeline_name
+        config_env = env or "base"
+        dest_params_config = (
+            fake_repo_path
+            / CONF_ROOT
+            / config_env
+            / "parameters"
+            / f"{pipeline_name}.yml"
+        )
 
         assert not filecmp.dircmp(source_path, source_dest).diff_files
-        assert not filecmp.dircmp(config_path, config_dest).diff_files
         assert not filecmp.dircmp(test_path, test_dest).diff_files
+        assert source_params_config.read_bytes() == dest_params_config.read_bytes()
 
     def test_pull_two_dist_info(
         self, fake_project_cli, fake_repo_path, mocker, tmp_path
@@ -439,10 +465,12 @@ class TestPipelinePullCommand:
         self.call_pipeline_delete(fake_project_cli)
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
-        config_path = fake_repo_path / "conf" / "base" / "pipelines" / PIPELINE_NAME
+        source_params_config = (
+            fake_repo_path / CONF_ROOT / "base" / "parameters" / f"{PIPELINE_NAME}.yml"
+        )
         # Make sure the files actually deleted before pulling from the wheel file.
         assert not source_path.exists()
-        assert not config_path.exists()
+        assert not source_params_config.exists()
 
         wheel_file = (
             fake_repo_path
@@ -461,12 +489,18 @@ class TestPipelinePullCommand:
 
         pipeline_name = alias or PIPELINE_NAME
         source_dest = fake_package_path / "pipelines" / pipeline_name
-        config_env = env or "base"
-        config_dest = fake_repo_path / "conf" / config_env / "pipelines" / pipeline_name
         test_dest = fake_repo_path / "src" / "tests" / "pipelines" / pipeline_name
+        config_env = env or "base"
+        params_config = (
+            fake_repo_path
+            / CONF_ROOT
+            / config_env
+            / "parameters"
+            / f"{pipeline_name}.yml"
+        )
 
         self.assert_package_files_exist(source_dest)
-        assert (config_dest / "parameters.yml").is_file()
+        assert params_config.is_file()
         assert not test_dest.exists()
 
     @pytest.mark.parametrize("env", [None, "local"])
@@ -480,9 +514,10 @@ class TestPipelinePullCommand:
         """
         # pylint: disable=too-many-locals
         self.call_pipeline_create(fake_project_cli)
-        config_path = fake_repo_path / "conf" / "base" / "pipelines" / PIPELINE_NAME
-        shutil.rmtree(config_path)
-        assert not config_path.exists()
+        source_params_config = (
+            fake_repo_path / CONF_ROOT / "base" / "parameters" / f"{PIPELINE_NAME}.yml"
+        )
+        source_params_config.unlink()
         self.call_pipeline_package(fake_project_cli)
         self.call_pipeline_delete(fake_project_cli)
 
@@ -509,16 +544,21 @@ class TestPipelinePullCommand:
 
         pipeline_name = alias or PIPELINE_NAME
         source_dest = fake_package_path / "pipelines" / pipeline_name
-        config_env = env or "base"
-        config_dest = fake_repo_path / "conf" / config_env / "pipelines" / pipeline_name
         test_dest = fake_repo_path / "src" / "tests" / "pipelines" / pipeline_name
+        config_env = env or "base"
+        dest_params_config = (
+            fake_repo_path
+            / CONF_ROOT
+            / config_env
+            / "parameters"
+            / f"{pipeline_name}.yml"
+        )
 
         self.assert_package_files_exist(source_dest)
-        assert not config_dest.exists()
-        assert {f.name for f in test_dest.iterdir()} == {
-            "__init__.py",
-            "test_pipeline.py",
-        }
+        assert not dest_params_config.exists()
+        actual_test_files = {f.name for f in test_dest.iterdir()}
+        expected_test_files = {"__init__.py", "test_pipeline.py"}
+        assert actual_test_files == expected_test_files
 
     @pytest.mark.parametrize("env", [None, "local"])
     @pytest.mark.parametrize("alias", [None, "alias_path"])
@@ -545,12 +585,14 @@ class TestPipelinePullCommand:
         self.call_pipeline_delete(fake_project_cli)
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
-        config_path = fake_repo_path / "conf" / "base" / "pipelines" / PIPELINE_NAME
         test_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        source_params_config = (
+            fake_repo_path / CONF_ROOT / "base" / "parameters" / f"{PIPELINE_NAME}.yml"
+        )
         # Make sure the files actually deleted before pulling from pypi.
         assert not source_path.exists()
         assert not test_path.exists()
-        assert not config_path.exists()
+        assert not source_params_config.exists()
 
         python_call_mock = mocker.patch("kedro.framework.cli.pipeline.python_call")
         mocker.patch(
@@ -571,16 +613,21 @@ class TestPipelinePullCommand:
 
         pipeline_name = alias or PIPELINE_NAME
         source_dest = fake_package_path / "pipelines" / pipeline_name
-        config_env = env or "base"
-        config_dest = fake_repo_path / "conf" / config_env / "pipelines" / pipeline_name
         test_dest = fake_repo_path / "src" / "tests" / "pipelines" / pipeline_name
+        config_env = env or "base"
+        dest_params_config = (
+            fake_repo_path
+            / CONF_ROOT
+            / config_env
+            / "parameters"
+            / f"{pipeline_name}.yml"
+        )
 
         self.assert_package_files_exist(source_dest)
-        assert (config_dest / "parameters.yml").is_file()
-        assert {f.name for f in test_dest.iterdir()} == {
-            "__init__.py",
-            "test_pipeline.py",
-        }
+        assert dest_params_config.is_file()
+        actual_test_files = {f.name for f in test_dest.iterdir()}
+        expected_test_files = {"__init__.py", "test_pipeline.py"}
+        assert actual_test_files == expected_test_files
 
     def test_invalid_pull_from_pypi(self, fake_project_cli, mocker, tmp_path):
         """

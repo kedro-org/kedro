@@ -155,6 +155,7 @@ Out[6]: ['xs']
 Modular pipelines allow you to develop and maintain smaller pipelines. As your Kedro project evolves and gets more sophisticated, you may find out that a single (“master”) pipeline does not fit the purpose of discoverability anymore due to its complexity. Also, it may be quite hard to port any reusable parts of the original pipeline into a different project. The solution would be to split the pipeline into several logically isolated reusable components, i.e. modular pipelines.
 
 Modular pipelines serve the following main purposes:
+
 * Discoverability: A modular pipeline represents a logically isolated unit of work that is much easier to develop, test and maintain
 * Portability: The proposed internal structure of a modular pipeline makes it easy to copy the pipeline between projects
 * Generalisability: A way to create reusable analytics code in future, depending on what you put in the modular pipeline
@@ -162,18 +163,20 @@ Modular pipelines serve the following main purposes:
 ### How do I create modular pipelines?
 
 For projects created using Kedro version 0.16.0 or later, Kedro ships a [project-specific CLI command](../09_development/03_commands_reference.md) `kedro pipeline create <pipeline_name>`, which does the following for you:
-1. Adds a new modular pipeline in a `src/<python_package>/pipelines/<pipeline_name>/` directory
-2. Creates boilerplate configuration files, `catalog.yml` and `parameters.yml`, in `conf/<env>/pipelines/<pipeline_name>/`, where `<env>` defaults to `base`
-3. Makes a placeholder for the pipeline unit tests in `src/tests/pipelines/<pipeline_name>/`
+
+* Adds a new modular pipeline in a `src/<python_package>/pipelines/<pipeline_name>/` directory
+* Creates a boilerplate parameter configuration file, `<pipeline_name>.yml`, in `conf/<env>/parameters/`, where `<env>` defaults to `base`
+* Makes a placeholder for the pipeline unit tests in `src/tests/pipelines/<pipeline_name>/`
 
 Running `kedro pipeline create` does _not_ automatically add a corresponding entry in `src/<python_package>/pipeline.py` at the moment, so in order to make your new pipeline runnable (by `kedro run --pipeline <pipeline_name>` CLI command, for example), you need to modify `src/<python_package>/pipeline.py` yourself as described in [this section](#ease-of-use-and-portability) below.
 
-> *Note:* In contrast, project configuration from `conf/base/pipelines/<pipeline_name>` is automatically discoverable by [KedroContext](/kedro.framework.context.KedroContext) and therefore requires no manual change.
+> *Note:* In contrast, project configuration from `conf/base/parameters/<pipeline_name>.yml` is automatically discoverable by [KedroContext](/kedro.framework.context.KedroContext) and therefore requires no manual change.
 
 You will need to specify exactly one pipeline name argument when calling `kedro pipeline create <your-pipeline-name-here>`. The pipeline name must adhere to generic Python module naming rules:
-1. Can only contain alphanumeric characters and underscores (`A-Za-z0-9_`)
-2. Must start with a letter or underscore
-3. Must be at least 2 characters long
+
+* Can only contain alphanumeric characters and underscores (`A-Za-z0-9_`)
+* Must start with a letter or underscore
+* Must be at least 2 characters long
 
 For the full list of available CLI options, you can always run `kedro pipeline create --help` for more information.
 
@@ -183,7 +186,7 @@ For the full list of available CLI options, you can always run `kedro pipeline c
 You can manually delete all the files that belong to a modular pipeline. However, Kedro also provides a CLI command to delete the following files automatically when you call `kedro pipeline delete <pipeline_name>`:
 
 * All the modular pipeline code in `src/<python_package>/pipelines/<pipeline_name>/`
-* Configuration files in `conf/<env>/pipelines/<pipeline_name>/`, where `<env>` defaults to `base`. If the files are located in a different config environment, run `kedro pipeline delete <pipeline_name> --env <env_name>`.
+* Configuration files `conf/<env>/parameters/<pipeline_name>.yml` and `conf/<env>/catalog/<pipeline_name>.yml`, where `<env>` defaults to `base`. If the files are located in a different config environment, run `kedro pipeline delete <pipeline_name> --env <env_name>`
 * Pipeline unit tests in `src/tests/pipelines/<pipeline_name>/`
 
 ### Modular pipeline structure
@@ -193,6 +196,7 @@ Modular pipelines can contain any logic that can be reused. Let's look at a gene
 - `src/new_kedro_project/pipelines/modular_pipeline_2` - A directory for modular pipeline 2
 
 Requirements for modular pipelines:
+
 * Each modular pipeline should be placed in a Python module, like `src/new_kedro_project/pipelines/modular_pipeline_1`
 * A modular pipeline must expose a function called `create_pipeline` at the top-level of its package and calling `create_pipeline` with no arguments should return an instance of a [Pipeline](/kedro.pipeline.Pipeline):
 
@@ -268,13 +272,13 @@ project_hooks = ProjectHooks()
 #### Packaging a modular pipeline
 Since Kedro 0.16.4 you can package a modular pipeline by executing `kedro pipeline package <pipeline_name>` command, which will generate a new [wheel file](https://pythonwheels.com/) for it. By default, the wheel file will be saved into `src/dist` directory inside your project, however this can be changed using the `--destination` (`-d`) option.
 
-When packaging your modular pipeline, Kedro will also automatically package files from 3 locations :
+When packaging your modular pipeline, Kedro will also automatically package files from 3 locations:
 
 *  All the modular pipeline code in `src/<python_package>/pipelines/<pipeline_name>/`
-*  Parameters configuration files in `conf/<env>/pipelines/<pipeline_name>`,where `<env>` defaults to `base`. If you need to capture the parameters from a different config environment, run `kedro pipeline package --env <env_name> <pipeline_name>`
+*  Parameter files that match the glob pattern `conf/<env>/parameters*/**/*<pipeline_name>*`, where `<env>` defaults to `base`. If you need to capture the parameters from a different config environment, run `kedro pipeline package --env <env_name> <pipeline_name>`
 *  Pipeline unit tests in `src/tests/pipelines/<pipeline_name>`
 
-> Note that Kedro _will not_ package the catalog config files even if those are present in `conf/<env>/pipelines/<pipeline_name>`.
+> Note that Kedro _will not_ package the catalog config files even if those are present in `conf/<env>/catalog/<pipeline_name>.yml`.
 
 If you plan to publish your packaged modular pipeline to some Python package repository like [PyPI](https://pypi.org/), you need to make sure that your modular pipeline name doesn't clash with any of the existing packages in that repository. However, there is no need to rename any of your source files if that is the case. Simply alias your package with a new name by running `kedro pipeline package --alias <new_package_name> <pipeline_name>`.
 
@@ -285,7 +289,7 @@ In addition to [PyPI](https://pypi.org/), you can also share the packaged wheel 
 You can pull a modular pipeline from a wheel file by executing `kedro pipeline pull <package_name>`. where `<package_name>` is either a package name on Pypi, or a path to the wheel file. Kedro will unpack the wheel file, and install the files in following locations in your Kedro project:
 
 *  All the modular pipeline code in `src/<python_package>/pipelines/<pipeline_name>/`
-*  Configuration files in `conf/<env>/pipelines/<pipeline_name>`, where `<env>` defaults to `base`. If you want to place the parameters from a different config environment, run `kedro pipeline pull <pipeline_name> --env <env_name>`
+*  Configuration files in `conf/<env>/parameters/<pipeline_name>.yml`, where `<env>` defaults to `base`. If you want to place the parameters from a different config environment, run `kedro pipeline pull <pipeline_name> --env <env_name>`
 *  Pipeline unit tests in `src/tests/pipelines/<pipeline_name>`
 
 You can pull a modular pipeline from different locations, including local, PyPI and a cloud storage. Here are CLI examples of pulling a modular pipeline.
@@ -299,7 +303,7 @@ kedro pipeline pull <path-to-your-project-root>/src/dist/<pipeline_name>-0.1-py3
 - Pulling a modular pipeline from S3
 
 ```bash
-kedro pipeline pull https://<bucket_name>.s3.<aws-region>.amazonaws.com/<pipline_name>-0.1-py3-none-any.whl
+kedro pipeline pull https://<bucket_name>.s3.<aws-region>.amazonaws.com/<pipeline_name>-0.1-py3-none-any.whl
 ```
 
 - Pulling a modular pipeline from PyPI
@@ -371,11 +375,11 @@ new-kedro-project
 
 Nested configuration in modular pipelines is _not_ supported by Kedro. It means that putting config files (like `catalog.yml`) in `src/<python_package>/pipelines/<pipeline_name>/conf` will have no effect on the Kedro project configuration.
 
-The recommended way to apply the changes to project catalog and/or parameters is by creating `catalog.yml` and/or `parameters.yml` in `conf/base/pipelines/<pipeline_name>`, which is done automatically if you created your pipeline by calling [`kedro pipeline create`](#how-do-i-create-modular-pipelines). If you plan to manually hand-off your modular pipeline to another project, we also recommend documenting the configuration used by the pipeline in the `README.md` of your modular pipeline. For example, you may copy your configuration into the modular pipeline location before the pipeline hand off and instruct the users to copy `catalog.yml` into their top-level configuration like that:
+The recommended way to apply the changes to the project catalog and/or parameters is by creating `conf/base/catalog/<pipeline_name>.yml` or `conf/base/parameters/<pipeline_name>.yml` respectively. The latter is automatically added when you create your pipeline by calling [`kedro pipeline create`](#how-do-i-create-modular-pipelines). If you plan to manually hand off your modular pipeline to another project, you should document the configuration used by the pipeline in the `README.md` of your modular pipeline. For example, you may copy your configuration into the modular pipeline location before the pipeline hand off and instruct the users to copy `catalog.yml` into their top-level configuration:
 
 ```bash
-mkdir -p conf/base/pipelines/data_engineering  # create a separate folder for the pipeline configs
-cp -r src/<python_package>/pipelines/data_engineering/conf/* conf/base/pipelines/data_engineering  # copy the pipeline configs
+mkdir conf/base/catalog/  # create a separate folder for the pipeline configs
+cp src/<python_package>/pipelines/data_engineering/conf/catalog.yml conf/base/catalog/data_engineering.yml  # copy the pipeline configs
 ```
 
 ### Datasets
@@ -442,9 +446,11 @@ cook_pipeline = Pipeline(
 eat_breakfast_pipeline = Pipeline([node(eat_breakfast, "breakfast_food", None)])
 eat_lunch_pipeline = Pipeline([node(eat_lunch, "lunch_food", None)])
 ```
+
 Now we need to "defrost" two different types of food and feed it to different pipelines. But we can't use the `cook_pipeline` twice, the internal dataset names will conflict. We might try to call `pipeline()` and map all datasets, but the conflicting explicitly set `name="defrost_node"` remains.
 
 The right solution is:
+
 ```python
 cook_breakfast_pipeline = pipeline(
     cook_pipeline,
@@ -466,12 +472,15 @@ final_pipeline = (
     + eat_lunch_pipeline
 )
 ```
+
 `namespace="lunch"` renames all datasets and nodes, prefixing them with `"lunch."`, except those datasets that we rename explicitly in the mapping (i.e `grilled_meat`, `frozen_meat`).
 
 The resulting pipeline now has two separate nodes, `breakfast.defrost_node` and `lunch.defrost_node`. Also two separate datasets `breakfast.meat` and `lunch.meat` connect the nodes inside the pipelines, causing no confusion between them.
 
 Note that `pipeline()` will skip prefixing when node inputs contain parameter references (`params:` and `parameters`).
+
 Example:
+
 ```python
 raw_pipeline = Pipeline([node(node_func, ["input", "params:x"], "output")])
 final_pipeline = pipeline(raw_pipeline, namespace="new")
@@ -506,7 +515,6 @@ As you notice, pipelines can usually readily resolve their dependencies. In some
 ### Pipeline with bad nodes
 
 In this case we have a pipeline consisting of a single node with no input and output:
-
 
 ```python
 try:
@@ -579,7 +587,6 @@ We recommend using `SequentialRunner` in cases where:
 - the pipeline has limited branching
 - the pipeline is fast
 - the resource consuming steps require most of a scarce resource (e.g., significant RAM, disk memory or CPU)
-
 
 Now we can execute the pipeline by providing a runner and values for each of the inputs.
 
@@ -922,6 +929,7 @@ io.load("v")
 ```
 
 `Ouput`:
+
 ```Console
 Out[12]: 5
 ```
@@ -945,6 +953,7 @@ io.load("v")
 ```
 
 `Ouput`:
+
 ```console
 Out[14]: 0.666666666666667
 ```
@@ -1089,6 +1098,7 @@ kedro run --from-nodes A --to-nodes Z
 ```
 
 or, when specifying multiple nodes:
+
 ```bash
 kedro run --from-nodes A,D --to-nodes X,Y,Z
 ```

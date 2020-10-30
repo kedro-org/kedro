@@ -27,6 +27,7 @@
 * Renamed `kedro_cli.py` to `cli.py` and moved it inside the Python packge (`src/<package_name>/`).
 * Removed `.kedro.yml` from the project template and replaced it with `pyproject.toml`.
 * `KEDRO_CONFIGS` constant (residing in `kedro.framework.context.context`) has been removed.
+* Modified `kedro pipeline create` CLI command to add a boilerplate parameter config file in `conf/<env>/parameters/<pipeline_name>.yml` instead of `conf/<env>/pipelines/<pipeline_name>/parameters.yml`. CLI commands `kedro pipeline delete` / `package` / `pull` were updated accordingly.
 
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman)

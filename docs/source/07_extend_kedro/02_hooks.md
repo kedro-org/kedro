@@ -13,7 +13,7 @@ Hooks are a mechanism to add extra behaviour to Kedro's main execution in an eas
 A Hook is comprised of a Hook specification and Hook implementation. To add Hooks to your project you will need to:
 
 * Provide a Hook implementation for an existing Kedro-defined Hook specification
-* Register your Hook implementation in the `ProjectContext`, `.kedro.yml`, or `pyproject.toml` under `[tool.kedro]` section if `.kedro.yml` doesn't exist.
+* Register your Hook implementation in the `ProjectContext` or in your `settings.py` file under the key `HOOKS`.
 
 
 ### Hook specification
@@ -102,7 +102,7 @@ We recommend that you group related Hook implementations under a namespace, pref
 
 #### Registering your Hook implementations with Kedro
 
-Hook implementations should be registered with Kedro either through code, in `ProjectContext`, or using a static configuration in `.kedro.yml` (if it exists) otherwise in `pyproject.toml` under the `[tool.kedro]` section.
+Hook implementations should be registered with Kedro either through `ProjectContext.hooks`, or in your `settings.py` file under `HOOKS` key.
 
 You can register more than one implementation for the same specification. They will be called in LIFO (last-in, first-out) order.
 
@@ -124,44 +124,28 @@ class ProjectContext(KedroContext):
     # in a tuple.`hooks = (Hook1(), Hook2())`
 ```
 
-Alternatively, if you include `transformer_hooks = TransformerHooks()` in your `hooks.py` file, you can use `.kedro.yml` as follows:
+Alternatively, you can use `settings.py` as follows:
 
-```yaml
-# <your_project>/.kedro.yml
-hooks:
-    - your_project.hooks.transformer_hooks
-```
+```python
+# <your_project>/src/<your_project>/settings.py
+from your_project.hooks import TransformerHooks
 
-If `.kedro.yml` doesn't exist you can use `pyproject.toml` instead as follows:
 
-```toml
-# <your_project>/pyproject.toml
-[tool.kedro]
-hooks=["your_project.hooks.transformer_hooks"]
+HOOKS = (TransformerHooks(),)
 ```
 
 
 Kedro also has auto-discovery enabled by default. This means that any installed plugins that declare a Hooks entry-point will be registered. To learn more about how to enable this for your custom plugin, see our [plugin development guide](04_plugins.md#hooks).
 
->Note: Auto-discovered Hooks will run *first*, followed by the ones specified in `.kedro.yml` or `pyproject.toml` (if `.kedro.yml` doesn't exist), and finally `ProjectContext.hooks`.
+>Note: Auto-discovered Hooks will run *first*, followed by the ones specified in `settings.py`, and finally `ProjectContext.hooks`.
 
 #### Disable auto-registered plugins' Hooks
 
-Auto-registered plugins' Hooks can be disabled via `.kedro.yml` or `pyproject.toml` as follows:
+Auto-registered plugins' Hooks can be disabled via `settings.py` as follows:
 
-```yaml
-# <your_project>/.kedro.yml
-disable_hooks_for_plugins:
-    - <plugin_name>
-    - ...
-```
-
-or
-
-```toml
-# <your_project>/pyproject.toml
-[tool.kedro]
-disable_hooks_for_plugins=["<plugin_name>", ]
+```python
+# <your_project>/src/<your_project>/settings.py
+DISABLE_HOOKS_FOR_PLUGINS = (<plugin_name>, ...)
 ```
 
 where `<plugin_name>` is the name of an installed plugin for which the auto-registered Hooks must be disabled.

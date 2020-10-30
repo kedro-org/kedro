@@ -41,7 +41,7 @@ Kedro also creates the following hidden files and folders:
     ├── .coveragerc     # Configuration file for the coverage reporting when doing `kedro test`
     ├── .gitignore      # Prevent staging of unnecessary files to `git`
     ├── .ipython        # IPython startup scripts
-    └── .kedro.yml      # Identifies the project root and [contains configuration information](https://kedro.readthedocs.io/en/latest/11_faq/02_architecture_overview.html#kedro-yml)
+    └── pyproject.toml  # Identifies the project root and [contains configuration information](https://kedro.readthedocs.io/en/latest/11_faq/02_architecture_overview.html#kedro-yml)
 ```
 
 #### `conf/`

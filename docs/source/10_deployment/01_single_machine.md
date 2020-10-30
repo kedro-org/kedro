@@ -45,7 +45,7 @@ kedro package
 
 Kedro builds the package into the `src/dist/` folder of your project, and creates one `.egg` file and one `.whl` file, which are [Python packaging formats for binary distribution](https://packaging.python.org/overview/).
 
-The resulting package only contains the Python source code of your Kedro pipeline, not any of the `conf/`, `data/` and `logs/` subfolders nor the `.kedro.yml` file. This means that you can distribute the project to run elsewhere, such as on a separate computer with different configuration, data and logging. When distributed, the packaged project must be run from within a directory that contains the `.kedro.yml` file and `conf/` subfolder (and `data/` and `logs/` if your pipeline loads/saves local data or uses logging). This means that you will have to create these directories on the remote servers manually.
+The resulting package only contains the Python source code of your Kedro pipeline, not any of the `conf/`, `data/` and `logs/` subfolders nor the `pyproject.toml` file. This means that you can distribute the project to run elsewhere, such as on a separate computer with different configuration, data and logging. When distributed, the packaged project must be run from within a directory that contains the `pyproject.toml` file and `conf/` subfolder (and `data/` and `logs/` if your pipeline loads/saves local data or uses logging). This means that you will have to create these directories on the remote servers manually.
 
 Recipients of the `.egg` and `.whl` files need to have Python and `pip` set up on their machines, but do not need to have Kedro installed. The project is installed to the root of a folder with the relevant `conf/`, `data/` and `logs/` subfolders, by navigating to the root and calling:
 

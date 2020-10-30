@@ -365,7 +365,7 @@ new-kedro-project
 │   │   └── test_run.py
 │   ├── requirements.txt
 │   └── setup.py
-├── .kedro.yml
+├── pyproject.toml
 ├── README.md
 └── setup.cfg
 ```

@@ -38,5 +38,5 @@ HOOKS = (ProjectHooks(),)
 # Define where to store data from a KedroSession
 # SESSION_STORE = {
 #     "type": "kedro.framework.session.store.ShelveStore",
-#     "path": "."
+#     "path": "./sessions"
 # }

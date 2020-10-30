@@ -40,13 +40,33 @@
 
 #### Migration for `kedro_cli.py`
 
-In your `.kedro.yml` file within the project root directory, add the following key:
+If you customised the `kedro run` command or added more CLI commands in your `kedro_cli.py`, copy-paste them into `<project_root>/src/<package_name>/cli.py`.
 
-```yaml
-package_name: "<your_package_name>"
+#### Migration for `.kedro.yml`
+
+From `.kedro.yml`, move the following four keys to `pyproject.toml`:
+
+```toml
+[tools.kedro]
+context_path = "<package_name>.run.ProjectContext"  # or your custom location if modified
+project_name = "<project_name>"
+project_version = "0.17.0"
+package_name = "<package_name>"
 ```
 
-Rename `kedro_cli.py` file to `cli.py` and move it inside your Python package directory, i.e. `<project_root>/src/<package_name>`.
+If you defined a different source directory (`source_dir`), make sure you also move that to `pyproject.toml`.
+
+Next, if you specified additional hook implementations in `hooks` listed plugins under `disable_hooks_by_plugin` in your `.kedro.yml`, you will need to move them to `settings.py` accordingly:
+
+```python
+from <package_name>.hooks import MyCustomHooks
+
+
+HOOKS = (ProjectHooks(), MyCustomHooks())
+
+DISABLE_HOOKS_FOR_PLUGINS = ("my_plugin1", )
+```
+
 
 # Release 0.16.6
 

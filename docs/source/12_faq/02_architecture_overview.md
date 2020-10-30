@@ -27,16 +27,24 @@ A Python file that contains project specific CLI commands (e.g., `kedro run`, `k
 
 A Python file located in `src/<python_package>/run.py`, which by default contains the definition of `ProjectContext`, a concrete implementation of `KedroContext` class. This file also serves as the main entry point of the project.
 
-#### `.kedro.yml`
+#### `pyproject.toml`
 
-`.kedro.yml` identifies the project root, which is used by other Kedro components and contains the following configuration entries:
-- `source_dir`: (Optional) The directory of the source path relative to the project root path. Default directory is `src/` and when customised the path should be separated by a forward slash (e.g `src/<path_to_src>/`)
+`pyproject.yml` identifies the project root, which is used by other Kedro components and contains the following metadata entries:
 - `context_path`: A top-level key pointing to the absolute path of the context class implementation (default is `<python_project>.run.ProjectContext`)
-- `hooks`: (Optional) A list of paths pointing to [Hooks](../07_extend_kedro/02_hooks.md) implementations to be registered with the project (default is `<python_project>.hooks.project_hooks`)
+- `package_name`: A valid Python package name for your project package
+- `project_name`: A human readable name for your project
+- `project_version`: Kedro version with which the project was generated
+- `source_dir`: (Optional) The directory of the source path relative to the project root path. Default directory is `src/` and when customised the path should be separated by a forward slash (e.g `src/<path_to_src>/`)
 
-`.kedro.yml` must be located at the root of the project.
+`pyproject.toml` must be located at the root of the project. We use the `pyproject.toml` for all configuration needed to create the Python package and allow the Kedro CLI to find where the source code is.
 
-> *Note:* Since Kedro 0.16.6, the `.kedro.yml` file is optional, instead a `pyproject.toml` file can be used with the same content under `[tool.kedro]` section.
+#### `settings.py`
+
+We use the `settings.py` for all project settings, which will not change at run time, but at development time. `settings.py` contains the following configuration entries:
+
+- `DISABLE_HOOKS_FOR_PLUGINS`: (Optional) A list of the installed plugins for which to disable auto-registry
+- `HOOKS`: (Optional) A list of paths pointing to [Hooks](../07_extend_kedro/02_hooks.md) implementations to be registered with the project (default is `<python_project>.hooks.ProjectHooks`)
+- `SESSION_STORE`: (Optional) Define where to store data from a `KedroSession`
 
 #### `00-kedro-init.py`
 
@@ -70,7 +78,7 @@ A python function that instantiates the project context by calling `load_context
 
 #### `load_context()`
 
-A python function that locates Kedro project based on `.kedro.yml` or `pyproject.toml` (if `.kedro.yml` doesn't exist) and instantiates the project context.
+A Python function that locates Kedro project based on `pyproject.toml` and instantiates the project context.
 
 #### `KedroContext`
 

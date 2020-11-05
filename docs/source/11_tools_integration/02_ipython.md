@@ -84,13 +84,13 @@ Navigate to the `notebooks` folder of your Kedro project and create a new notebo
 
 Every time you start or restart a Jupyter or IPython session in the CLI using a `kedro` command, a startup script in `.ipython/profile_default/startup/00-kedro-init.py` is executed. It adds the following variables in scope:
 
-* `context` (`KedroContext`) - Kedro project context that holds the configuration
+* `context` (`KedroContext`) - Kedro project context that provides access to Kedro's library components.
 * `catalog` (`DataCatalog`) - Data catalog instance that contains all defined datasets; this is a shortcut for `context.catalog`
 * `startup_error` (`Exception`) - An error that was raised during the execution of the startup script or `None` if no errors occurred
 
 ## How to use `context`
 
-`KedroContext` represents the main application entry point for your Kedro project. The `context` variable allows you to interact with your project components from within the Kedro Jupyter notebook.
+The `context` variable allows you to interact with Kedro library components from within the Kedro Jupyter notebook.
 
 ![context input graphic](../meta/images/jupyter_notebook_showing_context.png)
 
@@ -101,19 +101,21 @@ With `context`, you can access the following variables and methods:
 - `context.catalog` (`DataCatalog`) - An instance of [DataCatalog](/kedro.io.DataCatalog)
 - `context.config_loader` (`ConfigLoader`) - An instance of [ConfigLoader](/kedro.config.ConfigLoader)
 - `context.pipeline` (`Pipeline`) - Defined pipeline
-- `context.run` (`None`) - Method to run a pipeline
 
 ### Run the pipeline
 
-If you wish to run the whole 'master' pipeline within a notebook cell, you can do so as follows:
+If you wish to run the whole 'master' pipeline within a notebook cell, you can do so by instantiating a `Session`:
 
 ```python
-context.run()
+from kedro.framework.session import KedroSession
+
+with KedroSession.create() as session:
+    session.run()
 ```
 
 The command runs the nodes from your default project pipeline in a sequential manner.
 
-To parameterise your pipeline run, refer to [a later section on this page on run parameters](#additional-parameters-for-contextrun) which lists all available options.
+To parameterise your pipeline run, refer to [a later section on this page on run parameters](#additional-parameters-for-sessionrun) which lists all available options.
 
 
 ### Parameters
@@ -158,8 +160,8 @@ my_dict = {"key1": "some_value", "key2": None}
 catalog.save("my_dataset", my_dict)
 ```
 
-### Additional parameters for `context.run()`
-You can also specify the following optional arguments for `context.run()`:
+### Additional parameters for `session.run()`
+You can also specify the following optional arguments for `session.run()`:
 
 ```eval_rst
 +---------------+----------------+-------------------------------------------------------------------------------+

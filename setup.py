@@ -87,7 +87,7 @@ def _collect_requirements(requires):
 api_require = {"api.APIDataSet": ["requests~=2.20"]}
 biosequence_require = {"biosequence.BioSequenceDataSet": ["biopython~=1.73"]}
 dask_require = {"dask.ParquetDataSet": ["dask[complete]~=2.6"]}
-geopandas_require = {"geopandas.GeoJSONDataSet": ["geopandas>=0.6.0, <1.0"]}
+geopandas_require = {"geopandas.GeoJSONDataSet": ["geopandas>=0.6.0, <1.0", "pyproj>=2.2.0, <3.0"]}
 matplotlib_require = {"matplotlib.MatplotlibWriter": ["matplotlib>=3.0.3, <4.0"]}
 holoviews_require = {"holoviews.HoloviewsWriter": ["holoviews~=1.13.0"]}
 networkx_require = {"networkx.NetworkXDataSet": ["networkx~=2.4"]}

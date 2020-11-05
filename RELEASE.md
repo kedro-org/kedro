@@ -24,10 +24,12 @@
 * Added a `DeprecationWarning` to the Transformers API when adding a transformer to the catalog. Added documentation to recommend using Hooks for customising the `load` and `save` methods.
 * Added `DatasetSpecs` with hooks to run before and after loading and saving datasets from/to the catalog.
 * `kedro new --starter` now defaults to fetching the starter template matching the installed Kedro version.
-* Renamed `kedro_cli.py` to `cli.py` and moved it inside the Python packge (`src/<package_name>/`).
+* Renamed `kedro_cli.py` to `cli.py` and moved it inside the Python package (`src/<package_name>/`), for a better packaging and deployment experience.
 * Removed `.kedro.yml` from the project template and replaced it with `pyproject.toml`.
-* `KEDRO_CONFIGS` constant (residing in `kedro.framework.context.context`) has been removed.
+* Removed `KEDRO_CONFIGS` constant (previously residing in `kedro.framework.context.context`).
 * Modified `kedro pipeline create` CLI command to add a boilerplate parameter config file in `conf/<env>/parameters/<pipeline_name>.yml` instead of `conf/<env>/pipelines/<pipeline_name>/parameters.yml`. CLI commands `kedro pipeline delete` / `package` / `pull` were updated accordingly.
+* Removed `get_static_project_data` from `kedro.framework.context`.
+* Renamed `KedroContext.static_data` to `KedroContext.project_metadata`.
 
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman)

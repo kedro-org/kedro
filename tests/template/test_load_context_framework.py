@@ -36,10 +36,10 @@ import toml
 from kedro import __version__ as kedro_version
 from kedro.framework.context import (
     KedroContextError,
-    get_static_project_data,
     load_context,
     load_package_context,
 )
+from kedro.framework.project.metadata import _get_project_metadata
 
 
 @pytest.fixture(autouse=True)
@@ -60,16 +60,15 @@ def _create_kedro_config(project_path, payload):
 class TestLoadContext:
     def test_valid_context(self, fake_repo_path, mocker):
         """Test getting project context."""
-        get_static_project_data_mock = mocker.patch(
-            "kedro.framework.context.context.get_static_project_data",
-            wraps=get_static_project_data,
+        get_project_metadata_mock = mocker.patch(
+            "kedro.framework.context.context._get_project_metadata",
+            wraps=_get_project_metadata,
         )
         result = load_context(str(fake_repo_path))
         assert result.project_name == "Test Project"
         assert result.project_version == kedro_version
         assert str(fake_repo_path.resolve() / "src") in sys.path
-        get_static_project_data_mock.assert_called_with(fake_repo_path)
-        assert get_static_project_data_mock.call_count == 2
+        get_project_metadata_mock.assert_called_with(fake_repo_path)
 
     def test_valid_context_with_env(self, mocker, monkeypatch, fake_repo_path):
         """Test getting project context when Kedro config environment is
@@ -85,11 +84,10 @@ class TestLoadContext:
         other_path = tmp_path / "other"
         other_path.mkdir()
         pattern = "Could not find the project configuration file 'pyproject.toml'"
-        with pytest.raises(KedroContextError, match=re.escape(pattern)):
+        with pytest.raises(RuntimeError, match=re.escape(pattern)):
             load_context(str(other_path))
 
-    def test_pyproject_toml_has_no_context_path(self, fake_repo_path):
-        """Test for loading context from an invalid path. """
+    def test_pyproject_toml_has_missing_mandatory_keys(self, fake_repo_path):
         payload = {
             "tool": {
                 "kedro": {"fake_key": "fake_value", "project_version": kedro_version}
@@ -97,8 +95,34 @@ class TestLoadContext:
         }
         _create_kedro_config(fake_repo_path, payload)
 
-        pattern = "'pyproject.toml' doesn't have a required `context_path` field"
-        with pytest.raises(KedroContextError, match=re.escape(pattern)):
+        pattern = (
+            "Missing required keys ['context_path', 'package_name', 'project_name'] "
+            "from 'pyproject.toml'."
+        )
+        with pytest.raises(RuntimeError, match=re.escape(pattern)):
+            load_context(str(fake_repo_path))
+
+    def test_pyproject_toml_has_extra_keys(self, fake_repo_path, fake_package_name):
+        project_name = "Test Project"
+        payload = {
+            "tool": {
+                "kedro": {
+                    "context_path": f"{fake_package_name}.run.ProjectContext",
+                    "project_version": kedro_version,
+                    "project_name": project_name,
+                    "package_name": fake_package_name,
+                    "unexpected_key": "hello",
+                }
+            }
+        }
+        _create_kedro_config(fake_repo_path, payload)
+
+        pattern = (
+            "Found unexpected keys in 'pyproject.toml'. Make sure it "
+            "only contains the following keys: ['context_path', "
+            "'package_name', 'project_name', 'project_version', 'source_dir']."
+        )
+        with pytest.raises(RuntimeError, match=re.escape(pattern)):
             load_context(str(fake_repo_path))
 
     @pytest.mark.parametrize("source_dir", ["src", "./src", "./src/"])
@@ -166,6 +190,7 @@ class TestLoadContext:
                 "kedro": {
                     "context_path": f"{fake_package_name}.run.ProjectContext",
                     "source_dir": source_dir,
+                    "package_name": fake_package_name,
                     "project_version": kedro_version,
                     "project_name": "Test Project",
                 }

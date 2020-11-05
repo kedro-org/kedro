@@ -37,9 +37,10 @@ from typing import Any, Dict, Iterable, Optional, Union
 
 import click
 
-from kedro.framework.context import KedroContext, get_static_project_data, load_context
-from kedro.framework.context.context import _get_project_settings
+from kedro.framework.context import KedroContext, load_context
 from kedro.framework.hooks import get_hook_manager
+from kedro.framework.project.metadata import _get_project_metadata
+from kedro.framework.project.settings import _get_project_settings
 from kedro.framework.session.store import BaseSessionStore
 from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner, SequentialRunner
@@ -164,7 +165,7 @@ class KedroSession:
             save_on_close=save_on_close,
         )
 
-        session_data = get_static_project_data(session._project_path)
+        session_data = _get_project_metadata(session._project_path)._asdict()
         session_data["project_path"] = session._project_path
         session_data["session_id"] = session.session_id
         session_data.update(_describe_git(session._project_path))
@@ -183,8 +184,8 @@ class KedroSession:
         return session
 
     def _init_store(self) -> BaseSessionStore:
-        project_metadata = get_static_project_data(self._project_path)
-        project_settings = _get_project_settings(project_metadata)
+        metadata = _get_project_metadata(self._project_path)
+        project_settings = _get_project_settings(metadata)
 
         config = deepcopy(project_settings.session_store)
         config.setdefault("path", (self._project_path / "sessions").as_posix())

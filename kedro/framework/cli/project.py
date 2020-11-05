@@ -50,7 +50,7 @@ from kedro.framework.cli.utils import (
     ipython_message,
     python_call,
 )
-from kedro.framework.context import get_static_project_data
+from kedro.framework.project.metadata import _get_project_metadata
 
 NO_DEPENDENCY_MESSAGE = """{module} is not installed. Please make sure {module} is in
 {src}/requirements.txt and run `kedro install`."""
@@ -78,7 +78,7 @@ def _build_reqs(source_path: Path, args: Sequence[str] = ()):
 
 
 def _get_source_path():
-    return get_static_project_data(Path.cwd())["source_dir"]
+    return _get_project_metadata(Path.cwd()).source_dir
 
 
 @click.group()
@@ -105,11 +105,9 @@ def test(args, **kwargs):  # pylint: disable=unused-argument
 @click.argument("files", type=click.Path(exists=True), nargs=-1)
 def lint(files, check_only, **kwargs):  # pylint: disable=unused-argument
     """Run flake8, isort and black."""
-    static_data = get_static_project_data(Path.cwd())
-    source_path = static_data["source_dir"]
-    package_name = (
-        static_data.get("package_name") or _load_project_context().package_name
-    )
+    project_metadata = _get_project_metadata(Path.cwd())
+    source_path = project_metadata.source_dir
+    package_name = project_metadata.package_name
     files = files or (str(source_path / "tests"), str(source_path / package_name))
 
     if "PYTHONPATH" not in os.environ:
@@ -210,11 +208,9 @@ def package():
 )
 def build_docs(open_docs):
     """Build the project documentation."""
-    static_data = get_static_project_data(Path.cwd())
-    source_path = static_data["source_dir"]
-    package_name = (
-        static_data.get("package_name") or _load_project_context().package_name
-    )
+    project_metadata = _get_project_metadata(Path.cwd())
+    source_path = project_metadata.source_dir
+    package_name = project_metadata.package_name
 
     python_call("pip", ["install", str(source_path / "[docs]")])
     python_call("pip", ["install", "-r", str(source_path / "requirements.txt")])

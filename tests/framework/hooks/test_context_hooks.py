@@ -123,6 +123,7 @@ def config_dir(tmp_path, local_config, local_logging_config):
     payload = {
         "tool": {
             "kedro": {
+                "context_path": "test.path",
                 "project_version": __version__,
                 "project_name": "test hooks",
                 "package_name": "test_hooks",

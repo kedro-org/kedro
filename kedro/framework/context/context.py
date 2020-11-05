@@ -26,24 +26,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """This module provides context for Kedro project."""
-
 import abc
 import logging
 import logging.config
 import os
 import sys
 from copy import deepcopy
-from importlib import import_module
 from pathlib import Path, PurePosixPath, PureWindowsPath
-from typing import Any, Dict, Iterable, NamedTuple, Tuple, Union
+from typing import Any, Dict, Iterable, Tuple, Union
 from urllib.parse import urlparse
 from warnings import warn
-
-import anyconfig
 
 from kedro import __version__
 from kedro.config import ConfigLoader, MissingConfigException
 from kedro.framework.hooks import get_hook_manager
+from kedro.framework.project import ProjectMetadata, ProjectSettings
+from kedro.framework.project.metadata import _get_project_metadata
+from kedro.framework.project.settings import _get_project_settings
 from kedro.io import DataCatalog
 from kedro.io.core import generate_timestamp
 from kedro.pipeline import Pipeline
@@ -54,16 +53,6 @@ from kedro.utils import load_obj
 from kedro.versioning import Journal
 
 _PLUGIN_HOOKS = "kedro.hooks"  # entry-point to load hooks from for installed plugins
-
-_KEDRO_CONFIG = "pyproject.toml"
-
-
-class ProjectSettings(NamedTuple):
-    """Structure holding project settings configured in `settings.py`"""
-
-    disable_hooks_for_plugins: Tuple[str, ...] = ()
-    hooks: Tuple[str, ...] = ()
-    session_store: Dict[str, str] = {}
 
 
 def _version_mismatch_error(context_version) -> str:
@@ -252,8 +241,8 @@ class KedroContext(abc.ABC):
                 the parameters retrieved from the project configuration.
         """
         self._project_path = Path(project_path).expanduser().resolve()
-        self._static_data = get_static_project_data(self._project_path)
-        self._project_settings = _get_project_settings(self._static_data)
+        self._project_metadata = _get_project_metadata(self._project_path)
+        self._project_settings = _get_project_settings(self._project_metadata)
 
         # check the match for major and minor version (skip patch version)
         if self.project_version.split(".")[:2] != __version__.split(".")[:2]:
@@ -267,14 +256,14 @@ class KedroContext(abc.ABC):
         self._setup_logging()
 
     @property
-    def static_data(self) -> Dict[str, Any]:
-        """Read-only property for Kedro project static data.
+    def project_metadata(self) -> ProjectMetadata:
+        """Read-only property for Kedro project metadata.
 
         Returns:
-            A dictionary with defined static project data.
+            A named tuple with defined project metadata.
 
         """
-        return deepcopy(self._static_data)
+        return self._project_metadata
 
     @property
     def project_settings(self) -> ProjectSettings:
@@ -289,7 +278,7 @@ class KedroContext(abc.ABC):
             Name of Kedro project.
 
         """
-        return self.static_data["project_name"]
+        return self.project_metadata.project_name
 
     @property
     def project_version(self) -> str:
@@ -299,7 +288,7 @@ class KedroContext(abc.ABC):
             Kedro version.
 
         """
-        return self.static_data["project_version"]
+        return self.project_metadata.project_version
 
     @property
     def package_name(self) -> str:
@@ -309,7 +298,7 @@ class KedroContext(abc.ABC):
             Name of Kedro project package.
 
         """
-        return self.static_data["package_name"]
+        return self.project_metadata.package_name
 
     @property
     def pipeline(self) -> Pipeline:
@@ -804,74 +793,6 @@ class KedroContext(abc.ABC):
         return generate_timestamp()
 
 
-def get_static_project_data(project_path: Union[str, Path]) -> Dict[str, Any]:
-    """Read static project data from `<project_path>/pyproject.toml` config file,
-    under the `[tool.kedro]` section.
-
-    Args:
-        project_path: Local path to project root directory to look up `pyproject.toml` in.
-
-    Raises:
-        KedroContextError: `pyproject.toml` was not found or the `[tool.kedro]` section
-            is missing, or config file cannot be parsed.
-
-    Returns:
-        A mapping that contains static project data.
-    """
-    project_path = Path(project_path).expanduser().resolve()
-    config_path = project_path / _KEDRO_CONFIG
-
-    if not config_path.is_file():
-        raise KedroContextError(
-            f"Could not find the project configuration file '{_KEDRO_CONFIG}' in {project_path}. "
-            f"If you have created your project with Kedro "
-            f"version <0.17.0, make sure to update your project template. "
-            f"See https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md"
-            f"#migration-guide-from-kedro-016-to-kedro-0170 "
-            f"for how to migrate your Kedro project."
-        )
-
-    try:
-        static_data = anyconfig.load(config_path)
-    except Exception as exc:
-        raise KedroContextError(f"Failed to parse '{_KEDRO_CONFIG}' file.") from exc
-
-    try:
-        static_data = static_data["tool"]["kedro"]
-    except KeyError as exc:
-        raise KedroContextError(
-            f"There's no '[tool.kedro]' section in the '{_KEDRO_CONFIG}'. "
-            f"Please add '[tool.kedro]' section to the file with appropriate "
-            f"configuration parameters."
-        ) from exc
-
-    source_dir = Path(static_data.get("source_dir", "src")).expanduser()
-    source_dir = (project_path / source_dir).resolve()
-    static_data["source_dir"] = source_dir
-    static_data["config_file"] = config_path
-
-    return static_data
-
-
-def _get_project_settings(project_metadata: Dict[str, Any]) -> ProjectSettings:
-    source_dir = project_metadata["source_dir"]
-    package_name = project_metadata["package_name"]
-    settings_path = source_dir / package_name / "settings.py"
-
-    if settings_path.is_file():
-        module = import_module(f"{package_name}.settings")
-        project_settings = {
-            "disable_hooks_for_plugins": tuple(
-                getattr(module, "DISABLE_HOOKS_FOR_PLUGINS", ())
-            ),
-            "hooks": tuple(getattr(module, "HOOKS", ())),
-            "session_store": getattr(module, "SESSION_STORE", {}),
-        }
-        return ProjectSettings(**project_settings)
-
-    return ProjectSettings()  # default settings
-
-
 def validate_source_path(source_path: Path, project_path: Path):
     """Validate the source path exists and is relative to the project path.
 
@@ -958,19 +879,12 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
 
     """
     project_path = Path(project_path).expanduser().resolve()
-    static_data = get_static_project_data(project_path)
+    project_metadata = _get_project_metadata(project_path)
 
-    if "context_path" not in static_data:
-        conf_file = static_data["config_file"].name
-        raise KedroContextError(
-            f"'{conf_file}' doesn't have a required `context_path` field. "
-            f"Please refer to the documentation."
-        )
-
-    source_dir = static_data["source_dir"]
+    source_dir = project_metadata.source_dir
     _add_src_to_path(source_dir, project_path)
 
-    context_class = load_obj(static_data["context_path"])
+    context_class = load_obj(project_metadata.context_path)
 
     # update kwargs with env from the environment variable
     # (defaults to None if not set)

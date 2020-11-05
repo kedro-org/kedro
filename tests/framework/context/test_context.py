@@ -208,6 +208,7 @@ expected_message_head = (
 pyproject_toml_payload = {
     "tool": {
         "kedro": {
+            "context_path": "fake.module.path",
             "project_name": "mock_project_name",
             "project_version": kedro_version,
             "package_name": "mock_package_name",

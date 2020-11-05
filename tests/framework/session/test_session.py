@@ -36,8 +36,10 @@ import toml
 from kedro.framework.session import KedroSession, get_current_session
 from kedro.framework.session.store import BaseSessionStore, ShelveStore
 
+_FAKE_CONTEXT_PATH = "fake.module.path"
 _FAKE_KEDRO_VERSION = "fake_kedro_version"
 _FAKE_PACKAGE_NAME = "fake_package"
+_FAKE_PROJECT_NAME = "fake_project"
 _FAKE_PIPELINE_NAME = "fake_pipeline"
 
 
@@ -64,7 +66,9 @@ def fake_project(tmp_path, mock_load_context):  # pylint: disable=unused-argumen
     payload = {
         "tool": {
             "kedro": {
+                "context_path": _FAKE_CONTEXT_PATH,
                 "project_version": _FAKE_KEDRO_VERSION,
+                "project_name": _FAKE_PROJECT_NAME,
                 "package_name": _FAKE_PACKAGE_NAME,
             }
         }
@@ -107,7 +111,9 @@ class TestKedroSession:
         }
         expected_store = {
             "config_file": fake_project / "pyproject.toml",
+            "context_path": _FAKE_CONTEXT_PATH,
             "project_path": fake_project,
+            "project_name": _FAKE_PROJECT_NAME,
             "source_dir": fake_project / "src",
             "session_id": fake_session_id,
             "project_version": _FAKE_KEDRO_VERSION,
@@ -146,7 +152,9 @@ class TestKedroSession:
         }
         expected_store = {
             "config_file": fake_project / "pyproject.toml",
+            "context_path": _FAKE_CONTEXT_PATH,
             "project_path": fake_project,
+            "project_name": _FAKE_PROJECT_NAME,
             "source_dir": fake_project / "src",
             "session_id": fake_session_id,
             "package_name": _FAKE_PACKAGE_NAME,
@@ -192,7 +200,7 @@ class TestKedroSession:
         fake_settings_module.DISABLE_HOOKS_FOR_PLUGINS = ()
         fake_settings_module.HOOKS = ()
         mocker.patch(
-            "kedro.framework.context.context.import_module",
+            "kedro.framework.project.settings.import_module",
             return_value=fake_settings_module,
         )
 

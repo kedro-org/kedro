@@ -26,12 +26,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``kedro.framework.context`` provides functionality for loading Kedro
-project context.
+"""``kedro.framework.project`` provides functionality for loading metadata
+and settings of a Kedro project.
 """
 
-from .context import KedroContext  # NOQA
-from .context import KedroContextError  # NOQA
-from .context import load_context  # NOQA
-from .context import load_package_context  # NOQA
-from .context import validate_source_path  # NOQA
+from .metadata import ProjectMetadata  # NOQA
+from .settings import ProjectSettings  # NOQA

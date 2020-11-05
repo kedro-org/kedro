@@ -53,11 +53,8 @@ from kedro.framework.cli.utils import (
     _filter_deprecation_warnings,
     command_with_verbosity,
 )
-from kedro.framework.context.context import (
-    _add_src_to_path,
-    get_static_project_data,
-    load_context,
-)
+from kedro.framework.context.context import _add_src_to_path, load_context
+from kedro.framework.project.metadata import _get_project_metadata
 
 KEDRO_PATH = Path(kedro.__file__).parent
 TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
@@ -637,11 +634,11 @@ def main():  # pragma: no cover
 
     if pyproject_toml.is_file():
         # load project commands from cli.py
-        static_data = get_static_project_data(path)
-        source_dir = static_data["source_dir"]
+        project_metadata = _get_project_metadata(path)
+        source_dir = project_metadata.source_dir
         _add_src_to_path(source_dir, path)
 
-        package_name = static_data["package_name"]
+        package_name = project_metadata.package_name
         try:
             project_cli = importlib.import_module(f"{package_name}.cli")
             project_groups.extend(load_entry_points("project"))

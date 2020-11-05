@@ -54,7 +54,8 @@ from kedro.framework.cli.utils import (
     ipython_message,
     python_call,
 )
-from kedro.framework.context import get_static_project_data, load_context
+from kedro.framework.context import load_context
+from kedro.framework.project.metadata import _get_project_metadata
 
 JUPYTER_IP_HELP = "IP address of the Jupyter server."
 JUPYTER_ALL_KERNELS_HELP = "Display all available Python kernels."
@@ -192,7 +193,7 @@ def jupyter_lab(
 
 
 @command_with_verbosity(jupyter, "convert")
-@click.option("--all", "all_flag", is_flag=True, help=CONVERT_ALL_HELP)
+@click.option("--all", "-a", "all_flag", is_flag=True, help=CONVERT_ALL_HELP)
 @click.option("-y", "overwrite_flag", is_flag=True, help=OVERWRITE_HELP)
 @click.argument(
     "filepath",
@@ -214,11 +215,9 @@ def convert_notebook(
     Should not be provided if --all flag is already present.
     """
     project_path = Path.cwd()
-    static_data = get_static_project_data(project_path)
-    source_path = static_data["source_dir"]
-    package_name = (
-        static_data.get("package_name") or _load_project_context().package_name
-    )
+    project_metadata = _get_project_metadata(project_path)
+    source_path = project_metadata.source_dir
+    package_name = project_metadata.package_name
 
     _update_ipython_dir(project_path)
 

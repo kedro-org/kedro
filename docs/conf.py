@@ -125,6 +125,8 @@ type_targets = {
         "kedro.runner.parallel_runner._SharedMemoryDataSet",
         "kedro.versioning.journal.Journal",
         "kedro.framework.context.context.KedroContext",
+        "kedro.framework.project.metadata.ProjectMetadata",
+        "kedro.framework.project.settings.ProjectSettings",
         "abc.ABC",
         "pathlib.Path",
         "pathlib.PurePosixPath",

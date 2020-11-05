@@ -30,11 +30,8 @@ from pathlib import Path
 
 import pytest
 
-from kedro.framework.context import (
-    KedroContextError,
-    get_static_project_data,
-    validate_source_path,
-)
+from kedro.framework.context import KedroContextError, validate_source_path
+from kedro.framework.project.metadata import ProjectMetadata, _get_project_metadata
 
 
 class TestValidateSourcePath:
@@ -67,7 +64,7 @@ class TestValidateSourcePath:
             validate_source_path(source_path, tmp_path.resolve())
 
 
-class TestGetStaticProjectData:
+class TestGetProjectMetadata:
     project_path = Path.cwd()
 
     def test_no_config_files(self, mocker):
@@ -77,28 +74,42 @@ class TestGetStaticProjectData:
             f"Could not find the project configuration file 'pyproject.toml' "
             f"in {self.project_path}"
         )
-        with pytest.raises(KedroContextError, match=re.escape(pattern)):
-            get_static_project_data(self.project_path)
+        with pytest.raises(RuntimeError, match=re.escape(pattern)):
+            _get_project_metadata(self.project_path)
 
     def test_toml_invalid_format(self, tmp_path):
         """Test for loading context from an invalid path. """
         toml_path = tmp_path / "pyproject.toml"
         toml_path.write_text("!!")  # Invalid TOML
         pattern = "Failed to parse 'pyproject.toml' file"
-        with pytest.raises(KedroContextError, match=re.escape(pattern)):
-            get_static_project_data(str(tmp_path))
+        with pytest.raises(RuntimeError, match=re.escape(pattern)):
+            _get_project_metadata(str(tmp_path))
 
     def test_valid_toml_file(self, mocker):
         mocker.patch.object(Path, "is_file", side_effect=[True])
-        mocker.patch("anyconfig.load", return_value={"tool": {"kedro": {}}})
-
-        static_data = get_static_project_data(self.project_path)
-
-        # Using default source directory
-        assert static_data == {
-            "source_dir": self.project_path / "src",
-            "config_file": self.project_path / "pyproject.toml",
+        pyproject_toml_payload = {
+            "tool": {
+                "kedro": {
+                    "package_name": "fake_package_name",
+                    "project_name": "fake_project_name",
+                    "project_version": "0.1",
+                    "context_path": "hello.there",
+                }
+            }
         }
+        mocker.patch("anyconfig.load", return_value=pyproject_toml_payload)
+
+        actual = _get_project_metadata(self.project_path)
+
+        expected = ProjectMetadata(
+            source_dir=self.project_path / "src",  # default
+            config_file=self.project_path / "pyproject.toml",
+            package_name="fake_package_name",
+            project_name="fake_project_name",
+            project_version="0.1",
+            context_path="hello.there",
+        )
+        assert actual == expected
 
     def test_toml_file_without_kedro_section(self, mocker):
         mocker.patch.object(Path, "is_file", side_effect=[True])
@@ -106,17 +117,25 @@ class TestGetStaticProjectData:
 
         pattern = "There's no '[tool.kedro]' section in the 'pyproject.toml'."
 
-        with pytest.raises(KedroContextError, match=re.escape(pattern)):
-            get_static_project_data(self.project_path)
+        with pytest.raises(RuntimeError, match=re.escape(pattern)):
+            _get_project_metadata(self.project_path)
 
     def test_source_dir_specified_in_toml(self, mocker):
         mocker.patch.object(Path, "is_file", side_effect=[True])
         source_dir = "test_dir"
-        mocker.patch(
-            "anyconfig.load",
-            return_value={"tool": {"kedro": {"source_dir": source_dir}}},
-        )
+        pyproject_toml_payload = {
+            "tool": {
+                "kedro": {
+                    "source_dir": source_dir,
+                    "package_name": "fake_package_name",
+                    "project_name": "fake_project_name",
+                    "project_version": "0.1",
+                    "context_path": "hello.there",
+                }
+            }
+        }
+        mocker.patch("anyconfig.load", return_value=pyproject_toml_payload)
 
-        static_data = get_static_project_data(self.project_path)
+        project_metadata = _get_project_metadata(self.project_path)
 
-        assert static_data["source_dir"] == self.project_path / source_dir
+        assert project_metadata.source_dir == self.project_path / source_dir

@@ -9,5 +9,5 @@ kedro=={{ cookiecutter.kedro_version }}
 nbstripout==0.3.3
 pytest-cov~=2.5
 pytest-mock>=1.7.1, <2.0
-pytest~=5.0
+pytest~=6.1.2
 wheel==0.32.2

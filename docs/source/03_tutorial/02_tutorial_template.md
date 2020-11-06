@@ -39,7 +39,7 @@ kedro-viz~=3.1
 nbstripout==0.3.3 # Strips the output of a Jupyter Notebook and writes the outputless version to the original file
 pytest-cov~=2.5 # Produces test coverage reports
 pytest-mock>=1.7.1,<2.0 # Wrapper around the mock package for easier use with pytest
-pytest~=5.0 # Testing framework for Python code
+pytest~=6.1.2 # Testing framework for Python code
 wheel==0.32.2 # The reference implementation of the Python wheel packaging standard
 ```
 

@@ -9,6 +9,7 @@
 *  Bumped maximum required `fsspec` version to 0.8.
 * `before_node_run` can now overwrite node inputs by returning a dictionary with the corresponding updates.
 * Added minimal, black-compatible flake8 configuration to the project template.
+* Moved `isort` and `pytest` configuration from `<project_root>/setup.cfg` to `<project_root>/pyproject.toml`.
 
 ## Breaking changes to the API
 * `kedro.io.DataCatalog.exists()` returns `False` when the dataset does not exist, as opposed to raising an exception.

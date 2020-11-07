@@ -80,8 +80,18 @@ class TestPartitionedDataSetLocal:
     @pytest.mark.parametrize(
         "suffix,expected_num_parts", [("", 5), (".csv", 3), ("p4", 1)]
     )
+    @pytest.mark.parametrize(
+        "regex,expected_num_filtered_parts", [("", 5), ("^dat", 2)]
+    )
     def test_load(
-        self, dataset, local_csvs, partitioned_data_pandas, suffix, expected_num_parts
+        self,
+        dataset,
+        local_csvs,
+        partitioned_data_pandas,
+        suffix,
+        regex,
+        expected_num_parts,
+        expected_num_filtered_parts,
     ):
         pds = PartitionedDataSet(str(local_csvs), dataset, filename_suffix=suffix)
         loaded_partitions = pds.load()
@@ -92,6 +102,10 @@ class TestPartitionedDataSetLocal:
             assert_frame_equal(df, partitioned_data_pandas[partition_id + suffix])
             if suffix:
                 assert not partition_id.endswith(suffix)
+
+        pds = PartitionedDataSet(str(local_csvs), dataset, regex_filter=regex)
+        loaded_partitions = pds.load()
+        assert len(loaded_partitions.keys()) == expected_num_filtered_parts
 
     @pytest.mark.parametrize("dataset", LOCAL_DATASET_DEFINITION)
     @pytest.mark.parametrize("suffix", ["", ".csv"])

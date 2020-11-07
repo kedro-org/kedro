@@ -30,11 +30,12 @@
 underlying dataset definition. It also uses `fsspec` for filesystem level operations.
 """
 import operator
+import re
 from copy import deepcopy
 from typing import Any, Callable, Dict, List, Tuple, Type, Union
 from urllib.parse import urlparse
 from warnings import warn
-
+from pathlib import Path
 from cachetools import Cache, cachedmethod
 
 from kedro.io.core import (
@@ -102,6 +103,7 @@ class PartitionedDataSet(AbstractDataSet):
         dataset: Union[str, Type[AbstractDataSet], Dict[str, Any]],
         filepath_arg: str = "filepath",
         filename_suffix: str = "",
+        regex_filter: str = "",
         credentials: Dict[str, Any] = None,
         load_args: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
@@ -131,6 +133,7 @@ class PartitionedDataSet(AbstractDataSet):
                 If unspecified, defaults to "filepath".
             filename_suffix: If specified, only partitions that end with this
                 string will be processed.
+            regex_filter: If specified, only partitions that match this regex will read
             credentials: Protocol-specific options that will be passed to
                 ``fsspec.filesystem``
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.filesystem
@@ -157,6 +160,7 @@ class PartitionedDataSet(AbstractDataSet):
         self._filename_suffix = filename_suffix
         self._protocol = infer_storage_options(self._path)["protocol"]
         self._partition_cache = Cache(maxsize=1)
+        self._regex_filter = regex_filter
 
         dataset = dataset if isinstance(dataset, dict) else {"type": dataset}
         self._dataset_type, self._dataset_config = parse_dataset_definition(dataset)
@@ -220,6 +224,7 @@ class PartitionedDataSet(AbstractDataSet):
             path
             for path in self._filesystem.find(self._normalized_path, **self._load_args)
             if path.endswith(self._filename_suffix)
+            and bool(re.search(self._regex_filter, Path(path).name))
         ]
 
     def _join_protocol(self, path: str) -> str:

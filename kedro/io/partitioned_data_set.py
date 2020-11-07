@@ -134,7 +134,8 @@ class PartitionedDataSet(AbstractDataSet):
                 If unspecified, defaults to "filepath".
             filename_suffix: If specified, only partitions that end with this
                 string will be processed.
-            regex_filter: If specified, only partitions that match this regex will read
+            regex_filter: If specified, only partitions that match this regex will be
+                read
             credentials: Protocol-specific options that will be passed to
                 ``fsspec.filesystem``
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.filesystem

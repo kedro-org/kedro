@@ -32,10 +32,11 @@ underlying dataset definition. It also uses `fsspec` for filesystem level operat
 import operator
 import re
 from copy import deepcopy
+from pathlib import Path
 from typing import Any, Callable, Dict, List, Tuple, Type, Union
 from urllib.parse import urlparse
 from warnings import warn
-from pathlib import Path
+
 from cachetools import Cache, cachedmethod
 
 from kedro.io.core import (

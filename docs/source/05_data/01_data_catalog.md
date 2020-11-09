@@ -38,6 +38,7 @@ The following prepends are available:
 - **S3 Compatible Storage**: `s3://my-bucket-name/path/_to/data` - e.g. Minio, using the s3fs library.
 - **Google Cloud Storage**: `gcs://` - Google Cloud Storage, typically used with Google Compute
   resource using gcsfs (in development).
+- **Azure Blob Storage / Azure Data Lake Storage Gen2**: `abfs://` - Azure Blob Storage, typically used when working on an Azure environment.
 - **HTTP(s)**: ``http://`` or ``https://`` for reading data directly from HTTP web servers.
 
 `fsspec` also provides other file systems, such as SSH, FTP and WebHDFS. See the [documentation](https://filesystem-spec.readthedocs.io/en/latest/api.html#implementations) for more information.
@@ -280,6 +281,24 @@ dev_minio:
 > Note: The easiest way to setup MinIO is to run a Docker image. After the following command, you can access to Minio server with http://localhost:9000 and create a bucket and add files as if it is on S3.
 
 `docker run -p 9000:9000 -e "MINIO_ACCESS_KEY=token" -e "MINIO_SECRET_KEY=key" minio/minio server /data`
+
+Example 15: Loading a model saved as a pickle from Azure Blob Storage
+
+```yaml
+ml_model:
+  type: pickle.PickleDataSet
+  filepath: "abfs://models/ml_models.pickle"
+  versioned: True
+  credentials: dev_abs
+```
+In `credentials.yml`, define the `account_name` and `account_key` as follows:
+
+```yaml
+dev_abs:
+  account_name: accountname
+  account_key: key
+```
+
 
 ## Adding parameters
 

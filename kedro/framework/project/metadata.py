@@ -25,11 +25,16 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 """This module provides metadata for a Kedro project."""
+
 from pathlib import Path
-from typing import NamedTuple, Union
+from typing import Any, Dict, NamedTuple, Union
 
 import anyconfig
+
+from kedro import __version__ as kedro_version
+from kedro.utils import load_obj
 
 _KEDRO_CONFIG = "pyproject.toml"
 
@@ -38,11 +43,11 @@ class ProjectMetadata(NamedTuple):
     """Structure holding project metadata derived from `pyproject.toml`"""
 
     config_file: Path
-    context_path: str
     package_name: str
     project_name: str
     project_version: str
     source_dir: Path
+    context_path: Union[str, None] = None
 
 
 def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
@@ -91,7 +96,7 @@ def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
     metadata_dict["source_dir"] = source_dir
     metadata_dict["config_file"] = config_path
 
-    mandatory_keys = ["context_path", "package_name", "project_name", "project_version"]
+    mandatory_keys = ["package_name", "project_name", "project_version"]
     missing_keys = [key for key in mandatory_keys if key not in metadata_dict]
     if missing_keys:
         raise RuntimeError(
@@ -106,3 +111,58 @@ def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
             f"Found unexpected keys in '{_KEDRO_CONFIG}'. Make sure "
             f"it only contains the following keys: {expected_keys}."
         ) from exc
+
+
+def _generate_toml_config(path: Path, package_path: Path) -> None:
+    """Create toml configuration file with `[tool.kedro]` section
+    in order to run packaged Kedro project.
+
+    Args:
+        path: Path to a directory with `toml` file.
+        package_path: Path to the package source code.
+
+    Raises:
+        KedroConfigParserError: `pyproject.toml` config file cannot be parsed.
+    """
+    package_name = package_path.name
+    payload = {
+        "package_name": package_name,
+        "project_name": package_name,
+        "project_version": kedro_version,
+        "source_dir": str(package_path.parent),
+    }
+
+    context_path = _get_context_path(package_name)
+    if context_path:
+        payload["context_path"] = context_path
+
+    conf_data = {}  # type: Dict[str, Any]
+    config_path = path / _KEDRO_CONFIG
+    if config_path.is_file():
+        try:
+            conf_data = anyconfig.load(config_path)
+        except Exception as exc:
+            raise KedroConfigParserError(
+                f"Failed to parse '{config_path}' file."
+            ) from exc
+
+    if "tool" in conf_data and "kedro" in conf_data["tool"]:
+        # Do not touch `pyproject.toml`
+        return
+
+    tool_section = conf_data.setdefault("tool", {})
+    tool_section["kedro"] = payload
+    anyconfig.dump(conf_data, config_path)
+
+
+def _get_context_path(package_name):
+    context_path = f"{package_name}.run.ProjectContext"
+    try:
+        load_obj(context_path)
+    except (ModuleNotFoundError, AttributeError):
+        return None
+    return context_path
+
+
+class KedroConfigParserError(Exception):
+    """Error occurred when loading Kedro configuration file."""

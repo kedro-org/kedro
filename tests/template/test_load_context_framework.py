@@ -34,11 +34,7 @@ import pytest
 import toml
 
 from kedro import __version__ as kedro_version
-from kedro.framework.context import (
-    KedroContextError,
-    load_context,
-    load_package_context,
-)
+from kedro.framework.context import KedroContext, KedroContextError, load_context
 from kedro.framework.project.metadata import _get_project_metadata
 
 
@@ -96,7 +92,7 @@ class TestLoadContext:
         _create_kedro_config(fake_repo_path, payload)
 
         pattern = (
-            "Missing required keys ['context_path', 'package_name', 'project_name'] "
+            "Missing required keys ['package_name', 'project_name'] "
             "from 'pyproject.toml'."
         )
         with pytest.raises(RuntimeError, match=re.escape(pattern)):
@@ -119,8 +115,8 @@ class TestLoadContext:
 
         pattern = (
             "Found unexpected keys in 'pyproject.toml'. Make sure it "
-            "only contains the following keys: ['context_path', "
-            "'package_name', 'project_name', 'project_version', 'source_dir']."
+            "only contains the following keys: ['package_name', "
+            "'project_name', 'project_version', 'source_dir']."
         )
         with pytest.raises(RuntimeError, match=re.escape(pattern)):
             load_context(str(fake_repo_path))
@@ -137,7 +133,6 @@ class TestLoadContext:
         payload = {
             "tool": {
                 "kedro": {
-                    "context_path": f"{fake_package_name}.run.ProjectContext",
                     "project_version": kedro_version,
                     "project_name": project_name,
                     "package_name": fake_package_name,
@@ -211,7 +206,6 @@ class TestLoadContext:
         payload = {
             "tool": {
                 "kedro": {
-                    "context_path": f"{fake_package_name}.run.ProjectContext",
                     "project_version": kedro_version,
                     "project_name": project_name,
                     "package_name": fake_package_name,
@@ -225,25 +219,47 @@ class TestLoadContext:
         assert result.project_version == kedro_version
         assert str(fake_repo_path.resolve() / "src") in sys.path
 
+    def test_pyproject_toml_has_no_context_path(self, fake_repo_path):
+        """Test for loading default `KedroContext` context. """
+        payload = {
+            "tool": {
+                "kedro": {
+                    "package_name": "fake_package",
+                    "project_version": kedro_version,
+                    "project_name": "fake_project",
+                }
+            }
+        }
+        _create_kedro_config(fake_repo_path, payload)
 
-class TestLoadPackageContext:
-    """Test loading context for running a Kedro project package
-    """
+        context = load_context(str(fake_repo_path))
+        assert isinstance(context, KedroContext)
+        assert context.__class__ is KedroContext
 
-    def test_load_valid_package_context(self, fake_repo_path, fake_package_name):
-        result = load_package_context(
-            project_path=fake_repo_path, package_name=fake_package_name
+    def test_pyproject_toml_has_context_path(self, fake_repo_path, fake_package_name):
+        """Test for loading custom `ProjectContext` context. """
+        payload = {
+            "tool": {
+                "kedro": {
+                    "package_name": fake_package_name,
+                    "project_version": kedro_version,
+                    "context_path": f"{fake_package_name}.run.ProjectContext",
+                    "project_name": "fake_project",
+                }
+            }
+        }
+
+        project_context_code = (
+            "\nfrom kedro.framework.context import KedroContext\n\n"
+            "class ProjectContext(KedroContext):\n\tpass\n"
         )
-        assert result.project_name == "Test Project"
-        assert result.project_version == kedro_version
+        run_file = fake_repo_path / "src" / fake_package_name / "run.py"
+        with run_file.open(mode="a") as f:
+            f.write(project_context_code)
 
-    def test_load_invalid_package_context(self, fake_repo_path):
-        fake_package_name = "i-dont-exist"
-        pattern = (
-            f"Cannot load context object from {fake_package_name}.run.ProjectContext "
-            f"for package {fake_package_name}."
-        )
-        with pytest.raises(KedroContextError, match=re.escape(pattern)):
-            load_package_context(
-                project_path=fake_repo_path, package_name=fake_package_name
-            )
+        _create_kedro_config(fake_repo_path, payload)
+
+        context = load_context(str(fake_repo_path))
+        assert isinstance(context, KedroContext)
+        assert context.__class__ is not KedroContext
+        assert context.__class__.__name__ == "ProjectContext"

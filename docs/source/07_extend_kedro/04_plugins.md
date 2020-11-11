@@ -53,7 +53,7 @@ Commands must be provided as [`click` `Groups`](https://click.palletsprojects.co
 The `click Group` will be merged into the main CLI Group. In the process, the options on the group are lost, as is any processing that was done as part of its callback function.
 
 
-## `ProjectContext`
+## Project context
 
 While running, plugins may request information about the current project by calling `kedro.framework.cli.get_project_context()`.
 
@@ -78,7 +78,7 @@ We use the following command convention: `kedro <plugin-name> <command>`, with `
 
 ## Hooks
 
-You can develop hook implementations and have them automatically registered to the `ProjectContext` when the plugin is installed. To enable this for your custom plugin, simply add the following entry in your `setup.py`:
+You can develop hook implementations and have them automatically registered to the project context when the plugin is installed. To enable this for your custom plugin, simply add the following entry in your `setup.py`:
 
 ```python
 setup(

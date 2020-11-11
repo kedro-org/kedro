@@ -37,6 +37,7 @@ from kedro.framework.session import KedroSession
 from kedro.runner import ParallelRunner, SequentialRunner
 
 
+@pytest.mark.usefixtures("chdir_to_dummy_project")
 class TestRunCommand:
     @staticmethod
     @pytest.fixture(autouse=True)

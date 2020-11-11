@@ -31,4 +31,5 @@ and settings of a Kedro project.
 """
 
 from .metadata import ProjectMetadata  # NOQA
+from .metadata import _generate_toml_config  # NOQA
 from .settings import ProjectSettings  # NOQA

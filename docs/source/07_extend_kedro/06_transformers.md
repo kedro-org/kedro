@@ -99,15 +99,11 @@ class TransformerHooks:
 ```
 </details>
 
-Finally, update `ProjectContext` in `run.py` as follows:
+Finally, update `HOOKS` variable in `settings.py` as follows:
 
+```python
+HOOKS = (TransformerHooks(),)
 ```
-class ProjectContext(KedroContext):
-
-    ...
-    hooks = (TransformerHooks(),)
-```
-
 
 Then re-run the pipeline:
 

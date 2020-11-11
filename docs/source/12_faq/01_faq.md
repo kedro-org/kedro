@@ -123,7 +123,7 @@ To later upgrade Kedro to a different version, simply run:
 pip install kedro -U
 ```
 
-When migrating an existing project to a newer Kedro version, make sure you also update the `project_version` in your `ProjectContext`, which is found in your `.kedro.yml` file from the project root directory, or, for projects generated with Kedro>=0.17.0, in your `pyproject.toml` file.
+When migrating an existing project to a newer Kedro version, make sure you also update the `project_version` in your `pyproject.toml` file from the project root directory or, for projects generated with Kedro<0.17.0,  in your `ProjectContext`, which is found in `src/<package_name>/run.py`.
 
 ## How can I use a development version of Kedro?
 

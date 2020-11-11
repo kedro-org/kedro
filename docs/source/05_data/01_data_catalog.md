@@ -458,16 +458,14 @@ Here we cover the use case of _tracking operation performance_ by applying built
 
 Transformers are applied at the `DataCatalog` level. To apply the built-in `ProfileTimeTransformer`, you need to:
 
-1. Navigate to `src/<package_name>/run.py`
-2. Apply `ProfileTimeTransformer` in the hook implementation `TransformerHooks.after_catalog_created`.
-3. Register the hook in your `ProjectContext` as follows:
+1. Navigate to `src/<package_name>/hooks.py`
+2. Apply `ProfileTimeTransformer` in the hook implementation `TransformerHooks.after_catalog_created`
+3. Register the hook in your `src/<package_name>/settings.py`
 
 ```python
-from pathlib import Path
-from typing import Dict
+# src/<package_name>/hooks.py
 
 from kedro.extras.transformers import ProfileTimeTransformer # new import
-from kedro.framework.context import KedroContext, load_package_context
 from kedro.framework.hooks import hook_impl # new import
 from kedro.io import DataCatalog # new import
 
@@ -477,10 +475,13 @@ class TransformerHooks:
     def after_catalog_created(self, catalog: DataCatalog) -> None:
         catalog.add_transformer(ProfileTimeTransformer())
 
-class ProjectContext(KedroContext):
+```
 
-    ...
-    hooks = (TransformerHooks(),)
+```python
+# src/<package_name>/settings.py
+from <package_name>.hooks import TransformerHooks
+
+HOOKS = (TransformerHooks(),)
 ```
 
 Once complete, rerun the pipeline from the terminal and you should see the following logging output:

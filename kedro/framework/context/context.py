@@ -26,7 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """This module provides context for Kedro project."""
-import abc
+
 import logging
 import logging.config
 import os
@@ -191,27 +191,16 @@ def _validate_layers_for_transcoding(catalog: DataCatalog) -> None:
         )
 
 
-class KedroContext(abc.ABC):
+class KedroContext:
     """``KedroContext`` is the base class which holds the configuration and
-    Kedro's main functionality. Project-specific context class should extend
-    this abstract class and implement the all abstract methods.
+    Kedro's main functionality.
 
     Attributes:
-       CONF_ROOT: Name of root directory containing project configuration.
-       Default name is "conf".
-       hooks: The list of hooks provided by user to extend KedroContext's execution.
-
-    Example:
-    ::
-
-        >>> from kedro.framework.context import KedroContext
-        >>> from kedro.pipeline import Pipeline
-        >>>
-        >>> class ProjectContext(KedroContext):
-        >>>     @property
-        >>>     def pipeline(self) -> Pipeline:
-        >>>         return Pipeline([])
-
+        CONF_ROOT: Name of root directory containing project configuration.
+            Default name is "conf".
+        hooks: The list of hooks provided by user to extend KedroContext's execution.
+            This attribute is deprecated and will be removed in 0.18.0 release.
+            Instead `<python_package>.settings.HOOKS` should be used to register hooks.
     """
 
     CONF_ROOT = "conf"
@@ -362,6 +351,13 @@ class KedroContext(abc.ABC):
         Args:
             auto: An optional flag to enable auto-discovery and registration of plugin hooks.
         """
+        if self.hooks:
+            warn(
+                "`KedroContext.hooks` attribute is deprecated. Please use "
+                "`<python_package>.settings.HOOKS` to register hooks.",
+                DeprecationWarning,
+            )
+
         hook_manager = get_hook_manager()
 
         # enrich with hooks specified in settings.py
@@ -816,44 +812,9 @@ def validate_source_path(source_path: Path, project_path: Path):
         raise KedroContextError(f"Source path '{source_path}' cannot be found.")
 
 
-def load_package_context(
-    project_path: Path, package_name: str, **kwargs
+def load_context(
+    project_path: Union[str, Path], skip_validation: bool = False, **kwargs
 ) -> KedroContext:
-    """Loads the KedroContext object of a Kedro project package,
-    as output by `kedro package` and installed via `pip`.
-    This function is only intended to be used in a project's `run.py`.
-    If you are looking to load KedroContext object for any other workflow,
-    you might want to use ``load_context`` instead.
-
-    Args:
-        project_path: Path to the Kedro project, i.e. where `conf/` resides.
-        package_name: Name of the installed Kedro project package.
-        kwargs: Optional kwargs for ``ProjectContext`` class in `run.py`.
-
-    Returns:
-        Instance of ``KedroContext`` class defined in Kedro project.
-
-    Raises:
-        KedroContextError: `pyproject.toml` was not found or the `[tool.kedro]` section
-            is missing, or loaded context has package conflict.
-    """
-    context_path = f"{package_name}.run.ProjectContext"
-    try:
-        context_class = load_obj(context_path)
-    except ModuleNotFoundError as exc:
-        raise KedroContextError(
-            f"Cannot load context object from {context_path} for package {package_name}."
-        ) from exc
-    # update kwargs with env from the environment variable (defaults to None if not set)
-    # need to do this because some CLI command (e.g `kedro run`) defaults to passing
-    # in `env=None`
-    kwargs["env"] = kwargs.get("env") or os.getenv("KEDRO_ENV")
-
-    context = context_class(project_path=project_path, **kwargs)
-    return context
-
-
-def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
     """Loads the KedroContext object of a Kedro Project.
     This is the default way to load the KedroContext object for normal workflows such as
     CLI, Jupyter Notebook, Plugins, etc. It assumes the following project structure
@@ -868,7 +829,9 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
 
     Args:
         project_path: Path to the Kedro project.
-        kwargs: Optional kwargs for ``ProjectContext`` class in `run.py`.
+        skip_validation: Skip the validation that the source path exists and is
+            relative to the project path.
+        kwargs: Optional kwargs for ``KedroContext`` class.
 
     Returns:
         Instance of ``KedroContext`` class defined in Kedro project.
@@ -880,11 +843,15 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
     """
     project_path = Path(project_path).expanduser().resolve()
     project_metadata = _get_project_metadata(project_path)
-
     source_dir = project_metadata.source_dir
-    _add_src_to_path(source_dir, project_path)
 
-    context_class = load_obj(project_metadata.context_path)
+    _add_src_to_path(source_dir, project_path, skip_validation)
+
+    context_class = (
+        load_obj(project_metadata.context_path)
+        if project_metadata.context_path
+        else KedroContext
+    )
 
     # update kwargs with env from the environment variable
     # (defaults to None if not set)
@@ -895,8 +862,11 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
     return context
 
 
-def _add_src_to_path(source_dir: Path, project_path: Path):
-    validate_source_path(source_dir, project_path)
+def _add_src_to_path(
+    source_dir: Path, project_path: Path, skip_validation: bool = False
+):
+    if not skip_validation:
+        validate_source_path(source_dir, project_path)
 
     if str(source_dir) not in sys.path:
         sys.path.insert(0, str(source_dir))  # pragma: no cover

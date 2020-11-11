@@ -170,11 +170,13 @@ For further information, see the [`kedro install` documentation](../04_kedro_pro
 
 
 ### Run the project
-Call the `run()` method of the `ProjectContext` defined in `run.py` (`src/project-name/run.py`)
+Call the `run()` method of the `KedroSession` defined in `kedro.framework.session`.
 
 ```bash
 kedro run
 ```
+
+> _Note:_ `KedroContext` can be extended in `run.py` (`src/project-name/run.py`). In order to use the extended `KedroContext` you need to set `context_path` in [`pyproject.toml`](../12_faq/02_architecture_overview.md#pyproject-toml) configuration file.
 
 #### Modifying a `kedro run`
 
@@ -376,7 +378,7 @@ kedro ipython
 
 Every time you start or restart a notebook kernel, a startup script (`<project-root>/.ipython/profile_default/startup/00-kedro-init.py`) will add the following variables in scope:
 
-- `context`: An instance of `ProjectContext` class defined in `src/project-name/run.py` (Further details of how to use `context` can be found [in the IPython documentation](../11_tools_integration/02_ipython.md))
+- `context`: An instance of `kedro.framework.context.KedroContext` class or `ProjectContext` class defined in `src/project-name/run.py` and derived form `KedroContext` if it was set to `context_path` in `pyproject.toml` file (Further details of how to use `context` can be found [in the IPython documentation](../11_tools_integration/02_ipython.md))
 - `startup_error` (`Exception`)
 - `catalog`
 

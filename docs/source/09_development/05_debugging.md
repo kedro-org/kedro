@@ -42,11 +42,10 @@ class PDBNodeDebugHook:
         pdb.post_mortem(traceback_object)
 ```
 
-You can then register this `PDBNodeDebugHook` with your `ProjectContext` in your project's `run.py`:
+You can then register this `PDBNodeDebugHook` in your project's `settings.py`:
 
 ```python
-class ProjectContext(KedroContext):
-    hooks = (PDBNodeDebugHook(),)
+HOOKS = (PDBNodeDebugHook(),)
 ```
 
 ## Debugging Pipeline
@@ -79,9 +78,8 @@ class PDBPipelineDebugHook:
         pdb.post_mortem(traceback_object)
 ```
 
-You can then register this `PDBPipelineDebugHook` with your `ProjectContext` in your project's `run.py`:
+You can then register this `PDBPipelineDebugHook` in your project's `settings.py`:
 
 ```python
-class ProjectContext(KedroContext):
-    hooks = (PDBPipelineDebugHook(),)
+HOOKS = (PDBPipelineDebugHook(),)
 ```

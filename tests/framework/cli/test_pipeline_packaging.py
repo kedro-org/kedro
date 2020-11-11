@@ -91,8 +91,8 @@ def cleanup_dist(fake_repo_path):
 class TestPipelinePackageCommand:
     @staticmethod
     @pytest.fixture(autouse=True)
-    def fake_load_context(mocker, fake_project_cli):
-        yield mocker.patch.object(fake_project_cli, "load_context")
+    def mocked_session_manager(mocker, fake_project_cli):
+        yield mocker.patch.object(fake_project_cli.KedroSession, "create")
 
     def assert_wheel_contents_correct(
         self, wheel_location, package_name=PIPELINE_NAME, version="0.1"

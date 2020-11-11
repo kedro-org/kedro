@@ -4,6 +4,9 @@
 * Introduced `KedroSession` which is responsible for managing the lifecycle of a Kedro run.
 * Added `kedro catalog create` command. It creates `<conf_root>/<env>/catalog/<pipeline_name>.yml` configuration file with `MemoryDataSet` datasets for each dataset in a registered pipeline if it is missing from Data Catalog.
 * Added `settings.py` and `pyproject.toml` (to replace `.kedro.yml`) for project configuration, in line with Python best practice.
+* Deprecated `KedroContext.hooks`. Instead, hooks should be registered in `settings.py`.
+* Made `context_path` an optional key in `pyproject.toml`. `KedroContext` is used by default.
+* Removed `ProjectContext` from `src/<package_name>/run.py`.
 
 ## Bug fixes and other changes
 *  Bumped maximum required `fsspec` version to 0.8.

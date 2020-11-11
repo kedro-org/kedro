@@ -25,12 +25,12 @@ A Python file that contains project specific CLI commands (e.g., `kedro run`, `k
 
 #### `run.py`
 
-A Python file located in `src/<python_package>/run.py`, which by default contains the definition of `ProjectContext`, a concrete implementation of `KedroContext` class. This file also serves as the main entry point of the project.
+A Python file located in `src/<python_package>/run.py`, where you can define `ProjectContext` class that extends `KedroContext` class. This file also serves as the main entry point of the project.
 
 #### `pyproject.toml`
 
 `pyproject.yml` identifies the project root, which is used by other Kedro components and contains the following metadata entries:
-- `context_path`: A top-level key pointing to the absolute path of the context class implementation (default is `<python_project>.run.ProjectContext`)
+- `context_path`: (Optional) A top-level key pointing to the absolute path of the context class that extends `kedro.framework.context.KedroContext` class (e.g. `<python_project>.run.ProjectContext`)
 - `package_name`: A valid Python package name for your project package
 - `project_name`: A human readable name for your project
 - `project_version`: Kedro version with which the project was generated
@@ -48,11 +48,11 @@ We use the `settings.py` for all project settings, which will not change at run 
 
 #### `00-kedro-init.py`
 
-This script is automatically invoked at IPython kernel startup when calling `kedro jupyter notebook`, `kedro jupyter lab` and `kedro ipython` CLI commands. `00-kedro-init.py` creates an instance of `ProjectContext` object, which can be used to interact with the current project right away.
+This script is automatically invoked at IPython kernel startup when calling `kedro jupyter notebook`, `kedro jupyter lab` and `kedro ipython` CLI commands. `00-kedro-init.py` creates an instance of `KedroContext` object, which can be used to interact with the current project right away.
 
-#### `ProjectContext`
+#### `ProjectContext` (optional)
 
-Project specific context class that extends `kedro.framework.context.KedroContext` abstract class. `ProjectContext` contains the information about the current project name, Kedro version used to generate the project, and concrete pipeline definition.
+Project specific context class that extends `kedro.framework.context.KedroContext` class.
 
 ### Framework
 

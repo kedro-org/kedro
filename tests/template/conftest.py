@@ -33,8 +33,9 @@ from pathlib import Path
 
 import pytest
 import yaml
+from click.testing import CliRunner
 
-from kedro.framework.cli.cli import _create_project
+from kedro.framework.cli.cli import cli
 
 _FAKE_REPO_NAME = "fake_repo"
 _FAKE_PACKAGE_NAME = "fake_package"
@@ -47,8 +48,13 @@ def fake_package_name():
 
 @pytest.fixture(scope="session")
 def fake_root_dir():
-    with tempfile.TemporaryDirectory() as tmp_root:
-        yield Path(tmp_root)
+    try:
+        with tempfile.TemporaryDirectory() as tmp_root:
+            yield Path(tmp_root)
+    # On Windows `PermissionError` is raised from time to time
+    # while `tmp_root` removing.
+    except PermissionError:  # pragma: no cover
+        pass
 
 
 @pytest.fixture(scope="session")
@@ -74,7 +80,11 @@ def fake_repo_config_path(fake_root_dir):
 
 @pytest.fixture(scope="session")
 def fake_project_cli(fake_repo_path: Path, fake_repo_config_path: Path):
-    _create_project(str(fake_repo_config_path))
+    starter_path = Path(__file__).parents[2].resolve()
+    starter_path = starter_path / "features" / "steps" / "test_starter"
+    CliRunner().invoke(
+        cli, ["new", "-c", str(fake_repo_config_path), "--starter", str(starter_path)],
+    )
 
     # NOTE: Here we load a couple of modules, as they would be imported in
     # the code and tests.
@@ -90,3 +100,9 @@ def fake_project_cli(fake_repo_path: Path, fake_repo_config_path: Path):
     yield import_module(f"{_FAKE_PACKAGE_NAME}.cli")
 
     sys.path = old_path
+    del sys.modules[_FAKE_PACKAGE_NAME]
+
+
+@pytest.fixture
+def chdir_to_dummy_project(fake_repo_path, monkeypatch):
+    monkeypatch.chdir(str(fake_repo_path))

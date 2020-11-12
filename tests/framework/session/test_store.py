@@ -60,7 +60,7 @@ class TestBaseStore:
         actual_log_messages = [
             rec.getMessage()
             for rec in caplog.records
-            if rec.name == STORE_LOGGER_NAME and rec.levelno == logging.WARN
+            if rec.name == STORE_LOGGER_NAME and rec.levelno == logging.INFO
         ]
         assert actual_log_messages == expected_log_messages
 
@@ -77,7 +77,7 @@ class TestBaseStore:
         actual_log_messages = [
             rec.getMessage()
             for rec in caplog.records
-            if rec.name == STORE_LOGGER_NAME and rec.levelno == logging.WARN
+            if rec.name == STORE_LOGGER_NAME and rec.levelno == logging.INFO
         ]
         assert actual_log_messages == expected_log_messages
 

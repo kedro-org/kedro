@@ -25,6 +25,7 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# pylint: disable=invalid-name,global-statement
 """This module implements Kedro session responsible for project lifecycle."""
 
 import logging
@@ -32,7 +33,6 @@ import subprocess
 import traceback
 from copy import deepcopy
 from pathlib import Path
-from threading import local
 from typing import Any, Dict, Iterable, Optional, Union
 
 import click
@@ -45,11 +45,11 @@ from kedro.framework.session.store import BaseSessionStore
 from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner, SequentialRunner
 
-_local = local()
+_active_session = None
 
 
 def get_current_session(silent: bool = False) -> Optional["KedroSession"]:
-    """Fetch the most recent ``KedroSession`` instance from internal stack.
+    """Fetch the active ``KedroSession`` instance.
 
     Args:
         silent: Indicates to suppress the error if no active session was found.
@@ -61,22 +61,26 @@ def get_current_session(silent: bool = False) -> Optional["KedroSession"]:
         KedroSession instance.
 
     """
-    session = None
-
-    if getattr(_local, "stack", []):
-        session = _local.stack[-1]
-    elif not silent:
+    if not _active_session and not silent:
         raise RuntimeError("There is no active Kedro session.")
 
-    return session
+    return _active_session
 
 
-def _push_session(session):
-    _local.__dict__.setdefault("stack", []).append(session)
+def _activate_session(session: "KedroSession", force: bool = False) -> None:
+    global _active_session
+
+    if _active_session and not force and session is not _active_session:
+        raise RuntimeError(
+            "Cannot activate the session as another active session already exists."
+        )
+
+    _active_session = session
 
 
-def _pop_session():
-    _local.stack.pop()
+def _deactivate_session() -> None:
+    global _active_session
+    _active_session = None
 
 
 def _describe_git(project_path: Path) -> Dict[str, Dict[str, str]]:
@@ -99,7 +103,7 @@ def _describe_git(project_path: Path) -> Dict[str, Dict[str, str]]:
     return {"git": git_data}
 
 
-def _jsonify_cli_context(ctx: click.core.Context):
+def _jsonify_cli_context(ctx: click.core.Context) -> Dict[str, Any]:
     return {
         "args": ctx.args,
         "params": ctx.params,
@@ -209,12 +213,13 @@ class KedroSession:
         """Return a copy of internal store."""
         return dict(self._store)
 
-    @property
-    def context(self) -> KedroContext:
+    def load_context(self) -> KedroContext:
         """An instance of the project context."""
         env = self.store.get("env")
-        extra_params = self.store.get("extra_params") or {}
-        context = load_context(project_path=self._project_path, env=env, **extra_params)
+        extra_params = self.store.get("extra_params")
+        context = load_context(
+            project_path=self._project_path, env=env, extra_params=extra_params
+        )
         return context
 
     def close(self):
@@ -223,12 +228,13 @@ class KedroSession:
         """
         if self.save_on_close:
             self._store.save()
+
         if get_current_session(silent=True) is self:
-            _pop_session()
+            _deactivate_session()
 
     def __enter__(self):
         if get_current_session(silent=True) is not self:
-            _push_session(self)
+            _activate_session(self)
         return self
 
     def __exit__(self, exc_type, exc_value, tb_):
@@ -246,7 +252,6 @@ class KedroSession:
         to_nodes: Iterable[str] = None,
         from_inputs: Iterable[str] = None,
         load_versions: Dict[str, str] = None,
-        extra_params: Dict[str, Any] = None,
     ) -> Dict[str, Any]:
         """Runs the pipeline with a specified runner.
 
@@ -268,7 +273,6 @@ class KedroSession:
                 used as a starting point of the new ``Pipeline``.
             load_versions: An optional flag to specify a particular dataset
                 version timestamp to load.
-            extra_params: Additional run parameters.
         Raises:
             Exception: Any uncaught exception during the run will be re-raised
                 after being passed to ``on_pipeline_error`` hook.
@@ -282,8 +286,8 @@ class KedroSession:
         logging.info("** Kedro project %s", self._project_path.name)
 
         save_version = run_id = self.store["session_id"]
-        extra_params = deepcopy(extra_params) or dict()
-        context = self.context
+        extra_params = self.store.get("extra_params") or {}
+        context = self.load_context()
 
         pipeline = context._get_pipeline(name=pipeline_name)
         filtered_pipeline = context._filter_pipeline(

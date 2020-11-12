@@ -42,7 +42,13 @@ class TestRunCommand:
     @staticmethod
     @pytest.fixture(autouse=True)
     def mocked_session_manager(mocker):
-        yield mocker.patch.object(KedroSession, "create")
+        mock_session_create = mocker.patch.object(KedroSession, "create")
+        mock_load_context = (
+            mock_session_create.return_value.__enter__.return_value.load_context
+        )
+        # needed to be able to print the parameters in test_starter/.../cli.py
+        mock_load_context.return_value.params = {"fake": True}
+        return mock_session_create
 
     @staticmethod
     @pytest.fixture(params=["run_config.yml", "run_config.json"])

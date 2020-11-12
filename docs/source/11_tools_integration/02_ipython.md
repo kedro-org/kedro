@@ -205,8 +205,8 @@ def reload_kedro(project_path, line=None):
     try:
         # ...
         session = KedroSession.create(path)
-        _push_session(session)
-        context = session.context
+        _activate_session(session)
+        context = session.load_context()
         parameters = context.params
         # ...
         logging.info("Defined global variable `context`, `session`, `catalog` and `parameters`")
@@ -311,16 +311,16 @@ In certain cases, you may not be able to run `kedro jupyter notebook`, which mea
 ```python
 from pathlib import Path
 from kedro.framework.session import KedroSession
-from kedro.framework.session.session import _push_session
+from kedro.framework.session.session import _activate_session
 
 current_dir = Path.cwd()  # this points to 'notebooks/' folder
 proj_path = current_dir.parent  # point back to the root of the project
 session = KedroSession.create(proj_path)
-_push_session(session)
-context = session.context
+_activate_session(session)
+context = session.load_context()
 ```
 
-#### How can I reload the `context`, `catalog` and `startup_error` variables?
+#### How can I reload the `session`, `context`, `catalog` and `startup_error` variables?
 
 To reload these variables at any point (e.g., if you update `catalog.yml`), use the [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) `%reload_kedro`. This magic can also be used to see the error message if any of the variables above are undefined.
 

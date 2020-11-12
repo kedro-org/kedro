@@ -28,7 +28,6 @@
 import logging
 import subprocess
 from pathlib import Path
-from time import sleep
 
 import pytest
 import toml
@@ -128,15 +127,10 @@ class TestKedroSession:
         assert session.store == expected_store
 
         mock_load_context.assert_not_called()
-        assert session.context is mock_load_context.return_value
-        if extra_params:
-            mock_load_context.assert_called_once_with(
-                project_path=fake_project, env=env, **extra_params
-            )
-        else:
-            mock_load_context.assert_called_once_with(
-                project_path=fake_project, env=env
-            )
+        assert session.load_context() is mock_load_context.return_value
+        mock_load_context.assert_called_once_with(
+            project_path=fake_project, env=env, extra_params=extra_params
+        )
 
     def test_create_no_env_extra_params(
         self, fake_project, mock_load_context, fake_session_id, mocker
@@ -165,12 +159,12 @@ class TestKedroSession:
         assert session.store == expected_store
 
         mock_load_context.assert_not_called()
-        assert session.context is mock_load_context.return_value
-        mock_load_context.assert_called_once_with(project_path=fake_project, env=None)
+        assert session.load_context() is mock_load_context.return_value
+        mock_load_context.assert_called_once_with(
+            project_path=fake_project, env=None, extra_params=None
+        )
 
     def test_default_store(self, fake_project, fake_session_id, caplog):
-        caplog.set_level(logging.WARN, logger="kedro.framework.session.store")
-
         session = KedroSession.create(fake_project)
         assert isinstance(session.store, dict)
         assert session._store.__class__ is BaseSessionStore
@@ -184,7 +178,7 @@ class TestKedroSession:
         actual_log_messages = [
             rec.getMessage()
             for rec in caplog.records
-            if rec.name == STORE_LOGGER_NAME and rec.levelno == logging.WARN
+            if rec.name == STORE_LOGGER_NAME and rec.levelno == logging.INFO
         ]
         assert actual_log_messages == expected_log_messages
 
@@ -216,7 +210,7 @@ class TestKedroSession:
         actual_log_messages = [
             rec.getMessage()
             for rec in caplog.records
-            if rec.name == STORE_LOGGER_NAME and rec.levelno == logging.WARN
+            if rec.name == STORE_LOGGER_NAME and rec.levelno == logging.INFO
         ]
         assert not actual_log_messages
 
@@ -283,17 +277,23 @@ class TestKedroSession:
         with pytest.raises(RuntimeError, match=pattern):
             get_current_session()
 
-        # create a session, pull it from the stack
-        with KedroSession.create(fake_project) as session:
-            assert get_current_session() is session
-            sleep(0.01)  # to make sure we don't generate the same session id
-            with KedroSession.create(fake_project) as another:
-                assert get_current_session() is another
-                assert session.session_id != another.session_id
-            assert get_current_session() is session
+        session1 = KedroSession.create(fake_project)
+        session2 = KedroSession.create(fake_project)
 
-        # session has been closed, so no sessions left in the stack
+        with session1:
+            assert get_current_session() is session1
+
+            pattern = (
+                "Cannot activate the session as another active session already exists"
+            )
+            with pytest.raises(RuntimeError, match=pattern), session2:
+                pass  # pragma: no cover
+
+        # session has been closed, so no current sessions should be available
         assert get_current_session(silent=True) is None
+
+        with session2:
+            assert get_current_session() is session2
 
     @pytest.mark.parametrize("fake_pipeline_name", [None, _FAKE_PIPELINE_NAME])
     def test_run(

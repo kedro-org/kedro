@@ -28,6 +28,8 @@
 
 """Command line tools for manipulating a Kedro project.
 Intended to be invoked via `kedro`."""
+import json
+import logging
 import os
 from itertools import chain
 from pathlib import Path
@@ -236,6 +238,10 @@ def run(
             load_versions=load_version,
             pipeline_name=pipeline,
         )
+
+        # Logging parameters for some e2e tests
+        params_to_log = session.load_context().params
+        logging.info("Parameters: %s", json.dumps(params_to_log, sort_keys=True))
 
 
 cli.add_command(pipeline_group)

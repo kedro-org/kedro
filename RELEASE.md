@@ -13,6 +13,7 @@
 * `before_node_run` can now overwrite node inputs by returning a dictionary with the corresponding updates.
 * Added minimal, black-compatible flake8 configuration to the project template.
 * Moved `isort` and `pytest` configuration from `<project_root>/setup.cfg` to `<project_root>/pyproject.toml`.
+* Fixed a bug where extra parameters were incorrectly passed from `KedroSession` to `KedroContext`.
 
 ## Breaking changes to the API
 * `kedro.io.DataCatalog.exists()` returns `False` when the dataset does not exist, as opposed to raising an exception.
@@ -34,6 +35,8 @@
 * Modified `kedro pipeline create` CLI command to add a boilerplate parameter config file in `conf/<env>/parameters/<pipeline_name>.yml` instead of `conf/<env>/pipelines/<pipeline_name>/parameters.yml`. CLI commands `kedro pipeline delete` / `package` / `pull` were updated accordingly.
 * Removed `get_static_project_data` from `kedro.framework.context`.
 * Renamed `KedroContext.static_data` to `KedroContext.project_metadata`.
+* Replaced `context` property on `KedroContext` with `load_context()` method.
+* Renamed `_push_session` and `_pop_session` in `kedro.framework.session.session` to `_activate_session` and `_deactivate_session` respectively.
 
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman)

@@ -15,11 +15,13 @@ def reload_kedro(path, line=None):
     global startup_error
     global context
     global catalog
+    global session
 
     try:
         import kedro.config.default_logger
+        from kedro.framework.hooks import get_hook_manager
         from kedro.framework.session import KedroSession
-        from kedro.framework.session.session import _push_session
+        from kedro.framework.session.session import _activate_session
         from kedro.framework.cli.jupyter import collect_line_magic
     except ImportError:
         logging.error(
@@ -33,19 +35,26 @@ def reload_kedro(path, line=None):
 
         # remove cached user modules
         session = KedroSession.create(path)
-        _push_session(session)
-        context = session.context
+        _activate_session(session, force=True)
+        context = session.load_context()
         to_remove = [mod for mod in sys.modules if mod.startswith(context.package_name)]
         # `del` is used instead of `reload()` because: If the new version of a module does not
         # define a name that was defined by the old version, the old definition remains.
         for module in to_remove:
             del sys.modules[module]
 
+        # clear hook manager; hook implementations will be re-registered when the
+        # context is instantiated again in `session.load_context()` below
+        hook_manager = get_hook_manager()
+        name_plugin_pairs = hook_manager.list_name_plugin()
+        for name, plugin in name_plugin_pairs:
+            hook_manager.unregister(name=name, plugin=plugin)
+
         logging.debug("Loading the context from %s", str(path))
         # Reload context to fix `pickle` related error (it is unable to serialize reloaded objects)
         # Some details can be found here:
         # https://modwsgi.readthedocs.io/en/develop/user-guides/issues-with-pickle-module.html#packing-and-script-reloading
-        context = session.context
+        context = session.load_context()
         catalog = context.catalog
 
         logging.info("** Kedro project %s", str(context.project_name))

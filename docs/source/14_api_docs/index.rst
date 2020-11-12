@@ -121,13 +121,15 @@ Welcome to Kedro's documentation!
    :maxdepth: 2
    :caption: Deployment
 
-   10_deployment/01_single_machine
-   10_deployment/02_distributed
+   10_deployment/01_deployment_guide
+   10_deployment/02_single_machine
+   10_deployment/03_distributed
    10_deployment/04_argo
    10_deployment/05_prefect
    10_deployment/06_kubeflow
    10_deployment/07_aws_batch
-   10_deployment/08_aws_sagemaker
+   10_deployment/08_databricks
+   10_deployment/09_aws_sagemaker
 
 .. toctree::
    :maxdepth: 2
@@ -135,7 +137,6 @@ Welcome to Kedro's documentation!
 
    11_tools_integration/01_pyspark
    11_tools_integration/02_ipython
-   11_tools_integration/03_databricks
 
 .. toctree::
    :maxdepth: 2

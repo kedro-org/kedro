@@ -209,6 +209,25 @@ def split_string(ctx, param, value):  # pylint: disable=unused-argument
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
+def split_node_string(ctx, param, value):  # pylint: disable=unused-argument
+    """Split string of node names separated by comma"""
+    rough_split = value.split(",")
+
+    # NB: There are still edge-cases that can break the following, but
+    # they are unlikely to happen unintentionally.
+    corrected_split = []
+    current_token_group = []
+
+    for token in rough_split:
+        current_token_group.append(token)
+
+        if token.endswith("-> None") or token.endswith("]"):
+            corrected_split.append(",".join(current_token_group))
+            current_token_group = []
+
+    return [item.strip() for item in corrected_split if item.strip()]
+
+
 def env_option(func_=None, **kwargs):
     """Add `--env` CLI option to a function."""
     default_args = dict(type=str, default=None, help=ENV_HELP)

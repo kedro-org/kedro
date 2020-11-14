@@ -30,7 +30,7 @@ import re
 import pytest
 import yaml
 
-from kedro.framework.cli.utils import get_source_dir
+from kedro.framework.cli.utils import get_source_dir, split_node_string
 
 
 @pytest.fixture(params=[None])
@@ -58,3 +58,33 @@ def test_get_source_dir(tmp_path, fake_kedro_yml, expected_source_dir):
         src_dir = get_source_dir(tmp_path)
 
     assert src_dir == expected_source_dir
+
+
+def _make_split_node_string_params(node_list):
+    """Helper method to make the parametrize for test_split_node_string() less verbose"""
+    node_string = ",".join(node_list)
+    return node_string, node_list
+
+
+@pytest.mark.parametrize(
+    "node_string,expected_node_list",
+    [
+        _make_split_node_string_params([]),
+        _make_split_node_string_params(["train_model(None) -> None"]),
+        _make_split_node_string_params(["train_model([foo]) -> [bar]"]),
+        _make_split_node_string_params(
+            ["train_model(None) -> None", "train_model([foo,bar]) -> [one,two,three]"]
+        ),
+        _make_split_node_string_params(
+            [
+                "This is a custom name.: train_model([foo,bar]) -> [baz]",
+                "[Dangerous, but legal] custom: name: train_model(None) -> None",
+            ]
+        ),
+    ],
+)
+def test_split_node_string(node_string, expected_node_list):
+    # First two parameters are required by Click
+    actual_node_list = split_node_string(None, None, node_string)
+
+    assert actual_node_list == expected_node_list

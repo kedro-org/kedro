@@ -129,7 +129,7 @@ class TestBaseStore:
         with pytest.raises(ValueError, match=re.escape(pattern)):
             BaseSessionStore.from_config(config)
 
-        assert mocked_init.called_once_with(**config)
+        mocked_init.assert_called_once_with(**config)
 
 
 @pytest.fixture

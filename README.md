@@ -131,7 +131,7 @@ Yes! Want to help build Kedro? Check out our [guide to contributing to Kedro](ht
 
 ## Where can I learn more?
 
-There is a growing community around Kedro. Have a look at the [Kedro FAQs](https://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#how-can-i-find-out-more-about-kedro) to find projects using Kedro and links to articles, podcasts and talks.
+There is a growing community around Kedro. Have a look at the [Kedro FAQs](https://kedro.readthedocs.io/en/stable/12_faq/01_faq.html#how-can-i-find-out-more-about-kedro) to find projects using Kedro and links to articles, podcasts and talks.
 
 
 ## Who is using Kedro?

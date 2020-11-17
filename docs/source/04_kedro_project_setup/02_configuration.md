@@ -136,6 +136,51 @@ raw_car_data:
 
 > Note: `TemplatedConfigLoader` uses `jmespath` package in the background to extract elements from global dictionary. For more information about JMESPath syntax please see: https://github.com/jmespath/jmespath.py.
 
+### Jinja2 support
+
+From version 0.17.0 `TemplateConfigLoader` also supports [Jinja2](https://palletsprojects.com/p/jinja/) template engine alongside the original template syntax. Below is the example of a `catalog.yml` file, which uses both features:
+
+```
+{% for speed in ['fast', 'slow'] %}
+{{ speed }}-trains:
+    type: MemoryDataSet
+
+{{ speed }}-cars:
+    type: pandas.CSVDataSet
+    filepath: s3://${bucket_name}/{{ speed }}-cars.csv
+    save_args:
+        index: true
+
+{% endfor %}
+```
+
+When parsing this configuration file, `TemplateConfigLoader` will:
+
+1. Read the `catalog.yml` and compile it using Jinja2
+2. Use YAML parser to parse the compiled config into a Python dictionary
+3. Expand `${bucket_name}` in `filepath` using the `globals_*` arguments for the `TemplateConfigLoader` instance as in the previous examples
+
+The output Python dictionary will look as follows:
+
+```python
+{
+    "fast-trains": {"type": "MemoryDataSet"},
+    "fast-cars": {
+        "type": "pandas.CSVDataSet",
+        "filepath": "s3://my_s3_bucket/fast-cars.csv",
+        "save_args": {"index": True},
+    },
+    "slow-trains": {"type": "MemoryDataSet"},
+    "slow-cars": {
+        "type": "pandas.CSVDataSet",
+        "filepath": "s3://my_s3_bucket/slow-cars.csv",
+        "save_args": {"index": True},
+    },
+}
+```
+
+> Note: Although Jinja2 is a very powerful and extremely flexible template engine, which comes with a wide range of features, we do _not_ recommend to use it to template your configuration unless absolutely necessary. The flexibility of dynamic configuration comes at a cost of significantly reduced readability and much higher maintenance overhead. We believe that, for the majority of analytics projects, dynamically compiled configuration does more harm than good.
+
 
 ## Parameters
 

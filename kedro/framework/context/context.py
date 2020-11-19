@@ -30,7 +30,6 @@
 import logging
 import logging.config
 import os
-import sys
 from copy import deepcopy
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any, Dict, Iterable, Tuple, Union
@@ -789,32 +788,7 @@ class KedroContext:
         return generate_timestamp()
 
 
-def validate_source_path(source_path: Path, project_path: Path):
-    """Validate the source path exists and is relative to the project path.
-
-    Args:
-        source_path: Absolute source path.
-        project_path: Path to the Kedro project.
-
-    Raises:
-        KedroContextError: Either source_path is not relative to project_path or
-            source_path does not exist.
-
-    """
-    try:
-        source_path.relative_to(project_path)
-    except ValueError as exc:
-        raise KedroContextError(
-            f"Source path '{source_path}' has to be relative to "
-            f"your project root '{project_path}'."
-        ) from exc
-    if not source_path.exists():
-        raise KedroContextError(f"Source path '{source_path}' cannot be found.")
-
-
-def load_context(
-    project_path: Union[str, Path], skip_validation: bool = False, **kwargs
-) -> KedroContext:
+def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
     """Loads the KedroContext object of a Kedro Project.
     This is the default way to load the KedroContext object for normal workflows such as
     CLI, Jupyter Notebook, Plugins, etc. It assumes the following project structure
@@ -829,8 +803,6 @@ def load_context(
 
     Args:
         project_path: Path to the Kedro project.
-        skip_validation: Skip the validation that the source path exists and is
-            relative to the project path.
         kwargs: Optional kwargs for ``KedroContext`` class.
 
     Returns:
@@ -843,9 +815,6 @@ def load_context(
     """
     project_path = Path(project_path).expanduser().resolve()
     project_metadata = _get_project_metadata(project_path)
-    source_dir = project_metadata.source_dir
-
-    _add_src_to_path(source_dir, project_path, skip_validation)
 
     context_class = (
         load_obj(project_metadata.context_path)
@@ -860,18 +829,6 @@ def load_context(
     kwargs["env"] = kwargs.get("env") or os.getenv("KEDRO_ENV")
     context = context_class(project_path=project_path, **kwargs)
     return context
-
-
-def _add_src_to_path(
-    source_dir: Path, project_path: Path, skip_validation: bool = False
-):
-    if not skip_validation:
-        validate_source_path(source_dir, project_path)
-
-    if str(source_dir) not in sys.path:
-        sys.path.insert(0, str(source_dir))  # pragma: no cover
-    if "PYTHONPATH" not in os.environ:
-        os.environ["PYTHONPATH"] = str(source_dir)
 
 
 class KedroContextError(Exception):

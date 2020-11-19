@@ -49,11 +49,12 @@ from kedro import __version__ as version
 from kedro.framework.cli.utils import (
     CommandCollection,
     KedroCliError,
+    _add_src_to_path,
     _clean_pycache,
     _filter_deprecation_warnings,
     command_with_verbosity,
 )
-from kedro.framework.context.context import _add_src_to_path, load_context
+from kedro.framework.context.context import load_context
 from kedro.framework.project.metadata import _get_project_metadata
 
 KEDRO_PATH = Path(kedro.__file__).parent

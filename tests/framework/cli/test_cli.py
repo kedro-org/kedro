@@ -25,6 +25,9 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
+import re
+import sys
 from os.path import join
 from pathlib import Path
 
@@ -43,7 +46,9 @@ from kedro.framework.cli.cli import (
 from kedro.framework.cli.utils import (
     CommandCollection,
     KedroCliError,
+    _add_src_to_path,
     _clean_pycache,
+    _validate_source_path,
     forward_command,
     get_pkg_version,
 )
@@ -383,3 +388,48 @@ class TestEntryPoints:
         with raises(KedroCliError, match="Initializing"):
             _init_plugins()
         entry_points.assert_called_once_with(group="kedro.init")
+
+
+class TestValidateSourcePath:
+    @mark.parametrize(
+        "source_dir", [".", "src", "./src", "src/nested", "src/nested/nested"]
+    )
+    def test_valid_source_path(self, tmp_path, source_dir):
+        source_path = (tmp_path / source_dir).resolve()
+        source_path.mkdir(parents=True, exist_ok=True)
+        _validate_source_path(source_path, tmp_path.resolve())
+
+    @mark.parametrize("source_dir", ["..", "src/../..", "~"])
+    def test_invalid_source_path(self, tmp_path, source_dir):
+        source_dir = Path(source_dir).expanduser()
+        source_path = (tmp_path / source_dir).resolve()
+        source_path.mkdir(parents=True, exist_ok=True)
+
+        pattern = re.escape(
+            f"Source path '{source_path}' has to be relative to your project root "
+            f"'{tmp_path.resolve()}'"
+        )
+        with raises(ValueError, match=pattern):
+            _validate_source_path(source_path, tmp_path.resolve())
+
+    def test_non_existent_source_path(self, tmp_path):
+        source_path = (tmp_path / "non_existent").resolve()
+
+        pattern = re.escape(f"Source path '{source_path}' cannot be found.")
+        with raises(NotADirectoryError, match=pattern):
+            _validate_source_path(source_path, tmp_path.resolve())
+
+
+class TestAddSourceDir:
+    def test_add_source_dir_to_sys_path(self, monkeypatch, tmp_path, mocker):
+        # test we are also adding source_dir to PYTHONPATH as well
+        monkeypatch.delenv("PYTHONPATH", raising=False)
+        mocker.patch("kedro.framework.cli.utils._validate_source_path")
+
+        project_path = tmp_path
+        source_dir = project_path / "source_dir"
+
+        _add_src_to_path(source_dir, project_path)
+
+        assert str(source_dir) in sys.path[0]
+        assert os.environ["PYTHONPATH"] == str(source_dir)

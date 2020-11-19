@@ -30,38 +30,7 @@ from pathlib import Path
 
 import pytest
 
-from kedro.framework.context import KedroContextError, validate_source_path
 from kedro.framework.project.metadata import ProjectMetadata, _get_project_metadata
-
-
-class TestValidateSourcePath:
-    @pytest.mark.parametrize(
-        "source_dir", [".", "src", "./src", "src/nested", "src/nested/nested"]
-    )
-    def test_valid_source_path(self, tmp_path, source_dir):
-        source_path = (tmp_path / source_dir).resolve()
-        source_path.mkdir(parents=True, exist_ok=True)
-        validate_source_path(source_path, tmp_path.resolve())
-
-    @pytest.mark.parametrize("source_dir", ["..", "src/../..", "~"])
-    def test_invalid_source_path(self, tmp_path, source_dir):
-        source_dir = Path(source_dir).expanduser()
-        source_path = (tmp_path / source_dir).resolve()
-        source_path.mkdir(parents=True, exist_ok=True)
-
-        pattern = re.escape(
-            f"Source path '{source_path}' has to be relative to your project root "
-            f"'{tmp_path.resolve()}'"
-        )
-        with pytest.raises(KedroContextError, match=pattern):
-            validate_source_path(source_path, tmp_path.resolve())
-
-    def test_non_existent_source_path(self, tmp_path):
-        source_path = (tmp_path / "non_existent").resolve()
-
-        pattern = re.escape(f"Source path '{source_path}' cannot be found.")
-        with pytest.raises(KedroContextError, match=pattern):
-            validate_source_path(source_path, tmp_path.resolve())
 
 
 class TestGetProjectMetadata:

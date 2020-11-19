@@ -46,7 +46,7 @@ def run_package():
     # file with all the values derived from the packaged project.
     _generate_toml_config(project_path, package_path)
 
-    project_context = load_context(project_path, skip_validation=True)
+    project_context = load_context(project_path)
     project_context.run()
 
 

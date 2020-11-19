@@ -320,17 +320,22 @@ You should see output similar to the following:
 We have created a data engineering pipeline, which merges three input datasets to create a master table. Now we will create the data science pipeline for price prediction, which uses a [`LinearRegression`](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html) implementation from the [scikit-learn](https://scikit-learn.org/stable/) library.
 
 ### Update dependencies
-Update the project's dependencies in `src/requirements.txt` as follows:
+We now need to add `scikit-learn` to the project's dependencies. This is a slightly different process from the initial change we made early in the tutorial.
+
+To **update** the project's dependencies, you should modify `src/requirements.in` to add the following. Note that you do not need to update `src/requirements.txt` as you did previously in the tutorial before you built the project's requirements with `kedro build-reqs`:
+
 
 ```text
 scikit-learn==0.23.1
 ```
 
-From within the project directory, run:
+Then, re-run `kedro install` with a flag telling Kedro to recompile the requirements:
 
 ```bash
-kedro install
+kedro install --build-reqs
 ```
+
+You can find out more about [how to work with project dependencies](../04_kedro_project_setup/01_dependencies) in the Kedro project documentation.
 
 ### Create a data science node
 

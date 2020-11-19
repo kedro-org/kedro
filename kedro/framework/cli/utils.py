@@ -305,7 +305,6 @@ def _validate_source_path(source_path: Path, project_path: Path):
     Raises:
         ValueError: If source_path is not relative to project_path.
         NotADirectoryError: If source_path does not exist.
-
     """
     try:
         source_path.relative_to(project_path)

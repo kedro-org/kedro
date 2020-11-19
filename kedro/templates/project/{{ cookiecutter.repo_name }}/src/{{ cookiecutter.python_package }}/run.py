@@ -29,8 +29,8 @@
 """Application entry point."""
 from pathlib import Path
 
-from kedro.framework.context import load_context
 from kedro.framework.project import _generate_toml_config
+from kedro.framework.session import KedroSession
 
 
 def run_package():
@@ -46,8 +46,8 @@ def run_package():
     # file with all the values derived from the packaged project.
     _generate_toml_config(project_path, package_path)
 
-    project_context = load_context(project_path)
-    project_context.run()
+    with KedroSession.create(project_path=project_path) as session:
+        session.run()
 
 
 if __name__ == "__main__":

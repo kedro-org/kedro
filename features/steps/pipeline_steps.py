@@ -134,7 +134,7 @@ def _add_external_packages(context):
     )
     with pipeline_file.open("at", encoding="utf-8") as _pf:
         _imports = "\n".join("import {}".format(p) for p in external_packages)
-        _pf.write("\n{0}\n".format(_imports))
+        _pf.write(f"\n{_imports}\n")
 
     requirements_file = context.root_project_dir / "src" / "requirements.txt"
     with requirements_file.open("at", encoding="utf-8") as _reqs:

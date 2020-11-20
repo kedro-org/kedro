@@ -37,7 +37,7 @@ from typing import Callable
 def _func_full_name(func: Callable):
     if not getattr(func, "__module__", None):
         return getattr(func, "__qualname__", repr(func))
-    return "{}.{}".format(func.__module__, func.__qualname__)
+    return f"{func.__module__}.{func.__qualname__}"
 
 
 def _human_readable_time(elapsed: float):  # pragma: no cover
@@ -49,9 +49,9 @@ def _human_readable_time(elapsed: float):  # pragma: no cover
     elif mins > 0:
         message = "%dm%02ds" % (mins, secs)
     elif secs >= 1:
-        message = "%.2fs" % secs
+        message = f"{secs:.2f}s"
     else:
-        message = "%.0fms" % (secs * 1000.0)
+        message = f"{secs * 1000.0:.0f}ms"
 
     return message
 

@@ -41,7 +41,7 @@ here = path.abspath(path.dirname(__file__))
 PANDAS = "pandas>=0.24"
 SPARK = "pyspark~=2.2"
 HDFS = "hdfs>=2.5.8, <3.0"
-S3FS = "s3fs>=0.3.0, <0.4.1"
+S3FS = "s3fs>=0.3.0, <0.5"
 
 # get package version
 with open(path.join(here, name, "__init__.py"), encoding="utf-8") as f:
@@ -87,7 +87,9 @@ def _collect_requirements(requires):
 api_require = {"api.APIDataSet": ["requests~=2.20"]}
 biosequence_require = {"biosequence.BioSequenceDataSet": ["biopython~=1.73"]}
 dask_require = {"dask.ParquetDataSet": ["dask[complete]~=2.6"]}
-geopandas_require = {"geopandas.GeoJSONDataSet": ["geopandas>=0.6.0, <1.0", "pyproj>=2.2.0, <3.0"]}
+geopandas_require = {
+    "geopandas.GeoJSONDataSet": ["geopandas>=0.6.0, <1.0", "pyproj>=2.2.0, <3.0"]
+}
 matplotlib_require = {"matplotlib.MatplotlibWriter": ["matplotlib>=3.0.3, <4.0"]}
 holoviews_require = {"holoviews.HoloviewsWriter": ["holoviews~=1.13.0"]}
 networkx_require = {"networkx.NetworkXDataSet": ["networkx~=2.4"]}
@@ -134,6 +136,7 @@ extras_require = {
         "ipykernel>=4.8.1, <5.0",
     ],
     "geopandas": _collect_requirements(geopandas_require),
+    "ipython": ["ipython==7.10"],
     "matplotlib": _collect_requirements(matplotlib_require),
     "holoviews": _collect_requirements(holoviews_require),
     "networkx": _collect_requirements(networkx_require),

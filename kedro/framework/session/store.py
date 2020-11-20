@@ -32,6 +32,7 @@ import logging
 import shelve
 from collections import UserDict
 from copy import deepcopy
+from multiprocessing import Lock
 from pathlib import Path
 from typing import Any, Dict
 
@@ -88,6 +89,7 @@ class BaseSessionStore(UserDict):
             raise ValueError(
                 f"\n{err}.\nFailed to instantiate session store of type `{classpath}`."
             ) from err
+
         return store
 
     @property
@@ -100,7 +102,7 @@ class BaseSessionStore(UserDict):
         Returns:
             A mapping containing the session store data.
         """
-        self._logger.warning(
+        self._logger.info(
             "`read()` not implemented for `%s`. Assuming empty store.",
             self.__class__.__name__,
         )
@@ -108,7 +110,7 @@ class BaseSessionStore(UserDict):
 
     def save(self):
         """Persist the session store"""
-        self._logger.warning(
+        self._logger.info(
             "`save()` not implemented for `%s`. Skipping the step.",
             self.__class__.__name__,
         )
@@ -116,6 +118,8 @@ class BaseSessionStore(UserDict):
 
 class ShelveStore(BaseSessionStore):
     """Stores the session data on disk using `shelve` package."""
+
+    _lock = Lock()
 
     @property
     def _location(self) -> Path:
@@ -135,7 +139,7 @@ class ShelveStore(BaseSessionStore):
         """Save the data on disk using `shelve` package."""
         self._location.parent.mkdir(parents=True, exist_ok=True)
 
-        with shelve.open(str(self._location)) as _sh:
+        with self._lock, shelve.open(str(self._location)) as _sh:
             keys_to_del = _sh.keys() - self.data.keys()
             for key in keys_to_del:
                 del _sh[key]

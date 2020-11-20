@@ -1,0 +1,66 @@
+version: 1
+disable_existing_loggers: False
+formatters:
+    simple:
+        format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    json_formatter:
+        format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        class: pythonjsonlogger.jsonlogger.JsonFormatter
+
+handlers:
+    console:
+        class: logging.StreamHandler
+        level: INFO
+        formatter: simple
+        stream: ext://sys.stdout
+
+    info_file_handler:
+        class: logging.handlers.RotatingFileHandler
+        level: INFO
+        formatter: simple
+        filename: logs/info.log
+        maxBytes: 10485760 # 10MB
+        backupCount: 20
+        encoding: utf8
+        delay: True
+
+    error_file_handler:
+        class: logging.handlers.RotatingFileHandler
+        level: ERROR
+        formatter: simple
+        filename: logs/errors.log
+        maxBytes: 10485760 # 10MB
+        backupCount: 20
+        encoding: utf8
+        delay: True
+
+    journal_file_handler:
+        class: kedro.versioning.journal.JournalFileHandler
+        level: INFO
+        base_dir: logs/journals
+        formatter: json_formatter
+
+loggers:
+    anyconfig:
+        level: WARNING
+        handlers: [console, info_file_handler, error_file_handler]
+        propagate: no
+
+    kedro.io:
+        level: INFO
+        handlers: [console, info_file_handler, error_file_handler]
+        propagate: no
+
+    kedro.pipeline:
+        level: INFO
+        handlers: [console, info_file_handler, error_file_handler]
+        propagate: no
+
+    kedro.journal:
+        level: INFO
+        handlers: [journal_file_handler]
+        propagate: no
+
+root:
+    level: INFO
+    handlers: [console, info_file_handler, error_file_handler]

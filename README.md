@@ -75,7 +75,7 @@ The [Kedro documentation](https://kedro.readthedocs.io/en/stable/) includes thre
 Additional documentation includes:
 
 - An overview of [Kedro architecture](https://kedro.readthedocs.io/en/stable/11_faq/02_architecture_overview.html)
-- How to [use the CLI](https://kedro.readthedocs.io/en/stable/09_development/03_commands_reference.html) offered by `kedro_cli.py` (`kedro new`, `kedro run`, ...)
+- How to [use the CLI](https://kedro.readthedocs.io/en/stable/09_development/03_commands_reference.html) offered by `cli.py` (`kedro new`, `kedro run`, ...)
 
 > *Note:* The CLI is a convenient tool for being able to run `kedro` commands but you can also invoke the Kedro CLI as a Python module with `python -m kedro`
 

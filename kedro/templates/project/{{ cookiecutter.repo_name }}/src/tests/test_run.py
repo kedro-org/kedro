@@ -33,24 +33,25 @@ Tests should be placed in ``src/tests``, in modules that mirror your
 project's structure, and in files named test_*.py. They are simply functions
 named ``test_*`` which test a unit of logic.
 
-To run the tests, run ``kedro test``.
+To run the tests, run ``kedro test`` from the project root directory.
 """
+
 from pathlib import Path
 
 import pytest
-
-from {{ cookiecutter.python_package }}.run import ProjectContext
+from kedro.framework.context import KedroContext, load_context
 
 
 @pytest.fixture
 def project_context(mocker):
     # Don't configure the logging module. If it's configured, tests that
     # check logs using the ``caplog`` fixture depend on execution order.
-    mocker.patch.object(ProjectContext, "_setup_logging")
+    mocker.patch.object(KedroContext, "_setup_logging")
 
-    return ProjectContext(str(Path.cwd()))
+    return load_context(Path.cwd())
 
 
+# These are example tests
 class TestProjectContext:
     def test_project_name(self, project_context):
         assert project_context.project_name == "{{ cookiecutter.project_name }}"

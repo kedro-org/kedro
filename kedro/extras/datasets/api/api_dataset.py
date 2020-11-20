@@ -124,9 +124,7 @@ class APIDataSet(AbstractDataSet):
         return self._execute_request()
 
     def _save(self, data: Any) -> None:
-        raise DataSetError(
-            "{} is a read only data set type".format(self.__class__.__name__)
-        )
+        raise DataSetError(f"{self.__class__.__name__} is a read only data set type")
 
     def _exists(self) -> bool:
         response = self._execute_request()

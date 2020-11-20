@@ -44,7 +44,7 @@ BUCKET_NAME = "test_bucket"
 AWS_CREDENTIALS = {"key": "testing", "secret": "testing"}
 KEY_PATH = "matplotlib"
 COLOUR_LIST = ["blue", "green", "red"]
-FULL_PATH = "s3://{}/{}".format(BUCKET_NAME, KEY_PATH)
+FULL_PATH = f"s3://{BUCKET_NAME}/{KEY_PATH}"
 
 matplotlib.use("Agg")  # Disable interactive mode
 
@@ -97,7 +97,7 @@ def mocked_encrypted_s3_bucket():
                 "Effect": "Deny",
                 "Principal": "*",
                 "Action": "s3:PutObject",
-                "Resource": "arn:aws:s3:::{}/*".format(BUCKET_NAME),
+                "Resource": f"arn:aws:s3:::{BUCKET_NAME}/*",
                 "Condition": {"Null": {"s3:x-amz-server-side-encryption": "aws:kms"}},
             }
         ],
@@ -174,7 +174,7 @@ class TestMatplotlibWriter:
             actual_filepath = tmp_path / "locally_saved.png"
 
             mock_list_plot[index].savefig(str(actual_filepath))
-            _key_path = "{}/{}.png".format(KEY_PATH, index)
+            _key_path = f"{KEY_PATH}/{index}.png"
             mocked_s3_bucket.download_file(BUCKET_NAME, _key_path, str(download_path))
 
             assert actual_filepath.read_bytes() == download_path.read_bytes()
@@ -191,7 +191,7 @@ class TestMatplotlibWriter:
 
             mock_dict_plot[colour].savefig(str(actual_filepath))
 
-            _key_path = "{}/{}".format(KEY_PATH, colour)
+            _key_path = f"{KEY_PATH}/{colour}"
 
             mocked_s3_bucket.download_file(BUCKET_NAME, _key_path, str(download_path))
 
@@ -247,9 +247,7 @@ class TestMatplotlibWriter:
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         data_set = MatplotlibWriter(filepath=FULL_PATH)
         data_set.release()
-        fs_mock.invalidate_cache.assert_called_once_with(
-            "{}/{}".format(BUCKET_NAME, KEY_PATH)
-        )
+        fs_mock.invalidate_cache.assert_called_once_with(f"{BUCKET_NAME}/{KEY_PATH}")
 
 
 class TestMatplotlibWriterVersioned:
@@ -345,7 +343,7 @@ class TestMatplotlibWriterVersioned:
             versioned_filepath = str(versioned_plot_writer._get_load_path())
 
             mock_list_plot[index].savefig(str(test_path))
-            actual_filepath = Path("{}/{}.png".format(versioned_filepath, index))
+            actual_filepath = Path(f"{versioned_filepath}/{index}.png")
 
             assert actual_filepath.read_bytes() == test_path.read_bytes()
 
@@ -359,6 +357,6 @@ class TestMatplotlibWriterVersioned:
             versioned_filepath = str(versioned_plot_writer._get_load_path())
 
             mock_dict_plot[colour].savefig(str(test_path))
-            actual_filepath = Path("{}/{}".format(versioned_filepath, colour))
+            actual_filepath = Path(f"{versioned_filepath}/{colour}")
 
             assert actual_filepath.read_bytes() == test_path.read_bytes()

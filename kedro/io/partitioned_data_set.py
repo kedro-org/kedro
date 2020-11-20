@@ -225,7 +225,7 @@ class PartitionedDataSet(AbstractDataSet):
         if self._path.startswith(self._protocol) and not path.startswith(
             self._protocol
         ):
-            return "{}://{}".format(self._protocol, path)
+            return f"{self._protocol}://{path}"
         return path
 
     def _partition_to_path(self, path: str):
@@ -253,7 +253,7 @@ class PartitionedDataSet(AbstractDataSet):
             partitions[partition_id] = dataset.load
 
         if not partitions:
-            raise DataSetError("No partitions found in `{}`".format(self._path))
+            raise DataSetError(f"No partitions found in `{self._path}`")
 
         return partitions
 

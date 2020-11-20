@@ -389,7 +389,7 @@ def test_bad_input(func, expected):
 def apply_f(func: Callable) -> Callable:
     @wraps(func)
     def with_f(*args, **kwargs):
-        return func(*["f(%s)" % a for a in args], **kwargs)
+        return func(*[f"f({a})" for a in args], **kwargs)
 
     return with_f
 
@@ -397,7 +397,7 @@ def apply_f(func: Callable) -> Callable:
 def apply_g(func: Callable) -> Callable:
     @wraps(func)
     def with_g(*args, **kwargs):
-        return func(*["g(%s)" % a for a in args], **kwargs)
+        return func(*[f"g({a})" for a in args], **kwargs)
 
     return with_g
 
@@ -405,7 +405,7 @@ def apply_g(func: Callable) -> Callable:
 def apply_h(func: Callable) -> Callable:
     @wraps(func)
     def with_h(*args, **kwargs):
-        return func(*["h(%s)" % a for a in args], **kwargs)
+        return func(*[f"h({a})" for a in args], **kwargs)
 
     return with_h
 
@@ -413,7 +413,7 @@ def apply_h(func: Callable) -> Callable:
 def apply_ij(func: Callable) -> Callable:
     @wraps(func)
     def with_ij(*args, **kwargs):
-        return func(*["ij(%s)" % a for a in args], **kwargs)
+        return func(*[f"ij({a})" for a in args], **kwargs)
 
     return with_ij
 

@@ -102,22 +102,7 @@ Kedro is built upon our collective best-practice (and mistakes) trying to delive
 Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) and [Nikolaos Tsaousis](https://github.com/tsanikgr) to solve challenges they faced in their project work.
 Their work was later turned into an internal product by [Peteris Erins](https://github.com/Pet3ris), [Ivan Danov](https://github.com/idanov), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae) and [Nikolaos Tsaousis](https://github.com/tsanikgr).
 
-Currently the core Kedro team consists of:
-
-* [Yetunde Dada](https://github.com/yetudada)
-* [Ivan Danov](https://github.com/idanov)
-* [Richard Westenra](https://github.com/richardwestenra)
-* [Dmitrii Deriabin](https://github.com/DmitriiDeriabinQB)
-* [Lorena Balan](https://github.com/lorenabalan)
-* [Kiyohito Kunii](https://github.com/921kiyo)
-* [Zain Patel](https://github.com/mzjp2)
-* [Lim Hoang](https://github.com/limdauto)
-* [Andrii Ivaniuk](https://github.com/andrii-ivaniuk)
-* [Jo Stichbury](https://github.com/stichbury)
-* [Laís Carvalho](https://github.com/laisbsc)
-* [Merel Theisen](https://github.com/MerelTheisenQB)
-* [Gabriel Comym](https://github.com/GabrielComymQB)
-* [Liam Brummitt](https://github.com/bru5)
+Currently the core Kedro team consists of [Yetunde Dada](https://github.com/yetudada), [Ivan Danov](https://github.com/idanov), [Richard Westenra](https://github.com/richardwestenra), [Dmitrii Deriabin](https://github.com/DmitriiDeriabinQB), [Lorena Balan](https://github.com/lorenabalan), [Kiyohito Kunii](https://github.com/921kiyo), [Zain Patel](https://github.com/mzjp2), [Lim Hoang](https://github.com/limdauto), [Andrii Ivaniuk](https://github.com/andrii-ivaniuk), [Jo Stichbury](https://github.com/stichbury), [Laís Carvalho](https://github.com/laisbsc), [Merel Theisen](https://github.com/MerelTheisenQB), [Gabriel Comym](https://github.com/GabrielComymQB), and [Liam Brummitt](https://github.com/bru5)
 
 Former core team members with significant contributions include: [Gordon Wrigley](https://github.com/tolomea), [Nasef Khan](https://github.com/nakhan98) and [Anton Kirilenko](https://github.com/Flid).
 
@@ -131,7 +116,7 @@ Yes! Want to help build Kedro? Check out our [guide to contributing to Kedro](ht
 
 ## Where can I learn more?
 
-There is a growing community around Kedro. Have a look at the [Kedro FAQs](https://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#how-can-i-find-out-more-about-kedro) to find projects using Kedro and links to articles, podcasts and talks.
+There is a growing community around Kedro. Have a look at the [Kedro FAQs](https://kedro.readthedocs.io/en/stable/12_faq/01_faq.html#how-can-i-find-out-more-about-kedro) to find projects using Kedro and links to articles, podcasts and talks.
 
 
 ## Who is using Kedro?

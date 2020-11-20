@@ -338,17 +338,13 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
         if what == "class":
             # first do plural only for classes
             replacements += [
-                (
-                    r"``{}``s".format(obj),
-                    ":{}:`~{}.{}`\\\\s".format(what, module, obj),
-                    obj,
-                )
+                (r"``{}``s".format(obj), f":{what}:`~{module}.{obj}`\\\\s", obj,)
                 for obj in objects
             ]
 
         # singular
         replacements += [
-            (r"``{}``".format(obj), ":{}:`~{}.{}`".format(what, module, obj), obj)
+            (r"``{}``".format(obj), f":{what}:`~{module}.{obj}`", obj)
             for obj in objects
         ]
 
@@ -358,13 +354,13 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
         if what == "class":
             # first do plural only for classes
             suggestions += [
-                (r"(?<!\w|`){}s(?!\w|`{{2}})".format(obj), "``{}``s".format(obj), obj)
+                (r"(?<!\w|`){}s(?!\w|`{{2}})".format(obj), f"``{obj}``s", obj)
                 for obj in objects
             ]
 
         # then singular
         suggestions += [
-            (r"(?<!\w|`){}(?!\w|`{{2}})".format(obj), "``{}``".format(obj), obj)
+            (r"(?<!\w|`){}(?!\w|`{{2}})".format(obj), f"``{obj}``", obj)
             for obj in objects
         ]
 

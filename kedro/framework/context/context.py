@@ -132,7 +132,7 @@ def _convert_paths_to_absolute_posix(
     """
     if not project_path.is_absolute():
         raise ValueError(
-            "project_path must be an absolute path. Received: {}".format(project_path)
+            f"project_path must be an absolute path. Received: {project_path}"
         )
 
     # only check a few conf keys that are known to specify a path string as value
@@ -441,11 +441,7 @@ class KedroContext:
                 "parameters*", "parameters*/**", "**/parameters*"
             )
         except MissingConfigException as exc:
-            warn(
-                "Parameters not found in your Kedro project config.\n{}".format(
-                    str(exc)
-                )
-            )
+            warn(f"Parameters not found in your Kedro project config.\n{str(exc)}")
             params = {}
         params.update(self._extra_params or {})
         return params
@@ -595,12 +591,12 @@ class KedroContext:
                 >>> assert feed_dict["params:a"] == {"b": 1}
                 >>> assert feed_dict["params:a.b"] == 1
             """
-            key = "params:{}".format(param_name)
+            key = f"params:{param_name}"
             feed_dict[key] = param_value
 
             if isinstance(param_value, dict):
                 for key, val in param_value.items():
-                    _add_param_to_feed_dict("{}.{}".format(param_name, key), val)
+                    _add_param_to_feed_dict(f"{param_name}.{key}", val)
 
         for param_name, param_value in params.items():
             _add_param_to_feed_dict(param_name, param_value)
@@ -614,11 +610,7 @@ class KedroContext:
                 "credentials*", "credentials*/**", "**/credentials*"
             )
         except MissingConfigException as exc:
-            warn(
-                "Credentials not found in your Kedro project config.\n{}".format(
-                    str(exc)
-                )
-            )
+            warn(f"Credentials not found in your Kedro project config.\n{str(exc)}")
             conf_creds = {}
         return conf_creds
 
@@ -643,7 +635,7 @@ class KedroContext:
             new_pipeline &= pipeline.only_nodes_with_tags(*tags)
             if not new_pipeline.nodes:
                 raise KedroContextError(
-                    "Pipeline contains no nodes with tags: {}".format(str(tags))
+                    f"Pipeline contains no nodes with tags: {str(tags)}"
                 )
         if from_nodes:
             new_pipeline &= pipeline.from_nodes(*from_nodes)

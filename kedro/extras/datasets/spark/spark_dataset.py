@@ -146,9 +146,9 @@ class KedroHdfsInsecureClient(InsecureClient):
                 if fnmatch(dpath, pattern):
                     matched.add(dpath)
                 matched |= set(
-                    "{}/{}".format(dpath, fname)
+                    f"{dpath}/{fname}"
                     for fname in fnames
-                    if fnmatch("{}/{}".format(dpath, fname), pattern)
+                    if fnmatch(f"{dpath}/{fname}", pattern)
                 )
         except HdfsError:  # pragma: no cover
             # HdfsError is raised by `self.walk()` if prefix does not exist in HDFS.
@@ -291,7 +291,7 @@ class SparkDataSet(AbstractVersionedDataSet):
 
     def __getstate__(self):
         # SparkDataSet cannot be used with ParallelRunner
-        raise AttributeError("{} cannot be serialized!".format(self.__class__.__name__))
+        raise AttributeError(f"{self.__class__.__name__} cannot be serialized!")
 
     def _describe(self) -> Dict[str, Any]:
         return dict(

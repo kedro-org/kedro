@@ -157,9 +157,7 @@ class MatplotlibWriter(AbstractVersionedDataSet):
         )
 
     def _load(self) -> None:
-        raise DataSetError(
-            "Loading not supported for `{}`".format(self.__class__.__name__)
-        )
+        raise DataSetError(f"Loading not supported for `{self.__class__.__name__}`")
 
     def _save(
         self, data: Union[plt.figure, List[plt.figure], Dict[str, plt.figure]]

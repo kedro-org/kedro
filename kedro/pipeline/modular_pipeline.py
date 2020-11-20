@@ -139,7 +139,7 @@ def pipeline(
     mapping = {**inputs, **outputs, **parameters}
 
     def _prefix(name: str) -> str:
-        return "{}.{}".format(namespace, name) if namespace else name
+        return f"{namespace}.{name}" if namespace else name
 
     def _is_transcode_base_in_mapping(name: str) -> bool:
         base_name, _ = _transcode_split(name)
@@ -181,7 +181,7 @@ def pipeline(
             return {key: _rename(value) for key, value in datasets.items()}
 
         raise ValueError(  # pragma: no cover
-            "Unexpected input {} of type {}".format(datasets, type(datasets))
+            f"Unexpected input {datasets} of type {type(datasets)}"
         )
 
     def _copy_node(node: Node) -> Node:

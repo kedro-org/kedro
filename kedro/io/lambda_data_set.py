@@ -61,7 +61,7 @@ class LambdaDataSet(AbstractDataSet):
             if not func:
                 return None
             try:
-                return "<{}.{}>".format(func.__module__, func.__name__)
+                return f"<{func.__module__}.{func.__name__}>"
             except AttributeError:  # pragma: no cover
                 return str(func)
 

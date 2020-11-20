@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 
 from IPython.core.magic import register_line_magic, needs_local_scope
+from kedro.framework.hooks import get_hook_manager
 
 # Find the project root (./../../../)
 startup_error = None
@@ -37,6 +38,13 @@ def reload_kedro(path, line=None):
         # define a name that was defined by the old version, the old definition remains.
         for module in to_remove:
             del sys.modules[module]
+
+        # clear hook manager; hook implementations will be re-registered when the
+        # context is instantiated again in `load_context()` below
+        hook_manager = get_hook_manager()
+        name_plugin_pairs = hook_manager.list_name_plugin()
+        for name, plugin in name_plugin_pairs:
+            hook_manager.unregister(name=name, plugin=plugin)
 
         logging.debug("Loading the context from %s", str(path))
         # Reload context to fix `pickle` related error (it is unable to serialize reloaded objects)

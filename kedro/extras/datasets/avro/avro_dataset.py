@@ -31,7 +31,7 @@ filesystem (e.g.: local, S3, GCS). It uses avro library to handle the AVRO file.
 See details about AVRO format: https://avro.apache.org/
 """
 from copy import deepcopy
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 from typing import Any, Dict, List, Union
 
 # pylint: disable=import-error
@@ -134,12 +134,8 @@ class AVRODataSet(AbstractVersionedDataSet):
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `r` when loading
                 and to `w` when saving.
-
-        Raises:
-            SchemaParseException: Raised when AVRO schema parsing error happened.
         """
         _credentials = deepcopy(credentials) or {}
-
         _fs_args = deepcopy(fs_args) or {}
 
         self._fs_open_args_load = _fs_args.pop("open_args_load", {})
@@ -170,52 +166,56 @@ class AVRODataSet(AbstractVersionedDataSet):
 
         self._schema = save_args.get("schema", {}) if save_args else {}
 
-        def _describe(self) -> Dict[str, Any]:
-            return dict(
-                filepath=self._filepath,
-                protocol=self._protocol,
-                schema=self._schema,
-                load_args=self._load_args,
-                save_args=self._save_args,
-                version=self._version,
+    def _describe(self) -> Dict[str, Any]:
+        return dict(
+            filepath=self._filepath,
+            protocol=self._protocol,
+            schema=self._schema,
+            load_args=self._load_args,
+            save_args=self._save_args,
+            version=self._version,
+        )
+
+    def _load(self) -> List[Dict[str, Any]]:  # type: ignore
+        load_path = get_filepath_str(self._get_load_path(), self._protocol)
+
+        with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
+            with DataFileReader(fs_file, DatumReader()) as reader:
+                self._schema = reader.schema
+                for item in reader:
+                    return item
+
+    def _save(self, data: Union[Dict[str, Any], List[Dict[str, Any]]]) -> None:
+        if not self._save_args.get("schema", {}) or not self._schema:
+            raise KeyError("Please provide AVRO schema as the save_args' 'schema' attribute")
+
+        save_path = get_filepath_str(self._get_save_path(), self._protocol)
+
+        if Path(save_path).is_dir():
+            raise DataSetError(
+                f"Saving {self.__class__.__name__} to a directory is not supported."
             )
 
-        def _load(self) -> List[Dict[str, Any]]:
+        schema = make_avsc_object(self._schema)
+        codec = self._save_args.get("codec", "null")
+
+        with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
+            with DataFileWriter(fs_file, DatumWriter(), schema, codec) as writer:
+                writer.append(data)
+
+        self._invalidate_cache()
+
+    def _exists(self) -> bool:  # type: ignore
+        try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
+        except DataSetError:
+            return False
 
-            with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
-                with DataFileReader(fs_file, DatumReader()) as reader:
-                    self._schema = reader.schema
-                    return list(item for item in reader)
+    def _release(self) -> None:
+        super()._release()
+        self._invalidate_cache()
 
-        def _save(self, data: Union[Dict[str, Any], List[Dict[str, Any]]]) -> None:
-            if not self._save_args.get("schema", {}) or not self._schema:
-                raise KeyError(
-                    "Please provide AVRO schema as the save_args' 'schema' attribute"
-                )
-
-            save_path = get_filepath_str(self._get_save_path(), self._protocol)
-
-            schema = make_avsc_object(self._schema)
-
-            with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
-                with DataFileWriter(fs_file, DatumWriter(), schema) as writer:
-                    writer.append(data)
-
-            self._invalidate_cache()
-
-        def _exists(self) -> bool:
-            try:
-                get_filepath_str(self._get_load_path(), self._protocol)
-                return True
-            except DataSetError:
-                return False
-
-        def _release(self) -> None:
-            super()._release()
-            self._invalidate_cache()
-
-        def _invalidate_cache(self) -> None:
-            """Invalidate underlying filesystem caches."""
-            filepath = get_filepath_str(self._filepath, self._protocol)
-            self._fs.invalidate_cache(filepath)
+    def _invalidate_cache(self) -> None:
+        """Invalidate underlying filesystem caches."""
+        filepath = get_filepath_str(self._filepath, self._protocol)
+        self._fs.invalidate_cache(filepath)

@@ -205,7 +205,7 @@ class AVRODataSet(AbstractVersionedDataSet):
 
         self._invalidate_cache()
 
-    def _exists(self) -> bool:  # type: ignore
+    def _exists(self) -> bool:
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
             return self._fs.exists(load_path)

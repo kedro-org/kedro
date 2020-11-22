@@ -208,6 +208,7 @@ class AVRODataSet(AbstractVersionedDataSet):
     def _exists(self) -> bool:  # type: ignore
         try:
             load_path = get_filepath_str(self._get_load_path(), self._protocol)
+            return self._fs.exists(load_path)
         except DataSetError:
             return False
 

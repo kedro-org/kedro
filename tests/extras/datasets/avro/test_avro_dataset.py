@@ -114,8 +114,8 @@ class TestAvroDataSet:
         """Test `exists` method invocation for both existing and
         nonexistent data set."""
         assert not avro_data_set.exists()
-        # avro_data_set.save(dummy_data)
-        # assert avro_data_set.exists()
+        avro_data_set.save(dummy_data)
+        assert avro_data_set.exists()
 
     def test_load_missing_file(self, avro_data_set):
         """Check the error when trying to load missing file."""

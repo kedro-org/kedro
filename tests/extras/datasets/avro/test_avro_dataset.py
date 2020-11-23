@@ -29,6 +29,8 @@
 from pathlib import PurePosixPath
 
 import pytest
+
+# pylint: disable=import-error
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
@@ -79,12 +81,17 @@ def dummy_schema():
 @pytest.fixture
 def avro_data_set(filepath_avro, load_args, save_args, fs_args):
     return AVRODataSet(
-        filepath=filepath_avro, load_args=load_args, save_args=save_args, fs_args=fs_args,
+        filepath=filepath_avro,
+        load_args=load_args,
+        save_args=save_args,
+        fs_args=fs_args,
     )
 
 
 @pytest.fixture
-def versioned_avro_data_set(filepath_avro, load_args, save_args, load_version, save_version):
+def versioned_avro_data_set(
+    filepath_avro, load_args, save_args, load_version, save_version
+):
     return AVRODataSet(
         filepath=filepath_avro,
         load_args=load_args,
@@ -113,7 +120,9 @@ class TestAvroDataSet:
         assert dummy_data == reloaded
 
     @pytest.mark.parametrize(
-        "save_args", [{"schema": schema,}], indirect=True,
+        "save_args",
+        [{"schema": schema}],
+        indirect=True,
     )
     def test_exists(self, avro_data_set, dummy_data):
         """Test `exists` method invocation for both existing and
@@ -147,7 +156,9 @@ class TestAvroDataSet:
         assert str(data_set._filepath) == path
         assert isinstance(data_set._filepath, PurePosixPath)
 
-    @pytest.mark.parametrize("protocol,path", [("https://", "example.com/"), ("s3://", "bucket/")])
+    @pytest.mark.parametrize(
+        "protocol,path", [("https://", "example.com/"), ("s3://", "bucket/")]
+    )
     def test_catalog_release(self, protocol, path, mocker):
         filepath = f"{protocol}{path}{FILENAME}"
         fs_mock = mocker.patch("fsspec.filesystem").return_value
@@ -158,7 +169,9 @@ class TestAvroDataSet:
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
     def test_write_to_dir(self, dummy_data, tmp_path):
-        data_set = AVRODataSet(filepath=tmp_path.as_posix(), save_args={"schema": schema})
+        data_set = AVRODataSet(
+            filepath=tmp_path.as_posix(), save_args={"schema": schema}
+        )
         pattern = "Saving AVRODataSet to a directory is not supported"
 
         with pytest.raises(DataSetError, match=pattern):
@@ -170,7 +183,9 @@ class TestAVRODataSetVersioned:
         """Test that version is in string representation of the class instance
         when applicable."""
         ds = AVRODataSet(filepath=FILENAME)
-        ds_versioned = AVRODataSet(filepath=FILENAME, version=Version(load_version, save_version))
+        ds_versioned = AVRODataSet(
+            filepath=FILENAME, version=Version(load_version, save_version)
+        )
         assert FILENAME in str(ds)
         assert "version" not in str(ds)
 
@@ -183,7 +198,9 @@ class TestAVRODataSetVersioned:
         assert "protocol" in str(ds)
 
     @pytest.mark.parametrize(
-        "save_args", [{"schema": schema,}], indirect=True,
+        "save_args",
+        [{"schema": schema}],
+        indirect=True,
     )
     def test_save_and_load(self, versioned_avro_data_set, dummy_data):
         """Test that saved and reloaded data matches the original one for
@@ -199,7 +216,9 @@ class TestAVRODataSetVersioned:
             versioned_avro_data_set.load()
 
     @pytest.mark.parametrize(
-        "save_args", [{"schema": schema,}], indirect=True,
+        "save_args",
+        [{"schema": schema}],
+        indirect=True,
     )
     def test_exists(self, versioned_avro_data_set, dummy_data):
         """Test `exists` method invocation for versioned data set."""
@@ -208,23 +227,32 @@ class TestAVRODataSetVersioned:
         assert versioned_avro_data_set.exists()
 
     @pytest.mark.parametrize(
-        "save_args", [{"schema": schema,}], indirect=True,
+        "save_args",
+        [{"schema": schema}],
+        indirect=True,
     )
     def test_prevent_overwrite(self, versioned_avro_data_set, dummy_data):
         """Check the error when attempting to override the data set if the
         corresponding AVRO file for a given save version already exists."""
         versioned_avro_data_set.save(dummy_data)
         pattern = (
-            r"Save path \`.+\` for AVRODataSet\(.+\) must " r"not exist if versioning is enabled\."
+            r"Save path \`.+\` for AVRODataSet\(.+\) must "
+            r"not exist if versioning is enabled\."
         )
         with pytest.raises(DataSetError, match=pattern):
             versioned_avro_data_set.save(dummy_data)
 
     @pytest.mark.parametrize(
-        "save_args", [{"schema": schema,}], indirect=True,
+        "save_args",
+        [{"schema": schema}],
+        indirect=True,
     )
-    @pytest.mark.parametrize("load_version", ["2020-11-22T23.59.59.999Z"], indirect=True)
-    @pytest.mark.parametrize("save_version", ["2020-11-23T00.00.00.000Z"], indirect=True)
+    @pytest.mark.parametrize(
+        "load_version", ["2020-11-22T23.59.59.999Z"], indirect=True
+    )
+    @pytest.mark.parametrize(
+        "save_version", ["2020-11-23T00.00.00.000Z"], indirect=True
+    )
     def test_save_version_warning(
         self, versioned_avro_data_set, load_version, save_version, dummy_data
     ):
@@ -241,5 +269,6 @@ class TestAVRODataSetVersioned:
         pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
 
         with pytest.raises(DataSetError, match=pattern):
-            AVRODataSet(filepath=f"https://example.com/{FILENAME}", version=Version(None, None))
-
+            AVRODataSet(
+                filepath=f"https://example.com/{FILENAME}", version=Version(None, None)
+            )

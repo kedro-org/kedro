@@ -135,7 +135,9 @@ class GBQTableGCSAVRODataSet(AbstractDataSet):
         self._location = location
 
         self._client = bigquery.Client(
-            project=project, credentials=credentials, location=location,
+            project=project,
+            credentials=credentials,
+            location=location,
         )
 
         self._table_id = f"{project}.{dataset}.{table_name}"
@@ -169,13 +171,18 @@ class GBQTableGCSAVRODataSet(AbstractDataSet):
         job_config = bigquery.job.LoadJobConfig(**self._save_args)
 
         self._client.extract_table(
-            self._table_ref, self._uri, location=self._location, job_config=job_config,
+            self._table_ref,
+            self._uri,
+            location=self._location,
+            job_config=job_config,
         ).result()
 
     def _load(self) -> None:
         job_config = bigquery.job.LoadJobConfig(**self._load_args)
 
-        self._client.load_table_from_uri(self._uri, self._table_id, job_config=job_config).result()
+        self._client.load_table_from_uri(
+            self._uri, self._table_id, job_config=job_config
+        ).result()
 
     def _exists(self) -> bool:
         try:

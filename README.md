@@ -120,19 +120,8 @@ There is a growing community around Kedro. Have a look at the [Kedro FAQs](https
 
 
 ## Who is using Kedro?
-- [AI Singapore](https://makerspace.aisingapore.org/2020/08/leveraging-kedro-in-100e/)
-- [Caterpillar](https://www.caterpillar.com/)
-- [ElementAI](https://www.elementai.com/)
-- [Jungle Scout](https://www.junglescout.com/)
-- [MercadoLibre Argentina](https://www.mercadolibre.com.ar)
-- [Mosaic Data Science](https://www.youtube.com/watch?v=fCWGevB366g)
-- [NaranjaX](https://www.youtube.com/watch?v=_0kMmRfltEQ)
-- [Open Data Science LatAm](https://www.odesla.org/)
-- [Retrieva](https://tech.retrieva.jp/entry/2020/07/28/181414)
-- [Roche](https://www.roche.com/)
-- [UrbanLogiq](https://urbanlogiq.com/)
-- [XP](https://youtu.be/wgnGOVNkXqU?t=2210)
-- [Dendra Systems](https://www.dendra.io/)
+
+[AI Singapore](https://makerspace.aisingapore.org/2020/08/leveraging-kedro-in-100e/), [Caterpillar](https://www.caterpillar.com/), [Dendra Systems](https://www.dendra.io/), [ElementAI](https://www.elementai.com/), [Jungle Scout](https://www.junglescout.com/), [MercadoLibre Argentina](https://www.mercadolibre.com.ar), [Mosaic Data Science](https://www.youtube.com/watch?v=fCWGevB366g), [NaranjaX](https://www.youtube.com/watch?v=_0kMmRfltEQ), [Open Data Science LatAm](https://www.odesla.org/), [Retrieva](https://tech.retrieva.jp/entry/2020/07/28/181414), [Roche](https://www.roche.com/), [UrbanLogiq](https://urbanlogiq.com/), [XP](https://youtu.be/wgnGOVNkXqU?t=2210)
 
 ## What licence do you use?
 

@@ -91,4 +91,4 @@ class TestGBQTableGCSAVRODataSet:
         assert not gbq_to_gcs_avro_dataset.load()
 
     def test_save_missing_bucket(self, gbq_to_gcs_avro_dataset):
-        assert not gbq_to_gcs_avro_dataset.save(1)
+        assert not gbq_to_gcs_avro_dataset.save()

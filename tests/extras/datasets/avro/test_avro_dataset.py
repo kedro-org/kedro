@@ -29,16 +29,14 @@
 from pathlib import PurePosixPath
 
 import pytest
-
+from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from s3fs.core import S3FileSystem
-from fsspec.implementations.http import HTTPFileSystem
 
 from kedro.extras.datasets.avro import AVRODataSet
 from kedro.io import DataSetError
 from kedro.io.core import PROTOCOL_DELIMITER, Version
-
 
 FILENAME = "test.avro"
 
@@ -52,8 +50,8 @@ def filepath_avro(tmp_path):
 @pytest.fixture
 def dummy_data():
     return [
-        {'col1': 1, 'col2': 3, 'col3': 5},
-        {'col1': 2, 'col2': 4, 'col3': 6},
+        {"col1": 1, "col2": 3, "col3": 5},
+        {"col1": 2, "col2": 4, "col3": 6},
     ]
 
 
@@ -114,7 +112,9 @@ class TestAvroDataSet:
 
         assert dummy_data == reloaded
 
-    @pytest.mark.parametrize("save_args", [{"schema": schema,}], indirect=True)
+    @pytest.mark.parametrize(
+        "save_args", [{"schema": schema,}], indirect=True,
+    )
     def test_exists(self, avro_data_set, dummy_data):
         """Test `exists` method invocation for both existing and
         nonexistent data set."""
@@ -182,7 +182,9 @@ class TestAVRODataSetVersioned:
         assert "protocol" in str(ds_versioned)
         assert "protocol" in str(ds)
 
-    @pytest.mark.parametrize("save_args", [{"schema": schema,}], indirect=True)
+    @pytest.mark.parametrize(
+        "save_args", [{"schema": schema,}], indirect=True,
+    )
     def test_save_and_load(self, versioned_avro_data_set, dummy_data):
         """Test that saved and reloaded data matches the original one for
         the versioned data set."""
@@ -196,32 +198,33 @@ class TestAVRODataSetVersioned:
         with pytest.raises(DataSetError, match=pattern):
             versioned_avro_data_set.load()
 
-    @pytest.mark.parametrize("save_args", [{"schema": schema,}], indirect=True)
+    @pytest.mark.parametrize(
+        "save_args", [{"schema": schema,}], indirect=True,
+    )
     def test_exists(self, versioned_avro_data_set, dummy_data):
         """Test `exists` method invocation for versioned data set."""
         assert not versioned_avro_data_set.exists()
         versioned_avro_data_set.save(dummy_data)
         assert versioned_avro_data_set.exists()
 
-    @pytest.mark.parametrize("save_args", [{"schema": schema,}], indirect=True)
+    @pytest.mark.parametrize(
+        "save_args", [{"schema": schema,}], indirect=True,
+    )
     def test_prevent_overwrite(self, versioned_avro_data_set, dummy_data):
         """Check the error when attempting to override the data set if the
         corresponding AVRO file for a given save version already exists."""
         versioned_avro_data_set.save(dummy_data)
         pattern = (
-            r"Save path \`.+\` for AVRODataSet\(.+\) must "
-            r"not exist if versioning is enabled\."
+            r"Save path \`.+\` for AVRODataSet\(.+\) must " r"not exist if versioning is enabled\."
         )
         with pytest.raises(DataSetError, match=pattern):
             versioned_avro_data_set.save(dummy_data)
 
-    @pytest.mark.parametrize("save_args", [{"schema": schema,}], indirect=True)
     @pytest.mark.parametrize(
-        "load_version", ["2020-11-22T23.59.59.999Z"], indirect=True
+        "save_args", [{"schema": schema,}], indirect=True,
     )
-    @pytest.mark.parametrize(
-        "save_version", ["2020-11-23T00.00.00.000Z"], indirect=True
-    )
+    @pytest.mark.parametrize("load_version", ["2020-11-22T23.59.59.999Z"], indirect=True)
+    @pytest.mark.parametrize("save_version", ["2020-11-23T00.00.00.000Z"], indirect=True)
     def test_save_version_warning(
         self, versioned_avro_data_set, load_version, save_version, dummy_data
     ):
@@ -238,6 +241,5 @@ class TestAVRODataSetVersioned:
         pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
 
         with pytest.raises(DataSetError, match=pattern):
-            AVRODataSet(
-                filepath=f"https://example.com/{FILENAME}", version=Version(None, None)
-            )
+            AVRODataSet(filepath=f"https://example.com/{FILENAME}", version=Version(None, None))
+

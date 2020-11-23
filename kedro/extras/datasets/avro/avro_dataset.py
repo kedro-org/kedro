@@ -30,10 +30,10 @@
 filesystem (e.g.: local, S3, GCS). It uses avro library to handle the AVRO file.
 See details about AVRO format: https://avro.apache.org/
 """
-from copy import deepcopy
 import json
+from copy import deepcopy
 from pathlib import Path, PurePosixPath
-from typing import Any, Dict, List, Union, Optional
+from typing import Any, Dict, List, Optional, Union
 
 # pylint: disable=import-error
 import fsspec  # type: ignore
@@ -92,7 +92,7 @@ class AVRODataSet(AbstractVersionedDataSet):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments,too-many-locals
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         filepath: str,
@@ -165,7 +165,9 @@ class AVRODataSet(AbstractVersionedDataSet):
         if save_args:
             self._save_args.update(save_args)
 
-        self._schema: Optional[Dict[str, Any]] = save_args.get("schema") if save_args else None
+        self._schema: Optional[Dict[str, Any]] = (
+            save_args.get("schema") if save_args else None
+        )
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
@@ -184,7 +186,8 @@ class AVRODataSet(AbstractVersionedDataSet):
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             with DataFileReader(
-                fs_file, DatumReader(writers_schema=self._schema, readers_schema=schema_reader),
+                fs_file,
+                DatumReader(writers_schema=self._schema, readers_schema=schema_reader),
             ) as reader:
                 if not self._schema:
                     self._schema = json.loads(reader.schema)
@@ -193,7 +196,9 @@ class AVRODataSet(AbstractVersionedDataSet):
 
     def _save(self, data: Union[Dict[str, Any], List[Dict[str, Any]]]) -> None:
         if not self._schema:
-            raise KeyError("Please provide AVRO schema as the save_args' 'schema' attribute.")
+            raise KeyError(
+                "Please provide AVRO schema as the save_args' 'schema' attribute."
+            )
 
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 

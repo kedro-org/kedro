@@ -34,15 +34,15 @@ About GBQ data import: https://cloud.google.com/bigquery/docs/loading-data-cloud
 """
 
 from copy import deepcopy
-from typing import Any, Dict, Union, Optional
+from typing import Any, Dict, Optional, Union
 
+# pylint: disable=import-error
 from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
 from google.oauth2.credentials import Credentials
 
 from kedro.io.core import (  # type: ignore
     AbstractDataSet,
-    DataSetError,
     DataSetNotFoundError,
     validate_on_forbidden_chars,
 )
@@ -82,14 +82,14 @@ class GBQTableGCSAVRODataSet(AbstractDataSet):
         "use_avro_logical_types": True,
     }  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments,too-many-locals
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         project: str,
         dataset: str,
         table_name: str,
         bucket: str,
-        location: str = 'US',
+        location: str = "US",
         path_object: Optional[str] = None,
         credentials: Union[Dict[str, Any], Credentials] = None,
         load_args: Dict[str, Any] = None,
@@ -115,7 +115,7 @@ class GBQTableGCSAVRODataSet(AbstractDataSet):
                 Here you can find all available arguments:
                 https://cloud.google.com/bigquery/docs/loading-data-cloud-storage-avro
                 For options, please find details here:
-            https://googleapis.dev/python/bigquery/latest/generated/google.cloud.bigquery.job.LoadJobConfig.html
+                https://googleapis.dev/python/bigquery/latest/generated/google.cloud.bigquery.job.LoadJobConfig.html
                 Defaults:
                     `use_avro_logical_types` is set to True
                     `write_desposition` is set to "WRITE_APPEND"
@@ -123,7 +123,7 @@ class GBQTableGCSAVRODataSet(AbstractDataSet):
                 Here you can find all available arguments:
                 https://cloud.google.com/bigquery/docs/exporting-data
                 For options, please find details here:
-            https://googleapis.dev/python/bigquery/latest/generated/google.cloud.bigquery.job.ExtractJobConfig.html
+                https://googleapis.dev/python/bigquery/latest/generated/google.cloud.bigquery.job.ExtractJobConfig.html
                 Defaults:
                     `use_avro_logical_types` is set to True
         """
@@ -133,14 +133,16 @@ class GBQTableGCSAVRODataSet(AbstractDataSet):
             credentials = Credentials(**credentials)
 
         self._client = bigquery.Client(
-            project=project, credentials=credentials, location=location,
+            project=project,
+            credentials=credentials,
+            location=location,
         )
 
         self._table_id = f"{project}.{dataset}.{table_name}"
         self._table_ref = self._client.dataset(dataset).table(table_name)
 
-        self._path_object = path_object or f"{dataset}/{table_name}.avro"
-        self._uri = f"""gs://{bucket}/{self._path_object}"""
+        path_object = path_object or f"{dataset}/{table_name}.avro"
+        self._uri = f"""gs://{bucket}/{path_object}"""
 
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
@@ -149,9 +151,6 @@ class GBQTableGCSAVRODataSet(AbstractDataSet):
         self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args:
             self._save_args.update(save_args)
-
-        self._load_job_config = bigquery.job.LoadJobConfig(**self._load_args)
-        self._extract_job_config = bigquery.job.ExtractJobConfig(**self._save_args)
 
         def _describe(self) -> Dict[str, Any]:
             return dict(
@@ -167,16 +166,20 @@ class GBQTableGCSAVRODataSet(AbstractDataSet):
                     f"Table {self._table_id} is not found in the region {self._location}."
                 )
 
+            job_config = bigquery.job.LoadJobConfig(**self._save_args)
+
             self._client.extract_table(
                 self._table_ref,
                 self._uri,
                 location=self._location,
-                job_config=self._extract_job_config,
+                job_config=job_config,
             ).result()
 
         def _load(self) -> None:
+            job_config = bigquery.job.LoadJobConfig(**self._load_args)
+
             self._client.load_table_from_uri(
-                self._uri, self._table_id, job_config=self._load_job_config
+                self._uri, self._table_id, job_config=job_config
             ).result()
 
         def _exists(self) -> bool:

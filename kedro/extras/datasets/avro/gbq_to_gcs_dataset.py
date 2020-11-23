@@ -71,13 +71,15 @@ class GBQTableGCSAVRODataSet(AbstractDataSet):
     """
 
     DEFAULT_LOAD_ARGS = {
-        "source_format": "AVRO",
+        "source_format": bigquery.job.SourceFormat.AVRO,
         "use_avro_logical_types": True,
-        "write_desposition": "WRITE_APPEND",
+        "create_disposition": bigquery.job.CreateDisposition.CREATE_IF_NEEDED,
+        "write_desposition": bigquery.job.WriteDisposition.WRITE_APPEND,
+        "schema_update_options": bigquery.job.SchemaUpdateOption.ALLOW_FIELD_ADDITION,
     }  # type: Dict[str, Any]
 
     DEFAULT_SAVE_ARGS = {
-        "destination_format": "AVRO",
+        "destination_format": bigquery.job.SourceFormat.AVRO,
         "use_avro_logical_types": True,
     }  # type: Dict[str, Any]
 
@@ -108,23 +110,36 @@ class GBQTableGCSAVRODataSet(AbstractDataSet):
             credentials: Credentials for accessing Google APIs.
                 Either ``google.auth.credentials.Credentials`` object or dictionary with
                 parameters required to instantiate ``google.oauth2.credentials.Credentials``.
+
                 Here you can find all the arguments:
                 https://google-auth.readthedocs.io/en/latest/reference/google.oauth2.credentials.html
             load_args: Options to import data to BigQuery table from Google Cloud Storage.
+
                 Here you can find all available arguments:
                 https://cloud.google.com/bigquery/docs/loading-data-cloud-storage-avro
+
                 For options, please find details here:
                 https://googleapis.dev/python/bigquery/latest/generated/google.cloud.bigquery.job.LoadJobConfig.html
+
                 Defaults:
+
                 `use_avro_logical_types` is set to True
 
+                `create_disposition` is set to "CREATE_IF_NEEDED"
+
                 `write_desposition` is set to "WRITE_APPEND"
+
+                `schema_update_options` is set to "ALLOW_FIELD_ADDITION"
             save_args: Options to export data from BigQuery table to Google Cloud Storage.
+
                 Here you can find all available arguments:
                 https://cloud.google.com/bigquery/docs/exporting-data
+
                 For options, please find details here:
                 https://googleapis.dev/python/bigquery/latest/generated/google.cloud.bigquery.job.ExtractJobConfig.html
+
                 Defaults:
+
                 `use_avro_logical_types` is set to True
         """
         validate_on_forbidden_chars(dataset=dataset, table_name=table_name)

@@ -13,6 +13,8 @@ Data Sets
     :template: autosummary/class.rst
 
     kedro.extras.datasets.api.APIDataSet
+    kedro.extras.datasets.avro.AVRODataSet
+    kedro.extras.datasets.avro.GBQTableGCSAVRODataSet
     kedro.extras.datasets.biosequence.BioSequenceDataSet
     kedro.extras.datasets.dask.ParquetDataSet
     kedro.extras.datasets.geopandas.GeoJSONDataSet

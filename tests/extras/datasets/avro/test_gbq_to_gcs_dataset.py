@@ -30,6 +30,7 @@ import pytest
 from google.cloud.exceptions import NotFound
 
 from kedro.extras.datasets.avro import GBQTableGCSAVRODataSet
+from kedro.io import DataSetError
 
 DATASET = "dataset"
 TABLE_NAME = "table_name"
@@ -44,8 +45,13 @@ def mock_bigquery_client(mocker):
 
 
 @pytest.fixture
+def credentials():
+    return {"token": "foobar"}
+
+
+@pytest.fixture
 def gbq_to_gcs_avro_dataset(
-    load_args, save_args, mock_bigquery_client
+    credentials, load_args, save_args, mock_bigquery_client
 ):  # pylint: disable=unused-argument
     return GBQTableGCSAVRODataSet(
         project=PROJECT,
@@ -53,7 +59,7 @@ def gbq_to_gcs_avro_dataset(
         table_name=TABLE_NAME,
         bucket=BUCKET,
         path_object=OBJECT,
-        credentials=None,
+        credentials=credentials,
         load_args=load_args,
         save_args=save_args,
     )
@@ -87,8 +93,27 @@ class TestGBQTableGCSAVRODataSet:
         for key, value in save_args.items():
             assert gbq_to_gcs_avro_dataset._save_args[key] == value
 
-    def test_load_missing_object(self, gbq_to_gcs_avro_dataset):
+    def test_load(self, gbq_to_gcs_avro_dataset):
         assert not gbq_to_gcs_avro_dataset.load()
 
-    def test_save_missing_bucket(self, gbq_to_gcs_avro_dataset):
+    def test_save(self, gbq_to_gcs_avro_dataset):
         assert not gbq_to_gcs_avro_dataset.save()
+
+    def test_save_exceptions(self, gbq_to_gcs_avro_dataset):
+        def error1():
+            raise DataSetError
+
+        gbq_to_gcs_avro_dataset._save = error1
+        with pytest.raises(DataSetError, match=""):
+            gbq_to_gcs_avro_dataset.save()
+
+        def error2():
+            raise Exception("test")
+
+        gbq_to_gcs_avro_dataset._save = error2
+
+        pattern = (
+            r"Failed while saving data to data set GBQTableGCSAVRODataSet\(.*\).\ntest"
+        )
+        with pytest.raises(DataSetError, match=pattern):
+            gbq_to_gcs_avro_dataset.save()

@@ -521,7 +521,7 @@ class DataCatalog:
                 self._logger.warning("Replacing DataSet '%s'", data_set_name)
             else:
                 raise DataSetAlreadyExistsError(
-                    "DataSet '{}' has already been registered".format(data_set_name)
+                    f"DataSet '{data_set_name}' has already been registered"
                 )
         self._data_sets[data_set_name] = data_set
         self._transformers[data_set_name] = list(self._default_transformers)
@@ -625,9 +625,7 @@ class DataCatalog:
             data_set_names = [data_set_names]
         for data_set_name in data_set_names:
             if data_set_name not in self._data_sets:
-                raise DataSetNotFoundError(
-                    "No data set called {}".format(data_set_name)
-                )
+                raise DataSetNotFoundError(f"No data set called {data_set_name}")
             self._transformers[data_set_name].append(transformer)
 
     def list(self, regex_search: Optional[str] = None) -> List[str]:
@@ -715,6 +713,4 @@ class DataCatalog:
         if hasattr(data_set, "confirm"):
             data_set.confirm()  # type: ignore
         else:
-            raise DataSetError(
-                "DataSet '{}' does not have 'confirm' method".format(name)
-            )
+            raise DataSetError(f"DataSet '{name}' does not have 'confirm' method")

@@ -55,45 +55,42 @@ def dummy_data():
     ]
 
 
-schema = {
-    "namespace": "example.avro",
-    "type": "array",
-    "name": "DataArray",
-    "items": {
-        "type": "record",
-        "name": "DataElement",
-        "fields": [
-            {"name": "col1", "type": "int"},
-            {"name": "col2", "type": "int"},
-            {"name": "col3", "type": "int"},
-        ],
-    },
-}
-
-
 @pytest.fixture
 def dummy_schema():
-    return schema
+    return {
+        "namespace": "example.avro",
+        "type": "array",
+        "name": "DataArray",
+        "items": {
+            "type": "record",
+            "name": "DataElement",
+            "fields": [
+                {"name": "col1", "type": "int"},
+                {"name": "col2", "type": "int"},
+                {"name": "col3", "type": "int"},
+            ],
+        },
+    }
 
 
 @pytest.fixture
-def avro_data_set(filepath_avro, load_args, save_args, fs_args):
-    return AVRODataSet(
-        filepath=filepath_avro,
-        load_args=load_args,
-        save_args=save_args,
-        fs_args=fs_args,
-    )
+def dummy_codec():
+    return "null"
+
+
+@pytest.fixture
+def avro_data_set(filepath_avro, dummy_schema):
+    return AVRODataSet(filepath=filepath_avro, schema=dummy_schema,)
 
 
 @pytest.fixture
 def versioned_avro_data_set(
-    filepath_avro, load_args, save_args, load_version, save_version
+    filepath_avro, dummy_schema, dummy_codec, load_version, save_version
 ):
     return AVRODataSet(
         filepath=filepath_avro,
-        load_args=load_args,
-        save_args=save_args,
+        schema=dummy_schema,
+        codec=dummy_codec,
         version=Version(load_version, save_version),
     )
 
@@ -111,21 +108,40 @@ class TestAvroDataSet:
     def test_save_and_load(self, tmp_path, dummy_data, dummy_schema):
         """Test saving and reloading the data set."""
         filepath = (tmp_path / FILENAME).as_posix()
-        data_set = AVRODataSet(filepath=filepath, save_args={"schema": dummy_schema})
+        data_set = AVRODataSet(filepath=filepath, schema=dummy_schema)
         data_set.save(dummy_data)
         reloaded = data_set.load()
 
         assert dummy_data == reloaded
 
-    @pytest.mark.parametrize(
-        "save_args", [{"schema": schema}], indirect=True,
-    )
+        data_set_no_schema = AVRODataSet(filepath=filepath)
+        pattern = (
+            r"""Failed while saving data to data set AVRODataSet\(.*\)."""
+            r"""\n\"Please provide AVRO schema as the 'schema' argument.\""""
+        )
+        with pytest.raises(DataSetError, match=pattern):
+            data_set_no_schema.save(dummy_data)
+
+        reloaded_autoschema = data_set_no_schema.load()
+        assert dummy_data == reloaded_autoschema
+
+        data_set = AVRODataSet(filepath=tmp_path.as_posix(), schema=dummy_schema)
+        pattern = r"Saving AVRODataSet to a directory is not supported."
+        with pytest.raises(DataSetError, match=pattern):
+            data_set.save(dummy_data)
+
     def test_exists(self, avro_data_set, dummy_data):
         """Test `exists` method invocation for both existing and
         nonexistent data set."""
         assert not avro_data_set.exists()
         avro_data_set.save(dummy_data)
         assert avro_data_set.exists()
+
+        def patch_error():
+            raise DataSetError("test")
+
+        avro_data_set._get_load_path = patch_error
+        assert not avro_data_set.exists()
 
     def test_load_missing_file(self, avro_data_set):
         """Check the error when trying to load missing file."""
@@ -164,15 +180,6 @@ class TestAvroDataSet:
             filepath = path + FILENAME
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
 
-    def test_write_to_dir(self, dummy_data, tmp_path):
-        data_set = AVRODataSet(
-            filepath=tmp_path.as_posix(), save_args={"schema": schema}
-        )
-        pattern = "Saving AVRODataSet to a directory is not supported"
-
-        with pytest.raises(DataSetError, match=pattern):
-            data_set.save(dummy_data)
-
 
 class TestAVRODataSetVersioned:
     def test_version_str_repr(self, load_version, save_version):
@@ -193,9 +200,6 @@ class TestAVRODataSetVersioned:
         assert "protocol" in str(ds_versioned)
         assert "protocol" in str(ds)
 
-    @pytest.mark.parametrize(
-        "save_args", [{"schema": schema}], indirect=True,
-    )
     def test_save_and_load(self, versioned_avro_data_set, dummy_data):
         """Test that saved and reloaded data matches the original one for
         the versioned data set."""
@@ -209,18 +213,12 @@ class TestAVRODataSetVersioned:
         with pytest.raises(DataSetError, match=pattern):
             versioned_avro_data_set.load()
 
-    @pytest.mark.parametrize(
-        "save_args", [{"schema": schema}], indirect=True,
-    )
     def test_exists(self, versioned_avro_data_set, dummy_data):
         """Test `exists` method invocation for versioned data set."""
         assert not versioned_avro_data_set.exists()
         versioned_avro_data_set.save(dummy_data)
         assert versioned_avro_data_set.exists()
 
-    @pytest.mark.parametrize(
-        "save_args", [{"schema": schema}], indirect=True,
-    )
     def test_prevent_overwrite(self, versioned_avro_data_set, dummy_data):
         """Check the error when attempting to override the data set if the
         corresponding AVRO file for a given save version already exists."""
@@ -232,9 +230,6 @@ class TestAVRODataSetVersioned:
         with pytest.raises(DataSetError, match=pattern):
             versioned_avro_data_set.save(dummy_data)
 
-    @pytest.mark.parametrize(
-        "save_args", [{"schema": schema}], indirect=True,
-    )
     @pytest.mark.parametrize(
         "load_version", ["2020-11-22T23.59.59.999Z"], indirect=True
     )

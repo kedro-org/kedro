@@ -78,25 +78,20 @@ class AVRODataSet(AbstractVersionedDataSet):
         >>>     },
         >>> }
         >>>
-        >>> save_ops = {"schema": schema}
-        >>>
-        >>> # data_set = AVRODataSet(filepath="gcs://bucket/test.avro", save_args=save_ops)
-        >>> data_set = AVRODataSet(filepath="test.csv", save_args=save_ops)
+        >>> # data_set = AVRODataSet(filepath="gcs://bucket/test.avro", schema=schema)
+        >>> data_set = AVRODataSet(filepath="test.csv", save_args=schema)
         >>> data_set.save(data)
         >>> reloaded = data_set.load()
         >>> assert data == reloaded
 
     """
 
-    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
-    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
-
     # pylint: disable=too-many-arguments
     def __init__(
         self,
         filepath: str,
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
+        schema: Optional[Dict[str, Any]] = None,
+        codec: Optional[str] = "null",
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
@@ -109,17 +104,12 @@ class AVRODataSet(AbstractVersionedDataSet):
                 If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.
-            load_args: Options for loading AVRO files.
-                Here you can find the details:
-                https://avro.apache.org/docs/current/
-                All defaults are preserved.
-            save_args: Options for saving AVRO files.
-                Attention! The `schema` attribute MUST be set in order to save a file.
+            schema: AVRO schema.
                 See details about AVRO schema here:
                 https://avro.apache.org/docs/current/spec.html#schemas
-                Here you can find the details:
-                https://avro.apache.org/docs/current/
-                All defaults are preserved.
+            codec: AVRO writing codec.
+                See details about AVRO codes here:
+                https://avro.apache.org/docs/current/spec.html#Required+Codecs
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -132,8 +122,8 @@ class AVRODataSet(AbstractVersionedDataSet):
                 `open_args_load` and `open_args_save`.
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
-                All defaults are preserved, except `mode`, which is set to `r` when loading
-                and to `w` when saving.
+                All defaults are preserved, except `mode`, which is set to `rb` when loading
+                and to `wb` when saving.
         """
         _credentials = deepcopy(credentials) or {}
         _fs_args = deepcopy(fs_args) or {}
@@ -156,38 +146,23 @@ class AVRODataSet(AbstractVersionedDataSet):
             glob_function=self._fs.glob,
         )
 
-        # Handle default load and save arguments
-        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
-        if load_args:
-            self._load_args.update(load_args)
-        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
-        if save_args:
-            self._save_args.update(save_args)
-
-        self._schema: Optional[Dict[str, Any]] = (
-            save_args.get("schema") if save_args else None
-        )
+        self._schema: Optional[Dict[str, Any]] = schema
+        self._codec = codec
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
             filepath=self._filepath,
             protocol=self._protocol,
             schema=self._schema,
-            load_args=self._load_args,
-            save_args=self._save_args,
+            codec=self._codec,
             version=self._version,
         )
 
     def _load(self) -> List[Dict[str, Any]]:  # type: ignore
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
-        schema_reader: Optional[Dict[str, Any]] = self._load_args.get("schema")
-
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
-            with DataFileReader(
-                fs_file,
-                DatumReader(writers_schema=self._schema, readers_schema=schema_reader),
-            ) as reader:
+            with DataFileReader(fs_file, DatumReader()) as reader:
                 if not self._schema:
                     self._schema = json.loads(reader.schema)
                 for item in reader:
@@ -195,9 +170,7 @@ class AVRODataSet(AbstractVersionedDataSet):
 
     def _save(self, data: Union[Dict[str, Any], List[Dict[str, Any]]]) -> None:
         if not self._schema:
-            raise KeyError(
-                "Please provide AVRO schema as the save_args' 'schema' attribute."
-            )
+            raise KeyError("Please provide AVRO schema as the 'schema' argument.")
 
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
@@ -207,10 +180,9 @@ class AVRODataSet(AbstractVersionedDataSet):
             )
 
         schema = make_avsc_object(self._schema)
-        codec = self._save_args.get("codec", "null")
 
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
-            with DataFileWriter(fs_file, DatumWriter(), schema, codec) as writer:
+            with DataFileWriter(fs_file, DatumWriter(), schema, self._codec) as writer:
                 writer.append(data)
 
         self._invalidate_cache()

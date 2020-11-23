@@ -28,9 +28,12 @@
 
 """``AbstractDataSet`` implementations to operate with AVRO data files."""
 
-__all__ = ["AVRODataSet"]
+__all__ = ["AVRODataSet", "GBQTableGCSAVRODataSet"]
 
 from contextlib import suppress
 
 with suppress(ImportError):
     from .avro_dataset import AVRODataSet  # NOQA
+
+with suppress(ImportError):
+    from .gbq_to_gcs_dataset import GBQTableGCSAVRODataSet  # NOQA

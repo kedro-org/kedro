@@ -29,8 +29,6 @@
 from pathlib import PurePosixPath
 
 import pytest
-
-# pylint: disable=import-error
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
@@ -120,9 +118,7 @@ class TestAvroDataSet:
         assert dummy_data == reloaded
 
     @pytest.mark.parametrize(
-        "save_args",
-        [{"schema": schema}],
-        indirect=True,
+        "save_args", [{"schema": schema}], indirect=True,
     )
     def test_exists(self, avro_data_set, dummy_data):
         """Test `exists` method invocation for both existing and
@@ -198,9 +194,7 @@ class TestAVRODataSetVersioned:
         assert "protocol" in str(ds)
 
     @pytest.mark.parametrize(
-        "save_args",
-        [{"schema": schema}],
-        indirect=True,
+        "save_args", [{"schema": schema}], indirect=True,
     )
     def test_save_and_load(self, versioned_avro_data_set, dummy_data):
         """Test that saved and reloaded data matches the original one for
@@ -216,9 +210,7 @@ class TestAVRODataSetVersioned:
             versioned_avro_data_set.load()
 
     @pytest.mark.parametrize(
-        "save_args",
-        [{"schema": schema}],
-        indirect=True,
+        "save_args", [{"schema": schema}], indirect=True,
     )
     def test_exists(self, versioned_avro_data_set, dummy_data):
         """Test `exists` method invocation for versioned data set."""
@@ -227,9 +219,7 @@ class TestAVRODataSetVersioned:
         assert versioned_avro_data_set.exists()
 
     @pytest.mark.parametrize(
-        "save_args",
-        [{"schema": schema}],
-        indirect=True,
+        "save_args", [{"schema": schema}], indirect=True,
     )
     def test_prevent_overwrite(self, versioned_avro_data_set, dummy_data):
         """Check the error when attempting to override the data set if the
@@ -243,9 +233,7 @@ class TestAVRODataSetVersioned:
             versioned_avro_data_set.save(dummy_data)
 
     @pytest.mark.parametrize(
-        "save_args",
-        [{"schema": schema}],
-        indirect=True,
+        "save_args", [{"schema": schema}], indirect=True,
     )
     @pytest.mark.parametrize(
         "load_version", ["2020-11-22T23.59.59.999Z"], indirect=True

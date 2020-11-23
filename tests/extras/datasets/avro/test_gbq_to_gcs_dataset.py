@@ -28,9 +28,8 @@
 
 import pytest
 from google.cloud.exceptions import NotFound
-from kedro.extras.datasets.avro import GBQTableGCSAVRODataSet
-from kedro.io.core import DataSetError
 
+from kedro.extras.datasets.avro import GBQTableGCSAVRODataSet
 
 DATASET = "dataset"
 TABLE_NAME = "table_name"

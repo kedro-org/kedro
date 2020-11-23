@@ -35,7 +35,6 @@ from copy import deepcopy
 from pathlib import Path, PurePosixPath
 from typing import Any, Dict, List, Optional, Union
 
-# pylint: disable=import-error
 import fsspec  # type: ignore
 from avro.datafile import DataFileReader, DataFileWriter  # type: ignore
 from avro.io import DatumReader, DatumWriter  # type: ignore

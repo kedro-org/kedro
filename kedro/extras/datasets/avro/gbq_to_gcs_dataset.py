@@ -36,14 +36,13 @@ About GBQ data import: https://cloud.google.com/bigquery/docs/loading-data-cloud
 from copy import deepcopy
 from typing import Any, Dict, Optional, Union
 
-# pylint: disable=import-error
-from google.cloud import bigquery
-from google.cloud.exceptions import NotFound
-from google.oauth2.credentials import Credentials
+from google.cloud import bigquery  # type: ignore
+from google.cloud.exceptions import NotFound  # type: ignore
+from google.oauth2.credentials import Credentials  # type: ignore
 
 from kedro.io.core import (  # type: ignore
     AbstractDataSet,
-    DataSetNotFoundError,
+    DataSetError,
     validate_on_forbidden_chars,
 )
 
@@ -117,15 +116,16 @@ class GBQTableGCSAVRODataSet(AbstractDataSet):
                 For options, please find details here:
                 https://googleapis.dev/python/bigquery/latest/generated/google.cloud.bigquery.job.LoadJobConfig.html
                 Defaults:
-                    `use_avro_logical_types` is set to True
-                    `write_desposition` is set to "WRITE_APPEND"
+                `use_avro_logical_types` is set to True
+
+                `write_desposition` is set to "WRITE_APPEND"
             save_args: Options to export data from BigQuery table to Google Cloud Storage.
                 Here you can find all available arguments:
                 https://cloud.google.com/bigquery/docs/exporting-data
                 For options, please find details here:
                 https://googleapis.dev/python/bigquery/latest/generated/google.cloud.bigquery.job.ExtractJobConfig.html
                 Defaults:
-                    `use_avro_logical_types` is set to True
+                `use_avro_logical_types` is set to True
         """
         validate_on_forbidden_chars(dataset=dataset, table_name=table_name)
 
@@ -135,9 +135,7 @@ class GBQTableGCSAVRODataSet(AbstractDataSet):
         self._location = location
 
         self._client = bigquery.Client(
-            project=project,
-            credentials=credentials,
-            location=location,
+            project=project, credentials=credentials, location=location,
         )
 
         self._table_id = f"{project}.{dataset}.{table_name}"
@@ -162,20 +160,29 @@ class GBQTableGCSAVRODataSet(AbstractDataSet):
             save_args=self._save_args,
         )
 
-    def _save(self, data=None) -> None:
-        if not self._exists():
-            raise DataSetNotFoundError(
-                f"Table {self._table_id} is not found in the region {self._location}."
-            )
-
-        job_config = bigquery.job.LoadJobConfig(**self._save_args)
+    def _save(self) -> None:  # type: ignore # pylint: disable=arguments-differ
+        job_config = bigquery.job.ExtractJobConfig(**self._save_args)
 
         self._client.extract_table(
-            self._table_ref,
-            self._uri,
-            location=self._location,
-            job_config=job_config,
+            self._table_ref, self._uri, location=self._location, job_config=job_config,
         ).result()
+
+    def save(self) -> None:  # type: ignore # pylint: disable=arguments-differ
+        """Saves data by delegation to the provided save method.
+
+        Raises:
+            DataSetError: when underlying save method raises error.
+        """
+        try:
+            self._logger.debug("Saving %s", str(self))
+            self._save()
+        except DataSetError:
+            raise
+        except Exception as exc:
+            message = "Failed while saving data to data set {}.\n{}".format(
+                str(self), str(exc)
+            )
+            raise DataSetError(message) from exc
 
     def _load(self) -> None:
         job_config = bigquery.job.LoadJobConfig(**self._load_args)

@@ -104,7 +104,7 @@ def spark_test_databases(spark_hive_session):
 
     # Setup the databases and test table before testing
     for database in databases:
-        spark_hive_session.sql("create database {database}".format(database=database))
+        spark_hive_session.sql(f"create database {database}")
     spark_hive_session.sql("use default_1")
     spark_hive_session.sql("create table table_1 as select * from tmp")
 
@@ -112,9 +112,7 @@ def spark_test_databases(spark_hive_session):
 
     # Drop the databases after testing
     for database in databases:
-        spark_hive_session.sql(
-            "drop database {database} cascade".format(database=database)
-        )
+        spark_hive_session.sql(f"drop database {database} cascade")
 
 
 def assert_df_equal(expected, result):

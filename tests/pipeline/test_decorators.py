@@ -77,7 +77,7 @@ def test_log_time_no_module(caplog):
     assert res == 1
     assert logger_name == "kedro.pipeline.decorators"
     assert severity == logging.INFO
-    expected = "Running %r took" % no_module.__qualname__
+    expected = f"Running {no_module.__qualname__!r} took"
     assert expected in message
 
 

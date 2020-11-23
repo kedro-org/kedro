@@ -132,10 +132,10 @@ class GBQTableGCSAVRODataSet(AbstractDataSet):
         if isinstance(credentials, dict):
             credentials = Credentials(**credentials)
 
+        self._location = location
+
         self._client = bigquery.Client(
-            project=project,
-            credentials=credentials,
-            location=location,
+            project=project, credentials=credentials, location=location,
         )
 
         self._table_id = f"{project}.{dataset}.{table_name}"
@@ -152,39 +152,34 @@ class GBQTableGCSAVRODataSet(AbstractDataSet):
         if save_args:
             self._save_args.update(save_args)
 
-        def _describe(self) -> Dict[str, Any]:
-            return dict(
-                table_id=self._table_id,
-                bucket_uri=self._uri,
-                load_args=self._load_args,
-                save_args=self._save_args,
+    def _describe(self) -> Dict[str, Any]:
+        return dict(
+            table_id=self._table_id,
+            bucket_uri=self._uri,
+            load_args=self._load_args,
+            save_args=self._save_args,
+        )
+
+    def _save(self, data=None) -> None:
+        if not self._exists():
+            raise DataSetNotFoundError(
+                f"Table {self._table_id} is not found in the region {self._location}."
             )
 
-        def _save(self) -> None:
-            if not self._exists():
-                raise DataSetNotFoundError(
-                    f"Table {self._table_id} is not found in the region {self._location}."
-                )
+        job_config = bigquery.job.LoadJobConfig(**self._save_args)
 
-            job_config = bigquery.job.LoadJobConfig(**self._save_args)
+        self._client.extract_table(
+            self._table_ref, self._uri, location=self._location, job_config=job_config,
+        ).result()
 
-            self._client.extract_table(
-                self._table_ref,
-                self._uri,
-                location=self._location,
-                job_config=job_config,
-            ).result()
+    def _load(self) -> None:
+        job_config = bigquery.job.LoadJobConfig(**self._load_args)
 
-        def _load(self) -> None:
-            job_config = bigquery.job.LoadJobConfig(**self._load_args)
+        self._client.load_table_from_uri(self._uri, self._table_id, job_config=job_config).result()
 
-            self._client.load_table_from_uri(
-                self._uri, self._table_id, job_config=job_config
-            ).result()
-
-        def _exists(self) -> bool:
-            try:
-                self._client.get_table(self._table_ref)
-                return True
-            except NotFound:
-                return False
+    def _exists(self) -> bool:
+        try:
+            self._client.get_table(self._table_ref)
+            return True
+        except NotFound:
+            return False

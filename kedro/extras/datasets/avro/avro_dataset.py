@@ -193,7 +193,7 @@ class AVRODataSet(AbstractVersionedDataSet):
 
     def _save(self, data: Union[Dict[str, Any], List[Dict[str, Any]]]) -> None:
         if not self._schema:
-            raise KeyError("Please provide AVRO schema as the save_args' 'schema' attribute")
+            raise KeyError("Please provide AVRO schema as the save_args' 'schema' attribute.")
 
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 

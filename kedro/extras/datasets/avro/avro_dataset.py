@@ -31,8 +31,9 @@ filesystem (e.g.: local, S3, GCS). It uses avro library to handle the AVRO file.
 See details about AVRO format: https://avro.apache.org/
 """
 from copy import deepcopy
+import json
 from pathlib import Path, PurePosixPath
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, Optional
 
 # pylint: disable=import-error
 import fsspec  # type: ignore
@@ -114,7 +115,7 @@ class AVRODataSet(AbstractVersionedDataSet):
                 https://avro.apache.org/docs/current/
                 All defaults are preserved.
             save_args: Options for saving AVRO files.
-                Attention! The `schema` attribute MUST be set to save a file.
+                Attention! The `schema` attribute MUST be set in order to save a file.
                 See details about AVRO schema here:
                 https://avro.apache.org/docs/current/spec.html#schemas
                 Here you can find the details:
@@ -164,7 +165,7 @@ class AVRODataSet(AbstractVersionedDataSet):
         if save_args:
             self._save_args.update(save_args)
 
-        self._schema = save_args.get("schema", {}) if save_args else {}
+        self._schema: Optional[Dict[str, Any]] = save_args.get("schema") if save_args else None
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
@@ -179,14 +180,19 @@ class AVRODataSet(AbstractVersionedDataSet):
     def _load(self) -> List[Dict[str, Any]]:  # type: ignore
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
+        schema_reader: Optional[Dict[str, Any]] = self._load_args.get("schema")
+
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
-            with DataFileReader(fs_file, DatumReader()) as reader:
-                self._schema = reader.schema
+            with DataFileReader(
+                fs_file, DatumReader(writers_schema=self._schema, readers_schema=schema_reader),
+            ) as reader:
+                if not self._schema:
+                    self._schema = json.loads(reader.schema)
                 for item in reader:
                     return item
 
     def _save(self, data: Union[Dict[str, Any], List[Dict[str, Any]]]) -> None:
-        if not self._save_args.get("schema", {}) or not self._schema:
+        if not self._schema:
             raise KeyError("Please provide AVRO schema as the save_args' 'schema' attribute")
 
         save_path = get_filepath_str(self._get_save_path(), self._protocol)

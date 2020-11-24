@@ -21,6 +21,7 @@ Data Sets
     kedro.extras.datasets.matplotlib.MatplotlibWriter
     kedro.extras.datasets.holoviews.HoloviewsWriter
     kedro.extras.datasets.networkx.NetworkXDataSet
+    kedro.extras.datasets.pandas.AVRODataSet
     kedro.extras.datasets.pandas.CSVDataSet
     kedro.extras.datasets.pandas.ExcelDataSet
     kedro.extras.datasets.pandas.AppendableExcelDataSet

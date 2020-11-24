@@ -475,4 +475,6 @@ footer span.commit .rst-content tt,
     display: block;
     content: ' ';
     width: 1px;
+    height: 80px;
+    margin-top: -80px;
 }

@@ -29,6 +29,7 @@
 """``AbstractDataSet`` implementations that produce pandas DataFrames."""
 
 __all__ = [
+    "AVRODataSet",
     "CSVDataSet",
     "ExcelDataSet",
     "FeatherDataSet",
@@ -44,6 +45,8 @@ __all__ = [
 
 from contextlib import suppress
 
+with suppress(ImportError):
+    from .avro_dataset import AVRODataSet  # NOQA
 with suppress(ImportError):
     from .csv_dataset import CSVDataSet  # NOQA
 with suppress(ImportError):

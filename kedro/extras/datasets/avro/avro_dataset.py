@@ -33,7 +33,7 @@ See details about AVRO format: https://avro.apache.org/
 import json
 from copy import deepcopy
 from pathlib import Path, PurePosixPath
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 import fsspec  # type: ignore
 from avro.datafile import DataFileReader, DataFileWriter  # type: ignore
@@ -165,10 +165,14 @@ class AVRODataSet(AbstractVersionedDataSet):
             with DataFileReader(fs_file, DatumReader()) as reader:
                 if not self._schema:
                     self._schema = json.loads(reader.schema)
+
+                if self._schema.get("type") == "record":  # type: ignore
+                    return list(item for item in reader)
+
                 for item in reader:
                     return item
 
-    def _save(self, data: Union[Dict[str, Any], List[Dict[str, Any]]]) -> None:
+    def _save(self, data: List[Dict[str, Any]]) -> None:
         if not self._schema:
             raise KeyError("Please provide AVRO schema as the 'schema' argument.")
 
@@ -183,7 +187,11 @@ class AVRODataSet(AbstractVersionedDataSet):
 
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
             with DataFileWriter(fs_file, DatumWriter(), schema, self._codec) as writer:
-                writer.append(data)
+                if self._schema.get("type") != "record":  # type: ignore
+                    writer.append(data)
+                else:
+                    for item in data:
+                        writer.append(item)
 
         self._invalidate_cache()
 

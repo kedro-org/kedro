@@ -74,6 +74,20 @@ def dummy_schema():
 
 
 @pytest.fixture
+def dummy_schema_record():
+    return {
+        "namespace": "example.avro",
+        "type": "record",
+        "name": "DataElement",
+        "fields": [
+            {"name": "col1", "type": "int"},
+            {"name": "col2", "type": "int"},
+            {"name": "col3", "type": "int"},
+        ],
+    }
+
+
+@pytest.fixture
 def dummy_codec():
     return "null"
 
@@ -111,7 +125,6 @@ class TestAvroDataSet:
         data_set = AVRODataSet(filepath=filepath, schema=dummy_schema)
         data_set.save(dummy_data)
         reloaded = data_set.load()
-
         assert dummy_data == reloaded
 
         data_set_no_schema = AVRODataSet(filepath=filepath)
@@ -129,6 +142,14 @@ class TestAvroDataSet:
         pattern = r"Saving AVRODataSet to a directory is not supported."
         with pytest.raises(DataSetError, match=pattern):
             data_set.save(dummy_data)
+
+    def test_save_and_load_per_record(self, tmp_path, dummy_data, dummy_schema_record):
+        """Test saving and reloading the data set in case the schema is of type 'record' ."""
+        filepath = (tmp_path / FILENAME).as_posix()
+        data_set = AVRODataSet(filepath=filepath, schema=dummy_schema_record)
+        data_set.save(dummy_data)
+        reloaded = data_set.load()
+        assert dummy_data == reloaded
 
     def test_exists(self, avro_data_set, dummy_data):
         """Test `exists` method invocation for both existing and

@@ -44,12 +44,13 @@ from kedro.framework.cli.utils import (
     KedroCliError,
     _check_module_importable,
     call,
+    command_with_verbosity,
     env_option,
     forward_command,
     ipython_message,
     python_call,
 )
-from kedro.framework.context import get_static_project_data
+from kedro.framework.project.metadata import _get_project_metadata
 
 NO_DEPENDENCY_MESSAGE = """{module} is not installed. Please make sure {module} is in
 {src}/requirements.txt and run `kedro install`."""
@@ -77,7 +78,7 @@ def _build_reqs(source_path: Path, args: Sequence[str] = ()):
 
 
 def _get_source_path():
-    return get_static_project_data(Path.cwd())["source_dir"]
+    return _get_project_metadata(Path.cwd()).source_dir
 
 
 @click.group()
@@ -86,7 +87,7 @@ def project_group():
 
 
 @forward_command(project_group, forward_help=True)
-def test(args):
+def test(args, **kwargs):  # pylint: disable=unused-argument
     """Run the test suite."""
     try:
         _check_module_importable("pytest")
@@ -99,16 +100,14 @@ def test(args):
         python_call("pytest", args)
 
 
-@project_group.command()
+@command_with_verbosity(project_group)
 @click.option("-c", "--check-only", is_flag=True, help=LINT_CHECK_ONLY_HELP)
 @click.argument("files", type=click.Path(exists=True), nargs=-1)
-def lint(files, check_only):
+def lint(files, check_only, **kwargs):  # pylint: disable=unused-argument
     """Run flake8, isort and black."""
-    static_data = get_static_project_data(Path.cwd())
-    source_path = static_data["source_dir"]
-    package_name = (
-        static_data.get("package_name") or _load_project_context().package_name
-    )
+    project_metadata = _get_project_metadata(Path.cwd())
+    source_path = project_metadata.source_dir
+    package_name = project_metadata.package_name
     files = files or (str(source_path / "tests"), str(source_path / package_name))
 
     if "PYTHONPATH" not in os.environ:
@@ -125,12 +124,10 @@ def lint(files, check_only):
             ) from exc
 
     python_call("black", ("--check",) + files if check_only else files)
-    python_call("flake8", ("--max-line-length=88",) + files)
+    python_call("flake8", files)
 
     check_flag = ("-c",) if check_only else ()
-    python_call(
-        "isort", (*check_flag, "-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + files
-    )
+    python_call("isort", (*check_flag, "-rc") + files)
 
 
 @project_group.command()
@@ -172,7 +169,7 @@ def install(compile_flag):
 
 @forward_command(project_group, forward_help=True)
 @env_option
-def ipython(env, args):
+def ipython(env, args, **kwargs):  # pylint: disable=unused-argument
     """Open IPython with project specific variables loaded."""
     context = _load_project_context(env=env)
     _check_module_importable("IPython")
@@ -211,11 +208,9 @@ def package():
 )
 def build_docs(open_docs):
     """Build the project documentation."""
-    static_data = get_static_project_data(Path.cwd())
-    source_path = static_data["source_dir"]
-    package_name = (
-        static_data.get("package_name") or _load_project_context().package_name
-    )
+    project_metadata = _get_project_metadata(Path.cwd())
+    source_path = project_metadata.source_dir
+    package_name = project_metadata.package_name
 
     python_call("pip", ["install", str(source_path / "[docs]")])
     python_call("pip", ["install", "-r", str(source_path / "requirements.txt")])
@@ -238,7 +233,7 @@ def build_docs(open_docs):
 
 
 @forward_command(project_group, name="build-reqs")
-def build_reqs(args):
+def build_reqs(args, **kwargs):  # pylint: disable=unused-argument
     """Build the project dependency requirements."""
     source_path = _get_source_path()
     _build_reqs(source_path, args)
@@ -250,8 +245,8 @@ def build_reqs(args):
     )
 
 
-@project_group.command("activate-nbstripout")
-def activate_nbstripout():
+@command_with_verbosity(project_group, "activate-nbstripout")
+def activate_nbstripout(**kwargs):  # pylint: disable=unused-argument
     """Install the nbstripout git hook to automatically clean notebooks."""
     source_path = _get_source_path()
     secho(

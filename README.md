@@ -75,7 +75,7 @@ The [Kedro documentation](https://kedro.readthedocs.io/en/stable/) includes thre
 Additional documentation includes:
 
 - An overview of [Kedro architecture](https://kedro.readthedocs.io/en/stable/11_faq/02_architecture_overview.html)
-- How to [use the CLI](https://kedro.readthedocs.io/en/stable/09_development/03_commands_reference.html) offered by `kedro_cli.py` (`kedro new`, `kedro run`, ...)
+- How to [use the CLI](https://kedro.readthedocs.io/en/stable/09_development/03_commands_reference.html) offered by `cli.py` (`kedro new`, `kedro run`, ...)
 
 > *Note:* The CLI is a convenient tool for being able to run `kedro` commands but you can also invoke the Kedro CLI as a Python module with `python -m kedro`
 
@@ -120,19 +120,8 @@ There is a growing community around Kedro. Have a look at the [Kedro FAQs](https
 
 
 ## Who is using Kedro?
-- [AI Singapore](https://makerspace.aisingapore.org/2020/08/leveraging-kedro-in-100e/)
-- [Caterpillar](https://www.caterpillar.com/)
-- [ElementAI](https://www.elementai.com/)
-- [Jungle Scout](https://www.junglescout.com/)
-- [MercadoLibre Argentina](https://www.mercadolibre.com.ar)
-- [Mosaic Data Science](https://www.youtube.com/watch?v=fCWGevB366g)
-- [NaranjaX](https://www.youtube.com/watch?v=_0kMmRfltEQ)
-- [Open Data Science LatAm](https://www.odesla.org/)
-- [Retrieva](https://tech.retrieva.jp/entry/2020/07/28/181414)
-- [Roche](https://www.roche.com/)
-- [UrbanLogiq](https://urbanlogiq.com/)
-- [XP](https://youtu.be/wgnGOVNkXqU?t=2210)
-- [Dendra Systems](https://www.dendra.io/)
+
+[AI Singapore](https://makerspace.aisingapore.org/2020/08/leveraging-kedro-in-100e/), [Caterpillar](https://www.caterpillar.com/), [Dendra Systems](https://www.dendra.io/), [ElementAI](https://www.elementai.com/), [Jungle Scout](https://www.junglescout.com/), [MercadoLibre Argentina](https://www.mercadolibre.com.ar), [Mosaic Data Science](https://www.youtube.com/watch?v=fCWGevB366g), [NaranjaX](https://www.youtube.com/watch?v=_0kMmRfltEQ), [Open Data Science LatAm](https://www.odesla.org/), [Retrieva](https://tech.retrieva.jp/entry/2020/07/28/181414), [Roche](https://www.roche.com/), [UrbanLogiq](https://urbanlogiq.com/), [XP](https://youtu.be/wgnGOVNkXqU?t=2210)
 
 ## What licence do you use?
 

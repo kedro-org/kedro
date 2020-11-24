@@ -28,16 +28,17 @@
 import logging
 import subprocess
 from pathlib import Path
-from time import sleep
 
 import pytest
-import yaml
+import toml
 
-from kedro.framework.session import KedroSession
-from kedro.framework.session.session import get_current_session
+from kedro.framework.session import KedroSession, get_current_session
 from kedro.framework.session.store import BaseSessionStore, ShelveStore
 
+_FAKE_CONTEXT_PATH = "fake.module.path"
 _FAKE_KEDRO_VERSION = "fake_kedro_version"
+_FAKE_PACKAGE_NAME = "fake_package"
+_FAKE_PROJECT_NAME = "fake_project"
 _FAKE_PIPELINE_NAME = "fake_pipeline"
 
 
@@ -60,10 +61,19 @@ def fake_project(tmp_path, mock_load_context):  # pylint: disable=unused-argumen
     fake_project_dir = Path(tmp_path) / "fake_project"
     (fake_project_dir / "src").mkdir(parents=True)
 
-    kedro_yml_path = fake_project_dir / ".kedro.yml"
-    payload = {"kedro_version": _FAKE_KEDRO_VERSION}
-    with kedro_yml_path.open("w") as _f:
-        yaml.safe_dump(payload, _f)
+    pyproject_toml_path = fake_project_dir / "pyproject.toml"
+    payload = {
+        "tool": {
+            "kedro": {
+                "context_path": _FAKE_CONTEXT_PATH,
+                "project_version": _FAKE_KEDRO_VERSION,
+                "project_name": _FAKE_PROJECT_NAME,
+                "package_name": _FAKE_PACKAGE_NAME,
+            }
+        }
+    }
+    toml_str = toml.dumps(payload)
+    pyproject_toml_path.write_text(toml_str)
 
     return fake_project_dir
 
@@ -79,11 +89,18 @@ STORE_LOGGER_NAME = "kedro.framework.session.store"
 @pytest.mark.usefixtures("mock_load_context")
 class TestKedroSession:
     @pytest.mark.parametrize("env", [None, "env1"])
+    @pytest.mark.parametrize("extra_params", [None, {"key": "val"}])
     def test_create(
-        self, fake_project, mock_load_context, fake_session_id, mocker, env
+        self,
+        fake_project,
+        mock_load_context,
+        fake_session_id,
+        mocker,
+        env,
+        extra_params,
     ):
         mock_click_ctx = mocker.patch("click.get_current_context").return_value
-        session = KedroSession.create(fake_project, env=env)
+        session = KedroSession.create(fake_project, env=env, extra_params=extra_params)
 
         expected_cli_data = {
             "args": mock_click_ctx.args,
@@ -92,25 +109,62 @@ class TestKedroSession:
             "command_path": mock_click_ctx.command_path,
         }
         expected_store = {
-            "config_file": fake_project / ".kedro.yml",
+            "config_file": fake_project / "pyproject.toml",
+            "context_path": _FAKE_CONTEXT_PATH,
             "project_path": fake_project,
+            "project_name": _FAKE_PROJECT_NAME,
             "source_dir": fake_project / "src",
             "session_id": fake_session_id,
-            "kedro_version": _FAKE_KEDRO_VERSION,
+            "project_version": _FAKE_KEDRO_VERSION,
+            "package_name": _FAKE_PACKAGE_NAME,
             "cli": expected_cli_data,
         }
         if env:
             expected_store["env"] = env
+        if extra_params:
+            expected_store["extra_params"] = extra_params
 
         assert session.store == expected_store
 
         mock_load_context.assert_not_called()
-        assert session.context is mock_load_context.return_value
-        mock_load_context.assert_called_once_with(project_path=fake_project, env=env)
+        assert session.load_context() is mock_load_context.return_value
+        mock_load_context.assert_called_once_with(
+            project_path=fake_project, env=env, extra_params=extra_params
+        )
+
+    def test_create_no_env_extra_params(
+        self, fake_project, mock_load_context, fake_session_id, mocker
+    ):
+        mock_click_ctx = mocker.patch("click.get_current_context").return_value
+        session = KedroSession.create(fake_project)
+
+        expected_cli_data = {
+            "args": mock_click_ctx.args,
+            "params": mock_click_ctx.params,
+            "command_name": mock_click_ctx.command.name,
+            "command_path": mock_click_ctx.command_path,
+        }
+        expected_store = {
+            "config_file": fake_project / "pyproject.toml",
+            "context_path": _FAKE_CONTEXT_PATH,
+            "project_path": fake_project,
+            "project_name": _FAKE_PROJECT_NAME,
+            "source_dir": fake_project / "src",
+            "session_id": fake_session_id,
+            "package_name": _FAKE_PACKAGE_NAME,
+            "project_version": _FAKE_KEDRO_VERSION,
+            "cli": expected_cli_data,
+        }
+
+        assert session.store == expected_store
+
+        mock_load_context.assert_not_called()
+        assert session.load_context() is mock_load_context.return_value
+        mock_load_context.assert_called_once_with(
+            project_path=fake_project, env=None, extra_params=None
+        )
 
     def test_default_store(self, fake_project, fake_session_id, caplog):
-        caplog.set_level(logging.WARN, logger="kedro.framework.session.store")
-
         session = KedroSession.create(fake_project)
         assert isinstance(session.store, dict)
         assert session._store.__class__ is BaseSessionStore
@@ -124,20 +178,25 @@ class TestKedroSession:
         actual_log_messages = [
             rec.getMessage()
             for rec in caplog.records
-            if rec.name == STORE_LOGGER_NAME and rec.levelno == logging.WARN
+            if rec.name == STORE_LOGGER_NAME and rec.levelno == logging.INFO
         ]
         assert actual_log_messages == expected_log_messages
 
-    def test_shelve_store(self, fake_project, fake_session_id, caplog):
-        kedro_yml = fake_project / ".kedro.yml"
+    def test_shelve_store(self, fake_project, fake_session_id, caplog, mocker):
+        mocker.patch("pathlib.Path.is_file", return_value=True)
         shelve_location = fake_project / "nested" / "sessions"
-        with kedro_yml.open("r+") as f:
-            data = yaml.safe_load(f)
-            data["session_store"] = {
-                "type": "ShelveStore",
-                "path": shelve_location.as_posix(),
-            }
-            yaml.safe_dump(data, f)
+        session_store = {
+            "type": "ShelveStore",
+            "path": shelve_location.as_posix(),
+        }
+        fake_settings_module = mocker.Mock()
+        fake_settings_module.SESSION_STORE = session_store
+        fake_settings_module.DISABLE_HOOKS_FOR_PLUGINS = ()
+        fake_settings_module.HOOKS = ()
+        mocker.patch(
+            "kedro.framework.project.settings.import_module",
+            return_value=fake_settings_module,
+        )
 
         other = KedroSession.create(fake_project)
         assert other._store.__class__ is ShelveStore
@@ -151,7 +210,7 @@ class TestKedroSession:
         actual_log_messages = [
             rec.getMessage()
             for rec in caplog.records
-            if rec.name == STORE_LOGGER_NAME and rec.levelno == logging.WARN
+            if rec.name == STORE_LOGGER_NAME and rec.levelno == logging.INFO
         ]
         assert not actual_log_messages
 
@@ -218,17 +277,23 @@ class TestKedroSession:
         with pytest.raises(RuntimeError, match=pattern):
             get_current_session()
 
-        # create a session, pull it from the stack
-        with KedroSession.create(fake_project) as session:
-            assert get_current_session() is session
-            sleep(0.01)  # to make sure we don't generate the same session id
-            with KedroSession.create(fake_project) as another:
-                assert get_current_session() is another
-                assert session.session_id != another.session_id
-            assert get_current_session() is session
+        session1 = KedroSession.create(fake_project)
+        session2 = KedroSession.create(fake_project)
 
-        # session has been closed, so no sessions left in the stack
+        with session1:
+            assert get_current_session() is session1
+
+            pattern = (
+                "Cannot activate the session as another active session already exists"
+            )
+            with pytest.raises(RuntimeError, match=pattern), session2:
+                pass  # pragma: no cover
+
+        # session has been closed, so no current sessions should be available
         assert get_current_session(silent=True) is None
+
+        with session2:
+            assert get_current_session() is session2
 
     @pytest.mark.parametrize("fake_pipeline_name", [None, _FAKE_PIPELINE_NAME])
     def test_run(

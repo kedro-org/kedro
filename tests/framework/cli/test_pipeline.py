@@ -25,6 +25,7 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 import shutil
 from pathlib import Path
 
@@ -35,15 +36,17 @@ from pandas import DataFrame
 
 from kedro.extras.datasets.pandas import CSVDataSet
 from kedro.framework.cli.pipeline import _sync_dirs
-from kedro.framework.context import load_context
+from kedro.framework.context import KedroContext, load_context
 
 PACKAGE_NAME = "dummy_package"
 PIPELINE_NAME = "my_pipeline"
 
+CONF_ROOT = KedroContext.CONF_ROOT
+
 
 @pytest.fixture(autouse=True)
-def cleanup_pipelines(dummy_project):
-    pipes_path = dummy_project / "src" / PACKAGE_NAME / "pipelines"
+def cleanup_pipelines(fake_repo_path, fake_package_path):
+    pipes_path = fake_package_path / "pipelines"
     old_pipelines = {p.name for p in pipes_path.iterdir() if p.is_dir()}
     yield
 
@@ -56,25 +59,35 @@ def cleanup_pipelines(dummy_project):
     for pipeline in created_pipelines:
         shutil.rmtree(str(pipes_path / pipeline))
 
-        confs = dummy_project / "conf"
-        for each in confs.glob(f"*/pipelines/{pipeline}"):  # clean all config envs
-            shutil.rmtree(str(each))
+        confs = fake_repo_path / CONF_ROOT
+        for each in confs.rglob(f"*{pipeline}*"):  # clean all pipeline config files
+            if each.is_file():
+                each.unlink()
 
-        tests = dummy_project / "src" / "tests" / "pipelines" / pipeline
+        dirs_to_delete = (
+            dirpath
+            for pattern in ("parameters", "catalog")
+            for dirpath in confs.rglob(pattern)
+            if dirpath.is_dir() and not any(dirpath.iterdir())
+        )
+        for dirpath in dirs_to_delete:
+            dirpath.rmdir()
+
+        tests = fake_repo_path / "src" / "tests" / "pipelines" / pipeline
         if tests.is_dir():
             shutil.rmtree(str(tests))
 
 
 @pytest.fixture(params=["base"])
-def make_pipelines(request, dummy_project, mocker):
-    source_path = dummy_project / "src" / PACKAGE_NAME / "pipelines" / PIPELINE_NAME
-    tests_path = dummy_project / "src" / "tests" / "pipelines" / PIPELINE_NAME
-    conf_path = dummy_project / "conf" / request.param / "pipelines" / PIPELINE_NAME
+def make_pipelines(request, fake_repo_path, fake_package_path, mocker):
+    source_path = fake_package_path / "pipelines" / PIPELINE_NAME
+    tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+    conf_path = fake_repo_path / CONF_ROOT / request.param / "parameters"
 
     for path in (source_path, tests_path, conf_path):
-        path.mkdir(parents=True)
+        path.mkdir(parents=True, exist_ok=True)
 
-    (conf_path / "parameters.yml").touch()
+    (conf_path / f"{PIPELINE_NAME}.yml").touch()
     (tests_path / "test_pipe.py").touch()
     (source_path / "pipe.py").touch()
 
@@ -112,18 +125,18 @@ TOO_SHORT_ERROR = "It must be at least 2 characters long."
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
 class TestPipelineCreateCommand:
     @pytest.mark.parametrize("env", [None, "local"])
-    def test_create_pipeline(  # pylint: disable=too-many-locals
-        self, dummy_project, fake_kedro_cli, env
+    def test_create_pipeline(
+        self, fake_repo_path, fake_project_cli, env, fake_package_path
     ):
         """Test creation of a pipeline"""
-        pipelines_dir = dummy_project / "src" / PACKAGE_NAME / "pipelines"
+        pipelines_dir = fake_package_path / "pipelines"
         assert pipelines_dir.is_dir()
 
         assert not (pipelines_dir / PIPELINE_NAME).exists()
 
         cmd = ["pipeline", "create", PIPELINE_NAME]
         cmd += ["-e", env] if env else []
-        result = CliRunner().invoke(fake_kedro_cli.cli, cmd)
+        result = CliRunner().invoke(fake_project_cli.cli, cmd)
         assert result.exit_code == 0
         assert (
             f"To be able to run the pipeline `{PIPELINE_NAME}`, you will need "
@@ -137,27 +150,25 @@ class TestPipelineCreateCommand:
 
         # config
         conf_env = env or "base"
-        conf_dir = (
-            dummy_project / "conf" / conf_env / "pipelines" / PIPELINE_NAME
-        ).resolve()
-        expected_configs = {"catalog.yml", "parameters.yml"}
-        actual_configs = {f.name for f in conf_dir.iterdir()}
+        conf_dir = (fake_repo_path / CONF_ROOT / conf_env).resolve()
+        actual_configs = list(conf_dir.glob(f"**/{PIPELINE_NAME}.yml"))
+        expected_configs = [conf_dir / "parameters" / f"{PIPELINE_NAME}.yml"]
         assert actual_configs == expected_configs
 
         # tests
-        test_dir = dummy_project / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        test_dir = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
         expected_files = {"__init__.py", "test_pipeline.py"}
         actual_files = {f.name for f in test_dir.iterdir()}
         assert actual_files == expected_files
 
     @pytest.mark.parametrize("env", [None, "local"])
-    def test_create_pipeline_skip_config(self, dummy_project, fake_kedro_cli, env):
+    def test_create_pipeline_skip_config(self, fake_repo_path, fake_project_cli, env):
         """Test creation of a pipeline with no config"""
 
         cmd = ["pipeline", "create", "--skip-config", PIPELINE_NAME]
         cmd += ["-e", env] if env else []
 
-        result = CliRunner().invoke(fake_kedro_cli.cli, cmd)
+        result = CliRunner().invoke(fake_project_cli.cli, cmd)
         assert result.exit_code == 0
         assert (
             f"To be able to run the pipeline `{PIPELINE_NAME}`, you will need "
@@ -166,36 +177,42 @@ class TestPipelineCreateCommand:
         assert f"Creating the pipeline `{PIPELINE_NAME}`: OK" in result.output
         assert f"Pipeline `{PIPELINE_NAME}` was successfully created." in result.output
 
-        conf_dirs = list((dummy_project / "conf").rglob(PIPELINE_NAME))
+        conf_dirs = list((fake_repo_path / CONF_ROOT).rglob(PIPELINE_NAME))
         assert conf_dirs == []  # no configs created for the pipeline
 
-        test_dir = dummy_project / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        test_dir = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
         assert test_dir.is_dir()
 
-    def test_catalog_and_params(self, dummy_project, fake_kedro_cli):
+    def test_catalog_and_params(
+        self, fake_repo_path, fake_project_cli, fake_package_path
+    ):
         """Test that catalog and parameter configs generated in pipeline
         sections propagate into the context"""
-        pipelines_dir = dummy_project / "src" / PACKAGE_NAME / "pipelines"
+        pipelines_dir = fake_package_path / "pipelines"
         assert pipelines_dir.is_dir()
 
         cmd = ["pipeline", "create", PIPELINE_NAME]
-        result = CliRunner().invoke(fake_kedro_cli.cli, cmd)
+        result = CliRunner().invoke(fake_project_cli.cli, cmd)
         assert result.exit_code == 0
 
         # write pipeline catalog
-        pipe_conf_dir = dummy_project / "conf" / "base" / "pipelines" / PIPELINE_NAME
+        conf_dir = fake_repo_path / CONF_ROOT / "base"
         catalog_dict = {
             "ds_from_pipeline": {
                 "type": "pandas.CSVDataSet",
                 "filepath": "data/01_raw/iris.csv",
             }
         }
-        with (pipe_conf_dir / "catalog.yml").open("w") as f:
+        catalog_file = conf_dir / "catalog" / f"{PIPELINE_NAME}.yml"
+        catalog_file.parent.mkdir()
+        with catalog_file.open("w") as f:
             yaml.dump(catalog_dict, f)
 
         # write pipeline parameters
+        params_file = conf_dir / "parameters" / f"{PIPELINE_NAME}.yml"
+        assert params_file.is_file()
         params_dict = {"params_from_pipeline": {"p1": [1, 2, 3], "p2": None}}
-        with (pipe_conf_dir / "parameters.yml").open("w") as f:
+        with params_file.open("w") as f:
             yaml.dump(params_dict, f)
 
         ctx = load_context(Path.cwd())
@@ -203,23 +220,19 @@ class TestPipelineCreateCommand:
         assert isinstance(ctx.catalog.load("ds_from_pipeline"), DataFrame)
         assert ctx.params["params_from_pipeline"] == params_dict["params_from_pipeline"]
 
-    def test_skip_copy(self, dummy_project, fake_kedro_cli):
+    def test_skip_copy(self, fake_repo_path, fake_project_cli):
         """Test skipping the copy of conf and test files if those already exist"""
-        # touch pipeline
-        catalog = (
-            dummy_project
-            / "conf"
-            / "base"
-            / "pipelines"
-            / PIPELINE_NAME
-            / "catalog.yml"
-        )
-        catalog.parent.mkdir(parents=True)
-        catalog.touch()
+        # create catalog and parameter files
+        for dirname in ("catalog", "parameters"):
+            path = (
+                fake_repo_path / CONF_ROOT / "base" / dirname / f"{PIPELINE_NAME}.yml"
+            )
+            path.parent.mkdir(exist_ok=True)
+            path.touch()
 
-        # touch test __init__.py
+        # create __init__.py in tests
         tests_init = (
-            dummy_project
+            fake_repo_path
             / "src"
             / "tests"
             / "pipelines"
@@ -230,35 +243,35 @@ class TestPipelineCreateCommand:
         tests_init.touch()
 
         cmd = ["pipeline", "create", PIPELINE_NAME]
-        result = CliRunner().invoke(fake_kedro_cli.cli, cmd)
+        result = CliRunner().invoke(fake_project_cli.cli, cmd)
 
         assert result.exit_code == 0
-        assert "catalog.yml`: SKIPPED" in result.output
         assert "__init__.py`: SKIPPED" in result.output
+        assert f"parameters{os.sep}{PIPELINE_NAME}.yml`: SKIPPED" in result.output
         assert result.output.count("SKIPPED") == 2  # only 2 files skipped
 
-    def test_failed_copy(self, dummy_project, fake_kedro_cli, mocker):
+    def test_failed_copy(self, fake_project_cli, fake_package_path, mocker):
         """Test the error if copying some file fails"""
         error = Exception("Mock exception")
         mocked_copy = mocker.patch("shutil.copyfile", side_effect=error)
 
         cmd = ["pipeline", "create", PIPELINE_NAME]
-        result = CliRunner().invoke(fake_kedro_cli.cli, cmd)
+        result = CliRunner().invoke(fake_project_cli.cli, cmd)
         mocked_copy.assert_called_once()
         assert result.exit_code
         assert result.output.count("FAILED") == 1
         assert result.exception is error
 
         # but the pipeline is created anyways
-        pipelines_dir = dummy_project / "src" / PACKAGE_NAME / "pipelines"
+        pipelines_dir = fake_package_path / "pipelines"
         assert (pipelines_dir / PIPELINE_NAME / "pipeline.py").is_file()
 
-    def test_no_pipeline_arg_error(self, dummy_project, fake_kedro_cli):
+    def test_no_pipeline_arg_error(self, fake_project_cli, fake_package_path):
         """Test the error when no pipeline name was provided"""
-        pipelines_dir = dummy_project / "src" / PACKAGE_NAME / "pipelines"
+        pipelines_dir = fake_package_path / "pipelines"
         assert pipelines_dir.is_dir()
 
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["pipeline", "create"])
+        result = CliRunner().invoke(fake_project_cli.cli, ["pipeline", "create"])
         assert result.exit_code
         assert "Missing argument 'NAME'" in result.output
 
@@ -271,33 +284,33 @@ class TestPipelineCreateCommand:
             ("a", TOO_SHORT_ERROR),
         ],
     )
-    def test_bad_pipeline_name(self, fake_kedro_cli, bad_name, error_message):
+    def test_bad_pipeline_name(self, fake_project_cli, bad_name, error_message):
         """Test error message when bad pipeline name was provided"""
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["pipeline", "create", bad_name]
+            fake_project_cli.cli, ["pipeline", "create", bad_name]
         )
         assert result.exit_code
         assert error_message in result.output
 
-    def test_duplicate_pipeline_name(self, dummy_project, fake_kedro_cli):
+    def test_duplicate_pipeline_name(self, fake_project_cli, fake_package_path):
         """Test error when attempting to create pipelines with duplicate names"""
-        pipelines_dir = dummy_project / "src" / PACKAGE_NAME / "pipelines"
+        pipelines_dir = fake_package_path / "pipelines"
         assert pipelines_dir.is_dir()
 
         cmd = ["pipeline", "create", PIPELINE_NAME]
-        first = CliRunner().invoke(fake_kedro_cli.cli, cmd)
+        first = CliRunner().invoke(fake_project_cli.cli, cmd)
         assert first.exit_code == 0
 
-        second = CliRunner().invoke(fake_kedro_cli.cli, cmd)
+        second = CliRunner().invoke(fake_project_cli.cli, cmd)
         assert second.exit_code
         assert f"Creating the pipeline `{PIPELINE_NAME}`: FAILED" in second.output
         assert "directory already exists" in second.output
 
-    def test_bad_env(self, fake_kedro_cli):
+    def test_bad_env(self, fake_project_cli):
         """Test error when provided conf environment does not exist"""
         env = "no_such_env"
         cmd = ["pipeline", "create", "-e", env, PIPELINE_NAME]
-        result = CliRunner().invoke(fake_kedro_cli.cli, cmd)
+        result = CliRunner().invoke(fake_project_cli.cli, cmd)
         assert result.exit_code
         assert f"Unable to load Kedro context with environment `{env}`" in result.output
 
@@ -309,67 +322,77 @@ class TestPipelineDeleteCommand:
         [("base", None, "base"), ("local", "local", "local")],
         indirect=["make_pipelines"],
     )
-    def test_delete_pipeline(self, env, expected_conf, dummy_project, fake_kedro_cli):
+    def test_delete_pipeline(
+        self, env, expected_conf, fake_repo_path, fake_project_cli, fake_package_path
+    ):
         options = ["--env", env] if env else []
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["pipeline", "delete", "-y", PIPELINE_NAME, *options]
+            fake_project_cli.cli, ["pipeline", "delete", "-y", PIPELINE_NAME, *options]
         )
 
-        source_path = dummy_project / "src" / PACKAGE_NAME / "pipelines" / PIPELINE_NAME
-        tests_path = dummy_project / "src" / "tests" / "pipelines" / PIPELINE_NAME
-        conf_path = dummy_project / "conf" / expected_conf / "pipelines" / PIPELINE_NAME
+        source_path = fake_package_path / "pipelines" / PIPELINE_NAME
+        tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        params_path = (
+            fake_repo_path
+            / CONF_ROOT
+            / expected_conf
+            / "parameters"
+            / f"{PIPELINE_NAME}.yml"
+        )
 
         assert f"Deleting `{source_path}`: OK" in result.output
         assert f"Deleting `{tests_path}`: OK" in result.output
-        assert f"Deleting `{conf_path}`: OK" in result.output
+        assert f"Deleting `{params_path}`: OK" in result.output
 
         assert f"Pipeline `{PIPELINE_NAME}` was successfully deleted." in result.output
         assert (
             f"If you added the pipeline `{PIPELINE_NAME}` to `register_pipelines()` in "
-            f"`{dummy_project / 'src' / PACKAGE_NAME / 'hooks.py'}`, "
-            f"you will need to remove it.`"
+            f"`{fake_package_path / 'hooks.py'}`, you will need to remove it."
         ) in result.output
 
         assert not source_path.exists()
         assert not tests_path.exists()
-        assert not conf_path.exists()
+        assert not params_path.exists()
 
-    def test_delete_pipeline_skip(self, dummy_project, fake_kedro_cli):
+    def test_delete_pipeline_skip(
+        self, fake_repo_path, fake_project_cli, fake_package_path
+    ):
         """Tests that delete pipeline handles missing or already deleted files gracefully"""
-        source_path = dummy_project / "src" / PACKAGE_NAME / "pipelines" / PIPELINE_NAME
+        source_path = fake_package_path / "pipelines" / PIPELINE_NAME
 
         shutil.rmtree(str(source_path))
 
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["pipeline", "delete", "-y", PIPELINE_NAME]
+            fake_project_cli.cli, ["pipeline", "delete", "-y", PIPELINE_NAME]
         )
-        tests_path = dummy_project / "src" / "tests" / "pipelines" / PIPELINE_NAME
-        conf_path = dummy_project / "conf" / "base" / "pipelines" / PIPELINE_NAME
+        tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        params_path = (
+            fake_repo_path / CONF_ROOT / "base" / "parameters" / f"{PIPELINE_NAME}.yml"
+        )
 
         assert f"Deleting `{source_path}`" not in result.output
         assert f"Deleting `{tests_path}`: OK" in result.output
-        assert f"Deleting `{conf_path}`: OK" in result.output
+        assert f"Deleting `{params_path}`: OK" in result.output
 
         assert f"Pipeline `{PIPELINE_NAME}` was successfully deleted." in result.output
         assert (
             f"If you added the pipeline `{PIPELINE_NAME}` to `register_pipelines()` in "
-            f"`{dummy_project / 'src' / PACKAGE_NAME / 'hooks.py'}`, "
-            f"you will need to remove it.`"
+            f"`{fake_package_path / 'hooks.py'}`, you will need to remove it."
         ) in result.output
 
         assert not source_path.exists()
         assert not tests_path.exists()
-        assert not conf_path.exists()
+        assert not params_path.exists()
 
-    def test_delete_pipeline_fail(self, dummy_project, fake_kedro_cli, mocker):
-        source_path = dummy_project / "src" / PACKAGE_NAME / "pipelines" / PIPELINE_NAME
+    def test_delete_pipeline_fail(self, fake_project_cli, fake_package_path, mocker):
+        source_path = fake_package_path / "pipelines" / PIPELINE_NAME
 
         mocker.patch(
             "kedro.framework.cli.pipeline.shutil.rmtree",
             side_effect=PermissionError("permission"),
         )
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["pipeline", "delete", "-y", PIPELINE_NAME]
+            fake_project_cli.cli, ["pipeline", "delete", "-y", PIPELINE_NAME]
         )
 
         assert result.exit_code, result.output
@@ -384,18 +407,25 @@ class TestPipelineDeleteCommand:
             ("a", TOO_SHORT_ERROR),
         ],
     )
-    def test_bad_pipeline_name(self, fake_kedro_cli, bad_name, error_message):
+    def test_bad_pipeline_name(self, fake_project_cli, bad_name, error_message):
         """Test error message when bad pipeline name was provided."""
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["pipeline", "delete", "-y", bad_name]
+            fake_project_cli.cli, ["pipeline", "delete", "-y", bad_name]
         )
         assert result.exit_code
         assert error_message in result.output
 
-    def test_bad_env(self, fake_kedro_cli):
+    def test_pipeline_not_found(self, fake_project_cli):
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["pipeline", "delete", "-y", "non_existent"]
+        )
+        assert result.exit_code
+        assert "Pipeline `non_existent` not found." in result.output
+
+    def test_bad_env(self, fake_project_cli):
         """Test error when provided conf environment does not exist."""
         result = CliRunner().invoke(
-            fake_kedro_cli.cli,
+            fake_project_cli.cli,
             ["pipeline", "delete", "-y", "-e", "invalid_env", PIPELINE_NAME],
         )
         assert result.exit_code
@@ -405,23 +435,24 @@ class TestPipelineDeleteCommand:
         )
 
     @pytest.mark.parametrize("input_", ["n", "N", "random"])
-    def test_pipeline_delete_confirmation(self, dummy_project, fake_kedro_cli, input_):
+    def test_pipeline_delete_confirmation(
+        self, fake_repo_path, fake_project_cli, fake_package_path, input_
+    ):
         """Test that user confirmation of deletion works"""
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["pipeline", "delete", PIPELINE_NAME], input=input_
+            fake_project_cli.cli, ["pipeline", "delete", PIPELINE_NAME], input=input_
         )
 
-        source_path = dummy_project / "src" / PACKAGE_NAME / "pipelines" / PIPELINE_NAME
-        tests_path = dummy_project / "src" / "tests" / "pipelines" / PIPELINE_NAME
-        conf_path = dummy_project / "conf" / "base" / "pipelines" / PIPELINE_NAME
-
-        assert (
-            "The following directories and everything within them will be removed"
-            in result.output
+        source_path = fake_package_path / "pipelines" / PIPELINE_NAME
+        tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        params_path = (
+            fake_repo_path / CONF_ROOT / "base" / "parameters" / f"{PIPELINE_NAME}.yml"
         )
+
+        assert "The following paths will be removed:" in result.output
         assert str(source_path) in result.output
         assert str(tests_path) in result.output
-        assert str(conf_path) in result.output
+        assert str(params_path) in result.output
 
         assert (
             f"Are you sure you want to delete pipeline `{PIPELINE_NAME}`"
@@ -431,32 +462,31 @@ class TestPipelineDeleteCommand:
 
         assert source_path.is_dir()
         assert tests_path.is_dir()
-        assert conf_path.is_dir()
+        assert params_path.is_file()
 
     @pytest.mark.parametrize("input_", ["n", "N", "random"])
     def test_pipeline_delete_confirmation_skip(
-        self, dummy_project, fake_kedro_cli, input_
+        self, fake_repo_path, fake_project_cli, fake_package_path, input_
     ):
         """Test that user confirmation of deletion works when
         some of the files are missing or already deleted
         """
 
-        source_path = dummy_project / "src" / PACKAGE_NAME / "pipelines" / PIPELINE_NAME
+        source_path = fake_package_path / "pipelines" / PIPELINE_NAME
         shutil.rmtree(str(source_path))
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["pipeline", "delete", PIPELINE_NAME], input=input_
+            fake_project_cli.cli, ["pipeline", "delete", PIPELINE_NAME], input=input_
         )
 
-        tests_path = dummy_project / "src" / "tests" / "pipelines" / PIPELINE_NAME
-        conf_path = dummy_project / "conf" / "base" / "pipelines" / PIPELINE_NAME
-
-        assert (
-            "The following directories and everything within them will be removed"
-            in result.output
+        tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+        params_path = (
+            fake_repo_path / CONF_ROOT / "base" / "parameters" / f"{PIPELINE_NAME}.yml"
         )
+
+        assert "The following paths will be removed:" in result.output
         assert str(source_path) not in result.output
         assert str(tests_path) in result.output
-        assert str(conf_path) in result.output
+        assert str(params_path) in result.output
 
         assert (
             f"Are you sure you want to delete pipeline `{PIPELINE_NAME}`"
@@ -464,10 +494,13 @@ class TestPipelineDeleteCommand:
         )
         assert "Deletion aborted!" in result.output
 
+        assert tests_path.is_dir()
+        assert params_path.is_file()
+
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
-def test_list_pipelines(fake_kedro_cli, yaml_dump_mock, pipelines_dict):
-    result = CliRunner().invoke(fake_kedro_cli.cli, ["pipeline", "list"])
+def test_list_pipelines(fake_project_cli, yaml_dump_mock, pipelines_dict):
+    result = CliRunner().invoke(fake_project_cli.cli, ["pipeline", "list"])
 
     assert not result.exit_code
     yaml_dump_mock.assert_called_once_with(sorted(pipelines_dict.keys()))
@@ -477,19 +510,19 @@ def test_list_pipelines(fake_kedro_cli, yaml_dump_mock, pipelines_dict):
 class TestPipelineDescribeCommand:
     @pytest.mark.parametrize("pipeline_name", ["de", "ds", "__default__"])
     def test_describe_pipeline(
-        self, fake_kedro_cli, yaml_dump_mock, pipeline_name, pipelines_dict
+        self, fake_project_cli, yaml_dump_mock, pipeline_name, pipelines_dict
     ):
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["pipeline", "describe", pipeline_name]
+            fake_project_cli.cli, ["pipeline", "describe", pipeline_name]
         )
 
         assert not result.exit_code
         expected_dict = {"Nodes": pipelines_dict[pipeline_name]}
         yaml_dump_mock.assert_called_once_with(expected_dict)
 
-    def test_not_found_pipeline(self, fake_kedro_cli):
+    def test_not_found_pipeline(self, fake_project_cli):
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["pipeline", "describe", "missing"]
+            fake_project_cli.cli, ["pipeline", "describe", "missing"]
         )
 
         assert result.exit_code
@@ -497,7 +530,7 @@ class TestPipelineDescribeCommand:
             "Error: `missing` pipeline not found. Existing pipelines: "
             "[__default__, de, ds]\n"
         )
-        assert result.output == expected_output
+        assert expected_output in result.output
 
 
 class TestSyncDirs:

@@ -25,6 +25,7 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import re
 from functools import partial, update_wrapper, wraps
 from typing import Callable
 
@@ -79,6 +80,15 @@ class TestValidNode:
     def test_valid(self, simple_tuple_node_list):
         nodes = [node(*tup) for tup in simple_tuple_node_list]
         assert len(nodes) == len(simple_tuple_node_list)
+
+    def test_get_node_func(self):
+        test_node = node(identity, "A", "B")
+        assert test_node.func is identity
+
+    def test_set_node_func(self):
+        test_node = node(identity, "A", "B")
+        test_node.func = decorated_identity
+        assert test_node.func is decorated_identity
 
     def test_labelled(self):
         assert "labeled_node: <lambda>([input1]) -> [output1]" in str(
@@ -379,7 +389,7 @@ def test_bad_input(func, expected):
 def apply_f(func: Callable) -> Callable:
     @wraps(func)
     def with_f(*args, **kwargs):
-        return func(*["f(%s)" % a for a in args], **kwargs)
+        return func(*[f"f({a})" for a in args], **kwargs)
 
     return with_f
 
@@ -387,7 +397,7 @@ def apply_f(func: Callable) -> Callable:
 def apply_g(func: Callable) -> Callable:
     @wraps(func)
     def with_g(*args, **kwargs):
-        return func(*["g(%s)" % a for a in args], **kwargs)
+        return func(*[f"g({a})" for a in args], **kwargs)
 
     return with_g
 
@@ -395,7 +405,7 @@ def apply_g(func: Callable) -> Callable:
 def apply_h(func: Callable) -> Callable:
     @wraps(func)
     def with_h(*args, **kwargs):
-        return func(*["h(%s)" % a for a in args], **kwargs)
+        return func(*[f"h({a})" for a in args], **kwargs)
 
     return with_h
 
@@ -403,7 +413,7 @@ def apply_h(func: Callable) -> Callable:
 def apply_ij(func: Callable) -> Callable:
     @wraps(func)
     def with_ij(*args, **kwargs):
-        return func(*["ij(%s)" % a for a in args], **kwargs)
+        return func(*[f"ij({a})" for a in args], **kwargs)
 
     return with_ij
 
@@ -416,7 +426,14 @@ def decorated_identity(value):
 class TestTagDecorator:
     def test_apply_decorators(self):
         old_node = node(apply_g(decorated_identity), "input", "output", name="node")
-        new_node = old_node.decorate(apply_h, apply_ij)
+        pattern = (
+            "The node's `decorate` API will be deprecated in Kedro 0.18.0."
+            "Please use a node's Hooks to extend the node's behaviour in a pipeline."
+            "For more information, please visit"
+            "https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_hooks.html"
+        )
+        with pytest.warns(DeprecationWarning, match=re.escape(pattern)):
+            new_node = old_node.decorate(apply_h, apply_ij)
         result = new_node.run(dict(input=1))
 
         assert old_node.name == new_node.name

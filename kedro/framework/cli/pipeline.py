@@ -34,7 +34,7 @@ import tempfile
 from importlib import import_module
 from pathlib import Path
 from textwrap import indent
-from typing import NamedTuple, Tuple
+from typing import Any, List, NamedTuple, Tuple, Union
 from zipfile import ZipFile
 
 import click
@@ -42,12 +42,13 @@ import yaml
 from setuptools.dist import Distribution
 
 import kedro
-from kedro.framework.cli.cli import _assert_pkg_name_ok, _handle_exception
+from kedro.framework.cli.cli import _assert_pkg_name_ok
 from kedro.framework.cli.utils import (
     KedroCliError,
     _clean_pycache,
     _filter_deprecation_warnings,
     call,
+    command_with_verbosity,
     env_option,
     python_call,
 )
@@ -83,7 +84,7 @@ def _check_pipeline_name(ctx, param, value):  # pylint: disable=unused-argument
     return value
 
 
-@pipeline.command("create")
+@command_with_verbosity(pipeline, "create")
 @click.argument("name", nargs=1, callback=_check_pipeline_name)
 @click.option(
     "--skip-config",
@@ -91,22 +92,24 @@ def _check_pipeline_name(ctx, param, value):  # pylint: disable=unused-argument
     help="Skip creation of config files for the new pipeline(s).",
 )
 @env_option(help="Environment to create pipeline configuration in. Defaults to `base`.")
-def create_pipeline(name, skip_config, env):
+def create_pipeline(
+    name, skip_config, env, **kwargs
+):  # pylint: disable=unused-argument
     """Create a new modular pipeline by providing the new pipeline name as an argument."""
     try:
         context = load_context(Path.cwd(), env=env)
-    except Exception as err:  # pylint: disable=broad-except
-        _handle_exception(
+    except Exception as exc:
+        raise KedroCliError(
             f"Unable to load Kedro context with environment `{env}`. "
-            f"Make sure it exists in the project configuration.\nError: {err}"
-        )
+            f"Make sure it exists in the project configuration.\nError: {exc}"
+        ) from exc
 
     package_dir = _get_project_package_dir(context)
     output_dir = package_dir / "pipelines"
 
     result_path = _create_pipeline(name, context.project_version, output_dir)
     _copy_pipeline_tests(name, result_path, package_dir)
-    _copy_pipeline_configs(name, result_path, context, skip_config, env=env)
+    _copy_pipeline_configs(result_path, context, skip_config, env=env)
     click.secho(f"\nPipeline `{name}` was successfully created.\n", fg="green")
 
     click.secho(
@@ -116,7 +119,19 @@ def create_pipeline(name, skip_config, env):
     )
 
 
-@pipeline.command("delete")
+def _echo_deletion_warning(message: str, **paths: List[Path]):
+    paths = {key: values for key, values in paths.items() if values}
+
+    if paths:
+        click.secho(message, bold=True)
+
+    for key, values in paths.items():
+        click.echo(f"\n{key.capitalize()}:")
+        paths_str = "\n".join(str(value) for value in values)
+        click.echo(indent(paths_str, " " * 2))
+
+
+@command_with_verbosity(pipeline, "delete")
 @click.argument("name", nargs=1, callback=_check_pipeline_name)
 @env_option(
     help="Environment to delete pipeline configuration from. Defaults to `base`."
@@ -124,27 +139,41 @@ def create_pipeline(name, skip_config, env):
 @click.option(
     "-y", "--yes", is_flag=True, help="Confirm deletion of pipeline non-interactively."
 )
-def delete_pipeline(name, env, yes):
+def delete_pipeline(name, env, yes, **kwargs):  # pylint: disable=unused-argument
     """Delete a modular pipeline by providing the pipeline name as an argument."""
     try:
         context = load_context(Path.cwd(), env=env)
-    except Exception as err:  # pylint: disable=broad-except
-        _handle_exception(
+    except Exception as exc:
+        raise KedroCliError(
             f"Unable to load Kedro context with environment `{env}`. "
-            f"Make sure it exists in the project configuration.\nError: {err}"
-        )
+            f"Make sure it exists in the project configuration.\nError: {exc}"
+        ) from exc
 
     package_dir = _get_project_package_dir(context)
 
     env = env or "base"
     pipeline_artifacts = _get_pipeline_artifacts(context, pipeline_name=name, env=env)
-    dirs = [path for path in pipeline_artifacts if path.is_dir()]
+
+    files_to_delete = [
+        pipeline_artifacts.pipeline_conf / confdir / f"{name}.yml"
+        for confdir in ("parameters", "catalog")
+        if (pipeline_artifacts.pipeline_conf / confdir / f"{name}.yml").is_file()
+    ]
+    dirs_to_delete = [
+        path
+        for path in (pipeline_artifacts.pipeline_dir, pipeline_artifacts.pipeline_tests)
+        if path.is_dir()
+    ]
+
+    if not files_to_delete and not dirs_to_delete:
+        raise KedroCliError(f"Pipeline `{name}` not found.")
 
     if not yes:
-        click.echo(
-            "The following directories and everything within them will be removed:\n"
+        _echo_deletion_warning(
+            "The following paths will be removed:",
+            directories=dirs_to_delete,
+            files=files_to_delete,
         )
-        click.echo(indent("\n".join(str(dir_) for dir_ in dirs), " " * 2))
         click.echo()
         yes = click.confirm(f"Are you sure you want to delete pipeline `{name}`?")
         click.echo()
@@ -152,11 +181,11 @@ def delete_pipeline(name, env, yes):
     if not yes:
         raise KedroCliError("Deletion aborted!")
 
-    _delete_dirs(*dirs)
-    click.secho(f"\nPipeline `{name}` was successfully deleted.\n", fg="green")
+    _delete_artifacts(*files_to_delete, *dirs_to_delete)
+    click.secho(f"\nPipeline `{name}` was successfully deleted.", fg="green")
     click.secho(
-        f"If you added the pipeline `{name}` to `register_pipelines()` in "
-        f"`{package_dir / 'hooks.py'}`, you will need to remove it.`",
+        f"\nIf you added the pipeline `{name}` to `register_pipelines()` in "
+        f"`{package_dir / 'hooks.py'}`, you will need to remove it.",
         fg="yellow",
     )
 
@@ -170,10 +199,10 @@ def list_pipelines(env):
     click.echo(yaml.dump(sorted(project_pipelines)))
 
 
-@pipeline.command("describe")
+@command_with_verbosity(pipeline, "describe")
 @env_option
 @click.argument("name", nargs=1)
-def describe_pipeline(name, env):
+def describe_pipeline(name, env, **kwargs):  # pylint: disable=unused-argument
     """Describe a pipeline by providing the pipeline name as an argument."""
     context = load_context(Path.cwd(), env=env)
     pipeline_obj = context.pipelines.get(name)
@@ -193,7 +222,35 @@ def describe_pipeline(name, env):
     click.echo(yaml.dump(result))
 
 
-@pipeline.command("pull")
+def _unpack_wheel(location: str, destination: Path) -> None:
+    # pylint: disable=import-outside-toplevel
+    import fsspec
+
+    from kedro.io.core import get_protocol_and_path
+
+    protocol, _ = get_protocol_and_path(location)
+    filesystem = fsspec.filesystem(protocol)
+
+    if location.endswith(".whl") and filesystem.exists(location):
+        with filesystem.open(location) as fs_file:
+            ZipFile(fs_file).extractall(destination)
+    else:
+        python_call(
+            "pip", ["download", "--no-deps", "--dest", str(destination), location],
+        )
+        wheel_file = list(destination.glob("*.whl"))
+        # `--no-deps` should fetch only one wheel file, and CLI should fail if that's
+        # not the case.
+        if len(wheel_file) != 1:
+            file_names = [wf.name for wf in wheel_file]
+            raise KedroCliError(
+                f"More than 1 or no wheel files found: {file_names}. "
+                f"There has to be exactly one distribution file."
+            )
+        ZipFile(wheel_file[0]).extractall(destination)
+
+
+@command_with_verbosity(pipeline, "pull")
 @click.argument("package_path", nargs=1)
 @env_option(
     help="Environment to install the pipeline configuration to. Defaults to `base`."
@@ -205,44 +262,23 @@ def describe_pipeline(name, env):
     callback=_check_pipeline_name,
     help="Alternative name to unpackage under.",
 )
-def pull_package(package_path, env, alias):
+def pull_package(
+    package_path, env, alias, **kwargs
+):  # pylint: disable=unused-argument,too-many-locals
     """Pull a modular pipeline package, unpack it and install the files to corresponding
     locations.
     """
-    # pylint: disable=import-outside-toplevel
-    import fsspec
-
-    from kedro.io.core import get_protocol_and_path
-
-    protocol, _ = get_protocol_and_path(package_path)
-    filesystem = fsspec.filesystem(protocol)
 
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_dir_path = Path(temp_dir).resolve()
-        if package_path.endswith(".whl") and filesystem.exists(package_path):
-            with filesystem.open(package_path) as fs_file:
-                ZipFile(fs_file).extractall(temp_dir_path)
-        else:
-            python_call(
-                "pip",
-                ["download", "--no-deps", "--dest", str(temp_dir_path), package_path],
-            )
-            wheel_file = list(temp_dir_path.glob("*.whl"))
-            # `--no-deps` should fetch only one wheel file, and CLI should fail if that's
-            # not the case.
-            if len(wheel_file) != 1:
-                file_names = [wf.name for wf in wheel_file]
-                raise KedroCliError(
-                    f"More than 1 or no wheel files found: {str(file_names)}. "
-                    "There has to be exactly one distribution file."
-                )
-            ZipFile(wheel_file[0]).extractall(temp_dir_path)
+
+        _unpack_wheel(package_path, temp_dir_path)
 
         dist_info_file = list(temp_dir_path.glob("*.dist-info"))
         if len(dist_info_file) != 1:
             raise KedroCliError(
                 f"More than 1 or no dist-info files found from {package_path}. "
-                "There has to be exactly one dist-info directory."
+                f"There has to be exactly one dist-info directory."
             )
         # Extract package name, based on the naming convention for wheel files
         # https://www.python.org/dev/peps/pep-0427/#file-name-convention
@@ -250,6 +286,17 @@ def pull_package(package_path, env, alias):
 
         _clean_pycache(temp_dir_path)
         _install_files(package_name, temp_dir_path, env, alias)
+
+
+def _rename_files(conf_source: Path, old_name: str, new_name: str):
+    config_files_to_rename = (
+        each
+        for each in conf_source.rglob("*")
+        if each.is_file() and old_name in each.name
+    )
+    for config_file in config_files_to_rename:
+        new_config_name = config_file.name.replace(old_name, new_name)
+        config_file.rename(config_file.parent / new_config_name)
 
 
 def _install_files(
@@ -262,6 +309,9 @@ def _install_files(
         source_path, package_name
     )
 
+    if conf_source.is_dir() and alias:
+        _rename_files(conf_source, package_name, alias)
+
     pipeline_name = alias or package_name
     package_dest, test_dest, conf_dest = _get_pipeline_artifacts(
         context, pipeline_name=pipeline_name, env=env
@@ -269,15 +319,16 @@ def _install_files(
 
     if conf_source.is_dir():
         _sync_dirs(conf_source, conf_dest)
-        # `config` was packaged under `package_name` directory with `kedro pipeline package`.
-        # Since `config` was already synced, we don't want to send it again
-        # when syncing the package, so we remove it.
+        # `config` dir was packaged under `package_name` directory with
+        # `kedro pipeline package`. Since `config` was already synced,
+        # we don't want to copy it again when syncing the package, so we remove it.
         shutil.rmtree(str(conf_source))
 
     if test_source.is_dir():
         _sync_dirs(test_source, test_dest)
 
-    # Sync everything under package directory, except `config` since we already sent it.
+    # Sync everything under package directory, except `config`
+    # since it has already been copied.
     if package_source.is_dir():
         _sync_dirs(package_source, package_dest)
 
@@ -314,12 +365,7 @@ def package_pipeline(name, env, alias, destination, version):
     context = load_context(Path.cwd(), env=env)
 
     result_path = _package_pipeline(
-        name,
-        context,
-        package_name=alias,
-        destination=destination,
-        env=env,
-        version=version,
+        name, context, alias=alias, destination=destination, env=env, version=version
     )
 
     as_alias = f" as `{alias}`" if alias else ""
@@ -327,25 +373,52 @@ def package_pipeline(name, env, alias, destination, version):
     click.secho(message, fg="green")
 
 
+def _find_config_files(
+    source_config_dir: Path, glob_pattern: str
+) -> List[Tuple[Path, str]]:
+    config_files = []  # type: List[Tuple[Path, str]]
+
+    if source_config_dir.is_dir():
+        config_files = [
+            (path, path.parent.relative_to(source_config_dir).as_posix())
+            for path in source_config_dir.glob(glob_pattern)
+            if path.is_file()
+        ]
+
+    return config_files
+
+
 def _package_pipeline(  # pylint: disable=too-many-arguments
-    name: str,
+    pipeline_name: str,
     context: KedroContext,
-    package_name: str = None,
+    alias: str = None,
     destination: str = None,
     env: str = None,
     version: str = None,
 ) -> Path:
     package_dir = _get_project_package_dir(context)
     env = env or "base"
-    package_name = package_name or name
     version = version or "0.1"
 
-    artifacts_to_package = _get_pipeline_artifacts(context, pipeline_name=name, env=env)
+    artifacts_to_package = _get_pipeline_artifacts(
+        context, pipeline_name=pipeline_name, env=env
+    )
+    # as the wheel file will only contain parameters, we aren't listing other
+    # config files not to confused users and avoid useless file copies
+    configs_to_package = _find_config_files(
+        artifacts_to_package.pipeline_conf, f"parameters*/**/*{pipeline_name}*"
+    )
+    source_paths = (
+        artifacts_to_package.pipeline_dir,
+        artifacts_to_package.pipeline_tests,
+        configs_to_package,
+    )
+
     # Check that pipeline directory exists and not empty
     _validate_dir(artifacts_to_package.pipeline_dir)
     destination = Path(destination) if destination else package_dir.parent / "dist"
 
-    _generate_wheel_file(package_name, destination, artifacts_to_package, version)
+    _generate_wheel_file(pipeline_name, destination, source_paths, version, alias=alias)
 
     _clean_pycache(package_dir)
     _clean_pycache(context.project_path)
@@ -360,7 +433,7 @@ def _validate_dir(path: Path) -> None:
         raise KedroCliError(f"'{path}' is an empty directory.")
 
 
-def _get_wheel_name(**kwargs):
+def _get_wheel_name(**kwargs: Any) -> str:
     # https://stackoverflow.com/questions/51939257/how-do-you-get-the-filename-of-a-python-wheel-when-running-setup-py
     dist = Distribution(attrs=kwargs)
     bdist_wheel_cmd = dist.get_command_obj("bdist_wheel")
@@ -371,17 +444,36 @@ def _get_wheel_name(**kwargs):
     return f"{distname}-{tag}.whl"
 
 
+def _sync_path_list(source: List[Tuple[Path, str]], target: Path) -> None:
+    for source_path, suffix in source:
+        target_with_suffix = (target / suffix).resolve()
+        _sync_dirs(source_path, target_with_suffix)
+
+
+_SourcePathType = Union[Path, List[Tuple[Path, str]]]
+
+
 def _generate_wheel_file(
-    package_name: str, destination: Path, source_paths: Tuple[Path, ...], version: str
+    pipeline_name: str,
+    destination: Path,
+    source_paths: Tuple[_SourcePathType, ...],
+    version: str,
+    alias: str = None,
 ) -> None:
+    package_name = alias or pipeline_name
+
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_dir_path = Path(temp_dir).resolve()
 
         # Copy source folders
         target_paths = _get_package_artifacts(temp_dir_path, package_name)
         for source, target in zip(source_paths, target_paths):
-            if source.is_dir():
-                _sync_dirs(source, target)
+            sync_func = _sync_path_list if isinstance(source, list) else _sync_dirs
+            sync_func(source, target)  # type: ignore
+
+        conf_target = target_paths[-1]
+        if conf_target.is_dir() and alias:
+            _rename_files(conf_target, pipeline_name, alias)
 
         # Build a setup.py on the fly
         setup_file = _generate_setup_file(package_name, version, temp_dir_path)
@@ -456,10 +548,10 @@ def _create_pipeline(name: str, kedro_version: str, output_dir: Path) -> Path:
 
 # pylint: disable=missing-raises-doc
 def _sync_dirs(source: Path, target: Path, prefix: str = ""):
-    """Recursively copies `source` directory into `target` directory without
+    """Recursively copies `source` directory (or file) into `target` directory without
     overwriting any existing files/directories in the target using the following
     rules:
-        1) Skip any files/directories from source have same names as files in target.
+        1) Skip any files/directories which names match with files in target.
         2) Copy all files from source to target.
         3) Recursively copy all directories from source to target.
 
@@ -473,7 +565,14 @@ def _sync_dirs(source: Path, target: Path, prefix: str = ""):
     existing_files = {f.name for f in existing if f.is_file()}
     existing_folders = {f.name for f in existing if f.is_dir()}
 
-    for source_path in source.iterdir():
+    if source.is_dir():
+        content = list(source.iterdir())
+    elif source.is_file():
+        content = [source]
+    else:
+        content = []  # nothing to copy
+
+    for source_path in content:
         source_name = source_path.name
         target_path = target / source_name
         click.echo(indent(f"Creating `{target_path}`: ", prefix), nl=False)
@@ -494,8 +593,8 @@ def _sync_dirs(source: Path, target: Path, prefix: str = ""):
             click.secho("OK", fg="green")
         else:  # source_path is a directory, rule #3
             click.echo()
-            double_prefix = (prefix or " ") * 2
-            _sync_dirs(source_path, target_path, prefix=double_prefix)
+            new_prefix = (prefix or "") + " " * 2
+            _sync_dirs(source_path, target_path, prefix=new_prefix)
 
 
 def _get_project_package_dir(context: KedroContext) -> Path:
@@ -509,12 +608,12 @@ def _get_project_package_dir(context: KedroContext) -> Path:
 def _get_pipeline_artifacts(
     context: KedroContext, pipeline_name: str, env: str
 ) -> PipelineArtifacts:
-    """From existing project, returns in order: source_path, tests_path, config_path"""
+    """From existing project, returns in order: source_path, tests_path, config_paths"""
     package_dir = _get_project_package_dir(context)
     artifacts = PipelineArtifacts(
         package_dir / "pipelines" / pipeline_name,
         package_dir.parent / "tests" / "pipelines" / pipeline_name,
-        context.project_path / context.CONF_ROOT / env / "pipelines" / pipeline_name,
+        context.project_path / context.CONF_ROOT / env,
     )
     return artifacts
 
@@ -522,7 +621,9 @@ def _get_pipeline_artifacts(
 def _get_package_artifacts(
     source_path: Path, package_name: str
 ) -> Tuple[Path, Path, Path]:
-    """From existing unpacked wheel, returns in order: source_path, tests_path, config_path"""
+    """From existing unpacked wheel, returns in order:
+    source_path, tests_path, config_path
+    """
     artifacts = (
         source_path / package_name,
         source_path / "tests",
@@ -542,29 +643,26 @@ def _copy_pipeline_tests(pipeline_name: str, result_path: Path, package_dir: Pat
 
 
 def _copy_pipeline_configs(
-    pipe_name: str,
-    result_path: Path,
-    context: KedroContext,
-    skip_config: bool,
-    env: str = None,
+    result_path: Path, context: KedroContext, skip_config: bool, env: str = None
 ):
     config_source = result_path / "config"
     env = env or "base"
     try:
         if not skip_config:
-            config_target = (
-                context.project_path / context.CONF_ROOT / env / "pipelines" / pipe_name
-            )
+            config_target = context.project_path / context.CONF_ROOT / env
             _sync_dirs(config_source, config_target)
     finally:
         shutil.rmtree(config_source)
 
 
-def _delete_dirs(*dirs):
-    for dir_ in dirs:
-        click.echo(f"Deleting `{dir_}`: ", nl=False)
+def _delete_artifacts(*artifacts: Path):
+    for artifact in artifacts:
+        click.echo(f"Deleting `{artifact}`: ", nl=False)
         try:
-            shutil.rmtree(dir_)
+            if artifact.is_dir():
+                shutil.rmtree(artifact)
+            else:
+                artifact.unlink()
         except Exception as exc:
             click.secho("FAILED", fg="red")
             cls = exc.__class__

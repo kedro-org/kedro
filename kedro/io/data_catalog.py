@@ -35,6 +35,7 @@ import copy
 import difflib
 import logging
 import re
+import warnings
 from collections import defaultdict
 from functools import partial
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Type, Union
@@ -468,11 +469,11 @@ class DataCatalog:
         Returns:
             Whether the data set output exists.
 
-        Raises:
-            DataSetNotFoundError: When a data set with the given name
-                has not yet been registered.
         """
-        dataset = self._get_dataset(name)
+        try:
+            dataset = self._get_dataset(name)
+        except DataSetNotFoundError:
+            return False
         return dataset.exists()
 
     def release(self, name: str):
@@ -521,7 +522,7 @@ class DataCatalog:
                 self._logger.warning("Replacing DataSet '%s'", data_set_name)
             else:
                 raise DataSetAlreadyExistsError(
-                    "DataSet '{}' has already been registered".format(data_set_name)
+                    f"DataSet '{data_set_name}' has already been registered"
                 )
         self._data_sets[data_set_name] = data_set
         self._transformers[data_set_name] = list(self._default_transformers)
@@ -612,6 +613,15 @@ class DataCatalog:
                 existent data set.
             TypeError: When transformer isn't an instance of ``AbstractTransformer``
         """
+
+        warnings.warn(
+            "The transformer API will be deprecated in Kedro 0.18.0."
+            "Please use Dataset Hooks to customise the load and save methods."
+            "For more information, please visit"
+            "https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_hooks.html",
+            DeprecationWarning,
+        )
+
         if not isinstance(transformer, AbstractTransformer):
             raise TypeError(
                 "Object of type {} is not an instance of AbstractTransformer".format(
@@ -625,9 +635,7 @@ class DataCatalog:
             data_set_names = [data_set_names]
         for data_set_name in data_set_names:
             if data_set_name not in self._data_sets:
-                raise DataSetNotFoundError(
-                    "No data set called {}".format(data_set_name)
-                )
+                raise DataSetNotFoundError(f"No data set called {data_set_name}")
             self._transformers[data_set_name].append(transformer)
 
     def list(self, regex_search: Optional[str] = None) -> List[str]:
@@ -668,6 +676,7 @@ class DataCatalog:
 
         try:
             pattern = re.compile(regex_search, flags=re.IGNORECASE)
+
         except re.error as exc:
             raise SyntaxError(
                 f"Invalid regular expression provided: `{regex_search}`"
@@ -715,6 +724,4 @@ class DataCatalog:
         if hasattr(data_set, "confirm"):
             data_set.confirm()  # type: ignore
         else:
-            raise DataSetError(
-                "DataSet '{}' does not have 'confirm' method".format(name)
-            )
+            raise DataSetError(f"DataSet '{name}' does not have 'confirm' method")

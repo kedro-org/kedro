@@ -25,6 +25,7 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# pylint: disable=unused-argument
 
 from pathlib import Path
 
@@ -32,14 +33,22 @@ import anyconfig
 import pytest
 from click.testing import CliRunner
 
+from kedro.framework.session import KedroSession
 from kedro.runner import ParallelRunner, SequentialRunner
 
 
+@pytest.mark.usefixtures("chdir_to_dummy_project")
 class TestRunCommand:
     @staticmethod
     @pytest.fixture(autouse=True)
-    def fake_load_context(mocker, fake_kedro_cli):
-        yield mocker.patch.object(fake_kedro_cli, "load_context")
+    def mocked_session_manager(mocker):
+        mock_session_create = mocker.patch.object(KedroSession, "create")
+        mock_load_context = (
+            mock_session_create.return_value.__enter__.return_value.load_context
+        )
+        # needed to be able to print the parameters in test_starter/.../cli.py
+        mock_load_context.return_value.params = {"fake": True}
+        return mock_session_create
 
     @staticmethod
     @pytest.fixture(params=["run_config.yml", "run_config.json"])
@@ -65,11 +74,12 @@ class TestRunCommand:
         anyconfig.dump(config, fake_run_config)
         return fake_run_config
 
-    def test_run_successfully(self, fake_kedro_cli, fake_load_context, mocker):
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["run"])
+    def test_run_successfully(self, fake_project_cli, mocked_session_manager, mocker):
+        result = CliRunner().invoke(fake_project_cli.cli, ["run"])
         assert not result.exit_code
 
-        fake_load_context.return_value.run.assert_called_once_with(
+        mocked_session = mocked_session_manager.return_value.__enter__.return_value
+        mocked_session.run.assert_called_once_with(
             tags=(),
             runner=mocker.ANY,
             node_names=(),
@@ -80,28 +90,28 @@ class TestRunCommand:
             pipeline_name=None,
         )
 
-        runner = fake_load_context.return_value.run.call_args_list[0][1]["runner"]
+        runner = mocked_session.run.call_args_list[0][1]["runner"]
         assert isinstance(runner, SequentialRunner)
         assert not runner._is_async
 
     def test_with_sequential_runner_and_parallel_flag(
-        self, fake_kedro_cli, fake_load_context
+        self, fake_project_cli, mocked_session_manager
     ):
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["run", "--parallel", "--runner=SequentialRunner"]
+            fake_project_cli.cli, ["run", "--parallel", "--runner=SequentialRunner"]
         )
         assert result.exit_code
         assert "Please use either --parallel or --runner" in result.stdout
 
-        fake_load_context.return_value.run.assert_not_called()
+        mocked_session_manager.return_value.run.assert_not_called()
 
     def test_run_successfully_parallel_via_flag(
-        self, fake_kedro_cli, fake_load_context, mocker
+        self, fake_project_cli, mocked_session_manager, mocker
     ):
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["run", "--parallel"])
+        result = CliRunner().invoke(fake_project_cli.cli, ["run", "--parallel"])
         assert not result.exit_code
-
-        fake_load_context.return_value.run.assert_called_once_with(
+        mocked_session = mocked_session_manager.return_value.__enter__.return_value
+        mocked_session.run.assert_called_once_with(
             tags=(),
             runner=mocker.ANY,
             node_names=(),
@@ -112,39 +122,45 @@ class TestRunCommand:
             pipeline_name=None,
         )
 
-        runner = fake_load_context.return_value.run.call_args_list[0][1]["runner"]
+        runner = mocked_session.run.call_args_list[0][1]["runner"]
         assert isinstance(runner, ParallelRunner)
         assert not runner._is_async
 
     def test_run_successfully_parallel_via_name(
-        self, fake_kedro_cli, fake_load_context
+        self, fake_project_cli, mocked_session_manager
     ):
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["run", "--runner=ParallelRunner"]
+            fake_project_cli.cli, ["run", "--runner=ParallelRunner"]
         )
         assert not result.exit_code
-
-        runner = fake_load_context.return_value.run.call_args_list[0][1]["runner"]
+        mocked_session = mocked_session_manager.return_value.__enter__.return_value
+        runner = mocked_session.run.call_args_list[0][1]["runner"]
         assert isinstance(runner, ParallelRunner)
         assert not runner._is_async
 
-    def test_run_async(self, fake_kedro_cli, fake_load_context, mocker):
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["run", "--async"])
+    def test_run_async(self, fake_project_cli, mocked_session_manager, mocker):
+        result = CliRunner().invoke(fake_project_cli.cli, ["run", "--async"])
         assert not result.exit_code
-
-        runner = fake_load_context.return_value.run.call_args_list[0][1]["runner"]
+        mocked_session = mocked_session_manager.return_value.__enter__.return_value
+        runner = mocked_session.run.call_args_list[0][1]["runner"]
         assert isinstance(runner, SequentialRunner)
         assert runner._is_async
 
     @pytest.mark.parametrize("config_flag", ["--config", "-c"])
     def test_run_with_config(
-        self, config_flag, fake_kedro_cli, fake_load_context, fake_run_config, mocker
+        self,
+        config_flag,
+        fake_project_cli,
+        mocked_session_manager,
+        fake_run_config,
+        mocker,
     ):
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["run", config_flag, fake_run_config]
+            fake_project_cli.cli, ["run", config_flag, fake_run_config]
         )
         assert not result.exit_code
-        fake_load_context.return_value.run.assert_called_once_with(
+        mocked_session = mocked_session_manager.return_value.__enter__.return_value
+        mocked_session.run.assert_called_once_with(
             tags=("tag1", "tag2"),
             runner=mocker.ANY,
             node_names=("node1", "node2"),
@@ -171,16 +187,18 @@ class TestRunCommand:
     def test_run_with_params_in_config(
         self,
         expected,
-        fake_kedro_cli,
-        fake_load_context,
+        fake_project_cli,
+        mocked_session_manager,
         fake_run_config_with_params,
         mocker,
     ):
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["run", "-c", fake_run_config_with_params]
+            fake_project_cli.cli, ["run", "-c", fake_run_config_with_params]
         )
+
         assert not result.exit_code
-        fake_load_context.return_value.run.assert_called_once_with(
+        mocked_session = mocked_session_manager.return_value.__enter__.return_value
+        mocked_session.run.assert_called_once_with(
             tags=("tag1", "tag2"),
             runner=mocker.ANY,
             node_names=("node1", "node2"),
@@ -190,8 +208,8 @@ class TestRunCommand:
             load_versions={},
             pipeline_name="pipeline1",
         )
-        fake_load_context.assert_called_once_with(
-            Path.cwd(), env=mocker.ANY, extra_params=expected
+        mocked_session_manager.assert_called_once_with(
+            project_path=Path.cwd(), env=mocker.ANY, extra_params=expected
         )
 
     @pytest.mark.parametrize(
@@ -219,18 +237,23 @@ class TestRunCommand:
         ],
     )
     def test_run_extra_params(
-        self, mocker, fake_kedro_cli, fake_load_context, cli_arg, expected_extra_params
+        self,
+        mocker,
+        fake_project_cli,
+        mocked_session_manager,
+        cli_arg,
+        expected_extra_params,
     ):
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["run", "--params", cli_arg])
+        result = CliRunner().invoke(fake_project_cli.cli, ["run", "--params", cli_arg])
 
         assert not result.exit_code
-        fake_load_context.assert_called_once_with(
-            Path.cwd(), env=mocker.ANY, extra_params=expected_extra_params
+        mocked_session_manager.assert_called_once_with(
+            project_path=Path.cwd(), env=mocker.ANY, extra_params=expected_extra_params
         )
 
     @pytest.mark.parametrize("bad_arg", ["bad", "foo:bar,bad"])
-    def test_bad_extra_params(self, fake_kedro_cli, fake_load_context, bad_arg):
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["run", "--params", bad_arg])
+    def test_bad_extra_params(self, fake_project_cli, bad_arg):
+        result = CliRunner().invoke(fake_project_cli.cli, ["run", "--params", bad_arg])
         assert result.exit_code
         assert (
             "Item `bad` must contain a key and a value separated by `:`"
@@ -238,8 +261,8 @@ class TestRunCommand:
         )
 
     @pytest.mark.parametrize("bad_arg", [":", ":value", " :value"])
-    def test_bad_params_key(self, fake_kedro_cli, fake_load_context, bad_arg):
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["run", "--params", bad_arg])
+    def test_bad_params_key(self, fake_project_cli, bad_arg):
+        result = CliRunner().invoke(fake_project_cli.cli, ["run", "--params", bad_arg])
         assert result.exit_code
         assert "Parameter key cannot be an empty string" in result.stdout
 
@@ -248,13 +271,14 @@ class TestRunCommand:
         [("--load-version", "dataset1:time1"), ("-lv", "dataset2:time2")],
     )
     def test_reformat_load_versions(
-        self, fake_kedro_cli, fake_load_context, option, value, mocker
+        self, fake_project_cli, mocked_session_manager, option, value, mocker
     ):
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["run", option, value])
+        result = CliRunner().invoke(fake_project_cli.cli, ["run", option, value])
         assert not result.exit_code, result.output
 
         ds, t = value.split(":", 1)
-        fake_load_context.return_value.run.assert_called_once_with(
+        mocked_session = mocked_session_manager.return_value.__enter__.return_value
+        mocked_session.run.assert_called_once_with(
             tags=(),
             runner=mocker.ANY,
             node_names=(),
@@ -265,9 +289,9 @@ class TestRunCommand:
             pipeline_name=None,
         )
 
-    def test_fail_reformat_load_versions(self, fake_kedro_cli, fake_load_context):
+    def test_fail_reformat_load_versions(self, fake_project_cli):
         load_version = "2020-05-12T12.00.00"
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["run", "-lv", load_version])
+        result = CliRunner().invoke(fake_project_cli.cli, ["run", "-lv", load_version])
         assert result.exit_code, result.output
 
         expected_output = (
@@ -275,4 +299,4 @@ class TestRunCommand:
             f"`dataset_name:YYYY-MM-DDThh.mm.ss.sssZ`,"
             f"found {load_version} instead\n"
         )
-        assert result.output == expected_output
+        assert expected_output in result.output

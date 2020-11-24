@@ -31,6 +31,7 @@ with the values from the passed dictionary.
 """
 import re
 from copy import deepcopy
+from pathlib import Path
 from typing import Any, Dict, Iterable, Optional, Union
 
 import jmespath
@@ -144,6 +145,25 @@ class TemplatedConfigLoader(ConfigLoader):
         self._arg_dict = super().get(globals_pattern) if globals_pattern else {}
         globals_dict = deepcopy(globals_dict) or {}
         self._arg_dict = {**self._arg_dict, **globals_dict}
+
+    @staticmethod
+    def _load_config_file(config_file: Path) -> Dict[str, Any]:
+        """Load an individual config file using `anyconfig` as a backend.
+
+        Args:
+            config_file: Path to a config file to process.
+
+        Returns:
+            Parsed configuration.
+        """
+        # for performance reasons
+        import anyconfig  # pylint: disable=import-outside-toplevel
+
+        return {
+            k: v
+            for k, v in anyconfig.load(config_file, ac_template=True).items()
+            if not k.startswith("_")
+        }
 
     def get(self, *patterns: str) -> Dict[str, Any]:
         """Tries to resolve the template variables in the config dictionary

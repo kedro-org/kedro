@@ -29,9 +29,9 @@ import re
 from pathlib import Path
 from typing import Any, Dict
 
+import boto3
 import pandas as pd
 import pytest
-import s3fs
 from moto import mock_s3
 from pandas.util.testing import assert_frame_equal
 
@@ -46,7 +46,7 @@ DATASET = "kedro.extras.datasets.pandas.CSVDataSet"
 @pytest.fixture
 def partitioned_data_pandas():
     return {
-        "p{:02d}/data.csv".format(counter): pd.DataFrame(
+        f"p{counter:02d}/data.csv": pd.DataFrame(
             {"part": counter, "col": list(range(counter + 1))}
         )
         for counter in range(5)
@@ -295,11 +295,8 @@ class TestIncrementalDataSetLocal:
             ),
             (
                 {
-                    "dataset": DATASET,
-                    "credentials": {
-                        "cred": "common",
-                        "dataset_credentials": {"ds": "only"},
-                    },
+                    "dataset": {"type": DATASET, "credentials": {"ds": "only"}},
+                    "credentials": {"cred": "common"},
                 },
                 {"cred": "common"},
                 {"ds": "only"},
@@ -317,8 +314,7 @@ class TestIncrementalDataSetLocal:
             ),
             (
                 {
-                    "dataset": DATASET,
-                    "credentials": {"dataset_credentials": {"ds": "only"}},
+                    "dataset": {"type": DATASET, "credentials": {"ds": "only"}},
                     "checkpoint": {"credentials": {"cp": "only"}},
                 },
                 {},
@@ -378,7 +374,7 @@ BUCKET_NAME = "fake_bucket_name"
 def mocked_s3_bucket():
     """Create a bucket for testing using moto."""
     with mock_s3():
-        conn = s3fs.core.boto3.client("s3")
+        conn = boto3.client("s3")
         conn.create_bucket(Bucket=BUCKET_NAME)
         yield conn
 
@@ -388,11 +384,9 @@ def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas):
     prefix = "csvs"
     for key, data in partitioned_data_pandas.items():
         mocked_s3_bucket.put_object(
-            Bucket=BUCKET_NAME,
-            Key="{}/{}".format(prefix, key),
-            Body=data.to_csv(index=False),
+            Bucket=BUCKET_NAME, Key=f"{prefix}/{key}", Body=data.to_csv(index=False),
         )
-    return "s3://{}/{}".format(BUCKET_NAME, prefix)
+    return f"s3://{BUCKET_NAME}/{prefix}"
 
 
 class TestPartitionedDataSetS3:
@@ -420,7 +414,7 @@ class TestPartitionedDataSetS3:
     def test_load_and_confirm_s3a(
         self, mocked_csvs_in_s3, partitioned_data_pandas, mocker
     ):
-        s3a_path = "s3a://{}".format(mocked_csvs_in_s3.split("://", 1)[1])
+        s3a_path = f"s3a://{mocked_csvs_in_s3.split('://', 1)[1]}"
         pds = IncrementalDataSet(s3a_path, DATASET)
         assert pds._protocol == "s3a"
         assert pds._checkpoint._protocol == "s3"

@@ -93,8 +93,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
         if not callable(func):
             raise ValueError(
                 _node_error_message(
-                    "first argument must be a "
-                    "function, not `{}`.".format(type(func).__name__)
+                    f"first argument must be a function, not `{type(func).__name__}`."
                 )
             )
 
@@ -180,13 +179,13 @@ class Node:  # pylint: disable=too-many-instance-attributes
 
     def __str__(self):
         def _sorted_set_to_str(xset):
-            return "[{}]".format(",".join(sorted(xset)))
+            return f"[{','.join(sorted(xset))}]"
 
         out_str = _sorted_set_to_str(self.outputs) if self._outputs else "None"
         in_str = _sorted_set_to_str(self.inputs) if self._inputs else "None"
 
         prefix = self._name + ": " if self._name else ""
-        return prefix + "{}({}) -> {}".format(self._func_name, in_str, out_str)
+        return prefix + f"{self._func_name}({in_str}) -> {out_str}"
 
     def __repr__(self):  # pragma: no cover
         return "Node({}, {!r}, {!r}, {!r})".format(
@@ -206,6 +205,25 @@ class Node:  # pylint: disable=too-many-instance-attributes
                 f"`functools.update_wrapper` for better log messages."
             )
         return name
+
+    @property
+    def func(self) -> Callable:
+        """Exposes the underlying function of the node.
+
+        Returns:
+           Return the underlying function of the node.
+        """
+        return self._func
+
+    @func.setter
+    def func(self, func: Callable):
+        """Sets the underlying function of the node.
+        Useful if user wants to decorate the function in a node's Hook implementation.
+
+        Args:
+            func: The new function for node's execution.
+        """
+        self._func = func
 
     @property
     def tags(self) -> Set[str]:
@@ -374,6 +392,13 @@ class Node:  # pylint: disable=too-many-instance-attributes
             >>> assert "output" in result
             >>> assert result['output'] == "f(g(fg(h(1))))"
         """
+        warn(
+            "The node's `decorate` API will be deprecated in Kedro 0.18.0."
+            "Please use a node's Hooks to extend the node's behaviour in a pipeline."
+            "For more information, please visit"
+            "https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_hooks.html",
+            DeprecationWarning,
+        )
         return self._copy(decorators=self._decorators + list(reversed(decorators)))
 
     def run(self, inputs: Dict[str, Any] = None) -> Dict[str, Any]:

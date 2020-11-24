@@ -36,6 +36,7 @@ from typing import Any, Dict
 
 import pandas as pd
 import pytest
+import toml
 import yaml
 from pandas.util.testing import assert_frame_equal
 
@@ -87,6 +88,12 @@ def _write_yaml(filepath: Path, config: Dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     yaml_str = yaml.dump(config)
     filepath.write_text(yaml_str)
+
+
+def _write_toml(filepath: Path, config: Dict):
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    toml_str = toml.dumps(config)
+    filepath.write_text(toml_str)
 
 
 def _write_json(filepath: Path, config: Dict):
@@ -168,7 +175,7 @@ def prepare_project_dir(tmp_path, base_config, local_config, env):
     _write_json(parameters, project_parameters)
     _write_dummy_ini(db_config_path)
 
-    _write_yaml(tmp_path / ".kedro.yml", kedro_yml_payload)
+    _write_toml(tmp_path / "pyproject.toml", pyproject_toml_payload)
 
 
 @pytest.fixture
@@ -198,10 +205,15 @@ expected_message_head = (
     "argument to your previous command:\n"
 )
 
-kedro_yml_payload = {
-    "project_name": "mock_project_name",
-    "project_version": kedro_version,
-    "package_name": "mock_package_name",
+pyproject_toml_payload = {
+    "tool": {
+        "kedro": {
+            "context_path": "fake.module.path",
+            "project_name": "mock_project_name",
+            "project_version": kedro_version,
+            "package_name": "mock_package_name",
+        }
+    }
 }
 
 
@@ -265,7 +277,7 @@ class DummyContext(KedroContext):
 
 
 class DummyContextNoHooks(KedroContext):
-    def _create_catalog(  # pylint: disable=no-self-use,too-many-arguments
+    def _create_catalog(  # pylint: disable=too-many-arguments
         self,
         conf_catalog: Dict[str, Any],
         conf_creds: Dict[str, Any],
@@ -277,9 +289,7 @@ class DummyContextNoHooks(KedroContext):
             conf_catalog, conf_creds, load_versions, save_version, journal
         )
 
-    def _create_config_loader(  # pylint: disable=no-self-use
-        self, conf_paths
-    ) -> ConfigLoader:
+    def _create_config_loader(self, conf_paths) -> ConfigLoader:
         return TemplatedConfigLoader(conf_paths)
 
     def _get_pipelines(self) -> Dict[str, Pipeline]:
@@ -334,9 +344,10 @@ def clear_hook_manager():
 
 class TestKedroContext:
     def test_attributes(self, tmp_path, dummy_context):
-        assert dummy_context.project_name == kedro_yml_payload["project_name"]
-        assert dummy_context.package_name == kedro_yml_payload["package_name"]
-        assert dummy_context.project_version == kedro_yml_payload["project_version"]
+        project_metadata = pyproject_toml_payload["tool"]["kedro"]
+        assert dummy_context.project_name == project_metadata["project_name"]
+        assert dummy_context.package_name == project_metadata["package_name"]
+        assert dummy_context.project_version == project_metadata["project_version"]
         assert isinstance(dummy_context.project_path, Path)
         assert dummy_context.project_path == tmp_path.resolve()
 
@@ -668,8 +679,9 @@ class TestKedroContextRun:
     @pytest.mark.parametrize("context_class", [DummyContext, DummyContextNoHooks])
     def test_run_with_empty_pipeline(self, tmp_path, context_class):
         context = context_class(tmp_path)
-        assert context.project_name == kedro_yml_payload["project_name"]
-        assert context.project_version == kedro_yml_payload["project_version"]
+        project_metadata = pyproject_toml_payload["tool"]["kedro"]
+        assert context.project_name == project_metadata["project_name"]
+        assert context.project_version == project_metadata["project_version"]
 
         with pytest.raises(KedroContextError, match="Pipeline contains no nodes"):
             context.run(pipeline_name="empty")

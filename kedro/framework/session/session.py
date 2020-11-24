@@ -189,9 +189,11 @@ class KedroSession:
 
     def _init_store(self) -> BaseSessionStore:
         metadata = _get_project_metadata(self._project_path)
-        project_settings = _get_project_settings(metadata)
+        session_store = _get_project_settings(
+            metadata.package_name, "SESSION_STORE", {}
+        )
 
-        config = deepcopy(project_settings.session_store)
+        config = deepcopy(session_store)
         config.setdefault("path", (self._project_path / "sessions").as_posix())
         config["session_id"] = self.session_id
         store = BaseSessionStore.from_config(config)

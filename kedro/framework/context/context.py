@@ -36,10 +36,9 @@ from typing import Any, Dict, Iterable, Tuple, Union
 from urllib.parse import urlparse
 from warnings import warn
 
-from kedro import __version__
 from kedro.config import ConfigLoader, MissingConfigException
 from kedro.framework.hooks import get_hook_manager
-from kedro.framework.project import ProjectMetadata, ProjectSettings
+from kedro.framework.project import ProjectMetadata
 from kedro.framework.project.metadata import _get_project_metadata
 from kedro.framework.project.settings import _get_project_settings
 from kedro.io import DataCatalog
@@ -48,19 +47,9 @@ from kedro.pipeline import Pipeline
 from kedro.pipeline.pipeline import _transcode_split
 from kedro.runner.runner import AbstractRunner
 from kedro.runner.sequential_runner import SequentialRunner
-from kedro.utils import load_obj
 from kedro.versioning import Journal
 
 _PLUGIN_HOOKS = "kedro.hooks"  # entry-point to load hooks from for installed plugins
-
-
-def _version_mismatch_error(context_version) -> str:
-    return (
-        "Your Kedro project version {} does not match Kedro package version {} "
-        "you are running. Make sure to update your project template. See "
-        "https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md "
-        "for how to migrate your Kedro project."
-    ).format(context_version, __version__)
 
 
 def _is_relative_path(path_string: str) -> bool:
@@ -230,11 +219,6 @@ class KedroContext:
         """
         self._project_path = Path(project_path).expanduser().resolve()
         self._project_metadata = _get_project_metadata(self._project_path)
-        self._project_settings = _get_project_settings(self._project_metadata)
-
-        # check the match for major and minor version (skip patch version)
-        if self.project_version.split(".")[:2] != __version__.split(".")[:2]:
-            raise KedroContextError(_version_mismatch_error(self.project_version))
 
         self.env = env or "local"
         self._extra_params = deepcopy(extra_params)
@@ -252,11 +236,6 @@ class KedroContext:
 
         """
         return self._project_metadata
-
-    @property
-    def project_settings(self) -> ProjectSettings:
-        """Read-only property for Kedro project settings."""
-        return self._project_settings
 
     @property
     def project_name(self) -> str:
@@ -312,7 +291,11 @@ class KedroContext:
         hook_manager = get_hook_manager()
         already_registered = hook_manager.get_plugins()
         found = hook_manager.load_setuptools_entrypoints(_PLUGIN_HOOKS)
-        disable_plugins = set(self.project_settings.disable_hooks_for_plugins)
+        disable_plugins = set(
+            _get_project_settings(
+                self.project_metadata.package_name, "DISABLE_HOOKS_FOR_PLUGINS", ()
+            )
+        )
 
         # Get list of plugin/distinfo tuples for all setuptools registered plugins.
         plugininfo = hook_manager.list_plugin_distinfo()
@@ -358,9 +341,12 @@ class KedroContext:
             )
 
         hook_manager = get_hook_manager()
+        project_hooks = _get_project_settings(
+            self.project_metadata.package_name, "HOOKS", ()
+        )
 
         # enrich with hooks specified in settings.py
-        all_hooks = self.hooks + self.project_settings.hooks
+        all_hooks = self.hooks + project_hooks
         for hooks_collection in all_hooks:
             # Sometimes users might create more than one context instance, in which case
             # hooks have already been registered, so we perform a simple check here
@@ -806,12 +792,10 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
 
     """
     project_path = Path(project_path).expanduser().resolve()
-    project_metadata = _get_project_metadata(project_path)
+    metadata = _get_project_metadata(project_path)
 
-    context_class = (
-        load_obj(project_metadata.context_path)
-        if project_metadata.context_path
-        else KedroContext
+    context_class = _get_project_settings(
+        metadata.package_name, "CONTEXT_CLASS", KedroContext
     )
 
     # update kwargs with env from the environment variable

@@ -32,11 +32,10 @@ from pathlib import Path
 import pytest
 import toml
 
+from kedro import __version__ as kedro_version
 from kedro.framework.session import KedroSession, get_current_session
 from kedro.framework.session.store import BaseSessionStore, ShelveStore
 
-_FAKE_CONTEXT_PATH = "fake.module.path"
-_FAKE_KEDRO_VERSION = "fake_kedro_version"
 _FAKE_PACKAGE_NAME = "fake_package"
 _FAKE_PROJECT_NAME = "fake_project"
 _FAKE_PIPELINE_NAME = "fake_pipeline"
@@ -45,6 +44,14 @@ _FAKE_PIPELINE_NAME = "fake_pipeline"
 @pytest.fixture
 def mock_load_context(mocker):
     return mocker.patch("kedro.framework.session.session.load_context")
+
+
+@pytest.fixture(autouse=True)
+def mock_get_project_settings(mocker):
+    # Here _get_project_settings() is used to get SESSION_STORE only
+    return mocker.patch(
+        "kedro.framework.session.session._get_project_settings", return_value={}
+    )
 
 
 @pytest.fixture
@@ -65,8 +72,7 @@ def fake_project(tmp_path, mock_load_context):  # pylint: disable=unused-argumen
     payload = {
         "tool": {
             "kedro": {
-                "context_path": _FAKE_CONTEXT_PATH,
-                "project_version": _FAKE_KEDRO_VERSION,
+                "project_version": kedro_version,
                 "project_name": _FAKE_PROJECT_NAME,
                 "package_name": _FAKE_PACKAGE_NAME,
             }
@@ -110,12 +116,11 @@ class TestKedroSession:
         }
         expected_store = {
             "config_file": fake_project / "pyproject.toml",
-            "context_path": _FAKE_CONTEXT_PATH,
             "project_path": fake_project,
             "project_name": _FAKE_PROJECT_NAME,
             "source_dir": fake_project / "src",
             "session_id": fake_session_id,
-            "project_version": _FAKE_KEDRO_VERSION,
+            "project_version": kedro_version,
             "package_name": _FAKE_PACKAGE_NAME,
             "cli": expected_cli_data,
         }
@@ -146,13 +151,12 @@ class TestKedroSession:
         }
         expected_store = {
             "config_file": fake_project / "pyproject.toml",
-            "context_path": _FAKE_CONTEXT_PATH,
             "project_path": fake_project,
             "project_name": _FAKE_PROJECT_NAME,
             "source_dir": fake_project / "src",
             "session_id": fake_session_id,
             "package_name": _FAKE_PACKAGE_NAME,
-            "project_version": _FAKE_KEDRO_VERSION,
+            "project_version": kedro_version,
             "cli": expected_cli_data,
         }
 
@@ -189,13 +193,9 @@ class TestKedroSession:
             "type": "ShelveStore",
             "path": shelve_location.as_posix(),
         }
-        fake_settings_module = mocker.Mock()
-        fake_settings_module.SESSION_STORE = session_store
-        fake_settings_module.DISABLE_HOOKS_FOR_PLUGINS = ()
-        fake_settings_module.HOOKS = ()
         mocker.patch(
-            "kedro.framework.project.settings.import_module",
-            return_value=fake_settings_module,
+            "kedro.framework.session.session._get_project_settings",
+            return_value=session_store,
         )
 
         other = KedroSession.create(fake_project)
@@ -321,7 +321,7 @@ class TestKedroSession:
             "run_id": fake_session_id,
             "project_path": fake_project.as_posix(),
             "env": mock_context.env,
-            "kedro_version": _FAKE_KEDRO_VERSION,
+            "kedro_version": kedro_version,
             "tags": None,
             "from_nodes": None,
             "to_nodes": None,
@@ -372,7 +372,7 @@ class TestKedroSession:
             "run_id": fake_session_id,
             "project_path": fake_project.as_posix(),
             "env": mock_context.env,
-            "kedro_version": _FAKE_KEDRO_VERSION,
+            "kedro_version": kedro_version,
             "tags": None,
             "from_nodes": None,
             "to_nodes": None,

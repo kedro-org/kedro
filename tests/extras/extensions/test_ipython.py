@@ -91,7 +91,6 @@ class TestLoadKedroObjects:
             package_name="fake_package_name",
             project_name="fake_project_name",
             project_version="0.1",
-            context_path="hello.there",
         )
         mocker.patch(
             "kedro.framework.project.metadata._get_project_metadata",
@@ -111,6 +110,9 @@ class TestLoadKedroObjects:
             "kedro.extras.extensions.ipython.register_line_magic"
         )
         mock_context = mocker.patch("kedro.framework.session.KedroSession.load_context")
+        mock_get_settings = mocker.patch(
+            "kedro.framework.session.session._get_project_settings", return_value={}
+        )
         mock_ipython = mocker.patch("kedro.extras.extensions.ipython.get_ipython")
 
         load_kedro_objects(tmp_path)
@@ -123,6 +125,9 @@ class TestLoadKedroObjects:
             }
         )
         assert mock_register_line_magic.call_count == 1
+        mock_get_settings.assert_called_once_with(
+            fake_metadata.package_name, "SESSION_STORE", {}
+        )
 
     def test_load_kedro_objects_not_in_kedro_project(self, tmp_path, mocker):
         mocker.patch(

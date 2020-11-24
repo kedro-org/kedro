@@ -40,3 +40,6 @@ HOOKS = (ProjectHooks(),)
 #     "type": "kedro.framework.session.store.ShelveStore",
 #     "path": "./sessions"
 # }
+
+# Define custom context class. Defaults to `KedroContext`
+# CONTEXT_CLASS = KedroContext

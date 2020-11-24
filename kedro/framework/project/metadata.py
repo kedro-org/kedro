@@ -34,7 +34,6 @@ from typing import Any, Dict, NamedTuple, Union
 import anyconfig
 
 from kedro import __version__ as kedro_version
-from kedro.utils import load_obj
 
 _KEDRO_CONFIG = "pyproject.toml"
 
@@ -47,7 +46,15 @@ class ProjectMetadata(NamedTuple):
     project_name: str
     project_version: str
     source_dir: Path
-    context_path: Union[str, None] = None
+
+
+def _version_mismatch_error(project_version) -> str:
+    return (
+        f"Your Kedro project version {project_version} does not match Kedro package "
+        f"version {kedro_version} you are running. Make sure to update your project "
+        f"template. See https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md "
+        f"for how to migrate your Kedro project."
+    )
 
 
 def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
@@ -60,6 +67,8 @@ def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
     Raises:
         RuntimeError: `pyproject.toml` was not found or the `[tool.kedro]` section
             is missing, or config file cannot be parsed.
+        ValueError: If project version is different from Kedro package version.
+            Note: Project version is the Kedro version the project was generated with.
 
     Returns:
         A named tuple that contains project metadata.
@@ -91,17 +100,21 @@ def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
             f"configuration parameters."
         ) from exc
 
-    source_dir = Path(metadata_dict.get("source_dir", "src")).expanduser()
-    source_dir = (project_path / source_dir).resolve()
-    metadata_dict["source_dir"] = source_dir
-    metadata_dict["config_file"] = config_path
-
     mandatory_keys = ["package_name", "project_name", "project_version"]
     missing_keys = [key for key in mandatory_keys if key not in metadata_dict]
     if missing_keys:
         raise RuntimeError(
             f"Missing required keys {missing_keys} from '{_KEDRO_CONFIG}'."
         )
+
+    # check the match for major and minor version (skip patch version)
+    if metadata_dict["project_version"].split(".")[:2] != kedro_version.split(".")[:2]:
+        raise ValueError(_version_mismatch_error(metadata_dict["project_version"]))
+
+    source_dir = Path(metadata_dict.get("source_dir", "src")).expanduser()
+    source_dir = (project_path / source_dir).resolve()
+    metadata_dict["source_dir"] = source_dir
+    metadata_dict["config_file"] = config_path
 
     try:
         return ProjectMetadata(**metadata_dict)
@@ -132,10 +145,6 @@ def _generate_toml_config(path: Path, package_path: Path) -> None:
         "source_dir": str(package_path.parent),
     }
 
-    context_path = _get_context_path(package_name)
-    if context_path:
-        payload["context_path"] = context_path
-
     conf_data = {}  # type: Dict[str, Any]
     config_path = path / _KEDRO_CONFIG
     if config_path.is_file():
@@ -153,15 +162,6 @@ def _generate_toml_config(path: Path, package_path: Path) -> None:
     tool_section = conf_data.setdefault("tool", {})
     tool_section["kedro"] = payload
     anyconfig.dump(conf_data, config_path)
-
-
-def _get_context_path(package_name):
-    context_path = f"{package_name}.run.ProjectContext"
-    try:
-        load_obj(context_path)
-    except (ModuleNotFoundError, AttributeError):
-        return None
-    return context_path
 
 
 class KedroConfigParserError(Exception):

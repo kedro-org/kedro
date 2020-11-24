@@ -34,7 +34,11 @@ import pytest
 
 from kedro import __version__ as kedro_version
 from kedro.framework.project import _generate_toml_config
-from kedro.framework.project.metadata import KedroConfigParserError
+from kedro.framework.project.metadata import (
+    KedroConfigParserError,
+    ProjectMetadata,
+    _get_project_metadata,
+)
 
 
 class TestPyProjectTomlGeneration:
@@ -55,13 +59,6 @@ class TestPyProjectTomlGeneration:
 
     @staticmethod
     @pytest.fixture(autouse=True)
-    def load_obj_mock(mocker):
-        yield mocker.patch(
-            "kedro.framework.project.metadata.load_obj", side_effect=AttributeError
-        )
-
-    @staticmethod
-    @pytest.fixture(autouse=True)
     def is_file_mock(mocker):
         yield mocker.patch.object(Path, "is_file", return_value=False)
 
@@ -75,26 +72,7 @@ class TestPyProjectTomlGeneration:
     def anyconfig_load_mock(mocker):
         yield mocker.patch("anyconfig.load")
 
-    def test_toml_is_missing_with_context_path(
-        self, anyconfig_dump_mock, load_obj_mock
-    ):
-        load_obj_mock.side_effect = None
-
-        expected_data = deepcopy(self.EXPECTED_DATA)
-        expected_data["tool"]["kedro"][
-            "context_path"
-        ] = f"{self.PACKAGE_NAME}.run.ProjectContext"
-
-        _generate_toml_config(self.CONF_PATH.parent, self.PACKAGE_PATH)
-
-        anyconfig_dump_mock.assert_called_once_with(expected_data, self.CONF_PATH)
-
-    @pytest.mark.parametrize("exception", [ModuleNotFoundError, AttributeError])
-    def test_toml_is_missing_no_context_path(
-        self, anyconfig_dump_mock, load_obj_mock, exception
-    ):
-        load_obj_mock.side_effect = exception
-
+    def test_toml_is_missing(self, anyconfig_dump_mock):
         _generate_toml_config(self.CONF_PATH.parent, self.PACKAGE_PATH)
 
         anyconfig_dump_mock.assert_called_once_with(self.EXPECTED_DATA, self.CONF_PATH)
@@ -150,3 +128,101 @@ class TestPyProjectTomlGeneration:
         existing_data["tool"] = expected_data
 
         anyconfig_dump_mock.assert_called_once_with(existing_data, self.CONF_PATH)
+
+
+class TestGetProjectMetadata:
+    project_path = Path.cwd()
+
+    def test_no_config_files(self, mocker):
+        mocker.patch.object(Path, "is_file", return_value=False)
+
+        pattern = (
+            f"Could not find the project configuration file 'pyproject.toml' "
+            f"in {self.project_path}"
+        )
+        with pytest.raises(RuntimeError, match=re.escape(pattern)):
+            _get_project_metadata(self.project_path)
+
+    def test_toml_invalid_format(self, tmp_path):
+        """Test for loading context from an invalid path. """
+        toml_path = tmp_path / "pyproject.toml"
+        toml_path.write_text("!!")  # Invalid TOML
+        pattern = "Failed to parse 'pyproject.toml' file"
+        with pytest.raises(RuntimeError, match=re.escape(pattern)):
+            _get_project_metadata(str(tmp_path))
+
+    def test_valid_toml_file(self, mocker):
+        mocker.patch.object(Path, "is_file", return_value=True)
+        pyproject_toml_payload = {
+            "tool": {
+                "kedro": {
+                    "package_name": "fake_package_name",
+                    "project_name": "fake_project_name",
+                    "project_version": kedro_version,
+                }
+            }
+        }
+        mocker.patch("anyconfig.load", return_value=pyproject_toml_payload)
+
+        actual = _get_project_metadata(self.project_path)
+
+        expected = ProjectMetadata(
+            source_dir=self.project_path / "src",  # default
+            config_file=self.project_path / "pyproject.toml",
+            package_name="fake_package_name",
+            project_name="fake_project_name",
+            project_version=kedro_version,
+        )
+        assert actual == expected
+
+    def test_toml_file_without_kedro_section(self, mocker):
+        mocker.patch.object(Path, "is_file", return_value=True)
+        mocker.patch("anyconfig.load", return_value={})
+
+        pattern = "There's no '[tool.kedro]' section in the 'pyproject.toml'."
+
+        with pytest.raises(RuntimeError, match=re.escape(pattern)):
+            _get_project_metadata(self.project_path)
+
+    def test_source_dir_specified_in_toml(self, mocker):
+        mocker.patch.object(Path, "is_file", return_value=True)
+        source_dir = "test_dir"
+        pyproject_toml_payload = {
+            "tool": {
+                "kedro": {
+                    "source_dir": source_dir,
+                    "package_name": "fake_package_name",
+                    "project_name": "fake_project_name",
+                    "project_version": kedro_version,
+                }
+            }
+        }
+        mocker.patch("anyconfig.load", return_value=pyproject_toml_payload)
+
+        project_metadata = _get_project_metadata(self.project_path)
+
+        assert project_metadata.source_dir == self.project_path / source_dir
+
+    @pytest.mark.parametrize(
+        "invalid_version", ["0.13.0", "10.0", "101.1", "100.0", "-0"]
+    )
+    def test_invalid_version(self, invalid_version, mocker):
+        mocker.patch.object(Path, "is_file", return_value=True)
+        pyproject_toml_payload = {
+            "tool": {
+                "kedro": {
+                    "source_dir": "source_dir",
+                    "package_name": "fake_package_name",
+                    "project_name": "fake_project_name",
+                    "project_version": invalid_version,
+                }
+            }
+        }
+        mocker.patch("anyconfig.load", return_value=pyproject_toml_payload)
+
+        pattern = (
+            f"Your Kedro project version {invalid_version} does not match "
+            f"Kedro package version {kedro_version} you are running."
+        )
+        with pytest.raises(ValueError, match=re.escape(pattern)):
+            _get_project_metadata(self.project_path)

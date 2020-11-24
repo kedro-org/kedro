@@ -13,4 +13,3 @@ Base Classes
     :template: autosummary/class.rst
 
     kedro.framework.project.ProjectMetadata
-    kedro.framework.project.ProjectSettings

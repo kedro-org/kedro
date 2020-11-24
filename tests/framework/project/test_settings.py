@@ -25,13 +25,50 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This module provides settings of a Kedro project."""
-from importlib import import_module
-from typing import Any
+import pytest
+
+from kedro.framework.project.settings import _get_project_settings
 
 
-def _get_project_settings(
-    package_name: str, property_name: str, default: Any = None
-) -> Any:
-    settings = import_module(f"{package_name}.settings")
-    return getattr(settings, property_name, default)
+# pylint: disable=attribute-defined-outside-init,too-few-public-methods
+class TestSettings:
+    pass
+
+
+class TestGetSettings:
+    default_value = "default_value"
+    property_name = "property_name"
+    package_name = "package_name"
+
+    def test_settings_py_is_missing(self):
+        with pytest.raises(ModuleNotFoundError):
+            _get_project_settings(
+                self.package_name, self.property_name, self.default_value
+            )
+
+    def test_property_is_missing(self, mocker):
+        mocker.patch(
+            "kedro.framework.project.settings.import_module",
+            return_value=TestSettings(),
+        )
+
+        value = _get_project_settings(
+            self.package_name, self.property_name, self.default_value
+        )
+
+        assert value == self.default_value
+
+    def test_get_project_settings(self, mocker):
+        property_value = "property_value"
+
+        settings_obj = TestSettings()
+        settings_obj.property_name = property_value
+        mocker.patch(
+            "kedro.framework.project.settings.import_module", return_value=settings_obj
+        )
+
+        value = _get_project_settings(
+            self.package_name, self.property_name, self.default_value
+        )
+
+        assert value == property_value

@@ -178,6 +178,18 @@ def prepare_project_dir(tmp_path, base_config, local_config, env):
     _write_toml(tmp_path / "pyproject.toml", pyproject_toml_payload)
 
 
+# pylint: disable=too-few-public-methods
+class TestSettingsPy:
+    HOOKS = ()
+
+
+@pytest.fixture(autouse=True)
+def mocked_import_module(mocker):
+    mocker.patch(
+        "kedro.framework.project.settings.import_module", return_value=TestSettingsPy()
+    )
+
+
 @pytest.fixture
 def dummy_dataframe():
     return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
@@ -208,7 +220,6 @@ expected_message_head = (
 pyproject_toml_payload = {
     "tool": {
         "kedro": {
-            "context_path": "fake.module.path",
             "project_name": "mock_project_name",
             "project_version": kedro_version,
             "package_name": "mock_package_name",
@@ -441,28 +452,6 @@ class TestKedroContext:
 
     def test_default_env(self, dummy_context):
         assert dummy_context.env == "local"
-
-    @pytest.mark.parametrize(
-        "invalid_version", ["0.13.0", "10.0", "101.1", "100.0", "-0"]
-    )
-    @pytest.mark.parametrize(
-        "context_class,context_fixture",
-        [
-            (DummyContext, pytest.lazy_fixture("dummy_context_with_hooks")),
-            (DummyContextNoHooks, pytest.lazy_fixture("dummy_context_no_hooks")),
-        ],
-    )
-    def test_invalid_version(
-        self, mocker, invalid_version, context_class, context_fixture
-    ):
-        mocker.patch.object(context_class, "project_version", invalid_version)
-
-        pattern = (
-            f"Your Kedro project version {invalid_version} does not match "
-            f"Kedro package version {kedro_version} you are running."
-        )
-        with pytest.raises(KedroContextError, match=re.escape(pattern)):
-            context_class(context_fixture.project_path)
 
     @pytest.mark.parametrize("env", ["custom_env"], indirect=True)
     def test_custom_env(self, dummy_context, env):

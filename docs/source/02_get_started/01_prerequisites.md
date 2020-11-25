@@ -37,7 +37,7 @@ conda activate kedro-environment
 To exit `kedro-environment`:
 
 ```bash
-conda deactivate kedro-environment
+conda deactivate
 ```
 
 > *Note:* The `conda` virtual environment is not dependent on your current working directory and can be activated from any directory.

@@ -25,11 +25,14 @@ The main methods and properties of `KedroSession` are:
 ```python
 from kedro.framework.session import KedroSession
 
-with KedroSession.create() as session:
+with KedroSession.create("<your-kedro-project-package-name>") as session:
     session.run()
 ```
 
-Optionally, you can provide the following arguments in `KedroSession.create()`:
+You need to tell the `KedroSession` what is the package name of your Kedro
+ project, so it can load your settings, nodes and pipelines.
+Additionally, you can provide the following optional arguments in `KedroSession
+.create()`:
 
 - `project_path`: Path to the project root directory
 - `save_on_close`: A boolean value to indicate whether or not to save the session to disk when it's closed

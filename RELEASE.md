@@ -137,7 +137,7 @@ This release has accidentally broken the usage of `kedro lint` and `kedro jupyte
 
 ```yaml
 project_name: "<your_project_name>"
-project_version: "kedro_version_of_the_project>"
+project_version: "<kedro_version_of_the_project>"
 package_name: "<your_package_name>"
 ```
 

@@ -26,9 +26,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``kedro.framework.project`` provides functionality for loading metadata
-and settings of a Kedro project.
+"""``kedro.framework.project`` provides functionality for loading
+settings of a Kedro project.
 """
-
-from .metadata import ProjectMetadata  # NOQA
-from .metadata import _generate_toml_config  # NOQA

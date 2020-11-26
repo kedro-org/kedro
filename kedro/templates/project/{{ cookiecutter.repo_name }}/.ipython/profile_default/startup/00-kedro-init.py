@@ -5,6 +5,8 @@ from pathlib import Path
 from IPython.core.magic import register_line_magic, needs_local_scope
 
 # Find the project root (./../../../)
+from kedro.framework.startup import _get_project_metadata
+
 startup_error = None
 project_path = Path(__file__).parents[3].resolve()
 
@@ -34,10 +36,13 @@ def reload_kedro(path, line=None):
         path = path or project_path
 
         # remove cached user modules
-        session = KedroSession.create(path)
+        metadata = _get_project_metadata(path)
+        session = KedroSession.create(metadata.package_name, path)
         _activate_session(session, force=True)
         context = session.load_context()
-        to_remove = [mod for mod in sys.modules if mod.startswith(context.package_name)]
+        to_remove = [
+            mod for mod in sys.modules if mod.startswith(metadata.package_name)
+        ]
         # `del` is used instead of `reload()` because: If the new version of a module does not
         # define a name that was defined by the old version, the old definition remains.
         for module in to_remove:
@@ -57,7 +62,7 @@ def reload_kedro(path, line=None):
         context = session.load_context()
         catalog = context.catalog
 
-        logging.info("** Kedro project %s", str(context.project_name))
+        logging.info("** Kedro project %s", str(metadata.project_name))
         logging.info("Defined global variable `context`, `session` and `catalog`")
 
         for line_magic in collect_line_magic():

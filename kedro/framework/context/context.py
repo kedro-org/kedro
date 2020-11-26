@@ -38,9 +38,8 @@ from warnings import warn
 
 from kedro.config import ConfigLoader, MissingConfigException
 from kedro.framework.hooks import get_hook_manager
-from kedro.framework.project import ProjectMetadata
-from kedro.framework.project.metadata import _get_project_metadata
 from kedro.framework.project.settings import _get_project_settings
+from kedro.framework.startup import _get_project_metadata
 from kedro.io import DataCatalog
 from kedro.io.core import generate_timestamp
 from kedro.pipeline import Pipeline
@@ -198,6 +197,7 @@ class KedroContext:
 
     def __init__(
         self,
+        package_name: str,
         project_path: Union[Path, str],
         env: str = None,
         extra_params: Dict[str, Any] = None,
@@ -210,6 +210,8 @@ class KedroContext:
                 between Kedro project version and package version.
 
         Args:
+            package_name: Package name for the Kedro project the context is
+                created for.
             project_path: Project path to define the context for.
             env: Optional argument for configuration default environment to be used
                 for running the pipeline. If not specified, it defaults to "local".
@@ -218,7 +220,7 @@ class KedroContext:
                 the parameters retrieved from the project configuration.
         """
         self._project_path = Path(project_path).expanduser().resolve()
-        self._project_metadata = _get_project_metadata(self._project_path)
+        self._package_name = package_name
 
         self.env = env or "local"
         self._extra_params = deepcopy(extra_params)
@@ -228,36 +230,6 @@ class KedroContext:
         self._setup_logging()
 
     @property
-    def project_metadata(self) -> ProjectMetadata:
-        """Read-only property for Kedro project metadata.
-
-        Returns:
-            A named tuple with defined project metadata.
-
-        """
-        return self._project_metadata
-
-    @property
-    def project_name(self) -> str:
-        """Property for Kedro project name.
-
-        Returns:
-            Name of Kedro project.
-
-        """
-        return self.project_metadata.project_name
-
-    @property
-    def project_version(self) -> str:
-        """Property for Kedro version.
-
-        Returns:
-            Kedro version.
-
-        """
-        return self.project_metadata.project_version
-
-    @property
     def package_name(self) -> str:
         """Property for Kedro project package name.
 
@@ -265,7 +237,7 @@ class KedroContext:
             Name of Kedro project package.
 
         """
-        return self.project_metadata.package_name
+        return self._package_name
 
     @property
     def pipeline(self) -> Pipeline:
@@ -292,9 +264,7 @@ class KedroContext:
         already_registered = hook_manager.get_plugins()
         found = hook_manager.load_setuptools_entrypoints(_PLUGIN_HOOKS)
         disable_plugins = set(
-            _get_project_settings(
-                self.project_metadata.package_name, "DISABLE_HOOKS_FOR_PLUGINS", ()
-            )
+            _get_project_settings(self.package_name, "DISABLE_HOOKS_FOR_PLUGINS", ())
         )
 
         # Get list of plugin/distinfo tuples for all setuptools registered plugins.
@@ -341,9 +311,7 @@ class KedroContext:
             )
 
         hook_manager = get_hook_manager()
-        project_hooks = _get_project_settings(
-            self.project_metadata.package_name, "HOOKS", ()
-        )
+        project_hooks = _get_project_settings(self.package_name, "HOOKS", ())
 
         # enrich with hooks specified in settings.py
         all_hooks = self.hooks + project_hooks
@@ -532,9 +500,12 @@ class KedroContext:
             Instance of `ConfigLoader` created by `_create_config_loader()`.
 
         """
+        conf_root = _get_project_settings(
+            self.package_name, "CONF_ROOT", self.CONF_ROOT
+        )
         conf_paths = [
-            str(self.project_path / self.CONF_ROOT / "base"),
-            str(self.project_path / self.CONF_ROOT / self.env),
+            str(self.project_path / conf_root / "base"),
+            str(self.project_path / conf_root / self.env),
         ]
         return self._create_config_loader(conf_paths)
 
@@ -705,7 +676,6 @@ class KedroContext:
             "run_id": run_id,
             "project_path": str(self.project_path),
             "env": self.env,
-            "kedro_version": self.project_version,
             "tags": tags,
             "from_nodes": from_nodes,
             "to_nodes": to_nodes,
@@ -803,7 +773,9 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
     # need to do this because some CLI command (e.g `kedro run`) defaults to
     # passing in `env=None`
     kwargs["env"] = kwargs.get("env") or os.getenv("KEDRO_ENV")
-    context = context_class(project_path=project_path, **kwargs)
+    context = context_class(
+        package_name=metadata.package_name, project_path=project_path, **kwargs
+    )
     return context
 
 

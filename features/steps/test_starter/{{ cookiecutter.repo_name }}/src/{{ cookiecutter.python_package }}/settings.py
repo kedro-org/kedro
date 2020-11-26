@@ -43,3 +43,6 @@ HOOKS = (ProjectHooks(),)
 
 # Define custom context class. Defaults to `KedroContext`
 # CONTEXT_CLASS = KedroContext
+
+# Define the configuration folder. Defaults to `conf`
+# CONF_ROOT = "conf"

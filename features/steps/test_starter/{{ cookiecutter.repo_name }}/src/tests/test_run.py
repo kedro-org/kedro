@@ -55,8 +55,5 @@ def project_context(mocker):
 # and should be replaced with the ones testing the project
 # functionality
 class TestProjectContext:
-    def test_project_name(self, project_context):
-        assert project_context.project_name == "{{ cookiecutter.project_name }}"
-
-    def test_project_version(self, project_context):
-        assert project_context.project_version == "{{ cookiecutter.kedro_version }}"
+    def test_package_name(self, project_context):
+        assert project_context.package_name == "{{ cookiecutter.python_package }}"

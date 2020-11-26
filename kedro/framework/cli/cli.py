@@ -55,7 +55,7 @@ from kedro.framework.cli.utils import (
     command_with_verbosity,
 )
 from kedro.framework.context.context import load_context
-from kedro.framework.project.metadata import _get_project_metadata
+from kedro.framework.startup import _get_project_metadata, _is_project
 
 KEDRO_PATH = Path(kedro.__file__).parent
 TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
@@ -272,7 +272,6 @@ def _create_project(
                 checkout=checkout,
             )
         )
-
         _clean_pycache(result_path)
         _print_kedro_new_success_message(result_path)
     except click.exceptions.Abort as exc:  # pragma: no cover
@@ -629,32 +628,31 @@ def main():  # pragma: no cover
     global_groups = [cli]
     global_groups.extend(load_entry_points("global"))
     project_groups = []
+    cli_context = dict()
 
     path = Path.cwd()
-    pyproject_toml = path / "pyproject.toml"
-
-    if pyproject_toml.is_file():
+    if _is_project(path):
         # load project commands from cli.py
-        project_metadata = _get_project_metadata(path)
-        source_dir = project_metadata.source_dir
-        _add_src_to_path(source_dir, path)
+        metadata = _get_project_metadata(path)
+        cli_context = dict(obj=metadata)
+        _add_src_to_path(metadata.source_dir, path)
 
-        package_name = project_metadata.package_name
+        project_groups.extend(load_entry_points("project"))
+        package_name = metadata.package_name
+
         try:
             project_cli = importlib.import_module(f"{package_name}.cli")
-            project_groups.extend(load_entry_points("project"))
             project_groups.append(project_cli.cli)
         except Exception as exc:
-            project_cli_path = source_dir / package_name / "cli.py"
             raise KedroCliError(
-                f"Cannot load commands from {project_cli_path}"
+                f"Cannot load commands from {package_name}.cli"
             ) from exc
 
     cli_collection = CommandCollection(
         ("Global commands", global_groups),
         ("Project specific commands", project_groups),
     )
-    cli_collection()
+    cli_collection(**cli_context)
 
 
 if __name__ == "__main__":  # pragma: no cover

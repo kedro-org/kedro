@@ -103,7 +103,6 @@ class DummyContext:
     pipeline = "pipeline"
     project_name = "dummy_name"
     project_path = "dummy_path"
-    project_version = "dummy_version"
 
 
 @fixture

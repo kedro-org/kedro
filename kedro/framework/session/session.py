@@ -37,9 +37,9 @@ from typing import Any, Dict, Iterable, Optional, Union
 
 import click
 
-from kedro.framework.context import KedroContext, load_context
+from kedro import __version__ as kedro_version
+from kedro.framework.context import KedroContext
 from kedro.framework.hooks import get_hook_manager
-from kedro.framework.project.metadata import _get_project_metadata
 from kedro.framework.project.settings import _get_project_settings
 from kedro.framework.session.store import BaseSessionStore
 from kedro.io.core import generate_timestamp
@@ -115,8 +115,9 @@ def _jsonify_cli_context(ctx: click.core.Context) -> Dict[str, Any]:
 class KedroSession:
     """``KedroSession`` is the object that is responsible for managing the lifecycle
     of a Kedro run.
-    - Use `KedroSession.create()` as a context manager to construct a new KedroSession with
-    session data provided (see the example below).
+    - Use `KedroSession.create("<your-kedro-project-package-name>")` as
+    a context manager to construct a new KedroSession with session data
+    provided (see the example below).
     - Use `KedroSession(session_id=<id>)` to instantiate an existing session with a given
     ID.
 
@@ -125,7 +126,7 @@ class KedroSession:
 
         >>> from kedro.framework.session import KedroSession
         >>>
-        >>> with KedroSession.create() as session:
+        >>> with KedroSession.create("<your-kedro-project-package-name>") as session:
         >>>     session.run()
         >>>
     """
@@ -133,17 +134,20 @@ class KedroSession:
     def __init__(
         self,
         session_id: str,
+        package_name: str,
         project_path: Union[Path, str] = None,
         save_on_close: bool = False,
     ):
         self._project_path = Path(project_path or Path.cwd()).resolve()
         self.session_id = session_id
         self.save_on_close = save_on_close
+        self._package_name = package_name
         self._store = self._init_store()
 
     @classmethod
-    def create(
+    def create(  # pylint: disable=too-many-arguments
         cls,
+        package_name: str,
         project_path: Union[Path, str] = None,
         save_on_close: bool = True,
         env: str = None,
@@ -152,7 +156,10 @@ class KedroSession:
         """Create a new instance of ``KedroSession`` with the session data.
 
         Args:
-            project_path: Path to the project root directory.
+            package_name: Package name for the Kedro project the session is
+                created for.
+            project_path: Path to the project root directory. Default is
+                current working directory Path.cwd().
             save_on_close: Whether or not to save the session when it's closed.
             env: Environment for the KedroContext.
             extra_params: Optional dictionary containing extra project parameters
@@ -164,15 +171,18 @@ class KedroSession:
         """
         # pylint: disable=protected-access
         session = cls(
+            package_name=package_name,
             project_path=project_path,
             session_id=generate_timestamp(),
             save_on_close=save_on_close,
         )
 
-        session_data = _get_project_metadata(session._project_path)._asdict()
-        session_data["project_path"] = session._project_path
-        session_data["session_id"] = session.session_id
-        session_data.update(_describe_git(session._project_path))
+        session_data = {
+            "package_name": session._package_name,
+            "project_path": session._project_path,
+            "session_id": session.session_id,
+            **_describe_git(session._project_path),
+        }
 
         ctx = click.get_current_context(silent=True)
         if ctx:
@@ -188,10 +198,7 @@ class KedroSession:
         return session
 
     def _init_store(self) -> BaseSessionStore:
-        metadata = _get_project_metadata(self._project_path)
-        session_store = _get_project_settings(
-            metadata.package_name, "SESSION_STORE", {}
-        )
+        session_store = _get_project_settings(self._package_name, "SESSION_STORE", {})
 
         config = deepcopy(session_store)
         config.setdefault("path", (self._project_path / "sessions").as_posix())
@@ -219,8 +226,16 @@ class KedroSession:
         """An instance of the project context."""
         env = self.store.get("env")
         extra_params = self.store.get("extra_params")
-        context = load_context(
-            project_path=self._project_path, env=env, extra_params=extra_params
+
+        context_class = _get_project_settings(
+            self._package_name, "CONTEXT_CLASS", KedroContext
+        )
+
+        context = context_class(
+            package_name=self._package_name,
+            project_path=self._project_path,
+            env=env,
+            extra_params=extra_params,
         )
         return context
 
@@ -305,7 +320,7 @@ class KedroSession:
             "run_id": run_id,
             "project_path": self._project_path.as_posix(),
             "env": context.env,
-            "kedro_version": self.store["project_version"],
+            "kedro_version": kedro_version,
             "tags": tags,
             "from_nodes": from_nodes,
             "to_nodes": to_nodes,

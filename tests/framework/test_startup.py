@@ -27,107 +27,35 @@
 # limitations under the License.
 
 import re
-from copy import deepcopy
 from pathlib import Path
 
 import pytest
 
 from kedro import __version__ as kedro_version
-from kedro.framework.project import _generate_toml_config
-from kedro.framework.project.metadata import (
-    KedroConfigParserError,
-    ProjectMetadata,
-    _get_project_metadata,
-)
+from kedro.framework.startup import ProjectMetadata, _get_project_metadata, _is_project
 
 
-class TestPyProjectTomlGeneration:
-    PACKAGE_NAME = "mypackage"
-    PACKAGE_PATH = Path(f"/tmp/path/to/{PACKAGE_NAME}")
-    CONF_PATH = Path("/path/to/config/pyproject.toml")
+class TestIsProject:
+    project_path = Path.cwd()
 
-    EXPECTED_DATA = {
-        "tool": {
-            "kedro": {
-                "package_name": PACKAGE_NAME,
-                "project_name": PACKAGE_NAME,
-                "project_version": kedro_version,
-                "source_dir": str(PACKAGE_PATH.parent),
-            }
-        }
-    }
+    def test_no_metadata_file(self, mocker):
+        mocker.patch.object(Path, "is_file", return_value=False)
 
-    @staticmethod
-    @pytest.fixture(autouse=True)
-    def is_file_mock(mocker):
-        yield mocker.patch.object(Path, "is_file", return_value=False)
+        assert not _is_project(self.project_path)
 
-    @staticmethod
-    @pytest.fixture
-    def anyconfig_dump_mock(mocker):
-        yield mocker.patch("anyconfig.dump")
+    def test_toml_invalid_format(self, tmp_path):
+        """Test for loading context from an invalid path. """
+        toml_path = tmp_path / "pyproject.toml"
+        toml_path.write_text("!!")  # Invalid TOML
 
-    @staticmethod
-    @pytest.fixture
-    def anyconfig_load_mock(mocker):
-        yield mocker.patch("anyconfig.load")
+        assert not _is_project(tmp_path)
 
-    def test_toml_is_missing(self, anyconfig_dump_mock):
-        _generate_toml_config(self.CONF_PATH.parent, self.PACKAGE_PATH)
+    def test_valid_toml_file(self, mocker):
+        mocker.patch.object(Path, "is_file", return_value=True)
+        pyproject_toml_payload = {"tool": {"kedro": {}}}
+        mocker.patch("anyconfig.load", return_value=pyproject_toml_payload)
 
-        anyconfig_dump_mock.assert_called_once_with(self.EXPECTED_DATA, self.CONF_PATH)
-
-    def test_toml_exists_with_kedro_section(
-        self, is_file_mock, anyconfig_dump_mock, anyconfig_load_mock
-    ):
-        is_file_mock.return_value = True
-        anyconfig_load_mock.return_value = {"tool": {"kedro": {}}}
-
-        _generate_toml_config(self.CONF_PATH.parent, self.PACKAGE_PATH)
-
-        assert not anyconfig_dump_mock.called
-
-    def test_existing_toml_is_broken(self, is_file_mock, anyconfig_load_mock):
-        is_file_mock.return_value = True
-        anyconfig_load_mock.side_effect = Exception
-
-        pattern = f"Failed to parse '{self.CONF_PATH}' file"
-        with pytest.raises(KedroConfigParserError, match=re.escape(pattern)):
-            _generate_toml_config(self.CONF_PATH.parent, self.PACKAGE_PATH)
-
-    def test_toml_exists_without_kedro_section_in_tool(
-        self, is_file_mock, anyconfig_dump_mock, anyconfig_load_mock
-    ):
-        is_file_mock.return_value = True
-        existing_data = {"tool": {"isort": {"line_length": 80}}}
-        anyconfig_load_mock.return_value = deepcopy(existing_data)
-
-        _generate_toml_config(self.CONF_PATH.parent, self.PACKAGE_PATH)
-
-        expected_data = deepcopy(self.EXPECTED_DATA["tool"])
-        # `[tool.*]` section exists
-        # `anyconfig.dump()` should be called with `existing_data` updated with
-        # Kedro configuration
-        existing_data["tool"].update(expected_data)
-
-        anyconfig_dump_mock.assert_called_once_with(existing_data, self.CONF_PATH)
-
-    def test_toml_exists_without_kedro_section_and_tool(
-        self, is_file_mock, anyconfig_dump_mock, anyconfig_load_mock
-    ):
-        is_file_mock.return_value = True
-        existing_data = {"notool": {"isort": {"line_length": 80}}}
-        anyconfig_load_mock.return_value = deepcopy(existing_data)
-
-        _generate_toml_config(self.CONF_PATH.parent, self.PACKAGE_PATH)
-
-        expected_data = deepcopy(self.EXPECTED_DATA["tool"])
-        # `[tool.*]` section doesn't exist
-        # `anyconfig.dump()` should be called with `existing_data` updated with
-        # Kedro configuration
-        existing_data["tool"] = expected_data
-
-        anyconfig_dump_mock.assert_called_once_with(existing_data, self.CONF_PATH)
+        assert _is_project(self.project_path)
 
 
 class TestGetProjectMetadata:
@@ -172,6 +100,7 @@ class TestGetProjectMetadata:
             package_name="fake_package_name",
             project_name="fake_project_name",
             project_version=kedro_version,
+            project_path=self.project_path,
         )
         assert actual == expected
 

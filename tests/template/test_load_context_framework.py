@@ -34,7 +34,7 @@ import toml
 
 from kedro import __version__ as kedro_version
 from kedro.framework.context import KedroContext, load_context
-from kedro.framework.project.metadata import _get_project_metadata
+from kedro.framework.startup import _get_project_metadata
 
 
 @pytest.fixture(autouse=True)
@@ -64,8 +64,7 @@ class TestLoadContext:
             wraps=_get_project_metadata,
         )
         result = load_context(str(fake_repo_path))
-        assert result.project_name == "Test Project"
-        assert result.project_version == kedro_version
+        assert result.package_name == "fake_package"
         assert str(fake_repo_path.resolve() / "src") in sys.path
         get_project_metadata_mock.assert_called_with(fake_repo_path)
 
@@ -158,7 +157,7 @@ class TestLoadContext:
 
         settings_mock = mocker.patch(
             "kedro.framework.context.context._get_project_settings",
-            side_effect=(MyContext, (), ()),
+            side_effect=(MyContext, (), (), "conf"),
         )
 
         context = load_context(str(fake_repo_path))
@@ -166,11 +165,12 @@ class TestLoadContext:
         assert isinstance(context, KedroContext)
         assert context.__class__ is not KedroContext
         assert context.__class__.__name__ == "MyContext"
-        assert settings_mock.call_count == 3
+        assert settings_mock.call_count == 4
 
         expected_calls = [
             mocker.call(fake_package_name, "CONTEXT_CLASS", KedroContext),
             mocker.call(fake_package_name, "HOOKS", ()),
             mocker.call(fake_package_name, "DISABLE_HOOKS_FOR_PLUGINS", ()),
+            mocker.call(fake_package_name, "CONF_ROOT", "conf"),
         ]
         assert settings_mock.mock_calls == expected_calls

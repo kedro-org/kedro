@@ -112,7 +112,7 @@ If you wish to run the whole 'master' pipeline within a notebook cell, you can d
 ```python
 from kedro.framework.session import KedroSession
 
-with KedroSession.create() as session:
+with KedroSession.create("<your-kedro-project-package-name>") as session:
     session.run()
 ```
 
@@ -207,7 +207,7 @@ def reload_kedro(project_path, line=None):
     global parameters
     try:
         # ...
-        session = KedroSession.create(path)
+        session = KedroSession.create("<your-kedro-project-package-name>", project_path)
         _activate_session(session)
         context = session.load_context()
         parameters = context.params
@@ -317,8 +317,8 @@ from kedro.framework.session import KedroSession
 from kedro.framework.session.session import _activate_session
 
 current_dir = Path.cwd()  # this points to 'notebooks/' folder
-proj_path = current_dir.parent  # point back to the root of the project
-session = KedroSession.create(proj_path)
+project_path = current_dir.parent  # point back to the root of the project
+session = KedroSession.create("<your-kedro-project-package-name>", project_path)
 _activate_session(session)
 context = session.load_context()
 ```

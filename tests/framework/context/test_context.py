@@ -323,14 +323,18 @@ def mocked_logging(mocker):
 def dummy_context_with_hooks(
     tmp_path, prepare_project_dir, env, extra_params
 ):  # pylint: disable=unused-argument
-    return DummyContext(str(tmp_path), env=env, extra_params=extra_params)
+    return DummyContext(
+        "mock_package_name", str(tmp_path), env=env, extra_params=extra_params
+    )
 
 
 @pytest.fixture
 def dummy_context_no_hooks(
     tmp_path, prepare_project_dir, env, extra_params
 ):  # pylint: disable=unused-argument
-    return DummyContextNoHooks(str(tmp_path), env=env, extra_params=extra_params)
+    return DummyContextNoHooks(
+        "mock_package_name", str(tmp_path), env=env, extra_params=extra_params
+    )
 
 
 @pytest.fixture(
@@ -356,9 +360,7 @@ def clear_hook_manager():
 class TestKedroContext:
     def test_attributes(self, tmp_path, dummy_context):
         project_metadata = pyproject_toml_payload["tool"]["kedro"]
-        assert dummy_context.project_name == project_metadata["project_name"]
         assert dummy_context.package_name == project_metadata["package_name"]
-        assert dummy_context.project_version == project_metadata["project_version"]
         assert isinstance(dummy_context.project_path, Path)
         assert dummy_context.project_path == tmp_path.resolve()
 
@@ -470,7 +472,7 @@ class TestKedroContext:
 
         pattern = "Parameters not found in your Kedro project config."
         with pytest.warns(UserWarning, match=re.escape(pattern)):
-            _ = context_class(context_fixture.project_path).catalog
+            _ = context_class("mock_package_name", context_fixture.project_path).catalog
 
     @pytest.mark.parametrize(
         "context_class,context_fixture",
@@ -487,7 +489,7 @@ class TestKedroContext:
 
         pattern = "Credentials not found in your Kedro project config."
         with pytest.warns(UserWarning, match=re.escape(pattern)):
-            _ = context_class(context_fixture.project_path).catalog
+            _ = context_class("mock_package_name", context_fixture.project_path).catalog
 
     def test_pipeline(self, dummy_context):
         assert dummy_context.pipeline.nodes[0].inputs == ["cars"]
@@ -638,7 +640,7 @@ class TestKedroContextRun:
     @pytest.mark.usefixtures("prepare_project_dir")
     @pytest.mark.parametrize("context_class", [DummyContext, DummyContextNoHooks])
     def test_run_load_versions(self, tmp_path, dummy_dataframe, context_class):
-        context = context_class(tmp_path)
+        context = context_class("mock_package_name", tmp_path)
         filepath = (context.project_path / "cars.csv").as_posix()
 
         old_save_version = generate_timestamp()
@@ -667,10 +669,7 @@ class TestKedroContextRun:
     @pytest.mark.usefixtures("prepare_project_dir")
     @pytest.mark.parametrize("context_class", [DummyContext, DummyContextNoHooks])
     def test_run_with_empty_pipeline(self, tmp_path, context_class):
-        context = context_class(tmp_path)
-        project_metadata = pyproject_toml_payload["tool"]["kedro"]
-        assert context.project_name == project_metadata["project_name"]
-        assert context.project_version == project_metadata["project_version"]
+        context = context_class("mock_package_name", tmp_path)
 
         with pytest.raises(KedroContextError, match="Pipeline contains no nodes"):
             context.run(pipeline_name="empty")
@@ -693,7 +692,7 @@ class TestKedroContextRun:
         expected_message,
         context_class,
     ):
-        bad_context = context_class(tmp_path)
+        bad_context = context_class("mock_package_name", tmp_path)
         bad_context.catalog.save("cars", dummy_dataframe)
         with pytest.raises(ValueError, match="Oh no"):
             bad_context.run(pipeline_name=pipeline_name)
@@ -739,7 +738,7 @@ class TestKedroContextRun:
             context_class, "_get_save_version", return_value=save_version
         )
 
-        context = context_class(tmp_path)
+        context = context_class("mock_package_name", tmp_path)
         context.catalog.save("cars", dummy_dataframe)
         context.run(load_versions={"boats": save_version})
 
@@ -761,7 +760,7 @@ class TestKedroContextRun:
             context_class, "_get_run_id", return_value=run_id
         )
 
-        context = context_class(tmp_path)
+        context = context_class("mock_package_name", tmp_path)
         context.catalog.save("cars", dummy_dataframe)
         context.run()
 

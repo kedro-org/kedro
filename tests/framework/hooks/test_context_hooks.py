@@ -423,10 +423,12 @@ def _create_context_with_hooks(tmp_path, mocker, context_hooks, disable_hooks_fo
     """
     disable_hooks_for = disable_hooks_for or ()
 
-    mocker.patch(
-        "kedro.framework.context.context._get_project_settings",
-        return_value=tuple(disable_hooks_for),
-    )
+    def mock_settings(package, settings, default):  # pylint: disable=unused-argument
+        if settings == "DISABLE_HOOKS_FOR_PLUGINS":
+            return tuple(disable_hooks_for)
+        return default
+
+    mocker.patch("kedro.framework.context.context._get_project_settings", mock_settings)
 
     class DummyContextWithHooks(KedroContext):
         hooks = tuple(context_hooks)
@@ -435,7 +437,7 @@ def _create_context_with_hooks(tmp_path, mocker, context_hooks, disable_hooks_fo
             return "mocked context with hooks run id"
 
     mocker.patch("logging.config.dictConfig")
-    return DummyContextWithHooks(str(tmp_path), env="local")
+    return DummyContextWithHooks("dummy_package", str(tmp_path), env="local")
 
 
 @pytest.fixture
@@ -474,12 +476,13 @@ def _create_broken_context_with_hooks(tmp_path, mocker, context_hooks):
             )
             return {"__default__": pipeline}
 
+    def mock_settings(package, settings, default):  # pylint: disable=unused-argument
+        return default
+
     # Here _get_project_settings() is used to get DISABLE_HOOKS_FOR_PLUGINS and HOOKS
-    mocker.patch(
-        "kedro.framework.context.context._get_project_settings", return_value=()
-    )
+    mocker.patch("kedro.framework.context.context._get_project_settings", mock_settings)
     mocker.patch("logging.config.dictConfig")
-    return BrokenContextWithHooks(tmp_path, env="local")
+    return BrokenContextWithHooks("dummy_package", tmp_path, env="local")
 
 
 def _assert_hook_call_record_has_expected_parameters(

@@ -4,6 +4,9 @@
 
 This section follows the [Iris dataset example](../02_get_started/05_example_project.md) and demonstrates how to use Kedro with IPython and Jupyter Notebooks / Lab. We also recommend a video that explains the transition from the use of vanilla Jupyter Notebooks to using Kedro, from [Data Engineer One](https://www.youtube.com/watch?v=dRnCovp1GRQ&t=50s&ab_channel=DataEngineerOne).
 
+
+<iframe width="560" height="315" style="max-width: 100%" src="https://www.youtube.com/embed/dRnCovp1GRQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 ## Why use a Notebook?
 There are reasons why you may want to use a Notebook, although in general, the principles behind Kedro would discourage their use because they have some [drawbacks when they are used to create production or reproducible code](https://towardsdatascience.com/5-reasons-why-you-should-switch-from-jupyter-notebook-to-scripts-cb3535ba9c95). However, there are occasions when you'd want to put some code into a Notebook, for example:
 
@@ -109,7 +112,7 @@ If you wish to run the whole 'master' pipeline within a notebook cell, you can d
 ```python
 from kedro.framework.session import KedroSession
 
-with KedroSession.create() as session:
+with KedroSession.create("<your-kedro-project-package-name>") as session:
     session.run()
 ```
 
@@ -204,7 +207,7 @@ def reload_kedro(project_path, line=None):
     global parameters
     try:
         # ...
-        session = KedroSession.create(path)
+        session = KedroSession.create("<your-kedro-project-package-name>", project_path)
         _activate_session(session)
         context = session.load_context()
         parameters = context.params
@@ -314,8 +317,8 @@ from kedro.framework.session import KedroSession
 from kedro.framework.session.session import _activate_session
 
 current_dir = Path.cwd()  # this points to 'notebooks/' folder
-proj_path = current_dir.parent  # point back to the root of the project
-session = KedroSession.create(proj_path)
+project_path = current_dir.parent  # point back to the root of the project
+session = KedroSession.create("<your-kedro-project-package-name>", project_path)
 _activate_session(session)
 context = session.load_context()
 ```

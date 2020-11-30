@@ -29,19 +29,14 @@
 """Application entry point."""
 from pathlib import Path
 
-from kedro.framework.project import _generate_toml_config
 from kedro.framework.session import KedroSession
 
 
 def run_package():
     # Entry point for running a Kedro project packaged with `kedro package`
     # using `python -m <project_package>.run` command.
-    package_path = Path(__file__).resolve().parent
-    project_path = Path.cwd()
-
-    _generate_toml_config(project_path, package_path)
-
-    with KedroSession.create(project_path=project_path) as session:
+    package_name = Path(__file__).resolve().parent.name
+    with KedroSession.create(package_name) as session:
         session.run()
 
 

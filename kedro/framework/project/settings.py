@@ -27,33 +27,11 @@
 # limitations under the License.
 """This module provides settings of a Kedro project."""
 from importlib import import_module
-from typing import Dict, NamedTuple, Tuple
-
-from kedro.framework.project.metadata import ProjectMetadata
+from typing import Any
 
 
-class ProjectSettings(NamedTuple):
-    """Structure holding project settings configured in `settings.py`"""
-
-    disable_hooks_for_plugins: Tuple[str, ...] = ()
-    hooks: Tuple[str, ...] = ()
-    session_store: Dict[str, str] = {}
-
-
-def _get_project_settings(project_metadata: ProjectMetadata) -> ProjectSettings:
-    source_dir = project_metadata.source_dir
-    package_name = project_metadata.package_name
-    settings_path = source_dir / package_name / "settings.py"
-
-    if settings_path.is_file():
-        module = import_module(f"{package_name}.settings")
-        project_settings = {
-            "disable_hooks_for_plugins": tuple(
-                getattr(module, "DISABLE_HOOKS_FOR_PLUGINS", ())
-            ),
-            "hooks": tuple(getattr(module, "HOOKS", ())),
-            "session_store": getattr(module, "SESSION_STORE", {}),
-        }
-        return ProjectSettings(**project_settings)
-
-    return ProjectSettings()  # default settings
+def _get_project_settings(
+    package_name: str, property_name: str, default: Any = None
+) -> Any:
+    settings = import_module(f"{package_name}.settings")
+    return getattr(settings, property_name, default)

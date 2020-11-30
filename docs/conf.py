@@ -14,6 +14,7 @@
 # serve to show the default.
 
 import importlib
+import os
 import re
 import shutil
 import sys
@@ -125,7 +126,7 @@ type_targets = {
         "kedro.runner.parallel_runner._SharedMemoryDataSet",
         "kedro.versioning.journal.Journal",
         "kedro.framework.context.context.KedroContext",
-        "kedro.framework.project.metadata.ProjectMetadata",
+        "kedro.framework.startup.ProjectMetadata",
         "kedro.framework.project.settings.ProjectSettings",
         "abc.ABC",
         "pathlib.Path",
@@ -457,8 +458,24 @@ def _prepare_build_dir(app, config):
     shutil.rmtree(str(build_root / "css"))
 
 
+def env_override(default_appid):
+    build_version = os.getenv("READTHEDOCS_VERSION")
+
+    if build_version == "latest":
+        return os.environ["HEAP_APPID_QA"]
+    if build_version == "stable":
+        return os.environ["HEAP_APPID_PROD"]
+
+    return default_appid  # default to Development for local builds
+
+
+def _add_jinja_filters(app):
+    app.builder.templates.environment.filters["env_override"] = env_override
+
+
 def setup(app):
     app.connect("config-inited", _prepare_build_dir)
+    app.connect("builder-inited", _add_jinja_filters)
     app.connect("autodoc-process-docstring", autodoc_process_docstring)
     app.connect("autodoc-skip-member", skip)
     app.add_stylesheet("css/qb1-sphinx-rtd.css")

@@ -43,7 +43,9 @@ import yaml
 from click.testing import CliRunner
 from pytest import fixture
 
+from kedro import __version__ as kedro_version
 from kedro.framework.cli.cli import cli
+from kedro.framework.startup import ProjectMetadata
 
 MOCKED_HOME = "user/path/"
 REPO_NAME = "dummy_project"
@@ -88,11 +90,11 @@ def fake_repo_path(fake_root_dir):
 
 
 @fixture(scope="session")
-def dummy_config(fake_root_dir):
+def dummy_config(fake_root_dir, fake_metadata):
     config = {
-        "project_name": "Dummy Project",
+        "project_name": fake_metadata.project_name,
         "repo_name": REPO_NAME,
-        "python_package": PACKAGE_NAME,
+        "python_package": fake_metadata.package_name,
         "output_dir": str(fake_root_dir),
     }
 
@@ -101,6 +103,19 @@ def dummy_config(fake_root_dir):
         yaml.dump(config, f)
 
     return config_path
+
+
+@fixture(scope="session")
+def fake_metadata(fake_root_dir):
+    metadata = ProjectMetadata(
+        fake_root_dir / REPO_NAME / "pyproject.toml",
+        PACKAGE_NAME,
+        "CLI Testing Project",
+        kedro_version,
+        fake_root_dir / REPO_NAME / "src",
+        fake_root_dir / REPO_NAME,
+    )
+    return metadata
 
 
 @fixture(scope="session")
@@ -116,7 +131,7 @@ def fake_project_cli(fake_repo_path: Path, dummy_config: Path):
     # It's safe to remove the new entries from path due to the python
     # module caching mechanism. Any `reload` on it will not work though.
     old_path = sys.path.copy()
-    sys.path = [str(fake_repo_path), str(fake_repo_path / "src")] + sys.path
+    sys.path = [str(fake_repo_path / "src")] + sys.path
 
     import_module(PACKAGE_NAME)
     yield import_module(f"{PACKAGE_NAME}.cli")

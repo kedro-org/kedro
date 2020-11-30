@@ -54,8 +54,7 @@ from kedro.framework.cli.utils import (
     ipython_message,
     python_call,
 )
-from kedro.framework.context import load_context
-from kedro.framework.project.metadata import _get_project_metadata
+from kedro.framework.startup import ProjectMetadata
 
 JUPYTER_IP_HELP = "IP address of the Jupyter server."
 JUPYTER_ALL_KERNELS_HELP = "Display all available Python kernels."
@@ -68,18 +67,6 @@ including sub-folders."""
 
 OVERWRITE_HELP = """If Python file already exists for the equivalent notebook,
 overwrite its contents."""
-
-
-def _load_project_context(**kwargs):
-    """Returns project context."""
-    try:
-        return load_context(Path.cwd(), **kwargs)
-    except Exception as exc:
-        env = kwargs.get("env")
-        raise KedroCliError(
-            f"Unable to load Kedro context with environment `{env}`. "
-            f"Make sure it exists in the project configuration.\nError: {exc}"
-        ) from exc
 
 
 def collect_line_magic():
@@ -137,24 +124,30 @@ def jupyter():
 )
 @click.option("--idle-timeout", type=int, default=30, help=JUPYTER_IDLE_TIMEOUT_HELP)
 @env_option
+@click.pass_obj  # this will pass the metadata as first argument
 def jupyter_notebook(
-    ip_address, all_kernels, env, idle_timeout, args, **kwargs
-):  # pylint: disable=unused-argument
+    metadata: ProjectMetadata,
+    ip_address,
+    all_kernels,
+    env,
+    idle_timeout,
+    args,
+    **kwargs,
+):  # pylint: disable=unused-argument,too-many-arguments
     """Open Jupyter Notebook with project specific variables loaded."""
-    context = _load_project_context(env=env)
     _check_module_importable("jupyter_core")
 
     if "-h" not in args and "--help" not in args:
         ipython_message(all_kernels)
 
-    _update_ipython_dir(context.project_path)
+    _update_ipython_dir(metadata.project_path)
     arguments = _build_jupyter_command(
         "notebook",
         ip_address=ip_address,
         all_kernels=all_kernels,
         args=args,
         idle_timeout=idle_timeout,
-        project_name=context.project_name,
+        project_name=metadata.project_name,
     )
 
     python_call_kwargs = _build_jupyter_env(env)
@@ -168,24 +161,30 @@ def jupyter_notebook(
 )
 @click.option("--idle-timeout", type=int, default=30, help=JUPYTER_IDLE_TIMEOUT_HELP)
 @env_option
+@click.pass_obj  # this will pass the metadata as first argument
 def jupyter_lab(
-    ip_address, all_kernels, env, idle_timeout, args, **kwargs
-):  # pylint: disable=unused-argument
+    metadata: ProjectMetadata,
+    ip_address,
+    all_kernels,
+    env,
+    idle_timeout,
+    args,
+    **kwargs,
+):  # pylint: disable=unused-argument,too-many-arguments
     """Open Jupyter Lab with project specific variables loaded."""
-    context = _load_project_context(env=env)
     _check_module_importable("jupyter_core")
 
     if "-h" not in args and "--help" not in args:
         ipython_message(all_kernels)
 
-    _update_ipython_dir(context.project_path)
+    _update_ipython_dir(metadata.project_path)
     arguments = _build_jupyter_command(
         "lab",
         ip_address=ip_address,
         all_kernels=all_kernels,
         args=args,
         idle_timeout=idle_timeout,
-        project_name=context.project_name,
+        project_name=metadata.project_name,
     )
 
     python_call_kwargs = _build_jupyter_env(env)
@@ -202,8 +201,9 @@ def jupyter_lab(
     nargs=-1,
 )
 @env_option
+@click.pass_obj  # this will pass the metadata as first argument
 def convert_notebook(
-    all_flag, overwrite_flag, filepath, env, **kwargs
+    metadata: ProjectMetadata, all_flag, overwrite_flag, filepath, env, **kwargs
 ):  # pylint: disable=unused-argument, too-many-locals
     """Convert selected or all notebooks found in a Kedro project
     to Kedro code, by exporting code from the appropriately-tagged cells:
@@ -214,10 +214,9 @@ def convert_notebook(
     relative and absolute paths are accepted.
     Should not be provided if --all flag is already present.
     """
-    project_path = Path.cwd()
-    project_metadata = _get_project_metadata(project_path)
-    source_path = project_metadata.source_dir
-    package_name = project_metadata.package_name
+    project_path = metadata.project_path
+    source_path = metadata.source_dir
+    package_name = metadata.package_name
 
     _update_ipython_dir(project_path)
 
@@ -263,7 +262,7 @@ def convert_notebook(
         else:
             _export_nodes(notebook, output_path)
 
-    secho("Done!", color="green")
+    secho("Done!", color="green")  # type: ignore
 
 
 def _build_jupyter_command(  # pylint: disable=too-many-arguments

@@ -18,7 +18,7 @@ kedro
   kedro.runner
   kedro.framework.context
   kedro.framework.cli
-  kedro.framework.project
+  kedro.framework.startup
   kedro.versioning
   kedro.extras.datasets
   kedro.extras.decorators

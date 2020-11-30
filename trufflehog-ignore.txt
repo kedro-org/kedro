@@ -1,3 +1,9 @@
 docs/package.json
 docs/package-lock.json
 static/img/kedro_gitflow.svg
+.idea/
+.git/
+.mypy_cache/
+.coverage.*
+.*\.log
+.*\.iml

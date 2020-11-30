@@ -31,7 +31,6 @@ import json
 import shutil
 import sys
 import tempfile
-from importlib import import_module
 from pathlib import Path
 from textwrap import indent
 from typing import Any, List, NamedTuple, Tuple, Union
@@ -52,7 +51,9 @@ from kedro.framework.cli.utils import (
     env_option,
     python_call,
 )
-from kedro.framework.context import KedroContext, load_context
+from kedro.framework.context import load_context
+from kedro.framework.project.settings import _get_project_settings
+from kedro.framework.startup import ProjectMetadata
 
 _SETUP_PY_TEMPLATE = """# -*- coding: utf-8 -*-
 from setuptools import setup, find_packages
@@ -92,24 +93,25 @@ def _check_pipeline_name(ctx, param, value):  # pylint: disable=unused-argument
     help="Skip creation of config files for the new pipeline(s).",
 )
 @env_option(help="Environment to create pipeline configuration in. Defaults to `base`.")
+@click.pass_obj  # this will pass the metadata as first argument
 def create_pipeline(
-    name, skip_config, env, **kwargs
+    metadata: ProjectMetadata, name, skip_config, env, **kwargs
 ):  # pylint: disable=unused-argument
     """Create a new modular pipeline by providing the new pipeline name as an argument."""
-    try:
-        context = load_context(Path.cwd(), env=env)
-    except Exception as exc:
+    package_dir = metadata.source_dir / metadata.package_name
+    conf_root = _get_project_settings(metadata.package_name, "CONF_ROOT", "conf")
+    project_conf_path = metadata.project_path / conf_root
+
+    env = env or "base"
+    if not skip_config and not (project_conf_path / env).exists():
         raise KedroCliError(
-            f"Unable to load Kedro context with environment `{env}`. "
-            f"Make sure it exists in the project configuration.\nError: {exc}"
-        ) from exc
+            f"Unable to locate environment `{env}`. "
+            f"Make sure it exists in the project configuration."
+        )
 
-    package_dir = _get_project_package_dir(context)
-    output_dir = package_dir / "pipelines"
-
-    result_path = _create_pipeline(name, context.project_version, output_dir)
+    result_path = _create_pipeline(name, package_dir / "pipelines")
     _copy_pipeline_tests(name, result_path, package_dir)
-    _copy_pipeline_configs(result_path, context, skip_config, env=env)
+    _copy_pipeline_configs(result_path, project_conf_path, skip_config, env=env)
     click.secho(f"\nPipeline `{name}` was successfully created.\n", fg="green")
 
     click.secho(
@@ -139,20 +141,23 @@ def _echo_deletion_warning(message: str, **paths: List[Path]):
 @click.option(
     "-y", "--yes", is_flag=True, help="Confirm deletion of pipeline non-interactively."
 )
-def delete_pipeline(name, env, yes, **kwargs):  # pylint: disable=unused-argument
+@click.pass_obj  # this will pass the metadata as first argument
+def delete_pipeline(
+    metadata: ProjectMetadata, name, env, yes, **kwargs
+):  # pylint: disable=unused-argument
     """Delete a modular pipeline by providing the pipeline name as an argument."""
-    try:
-        context = load_context(Path.cwd(), env=env)
-    except Exception as exc:
-        raise KedroCliError(
-            f"Unable to load Kedro context with environment `{env}`. "
-            f"Make sure it exists in the project configuration.\nError: {exc}"
-        ) from exc
-
-    package_dir = _get_project_package_dir(context)
+    package_dir = metadata.source_dir / metadata.package_name
+    conf_root = _get_project_settings(metadata.package_name, "CONF_ROOT", "conf")
+    project_conf_path = metadata.project_path / conf_root
 
     env = env or "base"
-    pipeline_artifacts = _get_pipeline_artifacts(context, pipeline_name=name, env=env)
+    if not (project_conf_path / env).exists():
+        raise KedroCliError(
+            f"Unable to locate environment `{env}`. "
+            f"Make sure it exists in the project configuration."
+        )
+
+    pipeline_artifacts = _get_pipeline_artifacts(metadata, pipeline_name=name, env=env)
 
     files_to_delete = [
         pipeline_artifacts.pipeline_conf / confdir / f"{name}.yml"
@@ -262,9 +267,10 @@ def _unpack_wheel(location: str, destination: Path) -> None:
     callback=_check_pipeline_name,
     help="Alternative name to unpackage under.",
 )
+@click.pass_obj  # this will pass the metadata as first argument
 def pull_package(
-    package_path, env, alias, **kwargs
-):  # pylint: disable=unused-argument,too-many-locals
+    metadata: ProjectMetadata, package_path, env, alias, **kwargs
+):  # pylint:disable=unused-argument
     """Pull a modular pipeline package, unpack it and install the files to corresponding
     locations.
     """
@@ -285,7 +291,7 @@ def pull_package(
         package_name = dist_info_file[0].stem.split("-")[0]
 
         _clean_pycache(temp_dir_path)
-        _install_files(package_name, temp_dir_path, env, alias)
+        _install_files(metadata, package_name, temp_dir_path, env, alias)
 
 
 def _rename_files(conf_source: Path, old_name: str, new_name: str):
@@ -300,10 +306,13 @@ def _rename_files(conf_source: Path, old_name: str, new_name: str):
 
 
 def _install_files(
-    package_name: str, source_path: Path, env: str = None, alias: str = None
+    project_metadata: ProjectMetadata,
+    package_name: str,
+    source_path: Path,
+    env: str = None,
+    alias: str = None,
 ):
     env = env or "base"
-    context = load_context(Path.cwd(), env=env)
 
     package_source, test_source, conf_source = _get_package_artifacts(
         source_path, package_name
@@ -314,7 +323,7 @@ def _install_files(
 
     pipeline_name = alias or package_name
     package_dest, test_dest, conf_dest = _get_pipeline_artifacts(
-        context, pipeline_name=pipeline_name, env=env
+        project_metadata, pipeline_name=pipeline_name, env=env
     )
 
     if conf_source.is_dir():
@@ -359,13 +368,14 @@ def _install_files(
     help="Version to package under.",
 )
 @click.argument("name", nargs=1)
-def package_pipeline(name, env, alias, destination, version):
+@click.pass_obj  # this will pass the metadata as first argument
+def package_pipeline(
+    metadata: ProjectMetadata, name, env, alias, destination, version
+):  # pylint: disable=too-many-arguments
     """Package up a pipeline for easy distribution. A .whl file
     will be created in a `<source_dir>/dist/`."""
-    context = load_context(Path.cwd(), env=env)
-
     result_path = _package_pipeline(
-        name, context, alias=alias, destination=destination, env=env, version=version
+        name, metadata, alias=alias, destination=destination, env=env, version=version,
     )
 
     as_alias = f" as `{alias}`" if alias else ""
@@ -390,18 +400,18 @@ def _find_config_files(
 
 def _package_pipeline(  # pylint: disable=too-many-arguments
     pipeline_name: str,
-    context: KedroContext,
+    metadata: ProjectMetadata,
     alias: str = None,
     destination: str = None,
     env: str = None,
     version: str = None,
 ) -> Path:
-    package_dir = _get_project_package_dir(context)
+    package_dir = metadata.source_dir / metadata.package_name
     env = env or "base"
     version = version or "0.1"
 
     artifacts_to_package = _get_pipeline_artifacts(
-        context, pipeline_name=pipeline_name, env=env
+        metadata, pipeline_name=pipeline_name, env=env
     )
     # as the wheel file will only contain parameters, we aren't listing other
     # config files not to confused users and avoid useless file copies
@@ -421,7 +431,7 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
     _generate_wheel_file(pipeline_name, destination, source_paths, version, alias=alias)
 
     _clean_pycache(package_dir)
-    _clean_pycache(context.project_path)
+    _clean_pycache(metadata.project_path)
 
     return destination
 
@@ -514,13 +524,13 @@ def _generate_setup_file(package_name: str, version: str, output_dir: Path) -> P
     return setup_file
 
 
-def _create_pipeline(name: str, kedro_version: str, output_dir: Path) -> Path:
+def _create_pipeline(name: str, output_dir: Path) -> Path:
     with _filter_deprecation_warnings():
         # pylint: disable=import-outside-toplevel
         from cookiecutter.main import cookiecutter
 
     template_path = Path(kedro.__file__).parent / "templates" / "pipeline"
-    cookie_context = {"pipeline_name": name, "kedro_version": kedro_version}
+    cookie_context = {"pipeline_name": name, "kedro_version": kedro.__version__}
 
     click.echo(f"Creating the pipeline `{name}`: ", nl=False)
 
@@ -597,23 +607,19 @@ def _sync_dirs(source: Path, target: Path, prefix: str = ""):
             _sync_dirs(source_path, target_path, prefix=new_prefix)
 
 
-def _get_project_package_dir(context: KedroContext) -> Path:
-    # import the module of the current Kedro project
-    project_package = import_module(context.package_name)
-    # locate the directory of the project Python package
-    package_dir = Path(project_package.__file__).parent
-    return package_dir
-
-
 def _get_pipeline_artifacts(
-    context: KedroContext, pipeline_name: str, env: str
+    project_metadata: ProjectMetadata, pipeline_name: str, env: str
 ) -> PipelineArtifacts:
     """From existing project, returns in order: source_path, tests_path, config_paths"""
-    package_dir = _get_project_package_dir(context)
+    package_dir = project_metadata.source_dir / project_metadata.package_name
+    conf_root = _get_project_settings(
+        project_metadata.package_name, "CONF_ROOT", "conf"
+    )
+    project_conf_path = project_metadata.project_path / conf_root
     artifacts = PipelineArtifacts(
         package_dir / "pipelines" / pipeline_name,
         package_dir.parent / "tests" / "pipelines" / pipeline_name,
-        context.project_path / context.CONF_ROOT / env,
+        project_conf_path / env,
     )
     return artifacts
 
@@ -643,13 +649,12 @@ def _copy_pipeline_tests(pipeline_name: str, result_path: Path, package_dir: Pat
 
 
 def _copy_pipeline_configs(
-    result_path: Path, context: KedroContext, skip_config: bool, env: str = None
+    result_path: Path, conf_path: Path, skip_config: bool, env: str
 ):
     config_source = result_path / "config"
-    env = env or "base"
     try:
         if not skip_config:
-            config_target = context.project_path / context.CONF_ROOT / env
+            config_target = conf_path / env
             _sync_dirs(config_source, config_target)
     finally:
         shutil.rmtree(config_source)

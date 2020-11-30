@@ -39,7 +39,6 @@ from typing import Sequence
 import click
 from click import secho
 
-from kedro.framework.cli.jupyter import _load_project_context
 from kedro.framework.cli.utils import (
     KedroCliError,
     _check_module_importable,
@@ -50,7 +49,7 @@ from kedro.framework.cli.utils import (
     ipython_message,
     python_call,
 )
-from kedro.framework.project.metadata import _get_project_metadata
+from kedro.framework.startup import ProjectMetadata
 
 NO_DEPENDENCY_MESSAGE = """{module} is not installed. Please make sure {module} is in
 {src}/requirements.txt and run `kedro install`."""
@@ -77,22 +76,19 @@ def _build_reqs(source_path: Path, args: Sequence[str] = ()):
     python_call("piptools", ["compile", "-q", *args, str(requirements_in)])
 
 
-def _get_source_path():
-    return _get_project_metadata(Path.cwd()).source_dir
-
-
 @click.group()
 def project_group():
     """Collection of project commands."""
 
 
 @forward_command(project_group, forward_help=True)
-def test(args, **kwargs):  # pylint: disable=unused-argument
+@click.pass_obj  # this will pass the metadata as first argument
+def test(metadata: ProjectMetadata, args, **kwargs):  # pylint: disable=unused-argument
     """Run the test suite."""
     try:
         _check_module_importable("pytest")
     except KedroCliError as exc:
-        source_path = _get_source_path()
+        source_path = metadata.source_dir
         raise KedroCliError(
             NO_DEPENDENCY_MESSAGE.format(module="pytest", src=str(source_path))
         ) from exc
@@ -103,11 +99,13 @@ def test(args, **kwargs):  # pylint: disable=unused-argument
 @command_with_verbosity(project_group)
 @click.option("-c", "--check-only", is_flag=True, help=LINT_CHECK_ONLY_HELP)
 @click.argument("files", type=click.Path(exists=True), nargs=-1)
-def lint(files, check_only, **kwargs):  # pylint: disable=unused-argument
+@click.pass_obj  # this will pass the metadata as first argument
+def lint(
+    metadata: ProjectMetadata, files, check_only, **kwargs
+):  # pylint: disable=unused-argument
     """Run flake8, isort and black."""
-    project_metadata = _get_project_metadata(Path.cwd())
-    source_path = project_metadata.source_dir
-    package_name = project_metadata.package_name
+    source_path = metadata.source_dir
+    package_name = metadata.package_name
     files = files or (str(source_path / "tests"), str(source_path / package_name))
 
     if "PYTHONPATH" not in os.environ:
@@ -127,7 +125,7 @@ def lint(files, check_only, **kwargs):  # pylint: disable=unused-argument
     python_call("flake8", files)
 
     check_flag = ("-c",) if check_only else ()
-    python_call("isort", (*check_flag, "-rc") + files)
+    python_call("isort", (*check_flag, "-rc") + files)  # type: ignore
 
 
 @project_group.command()
@@ -138,13 +136,14 @@ def lint(files, check_only, **kwargs):  # pylint: disable=unused-argument
     help="Run `pip-compile` on project requirements before install. "
     "By default runs only if `src/requirements.in` file doesn't exist.",
 )
-def install(compile_flag):
+@click.pass_obj  # this will pass the metadata as first argument
+def install(metadata: ProjectMetadata, compile_flag):
     """Install project dependencies from both requirements.txt
     and environment.yml (optional)."""
     # we cannot use `context.project_path` as in other commands since
     # context instantiation might break due to missing dependencies
     # we attempt to install here
-    source_path = _get_source_path()
+    source_path = metadata.source_dir
     environment_yml = source_path / "environment.yml"
     requirements_in = source_path / "requirements.in"
     requirements_txt = source_path / "requirements.txt"
@@ -169,12 +168,14 @@ def install(compile_flag):
 
 @forward_command(project_group, forward_help=True)
 @env_option
-def ipython(env, args, **kwargs):  # pylint: disable=unused-argument
+@click.pass_obj  # this will pass the metadata as first argument
+def ipython(
+    metadata: ProjectMetadata, env, args, **kwargs
+):  # pylint: disable=unused-argument
     """Open IPython with project specific variables loaded."""
-    context = _load_project_context(env=env)
     _check_module_importable("IPython")
 
-    os.environ["IPYTHONDIR"] = str(context.project_path / ".ipython")
+    os.environ["IPYTHONDIR"] = str(metadata.project_path / ".ipython")
     if env:
         os.environ["KEDRO_ENV"] = env
     if "-h" not in args and "--help" not in args:
@@ -183,9 +184,10 @@ def ipython(env, args, **kwargs):  # pylint: disable=unused-argument
 
 
 @project_group.command()
-def package():
+@click.pass_obj  # this will pass the metadata as first argument
+def package(metadata: ProjectMetadata):
     """Package the project as a Python egg and wheel."""
-    source_path = _get_source_path()
+    source_path = metadata.source_dir
     call(
         [sys.executable, "setup.py", "clean", "--all", "bdist_egg"],
         cwd=str(source_path),
@@ -206,11 +208,11 @@ def package():
     default=False,
     help=OPEN_ARG_HELP,
 )
-def build_docs(open_docs):
+@click.pass_obj  # this will pass the metadata as first argument
+def build_docs(metadata: ProjectMetadata, open_docs):
     """Build the project documentation."""
-    project_metadata = _get_project_metadata(Path.cwd())
-    source_path = project_metadata.source_dir
-    package_name = project_metadata.package_name
+    source_path = metadata.source_dir
+    package_name = metadata.package_name
 
     python_call("pip", ["install", str(source_path / "[docs]")])
     python_call("pip", ["install", "-r", str(source_path / "requirements.txt")])
@@ -233,9 +235,12 @@ def build_docs(open_docs):
 
 
 @forward_command(project_group, name="build-reqs")
-def build_reqs(args, **kwargs):  # pylint: disable=unused-argument
+@click.pass_obj  # this will pass the metadata as first argument
+def build_reqs(
+    metadata: ProjectMetadata, args, **kwargs
+):  # pylint: disable=unused-argument
     """Build the project dependency requirements."""
-    source_path = _get_source_path()
+    source_path = metadata.source_dir
     _build_reqs(source_path, args)
     secho(
         "Requirements built! Please update requirements.in "
@@ -246,9 +251,12 @@ def build_reqs(args, **kwargs):  # pylint: disable=unused-argument
 
 
 @command_with_verbosity(project_group, "activate-nbstripout")
-def activate_nbstripout(**kwargs):  # pylint: disable=unused-argument
+@click.pass_obj  # this will pass the metadata as first argument
+def activate_nbstripout(
+    metadata: ProjectMetadata, **kwargs
+):  # pylint: disable=unused-argument
     """Install the nbstripout git hook to automatically clean notebooks."""
-    source_path = _get_source_path()
+    source_path = metadata.source_dir
     secho(
         (
             "Notebook output cells will be automatically cleared before committing"

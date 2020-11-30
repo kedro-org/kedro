@@ -25,35 +25,50 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-"""
-This module contains an example test.
-
-Tests should be placed in ``src/tests``, in modules that mirror your
-project's structure, and in files named test_*.py. They are simply functions
-named ``test_*`` which test a unit of logic.
-
-To run the tests, run ``kedro test`` from the project root directory.
-"""
-
-from pathlib import Path
-
 import pytest
-from kedro.framework.context import KedroContext, load_context
+
+from kedro.framework.project.settings import _get_project_settings
 
 
-@pytest.fixture
-def project_context(mocker):
-    # Suppress the logging configuration. Otherwise it might interfere
-    # with the tests that check logs using the ``caplog`` fixture.
-    mocker.patch.object(KedroContext, "_setup_logging")
-
-    return load_context(Path.cwd())
+# pylint: disable=attribute-defined-outside-init,too-few-public-methods
+class TestSettings:
+    pass
 
 
-# The tests below are here for the demonstration purpose
-# and should be replaced with the ones testing the project
-# functionality
-class TestProjectContext:
-    def test_package_name(self, project_context):
-        assert project_context.package_name == "{{ cookiecutter.python_package }}"
+class TestGetSettings:
+    default_value = "default_value"
+    property_name = "property_name"
+    package_name = "package_name"
+
+    def test_settings_py_is_missing(self):
+        with pytest.raises(ModuleNotFoundError):
+            _get_project_settings(
+                self.package_name, self.property_name, self.default_value
+            )
+
+    def test_property_is_missing(self, mocker):
+        mocker.patch(
+            "kedro.framework.project.settings.import_module",
+            return_value=TestSettings(),
+        )
+
+        value = _get_project_settings(
+            self.package_name, self.property_name, self.default_value
+        )
+
+        assert value == self.default_value
+
+    def test_get_project_settings(self, mocker):
+        property_value = "property_value"
+
+        settings_obj = TestSettings()
+        settings_obj.property_name = property_value
+        mocker.patch(
+            "kedro.framework.project.settings.import_module", return_value=settings_obj
+        )
+
+        value = _get_project_settings(
+            self.package_name, self.property_name, self.default_value
+        )
+
+        assert value == property_value

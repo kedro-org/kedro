@@ -27,8 +27,6 @@
 # limitations under the License.
 # pylint: disable=unused-argument
 
-from pathlib import Path
-
 import anyconfig
 import pytest
 from click.testing import CliRunner
@@ -209,7 +207,7 @@ class TestRunCommand:
             pipeline_name="pipeline1",
         )
         mocked_session_manager.assert_called_once_with(
-            project_path=Path.cwd(), env=mocker.ANY, extra_params=expected
+            "fake_package", env=mocker.ANY, extra_params=expected
         )
 
     @pytest.mark.parametrize(
@@ -248,7 +246,7 @@ class TestRunCommand:
 
         assert not result.exit_code
         mocked_session_manager.assert_called_once_with(
-            project_path=Path.cwd(), env=mocker.ANY, extra_params=expected_extra_params
+            "fake_package", env=mocker.ANY, extra_params=expected_extra_params
         )
 
     @pytest.mark.parametrize("bad_arg", ["bad", "foo:bar,bad"])

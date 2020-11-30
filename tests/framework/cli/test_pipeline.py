@@ -126,8 +126,8 @@ TOO_SHORT_ERROR = "It must be at least 2 characters long."
 class TestPipelineCreateCommand:
     @pytest.mark.parametrize("env", [None, "local"])
     def test_create_pipeline(
-        self, fake_repo_path, fake_project_cli, env, fake_package_path
-    ):
+        self, fake_repo_path, fake_project_cli, env, fake_package_path, fake_metadata
+    ):  # pylint: disable=too-many-locals
         """Test creation of a pipeline"""
         pipelines_dir = fake_package_path / "pipelines"
         assert pipelines_dir.is_dir()
@@ -136,7 +136,7 @@ class TestPipelineCreateCommand:
 
         cmd = ["pipeline", "create", PIPELINE_NAME]
         cmd += ["-e", env] if env else []
-        result = CliRunner().invoke(fake_project_cli.cli, cmd)
+        result = CliRunner().invoke(fake_project_cli.cli, cmd, obj=fake_metadata)
         assert result.exit_code == 0
         assert (
             f"To be able to run the pipeline `{PIPELINE_NAME}`, you will need "
@@ -162,13 +162,15 @@ class TestPipelineCreateCommand:
         assert actual_files == expected_files
 
     @pytest.mark.parametrize("env", [None, "local"])
-    def test_create_pipeline_skip_config(self, fake_repo_path, fake_project_cli, env):
+    def test_create_pipeline_skip_config(
+        self, fake_repo_path, fake_project_cli, env, fake_metadata
+    ):
         """Test creation of a pipeline with no config"""
 
         cmd = ["pipeline", "create", "--skip-config", PIPELINE_NAME]
         cmd += ["-e", env] if env else []
 
-        result = CliRunner().invoke(fake_project_cli.cli, cmd)
+        result = CliRunner().invoke(fake_project_cli.cli, cmd, obj=fake_metadata)
         assert result.exit_code == 0
         assert (
             f"To be able to run the pipeline `{PIPELINE_NAME}`, you will need "
@@ -184,7 +186,7 @@ class TestPipelineCreateCommand:
         assert test_dir.is_dir()
 
     def test_catalog_and_params(
-        self, fake_repo_path, fake_project_cli, fake_package_path
+        self, fake_repo_path, fake_project_cli, fake_package_path, fake_metadata
     ):
         """Test that catalog and parameter configs generated in pipeline
         sections propagate into the context"""
@@ -192,7 +194,7 @@ class TestPipelineCreateCommand:
         assert pipelines_dir.is_dir()
 
         cmd = ["pipeline", "create", PIPELINE_NAME]
-        result = CliRunner().invoke(fake_project_cli.cli, cmd)
+        result = CliRunner().invoke(fake_project_cli.cli, cmd, obj=fake_metadata)
         assert result.exit_code == 0
 
         # write pipeline catalog
@@ -220,7 +222,7 @@ class TestPipelineCreateCommand:
         assert isinstance(ctx.catalog.load("ds_from_pipeline"), DataFrame)
         assert ctx.params["params_from_pipeline"] == params_dict["params_from_pipeline"]
 
-    def test_skip_copy(self, fake_repo_path, fake_project_cli):
+    def test_skip_copy(self, fake_repo_path, fake_project_cli, fake_metadata):
         """Test skipping the copy of conf and test files if those already exist"""
         # create catalog and parameter files
         for dirname in ("catalog", "parameters"):
@@ -243,20 +245,22 @@ class TestPipelineCreateCommand:
         tests_init.touch()
 
         cmd = ["pipeline", "create", PIPELINE_NAME]
-        result = CliRunner().invoke(fake_project_cli.cli, cmd)
+        result = CliRunner().invoke(fake_project_cli.cli, cmd, obj=fake_metadata)
 
         assert result.exit_code == 0
         assert "__init__.py`: SKIPPED" in result.output
         assert f"parameters{os.sep}{PIPELINE_NAME}.yml`: SKIPPED" in result.output
         assert result.output.count("SKIPPED") == 2  # only 2 files skipped
 
-    def test_failed_copy(self, fake_project_cli, fake_package_path, mocker):
+    def test_failed_copy(
+        self, fake_project_cli, fake_package_path, mocker, fake_metadata
+    ):
         """Test the error if copying some file fails"""
         error = Exception("Mock exception")
         mocked_copy = mocker.patch("shutil.copyfile", side_effect=error)
 
         cmd = ["pipeline", "create", PIPELINE_NAME]
-        result = CliRunner().invoke(fake_project_cli.cli, cmd)
+        result = CliRunner().invoke(fake_project_cli.cli, cmd, obj=fake_metadata)
         mocked_copy.assert_called_once()
         assert result.exit_code
         assert result.output.count("FAILED") == 1
@@ -292,27 +296,29 @@ class TestPipelineCreateCommand:
         assert result.exit_code
         assert error_message in result.output
 
-    def test_duplicate_pipeline_name(self, fake_project_cli, fake_package_path):
+    def test_duplicate_pipeline_name(
+        self, fake_project_cli, fake_package_path, fake_metadata
+    ):
         """Test error when attempting to create pipelines with duplicate names"""
         pipelines_dir = fake_package_path / "pipelines"
         assert pipelines_dir.is_dir()
 
         cmd = ["pipeline", "create", PIPELINE_NAME]
-        first = CliRunner().invoke(fake_project_cli.cli, cmd)
+        first = CliRunner().invoke(fake_project_cli.cli, cmd, obj=fake_metadata)
         assert first.exit_code == 0
 
-        second = CliRunner().invoke(fake_project_cli.cli, cmd)
+        second = CliRunner().invoke(fake_project_cli.cli, cmd, obj=fake_metadata)
         assert second.exit_code
         assert f"Creating the pipeline `{PIPELINE_NAME}`: FAILED" in second.output
         assert "directory already exists" in second.output
 
-    def test_bad_env(self, fake_project_cli):
+    def test_bad_env(self, fake_project_cli, fake_metadata):
         """Test error when provided conf environment does not exist"""
         env = "no_such_env"
         cmd = ["pipeline", "create", "-e", env, PIPELINE_NAME]
-        result = CliRunner().invoke(fake_project_cli.cli, cmd)
+        result = CliRunner().invoke(fake_project_cli.cli, cmd, obj=fake_metadata)
         assert result.exit_code
-        assert f"Unable to load Kedro context with environment `{env}`" in result.output
+        assert f"Unable to locate environment `{env}`" in result.output
 
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log", "make_pipelines")
@@ -323,11 +329,19 @@ class TestPipelineDeleteCommand:
         indirect=["make_pipelines"],
     )
     def test_delete_pipeline(
-        self, env, expected_conf, fake_repo_path, fake_project_cli, fake_package_path
+        self,
+        env,
+        expected_conf,
+        fake_repo_path,
+        fake_project_cli,
+        fake_package_path,
+        fake_metadata,
     ):
         options = ["--env", env] if env else []
         result = CliRunner().invoke(
-            fake_project_cli.cli, ["pipeline", "delete", "-y", PIPELINE_NAME, *options]
+            fake_project_cli.cli,
+            ["pipeline", "delete", "-y", PIPELINE_NAME, *options],
+            obj=fake_metadata,
         )
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
@@ -355,7 +369,7 @@ class TestPipelineDeleteCommand:
         assert not params_path.exists()
 
     def test_delete_pipeline_skip(
-        self, fake_repo_path, fake_project_cli, fake_package_path
+        self, fake_repo_path, fake_project_cli, fake_package_path, fake_metadata
     ):
         """Tests that delete pipeline handles missing or already deleted files gracefully"""
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
@@ -363,7 +377,9 @@ class TestPipelineDeleteCommand:
         shutil.rmtree(str(source_path))
 
         result = CliRunner().invoke(
-            fake_project_cli.cli, ["pipeline", "delete", "-y", PIPELINE_NAME]
+            fake_project_cli.cli,
+            ["pipeline", "delete", "-y", PIPELINE_NAME],
+            obj=fake_metadata,
         )
         tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
         params_path = (
@@ -384,7 +400,9 @@ class TestPipelineDeleteCommand:
         assert not tests_path.exists()
         assert not params_path.exists()
 
-    def test_delete_pipeline_fail(self, fake_project_cli, fake_package_path, mocker):
+    def test_delete_pipeline_fail(
+        self, fake_project_cli, fake_package_path, mocker, fake_metadata
+    ):
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
 
         mocker.patch(
@@ -392,7 +410,9 @@ class TestPipelineDeleteCommand:
             side_effect=PermissionError("permission"),
         )
         result = CliRunner().invoke(
-            fake_project_cli.cli, ["pipeline", "delete", "-y", PIPELINE_NAME]
+            fake_project_cli.cli,
+            ["pipeline", "delete", "-y", PIPELINE_NAME],
+            obj=fake_metadata,
         )
 
         assert result.exit_code, result.output
@@ -407,40 +427,47 @@ class TestPipelineDeleteCommand:
             ("a", TOO_SHORT_ERROR),
         ],
     )
-    def test_bad_pipeline_name(self, fake_project_cli, bad_name, error_message):
+    def test_bad_pipeline_name(
+        self, fake_project_cli, bad_name, error_message, fake_metadata
+    ):
         """Test error message when bad pipeline name was provided."""
         result = CliRunner().invoke(
-            fake_project_cli.cli, ["pipeline", "delete", "-y", bad_name]
+            fake_project_cli.cli,
+            ["pipeline", "delete", "-y", bad_name],
+            obj=fake_metadata,
         )
         assert result.exit_code
         assert error_message in result.output
 
-    def test_pipeline_not_found(self, fake_project_cli):
+    def test_pipeline_not_found(self, fake_project_cli, fake_metadata):
         result = CliRunner().invoke(
-            fake_project_cli.cli, ["pipeline", "delete", "-y", "non_existent"]
+            fake_project_cli.cli,
+            ["pipeline", "delete", "-y", "non_existent"],
+            obj=fake_metadata,
         )
         assert result.exit_code
         assert "Pipeline `non_existent` not found." in result.output
 
-    def test_bad_env(self, fake_project_cli):
+    def test_bad_env(self, fake_project_cli, fake_metadata):
         """Test error when provided conf environment does not exist."""
         result = CliRunner().invoke(
             fake_project_cli.cli,
             ["pipeline", "delete", "-y", "-e", "invalid_env", PIPELINE_NAME],
+            obj=fake_metadata,
         )
         assert result.exit_code
-        assert (
-            "Unable to load Kedro context with environment `invalid_env`"
-            in result.output
-        )
+        assert "Unable to locate environment `invalid_env`" in result.output
 
     @pytest.mark.parametrize("input_", ["n", "N", "random"])
     def test_pipeline_delete_confirmation(
-        self, fake_repo_path, fake_project_cli, fake_package_path, input_
+        self, fake_repo_path, fake_project_cli, fake_package_path, input_, fake_metadata
     ):
         """Test that user confirmation of deletion works"""
         result = CliRunner().invoke(
-            fake_project_cli.cli, ["pipeline", "delete", PIPELINE_NAME], input=input_
+            fake_project_cli.cli,
+            ["pipeline", "delete", PIPELINE_NAME],
+            input=input_,
+            obj=fake_metadata,
         )
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
@@ -466,7 +493,7 @@ class TestPipelineDeleteCommand:
 
     @pytest.mark.parametrize("input_", ["n", "N", "random"])
     def test_pipeline_delete_confirmation_skip(
-        self, fake_repo_path, fake_project_cli, fake_package_path, input_
+        self, fake_repo_path, fake_project_cli, fake_package_path, input_, fake_metadata
     ):
         """Test that user confirmation of deletion works when
         some of the files are missing or already deleted
@@ -475,7 +502,10 @@ class TestPipelineDeleteCommand:
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
         shutil.rmtree(str(source_path))
         result = CliRunner().invoke(
-            fake_project_cli.cli, ["pipeline", "delete", PIPELINE_NAME], input=input_
+            fake_project_cli.cli,
+            ["pipeline", "delete", PIPELINE_NAME],
+            input=input_,
+            obj=fake_metadata,
         )
 
         tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME

@@ -97,7 +97,7 @@ def default_jupyter_options(command, address="127.0.0.1", all_kernels=False):
         cmd += [
             "--NotebookApp.kernel_spec_manager_class="
             "kedro.framework.cli.jupyter.SingleKernelSpecManager",
-            "--KernelSpecManager.default_kernel_name='DummyProject'",
+            "--KernelSpecManager.default_kernel_name='CLITestingProject'",
         ]
 
     return "jupyter", cmd
@@ -116,10 +116,12 @@ def fake_ipython_message(mocker):
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
 class TestJupyterNotebookCommand:
     def test_default_kernel(
-        self, python_call_mock, fake_project_cli, fake_ipython_message
+        self, python_call_mock, fake_project_cli, fake_ipython_message, fake_metadata
     ):
         result = CliRunner().invoke(
-            fake_project_cli.cli, ["jupyter", "notebook", "--ip", "0.0.0.0"]
+            fake_project_cli.cli,
+            ["jupyter", "notebook", "--ip", "0.0.0.0"],
+            obj=fake_metadata,
         )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_called_once_with(False)
@@ -128,10 +130,12 @@ class TestJupyterNotebookCommand:
         )
 
     def test_all_kernels(
-        self, python_call_mock, fake_project_cli, fake_ipython_message
+        self, python_call_mock, fake_project_cli, fake_ipython_message, fake_metadata
     ):
         result = CliRunner().invoke(
-            fake_project_cli.cli, ["jupyter", "notebook", "--all-kernels"]
+            fake_project_cli.cli,
+            ["jupyter", "notebook", "--all-kernels"],
+            obj=fake_metadata,
         )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_called_once_with(True)
@@ -140,18 +144,22 @@ class TestJupyterNotebookCommand:
         )
 
     @pytest.mark.parametrize("help_flag", ["-h", "--help"])
-    def test_help(self, help_flag, fake_project_cli, fake_ipython_message):
+    def test_help(
+        self, help_flag, fake_project_cli, fake_ipython_message, fake_metadata
+    ):
         result = CliRunner().invoke(
-            fake_project_cli.cli, ["jupyter", "notebook", help_flag]
+            fake_project_cli.cli, ["jupyter", "notebook", help_flag], obj=fake_metadata
         )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_not_called()
 
     @pytest.mark.parametrize("env_flag", ["--env", "-e"])
-    def test_env(self, env_flag, fake_project_cli, python_call_mock):
+    def test_env(self, env_flag, fake_project_cli, python_call_mock, fake_metadata):
         """This tests passing an environment variable to the jupyter subprocess."""
         result = CliRunner().invoke(
-            fake_project_cli.cli, ["jupyter", "notebook", env_flag, "base"]
+            fake_project_cli.cli,
+            ["jupyter", "notebook", env_flag, "base"],
+            obj=fake_metadata,
         )
         assert not result.exit_code
 
@@ -159,18 +167,6 @@ class TestJupyterNotebookCommand:
         assert args == default_jupyter_options("notebook")
         assert "env" in kwargs
         assert kwargs["env"]["KEDRO_ENV"] == "base"
-
-    def test_load_context_fail(self, fake_project_cli):
-        result = CliRunner().invoke(
-            fake_project_cli.cli, ["jupyter", "notebook", "--env", "fake_env"]
-        )
-
-        expected_output = (
-            "Error: Unable to load Kedro context with environment `fake_env`. "
-            "Make sure it exists in the project configuration.\n"
-        )
-        assert result.exit_code
-        assert expected_output in result.output
 
     def test_fail_no_jupyter_core(self, fake_project_cli, mocker):
         mocker.patch.dict("sys.modules", {"jupyter_core": None})
@@ -187,10 +183,12 @@ class TestJupyterNotebookCommand:
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
 class TestJupyterLabCommand:
     def test_default_kernel(
-        self, python_call_mock, fake_project_cli, fake_ipython_message
+        self, python_call_mock, fake_project_cli, fake_ipython_message, fake_metadata
     ):
         result = CliRunner().invoke(
-            fake_project_cli.cli, ["jupyter", "lab", "--ip", "0.0.0.0"]
+            fake_project_cli.cli,
+            ["jupyter", "lab", "--ip", "0.0.0.0"],
+            obj=fake_metadata,
         )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_called_once_with(False)
@@ -199,10 +197,10 @@ class TestJupyterLabCommand:
         )
 
     def test_all_kernels(
-        self, python_call_mock, fake_project_cli, fake_ipython_message
+        self, python_call_mock, fake_project_cli, fake_ipython_message, fake_metadata
     ):
         result = CliRunner().invoke(
-            fake_project_cli.cli, ["jupyter", "lab", "--all-kernels"]
+            fake_project_cli.cli, ["jupyter", "lab", "--all-kernels"], obj=fake_metadata
         )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_called_once_with(True)
@@ -211,16 +209,22 @@ class TestJupyterLabCommand:
         )
 
     @pytest.mark.parametrize("help_flag", ["-h", "--help"])
-    def test_help(self, help_flag, fake_project_cli, fake_ipython_message):
-        result = CliRunner().invoke(fake_project_cli.cli, ["jupyter", "lab", help_flag])
+    def test_help(
+        self, help_flag, fake_project_cli, fake_ipython_message, fake_metadata
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["jupyter", "lab", help_flag], obj=fake_metadata
+        )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_not_called()
 
     @pytest.mark.parametrize("env_flag", ["--env", "-e"])
-    def test_env(self, env_flag, fake_project_cli, python_call_mock):
+    def test_env(self, env_flag, fake_project_cli, python_call_mock, fake_metadata):
         """This tests passing an environment variable to the jupyter subprocess."""
         result = CliRunner().invoke(
-            fake_project_cli.cli, ["jupyter", "lab", env_flag, "base"]
+            fake_project_cli.cli,
+            ["jupyter", "lab", env_flag, "base"],
+            obj=fake_metadata,
         )
         assert not result.exit_code
 
@@ -268,6 +272,7 @@ class TestConvertNotebookCommand:
         fake_export_nodes,
         tmp_file_path,
         fake_package_path,
+        fake_metadata,
     ):
         """
         Trying to convert one file, the output file already exists,
@@ -279,7 +284,9 @@ class TestConvertNotebookCommand:
         assert not output_dir.exists()
 
         result = CliRunner().invoke(
-            fake_project_cli.cli, ["jupyter", "convert", str(tmp_file_path)]
+            fake_project_cli.cli,
+            ["jupyter", "convert", str(tmp_file_path)],
+            obj=fake_metadata,
         )
         assert not result.exit_code, result.stdout
 
@@ -289,7 +296,7 @@ class TestConvertNotebookCommand:
         )
 
     def test_convert_one_file_do_not_overwrite(
-        self, mocker, fake_project_cli, fake_export_nodes, tmp_file_path
+        self, mocker, fake_project_cli, fake_export_nodes, tmp_file_path, fake_metadata
     ):
         """
         Trying to convert one file, the output file already exists,
@@ -299,14 +306,21 @@ class TestConvertNotebookCommand:
         mocker.patch("click.confirm", return_value=False)
 
         result = CliRunner().invoke(
-            fake_project_cli.cli, ["jupyter", "convert", str(tmp_file_path)]
+            fake_project_cli.cli,
+            ["jupyter", "convert", str(tmp_file_path)],
+            obj=fake_metadata,
         )
         assert not result.exit_code, result.stdout
 
         fake_export_nodes.assert_not_called()
 
     def test_convert_all_files(
-        self, mocker, fake_project_cli, fake_export_nodes, fake_package_path
+        self,
+        mocker,
+        fake_project_cli,
+        fake_export_nodes,
+        fake_package_path,
+        fake_metadata,
     ):
         """Trying to convert all files, the output files already exist."""
         mocker.patch.object(Path, "is_file", return_value=True)
@@ -318,7 +332,7 @@ class TestConvertNotebookCommand:
         assert not output_dir.exists()
 
         result = CliRunner().invoke(
-            fake_project_cli.cli, ["jupyter", "convert", "--all"]
+            fake_project_cli.cli, ["jupyter", "convert", "--all"], obj=fake_metadata
         )
         assert not result.exit_code, result.stdout
 
@@ -330,9 +344,13 @@ class TestConvertNotebookCommand:
             ]
         )
 
-    def test_convert_without_filepath_and_all_flag(self, fake_project_cli):
+    def test_convert_without_filepath_and_all_flag(
+        self, fake_project_cli, fake_metadata
+    ):
         """Neither path nor --all flag is provided."""
-        result = CliRunner().invoke(fake_project_cli.cli, ["jupyter", "convert"])
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["jupyter", "convert"], obj=fake_metadata
+        )
         expected_output = (
             "Please specify a notebook filepath or "
             "add '--all' to convert all notebooks.\n"
@@ -340,14 +358,16 @@ class TestConvertNotebookCommand:
         assert result.exit_code
         assert result.stdout == expected_output
 
-    def test_non_unique_notebook_names_error(self, fake_project_cli, mocker):
+    def test_non_unique_notebook_names_error(
+        self, fake_project_cli, mocker, fake_metadata
+    ):
         """Trying to convert notebooks with the same name."""
         mocker.patch(
             "kedro.framework.cli.jupyter.iglob", return_value=["/path1/1", "/path2/1"]
         )
 
         result = CliRunner().invoke(
-            fake_project_cli.cli, ["jupyter", "convert", "--all"]
+            fake_project_cli.cli, ["jupyter", "convert", "--all"], obj=fake_metadata
         )
 
         expected_output = (
@@ -357,14 +377,21 @@ class TestConvertNotebookCommand:
         assert expected_output in result.output
 
     def test_convert_one_file(
-        self, fake_project_cli, fake_export_nodes, tmp_file_path, fake_package_path
+        self,
+        fake_project_cli,
+        fake_export_nodes,
+        tmp_file_path,
+        fake_package_path,
+        fake_metadata,
     ):
         """Trying to convert one file, the output file doesn't exist."""
         output_dir = fake_package_path / "nodes"
         assert not output_dir.exists()
 
         result = CliRunner().invoke(
-            fake_project_cli.cli, ["jupyter", "convert", str(tmp_file_path)]
+            fake_project_cli.cli,
+            ["jupyter", "convert", str(tmp_file_path)],
+            obj=fake_metadata,
         )
         assert not result.exit_code, result.stdout
 
@@ -374,7 +401,12 @@ class TestConvertNotebookCommand:
         )
 
     def test_convert_one_file_nodes_directory_exists(
-        self, fake_project_cli, fake_export_nodes, tmp_file_path, fake_package_path
+        self,
+        fake_project_cli,
+        fake_export_nodes,
+        tmp_file_path,
+        fake_package_path,
+        fake_metadata,
     ):
         """User-created nodes/ directory is used as is."""
         output_dir = fake_package_path / "nodes"
@@ -382,7 +414,9 @@ class TestConvertNotebookCommand:
         output_dir.mkdir()
 
         result = CliRunner().invoke(
-            fake_project_cli.cli, ["jupyter", "convert", str(tmp_file_path)]
+            fake_project_cli.cli,
+            ["jupyter", "convert", str(tmp_file_path)],
+            obj=fake_metadata,
         )
         assert not result.exit_code, result.stdout
 

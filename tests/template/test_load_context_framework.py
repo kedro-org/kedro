@@ -34,7 +34,7 @@ import toml
 
 from kedro import __version__ as kedro_version
 from kedro.framework.context import KedroContext, load_context
-from kedro.framework.project.metadata import _get_project_metadata
+from kedro.framework.startup import _get_project_metadata
 
 
 @pytest.fixture(autouse=True)
@@ -51,6 +51,10 @@ def _create_kedro_config(project_path, payload):
     kedro_conf.write_text(toml_str)
 
 
+class MyContext(KedroContext):
+    pass
+
+
 @pytest.mark.usefixtures("fake_project_cli")
 class TestLoadContext:
     def test_valid_context(self, fake_repo_path, mocker):
@@ -60,8 +64,7 @@ class TestLoadContext:
             wraps=_get_project_metadata,
         )
         result = load_context(str(fake_repo_path))
-        assert result.project_name == "Test Project"
-        assert result.project_version == kedro_version
+        assert result.package_name == "fake_package"
         assert str(fake_repo_path.resolve() / "src") in sys.path
         get_project_metadata_mock.assert_called_with(fake_repo_path)
 
@@ -102,7 +105,6 @@ class TestLoadContext:
         payload = {
             "tool": {
                 "kedro": {
-                    "context_path": f"{fake_package_name}.run.ProjectContext",
                     "project_version": kedro_version,
                     "project_name": project_name,
                     "package_name": fake_package_name,
@@ -120,7 +122,7 @@ class TestLoadContext:
         with pytest.raises(RuntimeError, match=re.escape(pattern)):
             load_context(str(fake_repo_path))
 
-    def test_pyproject_toml_has_no_context_path(self, fake_repo_path):
+    def test_settings_py_has_no_context_path(self, fake_repo_path):
         """Test for loading default `KedroContext` context. """
         payload = {
             "tool": {
@@ -137,30 +139,38 @@ class TestLoadContext:
         assert isinstance(context, KedroContext)
         assert context.__class__ is KedroContext
 
-    def test_pyproject_toml_has_context_path(self, fake_repo_path, fake_package_name):
+    def test_settings_py_has_context_path(
+        self, fake_repo_path, fake_package_name, mocker
+    ):
         """Test for loading custom `ProjectContext` context. """
         payload = {
             "tool": {
                 "kedro": {
                     "package_name": fake_package_name,
                     "project_version": kedro_version,
-                    "context_path": f"{fake_package_name}.run.ProjectContext",
                     "project_name": "fake_project",
                 }
             }
         }
 
-        project_context_code = (
-            "\nfrom kedro.framework.context import KedroContext\n\n"
-            "class ProjectContext(KedroContext):\n\tpass\n"
-        )
-        run_file = fake_repo_path / "src" / fake_package_name / "run.py"
-        with run_file.open(mode="a") as f:
-            f.write(project_context_code)
-
         _create_kedro_config(fake_repo_path, payload)
 
+        settings_mock = mocker.patch(
+            "kedro.framework.context.context._get_project_settings",
+            side_effect=(MyContext, (), (), "conf"),
+        )
+
         context = load_context(str(fake_repo_path))
+
         assert isinstance(context, KedroContext)
         assert context.__class__ is not KedroContext
-        assert context.__class__.__name__ == "ProjectContext"
+        assert context.__class__.__name__ == "MyContext"
+        assert settings_mock.call_count == 4
+
+        expected_calls = [
+            mocker.call(fake_package_name, "CONTEXT_CLASS", KedroContext),
+            mocker.call(fake_package_name, "HOOKS", ()),
+            mocker.call(fake_package_name, "DISABLE_HOOKS_FOR_PLUGINS", ()),
+            mocker.call(fake_package_name, "CONF_ROOT", "conf"),
+        ]
+        assert settings_mock.mock_calls == expected_calls

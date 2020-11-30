@@ -66,22 +66,22 @@ def load_kedro_objects(path, line=None):  # pylint: disable=unused-argument
     import kedro.config.default_logger  # noqa: F401 # pylint: disable=unused-import
     from kedro.framework.cli import load_entry_points
     from kedro.framework.cli.utils import _add_src_to_path
-    from kedro.framework.project.metadata import _get_project_metadata
     from kedro.framework.session import KedroSession
     from kedro.framework.session.session import _activate_session
+    from kedro.framework.startup import _get_project_metadata
 
     global context
     global catalog
     global session
 
     path = path or project_path
-    project_metadata = _get_project_metadata(path)
-    _add_src_to_path(project_metadata.source_dir, path)
+    metadata = _get_project_metadata(path)
+    _add_src_to_path(metadata.source_dir, path)
 
-    session = KedroSession.create(path)
+    session = KedroSession.create(metadata.package_name, path)
     _activate_session(session)
 
-    _remove_cached_modules(project_metadata.package_name)
+    _remove_cached_modules(metadata.package_name)
 
     # clear hook manager; hook implementations will be re-registered when the
     # context is instantiated again in `session.context` below
@@ -97,7 +97,7 @@ def load_kedro_objects(path, line=None):  # pylint: disable=unused-argument
         variables={"context": context, "catalog": catalog, "session": session}
     )
 
-    logging.info("** Kedro project %s", str(project_metadata.project_name))
+    logging.info("** Kedro project %s", str(metadata.project_name))
     logging.info("Defined global variable `context`, `session` and `catalog`")
 
     for line_magic in load_entry_points("line_magic"):

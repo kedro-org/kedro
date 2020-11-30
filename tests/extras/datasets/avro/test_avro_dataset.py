@@ -221,53 +221,11 @@ class TestAVRODataSetVersioned:
         assert "protocol" in str(ds_versioned)
         assert "protocol" in str(ds)
 
-    def test_save_and_load(self, versioned_avro_data_set, dummy_data):
-        """Test that saved and reloaded data matches the original one for
-        the versioned data set."""
-        versioned_avro_data_set.save(dummy_data)
-        reloaded_data = versioned_avro_data_set.load()
-        assert dummy_data == reloaded_data
-
     def test_no_versions(self, versioned_avro_data_set):
         """Check the error if no versions are available for load."""
         pattern = r"Did not find any versions for AVRODataSet\(.+\)"
         with pytest.raises(DataSetError, match=pattern):
             versioned_avro_data_set.load()
-
-    def test_exists(self, versioned_avro_data_set, dummy_data):
-        """Test `exists` method invocation for versioned data set."""
-        assert not versioned_avro_data_set.exists()
-        versioned_avro_data_set.save(dummy_data)
-        assert versioned_avro_data_set.exists()
-
-    def test_prevent_overwrite(self, versioned_avro_data_set, dummy_data):
-        """Check the error when attempting to override the data set if the
-        corresponding AVRO file for a given save version already exists."""
-        versioned_avro_data_set.save(dummy_data)
-        pattern = (
-            r"Save path \`.+\` for AVRODataSet\(.+\) must "
-            r"not exist if versioning is enabled\."
-        )
-        with pytest.raises(DataSetError, match=pattern):
-            versioned_avro_data_set.save(dummy_data)
-
-    @pytest.mark.parametrize(
-        "load_version", ["2020-11-22T23.59.59.999Z"], indirect=True
-    )
-    @pytest.mark.parametrize(
-        "save_version", ["2020-11-23T00.00.00.000Z"], indirect=True
-    )
-    def test_save_version_warning(
-        self, versioned_avro_data_set, load_version, save_version, dummy_data
-    ):
-        """Check the warning when saving to the path that differs from
-        the subsequent load path."""
-        pattern = (
-            r"Save version `{0}` did not match load version `{1}` "
-            r"for AVRODataSet\(.+\)".format(save_version, load_version)
-        )
-        with pytest.warns(UserWarning, match=pattern):
-            versioned_avro_data_set.save(dummy_data)
 
     def test_http_filesystem_no_versioning(self):
         pattern = r"HTTP\(s\) DataSet doesn't support versioning\."

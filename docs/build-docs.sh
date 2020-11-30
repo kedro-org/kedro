@@ -43,7 +43,7 @@ rm -rf docs/build
 mkdir docs/build/
 cp -r docs/_templates docs/conf.py docs/*.svg docs/*.json  docs/build/
 
-sphinx-build -c docs/ -WETan -j auto -D language=en docs/build/ docs/build/html
+sphinx-build -c docs/ -ETan -j auto -D language=en docs/build/ docs/build/html
 
 # Clean up build artefacts
 rm -rf docs/build/html/_sources

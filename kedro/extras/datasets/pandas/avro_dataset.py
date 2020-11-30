@@ -115,15 +115,13 @@ class AVRODataSet(BaseAVRODataSet):
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``ParquetDataSet`` pointing to a concrete Parquet file
+        """Creates a new instance of ``AVRODataSet`` pointing to a concrete AVRO file
         on a specific filesystem.
 
         Args:
-            filepath: Filepath in POSIX format to a Parquet file prefixed with a protocol like
-                `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be used.
+            filepath: Filepath in POSIX format to AVRO file prefixed with a protocol like `s3://`.
+                If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
-                It can also be a path to a directory. If the directory is
-                provided then it can be used for reading partitioned parquet files.
                 Note: `http(s)` doesn't support versioning.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
@@ -137,7 +135,8 @@ class AVRODataSet(BaseAVRODataSet):
                 `open_args_load` and `open_args_save`.
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
-                All defaults are preserved.
+                All defaults are preserved, except `mode`, which is set to `rb` when loading
+                and to `wb` when saving.
         """
         super().__init__(
             filepath=filepath,
@@ -147,7 +146,7 @@ class AVRODataSet(BaseAVRODataSet):
         )
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(filepath=self._filepath, version=self._version,)
+        return dict(filepath=self._filepath, version=self._version)
 
     def _load(self) -> pd.DataFrame:
         data: List[Dict[str, Any]] = BaseAVRODataSet._load(self)

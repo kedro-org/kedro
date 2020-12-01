@@ -54,7 +54,6 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
 
 * Global Kedro commands
   * [`kedro --help`](#get-help-on-kedro-commands)
-  * [`kedro --verbose`](#see-logging-and-error-stack-traces)
   * [`kedro --version`](#confirm-the-kedro-version)
   * [`kedro docs`](#open-the-kedro-documentation-in-your-browser)
   * [`kedro info`](#confirm-kedro-information)
@@ -65,6 +64,7 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
   * [`kedro build-docs`](#build-the-project-documentation)
   * [`kedro build-reqs`](#build-the-projects-dependency-tree)
   * [`kedro catalog list`](#list-datasets-per-pipeline-per-type)
+  * [`kedro catalog create`](#create-a-data-catalog-yaml-configuration-file)
   * [`kedro install`](#install-all-package-dependencies)
   * [`kedro ipython`](#notebooks)
   * [`kedro jupyter convert`](#copy-tagged-cells)
@@ -126,13 +126,6 @@ kedro_viz: 3.4.0 (hooks:global,line_magic)
 
 ```
 
-### See logging and error stack traces
-
-```bash
-kedro -v
-kedro --verbose
-```
-
 ### Create a new Kedro project
 
 ```bash
@@ -151,7 +144,7 @@ kedro docs
 
 Kedro's command line interface (CLI) allows you to associate a set of commands and dependencies with a target, which you can then execute from inside the project directory.
 
-The commands a project supports are specified in its `kedro_cli.py` file, which can be extended, either by modifying the file or by injecting commands into it via the [`plugin` framework](../07_extend_kedro/05_plugins.md).
+The commands a project supports are specified in its `cli.py` file, which can be extended, either by modifying the file or by injecting commands into it via the [`plugin` framework](../07_extend_kedro/04_plugins.md).
 
 ### Project setup
 
@@ -177,11 +170,13 @@ For further information, see the [`kedro install` documentation](../04_kedro_pro
 
 
 ### Run the project
-Call the `run()` method of the `ProjectContext` defined in `run.py` (`src/project-name/run.py`)
+Call the `run()` method of the `KedroSession` defined in `kedro.framework.session`.
 
 ```bash
 kedro run
 ```
+
+> _Note:_ `KedroContext` can be extended in `run.py` (`src/project-name/run.py`). In order to use the extended `KedroContext` you need to set `context_path` in [`pyproject.toml`](../12_faq/02_architecture_overview.md#pyproject-toml) configuration file.
 
 #### Modifying a `kedro run`
 
@@ -248,7 +243,7 @@ kedro pipeline pull <link-to-modular-pipeline-wheel-file>
 The above command will take the bundled `.whl` file and do the following:
 
 * Place source code in `src/<package_name>/pipelines/<pipeline_name>`
-* Place parameters in `conf/base/pipelines/<pipeline_name>`
+* Place parameters in `conf/base/parameters/<pipeline_name>.yml`
 * Pull out tests and place in `src/tests/pipelines/<pipeline_name>`
 
 `kedro pipeline pull` works with PyPI, local and cloud storage:
@@ -335,7 +330,7 @@ kedro pipeline list
 
 #### Datasets
 
-#### List datasets per pipeline per type
+##### List datasets per pipeline per type
 ```bash
 kedro catalog list
 ```
@@ -347,6 +342,19 @@ The command also accepts an optional `--pipeline` argument that allows you to sp
 kedro catalog list --pipeline "ds,de"
 ```
 
+#### Data Catalog
+
+##### Create a Data Catalog YAML configuration file
+
+The following command creates a Data Catalog YAML configuration file with `MemoryDataSet` datasets for each dataset in a registered pipeline, if it is missing from the `DataCatalog`.
+
+```bash
+kedro catalog create --pipeline <pipeline_name>
+```
+
+The command also accepts an optional `--env` argument that allows you to specify a configuration environment (defaults to `base`).
+
+The command creates the following file: `<conf_root>/<env>/catalog/<pipeline_name>.yml`
 
 #### Notebooks
 
@@ -370,7 +378,7 @@ kedro ipython
 
 Every time you start or restart a notebook kernel, a startup script (`<project-root>/.ipython/profile_default/startup/00-kedro-init.py`) will add the following variables in scope:
 
-- `context`: An instance of `ProjectContext` class defined in `src/project-name/run.py` (Further details of how to use `context` can be found [in the IPython documentation](../11_tools_integration/02_ipython.md))
+- `context`: An instance of `kedro.framework.context.KedroContext` class or `ProjectContext` class defined in `src/project-name/run.py` and derived form `KedroContext` if it was set to `context_path` in `pyproject.toml` file (Further details of how to use `context` can be found [in the IPython documentation](../11_tools_integration/02_ipython.md))
 - `startup_error` (`Exception`)
 - `catalog`
 

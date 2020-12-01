@@ -28,12 +28,14 @@
 
 """Utilities for use with click."""
 import difflib
+import os
 import re
 import shlex
 import shutil
 import subprocess
 import sys
 import textwrap
+import traceback
 import warnings
 from contextlib import contextmanager
 from importlib import import_module
@@ -42,8 +44,6 @@ from pathlib import Path
 from typing import Iterable, List, Sequence, Tuple, Union
 
 import click
-
-from kedro.framework.context import get_static_project_data
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 MAX_SUGGESTIONS = 3
@@ -89,7 +89,8 @@ def forward_command(group, name=None, forward_help=False):
 
     def wrapit(func):
         func = click.argument("args", nargs=-1, type=click.UNPROCESSED)(func)
-        func = group.command(
+        func = command_with_verbosity(
+            group,
             name=name,
             context_settings=dict(
                 ignore_unknown_options=True,
@@ -182,14 +183,56 @@ def get_pkg_version(reqs_path: (Union[str, Path]), package_name: str) -> str:
     raise KedroCliError(f"Cannot find `{package_name}` package in `{reqs_path}`.")
 
 
+def _update_verbose_flag(ctx, param, value):  # pylint: disable=unused-argument
+    KedroCliError.VERBOSE_ERROR = value
+
+
+def _click_verbose(func):
+    """Click option for enabling verbose mode.
+    """
+    return click.option(
+        "--verbose",
+        "-v",
+        is_flag=True,
+        callback=_update_verbose_flag,
+        help="See extensive logging and error stack traces.",
+    )(func)
+
+
+def command_with_verbosity(group: click.core.Group, *args, **kwargs):
+    """Custom command decorator with verbose flag added.
+    """
+
+    def decorator(func):
+        func = _click_verbose(func)
+        func = group.command(*args, **kwargs)(func)
+        return func
+
+    return decorator
+
+
 class KedroCliError(click.exceptions.ClickException):
     """Exceptions generated from the Kedro CLI.
 
     Users should pass an appropriate message at the constructor.
     """
 
-    def format_message(self):
-        return click.style(self.message, fg="red")  # pragma: no cover
+    VERBOSE_ERROR = False
+
+    def show(self, file=None):
+        if file is None:
+            # pylint: disable=protected-access
+            file = click._compat.get_text_stderr()
+        if self.VERBOSE_ERROR:
+            click.secho(traceback.format_exc(), nl=False, fg="yellow")
+        else:
+            etype, value, _ = sys.exc_info()
+            formatted_exception = "".join(traceback.format_exception_only(etype, value))
+            click.secho(
+                f"{formatted_exception}Run with --verbose to see the full exception",
+                fg="yellow",
+            )
+        click.secho(f"Error: {self.message}", fg="red", file=file)
 
 
 def _clean_pycache(path: Path):
@@ -242,23 +285,6 @@ def _filter_deprecation_warnings():
         yield
 
 
-def get_source_dir(project_path: Path) -> Path:
-    """Returns project source path.
-
-    Args:
-        project_path: The path to the project root.
-
-    Returns:
-        The absolute path to the project source directory.
-    """
-    warnings.warn(
-        "This function is now deprecated and will be removed in Kedro 0.17.0.",
-        DeprecationWarning,
-    )
-
-    return get_static_project_data(project_path)["source_dir"]
-
-
 def _check_module_importable(module_name: str) -> None:
     try:
         import_module(module_name)
@@ -267,3 +293,34 @@ def _check_module_importable(module_name: str) -> None:
             f"Module `{module_name}` not found. Make sure to install required project "
             f"dependencies by running the `kedro install` command first."
         ) from exc
+
+
+def _validate_source_path(source_path: Path, project_path: Path):
+    """Validate the source path exists and is relative to the project path.
+
+    Args:
+        source_path: Absolute source path.
+        project_path: Path to the Kedro project.
+
+    Raises:
+        ValueError: If source_path is not relative to project_path.
+        NotADirectoryError: If source_path does not exist.
+    """
+    try:
+        source_path.relative_to(project_path)
+    except ValueError as exc:
+        raise ValueError(
+            f"Source path '{source_path}' has to be relative to "
+            f"your project root '{project_path}'."
+        ) from exc
+    if not source_path.exists():
+        raise NotADirectoryError(f"Source path '{source_path}' cannot be found.")
+
+
+def _add_src_to_path(source_dir: Path, project_path: Path):
+    _validate_source_path(source_dir, project_path)
+
+    if str(source_dir) not in sys.path:
+        sys.path.insert(0, str(source_dir))
+    if "PYTHONPATH" not in os.environ:
+        os.environ["PYTHONPATH"] = str(source_dir)

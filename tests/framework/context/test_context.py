@@ -36,6 +36,7 @@ from typing import Any, Dict
 
 import pandas as pd
 import pytest
+import toml
 import yaml
 from pandas.util.testing import assert_frame_equal
 
@@ -48,45 +49,31 @@ from kedro.framework.context.context import (
     _is_relative_path,
     _validate_layers_for_transcoding,
 )
-from kedro.framework.hooks import get_hook_manager, hook_impl
+from kedro.framework.hooks import get_hook_manager
+from kedro.framework.hooks.manager import (
+    _register_hooks_setuptools,
+    _register_project_hooks,
+)
+from kedro.framework.project.settings import _get_project_settings
 from kedro.io import DataCatalog
 from kedro.io.core import Version, generate_timestamp
 from kedro.pipeline import Pipeline, node
 from kedro.runner import ParallelRunner, SequentialRunner
 from kedro.versioning import Journal
 
-
-def _get_local_logging_config():
-    return {
-        "version": 1,
-        "formatters": {
-            "simple": {"format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"}
-        },
-        "root": {"level": "INFO", "handlers": ["console"]},
-        "loggers": {
-            "kedro": {"level": "INFO", "handlers": ["console"], "propagate": False}
-        },
-        "handlers": {
-            "console": {
-                "class": "logging.StreamHandler",
-                "level": "INFO",
-                "formatter": "simple",
-                "stream": "ext://sys.stdout",
-            }
-        },
-        "info_file_handler": {
-            "class": "logging.handlers.RotatingFileHandler",
-            "level": "INFO",
-            "formatter": "simple",
-            "filename": "logs/info.log",
-        },
-    }
+MOCK_PACKAGE_NAME = "mock_package_name"
 
 
 def _write_yaml(filepath: Path, config: Dict):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     yaml_str = yaml.dump(config)
     filepath.write_text(yaml_str)
+
+
+def _write_toml(filepath: Path, config: Dict):
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    toml_str = toml.dumps(config)
+    filepath.write_text(toml_str)
 
 
 def _write_json(filepath: Path, config: Dict):
@@ -102,6 +89,17 @@ def _write_dummy_ini(filepath: Path):
     config["staging"] = {"url": "postgresql://user:pass@url_staging/db"}
     with filepath.open("wt") as configfile:  # save
         config.write(configfile)
+
+
+def _register_hooks(package_name: str):
+    hooks = _get_project_settings(package_name, "HOOKS", ())
+    disabled_plugins = set(
+        _get_project_settings(package_name, "DISABLE_HOOKS_FOR_PLUGINS", ())
+    )
+
+    hook_manager = get_hook_manager()
+    _register_project_hooks(hook_manager, hooks)
+    _register_hooks_setuptools(hook_manager, disabled_plugins)
 
 
 @pytest.fixture
@@ -157,18 +155,28 @@ def prepare_project_dir(tmp_path, base_config, local_config, env):
     proj_catalog = tmp_path / "conf" / "base" / "catalog.yml"
     env_catalog = tmp_path / "conf" / str(env) / "catalog.yml"
     env_credentials = tmp_path / "conf" / str(env) / "credentials.yml"
-    env_logging = tmp_path / "conf" / str(env) / "logging.yml"
     parameters = tmp_path / "conf" / "base" / "parameters.json"
     db_config_path = tmp_path / "conf" / "base" / "db.ini"
     project_parameters = {"param1": 1, "param2": 2, "param3": {"param4": 3}}
     _write_yaml(proj_catalog, base_config)
     _write_yaml(env_catalog, local_config)
     _write_yaml(env_credentials, local_config)
-    _write_yaml(env_logging, _get_local_logging_config())
     _write_json(parameters, project_parameters)
     _write_dummy_ini(db_config_path)
 
-    _write_yaml(tmp_path / ".kedro.yml", kedro_yml_payload)
+    _write_toml(tmp_path / "pyproject.toml", pyproject_toml_payload)
+
+
+# pylint: disable=too-few-public-methods
+class TestSettingsPy:
+    HOOKS = ()
+
+
+@pytest.fixture(autouse=True)
+def mocked_import_module(mocker):
+    mocker.patch(
+        "kedro.framework.project.settings.import_module", return_value=TestSettingsPy()
+    )
 
 
 @pytest.fixture
@@ -198,10 +206,14 @@ expected_message_head = (
     "argument to your previous command:\n"
 )
 
-kedro_yml_payload = {
-    "project_name": "mock_project_name",
-    "project_version": kedro_version,
-    "package_name": "mock_package_name",
+pyproject_toml_payload = {
+    "tool": {
+        "kedro": {
+            "project_name": "mock_project_name",
+            "project_version": kedro_version,
+            "package_name": MOCK_PACKAGE_NAME,
+        }
+    }
 }
 
 
@@ -242,30 +254,8 @@ def _create_pipelines():
     }
 
 
-class RegistrationHooks:
-    @hook_impl
-    def register_catalog(
-        self, catalog, credentials, load_versions, save_version, journal
-    ) -> DataCatalog:
-        return DataCatalog.from_config(
-            catalog, credentials, load_versions, save_version, journal
-        )
-
-    @hook_impl
-    def register_config_loader(self, conf_paths) -> ConfigLoader:
-        return ConfigLoader(conf_paths)
-
-    @hook_impl
-    def register_pipelines(self) -> Dict[str, Pipeline]:
-        return _create_pipelines()
-
-
 class DummyContext(KedroContext):
-    hooks = (RegistrationHooks(),)
-
-
-class DummyContextNoHooks(KedroContext):
-    def _create_catalog(  # pylint: disable=no-self-use,too-many-arguments
+    def _create_catalog(  # pylint: disable=too-many-arguments
         self,
         conf_catalog: Dict[str, Any],
         conf_creds: Dict[str, Any],
@@ -277,9 +267,7 @@ class DummyContextNoHooks(KedroContext):
             conf_catalog, conf_creds, load_versions, save_version, journal
         )
 
-    def _create_config_loader(  # pylint: disable=no-self-use
-        self, conf_paths
-    ) -> ConfigLoader:
+    def _create_config_loader(self, conf_paths) -> ConfigLoader:
         return TemplatedConfigLoader(conf_paths)
 
     def _get_pipelines(self) -> Dict[str, Pipeline]:
@@ -299,28 +287,14 @@ def mocked_logging(mocker):
 
 
 @pytest.fixture
-def dummy_context_with_hooks(
+def dummy_context(
     tmp_path, prepare_project_dir, env, extra_params
 ):  # pylint: disable=unused-argument
-    return DummyContext(str(tmp_path), env=env, extra_params=extra_params)
-
-
-@pytest.fixture
-def dummy_context_no_hooks(
-    tmp_path, prepare_project_dir, env, extra_params
-):  # pylint: disable=unused-argument
-    return DummyContextNoHooks(str(tmp_path), env=env, extra_params=extra_params)
-
-
-@pytest.fixture(
-    params=[
-        pytest.lazy_fixture("dummy_context_with_hooks"),
-        pytest.lazy_fixture("dummy_context_no_hooks"),
-    ]
-)
-def dummy_context(request):
-    # for backwards-compatibility, test with and without registration hooks
-    return request.param
+    context = DummyContext(
+        MOCK_PACKAGE_NAME, str(tmp_path), env=env, extra_params=extra_params
+    )
+    _register_hooks(MOCK_PACKAGE_NAME)
+    return context
 
 
 @pytest.fixture(autouse=True)
@@ -334,9 +308,8 @@ def clear_hook_manager():
 
 class TestKedroContext:
     def test_attributes(self, tmp_path, dummy_context):
-        assert dummy_context.project_name == kedro_yml_payload["project_name"]
-        assert dummy_context.package_name == kedro_yml_payload["package_name"]
-        assert dummy_context.project_version == kedro_yml_payload["project_version"]
+        project_metadata = pyproject_toml_payload["tool"]["kedro"]
+        assert dummy_context.package_name == project_metadata["package_name"]
         assert isinstance(dummy_context.project_path, Path)
         assert dummy_context.project_path == tmp_path.resolve()
 
@@ -398,21 +371,14 @@ class TestKedroContext:
         [None, {}, {"foo": "bar", "baz": [1, 2], "qux": None}],
         indirect=True,
     )
-    @pytest.mark.parametrize(
-        "context_class, context_fixture",
-        [
-            (DummyContext, pytest.lazy_fixture("dummy_context_with_hooks")),
-            (DummyContextNoHooks, pytest.lazy_fixture("dummy_context_no_hooks")),
-        ],
-    )
-    def test_params_missing(self, mocker, extra_params, context_class, context_fixture):
-        mock_config_loader = mocker.patch.object(context_class, "config_loader")
+    def test_params_missing(self, mocker, extra_params, dummy_context):
+        mock_config_loader = mocker.patch.object(DummyContext, "config_loader")
         mock_config_loader.get.side_effect = MissingConfigException("nope")
         extra_params = extra_params or {}
 
         pattern = "Parameters not found in your Kedro project config"
         with pytest.warns(UserWarning, match=pattern):
-            actual = context_fixture.params
+            actual = dummy_context.params
         assert actual == extra_params
 
     def test_config_loader(self, dummy_context):
@@ -431,63 +397,27 @@ class TestKedroContext:
     def test_default_env(self, dummy_context):
         assert dummy_context.env == "local"
 
-    @pytest.mark.parametrize(
-        "invalid_version", ["0.13.0", "10.0", "101.1", "100.0", "-0"]
-    )
-    @pytest.mark.parametrize(
-        "context_class,context_fixture",
-        [
-            (DummyContext, pytest.lazy_fixture("dummy_context_with_hooks")),
-            (DummyContextNoHooks, pytest.lazy_fixture("dummy_context_no_hooks")),
-        ],
-    )
-    def test_invalid_version(
-        self, mocker, invalid_version, context_class, context_fixture
-    ):
-        mocker.patch.object(context_class, "project_version", invalid_version)
-
-        pattern = (
-            f"Your Kedro project version {invalid_version} does not match "
-            f"Kedro package version {kedro_version} you are running."
-        )
-        with pytest.raises(KedroContextError, match=re.escape(pattern)):
-            context_class(context_fixture.project_path)
-
     @pytest.mark.parametrize("env", ["custom_env"], indirect=True)
     def test_custom_env(self, dummy_context, env):
         assert dummy_context.env == env
 
-    @pytest.mark.parametrize(
-        "context_class,context_fixture",
-        [
-            (DummyContext, pytest.lazy_fixture("dummy_context_with_hooks")),
-            (DummyContextNoHooks, pytest.lazy_fixture("dummy_context_no_hooks")),
-        ],
-    )
-    def test_missing_parameters(self, tmp_path, context_class, context_fixture):
+    def test_missing_parameters(self, tmp_path, dummy_context):
         parameters = tmp_path / "conf" / "base" / "parameters.json"
         parameters.unlink()
 
         pattern = "Parameters not found in your Kedro project config."
         with pytest.warns(UserWarning, match=re.escape(pattern)):
-            _ = context_class(context_fixture.project_path).catalog
+            _ = dummy_context.catalog
 
-    @pytest.mark.parametrize(
-        "context_class,context_fixture",
-        [
-            (DummyContext, pytest.lazy_fixture("dummy_context_with_hooks")),
-            (DummyContextNoHooks, pytest.lazy_fixture("dummy_context_no_hooks")),
-        ],
-    )
-    def test_missing_credentials(self, context_class, context_fixture):
+    def test_missing_credentials(self, dummy_context):
         env_credentials = (
-            context_fixture.project_path / "conf" / "local" / "credentials.yml"
+            dummy_context.project_path / "conf" / "local" / "credentials.yml"
         )
         env_credentials.unlink()
 
         pattern = "Credentials not found in your Kedro project config."
         with pytest.warns(UserWarning, match=re.escape(pattern)):
-            _ = context_class(context_fixture.project_path).catalog
+            _ = dummy_context.catalog
 
     def test_pipeline(self, dummy_context):
         assert dummy_context.pipeline.nodes[0].inputs == ["cars"]
@@ -498,13 +428,6 @@ class TestKedroContext:
     def test_pipelines(self, dummy_context):
         assert len(dummy_context.pipelines) == 5
         assert len(dummy_context.pipelines["__default__"].nodes) == 4
-
-    def test_setup_logging_using_absolute_path(self, dummy_context, mocked_logging):
-        project_path = dummy_context.project_path
-        called_args = mocked_logging.call_args[0][0]
-
-        expected_log_filepath = (project_path / "logs" / "info.log").as_posix()
-        assert called_args["info_file_handler"]["filename"] == expected_log_filepath
 
 
 class TestKedroContextRun:
@@ -635,11 +558,8 @@ class TestKedroContextRun:
         assert "Running node: node4: identity([ships]) -> [planes]" in log_msgs
         assert "Pipeline execution completed successfully." in log_msgs
 
-    @pytest.mark.usefixtures("prepare_project_dir")
-    @pytest.mark.parametrize("context_class", [DummyContext, DummyContextNoHooks])
-    def test_run_load_versions(self, tmp_path, dummy_dataframe, context_class):
-        context = context_class(tmp_path)
-        filepath = (context.project_path / "cars.csv").as_posix()
+    def test_run_load_versions(self, dummy_context, dummy_dataframe):
+        filepath = (dummy_context.project_path / "cars.csv").as_posix()
 
         old_save_version = generate_timestamp()
         old_df = pd.DataFrame({"col1": [0, 0], "col2": [0, 0], "col3": [0, 0]})
@@ -660,19 +580,13 @@ class TestKedroContextRun:
         new_csv_data_set.save(dummy_dataframe)
 
         load_versions = {"cars": old_save_version}
-        context.run(load_versions=load_versions, pipeline_name="simple")
-        assert not context.catalog.load("boats").equals(dummy_dataframe)
-        assert context.catalog.load("boats").equals(old_df)
+        dummy_context.run(load_versions=load_versions, pipeline_name="simple")
+        assert not dummy_context.catalog.load("boats").equals(dummy_dataframe)
+        assert dummy_context.catalog.load("boats").equals(old_df)
 
-    @pytest.mark.usefixtures("prepare_project_dir")
-    @pytest.mark.parametrize("context_class", [DummyContext, DummyContextNoHooks])
-    def test_run_with_empty_pipeline(self, tmp_path, context_class):
-        context = context_class(tmp_path)
-        assert context.project_name == kedro_yml_payload["project_name"]
-        assert context.project_version == kedro_yml_payload["project_version"]
-
+    def test_run_with_empty_pipeline(self, dummy_context):
         with pytest.raises(KedroContextError, match="Pipeline contains no nodes"):
-            context.run(pipeline_name="empty")
+            dummy_context.run(pipeline_name="empty")
 
     @pytest.mark.parametrize(
         "pipeline_name,expected_message",
@@ -681,21 +595,13 @@ class TestKedroContextRun:
             ("bad_pipeline_head", expected_message_head),
         ],  # pylint: disable=too-many-arguments
     )
-    @pytest.mark.parametrize("context_class", [DummyContext, DummyContextNoHooks])
     @pytest.mark.usefixtures("prepare_project_dir")
     def test_run_failure_prompts_resume_command(
-        self,
-        tmp_path,
-        dummy_dataframe,
-        caplog,
-        pipeline_name,
-        expected_message,
-        context_class,
+        self, dummy_context, dummy_dataframe, caplog, pipeline_name, expected_message
     ):
-        bad_context = context_class(tmp_path)
-        bad_context.catalog.save("cars", dummy_dataframe)
+        dummy_context.catalog.save("cars", dummy_dataframe)
         with pytest.raises(ValueError, match="Oh no"):
-            bad_context.run(pipeline_name=pipeline_name)
+            dummy_context.run(pipeline_name=pipeline_name)
 
         actual_messages = [
             record.getMessage()
@@ -726,21 +632,19 @@ class TestKedroContextRun:
         assert mock_journal.call_args[0][0]["extra_params"] == extra_params
 
     @pytest.mark.usefixtures("prepare_project_dir")
-    @pytest.mark.parametrize("context_class", [DummyContext, DummyContextNoHooks])
     def test_run_with_save_version_as_run_id(
-        self, mocker, tmp_path, dummy_dataframe, caplog, context_class
+        self, mocker, dummy_context, dummy_dataframe, caplog
     ):
         """Test that the default behaviour, with run_id set to None,
         creates a journal record with the run_id the same as save_version.
         """
         save_version = "2020-01-01T00.00.00.000Z"
         mocked_get_save_version = mocker.patch.object(
-            context_class, "_get_save_version", return_value=save_version
+            dummy_context, "_get_save_version", return_value=save_version
         )
 
-        context = context_class(tmp_path)
-        context.catalog.save("cars", dummy_dataframe)
-        context.run(load_versions={"boats": save_version})
+        dummy_context.catalog.save("cars", dummy_dataframe)
+        dummy_context.run(load_versions={"boats": save_version})
 
         mocked_get_save_version.assert_called_once_with()
         log_msg = next(
@@ -751,18 +655,16 @@ class TestKedroContextRun:
         assert json.loads(log_msg)["run_id"] == save_version
 
     @pytest.mark.usefixtures("prepare_project_dir")
-    @pytest.mark.parametrize("context_class", [DummyContext, DummyContextNoHooks])
     def test_run_with_custom_run_id(
-        self, mocker, tmp_path, dummy_dataframe, caplog, context_class
+        self, mocker, dummy_context, dummy_dataframe, caplog
     ):
         run_id = "001"
         mocked_get_run_id = mocker.patch.object(
-            context_class, "_get_run_id", return_value=run_id
+            dummy_context, "_get_run_id", return_value=run_id
         )
 
-        context = context_class(tmp_path)
-        context.catalog.save("cars", dummy_dataframe)
-        context.run()
+        dummy_context.catalog.save("cars", dummy_dataframe)
+        dummy_context.run()
 
         # once during run, and twice for each `.catalog`
         assert mocked_get_run_id.call_count == 3

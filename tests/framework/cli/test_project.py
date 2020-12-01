@@ -38,6 +38,13 @@ from kedro.framework.cli.project import NO_DEPENDENCY_MESSAGE
 
 
 @pytest.fixture(autouse=True)
+def mocked_logging(mocker):
+    # Disable logging.config.dictConfig in KedroSession._setup_logging as
+    # it changes logging.config and affects other unit tests
+    return mocker.patch("logging.config.dictConfig")
+
+
+@pytest.fixture(autouse=True)
 def call_mock(mocker):
     return mocker.patch("kedro.framework.cli.project.call")
 

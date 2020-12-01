@@ -28,14 +28,14 @@
 
 """A collection of CLI commands for working with Kedro catalog."""
 from collections import defaultdict
-from pathlib import Path
 
 import click
 import yaml
 from click import secho
 
+from kedro.framework.cli.pipeline import _create_session
 from kedro.framework.cli.utils import KedroCliError, env_option, split_string
-from kedro.framework.context import load_context
+from kedro.framework.startup import ProjectMetadata
 
 
 @click.group()
@@ -50,16 +50,19 @@ def catalog():
     "--pipeline",
     type=str,
     default="",
-    help="Name of the modular pipeline to run. If not set, the project pipeline is run by default.",
+    help="Name of the modular pipeline to run. If not set, "
+    "the project pipeline is run by default.",
     callback=split_string,
 )
-def list_datasets(pipeline, env):
+@click.pass_obj
+def list_datasets(metadata: ProjectMetadata, pipeline, env):
     """Show datasets per type."""
     title = "DataSets in '{}' pipeline"
     not_mentioned = "Datasets not mentioned in pipeline"
     mentioned = "Datasets mentioned in pipeline"
 
-    context = load_context(Path.cwd(), env=env)
+    session = _create_session(metadata.package_name, env=env)
+    context = session.load_context()
     datasets_meta = context.catalog._data_sets  # pylint: disable=protected-access
     catalog_ds = set(context.catalog.list())
 
@@ -111,7 +114,8 @@ def _map_type_to_datasets(datasets, datasets_meta):
 @click.option(
     "--pipeline", "pipeline_name", type=str, required=True, help="Name of a pipeline.",
 )
-def create_catalog(pipeline_name, env):
+@click.pass_obj
+def create_catalog(metadata: ProjectMetadata, pipeline_name, env):
     """Create Data Catalog YAML configuration with missing datasets.
 
     Add `MemoryDataSet` datasets to Data Catalog YAML configuration file
@@ -122,7 +126,9 @@ def create_catalog(pipeline_name, env):
     `<conf_root>/<env>/catalog/<pipeline_name>.yml` file.
     """
     env = env or "base"
-    context = load_context(Path.cwd(), env=env)
+    session = _create_session(metadata.package_name, env=env)
+    context = session.load_context()
+
     pipeline = context.pipelines.get(pipeline_name)
 
     if not pipeline:

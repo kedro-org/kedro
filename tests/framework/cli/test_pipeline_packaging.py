@@ -46,6 +46,13 @@ CONF_ROOT = KedroContext.CONF_ROOT
 
 
 @pytest.fixture(autouse=True)
+def mocked_logging(mocker):
+    # Disable logging.config.dictConfig in KedroSession._setup_logging as
+    # it changes logging.config and affects other unit tests
+    return mocker.patch("logging.config.dictConfig")
+
+
+@pytest.fixture(autouse=True)
 def cleanup_pipelines(fake_repo_path, fake_package_path):
     pipes_path = fake_package_path / "pipelines"
     old_pipelines = {p.name for p in pipes_path.iterdir() if p.is_dir()}
@@ -89,11 +96,6 @@ def cleanup_dist(fake_repo_path):
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
 class TestPipelinePackageCommand:
-    @staticmethod
-    @pytest.fixture(autouse=True)
-    def mocked_session_manager(mocker, fake_project_cli):
-        yield mocker.patch.object(fake_project_cli.KedroSession, "create")
-
     def assert_wheel_contents_correct(
         self, wheel_location, package_name=PIPELINE_NAME, version="0.1"
     ):

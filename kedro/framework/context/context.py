@@ -28,11 +28,10 @@
 """This module provides context for Kedro project."""
 
 import logging
-import logging.config
 import os
 from copy import deepcopy
 from pathlib import Path, PurePosixPath, PureWindowsPath
-from typing import Any, Dict, Iterable, Tuple, Union
+from typing import Any, Dict, Iterable, Union
 from urllib.parse import urlparse
 from warnings import warn
 
@@ -47,8 +46,6 @@ from kedro.pipeline.pipeline import _transcode_split
 from kedro.runner.runner import AbstractRunner
 from kedro.runner.sequential_runner import SequentialRunner
 from kedro.versioning import Journal
-
-_PLUGIN_HOOKS = "kedro.hooks"  # entry-point to load hooks from for installed plugins
 
 
 def _is_relative_path(path_string: str) -> bool:
@@ -185,15 +182,9 @@ class KedroContext:
     Attributes:
         CONF_ROOT: Name of root directory containing project configuration.
             Default name is "conf".
-        hooks: The list of hooks provided by user to extend KedroContext's execution.
-            This attribute is deprecated and will be removed in 0.18.0 release.
-            Instead `<python_package>.settings.HOOKS` should be used to register hooks.
     """
 
     CONF_ROOT = "conf"
-
-    # Registry for user-defined hooks to be overwritten by a project context.
-    hooks: Tuple = ()
 
     def __init__(
         self,
@@ -225,10 +216,6 @@ class KedroContext:
         self.env = env or "local"
         self._extra_params = deepcopy(extra_params)
 
-        self._register_hooks(auto=True)
-        # we need a ConfigLoader registered in order to be able to set up logging
-        self._setup_logging()
-
     @property
     def package_name(self) -> str:
         """Property for Kedro project package name.
@@ -257,73 +244,6 @@ class KedroContext:
             A dictionary of defined pipelines.
         """
         return self._get_pipelines()
-
-    def _register_hooks_setuptools(self):
-        """Register pluggy hooks from setuptools entrypoints."""
-        hook_manager = get_hook_manager()
-        already_registered = hook_manager.get_plugins()
-        found = hook_manager.load_setuptools_entrypoints(_PLUGIN_HOOKS)
-        disable_plugins = set(
-            _get_project_settings(self.package_name, "DISABLE_HOOKS_FOR_PLUGINS", ())
-        )
-
-        # Get list of plugin/distinfo tuples for all setuptools registered plugins.
-        plugininfo = hook_manager.list_plugin_distinfo()
-        plugin_names = []
-        disabled_plugin_names = []
-        for plugin, dist in plugininfo:
-            if dist.project_name in disable_plugins:
-                # `unregister()` is used instead of `set_blocked()` because
-                # we want to disable hooks for specific plugin based on project
-                # name and not `entry_point` name. Also, we log project names with
-                # version for which hooks were registered.
-                hook_manager.unregister(plugin=plugin)
-                found -= 1
-                disabled_plugin_names.append(f"{dist.project_name}-{dist.version}")
-            elif plugin not in already_registered:
-                plugin_names.append(f"{dist.project_name}-{dist.version}")
-
-        if disabled_plugin_names:
-            logging.info(
-                "Hooks are disabled for plugin(s): %s",
-                ", ".join(sorted(disabled_plugin_names)),
-            )
-
-        if plugin_names:
-            logging.info(
-                "Registered hooks from %d installed plugin(s): %s",
-                found,
-                ", ".join(sorted(plugin_names)),
-            )
-
-    def _register_hooks(self, auto: bool = False) -> None:
-        """Register all hooks as specified in ``hooks`` with the global ``hook_manager``,
-        and, optionally, from installed plugins.
-
-        Args:
-            auto: An optional flag to enable auto-discovery and registration of plugin hooks.
-        """
-        if self.hooks:
-            warn(
-                "`KedroContext.hooks` attribute is deprecated. Please use "
-                "`<python_package>.settings.HOOKS` to register hooks.",
-                DeprecationWarning,
-            )
-
-        hook_manager = get_hook_manager()
-        project_hooks = _get_project_settings(self.package_name, "HOOKS", ())
-
-        # enrich with hooks specified in settings.py
-        all_hooks = self.hooks + project_hooks
-        for hooks_collection in all_hooks:
-            # Sometimes users might create more than one context instance, in which case
-            # hooks have already been registered, so we perform a simple check here
-            # to avoid an error being raised and break user's workflow.
-            if not hook_manager.is_registered(hooks_collection):
-                hook_manager.register(hooks_collection)
-
-        if auto:
-            self._register_hooks_setuptools()
 
     def _get_pipeline(self, name: str = None) -> Pipeline:
         name = name or "__default__"
@@ -519,16 +439,6 @@ class KedroContext:
 
         """
         return self._get_config_loader()
-
-    def _setup_logging(self) -> None:
-        """Register logging specified in logging directory."""
-        conf_logging = self.config_loader.get("logging*", "logging*/**", "**/logging*")
-        # turn relative paths in logging config into absolute path
-        # before initialising loggers
-        conf_logging = _convert_paths_to_absolute_posix(
-            project_path=self.project_path, conf_dictionary=conf_logging
-        )
-        logging.config.dictConfig(conf_logging)
 
     def _get_feed_dict(self) -> Dict[str, Any]:
         """Get parameters and return the feed dictionary."""

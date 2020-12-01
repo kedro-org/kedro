@@ -27,6 +27,7 @@
 # limitations under the License.
 
 import shutil
+from functools import partial
 
 import pytest
 import yaml
@@ -41,15 +42,27 @@ from kedro.pipeline import Pipeline, node
 def fake_load_context(mocker):
     context = mocker.MagicMock()
     return mocker.patch(
-        "kedro.framework.cli.catalog.load_context", return_value=context
+        "kedro.framework.session.KedroSession.load_context", return_value=context
     )
+
+
+@pytest.fixture(autouse=True)
+def mocked_logging(mocker):
+    # Disable logging.config.dictConfig in KedroSession._setup_logging as
+    # it changes logging.config and affects other unit tests
+    return mocker.patch("logging.config.dictConfig")
+
+
+@pytest.fixture
+def fake_cli_invoke(fake_project_cli, fake_metadata):
+    return partial(CliRunner().invoke, fake_project_cli.cli, obj=fake_metadata)
 
 
 @pytest.mark.usefixtures("chdir_to_dummy_project")
 class TestCatalogListCommand:
     PIPELINE_NAME = "pipeline"
 
-    def test_list_all_pipelines(self, fake_project_cli, fake_load_context, mocker):
+    def test_list_all_pipelines(self, fake_cli_invoke, fake_load_context, mocker):
         yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
         mocked_context = fake_load_context.return_value
         mocked_context.pipelines.keys.return_value = (self.PIPELINE_NAME,)
@@ -57,7 +70,7 @@ class TestCatalogListCommand:
         mocked_pl_obj = mocked_context.pipelines.get.return_value
         mocked_pl_obj.data_sets.return_value = set()
 
-        result = CliRunner().invoke(fake_project_cli.cli, ["catalog", "list"])
+        result = fake_cli_invoke(["catalog", "list"])
 
         assert not result.exit_code
         assert mocked_context.pipelines.keys.call_count == 1
@@ -66,24 +79,20 @@ class TestCatalogListCommand:
         expected_dict = {"DataSets in 'pipeline' pipeline": {}}
         yaml_dump_mock.assert_called_once_with(expected_dict)
 
-    def test_list_specific_pipelines(self, fake_project_cli, fake_load_context):
+    def test_list_specific_pipelines(self, fake_cli_invoke, fake_load_context):
         mocked_context = fake_load_context.return_value
 
-        result = CliRunner().invoke(
-            fake_project_cli.cli, ["catalog", "list", "--pipeline", self.PIPELINE_NAME]
-        )
+        result = fake_cli_invoke(["catalog", "list", "--pipeline", self.PIPELINE_NAME])
 
         assert not result.exit_code
         assert not mocked_context.pipelines.keys.called
         mocked_context.pipelines.get.assert_called_once_with(self.PIPELINE_NAME)
 
-    def test_not_found_pipeline(self, fake_project_cli, fake_load_context):
+    def test_not_found_pipeline(self, fake_cli_invoke, fake_load_context):
         mocked_context = fake_load_context.return_value
         mocked_context.pipelines.get.return_value = None
         mocked_context.pipelines.keys.return_value = (self.PIPELINE_NAME,)
-        result = CliRunner().invoke(
-            fake_project_cli.cli, ["catalog", "list", "--pipeline", "fake"]
-        )
+        result = fake_cli_invoke(["catalog", "list", "--pipeline", "fake"])
         assert result.exit_code
         expected_output = (
             f"Error: `fake` pipeline not found! Existing "
@@ -92,7 +101,7 @@ class TestCatalogListCommand:
         assert expected_output in result.output
 
     def test_no_param_datasets_in_respose(
-        self, fake_project_cli, fake_load_context, mocker
+        self, fake_cli_invoke, fake_load_context, mocker
     ):
         yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
         mocked_context = fake_load_context.return_value
@@ -110,7 +119,7 @@ class TestCatalogListCommand:
         mocked_pl_obj = mocked_context.pipelines.get.return_value
         mocked_pl_obj.data_sets.return_value = pl_obj_data_sets
 
-        result = CliRunner().invoke(fake_project_cli.cli, ["catalog", "list"])
+        result = fake_cli_invoke(["catalog", "list"])
 
         assert not result.exit_code
         # 'parameters' and 'params:data_ratio' should not appear in the response
@@ -149,15 +158,13 @@ class TestCatalogCreateCommand:
         expected_output = "Error: Missing option '--pipeline'."
         assert expected_output in result.output
 
-    def test_not_found_pipeline(self, fake_project_cli, fake_load_context):
+    def test_not_found_pipeline(self, fake_cli_invoke, fake_load_context):
         mocked_context = fake_load_context.return_value
         mocked_context.pipelines = {
             "data_science": "ds_pipeline_obj",
             "data_engineering": "de_pipeline_obj",
         }
-        result = CliRunner().invoke(
-            fake_project_cli.cli, ["catalog", "create", "--pipeline", "fake"]
-        )
+        result = fake_cli_invoke(["catalog", "create", "--pipeline", "fake"])
         assert result.exit_code
 
         existing_pipelines = ", ".join(sorted(mocked_context.pipelines.keys()))
@@ -168,7 +175,7 @@ class TestCatalogCreateCommand:
         assert expected_output in result.output
 
     def test_catalog_is_created_in_base_by_default(
-        self, fake_project_cli, fake_repo_path, catalog_path
+        self, fake_cli_invoke, fake_repo_path, catalog_path
     ):
         main_catalog_path = fake_repo_path / "conf" / "base" / "catalog.yml"
         main_catalog_config = yaml.safe_load(main_catalog_path.read_text())
@@ -176,9 +183,8 @@ class TestCatalogCreateCommand:
 
         data_catalog_file = catalog_path / f"{self.PIPELINE_NAME}.yml"
 
-        result = CliRunner().invoke(
-            fake_project_cli.cli,
-            ["catalog", "create", "--pipeline", self.PIPELINE_NAME],
+        result = fake_cli_invoke(
+            ["catalog", "create", "--pipeline", self.PIPELINE_NAME]
         )
 
         assert not result.exit_code
@@ -194,20 +200,19 @@ class TestCatalogCreateCommand:
         assert catalog_config == expected_catalog_config
 
     @pytest.mark.parametrize("catalog_path", ["local"], indirect=True)
-    def test_catalog_is_created_in_correct_env(self, fake_project_cli, catalog_path):
+    def test_catalog_is_created_in_correct_env(self, fake_cli_invoke, catalog_path):
         data_catalog_file = catalog_path / f"{self.PIPELINE_NAME}.yml"
 
         env = catalog_path.parent.name
-        result = CliRunner().invoke(
-            fake_project_cli.cli,
-            ["catalog", "create", "--pipeline", self.PIPELINE_NAME, "--env", env],
+        result = fake_cli_invoke(
+            ["catalog", "create", "--pipeline", self.PIPELINE_NAME, "--env", env]
         )
 
         assert not result.exit_code
         assert data_catalog_file.is_file()
 
     def test_no_missing_datasets(
-        self, fake_project_cli, fake_load_context, fake_repo_path
+        self, fake_cli_invoke, fake_load_context, fake_repo_path
     ):
         mocked_context = fake_load_context.return_value
 
@@ -227,15 +232,14 @@ class TestCatalogCreateCommand:
             fake_repo_path / "conf" / "base" / "catalog" / f"{self.PIPELINE_NAME}.yml"
         )
 
-        result = CliRunner().invoke(
-            fake_project_cli.cli,
-            ["catalog", "create", "--pipeline", self.PIPELINE_NAME],
+        result = fake_cli_invoke(
+            ["catalog", "create", "--pipeline", self.PIPELINE_NAME]
         )
 
         assert not result.exit_code
         assert not data_catalog_file.exists()
 
-    def test_missing_datasets_appended(self, fake_project_cli, catalog_path):
+    def test_missing_datasets_appended(self, fake_cli_invoke, catalog_path):
         data_catalog_file = catalog_path / f"{self.PIPELINE_NAME}.yml"
         assert not catalog_path.exists()
         catalog_path.mkdir()
@@ -246,9 +250,8 @@ class TestCatalogCreateCommand:
         with data_catalog_file.open(mode="w") as catalog_file:
             yaml.safe_dump(catalog_config, catalog_file, default_flow_style=False)
 
-        result = CliRunner().invoke(
-            fake_project_cli.cli,
-            ["catalog", "create", "--pipeline", self.PIPELINE_NAME],
+        result = fake_cli_invoke(
+            ["catalog", "create", "--pipeline", self.PIPELINE_NAME]
         )
 
         assert not result.exit_code

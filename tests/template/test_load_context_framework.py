@@ -165,12 +165,7 @@ class TestLoadContext:
         assert isinstance(context, KedroContext)
         assert context.__class__ is not KedroContext
         assert context.__class__.__name__ == "MyContext"
-        assert settings_mock.call_count == 4
 
-        expected_calls = [
-            mocker.call(fake_package_name, "CONTEXT_CLASS", KedroContext),
-            mocker.call(fake_package_name, "HOOKS", ()),
-            mocker.call(fake_package_name, "DISABLE_HOOKS_FOR_PLUGINS", ()),
-            mocker.call(fake_package_name, "CONF_ROOT", "conf"),
-        ]
-        assert settings_mock.mock_calls == expected_calls
+        settings_mock.assert_called_once_with(
+            fake_package_name, "CONTEXT_CLASS", KedroContext
+        )

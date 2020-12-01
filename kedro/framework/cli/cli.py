@@ -75,6 +75,7 @@ _STARTER_ALIASES = {
     "pyspark": "git+https://github.com/quantumblacklabs/kedro-starter-pyspark.git",
     "pyspark-iris": "git+https://github.com/quantumblacklabs/kedro-starter-pyspark-iris.git",
     "spaceflights": "git+https://github.com/quantumblacklabs/kedro-starter-spaceflights.git",
+    "mini-kedro": str(KEDRO_PATH / "templates" / "mini-kedro"),
 }
 
 

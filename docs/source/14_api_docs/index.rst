@@ -53,7 +53,6 @@ Welcome to Kedro's documentation!
    02_get_started/05_example_project
    02_get_started/06_starters
 
-
 .. toctree::
    :maxdepth: 2
    :caption: Tutorial
@@ -72,6 +71,7 @@ Welcome to Kedro's documentation!
    04_kedro_project_setup/01_dependencies
    04_kedro_project_setup/02_configuration
    04_kedro_project_setup/03_session
+   04_kedro_project_setup/04_mini_kedro
 
 .. toctree::
    :maxdepth: 2

@@ -8,7 +8,7 @@ This section covers the third part of the [standard development workflow](./01_s
 
 ## Data engineering pipeline
 
-You previously registered the raw datasets for your Kedro project, so you can now create nodes to pre-process two of the datasets ([companies.csv](https://github.com/quantumblacklabs/kedro-examples/blob/master/kedro-tutorial/data/01_raw/companies.csv) and [shuttles.xlsx](https://github.com/quantumblacklabs/kedro-examples/blob/master/kedro-tutorial/data/01_raw/shuttles.xlsx) to prepare the data for modelling.
+You previously registered the raw datasets for your Kedro project, so you can now create nodes to pre-process two of the datasets, [companies.csv](https://github.com/quantumblacklabs/kedro-examples/blob/master/kedro-tutorial/data/01_raw/companies.csv) and [shuttles.xlsx](https://github.com/quantumblacklabs/kedro-examples/blob/master/kedro-tutorial/data/01_raw/shuttles.xlsx), to prepare the data for modelling.
 
 ### Node functions
 
@@ -77,7 +77,7 @@ def preprocess_shuttles(shuttles: pd.DataFrame) -> pd.DataFrame:
 
 ### Assemble nodes into the data engineering pipeline
 
-The next step is to create a `node` for each function, and add it to the data engineering pipeline.
+The next step is to create a `node` for each function, and create a modular pipeline for data engineering.
 
 Add the following to `src/kedro_tutorial/pipelines/data_engineering/pipeline.py`, so the `create_pipeline()` function looks as follows:
 
@@ -119,7 +119,7 @@ from kedro_tutorial.pipelines.data_engineering.nodes import (
 
 ### Update the project pipeline
 
-Next, update the project's pipeline in `src/kedro_tutorial/hooks.py` to add the data engineering pipeline:
+Next, update the project's pipeline in `src/kedro_tutorial/hooks.py` to add the modular pipeline for data engineering:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -156,7 +156,7 @@ project_hooks = ProjectHooks()
 
 ### Test the example
 
-To test the progress of the example, run the following command in your terminal window to test the preprocessing_companies node:
+Run the following command in your terminal window to test the `preprocessing_companies` node:
 
 ```bash
 kedro run --node=preprocessing_companies
@@ -174,7 +174,7 @@ You should see output similar to the below:
 
 ```
 
-To test the entire pipeline:
+To test the entire data engineering pipeline:
 
 ```bash
 kedro run
@@ -201,7 +201,7 @@ kedro run
 
 ### Persist pre-processed data
 
-The nodes above each output a new dataset (`preprocessed_companies` and `preprocessed_shuttles`). When Kedro ran the pipeline, it determined that neither datasets was registered in the data catalog (`conf/base/catalog.yml`). If a dataset is not registered, Kedro stores it in memory as a Python object using the [MemoryDataSet](/kedro.io.MemoryDataSet) class. Once all nodes depending on it have been executed, the `MemoryDataSet` is cleared and its memory released by the Python garbage collector.
+The nodes above each output a new dataset (`preprocessed_companies` and `preprocessed_shuttles`). When Kedro ran the pipeline, it determined that neither datasets had been registered in the data catalog (`conf/base/catalog.yml`). If a dataset is not registered, Kedro stores it in memory as a Python object using the [MemoryDataSet](/kedro.io.MemoryDataSet) class. Once all nodes depending on it have been executed, the `MemoryDataSet` is cleared and its memory released by the Python garbage collector.
 
 You can persist the preprocessed data by adding the following to `conf/base/catalog.yml`:
 
@@ -317,7 +317,7 @@ You should see output similar to the following:
 
 ## Data science pipeline
 
-We have created a data engineering pipeline, which merges three input datasets to create a master table. Now we will create the data science pipeline for price prediction, which uses a [`LinearRegression`](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html) implementation from the [scikit-learn](https://scikit-learn.org/stable/) library.
+We have created a modular pipeline for data engineering, which merges three input datasets to create a master table. Now we will create the data science pipeline for price prediction, which uses a [`LinearRegression`](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html) implementation from the [scikit-learn](https://scikit-learn.org/stable/) library.
 
 ### Update dependencies
 We now need to add `scikit-learn` to the project's dependencies. This is a slightly different process from the initial change we made early in the tutorial.
@@ -443,7 +443,7 @@ regressor:
 > this pipeline. Further details can be found in the [Versioning](../05_data/02_kedro_io.md#versioning) section.
 
 ### Assemble the data science pipeline
-To create a pipeline for the price prediction model, add the following to the top of `src/kedro_tutorial/pipelines/data_science/pipeline.py`:
+To create a modular pipeline for the price prediction model, add the following to the top of `src/kedro_tutorial/pipelines/data_science/pipeline.py`:
 
 ```python
 from kedro.pipeline import Pipeline, node
@@ -500,16 +500,17 @@ def register_pipelines(self) -> Dict[str, Pipeline]:
 ```
 
 Include the import at the top of the file:
+
 ```python
 from kedro_tutorial.pipelines.data_science import pipeline as ds
 ```
-The two pipelines are merged together into a project default pipeline by the `__default__` key used in `"__default__": de_pipeline + ds_pipeline`.
+The two modular pipelines are merged together into a project default pipeline by the `__default__` key used in `"__default__": de_pipeline + ds_pipeline`.
 The `de_pipeline` will preprocess the data, and `ds_pipeline` will create features, train and evaluate the model.
 
 > *Note:* The order in which you add the pipelines together is not significant and `ds_pipeline + de_pipeline` will result in the same pipeline, since Kedro automatically detects the correct execution order for all the nodes in the resulting pipeline.
 
 
-### Test the multiple pipelines
+### Test the pipelines
 Execute the default pipeline:
 
 ```bash

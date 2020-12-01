@@ -38,6 +38,7 @@
 * Renamed `KedroContext.static_data` to `KedroContext.project_metadata`.
 * Replaced `context` property on `KedroContext` with `load_context()` method.
 * Renamed `_push_session` and `_pop_session` in `kedro.framework.session.session` to `_activate_session` and `_deactivate_session` respectively.
+* Custom context class is set via `CONTEXT_CLASS` variable in `src/<your_project>/settings.py`.
 * Removed `KedroContext.hooks` attribute. Register your Hook implementations in the `src/<your_project>/settings.py` file under the `HOOKS` key.
 
 ## Thanks for supporting contributions

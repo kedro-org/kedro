@@ -25,12 +25,11 @@ A Python file that contains project specific CLI commands (e.g., `kedro run`, `k
 
 #### `run.py`
 
-A Python file located in `src/<python_package>/run.py`, where you can define `ProjectContext` class that extends `KedroContext` class. This file also serves as the main entry point of the project.
+A Python file located in `src/<python_package>/run.py`. This file serves as the main entry point of the project and is used to run the project in [package mode](../03_tutorial/05_package_a_project.md#package-your-project).
 
 #### `pyproject.toml`
 
 `pyproject.yml` identifies the project root, which is used by other Kedro components and contains the following metadata entries:
-- `context_path`: (Optional) A top-level key pointing to the absolute path of the context class that extends `kedro.framework.context.KedroContext` class (e.g. `<python_project>.run.ProjectContext`)
 - `package_name`: A valid Python package name for your project package
 - `project_name`: A human readable name for your project
 - `project_version`: Kedro version with which the project was generated
@@ -45,14 +44,11 @@ We use the `settings.py` for all project settings, which will not change at run 
 - `DISABLE_HOOKS_FOR_PLUGINS`: (Optional) A list of the installed plugins for which to disable auto-registry
 - `HOOKS`: (Optional) A list of paths pointing to [Hooks](../07_extend_kedro/02_hooks.md) implementations to be registered with the project (default is `<python_project>.hooks.ProjectHooks`)
 - `SESSION_STORE`: (Optional) Define where to store data from a `KedroSession`
+- `CONTEXT_CLASS`: (Optional) Define a project context class to be used at runtime. Defaults to `KedroContext` class
 
 #### `00-kedro-init.py`
 
 This script is automatically invoked at IPython kernel startup when calling `kedro jupyter notebook`, `kedro jupyter lab` and `kedro ipython` CLI commands. `00-kedro-init.py` creates an instance of `KedroContext` object, which can be used to interact with the current project right away.
-
-#### `ProjectContext` (optional)
-
-Project specific context class that extends `kedro.framework.context.KedroContext` class.
 
 ### Framework
 

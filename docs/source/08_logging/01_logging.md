@@ -8,7 +8,6 @@ Kedro uses, and facilitates, the use of Python’s `logging` library by providin
 
 You can customise project logging in `conf/<env>/logging.yml` using [standard Kedro mechanisms for handling configuration](../04_kedro_project_setup/02_configuration.md). The configuration should comply with the guidelines from the `logging` library. Find more about it in [the documentation for `logging` module](https://docs.python.org/3/library/logging.html).
 
-
 ## Use logging
 
 After reading and applying project logging configuration, `kedro` will start emitting the logs automatically. To log your own code, you are advised to do the following:

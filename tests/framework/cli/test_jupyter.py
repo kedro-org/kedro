@@ -42,6 +42,13 @@ from kedro.framework.cli.jupyter import (
 from kedro.framework.cli.utils import KedroCliError
 
 
+@pytest.fixture(autouse=True)
+def mocked_logging(mocker):
+    # Disable logging.config.dictConfig in KedroSession._setup_logging as
+    # it changes logging.config and affects other unit tests
+    return mocker.patch("logging.config.dictConfig")
+
+
 def test_collect_line_magic(entry_points, entry_point):
     entry_point.load.return_value = "line_magic"
     line_magics = collect_line_magic()

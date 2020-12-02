@@ -29,6 +29,7 @@
 """This module implements Kedro session responsible for project lifecycle."""
 
 import logging
+import logging.config
 import subprocess
 import traceback
 from copy import deepcopy
@@ -39,7 +40,12 @@ import click
 
 from kedro import __version__ as kedro_version
 from kedro.framework.context import KedroContext
+from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import get_hook_manager
+from kedro.framework.hooks.manager import (
+    _register_hooks_setuptools,
+    _register_project_hooks,
+)
 from kedro.framework.project.settings import _get_project_settings
 from kedro.framework.session.store import BaseSessionStore
 from kedro.io.core import generate_timestamp
@@ -195,7 +201,39 @@ class KedroSession:
             session_data["extra_params"] = extra_params
 
         session._store.update(session_data)
+
+        session._register_hooks()
+        # we need a ConfigLoader registered in order to be able to set up logging
+        session._setup_logging()
         return session
+
+    def _register_hooks(self) -> None:
+        """Register all hooks with the global ``hook_manager``,
+        and from installed plugins.
+        """
+        # take context hooks and enrich with hooks specified in settings.py
+        hooks = _get_project_settings(self._package_name, "HOOKS", ())
+        disabled_plugins = set(
+            _get_project_settings(self._package_name, "DISABLE_HOOKS_FOR_PLUGINS", ())
+        )
+
+        hook_manager = get_hook_manager()
+        _register_project_hooks(hook_manager, hooks)
+        _register_hooks_setuptools(hook_manager, disabled_plugins)
+
+    def _setup_logging(self) -> None:
+        """Register logging specified in logging directory."""
+        context = self.load_context()
+
+        conf_logging = context.config_loader.get(
+            "logging*", "logging*/**", "**/logging*"
+        )
+        # turn relative paths in logging config into absolute path
+        # before initialising loggers
+        conf_logging = _convert_paths_to_absolute_posix(
+            project_path=self._project_path, conf_dictionary=conf_logging
+        )
+        logging.config.dictConfig(conf_logging)
 
     def _init_store(self) -> BaseSessionStore:
         session_store = _get_project_settings(self._package_name, "SESSION_STORE", {})

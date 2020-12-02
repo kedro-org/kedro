@@ -39,15 +39,11 @@ To run the tests, run ``kedro test`` from the project root directory.
 from pathlib import Path
 
 import pytest
-from kedro.framework.context import KedroContext, load_context
+from kedro.framework.context import load_context
 
 
 @pytest.fixture
-def project_context(mocker):
-    # Suppress the logging configuration. Otherwise it might interfere
-    # with the tests that check logs using the ``caplog`` fixture.
-    mocker.patch.object(KedroContext, "_setup_logging")
-
+def project_context():
     return load_context(Path.cwd())
 
 

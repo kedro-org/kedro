@@ -44,6 +44,13 @@ def project_path(mocker, tmp_path):
 
 
 @pytest.fixture(autouse=True)
+def mocked_logging(mocker):
+    # Disable logging.config.dictConfig in KedroSession._setup_logging as
+    # it changes logging.config and affects other unit tests
+    return mocker.patch("logging.config.dictConfig")
+
+
+@pytest.fixture(autouse=True)
 def cleanup_session():
     yield
     _deactivate_session()
@@ -121,9 +128,13 @@ class TestLoadKedroObjects:
             }
         )
         assert mock_register_line_magic.call_count == 1
-        mock_get_settings.assert_called_once_with(
-            fake_metadata.package_name, "SESSION_STORE", {}
-        )
+
+        expected_calls = [
+            mocker.call(fake_metadata.package_name, "SESSION_STORE", {}),
+            mocker.call(fake_metadata.package_name, "HOOKS", ()),
+            mocker.call(fake_metadata.package_name, "DISABLE_HOOKS_FOR_PLUGINS", ()),
+        ]
+        assert mock_get_settings.mock_calls == expected_calls
 
     def test_load_kedro_objects_not_in_kedro_project(self, tmp_path, mocker):
         mocker.patch(

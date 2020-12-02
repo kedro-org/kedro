@@ -8,21 +8,33 @@
 
 ## Thanks for supporting contributions
 
-# Upcoming 0.16.6 release
+# Release 0.16.6
 
 ## Major features and improvements
 
+* Added documentation with a focus on single machine and distributed environment deployment; the series includes Docker, Argo, Prefect, Kubeflow, AWS Batch, AWS Sagemaker and extends our section on Databricks
+* Added [kedro-starter-spaceflights](https://github.com/quantumblacklabs/kedro-starter-spaceflights/) alias for generating a project: `kedro new --starter spaceflights`.
+
 ## Bug fixes and other changes
+* Fixed `TypeError` when converting dict inputs to a node made from a wrapped `partial` function.
+* `PartitionedDataSet` improvements:
+  - Supported passing arguments to the underlying filesystem.
 * Improved handling of non-ASCII word characters in dataset names.
   - For example, a dataset named `jalapeño` will be accessible as `DataCatalog.datasets.jalapeño` rather than `DataCatalog.datasets.jalape__o`.
 * Fixed `kedro install` for an Anaconda environment defined in `environment.yml`.
 * Fixed backwards compatibility with templates generated with older Kedro versions <0.16.5. No longer need to update `.kedro.yml` to use `kedro lint` and `kedro jupyter notebook convert`.
 * Improved documentation.
+* Added documentation using MinIO with Kedro.
+* Improved error messages for incorrect parameters passed into a node.
+* Fixed issue with saving a `TensorFlowModelDataset` in the HDF5 format with versioning enabled.
+* Added missing `run_result` argument in `after_pipeline_run` Hooks spec.
+* Fixed a bug in IPython script that was causing context hooks to be registered twice. To apply this fix to a project generated with an older Kedro version, apply the same changes made in [this PR](https://github.com/quantumblacklabs/kedro-starter-pandas-iris/pull/16) to your `00-kedro-init.py` file.
+* Improved documentation.
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Deepyaman Datta](https://github.com/deepyaman), [Bhavya Merchant](https://github.com/bnmerchant), [Lovkush Agarwal](https://github.com/Lovkush-A), [Varun Krishna S](https://github.com/vhawk19), [Sebastian Bertoli](https://github.com/sebastianbertoli)
+[Deepyaman Datta](https://github.com/deepyaman), [Bhavya Merchant](https://github.com/bnmerchant), [Lovkush Agarwal](https://github.com/Lovkush-A), [Varun Krishna S](https://github.com/vhawk19), [Sebastian Bertoli](https://github.com/sebastianbertoli), [noklam](https://github.com/noklam), [Daniel Petti](https://github.com/djpetti), [Waylon Walker](https://github.com/waylonwalker), [Abdulelah Al Mesfer](https://github.com/abdulelahsm)
 
 # Release 0.16.5
 
@@ -128,17 +140,17 @@ package_name: "<your_package_name>"
 * Added the `kedro pipeline package` command to help package up a modular pipeline. It will bundle up the pipeline source code, tests, and parameters configuration into a .whl file.
 
 ## Bug fixes and other changes
-* Improvement in `DataCatalog`:
+* `DataCatalog` improvements:
   - Introduced regex filtering to the `DataCatalog.list()` method.
   - Non-alphanumeric characters (except underscore) in dataset name are replaced with `__` in `DataCatalog.datasets`, for ease of access to transcoded datasets.
-* Improvement in Datasets:
+* Dataset improvements:
   - Improved initialization speed of `spark.SparkHiveDataSet`.
   - Improved S3 cache in `spark.SparkDataSet`.
   - Added support of options for building `pyarrow` table in `pandas.ParquetDataSet`.
-* Improvement in `kedro build-reqs` CLI command:
+* `kedro build-reqs` CLI command improvements:
   - `kedro build-reqs` is now called with `-q` option and will no longer print out compiled requirements to the console for security reasons.
   - All unrecognized CLI options in `kedro build-reqs` command are now passed to [pip-compile](https://github.com/jazzband/pip-tools#example-usage-for-pip-compile) call (e.g. `kedro build-reqs --generate-hashes`).
-* Improvement in `kedro jupyter` CLI command:
+* `kedro jupyter` CLI command improvements:
   - Improved error message when running `kedro jupyter notebook`, `kedro jupyter lab` or `kedro ipython` with Jupyter/IPython dependencies not being installed.
   - Fixed `%run_viz` line magic for showing kedro viz inside a Jupyter notebook. For the fix to be applied on existing Kedro project, please see the migration guide.
   - Fixed the bug in IPython startup script ([issue 298](https://github.com/quantumblacklabs/kedro/issues/298)).

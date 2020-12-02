@@ -14,6 +14,7 @@
 # serve to show the default.
 
 import importlib
+import os
 import re
 import shutil
 import sys
@@ -170,7 +171,7 @@ html_theme_options = {"collapse_navigation": False, "style_external_links": True
 
 html_context = {
     "display_github": True,
-    "github_url": "https://github.com/quantumblacklabs/kedro/tree/develop/docs/source",
+    "github_url": "https://github.com/quantumblacklabs/kedro/tree/master/docs/source",
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -335,17 +336,13 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
         if what == "class":
             # first do plural only for classes
             replacements += [
-                (
-                    r"``{}``s".format(obj),
-                    ":{}:`~{}.{}`\\\\s".format(what, module, obj),
-                    obj,
-                )
+                (r"``{}``s".format(obj), f":{what}:`~{module}.{obj}`\\\\s", obj,)
                 for obj in objects
             ]
 
         # singular
         replacements += [
-            (r"``{}``".format(obj), ":{}:`~{}.{}`".format(what, module, obj), obj)
+            (r"``{}``".format(obj), f":{what}:`~{module}.{obj}`", obj)
             for obj in objects
         ]
 
@@ -355,13 +352,13 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
         if what == "class":
             # first do plural only for classes
             suggestions += [
-                (r"(?<!\w|`){}s(?!\w|`{{2}})".format(obj), "``{}``s".format(obj), obj)
+                (r"(?<!\w|`){}s(?!\w|`{{2}})".format(obj), f"``{obj}``s", obj)
                 for obj in objects
             ]
 
         # then singular
         suggestions += [
-            (r"(?<!\w|`){}(?!\w|`{{2}})".format(obj), "``{}``".format(obj), obj)
+            (r"(?<!\w|`){}(?!\w|`{{2}})".format(obj), f"``{obj}``", obj)
             for obj in objects
         ]
 
@@ -458,8 +455,24 @@ def _prepare_build_dir(app, config):
     shutil.rmtree(str(build_root / "css"))
 
 
+def env_override(default_appid):
+    build_version = os.getenv("READTHEDOCS_VERSION")
+
+    if build_version == "latest":
+        return os.environ["HEAP_APPID_QA"]
+    if build_version == "stable":
+        return os.environ["HEAP_APPID_PROD"]
+
+    return default_appid  # default to Development for local builds
+
+
+def _add_jinja_filters(app):
+    app.builder.templates.environment.filters["env_override"] = env_override
+
+
 def setup(app):
     app.connect("config-inited", _prepare_build_dir)
+    app.connect("builder-inited", _add_jinja_filters)
     app.connect("autodoc-process-docstring", autodoc_process_docstring)
     app.connect("autodoc-skip-member", skip)
     app.add_stylesheet("css/qb1-sphinx-rtd.css")
@@ -506,3 +519,5 @@ except Exception as e:
     )
 
 fix_module_paths()
+
+copybutton_image_path = "_images/copy-button.svg"

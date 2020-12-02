@@ -332,20 +332,42 @@ def inconsistent_input_kwargs():
     return dummy_func_args, "A", "B"
 
 
+lambda_identity = lambda input1: input1  # noqa: disable=E731
+
+
+def lambda_inconsistent_input_size():
+    return lambda_identity, ["A", "B"], "C"
+
+
+partial_identity = partial(identity)
+
+
+def partial_inconsistent_input_size():
+    return partial_identity, ["A", "B"], "C"
+
+
 @pytest.mark.parametrize(
     "func, expected",
     [
         (
             inconsistent_input_size,
-            r"Inputs of function expected \[\'input1\'\], but got \[\'A\', \'B\'\]",
+            r"Inputs of 'identity' function expected \[\'input1\'\], but got \[\'A\', \'B\'\]",
         ),
         (
             inconsistent_input_args,
-            r"Inputs of function expected \[\'args\'\], but got {\'a\': \'A\'}",
+            r"Inputs of 'dummy_func_args' function expected \[\'args\'\], but got {\'a\': \'A\'}",
         ),
         (
             inconsistent_input_kwargs,
-            r"Inputs of function expected \[\'kwargs\'\], but got A",
+            r"Inputs of 'dummy_func_args' function expected \[\'kwargs\'\], but got A",
+        ),
+        (
+            lambda_inconsistent_input_size,
+            r"Inputs of '<lambda>' function expected \[\'input1\'\], but got \[\'A\', \'B\'\]",
+        ),
+        (
+            partial_inconsistent_input_size,
+            r"Inputs of '<partial>' function expected \[\'input1\'\], but got \[\'A\', \'B\'\]",
         ),
     ],
 )
@@ -357,7 +379,7 @@ def test_bad_input(func, expected):
 def apply_f(func: Callable) -> Callable:
     @wraps(func)
     def with_f(*args, **kwargs):
-        return func(*["f(%s)" % a for a in args], **kwargs)
+        return func(*[f"f({a})" for a in args], **kwargs)
 
     return with_f
 
@@ -365,7 +387,7 @@ def apply_f(func: Callable) -> Callable:
 def apply_g(func: Callable) -> Callable:
     @wraps(func)
     def with_g(*args, **kwargs):
-        return func(*["g(%s)" % a for a in args], **kwargs)
+        return func(*[f"g({a})" for a in args], **kwargs)
 
     return with_g
 
@@ -373,7 +395,7 @@ def apply_g(func: Callable) -> Callable:
 def apply_h(func: Callable) -> Callable:
     @wraps(func)
     def with_h(*args, **kwargs):
-        return func(*["h(%s)" % a for a in args], **kwargs)
+        return func(*[f"h({a})" for a in args], **kwargs)
 
     return with_h
 
@@ -381,7 +403,7 @@ def apply_h(func: Callable) -> Callable:
 def apply_ij(func: Callable) -> Callable:
     @wraps(func)
     def with_ij(*args, **kwargs):
-        return func(*["ij(%s)" % a for a in args], **kwargs)
+        return func(*[f"ij({a})" for a in args], **kwargs)
 
     return with_ij
 
@@ -464,3 +486,13 @@ class TestNames:
         assert str(n) == "identity([in]) -> [out]"
         assert n.name == "identity([in]) -> [out]"
         assert n.short_name == "Identity"
+
+    def test_updated_partial_dict_inputs(self):
+        n = node(
+            update_wrapper(partial(biconcat, input1=["in1"]), biconcat),
+            dict(input2="in2"),
+            ["out"],
+        )
+        assert str(n) == "biconcat([in2]) -> [out]"
+        assert n.name == "biconcat([in2]) -> [out]"
+        assert n.short_name == "Biconcat"

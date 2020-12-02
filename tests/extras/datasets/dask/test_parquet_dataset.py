@@ -49,7 +49,7 @@ AWS_CREDENTIALS = dict(
 )
 
 # Pathlib cannot be used since it strips out the second slash from "s3://"
-S3_PATH = "s3://{}/{}".format(BUCKET_NAME, FILE_NAME)
+S3_PATH = f"s3://{BUCKET_NAME}/{FILE_NAME}"
 
 
 @pytest.fixture

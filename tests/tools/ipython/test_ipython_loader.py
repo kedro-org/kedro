@@ -121,9 +121,7 @@ class TestRunStartupScripts:
 
     def test_run(self, dummy_project_dir, startup_script, caplog):
         ipython_loader.run_startup_scripts(dummy_project_dir)
-        expected_message = "Startup script `{}` successfully executed".format(
-            startup_script
-        )
+        expected_message = f"Startup script `{startup_script}` successfully executed"
 
         assert getattr(ipython_loader, "dummy_project_var1") == 111
         assert len(caplog.records) == 1
@@ -132,8 +130,7 @@ class TestRunStartupScripts:
     def test_run_bad_script(self, dummy_project_dir, bad_startup_script, caplog):
         ipython_loader.run_startup_scripts(dummy_project_dir)
         expected_error_message = (
-            "Startup script `{}` failed:\n"
-            "ValueError: bad script!".format(bad_startup_script)
+            f"Startup script `{bad_startup_script}` failed:\nValueError: bad script!"
         )
         assert len(caplog.records) == 1
         assert caplog.records[0].message == expected_error_message
@@ -143,8 +140,7 @@ class TestRunStartupScripts:
     ):
         ipython_loader.run_startup_scripts(dummy_project_dir)
         expected_error_message = (
-            "Startup script `{}` failed:\n"
-            "ValueError: bad script!".format(bad_startup_script)
+            f"Startup script `{bad_startup_script}` failed:\nValueError: bad script!"
         )
         expected_success_message = "Startup script `{}` successfully executed".format(
             startup_script
@@ -176,7 +172,5 @@ class TestRunStartupScripts:
 
         assert getattr(ipython_loader, "dummy_project_var2") == 2222
         assert len(caplog.records) == 1
-        expected_message = "Startup script `{}` successfully executed".format(
-            script_path
-        )
+        expected_message = f"Startup script `{script_path}` successfully executed"
         assert caplog.records[0].message == expected_message

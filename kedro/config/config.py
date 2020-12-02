@@ -217,7 +217,7 @@ def _load_config(config_files: List[Path]) -> Dict[str, Any]:
             if common:
                 if len(common) > 100:
                     common = common[:100] + "..."
-                dups.add("{}: {}".format(str(file2), common))
+                dups.add(f"{str(file2)}: {common}")
 
         if dups:
             msg = "Duplicate keys found in {0} and:\n- {1}".format(

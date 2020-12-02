@@ -337,7 +337,7 @@ class TestPartitionedDataSetLocal:
         pattern = re.escape(
             f"`{path.as_posix()}` is not a well-formed versioned path ending with "
             "`filename/timestamp/filename` (got `version/partition/"
-            "file`)."
+            "file`, expected `file/<version>/file`)."
         )
         with pytest.raises(DataSetError, match=pattern):
             pds.load()

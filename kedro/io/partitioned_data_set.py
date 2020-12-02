@@ -219,8 +219,9 @@ class PartitionedDataSet(AbstractDataSet):
 
     @cachedmethod(cache=operator.attrgetter("_partition_cache"))
     def _list_partitions(self) -> List[str]:
+        dataset_is_versioned = self._dataset_config.get(VERSION_KEY, False)
         return [
-            _grandparent(path) if self._dataset_config.get(VERSION_KEY) else path
+            _grandparent(path) if dataset_is_versioned else path
             for path in self._filesystem.find(self._normalized_path, **self._load_args)
             if path.endswith(self._filename_suffix)
         ]

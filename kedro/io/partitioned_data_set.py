@@ -66,8 +66,7 @@ def _grandparent(path: str) -> str:
         last_three_parts = path_obj.relative_to(*path_obj.parts[:-3])
         raise DataSetError(
             f"`{path}` is not a well-formed versioned path ending with "
-            f"`filename/timestamp/filename` (got `{last_three_parts}`, "
-            f"expected `{path_obj.name}/<version>/{path_obj.name}`)."
+            f"`filename/timestamp/filename` (got `{last_three_parts}`)."
         )
     return str(grandparent)
 

@@ -372,7 +372,7 @@ class TestPartitionedDataSetLocal:
     def test_filepath_arg_warning(self, pds_config, filepath_arg):
         pattern = (
             f"`{filepath_arg}` key must not be specified in the dataset definition as it "
-            "will be overwritten by partition path"
+            f"will be overwritten by partition path"
         )
         with pytest.warns(UserWarning, match=re.escape(pattern)):
             PartitionedDataSet(**pds_config)

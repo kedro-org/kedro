@@ -3,10 +3,13 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* `PartitionedDataSet` improvements:
+  - Supported versioning of the underlying dataset.
 
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
+[Deepyaman Datta](https://github.com/deepyaman)
 
 # Release 0.16.6
 
@@ -18,7 +21,6 @@
 ## Bug fixes and other changes
 * Fixed `TypeError` when converting dict inputs to a node made from a wrapped `partial` function.
 * `PartitionedDataSet` improvements:
-  - Supported versioning of the underlying dataset.
   - Supported passing arguments to the underlying filesystem.
 * Improved handling of non-ASCII word characters in dataset names.
   - For example, a dataset named `jalapeño` will be accessible as `DataCatalog.datasets.jalapeño` rather than `DataCatalog.datasets.jalape__o`.

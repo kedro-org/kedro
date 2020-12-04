@@ -48,6 +48,7 @@ from kedro.framework.hooks import hook_impl
 from kedro.framework.hooks.manager import get_hook_manager
 from kedro.framework.project.settings import _get_project_settings
 from kedro.framework.session import KedroSession
+from kedro.framework.session.session import _register_all_project_hooks
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node, node
@@ -472,14 +473,24 @@ def mock_session_with_hooks(
 
 
 class TestKedroSessionHooks:
-    def test_calling_register_hooks_again(self, mock_session_with_hooks, logging_hooks):
+    def test_assert_register_hooks(self, request, logging_hooks):
+        hook_manager = get_hook_manager()
+        assert not hook_manager.is_registered(logging_hooks)
+
+        # call the fixture to construct the session
+        request.getfixturevalue("mock_session_with_hooks")
+
+        assert hook_manager.is_registered(logging_hooks)
+
+    def test_calling_register_hooks_twice(self, mock_session_with_hooks, logging_hooks):
         """Calling hook registration multiple times should not raise"""
         hook_manager = get_hook_manager()
+        package_name = mock_session_with_hooks._package_name
 
         # hooks already registered when fixture 'mock_session_with_hooks' was called
         assert hook_manager.is_registered(logging_hooks)
-        mock_session_with_hooks._register_hooks()
-        mock_session_with_hooks._register_hooks()
+        _register_all_project_hooks(hook_manager, package_name)
+        _register_all_project_hooks(hook_manager, package_name)
         assert hook_manager.is_registered(logging_hooks)
 
     @pytest.mark.parametrize("num_plugins", [0, 1])

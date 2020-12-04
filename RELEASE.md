@@ -8,6 +8,7 @@
 * Made `context_path` an optional key in `pyproject.toml`. `KedroContext` is used by default.
 * Removed `ProjectContext` from `src/<package_name>/run.py`.
 * `TemplatedConfigLoader` now supports Jinja2 template syntax alongside its original one.
+* Triggering the run from the notebook using `ParallelRunner` does not result in the run failure if the run was started using `KedroSession` (`session.run()`).
 
 ## Bug fixes and other changes
 * Bumped maximum required `fsspec` version to 0.9.

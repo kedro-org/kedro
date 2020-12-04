@@ -137,9 +137,10 @@ class ShelveStore(BaseSessionStore):
 
     def save(self) -> None:
         """Save the data on disk using `shelve` package."""
-        self._location.parent.mkdir(parents=True, exist_ok=True)
+        location = self._location
+        location.parent.mkdir(parents=True, exist_ok=True)
 
-        with self._lock, shelve.open(str(self._location)) as _sh:
+        with self._lock, shelve.open(str(location)) as _sh:
             keys_to_del = _sh.keys() - self.data.keys()
             for key in keys_to_del:
                 del _sh[key]

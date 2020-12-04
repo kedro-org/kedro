@@ -32,6 +32,7 @@ from typing import Any, Dict
 
 import pytest
 
+from kedro.framework.hooks import get_hook_manager
 from kedro.io import (
     AbstractDataSet,
     DataCatalog,
@@ -45,6 +46,7 @@ from kedro.runner import ParallelRunner
 from kedro.runner.parallel_runner import (
     _MAX_WINDOWS_WORKERS,
     ParallelRunnerManager,
+    _run_node_synchronization,
     _SharedMemoryDataSet,
 )
 
@@ -186,7 +188,8 @@ class TestMaxWorkers:
     def test_max_worker_windows(self, mocker):
         """The ProcessPoolExecutor on Python 3.7+
         has a quirk with the max worker number on Windows
-        and requires it to be <=61"""
+        and requires it to be <=61
+        """
         mocker.patch("os.cpu_count", return_value=100)
         mocker.patch("sys.platform", "win32")
 
@@ -247,8 +250,7 @@ class TestInvalidParallelRunner:
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
     def test_memory_dataset_not_serializable(self, is_async, catalog):
-        """Memory dataset cannot be serializable because of data it stores.
-        """
+        """Memory dataset cannot be serializable because of data it stores."""
         data = return_not_serializable(None)
         pipeline = Pipeline([node(return_not_serializable, "A", "B")])
         catalog.add_feed_dict(feed_dict=dict(A=42))
@@ -259,6 +261,30 @@ class TestInvalidParallelRunner:
 
         with pytest.raises(DataSetError, match=pattern):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
+
+    def test_unable_to_schedule_all_nodes(
+        self, mocker, is_async, fan_out_fan_in, catalog
+    ):
+        """Test the error raised when `futures` variable is empty,
+        but `todo_nodes` is not (can barely happen in real life).
+        """
+        catalog.add_feed_dict(dict(A=42))
+        runner = ParallelRunner(is_async=is_async)
+
+        real_node_deps = fan_out_fan_in.node_dependencies
+        # construct deliberately unresolvable dependencies for all
+        # pipeline nodes, so that none can be run
+        fake_node_deps = {k: {"you_shall_not_pass"} for k in real_node_deps}
+        # property mock requires patching a class, not an instance
+        mocker.patch(
+            "kedro.pipeline.Pipeline.node_dependencies",
+            new_callable=mocker.PropertyMock,
+            return_value=fake_node_deps,
+        )
+
+        pattern = "Unable to schedule new tasks although some nodes have not been run"
+        with pytest.raises(RuntimeError, match=pattern):
+            runner.run(fan_out_fan_in, catalog)
 
 
 @log_time
@@ -425,3 +451,87 @@ class TestParallelRunnerRelease:
 
         # we want to see both datasets being released
         assert list(log) == [("release", "save"), ("load", "load"), ("release", "load")]
+
+
+@pytest.mark.parametrize("is_async", [False, True])
+class TestRunNodeSynchronisationHelper:
+    """Test class for _run_node_synchronization helper. It is tested manually
+    in isolation since it's called in the subprocess, which ParallelRunner
+    patches have no access to.
+    """
+
+    @pytest.fixture(autouse=True)
+    def mock_logging(self, mocker):
+        return mocker.patch("logging.config.dictConfig")
+
+    @pytest.fixture
+    def mock_run_node(self, mocker):
+        return mocker.patch("kedro.runner.parallel_runner.run_node")
+
+    @pytest.fixture
+    def mock_register_hooks(self, mocker):
+        return mocker.patch(
+            "kedro.framework.session.session._register_all_project_hooks"
+        )
+
+    @pytest.mark.parametrize("conf_logging", [{"fake_logging_config": True}, dict()])
+    def test_package_name_and_logging_provided(
+        self,
+        mock_logging,
+        mock_run_node,
+        mock_register_hooks,
+        is_async,
+        conf_logging,
+        mocker,
+    ):
+        mocker.patch("multiprocessing.get_start_method", return_value="spawn")
+        node = mocker.sentinel.node
+        catalog = mocker.sentinel.catalog
+        run_id = "fake_run_id"
+        package_name = mocker.sentinel.package_name
+        hook_manager = get_hook_manager()
+
+        _run_node_synchronization(
+            node,
+            catalog,
+            is_async,
+            run_id,
+            package_name=package_name,
+            conf_logging=conf_logging,
+        )
+        mock_run_node.assert_called_once_with(node, catalog, is_async, run_id)
+        mock_register_hooks.assert_called_once_with(hook_manager, package_name)
+        mock_logging.assert_called_once_with(conf_logging)
+
+    def test_package_name_provided(
+        self, mock_logging, mock_run_node, mock_register_hooks, is_async, mocker,
+    ):
+        mocker.patch("multiprocessing.get_start_method", return_value="spawn")
+        node = mocker.sentinel.node
+        catalog = mocker.sentinel.catalog
+        run_id = "fake_run_id"
+        package_name = mocker.sentinel.package_name
+        hook_manager = get_hook_manager()
+
+        _run_node_synchronization(
+            node, catalog, is_async, run_id, package_name=package_name
+        )
+        mock_run_node.assert_called_once_with(node, catalog, is_async, run_id)
+        mock_register_hooks.assert_called_once_with(hook_manager, package_name)
+        mock_logging.assert_called_once_with({})
+
+    def test_package_name_not_provided(
+        self, mock_logging, mock_run_node, mock_register_hooks, is_async, mocker
+    ):
+        mocker.patch("multiprocessing.get_start_method", return_value="fork")
+        node = mocker.sentinel.node
+        catalog = mocker.sentinel.catalog
+        run_id = "fake_run_id"
+        package_name = mocker.sentinel.package_name
+
+        _run_node_synchronization(
+            node, catalog, is_async, run_id, package_name=package_name
+        )
+        mock_run_node.assert_called_once_with(node, catalog, is_async, run_id)
+        mock_register_hooks.assert_not_called()
+        mock_logging.assert_not_called()

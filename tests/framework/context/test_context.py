@@ -50,11 +50,7 @@ from kedro.framework.context.context import (
     _validate_layers_for_transcoding,
 )
 from kedro.framework.hooks import get_hook_manager
-from kedro.framework.hooks.manager import (
-    _register_hooks_setuptools,
-    _register_project_hooks,
-)
-from kedro.framework.project.settings import _get_project_settings
+from kedro.framework.session.session import _register_all_project_hooks
 from kedro.io import DataCatalog
 from kedro.io.core import Version, generate_timestamp
 from kedro.pipeline import Pipeline, node
@@ -89,17 +85,6 @@ def _write_dummy_ini(filepath: Path):
     config["staging"] = {"url": "postgresql://user:pass@url_staging/db"}
     with filepath.open("wt") as configfile:  # save
         config.write(configfile)
-
-
-def _register_hooks(package_name: str):
-    hooks = _get_project_settings(package_name, "HOOKS", ())
-    disabled_plugins = set(
-        _get_project_settings(package_name, "DISABLE_HOOKS_FOR_PLUGINS", ())
-    )
-
-    hook_manager = get_hook_manager()
-    _register_project_hooks(hook_manager, hooks)
-    _register_hooks_setuptools(hook_manager, disabled_plugins)
 
 
 @pytest.fixture
@@ -293,7 +278,9 @@ def dummy_context(
     context = DummyContext(
         MOCK_PACKAGE_NAME, str(tmp_path), env=env, extra_params=extra_params
     )
-    _register_hooks(MOCK_PACKAGE_NAME)
+
+    hook_manager = get_hook_manager()
+    _register_all_project_hooks(hook_manager, MOCK_PACKAGE_NAME)
     return context
 
 

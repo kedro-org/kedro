@@ -69,7 +69,7 @@ def get_hook_manager():
     return _hook_manager
 
 
-def _register_project_hooks(hook_manager: PluginManager, hooks: Iterable[Any]) -> None:
+def _register_hooks(hook_manager: PluginManager, hooks: Iterable[Any]) -> None:
     """Register all hooks as specified in ``hooks`` with the global ``hook_manager``.
 
     Args:

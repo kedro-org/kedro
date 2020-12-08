@@ -25,29 +25,55 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# pylint: disable=invalid-name,global-statement
 """This module implements Kedro session responsible for project lifecycle."""
 
 import logging
+import logging.config
 import subprocess
 import traceback
 from copy import deepcopy
 from pathlib import Path
-from threading import local
 from typing import Any, Dict, Iterable, Optional, Union
 
 import click
+from pluggy import PluginManager
 
-from kedro.framework.context import KedroContext, get_static_project_data, load_context
+from kedro import __version__ as kedro_version
+from kedro.framework.context import KedroContext
+from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import get_hook_manager
+from kedro.framework.hooks.manager import _register_hooks, _register_hooks_setuptools
+from kedro.framework.project.settings import _get_project_settings
 from kedro.framework.session.store import BaseSessionStore
 from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner, SequentialRunner
 
-_local = local()
+_active_session = None
+
+
+def _register_all_project_hooks(hook_manager: PluginManager, package_name: str) -> None:
+    """Register all hooks from the project settings and from installed plugins
+    with the global ``hook_manager``.
+
+    Args:
+        hook_manager: Hook manager instance to register the hooks with.
+        package_name: Python package name to read the settings for.
+
+    """
+    # get the hooks specified in settings.py
+    hooks = _get_project_settings(package_name, "HOOKS", ())
+    # get the plugins that must be disabled
+    disabled_plugins = set(
+        _get_project_settings(package_name, "DISABLE_HOOKS_FOR_PLUGINS", ())
+    )
+
+    _register_hooks(hook_manager, hooks)
+    _register_hooks_setuptools(hook_manager, disabled_plugins)
 
 
 def get_current_session(silent: bool = False) -> Optional["KedroSession"]:
-    """Fetch the most recent ``KedroSession`` instance from internal stack.
+    """Fetch the active ``KedroSession`` instance.
 
     Args:
         silent: Indicates to suppress the error if no active session was found.
@@ -57,23 +83,28 @@ def get_current_session(silent: bool = False) -> Optional["KedroSession"]:
 
     Returns:
         KedroSession instance.
-    """
-    session = None
 
-    if getattr(_local, "stack", []):
-        session = _local.stack[-1]
-    elif not silent:
+    """
+    if not _active_session and not silent:
         raise RuntimeError("There is no active Kedro session.")
 
-    return session
+    return _active_session
 
 
-def _push_session(session):
-    _local.__dict__.setdefault("stack", []).append(session)
+def _activate_session(session: "KedroSession", force: bool = False) -> None:
+    global _active_session
+
+    if _active_session and not force and session is not _active_session:
+        raise RuntimeError(
+            "Cannot activate the session as another active session already exists."
+        )
+
+    _active_session = session
 
 
-def _pop_session():
-    _local.stack.pop()
+def _deactivate_session() -> None:
+    global _active_session
+    _active_session = None
 
 
 def _describe_git(project_path: Path) -> Dict[str, Dict[str, str]]:
@@ -96,7 +127,7 @@ def _describe_git(project_path: Path) -> Dict[str, Dict[str, str]]:
     return {"git": git_data}
 
 
-def _jsonify_cli_context(ctx: click.core.Context):
+def _jsonify_cli_context(ctx: click.core.Context) -> Dict[str, Any]:
     return {
         "args": ctx.args,
         "params": ctx.params,
@@ -107,52 +138,75 @@ def _jsonify_cli_context(ctx: click.core.Context):
 
 class KedroSession:
     """``KedroSession`` is the object that is responsible for managing the lifecycle
-    of a Kedro project.
+    of a Kedro run.
+    - Use `KedroSession.create("<your-kedro-project-package-name>")` as
+    a context manager to construct a new KedroSession with session data
+    provided (see the example below).
+    - Use `KedroSession(session_id=<id>)` to instantiate an existing session with a given
+    ID.
 
-    IMPORTANT: ``KedroSession`` is currently under development and is not
-    integrated into existing Kedro workflow. Its public (and private) interface
-    may change between minor releases without notice.
+    Example:
+    ::
+
+        >>> from kedro.framework.session import KedroSession
+        >>>
+        >>> with KedroSession.create("<your-kedro-project-package-name>") as session:
+        >>>     session.run()
+        >>>
     """
 
     def __init__(
         self,
         session_id: str,
+        package_name: str,
         project_path: Union[Path, str] = None,
         save_on_close: bool = False,
     ):
         self._project_path = Path(project_path or Path.cwd()).resolve()
         self.session_id = session_id
         self.save_on_close = save_on_close
+        self._package_name = package_name
         self._store = self._init_store()
 
     @classmethod
-    def create(
+    def create(  # pylint: disable=too-many-arguments
         cls,
+        package_name: str,
         project_path: Union[Path, str] = None,
         save_on_close: bool = True,
         env: str = None,
+        extra_params: Dict[str, Any] = None,
     ) -> "KedroSession":
-        """Create a new instance of ``KedroSession``.
+        """Create a new instance of ``KedroSession`` with the session data.
 
         Args:
-            project_path: Path to the project root directory.
+            package_name: Package name for the Kedro project the session is
+                created for.
+            project_path: Path to the project root directory. Default is
+                current working directory Path.cwd().
             save_on_close: Whether or not to save the session when it's closed.
             env: Environment for the KedroContext.
+            extra_params: Optional dictionary containing extra project parameters
+            for underlying KedroContext. If specified, will update (and therefore take
+            precedence over) the parameters retrieved from the project configuration.
 
         Returns:
             A new ``KedroSession`` instance.
         """
         # pylint: disable=protected-access
         session = cls(
+            package_name=package_name,
             project_path=project_path,
             session_id=generate_timestamp(),
             save_on_close=save_on_close,
         )
 
-        session_data = get_static_project_data(session._project_path)
-        session_data["project_path"] = session._project_path
-        session_data["session_id"] = session.session_id
-        session_data.update(_describe_git(session._project_path))
+        session_data = {
+            "package_name": session._package_name,
+            "project_path": session._project_path,
+            "session_id": session.session_id,
+            **_describe_git(session._project_path),
+        }
 
         ctx = click.get_current_context(silent=True)
         if ctx:
@@ -161,13 +215,39 @@ class KedroSession:
         if env:
             session_data["env"] = env
 
+        if extra_params:
+            session_data["extra_params"] = extra_params
+
         session._store.update(session_data)
+
+        hook_manager = get_hook_manager()
+        _register_all_project_hooks(hook_manager, session._package_name)
+        # we need a ConfigLoader registered in order to be able to set up logging
+        session._setup_logging()
         return session
 
-    def _init_store(self) -> BaseSessionStore:
-        static_data = get_static_project_data(self._project_path)
+    def _get_logging_config(self) -> Dict[str, Any]:
+        context = self.load_context()
 
-        config = deepcopy(static_data.get("session_store", {}))
+        conf_logging = context.config_loader.get(
+            "logging*", "logging*/**", "**/logging*"
+        )
+        # turn relative paths in logging config into absolute path
+        # before initialising loggers
+        conf_logging = _convert_paths_to_absolute_posix(
+            project_path=self._project_path, conf_dictionary=conf_logging
+        )
+        return conf_logging
+
+    def _setup_logging(self) -> None:
+        """Register logging specified in logging directory."""
+        conf_logging = self._get_logging_config()
+        logging.config.dictConfig(conf_logging)
+
+    def _init_store(self) -> BaseSessionStore:
+        session_store = _get_project_settings(self._package_name, "SESSION_STORE", {})
+
+        config = deepcopy(session_store)
         config.setdefault("path", (self._project_path / "sessions").as_posix())
         config["session_id"] = self.session_id
         store = BaseSessionStore.from_config(config)
@@ -189,11 +269,21 @@ class KedroSession:
         """Return a copy of internal store."""
         return dict(self._store)
 
-    @property
-    def context(self) -> KedroContext:
+    def load_context(self) -> KedroContext:
         """An instance of the project context."""
         env = self.store.get("env")
-        context = load_context(project_path=self._project_path, env=env)
+        extra_params = self.store.get("extra_params")
+
+        context_class = _get_project_settings(
+            self._package_name, "CONTEXT_CLASS", KedroContext
+        )
+
+        context = context_class(
+            package_name=self._package_name,
+            project_path=self._project_path,
+            env=env,
+            extra_params=extra_params,
+        )
         return context
 
     def close(self):
@@ -202,12 +292,13 @@ class KedroSession:
         """
         if self.save_on_close:
             self._store.save()
+
         if get_current_session(silent=True) is self:
-            _pop_session()
+            _deactivate_session()
 
     def __enter__(self):
         if get_current_session(silent=True) is not self:
-            _push_session(self)
+            _activate_session(self)
         return self
 
     def __exit__(self, exc_type, exc_value, tb_):
@@ -225,7 +316,6 @@ class KedroSession:
         to_nodes: Iterable[str] = None,
         from_inputs: Iterable[str] = None,
         load_versions: Dict[str, str] = None,
-        extra_params: Dict[str, Any] = None,
     ) -> Dict[str, Any]:
         """Runs the pipeline with a specified runner.
 
@@ -247,7 +337,6 @@ class KedroSession:
                 used as a starting point of the new ``Pipeline``.
             load_versions: An optional flag to specify a particular dataset
                 version timestamp to load.
-            extra_params: Additional run parameters.
         Raises:
             Exception: Any uncaught exception during the run will be re-raised
                 after being passed to ``on_pipeline_error`` hook.
@@ -261,8 +350,8 @@ class KedroSession:
         logging.info("** Kedro project %s", self._project_path.name)
 
         save_version = run_id = self.store["session_id"]
-        extra_params = deepcopy(extra_params) or dict()
-        context = self.context
+        extra_params = self.store.get("extra_params") or {}
+        context = self.load_context()
 
         pipeline = context._get_pipeline(name=pipeline_name)
         filtered_pipeline = context._filter_pipeline(
@@ -278,7 +367,7 @@ class KedroSession:
             "run_id": run_id,
             "project_path": self._project_path.as_posix(),
             "env": context.env,
-            "kedro_version": self.store["kedro_version"],
+            "kedro_version": kedro_version,
             "tags": tags,
             "from_nodes": from_nodes,
             "to_nodes": to_nodes,
@@ -295,15 +384,15 @@ class KedroSession:
 
         # Run the runner
         runner = runner or SequentialRunner()
-        hook = get_hook_manager().hook
-        hook.before_pipeline_run(
+        hook_manager = get_hook_manager()
+        hook_manager.hook.before_pipeline_run(  # pylint: disable=no-member
             run_params=record_data, pipeline=filtered_pipeline, catalog=catalog
         )
 
         try:
             run_result = runner.run(filtered_pipeline, catalog, run_id)
         except Exception as error:
-            hook.on_pipeline_error(
+            hook_manager.hook.on_pipeline_error(
                 error=error,
                 run_params=record_data,
                 pipeline=filtered_pipeline,
@@ -311,7 +400,7 @@ class KedroSession:
             )
             raise
 
-        hook.after_pipeline_run(
+        hook_manager.hook.after_pipeline_run(
             run_params=record_data,
             run_result=run_result,
             pipeline=filtered_pipeline,

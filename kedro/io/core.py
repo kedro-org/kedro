@@ -177,18 +177,13 @@ class AbstractDataSet(abc.ABC):
             data_set = class_obj(**config)  # type: ignore
         except TypeError as err:
             raise DataSetError(
-                "\n{}.\nDataSet '{}' must only contain "
-                "arguments valid for the constructor "
-                "of `{}.{}`.".format(
-                    str(err), name, class_obj.__module__, class_obj.__qualname__
-                )
+                f"\n{err}.\nDataSet '{name}' must only contain arguments valid for the "
+                f"constructor of `{class_obj.__module__}.{class_obj.__qualname__}`."
             ) from err
         except Exception as err:
             raise DataSetError(
-                "\n{}.\nFailed to instantiate DataSet "
-                "'{}' of type `{}.{}`.".format(
-                    str(err), name, class_obj.__module__, class_obj.__qualname__
-                )
+                f"\n{err}.\nFailed to instantiate DataSet '{name}' "
+                f"of type `{class_obj.__module__}.{class_obj.__qualname__}`."
             ) from err
         return data_set
 
@@ -419,8 +414,8 @@ def parse_dataset_definition(
 
     if not issubclass(class_obj, AbstractDataSet):
         raise DataSetError(
-            "DataSet type `{}.{}` is invalid: all data set types must extend "
-            "`AbstractDataSet`.".format(class_obj.__module__, class_obj.__qualname__)
+            f"DataSet type `{class_obj.__module__}.{class_obj.__qualname__}` "
+            f"is invalid: all data set types must extend `AbstractDataSet`."
         )
 
     if VERSION_KEY in config:

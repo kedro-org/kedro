@@ -29,7 +29,7 @@ from unittest import mock
 
 import pytest
 
-from kedro.extras.datasets.spark import SparkJDBCDataSet  # pylint: disable=import-error
+from kedro.extras.datasets.spark import SparkJDBCDataSet
 from kedro.io import DataSetError
 
 

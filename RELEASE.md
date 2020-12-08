@@ -17,6 +17,7 @@
 * Added minimal, black-compatible flake8 configuration to the project template.
 * Moved `isort` and `pytest` configuration from `<project_root>/setup.cfg` to `<project_root>/pyproject.toml`.
 * Fixed a bug where extra parameters were incorrectly passed from `KedroSession` to `KedroContext`.
+* Fixed a typo in the [Kedro spaceflights tutorial](/docs/source/03_tutorial/01_spaceflights_tutorial.md)
 
 ## Breaking changes to the API
 * `kedro.io.DataCatalog.exists()` returns `False` when the dataset does not exist, as opposed to raising an exception.
@@ -45,7 +46,8 @@
 * Removed `KedroContext._create_config_loader()` and `KedroContext._create_data_catalog()`. They have been replaced by registration hooks, namely `register_config_loader()` and `register_catalog()`.
 
 ## Thanks for supporting contributions
-[Deepyaman Datta](https://github.com/deepyaman)
+[Deepyaman Datta](https://github.com/deepyaman),
+[Zach Schuster](https://github.com/zschuster)
 
 ### Migration guide from Kedro 0.16.* to 0.17.*
 

@@ -27,6 +27,7 @@
 # limitations under the License.
 import json
 import logging
+import re
 import subprocess
 from pathlib import Path
 from typing import Iterable
@@ -43,6 +44,12 @@ from kedro.framework.session.store import BaseSessionStore, ShelveStore
 _FAKE_PACKAGE_NAME = "fake_package"
 _FAKE_PROJECT_NAME = "fake_project"
 _FAKE_PIPELINE_NAME = "fake_pipeline"
+
+
+class BadStore:  # pylint: disable=too-few-public-methods
+    """
+    Store class that doesn't subclass `BaseSessionStore`, for testing only.
+    """
 
 
 @pytest.fixture(autouse=True)
@@ -65,13 +72,13 @@ class ConfigLoaderHooks:
 
 @pytest.fixture(autouse=True)
 def mock_settings_import(mocker):
-    # https://docs.python.org/3/library/unittest.mock.html#unittest.mock.sentinel
-    mock_settings = mocker.sentinel.mock_settings
-    # need a ConfigLoader registered to be able to setup logging
-    mock_settings.HOOKS = (ConfigLoaderHooks(),)
+    # `SettingsMock` plays a role of an imported `settings.py` module
+    class SettingsMock:  # pylint: disable=too-few-public-methods
+        # need a ConfigLoader registered to be able to setup logging
+        HOOKS = (ConfigLoaderHooks(),)
 
     return mocker.patch(
-        "kedro.framework.project.settings.import_module", return_value=mock_settings
+        "kedro.framework.project.settings.import_module", return_value=SettingsMock()
     )
 
 
@@ -244,8 +251,8 @@ class TestKedroSession:
     ):
         mocker.patch("pathlib.Path.is_file", return_value=True)
         shelve_location = fake_project / "nested" / "sessions"
-        mock_settings_import.return_value.SESSION_STORE = {
-            "type": "ShelveStore",
+        mock_settings_import.return_value.SESSION_STORE_CLASS = ShelveStore
+        mock_settings_import.return_value.SESSION_STORE_ARGS = {
             "path": shelve_location.as_posix(),
         }
 
@@ -264,6 +271,41 @@ class TestKedroSession:
             if rec.name == STORE_LOGGER_NAME and rec.levelno == logging.INFO
         ]
         assert not actual_log_messages
+
+    def test_wrong_store_type(self, fake_project, mock_settings_import):
+        classpath = f"{BadStore.__module__}.{BadStore.__qualname__}"
+
+        mock_settings_import.return_value.SESSION_STORE_CLASS = BadStore
+        pattern = (
+            f"Store type `{classpath}` is invalid: "
+            f"it must extend `BaseSessionStore`."
+        )
+        with pytest.raises(ValueError, match=re.escape(pattern)):
+            KedroSession.create(_FAKE_PACKAGE_NAME, fake_project)
+
+    def test_wrong_store_args(self, fake_project, mock_settings_import):
+        classpath = f"{BaseSessionStore.__module__}.{BaseSessionStore.__qualname__}"
+        mock_settings_import.return_value.SESSION_STORE_ARGS = {"wrong_arg": "O_o"}
+        pattern = (
+            f"Store config must only contain arguments valid for "
+            f"the constructor of `{classpath}`."
+        )
+        with pytest.raises(ValueError, match=re.escape(pattern)):
+            KedroSession.create(_FAKE_PACKAGE_NAME, fake_project)
+
+    def test_store_uncaught_error(
+        self, fake_project, mock_settings_import, fake_session_id, mocker
+    ):
+        classpath = f"{BaseSessionStore.__module__}.{BaseSessionStore.__qualname__}"
+        mocked_init = mocker.patch.object(
+            BaseSessionStore, "__init__", side_effect=Exception("Fake")
+        )
+        mock_settings_import.return_value.SESSION_STORE_ARGS = {"path": "path"}
+        pattern = f"Failed to instantiate session store of type `{classpath}`."
+        with pytest.raises(ValueError, match=re.escape(pattern)):
+            KedroSession.create(_FAKE_PACKAGE_NAME, fake_project)
+
+        mocked_init.assert_called_once_with(path="path", session_id=fake_session_id)
 
     @pytest.mark.parametrize("fake_git_status", ["dirty", ""])
     @pytest.mark.parametrize("fake_commit_hash", ["fake_commit_hash"])

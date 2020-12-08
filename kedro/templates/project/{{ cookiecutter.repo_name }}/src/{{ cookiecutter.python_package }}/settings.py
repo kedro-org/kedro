@@ -35,9 +35,12 @@ HOOKS = (ProjectHooks(),)
 # List the installed plugins for which to disable auto-registry
 # DISABLE_HOOKS_FOR_PLUGINS = ("kedro-viz",)
 
-# Define where to store data from a KedroSession
-# SESSION_STORE = {
-#     "type": "kedro.framework.session.store.ShelveStore",
+# Define where to store data from a KedroSession. Defaults to BaseSessionStore.
+# from kedro.framework.session.store import ShelveStore
+# SESSION_STORE_CLASS = ShelveStore
+
+# Define keyword arguments to be passed to `SESSION_STORE_CLASS` constructor
+# SESSION_STORE_ARGS = {
 #     "path": "./sessions"
 # }
 

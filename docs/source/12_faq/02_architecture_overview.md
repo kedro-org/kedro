@@ -41,10 +41,11 @@ A Python file located in `src/<python_package>/run.py`. This file serves as the 
 
 We use the `settings.py` for all project settings, which will not change at run time, but at development time. `settings.py` contains the following configuration entries:
 
-- `DISABLE_HOOKS_FOR_PLUGINS`: (Optional) A list of the installed plugins for which to disable auto-registry
-- `HOOKS`: (Optional) A list of paths pointing to [Hooks](../07_extend_kedro/02_hooks.md) implementations to be registered with the project (default is `<python_project>.hooks.ProjectHooks`)
-- `SESSION_STORE`: (Optional) Define where to store data from a `KedroSession`
-- `CONTEXT_CLASS`: (Optional) Define a project context class to be used at runtime. Defaults to `KedroContext` class
+- `DISABLE_HOOKS_FOR_PLUGINS`: (Optional, `tuple`) A list of the installed plugins for which to disable auto-registry
+- `HOOKS`: (Optional, `tuple`) A list of instances of [Hooks](../07_extend_kedro/02_hooks.md) implementations to be registered with the project (default is an instance of `<python_project>.hooks.ProjectHooks`)
+- `SESSION_STORE_CLASS`: (Optional, `class`) Define a store class to be used to save data from a `KedroSession`
+- `SESSION_STORE_ARGS`: (Optional, `dict`) Define keyword arguments to be passed to `SESSION_STORE_CLASS` constructor
+- `CONTEXT_CLASS`: (Optional, `class`) Define a project context class to be used at runtime. Defaults to `KedroContext` class
 
 #### `00-kedro-init.py`
 

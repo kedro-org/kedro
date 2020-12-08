@@ -245,13 +245,34 @@ class KedroSession:
         logging.config.dictConfig(conf_logging)
 
     def _init_store(self) -> BaseSessionStore:
-        session_store = _get_project_settings(self._package_name, "SESSION_STORE", {})
+        store_class = _get_project_settings(
+            self._package_name, "SESSION_STORE_CLASS", BaseSessionStore
+        )
+        classpath = f"{store_class.__module__}.{store_class.__qualname__}"
 
-        config = deepcopy(session_store)
-        config.setdefault("path", (self._project_path / "sessions").as_posix())
-        config["session_id"] = self.session_id
-        store = BaseSessionStore.from_config(config)
-        return store
+        if not issubclass(store_class, BaseSessionStore):
+            raise ValueError(
+                f"Store type `{classpath}` is invalid: "
+                f"it must extend `BaseSessionStore`."
+            )
+
+        store_args = deepcopy(
+            _get_project_settings(self._package_name, "SESSION_STORE_ARGS", {})
+        )
+        store_args.setdefault("path", (self._project_path / "sessions").as_posix())
+        store_args["session_id"] = self.session_id
+
+        try:
+            return store_class(**store_args)
+        except TypeError as err:
+            raise ValueError(
+                f"\n{err}.\nStore config must only contain arguments valid "
+                f"for the constructor of `{classpath}`."
+            ) from err
+        except Exception as err:
+            raise ValueError(
+                f"\n{err}.\nFailed to instantiate session store of type `{classpath}`."
+            ) from err
 
     def _log_exception(self, exc_type, exc_value, exc_tb):
         type_ = [] if exc_type.__module__ == "builtins" else [exc_type.__module__]

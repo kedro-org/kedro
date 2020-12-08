@@ -42,7 +42,7 @@ import yaml
 
 from kedro import __version__ as kedro_version
 from kedro.config import ConfigLoader
-from kedro.framework.context import KedroContext
+from kedro.framework.context import KedroContext, KedroContextError
 from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import hook_impl
 from kedro.framework.hooks.manager import get_hook_manager
@@ -401,24 +401,55 @@ class MockDatasetReplacement:  # pylint: disable=too-few-public-methods
     pass
 
 
-class BeforeNodeRunHook:
-    """Should overwrite the `cars` dataset"""
+class RequiredHooks:
+    """Mandatory registration hooks"""
 
     @hook_impl
     def register_pipelines(self) -> Dict[str, Pipeline]:
         return {"__default__": CONTEXT_PIPELINE}
+
+    @hook_impl
+    def register_config_loader(self, conf_paths: Iterable[str]) -> ConfigLoader:
+        return ConfigLoader(conf_paths)
+
+    @hook_impl
+    def register_catalog(
+        self,
+        catalog: Optional[Dict[str, Dict[str, Any]]],
+        credentials: Dict[str, Dict[str, Any]],
+        load_versions: Dict[str, str],
+        save_version: str,
+        journal: Journal,
+    ) -> DataCatalog:
+        return DataCatalog.from_config(
+            catalog, credentials, load_versions, save_version, journal
+        )
+
+
+class BrokenConfigLoaderHooks(RequiredHooks):
+    @hook_impl
+    def register_config_loader(self, conf_paths):
+        return None
+
+
+class BrokenCatalogHooks(RequiredHooks):
+    @hook_impl
+    def register_catalog(
+        self, catalog, credentials, load_versions, save_version, journal,
+    ):
+        return None
+
+
+class BeforeNodeRunHook(RequiredHooks):
+    """Should overwrite the `cars` dataset"""
 
     @hook_impl
     def before_node_run(self, node: Node):
         return {"cars": MockDatasetReplacement()} if node.name == "node1" else None
 
 
-class BrokenBeforeNodeRunHook:
+class BrokenBeforeNodeRunHook(RequiredHooks):
     """Broken since `before_node_run` doesn't return a dictionary"""
-
-    @hook_impl
-    def register_pipelines(self) -> Dict[str, Pipeline]:
-        return {"__default__": CONTEXT_PIPELINE}
 
     @hook_impl
     def before_node_run(self):
@@ -1083,3 +1114,27 @@ class TestRegistrationHooks:
         assert record.save_version is None
         assert record.load_versions is None
         assert record.journal is None
+
+    def test_broken_register_config_loader_hook(self, mocker, tmp_path):
+        mock_settings = mocker.sentinel.mock_settings
+        mock_settings.HOOKS = (BrokenConfigLoaderHooks(),)
+        mocker.patch(
+            "kedro.framework.project.settings.import_module", return_value=mock_settings
+        )
+
+        pattern = "Expected an instance of `ConfigLoader`, got `NoneType` instead."
+        with pytest.raises(KedroContextError, match=re.escape(pattern)):
+            KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
+
+    def test_broken_register_catalog_hook(self, mocker, tmp_path):
+        mock_settings = mocker.sentinel.mock_settings
+        mock_settings.HOOKS = (BrokenCatalogHooks(),)
+        mocker.patch(
+            "kedro.framework.project.settings.import_module", return_value=mock_settings
+        )
+
+        pattern = "Expected an instance of `DataCatalog`, got `NoneType` instead."
+        with KedroSession.create(MOCK_PACKAGE_NAME, tmp_path) as session:
+            context = session.load_context()
+            with pytest.raises(KedroContextError, match=re.escape(pattern)):
+                _ = context.catalog

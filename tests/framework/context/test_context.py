@@ -25,7 +25,6 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# pylint: disable=no-member
 import configparser
 import json
 import re
@@ -41,7 +40,7 @@ import yaml
 from pandas.util.testing import assert_frame_equal
 
 from kedro import __version__ as kedro_version
-from kedro.config import ConfigLoader, MissingConfigException, TemplatedConfigLoader
+from kedro.config import ConfigLoader, MissingConfigException
 from kedro.extras.datasets.pandas import CSVDataSet
 from kedro.framework.context import KedroContext, KedroContextError
 from kedro.framework.context.context import (
@@ -49,13 +48,12 @@ from kedro.framework.context.context import (
     _is_relative_path,
     _validate_layers_for_transcoding,
 )
-from kedro.framework.hooks import get_hook_manager
+from kedro.framework.hooks import get_hook_manager, hook_impl
 from kedro.framework.session.session import _register_all_project_hooks
 from kedro.io import DataCatalog
 from kedro.io.core import Version, generate_timestamp
 from kedro.pipeline import Pipeline, node
 from kedro.runner import ParallelRunner, SequentialRunner
-from kedro.versioning import Journal
 
 MOCK_PACKAGE_NAME = "mock_package_name"
 
@@ -152,9 +150,27 @@ def prepare_project_dir(tmp_path, base_config, local_config, env):
     _write_toml(tmp_path / "pyproject.toml", pyproject_toml_payload)
 
 
+class RegistrationHooks:
+    @hook_impl
+    def register_catalog(
+        self, catalog, credentials, load_versions, save_version, journal
+    ) -> DataCatalog:
+        return DataCatalog.from_config(
+            catalog, credentials, load_versions, save_version, journal
+        )
+
+    @hook_impl
+    def register_config_loader(self, conf_paths) -> ConfigLoader:
+        return ConfigLoader(conf_paths)
+
+    @hook_impl
+    def register_pipelines(self) -> Dict[str, Pipeline]:
+        return _create_pipelines()
+
+
 # pylint: disable=too-few-public-methods
 class TestSettingsPy:
-    HOOKS = ()
+    HOOKS = (RegistrationHooks(),)
 
 
 @pytest.fixture(autouse=True)
@@ -239,26 +255,6 @@ def _create_pipelines():
     }
 
 
-class DummyContext(KedroContext):
-    def _create_catalog(  # pylint: disable=too-many-arguments
-        self,
-        conf_catalog: Dict[str, Any],
-        conf_creds: Dict[str, Any],
-        save_version: str = None,
-        journal: Journal = None,
-        load_versions: Dict[str, str] = None,
-    ) -> DataCatalog:
-        return DataCatalog.from_config(
-            conf_catalog, conf_creds, load_versions, save_version, journal
-        )
-
-    def _create_config_loader(self, conf_paths) -> ConfigLoader:
-        return TemplatedConfigLoader(conf_paths)
-
-    def _get_pipelines(self) -> Dict[str, Pipeline]:
-        return _create_pipelines()
-
-
 @pytest.fixture(params=[None])
 def extra_params(request):
     return request.param
@@ -275,7 +271,7 @@ def mocked_logging(mocker):
 def dummy_context(
     tmp_path, prepare_project_dir, env, extra_params
 ):  # pylint: disable=unused-argument
-    context = DummyContext(
+    context = KedroContext(
         MOCK_PACKAGE_NAME, str(tmp_path), env=env, extra_params=extra_params
     )
 
@@ -359,7 +355,7 @@ class TestKedroContext:
         indirect=True,
     )
     def test_params_missing(self, mocker, extra_params, dummy_context):
-        mock_config_loader = mocker.patch.object(DummyContext, "config_loader")
+        mock_config_loader = mocker.patch.object(KedroContext, "config_loader")
         mock_config_loader.get.side_effect = MissingConfigException("nope")
         extra_params = extra_params or {}
 
@@ -582,7 +578,6 @@ class TestKedroContextRun:
             ("bad_pipeline_head", expected_message_head),
         ],  # pylint: disable=too-many-arguments
     )
-    @pytest.mark.usefixtures("prepare_project_dir")
     def test_run_failure_prompts_resume_command(
         self, dummy_context, dummy_dataframe, caplog, pipeline_name, expected_message
     ):
@@ -618,7 +613,6 @@ class TestKedroContextRun:
 
         assert mock_journal.call_args[0][0]["extra_params"] == extra_params
 
-    @pytest.mark.usefixtures("prepare_project_dir")
     def test_run_with_save_version_as_run_id(
         self, mocker, dummy_context, dummy_dataframe, caplog
     ):
@@ -641,7 +635,6 @@ class TestKedroContextRun:
         )
         assert json.loads(log_msg)["run_id"] == save_version
 
-    @pytest.mark.usefixtures("prepare_project_dir")
     def test_run_with_custom_run_id(
         self, mocker, dummy_context, dummy_dataframe, caplog
     ):

@@ -35,6 +35,12 @@ def reload_kedro(path, line=None):
     try:
         path = path or project_path
 
+        # clear hook manager
+        hook_manager = get_hook_manager()
+        name_plugin_pairs = hook_manager.list_name_plugin()
+        for name, plugin in name_plugin_pairs:
+            hook_manager.unregister(name=name, plugin=plugin)
+
         # remove cached user modules
         metadata = _get_project_metadata(path)
         session = KedroSession.create(metadata.package_name, path)
@@ -47,13 +53,6 @@ def reload_kedro(path, line=None):
         # define a name that was defined by the old version, the old definition remains.
         for module in to_remove:
             del sys.modules[module]
-
-        # clear hook manager; hook implementations will be re-registered when the
-        # context is instantiated again in `session.load_context()` below
-        hook_manager = get_hook_manager()
-        name_plugin_pairs = hook_manager.list_name_plugin()
-        for name, plugin in name_plugin_pairs:
-            hook_manager.unregister(name=name, plugin=plugin)
 
         logging.debug("Loading the context from %s", str(path))
         # Reload context to fix `pickle` related error (it is unable to serialize reloaded objects)

@@ -29,11 +29,14 @@ import json
 import logging
 import subprocess
 from pathlib import Path
+from typing import Iterable
 
 import pytest
 import toml
 
 from kedro import __version__ as kedro_version
+from kedro.config import ConfigLoader
+from kedro.framework.hooks import hook_impl
 from kedro.framework.session import KedroSession, get_current_session
 from kedro.framework.session.store import BaseSessionStore, ShelveStore
 
@@ -54,10 +57,18 @@ def mock_context_class(mocker):
     return mocker.patch("kedro.framework.session.session.KedroContext")
 
 
+class ConfigLoaderHooks:
+    @hook_impl
+    def register_config_loader(self, conf_paths: Iterable[str]) -> ConfigLoader:
+        return ConfigLoader(conf_paths)
+
+
 @pytest.fixture(autouse=True)
 def mock_settings_import(mocker):
     # https://docs.python.org/3/library/unittest.mock.html#unittest.mock.sentinel
     mock_settings = mocker.sentinel.mock_settings
+    # need a ConfigLoader registered to be able to setup logging
+    mock_settings.HOOKS = (ConfigLoaderHooks(),)
 
     return mocker.patch(
         "kedro.framework.project.settings.import_module", return_value=mock_settings

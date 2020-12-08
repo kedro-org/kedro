@@ -297,6 +297,8 @@ class KedroContext:
 
         Returns:
             DataCatalog defined in `catalog.yml`.
+        Raises:
+            KedroContextError: Incorrect ``DataCatalog`` registered for the project.
 
         """
         return self._get_catalog()
@@ -330,6 +332,8 @@ class KedroContext:
 
         Returns:
             DataCatalog defined in `catalog.yml`.
+        Raises:
+            KedroContextError: Incorrect ``DataCatalog`` registered for the project.
 
         """
         # '**/catalog*' reads modular pipeline configs
@@ -340,9 +344,21 @@ class KedroContext:
             project_path=self.project_path, conf_dictionary=conf_catalog
         )
         conf_creds = self._get_config_credentials()
-        catalog = self._create_catalog(
-            conf_catalog, conf_creds, save_version, journal, load_versions
+
+        hook_manager = get_hook_manager()
+        catalog = hook_manager.hook.register_catalog(  # pylint: disable=no-member
+            catalog=conf_catalog,
+            credentials=conf_creds,
+            load_versions=load_versions,
+            save_version=save_version,
+            journal=journal,
         )
+        if not isinstance(catalog, DataCatalog):
+            raise KedroContextError(
+                f"Expected an instance of `DataCatalog`, "
+                f"got `{type(catalog).__name__}` instead."
+            )
+
         feed_dict = self._get_feed_dict()
         catalog.add_feed_dict(feed_dict)
         if catalog.layers:
@@ -359,33 +375,6 @@ class KedroContext:
         )
         return catalog
 
-    def _create_catalog(  # pylint: disable=no-self-use,too-many-arguments
-        self,
-        conf_catalog: Dict[str, Any],
-        conf_creds: Dict[str, Any],
-        save_version: str = None,
-        journal: Journal = None,
-        load_versions: Dict[str, str] = None,
-    ) -> DataCatalog:
-        """A factory method for the DataCatalog instantiation.
-
-        Returns:
-            DataCatalog defined in `catalog.yml`.
-
-        """
-        hook_manager = get_hook_manager()
-        catalog = hook_manager.hook.register_catalog(  # pylint: disable=no-member
-            catalog=conf_catalog,
-            credentials=conf_creds,
-            load_versions=load_versions,
-            save_version=save_version,
-            journal=journal,
-        )
-
-        return catalog or DataCatalog.from_config(  # for backwards compatibility
-            conf_catalog, conf_creds, load_versions, save_version, journal
-        )
-
     @property
     def io(self) -> DataCatalog:
         """Read-only alias property referring to Kedro's ``DataCatalog`` for this
@@ -393,31 +382,20 @@ class KedroContext:
 
         Returns:
             DataCatalog defined in `catalog.yml`.
+        Raises:
+            KedroContextError: Incorrect ``DataCatalog`` registered for the project.
 
         """
         # pylint: disable=invalid-name
         return self.catalog
 
-    def _create_config_loader(  # pylint: disable=no-self-use
-        self, conf_paths: Iterable[str]
-    ) -> ConfigLoader:
-        """A factory method for the ConfigLoader instantiation.
-
-        Returns:
-            Instance of `ConfigLoader`.
-
-        """
-        hook_manager = get_hook_manager()
-        config_loader = hook_manager.hook.register_config_loader(  # pylint: disable=no-member
-            conf_paths=conf_paths
-        )
-        return config_loader or ConfigLoader(conf_paths)  # for backwards compatibility
-
     def _get_config_loader(self) -> ConfigLoader:
         """A hook for changing the creation of a ConfigLoader instance.
 
         Returns:
-            Instance of `ConfigLoader` created by `_create_config_loader()`.
+            Instance of `ConfigLoader` created by `register_config_loader` hook.
+        Raises:
+            KedroContextError: Incorrect ``ConfigLoader`` registered for the project.
 
         """
         conf_root = _get_project_settings(
@@ -427,7 +405,16 @@ class KedroContext:
             str(self.project_path / conf_root / "base"),
             str(self.project_path / conf_root / self.env),
         ]
-        return self._create_config_loader(conf_paths)
+        hook_manager = get_hook_manager()
+        config_loader = hook_manager.hook.register_config_loader(  # pylint: disable=no-member
+            conf_paths=conf_paths
+        )
+        if not isinstance(config_loader, ConfigLoader):
+            raise KedroContextError(
+                f"Expected an instance of `ConfigLoader`, "
+                f"got `{type(config_loader).__name__}` instead."
+            )
+        return config_loader
 
     @property
     def config_loader(self) -> ConfigLoader:
@@ -436,6 +423,8 @@ class KedroContext:
 
         Returns:
             Instance of `ConfigLoader`.
+        Raises:
+            KedroContextError: Incorrect ``ConfigLoader`` registered for the project.
 
         """
         return self._get_config_loader()

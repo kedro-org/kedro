@@ -59,7 +59,7 @@ While running, plugins may request information about the current project by call
 
 This function provides access to the verbose flag via the key `verbose` and to the project's `KedroContext` object.
 
-> *Note:* The `load_context()` can be used instead of using `get_project_context()` to get project's `KedroContext` object.
+> *Note:* The `KedroSession.load_context()` should be used instead of `get_project_context()` to get the project's `KedroContext` object.
 
 ## Initialisation
 

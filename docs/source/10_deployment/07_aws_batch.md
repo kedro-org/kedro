@@ -313,18 +313,19 @@ def run(tag, env, parallel, ...):
     tag = _get_values_as_tuple(tag) if tag else tag
     node_names = _get_values_as_tuple(node_names) if node_names else node_names
 
-    context = load_context(Path.cwd(), env=env, extra_params=params)
-    runner_instance = _instantiate_runner(runner, is_async, context)
-    context.run(
-        tags=tag,
-        runner=runner_instance,
-        node_names=node_names,
-        from_nodes=from_nodes,
-        to_nodes=to_nodes,
-        from_inputs=from_inputs,
-        load_versions=load_version,
-        pipeline_name=pipeline,
-    )
+    package_name = str(Path(__file__).resolve().parent.name)
+    with KedroSession.create(package_name, env=env, extra_params=params) as session:
+        runner_instance = _instantiate_runner(runner, is_async, context)
+        session.run(
+            tags=tag,
+            runner=runner_instance,
+            node_names=node_names,
+            from_nodes=from_nodes,
+            to_nodes=to_nodes,
+            from_inputs=from_inputs,
+            load_versions=load_version,
+            pipeline_name=pipeline,
+        )
 ```
 
 where the helper function `_instantiate_runner()` looks like this:

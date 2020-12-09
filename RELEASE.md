@@ -17,7 +17,7 @@
 * Added minimal, black-compatible flake8 configuration to the project template.
 * Moved `isort` and `pytest` configuration from `<project_root>/setup.cfg` to `<project_root>/pyproject.toml`.
 * Fixed a bug where extra parameters were incorrectly passed from `KedroSession` to `KedroContext`.
-* Fixed a typo in the [Kedro spaceflights tutorial](/docs/source/03_tutorial/01_spaceflights_tutorial.md)
+* Fixed a typo in the [Kedro spaceflights tutorial](/docs/source/03_tutorial/01_spaceflights_tutorial.md).
 
 ## Breaking changes to the API
 * `kedro.io.DataCatalog.exists()` returns `False` when the dataset does not exist, as opposed to raising an exception.

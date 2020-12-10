@@ -281,36 +281,6 @@ def _get_fsspec_filesystem(location: str, fs_args: Optional[str]):
     return fsspec.filesystem(protocol, **fs_args_config)
 
 
-def _install_files(
-    package_name: str, source_path: Path, env: str = None, alias: str = None
-):
-    env = env or "base"
-    context = load_context(Path.cwd(), env=env)
-
-    package_source, test_source, conf_source = _get_package_artifacts(
-        source_path, package_name
-    )
-
-    pipeline_name = alias or package_name
-    package_dest, test_dest, conf_dest = _get_pipeline_artifacts(
-        context, pipeline_name=pipeline_name, env=env
-    )
-
-    if conf_source.is_dir():
-        _sync_dirs(conf_source, conf_dest)
-        # `config` was packaged under `package_name` directory with `kedro pipeline package`.
-        # Since `config` was already synced, we don't want to send it again
-        # when syncing the package, so we remove it.
-        shutil.rmtree(str(conf_source))
-
-    if test_source.is_dir():
-        _sync_dirs(test_source, test_dest)
-
-    # Sync everything under package directory, except `config` since we already sent it.
-    if package_source.is_dir():
-        _sync_dirs(package_source, package_dest)
-
-
 @pipeline.command("package")
 @env_option(
     help="Environment where the pipeline configuration lives. Defaults to `base`."

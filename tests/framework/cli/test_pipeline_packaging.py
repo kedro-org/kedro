@@ -468,12 +468,7 @@ class TestPipelinePullCommand:
         assert source_params_config.read_bytes() == dest_params_config.read_bytes()
 
     def test_pull_whl_fs_args(
-        self,
-        fake_project_cli,
-        fake_repo_path,
-        mocker,
-        tmp_path,
-        fake_metadata
+        self, fake_project_cli, fake_repo_path, mocker, tmp_path, fake_metadata
     ):
         """
         Test for pulling a wheel file with custom fs_args specified.

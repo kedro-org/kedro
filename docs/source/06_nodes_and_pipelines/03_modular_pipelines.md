@@ -160,6 +160,21 @@ kedro pipeline pull https://<bucket_name>.s3.<aws-region>.amazonaws.com/<pipelin
 kedro pipeline pull <pypi-package-name>
 ```
 
+If you are pulling the pipeline from a location that isn't PyPI, Kedro uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to locate and pull down your pipeline. If you need to provide any `fsspec`-specific arguments (say, if you're pulling your pipeline down from an S3 bucket and want to provide the S3 credentials inline or from a local server that requires tokens in the header) then you can use the `--fs-args` option to point to a YAML (or any `anyconfig`-supported configuration) file that contains the required configuration.
+
+```bash
+kedro pipeline pull https://<url-to-pipeline.whl> --fs-args pipeline_pull_args.yml
+```
+
+where
+
+```
+# pipeline_pull_args.yml
+client_kwargs:
+  headers:
+    Authorization: token <token>
+```
+
 ## A modular pipeline example template
 
 Here is an example of a modular pipeline which combines all of these concepts within a Kedro project:

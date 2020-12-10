@@ -78,21 +78,16 @@ def load_kedro_objects(path, line=None):  # pylint: disable=unused-argument
     metadata = _get_project_metadata(path)
     _add_src_to_path(metadata.source_dir, path)
 
-    session = KedroSession.create(metadata.package_name, path)
-    _activate_session(session)
+    _clear_hook_manager()
 
     _remove_cached_modules(metadata.package_name)
 
-    # clear hook manager; hook implementations will be re-registered when the
-    # context is instantiated again in `session.context` below
-    _clear_hook_manager()
-
+    session = KedroSession.create(metadata.package_name, path)
+    _activate_session(session)
     logging.debug("Loading the context from %s", str(path))
-    # Reload context to fix `pickle` related error (it is unable to serialize reloaded objects)
-    # Some details can be found here:
-    # https://modwsgi.readthedocs.io/en/develop/user-guides/issues-with-pickle-module.html#packing-and-script-reloading
     context = session.load_context()
     catalog = context.catalog
+
     get_ipython().push(
         variables={"context": context, "catalog": catalog, "session": session}
     )

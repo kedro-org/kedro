@@ -43,9 +43,6 @@ def reload_kedro(path, line=None):
 
         # remove cached user modules
         metadata = _get_project_metadata(path)
-        session = KedroSession.create(metadata.package_name, path)
-        _activate_session(session, force=True)
-        context = session.load_context()
         to_remove = [
             mod for mod in sys.modules if mod.startswith(metadata.package_name)
         ]
@@ -54,10 +51,9 @@ def reload_kedro(path, line=None):
         for module in to_remove:
             del sys.modules[module]
 
+        session = KedroSession.create(metadata.package_name, path)
+        _activate_session(session, force=True)
         logging.debug("Loading the context from %s", str(path))
-        # Reload context to fix `pickle` related error (it is unable to serialize reloaded objects)
-        # Some details can be found here:
-        # https://modwsgi.readthedocs.io/en/develop/user-guides/issues-with-pickle-module.html#packing-and-script-reloading
         context = session.load_context()
         catalog = context.catalog
 

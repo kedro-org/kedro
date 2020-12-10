@@ -18,6 +18,7 @@
 * Moved `isort` and `pytest` configuration from `<project_root>/setup.cfg` to `<project_root>/pyproject.toml`.
 * Fixed a bug where extra parameters were incorrectly passed from `KedroSession` to `KedroContext`.
 * Deprecated `kedro.framework.context.load_context`, it will be removed in 0.18.0 release.
+* Deprecated `kedro.framework.cli.get_project_context`, it will be removed in 0.18.0 release.
 
 ## Breaking changes to the API
 * `kedro.io.DataCatalog.exists()` returns `False` when the dataset does not exist, as opposed to raising an exception.

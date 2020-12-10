@@ -17,7 +17,7 @@ Here is a simple example of a plugin that prints the pipeline as JSON:
 
 ```python
 import click
-from kedro.framework.cli import get_project_context
+from kedro.framework.session import KedroSession
 
 
 @click.group(name="JSON")
@@ -27,9 +27,11 @@ def commands():
 
 
 @commands.command()
-def to_json():
+@click.pass_obj
+def to_json(metadata):
     """ Display the pipeline in JSON format """
-    context = get_project_context()
+    session = KedroSession.create(metadata.package_name)
+    context = session.load_context()
     print(context.pipeline.to_json())
 ```
 
@@ -55,11 +57,20 @@ The `click Group` will be merged into the main CLI Group. In the process, the op
 
 ## Project context
 
-While running, plugins may request information about the current project by calling `kedro.framework.cli.get_project_context()`.
+When they run, plugins may request information about the current project by creating a session and loading its context:
 
-This function provides access to the verbose flag via the key `verbose` and to the project's `KedroContext` object.
+```python
+from pathlib import Path
 
-> *Note:* The `KedroSession.load_context()` should be used instead of `get_project_context()` to get the project's `KedroContext` object.
+from kedro.framework.startup import _get_project_metadata
+from kedro.framework.session import KedroSession
+
+
+project_path = Path.cwd()
+metadata = _get_project_metadata(project_path)
+session = KedroSession.create(metadata.package_name, project_path)
+context = session.load_context()
+```
 
 ## Initialisation
 

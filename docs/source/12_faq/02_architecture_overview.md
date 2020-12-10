@@ -71,7 +71,7 @@ Any CLI command that is implemented by a [Kedro plugin](../07_extend_kedro/04_pl
 
 A python function that instantiates the project context by calling `load_context()`. `get_project_context()` also preserves backwards compatible interface to ensure old versions of the plugins continue working even if breaking changes are introduced in `load_context()`.
 
-> *Note:* This function is intended for plugin use only and will remain backwards compatible. To instantiate the project context outside of a plugin, we strongly recommend that you call `KedroSession.load_context()`.
+> *Note:* This function is intended for plugin use only. It is now deprecated and will be removed in version 0.18.0. To instantiate the project context outside of a plugin, you should call `KedroSession.load_context()`.
 
 #### `load_context()`
 

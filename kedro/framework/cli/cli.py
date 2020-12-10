@@ -33,6 +33,7 @@ This module implements commands available from the kedro CLI.
 import importlib
 import os
 import re
+import warnings
 import webbrowser
 from collections import defaultdict
 from copy import deepcopy
@@ -578,6 +579,13 @@ def get_project_context(
         KedroCliError: When the key is not found and the default value was not
             specified.
     """
+    warnings.warn(
+        "`get_project_context` is now deprecated and will be removed in Kedro 0.18.0. "
+        "Please use `KedroSession.load_context()` to access the "
+        "`KedroContext` object. For more information, please visit "
+        "https://kedro.readthedocs.io/en/stable/04_kedro_project_setup/03_session.html",
+        DeprecationWarning,
+    )
     project_path = project_path or Path.cwd()
     context = load_context(project_path, **kwargs)
     # Dictionary to be compatible with existing Plugins. Future plugins should

@@ -47,6 +47,7 @@
 * Custom context class is set via `CONTEXT_CLASS` variable in `src/<your_project>/settings.py`.
 * Removed `KedroContext.hooks` attribute. Instead, hooks should be registered in `src/<your_project>/settings.py` under the `HOOKS` key.
 * Removed `KedroContext._create_config_loader()` and `KedroContext._create_data_catalog()`. They have been replaced by registration hooks, namely `register_config_loader()` and `register_catalog()`.
+* Restricted names given to nodes to match the regex pattern `[\w\.-]+$`.
 
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman)
@@ -56,6 +57,10 @@
 #### General Migration
 
 **reminder** [How do I upgrade Kedro](https://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#how-do-i-upgrade-kedro) covers a few key things to remember when updating any kedro version.
+
+#### Migration for `node` names
+
+From 0.17.0 the only allowed characters for node names are letters, digits, hyphens, underscores and/or fullstops. If you defined node names that have special characters, spaces or other characters no included in the requirements, you will need to rename them to fit the new restrictions.
 
 #### Migration for `kedro_cli.py`
 

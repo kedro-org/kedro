@@ -29,8 +29,7 @@ psutil==5.6.6
 pyarrow>=0.12.0, <3.0.0
 pylint>=2.5.2, <3.0
 pyproj>=2.2.0, <3.0  # pyproj 3.0 requires proj>=7.2 but that conflicts with fiona which requires proj<7.2.
-pyspark~=2.2; python_version < '3.8'
-pyspark~=3.0; python_version >= '3.8'
+pyspark>=2.2, <4.0
 pytest-cov~=2.5
 pytest-lazy-fixture~=0.6.3
 pytest-mock>=1.7.1,<2.0

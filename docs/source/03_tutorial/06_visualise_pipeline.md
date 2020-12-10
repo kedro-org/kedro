@@ -55,7 +55,7 @@ reviews:
   layer: raw
 
 shuttles:
-  type: kedro_tutorial.io.xls_local.ExcelLocalDataSet
+  type: pandas.ExcelDataSet
   filepath: data/01_raw/shuttles.xlsx
   layer: raw
 

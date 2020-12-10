@@ -26,23 +26,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-import re
 from pathlib import Path
 
 import pytest
 
 from kedro.framework.session.store import BaseSessionStore, ShelveStore
 
-BASE_CLASSPATH = f"{BaseSessionStore.__module__}.{BaseSessionStore.__qualname__}"
 FAKE_SESSION_ID = "fake_session_id"
-
-
-class BadStore:  # pylint: disable=too-few-public-methods
-    """
-    Store class that doesn't subclass `BaseSessionStore`, for testing only.
-    """
-
-
 STORE_LOGGER_NAME = "kedro.framework.session.store"
 
 
@@ -60,7 +50,7 @@ class TestBaseStore:
         actual_log_messages = [
             rec.getMessage()
             for rec in caplog.records
-            if rec.name == STORE_LOGGER_NAME and rec.levelno == logging.WARN
+            if rec.name == STORE_LOGGER_NAME and rec.levelno == logging.INFO
         ]
         assert actual_log_messages == expected_log_messages
 
@@ -77,59 +67,9 @@ class TestBaseStore:
         actual_log_messages = [
             rec.getMessage()
             for rec in caplog.records
-            if rec.name == STORE_LOGGER_NAME and rec.levelno == logging.WARN
+            if rec.name == STORE_LOGGER_NAME and rec.levelno == logging.INFO
         ]
         assert actual_log_messages == expected_log_messages
-
-    @pytest.mark.parametrize(
-        "config,expected_class",
-        [
-            ({}, BaseSessionStore),
-            ({"type": "BaseSessionStore"}, BaseSessionStore),
-            ({"type": BASE_CLASSPATH}, BaseSessionStore),
-            ({"type": "ShelveStore"}, ShelveStore),
-        ],
-    )
-    def test_from_config(self, config, expected_class):
-        config = {"path": "fake_path", "session_id": FAKE_SESSION_ID, **config}
-        store = BaseSessionStore.from_config(config)
-        assert store.__class__ is expected_class
-
-    def test_from_config_wrong_type(self):
-        config_wrong_type = {"type": f"{BadStore.__module__}.{BadStore.__qualname__}"}
-        pattern = (
-            f"Store type `{config_wrong_type['type']}` is invalid: "
-            f"it must extend `BaseSessionStore`."
-        )
-        with pytest.raises(ValueError, match=re.escape(pattern)):
-            BaseSessionStore.from_config(config_wrong_type)
-
-    @pytest.mark.parametrize(
-        "config",
-        [
-            {"path": "fake_path", "session_id": FAKE_SESSION_ID, "wrong_arg": "O_o"},
-            {"path": "fake_path"},
-            {"session_id": FAKE_SESSION_ID},
-        ],
-    )
-    def test_from_config_wrong_args(self, config):
-        pattern = (
-            f"Store config must only contain arguments valid for "
-            f"the constructor of `{BASE_CLASSPATH}`."
-        )
-        with pytest.raises(ValueError, match=re.escape(pattern)):
-            BaseSessionStore.from_config(config)
-
-    def test_from_config_uncaught_error(self, mocker):
-        mocked_init = mocker.patch.object(
-            BaseSessionStore, "__init__", side_effect=Exception("Fake")
-        )
-        config = {"path": "fake_path", "session_id": FAKE_SESSION_ID}
-        pattern = f"Failed to instantiate session store of type `{BASE_CLASSPATH}`."
-        with pytest.raises(ValueError, match=re.escape(pattern)):
-            BaseSessionStore.from_config(config)
-
-        assert mocked_init.called_once_with(**config)
 
 
 @pytest.fixture

@@ -207,6 +207,25 @@ class Node:  # pylint: disable=too-many-instance-attributes
         return name
 
     @property
+    def func(self) -> Callable:
+        """Exposes the underlying function of the node.
+
+        Returns:
+           Return the underlying function of the node.
+        """
+        return self._func
+
+    @func.setter
+    def func(self, func: Callable):
+        """Sets the underlying function of the node.
+        Useful if user wants to decorate the function in a node's Hook implementation.
+
+        Args:
+            func: The new function for node's execution.
+        """
+        self._func = func
+
+    @property
     def tags(self) -> Set[str]:
         """Return the tags assigned to the node.
 
@@ -373,6 +392,13 @@ class Node:  # pylint: disable=too-many-instance-attributes
             >>> assert "output" in result
             >>> assert result['output'] == "f(g(fg(h(1))))"
         """
+        warn(
+            "The node's `decorate` API will be deprecated in Kedro 0.18.0."
+            "Please use a node's Hooks to extend the node's behaviour in a pipeline."
+            "For more information, please visit"
+            "https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_hooks.html",
+            DeprecationWarning,
+        )
         return self._copy(decorators=self._decorators + list(reversed(decorators)))
 
     def run(self, inputs: Dict[str, Any] = None) -> Dict[str, Any]:

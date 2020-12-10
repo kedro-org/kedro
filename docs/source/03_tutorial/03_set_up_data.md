@@ -139,4 +139,4 @@ exit()
 
 Kedro supports a number of [datasets](/kedro.extras.datasets) out of the box, but you can also add support for any proprietary data format or filesystem in your pipeline.
 
-You can find further information about [how to add support for custom datasets](../07_extend_kedro/01_custom_datasets.md) in specific documentation covering advanced usage.
+You can find further information about [how to add support for custom datasets](../07_extend_kedro/03_custom_datasets.md) in specific documentation covering advanced usage.

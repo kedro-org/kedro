@@ -1,13 +1,94 @@
 # Upcoming 0.17.0 release
 
 ## Major features and improvements
+* Introduced `KedroSession` which is responsible for managing the lifecycle of a Kedro run.
+* Added `DatasetSpecs` with hooks to run before and after loading and saving datasets from/to the catalog.
+* Added `kedro catalog create` command. It creates `<conf_root>/<env>/catalog/<pipeline_name>.yml` configuration file with `MemoryDataSet` datasets for each dataset in a registered pipeline if it is missing from Data Catalog.
+* Added `settings.py` and `pyproject.toml` (to replace `.kedro.yml`) for project configuration, in line with Python best practice.
+* Made `context_path` an optional key in `pyproject.toml`. `KedroContext` is used by default.
+* Removed `ProjectContext` from `src/<package_name>/run.py`.
+* `TemplatedConfigLoader` now supports Jinja2 template syntax alongside its original one.
+* Triggering the run from the notebook using `ParallelRunner` does not result in the run failure if the run was started using `KedroSession` (`session.run()`).
+* Made [registration hooks](https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_hooks.html#registration-hooks) mandatory, as the only way to customise the `ConfigLoader` or the `DataCatalog` used in a project. If no such hook is provided in `src/<package_name>/hooks.py`, a `KedroContextError` will be raised. There are sensible defaults defined in any project generated with Kedro >= 0.16.5.
 
 ## Bug fixes and other changes
+* Bumped maximum required `fsspec` version to 0.9.
+* `before_node_run` can now overwrite node inputs by returning a dictionary with the corresponding updates.
+* Added minimal, black-compatible flake8 configuration to the project template.
+* Moved `isort` and `pytest` configuration from `<project_root>/setup.cfg` to `<project_root>/pyproject.toml`.
+* Fixed a bug where extra parameters were incorrectly passed from `KedroSession` to `KedroContext`.
+* Deprecated `kedro.framework.context.load_context`, it will be removed in 0.18.0 release.
+* Deprecated `kedro.framework.cli.get_project_context`, it will be removed in 0.18.0 release.
 * Added a `--fs-args` option to the `kedro pipeline pull` command to specify configuration options for the fsspec filesystem arguments used when pulling modular pipelines from non-PyPI locations.
 
 ## Breaking changes to the API
+* `kedro.io.DataCatalog.exists()` returns `False` when the dataset does not exist, as opposed to raising an exception.
+* Bumped maximum supported `s3fs` version to 0.5 (`S3FileSystem` interface has changed since 0.4.1 version).
+* Deleted the deprecated `kedro.cli` and `kedro.context` modules in favor of `kedro.framework.cli` and `kedro.framework.context` respectively.
+* The pipeline-specific `catalog.yml` file is no longer automatically created for modular pipelines when doing `kedro pipeline create`.
+* Removed `include_examples` from `kedro new`. It has been replaced with Kedro starter.
+* Changed `--verbose` flag from a global command to a project-specific command flag (e.g `kedro --verbose new` becomes `kedro new --verbose`).
+* Dropped support of `dataset_credentials` key in credentials in PartitionedDataSet.
+* `get_source_dir()` was removed from `kedro/framework/cli/utils.py`.
+* Dropped support of `get_config`, `create_catalog`, `create_pipeline`, `template_version`, `project_name` and `project_path` keys by `get_project_context()` function (`kedro/framework/cli/cli.py`).
+* Added a `DeprecationWarning` to the decorator API for both `node` and `pipeline`. Added documentation to recommend using Hooks for extending node's behavior instead.
+* Added a `DeprecationWarning` to the Transformers API when adding a transformer to the catalog. Added documentation to recommend using Hooks for customising the `load` and `save` methods.
+* `kedro new --starter` now defaults to fetching the starter template matching the installed Kedro version.
+* Renamed `kedro_cli.py` to `cli.py` and moved it inside the Python package (`src/<package_name>/`), for a better packaging and deployment experience.
+* Removed `.kedro.yml` from the project template and replaced it with `pyproject.toml`.
+* Removed `KEDRO_CONFIGS` constant (previously residing in `kedro.framework.context.context`).
+* Modified `kedro pipeline create` CLI command to add a boilerplate parameter config file in `conf/<env>/parameters/<pipeline_name>.yml` instead of `conf/<env>/pipelines/<pipeline_name>/parameters.yml`. CLI commands `kedro pipeline delete` / `package` / `pull` were updated accordingly.
+* Removed `get_static_project_data` from `kedro.framework.context`.
+* Removed `KedroContext.static_data`.
+* `KedroContext` constructor now takes `package_name` as first argument.
+* Replaced `context` property on `KedroSession` with `load_context()` method.
+* Renamed `_push_session` and `_pop_session` in `kedro.framework.session.session` to `_activate_session` and `_deactivate_session` respectively.
+* Custom context class is set via `CONTEXT_CLASS` variable in `src/<your_project>/settings.py`.
+* Removed `KedroContext.hooks` attribute. Instead, hooks should be registered in `src/<your_project>/settings.py` under the `HOOKS` key.
+* Removed `KedroContext._create_config_loader()` and `KedroContext._create_data_catalog()`. They have been replaced by registration hooks, namely `register_config_loader()` and `register_catalog()`.
 
 ## Thanks for supporting contributions
+[Deepyaman Datta](https://github.com/deepyaman)
+
+### Migration guide from Kedro 0.16.* to 0.17.*
+
+#### General Migration
+
+**reminder** [How do I upgrade Kedro](https://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#how-do-i-upgrade-kedro) covers a few key things to remember when updating any kedro version.
+
+#### Migration for `kedro_cli.py`
+
+If you customised the `kedro run` command or added more CLI commands in your `kedro_cli.py`, copy-paste them into `<project_root>/src/<package_name>/cli.py`.
+
+#### Migration for `.kedro.yml`
+
+From `.kedro.yml`, move the following four keys to `pyproject.toml`:
+
+```toml
+[tools.kedro]
+context_path = "<package_name>.run.ProjectContext"  # or your custom location if modified
+project_name = "<project_name>"
+project_version = "0.17.0"
+package_name = "<package_name>"
+```
+
+If you defined a different source directory (`source_dir`), make sure you also move that to `pyproject.toml`.
+
+Next, if you specified additional hook implementations in `hooks` listed plugins under `disable_hooks_by_plugin` in your `.kedro.yml`, you will need to move them to `settings.py` accordingly:
+
+```python
+from <package_name>.hooks import MyCustomHooks
+
+
+HOOKS = (ProjectHooks(), MyCustomHooks())
+
+DISABLE_HOOKS_FOR_PLUGINS = ("my_plugin1", )
+```
+
+#### Migration for using custom `ConfigLoader` or `DataCatalog`
+
+If you were defining a custom class, such as `TemplatedConfigLoader`, by overriding `ProjectContext._create_config_loader`, you should move the contents of the function in `src/<package_name>/hooks.py`, under `register_config_loader`. Similarly, for `DataCatalog` defined with `ProjectContext._create_catalog`, you should copy-paste the contents into `register_catalog`.
+
 
 # Release 0.16.6
 
@@ -35,7 +116,7 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Deepyaman Datta](https://github.com/deepyaman), [Bhavya Merchant](https://github.com/bnmerchant), [Lovkush Agarwal](https://github.com/Lovkush-A), [Varun Krishna S](https://github.com/vhawk19), [Sebastian Bertoli](https://github.com/sebastianbertoli), [noklam](https://github.com/noklam), [Daniel Petti](https://github.com/djpetti), [Waylon Walker](https://github.com/waylonwalker), [Abdulelah Al Mesfer](https://github.com/abdulelahsm)
+[Deepyaman Datta](https://github.com/deepyaman), [Bhavya Merchant](https://github.com/bnmerchant), [Lovkush Agarwal](https://github.com/Lovkush-A), [Varun Krishna S](https://github.com/vhawk19), [Sebastian Bertoli](https://github.com/sebastianbertoli), [noklam](https://github.com/noklam), [Daniel Petti](https://github.com/djpetti), [Waylon Walker](https://github.com/waylonwalker), [Saran Balaji C](https://github.com/csaranbalaji)
 
 # Release 0.16.5
 
@@ -68,7 +149,7 @@ This release has accidentally broken the usage of `kedro lint` and `kedro jupyte
 
 ```yaml
 project_name: "<your_project_name>"
-project_version: "kedro_version_of_the_project>"
+project_version: "<kedro_version_of_the_project>"
 package_name: "<your_package_name>"
 ```
 

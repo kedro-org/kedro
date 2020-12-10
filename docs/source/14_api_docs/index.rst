@@ -53,7 +53,6 @@ Welcome to Kedro's documentation!
    02_get_started/05_example_project
    02_get_started/06_starters
 
-
 .. toctree::
    :maxdepth: 2
    :caption: Tutorial
@@ -71,6 +70,8 @@ Welcome to Kedro's documentation!
 
    04_kedro_project_setup/01_dependencies
    04_kedro_project_setup/02_configuration
+   04_kedro_project_setup/03_session
+   04_kedro_project_setup/04_mini_kedro
 
 .. toctree::
    :maxdepth: 2
@@ -93,12 +94,13 @@ Welcome to Kedro's documentation!
    :maxdepth: 2
    :caption: Extend Kedro
 
-   07_extend_kedro/01_custom_datasets
-   07_extend_kedro/02_transformers
-   07_extend_kedro/03_decorators
-   07_extend_kedro/04_hooks
-   07_extend_kedro/05_plugins
-   07_extend_kedro/06_create_kedro_starters
+   07_extend_kedro/01_common_use_cases
+   07_extend_kedro/02_hooks
+   07_extend_kedro/03_custom_datasets
+   07_extend_kedro/04_plugins
+   07_extend_kedro/05_create_kedro_starters
+   07_extend_kedro/06_transformers
+   07_extend_kedro/07_decorators
 
 
 .. toctree::
@@ -122,13 +124,15 @@ Welcome to Kedro's documentation!
    :maxdepth: 2
    :caption: Deployment
 
-   10_deployment/01_single_machine
-   10_deployment/02_distributed
+   10_deployment/01_deployment_guide
+   10_deployment/02_single_machine
+   10_deployment/03_distributed
    10_deployment/04_argo
    10_deployment/05_prefect
    10_deployment/06_kubeflow
    10_deployment/07_aws_batch
-   10_deployment/08_aws_sagemaker
+   10_deployment/08_databricks
+   10_deployment/09_aws_sagemaker
 
 .. toctree::
    :maxdepth: 2
@@ -136,7 +140,6 @@ Welcome to Kedro's documentation!
 
    11_tools_integration/01_pyspark
    11_tools_integration/02_ipython
-   11_tools_integration/03_databricks
 
 .. toctree::
    :maxdepth: 2

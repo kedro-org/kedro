@@ -299,10 +299,23 @@ dev_abs:
   account_key: key
 ```
 
+## Creating a Data Catalog YAML configuration file via CLI
+
+You can use [`kedro catalog create` command](../09_development/03_commands_reference.md#create-a-data-catalog-yaml-configuration-file) to create a Data Catalog YAML configuration.
+
+It creates a `<conf_root>/<env>/catalog/<pipeline_name>.yml` configuration file with `MemoryDataSet` datasets for each dataset in a registered pipeline if it is missing from the `DataCatalog`.
+
+```yaml
+# <conf_root>/<env>/catalog/<pipeline_name>.yml
+rockets:
+  type: MemoryDataSet
+scooters:
+  type: MemoryDataSet
+```
 
 ## Adding parameters
 
-You can [configure parameters](../04_kedro_project_setup/02_configuration.md#loading-parameters) for your project and [reference them](../04_kedro_project_setup/02_configuration.md#using-parameters) in your nodes. The way to do this is via `add_feed_dict()` method (Relevant API documentation: [DataCatalog](/kedro.io.DataCatalog)). You can use this method to add any other entry / metadata you wish on the `DataCatalog`.
+You can [configure parameters](../04_kedro_project_setup/02_configuration.md#loading-parameters) for your project and [reference them](../04_kedro_project_setup/02_configuration.md#using-parameters) in your nodes. Do this using the `add_feed_dict()` method ([API documentation](/kedro.io.DataCatalog)). You can use this method to add any other entry / metadata you wish on the `DataCatalog`.
 
 
 ## Feeding in credentials
@@ -445,16 +458,14 @@ Here we cover the use case of _tracking operation performance_ by applying built
 
 Transformers are applied at the `DataCatalog` level. To apply the built-in `ProfileTimeTransformer`, you need to:
 
-1. Navigate to `src/<package_name>/run.py`
-2. Apply `ProfileTimeTransformer` in the hook implementation `TransformerHooks.after_catalog_created`.
-3. Register the hook in your `ProjectContext` as follows:
+1. Navigate to `src/<package_name>/hooks.py`
+2. Apply `ProfileTimeTransformer` in the hook implementation `TransformerHooks.after_catalog_created`
+3. Register the hook in your `src/<package_name>/settings.py`
 
 ```python
-from pathlib import Path
-from typing import Dict
+# src/<package_name>/hooks.py
 
 from kedro.extras.transformers import ProfileTimeTransformer # new import
-from kedro.framework.context import KedroContext, load_package_context
 from kedro.framework.hooks import hook_impl # new import
 from kedro.io import DataCatalog # new import
 
@@ -464,10 +475,13 @@ class TransformerHooks:
     def after_catalog_created(self, catalog: DataCatalog) -> None:
         catalog.add_transformer(ProfileTimeTransformer())
 
-class ProjectContext(KedroContext):
+```
 
-    ...
-    hooks = (TransformerHooks(),)
+```python
+# src/<package_name>/settings.py
+from <package_name>.hooks import TransformerHooks
+
+HOOKS = (TransformerHooks(),)
 ```
 
 Once complete, rerun the pipeline from the terminal and you should see the following logging output:

@@ -67,7 +67,7 @@ class TestJSONDataSet:
         json_data_set.save(dummy_data)
         reloaded = json_data_set.load()
         assert dummy_data == reloaded
-        assert json_data_set._fs_open_args_load == {"mode": "r"}
+        assert json_data_set._fs_open_args_load == {}
         assert json_data_set._fs_open_args_save == {"mode": "w"}
 
     def test_exists(self, json_data_set, dummy_data):

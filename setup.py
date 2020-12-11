@@ -39,9 +39,9 @@ here = path.abspath(path.dirname(__file__))
 
 
 PANDAS = "pandas>=0.24"
-SPARK = "pyspark~=2.2"
+SPARK = "pyspark>=2.2, <4.0"
 HDFS = "hdfs>=2.5.8, <3.0"
-S3FS = "s3fs>=0.3.0, <0.4.1"
+S3FS = "s3fs>=0.3.0, <0.5"
 
 # get package version
 with open(path.join(here, name, "__init__.py"), encoding="utf-8") as f:
@@ -136,6 +136,7 @@ extras_require = {
         "ipykernel>=4.8.1, <5.0",
     ],
     "geopandas": _collect_requirements(geopandas_require),
+    "ipython": ["ipython==7.10"],
     "matplotlib": _collect_requirements(matplotlib_require),
     "holoviews": _collect_requirements(holoviews_require),
     "networkx": _collect_requirements(networkx_require),

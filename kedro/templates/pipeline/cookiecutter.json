@@ -1,4 +1,1 @@
-{
-    "pipeline_name": "default",
-    "kedro_version": "{{ cookiecutter.kedro_version }}"
-}
+{"pipeline_name": "default", "kedro_version": "{{ cookiecutter.kedro_version }}"}

@@ -39,7 +39,7 @@ import behave
 import pandas as pd
 import yaml
 from behave import given, then, when
-from pandas.util.testing import assert_frame_equal
+from pandas.testing import assert_frame_equal
 
 import features.steps.util as util
 from features.steps.sh_run import run
@@ -146,7 +146,6 @@ def _create_template_project(context):
     # - project_name      (the simple project name == project-pipeline)
     # - temp_dir          (the directory containing the created project)
     # - root_project_dir  (the full path to the created project)
-    # - include_example   (the project contains code example)
 
     context.project_name = "project-pipeline"
     context.config_file = context.temp_dir / "config"
@@ -154,20 +153,21 @@ def _create_template_project(context):
     root_project_dir = context.temp_dir / context.project_name
     context.root_project_dir = root_project_dir
 
-    context.include_example = True
-
     config = {
         "project_name": context.project_name,
         "repo_name": context.project_name,
         "output_dir": str(context.temp_dir),
         "python_package": context.project_name.replace("-", "_"),
-        "include_example": context.include_example,
     }
 
     with context.config_file.open("w") as config_file:
         yaml.dump(config, config_file, default_flow_style=False)
 
-    res = run([context.kedro, "new", "-c", str(context.config_file)], env=context.env)
+    res = run(
+        [context.kedro, "new", "-c", str(context.config_file)],
+        env=context.env,
+        cwd=str(context.temp_dir),
+    )
     assert res.returncode == 0
 
     _setup_template_files(context)
@@ -208,18 +208,18 @@ def create_template_with_pipeline(context):
 
 @given('I have defined a node "{node_name}" tagged with {tags:CSV}')
 def node_tagged_with(context, node_name, tags):
-    """
-    Check tagging in `hooks_template.py` is consistent with tagging
+    """Check tagging in `hooks_template.py` is consistent with tagging
     descriptions in background steps
     """
     sys.path.append(
         str(context.root_project_dir / "src" / context.project_name.replace("-", "_"))
     )
     # pylint: disable=import-outside-toplevel
-    import hooks
+    from hooks import ProjectHooks
 
     # pylint: disable=no-member
-    context.project_pipeline = hooks.project_hooks.register_pipelines()["__default__"]
+    context.project_pipeline = ProjectHooks().register_pipelines()["__default__"]
+
     node_objs = [n for n in context.project_pipeline.nodes if n.name == node_name]
     assert node_objs
     assert set(tags) == node_objs[0].tags

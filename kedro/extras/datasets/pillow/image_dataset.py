@@ -105,6 +105,8 @@ class ImageDataSet(AbstractVersionedDataSet):
         _credentials = deepcopy(credentials) or {}
 
         protocol, path = get_protocol_and_path(filepath, version)
+        if protocol == "file":
+            _fs_args.setdefault("auto_mkdir", True)
 
         self._protocol = protocol
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
@@ -121,7 +123,6 @@ class ImageDataSet(AbstractVersionedDataSet):
         if save_args is not None:
             self._save_args.update(save_args)
 
-        _fs_open_args_load.setdefault("mode", "rb")
         _fs_open_args_save.setdefault("mode", "wb")
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save

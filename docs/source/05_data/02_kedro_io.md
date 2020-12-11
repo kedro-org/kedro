@@ -35,7 +35,7 @@ parts_df = parts.load()
 
 However, we recommend using a `DataCatalog` instead (for more details, see [this section](../05_data/01_data_catalog.md) in the User Guide) as it has been designed to make all datasets available to project members.
 
-For contributors, if you would like to submit a new dataset, you will have to extend `AbstractDataSet`. For a complete guide, please read [Creating a new dataset](../07_extend_kedro/01_custom_datasets.md).
+For contributors, if you would like to submit a new dataset, you will have to extend `AbstractDataSet`. For a complete guide, please read [Creating a new dataset](../07_extend_kedro/03_custom_datasets.md).
 
 
 ## Versioning

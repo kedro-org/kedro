@@ -30,6 +30,7 @@ import shutil
 from zipfile import ZipFile
 
 import pytest
+import yaml
 from click import ClickException
 from click.testing import CliRunner
 
@@ -382,6 +383,35 @@ class TestPipelinePullCommand:
         assert not filecmp.dircmp(source_path, source_dest).diff_files
         assert not filecmp.dircmp(config_path, config_dest).diff_files
         assert not filecmp.dircmp(test_path, test_dest).diff_files
+
+    def test_pull_whl_fs_args(self, fake_kedro_cli, dummy_project, mocker, tmp_path):
+        """
+        Test for pulling a wheel file with custom fs_args specified.
+        """
+        self.call_pipeline_create(fake_kedro_cli)
+        self.call_pipeline_package(fake_kedro_cli)
+        self.call_pipeline_delete(fake_kedro_cli)
+
+        fs_args_config = tmp_path / "fs_args_config.yml"
+        with fs_args_config.open(mode="w") as f:
+            yaml.dump({"fs_arg_1": 1, "fs_arg_2": {"fs_arg_2_nested_1": 2}}, f)
+        mocked_filesystem = mocker.patch("fsspec.filesystem")
+
+        wheel_file = (
+            dummy_project
+            / "src"
+            / "dist"
+            / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
+        )
+
+        options = ["--fs-args", str(fs_args_config)]
+        CliRunner().invoke(
+            fake_kedro_cli.cli, ["pipeline", "pull", str(wheel_file), *options]
+        )
+
+        mocked_filesystem.assert_called_once_with(
+            "file", fs_arg_1=1, fs_arg_2=dict(fs_arg_2_nested_1=2)
+        )
 
     def test_pull_two_dist_info(self, fake_kedro_cli, dummy_project, mocker, tmp_path):
         """

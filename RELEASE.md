@@ -5,6 +5,7 @@
 ## Bug fixes and other changes
 * `PartitionedDataSet` improvements:
   - Supported versioning of the underlying dataset.
+* Added a `--fs-args` option to the `kedro pipeline pull` command to specify configuration options for the fsspec filesystem arguments used when pulling modular pipelines from non-PyPI locations.
 
 ## Breaking changes to the API
 

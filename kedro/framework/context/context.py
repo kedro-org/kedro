@@ -660,6 +660,11 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
             is missing, or loaded context has package conflict.
 
     """
+    warn(
+        "`kedro.framework.context.load_context` is now deprecated in favour of "
+        "`KedroSession.load_context` and will be removed in Kedro 0.18.0.",
+        DeprecationWarning,
+    )
     project_path = Path(project_path).expanduser().resolve()
     metadata = _get_project_metadata(project_path)
 

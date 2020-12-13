@@ -33,7 +33,7 @@ import sys
 import tempfile
 from pathlib import Path
 from textwrap import indent
-from typing import Any, List, NamedTuple, Tuple, Union
+from typing import Any, List, NamedTuple, Optional, Tuple, Union
 from zipfile import ZipFile
 
 import click
@@ -233,9 +233,17 @@ def describe_pipeline(
     callback=_check_pipeline_name,
     help="Alternative name to unpackage under.",
 )
+@click.option(
+    "--fs-args",
+    type=click.Path(
+        exists=True, file_okay=True, dir_okay=False, readable=True, resolve_path=True
+    ),
+    default=None,
+    help="Location of a configuration file for the fsspec filesystem used to pull the package.",
+)
 @click.pass_obj  # this will pass the metadata as first argument
 def pull_package(
-    metadata: ProjectMetadata, package_path, env, alias, **kwargs
+    metadata: ProjectMetadata, package_path, env, alias, fs_args, **kwargs
 ):  # pylint:disable=unused-argument
     """Pull a modular pipeline package, unpack it and install the files to corresponding
     locations.
@@ -244,7 +252,7 @@ def pull_package(
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_dir_path = Path(temp_dir).resolve()
 
-        _unpack_wheel(package_path, temp_dir_path)
+        _unpack_wheel(package_path, temp_dir_path, fs_args)
 
         dist_info_file = list(temp_dir_path.glob("*.dist-info"))
         if len(dist_info_file) != 1:
@@ -258,6 +266,19 @@ def pull_package(
 
         _clean_pycache(temp_dir_path)
         _install_files(metadata, package_name, temp_dir_path, env, alias)
+
+
+def _get_fsspec_filesystem(location: str, fs_args: Optional[str]):
+    # pylint: disable=import-outside-toplevel
+    import anyconfig
+    import fsspec
+
+    from kedro.io.core import get_protocol_and_path
+
+    protocol, _ = get_protocol_and_path(location)
+    fs_args_config = anyconfig.load(fs_args) if fs_args else {}
+
+    return fsspec.filesystem(protocol, **fs_args_config)
 
 
 @pipeline.command("package")
@@ -313,14 +334,8 @@ def _echo_deletion_warning(message: str, **paths: List[Path]):
         click.echo(indent(paths_str, " " * 2))
 
 
-def _unpack_wheel(location: str, destination: Path) -> None:
-    # pylint: disable=import-outside-toplevel
-    import fsspec
-
-    from kedro.io.core import get_protocol_and_path
-
-    protocol, _ = get_protocol_and_path(location)
-    filesystem = fsspec.filesystem(protocol)
+def _unpack_wheel(location: str, destination: Path, fs_args: Optional[str]) -> None:
+    filesystem = _get_fsspec_filesystem(location, fs_args)
 
     if location.endswith(".whl") and filesystem.exists(location):
         with filesystem.open(location) as fs_file:

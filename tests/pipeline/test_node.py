@@ -209,8 +209,8 @@ class TestValidNode:
 
 class TestNodeComparisons:
     def test_node_equals(self):
-        first = node(identity, "input1", "output1", name="a node")
-        second = node(identity, "input1", "output1", name="a node")
+        first = node(identity, "input1", "output1", name="a_node")
+        second = node(identity, "input1", "output1", name="a_node")
         assert first == second
         assert first is not second
 
@@ -221,11 +221,11 @@ class TestNodeComparisons:
         assert first is not second
 
     def test_node_invalid_equals(self):
-        n = node(identity, "input1", "output1", name="a node")
+        n = node(identity, "input1", "output1", name="a_node")
         assert n != "hello"
 
     def test_node_invalid_less_than(self):
-        n = node(identity, "input1", "output1", name="a node")
+        n = node(identity, "input1", "output1", name="a_node")
         pattern = "'<' not supported between instances of 'Node' and 'str'"
 
         with pytest.raises(TypeError, match=pattern):
@@ -467,6 +467,16 @@ class TestNames:
         assert str(n) == "name: identity([in]) -> [out]"
         assert n.name == "name"
         assert n.short_name == "name"
+
+    @pytest.mark.parametrize("bad_name", ["name,with,comma", "name with space"])
+    def test_invalid_name(self, bad_name):
+        pattern = (
+            f"'{bad_name}' is not a valid node name. "
+            f"It must contain only letters, digits, hyphens, "
+            f"underscores and/or fullstops."
+        )
+        with pytest.raises(ValueError, match=re.escape(pattern)):
+            node(identity, ["in"], ["out"], name=bad_name)
 
     def test_namespaced(self):
         n = node(identity, ["in"], ["out"], namespace="namespace")

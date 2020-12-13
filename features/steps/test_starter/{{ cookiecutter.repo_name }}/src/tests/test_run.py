@@ -39,12 +39,12 @@ To run the tests, run ``kedro test`` from the project root directory.
 from pathlib import Path
 
 import pytest
-from kedro.framework.context import load_context
+from kedro.framework.context import KedroContext
 
 
 @pytest.fixture
 def project_context():
-    return load_context(Path.cwd())
+    return KedroContext(package_name="{{ cookiecutter.python_package }}", project_path=Path.cwd())
 
 
 # The tests below are here for the demonstration purpose

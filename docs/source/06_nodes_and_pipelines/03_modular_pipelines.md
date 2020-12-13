@@ -8,26 +8,25 @@ In many typical Kedro projects, a single (“master”) pipeline increases in co
 
 ## How do I create a modular pipeline?
 
-In Kedro version 0.16.0 or later, you can use a [project-specific CLI command](../09_development/03_commands_reference.md#kedro-commands) to create a modular pipeline:
-
-```python
-kedro pipeline create <pipeline_name>
-```
-
-The pipeline name must adhere to generic Python module naming rules:
+You can use a [project-specific CLI command](../09_development/03_commands_reference.md#kedro-commands) to create a modular pipeline. The pipeline name must adhere to [generic Python module naming rules](https://realpython.com/python-pep8/#naming-conventions):
 
 * Can only contain alphanumeric characters and underscores (`A-Za-z0-9_`)
 * Must start with a letter or underscore
 * Must be at least 2 characters long
 
+> *Note:* Since `kedro pipeline` is a group of project-specific commands, those will only show up when your current working directory is the project root. If you see an error message like `Error: No such command 'pipeline'`, this indicates that your working directory does not point to a valid Kedro project.
+
 For the full list of available CLI options, you can always run `kedro pipeline create --help` for more information.
 
-> *Note:* Since `kedro pipeline` is a group of project specific commands, those will only show up when your current working directory is the project root. If you see an error message like `Error: No such command 'pipeline'`, this indicates that your working directory does not point to a valid Kedro project.
+```python
+kedro pipeline create <pipeline_name>
+```
 
+> *Note:* Although Kedro does not enforce the following project structure, we strongly encourage that you use it when you develop your modular pipelines. Future versions of Kedro may assume this structure.
 
-The `kedro pipeline create <pipeline_name>` command satisfies the following requirements for a modular pipeline:
+The `kedro pipeline create <pipeline_name>` command creates the following:
 
-***Creates a module in a subfolder***
+***A modular pipeline in a subfolder***
 
 The command creates a modular pipeline in `src/<python_package>/pipelines/<pipeline_name>/`. The folder contains the following files:
 
@@ -42,18 +41,22 @@ from <project-name>.pipelines import my_modular_pipeline_1
 pipeline = my_modular_pipeline_1.create_pipeline()
 ```
 
-***Creates boilerplate configuration files***
+> Note: When you run `kedro pipeline create` it does _not_ automatically add a corresponding entry to `register_pipelines()` in `src/<python_package>/pipeline.py`.
+> In order to make your new pipeline runnable (using the `kedro run --pipeline <pipeline_name>` CLI command, for example), you need to modify `src/<python_package>/pipeline.py` yourself.
 
-The `kedro pipeline create <pipeline_name>` command also creates a pair of boilerplate configuration files in `conf/<env>/pipelines/<pipeline_name>`, where `<env>` defaults to `base`. These config files are `catalog.yml` and `parameters.yml`
+You can see an example in this video from [Data Engineer One](https://www.youtube.com/watch?v=dRnCovp1GRQ&t=50s&ab_channel=DataEngineerOne):
 
-***Creates a placeholder folder for unit tests***
+<iframe width="560" height="315" style="max-width: 100%" src="https://youtu.be/EGxEslQfZ-E" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-Finally, `kedro pipeline create <pipeline_name>` also creates a placeholder folder for the pipeline unit tests in `src/tests/pipelines/<pipeline_name>/`
+***Boilerplate configuration files***
 
-> Note: When you run `kedro pipeline create` it does _not_ automatically add a corresponding entry to `register_pipelines()` in `src/<python_package>/hooks.py`. In order to make your new pipeline runnable using the `kedro run --pipeline <pipeline_name>` CLI command, for example, you need to modify `src/<python_package>/hooks.py` yourself.
+The `kedro pipeline create <pipeline_name>` command also creates a boilerplate parameter configuration file, `<pipeline_name>.yml`, in `conf/<env>/parameters/`, where `<env>` defaults to `base`.
 
+> *Note:* project configuration from `conf/base/parameters/<pipeline_name>.yml` is automatically discoverable by [KedroContext](/kedro.framework.context.KedroContext) and requires no manual change.
 
-> *Note:* Although Kedro does not enforce the structure below, we strongly encourage following it when you develop your modular pipelines. Future versions of Kedro may assume this structure.
+***A placeholder folder for unit tests***
+
+Finally, `kedro pipeline create <pipeline_name>` also creates a placeholder for the pipeline unit tests in `src/tests/pipelines/<pipeline_name>/`.
 
 ## Recommendations
 For ease of use and portability, consider these recommendations as you develop a modular pipeline:
@@ -120,7 +123,7 @@ Since Kedro 0.16.4 you can package a modular pipeline by executing `kedro pipeli
 When you package your modular pipeline, Kedro will also automatically package files from 3 locations:
 
 *  All the modular pipeline code in `src/<python_package>/pipelines/<pipeline_name>/`
-*  Configuration files that match the glob pattern `conf/<env>/parameters*/**/*<pipeline_name>*`, where `<env>` defaults to `base`. If you need to capture the parameters from a different config environment, run `kedro pipeline package --env <env_name> <pipeline_name>`
+*  Parameter files that match the glob pattern `conf/<env>/parameters*/**/*<pipeline_name>*`, where `<env>` defaults to `base`. If you need to capture the parameters from a different config environment, run `kedro pipeline package --env <env_name> <pipeline_name>`
 *  Pipeline unit tests in `src/tests/pipelines/<pipeline_name>`
 
 > _Note:_ Kedro _will not_ package the catalog config files even if those are present in `conf/<env>/catalog/<pipeline_name>.yml`.
@@ -134,7 +137,7 @@ In addition to [PyPI](https://pypi.org/), you can also share the packaged wheel 
 You can pull a modular pipeline from a wheel file by executing `kedro pipeline pull <package_name>`, where `<package_name>` is either a package name on PyPI, or a path to the wheel file. Kedro will unpack the wheel file, and install the files in following locations in your Kedro project:
 
 *  All the modular pipeline code in `src/<python_package>/pipelines/<pipeline_name>/`
-*  Configuration files in `conf/<env>/pipelines/<pipeline_name>`, where `<env>` defaults to `base`. If you want to place the parameters from a different config environment, run `kedro pipeline pull <pipeline_name> --env <env_name>`
+*  Configuration files in `conf/<env>/parameters/<pipeline_name>.yml`, where `<env>` defaults to `base`. If you want to place the parameters from a different config environment, run `kedro pipeline pull <pipeline_name> --env <env_name>`
 *  Pipeline unit tests in `src/tests/pipelines/<pipeline_name>`
 
 You can pull a modular pipeline from different locations, including local storage, PyPI and the cloud:
@@ -155,6 +158,21 @@ kedro pipeline pull https://<bucket_name>.s3.<aws-region>.amazonaws.com/<pipelin
 
 ```bash
 kedro pipeline pull <pypi-package-name>
+```
+
+If you are pulling the pipeline from a location that isn't PyPI, Kedro uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to locate and pull down your pipeline. If you need to provide any `fsspec`-specific arguments (say, if you're pulling your pipeline down from an S3 bucket and want to provide the S3 credentials inline or from a local server that requires tokens in the header) then you can use the `--fs-args` option to point to a YAML (or any `anyconfig`-supported configuration) file that contains the required configuration.
+
+```bash
+kedro pipeline pull https://<url-to-pipeline.whl> --fs-args pipeline_pull_args.yml
+```
+
+where
+
+```
+# pipeline_pull_args.yml
+client_kwargs:
+  headers:
+    Authorization: token <token>
 ```
 
 ## A modular pipeline example template
@@ -202,7 +220,7 @@ new-kedro-project
 │   │   │   │   └── README.md
 │   │   │   └── __init__.py
 │   │   ├── __init__.py
-|   |   ├── nodes.py
+|   |   ├── cli.py
 │   │   ├── hooks.py
 │   │   └── run.py
 │   ├── tests
@@ -220,9 +238,8 @@ new-kedro-project
 │   │   └── test_run.py
 │   ├── requirements.txt
 │   └── setup.py
-├── .kedro.yml
+├── pyproject.toml
 ├── README.md
-├── kedro_cli.py
 └── setup.cfg
 ```
 </details>
@@ -376,8 +393,10 @@ The value of parameter `alpha` is replaced with the value of parameter `beta`, a
 ## How to clean up a modular pipeline
 You can manually delete all the files that belong to a modular pipeline. However, Kedro also provides a CLI command to clean up automatically. It deletes the following files when you call `kedro pipeline delete <pipeline_name>`:
 
+
+
 * All the modular pipeline code in `src/<python_package>/pipelines/<pipeline_name>/`
-* Configuration files `conf/<env>/pipelines/<pipeline_name>/catalog.yml` and `conf/<env>/pipelines/<pipeline_name>/parameters.yml`, where `<env>` defaults to `base`. If the files are located in a different config environment, run `kedro pipeline delete <pipeline_name> --env <env_name>`
+* Configuration files `conf/<env>/parameters/<pipeline_name>.yml` and `conf/<env>/catalog/<pipeline_name>.yml`, where `<env>` defaults to `base`. If the files are located in a different config environment, run `kedro pipeline delete <pipeline_name> --env <env_name>`.
 * Pipeline unit tests in `tests/pipelines/<pipeline_name>/`
 
 >*Note*: `kedro pipeline delete` won't remove the entry from `hooks.py` if you have imported the modular pipeline there.You must remove it manually to clean up, otherwise it will break your project because the import will raise an error.

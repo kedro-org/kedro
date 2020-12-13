@@ -338,10 +338,15 @@ Out[11]: [FileInfo(path='dbfs:/root/projects/iris-databricks/data/01_raw/.gitkee
 * Run Kedro project
 
 ```python
-from kedro.framework.context import load_context
+from kedro.framework.cli.utils import _add_src_to_path
+from kedro.framework.session import KedroSession
+from kedro.framework.startup import _get_project_metadata
 
-context = load_context(project_root)
-context.run()
+metadata = _get_project_metadata(project_root)
+_add_src_to_path(metadata.source_dir, project_root)
+
+with KedroSession.create(metadata.package_name, project_root) as session:
+    session.run()
 ```
 
 You should get a similar output:

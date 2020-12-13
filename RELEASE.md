@@ -17,7 +17,10 @@
 * Added minimal, black-compatible flake8 configuration to the project template.
 * Moved `isort` and `pytest` configuration from `<project_root>/setup.cfg` to `<project_root>/pyproject.toml`.
 * Fixed a bug where extra parameters were incorrectly passed from `KedroSession` to `KedroContext`.
-* Fixed a typo in the [Kedro spaceflights tutorial](/docs/source/03_tutorial/01_spaceflights_tutorial.md).
+* Deprecated `kedro.framework.context.load_context`, it will be removed in 0.18.0 release.
+* Relax `pyspark` requirements to allow for installation of `pyspark` 3.0.
+* Deprecated `kedro.framework.cli.get_project_context`, it will be removed in 0.18.0 release.
+* Added a `--fs-args` option to the `kedro pipeline pull` command to specify configuration options for the fsspec filesystem arguments used when pulling modular pipelines from non-PyPI locations.
 
 ## Breaking changes to the API
 * `kedro.io.DataCatalog.exists()` returns `False` when the dataset does not exist, as opposed to raising an exception.
@@ -44,6 +47,7 @@
 * Custom context class is set via `CONTEXT_CLASS` variable in `src/<your_project>/settings.py`.
 * Removed `KedroContext.hooks` attribute. Instead, hooks should be registered in `src/<your_project>/settings.py` under the `HOOKS` key.
 * Removed `KedroContext._create_config_loader()` and `KedroContext._create_data_catalog()`. They have been replaced by registration hooks, namely `register_config_loader()` and `register_catalog()`.
+* Restricted names given to nodes to match the regex pattern `[\w\.-]+$`.
 
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman),
@@ -54,6 +58,10 @@
 #### General Migration
 
 **reminder** [How do I upgrade Kedro](https://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#how-do-i-upgrade-kedro) covers a few key things to remember when updating any kedro version.
+
+#### Migration for `node` names
+
+From 0.17.0 the only allowed characters for node names are letters, digits, hyphens, underscores and/or fullstops. If you defined node names that have special characters, spaces or other characters no included in the requirements, you will need to rename them to fit the new restrictions.
 
 #### Migration for `kedro_cli.py`
 

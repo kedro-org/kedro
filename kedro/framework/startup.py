@@ -44,9 +44,9 @@ class ProjectMetadata(NamedTuple):
     config_file: Path
     package_name: str
     project_name: str
+    project_path: Path
     project_version: str
     source_dir: Path
-    project_path: Path
 
 
 def _version_mismatch_error(project_version) -> str:

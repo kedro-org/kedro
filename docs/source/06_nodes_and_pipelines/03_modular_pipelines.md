@@ -131,7 +131,7 @@ In addition to [PyPI](https://pypi.org/), you can also share the packaged wheel 
 
 ### Pull a modular pipeline
 
-You can pull a modular pipeline from a wheel file by executing `kedro pipeline pull <package_name>`, where `<package_name>` is either a package name on PyPI, or a path to the wheel file. Kedro will unpack the wheel file, and install the files in following locations in your Kedro project:
+You can pull a modular pipeline from a wheel file by executing `kedro pipeline pull <package_name>`, where `<package_name>` is either a package name on PyPI or a path to the wheel file. Kedro will unpack the wheel file, and install the files in following locations in your Kedro project:
 
 *  All the modular pipeline code in `src/<python_package>/pipelines/<pipeline_name>/`
 *  Configuration files in `conf/<env>/pipelines/<pipeline_name>`, where `<env>` defaults to `base`. If you want to place the parameters from a different config environment, run `kedro pipeline pull <pipeline_name> --env <env_name>`

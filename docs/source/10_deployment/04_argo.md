@@ -30,7 +30,7 @@ First, you need to containerise your Kedro project, using any preferred containe
 
 For the purpose of this walk-through, we are going to assume a `Docker` workflow. We recommend the [`Kedro-Docker`](https://github.com/quantumblacklabs/kedro-docker) plugin to streamline the process. [Instructions for Kedro-Docker are in the plugin's README.md](https://github.com/quantumblacklabs/kedro-docker/blob/master/README.md).
 
-After you’ve built the Docker image for your project locally, [transfer the image to a container registry](./01_single_machine.md#how-to-use-container-registry).
+After you’ve built the Docker image for your project locally, [transfer the image to a container registry](./01_single_machine.html#how-to-use-container-registry).
 
 ### Create Argo Workflows spec
 
@@ -43,7 +43,10 @@ from pathlib import Path
 
 import click
 from jinja2 import Environment, FileSystemLoader
-from kedro.framework.context import load_context
+
+from kedro.framework.cli.utils import _add_src_to_path
+from kedro.framework.session import KedroSession
+from kedro.framework.startup import _get_project_metadata
 
 TEMPLATE_FILE = "argo_spec.tmpl"
 SEARCH_PATH = Path("templates")
@@ -58,8 +61,14 @@ def generate_argo_config(image, pipeline_name, env):
     template_env = Environment(loader=loader, trim_blocks=True, lstrip_blocks=True)
     template = template_env.get_template(TEMPLATE_FILE)
 
-    context = load_context(Path.cwd(), env=env)
-    project_name = context.project_name
+    project_path = Path.cwd()
+    metadata = _get_project_metadata(project_path)
+    _add_src_to_path(metadata.source_dir, project_path)
+    project_name = metadata.project_name
+
+    session = KedroSession.create(metadata.package_name, project_path, env=env)
+    context = session.load_context()
+
     pipeline_name = pipeline_name or "__default__"
     pipeline = context.pipelines.get(pipeline_name)
 

@@ -35,6 +35,7 @@ import json
 from collections import Counter, defaultdict
 from itertools import chain
 from typing import Callable, Dict, Iterable, List, Set, Tuple, Union
+from warnings import warn
 
 from toposort import CircularDependencyError as ToposortCircleError
 from toposort import toposort
@@ -705,6 +706,13 @@ class Pipeline:  # pylint: disable=too-many-public-methods
             provided decorators.
 
         """
+        warn(
+            "The pipeline's `decorate` API will be deprecated in Kedro 0.18.0."
+            "Please use a node's Hooks to extend the node's behaviour in a pipeline."
+            "For more information, please visit"
+            "https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_hooks.html",
+            DeprecationWarning,
+        )
         nodes = [node.decorate(*decorators) for node in self.nodes]
         return Pipeline(nodes)
 

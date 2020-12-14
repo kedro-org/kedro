@@ -50,9 +50,7 @@ from kedro.runner import ParallelRunner, SequentialRunner
 FOLDER_NAME = "fake_folder"
 FILENAME = "test.parquet"
 BUCKET_NAME = "test_bucket"
-AWS_CREDENTIALS = dict(
-    aws_access_key_id="FAKE_ACCESS_KEY", aws_secret_access_key="FAKE_SECRET_KEY"
-)
+AWS_CREDENTIALS = {"key": "FAKE_ACCESS_KEY", "secret": "FAKE_SECRET_KEY"}
 
 HDFS_PREFIX = f"{FOLDER_NAME}/{FILENAME}"
 HDFS_FOLDER_STRUCTURE = [

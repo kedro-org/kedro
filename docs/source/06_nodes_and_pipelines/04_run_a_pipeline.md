@@ -229,21 +229,10 @@ When processing a node, both `SequentialRunner` and `ParallelRunner` perform the
 2. Execute node function with the input(s)
 3. Save the output(s)
 
-If a node has multiple inputs or outputs (e.g., `node(func, ["a", "b", "c"], ["d", "e", "f"])`), you can reduce load and save time by using asynchronous mode. You can enable it by passing an extra boolean flag to the runner's constructor in `src/<project-package>/run.py` as follows:
-
-```python
-from kedro.runner import SequentialRunner
-
-class ProjectContext(KedroContext):
-    def run(self, *args, **kwargs):
-        kwargs["runner"] = SequentialRunner(is_async=True)
-        # or ParallelRunner(is_async=True). By default, `is_async` is False.
-        return super().run(*args, **kwargs)
-```
-
-Once you enabled the asynchronous mode and ran `kedro run` from the command line, you should see the following logging message:
+If a node has multiple inputs or outputs (e.g., `node(func, ["a", "b", "c"], ["d", "e", "f"])`), you can reduce load and save time by using asynchronous mode. You can enable it by passing an `--async` flag to the run command as follows:
 
 ```bash
+$ kedro run --async
 ...
 2020-03-24 09:20:01,482 - kedro.runner.sequential_runner - INFO - Asynchronous mode is enabled for loading and saving data
 2020-03-24 09:20:01,483 - kedro.io.data_catalog - INFO - Loading data from `example_iris_data` (CSVDataSet)...

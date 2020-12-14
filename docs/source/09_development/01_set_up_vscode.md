@@ -211,7 +211,7 @@ scp -r /path/to/<your_project_name> <your_username>@<remote_server>:projects/
 }
 ```
 
-> *Note:* There is also a third-party plugin for VS Code that supports remote workspaces, click [here](https://marketplace.visualstudio.com/items?itemName=mkloubert.vscode-remote-workspace) to find it.
+> *Note:* There is also a third-party plugin for VS Code that supports remote workspaces, click [here](https://marketplace.visualstudio.com/items?itemName=Liveecommerce.vscode-remote-workspace) to find it.
 
 Start executing the pipeline on your remote computer:
 

@@ -40,10 +40,10 @@ from typing import Any, Dict, List
 
 import numpy as np
 
-from kedro.io import AbstractDataSet
+from kedro.io import AbstractVersionedDataSet
 
 
-class ImageDataSet(AbstractDataSet):
+class ImageDataSet(AbstractVersionedDataSet):
     """``ImageDataSet`` loads / save image data from a given filepath as `numpy` array using Pillow.
 
     Example:
@@ -100,8 +100,11 @@ Here is the implementation of the `_load` method using `fsspec` and `Pillow` to 
 ```python
 from pathlib import PurePosixPath
 
-from kedro.io import AbstractDataSet
-from kedro.io.core import get_filepath_str, get_protocol_and_path
+from kedro.io.core import (
+    AbstractVersionedDataSet,
+    get_filepath_str,
+    get_protocol_and_path,
+)
 
 import fsspec
 import numpy as np
@@ -110,7 +113,7 @@ import numpy as np
 from PIL import Image
 
 
-class ImageDataSet(AbstractDataSet):
+class ImageDataSet(AbstractVersionedDataSet):
     def __init__(self, filepath: str):
         """Creates a new instance of ImageDataSet to load / save image data for given filepath.
 
@@ -167,11 +170,10 @@ Similarly, we can implement the `_save` method as follows:
 ```python
 import numpy as np
 from PIL import Image
-from kedro.io import AbstractDataSet
-from kedro.io.core import get_filepath_str
+from kedro.io.core import AbstractVersionedDataSet, get_filepath_str
 
 
-class ImageDataSet(AbstractDataSet):
+class ImageDataSet(AbstractVersionedDataSet):
     def _save(self, data: np.ndarray) -> None:
         """Saves image data to the specified filepath.
         """
@@ -196,10 +198,10 @@ You can open the file to verify that the data was written back correctly.
 The `_describe` method is used for printing purposes. The convention in Kedro is for the method to return a dictionary describing the attributes of the dataset.
 
 ```python
-from kedro.io import AbstractDataSet
+from kedro.io import AbstractVersionedDataSet
 
 
-class ImageDataSet(AbstractDataSet):
+class ImageDataSet(AbstractVersionedDataSet):
     def _describe(self) -> Dict[str, Any]:
         """Returns a dict that describes the attributes of the dataset.
         """
@@ -220,15 +222,18 @@ Here is the full implementation of our basic `ImageDataSet`:
 from pathlib import PurePosixPath
 from typing import Any, Dict
 
-from kedro.io import AbstractDataSet
-from kedro.io.core import get_filepath_str, get_protocol_and_path
+from kedro.io.core import (
+    AbstractVersionedDataSet,
+    get_filepath_str,
+    get_protocol_and_path,
+)
 
 import fsspec
 import numpy as np
 from PIL import Image
 
 
-class ImageDataSet(AbstractDataSet):
+class ImageDataSet(AbstractVersionedDataSet):
     """``ImageDataSet`` loads / save image data from a given filepath as `numpy` array using Pillow.
 
     Example:
@@ -479,7 +484,7 @@ These parameters are then passed to the dataset constructor so you can use them 
 import fsspec
 
 
-class ImageDataSet(AbstractDataSet):
+class ImageDataSet(AbstractVersionedDataSet):
     def __init__(
         self,
         filepath: str,
@@ -499,7 +504,7 @@ class ImageDataSet(AbstractDataSet):
         """
         protocol, path = get_protocol_and_path(filepath)
         self._protocol = protocol
-        self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
+        self._fs = fsspec.filesystem(self._protocol, **credentials, **fs_args)
     ...
 ```
 

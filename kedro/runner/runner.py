@@ -85,8 +85,7 @@ class AbstractRunner(ABC):
         unsatisfied = pipeline.inputs() - set(catalog.list())
         if unsatisfied:
             raise ValueError(
-                "Pipeline input(s) {} not found in the "
-                "DataCatalog".format(unsatisfied)
+                f"Pipeline input(s) {unsatisfied} not found in the DataCatalog"
             )
 
         free_outputs = pipeline.outputs() - set(catalog.list())
@@ -180,7 +179,7 @@ class AbstractRunner(ABC):
 
             start_p = resume_p.only_nodes_with_inputs(*resume_p.inputs())
             start_node_names = (n.name for n in start_p.nodes)
-            postfix += '  --from-nodes "{}"'.format(",".join(start_node_names))
+            postfix += f"  --from-nodes \"{','.join(start_node_names)}\""
 
         self._logger.warning(
             "There are %d nodes that have not run.\n"

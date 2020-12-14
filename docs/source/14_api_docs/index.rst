@@ -53,7 +53,6 @@ Welcome to Kedro's documentation!
    02_get_started/05_example_project
    02_get_started/06_starters
 
-
 .. toctree::
    :maxdepth: 2
    :caption: Tutorial
@@ -72,6 +71,7 @@ Welcome to Kedro's documentation!
    04_kedro_project_setup/01_dependencies
    04_kedro_project_setup/02_configuration
    04_kedro_project_setup/03_session
+   04_kedro_project_setup/04_mini_kedro
 
 .. toctree::
    :maxdepth: 2
@@ -85,7 +85,10 @@ Welcome to Kedro's documentation!
    :caption: Nodes and Pipelines
 
    06_nodes_and_pipelines/01_nodes
-   06_nodes_and_pipelines/02_pipelines
+   06_nodes_and_pipelines/02_pipeline_introduction
+   06_nodes_and_pipelines/03_modular_pipelines
+   06_nodes_and_pipelines/04_run_a_pipeline
+   06_nodes_and_pipelines/05_partial_pipelines
 
 .. toctree::
    :maxdepth: 2

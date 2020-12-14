@@ -26,14 +26,15 @@ pandas>=0.24.0  # Needs to be at least 0.24.0 to make use of `pandas.DataFrame.t
 Pillow~=7.1.2
 pre-commit~=1.17
 psutil==5.6.6
-pyarrow>=0.12.0, <1.0.0
+pyarrow>=0.12.0, <3.0.0
 pylint>=2.5.2, <3.0
 pyproj>=2.2.0, <3.0  # pyproj 3.0 requires proj>=7.2 but that conflicts with fiona which requires proj<7.2.
-pyspark~=2.2; python_version < '3.8'
+pyspark>=2.2, <4.0
 pytest-cov~=2.5
 pytest-lazy-fixture~=0.6.3
 pytest-mock>=1.7.1,<2.0
-pytest~=6.1.2
+pytest<6.0; platform_system == "Windows" and python_version == "3.8"  # Using pytest 6 resulted in an intermittent Stack Overflow exception ocurring after completion of all tests on Windows and Python 3.8
+pytest~=6.1.2; platform_system != "Windows" or python_version != "3.8"
 requests-mock~=1.6
 requests~=2.20
 s3fs>=0.3.0, <0.5  # Needs to be at least 0.3.0 to make use of `cachable` attribute on S3FileSystem.

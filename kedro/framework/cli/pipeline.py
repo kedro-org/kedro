@@ -33,7 +33,7 @@ import sys
 import tempfile
 from pathlib import Path
 from textwrap import indent
-from typing import Any, List, NamedTuple, Tuple, Union
+from typing import Any, List, NamedTuple, Optional, Tuple, Union
 from zipfile import ZipFile
 
 import click
@@ -51,8 +51,8 @@ from kedro.framework.cli.utils import (
     env_option,
     python_call,
 )
-from kedro.framework.context import load_context
 from kedro.framework.project.settings import _get_project_settings
+from kedro.framework.session import KedroSession
 from kedro.framework.startup import ProjectMetadata
 
 _SETUP_PY_TEMPLATE = """# -*- coding: utf-8 -*-
@@ -74,15 +74,15 @@ PipelineArtifacts = NamedTuple(
 )
 
 
-@click.group()
-def pipeline():
-    """Commands for working with pipelines."""
-
-
 def _check_pipeline_name(ctx, param, value):  # pylint: disable=unused-argument
     if value:
         _assert_pkg_name_ok(value)
     return value
+
+
+@click.group()
+def pipeline():
+    """Commands for working with pipelines."""
 
 
 @command_with_verbosity(pipeline, "create")
@@ -119,18 +119,6 @@ def create_pipeline(
         f"to `register_pipelines()` in `{package_dir / 'hooks.py'}`.",
         fg="yellow",
     )
-
-
-def _echo_deletion_warning(message: str, **paths: List[Path]):
-    paths = {key: values for key, values in paths.items() if values}
-
-    if paths:
-        click.secho(message, bold=True)
-
-    for key, values in paths.items():
-        click.echo(f"\n{key.capitalize()}:")
-        paths_str = "\n".join(str(value) for value in values)
-        click.echo(indent(paths_str, " " * 2))
 
 
 @command_with_verbosity(pipeline, "delete")
@@ -197,9 +185,11 @@ def delete_pipeline(
 
 @pipeline.command("list")
 @env_option
-def list_pipelines(env):
+@click.pass_obj
+def list_pipelines(metadata: ProjectMetadata, env):
     """List all pipelines defined in your hooks.py file."""
-    context = load_context(Path.cwd(), env=env)
+    session = _create_session(metadata.package_name, env=env)
+    context = session.load_context()
     project_pipelines = context.pipelines
     click.echo(yaml.dump(sorted(project_pipelines)))
 
@@ -207,9 +197,13 @@ def list_pipelines(env):
 @command_with_verbosity(pipeline, "describe")
 @env_option
 @click.argument("name", nargs=1)
-def describe_pipeline(name, env, **kwargs):  # pylint: disable=unused-argument
+@click.pass_obj
+def describe_pipeline(
+    metadata: ProjectMetadata, name, env, **kwargs
+):  # pylint: disable=unused-argument
     """Describe a pipeline by providing the pipeline name as an argument."""
-    context = load_context(Path.cwd(), env=env)
+    session = _create_session(metadata.package_name, env=env)
+    context = session.load_context()
     pipeline_obj = context.pipelines.get(name)
     if not pipeline_obj:
         existing_pipelines = ", ".join(sorted(context.pipelines.keys()))
@@ -227,14 +221,121 @@ def describe_pipeline(name, env, **kwargs):  # pylint: disable=unused-argument
     click.echo(yaml.dump(result))
 
 
-def _unpack_wheel(location: str, destination: Path) -> None:
+@command_with_verbosity(pipeline, "pull")
+@click.argument("package_path", nargs=1)
+@env_option(
+    help="Environment to install the pipeline configuration to. Defaults to `base`."
+)
+@click.option(
+    "--alias",
+    type=str,
+    default="",
+    callback=_check_pipeline_name,
+    help="Alternative name to unpackage under.",
+)
+@click.option(
+    "--fs-args",
+    type=click.Path(
+        exists=True, file_okay=True, dir_okay=False, readable=True, resolve_path=True
+    ),
+    default=None,
+    help="Location of a configuration file for the fsspec filesystem used to pull the package.",
+)
+@click.pass_obj  # this will pass the metadata as first argument
+def pull_package(
+    metadata: ProjectMetadata, package_path, env, alias, fs_args, **kwargs
+):  # pylint:disable=unused-argument
+    """Pull a modular pipeline package, unpack it and install the files to corresponding
+    locations.
+    """
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_dir_path = Path(temp_dir).resolve()
+
+        _unpack_wheel(package_path, temp_dir_path, fs_args)
+
+        dist_info_file = list(temp_dir_path.glob("*.dist-info"))
+        if len(dist_info_file) != 1:
+            raise KedroCliError(
+                f"More than 1 or no dist-info files found from {package_path}. "
+                f"There has to be exactly one dist-info directory."
+            )
+        # Extract package name, based on the naming convention for wheel files
+        # https://www.python.org/dev/peps/pep-0427/#file-name-convention
+        package_name = dist_info_file[0].stem.split("-")[0]
+
+        _clean_pycache(temp_dir_path)
+        _install_files(metadata, package_name, temp_dir_path, env, alias)
+
+
+def _get_fsspec_filesystem(location: str, fs_args: Optional[str]):
     # pylint: disable=import-outside-toplevel
+    import anyconfig
     import fsspec
 
     from kedro.io.core import get_protocol_and_path
 
     protocol, _ = get_protocol_and_path(location)
-    filesystem = fsspec.filesystem(protocol)
+    fs_args_config = anyconfig.load(fs_args) if fs_args else {}
+
+    return fsspec.filesystem(protocol, **fs_args_config)
+
+
+@pipeline.command("package")
+@env_option(
+    help="Environment where the pipeline configuration lives. Defaults to `base`."
+)
+@click.option(
+    "--alias",
+    type=str,
+    default="",
+    callback=_check_pipeline_name,
+    help="Alternative name to package under.",
+)
+@click.option(
+    "-d",
+    "--destination",
+    type=click.Path(resolve_path=True, file_okay=False),
+    help="Location where to create the wheel file. Defaults to `src/dist`.",
+)
+@click.option(
+    "-v",
+    "--version",
+    type=str,
+    default="0.1",
+    show_default=True,
+    help="Version to package under.",
+)
+@click.argument("name", nargs=1)
+@click.pass_obj  # this will pass the metadata as first argument
+def package_pipeline(
+    metadata: ProjectMetadata, name, env, alias, destination, version
+):  # pylint: disable=too-many-arguments
+    """Package up a pipeline for easy distribution. A .whl file
+    will be created in a `<source_dir>/dist/`."""
+    result_path = _package_pipeline(
+        name, metadata, alias=alias, destination=destination, env=env, version=version,
+    )
+
+    as_alias = f" as `{alias}`" if alias else ""
+    message = f"Pipeline `{name}` packaged{as_alias}! Location: {result_path}"
+    click.secho(message, fg="green")
+
+
+def _echo_deletion_warning(message: str, **paths: List[Path]):
+    paths = {key: values for key, values in paths.items() if values}
+
+    if paths:
+        click.secho(message, bold=True)
+
+    for key, values in paths.items():
+        click.echo(f"\n{key.capitalize()}:")
+        paths_str = "\n".join(str(value) for value in values)
+        click.echo(indent(paths_str, " " * 2))
+
+
+def _unpack_wheel(location: str, destination: Path, fs_args: Optional[str]) -> None:
+    filesystem = _get_fsspec_filesystem(location, fs_args)
 
     if location.endswith(".whl") and filesystem.exists(location):
         with filesystem.open(location) as fs_file:
@@ -255,43 +356,14 @@ def _unpack_wheel(location: str, destination: Path) -> None:
         ZipFile(wheel_file[0]).extractall(destination)
 
 
-@command_with_verbosity(pipeline, "pull")
-@click.argument("package_path", nargs=1)
-@env_option(
-    help="Environment to install the pipeline configuration to. Defaults to `base`."
-)
-@click.option(
-    "--alias",
-    type=str,
-    default="",
-    callback=_check_pipeline_name,
-    help="Alternative name to unpackage under.",
-)
-@click.pass_obj  # this will pass the metadata as first argument
-def pull_package(
-    metadata: ProjectMetadata, package_path, env, alias, **kwargs
-):  # pylint:disable=unused-argument
-    """Pull a modular pipeline package, unpack it and install the files to corresponding
-    locations.
-    """
-
-    with tempfile.TemporaryDirectory() as temp_dir:
-        temp_dir_path = Path(temp_dir).resolve()
-
-        _unpack_wheel(package_path, temp_dir_path)
-
-        dist_info_file = list(temp_dir_path.glob("*.dist-info"))
-        if len(dist_info_file) != 1:
-            raise KedroCliError(
-                f"More than 1 or no dist-info files found from {package_path}. "
-                f"There has to be exactly one dist-info directory."
-            )
-        # Extract package name, based on the naming convention for wheel files
-        # https://www.python.org/dev/peps/pep-0427/#file-name-convention
-        package_name = dist_info_file[0].stem.split("-")[0]
-
-        _clean_pycache(temp_dir_path)
-        _install_files(metadata, package_name, temp_dir_path, env, alias)
+def _create_session(package_name: str, **kwargs):
+    kwargs.setdefault("save_on_close", False)
+    try:
+        return KedroSession.create(package_name, **kwargs)
+    except Exception as exc:
+        raise KedroCliError(
+            f"Unable to instantiate Kedro session.\nError: {exc}"
+        ) from exc
 
 
 def _rename_files(conf_source: Path, old_name: str, new_name: str):
@@ -340,47 +412,6 @@ def _install_files(
     # since it has already been copied.
     if package_source.is_dir():
         _sync_dirs(package_source, package_dest)
-
-
-@pipeline.command("package")
-@env_option(
-    help="Environment where the pipeline configuration lives. Defaults to `base`."
-)
-@click.option(
-    "--alias",
-    type=str,
-    default="",
-    callback=_check_pipeline_name,
-    help="Alternative name to package under.",
-)
-@click.option(
-    "-d",
-    "--destination",
-    type=click.Path(resolve_path=True, file_okay=False),
-    help="Location where to create the wheel file. Defaults to `src/dist`.",
-)
-@click.option(
-    "-v",
-    "--version",
-    type=str,
-    default="0.1",
-    show_default=True,
-    help="Version to package under.",
-)
-@click.argument("name", nargs=1)
-@click.pass_obj  # this will pass the metadata as first argument
-def package_pipeline(
-    metadata: ProjectMetadata, name, env, alias, destination, version
-):  # pylint: disable=too-many-arguments
-    """Package up a pipeline for easy distribution. A .whl file
-    will be created in a `<source_dir>/dist/`."""
-    result_path = _package_pipeline(
-        name, metadata, alias=alias, destination=destination, env=env, version=version,
-    )
-
-    as_alias = f" as `{alias}`" if alias else ""
-    message = f"Pipeline `{name}` packaged{as_alias}! Location: {result_path}"
-    click.secho(message, fg="green")
 
 
 def _find_config_files(
@@ -444,7 +475,7 @@ def _validate_dir(path: Path) -> None:
 
 
 def _get_wheel_name(**kwargs: Any) -> str:
-    # https://stackoverflow.com/questions/51939257/how-do-you-get-the-filename-of-a-python-wheel-when-running-setup-py
+    # https://stackoverflow.com/q/51939257/3364156
     dist = Distribution(attrs=kwargs)
     bdist_wheel_cmd = dist.get_command_obj("bdist_wheel")
     bdist_wheel_cmd.ensure_finalized()

@@ -31,12 +31,9 @@ import dbm
 import logging
 import shelve
 from collections import UserDict
-from copy import deepcopy
 from multiprocessing import Lock
 from pathlib import Path
 from typing import Any, Dict
-
-from kedro.utils import load_obj
 
 
 class BaseSessionStore(UserDict):
@@ -49,48 +46,6 @@ class BaseSessionStore(UserDict):
         self._path = path
         self._session_id = session_id
         super().__init__(self.read())
-
-    @classmethod
-    def from_config(cls, config: Dict[str, Any]) -> "BaseSessionStore":
-        """Create a session store instance using the configuration provided.
-
-        Args:
-            config: Session store config dictionary.
-
-        Raises:
-            ValueError: When the function fails to create the session store
-                from its config.
-
-        Returns:
-            An instance of an ``BaseSessionStore`` subclass.
-        """
-        config = deepcopy(config)
-
-        class_obj = config.pop("type", BaseSessionStore)
-        if isinstance(class_obj, str):
-            class_obj = load_obj(class_obj, BaseSessionStore.__module__)
-
-        classpath = f"{class_obj.__module__}.{class_obj.__qualname__}"
-
-        if not issubclass(class_obj, BaseSessionStore):
-            raise ValueError(
-                f"Store type `{classpath}` is invalid: "
-                f"it must extend `BaseSessionStore`."
-            )
-
-        try:
-            store = class_obj(**config)
-        except TypeError as err:
-            raise ValueError(
-                f"\n{err}.\nStore config must only contain arguments valid "
-                f"for the constructor of `{classpath}`."
-            ) from err
-        except Exception as err:
-            raise ValueError(
-                f"\n{err}.\nFailed to instantiate session store of type `{classpath}`."
-            ) from err
-
-        return store
 
     @property
     def _logger(self) -> logging.Logger:
@@ -129,7 +84,7 @@ class ShelveStore(BaseSessionStore):
         """Read the data from disk using `shelve` package."""
         data = {}  # type: Dict[str, Any]
         try:
-            with shelve.open(str(self._location), flag="r") as _sh:
+            with shelve.open(str(self._location), flag="r") as _sh:  # nosec
                 data = dict(_sh)
         except dbm.error:
             pass
@@ -137,9 +92,10 @@ class ShelveStore(BaseSessionStore):
 
     def save(self) -> None:
         """Save the data on disk using `shelve` package."""
-        self._location.parent.mkdir(parents=True, exist_ok=True)
+        location = self._location
+        location.parent.mkdir(parents=True, exist_ok=True)
 
-        with self._lock, shelve.open(str(self._location)) as _sh:
+        with self._lock, shelve.open(str(location)) as _sh:  # nosec
             keys_to_del = _sh.keys() - self.data.keys()
             for key in keys_to_del:
                 del _sh[key]

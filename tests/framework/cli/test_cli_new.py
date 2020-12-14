@@ -321,15 +321,17 @@ class TestNewWithStarter:
         )
 
     @pytest.mark.parametrize(
-        "alias,expected_starter",
+        "alias,expected_starter_repo",
         [
             (
                 "pyspark-iris",
-                "git+https://github.com/quantumblacklabs/kedro-starter-pyspark-iris.git",
+                "git+https://github.com/quantumblacklabs/kedro-starters.git",
             )
         ],
     )
-    def test_new_with_starter_alias(self, alias, expected_starter, cli_runner, mocker):
+    def test_new_with_starter_alias(
+        self, alias, expected_starter_repo, cli_runner, mocker
+    ):
         mocked_cookie = mocker.patch("cookiecutter.main.cookiecutter")
         _invoke(
             cli_runner,
@@ -338,8 +340,10 @@ class TestNewWithStarter:
             python_package=self.package_name,
             repo_name=self.repo_name,
         )
-        actual_starter = mocked_cookie.call_args[0][0]
-        assert actual_starter == expected_starter
+        actual_starter_repo = mocked_cookie.call_args[0][0]
+        starter_directory = mocked_cookie.call_args[1]["directory"]
+        assert actual_starter_repo == expected_starter_repo
+        assert starter_directory == alias
 
     def test_new_starter_with_checkout(self, cli_runner, mocker):
         starter_path = "some-starter"
@@ -443,4 +447,31 @@ class TestNewWithStarter:
         assert result.exit_code != 0
         assert (
             "Cannot use the --checkout flag without a --starter value." in result.output
+        )
+
+    def test_directory_flag_without_starter(self, cli_runner):
+        result = _invoke(
+            cli_runner,
+            ["new", "--directory", "some-dir"],
+            project_name=self.project_name,
+            python_package=self.package_name,
+            repo_name=self.repo_name,
+        )
+        assert result.exit_code != 0
+        assert (
+            "Cannot use the --directory flag without a --starter value."
+            in result.output
+        )
+
+    def test_directory_flag_with_starter_alias(self, cli_runner):
+        result = _invoke(
+            cli_runner,
+            ["new", "--starter", "pyspark-iris", "--directory", "some-dir"],
+            project_name=self.project_name,
+            python_package=self.package_name,
+            repo_name=self.repo_name,
+        )
+        assert result.exit_code != 0
+        assert (
+            "Cannot use the --directory flag with a --starter alias." in result.output
         )

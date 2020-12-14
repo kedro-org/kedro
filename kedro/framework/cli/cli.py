@@ -33,6 +33,7 @@ This module implements commands available from the kedro CLI.
 import importlib
 import os
 import re
+import warnings
 import webbrowser
 from collections import defaultdict
 from copy import deepcopy
@@ -70,11 +71,13 @@ LOGO = rf"""
 v{version}
 """
 
+_STARTERS_REPO = "git+https://github.com/quantumblacklabs/kedro-starters.git"
 _STARTER_ALIASES = {
-    "pandas-iris": "git+https://github.com/quantumblacklabs/kedro-starter-pandas-iris.git",
-    "pyspark": "git+https://github.com/quantumblacklabs/kedro-starter-pyspark.git",
-    "pyspark-iris": "git+https://github.com/quantumblacklabs/kedro-starter-pyspark-iris.git",
-    "spaceflights": "git+https://github.com/quantumblacklabs/kedro-starter-spaceflights.git",
+    "mini-kedro",
+    "pandas-iris",
+    "pyspark",
+    "pyspark-iris",
+    "spaceflights",
 }
 
 
@@ -144,7 +147,13 @@ def info():
 @click.option(
     "--checkout", help="A tag, branch or commit to checkout in the starter repository."
 )
-def new(config, starter_name, checkout, **kwargs):  # pylint: disable=unused-argument
+@click.option(
+    "--directory",
+    help="An optional directory inside the repository where the starter resides.",
+)
+def new(
+    config, starter_name, checkout, directory, **kwargs
+):  # pylint: disable=unused-argument
     """Create a new kedro project, either interactively or from a
     configuration file.
 
@@ -186,15 +195,37 @@ def new(config, starter_name, checkout, **kwargs):  # pylint: disable=unused-arg
     Create a new project from a starter template and a particular tag, branch or commit
     in the starter repository.
 
+    \b
+    ``kedro new --starter <starter> --directory <directory>``
+    Create a new project from a starter repository and a directory within the location.
+    Useful when you have multiple starters in the same repository.
     """
     if checkout and not starter_name:
         raise KedroCliError("Cannot use the --checkout flag without a --starter value.")
 
-    if starter_name:
-        template_path = _STARTER_ALIASES.get(starter_name, starter_name)
+    if directory and not starter_name:
+        raise KedroCliError(
+            "Cannot use the --directory flag without a --starter value."
+        )
+
+    if starter_name in _STARTER_ALIASES:
+        if directory:
+            raise KedroCliError(
+                "Cannot use the --directory flag with a --starter alias."
+            )
+        template_path = _STARTERS_REPO
+        directory = starter_name
+    elif starter_name is not None:
+        template_path = starter_name
     else:
         template_path = TEMPLATE_PATH
-    _create_project(config_path=config, template_path=template_path, checkout=checkout)
+
+    _create_project(
+        config_path=config,
+        template_path=template_path,
+        checkout=checkout,
+        directory=directory,
+    )
 
 
 @cli.command(short_help="See the kedro API docs and introductory tutorial.")
@@ -218,20 +249,20 @@ def starter():
 @starter.command("list")
 def list_starters():
     """List all official project starters available."""
-
-    def _get_clickable_link(git_link):
-        prefix = re.escape("git+")
-        return re.sub(rf"^{prefix}", "", git_link)
-
+    repo_url = _STARTERS_REPO.replace("git+", "").replace(
+        ".git", "/tree/master/{alias}"
+    )
     output = [
-        {alias: _get_clickable_link(url)}
-        for alias, url in sorted(_STARTER_ALIASES.items())
+        {alias: repo_url.format(alias=alias)} for alias in sorted(_STARTER_ALIASES)
     ]
     click.echo(yaml.safe_dump(output))
 
 
 def _create_project(
-    config_path: str, template_path: Path = TEMPLATE_PATH, checkout: str = None
+    config_path: str,
+    template_path: Path = TEMPLATE_PATH,
+    checkout: str = None,
+    directory: str = None,
 ):
     """Implementation of the kedro new cli command.
 
@@ -246,6 +277,9 @@ def _create_project(
             Maps directly to cookiecutter's --checkout argument.
             If the value is not provided, cookiecutter will use the installed Kedro version
             by default.
+        directory: The directory of a specific starter inside a repository containing
+            multiple starters. Map directly to cookiecutter's --directory argument.
+            https://cookiecutter.readthedocs.io/en/1.7.2/advanced/directories.html
     Raises:
         KedroCliError: If it fails to generate a project.
     """
@@ -263,15 +297,15 @@ def _create_project(
         config.setdefault("kedro_version", version)
 
         checkout = checkout or version
-        result_path = Path(
-            cookiecutter(
-                str(template_path),
-                output_dir=config["output_dir"],
-                no_input=True,
-                extra_context=config,
-                checkout=checkout,
-            )
+        cookiecutter_args = dict(
+            output_dir=config["output_dir"],
+            no_input=True,
+            extra_context=config,
+            checkout=checkout,
         )
+        if directory:
+            cookiecutter_args["directory"] = directory
+        result_path = Path(cookiecutter(str(template_path), **cookiecutter_args))
         _clean_pycache(result_path)
         _print_kedro_new_success_message(result_path)
     except click.exceptions.Abort as exc:  # pragma: no cover
@@ -577,6 +611,13 @@ def get_project_context(
         KedroCliError: When the key is not found and the default value was not
             specified.
     """
+    warnings.warn(
+        "`get_project_context` is now deprecated and will be removed in Kedro 0.18.0. "
+        "Please use `KedroSession.load_context()` to access the "
+        "`KedroContext` object. For more information, please visit "
+        "https://kedro.readthedocs.io/en/stable/04_kedro_project_setup/03_session.html",
+        DeprecationWarning,
+    )
     project_path = project_path or Path.cwd()
     context = load_context(project_path, **kwargs)
     # Dictionary to be compatible with existing Plugins. Future plugins should

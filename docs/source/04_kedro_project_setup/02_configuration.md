@@ -7,11 +7,10 @@ This section contains detailed information about configuration, for which the re
 
 ## Local and base configuration
 
-We recommend that you keep all configuration files in the `conf` directory of a Kedro project. However, if you prefer, you may point Kedro to any other directory and change the configuration paths by overriding `CONF_ROOT` variable from the derived `ProjectContext` class in `src/<project-package>/run.py` as follows:
+We recommend that you keep all configuration files in the `conf` directory of a Kedro project. However, if you prefer, you may point Kedro to any other directory and change the configuration paths by setting the `CONF_ROOT` variable in `src/<project-package>/settings.py` as follows:
 ```python
-class ProjectContext(KedroContext):
-    CONF_ROOT = "new_conf"
-    # ...
+# ...
+CONF_ROOT = "new_conf"
 ```
 
 ## Loading
@@ -53,7 +52,7 @@ kedro run --env=test
 
 If no `env` option is specified, this will default to using `local` environment to overwrite `conf/base`.
 
-> *Note*: If, for some reason, your project does not have any other environments apart from `base`, i.e. no `local` environment to default to, the recommended course of action is to use the approach above, namely customise your `ProjectContext` to take `env="base"` in the constructor.
+> *Note*: If, for some reason, your project does not have any other environments apart from `base`, i.e. no `local` environment to default to, you will need to customise `KedroContext` to take `env="base"` in the constructor and then specify your custom `KedroContext` subclass in `src/<python-package>/settings.py` under `CONTEXT_CLASS` key.
 
 If you set the `KEDRO_ENV` environment variable to the name of your environment, Kedro will load that environment for your `kedro run`, `kedro ipython`, `kedro jupyter notebook` and `kedro jupyter lab` sessions.
 

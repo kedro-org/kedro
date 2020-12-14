@@ -111,9 +111,9 @@ def fake_metadata(fake_root_dir):
         fake_root_dir / REPO_NAME / "pyproject.toml",
         PACKAGE_NAME,
         "CLI Testing Project",
+        fake_root_dir / REPO_NAME,
         kedro_version,
         fake_root_dir / REPO_NAME / "src",
-        fake_root_dir / REPO_NAME,
     )
     return metadata
 

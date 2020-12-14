@@ -33,19 +33,22 @@ from collections import namedtuple
 from logging.handlers import QueueHandler, QueueListener
 from multiprocessing import Queue
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional
 
 import pandas as pd
 import pytest
 import toml
 import yaml
 
-from kedro import __version__
+from kedro import __version__ as kedro_version
 from kedro.config import ConfigLoader
-from kedro.framework.context import KedroContext
+from kedro.framework.context import KedroContext, KedroContextError
 from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import hook_impl
-from kedro.framework.hooks.manager import _create_hook_manager
+from kedro.framework.hooks.manager import get_hook_manager
+from kedro.framework.project.settings import _get_project_settings
+from kedro.framework.session import KedroSession
+from kedro.framework.session.session import _register_all_project_hooks
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node, node
@@ -89,6 +92,14 @@ def _write_toml(filepath: Path, config: Dict):
     filepath.write_text(toml_str)
 
 
+def _assert_hook_call_record_has_expected_parameters(
+    call_record: logging.LogRecord, expected_parameters: List[str]
+):
+    """Assert the given call record has all expected parameters."""
+    for param in expected_parameters:
+        assert hasattr(call_record, param)
+
+
 @pytest.fixture
 def local_config(tmp_path):
     cars_filepath = str(tmp_path / "cars.csv")
@@ -109,6 +120,15 @@ def local_config(tmp_path):
 
 
 @pytest.fixture(autouse=True)
+def clear_hook_manager():
+    yield
+    hook_manager = get_hook_manager()
+    plugins = hook_manager.get_plugins()
+    for plugin in plugins:
+        hook_manager.unregister(plugin)
+
+
+@pytest.fixture(autouse=True)
 def config_dir(tmp_path, local_config, local_logging_config):
     catalog = tmp_path / "conf" / "base" / "catalog.yml"
     credentials = tmp_path / "conf" / "local" / "credentials.yml"
@@ -120,25 +140,13 @@ def config_dir(tmp_path, local_config, local_logging_config):
     payload = {
         "tool": {
             "kedro": {
-                "project_version": __version__,
+                "project_version": kedro_version,
                 "project_name": "test hooks",
                 "package_name": "test_hooks",
             }
         }
     }
     _write_toml(pyproject_toml, payload)
-
-
-@pytest.fixture(autouse=True)
-def hook_manager(monkeypatch):
-    # re-create the global hook manager after every test
-    hook_manager = _create_hook_manager()
-    monkeypatch.setattr("kedro.framework.hooks.get_hook_manager", lambda: hook_manager)
-    monkeypatch.setattr(
-        "kedro.framework.context.context.get_hook_manager", lambda: hook_manager
-    )
-    monkeypatch.setattr("kedro.runner.runner.get_hook_manager", lambda: hook_manager)
-    return hook_manager
 
 
 def identity(x: str):
@@ -158,13 +166,23 @@ def dummy_dataframe():
     return pd.DataFrame({"test": [1, 2]})
 
 
-context_pipeline = Pipeline(
+CONTEXT_PIPELINE = Pipeline(
     [
         node(identity, "cars", "planes", name="node1"),
         node(identity, "boats", "ships", name="node2"),
     ],
     tags="pipeline",
 )
+
+BROKEN_PIPELINE = Pipeline(
+    [
+        node(broken_node, None, "A", name="node1"),
+        node(broken_node, None, "B", name="node2"),
+    ],
+    tags="pipeline",
+)
+
+MockDistInfo = namedtuple("Distinfo", ["project_name", "version"])
 
 
 class LoggingHooks:
@@ -342,7 +360,7 @@ class LoggingHooks:
     @hook_impl
     def register_pipelines(self) -> Dict[str, Pipeline]:
         self.logger.info("Registering pipelines")
-        return {"__default__": context_pipeline, "de": context_pipeline}
+        return {"__default__": CONTEXT_PIPELINE, "de": CONTEXT_PIPELINE}
 
     @hook_impl
     def register_config_loader(self, conf_paths: Iterable[str]) -> ConfigLoader:
@@ -376,31 +394,62 @@ class LoggingHooks:
 class DuplicateHooks:
     @hook_impl
     def register_pipelines(self) -> Dict[str, Pipeline]:
-        return {"__default__": context_pipeline, "pipe": context_pipeline}
+        return {"__default__": CONTEXT_PIPELINE, "pipe": CONTEXT_PIPELINE}
 
 
 class MockDatasetReplacement:  # pylint: disable=too-few-public-methods
     pass
 
 
-class BeforeNodeRunHook:
-    """Should overwrite the `cars` dataset"""
+class RequiredHooks:
+    """Mandatory registration hooks"""
 
     @hook_impl
     def register_pipelines(self) -> Dict[str, Pipeline]:
-        return {"__default__": context_pipeline}
+        return {"__default__": CONTEXT_PIPELINE}
+
+    @hook_impl
+    def register_config_loader(self, conf_paths: Iterable[str]) -> ConfigLoader:
+        return ConfigLoader(conf_paths)
+
+    @hook_impl
+    def register_catalog(
+        self,
+        catalog: Optional[Dict[str, Dict[str, Any]]],
+        credentials: Dict[str, Dict[str, Any]],
+        load_versions: Dict[str, str],
+        save_version: str,
+        journal: Journal,
+    ) -> DataCatalog:
+        return DataCatalog.from_config(
+            catalog, credentials, load_versions, save_version, journal
+        )
+
+
+class BrokenConfigLoaderHooks(RequiredHooks):
+    @hook_impl
+    def register_config_loader(self, conf_paths):
+        return None
+
+
+class BrokenCatalogHooks(RequiredHooks):
+    @hook_impl
+    def register_catalog(
+        self, catalog, credentials, load_versions, save_version, journal,
+    ):
+        return None
+
+
+class BeforeNodeRunHook(RequiredHooks):
+    """Should overwrite the `cars` dataset"""
 
     @hook_impl
     def before_node_run(self, node: Node):
         return {"cars": MockDatasetReplacement()} if node.name == "node1" else None
 
 
-class BrokenBeforeNodeRunHook:
+class BrokenBeforeNodeRunHook(RequiredHooks):
     """Broken since `before_node_run` doesn't return a dictionary"""
-
-    @hook_impl
-    def register_pipelines(self) -> Dict[str, Pipeline]:
-        return {"__default__": context_pipeline}
 
     @hook_impl
     def before_node_run(self):
@@ -417,113 +466,83 @@ def logging_hooks(logs_queue):
     return LoggingHooks(logs_queue)
 
 
-def _create_context_with_hooks(tmp_path, mocker, context_hooks, disable_hooks_for=None):
-    """Create a context with some Hooks registered. We do this in a function
-    to support both calling it directly as well as as part of a fixture.
-    """
-    disable_hooks_for = disable_hooks_for or ()
+@pytest.fixture(autouse=True)
+def mocked_logging(mocker):
+    # Disable logging.config.dictConfig in KedroSession._setup_logging as
+    # it changes logging.config and affects other unit tests
+    return mocker.patch("logging.config.dictConfig")
 
-    def mock_settings(package, settings, default):  # pylint: disable=unused-argument
-        if settings == "DISABLE_HOOKS_FOR_PLUGINS":
-            return tuple(disable_hooks_for)
-        return default
 
-    mocker.patch("kedro.framework.context.context._get_project_settings", mock_settings)
-
-    class DummyContextWithHooks(KedroContext):
-        hooks = tuple(context_hooks)
-
-        def _get_run_id(self, *args, **kwargs) -> Union[None, str]:
-            return "mocked context with hooks run id"
-
-    mocker.patch("logging.config.dictConfig")
-    return DummyContextWithHooks("dummy_package", str(tmp_path), env="local")
+MOCK_PACKAGE_NAME = "mock_package_name"
 
 
 @pytest.fixture
-def context_with_hooks(tmp_path, mocker, logging_hooks):
-    logging_hooks.queue_listener.start()
-    yield _create_context_with_hooks(tmp_path, mocker, [logging_hooks])
-    logging_hooks.queue_listener.stop()
+def mock_broken_pipeline(mocker):
+    mocker.patch.object(
+        KedroContext, "_get_pipelines", return_value={"__default__": BROKEN_PIPELINE}
+    )
 
 
 @pytest.fixture
-def context_with_duplicate_hooks(tmp_path, mocker, logging_hooks):
-    logging_hooks.queue_listener.start()
-    hooks = (logging_hooks, DuplicateHooks())
-    yield _create_context_with_hooks(tmp_path, mocker, hooks)
-    logging_hooks.queue_listener.stop()
+def mock_settings_import(mocker, logging_hooks):
+    # https://docs.python.org/3/library/unittest.mock.html#unittest.mock.sentinel
+    mock_settings = mocker.sentinel.mock_settings
+    mock_settings.HOOKS = (logging_hooks,)
+
+    return mocker.patch(
+        "kedro.framework.project.settings.import_module", return_value=mock_settings
+    )
 
 
 @pytest.fixture
-def broken_context_with_hooks(tmp_path, mocker, logging_hooks):
+def mock_session_with_hooks(
+    tmp_path, mock_settings_import, logging_hooks
+):  # pylint: disable=unused-argument
     logging_hooks.queue_listener.start()
-    yield _create_broken_context_with_hooks(tmp_path, mocker, [logging_hooks])
+    yield KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
     logging_hooks.queue_listener.stop()
 
 
-def _create_broken_context_with_hooks(tmp_path, mocker, context_hooks):
-    class BrokenContextWithHooks(KedroContext):
-        hooks = tuple(context_hooks)
+class TestKedroSessionHooks:
+    def test_assert_register_hooks(self, request, logging_hooks):
+        hook_manager = get_hook_manager()
+        assert not hook_manager.is_registered(logging_hooks)
 
-        def _get_pipelines(self) -> Dict[str, Pipeline]:
-            pipeline = Pipeline(
-                [
-                    node(broken_node, None, "A", name="node1"),
-                    node(broken_node, None, "B", name="node2"),
-                ],
-                tags="pipeline",
-            )
-            return {"__default__": pipeline}
+        # call the fixture to construct the session
+        request.getfixturevalue("mock_session_with_hooks")
 
-    def mock_settings(package, settings, default):  # pylint: disable=unused-argument
-        return default
+        assert hook_manager.is_registered(logging_hooks)
 
-    # Here _get_project_settings() is used to get DISABLE_HOOKS_FOR_PLUGINS and HOOKS
-    mocker.patch("kedro.framework.context.context._get_project_settings", mock_settings)
-    mocker.patch("logging.config.dictConfig")
-    return BrokenContextWithHooks("dummy_package", tmp_path, env="local")
+    def test_calling_register_hooks_twice(self, mock_session_with_hooks, logging_hooks):
+        """Calling hook registration multiple times should not raise"""
+        hook_manager = get_hook_manager()
+        package_name = mock_session_with_hooks._package_name
 
-
-def _assert_hook_call_record_has_expected_parameters(
-    call_record: logging.LogRecord, expected_parameters: List[str]
-):
-    """Assert the given call record has all expected parameters."""
-    for param in expected_parameters:
-        assert hasattr(call_record, param)
-
-
-MockDistInfo = namedtuple("Distinfo", ["project_name", "version"])
-
-
-class TestKedroContextHooks:
-    def test_calling_register_hooks_multiple_times_should_not_raise(
-        self, context_with_hooks
-    ):
-        context_with_hooks._register_hooks()
-        context_with_hooks._register_hooks()
-        assert True  # if we get to this statement, it means the previous repeated calls don't raise
+        # hooks already registered when fixture 'mock_session_with_hooks' was called
+        assert hook_manager.is_registered(logging_hooks)
+        _register_all_project_hooks(hook_manager, package_name)
+        _register_all_project_hooks(hook_manager, package_name)
+        assert hook_manager.is_registered(logging_hooks)
 
     @pytest.mark.parametrize("num_plugins", [0, 1])
-    def test_hooks_are_registered_when_context_is_created(
-        self, tmp_path, mocker, logging_hooks, hook_manager, num_plugins, caplog
+    def test_hooks_registered_when_session_created(
+        self, mocker, request, caplog, logging_hooks, num_plugins
     ):
+        hook_manager = get_hook_manager()
+        assert not hook_manager.get_plugins()
+
         load_setuptools_entrypoints = mocker.patch.object(
             hook_manager, "load_setuptools_entrypoints", return_value=num_plugins
         )
-
         distinfo = [("plugin_obj_1", MockDistInfo("test-project-a", "0.1"))]
         list_distinfo_mock = mocker.patch.object(
             hook_manager, "list_plugin_distinfo", return_value=distinfo
         )
 
-        assert not hook_manager.is_registered(logging_hooks)
-
-        # create the context
-        _create_context_with_hooks(tmp_path, mocker, [logging_hooks])
-
-        # assert hooks are registered after context is created
+        # call a fixture which creates a session
+        request.getfixturevalue("mock_session_with_hooks")
         assert hook_manager.is_registered(logging_hooks)
+
         load_setuptools_entrypoints.assert_called_once_with("kedro.hooks")
         list_distinfo_mock.assert_called_once_with()
 
@@ -536,38 +555,57 @@ class TestKedroContextHooks:
             assert expected_msg in log_messages
 
     def test_disabling_auto_discovered_hooks(
-        self, tmp_path, mocker, hook_manager, caplog
+        self, mocker, request, caplog, mock_settings_import
     ):
-        mocker.patch.object(hook_manager, "load_setuptools_entrypoints", return_value=2)
+        hook_manager = get_hook_manager()
+        assert not hook_manager.get_plugins()
 
-        distinfo = [
-            ("plugin_obj_1", MockDistInfo("test-project-a", "0.1")),
-            ("plugin_obj_2", MockDistInfo("test-project-b", "0.2")),
-        ]
+        # pretend that some setuptools plugins were autodiscovered
+        naughty_plugin = MockDistInfo("test-project-a", "0.1")
+        good_plugin = MockDistInfo("test-project-b", "0.2")
+
+        distinfo = [("plugin_obj_1", naughty_plugin), ("plugin_obj_2", good_plugin)]
         list_distinfo_mock = mocker.patch.object(
             hook_manager, "list_plugin_distinfo", return_value=distinfo
         )
-
+        mocker.patch.object(
+            hook_manager, "load_setuptools_entrypoints", return_value=len(distinfo)
+        )
         unregister_mock = mocker.patch.object(hook_manager, "unregister")
 
-        # create the context
-        _create_context_with_hooks(tmp_path, mocker, [], [distinfo[0][1].project_name])
+        # pretend that we disabled hooks for plugin 'test-project-a'
+        mock_settings_import.return_value.DISABLE_HOOKS_FOR_PLUGINS = (
+            naughty_plugin.project_name,
+        )
 
+        # call a fixture which creates a session
+        request.getfixturevalue("mock_session_with_hooks")
         list_distinfo_mock.assert_called_once_with()
         unregister_mock.assert_called_once_with(plugin=distinfo[0][0])
 
+        # check the logs
         log_messages = [record.getMessage() for record in caplog.records]
-        plugin = f"{distinfo[1][1].project_name}-{distinfo[1][1].version}"
-        expected_msg = f"Registered hooks from 1 installed plugin(s): {plugin}"
+        expected_msg = (
+            f"Registered hooks from 1 installed plugin(s): "
+            f"{good_plugin.project_name}-{good_plugin.version}"
+        )
         assert expected_msg in log_messages
 
-        plugin = f"{distinfo[0][1].project_name}-{distinfo[0][1].version}"
-        expected_msg = f"Hooks are disabled for plugin(s): {plugin}"
+        expected_msg = (
+            f"Hooks are disabled for plugin(s): "
+            f"{naughty_plugin.project_name}-{naughty_plugin.version}"
+        )
         assert expected_msg in log_messages
 
-    def test_after_catalog_created_hook_is_called(self, context_with_hooks, caplog):
-        catalog = context_with_hooks.catalog
-        config_loader = context_with_hooks.config_loader
+    def test_after_catalog_created_hook(self, mocker, caplog, mock_session_with_hooks):
+        context = mock_session_with_hooks.load_context()
+        fake_run_id = mocker.sentinel.fake_run_id
+        mocker.patch.object(context, "_get_run_id", return_value=fake_run_id)
+
+        project_path = context.project_path
+        catalog = context.catalog
+        config_loader = context.config_loader
+
         relevant_records = [
             r
             for r in caplog.records
@@ -576,23 +614,25 @@ class TestKedroContextHooks:
         ]
         assert len(relevant_records) == 1
         record = relevant_records[0]
-        assert record.catalog == catalog
+        assert record.catalog is catalog
         assert record.conf_creds == config_loader.get("credentials*")
         assert record.conf_catalog == _convert_paths_to_absolute_posix(
-            project_path=context_with_hooks.project_path,
-            conf_dictionary=config_loader.get("catalog*"),
+            project_path=project_path, conf_dictionary=config_loader.get("catalog*"),
         )
+        # save_version is only passed during a run, not on the property getter
         assert record.save_version is None
         assert record.load_versions is None
-        assert record.run_id == "mocked context with hooks run id"
+        assert record.run_id is fake_run_id
 
-    def test_before_and_after_pipeline_run_hooks_are_called(
-        self, context_with_hooks, dummy_dataframe, caplog
+    def test_before_and_after_pipeline_run_hooks(
+        self, caplog, mock_session_with_hooks, dummy_dataframe
     ):
-
-        context_with_hooks.catalog.save("cars", dummy_dataframe)
-        context_with_hooks.catalog.save("boats", dummy_dataframe)
-        context_with_hooks.run()
+        context = mock_session_with_hooks.load_context()
+        catalog = context.catalog
+        default_pipeline = context.pipeline
+        catalog.save("cars", dummy_dataframe)
+        catalog.save("boats", dummy_dataframe)
+        mock_session_with_hooks.run()
 
         # test before pipeline run hook
         before_pipeline_run_calls = [
@@ -602,7 +642,7 @@ class TestKedroContextHooks:
         ]
         assert len(before_pipeline_run_calls) == 1
         call_record = before_pipeline_run_calls[0]
-        assert call_record.pipeline.describe() == context_with_hooks.pipeline.describe()
+        assert call_record.pipeline is default_pipeline
         _assert_hook_call_record_has_expected_parameters(
             call_record, ["pipeline", "catalog", "run_params"]
         )
@@ -618,11 +658,12 @@ class TestKedroContextHooks:
         _assert_hook_call_record_has_expected_parameters(
             call_record, ["pipeline", "catalog", "run_params"]
         )
-        assert call_record.pipeline.describe() == context_with_hooks.pipeline.describe()
+        assert call_record.pipeline is default_pipeline
 
-    def test_on_pipeline_error_hook_is_called(self, broken_context_with_hooks, caplog):
+    @pytest.mark.usefixtures("mock_broken_pipeline")
+    def test_on_pipeline_error_hook(self, caplog, mock_session_with_hooks):
         with pytest.raises(ValueError, match="broken"):
-            broken_context_with_hooks.run()
+            mock_session_with_hooks.run()
 
         on_pipeline_error_calls = [
             record
@@ -637,11 +678,12 @@ class TestKedroContextHooks:
         expected_error = ValueError("broken")
         assert_exceptions_equal(call_record.error, expected_error)
 
-    def test_on_node_error_hook_is_called_with_sequential_runner(
-        self, broken_context_with_hooks, caplog
+    @pytest.mark.usefixtures("mock_broken_pipeline")
+    def test_on_node_error_hook_sequential_runner(
+        self, caplog, mock_session_with_hooks
     ):
         with pytest.raises(ValueError, match="broken"):
-            broken_context_with_hooks.run(node_names=["node1"])
+            mock_session_with_hooks.run(node_names=["node1"])
 
         on_node_error_calls = [
             record for record in caplog.records if record.funcName == "on_node_error"
@@ -654,11 +696,13 @@ class TestKedroContextHooks:
         expected_error = ValueError("broken")
         assert_exceptions_equal(call_record.error, expected_error)
 
-    def test_before_and_after_node_run_hooks_are_called_with_sequential_runner(
-        self, context_with_hooks, dummy_dataframe, caplog
+    def test_before_and_after_node_run_hooks_sequential_runner(
+        self, caplog, mock_session_with_hooks, dummy_dataframe
     ):
-        context_with_hooks.catalog.save("cars", dummy_dataframe)
-        context_with_hooks.run(node_names=["node1"])
+        context = mock_session_with_hooks.load_context()
+        catalog = context.catalog
+        catalog.save("cars", dummy_dataframe)
+        mock_session_with_hooks.run(node_names=["node1"])
 
         # test before node run hook
         before_node_run_calls = [
@@ -671,7 +715,7 @@ class TestKedroContextHooks:
         )
         # sanity check a couple of important parameters
         assert call_record.inputs["cars"].to_dict() == dummy_dataframe.to_dict()
-        assert call_record.run_id == context_with_hooks.run_id
+        assert call_record.run_id == mock_session_with_hooks.session_id
 
         # test after node run hook
         after_node_run_calls = [
@@ -684,33 +728,28 @@ class TestKedroContextHooks:
         )
         # sanity check a couple of important parameters
         assert call_record.outputs["planes"].to_dict() == dummy_dataframe.to_dict()
-        assert call_record.run_id == context_with_hooks.run_id
+        assert call_record.run_id == mock_session_with_hooks.session_id
 
     @SKIP_ON_WINDOWS
-    def test_on_node_error_hook_is_called_with_parallel_runner(
-        self, tmp_path, mocker, logging_hooks
-    ):
+    @pytest.mark.usefixtures("mock_broken_pipeline", "mock_settings_import")
+    def test_on_node_error_hook_parallel_runner(self, tmp_path, logging_hooks):
+        session = KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
         log_records = []
 
         class LogHandler(logging.Handler):  # pylint: disable=abstract-method
             def handle(self, record):
                 log_records.append(record)
 
-        broken_context_with_hooks = _create_broken_context_with_hooks(
-            tmp_path, mocker, [logging_hooks]
-        )
-        mocker.patch(
-            "kedro.framework.context.context.load_context",
-            return_value=broken_context_with_hooks,
-        )
         logs_queue_listener = QueueListener(logging_hooks.queue, LogHandler())
         logs_queue_listener.start()
 
         with pytest.raises(ValueError, match="broken"):
-            broken_context_with_hooks.run(
-                runner=ParallelRunner(max_workers=2), node_names=["node1", "node2"]
-            )
-        logs_queue_listener.stop()
+            try:
+                session.run(
+                    runner=ParallelRunner(max_workers=2), node_names=["node1", "node2"]
+                )
+            finally:
+                logs_queue_listener.stop()
 
         on_node_error_records = [
             r for r in log_records if r.funcName == "on_node_error"
@@ -726,28 +765,28 @@ class TestKedroContextHooks:
             assert_exceptions_equal(call_record.error, expected_error)
 
     @SKIP_ON_WINDOWS
-    def test_before_and_after_node_run_hooks_are_called_with_parallel_runner(
-        self, tmp_path, mocker, logging_hooks, dummy_dataframe
+    @pytest.mark.usefixtures("mock_settings_import")
+    def test_before_and_after_node_run_hooks_parallel_runner(
+        self, tmp_path, logging_hooks, dummy_dataframe
     ):
         log_records = []
+        session = KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
+        context = session.load_context()
+        catalog = context.catalog
+        catalog.save("cars", dummy_dataframe)
+        catalog.save("boats", dummy_dataframe)
 
         class LogHandler(logging.Handler):  # pylint: disable=abstract-method
             def handle(self, record):
                 log_records.append(record)
 
-        context_with_hooks = _create_context_with_hooks(
-            tmp_path, mocker, [logging_hooks]
-        )
-        mocker.patch(
-            "kedro.framework.context.context.load_context",
-            return_value=context_with_hooks,
-        )
         logs_queue_listener = QueueListener(logging_hooks.queue, LogHandler())
         logs_queue_listener.start()
-        context_with_hooks.catalog.save("cars", dummy_dataframe)
-        context_with_hooks.catalog.save("boats", dummy_dataframe)
-        context_with_hooks.run(runner=ParallelRunner(), node_names=["node1", "node2"])
-        logs_queue_listener.stop()
+
+        try:
+            session.run(runner=ParallelRunner(), node_names=["node1", "node2"])
+        finally:
+            logs_queue_listener.stop()
 
         before_node_run_log_records = [
             r for r in log_records if r.funcName == "before_node_run"
@@ -767,11 +806,13 @@ class TestKedroContextHooks:
             assert record.node.name in ["node1", "node2"]
             assert set(record.outputs.keys()) <= {"planes", "ships"}
 
-    def test_before_and_after_dataset_loaded_hooks_are_called_with_sequential_runner(
-        self, context_with_hooks, dummy_dataframe, caplog
+    def test_before_and_after_dataset_loaded_hooks_sequential_runner(
+        self, caplog, mock_session_with_hooks, dummy_dataframe
     ):
-        context_with_hooks.catalog.save("cars", dummy_dataframe)
-        context_with_hooks.run(node_names=["node1"])
+        context = mock_session_with_hooks.load_context()
+        catalog = context.catalog
+        catalog.save("cars", dummy_dataframe)
+        mock_session_with_hooks.run(node_names=["node1"])
 
         # test before dataset loaded hook
         before_dataset_loaded_calls = [
@@ -800,31 +841,28 @@ class TestKedroContextHooks:
         assert call_record.dataset_name == "cars"
         pd.testing.assert_frame_equal(call_record.data, dummy_dataframe)
 
-    @pytest.mark.skipif(
-        sys.platform.startswith("win"), reason="Due to bug in parallel runner"
-    )
-    def test_before_and_after_dataset_loaded_hooks_are_called_with_parallel_runner(
-        self, tmp_path, mocker, logging_hooks, dummy_dataframe
+    @SKIP_ON_WINDOWS
+    @pytest.mark.usefixtures("mock_settings_import")
+    def test_before_and_after_dataset_loaded_hooks_parallel_runner(
+        self, tmp_path, logging_hooks, dummy_dataframe
     ):
         log_records = []
+        session = KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
+        context = session.load_context()
+        catalog = context.catalog
+        catalog.save("cars", dummy_dataframe)
+        catalog.save("boats", dummy_dataframe)
 
         class LogHandler(logging.Handler):  # pylint: disable=abstract-method
             def handle(self, record):
                 log_records.append(record)
 
-        context_with_hooks = _create_context_with_hooks(
-            tmp_path, mocker, [logging_hooks]
-        )
-        mocker.patch(
-            "kedro.framework.context.context.load_context",
-            return_value=context_with_hooks,
-        )
         logs_queue_listener = QueueListener(logging_hooks.queue, LogHandler())
         logs_queue_listener.start()
-        context_with_hooks.catalog.save("cars", dummy_dataframe)
-        context_with_hooks.catalog.save("boats", dummy_dataframe)
-        context_with_hooks.run(runner=ParallelRunner(), node_names=["node1", "node2"])
-        logs_queue_listener.stop()
+        try:
+            session.run(runner=ParallelRunner(), node_names=["node1", "node2"])
+        finally:
+            logs_queue_listener.stop()
 
         before_dataset_loaded_log_records = [
             r for r in log_records if r.funcName == "before_dataset_loaded"
@@ -843,11 +881,12 @@ class TestKedroContextHooks:
             assert record.dataset_name in ["cars", "boats"]
             pd.testing.assert_frame_equal(record.data, dummy_dataframe)
 
-    def test_before_and_after_dataset_saved_hooks_are_called_with_sequential_runner(
-        self, context_with_hooks, dummy_dataframe, caplog
+    def test_before_and_after_dataset_saved_hooks_sequential_runner(
+        self, caplog, mock_session_with_hooks, dummy_dataframe
     ):
-        context_with_hooks.catalog.save("cars", dummy_dataframe)
-        context_with_hooks.run(node_names=["node1"])
+        context = mock_session_with_hooks.load_context()
+        context.catalog.save("cars", dummy_dataframe)
+        mock_session_with_hooks.run(node_names=["node1"])
 
         # test before dataset saved hook
         before_dataset_saved_calls = [
@@ -879,31 +918,28 @@ class TestKedroContextHooks:
         assert call_record.dataset_name == "planes"
         assert call_record.data.to_dict() == dummy_dataframe.to_dict()
 
-    @pytest.mark.skipif(
-        sys.platform.startswith("win"), reason="Due to bug in parallel runner"
-    )
-    def test_before_and_after_dataset_saved_hooks_are_called_with_parallel_runner(
-        self, tmp_path, mocker, logging_hooks, dummy_dataframe
+    @SKIP_ON_WINDOWS
+    @pytest.mark.usefixtures("mock_settings_import")
+    def test_before_and_after_dataset_saved_hooks_parallel_runner(
+        self, tmp_path, logging_hooks, dummy_dataframe
     ):
         log_records = []
+        session = KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
+        context = session.load_context()
+        catalog = context.catalog
+        catalog.save("cars", dummy_dataframe)
+        catalog.save("boats", dummy_dataframe)
 
         class LogHandler(logging.Handler):  # pylint: disable=abstract-method
             def handle(self, record):
                 log_records.append(record)
 
-        context_with_hooks = _create_context_with_hooks(
-            tmp_path, mocker, [logging_hooks]
-        )
-        mocker.patch(
-            "kedro.framework.context.context.load_context",
-            return_value=context_with_hooks,
-        )
         logs_queue_listener = QueueListener(logging_hooks.queue, LogHandler())
         logs_queue_listener.start()
-        context_with_hooks.catalog.save("cars", dummy_dataframe)
-        context_with_hooks.catalog.save("boats", dummy_dataframe)
-        context_with_hooks.run(runner=ParallelRunner(), node_names=["node1", "node2"])
-        logs_queue_listener.stop()
+        try:
+            session.run(runner=ParallelRunner(), node_names=["node1", "node2"])
+        finally:
+            logs_queue_listener.stop()
 
         before_dataset_saved_log_records = [
             r for r in log_records if r.funcName == "before_dataset_saved"
@@ -927,44 +963,43 @@ class TestKedroContextHooks:
 class TestBeforeNodeRunHookWithInputUpdates:
     """Test the behavior of `before_node_run_hook` when updating node inputs"""
 
-    @pytest.fixture(params=[BeforeNodeRunHook])
-    def context_with_before_node_run_hook(self, tmp_path, mocker, request):
-        hook_class = request.param
-        return _create_context_with_hooks(tmp_path, mocker, [hook_class()])
-
-    @pytest.mark.usefixtures("hook_manager")
     def test_correct_input_update(
-        self, context_with_before_node_run_hook, dummy_dataframe
+        self, mock_settings_import, tmp_path, dummy_dataframe
     ):
-        catalog = context_with_before_node_run_hook.catalog
+        mock_settings_import.return_value.HOOKS = (BeforeNodeRunHook(),)
+
+        session = KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
+        context = session.load_context()
+        catalog = context.catalog
         catalog.save("cars", dummy_dataframe)
         catalog.save("boats", dummy_dataframe)
 
-        result = context_with_before_node_run_hook.run()
+        result = session.run()
         assert isinstance(result["planes"], MockDatasetReplacement)
         assert isinstance(result["ships"], pd.DataFrame)
 
     @SKIP_ON_WINDOWS
-    @pytest.mark.usefixtures("hook_manager")
     def test_correct_input_update_parallel(
-        self, context_with_before_node_run_hook, dummy_dataframe
+        self, mock_settings_import, tmp_path, dummy_dataframe
     ):
-        catalog = context_with_before_node_run_hook.catalog
+        mock_settings_import.return_value.HOOKS = (BeforeNodeRunHook(),)
+
+        session = KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
+        context = session.load_context()
+        catalog = context.catalog
         catalog.save("cars", dummy_dataframe)
         catalog.save("boats", dummy_dataframe)
 
-        result = context_with_before_node_run_hook.run(runner=ParallelRunner())
+        result = session.run(runner=ParallelRunner())
         assert isinstance(result["planes"], MockDatasetReplacement)
         assert isinstance(result["ships"], pd.DataFrame)
 
-    @pytest.mark.parametrize(
-        "context_with_before_node_run_hook", [BrokenBeforeNodeRunHook], indirect=True
-    )
-    @pytest.mark.usefixtures("hook_manager")
-    def test_broken_input_update(
-        self, context_with_before_node_run_hook, dummy_dataframe
-    ):
-        catalog = context_with_before_node_run_hook.catalog
+    def test_broken_input_update(self, mock_settings_import, tmp_path, dummy_dataframe):
+        mock_settings_import.return_value.HOOKS = (BrokenBeforeNodeRunHook(),)
+
+        session = KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
+        context = session.load_context()
+        catalog = context.catalog
         catalog.save("cars", dummy_dataframe)
         catalog.save("boats", dummy_dataframe)
 
@@ -973,17 +1008,17 @@ class TestBeforeNodeRunHookWithInputUpdates:
             "mapping dataset names to updated values, got `MockDatasetReplacement`"
         )
         with pytest.raises(TypeError, match=re.escape(pattern)):
-            context_with_before_node_run_hook.run()
+            session.run()
 
-    @pytest.mark.parametrize(
-        "context_with_before_node_run_hook", [BrokenBeforeNodeRunHook], indirect=True
-    )
     @SKIP_ON_WINDOWS
-    @pytest.mark.usefixtures("hook_manager")
     def test_broken_input_update_parallel(
-        self, context_with_before_node_run_hook, dummy_dataframe
+        self, mock_settings_import, tmp_path, dummy_dataframe
     ):
-        catalog = context_with_before_node_run_hook.catalog
+        mock_settings_import.return_value.HOOKS = (BrokenBeforeNodeRunHook(),)
+
+        session = KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
+        context = session.load_context()
+        catalog = context.catalog
         catalog.save("cars", dummy_dataframe)
         catalog.save("boats", dummy_dataframe)
 
@@ -992,16 +1027,18 @@ class TestBeforeNodeRunHookWithInputUpdates:
             "mapping dataset names to updated values, got `MockDatasetReplacement`"
         )
         with pytest.raises(TypeError, match=re.escape(pattern)):
-            context_with_before_node_run_hook.run(runner=ParallelRunner())
+            session.run(runner=ParallelRunner())
 
 
 class TestRegistrationHooks:
     def test_register_pipelines_is_called(
-        self, context_with_hooks, dummy_dataframe, caplog
+        self, mock_session_with_hooks, dummy_dataframe, caplog
     ):
-        context_with_hooks.catalog.save("cars", dummy_dataframe)
-        context_with_hooks.catalog.save("boats", dummy_dataframe)
-        context_with_hooks.run()
+        context = mock_session_with_hooks.load_context()
+        catalog = context.catalog
+        catalog.save("cars", dummy_dataframe)
+        catalog.save("boats", dummy_dataframe)
+        mock_session_with_hooks.run()
 
         register_pipelines_calls = [
             record
@@ -1012,27 +1049,36 @@ class TestRegistrationHooks:
         call_record = register_pipelines_calls[0]
         _assert_hook_call_record_has_expected_parameters(call_record, [])
 
-        expected_pipelines = {"__default__": context_pipeline, "de": context_pipeline}
-        assert context_with_hooks.pipelines == expected_pipelines
+        expected_pipelines = {"__default__": CONTEXT_PIPELINE, "de": CONTEXT_PIPELINE}
+        assert context.pipelines == expected_pipelines
 
     def test_register_pipelines_with_duplicate_entries(
-        self, context_with_duplicate_hooks, dummy_dataframe
+        self, tmp_path, mock_settings_import, logging_hooks, dummy_dataframe
     ):
-        context_with_duplicate_hooks.catalog.save("cars", dummy_dataframe)
-        context_with_duplicate_hooks.catalog.save("boats", dummy_dataframe)
+        mock_settings_import.return_value.HOOKS = (logging_hooks, DuplicateHooks())
 
-        pattern = "Found duplicate pipeline entries. The following will be overwritten: __default__"
+        session = KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
+        context = session.load_context()
+        catalog = context.catalog
+        catalog.save("cars", dummy_dataframe)
+        catalog.save("boats", dummy_dataframe)
+
+        pattern = (
+            "Found duplicate pipeline entries. The following "
+            "will be overwritten: __default__"
+        )
         with pytest.warns(UserWarning, match=re.escape(pattern)):
-            context_with_duplicate_hooks.run()
+            session.run()
 
         # check that all pipeline dictionaries merged together correctly
         expected_pipelines = {
-            key: context_pipeline for key in ("__default__", "de", "pipe")
+            key: CONTEXT_PIPELINE for key in ("__default__", "de", "pipe")
         }
-        assert context_with_duplicate_hooks.pipelines == expected_pipelines
+        assert context.pipelines == expected_pipelines
 
-    def test_register_config_loader_is_called(self, context_with_hooks, caplog):
-        _ = context_with_hooks.config_loader
+    def test_register_config_loader_is_called(self, mock_session_with_hooks, caplog):
+        context = mock_session_with_hooks.load_context()
+        _ = context.config_loader
 
         relevant_records = [
             r for r in caplog.records if r.name == LoggingHooks.handler_name
@@ -1040,18 +1086,17 @@ class TestRegistrationHooks:
         assert len(relevant_records) == 1
         record = relevant_records[0]
         assert record.getMessage() == "Registering config loader"
+
+        conf_root = _get_project_settings(MOCK_PACKAGE_NAME, "CONF_ROOT", "conf")
         expected_conf_paths = [
-            str(
-                context_with_hooks.project_path / context_with_hooks.CONF_ROOT / "base"
-            ),
-            str(
-                context_with_hooks.project_path / context_with_hooks.CONF_ROOT / "local"
-            ),
+            str(context.project_path / conf_root / "base"),
+            str(context.project_path / conf_root / "local"),
         ]
         assert record.conf_paths == expected_conf_paths
 
-    def test_register_catalog_is_called(self, context_with_hooks, caplog):
-        catalog = context_with_hooks.catalog
+    def test_register_catalog_is_called(self, mock_session_with_hooks, caplog):
+        context = mock_session_with_hooks.load_context()
+        catalog = context.catalog
         assert isinstance(catalog, DataCatalog)
 
         relevant_records = [
@@ -1069,3 +1114,27 @@ class TestRegistrationHooks:
         assert record.save_version is None
         assert record.load_versions is None
         assert record.journal is None
+
+    def test_broken_register_config_loader_hook(self, mocker, tmp_path):
+        mock_settings = mocker.sentinel.mock_settings
+        mock_settings.HOOKS = (BrokenConfigLoaderHooks(),)
+        mocker.patch(
+            "kedro.framework.project.settings.import_module", return_value=mock_settings
+        )
+
+        pattern = "Expected an instance of `ConfigLoader`, got `NoneType` instead."
+        with pytest.raises(KedroContextError, match=re.escape(pattern)):
+            KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
+
+    def test_broken_register_catalog_hook(self, mocker, tmp_path):
+        mock_settings = mocker.sentinel.mock_settings
+        mock_settings.HOOKS = (BrokenCatalogHooks(),)
+        mocker.patch(
+            "kedro.framework.project.settings.import_module", return_value=mock_settings
+        )
+
+        pattern = "Expected an instance of `DataCatalog`, got `NoneType` instead."
+        with KedroSession.create(MOCK_PACKAGE_NAME, tmp_path) as session:
+            context = session.load_context()
+            with pytest.raises(KedroContextError, match=re.escape(pattern)):
+                _ = context.catalog

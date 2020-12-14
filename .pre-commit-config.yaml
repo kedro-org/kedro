@@ -75,7 +75,7 @@ repos:
             language: system
             pass_filenames: false
             stages: [manual]
-            entry: pylint --disable=unnecessary-pass kedro
+            entry: pylint --disable=unnecessary-pass --init-hook="import sys; sys.setrecursionlimit(2000)" kedro
           - id: pylint-features
             name: "PyLint on features/*"
             language: system

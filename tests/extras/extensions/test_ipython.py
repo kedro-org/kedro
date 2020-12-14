@@ -34,6 +34,7 @@ from kedro.extras.extensions.ipython import (
     load_kedro_objects,
 )
 from kedro.framework.session.session import _deactivate_session
+from kedro.framework.session.store import BaseSessionStore
 from kedro.framework.startup import ProjectMetadata
 
 
@@ -41,6 +42,13 @@ from kedro.framework.startup import ProjectMetadata
 def project_path(mocker, tmp_path):
     path = tmp_path
     mocker.patch("kedro.extras.extensions.ipython.project_path", path)
+
+
+@pytest.fixture(autouse=True)
+def mocked_logging(mocker):
+    # Disable logging.config.dictConfig in KedroSession._setup_logging as
+    # it changes logging.config and affects other unit tests
+    return mocker.patch("logging.config.dictConfig")
 
 
 @pytest.fixture(autouse=True)
@@ -85,6 +93,10 @@ class TestInitKedro:
 
 class TestLoadKedroObjects:
     def test_load_kedro_objects(self, tmp_path, mocker):
+        # pylint: disable=unused-argument
+        def get_settings_mock(package_name, property_name, default):
+            return default
+
         fake_metadata = ProjectMetadata(
             source_dir=tmp_path / "src",  # default
             config_file=tmp_path / "pyproject.toml",
@@ -107,7 +119,8 @@ class TestLoadKedroObjects:
         )
         mock_context = mocker.patch("kedro.framework.session.KedroSession.load_context")
         mock_get_settings = mocker.patch(
-            "kedro.framework.session.session._get_project_settings", return_value={}
+            "kedro.framework.session.session._get_project_settings",
+            side_effect=get_settings_mock,
         )
         mock_ipython = mocker.patch("kedro.extras.extensions.ipython.get_ipython")
 
@@ -121,9 +134,16 @@ class TestLoadKedroObjects:
             }
         )
         assert mock_register_line_magic.call_count == 1
-        mock_get_settings.assert_called_once_with(
-            fake_metadata.package_name, "SESSION_STORE", {}
-        )
+
+        expected_calls = [
+            mocker.call(
+                fake_metadata.package_name, "SESSION_STORE_CLASS", BaseSessionStore
+            ),
+            mocker.call(fake_metadata.package_name, "SESSION_STORE_ARGS", {}),
+            mocker.call(fake_metadata.package_name, "HOOKS", ()),
+            mocker.call(fake_metadata.package_name, "DISABLE_HOOKS_FOR_PLUGINS", ()),
+        ]
+        assert mock_get_settings.mock_calls == expected_calls
 
     def test_load_kedro_objects_not_in_kedro_project(self, tmp_path, mocker):
         mocker.patch(

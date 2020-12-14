@@ -30,6 +30,7 @@ import shutil
 from zipfile import ZipFile
 
 import pytest
+import yaml
 from click import ClickException
 from click.testing import CliRunner
 
@@ -43,6 +44,13 @@ FIRST_CHAR_ERROR = "It must start with a letter or underscore."
 TOO_SHORT_ERROR = "It must be at least 2 characters long."
 
 CONF_ROOT = KedroContext.CONF_ROOT
+
+
+@pytest.fixture(autouse=True)
+def mocked_logging(mocker):
+    # Disable logging.config.dictConfig in KedroSession._setup_logging as
+    # it changes logging.config and affects other unit tests
+    return mocker.patch("logging.config.dictConfig")
 
 
 @pytest.fixture(autouse=True)
@@ -89,11 +97,6 @@ def cleanup_dist(fake_repo_path):
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
 class TestPipelinePackageCommand:
-    @staticmethod
-    @pytest.fixture(autouse=True)
-    def mocked_session_manager(mocker, fake_project_cli):
-        yield mocker.patch.object(fake_project_cli.KedroSession, "create")
-
     def assert_wheel_contents_correct(
         self, wheel_location, package_name=PIPELINE_NAME, version="0.1"
     ):
@@ -463,6 +466,37 @@ class TestPipelinePullCommand:
         assert not filecmp.dircmp(source_path, source_dest).diff_files
         assert not filecmp.dircmp(test_path, test_dest).diff_files
         assert source_params_config.read_bytes() == dest_params_config.read_bytes()
+
+    def test_pull_whl_fs_args(
+        self, fake_project_cli, fake_repo_path, mocker, tmp_path, fake_metadata
+    ):
+        """
+        Test for pulling a wheel file with custom fs_args specified.
+        """
+        self.call_pipeline_create(fake_project_cli.cli, fake_metadata)
+        self.call_pipeline_package(fake_project_cli.cli, fake_metadata)
+        self.call_pipeline_delete(fake_project_cli.cli, fake_metadata)
+
+        fs_args_config = tmp_path / "fs_args_config.yml"
+        with fs_args_config.open(mode="w") as f:
+            yaml.dump({"fs_arg_1": 1, "fs_arg_2": {"fs_arg_2_nested_1": 2}}, f)
+        mocked_filesystem = mocker.patch("fsspec.filesystem")
+
+        wheel_file = (
+            fake_repo_path
+            / "src"
+            / "dist"
+            / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
+        )
+
+        options = ["--fs-args", str(fs_args_config)]
+        CliRunner().invoke(
+            fake_project_cli.cli, ["pipeline", "pull", str(wheel_file), *options]
+        )
+
+        mocked_filesystem.assert_called_once_with(
+            "file", fs_arg_1=1, fs_arg_2=dict(fs_arg_2_nested_1=2)
+        )
 
     def test_pull_two_dist_info(
         self, fake_project_cli, fake_repo_path, mocker, tmp_path, fake_metadata

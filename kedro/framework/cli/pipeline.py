@@ -34,7 +34,7 @@ import tempfile
 from importlib import import_module
 from pathlib import Path
 from textwrap import indent
-from typing import NamedTuple, Tuple
+from typing import NamedTuple, Optional, Tuple
 from zipfile import ZipFile
 
 import click
@@ -205,17 +205,19 @@ def describe_pipeline(name, env):
     callback=_check_pipeline_name,
     help="Alternative name to unpackage under.",
 )
-def pull_package(package_path, env, alias):
+@click.option(
+    "--fs-args",
+    type=click.Path(
+        exists=True, file_okay=True, dir_okay=False, readable=True, resolve_path=True
+    ),
+    default=None,
+    help="Location of a configuration file for the fsspec filesystem used to pull the package.",
+)
+def pull_package(package_path, env, alias, fs_args):
     """Pull a modular pipeline package, unpack it and install the files to corresponding
     locations.
     """
-    # pylint: disable=import-outside-toplevel
-    import fsspec
-
-    from kedro.io.core import get_protocol_and_path
-
-    protocol, _ = get_protocol_and_path(package_path)
-    filesystem = fsspec.filesystem(protocol)
+    filesystem = _get_fsspec_filesystem(package_path, fs_args)
 
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_dir_path = Path(temp_dir).resolve()
@@ -250,6 +252,19 @@ def pull_package(package_path, env, alias):
 
         _clean_pycache(temp_dir_path)
         _install_files(package_name, temp_dir_path, env, alias)
+
+
+def _get_fsspec_filesystem(package_path: str, fs_args: Optional[str]):
+    # pylint: disable=import-outside-toplevel
+    import anyconfig
+    import fsspec
+
+    from kedro.io.core import get_protocol_and_path
+
+    protocol, _ = get_protocol_and_path(package_path)
+    fs_args_config = anyconfig.load(fs_args) if fs_args else {}
+
+    return fsspec.filesystem(protocol, **fs_args_config)
 
 
 def _install_files(

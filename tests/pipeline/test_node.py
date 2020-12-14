@@ -50,12 +50,6 @@ def triconcat(input1: str, input2: str, input3: str):
     return input1 + input2 + input3  # pragma: no cover
 
 
-def kwarg_node(
-    arg1, arg2, *args, arg3, arg_10=0, **extra  # pylint: disable=unused-argument
-):
-    pass  # pragma: no cover
-
-
 @pytest.fixture
 def simple_tuple_node_list():
     return [
@@ -139,15 +133,6 @@ class TestValidNode:
         assert isinstance(inputs, list)
         assert len(inputs) == 2
         assert set(inputs) == {"in1", "in2"}
-
-    def test_inputs_dict_order(self):
-        dummy = node(
-            kwarg_node,
-            {"arg5": "a", "arg4": "b", "arg3": "c", "arg2": "d", "arg1": "e"},
-            None,
-        )
-        # a and b and c are keyword args, so they should be sorted
-        assert dummy.inputs == ["e", "d", "a", "b", "c"]
 
     def test_inputs_list(self):
         dummy_node = node(

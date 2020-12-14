@@ -20,8 +20,7 @@
 * Deprecated `kedro.framework.context.load_context`, it will be removed in 0.18.0 release.
 * Relax `pyspark` requirements to allow for installation of `pyspark` 3.0.
 * Deprecated `kedro.framework.cli.get_project_context`, it will be removed in 0.18.0 release.
-* `PartitionedDataSet` improvements:
-  - Supported versioning of the underlying dataset.
+* `PartitionedDataSet` and `IncrementalDataSet` now both support versioning of the underlying dataset.
 * Added a `--fs-args` option to the `kedro pipeline pull` command to specify configuration options for the fsspec filesystem arguments used when pulling modular pipelines from non-PyPI locations.
 
 ## Breaking changes to the API

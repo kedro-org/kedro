@@ -279,10 +279,74 @@ class TestIncrementalDataSetLocal:
             ),
         ],
     )
-    def test_version_not_allowed(self, tmp_path, checkpoint_config, error_pattern):
+    def test_checkpoint_versioning_not_allowed(
+        self, tmp_path, checkpoint_config, error_pattern
+    ):
         """Test that invalid checkpoint configurations raise expected errors"""
         with pytest.raises(DataSetError, match=re.escape(error_pattern)):
             IncrementalDataSet(str(tmp_path), DATASET, checkpoint=checkpoint_config)
+
+    @pytest.mark.parametrize("dataset_config", [{"type": DATASET, "versioned": True}])
+    @pytest.mark.parametrize(
+        "suffix,expected_num_parts", [("", 5), (".csv", 5), ("bad", 0)]
+    )
+    def test_versioned_dataset_save_and_load(
+        self,
+        mocker,
+        tmp_path,
+        partitioned_data_pandas,
+        dataset_config,
+        suffix,
+        expected_num_parts,
+    ):
+        """Test that saved and reloaded data matches the original one for
+        the versioned data set."""
+        save_version = "2020-01-01T00.00.00.000Z"
+        mock_ts = mocker.patch(
+            "kedro.io.core.generate_timestamp", return_value=save_version
+        )
+        IncrementalDataSet(str(tmp_path), dataset_config).save(partitioned_data_pandas)
+        mock_ts.assert_called_once()
+
+        dataset = IncrementalDataSet(
+            str(tmp_path), dataset_config, filename_suffix=suffix
+        )
+        loaded_partitions = dataset.load()
+
+        assert len(loaded_partitions) == expected_num_parts
+
+        actual_save_versions = set()
+        for part in loaded_partitions:
+            partition_dir = tmp_path / (part + suffix)
+            actual_save_versions |= {each.name for each in partition_dir.iterdir()}
+            assert partition_dir.is_dir()
+            assert_frame_equal(
+                loaded_partitions[part], partitioned_data_pandas[part + suffix]
+            )
+
+        if expected_num_parts:
+            # all partitions were saved using the same version string
+            assert actual_save_versions == {save_version}
+
+    def test_malformed_versioned_path(self, tmp_path):
+        local_dir = tmp_path / "files"
+        local_dir.mkdir()
+
+        path = local_dir / "path/to/folder/new/partition/version/partition/file"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("content")
+
+        dataset = IncrementalDataSet(
+            str(local_dir / "path/to/folder"),
+            {"type": "pandas.CSVDataSet", "versioned": True},
+        )
+
+        pattern = re.escape(
+            f"`{path.as_posix()}` is not a well-formed versioned path ending with "
+            f"`filename/timestamp/filename` (got `version/partition/file`)."
+        )
+        with pytest.raises(DataSetError, match=pattern):
+            dataset.load()
 
     @pytest.mark.parametrize(
         "pds_config,fs_creds,dataset_creds,checkpoint_creds",

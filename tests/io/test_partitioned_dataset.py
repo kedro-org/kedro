@@ -289,25 +289,38 @@ class TestPartitionedDataSetLocal:
     )
     def test_versioned_dataset_save_and_load(
         self,
+        mocker,
         filepath_csvs,
         dataset_config,
         suffix,
         expected_num_parts,
         partitioned_data_pandas,
-    ):
+    ):  # pylint: disable=too-many-locals
         """Test that saved and reloaded data matches the original one for
         the versioned data set."""
+        save_version = "2020-01-01T00.00.00.000Z"
+        mock_ts = mocker.patch(
+            "kedro.io.core.generate_timestamp", return_value=save_version
+        )
         PartitionedDataSet(filepath_csvs, dataset_config).save(partitioned_data_pandas)
+        mock_ts.assert_called_once()
 
         pds = PartitionedDataSet(filepath_csvs, dataset_config, filename_suffix=suffix)
         loaded_partitions = pds.load()
 
-        assert len(loaded_partitions.keys()) == expected_num_parts
+        assert len(loaded_partitions) == expected_num_parts
+        actual_save_versions = set()
         for partition_id, load_func in loaded_partitions.items():
+            partition_dir = Path(filepath_csvs, partition_id + suffix)
+            actual_save_versions |= {each.name for each in partition_dir.iterdir()}
             df = load_func()
             assert_frame_equal(df, partitioned_data_pandas[partition_id + suffix])
             if suffix:
                 assert not partition_id.endswith(suffix)
+
+        if expected_num_parts:
+            # all partitions were saved using the same version string
+            assert actual_save_versions == {save_version}
 
     def test_malformed_versioned_path(self, tmp_path):
         local_dir = tmp_path / "files"
@@ -324,8 +337,7 @@ class TestPartitionedDataSetLocal:
 
         pattern = re.escape(
             f"`{path.as_posix()}` is not a well-formed versioned path ending with "
-            "`filename/timestamp/filename` (got `version/partition/"
-            "file`)."
+            f"`filename/timestamp/filename` (got `version/partition/file`)."
         )
         with pytest.raises(DataSetError, match=pattern):
             pds.load()

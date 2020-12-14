@@ -154,7 +154,7 @@ class PartitionedDataSet(AbstractDataSet):
             load_args: Keyword arguments to be passed into ``find()`` method of
                 the filesystem implementation.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
-                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``)
+                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
         """
         # pylint: disable=import-outside-toplevel
         from fsspec.utils import infer_storage_options  # for performance reasons
@@ -393,7 +393,7 @@ class IncrementalDataSet(PartitionedDataSet):
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
 
         Raises:
-            DataSetError: If versioning is enabled for the underlying dataset.
+            DataSetError: If versioning is enabled for the checkpoint dataset.
         """
 
         super().__init__(
@@ -454,6 +454,7 @@ class IncrementalDataSet(PartitionedDataSet):
         checkpoint_path = self._filesystem._strip_protocol(  # pylint: disable=protected-access
             self._checkpoint_config[self._filepath_arg]
         )
+        dataset_is_versioned = VERSION_KEY in self._dataset_config
 
         def _is_valid_partition(partition) -> bool:
             if not partition.endswith(self._filename_suffix):
@@ -467,9 +468,9 @@ class IncrementalDataSet(PartitionedDataSet):
             return self._comparison_func(partition_id, checkpoint)
 
         return sorted(
-            part
-            for part in self._filesystem.find(self._normalized_path, **self._load_args)
-            if _is_valid_partition(part)
+            _grandparent(path) if dataset_is_versioned else path
+            for path in self._filesystem.find(self._normalized_path, **self._load_args)
+            if _is_valid_partition(path)
         )
 
     @property

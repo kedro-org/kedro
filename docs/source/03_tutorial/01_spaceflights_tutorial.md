@@ -6,7 +6,7 @@
 
 In this tutorial, we illustrate the typical Kedro workflow and the steps necessary to convert an empty Kedro project template into a working project.
 
-In the text, we assume that you create an empty project and follow the flow of the tutorial by copying and pasting the example code into the project as we describe. This tutorial will take approximately 2 hours, and you will learn each step of the Kedro project development workflow by working on an example to construct nodes and pipelines for the price-prediction model.
+In the text, we assume that you create an empty project and follow the flow of the tutorial by copying and pasting the example code into the project as we describe. This tutorial will take approximately 2 hours and you will learn each step of the Kedro project development workflow, by working on an example to construct nodes and pipelines for the price-prediction model.
 
 However, you may prefer to get up and running more swiftly so we provide the full spaceflights example project as a [Kedro starter](../02_get_started/06_starters.md). To create the project:
 
@@ -15,7 +15,6 @@ kedro new --starter=spaceflights
 ```
 
 This will generate a project from the [Kedro starter for the spaceflights tutorial](https://github.com/quantumblacklabs/kedro-starter-spaceflights) so you can follow the tutorial without any of the copy/pasting.
-
 
 ## Kedro project development workflow
 

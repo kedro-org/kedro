@@ -135,7 +135,7 @@ class JournalFileHandler(logging.Handler):
 
         """
         self.base_dir.mkdir(parents=True, exist_ok=True)
-        handler_path = self.base_dir.resolve() / "journal_{}.log".format(run_id)
+        handler_path = self.base_dir.resolve() / f"journal_{run_id}.log"
         return logging.FileHandler(str(handler_path), mode="a")
 
     def emit(self, record: logging.LogRecord) -> None:

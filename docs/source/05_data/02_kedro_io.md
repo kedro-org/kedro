@@ -531,7 +531,7 @@ Pipeline(
 ```
 
 Here are 2 important notes about the confirmation operation:
-1. Confirming a partitioned dataset does not affect any subsequent loads within the same run. All downstream nodes that input the same partitioned dataset as input will all receive the _same_ partitions. Partitions that are created externally during the run will also not affect the dataset loads and won't appear in the list of loaded partitions until the next run or until the dataset object is [released](/kedro.io.IncrementalDataSet#kedro.io.IncrementalDataSet.release).
+1. Confirming a partitioned dataset does not affect any subsequent loads within the same run. All downstream nodes that input the same partitioned dataset as input will all receive the _same_ partitions. Partitions that are created externally during the run will also not affect the dataset loads and won't appear in the list of loaded partitions until the next run or until the [`release()`](/kedro.io.IncrementalDataSet) method is called on the dataset object.
 2. A pipeline cannot contain more than one node confirming the same dataset.
 
 

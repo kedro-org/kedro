@@ -142,7 +142,7 @@ commands:
           command: |
             $ProgressPreference = "SilentlyContinue"
             Invoke-WebRequest https://aka.ms/vs/16/release/vc_redist.x64.exe -OutFile vc_redist.x64.exe
-            .\vc_redist.x64.exe /S /v/qn | write-output
+            .\vc_redist.x64.exe /S /v/qn
       - run:
           name: Install Java 8
           command: |

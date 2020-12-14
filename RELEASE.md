@@ -50,7 +50,8 @@
 * Restricted names given to nodes to match the regex pattern `[\w\.-]+$`.
 
 ## Thanks for supporting contributions
-[Deepyaman Datta](https://github.com/deepyaman)
+[Deepyaman Datta](https://github.com/deepyaman),
+[Zach Schuster](https://github.com/zschuster)
 
 ### Migration guide from Kedro 0.16.* to 0.17.*
 

@@ -294,8 +294,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
     @property
     def inputs(self) -> List[str]:
         """Return node inputs as a list, in the order required to bind them properly to
-        the node's function. If the node's function contains ``kwargs``, then ``kwarg`` inputs
-        are sorted alphabetically (for python 3.5 deterministic behavior).
+        the node's function.
 
         Returns:
             Node input names as a list.
@@ -701,12 +700,11 @@ def node(
 
 
 def _dict_inputs_to_list(func: Callable[[Any], Any], inputs: Dict[str, str]):
-    """Convert a dict representation of the node inputs to a list , ensuring
+    """Convert a dict representation of the node inputs to a list, ensuring
     the appropriate order for binding them to the node's function.
     """
     sig = inspect.signature(func, follow_wrapped=False).bind(**inputs)
-    # for deterministic behavior in python 3.5, sort kwargs inputs alphabetically
-    return list(sig.args) + sorted(sig.kwargs.values())
+    return [*sig.args, *sig.kwargs.values()]
 
 
 def _to_list(element: Union[None, str, Iterable[str], Dict[str, str]]) -> List:

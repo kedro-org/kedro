@@ -49,6 +49,14 @@ class CSVDataSet(AbstractVersionedDataSet):
     """``CSVDataSet`` loads/saves data from/to a CSV file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses datatable to handle the CSV file.
 
+    The main differences with respect to the ``pandas`` implementation:
+
+    - speed-up of csv reading, as datatable allows multi-thread reading from csv;
+    - usage of data manipulation API that is familiar to R users,
+      who might not have experience with ``pandas``.
+
+    Note that ``pandas.DataFrame`` is used for writing out.
+
     Example:
     ::
 

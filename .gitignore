@@ -131,6 +131,7 @@ venv.bak/
 
 # mkdocs documentation
 /site
+/kedro/framework/html
 
 # mypy
 .mypy_cache/

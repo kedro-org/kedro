@@ -260,7 +260,7 @@ class SparkHiveDataSet(AbstractDataSet):
         if (
             self._get_spark()
             .sql("show databases")
-            .filter(col("databaseName") == lit(self._database))
+            .filter(col("namespace") == lit(self._database))
             .take(1)
         ):
             self._get_spark().sql(f"use {self._database}")

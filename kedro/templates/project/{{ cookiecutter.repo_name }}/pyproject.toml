@@ -1,0 +1,17 @@
+[tool.kedro]
+package_name = "{{ cookiecutter.python_package }}"
+project_name = "{{ cookiecutter.project_name }}"
+project_version = "{{ cookiecutter.kedro_version }}"
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+line_length = 88
+known_third_party = "kedro"
+
+[tool.pytest.ini_options]
+addopts = """
+--cov-report term-missing \
+--cov src/{{ cookiecutter.python_package }} -ra"""

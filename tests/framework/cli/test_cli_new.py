@@ -36,6 +36,7 @@ from pathlib import Path
 
 import pytest
 import yaml
+from cookiecutter.exceptions import RepositoryCloneFailed
 
 from kedro import __version__ as version
 from kedro.framework.cli.cli import (
@@ -45,21 +46,12 @@ from kedro.framework.cli.cli import (
     cli,
 )
 
-FILES_IN_TEMPLATE_NO_EXAMPLE = 35
-FILES_IN_TEMPLATE_WITH_EXAMPLE = 44
+FILES_IN_TEMPLATE = 36
 
 
-# pylint: disable=too-many-arguments
-def _invoke(
-    cli_runner,
-    args,
-    project_name=None,
-    repo_name=None,
-    python_package=None,
-    include_example=None,
-):
+def _invoke(cli_runner, args, project_name=None, repo_name=None, python_package=None):
 
-    click_prompts = (project_name, repo_name, python_package, include_example)
+    click_prompts = (project_name, repo_name, python_package)
     input_string = "\n".join(x or "" for x in click_prompts)
 
     return cli_runner.invoke(cli, args, input=input_string)
@@ -106,39 +98,19 @@ class TestInteractiveNew:
 
     repo_name = "project-test"
     package_name = "package_test"
-    include_example = "y"
 
-    def test_new_no_example(self, cli_runner):
+    def test_new(self, cli_runner):
         """Test new project creation without code example."""
         project_name = "Test"
         result = _invoke(
             cli_runner,
-            ["-v", "new"],
+            ["new", "-v"],
             project_name=project_name,
             repo_name=self.repo_name,
-            include_example="N",
         )
         _assert_template_ok(
             result,
-            FILES_IN_TEMPLATE_NO_EXAMPLE,
-            repo_name=self.repo_name,
-            project_name=project_name,
-            package_name="test",
-        )
-
-    def test_new_with_example(self, cli_runner):
-        """Test new project creation with code example."""
-        project_name = "Test"
-        result = _invoke(
-            cli_runner,
-            ["-v", "new"],
-            project_name=project_name,
-            repo_name=self.repo_name,
-            include_example="y",
-        )
-        _assert_template_ok(
-            result,
-            FILES_IN_TEMPLATE_WITH_EXAMPLE,
+            FILES_IN_TEMPLATE,
             repo_name=self.repo_name,
             project_name=project_name,
             package_name="test",
@@ -147,30 +119,18 @@ class TestInteractiveNew:
     def test_new_custom_dir(self, cli_runner):
         """Test that default package name does not change if custom
         repo name was specified."""
-        result = _invoke(
-            cli_runner,
-            ["new"],
-            repo_name=self.repo_name,
-            include_example=self.include_example,
-        )
+        result = _invoke(cli_runner, ["new"], repo_name=self.repo_name)
         _assert_template_ok(
             result,
-            FILES_IN_TEMPLATE_WITH_EXAMPLE,
+            FILES_IN_TEMPLATE,
             repo_name=self.repo_name,
             package_name="new_kedro_project",
         )
 
     def test_new_correct_path(self, cli_runner):
         """Test new project creation with the default project name."""
-        result = _invoke(
-            cli_runner,
-            ["new"],
-            repo_name=self.repo_name,
-            include_example=self.include_example,
-        )
-        _assert_template_ok(
-            result, FILES_IN_TEMPLATE_WITH_EXAMPLE, repo_name=self.repo_name
-        )
+        result = _invoke(cli_runner, ["new"], repo_name=self.repo_name)
+        _assert_template_ok(result, FILES_IN_TEMPLATE, repo_name=self.repo_name)
 
     def test_fail_if_dir_exists(self, cli_runner):
         """Check the error if the output directory already exists."""
@@ -180,12 +140,7 @@ class TestInteractiveNew:
 
         old_contents = list(Path(self.repo_name).iterdir())
 
-        result = _invoke(
-            cli_runner,
-            ["-v", "new"],
-            repo_name=self.repo_name,
-            include_example=self.include_example,
-        )
+        result = _invoke(cli_runner, ["new", "-v"], repo_name=self.repo_name)
 
         assert list(Path(self.repo_name).iterdir()) == old_contents
         assert "directory already exists" in result.output
@@ -194,12 +149,7 @@ class TestInteractiveNew:
     @pytest.mark.parametrize("repo_name", [".repo", "re!po", "-repo", "repo-"])
     def test_bad_repo_name(self, cli_runner, repo_name):
         """Check the error if the repository name is invalid."""
-        result = _invoke(
-            cli_runner,
-            ["new"],
-            repo_name=repo_name,
-            include_example=self.include_example,
-        )
+        result = _invoke(cli_runner, ["new"], repo_name=repo_name)
         assert result.exit_code == 0
         assert "is not a valid repository name." in result.output
 
@@ -208,36 +158,16 @@ class TestInteractiveNew:
     )
     def test_bad_pkg_name(self, cli_runner, pkg_name):
         """Check the error if the package name is invalid."""
-        result = _invoke(
-            cli_runner,
-            ["new"],
-            python_package=pkg_name,
-            include_example=self.include_example,
-        )
+        result = _invoke(cli_runner, ["new"], python_package=pkg_name)
         assert result.exit_code == 0
         assert "is not a valid Python package name." in result.output
 
-    @pytest.mark.parametrize("include_example", ["A", "a", "_", "?"])
-    def test_bad_include_example(self, cli_runner, include_example):
-        """Check the error include example response is invalid."""
-        result = _invoke(
-            cli_runner,
-            ["new"],
-            python_package=self.package_name,
-            include_example=include_example,
-        )
-        assert result.exit_code == 0
-        assert "invalid input" in result.output
 
-
-def _create_config_file(
-    config_path, project_name, repo_name, output_dir=None, include_example=False
-):
+def _create_config_file(config_path, project_name, repo_name, output_dir=None):
     config = {
         "project_name": project_name,
         "repo_name": repo_name,
         "python_package": repo_name.replace("-", "_"),
-        "include_example": include_example,
     }
 
     if output_dir is not None:
@@ -255,7 +185,6 @@ class TestNewFromConfig:
     project_name = "test1"
     repo_name = "project-test1"
     config_path = "config.yml"
-    include_example = True
 
     def test_config_does_not_exist(self, cli_runner):
         """Check the error if the config file does not exist."""
@@ -266,50 +195,20 @@ class TestNewFromConfig:
     def test_empty_config(self, cli_runner):
         """Check the error if the config file is empty."""
         open("touch", "a").close()
-        result = _invoke(cli_runner, ["-v", "new", "-c", "touch"])
+        result = _invoke(cli_runner, ["new", "-v", "-c", "touch"])
         assert result.exit_code != 0
         assert "is empty" in result.output
 
-    def test_new_from_config_no_example(self, cli_runner):
+    def test_new_from_config(self, cli_runner):
         """Test project created from config without example code."""
         output_dir = "test_dir"
-        include_example = False
         Path(output_dir).mkdir(parents=True)
         _create_config_file(
-            self.config_path,
-            self.project_name,
-            self.repo_name,
-            output_dir,
-            include_example,
+            self.config_path, self.project_name, self.repo_name, output_dir
         )
-        result = _invoke(cli_runner, ["-v", "new", "--config", self.config_path])
+        result = _invoke(cli_runner, ["new", "-v", "--config", self.config_path])
         _assert_template_ok(
-            result,
-            FILES_IN_TEMPLATE_NO_EXAMPLE,
-            self.repo_name,
-            self.project_name,
-            output_dir,
-        )
-
-    def test_new_from_config_with_example(self, cli_runner):
-        """Test project created from config with example code."""
-        output_dir = "test_dir"
-        Path(output_dir).mkdir(parents=True)
-        _create_config_file(
-            self.config_path,
-            self.project_name,
-            self.repo_name,
-            output_dir,
-            self.include_example,
-        )
-        result = _invoke(cli_runner, ["-v", "new", "--config", self.config_path])
-
-        _assert_template_ok(
-            result,
-            FILES_IN_TEMPLATE_WITH_EXAMPLE,
-            self.repo_name,
-            self.project_name,
-            output_dir,
+            result, FILES_IN_TEMPLATE, self.repo_name, self.project_name, output_dir
         )
 
     def test_wrong_config(self, cli_runner):
@@ -319,8 +218,7 @@ class TestNewFromConfig:
             self.config_path, self.project_name, self.repo_name, output_dir
         )
 
-        result = _invoke(cli_runner, ["new", "-c", self.config_path])
-
+        result = _invoke(cli_runner, ["new", "-v", "-c", self.config_path])
         assert result.exit_code != 0
         assert "is not a valid output directory." in result.output
 
@@ -329,8 +227,7 @@ class TestNewFromConfig:
         Path(self.config_path).write_text(
             "output_dir: \nproject_name:\ttest\nrepo_name:\ttest1\n"
         )
-        result = _invoke(cli_runner, ["new", "-c", self.config_path])
-
+        result = _invoke(cli_runner, ["new", "-v", "-c", self.config_path])
         assert result.exit_code != 0
         assert "that cannot start any token" in result.output
 
@@ -360,33 +257,12 @@ class TestNewFromConfig:
         """Check the error if config YAML does not contain the output
         directory."""
         _create_config_file(
-            self.config_path,
-            self.project_name,
-            self.repo_name,
-            output_dir=None,
-            include_example=self.include_example,
+            self.config_path, self.project_name, self.repo_name, output_dir=None
         )  # output dir missing
-        result = _invoke(cli_runner, ["-v", "new", "--config", self.config_path])
+        result = _invoke(cli_runner, ["new", "-v", "--config", self.config_path])
 
         assert result.exit_code != 0
         assert "[output_dir] not found in" in result.output
-        assert not Path(self.repo_name).exists()
-
-    def test_missing_include_example(self, cli_runner):
-        """Check the error if config YAML does not contain include example."""
-        output_dir = "test_dir"
-        Path(output_dir).mkdir(parents=True)
-        _create_config_file(
-            self.config_path,
-            self.project_name,
-            self.repo_name,
-            output_dir,
-            include_example=None,
-        )  # include_example missing
-        result = _invoke(cli_runner, ["-v", "new", "--config", self.config_path])
-
-        assert result.exit_code != 0
-        assert "It must be a boolean value" in result.output
         assert not Path(self.repo_name).exists()
 
 
@@ -416,14 +292,14 @@ class TestNewWithStarter:
 
         result = _invoke(
             cli_runner,
-            ["-v", "new", "--starter", str(starter_path)],
+            ["new", "-v", "--starter", str(starter_path)],
             project_name=self.project_name,
             python_package=self.package_name,
             repo_name=self.repo_name,
         )
         _assert_template_ok(
             result,
-            FILES_IN_TEMPLATE_WITH_EXAMPLE,
+            FILES_IN_TEMPLATE,
             repo_name=self.repo_name,
             project_name=self.project_name,
             package_name=self.package_name,
@@ -433,7 +309,7 @@ class TestNewWithStarter:
         invalid_starter_path = "/foo/bar"
         result = _invoke(
             cli_runner,
-            ["-v", "new", "--starter", invalid_starter_path],
+            ["new", "-v", "--starter", invalid_starter_path],
             project_name=self.project_name,
             python_package=self.package_name,
             repo_name=self.repo_name,
@@ -445,15 +321,17 @@ class TestNewWithStarter:
         )
 
     @pytest.mark.parametrize(
-        "alias,expected_starter",
+        "alias,expected_starter_repo",
         [
             (
                 "pyspark-iris",
-                "git+https://github.com/quantumblacklabs/kedro-starter-pyspark-iris.git",
-            ),
+                "git+https://github.com/quantumblacklabs/kedro-starters.git",
+            )
         ],
     )
-    def test_new_with_starter_alias(self, alias, expected_starter, cli_runner, mocker):
+    def test_new_with_starter_alias(
+        self, alias, expected_starter_repo, cli_runner, mocker
+    ):
         mocked_cookie = mocker.patch("cookiecutter.main.cookiecutter")
         _invoke(
             cli_runner,
@@ -462,10 +340,10 @@ class TestNewWithStarter:
             python_package=self.package_name,
             repo_name=self.repo_name,
         )
-        actual_starter = mocked_cookie.call_args[0][0]
-        actual_context = mocked_cookie.call_args[1]["extra_context"]
-        assert actual_starter == expected_starter
-        assert actual_context["include_example"] is False
+        actual_starter_repo = mocked_cookie.call_args[0][0]
+        starter_directory = mocked_cookie.call_args[1]["directory"]
+        assert actual_starter_repo == expected_starter_repo
+        assert starter_directory == alias
 
     def test_new_starter_with_checkout(self, cli_runner, mocker):
         starter_path = "some-starter"
@@ -485,7 +363,6 @@ class TestNewWithStarter:
             starter_path,
             checkout=checkout_version,
             extra_context={
-                "include_example": False,
                 "kedro_version": version,
                 "output_dir": output_dir,
                 "project_name": self.project_name,
@@ -494,6 +371,69 @@ class TestNewWithStarter:
             },
             no_input=True,
             output_dir=output_dir,
+        )
+
+    def test_new_starter_with_checkout_invalid_checkout(self, cli_runner, mocker):
+        starter_path = "some-starter"
+        checkout_version = "some-version"
+        mocked_cookiecutter = mocker.patch(
+            "cookiecutter.main.cookiecutter", side_effect=RepositoryCloneFailed
+        )
+        result = _invoke(
+            cli_runner,
+            ["new", "--starter", starter_path, "--checkout", checkout_version],
+            project_name=self.project_name,
+            python_package=self.package_name,
+            repo_name=self.repo_name,
+        )
+        assert result.exit_code
+        assert (
+            f"Kedro project template not found at {starter_path} with tag {checkout_version}"
+            in result.output
+        )
+        output_dir = str(Path.cwd())
+        mocked_cookiecutter.assert_called_once_with(
+            starter_path,
+            checkout=checkout_version,
+            extra_context={
+                "kedro_version": version,
+                "output_dir": output_dir,
+                "project_name": self.project_name,
+                "python_package": self.package_name,
+                "repo_name": self.repo_name,
+            },
+            no_input=True,
+            output_dir=output_dir,
+        )
+
+    @pytest.mark.parametrize("starter_path", ["some-starter", "git+some-starter"])
+    def test_new_starter_with_checkout_invalid_checkout_alternative_tags(
+        self, cli_runner, mocker, starter_path
+    ):
+        checkout_version = "some-version"
+        mocker.patch(
+            "cookiecutter.main.cookiecutter", side_effect=RepositoryCloneFailed
+        )
+        mocked_git = mocker.patch("kedro.framework.cli.cli.git")
+        alternative_tags = "version1\nversion2"
+        mocked_git.cmd.Git.return_value.ls_remote.return_value = alternative_tags
+
+        result = _invoke(
+            cli_runner,
+            ["new", "--starter", starter_path, "--checkout", checkout_version],
+            project_name=self.project_name,
+            python_package=self.package_name,
+            repo_name=self.repo_name,
+        )
+        assert result.exit_code
+        tags = sorted(set(alternative_tags.split("\n")))
+        pattern = (
+            f"Kedro project template not found at {starter_path} with tag {checkout_version}. "
+            f"The following tags are available: {', '.join(tags)}"
+        )
+        assert pattern in result.output
+        mocked_git.cmd.Git.return_value.ls_remote.assert_called_once_with(
+            "--tags", starter_path.replace("git+", "")
         )
 
     def test_checkout_flag_without_starter(self, cli_runner):
@@ -507,4 +447,31 @@ class TestNewWithStarter:
         assert result.exit_code != 0
         assert (
             "Cannot use the --checkout flag without a --starter value." in result.output
+        )
+
+    def test_directory_flag_without_starter(self, cli_runner):
+        result = _invoke(
+            cli_runner,
+            ["new", "--directory", "some-dir"],
+            project_name=self.project_name,
+            python_package=self.package_name,
+            repo_name=self.repo_name,
+        )
+        assert result.exit_code != 0
+        assert (
+            "Cannot use the --directory flag without a --starter value."
+            in result.output
+        )
+
+    def test_directory_flag_with_starter_alias(self, cli_runner):
+        result = _invoke(
+            cli_runner,
+            ["new", "--starter", "pyspark-iris", "--directory", "some-dir"],
+            project_name=self.project_name,
+            python_package=self.package_name,
+            repo_name=self.repo_name,
+        )
+        assert result.exit_code != 0
+        assert (
+            "Cannot use the --directory flag with a --starter alias." in result.output
         )

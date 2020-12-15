@@ -25,6 +25,7 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import re
 from functools import partial, update_wrapper, wraps
 from typing import Callable
 
@@ -73,6 +74,15 @@ class TestValidNode:
     def test_valid(self, simple_tuple_node_list):
         nodes = [node(*tup) for tup in simple_tuple_node_list]
         assert len(nodes) == len(simple_tuple_node_list)
+
+    def test_get_node_func(self):
+        test_node = node(identity, "A", "B")
+        assert test_node.func is identity
+
+    def test_set_node_func(self):
+        test_node = node(identity, "A", "B")
+        test_node.func = decorated_identity
+        assert test_node.func is decorated_identity
 
     def test_labelled(self):
         assert "labeled_node: <lambda>([input1]) -> [output1]" in str(
@@ -184,8 +194,8 @@ class TestValidNode:
 
 class TestNodeComparisons:
     def test_node_equals(self):
-        first = node(identity, "input1", "output1", name="a node")
-        second = node(identity, "input1", "output1", name="a node")
+        first = node(identity, "input1", "output1", name="a_node")
+        second = node(identity, "input1", "output1", name="a_node")
         assert first == second
         assert first is not second
 
@@ -196,11 +206,11 @@ class TestNodeComparisons:
         assert first is not second
 
     def test_node_invalid_equals(self):
-        n = node(identity, "input1", "output1", name="a node")
+        n = node(identity, "input1", "output1", name="a_node")
         assert n != "hello"
 
     def test_node_invalid_less_than(self):
-        n = node(identity, "input1", "output1", name="a node")
+        n = node(identity, "input1", "output1", name="a_node")
         pattern = "'<' not supported between instances of 'Node' and 'str'"
 
         with pytest.raises(TypeError, match=pattern):
@@ -401,7 +411,14 @@ def decorated_identity(value):
 class TestTagDecorator:
     def test_apply_decorators(self):
         old_node = node(apply_g(decorated_identity), "input", "output", name="node")
-        new_node = old_node.decorate(apply_h, apply_ij)
+        pattern = (
+            "The node's `decorate` API will be deprecated in Kedro 0.18.0."
+            "Please use a node's Hooks to extend the node's behaviour in a pipeline."
+            "For more information, please visit"
+            "https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_hooks.html"
+        )
+        with pytest.warns(DeprecationWarning, match=re.escape(pattern)):
+            new_node = old_node.decorate(apply_h, apply_ij)
         result = new_node.run(dict(input=1))
 
         assert old_node.name == new_node.name
@@ -435,6 +452,16 @@ class TestNames:
         assert str(n) == "name: identity([in]) -> [out]"
         assert n.name == "name"
         assert n.short_name == "name"
+
+    @pytest.mark.parametrize("bad_name", ["name,with,comma", "name with space"])
+    def test_invalid_name(self, bad_name):
+        pattern = (
+            f"'{bad_name}' is not a valid node name. "
+            f"It must contain only letters, digits, hyphens, "
+            f"underscores and/or fullstops."
+        )
+        with pytest.raises(ValueError, match=re.escape(pattern)):
+            node(identity, ["in"], ["out"], name=bad_name)
 
     def test_namespaced(self):
         n = node(identity, ["in"], ["out"], namespace="namespace")

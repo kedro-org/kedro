@@ -9,6 +9,7 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
+[Sasaki Takeru](https://github.com/takeru/)
 
 # Release 0.16.6
 
@@ -36,7 +37,7 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
-[Deepyaman Datta](https://github.com/deepyaman), [Bhavya Merchant](https://github.com/bnmerchant), [Lovkush Agarwal](https://github.com/Lovkush-A), [Varun Krishna S](https://github.com/vhawk19), [Sebastian Bertoli](https://github.com/sebastianbertoli), [noklam](https://github.com/noklam), [Daniel Petti](https://github.com/djpetti), [Waylon Walker](https://github.com/waylonwalker), [Abdulelah Al Mesfer](https://github.com/abdulelahsm), [Sasaki Takeru](https://github.com/takeru/)
+[Deepyaman Datta](https://github.com/deepyaman), [Bhavya Merchant](https://github.com/bnmerchant), [Lovkush Agarwal](https://github.com/Lovkush-A), [Varun Krishna S](https://github.com/vhawk19), [Sebastian Bertoli](https://github.com/sebastianbertoli), [noklam](https://github.com/noklam), [Daniel Petti](https://github.com/djpetti), [Waylon Walker](https://github.com/waylonwalker), [Abdulelah Al Mesfer](https://github.com/abdulelahsm)
 
 # Release 0.16.5
 

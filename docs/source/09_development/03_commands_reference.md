@@ -1,6 +1,6 @@
 # Kedro's command line interface
 
-> *Note:* This documentation is based on `Kedro 0.16.5`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.6`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 Kedro's command line interface (CLI) is used to give commands to Kedro via a terminal shell (such as the terminal app on macOS, or cmd.exe or PowerShell on Windows). You need to use the CLI to set up a new Kedro project, and to run it.
 
@@ -63,7 +63,7 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
 * Project-specific Kedro commands
   * [`kedro activate-nbstripout`](#strip-output-cells)
   * [`kedro build-docs`](#build-the-project-documentation)
-  * [`kedro build-reqs`](#build-the-projects-dependency-tree)
+  * [`kedro build-reqs`](#build-the-project-s-dependency-tree)
   * [`kedro catalog list`](#list-datasets-per-pipeline-per-type)
   * [`kedro install`](#install-all-package-dependencies)
   * [`kedro ipython`](#notebooks)
@@ -115,7 +115,7 @@ Returns output similar to the following, depending on the version of Kedro used 
 | |/ / _ \/ _` | '__/ _ \
 |   <  __/ (_| | | | (_) |
 |_|\_\___|\__,_|_|  \___/
-v0.16.5
+v0.16.6
 
 kedro allows teams to create analytics
 projects. It is developed as part of
@@ -226,7 +226,7 @@ kedro run --from-nodes split --to-nodes predict,report
 
 This functionality is extended to the `kedro run --config config.yml` command, which allows you to [specify run commands in a configuration file](../04_kedro_project_setup/02_configuration.md#configuring-kedro-run-arguments).
 
-> _Note:_ A parameterised run is best used for dynamic parameters, i.e. running the same pipeline with different inputs, for static parameters that do not change we recommend following the [Kedro project setup methodology](../04_kedro_project_setup/03_configuration.md#parameters).
+> _Note:_ A parameterised run is best used for dynamic parameters, i.e. running the same pipeline with different inputs, for static parameters that do not change we recommend following the [Kedro project setup methodology](../04_kedro_project_setup/02_configuration.md#parameters).
 
 ### Deploy the project
 
@@ -289,7 +289,7 @@ kedro test
 
 #### Modular pipelines
 
-##### Create a new [modular pipeline](../06_nodes_and_pipelines/02_pipelines.md#developing-modular-pipelines) in your project
+##### Create a new [modular pipeline](../06_nodes_and_pipelines/03_modular_pipelines) in your project
 ```bash
 kedro pipeline create <pipeline_name>
 ```
@@ -301,7 +301,7 @@ The following command packages all the files related to a modular pipeline into 
 kedro pipeline package <pipeline_name>
 ```
 
-Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/02_pipelines.md#packaging-a-modular-pipeline).
+Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/03_modular_pipelines.html#package-a-modular-pipeline).
 
 ##### Pull a modular pipeline in your project
 The following command pulls all the files related to a modular pipeline from either [Pypi](https://pypi.org/) or a storage location of a [wheel file](https://pythonwheels.com/).
@@ -309,7 +309,7 @@ The following command pulls all the files related to a modular pipeline from eit
 kedro pipeline pull <package_name> (or path to a wheel file)
 ```
 
-Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/02_pipelines.md#pulling-a-modular-pipeline).
+Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/03_modular_pipelines.html#pull-a-modular-pipeline).
 
 ##### Delete a modular pipeline
 The following command deletes all the files related to a modular pipeline in your Kedro project.
@@ -318,7 +318,7 @@ The following command deletes all the files related to a modular pipeline in you
 kedro pipeline delete <pipeline_name>
 ```
 
-Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/02_pipelines.md#how-do-i-delete-a-modular-pipeline).
+Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/03_modular_pipelines.html#pull-a-modular-pipeline).
 
 ##### Describe a pipeline
 

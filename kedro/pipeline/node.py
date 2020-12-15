@@ -93,8 +93,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
         if not callable(func):
             raise ValueError(
                 _node_error_message(
-                    "first argument must be a "
-                    "function, not `{}`.".format(type(func).__name__)
+                    f"first argument must be a function, not `{type(func).__name__}`."
                 )
             )
 
@@ -180,13 +179,13 @@ class Node:  # pylint: disable=too-many-instance-attributes
 
     def __str__(self):
         def _sorted_set_to_str(xset):
-            return "[{}]".format(",".join(sorted(xset)))
+            return f"[{','.join(sorted(xset))}]"
 
         out_str = _sorted_set_to_str(self.outputs) if self._outputs else "None"
         in_str = _sorted_set_to_str(self.inputs) if self._inputs else "None"
 
         prefix = self._name + ": " if self._name else ""
-        return prefix + "{}({}) -> {}".format(self._func_name, in_str, out_str)
+        return prefix + f"{self._func_name}({in_str}) -> {out_str}"
 
     def __repr__(self):  # pragma: no cover
         return "Node({}, {!r}, {!r}, {!r})".format(
@@ -197,20 +196,14 @@ class Node:  # pylint: disable=too-many-instance-attributes
         return self.run(inputs=kwargs)
 
     @property
-    def _func_name(self):
-        if hasattr(self._func, "__name__"):
-            return self._func.__name__
-
-        name = repr(self._func)
-        if "functools.partial" in name:
+    def _func_name(self) -> str:
+        name = _get_readable_func_name(self._func)
+        if name == "<partial>":
             warn(
-                "The node producing outputs `{}` is made from a `partial` function. "
-                "Partial functions do not have a `__name__` attribute: consider using "
-                "`functools.update_wrapper` for better log messages.".format(
-                    self.outputs
-                )
+                f"The node producing outputs `{self.outputs}` is made from a `partial` function. "
+                f"Partial functions do not have a `__name__` attribute: consider using "
+                f"`functools.update_wrapper` for better log messages."
             )
-            name = "<partial>"
         return name
 
     @property
@@ -273,8 +266,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
     @property
     def inputs(self) -> List[str]:
         """Return node inputs as a list, in the order required to bind them properly to
-        the node's function. If the node's function contains ``kwargs``, then ``kwarg`` inputs
-        are sorted alphabetically (for python 3.5 deterministic behavior).
+        the node's function.
 
         Returns:
             Node input names as a list.
@@ -550,10 +542,11 @@ class Node:  # pylint: disable=too-many-instance-attributes
                 func_args = inspect.signature(
                     func, follow_wrapped=False
                 ).parameters.keys()
+                func_name = _get_readable_func_name(func)
+
                 raise TypeError(
-                    "Inputs of function expected {}, but got {}".format(
-                        str(list(func_args)), str(inputs)
-                    )
+                    f"Inputs of '{func_name}' function expected {list(func_args)}, "
+                    f"but got {inputs}"
                 ) from exc
 
     def _validate_unique_outputs(self):
@@ -674,12 +667,11 @@ def node(
 
 
 def _dict_inputs_to_list(func: Callable[[Any], Any], inputs: Dict[str, str]):
-    """Convert a dict representation of the node inputs to a list , ensuring
+    """Convert a dict representation of the node inputs to a list, ensuring
     the appropriate order for binding them to the node's function.
     """
-    sig = inspect.signature(func).bind(**inputs)
-    # for deterministic behavior in python 3.5, sort kwargs inputs alphabetically
-    return list(sig.args) + sorted(sig.kwargs.values())
+    sig = inspect.signature(func, follow_wrapped=False).bind(**inputs)
+    return [*sig.args, *sig.kwargs.values()]
 
 
 def _to_list(element: Union[None, str, Iterable[str], Dict[str, str]]) -> List:
@@ -696,3 +688,20 @@ def _to_list(element: Union[None, str, Iterable[str], Dict[str, str]]) -> List:
     if isinstance(element, dict):
         return sorted(element.values())
     return list(element)
+
+
+def _get_readable_func_name(func: Callable) -> str:
+    """Get a user-friendly readable name of the function provided.
+
+    Returns:
+        str: readable name of the provided callable func.
+    """
+
+    if hasattr(func, "__name__"):
+        return func.__name__
+
+    name = repr(func)
+    if "functools.partial" in name:
+        name = "<partial>"
+
+    return name

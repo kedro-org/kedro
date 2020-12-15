@@ -202,8 +202,8 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         nodes_reprs_str = (
             "[\n{}\n]".format(",\n".join(nodes_reprs)) if nodes_reprs else "[]"
         )
-        constructor_repr = "({})".format(nodes_reprs_str)
-        return "{}{}".format(self.__class__.__name__, constructor_repr)
+        constructor_repr = f"({nodes_reprs_str})"
+        return f"{self.__class__.__name__}{constructor_repr}"
 
     def __add__(self, other):
         if not isinstance(other, Pipeline):
@@ -405,9 +405,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         unregistered_nodes = set(node_names) - set(self._nodes_by_name.keys())
         if unregistered_nodes:
             raise ValueError(
-                "Pipeline does not contain nodes named {}.".format(
-                    list(unregistered_nodes)
-                )
+                f"Pipeline does not contain nodes named {list(unregistered_nodes)}."
             )
 
         nodes = [self._nodes_by_name[name] for name in node_names]
@@ -459,9 +457,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
             datasets - self.data_sets() - self._transcode_compatible_names()
         )
         if missing:
-            raise ValueError(
-                "Pipeline does not contain data_sets named {}".format(missing)
-            )
+            raise ValueError(f"Pipeline does not contain data_sets named {missing}")
 
         relevant_nodes = set()
         for input_ in datasets:
@@ -492,9 +488,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
             datasets - self.data_sets() - self._transcode_compatible_names()
         )
         if missing:
-            raise ValueError(
-                "Pipeline does not contain data_sets named {}".format(missing)
-            )
+            raise ValueError(f"Pipeline does not contain data_sets named {missing}")
 
         relevant_nodes = set()
         for output in datasets:
@@ -846,7 +840,7 @@ def _topologically_sorted(node_dependencies) -> List[Set[Node]]:
         one that refers to the nodes' string representations.
         """
         circular = [str(node) for node in error_data.keys()]
-        return "Circular dependencies exist among these items: {}".format(circular)
+        return f"Circular dependencies exist among these items: {circular}"
 
     try:
         return list(toposort(node_dependencies))

@@ -417,7 +417,7 @@ class TestExportNodes:
         notebook_file = project_path / "notebook.ipynb"
         notebook_file.write_text(nodes)
 
-        output_path = nodes_path / "{}.py".format(notebook_file.stem)
+        output_path = nodes_path / f"{notebook_file.stem}.py"
         _export_nodes(notebook_file, output_path)
 
         assert output_path.is_file()
@@ -470,7 +470,7 @@ class TestExportNodes:
         notebook_file.write_text(nodes)
 
         with pytest.warns(UserWarning, match="Skipping notebook"):
-            output_path = nodes_path / "{}.py".format(notebook_file.stem)
+            output_path = nodes_path / f"{notebook_file.stem}.py"
             _export_nodes(notebook_file, output_path)
 
         output_path = nodes_path / "notebook.py"
@@ -495,7 +495,7 @@ class TestExportNodes:
         notebook_file = project_path / "notebook.iypnb"
         notebook_file.write_text(nodes)
 
-        output_path = nodes_path / "{}.py".format(notebook_file.stem)
+        output_path = nodes_path / f"{notebook_file.stem}.py"
         _export_nodes(notebook_file, output_path)
 
         assert output_path.is_file()
@@ -505,7 +505,7 @@ class TestExportNodes:
         random_file = nodes_path / "notebook.txt"
         random_file.touch()
         random_file.write_text("original")
-        output_path = nodes_path / "{}.py".format(random_file.stem)
+        output_path = nodes_path / f"{random_file.stem}.py"
 
         pattern = "Provided filepath is not a Jupyter notebook"
         with pytest.raises(KedroCliError, match=pattern):

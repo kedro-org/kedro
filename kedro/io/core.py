@@ -241,9 +241,7 @@ class AbstractDataSet(abc.ABC):
         except DataSetError:
             raise
         except Exception as exc:
-            message = "Failed while saving data to data set {}.\n{}".format(
-                str(self), str(exc)
-            )
+            message = f"Failed while saving data to data set {str(self)}.\n{str(exc)}"
             raise DataSetError(message) from exc
 
     def __str__(self):
@@ -271,7 +269,7 @@ class AbstractDataSet(abc.ABC):
             # not a dictionary
             return str(obj)
 
-        return "{}({})".format(type(self).__name__, _to_str(self._describe(), True))
+        return f"{type(self).__name__}({_to_str(self._describe(), True)})"
 
     @abc.abstractmethod
     def _load(self) -> Any:
@@ -332,9 +330,7 @@ class AbstractDataSet(abc.ABC):
             self._logger.debug("Releasing %s", str(self))
             self._release()
         except Exception as exc:
-            message = "Failed during release for data set {}.\n{}".format(
-                str(self), str(exc)
-            )
+            message = f"Failed during release for data set {str(self)}.\n{str(exc)}"
             raise DataSetError(message) from exc
 
     def _release(self) -> None:
@@ -419,7 +415,7 @@ def parse_dataset_definition(
         try:
             class_obj = next(obj for obj in trials if obj is not None)
         except StopIteration as exc:
-            raise DataSetError("Class `{}` not found.".format(class_obj)) from exc
+            raise DataSetError(f"Class `{class_obj}` not found.") from exc
 
     if not issubclass(class_obj, AbstractDataSet):
         raise DataSetError(
@@ -745,5 +741,5 @@ def validate_on_forbidden_chars(**kwargs):
     for key, value in kwargs.items():
         if " " in value or ";" in value:
             raise DataSetError(
-                "Neither white-space nor semicolon are allowed in `{}`.".format(key)
+                f"Neither white-space nor semicolon are allowed in `{key}`."
             )

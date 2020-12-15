@@ -3,7 +3,7 @@
 
 In this tutorial, we cover advanced uses of the [Kedro IO](/kedro.io.rst) module to understand the underlying implementation. The relevant API documentation is [kedro.io.AbstractDataSet](/kedro.io.AbstractDataSet) and [kedro.io.DataSetError](/kedro.io.DataSetError).
 
-> *Note:* This documentation is based on `Kedro 0.16.5`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.6`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 ## Error handling
 
@@ -531,7 +531,7 @@ Pipeline(
 ```
 
 Here are 2 important notes about the confirmation operation:
-1. Confirming a partitioned dataset does not affect any subsequent loads within the same run. All downstream nodes that input the same partitioned dataset as input will all receive the _same_ partitions. Partitions that are created externally during the run will also not affect the dataset loads and won't appear in the list of loaded partitions until the next run or until the dataset object is [released](/kedro.io.IncrementalDataSet#kedro.io.IncrementalDataSet.release).
+1. Confirming a partitioned dataset does not affect any subsequent loads within the same run. All downstream nodes that input the same partitioned dataset as input will all receive the _same_ partitions. Partitions that are created externally during the run will also not affect the dataset loads and won't appear in the list of loaded partitions until the next run or until the [`release()`](/kedro.io.IncrementalDataSet) method is called on the dataset object.
 2. A pipeline cannot contain more than one node confirming the same dataset.
 
 

@@ -1,7 +1,7 @@
 # How to use Kedro on a Databricks cluster
 
 
-> *Note:* This documentation is based on `Kedro 0.16.5`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.16.6`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 In this tutorial we use [PySpark Iris Kedro Starter](https://github.com/quantumblacklabs/kedro-starter-pyspark-iris) to bootstrap a Kedro project using Spark.
 
@@ -38,7 +38,7 @@ conda create --name iris_databricks python=3.7 -y
 conda activate iris_databricks
 
 # install Kedro and create a new project
-pip install "kedro~=0.16.5"
+pip install "kedro~=0.16.6"
 # name your project Iris Databricks when prompted for it
 kedro new --starter pyspark-iris
 ```
@@ -214,9 +214,9 @@ In addition to the [common prerequisites](#prerequisites), to run through this s
 ### 1. Create Kedro project
 
 Firstly, we will need to reproduce the first three steps from the previous section:
-1. [Project setup](#1-project-setup)
-2. [Dependency installation](#2-install-dependencies-and-run-locally)
-3. [Databricks cluster provisioning](#3-create-a-databricks-cluster)
+1. [Project setup](#project-setup)
+2. [Dependency installation](#install-dependencies-and-run-locally)
+3. [Databricks cluster provisioning](#create-a-databricks-cluster)
 
 As a result you should get:
 * A Kedro project, which runs with the local version of PySpark library
@@ -235,7 +235,7 @@ Now you should [create a new repository in GitHub](https://docs.github.com/en/gi
 To connect to the newly created repository you can use one of 2 options:
 
 * **SSH:** If you choose to connect with SSH, you will also need to configure [the SSH connection to GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh), unless you already have [an existing SSH key](https://docs.github.com/en/github/authenticating-to-github/checking-for-existing-ssh-keys) configured for GitHub
-* **HTTPS:** If using HTTPS, you will be asked for your GitHub username and password when you push your first commit - please use your GitHub username and your [personal access token](#2-create-github-personal-access-token) generated in the previous step as a password and [_not_ your original GitHub password](https://developer.github.com/v3/auth/#via-username-and-password).
+* **HTTPS:** If using HTTPS, you will be asked for your GitHub username and password when you push your first commit - please use your GitHub username and your [personal access token](#create-github-personal-access-token) generated in the previous step as a password and [_not_ your original GitHub password](https://developer.github.com/v3/auth/#via-username-and-password).
 
 ### 4. Push Kedro project to the GitHub repository
 
@@ -275,7 +275,7 @@ git push --set-upstream origin master
 
 ### 5. Configure the Databricks cluster
 
-The project has now been pushed to your private GitHub repository, and in order to pull it from the Databricks, we need to configure personal access token you generated in [Step 2](#2-create-github-personal-access-token).
+The project has now been pushed to your private GitHub repository, and in order to pull it from the Databricks, we need to configure personal access token you generated in [Step 2](#create-github-personal-access-token).
 
 [Log into your Databricks workspace](https://docs.databricks.com/workspace/workspace-details.html#workspace-instance-names-urls-and-ids) and then:
 1. Open `Clusters` tab
@@ -309,10 +309,10 @@ In your newly created notebook put each code snippet from below into a separate 
 %sh rm -rf ~/projects/iris-databricks && git clone --single-branch --branch master https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/${GITHUB_USER}/<your-repo-name>.git ~/projects/iris-databricks
 ```
 
-* Install the latest version of Kedro compatible with version `0.16.5`
+* Install the latest version of Kedro compatible with version `0.16.6`
 
 ```console
-%pip install "kedro[spark.SparkDataSet]~=0.16.5"
+%pip install "kedro[spark.SparkDataSet]~=0.16.6"
 ```
 
 * Copy input data into DBFS

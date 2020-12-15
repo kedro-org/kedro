@@ -142,7 +142,7 @@ commands:
           command: |
             $ProgressPreference = "SilentlyContinue"
             Invoke-WebRequest https://aka.ms/vs/16/release/vc_redist.x64.exe -OutFile vc_redist.x64.exe
-            .\vc_redist.x64.exe /S /v/qn | write-output
+            .\vc_redist.x64.exe /S /v/qn
       - run:
           name: Install Java 8
           command: |
@@ -213,7 +213,7 @@ commands:
           name: Run unit tests
           command: |
             conda activate kedro_builder
-            pytest .\tests --no-cov
+            pytest .\tests --ignore .\tests\extras\datasets\tensorflow --no-cov
 
   win_e2e_tests:
     description: Run all end to end tests
@@ -362,7 +362,7 @@ jobs:
           name: Run unit tests without Spark
           command: |
             conda activate kedro_builder
-            pytest .\tests --ignore .\tests\extras\datasets\spark --no-cov
+            pytest .\tests --ignore .\tests\extras\datasets\spark --ignore .\tests\extras\datasets\tensorflow --no-cov
 
   win_e2e_tests_36:
     executor:

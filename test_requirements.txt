@@ -5,7 +5,7 @@ behave==1.2.6
 biopython~=1.73
 black==v19.10.b0
 dask[complete]~=2.6
-datatable>=0.10.0, <0.11
+datatable>=0.11.1, <1.0
 flake8~=3.5
 gcsfs>=0.3.0, <0.7.0 # gcsfs 0.7.0 requires fsspec>=0.8.0, but we pin fsspec <0.7.0
 geopandas>=0.6.0, <1.0

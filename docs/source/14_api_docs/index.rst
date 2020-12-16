@@ -88,7 +88,7 @@ Welcome to Kedro's documentation!
    06_nodes_and_pipelines/02_pipeline_introduction
    06_nodes_and_pipelines/03_modular_pipelines
    06_nodes_and_pipelines/04_run_a_pipeline
-   06_nodes_and_pipelines/05_partial_pipelines
+   06_nodes_and_pipelines/05_slice_a_pipeline
 
 .. toctree::
    :maxdepth: 2

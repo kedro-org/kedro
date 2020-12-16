@@ -73,7 +73,6 @@ class TestCSVDataSet:
         csv_data_set.save(dummy_dataframe)
         reloaded = csv_data_set.load()
         assert_frame_equal(dummy_dataframe.to_pandas(), reloaded.to_pandas())
-        assert csv_data_set._fs_open_args_load == {"mode": "r"}
         assert csv_data_set._fs_open_args_save == {"mode": "w"}
 
     def test_exists(self, csv_data_set, dummy_dataframe):

@@ -470,7 +470,12 @@ def env_override(default_appid):
 
 
 def _add_jinja_filters(app):
-    app.builder.templates.environment.filters["env_override"] = env_override
+    from sphinx.builders.latex import LaTeXBuilder
+
+    # LaTeXBuilder is used in the PDF docs build,
+    # and it doesn't have attribute 'templates'
+    if not isinstance(app.builder, LaTeXBuilder):
+        app.builder.templates.environment.filters["env_override"] = env_override
 
 
 def setup(app):

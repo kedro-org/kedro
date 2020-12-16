@@ -96,7 +96,7 @@ class CSVDataSet(AbstractVersionedDataSet):
                 Here you can find all available arguments:
                 https://datatable.readthedocs.io/en/latest/api/dt/fread.html
                 All defaults are preserved.
-            save_args: Datatable options for saving CSV files.
+            save_args: Pandas options for saving CSV files.
                 Saving is done via pandas.
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_csv.html

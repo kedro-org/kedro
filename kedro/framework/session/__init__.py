@@ -29,4 +29,4 @@
 """``kedro.framework.session`` provides access to KedroSession responsible for
 project lifecycle.
 """
-from .session import KedroSession  # NOQA
+from .session import KedroSession, get_current_session  # NOQA

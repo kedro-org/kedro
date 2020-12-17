@@ -1,8 +1,11 @@
 # Use Kedro with IPython and Jupyter Notebooks/Lab
 
-> *Note:* This documentation is based on `Kedro 0.16.6`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.17.0`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 This section follows the [Iris dataset example](../02_get_started/05_example_project.md) and demonstrates how to use Kedro with IPython and Jupyter Notebooks / Lab. We also recommend a video that explains the transition from the use of vanilla Jupyter Notebooks to using Kedro, from [Data Engineer One](https://www.youtube.com/watch?v=dRnCovp1GRQ&t=50s&ab_channel=DataEngineerOne).
+
+
+<iframe width="560" height="315" style="max-width: 100%" src="https://www.youtube.com/embed/dRnCovp1GRQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 ## Why use a Notebook?
 There are reasons why you may want to use a Notebook, although in general, the principles behind Kedro would discourage their use because they have some [drawbacks when they are used to create production or reproducible code](https://towardsdatascience.com/5-reasons-why-you-should-switch-from-jupyter-notebook-to-scripts-cb3535ba9c95). However, there are occasions when you'd want to put some code into a Notebook, for example:
@@ -84,13 +87,13 @@ Navigate to the `notebooks` folder of your Kedro project and create a new notebo
 
 Every time you start or restart a Jupyter or IPython session in the CLI using a `kedro` command, a startup script in `.ipython/profile_default/startup/00-kedro-init.py` is executed. It adds the following variables in scope:
 
-* `context` (`KedroContext`) - Kedro project context that holds the configuration
+* `context` (`KedroContext`) - Kedro project context that provides access to Kedro's library components.
 * `catalog` (`DataCatalog`) - Data catalog instance that contains all defined datasets; this is a shortcut for `context.catalog`
 * `startup_error` (`Exception`) - An error that was raised during the execution of the startup script or `None` if no errors occurred
 
 ## How to use `context`
 
-`KedroContext` represents the main application entry point for your Kedro project. The `context` variable allows you to interact with your project components from within the Kedro Jupyter notebook.
+The `context` variable allows you to interact with Kedro library components from within the Kedro Jupyter notebook.
 
 ![context input graphic](../meta/images/jupyter_notebook_showing_context.png)
 
@@ -101,19 +104,21 @@ With `context`, you can access the following variables and methods:
 - `context.catalog` (`DataCatalog`) - An instance of [DataCatalog](/kedro.io.DataCatalog)
 - `context.config_loader` (`ConfigLoader`) - An instance of [ConfigLoader](/kedro.config.ConfigLoader)
 - `context.pipeline` (`Pipeline`) - Defined pipeline
-- `context.run` (`None`) - Method to run a pipeline
 
 ### Run the pipeline
 
-If you wish to run the whole 'master' pipeline within a notebook cell, you can do so as follows:
+If you wish to run the whole 'master' pipeline within a notebook cell, you can do so by instantiating a `Session`:
 
 ```python
-context.run()
+from kedro.framework.session import KedroSession
+
+with KedroSession.create("<your-kedro-project-package-name>") as session:
+    session.run()
 ```
 
 The command runs the nodes from your default project pipeline in a sequential manner.
 
-To parameterise your pipeline run, refer to [a later section on this page on run parameters](#additional-parameters-for-context-run) which lists all available options.
+To parameterise your pipeline run, refer to [a later section on this page on run parameters](#additional-parameters-for-session-run) which lists all available options.
 
 
 ### Parameters
@@ -158,8 +163,8 @@ my_dict = {"key1": "some_value", "key2": None}
 catalog.save("my_dataset", my_dict)
 ```
 
-### Additional parameters for `context.run()`
-You can also specify the following optional arguments for `context.run()`:
+### Additional parameters for `session.run()`
+You can also specify the following optional arguments for `session.run()`:
 
 ```eval_rst
 +---------------+----------------+-------------------------------------------------------------------------------+
@@ -202,10 +207,12 @@ def reload_kedro(project_path, line=None):
     global parameters
     try:
         # ...
-        context = load_context(path)
+        session = KedroSession.create("<your-kedro-project-package-name>", project_path)
+        _activate_session(session)
+        context = session.load_context()
         parameters = context.params
         # ...
-        logging.info("Defined global variable `context`, `catalog` and `parameters`")
+        logging.info("Defined global variable `context`, `session`, `catalog` and `parameters`")
     except:
         pass
 ```
@@ -234,7 +241,7 @@ def some_action():
 > Tip: The notebook can contain multiple functions tagged as `node`, each of them will be exported into the resulting Python file
 
 * Save your Jupyter notebook to `notebooks/my_notebook.ipynb`
-* Run `kedro jupyter convert notebooks/my_notebook.ipynb` from the terminal to create a Python file `src/<package_name>/nodes/my_notebook.py` containing `convert_me` function definition
+* Run `kedro jupyter convert notebooks/my_notebook.ipynb` from the terminal to create a Python file `src/<package_name>/nodes/my_notebook.py` containing `some_action` function definition
 
 > Tip: You can also convert all your notebooks at once by calling `kedro jupyter convert --all`
 
@@ -306,14 +313,17 @@ In certain cases, you may not be able to run `kedro jupyter notebook`, which mea
 
 ```python
 from pathlib import Path
-from kedro.framework.context import load_context
+from kedro.framework.session import KedroSession
+from kedro.framework.session.session import _activate_session
 
 current_dir = Path.cwd()  # this points to 'notebooks/' folder
-proj_path = current_dir.parent  # point back to the root of the project
-context = load_context(proj_path)
+project_path = current_dir.parent  # point back to the root of the project
+session = KedroSession.create("<your-kedro-project-package-name>", project_path)
+_activate_session(session)
+context = session.load_context()
 ```
 
-#### How can I reload the `context`, `catalog` and `startup_error` variables?
+#### How can I reload the `session`, `context`, `catalog` and `startup_error` variables?
 
 To reload these variables at any point (e.g., if you update `catalog.yml`), use the [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) `%reload_kedro`. This magic can also be used to see the error message if any of the variables above are undefined.
 

@@ -11,9 +11,13 @@
 Welcome to Kedro's documentation!
 =============================================
 
-.. image:: https://circleci.com/gh/quantumblacklabs/kedro/tree/master.svg?style=shield
+.. image:: https://img.shields.io/circleci/build/github/quantumblacklabs/kedro/master?label=master
     :target: https://circleci.com/gh/quantumblacklabs/kedro/tree/master
-    :alt: CircleCI build status
+    :alt: CircleCI - Master Branch
+
+.. image:: https://img.shields.io/circleci/build/github/quantumblacklabs/kedro/develop?label=develop
+    :target: https://circleci.com/gh/quantumblacklabs/kedro/tree/develop
+    :alt: CircleCI - Develop Branch
 
 .. image:: https://img.shields.io/badge/license-Apache%202.0-blue.svg
     :target: https://opensource.org/licenses/Apache-2.0
@@ -27,9 +31,17 @@ Welcome to Kedro's documentation!
     :target: https://pypi.org/project/kedro/
     :alt: PyPI package version
 
-.. image:: https://readthedocs.org/projects/kedro/badge/?version=latest
+.. image:: https://img.shields.io/conda/vn/conda-forge/kedro.svg
+    :target: https://anaconda.org/conda-forge/kedro
+    :alt: Conda package version
+
+.. image:: https://readthedocs.org/projects/kedro/badge/?version=stable
     :target: https://kedro.readthedocs.io/
     :alt: Docs build status
+
+.. image:: https://img.shields.io/discourse/users?server=https%3A%2F%2Fdiscourse.kedro.community%2F
+    :target: https://discourse.kedro.community/
+    :alt: Discourse users
 
 .. image:: https://img.shields.io/badge/code%20style-black-black.svg
     :target: https://github.com/ambv/black
@@ -53,7 +65,6 @@ Welcome to Kedro's documentation!
    02_get_started/05_example_project
    02_get_started/06_starters
 
-
 .. toctree::
    :maxdepth: 2
    :caption: Tutorial
@@ -71,6 +82,8 @@ Welcome to Kedro's documentation!
 
    04_kedro_project_setup/01_dependencies
    04_kedro_project_setup/02_configuration
+   04_kedro_project_setup/03_session
+   04_kedro_project_setup/04_mini_kedro
 
 .. toctree::
    :maxdepth: 2
@@ -87,18 +100,19 @@ Welcome to Kedro's documentation!
    06_nodes_and_pipelines/02_pipeline_introduction
    06_nodes_and_pipelines/03_modular_pipelines
    06_nodes_and_pipelines/04_run_a_pipeline
-   06_nodes_and_pipelines/05_partial_pipelines
+   06_nodes_and_pipelines/05_slice_a_pipeline
 
 .. toctree::
    :maxdepth: 2
    :caption: Extend Kedro
 
-   07_extend_kedro/01_custom_datasets
-   07_extend_kedro/02_transformers
-   07_extend_kedro/03_decorators
-   07_extend_kedro/04_hooks
-   07_extend_kedro/05_plugins
-   07_extend_kedro/06_create_kedro_starters
+   07_extend_kedro/01_common_use_cases
+   07_extend_kedro/02_hooks
+   07_extend_kedro/03_custom_datasets
+   07_extend_kedro/04_plugins
+   07_extend_kedro/05_create_kedro_starters
+   07_extend_kedro/06_transformers
+   07_extend_kedro/07_decorators
 
 
 .. toctree::
@@ -122,13 +136,15 @@ Welcome to Kedro's documentation!
    :maxdepth: 2
    :caption: Deployment
 
-   10_deployment/01_single_machine
-   10_deployment/02_distributed
+   10_deployment/01_deployment_guide
+   10_deployment/02_single_machine
+   10_deployment/03_distributed
    10_deployment/04_argo
    10_deployment/05_prefect
    10_deployment/06_kubeflow
    10_deployment/07_aws_batch
-   10_deployment/08_aws_sagemaker
+   10_deployment/08_databricks
+   10_deployment/09_aws_sagemaker
 
 .. toctree::
    :maxdepth: 2
@@ -136,7 +152,6 @@ Welcome to Kedro's documentation!
 
    11_tools_integration/01_pyspark
    11_tools_integration/02_ipython
-   11_tools_integration/03_databricks
 
 .. toctree::
    :maxdepth: 2

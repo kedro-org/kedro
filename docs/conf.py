@@ -103,6 +103,7 @@ type_targets = {
         "int",
         "float",
         "str",
+        "tuple",
         "Any",
         "Dict",
         "typing.Dict",
@@ -125,6 +126,8 @@ type_targets = {
         "kedro.runner.parallel_runner._SharedMemoryDataSet",
         "kedro.versioning.journal.Journal",
         "kedro.framework.context.context.KedroContext",
+        "kedro.framework.startup.ProjectMetadata",
+        "kedro.framework.project.settings.ProjectSettings",
         "abc.ABC",
         "pathlib.Path",
         "pathlib.PurePosixPath",
@@ -467,7 +470,12 @@ def env_override(default_appid):
 
 
 def _add_jinja_filters(app):
-    app.builder.templates.environment.filters["env_override"] = env_override
+    from sphinx.builders.latex import LaTeXBuilder
+
+    # LaTeXBuilder is used in the PDF docs build,
+    # and it doesn't have attribute 'templates'
+    if not isinstance(app.builder, LaTeXBuilder):
+        app.builder.templates.environment.filters["env_override"] = env_override
 
 
 def setup(app):

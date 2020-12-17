@@ -29,9 +29,9 @@ import re
 from pathlib import Path
 from typing import Any, Dict
 
+import boto3
 import pandas as pd
 import pytest
-import s3fs
 from moto import mock_s3
 from pandas.util.testing import assert_frame_equal
 
@@ -295,11 +295,8 @@ class TestIncrementalDataSetLocal:
             ),
             (
                 {
-                    "dataset": DATASET,
-                    "credentials": {
-                        "cred": "common",
-                        "dataset_credentials": {"ds": "only"},
-                    },
+                    "dataset": {"type": DATASET, "credentials": {"ds": "only"}},
+                    "credentials": {"cred": "common"},
                 },
                 {"cred": "common"},
                 {"ds": "only"},
@@ -317,8 +314,7 @@ class TestIncrementalDataSetLocal:
             ),
             (
                 {
-                    "dataset": DATASET,
-                    "credentials": {"dataset_credentials": {"ds": "only"}},
+                    "dataset": {"type": DATASET, "credentials": {"ds": "only"}},
                     "checkpoint": {"credentials": {"cp": "only"}},
                 },
                 {},
@@ -378,7 +374,7 @@ BUCKET_NAME = "fake_bucket_name"
 def mocked_s3_bucket():
     """Create a bucket for testing using moto."""
     with mock_s3():
-        conn = s3fs.core.boto3.client("s3")
+        conn = boto3.client("s3")
         conn.create_bucket(Bucket=BUCKET_NAME)
         yield conn
 

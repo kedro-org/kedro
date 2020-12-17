@@ -577,14 +577,17 @@ kedro run --parallel
 
 > *Note:* `ParallelRunner` performs task parallelisation, which is different from data parallelisation as seen in PySpark.
 
+You can find out more about the runners Kedro provides, and how to create your own, in the [pipeline documentation about runners](../06_nodes_and_pipelines/04_run_a_pipeline.md).
 
-## Partial pipeline runs
+## Slice a pipeline
 
-In some cases, you may want to partially run the pipeline. For example, you may need to only run the `ds_pipeline` to tune the hyperparameters of the price prediction model and skip `de_pipeline` execution. You can specify just the pipeline you want to run by using the `--pipeline` command line option. For example, to only run `ds_pipeline`, execute the following command:
+In some cases you may want to run just part of a pipeline. For example, you may need to only run the `ds_pipeline` to tune the hyperparameters of the price prediction model and skip `de_pipeline` execution. You can 'slice' the pipeline and specify just the portion you want to run by using the `--pipeline` command line option. For example, to only run `ds_pipeline`, execute the following command:
 
 ```bash
 kedro run --pipeline=ds
 ```
+
+See the [pipeline slicing documentation](../06_nodes_and_pipelines/05_slice_a_pipeline.md) for other ways to run sections of your pipeline.
 
 > *Note:* To successfully run the pipeline, you need to make sure that all required input datasets already exist, otherwise you may get an error similar to this:
 

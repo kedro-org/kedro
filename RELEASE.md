@@ -8,6 +8,7 @@
 ## Other breaking changes to the API
 
 ## Thanks for supporting contributions
+[Sasaki Takeru](https://github.com/takeru/)
 
 # Release 0.17.0
 
@@ -72,7 +73,6 @@
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman),
 [Zach Schuster](https://github.com/zschuster)
-[Sasaki Takeru](https://github.com/takeru/)
 
 ## Migration guide from Kedro 0.16.* to 0.17.*
 

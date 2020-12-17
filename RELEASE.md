@@ -73,10 +73,9 @@ The Kedro 0.17.0 release contains some breaking changes. If you update Kedro to 
 >* [How can I find out more about Kedro?](https://kedro.readthedocs.io/en/stable/12_faq/01_faq.html#how-can-i-find-out-more-about-kedro)
 >* [How can I get my questions answered?](https://kedro.readthedocs.io/en/stable/12_faq/01_faq.html#how-can-i-get-my-question-answered).
 
-
 To get an existing Kedro project to work after you upgrade to Kedro 0.17.0, we recommend that you create a new project against Kedro 0.17.0 and move the code from your existing project into it. Let's go through the changes, but first, note that if you create a new Kedro project with Kedro 0.17.0 you will not be asked whether you want to include the boilerplate code for the Iris dataset example. We've removed this option (you should now use a Kedro starter if you want to create a project that is pre-populated with code).
 
-To create a new, blank Kedro 0.17.0 project to drop your existing code into, you can create one, as always, with `kedro new`.
+To create a new, blank Kedro 0.17.0 project to drop your existing code into, you can create one, as always, with `kedro new`. We also recommend creating a new virtual environment for your new project, or you might run into conflicts with existing dependencies.
 
 * **Update `pyproject.toml`**: Copy the following three keys from the `.kedro.yml` of your existing Kedro project into the `pyproject.toml` file of your new Kedro 0.17.0 project:
 
@@ -126,6 +125,7 @@ with KedroSession.create(package_name=...) as session:
 
 * **Copy changes made to `DataCatalog`**. Likewise, if you have `DataCatalog` defined with `ProjectContext._create_catalog`, you should copy-paste the contents into `register_catalog`.
 
+* **Optional**: If you have plugins such as [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz) installed, it's likely that Kedro 0.17.0 won't work with their older versions, so please either upgrade to the plugin's newest version or follow their migration guides.
 
 # Release 0.16.6
 

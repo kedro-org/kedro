@@ -42,10 +42,14 @@ from pathlib import Path
 from typing import Dict, Set
 
 import click
-from kedro.framework.context import load_context
-from kedro.pipeline.node import Node
+
 from kfp import aws, dsl
 from kfp.compiler.compiler import Compiler
+
+from kedro.framework.cli.utils import _add_src_to_path
+from kedro.framework.session import KedroSession
+from kedro.framework.startup import _get_project_metadata
+from kedro.pipeline.node import Node
 
 _PIPELINE = None
 _IMAGE = None
@@ -68,8 +72,14 @@ def generate_kfp(image: str, pipeline_name: str, env: str) -> None:
     global _IMAGE
     _IMAGE = image
 
-    context = load_context(Path.cwd(), env=env)
-    project_name = context.project_name
+    project_path = Path.cwd()
+    metadata = _get_project_metadata(project_path)
+    _add_src_to_path(metadata.source_dir, project_path)
+    project_name = metadata.project_name
+
+    session = KedroSession.create(metadata.package_name, project_path, env=env)
+    context = session.load_context()
+
     pipeline_name = pipeline_name or "__default__"
     _PIPELINE = context.pipelines.get(pipeline_name)
 

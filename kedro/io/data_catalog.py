@@ -35,6 +35,7 @@ import copy
 import difflib
 import logging
 import re
+import warnings
 from collections import defaultdict
 from functools import partial
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Type, Union
@@ -468,11 +469,11 @@ class DataCatalog:
         Returns:
             Whether the data set output exists.
 
-        Raises:
-            DataSetNotFoundError: When a data set with the given name
-                has not yet been registered.
         """
-        dataset = self._get_dataset(name)
+        try:
+            dataset = self._get_dataset(name)
+        except DataSetNotFoundError:
+            return False
         return dataset.exists()
 
     def release(self, name: str):
@@ -612,6 +613,15 @@ class DataCatalog:
                 existent data set.
             TypeError: When transformer isn't an instance of ``AbstractTransformer``
         """
+
+        warnings.warn(
+            "The transformer API will be deprecated in Kedro 0.18.0."
+            "Please use Dataset Hooks to customise the load and save methods."
+            "For more information, please visit"
+            "https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_hooks.html",
+            DeprecationWarning,
+        )
+
         if not isinstance(transformer, AbstractTransformer):
             raise TypeError(
                 "Object of type {} is not an instance of AbstractTransformer".format(
@@ -666,6 +676,7 @@ class DataCatalog:
 
         try:
             pattern = re.compile(regex_search, flags=re.IGNORECASE)
+
         except re.error as exc:
             raise SyntaxError(
                 f"Invalid regular expression provided: `{regex_search}`"

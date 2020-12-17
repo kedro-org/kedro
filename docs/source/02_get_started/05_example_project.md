@@ -12,9 +12,9 @@ The Iris dataset can be used by a machine learning model to illustrate classific
 
 You must first [create a project](./04_new_project.md). Feel free to name your project as you like, but here we will assume the project's repository name is `get-started`.
 
-> Be sure to enter `Y` at the final prompt, so your new project is pre-populated with the Iris dataset example.
-
-If you prefer, clone the example project from the [`kedro-examples` repository on Github](https://github.com/quantumblacklabs/kedro-examples)
+```bash
+kedro new --starter=pandas-iris
+```
 
 ### Project directory structure
 
@@ -27,7 +27,6 @@ The example project directory is set out as follows:
     ├── conf            # Project configuration files
     ├── data            # Local project data (not committed to version control)
     ├── docs            # Project documentation
-    ├── kedro_cli.py    # A collection of Kedro command line interface (CLI) commands
     ├── logs            # Project output logs (not committed to version control)
     ├── notebooks       # Project related Jupyter notebooks (can be used for experimental code before moving the code to src)
     ├── README.md       # Project README
@@ -42,7 +41,7 @@ Kedro also creates the following hidden files and folders:
     ├── .coveragerc     # Configuration file for the coverage reporting when doing `kedro test`
     ├── .gitignore      # Prevent staging of unnecessary files to `git`
     ├── .ipython        # IPython startup scripts
-    └── .kedro.yml      # Identifies the project root and [contains configuration information](https://kedro.readthedocs.io/en/latest/11_faq/02_architecture_overview.html#kedro-yml)
+    └── pyproject.toml  # Identifies the project root and [contains configuration information](https://kedro.readthedocs.io/en/latest/11_faq/02_architecture_overview.html#kedro-yml)
 ```
 
 #### `conf/`

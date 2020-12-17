@@ -141,21 +141,47 @@ The output is as follows:
 
 ```python
 [Node(len, 'xs', 'n', None),
- Node(mean, ['xs', 'n'], 'm', 'mean node'),
- Node(mean_sos, ['xs', 'n'], 'm2', 'mean sos'),
+ Node(mean, ['xs', 'n'], 'm', 'mean_node'),
+ Node(mean_sos, ['xs', 'n'], 'm2', 'mean_sos'),
  Node(variance, ['m', 'm2'], 'v', 'variance node')]
  ```
+
+To find out about the inputs:
 
 ```python
 nodes[0].inputs
 ```
 
-Gives the following output:
+You should see the following:
 
 ```python
 ['xs']
 ```
 </details>
+
+### Information about pipeline inputs and outputs
+In a similar way to the above, you can use `inputs()` and `outputs()` to check the inputs and outputs of a pipeline:
+
+```python
+pipeline.inputs()
+```
+
+Gives the following:
+
+```console
+Out[7]: {'xs'}
+```
+
+```python
+pipeline.outputs()
+```
+
+Displays the output:
+
+```console
+Out[8]: {'v'}
+```
+
 
 ## Bad pipelines
 

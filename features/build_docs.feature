@@ -31,8 +31,8 @@ Feature: build-docs target in new project
 
   @fresh_venv
   Scenario: Execute build-docs target
-    Given I have prepared a config file with example code
-    And I have run a non-interactive kedro new
+    Given I have prepared a config file
+    And I have run a non-interactive kedro new with starter
     And I have updated kedro requirements
     Given I have executed the kedro command "install"
     When I execute the kedro command "build-docs"

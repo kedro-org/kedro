@@ -1,5 +1,0 @@
-# This is a boilerplate catalog config generated for pipeline '{{ cookiecutter.pipeline_name }}'
-# using Kedro {{ cookiecutter.kedro_version }}.
-#
-# Documentation for this file format can be found in "The Data Catalog"
-# Link: https://kedro.readthedocs.io/en/stable/05_data/01_data_catalog.html

@@ -72,24 +72,24 @@ def entry_point(mocker, entry_points):
     return ep
 
 
-@fixture(scope="session")
+@fixture(scope="module")
 def fake_root_dir():
     # using tempfile as tmp_path fixture doesn't support module scope
     with tempfile.TemporaryDirectory() as tmp_root:
         yield Path(tmp_root).resolve()
 
 
-@fixture(scope="session")
+@fixture(scope="module")
 def fake_package_path(fake_root_dir):
     return fake_root_dir.resolve() / REPO_NAME / "src" / PACKAGE_NAME
 
 
-@fixture(scope="session")
+@fixture(scope="module")
 def fake_repo_path(fake_root_dir):
     return fake_root_dir.resolve() / REPO_NAME
 
 
-@fixture(scope="session")
+@fixture(scope="module")
 def dummy_config(fake_root_dir, fake_metadata):
     config = {
         "project_name": fake_metadata.project_name,
@@ -105,7 +105,7 @@ def dummy_config(fake_root_dir, fake_metadata):
     return config_path
 
 
-@fixture(scope="session")
+@fixture(scope="module")
 def fake_metadata(fake_root_dir):
     metadata = ProjectMetadata(
         fake_root_dir / REPO_NAME / "pyproject.toml",
@@ -118,7 +118,7 @@ def fake_metadata(fake_root_dir):
     return metadata
 
 
-@fixture(scope="session")
+@fixture(scope="module")
 def fake_project_cli(fake_repo_path: Path, dummy_config: Path):
     starter_path = Path(__file__).parents[3].resolve()
     starter_path = starter_path / "features" / "steps" / "test_starter"

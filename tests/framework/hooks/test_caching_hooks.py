@@ -1,18 +1,13 @@
 import json
-import math
+import os
 from pathlib import Path
 from random import random
-from shutil import rmtree
-from tempfile import TemporaryFile, gettempdir
-from unittest.mock import MagicMock, Mock
+from tempfile import gettempdir
+from unittest.mock import Mock
 
-from kedro.extras.caching.CachingHook import LocalFileCachingHook, get_function_fingerprint, get_inputs_outputs
-import pytest
-import os
-
+from kedro.extras.caching.CachingHook import LocalFileCachingHook, get_function_fingerprint
 from kedro.extras.datasets.json import JSONDataSet
 from kedro.framework.hooks import get_hook_manager
-from kedro.framework.session import KedroSession
 from kedro.io import DataCatalog, MemoryDataSet
 from kedro.pipeline import Pipeline, node
 from kedro.runner import SequentialRunner
@@ -52,7 +47,8 @@ def b_func(a_out):
     return {"b": b}
 
 
-def _run_pipeline_twice(pipeline: Pipeline, catalog: DataCatalog):
+def _run_pipeline_twice(pipeline: Pipeline, catalog: DataCatalog, second_pipeline=None):
+    second_pipeline = second_pipeline or pipeline
     manager = get_hook_manager()
     runner = SequentialRunner()
     tmp_dir = gettempdir()
@@ -69,7 +65,7 @@ def _run_pipeline_twice(pipeline: Pipeline, catalog: DataCatalog):
     # run pipeline 2nd time
     hook2 = LocalFileCachingHook(state_path)
     manager.register(hook2)
-    runner.run(pipeline, catalog, "2")
+    runner.run(second_pipeline, catalog, "2")
     manager.unregister(hook2)
     hook2._persist()
     with open(state_path) as f:
@@ -82,7 +78,7 @@ def test_simple_in_memory_pipeline():
     a = Mock()
     b = Mock()
     pipeline = Pipeline([node(lambda: a(), inputs=None, outputs="a_out", name="A"), node(lambda a: b(), inputs="a_out",
-                                                                               outputs="b_out", name="B")])
+                                                                                         outputs="b_out", name="B")])
     data_catalog = DataCatalog({"a_out": MemoryDataSet(), "b_out": MemoryDataSet()})
     hook1, hook2, state_content = _run_pipeline_twice(pipeline, data_catalog)
 
@@ -97,23 +93,74 @@ def test_simple_in_memory_pipeline():
 
 
 def test_simple_pipeline(tmp_path):
-    # Assemble nodes into a pipeline
+    # tests that nodes are skipped when called subsequently without changes to the nodes
     a_called = Mock()
+
     def a():
         a_called()
         return {"a": 1}
+
     b_called = Mock()
+
     def b(a_out):
         b_called()
         return {"b": 1}
 
     pipeline = Pipeline([node(a, inputs=None, outputs="a_out", name="A"), node(b, inputs="a_out", outputs="b_out",
-                                                                                name="B")])
-    data_catalog = DataCatalog({"a_out": JSONDataSet(str(tmp_path / "a.json")), "b_out": JSONDataSet(str(tmp_path / "b.json"))})
+                                                                               name="B")])
+    data_catalog = DataCatalog(
+        {"a_out": JSONDataSet(str(tmp_path / "a.json")), "b_out": JSONDataSet(str(tmp_path / "b.json"))})
     hook1, hook2, state_content = _run_pipeline_twice(pipeline, data_catalog)
 
+    # call each node only once, skipping the second run
     assert a_called.call_count == 1
     assert b_called.call_count == 1
+
+    # check state_content
+    state = json.loads(state_content)
+    assert state['datasets']['a_out'] == 1
+    assert state['datasets']['b_out'] == 2
+
+
+def test_with_edited_pipeline(tmp_path):
+    # tests that nodes are skipped when called subsequently without changes to the nodes
+    a_called = Mock()
+
+    def a():
+        a_called()
+        return {"a": 1}
+
+    b_called = Mock()
+
+    def b(a_out):
+        b_called()
+        return {"b": 1}
+
+    c_called = Mock()
+
+    def c(b_out):
+        c_called()
+        return None
+
+    initial_pipeline = Pipeline([
+        node(a, inputs=None, outputs="a_out", name="A"),
+        node(b, inputs="a_out", outputs="b_out", name="B")
+    ])
+    edited_pipeline = Pipeline([
+        node(a, inputs=None, outputs="a_out", name="A"),
+        node(b, inputs="a_out", outputs="b_out", name="B"),
+        node(c, inputs="b_out", outputs=None, name="C")
+    ])
+
+    data_catalog = DataCatalog(
+        {"a_out": JSONDataSet(str(tmp_path / "a.json")), "b_out": JSONDataSet(str(tmp_path / "b.json"))})
+    hook1, hook2, state_content = _run_pipeline_twice(initial_pipeline, data_catalog, second_pipeline=edited_pipeline)
+
+    # call each node only once, skipping the second run
+    assert a_called.call_count == 1
+    assert b_called.call_count == 1
+    assert c_called.call_count == 1
+
     # check state_content
     state = json.loads(state_content)
     assert state['datasets']['a_out'] == 1
@@ -140,20 +187,3 @@ def test_expect_two_functions_equal():
     hash_one = get_function_fingerprint(lambda: random())
     hash_two = get_function_fingerprint(lambda: random())
     assert hash_one == hash_two
-
-# def test_get_inputs_outputs():
-#     # TODO test
-#     # get_inputs_outputs()
-#     pass
-#
-#
-# def test_after_node_run(caching_hook: LocalFileCachingHook):
-#     # TODO test
-#     caching_hook.after_node_run()
-#     pass
-#
-#
-# def test_before_node_run(caching_hook: LocalFileCachingHook):
-#     # TODO test
-#     caching_hook.before_node_run()
-#     pass

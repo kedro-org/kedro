@@ -18,6 +18,12 @@ STATE_PATH = Path("pipeline.kstate")
 
 
 class AbstractCachingHook(abc.ABC):
+
+    def __init__(self):
+        self._node_state: Dict[str, str] = {}
+        self._dataset_state: Dict[str, int] = {}
+        self._counter = 1
+
     @abc.abstractmethod
     def _load(self) -> Any:
         raise NotImplementedError(
@@ -30,40 +36,6 @@ class AbstractCachingHook(abc.ABC):
             "`{}` is a subclass of AbstractCachingHook and"
             "it must implement the `_persist` method".format(self.__class__.__name__)
         )
-
-
-class LocalFileCachingHook(AbstractCachingHook):
-
-    def __init__(self, path: Union[Path, str]):
-        self._location = path or STATE_PATH
-        self._node_state: Dict[str, str] = {}
-        self._dataset_state: Dict[str, int] = {}
-        self._counter = 1
-        self._load()
-
-    def _load(self) -> None:
-        """loads state from disk to memory"""
-        try:
-            with open(self._location) as f:
-                data = json.load(f)
-                self._node_state = data.get("nodes", {})
-                self._dataset_state = data.get("datasets", {})
-                self._counter = data.get("counter", 1)
-        except FileNotFoundError:
-            pass
-
-    def _persist(self) -> None:
-        """persists the state of memory to disk"""
-        # may also support other state locations such as dynamoDB tables or remote state (take inspiration from
-        # terraform for this)
-        logging.warning("Persisting call counts")
-        with open(self._location, "w") as f:
-            data = {
-                "nodes": self._node_state,
-                "datasets": self._dataset_state,
-                "counter": self._counter
-            }
-            json.dump(data, f, indent=4)
 
     @hook_impl
     def after_pipeline_run(self,
@@ -118,7 +90,7 @@ class LocalFileCachingHook(AbstractCachingHook):
         output_counters = [self._dataset_state.get(out) for out in outputs]
 
         latest_input = sorted(input_counters)[-1] if len(input_counters) > 0 else 0
-        oldest_output = sorted(output_counters)[0] if len(output_counters) > 0 else latest_input+1
+        oldest_output = sorted(output_counters)[0] if len(output_counters) > 0 else latest_input + 1
 
         return latest_input >= oldest_output
 
@@ -133,8 +105,8 @@ class LocalFileCachingHook(AbstractCachingHook):
             run_id: str,
     ) -> None:
         """Stores the results of this node run to be able to skip it in the future if needed.
-        
-        To enable skipping, we remember: 
+
+        To enable skipping, we remember:
          - the node's bytecode (by remembering a hash of it)
          - the datetime of completion of the node -> all outputs are remembered with this timestamp
         """
@@ -159,6 +131,39 @@ class LocalFileCachingHook(AbstractCachingHook):
     ):
         """Reset node to make sure it's run again when this happens"""
         pass
+
+
+class LocalFileCachingHook(AbstractCachingHook):
+
+    def __init__(self, path: Union[Path, str]):
+        super().__init__()
+        self._location = path or STATE_PATH
+        self._load()
+
+    def _load(self) -> None:
+        """loads state from disk to memory"""
+        try:
+            with open(self._location) as f:
+                data = json.load(f)
+                self._node_state = data.get("nodes", {})
+                self._dataset_state = data.get("datasets", {})
+                self._counter = data.get("counter", 1)
+        except FileNotFoundError:
+            pass
+
+    def _persist(self) -> None:
+        """persists the state of memory to disk"""
+        # may also support other state locations such as dynamoDB tables or remote state (take inspiration from
+        # terraform for this)
+        logging.warning("Persisting call counts")
+        with open(self._location, "w") as f:
+            data = {
+                "nodes": self._node_state,
+                "datasets": self._dataset_state,
+                "counter": self._counter
+            }
+            json.dump(data, f, indent=4)
+
 
 
 def get_inputs_outputs(catalog: DataCatalog, inputs, node: Node):

@@ -75,10 +75,12 @@ def _run_pipeline_twice(pipeline: Pipeline, catalog: DataCatalog, second_pipelin
 
 def test_simple_in_memory_pipeline():
     # Assemble nodes into a pipeline
-    a = Mock()
+    a = Mock(return_value={"a": 1})
     b = Mock()
-    pipeline = Pipeline([node(lambda: a(), inputs=None, outputs="a_out", name="A"), node(lambda a: b(), inputs="a_out",
-                                                                                         outputs="b_out", name="B")])
+    pipeline = Pipeline([
+        node(lambda: a(), inputs=None, outputs="a_out", name="A"),
+        node(lambda x: b(x), inputs="a_out", outputs="b_out", name="B")
+    ])
     data_catalog = DataCatalog({"a_out": MemoryDataSet(), "b_out": MemoryDataSet()})
     hook1, hook2, state_content = _run_pipeline_twice(pipeline, data_catalog)
 
@@ -92,64 +94,20 @@ def test_simple_in_memory_pipeline():
     assert state['datasets']['b_out'] == 4
 
 
-def test_simple_pipeline(tmp_path):
-    # tests that nodes are skipped when called subsequently without changes to the nodes
-    a_called = Mock()
-
-    def a():
-        a_called()
-        return {"a": 1}
-
-    b_called = Mock()
-
-    def b(a_out):
-        b_called()
-        return {"b": 1}
-
-    pipeline = Pipeline([node(a, inputs=None, outputs="a_out", name="A"), node(b, inputs="a_out", outputs="b_out",
-                                                                               name="B")])
-    data_catalog = DataCatalog(
-        {"a_out": JSONDataSet(str(tmp_path / "a.json")), "b_out": JSONDataSet(str(tmp_path / "b.json"))})
-    hook1, hook2, state_content = _run_pipeline_twice(pipeline, data_catalog)
-
-    # call each node only once, skipping the second run
-    assert a_called.call_count == 1
-    assert b_called.call_count == 1
-
-    # check state_content
-    state = json.loads(state_content)
-    assert state['datasets']['a_out'] == 1
-    assert state['datasets']['b_out'] == 2
-
-
 def test_with_edited_pipeline(tmp_path):
     # tests that nodes are skipped when called subsequently without changes to the nodes
-    a_called = Mock()
-
-    def a():
-        a_called()
-        return {"a": 1}
-
-    b_called = Mock()
-
-    def b(a_out):
-        b_called()
-        return {"b": 1}
-
-    c_called = Mock()
-
-    def c(b_out):
-        c_called()
-        return None
+    a = Mock(return_value={"a": 1})
+    b = Mock(return_value={"b": 1})
+    c = Mock()
 
     initial_pipeline = Pipeline([
-        node(a, inputs=None, outputs="a_out", name="A"),
-        node(b, inputs="a_out", outputs="b_out", name="B")
+        node(lambda: a(), inputs=None, outputs="a_out", name="A"),
+        node(lambda x: b(x), inputs="a_out", outputs="b_out", name="B")
     ])
     edited_pipeline = Pipeline([
-        node(a, inputs=None, outputs="a_out", name="A"),
-        node(b, inputs="a_out", outputs="b_out", name="B"),
-        node(c, inputs="b_out", outputs=None, name="C")
+        node(lambda:a(), inputs=None, outputs="a_out", name="A"),
+        node(lambda x:b(x), inputs="a_out", outputs="b_out", name="B"),
+        node(lambda x:c(x), inputs="b_out", outputs=None, name="C")
     ])
 
     data_catalog = DataCatalog(
@@ -157,9 +115,9 @@ def test_with_edited_pipeline(tmp_path):
     hook1, hook2, state_content = _run_pipeline_twice(initial_pipeline, data_catalog, second_pipeline=edited_pipeline)
 
     # call each node only once, skipping the second run
-    assert a_called.call_count == 1
-    assert b_called.call_count == 1
-    assert c_called.call_count == 1
+    assert a.call_count == 1
+    assert b.call_count == 1
+    assert c.call_count == 1
 
     # check state_content
     state = json.loads(state_content)

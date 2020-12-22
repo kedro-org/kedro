@@ -87,6 +87,7 @@ def _collect_requirements(requires):
 api_require = {"api.APIDataSet": ["requests~=2.20"]}
 biosequence_require = {"biosequence.BioSequenceDataSet": ["biopython~=1.73"]}
 dask_require = {"dask.ParquetDataSet": ["dask[complete]~=2.6"]}
+datatable_require = {"datatable.CSVDataSet": ["datatable>=0.11.1, <1.0", PANDAS]}
 geopandas_require = {
     "geopandas.GeoJSONDataSet": ["geopandas>=0.6.0, <1.0", "pyproj>=2.2.0, <3.0"]
 }
@@ -103,6 +104,7 @@ pandas_require = {
     "pandas.JSONDataSet": [PANDAS],
     "pandas.ParquetDataSet": [PANDAS, "pyarrow>=0.12.0, <1.0.0"],
     "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy~=1.2"],
+    "datatable.CSVDataSet": datatable_require["datatable.CSVDataSet"],
 }
 pillow_require = {"pillow.ImageDataSet": ["Pillow~=7.1.2"]}
 spark_require = {
@@ -123,6 +125,7 @@ extras_require = {
     "api": _collect_requirements(api_require),
     "biosequence": _collect_requirements(biosequence_require),
     "dask": _collect_requirements(dask_require),
+    "datatable": _collect_requirements(datatable_require),
     "docs": [
         "sphinx>=1.8.4, <2.0",
         "sphinx_rtd_theme==0.4.3",
@@ -149,6 +152,7 @@ extras_require = {
     **api_require,
     **biosequence_require,
     **dask_require,
+    **datatable_require,
     **geopandas_require,
     **matplotlib_require,
     **holoviews_require,

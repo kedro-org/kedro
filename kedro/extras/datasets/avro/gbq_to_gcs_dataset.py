@@ -157,7 +157,7 @@ class GBQTableGCSAVRODataSet(AbstractDataSet):
         self._table_ref = self._client.dataset(dataset).table(table_name)
 
         path_object = path_object or f"{dataset}/{table_name}.avro"
-        self._uri = f"""gs://{bucket}/{path_object}"""
+        self._uri = f"gs://{bucket}/{path_object}"
 
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)

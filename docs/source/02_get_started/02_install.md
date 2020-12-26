@@ -9,8 +9,8 @@ pip install kedro
 >_Note:_ It is also possible to install Kedro using `conda`, as follows, but we recommend that you prefer to use `pip` at this point to eliminate any potential dependency issues:
 >
 >```bash
-conda install -c conda-forge kedro
-```
+>    conda install -c conda-forge kedro
+>```
 
 Both `pip` and `conda` install the core Kedro module, which includes the CLI tool, project template, pipeline abstraction, framework, and support for configuration.
 

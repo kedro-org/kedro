@@ -223,7 +223,6 @@ def run(
     runner_class = load_obj(runner, "kedro.runner")
 
     tag = _get_values_as_tuple(tag) if tag else tag
-    node_names = _get_values_as_tuple(node_names) if node_names else node_names
 
     package_name = str(Path(__file__).resolve().parent.name)
     with KedroSession.create(package_name, env=env, extra_params=params) as session:

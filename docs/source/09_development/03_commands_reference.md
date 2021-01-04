@@ -192,7 +192,7 @@ Kedro has options to modify pipeline runs. Here is a list of CLI arguments suppo
 +---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
 | :code:`kedro run --to-nodes node3,node4`                                  | A list of node names which should be used as an end point                       | No                        |
 +---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| :code:`kedro run --node debug_me,debug_me_too`                            | Run only nodes with specified names                                             | Yes                       |
+| :code:`kedro run --node debug_me --node debug_me_too`                     | Run only nodes with specified names                                             | Yes                       |
 +---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
 | :code:`kedro run --runner runner_name`                                    | Run the pipeline with a specific runner. Cannot be used together with --parallel| No                        |
 +---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+

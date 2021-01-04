@@ -103,7 +103,7 @@ def _get_values_as_tuple(values: Iterable[str]) -> Tuple[str, ...]:
 def _reformat_load_versions(  # pylint: disable=unused-argument
     ctx, param, value
 ) -> Dict[str, str]:
-    """Reformat data structure from tuple to dictionary for `load-version`, e.g:
+    """Reformat data structure from tuple to dictionary for `load-version`, e.g.:
     ('dataset1:time1', 'dataset2:time2') -> {"dataset1": "time1", "dataset2": "time2"}.
     """
     load_versions_dict = {}

@@ -2,7 +2,7 @@
 
 ## Major features and improvements
 
-* In a significant change, [we have introduced `KedroSession`](https://kedro.readthedocs.io/en/stable/04_kedro_project_setup/01_dependencies/03_session.html) which is responsible for managing the lifecycle of a Kedro run.
+* In a significant change, [we have introduced `KedroSession`](https://kedro.readthedocs.io/en/stable/04_kedro_project_setup/03_session.html) which is responsible for managing the lifecycle of a Kedro run.
 * Created a new Kedro Starter: `kedro new --starter=mini-kedro`. It is possible to [use the DataCatalog as a standalone component](https://github.com/quantumblacklabs/kedro-starters/tree/master/mini-kedro) in a Jupyter notebook and transition into the rest of the Kedro framework.
 * Added `DatasetSpecs` with Hooks to run before and after datasets are loaded from/saved to the catalog.
 * Added a command: `kedro catalog create`. For a registered pipeline, it creates a `<conf_root>/<env>/catalog/<pipeline_name>.yml` configuration file with `MemoryDataSet` datasets for each dataset that is missing from `DataCatalog`.

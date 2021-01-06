@@ -146,6 +146,8 @@ class PickleDataSet(AbstractVersionedDataSet):
         _credentials = deepcopy(credentials) or {}
 
         protocol, path = get_protocol_and_path(filepath, version)
+        if protocol == "file":
+            _fs_args.setdefault("auto_mkdir", True)
 
         self._protocol = protocol
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
@@ -197,7 +199,7 @@ class PickleDataSet(AbstractVersionedDataSet):
                 self.BACKENDS[self._backend].dump(data, fs_file, **self._save_args)
             except Exception as exc:
                 raise DataSetError(
-                    f"{str(data.__class__)} was not serialized due to: {str(exc)}"
+                    f"{data.__class__} was not serialized due to: {exc}"
                 ) from exc
 
         self._invalidate_cache()

@@ -133,10 +133,7 @@ def _setup_kedro_install_venv(context):
             "pip",
             "install",
             "-U",
-            # pip 20.3 broke "Execute build-docs target" scenario:
-            # ERROR: Requested docutils ... has different version in
-            # metadata: '0.15.1'
-            "pip>=20.0,<20.3",
+            "pip>=20.0",
             "setuptools>=38.0",
             "wheel",
         ],

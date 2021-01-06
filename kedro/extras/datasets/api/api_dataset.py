@@ -113,10 +113,10 @@ class APIDataSet(AbstractDataSet):
         try:
             response = requests.request(**self._request_args)
             response.raise_for_status()
-        except requests.exceptions.HTTPError as err:
-            raise DataSetError("Failed to fetch data", err) from err
-        except socket.error as err:
-            raise DataSetError("Failed to connect to the remote server") from err
+        except requests.exceptions.HTTPError as exc:
+            raise DataSetError("Failed to fetch data", exc) from exc
+        except socket.error as exc:
+            raise DataSetError("Failed to connect to the remote server") from exc
 
         return response
 

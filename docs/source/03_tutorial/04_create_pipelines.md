@@ -217,7 +217,7 @@ preprocessed_shuttles:
 
 The code above declares explicitly that [pandas.CSVDataSet](/kedro.extras.datasets.pandas.CSVDataSet) should be used instead of [`MemoryDataSet`](/kedro.io.MemoryDataSet). `DataCatalog` will take care of saving the datasets automatically as `csv` data to the `filepath`s specified next time the pipeline is run. There is no need to change any code in your preprocessing functions to accommodate this change.
 
-In this tutorial, we chose `pandas.CSVDataSet` for its simplicity, but you can use any other available dataset implementation class, for example, a database table, cloud storage (like [AWS S3](https://aws.amazon.com/s3/), [Azure Blob Storage](https://azure.microsoft.com/en-gb/services/storage/blobs/), etc.) or others. If you cannot find the dataset implementation you need, you can implement your own [custom dataset](../07_extend_kedro/01_custom_datasets.md).
+In this tutorial, we chose `pandas.CSVDataSet` for its simplicity, but you can use any other available dataset implementation class, for example, a database table, cloud storage (like [AWS S3](https://aws.amazon.com/s3/), [Azure Blob Storage](https://azure.microsoft.com/en-gb/services/storage/blobs/), etc.) or others. If you cannot find the dataset implementation you need, you can implement your own [custom dataset](../07_extend_kedro/03_custom_datasets.md).
 
 ### Extend the data engineering pipeline
 
@@ -320,17 +320,22 @@ You should see output similar to the following:
 We have created a modular pipeline for data engineering, which merges three input datasets to create a master table. Now we will create the data science pipeline for price prediction, which uses a [`LinearRegression`](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html) implementation from the [scikit-learn](https://scikit-learn.org/stable/) library.
 
 ### Update dependencies
-Update the project's dependencies in `src/requirements.txt` as follows:
+We now need to add `scikit-learn` to the project's dependencies. This is a slightly different process from the initial change we made early in the tutorial.
+
+To **update** the project's dependencies, you should modify `src/requirements.in` to add the following. Note that you do not need to update `src/requirements.txt` as you did previously in the tutorial before you built the project's requirements with `kedro build-reqs`:
+
 
 ```text
 scikit-learn==0.23.1
 ```
 
-From within the project directory, run:
+Then, re-run `kedro install` with a flag telling Kedro to recompile the requirements:
 
 ```bash
-kedro install
+kedro install --build-reqs
 ```
+
+You can find out more about [how to work with project dependencies](../04_kedro_project_setup/01_dependencies) in the Kedro project documentation.
 
 ### Create a data science node
 
@@ -572,14 +577,17 @@ kedro run --parallel
 
 > *Note:* `ParallelRunner` performs task parallelisation, which is different from data parallelisation as seen in PySpark.
 
+You can find out more about the runners Kedro provides, and how to create your own, in the [pipeline documentation about runners](../06_nodes_and_pipelines/04_run_a_pipeline.md).
 
-## Partial pipeline runs
+## Slice a pipeline
 
-In some cases, you may want to partially run the pipeline. For example, you may need to only run the `ds_pipeline` to tune the hyperparameters of the price prediction model and skip `de_pipeline` execution. You can specify just the pipeline you want to run by using the `--pipeline` command line option. For example, to only run `ds_pipeline`, execute the following command:
+In some cases you may want to run just part of a pipeline. For example, you may need to only run the `ds_pipeline` to tune the hyperparameters of the price prediction model and skip `de_pipeline` execution. You can 'slice' the pipeline and specify just the portion you want to run by using the `--pipeline` command line option. For example, to only run `ds_pipeline`, execute the following command:
 
 ```bash
 kedro run --pipeline=ds
 ```
+
+See the [pipeline slicing documentation](../06_nodes_and_pipelines/05_slice_a_pipeline.md) for other ways to run sections of your pipeline.
 
 > *Note:* To successfully run the pipeline, you need to make sure that all required input datasets already exist, otherwise you may get an error similar to this:
 

@@ -83,7 +83,7 @@ class TestNetworkXDataSet:
         networkx_data_set.save(dummy_graph_data)
         reloaded = networkx_data_set.load()
         assert dummy_graph_data.nodes(data=True) == reloaded.nodes(data=True)
-        assert networkx_data_set._fs_open_args_load == {"mode": "r"}
+        assert networkx_data_set._fs_open_args_load == {}
         assert networkx_data_set._fs_open_args_save == {"mode": "w"}
 
     def test_load_missing_file(self, networkx_data_set):

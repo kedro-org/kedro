@@ -83,7 +83,7 @@ This subfolder contains the project's source code. It contains 2 subfolders:
 * Avoid committing data to version control.
 * Avoid committing data to notebook output cells (data can easily sneak into notebooks when you don't delete output cells).
 * Don't commit sensitive results or plots to version control (in notebooks or otherwise).
-* Don't commit credentials in `conf/`. Only the `conf/local/` folder should be used for sensitive information like access credentials. To add credentials, please refer to the `conf/base/credentials.yml` file in the project template.
+* Don't commit credentials in `conf/`. Only the `conf/local/` folder should be used for sensitive information like access credentials. To add credentials, please refer to the `conf/local/credentials.yml` file in the project template.
 * By default any file inside the `conf/` folder (and its subfolders) containing `credentials` in its name will be ignored via `.gitignore` and not committed to your git repository.
 * To describe where your colleagues can access the credentials, you may edit the `README.md` to provide instructions.
 

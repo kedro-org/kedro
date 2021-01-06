@@ -580,27 +580,6 @@ def check_python_packages_created(context):
     assert any(whl_file)
 
 
-@then('"{env}" environment was used')
-def check_environment_used(context, env):
-    env_path = context.root_project_dir / "conf" / env
-    assert env_path.exists(), f'Environment "{env}" does not exist'
-
-    if isinstance(context.result, ChildTerminatingPopen):
-        stdout = context.result.stdout.read().decode()
-        context.result.terminate()
-    else:
-        stdout = context.result.stdout
-
-    for config_name in ("catalog", "parameters", "credentials"):
-        path = env_path.joinpath(f"{config_name}.yml")
-        if path.exists():
-            msg = f"Loading: {path.resolve()}"
-            assert msg in stdout, (
-                "Expected the following message segment to be printed on stdout: "
-                f"{msg}, but got:\n{stdout}"
-            )
-
-
 @then('I should get a message including "{msg}"')
 def check_message_printed(context, msg):
     """Check that specified message is printed to stdout (can be a segment)."""

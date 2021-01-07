@@ -513,9 +513,7 @@ We provide additional examples of [how to use parameters through the data catalo
 
 ## How to contribute a custom dataset implementation
 
-```eval_rst
-One of the easiest ways to contribute back to Kedro is to share a custom dataset. Kedro has a :code:`kedro.extras.datasets` sub-package where you can add a new custom dataset implementation to share it with others. You can find out more in the `Kedro contribution guide <https://github.com/quantumblacklabs/kedro/blob/master/CONTRIBUTING.md>`_ on Github.
-```
+One of the easiest ways to contribute back to Kedro is to share a custom dataset. Kedro has a :code:`kedro.extras.datasets` sub-package where you can add a new custom dataset implementation to share it with others. You can find out more in the [Kedro contribution guide](https://github.com/quantumblacklabs/kedro/blob/master/CONTRIBUTING.md) on Github.
 
 To contribute your custom dataset:
 

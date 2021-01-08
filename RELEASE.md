@@ -1,3 +1,13 @@
+# Upcoming Release 0.17.1
+
+## Major features and improvements
+
+## Bug fixes and other changes
+* The version of a packaged modular pipeline now defaults to the version of the project package.
+
+## Thanks for supporting contributions
+
+
 # Release 0.17.0
 
 ## Major features and improvements

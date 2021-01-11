@@ -31,6 +31,7 @@ import json
 import shutil
 import sys
 import tempfile
+from importlib import import_module
 from pathlib import Path
 from textwrap import indent
 from typing import Any, List, NamedTuple, Optional, Tuple, Union
@@ -302,9 +303,7 @@ def _get_fsspec_filesystem(location: str, fs_args: Optional[str]):
     "-v",
     "--version",
     type=str,
-    default="0.1",
-    show_default=True,
-    help="Version to package under.",
+    help="Version to package under. Defaults to project package version.",
 )
 @click.argument("name", nargs=1)
 @click.pass_obj  # this will pass the metadata as first argument
@@ -314,7 +313,7 @@ def package_pipeline(
     """Package up a pipeline for easy distribution. A .whl file
     will be created in a `<source_dir>/dist/`."""
     result_path = _package_pipeline(
-        name, metadata, alias=alias, destination=destination, env=env, version=version,
+        name, metadata, alias=alias, destination=destination, env=env, version=version
     )
 
     as_alias = f" as `{alias}`" if alias else ""
@@ -342,7 +341,7 @@ def _unpack_wheel(location: str, destination: Path, fs_args: Optional[str]) -> N
             ZipFile(fs_file).extractall(destination)
     else:
         python_call(
-            "pip", ["download", "--no-deps", "--dest", str(destination), location],
+            "pip", ["download", "--no-deps", "--dest", str(destination), location]
         )
         wheel_file = list(destination.glob("*.whl"))
         # `--no-deps` should fetch only one wheel file, and CLI should fail if that's
@@ -439,7 +438,9 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
 ) -> Path:
     package_dir = metadata.source_dir / metadata.package_name
     env = env or "base"
-    version = version or "0.1"
+    if not version:  # default to project package version
+        project_module = import_module(f"{metadata.package_name}")
+        version = project_module.__version__  # type: ignore
 
     artifacts_to_package = _get_pipeline_artifacts(
         metadata, pipeline_name=pipeline_name, env=env
@@ -459,7 +460,9 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
     _validate_dir(artifacts_to_package.pipeline_dir)
     destination = Path(destination) if destination else package_dir.parent / "dist"
 
-    _generate_wheel_file(pipeline_name, destination, source_paths, version, alias=alias)
+    _generate_wheel_file(  # type: ignore
+        pipeline_name, destination, source_paths, version, alias=alias
+    )
 
     _clean_pycache(package_dir)
     _clean_pycache(metadata.project_path)

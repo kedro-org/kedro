@@ -1,7 +1,7 @@
 # Upcoming Release 0.17.1
 
 ## Major features and improvements
-* Add `env` and `extra_params` to `reload_kedro()` line magic.
+* Added `env` and `extra_params` to `reload_kedro()` line magic.
 
 ## Bug fixes and other changes
 * The version of a packaged modular pipeline now defaults to the version of the project package.

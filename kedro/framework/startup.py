@@ -63,10 +63,12 @@ def _is_project(project_path: Union[str, Path]) -> bool:
     if not metadata_file.is_file():
         return False
     try:
-        anyconfig.load(metadata_file)
+        metadata_dict = anyconfig.load(metadata_file)
+        if "tool" in metadata_dict and "kedro" in metadata_dict["tool"]:
+            return True
     except Exception:  # pylint: disable=broad-except
         return False
-    return True
+    return False
 
 
 def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:

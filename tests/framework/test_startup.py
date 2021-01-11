@@ -50,6 +50,13 @@ class TestIsProject:
 
         assert not _is_project(tmp_path)
 
+    def test_non_kedro_project(self, mocker):
+        mocker.patch.object(Path, "is_file", return_value=True)
+        pyproject_toml_payload = {"tool": {}}
+        mocker.patch("anyconfig.load", return_value=pyproject_toml_payload)
+
+        assert not _is_project(self.project_path)
+
     def test_valid_toml_file(self, mocker):
         mocker.patch.object(Path, "is_file", return_value=True)
         pyproject_toml_payload = {"tool": {"kedro": {}}}

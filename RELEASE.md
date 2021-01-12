@@ -5,10 +5,12 @@
 
 ## Bug fixes and other changes
 * The version of a packaged modular pipeline now defaults to the version of the project package.
+* Added fix to prevent new lines being added to pandas CSV datasets.
 
 ## Thanks for supporting contributions
 [Mariana Silva](https://github.com/marianansilva),
-[Kiyohito Kunii](https://github.com/921kiyo)
+[Kiyohito Kunii](https://github.com/921kiyo),
+[noklam](https://github.com/noklam)
 
 # Release 0.17.0
 

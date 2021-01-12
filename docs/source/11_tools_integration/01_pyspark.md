@@ -1,6 +1,6 @@
 # Build a Kedro pipeline with PySpark
 
-> *Note:* This documentation is based on `Kedro 0.16.6`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.17.0`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 This page outlines some best practices when building a Kedro pipeline with [`PySpark`](https://spark.apache.org/docs/latest/api/python/index.html). It assumes a basic understanding of both Kedro and `PySpark`.
 
@@ -15,11 +15,11 @@ spark.scheduler.mode: FAIR
 
 >_Note:_ Optimal configuration for Spark depends on the setup of your Spark cluster.
 
-## Initialise a `SparkSession` in `ProjectContext`
+## Initialise a `SparkSession` in custom project context class
 
-Before any `PySpark` operations are performed, you should initialise your [`SparkSession`](https://spark.apache.org/docs/latest/sql-getting-started.html#starting-point-sparksession) in your `ProjectContext`, which is the entrypoint for your Kedro project. This ensures that a `SparkSession` has been initialised before the Kedro pipeline is run.
+Before any `PySpark` operations are performed, you should initialise your [`SparkSession`](https://spark.apache.org/docs/latest/sql-getting-started.html#starting-point-sparksession) in your custom project context class, which is the entrypoint for your Kedro project. This ensures that a `SparkSession` has been initialised before the Kedro pipeline is run.
 
-Below is an example implementation to initialise the `SparkSession` in `<project-name>/src/<package-name>/run.py` by reading configuration from the `spark.yml` configuration file created in the previous section:
+Below is an example implementation to initialise the `SparkSession` in `<project-name>/src/<package-name>/<custom_context>.py` by reading configuration from the `spark.yml` configuration file created in the previous section:
 
 ```python
 from typing import Any, Dict, Union
@@ -28,7 +28,7 @@ from pyspark import SparkConf
 from pyspark.sql import SparkSession
 
 
-class ProjectContext(KedroContext):
+class CustomContext(KedroContext):
 
     def __init__(
         self,
@@ -61,7 +61,15 @@ You should modify this code to adapt it to your cluster's setup, e.g. setting ma
 
 Call `SparkSession.builder.getOrCreate()` to obtain the `SparkSession` anywhere in your pipeline. `SparkSession.builder.getOrCreate()` is a global [singleton](https://python-3-patterns-idioms-test.readthedocs.io/en/latest/Singleton.html).
 
-We don't recommend storing the session on the context object, as it cannot be serialised and therefore prevents the context from being initialised for some plugins.
+We don't recommend storing Spark session on the context object, as it cannot be serialised and therefore prevents the context from being initialised for some plugins.
+
+Now, you need to configure Kedro to use `CustomContext`. All you need to do is just set `CONTEXT_CLASS` in `<project-name>/src/<package-name>/settings.py` as follow:
+
+```python
+from <package-name>.<custom_context> import CustomContext
+
+CONTEXT_CLASS = CustomContext
+```
 
 ## Use Kedro's built-in Spark datasets to load and save raw data
 
@@ -170,7 +178,7 @@ Under the hood, every Kedro node that performs a Spark action (e.g. `save`, `col
 kedro run --runner=ThreadRunner
 ```
 
-To further increase the concurrency level, if you are using Spark >= 0.8, you can also give each node a roughly equal share of the Spark cluster by turning on fair sharing and therefore giving them a roughly equal chance of being executed concurrently. By default, they are executed in a FIFO manner, which means if a job takes up too much resources, it could hold up the execution of other jobs. In order to turn on fair sharing, put the following in your `conf/base/spark.yml` file, which was created in the [Initialising a `SparkSession`](#initialising-a-sparksession) section:
+To further increase the concurrency level, if you are using Spark >= 0.8, you can also give each node a roughly equal share of the Spark cluster by turning on fair sharing and therefore giving them a roughly equal chance of being executed concurrently. By default, they are executed in a FIFO manner, which means if a job takes up too much resources, it could hold up the execution of other jobs. In order to turn on fair sharing, put the following in your `conf/base/spark.yml` file, which was created in the [Initialise a `SparkSession`](#initialise-a-sparksession-in-projectcontext) section:
 
 ```yaml
 spark.scheduler.mode: FAIR

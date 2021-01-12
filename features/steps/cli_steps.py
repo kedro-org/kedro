@@ -37,6 +37,7 @@ from time import time
 
 import behave
 import requests
+import toml
 import yaml
 from behave import given, then, when
 
@@ -162,7 +163,18 @@ def _check_service_up(context: behave.runner.Context, url: str, string: str):
     assert context.result.poll() is None
 
 
-def _create_config_file(context, include_example):
+@given("I have prepared a run_config file with config options")
+def create_run_config_file(context):
+    curr_dir = Path(__file__).parent
+    run_config_file = context.root_project_dir / "run_config.yml"
+    shutil.copyfile(str(curr_dir / "e2e_test_cli_config.yml"), str(run_config_file))
+
+
+@given("I have prepared a config file")
+def create_config_file(context):
+    """Behave step to create a temporary config file
+    (given the existing temp directory) and store it in the context.
+    """
     context.config_file = context.temp_dir / "config.yml"
     context.project_name = "project-dummy"
     root_project_dir = context.temp_dir / context.project_name
@@ -173,33 +185,9 @@ def _create_config_file(context, include_example):
         "repo_name": context.project_name,
         "output_dir": str(context.temp_dir),
         "python_package": context.package_name,
-        "include_example": include_example,
     }
     with context.config_file.open("w") as config_file:
         yaml.dump(config, config_file, default_flow_style=False)
-
-
-@given("I have prepared a run_config file with config options")
-def create_run_config_file(context):
-    curr_dir = Path(__file__).parent
-    run_config_file = context.root_project_dir / "run_config.yml"
-    shutil.copyfile(str(curr_dir / "e2e_test_cli_config.yml"), str(run_config_file))
-
-
-@given("I have prepared a config file without example code")
-def create_config_file_no_example(context):
-    """Behave step to create a temporary config file
-    (given the existing temp directory) and store it in the context.
-    """
-    _create_config_file(context, include_example=False)
-
-
-@given("I have prepared a config file with example code")
-def create_config_file_with_example(context):
-    """Behave step to create a temporary config file
-    (given the existing temp directory) and store it in the context.
-    """
-    _create_config_file(context, include_example=True)
 
 
 @given('I have executed the kedro command "{command}"')
@@ -275,13 +263,13 @@ def install_test_plugin(context):
 
 @given('I have disabled hooks for "{plugin}" plugin via config')
 def disable_plugin_hooks(context, plugin):
-    """Set `disable_hooks_for_plugins` in `.kedro.yml`."""
-    kedro_yml_path = context.root_project_dir / ".kedro.yml"
-
-    with kedro_yml_path.open("r+") as _f:
-        content = yaml.safe_load(_f)
-        content["disable_hooks_for_plugins"] = [plugin]
-        yaml.safe_dump(content, _f)
+    """Set `disable_hooks_for_plugins` in `settings.py`."""
+    settings_path = (
+        context.root_project_dir / "src" / context.package_name / "settings.py"
+    )
+    to_add = f"""\nDISABLE_HOOKS_FOR_PLUGINS = ("{plugin}",)"""
+    with settings_path.open("a") as settings_file:
+        settings_file.write(to_add)
 
 
 @given("I have initialized a git repository")
@@ -302,12 +290,37 @@ def add_test_jupyter_nb(context):
         test_nb_fh.write(TEST_JUPYTER_ORG)
 
 
-@given("I have run a non-interactive kedro new")
-@when("I run a non-interactive kedro new")
-def create_project_from_config_file(context):
+@given("I have run a non-interactive kedro new with starter")
+@when("I run a non-interactive kedro new with starter")
+def create_project_with_starter(context):
     """Behave step to run kedro new given the config I previously created.
     """
-    res = run([context.kedro, "new", "-c", str(context.config_file)], env=context.env)
+    starter_dir = Path(__file__).parent / "test_starter"
+    res = run(
+        [
+            context.kedro,
+            "new",
+            "-c",
+            str(context.config_file),
+            "--starter",
+            str(starter_dir),
+        ],
+        env=context.env,
+        cwd=context.temp_dir,
+    )
+    assert res.returncode == OK_EXIT_CODE, res
+
+
+@given("I have run a non-interactive kedro new without starter")
+@when("I run a non-interactive kedro new without starter")
+def create_project_without_starter(context):
+    """Behave step to run kedro new given the config I previously created.
+    """
+    res = run(
+        [context.kedro, "new", "-c", str(context.config_file)],
+        env=context.env,
+        cwd=context.temp_dir,
+    )
     assert res.returncode == OK_EXIT_CODE, res
 
 
@@ -372,7 +385,7 @@ def exec_kedro_run_with_tag(context, cmd, tags):
 @when("I ask the CLI for a version")
 def get_kedro_version(context):
     """Behave step to run `kedro -V`."""
-    res = run([context.kedro, "-V"], env=context.env)
+    res = run([context.kedro, "-V"], env=context.env, cwd=context.temp_dir)
     context.version_str = res.stdout
     assert context.version_str, res  # check non-empty
 
@@ -381,7 +394,7 @@ def get_kedro_version(context):
 def get_kedro_version_python(context):
     """Behave step to run `python -m kedro -V`."""
     cmd = [context.python, "-m", "kedro", "-V"]
-    context.version_str = run(cmd, env=context.env).stdout
+    context.version_str = run(cmd, env=context.env, cwd=context.temp_dir).stdout
     assert context.version_str  # check non-empty
 
 
@@ -431,8 +444,7 @@ def do_git_reset_hard(context):
 
 @when('I move the package to "{new_source_dir}"')
 def move_package(context: behave.runner.Context, new_source_dir):
-    """Move the project package to a new directory.
-    """
+    """Move the project package to a new directory."""
     current_src_path = (context.root_project_dir / "src").resolve()
     new_src_path = (context.root_project_dir / new_source_dir).resolve()
 
@@ -440,17 +452,14 @@ def move_package(context: behave.runner.Context, new_source_dir):
     shutil.move(str(current_src_path / context.package_name), str(new_src_path))
 
 
-@when('Source directory is updated to "{new_source_dir}" in kedro.yml')
-def udpate_kedro_yml(context: behave.runner.Context, new_source_dir):
-    """Update `source_dir` in .kedro.yml file.
-    """
-
-    kedro_yml_path = context.root_project_dir / ".kedro.yml"
-
-    with kedro_yml_path.open("r+") as _f:
-        content = yaml.safe_load(_f)
-        content["source_dir"] = new_source_dir
-        yaml.safe_dump(content, _f)
+@when('Source directory is updated to "{new_source_dir}" in pyproject.toml')
+def update_pyproject_toml(context: behave.runner.Context, new_source_dir):
+    """Update `source_dir` in pyproject.toml file."""
+    pyproject_toml_path = context.root_project_dir / "pyproject.toml"
+    content = toml.load(pyproject_toml_path)
+    content["tool"]["kedro"]["source_dir"] = new_source_dir
+    content_str = toml.dumps(content)
+    pyproject_toml_path.write_text(content_str)
 
 
 @given("I have updated kedro requirements")
@@ -569,27 +578,6 @@ def check_python_packages_created(context):
     whl_file = dist_dir.glob("*.whl")
     assert any(egg_file)
     assert any(whl_file)
-
-
-@then('"{env}" environment was used')
-def check_environment_used(context, env):
-    env_path = context.root_project_dir / "conf" / env
-    assert env_path.exists(), f'Environment "{env}" does not exist'
-
-    if isinstance(context.result, ChildTerminatingPopen):
-        stdout = context.result.stdout.read().decode()
-        context.result.terminate()
-    else:
-        stdout = context.result.stdout
-
-    for config_name in ("catalog", "parameters", "credentials"):
-        path = env_path.joinpath(f"{config_name}.yml")
-        if path.exists():
-            msg = f"Loading: {path.resolve()}"
-            assert msg in stdout, (
-                "Expected the following message segment to be printed on stdout: "
-                f"{msg}, but got:\n{stdout}"
-            )
 
 
 @then('I should get a message including "{msg}"')
@@ -711,7 +699,7 @@ def check_docs_generated(context: behave.runner.Context):
         context.root_project_dir / "docs" / "build" / "html" / "index.html"
     ).read_text("utf-8")
     project_repo = context.project_name.replace("-", "_")
-    assert "Welcome to project %s’s API docs!" % project_repo in index_html
+    assert f"Welcome to project’s {project_repo} API docs!" in index_html, index_html
 
 
 @then("requirements should be generated")

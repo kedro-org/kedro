@@ -2,7 +2,9 @@
 
 In this section we introduce the concept of a node, for which the relevant API documentation is [kedro.pipeline.node](/kedro.pipeline.node).
 
-> *Note:* This documentation is based on `Kedro 0.16.6`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+Nodes are the building blocks of pipelines and represent tasks. Pipelines are used to combine nodes to build workflows, which range from simple machine learning workflows to end-to-end production workflows.
+
+> *Note:* This documentation is based on `Kedro 0.17.0`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 You will first need to import libraries from Kedro and other standard tools to run the code snippets demonstrated below.
 
@@ -15,9 +17,7 @@ import pickle
 import os
 ```
 
-Nodes are the building blocks of pipelines and represent tasks. Pipelines are used to combine nodes to build simple machine learning workflows or even build entire end-to-end production workflows.
-
-## Creating a pipeline node
+## How to create a node
 
 A node is created by specifying a function, input variable names and output variable names. Let's consider a simple function that adds two numbers:
 
@@ -26,14 +26,16 @@ def add(x, y):
     return x + y
 ```
 
-The add function has two inputs `x` and `y` and a single output. A new node can now be created with this function:
+The function has two inputs (`x` and `y`) and a single output (the sum of the inputs).
+
+Here is how a node is created with this function:
 
 ```python
 adder_node = node(func=add, inputs=["a", "b"], outputs="sum")
 adder_node
 ```
 
-`Output`:
+Here is the output:
 
 ```console
 Out[1]: Node(add, ['a', 'b'], 'sum', None)
@@ -49,7 +51,7 @@ adder_node = node(func=add, inputs=["a", "b"], outputs="sum", name="adding_a_and
 print(str(adder_node))
 ```
 
-`Output`:
+Gives the following output:
 
 ```console
 add([a,b]) -> [sum]
@@ -58,14 +60,14 @@ adding_a_and_b: add([a,b]) -> [sum]
 
 Let's break down the node definition:
 
-* `add` is our function that will execute when running the node
-* `['a', 'b']` specify our input variable names, in this case, they are different from `x` and `y`
-* `sum` specifies the name of our return variable. The value returned by `add` will be bound in this variable
-* `name` is an optional label, which can be used to provide description of the business logic of the node
+* `add` is the Python function that will execute when the node runs
+* `['a', 'b']` specify the input variable names
+* `sum` specifies the return variable name. The value returned by `add` will be bound in this variable
+* `name` is an optional label for the node, which can be used to provide description of the business logic it provides
 
 ### Node definition syntax
 
-There is a special syntax for describing function inputs and outputs. This allows different Python functions to be reused in nodes and supports dependency resolution in pipelines.
+There is a syntax to describe function inputs and outputs. This allows different Python functions to be reused in nodes and supports dependency resolution in pipelines.
 
 ### Syntax for input variables
 
@@ -101,9 +103,9 @@ There is a special syntax for describing function inputs and outputs. This allow
 
 Any combinations of the above are possible, except nodes of the form `node(f, None, None)` (at least a single input or output needs to be provided).
 
-## Tagging nodes
+## How to tag a node
 
-Tags may be useful to run partial pipelines without changing the code. For instance, `kedro run --tag=ds` will only run nodes that have a `ds` tag attached.
+Tags may be useful to run part of a pipeline without changing the code. For instance, `kedro run --tag=ds` will only run nodes that have a `ds` tag attached.
 
 To tag a node, you can simply specify the `tags` argument, as follows:
 
@@ -111,7 +113,7 @@ To tag a node, you can simply specify the `tags` argument, as follows:
 node(func=add, inputs=["a", "b"], outputs="sum", name="adding_a_and_b", tags="node_tag")
 ```
 
-Moreover, you can [tag all nodes in a ``Pipeline``](../06_nodes_and_pipelines/02_pipelines.md#tagging-pipeline-nodes). If the pipeline definition contains the `tags=` argument, Kedro will attach the corresponding tag to every node within that pipeline.
+Moreover, you can [tag all nodes in a `Pipeline`](../06_nodes_and_pipelines/02_pipeline_introduction.html#how-to-tag-a-pipeline). If the pipeline definition contains the `tags=` argument, Kedro will attach the corresponding tag to every node within that pipeline.
 
 To run a pipeline using a tag:
 
@@ -122,7 +124,7 @@ kedro run --tag=pipeline_tag
 This will run only the nodes found within the pipeline tagged with `pipeline_tag`
 
 
-## Running nodes
+## How to run a node
 
 To run a node, you need to instantiate its inputs. In this case, the node expects two inputs:
 
@@ -130,7 +132,7 @@ To run a node, you need to instantiate its inputs. In this case, the node expect
 adder_node.run(dict(a=2, b=3))
 ```
 
-`Output`:
+The output is as follows:
 
 ```console
 Out[2]: {'sum': 5}

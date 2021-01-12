@@ -31,6 +31,7 @@ of Kedro pipelines.
 import copy
 import inspect
 import logging
+import re
 from collections import Counter
 from functools import reduce
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Union
@@ -86,31 +87,33 @@ class Node:  # pylint: disable=too-many-instance-attributes
                 a) When the provided arguments do not conform to
                 the format suggested by the type hint of the argument.
                 b) When the node produces multiple outputs with the same name.
-                c) An input has the same name as an output.
+                c) When an input has the same name as an output.
+                d) When the given node name violates the requirements:
+                it must contain only letters, digits, hyphens, underscores
+                and/or fullstops.
 
         """
 
         if not callable(func):
             raise ValueError(
                 _node_error_message(
-                    "first argument must be a "
-                    "function, not `{}`.".format(type(func).__name__)
+                    f"first argument must be a function, not `{type(func).__name__}`."
                 )
             )
 
         if inputs and not isinstance(inputs, (list, dict, str)):
             raise ValueError(
                 _node_error_message(
-                    "`inputs` type must be one of [String, List, Dict, None], "
-                    "not `{}`.".format(type(inputs).__name__)
+                    f"`inputs` type must be one of [String, List, Dict, None], "
+                    f"not `{type(inputs).__name__}`."
                 )
             )
 
         if outputs and not isinstance(outputs, (list, dict, str)):
             raise ValueError(
                 _node_error_message(
-                    "`outputs` type must be one of [String, List, Dict, None], "
-                    "not `{}`.".format(type(outputs).__name__)
+                    f"`outputs` type must be one of [String, List, Dict, None], "
+                    f"not `{type(outputs).__name__}`."
                 )
             )
 
@@ -124,6 +127,11 @@ class Node:  # pylint: disable=too-many-instance-attributes
         self._func = func
         self._inputs = inputs
         self._outputs = outputs
+        if name and not re.match(r"[\w\.-]+$", name):
+            raise ValueError(
+                f"'{name}' is not a valid node name. It must contain only "
+                f"letters, digits, hyphens, underscores and/or fullstops."
+            )
         self._name = name
         self._namespace = namespace
         self._tags = set(_to_list(tags))
@@ -180,13 +188,13 @@ class Node:  # pylint: disable=too-many-instance-attributes
 
     def __str__(self):
         def _sorted_set_to_str(xset):
-            return "[{}]".format(",".join(sorted(xset)))
+            return f"[{','.join(sorted(xset))}]"
 
         out_str = _sorted_set_to_str(self.outputs) if self._outputs else "None"
         in_str = _sorted_set_to_str(self.inputs) if self._inputs else "None"
 
         prefix = self._name + ": " if self._name else ""
-        return prefix + "{}({}) -> {}".format(self._func_name, in_str, out_str)
+        return prefix + f"{self._func_name}({in_str}) -> {out_str}"
 
     def __repr__(self):  # pragma: no cover
         return "Node({}, {!r}, {!r}, {!r})".format(
@@ -206,6 +214,25 @@ class Node:  # pylint: disable=too-many-instance-attributes
                 f"`functools.update_wrapper` for better log messages."
             )
         return name
+
+    @property
+    def func(self) -> Callable:
+        """Exposes the underlying function of the node.
+
+        Returns:
+           Return the underlying function of the node.
+        """
+        return self._func
+
+    @func.setter
+    def func(self, func: Callable):
+        """Sets the underlying function of the node.
+        Useful if user wants to decorate the function in a node's Hook implementation.
+
+        Args:
+            func: The new function for node's execution.
+        """
+        self._func = func
 
     @property
     def tags(self) -> Set[str]:
@@ -267,8 +294,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
     @property
     def inputs(self) -> List[str]:
         """Return node inputs as a list, in the order required to bind them properly to
-        the node's function. If the node's function contains ``kwargs``, then ``kwarg`` inputs
-        are sorted alphabetically (for python 3.5 deterministic behavior).
+        the node's function.
 
         Returns:
             Node input names as a list.
@@ -374,6 +400,13 @@ class Node:  # pylint: disable=too-many-instance-attributes
             >>> assert "output" in result
             >>> assert result['output'] == "f(g(fg(h(1))))"
         """
+        warn(
+            "The node's `decorate` API will be deprecated in Kedro 0.18.0."
+            "Please use a node's Hooks to extend the node's behaviour in a pipeline."
+            "For more information, please visit"
+            "https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_hooks.html",
+            DeprecationWarning,
+        )
         return self._copy(decorators=self._decorators + list(reversed(decorators)))
 
     def run(self, inputs: Dict[str, Any] = None) -> Dict[str, Any]:
@@ -410,8 +443,8 @@ class Node:  # pylint: disable=too-many-instance-attributes
 
         if not (inputs is None or isinstance(inputs, dict)):
             raise ValueError(
-                "Node.run() expects a dictionary or None, "
-                "but got {} instead".format(type(inputs))
+                f"Node.run() expects a dictionary or None, "
+                f"but got {type(inputs)} instead"
             )
 
         try:
@@ -520,9 +553,9 @@ class Node:  # pylint: disable=too-many-instance-attributes
 
         if isinstance(self._outputs, dict) and not isinstance(outputs, dict):
             raise ValueError(
-                "Failed to save outputs of node {}.\n"
-                "The node output is a dictionary, whereas the "
-                "function output is not.".format(str(self))
+                f"Failed to save outputs of node {self}.\n"
+                f"The node output is a dictionary, whereas the "
+                f"function output is not."
             )
 
         if self._outputs is None:
@@ -555,19 +588,17 @@ class Node:  # pylint: disable=too-many-instance-attributes
         diff = Counter(self.outputs) - Counter(set(self.outputs))
         if diff:
             raise ValueError(
-                "Failed to create node {} due to duplicate"
-                " output(s) {}.\nNode outputs must be unique.".format(
-                    str(self), set(diff.keys())
-                )
+                f"Failed to create node {self} due to duplicate"
+                f" output(s) {set(diff.keys())}.\nNode outputs must be unique."
             )
 
     def _validate_inputs_dif_than_outputs(self):
         common_in_out = set(self.inputs).intersection(set(self.outputs))
         if common_in_out:
             raise ValueError(
-                "Failed to create node {}.\n"
-                "A node cannot have the same inputs and outputs: "
-                "{}".format(str(self), common_in_out)
+                f"Failed to create node {self}.\n"
+                f"A node cannot have the same inputs and outputs: "
+                f"{common_in_out}"
             )
 
     @staticmethod
@@ -669,12 +700,11 @@ def node(
 
 
 def _dict_inputs_to_list(func: Callable[[Any], Any], inputs: Dict[str, str]):
-    """Convert a dict representation of the node inputs to a list , ensuring
+    """Convert a dict representation of the node inputs to a list, ensuring
     the appropriate order for binding them to the node's function.
     """
     sig = inspect.signature(func, follow_wrapped=False).bind(**inputs)
-    # for deterministic behavior in python 3.5, sort kwargs inputs alphabetically
-    return list(sig.args) + sorted(sig.kwargs.values())
+    return [*sig.args, *sig.kwargs.values()]
 
 
 def _to_list(element: Union[None, str, Iterable[str], Dict[str, str]]) -> List:

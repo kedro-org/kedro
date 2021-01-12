@@ -42,6 +42,13 @@ from kedro.framework.cli.jupyter import (
 from kedro.framework.cli.utils import KedroCliError
 
 
+@pytest.fixture(autouse=True)
+def mocked_logging(mocker):
+    # Disable logging.config.dictConfig in KedroSession._setup_logging as
+    # it changes logging.config and affects other unit tests
+    return mocker.patch("logging.config.dictConfig")
+
+
 def test_collect_line_magic(entry_points, entry_point):
     entry_point.load.return_value = "line_magic"
     line_magics = collect_line_magic()
@@ -97,7 +104,7 @@ def default_jupyter_options(command, address="127.0.0.1", all_kernels=False):
         cmd += [
             "--NotebookApp.kernel_spec_manager_class="
             "kedro.framework.cli.jupyter.SingleKernelSpecManager",
-            "--KernelSpecManager.default_kernel_name='DummyProject'",
+            "--KernelSpecManager.default_kernel_name='CLITestingProject'",
         ]
 
     return "jupyter", cmd
@@ -116,10 +123,12 @@ def fake_ipython_message(mocker):
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
 class TestJupyterNotebookCommand:
     def test_default_kernel(
-        self, python_call_mock, fake_kedro_cli, fake_ipython_message
+        self, python_call_mock, fake_project_cli, fake_ipython_message, fake_metadata
     ):
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["jupyter", "notebook", "--ip", "0.0.0.0"]
+            fake_project_cli.cli,
+            ["jupyter", "notebook", "--ip", "0.0.0.0"],
+            obj=fake_metadata,
         )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_called_once_with(False)
@@ -127,9 +136,13 @@ class TestJupyterNotebookCommand:
             *default_jupyter_options("notebook", "0.0.0.0")
         )
 
-    def test_all_kernels(self, python_call_mock, fake_kedro_cli, fake_ipython_message):
+    def test_all_kernels(
+        self, python_call_mock, fake_project_cli, fake_ipython_message, fake_metadata
+    ):
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["jupyter", "notebook", "--all-kernels"]
+            fake_project_cli.cli,
+            ["jupyter", "notebook", "--all-kernels"],
+            obj=fake_metadata,
         )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_called_once_with(True)
@@ -138,18 +151,22 @@ class TestJupyterNotebookCommand:
         )
 
     @pytest.mark.parametrize("help_flag", ["-h", "--help"])
-    def test_help(self, help_flag, fake_kedro_cli, fake_ipython_message):
+    def test_help(
+        self, help_flag, fake_project_cli, fake_ipython_message, fake_metadata
+    ):
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["jupyter", "notebook", help_flag]
+            fake_project_cli.cli, ["jupyter", "notebook", help_flag], obj=fake_metadata
         )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_not_called()
 
     @pytest.mark.parametrize("env_flag", ["--env", "-e"])
-    def test_env(self, env_flag, fake_kedro_cli, python_call_mock):
+    def test_env(self, env_flag, fake_project_cli, python_call_mock, fake_metadata):
         """This tests passing an environment variable to the jupyter subprocess."""
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["jupyter", "notebook", env_flag, "base"]
+            fake_project_cli.cli,
+            ["jupyter", "notebook", env_flag, "base"],
+            obj=fake_metadata,
         )
         assert not result.exit_code
 
@@ -158,21 +175,9 @@ class TestJupyterNotebookCommand:
         assert "env" in kwargs
         assert kwargs["env"]["KEDRO_ENV"] == "base"
 
-    def test_load_context_fail(self, fake_kedro_cli):
-        result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["jupyter", "notebook", "--env", "fake_env"]
-        )
-
-        expected_output = (
-            "Error: Unable to load Kedro context with environment `fake_env`. "
-            "Make sure it exists in the project configuration.\n"
-        )
-        assert result.exit_code
-        assert expected_output in result.output
-
-    def test_fail_no_jupyter_core(self, fake_kedro_cli, mocker):
+    def test_fail_no_jupyter_core(self, fake_project_cli, mocker):
         mocker.patch.dict("sys.modules", {"jupyter_core": None})
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["jupyter", "notebook"])
+        result = CliRunner().invoke(fake_project_cli.cli, ["jupyter", "notebook"])
 
         assert result.exit_code
         error = (
@@ -185,10 +190,12 @@ class TestJupyterNotebookCommand:
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
 class TestJupyterLabCommand:
     def test_default_kernel(
-        self, python_call_mock, fake_kedro_cli, fake_ipython_message
+        self, python_call_mock, fake_project_cli, fake_ipython_message, fake_metadata
     ):
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["jupyter", "lab", "--ip", "0.0.0.0"]
+            fake_project_cli.cli,
+            ["jupyter", "lab", "--ip", "0.0.0.0"],
+            obj=fake_metadata,
         )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_called_once_with(False)
@@ -196,9 +203,11 @@ class TestJupyterLabCommand:
             *default_jupyter_options("lab", "0.0.0.0")
         )
 
-    def test_all_kernels(self, python_call_mock, fake_kedro_cli, fake_ipython_message):
+    def test_all_kernels(
+        self, python_call_mock, fake_project_cli, fake_ipython_message, fake_metadata
+    ):
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["jupyter", "lab", "--all-kernels"]
+            fake_project_cli.cli, ["jupyter", "lab", "--all-kernels"], obj=fake_metadata
         )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_called_once_with(True)
@@ -207,16 +216,22 @@ class TestJupyterLabCommand:
         )
 
     @pytest.mark.parametrize("help_flag", ["-h", "--help"])
-    def test_help(self, help_flag, fake_kedro_cli, fake_ipython_message):
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["jupyter", "lab", help_flag])
+    def test_help(
+        self, help_flag, fake_project_cli, fake_ipython_message, fake_metadata
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["jupyter", "lab", help_flag], obj=fake_metadata
+        )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_not_called()
 
     @pytest.mark.parametrize("env_flag", ["--env", "-e"])
-    def test_env(self, env_flag, fake_kedro_cli, python_call_mock):
+    def test_env(self, env_flag, fake_project_cli, python_call_mock, fake_metadata):
         """This tests passing an environment variable to the jupyter subprocess."""
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["jupyter", "lab", env_flag, "base"]
+            fake_project_cli.cli,
+            ["jupyter", "lab", env_flag, "base"],
+            obj=fake_metadata,
         )
         assert not result.exit_code
 
@@ -225,9 +240,9 @@ class TestJupyterLabCommand:
         assert "env" in kwargs
         assert kwargs["env"]["KEDRO_ENV"] == "base"
 
-    def test_fail_no_jupyter_core(self, fake_kedro_cli, mocker):
+    def test_fail_no_jupyter_core(self, fake_project_cli, mocker):
         mocker.patch.dict("sys.modules", {"jupyter_core": None})
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["jupyter", "lab"])
+        result = CliRunner().invoke(fake_project_cli.cli, ["jupyter", "lab"])
 
         assert result.exit_code
         error = (
@@ -260,10 +275,11 @@ class TestConvertNotebookCommand:
     def test_convert_one_file_overwrite(
         self,
         mocker,
-        fake_kedro_cli,
+        fake_project_cli,
         fake_export_nodes,
         tmp_file_path,
         fake_package_path,
+        fake_metadata,
     ):
         """
         Trying to convert one file, the output file already exists,
@@ -275,7 +291,9 @@ class TestConvertNotebookCommand:
         assert not output_dir.exists()
 
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["jupyter", "convert", str(tmp_file_path)]
+            fake_project_cli.cli,
+            ["jupyter", "convert", str(tmp_file_path)],
+            obj=fake_metadata,
         )
         assert not result.exit_code, result.stdout
 
@@ -285,7 +303,7 @@ class TestConvertNotebookCommand:
         )
 
     def test_convert_one_file_do_not_overwrite(
-        self, mocker, fake_kedro_cli, fake_export_nodes, tmp_file_path
+        self, mocker, fake_project_cli, fake_export_nodes, tmp_file_path, fake_metadata
     ):
         """
         Trying to convert one file, the output file already exists,
@@ -295,14 +313,21 @@ class TestConvertNotebookCommand:
         mocker.patch("click.confirm", return_value=False)
 
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["jupyter", "convert", str(tmp_file_path)]
+            fake_project_cli.cli,
+            ["jupyter", "convert", str(tmp_file_path)],
+            obj=fake_metadata,
         )
         assert not result.exit_code, result.stdout
 
         fake_export_nodes.assert_not_called()
 
     def test_convert_all_files(
-        self, mocker, fake_kedro_cli, fake_export_nodes, fake_package_path
+        self,
+        mocker,
+        fake_project_cli,
+        fake_export_nodes,
+        fake_package_path,
+        fake_metadata,
     ):
         """Trying to convert all files, the output files already exist."""
         mocker.patch.object(Path, "is_file", return_value=True)
@@ -313,7 +338,9 @@ class TestConvertNotebookCommand:
         output_dir = fake_package_path / "nodes"
         assert not output_dir.exists()
 
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["jupyter", "convert", "--all"])
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["jupyter", "convert", "--all"], obj=fake_metadata
+        )
         assert not result.exit_code, result.stdout
 
         assert (output_dir / "__init__.py").is_file()
@@ -324,9 +351,13 @@ class TestConvertNotebookCommand:
             ]
         )
 
-    def test_convert_without_filepath_and_all_flag(self, fake_kedro_cli):
+    def test_convert_without_filepath_and_all_flag(
+        self, fake_project_cli, fake_metadata
+    ):
         """Neither path nor --all flag is provided."""
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["jupyter", "convert"])
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["jupyter", "convert"], obj=fake_metadata
+        )
         expected_output = (
             "Please specify a notebook filepath or "
             "add '--all' to convert all notebooks.\n"
@@ -334,29 +365,40 @@ class TestConvertNotebookCommand:
         assert result.exit_code
         assert result.stdout == expected_output
 
-    def test_non_unique_notebook_names_error(self, fake_kedro_cli, mocker):
+    def test_non_unique_notebook_names_error(
+        self, fake_project_cli, mocker, fake_metadata
+    ):
         """Trying to convert notebooks with the same name."""
         mocker.patch(
             "kedro.framework.cli.jupyter.iglob", return_value=["/path1/1", "/path2/1"]
         )
 
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["jupyter", "convert", "--all"])
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["jupyter", "convert", "--all"], obj=fake_metadata
+        )
 
         expected_output = (
             "Error: Found non-unique notebook names! Please rename the following: 1\n"
         )
         assert result.exit_code
-        assert result.output == expected_output
+        assert expected_output in result.output
 
     def test_convert_one_file(
-        self, fake_kedro_cli, fake_export_nodes, tmp_file_path, fake_package_path,
+        self,
+        fake_project_cli,
+        fake_export_nodes,
+        tmp_file_path,
+        fake_package_path,
+        fake_metadata,
     ):
         """Trying to convert one file, the output file doesn't exist."""
         output_dir = fake_package_path / "nodes"
         assert not output_dir.exists()
 
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["jupyter", "convert", str(tmp_file_path)]
+            fake_project_cli.cli,
+            ["jupyter", "convert", str(tmp_file_path)],
+            obj=fake_metadata,
         )
         assert not result.exit_code, result.stdout
 
@@ -366,7 +408,12 @@ class TestConvertNotebookCommand:
         )
 
     def test_convert_one_file_nodes_directory_exists(
-        self, fake_kedro_cli, fake_export_nodes, tmp_file_path, fake_package_path
+        self,
+        fake_project_cli,
+        fake_export_nodes,
+        tmp_file_path,
+        fake_package_path,
+        fake_metadata,
     ):
         """User-created nodes/ directory is used as is."""
         output_dir = fake_package_path / "nodes"
@@ -374,7 +421,9 @@ class TestConvertNotebookCommand:
         output_dir.mkdir()
 
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["jupyter", "convert", str(tmp_file_path)]
+            fake_project_cli.cli,
+            ["jupyter", "convert", str(tmp_file_path)],
+            obj=fake_metadata,
         )
         assert not result.exit_code, result.stdout
 
@@ -417,7 +466,7 @@ class TestExportNodes:
         notebook_file = project_path / "notebook.ipynb"
         notebook_file.write_text(nodes)
 
-        output_path = nodes_path / "{}.py".format(notebook_file.stem)
+        output_path = nodes_path / f"{notebook_file.stem}.py"
         _export_nodes(notebook_file, output_path)
 
         assert output_path.is_file()
@@ -470,7 +519,7 @@ class TestExportNodes:
         notebook_file.write_text(nodes)
 
         with pytest.warns(UserWarning, match="Skipping notebook"):
-            output_path = nodes_path / "{}.py".format(notebook_file.stem)
+            output_path = nodes_path / f"{notebook_file.stem}.py"
             _export_nodes(notebook_file, output_path)
 
         output_path = nodes_path / "notebook.py"
@@ -495,7 +544,7 @@ class TestExportNodes:
         notebook_file = project_path / "notebook.iypnb"
         notebook_file.write_text(nodes)
 
-        output_path = nodes_path / "{}.py".format(notebook_file.stem)
+        output_path = nodes_path / f"{notebook_file.stem}.py"
         _export_nodes(notebook_file, output_path)
 
         assert output_path.is_file()
@@ -505,7 +554,7 @@ class TestExportNodes:
         random_file = nodes_path / "notebook.txt"
         random_file.touch()
         random_file.write_text("original")
-        output_path = nodes_path / "{}.py".format(random_file.stem)
+        output_path = nodes_path / f"{random_file.stem}.py"
 
         pattern = "Provided filepath is not a Jupyter notebook"
         with pytest.raises(KedroCliError, match=pattern):

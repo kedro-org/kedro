@@ -50,11 +50,9 @@ from kedro.runner import ParallelRunner, SequentialRunner
 FOLDER_NAME = "fake_folder"
 FILENAME = "test.parquet"
 BUCKET_NAME = "test_bucket"
-AWS_CREDENTIALS = dict(
-    aws_access_key_id="FAKE_ACCESS_KEY", aws_secret_access_key="FAKE_SECRET_KEY"
-)
+AWS_CREDENTIALS = {"key": "FAKE_ACCESS_KEY", "secret": "FAKE_SECRET_KEY"}
 
-HDFS_PREFIX = "{}/{}".format(FOLDER_NAME, FILENAME)
+HDFS_PREFIX = f"{FOLDER_NAME}/{FILENAME}"
 HDFS_FOLDER_STRUCTURE = [
     (
         HDFS_PREFIX,
@@ -112,7 +110,7 @@ def versioned_dataset_dbfs(tmp_path, version):
 @pytest.fixture
 def versioned_dataset_s3(version):
     return SparkDataSet(
-        filepath="s3a://{}/{}".format(BUCKET_NAME, FILENAME),
+        filepath=f"s3a://{BUCKET_NAME}/{FILENAME}",
         version=version,
         credentials=AWS_CREDENTIALS,
     )
@@ -222,7 +220,7 @@ class TestSparkDataSet:
                 filepath=filepath, file_format="csv", load_args={"header": True},
             )
             assert "SparkDataSet" in str(spark_data_set)
-            assert "filepath={}".format(filepath) in str(spark_data_set)
+            assert f"filepath={filepath}" in str(spark_data_set)
 
     def test_save_overwrite_fail(self, tmp_path, sample_spark_df):
         # Writes a data frame twice and expects it to fail.
@@ -326,7 +324,7 @@ class TestSparkDataSetVersionedLocal:
         assert (tmp_path / FILENAME / version.save / FILENAME).exists()
 
     def test_repr(self, versioned_dataset_local, tmp_path, version):
-        assert "version=Version(load=None, save='{}')".format(version.save) in str(
+        assert f"version=Version(load=None, save='{version.save}')" in str(
             versioned_dataset_local
         )
 
@@ -537,7 +535,7 @@ class TestSparkDataSetVersionedS3:
     def test_load_exact(self, mocker):
         ts = generate_timestamp()
         ds_s3 = SparkDataSet(
-            filepath="s3a://{}/{}".format(BUCKET_NAME, FILENAME),
+            filepath=f"s3a://{BUCKET_NAME}/{FILENAME}",
             version=Version(ts, None),
             credentials=AWS_CREDENTIALS,
         )
@@ -567,7 +565,7 @@ class TestSparkDataSetVersionedS3:
     def test_save_version_warning(self, mocker):
         exact_version = Version("2019-01-01T23.59.59.999Z", "2019-01-02T00.00.00.000Z")
         ds_s3 = SparkDataSet(
-            filepath="s3a://{}/{}".format(BUCKET_NAME, FILENAME),
+            filepath=f"s3a://{BUCKET_NAME}/{FILENAME}",
             version=exact_version,
             credentials=AWS_CREDENTIALS,
         )
@@ -605,17 +603,15 @@ class TestSparkDataSetVersionedS3:
             "please consider switching to `s3a`"
         )
         with pytest.warns(DeprecationWarning, match=pattern):
-            SparkDataSet(
-                filepath="s3n://{}/{}".format(BUCKET_NAME, FILENAME), version=version
-            )
+            SparkDataSet(filepath=f"s3n://{BUCKET_NAME}/{FILENAME}", version=version)
 
     def test_repr(self, versioned_dataset_s3, version):
         assert "filepath=s3a://" in str(versioned_dataset_s3)
-        assert "version=Version(load=None, save='{}')".format(version.save) in str(
+        assert f"version=Version(load=None, save='{version.save}')" in str(
             versioned_dataset_s3
         )
 
-        dataset_s3 = SparkDataSet(filepath="s3a://{}/{}".format(BUCKET_NAME, FILENAME))
+        dataset_s3 = SparkDataSet(filepath=f"s3a://{BUCKET_NAME}/{FILENAME}")
         assert "filepath=s3a://" in str(dataset_s3)
         assert "version=" not in str(dataset_s3)
 
@@ -627,9 +623,7 @@ class TestSparkDataSetVersionedHdfs:
         )
         hdfs_walk.return_value = []
 
-        versioned_hdfs = SparkDataSet(
-            filepath="hdfs://{}".format(HDFS_PREFIX), version=version
-        )
+        versioned_hdfs = SparkDataSet(filepath=f"hdfs://{HDFS_PREFIX}", version=version)
 
         pattern = r"Did not find any versions for SparkDataSet\(.+\)"
         with pytest.raises(DataSetError, match=pattern):
@@ -647,9 +641,7 @@ class TestSparkDataSetVersionedHdfs:
         )
         hdfs_walk.return_value = HDFS_FOLDER_STRUCTURE
 
-        versioned_hdfs = SparkDataSet(
-            filepath="hdfs://{}".format(HDFS_PREFIX), version=version
-        )
+        versioned_hdfs = SparkDataSet(filepath=f"hdfs://{HDFS_PREFIX}", version=version)
         get_spark = mocker.patch.object(versioned_hdfs, "_get_spark")
 
         versioned_hdfs.load()
@@ -665,7 +657,7 @@ class TestSparkDataSetVersionedHdfs:
     def test_load_exact(self, mocker):
         ts = generate_timestamp()
         versioned_hdfs = SparkDataSet(
-            filepath="hdfs://{}".format(HDFS_PREFIX), version=Version(ts, None)
+            filepath=f"hdfs://{HDFS_PREFIX}", version=Version(ts, None)
         )
         get_spark = mocker.patch.object(versioned_hdfs, "_get_spark")
 
@@ -682,9 +674,7 @@ class TestSparkDataSetVersionedHdfs:
         )
         hdfs_status.return_value = None
 
-        versioned_hdfs = SparkDataSet(
-            filepath="hdfs://{}".format(HDFS_PREFIX), version=version
-        )
+        versioned_hdfs = SparkDataSet(filepath=f"hdfs://{HDFS_PREFIX}", version=version)
 
         # need resolve_load_version() call to return a load version that
         # matches save version due to consistency check in versioned_hdfs.save()
@@ -709,7 +699,7 @@ class TestSparkDataSetVersionedHdfs:
     def test_save_version_warning(self, mocker):
         exact_version = Version("2019-01-01T23.59.59.999Z", "2019-01-02T00.00.00.000Z")
         versioned_hdfs = SparkDataSet(
-            filepath="hdfs://{}".format(HDFS_PREFIX), version=exact_version
+            filepath=f"hdfs://{HDFS_PREFIX}", version=exact_version
         )
         mocker.patch.object(versioned_hdfs, "_exists_function", return_value=False)
         mocked_spark_df = mocker.Mock()
@@ -734,9 +724,7 @@ class TestSparkDataSetVersionedHdfs:
         )
         hdfs_status.return_value = True
 
-        versioned_hdfs = SparkDataSet(
-            filepath="hdfs://{}".format(HDFS_PREFIX), version=version
-        )
+        versioned_hdfs = SparkDataSet(filepath=f"hdfs://{HDFS_PREFIX}", version=version)
 
         mocked_spark_df = mocker.Mock()
 
@@ -759,18 +747,16 @@ class TestSparkDataSetVersionedHdfs:
             "and uses `hdfs.client.InsecureClient`, please use with caution"
         )
         with pytest.warns(UserWarning, match=pattern):
-            SparkDataSet(filepath="hdfs://{}".format(HDFS_PREFIX), version=version)
+            SparkDataSet(filepath=f"hdfs://{HDFS_PREFIX}", version=version)
 
     def test_repr(self, version):
-        versioned_hdfs = SparkDataSet(
-            filepath="hdfs://{}".format(HDFS_PREFIX), version=version
-        )
+        versioned_hdfs = SparkDataSet(filepath=f"hdfs://{HDFS_PREFIX}", version=version)
         assert "filepath=hdfs://" in str(versioned_hdfs)
-        assert "version=Version(load=None, save='{}')".format(version.save) in str(
+        assert f"version=Version(load=None, save='{version.save}')" in str(
             versioned_hdfs
         )
 
-        dataset_hdfs = SparkDataSet(filepath="hdfs://{}".format(HDFS_PREFIX))
+        dataset_hdfs = SparkDataSet(filepath=f"hdfs://{HDFS_PREFIX}")
         assert "filepath=hdfs://" in str(dataset_hdfs)
         assert "version=" not in str(dataset_hdfs)
 

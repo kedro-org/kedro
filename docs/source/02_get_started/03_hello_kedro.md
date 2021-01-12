@@ -119,7 +119,6 @@ runner = SequentialRunner()
 # Run the pipeline
 print(runner.run(pipeline, data_catalog))
 ```
-
 Then open a terminal and run the following command:
 
 ```bash

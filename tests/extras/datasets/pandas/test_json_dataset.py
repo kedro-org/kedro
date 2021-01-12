@@ -75,7 +75,7 @@ class TestJSONDataSet:
         json_data_set.save(dummy_dataframe)
         reloaded = json_data_set.load()
         assert_frame_equal(dummy_dataframe, reloaded)
-        assert json_data_set._fs_open_args_load == {"mode": "r"}
+        assert json_data_set._fs_open_args_load == {}
         assert json_data_set._fs_open_args_save == {"mode": "w"}
 
     def test_exists(self, json_data_set, dummy_dataframe):
@@ -124,7 +124,11 @@ class TestJSONDataSet:
             ("/tmp/test.json", LocalFileSystem, {}),
             ("gcs://bucket/file.json", GCSFileSystem, {}),
             ("https://example.com/file.json", HTTPFileSystem, {}),
-            ("abfs://bucket/file.csv", AzureBlobFileSystem, {"account_name": "test"}),
+            (
+                "abfs://bucket/file.csv",
+                AzureBlobFileSystem,
+                {"account_name": "test", "account_key": "test"},
+            ),
         ],
     )
     def test_protocol_usage(self, filepath, instance_type, credentials):

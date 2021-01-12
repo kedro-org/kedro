@@ -73,7 +73,7 @@ class TestCSVDataSet:
         csv_data_set.save(dummy_dataframe)
         reloaded = csv_data_set.load()
         assert_frame_equal(dummy_dataframe, reloaded)
-        assert csv_data_set._fs_open_args_load == {"mode": "r"}
+        assert csv_data_set._fs_open_args_load == {}
         assert csv_data_set._fs_open_args_save == {"mode": "w", "newline": ""}
 
     def test_exists(self, csv_data_set, dummy_dataframe):
@@ -125,7 +125,11 @@ class TestCSVDataSet:
             ("/tmp/test.csv", LocalFileSystem, {}),
             ("gcs://bucket/file.csv", GCSFileSystem, {}),
             ("https://example.com/file.csv", HTTPFileSystem, {}),
-            ("abfs://bucket/file.csv", AzureBlobFileSystem, {"account_name": "test"}),
+            (
+                "abfs://bucket/file.csv",
+                AzureBlobFileSystem,
+                {"account_name": "test", "account_key": "test"},
+            ),
         ],
     )
     def test_protocol_usage(self, filepath, instance_type, credentials):

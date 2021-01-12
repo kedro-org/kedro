@@ -114,7 +114,7 @@ class MatplotlibWriter(AbstractVersionedDataSet):
                 All defaults are preserved, except `mode`, which is set to `wb` when saving.
             credentials: Credentials required to get access to the underlying filesystem.
                 E.g. for ``S3FileSystem`` it should look like:
-                `{'client_kwargs': {'aws_access_key_id': '<id>', 'aws_secret_access_key': '<key>'}}`
+                `{'key': '<id>', 'secret': '<key>'}}`
             save_args: Save args passed to `plt.savefig`. See
                 https://matplotlib.org/api/_as_gen/matplotlib.pyplot.savefig.html
             version: If specified, should be an instance of
@@ -128,9 +128,11 @@ class MatplotlibWriter(AbstractVersionedDataSet):
         _fs_open_args_save.setdefault("mode", "wb")
 
         protocol, path = get_protocol_and_path(filepath, version)
-        self._fs_args = _fs_args
+        if protocol == "file":
+            _fs_args.setdefault("auto_mkdir", True)
+
         self._protocol = protocol
-        self._fs = fsspec.filesystem(self._protocol, **_credentials, **self._fs_args)
+        self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
 
         super().__init__(
             filepath=PurePosixPath(path),
@@ -150,15 +152,12 @@ class MatplotlibWriter(AbstractVersionedDataSet):
         return dict(
             filepath=self._filepath,
             protocol=self._protocol,
-            fs_args=self._fs_args,
             save_args=self._save_args,
             version=self._version,
         )
 
     def _load(self) -> None:
-        raise DataSetError(
-            "Loading not supported for `{}`".format(self.__class__.__name__)
-        )
+        raise DataSetError(f"Loading not supported for `{self.__class__.__name__}`")
 
     def _save(
         self, data: Union[plt.figure, List[plt.figure], Dict[str, plt.figure]]

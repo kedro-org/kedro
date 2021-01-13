@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@
 """``AbstractDataSet`` implementation to access Spark dataframes using
 ``pyspark``
 """
-
 from copy import deepcopy
 from fnmatch import fnmatch
 from functools import partial
@@ -184,6 +183,7 @@ class SparkDataSet(AbstractVersionedDataSet):
         >>> reloaded.take(4)
     """
 
+    _SINGLE_PROCESS = True
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
@@ -288,10 +288,6 @@ class SparkDataSet(AbstractVersionedDataSet):
 
         self._file_format = file_format
         self._fs_prefix = fs_prefix
-
-    def __getstate__(self):
-        # SparkDataSet cannot be used with ParallelRunner
-        raise AttributeError(f"{self.__class__.__name__} cannot be serialized!")
 
     def _describe(self) -> Dict[str, Any]:
         return dict(

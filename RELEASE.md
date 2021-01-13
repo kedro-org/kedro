@@ -5,9 +5,11 @@
 ## Bug fixes and other changes
 
 * The version of a packaged modular pipeline now defaults to the version of the project package.
+* Fixed issue with loading a versioned `SparkDataSet` in the interactive workflow.
 * Kedro CLI now checks `pyproject.toml` for a `tool.kedro` section before treating the project as a Kedro project
 
 ## Breaking changes to the API
+
 
 ## Thanks for supporting contributions
 

@@ -229,6 +229,9 @@ class ParallelRunner(AbstractRunner):
 
         unserializable = []
         for name, data_set in data_sets.items():
+            if getattr(data_set, "_SINGLE_PROCESS", False):  # SKIP_IF_NO_SPARK
+                unserializable.append(name)
+                continue
             try:
                 ForkingPickler.dumps(data_set)
             except (AttributeError, PicklingError):
@@ -236,10 +239,10 @@ class ParallelRunner(AbstractRunner):
 
         if unserializable:
             raise AttributeError(
-                "The following data_sets cannot be serialized: {}\nIn order "
-                "to utilize multiprocessing you need to make sure all data "
-                "sets are serializable, i.e. data sets should not make use of "
-                "lambda functions, nested functions, closures etc.\nIf you "
+                "The following data sets cannot be used with multiprocessing: "
+                "{}\nIn order to utilize multiprocessing you need to make sure "
+                "all data sets are serializable, i.e. data sets should not make "
+                "use of lambda functions, nested functions, closures etc.\nIf you "
                 "are using custom decorators ensure they are correctly using "
                 "functools.wraps().".format(sorted(unserializable))
             )

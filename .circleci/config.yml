@@ -462,7 +462,8 @@ workflows:
             - win_pip_compile_38
             - win_unit_tests_36
             - win_unit_tests_37
-#            - win_unit_tests_38
+            # Skipped due to Windows fatal exception: stack overflow
+            # - win_unit_tests_38
             - win_e2e_tests_36
             - win_e2e_tests_37
             - win_e2e_tests_38

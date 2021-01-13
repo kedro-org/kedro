@@ -1,6 +1,7 @@
 # Upcoming Release 0.17.1
 
 ## Major features and improvements
+* Added `env` and `extra_params` to `reload_kedro()` line magic.
 
 ## Bug fixes and other changes
 
@@ -10,6 +11,9 @@
 
 ## Breaking changes to the API
 
+## Thanks for supporting contributions
+[Mariana Silva](https://github.com/marianansilva),
+[Kiyohito Kunii](https://github.com/921kiyo)
 
 ## Thanks for supporting contributions
 

@@ -6,6 +6,8 @@
 ## Bug fixes and other changes
 * The version of a packaged modular pipeline now defaults to the version of the project package.
 
+## Breaking changes to the API
+
 ## Thanks for supporting contributions
 [Mariana Silva](https://github.com/marianansilva),
 [Kiyohito Kunii](https://github.com/921kiyo)

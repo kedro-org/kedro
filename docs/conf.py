@@ -172,6 +172,24 @@ html_logo = str(here / "kedro_logo.svg")
 #
 html_theme_options = {"collapse_navigation": False, "style_external_links": True}
 
+# some of these complain that the sections don't exist (which is not true),
+# too many requests, or forbidden URL
+linkcheck_ignore = [
+    "https://github.com/EbookFoundation/free-programming-books/blob/master/books/free-programming-books.md#python",
+    "https://www.datacamp.com/community/tutorials/docstrings-python",  # "forbidden" url
+    "https://github.com/jazzband/pip-tools#example-usage-for-pip-compile",
+    "https://setuptools.readthedocs.io/en/latest/setuptools.html#dynamic-discovery-of-services-and-plugins",
+    "https://github.com/argoproj/argo/blob/master/README.md#quickstart",
+    "https://console.aws.amazon.com/batch/home#/jobs",
+    "https://github.com/bruceaphilp",
+    "https://github.com/quantumblacklabs/kedro-community",
+    "https://github.com/gbraccialli-qb",
+
+]
+
+# retry before render a link broken (fix for "too many requests")
+linkcheck_retries = 7  # in sphinx>=3.4 there is also linkcheck_rate_limit_timeout
+
 html_context = {
     "display_github": True,
     "github_url": "https://github.com/quantumblacklabs/kedro/tree/master/docs/source",
@@ -470,11 +488,13 @@ def env_override(default_appid):
 
 
 def _add_jinja_filters(app):
+    # https://github.com/crate/crate/issues/10833
     from sphinx.builders.latex import LaTeXBuilder
+    from sphinx.builders.linkcheck import CheckExternalLinksBuilder
 
     # LaTeXBuilder is used in the PDF docs build,
     # and it doesn't have attribute 'templates'
-    if not isinstance(app.builder, LaTeXBuilder):
+    if not (isinstance(app.builder, LaTeXBuilder) or isinstance(app.builder, CheckExternalLinksBuilder)):
         app.builder.templates.environment.filters["env_override"] = env_override
 
 

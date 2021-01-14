@@ -36,7 +36,10 @@ secret-scan:
 SPHINXPROJ = Kedro
 
 build-docs:
-	./docs/build-docs.sh
+	./docs/build-docs.sh "docs"
+
+linkcheck:
+	./docs/build-docs.sh "linkcheck"
 
 devserver: build-docs
 	cd docs && npm install && npm start

@@ -352,4 +352,4 @@ kedro run --env aws_batch --runner kedro_tutorial.runner.AWSBatchRunner
 
 You should start seeing jobs appearing on your Jobs dashboard, under the `Runnable` tab - meaning they're ready to start as soon as the resources are provisioned in the compute environment.
 
-AWS Batch has native integration with CloudWatch, where you can check the logs for a particular job. You can either click on the Batch job in the [Jobs](https://console.aws.amazon.com/batch/home#/jobs) tab and click `View logs` in the pop-up panel, or go to [CloudWatch dashboard](https://console.aws.amazon.com/cloudwatch), click `Log groups` in the side bar and find `/aws/batch/job`.
+AWS Batch has native integration with CloudWatch, where you can check the logs for a particular job. You can either click on the Batch job in the [Jobs](https://console.aws.amazon.com/batch/home/jobs) tab and click `View logs` in the pop-up panel, or go to [CloudWatch dashboard](https://console.aws.amazon.com/cloudwatch), click `Log groups` in the side bar and find `/aws/batch/job`.

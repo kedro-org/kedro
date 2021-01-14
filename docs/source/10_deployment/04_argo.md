@@ -16,7 +16,7 @@ Here are the main reasons to use Argo Workflows:
 
 To use Argo Workflows, make sure you have the following prerequisites in place:
 
-- Argo Workflows is [installed](https://github.com/argoproj/argo#quickstart) on your Kubernetes cluster
+- Argo Workflows is [installed](https://github.com/argoproj/argo/blob/master/README.md#quickstart) on your Kubernetes cluster
 - Argo CLI is [installed](https://github.com/argoproj/argo/releases) on you machine
 - A `name` attribute is set for each Kedro [node](/kedro.pipeline.node) since it is used to build a DAG
 - All node input/output DataSets must be configured in `catalog.yml` and refer to an external location (e.g. [AWS S3](../05_data/01_data_catalog.md#using-the-data-catalog-with-the-yaml-api)); you cannot use the `MemoryDataSet` in your workflow

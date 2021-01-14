@@ -25,4 +25,4 @@ We have designed the documentation and the [spaceflights tutorial](../03_tutoria
 > *Note:* There are a number of excellent online resources for learning Python, but you should choose those that reference Python 3, as Kedro is built for Python 3.6+. There are many curated lists of online resources, such as:
 >
 > -   [Official Python programming language website](https://www.python.org/)
-> -   [List of free programming books and tutorials](https://github.com/EbookFoundation/free-programming-books/blob/master/free-programming-books.md#python)
+> -   [List of free programming books and tutorials](https://github.com/EbookFoundation/free-programming-books/blob/master/books/free-programming-books.md#python)

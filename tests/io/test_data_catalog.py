@@ -103,7 +103,7 @@ def multi_catalog(mocker):
     csv = CSVDataSet(filepath="abc.csv")
     parq = ParquetDataSet(filepath="xyz.parq")
     journal = mocker.Mock()
-    layers={"raw": ["csv"], "model": ["xyz.parq"]}
+    layers = {"raw": {"abc.csv"}, "model": {"xyz.parq"}}
     return DataCatalog({"abc": csv, "xyz": parq}, journal=journal, layers=layers)
 
 

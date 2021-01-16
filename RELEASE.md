@@ -8,7 +8,7 @@
 * Added fix to prevent new lines being added to pandas CSV datasets.
 * Fixed issue with loading a versioned `SparkDataSet` in the interactive workflow.
 * Kedro CLI now checks `pyproject.toml` for a `tool.kedro` section before treating the project as a Kedro project
-* Added [kedro-dataframe-dopin](https://github.com/mzjp2/kedro-dataframe-dropin) to the list of community plugins
+* Added [kedro-dataframe-dropin](https://github.com/mzjp2/kedro-dataframe-dropin) to the list of community plugins
 
 ## Breaking changes to the API
 

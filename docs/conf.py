@@ -184,7 +184,8 @@ linkcheck_ignore = [
     "https://github.com/bruceaphilp",
     "https://github.com/quantumblacklabs/kedro-community",
     "https://github.com/gbraccialli-qb",
-
+    "https://github.com/quantumblacklabs/kedro/blob/develop/RELEASE.md",
+    "https://github.com/quantumblacklabs",
 ]
 
 # retry before render a link broken (fix for "too many requests")

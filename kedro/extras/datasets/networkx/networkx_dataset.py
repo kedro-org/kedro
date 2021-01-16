@@ -51,7 +51,7 @@ class NetworkXDataSet(AbstractVersionedDataSet):
     """``NetworkXDataSet`` loads and saves graphs to a JSON file using an
     underlying filesystem (e.g.: local, S3, GCS). ``NetworkX`` is used to
     create JSON data.
-    See https://networkx.github.io/documentation/stable/tutorial.html for details.
+    See https://networkx.org/documentation/stable/tutorial.html for details.
 
     Example:
     ::
@@ -85,10 +85,10 @@ class NetworkXDataSet(AbstractVersionedDataSet):
             filepath: Filepath in POSIX format to the NetworkX graph JSON file.
             load_args: Arguments passed on to ```networkx.node_link_graph``.
                 See the details in
-                https://networkx.github.io/documentation/networkx-1.9.1/reference/generated/networkx.readwrite.json_graph.node_link_graph.html
+                https://networkx.org/documentation/networkx-1.9.1/reference/generated/networkx.readwrite.json_graph.node_link_graph.html
             save_args: Arguments passed on to ```networkx.node_link_data``.
                 See the details in
-                https://networkx.github.io/documentation/networkx-1.9.1/reference/generated/networkx.readwrite.json_graph.node_link_data.html
+                https://networkx.org/documentation/networkx-1.9.1/reference/generated/networkx.readwrite.json_graph.node_link_data.html
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``

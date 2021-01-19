@@ -16,7 +16,8 @@
 ## Thanks for supporting contributions
 [Mariana Silva](https://github.com/marianansilva),
 [Kiyohito Kunii](https://github.com/921kiyo),
-[noklam](https://github.com/noklam)
+[noklam](https://github.com/noklam),
+[Ivan Doroshenko](https://github.com/imdoroshenko)
 
 ## Thanks for supporting contributions
 

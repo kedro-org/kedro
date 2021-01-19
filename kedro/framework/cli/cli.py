@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -87,8 +87,8 @@ def cli():
     """Kedro is a CLI for creating and using Kedro projects
     For more information, type ``kedro info``.
 
-    When inside a Kedro project (created with `kedro new`) commands from
-    the project's `cli.py` file will also be available here.
+    When inside a Kedro project (created with ``kedro new``) commands
+    from the project's ``cli.py`` file will also be available here.
     """
     pass
 
@@ -576,7 +576,7 @@ def _print_kedro_new_success_message(result):
     )
     click.secho(
         "\nA best-practice setup includes initialising git and creating "
-        "a virtual environment before running `kedro install` to install "
+        "a virtual environment before running ``kedro install`` to install "
         "project-specific dependencies. Refer to the Kedro documentation: "
         "https://kedro.readthedocs.io/"
     )
@@ -661,8 +661,8 @@ def _init_plugins():
 
 
 def main():  # pragma: no cover
-    """Main entry point, look for a `cli.py` and if found add its
-    commands to `kedro`'s then invoke the cli.
+    """Main entry point. Look for a ``cli.py``, and, if found, add its
+    commands to `kedro`'s before invoking the CLI.
     """
     _init_plugins()
 

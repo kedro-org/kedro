@@ -78,14 +78,6 @@ You can find further information in our [advanced documentation about working wi
 
 ## Configure the project
 
-You need to configure the credentials within your project's `conf` folder:
-
-* Move `credentials.yml` from `conf/base/` to `conf/local/`. To do this in the terminal, type the following from within the project's root directory:
-
-```bash
-mv conf/base/credentials.yml conf/local/
-```
-
-* You may optionally add in any credentials to `conf/local/credentials.yml` that you would need to load specific data sources like usernames and passwords. Some examples are given within the file to illustrate how you store credentials. Additional information can be found in the [advanced documentation on configuration](../04_kedro_project_setup/02_configuration.md).
+You may optionally add in any credentials to `conf/local/credentials.yml` that you would need to load specific data sources like usernames and passwords. Some examples are given within the file to illustrate how you store credentials. Additional information can be found in the [advanced documentation on configuration](../04_kedro_project_setup/02_configuration.md).
 
 At this stage of the workflow, you may also want to [set up logging](../08_logging/01_logging.md), but we do not use it in this tutorial.

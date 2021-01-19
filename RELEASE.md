@@ -1,3 +1,24 @@
+# Upcoming Release 0.17.1
+
+## Major features and improvements
+* Added `env` and `extra_params` to `reload_kedro()` line magic.
+
+## Bug fixes and other changes
+* The version of a packaged modular pipeline now defaults to the version of the project package.
+* Added fix to prevent new lines being added to pandas CSV datasets.
+* Fixed issue with loading a versioned `SparkDataSet` in the interactive workflow.
+* Kedro CLI now checks `pyproject.toml` for a `tool.kedro` section before treating the project as a Kedro project
+
+## Breaking changes to the API
+
+
+## Thanks for supporting contributions
+[Mariana Silva](https://github.com/marianansilva),
+[Kiyohito Kunii](https://github.com/921kiyo),
+[noklam](https://github.com/noklam)
+
+## Thanks for supporting contributions
+
 # Release 0.17.0
 
 ## Major features and improvements

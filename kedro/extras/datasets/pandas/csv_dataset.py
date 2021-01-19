@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -138,6 +138,7 @@ class CSVDataSet(AbstractVersionedDataSet):
             self._save_args.update(save_args)
 
         _fs_open_args_save.setdefault("mode", "w")
+        _fs_open_args_save.setdefault("newline", "")
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
 

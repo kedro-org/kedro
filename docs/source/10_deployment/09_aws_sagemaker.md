@@ -110,7 +110,7 @@ s3:
 
 ### Update the project hooks
 
-Now you need to tell Kedro to use the [`TemplatedConfigLoader`](https://kedro.readthedocs.io/en/stable/kedro.config.TemplatedConfigLoader.html) instead of the default `ConfigLoader` class to read the project configuration. It is very easy to do via [Kedro hooks](https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_hooks.html) - open `src/kedro_tutorial/hooks.py` file, locate the definition of `ProjectHooks` and add the following method to it:
+Now you need to tell Kedro to use the [`TemplatedConfigLoader`](https://kedro.readthedocs.io/en/stable/kedro.config.TemplatedConfigLoader.html) instead of the default `ConfigLoader` class to read the project configuration. It is very easy to do via [Kedro hooks](https://kedro.readthedocs.io/en/stable/07_extend_kedro/02_hooks.html) - open `src/kedro_tutorial/hooks.py` file, locate the definition of `ProjectHooks` and add the following method to it:
 
 ```python
 from typing import Iterable

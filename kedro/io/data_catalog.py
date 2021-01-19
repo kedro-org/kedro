@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -179,7 +179,7 @@ class DataCatalog:
             layers: A dictionary of data set layers. It maps a layer name
                 to a set of data set names, according to the
                 data engineering convention. For more details, see
-                https://kedro.readthedocs.io/en/stable/11_faq/01_faq.html#what-is-data-engineering-convention
+                https://kedro.readthedocs.io/en/stable/12_faq/01_faq.html#what-is-data-engineering-convention
         Raises:
             DataSetNotFoundError: When transformers are passed for a non
                 existent data set.

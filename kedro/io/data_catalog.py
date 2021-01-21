@@ -694,6 +694,7 @@ class DataCatalog:
             transformers=self._transformers,
             default_transformers=self._default_transformers,
             journal=self._journal,
+            layers=self.layers,
         )
 
     def __eq__(self, other):
@@ -702,11 +703,13 @@ class DataCatalog:
             self._transformers,
             self._default_transformers,
             self._journal,
+            self.layers,
         ) == (
             other._data_sets,
             other._transformers,
             other._default_transformers,
             other._journal,
+            other.layers,
         )
 
     def confirm(self, name: str) -> None:

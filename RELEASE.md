@@ -8,6 +8,7 @@
 * Added fix to prevent new lines being added to pandas CSV datasets.
 * Fixed issue with loading a versioned `SparkDataSet` in the interactive workflow.
 * Kedro CLI now checks `pyproject.toml` for a `tool.kedro` section before treating the project as a Kedro project
+* Added fix to `DataCatalog::shallow_copy` now it should copy layers
 
 ## Breaking changes to the API
 
@@ -15,7 +16,8 @@
 ## Thanks for supporting contributions
 [Mariana Silva](https://github.com/marianansilva),
 [Kiyohito Kunii](https://github.com/921kiyo),
-[noklam](https://github.com/noklam)
+[noklam](https://github.com/noklam),
+[Ivan Doroshenko](https://github.com/imdoroshenko)
 
 ## Thanks for supporting contributions
 

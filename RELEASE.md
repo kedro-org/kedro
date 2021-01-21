@@ -9,6 +9,7 @@
 * Fixed issue with loading a versioned `SparkDataSet` in the interactive workflow.
 * Kedro CLI now checks `pyproject.toml` for a `tool.kedro` section before treating the project as a Kedro project
 * Added fix to `DataCatalog::shallow_copy` now it should copy layers
+* Cleaned up documentation to fix broken links and rewrite permanently redirected ones
 
 ## Breaking changes to the API
 
@@ -18,6 +19,7 @@
 [Kiyohito Kunii](https://github.com/921kiyo),
 [noklam](https://github.com/noklam),
 [Ivan Doroshenko](https://github.com/imdoroshenko)
+[Zain Patel](https://github.com/mzjp2)
 
 ## Thanks for supporting contributions
 

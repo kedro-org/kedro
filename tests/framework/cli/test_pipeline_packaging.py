@@ -791,3 +791,33 @@ class TestPipelinePullCommand:
 
         assert result.exit_code
         assert "Error: More than 1 or no wheel files found:" in result.output
+
+    def test_pull_unsupported_protocol_by_fsspec(
+        self, fake_project_cli, fake_metadata, tmp_path, mocker
+    ):
+        protocol = "unsupported"
+        exception_message = f"Protocol not known: {protocol}"
+        error_message = "Error: More than 1 or no wheel files found:"
+        package_path = f"{protocol}://{PIPELINE_NAME}"
+
+        python_call_mock = mocker.patch("kedro.framework.cli.pipeline.python_call")
+        filesystem_mock = mocker.patch(
+            "fsspec.filesystem", side_effect=ValueError(exception_message)
+        )
+        mocker.patch(
+            "kedro.framework.cli.pipeline.tempfile.TemporaryDirectory",
+            return_value=tmp_path,
+        )
+
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["pipeline", "pull", package_path], obj=fake_metadata
+        )
+
+        assert result.exit_code
+        filesystem_mock.assert_called_once_with(protocol)
+        python_call_mock.assert_called_once_with(
+            "pip", ["download", "--no-deps", "--dest", str(tmp_path), package_path]
+        )
+        assert exception_message in result.output
+        assert "Trying to use 'pip download'..." in result.output
+        assert error_message in result.output

@@ -7,8 +7,9 @@
 * The version of a packaged modular pipeline now defaults to the version of the project package.
 * Added fix to prevent new lines being added to pandas CSV datasets.
 * Fixed issue with loading a versioned `SparkDataSet` in the interactive workflow.
-* Kedro CLI now checks `pyproject.toml` for a `tool.kedro` section before treating the project as a Kedro project
-* Added fix to `DataCatalog::shallow_copy` now it should copy layers
+* Kedro CLI now checks `pyproject.toml` for a `tool.kedro` section before treating the project as a Kedro project.
+* Added fix to `DataCatalog::shallow_copy` now it should copy layers.
+* `kedro pipeline pull` now uses `pip download` for protocols that are not supported by `fsspec`.
 * Cleaned up documentation to fix broken links and rewrite permanently redirected ones
 
 ## Breaking changes to the API

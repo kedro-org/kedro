@@ -269,19 +269,6 @@ def pull_package(
         _install_files(metadata, package_name, temp_dir_path, env, alias)
 
 
-def _get_fsspec_filesystem(location: str, fs_args: Optional[str]):
-    # pylint: disable=import-outside-toplevel
-    import anyconfig
-    import fsspec
-
-    from kedro.io.core import get_protocol_and_path
-
-    protocol, _ = get_protocol_and_path(location)
-    fs_args_config = anyconfig.load(fs_args) if fs_args else {}
-
-    return fsspec.filesystem(protocol, **fs_args_config)
-
-
 @pipeline.command("package")
 @env_option(
     help="Environment where the pipeline configuration lives. Defaults to `base`."
@@ -333,10 +320,30 @@ def _echo_deletion_warning(message: str, **paths: List[Path]):
         click.echo(indent(paths_str, " " * 2))
 
 
+def _get_fsspec_filesystem(location: str, fs_args: Optional[str]):
+    # pylint: disable=import-outside-toplevel
+    import anyconfig
+    import fsspec
+
+    from kedro.io.core import get_protocol_and_path
+
+    protocol, _ = get_protocol_and_path(location)
+    fs_args_config = anyconfig.load(fs_args) if fs_args else {}
+
+    try:
+        return fsspec.filesystem(protocol, **fs_args_config)
+    except Exception as exc:  # pylint: disable=broad-except
+        # Specified protocol is not supported by `fsspec`
+        # or requires extra dependencies
+        click.secho(str(exc), fg="red")
+        click.secho("Trying to use 'pip download'...", fg="red")
+        return None
+
+
 def _unpack_wheel(location: str, destination: Path, fs_args: Optional[str]) -> None:
     filesystem = _get_fsspec_filesystem(location, fs_args)
 
-    if location.endswith(".whl") and filesystem.exists(location):
+    if location.endswith(".whl") and filesystem and filesystem.exists(location):
         with filesystem.open(location) as fs_file:
             ZipFile(fs_file).extractall(destination)
     else:

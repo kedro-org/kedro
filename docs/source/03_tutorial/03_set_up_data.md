@@ -35,7 +35,7 @@ curl -o data/01_raw/shuttles.xlsx https://quantumblacklabs.github.io/kedro/shutt
 ```
 </details>
 
-Using [cURL for Windows](https://curl.haxx.se/windows/):
+Using [cURL for Windows](https://curl.se/windows/):
 
 <details>
 <summary><b>Click to expand</b></summary>

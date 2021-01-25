@@ -115,7 +115,7 @@ commands:
       - setup_conda
       - setup_requirements
       - run:
-          name: Build docs
+          name: Check for broken links
           command: make linkcheck
 
   pip_compile:

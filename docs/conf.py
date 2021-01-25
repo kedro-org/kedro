@@ -175,16 +175,11 @@ html_theme_options = {"collapse_navigation": False, "style_external_links": True
 # some of these complain that the sections don't exist (which is not true),
 # too many requests, or forbidden URL
 linkcheck_ignore = [
-    "https://github.com/EbookFoundation/free-programming-books/blob/master/books/free-programming-books.md#python",
     "https://www.datacamp.com/community/tutorials/docstrings-python",  # "forbidden" url
-    "https://github.com/jazzband/pip-tools#example-usage-for-pip-compile",
     "https://setuptools.readthedocs.io/en/latest/setuptools.html#dynamic-discovery-of-services-and-plugins",
     "https://github.com/argoproj/argo/blob/master/README.md#quickstart",
     "https://console.aws.amazon.com/batch/home#/jobs",
-    "https://github.com/bruceaphilp",
-    "https://github.com/quantumblacklabs/kedro-community",
-    "https://github.com/gbraccialli-qb",
-
+    "https://github.com/*"
 ]
 
 # retry before render a link broken (fix for "too many requests")

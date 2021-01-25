@@ -138,11 +138,11 @@
               },
               "load_args": {
                 "type": "object",
-                "description": "Arguments passed on to ```networkx.node_link_graph``.\nSee the details in\nhttps://networkx.github.io/documentation/networkx-1.9.1/reference/generated/networkx.readwrite.json_graph.node_link_graph.html"
+                "description": "Arguments passed on to ```networkx.node_link_graph``.\nSee the details in\nhttps://networkx.org/documentation/networkx-1.9.1/reference/generated/networkx.readwrite.json_graph.node_link_graph.html"
               },
               "save_args": {
                 "type": "object",
-                "description": "Arguments passed on to ```networkx.node_link_data``.\nSee the details in\nhttps://networkx.github.io/documentation/networkx-1.9.1/reference/generated/networkx.readwrite.json_graph.node_link_data.html"
+                "description": "Arguments passed on to ```networkx.node_link_data``.\nSee the details in\nhttps://networkx.org/documentation/networkx-1.9.1/reference/generated/networkx.readwrite.json_graph.node_link_data.html"
               },
               "credentials": {
                 "type": "object",

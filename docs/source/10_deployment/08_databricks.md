@@ -20,7 +20,7 @@ Both section have the following prerequisites:
 
 In this section, we show how to create a sample Iris project with PySpark, connect it to the Databricks cluster using [Databricks Connect](https://docs.databricks.com/dev-tools/databricks-connect.html), and trigger a run from the local machine.
 
-> Note: Additional requirement in this section is to have [Java 8 installed](https://www.java.com/en/download/help/download_options.xml) on your local machine (as Databricks Connect does not support Java 11).
+> Note: Additional requirement in this section is to have [Java 8 installed](https://www.java.com/en/download/help/download_options.html) on your local machine (as Databricks Connect does not support Java 11).
 
 ### 1. Project setup
 
@@ -231,7 +231,7 @@ Now you should [create a new repository in GitHub](https://docs.github.com/en/gi
 To connect to the newly created repository you can use one of 2 options:
 
 * **SSH:** If you choose to connect with SSH, you will also need to configure [the SSH connection to GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh), unless you already have [an existing SSH key](https://docs.github.com/en/github/authenticating-to-github/checking-for-existing-ssh-keys) configured for GitHub
-* **HTTPS:** If using HTTPS, you will be asked for your GitHub username and password when you push your first commit - please use your GitHub username and your [personal access token](#create-github-personal-access-token) generated in the previous step as a password and [_not_ your original GitHub password](https://developer.github.com/v3/auth/#via-username-and-password).
+* **HTTPS:** If using HTTPS, you will be asked for your GitHub username and password when you push your first commit - please use your GitHub username and your [personal access token](#create-github-personal-access-token) generated in the previous step as a password and [_not_ your original GitHub password](https://docs.github.com/en/rest/overview/other-authentication-methods#via-username-and-password).
 
 ### 4. Push Kedro project to the GitHub repository
 

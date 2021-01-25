@@ -7,9 +7,10 @@
 * The version of a packaged modular pipeline now defaults to the version of the project package.
 * Added fix to prevent new lines being added to pandas CSV datasets.
 * Fixed issue with loading a versioned `SparkDataSet` in the interactive workflow.
-* Kedro CLI now checks `pyproject.toml` for a `tool.kedro` section before treating the project as a Kedro project
-* Added fix to `DataCatalog::shallow_copy` now it should copy layers
-* Added [kedro-dataframe-dropin](https://github.com/mzjp2/kedro-dataframe-dropin) to the list of community plugins
+* Kedro CLI now checks `pyproject.toml` for a `tool.kedro` section before treating the project as a Kedro project.
+* Added fix to `DataCatalog::shallow_copy` now it should copy layers.
+* `kedro pipeline pull` now uses `pip download` for protocols that are not supported by `fsspec`.
+* Cleaned up documentation to fix broken links and rewrite permanently redirected ones.
 
 ## Breaking changes to the API
 
@@ -19,6 +20,7 @@
 [Kiyohito Kunii](https://github.com/921kiyo),
 [noklam](https://github.com/noklam),
 [Ivan Doroshenko](https://github.com/imdoroshenko)
+[Zain Patel](https://github.com/mzjp2)
 
 ## Thanks for supporting contributions
 
@@ -647,7 +649,7 @@ You can also load data incrementally whenever it is dumped into a directory with
 * New CLI commands and command flags:
   - Load multiple `kedro run` CLI flags from a configuration file with the `--config` flag (e.g. `kedro run --config run_config.yml`)
   - Run parametrised pipeline runs with the `--params` flag (e.g. `kedro run --params param1:value1,param2:value2`).
-  - Lint your project code using the `kedro lint` command, your project is linted with [`black`](https://github.com/psf/black) (Python 3.6+), [`flake8`](https://gitlab.com/pycqa/flake8) and [`isort`](https://github.com/timothycrosley/isort).
+  - Lint your project code using the `kedro lint` command, your project is linted with [`black`](https://github.com/psf/black) (Python 3.6+), [`flake8`](https://gitlab.com/pycqa/flake8) and [`isort`](https://github.com/PyCQA/isort).
 * Load specific environments with Jupyter notebooks using `KEDRO_ENV` which will globally set `run`, `jupyter notebook` and `jupyter lab` commands using environment variables.
 * Added the following datasets:
   - `CSVGCSDataSet` dataset in `contrib` for working with CSV files in Google Cloud Storage.

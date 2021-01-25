@@ -8,7 +8,7 @@ You can generate project-specific documentation by running `kedro build-docs` in
 
 The `build-docs` command creates documentation based on the code structure of your project. Documentation includes any [`docstrings`](https://www.datacamp.com/community/tutorials/docstrings-python) defined in your code.
 
-Kedro uses the [Sphinx](https://www.sphinx-doc.org) framework, so if you want to customise your documentation, please refer to `docs/source/conf.py` and the [corresponding section of the Sphinx documentation](http://www.sphinx-doc.org/en/master/usage/configuration.html).
+Kedro uses the [Sphinx](https://www.sphinx-doc.org) framework, so if you want to customise your documentation, please refer to `docs/source/conf.py` and the [corresponding section of the Sphinx documentation](https://www.sphinx-doc.org/en/master/usage/configuration.html).
 
 
 ## Package your project

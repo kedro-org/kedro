@@ -116,7 +116,7 @@ class TemplatedConfigLoader(ConfigLoader):
             filepath: "s3://${bucket}/data/${environment}/${folders.raw}/cars.csv"
 
     This uses ``jmespath`` in the background. For more information see:
-    https://github.com/jmespath/jmespath.py and http://jmespath.org/.
+    https://github.com/jmespath/jmespath.py and https://jmespath.org/.
     """
 
     def __init__(

@@ -75,6 +75,29 @@ There is a growing community around Kedro. Have a look at the [Kedro FAQs](https
 
 ## Who likes Kedro?
 
-There are Kedro users across the world, who work at start-ups, major enterprises and academic institutions like [Absa](https://www.absa.co.za/), [Acensi](https://acensi.eu/page/home), [AI Singapore](https://makerspace.aisingapore.org/2020/08/leveraging-kedro-in-100e/), [AXA UK](https://www.axa.co.uk/), [Caterpillar](https://www.caterpillar.com/), [CRIM](https://www.crim.ca/en/), [Dendra Systems](https://www.dendra.io/), [ElementAI](https://www.elementai.com/), [GMO](https://recruit.gmo.jp/engineer/jisedai/engineer/jisedai/engineer/jisedai/engineer/jisedai/engineer/jisedai/blog/kedro_and_mlflow_tracking/),  [Imperial College London](https://github.com/dssg/barefoot-winnie-public), [Jungle Scout](https://junglescouteng.medium.com/jungle-scout-case-study-kedro-airflow-and-mlflow-use-on-production-code-150d7231d42e), [Helvetas](https://www.linkedin.com/feed/update/urn:li:activity:6747076717967364096/?commentUrn=urn%3Ali%3Acomment%3A(ugcPost%3A6747074322164154368%2C6747076597578252288)), [Leapfrog](https://www.lftechnology.com/blog/ai-pipeline-kedro/), [McKinsey & Company](https://www.mckinsey.com/alumni/news-and-insights/global-news/firm-news/kedro-from-proprietary-to-open-source), [Mercado Libre Argentina](https://www.mercadolibre.com.ar), [Modec](https://www.modec.com/), [Mosaic Data Science](https://www.youtube.com/watch?v=fCWGevB366g), [NaranjaX](https://www.youtube.com/watch?v=_0kMmRfltEQ), [Open Data Science LatAm](https://www.odesla.org/), [QuantumBlack](https://medium.com/quantumblack/introducing-kedro-the-open-source-library-for-production-ready-machine-learning-code-d1c6d26ce2cf), [Retrieva](https://tech.retrieva.jp/entry/2020/07/28/181414), [Roche](https://www.roche.com/), [Telkomsel](https://www.linkedin.com/feed/update/urn:li:activity:6749338226403766272/updateEntityUrn=urn%3Ali%3Afs_feedUpdate%3A%28V2%2Curn%3Ali%3Aactivity%3A6749338226403766272%29), [UrbanLogiq](https://urbanlogiq.com/), [Universidad Rey Juan Carlos](https://github.com/vchaparro/MasterThesis-wind-power-forecasting/blob/master/thesis.pdf) and [XP](https://youtu.be/wgnGOVNkXqU?t=2210).
+There are Kedro users across the world, who work at start-ups, major enterprises and academic institutions like [Absa](https://www.absa.co.za/),
+[Acensi](https://acensi.eu/page/home),
+[AI Singapore](https://makerspace.aisingapore.org/2020/08/leveraging-kedro-in-100e/),
+[AXA UK](https://www.axa.co.uk/), [Caterpillar](https://www.caterpillar.com/),
+[CRIM](https://www.crim.ca/en/),
+[Dendra Systems](https://www.dendra.io/),
+[ElementAI](https://www.elementai.com/),
+[GMO](https://recruit.gmo.jp/engineer/jisedai/engineer/jisedai/engineer/jisedai/engineer/jisedai/engineer/jisedai/blog/kedro_and_mlflow_tracking/),
+[Imperial College London](https://github.com/dssg/barefoot-winnie-public),
+[Jungle Scout](https://junglescouteng.medium.com/jungle-scout-case-study-kedro-airflow-and-mlflow-use-on-production-code-150d7231d42e),
+[Helvetas](https://www.linkedin.com/posts/lionel-trebuchon_mlflow-kedro-ml-ugcPost-6747074322164154368-umKw),
+[Leapfrog](https://www.lftechnology.com/blog/ai-pipeline-kedro/),
+[McKinsey & Company](https://www.mckinsey.com/alumni/news-and-insights/global-news/firm-news/kedro-from-proprietary-to-open-source),
+[Mercado Libre Argentina](https://www.mercadolibre.com.ar),
+[Modec](https://www.modec.com/),
+[Mosaic Data Science](https://www.youtube.com/watch?v=fCWGevB366g),
+[NaranjaX](https://www.youtube.com/watch?v=_0kMmRfltEQ),
+[Open Data Science LatAm](https://www.odesla.org/),
+[QuantumBlack](https://medium.com/quantumblack/introducing-kedro-the-open-source-library-for-production-ready-machine-learning-code-d1c6d26ce2cf),
+[Retrieva](https://tech.retrieva.jp/entry/2020/07/28/181414), [Roche](https://www.roche.com/),
+[Telkomsel](https://www.linkedin.com/feed/update/urn:li:activity:6749338226403766272/updateEntityUrn=urn%3Ali%3Afs_feedUpdate%3A%28V2%2Curn%3Ali%3Aactivity%3A6749338226403766272%29),
+[UrbanLogiq](https://urbanlogiq.com/),
+[Universidad Rey Juan Carlos](https://github.com/vchaparro/MasterThesis-wind-power-forecasting/blob/master/thesis.pdf) and
+[XP](https://youtu.be/wgnGOVNkXqU?t=2210).
 
 Kedro has also won [Best Technical Tool or Framework for AI](https://awards.ai/the-awards/previous-awards/the-4th-ai-award-winners/) in the 2019 Awards AI competition and a merit award for the 2020 [UK Technical Communication Awards](https://uktcawards.com/announcing-the-award-winners-for-2020/). It is listed on the 2020 [ThoughtWorks Technology Radar](https://www.thoughtworks.com/radar/languages-and-frameworks/kedro) and the 2020 [Data & AI Landscape](https://mattturck.com/data2020/).

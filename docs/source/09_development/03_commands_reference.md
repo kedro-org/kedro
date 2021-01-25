@@ -269,7 +269,7 @@ The `build-docs` command builds [project documentation](../03_tutorial/05_packag
 kedro lint
 ```
 
-Your project is linted with [`black`](https://github.com/psf/black), [`flake8`](https://gitlab.com/pycqa/flake8) and [`isort`](https://github.com/timothycrosley/isort). See our [documentation about `kedro lint`](../09_development/04_lint.md#linting-your-kedro-project) for further details.
+Your project is linted with [`black`](https://github.com/psf/black), [`flake8`](https://gitlab.com/pycqa/flake8) and [`isort`](https://github.com/PyCQA/isort). See our [documentation about `kedro lint`](../09_development/04_lint.md#linting-your-kedro-project) for further details.
 
 
 #### Test your project
@@ -387,7 +387,7 @@ To reload these variables at any point in your notebook (e.g. if you updated `ca
 > *Note:* If you get an error message `Module ``<module_name>`` not found. Make sure to install required project dependencies by running ``kedro install`` command first.` when running any of those commands, it indicates that some Jupyter or IPython dependencies are not installed in your environment. To resolve this you will need to a) make sure the corresponding dependency is present in `src/requirements.in` (`src/requirements.txt` if not compiled), b) run [`kedro install`](#install-all-package-dependencies) command from your terminal.
 
 ##### Copy tagged cells
-To copy the code from cells [tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) with `node` tag into Python files under `src/<package_name>/nodes/` in a Kedro project:
+To copy the code from cells [tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#release-5-0-0) with `node` tag into Python files under `src/<package_name>/nodes/` in a Kedro project:
 
 ```bash
 kedro jupyter convert --all

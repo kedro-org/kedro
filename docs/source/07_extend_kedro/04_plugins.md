@@ -129,9 +129,6 @@ When you are ready to submit your code:
 3. Include a `README.md` describing your plugin's functionality and all dependencies that should be included
 4. Use GitHub tagging to tag your plugin as a `kedro-plugin` so that we can find it
 
-> *Note:* In future, we will feature a list of "Plugins by Contributors". Your plugin needs to have an [Apache 2.0 compatible license](https://www.apache.org/legal/resolved.html#category-a) to be considered for this list.
-
-
 ## Supported Kedro plugins
 
 - [Kedro-Docker](https://github.com/quantumblacklabs/kedro-docker), a tool for packaging and shipping Kedro projects within containers
@@ -141,6 +138,7 @@ When you are ready to submit your code:
 ## Community-developed plugins
 
 > *Note:* See the full list of plugins using the GitHub tag [kedro-plugin](https://github.com/topics/kedro-plugin).
+> *Note:* Your plugin needs to have an [Apache 2.0 compatible license](https://www.apache.org/legal/resolved.html#category-a) to be considered for this list.
 
 - [Kedro-Pandas-Profiling](https://github.com/BrickFrog/kedro-pandas-profiling), by [Justin Malloy](https://github.com/BrickFrog), uses [Pandas Profiling](https://github.com/pandas-profiling/pandas-profiling) to profile datasets in the Kedro catalog
 - [find-kedro](https://github.com/WaylonWalker/find-kedro), by [Waylon Walker](https://github.com/WaylonWalker), automatically constructs pipelines using `pytest`-style pattern matching
@@ -149,3 +147,4 @@ When you are ready to submit your code:
 - [kedro-wings](https://github.com/tamsanh/kedro-wings), by [Tam-Sanh Nguyen](https://github.com/tamsanh), simplifies and speeds up pipeline creation by auto-generating catalog datasets
 - [kedro-great](https://github.com/tamsanh/kedro-great), by [Tam-Sanh Nguyen](https://github.com/tamsanh), integrates Kedro with [Great Expectations](https://greatexpectations.io), enabling catalog-based expectation generation and data validation on pipeline run
 - [Kedro-Accelerator](https://github.com/deepyaman/kedro-accelerator), by [Deepyaman Datta](https://github.com/deepyaman), speeds up pipelines by parallelizing I/O in the background
+- [kedro-dataframe-dropin](https://github.com/mzjp2/kedro-dataframe-dropin), by [Zain Patel](https://github.com/mzjp2), lets you swap out pandas datasets for modin or RAPIDs equivalents for specialised use to speed up your workflows (e.g on GPUs)

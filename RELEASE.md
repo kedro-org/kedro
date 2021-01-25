@@ -10,7 +10,7 @@
 * Kedro CLI now checks `pyproject.toml` for a `tool.kedro` section before treating the project as a Kedro project.
 * Added fix to `DataCatalog::shallow_copy` now it should copy layers.
 * `kedro pipeline pull` now uses `pip download` for protocols that are not supported by `fsspec`.
-* Cleaned up documentation to fix broken links and rewrite permanently redirected ones
+* Cleaned up documentation to fix broken links and rewrite permanently redirected ones.
 * Added a `jsonschema` schema definition for the Kedro 0.17 catalog.
 
 ## Breaking changes to the API

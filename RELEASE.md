@@ -11,6 +11,7 @@
 * Added fix to `DataCatalog::shallow_copy` now it should copy layers.
 * `kedro pipeline pull` now uses `pip download` for protocols that are not supported by `fsspec`.
 * Cleaned up documentation to fix broken links and rewrite permanently redirected ones.
+* Added a `jsonschema` schema definition for the Kedro 0.17 catalog.
 
 ## Breaking changes to the API
 
@@ -19,7 +20,7 @@
 [Mariana Silva](https://github.com/marianansilva),
 [Kiyohito Kunii](https://github.com/921kiyo),
 [noklam](https://github.com/noklam),
-[Ivan Doroshenko](https://github.com/imdoroshenko)
+[Ivan Doroshenko](https://github.com/imdoroshenko),
 [Zain Patel](https://github.com/mzjp2)
 
 ## Thanks for supporting contributions

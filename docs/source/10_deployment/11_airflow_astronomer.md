@@ -127,6 +127,7 @@ echo "src/" >> .dockerignore
 FROM quay.io/astronomer/ap-airflow:2.0.0-buster-onbuild
 
 RUN pip install --user src/dist/new_kedro_project-0.1-py3-none-any.whl
+```
 
 ### Step 3. Convert the Kedro pipeline into an Airflow DAG with `kedro airflow`
 

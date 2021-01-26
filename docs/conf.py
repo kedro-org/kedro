@@ -92,8 +92,7 @@ exclude_patterns = [
     "_templates",
     "modules.rst",
     "source",
-    "README.md",
-    "12_faq/03_glossary.md",
+    "README.md"
 ]
 
 type_targets = {

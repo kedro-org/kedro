@@ -4,7 +4,7 @@
 
 ## What are modular pipelines?
 
-In many typical Kedro projects, a single (“master”) pipeline increases in complexity as the project evolves. To keep your project fit for purpose, we recommend that you create modular pipelines, which are logically isolated and can be reused. Modular pipelines are easier to develop, test and maintain, and are portable so they can be copied and reused between projects.
+In many typical Kedro projects, a single (“main”) pipeline increases in complexity as the project evolves. To keep your project fit for purpose, we recommend that you create modular pipelines, which are logically isolated and can be reused. Modular pipelines are easier to develop, test and maintain, and are portable so they can be copied and reused between projects.
 
 ## How do I create a modular pipeline?
 
@@ -81,7 +81,7 @@ def create_pipeline():
 ```
 
 * Modular pipelines should _not_ depend on the main Python package (`new_kedro_project` in this example) as this would break portability to another project
-* Modular pipelines should be registered and stitched together in a master (or `__default__`) pipeline located in `src/new_kedro_project/hooks.py`
+* Modular pipelines should be registered and stitched together in a main (or `__default__`) pipeline located in `src/new_kedro_project/hooks.py`
 
 The following example, illustrates how to import and instantiate two modular pipelines (`modular_pipeline_1` and `modular_pipeline_2`) within `src/new_kedro_project/hooks.py`:
 
@@ -183,7 +183,7 @@ Here is an example of a modular pipeline which combines all of these concepts wi
   - `src/new_kedro_project/pipelines/data_engineering` - A pipeline that imputes missing data and discovers outlier data points
   - `src/new_kedro_project/pipelines/feature_engineering` - A pipeline that generates temporal features while aggregating data and performs a train/test split on the data
   - `src/new_kedro_project/pipelines/modelling` - A pipeline that fits models, does hyperparameter search and reports on model performance
-* A master (or `__default__`) pipeline:
+* A main (or `__default__`) pipeline:
   - `src/new_kedro_project/hooks.py` - combines 3 modular pipelines from the above
 
 <details>

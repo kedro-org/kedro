@@ -120,7 +120,6 @@ Welcome to Kedro's documentation!
    :caption: Logging
 
    08_logging/01_logging
-   08_logging/02_journal
 
 .. toctree::
    :maxdepth: 2
@@ -167,6 +166,7 @@ Welcome to Kedro's documentation!
    :caption: Resources
 
    13_resources/01_logos
+   13_resources/02_glossary
 
 
 API Docs

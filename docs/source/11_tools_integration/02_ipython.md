@@ -107,7 +107,7 @@ With `context`, you can access the following variables and methods:
 
 ### Run the pipeline
 
-If you wish to run the whole 'master' pipeline within a notebook cell, you can do so by instantiating a `Session`:
+If you wish to run the whole main pipeline within a notebook cell, you can do so by instantiating a `Session`:
 
 ```python
 from kedro.framework.session import KedroSession

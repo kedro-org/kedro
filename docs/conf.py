@@ -65,6 +65,7 @@ extensions = [
 # enable autosummary plugin (table of contents for modules/classes/class
 # methods)
 autosummary_generate = True
+autosummary_generate_overwrite = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -133,8 +134,17 @@ type_targets = {
         "requests.auth.AuthBase",
         "google.oauth2.credentials.Credentials",
         "Exception",
+        "CONF_ROOT",
+        "integer -- return number of occurrences of value",
+        "integer -- return first index of value.",
     ),
-    "py:data": ("typing.Any", "typing.Callable", "typing.Union", "typing.Optional"),
+    "py:data": (
+        "typing.Any",
+        "typing.Callable",
+        "typing.Union",
+        "typing.Optional",
+        "typing.Tuple",
+    ),
     "py:exc": (
         "ValueError",
         "MissingConfigException",
@@ -178,11 +188,14 @@ linkcheck_ignore = [
     "https://setuptools.readthedocs.io/en/latest/setuptools.html#dynamic-discovery-of-services-and-plugins",
     "https://github.com/argoproj/argo/blob/master/README.md#quickstart",
     "https://console.aws.amazon.com/batch/home#/jobs",
-    "https://github.com/*"
+    "https://github.com/EbookFoundation/free-programming-books/blob/master/books/free-programming-books.md#python",
+    "https://github.com/jazzband/pip-tools#example-usage-for-pip-compile",
+    "https://www.astronomer.io/docs/cloud/stable/get-started/quickstart#",
 ]
 
 # retry before render a link broken (fix for "too many requests")
-linkcheck_retries = 7  # in sphinx>=3.4 there is also linkcheck_rate_limit_timeout
+linkcheck_retries = 5
+linkcheck_rate_limit_timeout = 2.0
 
 html_context = {
     "display_github": True,
@@ -488,7 +501,10 @@ def _add_jinja_filters(app):
 
     # LaTeXBuilder is used in the PDF docs build,
     # and it doesn't have attribute 'templates'
-    if not (isinstance(app.builder, LaTeXBuilder) or isinstance(app.builder, CheckExternalLinksBuilder)):
+    if not (
+        isinstance(app.builder, LaTeXBuilder)
+        or isinstance(app.builder, CheckExternalLinksBuilder)
+    ):
         app.builder.templates.environment.filters["env_override"] = env_override
 
 
@@ -497,12 +513,10 @@ def setup(app):
     app.connect("builder-inited", _add_jinja_filters)
     app.connect("autodoc-process-docstring", autodoc_process_docstring)
     app.connect("autodoc-skip-member", skip)
-    app.add_stylesheet("css/qb1-sphinx-rtd.css")
+    app.add_css_file("css/qb1-sphinx-rtd.css")
     # fix a bug with table wraps in Read the Docs Sphinx theme:
     # https://rackerlabs.github.io/docs-rackspace/tools/rtd-tables.html
-    app.add_stylesheet("css/theme-overrides.css")
-    # add "Copy" button to code snippets
-    app.add_stylesheet("css/copybutton.css")
+    app.add_css_file("css/theme-overrides.css")
     # enable rendering RST tables in Markdown
     app.add_config_value("recommonmark_config", {"enable_eval_rst": True}, True)
     app.add_transform(AutoStructify)
@@ -541,5 +555,3 @@ except Exception as e:
     )
 
 fix_module_paths()
-
-copybutton_image_path = "_images/copy-button.svg"

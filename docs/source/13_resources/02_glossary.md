@@ -19,7 +19,7 @@ Kedro is an open-source Python framework for creating reproducible, maintainable
 ## `KedroContext`
 A Python class that holds the configuration and Kedro’s main functionality.
 
-API documentation for [`KedroContext`](kedro.framework.context.KedroContext)
+API documentation for [`KedroContext`](/kedro.framework.context.KedroContext)
 
 ## `KedroSession`
 A KedroSession allows you to manage the lifecycle of a Kedro run, persist runtime parameters and trace back runtime parameters, such as CLI command flags and environment variables.
@@ -36,9 +36,9 @@ You can use Kedro-Viz to visualise your Kedro data pipelines:
 [Further information from the Kedro-Viz repository](https://github.com/quantumblacklabs/kedro-viz) and [Kedro tutorial documentation](../03_tutorial/06_visualise_pipeline)
 
 ## Layers (data engineering convention)
-According to [data engineering convention](../12_faq/01_faq.html#what-is-data-engineering-convention), a pipeline can be broken up into different layers according to how data is processed. This convention makes it easier to collaborate with other team members because everyone has an idea of what type of data cleaning or processing has happened.
+According to [data engineering convention](../12_faq/01_faq.md#what-is-data-engineering-convention), a pipeline can be broken up into different layers according to how data is processed. This convention makes it easier to collaborate with other team members because everyone has an idea of what type of data cleaning or processing has happened.
 
-Kedro-Viz makes it easy to [visualise these data processing stages](../03_tutorial/06_visualise_pipeline.html#interact-with-data-engineering-convention) by adding a `layer` attribute to the datasets in the Data Catalog
+Kedro-Viz makes it easy to [visualise these data processing stages](../03_tutorial/06_visualise_pipeline.md#interact-with-data-engineering-convention) by adding a `layer` attribute to the datasets in the Data Catalog
 
 ## Modular pipeline
 _(See also [Pipeline](#pipeline))_

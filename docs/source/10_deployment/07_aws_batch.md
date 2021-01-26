@@ -76,7 +76,7 @@ First, you need to containerise your Kedro project, using any preferred containe
 
 For the purpose of this walk-through, we are going to assume a `Docker` workflow. We recommend using the [`Kedro-Docker`](https://github.com/quantumblacklabs/kedro-docker) plugin to streamline the process.  [Instructions for using this are in the plugin's README.md](https://github.com/quantumblacklabs/kedro-docker/blob/master/README.md).
 
-After you’ve built the Docker image for your project locally, [transfer the image to a container registry](./01_single_machine.html#how-to-use-container-registry), for instance [AWS ECR](https://aws.amazon.com/ecr/). You can find instructions on how to push your Docker image to ECR [in Amazon's ECR documentation](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html).
+After you’ve built the Docker image for your project locally, [transfer the image to a container registry](./02_single_machine.md#how-to-use-container-registry), for instance [AWS ECR](https://aws.amazon.com/ecr/). You can find instructions on how to push your Docker image to ECR [in Amazon's ECR documentation](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html).
 
 Alternatively, once you've created a container repository, click the `View Push Commands` button in the top-right corner of the [ECR dashboard](https://console.aws.amazon.com/ecr).
 

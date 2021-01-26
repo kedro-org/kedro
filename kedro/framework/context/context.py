@@ -178,13 +178,11 @@ def _validate_layers_for_transcoding(catalog: DataCatalog) -> None:
 class KedroContext:
     """``KedroContext`` is the base class which holds the configuration and
     Kedro's main functionality.
-
-    Attributes:
-        CONF_ROOT: Name of root directory containing project configuration.
-            Default name is "conf".
     """
 
     CONF_ROOT = "conf"
+    """CONF_ROOT: Name of root directory containing project configuration.
+    Default name is "conf"."""
 
     def __init__(
         self,

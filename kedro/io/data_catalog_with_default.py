@@ -161,7 +161,7 @@ class DataCatalogWithDefault(DataCatalog):
 
         Raises:
             ValueError: If you try to instantiate a ``DataCatalogWithDefault``
-            directly with this method.
+                directly with this method.
 
         """
         raise ValueError(

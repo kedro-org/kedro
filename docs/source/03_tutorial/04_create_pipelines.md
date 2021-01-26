@@ -2,8 +2,8 @@
 
 This section covers the third part of the [standard development workflow](./01_spaceflights_tutorial.md#kedro-project-development-workflow), and covers the following:
 
-* How to create each [node](../13_resources/02_glossary.html#node) required by the example
-* How to set up a [pipeline](../13_resources/02_glossary.html#pipeline)
+* How to create each [node](../13_resources/02_glossary.md#node) required by the example
+* How to set up a [pipeline](../13_resources/02_glossary.md#pipeline)
 
 
 ## Data engineering pipeline
@@ -78,7 +78,7 @@ def preprocess_shuttles(shuttles: pd.DataFrame) -> pd.DataFrame:
 ### Assemble nodes into the data engineering pipeline
 
 
-The next steps are to create a [node](../13_resources/02_glossary.html#node) for each function, and to create a [modular pipeline](../13_resources/02_glossary.html#modular_pipeline) for [data engineering](../13_resources/02_glossary.html#data-engineering):
+The next steps are to create a [node](../13_resources/02_glossary.md#node) for each function, and to create a [modular pipeline](../13_resources/02_glossary.md#modular-pipeline) for [data engineering](../13_resources/02_glossary.md#data-engineering-vs-data-science):
 
 Add the following to `src/kedro_tutorial/pipelines/data_engineering/pipeline.py`, so the `create_pipeline()` function looks as follows:
 
@@ -120,7 +120,7 @@ from kedro_tutorial.pipelines.data_engineering.nodes import (
 
 ### Update the project pipeline
 
-Now update the project's pipeline in `src/kedro_tutorial/hooks.py` to add the [modular pipeline](../13_resources/02_glossary.html#modular-pipeline) for [data engineering](../13_resources/02_glossary.html#data-engineering):
+Now update the project's pipeline in `src/kedro_tutorial/hooks.py` to add the [modular pipeline](../13_resources/02_glossary.md#modular-pipeline) for [data engineering](../13_resources/02_glossary.md#data-engineering-vs-data-science):
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -219,7 +219,7 @@ preprocessed_shuttles:
 The code above declares explicitly that [pandas.CSVDataSet](/kedro.extras.datasets.pandas.CSVDataSet) should be used instead of [`MemoryDataSet`](/kedro.io.MemoryDataSet).
 
 
-The [Data Catalog](../13_resources/02_glossary.html#data-catalog) will take care of saving the datasets automatically (in this case as CSV data) to the path specified next time the pipeline is run. There is no need to change any code in your preprocessing functions to accommodate this change.
+The [Data Catalog](../13_resources/02_glossary.md#data-catalog) will take care of saving the datasets automatically (in this case as CSV data) to the path specified next time the pipeline is run. There is no need to change any code in your preprocessing functions to accommodate this change.
 
 In this tutorial, we chose `pandas.CSVDataSet` for its simplicity, but you can use any other available dataset implementation class, for example, a database table, cloud storage (like [AWS S3](https://aws.amazon.com/s3/), [Azure Blob Storage](https://azure.microsoft.com/en-gb/services/storage/blobs/), etc.) or others. If you cannot find the dataset implementation you need, you can implement your own [custom dataset](../07_extend_kedro/03_custom_datasets.md).
 

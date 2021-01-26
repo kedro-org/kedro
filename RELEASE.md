@@ -12,6 +12,7 @@
 * `kedro pipeline pull` now uses `pip download` for protocols that are not supported by `fsspec`.
 * Cleaned up documentation to fix broken links and rewrite permanently redirected ones.
 * Added a `jsonschema` schema definition for the Kedro 0.17 catalog.
+* Bumped maximum required `sphinx` version to 3.5.
 
 ## Breaking changes to the API
 

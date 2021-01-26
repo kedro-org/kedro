@@ -466,6 +466,7 @@ workflows:
             - linters_37
             - e2e_tests_37
             - docs_37
+            - docs_linkcheck_37
             - unit_tests_38
             - linters_38
             - e2e_tests_38

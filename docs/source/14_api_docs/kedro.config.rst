@@ -5,11 +5,11 @@ kedro.config
 
 .. automodule:: kedro.config
 
-   .. rubric:: Classes
+.. rubric:: Classes
 
-   .. autosummary::
-      :toctree:
-      :template: autosummary/class.rst
+.. autosummary::
+  :toctree:
+  :template: autosummary/class.rst
 
-      kedro.config.ConfigLoader
-      kedro.config.TemplatedConfigLoader
+  kedro.config.ConfigLoader
+  kedro.config.TemplatedConfigLoader

@@ -65,7 +65,7 @@ Then run the following:
 kedro build-reqs
 ```
 
-You can find out more about [how to work with project dependencies](../04_kedro_project_setup/01_dependencies) in the Kedro project documentation. In a [later step of this tutorial](./04_create_pipelines.html#update-dependencies), we will modify project's dependencies to illustrate how, once you have installed project-specific dependencies, you can update them.
+You can find out more about [how to work with project dependencies](../04_kedro_project_setup/01_dependencies.md) in the Kedro project documentation. In a [later step of this tutorial](./04_create_pipelines.md#update-dependencies), we will modify project's dependencies to illustrate how, once you have installed project-specific dependencies, you can update them.
 
 ## `kedro install`
 

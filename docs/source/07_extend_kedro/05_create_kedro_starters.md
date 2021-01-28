@@ -37,18 +37,18 @@ As the creator of the Kedro starter, if you need to ask for additional configura
 
 ### Example Kedro starter
 
-To review an example Kedro starter, clone [`pandas-iris`](https://github.com/quantumblacklabs/kedro-starter-pandas-iris) from Github.
+To review an example Kedro starter, clone [`pandas-iris`](https://github.com/quantumblacklabs/kedro-starters/tree/master/pandas-iris) from Github.
 
 When you create an Iris dataset example project by calling `kedro new`, you supply three configuration variables as the documentation in [Create a new project](../02_get_started/04_new_project.md) describes. These variables are `project_name`, `repo_name` and `python_package` and they are supplied interactively or by means of a configuration file. You can see how these variables are used by inspecting the template:
 
 **`project_name`**
-The human-readable `project-name` variable is used in the [README.md](https://github.com/quantumblacklabs/kedro-starter-pandas-iris/blob/master/README.md) for the new project and within [`run.py`](https://github.com/quantumblacklabs/kedro-starter-pandas-iris/blob/master/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D/run.py).
+The human-readable `project-name` variable is used in the [README.md](https://github.com/quantumblacklabs/kedro-starters/tree/master/pandas-iris/README.md) for the new project and within [`run.py`](https://github.com/quantumblacklabs/kedro-starters/tree/master/pandas-iris/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D/run.py).
 
 **`repo_name`**
-The project structure contains a folder labelled [`{{ cookiecutter.repo_name }}`](https://github.com/quantumblacklabs/kedro-starter-pandas-iris/tree/master/%7B%7B%20cookiecutter.repo_name%20%7D%7D), which forms the top-level folder to contain the Iris dataset example when it is created. The folder storing the example project is represented by `cookiecutter.repo_name`, which is a customisable variable, as you would expect.
+The project structure contains a folder labelled [`{{ cookiecutter.repo_name }}`](https://github.com/quantumblacklabs/kedro-starters/tree/master/pandas-iris/%7B%7B%20cookiecutter.repo_name%20%7D%7D), which forms the top-level folder to contain the Iris dataset example when it is created. The folder storing the example project is represented by `cookiecutter.repo_name`, which is a customisable variable, as you would expect.
 
 **`python_package`**
-Within the parent folder, inside the `src` subfolder, is another configurable variable [{{ cookiecutter.python_package }}](https://github.com/quantumblacklabs/kedro-starter-pandas-iris/tree/master/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D) which contains the source code for the example pipelines.
+Within the parent folder, inside the `src` subfolder, is another configurable variable [{{ cookiecutter.python_package }}](https://github.com/quantumblacklabs/kedro-starters/tree/master/pandas-iris/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D) which contains the source code for the example pipelines.
 
 Here is the layout of the project as a Cookiecutter template:
 

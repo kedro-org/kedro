@@ -20,7 +20,7 @@ kedro new --starter=<path-to-starter>
 To create a project using the `PySpark` starter:
 
 ```bash
-kedro new --starter=https://github.com/quantumblacklabs/kedro-starter-pyspark.git
+kedro new --starter=pyspark
 ```
 
 If no starter is provided to `kedro new`, the default Kedro template will be used, as documented in ["Creating a new project"](./04_new_project.md).
@@ -43,11 +43,11 @@ kedro starter list
 
 The Kedro team maintains the following starters to bootstrap new Kedro projects:
 
-* Alias `mini-kedro`: A minimum setup to use the traditional [Iris dataset](https://www.kaggle.com/uciml/iris) with Kedro's [`DataCatalog`](../05_data/01_data_catalog.md), which is a core component of Kedro. This starter is of use in the exploratory phase of a project. For more information, please read the [Mini-Kedro](../04_kedro_project_setup/04_mini_kedro.md) guide.
-* [Alias `pandas-iris`](https://github.com/quantumblacklabs/kedro-starter-pandas-iris): The [Kedro Iris dataset example project](./05_example_project.md)
-* [Alias `pyspark-iris`](https://github.com/quantumblacklabs/kedro-starter-pyspark-iris): An alternative Kedro Iris dataset example, using [PySpark](../11_tools_integration/01_pyspark.md)
-* [Alias `pyspark`](https://github.com/quantumblacklabs/kedro-starter-pyspark): The configuration and initialisation code for a [Kedro pipeline using PySpark](../11_tools_integration/01_pyspark.md)
-* [Alias `spaceflights`](https://github.com/quantumblacklabs/kedro-starter-spaceflights): The [spaceflights tutorial](../03_tutorial/01_spaceflights_tutorial.md) example code
+* [Alias `mini-kedro`](https://github.com/quantumblacklabs/kedro-starters/tree/master/mini-kedro): A minimum setup to use the traditional [Iris dataset](https://www.kaggle.com/uciml/iris) with Kedro's [`DataCatalog`](../05_data/01_data_catalog.md), which is a core component of Kedro. This starter is of use in the exploratory phase of a project. For more information, please read the [Mini-Kedro](../04_kedro_project_setup/04_mini_kedro.md) guide.
+* [Alias `pandas-iris`](https://github.com/quantumblacklabs/kedro-starters/tree/master/pandas-iris): The [Kedro Iris dataset example project](./05_example_project.md)
+* [Alias `pyspark-iris`](https://github.com/quantumblacklabs/kedro-starters/tree/master/pyspark-iris): An alternative Kedro Iris dataset example, using [PySpark](../11_tools_integration/01_pyspark.md)
+* [Alias `pyspark`](https://github.com/quantumblacklabs/kedro-starters/tree/master/pyspark): The configuration and initialisation code for a [Kedro pipeline using PySpark](../11_tools_integration/01_pyspark.md)
+* [Alias `spaceflights`](https://github.com/quantumblacklabs/kedro-starters/tree/master/spaceflights): The [spaceflights tutorial](../03_tutorial/01_spaceflights_tutorial.md) example code
 
 
 Each starter project encodes our [recommended Kedro best practices](../11_tools_integration/01_pyspark.md).

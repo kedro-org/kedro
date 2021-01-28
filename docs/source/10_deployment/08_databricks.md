@@ -3,7 +3,7 @@
 
 > *Note:* This documentation is based on `Kedro 0.17.0`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
-This tutorial uses the [PySpark Iris Kedro Starter](https://github.com/quantumblacklabs/kedro-starter-pyspark-iris) to illustrate how to bootstrap a Kedro project using Spark and deploy it to a [Databricks cluster on AWS](https://databricks.com/aws). It is split into 2 sections:
+This tutorial uses the [PySpark Iris Kedro Starter](https://github.com/quantumblacklabs/kedro-starters/tree/master/pyspark-iris) to illustrate how to bootstrap a Kedro project using Spark and deploy it to a [Databricks cluster on AWS](https://databricks.com/aws). It is split into 2 sections:
 
 * [Databricks Connect workflow](#run-the-kedro-project-with-databricks-connect) (recommended)
 * [Databricks Notebook workflow](#run-kedro-project-from-a-databricks-notebook) (the setup of this is more involved)

@@ -14,7 +14,7 @@ However, you may prefer to get up and running more swiftly so we provide the ful
 kedro new --starter=spaceflights
 ```
 
-This will generate a project from the [Kedro starter for the spaceflights tutorial](https://github.com/quantumblacklabs/kedro-starter-spaceflights) so you can follow the tutorial without any of the copy/pasting.
+This will generate a project from the [Kedro starter for the spaceflights tutorial](https://github.com/quantumblacklabs/kedro-starters/tree/master/spaceflights) so you can follow the tutorial without any of the copy/pasting.
 
 ## Kedro project development workflow
 

@@ -101,7 +101,7 @@ pandas_require = {
     "pandas.GBQTableDataSet": [PANDAS, "pandas-gbq>=0.12.0, <1.0"],
     "pandas.HDFDataSet": [PANDAS, "tables~=3.6"],
     "pandas.JSONDataSet": [PANDAS],
-    "pandas.ParquetDataSet": [PANDAS, "pyarrow>=0.12.0, <1.0.0"],
+    "pandas.ParquetDataSet": [PANDAS, "pyarrow>=0.12.0, <3.0"],
     "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy~=1.2"],
 }
 pillow_require = {"pillow.ImageDataSet": ["Pillow~=7.1.2"]}

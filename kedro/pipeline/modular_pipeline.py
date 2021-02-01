@@ -27,7 +27,7 @@
 # limitations under the License.
 """Helper to integrate modular pipelines into a master pipeline."""
 import copy
-from typing import AbstractSet, Dict, List, Union
+from typing import AbstractSet, Dict, List, Set, Union
 
 from kedro.pipeline.node import Node
 from kedro.pipeline.pipeline import (
@@ -99,8 +99,8 @@ def _validate_datasets_exist(
 def pipeline(
     pipe: Pipeline,
     *,
-    inputs: Dict[str, str] = None,
-    outputs: Dict[str, str] = None,
+    inputs: Union[str, Set[str], Dict[str, str]] = None,
+    outputs: Union[str, Set[str], Dict[str, str]] = None,
     parameters: Dict[str, str] = None,
     namespace: str = None,
 ) -> Pipeline:
@@ -109,11 +109,21 @@ def pipeline(
 
     Args:
         pipe: Original modular pipeline to integrate
-        inputs: A map of the existing input name to the new one.
+        inputs: A name or collection of input names to be exposed as connection points
+            to other pipelines upstream.
+            When str or Set[str] is provided, the listed input names will stay
+            the same as they are named in the provided pipeline.
+            When Dict[str, str] is provided, current input names will be
+            mapped to new names.
             Must only refer to the pipeline's free inputs.
-        outputs: A map of the existing output name to the new one.
-            Can refer to both the pipeline's free outputs, as well
-            as intermediate results that need to be exposed.
+        outputs: A name or collection of names to be exposed as connection points
+            to other pipelines downstream.
+            When str or Set[str] is provided, the listed output names will stay
+            the same as they are named in the provided pipeline.
+            When Dict[str, str] is provided, current output names will be
+            mapped to new names.
+            Can refer to both the pipeline's free outputs, as well as
+            intermediate results that need to be exposed.
         parameters: A map of existing parameter to the new one.
         namespace: A prefix to give to all dataset names,
             except those explicitly named with the `inputs`/`outputs`
@@ -129,9 +139,9 @@ def pipeline(
         A new ``Pipeline`` object with the new nodes, modified as requested.
     """
     # pylint: disable=protected-access
-    inputs = copy.deepcopy(inputs) or {}
-    outputs = copy.deepcopy(outputs) or {}
-    parameters = copy.deepcopy(parameters) or {}
+    inputs = _to_dict(inputs)
+    outputs = _to_dict(outputs)
+    parameters = _to_dict(parameters)
 
     _validate_datasets_exist(inputs.keys(), outputs.keys(), parameters.keys(), pipe)
     _validate_inputs_outputs(inputs.keys(), outputs.keys(), pipe)
@@ -200,3 +210,13 @@ def pipeline(
     new_nodes = [_copy_node(n) for n in pipe.nodes]
 
     return Pipeline(new_nodes)
+
+
+def _to_dict(element: Union[None, str, Set[str], Dict[str, str]]) -> Dict[str, str]:
+    if element is None:
+        return {}
+    if isinstance(element, str):
+        return {element: element}
+    if isinstance(element, dict):
+        return copy.deepcopy(element)
+    return {item: item for item in element}

@@ -116,6 +116,31 @@ class TestPipelineHelper:
         assert resulting_pipeline.nodes[0]._inputs == ["C_new", "PREFIX.D"]
         assert resulting_pipeline.nodes[0]._outputs == ["E_new", "PREFIX.F"]
 
+    @pytest.mark.parametrize(
+        "inputs,outputs",
+        [("A", "D"), (["A"], ["D"]), ({"A"}, {"D"}), ({"A": "A"}, {"D": "D"})],
+    )
+    def test_prefix_exclude_free_inputs(self, inputs, outputs):
+        raw_pipeline = Pipeline(
+            [
+                node(identity, "A", "B", name="node1"),
+                node(identity, "B", "C", name="node2"),
+                node(identity, "C", "D", name="node3"),
+            ]
+        )
+        resulting_pipeline = pipeline(
+            raw_pipeline, inputs=inputs, outputs=outputs, namespace="PREFIX"
+        )
+        nodes = sorted(resulting_pipeline.nodes)
+        assert nodes[0]._inputs == "A"
+        assert nodes[0]._outputs == "PREFIX.B"
+
+        assert nodes[1]._inputs == "PREFIX.B"
+        assert nodes[1]._outputs == "PREFIX.C"
+
+        assert nodes[2]._inputs == "PREFIX.C"
+        assert nodes[2]._outputs == "D"
+
     def test_transform_params_prefix_and_parameters(self):
         """
         Test that transform should skip `params:` and `parameters`: str, list and dict.

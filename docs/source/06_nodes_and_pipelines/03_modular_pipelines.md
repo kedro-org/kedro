@@ -334,13 +334,13 @@ Here is a solution that uses a namespace:
 ```python
 cook_breakfast_pipeline = pipeline(
     cook_pipeline,
-    inputs={"frozen_meat": "frozen_meat"},  # inputs stay the same, don't namespace
+    inputs="frozen_meat",  # inputs stay the same, don't namespace
     outputs={"grilled_meat": "breakfast_food"},
     namespace="breakfast"
 )
 cook_lunch_pipeline = pipeline(
     cook_pipeline,
-    inputs={"frozen_meat": "frozen_meat"},  # inputs stay the same, don't namespace
+    inputs="frozen_meat",  # inputs stay the same, don't namespace
     outputs={"grilled_meat": "lunch_food"},
     namespace="lunch"
 )
@@ -353,9 +353,9 @@ final_pipeline = (
 )
 ```
 
-`namespace="lunch"` renames all datasets and nodes, prefixing them with `"lunch."`, except those datasets that we rename explicitly in the mapping (i.e `grilled_meat`, `frozen_meat`).
+`namespace="lunch"` renames all datasets and nodes, prefixing them with `"lunch."`, except those datasets that we explicitly "freeze" (`frozen_meant`) or remap (`grilled_meat`).
 
-Renaming free outputs is required since "breakfast_food" and "lunch_food" are the names expected by the `eat_breakfast_pipeline` and `eat_lunch_pipeline` respectively.
+Remapping free outputs is required since "breakfast_food" and "lunch_food" are the names expected by the `eat_breakfast_pipeline` and `eat_lunch_pipeline` respectively.
 
 The resulting pipeline now has two separate nodes, `breakfast.defrost_node` and `lunch.defrost_node`. Also two separate datasets `breakfast.meat` and `lunch.meat` connect the nodes inside the pipelines, causing no confusion between them.
 
@@ -380,7 +380,7 @@ alpha_pipeline = Pipeline([
 ])
 beta_pipeline = pipeline(
     alpha_pipeline,
-    inputs={"input1": "input1", "input2": "input2"},
+    inputs={"input1", "input2"},
     parameters={"params:alpha": "params:beta"},
     namespace="beta"
 )

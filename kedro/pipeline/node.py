@@ -707,7 +707,7 @@ def _dict_inputs_to_list(func: Callable[[Any], Any], inputs: Dict[str, str]):
     return [*sig.args, *sig.kwargs.values()]
 
 
-def _to_list(element: Union[None, str, Iterable[str], Dict[str, str]]) -> List:
+def _to_list(element: Union[None, str, Iterable[str], Dict[str, str]]) -> List[str]:
     """Make a list out of node inputs/outputs.
 
     Returns:

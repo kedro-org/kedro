@@ -2,6 +2,7 @@
 
 ## Major features and improvements
 * Added `env` and `extra_params` to `reload_kedro()` line magic.
+* Extended the `pipeline()` API to allow strings and sets of strings as `inputs` and `outputs`, to specify when a dataset name remains the same (not namespaced).
 
 ## Bug fixes and other changes
 * The version of a packaged modular pipeline now defaults to the version of the project package.

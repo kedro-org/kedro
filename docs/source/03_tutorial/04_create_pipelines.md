@@ -568,15 +568,23 @@ kedro run
 
 ## Kedro runners
 
-There are two different Kedro runners that can run the pipeline:
+There are three different Kedro runners that can run the pipeline:
 
 * `SequentialRunner` - runs your nodes sequentially; once a node has completed its task then the next one starts.
 * `ParallelRunner` - runs your nodes in parallel; independent nodes are able to run at the same time, which is more efficient when there are independent branches in your pipeline and allows you to take advantage of multiple CPU cores.
+* `ThreadRunner` - runs your nodes in parallel, similarly to `ParallelRunner`, but uses multithreading instead of multiprocessing.
 
 By default, Kedro uses a `SequentialRunner`, which is instantiated when you execute `kedro run` from the command line. If you decide to use `ParallelRunner`, provide an additional flag when running the pipeline from the command line:
 
 ```bash
 kedro run --parallel
+```
+
+If you want to run using `ThreadRunner` or a custom runner, you can do so by running:
+
+```bash
+kedro run --runner=ThreadRunner
+kedro run --runner=module.path.to.my.runner
 ```
 
 > *Note:* `ParallelRunner` performs task parallelisation, which is different from data parallelisation as seen in PySpark.

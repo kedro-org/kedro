@@ -103,7 +103,7 @@ reviews:
 To check whether Kedro can load the data correctly, open a `kedro ipython` session and run:
 
 ```python
-context.catalog.load("companies").head()
+catalog.load("companies").head()
 ```
 
 The command loads the dataset named `companies` (as per top-level key in `catalog.yml`), from the underlying filepath `data/01_raw/companies.csv`. It displays the first five rows of the dataset, and is loaded into a `pandas` DataFrame for you to experiment with the data.
@@ -124,10 +124,10 @@ shuttles:
   filepath: data/01_raw/shuttles.xlsx
 ```
 
-To test that everything works as expected, load the dataset within a new `kedro ipython` session:
+To test that everything works as expected, load the dataset within a _new_ `kedro ipython` session:
 
 ```python
-context.catalog.load("shuttles").head()
+catalog.load("shuttles").head()
 ```
 When you have finished, close `ipython` session as follows:
 

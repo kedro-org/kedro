@@ -125,7 +125,7 @@ extras_require = {
     "dask": _collect_requirements(dask_require),
     "docs": [
         "sphinx~=3.4.3",
-        "sphinx_rtd_theme==0.5.1",
+        "sphinx_rtd_theme==0.4.1",
         "nbsphinx==0.8.1",
         "nbstripout==0.3.3",
         "recommonmark==0.7.1",

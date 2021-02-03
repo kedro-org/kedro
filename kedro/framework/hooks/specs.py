@@ -327,8 +327,15 @@ class RegistrationSpecs:
         pass
 
     @hook_spec(firstresult=True)
-    def register_config_loader(self, conf_paths: Iterable[str]) -> ConfigLoader:
+    def register_config_loader(
+        self, conf_paths: Iterable[str], env: str, extra_params: Dict[str, Any]
+    ) -> ConfigLoader:
         """Hook to be invoked to register a project's config loader.
+
+        Args:
+            conf_paths: the paths to the conf directory to be supplied to the config loader
+            env: the environment with which the config loader will be instantiated
+            extra_params: the extra parameters passed to a Kedro run
 
         Returns:
             An instance of a ``ConfigLoader``.

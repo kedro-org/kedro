@@ -363,8 +363,13 @@ class LoggingHooks:
         return {"__default__": CONTEXT_PIPELINE, "de": CONTEXT_PIPELINE}
 
     @hook_impl
-    def register_config_loader(self, conf_paths: Iterable[str]) -> ConfigLoader:
-        self.logger.info("Registering config loader", extra={"conf_paths": conf_paths})
+    def register_config_loader(
+        self, conf_paths: Iterable[str], env: str, extra_params: Dict[str, Any]
+    ) -> ConfigLoader:
+        self.logger.info(
+            "Registering config loader",
+            extra={"conf_paths": conf_paths, "env": env, "extra_params": extra_params},
+        )
         return ConfigLoader(conf_paths)
 
     @hook_impl
@@ -499,7 +504,9 @@ def mock_session_with_hooks(
     tmp_path, mock_settings_import, logging_hooks
 ):  # pylint: disable=unused-argument
     logging_hooks.queue_listener.start()
-    yield KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
+    yield KedroSession.create(
+        MOCK_PACKAGE_NAME, tmp_path, extra_params={"params:key": "value"}
+    )
     logging_hooks.queue_listener.stop()
 
 
@@ -1093,6 +1100,8 @@ class TestRegistrationHooks:
             str(context.project_path / conf_root / "local"),
         ]
         assert record.conf_paths == expected_conf_paths
+        assert record.env == context.env
+        assert record.extra_params == {"params:key": "value"}
 
     def test_register_catalog_is_called(self, mock_session_with_hooks, caplog):
         context = mock_session_with_hooks.load_context()

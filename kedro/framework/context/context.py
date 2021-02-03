@@ -405,7 +405,7 @@ class KedroContext:
         ]
         hook_manager = get_hook_manager()
         config_loader = hook_manager.hook.register_config_loader(  # pylint: disable=no-member
-            conf_paths=conf_paths
+            conf_paths=conf_paths, env=self.env, extra_params=self._extra_params,
         )
         if not isinstance(config_loader, ConfigLoader):
             raise KedroContextError(

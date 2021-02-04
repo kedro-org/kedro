@@ -373,10 +373,12 @@ jobs:
           name: Set HDF5_DISABLE_VERSION_CHECK environment variable
           command: setx /m HDF5_DISABLE_VERSION_CHECK 1
       - run:
-          name: Run unit tests without Spark
+          name: Run unit tests without Spark and TensorFlow
+          # Run `test_parallel_runner.py` separately because of `Windows fatal exception: stack overflow`
           command: |
             conda activate kedro_builder
-            pytest .\tests --ignore .\tests\extras\datasets\spark --ignore .\tests\extras\datasets\tensorflow --no-cov
+            pytest .\tests --ignore .\tests\extras\datasets\spark --ignore .\tests\extras\datasets\tensorflow --ignore .\tests\runner\test_parallel_runner.py --no-cov
+            if ($?) { pytest .\tests\runner\test_parallel_runner.py --no-cov }
 
   win_e2e_tests_36:
     executor:
@@ -478,8 +480,7 @@ workflows:
             - win_pip_compile_38
             - win_unit_tests_36
             - win_unit_tests_37
-            # Skipped due to Windows fatal exception: stack overflow
-            # - win_unit_tests_38
+            - win_unit_tests_38
             - win_e2e_tests_36
             - win_e2e_tests_37
             - win_e2e_tests_38

@@ -14,6 +14,7 @@
 * Cleaned up documentation to fix broken links and rewrite permanently redirected ones.
 * Added a `jsonschema` schema definition for the Kedro 0.17 catalog.
 * Bumped up maximum required versions for the following packages: `sphinx` (3.5), `pyarrow` (3.0).
+* Added `blacken-docs` pre-commit linter to ensure all snippets in the documentation are `black`ed.
 
 ## Breaking changes to the API
 

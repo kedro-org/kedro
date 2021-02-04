@@ -86,7 +86,8 @@ Next, you need to update `TransformerHooks` to apply your custom transformer. Ad
 
 ```python
 ...
-from .memory_profile import ProfileMemoryTransformer # new import
+from .memory_profile import ProfileMemoryTransformer  # new import
+
 
 class TransformerHooks:
     @hook_impl

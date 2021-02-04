@@ -118,6 +118,7 @@ from typing import Iterable
 from kedro.config import TemplatedConfigLoader
 from kedro.framework.hooks import hook_impl
 
+
 class ProjectHooks:
     # <other hooks>
 
@@ -150,18 +151,19 @@ from sklearn.linear_model import LinearRegression
 
 # <other node functions>
 
+
 def train_model_sagemaker(
     X_train_path: str, sklearn_estimator_kwargs: Dict[str, Any]
 ) -> str:
     """Train the linear regression model on SageMaker.
 
-        Args:
-            X_train_path: Full S3 path to `X_train` dataset.
-            sklearn_estimator_kwargs: Keyword arguments that will be used
-                to instantiate SKLearn estimator.
+    Args:
+        X_train_path: Full S3 path to `X_train` dataset.
+        sklearn_estimator_kwargs: Keyword arguments that will be used
+            to instantiate SKLearn estimator.
 
-        Returns:
-            Full S3 path to `model.tar.gz` file containing the model artifact.
+    Returns:
+        Full S3 path to `model.tar.gz` file containing the model artifact.
 
     """
     sklearn_estimator = SKLearn(**sklearn_estimator_kwargs)
@@ -242,7 +244,6 @@ def create_pipeline(**kwargs):
             ),
         ]
     )
-
 ```
 </details>
 
@@ -314,7 +315,6 @@ def main():
 if __name__ == "__main__":
     # SageMaker will run this script as the main program
     main()
-
 ```
 </details>
 

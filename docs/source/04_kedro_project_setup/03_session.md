@@ -45,6 +45,7 @@ When you want to access to the most recent session object, use a helper function
 
 ```python
 from kedro.framework.session import get_current_session
+
 session = get_current_session()
 context = session.load_context()
 context.catalog.load("my_data").head()

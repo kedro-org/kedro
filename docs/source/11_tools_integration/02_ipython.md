@@ -212,7 +212,9 @@ def reload_kedro(project_path, line=None):
         context = session.load_context()
         parameters = context.params
         # ...
-        logging.info("Defined global variable `context`, `session`, `catalog` and `parameters`")
+        logging.info(
+            "Defined global variable `context`, `session`, `catalog` and `parameters`"
+        )
     except:
         pass
 ```

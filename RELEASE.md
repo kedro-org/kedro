@@ -437,7 +437,7 @@ As an example, code that used to look like this with the `Pipeline.transform()` 
 ```python
 result = my_pipeline.transform(
     datasets={"input": "new_input", "output": "new_output", "params:x": "params:y"},
-    prefix="pre"
+    prefix="pre",
 )
 ```
 
@@ -450,7 +450,7 @@ result = pipeline(
     inputs={"input": "new_input"},
     outputs={"output": "new_output"},
     parameters={"params:x": "params:y"},
-    namespace="pre"
+    namespace="pre",
 )
 ```
 

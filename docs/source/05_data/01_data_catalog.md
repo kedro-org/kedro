@@ -342,7 +342,12 @@ In the example above `catalog.yml` contains references to credentials keys `dev_
 ```python
 CSVDataSet(
     filepath="s3://test_bucket/data/02_intermediate/company/motorbikes.csv",
-    load_args=dict(sep=",", skiprows=5, skipfooter=1, na_values=["#NA", "NA"],),
+    load_args=dict(
+        sep=",",
+        skiprows=5,
+        skipfooter=1,
+        na_values=["#NA", "NA"],
+    ),
     credentials=dict(key="token", secret="key"),
 )
 ```
@@ -465,16 +470,15 @@ Transformers are applied at the `DataCatalog` level. To apply the built-in `Prof
 ```python
 # src/<package_name>/hooks.py
 
-from kedro.extras.transformers import ProfileTimeTransformer # new import
-from kedro.framework.hooks import hook_impl # new import
-from kedro.io import DataCatalog # new import
+from kedro.extras.transformers import ProfileTimeTransformer  # new import
+from kedro.framework.hooks import hook_impl  # new import
+from kedro.io import DataCatalog  # new import
 
 
 class TransformerHooks:
     @hook_impl
     def after_catalog_created(self, catalog: DataCatalog) -> None:
         catalog.add_transformer(ProfileTimeTransformer())
-
 ```
 
 ```python
@@ -557,9 +561,7 @@ from kedro.extras.datasets.pandas import (
 io = DataCatalog(
     {
         "bikes": CSVDataSet(filepath="../data/01_raw/bikes.csv"),
-        "cars": CSVDataSet(
-            filepath="../data/01_raw/cars.csv", load_args=dict(sep=",")
-        ),
+        "cars": CSVDataSet(filepath="../data/01_raw/cars.csv", load_args=dict(sep=",")),
         "cars_table": SQLTableDataSet(
             table_name="cars", credentials=dict(con="sqlite:///kedro.db")
         ),

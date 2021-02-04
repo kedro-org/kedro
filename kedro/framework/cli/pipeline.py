@@ -98,7 +98,7 @@ def pipeline():
 def create_pipeline(
     metadata: ProjectMetadata, name, skip_config, env, **kwargs
 ):  # pylint: disable=unused-argument
-    """Create a new modular pipeline by providing the new pipeline name as an argument."""
+    """Create a new modular pipeline by providing a name."""
     package_dir = metadata.source_dir / metadata.package_name
     conf_root = _get_project_settings(metadata.package_name, "CONF_ROOT", "conf")
     project_conf_path = metadata.project_path / conf_root
@@ -134,7 +134,7 @@ def create_pipeline(
 def delete_pipeline(
     metadata: ProjectMetadata, name, env, yes, **kwargs
 ):  # pylint: disable=unused-argument
-    """Delete a modular pipeline by providing the pipeline name as an argument."""
+    """Delete a modular pipeline by providing a name."""
     package_dir = metadata.source_dir / metadata.package_name
     conf_root = _get_project_settings(metadata.package_name, "CONF_ROOT", "conf")
     project_conf_path = metadata.project_path / conf_root
@@ -202,7 +202,7 @@ def list_pipelines(metadata: ProjectMetadata, env):
 def describe_pipeline(
     metadata: ProjectMetadata, name, env, **kwargs
 ):  # pylint: disable=unused-argument
-    """Describe a pipeline by providing the pipeline name as an argument."""
+    """Describe a pipeline by providing a pipeline name."""
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
     pipeline_obj = context.pipelines.get(name)
@@ -246,8 +246,7 @@ def describe_pipeline(
 def pull_package(
     metadata: ProjectMetadata, package_path, env, alias, fs_args, **kwargs
 ):  # pylint:disable=unused-argument
-    """Pull a modular pipeline package, unpack it and install the files to corresponding
-    locations.
+    """Pull and unpack a modular pipeline in your project.
     """
 
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -297,8 +296,7 @@ def pull_package(
 def package_pipeline(
     metadata: ProjectMetadata, name, env, alias, destination, version
 ):  # pylint: disable=too-many-arguments
-    """Package up a pipeline for easy distribution. A .whl file
-    will be created in a `<source_dir>/dist/`."""
+    """Package up a modular pipeline as a Python .whl."""
     result_path = _package_pipeline(
         name, metadata, alias=alias, destination=destination, env=env, version=version
     )

@@ -1,0 +1,21 @@
+project_name:
+  title: "Project Name:"
+  text: |
+    Please enter a human readable name for your new project.
+    Spaces and punctuation are allowed.
+  default: New Kedro Project
+
+repo_name:
+  title: "Repository Name:"
+  text: |
+    Please enter a directory name for your new project repository.
+    Alphanumeric characters, hyphens and underscores are allowed.
+    Lowercase is recommended.
+
+custom:
+  title: "Python Package Name:"
+  text: |
+    Please enter a valid Python package name for your project package.
+    Alphanumeric characters and underscores are allowed.
+    Lowercase is recommended. Package name must start with a letter
+    or underscore.

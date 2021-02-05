@@ -28,6 +28,7 @@
 
 """A collection of CLI commands for working with Kedro pipelines."""
 import json
+import re
 import shutil
 import sys
 import tempfile
@@ -42,7 +43,6 @@ import yaml
 from setuptools.dist import Distribution
 
 import kedro
-from kedro.framework.cli.cli import _assert_pkg_name_ok
 from kedro.framework.cli.utils import (
     KedroCliError,
     _clean_pycache,
@@ -73,6 +73,30 @@ PipelineArtifacts = NamedTuple(
     "PipelineArtifacts",
     [("pipeline_dir", Path), ("pipeline_tests", Path), ("pipeline_conf", Path)],
 )
+
+
+def _assert_pkg_name_ok(pkg_name: str):
+    """Check that python package name is in line with PEP8 requirements.
+
+    Args:
+        pkg_name: Candidate Python package name.
+
+    Raises:
+        KedroCliError: If package name violates the requirements.
+    """
+
+    base_message = f"`{pkg_name}` is not a valid Python package name."
+    if not re.match(r"^[a-zA-Z_]", pkg_name):
+        message = base_message + " It must start with a letter or underscore."
+        raise KedroCliError(message)
+    if len(pkg_name) < 2:
+        message = base_message + " It must be at least 2 characters long."
+        raise KedroCliError(message)
+    if not re.match(r"^\w+$", pkg_name[1:]):
+        message = (
+            base_message + " It must contain only letters, digits, and/or underscores."
+        )
+        raise KedroCliError(message)
 
 
 def _check_pipeline_name(ctx, param, value):  # pylint: disable=unused-argument

@@ -21,19 +21,32 @@ You then need to decide which are:
 
 ## Configuration variables
 
-By default, when you create a new project using a Kedro starter, `kedro new` launches in interactive mode. The user is prompted for just three variables, which we have seen used in the previous example. No additional configuration information can be submitted at the time the project is created:
+By default, when you create a new project using a Kedro starter, `kedro new` launches in interactive mode. The user is then prompted for the variables that have been set in `starter_config.yml`.
 
+The most basic and empty starter triggered by `kedro new` is set up with the following three variables:
 * `project_name` - A human readable name for the new project
 * `repo_name` - A name for the directory that holds the project repository
-* `python_package` - A Python package name for the project package (see [Python package naming conventions](https://www.python.org/dev/peps/pep-0008/#package-and-module-names)
+* `python_package` - A Python package name for the project package (see [Python package naming conventions](https://www.python.org/dev/peps/pep-0008/#package-and-module-names))
 
-Kedro also allows you to [specify a configuration file](../02_get_started/04_new_project.md) to create a project, which means that additional variables can be passed in. This is not the default way to use `kedro new`, so an additional `--config` flag is needed:
+See the configuration for this basic configuration in [the default starter setup](https://github.com/quantumblacklabs/private-kedro/blob/master/kedro/templates/project/starter_config.yml).
 
-```bash
-kedro new --config=my_config.yml --starter=<path-to-starter>
+As the creator of the Kedro starter you can customise the prompts triggered by `kedro new` by adding your own prompts in `starter_config.yml`. This is an example of a custom prompt:
+
+```yaml
+custom_prompt:
+    title: "Prompt title:"
+    text: |
+      Prompt description that explains to the user what
+      information they should provide.
+    default: An optional default value
 ```
 
-As the creator of the Kedro starter, if you need to ask for additional configuration variables, you will need to explain to your users that they must specify them in a file and use the file when they create a new project.
+Both the prompt `title` and `text` must be provided for the prompt to be valid. The `default` field is optional.
+
+If the input to the prompts needs to be validated, for example to make sure it only has alphanumeric characters, you should add [cookiecutter hook validation](https://cookiecutter.readthedocs.io/en/1.7.2/advanced/hooks.html#example-validating-template-variables).
+See [the `pre_gen_project.py` file](https://github.com/quantumblacklabs/private-kedro/blob/master/kedro/templates/project/hooks/pre_gen_project.py) for the default empty starter as an example.
+
+If you want cookiecutter to provide sensible defaults in case a user doesn't provide any input, you can add those to `cookiecutter.json`. See the default starter [`cookiecutter.json`](https://github.com/quantumblacklabs/private-kedro/blob/master/kedro/templates/project/cookiecutter.json) as example.
 
 ### Example Kedro starter
 

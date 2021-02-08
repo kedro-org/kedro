@@ -411,7 +411,11 @@ S3_DATASET_DEFINITION = [
 def mocked_s3_bucket():
     """Create a bucket for testing using moto."""
     with mock_s3():
-        conn = boto3.client("s3")
+        conn = boto3.client(
+            "s3",
+            aws_access_key_id="fake_access_key",
+            aws_secret_access_key="fake_secret_key",
+        )
         conn.create_bucket(Bucket=BUCKET_NAME)
         yield conn
 

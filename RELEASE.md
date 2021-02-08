@@ -3,6 +3,7 @@
 ## Major features and improvements
 * Added `env` and `extra_params` to `reload_kedro()` line magic.
 * Extended the `pipeline()` API to allow strings and sets of strings as `inputs` and `outputs`, to specify when a dataset name remains the same (not namespaced).
+* Added the ability to add custom prompts for starters by repurposing `default_config.yml` as `starter_config.yml`.
 
 ## Bug fixes and other changes
 * The version of a packaged modular pipeline now defaults to the version of the project package.
@@ -15,6 +16,7 @@
 * Added a `jsonschema` schema definition for the Kedro 0.17 catalog.
 * Bumped up maximum required versions for the following packages: `sphinx` (3.5), `pyarrow` (3.0).
 * Added `blacken-docs` pre-commit linter to ensure all snippets in the documentation are `black`ed.
+* `kedro install` now waits on Windows until all the requirements are installed.
 
 ## Breaking changes to the API
 

@@ -32,13 +32,13 @@ This module implements commands available from the kedro CLI.
 """
 import importlib
 import os
-import re
+import tempfile
 import warnings
 import webbrowser
 from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Callable, Dict, List
+from typing import Any, Dict, List
 
 import click
 import git
@@ -263,7 +263,7 @@ def _create_project(
     template_path: Path = TEMPLATE_PATH,
     checkout: str = None,
     directory: str = None,
-):
+):  # pylint: disable=too-many-locals
     """Implementation of the kedro new cli command.
 
     Args:
@@ -287,18 +287,34 @@ def _create_project(
         # pylint: disable=import-outside-toplevel
         from cookiecutter.exceptions import RepositoryCloneFailed, RepositoryNotFound
         from cookiecutter.main import cookiecutter  # for performance reasons
+        from cookiecutter.repository import determine_repo_dir
 
+    config: Dict[str, str] = dict()
     try:
         if config_path:
             config = _parse_config(config_path)
             config = _check_config_ok(config_path, config)
         else:
-            config = _get_config_from_prompts()
+            with tempfile.TemporaryDirectory() as tmpdir:
+                temp_dir_path = Path(tmpdir).resolve()
+                repo, _ = determine_repo_dir(
+                    template=str(template_path),
+                    abbreviations=dict(),
+                    clone_to_dir=temp_dir_path,
+                    checkout=checkout,
+                    no_input=True,
+                    directory=directory,
+                )
+                config_yml = temp_dir_path / repo / "starter_config.yml"
+                if config_yml.is_file():
+                    with open(config_yml) as config_file:
+                        prompts = yaml.safe_load(config_file)
+                    config = _get_config_from_starter_prompts(prompts)
         config.setdefault("kedro_version", version)
 
         checkout = checkout or version
         cookiecutter_args = dict(
-            output_dir=config["output_dir"],
+            output_dir=config.get("output_dir", str(Path.cwd().resolve())),
             no_input=True,
             extra_context=config,
             checkout=checkout,
@@ -343,15 +359,12 @@ def _get_available_tags(template_path: str) -> List:
     return sorted(unique_tags)
 
 
-def _get_user_input(
-    text: str, default: Any = None, check_input: Callable = None
-) -> Any:
+def _get_user_input(text: str, default: Any = None) -> Any:
     """Get user input and validate it.
 
     Args:
         text: Text to display in command line prompt.
         default: Default value for the input.
-        check_input: Function to apply to check user input.
 
     Returns:
         Processed user value.
@@ -359,71 +372,24 @@ def _get_user_input(
     """
 
     while True:
-        value = click.prompt(text, default=default)
-        if check_input:
-            try:
-                check_input(value)
-            except KedroCliError as exc:
-                click.secho(str(exc), fg="red", err=True)
-                continue
-        return value
+        return click.prompt(text, default=default)
 
 
-def _get_config_from_prompts() -> Dict:
-    """Ask user to provide necessary inputs.
-
-    Returns:
-        Resulting config dictionary.
-
-    """
-
-    # set output directory to the current directory
-    output_dir = os.path.abspath(os.path.curdir)
-
-    # get project name
-    project_name_prompt = _get_prompt_text(
-        "Project Name:",
-        "Please enter a human readable name for your new project.",
-        "Spaces and punctuation are allowed.",
-        start="",
-    )
-
-    project_name = _get_user_input(project_name_prompt, default="New Kedro Project")
-
-    normalized_project_name = re.sub(r"[^\w-]+", "-", project_name).lower().strip("-")
-
-    # get repo name
-    repo_name_prompt = _get_prompt_text(
-        "Repository Name:",
-        "Please enter a directory name for your new project repository.",
-        "Alphanumeric characters, hyphens and underscores are allowed.",
-        "Lowercase is recommended.",
-    )
-    repo_name = _get_user_input(
-        repo_name_prompt,
-        default=normalized_project_name,
-        check_input=_assert_repo_name_ok,
-    )
-
-    # get python package_name
-    default_pkg_name = normalized_project_name.replace("-", "_")
-    pkg_name_prompt = _get_prompt_text(
-        "Python Package Name:",
-        "Please enter a valid Python package name for your project package.",
-        "Alphanumeric characters and underscores are allowed.",
-        "Lowercase is recommended. Package name must start with a letter "
-        "or underscore.",
-    )
-    python_package = _get_user_input(
-        pkg_name_prompt, default=default_pkg_name, check_input=_assert_pkg_name_ok
-    )
-
-    return {
-        "output_dir": output_dir,
-        "project_name": project_name,
-        "repo_name": repo_name,
-        "python_package": python_package,
-    }
+def _get_config_from_starter_prompts(starter_prompts):
+    config = dict()
+    config["output_dir"] = str(Path.cwd().resolve())
+    for key, value in starter_prompts.items():
+        try:
+            prompt = _get_prompt_text(value["title"], value["text"])
+        except KeyError as exc:
+            raise KedroCliError(
+                "Each prompt must have both a title and text field to be valid."
+            ) from exc
+        default = value.get("default", "")
+        response = _get_user_input(text=prompt, default=default)
+        if response:
+            config[key] = response
+    return config
 
 
 def _parse_config(config_path: str) -> Dict:
@@ -474,7 +440,9 @@ def _check_config_ok(config_path: str, config: Dict[str, Any]) -> Dict[str, Any]
         _show_example_config()
         raise KedroCliError(config_path + " is empty")
 
-    missing_keys = _get_default_config().keys() - config.keys()
+    mandatory_keys = set(_get_starter_config().keys())
+    mandatory_keys.add("output_dir")
+    missing_keys = mandatory_keys - set(config.keys())
 
     if missing_keys:
         click.echo(f"\n{config_path}:")
@@ -486,15 +454,13 @@ def _check_config_ok(config_path: str, config: Dict[str, Any]) -> Dict[str, Any]
 
     config["output_dir"] = _fix_user_path(config["output_dir"])
     _assert_output_dir_ok(config["output_dir"])
-    _assert_repo_name_ok(config["repo_name"])
-    _assert_pkg_name_ok(config["python_package"])
     return config
 
 
-def _get_default_config():
-    default_config_path = TEMPLATE_PATH / "default_config.yml"
-    with default_config_path.open() as default_config_file:
-        return yaml.safe_load(default_config_file)
+def _get_starter_config():
+    starter_config_path = TEMPLATE_PATH / "starter_config.yml"
+    with starter_config_path.open() as starter_config_file:
+        return yaml.safe_load(starter_config_file)
 
 
 def _assert_output_dir_ok(output_dir: str):
@@ -516,40 +482,6 @@ def _assert_output_dir_ok(output_dir: str):
         raise KedroCliError(message)
 
 
-def _assert_pkg_name_ok(pkg_name: str):
-    """Check that python package name is in line with PEP8 requirements.
-
-    Args:
-        pkg_name: Candidate Python package name.
-
-    Raises:
-        KedroCliError: If package name violates the requirements.
-    """
-
-    base_message = f"`{pkg_name}` is not a valid Python package name."
-    if not re.match(r"^[a-zA-Z_]", pkg_name):
-        message = base_message + " It must start with a letter or underscore."
-        raise KedroCliError(message)
-    if len(pkg_name) < 2:
-        message = base_message + " It must be at least 2 characters long."
-        raise KedroCliError(message)
-    if not re.match(r"^\w+$", pkg_name[1:]):
-        message = (
-            base_message + " It must contain only letters, digits, and/or underscores."
-        )
-        raise KedroCliError(message)
-
-
-def _assert_repo_name_ok(repo_name):
-    if not re.match(r"^\w+(-*\w+)*$", repo_name):
-        message = (
-            f"`{repo_name}` is not a valid repository name. It must contain "
-            f"only word symbols and/or hyphens, must also start and "
-            f"end with alphanumeric symbol."
-        )
-        raise KedroCliError(message)
-
-
 def _fix_user_path(output_dir):
     output_dir = output_dir or ""
     output_dir = os.path.expanduser(output_dir)
@@ -560,8 +492,8 @@ def _fix_user_path(output_dir):
 
 def _show_example_config():
     click.secho("Example of valid config.yml:")
-    default_config = _get_default_config()
-    for key, value in default_config.items():
+    starter_config = _get_starter_config()
+    for key, value in starter_config.items():
         click.secho(
             click.style(key + ": ", bold=True, fg="yellow")
             + click.style(str(value), fg="cyan")

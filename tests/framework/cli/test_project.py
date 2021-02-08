@@ -415,6 +415,7 @@ class TestInstallCommand:
         self, fake_project_cli, mocker, fake_repo_path, fake_copyfile, fake_metadata
     ):
         mock_subprocess = mocker.patch("kedro.framework.cli.project.subprocess")
+        mock_subprocess.Popen.return_value.communicate.return_value = ("", b"")
         # pretend we are on Windows
         mocker.patch("kedro.framework.cli.project.os").name = "nt"
 
@@ -436,11 +437,30 @@ class TestInstallCommand:
             str(requirements_txt),
         ]
         mock_subprocess.Popen.assert_called_once_with(
-            command, creationflags=mock_subprocess.CREATE_NEW_CONSOLE
+            command,
+            creationflags=mock_subprocess.CREATE_NEW_CONSOLE,
+            stderr=mock_subprocess.PIPE,
         )
         fake_copyfile.assert_called_once_with(
             str(requirements_txt), str(requirements_in)
         )
+
+    def test_windows_err(
+        self, fake_project_cli, mocker, fake_repo_path, fake_copyfile, fake_metadata
+    ):
+        mock_subprocess = mocker.patch("kedro.framework.cli.project.subprocess")
+        mock_subprocess.Popen.return_value.communicate.return_value = (
+            "",
+            b"Error in dependencies",
+        )
+        # pretend we are on Windows
+        mocker.patch("kedro.framework.cli.project.os").name = "nt"
+
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["install"], obj=fake_metadata
+        )
+        assert result.exit_code, result.stdout
+        assert "Error in dependencies" in result.output
 
 
 @pytest.fixture

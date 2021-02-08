@@ -42,9 +42,11 @@ from kedro import __version__ as version
 from kedro.framework.cli.cli import (
     TEMPLATE_PATH,
     _fix_user_path,
-    _get_default_config,
+    _get_config_from_starter_prompts,
+    _get_starter_config,
     cli,
 )
+from kedro.framework.cli.utils import KedroCliError
 
 FILES_IN_TEMPLATE = 36
 
@@ -150,8 +152,7 @@ class TestInteractiveNew:
     def test_bad_repo_name(self, cli_runner, repo_name):
         """Check the error if the repository name is invalid."""
         result = _invoke(cli_runner, ["new"], repo_name=repo_name)
-        assert result.exit_code == 0
-        assert "is not a valid repository name." in result.output
+        assert result.exit_code != 0
 
     @pytest.mark.parametrize(
         "pkg_name", ["0package", "_", "package-name", "package name"]
@@ -159,8 +160,7 @@ class TestInteractiveNew:
     def test_bad_pkg_name(self, cli_runner, pkg_name):
         """Check the error if the package name is invalid."""
         result = _invoke(cli_runner, ["new"], python_package=pkg_name)
-        assert result.exit_code == 0
-        assert "is not a valid Python package name." in result.output
+        assert result.exit_code != 0
 
 
 def _create_config_file(config_path, project_name, repo_name, output_dir=None):
@@ -274,8 +274,7 @@ def test_default_config_up_to_date():
     cookie_keys = [
         key for key in cookie if not key.startswith("_") and key != "kedro_version"
     ]
-    cookie_keys.append("output_dir")
-    default_config_keys = _get_default_config().keys()
+    default_config_keys = _get_starter_config().keys()
 
     assert set(cookie_keys) == set(default_config_keys)
 
@@ -326,12 +325,16 @@ class TestNewWithStarter:
             (
                 "pyspark-iris",
                 "git+https://github.com/quantumblacklabs/kedro-starters.git",
-            )
+            ),
         ],
     )
     def test_new_with_starter_alias(
-        self, alias, expected_starter_repo, cli_runner, mocker
+        self, alias, expected_starter_repo, cli_runner, mocker, tmp_path
     ):
+        mocker.patch(
+            "kedro.framework.cli.cli.tempfile.TemporaryDirectory",
+            return_value=tmp_path,
+        )
         mocked_cookie = mocker.patch("cookiecutter.main.cookiecutter")
         _invoke(
             cli_runner,
@@ -349,8 +352,10 @@ class TestNewWithStarter:
         starter_path = "some-starter"
         checkout_version = "some-version"
         output_dir = str(Path.cwd())
-        mocked_cookiecutter = mocker.patch("cookiecutter.main.cookiecutter")
-        mocked_cookiecutter.return_value = starter_path
+        mocker.patch("cookiecutter.repository.repository_has_cookiecutter_json")
+        mocked_cookiecutter = mocker.patch(
+            "cookiecutter.main.cookiecutter", return_value=starter_path
+        )
         result = _invoke(
             cli_runner,
             ["new", "--starter", starter_path, "--checkout", checkout_version],
@@ -362,13 +367,7 @@ class TestNewWithStarter:
         mocked_cookiecutter.assert_called_once_with(
             starter_path,
             checkout=checkout_version,
-            extra_context={
-                "kedro_version": version,
-                "output_dir": output_dir,
-                "project_name": self.project_name,
-                "python_package": self.package_name,
-                "repo_name": self.repo_name,
-            },
+            extra_context={"kedro_version": version},
             no_input=True,
             output_dir=output_dir,
         )
@@ -376,6 +375,7 @@ class TestNewWithStarter:
     def test_new_starter_with_checkout_invalid_checkout(self, cli_runner, mocker):
         starter_path = "some-starter"
         checkout_version = "some-version"
+        mocker.patch("cookiecutter.repository.repository_has_cookiecutter_json")
         mocked_cookiecutter = mocker.patch(
             "cookiecutter.main.cookiecutter", side_effect=RepositoryCloneFailed
         )
@@ -395,13 +395,7 @@ class TestNewWithStarter:
         mocked_cookiecutter.assert_called_once_with(
             starter_path,
             checkout=checkout_version,
-            extra_context={
-                "kedro_version": version,
-                "output_dir": output_dir,
-                "project_name": self.project_name,
-                "python_package": self.package_name,
-                "repo_name": self.repo_name,
-            },
+            extra_context={"kedro_version": version},
             no_input=True,
             output_dir=output_dir,
         )
@@ -411,6 +405,7 @@ class TestNewWithStarter:
         self, cli_runner, mocker, starter_path
     ):
         checkout_version = "some-version"
+        mocker.patch("cookiecutter.repository.repository_has_cookiecutter_json")
         mocker.patch(
             "cookiecutter.main.cookiecutter", side_effect=RepositoryCloneFailed
         )
@@ -475,3 +470,41 @@ class TestNewWithStarter:
         assert (
             "Cannot use the --directory flag with a --starter alias." in result.output
         )
+
+    def test_get_config_from_starter_prompts(self, cli_runner, mocker):
+        starter_path = Path(__file__).parents[3].resolve()
+        starter_path = starter_path / "features" / "steps" / "test_starter"
+
+        output_dir = str(Path.cwd())
+        mocked_cookiecutter = mocker.patch(
+            "cookiecutter.main.cookiecutter", return_value=starter_path
+        )
+        result = _invoke(
+            cli_runner,
+            ["new", "--starter", starter_path],
+            project_name=self.project_name,
+            python_package=self.package_name,
+            repo_name=self.repo_name,
+        )
+        assert result.exit_code == 0, result.output
+        mocked_cookiecutter.assert_called_once_with(
+            str(starter_path),
+            checkout=version,
+            extra_context={
+                "kedro_version": version,
+                "output_dir": output_dir,
+                "project_name": self.project_name,
+                "custom": self.package_name,
+                "repo_name": self.repo_name,
+            },
+            no_input=True,
+            output_dir=output_dir,
+        )
+
+    def test_raise_error_when_prompt_invalid(self):
+        invalid_prompt = {"repo_name": {"title": "Repository Name:"}}
+        with pytest.raises(
+            KedroCliError,
+            match="Each prompt must have both a title and text field to be valid.",
+        ):
+            _get_config_from_starter_prompts(invalid_prompt)

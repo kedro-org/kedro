@@ -33,13 +33,9 @@ This command will run a server on http://127.0.0.1:4141 that will open up your v
 
 You exit this visualisation by closing the open browser and entering **Ctrl+C** or **Cmd+C** in your terminal.
 
-### Interact with Data Engineering Convention
+### Interact with data engineering convention
 
-The pipeline can be broken up into different layers to specify convention for how data is processed. This convention
- makes it easier to collaborate with other team members because everyone has an idea of what type of data cleaning or
-  processing has happened. It also makes it easier to collaborate with yourself in future because it makes your data
-   easier to reproduce if you have done something wrong. You can read more about the [Data Engineering Convention
-   ](../12_faq/01_faq.md#what-is-data-engineering-convention) that we use.
+The pipeline can be broken up into different layers to specify convention for how data is processed. This convention makes it easier to collaborate with other team members because everyone has an idea of what type of data cleaning or processing has happened. It also makes it easier to collaborate with yourself in future because it makes your data easier to reproduce if you have done something wrong. You can read more about the [data engineering convention](../12_faq/01_faq.md#what-is-data-engineering-convention) that we use.
 
 Kedro-Viz makes it easy to visualise these data processing stages by adding a `layer` attribute to the datasets in the Data Catalog. We will be modifying `catalog.yml` with the following:
 

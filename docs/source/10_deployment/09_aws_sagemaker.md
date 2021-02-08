@@ -128,9 +128,9 @@ class ProjectHooks:
         return TemplatedConfigLoader(conf_paths, globals_pattern="*globals.yml")
 ```
 
-### Update the Data Science pipeline
+### Update the data science pipeline
 
-Now modify the Data Science pipeline in the project to send the training job to Amazon SageMaker and to process the resulting model artifact afterwards.
+Now modify the data science pipeline in the project to send the training job to Amazon SageMaker and to process the resulting model artifact afterwards.
 
 #### Create node functions
 

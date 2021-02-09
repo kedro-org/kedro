@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,12 +38,6 @@ from s3fs import S3FileSystem
 
 from kedro.io import DataSetError
 from kedro.io.core import PROTOCOL_DELIMITER, Version
-
-AWS_MODEL_DIR_NAME = "test_tf_model"
-AWS_BUCKET_NAME = "test_bucket"
-AWS_CREDENTIALS = dict(
-    aws_access_key_id="FAKE_ACCESS_KEY", aws_secret_access_key="FAKE_SECRET_KEY"
-)
 
 
 # In this test module, we wrap tensorflow and TensorFlowModelDataset imports into a module-scoped
@@ -133,7 +127,7 @@ def dummy_tf_subclassed_model(dummy_x_train, dummy_y_train, tf):
     """Demonstrate that own class models cannot be saved
     using HDF5 format but can using TF format
     """
-    # pylint: disable=too-many-ancestors
+
     class MyModel(tf.keras.Model):
         def __init__(self):
             super().__init__()
@@ -314,6 +308,30 @@ class TestTensorFlowModelDatasetVersioned:
         versioned_tf_model_dataset.save(dummy_tf_base_model)
 
         reloaded = versioned_tf_model_dataset.load()
+        new_predictions = reloaded.predict(dummy_x_test)
+        np.testing.assert_allclose(predictions, new_predictions, rtol=1e-6, atol=1e-6)
+
+    def test_hdf5_save_format(
+        self,
+        dummy_tf_base_model,
+        dummy_x_test,
+        filepath,
+        tensorflow_model_dataset,
+        load_version,
+        save_version,
+    ):
+        """Test versioned TensorflowModelDataset can save TF graph models in
+        HDF5 format"""
+        hdf5_dataset = tensorflow_model_dataset(
+            filepath=filepath,
+            save_args={"save_format": "h5"},
+            version=Version(load_version, save_version),
+        )
+
+        predictions = dummy_tf_base_model.predict(dummy_x_test)
+        hdf5_dataset.save(dummy_tf_base_model)
+
+        reloaded = hdf5_dataset.load()
         new_predictions = reloaded.predict(dummy_x_test)
         np.testing.assert_allclose(predictions, new_predictions, rtol=1e-6, atol=1e-6)
 

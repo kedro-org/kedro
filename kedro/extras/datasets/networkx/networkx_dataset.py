@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ class NetworkXDataSet(AbstractVersionedDataSet):
     """``NetworkXDataSet`` loads and saves graphs to a JSON file using an
     underlying filesystem (e.g.: local, S3, GCS). ``NetworkX`` is used to
     create JSON data.
-    See https://networkx.github.io/documentation/stable/tutorial.html for details.
+    See https://networkx.org/documentation/stable/tutorial.html for details.
 
     Example:
     ::
@@ -85,10 +85,10 @@ class NetworkXDataSet(AbstractVersionedDataSet):
             filepath: Filepath in POSIX format to the NetworkX graph JSON file.
             load_args: Arguments passed on to ```networkx.node_link_graph``.
                 See the details in
-                https://networkx.github.io/documentation/networkx-1.9.1/reference/generated/networkx.readwrite.json_graph.node_link_graph.html
+                https://networkx.org/documentation/networkx-1.9.1/reference/generated/networkx.readwrite.json_graph.node_link_graph.html
             save_args: Arguments passed on to ```networkx.node_link_data``.
                 See the details in
-                https://networkx.github.io/documentation/networkx-1.9.1/reference/generated/networkx.readwrite.json_graph.node_link_data.html
+                https://networkx.org/documentation/networkx-1.9.1/reference/generated/networkx.readwrite.json_graph.node_link_data.html
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -110,6 +110,8 @@ class NetworkXDataSet(AbstractVersionedDataSet):
         _credentials = deepcopy(credentials) or {}
 
         protocol, path = get_protocol_and_path(filepath, version)
+        if protocol == "file":
+            _fs_args.setdefault("auto_mkdir", True)
 
         self._protocol = protocol
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
@@ -129,7 +131,6 @@ class NetworkXDataSet(AbstractVersionedDataSet):
         if save_args is not None:
             self._save_args.update(save_args)
 
-        _fs_open_args_load.setdefault("mode", "r")
         _fs_open_args_save.setdefault("mode", "w")
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save

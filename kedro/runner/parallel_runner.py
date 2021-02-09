@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@
 """``ParallelRunner`` is an ``AbstractRunner`` implementation. It can
 be used to run the ``Pipeline`` in parallel groups formed by toposort.
 """
+import logging.config
 import multiprocessing
 import os
 import pickle
@@ -37,10 +38,10 @@ from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
 from itertools import chain
 from multiprocessing.managers import BaseProxy, SyncManager  # type: ignore
 from multiprocessing.reduction import ForkingPickler
-from pathlib import Path
 from pickle import PicklingError
-from typing import Any, Iterable, Set
+from typing import Any, Dict, Iterable, Set
 
+from kedro.framework.hooks.manager import get_hook_manager
 from kedro.io import DataCatalog, DataSetError, MemoryDataSet
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
@@ -100,15 +101,29 @@ ParallelRunnerManager.register(  # pylint: disable=no-member
 )
 
 
-def _run_node_synchronization(
-    node: Node, catalog: DataCatalog, is_async: bool = False, run_id: str = None
+def _bootstrap_subprocess(package_name: str, conf_logging: Dict[str, Any]):
+    # pylint: disable=import-outside-toplevel,protected-access,cyclic-import
+    from kedro.framework.session.session import _register_all_project_hooks
+
+    hook_manager = get_hook_manager()
+    _register_all_project_hooks(hook_manager, package_name)
+    logging.config.dictConfig(conf_logging)
+
+
+def _run_node_synchronization(  # pylint: disable=too-many-arguments
+    node: Node,
+    catalog: DataCatalog,
+    is_async: bool = False,
+    run_id: str = None,
+    package_name: str = None,
+    conf_logging: Dict[str, Any] = None,
 ) -> Node:
     """Run a single `Node` with inputs from and outputs to the `catalog`.
-    `KedroContext` class is initialized in every subprocess because of Windows
-    (latest OSX with Python 3.8) limitation.
-    Windows has no "fork", so every subprocess is a brand new process created via "spawn",
-    and KedroContext needs to be created in every subprocess in order to make
-    KedroContext logging setup and hook manager work.
+    `KedroSession` instance is activated in every subprocess because of Windows
+    (and latest OSX with Python 3.8) limitation.
+    Windows has no "fork", so every subprocess is a brand new process
+    created via "spawn", hence the need to a) setup the logging, b) register
+    the hooks, and c) activate `KedroSession` in every subprocess.
 
     Args:
         node: The ``Node`` to run.
@@ -116,22 +131,17 @@ def _run_node_synchronization(
         is_async: If True, the node inputs and outputs are loaded and saved
             asynchronously with threads. Defaults to False.
         run_id: The id of the pipeline run.
+        package_name: The name of the project Python package.
+        conf_logging: A dictionary containing logging configuration.
 
     Returns:
         The node argument.
 
     """
+    if multiprocessing.get_start_method() == "spawn" and package_name:  # type: ignore
+        conf_logging = conf_logging or dict()
+        _bootstrap_subprocess(package_name, conf_logging)
 
-    if multiprocessing.get_start_method() == "spawn":  # type: ignore
-        # pylint: disable=import-outside-toplevel
-        import kedro.framework.context.context as context  # pragma: no cover
-
-        context.load_context(Path.cwd())  # pragma: no cover
-    # The hard-coded current working directory causes
-    # parallel runner to not work in notebook environment,
-    # but we will revisit this when we work on access `project_path`
-    # from within the runner and data in KedroContext
-    # See https://github.com/quantumblacklabs/private-kedro/issues/701.
     return run_node(node, catalog, is_async, run_id)
 
 
@@ -219,6 +229,9 @@ class ParallelRunner(AbstractRunner):
 
         unserializable = []
         for name, data_set in data_sets.items():
+            if getattr(data_set, "_SINGLE_PROCESS", False):  # SKIP_IF_NO_SPARK
+                unserializable.append(name)
+                continue
             try:
                 ForkingPickler.dumps(data_set)
             except (AttributeError, PicklingError):
@@ -226,10 +239,10 @@ class ParallelRunner(AbstractRunner):
 
         if unserializable:
             raise AttributeError(
-                "The following data_sets cannot be serialized: {}\nIn order "
-                "to utilize multiprocessing you need to make sure all data "
-                "sets are serializable, i.e. data sets should not make use of "
-                "lambda functions, nested functions, closures etc.\nIf you "
+                "The following data sets cannot be used with multiprocessing: "
+                "{}\nIn order to utilize multiprocessing you need to make sure "
+                "all data sets are serializable, i.e. data sets should not make "
+                "use of lambda functions, nested functions, closures etc.\nIf you "
                 "are using custom decorators ensure they are correctly using "
                 "functools.wraps().".format(sorted(unserializable))
             )
@@ -275,11 +288,16 @@ class ParallelRunner(AbstractRunner):
             run_id: The id of the run.
 
         Raises:
-            AttributeError: when the provided pipeline is not suitable for
+            AttributeError: When the provided pipeline is not suitable for
                 parallel execution.
-            Exception: in case of any downstream node failure.
+            RuntimeError: If the runner is unable to schedule the execution of
+                all pipeline nodes.
+            Exception: In case of any downstream node failure.
 
         """
+        # pylint: disable=import-outside-toplevel,cyclic-import
+        from kedro.framework.session.session import get_current_session
+
         nodes = pipeline.nodes
         self._validate_catalog(catalog, pipeline)
         self._validate_nodes(nodes)
@@ -291,6 +309,11 @@ class ParallelRunner(AbstractRunner):
         futures = set()
         done = None
         max_workers = self._get_required_workers_count(pipeline)
+
+        session = get_current_session(silent=True)
+        # pylint: disable=protected-access
+        package_name = session._package_name if session else None
+        conf_logging = session._get_logging_config() if session else None
 
         with ProcessPoolExecutor(max_workers=max_workers) as pool:
             while True:
@@ -304,11 +327,26 @@ class ParallelRunner(AbstractRunner):
                             catalog,
                             self._is_async,
                             run_id,
+                            package_name=package_name,
+                            conf_logging=conf_logging,
                         )
                     )
                 if not futures:
-                    assert not todo_nodes, (todo_nodes, done_nodes, ready, done)
-                    break
+                    if todo_nodes:
+                        debug_data = {
+                            "todo_nodes": todo_nodes,
+                            "done_nodes": done_nodes,
+                            "ready_nodes": ready,
+                            "done_futures": done,
+                        }
+                        debug_data_str = "\n".join(
+                            f"{k} = {v}" for k, v in debug_data.items()
+                        )
+                        raise RuntimeError(
+                            f"Unable to schedule new tasks although some nodes "
+                            f"have not been run:\n{debug_data_str}"
+                        )
+                    break  # pragma: no cover
                 done, futures = wait(futures, return_when=FIRST_COMPLETED)
                 for future in done:
                     try:

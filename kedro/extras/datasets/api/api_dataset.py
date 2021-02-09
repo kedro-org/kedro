@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -113,10 +113,10 @@ class APIDataSet(AbstractDataSet):
         try:
             response = requests.request(**self._request_args)
             response.raise_for_status()
-        except requests.exceptions.HTTPError as err:
-            raise DataSetError("Failed to fetch data", err) from err
-        except socket.error as err:
-            raise DataSetError("Failed to connect to the remote server") from err
+        except requests.exceptions.HTTPError as exc:
+            raise DataSetError("Failed to fetch data", exc) from exc
+        except socket.error as exc:
+            raise DataSetError("Failed to connect to the remote server") from exc
 
         return response
 
@@ -124,9 +124,7 @@ class APIDataSet(AbstractDataSet):
         return self._execute_request()
 
     def _save(self, data: Any) -> None:
-        raise DataSetError(
-            "{} is a read only data set type".format(self.__class__.__name__)
-        )
+        raise DataSetError(f"{self.__class__.__name__} is a read only data set type")
 
     def _exists(self) -> bool:
         response = self._execute_request()

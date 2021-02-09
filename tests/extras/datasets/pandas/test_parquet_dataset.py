@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from pandas.testing import assert_frame_equal
+from pyarrow.fs import FSSpecHandler, PyFileSystem
 from s3fs.core import S3FileSystem
 
 from kedro.extras.datasets.pandas import ParquetDataSet
@@ -80,7 +81,7 @@ class TestParquetDataSet:
 
         ParquetDataSet(filepath=FILENAME, credentials=credentials)
 
-        mock_fs.assert_called_once_with("file", **credentials)
+        mock_fs.assert_called_once_with("file", auto_mkdir=True, **credentials)
 
     def test_save_and_load(self, tmp_path, dummy_dataframe):
         """Test saving and reloading the data set."""
@@ -253,9 +254,13 @@ class TestParquetDataSetVersioned:
         assert "protocol" in str(ds_versioned)
         assert "protocol" in str(ds)
 
-    def test_save_and_load(self, versioned_parquet_data_set, dummy_dataframe):
+    def test_save_and_load(self, versioned_parquet_data_set, dummy_dataframe, mocker):
         """Test that saved and reloaded data matches the original one for
         the versioned data set."""
+        mocker.patch(
+            "pyarrow.fs._ensure_filesystem",
+            return_value=PyFileSystem(FSSpecHandler(versioned_parquet_data_set._fs)),
+        )
         versioned_parquet_data_set.save(dummy_dataframe)
         reloaded_df = versioned_parquet_data_set.load()
         assert_frame_equal(dummy_dataframe, reloaded_df)
@@ -266,15 +271,25 @@ class TestParquetDataSetVersioned:
         with pytest.raises(DataSetError, match=pattern):
             versioned_parquet_data_set.load()
 
-    def test_exists(self, versioned_parquet_data_set, dummy_dataframe):
+    def test_exists(self, versioned_parquet_data_set, dummy_dataframe, mocker):
         """Test `exists` method invocation for versioned data set."""
         assert not versioned_parquet_data_set.exists()
+        mocker.patch(
+            "pyarrow.fs._ensure_filesystem",
+            return_value=PyFileSystem(FSSpecHandler(versioned_parquet_data_set._fs)),
+        )
         versioned_parquet_data_set.save(dummy_dataframe)
         assert versioned_parquet_data_set.exists()
 
-    def test_prevent_overwrite(self, versioned_parquet_data_set, dummy_dataframe):
+    def test_prevent_overwrite(
+        self, versioned_parquet_data_set, dummy_dataframe, mocker
+    ):
         """Check the error when attempting to override the data set if the
         corresponding parquet file for a given save version already exists."""
+        mocker.patch(
+            "pyarrow.fs._ensure_filesystem",
+            return_value=PyFileSystem(FSSpecHandler(versioned_parquet_data_set._fs)),
+        )
         versioned_parquet_data_set.save(dummy_dataframe)
         pattern = (
             r"Save path \`.+\` for ParquetDataSet\(.+\) must "
@@ -290,13 +305,22 @@ class TestParquetDataSetVersioned:
         "save_version", ["2019-01-02T00.00.00.000Z"], indirect=True
     )
     def test_save_version_warning(
-        self, versioned_parquet_data_set, load_version, save_version, dummy_dataframe
+        self,
+        versioned_parquet_data_set,
+        load_version,
+        save_version,
+        dummy_dataframe,
+        mocker,
     ):
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
             r"Save version `{0}` did not match load version `{1}` "
             r"for ParquetDataSet\(.+\)".format(save_version, load_version)
+        )
+        mocker.patch(
+            "pyarrow.fs._ensure_filesystem",
+            return_value=PyFileSystem(FSSpecHandler(versioned_parquet_data_set._fs)),
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_parquet_data_set.save(dummy_dataframe)

@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ def test_log_time_no_module(caplog):
     assert res == 1
     assert logger_name == "kedro.pipeline.decorators"
     assert severity == logging.INFO
-    expected = "Running %r took" % no_module.__qualname__
+    expected = f"Running {no_module.__qualname__!r} took"
     assert expected in message
 
 

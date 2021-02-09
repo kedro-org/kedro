@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -67,12 +67,7 @@ def sane_config(filepath):
             },
         },
         "credentials": {
-            "s3_credentials": {
-                "client_kwargs": {
-                    "aws_access_key_id": "FAKE_ACCESS_KEY",
-                    "aws_secret_access_key": "FAKE_SECRET_KEY",
-                }
-            }
+            "s3_credentials": {"key": "FAKE_ACCESS_KEY", "secret": "FAKE_SECRET_KEY"}
         },
     }
 

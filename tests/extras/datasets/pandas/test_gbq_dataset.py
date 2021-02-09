@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -135,8 +135,8 @@ class TestGBQDataSet:
 
     def test_save_load_data(self, gbq_dataset, dummy_dataframe, mocker):
         """Test saving and reloading the data set."""
-        sql = "select * from {}.{}".format(DATASET, TABLE_NAME)
-        table_id = "{}.{}".format(DATASET, TABLE_NAME)
+        sql = f"select * from {DATASET}.{TABLE_NAME}"
+        table_id = f"{DATASET}.{TABLE_NAME}"
         mocked_read_gbq = mocker.patch(
             "kedro.extras.datasets.pandas.gbq_dataset.pd.read_gbq"
         )

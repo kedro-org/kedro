@@ -11,7 +11,7 @@ The following sections are a guide on how to deploy a Kedro project to AWS Batch
 
 To use AWS Batch, make sure you have the following prerequisites in place:
 
-- An AWS account set up.
+- An [AWS account set up](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/).
 - A `name` attribute is set for each Kedro [node](/kedro.pipeline.node). Each node will run in its own Batch job, so having sensible node names will make it easier to `kedro run --node <node_name>`.
 - All node input/output `DataSets` must be configured in `catalog.yml` and refer to an external location (e.g. [AWS S3](../05_data/01_data_catalog.md#using-the-data-catalog-with-the-yaml-api)). A clean way to do this is to create a new configuration environment `conf/aws_batch` containing a `catalog.yml` file with the appropriate configuration, as illustrated below.
 
@@ -76,7 +76,7 @@ First, you need to containerise your Kedro project, using any preferred containe
 
 For the purpose of this walk-through, we are going to assume a `Docker` workflow. We recommend using the [`Kedro-Docker`](https://github.com/quantumblacklabs/kedro-docker) plugin to streamline the process.  [Instructions for using this are in the plugin's README.md](https://github.com/quantumblacklabs/kedro-docker/blob/master/README.md).
 
-After you’ve built the Docker image for your project locally, [transfer the image to a container registry](./01_single_machine.md#how-to-use-container-registry), for instance [AWS ECR](https://aws.amazon.com/ecr/). You can find instructions on how to push your Docker image to ECR [in Amazon's ECR documentation](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html).
+After you’ve built the Docker image for your project locally, [transfer the image to a container registry](./02_single_machine.md#how-to-use-container-registry), for instance [AWS ECR](https://aws.amazon.com/ecr/). You can find instructions on how to push your Docker image to ECR [in Amazon's ECR documentation](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html).
 
 Alternatively, once you've created a container repository, click the `View Push Commands` button in the top-right corner of the [ECR dashboard](https://console.aws.amazon.com/ecr).
 
@@ -296,7 +296,7 @@ aws_batch:
 
 #### Update CLI implementation
 
-You're nearly there! Before being able to use the new runner, update the `run()` function in your `kedro_cli.py` file to make sure the runner class is instantiated correctly:
+You're nearly there! Before being able to use the new runner, update the `run()` function in your `cli.py` file to make sure the runner class is instantiated correctly:
 
 ```python
 def run(tag, env, parallel, ...):
@@ -313,18 +313,19 @@ def run(tag, env, parallel, ...):
     tag = _get_values_as_tuple(tag) if tag else tag
     node_names = _get_values_as_tuple(node_names) if node_names else node_names
 
-    context = load_context(Path.cwd(), env=env, extra_params=params)
-    runner_instance = _instantiate_runner(runner, is_async, context)
-    context.run(
-        tags=tag,
-        runner=runner_instance,
-        node_names=node_names,
-        from_nodes=from_nodes,
-        to_nodes=to_nodes,
-        from_inputs=from_inputs,
-        load_versions=load_version,
-        pipeline_name=pipeline,
-    )
+    package_name = str(Path(__file__).resolve().parent.name)
+    with KedroSession.create(package_name, env=env, extra_params=params) as session:
+        runner_instance = _instantiate_runner(runner, is_async, context)
+        session.run(
+            tags=tag,
+            runner=runner_instance,
+            node_names=node_names,
+            from_nodes=from_nodes,
+            to_nodes=to_nodes,
+            from_inputs=from_inputs,
+            load_versions=load_version,
+            pipeline_name=pipeline,
+        )
 ```
 
 where the helper function `_instantiate_runner()` looks like this:
@@ -351,4 +352,4 @@ kedro run --env aws_batch --runner kedro_tutorial.runner.AWSBatchRunner
 
 You should start seeing jobs appearing on your Jobs dashboard, under the `Runnable` tab - meaning they're ready to start as soon as the resources are provisioned in the compute environment.
 
-AWS Batch has native integration with CloudWatch, where you can check the logs for a particular job. You can either click on the Batch job in the [Jobs](https://console.aws.amazon.com/batch/home#/jobs) tab and click `View logs` in the pop-up panel, or go to [CloudWatch dashboard](https://console.aws.amazon.com/cloudwatch), click `Log groups` in the side bar and find `/aws/batch/job`.
+AWS Batch has native integration with CloudWatch, where you can check the logs for a particular job. You can either click on the Batch job in the [Jobs](https://console.aws.amazon.com/batch/home/jobs) tab and click `View logs` in the pop-up panel, or go to [CloudWatch dashboard](https://console.aws.amazon.com/cloudwatch), click `Log groups` in the side bar and find `/aws/batch/job`.

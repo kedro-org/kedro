@@ -2,13 +2,13 @@
 
 This section covers the third part of the [standard development workflow](./01_spaceflights_tutorial.md#kedro-project-development-workflow), and covers the following:
 
-* How to create each `node` required by the example
-* How to set up a `pipeline`
+* How to create each [node](../13_resources/02_glossary.md#node) required by the example
+* How to set up a [pipeline](../13_resources/02_glossary.md#pipeline)
 
 
 ## Data engineering pipeline
 
-You previously registered the raw datasets for your Kedro project, so you can now create nodes to pre-process two of the datasets ([companies.csv](https://github.com/quantumblacklabs/kedro-examples/blob/master/kedro-tutorial/data/01_raw/companies.csv) and [shuttles.xlsx](https://github.com/quantumblacklabs/kedro-examples/blob/master/kedro-tutorial/data/01_raw/shuttles.xlsx) to prepare the data for modelling.
+You previously registered the raw datasets for your Kedro project, so you can now create nodes to pre-process two of the datasets, [companies.csv](https://github.com/quantumblacklabs/kedro-starters/blob/master/spaceflights/%7B%7B%20cookiecutter.repo_name%20%7D%7D/data/01_raw/companies.csv) and [shuttles.xlsx](https://github.com/quantumblacklabs/kedro-starters/blob/master/spaceflights/%7B%7B%20cookiecutter.repo_name%20%7D%7D/data/01_raw/shuttles.xlsx), to prepare the data for modelling.
 
 ### Node functions
 
@@ -77,7 +77,8 @@ def preprocess_shuttles(shuttles: pd.DataFrame) -> pd.DataFrame:
 
 ### Assemble nodes into the data engineering pipeline
 
-The next step is to create a `node` for each function, and add it to the data engineering pipeline.
+
+The next steps are to create a [node](../13_resources/02_glossary.md#node) for each function, and to create a [modular pipeline](../13_resources/02_glossary.md#modular-pipeline) for [data engineering](../13_resources/02_glossary.md#data-engineering-vs-data-science):
 
 Add the following to `src/kedro_tutorial/pipelines/data_engineering/pipeline.py`, so the `create_pipeline()` function looks as follows:
 
@@ -119,7 +120,7 @@ from kedro_tutorial.pipelines.data_engineering.nodes import (
 
 ### Update the project pipeline
 
-Next, update the project's pipeline in `src/kedro_tutorial/hooks.py` to add the data engineering pipeline:
+Now update the project's pipeline in `src/kedro_tutorial/hooks.py` to add the [modular pipeline](../13_resources/02_glossary.md#modular-pipeline) for [data engineering](../13_resources/02_glossary.md#data-engineering-vs-data-science):
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -156,7 +157,7 @@ project_hooks = ProjectHooks()
 
 ### Test the example
 
-To test the progress of the example, run the following command in your terminal window to test the preprocessing_companies node:
+Run the following command in your terminal window to test the `preprocessing_companies` node:
 
 ```bash
 kedro run --node=preprocessing_companies
@@ -174,7 +175,7 @@ You should see output similar to the below:
 
 ```
 
-To test the entire pipeline:
+To test the entire data engineering pipeline:
 
 ```bash
 kedro run
@@ -201,7 +202,7 @@ kedro run
 
 ### Persist pre-processed data
 
-The nodes above each output a new dataset (`preprocessed_companies` and `preprocessed_shuttles`). When Kedro ran the pipeline, it determined that neither datasets was registered in the data catalog (`conf/base/catalog.yml`). If a dataset is not registered, Kedro stores it in memory as a Python object using the [MemoryDataSet](/kedro.io.MemoryDataSet) class. Once all nodes depending on it have been executed, the `MemoryDataSet` is cleared and its memory released by the Python garbage collector.
+The nodes above each output a new dataset (`preprocessed_companies` and `preprocessed_shuttles`). When Kedro ran the pipeline, it determined that neither datasets had been registered in the data catalog (`conf/base/catalog.yml`). If a dataset is not registered, Kedro stores it in memory as a Python object using the [MemoryDataSet](/kedro.io.MemoryDataSet) class. Once all nodes depending on it have been executed, the `MemoryDataSet` is cleared and its memory released by the Python garbage collector.
 
 You can persist the preprocessed data by adding the following to `conf/base/catalog.yml`:
 
@@ -215,9 +216,12 @@ preprocessed_shuttles:
   filepath: data/02_intermediate/preprocessed_shuttles.csv
 ```
 
-The code above declares explicitly that [pandas.CSVDataSet](/kedro.extras.datasets.pandas.CSVDataSet) should be used instead of [`MemoryDataSet`](/kedro.io.MemoryDataSet). `DataCatalog` will take care of saving the datasets automatically as `csv` data to the `filepath`s specified next time the pipeline is run. There is no need to change any code in your preprocessing functions to accommodate this change.
+The code above declares explicitly that [pandas.CSVDataSet](/kedro.extras.datasets.pandas.CSVDataSet) should be used instead of [`MemoryDataSet`](/kedro.io.MemoryDataSet).
 
-In this tutorial, we chose `pandas.CSVDataSet` for its simplicity, but you can use any other available dataset implementation class, for example, a database table, cloud storage (like [AWS S3](https://aws.amazon.com/s3/), [Azure Blob Storage](https://azure.microsoft.com/en-gb/services/storage/blobs/), etc.) or others. If you cannot find the dataset implementation you need, you can implement your own [custom dataset](../07_extend_kedro/01_custom_datasets.md).
+
+The [Data Catalog](../13_resources/02_glossary.md#data-catalog) will take care of saving the datasets automatically (in this case as CSV data) to the path specified next time the pipeline is run. There is no need to change any code in your preprocessing functions to accommodate this change.
+
+In this tutorial, we chose `pandas.CSVDataSet` for its simplicity, but you can use any other available dataset implementation class, for example, a database table, cloud storage (like [AWS S3](https://aws.amazon.com/s3/), [Azure Blob Storage](https://azure.microsoft.com/en-gb/services/storage/blobs/), etc.) or others. If you cannot find the dataset implementation you need, you can implement your own [custom dataset](../07_extend_kedro/03_custom_datasets.md).
 
 ### Extend the data engineering pipeline
 
@@ -317,20 +321,25 @@ You should see output similar to the following:
 
 ## Data science pipeline
 
-We have created a data engineering pipeline, which merges three input datasets to create a master table. Now we will create the data science pipeline for price prediction, which uses a [`LinearRegression`](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html) implementation from the [scikit-learn](https://scikit-learn.org/stable/) library.
+We have created a modular pipeline for data engineering, which merges three input datasets to create a master table. Now we will create the data science pipeline for price prediction, which uses a [`LinearRegression`](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html) implementation from the [scikit-learn](https://scikit-learn.org/stable/) library.
 
 ### Update dependencies
-Update the project's dependencies in `src/requirements.txt` as follows:
+We now need to add `scikit-learn` to the project's dependencies. This is a slightly different process from the initial change we made early in the tutorial.
+
+To **update** the project's dependencies, you should modify `src/requirements.in` to add the following. Note that you do not need to update `src/requirements.txt` as you did previously in the tutorial before you built the project's requirements with `kedro build-reqs`:
+
 
 ```text
 scikit-learn==0.23.1
 ```
 
-From within the project directory, run:
+Then, re-run `kedro install` with a flag telling Kedro to recompile the requirements:
 
 ```bash
-kedro install
+kedro install --build-reqs
 ```
+
+You can find out more about [how to work with project dependencies](../04_kedro_project_setup/01_dependencies) in the Kedro project documentation.
 
 ### Create a data science node
 
@@ -438,7 +447,7 @@ regressor:
 > this pipeline. Further details can be found in the [Versioning](../05_data/02_kedro_io.md#versioning) section.
 
 ### Assemble the data science pipeline
-To create a pipeline for the price prediction model, add the following to the top of `src/kedro_tutorial/pipelines/data_science/pipeline.py`:
+To create a modular pipeline for the price prediction model, add the following to the top of `src/kedro_tutorial/pipelines/data_science/pipeline.py`:
 
 ```python
 from kedro.pipeline import Pipeline, node
@@ -495,16 +504,17 @@ def register_pipelines(self) -> Dict[str, Pipeline]:
 ```
 
 Include the import at the top of the file:
+
 ```python
 from kedro_tutorial.pipelines.data_science import pipeline as ds
 ```
-The two pipelines are merged together into a project default pipeline by the `__default__` key used in `"__default__": de_pipeline + ds_pipeline`.
+The two modular pipelines are merged together into a project default pipeline by the `__default__` key used in `"__default__": de_pipeline + ds_pipeline`.
 The `de_pipeline` will preprocess the data, and `ds_pipeline` will create features, train and evaluate the model.
 
 > *Note:* The order in which you add the pipelines together is not significant and `ds_pipeline + de_pipeline` will result in the same pipeline, since Kedro automatically detects the correct execution order for all the nodes in the resulting pipeline.
 
 
-### Test the multiple pipelines
+### Test the pipelines
 Execute the default pipeline:
 
 ```bash
@@ -558,10 +568,11 @@ kedro run
 
 ## Kedro runners
 
-There are two different Kedro runners that can run the pipeline:
+There are three different Kedro runners that can run the pipeline:
 
 * `SequentialRunner` - runs your nodes sequentially; once a node has completed its task then the next one starts.
 * `ParallelRunner` - runs your nodes in parallel; independent nodes are able to run at the same time, which is more efficient when there are independent branches in your pipeline and allows you to take advantage of multiple CPU cores.
+* `ThreadRunner` - runs your nodes in parallel, similarly to `ParallelRunner`, but uses multithreading instead of multiprocessing.
 
 By default, Kedro uses a `SequentialRunner`, which is instantiated when you execute `kedro run` from the command line. If you decide to use `ParallelRunner`, provide an additional flag when running the pipeline from the command line:
 
@@ -569,16 +580,26 @@ By default, Kedro uses a `SequentialRunner`, which is instantiated when you exec
 kedro run --parallel
 ```
 
+If you want to run using `ThreadRunner` or a custom runner, you can do so by running:
+
+```bash
+kedro run --runner=ThreadRunner
+kedro run --runner=module.path.to.my.runner
+```
+
 > *Note:* `ParallelRunner` performs task parallelisation, which is different from data parallelisation as seen in PySpark.
 
+You can find out more about the runners Kedro provides, and how to create your own, in the [pipeline documentation about runners](../06_nodes_and_pipelines/04_run_a_pipeline.md).
 
-## Partial pipeline runs
+## Slice a pipeline
 
-In some cases, you may want to partially run the pipeline. For example, you may need to only run the `ds_pipeline` to tune the hyperparameters of the price prediction model and skip `de_pipeline` execution. You can specify just the pipeline you want to run by using the `--pipeline` command line option. For example, to only run `ds_pipeline`, execute the following command:
+In some cases you may want to run just part of a pipeline. For example, you may need to only run the `ds_pipeline` to tune the hyperparameters of the price prediction model and skip `de_pipeline` execution. You can 'slice' the pipeline and specify just the portion you want to run by using the `--pipeline` command line option. For example, to only run `ds_pipeline`, execute the following command:
 
 ```bash
 kedro run --pipeline=ds
 ```
+
+See the [pipeline slicing documentation](../06_nodes_and_pipelines/05_slice_a_pipeline.md) for other ways to run sections of your pipeline.
 
 > *Note:* To successfully run the pipeline, you need to make sure that all required input datasets already exist, otherwise you may get an error similar to this:
 

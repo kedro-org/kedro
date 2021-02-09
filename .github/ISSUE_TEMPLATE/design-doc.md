@@ -1,8 +1,8 @@
 ---
-name: Software Design Doc
+name: Software design documentation
 about: To propose and request comments on a software design decision
 title: '<Title>'
-labels: 'Type: Design Doc'
+labels: 'Type: Design Documentation'
 assignees: ''
 
 ---

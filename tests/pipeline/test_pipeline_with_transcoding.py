@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -333,7 +333,7 @@ class TestComplexPipelineWithTranscoding:
         but traverses transcoded nodes (H) found further down the graph."""
 
         p = complex_pipeline.from_inputs("B@node7", "L")
-        assert _get_node_names(p) == {"node{}".format(i) for i in range(1, 8)}
+        assert _get_node_names(p) == {f"node{i}" for i in range(1, 8)}
 
     def test_from_inputs_transcode_compatible_name(self, complex_pipeline):
         p = complex_pipeline.from_inputs("H")

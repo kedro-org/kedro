@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,6 +35,13 @@ import pytest
 from click.testing import CliRunner
 
 from kedro.framework.cli.project import NO_DEPENDENCY_MESSAGE
+
+
+@pytest.fixture(autouse=True)
+def mocked_logging(mocker):
+    # Disable logging.config.dictConfig in KedroSession._setup_logging as
+    # it changes logging.config and affects other unit tests
+    return mocker.patch("logging.config.dictConfig")
 
 
 @pytest.fixture(autouse=True)
@@ -82,9 +89,11 @@ class TestActivateNbstripoutCommand:
         return mocker.patch("subprocess.run", return_value=mocker.Mock(returncode=1))
 
     def test_install_successfully(
-        self, fake_kedro_cli, call_mock, fake_nbstripout, fake_git_repo
+        self, fake_project_cli, call_mock, fake_nbstripout, fake_git_repo, fake_metadata
     ):
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["activate-nbstripout"])
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["activate-nbstripout"], obj=fake_metadata
+        )
         assert not result.exit_code
 
         call_mock.assert_called_once_with(["nbstripout", "--install"])
@@ -95,30 +104,42 @@ class TestActivateNbstripoutCommand:
             stderr=subprocess.PIPE,
         )
 
-    def test_nbstripout_not_installed(self, fake_kedro_cli, fake_git_repo, mocker):
+    def test_nbstripout_not_installed(
+        self, fake_project_cli, fake_git_repo, mocker, fake_metadata
+    ):
         """
         Run activate-nbstripout target without nbstripout installed
         There should be a clear message about it.
         """
         mocker.patch.dict("sys.modules", {"nbstripout": None})
 
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["activate-nbstripout"])
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["activate-nbstripout"], obj=fake_metadata
+        )
         assert result.exit_code
         assert "nbstripout is not installed" in result.stdout
 
-    def test_no_git_repo(self, fake_kedro_cli, fake_nbstripout, without_git_repo):
+    def test_no_git_repo(
+        self, fake_project_cli, fake_nbstripout, without_git_repo, fake_metadata
+    ):
         """
         Run activate-nbstripout target with no git repo available.
         There should be a clear message about it.
         """
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["activate-nbstripout"])
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["activate-nbstripout"], obj=fake_metadata
+        )
 
         assert result.exit_code
         assert "Not a git repository" in result.stdout
 
-    def test_no_git_executable(self, fake_kedro_cli, fake_nbstripout, mocker):
+    def test_no_git_executable(
+        self, fake_project_cli, fake_nbstripout, mocker, fake_metadata
+    ):
         mocker.patch("subprocess.run", side_effect=FileNotFoundError)
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["activate-nbstripout"])
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["activate-nbstripout"], obj=fake_metadata
+        )
 
         assert result.exit_code
         assert "Git executable not found. Install Git first." in result.stdout
@@ -126,20 +147,20 @@ class TestActivateNbstripoutCommand:
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
 class TestTestCommand:
-    def test_happy_path(self, fake_kedro_cli, python_call_mock):
+    def test_happy_path(self, fake_project_cli, python_call_mock):
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["test", "--random-arg", "value"]
+            fake_project_cli.cli, ["test", "--random-arg", "value"]
         )
         assert not result.exit_code
         python_call_mock.assert_called_once_with("pytest", ("--random-arg", "value"))
 
     def test_pytest_not_installed(
-        self, fake_kedro_cli, python_call_mock, mocker, fake_repo_path
+        self, fake_project_cli, python_call_mock, mocker, fake_repo_path, fake_metadata
     ):
         mocker.patch.dict("sys.modules", {"pytest": None})
 
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["test", "--random-arg", "value"]
+            fake_project_cli.cli, ["test", "--random-arg", "value"], obj=fake_metadata
         )
         expected_message = NO_DEPENDENCY_MESSAGE.format(
             module="pytest", src=str(fake_repo_path / "src")
@@ -154,9 +175,17 @@ class TestTestCommand:
 class TestLintCommand:
     @pytest.mark.parametrize("files", [(), ("src",)])
     def test_lint(
-        self, fake_kedro_cli, python_call_mock, files, mocker, fake_repo_path
+        self,
+        fake_project_cli,
+        python_call_mock,
+        files,
+        mocker,
+        fake_repo_path,
+        fake_metadata,
     ):
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["lint", *files])
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["lint", *files], obj=fake_metadata
+        )
         assert not result.exit_code, result.stdout
 
         expected_files = files or (
@@ -165,11 +194,8 @@ class TestLintCommand:
         )
         expected_calls = [
             mocker.call("black", expected_files),
-            mocker.call("flake8", ("--max-line-length=88",) + expected_files),
-            mocker.call(
-                "isort",
-                ("-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + expected_files,
-            ),
+            mocker.call("flake8", expected_files),
+            mocker.call("isort", ("-rc",) + expected_files),
         ]
 
         assert python_call_mock.call_args_list == expected_calls
@@ -185,14 +211,17 @@ class TestLintCommand:
     )
     def test_lint_check_only(
         self,
-        fake_kedro_cli,
+        fake_project_cli,
         python_call_mock,
         check_flag,
         mocker,
         files,
         fake_repo_path,
+        fake_metadata,
     ):
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["lint", check_flag, *files])
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["lint", check_flag, *files], obj=fake_metadata
+        )
         assert not result.exit_code, result.stdout
 
         expected_files = files or (
@@ -201,22 +230,25 @@ class TestLintCommand:
         )
         expected_calls = [
             mocker.call("black", ("--check",) + expected_files),
-            mocker.call("flake8", ("--max-line-length=88",) + expected_files),
-            mocker.call(
-                "isort",
-                ("-c", "-rc", "-tc", "-up", "-fgw=0", "-m=3", "-w=88") + expected_files,
-            ),
+            mocker.call("flake8", expected_files),
+            mocker.call("isort", ("-c", "-rc") + expected_files),
         ]
 
         assert python_call_mock.call_args_list == expected_calls
 
     @pytest.mark.parametrize("module_name", ["flake8", "isort"])
     def test_import_not_installed(
-        self, fake_kedro_cli, python_call_mock, module_name, mocker, fake_repo_path
+        self,
+        fake_project_cli,
+        python_call_mock,
+        module_name,
+        mocker,
+        fake_repo_path,
+        fake_metadata,
     ):
         mocker.patch.dict("sys.modules", {module_name: None})
 
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["lint"])
+        result = CliRunner().invoke(fake_project_cli.cli, ["lint"], obj=fake_metadata)
         expected_message = NO_DEPENDENCY_MESSAGE.format(
             module=module_name, src=str(fake_repo_path / "src")
         )
@@ -225,21 +257,31 @@ class TestLintCommand:
         assert expected_message in result.stdout
         python_call_mock.assert_not_called()
 
-    def test_pythonpath_env_var(self, fake_kedro_cli, mocker, fake_repo_path):
+    def test_pythonpath_env_var(
+        self, fake_project_cli, mocker, fake_repo_path, fake_metadata
+    ):
         mocked_environ = mocker.patch("os.environ", {})
-        CliRunner().invoke(fake_kedro_cli.cli, ["lint"])
+        CliRunner().invoke(fake_project_cli.cli, ["lint"], obj=fake_metadata)
         assert mocked_environ == {"PYTHONPATH": str(fake_repo_path / "src")}
 
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log", "fake_copyfile")
 class TestInstallCommand:
     def test_install_compile_default(
-        self, python_call_mock, fake_kedro_cli, fake_repo_path, fake_copyfile, mocker,
+        self,
+        python_call_mock,
+        fake_project_cli,
+        fake_repo_path,
+        fake_copyfile,
+        mocker,
+        fake_metadata,
     ):
         """Test that the requirements are compiled by default
         if requirements.in doesn't exist"""
         mocker.patch("kedro.framework.cli.project.os").name = "posix"
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["install"])
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["install"], obj=fake_metadata
+        )
         assert not result.exit_code, result.output
         assert "Requirements installed!" in result.output
 
@@ -255,13 +297,21 @@ class TestInstallCommand:
         )
 
     def test_install_compile_force(
-        self, python_call_mock, fake_kedro_cli, fake_repo_path, fake_copyfile, mocker,
+        self,
+        python_call_mock,
+        fake_project_cli,
+        fake_repo_path,
+        fake_copyfile,
+        mocker,
+        fake_metadata,
     ):
         """Test that the requirements are compiled if requirements.in exists
         and --build-reqs CLI option is specified"""
         mocker.patch("kedro.framework.cli.project.os").name = "posix"
         mocker.patch.object(Path, "is_file", return_value=True)
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["install", "--build-reqs"])
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["install", "--build-reqs"], obj=fake_metadata
+        )
         assert not result.exit_code, result.output
         assert "Requirements installed!" in result.output
 
@@ -275,13 +325,21 @@ class TestInstallCommand:
         fake_copyfile.assert_not_called()
 
     def test_install_no_compile_default(
-        self, python_call_mock, fake_kedro_cli, fake_repo_path, fake_copyfile, mocker,
+        self,
+        python_call_mock,
+        fake_project_cli,
+        fake_repo_path,
+        fake_copyfile,
+        mocker,
+        fake_metadata,
     ):
         """Test that the requirements aren't compiled by default
         if requirements.in exists"""
         mocker.patch("kedro.framework.cli.project.os").name = "posix"
         mocker.patch.object(Path, "is_file", return_value=True)
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["install"])
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["install"], obj=fake_metadata
+        )
         assert not result.exit_code, result.output
         assert "Requirements installed!" in result.output
 
@@ -292,12 +350,20 @@ class TestInstallCommand:
         fake_copyfile.assert_not_called()
 
     def test_install_no_compile_force(
-        self, python_call_mock, fake_kedro_cli, fake_repo_path, fake_copyfile, mocker
+        self,
+        python_call_mock,
+        fake_project_cli,
+        fake_repo_path,
+        fake_copyfile,
+        mocker,
+        fake_metadata,
     ):
         """Test that the requirements aren't compiled if requirements.in doesn't exist
         and --no-build-reqs CLI option is specified"""
         mocker.patch("kedro.framework.cli.project.os").name = "posix"
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["install", "--no-build-reqs"])
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["install", "--no-build-reqs"], obj=fake_metadata
+        )
         assert not result.exit_code, result.output
         assert "Requirements installed!" in result.output
 
@@ -311,16 +377,19 @@ class TestInstallCommand:
         self,
         python_call_mock,
         call_mock,
-        fake_kedro_cli,
+        fake_project_cli,
         mocker,
         fake_repo_path,
         fake_copyfile,
+        fake_metadata,
     ):
         mocker.patch("kedro.framework.cli.project.os").name = "posix"
         # Pretend env file exists:
         mocker.patch.object(Path, "is_file", return_value=True)
 
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["install"])
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["install"], obj=fake_metadata
+        )
         assert not result.exit_code, result.stdout
         assert "Requirements installed!" in result.output
 
@@ -342,12 +411,17 @@ class TestInstallCommand:
         )
         fake_copyfile.assert_not_called()
 
-    def test_windows(self, fake_kedro_cli, mocker, fake_repo_path, fake_copyfile):
+    def test_windows(
+        self, fake_project_cli, mocker, fake_repo_path, fake_copyfile, fake_metadata
+    ):
         mock_subprocess = mocker.patch("kedro.framework.cli.project.subprocess")
+        mock_subprocess.Popen.return_value.communicate.return_value = ("", b"")
         # pretend we are on Windows
         mocker.patch("kedro.framework.cli.project.os").name = "nt"
 
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["install"])
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["install"], obj=fake_metadata
+        )
         assert not result.exit_code, result.stdout
         assert "Requirements installed!" in result.output
 
@@ -363,11 +437,30 @@ class TestInstallCommand:
             str(requirements_txt),
         ]
         mock_subprocess.Popen.assert_called_once_with(
-            command, creationflags=mock_subprocess.CREATE_NEW_CONSOLE
+            command,
+            creationflags=mock_subprocess.CREATE_NEW_CONSOLE,
+            stderr=mock_subprocess.PIPE,
         )
         fake_copyfile.assert_called_once_with(
             str(requirements_txt), str(requirements_in)
         )
+
+    def test_windows_err(
+        self, fake_project_cli, mocker, fake_repo_path, fake_copyfile, fake_metadata
+    ):
+        mock_subprocess = mocker.patch("kedro.framework.cli.project.subprocess")
+        mock_subprocess.Popen.return_value.communicate.return_value = (
+            "",
+            b"Error in dependencies",
+        )
+        # pretend we are on Windows
+        mocker.patch("kedro.framework.cli.project.os").name = "nt"
+
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["install"], obj=fake_metadata
+        )
+        assert result.exit_code, result.stdout
+        assert "Error in dependencies" in result.output
 
 
 @pytest.fixture
@@ -378,10 +471,18 @@ def os_mock(mocker):
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log", "os_mock")
 class TestIpythonCommand:
     def test_happy_path(
-        self, call_mock, fake_kedro_cli, fake_ipython_message, os_mock, fake_repo_path
+        self,
+        call_mock,
+        fake_project_cli,
+        fake_ipython_message,
+        os_mock,
+        fake_repo_path,
+        fake_metadata,
     ):
         result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["ipython", "--random-arg", "value"]
+            fake_project_cli.cli,
+            ["ipython", "--random-arg", "value"],
+            obj=fake_metadata,
         )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_called_once_with()
@@ -391,18 +492,37 @@ class TestIpythonCommand:
         )
 
     @pytest.mark.parametrize("help_flag", ["-h", "--help"])
-    def test_help(self, help_flag, call_mock, fake_kedro_cli, fake_ipython_message):
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["ipython", help_flag])
+    def test_help(
+        self,
+        help_flag,
+        call_mock,
+        fake_project_cli,
+        fake_ipython_message,
+        fake_metadata,
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["ipython", help_flag], obj=fake_metadata
+        )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_not_called()
         call_mock.assert_called_once_with(["ipython", help_flag])
 
     @pytest.mark.parametrize("env_flag,env", [("--env", "base"), ("-e", "local")])
     def test_env(
-        self, env_flag, env, fake_kedro_cli, call_mock, fake_repo_path, os_mock, mocker
+        self,
+        env_flag,
+        env,
+        fake_project_cli,
+        call_mock,
+        fake_repo_path,
+        os_mock,
+        mocker,
+        fake_metadata,
     ):
         """This tests starting ipython with specific env."""
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["ipython", env_flag, env])
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["ipython", env_flag, env], obj=fake_metadata
+        )
         assert not result.exit_code, result.stdout
 
         calls = [
@@ -411,21 +531,9 @@ class TestIpythonCommand:
         ]
         os_mock.environ.__setitem__.assert_has_calls(calls)
 
-    def test_load_context_error(self, fake_kedro_cli):
-        result = CliRunner().invoke(
-            fake_kedro_cli.cli, ["ipython", "--env", "fake_env"]
-        )
-
-        expected_output = (
-            "Error: Unable to load Kedro context with environment `fake_env`. "
-            "Make sure it exists in the project configuration.\n"
-        )
-        assert result.exit_code
-        assert expected_output in result.output
-
-    def test_fail_no_ipython(self, fake_kedro_cli, mocker):
+    def test_fail_no_ipython(self, fake_project_cli, mocker):
         mocker.patch.dict("sys.modules", {"IPython": None})
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["ipython"])
+        result = CliRunner().invoke(fake_project_cli.cli, ["ipython"])
 
         assert result.exit_code
         error = (
@@ -437,8 +545,12 @@ class TestIpythonCommand:
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
 class TestPackageCommand:
-    def test_happy_path(self, call_mock, fake_kedro_cli, mocker, fake_repo_path):
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["package"])
+    def test_happy_path(
+        self, call_mock, fake_project_cli, mocker, fake_repo_path, fake_metadata
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["package"], obj=fake_metadata
+        )
         assert not result.exit_code, result.stdout
         call_mock.assert_has_calls(
             [
@@ -457,11 +569,19 @@ class TestPackageCommand:
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
 class TestBuildDocsCommand:
     def test_happy_path(
-        self, call_mock, python_call_mock, fake_kedro_cli, mocker, fake_repo_path
+        self,
+        call_mock,
+        python_call_mock,
+        fake_project_cli,
+        mocker,
+        fake_repo_path,
+        fake_metadata,
     ):
         fake_rmtree = mocker.patch("shutil.rmtree")
 
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["build-docs"])
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["build-docs"], obj=fake_metadata
+        )
         assert not result.exit_code, result.stdout
         call_mock.assert_has_calls(
             [
@@ -492,10 +612,12 @@ class TestBuildDocsCommand:
         fake_rmtree.assert_called_once_with("docs/build", ignore_errors=True)
 
     @pytest.mark.parametrize("open_flag", ["-o", "--open"])
-    def test_open_docs(self, open_flag, fake_kedro_cli, mocker):
+    def test_open_docs(self, open_flag, fake_project_cli, mocker, fake_metadata):
         mocker.patch("shutil.rmtree")
         patched_browser = mocker.patch("webbrowser.open")
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["build-docs", open_flag])
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["build-docs", open_flag], obj=fake_metadata
+        )
         assert not result.exit_code, result.stdout
         expected_path = (Path.cwd() / "docs" / "build" / "html" / "index.html").as_uri()
         patched_browser.assert_called_once_with(expected_path)
@@ -504,12 +626,20 @@ class TestBuildDocsCommand:
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log", "fake_copyfile")
 class TestBuildReqsCommand:
     def test_requirements_file_exists(
-        self, python_call_mock, fake_kedro_cli, mocker, fake_repo_path, fake_copyfile
+        self,
+        python_call_mock,
+        fake_project_cli,
+        mocker,
+        fake_repo_path,
+        fake_copyfile,
+        fake_metadata,
     ):
         # File exists:
         mocker.patch.object(Path, "is_file", return_value=True)
 
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["build-reqs"])
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["build-reqs"], obj=fake_metadata
+        )
         assert not result.exit_code, result.stdout
         assert "Requirements built!" in result.stdout
 
@@ -520,13 +650,20 @@ class TestBuildReqsCommand:
         fake_copyfile.assert_not_called()
 
     def test_requirements_file_doesnt_exist(
-        self, python_call_mock, fake_kedro_cli, fake_repo_path, fake_copyfile
+        self,
+        python_call_mock,
+        fake_project_cli,
+        fake_repo_path,
+        fake_copyfile,
+        fake_metadata,
     ):
         # File does not exist:
         requirements_in = fake_repo_path / "src" / "requirements.in"
         requirements_txt = fake_repo_path / "src" / "requirements.txt"
 
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["build-reqs"])
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["build-reqs"], obj=fake_metadata
+        )
         assert not result.exit_code, result.stdout
         assert "Requirements built!" in result.stdout
         python_call_mock.assert_called_once_with(
@@ -540,11 +677,19 @@ class TestBuildReqsCommand:
         "extra_args", [["--generate-hashes"], ["-foo", "--bar", "baz"]]
     )
     def test_extra_args(
-        self, python_call_mock, fake_kedro_cli, fake_repo_path, extra_args
+        self,
+        python_call_mock,
+        fake_project_cli,
+        fake_repo_path,
+        extra_args,
+        fake_metadata,
     ):
         requirements_in = fake_repo_path / "src" / "requirements.in"
 
-        result = CliRunner().invoke(fake_kedro_cli.cli, ["build-reqs"] + extra_args)
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["build-reqs"] + extra_args, obj=fake_metadata
+        )
+
         assert not result.exit_code, result.stdout
         assert "Requirements built!" in result.stdout
 

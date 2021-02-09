@@ -1,6 +1,6 @@
 # The Data Catalog
 
-> *Note:* This documentation is based on `Kedro 0.16.5`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.17.0`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 This section introduces `catalog.yml`, the project-shareable Data Catalog. The file is located in `conf/base` and is a registry of all data sources available for use by a project; it manages loading and saving of data.
 
@@ -35,8 +35,10 @@ The following prepends are available:
 - **Hadoop File System (HDFS)**: `hdfs://user@server:port/path/to/data` - Hadoop Distributed File System, for resilient, replicated files within a cluster.
 - **Amazon S3**: `s3://my-bucket-name/path/to/data` - Amazon S3 remote binary store, often used with Amazon EC2,
   using the library s3fs.
+- **S3 Compatible Storage**: `s3://my-bucket-name/path/_to/data` - e.g. Minio, using the s3fs library.
 - **Google Cloud Storage**: `gcs://` - Google Cloud Storage, typically used with Google Compute
   resource using gcsfs (in development).
+- **Azure Blob Storage / Azure Data Lake Storage Gen2**: `abfs://` - Azure Blob Storage, typically used when working on an Azure environment.
 - **HTTP(s)**: ``http://`` or ``https://`` for reading data directly from HTTP web servers.
 
 `fsspec` also provides other file systems, such as SSH, FTP and WebHDFS. See the [documentation](https://filesystem-spec.readthedocs.io/en/latest/api.html#implementations) for more information.
@@ -260,10 +262,60 @@ us_corn_yield_data:
 
 > *Note:* When using [`pandas.SQLTableDataSet`](/kedro.extras.datasets.pandas.SQLTableDataSet) or [`pandas.SQLQueryDataSet`](/kedro.extras.datasets.pandas.SQLQueryDataSet) you must provide a database connection string. In the example above we pass it using `scooters_credentials` key from the credentials (see the details in [Feeding in credentials](#feeding-in-credentials) section below). `scooters_credentials` must have a top-level key `con` containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataSet` only).
 
+Example 14: Loading data from Minio (S3 API Compatible Storage)
+```yaml
+test:
+  type: pandas.CSVDataSet
+  filepath: s3://your_bucket/test.csv # assume `test.csv` is uploaded to the Minio server.
+  credentials: dev_minio
+```
+In `credentials.yml`, define the `key`, `secret` and the `endpoint_url` as follows:
+
+```yaml
+dev_minio:
+  key: token
+  secret: key
+  cleitn_kwargs:
+    endpoint_url : 'http://localhost:9000'
+```
+> Note: The easiest way to setup MinIO is to run a Docker image. After the following command, you can access to Minio server with http://localhost:9000 and create a bucket and add files as if it is on S3.
+
+`docker run -p 9000:9000 -e "MINIO_ACCESS_KEY=token" -e "MINIO_SECRET_KEY=key" minio/minio server /data`
+
+Example 15: Loading a model saved as a pickle from Azure Blob Storage
+
+```yaml
+ml_model:
+  type: pickle.PickleDataSet
+  filepath: "abfs://models/ml_models.pickle"
+  versioned: True
+  credentials: dev_abs
+```
+In `credentials.yml`, define the `account_name` and `account_key` as follows:
+
+```yaml
+dev_abs:
+  account_name: accountname
+  account_key: key
+```
+
+## Creating a Data Catalog YAML configuration file via CLI
+
+You can use [`kedro catalog create` command](../09_development/03_commands_reference.md#create-a-data-catalog-yaml-configuration-file) to create a Data Catalog YAML configuration.
+
+It creates a `<conf_root>/<env>/catalog/<pipeline_name>.yml` configuration file with `MemoryDataSet` datasets for each dataset in a registered pipeline if it is missing from the `DataCatalog`.
+
+```yaml
+# <conf_root>/<env>/catalog/<pipeline_name>.yml
+rockets:
+  type: MemoryDataSet
+scooters:
+  type: MemoryDataSet
+```
 
 ## Adding parameters
 
-You can [configure parameters](../04_kedro_project_setup/02_configuration.md#loading-parameters) for your project and [reference them](../04_kedro_project_setup/02_configuration.md#using-parameters) in your nodes. The way to do this is via `add_feed_dict()` method (Relevant API documentation: [DataCatalog](/kedro.io.DataCatalog)). You can use this method to add any other entry / metadata you wish on the `DataCatalog`.
+You can [configure parameters](../04_kedro_project_setup/02_configuration.md#loading-parameters) for your project and [reference them](../04_kedro_project_setup/02_configuration.md#using-parameters) in your nodes. Do this using the `add_feed_dict()` method ([API documentation](/kedro.io.DataCatalog)). You can use this method to add any other entry / metadata you wish on the `DataCatalog`.
 
 
 ## Feeding in credentials
@@ -274,8 +326,9 @@ Let's assume that the project contains the file `conf/local/credentials.yml` wit
 
 ```yaml
 dev_s3:
-  key: token
-  secret: key
+  client_kwargs:
+    aws_access_key_id: key
+    aws_secret_access_key: secret
 
 scooters_credentials:
   con: sqlite:///kedro.db
@@ -397,7 +450,7 @@ Transformers are used to intercept the load and save operations on Kedro `DataSe
 
  - Data validation
  - Tracking operation performance
- - Data format conversion (although we would recommend [Transcoding](../05_data/01_data_catalog#transcoding-datasets) for this)
+ - Data format conversion (although we would recommend [Transcoding](#transcoding-datasets) for this)
 
 ### Applying built-in transformers
 
@@ -405,16 +458,14 @@ Here we cover the use case of _tracking operation performance_ by applying built
 
 Transformers are applied at the `DataCatalog` level. To apply the built-in `ProfileTimeTransformer`, you need to:
 
-1. Navigate to `src/<package_name>/run.py`
-2. Apply `ProfileTimeTransformer` in the hook implementation `TransformerHooks.after_catalog_created`.
-3. Register the hook in your `ProjectContext` as follows:
+1. Navigate to `src/<package_name>/hooks.py`
+2. Apply `ProfileTimeTransformer` in the hook implementation `TransformerHooks.after_catalog_created`
+3. Register the hook in your `src/<package_name>/settings.py`
 
 ```python
-from pathlib import Path
-from typing import Dict
+# src/<package_name>/hooks.py
 
 from kedro.extras.transformers import ProfileTimeTransformer # new import
-from kedro.framework.context import KedroContext, load_package_context
 from kedro.framework.hooks import hook_impl # new import
 from kedro.io import DataCatalog # new import
 
@@ -424,10 +475,13 @@ class TransformerHooks:
     def after_catalog_created(self, catalog: DataCatalog) -> None:
         catalog.add_transformer(ProfileTimeTransformer())
 
-class ProjectContext(KedroContext):
+```
 
-    ...
-    hooks = (TransformerHooks(),)
+```python
+# src/<package_name>/settings.py
+from <package_name>.hooks import TransformerHooks
+
+HOOKS = (TransformerHooks(),)
 ```
 
 Once complete, rerun the pipeline from the terminal and you should see the following logging output:

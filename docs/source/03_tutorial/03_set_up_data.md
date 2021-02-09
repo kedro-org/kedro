@@ -27,23 +27,23 @@ Using [cURL in a Unix terminal](https://curl.haxx.se/download.html):
 
 ```bash
 # reviews
-curl -o data/01_raw/reviews.csv https://raw.githubusercontent.com/quantumblacklabs/kedro-examples/master/kedro-tutorial/data/01_raw/reviews.csv
+curl -o data/01_raw/reviews.csv https://quantumblacklabs.github.io/kedro/reviews.csv
 # companies
-curl -o data/01_raw/companies.csv https://raw.githubusercontent.com/quantumblacklabs/kedro-examples/master/kedro-tutorial/data/01_raw/companies.csv
+curl -o data/01_raw/companies.csv https://quantumblacklabs.github.io/kedro/companies.csv
 # shuttles
-curl -o data/01_raw/shuttles.xlsx https://raw.githubusercontent.com/quantumblacklabs/kedro-examples/master/kedro-tutorial/data/01_raw/shuttles.xlsx
+curl -o data/01_raw/shuttles.xlsx https://quantumblacklabs.github.io/kedro/shuttles.xlsx
 ```
 </details>
 
-Using [cURL for Windows](https://curl.haxx.se/windows/):
+Using [cURL for Windows](https://curl.se/windows/):
 
 <details>
 <summary><b>Click to expand</b></summary>
 
 ```bat
-curl -o data\01_raw\reviews.csv https://raw.githubusercontent.com/quantumblacklabs/kedro-examples/master/kedro-tutorial/data/01_raw/reviews.csv
-curl -o data\01_raw\companies.csv https://raw.githubusercontent.com/quantumblacklabs/kedro-examples/master/kedro-tutorial/data/01_raw/companies.csv
-curl -o data\01_raw\shuttles.xlsx https://raw.githubusercontent.com/quantumblacklabs/kedro-examples/master/kedro-tutorial/data/01_raw/shuttles.xlsx
+curl -o data\01_raw\reviews.csv https://quantumblacklabs.github.io/kedro/reviews.csv
+curl -o data\01_raw\companies.csv https://quantumblacklabs.github.io/kedro/companies.csv
+curl -o data\01_raw\shuttles.xlsx https://quantumblacklabs.github.io/kedro/shuttles.xlsx
 ```
 </details>
 
@@ -54,11 +54,11 @@ Using [Wget in a Unix terminal](https://www.gnu.org/software/wget/):
 
 ```bash
 # reviews
-wget -O data/01_raw/reviews.csv https://raw.githubusercontent.com/quantumblacklabs/kedro-examples/master/kedro-tutorial/data/01_raw/reviews.csv
+wget -O data/01_raw/reviews.csv https://quantumblacklabs.github.io/kedro/reviews.csv
 # companies
-wget -O data/01_raw/companies.csv https://raw.githubusercontent.com/quantumblacklabs/kedro-examples/master/kedro-tutorial/data/01_raw/companies.csv
+wget -O data/01_raw/companies.csv https://quantumblacklabs.github.io/kedro/companies.csv
 # shuttles
-wget -O data/01_raw/shuttles.xlsx https://raw.githubusercontent.com/quantumblacklabs/kedro-examples/master/kedro-tutorial/data/01_raw/shuttles.xlsx
+wget -O data/01_raw/shuttles.xlsx https://quantumblacklabs.github.io/kedro/shuttles.xlsx
 ```
 </details>
 
@@ -68,9 +68,9 @@ Using [Wget for Windows](https://eternallybored.org/misc/wget/):
 <summary><b>Click to expand</b></summary>
 
 ```bat
-wget -O data\01_raw\reviews.csv https://raw.githubusercontent.com/quantumblacklabs/kedro-examples/master/kedro-tutorial/data/01_raw/reviews.csv
-wget -O data\01_raw\companies.csv https://raw.githubusercontent.com/quantumblacklabs/kedro-examples/master/kedro-tutorial/data/01_raw/companies.csv
-wget -O data\01_raw\shuttles.xlsx https://raw.githubusercontent.com/quantumblacklabs/kedro-examples/master/kedro-tutorial/data/01_raw/shuttles.xlsx
+wget -O data\01_raw\reviews.csv https://quantumblacklabs.github.io/kedro/reviews.csv
+wget -O data\01_raw\companies.csv https://quantumblacklabs.github.io/kedro/companies.csv
+wget -O data\01_raw\shuttles.xlsx https://quantumblacklabs.github.io/kedro/shuttles.xlsx
 ```
 </details>
 
@@ -103,7 +103,7 @@ reviews:
 To check whether Kedro can load the data correctly, open a `kedro ipython` session and run:
 
 ```python
-context.catalog.load("companies").head()
+catalog.load("companies").head()
 ```
 
 The command loads the dataset named `companies` (as per top-level key in `catalog.yml`), from the underlying filepath `data/01_raw/companies.csv`. It displays the first five rows of the dataset, and is loaded into a `pandas` DataFrame for you to experiment with the data.
@@ -124,10 +124,10 @@ shuttles:
   filepath: data/01_raw/shuttles.xlsx
 ```
 
-To test that everything works as expected, load the dataset within a new `kedro ipython` session:
+To test that everything works as expected, load the dataset within a _new_ `kedro ipython` session:
 
 ```python
-context.catalog.load("shuttles").head()
+catalog.load("shuttles").head()
 ```
 When you have finished, close `ipython` session as follows:
 
@@ -139,4 +139,4 @@ exit()
 
 Kedro supports a number of [datasets](/kedro.extras.datasets) out of the box, but you can also add support for any proprietary data format or filesystem in your pipeline.
 
-You can find further information about [how to add support for custom datasets](../07_extend_kedro/01_custom_datasets.md) in specific documentation covering advanced usage.
+You can find further information about [how to add support for custom datasets](../07_extend_kedro/03_custom_datasets.md) in specific documentation covering advanced usage.

@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,14 +28,14 @@
 
 """A collection of CLI commands for working with Kedro catalog."""
 from collections import defaultdict
-from pathlib import Path
 
 import click
 import yaml
 from click import secho
 
+from kedro.framework.cli.pipeline import _create_session
 from kedro.framework.cli.utils import KedroCliError, env_option, split_string
-from kedro.framework.context import load_context
+from kedro.framework.startup import ProjectMetadata
 
 
 @click.group()
@@ -50,16 +50,19 @@ def catalog():
     "--pipeline",
     type=str,
     default="",
-    help="Name of the modular pipeline to run. If not set, the project pipeline is run by default.",
+    help="Name of the modular pipeline to run. If not set, "
+    "the project pipeline is run by default.",
     callback=split_string,
 )
-def list_datasets(pipeline, env):
+@click.pass_obj
+def list_datasets(metadata: ProjectMetadata, pipeline, env):
     """Show datasets per type."""
     title = "DataSets in '{}' pipeline"
     not_mentioned = "Datasets not mentioned in pipeline"
     mentioned = "Datasets mentioned in pipeline"
 
-    context = load_context(Path.cwd(), env=env)
+    session = _create_session(metadata.package_name, env=env)
+    context = session.load_context()
     datasets_meta = context.catalog._data_sets  # pylint: disable=protected-access
     catalog_ds = set(context.catalog.list())
 
@@ -73,7 +76,7 @@ def list_datasets(pipeline, env):
         else:
             existing_pls = ", ".join(sorted(context.pipelines.keys()))
             raise KedroCliError(
-                f"{pipe} pipeline not found! Existing pipelines: {existing_pls}"
+                f"`{pipe}` pipeline not found! Existing pipelines: {existing_pls}"
             )
 
         unused_ds = catalog_ds - pipeline_ds
@@ -104,3 +107,75 @@ def _map_type_to_datasets(datasets, datasets_meta):
             if dataset not in mapping[ds_type]:
                 mapping[ds_type].append(dataset)
     return mapping
+
+
+@catalog.command("create")
+@env_option(help="Environment to create Data Catalog YAML file in. Defaults to `base`.")
+@click.option(
+    "--pipeline", "pipeline_name", type=str, required=True, help="Name of a pipeline.",
+)
+@click.pass_obj
+def create_catalog(metadata: ProjectMetadata, pipeline_name, env):
+    """Create Data Catalog YAML configuration with missing datasets.
+
+    Add `MemoryDataSet` datasets to Data Catalog YAML configuration file
+    for each dataset in a registered pipeline if it is missing from
+    the `DataCatalog`.
+
+    The catalog configuration will be saved to
+    `<conf_root>/<env>/catalog/<pipeline_name>.yml` file.
+    """
+    env = env or "base"
+    session = _create_session(metadata.package_name, env=env)
+    context = session.load_context()
+
+    pipeline = context.pipelines.get(pipeline_name)
+
+    if not pipeline:
+        existing_pipelines = ", ".join(sorted(context.pipelines.keys()))
+        raise KedroCliError(
+            f"`{pipeline_name}` pipeline not found! Existing pipelines: {existing_pipelines}"
+        )
+
+    pipe_datasets = {
+        ds_name
+        for ds_name in pipeline.data_sets()
+        if not ds_name.startswith("params:") and ds_name != "parameters"
+    }
+
+    catalog_datasets = {
+        ds_name
+        for ds_name in context.catalog._data_sets.keys()  # pylint: disable=protected-access
+        if not ds_name.startswith("params:") and ds_name != "parameters"
+    }
+
+    # Datasets that are missing in Data Catalog
+    missing_ds = sorted(pipe_datasets - catalog_datasets)
+    if missing_ds:
+        catalog_path = (
+            context.project_path
+            / context.CONF_ROOT
+            / env
+            / "catalog"
+            / f"{pipeline_name}.yml"
+        )
+        _add_missing_datasets_to_catalog(missing_ds, catalog_path)
+        click.echo(f"Data Catalog YAML configuration was created: {catalog_path}")
+    else:
+        click.echo("All datasets are already configured.")
+
+
+def _add_missing_datasets_to_catalog(missing_ds, catalog_path):
+    if catalog_path.is_file():
+        catalog_config = yaml.safe_load(catalog_path.read_text()) or {}
+    else:
+        catalog_config = {}
+
+    for ds_name in missing_ds:
+        catalog_config[ds_name] = {"type": "MemoryDataSet"}
+
+    # Create only `catalog` folder under existing environment
+    # (all parent folders must exist).
+    catalog_path.parent.mkdir(exist_ok=True)
+    with catalog_path.open(mode="w") as catalog_file:
+        yaml.safe_dump(catalog_config, catalog_file, default_flow_style=False)

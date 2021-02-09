@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ class TestNetworkXDataSet:
         networkx_data_set.save(dummy_graph_data)
         reloaded = networkx_data_set.load()
         assert dummy_graph_data.nodes(data=True) == reloaded.nodes(data=True)
-        assert networkx_data_set._fs_open_args_load == {"mode": "r"}
+        assert networkx_data_set._fs_open_args_load == {}
         assert networkx_data_set._fs_open_args_save == {"mode": "w"}
 
     def test_load_missing_file(self, networkx_data_set):

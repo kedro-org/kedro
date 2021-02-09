@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -75,6 +75,28 @@ def template_config():
         "float_type": "FLOAT",
         "write_only_user": "ron",
     }
+
+
+@pytest.fixture
+def catalog_with_jinja2_syntax(tmp_path):
+    filepath = tmp_path / "base" / "catalog.yml"
+
+    catalog = """
+{% for speed in ['fast', 'slow'] %}
+{{ speed }}-trains:
+    type: MemoryDataSet
+
+{{ speed }}-cars:
+    type: pandas.CSVDataSet
+    filepath: ${s3_bucket}/{{ speed }}-cars.csv
+    save_args:
+        index: true
+
+{% endfor %}
+"""
+
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    filepath.write_text(catalog)
 
 
 @pytest.fixture
@@ -205,7 +227,7 @@ def proj_catalog_param_w_vals_exceptional(tmp_path, param_config_exceptional):
 
 class TestTemplatedConfigLoader:
     @pytest.mark.usefixtures("proj_catalog_param")
-    def test_catlog_parameterized_w_dict(self, tmp_path, conf_paths, template_config):
+    def test_catalog_parameterized_w_dict(self, tmp_path, conf_paths, template_config):
         """Test parameterized config with input from dictionary with values"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
@@ -223,7 +245,7 @@ class TestTemplatedConfigLoader:
         assert catalog["boats"]["users"] == ["fred", "ron"]
 
     @pytest.mark.usefixtures("proj_catalog_param", "proj_catalog_globals")
-    def test_catlog_parameterized_w_globals(self, tmp_path, conf_paths):
+    def test_catalog_parameterized_w_globals(self, tmp_path, conf_paths):
         """Test parameterized config with globals yaml file"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
@@ -241,7 +263,7 @@ class TestTemplatedConfigLoader:
         assert catalog["boats"]["users"] == ["fred", "ron"]
 
     @pytest.mark.usefixtures("proj_catalog_param")
-    def test_catlog_parameterized_no_params(self, tmp_path, conf_paths):
+    def test_catalog_parameterized_no_params(self, tmp_path, conf_paths):
         """Test parameterized config without input"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
@@ -258,7 +280,7 @@ class TestTemplatedConfigLoader:
         assert catalog["boats"]["users"] == ["fred", "${write_only_user}"]
 
     @pytest.mark.usefixtures("proj_catalog_advanced")
-    def test_catlog_advanced(self, tmp_path, conf_paths, normal_config_advanced):
+    def test_catalog_advanced(self, tmp_path, conf_paths, normal_config_advanced):
         """Test whether it responds well to advanced yaml values
         (i.e. nested dicts, booleans, lists, etc.)"""
         (tmp_path / "local").mkdir(exist_ok=True)
@@ -275,7 +297,7 @@ class TestTemplatedConfigLoader:
         assert catalog["planes"]["secret_tables"] == ["models", "pilots", "engines"]
 
     @pytest.mark.usefixtures("proj_catalog_param_w_vals_advanced")
-    def test_catlog_parameterized_advanced(
+    def test_catalog_parameterized_advanced(
         self, tmp_path, conf_paths, template_config_advanced
     ):
         """Test advanced templating (i.e. nested dicts, booleans, lists, etc.)"""
@@ -293,7 +315,9 @@ class TestTemplatedConfigLoader:
         assert catalog["planes"]["secret_tables"] == ["models", "pilots", "engines"]
 
     @pytest.mark.usefixtures("proj_catalog_param_mixed", "proj_catalog_globals")
-    def test_catlog_parameterized_w_dict_mixed(self, tmp_path, conf_paths, get_environ):
+    def test_catalog_parameterized_w_dict_mixed(
+        self, tmp_path, conf_paths, get_environ
+    ):
         """Test parameterized config with input from dictionary with values
         and globals.yml"""
         (tmp_path / "local").mkdir(exist_ok=True)
@@ -312,7 +336,7 @@ class TestTemplatedConfigLoader:
         assert catalog["boats"]["users"] == ["fred", "ron"]
 
     @pytest.mark.usefixtures("proj_catalog_param_namespaced")
-    def test_catlog_parameterized_w_dict_namespaced(
+    def test_catalog_parameterized_w_dict_namespaced(
         self, tmp_path, conf_paths, template_config, get_environ
     ):
         """Test parameterized config with namespacing in the template values"""
@@ -332,7 +356,7 @@ class TestTemplatedConfigLoader:
         assert catalog["boats"]["users"] == ["fred", "ron"]
 
     @pytest.mark.usefixtures("proj_catalog_param_w_vals_exceptional")
-    def test_catlog_parameterized_exceptional(
+    def test_catalog_parameterized_exceptional(
         self, tmp_path, conf_paths, template_config_exceptional
     ):
         """Test templating with mixed type replacement values going into one string"""
@@ -343,6 +367,28 @@ class TestTemplatedConfigLoader:
         ).get("catalog*.yml")
 
         assert catalog["postcode"] == "NW10 2JK"
+
+    @pytest.mark.usefixtures("catalog_with_jinja2_syntax")
+    def test_catalog_with_jinja2_syntax(self, tmp_path, conf_paths, template_config):
+        (tmp_path / "local").mkdir(exist_ok=True)
+        catalog = TemplatedConfigLoader(conf_paths, globals_dict=template_config).get(
+            "catalog*.yml"
+        )
+        expected_catalog = {
+            "fast-trains": {"type": "MemoryDataSet"},
+            "fast-cars": {
+                "type": "pandas.CSVDataSet",
+                "filepath": "s3a://boat-and-car-bucket/fast-cars.csv",
+                "save_args": {"index": True},
+            },
+            "slow-trains": {"type": "MemoryDataSet"},
+            "slow-cars": {
+                "type": "pandas.CSVDataSet",
+                "filepath": "s3a://boat-and-car-bucket/slow-cars.csv",
+                "save_args": {"index": True},
+            },
+        }
+        assert catalog == expected_catalog
 
 
 class TestFormatObject:

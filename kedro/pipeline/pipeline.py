@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import json
 from collections import Counter, defaultdict
 from itertools import chain
 from typing import Callable, Dict, Iterable, List, Set, Tuple, Union
+from warnings import warn
 
 from toposort import CircularDependencyError as ToposortCircleError
 from toposort import toposort
@@ -202,8 +203,8 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         nodes_reprs_str = (
             "[\n{}\n]".format(",\n".join(nodes_reprs)) if nodes_reprs else "[]"
         )
-        constructor_repr = "({})".format(nodes_reprs_str)
-        return "{}{}".format(self.__class__.__name__, constructor_repr)
+        constructor_repr = f"({nodes_reprs_str})"
+        return f"{self.__class__.__name__}{constructor_repr}"
 
     def __add__(self, other):
         if not isinstance(other, Pipeline):
@@ -405,9 +406,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         unregistered_nodes = set(node_names) - set(self._nodes_by_name.keys())
         if unregistered_nodes:
             raise ValueError(
-                "Pipeline does not contain nodes named {}.".format(
-                    list(unregistered_nodes)
-                )
+                f"Pipeline does not contain nodes named {list(unregistered_nodes)}."
             )
 
         nodes = [self._nodes_by_name[name] for name in node_names]
@@ -459,9 +458,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
             datasets - self.data_sets() - self._transcode_compatible_names()
         )
         if missing:
-            raise ValueError(
-                "Pipeline does not contain data_sets named {}".format(missing)
-            )
+            raise ValueError(f"Pipeline does not contain data_sets named {missing}")
 
         relevant_nodes = set()
         for input_ in datasets:
@@ -492,9 +489,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
             datasets - self.data_sets() - self._transcode_compatible_names()
         )
         if missing:
-            raise ValueError(
-                "Pipeline does not contain data_sets named {}".format(missing)
-            )
+            raise ValueError(f"Pipeline does not contain data_sets named {missing}")
 
         relevant_nodes = set()
         for output in datasets:
@@ -711,6 +706,13 @@ class Pipeline:  # pylint: disable=too-many-public-methods
             provided decorators.
 
         """
+        warn(
+            "The pipeline's `decorate` API will be deprecated in Kedro 0.18.0."
+            "Please use a node's Hooks to extend the node's behaviour in a pipeline."
+            "For more information, please visit"
+            "https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_hooks.html",
+            DeprecationWarning,
+        )
         nodes = [node.decorate(*decorators) for node in self.nodes]
         return Pipeline(nodes)
 
@@ -846,7 +848,7 @@ def _topologically_sorted(node_dependencies) -> List[Set[Node]]:
         one that refers to the nodes' string representations.
         """
         circular = [str(node) for node in error_data.keys()]
-        return "Circular dependencies exist among these items: {}".format(circular)
+        return f"Circular dependencies exist among these items: {circular}"
 
     try:
         return list(toposort(node_dependencies))

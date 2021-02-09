@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -148,9 +148,7 @@ class TestCachedDataset:
 
     def test_pickle(self, cached_ds, caplog):
         _ = pickle.dumps(cached_ds)
-        assert caplog.records[0].message == "{}: clearing cache to pickle.".format(
-            cached_ds
-        )
+        assert caplog.records[0].message == f"{cached_ds}: clearing cache to pickle."
 
     def test_str(self):
         assert (

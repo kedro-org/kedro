@@ -30,12 +30,16 @@ To build a Prefect [flow](https://docs.prefect.io/core/concepts/flows.html) for 
 from pathlib import Path
 
 import click
-from kedro.framework.context import load_context
+
+from prefect import Client, Flow, Task
+from prefect.utilities.exceptions import ClientError
+
+from kedro.framework.cli.utils import _add_src_to_path
+from kedro.framework.session import KedroSession
+from kedro.framework.startup import _get_project_metadata
 from kedro.io import DataCatalog, MemoryDataSet
 from kedro.pipeline.node import Node
 from kedro.runner import run_node
-from prefect import Client, Flow, Task
-from prefect.utilities.exceptions import ClientError
 
 
 class KedroTask(Task):
@@ -55,7 +59,13 @@ class KedroTask(Task):
 @click.option("--env", "-e", type=str, default=None)
 def build_and_register_flow(pipeline_name, env):
     """Register a Kedro pipeline as a Prefect flow."""
-    context = load_context(project_path=Path.cwd(), env=env)
+    project_path = Path.cwd()
+    metadata = _get_project_metadata(project_path)
+    _add_src_to_path(metadata.source_dir, project_path)
+
+    session = KedroSession.create(metadata.package_name, project_path, env=env)
+    context = session.load_context()
+
     catalog = context.catalog
     pipeline_name = pipeline_name or "__default__"
     pipeline = context.pipelines.get(pipeline_name)

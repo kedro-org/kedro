@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -96,7 +96,7 @@ class MemoryDataSet(AbstractDataSet):
 
     def _describe(self) -> Dict[str, Any]:
         if self._data is not _EMPTY:
-            return dict(data="<{}>".format(type(self._data).__name__))
+            return dict(data=f"<{type(self._data).__name__}>")
         # the string representation of datasets leaves out __init__
         # arguments that are empty/None, equivalent here is _EMPTY
         return dict(data=None)  # pragma: no cover

@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ underlying dataset definition. It also uses `fsspec` for filesystem level operat
 """
 import operator
 from copy import deepcopy
-from typing import Any, Callable, Dict, List, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Type, Union
 from urllib.parse import urlparse
 from warnings import warn
 
@@ -49,6 +49,11 @@ from kedro.utils import load_obj
 
 DATASET_CREDENTIALS_KEY = "dataset_credentials"
 CHECKPOINT_CREDENTIALS_KEY = "checkpoint_credentials"
+
+KEY_PROPAGATION_WARNING = (
+    "Top-level %(keys)s will not propagate into the %(target)s since "
+    "%(keys)s were explicitly defined in the %(target)s config."
+)
 
 S3_PROTOCOLS = ("s3", "s3a", "s3n")
 
@@ -99,6 +104,7 @@ class PartitionedDataSet(AbstractDataSet):
         filename_suffix: str = "",
         credentials: Dict[str, Any] = None,
         load_args: Dict[str, Any] = None,
+        fs_args: Dict[str, Any] = None,
     ):
         """Creates a new instance of ``PartitionedDataSet``.
 
@@ -130,12 +136,12 @@ class PartitionedDataSet(AbstractDataSet):
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.filesystem
                 and the dataset initializer. If the dataset config contains
                 explicit credentials spec, then such spec will take precedence.
-                **Note:** ``dataset_credentials`` key has now been deprecated
-                and should not be specified.
                 All possible credentials management scenarios are documented here:
-                https://kedro.readthedocs.io/en/stable/04_user_guide/08_advanced_io.html#partitioned-dataset-credentials
+                https://kedro.readthedocs.io/en/stable/05_data/02_kedro_io.html#partitioned-dataset-credentials
             load_args: Keyword arguments to be passed into ``find()`` method of
                 the filesystem implementation.
+            fs_args: Extra arguments to pass into underlying filesystem class constructor
+                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``)
 
         Raises:
             DataSetError: If versioning is enabled for the underlying dataset.
@@ -160,16 +166,26 @@ class PartitionedDataSet(AbstractDataSet):
                 )
             )
 
-        self._credentials, dataset_credentials = _split_credentials(credentials)
-        if dataset_credentials:
+        if credentials:
             if CREDENTIALS_KEY in self._dataset_config:
                 self._logger.warning(
-                    "Top-level credentials will not propagate into the "
-                    "underlying dataset since credentials were explicitly "
-                    "defined in the dataset config."
+                    KEY_PROPAGATION_WARNING,
+                    {"keys": CREDENTIALS_KEY, "target": "underlying dataset"},
                 )
             else:
-                self._dataset_config[CREDENTIALS_KEY] = dataset_credentials
+                self._dataset_config[CREDENTIALS_KEY] = deepcopy(credentials)
+
+        self._credentials = deepcopy(credentials) or {}
+
+        self._fs_args = deepcopy(fs_args) or {}
+        if self._fs_args:
+            if "fs_args" in self._dataset_config:
+                self._logger.warning(
+                    KEY_PROPAGATION_WARNING,
+                    {"keys": "filesystem arguments", "target": "underlying dataset"},
+                )
+            else:
+                self._dataset_config["fs_args"] = deepcopy(self._fs_args)
 
         self._filepath_arg = filepath_arg
         if self._filepath_arg in self._dataset_config:
@@ -189,7 +205,7 @@ class PartitionedDataSet(AbstractDataSet):
         import fsspec  # pylint: disable=import-outside-toplevel
 
         protocol = "s3" if self._protocol in S3_PROTOCOLS else self._protocol
-        return fsspec.filesystem(protocol, **self._credentials)
+        return fsspec.filesystem(protocol, **self._credentials, **self._fs_args)
 
     @property
     def _normalized_path(self) -> str:
@@ -209,7 +225,7 @@ class PartitionedDataSet(AbstractDataSet):
         if self._path.startswith(self._protocol) and not path.startswith(
             self._protocol
         ):
-            return "{}://{}".format(self._protocol, path)
+            return f"{self._protocol}://{path}"
         return path
 
     def _partition_to_path(self, path: str):
@@ -237,7 +253,7 @@ class PartitionedDataSet(AbstractDataSet):
             partitions[partition_id] = dataset.load
 
         if not partitions:
-            raise DataSetError("No partitions found in `{}`".format(self._path))
+            raise DataSetError(f"No partitions found in `{self._path}`")
 
         return partitions
 
@@ -273,23 +289,6 @@ class PartitionedDataSet(AbstractDataSet):
     def _release(self) -> None:
         super()._release()
         self._invalidate_caches()
-
-
-def _split_credentials(
-    credentials: Union[Dict[str, Any], None]
-) -> Tuple[Dict[str, Any], Any]:
-    credentials = deepcopy(credentials) or {}
-    if DATASET_CREDENTIALS_KEY in credentials:
-        warn(
-            "Support for `{}` key in the credentials is now deprecated and will be "
-            "removed in the next version. Please specify the dataset credentials "
-            "explicitly inside the dataset config.".format(DATASET_CREDENTIALS_KEY),
-            DeprecationWarning,
-        )
-        dataset_credentials = credentials.pop(DATASET_CREDENTIALS_KEY)
-    else:
-        dataset_credentials = deepcopy(credentials)
-    return credentials, dataset_credentials
 
 
 class IncrementalDataSet(PartitionedDataSet):
@@ -341,6 +340,7 @@ class IncrementalDataSet(PartitionedDataSet):
         filename_suffix: str = "",
         credentials: Dict[str, Any] = None,
         load_args: Dict[str, Any] = None,
+        fs_args: Dict[str, Any] = None,
     ):
 
         """Creates a new instance of ``IncrementalDataSet``.
@@ -367,7 +367,7 @@ class IncrementalDataSet(PartitionedDataSet):
                 with the corresponding dataset definition including ``filepath``
                 (unlike ``dataset`` argument). Checkpoint configuration is
                 described here:
-                https://kedro.readthedocs.io/en/stable/04_user_guide/08_advanced_io.html#checkpoint-configuration
+                https://kedro.readthedocs.io/en/stable/05_data/02_kedro_io.html#checkpoint-configuration
                 Credentials for the checkpoint can be explicitly specified
                 in this configuration.
             filepath_arg: Underlying dataset initializer argument that will
@@ -382,16 +382,24 @@ class IncrementalDataSet(PartitionedDataSet):
                 the dataset or the checkpoint configuration contains explicit
                 credentials spec, then such spec will take precedence.
                 All possible credentials management scenarios are documented here:
-                https://kedro.readthedocs.io/en/stable/04_user_guide/08_advanced_io.html#partitioned-dataset-credentials
+                https://kedro.readthedocs.io/en/stable/05_data/02_kedro_io.html#partitioned-dataset-credentials
             load_args: Keyword arguments to be passed into ``find()`` method of
                 the filesystem implementation.
+            fs_args: Extra arguments to pass into underlying filesystem class constructor
+                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
 
         Raises:
             DataSetError: If versioning is enabled for the underlying dataset.
         """
 
         super().__init__(
-            path, dataset, filepath_arg, filename_suffix, credentials, load_args
+            path=path,
+            dataset=dataset,
+            filepath_arg=filepath_arg,
+            filename_suffix=filename_suffix,
+            credentials=credentials,
+            load_args=load_args,
+            fs_args=fs_args,
         )
 
         self._checkpoint_config = self._parse_checkpoint_config(checkpoint)
@@ -430,8 +438,8 @@ class IncrementalDataSet(PartitionedDataSet):
 
         if CREDENTIALS_KEY in default_config.keys() & checkpoint_config.keys():
             self._logger.warning(
-                "Top-level credentials will not propagate into the checkpoint since "
-                "credentials were explicitly defined in the checkpoint config."
+                KEY_PROPAGATION_WARNING,
+                {"keys": CREDENTIALS_KEY, "target": "checkpoint"},
             )
 
         return {**default_config, **checkpoint_config}

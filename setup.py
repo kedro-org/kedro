@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,9 +39,9 @@ here = path.abspath(path.dirname(__file__))
 
 
 PANDAS = "pandas>=0.24"
-SPARK = "pyspark~=2.2"
+SPARK = "pyspark>=2.2, <4.0"
 HDFS = "hdfs>=2.5.8, <3.0"
-S3FS = "s3fs>=0.3.0, <0.4.1"
+S3FS = "s3fs>=0.3.0, <0.5"
 
 # get package version
 with open(path.join(here, name, "__init__.py"), encoding="utf-8") as f:
@@ -87,7 +87,9 @@ def _collect_requirements(requires):
 api_require = {"api.APIDataSet": ["requests~=2.20"]}
 biosequence_require = {"biosequence.BioSequenceDataSet": ["biopython~=1.73"]}
 dask_require = {"dask.ParquetDataSet": ["dask[complete]~=2.6"]}
-geopandas_require = {"geopandas.GeoJSONDataSet": ["geopandas>=0.6.0, <1.0"]}
+geopandas_require = {
+    "geopandas.GeoJSONDataSet": ["geopandas>=0.6.0, <1.0", "pyproj>=2.2.0, <3.0"]
+}
 matplotlib_require = {"matplotlib.MatplotlibWriter": ["matplotlib>=3.0.3, <4.0"]}
 holoviews_require = {"holoviews.HoloviewsWriter": ["holoviews~=1.13.0"]}
 networkx_require = {"networkx.NetworkXDataSet": ["networkx~=2.4"]}
@@ -99,7 +101,7 @@ pandas_require = {
     "pandas.GBQTableDataSet": [PANDAS, "pandas-gbq>=0.12.0, <1.0"],
     "pandas.HDFDataSet": [PANDAS, "tables~=3.6"],
     "pandas.JSONDataSet": [PANDAS],
-    "pandas.ParquetDataSet": [PANDAS, "pyarrow>=0.12.0, <1.0.0"],
+    "pandas.ParquetDataSet": [PANDAS, "pyarrow>=0.12.0, <3.0"],
     "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy~=1.2"],
 }
 pillow_require = {"pillow.ImageDataSet": ["Pillow~=7.1.2"]}
@@ -122,18 +124,17 @@ extras_require = {
     "biosequence": _collect_requirements(biosequence_require),
     "dask": _collect_requirements(dask_require),
     "docs": [
-        "sphinx>=1.8.4, <2.0",
-        "sphinx_rtd_theme==0.4.3",
-        "nbsphinx==0.4.2",
+        "sphinx~=3.4.3",
+        "sphinx_rtd_theme==0.4.1",
+        "nbsphinx==0.8.1",
         "nbstripout==0.3.3",
-        "recommonmark==0.5.0",
-        "sphinx-autodoc-typehints==1.6.0",
-        "sphinx_copybutton==0.2.5",
-        "jupyter_client>=5.1, <7.0",
-        "tornado>=4.2, <6.0",
-        "ipykernel>=4.8.1, <5.0",
+        "recommonmark==0.7.1",
+        "sphinx-autodoc-typehints==1.11.1",
+        "sphinx_copybutton==0.3.1",
+        "ipykernel~=5.3",
     ],
     "geopandas": _collect_requirements(geopandas_require),
+    "ipython": ["ipython==7.10"],
     "matplotlib": _collect_requirements(matplotlib_require),
     "holoviews": _collect_requirements(holoviews_require),
     "networkx": _collect_requirements(networkx_require),

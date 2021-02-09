@@ -34,10 +34,12 @@ If you're unsure where to begin contributing to Kedro, please start by looking t
 
 We focus on three areas for contribution: `core`, [`extras`](/kedro/extras/) or `plugin`:
 - `core` refers to the primary Kedro library
-- [`extras`](/kedro/extras/) refers to features that could be added to `core` that do not introduce too many depencies or require new Kedro CLI commands to be created e.g. adding a new dataset to the `kedro.extras.dataset` data management module. All the datasets are placed under `kedro.extras.datasets` to separate heavy depencies (e.g Pandas) from Kedro `core` components.
+- [`extras`](/kedro/extras/) refers to features that could be added to `core` that do not introduce too many dependencies or require new Kedro CLI commands to be created e.g. adding a new dataset to the `kedro.extras.dataset` data management module. All the datasets are placed under `kedro.extras.datasets` to separate heavy dependencies (e.g Pandas) from Kedro `core` components.
 - [`plugin`](https://kedro.readthedocs.io/en/stable/04_user_guide/10_developing_plugins.html) refers to new functionality that requires a Kedro CLI command e.g. adding in Airflow functionality
 
 Typically, we only accept small contributions for the `core` Kedro library but accept new features as `plugin`s or additions to the [`extras`](/kedro/extras/) module. We regularly review [`extras`](/kedro/extras/) and may migrate modules to `core` if they prove to be essential for the functioning of the framework.
+
+If your development environment is Windows, you will need to set up your environment in order to contribute. You can use the `win_setup_conda` and `win_setup_env` commands from [Circle CI configuration](https://github.com/quantumblacklabs/kedro/blob/master/.circleci/config.yml) to guide you in the correct way to do this.
 
 ## Your first contribution
 
@@ -99,10 +101,11 @@ def count_truthy(elements: List[Any]) -> int:
 
 > *Note:* We only accept contributions under the Apache 2.0 license and you should have permission to share the submitted code.
 
-Please note that each code file should have a licence header, include the content of [`legal_header.txt`](https://github.com/quantumblacklabs/kedro/blob/master/legal_header.txt).
+Please note that each code file should have a legal header, i.e. the content of [`LICENSE.md`](https://github.com/quantumblacklabs/kedro/blob/master/LICENSE.md).
 There is an automated check to verify that it exists. The check will highlight any issues and suggest a solution.
 
 ### Branching conventions
+
 We use a branching model that helps us keep track of branches in a logical, consistent way. All branches should have the hyphen-separated convention of: `<type-of-change>/<short-description-of-change>` e.g. `feature/io-dataset`
 
 | Types of changes | Description                                                             |
@@ -111,6 +114,17 @@ We use a branching model that helps us keep track of branches in a logical, cons
 | `feature`        | Change which adds or removes functionality                              |
 | `fix`            | Non-breaking change which fixes an issue                                |
 | `tests`          | Changes to project unit `tests/` and / or integration `features/` tests |
+
+### Pull request title conventions
+
+The Kedro repository requires that you [squash and merge your pull request commits](https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/about-pull-request-merges#squash-and-merge-your-pull-request-commits), and, in most cases, the [merge message for a squash merge](https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/about-pull-request-merges#merge-message-for-a-squash-merge) then defaults to the pull request title.
+
+For clarity, your pull request title should be descriptive, and we ask you to follow some guidelines suggested by [Chris Beams](https://github.com/cbeams) in his post [How to Write a Git Commit Message](https://chris.beams.io/posts/git-commit/#seven-rules). In particular, for your pull request title, we suggest that you:
+
+* [Limit the length to 50 characters](https://chris.beams.io/posts/git-commit/#limit-50)
+* [Capitalise the first letter of the first word](https://chris.beams.io/posts/git-commit/#capitalize)
+* [Omit the period at the end](https://chris.beams.io/posts/git-commit/#end)
+* [Use the imperative tense](https://chris.beams.io/posts/git-commit/#imperative)
 
 ### Backwards compatibility
 
@@ -127,6 +141,7 @@ We aim to minimise the number of breaking changes to help keep the Kedro softwar
 Before contributing a breaking change, you should create an [issue](https://github.com/quantumblacklabs/kedro/issues) describing the change and justify the value gained by breaking backwards compatibility.
 
 ### Deprecation policy
+
 Deprecation is the process of retiring old code that is no longer useful and eventually removing it completely. This allows us to maintain a cleaner codebase and progress with new functionality for users. The Kedro deprecation policy is as follows:
 
 * We reserve the right to remove deprecated public methods and properties in the next major release following the deprecation of any code.
@@ -146,14 +161,20 @@ All breaking changes go into `develop`, from which a major release can be deploy
 
 Small contributions are accepted for the `core` library:
 
-1. Fork the project by clicking **Fork** in the top-right corner of the [Kedro GitHub repository](https://github.com/quantumblacklabs/kedro)and then choosing the target account the repository will be forked to.
+1. Fork the project by clicking **Fork** in the top-right corner of the [Kedro GitHub repository](https://github.com/quantumblacklabs/kedro) and then choosing the target account the repository will be forked to.
 2. Create a feature branch on your forked repository and push all your local changes to that feature branch. Your feature branch should branch off from:
-   a. `master` if you intend for it to be a non-breaking, backwards-compatible change.
-   b. `develop` if you intend for it to be a breaking change
-3. Before submitting a pull request (PR), please ensure that unit, end-to-end tests and linting are passing for your changes by running `make test`, `make e2e-tests` and `make lint` locally, have a look at the section [Running checks locally](/CONTRIBUTING.md#running-checks-locally)below.
+   <ol type="a">
+     <li>`master` if you intend for it to be a non-breaking, backwards-compatible change.</li>
+     <li>`develop` if you intend for it to be a breaking change.</li>
+   </ol>
+
+3. Before submitting a pull request (PR), please ensure that unit, end-to-end tests and linting are passing for your changes by running `make test`, `make e2e-tests` and `make lint` locally, have a look at the section [Running checks locally](/CONTRIBUTING.md#running-checks-locally) below.
 4. Determine if your change is [backwards compatible](#Backwards_compatibility):
-   a. For backwards compatible changes, open a PR against the `quantumblacklabs:master` branch from your feature branch.
-   b. For changes that are NOT backwards compatible, open a PR against the `quantumblacklabs:develop` branch from your feature branch.
+   <ol type="a">
+     <li>For backwards compatible changes, open a PR against the `quantumblacklabs:master` branch from your feature branch.</li>
+     <li>For changes that are NOT backwards compatible, open a PR against the `quantumblacklabs:develop` branch from your feature branch.</li>
+   </ol>
+
 5. Await reviewer comments.
 6. Update the PR according to the reviewer's comments.
 7. Your PR will be merged by the Kedro team once all the comments are addressed.
@@ -165,13 +186,16 @@ Small contributions are accepted for the `core` library:
 You can add new work to `extras` if you do not need to create a new Kedro CLI command:
 
 1. Create an [issue](https://github.com/quantumblacklabs/kedro/issues) describing your contribution.
-2. Fork the project by clicking **Fork** in the top-right corner of the [Kedro GitHub repository](https://github.com/quantumblacklabs/kedro)and then choosing the target account the repository will be forked to.
+2. Fork the project by clicking **Fork** in the top-right corner of the [Kedro GitHub repository](https://github.com/quantumblacklabs/kedro) and then choosing the target account the repository will be forked to.
 3. Work in [`extras`](/kedro/extras/) and create a feature branch on your forked repository and push all your local changes to that featurebranch.
 4. Before submitting a pull request, please ensure that unit, e2e tests and linting are passing for your changes by running `make test`,`make e2e-tests` and `make lint` locally, have a look at the section [Running checks locally](/CONTRIBUTING.md#running-checks-locally) below.
 5. Include a `README.md` with instructions on how to use your contribution.
 6. Determine if your change is [backwards compatible](#Backwards_compatibility):
-    a. For backwards compatible changes, open a PR against the `quantumblacklabs:master` branch from your feature branch.
-    b. For changes that are NOT backwards compatible, open a PR against the `quantumblacklabs:develop` branch from your feature branch.
+   <ol type="a">
+     <li>For backwards compatible changes, open a PR against the `quantumblacklabs:master` branch from your feature branch.</li>
+     <li>For changes that are NOT backwards compatible, open a PR against the `quantumblacklabs:develop` branch from your feature branch.</li>
+   </ol>
+
 7. Reference your issue in the PR description (e.g., `Resolves #<issue-number>`).
 8. Await review comments.
 9. Update the PR according to the reviewer's comments.
@@ -181,11 +205,12 @@ You can add new work to `extras` if you do not need to create a new Kedro CLI co
 
 ## `plugin` contribution process
 
-See the [`plugin` development documentation](https://kedro.readthedocs.io/en/stable/04_user_guide/10_developing_plugins.html) for guidance on how to design and develop a Kedro `plugin`.
+See the [`plugin` development documentation](https://kedro.readthedocs.io/en/stable/07_extend_kedro/05_plugins.html) for guidance on how to design and develop a Kedro `plugin`.
 
 ## CI / CD and running checks locally
+
 To run E2E tests you need to install the test requirements which includes `behave`.
-Also we use [pre-commit](https://pre-commit.com) hooks for the repository to run the checks automatically.
+We also use [pre-commit](https://pre-commit.com) hooks for the repository to run the checks automatically.
 It can all be installed using the following command:
 
 ```bash
@@ -236,6 +261,7 @@ make build-docs
 This command will only work on Unix-like systems and requires `pandoc` to be installed.
 
 ## Hints on pre-commit usage
+
 The checks will automatically run on all the changed files on each commit.
 Even more extensive set of checks (including the heavy set of `pylint` checks)
 will run before the push.

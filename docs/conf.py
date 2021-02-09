@@ -192,6 +192,8 @@ linkcheck_ignore = [
     "https://github.com/jazzband/pip-tools#example-usage-for-pip-compile",
     "https://www.astronomer.io/docs/cloud/stable/get-started/quickstart#",
     "https://github.com/quantumblacklabs/private-kedro/blob/master/kedro/templates/project/*",
+    "https://zenodo.org/record/4336685",
+    "https://zenodo.org/badge/latestdoi/182067506",
 ]
 
 # retry before render a link broken (fix for "too many requests")

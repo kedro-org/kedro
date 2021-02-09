@@ -47,6 +47,10 @@ Welcome to Kedro's documentation!
     :target: https://github.com/psf/black
     :alt: Code style is Black
 
+.. image:: https://zenodo.org/badge/182067506.svg
+   :target: https://zenodo.org/badge/latestdoi/182067506
+    :alt: Citation Reference
+
 .. toctree::
    :maxdepth: 2
    :caption: Introduction

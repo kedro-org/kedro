@@ -122,7 +122,7 @@ def load_ipython_extension(ipython):
     except (ImportError, ModuleNotFoundError):
         logging.error("Kedro appears not to be installed in your current environment.")
     except Exception:  # pylint: disable=broad-except
-        logging.error(
-            "Could not register Kedro extension. Make sure you're in a valid Kedro project.",
-            exc_info=True,
+        logging.warning(
+            "Kedro extension was registered. Make sure you pass the project path to "
+            "`%reload_kedro` or set it using `%init_kedro`."
         )

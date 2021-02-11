@@ -159,20 +159,23 @@ class TestLoadKedroObjects:
 
 class TestLoadIPythonExtension:
     @pytest.mark.parametrize(
-        "error,expected_log_message",
+        "error,expected_log_message,level",
         [
             (
                 ImportError,
                 "Kedro appears not to be installed in your current environment.",
+                "ERROR",
             ),
             (
                 RuntimeError,
-                "Could not register Kedro extension. Make sure you're in a valid Kedro project.",
+                "Kedro extension was registered. Make sure you pass the project path to "
+                "`%reload_kedro` or set it using `%init_kedro`.",
+                "WARNING",
             ),
         ],
     )
     def test_load_extension_not_in_kedro_env_or_project(
-        self, error, expected_log_message, mocker, caplog
+        self, error, expected_log_message, level, mocker, caplog
     ):
         mocker.patch(
             "kedro.framework.startup._get_project_metadata", side_effect=error,
@@ -187,6 +190,6 @@ class TestLoadIPythonExtension:
         log_messages = [
             record.getMessage()
             for record in caplog.records
-            if record.levelname == "ERROR"
+            if record.levelname == level
         ]
         assert log_messages == [expected_log_message]

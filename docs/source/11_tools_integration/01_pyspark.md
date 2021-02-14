@@ -26,6 +26,7 @@ from typing import Any, Dict, Union
 
 from pyspark import SparkConf
 from pyspark.sql import SparkSession
+from kedro.framework.context import KedroContext
 
 
 class CustomContext(KedroContext):

@@ -39,6 +39,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 
 from kedro.io.core import (
+    HTTP_PROTOCOLS,
     AbstractVersionedDataSet,
     DataSetError,
     Version,
@@ -182,6 +183,8 @@ class ParquetDataSet(AbstractVersionedDataSet):
                 f"Saving {self.__class__.__name__} to a directory is not supported."
             )
 
+        if self._protocol not in HTTP_PROTOCOLS:
+            self._fs.makedirs(Path(save_path).parent.as_posix(), exist_ok=True)
         table = pa.Table.from_pandas(data, **self._from_pandas_args)
         pq.write_table(
             table=table, where=save_path, filesystem=self._fs, **self._save_args

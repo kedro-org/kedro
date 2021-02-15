@@ -1,6 +1,14 @@
 ![Kedro Logo Banner](https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/static/img/kedro_banner.png)
 
-[![Python version](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue.svg)](https://pypi.org/project/kedro/) [![PyPI version](https://badge.fury.io/py/kedro.svg)](https://pypi.org/project/kedro/) [![Conda version](https://img.shields.io/conda/vn/conda-forge/kedro.svg)](https://anaconda.org/conda-forge/kedro) [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/quantumblacklabs/kedro/blob/master/LICENSE.md) [![Discourse users](https://img.shields.io/discourse/users?server=https%3A%2F%2Fdiscourse.kedro.community%2F)](https://discourse.kedro.community/) ![CircleCI - Master Branch](https://img.shields.io/circleci/build/github/quantumblacklabs/kedro/master?label=master) ![Develop Branch Build](https://img.shields.io/circleci/build/github/quantumblacklabs/kedro/develop?label=develop) [![Documentation](https://readthedocs.org/projects/kedro/badge/?version=stable)](https://kedro.readthedocs.io/)
+[![Python version](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue.svg)](https://pypi.org/project/kedro/)
+[![PyPI version](https://badge.fury.io/py/kedro.svg)](https://pypi.org/project/kedro/)
+[![Conda version](https://img.shields.io/conda/vn/conda-forge/kedro.svg)](https://anaconda.org/conda-forge/kedro)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/quantumblacklabs/kedro/blob/master/LICENSE.md)
+[![Discourse users](https://img.shields.io/discourse/users?server=https%3A%2F%2Fdiscourse.kedro.community%2F)](https://discourse.kedro.community/)
+![CircleCI - Master Branch](https://img.shields.io/circleci/build/github/quantumblacklabs/kedro/master?label=master)
+![Develop Branch Build](https://img.shields.io/circleci/build/github/quantumblacklabs/kedro/develop?label=develop)
+[![Documentation](https://readthedocs.org/projects/kedro/badge/?version=stable)](https://kedro.readthedocs.io/)
+[![DOI](https://zenodo.org/badge/182067506.svg)](https://zenodo.org/badge/latestdoi/182067506)
 
 
 ## What is Kedro?
@@ -101,3 +109,7 @@ There are Kedro users across the world, who work at start-ups, major enterprises
 [XP](https://youtu.be/wgnGOVNkXqU?t=2210).
 
 Kedro has also won [Best Technical Tool or Framework for AI](https://awards.ai/the-awards/previous-awards/the-4th-ai-award-winners/) in the 2019 Awards AI competition and a merit award for the 2020 [UK Technical Communication Awards](https://uktcawards.com/announcing-the-award-winners-for-2020/). It is listed on the 2020 [ThoughtWorks Technology Radar](https://www.thoughtworks.com/radar/languages-and-frameworks/kedro) and the 2020 [Data & AI Landscape](https://mattturck.com/data2020/).
+
+## How can I cite Kedro?
+
+If you're an academic, Kedro can also help you, for example, as a tool to solve the problem of reproducible research. Find our citation reference on [Zenodo](https://zenodo.org/record/4336685).

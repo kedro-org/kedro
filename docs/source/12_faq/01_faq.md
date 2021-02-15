@@ -154,6 +154,10 @@ There are a host of articles, podcasts, talks and Kedro showcase projects in the
 
 Our preferred Kedro-community channel for feedback is through [GitHub issues](https://github.com/quantumblacklabs/kedro/issues). We update the codebase regularly; you can find news about updates and features in the [RELEASE.md file on the Github repository](https://github.com/quantumblacklabs/kedro/blob/develop/RELEASE.md).
 
+## How can I cite Kedro?
+
+If you're an academic, Kedro can also help you, for example, as a tool to solve the problem of reproducible research. Find our citation reference on [Zenodo](https://zenodo.org/record/4336685).
+
 ## How can I get my question answered?
 
 If your question isn't answered above, please consider asking it over on [Stack Overflow](https://stackoverflow.com/questions/tagged/kedro) or refer to the [Kedro.Community Discourse channel](https://discourse.kedro.community/) that is managed by Kedroids all over the world.

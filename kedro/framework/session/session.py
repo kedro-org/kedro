@@ -336,6 +336,7 @@ class KedroSession:
         from_nodes: Iterable[str] = None,
         to_nodes: Iterable[str] = None,
         from_inputs: Iterable[str] = None,
+        to_outputs: Iterable[str] = None,
         load_versions: Dict[str, str] = None,
     ) -> Dict[str, Any]:
         """Runs the pipeline with a specified runner.
@@ -356,6 +357,8 @@ class KedroSession:
                 end point of the new ``Pipeline``.
             from_inputs: An optional list of input datasets which should be
                 used as a starting point of the new ``Pipeline``.
+            to_outputs: An optional list of output datasets which should be
+                used as an end point of the new ``Pipeline``.
             load_versions: An optional flag to specify a particular dataset
                 version timestamp to load.
         Raises:
@@ -382,6 +385,7 @@ class KedroSession:
             to_nodes=to_nodes,
             node_names=node_names,
             from_inputs=from_inputs,
+            to_outputs=to_outputs,
         )
 
         record_data = {
@@ -394,6 +398,7 @@ class KedroSession:
             "to_nodes": to_nodes,
             "node_names": node_names,
             "from_inputs": from_inputs,
+            "to_outputs": to_outputs,
             "load_versions": load_versions,
             "extra_params": extra_params,
             "pipeline_name": pipeline_name,

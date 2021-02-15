@@ -477,6 +477,7 @@ class KedroContext:
         to_nodes: Iterable[str] = None,
         node_names: Iterable[str] = None,
         from_inputs: Iterable[str] = None,
+        to_outputs: Iterable[str] = None,
     ) -> Pipeline:
         """Filter the pipeline as the intersection of all conditions."""
         new_pipeline = pipeline
@@ -499,6 +500,8 @@ class KedroContext:
             new_pipeline &= pipeline.only_nodes(*node_names)
         if from_inputs:
             new_pipeline &= pipeline.from_inputs(*from_inputs)
+        if to_outputs:
+            new_pipeline &= pipeline.to_outputs(*to_outputs)
 
         if not new_pipeline.nodes:
             raise KedroContextError("Pipeline contains no nodes")
@@ -519,6 +522,7 @@ class KedroContext:
         from_nodes: Iterable[str] = None,
         to_nodes: Iterable[str] = None,
         from_inputs: Iterable[str] = None,
+        to_outputs: Iterable[str] = None,
         load_versions: Dict[str, str] = None,
         pipeline_name: str = None,
     ) -> Dict[str, Any]:
@@ -539,6 +543,8 @@ class KedroContext:
                 end point of the new ``Pipeline``.
             from_inputs: An optional list of input datasets which should be used as a
                 starting point of the new ``Pipeline``.
+            to_outputs: An optional list of output datasets which should be used as an
+                end point of the new ``Pipeline``.
             load_versions: An optional flag to specify a particular dataset version timestamp
                 to load.
             pipeline_name: Name of the ``Pipeline`` to execute.
@@ -564,6 +570,7 @@ class KedroContext:
             to_nodes=to_nodes,
             node_names=node_names,
             from_inputs=from_inputs,
+            to_outputs=to_outputs,
         )
 
         save_version = self._get_save_version()
@@ -578,6 +585,7 @@ class KedroContext:
             "to_nodes": to_nodes,
             "node_names": node_names,
             "from_inputs": from_inputs,
+            "to_outputs": to_outputs,
             "load_versions": load_versions,
             "pipeline_name": pipeline_name,
             "extra_params": self._extra_params,

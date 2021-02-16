@@ -24,9 +24,9 @@ Below is an example implementation to initialise the `SparkSession` in `<project
 ```python
 from typing import Any, Dict, Union
 
+from kedro.framework.context import KedroContext
 from pyspark import SparkConf
 from pyspark.sql import SparkSession
-from kedro.framework.context import KedroContext
 
 
 class CustomContext(KedroContext):

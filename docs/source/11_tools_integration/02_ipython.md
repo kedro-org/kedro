@@ -330,3 +330,39 @@ To reload these variables at any point (e.g., if you update `catalog.yml`), use 
 ![reload kedro line magic graphic](../meta/images/jupyter_notebook_loading_context.png)
 
 If the `KEDRO_ENV` environment variable is specified, the startup script loads that environment, otherwise it defaults to `local`. Instructions for setting the environment variable can be found in the [Kedro configuration documentation](../04_kedro_project_setup/02_configuration.md#additional-configuration-environments).
+
+## IPython extension
+
+Kedro also has an IPython extension (`kedro.extras.extensions.ipython`) that allows you to start an `ipython` shell directly and then initialize `context`, `catalog`, and `session` variables.
+
+When you start an `ipython` shell in a project root then you only need to load the extension to get the variables.
+
+```bash
+cd <your-project-root>
+ipython
+
+In [1]: %load_ext kedro.extras.extensions.ipython
+```
+
+When you start an `ipython` shell outside a project root and load the extension the variables won't be loaded.
+Run `%reload_kedro <path_to_project_root>` to get the variables, or `%init_kedro <path_to_project_root>` to set the project path for subsequent calls and then call simply `%reload_kedro` after that without having to specify the path.
+
+```ipython
+In [1]: %load_ext kedro.extras.extensions.ipython
+In [2]: %reload_kedro <path_to_project_root>
+```
+
+or
+
+```ipython
+In [1]: %load_ext kedro.extras.extensions.ipython
+In [2]: %init_kedro <path_to_project_root>
+In [3]: %reload_kedro
+```
+
+To configure the extension to be loaded automatically every time when you open an IPython shell, do the following:
+
+* Run `ipython profile create` to create the config file `~/.ipython/profile_default/ipython_config.py` if it doesn't exist
+* Edit `~/.ipython/profile_default/ipython_config.py`:
+  - uncomment the extensions
+  - add Kedro extension to the list as follows: `c.InteractiveShellApp.extensions = ["kedro.extras.extensions.ipython"]`

@@ -290,6 +290,7 @@ def _create_project(
         from cookiecutter.repository import determine_repo_dir
 
     config: Dict[str, str] = dict()
+    checkout = checkout or version
     try:
         if config_path:
             config = _parse_config(config_path)
@@ -312,7 +313,6 @@ def _create_project(
                     config = _get_config_from_starter_prompts(prompts)
         config.setdefault("kedro_version", version)
 
-        checkout = checkout or version
         cookiecutter_args = dict(
             output_dir=config.get("output_dir", str(Path.cwd().resolve())),
             no_input=True,

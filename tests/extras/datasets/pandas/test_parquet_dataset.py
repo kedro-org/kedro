@@ -96,6 +96,14 @@ class TestParquetDataSet:
         assert all(files)
         assert len(files) == 1
 
+    def test_save_and_load_non_existing_dir(self, tmp_path, dummy_dataframe):
+        """Test saving and reloading the data set to non-existing directory."""
+        filepath = (tmp_path / "non-existing" / FILENAME).as_posix()
+        data_set = ParquetDataSet(filepath=filepath)
+        data_set.save(dummy_dataframe)
+        reloaded = data_set.load()
+        assert_frame_equal(dummy_dataframe, reloaded)
+
     def test_exists(self, parquet_data_set, dummy_dataframe):
         """Test `exists` method invocation for both existing and
         nonexistent data set."""

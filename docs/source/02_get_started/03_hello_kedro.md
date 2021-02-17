@@ -21,9 +21,7 @@ def return_greeting():
     return "Hello"
 
 
-return_greeting_node = node(
-    func=return_greeting, inputs=None, outputs="my_salutation"
-)
+return_greeting_node = node(func=return_greeting, inputs=None, outputs="my_salutation")
 ```
 
 The `join_statements` function is wrapped by a node called `join_statements_node`, which names a single input (`my_salutation`) and a single output (`my_message`):
@@ -97,9 +95,7 @@ def return_greeting():
     return "Hello"
 
 
-return_greeting_node = node(
-    return_greeting, inputs=None, outputs="my_salutation"
-)
+return_greeting_node = node(return_greeting, inputs=None, outputs="my_salutation")
 
 # Prepare second node
 def join_statements(greeting):

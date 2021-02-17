@@ -40,10 +40,10 @@ def _parse_money(x):
 def preprocess_companies(companies: pd.DataFrame) -> pd.DataFrame:
     """Preprocess the data for companies.
 
-        Args:
-            companies: Source data.
-        Returns:
-            Preprocessed data.
+    Args:
+        companies: Source data.
+    Returns:
+        Preprocessed data.
 
     """
 
@@ -57,10 +57,10 @@ def preprocess_companies(companies: pd.DataFrame) -> pd.DataFrame:
 def preprocess_shuttles(shuttles: pd.DataFrame) -> pd.DataFrame:
     """Preprocess the data for shuttles.
 
-        Args:
-            shuttles: Source data.
-        Returns:
-            Preprocessed data.
+    Args:
+        shuttles: Source data.
+    Returns:
+        Preprocessed data.
 
     """
     shuttles["d_check_complete"] = shuttles["d_check_complete"].apply(_is_true)
@@ -231,18 +231,17 @@ The next step in the tutorial is to add another node for a function to join toge
 <summary><b>Click to expand</b></summary>
 
 ```python
-
 def create_master_table(
     shuttles: pd.DataFrame, companies: pd.DataFrame, reviews: pd.DataFrame
 ) -> pd.DataFrame:
     """Combines all data to create a master table.
 
-        Args:
-            shuttles: Preprocessed data for shuttles.
-            companies: Preprocessed data for companies.
-            reviews: Source data for reviews.
-        Returns:
-            Master table.
+    Args:
+        shuttles: Preprocessed data for shuttles.
+        companies: Preprocessed data for companies.
+        reviews: Source data for reviews.
+    Returns:
+        Master table.
 
     """
     rated_shuttles = shuttles.merge(reviews, left_on="id", right_on="shuttle_id")
@@ -362,12 +361,12 @@ from sklearn.model_selection import train_test_split
 def split_data(data: pd.DataFrame, parameters: Dict) -> List:
     """Splits data into training and test sets.
 
-        Args:
-            data: Source data.
-            parameters: Parameters defined in parameters.yml.
+    Args:
+        data: Source data.
+        parameters: Parameters defined in parameters.yml.
 
-        Returns:
-            A list containing split data.
+    Returns:
+        A list containing split data.
 
     """
     X = data[
@@ -390,12 +389,12 @@ def split_data(data: pd.DataFrame, parameters: Dict) -> List:
 def train_model(X_train: np.ndarray, y_train: np.ndarray) -> LinearRegression:
     """Train the linear regression model.
 
-        Args:
-            X_train: Training data of independent features.
-            y_train: Training data for price.
+    Args:
+        X_train: Training data of independent features.
+        y_train: Training data for price.
 
-        Returns:
-            Trained model.
+    Returns:
+        Trained model.
 
     """
     regressor = LinearRegression()
@@ -406,10 +405,10 @@ def train_model(X_train: np.ndarray, y_train: np.ndarray) -> LinearRegression:
 def evaluate_model(regressor: LinearRegression, X_test: np.ndarray, y_test: np.ndarray):
     """Calculate the coefficient of determination and log the result.
 
-        Args:
-            regressor: Trained model.
-            X_test: Testing data of independent features.
-            y_test: Testing data for price.
+    Args:
+        regressor: Trained model.
+        X_test: Testing data of independent features.
+        y_test: Testing data for price.
 
     """
     y_pred = regressor.predict(X_test)

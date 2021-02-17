@@ -18,7 +18,7 @@ data_set = GeoJSONDataSet(filepath="test.geojson")
 data_set.save(data)
 reloaded = data_set.load()
 assert data.equals(reloaded)
-``
+```
 
 #### Example catalog.yml:
 

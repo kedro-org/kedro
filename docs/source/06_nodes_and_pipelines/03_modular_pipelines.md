@@ -273,10 +273,17 @@ Consider this example:
 
 ```python
 cook_pipeline = Pipeline(
-    [node(defrost, "frozen_meat", "meat"), node(grill, "meat", "grilled_meat"),]
+    [
+        node(defrost, "frozen_meat", "meat"),
+        node(grill, "meat", "grilled_meat"),
+    ]
 )
 
-lunch_pipeline = Pipeline([node(eat, "food", None),])
+lunch_pipeline = Pipeline(
+    [
+        node(eat, "food", None),
+    ]
+)
 ```
 
 A simple `cook_pipeline + lunch_pipeline` doesn't work, because the `grilled_meat` output in the `cook_pipeline` needs to be mapped to the `food` input in the `lunch_pipeline`. This can be done in any of the following three (equivalent) ways:
@@ -302,12 +309,14 @@ final_pipeline3 = pipeline(
 Remember you can pass `Pipeline` objects in the constructor as well, like in the example below. This approach is cleaner and more idiomatic when you are combining multiple modular pipelines together.
 
 ```python
-final_pipeline = Pipeline([
-    pipeline(cook_pipeline, outputs={"grilled_meat": "new_name"}),
-    pipeline(lunch_pipeline, inputs={"food": "new_name"}),
-    node(...),
-    ...
-])
+final_pipeline = Pipeline(
+    [
+        pipeline(cook_pipeline, outputs={"grilled_meat": "new_name"}),
+        pipeline(lunch_pipeline, inputs={"food": "new_name"}),
+        node(...),
+        ...,
+    ]
+)
 ```
 
 >*Note:* `inputs` should correspond to the pipeline free inputs, while `outputs` are either free or intermediary outputs.
@@ -336,13 +345,13 @@ cook_breakfast_pipeline = pipeline(
     cook_pipeline,
     inputs="frozen_meat",  # inputs stay the same, don't namespace
     outputs={"grilled_meat": "breakfast_food"},
-    namespace="breakfast"
+    namespace="breakfast",
 )
 cook_lunch_pipeline = pipeline(
     cook_pipeline,
     inputs="frozen_meat",  # inputs stay the same, don't namespace
     outputs={"grilled_meat": "lunch_food"},
-    namespace="lunch"
+    namespace="lunch",
 )
 
 final_pipeline = (
@@ -374,15 +383,17 @@ final_pipeline = pipeline(raw_pipeline, namespace="new")
 You can map parameter values in a similar way to inputs and outputs. Let's say you have two almost identical pipelines that differ by one parameter. You want to run the pipelines on the same set of inputs.
 
 ```python
-alpha_pipeline = Pipeline([
-    node(node_func1, ["input1", "input2", "params:alpha"], "intermediary_output"),
-    node(node_func2, "intermediary_output", "output")
-])
+alpha_pipeline = Pipeline(
+    [
+        node(node_func1, ["input1", "input2", "params:alpha"], "intermediary_output"),
+        node(node_func2, "intermediary_output", "output"),
+    ]
+)
 beta_pipeline = pipeline(
     alpha_pipeline,
     inputs={"input1", "input2"},
     parameters={"params:alpha": "params:beta"},
-    namespace="beta"
+    namespace="beta",
 )
 
 final_pipeline = alpha_pipeline + beta_pipeline

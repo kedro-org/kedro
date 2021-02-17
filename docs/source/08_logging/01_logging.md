@@ -14,6 +14,7 @@ After reading and applying project logging configuration, `kedro` will start emi
 
 ```python
 import logging
+
 log = logging.getLogger(__name__)
 log.warning("Issue warning")
 log.info("Send information")

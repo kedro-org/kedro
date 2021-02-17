@@ -89,7 +89,6 @@ from kedro.io import DataCatalog
 
 
 class TransformerHooks:
-
     @hook_impl
     def after_catalog_created(self, catalog: DataCatalog) -> None:
         catalog.add_transformer(ProfileTimeTransformer())
@@ -125,7 +124,7 @@ Auto-registered plugins' Hooks can be disabled via `settings.py` as follows:
 ```python
 # <your_project>/src/<your_project>/settings.py
 
-DISABLE_HOOKS_FOR_PLUGINS = ("<plugin_name>", )
+DISABLE_HOOKS_FOR_PLUGINS = ("<plugin_name>",)
 ```
 
 where `<plugin_name>` is the name of an installed plugin for which the auto-registered Hooks must be disabled.
@@ -141,9 +140,9 @@ However, after the introduction of Hooks in 0.16, this capability is readily ava
 ```python
 from kedro.pipeline.node import Node
 
+
 def say_hello(node: Node):
-    """An extra behaviour for a node to say hello before running.
-    """
+    """An extra behaviour for a node to say hello before running."""
     print(f"Hello from {node.name}")
 ```
 
@@ -157,7 +156,6 @@ from kedro.pipeline.node import Node
 
 
 class ProjectHooks:
-
     @hook_impl
     def before_node_run(self, node: Node):
         # adding extra behaviour to a single node
@@ -176,7 +174,6 @@ from kedro.pipeline.node import Node
 
 
 class ProjectHooks:
-
     @hook_impl
     def before_node_run(self, node: Node):
         if "hello" in node.tags:
@@ -193,7 +190,6 @@ from kedro.pipeline.node import Node
 
 
 class ProjectHooks:
-
     @hook_impl
     def before_node_run(self, node: Node):
         # adding extra behaviour to all nodes in the pipeline
@@ -204,6 +200,7 @@ If your use case takes advantage of a decorator, for example to retry a node's e
 
 ```python
 from tenacity import retry
+
 
 @retry
 def my_flaky_node_function():
@@ -221,7 +218,6 @@ from kedro.pipeline.node import Node
 
 
 class ProjectHooks:
-
     @hook_impl
     def before_node_run(self, node: Node):
         # adding retrying behaviour to nodes tagged as flaky
@@ -238,10 +234,12 @@ For example, you can add logging about the dataset load runtime as follows:
 def _logger(self):
     return logging.getLogger(self.__class__.__name__)
 
+
 @hook_impl
 def before_dataset_loaded(self, dataset_name: str) -> None:
     start = time.time()
     logging.info("Loading dataset %s started at %0.3f", dataset_name, start)
+
 
 @hook_impl
 def after_dataset_loaded(self, dataset_name: str, data: Any) -> None:
@@ -287,7 +285,7 @@ class DataValidationHooks:
     def before_node_run(
         self, catalog: DataCatalog, inputs: Dict[str, Any], run_id: str
     ) -> None:
-        """ Validate inputs data to a node based on using great expectation
+        """Validate inputs data to a node based on using great expectation
         if an expectation suite is defined in ``DATASET_EXPECTATION_MAPPING``.
         """
         self._run_validation(catalog, inputs, run_id)
@@ -296,7 +294,7 @@ class DataValidationHooks:
     def after_node_run(
         self, catalog: DataCatalog, outputs: Dict[str, Any], run_id: str
     ) -> None:
-        """ Validate outputs data from a node based on using great expectation
+        """Validate outputs data from a node based on using great expectation
         if an expectation suite is defined in ``DATASET_EXPECTATION_MAPPING``.
         """
         self._run_validation(catalog, outputs, run_id)
@@ -395,8 +393,7 @@ from kedro.pipeline.node import Node
 
 
 class ModelTrackingHooks:
-    """Namespace for grouping all model-tracking hooks with MLflow together.
-    """
+    """Namespace for grouping all model-tracking hooks with MLflow together."""
 
     @hook_impl
     def before_pipeline_run(self, run_params: Dict[str, Any]) -> None:
@@ -453,13 +450,13 @@ from kedro.framework.hooks import hook_impl
 from kedro.pipeline.node import Node
 from kedro.io import DataCatalog
 
+
 class NodeInputReplacementHook:
     @hook_impl
     def before_node_run(
         self, node: Node, catalog: DataCatalog
     ) -> Optional[Dict[str, Any]]:
-        """Replace `first_input` for `my_node`
-        """
+        """Replace `first_input` for `my_node`"""
         if node.name == "my_node":
             # return the string filepath to the `first_input` dataset
             # instead of the underlying data

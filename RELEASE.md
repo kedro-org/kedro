@@ -16,6 +16,7 @@
 * Added a `jsonschema` schema definition for the Kedro 0.17 catalog.
 * Bumped up maximum required versions for the following packages: `sphinx` (3.5), `pyarrow` (4.0).
 * `kedro install` now waits on Windows until all the requirements are installed.
+* Exposed `--to-outputs` option in the CLI, throughout the codebase, and as part of hooks specifications.
 * Fixed a bug where `ParquetDataSet` wasn't creating parent directories on the fly.
 
 ## Breaking changes to the API
@@ -26,7 +27,8 @@
 [Kiyohito Kunii](https://github.com/921kiyo),
 [noklam](https://github.com/noklam),
 [Ivan Doroshenko](https://github.com/imdoroshenko),
-[Zain Patel](https://github.com/mzjp2)
+[Zain Patel](https://github.com/mzjp2),
+[Deepyaman Datta](https://github.com/deepyaman)
 
 ## Thanks for supporting contributions
 

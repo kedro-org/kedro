@@ -134,7 +134,9 @@ spark = SparkSession.builder.getOrCreate()
 dbutils = DBUtils(spark.sparkContext)
 
 data_dir = Path.cwd() / "data"
-dbutils.fs.cp(f"file://{data_dir.as_posix()}", "dbfs:/iris-databricks/data", recurse=True)
+dbutils.fs.cp(
+    f"file://{data_dir.as_posix()}", "dbfs:/iris-databricks/data", recurse=True
+)
 
 # make sure DBFS ls returns a similar result
 dbutils.fs.ls("dbfs:/iris-databricks/data/01_raw/")
@@ -323,7 +325,9 @@ logging.getLogger("py4j.java_gateway").setLevel(logging.ERROR)
 # copy project data into DBFS
 project_root = Path.home() / "projects" / "iris-databricks"
 data_dir = project_root / "data"
-dbutils.fs.cp(f"file://{data_dir.as_posix()}", f"dbfs://{data_dir.as_posix()}", recurse=True)
+dbutils.fs.cp(
+    f"file://{data_dir.as_posix()}", f"dbfs://{data_dir.as_posix()}", recurse=True
+)
 
 # make sure the data has been copied
 dbutils.fs.ls((data_dir / "01_raw").as_posix())

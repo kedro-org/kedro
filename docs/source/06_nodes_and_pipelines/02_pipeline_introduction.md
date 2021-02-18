@@ -140,11 +140,13 @@ nodes
 The output is as follows:
 
 ```python
-[Node(len, 'xs', 'n', None),
- Node(mean, ['xs', 'n'], 'm', 'mean_node'),
- Node(mean_sos, ['xs', 'n'], 'm2', 'mean_sos'),
- Node(variance, ['m', 'm2'], 'v', 'variance node')]
- ```
+[
+    Node(len, "xs", "n", None),
+    Node(mean, ["xs", "n"], "m", "mean_node"),
+    Node(mean_sos, ["xs", "n"], "m2", "mean_sos"),
+    Node(variance, ["m", "m2"], "v", "variance node"),
+]
+```
 
 To find out about the inputs:
 
@@ -155,7 +157,7 @@ nodes[0].inputs
 You should see the following:
 
 ```python
-['xs']
+["xs"]
 ```
 </details>
 

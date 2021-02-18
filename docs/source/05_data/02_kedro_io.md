@@ -59,7 +59,7 @@ from kedro.io import AbstractVersionedDataSet
 
 
 class MyOwnDataSet(AbstractVersionedDataSet):
-    def __init__(self, filepath, version,  param1, param2=True):
+    def __init__(self, filepath, version, param1, param2=True):
         super().__init__(PurePosixPath(filepath), version)
         self._param1 = param1
         self._param2 = param2
@@ -149,8 +149,9 @@ version = Version(
 )
 
 test_data_set = CSVDataSet(
-    filepath="data/01_raw/test.csv", save_args={"index": False}, version=version,
-
+    filepath="data/01_raw/test.csv",
+    save_args={"index": False},
+    version=version,
 )
 io = DataCatalog({"test_data_set": test_data_set})
 
@@ -173,8 +174,9 @@ version = Version(
 )
 
 test_data_set = CSVDataSet(
-    filepath="data/01_raw/test.csv", save_args={"index": False}, version=version,
-
+    filepath="data/01_raw/test.csv",
+    save_args={"index": False},
+    version=version,
 )
 io = DataCatalog({"test_data_set": test_data_set})
 
@@ -198,8 +200,9 @@ version = Version(
 )
 
 test_data_set = CSVDataSet(
-    filepath="data/01_raw/test.csv", save_args={"index": False}, version=version,
-
+    filepath="data/01_raw/test.csv",
+    save_args={"index": False},
+    version=version,
 )
 io = DataCatalog({"test_data_set": test_data_set})
 

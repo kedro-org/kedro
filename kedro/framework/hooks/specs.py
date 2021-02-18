@@ -183,6 +183,7 @@ class PipelineSpecs:
                      "to_nodes": Optional[List[str]],
                      "node_names": Optional[List[str]],
                      "from_inputs": Optional[List[str]],
+                     "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
                      "pipeline_name": str,
                      "extra_params": Optional[Dict[str, Any]]
@@ -217,6 +218,7 @@ class PipelineSpecs:
                      "to_nodes": Optional[List[str]],
                      "node_names": Optional[List[str]],
                      "from_inputs": Optional[List[str]],
+                     "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
                      "pipeline_name": str,
                      "extra_params": Optional[Dict[str, Any]]
@@ -255,6 +257,7 @@ class PipelineSpecs:
                      "to_nodes": Optional[List[str]],
                      "node_names": Optional[List[str]],
                      "from_inputs": Optional[List[str]],
+                     "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
                      "pipeline_name": str,
                      "extra_params": Optional[Dict[str, Any]]

@@ -541,6 +541,17 @@ class TestKedroContextRun:
         assert "Running node: node4: identity([ships]) -> [planes]" in log_msgs
         assert "Pipeline execution completed successfully." in log_msgs
 
+    def test_run_to_outputs(self, dummy_context, dummy_dataframe, caplog):
+        dummy_context.catalog.save("cars", dummy_dataframe)
+        dummy_context.run(to_outputs=["trains"])
+
+        log_msgs = [record.getMessage() for record in caplog.records]
+        assert "Completed 2 out of 2 tasks" in log_msgs
+        assert "Running node: node1: identity([cars]) -> [boats]" in log_msgs
+        assert "Running node: node2: identity([boats]) -> [trains]" in log_msgs
+        assert "Running node: node3: identity([trains]) -> [ships]" not in log_msgs
+        assert "Pipeline execution completed successfully." in log_msgs
+
     def test_run_load_versions(self, dummy_context, dummy_dataframe):
         filepath = (dummy_context.project_path / "cars.csv").as_posix()
 

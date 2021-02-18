@@ -25,9 +25,10 @@
 * `kedro pipeline pull` now uses `pip download` for protocols that are not supported by `fsspec`.
 * Cleaned up documentation to fix broken links and rewrite permanently redirected ones.
 * Added a `jsonschema` schema definition for the Kedro 0.17 catalog.
-* Bumped up maximum required versions for the following packages: `sphinx` (3.5), `pyarrow` (4.0).
 * `kedro install` now waits on Windows until all the requirements are installed.
+* Exposed `--to-outputs` option in the CLI, throughout the codebase, and as part of hooks specifications.
 * Fixed a bug where `ParquetDataSet` wasn't creating parent directories on the fly.
+* Added `blacken-docs` pre-commit linter to ensure all snippets in the documentation are `black`ed.
 
 ## Breaking changes to the API
 
@@ -37,7 +38,8 @@
 [Kiyohito Kunii](https://github.com/921kiyo),
 [noklam](https://github.com/noklam),
 [Ivan Doroshenko](https://github.com/imdoroshenko),
-[Zain Patel](https://github.com/mzjp2)
+[Zain Patel](https://github.com/mzjp2),
+[Deepyaman Datta](https://github.com/deepyaman)
 
 ## Thanks for supporting contributions
 
@@ -451,7 +453,7 @@ As an example, code that used to look like this with the `Pipeline.transform()` 
 ```python
 result = my_pipeline.transform(
     datasets={"input": "new_input", "output": "new_output", "params:x": "params:y"},
-    prefix="pre"
+    prefix="pre",
 )
 ```
 
@@ -464,7 +466,7 @@ result = pipeline(
     inputs={"input": "new_input"},
     outputs={"output": "new_output"},
     parameters={"params:x": "params:y"},
-    namespace="pre"
+    namespace="pre",
 )
 ```
 

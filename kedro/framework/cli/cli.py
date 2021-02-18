@@ -56,6 +56,7 @@ from kedro.framework.cli.utils import (
     command_with_verbosity,
 )
 from kedro.framework.context.context import load_context
+from kedro.framework.project import configure_project
 from kedro.framework.startup import _get_project_metadata, _is_project
 
 KEDRO_PATH = Path(kedro.__file__).parent
@@ -607,11 +608,12 @@ def main():  # pragma: no cover
     if _is_project(path):
         # load project commands from cli.py
         metadata = _get_project_metadata(path)
+        package_name = metadata.package_name
         cli_context = dict(obj=metadata)
         _add_src_to_path(metadata.source_dir, path)
+        configure_project(package_name)
 
         project_groups.extend(load_entry_points("project"))
-        package_name = metadata.package_name
 
         try:
             project_cli = importlib.import_module(f"{package_name}.cli")

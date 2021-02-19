@@ -6,7 +6,7 @@ To install Kedro from the Python Package Index (PyPI) simply run:
 pip install kedro
 ```
 
->_Note:_ It is also possible to install Kedro using `conda`, as follows, but we recommend that you prefer to use `pip` at this point to eliminate any potential dependency issues:
+>_Note:_ It is also possible to install Kedro using `conda`, as follows, but we recommend using `pip` at this point to eliminate any potential dependency issues:
 >
 
 ```bash

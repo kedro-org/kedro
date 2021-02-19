@@ -222,7 +222,8 @@ new-kedro-project
 │   │   ├── __init__.py
 |   |   ├── cli.py
 │   │   ├── hooks.py
-│   │   └── run.py
+│   │   ├── run.py
+|   |   └── settings.py
 │   ├── tests
 │   │   ├── __init__.py
 │   │   ├── pipelines

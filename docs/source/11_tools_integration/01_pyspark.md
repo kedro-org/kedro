@@ -32,7 +32,6 @@ from kedro.framework.context import KedroContext
 
 
 class CustomContext(KedroContext):
-
     def __init__(
         self,
         package_name: str,
@@ -134,15 +133,13 @@ from pyspark.sql import DataFrame
 
 
 def train_model(training_data: DataFrame) -> RandomForestClassifier:
-    """Node for training a random forest model to classify the data.
-    """
+    """Node for training a random forest model to classify the data."""
     classifier = RandomForestClassifier(numTrees=10)
     return classifier.fit(training_data)
 
 
 def predict(model: RandomForestClassifier, testing_data: DataFrame) -> DataFrame:
-    """Node for making predictions given a pre-trained model and a testing dataset.
-    """
+    """Node for making predictions given a pre-trained model and a testing dataset."""
     predictions = model.transform(testing_data)
     return predictions
 
@@ -159,7 +156,7 @@ def create_pipeline(**kwargs):
                 predict,
                 inputs=dict(model="example_classifier", testing_data="testing_data"),
                 outputs="example_predictions",
-            )
+            ),
         ]
     )
 ```

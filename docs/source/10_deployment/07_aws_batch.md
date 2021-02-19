@@ -63,7 +63,6 @@ y_train:
 y_test:
   type: pickle.PickleDataSet
   filepath: s3://<your-bucket>/y_test.pickle
-
 ```
 
 </details>
@@ -208,7 +207,6 @@ class AWSBatchRunner(ThreadRunner):
                 if not futures:
                     assert not todo_nodes, (todo_nodes, done_nodes, ready, done)
                     break
-
 ```
 
 Next you will want to add the implementation of the `_submit_job()` method referenced in `_run()`. This method will create and submit jobs to AWS Batch with the following:
@@ -222,41 +220,40 @@ Once submitted, the method tracks progress and surfaces any errors if the jobs e
 Make sure the contents below are placed inside the `AWSBatchRunner` class:
 
 ```python
-    def _submit_job(
-        self,
-        node: Node,
-        node_to_job: Dict[Node, str],
-        node_dependencies: Set[Node],
-        run_id: str,
-    ) -> Node:
-        self._logger.info("Submitting the job for node: %s", str(node))
+def _submit_job(
+    self,
+    node: Node,
+    node_to_job: Dict[Node, str],
+    node_dependencies: Set[Node],
+    run_id: str,
+) -> Node:
+    self._logger.info("Submitting the job for node: %s", str(node))
 
-        job_name = f"kedro_{run_id}_{node.name}".replace(".", "-")
-        depends_on = [{"jobId": node_to_job[dep]} for dep in node_dependencies]
-        command = ["kedro", "run", "--node", node.name]
+    job_name = f"kedro_{run_id}_{node.name}".replace(".", "-")
+    depends_on = [{"jobId": node_to_job[dep]} for dep in node_dependencies]
+    command = ["kedro", "run", "--node", node.name]
 
-        response = self._client.submit_job(
-            jobName=job_name,
-            jobQueue=self._job_queue,
-            jobDefinition=self._job_definition,
-            dependsOn=depends_on,
-            containerOverrides={"command": command},
-        )
+    response = self._client.submit_job(
+        jobName=job_name,
+        jobQueue=self._job_queue,
+        jobDefinition=self._job_definition,
+        dependsOn=depends_on,
+        containerOverrides={"command": command},
+    )
 
-        job_id = response["jobId"]
-        node_to_job[node] = job_id
+    job_id = response["jobId"]
+    node_to_job[node] = job_id
 
-        _track_batch_job(job_id, self._client)  # make sure the job finishes
+    _track_batch_job(job_id, self._client)  # make sure the job finishes
 
-        return node
-
+    return node
 ```
 
 The last part of the implementation is the helper function `_track_batch_job()`, called from `_submit_job()`, which looks like this:
 
 ```python
 def _track_batch_job(job_id: str, client: Any) -> None:
-    """ Continuously poll the Batch client for a job's status,
+    """Continuously poll the Batch client for a job's status,
     given the job ID. If it ends in FAILED state, raise an exception
     and log the reason. Return if successful.
     """
@@ -280,7 +277,6 @@ def _track_batch_job(job_id: str, client: Any) -> None:
 
         if status == "SUCCEEDED":
             return
-
 ```
 
 #### Set up Batch-related configuration

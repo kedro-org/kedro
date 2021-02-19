@@ -12,6 +12,7 @@ This example illustrates decorators that modify the first string argument of a g
 from functools import wraps
 from typing import Callable
 
+
 def apply_f(func: Callable) -> Callable:
     @wraps(func)
     def with_f(*args, **kwargs):

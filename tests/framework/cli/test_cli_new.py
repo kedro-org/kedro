@@ -43,7 +43,7 @@ from kedro.framework.cli.cli import (
     TEMPLATE_PATH,
     _fix_user_path,
     _get_config_from_starter_prompts,
-    _get_starter_config,
+    _get_prompts_config,
     cli,
 )
 from kedro.framework.cli.utils import KedroCliError
@@ -51,7 +51,13 @@ from kedro.framework.cli.utils import KedroCliError
 FILES_IN_TEMPLATE = 36
 
 
-def _invoke(cli_runner, args, project_name=None, repo_name=None, python_package=None):
+def _invoke(
+    cli_runner,
+    args,
+    project_name=None,
+    repo_name="repo_name",
+    python_package="python_package",
+):
 
     click_prompts = (project_name, repo_name, python_package)
     input_string = "\n".join(x or "" for x in click_prompts)
@@ -66,7 +72,7 @@ def _assert_template_ok(
     repo_name=None,
     project_name="New Kedro Project",
     output_dir=".",
-    package_name=None,
+    package_name="python_package",
 ):
     assert result.exit_code == 0, result.output
     assert "Change directory to the project generated in" in result.output
@@ -115,7 +121,6 @@ class TestInteractiveNew:
             FILES_IN_TEMPLATE,
             repo_name=self.repo_name,
             project_name=project_name,
-            package_name="test",
         )
 
     def test_new_custom_dir(self, cli_runner):
@@ -123,10 +128,7 @@ class TestInteractiveNew:
         repo name was specified."""
         result = _invoke(cli_runner, ["new"], repo_name=self.repo_name)
         _assert_template_ok(
-            result,
-            FILES_IN_TEMPLATE,
-            repo_name=self.repo_name,
-            package_name="new_kedro_project",
+            result, FILES_IN_TEMPLATE, repo_name=self.repo_name,
         )
 
     def test_new_correct_path(self, cli_runner):
@@ -148,19 +150,26 @@ class TestInteractiveNew:
         assert "directory already exists" in result.output
         assert result.exit_code != 0
 
-    @pytest.mark.parametrize("repo_name", [".repo", "re!po", "-repo", "repo-"])
+    @pytest.mark.parametrize(
+        "repo_name", [".repo\nvalid", "re!po\nvalid", "-repo\nvalid", "repo-\nvalid"]
+    )
     def test_bad_repo_name(self, cli_runner, repo_name):
         """Check the error if the repository name is invalid."""
         result = _invoke(cli_runner, ["new"], repo_name=repo_name)
-        assert result.exit_code != 0
+        assert (
+            "is an invalid value.\nIt must contain only word symbols" in result.output
+        )
+        assert result.exit_code == 0
 
     @pytest.mark.parametrize(
-        "pkg_name", ["0package", "_", "package-name", "package name"]
+        "pkg_name",
+        ["0package\nvalid", "_\nvalid", "package-name\nvalid", "package name\nvalid"],
     )
     def test_bad_pkg_name(self, cli_runner, pkg_name):
         """Check the error if the package name is invalid."""
         result = _invoke(cli_runner, ["new"], python_package=pkg_name)
-        assert result.exit_code != 0
+        assert "is an invalid value.\nIt must start with a letter" in result.output
+        assert result.exit_code == 0
 
 
 def _create_config_file(config_path, project_name, repo_name, output_dir=None):
@@ -208,7 +217,12 @@ class TestNewFromConfig:
         )
         result = _invoke(cli_runner, ["new", "-v", "--config", self.config_path])
         _assert_template_ok(
-            result, FILES_IN_TEMPLATE, self.repo_name, self.project_name, output_dir
+            result,
+            FILES_IN_TEMPLATE,
+            self.repo_name,
+            self.project_name,
+            output_dir,
+            self.repo_name.replace("-", "_"),
         )
 
     def test_wrong_config(self, cli_runner):
@@ -274,7 +288,7 @@ def test_default_config_up_to_date():
     cookie_keys = [
         key for key in cookie if not key.startswith("_") and key != "kedro_version"
     ]
-    default_config_keys = _get_starter_config().keys()
+    default_config_keys = _get_prompts_config().keys()
 
     assert set(cookie_keys) == set(default_config_keys)
 

@@ -474,12 +474,17 @@ class TestRunNodeSynchronisationHelper:
             "kedro.framework.session.session._register_all_project_hooks"
         )
 
+    @pytest.fixture
+    def mock_configure_project(self, mocker):
+        return mocker.patch("kedro.framework.project.configure_project")
+
     @pytest.mark.parametrize("conf_logging", [{"fake_logging_config": True}, dict()])
     def test_package_name_and_logging_provided(
         self,
         mock_logging,
         mock_run_node,
         mock_register_hooks,
+        mock_configure_project,
         is_async,
         conf_logging,
         mocker,
@@ -500,11 +505,18 @@ class TestRunNodeSynchronisationHelper:
             conf_logging=conf_logging,
         )
         mock_run_node.assert_called_once_with(node, catalog, is_async, run_id)
-        mock_register_hooks.assert_called_once_with(hook_manager, package_name)
+        mock_register_hooks.assert_called_once_with(hook_manager)
         mock_logging.assert_called_once_with(conf_logging)
+        mock_configure_project.assert_called_once_with(package_name)
 
     def test_package_name_provided(
-        self, mock_logging, mock_run_node, mock_register_hooks, is_async, mocker,
+        self,
+        mock_logging,
+        mock_run_node,
+        mock_register_hooks,
+        mock_configure_project,
+        is_async,
+        mocker,
     ):
         mocker.patch("multiprocessing.get_start_method", return_value="spawn")
         node = mocker.sentinel.node
@@ -517,8 +529,9 @@ class TestRunNodeSynchronisationHelper:
             node, catalog, is_async, run_id, package_name=package_name
         )
         mock_run_node.assert_called_once_with(node, catalog, is_async, run_id)
-        mock_register_hooks.assert_called_once_with(hook_manager, package_name)
+        mock_register_hooks.assert_called_once_with(hook_manager)
         mock_logging.assert_called_once_with({})
+        mock_configure_project.assert_called_once_with(package_name)
 
     def test_package_name_not_provided(
         self, mock_logging, mock_run_node, mock_register_hooks, is_async, mocker

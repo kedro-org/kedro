@@ -139,6 +139,7 @@ def handler(event, context):
     # https://stackoverflow.com/questions/34005930/multiprocessing-semlock-is-not-implemented-when-running-on-aws-lambda
     with patch("multiprocessing.Lock"):
         from kedro.framework.session import KedroSession
+
         with KedroSession.create("spaceflights_steps_function", env="aws") as session:
             session.run(node_names=[node_to_run])
 ```
@@ -256,12 +257,14 @@ def _clean_name(name: str) -> str:
 
 
 class KedroStepFunctionsStack(core.Stack):
-    """A CDK Stack to deploy a Kedro pipeline to AWS Step Functions.
-    """
+    """A CDK Stack to deploy a Kedro pipeline to AWS Step Functions."""
+
     env = "aws"
     project_path = Path.cwd()
     erc_repository_name = project_path.name
-    s3_data_bucket_name = "spaceflights-step-functions"  # this is where the raw data is located
+    s3_data_bucket_name = (
+        "spaceflights-step-functions"  # this is where the raw data is located
+    )
 
     def __init__(self, scope: core.Construct, id: str, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
@@ -276,7 +279,9 @@ class KedroStepFunctionsStack(core.Stack):
         """Extract the Kedro pipeline from the project"""
         metadata = _get_project_metadata(self.project_path)
         _add_src_to_path(metadata.source_dir, self.project_path)
-        session = KedroSession.create(metadata.package_name, self.project_path, env=self.env)
+        session = KedroSession.create(
+            metadata.package_name, self.project_path, env=self.env
+        )
         context = session.load_context()
 
         self.project_name = metadata.project_name
@@ -285,9 +290,7 @@ class KedroStepFunctionsStack(core.Stack):
     def _set_ecr_repository(self) -> None:
         """Set the ECR repository for the Lambda base image"""
         self.ecr_repository = aws_ecr.Repository.from_repository_name(
-            self,
-            id="ECR",
-            repository_name=self.erc_repository_name
+            self, id="ECR", repository_name=self.erc_repository_name
         )
 
     def _set_ecr_image(self) -> None:
@@ -296,7 +299,9 @@ class KedroStepFunctionsStack(core.Stack):
 
     def _set_s3_data_bucket(self) -> None:
         """Set the S3 bucket containing the raw data"""
-        self.s3_bucket = s3.Bucket(self, "RawDataBucket", bucket_name=self.s3_data_bucket_name)
+        self.s3_bucket = s3.Bucket(
+            self, "RawDataBucket", bucket_name=self.s3_data_bucket_name
+        )
 
     def _convert_kedro_node_to_lambda_function(self, node: Node) -> IFunction:
         """Convert a Kedro node into an AWS Lambda function"""
@@ -322,7 +327,7 @@ class KedroStepFunctionsStack(core.Stack):
             self,
             _clean_name(node.name),
             lambda_function=self._convert_kedro_node_to_lambda_function(node),
-            payload=sfn.TaskInput.from_object({"node_name": node.name})
+            payload=sfn.TaskInput.from_object({"node_name": node.name}),
         )
 
     def _convert_kedro_pipeline_to_step_functions_state_machine(self) -> None:

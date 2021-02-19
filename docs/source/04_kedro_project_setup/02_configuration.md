@@ -107,10 +107,7 @@ The contents of the dictionary resulting from `globals_pattern` get merged with 
     "bucket_name": "another_bucket_name",
     "non_string_key": 10,
     "key_prefix": "my/key/prefix",
-    "datasets": {
-        "csv": "pandas.CSVDataSet",
-        "spark": "spark.SparkDataSet"
-    },
+    "datasets": {"csv": "pandas.CSVDataSet", "spark": "spark.SparkDataSet"},
     "folders": {
         "raw": "01_raw",
         "int": "02_intermediate",

@@ -49,6 +49,7 @@ from kedro.framework.context.context import (
     _validate_layers_for_transcoding,
 )
 from kedro.framework.hooks import get_hook_manager, hook_impl
+from kedro.framework.project import Validator, _ProjectSettings
 from kedro.framework.session.session import _register_all_project_hooks
 from kedro.io import DataCatalog
 from kedro.io.core import Version, generate_timestamp
@@ -168,16 +169,16 @@ class RegistrationHooks:
         return _create_pipelines()
 
 
-# pylint: disable=too-few-public-methods
-class TestSettingsPy:
-    HOOKS = (RegistrationHooks(),)
+class MockSettings(_ProjectSettings):
+    _HOOKS = Validator("HOOKS", default=(RegistrationHooks(),))
 
 
 @pytest.fixture(autouse=True)
-def mocked_import_module(mocker):
-    mocker.patch(
-        "kedro.framework.project.settings.import_module", return_value=TestSettingsPy()
-    )
+def mock_settings(mocker):
+    mocked_settings = MockSettings()
+    mocker.patch("kedro.framework.session.session.settings", mocked_settings)
+    mocker.patch("kedro.framework.context.context.settings", mocked_settings)
+    return mocker.patch("kedro.framework.project.settings", mocked_settings)
 
 
 @pytest.fixture
@@ -276,7 +277,7 @@ def dummy_context(
     )
 
     hook_manager = get_hook_manager()
-    _register_all_project_hooks(hook_manager, MOCK_PACKAGE_NAME)
+    _register_all_project_hooks(hook_manager)
     return context
 
 
@@ -290,6 +291,20 @@ def clear_hook_manager():
 
 
 class TestKedroContext:
+    def test_deprecate_reading_conf_root_from_context(self, dummy_context):
+        pattern = (
+            "Accessing CONF_ROOT via the context will be deprecated in Kedro 0.18.0."
+        )
+        with pytest.warns(DeprecationWarning, match=pattern):
+            assert dummy_context.CONF_ROOT == "conf"
+
+    def test_deprecate_setting_conf_root_on_context(self, dummy_context):
+        pattern = (
+            "Accessing CONF_ROOT via the context will be deprecated in Kedro 0.18.0."
+        )
+        with pytest.warns(DeprecationWarning, match=pattern):
+            dummy_context.CONF_ROOT = "test_conf"
+
     def test_attributes(self, tmp_path, dummy_context):
         project_metadata = pyproject_toml_payload["tool"]["kedro"]
         assert dummy_context.package_name == project_metadata["package_name"]
@@ -539,6 +554,17 @@ class TestKedroContextRun:
         assert "Completed 2 out of 2 tasks" in log_msgs
         assert "Running node: node3: identity([trains]) -> [ships]" in log_msgs
         assert "Running node: node4: identity([ships]) -> [planes]" in log_msgs
+        assert "Pipeline execution completed successfully." in log_msgs
+
+    def test_run_to_outputs(self, dummy_context, dummy_dataframe, caplog):
+        dummy_context.catalog.save("cars", dummy_dataframe)
+        dummy_context.run(to_outputs=["trains"])
+
+        log_msgs = [record.getMessage() for record in caplog.records]
+        assert "Completed 2 out of 2 tasks" in log_msgs
+        assert "Running node: node1: identity([cars]) -> [boats]" in log_msgs
+        assert "Running node: node2: identity([boats]) -> [trains]" in log_msgs
+        assert "Running node: node3: identity([trains]) -> [ships]" not in log_msgs
         assert "Pipeline execution completed successfully." in log_msgs
 
     def test_run_load_versions(self, dummy_context, dummy_dataframe):

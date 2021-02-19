@@ -52,7 +52,7 @@ from kedro.framework.cli.utils import (
     env_option,
     python_call,
 )
-from kedro.framework.project.settings import _get_project_settings
+from kedro.framework.project import settings
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import ProjectMetadata
 
@@ -124,7 +124,7 @@ def create_pipeline(
 ):  # pylint: disable=unused-argument
     """Create a new modular pipeline by providing a name."""
     package_dir = metadata.source_dir / metadata.package_name
-    conf_root = _get_project_settings(metadata.package_name, "CONF_ROOT", "conf")
+    conf_root = settings.CONF_ROOT
     project_conf_path = metadata.project_path / conf_root
 
     env = env or "base"
@@ -160,7 +160,7 @@ def delete_pipeline(
 ):  # pylint: disable=unused-argument
     """Delete a modular pipeline by providing a name."""
     package_dir = metadata.source_dir / metadata.package_name
-    conf_root = _get_project_settings(metadata.package_name, "CONF_ROOT", "conf")
+    conf_root = settings.CONF_ROOT
     project_conf_path = metadata.project_path / conf_root
 
     env = env or "base"
@@ -675,9 +675,7 @@ def _get_pipeline_artifacts(
 ) -> PipelineArtifacts:
     """From existing project, returns in order: source_path, tests_path, config_paths"""
     package_dir = project_metadata.source_dir / project_metadata.package_name
-    conf_root = _get_project_settings(
-        project_metadata.package_name, "CONF_ROOT", "conf"
-    )
+    conf_root = settings.CONF_ROOT
     project_conf_path = project_metadata.project_path / conf_root
     artifacts = PipelineArtifacts(
         package_dir / "pipelines" / pipeline_name,

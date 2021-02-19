@@ -37,12 +37,11 @@ from pandas import DataFrame
 
 from kedro.extras.datasets.pandas import CSVDataSet
 from kedro.framework.cli.pipeline import _sync_dirs
-from kedro.framework.context import KedroContext, load_context
+from kedro.framework.project import settings
+from kedro.framework.session import KedroSession
 
 PACKAGE_NAME = "dummy_package"
 PIPELINE_NAME = "my_pipeline"
-
-CONF_ROOT = KedroContext.CONF_ROOT
 
 
 @pytest.fixture(autouse=True)
@@ -67,7 +66,7 @@ def cleanup_pipelines(fake_repo_path, fake_package_path):
     for pipeline in created_pipelines:
         shutil.rmtree(str(pipes_path / pipeline))
 
-        confs = fake_repo_path / CONF_ROOT
+        confs = fake_repo_path / settings.CONF_ROOT
         for each in confs.rglob(f"*{pipeline}*"):  # clean all pipeline config files
             if each.is_file():
                 each.unlink()
@@ -90,7 +89,7 @@ def cleanup_pipelines(fake_repo_path, fake_package_path):
 def make_pipelines(request, fake_repo_path, fake_package_path, mocker):
     source_path = fake_package_path / "pipelines" / PIPELINE_NAME
     tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
-    conf_path = fake_repo_path / CONF_ROOT / request.param / "parameters"
+    conf_path = fake_repo_path / settings.CONF_ROOT / request.param / "parameters"
 
     for path in (source_path, tests_path, conf_path):
         path.mkdir(parents=True, exist_ok=True)
@@ -163,7 +162,7 @@ class TestPipelineCreateCommand:
 
         # config
         conf_env = env or "base"
-        conf_dir = (fake_repo_path / CONF_ROOT / conf_env).resolve()
+        conf_dir = (fake_repo_path / settings.CONF_ROOT / conf_env).resolve()
         actual_configs = list(conf_dir.glob(f"**/{PIPELINE_NAME}.yml"))
         expected_configs = [conf_dir / "parameters" / f"{PIPELINE_NAME}.yml"]
         assert actual_configs == expected_configs
@@ -190,7 +189,7 @@ class TestPipelineCreateCommand:
         assert f"Creating the pipeline `{PIPELINE_NAME}`: OK" in result.output
         assert f"Pipeline `{PIPELINE_NAME}` was successfully created." in result.output
 
-        conf_dirs = list((fake_repo_path / CONF_ROOT).rglob(PIPELINE_NAME))
+        conf_dirs = list((fake_repo_path / settings.CONF_ROOT).rglob(PIPELINE_NAME))
         assert conf_dirs == []  # no configs created for the pipeline
 
         test_dir = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
@@ -209,7 +208,7 @@ class TestPipelineCreateCommand:
         assert result.exit_code == 0
 
         # write pipeline catalog
-        conf_dir = fake_repo_path / CONF_ROOT / "base"
+        conf_dir = fake_repo_path / settings.CONF_ROOT / "base"
         catalog_dict = {
             "ds_from_pipeline": {
                 "type": "pandas.CSVDataSet",
@@ -228,7 +227,8 @@ class TestPipelineCreateCommand:
         with params_file.open("w") as f:
             yaml.dump(params_dict, f)
 
-        ctx = load_context(Path.cwd())
+        with KedroSession.create(PACKAGE_NAME) as session:
+            ctx = session.load_context()
         assert isinstance(ctx.catalog._data_sets["ds_from_pipeline"], CSVDataSet)
         assert isinstance(ctx.catalog.load("ds_from_pipeline"), DataFrame)
         assert ctx.params["params_from_pipeline"] == params_dict["params_from_pipeline"]
@@ -238,7 +238,11 @@ class TestPipelineCreateCommand:
         # create catalog and parameter files
         for dirname in ("catalog", "parameters"):
             path = (
-                fake_repo_path / CONF_ROOT / "base" / dirname / f"{PIPELINE_NAME}.yml"
+                fake_repo_path
+                / settings.CONF_ROOT
+                / "base"
+                / dirname
+                / f"{PIPELINE_NAME}.yml"
             )
             path.parent.mkdir(exist_ok=True)
             path.touch()
@@ -343,7 +347,7 @@ class TestPipelineDeleteCommand:
         tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
         params_path = (
             fake_repo_path
-            / CONF_ROOT
+            / settings.CONF_ROOT
             / expected_conf
             / "parameters"
             / f"{PIPELINE_NAME}.yml"
@@ -374,7 +378,11 @@ class TestPipelineDeleteCommand:
         result = fake_cli_invoke(["pipeline", "delete", "-y", PIPELINE_NAME])
         tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
         params_path = (
-            fake_repo_path / CONF_ROOT / "base" / "parameters" / f"{PIPELINE_NAME}.yml"
+            fake_repo_path
+            / settings.CONF_ROOT
+            / "base"
+            / "parameters"
+            / f"{PIPELINE_NAME}.yml"
         )
 
         assert f"Deleting `{source_path}`" not in result.output
@@ -441,7 +449,11 @@ class TestPipelineDeleteCommand:
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
         tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
         params_path = (
-            fake_repo_path / CONF_ROOT / "base" / "parameters" / f"{PIPELINE_NAME}.yml"
+            fake_repo_path
+            / settings.CONF_ROOT
+            / "base"
+            / "parameters"
+            / f"{PIPELINE_NAME}.yml"
         )
 
         assert "The following paths will be removed:" in result.output
@@ -473,7 +485,11 @@ class TestPipelineDeleteCommand:
 
         tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
         params_path = (
-            fake_repo_path / CONF_ROOT / "base" / "parameters" / f"{PIPELINE_NAME}.yml"
+            fake_repo_path
+            / settings.CONF_ROOT
+            / "base"
+            / "parameters"
+            / f"{PIPELINE_NAME}.yml"
         )
 
         assert "The following paths will be removed:" in result.output

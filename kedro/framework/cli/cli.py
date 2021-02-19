@@ -32,6 +32,7 @@ This module implements commands available from the kedro CLI.
 """
 import importlib
 import os
+import re
 import tempfile
 import warnings
 import webbrowser
@@ -56,6 +57,7 @@ from kedro.framework.cli.utils import (
     command_with_verbosity,
 )
 from kedro.framework.context.context import load_context
+from kedro.framework.project import configure_project
 from kedro.framework.startup import _get_project_metadata, _is_project
 
 KEDRO_PATH = Path(kedro.__file__).parent
@@ -306,7 +308,7 @@ def _create_project(
                     no_input=True,
                     directory=directory,
                 )
-                config_yml = temp_dir_path / repo / "starter_config.yml"
+                config_yml = temp_dir_path / repo / "prompts.yml"
                 if config_yml.is_file():
                     with open(config_yml) as config_file:
                         prompts = yaml.safe_load(config_file)
@@ -359,12 +361,16 @@ def _get_available_tags(template_path: str) -> List:
     return sorted(unique_tags)
 
 
-def _get_user_input(text: str, default: Any = None) -> Any:
+def _get_user_input(
+    text: str, default: Any = None, regexp: str = None, error_msg: str = ""
+) -> Any:
     """Get user input and validate it.
 
     Args:
         text: Text to display in command line prompt.
         default: Default value for the input.
+        regexp: Regular expresion used to validate user's input.
+        error_msg: Error message to be emitted if user's input is invalid.
 
     Returns:
         Processed user value.
@@ -372,7 +378,13 @@ def _get_user_input(text: str, default: Any = None) -> Any:
     """
 
     while True:
-        return click.prompt(text, default=default)
+        value = click.prompt(text, default=default)
+
+        if regexp and not re.match(regexp, value):
+            click.secho(f"`{value}` is an invalid value.", fg="red", err=True)
+            click.secho(error_msg, fg="red", err=True)
+        else:
+            return value
 
 
 def _get_config_from_starter_prompts(starter_prompts):
@@ -386,7 +398,13 @@ def _get_config_from_starter_prompts(starter_prompts):
                 "Each prompt must have both a title and text field to be valid."
             ) from exc
         default = value.get("default", "")
-        response = _get_user_input(text=prompt, default=default)
+        regexp = value.get("regex_validator")
+        error_msg = value.get("error_msg", "")
+
+        response = _get_user_input(
+            text=prompt, default=default, regexp=regexp, error_msg=error_msg
+        )
+
         if response:
             config[key] = response
     return config
@@ -440,7 +458,7 @@ def _check_config_ok(config_path: str, config: Dict[str, Any]) -> Dict[str, Any]
         _show_example_config()
         raise KedroCliError(config_path + " is empty")
 
-    mandatory_keys = set(_get_starter_config().keys())
+    mandatory_keys = set(_get_prompts_config().keys())
     mandatory_keys.add("output_dir")
     missing_keys = mandatory_keys - set(config.keys())
 
@@ -457,10 +475,10 @@ def _check_config_ok(config_path: str, config: Dict[str, Any]) -> Dict[str, Any]
     return config
 
 
-def _get_starter_config():
-    starter_config_path = TEMPLATE_PATH / "starter_config.yml"
-    with starter_config_path.open() as starter_config_file:
-        return yaml.safe_load(starter_config_file)
+def _get_prompts_config():
+    prompts_config_path = TEMPLATE_PATH / "prompts.yml"
+    with prompts_config_path.open() as prompts_config_file:
+        return yaml.safe_load(prompts_config_file)
 
 
 def _assert_output_dir_ok(output_dir: str):
@@ -492,8 +510,8 @@ def _fix_user_path(output_dir):
 
 def _show_example_config():
     click.secho("Example of valid config.yml:")
-    starter_config = _get_starter_config()
-    for key, value in starter_config.items():
+    prompts_config = _get_prompts_config()
+    for key, value in prompts_config.items():
         click.secho(
             click.style(key + ": ", bold=True, fg="yellow")
             + click.style(str(value), fg="cyan")
@@ -607,11 +625,12 @@ def main():  # pragma: no cover
     if _is_project(path):
         # load project commands from cli.py
         metadata = _get_project_metadata(path)
+        package_name = metadata.package_name
         cli_context = dict(obj=metadata)
         _add_src_to_path(metadata.source_dir, path)
+        configure_project(package_name)
 
         project_groups.extend(load_entry_points("project"))
-        package_name = metadata.package_name
 
         try:
             project_cli = importlib.import_module(f"{package_name}.cli")

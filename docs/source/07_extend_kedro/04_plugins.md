@@ -38,9 +38,11 @@ def to_json(metadata):
 The plugin provides the following `entry_points` config in `setup.py`:
 
 ```python
-entry_points={
-    "kedro.project_commands": ["kedrojson = kedrojson.plugin:commands"],
-}
+setup(
+    entry_points={
+        "kedro.project_commands": ["kedrojson = kedrojson.plugin:commands"],
+    }
+)
 ```
 
 Once the plugin is installed, you can run it as follows:
@@ -93,7 +95,6 @@ You can develop hook implementations and have them automatically registered to t
 
 ```python
 setup(
-    ...
     entry_points={"kedro.hooks": ["plugin_name = plugin_name.plugin:hooks"]},
 )
 ```

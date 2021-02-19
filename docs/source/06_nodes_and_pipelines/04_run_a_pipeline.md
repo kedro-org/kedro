@@ -152,7 +152,6 @@ from kedro.framework.hooks import hook_impl
 
 
 class ProjectHooks:
-
     @hook_impl
     def register_pipelines(self):
         """Register the project's pipelines.

@@ -223,7 +223,7 @@ commands:
           name: Run unit tests
           command: |
             conda activate kedro_builder
-            pytest .\tests --ignore .\tests\extras\datasets\tensorflow --no-cov
+            pytest .\tests --ignore .\tests\extras\datasets\tensorflow --ignore tests\framework\session\test_session_hooks.py --no-cov
 
   win_e2e_tests:
     description: Run all end to end tests
@@ -377,7 +377,7 @@ jobs:
           # Run `test_parallel_runner.py` separately because of `Windows fatal exception: stack overflow`
           command: |
             conda activate kedro_builder
-            pytest .\tests --ignore .\tests\extras\datasets\spark --ignore .\tests\extras\datasets\tensorflow --ignore .\tests\runner\test_parallel_runner.py --no-cov
+            pytest .\tests --ignore .\tests\extras\datasets\spark --ignore .\tests\extras\datasets\tensorflow --ignore tests\framework\session\test_session_hooks.py --ignore .\tests\runner\test_parallel_runner.py --no-cov
             if ($?) { pytest .\tests\runner\test_parallel_runner.py --no-cov }
 
   win_e2e_tests_36:

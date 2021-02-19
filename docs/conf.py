@@ -93,7 +93,7 @@ exclude_patterns = [
     "_templates",
     "modules.rst",
     "source",
-    "README.md"
+    "README.md",
 ]
 
 type_targets = {
@@ -127,7 +127,6 @@ type_targets = {
         "kedro.versioning.journal.Journal",
         "kedro.framework.context.context.KedroContext",
         "kedro.framework.startup.ProjectMetadata",
-        "kedro.framework.project.settings.ProjectSettings",
         "abc.ABC",
         "pathlib.Path",
         "pathlib.PurePosixPath",

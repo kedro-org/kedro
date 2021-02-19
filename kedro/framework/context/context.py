@@ -27,6 +27,7 @@
 # limitations under the License.
 """This module provides context for Kedro project."""
 
+import functools
 import logging
 import os
 from copy import deepcopy
@@ -37,7 +38,7 @@ from warnings import warn
 
 from kedro.config import ConfigLoader, MissingConfigException
 from kedro.framework.hooks import get_hook_manager
-from kedro.framework.project.settings import _get_project_settings
+from kedro.framework.project import settings
 from kedro.framework.startup import _get_project_metadata
 from kedro.io import DataCatalog
 from kedro.io.core import generate_timestamp
@@ -46,6 +47,25 @@ from kedro.pipeline.pipeline import _transcode_split
 from kedro.runner.runner import AbstractRunner
 from kedro.runner.sequential_runner import SequentialRunner
 from kedro.versioning import Journal
+
+
+def _deprecate(version):
+    """Decorator to deprecate a few of the context's properties
+    """
+
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            property_name = func.__name__
+            warn(
+                f"Accessing {property_name} via the context will be deprecated in Kedro {version}.",
+                DeprecationWarning,
+            )
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
 
 
 def _is_relative_path(path_string: str) -> bool:
@@ -180,7 +200,7 @@ class KedroContext:
     Kedro's main functionality.
     """
 
-    CONF_ROOT = "conf"
+    _CONF_ROOT = "conf"
     """CONF_ROOT: Name of root directory containing project configuration.
     Default name is "conf"."""
 
@@ -211,10 +231,42 @@ class KedroContext:
         self._project_path = Path(project_path).expanduser().resolve()
         self._package_name = package_name
 
-        self.env = env or "local"
+        self._env = env or "local"
         self._extra_params = deepcopy(extra_params)
 
-    @property
+    @property  # type: ignore
+    @_deprecate(version="0.18.0")
+    def CONF_ROOT(self) -> str:  # pylint: disable=invalid-name
+        """Deprecated in favour of settings.CONF_ROOT
+
+        Returns:
+            The root directory of the configuration directory of the project.
+        Raises:
+            DeprecationWarning
+        """
+        return self._CONF_ROOT
+
+    @CONF_ROOT.setter  # type: ignore
+    @_deprecate(version="0.18.0")
+    def CONF_ROOT(self, value: str) -> None:  # pylint: disable=invalid-name
+        """Deprecated in favour of settings.CONF_ROOT
+        Raises:
+            DeprecationWarning
+        """
+        self._CONF_ROOT = value  # pylint: disable=invalid-name
+
+    @property  # type: ignore
+    def env(self) -> str:
+        """Property for the current Kedro environment.
+
+        Returns:
+            Name of the current Kedro environment.
+
+        """
+        return self._env
+
+    @property  # type: ignore
+    @_deprecate(version="0.18.0")
     def package_name(self) -> str:
         """Property for Kedro project package name.
 
@@ -396,9 +448,7 @@ class KedroContext:
             KedroContextError: Incorrect ``ConfigLoader`` registered for the project.
 
         """
-        conf_root = _get_project_settings(
-            self.package_name, "CONF_ROOT", self.CONF_ROOT
-        )
+        conf_root = settings.CONF_ROOT
         conf_paths = [
             str(self.project_path / conf_root / "base"),
             str(self.project_path / conf_root / self.env),
@@ -674,10 +724,7 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
     project_path = Path(project_path).expanduser().resolve()
     metadata = _get_project_metadata(project_path)
 
-    context_class = _get_project_settings(
-        metadata.package_name, "CONTEXT_CLASS", KedroContext
-    )
-
+    context_class = settings.CONTEXT_CLASS
     # update kwargs with env from the environment variable
     # (defaults to None if not set)
     # need to do this because some CLI command (e.g `kedro run`) defaults to

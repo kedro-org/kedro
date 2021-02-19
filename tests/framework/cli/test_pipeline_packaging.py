@@ -35,15 +35,13 @@ from click import ClickException
 from click.testing import CliRunner
 
 from kedro.framework.cli.pipeline import _get_wheel_name
-from kedro.framework.context import KedroContext
+from kedro.framework.project import settings
 
 PIPELINE_NAME = "my_pipeline"
 
 LETTER_ERROR = "It must contain only letters, digits, and/or underscores."
 FIRST_CHAR_ERROR = "It must start with a letter or underscore."
 TOO_SHORT_ERROR = "It must be at least 2 characters long."
-
-CONF_ROOT = KedroContext.CONF_ROOT
 
 
 @pytest.fixture(autouse=True)
@@ -68,7 +66,7 @@ def cleanup_pipelines(fake_repo_path, fake_package_path):
     for pipeline in created_pipelines:
         shutil.rmtree(str(pipes_path / pipeline))
 
-        confs = fake_repo_path / CONF_ROOT
+        confs = fake_repo_path / settings.CONF_ROOT
         for each in confs.rglob(f"*{pipeline}*"):  # clean all pipeline config files
             if each.is_file():
                 each.unlink()
@@ -366,7 +364,9 @@ class TestPipelinePullCommand:
         self.call_pipeline_delete(fake_project_cli.cli, fake_metadata)
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
-        config_path = fake_repo_path / CONF_ROOT / "base" / "pipelines" / PIPELINE_NAME
+        config_path = (
+            fake_repo_path / settings.CONF_ROOT / "base" / "pipelines" / PIPELINE_NAME
+        )
         test_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
         # Make sure the files actually deleted before pulling from the wheel file.
         assert not source_path.exists()
@@ -396,7 +396,7 @@ class TestPipelinePullCommand:
         config_env = env or "base"
         params_config = (
             fake_repo_path
-            / CONF_ROOT
+            / settings.CONF_ROOT
             / config_env
             / "parameters"
             / f"{pipeline_name}.yml"
@@ -431,7 +431,11 @@ class TestPipelinePullCommand:
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
         test_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
         source_params_config = (
-            fake_repo_path / CONF_ROOT / "base" / "parameters" / f"{PIPELINE_NAME}.yml"
+            fake_repo_path
+            / settings.CONF_ROOT
+            / "base"
+            / "parameters"
+            / f"{PIPELINE_NAME}.yml"
         )
 
         wheel_file = (
@@ -457,7 +461,7 @@ class TestPipelinePullCommand:
         config_env = env or "base"
         dest_params_config = (
             fake_repo_path
-            / CONF_ROOT
+            / settings.CONF_ROOT
             / config_env
             / "parameters"
             / f"{pipeline_name}.yml"
@@ -553,7 +557,11 @@ class TestPipelinePullCommand:
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
         source_params_config = (
-            fake_repo_path / CONF_ROOT / "base" / "parameters" / f"{PIPELINE_NAME}.yml"
+            fake_repo_path
+            / settings.CONF_ROOT
+            / "base"
+            / "parameters"
+            / f"{PIPELINE_NAME}.yml"
         )
         # Make sure the files actually deleted before pulling from the wheel file.
         assert not source_path.exists()
@@ -582,7 +590,7 @@ class TestPipelinePullCommand:
         config_env = env or "base"
         params_config = (
             fake_repo_path
-            / CONF_ROOT
+            / settings.CONF_ROOT
             / config_env
             / "parameters"
             / f"{pipeline_name}.yml"
@@ -610,7 +618,11 @@ class TestPipelinePullCommand:
         # pylint: disable=too-many-locals
         self.call_pipeline_create(fake_project_cli.cli, fake_metadata)
         source_params_config = (
-            fake_repo_path / CONF_ROOT / "base" / "parameters" / f"{PIPELINE_NAME}.yml"
+            fake_repo_path
+            / settings.CONF_ROOT
+            / "base"
+            / "parameters"
+            / f"{PIPELINE_NAME}.yml"
         )
         source_params_config.unlink()
         self.call_pipeline_package(fake_project_cli.cli, fake_metadata)
@@ -645,7 +657,7 @@ class TestPipelinePullCommand:
         config_env = env or "base"
         dest_params_config = (
             fake_repo_path
-            / CONF_ROOT
+            / settings.CONF_ROOT
             / config_env
             / "parameters"
             / f"{pipeline_name}.yml"
@@ -687,7 +699,11 @@ class TestPipelinePullCommand:
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
         test_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
         source_params_config = (
-            fake_repo_path / CONF_ROOT / "base" / "parameters" / f"{PIPELINE_NAME}.yml"
+            fake_repo_path
+            / settings.CONF_ROOT
+            / "base"
+            / "parameters"
+            / f"{PIPELINE_NAME}.yml"
         )
         # Make sure the files actually deleted before pulling from pypi.
         assert not source_path.exists()
@@ -719,7 +735,7 @@ class TestPipelinePullCommand:
         config_env = env or "base"
         dest_params_config = (
             fake_repo_path
-            / CONF_ROOT
+            / settings.CONF_ROOT
             / config_env
             / "parameters"
             / f"{pipeline_name}.yml"

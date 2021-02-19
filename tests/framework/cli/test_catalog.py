@@ -226,7 +226,6 @@ class TestCatalogCreateCommand:
         }
 
         mocked_context.project_path = fake_repo_path
-        mocked_context.CONF_ROOT = "conf"
 
         data_catalog_file = (
             fake_repo_path / "conf" / "base" / "catalog" / f"{self.PIPELINE_NAME}.yml"

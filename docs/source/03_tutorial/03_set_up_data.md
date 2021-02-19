@@ -3,7 +3,7 @@
 In this section, we discuss the data set-up phase, which is the second part of the [standard development workflow](./01_spaceflights_tutorial.md#kedro-project-development-workflow). The steps are as follows:
 
 * Add datasets to your `data/` folder, according to [data engineering convention](../12_faq/01_faq.md#what-is-data-engineering-convention)
-* Register the datasets with the Data Catalog, which is the registry of all data sources available for use by the project `conf/base/catalog.yml`. This ensures that your code is reproducible when it references datasets in different locations and/or environments.
+* Register the datasets with the Data Catalog in `conf/base/catalog.yml`, which is the registry of all data sources available for use by the project. This ensures that your code is reproducible when it references datasets in different locations and/or environments.
 
 You can find further information about [the Data Catalog](../05_data/01_data_catalog.md) in specific documentation covering advanced usage.
 
@@ -103,10 +103,11 @@ reviews:
 To check whether Kedro can load the data correctly, open a `kedro ipython` session and run:
 
 ```python
-catalog.load("companies").head()
+companies = catalog.load("companies")
+companies.head()
 ```
 
-The command loads the dataset named `companies` (as per top-level key in `catalog.yml`), from the underlying filepath `data/01_raw/companies.csv`. It displays the first five rows of the dataset, and is loaded into a `pandas` DataFrame for you to experiment with the data.
+The command loads the dataset named `companies` (as per top-level key in `catalog.yml`) from the underlying filepath `data/01_raw/companies.csv` into the variable `companies`, which is of type `pandas.DataFrame`. The `head` method from `pandas` then displays the first five rows of the DataFrame.
 
 When you have finished, close `ipython` session as follows:
 
@@ -124,10 +125,11 @@ shuttles:
   filepath: data/01_raw/shuttles.xlsx
 ```
 
-To test that everything works as expected, load the dataset within a _new_ `kedro ipython` session:
+To test that everything works as expected, load the dataset within a _new_ `kedro ipython` session and display its first five rows:
 
 ```python
-catalog.load("shuttles").head()
+shuttles = catalog.load("shuttles")
+shuttles.head()
 ```
 When you have finished, close `ipython` session as follows:
 

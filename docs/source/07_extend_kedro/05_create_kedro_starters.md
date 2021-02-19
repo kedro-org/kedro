@@ -66,24 +66,25 @@ Within the parent folder, inside the `src` subfolder, is another configurable va
 Here is the layout of the project as a Cookiecutter template:
 
 ```
-    {{ cookiecutter.repo_name }}     # Parent directory of the template
-    ├── conf                         # Project configuration files
-    ├── data                         # Local project data (not committed to version control)
-    ├── docs                         # Project documentation
-    ├── logs                         # Project output logs (not committed to version control)
-    ├── notebooks                    # Project related Jupyter notebooks (can be used for experimental code before moving the code to src)
-    ├── README.md                    # Project README
-    ├── setup.cfg                    # Configuration options for tools e.g. `pytest` or `flake8`
-    └── src                          # Project source code
-        └── {{ cookiecutter.python_package }}
-           └── __init.py__
-           └── cli.py                # A collection of Kedro command line interface (CLI) commands
-           └── hooks.py
-           └── pipelines
-           └── run.py
-        ├── requirements.txt
-        ├── setup.py
-        └── tests
+{{ cookiecutter.repo_name }}     # Parent directory of the template
+├── conf                         # Project configuration files
+├── data                         # Local project data (not committed to version control)
+├── docs                         # Project documentation
+├── logs                         # Project output logs (not committed to version control)
+├── notebooks                    # Project related Jupyter notebooks (can be used for experimental code before moving the code to src)
+├── README.md                    # Project README
+├── setup.cfg                    # Configuration options for tools e.g. `pytest` or `flake8`
+└── src                          # Project source code
+    └── {{ cookiecutter.python_package }}
+       ├── __init.py__
+       ├── cli.py                # A collection of Kedro command line interface (CLI) commands
+       ├── hooks.py
+       ├── pipelines
+       ├── run.py
+       └── settings.py
+    ├── requirements.txt
+    ├── setup.py
+    └── tests
 ```
 
 <!--TO DO: Add something here about how the variables passed in at the time the project is created are used by Cookiecutter to create the project. Give the cookiecutter.json file?-->

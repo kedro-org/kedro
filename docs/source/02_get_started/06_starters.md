@@ -27,7 +27,7 @@ If no starter is provided to `kedro new`, the default Kedro template will be use
 
 ### Starter aliases
 
-We provide aliases for common starters maintained by Kedro team so that users don't have to specify the full path. For example, to create a project using the `PySpark` starter:
+We provide aliases for common starters maintained by the Kedro team so that users don't have to specify the full path. For example, to create a project using the `PySpark` starter:
 
 ```bash
 kedro new --starter=pyspark

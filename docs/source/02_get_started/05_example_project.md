@@ -23,25 +23,25 @@ This example project illustrates a convenient starting point and some best-pract
 The example project directory is set out as follows:
 
 ```
-    get-started         # Parent directory of the template
-    ├── conf            # Project configuration files
-    ├── data            # Local project data (not committed to version control)
-    ├── docs            # Project documentation
-    ├── logs            # Project output logs (not committed to version control)
-    ├── notebooks       # Project related Jupyter notebooks (can be used for experimental code before moving the code to src)
-    ├── README.md       # Project README
-    ├── setup.cfg       # Configuration options for `pytest` when doing `kedro test` and for the `isort` utility when doing `kedro lint`
-    └── src             # Project source code
+get-started         # Parent directory of the template
+├── conf            # Project configuration files
+├── data            # Local project data (not committed to version control)
+├── docs            # Project documentation
+├── logs            # Project output logs (not committed to version control)
+├── notebooks       # Project related Jupyter notebooks (can be used for experimental code before moving the code to src)
+├── README.md       # Project README
+├── setup.cfg       # Configuration options for `pytest` when doing `kedro test` and for the `isort` utility when doing `kedro lint`
+└── src             # Project source code
 ```
 
 Kedro also creates the following hidden files and folders:
 
 ```
-    get-started
-    ├── .coveragerc     # Configuration file for the coverage reporting when doing `kedro test`
-    ├── .gitignore      # Prevent staging of unnecessary files to `git`
-    ├── .ipython        # IPython startup scripts
-    └── pyproject.toml  # Identifies the project root and [contains configuration information](https://kedro.readthedocs.io/en/latest/11_faq/02_architecture_overview.html#kedro-yml)
+get-started
+├── .coveragerc     # Configuration file for the coverage reporting when doing `kedro test`
+├── .gitignore      # Prevent staging of unnecessary files to `git`
+├── .ipython        # IPython startup scripts
+└── pyproject.toml  # Identifies the project root and [contains configuration information](https://kedro.readthedocs.io/en/latest/11_faq/02_architecture_overview.html#kedro-yml)
 ```
 
 #### `conf/`
@@ -60,16 +60,13 @@ The folder contains three files for the example, but you can add others as you r
 
 ##### `conf/local/`
 
-The `local` subfolder of `conf` is used for **settings that should not be shared**, such as access credentials, custom editor configuration, personal IDE configuration and other sensitive or personal content. It is specific to user and installation. The contents of `conf/local/` is ignored by `git` (through inclusion in `.gitignore`).
-
-
-By default, when Kedro creates `conf/local` folder, it is empty. However, Kedro creates `credentials.yml` in `conf/base/` for use as an example. Before you populate and use the file, **you should first move it to `conf/local/`**.
+The `local` subfolder of `conf` is used for **settings that should not be shared**, such as access credentials, custom editor configuration, personal IDE configuration and other sensitive or personal content. It is specific to user and installation. The contents of `conf/local/` is ignored by `git` (through inclusion in `.gitignore`). By default, Kedro creates one file, `credentials.yml`, in `conf/local`.
 
 #### `data`
 
 The `data` folder contains a number of subfolders to store project data. We recommend that you put raw data into `raw` and move processed data to other subfolders according to [data engineering convention](../12_faq/01_faq.md#what-is-data-engineering-convention).
 
-The example project has a single file, `iris.csv`, that contains the Iris dataset. The subfolders of `data` are ignored by `git` through inclusion in `.gitignore` since data is more frequently stored elsewhere, such as a in an S3 bucket. However, if you are familiar with [`.gitignore`](https://docs.github.com/en/github/using-git/ignoring-files) you can edit it, if you are confident that you need to manage your data in `git`.
+The example project has a single file, `iris.csv`, that contains the Iris dataset. The subfolders of `data` are ignored by `git` through inclusion in `.gitignore` since data is more frequently stored elsewhere, such as in an S3 bucket. However, if you are familiar with [`.gitignore`](https://docs.github.com/en/github/using-git/ignoring-files) you can edit it, if you are confident that you need to manage your data in `git`.
 
 #### `src`
 
@@ -81,12 +78,8 @@ This subfolder contains the project's source code. It contains 2 subfolders:
 ### What best practice should I follow to avoid leaking confidential data?
 
 * Avoid committing data to version control.
-* Avoid committing data to notebook output cells (data can easily sneak into notebooks when you don't delete output cells).
-* Don't commit sensitive results or plots to version control (in notebooks or otherwise).
-* Don't commit credentials in `conf/`. Only the `conf/local/` folder should be used for sensitive information like access credentials. To add credentials, please refer to the `conf/local/credentials.yml` file in the project template.
-* By default any file inside the `conf/` folder (and its subfolders) containing `credentials` in its name will be ignored via `.gitignore` and not committed to your git repository.
-* To describe where your colleagues can access the credentials, you may edit the `README.md` to provide instructions.
-
+* Avoid committing notebook output cells (data can easily sneak into notebooks when you don't delete output cells).
+* Avoid committing credentials in `conf/`. Only the `conf/local/` folder should be used for sensitive information like access credentials. Note that by default any file inside the `conf/` folder (and its subfolders) containing `credentials` in its name will be ignored via `.gitignore`.
 
 ## Run the example project
 
@@ -103,8 +96,8 @@ kedro run
 When the command completes, you should see a log message similar to the following in your console:
 
 ```bash
-    2019-02-13 16:59:26,293 - kedro.runner.sequential_runner - INFO - Completed 4 out of 4 tasks
-    2019-02-13 16:59:26,293 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
+2019-02-13 16:59:26,293 - kedro.runner.sequential_runner - INFO - Completed 4 out of 4 tasks
+2019-02-13 16:59:26,293 - kedro.runner.sequential_runner - INFO - Pipeline execution completed successfully.
 ```
 
 ## Under the hood: Pipelines and nodes

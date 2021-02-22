@@ -6,9 +6,9 @@ A Kedro starter is a [Cookiecutter](https://cookiecutter.readthedocs.io/en/1.7.2
 
 ## How to create a Kedro starter
 
-To create a Kedro starter, you need a base project to convert to a Cookiecutter template, which forms the boilerplate for all projects that use the Kedro starter.
+To create a Kedro starter, you need a base project to convert to a `cookiecutter` template, which forms the boilerplate for all projects that use the Kedro starter.
 
-Install Cookiecutter as follows:
+Install `cookiecutter` as follows:
 
 ```bash
 pip install cookiecutter
@@ -17,20 +17,20 @@ pip install cookiecutter
 You then need to decide which are:
 
 * the common, boilerplate parts of the project
-* the configurable elements, which need to be replaced by Cookiecutter strings.
+* the configurable elements, which need to be replaced by `cookiecutter` strings
 
 ## Configuration variables
 
-By default, when you create a new project using a Kedro starter, `kedro new` launches in interactive mode. The user is then prompted for the variables that have been set in `starter_config.yml`.
+By default, when you create a new project using a Kedro starter, `kedro new` launches in interactive mode. The user is then prompted for the variables that have been set in `prompts.yml`.
 
 The most basic and empty starter triggered by `kedro new` is set up with the following three variables:
 * `project_name` - A human readable name for the new project
 * `repo_name` - A name for the directory that holds the project repository
 * `python_package` - A Python package name for the project package (see [Python package naming conventions](https://www.python.org/dev/peps/pep-0008/#package-and-module-names))
 
-See the configuration for this basic configuration in [the default starter setup](https://github.com/quantumblacklabs/private-kedro/blob/master/kedro/templates/project/starter_config.yml).
+See the configuration for this basic configuration in [the default starter setup](https://github.com/quantumblacklabs/private-kedro/blob/master/kedro/templates/project/prompts.yml).
 
-As the creator of the Kedro starter you can customise the prompts triggered by `kedro new` by adding your own prompts in `starter_config.yml`. This is an example of a custom prompt:
+As the creator of the Kedro starter you can customise the prompts triggered by `kedro new` by adding your own prompts in `prompts.yml`. This is an example of a custom prompt:
 
 ```yaml
 custom_prompt:
@@ -43,10 +43,9 @@ custom_prompt:
 
 Both the prompt `title` and `text` must be provided for the prompt to be valid. The `default` field is optional.
 
-If the input to the prompts needs to be validated, for example to make sure it only has alphanumeric characters, you should add [cookiecutter hook validation](https://cookiecutter.readthedocs.io/en/1.7.2/advanced/hooks.html#example-validating-template-variables).
-See [the `pre_gen_project.py` file](https://github.com/quantumblacklabs/private-kedro/blob/master/kedro/templates/project/hooks/pre_gen_project.py) for the default empty starter as an example.
+If the input to the prompts needs to be **validated**, for example to make sure it only has alphanumeric characters, you can add regex validation rules via the `regex_validator` key. For more complex validation, have a look at [cookiecutter pre/post-generate hooks](https://cookiecutter.readthedocs.io/en/1.7.2/advanced/hooks.html#using-pre-post-generate-hooks-0-7-0).
 
-If you want cookiecutter to provide sensible defaults in case a user doesn't provide any input, you can add those to `cookiecutter.json`. See the default starter [`cookiecutter.json`](https://github.com/quantumblacklabs/private-kedro/blob/master/kedro/templates/project/cookiecutter.json) as example.
+If you want `cookiecutter` to provide sensible **defaults** in case a user doesn't provide any input, you can add those to `cookiecutter.json`. See the default starter [`cookiecutter.json`](https://github.com/quantumblacklabs/private-kedro/blob/master/kedro/templates/project/cookiecutter.json) as example.
 
 ### Example Kedro starter
 
@@ -54,14 +53,17 @@ To review an example Kedro starter, clone [`pandas-iris`](https://github.com/qua
 
 When you create an Iris dataset example project by calling `kedro new`, you supply three configuration variables as the documentation in [Create a new project](../02_get_started/04_new_project.md) describes. These variables are `project_name`, `repo_name` and `python_package` and they are supplied interactively or by means of a configuration file. You can see how these variables are used by inspecting the template:
 
-**`project_name`**
-The human-readable `project-name` variable is used in the [README.md](https://github.com/quantumblacklabs/kedro-starters/tree/master/pandas-iris/README.md) for the new project and within [`run.py`](https://github.com/quantumblacklabs/kedro-starters/tree/master/pandas-iris/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D/run.py).
+**project_name**
 
-**`repo_name`**
+The human-readable `project-name` variable is used in the [README.md](https://github.com/quantumblacklabs/kedro-starters/tree/master/pandas-iris/README.md) for the new project.
+
+**repo_name**
+
 The project structure contains a folder labelled [`{{ cookiecutter.repo_name }}`](https://github.com/quantumblacklabs/kedro-starters/tree/master/pandas-iris/%7B%7B%20cookiecutter.repo_name%20%7D%7D), which forms the top-level folder to contain the Iris dataset example when it is created. The folder storing the example project is represented by `cookiecutter.repo_name`, which is a customisable variable, as you would expect.
 
-**`python_package`**
-Within the parent folder, inside the `src` subfolder, is another configurable variable [{{ cookiecutter.python_package }}](https://github.com/quantumblacklabs/kedro-starters/tree/master/pandas-iris/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D) which contains the source code for the example pipelines.
+**python_package**
+
+Within the parent folder, inside the `src` subfolder, is another configurable variable [{{ cookiecutter.python_package }}](https://github.com/quantumblacklabs/kedro-starters/tree/master/pandas-iris/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D) which contains the source code for the example pipelines. The variable is also used within [`run.py`](https://github.com/quantumblacklabs/kedro-starters/tree/master/pandas-iris/%7B%7B%20cookiecutter.repo_name%20%7D%7D/src/%7B%7B%20cookiecutter.python_package%20%7D%7D/run.py).
 
 Here is the layout of the project as a Cookiecutter template:
 

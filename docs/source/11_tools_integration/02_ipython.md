@@ -331,6 +331,8 @@ To reload these variables at any point (e.g., if you update `catalog.yml`), use 
 
 ![reload kedro line magic graphic](../meta/images/jupyter_notebook_loading_context.png)
 
+Note that if you want to pass an argument to `reload_kedro` line magic function, you should call like a normal Python function (e.g `reload_kedro(extra_params=extra_params)` rather than using `%reload_kedro` in a notebook cell (e.g. `%reload_kedro(extra_params=extra_params)` wouldn't work).
+
 If the `KEDRO_ENV` environment variable is specified, the startup script loads that environment, otherwise it defaults to `local`. Instructions for setting the environment variable can be found in the [Kedro configuration documentation](../04_kedro_project_setup/02_configuration.md#additional-configuration-environments).
 
 ## IPython extension

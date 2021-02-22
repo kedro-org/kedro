@@ -29,6 +29,7 @@
 * Exposed `--to-outputs` option in the CLI, throughout the codebase, and as part of hooks specifications.
 * Fixed a bug where `ParquetDataSet` wasn't creating parent directories on the fly.
 * Added `blacken-docs` pre-commit linter to ensure all snippets in the documentation are `black`ed.
+* Updated the pyspark `CustomContext` example to reflect revised `KedroContext` initialisation args
 
 ## Breaking changes to the API
 
@@ -40,6 +41,7 @@
 [Ivan Doroshenko](https://github.com/imdoroshenko),
 [Zain Patel](https://github.com/mzjp2),
 [Deepyaman Datta](https://github.com/deepyaman)
+[Sam Hiscox](https://github.com/samhiscoxqb)
 
 ## Thanks for supporting contributions
 

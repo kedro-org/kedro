@@ -368,3 +368,9 @@ To configure the extension to be loaded automatically every time when you open a
 * Edit `~/.ipython/profile_default/ipython_config.py`:
   - uncomment the extensions
   - add Kedro extension to the list as follows: `c.InteractiveShellApp.extensions = ["kedro.extras.extensions.ipython"]`
+
+### Kedro-Viz and Jupyter
+
+If you have [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz) installed then you can display an interactive visualisation of your pipeline directly in your notebook using the [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html) `%run_viz`. You should see a visualisation like the following:
+
+![](../meta/images/jupyter_notebook_kedro_viz.png)

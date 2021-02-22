@@ -67,7 +67,7 @@ git remote add origin https://github.com/<your-repo>
 As you work on a project, you will periodically save your changes. In a team, we suggest that you each develop your code on a branch and create pull requests to submit it to the `develop` or `master` branches:
 
 ```bash
-# create a new feature branch called 'feature-project-template'
+# create a new feature branch called 'feature/project-template'
 git checkout -b feature/project-template
 # stage all the files you have changed
 git add .

@@ -12,7 +12,7 @@ You previously registered the raw datasets for your Kedro project, so you can no
 
 ### Node functions
 
-Create a file in the following location, adding the subfolders too if necessary `src/kedro_tutorial/pipelines/data_engineering/nodes.py`.
+Create a file `src/kedro_tutorial/pipelines/data_engineering/nodes.py`, adding the subfolders too if necessary.
 
 Add the code below, which provides two functions (`preprocess_companies` and `preprocess_shuttles`) that each input a raw dataframe and output a dataframe containing pre-processed data:
 
@@ -181,7 +181,7 @@ To test the entire data engineering pipeline:
 kedro run
 ```
 
-You should see output similar to the following
+You should see output similar to the following:
 
 ```bash
 kedro run
@@ -320,12 +320,12 @@ You should see output similar to the following:
 
 ## Data science pipeline
 
-We have created a modular pipeline for data engineering, which merges three input datasets to create a master table. Now we will create the data science pipeline for price prediction, which uses a [`LinearRegression`](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html) implementation from the [scikit-learn](https://scikit-learn.org/stable/) library.
+We have created a modular pipeline for data engineering, which merges three input datasets to create a master table. Now we will create the data science pipeline for price prediction, which uses the [`LinearRegression`](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html) implementation from the [scikit-learn](https://scikit-learn.org/stable/) library.
 
 ### Update dependencies
 We now need to add `scikit-learn` to the project's dependencies. This is a slightly different process from the initial change we made early in the tutorial.
 
-To **update** the project's dependencies, you should modify `src/requirements.in` to add the following. Note that you do not need to update `src/requirements.txt` as you did previously in the tutorial before you built the project's requirements with `kedro build-reqs`:
+To **update** the project's dependencies, you should modify `src/requirements.in` to add the following. Note that you do not need to update `src/requirements.txt` as you did previously in the tutorial before you built the project's requirements with `kedro build-reqs`.
 
 
 ```text
@@ -342,7 +342,7 @@ You can find out more about [how to work with project dependencies](../04_kedro_
 
 ### Create a data science node
 
-Create a file in the following location, adding the subfolders too if necessary `src/kedro_tutorial/pipelines/data_science/nodes.py`. Add the following code to the file:
+Create a file `src/kedro_tutorial/pipelines/data_science/nodes.py`, adding the subfolders too if necessary. Add the following code to the file:
 
 <details>
 <summary><b>Click to expand</b></summary>

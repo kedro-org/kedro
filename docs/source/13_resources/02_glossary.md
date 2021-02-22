@@ -38,7 +38,7 @@ You can use Kedro-Viz to visualise your Kedro data pipelines:
 ## Layers (data engineering convention)
 According to [data engineering convention](../12_faq/01_faq.md#what-is-data-engineering-convention), a pipeline can be broken up into different layers according to how data is processed. This convention makes it easier to collaborate with other team members because everyone has an idea of what type of data cleaning or processing has happened.
 
-Kedro-Viz makes it easy to [visualise these data processing stages](../03_tutorial/06_visualise_pipeline.md#interact-with-data-engineering-convention) by adding a `layer` attribute to the datasets in the Data Catalog
+Kedro-Viz makes it easy to [visualise these data processing stages](../03_tutorial/06_visualise_pipeline.md#visualise-layers) by adding a `layer` attribute to the datasets in the Data Catalog.
 
 ## Modular pipeline
 _(See also [Pipeline](#pipeline))_

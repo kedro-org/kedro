@@ -139,7 +139,7 @@ class TestPipelineCreateCommand:
     @pytest.mark.parametrize("env", [None, "local"])
     def test_create_pipeline(
         self, fake_repo_path, fake_cli_invoke, env, fake_package_path
-    ):  # pylint: disable=too-many-locals
+    ):
         """Test creation of a pipeline"""
         pipelines_dir = fake_package_path / "pipelines"
         assert pipelines_dir.is_dir()

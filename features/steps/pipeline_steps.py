@@ -214,10 +214,9 @@ def node_tagged_with(context, node_name, tags):
     sys.path.append(
         str(context.root_project_dir / "src" / context.project_name.replace("-", "_"))
     )
-    # pylint: disable=import-outside-toplevel
+    # pylint: disable=import-error,import-outside-toplevel
     from hooks import ProjectHooks
 
-    # pylint: disable=no-member
     context.project_pipeline = ProjectHooks().register_pipelines()["__default__"]
 
     node_objs = [n for n in context.project_pipeline.nodes if n.name == node_name]

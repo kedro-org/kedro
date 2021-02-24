@@ -40,7 +40,7 @@ python -c 'import sys, os.path; print(os.path.join(os.path.dirname(sys.executabl
 
 We're going to need you to modify your `tasks.json`. To do this, go to **Terminal > Configure Tasks...** on your menu and open up `tasks.json` in the editor. Modify it with the following:
 
-```
+```json
 {
     // See https://go.microsoft.com/fwlink/?LinkId=733558
     // Kedro tasks
@@ -100,14 +100,14 @@ To start a build, go to **Terminal > Run Build Task...** or press `Cmd + Shift +
 
 ## Debugging
 
-To debug, you will first need to create an `.env` file in your project root. Add the full path to the `./src/` folder to the *PYTHONPATH* environment variable in the `.env` file:
+To debug, you _may_ need to create an `.env` file in your project root. Add the full path to the `./src/` folder to the *PYTHONPATH* environment variable in the `.env` file:
 
 ```console
 # In macOS / Linux:
 PYTHONPATH=/path/to/project/src:$PYTHONPATH
 
 # In Windows
-set PYTHONPATH=C:/path/to/project/src;%PYTHONPATH%
+PYTHONPATH=C:/path/to/project/src;%PYTHONPATH%
 ```
 
 You can find more information about setting up environmental variables [here](https://code.visualstudio.com/docs/python/environments#_environment-variable-definitions-file).
@@ -118,7 +118,7 @@ Go to **Debug > Add Configurations**.
 
 Edit the `launch.json` that opens in the editor with:
 
-```
+```json
 {
     // Use IntelliSense to learn about possible attributes.
     // Hover to view descriptions of existing attributes.
@@ -129,8 +129,11 @@ Edit the `launch.json` that opens in the editor with:
             "name": "Python: Kedro Run",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/src/<your_project_package>/run.py",
             "console": "integratedTerminal",
+            "module": "kedro",
+            "args": ["run"]
+            // Any other arguments should be passed as a comma-seperated-list
+            // e.g "args": ["run", "--pipeline", "pipeline_name"]
         }
     ]
 }

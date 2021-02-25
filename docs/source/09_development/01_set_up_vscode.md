@@ -40,7 +40,7 @@ python -c 'import sys, os.path; print(os.path.join(os.path.dirname(sys.executabl
 
 We're going to need you to modify your `tasks.json`. To do this, go to **Terminal > Configure Tasks...** on your menu and open up `tasks.json` in the editor. Modify it with the following:
 
-```json
+```
 {
     // See https://go.microsoft.com/fwlink/?LinkId=733558
     // Kedro tasks
@@ -118,7 +118,7 @@ Go to **Debug > Add Configurations**.
 
 Edit the `launch.json` that opens in the editor with:
 
-```json
+```
 {
     // Use IntelliSense to learn about possible attributes.
     // Hover to view descriptions of existing attributes.

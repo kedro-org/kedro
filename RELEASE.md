@@ -4,6 +4,13 @@
 * Added `env` and `extra_params` to `reload_kedro()` line magic.
 * Extended the `pipeline()` API to allow strings and sets of strings as `inputs` and `outputs`, to specify when a dataset name remains the same (not namespaced).
 * Added the ability to add custom prompts with regexp validator for starters by repurposing `default_config.yml` as `prompts.yml`.
+* Refactored the way `settings` are loaded. You will now be able to run:
+
+```python
+from kedro.framework.project import settings
+
+print(settings.CONF_ROOT)
+```
 
 ## Bug fixes and other changes
 * The version of a packaged modular pipeline now defaults to the version of the project package.
@@ -17,11 +24,28 @@
 * `kedro install` now waits on Windows until all the requirements are installed.
 * Exposed `--to-outputs` option in the CLI, throughout the codebase, and as part of hooks specifications.
 * Fixed a bug where `ParquetDataSet` wasn't creating parent directories on the fly.
-* Added `blacken-docs` pre-commit linter to ensure all snippets in the documentation are `black`ed.
-* Updated the pyspark `CustomContext` example to reflect revised `KedroContext` initialisation args
+* Updated documentation.
 
 ## Breaking changes to the API
+* This release has broken the `kedro ipython` and `kedro jupyter` workflows. To fix this, follow the instructions in the migration guide below.
 
+> *Note:* If you're using the `ipython` [extension](https://kedro.readthedocs.io/en/stable/11_tools_integration/02_ipython.html#ipython-extension) instead, you will not encounter this problem.
+
+## Migration guide
+You will have to update the file `<your_project>/.ipython/profile_default/startup/00-kedro-init.py` in order to make `kedro ipython` and/or `kedro jupyter` work. Add the following line before the `KedroSession` is created:
+
+```python
+configure_project(metadata.package_name)  # to add
+
+session = KedroSession.create(metadata.package_name, path)
+```
+
+Make sure that the associated import is provided in the same place as others in the file:
+
+```python
+from kedro.framework.project import configure_project  # to add
+from kedro.framework.session import KedroSession
+```
 
 ## Thanks for supporting contributions
 [Mariana Silva](https://github.com/marianansilva),

@@ -35,6 +35,9 @@ print(settings.CONF_ROOT)
 * `kedro install` now waits on Windows until all the requirements are installed.
 * Exposed `--to-outputs` option in the CLI, throughout the codebase, and as part of hooks specifications.
 * Fixed a bug where `ParquetDataSet` wasn't creating parent directories on the fly.
+* Added `blacken-docs` pre-commit linter to ensure all snippets in the documentation are `black`ed.
+* Updated the pyspark `CustomContext` example to reflect revised `KedroContext` initialisation args.
+* Improved and fixed the VSCode debugging documentation.
 * Updated documentation.
 
 ## Breaking changes to the API

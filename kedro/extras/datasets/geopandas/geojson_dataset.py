@@ -96,10 +96,10 @@ class GeoJSONDataSet(AbstractVersionedDataSet):
                 Note: `http(s)` doesn't support versioning.
             load_args: GeoPandas options for loading GeoJSON files.
                 Here you can find all available arguments:
-                https://geopandas.org/reference/geopandas.read_file.html
+                https://geopandas.org/docs/reference/api/geopandas.read_file.html#geopandas.read_file
             save_args: GeoPandas options for saving geojson files.
                 Here you can find all available arguments:
-                https://geopandas.org/reference.html#geopandas.GeoDataFrame.to_file
+                https://geopandas.org/docs/reference/api/geopandas.GeoDataFrame.to_file.html#geopandas.GeoDataFrame.to_file
                 The default_save_arg driver is 'GeoJSON', all others preserved.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is

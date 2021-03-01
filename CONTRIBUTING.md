@@ -35,7 +35,7 @@ If you're unsure where to begin contributing to Kedro, please start by looking t
 We focus on three areas for contribution: `core`, [`extras`](/kedro/extras/) or `plugin`:
 - `core` refers to the primary Kedro library
 - [`extras`](/kedro/extras/) refers to features that could be added to `core` that do not introduce too many dependencies or require new Kedro CLI commands to be created e.g. adding a new dataset to the `kedro.extras.dataset` data management module. All the datasets are placed under `kedro.extras.datasets` to separate heavy dependencies (e.g Pandas) from Kedro `core` components.
-- [`plugin`](https://kedro.readthedocs.io/en/stable/04_user_guide/10_developing_plugins.html) refers to new functionality that requires a Kedro CLI command e.g. adding in Airflow functionality
+- [`plugin`](https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_plugins.html) refers to new functionality that requires a Kedro CLI command e.g. adding in Airflow functionality
 
 Typically, we only accept small contributions for the `core` Kedro library but accept new features as `plugin`s or additions to the [`extras`](/kedro/extras/) module. We regularly review [`extras`](/kedro/extras/) and may migrate modules to `core` if they prove to be essential for the functioning of the framework.
 
@@ -205,7 +205,7 @@ You can add new work to `extras` if you do not need to create a new Kedro CLI co
 
 ## `plugin` contribution process
 
-See the [`plugin` development documentation](https://kedro.readthedocs.io/en/stable/07_extend_kedro/05_plugins.html) for guidance on how to design and develop a Kedro `plugin`.
+See the [`plugin` development documentation](https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_plugins.html) for guidance on how to design and develop a Kedro `plugin`.
 
 ## CI / CD and running checks locally
 

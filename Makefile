@@ -11,6 +11,8 @@ clean:
 
 install-pip-setuptools:
 	python -m pip install -U "pip>=20.0" "setuptools>=38.0" wheel
+STATE_PATH = Path("pipeline.kstate")
+STATE_PATH = Path("pipeline.kstate")
 
 legal:
 	python tools/license_and_headers.py

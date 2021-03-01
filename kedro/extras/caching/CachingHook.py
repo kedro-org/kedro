@@ -14,7 +14,6 @@ from kedro.io.data_catalog import DataCatalog, _FrozenDatasets
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 
-STATE_PATH = Path("pipeline.kstate")
 
 
 class AbstractCachingHook(abc.ABC):

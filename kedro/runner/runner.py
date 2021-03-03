@@ -32,7 +32,7 @@ implementations.
 import logging
 from abc import ABC, abstractmethod
 from concurrent.futures import ALL_COMPLETED, ThreadPoolExecutor, as_completed, wait
-from typing import Any, Dict, Iterable
+from typing import Any, Dict, Iterable, Tuple
 
 from kedro.framework.hooks import get_hook_manager
 from kedro.io import AbstractDataSet, DataCatalog
@@ -222,7 +222,7 @@ def _collect_inputs_from_hook(
     inputs: Dict[str, Any],
     is_async: bool,
     run_id: str = None,
-) -> Dict[str, Any]:
+) -> Tuple[Dict[str, Any], bool]:
     inputs = inputs.copy()  # shallow copy to prevent in-place modification by the hook
     hook_manager = get_hook_manager()
     hook_response = hook_manager.hook.before_node_run(  # pylint: disable=no-member
@@ -230,7 +230,11 @@ def _collect_inputs_from_hook(
     )
 
     additional_inputs = {}
+    skip = False
     for response in hook_response:
+        if response is not None and isinstance(response, bool):
+            skip = response
+            continue
         if response is not None and not isinstance(response, dict):
             response_type = type(response).__name__
             raise TypeError(
@@ -240,7 +244,7 @@ def _collect_inputs_from_hook(
         response = response or {}
         additional_inputs.update(response)
 
-    return additional_inputs
+    return additional_inputs, skip
 
 
 def _call_node_run(
@@ -289,10 +293,12 @@ def _run_node_sequential(node: Node, catalog: DataCatalog, run_id: str = None) -
 
     is_async = False
 
-    additional_inputs = _collect_inputs_from_hook(
+    additional_inputs, skip = _collect_inputs_from_hook(
         node, catalog, inputs, is_async, run_id=run_id
     )
     inputs.update(additional_inputs)
+    if skip:
+        return node
 
     outputs = _call_node_run(node, catalog, inputs, is_async, run_id=run_id)
 
@@ -324,10 +330,12 @@ def _run_node_async(node: Node, catalog: DataCatalog, run_id: str = None) -> Nod
         wait(inputs.values(), return_when=ALL_COMPLETED)
         inputs = {key: value.result() for key, value in inputs.items()}
         is_async = True
-        additional_inputs = _collect_inputs_from_hook(
+        additional_inputs, skip = _collect_inputs_from_hook(
             node, catalog, inputs, is_async, run_id=run_id
         )
         inputs.update(additional_inputs)
+        if skip:
+            return node
 
         outputs = _call_node_run(node, catalog, inputs, is_async, run_id=run_id)
 

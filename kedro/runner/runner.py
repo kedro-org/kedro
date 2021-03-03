@@ -216,7 +216,7 @@ def run_node(
     return node
 
 
-def _collect_inputs_from_hook(
+def _execute_before_node_run_hooks(
     node: Node,
     catalog: DataCatalog,
     inputs: Dict[str, Any],
@@ -293,7 +293,7 @@ def _run_node_sequential(node: Node, catalog: DataCatalog, run_id: str = None) -
 
     is_async = False
 
-    additional_inputs, skip = _collect_inputs_from_hook(
+    additional_inputs, skip = _execute_before_node_run_hooks(
         node, catalog, inputs, is_async, run_id=run_id
     )
     inputs.update(additional_inputs)
@@ -330,7 +330,7 @@ def _run_node_async(node: Node, catalog: DataCatalog, run_id: str = None) -> Nod
         wait(inputs.values(), return_when=ALL_COMPLETED)
         inputs = {key: value.result() for key, value in inputs.items()}
         is_async = True
-        additional_inputs, skip = _collect_inputs_from_hook(
+        additional_inputs, skip = _execute_before_node_run_hooks(
             node, catalog, inputs, is_async, run_id=run_id
         )
         inputs.update(additional_inputs)

@@ -309,8 +309,7 @@ def run(tag, env, parallel, ...):
     tag = _get_values_as_tuple(tag) if tag else tag
     node_names = _get_values_as_tuple(node_names) if node_names else node_names
 
-    package_name = str(Path(__file__).resolve().parent.name)
-    with KedroSession.create(package_name, env=env, extra_params=params) as session:
+    with KedroSession.create(env=env, extra_params=params) as session:
         runner_instance = _instantiate_runner(runner, is_async, context)
         session.run(
             tags=tag,

@@ -223,7 +223,7 @@ commands:
           name: Run unit tests
           command: |
             conda activate kedro_builder
-            pytest .\tests --ignore .\tests\extras\datasets\tensorflow --ignore tests\framework\session\test_session_hooks.py --no-cov
+            pytest .\tests --ignore .\tests\extras\datasets\spark --ignore .\tests\extras\datasets\tensorflow --ignore tests\framework\session\test_session_hooks.py --no-cov
 
   win_e2e_tests:
     description: Run all end to end tests

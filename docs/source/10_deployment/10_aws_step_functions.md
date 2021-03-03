@@ -130,6 +130,9 @@ from unittest.mock import patch
 
 
 def handler(event, context):
+    from kedro.framework.project import configure_project
+
+    configure_project("spaceflights_steps_function")
     node_to_run = event["node_name"]
 
     # Since _multiprocessing.SemLock is not implemented on lambda yet,
@@ -140,7 +143,7 @@ def handler(event, context):
     with patch("multiprocessing.Lock"):
         from kedro.framework.session import KedroSession
 
-        with KedroSession.create("spaceflights_steps_function", env="aws") as session:
+        with KedroSession.create(env="aws") as session:
             session.run(node_names=[node_to_run])
 ```
 
@@ -242,6 +245,7 @@ from aws_cdk import core, aws_lambda, aws_ecr
 from aws_cdk.aws_lambda import IFunction
 from aws_cdk.aws_stepfunctions_tasks import LambdaInvoke
 from kedro.framework.cli.utils import _add_src_to_path
+from kedro.framework.project import configure_project
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import _get_project_metadata
 from kedro.pipeline.node import Node
@@ -279,9 +283,8 @@ class KedroStepFunctionsStack(core.Stack):
         """Extract the Kedro pipeline from the project"""
         metadata = _get_project_metadata(self.project_path)
         _add_src_to_path(metadata.source_dir, self.project_path)
-        session = KedroSession.create(
-            metadata.package_name, self.project_path, env=self.env
-        )
+        configure_project(metadata.package_name)
+        session = KedroSession.create(project_path=self.project_path, env=self.env)
         context = session.load_context()
 
         self.project_name = metadata.project_name

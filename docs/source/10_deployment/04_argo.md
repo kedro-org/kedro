@@ -45,6 +45,7 @@ import click
 from jinja2 import Environment, FileSystemLoader
 
 from kedro.framework.cli.utils import _add_src_to_path
+from kedro.framework.project import configure_project
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import _get_project_metadata
 
@@ -64,9 +65,10 @@ def generate_argo_config(image, pipeline_name, env):
     project_path = Path.cwd()
     metadata = _get_project_metadata(project_path)
     _add_src_to_path(metadata.source_dir, project_path)
+    configure_project(metadata.package_name)
     project_name = metadata.project_name
 
-    session = KedroSession.create(metadata.package_name, project_path, env=env)
+    session = KedroSession.create(project_path=project_path, env=env)
     context = session.load_context()
 
     pipeline_name = pipeline_name or "__default__"

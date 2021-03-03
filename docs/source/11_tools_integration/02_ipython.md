@@ -87,8 +87,9 @@ Navigate to the `notebooks` folder of your Kedro project and create a new notebo
 
 Every time you start or restart a Jupyter or IPython session in the CLI using a `kedro` command, a startup script in `.ipython/profile_default/startup/00-kedro-init.py` is executed. It adds the following variables in scope:
 
+* `catalog` (`DataCatalog`) - Data catalog instance that contains all defined datasets; this is a shortcut for `context.catalog`, but it's only created at startup time, whereas `context.catalog` is rebuilt everytime.
 * `context` (`KedroContext`) - Kedro project context that provides access to Kedro's library components.
-* `catalog` (`DataCatalog`) - Data catalog instance that contains all defined datasets; this is a shortcut for `context.catalog`
+* `session` (`KedroSession`) - Kedro session that orchestrates the run
 * `startup_error` (`Exception`) - An error that was raised during the execution of the startup script or `None` if no errors occurred
 
 ## How to use `context`
@@ -103,17 +104,14 @@ With `context`, you can access the following variables and methods:
 - `context.project_name` (`str`) - Project folder name
 - `context.catalog` (`DataCatalog`) - An instance of [DataCatalog](/kedro.io.DataCatalog)
 - `context.config_loader` (`ConfigLoader`) - An instance of [ConfigLoader](/kedro.config.ConfigLoader)
-- `context.pipeline` (`Pipeline`) - Defined pipeline
+- `context.pipeline` (`Pipeline`) - Default pipeline
 
 ### Run the pipeline
 
-If you wish to run the whole main pipeline within a notebook cell, you can do so by instantiating a `Session`:
+If you wish to run the whole main pipeline within a notebook cell, you can do so by running:
 
 ```python
-from kedro.framework.session import KedroSession
-
-with KedroSession.create("<your-kedro-project-package-name>") as session:
-    session.run()
+session.run()
 ```
 
 The command runs the nodes from your default project pipeline in a sequential manner.
@@ -184,6 +182,8 @@ You can also specify the following optional arguments for `session.run()`:
 +---------------+----------------+-------------------------------------------------------------------------------+
 | from_inputs   | Iterable[str]  | A list of dataset names which should be used as a starting point              |
 +---------------+----------------+-------------------------------------------------------------------------------+
+| to_outputs    | Iterable[str]  | A list of dataset names which should be used as an end point                  |
++---------------+----------------+-------------------------------------------------------------------------------+
 | load_versions | Dict[str, str] | A mapping of a dataset name to a specific dataset version (timestamp)         |
 |               |                | for loading - this applies to the versioned datasets only                     |
 +---------------+----------------+-------------------------------------------------------------------------------+
@@ -192,7 +192,7 @@ You can also specify the following optional arguments for `session.run()`:
 +---------------+----------------+-------------------------------------------------------------------------------+
 ```
 
-This list of options is fully compatible with the list of CLI options for the `kedro run` command. In fact, `kedro run` is calling `context.run()` behind the scenes.
+This list of options is fully compatible with the list of CLI options for the `kedro run` command. In fact, `kedro run` is calling `session.run()` behind the scenes.
 
 
 ## Global variables
@@ -337,7 +337,7 @@ If the `KEDRO_ENV` environment variable is specified, the startup script loads t
 
 ## IPython extension
 
-Kedro also has an IPython extension (`kedro.extras.extensions.ipython`) that allows you to start an `ipython` shell directly and then initialize `context`, `catalog`, and `session` variables.
+Kedro also has an IPython extension (`kedro.extras.extensions.ipython`) that allows you to start an `ipython` shell directly and then initialize `context`, `catalog`, and `session` variables. This can be used as a replacement for `<your_project>.ipython/profile_default/startup/00-kedro-init.py`.
 
 When you start an `ipython` shell in a project root then you only need to load the extension to get the variables.
 

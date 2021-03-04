@@ -36,7 +36,7 @@ import re
 import tempfile
 import warnings
 import webbrowser
-from collections import defaultdict
+from collections import OrderedDict, defaultdict, namedtuple
 from copy import deepcopy
 from pathlib import Path
 from typing import Any, Dict, List
@@ -289,7 +289,6 @@ def _create_project(
         # pylint: disable=import-outside-toplevel
         from cookiecutter.exceptions import RepositoryCloneFailed, RepositoryNotFound
         from cookiecutter.main import cookiecutter  # for performance reasons
-        from cookiecutter.repository import determine_repo_dir
 
     config: Dict[str, str] = dict()
     checkout = checkout or version
@@ -298,23 +297,9 @@ def _create_project(
             config = _parse_config(config_path)
             config = _check_config_ok(config_path, config)
         else:
-            with tempfile.TemporaryDirectory() as tmpdir:
-                temp_dir_path = Path(tmpdir).resolve()
-                repo, _ = determine_repo_dir(
-                    template=str(template_path),
-                    abbreviations=dict(),
-                    clone_to_dir=temp_dir_path,
-                    checkout=checkout,
-                    no_input=True,
-                    directory=directory,
-                )
-                config_yml = temp_dir_path / repo / "prompts.yml"
-                if config_yml.is_file():
-                    with open(config_yml) as config_file:
-                        prompts = yaml.safe_load(config_file)
-                    config = _get_config_from_starter_prompts(prompts)
-        config.setdefault("kedro_version", version)
+            config = _prompt_user_for_config(template_path, checkout, directory)
 
+        config.setdefault("kedro_version", version)
         cookiecutter_args = dict(
             output_dir=config.get("output_dir", str(Path.cwd().resolve())),
             no_input=True,
@@ -347,6 +332,112 @@ def _create_project(
         raise KedroCliError("Failed to generate project.") from exc
 
 
+def _prompt_user_for_config(  # pylint: disable=too-many-locals
+    template_path: Path, checkout: str = None, directory: str = None
+) -> Dict[str, str]:
+    """Prompt user in the CLI to provide configuration values for cookiecutter variables
+    in a starter, such as project_name, package_name, etc.
+    """
+    # pylint: disable=import-outside-toplevel
+    from cookiecutter.prompt import read_user_variable, render_variable
+    from cookiecutter.repository import determine_repo_dir  # for performance reasons
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        temp_dir_path = Path(tmpdir).resolve()
+        cookiecutter_repo, _ = determine_repo_dir(
+            template=str(template_path),
+            abbreviations=dict(),
+            clone_to_dir=temp_dir_path,
+            checkout=checkout,
+            no_input=True,
+            directory=directory,
+        )
+        cookiecutter_dir = temp_dir_path / cookiecutter_repo
+        prompts_yml = cookiecutter_dir / "prompts.yml"
+
+        # If there is no prompts.yml, no need to ask user for input.
+        if not prompts_yml.is_file():
+            return {}
+
+        with open(prompts_yml) as config_file:
+            prompts_dict = yaml.safe_load(config_file)
+
+        cookiecutter_env = _prepare_cookiecutter_env(cookiecutter_dir)
+
+        config: Dict[str, str] = OrderedDict()
+        config["output_dir"] = str(Path.cwd().resolve())
+
+        for variable_name, prompt_dict in prompts_dict.items():
+            prompt = _Prompt(**prompt_dict)
+
+            # render the variable on the command line
+            cookiecutter_variable = render_variable(
+                env=cookiecutter_env.env,
+                raw=cookiecutter_env.context[variable_name],
+                cookiecutter_dict=config,
+            )
+
+            # read the user's input for the variable
+            user_input = read_user_variable(str(prompt), cookiecutter_variable)
+            if user_input:
+                prompt.validate(user_input)
+                config[variable_name] = user_input
+        return config
+
+
+# A cookiecutter env contains the context and environment to render templated
+# cookiecutter values on the CLI.
+_CookiecutterEnv = namedtuple("CookiecutterEnv", ["env", "context"])
+
+
+def _prepare_cookiecutter_env(cookiecutter_dir) -> _CookiecutterEnv:
+    """Prepare the cookiecutter environment to render its default values
+    when prompting user on the CLI for inputs.
+    """
+    # pylint: disable=import-outside-toplevel
+    from cookiecutter.environment import StrictEnvironment
+    from cookiecutter.generate import generate_context
+
+    cookiecutter_json = cookiecutter_dir / "cookiecutter.json"
+    cookiecutter_context = generate_context(context_file=cookiecutter_json).get(
+        "cookiecutter", {}
+    )
+    cookiecutter_env = StrictEnvironment(context=cookiecutter_context)
+    return _CookiecutterEnv(context=cookiecutter_context, env=cookiecutter_env)
+
+
+class _Prompt:
+    """Represent a single CLI prompt for `kedro new`
+    """
+
+    def __init__(self, *args, **kwargs) -> None:  # pylint: disable=unused-argument
+        try:
+            self.title = kwargs["title"]
+        except KeyError as exc:
+            raise KedroCliError(
+                "Each prompt must have a title field to be valid."
+            ) from exc
+
+        self.text = kwargs.get("text", "")
+        self.regexp = kwargs.get("regex_validator", None)
+        self.error_message = kwargs.get("error_message", "")
+
+    def __str__(self) -> str:
+        title = self.title.strip().title()
+        title = click.style(title + "\n" + "=" * len(title), bold=True)
+        prompt_lines = [title] + [self.text]
+        prompt_text = "\n".join(str(line).strip() for line in prompt_lines)
+        return f"\n{prompt_text}\n"
+
+    def validate(self, user_input: str) -> None:
+        """Validate a given prompt value against the regex validator
+        """
+        if self.regexp and not re.match(self.regexp, user_input):
+            click.secho(f"`{user_input}` is an invalid value.", fg="red", err=True)
+            click.secho(self.error_message, fg="red", err=True)
+            raise ValueError(user_input)
+
+
 def _get_available_tags(template_path: str) -> List:
     try:
         tags = git.cmd.Git().ls_remote("--tags", str(template_path)).split("\n")
@@ -359,55 +450,6 @@ def _get_available_tags(template_path: str) -> List:
     except git.GitCommandError:
         return []
     return sorted(unique_tags)
-
-
-def _get_user_input(
-    text: str, default: Any = None, regexp: str = None, error_msg: str = ""
-) -> Any:
-    """Get user input and validate it.
-
-    Args:
-        text: Text to display in command line prompt.
-        default: Default value for the input.
-        regexp: Regular expresion used to validate user's input.
-        error_msg: Error message to be emitted if user's input is invalid.
-
-    Returns:
-        Processed user value.
-
-    """
-
-    while True:
-        value = click.prompt(text, default=default)
-
-        if regexp and not re.match(regexp, value):
-            click.secho(f"`{value}` is an invalid value.", fg="red", err=True)
-            click.secho(error_msg, fg="red", err=True)
-        else:
-            return value
-
-
-def _get_config_from_starter_prompts(starter_prompts):
-    config = dict()
-    config["output_dir"] = str(Path.cwd().resolve())
-    for key, value in starter_prompts.items():
-        try:
-            prompt = _get_prompt_text(value["title"], value["text"])
-        except KeyError as exc:
-            raise KedroCliError(
-                "Each prompt must have both a title and text field to be valid."
-            ) from exc
-        default = value.get("default", "")
-        regexp = value.get("regex_validator")
-        error_msg = value.get("error_msg", "")
-
-        response = _get_user_input(
-            text=prompt, default=default, regexp=regexp, error_msg=error_msg
-        )
-
-        if response:
-            config[key] = response
-    return config
 
 
 def _parse_config(config_path: str) -> Dict:
@@ -530,14 +572,6 @@ def _print_kedro_new_success_message(result):
         "project-specific dependencies. Refer to the Kedro documentation: "
         "https://kedro.readthedocs.io/"
     )
-
-
-def _get_prompt_text(title, *text, start: str = "\n"):
-    title = title.strip().title()
-    title = click.style(title + "\n" + "=" * len(title), bold=True)
-    prompt_lines = [title] + list(text)
-    prompt_text = "\n".join(str(line).strip() for line in prompt_lines)
-    return f"{start}{prompt_text}\n"
 
 
 def get_project_context(

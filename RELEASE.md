@@ -1,4 +1,4 @@
-# Upcoming Release 0.17.1
+# Release 0.17.1
 
 ## Major features and improvements
 * Added `env` and `extra_params` to `reload_kedro()` line magic.

@@ -2,7 +2,7 @@
 
 To follow these instructions, you will need to install the  `pylint` package, subject to GPL licence.
 
-> *Note:* This documentation is based on `Kedro 0.17.0`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 You can lint your project code to ensure code quality using the `kedro lint` command, your project is linted with [`black`](https://github.com/psf/black) (projects created with Python 3.6 and above), [`flake8`](https://gitlab.com/pycqa/flake8) and [`isort`](https://github.com/PyCQA/isort). If you prefer to use [pylint](https://www.pylint.org/), a popular linting tool, then the sample commands you can use to help with this are included in the script below:
 

@@ -9,7 +9,7 @@
 ## Migration guide from Kedro 0.17.* to 0.18.*
 * Optional: You can now remove all `params:` prefix when supplying values to `parameters` argument in a `pipeline()` call.
 
-# Upcoming Release 0.17.1
+# Release 0.17.1
 
 ## Major features and improvements
 * Added `env` and `extra_params` to `reload_kedro()` line magic.

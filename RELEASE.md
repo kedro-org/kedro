@@ -29,6 +29,7 @@ print(settings.CONF_ROOT)
 
 ## Breaking changes to the API
 * This release has broken the `kedro ipython` and `kedro jupyter` workflows. To fix this, follow the instructions in the migration guide below.
+* You will also need to upgrade `kedro-viz` to 3.10.1 if you use the `%run_viz` line magic in Jupyter Notebook.
 
 > *Note:* If you're using the `ipython` [extension](https://kedro.readthedocs.io/en/stable/11_tools_integration/02_ipython.html#ipython-extension) instead, you will not encounter this problem.
 

@@ -28,7 +28,7 @@ The most basic and empty starter triggered by `kedro new` is set up with the fol
 * `repo_name` - A name for the directory that holds the project repository
 * `python_package` - A Python package name for the project package (see [Python package naming conventions](https://www.python.org/dev/peps/pep-0008/#package-and-module-names))
 
-See the configuration for this basic configuration in [the default starter setup](https://github.com/quantumblacklabs/private-kedro/blob/master/kedro/templates/project/prompts.yml).
+See the configuration for this basic configuration in [the default starter setup](https://github.com/quantumblacklabs/kedro/blob/master/kedro/templates/project/prompts.yml).
 
 As the creator of the Kedro starter you can customise the prompts triggered by `kedro new` by adding your own prompts in `prompts.yml`. This is an example of a custom prompt:
 
@@ -38,14 +38,13 @@ custom_prompt:
     text: |
       Prompt description that explains to the user what
       information they should provide.
-    default: An optional default value
 ```
 
-Both the prompt `title` and `text` must be provided for the prompt to be valid. The `default` field is optional.
+At the very least, the prompt `title` must be defined for the prompt to be valid. After Kedro gets the user's input for each prompt, we pass the value to [`cookiecutter`](https://cookiecutter.readthedocs.io/en/1.7.2/), so every key in your `prompts.yml` must have a corresponding key in [`cookiecutter.json`](https://cookiecutter.readthedocs.io/en/1.7.2/tutorial1.html#cookiecutter-json).
 
 If the input to the prompts needs to be **validated**, for example to make sure it only has alphanumeric characters, you can add regex validation rules via the `regex_validator` key. For more complex validation, have a look at [cookiecutter pre/post-generate hooks](https://cookiecutter.readthedocs.io/en/1.7.2/advanced/hooks.html#using-pre-post-generate-hooks-0-7-0).
 
-If you want `cookiecutter` to provide sensible **defaults** in case a user doesn't provide any input, you can add those to `cookiecutter.json`. See the default starter [`cookiecutter.json`](https://github.com/quantumblacklabs/private-kedro/blob/master/kedro/templates/project/cookiecutter.json) as example.
+If you want `cookiecutter` to provide sensible **defaults** in case a user doesn't provide any input, you can add those to `cookiecutter.json`. See the default starter [`cookiecutter.json`](https://github.com/quantumblacklabs/kedro/blob/master/kedro/templates/project/cookiecutter.json) as example.
 
 ### Example Kedro starter
 

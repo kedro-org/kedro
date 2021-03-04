@@ -3,7 +3,6 @@ project_name:
   text: |
     Please enter a human readable name for your new project.
     Spaces and punctuation are allowed.
-  default: New Kedro Project
 
 repo_name:
   title: "Repository Name:"
@@ -12,7 +11,7 @@ repo_name:
     Alphanumeric characters, hyphens and underscores are allowed.
     Lowercase is recommended.
   regex_validator: "^\\w+(-*\\w+)*$"
-  error_msg: |
+  error_message: |
     It must contain only word symbols and/or hyphens, must also
     start and end with alphanumeric symbol."
 
@@ -24,6 +23,6 @@ python_package:
     Lowercase is recommended. Package name must start with a letter
     or underscore.
   regex_validator: "^[a-zA-Z_]\\w{1,}$"
-  error_msg: |
+  error_message: |
     It must start with a letter or underscore, be at least 2 characters long
     and contain only letters, digits, and/or underscores.

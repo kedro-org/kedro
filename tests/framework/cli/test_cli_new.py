@@ -42,11 +42,9 @@ from kedro import __version__ as version
 from kedro.framework.cli.cli import (
     TEMPLATE_PATH,
     _fix_user_path,
-    _get_config_from_starter_prompts,
     _get_prompts_config,
     cli,
 )
-from kedro.framework.cli.utils import KedroCliError
 
 FILES_IN_TEMPLATE = 36
 
@@ -159,7 +157,7 @@ class TestInteractiveNew:
         assert (
             "is an invalid value.\nIt must contain only word symbols" in result.output
         )
-        assert result.exit_code == 0
+        assert result.exit_code != 0
 
     @pytest.mark.parametrize(
         "pkg_name",
@@ -169,7 +167,7 @@ class TestInteractiveNew:
         """Check the error if the package name is invalid."""
         result = _invoke(cli_runner, ["new"], python_package=pkg_name)
         assert "is an invalid value.\nIt must start with a letter" in result.output
-        assert result.exit_code == 0
+        assert result.exit_code != 0
 
 
 def _create_config_file(config_path, project_name, repo_name, output_dir=None):
@@ -485,7 +483,7 @@ class TestNewWithStarter:
             "Cannot use the --directory flag with a --starter alias." in result.output
         )
 
-    def test_get_config_from_starter_prompts(self, cli_runner, mocker):
+    def test_prompt_user_for_config(self, cli_runner, mocker):
         starter_path = Path(__file__).parents[3].resolve()
         starter_path = starter_path / "features" / "steps" / "test_starter"
 
@@ -515,10 +513,20 @@ class TestNewWithStarter:
             output_dir=output_dir,
         )
 
-    def test_raise_error_when_prompt_invalid(self):
-        invalid_prompt = {"repo_name": {"title": "Repository Name:"}}
-        with pytest.raises(
-            KedroCliError,
-            match="Each prompt must have both a title and text field to be valid.",
-        ):
-            _get_config_from_starter_prompts(invalid_prompt)
+    def test_raise_error_when_prompt_invalid(self, cli_runner, tmpdir):
+        starter_path = tmpdir / "starter"
+        shutil.copytree(TEMPLATE_PATH, str(starter_path))
+        with open(starter_path / "prompts.yml", "w+") as prompts_file:
+            yaml.dump({"repo_name": {}}, prompts_file)
+
+        result = _invoke(
+            cli_runner,
+            ["new", "-v", "--starter", str(starter_path)],
+            project_name=self.project_name,
+            python_package=self.package_name,
+            repo_name=self.repo_name,
+        )
+        assert result.exit_code != 0
+        assert (
+            "Each prompt must have a title field to be valid" in result.output
+        ), result.output

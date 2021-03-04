@@ -56,8 +56,9 @@ from kedro.framework.session import KedroSession
 [noklam](https://github.com/noklam),
 [Ivan Doroshenko](https://github.com/imdoroshenko),
 [Zain Patel](https://github.com/mzjp2),
-[Deepyaman Datta](https://github.com/deepyaman)
-[Sam Hiscox](https://github.com/samhiscoxqb)
+[Deepyaman Datta](https://github.com/deepyaman),
+[Sam Hiscox](https://github.com/samhiscoxqb),
+[Pascal Brokmeier](https://github.com/pascalwhoop)
 
 ## Thanks for supporting contributions
 

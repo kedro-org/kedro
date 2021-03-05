@@ -49,7 +49,7 @@ wheel==0.32.2 # The reference implementation of the Python wheel packaging stand
 The dependencies above may be sufficient for some projects, but for the spaceflights project, you need to add a requirement for the `pandas` project because you are working with CSV and Excel files. You can add the necessary dependencies for these files types as follows:
 
 ```bash
-pip install kedro[pandas.CSVDataSet,pandas.ExcelDataSet]
+pip install "kedro[pandas.CSVDataSet,pandas.ExcelDataSet]"
 ```
 
 Alternatively, if you need to, you can edit `src/requirements.txt` directly to modify your list of dependencies by replacing the requirement `kedro==0.17.1` with the following (your version of Kedro may be different):

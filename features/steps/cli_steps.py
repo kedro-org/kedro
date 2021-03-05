@@ -699,7 +699,7 @@ def check_docs_generated(context: behave.runner.Context):
         context.root_project_dir / "docs" / "build" / "html" / "index.html"
     ).read_text("utf-8")
     project_repo = context.project_name.replace("-", "_")
-    assert f"Welcome to project’s {project_repo} API docs!" in index_html, index_html
+    assert f"Welcome to project {project_repo}’s API docs!" in index_html, index_html
 
 
 @then("requirements should be generated")

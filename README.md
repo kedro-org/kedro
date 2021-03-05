@@ -52,7 +52,7 @@ Our [Get Started guide](https://kedro.readthedocs.io/en/stable/02_get_started/01
 
 The [Kedro documentation](https://kedro.readthedocs.io/en/stable/) includes three examples to help get you started:
 - A typical "Hello World" example, for an [entry-level description of the main Kedro concepts](https://kedro.readthedocs.io/en/stable/02_get_started/03_hello_kedro.html)
-- An [introduction to the product template](https://kedro.readthedocs.io/en/stable/02_get_started/05_example_project.html) using the Iris dataset
+- An [introduction to the project template](https://kedro.readthedocs.io/en/stable/02_get_started/05_example_project.html) using the Iris dataset
 - A more detailed [spaceflights tutorial](https://kedro.readthedocs.io/en/stable/03_tutorial/02_tutorial_template.html) to give you hands-on experience
 
 

@@ -49,9 +49,6 @@ The Kedro team maintains the following starters to bootstrap new Kedro projects:
 * [Alias `pyspark`](https://github.com/quantumblacklabs/kedro-starters/tree/master/pyspark): The configuration and initialisation code for a [Kedro pipeline using PySpark](../11_tools_integration/01_pyspark.md)
 * [Alias `spaceflights`](https://github.com/quantumblacklabs/kedro-starters/tree/master/spaceflights): The [spaceflights tutorial](../03_tutorial/01_spaceflights_tutorial.md) example code
 
-
-Each starter project encodes our [recommended Kedro best practices](../11_tools_integration/01_pyspark.md).
-
 ## Starter versioning
 
 By default, Kedro will use the latest version available in the repository, but if you want to use a specific version of a starter, you can pass a `--checkout` argument to the command as follows:

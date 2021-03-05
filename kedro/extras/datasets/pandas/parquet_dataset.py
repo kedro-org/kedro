@@ -30,6 +30,7 @@
 filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Parquet file.
 """
 from copy import deepcopy
+from fnmatch import fnmatch
 from pathlib import Path, PurePosixPath
 from typing import Any, Dict
 
@@ -161,6 +162,8 @@ class ParquetDataSet(AbstractVersionedDataSet):
     def _load(self) -> pd.DataFrame:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
+        explode_columns_with_wildcards(load_path, self._load_args, self._fs)
+
         if self._fs.isdir(load_path):
             # It doesn't work at least on S3 if root folder was created manually
             # https://issues.apache.org/jira/browse/ARROW-7867
@@ -208,3 +211,17 @@ class ParquetDataSet(AbstractVersionedDataSet):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+
+def explode_columns_with_wildcards(load_path, load_args, filesystem):
+    """
+    if find columns with wildcards, replace them by the names with wildcards
+    """
+    wildcards_columns = [col for col in load_args.get("columns", []) if "*" in col]
+    if wildcards_columns:
+        all_columns = pq.ParquetDataset(load_path, filesystem=filesystem).schema.names
+        load_args["columns"] = [
+            c
+            for c in all_columns
+            if any(fnmatch(c, wild_col) for wild_col in load_args["columns"])
+        ]

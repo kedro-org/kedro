@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -98,11 +98,11 @@ class SparkJDBCDataSet(AbstractDataSet):
             load_args: Provided to underlying PySpark ``jdbc`` function along
                 with the JDBC URL and the name of the table. To find all
                 supported arguments, see here:
-                https://spark.apache.org/docs/latest/api/python/pyspark.sql.html?highlight=jdbc#pyspark.sql.DataFrameReader.jdbc
+                https://spark.apache.org/docs/latest/api/python/reference/api/pyspark.sql.DataFrameReader.jdbc.html
             save_args: Provided to underlying PySpark ``jdbc`` function along
                 with the JDBC URL and the name of the table. To find all
                 supported arguments, see here:
-                https://spark.apache.org/docs/latest/api/python/pyspark.sql.html?highlight=jdbc#pyspark.sql.DataFrameWriter.jdbc
+                https://spark.apache.org/docs/latest/api/python/reference/api/pyspark.sql.DataFrameWriter.jdbc.html
 
         Raises:
             DataSetError: When either ``url`` or ``table`` is empty or

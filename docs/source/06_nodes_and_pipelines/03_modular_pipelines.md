@@ -1,10 +1,10 @@
 # Modular pipelines
 
-> *Note:* This documentation is based on `Kedro 0.16.6`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 ## What are modular pipelines?
 
-In many typical Kedro projects, a single (“master”) pipeline increases in complexity as the project evolves. To keep your project fit for purpose, we recommend that you create modular pipelines, which are logically isolated and can be reused. Modular pipelines are easier to develop, test and maintain, and are portable so they can be copied and reused between projects.
+In many typical Kedro projects, a single (“main”) pipeline increases in complexity as the project evolves. To keep your project fit for purpose, we recommend that you create modular pipelines, which are logically isolated and can be reused. Modular pipelines are easier to develop, test and maintain, and are portable so they can be copied and reused between projects.
 
 ## How do I create a modular pipeline?
 
@@ -81,7 +81,7 @@ def create_pipeline():
 ```
 
 * Modular pipelines should _not_ depend on the main Python package (`new_kedro_project` in this example) as this would break portability to another project
-* Modular pipelines should be registered and stitched together in a master (or `__default__`) pipeline located in `src/new_kedro_project/hooks.py`
+* Modular pipelines should be registered and stitched together in a main (or `__default__`) pipeline located in `src/new_kedro_project/hooks.py`
 
 The following example, illustrates how to import and instantiate two modular pipelines (`modular_pipeline_1` and `modular_pipeline_2`) within `src/new_kedro_project/hooks.py`:
 
@@ -134,7 +134,7 @@ In addition to [PyPI](https://pypi.org/), you can also share the packaged wheel 
 
 ### Pull a modular pipeline
 
-You can pull a modular pipeline from a wheel file by executing `kedro pipeline pull <package_name>`, where `<package_name>` is either a package name on PyPI, or a path to the wheel file. Kedro will unpack the wheel file, and install the files in following locations in your Kedro project:
+You can pull a modular pipeline from a wheel file by executing `kedro pipeline pull <package_name>`, where `<package_name>` is either a package name on PyPI or a path to the wheel file. Kedro will unpack the wheel file, and install the files in following locations in your Kedro project:
 
 *  All the modular pipeline code in `src/<python_package>/pipelines/<pipeline_name>/`
 *  Configuration files in `conf/<env>/parameters/<pipeline_name>.yml`, where `<env>` defaults to `base`. If you want to place the parameters from a different config environment, run `kedro pipeline pull <pipeline_name> --env <env_name>`
@@ -183,7 +183,7 @@ Here is an example of a modular pipeline which combines all of these concepts wi
   - `src/new_kedro_project/pipelines/data_engineering` - A pipeline that imputes missing data and discovers outlier data points
   - `src/new_kedro_project/pipelines/feature_engineering` - A pipeline that generates temporal features while aggregating data and performs a train/test split on the data
   - `src/new_kedro_project/pipelines/modelling` - A pipeline that fits models, does hyperparameter search and reports on model performance
-* A master (or `__default__`) pipeline:
+* A main (or `__default__`) pipeline:
   - `src/new_kedro_project/hooks.py` - combines 3 modular pipelines from the above
 
 <details>
@@ -222,7 +222,8 @@ new-kedro-project
 │   │   ├── __init__.py
 |   |   ├── cli.py
 │   │   ├── hooks.py
-│   │   └── run.py
+│   │   ├── run.py
+|   |   └── settings.py
 │   ├── tests
 │   │   ├── __init__.py
 │   │   ├── pipelines
@@ -273,10 +274,17 @@ Consider this example:
 
 ```python
 cook_pipeline = Pipeline(
-    [node(defrost, "frozen_meat", "meat"), node(grill, "meat", "grilled_meat"),]
+    [
+        node(defrost, "frozen_meat", "meat"),
+        node(grill, "meat", "grilled_meat"),
+    ]
 )
 
-lunch_pipeline = Pipeline([node(eat, "food", None),])
+lunch_pipeline = Pipeline(
+    [
+        node(eat, "food", None),
+    ]
+)
 ```
 
 A simple `cook_pipeline + lunch_pipeline` doesn't work, because the `grilled_meat` output in the `cook_pipeline` needs to be mapped to the `food` input in the `lunch_pipeline`. This can be done in any of the following three (equivalent) ways:
@@ -302,12 +310,14 @@ final_pipeline3 = pipeline(
 Remember you can pass `Pipeline` objects in the constructor as well, like in the example below. This approach is cleaner and more idiomatic when you are combining multiple modular pipelines together.
 
 ```python
-final_pipeline = Pipeline([
-    pipeline(cook_pipeline, outputs={"grilled_meat": "new_name"}),
-    pipeline(lunch_pipeline, inputs={"food": "new_name"}),
-    node(...),
-    ...
-])
+final_pipeline = Pipeline(
+    [
+        pipeline(cook_pipeline, outputs={"grilled_meat": "new_name"}),
+        pipeline(lunch_pipeline, inputs={"food": "new_name"}),
+        node(...),
+        ...,
+    ]
+)
 ```
 
 >*Note:* `inputs` should correspond to the pipeline free inputs, while `outputs` are either free or intermediary outputs.
@@ -334,15 +344,15 @@ Here is a solution that uses a namespace:
 ```python
 cook_breakfast_pipeline = pipeline(
     cook_pipeline,
-    inputs={"frozen_meat": "frozen_meat"},  # inputs stay the same, don't namespace
+    inputs="frozen_meat",  # inputs stay the same, don't namespace
     outputs={"grilled_meat": "breakfast_food"},
-    namespace="breakfast"
+    namespace="breakfast",
 )
 cook_lunch_pipeline = pipeline(
     cook_pipeline,
-    inputs={"frozen_meat": "frozen_meat"},  # inputs stay the same, don't namespace
+    inputs="frozen_meat",  # inputs stay the same, don't namespace
     outputs={"grilled_meat": "lunch_food"},
-    namespace="lunch"
+    namespace="lunch",
 )
 
 final_pipeline = (
@@ -353,20 +363,20 @@ final_pipeline = (
 )
 ```
 
-`namespace="lunch"` renames all datasets and nodes, prefixing them with `"lunch."`, except those datasets that we rename explicitly in the mapping (i.e `grilled_meat`, `frozen_meat`).
+`namespace="lunch"` renames all datasets and nodes, prefixing them with `"lunch."`, except those datasets that we explicitly "freeze" (`frozen_meat`) or remap (`grilled_meat`).
 
-Renaming free outputs is required since "breakfast_food" and "lunch_food" are the names expected by the `eat_breakfast_pipeline` and `eat_lunch_pipeline` respectively.
+Remapping free outputs is required since "breakfast_food" and "lunch_food" are the names expected by the `eat_breakfast_pipeline` and `eat_lunch_pipeline` respectively.
 
 The resulting pipeline now has two separate nodes, `breakfast.defrost_node` and `lunch.defrost_node`. Also two separate datasets `breakfast.meat` and `lunch.meat` connect the nodes inside the pipelines, causing no confusion between them.
 
-Note that `pipeline()` will skip prefixing when node inputs contain parameter references (`params:` and `parameters`).
+Note that `pipeline()` will also prefix single parameter referenced with `params:` in a node's inputs. However, it won't prefix `parameters`.
 
 For example:
 
 ```python
 raw_pipeline = Pipeline([node(node_func, ["input", "params:x"], "output")])
 final_pipeline = pipeline(raw_pipeline, namespace="new")
-# `final_pipeline` will be `Pipeline([node(node_func, ["new.input", "params:x"], "new.output")])`
+# `final_pipeline` will be `Pipeline([node(node_func, ["new.input", "params:new.x"], "new.output")])`
 ```
 
 ## How to use a modular pipeline with different parameters
@@ -374,21 +384,25 @@ final_pipeline = pipeline(raw_pipeline, namespace="new")
 You can map parameter values in a similar way to inputs and outputs. Let's say you have two almost identical pipelines that differ by one parameter. You want to run the pipelines on the same set of inputs.
 
 ```python
-alpha_pipeline = Pipeline([
-    node(node_func1, ["input1", "input2", "params:alpha"], "intermediary_output"),
-    node(node_func2, "intermediary_output", "output")
-])
+alpha_pipeline = Pipeline(
+    [
+        node(node_func1, ["input1", "input2", "params:alpha"], "intermediary_output"),
+        node(node_func2, "intermediary_output", "output"),
+    ]
+)
 beta_pipeline = pipeline(
     alpha_pipeline,
-    inputs={"input1": "input1", "input2": "input2"},
-    parameters={"params:alpha": "params:beta"},
-    namespace="beta"
+    inputs={"input1", "input2"},
+    parameters={"alpha": "beta"},
+    namespace="beta",
 )
 
 final_pipeline = alpha_pipeline + beta_pipeline
 ```
 
 The value of parameter `alpha` is replaced with the value of parameter `beta`, assuming they both live in your parameters configuration (`parameters.yml`). The namespace ensures that outputs are not overwritten, so intermediate and final outputs are prefixed, i.e. `beta.intermediary_output`, `beta.output`.
+
+Note that similar to `inputs` and `outputs` namespacing rule, if you supply a `str` or a `Set[str]`, these explicitly listed parameters won't be namespaced.
 
 ## How to clean up a modular pipeline
 You can manually delete all the files that belong to a modular pipeline. However, Kedro also provides a CLI command to clean up automatically. It deletes the following files when you call `kedro pipeline delete <pipeline_name>`:

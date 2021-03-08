@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,12 +33,13 @@ This module implements commands available from the kedro CLI.
 import importlib
 import os
 import re
+import tempfile
 import warnings
 import webbrowser
-from collections import defaultdict
+from collections import OrderedDict, defaultdict, namedtuple
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Callable, Dict, List
+from typing import Any, Dict, List
 
 import click
 import git
@@ -56,6 +57,7 @@ from kedro.framework.cli.utils import (
     command_with_verbosity,
 )
 from kedro.framework.context.context import load_context
+from kedro.framework.project import configure_project
 from kedro.framework.startup import _get_project_metadata, _is_project
 
 KEDRO_PATH = Path(kedro.__file__).parent
@@ -87,8 +89,8 @@ def cli():
     """Kedro is a CLI for creating and using Kedro projects
     For more information, type ``kedro info``.
 
-    When inside a Kedro project (created with `kedro new`) commands from
-    the project's `cli.py` file will also be available here.
+    When inside a Kedro project (created with ``kedro new``) commands
+    from the project's ``cli.py`` file will also be available here.
     """
     pass
 
@@ -263,7 +265,7 @@ def _create_project(
     template_path: Path = TEMPLATE_PATH,
     checkout: str = None,
     directory: str = None,
-):
+):  # pylint: disable=too-many-locals
     """Implementation of the kedro new cli command.
 
     Args:
@@ -288,17 +290,18 @@ def _create_project(
         from cookiecutter.exceptions import RepositoryCloneFailed, RepositoryNotFound
         from cookiecutter.main import cookiecutter  # for performance reasons
 
+    config: Dict[str, str] = dict()
+    checkout = checkout or version
     try:
         if config_path:
             config = _parse_config(config_path)
             config = _check_config_ok(config_path, config)
         else:
-            config = _get_config_from_prompts()
-        config.setdefault("kedro_version", version)
+            config = _prompt_user_for_config(template_path, checkout, directory)
 
-        checkout = checkout or version
+        config.setdefault("kedro_version", version)
         cookiecutter_args = dict(
-            output_dir=config["output_dir"],
+            output_dir=config.get("output_dir", str(Path.cwd().resolve())),
             no_input=True,
             extra_context=config,
             checkout=checkout,
@@ -329,6 +332,112 @@ def _create_project(
         raise KedroCliError("Failed to generate project.") from exc
 
 
+def _prompt_user_for_config(  # pylint: disable=too-many-locals
+    template_path: Path, checkout: str = None, directory: str = None
+) -> Dict[str, str]:
+    """Prompt user in the CLI to provide configuration values for cookiecutter variables
+    in a starter, such as project_name, package_name, etc.
+    """
+    # pylint: disable=import-outside-toplevel
+    from cookiecutter.prompt import read_user_variable, render_variable
+    from cookiecutter.repository import determine_repo_dir  # for performance reasons
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        temp_dir_path = Path(tmpdir).resolve()
+        cookiecutter_repo, _ = determine_repo_dir(
+            template=str(template_path),
+            abbreviations=dict(),
+            clone_to_dir=temp_dir_path,
+            checkout=checkout,
+            no_input=True,
+            directory=directory,
+        )
+        cookiecutter_dir = temp_dir_path / cookiecutter_repo
+        prompts_yml = cookiecutter_dir / "prompts.yml"
+
+        # If there is no prompts.yml, no need to ask user for input.
+        if not prompts_yml.is_file():
+            return {}
+
+        with open(prompts_yml) as config_file:
+            prompts_dict = yaml.safe_load(config_file)
+
+        cookiecutter_env = _prepare_cookiecutter_env(cookiecutter_dir)
+
+        config: Dict[str, str] = OrderedDict()
+        config["output_dir"] = str(Path.cwd().resolve())
+
+        for variable_name, prompt_dict in prompts_dict.items():
+            prompt = _Prompt(**prompt_dict)
+
+            # render the variable on the command line
+            cookiecutter_variable = render_variable(
+                env=cookiecutter_env.env,
+                raw=cookiecutter_env.context[variable_name],
+                cookiecutter_dict=config,
+            )
+
+            # read the user's input for the variable
+            user_input = read_user_variable(str(prompt), cookiecutter_variable)
+            if user_input:
+                prompt.validate(user_input)
+                config[variable_name] = user_input
+        return config
+
+
+# A cookiecutter env contains the context and environment to render templated
+# cookiecutter values on the CLI.
+_CookiecutterEnv = namedtuple("CookiecutterEnv", ["env", "context"])
+
+
+def _prepare_cookiecutter_env(cookiecutter_dir) -> _CookiecutterEnv:
+    """Prepare the cookiecutter environment to render its default values
+    when prompting user on the CLI for inputs.
+    """
+    # pylint: disable=import-outside-toplevel
+    from cookiecutter.environment import StrictEnvironment
+    from cookiecutter.generate import generate_context
+
+    cookiecutter_json = cookiecutter_dir / "cookiecutter.json"
+    cookiecutter_context = generate_context(context_file=cookiecutter_json).get(
+        "cookiecutter", {}
+    )
+    cookiecutter_env = StrictEnvironment(context=cookiecutter_context)
+    return _CookiecutterEnv(context=cookiecutter_context, env=cookiecutter_env)
+
+
+class _Prompt:
+    """Represent a single CLI prompt for `kedro new`
+    """
+
+    def __init__(self, *args, **kwargs) -> None:  # pylint: disable=unused-argument
+        try:
+            self.title = kwargs["title"]
+        except KeyError as exc:
+            raise KedroCliError(
+                "Each prompt must have a title field to be valid."
+            ) from exc
+
+        self.text = kwargs.get("text", "")
+        self.regexp = kwargs.get("regex_validator", None)
+        self.error_message = kwargs.get("error_message", "")
+
+    def __str__(self) -> str:
+        title = self.title.strip().title()
+        title = click.style(title + "\n" + "=" * len(title), bold=True)
+        prompt_lines = [title] + [self.text]
+        prompt_text = "\n".join(str(line).strip() for line in prompt_lines)
+        return f"\n{prompt_text}\n"
+
+    def validate(self, user_input: str) -> None:
+        """Validate a given prompt value against the regex validator
+        """
+        if self.regexp and not re.match(self.regexp, user_input):
+            click.secho(f"`{user_input}` is an invalid value.", fg="red", err=True)
+            click.secho(self.error_message, fg="red", err=True)
+            raise ValueError(user_input)
+
+
 def _get_available_tags(template_path: str) -> List:
     try:
         tags = git.cmd.Git().ls_remote("--tags", str(template_path)).split("\n")
@@ -341,89 +450,6 @@ def _get_available_tags(template_path: str) -> List:
     except git.GitCommandError:
         return []
     return sorted(unique_tags)
-
-
-def _get_user_input(
-    text: str, default: Any = None, check_input: Callable = None
-) -> Any:
-    """Get user input and validate it.
-
-    Args:
-        text: Text to display in command line prompt.
-        default: Default value for the input.
-        check_input: Function to apply to check user input.
-
-    Returns:
-        Processed user value.
-
-    """
-
-    while True:
-        value = click.prompt(text, default=default)
-        if check_input:
-            try:
-                check_input(value)
-            except KedroCliError as exc:
-                click.secho(str(exc), fg="red", err=True)
-                continue
-        return value
-
-
-def _get_config_from_prompts() -> Dict:
-    """Ask user to provide necessary inputs.
-
-    Returns:
-        Resulting config dictionary.
-
-    """
-
-    # set output directory to the current directory
-    output_dir = os.path.abspath(os.path.curdir)
-
-    # get project name
-    project_name_prompt = _get_prompt_text(
-        "Project Name:",
-        "Please enter a human readable name for your new project.",
-        "Spaces and punctuation are allowed.",
-        start="",
-    )
-
-    project_name = _get_user_input(project_name_prompt, default="New Kedro Project")
-
-    normalized_project_name = re.sub(r"[^\w-]+", "-", project_name).lower().strip("-")
-
-    # get repo name
-    repo_name_prompt = _get_prompt_text(
-        "Repository Name:",
-        "Please enter a directory name for your new project repository.",
-        "Alphanumeric characters, hyphens and underscores are allowed.",
-        "Lowercase is recommended.",
-    )
-    repo_name = _get_user_input(
-        repo_name_prompt,
-        default=normalized_project_name,
-        check_input=_assert_repo_name_ok,
-    )
-
-    # get python package_name
-    default_pkg_name = normalized_project_name.replace("-", "_")
-    pkg_name_prompt = _get_prompt_text(
-        "Python Package Name:",
-        "Please enter a valid Python package name for your project package.",
-        "Alphanumeric characters and underscores are allowed.",
-        "Lowercase is recommended. Package name must start with a letter "
-        "or underscore.",
-    )
-    python_package = _get_user_input(
-        pkg_name_prompt, default=default_pkg_name, check_input=_assert_pkg_name_ok
-    )
-
-    return {
-        "output_dir": output_dir,
-        "project_name": project_name,
-        "repo_name": repo_name,
-        "python_package": python_package,
-    }
 
 
 def _parse_config(config_path: str) -> Dict:
@@ -474,7 +500,9 @@ def _check_config_ok(config_path: str, config: Dict[str, Any]) -> Dict[str, Any]
         _show_example_config()
         raise KedroCliError(config_path + " is empty")
 
-    missing_keys = _get_default_config().keys() - config.keys()
+    mandatory_keys = set(_get_prompts_config().keys())
+    mandatory_keys.add("output_dir")
+    missing_keys = mandatory_keys - set(config.keys())
 
     if missing_keys:
         click.echo(f"\n{config_path}:")
@@ -486,15 +514,13 @@ def _check_config_ok(config_path: str, config: Dict[str, Any]) -> Dict[str, Any]
 
     config["output_dir"] = _fix_user_path(config["output_dir"])
     _assert_output_dir_ok(config["output_dir"])
-    _assert_repo_name_ok(config["repo_name"])
-    _assert_pkg_name_ok(config["python_package"])
     return config
 
 
-def _get_default_config():
-    default_config_path = TEMPLATE_PATH / "default_config.yml"
-    with default_config_path.open() as default_config_file:
-        return yaml.safe_load(default_config_file)
+def _get_prompts_config():
+    prompts_config_path = TEMPLATE_PATH / "prompts.yml"
+    with prompts_config_path.open() as prompts_config_file:
+        return yaml.safe_load(prompts_config_file)
 
 
 def _assert_output_dir_ok(output_dir: str):
@@ -516,40 +542,6 @@ def _assert_output_dir_ok(output_dir: str):
         raise KedroCliError(message)
 
 
-def _assert_pkg_name_ok(pkg_name: str):
-    """Check that python package name is in line with PEP8 requirements.
-
-    Args:
-        pkg_name: Candidate Python package name.
-
-    Raises:
-        KedroCliError: If package name violates the requirements.
-    """
-
-    base_message = f"`{pkg_name}` is not a valid Python package name."
-    if not re.match(r"^[a-zA-Z_]", pkg_name):
-        message = base_message + " It must start with a letter or underscore."
-        raise KedroCliError(message)
-    if len(pkg_name) < 2:
-        message = base_message + " It must be at least 2 characters long."
-        raise KedroCliError(message)
-    if not re.match(r"^\w+$", pkg_name[1:]):
-        message = (
-            base_message + " It must contain only letters, digits, and/or underscores."
-        )
-        raise KedroCliError(message)
-
-
-def _assert_repo_name_ok(repo_name):
-    if not re.match(r"^\w+(-*\w+)*$", repo_name):
-        message = (
-            f"`{repo_name}` is not a valid repository name. It must contain "
-            f"only word symbols and/or hyphens, must also start and "
-            f"end with alphanumeric symbol."
-        )
-        raise KedroCliError(message)
-
-
 def _fix_user_path(output_dir):
     output_dir = output_dir or ""
     output_dir = os.path.expanduser(output_dir)
@@ -560,8 +552,8 @@ def _fix_user_path(output_dir):
 
 def _show_example_config():
     click.secho("Example of valid config.yml:")
-    default_config = _get_default_config()
-    for key, value in default_config.items():
+    prompts_config = _get_prompts_config()
+    for key, value in prompts_config.items():
         click.secho(
             click.style(key + ": ", bold=True, fg="yellow")
             + click.style(str(value), fg="cyan")
@@ -576,18 +568,10 @@ def _print_kedro_new_success_message(result):
     )
     click.secho(
         "\nA best-practice setup includes initialising git and creating "
-        "a virtual environment before running `kedro install` to install "
+        "a virtual environment before running ``kedro install`` to install "
         "project-specific dependencies. Refer to the Kedro documentation: "
         "https://kedro.readthedocs.io/"
     )
-
-
-def _get_prompt_text(title, *text, start: str = "\n"):
-    title = title.strip().title()
-    title = click.style(title + "\n" + "=" * len(title), bold=True)
-    prompt_lines = [title] + list(text)
-    prompt_text = "\n".join(str(line).strip() for line in prompt_lines)
-    return f"{start}{prompt_text}\n"
 
 
 def get_project_context(
@@ -661,8 +645,8 @@ def _init_plugins():
 
 
 def main():  # pragma: no cover
-    """Main entry point, look for a `cli.py` and if found add its
-    commands to `kedro`'s then invoke the cli.
+    """Main entry point. Look for a ``cli.py``, and, if found, add its
+    commands to `kedro`'s before invoking the CLI.
     """
     _init_plugins()
 
@@ -675,11 +659,12 @@ def main():  # pragma: no cover
     if _is_project(path):
         # load project commands from cli.py
         metadata = _get_project_metadata(path)
+        package_name = metadata.package_name
         cli_context = dict(obj=metadata)
         _add_src_to_path(metadata.source_dir, path)
+        configure_project(package_name)
 
         project_groups.extend(load_entry_points("project"))
-        package_name = metadata.package_name
 
         try:
             project_cli = importlib.import_module(f"{package_name}.cli")

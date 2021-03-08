@@ -17,10 +17,10 @@ Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) a
 
 Their work was later turned into an internal product by [Peteris Erins](https://github.com/Pet3ris), [Ivan Danov](https://github.com/idanov), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae) and [Nikolaos Tsaousis](https://github.com/tsanikgr).
 
-Currently, the core Kedro team consists of [Yetunde Dada](https://github.com/yetudada), [Ivan Danov](https://github.com/idanov), [Richard Westenra](https://github.com/richardwestenra), [Dmitrii Deriabin](https://github.com/DmitriiDeriabinQB), [Lorena Balan](https://github.com/lorenabalan), [Lim Hoang](https://github.com/limdauto), [Andrii Ivaniuk](https://github.com/andrii-ivaniuk), [Jo Stichbury](https://github.com/stichbury), [Merel Theisen](https://github.com/MerelTheisenQB), [Gabriel Comym](https://github.com/GabrielComymQB) and [Liam Brummitt](https://github.com/bru5).
+Currently, the core Kedro team consists of [Yetunde Dada](https://github.com/yetudada), [Ivan Danov](https://github.com/idanov), [Richard Westenra](https://github.com/richardwestenra), [Lorena Balan](https://github.com/lorenabalan), [Lim Hoang](https://github.com/limdauto), [Andrii Ivaniuk](https://github.com/andrii-ivaniuk), [Jo Stichbury](https://github.com/stichbury), [Merel Theisen](https://github.com/MerelTheisenQB), [Gabriel Comym](https://github.com/GabrielComymQB), [Liam Brummitt](https://github.com/bru5) and [Susanna Wong](https://github.com/studioswong).
 
 Former core team members with significant contributions include: [Gordon Wrigley](https://github.com/tolomea), [Nasef
- Khan](https://github.com/nakhan98), [Anton Kirilenko](https://github.com/Flid), [Zain Patel](https://github.com/mzjp2), [Laís Carvalho](https://github.com/laisbsc) and [Kiyohito Kunii](https://github.com/921kiyo).
+ Khan](https://github.com/nakhan98), [Anton Kirilenko](https://github.com/Flid), [Zain Patel](https://github.com/mzjp2), [Laís Carvalho](https://github.com/laisbsc), [Kiyohito Kunii](https://github.com/921kiyo) and [Dmitrii Deriabin](https://github.com/dmder).
 
 And last, but not least, all the open-source contributors whose work went into all Kedro [releases](https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md).
 
@@ -113,7 +113,7 @@ The responsibility of _"What time will this pipeline run?"_, _"How do I manage m
 
 ## How do I upgrade Kedro?
 
-We use [Semantic Versioning](http://semver.org/). The best way to safely upgrade is to check our [release notes](https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md) for any notable breaking changes. Follow the steps in the migration guide included for that specific release.
+We use [Semantic Versioning](https://semver.org/). The best way to safely upgrade is to check our [release notes](https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md) for any notable breaking changes. Follow the steps in the migration guide included for that specific release.
 
 Once Kedro is installed, you can check your version as follows:
 
@@ -153,6 +153,10 @@ pip install kedro
 There are a host of articles, podcasts, talks and Kedro showcase projects in the [`kedro-community`](https://github.com/quantumblacklabs/kedro-community) repository.
 
 Our preferred Kedro-community channel for feedback is through [GitHub issues](https://github.com/quantumblacklabs/kedro/issues). We update the codebase regularly; you can find news about updates and features in the [RELEASE.md file on the Github repository](https://github.com/quantumblacklabs/kedro/blob/develop/RELEASE.md).
+
+## How can I cite Kedro?
+
+If you're an academic, Kedro can also help you, for example, as a tool to solve the problem of reproducible research. Find our citation reference on [Zenodo](https://zenodo.org/record/4336685).
 
 ## How can I get my question answered?
 

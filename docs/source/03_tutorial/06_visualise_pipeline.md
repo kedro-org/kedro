@@ -1,19 +1,15 @@
 # Visualise pipelines
 
-[Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz) displays data and machine-learning pipelines in an informative way, emphasising the connections between datasets and nodes. It shows the structure of your Kedro pipeline.
+[Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz) displays data and machine-learning pipelines in an informative way, emphasising the connections between datasets and nodes. It shows the structure of your Kedro pipeline. This exercise assumes that you have been following the [Spaceflights tutorial](01_spaceflights_tutorial.md).
 
-## Use Kedro-Viz
-
-This exercise assumes that you have been following the [Spaceflights tutorial](01_spaceflights_tutorial.md).
-
-### Install Kedro-Viz
+## Install Kedro-Viz
 
 You can install Kedro-Viz by running:
 ```bash
 pip install kedro-viz
 ```
 
-### Visualise a whole pipeline
+## Visualise a whole pipeline
 
 You should be in your project root directory, and once Kedro-Viz is installed you can visualise your pipeline by running:
 ```bash
@@ -29,17 +25,13 @@ This command will run a server on http://127.0.0.1:4141 that will open up your v
 > definition](04_create_pipelines.md) is complete. All other errors can be logged as GitHub Issues on
 > the [Kedro-Viz repository](https://github.com/quantumblacklabs/kedro-viz).
 
-### Exit an open visualisation
+## Exit an open visualisation
 
 You exit this visualisation by closing the open browser and entering **Ctrl+C** or **Cmd+C** in your terminal.
 
-### Interact with Data Engineering Convention
+## Visualise layers
 
-The pipeline can be broken up into different layers to specify convention for how data is processed. This convention
- makes it easier to collaborate with other team members because everyone has an idea of what type of data cleaning or
-  processing has happened. It also makes it easier to collaborate with yourself in future because it makes your data
-   easier to reproduce if you have done something wrong. You can read more about the [Data Engineering Convention
-   ](../12_faq/01_faq.md#what-is-data-engineering-convention) that we use.
+A pipeline can be broken up into different layers according to how data is processed, and using a convention for layers makes it easier to collaborate. For example, the [data engineering convention](../12_faq/01_faq.md#what-is-data-engineering-convention) shown here labels datasets according to the stage of the pipeline (e.g. whether the data has been cleaned).
 
 Kedro-Viz makes it easy to visualise these data processing stages by adding a `layer` attribute to the datasets in the Data Catalog. We will be modifying `catalog.yml` with the following:
 
@@ -81,11 +73,11 @@ regressor:
   layer: models
 ```
 
-Run kedro-viz again with `kedro viz` and observe how your visualisation has changed to accommodate the data processing stages as seen in the image below:
+Run kedro-viz again with `kedro viz` and observe how your visualisation has changed to indicate the layers:
 
 ![](../meta/images/pipeline_visualisation_with_layers.png)
 
-### Share a pipeline
+## Share a pipeline
 
 Visualisations from Kedro-Viz are made shareable by using functionality that allows you to save the visualisation as a JSON file.
 

@@ -1,6 +1,6 @@
 # Pipelines
 
-> *Note:* This documentation is based on `Kedro 0.16.6`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 We previously introduced [Nodes](./01_nodes.md) as building blocks that represent tasks, and which can be combined in a pipeline to build your workflow.  A pipeline organises the dependencies and execution order of your collection of nodes, and connects inputs and outputs while keeping your code modular. The pipeline determines the node execution order by resolving dependencies and does *not* necessarily run the nodes in the order in which they are passed in.
 
@@ -140,22 +140,50 @@ nodes
 The output is as follows:
 
 ```python
-[Node(len, 'xs', 'n', None),
- Node(mean, ['xs', 'n'], 'm', 'mean node'),
- Node(mean_sos, ['xs', 'n'], 'm2', 'mean sos'),
- Node(variance, ['m', 'm2'], 'v', 'variance node')]
- ```
+[
+    Node(len, "xs", "n", None),
+    Node(mean, ["xs", "n"], "m", "mean_node"),
+    Node(mean_sos, ["xs", "n"], "m2", "mean_sos"),
+    Node(variance, ["m", "m2"], "v", "variance node"),
+]
+```
+
+To find out about the inputs:
 
 ```python
 nodes[0].inputs
 ```
 
-Gives the following output:
+You should see the following:
 
 ```python
-['xs']
+["xs"]
 ```
 </details>
+
+### Information about pipeline inputs and outputs
+In a similar way to the above, you can use `inputs()` and `outputs()` to check the inputs and outputs of a pipeline:
+
+```python
+pipeline.inputs()
+```
+
+Gives the following:
+
+```console
+Out[7]: {'xs'}
+```
+
+```python
+pipeline.outputs()
+```
+
+Displays the output:
+
+```console
+Out[8]: {'v'}
+```
+
 
 ## Bad pipelines
 

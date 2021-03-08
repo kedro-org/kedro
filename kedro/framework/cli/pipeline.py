@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,9 +28,11 @@
 
 """A collection of CLI commands for working with Kedro pipelines."""
 import json
+import re
 import shutil
 import sys
 import tempfile
+from importlib import import_module
 from pathlib import Path
 from textwrap import indent
 from typing import Any, List, NamedTuple, Optional, Tuple, Union
@@ -41,7 +43,6 @@ import yaml
 from setuptools.dist import Distribution
 
 import kedro
-from kedro.framework.cli.cli import _assert_pkg_name_ok
 from kedro.framework.cli.utils import (
     KedroCliError,
     _clean_pycache,
@@ -51,7 +52,7 @@ from kedro.framework.cli.utils import (
     env_option,
     python_call,
 )
-from kedro.framework.project.settings import _get_project_settings
+from kedro.framework.project import settings
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import ProjectMetadata
 
@@ -72,6 +73,30 @@ PipelineArtifacts = NamedTuple(
     "PipelineArtifacts",
     [("pipeline_dir", Path), ("pipeline_tests", Path), ("pipeline_conf", Path)],
 )
+
+
+def _assert_pkg_name_ok(pkg_name: str):
+    """Check that python package name is in line with PEP8 requirements.
+
+    Args:
+        pkg_name: Candidate Python package name.
+
+    Raises:
+        KedroCliError: If package name violates the requirements.
+    """
+
+    base_message = f"`{pkg_name}` is not a valid Python package name."
+    if not re.match(r"^[a-zA-Z_]", pkg_name):
+        message = base_message + " It must start with a letter or underscore."
+        raise KedroCliError(message)
+    if len(pkg_name) < 2:
+        message = base_message + " It must be at least 2 characters long."
+        raise KedroCliError(message)
+    if not re.match(r"^\w+$", pkg_name[1:]):
+        message = (
+            base_message + " It must contain only letters, digits, and/or underscores."
+        )
+        raise KedroCliError(message)
 
 
 def _check_pipeline_name(ctx, param, value):  # pylint: disable=unused-argument
@@ -97,9 +122,9 @@ def pipeline():
 def create_pipeline(
     metadata: ProjectMetadata, name, skip_config, env, **kwargs
 ):  # pylint: disable=unused-argument
-    """Create a new modular pipeline by providing the new pipeline name as an argument."""
+    """Create a new modular pipeline by providing a name."""
     package_dir = metadata.source_dir / metadata.package_name
-    conf_root = _get_project_settings(metadata.package_name, "CONF_ROOT", "conf")
+    conf_root = settings.CONF_ROOT
     project_conf_path = metadata.project_path / conf_root
 
     env = env or "base"
@@ -133,9 +158,9 @@ def create_pipeline(
 def delete_pipeline(
     metadata: ProjectMetadata, name, env, yes, **kwargs
 ):  # pylint: disable=unused-argument
-    """Delete a modular pipeline by providing the pipeline name as an argument."""
+    """Delete a modular pipeline by providing a name."""
     package_dir = metadata.source_dir / metadata.package_name
-    conf_root = _get_project_settings(metadata.package_name, "CONF_ROOT", "conf")
+    conf_root = settings.CONF_ROOT
     project_conf_path = metadata.project_path / conf_root
 
     env = env or "base"
@@ -201,7 +226,7 @@ def list_pipelines(metadata: ProjectMetadata, env):
 def describe_pipeline(
     metadata: ProjectMetadata, name, env, **kwargs
 ):  # pylint: disable=unused-argument
-    """Describe a pipeline by providing the pipeline name as an argument."""
+    """Describe a pipeline by providing a pipeline name."""
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
     pipeline_obj = context.pipelines.get(name)
@@ -245,8 +270,7 @@ def describe_pipeline(
 def pull_package(
     metadata: ProjectMetadata, package_path, env, alias, fs_args, **kwargs
 ):  # pylint:disable=unused-argument
-    """Pull a modular pipeline package, unpack it and install the files to corresponding
-    locations.
+    """Pull and unpack a modular pipeline in your project.
     """
 
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -266,19 +290,6 @@ def pull_package(
 
         _clean_pycache(temp_dir_path)
         _install_files(metadata, package_name, temp_dir_path, env, alias)
-
-
-def _get_fsspec_filesystem(location: str, fs_args: Optional[str]):
-    # pylint: disable=import-outside-toplevel
-    import anyconfig
-    import fsspec
-
-    from kedro.io.core import get_protocol_and_path
-
-    protocol, _ = get_protocol_and_path(location)
-    fs_args_config = anyconfig.load(fs_args) if fs_args else {}
-
-    return fsspec.filesystem(protocol, **fs_args_config)
 
 
 @pipeline.command("package")
@@ -302,19 +313,16 @@ def _get_fsspec_filesystem(location: str, fs_args: Optional[str]):
     "-v",
     "--version",
     type=str,
-    default="0.1",
-    show_default=True,
-    help="Version to package under.",
+    help="Version to package under. Defaults to project package version.",
 )
 @click.argument("name", nargs=1)
 @click.pass_obj  # this will pass the metadata as first argument
 def package_pipeline(
     metadata: ProjectMetadata, name, env, alias, destination, version
 ):  # pylint: disable=too-many-arguments
-    """Package up a pipeline for easy distribution. A .whl file
-    will be created in a `<source_dir>/dist/`."""
+    """Package up a modular pipeline as a Python .whl."""
     result_path = _package_pipeline(
-        name, metadata, alias=alias, destination=destination, env=env, version=version,
+        name, metadata, alias=alias, destination=destination, env=env, version=version
     )
 
     as_alias = f" as `{alias}`" if alias else ""
@@ -334,15 +342,35 @@ def _echo_deletion_warning(message: str, **paths: List[Path]):
         click.echo(indent(paths_str, " " * 2))
 
 
+def _get_fsspec_filesystem(location: str, fs_args: Optional[str]):
+    # pylint: disable=import-outside-toplevel
+    import anyconfig
+    import fsspec
+
+    from kedro.io.core import get_protocol_and_path
+
+    protocol, _ = get_protocol_and_path(location)
+    fs_args_config = anyconfig.load(fs_args) if fs_args else {}
+
+    try:
+        return fsspec.filesystem(protocol, **fs_args_config)
+    except Exception as exc:  # pylint: disable=broad-except
+        # Specified protocol is not supported by `fsspec`
+        # or requires extra dependencies
+        click.secho(str(exc), fg="red")
+        click.secho("Trying to use 'pip download'...", fg="red")
+        return None
+
+
 def _unpack_wheel(location: str, destination: Path, fs_args: Optional[str]) -> None:
     filesystem = _get_fsspec_filesystem(location, fs_args)
 
-    if location.endswith(".whl") and filesystem.exists(location):
+    if location.endswith(".whl") and filesystem and filesystem.exists(location):
         with filesystem.open(location) as fs_file:
             ZipFile(fs_file).extractall(destination)
     else:
         python_call(
-            "pip", ["download", "--no-deps", "--dest", str(destination), location],
+            "pip", ["download", "--no-deps", "--dest", str(destination), location]
         )
         wheel_file = list(destination.glob("*.whl"))
         # `--no-deps` should fetch only one wheel file, and CLI should fail if that's
@@ -439,7 +467,9 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
 ) -> Path:
     package_dir = metadata.source_dir / metadata.package_name
     env = env or "base"
-    version = version or "0.1"
+    if not version:  # default to project package version
+        project_module = import_module(f"{metadata.package_name}")
+        version = project_module.__version__  # type: ignore
 
     artifacts_to_package = _get_pipeline_artifacts(
         metadata, pipeline_name=pipeline_name, env=env
@@ -459,7 +489,9 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
     _validate_dir(artifacts_to_package.pipeline_dir)
     destination = Path(destination) if destination else package_dir.parent / "dist"
 
-    _generate_wheel_file(pipeline_name, destination, source_paths, version, alias=alias)
+    _generate_wheel_file(  # type: ignore
+        pipeline_name, destination, source_paths, version, alias=alias
+    )
 
     _clean_pycache(package_dir)
     _clean_pycache(metadata.project_path)
@@ -643,9 +675,7 @@ def _get_pipeline_artifacts(
 ) -> PipelineArtifacts:
     """From existing project, returns in order: source_path, tests_path, config_paths"""
     package_dir = project_metadata.source_dir / project_metadata.package_name
-    conf_root = _get_project_settings(
-        project_metadata.package_name, "CONF_ROOT", "conf"
-    )
+    conf_root = settings.CONF_ROOT
     project_conf_path = project_metadata.project_path / conf_root
     artifacts = PipelineArtifacts(
         package_dir / "pipelines" / pipeline_name,

@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -52,16 +52,13 @@ setup(
     install_requires=requires,
     extras_require={
         "docs": [
-            "sphinx>=1.6.3, <2.0",
-            "sphinx_rtd_theme==0.4.1",
-            "docutils",
-            "nbsphinx==0.3.4",
+            "sphinx~=3.4.3",
+            "sphinx_rtd_theme==0.5.1",
+            "nbsphinx==0.8.1",
             "nbstripout==0.3.3",
-            "recommonmark==0.5.0",
-            "sphinx-autodoc-typehints==1.6.0",
-            "sphinx_copybutton==0.2.5",
-            "jupyter_client>=5.1.0, <7.0",
-            "tornado~=6.1",
+            "recommonmark==0.7.1",
+            "sphinx-autodoc-typehints==1.11.1",
+            "sphinx_copybutton==0.3.1",
             "ipykernel~=5.3",
         ]
     },

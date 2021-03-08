@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -63,10 +63,12 @@ def _is_project(project_path: Union[str, Path]) -> bool:
     if not metadata_file.is_file():
         return False
     try:
-        anyconfig.load(metadata_file)
+        metadata_dict = anyconfig.load(metadata_file)
+        if "tool" in metadata_dict and "kedro" in metadata_dict["tool"]:
+            return True
     except Exception:  # pylint: disable=broad-except
         return False
-    return True
+    return False
 
 
 def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:

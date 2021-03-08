@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ from kedro.framework.context import KedroContext
 from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import get_hook_manager
 from kedro.framework.hooks.manager import _register_hooks, _register_hooks_setuptools
-from kedro.framework.project.settings import _get_project_settings
+from kedro.framework.project import settings
 from kedro.framework.session.store import BaseSessionStore
 from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner, SequentialRunner
@@ -52,22 +52,18 @@ from kedro.runner import AbstractRunner, SequentialRunner
 _active_session = None
 
 
-def _register_all_project_hooks(hook_manager: PluginManager, package_name: str) -> None:
+def _register_all_project_hooks(hook_manager: PluginManager) -> None:
     """Register all hooks from the project settings and from installed plugins
     with the global ``hook_manager``.
 
     Args:
         hook_manager: Hook manager instance to register the hooks with.
-        package_name: Python package name to read the settings for.
 
     """
     # get the hooks specified in settings.py
-    hooks = _get_project_settings(package_name, "HOOKS", ())
+    hooks = settings.HOOKS
     # get the plugins that must be disabled
-    disabled_plugins = set(
-        _get_project_settings(package_name, "DISABLE_HOOKS_FOR_PLUGINS", ())
-    )
-
+    disabled_plugins = settings.DISABLE_HOOKS_FOR_PLUGINS
     _register_hooks(hook_manager, hooks)
     _register_hooks_setuptools(hook_manager, disabled_plugins)
 
@@ -158,7 +154,7 @@ class KedroSession:
     def __init__(
         self,
         session_id: str,
-        package_name: str,
+        package_name: str = None,
         project_path: Union[Path, str] = None,
         save_on_close: bool = False,
     ):
@@ -171,7 +167,7 @@ class KedroSession:
     @classmethod
     def create(  # pylint: disable=too-many-arguments
         cls,
-        package_name: str,
+        package_name: str = None,
         project_path: Union[Path, str] = None,
         save_on_close: bool = True,
         env: str = None,
@@ -201,7 +197,9 @@ class KedroSession:
             save_on_close=save_on_close,
         )
 
-        session_data = {
+        # have to explicity type session_data otherwise mypy will complain
+        # possibly related to this: https://github.com/python/mypy/issues/1430
+        session_data: Dict[str, Any] = {
             "package_name": session._package_name,
             "project_path": session._project_path,
             "session_id": session.session_id,
@@ -221,7 +219,7 @@ class KedroSession:
         session._store.update(session_data)
 
         hook_manager = get_hook_manager()
-        _register_all_project_hooks(hook_manager, session._package_name)
+        _register_all_project_hooks(hook_manager)
         # we need a ConfigLoader registered in order to be able to set up logging
         session._setup_logging()
         return session
@@ -245,20 +243,9 @@ class KedroSession:
         logging.config.dictConfig(conf_logging)
 
     def _init_store(self) -> BaseSessionStore:
-        store_class = _get_project_settings(
-            self._package_name, "SESSION_STORE_CLASS", BaseSessionStore
-        )
+        store_class = settings.SESSION_STORE_CLASS
         classpath = f"{store_class.__module__}.{store_class.__qualname__}"
-
-        if not issubclass(store_class, BaseSessionStore):
-            raise ValueError(
-                f"Store type `{classpath}` is invalid: "
-                f"it must extend `BaseSessionStore`."
-            )
-
-        store_args = deepcopy(
-            _get_project_settings(self._package_name, "SESSION_STORE_ARGS", {})
-        )
+        store_args = deepcopy(settings.SESSION_STORE_ARGS)
         store_args.setdefault("path", (self._project_path / "sessions").as_posix())
         store_args["session_id"] = self.session_id
 
@@ -295,10 +282,7 @@ class KedroSession:
         env = self.store.get("env")
         extra_params = self.store.get("extra_params")
 
-        context_class = _get_project_settings(
-            self._package_name, "CONTEXT_CLASS", KedroContext
-        )
-
+        context_class = settings.CONTEXT_CLASS
         context = context_class(
             package_name=self._package_name,
             project_path=self._project_path,
@@ -336,6 +320,7 @@ class KedroSession:
         from_nodes: Iterable[str] = None,
         to_nodes: Iterable[str] = None,
         from_inputs: Iterable[str] = None,
+        to_outputs: Iterable[str] = None,
         load_versions: Dict[str, str] = None,
     ) -> Dict[str, Any]:
         """Runs the pipeline with a specified runner.
@@ -356,6 +341,8 @@ class KedroSession:
                 end point of the new ``Pipeline``.
             from_inputs: An optional list of input datasets which should be
                 used as a starting point of the new ``Pipeline``.
+            to_outputs: An optional list of output datasets which should be
+                used as an end point of the new ``Pipeline``.
             load_versions: An optional flag to specify a particular dataset
                 version timestamp to load.
         Raises:
@@ -382,6 +369,7 @@ class KedroSession:
             to_nodes=to_nodes,
             node_names=node_names,
             from_inputs=from_inputs,
+            to_outputs=to_outputs,
         )
 
         record_data = {
@@ -394,6 +382,7 @@ class KedroSession:
             "to_nodes": to_nodes,
             "node_names": node_names,
             "from_inputs": from_inputs,
+            "to_outputs": to_outputs,
             "load_versions": load_versions,
             "extra_params": extra_params,
             "pipeline_name": pipeline_name,

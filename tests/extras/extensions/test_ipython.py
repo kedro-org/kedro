@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ from kedro.extras.extensions.ipython import (
     load_kedro_objects,
 )
 from kedro.framework.session.session import _deactivate_session
-from kedro.framework.session.store import BaseSessionStore
 from kedro.framework.startup import ProjectMetadata
 
 
@@ -93,10 +92,6 @@ class TestInitKedro:
 
 class TestLoadKedroObjects:
     def test_load_kedro_objects(self, tmp_path, mocker):
-        # pylint: disable=unused-argument
-        def get_settings_mock(package_name, property_name, default):
-            return default
-
         fake_metadata = ProjectMetadata(
             source_dir=tmp_path / "src",  # default
             config_file=tmp_path / "pyproject.toml",
@@ -118,10 +113,6 @@ class TestLoadKedroObjects:
             "kedro.extras.extensions.ipython.register_line_magic"
         )
         mock_context = mocker.patch("kedro.framework.session.KedroSession.load_context")
-        mock_get_settings = mocker.patch(
-            "kedro.framework.session.session._get_project_settings",
-            side_effect=get_settings_mock,
-        )
         mock_ipython = mocker.patch("kedro.extras.extensions.ipython.get_ipython")
 
         load_kedro_objects(tmp_path)
@@ -134,16 +125,6 @@ class TestLoadKedroObjects:
             }
         )
         assert mock_register_line_magic.call_count == 1
-
-        expected_calls = [
-            mocker.call(
-                fake_metadata.package_name, "SESSION_STORE_CLASS", BaseSessionStore
-            ),
-            mocker.call(fake_metadata.package_name, "SESSION_STORE_ARGS", {}),
-            mocker.call(fake_metadata.package_name, "HOOKS", ()),
-            mocker.call(fake_metadata.package_name, "DISABLE_HOOKS_FOR_PLUGINS", ()),
-        ]
-        assert mock_get_settings.mock_calls == expected_calls
 
     def test_load_kedro_objects_not_in_kedro_project(self, tmp_path, mocker):
         mocker.patch(
@@ -159,20 +140,23 @@ class TestLoadKedroObjects:
 
 class TestLoadIPythonExtension:
     @pytest.mark.parametrize(
-        "error,expected_log_message",
+        "error,expected_log_message,level",
         [
             (
                 ImportError,
                 "Kedro appears not to be installed in your current environment.",
+                "ERROR",
             ),
             (
                 RuntimeError,
-                "Could not register Kedro extension. Make sure you're in a valid Kedro project.",
+                "Kedro extension was registered. Make sure you pass the project path to "
+                "`%reload_kedro` or set it using `%init_kedro`.",
+                "WARNING",
             ),
         ],
     )
     def test_load_extension_not_in_kedro_env_or_project(
-        self, error, expected_log_message, mocker, caplog
+        self, error, expected_log_message, level, mocker, caplog
     ):
         mocker.patch(
             "kedro.framework.startup._get_project_metadata", side_effect=error,
@@ -187,6 +171,6 @@ class TestLoadIPythonExtension:
         log_messages = [
             record.getMessage()
             for record in caplog.records
-            if record.levelname == "ERROR"
+            if record.levelname == level
         ]
         assert log_messages == [expected_log_message]

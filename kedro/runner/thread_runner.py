@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -147,6 +147,10 @@ class ThreadRunner(AbstractRunner):
                         self._suggest_resume_scenario(pipeline, done_nodes)
                         raise
                     done_nodes.add(node)
+                    self._logger.info("Completed node: %s", node.name)
+                    self._logger.info(
+                        "Completed %d out of %d tasks", len(done_nodes), len(nodes)
+                    )
 
                     # decrement load counts and release any data sets we've finished
                     # with this is particularly important for the shared datasets we

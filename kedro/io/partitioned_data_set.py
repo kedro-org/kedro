@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -150,7 +150,7 @@ class PartitionedDataSet(AbstractDataSet):
                 and the dataset initializer. If the dataset config contains
                 explicit credentials spec, then such spec will take precedence.
                 All possible credentials management scenarios are documented here:
-                https://kedro.readthedocs.io/en/stable/04_user_guide/08_advanced_io.html#partitioned-dataset-credentials
+                https://kedro.readthedocs.io/en/stable/05_data/02_kedro_io.html#partitioned-dataset-credentials
             load_args: Keyword arguments to be passed into ``find()`` method of
                 the filesystem implementation.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
@@ -371,7 +371,7 @@ class IncrementalDataSet(PartitionedDataSet):
                 with the corresponding dataset definition including ``filepath``
                 (unlike ``dataset`` argument). Checkpoint configuration is
                 described here:
-                https://kedro.readthedocs.io/en/stable/04_user_guide/08_advanced_io.html#checkpoint-configuration
+                https://kedro.readthedocs.io/en/stable/05_data/02_kedro_io.html#checkpoint-configuration
                 Credentials for the checkpoint can be explicitly specified
                 in this configuration.
             filepath_arg: Underlying dataset initializer argument that will
@@ -386,7 +386,7 @@ class IncrementalDataSet(PartitionedDataSet):
                 the dataset or the checkpoint configuration contains explicit
                 credentials spec, then such spec will take precedence.
                 All possible credentials management scenarios are documented here:
-                https://kedro.readthedocs.io/en/stable/04_user_guide/08_advanced_io.html#partitioned-dataset-credentials
+                https://kedro.readthedocs.io/en/stable/05_data/02_kedro_io.html#partitioned-dataset-credentials
             load_args: Keyword arguments to be passed into ``find()`` method of
                 the filesystem implementation.
             fs_args: Extra arguments to pass into underlying filesystem class constructor

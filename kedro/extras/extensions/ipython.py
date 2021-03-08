@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -66,6 +66,7 @@ def load_kedro_objects(path, line=None):  # pylint: disable=unused-argument
     import kedro.config.default_logger  # noqa: F401 # pylint: disable=unused-import
     from kedro.framework.cli import load_entry_points
     from kedro.framework.cli.utils import _add_src_to_path
+    from kedro.framework.project import configure_project
     from kedro.framework.session import KedroSession
     from kedro.framework.session.session import _activate_session
     from kedro.framework.startup import _get_project_metadata
@@ -77,6 +78,7 @@ def load_kedro_objects(path, line=None):  # pylint: disable=unused-argument
     path = path or project_path
     metadata = _get_project_metadata(path)
     _add_src_to_path(metadata.source_dir, path)
+    configure_project(metadata.package_name)
 
     _clear_hook_manager()
 
@@ -122,7 +124,7 @@ def load_ipython_extension(ipython):
     except (ImportError, ModuleNotFoundError):
         logging.error("Kedro appears not to be installed in your current environment.")
     except Exception:  # pylint: disable=broad-except
-        logging.error(
-            "Could not register Kedro extension. Make sure you're in a valid Kedro project.",
-            exc_info=True,
+        logging.warning(
+            "Kedro extension was registered. Make sure you pass the project path to "
+            "`%reload_kedro` or set it using `%init_kedro`."
         )

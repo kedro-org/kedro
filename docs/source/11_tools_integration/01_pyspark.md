@@ -1,6 +1,6 @@
 # Build a Kedro pipeline with PySpark
 
-> *Note:* This documentation is based on `Kedro 0.16.6`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 This page outlines some best practices when building a Kedro pipeline with [`PySpark`](https://spark.apache.org/docs/latest/api/python/index.html). It assumes a basic understanding of both Kedro and `PySpark`.
 
@@ -23,20 +23,23 @@ Below is an example implementation to initialise the `SparkSession` in `<project
 
 ```python
 from typing import Any, Dict, Union
+from pathlib import Path
 
 from pyspark import SparkConf
 from pyspark.sql import SparkSession
 
+from kedro.framework.context import KedroContext
+
 
 class CustomContext(KedroContext):
-
     def __init__(
         self,
+        package_name: str,
         project_path: Union[Path, str],
         env: str = None,
         extra_params: Dict[str, Any] = None,
     ):
-        super().__init__(project_path, env, extra_params)
+        super().__init__(package_name, project_path, env, extra_params)
         self.init_spark_session()
 
     def init_spark_session(self) -> None:
@@ -48,8 +51,7 @@ class CustomContext(KedroContext):
 
         # Initialise the spark session
         spark_session_conf = (
-            SparkSession.builder
-            .appName(self.project_name)
+            SparkSession.builder.appName(self.package_name)
             .enableHiveSupport()
             .config(conf=spark_conf)
         )
@@ -73,7 +75,7 @@ CONTEXT_CLASS = CustomContext
 
 ## Use Kedro's built-in Spark datasets to load and save raw data
 
-We recommend using Kedro's built-in Spark datasets to load raw data into Spark's [DataFrame](https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrame), as well as to write them back to storage. Some of our built-in Spark datasets include:
+We recommend using Kedro's built-in Spark datasets to load raw data into Spark's [DataFrame](https://spark.apache.org/docs/latest/api/python/reference/api/pyspark.sql.DataFrame.html), as well as to write them back to storage. Some of our built-in Spark datasets include:
 
 * [spark.SparkDataSet](/kedro.extras.datasets.spark.SparkDataSet)
 * [spark.SparkJDBCDataSet](/kedro.extras.datasets.spark.SparkJDBCDataSet)
@@ -130,15 +132,13 @@ from pyspark.sql import DataFrame
 
 
 def train_model(training_data: DataFrame) -> RandomForestClassifier:
-    """Node for training a random forest model to classify the data.
-    """
+    """Node for training a random forest model to classify the data."""
     classifier = RandomForestClassifier(numTrees=10)
     return classifier.fit(training_data)
 
 
 def predict(model: RandomForestClassifier, testing_data: DataFrame) -> DataFrame:
-    """Node for making predictions given a pre-trained model and a testing dataset.
-    """
+    """Node for making predictions given a pre-trained model and a testing dataset."""
     predictions = model.transform(testing_data)
     return predictions
 
@@ -155,7 +155,7 @@ def create_pipeline(**kwargs):
                 predict,
                 inputs=dict(model="example_classifier", testing_data="testing_data"),
                 outputs="example_predictions",
-            )
+            ),
         ]
     )
 ```

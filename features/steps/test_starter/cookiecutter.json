@@ -1,6 +1,7 @@
 {
-    "project_name": "default",
-    "repo_name": "{{ cookiecutter.project_name }}",
-    "python_package": "{{ cookiecutter.repo_name }}",
-    "kedro_version": "{{ cookiecutter.kedro_version }}"
+    "project_name": "New Kedro Project",
+    "repo_name": "{{ cookiecutter.project_name.replace(' ', '-').lower().strip('-') }}",
+    "python_package": "{{ cookiecutter.project_name.replace(' ', '_').lower().strip('-') }}",
+    "kedro_version": "{{ cookiecutter.kedro_version }}",
+    "custom": "custom"
 }

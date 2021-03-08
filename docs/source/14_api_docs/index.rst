@@ -11,9 +11,13 @@
 Welcome to Kedro's documentation!
 =============================================
 
-.. image:: https://circleci.com/gh/quantumblacklabs/kedro/tree/master.svg?style=shield
+.. image:: https://img.shields.io/circleci/build/github/quantumblacklabs/kedro/master?label=master
     :target: https://circleci.com/gh/quantumblacklabs/kedro/tree/master
-    :alt: CircleCI build status
+    :alt: CircleCI - Master Branch
+
+.. image:: https://img.shields.io/circleci/build/github/quantumblacklabs/kedro/develop?label=develop
+    :target: https://circleci.com/gh/quantumblacklabs/kedro/tree/develop
+    :alt: CircleCI - Develop Branch
 
 .. image:: https://img.shields.io/badge/license-Apache%202.0-blue.svg
     :target: https://opensource.org/licenses/Apache-2.0
@@ -27,13 +31,25 @@ Welcome to Kedro's documentation!
     :target: https://pypi.org/project/kedro/
     :alt: PyPI package version
 
-.. image:: https://readthedocs.org/projects/kedro/badge/?version=latest
+.. image:: https://img.shields.io/conda/vn/conda-forge/kedro.svg
+    :target: https://anaconda.org/conda-forge/kedro
+    :alt: Conda package version
+
+.. image:: https://readthedocs.org/projects/kedro/badge/?version=stable
     :target: https://kedro.readthedocs.io/
     :alt: Docs build status
 
+.. image:: https://img.shields.io/discourse/users?server=https%3A%2F%2Fdiscourse.kedro.community%2F
+    :target: https://discourse.kedro.community/
+    :alt: Discourse users
+
 .. image:: https://img.shields.io/badge/code%20style-black-black.svg
-    :target: https://github.com/ambv/black
+    :target: https://github.com/psf/black
     :alt: Code style is Black
+
+.. image:: https://zenodo.org/badge/182067506.svg
+   :target: https://zenodo.org/badge/latestdoi/182067506
+    :alt: Citation Reference
 
 .. toctree::
    :maxdepth: 2
@@ -88,7 +104,7 @@ Welcome to Kedro's documentation!
    06_nodes_and_pipelines/02_pipeline_introduction
    06_nodes_and_pipelines/03_modular_pipelines
    06_nodes_and_pipelines/04_run_a_pipeline
-   06_nodes_and_pipelines/05_partial_pipelines
+   06_nodes_and_pipelines/05_slice_a_pipeline
 
 .. toctree::
    :maxdepth: 2
@@ -108,7 +124,6 @@ Welcome to Kedro's documentation!
    :caption: Logging
 
    08_logging/01_logging
-   08_logging/02_journal
 
 .. toctree::
    :maxdepth: 2
@@ -133,6 +148,8 @@ Welcome to Kedro's documentation!
    10_deployment/07_aws_batch
    10_deployment/08_databricks
    10_deployment/09_aws_sagemaker
+   10_deployment/10_aws_step_functions
+   10_deployment/11_airflow_astronomer
 
 .. toctree::
    :maxdepth: 2
@@ -153,6 +170,7 @@ Welcome to Kedro's documentation!
    :caption: Resources
 
    13_resources/01_logos
+   13_resources/02_glossary
 
 
 API Docs

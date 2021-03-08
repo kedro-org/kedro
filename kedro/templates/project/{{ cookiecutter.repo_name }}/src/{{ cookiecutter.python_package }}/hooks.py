@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -49,7 +49,9 @@ class ProjectHooks:
         return {"__default__": Pipeline([])}
 
     @hook_impl
-    def register_config_loader(self, conf_paths: Iterable[str]) -> ConfigLoader:
+    def register_config_loader(
+        self, conf_paths: Iterable[str], env: str, extra_params: Dict[str, Any],
+    ) -> ConfigLoader:
         return ConfigLoader(conf_paths)
 
     @hook_impl

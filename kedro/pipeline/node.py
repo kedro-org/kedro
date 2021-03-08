@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -707,7 +707,7 @@ def _dict_inputs_to_list(func: Callable[[Any], Any], inputs: Dict[str, str]):
     return [*sig.args, *sig.kwargs.values()]
 
 
-def _to_list(element: Union[None, str, Iterable[str], Dict[str, str]]) -> List:
+def _to_list(element: Union[None, str, Iterable[str], Dict[str, str]]) -> List[str]:
     """Make a list out of node inputs/outputs.
 
     Returns:

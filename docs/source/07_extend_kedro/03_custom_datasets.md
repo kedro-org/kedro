@@ -10,7 +10,7 @@ In this example, we use a [Kaggle dataset of Pokémon images and types](https://
 
 We assume that you have already [installed Kedro](../02_get_started/02_install.md). Now [create a project](../02_get_started/04_new_project.md) (feel free to name your project as you like, but here we will assume the project's repository name is `kedro-pokemon`).
 
-Log into your Kaggle account to [download the Pokémon dataset](https://www.kaggle.com/vishalsubbiah/pokemon-images-and-types/download) and unzip it into `data/01_raw`, within a subfolder named `pokemon-images-and-types`. The data comprises a single `pokemon.csv` file plus a subfolder of images.
+Log into your Kaggle account to [download the Pokémon dataset](https://www.kaggle.com/vishalsubbiah/pokemon-images-and-types) and unzip it into `data/01_raw`, within a subfolder named `pokemon-images-and-types`. The data comprises a single `pokemon.csv` file plus a subfolder of images.
 
 The dataset will use [Pillow](https://pillow.readthedocs.io/en/stable/) for generic image processing functionality, to ensure that it can work with a range of different image formats, not just PNG.
 
@@ -135,7 +135,7 @@ class ImageDataSet(AbstractVersionedDataSet):
         # using get_filepath_str ensures that the protocol and path are appended correctly for different filesystems
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         with self._fs.open(load_path) as f:
-            image = Image.open(f).convert('RGBA')
+            image = Image.open(f).convert("RGBA")
             return np.asarray(image)
 ```
 </details>
@@ -175,11 +175,10 @@ from kedro.io.core import AbstractVersionedDataSet, get_filepath_str
 
 class ImageDataSet(AbstractVersionedDataSet):
     def _save(self, data: np.ndarray) -> None:
-        """Saves image data to the specified filepath.
-        """
+        """Saves image data to the specified filepath."""
         # using get_filepath_str ensures that the protocol and path are appended correctly for different filesystems
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
-        with self._fs.open(save_path, 'wb') as f:
+        with self._fs.open(save_path, "wb") as f:
             image = Image.fromarray(data)
             image.save(f)
 ```
@@ -203,12 +202,8 @@ from kedro.io import AbstractVersionedDataSet
 
 class ImageDataSet(AbstractVersionedDataSet):
     def _describe(self) -> Dict[str, Any]:
-        """Returns a dict that describes the attributes of the dataset.
-        """
-        return dict(
-            filepath=self._filepath,
-            protocol=self._protocol
-        )
+        """Returns a dict that describes the attributes of the dataset."""
+        return dict(filepath=self._filepath, protocol=self._protocol)
 ```
 
 ## The complete example
@@ -263,12 +258,11 @@ class ImageDataSet(AbstractVersionedDataSet):
         # using get_filepath_str ensures that the protocol and path are appended correctly for different filesystems
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         with self._fs.open(load_path, mode="r") as f:
-            image = Image.open(f).convert('RGBA')
+            image = Image.open(f).convert("RGBA")
             return np.asarray(image)
 
     def _save(self, data: np.ndarray) -> None:
-        """Saves image data to the specified filepath.
-        """
+        """Saves image data to the specified filepath."""
         # using get_filepath_str ensures that the protocol and path are appended correctly for different filesystems
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
         with self._fs.open(save_path, mode="wb") as f:
@@ -276,12 +270,8 @@ class ImageDataSet(AbstractVersionedDataSet):
             image.save(f)
 
     def _describe(self) -> Dict[str, Any]:
-        """Returns a dict that describes the attributes of the dataset.
-        """
-        return dict(
-            filepath=self._filepath,
-            protocol=self._protocol
-        )
+        """Returns a dict that describes the attributes of the dataset."""
+        return dict(filepath=self._filepath, protocol=self._protocol)
 ```
 </details>
 
@@ -381,24 +371,20 @@ class ImageDataSet(AbstractVersionedDataSet):
         """
         load_path = self._get_load_path()
         with self._fs.open(load_path, mode="r") as f:
-            image = Image.open(f).convert('RGBA')
+            image = Image.open(f).convert("RGBA")
             return np.asarray(image)
 
     def _save(self, data: np.ndarray) -> None:
-        """Saves image data to the specified filepath.
-        """
+        """Saves image data to the specified filepath."""
         save_path = self._get_save_path()
         with self._fs.open(save_path, mode="wb") as f:
             image = Image.fromarray(data)
             image.save(f)
 
     def _describe(self) -> Dict[str, Any]:
-        """Returns a dict that describes the attributes of the dataset.
-        """
+        """Returns a dict that describes the attributes of the dataset."""
         return dict(
-            filepath=self._filepath,
-            version=self._version,
-            protocol=self._protocol
+            filepath=self._filepath, version=self._version, protocol=self._protocol
         )
 ```
 </details>
@@ -456,7 +442,7 @@ Every Kedro dataset should work with the [SequentialRunner](/kedro.runner.Sequen
 To verify whether your dataset is serialisable by `multiprocessing`, use the console or an iPython session to try dumping it using `multiprocessing.reduction.ForkingPickler`:
 
 ```python
-dataset = context.catalog._data_sets['pokemon']
+dataset = context.catalog._data_sets["pokemon"]
 from multiprocessing.reduction import ForkingPickler
 
 # the following call shouldn't throw any errors
@@ -494,17 +480,18 @@ class ImageDataSet(AbstractVersionedDataSet):
     ):
         """Creates a new instance of ImageDataSet to load / save image data for given filepath.
 
-            Args:
-                filepath: The location of the image file to load / save data.
-                version: The version of the dataset being saved and loaded.
-                credentials: Credentials required to get access to the underlying filesystem.
-                    E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
-                fs_args: Extra arguments to pass into underlying filesystem class.
-                    E.g. for ``GCSFileSystem`` class: `{"project": "my-project", ...}`.
+        Args:
+            filepath: The location of the image file to load / save data.
+            version: The version of the dataset being saved and loaded.
+            credentials: Credentials required to get access to the underlying filesystem.
+                E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
+            fs_args: Extra arguments to pass into underlying filesystem class.
+                E.g. for ``GCSFileSystem`` class: `{"project": "my-project", ...}`.
         """
         protocol, path = get_protocol_and_path(filepath)
         self._protocol = protocol
         self._fs = fsspec.filesystem(self._protocol, **credentials, **fs_args)
+
     ...
 ```
 
@@ -513,9 +500,7 @@ We provide additional examples of [how to use parameters through the data catalo
 
 ## How to contribute a custom dataset implementation
 
-```eval_rst
-One of the easiest ways to contribute back to Kedro is to share a custom dataset. Kedro has a :code:`kedro.extras.datasets` sub-package where you can add a new custom dataset implementation to share it with others. You can find out more in the `Kedro contribution guide <https://github.com/quantumblacklabs/kedro/blob/master/CONTRIBUTING.md>`_ on Github.
-```
+One of the easiest ways to contribute back to Kedro is to share a custom dataset. Kedro has a :code:`kedro.extras.datasets` sub-package where you can add a new custom dataset implementation to share it with others. You can find out more in the [Kedro contribution guide](https://github.com/quantumblacklabs/kedro/blob/master/CONTRIBUTING.md) on Github.
 
 To contribute your custom dataset:
 

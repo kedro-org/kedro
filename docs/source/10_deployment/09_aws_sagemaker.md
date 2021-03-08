@@ -1,7 +1,7 @@
 # How to integrate Amazon SageMaker into your Kedro pipeline
 
 
-> *Note:* This documentation is based on `Kedro 0.16.6`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 This tutorial explains how to integrate a Kedro project with [Amazon SageMaker](https://aws.amazon.com/sagemaker/) in order to train a machine learning model. It shows how to build machine learning pipelines in Kedro and while taking advantage of the power of SageMaker for potentially compute-intensive machine learning tasks.
 
@@ -18,7 +18,7 @@ Amazon SageMaker is a fully-managed service and its features are covered by the 
 To use Amazon SageMaker, make sure you have the following prerequisites in place:
 - An [AWS account set up](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/)
 - [Configured AWS credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) on your local machine
-- Generated Kedro project called **Kedro Tutorial** using [Kedro Spaceflights starter](https://github.com/quantumblacklabs/kedro-starter-spaceflights/)
+- Generated Kedro project called **Kedro Tutorial** using [Kedro Spaceflights starter](https://github.com/quantumblacklabs/kedro-starters/tree/master/spaceflights/)
 - Completed the [spaceflights tutorial](../03_tutorial/01_spaceflights_tutorial.md)
 
 ## Prepare the environment
@@ -110,13 +110,14 @@ s3:
 
 ### Update the project hooks
 
-Now you need to tell Kedro to use the [`TemplatedConfigLoader`](https://kedro.readthedocs.io/en/stable/kedro.config.TemplatedConfigLoader.html) instead of the default `ConfigLoader` class to read the project configuration. It is very easy to do via [Kedro hooks](https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_hooks.html) - open `src/kedro_tutorial/hooks.py` file, locate the definition of `ProjectHooks` and add the following method to it:
+Now you need to tell Kedro to use the [`TemplatedConfigLoader`](https://kedro.readthedocs.io/en/stable/kedro.config.TemplatedConfigLoader.html) instead of the default `ConfigLoader` class to read the project configuration. It is very easy to do via [Kedro hooks](https://kedro.readthedocs.io/en/stable/07_extend_kedro/02_hooks.html) - open `src/kedro_tutorial/hooks.py` file, locate the definition of `ProjectHooks` and add the following method to it:
 
 ```python
 from typing import Iterable
 
 from kedro.config import TemplatedConfigLoader
 from kedro.framework.hooks import hook_impl
+
 
 class ProjectHooks:
     # <other hooks>
@@ -128,9 +129,9 @@ class ProjectHooks:
         return TemplatedConfigLoader(conf_paths, globals_pattern="*globals.yml")
 ```
 
-### Update the Data Science pipeline
+### Update the data science pipeline
 
-Now modify the Data Science pipeline in the project to send the training job to Amazon SageMaker and to process the resulting model artifact afterwards.
+Now modify the data science pipeline in the project to send the training job to Amazon SageMaker and to process the resulting model artifact afterwards.
 
 #### Create node functions
 
@@ -150,18 +151,19 @@ from sklearn.linear_model import LinearRegression
 
 # <other node functions>
 
+
 def train_model_sagemaker(
     X_train_path: str, sklearn_estimator_kwargs: Dict[str, Any]
 ) -> str:
     """Train the linear regression model on SageMaker.
 
-        Args:
-            X_train_path: Full S3 path to `X_train` dataset.
-            sklearn_estimator_kwargs: Keyword arguments that will be used
-                to instantiate SKLearn estimator.
+    Args:
+        X_train_path: Full S3 path to `X_train` dataset.
+        sklearn_estimator_kwargs: Keyword arguments that will be used
+            to instantiate SKLearn estimator.
 
-        Returns:
-            Full S3 path to `model.tar.gz` file containing the model artifact.
+    Returns:
+        Full S3 path to `model.tar.gz` file containing the model artifact.
 
     """
     sklearn_estimator = SKLearn(**sklearn_estimator_kwargs)
@@ -242,7 +244,6 @@ def create_pipeline(**kwargs):
             ),
         ]
     )
-
 ```
 </details>
 
@@ -314,7 +315,6 @@ def main():
 if __name__ == "__main__":
     # SageMaker will run this script as the main program
     main()
-
 ```
 </details>
 

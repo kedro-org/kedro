@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,7 +44,9 @@ from kedro.framework.context import KedroContext
 
 @pytest.fixture
 def project_context():
-    return KedroContext(package_name="{{ cookiecutter.python_package }}", project_path=Path.cwd())
+    return KedroContext(
+        package_name="{{ cookiecutter.python_package }}", project_path=Path.cwd()
+    )
 
 
 # The tests below are here for the demonstration purpose

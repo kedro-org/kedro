@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -103,10 +103,12 @@ ParallelRunnerManager.register(  # pylint: disable=no-member
 
 def _bootstrap_subprocess(package_name: str, conf_logging: Dict[str, Any]):
     # pylint: disable=import-outside-toplevel,protected-access,cyclic-import
+    from kedro.framework.project import configure_project
     from kedro.framework.session.session import _register_all_project_hooks
 
     hook_manager = get_hook_manager()
-    _register_all_project_hooks(hook_manager, package_name)
+    configure_project(package_name)
+    _register_all_project_hooks(hook_manager)
     logging.config.dictConfig(conf_logging)
 
 
@@ -229,6 +231,9 @@ class ParallelRunner(AbstractRunner):
 
         unserializable = []
         for name, data_set in data_sets.items():
+            if getattr(data_set, "_SINGLE_PROCESS", False):  # SKIP_IF_NO_SPARK
+                unserializable.append(name)
+                continue
             try:
                 ForkingPickler.dumps(data_set)
             except (AttributeError, PicklingError):
@@ -236,10 +241,10 @@ class ParallelRunner(AbstractRunner):
 
         if unserializable:
             raise AttributeError(
-                "The following data_sets cannot be serialized: {}\nIn order "
-                "to utilize multiprocessing you need to make sure all data "
-                "sets are serializable, i.e. data sets should not make use of "
-                "lambda functions, nested functions, closures etc.\nIf you "
+                "The following data sets cannot be used with multiprocessing: "
+                "{}\nIn order to utilize multiprocessing you need to make sure "
+                "all data sets are serializable, i.e. data sets should not make "
+                "use of lambda functions, nested functions, closures etc.\nIf you "
                 "are using custom decorators ensure they are correctly using "
                 "functools.wraps().".format(sorted(unserializable))
             )

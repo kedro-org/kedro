@@ -1,6 +1,6 @@
 # Lifecycle management with `KedroSession`
 
-> *Note:* This documentation is based on `Kedro 0.17.0`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 ### Overview
 A `KedroSession` allows you to:
@@ -45,6 +45,7 @@ When you want to access to the most recent session object, use a helper function
 
 ```python
 from kedro.framework.session import get_current_session
+
 session = get_current_session()
 context = session.load_context()
 context.catalog.load("my_data").head()

@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ pipeline will run using environment `local`."""
 FROM_INPUTS_HELP = (
     """A list of dataset names which should be used as a starting point."""
 )
+TO_OUTPUTS_HELP = """A list of dataset names which should be used as an end point."""
 FROM_NODES_HELP = """A list of node names which should be used as a starting point."""
 TO_NODES_HELP = """A list of node names which should be used as an end point."""
 NODE_ARG_HELP = """Run only nodes with specified names."""
@@ -103,7 +104,7 @@ def _get_values_as_tuple(values: Iterable[str]) -> Tuple[str, ...]:
 def _reformat_load_versions(  # pylint: disable=unused-argument
     ctx, param, value
 ) -> Dict[str, str]:
-    """Reformat data structure from tuple to dictionary for `load-version`, e.g:
+    """Reformat data structure from tuple to dictionary for `load-version`, e.g.:
     ('dataset1:time1', 'dataset2:time2') -> {"dataset1": "time1", "dataset2": "time2"}.
     """
     load_versions_dict = {}
@@ -162,6 +163,9 @@ def cli():
     "--from-inputs", type=str, default="", help=FROM_INPUTS_HELP, callback=split_string
 )
 @click.option(
+    "--to-outputs", type=str, default="", help=TO_OUTPUTS_HELP, callback=split_string
+)
+@click.option(
     "--from-nodes", type=str, default="", help=FROM_NODES_HELP, callback=split_string
 )
 @click.option(
@@ -204,6 +208,7 @@ def run(
     to_nodes,
     from_nodes,
     from_inputs,
+    to_outputs,
     load_version,
     pipeline,
     config,
@@ -232,6 +237,7 @@ def run(
             from_nodes=from_nodes,
             to_nodes=to_nodes,
             from_inputs=from_inputs,
+            to_outputs=to_outputs,
             load_versions=load_version,
             pipeline_name=pipeline,
         )

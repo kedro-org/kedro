@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -183,6 +183,7 @@ class PipelineSpecs:
                      "to_nodes": Optional[List[str]],
                      "node_names": Optional[List[str]],
                      "from_inputs": Optional[List[str]],
+                     "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
                      "pipeline_name": str,
                      "extra_params": Optional[Dict[str, Any]]
@@ -217,6 +218,7 @@ class PipelineSpecs:
                      "to_nodes": Optional[List[str]],
                      "node_names": Optional[List[str]],
                      "from_inputs": Optional[List[str]],
+                     "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
                      "pipeline_name": str,
                      "extra_params": Optional[Dict[str, Any]]
@@ -255,6 +257,7 @@ class PipelineSpecs:
                      "to_nodes": Optional[List[str]],
                      "node_names": Optional[List[str]],
                      "from_inputs": Optional[List[str]],
+                     "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
                      "pipeline_name": str,
                      "extra_params": Optional[Dict[str, Any]]
@@ -327,8 +330,15 @@ class RegistrationSpecs:
         pass
 
     @hook_spec(firstresult=True)
-    def register_config_loader(self, conf_paths: Iterable[str]) -> ConfigLoader:
+    def register_config_loader(
+        self, conf_paths: Iterable[str], env: str, extra_params: Dict[str, Any]
+    ) -> ConfigLoader:
         """Hook to be invoked to register a project's config loader.
+
+        Args:
+            conf_paths: the paths to the conf directory to be supplied to the config loader
+            env: the environment with which the config loader will be instantiated
+            extra_params: the extra parameters passed to a Kedro run
 
         Returns:
             An instance of a ``ConfigLoader``.

@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ from click import secho
 
 from kedro.framework.cli.pipeline import _create_session
 from kedro.framework.cli.utils import KedroCliError, env_option, split_string
+from kedro.framework.project import settings
 from kedro.framework.startup import ProjectMetadata
 
 
@@ -154,7 +155,7 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name, env):
     if missing_ds:
         catalog_path = (
             context.project_path
-            / context.CONF_ROOT
+            / settings.CONF_ROOT
             / env
             / "catalog"
             / f"{pipeline_name}.yml"

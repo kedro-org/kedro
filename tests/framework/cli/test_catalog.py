@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -226,7 +226,6 @@ class TestCatalogCreateCommand:
         }
 
         mocked_context.project_path = fake_repo_path
-        mocked_context.CONF_ROOT = "conf"
 
         data_catalog_file = (
             fake_repo_path / "conf" / "base" / "catalog" / f"{self.PIPELINE_NAME}.yml"

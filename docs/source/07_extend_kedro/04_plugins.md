@@ -1,7 +1,7 @@
 # Kedro plugins
 
 
-> *Note:* This documentation is based on `Kedro 0.16.6`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 Kedro plugins allow you to create new features for Kedro and inject additional commands into the CLI. Plugins are developed as separate Python packages that exist outside of any Kedro project.
 
@@ -38,9 +38,11 @@ def to_json(metadata):
 The plugin provides the following `entry_points` config in `setup.py`:
 
 ```python
-entry_points={
-    "kedro.project_commands": ["kedrojson = kedrojson.plugin:commands"],
-}
+setup(
+    entry_points={
+        "kedro.project_commands": ["kedrojson = kedrojson.plugin:commands"],
+    }
+)
 ```
 
 Once the plugin is installed, you can run it as follows:
@@ -93,7 +95,6 @@ You can develop hook implementations and have them automatically registered to t
 
 ```python
 setup(
-    ...
     entry_points={"kedro.hooks": ["plugin_name = plugin_name.plugin:hooks"]},
 )
 ```
@@ -129,9 +130,6 @@ When you are ready to submit your code:
 3. Include a `README.md` describing your plugin's functionality and all dependencies that should be included
 4. Use GitHub tagging to tag your plugin as a `kedro-plugin` so that we can find it
 
-> *Note:* In future, we will feature a list of "Plugins by Contributors". Your plugin needs to have an [Apache 2.0 compatible license](https://www.apache.org/legal/resolved.html#category-a) to be considered for this list.
-
-
 ## Supported Kedro plugins
 
 - [Kedro-Docker](https://github.com/quantumblacklabs/kedro-docker), a tool for packaging and shipping Kedro projects within containers
@@ -141,6 +139,7 @@ When you are ready to submit your code:
 ## Community-developed plugins
 
 > *Note:* See the full list of plugins using the GitHub tag [kedro-plugin](https://github.com/topics/kedro-plugin).
+> *Note:* Your plugin needs to have an [Apache 2.0 compatible license](https://www.apache.org/legal/resolved.html#category-a) to be considered for this list.
 
 - [Kedro-Pandas-Profiling](https://github.com/BrickFrog/kedro-pandas-profiling), by [Justin Malloy](https://github.com/BrickFrog), uses [Pandas Profiling](https://github.com/pandas-profiling/pandas-profiling) to profile datasets in the Kedro catalog
 - [find-kedro](https://github.com/WaylonWalker/find-kedro), by [Waylon Walker](https://github.com/WaylonWalker), automatically constructs pipelines using `pytest`-style pattern matching
@@ -149,3 +148,6 @@ When you are ready to submit your code:
 - [kedro-wings](https://github.com/tamsanh/kedro-wings), by [Tam-Sanh Nguyen](https://github.com/tamsanh), simplifies and speeds up pipeline creation by auto-generating catalog datasets
 - [kedro-great](https://github.com/tamsanh/kedro-great), by [Tam-Sanh Nguyen](https://github.com/tamsanh), integrates Kedro with [Great Expectations](https://greatexpectations.io), enabling catalog-based expectation generation and data validation on pipeline run
 - [Kedro-Accelerator](https://github.com/deepyaman/kedro-accelerator), by [Deepyaman Datta](https://github.com/deepyaman), speeds up pipelines by parallelizing I/O in the background
+- [kedro-dataframe-dropin](https://github.com/mzjp2/kedro-dataframe-dropin), by [Zain Patel](https://github.com/mzjp2), lets you swap out pandas datasets for modin or RAPIDs equivalents for specialised use to speed up your workflows (e.g on GPUs)
+- [kedro-kubeflow](https://github.com/getindata/kedro-kubeflow), by [Mateusz Pytel](https://github.com/em-pe) and [Mariusz Strzelecki](https://github.com/szczeles), lets you run and schedule pipelines on Kubernetes clusters using [Kubeflow Pipelines](https://www.kubeflow.org/docs/pipelines/overview/pipelines-overview/)
+- [kedro-mlflow](https://github.com/Galileo-Galilei/kedro-mlflow), by [Yolan Honoré-Rougé](https://github.com/galileo-galilei), [Kajetan Maurycy Olszewski](https://github.com/kaemo), and [Takieddine Kadiri](https://github.com/takikadiri) facilitates [Mlflow](https://www.mlflow.org/) integration inside Kedro projects while enforcing [Kedro's principles](https://kedro.readthedocs.io/en/stable/12_faq/01_faq.html#what-are-the-primary-advantages-of-kedro). Its main features are modular configuration, automatic parameters tracking, datasets versioning, Kedro pipelines packaging and serving and automatic synchronization between training and inference pipelines for high reproducibility of machine learning experiments and ease of deployment. A tutorial is provided in the [kedro-mlflow-tutorial repo](https://github.com/Galileo-Galilei/kedro-mlflow-tutorial).

@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -49,6 +49,13 @@ class TestIsProject:
         toml_path.write_text("!!")  # Invalid TOML
 
         assert not _is_project(tmp_path)
+
+    def test_non_kedro_project(self, mocker):
+        mocker.patch.object(Path, "is_file", return_value=True)
+        pyproject_toml_payload = {"tool": {}}
+        mocker.patch("anyconfig.load", return_value=pyproject_toml_payload)
+
+        assert not _is_project(self.project_path)
 
     def test_valid_toml_file(self, mocker):
         mocker.patch.object(Path, "is_file", return_value=True)

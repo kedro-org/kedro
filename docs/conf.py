@@ -31,7 +31,7 @@ from kedro import __version__ as release
 # -- Project information -----------------------------------------------------
 
 project = "Kedro"
-copyright = "2020, QuantumBlack Visual Analytics Limited"
+copyright = "2021, QuantumBlack Visual Analytics Limited"
 author = "QuantumBlack"
 
 # The short X.Y version.
@@ -65,6 +65,7 @@ extensions = [
 # enable autosummary plugin (table of contents for modules/classes/class
 # methods)
 autosummary_generate = True
+autosummary_generate_overwrite = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -93,7 +94,6 @@ exclude_patterns = [
     "modules.rst",
     "source",
     "README.md",
-    "12_faq/03_glossary.md",
 ]
 
 type_targets = {
@@ -127,15 +127,23 @@ type_targets = {
         "kedro.versioning.journal.Journal",
         "kedro.framework.context.context.KedroContext",
         "kedro.framework.startup.ProjectMetadata",
-        "kedro.framework.project.settings.ProjectSettings",
         "abc.ABC",
         "pathlib.Path",
         "pathlib.PurePosixPath",
         "requests.auth.AuthBase",
         "google.oauth2.credentials.Credentials",
         "Exception",
+        "CONF_ROOT",
+        "integer -- return number of occurrences of value",
+        "integer -- return first index of value.",
     ),
-    "py:data": ("typing.Any", "typing.Callable", "typing.Union", "typing.Optional"),
+    "py:data": (
+        "typing.Any",
+        "typing.Callable",
+        "typing.Union",
+        "typing.Optional",
+        "typing.Tuple",
+    ),
     "py:exc": (
         "ValueError",
         "MissingConfigException",
@@ -171,6 +179,25 @@ html_logo = str(here / "kedro_logo.svg")
 # documentation.
 #
 html_theme_options = {"collapse_navigation": False, "style_external_links": True}
+
+# some of these complain that the sections don't exist (which is not true),
+# too many requests, or forbidden URL
+linkcheck_ignore = [
+    "https://www.datacamp.com/community/tutorials/docstrings-python",  # "forbidden" url
+    "https://setuptools.readthedocs.io/en/latest/setuptools.html#dynamic-discovery-of-services-and-plugins",
+    "https://github.com/argoproj/argo/blob/master/README.md#quickstart",
+    "https://console.aws.amazon.com/batch/home#/jobs",
+    "https://github.com/EbookFoundation/free-programming-books/blob/master/books/free-programming-books.md#python",
+    "https://github.com/jazzband/pip-tools#example-usage-for-pip-compile",
+    "https://www.astronomer.io/docs/cloud/stable/get-started/quickstart#",
+    "https://github.com/quantumblacklabs/private-kedro/blob/master/kedro/templates/project/*",
+    "https://zenodo.org/record/4336685",
+    "https://zenodo.org/badge/latestdoi/182067506",
+]
+
+# retry before render a link broken (fix for "too many requests")
+linkcheck_retries = 5
+linkcheck_rate_limit_timeout = 2.0
 
 html_context = {
     "display_github": True,
@@ -470,7 +497,17 @@ def env_override(default_appid):
 
 
 def _add_jinja_filters(app):
-    app.builder.templates.environment.filters["env_override"] = env_override
+    # https://github.com/crate/crate/issues/10833
+    from sphinx.builders.latex import LaTeXBuilder
+    from sphinx.builders.linkcheck import CheckExternalLinksBuilder
+
+    # LaTeXBuilder is used in the PDF docs build,
+    # and it doesn't have attribute 'templates'
+    if not (
+        isinstance(app.builder, LaTeXBuilder)
+        or isinstance(app.builder, CheckExternalLinksBuilder)
+    ):
+        app.builder.templates.environment.filters["env_override"] = env_override
 
 
 def setup(app):
@@ -478,12 +515,10 @@ def setup(app):
     app.connect("builder-inited", _add_jinja_filters)
     app.connect("autodoc-process-docstring", autodoc_process_docstring)
     app.connect("autodoc-skip-member", skip)
-    app.add_stylesheet("css/qb1-sphinx-rtd.css")
+    app.add_css_file("css/qb1-sphinx-rtd.css")
     # fix a bug with table wraps in Read the Docs Sphinx theme:
     # https://rackerlabs.github.io/docs-rackspace/tools/rtd-tables.html
-    app.add_stylesheet("css/theme-overrides.css")
-    # add "Copy" button to code snippets
-    app.add_stylesheet("css/copybutton.css")
+    app.add_css_file("css/theme-overrides.css")
     # enable rendering RST tables in Markdown
     app.add_config_value("recommonmark_config", {"enable_eval_rst": True}, True)
     app.add_transform(AutoStructify)
@@ -522,5 +557,3 @@ except Exception as e:
     )
 
 fix_module_paths()
-
-copybutton_image_path = "_images/copy-button.svg"

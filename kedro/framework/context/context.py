@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@
 # limitations under the License.
 """This module provides context for Kedro project."""
 
+import functools
 import logging
 import os
 from copy import deepcopy
@@ -37,7 +38,7 @@ from warnings import warn
 
 from kedro.config import ConfigLoader, MissingConfigException
 from kedro.framework.hooks import get_hook_manager
-from kedro.framework.project.settings import _get_project_settings
+from kedro.framework.project import settings
 from kedro.framework.startup import _get_project_metadata
 from kedro.io import DataCatalog
 from kedro.io.core import generate_timestamp
@@ -46,6 +47,25 @@ from kedro.pipeline.pipeline import _transcode_split
 from kedro.runner.runner import AbstractRunner
 from kedro.runner.sequential_runner import SequentialRunner
 from kedro.versioning import Journal
+
+
+def _deprecate(version):
+    """Decorator to deprecate a few of the context's properties
+    """
+
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            property_name = func.__name__
+            warn(
+                f"Accessing {property_name} via the context will be deprecated in Kedro {version}.",
+                DeprecationWarning,
+            )
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
 
 
 def _is_relative_path(path_string: str) -> bool:
@@ -178,13 +198,11 @@ def _validate_layers_for_transcoding(catalog: DataCatalog) -> None:
 class KedroContext:
     """``KedroContext`` is the base class which holds the configuration and
     Kedro's main functionality.
-
-    Attributes:
-        CONF_ROOT: Name of root directory containing project configuration.
-            Default name is "conf".
     """
 
-    CONF_ROOT = "conf"
+    _CONF_ROOT = "conf"
+    """CONF_ROOT: Name of root directory containing project configuration.
+    Default name is "conf"."""
 
     def __init__(
         self,
@@ -213,10 +231,42 @@ class KedroContext:
         self._project_path = Path(project_path).expanduser().resolve()
         self._package_name = package_name
 
-        self.env = env or "local"
+        self._env = env or "local"
         self._extra_params = deepcopy(extra_params)
 
-    @property
+    @property  # type: ignore
+    @_deprecate(version="0.18.0")
+    def CONF_ROOT(self) -> str:  # pylint: disable=invalid-name
+        """Deprecated in favour of settings.CONF_ROOT
+
+        Returns:
+            The root directory of the configuration directory of the project.
+        Raises:
+            DeprecationWarning
+        """
+        return self._CONF_ROOT
+
+    @CONF_ROOT.setter  # type: ignore
+    @_deprecate(version="0.18.0")
+    def CONF_ROOT(self, value: str) -> None:  # pylint: disable=invalid-name
+        """Deprecated in favour of settings.CONF_ROOT
+        Raises:
+            DeprecationWarning
+        """
+        self._CONF_ROOT = value  # pylint: disable=invalid-name
+
+    @property  # type: ignore
+    def env(self) -> str:
+        """Property for the current Kedro environment.
+
+        Returns:
+            Name of the current Kedro environment.
+
+        """
+        return self._env
+
+    @property  # type: ignore
+    @_deprecate(version="0.18.0")
     def package_name(self) -> str:
         """Property for Kedro project package name.
 
@@ -398,16 +448,14 @@ class KedroContext:
             KedroContextError: Incorrect ``ConfigLoader`` registered for the project.
 
         """
-        conf_root = _get_project_settings(
-            self.package_name, "CONF_ROOT", self.CONF_ROOT
-        )
+        conf_root = settings.CONF_ROOT
         conf_paths = [
             str(self.project_path / conf_root / "base"),
             str(self.project_path / conf_root / self.env),
         ]
         hook_manager = get_hook_manager()
         config_loader = hook_manager.hook.register_config_loader(  # pylint: disable=no-member
-            conf_paths=conf_paths
+            conf_paths=conf_paths, env=self.env, extra_params=self._extra_params,
         )
         if not isinstance(config_loader, ConfigLoader):
             raise KedroContextError(
@@ -479,6 +527,7 @@ class KedroContext:
         to_nodes: Iterable[str] = None,
         node_names: Iterable[str] = None,
         from_inputs: Iterable[str] = None,
+        to_outputs: Iterable[str] = None,
     ) -> Pipeline:
         """Filter the pipeline as the intersection of all conditions."""
         new_pipeline = pipeline
@@ -501,6 +550,8 @@ class KedroContext:
             new_pipeline &= pipeline.only_nodes(*node_names)
         if from_inputs:
             new_pipeline &= pipeline.from_inputs(*from_inputs)
+        if to_outputs:
+            new_pipeline &= pipeline.to_outputs(*to_outputs)
 
         if not new_pipeline.nodes:
             raise KedroContextError("Pipeline contains no nodes")
@@ -521,6 +572,7 @@ class KedroContext:
         from_nodes: Iterable[str] = None,
         to_nodes: Iterable[str] = None,
         from_inputs: Iterable[str] = None,
+        to_outputs: Iterable[str] = None,
         load_versions: Dict[str, str] = None,
         pipeline_name: str = None,
     ) -> Dict[str, Any]:
@@ -541,6 +593,8 @@ class KedroContext:
                 end point of the new ``Pipeline``.
             from_inputs: An optional list of input datasets which should be used as a
                 starting point of the new ``Pipeline``.
+            to_outputs: An optional list of output datasets which should be used as an
+                end point of the new ``Pipeline``.
             load_versions: An optional flag to specify a particular dataset version timestamp
                 to load.
             pipeline_name: Name of the ``Pipeline`` to execute.
@@ -566,6 +620,7 @@ class KedroContext:
             to_nodes=to_nodes,
             node_names=node_names,
             from_inputs=from_inputs,
+            to_outputs=to_outputs,
         )
 
         save_version = self._get_save_version()
@@ -580,6 +635,7 @@ class KedroContext:
             "to_nodes": to_nodes,
             "node_names": node_names,
             "from_inputs": from_inputs,
+            "to_outputs": to_outputs,
             "load_versions": load_versions,
             "pipeline_name": pipeline_name,
             "extra_params": self._extra_params,
@@ -668,10 +724,7 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
     project_path = Path(project_path).expanduser().resolve()
     metadata = _get_project_metadata(project_path)
 
-    context_class = _get_project_settings(
-        metadata.package_name, "CONTEXT_CLASS", KedroContext
-    )
-
+    context_class = settings.CONTEXT_CLASS
     # update kwargs with env from the environment variable
     # (defaults to None if not set)
     # need to do this because some CLI command (e.g `kedro run`) defaults to

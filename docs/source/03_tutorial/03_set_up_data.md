@@ -3,14 +3,14 @@
 In this section, we discuss the data set-up phase, which is the second part of the [standard development workflow](./01_spaceflights_tutorial.md#kedro-project-development-workflow). The steps are as follows:
 
 * Add datasets to your `data/` folder, according to [data engineering convention](../12_faq/01_faq.md#what-is-data-engineering-convention)
-* Register the datasets with the Data Catalog, which is the registry of all data sources available for use by the project `conf/base/catalog.yml`. This ensures that your code is reproducible when it references datasets in different locations and/or environments.
+* Register the datasets with the Data Catalog in `conf/base/catalog.yml`, which is the registry of all data sources available for use by the project. This ensures that your code is reproducible when it references datasets in different locations and/or environments.
 
 You can find further information about [the Data Catalog](../05_data/01_data_catalog.md) in specific documentation covering advanced usage.
 
 
 ## Add your datasets to `data`
 
-The spaceflights tutorial makes use of fictional datasets of companies shuttling customers to the Moon and back. You will use the data to train a model to predict the price of shuttle hire. However, before you get to train the model, you will need to prepare the data by doing some data engineering, which is the process of preparing data for model building by creating a master table.
+The spaceflights tutorial makes use of fictional datasets of companies shuttling customers to the Moon and back. You will use the data to train a model to predict the price of shuttle hire. However, before you get to train the model, you will need to prepare the data for model building by creating a master table.
 
 The spaceflight tutorial has three files and uses two data formats: `.csv` and `.xlsx`. Download and save the files to the `data/01_raw/` folder of your project directory:
 
@@ -35,7 +35,7 @@ curl -o data/01_raw/shuttles.xlsx https://quantumblacklabs.github.io/kedro/shutt
 ```
 </details>
 
-Using [cURL for Windows](https://curl.haxx.se/windows/):
+Using [cURL for Windows](https://curl.se/windows/):
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -103,10 +103,11 @@ reviews:
 To check whether Kedro can load the data correctly, open a `kedro ipython` session and run:
 
 ```python
-context.catalog.load("companies").head()
+companies = catalog.load("companies")
+companies.head()
 ```
 
-The command loads the dataset named `companies` (as per top-level key in `catalog.yml`), from the underlying filepath `data/01_raw/companies.csv`. It displays the first five rows of the dataset, and is loaded into a `pandas` DataFrame for you to experiment with the data.
+The command loads the dataset named `companies` (as per top-level key in `catalog.yml`) from the underlying filepath `data/01_raw/companies.csv` into the variable `companies`, which is of type `pandas.DataFrame`. The `head` method from `pandas` then displays the first five rows of the DataFrame.
 
 When you have finished, close `ipython` session as follows:
 
@@ -124,10 +125,11 @@ shuttles:
   filepath: data/01_raw/shuttles.xlsx
 ```
 
-To test that everything works as expected, load the dataset within a new `kedro ipython` session:
+To test that everything works as expected, load the dataset within a _new_ `kedro ipython` session and display its first five rows:
 
 ```python
-context.catalog.load("shuttles").head()
+shuttles = catalog.load("shuttles")
+shuttles.head()
 ```
 When you have finished, close `ipython` session as follows:
 

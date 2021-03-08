@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -116,7 +116,7 @@ class TemplatedConfigLoader(ConfigLoader):
             filepath: "s3://${bucket}/data/${environment}/${folders.raw}/cars.csv"
 
     This uses ``jmespath`` in the background. For more information see:
-    https://github.com/jmespath/jmespath.py and http://jmespath.org/.
+    https://github.com/jmespath/jmespath.py and https://jmespath.org/.
     """
 
     def __init__(

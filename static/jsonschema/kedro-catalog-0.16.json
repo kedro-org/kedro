@@ -138,11 +138,11 @@
               },
               "load_args": {
                 "type": "object",
-                "description": "Arguments passed on to ```networkx.node_link_graph``.\nSee the details in\nhttps://networkx.github.io/documentation/networkx-1.9.1/reference/generated/networkx.readwrite.json_graph.node_link_graph.html"
+                "description": "Arguments passed on to ```networkx.node_link_graph``.\nSee the details in\nhttps://networkx.org/documentation/networkx-1.9.1/reference/generated/networkx.readwrite.json_graph.node_link_graph.html"
               },
               "save_args": {
                 "type": "object",
-                "description": "Arguments passed on to ```networkx.node_link_data``.\nSee the details in\nhttps://networkx.github.io/documentation/networkx-1.9.1/reference/generated/networkx.readwrite.json_graph.node_link_data.html"
+                "description": "Arguments passed on to ```networkx.node_link_data``.\nSee the details in\nhttps://networkx.org/documentation/networkx-1.9.1/reference/generated/networkx.readwrite.json_graph.node_link_data.html"
               },
               "credentials": {
                 "type": "object",
@@ -434,11 +434,11 @@
               },
               "load_args": {
                 "type": "object",
-                "description": "Provided to underlying PySpark ``jdbc`` function along\nwith the JDBC URL and the name of the table. To find all\nsupported arguments, see here:\nhttps://spark.apache.org/docs/latest/api/python/pyspark.sql.html?highlight=jdbc#pyspark.sql.DataFrameReader.jdbc"
+                "description": "Provided to underlying PySpark ``jdbc`` function along\nwith the JDBC URL and the name of the table. To find all\nsupported arguments, see here:\nhttps://spark.apache.org/docs/latest/api/python/reference/api/pyspark.sql.DataFrameReader.jdbc.html"
               },
               "save_args": {
                 "type": "object",
-                "description": "Provided to underlying PySpark ``jdbc`` function along\nwith the JDBC URL and the name of the table. To find all\nsupported arguments, see here:\nhttps://spark.apache.org/docs/latest/api/python/pyspark.sql.html?highlight=jdbc#pyspark.sql.DataFrameWriter.jdbc"
+                "description": "Provided to underlying PySpark ``jdbc`` function along\nwith the JDBC URL and the name of the table. To find all\nsupported arguments, see here:\nhttps://spark.apache.org/docs/latest/api/python/reference/api/pyspark.sql.DataFrameWriter.jdbc.html"
               }
             }
           }
@@ -484,11 +484,11 @@
               },
               "load_args": {
                 "type": "object",
-                "description": "Load args passed to Spark DataFrameReader load method.\nIt is dependent on the selected file format. You can find\na list of read options for each supported format\nin Spark DataFrame read documentation:\nhttps://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrame"
+                "description": "Load args passed to Spark DataFrameReader load method.\nIt is dependent on the selected file format. You can find\na list of read options for each supported format\nin Spark DataFrame read documentation:\nhttps://spark.apache.org/docs/latest/api/python/reference/api/pyspark.sql.DataFrame.html"
               },
               "save_args": {
                 "type": "object",
-                "description": "Save args passed to Spark DataFrame write options.\nSimilar to load_args this is dependent on the selected file\nformat. You can pass ``mode`` and ``partitionBy`` to specify\nyour overwrite mode and partitioning respectively. You can find\na list of options for each format in Spark DataFrame\nwrite documentation:\nhttps://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrame"
+                "description": "Save args passed to Spark DataFrame write options.\nSimilar to load_args this is dependent on the selected file\nformat. You can pass ``mode`` and ``partitionBy`` to specify\nyour overwrite mode and partitioning respectively. You can find\na list of options for each format in Spark DataFrame\nwrite documentation:\nhttps://spark.apache.org/docs/latest/api/python/reference/api/pyspark.sql.DataFrame.html"
               },
               "credentials": {
                 "type": "object",

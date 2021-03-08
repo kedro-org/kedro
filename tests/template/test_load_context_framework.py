@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import toml
 
 from kedro import __version__ as kedro_version
 from kedro.framework.context import KedroContext, load_context
+from kedro.framework.project import Validator, _ProjectSettings
 from kedro.framework.startup import _get_project_metadata
 
 
@@ -53,6 +54,18 @@ def _create_kedro_config(project_path, payload):
 
 class MyContext(KedroContext):
     pass
+
+
+class MockSettings(_ProjectSettings):
+    _HOOKS = Validator("HOOKS", default=())
+    _CONTEXT_CLASS = Validator("CONTEXT_CLASS", default=lambda *_: MyContext,)
+
+
+@pytest.fixture
+def mock_settings(mocker):
+    mocked_settings = MockSettings()
+    mocker.patch("kedro.framework.project.settings", mocked_settings)
+    mocker.patch("kedro.framework.context.context.settings", mocked_settings)
 
 
 @pytest.mark.usefixtures("fake_project_cli")
@@ -139,8 +152,9 @@ class TestLoadContext:
         assert isinstance(context, KedroContext)
         assert context.__class__ is KedroContext
 
+    @pytest.mark.usefixtures("mock_settings")
     def test_settings_py_has_context_path(
-        self, fake_repo_path, fake_package_name, mocker
+        self, fake_repo_path, fake_package_name,
     ):
         """Test for loading custom `ProjectContext` context. """
         payload = {
@@ -155,17 +169,8 @@ class TestLoadContext:
 
         _create_kedro_config(fake_repo_path, payload)
 
-        settings_mock = mocker.patch(
-            "kedro.framework.context.context._get_project_settings",
-            side_effect=(MyContext, (), (), "conf"),
-        )
-
         context = load_context(str(fake_repo_path))
 
         assert isinstance(context, KedroContext)
         assert context.__class__ is not KedroContext
         assert context.__class__.__name__ == "MyContext"
-
-        settings_mock.assert_called_once_with(
-            fake_package_name, "CONTEXT_CLASS", KedroContext
-        )

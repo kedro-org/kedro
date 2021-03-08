@@ -1,0 +1,28 @@
+project_name:
+  title: "Project Name:"
+  text: |
+    Please enter a human readable name for your new project.
+    Spaces and punctuation are allowed.
+
+repo_name:
+  title: "Repository Name:"
+  text: |
+    Please enter a directory name for your new project repository.
+    Alphanumeric characters, hyphens and underscores are allowed.
+    Lowercase is recommended.
+  regex_validator: "^\\w+(-*\\w+)*$"
+  error_message: |
+    It must contain only word symbols and/or hyphens, must also
+    start and end with alphanumeric symbol."
+
+python_package:
+  title: "Python Package Name:"
+  text: |
+    Please enter a valid Python package name for your project package.
+    Alphanumeric characters and underscores are allowed.
+    Lowercase is recommended. Package name must start with a letter
+    or underscore.
+  regex_validator: "^[a-zA-Z_]\\w{1,}$"
+  error_message: |
+    It must start with a letter or underscore, be at least 2 characters long
+    and contain only letters, digits, and/or underscores.

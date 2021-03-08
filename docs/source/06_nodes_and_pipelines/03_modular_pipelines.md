@@ -363,7 +363,7 @@ final_pipeline = (
 )
 ```
 
-`namespace="lunch"` renames all datasets and nodes, prefixing them with `"lunch."`, except those datasets that we explicitly "freeze" (`frozen_meant`) or remap (`grilled_meat`).
+`namespace="lunch"` renames all datasets and nodes, prefixing them with `"lunch."`, except those datasets that we explicitly "freeze" (`frozen_meat`) or remap (`grilled_meat`).
 
 Remapping free outputs is required since "breakfast_food" and "lunch_food" are the names expected by the `eat_breakfast_pipeline` and `eat_lunch_pipeline` respectively.
 

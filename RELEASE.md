@@ -5,9 +5,11 @@
 
 ## Breaking changes to the API
 * Add namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/quantumblacklabs/kedro/issues/399)
+* `pandas.ExcelDataSet` now uses `openpyxl` engine instead of `xlrd`.
 
 ## Migration guide from Kedro 0.17.* to 0.18.*
 * Optional: You can now remove all `params:` prefix when supplying values to `parameters` argument in a `pipeline()` call.
+* If you're using `pandas.ExcelDataSet`, make sure you have `openpyxl` installed in your environment. Note that this is automatically pulled if you specify `kedro[pandas.ExcelDataSet]==0.18.0` in your `requirements.in`. You can uninstall `xlrd` if you were only using it for this dataset.
 
 # Release 0.17.1
 

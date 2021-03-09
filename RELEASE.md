@@ -1,6 +1,7 @@
 # Upcoming Release 0.17.2
 
 ## Major features and improvements
+* Added support for `compress_pickle` backend to `PickleDataSet`.
 
 ## Bug fixes and other changes
 * If `settings.py` is not importable, the errors will be surfaced earlier in the process, rather than at runtime.
@@ -8,6 +9,7 @@
 ## Breaking changes to the API
 
 ## Thanks for supporting contributions
+[Sasaki Takeru](https://github.com/takeru/)
 
 # Release 0.17.1
 

@@ -42,13 +42,18 @@ import yaml
 
 from kedro import __version__ as kedro_version
 from kedro.config import ConfigLoader
-from kedro.framework.context import KedroContext, KedroContextError
+from kedro.framework.context import KedroContextError
 from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import hook_impl
-from kedro.framework.hooks.manager import get_hook_manager
-from kedro.framework.project import Validator, _ProjectSettings, settings
+from kedro.framework.hooks.manager import _register_hooks, get_hook_manager
+from kedro.framework.project import (
+    Validator,
+    _ProjectPipelines,
+    _ProjectSettings,
+    configure_project,
+    settings,
+)
 from kedro.framework.session import KedroSession
-from kedro.framework.session.session import _register_all_project_hooks
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node, node
@@ -336,7 +341,7 @@ class LoggingHooks:
         )
 
     @hook_impl
-    def before_dataset_loaded(self, dataset_name: str,) -> None:
+    def before_dataset_loaded(self, dataset_name: str) -> None:
         self.logger.info("Before dataset loaded", extra={"dataset_name": dataset_name})
 
     @hook_impl
@@ -410,10 +415,6 @@ class RequiredHooks:
     """Mandatory registration hooks"""
 
     @hook_impl
-    def register_pipelines(self) -> Dict[str, Pipeline]:
-        return {"__default__": CONTEXT_PIPELINE}
-
-    @hook_impl
     def register_config_loader(self, conf_paths: Iterable[str]) -> ConfigLoader:
         return ConfigLoader(conf_paths)
 
@@ -434,13 +435,13 @@ class RequiredHooks:
 class BrokenConfigLoaderHooks(RequiredHooks):
     @hook_impl
     def register_config_loader(self, conf_paths):
-        return None
+        return None  # pragma: no cover
 
 
 class BrokenCatalogHooks(RequiredHooks):
     @hook_impl
     def register_catalog(
-        self, catalog, credentials, load_versions, save_version, journal,
+        self, catalog, credentials, load_versions, save_version, journal
     ):
         return None
 
@@ -481,11 +482,26 @@ def mocked_logging(mocker):
 MOCK_PACKAGE_NAME = "mock_package_name"
 
 
+@pytest.fixture(autouse=True)
+def mock_pipelines(mocker):
+    class MockPipelines(_ProjectPipelines):
+        def _get_register_pipelines(self, pipelines_module: str):
+            return lambda: {"__default__": CONTEXT_PIPELINE, "pipe": CONTEXT_PIPELINE}
+
+    dummy = MockPipelines()
+    mocker.patch("kedro.framework.context.context.pipelines", dummy)
+    return mocker.patch("kedro.framework.project.pipelines", dummy)
+
+
 @pytest.fixture
 def mock_broken_pipeline(mocker):
-    mocker.patch.object(
-        KedroContext, "_get_pipelines", return_value={"__default__": BROKEN_PIPELINE}
-    )
+    class MockPipelines(_ProjectPipelines):
+        def configure(self, pipelines_module=None, **kwargs):
+            self["__default__"] = BROKEN_PIPELINE
+
+    dummy = MockPipelines()
+    mocker.patch("kedro.framework.context.context.pipelines", dummy)
+    return mocker.patch("kedro.framework.project.pipelines", dummy)
 
 
 def _mock_imported_settings_paths(mocker, mock_settings):
@@ -512,20 +528,18 @@ def mock_settings_with_logging_hooks(mocker, logging_hooks):
 
 @pytest.fixture
 def mock_settings_duplicate_hooks(mocker, logging_hooks):
-    return _mock_settings_with_hooks(mocker, hooks=(logging_hooks, DuplicateHooks(),))
+    return _mock_settings_with_hooks(mocker, hooks=(logging_hooks, DuplicateHooks()))
 
 
 @pytest.fixture
 def mock_settings_before_node_run_hooks(mocker, logging_hooks):
-    return _mock_settings_with_hooks(
-        mocker, hooks=(logging_hooks, BeforeNodeRunHook(),)
-    )
+    return _mock_settings_with_hooks(mocker, hooks=(logging_hooks, BeforeNodeRunHook()))
 
 
 @pytest.fixture
 def mock_settings_broken_before_node_run_hooks(mocker, logging_hooks):
     return _mock_settings_with_hooks(
-        mocker, hooks=(logging_hooks, BrokenBeforeNodeRunHook(),)
+        mocker, hooks=(logging_hooks, BrokenBeforeNodeRunHook())
     )
 
 
@@ -556,10 +570,19 @@ def mock_settings_with_disabled_hooks(mocker, logging_hooks, naughty_plugin):
 
 
 @pytest.fixture
+def patched_configure_project(mocker):
+    mocker.patch("kedro.framework.project._validate_module")
+    configure_project(MOCK_PACKAGE_NAME)
+    yield
+
+
+@pytest.fixture
 def mock_session_with_hooks(
-    tmp_path, mock_settings_with_logging_hooks, logging_hooks
+    tmp_path, mock_settings_with_logging_hooks, logging_hooks, mocker
 ):  # pylint: disable=unused-argument
+    mocker.patch("kedro.framework.project._validate_module")
     logging_hooks.queue_listener.start()
+    configure_project(MOCK_PACKAGE_NAME)
     yield KedroSession.create(
         MOCK_PACKAGE_NAME, tmp_path, extra_params={"params:key": "value"}
     )
@@ -583,8 +606,8 @@ class TestKedroSessionHooks:
 
         # hooks already registered when fixture 'mock_session_with_hooks' was called
         assert hook_manager.is_registered(logging_hooks)
-        _register_all_project_hooks(hook_manager)
-        _register_all_project_hooks(hook_manager)
+        _register_hooks(hook_manager, (logging_hooks, RequiredHooks()))
+        _register_hooks(hook_manager, (logging_hooks, RequiredHooks()))
         assert hook_manager.is_registered(logging_hooks)
 
     @pytest.mark.parametrize("num_plugins", [0, 1])
@@ -637,7 +660,9 @@ class TestKedroSessionHooks:
         )
         unregister_mock = mocker.patch.object(hook_manager, "unregister")
 
+        mocker.patch("kedro.framework.project._validate_module")
         logging_hooks.queue_listener.start()
+        configure_project(MOCK_PACKAGE_NAME)
         KedroSession.create(
             MOCK_PACKAGE_NAME, tmp_path, extra_params={"params:key": "value"}
         )
@@ -679,7 +704,7 @@ class TestKedroSessionHooks:
         assert record.catalog is catalog
         assert record.conf_creds == config_loader.get("credentials*")
         assert record.conf_catalog == _convert_paths_to_absolute_posix(
-            project_path=project_path, conf_dictionary=config_loader.get("catalog*"),
+            project_path=project_path, conf_dictionary=config_loader.get("catalog*")
         )
         # save_version is only passed during a run, not on the property getter
         assert record.save_version is None
@@ -793,7 +818,11 @@ class TestKedroSessionHooks:
         assert call_record.run_id == mock_session_with_hooks.session_id
 
     @SKIP_ON_WINDOWS
-    @pytest.mark.usefixtures("mock_broken_pipeline", "mock_settings_with_logging_hooks")
+    @pytest.mark.usefixtures(
+        "mock_broken_pipeline",
+        "mock_settings_with_logging_hooks",
+        "patched_configure_project",
+    )
     def test_on_node_error_hook_parallel_runner(self, tmp_path, logging_hooks):
         session = KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
         log_records = []
@@ -827,7 +856,9 @@ class TestKedroSessionHooks:
             assert_exceptions_equal(call_record.error, expected_error)
 
     @SKIP_ON_WINDOWS
-    @pytest.mark.usefixtures("mock_settings_with_logging_hooks")
+    @pytest.mark.usefixtures(
+        "mock_settings_with_logging_hooks", "patched_configure_project"
+    )
     def test_before_and_after_node_run_hooks_parallel_runner(
         self, tmp_path, logging_hooks, dummy_dataframe
     ):
@@ -904,7 +935,9 @@ class TestKedroSessionHooks:
         pd.testing.assert_frame_equal(call_record.data, dummy_dataframe)
 
     @SKIP_ON_WINDOWS
-    @pytest.mark.usefixtures("mock_settings_with_logging_hooks")
+    @pytest.mark.usefixtures(
+        "mock_settings_with_logging_hooks", "patched_configure_project"
+    )
     def test_before_and_after_dataset_loaded_hooks_parallel_runner(
         self, tmp_path, logging_hooks, dummy_dataframe
     ):
@@ -981,7 +1014,9 @@ class TestKedroSessionHooks:
         assert call_record.data.to_dict() == dummy_dataframe.to_dict()
 
     @SKIP_ON_WINDOWS
-    @pytest.mark.usefixtures("mock_settings_with_logging_hooks")
+    @pytest.mark.usefixtures(
+        "mock_settings_with_logging_hooks", "patched_configure_project"
+    )
     def test_before_and_after_dataset_saved_hooks_parallel_runner(
         self, tmp_path, logging_hooks, dummy_dataframe
     ):
@@ -1025,9 +1060,10 @@ class TestKedroSessionHooks:
 class TestBeforeNodeRunHookWithInputUpdates:
     """Test the behavior of `before_node_run_hook` when updating node inputs"""
 
-    @pytest.mark.usefixtures("mock_settings_before_node_run_hooks")
+    @pytest.mark.usefixtures(
+        "mock_settings_before_node_run_hooks", "patched_configure_project"
+    )
     def test_correct_input_update(self, tmp_path, dummy_dataframe):
-
         session = KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
         context = session.load_context()
         catalog = context.catalog
@@ -1039,7 +1075,9 @@ class TestBeforeNodeRunHookWithInputUpdates:
         assert isinstance(result["ships"], pd.DataFrame)
 
     @SKIP_ON_WINDOWS
-    @pytest.mark.usefixtures("mock_settings_before_node_run_hooks")
+    @pytest.mark.usefixtures(
+        "mock_settings_before_node_run_hooks", "patched_configure_project"
+    )
     def test_correct_input_update_parallel(self, tmp_path, dummy_dataframe):
         session = KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
         context = session.load_context()
@@ -1051,7 +1089,9 @@ class TestBeforeNodeRunHookWithInputUpdates:
         assert isinstance(result["planes"], MockDatasetReplacement)
         assert isinstance(result["ships"], pd.DataFrame)
 
-    @pytest.mark.usefixtures("mock_settings_broken_before_node_run_hooks")
+    @pytest.mark.usefixtures(
+        "mock_settings_broken_before_node_run_hooks", "patched_configure_project"
+    )
     def test_broken_input_update(self, tmp_path, dummy_dataframe):
         session = KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
         context = session.load_context()
@@ -1067,7 +1107,9 @@ class TestBeforeNodeRunHookWithInputUpdates:
             session.run()
 
     @SKIP_ON_WINDOWS
-    @pytest.mark.usefixtures("mock_settings_broken_before_node_run_hooks")
+    @pytest.mark.usefixtures(
+        "mock_settings_broken_before_node_run_hooks", "patched_configure_project"
+    )
     def test_broken_input_update_parallel(self, tmp_path, dummy_dataframe):
         session = KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
         context = session.load_context()
@@ -1087,6 +1129,9 @@ class TestRegistrationHooks:
     def test_register_pipelines_is_called(
         self, mock_session_with_hooks, dummy_dataframe, caplog
     ):
+        # not sure why this test needs this line here too
+        # and not just in the session fixture
+        configure_project(MOCK_PACKAGE_NAME)
         context = mock_session_with_hooks.load_context()
         catalog = context.catalog
         catalog.save("cars", dummy_dataframe)
@@ -1102,28 +1147,32 @@ class TestRegistrationHooks:
         call_record = register_pipelines_calls[0]
         _assert_hook_call_record_has_expected_parameters(call_record, [])
 
-        expected_pipelines = {"__default__": CONTEXT_PIPELINE, "de": CONTEXT_PIPELINE}
+        expected_pipelines = {
+            "__default__": CONTEXT_PIPELINE,
+            "de": CONTEXT_PIPELINE,
+            "pipe": CONTEXT_PIPELINE,
+        }
         assert context.pipelines == expected_pipelines
 
     @pytest.mark.usefixtures("mock_settings_duplicate_hooks")
-    def test_register_pipelines_with_duplicate_entries(self, tmp_path, dummy_dataframe):
-        session = KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
-        context = session.load_context()
-        catalog = context.catalog
-        catalog.save("cars", dummy_dataframe)
-        catalog.save("boats", dummy_dataframe)
-
+    def test_register_pipelines_with_duplicate_entries(
+        self, tmp_path, mock_pipelines, mocker
+    ):
+        mocker.patch("kedro.framework.project._validate_module")
         pattern = (
             "Found duplicate pipeline entries. The following "
             "will be overwritten: __default__"
         )
         with pytest.warns(UserWarning, match=re.escape(pattern)):
-            session.run()
+            configure_project(MOCK_PACKAGE_NAME)
 
+        session = KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
+        context = session.load_context()
         # check that all pipeline dictionaries merged together correctly
         expected_pipelines = {
             key: CONTEXT_PIPELINE for key in ("__default__", "de", "pipe")
         }
+        assert mock_pipelines == expected_pipelines
         assert context.pipelines == expected_pipelines
 
     def test_register_config_loader_is_called(self, mock_session_with_hooks, caplog):
@@ -1172,7 +1221,9 @@ class TestRegistrationHooks:
         with pytest.raises(KedroContextError, match=re.escape(pattern)):
             KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
 
-    @pytest.mark.usefixtures("mock_settings_broken_catalog_hooks")
+    @pytest.mark.usefixtures(
+        "mock_settings_broken_catalog_hooks", "patched_configure_project"
+    )
     def test_broken_register_catalog_hook(self, tmp_path):
         pattern = "Expected an instance of `DataCatalog`, got `NoneType` instead."
         with KedroSession.create(MOCK_PACKAGE_NAME, tmp_path) as session:

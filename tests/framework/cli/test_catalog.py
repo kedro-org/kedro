@@ -58,73 +58,75 @@ def fake_cli_invoke(fake_project_cli, fake_metadata):
     return partial(CliRunner().invoke, fake_project_cli.cli, obj=fake_metadata)
 
 
-@pytest.mark.usefixtures("chdir_to_dummy_project")
-class TestCatalogListCommand:
-    PIPELINE_NAME = "pipeline"
+PIPELINE_NAME = "pipeline"
 
-    def test_list_all_pipelines(self, fake_cli_invoke, fake_load_context, mocker):
+
+@pytest.fixture
+def mock_pipelines(mocker):
+    dummy_pipelines = {PIPELINE_NAME: Pipeline([]), "second": Pipeline([])}
+    return mocker.patch("kedro.framework.cli.catalog.pipelines", dummy_pipelines)
+
+
+@pytest.mark.usefixtures(
+    "chdir_to_dummy_project", "fake_load_context", "mock_pipelines"
+)
+class TestCatalogListCommand:
+    def test_list_all_pipelines(self, fake_cli_invoke, mocker):
         yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
-        mocked_context = fake_load_context.return_value
-        mocked_context.pipelines.keys.return_value = (self.PIPELINE_NAME,)
-        mocked_context.catalog.list.return_value = []
-        mocked_pl_obj = mocked_context.pipelines.get.return_value
-        mocked_pl_obj.data_sets.return_value = set()
 
         result = fake_cli_invoke(["catalog", "list"])
 
         assert not result.exit_code
-        assert mocked_context.pipelines.keys.call_count == 1
-        mocked_context.pipelines.get.assert_called_once_with(self.PIPELINE_NAME)
-
-        expected_dict = {"DataSets in 'pipeline' pipeline": {}}
+        expected_dict = {
+            "DataSets in 'pipeline' pipeline": {},
+            "DataSets in 'second' pipeline": {},
+        }
         yaml_dump_mock.assert_called_once_with(expected_dict)
 
-    def test_list_specific_pipelines(self, fake_cli_invoke, fake_load_context):
-        mocked_context = fake_load_context.return_value
+    def test_list_specific_pipelines(self, fake_cli_invoke, mocker):
+        yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
 
-        result = fake_cli_invoke(["catalog", "list", "--pipeline", self.PIPELINE_NAME])
+        result = fake_cli_invoke(["catalog", "list", "--pipeline", PIPELINE_NAME])
 
         assert not result.exit_code
-        assert not mocked_context.pipelines.keys.called
-        mocked_context.pipelines.get.assert_called_once_with(self.PIPELINE_NAME)
+        expected_dict = {f"DataSets in '{PIPELINE_NAME}' pipeline": {}}
+        yaml_dump_mock.assert_called_once_with(expected_dict)
 
-    def test_not_found_pipeline(self, fake_cli_invoke, fake_load_context):
-        mocked_context = fake_load_context.return_value
-        mocked_context.pipelines.get.return_value = None
-        mocked_context.pipelines.keys.return_value = (self.PIPELINE_NAME,)
+    def test_not_found_pipeline(self, fake_cli_invoke):
         result = fake_cli_invoke(["catalog", "list", "--pipeline", "fake"])
+
         assert result.exit_code
         expected_output = (
-            f"Error: `fake` pipeline not found! Existing "
-            f"pipelines: {self.PIPELINE_NAME}\n"
+            "Error: `fake` pipeline not found! Existing pipelines: pipeline, second"
         )
         assert expected_output in result.output
 
     def test_no_param_datasets_in_respose(
-        self, fake_cli_invoke, fake_load_context, mocker
+        self, fake_cli_invoke, fake_load_context, mocker, mock_pipelines
     ):
         yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
         mocked_context = fake_load_context.return_value
         catalog_data_sets = {
             "iris_data": CSVDataSet("test.csv"),
+            "intermediate": MemoryDataSet(),
             "parameters": MemoryDataSet(),
             "params:data_ratio": MemoryDataSet(),
-            "intermediate": MemoryDataSet(),
             "not_used": CSVDataSet("test2.csv"),
         }
 
-        pl_obj_data_sets = catalog_data_sets.keys() - {"not_used"}
         mocked_context.catalog = DataCatalog(data_sets=catalog_data_sets)
-        mocked_context.pipelines.keys.return_value = (self.PIPELINE_NAME,)
-        mocked_pl_obj = mocked_context.pipelines.get.return_value
-        mocked_pl_obj.data_sets.return_value = pl_obj_data_sets
+        mocker.patch.object(
+            mock_pipelines[PIPELINE_NAME],
+            "data_sets",
+            return_value=catalog_data_sets.keys() - {"not_used"},
+        )
 
         result = fake_cli_invoke(["catalog", "list"])
 
         assert not result.exit_code
         # 'parameters' and 'params:data_ratio' should not appear in the response
         expected_dict = {
-            "DataSets in 'pipeline' pipeline": {
+            f"DataSets in '{PIPELINE_NAME}' pipeline": {
                 "Datasets mentioned in pipeline": {
                     "CSVDataSet": ["iris_data"],
                     "MemoryDataSet": ["intermediate"],
@@ -132,7 +134,40 @@ class TestCatalogListCommand:
                 "Datasets not mentioned in pipeline": {"CSVDataSet": ["not_used"]},
             }
         }
-        yaml_dump_mock.assert_called_once_with(expected_dict)
+        key = f"DataSets in '{PIPELINE_NAME}' pipeline"
+        assert yaml_dump_mock.call_count == 1
+        assert yaml_dump_mock.call_args[0][0][key] == expected_dict[key]
+
+    def test_default_dataset(
+        self, fake_cli_invoke, fake_load_context, mocker, mock_pipelines
+    ):
+        """Test that datasets that are found in `Pipeline.data_sets()`,
+        but not in the catalog, are outputted under the key "DefaultDataset".
+        """
+        yaml_dump_mock = mocker.patch("yaml.dump", return_value="Result YAML")
+        mocked_context = fake_load_context.return_value
+        catalog_data_sets = {"some_dataset": CSVDataSet("test.csv")}
+        mocked_context.catalog = DataCatalog(data_sets=catalog_data_sets)
+        mocker.patch.object(
+            mock_pipelines[PIPELINE_NAME],
+            "data_sets",
+            return_value=catalog_data_sets.keys() | {"intermediate"},
+        )
+
+        result = fake_cli_invoke(["catalog", "list"])
+
+        assert not result.exit_code
+        expected_dict = {
+            f"DataSets in '{PIPELINE_NAME}' pipeline": {
+                "Datasets mentioned in pipeline": {
+                    "CSVDataSet": ["some_dataset"],
+                    "DefaultDataSet": ["intermediate"],
+                }
+            }
+        }
+        key = f"DataSets in '{PIPELINE_NAME}' pipeline"
+        assert yaml_dump_mock.call_count == 1
+        assert yaml_dump_mock.call_args[0][0][key] == expected_dict[key]
 
 
 def identity(data):
@@ -158,16 +193,13 @@ class TestCatalogCreateCommand:
         expected_output = "Error: Missing option '--pipeline'."
         assert expected_output in result.output
 
-    def test_not_found_pipeline(self, fake_cli_invoke, fake_load_context):
-        mocked_context = fake_load_context.return_value
-        mocked_context.pipelines = {
-            "data_science": "ds_pipeline_obj",
-            "data_engineering": "de_pipeline_obj",
-        }
+    @pytest.mark.usefixtures("fake_load_context")
+    def test_not_found_pipeline(self, fake_cli_invoke, mock_pipelines):
         result = fake_cli_invoke(["catalog", "create", "--pipeline", "fake"])
+
         assert result.exit_code
 
-        existing_pipelines = ", ".join(sorted(mocked_context.pipelines.keys()))
+        existing_pipelines = ", ".join(sorted(mock_pipelines.keys()))
         expected_output = (
             f"Error: `fake` pipeline not found! Existing "
             f"pipelines: {existing_pipelines}\n"
@@ -212,7 +244,7 @@ class TestCatalogCreateCommand:
         assert data_catalog_file.is_file()
 
     def test_no_missing_datasets(
-        self, fake_cli_invoke, fake_load_context, fake_repo_path
+        self, fake_cli_invoke, fake_load_context, fake_repo_path, mock_pipelines
     ):
         mocked_context = fake_load_context.return_value
 
@@ -221,11 +253,10 @@ class TestCatalogCreateCommand:
             "output_data": CSVDataSet("test2.csv"),
         }
         mocked_context.catalog = DataCatalog(data_sets=catalog_data_sets)
-        mocked_context.pipelines = {
-            self.PIPELINE_NAME: Pipeline([node(identity, "input_data", "output_data")])
-        }
-
         mocked_context.project_path = fake_repo_path
+        mock_pipelines[self.PIPELINE_NAME] = Pipeline(
+            [node(identity, "input_data", "output_data")]
+        )
 
         data_catalog_file = (
             fake_repo_path / "conf" / "base" / "catalog" / f"{self.PIPELINE_NAME}.yml"
@@ -238,6 +269,7 @@ class TestCatalogCreateCommand:
         assert not result.exit_code
         assert not data_catalog_file.exists()
 
+    @pytest.mark.usefixtures("fake_repo_path")
     def test_missing_datasets_appended(self, fake_cli_invoke, catalog_path):
         data_catalog_file = catalog_path / f"{self.PIPELINE_NAME}.yml"
         assert not catalog_path.exists()
@@ -263,3 +295,13 @@ class TestCatalogCreateCommand:
         }
         catalog_config = yaml.safe_load(data_catalog_file.read_text())
         assert catalog_config == expected_catalog_config
+
+    def test_bad_env(self, fake_cli_invoke):
+        """Test error when provided conf environment does not exist"""
+        env = "no_such_env"
+        cmd = ["catalog", "list", "-e", env, "--pipeline", PIPELINE_NAME]
+
+        result = fake_cli_invoke(cmd)
+
+        assert result.exit_code
+        assert "Unable to instantiate Kedro session" in result.output

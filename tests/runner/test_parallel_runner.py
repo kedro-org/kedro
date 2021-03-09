@@ -32,7 +32,6 @@ from typing import Any, Dict
 
 import pytest
 
-from kedro.framework.hooks import get_hook_manager
 from kedro.io import (
     AbstractDataSet,
     DataCatalog,
@@ -469,12 +468,6 @@ class TestRunNodeSynchronisationHelper:
         return mocker.patch("kedro.runner.parallel_runner.run_node")
 
     @pytest.fixture
-    def mock_register_hooks(self, mocker):
-        return mocker.patch(
-            "kedro.framework.session.session._register_all_project_hooks"
-        )
-
-    @pytest.fixture
     def mock_configure_project(self, mocker):
         return mocker.patch("kedro.framework.project.configure_project")
 
@@ -483,68 +476,56 @@ class TestRunNodeSynchronisationHelper:
         self,
         mock_logging,
         mock_run_node,
-        mock_register_hooks,
         mock_configure_project,
         is_async,
         conf_logging,
         mocker,
     ):
         mocker.patch("multiprocessing.get_start_method", return_value="spawn")
-        node = mocker.sentinel.node
+        node_ = mocker.sentinel.node
         catalog = mocker.sentinel.catalog
         run_id = "fake_run_id"
         package_name = mocker.sentinel.package_name
-        hook_manager = get_hook_manager()
 
         _run_node_synchronization(
-            node,
+            node_,
             catalog,
             is_async,
             run_id,
             package_name=package_name,
             conf_logging=conf_logging,
         )
-        mock_run_node.assert_called_once_with(node, catalog, is_async, run_id)
-        mock_register_hooks.assert_called_once_with(hook_manager)
+        mock_run_node.assert_called_once_with(node_, catalog, is_async, run_id)
         mock_logging.assert_called_once_with(conf_logging)
         mock_configure_project.assert_called_once_with(package_name)
 
     def test_package_name_provided(
-        self,
-        mock_logging,
-        mock_run_node,
-        mock_register_hooks,
-        mock_configure_project,
-        is_async,
-        mocker,
+        self, mock_logging, mock_run_node, mock_configure_project, is_async, mocker,
     ):
         mocker.patch("multiprocessing.get_start_method", return_value="spawn")
-        node = mocker.sentinel.node
+        node_ = mocker.sentinel.node
         catalog = mocker.sentinel.catalog
         run_id = "fake_run_id"
         package_name = mocker.sentinel.package_name
-        hook_manager = get_hook_manager()
 
         _run_node_synchronization(
-            node, catalog, is_async, run_id, package_name=package_name
+            node_, catalog, is_async, run_id, package_name=package_name
         )
-        mock_run_node.assert_called_once_with(node, catalog, is_async, run_id)
-        mock_register_hooks.assert_called_once_with(hook_manager)
+        mock_run_node.assert_called_once_with(node_, catalog, is_async, run_id)
         mock_logging.assert_called_once_with({})
         mock_configure_project.assert_called_once_with(package_name)
 
     def test_package_name_not_provided(
-        self, mock_logging, mock_run_node, mock_register_hooks, is_async, mocker
+        self, mock_logging, mock_run_node, is_async, mocker
     ):
         mocker.patch("multiprocessing.get_start_method", return_value="fork")
-        node = mocker.sentinel.node
+        node_ = mocker.sentinel.node
         catalog = mocker.sentinel.catalog
         run_id = "fake_run_id"
         package_name = mocker.sentinel.package_name
 
         _run_node_synchronization(
-            node, catalog, is_async, run_id, package_name=package_name
+            node_, catalog, is_async, run_id, package_name=package_name
         )
-        mock_run_node.assert_called_once_with(node, catalog, is_async, run_id)
-        mock_register_hooks.assert_not_called()
+        mock_run_node.assert_called_once_with(node_, catalog, is_async, run_id)
         mock_logging.assert_not_called()

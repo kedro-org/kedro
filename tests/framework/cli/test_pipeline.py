@@ -360,7 +360,7 @@ class TestPipelineDeleteCommand:
         assert f"Pipeline `{PIPELINE_NAME}` was successfully deleted." in result.output
         assert (
             f"If you added the pipeline `{PIPELINE_NAME}` to `register_pipelines()` in "
-            f"`{fake_package_path / 'hooks.py'}`, you will need to remove it."
+            f"`{fake_package_path / 'pipeline_registry.py'}`, you will need to remove it."
         ) in result.output
 
         assert not source_path.exists()
@@ -392,7 +392,7 @@ class TestPipelineDeleteCommand:
         assert f"Pipeline `{PIPELINE_NAME}` was successfully deleted." in result.output
         assert (
             f"If you added the pipeline `{PIPELINE_NAME}` to `register_pipelines()` in "
-            f"`{fake_package_path / 'hooks.py'}`, you will need to remove it."
+            f"`{fake_package_path / 'pipeline_registry.py'}`, you will need to remove it."
         ) in result.output
 
         assert not source_path.exists()
@@ -536,14 +536,6 @@ class TestPipelineDescribeCommand:
             "[__default__, de, ds]\n"
         )
         assert expected_output in result.output
-
-    def test_bad_env(self, fake_cli_invoke):
-        """Test error when provided conf environment does not exist"""
-        env = "no_such_env"
-        cmd = ["pipeline", "describe", "-e", env, PIPELINE_NAME]
-        result = fake_cli_invoke(cmd)
-        assert result.exit_code
-        assert "Unable to instantiate Kedro session" in result.output
 
 
 class TestSyncDirs:

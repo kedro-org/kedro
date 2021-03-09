@@ -49,8 +49,12 @@ from kedro.framework.context.context import (
     _validate_layers_for_transcoding,
 )
 from kedro.framework.hooks import get_hook_manager, hook_impl
-from kedro.framework.project import Validator, _ProjectSettings
-from kedro.framework.session.session import _register_all_project_hooks
+from kedro.framework.project import (
+    Validator,
+    _ProjectPipelines,
+    _ProjectSettings,
+    configure_project,
+)
 from kedro.io import DataCatalog
 from kedro.io.core import Version, generate_timestamp
 from kedro.pipeline import Pipeline, node
@@ -164,10 +168,6 @@ class RegistrationHooks:
     def register_config_loader(self, conf_paths) -> ConfigLoader:
         return ConfigLoader(conf_paths)
 
-    @hook_impl
-    def register_pipelines(self) -> Dict[str, Pipeline]:
-        return _create_pipelines()
-
 
 class MockSettings(_ProjectSettings):
     _HOOKS = Validator("HOOKS", default=(RegistrationHooks(),))
@@ -179,6 +179,18 @@ def mock_settings(mocker):
     mocker.patch("kedro.framework.session.session.settings", mocked_settings)
     mocker.patch("kedro.framework.context.context.settings", mocked_settings)
     return mocker.patch("kedro.framework.project.settings", mocked_settings)
+
+
+@pytest.fixture(autouse=True)
+def mock_pipelines(mocker):
+    class MockPipelines(_ProjectPipelines):
+        def configure(self, pipelines_module=None, **kwargs):
+            for pipeline_name, pipeline_obj in _create_pipelines().items():
+                self[pipeline_name] = pipeline_obj
+
+    dummy = MockPipelines()
+    mocker.patch("kedro.framework.context.context.pipelines", dummy)
+    return mocker.patch("kedro.framework.project.pipelines", dummy)
 
 
 @pytest.fixture
@@ -263,21 +275,21 @@ def extra_params(request):
 
 @pytest.fixture(autouse=True)
 def mocked_logging(mocker):
-    # Disable logging.config.dictConfig in KedroContext._setup_logging as
+    # Disable logging.config.dictConfig in KedroSession._setup_logging as
     # it changes logging.config and affects other unit tests
     return mocker.patch("logging.config.dictConfig")
 
 
 @pytest.fixture
 def dummy_context(
-    tmp_path, prepare_project_dir, env, extra_params
+    tmp_path, prepare_project_dir, env, extra_params, mocker
 ):  # pylint: disable=unused-argument
+    mocker.patch("kedro.framework.project._validate_module")
+    configure_project(MOCK_PACKAGE_NAME)
     context = KedroContext(
         MOCK_PACKAGE_NAME, str(tmp_path), env=env, extra_params=extra_params
     )
 
-    hook_manager = get_hook_manager()
-    _register_all_project_hooks(hook_manager)
     return context
 
 

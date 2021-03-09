@@ -1,11 +1,21 @@
 # Upcoming Release 0.17.2
 
 ## Major features and improvements
+* Refactored the way pipelines are loaded so you don't need a `KedroContext` instance. You will now be able to run:
+
+```python
+from kedro.framework.project import pipelines
+
+print(pipelines)
+```
+
+* Projects generated with kedro>=0.17.2 can specify the project's pipelines in `pipeline_registry.py` rather than `hooks.py`.
 
 ## Bug fixes and other changes
 * If `settings.py` is not importable, the errors will be surfaced earlier in the process, rather than at runtime.
 
 ## Breaking changes to the API
+* `kedro pipeline list` and `kedro pipeline describe` no longer accept redundant `--env` parameter.
 
 ## Thanks for supporting contributions
 

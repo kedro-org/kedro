@@ -25,25 +25,42 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Dummy plugin with simple hook implementations."""
-import logging
+import sys
+import textwrap
 
-from kedro.framework.hooks import hook_impl
-from kedro.pipeline import Pipeline, node
+import pytest
 
-
-class MyPluginHook:
-    @hook_impl
-    def after_catalog_created(
-        self, catalog
-    ):  # pylint: disable=unused-argument,no-self-use
-        logging.info("Reached after_catalog_created hook")
-
-    @hook_impl
-    def register_pipelines(self):  # pylint: disable=no-self-use
-        return {
-            "from_plugin": Pipeline([node(lambda: "sth", inputs=None, outputs="x")])
-        }
+from kedro.framework.project import configure_project, pipelines
+from kedro.pipeline import Pipeline
 
 
-hooks = MyPluginHook()
+@pytest.fixture
+def mock_package_name_with_pipelines_file(tmpdir):
+    pipelines_file_path = tmpdir.mkdir("test_package") / "pipeline_registry.py"
+    pipelines_file_path.write(
+        textwrap.dedent(
+            """
+                from kedro.pipeline import Pipeline
+                def register_pipelines():
+                    return {"new_pipeline": Pipeline([])}
+            """
+        )
+    )
+    project_path, package_name, _ = str(pipelines_file_path).rpartition("test_package")
+    sys.path.insert(0, project_path)
+    yield package_name
+    sys.path.pop(0)
+    # reset side-effect of configure_project
+    pipelines.pop("new_pipeline")
+
+
+def test_pipelines_without_configure_project_is_empty():
+    assert pipelines == {}
+
+
+def test_pipelines_after_configuring_project_shows_updated_values(
+    mock_package_name_with_pipelines_file, mocker
+):
+    mocker.patch("kedro.framework.project._validate_module")
+    configure_project(mock_package_name_with_pipelines_file)
+    assert isinstance(pipelines["new_pipeline"], Pipeline)

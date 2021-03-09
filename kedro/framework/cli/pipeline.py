@@ -52,8 +52,7 @@ from kedro.framework.cli.utils import (
     env_option,
     python_call,
 )
-from kedro.framework.project import settings
-from kedro.framework.session import KedroSession
+from kedro.framework.project import pipelines, settings
 from kedro.framework.startup import ProjectMetadata
 
 _SETUP_PY_TEMPLATE = """# -*- coding: utf-8 -*-
@@ -141,7 +140,7 @@ def create_pipeline(
 
     click.secho(
         f"To be able to run the pipeline `{name}`, you will need to add it "
-        f"to `register_pipelines()` in `{package_dir / 'hooks.py'}`.",
+        f"to `register_pipelines()` in `{package_dir / 'pipeline_registry.py'}`.",
         fg="yellow",
     )
 
@@ -203,35 +202,28 @@ def delete_pipeline(
     click.secho(f"\nPipeline `{name}` was successfully deleted.", fg="green")
     click.secho(
         f"\nIf you added the pipeline `{name}` to `register_pipelines()` in "
-        f"`{package_dir / 'hooks.py'}`, you will need to remove it.",
+        f"`{package_dir / 'pipeline_registry.py'}`, you will need to remove it.",
         fg="yellow",
     )
 
 
 @pipeline.command("list")
-@env_option
-@click.pass_obj
-def list_pipelines(metadata: ProjectMetadata, env):
-    """List all pipelines defined in your hooks.py file."""
-    session = _create_session(metadata.package_name, env=env)
-    context = session.load_context()
-    project_pipelines = context.pipelines
-    click.echo(yaml.dump(sorted(project_pipelines)))
+def list_pipelines():
+    """List all pipelines defined in your pipeline_registry.py file."""
+    click.echo(yaml.dump(sorted(pipelines)))
 
 
 @command_with_verbosity(pipeline, "describe")
-@env_option
 @click.argument("name", nargs=1)
 @click.pass_obj
 def describe_pipeline(
-    metadata: ProjectMetadata, name, env, **kwargs
+    metadata: ProjectMetadata, name, **kwargs
 ):  # pylint: disable=unused-argument
     """Describe a pipeline by providing a pipeline name."""
-    session = _create_session(metadata.package_name, env=env)
-    context = session.load_context()
-    pipeline_obj = context.pipelines.get(name)
+    pipeline_obj = pipelines.get(name)
     if not pipeline_obj:
-        existing_pipelines = ", ".join(sorted(context.pipelines.keys()))
+        all_pipeline_names = pipelines.keys()
+        existing_pipelines = ", ".join(sorted(all_pipeline_names))
         raise KedroCliError(
             f"`{name}` pipeline not found. Existing pipelines: [{existing_pipelines}]"
         )
@@ -382,16 +374,6 @@ def _unpack_wheel(location: str, destination: Path, fs_args: Optional[str]) -> N
                 f"There has to be exactly one distribution file."
             )
         ZipFile(wheel_file[0]).extractall(destination)
-
-
-def _create_session(package_name: str, **kwargs):
-    kwargs.setdefault("save_on_close", False)
-    try:
-        return KedroSession.create(package_name, **kwargs)
-    except Exception as exc:
-        raise KedroCliError(
-            f"Unable to instantiate Kedro session.\nError: {exc}"
-        ) from exc
 
 
 def _rename_files(conf_source: Path, old_name: str, new_name: str):

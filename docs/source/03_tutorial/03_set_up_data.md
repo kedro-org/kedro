@@ -20,7 +20,7 @@ The spaceflight tutorial has three files and uses two data formats: `.csv` and `
 
 Here are some examples of how you can [download the files from GitHub](https://www.quora.com/How-do-I-download-something-from-GitHub) to the `data/01_raw` directory inside your project:
 
-Using [cURL in a Unix terminal](https://curl.haxx.se/download.html):
+Using [cURL in a Unix terminal](https://curl.se/download.html):
 
 <details>
 <summary><b>Click to expand</b></summary>

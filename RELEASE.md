@@ -1,3 +1,14 @@
+# Upcoming Release 0.17.2
+
+## Major features and improvements
+
+## Bug fixes and other changes
+* If `settings.py` is not importable, the errors will be surfaced earlier in the process, rather than at runtime.
+
+## Breaking changes to the API
+
+## Thanks for supporting contributions
+
 # Release 0.17.1
 
 ## Major features and improvements
@@ -58,8 +69,6 @@ from kedro.framework.session import KedroSession
 [Deepyaman Datta](https://github.com/deepyaman),
 [Sam Hiscox](https://github.com/samhiscoxqb),
 [Pascal Brokmeier](https://github.com/pascalwhoop)
-
-## Thanks for supporting contributions
 
 # Release 0.17.0
 

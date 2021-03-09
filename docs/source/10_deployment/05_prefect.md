@@ -35,6 +35,7 @@ from prefect import Client, Flow, Task
 from prefect.utilities.exceptions import ClientError
 
 from kedro.framework.cli.utils import _add_src_to_path
+from kedro.framework.project import configure_project
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import _get_project_metadata
 from kedro.io import DataCatalog, MemoryDataSet
@@ -62,8 +63,9 @@ def build_and_register_flow(pipeline_name, env):
     project_path = Path.cwd()
     metadata = _get_project_metadata(project_path)
     _add_src_to_path(metadata.source_dir, project_path)
+    configure_project(metadata.package_name)
 
-    session = KedroSession.create(metadata.package_name, project_path, env=env)
+    session = KedroSession.create(project_path=project_path, env=env)
     context = session.load_context()
 
     catalog = context.catalog
@@ -74,7 +76,7 @@ def build_and_register_flow(pipeline_name, env):
     for ds_name in unregistered_ds:
         catalog.add(ds_name, MemoryDataSet())
 
-    flow = Flow(context.project_name)
+    flow = Flow(metadata.project_name)
 
     tasks = {}
     for node, parent_nodes in pipeline.node_dependencies.items():
@@ -99,13 +101,13 @@ def build_and_register_flow(pipeline_name, env):
 
     client = Client()
     try:
-        client.create_project(project_name=context.project_name)
+        client.create_project(project_name=metadata.project_name)
     except ClientError:
-        # `context.project_name` project already exists
+        # `metadata.project_name` project already exists
         pass
 
     # Register the flow with the server
-    flow.register(project_name=context.project_name)
+    flow.register(project_name=metadata.project_name)
 
     # Start a local agent that can communicate between the server
     # and your flow code

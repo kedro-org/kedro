@@ -16,7 +16,7 @@ Here are the main reasons to use Argo Workflows:
 
 To use Argo Workflows, make sure you have the following prerequisites in place:
 
-- Argo Workflows is [installed](https://github.com/argoproj/argo#quickstart) on your Kubernetes cluster
+- Argo Workflows is [installed](https://github.com/argoproj/argo/blob/master/README.md#quickstart) on your Kubernetes cluster
 - Argo CLI is [installed](https://github.com/argoproj/argo/releases) on you machine
 - A `name` attribute is set for each Kedro [node](/kedro.pipeline.node) since it is used to build a DAG
 - All node input/output DataSets must be configured in `catalog.yml` and refer to an external location (e.g. [AWS S3](../05_data/01_data_catalog.md#using-the-data-catalog-with-the-yaml-api)); you cannot use the `MemoryDataSet` in your workflow
@@ -30,7 +30,7 @@ First, you need to containerise your Kedro project, using any preferred containe
 
 For the purpose of this walk-through, we are going to assume a `Docker` workflow. We recommend the [`Kedro-Docker`](https://github.com/quantumblacklabs/kedro-docker) plugin to streamline the process. [Instructions for Kedro-Docker are in the plugin's README.md](https://github.com/quantumblacklabs/kedro-docker/blob/master/README.md).
 
-After you’ve built the Docker image for your project locally, [transfer the image to a container registry](./01_single_machine.html#how-to-use-container-registry).
+After you’ve built the Docker image for your project locally, [transfer the image to a container registry](./02_single_machine.md#how-to-use-container-registry).
 
 ### Create Argo Workflows spec
 
@@ -45,6 +45,7 @@ import click
 from jinja2 import Environment, FileSystemLoader
 
 from kedro.framework.cli.utils import _add_src_to_path
+from kedro.framework.project import configure_project
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import _get_project_metadata
 
@@ -64,9 +65,10 @@ def generate_argo_config(image, pipeline_name, env):
     project_path = Path.cwd()
     metadata = _get_project_metadata(project_path)
     _add_src_to_path(metadata.source_dir, project_path)
+    configure_project(metadata.package_name)
     project_name = metadata.project_name
 
-    session = KedroSession.create(metadata.package_name, project_path, env=env)
+    session = KedroSession.create(project_path=project_path, env=env)
     context = session.load_context()
 
     pipeline_name = pipeline_name or "__default__"

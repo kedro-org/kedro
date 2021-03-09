@@ -1,20 +1,82 @@
-# Upcoming 0.17.1
+# Upcoming Release 0.17.2
 
 ## Major features and improvements
 * Added support for `compress_pickle` backend to `PickleDataSet`.
 
 ## Bug fixes and other changes
+* If `settings.py` is not importable, the errors will be surfaced earlier in the process, rather than at runtime.
 
-## Other breaking changes to the API
+## Breaking changes to the API
 
 ## Thanks for supporting contributions
 [Sasaki Takeru](https://github.com/takeru/)
+
+# Release 0.17.1
+
+## Major features and improvements
+* Added `env` and `extra_params` to `reload_kedro()` line magic.
+* Extended the `pipeline()` API to allow strings and sets of strings as `inputs` and `outputs`, to specify when a dataset name remains the same (not namespaced).
+* Added the ability to add custom prompts with regexp validator for starters by repurposing `default_config.yml` as `prompts.yml`.
+* Added the `env` and `extra_params` arguments to `register_config_loader` hook.
+* Refactored the way `settings` are loaded. You will now be able to run:
+
+```python
+from kedro.framework.project import settings
+
+print(settings.CONF_ROOT)
+```
+
+## Bug fixes and other changes
+* The version of a packaged modular pipeline now defaults to the version of the project package.
+* Added fix to prevent new lines being added to pandas CSV datasets.
+* Fixed issue with loading a versioned `SparkDataSet` in the interactive workflow.
+* Kedro CLI now checks `pyproject.toml` for a `tool.kedro` section before treating the project as a Kedro project.
+* Added fix to `DataCatalog::shallow_copy` now it should copy layers.
+* `kedro pipeline pull` now uses `pip download` for protocols that are not supported by `fsspec`.
+* Cleaned up documentation to fix broken links and rewrite permanently redirected ones.
+* Added a `jsonschema` schema definition for the Kedro 0.17 catalog.
+* `kedro install` now waits on Windows until all the requirements are installed.
+* Exposed `--to-outputs` option in the CLI, throughout the codebase, and as part of hooks specifications.
+* Fixed a bug where `ParquetDataSet` wasn't creating parent directories on the fly.
+* Updated documentation.
+
+## Breaking changes to the API
+* This release has broken the `kedro ipython` and `kedro jupyter` workflows. To fix this, follow the instructions in the migration guide below.
+* You will also need to upgrade `kedro-viz` to 3.10.1 if you use the `%run_viz` line magic in Jupyter Notebook.
+
+> *Note:* If you're using the `ipython` [extension](https://kedro.readthedocs.io/en/stable/11_tools_integration/02_ipython.html#ipython-extension) instead, you will not encounter this problem.
+
+## Migration guide
+You will have to update the file `<your_project>/.ipython/profile_default/startup/00-kedro-init.py` in order to make `kedro ipython` and/or `kedro jupyter` work. Add the following line before the `KedroSession` is created:
+
+```python
+configure_project(metadata.package_name)  # to add
+
+session = KedroSession.create(metadata.package_name, path)
+```
+
+Make sure that the associated import is provided in the same place as others in the file:
+
+```python
+from kedro.framework.project import configure_project  # to add
+from kedro.framework.session import KedroSession
+```
+
+## Thanks for supporting contributions
+[Mariana Silva](https://github.com/marianansilva),
+[Kiyohito Kunii](https://github.com/921kiyo),
+[noklam](https://github.com/noklam),
+[Ivan Doroshenko](https://github.com/imdoroshenko),
+[Zain Patel](https://github.com/mzjp2),
+[Deepyaman Datta](https://github.com/deepyaman),
+[Sam Hiscox](https://github.com/samhiscoxqb),
+[Pascal Brokmeier](https://github.com/pascalwhoop)
 
 # Release 0.17.0
 
 ## Major features and improvements
 
-* In a significant change, [we have introduced `KedroSession`](https://kedro.readthedocs.io/en/stable/04_kedro_project_setup/01_dependencies/03_session.html) which is responsible for managing the lifecycle of a Kedro run.
+* In a significant change, [we have introduced `KedroSession`](https://kedro.readthedocs.io/en/stable/04_kedro_project_setup/03_session.html) which is responsible for managing the lifecycle of a Kedro run.
 * Created a new Kedro Starter: `kedro new --starter=mini-kedro`. It is possible to [use the DataCatalog as a standalone component](https://github.com/quantumblacklabs/kedro-starters/tree/master/mini-kedro) in a Jupyter notebook and transition into the rest of the Kedro framework.
 * Added `DatasetSpecs` with Hooks to run before and after datasets are loaded from/saved to the catalog.
 * Added a command: `kedro catalog create`. For a registered pipeline, it creates a `<conf_root>/<env>/catalog/<pipeline_name>.yml` configuration file with `MemoryDataSet` datasets for each dataset that is missing from `DataCatalog`.
@@ -420,7 +482,7 @@ As an example, code that used to look like this with the `Pipeline.transform()` 
 ```python
 result = my_pipeline.transform(
     datasets={"input": "new_input", "output": "new_output", "params:x": "params:y"},
-    prefix="pre"
+    prefix="pre",
 )
 ```
 
@@ -433,7 +495,7 @@ result = pipeline(
     inputs={"input": "new_input"},
     outputs={"output": "new_output"},
     parameters={"params:x": "params:y"},
-    namespace="pre"
+    namespace="pre",
 )
 ```
 
@@ -635,7 +697,7 @@ You can also load data incrementally whenever it is dumped into a directory with
 * New CLI commands and command flags:
   - Load multiple `kedro run` CLI flags from a configuration file with the `--config` flag (e.g. `kedro run --config run_config.yml`)
   - Run parametrised pipeline runs with the `--params` flag (e.g. `kedro run --params param1:value1,param2:value2`).
-  - Lint your project code using the `kedro lint` command, your project is linted with [`black`](https://github.com/psf/black) (Python 3.6+), [`flake8`](https://gitlab.com/pycqa/flake8) and [`isort`](https://github.com/timothycrosley/isort).
+  - Lint your project code using the `kedro lint` command, your project is linted with [`black`](https://github.com/psf/black) (Python 3.6+), [`flake8`](https://gitlab.com/pycqa/flake8) and [`isort`](https://github.com/PyCQA/isort).
 * Load specific environments with Jupyter notebooks using `KEDRO_ENV` which will globally set `run`, `jupyter notebook` and `jupyter lab` commands using environment variables.
 * Added the following datasets:
   - `CSVGCSDataSet` dataset in `contrib` for working with CSV files in Google Cloud Storage.

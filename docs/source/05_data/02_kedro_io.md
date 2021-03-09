@@ -3,7 +3,7 @@
 
 In this tutorial, we cover advanced uses of the [Kedro IO](/kedro.io.rst) module to understand the underlying implementation. The relevant API documentation is [kedro.io.AbstractDataSet](/kedro.io.AbstractDataSet) and [kedro.io.DataSetError](/kedro.io.DataSetError).
 
-> *Note:* This documentation is based on `Kedro 0.17.0`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 ## Error handling
 
@@ -59,7 +59,7 @@ from kedro.io import AbstractVersionedDataSet
 
 
 class MyOwnDataSet(AbstractVersionedDataSet):
-    def __init__(self, filepath, version,  param1, param2=True):
+    def __init__(self, filepath, version, param1, param2=True):
         super().__init__(PurePosixPath(filepath), version)
         self._param1 = param1
         self._param2 = param2
@@ -149,8 +149,9 @@ version = Version(
 )
 
 test_data_set = CSVDataSet(
-    filepath="data/01_raw/test.csv", save_args={"index": False}, version=version,
-
+    filepath="data/01_raw/test.csv",
+    save_args={"index": False},
+    version=version,
 )
 io = DataCatalog({"test_data_set": test_data_set})
 
@@ -173,8 +174,9 @@ version = Version(
 )
 
 test_data_set = CSVDataSet(
-    filepath="data/01_raw/test.csv", save_args={"index": False}, version=version,
-
+    filepath="data/01_raw/test.csv",
+    save_args={"index": False},
+    version=version,
 )
 io = DataCatalog({"test_data_set": test_data_set})
 
@@ -198,8 +200,9 @@ version = Version(
 )
 
 test_data_set = CSVDataSet(
-    filepath="data/01_raw/test.csv", save_args={"index": False}, version=version,
-
+    filepath="data/01_raw/test.csv",
+    save_args={"index": False},
+    version=version,
 )
 io = DataCatalog({"test_data_set": test_data_set})
 

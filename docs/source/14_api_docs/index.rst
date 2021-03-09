@@ -44,8 +44,12 @@ Welcome to Kedro's documentation!
     :alt: Discourse users
 
 .. image:: https://img.shields.io/badge/code%20style-black-black.svg
-    :target: https://github.com/ambv/black
+    :target: https://github.com/psf/black
     :alt: Code style is Black
+
+.. image:: https://zenodo.org/badge/182067506.svg
+   :target: https://zenodo.org/badge/latestdoi/182067506
+    :alt: Citation Reference
 
 .. toctree::
    :maxdepth: 2
@@ -120,7 +124,6 @@ Welcome to Kedro's documentation!
    :caption: Logging
 
    08_logging/01_logging
-   08_logging/02_journal
 
 .. toctree::
    :maxdepth: 2
@@ -145,6 +148,8 @@ Welcome to Kedro's documentation!
    10_deployment/07_aws_batch
    10_deployment/08_databricks
    10_deployment/09_aws_sagemaker
+   10_deployment/10_aws_step_functions
+   10_deployment/11_airflow_astronomer
 
 .. toctree::
    :maxdepth: 2
@@ -165,6 +170,7 @@ Welcome to Kedro's documentation!
    :caption: Resources
 
    13_resources/01_logos
+   13_resources/02_glossary
 
 
 API Docs

@@ -20,7 +20,7 @@ kedro build-reqs
 We then recommend the [`Kedro-Docker`](https://github.com/quantumblacklabs/kedro-docker) plugin to streamline the process of building the image. [Instructions for using this are in the plugin's README.md](https://github.com/quantumblacklabs/kedro-docker/blob/master/README.md).
 
 
-After you’ve built the Docker image for your project locally, you would typically have to transfer the image to a container registry, such as DockerHub or AWS Elastic Container Registry, to be able to pull it on your remote servers. You can find instructions on how to do so [in our guide for single-machine deployment](./01_single_machine.html#how-to-use-container-registry).
+After you’ve built the Docker image for your project locally, you would typically have to transfer the image to a container registry, such as DockerHub or AWS Elastic Container Registry, to be able to pull it on your remote servers. You can find instructions on how to do so [in our guide for single-machine deployment](./02_single_machine.md#how-to-use-container-registry).
 
 ## 2. Convert your Kedro pipeline into targeted platform's primitives
 

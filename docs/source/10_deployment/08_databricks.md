@@ -1,9 +1,9 @@
 # Deployment to a Databricks cluster
 
 
-> *Note:* This documentation is based on `Kedro 0.17.0`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
-This tutorial uses the [PySpark Iris Kedro Starter](https://github.com/quantumblacklabs/kedro-starter-pyspark-iris) to illustrate how to bootstrap a Kedro project using Spark and deploy it to a [Databricks cluster on AWS](https://databricks.com/aws). It is split into 2 sections:
+This tutorial uses the [PySpark Iris Kedro Starter](https://github.com/quantumblacklabs/kedro-starters/tree/master/pyspark-iris) to illustrate how to bootstrap a Kedro project using Spark and deploy it to a [Databricks cluster on AWS](https://databricks.com/aws). It is split into 2 sections:
 
 * [Databricks Connect workflow](#run-the-kedro-project-with-databricks-connect) (recommended)
 * [Databricks Notebook workflow](#run-kedro-project-from-a-databricks-notebook) (the setup of this is more involved)
@@ -20,7 +20,7 @@ Both section have the following prerequisites:
 
 In this section, we show how to create a sample Iris project with PySpark, connect it to the Databricks cluster using [Databricks Connect](https://docs.databricks.com/dev-tools/databricks-connect.html), and trigger a run from the local machine.
 
-> Note: Additional requirement in this section is to have [Java 8 installed](https://www.java.com/en/download/help/download_options.xml) on your local machine (as Databricks Connect does not support Java 11).
+> Note: Additional requirement in this section is to have [Java 8 installed](https://www.java.com/en/download/help/download_options.html) on your local machine (as Databricks Connect does not support Java 11).
 
 ### 1. Project setup
 
@@ -34,7 +34,7 @@ conda create --name iris_databricks python=3.7 -y
 conda activate iris_databricks
 
 # install Kedro and create a new project
-pip install "kedro~=0.17.0"
+pip install "kedro~=0.17.1"
 # name your project Iris Databricks when prompted for it
 kedro new --starter pyspark-iris
 ```
@@ -134,7 +134,9 @@ spark = SparkSession.builder.getOrCreate()
 dbutils = DBUtils(spark.sparkContext)
 
 data_dir = Path.cwd() / "data"
-dbutils.fs.cp(f"file://{data_dir.as_posix()}", "dbfs:/iris-databricks/data", recurse=True)
+dbutils.fs.cp(
+    f"file://{data_dir.as_posix()}", "dbfs:/iris-databricks/data", recurse=True
+)
 
 # make sure DBFS ls returns a similar result
 dbutils.fs.ls("dbfs:/iris-databricks/data/01_raw/")
@@ -231,7 +233,7 @@ Now you should [create a new repository in GitHub](https://docs.github.com/en/gi
 To connect to the newly created repository you can use one of 2 options:
 
 * **SSH:** If you choose to connect with SSH, you will also need to configure [the SSH connection to GitHub](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh), unless you already have [an existing SSH key](https://docs.github.com/en/github/authenticating-to-github/checking-for-existing-ssh-keys) configured for GitHub
-* **HTTPS:** If using HTTPS, you will be asked for your GitHub username and password when you push your first commit - please use your GitHub username and your [personal access token](#create-github-personal-access-token) generated in the previous step as a password and [_not_ your original GitHub password](https://developer.github.com/v3/auth/#via-username-and-password).
+* **HTTPS:** If using HTTPS, you will be asked for your GitHub username and password when you push your first commit - please use your GitHub username and your [personal access token](#create-github-personal-access-token) generated in the previous step as a password and [_not_ your original GitHub password](https://docs.github.com/en/rest/overview/other-authentication-methods#via-username-and-password).
 
 ### 4. Push Kedro project to the GitHub repository
 
@@ -305,10 +307,10 @@ In your newly created notebook put each code snippet from below into a separate 
 %sh rm -rf ~/projects/iris-databricks && git clone --single-branch --branch master https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/${GITHUB_USER}/<your-repo-name>.git ~/projects/iris-databricks
 ```
 
-* Install the latest version of Kedro compatible with version `0.17.0`
+* Install the latest version of Kedro compatible with version `0.17.1`
 
 ```console
-%pip install "kedro[spark.SparkDataSet]~=0.17.0"
+%pip install "kedro[spark.SparkDataSet]~=0.17.1"
 ```
 
 * Copy input data into DBFS
@@ -323,7 +325,9 @@ logging.getLogger("py4j.java_gateway").setLevel(logging.ERROR)
 # copy project data into DBFS
 project_root = Path.home() / "projects" / "iris-databricks"
 data_dir = project_root / "data"
-dbutils.fs.cp(f"file://{data_dir.as_posix()}", f"dbfs://{data_dir.as_posix()}", recurse=True)
+dbutils.fs.cp(
+    f"file://{data_dir.as_posix()}", f"dbfs://{data_dir.as_posix()}", recurse=True
+)
 
 # make sure the data has been copied
 dbutils.fs.ls((data_dir / "01_raw").as_posix())
@@ -339,13 +343,15 @@ Out[11]: [FileInfo(path='dbfs:/root/projects/iris-databricks/data/01_raw/.gitkee
 
 ```python
 from kedro.framework.cli.utils import _add_src_to_path
+from kedro.framework.project import configure_project
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import _get_project_metadata
 
 metadata = _get_project_metadata(project_root)
 _add_src_to_path(metadata.source_dir, project_root)
+configure_project(metadata.package_name)
 
-with KedroSession.create(metadata.package_name, project_root) as session:
+with KedroSession.create(project_path=project_root) as session:
     session.run()
 ```
 

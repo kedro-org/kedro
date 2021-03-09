@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@
 """Application entry point."""
 from pathlib import Path
 
+from kedro.framework.project import configure_project
 from kedro.framework.session import KedroSession
 
 
@@ -36,6 +37,7 @@ def run_package():
     # Entry point for running a Kedro project packaged with `kedro package`
     # using `python -m <project_package>.run` command.
     package_name = Path(__file__).resolve().parent.name
+    configure_project(package_name)
     with KedroSession.create(package_name) as session:
         session.run()
 

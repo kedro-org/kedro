@@ -1,8 +1,9 @@
 import logging.config
 import sys
 from pathlib import Path
+from typing import Any, Dict
 
-from IPython.core.magic import register_line_magic, needs_local_scope
+from IPython.core.magic import needs_local_scope, register_line_magic
 
 # Find the project root (./../../../)
 from kedro.framework.startup import _get_project_metadata
@@ -12,7 +13,7 @@ project_path = Path(__file__).parents[3].resolve()
 
 
 @register_line_magic
-def reload_kedro(path, line=None):
+def reload_kedro(path, line=None, env: str = None, extra_params: Dict[str, Any] = None):
     """Line magic which reloads all Kedro default variables."""
     global startup_error
     global context
@@ -22,6 +23,7 @@ def reload_kedro(path, line=None):
     try:
         import kedro.config.default_logger
         from kedro.framework.hooks import get_hook_manager
+        from kedro.framework.project import configure_project
         from kedro.framework.session import KedroSession
         from kedro.framework.session.session import _activate_session
         from kedro.framework.cli.jupyter import collect_line_magic
@@ -51,7 +53,10 @@ def reload_kedro(path, line=None):
         for module in to_remove:
             del sys.modules[module]
 
-        session = KedroSession.create(metadata.package_name, path)
+        configure_project(metadata.package_name)
+        session = KedroSession.create(
+            metadata.package_name, path, env=env, extra_params=extra_params
+        )
         _activate_session(session, force=True)
         logging.debug("Loading the context from %s", str(path))
         context = session.load_context()

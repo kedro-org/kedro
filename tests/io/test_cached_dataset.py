@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -88,6 +88,7 @@ class TestCachedDataset:
 
         cached_ds.save(42)
         assert cached_ds.load() == 42
+        # pylint: disable=no-member
         assert wrapped.load.call_count == 0
         assert wrapped.save.call_count == 1
         assert cached_ds._cache.load.call_count == 1
@@ -101,6 +102,7 @@ class TestCachedDataset:
         mocker.spy(cached_ds._cache, "load")
 
         assert cached_ds.load() == -42
+        # pylint: disable=no-member
         assert wrapped.load.call_count == 1
         assert cached_ds._cache.load.call_count == 0
 

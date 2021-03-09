@@ -1,7 +1,7 @@
 # Set up Visual Studio Code
 
 
-> *Note:* This documentation is based on `Kedro 0.17.0`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 Start by opening a new project directory in VS Code and installing the Python plugin under **Tools and languages**:
 
@@ -100,14 +100,14 @@ To start a build, go to **Terminal > Run Build Task...** or press `Cmd + Shift +
 
 ## Debugging
 
-To debug, you will first need to create an `.env` file in your project root. Add the full path to the `./src/` folder to the *PYTHONPATH* environment variable in the `.env` file:
+To debug, you _may_ need to create an `.env` file in your project root. Add the full path to the `./src/` folder to the *PYTHONPATH* environment variable in the `.env` file:
 
 ```console
 # In macOS / Linux:
 PYTHONPATH=/path/to/project/src:$PYTHONPATH
 
 # In Windows
-set PYTHONPATH=C:/path/to/project/src;%PYTHONPATH%
+PYTHONPATH=C:/path/to/project/src;%PYTHONPATH%
 ```
 
 You can find more information about setting up environmental variables [here](https://code.visualstudio.com/docs/python/environments#_environment-variable-definitions-file).
@@ -129,8 +129,11 @@ Edit the `launch.json` that opens in the editor with:
             "name": "Python: Kedro Run",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/src/<your_project_package>/run.py",
             "console": "integratedTerminal",
+            "module": "kedro",
+            "args": ["run"]
+            // Any other arguments should be passed as a comma-seperated-list
+            // e.g "args": ["run", "--pipeline", "pipeline_name"]
         }
     ]
 }
@@ -248,7 +251,7 @@ Enter the following in your `settings.json` file:
 ```json
 {
   "yaml.schemas": {
-    "https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/static/jsonschema/kedro-catalog-0.16.json": "conf/**/*catalog*"
+    "https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/static/jsonschema/kedro-catalog-0.17.json": "conf/**/*catalog*"
   }
 }
 ```

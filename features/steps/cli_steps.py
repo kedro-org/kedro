@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -580,27 +580,6 @@ def check_python_packages_created(context):
     assert any(whl_file)
 
 
-@then('"{env}" environment was used')
-def check_environment_used(context, env):
-    env_path = context.root_project_dir / "conf" / env
-    assert env_path.exists(), f'Environment "{env}" does not exist'
-
-    if isinstance(context.result, ChildTerminatingPopen):
-        stdout = context.result.stdout.read().decode()
-        context.result.terminate()
-    else:
-        stdout = context.result.stdout
-
-    for config_name in ("catalog", "parameters", "credentials"):
-        path = env_path.joinpath(f"{config_name}.yml")
-        if path.exists():
-            msg = f"Loading: {path.resolve()}"
-            assert msg in stdout, (
-                "Expected the following message segment to be printed on stdout: "
-                f"{msg}, but got:\n{stdout}"
-            )
-
-
 @then('I should get a message including "{msg}"')
 def check_message_printed(context, msg):
     """Check that specified message is printed to stdout (can be a segment)."""
@@ -720,7 +699,7 @@ def check_docs_generated(context: behave.runner.Context):
         context.root_project_dir / "docs" / "build" / "html" / "index.html"
     ).read_text("utf-8")
     project_repo = context.project_name.replace("-", "_")
-    assert f"Welcome to project’s {project_repo} API docs!" in index_html, index_html
+    assert f"Welcome to project {project_repo}’s API docs!" in index_html, index_html
 
 
 @then("requirements should be generated")

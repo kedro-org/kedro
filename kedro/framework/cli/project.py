@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -162,7 +162,13 @@ def install(metadata: ProjectMetadata, compile_flag):
         python_call("pip", pip_command)
     else:
         command = [sys.executable, "-m", "pip"] + pip_command
-        subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_CONSOLE)
+        proc = subprocess.Popen(
+            command, creationflags=subprocess.CREATE_NEW_CONSOLE, stderr=subprocess.PIPE
+        )
+        _, errs = proc.communicate()
+        if errs:
+            secho(errs.decode(), fg="red")
+            raise click.exceptions.Exit(code=1)
     secho("Requirements installed!", fg="green")
 
 

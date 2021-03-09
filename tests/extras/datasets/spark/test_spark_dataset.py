@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pylint: disable=import-error
 import sys
 import tempfile
 from pathlib import Path, PurePosixPath
@@ -287,13 +286,30 @@ class TestSparkDataSet:
         """
         catalog = DataCatalog(data_sets={"spark_in": spark_in})
         pipeline = Pipeline([node(identity, "spark_in", "spark_out")])
-        pattern = r"The following data_sets cannot be serialized: \['spark_in'\]"
+        pattern = (
+            r"The following data sets cannot be used with "
+            r"multiprocessing: \['spark_in'\]"
+        )
         with pytest.raises(AttributeError, match=pattern):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
     def test_s3_glob_refresh(self):
         spark_dataset = SparkDataSet(filepath="s3a://bucket/data")
         assert spark_dataset._glob_function.keywords == {"refresh": True}
+
+    def test_copy(self):
+        spark_dataset = SparkDataSet(
+            filepath="/tmp/data", save_args={"mode": "overwrite"}
+        )
+        assert spark_dataset._file_format == "parquet"
+
+        spark_dataset_copy = spark_dataset._copy(_file_format="csv")
+
+        assert spark_dataset is not spark_dataset_copy
+        assert spark_dataset._file_format == "parquet"
+        assert spark_dataset._save_args == {"mode": "overwrite"}
+        assert spark_dataset_copy._file_format == "csv"
+        assert spark_dataset_copy._save_args == {"mode": "overwrite"}
 
 
 class TestSparkDataSetVersionedLocal:

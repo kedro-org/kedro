@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -103,7 +103,8 @@ def multi_catalog(mocker):
     csv = CSVDataSet(filepath="abc.csv")
     parq = ParquetDataSet(filepath="xyz.parq")
     journal = mocker.Mock()
-    return DataCatalog({"abc": csv, "xyz": parq}, journal=journal)
+    layers = {"raw": {"abc.csv"}, "model": {"xyz.parq"}}
+    return DataCatalog({"abc": csv, "xyz": parq}, journal=journal, layers=layers)
 
 
 @pytest.fixture

@@ -63,7 +63,6 @@ y_train:
 y_test:
   type: pickle.PickleDataSet
   filepath: s3://<your-bucket>/y_test.pickle
-
 ```
 
 </details>
@@ -76,7 +75,7 @@ First, you need to containerise your Kedro project, using any preferred containe
 
 For the purpose of this walk-through, we are going to assume a `Docker` workflow. We recommend using the [`Kedro-Docker`](https://github.com/quantumblacklabs/kedro-docker) plugin to streamline the process.  [Instructions for using this are in the plugin's README.md](https://github.com/quantumblacklabs/kedro-docker/blob/master/README.md).
 
-After you’ve built the Docker image for your project locally, [transfer the image to a container registry](./01_single_machine.html#how-to-use-container-registry), for instance [AWS ECR](https://aws.amazon.com/ecr/). You can find instructions on how to push your Docker image to ECR [in Amazon's ECR documentation](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html).
+After you’ve built the Docker image for your project locally, [transfer the image to a container registry](./02_single_machine.md#how-to-use-container-registry), for instance [AWS ECR](https://aws.amazon.com/ecr/). You can find instructions on how to push your Docker image to ECR [in Amazon's ECR documentation](https://docs.aws.amazon.com/AmazonECR/latest/userguide/docker-push-ecr-image.html).
 
 Alternatively, once you've created a container repository, click the `View Push Commands` button in the top-right corner of the [ECR dashboard](https://console.aws.amazon.com/ecr).
 
@@ -208,7 +207,6 @@ class AWSBatchRunner(ThreadRunner):
                 if not futures:
                     assert not todo_nodes, (todo_nodes, done_nodes, ready, done)
                     break
-
 ```
 
 Next you will want to add the implementation of the `_submit_job()` method referenced in `_run()`. This method will create and submit jobs to AWS Batch with the following:
@@ -222,41 +220,40 @@ Once submitted, the method tracks progress and surfaces any errors if the jobs e
 Make sure the contents below are placed inside the `AWSBatchRunner` class:
 
 ```python
-    def _submit_job(
-        self,
-        node: Node,
-        node_to_job: Dict[Node, str],
-        node_dependencies: Set[Node],
-        run_id: str,
-    ) -> Node:
-        self._logger.info("Submitting the job for node: %s", str(node))
+def _submit_job(
+    self,
+    node: Node,
+    node_to_job: Dict[Node, str],
+    node_dependencies: Set[Node],
+    run_id: str,
+) -> Node:
+    self._logger.info("Submitting the job for node: %s", str(node))
 
-        job_name = f"kedro_{run_id}_{node.name}".replace(".", "-")
-        depends_on = [{"jobId": node_to_job[dep]} for dep in node_dependencies]
-        command = ["kedro", "run", "--node", node.name]
+    job_name = f"kedro_{run_id}_{node.name}".replace(".", "-")
+    depends_on = [{"jobId": node_to_job[dep]} for dep in node_dependencies]
+    command = ["kedro", "run", "--node", node.name]
 
-        response = self._client.submit_job(
-            jobName=job_name,
-            jobQueue=self._job_queue,
-            jobDefinition=self._job_definition,
-            dependsOn=depends_on,
-            containerOverrides={"command": command},
-        )
+    response = self._client.submit_job(
+        jobName=job_name,
+        jobQueue=self._job_queue,
+        jobDefinition=self._job_definition,
+        dependsOn=depends_on,
+        containerOverrides={"command": command},
+    )
 
-        job_id = response["jobId"]
-        node_to_job[node] = job_id
+    job_id = response["jobId"]
+    node_to_job[node] = job_id
 
-        _track_batch_job(job_id, self._client)  # make sure the job finishes
+    _track_batch_job(job_id, self._client)  # make sure the job finishes
 
-        return node
-
+    return node
 ```
 
 The last part of the implementation is the helper function `_track_batch_job()`, called from `_submit_job()`, which looks like this:
 
 ```python
 def _track_batch_job(job_id: str, client: Any) -> None:
-    """ Continuously poll the Batch client for a job's status,
+    """Continuously poll the Batch client for a job's status,
     given the job ID. If it ends in FAILED state, raise an exception
     and log the reason. Return if successful.
     """
@@ -280,7 +277,6 @@ def _track_batch_job(job_id: str, client: Any) -> None:
 
         if status == "SUCCEEDED":
             return
-
 ```
 
 #### Set up Batch-related configuration
@@ -313,8 +309,7 @@ def run(tag, env, parallel, ...):
     tag = _get_values_as_tuple(tag) if tag else tag
     node_names = _get_values_as_tuple(node_names) if node_names else node_names
 
-    package_name = str(Path(__file__).resolve().parent.name)
-    with KedroSession.create(package_name, env=env, extra_params=params) as session:
+    with KedroSession.create(env=env, extra_params=params) as session:
         runner_instance = _instantiate_runner(runner, is_async, context)
         session.run(
             tags=tag,
@@ -352,4 +347,4 @@ kedro run --env aws_batch --runner kedro_tutorial.runner.AWSBatchRunner
 
 You should start seeing jobs appearing on your Jobs dashboard, under the `Runnable` tab - meaning they're ready to start as soon as the resources are provisioned in the compute environment.
 
-AWS Batch has native integration with CloudWatch, where you can check the logs for a particular job. You can either click on the Batch job in the [Jobs](https://console.aws.amazon.com/batch/home#/jobs) tab and click `View logs` in the pop-up panel, or go to [CloudWatch dashboard](https://console.aws.amazon.com/cloudwatch), click `Log groups` in the side bar and find `/aws/batch/job`.
+AWS Batch has native integration with CloudWatch, where you can check the logs for a particular job. You can either click on the Batch job in the [Jobs](https://console.aws.amazon.com/batch/home/jobs) tab and click `View logs` in the pop-up panel, or go to [CloudWatch dashboard](https://console.aws.amazon.com/cloudwatch), click `Log groups` in the side bar and find `/aws/batch/job`.

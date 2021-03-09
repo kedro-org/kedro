@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ from kedro.framework.context import KedroContext, KedroContextError
 from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import hook_impl
 from kedro.framework.hooks.manager import get_hook_manager
-from kedro.framework.project.settings import _get_project_settings
+from kedro.framework.project import Validator, _ProjectSettings, settings
 from kedro.framework.session import KedroSession
 from kedro.framework.session.session import _register_all_project_hooks
 from kedro.io import DataCatalog
@@ -363,8 +363,13 @@ class LoggingHooks:
         return {"__default__": CONTEXT_PIPELINE, "de": CONTEXT_PIPELINE}
 
     @hook_impl
-    def register_config_loader(self, conf_paths: Iterable[str]) -> ConfigLoader:
-        self.logger.info("Registering config loader", extra={"conf_paths": conf_paths})
+    def register_config_loader(
+        self, conf_paths: Iterable[str], env: str, extra_params: Dict[str, Any]
+    ) -> ConfigLoader:
+        self.logger.info(
+            "Registering config loader",
+            extra={"conf_paths": conf_paths, "env": env, "extra_params": extra_params},
+        )
         return ConfigLoader(conf_paths)
 
     @hook_impl
@@ -483,23 +488,81 @@ def mock_broken_pipeline(mocker):
     )
 
 
-@pytest.fixture
-def mock_settings_import(mocker, logging_hooks):
-    # https://docs.python.org/3/library/unittest.mock.html#unittest.mock.sentinel
-    mock_settings = mocker.sentinel.mock_settings
-    mock_settings.HOOKS = (logging_hooks,)
+def _mock_imported_settings_paths(mocker, mock_settings):
+    for path in [
+        "kedro.framework.context.context.settings",
+        "kedro.framework.session.session.settings",
+        "kedro.framework.project.settings",
+    ]:
+        mocker.patch(path, mock_settings)
+    return mock_settings
 
-    return mocker.patch(
-        "kedro.framework.project.settings.import_module", return_value=mock_settings
+
+def _mock_settings_with_hooks(mocker, hooks):
+    class MockSettings(_ProjectSettings):
+        _HOOKS = Validator("HOOKS", default=hooks)
+
+    return _mock_imported_settings_paths(mocker, MockSettings())
+
+
+@pytest.fixture
+def mock_settings_with_logging_hooks(mocker, logging_hooks):
+    return _mock_settings_with_hooks(mocker, hooks=(logging_hooks,))
+
+
+@pytest.fixture
+def mock_settings_duplicate_hooks(mocker, logging_hooks):
+    return _mock_settings_with_hooks(mocker, hooks=(logging_hooks, DuplicateHooks(),))
+
+
+@pytest.fixture
+def mock_settings_before_node_run_hooks(mocker, logging_hooks):
+    return _mock_settings_with_hooks(
+        mocker, hooks=(logging_hooks, BeforeNodeRunHook(),)
     )
 
 
 @pytest.fixture
+def mock_settings_broken_before_node_run_hooks(mocker, logging_hooks):
+    return _mock_settings_with_hooks(
+        mocker, hooks=(logging_hooks, BrokenBeforeNodeRunHook(),)
+    )
+
+
+@pytest.fixture
+def mock_settings_broken_config_loader_hooks(mocker):
+    return _mock_settings_with_hooks(mocker, hooks=(BrokenConfigLoaderHooks(),))
+
+
+@pytest.fixture
+def mock_settings_broken_catalog_hooks(mocker):
+    return _mock_settings_with_hooks(mocker, hooks=(BrokenCatalogHooks(),))
+
+
+@pytest.fixture
+def naughty_plugin():
+    return MockDistInfo("test-project-a", "0.1")
+
+
+@pytest.fixture
+def mock_settings_with_disabled_hooks(mocker, logging_hooks, naughty_plugin):
+    class MockSettings(_ProjectSettings):
+        _HOOKS = Validator("HOOKS", default=(logging_hooks,))
+        _DISABLE_HOOKS_FOR_PLUGINS = Validator(
+            "DISABLE_HOOKS_FOR_PLUGINS", default=(naughty_plugin.project_name,)
+        )
+
+    _mock_imported_settings_paths(mocker, MockSettings())
+
+
+@pytest.fixture
 def mock_session_with_hooks(
-    tmp_path, mock_settings_import, logging_hooks
+    tmp_path, mock_settings_with_logging_hooks, logging_hooks
 ):  # pylint: disable=unused-argument
     logging_hooks.queue_listener.start()
-    yield KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
+    yield KedroSession.create(
+        MOCK_PACKAGE_NAME, tmp_path, extra_params={"params:key": "value"}
+    )
     logging_hooks.queue_listener.stop()
 
 
@@ -513,15 +576,15 @@ class TestKedroSessionHooks:
 
         assert hook_manager.is_registered(logging_hooks)
 
-    def test_calling_register_hooks_twice(self, mock_session_with_hooks, logging_hooks):
+    @pytest.mark.usefixtures("mock_session_with_hooks")
+    def test_calling_register_hooks_twice(self, logging_hooks):
         """Calling hook registration multiple times should not raise"""
         hook_manager = get_hook_manager()
-        package_name = mock_session_with_hooks._package_name
 
         # hooks already registered when fixture 'mock_session_with_hooks' was called
         assert hook_manager.is_registered(logging_hooks)
-        _register_all_project_hooks(hook_manager, package_name)
-        _register_all_project_hooks(hook_manager, package_name)
+        _register_all_project_hooks(hook_manager)
+        _register_all_project_hooks(hook_manager)
         assert hook_manager.is_registered(logging_hooks)
 
     @pytest.mark.parametrize("num_plugins", [0, 1])
@@ -554,8 +617,9 @@ class TestKedroSessionHooks:
             )
             assert expected_msg in log_messages
 
+    @pytest.mark.usefixtures("mock_settings_with_disabled_hooks")
     def test_disabling_auto_discovered_hooks(
-        self, mocker, request, caplog, mock_settings_import
+        self, mocker, caplog, logging_hooks, tmp_path
     ):
         hook_manager = get_hook_manager()
         assert not hook_manager.get_plugins()
@@ -573,13 +637,11 @@ class TestKedroSessionHooks:
         )
         unregister_mock = mocker.patch.object(hook_manager, "unregister")
 
-        # pretend that we disabled hooks for plugin 'test-project-a'
-        mock_settings_import.return_value.DISABLE_HOOKS_FOR_PLUGINS = (
-            naughty_plugin.project_name,
+        logging_hooks.queue_listener.start()
+        KedroSession.create(
+            MOCK_PACKAGE_NAME, tmp_path, extra_params={"params:key": "value"}
         )
-
-        # call a fixture which creates a session
-        request.getfixturevalue("mock_session_with_hooks")
+        logging_hooks.queue_listener.stop()
         list_distinfo_mock.assert_called_once_with()
         unregister_mock.assert_called_once_with(plugin=distinfo[0][0])
 
@@ -731,7 +793,7 @@ class TestKedroSessionHooks:
         assert call_record.run_id == mock_session_with_hooks.session_id
 
     @SKIP_ON_WINDOWS
-    @pytest.mark.usefixtures("mock_broken_pipeline", "mock_settings_import")
+    @pytest.mark.usefixtures("mock_broken_pipeline", "mock_settings_with_logging_hooks")
     def test_on_node_error_hook_parallel_runner(self, tmp_path, logging_hooks):
         session = KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
         log_records = []
@@ -765,7 +827,7 @@ class TestKedroSessionHooks:
             assert_exceptions_equal(call_record.error, expected_error)
 
     @SKIP_ON_WINDOWS
-    @pytest.mark.usefixtures("mock_settings_import")
+    @pytest.mark.usefixtures("mock_settings_with_logging_hooks")
     def test_before_and_after_node_run_hooks_parallel_runner(
         self, tmp_path, logging_hooks, dummy_dataframe
     ):
@@ -842,7 +904,7 @@ class TestKedroSessionHooks:
         pd.testing.assert_frame_equal(call_record.data, dummy_dataframe)
 
     @SKIP_ON_WINDOWS
-    @pytest.mark.usefixtures("mock_settings_import")
+    @pytest.mark.usefixtures("mock_settings_with_logging_hooks")
     def test_before_and_after_dataset_loaded_hooks_parallel_runner(
         self, tmp_path, logging_hooks, dummy_dataframe
     ):
@@ -919,7 +981,7 @@ class TestKedroSessionHooks:
         assert call_record.data.to_dict() == dummy_dataframe.to_dict()
 
     @SKIP_ON_WINDOWS
-    @pytest.mark.usefixtures("mock_settings_import")
+    @pytest.mark.usefixtures("mock_settings_with_logging_hooks")
     def test_before_and_after_dataset_saved_hooks_parallel_runner(
         self, tmp_path, logging_hooks, dummy_dataframe
     ):
@@ -963,10 +1025,8 @@ class TestKedroSessionHooks:
 class TestBeforeNodeRunHookWithInputUpdates:
     """Test the behavior of `before_node_run_hook` when updating node inputs"""
 
-    def test_correct_input_update(
-        self, mock_settings_import, tmp_path, dummy_dataframe
-    ):
-        mock_settings_import.return_value.HOOKS = (BeforeNodeRunHook(),)
+    @pytest.mark.usefixtures("mock_settings_before_node_run_hooks")
+    def test_correct_input_update(self, tmp_path, dummy_dataframe):
 
         session = KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
         context = session.load_context()
@@ -979,11 +1039,8 @@ class TestBeforeNodeRunHookWithInputUpdates:
         assert isinstance(result["ships"], pd.DataFrame)
 
     @SKIP_ON_WINDOWS
-    def test_correct_input_update_parallel(
-        self, mock_settings_import, tmp_path, dummy_dataframe
-    ):
-        mock_settings_import.return_value.HOOKS = (BeforeNodeRunHook(),)
-
+    @pytest.mark.usefixtures("mock_settings_before_node_run_hooks")
+    def test_correct_input_update_parallel(self, tmp_path, dummy_dataframe):
         session = KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
         context = session.load_context()
         catalog = context.catalog
@@ -994,9 +1051,8 @@ class TestBeforeNodeRunHookWithInputUpdates:
         assert isinstance(result["planes"], MockDatasetReplacement)
         assert isinstance(result["ships"], pd.DataFrame)
 
-    def test_broken_input_update(self, mock_settings_import, tmp_path, dummy_dataframe):
-        mock_settings_import.return_value.HOOKS = (BrokenBeforeNodeRunHook(),)
-
+    @pytest.mark.usefixtures("mock_settings_broken_before_node_run_hooks")
+    def test_broken_input_update(self, tmp_path, dummy_dataframe):
         session = KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
         context = session.load_context()
         catalog = context.catalog
@@ -1011,11 +1067,8 @@ class TestBeforeNodeRunHookWithInputUpdates:
             session.run()
 
     @SKIP_ON_WINDOWS
-    def test_broken_input_update_parallel(
-        self, mock_settings_import, tmp_path, dummy_dataframe
-    ):
-        mock_settings_import.return_value.HOOKS = (BrokenBeforeNodeRunHook(),)
-
+    @pytest.mark.usefixtures("mock_settings_broken_before_node_run_hooks")
+    def test_broken_input_update_parallel(self, tmp_path, dummy_dataframe):
         session = KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
         context = session.load_context()
         catalog = context.catalog
@@ -1052,11 +1105,8 @@ class TestRegistrationHooks:
         expected_pipelines = {"__default__": CONTEXT_PIPELINE, "de": CONTEXT_PIPELINE}
         assert context.pipelines == expected_pipelines
 
-    def test_register_pipelines_with_duplicate_entries(
-        self, tmp_path, mock_settings_import, logging_hooks, dummy_dataframe
-    ):
-        mock_settings_import.return_value.HOOKS = (logging_hooks, DuplicateHooks())
-
+    @pytest.mark.usefixtures("mock_settings_duplicate_hooks")
+    def test_register_pipelines_with_duplicate_entries(self, tmp_path, dummy_dataframe):
         session = KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
         context = session.load_context()
         catalog = context.catalog
@@ -1087,12 +1137,13 @@ class TestRegistrationHooks:
         record = relevant_records[0]
         assert record.getMessage() == "Registering config loader"
 
-        conf_root = _get_project_settings(MOCK_PACKAGE_NAME, "CONF_ROOT", "conf")
         expected_conf_paths = [
-            str(context.project_path / conf_root / "base"),
-            str(context.project_path / conf_root / "local"),
+            str(context.project_path / settings.CONF_ROOT / "base"),
+            str(context.project_path / settings.CONF_ROOT / "local"),
         ]
         assert record.conf_paths == expected_conf_paths
+        assert record.env == context.env
+        assert record.extra_params == {"params:key": "value"}
 
     def test_register_catalog_is_called(self, mock_session_with_hooks, caplog):
         context = mock_session_with_hooks.load_context()
@@ -1115,24 +1166,14 @@ class TestRegistrationHooks:
         assert record.load_versions is None
         assert record.journal is None
 
-    def test_broken_register_config_loader_hook(self, mocker, tmp_path):
-        mock_settings = mocker.sentinel.mock_settings
-        mock_settings.HOOKS = (BrokenConfigLoaderHooks(),)
-        mocker.patch(
-            "kedro.framework.project.settings.import_module", return_value=mock_settings
-        )
-
+    @pytest.mark.usefixtures("mock_settings_broken_config_loader_hooks")
+    def test_broken_register_config_loader_hook(self, tmp_path):
         pattern = "Expected an instance of `ConfigLoader`, got `NoneType` instead."
         with pytest.raises(KedroContextError, match=re.escape(pattern)):
             KedroSession.create(MOCK_PACKAGE_NAME, tmp_path)
 
-    def test_broken_register_catalog_hook(self, mocker, tmp_path):
-        mock_settings = mocker.sentinel.mock_settings
-        mock_settings.HOOKS = (BrokenCatalogHooks(),)
-        mocker.patch(
-            "kedro.framework.project.settings.import_module", return_value=mock_settings
-        )
-
+    @pytest.mark.usefixtures("mock_settings_broken_catalog_hooks")
+    def test_broken_register_catalog_hook(self, tmp_path):
         pattern = "Expected an instance of `DataCatalog`, got `NoneType` instead."
         with KedroSession.create(MOCK_PACKAGE_NAME, tmp_path) as session:
             context = session.load_context()

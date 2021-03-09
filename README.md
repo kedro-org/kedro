@@ -1,6 +1,14 @@
 ![Kedro Logo Banner](https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/static/img/kedro_banner.png)
 
-[![Python version](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue.svg)](https://pypi.org/project/kedro/) [![PyPI version](https://badge.fury.io/py/kedro.svg)](https://pypi.org/project/kedro/) [![Conda version](https://img.shields.io/conda/vn/conda-forge/kedro.svg)](https://anaconda.org/conda-forge/kedro) [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/quantumblacklabs/kedro/blob/master/LICENSE.md) [![Discourse users](https://img.shields.io/discourse/users?server=https%3A%2F%2Fdiscourse.kedro.community%2F)](https://discourse.kedro.community/) ![CircleCI - Master Branch](https://img.shields.io/circleci/build/github/quantumblacklabs/kedro/master?label=master) ![Develop Branch Build](https://img.shields.io/circleci/build/github/quantumblacklabs/kedro/develop?label=develop) [![Documentation](https://readthedocs.org/projects/kedro/badge/?version=stable)](https://kedro.readthedocs.io/)
+[![Python version](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue.svg)](https://pypi.org/project/kedro/)
+[![PyPI version](https://badge.fury.io/py/kedro.svg)](https://pypi.org/project/kedro/)
+[![Conda version](https://img.shields.io/conda/vn/conda-forge/kedro.svg)](https://anaconda.org/conda-forge/kedro)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/quantumblacklabs/kedro/blob/master/LICENSE.md)
+[![Discourse users](https://img.shields.io/discourse/users?server=https%3A%2F%2Fdiscourse.kedro.community%2F)](https://discourse.kedro.community/)
+![CircleCI - Master Branch](https://img.shields.io/circleci/build/github/quantumblacklabs/kedro/master?label=master)
+![Develop Branch Build](https://img.shields.io/circleci/build/github/quantumblacklabs/kedro/develop?label=develop)
+[![Documentation](https://readthedocs.org/projects/kedro/badge/?version=stable)](https://kedro.readthedocs.io/)
+[![DOI](https://zenodo.org/badge/182067506.svg)](https://zenodo.org/badge/latestdoi/182067506)
 
 
 ## What is Kedro?
@@ -36,7 +44,7 @@ Our [Get Started guide](https://kedro.readthedocs.io/en/stable/02_get_started/01
 | Project Template | A standard, modifiable and easy-to-use project template based on [Cookiecutter Data Science](https://github.com/drivendata/cookiecutter-data-science/). |
 | Data Catalog | A series of lightweight data connectors used to save and load data across many different file formats and file systems, including local and network file systems, cloud object stores, and HDFS. The Data Catalog also includes data and model versioning for file-based systems. |
 | Pipeline Abstraction | Automatic resolution of dependencies between pure Python functions and data pipeline visualisation using [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz). |
-| Coding Standards | Test-driven development using [`pytest`](https://github.com/pytest-dev/pytest), produce well-documented code using [Sphinx](http://www.sphinx-doc.org/en/master/), create linted code with support for [`flake8`](https://github.com/PyCQA/flake8), [`isort`](https://github.com/timothycrosley/isort) and [`black`](https://github.com/psf/black) and make use of the standard Python logging library. |
+| Coding Standards | Test-driven development using [`pytest`](https://github.com/pytest-dev/pytest), produce well-documented code using [Sphinx](http://www.sphinx-doc.org/en/master/), create linted code with support for [`flake8`](https://github.com/PyCQA/flake8), [`isort`](https://github.com/PyCQA/isort) and [`black`](https://github.com/psf/black) and make use of the standard Python logging library. |
 | Flexible Deployment | Deployment strategies that include single or distributed-machine deployment as well as additional support for deploying on Argo, Prefect, Kubeflow, AWS Batch and Databricks. |
 
 
@@ -44,7 +52,7 @@ Our [Get Started guide](https://kedro.readthedocs.io/en/stable/02_get_started/01
 
 The [Kedro documentation](https://kedro.readthedocs.io/en/stable/) includes three examples to help get you started:
 - A typical "Hello World" example, for an [entry-level description of the main Kedro concepts](https://kedro.readthedocs.io/en/stable/02_get_started/03_hello_kedro.html)
-- An [introduction to the product template](https://kedro.readthedocs.io/en/stable/02_get_started/05_example_project.html) using the Iris dataset
+- An [introduction to the project template](https://kedro.readthedocs.io/en/stable/02_get_started/05_example_project.html) using the Iris dataset
 - A more detailed [spaceflights tutorial](https://kedro.readthedocs.io/en/stable/03_tutorial/02_tutorial_template.html) to give you hands-on experience
 
 
@@ -75,6 +83,33 @@ There is a growing community around Kedro. Have a look at the [Kedro FAQs](https
 
 ## Who likes Kedro?
 
-There are Kedro users across the world, who work at start-ups, major enterprises and academic institutions like [Absa](https://www.absa.co.za/), [AI Singapore](https://makerspace.aisingapore.org/2020/08/leveraging-kedro-in-100e/), [Caterpillar](https://www.caterpillar.com/), [Dendra Systems](https://www.dendra.io/), [ElementAI](https://www.elementai.com/), [Imperial College London](https://github.com/dssg/barefoot-winnie-public), [Jungle Scout](https://junglescouteng.medium.com/jungle-scout-case-study-kedro-airflow-and-mlflow-use-on-production-code-150d7231d42e), [McKinsey & Company](https://www.mckinsey.com/alumni/news-and-insights/global-news/firm-news/kedro-from-proprietary-to-open-source), [Mercado Libre Argentina](https://www.mercadolibre.com.ar), [Modec](https://www.modec.com/), [Mosaic Data Science](https://www.youtube.com/watch?v=fCWGevB366g), [NaranjaX](https://www.youtube.com/watch?v=_0kMmRfltEQ), [Open Data Science LatAm](https://www.odesla.org/), [QuantumBlack](https://medium.com/quantumblack/introducing-kedro-the-open-source-library-for-production-ready-machine-learning-code-d1c6d26ce2cf), [Retrieva](https://tech.retrieva.jp/entry/2020/07/28/181414), [Roche](https://www.roche.com/), [UrbanLogiq](https://urbanlogiq.com/), [Universidad Rey Juan Carlos](https://github.com/vchaparro/MasterThesis-wind-power-forecasting/blob/master/thesis.pdf) and [XP](https://youtu.be/wgnGOVNkXqU?t=2210).
+There are Kedro users across the world, who work at start-ups, major enterprises and academic institutions like [Absa](https://www.absa.co.za/),
+[Acensi](https://acensi.eu/page/home),
+[AI Singapore](https://makerspace.aisingapore.org/2020/08/leveraging-kedro-in-100e/),
+[AXA UK](https://www.axa.co.uk/), [Caterpillar](https://www.caterpillar.com/),
+[CRIM](https://www.crim.ca/en/),
+[Dendra Systems](https://www.dendra.io/),
+[ElementAI](https://www.elementai.com/),
+[GMO](https://recruit.gmo.jp/engineer/jisedai/engineer/jisedai/engineer/jisedai/engineer/jisedai/engineer/jisedai/blog/kedro_and_mlflow_tracking/),
+[Imperial College London](https://github.com/dssg/barefoot-winnie-public),
+[Jungle Scout](https://junglescouteng.medium.com/jungle-scout-case-study-kedro-airflow-and-mlflow-use-on-production-code-150d7231d42e),
+[Helvetas](https://www.linkedin.com/posts/lionel-trebuchon_mlflow-kedro-ml-ugcPost-6747074322164154368-umKw),
+[Leapfrog](https://www.lftechnology.com/blog/ai-pipeline-kedro/),
+[McKinsey & Company](https://www.mckinsey.com/alumni/news-and-insights/global-news/firm-news/kedro-from-proprietary-to-open-source),
+[Mercado Libre Argentina](https://www.mercadolibre.com.ar),
+[Modec](https://www.modec.com/),
+[Mosaic Data Science](https://www.youtube.com/watch?v=fCWGevB366g),
+[NaranjaX](https://www.youtube.com/watch?v=_0kMmRfltEQ),
+[Open Data Science LatAm](https://www.odesla.org/),
+[QuantumBlack](https://medium.com/quantumblack/introducing-kedro-the-open-source-library-for-production-ready-machine-learning-code-d1c6d26ce2cf),
+[Retrieva](https://tech.retrieva.jp/entry/2020/07/28/181414), [Roche](https://www.roche.com/),
+[Telkomsel](https://www.linkedin.com/feed/update/urn:li:activity:6749338226403766272/updateEntityUrn=urn%3Ali%3Afs_feedUpdate%3A%28V2%2Curn%3Ali%3Aactivity%3A6749338226403766272%29),
+[UrbanLogiq](https://urbanlogiq.com/),
+[Universidad Rey Juan Carlos](https://github.com/vchaparro/MasterThesis-wind-power-forecasting/blob/master/thesis.pdf) and
+[XP](https://youtu.be/wgnGOVNkXqU?t=2210).
 
 Kedro has also won [Best Technical Tool or Framework for AI](https://awards.ai/the-awards/previous-awards/the-4th-ai-award-winners/) in the 2019 Awards AI competition and a merit award for the 2020 [UK Technical Communication Awards](https://uktcawards.com/announcing-the-award-winners-for-2020/). It is listed on the 2020 [ThoughtWorks Technology Radar](https://www.thoughtworks.com/radar/languages-and-frameworks/kedro) and the 2020 [Data & AI Landscape](https://mattturck.com/data2020/).
+
+## How can I cite Kedro?
+
+If you're an academic, Kedro can also help you, for example, as a tool to solve the problem of reproducible research. Find our citation reference on [Zenodo](https://zenodo.org/record/4336685).

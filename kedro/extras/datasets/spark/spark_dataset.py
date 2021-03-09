@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@
 """``AbstractDataSet`` implementation to access Spark dataframes using
 ``pyspark``
 """
-
 from copy import deepcopy
 from fnmatch import fnmatch
 from functools import partial
@@ -184,6 +183,7 @@ class SparkDataSet(AbstractVersionedDataSet):
         >>> reloaded.take(4)
     """
 
+    _SINGLE_PROCESS = True
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
@@ -212,14 +212,14 @@ class SparkDataSet(AbstractVersionedDataSet):
                 It is dependent on the selected file format. You can find
                 a list of read options for each supported format
                 in Spark DataFrame read documentation:
-                https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrame
+                https://spark.apache.org/docs/latest/api/python/reference/api/pyspark.sql.DataFrame.html
             save_args: Save args passed to Spark DataFrame write options.
                 Similar to load_args this is dependent on the selected file
                 format. You can pass ``mode`` and ``partitionBy`` to specify
                 your overwrite mode and partitioning respectively. You can find
                 a list of options for each format in Spark DataFrame
                 write documentation:
-                https://spark.apache.org/docs/latest/api/python/pyspark.sql.html#pyspark.sql.DataFrame
+                https://spark.apache.org/docs/latest/api/python/reference/api/pyspark.sql.DataFrame.html
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -288,10 +288,6 @@ class SparkDataSet(AbstractVersionedDataSet):
 
         self._file_format = file_format
         self._fs_prefix = fs_prefix
-
-    def __getstate__(self):
-        # SparkDataSet cannot be used with ParallelRunner
-        raise AttributeError(f"{self.__class__.__name__} cannot be serialized!")
 
     def _describe(self) -> Dict[str, Any]:
         return dict(

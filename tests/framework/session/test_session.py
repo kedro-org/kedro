@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import json
 import logging
 import re
 import subprocess
+import textwrap
 from pathlib import Path
 from typing import Iterable
 
@@ -38,6 +39,7 @@ import toml
 from kedro import __version__ as kedro_version
 from kedro.config import ConfigLoader
 from kedro.framework.hooks import hook_impl
+from kedro.framework.project import ValidationError, Validator, _ProjectSettings
 from kedro.framework.session import KedroSession, get_current_session
 from kedro.framework.session.store import BaseSessionStore, ShelveStore
 
@@ -61,7 +63,7 @@ def mocked_logging(mocker):
 
 @pytest.fixture
 def mock_context_class(mocker):
-    return mocker.patch("kedro.framework.session.session.KedroContext")
+    return mocker.patch("kedro.framework.session.session.KedroContext", autospec=True)
 
 
 class ConfigLoaderHooks:
@@ -70,16 +72,81 @@ class ConfigLoaderHooks:
         return ConfigLoader(conf_paths)
 
 
-@pytest.fixture(autouse=True)
-def mock_settings_import(mocker):
-    # `SettingsMock` plays a role of an imported `settings.py` module
-    class SettingsMock:  # pylint: disable=too-few-public-methods
-        # need a ConfigLoader registered to be able to setup logging
-        HOOKS = (ConfigLoaderHooks(),)
+def _mock_imported_settings_paths(mocker, mock_settings):
+    for path in [
+        "kedro.framework.project.settings",
+        "kedro.framework.session.session.settings",
+        "kedro.framework.context.context.settings",
+    ]:
+        mocker.patch(path, mock_settings)
+    return mock_settings
 
-    return mocker.patch(
-        "kedro.framework.project.settings.import_module", return_value=SettingsMock()
+
+@pytest.fixture
+def mock_settings(mocker):
+    return _mock_imported_settings_paths(mocker, _ProjectSettings())
+
+
+@pytest.fixture
+def mock_settings_context_class(mocker, mock_context_class):
+    class MockSettings(_ProjectSettings):
+        _HOOKS = Validator("HOOKS", default=(ConfigLoaderHooks(),))
+        _CONTEXT_CLASS = Validator(
+            "CONTEXT_CLASS", default=lambda *_: mock_context_class
+        )
+
+    return _mock_imported_settings_paths(mocker, MockSettings())
+
+
+@pytest.fixture
+def mock_settings_file_bad_session_store_class(tmpdir):
+    mock_settings_file = tmpdir.join("mock_settings_file.py")
+    mock_settings_file.write(
+        textwrap.dedent(
+            f"""
+            from {__name__} import BadStore
+            SESSION_STORE_CLASS = BadStore
+            """
+        )
     )
+    return mock_settings_file
+
+
+@pytest.fixture
+def mock_settings_bad_session_store_args(mocker):
+    class MockSettings(_ProjectSettings):
+        _SESSION_STORE_ARGS = Validator(
+            "SESSION_STORE_ARGS", default={"wrong_arg": "O_o"}
+        )
+
+    return _mock_imported_settings_paths(mocker, MockSettings())
+
+
+@pytest.fixture
+def mock_settings_uncaught_session_store_exception(mocker):
+    class MockSettings(_ProjectSettings):
+        _SESSION_STORE_ARGS = Validator("SESSION_STORE_ARGS", default={"path": "path"})
+
+    _mock_imported_settings_paths(mocker, MockSettings())
+    return mocker.patch.object(
+        BaseSessionStore, "__init__", side_effect=Exception("Fake")
+    )
+
+
+@pytest.fixture
+def mock_settings_shelve_session_store(mocker, fake_project):
+    shelve_location = fake_project / "nested" / "sessions"
+
+    class MockSettings(_ProjectSettings):
+        _HOOKS = Validator("HOOKS", default=(ConfigLoaderHooks(),))
+        _SESSION_STORE_CLASS = Validator(
+            "SESSION_STORE_CLASS", default=lambda *_: ShelveStore
+        )
+        _SESSION_STORE_ARGS = Validator(
+            "SESSION_STORE_ARGS", default={"path": shelve_location.as_posix()}
+        )
+
+    return _mock_imported_settings_paths(mocker, MockSettings())
 
 
 @pytest.fixture
@@ -153,8 +220,8 @@ SESSION_LOGGER_NAME = "kedro.framework.session.session"
 STORE_LOGGER_NAME = "kedro.framework.session.store"
 
 
-@pytest.mark.usefixtures("mock_context_class")
 class TestKedroSession:
+    @pytest.mark.usefixtures("mock_settings_context_class")
     @pytest.mark.parametrize("env", [None, "env1"])
     @pytest.mark.parametrize("extra_params", [None, {"key": "val"}])
     def test_create(
@@ -199,6 +266,7 @@ class TestKedroSession:
 
         assert session.load_context() is mock_context_class.return_value
 
+    @pytest.mark.usefixtures("mock_settings_context_class")
     def test_create_no_env_extra_params(
         self, fake_project, mock_context_class, fake_session_id, mocker
     ):
@@ -228,6 +296,7 @@ class TestKedroSession:
 
         assert session.load_context() is mock_context_class.return_value
 
+    @pytest.mark.usefixtures("mock_settings_context_class")
     def test_default_store(self, fake_project, fake_session_id, caplog):
         session = KedroSession.create(_FAKE_PACKAGE_NAME, fake_project)
         assert isinstance(session.store, dict)
@@ -246,16 +315,10 @@ class TestKedroSession:
         ]
         assert actual_log_messages == expected_log_messages
 
-    def test_shelve_store(
-        self, fake_project, fake_session_id, mock_settings_import, caplog, mocker
-    ):
+    @pytest.mark.usefixtures("mock_settings_shelve_session_store")
+    def test_shelve_store(self, fake_project, fake_session_id, caplog, mocker):
         mocker.patch("pathlib.Path.is_file", return_value=True)
         shelve_location = fake_project / "nested" / "sessions"
-        mock_settings_import.return_value.SESSION_STORE_CLASS = ShelveStore
-        mock_settings_import.return_value.SESSION_STORE_ARGS = {
-            "path": shelve_location.as_posix(),
-        }
-
         other = KedroSession.create(_FAKE_PACKAGE_NAME, fake_project)
         assert other._store.__class__ is ShelveStore
         assert other._store._path == shelve_location.as_posix()
@@ -272,20 +335,22 @@ class TestKedroSession:
         ]
         assert not actual_log_messages
 
-    def test_wrong_store_type(self, fake_project, mock_settings_import):
-        classpath = f"{BadStore.__module__}.{BadStore.__qualname__}"
-
-        mock_settings_import.return_value.SESSION_STORE_CLASS = BadStore
+    def test_wrong_store_type(self, mock_settings_file_bad_session_store_class):
         pattern = (
-            f"Store type `{classpath}` is invalid: "
-            f"it must extend `BaseSessionStore`."
+            "Invalid value `tests.framework.session.test_session.BadStore` received "
+            "for setting `SESSION_STORE_CLASS`. "
+            "It must be a subclass of `kedro.framework.session.store.BaseSessionStore`."
         )
-        with pytest.raises(ValueError, match=re.escape(pattern)):
-            KedroSession.create(_FAKE_PACKAGE_NAME, fake_project)
+        mock_settings = _ProjectSettings(
+            settings_file=str(mock_settings_file_bad_session_store_class)
+        )
+        with pytest.raises(ValidationError, match=re.escape(pattern)):
+            # accessing the setting attribute will cause it to be evaluated and therefore validated
+            assert mock_settings.SESSION_STORE_CLASS
 
-    def test_wrong_store_args(self, fake_project, mock_settings_import):
+    @pytest.mark.usefixtures("mock_settings_bad_session_store_args")
+    def test_wrong_store_args(self, fake_project):
         classpath = f"{BaseSessionStore.__module__}.{BaseSessionStore.__qualname__}"
-        mock_settings_import.return_value.SESSION_STORE_ARGS = {"wrong_arg": "O_o"}
         pattern = (
             f"Store config must only contain arguments valid for "
             f"the constructor of `{classpath}`."
@@ -294,19 +359,21 @@ class TestKedroSession:
             KedroSession.create(_FAKE_PACKAGE_NAME, fake_project)
 
     def test_store_uncaught_error(
-        self, fake_project, mock_settings_import, fake_session_id, mocker
+        self,
+        fake_project,
+        fake_session_id,
+        mock_settings_uncaught_session_store_exception,
     ):
         classpath = f"{BaseSessionStore.__module__}.{BaseSessionStore.__qualname__}"
-        mocked_init = mocker.patch.object(
-            BaseSessionStore, "__init__", side_effect=Exception("Fake")
-        )
-        mock_settings_import.return_value.SESSION_STORE_ARGS = {"path": "path"}
         pattern = f"Failed to instantiate session store of type `{classpath}`."
         with pytest.raises(ValueError, match=re.escape(pattern)):
             KedroSession.create(_FAKE_PACKAGE_NAME, fake_project)
 
-        mocked_init.assert_called_once_with(path="path", session_id=fake_session_id)
+        mock_settings_uncaught_session_store_exception.assert_called_once_with(
+            path="path", session_id=fake_session_id
+        )
 
+    @pytest.mark.usefixtures("mock_settings")
     @pytest.mark.parametrize("fake_git_status", ["dirty", ""])
     @pytest.mark.parametrize("fake_commit_hash", ["fake_commit_hash"])
     def test_git_describe(
@@ -325,6 +392,7 @@ class TestKedroSession:
         }
         assert session.store["git"] == expected_git_info
 
+    @pytest.mark.usefixtures("mock_settings")
     @pytest.mark.parametrize(
         "exception",
         [
@@ -349,6 +417,7 @@ class TestKedroSession:
         ]
         assert actual_log_messages == expected_log_messages
 
+    @pytest.mark.usefixtures("mock_settings")
     def test_log_error(self, fake_project):
         """Test logging the error by the session"""
 
@@ -365,6 +434,7 @@ class TestKedroSession:
             "raise FakeException" in tb_line for tb_line in exception["traceback"]
         )
 
+    @pytest.mark.usefixtures("mock_settings")
     def test_get_current_session(self, fake_project):
         assert get_current_session(silent=True) is None  # no sessions yet
 
@@ -390,6 +460,7 @@ class TestKedroSession:
         with session2:
             assert get_current_session() is session2
 
+    @pytest.mark.usefixtures("mock_settings_context_class")
     @pytest.mark.parametrize("fake_pipeline_name", [None, _FAKE_PIPELINE_NAME])
     def test_run(
         self,
@@ -422,6 +493,7 @@ class TestKedroSession:
             "to_nodes": None,
             "node_names": None,
             "from_inputs": None,
+            "to_outputs": None,
             "load_versions": None,
             "extra_params": {},
             "pipeline_name": fake_pipeline_name,
@@ -440,6 +512,7 @@ class TestKedroSession:
             catalog=mock_catalog,
         )
 
+    @pytest.mark.usefixtures("mock_settings_context_class")
     @pytest.mark.parametrize("fake_pipeline_name", [None, _FAKE_PIPELINE_NAME])
     def test_run_exception(
         self,
@@ -475,6 +548,7 @@ class TestKedroSession:
             "to_nodes": None,
             "node_names": None,
             "from_inputs": None,
+            "to_outputs": None,
             "load_versions": None,
             "extra_params": {},
             "pipeline_name": fake_pipeline_name,
@@ -495,6 +569,7 @@ class TestKedroSession:
         assert exception["traceback"]
 
 
+@pytest.mark.usefixtures("mock_settings")
 def test_setup_logging_using_absolute_path(fake_project, mocked_logging):
     KedroSession.create(_FAKE_PACKAGE_NAME, fake_project)
 

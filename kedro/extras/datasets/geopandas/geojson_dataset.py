@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -96,10 +96,10 @@ class GeoJSONDataSet(AbstractVersionedDataSet):
                 Note: `http(s)` doesn't support versioning.
             load_args: GeoPandas options for loading GeoJSON files.
                 Here you can find all available arguments:
-                https://geopandas.org/reference/geopandas.read_file.html
+                https://geopandas.org/docs/reference/api/geopandas.read_file.html#geopandas.read_file
             save_args: GeoPandas options for saving geojson files.
                 Here you can find all available arguments:
-                https://geopandas.org/reference.html#geopandas.GeoDataFrame.to_file
+                https://geopandas.org/docs/reference/api/geopandas.GeoDataFrame.to_file.html
                 The default_save_arg driver is 'GeoJSON', all others preserved.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is

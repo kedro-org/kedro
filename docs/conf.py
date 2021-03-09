@@ -193,6 +193,9 @@ linkcheck_ignore = [
     "https://github.com/quantumblacklabs/private-kedro/blob/master/kedro/templates/project/*",
     "https://zenodo.org/record/4336685",
     "https://zenodo.org/badge/latestdoi/182067506",
+    "https://quantumblacklabs.github.io/kedro/shuttles.xlsx",
+    "https://quantumblacklabs.github.io/kedro/companies.csv",
+    "https://quantumblacklabs.github.io/kedro/reviews.csv",
 ]
 
 # retry before render a link broken (fix for "too many requests")

@@ -41,12 +41,8 @@ from <project-name>.pipelines import my_modular_pipeline_1
 pipeline = my_modular_pipeline_1.create_pipeline()
 ```
 
-> Note: When you run `kedro pipeline create` it does _not_ automatically add a corresponding entry to `register_pipelines()` in `src/<python_package>/pipeline.py`.
-> In order to make your new pipeline runnable (using the `kedro run --pipeline <pipeline_name>` CLI command, for example), you need to modify `src/<python_package>/pipeline.py` yourself.
-
-You can see an example in this video from [Data Engineer One](https://www.youtube.com/watch?v=dRnCovp1GRQ&t=50s&ab_channel=DataEngineerOne):
-
-<iframe width="560" height="315" style="max-width: 100%" src="https://youtu.be/EGxEslQfZ-E" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+> Note: When you run `kedro pipeline create` it does _not_ automatically add a corresponding entry to `register_pipelines()` in `src/<python_package>/pipeline_registry.py`.
+> In order to make your new pipeline runnable (using the `kedro run --pipeline <pipeline_name>` CLI command, for example), you need to modify `src/<python_package>/pipeline_registry.py` yourself.
 
 ***Boilerplate configuration files***
 
@@ -81,14 +77,13 @@ def create_pipeline():
 ```
 
 * Modular pipelines should _not_ depend on the main Python package (`new_kedro_project` in this example) as this would break portability to another project
-* Modular pipelines should be registered and stitched together in a main (or `__default__`) pipeline located in `src/new_kedro_project/hooks.py`
+* Modular pipelines should be registered and stitched together in a main (or `__default__`) pipeline located in `src/new_kedro_project/pipeline_registry.py`
 
-The following example, illustrates how to import and instantiate two modular pipelines (`modular_pipeline_1` and `modular_pipeline_2`) within `src/new_kedro_project/hooks.py`:
+The following example, illustrates how to import and instantiate two modular pipelines (`modular_pipeline_1` and `modular_pipeline_2`) within `src/new_kedro_project/pipeline_registry.py`:
 
 ```python
 from typing import Dict
 
-from kedro.framework.hooks import hook_impl
 from kedro.pipeline import Pipeline
 
 from new_kedro_project.pipelines import (
@@ -97,16 +92,11 @@ from new_kedro_project.pipelines import (
 )
 
 
-class ProjectHooks:
-    @hook_impl
-    def register_pipelines(self) -> Dict[str, Pipeline]:
-        pipeline1 = mp1.create_pipeline()
-        pipeline2 = mp2.create_pipeline()
-        pipeline_all = pipeline1 + pipeline2
-        return {"mp1": pipeline1, "mp2": pipeline2, "__default__": pipeline_all}
-
-
-project_hooks = ProjectHooks()
+def register_pipelines() -> Dict[str, Pipeline]:
+    pipeline1 = mp1.create_pipeline()
+    pipeline2 = mp2.create_pipeline()
+    pipeline_all = pipeline1 + pipeline2
+    return {"mp1": pipeline1, "mp2": pipeline2, "__default__": pipeline_all}
 ```
 
 To run a pipeline by name from the command line:
@@ -184,7 +174,7 @@ Here is an example of a modular pipeline which combines all of these concepts wi
   - `src/new_kedro_project/pipelines/feature_engineering` - A pipeline that generates temporal features while aggregating data and performs a train/test split on the data
   - `src/new_kedro_project/pipelines/modelling` - A pipeline that fits models, does hyperparameter search and reports on model performance
 * A main (or `__default__`) pipeline:
-  - `src/new_kedro_project/hooks.py` - combines 3 modular pipelines from the above
+  - `src/new_kedro_project/pipeline_registry.py` - combines 3 modular pipelines from the above
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -222,6 +212,7 @@ new-kedro-project
 │   │   ├── __init__.py
 |   |   ├── cli.py
 │   │   ├── hooks.py
+│   │   ├── pipeline_registry.py
 │   │   ├── run.py
 |   |   └── settings.py
 │   ├── tests
@@ -413,4 +404,4 @@ You can manually delete all the files that belong to a modular pipeline. However
 * Configuration files `conf/<env>/parameters/<pipeline_name>.yml` and `conf/<env>/catalog/<pipeline_name>.yml`, where `<env>` defaults to `base`. If the files are located in a different config environment, run `kedro pipeline delete <pipeline_name> --env <env_name>`.
 * Pipeline unit tests in `tests/pipelines/<pipeline_name>/`
 
->*Note*: `kedro pipeline delete` won't remove the entry from `hooks.py` if you have imported the modular pipeline there.You must remove it manually to clean up, otherwise it will break your project because the import will raise an error.
+>*Note*: `kedro pipeline delete` won't remove the entry from `pipeline_registry.py` if you have imported the modular pipeline there.You must remove it manually to clean up, otherwise it will break your project because the import will raise an error.

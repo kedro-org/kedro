@@ -41,7 +41,6 @@ from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
 from typing import Any, Dict, Iterable, Set
 
-from kedro.framework.hooks.manager import get_hook_manager
 from kedro.io import DataCatalog, DataSetError, MemoryDataSet
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
@@ -104,11 +103,8 @@ ParallelRunnerManager.register(  # pylint: disable=no-member
 def _bootstrap_subprocess(package_name: str, conf_logging: Dict[str, Any]):
     # pylint: disable=import-outside-toplevel,protected-access,cyclic-import
     from kedro.framework.project import configure_project
-    from kedro.framework.session.session import _register_all_project_hooks
 
-    hook_manager = get_hook_manager()
     configure_project(package_name)
-    _register_all_project_hooks(hook_manager)
     logging.config.dictConfig(conf_logging)
 
 

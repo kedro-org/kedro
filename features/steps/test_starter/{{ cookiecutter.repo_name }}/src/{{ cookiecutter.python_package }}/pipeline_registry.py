@@ -25,25 +25,27 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Dummy plugin with simple hook implementations."""
-import logging
 
-from kedro.framework.hooks import hook_impl
-from kedro.pipeline import Pipeline, node
+"""Project pipelines."""
+from typing import Dict
 
+from kedro.pipeline import Pipeline
 
-class MyPluginHook:
-    @hook_impl
-    def after_catalog_created(
-        self, catalog
-    ):  # pylint: disable=unused-argument,no-self-use
-        logging.info("Reached after_catalog_created hook")
-
-    @hook_impl
-    def register_pipelines(self):  # pylint: disable=no-self-use
-        return {
-            "from_plugin": Pipeline([node(lambda: "sth", inputs=None, outputs="x")])
-        }
+from {{cookiecutter.python_package}}.pipelines import data_engineering as de
+from {{cookiecutter.python_package}}.pipelines import data_science as ds
 
 
-hooks = MyPluginHook()
+def register_pipelines() -> Dict[str, Pipeline]:
+    """Register the project's pipelines.
+
+    Returns:
+        A mapping from a pipeline name to a ``Pipeline`` object.
+    """
+    data_engineering_pipeline = de.create_pipeline()
+    data_science_pipeline = ds.create_pipeline()
+
+    return {
+        "de": data_engineering_pipeline,
+        "ds": data_science_pipeline,
+        "__default__": data_engineering_pipeline + data_science_pipeline,
+    }

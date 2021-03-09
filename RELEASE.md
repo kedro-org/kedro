@@ -11,6 +11,29 @@
 * Optional: You can now remove all `params:` prefix when supplying values to `parameters` argument in a `pipeline()` call.
 * If you're using `pandas.ExcelDataSet`, make sure you have `openpyxl` installed in your environment. Note that this is automatically pulled if you specify `kedro[pandas.ExcelDataSet]==0.18.0` in your `requirements.in`. You can uninstall `xlrd` if you were only using it for this dataset.
 
+# Upcoming Release 0.17.2
+
+## Major features and improvements
+* Added support for `compress_pickle` backend to `PickleDataSet`.
+* Refactored the way pipelines are loaded so you don't need a `KedroContext` instance. You will now be able to run:
+
+```python
+from kedro.framework.project import pipelines
+
+print(pipelines)
+```
+
+* Projects generated with kedro>=0.17.2 can specify the project's pipelines in `pipeline_registry.py` rather than `hooks.py`.
+
+## Bug fixes and other changes
+* If `settings.py` is not importable, the errors will be surfaced earlier in the process, rather than at runtime.
+
+## Breaking changes to the API
+* `kedro pipeline list` and `kedro pipeline describe` no longer accept redundant `--env` parameter.
+
+## Thanks for supporting contributions
+[Sasaki Takeru](https://github.com/takeru/)
+
 # Release 0.17.1
 
 ## Major features and improvements
@@ -71,8 +94,6 @@ from kedro.framework.session import KedroSession
 [Deepyaman Datta](https://github.com/deepyaman),
 [Sam Hiscox](https://github.com/samhiscoxqb),
 [Pascal Brokmeier](https://github.com/pascalwhoop)
-
-## Thanks for supporting contributions
 
 # Release 0.17.0
 

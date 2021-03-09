@@ -29,9 +29,14 @@
 configure a Kedro project and access its settings."""
 # pylint: disable=redefined-outer-name,unused-argument
 import importlib
+from warnings import warn
 
 from dynaconf import LazySettings
+from dynaconf.utils.functional import LazyObject
 from dynaconf.validator import ValidationError, Validator
+
+from kedro.framework.hooks import get_hook_manager
+from kedro.framework.hooks.manager import _register_hooks, _register_hooks_setuptools
 
 
 def _get_default_class(class_import_path):
@@ -89,16 +94,78 @@ class _ProjectSettings(LazySettings):
                 self._SESSION_STORE_CLASS,
                 self._SESSION_STORE_ARGS,
                 self._DISABLE_HOOKS_FOR_PLUGINS,
-            ],
+            ]
         )
         super().__init__(*args, **kwargs)
+
+
+class _ProjectPipelines(LazyObject):
+    def _setup(self):
+        self._wrapped = {}
+
+    def _get_register_pipelines(  # pylint: disable=no-self-use
+        self, pipelines_module: str
+    ):
+        module_obj = importlib.import_module(pipelines_module)
+        register_pipelines = getattr(module_obj, "register_pipelines")
+        return register_pipelines
+
+    def configure(self, pipelines_module=None, **kwargs):
+        """Collect all pipelines from hooks and from
+        the project's pipeline registry module.
+        """
+        try:
+            register_pipelines = self._get_register_pipelines(pipelines_module)
+        except (ModuleNotFoundError, AttributeError):
+            # for backwards compatibility, this is fine
+            project_pipelines = {}
+        else:
+            project_pipelines = register_pipelines()
+
+        # get pipelines registered from external hooks
+        hook_manager = get_hook_manager()
+        pipelines_dicts = (
+            hook_manager.hook.register_pipelines()  # pylint: disable=no-member
+        )
+        for pipeline_collection in pipelines_dicts:
+            duplicate_keys = pipeline_collection.keys() & project_pipelines.keys()
+            if duplicate_keys:
+                warn(
+                    f"Found duplicate pipeline entries. "
+                    f"The following will be overwritten: {', '.join(duplicate_keys)}"
+                )
+            project_pipelines.update(pipeline_collection)
+
+        for pipeline_name, pipeline in project_pipelines.items():
+            self[pipeline_name] = pipeline
 
 
 settings = _ProjectSettings()
 
 
+pipelines = _ProjectPipelines()
+
+
+def _validate_module(settings_module):
+    """Eagerly validate that the module is importable.
+    This ensures that the settings module is syntactically
+    correct so that any import errors are surfaced early.
+    """
+    importlib.import_module(settings_module)
+
+
 def configure_project(package_name: str):
     """Configure a Kedro project by populating its settings with values
-    defined in user's settings.py."""
+    defined in user's settings.py and pipeline_registry.py.
+    """
     settings_module = f"{package_name}.settings"
+    _validate_module(settings_module)
     settings.configure(settings_module)
+
+    # set up all hooks so we can discover all pipelines
+    hook_manager = get_hook_manager()
+    _register_hooks(hook_manager, settings.HOOKS)
+    _register_hooks_setuptools(hook_manager, settings.DISABLE_HOOKS_FOR_PLUGINS)
+
+    pipelines_module = f"{package_name}.pipeline_registry"
+    pipelines.configure(pipelines_module)

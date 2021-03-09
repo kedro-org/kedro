@@ -33,10 +33,20 @@ import click
 import yaml
 from click import secho
 
-from kedro.framework.cli.pipeline import _create_session
 from kedro.framework.cli.utils import KedroCliError, env_option, split_string
-from kedro.framework.project import settings
+from kedro.framework.project import pipelines, settings
+from kedro.framework.session import KedroSession
 from kedro.framework.startup import ProjectMetadata
+
+
+def _create_session(package_name: str, **kwargs):
+    kwargs.setdefault("save_on_close", False)
+    try:
+        return KedroSession.create(package_name, **kwargs)
+    except Exception as exc:
+        raise KedroCliError(
+            f"Unable to instantiate Kedro session.\nError: {exc}"
+        ) from exc
 
 
 @click.group()
@@ -67,15 +77,15 @@ def list_datasets(metadata: ProjectMetadata, pipeline, env):
     datasets_meta = context.catalog._data_sets  # pylint: disable=protected-access
     catalog_ds = set(context.catalog.list())
 
-    pipelines = pipeline or context.pipelines.keys()
+    target_pipelines = pipeline or pipelines.keys()
 
     result = {}
-    for pipe in pipelines:
-        pl_obj = context.pipelines.get(pipe)
+    for pipe in target_pipelines:
+        pl_obj = pipelines.get(pipe)
         if pl_obj:
             pipeline_ds = pl_obj.data_sets()
         else:
-            existing_pls = ", ".join(sorted(context.pipelines.keys()))
+            existing_pls = ", ".join(sorted(pipelines.keys()))
             raise KedroCliError(
                 f"`{pipe}` pipeline not found! Existing pipelines: {existing_pls}"
             )
@@ -130,10 +140,10 @@ def create_catalog(metadata: ProjectMetadata, pipeline_name, env):
     session = _create_session(metadata.package_name, env=env)
     context = session.load_context()
 
-    pipeline = context.pipelines.get(pipeline_name)
+    pipeline = pipelines.get(pipeline_name)
 
     if not pipeline:
-        existing_pipelines = ", ".join(sorted(context.pipelines.keys()))
+        existing_pipelines = ", ".join(sorted(pipelines.keys()))
         raise KedroCliError(
             f"`{pipeline_name}` pipeline not found! Existing pipelines: {existing_pipelines}"
         )

@@ -45,7 +45,7 @@ from pytest import fixture
 
 from kedro import __version__ as kedro_version
 from kedro.framework.cli.cli import cli
-from kedro.framework.project import configure_project
+from kedro.framework.project import configure_project, pipelines, settings
 from kedro.framework.startup import ProjectMetadata
 
 MOCKED_HOME = "user/path/"
@@ -121,6 +121,7 @@ def fake_metadata(fake_root_dir):
 
 @fixture(scope="module")
 def fake_project_cli(fake_repo_path: Path, dummy_config: Path):
+    old_settings = settings.as_dict()
     starter_path = Path(__file__).parents[3].resolve()
     starter_path = starter_path / "features" / "steps" / "test_starter"
     CliRunner().invoke(
@@ -138,6 +139,10 @@ def fake_project_cli(fake_repo_path: Path, dummy_config: Path):
     configure_project(PACKAGE_NAME)
     yield import_module(f"{PACKAGE_NAME}.cli")
 
+    # reset side-effects of configure_project
+    pipelines.clear()
+    for key, value in old_settings.items():
+        settings.set(key, value)
     sys.path = old_path
     del sys.modules[PACKAGE_NAME]
 

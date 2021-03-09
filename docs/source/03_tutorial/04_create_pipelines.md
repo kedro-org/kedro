@@ -118,7 +118,7 @@ This file ensures that the `data_processing` folder is a Python package, in acco
 
 ### Update the project pipeline
 
-Now update the project's pipeline in `src/kedro_tutorial/hooks.py` to add the [modular pipeline](../13_resources/02_glossary.md#modular-pipeline) for data processing:
+Now update the project's pipeline in `src/kedro_tutorial/pipeline_registry.py` to add the [modular pipeline](../13_resources/02_glossary.md#modular-pipeline) for data processing:
 
 <details>
 <summary><b>Click to expand</b></summary>
@@ -126,19 +126,16 @@ Now update the project's pipeline in `src/kedro_tutorial/hooks.py` to add the [m
 ```python
 from typing import Dict
 
-from kedro.framework.hooks import hook_impl
 from kedro.pipeline import Pipeline
 
 from kedro_tutorial.pipelines import data_processing as dp
 
 
-class ProjectHooks:
-    @hook_impl
-    def register_pipelines(self) -> Dict[str, Pipeline]:
-        """Register the project's pipeline.
+def register_pipelines() -> Dict[str, Pipeline]:
+    """Register the project's pipeline.
 
-        Returns:
-            A mapping from a pipeline name to a ``Pipeline`` object.
+    Returns:
+        A mapping from a pipeline name to a ``Pipeline`` object.
 
         """
         data_processing_pipeline = dp.create_pipeline()
@@ -470,10 +467,10 @@ from .pipeline import create_pipeline  # NOQA
 
 ### Update the project pipeline
 
-Add the data science pipeline to the project by replacing the code in `register_pipelines` in `src/kedro_tutorial/hooks.py` with the following:
+Add the data science pipeline to the project by replacing the code in `register_pipelines` in `src/kedro_tutorial/pipeline_registry.py` with the following:
 
 ```python
-def register_pipelines(self) -> Dict[str, Pipeline]:
+def register_pipelines() -> Dict[str, Pipeline]:
     """Register the project's pipeline.
 
     Returns:
@@ -495,6 +492,7 @@ Include the import at the top of the file:
 ```python
 from kedro_tutorial.pipelines import data_science as ds
 ```
+
 The two modular pipelines are merged together into a project default pipeline by the `__default__` key used in `"__default__": data_processing_pipeline + data_science_pipeline`.
 The `data_processing_pipeline` will preprocess the data, and `data_science_pipeline` will create features, train and evaluate the model.
 

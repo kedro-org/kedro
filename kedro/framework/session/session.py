@@ -37,35 +37,17 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, Optional, Union
 
 import click
-from pluggy import PluginManager
 
 from kedro import __version__ as kedro_version
 from kedro.framework.context import KedroContext
 from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import get_hook_manager
-from kedro.framework.hooks.manager import _register_hooks, _register_hooks_setuptools
 from kedro.framework.project import settings
 from kedro.framework.session.store import BaseSessionStore
 from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner, SequentialRunner
 
 _active_session = None
-
-
-def _register_all_project_hooks(hook_manager: PluginManager) -> None:
-    """Register all hooks from the project settings and from installed plugins
-    with the global ``hook_manager``.
-
-    Args:
-        hook_manager: Hook manager instance to register the hooks with.
-
-    """
-    # get the hooks specified in settings.py
-    hooks = settings.HOOKS
-    # get the plugins that must be disabled
-    disabled_plugins = settings.DISABLE_HOOKS_FOR_PLUGINS
-    _register_hooks(hook_manager, hooks)
-    _register_hooks_setuptools(hook_manager, disabled_plugins)
 
 
 def get_current_session(silent: bool = False) -> Optional["KedroSession"]:
@@ -218,8 +200,6 @@ class KedroSession:
 
         session._store.update(session_data)
 
-        hook_manager = get_hook_manager()
-        _register_all_project_hooks(hook_manager)
         # we need a ConfigLoader registered in order to be able to set up logging
         session._setup_logging()
         return session

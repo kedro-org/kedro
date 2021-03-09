@@ -101,4 +101,7 @@ def configure_project(package_name: str):
     """Configure a Kedro project by populating its settings with values
     defined in user's settings.py."""
     settings_module = f"{package_name}.settings"
+    # validate the settings module is syntactically correct
+    # any errors (e.g. import errors) should be surfaced early
+    importlib.import_module(settings_module)
     settings.configure(settings_module)

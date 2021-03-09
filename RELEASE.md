@@ -1,6 +1,7 @@
 # Upcoming Release 0.17.2
 
 ## Major features and improvements
+* Added support for `compress_pickle` backend to `PickleDataSet`.
 * Refactored the way pipelines are loaded so you don't need a `KedroContext` instance. You will now be able to run:
 
 ```python
@@ -18,6 +19,7 @@ print(pipelines)
 * `kedro pipeline list` and `kedro pipeline describe` no longer accept redundant `--env` parameter.
 
 ## Thanks for supporting contributions
+[Sasaki Takeru](https://github.com/takeru/)
 
 # Release 0.17.1
 

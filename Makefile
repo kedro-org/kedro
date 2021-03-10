@@ -16,7 +16,7 @@ legal:
 	python tools/license_and_headers.py
 
 lint:
-	pre-commit run -a --hook-stage manual
+	pre-commit run -a --hook-stage manual $(hook)
 
 test:
 	pytest tests --cov-config pyproject.toml

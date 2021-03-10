@@ -48,53 +48,6 @@ repos:
             types: [file, python]
             exclude: ^kedro/templates/|^features/steps/test_starter
             entry: isort
-          # It's impossible to specify per-directory configuration, so we just run it many times.
-          # https://github.com/PyCQA/pylint/issues/618
-          # The first set of pylint checks if for local pre-commit, it only runs on the files changed.
-          - id: pylint-quick-kedro
-            name: "Quick PyLint on kedro/*"
-            language: system
-            types: [file, python]
-            files: ^kedro/
-            exclude: ^kedro/templates/
-            entry: pylint --disable=unnecessary-pass
-            stages: [commit]
-          - id: pylint-quick-features
-            name: "Quick PyLint on features/*"
-            language: system
-            types: [file, python]
-            files: ^features/
-            exclude: ^features/steps/test_starter
-            entry: pylint --disable=missing-docstring,no-name-in-module
-            stages: [commit]
-          - id: pylint-quick-tests
-            name: "Quick PyLint on tests/*"
-            language: system
-            types: [file, python]
-            files: ^tests/
-            entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments,too-many-public-methods
-            stages: [commit]
-
-          # The same pylint checks, but running on all files. It's for manual run with `make lint`
-          - id: pylint-kedro
-            name: "PyLint on kedro/*"
-            language: system
-            pass_filenames: false
-            stages: [manual]
-            entry: pylint --disable=unnecessary-pass --init-hook="import sys; sys.setrecursionlimit(2000)" kedro
-          - id: pylint-features
-            name: "PyLint on features/*"
-            language: system
-            pass_filenames: false
-            stages: [manual]
-            exclude: ^features/steps/test_starter
-            entry: pylint --disable=missing-docstring,no-name-in-module features
-          - id: pylint-tests
-            name: "PyLint on tests/*"
-            language: system
-            pass_filenames: false
-            stages: [manual]
-            entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments,too-many-public-methods tests
           - id: black
             name: "Black"
             language: system
@@ -124,3 +77,51 @@ repos:
             types: [file, python]
             exclude: ^kedro/templates/|^tests/|^features/steps/test_starter
             entry: bandit -ll
+
+          # It's impossible to specify per-directory configuration, so we just run it many times.
+          # https://github.com/PyCQA/pylint/issues/618
+          # The first set of pylint checks if for local pre-commit, it only runs on the files changed.
+          - id: pylint-quick-kedro
+            name: "Quick PyLint on kedro/*"
+            language: system
+            types: [file, python]
+            files: ^kedro/
+            exclude: ^kedro/templates/
+            entry: pylint -j 4 --disable=unnecessary-pass
+            stages: [commit]
+          - id: pylint-quick-features
+            name: "Quick PyLint on features/*"
+            language: system
+            types: [file, python]
+            files: ^features/
+            exclude: ^features/steps/test_starter
+            entry: pylint -j 4 --disable=missing-docstring,no-name-in-module
+            stages: [commit]
+          - id: pylint-quick-tests
+            name: "Quick PyLint on tests/*"
+            language: system
+            types: [file, python]
+            files: ^tests/
+            entry: pylint -j 4 --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments,too-many-public-methods
+            stages: [commit]
+
+          # The same pylint checks, but running on all files. It's for manual run with `make lint`
+          - id: pylint-kedro
+            name: "PyLint on kedro/*"
+            language: system
+            pass_filenames: false
+            stages: [manual]
+            entry: pylint -j 4 --disable=unnecessary-pass --init-hook="import sys; sys.setrecursionlimit(2000)" kedro
+          - id: pylint-features
+            name: "PyLint on features/*"
+            language: system
+            pass_filenames: false
+            stages: [manual]
+            exclude: ^features/steps/test_starter
+            entry: pylint -j 4 --disable=missing-docstring,no-name-in-module features
+          - id: pylint-tests
+            name: "PyLint on tests/*"
+            language: system
+            pass_filenames: false
+            stages: [manual]
+            entry: pylint -j 4 --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments,too-many-public-methods tests

@@ -4,6 +4,7 @@ bandit>=1.6.2, <2.0
 behave==1.2.6
 biopython~=1.73
 black==v19.10.b0
+compress-pickle[lz4]~=1.2.0
 dask[complete]~=2.6
 flake8~=3.5
 gcsfs>=0.3.0, <0.8.0
@@ -31,8 +32,8 @@ pylint>=2.5.2, <3.0
 pyproj>=2.2.0, <3.0  # pyproj 3.0 requires proj>=7.2 but that conflicts with fiona which requires proj<7.2.
 pyspark>=2.2, <4.0
 pytest-cov~=2.5
-pytest-lazy-fixture~=0.6.3
 pytest-mock>=1.7.1,<2.0
+pytest-xdist[psutil]~=2.2.1
 pytest~=6.2
 requests-mock~=1.6
 requests~=2.20

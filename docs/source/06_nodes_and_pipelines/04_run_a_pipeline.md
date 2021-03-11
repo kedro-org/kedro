@@ -142,41 +142,33 @@ $ kedro run --async
 
 ## Run a pipeline by name
 
-To run the pipeline by its name, you need to add your new pipeline to `register_pipelines()` function `src/<python_package>/hooks.py` as below:
+To run the pipeline by its name, you need to add your new pipeline to `register_pipelines()` function `src/<python_package>/pipeline_registry.py` as below:
 
 <details>
 <summary><b>Click to expand</b></summary>
 
 ```python
-from kedro.framework.hooks import hook_impl
+def register_pipelines():
+    """Register the project's pipelines.
 
+    Returns:
+        A mapping from a pipeline name to a ``Pipeline`` object.
 
-class ProjectHooks:
-    @hook_impl
-    def register_pipelines(self):
-        """Register the project's pipelines.
+    """
 
-        Returns:
-            A mapping from a pipeline name to a ``Pipeline`` object.
+    data_engineering_pipeline = de.create_pipeline()
+    data_science_pipeline = ds.create_pipeline()
+    my_pipeline = Pipeline(
+        [
+            # your definition goes here
+        ]
+    )
 
-        """
-
-        data_engineering_pipeline = de.create_pipeline()
-        data_science_pipeline = ds.create_pipeline()
-        my_pipeline = Pipeline(
-            [
-                # your definition goes here
-            ]
-        )
-
-        return {
-            "de": data_engineering_pipeline,
-            "my_pipeline": my_pipeline,
-            "__default__": data_engineering_pipeline + data_science_pipeline,
-        }
-
-
-project_hooks = ProjectHooks()
+    return {
+        "de": data_engineering_pipeline,
+        "my_pipeline": my_pipeline,
+        "__default__": data_engineering_pipeline + data_science_pipeline,
+    }
 ```
 </details>
 

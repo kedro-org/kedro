@@ -53,6 +53,12 @@ Feature: Custom Kedro project
         And I should get a message including "Registered hooks from 1 installed plugin(s): test-plugin-0.1"
         And I should get a message including "Reached after_catalog_created hook"
 
+    Scenario: Pipelines from installed plugins are added to the project's pipelines
+        Given I have installed the test plugin
+        When I execute the kedro command "run --pipeline from_plugin"
+        Then I should get a successful exit code
+        And I should get a message including "Registered hooks from 1 installed plugin(s): test-plugin-0.1"
+
     Scenario: Disable automatically registered plugin hooks
         Given I have installed the test plugin
         And I have disabled hooks for "test-plugin" plugin via config

@@ -38,7 +38,7 @@ from warnings import warn
 
 from kedro.config import ConfigLoader, MissingConfigException
 from kedro.framework.hooks import get_hook_manager
-from kedro.framework.project import settings
+from kedro.framework.project import pipelines, settings
 from kedro.framework.startup import _get_project_metadata
 from kedro.io import DataCatalog
 from kedro.io.core import generate_timestamp
@@ -293,11 +293,12 @@ class KedroContext:
         Returns:
             A dictionary of defined pipelines.
         """
-        return self._get_pipelines()
+        return pipelines
 
-    def _get_pipeline(self, name: str = None) -> Pipeline:
+    def _get_pipeline(  # pylint: disable=no-self-use
+        self, name: str = None
+    ) -> Pipeline:
         name = name or "__default__"
-        pipelines = self._get_pipelines()
 
         try:
             return pipelines[name]
@@ -305,31 +306,8 @@ class KedroContext:
             raise KedroContextError(
                 f"Failed to find the pipeline named '{name}'. "
                 f"It needs to be generated and returned "
-                f"by the '_get_pipelines' function."
+                f"by the 'register_pipelines' function."
             ) from exc
-
-    def _get_pipelines(self) -> Dict[str, Pipeline]:  # pylint: disable=no-self-use
-        """Abstract method for a hook for changing the creation of a Pipeline instance.
-
-        Returns:
-            A dictionary of defined pipelines.
-        """
-        hook_manager = get_hook_manager()
-        pipelines_dicts = (
-            hook_manager.hook.register_pipelines()  # pylint: disable=no-member
-        )
-
-        pipelines = {}  # type: Dict[str, Pipeline]
-        for pipeline_collection in pipelines_dicts:
-            duplicate_keys = pipeline_collection.keys() & pipelines.keys()
-            if duplicate_keys:
-                warn(
-                    f"Found duplicate pipeline entries. "
-                    f"The following will be overwritten: {', '.join(duplicate_keys)}"
-                )
-            pipelines.update(pipeline_collection)
-
-        return pipelines
 
     @property
     def project_path(self) -> Path:

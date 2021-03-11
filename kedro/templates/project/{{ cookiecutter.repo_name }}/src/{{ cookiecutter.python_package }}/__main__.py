@@ -25,22 +25,20 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-"""Application entry point."""
+"""{{ cookiecutter.project_name }} file for ensuring the package is executable
+as `{{ cookiecutter.repo_name }}` and `python -m {{ cookiecutter.python_package }}`
+"""
 from pathlib import Path
 
 from kedro.framework.project import configure_project
-from kedro.framework.session import KedroSession
+
+from .cli import run
 
 
-def run_package():
-    # Entry point for running a Kedro project packaged with `kedro package`
-    # using `python -m <project_package>.run` command.
-    package_name = Path(__file__).resolve().parent.name
-    configure_project(package_name)
-    with KedroSession.create(package_name) as session:
-        session.run()
+def main():
+    configure_project(Path(__file__).parent.name)
+    run()
 
 
 if __name__ == "__main__":
-    run_package()
+    main()

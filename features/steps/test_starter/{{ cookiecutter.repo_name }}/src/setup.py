@@ -29,7 +29,7 @@
 from setuptools import find_packages, setup
 
 entry_point = (
-    "{{ cookiecutter.repo_name }} = {{ cookiecutter.python_package }}.run:run_package"
+    "{{ cookiecutter.repo_name }} = {{ cookiecutter.python_package }}.__main__:main"
 )
 
 

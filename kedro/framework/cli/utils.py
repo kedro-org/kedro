@@ -37,11 +37,12 @@ import sys
 import textwrap
 import traceback
 import warnings
+from collections import defaultdict
 from contextlib import contextmanager
 from importlib import import_module
 from itertools import chain
 from pathlib import Path
-from typing import Iterable, List, Sequence, Tuple, Union
+from typing import Iterable, List, Mapping, Sequence, Tuple, Union
 
 import click
 
@@ -135,6 +136,16 @@ class CommandCollection(click.CommandCollection):
         self.params = sources[0].params
         self.callback = sources[0].callback
 
+    @staticmethod
+    def _merge_same_name_groups(groups: Sequence[click.core.MultiCommand]):
+        named_groups: Mapping[str, List[click.core.MultiCommand]] = defaultdict(list)
+        for group in groups:
+            named_groups[group.name].append(group)
+
+        return [
+            click.CommandCollection(name=k, sources=v) for k, v in named_groups.items()
+        ]
+
     def resolve_command(self, ctx: click.core.Context, args: List):
         try:
             return super().resolve_command(ctx, args)
@@ -150,7 +161,7 @@ class CommandCollection(click.CommandCollection):
         self, ctx: click.core.Context, formatter: click.formatting.HelpFormatter
     ):
         for title, groups in self.groups:
-            for group in groups:
+            for group in self._merge_same_name_groups(groups):
                 formatter.write(click.style(f"\n{title} from {group.name}", fg="green"))
                 group.format_commands(ctx, formatter)
 

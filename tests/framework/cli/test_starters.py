@@ -30,20 +30,21 @@
 """
 
 import json
-import os
 import shutil
 from pathlib import Path
 
+import click
 import pytest
 import yaml
 from cookiecutter.exceptions import RepositoryCloneFailed
 
 from kedro import __version__ as version
-from kedro.framework.cli.cli import (
+from kedro.framework.cli.cli import cli
+from kedro.framework.cli.starters import (
+    _STARTER_ALIASES,
     TEMPLATE_PATH,
-    _fix_user_path,
     _get_prompts_config,
-    cli,
+    create_cli,
 )
 
 FILES_IN_TEMPLATE = 37
@@ -59,8 +60,10 @@ def _invoke(
 
     click_prompts = (project_name, repo_name, python_package)
     input_string = "\n".join(x or "" for x in click_prompts)
-
-    return cli_runner.invoke(cli, args, input=input_string)
+    # This is needed just for the tests, those CLI groups are merged in our
+    # code when invoking `kedro` but when imported, they still need to be merged
+    kedro_cli = click.CommandCollection(sources=[cli, create_cli])
+    return cli_runner.invoke(kedro_cli, args, input=input_string)
 
 
 # pylint: disable=too-many-arguments
@@ -243,28 +246,6 @@ class TestNewFromConfig:
         assert result.exit_code != 0
         assert "that cannot start any token" in result.output
 
-    def test_output_dir_with_tilde_in_path(self):
-        """Check no error if the output directory contains "~" ."""
-        home_dir = Path.home()
-        output_dir = os.path.join("~", "here")
-
-        expected = str(home_dir / "here")
-
-        actual = _fix_user_path(output_dir)
-        assert actual == expected
-
-    def test_output_dir_with_relative_path(self, mocker):
-        """Check no error if the output directory contains a relative path."""
-        home_dir = Path.home()
-        current_dir = home_dir / "current/directory"
-        output_dir = os.path.join("path", "to", "here")
-
-        expected = str(current_dir / output_dir)
-
-        mocker.patch("os.path.abspath", return_value=expected)
-        actual = _fix_user_path(str(output_dir))
-        assert actual == expected
-
     def test_missing_output_dir(self, cli_runner):
         """Check the error if config YAML does not contain the output
         directory."""
@@ -344,7 +325,7 @@ class TestNewWithStarter:
         self, alias, expected_starter_repo, cli_runner, mocker, tmp_path
     ):
         mocker.patch(
-            "kedro.framework.cli.cli.tempfile.TemporaryDirectory",
+            "kedro.framework.cli.starters.tempfile.TemporaryDirectory",
             return_value=tmp_path,
         )
         mocked_cookie = mocker.patch("cookiecutter.main.cookiecutter")
@@ -421,7 +402,7 @@ class TestNewWithStarter:
         mocker.patch(
             "cookiecutter.main.cookiecutter", side_effect=RepositoryCloneFailed
         )
-        mocked_git = mocker.patch("kedro.framework.cli.cli.git")
+        mocked_git = mocker.patch("kedro.framework.cli.starters.git")
         alternative_tags = "version1\nversion2"
         mocked_git.cmd.Git.return_value.ls_remote.return_value = alternative_tags
 
@@ -506,7 +487,7 @@ class TestNewWithStarter:
                 "kedro_version": version,
                 "output_dir": output_dir,
                 "project_name": self.project_name,
-                "custom": self.package_name,
+                "python_package": self.package_name,
                 "repo_name": self.repo_name,
             },
             no_input=True,
@@ -530,3 +511,11 @@ class TestNewWithStarter:
         assert (
             "Each prompt must have a title field to be valid" in result.output
         ), result.output
+
+    def test_starter_list(self, cli_runner):
+        """Check that `kedro starter list` prints out all starter aliases."""
+        result = _invoke(cli_runner, ["starter", "list"])
+
+        assert result.exit_code == 0, result.output
+        for alias in _STARTER_ALIASES:
+            assert alias in result.output

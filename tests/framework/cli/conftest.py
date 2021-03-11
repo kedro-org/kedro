@@ -32,19 +32,20 @@ this directory. You don't need to import the fixtures as pytest will
 discover them automatically. More info here:
 https://docs.pytest.org/en/latest/fixture.html
 """
-
 import sys
 import tempfile
 from importlib import import_module
 from os import makedirs
 from pathlib import Path
 
+import click
 import yaml
 from click.testing import CliRunner
 from pytest import fixture
 
 from kedro import __version__ as kedro_version
 from kedro.framework.cli.cli import cli
+from kedro.framework.cli.starters import create_cli
 from kedro.framework.project import configure_project, pipelines, settings
 from kedro.framework.startup import ProjectMetadata
 
@@ -124,8 +125,11 @@ def fake_project_cli(fake_repo_path: Path, dummy_config: Path):
     old_settings = settings.as_dict()
     starter_path = Path(__file__).parents[3].resolve()
     starter_path = starter_path / "features" / "steps" / "test_starter"
+    # This is needed just for the tests, those CLI groups are merged in our
+    # code when invoking `kedro` but when imported, they still need to be merged
+    kedro_cli = click.CommandCollection(name="Kedro", sources=[cli, create_cli])
     CliRunner().invoke(
-        cli, ["new", "-c", str(dummy_config), "--starter", str(starter_path)],
+        kedro_cli, ["new", "-c", str(dummy_config), "--starter", str(starter_path)],
     )
 
     # NOTE: Here we load a couple of modules, as they would be imported in

@@ -101,7 +101,7 @@ ParallelRunnerManager.register(  # pylint: disable=no-member
 
 
 def _bootstrap_subprocess(package_name: str, conf_logging: Dict[str, Any]):
-    # pylint: disable=import-outside-toplevel,protected-access,cyclic-import
+    # pylint: disable=import-outside-toplevel,cyclic-import
     from kedro.framework.project import configure_project
 
     configure_project(package_name)

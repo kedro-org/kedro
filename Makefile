@@ -16,13 +16,13 @@ legal:
 	python tools/license_and_headers.py
 
 lint:
-	pre-commit run -a --hook-stage manual
+	pre-commit run -a --hook-stage manual $(hook)
 
 test:
-	pytest tests --cov-config pyproject.toml
+	pytest tests --cov-config pyproject.toml --numprocesses 4 --dist loadfile
 
 test-no-spark:
-	pytest tests --cov-config pyproject_no_spark.toml --ignore tests/extras/datasets/spark
+	pytest tests --cov-config pyproject_no_spark.toml --ignore tests/extras/datasets/spark --numprocesses 4 --dist loadfile
 
 e2e-tests:
 	behave

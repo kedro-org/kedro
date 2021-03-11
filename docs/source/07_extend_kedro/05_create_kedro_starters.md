@@ -81,6 +81,7 @@ Here is the layout of the project as a Cookiecutter template:
        ├── cli.py                # A collection of Kedro command line interface (CLI) commands
        ├── hooks.py
        ├── pipelines
+       ├── pipeline_registry.py
        ├── run.py
        └── settings.py
     ├── requirements.txt

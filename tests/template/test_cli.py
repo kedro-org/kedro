@@ -92,6 +92,33 @@ class TestRunCommand:
         assert isinstance(runner, SequentialRunner)
         assert not runner._is_async
 
+    def test_run_with_pipeline_filters(
+        self, fake_project_cli, mocked_session_manager, mocker
+    ):
+        from_nodes = ["--from-nodes", "splitting_data"]
+        to_nodes = ["--to-nodes", "training_model"]
+        tags = ["--tag", "de"]
+        result = CliRunner().invoke(
+            fake_project_cli.cli, ["run", *from_nodes, *to_nodes, *tags]
+        )
+        assert not result.exit_code
+
+        mocked_session = mocked_session_manager.return_value.__enter__.return_value
+        mocked_session.run.assert_called_once_with(
+            tags=("de",),
+            runner=mocker.ANY,
+            node_names=(),
+            from_nodes=from_nodes[1:],
+            to_nodes=to_nodes[1:],
+            from_inputs=[],
+            load_versions={},
+            pipeline_name=None,
+        )
+
+        runner = mocked_session.run.call_args_list[0][1]["runner"]
+        assert isinstance(runner, SequentialRunner)
+        assert not runner._is_async
+
     def test_with_sequential_runner_and_parallel_flag(
         self, fake_project_cli, mocked_session_manager
     ):

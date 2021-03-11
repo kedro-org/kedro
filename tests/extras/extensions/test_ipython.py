@@ -104,6 +104,7 @@ class TestLoadKedroObjects:
             "kedro.framework.startup._get_project_metadata", return_value=fake_metadata,
         )
         mocker.patch("kedro.framework.cli.utils._add_src_to_path")
+        mocker.patch("kedro.framework.project.configure_project")
         mock_line_magic = mocker.MagicMock()
         mock_line_magic.__name__ = "abc"
         mocker.patch(

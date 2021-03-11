@@ -28,13 +28,11 @@
 
 """Command line tools for manipulating a Kedro project.
 Intended to be invoked via `kedro`."""
-import os
 from itertools import chain
 from pathlib import Path
 from typing import Dict, Iterable, Tuple
 
 import click
-from kedro.framework.cli import main as kedro_main
 from kedro.framework.cli.catalog import catalog as catalog_group
 from kedro.framework.cli.jupyter import jupyter as jupyter_group
 from kedro.framework.cli.pipeline import pipeline as pipeline_group
@@ -249,8 +247,3 @@ cli.add_command(jupyter_group)
 
 for command in project_group.commands.values():
     cli.add_command(command)
-
-
-if __name__ == "__main__":
-    os.chdir(str(PROJ_PATH))
-    kedro_main()

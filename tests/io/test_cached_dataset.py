@@ -88,7 +88,6 @@ class TestCachedDataset:
 
         cached_ds.save(42)
         assert cached_ds.load() == 42
-        # pylint: disable=no-member
         assert wrapped.load.call_count == 0
         assert wrapped.save.call_count == 1
         assert cached_ds._cache.load.call_count == 1
@@ -102,7 +101,6 @@ class TestCachedDataset:
         mocker.spy(cached_ds._cache, "load")
 
         assert cached_ds.load() == -42
-        # pylint: disable=no-member
         assert wrapped.load.call_count == 1
         assert cached_ds._cache.load.call_count == 0
 

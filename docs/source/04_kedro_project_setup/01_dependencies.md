@@ -19,6 +19,8 @@ The `build-reqs` command will:
 
 To further update the project requirements, you should modify `src/requirements.in` (not `src/requirements.txt`) and re-run `kedro build-reqs`.
 
+> Any extra arguments for the `pip-compile` command can be directly passed as extra flags to `kedro build-reqs`. For example, if you need to install private python packages, you can add your private pypi repository to the repositories `pip-compile` will search in using `kedro build-reqs --extra-index-url="https://private.pypi.repository/simple/"` (see `pip-compile -h` for all the available extra arguments).
+
 
 ## `kedro install`
 
@@ -45,6 +47,9 @@ kedro install --build-reqs
 ```
 
 In some cases, such as a production setting, this is useful to eliminate ambiguity and specify exactly the version of each dependency that is installed.
+
+> Note that you can pass extra arguments to the `kedro build-reqs` triggered by the `kedro install` command using the `--build-reqs-args` flag (e.g.: `kedro install --build-reqs-args="--annotate"`).
+
 
 ## Workflow dependencies
 

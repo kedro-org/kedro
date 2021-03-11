@@ -138,7 +138,7 @@ def lint(
 )
 @click.option(
     "--build-reqs-args",
-    "compile_arguments",
+    "compile_args",
     multiple=True,
     default=[],
     help="Extra arguments to be passed to the `pip-compile` command.",

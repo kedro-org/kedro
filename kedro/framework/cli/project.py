@@ -136,8 +136,15 @@ def lint(
     help="Run `pip-compile` on project requirements before install. "
     "By default runs only if `src/requirements.in` file doesn't exist.",
 )
+@click.option(
+    "--build-reqs-args",
+    "compile_arguments",
+    multiple=True,
+    default=[],
+    help="Extra arguments to be passed to the `pip-compile` command.",
+)
 @click.pass_obj  # this will pass the metadata as first argument
-def install(metadata: ProjectMetadata, compile_flag):
+def install(metadata: ProjectMetadata, compile_flag, compile_args):
     """Install project dependencies from both requirements.txt
     and environment.yml (optional)."""
     # we cannot use `context.project_path` as in other commands since
@@ -154,7 +161,7 @@ def install(metadata: ProjectMetadata, compile_flag):
     default_compile = bool(compile_flag is None and not requirements_in.is_file())
     do_compile = compile_flag or default_compile
     if do_compile:
-        _build_reqs(source_path)
+        _build_reqs(source_path, compile_args)
 
     pip_command = ["install", "-U", "-r", str(requirements_txt)]
 

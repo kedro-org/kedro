@@ -25,17 +25,18 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import sys
 import tempfile
 from importlib import import_module
 from pathlib import Path
 
+import click
 import pytest
 import yaml
 from click.testing import CliRunner
 
 from kedro.framework.cli.cli import cli
+from kedro.framework.cli.starters import create_cli
 
 _FAKE_REPO_NAME = "fake_repo"
 _FAKE_PACKAGE_NAME = "fake_package"
@@ -82,8 +83,12 @@ def fake_repo_config_path(fake_root_dir):
 def fake_project_cli(fake_repo_path: Path, fake_repo_config_path: Path):
     starter_path = Path(__file__).parents[2].resolve()
     starter_path = starter_path / "features" / "steps" / "test_starter"
+    # This is needed just for the tests, those CLI groups are merged in our
+    # code when invoking `kedro` but when imported, they still need to be merged
+    kedro_cli = click.CommandCollection(sources=[cli, create_cli])
     CliRunner().invoke(
-        cli, ["new", "-c", str(fake_repo_config_path), "--starter", str(starter_path)],
+        kedro_cli,
+        ["new", "-c", str(fake_repo_config_path), "--starter", str(starter_path)],
     )
 
     # NOTE: Here we load a couple of modules, as they would be imported in

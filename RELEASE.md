@@ -34,6 +34,10 @@ print(pipelines)
 * `kedro pipeline list` and `kedro pipeline describe` no longer accept redundant `--env` parameter.
 * `from kedro.framework.cli.cli import cli` no longer includes the `new` and `starter` commands.
 
+## Upcoming deprecations for Kedro 0.18.0
+
+* `kedro.framework.context.KedroContext.run` will be removed in release 0.18.0.
+
 ## Thanks for supporting contributions
 [Sasaki Takeru](https://github.com/takeru/)
 

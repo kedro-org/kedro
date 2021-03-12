@@ -587,6 +587,11 @@ class KedroContext:
             These are returned in a dictionary, where the keys are defined
             by the node outputs.
         """
+        warn(
+            "`kedro.framework.context.KedroContext.run` is now deprecated in favour of "
+            "`KedroSession.run` and will be removed in Kedro 0.18.0.",
+            DeprecationWarning,
+        )
         # Report project name
         logging.info("** Kedro project %s", self.project_path.name)
 

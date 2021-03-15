@@ -16,7 +16,7 @@
 
 ## Major features and improvements
 * Added support for `compress_pickle` backend to `PickleDataSet`.
-* Refactored the way pipelines are loaded so you don't need a `KedroContext` instance. You will now be able to run:
+* Enabled loading pipelines without creating a `KedroContext` instance:
 
 ```python
 from kedro.framework.project import pipelines
@@ -24,13 +24,20 @@ from kedro.framework.project import pipelines
 print(pipelines)
 ```
 
-* Projects generated with kedro>=0.17.2 can specify the project's pipelines in `pipeline_registry.py` rather than `hooks.py`.
+* Projects generated with kedro>=0.17.2:
+  - should define pipelines in `pipeline_registry.py` rather than `hooks.py`.
+  - when run as a package will behave the same as `kedro run`
 
 ## Bug fixes and other changes
 * If `settings.py` is not importable, the errors will be surfaced earlier in the process, rather than at runtime.
 
-## Breaking changes to the API
+## Minor breaking changes to the API
 * `kedro pipeline list` and `kedro pipeline describe` no longer accept redundant `--env` parameter.
+* `from kedro.framework.cli.cli import cli` no longer includes the `new` and `starter` commands.
+
+## Upcoming deprecations for Kedro 0.18.0
+
+* `kedro.framework.context.KedroContext.run` will be removed in release 0.18.0.
 
 ## Thanks for supporting contributions
 [Sasaki Takeru](https://github.com/takeru/)

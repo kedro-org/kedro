@@ -110,7 +110,7 @@ def _convert_paths_to_absolute_posix(
     to ``project_path`` and convert absolute Windows paths to POSIX format. This is a hack to
     make sure that we don't have to change user's working directory for logging and datasets to
     work. It is important for non-standard workflows such as IPython notebook where users don't go
-    through `kedro run` or `run.py` entrypoints.
+    through `kedro run` or `__main__.py` entrypoints.
 
     Example:
     ::

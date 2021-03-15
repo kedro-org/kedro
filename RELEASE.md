@@ -1,4 +1,4 @@
-# Upcoming Release 0.17.2
+# Release 0.17.2
 
 ## Major features and improvements
 * Added support for `compress_pickle` backend to `PickleDataSet`.
@@ -12,7 +12,7 @@ print(pipelines)
 
 * Projects generated with kedro>=0.17.2:
   - should define pipelines in `pipeline_registry.py` rather than `hooks.py`.
-  - when run as a package will behave the same as `kedro run`
+  - when run as a package, will behave the same as `kedro run`
 
 ## Bug fixes and other changes
 * If `settings.py` is not importable, the errors will be surfaced earlier in the process, rather than at runtime.

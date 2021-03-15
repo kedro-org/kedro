@@ -441,6 +441,15 @@ class TestKedroContext:
 
 
 class TestKedroContextRun:
+    def test_deprecate_run(self, dummy_context, dummy_dataframe):
+        dummy_context.catalog.save("cars", dummy_dataframe)
+        pattern = (
+            "`kedro.framework.context.KedroContext.run` is now deprecated in favour of "
+            "`KedroSession.run` and will be removed in Kedro 0.18.0."
+        )
+        with pytest.warns(DeprecationWarning, match=pattern):
+            dummy_context.run()
+
     def test_run_output(self, dummy_context, dummy_dataframe):
         dummy_context.catalog.save("cars", dummy_dataframe)
         outputs = dummy_context.run()

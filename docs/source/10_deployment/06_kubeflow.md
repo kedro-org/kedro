@@ -192,7 +192,7 @@ You can find more information about AWS configuration in [the Kubeflow Pipelines
 
 ### Upload workflow spec and execute runs
 
-Once a Kubernetes Secrets is deployed, upload the workflow spec `<project_name>.yaml` to Kubeflow. Below is the example of how to upload and execute the Kubeflow Pipelines through the UI (see [how to open the pipelines dashboard](https://www.kubeflow.org/docs/pipelines/pipelines-quickstart/#deploy-kubeflow-and-open-the-pipelines-ui)).
+Once a Kubernetes Secrets is deployed, upload the workflow spec `<project_name>.yaml` to Kubeflow. Below is the example of how to upload and execute the Kubeflow Pipelines through the UI (see [how to open the pipelines dashboard](https://www.kubeflow.org/docs/components/pipelines/pipelines-quickstart/#deploy-kubeflow-and-open-the-kubeflow-pipelines-ui)).
 
 First, go to "Pipelines" on the left panel, and click "Upload pipeline", and you will see the following page to upload your workflow spec.
 ![context input graphic](../meta/images/kubeflow_pipelines_upload_pipeline.png)

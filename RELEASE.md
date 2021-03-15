@@ -3,10 +3,12 @@
 ## Major features and improvements
 * Support specifying parameters mapping in `pipeline()` without the `params:` prefix.
 * `PartitionedDataSet` and `IncrementalDataSet` now both support versioning of the underlying dataset.
+* Added new API `Pipeline.filter()` (previously in `KedroContext._filter_pipeline()`) to filter parts of a pipeline.
 
 ## Breaking changes to the API
 * Add namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/quantumblacklabs/kedro/issues/399).
 * `pandas.ExcelDataSet` now uses `openpyxl` engine instead of `xlrd`.
+* `KedroSession.run` now raises `ValueError` rather than `KedroContextError` when the pipeline contains no nodes. The same `ValueError` is raised when there are no matching tags.
 
 ## Migration guide from Kedro 0.17.* to 0.18.*
 * Optional: You can now remove all `params:` prefix when supplying values to `parameters` argument in a `pipeline()` call.

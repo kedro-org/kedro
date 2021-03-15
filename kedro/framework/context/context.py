@@ -496,45 +496,6 @@ class KedroContext:
             conf_creds = {}
         return conf_creds
 
-    # pylint: disable=too-many-arguments, no-self-use
-    def _filter_pipeline(
-        self,
-        pipeline: Pipeline,
-        tags: Iterable[str] = None,
-        from_nodes: Iterable[str] = None,
-        to_nodes: Iterable[str] = None,
-        node_names: Iterable[str] = None,
-        from_inputs: Iterable[str] = None,
-        to_outputs: Iterable[str] = None,
-    ) -> Pipeline:
-        """Filter the pipeline as the intersection of all conditions."""
-        new_pipeline = pipeline
-        # We need to intersect with the pipeline because the order
-        # of operations matters, so we don't want to do it incrementally.
-        # As an example, with a pipeline of nodes 1,2,3, think of
-        # "from 1", and "only 1 and 3" - the order you do them in results in
-        # either 1 & 3, or just 1.
-        if tags:
-            new_pipeline &= pipeline.only_nodes_with_tags(*tags)
-            if not new_pipeline.nodes:
-                raise KedroContextError(
-                    f"Pipeline contains no nodes with tags: {str(tags)}"
-                )
-        if from_nodes:
-            new_pipeline &= pipeline.from_nodes(*from_nodes)
-        if to_nodes:
-            new_pipeline &= pipeline.to_nodes(*to_nodes)
-        if node_names:
-            new_pipeline &= pipeline.only_nodes(*node_names)
-        if from_inputs:
-            new_pipeline &= pipeline.from_inputs(*from_inputs)
-        if to_outputs:
-            new_pipeline &= pipeline.to_outputs(*to_outputs)
-
-        if not new_pipeline.nodes:
-            raise KedroContextError("Pipeline contains no nodes")
-        return new_pipeline
-
     @property
     def run_id(self) -> Union[None, str]:
         """Unique identifier for a run / journal record, defaults to None.
@@ -596,8 +557,7 @@ class KedroContext:
         logging.info("** Kedro project %s", self.project_path.name)
 
         pipeline = self._get_pipeline(name=pipeline_name)
-        filtered_pipeline = self._filter_pipeline(
-            pipeline=pipeline,
+        filtered_pipeline = pipeline.filter(
             tags=tags,
             from_nodes=from_nodes,
             to_nodes=to_nodes,
@@ -655,7 +615,7 @@ class KedroContext:
         )
         return run_result
 
-    def _get_run_id(
+    def _get_run_id(  # pylint: disable=no-self-use
         self, *args, **kwargs  # pylint: disable=unused-argument
     ) -> Union[None, str]:
         """A hook for generating a unique identifier for a
@@ -664,7 +624,7 @@ class KedroContext:
         """
         return None
 
-    def _get_save_version(
+    def _get_save_version(  # pylint: disable=no-self-use
         self, *args, **kwargs  # pylint: disable=unused-argument
     ) -> str:
         """Generate unique ID for dataset versioning, defaults to timestamp.

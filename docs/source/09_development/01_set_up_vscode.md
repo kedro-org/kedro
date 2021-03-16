@@ -184,7 +184,7 @@ Go to the Debugger Configurations as described [above](#debugging). Add the foll
 }
 ```
 
-Change the `remoteRoot` path to the path of your project on the remote computer. Open the file `src/<package_name>/run.py` and enter the following near the top:
+Change the `remoteRoot` path to the path of your project on the remote computer. Open the file `src/<package_name>/__main__.py` and enter the following near the top:
 
 ```python
 import ptvsd

@@ -134,7 +134,7 @@ raw_car_data:
 
 ### Jinja2 support
 
-From version 0.17.1 `TemplateConfigLoader` also supports [Jinja2](https://palletsprojects.com/p/jinja/) template engine alongside the original template syntax. Below is the example of a `catalog.yml` file, which uses both features:
+From version 0.17.0 `TemplateConfigLoader` also supports [Jinja2](https://palletsprojects.com/p/jinja/) template engine alongside the original template syntax. Below is the example of a `catalog.yml` file, which uses both features:
 
 ```
 {% for speed in ['fast', 'slow'] %}

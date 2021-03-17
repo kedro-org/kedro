@@ -18,6 +18,7 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Fixed a bug where the `KEDRO_ENV` environment variable had no effect on instantiating the `context` variable in an iPython session or a Jupyter notebook.
 
 ## Minor breaking changes to the API
 

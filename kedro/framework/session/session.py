@@ -30,6 +30,7 @@
 
 import logging
 import logging.config
+import os
 import subprocess
 import traceback
 from copy import deepcopy
@@ -192,6 +193,7 @@ class KedroSession:
         if ctx:
             session_data["cli"] = _jsonify_cli_context(ctx)
 
+        env = env or os.getenv("KEDRO_ENV")
         if env:
             session_data["env"] = env
 

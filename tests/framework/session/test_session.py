@@ -38,6 +38,7 @@ import toml
 
 from kedro import __version__ as kedro_version
 from kedro.config import ConfigLoader
+from kedro.framework.context import KedroContext
 from kedro.framework.hooks import hook_impl
 from kedro.framework.project import (
     ValidationError,
@@ -309,6 +310,18 @@ class TestKedroSession:
         )
 
         assert session.load_context() is mock_context_class.return_value
+
+    @pytest.mark.usefixtures("mock_settings", "patched_configure_project")
+    def test_load_context_with_envvar(self, fake_project, monkeypatch, mocker):
+        mocker.patch("kedro.config.config.ConfigLoader.get")
+        monkeypatch.setenv("KEDRO_ENV", "my_fake_env")
+
+        session = KedroSession.create(_FAKE_PACKAGE_NAME, fake_project)
+        result = session.load_context()
+
+        assert isinstance(result, KedroContext)
+        assert result.__class__.__name__ == "KedroContext"
+        assert result.env == "my_fake_env"
 
     @pytest.mark.usefixtures("mock_settings_context_class")
     def test_default_store(self, fake_project, fake_session_id, caplog):

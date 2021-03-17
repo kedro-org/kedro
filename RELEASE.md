@@ -13,6 +13,16 @@
 * Optional: You can now remove all `params:` prefix when supplying values to `parameters` argument in a `pipeline()` call.
 * If you're using `pandas.ExcelDataSet`, make sure you have `openpyxl` installed in your environment. Note that this is automatically pulled if you specify `kedro[pandas.ExcelDataSet]==0.18.0` in your `requirements.in`. You can uninstall `xlrd` if you were only using it for this dataset.
 
+# Upcoming Release 0.17.3
+
+## Major features and improvements
+
+## Bug fixes and other changes
+
+## Minor breaking changes to the API
+
+## Thanks for supporting contributions
+
 # Release 0.17.2
 
 ## Major features and improvements

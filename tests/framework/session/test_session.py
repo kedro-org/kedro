@@ -495,7 +495,7 @@ class TestKedroSession:
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
         mock_runner = mocker.Mock()
-        mock_pipeline = mock_context._filter_pipeline.return_value
+        mock_pipeline = mock_context._get_pipeline.return_value.filter.return_value
 
         with KedroSession.create(_FAKE_PACKAGE_NAME, fake_project) as session:
             session.run(runner=mock_runner, pipeline_name=fake_pipeline_name)
@@ -548,7 +548,7 @@ class TestKedroSession:
         error = FakeException("You shall not pass!")
         mock_runner = mocker.Mock()
         mock_runner.run.side_effect = error  # runner.run() raises an error
-        mock_pipeline = mock_context._filter_pipeline.return_value
+        mock_pipeline = mock_context._get_pipeline.return_value.filter.return_value
 
         with pytest.raises(FakeException), KedroSession.create(
             _FAKE_PACKAGE_NAME, fake_project

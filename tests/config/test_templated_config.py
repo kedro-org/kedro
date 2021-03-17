@@ -225,6 +225,17 @@ def proj_catalog_param_w_vals_exceptional(tmp_path, param_config_exceptional):
     _write_yaml(proj_catalog, param_config_exceptional)
 
 
+@pytest.fixture
+def param_config_with_default():
+    return {"boats": {"users": ["fred", "${write_only_user|ron}"]}}
+
+
+@pytest.fixture
+def proj_catalog_param_with_default(tmp_path, param_config_with_default):
+    proj_catalog = tmp_path / "base" / "catalog.yml"
+    _write_yaml(proj_catalog, param_config_with_default)
+
+
 class TestTemplatedConfigLoader:
     @pytest.mark.usefixtures("proj_catalog_param")
     def test_catalog_parameterized_w_dict(self, tmp_path, conf_paths, template_config):
@@ -263,21 +274,25 @@ class TestTemplatedConfigLoader:
         assert catalog["boats"]["users"] == ["fred", "ron"]
 
     @pytest.mark.usefixtures("proj_catalog_param")
-    def test_catalog_parameterized_no_params(self, tmp_path, conf_paths):
+    def test_catalog_parameterized_no_params_no_default(self, tmp_path, conf_paths):
         """Test parameterized config without input"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
-        catalog = TemplatedConfigLoader(conf_paths).get("catalog*.yml")
+        with pytest.raises(ValueError, match="Failed to format pattern"):
+            TemplatedConfigLoader(conf_paths).get("catalog*.yml")
 
-        assert catalog["boats"]["type"] == "${boat_data_type}"
-        assert (
-            catalog["boats"]["filepath"]
-            == "${s3_bucket}/${raw_data_folder}/${boat_file_name}"
+    @pytest.mark.usefixtures("proj_catalog_param_with_default")
+    def test_catalog_parameterized_empty_params_with_default(
+        self, tmp_path, conf_paths
+    ):
+        """Test parameterized config with empty globals dictionary"""
+        (tmp_path / "local").mkdir(exist_ok=True)
+
+        catalog = TemplatedConfigLoader(conf_paths, globals_dict=dict()).get(
+            "catalog*.yml"
         )
-        assert catalog["boats"]["columns"]["id"] == "${string_type}"
-        assert catalog["boats"]["columns"]["name"] == "${string_type}"
-        assert catalog["boats"]["columns"]["top_speed"] == "${float_type}"
-        assert catalog["boats"]["users"] == ["fred", "${write_only_user}"]
+
+        assert catalog["boats"]["users"] == ["fred", "ron"]
 
     @pytest.mark.usefixtures("proj_catalog_advanced")
     def test_catalog_advanced(self, tmp_path, conf_paths, normal_config_advanced):

@@ -188,11 +188,7 @@ class TemplatedConfigLoader(ConfigLoader):
         """
 
         config_raw = super().get(*patterns)
-
-        if self._arg_dict:
-            return _format_object(config_raw, self._arg_dict)
-
-        return config_raw
+        return _format_object(config_raw, self._arg_dict)
 
 
 def _format_object(val: Any, format_dict: Dict[str, Any]) -> Any:

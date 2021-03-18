@@ -44,7 +44,6 @@ from click import secho
 from jupyter_client.kernelspec import NATIVE_KERNEL_NAME, KernelSpecManager
 from traitlets import Unicode
 
-from kedro.framework.cli import load_entry_points
 from kedro.framework.cli.utils import (
     KedroCliError,
     _check_module_importable,
@@ -52,6 +51,7 @@ from kedro.framework.cli.utils import (
     env_option,
     forward_command,
     ipython_message,
+    load_entry_points,
     python_call,
 )
 from kedro.framework.startup import ProjectMetadata
@@ -104,7 +104,13 @@ def _update_ipython_dir(project_path: Path) -> None:
     os.environ["IPYTHONDIR"] = str(project_path / ".ipython")
 
 
-@click.group()
+# pylint: disable=missing-function-docstring
+@click.group(name="Kedro")
+def jupyter_cli():  # pragma: no cover
+    pass
+
+
+@jupyter_cli.group()
 def jupyter():
     """Open Jupyter Notebook / Lab with project specific variables loaded, or
     convert notebooks into Kedro code.

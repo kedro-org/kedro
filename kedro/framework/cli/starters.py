@@ -44,6 +44,7 @@ import yaml
 import kedro
 from kedro import __version__ as version
 from kedro.framework.cli.utils import (
+    CONTEXT_SETTINGS,
     KedroCliError,
     _clean_pycache,
     _filter_deprecation_warnings,
@@ -63,9 +64,9 @@ _STARTER_ALIASES = {
 _STARTERS_REPO = "git+https://github.com/quantumblacklabs/kedro-starters.git"
 
 
-@click.group(name="Kedro")
+# pylint: disable=missing-function-docstring
+@click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")
 def create_cli():  # pragma: no cover
-    """Command line tools for creating Kedro projects."""
     pass
 
 

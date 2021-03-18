@@ -29,5 +29,5 @@
 """``kedro.framework.cli`` implements commands available from Kedro's CLI.
 """
 
-from .cli import get_project_context, load_entry_points, main  # NOQA
-from .utils import command_with_verbosity  # NOQA
+from .cli import get_project_context, main  # NOQA
+from .utils import command_with_verbosity, load_entry_points  # NOQA

@@ -28,6 +28,8 @@
 import os
 import re
 import sys
+from collections import namedtuple
+from itertools import cycle
 from os.path import join
 from pathlib import Path
 
@@ -36,8 +38,13 @@ from mock import patch
 from pytest import fixture, mark, raises
 
 from kedro import __version__ as version
-from kedro.framework.cli import get_project_context
-from kedro.framework.cli.cli import _init_plugins, cli, load_entry_points
+from kedro.framework.cli import get_project_context, load_entry_points
+from kedro.framework.cli.catalog import catalog_cli
+from kedro.framework.cli.cli import KedroCLI, _init_plugins, cli
+from kedro.framework.cli.jupyter import jupyter_cli
+from kedro.framework.cli.pipeline import pipeline_cli
+from kedro.framework.cli.project import project_group
+from kedro.framework.cli.starters import create_cli
 from kedro.framework.cli.utils import (
     CommandCollection,
     KedroCliError,
@@ -374,6 +381,111 @@ class TestEntryPoints:
         with raises(KedroCliError, match="Initializing"):
             _init_plugins()
         entry_points.assert_called_once_with(group="kedro.init")
+
+
+class TestKedroCLI:
+    def test_project_commands_no_clipy(self, mocker, fake_metadata):
+        mocker.patch(
+            "kedro.framework.cli.cli.importlib.import_module",
+            side_effect=cycle([ModuleNotFoundError()]),
+        )
+        mocker.patch(
+            "kedro.framework.cli.cli.KedroCLI._load_project",
+            return_value=fake_metadata,
+        )
+        kedro_cli = KedroCLI(fake_metadata.project_path)
+        assert len(kedro_cli.project_groups) == 4
+        assert kedro_cli.project_groups == [
+            catalog_cli,
+            jupyter_cli,
+            pipeline_cli,
+            project_group,
+        ]
+
+    def test_project_commands_no_project(self, mocker, tmp_path):
+        mocker.patch(
+            "kedro.framework.cli.cli.KedroCLI._load_project", return_value=None
+        )
+        kedro_cli = KedroCLI(tmp_path)
+        assert len(kedro_cli.project_groups) == 0
+
+    def test_project_commands_invalid_clipy(self, mocker, fake_metadata):
+        mocker.patch(
+            "kedro.framework.cli.cli.importlib.import_module", return_value=None,
+        )
+        mocker.patch(
+            "kedro.framework.cli.cli.KedroCLI._load_project",
+            return_value=fake_metadata,
+        )
+        with raises(KedroCliError, match="Cannot load commands from"):
+            _ = KedroCLI(fake_metadata.project_path)
+
+    def test_project_commands_valid_clipy(self, mocker, fake_metadata):
+        Module = namedtuple("Module", ["cli"])
+        mocker.patch(
+            "kedro.framework.cli.cli.importlib.import_module",
+            return_value=Module(cli=cli),
+        )
+        mocker.patch(
+            "kedro.framework.cli.cli.KedroCLI._load_project", return_value=fake_metadata
+        )
+        kedro_cli = KedroCLI(fake_metadata.project_path)
+        assert len(kedro_cli.project_groups) == 5
+        assert kedro_cli.project_groups == [
+            catalog_cli,
+            jupyter_cli,
+            pipeline_cli,
+            project_group,
+            cli,
+        ]
+
+    def test_kedro_cli_no_project(self, mocker, tmp_path, cli_runner):
+        mocker.patch(
+            "kedro.framework.cli.cli.KedroCLI._load_project", return_value=None,
+        )
+        kedro_cli = KedroCLI(tmp_path)
+        assert len(kedro_cli.global_groups) == 2
+        assert kedro_cli.global_groups == [
+            cli,
+            create_cli,
+        ]
+
+        result = cli_runner.invoke(kedro_cli, [])
+
+        assert result.exit_code == 0
+        assert "Global commands from Kedro" in result.output
+        assert "Project specific commands from Kedro" not in result.output
+
+    def test_kedro_cli_with_project(self, mocker, fake_metadata, cli_runner):
+        Module = namedtuple("Module", ["cli"])
+        mocker.patch(
+            "kedro.framework.cli.cli.importlib.import_module",
+            return_value=Module(cli=cli),
+        )
+        mocker.patch(
+            "kedro.framework.cli.cli.KedroCLI._load_project",
+            return_value=fake_metadata,
+        )
+        kedro_cli = KedroCLI(fake_metadata.project_path)
+
+        assert len(kedro_cli.global_groups) == 2
+        assert kedro_cli.global_groups == [
+            cli,
+            create_cli,
+        ]
+        assert len(kedro_cli.project_groups) == 5
+        assert kedro_cli.project_groups == [
+            catalog_cli,
+            jupyter_cli,
+            pipeline_cli,
+            project_group,
+            cli,
+        ]
+
+        result = cli_runner.invoke(kedro_cli, [])
+        assert result.exit_code == 0
+        assert "Global commands from Kedro" in result.output
+        assert "Project specific commands from Kedro" in result.output
 
 
 class TestValidateSourcePath:

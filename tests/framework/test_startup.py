@@ -111,6 +111,44 @@ class TestGetProjectMetadata:
         )
         assert actual == expected
 
+    def test_toml_file_with_extra_keys(self, mocker):
+        mocker.patch.object(Path, "is_file", return_value=True)
+        pyproject_toml_payload = {
+            "tool": {
+                "kedro": {
+                    "package_name": "fake_package_name",
+                    "project_name": "fake_project_name",
+                    "project_version": kedro_version,
+                    "unexpected_key": "hello",
+                }
+            }
+        }
+        mocker.patch("anyconfig.load", return_value=pyproject_toml_payload)
+        pattern = (
+            "Found unexpected keys in 'pyproject.toml'. Make sure it "
+            "only contains the following keys: ['package_name', "
+            "'project_name', 'project_version', 'source_dir']."
+        )
+
+        with pytest.raises(RuntimeError, match=re.escape(pattern)):
+            _get_project_metadata(self.project_path)
+
+    def test_toml_file_has_missing_mandatory_keys(self, mocker):
+        mocker.patch.object(Path, "is_file", return_value=True)
+        pyproject_toml_payload = {
+            "tool": {
+                "kedro": {"project_version": kedro_version, "unexpected_key": "hello"}
+            }
+        }
+        mocker.patch("anyconfig.load", return_value=pyproject_toml_payload)
+        pattern = (
+            "Missing required keys ['package_name', 'project_name'] "
+            "from 'pyproject.toml'."
+        )
+
+        with pytest.raises(RuntimeError, match=re.escape(pattern)):
+            _get_project_metadata(self.project_path)
+
     def test_toml_file_without_kedro_section(self, mocker):
         mocker.patch.object(Path, "is_file", return_value=True)
         mocker.patch("anyconfig.load", return_value={})

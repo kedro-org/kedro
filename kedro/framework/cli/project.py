@@ -76,9 +76,10 @@ def _build_reqs(source_path: Path, args: Sequence[str] = ()):
     python_call("piptools", ["compile", "-q", *args, str(requirements_in)])
 
 
-@click.group()
-def project_group():
-    """Collection of project commands."""
+# pylint: disable=missing-function-docstring
+@click.group(name="Kedro")
+def project_group():  # pragma: no cover
+    pass
 
 
 @forward_command(project_group, forward_help=True)

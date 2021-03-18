@@ -1,10 +1,14 @@
 # Upcoming Release 0.17.3
 
 ## Major features and improvements
+* Kedro plugins can now override built-in CLI commands.
 
 ## Bug fixes and other changes
 * `TemplatedConfigLoader` now correctly inserts default values when no globals are supplied.
 * Fixed a bug where the `KEDRO_ENV` environment variable had no effect on instantiating the `context` variable in an iPython session or a Jupyter notebook.
+* Plugins with empty CLI groups are no longer displayed in the Kedro CLI help screen.
+* Duplicate commands will no longer appear twice in the Kedro CLI help screen.
+* CLI commands from sources with the same name will show under one list in the help screen.
 
 ## Minor breaking changes to the API
 

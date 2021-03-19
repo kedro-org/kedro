@@ -20,9 +20,17 @@ Feel free to name your project as you like, but this guide will assume the proje
 
 Keep the default names for the `repo_name` and `python_package` when prompted.
 
-## Install project dependencies
+## Install project dependencies with `kedro install`
 
-Up to this point, we haven't discussed project dependencies, so now is a good time to introduce them. Specifying a project's dependencies in Kedro makes it easier for others to run your project; it avoids version conflicts by use of the same Python packages.
+To install the project-specific dependencies, navigate to the root directory of the project and run:
+
+```bash
+kedro install
+```
+
+### More about project dependencies
+
+Up to this point, we haven't discussed project dependencies, so now is a good time to examine them. We use Kedro to specify a project's dependencies and make it easier for others to run your project. It avoids version conflicts because Kedro ensures that you use same Python packages and versions.
 
 The generic project template bundles some typical dependencies, in `src/requirements.txt`. Here's a typical example, although you may find that the version numbers are slightly different depending on the version of Kedro that you are using:
 
@@ -66,14 +74,6 @@ kedro build-reqs
 
 You can find out more about [how to work with project dependencies](../04_kedro_project_setup/01_dependencies.md) in the Kedro project documentation. In a [later step of this tutorial](./04_create_pipelines.md#update-dependencies), we will modify project's dependencies to illustrate how, once you have installed project-specific dependencies, you can update them.
 
-## `kedro install`
-
-To install the project-specific dependencies, navigate to the root directory of the project and run:
-
-```bash
-kedro install
-```
-You can find further information in our [advanced documentation about working with dependencies](../04_kedro_project_setup/01_dependencies.md).
 
 ## Configure the project
 

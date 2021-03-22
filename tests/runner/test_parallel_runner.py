@@ -97,19 +97,6 @@ def fan_out_fan_in():
     )
 
 
-@pytest.fixture(autouse=True)
-def mock_load_context(tmp_path, mocker):
-    # pylint: disable=too-few-public-methods
-    class DummyContext:
-        def __init__(self, project_path):
-            self.project_path = project_path
-
-    mocker.patch(
-        "kedro.framework.context.context.load_context",
-        return_value=DummyContext(str(tmp_path)),
-    )
-
-
 @pytest.mark.skipif(
     sys.platform.startswith("win"), reason="Due to bug in parallel runner"
 )

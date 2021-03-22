@@ -482,10 +482,7 @@ class TestKedroContextRun:
     @pytest.mark.skipif(
         sys.platform.startswith("win"), reason="Due to bug in parallel runner"
     )
-    def test_parallel_run_arg(self, dummy_context, dummy_dataframe, caplog, mocker):
-        mocker.patch(
-            "kedro.framework.context.context.load_context", return_value=dummy_context
-        )
+    def test_parallel_run_arg(self, dummy_context, dummy_dataframe, caplog):
         dummy_context.catalog.save("cars", dummy_dataframe)
         dummy_context.run(runner=ParallelRunner())
 

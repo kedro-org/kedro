@@ -34,6 +34,7 @@ from typing import NamedTuple, Union
 import anyconfig
 
 from kedro import __version__ as kedro_version
+from kedro.errors import KedroConfigError
 
 _PYPROJECT = "pyproject.toml"
 
@@ -79,7 +80,7 @@ def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
         project_path: Local path to project root directory to look up `pyproject.toml` in.
 
     Raises:
-        RuntimeError: `pyproject.toml` was not found or the `[tool.kedro]` section
+        KedroConfigError: `pyproject.toml` was not found or the `[tool.kedro]` section
             is missing, or config file cannot be parsed.
         ValueError: If project version is different from Kedro package version.
             Note: Project version is the Kedro version the project was generated with.
@@ -91,7 +92,7 @@ def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
     pyproject_toml = project_path / _PYPROJECT
 
     if not pyproject_toml.is_file():
-        raise RuntimeError(
+        raise KedroConfigError(
             f"Could not find the project configuration file '{_PYPROJECT}' in {project_path}. "
             f"If you have created your project with Kedro "
             f"version <0.17.0, make sure to update your project template. "
@@ -103,12 +104,12 @@ def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
     try:
         metadata_dict = anyconfig.load(pyproject_toml)
     except Exception as exc:
-        raise RuntimeError(f"Failed to parse '{_PYPROJECT}' file.") from exc
+        raise KedroConfigError(f"Failed to parse '{_PYPROJECT}' file.") from exc
 
     try:
         metadata_dict = metadata_dict["tool"]["kedro"]
     except KeyError as exc:
-        raise RuntimeError(
+        raise KedroConfigError(
             f"There's no '[tool.kedro]' section in the '{_PYPROJECT}'. "
             f"Please add '[tool.kedro]' section to the file with appropriate "
             f"configuration parameters."
@@ -117,7 +118,9 @@ def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
     mandatory_keys = ["package_name", "project_name", "project_version"]
     missing_keys = [key for key in mandatory_keys if key not in metadata_dict]
     if missing_keys:
-        raise RuntimeError(f"Missing required keys {missing_keys} from '{_PYPROJECT}'.")
+        raise KedroConfigError(
+            f"Missing required keys {missing_keys} from '{_PYPROJECT}'."
+        )
 
     # check the match for major and minor version (skip patch version)
     if metadata_dict["project_version"].split(".")[:2] != kedro_version.split(".")[:2]:
@@ -133,7 +136,7 @@ def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
         return ProjectMetadata(**metadata_dict)
     except TypeError as exc:
         expected_keys = mandatory_keys + ["source_dir"]
-        raise RuntimeError(
+        raise KedroConfigError(
             f"Found unexpected keys in '{_PYPROJECT}'. Make sure "
             f"it only contains the following keys: {expected_keys}."
         ) from exc

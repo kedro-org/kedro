@@ -40,6 +40,7 @@ from typing import Any, Dict, Iterable, Optional, Union
 import click
 
 from kedro import __version__ as kedro_version
+from kedro.errors import KedroSessionError
 from kedro.framework.context import KedroContext
 from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import get_hook_manager
@@ -47,7 +48,6 @@ from kedro.framework.project import settings
 from kedro.framework.session.store import BaseSessionStore
 from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner, SequentialRunner
-from kedro.errors import KedroSessionError
 
 _active_session = None
 

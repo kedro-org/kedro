@@ -47,6 +47,7 @@ from kedro.framework.project import settings
 from kedro.framework.session.store import BaseSessionStore
 from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner, SequentialRunner
+from kedro.errors import KedroSessionError
 
 _active_session = None
 
@@ -58,14 +59,14 @@ def get_current_session(silent: bool = False) -> Optional["KedroSession"]:
         silent: Indicates to suppress the error if no active session was found.
 
     Raises:
-        RuntimeError: If no active session was found and `silent` is False.
+        KedroSessionError: If no active session was found and `silent` is False.
 
     Returns:
         KedroSession instance.
 
     """
     if not _active_session and not silent:
-        raise RuntimeError("There is no active Kedro session.")
+        raise KedroSessionError("There is no active Kedro session.")
 
     return _active_session
 
@@ -74,7 +75,7 @@ def _activate_session(session: "KedroSession", force: bool = False) -> None:
     global _active_session
 
     if _active_session and not force and session is not _active_session:
-        raise RuntimeError(
+        raise KedroSessionError(
             "Cannot activate the session as another active session already exists."
         )
 

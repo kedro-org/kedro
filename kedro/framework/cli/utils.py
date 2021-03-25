@@ -28,7 +28,6 @@
 
 """Utilities for use with click."""
 import difflib
-import os
 import re
 import shlex
 import shutil
@@ -384,32 +383,16 @@ def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
     return entry_point_commands
 
 
-def _validate_source_path(source_path: Path, project_path: Path):
-    """Validate the source path exists and is relative to the project path.
+def _add_src_to_path(source_dir: Path, project_path: Path) -> None:  # pragma: no cover
+    # for backwards compatibility with ipython & deployment scripts
+    # pylint: disable=import-outside-toplevel
+    from kedro.framework.startup import _add_src_to_path as real_add_src_to_path
 
-    Args:
-        source_path: Absolute source path.
-        project_path: Path to the Kedro project.
-
-    Raises:
-        ValueError: If source_path is not relative to project_path.
-        NotADirectoryError: If source_path does not exist.
-    """
-    try:
-        source_path.relative_to(project_path)
-    except ValueError as exc:
-        raise ValueError(
-            f"Source path '{source_path}' has to be relative to "
-            f"your project root '{project_path}'."
-        ) from exc
-    if not source_path.exists():
-        raise NotADirectoryError(f"Source path '{source_path}' cannot be found.")
-
-
-def _add_src_to_path(source_dir: Path, project_path: Path):
-    _validate_source_path(source_dir, project_path)
-
-    if str(source_dir) not in sys.path:
-        sys.path.insert(0, str(source_dir))
-    if "PYTHONPATH" not in os.environ:
-        os.environ["PYTHONPATH"] = str(source_dir)
+    msg = (
+        "kedro.framework.utils._add_src_to_path is deprecated. "
+        "Please import from new location kedro.framework.startup "
+        "or use `bootstrap_project()` instead for setting up "
+        "the Kedro project."
+    )
+    warnings.warn(msg, FutureWarning)
+    real_add_src_to_path(source_dir, project_path)

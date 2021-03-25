@@ -54,12 +54,10 @@ from kedro.framework.cli.utils import (
     ENTRY_POINT_GROUPS,
     CommandCollection,
     KedroCliError,
-    _add_src_to_path,
     load_entry_points,
 )
 from kedro.framework.context.context import load_context
-from kedro.framework.project import configure_project
-from kedro.framework.startup import _get_project_metadata, _is_project
+from kedro.framework.startup import _is_project, bootstrap_project
 
 LOGO = rf"""
  _            _
@@ -176,7 +174,9 @@ class KedroCLI(CommandCollection):
     """
 
     def __init__(self, project_path: Path):
-        self._metadata = self._load_project(project_path)
+        self._metadata = None  # running in package mode
+        if _is_project(project_path):
+            self._metadata = bootstrap_project(project_path)
 
         super().__init__(
             ("Global commands", self.global_groups),
@@ -203,7 +203,7 @@ class KedroCLI(CommandCollection):
 
     @property
     def global_groups(self) -> Sequence[click.MultiCommand]:
-        """Lazy property which loads all global command groups from plugins and
+        """Property which loads all global command groups from plugins and
         combines them with the built-in ones (eventually overriding the
         built-in ones if they are redefined by plugins).
         """
@@ -211,7 +211,7 @@ class KedroCLI(CommandCollection):
 
     @property
     def project_groups(self) -> Sequence[click.MultiCommand]:
-        """Lazy property which loads all project command groups from the
+        """Property which loads all project command groups from the
         project and the plugins, then combines them with the built-in ones.
         Built-in commands can be overridden by plugins, which can be
         overridden by the project's cli.py.
@@ -245,17 +245,6 @@ class KedroCLI(CommandCollection):
         # return built-in commands, plugin commands and user defined commands
         # (overriding happens as follows built-in < plugins < cli.py)
         return [*built_in, *plugins, user_defined]
-
-    @staticmethod
-    def _load_project(project_path):  # pragma: no cover
-        # TODO: This one can potentially become project bootstrap and will be
-        #  tested there
-        if not _is_project(project_path):
-            return None
-        metadata = _get_project_metadata(project_path)
-        _add_src_to_path(metadata.source_dir, project_path)
-        configure_project(metadata.package_name)
-        return metadata
 
 
 def main():  # pragma: no cover

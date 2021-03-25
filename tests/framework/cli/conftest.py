@@ -35,7 +35,6 @@ https://docs.pytest.org/en/latest/fixture.html
 import sys
 import tempfile
 from importlib import import_module
-from os import makedirs
 from pathlib import Path
 
 import click
@@ -49,17 +48,8 @@ from kedro.framework.cli.starters import create_cli
 from kedro.framework.project import configure_project, pipelines, settings
 from kedro.framework.startup import ProjectMetadata
 
-MOCKED_HOME = "user/path/"
 REPO_NAME = "dummy_project"
 PACKAGE_NAME = "dummy_package"
-
-
-@fixture(name="cli_runner")
-def cli_runner_fixture():
-    runner = CliRunner()
-    with runner.isolated_filesystem():
-        makedirs(MOCKED_HOME)
-        yield runner
 
 
 @fixture
@@ -120,16 +110,23 @@ def fake_metadata(fake_root_dir):
     return metadata
 
 
+# This is needed just for the tests, those CLI groups are merged in our
+# code when invoking `kedro` but when imported, they still need to be merged
 @fixture(scope="module")
-def fake_project_cli(fake_repo_path: Path, dummy_config: Path):
+def fake_kedro_cli():
+    return click.CommandCollection(name="Kedro", sources=[cli, create_cli])
+
+
+@fixture(scope="module")
+def fake_project_cli(
+    fake_repo_path: Path, dummy_config: Path, fake_kedro_cli: click.CommandCollection
+):
     old_settings = settings.as_dict()
     starter_path = Path(__file__).parents[3].resolve()
     starter_path = starter_path / "features" / "steps" / "test_starter"
-    # This is needed just for the tests, those CLI groups are merged in our
-    # code when invoking `kedro` but when imported, they still need to be merged
-    kedro_cli = click.CommandCollection(name="Kedro", sources=[cli, create_cli])
     CliRunner().invoke(
-        kedro_cli, ["new", "-c", str(dummy_config), "--starter", str(starter_path)],
+        fake_kedro_cli,
+        ["new", "-c", str(dummy_config), "--starter", str(starter_path)],
     )
 
     # NOTE: Here we load a couple of modules, as they would be imported in
@@ -141,7 +138,7 @@ def fake_project_cli(fake_repo_path: Path, dummy_config: Path):
 
     import_module(PACKAGE_NAME)
     configure_project(PACKAGE_NAME)
-    yield import_module(f"{PACKAGE_NAME}.cli")
+    yield getattr(import_module(f"{PACKAGE_NAME}.cli"), "cli")
 
     # reset side-effects of configure_project
     pipelines.clear()

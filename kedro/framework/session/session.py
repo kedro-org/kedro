@@ -344,8 +344,7 @@ class KedroSession:
         context = self.load_context()
 
         pipeline = context._get_pipeline(name=pipeline_name)
-        filtered_pipeline = context._filter_pipeline(
-            pipeline=pipeline,
+        filtered_pipeline = pipeline.filter(
             tags=tags,
             from_nodes=from_nodes,
             to_nodes=to_nodes,

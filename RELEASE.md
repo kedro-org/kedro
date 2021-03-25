@@ -25,6 +25,7 @@
 * Plugins with empty CLI groups are no longer displayed in the Kedro CLI help screen.
 * Duplicate commands will no longer appear twice in the Kedro CLI help screen.
 * CLI commands from sources with the same name will show under one list in the help screen.
+* The setup of a Kedro project, including adding src to path and configuring settings, is now handled via the `bootstrap_project` method.
 
 ## Minor breaking changes to the API
 

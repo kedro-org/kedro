@@ -65,20 +65,16 @@ def load_kedro_objects(path, line=None):  # pylint: disable=unused-argument
 
     import kedro.config.default_logger  # noqa: F401 # pylint: disable=unused-import
     from kedro.framework.cli import load_entry_points
-    from kedro.framework.cli.utils import _add_src_to_path
-    from kedro.framework.project import configure_project
     from kedro.framework.session import KedroSession
     from kedro.framework.session.session import _activate_session
-    from kedro.framework.startup import _get_project_metadata
+    from kedro.framework.startup import bootstrap_project
 
     global context
     global catalog
     global session
 
     path = path or project_path
-    metadata = _get_project_metadata(path)
-    _add_src_to_path(metadata.source_dir, path)
-    configure_project(metadata.package_name)
+    metadata = bootstrap_project(path)
 
     _clear_hook_manager()
 

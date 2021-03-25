@@ -244,10 +244,8 @@ from aws_cdk import aws_s3 as s3
 from aws_cdk import core, aws_lambda, aws_ecr
 from aws_cdk.aws_lambda import IFunction
 from aws_cdk.aws_stepfunctions_tasks import LambdaInvoke
-from kedro.framework.cli.utils import _add_src_to_path
-from kedro.framework.project import configure_project
 from kedro.framework.session import KedroSession
-from kedro.framework.startup import _get_project_metadata
+from kedro.framework.startup import bootstrap_project
 from kedro.pipeline.node import Node
 
 
@@ -281,9 +279,7 @@ class KedroStepFunctionsStack(core.Stack):
 
     def _parse_kedro_pipeline(self) -> None:
         """Extract the Kedro pipeline from the project"""
-        metadata = _get_project_metadata(self.project_path)
-        _add_src_to_path(metadata.source_dir, self.project_path)
-        configure_project(metadata.package_name)
+        metadata = bootstrap_project(self.project_path)
         session = KedroSession.create(project_path=self.project_path, env=self.env)
         context = session.load_context()
 

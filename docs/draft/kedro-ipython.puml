@@ -18,7 +18,7 @@ cli->ipython: Start ipython
 ipython->entrypoint: load startup script
 entrypoint->entrypoint: import Kedro
 entrypoint->hook_manager: clear the hook manager
-entrypoint->project: get the project metadata
+entrypoint->project: bootstrap the project
 entrypoint->entrypoint: remove imported project package modules
 entrypoint->session: create a KedroSession
 entrypoint->session: activate the session

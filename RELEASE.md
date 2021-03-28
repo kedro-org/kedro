@@ -2,6 +2,7 @@
 
 ## Major features and improvements
 * Kedro plugins can now override built-in CLI commands.
+* Support for reusing pipelines through automatic replication via `parallelised_pipeline`
 
 ## Bug fixes and other changes
 * `TemplatedConfigLoader` now correctly inserts default values when no globals are supplied.
@@ -14,6 +15,7 @@
 ## Minor breaking changes to the API
 
 ## Thanks for supporting contributions
+[Szabolcs Blaga](https://github.com/blagasz/)
 
 # Release 0.17.2
 

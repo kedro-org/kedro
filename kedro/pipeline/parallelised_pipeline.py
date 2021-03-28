@@ -33,7 +33,7 @@ import collections
 import functools
 import itertools
 import warnings
-from typing import Callable, Dict, Iterable, List
+from typing import Dict, Iterable, List
 
 import pandas
 
@@ -134,34 +134,34 @@ def parallelised_pipeline(
     return Pipeline([*pipes, aggregator_node])
 
 
-def parallelisation_setup(
-    scenarios: Dict[str, Iterable], filter_datasets: Dict[str, Iterable],
-) -> Callable:
-    """Decorator to setup parallelisation for a function
-    that returns a pipeline (typical for Kedro's modular
-    pipelines).
+# def parallelisation_setup(
+#     scenarios: Dict[str, Iterable], filter_datasets: Dict[str, Iterable],
+# ) -> Callable:
+#     """Decorator to setup parallelisation for a function
+#     that returns a pipeline (typical for Kedro's modular
+#     pipelines).
 
-    Args:
-        scenarios (Iterable[str]): Scenarios to apply defined in the parameter
-            `parallelisation_setup`.
-        filter_datasets (Dict[str, Iterable]): Datasets to filter should match the
-            input for :func:`aggregator_pipeline`.
+#     Args:
+#         scenarios (Iterable[str]): Scenarios to apply defined in the parameter
+#             `parallelisation_setup`.
+#         filter_datasets (Dict[str, Iterable]): Datasets to filter should match the
+#             input for :func:`aggregator_pipeline`.
 
-    Returns:
-        Callable: The decorator to use.
-    """
+#     Returns:
+#         Callable: The decorator to use.
+#     """
 
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwds):
-            pipe = func(*args, **kwds)
-            return parallelised_pipeline(
-                pipe, scenarios=scenarios, filters=filter_datasets,
-            )
+#     def decorator(func):
+#         @functools.wraps(func)
+#         def wrapper(*args, **kwds):
+#             pipe = func(*args, **kwds)
+#             return parallelised_pipeline(
+#                 pipe, scenarios=scenarios, filters=filter_datasets,
+#             )
 
-        return wrapper
+#         return wrapper
 
-    return decorator
+#     return decorator
 
 
 def _short_name(lst):

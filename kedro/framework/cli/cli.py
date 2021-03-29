@@ -40,11 +40,13 @@ from typing import Any, Sequence
 
 import click
 import pkg_resources
+from click.utils import get_os_args
 
 # pylint: disable=unused-import
 import kedro.config.default_logger  # noqa
 from kedro import __version__ as version
 from kedro.framework.cli.catalog import catalog_cli
+from kedro.framework.cli.hooks import CLIHooksManager
 from kedro.framework.cli.jupyter import jupyter_cli
 from kedro.framework.cli.pipeline import pipeline_cli
 from kedro.framework.cli.project import project_group
@@ -177,6 +179,7 @@ class KedroCLI(CommandCollection):
         self._metadata = None  # running in package mode
         if _is_project(project_path):
             self._metadata = bootstrap_project(project_path)
+        self._cli_hook_manager = CLIHooksManager()
 
         super().__init__(
             ("Global commands", self.global_groups),
@@ -193,6 +196,16 @@ class KedroCLI(CommandCollection):
     ):
         if self._metadata:
             extra.update(obj=self._metadata)
+
+        # This is how click's internals parse sys.argv, which include the command,
+        # subcommand, arguments and options. click doesn't store this information anywhere
+        # so we have to re-do it.
+        # https://github.com/pallets/click/blob/master/src/click/core.py#L942-L945
+        args = get_os_args() if args is None else list(args)
+        self._cli_hook_manager.hook.before_command_run(
+            project_metadata=self._metadata, command_args=args,
+        )
+
         super().main(
             args=args,
             prog_name=prog_name,

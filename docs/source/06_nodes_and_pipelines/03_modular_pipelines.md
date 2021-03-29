@@ -18,7 +18,7 @@ You can use a [project-specific CLI command](../09_development/03_commands_refer
 
 For the full list of available CLI options, you can always run `kedro pipeline create --help` for more information.
 
-```python
+```bash
 kedro pipeline create <pipeline_name>
 ```
 

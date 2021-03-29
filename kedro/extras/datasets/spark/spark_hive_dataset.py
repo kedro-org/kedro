@@ -121,8 +121,14 @@ class SparkHiveDataSet(AbstractDataSet):
         >>> reloaded.take(4)
     """
 
+    # pylint: disable=too-many-arguments
     def __init__(
-        self, database: str, table: str, write_mode: str, table_pk: List[str] = None
+        self,
+        database: str,
+        table: str,
+        write_mode: str,
+        table_pk: List[str] = None,
+        partition: str = None,
     ) -> None:
         """Creates a new instance of ``SparkHiveDataSet``.
 
@@ -132,7 +138,8 @@ class SparkHiveDataSet(AbstractDataSet):
             write_mode: ``insert``, ``upsert`` or ``overwrite`` are supported.
             table_pk: If performing an upsert, this identifies the primary key columns used to
                 resolve preexisting data. Is required for ``write_mode="upsert"``.
-
+            partition: Define in which partition the data should be inserted. It only works
+                if the table already exists.
         Raises:
             DataSetError: Invalid configuration supplied
         """
@@ -151,6 +158,13 @@ class SparkHiveDataSet(AbstractDataSet):
         self._database = database
         self._table = table
         self._stage_table = "_temp_" + table
+        self._partition = partition
+
+        # get the name of each partition
+        self._partitions = []
+        if self._partition is not None:
+            for pt in self._partition.split(','):
+                self._partitions.append(pt.split("=")[0].strip())
 
         # self._table_columns is set up in _save() to speed up initialization
         self._table_columns = []  # type: List[str]
@@ -169,6 +183,7 @@ class SparkHiveDataSet(AbstractDataSet):
 
     def _create_empty_hive_table(self, data):
         data.createOrReplaceTempView("tmp")
+
         self._get_spark().sql(
             f"create table {self._database}.{self._table} select * from tmp limit 1"  # nosec
         )
@@ -188,7 +203,7 @@ class SparkHiveDataSet(AbstractDataSet):
             self._create_empty_hive_table(data)
             self._table_columns = data.columns
         else:
-            self._table_columns = self._load().columns
+            self._table_columns = list(set(self._load().columns) - set(self._partitions))
             if self._write_mode == "upsert":
                 non_existent_columns = set(self._table_pk) - set(self._table_columns)
                 if non_existent_columns:
@@ -209,8 +224,16 @@ class SparkHiveDataSet(AbstractDataSet):
     def _insert_save(self, data: DataFrame) -> None:
         data.createOrReplaceTempView("tmp")
         columns = ", ".join(self._table_columns)
+
+        partition = ''
+        if self._partition is not None:
+            partition = f"partition ({self._partition.strip()})"
+
         self._get_spark().sql(
-            f"insert into {self._database}.{self._table} select {columns} from tmp"  # nosec
+            f"""
+            insert into {self._database}.{self._table} {partition}
+            select {columns} from tmp
+            """  # nosec
         )
 
     def _upsert_save(self, data: DataFrame) -> None:
@@ -242,7 +265,10 @@ class SparkHiveDataSet(AbstractDataSet):
 
     def _validate_save(self, data: DataFrame):
         hive_dtypes = set(self._load().dtypes)
+        if len(self._partitions) > 0:
+            hive_dtypes = {(k,v) for k,v in hive_dtypes if k not in self._partitions}
         data_dtypes = set(data.dtypes)
+
         if data_dtypes != hive_dtypes:
             new_cols = data_dtypes - hive_dtypes
             missing_cols = hive_dtypes - data_dtypes

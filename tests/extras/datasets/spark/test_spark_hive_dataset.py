@@ -322,3 +322,76 @@ class TestSparkHiveDataSet:
             match="Requested table not found: default_1.table_doesnt_exist",
         ):
             dataset.load()
+    
+    def test_insert_empty_table_with_partition(self, spark_hive_session):
+        spark_hive_session.sql(
+            """
+            create table default_1.test_insert_empty_table_with_partition 
+            (name string, age integer)
+            partitioned by (ref integer)
+            """
+        ).take(1)
+        dataset = SparkHiveDataSet(
+            database="default_1",
+            table="test_insert_empty_table_with_partition",
+            write_mode="insert",
+            partition="ref = 1"
+        )
+        dataset.save(_generate_spark_df_one())
+        assert_df_equal(dataset.load().drop('ref'), _generate_spark_df_one())
+
+    def test_insert_to_non_existent_table_with_partition(self):
+        dataset = SparkHiveDataSet(
+            database="default_1",
+            table="table_with_partition_doesnt_exist", 
+            write_mode="insert",
+            partition="ref = 1"
+        )
+        with pytest.raises(
+            DataSetError,
+            match=r"Failed while saving data to data set SparkHiveDataSet\(database\=default_1, table\=table_with_partition_doesnt_exist, table_pk\=\[\], write_mode\=insert\)\.\n"
+            r"ref is not a valid partition column in table \`default_1\`\.`table_with_partition_doesnt_exist`"
+        ):
+            dataset.save(_generate_spark_df_one())
+    
+    def test_upsert_not_empty_table_with_partition(self, spark_hive_session):
+        spark_hive_session.sql(
+            """
+            create table default_1.test_upsert_not_empty_table_with_partition 
+            (name string, age integer)
+            partitioned by (ref integer)
+            """
+        ).take(1)
+        dataset = SparkHiveDataSet(
+            database="default_1",
+            table="test_upsert_not_empty_table_with_partition",
+            write_mode="upsert",
+            partition="ref = 1",
+            table_pk=["name"],
+        )
+        dataset.save(_generate_spark_df_one())
+        dataset.save(_generate_spark_df_upsert())
+
+        assert_df_equal(
+            dataset.load().drop('ref').sort("name"),
+            _generate_spark_df_upsert_expected().sort("name"),
+        )
+    
+    def test_overwrite_not_empty_table_with_partition(self, spark_hive_session):
+        spark_hive_session.sql(
+            """
+            create table default_1.test_overwrite_not_empty_table_with_partition 
+            (name string, age integer)
+            partitioned by (ref integer)
+            """
+        ).take(1)
+        dataset = SparkHiveDataSet(
+            database="default_1",
+            table="test_overwrite_not_empty_table_with_partition",
+            write_mode="overwrite",
+            partition="ref = 1",
+            table_pk=["name"],
+        )
+        dataset.save(_generate_spark_df_one())
+        dataset.save(_generate_spark_df_one())
+        assert_df_equal(dataset.load().drop('ref'), _generate_spark_df_one())

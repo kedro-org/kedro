@@ -100,6 +100,7 @@ class TestLoadKedroObjects:
             project_version="0.1",
             project_path=tmp_path,
         )
+        mocker.patch("kedro.framework.session.session.configure_project")
         mocker.patch(
             "kedro.framework.startup.bootstrap_project", return_value=fake_metadata,
         )

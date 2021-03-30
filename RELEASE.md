@@ -18,6 +18,7 @@
 
 ## Major features and improvements
 * Kedro plugins can now override built-in CLI commands.
+* Added a `before_command_run` hook for plugins to add extra behaviour before Kedro CLI commands run.
 
 ## Bug fixes and other changes
 * `TemplatedConfigLoader` now correctly inserts default values when no globals are supplied.

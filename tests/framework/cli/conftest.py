@@ -43,7 +43,11 @@ from click.testing import CliRunner
 from pytest import fixture
 
 from kedro import __version__ as kedro_version
+from kedro.framework.cli.catalog import catalog_cli
 from kedro.framework.cli.cli import cli
+from kedro.framework.cli.jupyter import jupyter_cli
+from kedro.framework.cli.pipeline import pipeline_cli
+from kedro.framework.cli.project import project_group
 from kedro.framework.cli.starters import create_cli
 from kedro.framework.project import configure_project, pipelines, settings
 from kedro.framework.startup import ProjectMetadata
@@ -114,7 +118,17 @@ def fake_metadata(fake_root_dir):
 # code when invoking `kedro` but when imported, they still need to be merged
 @fixture(scope="module")
 def fake_kedro_cli():
-    return click.CommandCollection(name="Kedro", sources=[cli, create_cli])
+    return click.CommandCollection(
+        name="Kedro",
+        sources=[
+            cli,
+            create_cli,
+            catalog_cli,
+            jupyter_cli,
+            pipeline_cli,
+            project_group,
+        ],
+    )
 
 
 @fixture(scope="module")
@@ -125,8 +139,7 @@ def fake_project_cli(
     starter_path = Path(__file__).parents[3].resolve()
     starter_path = starter_path / "features" / "steps" / "test_starter"
     CliRunner().invoke(
-        fake_kedro_cli,
-        ["new", "-c", str(dummy_config), "--starter", str(starter_path)],
+        fake_kedro_cli, ["new", "-c", str(dummy_config), "--starter", str(starter_path)]
     )
 
     # NOTE: Here we load a couple of modules, as they would be imported in
@@ -138,7 +151,7 @@ def fake_project_cli(
 
     import_module(PACKAGE_NAME)
     configure_project(PACKAGE_NAME)
-    yield getattr(import_module(f"{PACKAGE_NAME}.cli"), "cli")
+    yield fake_kedro_cli
 
     # reset side-effects of configure_project
     pipelines.clear()

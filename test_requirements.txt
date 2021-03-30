@@ -14,7 +14,7 @@ holoviews~=1.13.0
 import-linter==1.0
 ipython==7.10  # Due to https://github.com/ipython/ipykernel/issues/540
 joblib>=0.14
-matplotlib>=3.0.3, <4.0
+matplotlib>=3.0.3, <3.4  # 3.4.0 breaks holoviews
 memory_profiler>=0.50.0, <1.0
 moto==1.3.7
 mypy<=1.0

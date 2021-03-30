@@ -28,13 +28,9 @@
 
 Feature: IPython target in new project
 
-  Background:
+  Scenario: Execute ipython target
     Given I have prepared a config file
     And I have run a non-interactive kedro new with starter
-    And I have updated kedro requirements
-    And I have executed the kedro command "install"
-
-  Scenario: Execute ipython target
     When I execute the kedro command "ipython"
     Then I should get a message including "An enhanced Interactive Python"
     And I should get a message including "INFO - ** Kedro project project-dummy"

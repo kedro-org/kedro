@@ -729,7 +729,7 @@ class TestKedroSessionHooks:
         ]
         assert len(before_pipeline_run_calls) == 1
         call_record = before_pipeline_run_calls[0]
-        assert call_record.pipeline is default_pipeline
+        assert set(call_record.pipeline.nodes) == set(default_pipeline.nodes)
         _assert_hook_call_record_has_expected_parameters(
             call_record, ["pipeline", "catalog", "run_params"]
         )
@@ -745,7 +745,7 @@ class TestKedroSessionHooks:
         _assert_hook_call_record_has_expected_parameters(
             call_record, ["pipeline", "catalog", "run_params"]
         )
-        assert call_record.pipeline is default_pipeline
+        assert set(call_record.pipeline.nodes) == set(default_pipeline.nodes)
 
     @pytest.mark.usefixtures("mock_broken_pipeline")
     def test_on_pipeline_error_hook(self, caplog, mock_session_with_hooks):

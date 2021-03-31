@@ -27,6 +27,7 @@
 * Duplicate commands will no longer appear twice in the Kedro CLI help screen.
 * CLI commands from sources with the same name will show under one list in the help screen.
 * The setup of a Kedro project, including adding src to path and configuring settings, is now handled via the `bootstrap_project` method.
+* Invoked `configure_project` if a `package_name` is supplied to `KedroSession.create`. This is added for backward-compatibility purpose to support workflow that creates a `Session` manually. It will only be removed in `0.18.0`.
 
 ## Minor breaking changes to the API
 

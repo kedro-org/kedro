@@ -36,8 +36,6 @@ Feature: Run Project
 
     Given I have prepared a config file
     And I have run a non-interactive kedro new with starter
-    And I have updated kedro requirements
-    And I have executed the kedro command "install"
     When I execute the kedro command "run"
     Then I should get a successful exit code
     And the console log should show that 4 nodes were run
@@ -45,8 +43,6 @@ Feature: Run Project
   Scenario: Run parallel runner with default python entry point with example code
     Given I have prepared a config file
     And I have run a non-interactive kedro new with starter
-    And I have updated kedro requirements
-    And I have executed the kedro command "install"
     When I execute the kedro command "run --parallel"
     Then I should get a successful exit code
     And the console log should show that "split_data" was run
@@ -57,8 +53,6 @@ Feature: Run Project
   Scenario: Run default python entry point without example code
     Given I have prepared a config file
     And I have run a non-interactive kedro new without starter
-    And I have updated kedro requirements
-    And I have executed the kedro command "install"
     When I execute the kedro command "run"
     Then I should get an error exit code
     And I should get an error message including "Pipeline contains no nodes"
@@ -67,8 +61,6 @@ Feature: Run Project
     Given I have prepared a config file
     And I have run a non-interactive kedro new with starter
     And I have prepared a run_config file with config options
-    And I have updated kedro requirements
-    And I have executed the kedro command "install"
     When I execute the kedro command "run --config run_config.yml"
     Then I should get a successful exit code
     And the console log should show that 1 nodes were run
@@ -77,8 +69,6 @@ Feature: Run Project
     Given I have prepared a config file
     And I have run a non-interactive kedro new with starter
     And I have prepared a run_config file with config options
-    And I have updated kedro requirements
-    And I have executed the kedro command "install"
     When I execute the kedro command "run --config run_config.yml --pipeline __default__"
     Then I should get a successful exit code
     And the console log should show that 4 nodes were run
@@ -86,8 +76,6 @@ Feature: Run Project
   Scenario: Run kedro run with extra parameters
     Given I have prepared a config file
     And I have run a non-interactive kedro new with starter
-    And I have updated kedro requirements
-    And I have executed the kedro command "install"
     When I execute the kedro command "run --params extra1:1,extra2:value2"
     Then I should get a successful exit code
     And the console log should show that 4 nodes were run

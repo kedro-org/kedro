@@ -55,6 +55,7 @@ KEDRO_PATH = Path(kedro.__file__).parent
 TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
 
 _STARTER_ALIASES = {
+    "astro-iris",
     "mini-kedro",
     "pandas-iris",
     "pyspark",
@@ -74,6 +75,7 @@ def create_cli():  # pragma: no cover
 @click.option(
     "--config",
     "-c",
+    "config_path",
     type=click.Path(exists=True),
     help="Non-interactive mode, using a configuration yaml file.",
 )
@@ -91,7 +93,7 @@ def create_cli():  # pragma: no cover
     help="An optional directory inside the repository where the starter resides.",
 )
 def new(
-    config, starter_name, checkout, directory, **kwargs
+    config_path, starter_name, checkout, directory, **kwargs
 ):  # pylint: disable=unused-argument
     """Create a new kedro project, either interactively or from a
     configuration file.
@@ -146,17 +148,21 @@ def new(
             )
         template_path = _STARTERS_REPO
         directory = starter_name
+        checkout = checkout or version
     elif starter_name is not None:
         template_path = starter_name
+        checkout = checkout or version
     else:
-        template_path = TEMPLATE_PATH
+        template_path = str(TEMPLATE_PATH)
 
-    _create_project(
-        config_path=config,
-        template_path=template_path,
-        checkout=checkout,
-        directory=directory,
-    )
+    if config_path:
+        config = _fetch_config_from_file(config_path)
+    else:
+        config = _fetch_config_from_prompts(template_path, checkout, directory)
+    config.setdefault("kedro_version", version)
+
+    cookiecutter_args = _make_cookiecutter_args(config, checkout, directory)
+    _create_project(template_path, cookiecutter_args)
 
 
 @create_cli.group()
@@ -176,27 +182,68 @@ def list_starters():
     click.echo(yaml.safe_dump(output))
 
 
-def _create_project(
-    config_path: str,
-    template_path: Path = TEMPLATE_PATH,
-    checkout: str = None,
-    directory: str = None,
-):
-    """Implementation of the kedro new cli command.
+def _fetch_config_from_file(config_path: str) -> Dict[str, str]:
+    """Obtains configuration for a new kedro project non-interactively from a file.
+
     Args:
-        config_path: In non-interactive mode, the path of the config.yml which
-            should contain the project_name, output_dir and repo_name.
+        config_path: The path of the config.yml which should contain the data required
+            by ``prompts.yml`` and also ``output_dir``.
+
+    Returns:
+        Configuration for starting a new project. This is passed as ``extra_context``
+            to cookiecutter and will overwrite the cookiecutter.json defaults.
+    """
+    config = _parse_config_from_file(config_path)
+    _validate_config_from_file(config_path, config)
+    config["output_dir"] = Path(config["output_dir"]).expanduser().resolve()  # type: ignore
+    _assert_output_dir_ok(config["output_dir"])  # type: ignore
+    return config
+
+
+def _make_cookiecutter_args(
+    config: Dict[str, str], checkout: str, directory: str,
+) -> Dict[str, Any]:
+    """Creates a dictionary of arguments to pass to cookiecutter.
+
+    Args:
+        config: Configuration for starting a new project. This is passed as
+            ``extra_context`` to cookiecutter and will overwrite the cookiecutter.json
+            defaults.
+        checkout: The tag, branch or commit in the starter repository to checkout.
+            Maps directly to cookiecutter's ``checkout`` argument. Relevant only when
+            using a starter.
+        directory: The directory of a specific starter inside a repository containing
+            multiple starters. Maps directly to cookiecutter's ``directory`` argument.
+            Relevant only when using a starter.
+            https://cookiecutter.readthedocs.io/en/1.7.2/advanced/directories.html
+
+    Returns:
+        Arguments to pass to cookiecutter.
+    """
+    cookiecutter_args = {
+        "output_dir": config.get("output_dir", str(Path.cwd().resolve())),
+        "no_input": True,
+        "extra_context": config,
+    }
+
+    if checkout:
+        cookiecutter_args["checkout"] = checkout
+    if directory:
+        cookiecutter_args["directory"] = directory
+
+    return cookiecutter_args
+
+
+def _create_project(template_path: str, cookiecutter_args: Dict[str, str]):
+    """Creates a new kedro project using cookiecutter.
+
+    Args:
         template_path: The path to the cookiecutter template to create the project.
             It could either be a local directory or a remote VCS repository
             supported by cookiecutter. For more details, please see:
             https://cookiecutter.readthedocs.io/en/latest/usage.html#generate-your-project
-        checkout: The tag, branch or commit in the starter repository to checkout.
-            Maps directly to cookiecutter's --checkout argument.
-            If the value is not provided, cookiecutter will use the installed Kedro version
-            by default.
-        directory: The directory of a specific starter inside a repository containing
-            multiple starters. Map directly to cookiecutter's --directory argument.
-            https://cookiecutter.readthedocs.io/en/1.7.2/advanced/directories.html
+        cookiecutter_args: Arguments to pass to cookiecutter.
+
     Raises:
         KedroCliError: If it fails to generate a project.
     """
@@ -205,99 +252,111 @@ def _create_project(
         from cookiecutter.exceptions import RepositoryCloneFailed, RepositoryNotFound
         from cookiecutter.main import cookiecutter  # for performance reasons
 
-    config: Dict[str, str] = dict()
-    checkout = checkout or version
     try:
-        if config_path:
-            config = _parse_config(config_path)
-            config = _check_config_ok(config_path, config)
-        else:
-            config = _prompt_user_for_config(template_path, checkout, directory)
-
-        config.setdefault("kedro_version", version)
-        cookiecutter_args = dict(
-            output_dir=config.get("output_dir", str(Path.cwd().resolve())),
-            no_input=True,
-            extra_context=config,
-            checkout=checkout,
-        )
-        if directory:
-            cookiecutter_args["directory"] = directory
-        result_path = Path(cookiecutter(str(template_path), **cookiecutter_args))
-        _clean_pycache(result_path)
-        _print_kedro_new_success_message(result_path)
-    except click.exceptions.Abort as exc:  # pragma: no cover
-        raise KedroCliError("User interrupt.") from exc
-    except RepositoryNotFound as exc:
-        raise KedroCliError(
-            f"Kedro project template not found at {template_path}"
-        ) from exc
-    except RepositoryCloneFailed as exc:
+        result_path = cookiecutter(template_path, **cookiecutter_args)
+    except (RepositoryNotFound, RepositoryCloneFailed) as exc:
         error_message = (
-            f"Kedro project template not found at {template_path} with tag {checkout}."
+            f"Kedro project template not found at {template_path}"
+            f" with tag {cookiecutter_args.get('checkout')}."
         )
-        tags = _get_available_tags(str(template_path).replace("git+", ""))
+        tags = _get_available_tags(template_path)
         if tags:
-            error_message += (
-                f" The following tags are available: {', '.join(tags.__iter__())}"
-            )
+            error_message += f" The following tags are available: {', '.join(tags)}"
         raise KedroCliError(error_message) from exc
     # we don't want the user to see a stack trace on the cli
     except Exception as exc:
         raise KedroCliError("Failed to generate project.") from exc
 
+    _clean_pycache(Path(result_path))
+    _print_kedro_new_success_message(result_path)
 
-def _prompt_user_for_config(  # pylint: disable=too-many-locals
-    template_path: Path, checkout: str = None, directory: str = None
+
+def _fetch_config_from_prompts(
+    template_path: str, checkout: str, directory: str
 ) -> Dict[str, str]:
-    """Prompt user in the CLI to provide configuration values for cookiecutter variables
-    in a starter, such as project_name, package_name, etc.
+    """Obtains configuration for a new kedro project interactively from user prompts.
+
+    Args:
+       template_path: The path to the cookiecutter template to create the project.
+           It could either be a local directory or a remote VCS repository
+           supported by cookiecutter. For more details, please see:
+           https://cookiecutter.readthedocs.io/en/latest/usage.html#generate-your-project
+       checkout: The tag, branch or commit in the starter repository to checkout.
+           Maps directly to cookiecutter's ``checkout`` argument. Relevant only when
+           using a starter.
+       directory: The directory of a specific starter inside a repository containing
+           multiple starters. Maps directly to cookiecutter's ``directory`` argument.
+           Relevant only when using a starter.
+           https://cookiecutter.readthedocs.io/en/1.7.2/advanced/directories.html
+
+    Returns:
+        Configuration for starting a new project. This is passed as ``extra_context``
+        to cookiecutter and will overwrite the cookiecutter.json defaults.
+
+    Raises:
+        KedroCliError: if Kedro project template could not be found.
     """
-    # pylint: disable=import-outside-toplevel
-    from cookiecutter.prompt import read_user_variable, render_variable
+    # pylint: disable=import-outside-toplevel, too-many-locals
+    from cookiecutter.exceptions import RepositoryCloneFailed, RepositoryNotFound
     from cookiecutter.repository import determine_repo_dir  # for performance reasons
 
     with tempfile.TemporaryDirectory() as tmpdir:
         temp_dir_path = Path(tmpdir).resolve()
-        cookiecutter_repo, _ = determine_repo_dir(
-            template=str(template_path),
-            abbreviations=dict(),
-            clone_to_dir=temp_dir_path,
-            checkout=checkout,
-            no_input=True,
-            directory=directory,
-        )
+        try:
+            cookiecutter_repo, _ = determine_repo_dir(
+                template=template_path,
+                abbreviations=dict(),
+                clone_to_dir=temp_dir_path,
+                checkout=checkout,
+                no_input=True,
+                directory=directory,
+            )
+        except (RepositoryNotFound, RepositoryCloneFailed) as exc:
+            error_message = (
+                f"Kedro project template not found at {template_path}"
+                f" with tag {checkout}."
+            )
+            tags = _get_available_tags(template_path)
+            if tags:
+                error_message += f" The following tags are available: {', '.join(tags)}"
+            raise KedroCliError(error_message) from exc
+
         cookiecutter_dir = temp_dir_path / cookiecutter_repo
         prompts_yml = cookiecutter_dir / "prompts.yml"
 
         # If there is no prompts.yml, no need to ask user for input.
         if not prompts_yml.is_file():
-            return {}
+            return dict()
 
-        with open(prompts_yml) as config_file:
-            prompts_dict = yaml.safe_load(config_file)
+        prompts = _parse_prompts_from_file(prompts_yml)
+        return _run_prompts_for_user_input(prompts, cookiecutter_dir)
 
-        cookiecutter_env = _prepare_cookiecutter_env(cookiecutter_dir)
 
-        config: Dict[str, str] = dict()
-        config["output_dir"] = str(Path.cwd().resolve())
+def _run_prompts_for_user_input(
+    prompts: Dict[str, Dict[str, str]], cookiecutter_dir: Path
+) -> Dict[str, str]:
+    # pylint: disable=import-outside-toplevel
+    from cookiecutter.prompt import read_user_variable, render_variable
 
-        for variable_name, prompt_dict in prompts_dict.items():
-            prompt = _Prompt(**prompt_dict)
+    cookiecutter_env = _prepare_cookiecutter_env(cookiecutter_dir)
+    config: Dict[str, str] = dict()
 
-            # render the variable on the command line
-            cookiecutter_variable = render_variable(
-                env=cookiecutter_env.env,
-                raw=cookiecutter_env.context[variable_name],
-                cookiecutter_dict=config,
-            )
+    for variable_name, prompt_dict in prompts.items():
+        prompt = _Prompt(**prompt_dict)
 
-            # read the user's input for the variable
-            user_input = read_user_variable(str(prompt), cookiecutter_variable)
-            if user_input:
-                prompt.validate(user_input)
-                config[variable_name] = user_input
-        return config
+        # render the variable on the command line
+        cookiecutter_variable = render_variable(
+            env=cookiecutter_env.env,
+            raw=cookiecutter_env.context[variable_name],
+            cookiecutter_dict=config,
+        )
+
+        # read the user's input for the variable
+        user_input = read_user_variable(str(prompt), cookiecutter_variable)
+        if user_input:
+            prompt.validate(user_input)
+            config[variable_name] = user_input
+    return config
 
 
 # A cookiecutter env contains the context and environment to render templated
@@ -355,9 +414,11 @@ class _Prompt:
 
 def _get_available_tags(template_path: str) -> List:
     try:
-        tags = git.cmd.Git().ls_remote("--tags", str(template_path)).split("\n")
+        tags = git.cmd.Git().ls_remote("--tags", template_path.replace("git+", ""))
 
-        unique_tags = {tag.split("/")[-1].replace("^{}", "") for tag in tags}
+        unique_tags = {
+            tag.split("/")[-1].replace("^{}", "") for tag in tags.split("\n")
+        }
         # Remove git ref "^{}" and duplicates. For example,
         # tags: ['/tags/version', '/tags/version^{}']
         # unique_tags: {'version'}
@@ -367,12 +428,15 @@ def _get_available_tags(template_path: str) -> List:
     return sorted(unique_tags)
 
 
-def _parse_config(config_path: str) -> Dict:
-    """Parse the config YAML from its path.
+def _parse_config_from_file(config_path: str) -> Dict[str, str]:
+    """Parses the config YAML from its path.
+
     Args:
         config_path: The path of the config.yml file.
+
     Raises:
-        Exception: If the file cannot be parsed.
+        KedroCliError: If the file cannot be parsed.
+
     Returns:
         The config as a dictionary.
     """
@@ -383,22 +447,20 @@ def _parse_config(config_path: str) -> Dict:
         if KedroCliError.VERBOSE_ERROR:
             click.echo(config_path + ":")
             click.echo(yaml.dump(config, default_flow_style=False))
-
-        return config
-
     except Exception as exc:
-        click.secho("Failed to parse " + config_path, fg="red", err=True)
         _show_example_config()
-        raise exc
+        raise KedroCliError(f"Failed to parse {config_path}.") from exc
+
+    return config
 
 
-def _check_config_ok(config_path: str, config: Dict[str, Any]) -> Dict[str, Any]:
-    """Check that the configuration file contains all needed variables.
+def _validate_config_from_file(config_path: str, config: Dict[str, str]) -> None:
+    """Checks that the configuration file contains all needed variables.
+
     Args:
         config_path: The path of the config file.
         config: The config as a dictionary.
-    Returns:
-        Config dictionary.
+
     Raises:
         KedroCliError: If the config file is empty or does not contain all
             keys from template/cookiecutter.json and output_dir.
@@ -407,7 +469,7 @@ def _check_config_ok(config_path: str, config: Dict[str, Any]) -> Dict[str, Any]
         _show_example_config()
         raise KedroCliError(config_path + " is empty")
 
-    mandatory_keys = set(_get_prompts_config().keys())
+    mandatory_keys = set(_parse_prompts_from_file(TEMPLATE_PATH / "prompts.yml").keys())
     mandatory_keys.add("output_dir")
     missing_keys = mandatory_keys - set(config.keys())
 
@@ -416,28 +478,28 @@ def _check_config_ok(config_path: str, config: Dict[str, Any]) -> Dict[str, Any]
         click.echo(yaml.dump(config, default_flow_style=False))
         _show_example_config()
 
-        missing_keys_str = ", ".join(str(k) for k in missing_keys)
-        raise KedroCliError(f"[{missing_keys_str}] not found in {config_path}")
-
-    config["output_dir"] = Path(config.get("output_dir", "")).expanduser().resolve()
-    _assert_output_dir_ok(config["output_dir"])
-    return config
+        raise KedroCliError(f"{', '.join(missing_keys)} not found in {config_path}")
 
 
-def _get_prompts_config():
-    prompts_config_path = TEMPLATE_PATH / "prompts.yml"
-    with prompts_config_path.open() as prompts_config_file:
-        return yaml.safe_load(prompts_config_file)
+def _parse_prompts_from_file(prompts_yml: Path) -> Dict[str, Dict[str, str]]:
+    try:
+        with prompts_yml.open() as prompts:
+            return yaml.safe_load(prompts)
+    # we don't want the user to see a stack trace on the cli
+    except Exception as exc:  # pragma: no cover
+        raise KedroCliError("Failed to generate project.") from exc
 
 
-def _assert_output_dir_ok(output_dir: str):
-    """Check that output directory exists.
+def _assert_output_dir_ok(output_dir: Path):
+    """Checks that output directory exists.
+
     Args:
         output_dir: Output directory path.
+
     Raises:
         KedroCliError: If the output directory does not exist.
     """
-    if not Path(output_dir).exists():
+    if not output_dir.exists():
         message = (
             f"`{output_dir}` is not a valid output directory. "
             f"It must be a relative or absolute path "
@@ -448,7 +510,7 @@ def _assert_output_dir_ok(output_dir: str):
 
 def _show_example_config():
     click.secho("Example of valid config.yml:")
-    prompts_config = _get_prompts_config()
+    prompts_config = _parse_prompts_from_file(TEMPLATE_PATH / "prompts.yml")
     for key, value in prompts_config.items():
         click.secho(
             click.style(key + ": ", bold=True, fg="yellow")
@@ -457,10 +519,9 @@ def _show_example_config():
     click.echo("")
 
 
-def _print_kedro_new_success_message(result):
+def _print_kedro_new_success_message(result_path):
     click.secho(
-        f"\nChange directory to the project generated in {result.resolve()}",
-        fg="green",
+        f"\nChange directory to the project generated in {result_path}", fg="green",
     )
     click.secho(
         "\nA best-practice setup includes initialising git and creating "

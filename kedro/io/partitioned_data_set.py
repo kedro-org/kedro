@@ -264,6 +264,8 @@ class PartitionedDataSet(AbstractDataSet):
             # join the protocol back since tools like PySpark may rely on it
             kwargs[self._filepath_arg] = self._join_protocol(partition)
             dataset = self._dataset_type(**kwargs)  # type: ignore
+            if callable(partition_data):
+                partition_data = partition_data()
             dataset.save(partition_data)
         self._invalidate_caches()
 

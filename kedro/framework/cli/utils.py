@@ -28,7 +28,6 @@
 
 """Utilities for use with click."""
 import difflib
-import os
 import re
 import shlex
 import shutil
@@ -42,15 +41,23 @@ from contextlib import contextmanager
 from importlib import import_module
 from itertools import chain
 from pathlib import Path
-from typing import Iterable, List, Mapping, Sequence, Tuple, Union
+from typing import Dict, Iterable, List, Mapping, Sequence, Set, Tuple, Union
 
 import click
+import pkg_resources
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 MAX_SUGGESTIONS = 3
 CUTOFF = 0.5
 
 ENV_HELP = "Kedro configuration environment name. Defaults to `local`."
+
+ENTRY_POINT_GROUPS = {
+    "global": "kedro.global_commands",
+    "project": "kedro.project_commands",
+    "init": "kedro.init",
+    "line_magic": "kedro.line_magic",
+}
 
 
 def call(cmd: List[str], **kwargs):  # pragma: no cover
@@ -124,26 +131,70 @@ def _suggest_cli_command(
 class CommandCollection(click.CommandCollection):
     """Modified from the Click one to still run the source groups function."""
 
-    def __init__(self, *groups: Tuple[str, Sequence[click.core.MultiCommand]]):
-        self.groups = groups
-        sources = list(chain.from_iterable(cli_groups for title, cli_groups in groups))
-        help_strs = [source.help for source in sources if source.help]
+    def __init__(self, *groups: Tuple[str, Sequence[click.MultiCommand]]):
+        self.groups = [
+            (title, self._merge_same_name_collections(cli_list))
+            for title, cli_list in groups
+        ]
+        sources = list(chain.from_iterable(cli_list for _, cli_list in self.groups))
+
+        help_texts = [
+            cli.help
+            for cli_collection in sources
+            for cli in cli_collection.sources
+            if cli.help
+        ]
+        self._dedupe_commands(sources)
         super().__init__(
             sources=sources,
-            help="\n\n".join(help_strs),
+            help="\n\n".join(help_texts),
             context_settings=CONTEXT_SETTINGS,
         )
         self.params = sources[0].params
         self.callback = sources[0].callback
 
     @staticmethod
-    def _merge_same_name_groups(groups: Sequence[click.core.MultiCommand]):
-        named_groups: Mapping[str, List[click.core.MultiCommand]] = defaultdict(list)
+    def _dedupe_commands(cli_collections: Sequence[click.CommandCollection]):
+        """Deduplicate commands by keeping the ones from the last source
+        in the list.
+        """
+        seen_names: Set[str] = set()
+        for cli_collection in reversed(cli_collections):
+            for cmd_group in reversed(cli_collection.sources):
+                cmd_group.commands = {  # type: ignore
+                    cmd_name: cmd
+                    for cmd_name, cmd in cmd_group.commands.items()  # type: ignore
+                    if cmd_name not in seen_names
+                }
+                seen_names |= cmd_group.commands.keys()  # type: ignore
+
+        # remove empty command groups
+        for cli_collection in cli_collections:
+            cli_collection.sources = [
+                cmd_group
+                for cmd_group in cli_collection.sources
+                if cmd_group.commands  # type: ignore
+            ]
+
+    @staticmethod
+    def _merge_same_name_collections(groups: Sequence[click.MultiCommand]):
+        named_groups: Mapping[str, List[click.MultiCommand]] = defaultdict(list)
+        helps: Mapping[str, list] = defaultdict(list)
         for group in groups:
             named_groups[group.name].append(group)
+            if group.help:
+                helps[group.name].append(group.help)
 
         return [
-            click.CommandCollection(name=k, sources=v) for k, v in named_groups.items()
+            click.CommandCollection(
+                name=group_name,
+                sources=cli_list,
+                help="\n\n".join(helps[group_name]),
+                callback=cli_list[0].callback,
+                params=cli_list[0].params,
+            )
+            for group_name, cli_list in named_groups.items()
+            if cli_list
         ]
 
     def resolve_command(self, ctx: click.core.Context, args: List):
@@ -160,10 +211,13 @@ class CommandCollection(click.CommandCollection):
     def format_commands(
         self, ctx: click.core.Context, formatter: click.formatting.HelpFormatter
     ):
-        for title, groups in self.groups:
-            for group in self._merge_same_name_groups(groups):
-                formatter.write(click.style(f"\n{title} from {group.name}", fg="green"))
-                group.format_commands(ctx, formatter)
+        for title, cli in self.groups:
+            for group in cli:
+                if group.sources:
+                    formatter.write(
+                        click.style(f"\n{title} from {group.name}", fg="green")
+                    )
+                    group.format_commands(ctx, formatter)
 
 
 def get_pkg_version(reqs_path: (Union[str, Path]), package_name: str) -> str:
@@ -306,32 +360,94 @@ def _check_module_importable(module_name: str) -> None:
         ) from exc
 
 
-def _validate_source_path(source_path: Path, project_path: Path):
-    """Validate the source path exists and is relative to the project path.
+def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
+    """Load package entry point commands.
 
     Args:
-        source_path: Absolute source path.
-        project_path: Path to the Kedro project.
+        name: The key value specified in ENTRY_POINT_GROUPS.
 
     Raises:
-        ValueError: If source_path is not relative to project_path.
-        NotADirectoryError: If source_path does not exist.
+        KedroCliError: If loading an entry point failed.
+
+    Returns:
+        List of entry point commands.
+
     """
+    entry_points = pkg_resources.iter_entry_points(group=ENTRY_POINT_GROUPS[name])
+    entry_point_commands = []
+    for entry_point in entry_points:
+        try:
+            entry_point_commands.append(entry_point.load())
+        except Exception as exc:
+            raise KedroCliError(f"Loading {name} commands from {entry_point}") from exc
+    return entry_point_commands
+
+
+def _config_file_callback(ctx, param, value):  # pylint: disable=unused-argument
+    """CLI callback that replaces command line options
+    with values specified in a config file. If command line
+    options are passed, they override config file values.
+    """
+    # for performance reasons
+    import anyconfig  # pylint: disable=import-outside-toplevel
+
+    ctx.default_map = ctx.default_map or {}
+    section = ctx.info_name
+
+    if value:
+        config = anyconfig.load(value)[section]
+        ctx.default_map.update(config)
+
+    return value
+
+
+def _reformat_load_versions(  # pylint: disable=unused-argument
+    ctx, param, value
+) -> Dict[str, str]:
+    """Reformat data structure from tuple to dictionary for `load-version`, e.g.:
+    ('dataset1:time1', 'dataset2:time2') -> {"dataset1": "time1", "dataset2": "time2"}.
+    """
+    load_versions_dict = {}
+
+    for load_version in value:
+        load_version_list = load_version.split(":", 1)
+        if len(load_version_list) != 2:
+            raise KedroCliError(
+                f"Expected the form of `load_version` to be "
+                f"`dataset_name:YYYY-MM-DDThh.mm.ss.sssZ`,"
+                f"found {load_version} instead"
+            )
+        load_versions_dict[load_version_list[0]] = load_version_list[1]
+
+    return load_versions_dict
+
+
+def _try_convert_to_numeric(value):
     try:
-        source_path.relative_to(project_path)
-    except ValueError as exc:
-        raise ValueError(
-            f"Source path '{source_path}' has to be relative to "
-            f"your project root '{project_path}'."
-        ) from exc
-    if not source_path.exists():
-        raise NotADirectoryError(f"Source path '{source_path}' cannot be found.")
+        value = float(value)
+    except ValueError:
+        return value
+    return int(value) if value.is_integer() else value
 
 
-def _add_src_to_path(source_dir: Path, project_path: Path):
-    _validate_source_path(source_dir, project_path)
-
-    if str(source_dir) not in sys.path:
-        sys.path.insert(0, str(source_dir))
-    if "PYTHONPATH" not in os.environ:
-        os.environ["PYTHONPATH"] = str(source_dir)
+def _split_params(ctx, param, value):
+    if isinstance(value, dict):
+        return value
+    result = {}
+    for item in split_string(ctx, param, value):
+        item = item.split(":", 1)
+        if len(item) != 2:
+            ctx.fail(
+                f"Invalid format of `{param.name}` option: "
+                f"Item `{item[0]}` must contain "
+                f"a key and a value separated by `:`."
+            )
+        key = item[0].strip()
+        if not key:
+            ctx.fail(
+                f"Invalid format of `{param.name}` option: Parameter key "
+                f"cannot be an empty string."
+            )
+        value = item[1].strip()
+        result[key] = _try_convert_to_numeric(value)
+    return result

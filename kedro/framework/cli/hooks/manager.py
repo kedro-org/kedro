@@ -25,9 +25,41 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""This module defines a dedicated hook manager for hooks that extends Kedro CLI behaviour."""
+import logging
 
-"""``kedro.framework.cli`` implements commands available from Kedro's CLI.
-"""
+from pluggy import PluginManager
 
-from .cli import main  # NOQA
-from .utils import command_with_verbosity, load_entry_points  # NOQA
+from .markers import CLI_HOOK_NAMESPACE
+from .specs import CLICommandSpecs
+
+_CLI_PLUGIN_HOOKS = "kedro.cli_hooks"
+
+
+class CLIHooksManager(PluginManager):
+    """Hooks manager to manage CLI hooks"""
+
+    def __init__(self) -> None:
+        super().__init__(CLI_HOOK_NAMESPACE)
+        self.add_hookspecs(CLICommandSpecs)
+        self._register_cli_hooks_setuptools()
+
+    def _register_cli_hooks_setuptools(self) -> None:
+        """Register CLI hook implementations from setuptools entrypoints"""
+        already_registered = self.get_plugins()
+        num_cli_hooks_found = self.load_setuptools_entrypoints(_CLI_PLUGIN_HOOKS)
+
+        # Get list of plugin/distinfo tuples for all setuptools registered plugins.
+        plugininfo = self.list_plugin_distinfo()
+        plugin_names = {
+            f"{dist.project_name}-{dist.version}"
+            for plugin, dist in plugininfo
+            if plugin not in already_registered
+        }
+
+        if plugin_names:
+            logging.info(
+                "Registered CLI hooks from %d installed plugin(s): %s",
+                num_cli_hooks_found,
+                ", ".join(sorted(plugin_names)),
+            )

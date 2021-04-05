@@ -25,14 +25,22 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import os
 import re
+import sys
 from pathlib import Path
 
 import pytest
+import toml
 
 from kedro import __version__ as kedro_version
-from kedro.framework.startup import ProjectMetadata, _get_project_metadata, _is_project
+from kedro.framework.startup import (
+    ProjectMetadata,
+    _get_project_metadata,
+    _is_project,
+    _validate_source_path,
+    bootstrap_project,
+)
 
 
 class TestIsProject:
@@ -111,6 +119,44 @@ class TestGetProjectMetadata:
         )
         assert actual == expected
 
+    def test_toml_file_with_extra_keys(self, mocker):
+        mocker.patch.object(Path, "is_file", return_value=True)
+        pyproject_toml_payload = {
+            "tool": {
+                "kedro": {
+                    "package_name": "fake_package_name",
+                    "project_name": "fake_project_name",
+                    "project_version": kedro_version,
+                    "unexpected_key": "hello",
+                }
+            }
+        }
+        mocker.patch("anyconfig.load", return_value=pyproject_toml_payload)
+        pattern = (
+            "Found unexpected keys in 'pyproject.toml'. Make sure it "
+            "only contains the following keys: ['package_name', "
+            "'project_name', 'project_version', 'source_dir']."
+        )
+
+        with pytest.raises(RuntimeError, match=re.escape(pattern)):
+            _get_project_metadata(self.project_path)
+
+    def test_toml_file_has_missing_mandatory_keys(self, mocker):
+        mocker.patch.object(Path, "is_file", return_value=True)
+        pyproject_toml_payload = {
+            "tool": {
+                "kedro": {"project_version": kedro_version, "unexpected_key": "hello"}
+            }
+        }
+        mocker.patch("anyconfig.load", return_value=pyproject_toml_payload)
+        pattern = (
+            "Missing required keys ['package_name', 'project_name'] "
+            "from 'pyproject.toml'."
+        )
+
+        with pytest.raises(RuntimeError, match=re.escape(pattern)):
+            _get_project_metadata(self.project_path)
+
     def test_toml_file_without_kedro_section(self, mocker):
         mocker.patch.object(Path, "is_file", return_value=True)
         mocker.patch("anyconfig.load", return_value={})
@@ -162,3 +208,67 @@ class TestGetProjectMetadata:
         )
         with pytest.raises(ValueError, match=re.escape(pattern)):
             _get_project_metadata(self.project_path)
+
+
+class TestValidateSourcePath:
+    @pytest.mark.parametrize(
+        "source_dir", [".", "src", "./src", "src/nested", "src/nested/nested"]
+    )
+    def test_valid_source_path(self, tmp_path, source_dir):
+        source_path = (tmp_path / source_dir).resolve()
+        source_path.mkdir(parents=True, exist_ok=True)
+        _validate_source_path(source_path, tmp_path.resolve())
+
+    @pytest.mark.parametrize("source_dir", ["..", "src/../..", "~"])
+    def test_invalid_source_path(self, tmp_path, source_dir):
+        source_dir = Path(source_dir).expanduser()
+        source_path = (tmp_path / source_dir).resolve()
+        source_path.mkdir(parents=True, exist_ok=True)
+
+        pattern = re.escape(
+            f"Source path '{source_path}' has to be relative to your project root "
+            f"'{tmp_path.resolve()}'"
+        )
+        with pytest.raises(ValueError, match=pattern):
+            _validate_source_path(source_path, tmp_path.resolve())
+
+    def test_non_existent_source_path(self, tmp_path):
+        source_path = (tmp_path / "non_existent").resolve()
+
+        pattern = re.escape(f"Source path '{source_path}' cannot be found.")
+        with pytest.raises(NotADirectoryError, match=pattern):
+            _validate_source_path(source_path, tmp_path.resolve())
+
+
+class TestBootstrapProject:
+    def test_bootstrap_project(self, mocker, monkeypatch, tmp_path):
+        monkeypatch.delenv("PYTHONPATH", raising=False)
+        # assume settings.py is okay
+        mocker.patch("kedro.framework.project._validate_module")
+        pyproject_toml_payload = {
+            "tool": {
+                "kedro": {
+                    "package_name": "fake_package_name",
+                    "project_name": "fake_project_name",
+                    "project_version": kedro_version,
+                }
+            }
+        }
+        pyproject_toml = tmp_path / "pyproject.toml"
+        pyproject_toml.write_text(toml.dumps(pyproject_toml_payload))
+        src_dir = tmp_path / "src"
+        src_dir.mkdir(exist_ok=True)
+
+        result = bootstrap_project(tmp_path)
+
+        expected_metadata = {
+            "config_file": pyproject_toml,
+            "package_name": "fake_package_name",
+            "project_name": "fake_project_name",
+            "project_path": tmp_path,
+            "project_version": kedro_version,
+            "source_dir": src_dir,
+        }
+        assert result == ProjectMetadata(**expected_metadata)
+        assert str(src_dir) in sys.path[0]
+        assert os.environ["PYTHONPATH"] == str(src_dir)

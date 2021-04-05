@@ -9,6 +9,7 @@
 * Add namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/quantumblacklabs/kedro/issues/399).
 * `pandas.ExcelDataSet` now uses `openpyxl` engine instead of `xlrd`.
 * `KedroSession.run` now raises `ValueError` rather than `KedroContextError` when the pipeline contains no nodes. The same `ValueError` is raised when there are no matching tags.
+* Removed deprecated functions `load_context` and `get_project_context`.
 
 ## Migration guide from Kedro 0.17.* to 0.18.*
 * Optional: You can now remove all `params:` prefix when supplying values to `parameters` argument in a `pipeline()` call.
@@ -17,10 +18,17 @@
 # Upcoming Release 0.17.3
 
 ## Major features and improvements
+* Kedro plugins can now override built-in CLI commands.
+* Added a `before_command_run` hook for plugins to add extra behaviour before Kedro CLI commands run.
 
 ## Bug fixes and other changes
 * `TemplatedConfigLoader` now correctly inserts default values when no globals are supplied.
 * Fixed a bug where the `KEDRO_ENV` environment variable had no effect on instantiating the `context` variable in an iPython session or a Jupyter notebook.
+* Plugins with empty CLI groups are no longer displayed in the Kedro CLI help screen.
+* Duplicate commands will no longer appear twice in the Kedro CLI help screen.
+* CLI commands from sources with the same name will show under one list in the help screen.
+* The setup of a Kedro project, including adding src to path and configuring settings, is now handled via the `bootstrap_project` method.
+* Invoked `configure_project` if a `package_name` is supplied to `KedroSession.create`. This is added for backward-compatibility purpose to support workflow that creates a `Session` manually. It will only be removed in `0.18.0`.
 
 ## Minor breaking changes to the API
 

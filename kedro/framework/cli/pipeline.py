@@ -104,7 +104,13 @@ def _check_pipeline_name(ctx, param, value):  # pylint: disable=unused-argument
     return value
 
 
-@click.group()
+# pylint: disable=missing-function-docstring
+@click.group(name="Kedro")
+def pipeline_cli():  # pragma: no cover
+    pass
+
+
+@pipeline_cli.group()
 def pipeline():
     """Commands for working with pipelines."""
 

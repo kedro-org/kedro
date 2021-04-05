@@ -5,6 +5,7 @@ omit = [
   "kedro/templates/*",
   "kedro/extras/datasets/spark/*",
   "tests/extras/datasets/spark/*",
+  "kedro/framework/cli/hooks/specs.py",
   "kedro/framework/hooks/specs.py",
   "kedro/extras/datasets/tensorflow/*"
 ]

@@ -118,6 +118,36 @@ hooks = MyHooks()
 
 > *Note:* Here, `hooks` should be an instance of the class defining the hooks.
 
+
+## CLI Hooks
+
+You can also develop hook implementations to extend Kedro's CLI behaviour in your plugin. To find available CLI hooks, please visit [kedro.framework.cli.hooks](/kedro.framework.cli.hooks). To register CLI hooks developed in your plugin with Kedro, add the following entry in your project's `setup.py`:
+
+```python
+setup(
+    entry_points={"kedro.cli_hooks": ["plugin_name = plugin_name.plugin:cli_hooks"]},
+)
+```
+
+where `plugin.py` is the module where you declare hook implementations:
+
+```python
+import logging
+
+from kedro.framework.cli.hooks import cli_hook_impl
+
+
+class MyCLIHooks:
+    @cli_hook_impl
+    def before_command_run(self, project_metadata, command_args):
+        logging.info(
+            "Command %s will be run for project %s", command_args, project_metadata
+        )
+
+
+cli_hooks = MyCLIHooks()
+```
+
 ## Contributing process
 
 When you are ready to submit your code:

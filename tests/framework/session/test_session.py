@@ -108,6 +108,18 @@ def mock_settings_context_class(mocker, mock_context_class):
 
 
 @pytest.fixture
+def mock_settings_custom_context_class(mocker):
+    class MyContext(KedroContext):
+        pass
+
+    class MockSettings(_ProjectSettings):
+        _HOOKS = Validator("HOOKS", default=(ConfigLoaderHooks(),))
+        _CONTEXT_CLASS = Validator("CONTEXT_CLASS", default=lambda *_: MyContext)
+
+    return _mock_imported_settings_paths(mocker, MockSettings())
+
+
+@pytest.fixture
 def mock_settings_file_bad_session_store_class(tmpdir):
     mock_settings_file = tmpdir.join("mock_settings_file.py")
     mock_settings_file.write(
@@ -196,7 +208,7 @@ def local_logging_config():
 
 
 @pytest.fixture
-def fake_project(tmp_path, local_logging_config):
+def fake_project(mocker, tmp_path, local_logging_config):
     fake_project_dir = Path(tmp_path) / "fake_project"
     (fake_project_dir / "src").mkdir(parents=True)
 
@@ -218,13 +230,8 @@ def fake_project(tmp_path, local_logging_config):
     env_logging.write_text(json.dumps(local_logging_config))
     (fake_project_dir / "conf" / "local").mkdir()
 
-    return fake_project_dir
-
-
-@pytest.fixture
-def patched_configure_project(mocker):
     mocker.patch("kedro.framework.project._validate_module")
-    configure_project(_FAKE_PACKAGE_NAME)
+    return fake_project_dir
 
 
 class FakeException(Exception):
@@ -311,7 +318,7 @@ class TestKedroSession:
 
         assert session.load_context() is mock_context_class.return_value
 
-    @pytest.mark.usefixtures("mock_settings", "patched_configure_project")
+    @pytest.mark.usefixtures("mock_settings")
     def test_load_context_with_envvar(self, fake_project, monkeypatch, mocker):
         mocker.patch("kedro.config.config.ConfigLoader.get")
         monkeypatch.setenv("KEDRO_ENV", "my_fake_env")
@@ -322,6 +329,14 @@ class TestKedroSession:
         assert isinstance(result, KedroContext)
         assert result.__class__.__name__ == "KedroContext"
         assert result.env == "my_fake_env"
+
+    @pytest.mark.usefixtures("mock_settings_custom_context_class")
+    def test_load_context_custom_context_class(self, fake_project):
+        session = KedroSession.create(_FAKE_PACKAGE_NAME, fake_project)
+        result = session.load_context()
+
+        assert isinstance(result, KedroContext)
+        assert result.__class__.__name__ == "MyContext"
 
     @pytest.mark.usefixtures("mock_settings_context_class")
     def test_default_store(self, fake_project, fake_session_id, caplog):
@@ -342,9 +357,7 @@ class TestKedroSession:
         ]
         assert actual_log_messages == expected_log_messages
 
-    @pytest.mark.usefixtures(
-        "mock_settings_shelve_session_store", "patched_configure_project"
-    )
+    @pytest.mark.usefixtures("mock_settings_shelve_session_store")
     def test_shelve_store(self, fake_project, fake_session_id, caplog, mocker):
         mocker.patch("pathlib.Path.is_file", return_value=True)
         shelve_location = fake_project / "nested" / "sessions"
@@ -421,7 +434,7 @@ class TestKedroSession:
         }
         assert session.store["git"] == expected_git_info
 
-    @pytest.mark.usefixtures("mock_settings", "patched_configure_project")
+    @pytest.mark.usefixtures("mock_settings")
     @pytest.mark.parametrize(
         "exception",
         [
@@ -446,7 +459,7 @@ class TestKedroSession:
         ]
         assert actual_log_messages == expected_log_messages
 
-    @pytest.mark.usefixtures("mock_settings", "patched_configure_project")
+    @pytest.mark.usefixtures("mock_settings")
     def test_log_error(self, fake_project):
         """Test logging the error by the session"""
         # test that the error is not swallowed by the session

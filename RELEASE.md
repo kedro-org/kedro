@@ -10,6 +10,7 @@
 - Add namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/quantumblacklabs/kedro/issues/399)
 - `pandas.ExcelDataSet` now uses `openpyxl` engine instead of `xlrd`.
 - `KedroSession.run` now raises `ValueError` rather than `KedroContextError` when the pipeline contains no nodes. The same `ValueError` is raised when there are no matching tags.
+- Removed deprecated functions `load_context` and `get_project_context`.
 
 ## Migration guide from Kedro 0.17._ to 0.18._
 

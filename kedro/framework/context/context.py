@@ -29,7 +29,6 @@
 
 import functools
 import logging
-import os
 from copy import deepcopy
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any, Dict, Iterable, Union
@@ -39,7 +38,6 @@ from warnings import warn
 from kedro.config import ConfigLoader, MissingConfigException
 from kedro.framework.hooks import get_hook_manager
 from kedro.framework.project import pipelines, settings
-from kedro.framework.startup import _get_project_metadata
 from kedro.io import DataCatalog
 from kedro.io.core import generate_timestamp
 from kedro.pipeline import Pipeline
@@ -632,51 +630,6 @@ class KedroContext:
         easily determine the latest version.
         """
         return generate_timestamp()
-
-
-def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
-    """Loads the KedroContext object of a Kedro Project.
-    This is the default way to load the KedroContext object for normal workflows such as
-    CLI, Jupyter Notebook, Plugins, etc. It assumes the following project structure
-    under the given project_path::
-
-       <project_path>
-           |__ <src_dir>
-           |__ pyproject.toml
-
-    The name of the <scr_dir> is `src` by default. The `pyproject.toml` file is used
-    for project metadata. Kedro configuration should be under `[tool.kedro]` section.
-
-    Args:
-        project_path: Path to the Kedro project.
-        kwargs: Optional kwargs for ``KedroContext`` class.
-
-    Returns:
-        Instance of ``KedroContext`` class defined in Kedro project.
-
-    Raises:
-        KedroContextError: `pyproject.toml` was not found or the `[tool.kedro]` section
-            is missing, or loaded context has package conflict.
-
-    """
-    warn(
-        "`kedro.framework.context.load_context` is now deprecated in favour of "
-        "`KedroSession.load_context` and will be removed in Kedro 0.18.0.",
-        DeprecationWarning,
-    )
-    project_path = Path(project_path).expanduser().resolve()
-    metadata = _get_project_metadata(project_path)
-
-    context_class = settings.CONTEXT_CLASS
-    # update kwargs with env from the environment variable
-    # (defaults to None if not set)
-    # need to do this because some CLI command (e.g `kedro run`) defaults to
-    # passing in `env=None`
-    kwargs["env"] = kwargs.get("env") or os.getenv("KEDRO_ENV")
-    context = context_class(
-        package_name=metadata.package_name, project_path=project_path, **kwargs
-    )
-    return context
 
 
 class KedroContextError(Exception):

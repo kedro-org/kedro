@@ -33,37 +33,26 @@ import json
 import shutil
 from pathlib import Path
 
-import click
 import pytest
 import yaml
+from click.testing import CliRunner
 from cookiecutter.exceptions import RepositoryCloneFailed
 
 from kedro import __version__ as version
-from kedro.framework.cli.cli import cli
 from kedro.framework.cli.starters import (
     _STARTER_ALIASES,
     TEMPLATE_PATH,
-    _get_prompts_config,
-    create_cli,
+    _parse_prompts_from_file,
 )
 
 FILES_IN_TEMPLATE = 37
 
 
-def _invoke(
-    cli_runner,
-    args,
-    project_name=None,
-    repo_name="repo_name",
-    python_package="python_package",
+def _make_cli_prompt_input(
+    project_name=None, repo_name="repo_name", python_package="python_package",
 ):
-
-    click_prompts = (project_name, repo_name, python_package)
-    input_string = "\n".join(x or "" for x in click_prompts)
-    # This is needed just for the tests, those CLI groups are merged in our
-    # code when invoking `kedro` but when imported, they still need to be merged
-    kedro_cli = click.CommandCollection(sources=[cli, create_cli])
-    return cli_runner.invoke(kedro_cli, args, input=input_string)
+    prompts = (project_name, repo_name, python_package)
+    return "\n".join(prompt or "" for prompt in prompts)
 
 
 # pylint: disable=too-many-arguments
@@ -102,20 +91,26 @@ def _assert_template_ok(
             assert (full_path / "src" / package_name / "__init__.py").is_file()
 
 
+@pytest.fixture(autouse=True)
+def chdir_to_tmp(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+
+
 class TestInteractiveNew:
     """Tests for running `kedro new` interactively."""
 
     repo_name = "project-test"
     package_name = "package_test"
 
-    def test_new(self, cli_runner):
+    def test_new(self, fake_kedro_cli):
         """Test new project creation without code example."""
         project_name = "Test"
-        result = _invoke(
-            cli_runner,
+        result = CliRunner().invoke(
+            fake_kedro_cli,
             ["new", "-v"],
-            project_name=project_name,
-            repo_name=self.repo_name,
+            input=_make_cli_prompt_input(
+                project_name=project_name, repo_name=self.repo_name,
+            ),
         )
         _assert_template_ok(
             result,
@@ -124,20 +119,28 @@ class TestInteractiveNew:
             project_name=project_name,
         )
 
-    def test_new_custom_dir(self, cli_runner):
+    def test_new_custom_dir(self, fake_kedro_cli):
         """Test that default package name does not change if custom
         repo name was specified."""
-        result = _invoke(cli_runner, ["new"], repo_name=self.repo_name)
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(repo_name=self.repo_name),
+        )
         _assert_template_ok(
             result, FILES_IN_TEMPLATE, repo_name=self.repo_name,
         )
 
-    def test_new_correct_path(self, cli_runner):
+    def test_new_correct_path(self, fake_kedro_cli):
         """Test new project creation with the default project name."""
-        result = _invoke(cli_runner, ["new"], repo_name=self.repo_name)
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(repo_name=self.repo_name),
+        )
         _assert_template_ok(result, FILES_IN_TEMPLATE, repo_name=self.repo_name)
 
-    def test_fail_if_dir_exists(self, cli_runner):
+    def test_fail_if_dir_exists(self, fake_kedro_cli):
         """Check the error if the output directory already exists."""
         empty_file = Path(self.repo_name) / "empty_file"
         empty_file.parent.mkdir(parents=True)
@@ -145,7 +148,11 @@ class TestInteractiveNew:
 
         old_contents = list(Path(self.repo_name).iterdir())
 
-        result = _invoke(cli_runner, ["new", "-v"], repo_name=self.repo_name)
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "-v"],
+            input=_make_cli_prompt_input(repo_name=self.repo_name),
+        )
 
         assert list(Path(self.repo_name).iterdir()) == old_contents
         assert "directory already exists" in result.output
@@ -154,9 +161,11 @@ class TestInteractiveNew:
     @pytest.mark.parametrize(
         "repo_name", [".repo\nvalid", "re!po\nvalid", "-repo\nvalid", "repo-\nvalid"]
     )
-    def test_bad_repo_name(self, cli_runner, repo_name):
+    def test_bad_repo_name(self, fake_kedro_cli, repo_name):
         """Check the error if the repository name is invalid."""
-        result = _invoke(cli_runner, ["new"], repo_name=repo_name)
+        result = CliRunner().invoke(
+            fake_kedro_cli, ["new"], input=_make_cli_prompt_input(repo_name=repo_name)
+        )
         assert (
             "is an invalid value.\nIt must contain only word symbols" in result.output
         )
@@ -166,9 +175,13 @@ class TestInteractiveNew:
         "pkg_name",
         ["0package\nvalid", "_\nvalid", "package-name\nvalid", "package name\nvalid"],
     )
-    def test_bad_pkg_name(self, cli_runner, pkg_name):
+    def test_bad_pkg_name(self, fake_kedro_cli, pkg_name):
         """Check the error if the package name is invalid."""
-        result = _invoke(cli_runner, ["new"], python_package=pkg_name)
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(python_package=pkg_name),
+        )
         assert "is an invalid value.\nIt must start with a letter" in result.output
         assert result.exit_code != 0
 
@@ -196,27 +209,29 @@ class TestNewFromConfig:
     repo_name = "project-test1"
     config_path = "config.yml"
 
-    def test_config_does_not_exist(self, cli_runner):
+    def test_config_does_not_exist(self, fake_kedro_cli):
         """Check the error if the config file does not exist."""
-        result = _invoke(cli_runner, ["new", "-c", "missing.yml"])
+        result = CliRunner().invoke(fake_kedro_cli, ["new", "-c", "missing.yml"])
         assert result.exit_code != 0
         assert "does not exist" in result.output
 
-    def test_empty_config(self, cli_runner):
+    def test_empty_config(self, fake_kedro_cli):
         """Check the error if the config file is empty."""
         open("touch", "a").close()
-        result = _invoke(cli_runner, ["new", "-v", "-c", "touch"])
+        result = CliRunner().invoke(fake_kedro_cli, ["new", "-v", "-c", "touch"])
         assert result.exit_code != 0
         assert "is empty" in result.output
 
-    def test_new_from_config(self, cli_runner):
+    def test_new_from_config(self, fake_kedro_cli):
         """Test project created from config without example code."""
         output_dir = "test_dir"
         Path(output_dir).mkdir(parents=True)
         _create_config_file(
             self.config_path, self.project_name, self.repo_name, output_dir
         )
-        result = _invoke(cli_runner, ["new", "-v", "--config", self.config_path])
+        result = CliRunner().invoke(
+            fake_kedro_cli, ["new", "-v", "--config", self.config_path]
+        )
         _assert_template_ok(
             result,
             FILES_IN_TEMPLATE,
@@ -226,36 +241,65 @@ class TestNewFromConfig:
             self.repo_name.replace("-", "_"),
         )
 
-    def test_wrong_config(self, cli_runner):
+    def test_wrong_config(self, fake_kedro_cli):
         """Check the error if the output directory is invalid."""
         output_dir = "/usr/invalid/dir"
         _create_config_file(
             self.config_path, self.project_name, self.repo_name, output_dir
         )
 
-        result = _invoke(cli_runner, ["new", "-v", "-c", self.config_path])
+        result = CliRunner().invoke(
+            fake_kedro_cli, ["new", "-v", "-c", self.config_path]
+        )
         assert result.exit_code != 0
         assert "is not a valid output directory." in result.output
 
-    def test_bad_yaml(self, cli_runner):
+    @pytest.mark.xfail
+    def test_config_missing_key(self, fake_kedro_cli, tmp_path):
+        """Check the error if keys are missing from config file."""
+        output_dir = tmp_path / "test_dir"
+        output_dir.mkdir(parents=True)
+
+        _create_config_file(
+            self.config_path, self.project_name, self.repo_name, str(output_dir)
+        )
+
+        starter_path = tmp_path / "starter"
+        shutil.copytree(TEMPLATE_PATH, str(starter_path))
+        with (starter_path / "prompts.yml").open(mode="a+") as prompts_file:
+            yaml.dump({"extra_key": {"title": "extra_key"}}, prompts_file)
+
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "-v", "-c", self.config_path, "-s", str(starter_path)],
+        )
+
+        assert result.exit_code != 0
+        assert "extra_key not found" in result.output  # pragma: no cover
+
+    def test_bad_yaml(self, fake_kedro_cli):
         """Check the error if config YAML is invalid."""
         Path(self.config_path).write_text(
             "output_dir: \nproject_name:\ttest\nrepo_name:\ttest1\n"
         )
-        result = _invoke(cli_runner, ["new", "-v", "-c", self.config_path])
+        result = CliRunner().invoke(
+            fake_kedro_cli, ["new", "-v", "-c", self.config_path]
+        )
         assert result.exit_code != 0
-        assert "that cannot start any token" in result.output
+        assert "Failed to parse config.yml" in result.output
 
-    def test_missing_output_dir(self, cli_runner):
+    def test_missing_output_dir(self, fake_kedro_cli):
         """Check the error if config YAML does not contain the output
         directory."""
         _create_config_file(
             self.config_path, self.project_name, self.repo_name, output_dir=None
         )  # output dir missing
-        result = _invoke(cli_runner, ["new", "-v", "--config", self.config_path])
+        result = CliRunner().invoke(
+            fake_kedro_cli, ["new", "-v", "--config", self.config_path]
+        )
 
         assert result.exit_code != 0
-        assert "[output_dir] not found in" in result.output
+        assert "output_dir not found in" in result.output
         assert not Path(self.repo_name).exists()
 
 
@@ -267,7 +311,7 @@ def test_default_config_up_to_date():
     cookie_keys = [
         key for key in cookie if not key.startswith("_") and key != "kedro_version"
     ]
-    default_config_keys = _get_prompts_config().keys()
+    default_config_keys = _parse_prompts_from_file(TEMPLATE_PATH / "prompts.yml").keys()
 
     assert set(cookie_keys) == set(default_config_keys)
 
@@ -278,16 +322,18 @@ class TestNewWithStarter:
     package_name = "package_test"
     project_name = "Test"
 
-    def test_new_with_valid_starter(self, cli_runner, tmpdir):
-        starter_path = tmpdir / "starter"
+    def test_new_with_valid_starter(self, fake_kedro_cli, tmp_path):
+        starter_path = tmp_path / "starter"
         shutil.copytree(TEMPLATE_PATH, str(starter_path))
 
-        result = _invoke(
-            cli_runner,
+        result = CliRunner().invoke(
+            fake_kedro_cli,
             ["new", "-v", "--starter", str(starter_path)],
-            project_name=self.project_name,
-            python_package=self.package_name,
-            repo_name=self.repo_name,
+            _make_cli_prompt_input(
+                project_name=self.project_name,
+                python_package=self.package_name,
+                repo_name=self.repo_name,
+            ),
         )
         _assert_template_ok(
             result,
@@ -297,14 +343,16 @@ class TestNewWithStarter:
             package_name=self.package_name,
         )
 
-    def test_new_with_invalid_starter_path_should_raise(self, cli_runner):
+    def test_new_with_invalid_starter_path_should_raise(self, fake_kedro_cli):
         invalid_starter_path = "/foo/bar"
-        result = _invoke(
-            cli_runner,
+        result = CliRunner().invoke(
+            fake_kedro_cli,
             ["new", "-v", "--starter", invalid_starter_path],
-            project_name=self.project_name,
-            python_package=self.package_name,
-            repo_name=self.repo_name,
+            input=_make_cli_prompt_input(
+                project_name=self.project_name,
+                python_package=self.package_name,
+                repo_name=self.repo_name,
+            ),
         )
         assert result.exit_code != 0
         assert (
@@ -322,26 +370,28 @@ class TestNewWithStarter:
         ],
     )
     def test_new_with_starter_alias(
-        self, alias, expected_starter_repo, cli_runner, mocker, tmp_path
+        self, alias, expected_starter_repo, fake_kedro_cli, mocker, tmp_path
     ):
         mocker.patch(
             "kedro.framework.cli.starters.tempfile.TemporaryDirectory",
             return_value=tmp_path,
         )
         mocked_cookie = mocker.patch("cookiecutter.main.cookiecutter")
-        _invoke(
-            cli_runner,
+        CliRunner().invoke(
+            fake_kedro_cli,
             ["new", "--starter", alias],
-            project_name=self.project_name,
-            python_package=self.package_name,
-            repo_name=self.repo_name,
+            input=_make_cli_prompt_input(
+                project_name=self.project_name,
+                python_package=self.package_name,
+                repo_name=self.repo_name,
+            ),
         )
         actual_starter_repo = mocked_cookie.call_args[0][0]
         starter_directory = mocked_cookie.call_args[1]["directory"]
         assert actual_starter_repo == expected_starter_repo
         assert starter_directory == alias
 
-    def test_new_starter_with_checkout(self, cli_runner, mocker):
+    def test_new_starter_with_checkout(self, fake_kedro_cli, mocker):
         starter_path = "some-starter"
         checkout_version = "some-version"
         output_dir = str(Path.cwd())
@@ -349,12 +399,14 @@ class TestNewWithStarter:
         mocked_cookiecutter = mocker.patch(
             "cookiecutter.main.cookiecutter", return_value=starter_path
         )
-        result = _invoke(
-            cli_runner,
+        result = CliRunner().invoke(
+            fake_kedro_cli,
             ["new", "--starter", starter_path, "--checkout", checkout_version],
-            project_name=self.project_name,
-            python_package=self.package_name,
-            repo_name=self.repo_name,
+            input=_make_cli_prompt_input(
+                project_name=self.project_name,
+                python_package=self.package_name,
+                repo_name=self.repo_name,
+            ),
         )
         assert result.exit_code == 0, result.output
         mocked_cookiecutter.assert_called_once_with(
@@ -365,19 +417,21 @@ class TestNewWithStarter:
             output_dir=output_dir,
         )
 
-    def test_new_starter_with_checkout_invalid_checkout(self, cli_runner, mocker):
+    def test_new_starter_with_checkout_invalid_checkout(self, fake_kedro_cli, mocker):
         starter_path = "some-starter"
         checkout_version = "some-version"
         mocker.patch("cookiecutter.repository.repository_has_cookiecutter_json")
         mocked_cookiecutter = mocker.patch(
             "cookiecutter.main.cookiecutter", side_effect=RepositoryCloneFailed
         )
-        result = _invoke(
-            cli_runner,
+        result = CliRunner().invoke(
+            fake_kedro_cli,
             ["new", "--starter", starter_path, "--checkout", checkout_version],
-            project_name=self.project_name,
-            python_package=self.package_name,
-            repo_name=self.repo_name,
+            input=_make_cli_prompt_input(
+                project_name=self.project_name,
+                python_package=self.package_name,
+                repo_name=self.repo_name,
+            ),
         )
         assert result.exit_code
         assert (
@@ -393,25 +447,31 @@ class TestNewWithStarter:
             output_dir=output_dir,
         )
 
+    # TODO: merge this with test_new_starter_with_checkout_invalid_checkout_alternative_tags
+    # once _obtain_config_from_prompts/_create_project error handling tidied
     @pytest.mark.parametrize("starter_path", ["some-starter", "git+some-starter"])
-    def test_new_starter_with_checkout_invalid_checkout_alternative_tags(
-        self, cli_runner, mocker, starter_path
+    def test_new_starter_with_checkout_invalid_checkout_alternative_tags_determine(
+        self, fake_kedro_cli, mocker, starter_path
     ):
         checkout_version = "some-version"
         mocker.patch("cookiecutter.repository.repository_has_cookiecutter_json")
         mocker.patch(
-            "cookiecutter.main.cookiecutter", side_effect=RepositoryCloneFailed
+            "cookiecutter.repository.determine_repo_dir",
+            side_effect=RepositoryCloneFailed,
         )
+
         mocked_git = mocker.patch("kedro.framework.cli.starters.git")
         alternative_tags = "version1\nversion2"
         mocked_git.cmd.Git.return_value.ls_remote.return_value = alternative_tags
 
-        result = _invoke(
-            cli_runner,
+        result = CliRunner().invoke(
+            fake_kedro_cli,
             ["new", "--starter", starter_path, "--checkout", checkout_version],
-            project_name=self.project_name,
-            python_package=self.package_name,
-            repo_name=self.repo_name,
+            input=_make_cli_prompt_input(
+                project_name=self.project_name,
+                python_package=self.package_name,
+                repo_name=self.repo_name,
+            ),
         )
         assert result.exit_code
         tags = sorted(set(alternative_tags.split("\n")))
@@ -424,26 +484,63 @@ class TestNewWithStarter:
             "--tags", starter_path.replace("git+", "")
         )
 
-    def test_checkout_flag_without_starter(self, cli_runner):
-        result = _invoke(
-            cli_runner,
+    @pytest.mark.parametrize("starter_path", ["some-starter", "git+some-starter"])
+    def test_new_starter_with_checkout_invalid_checkout_alternative_tags(
+        self, fake_kedro_cli, mocker, starter_path
+    ):
+        checkout_version = "some-version"
+        mocker.patch("cookiecutter.repository.repository_has_cookiecutter_json")
+        mocker.patch(
+            "cookiecutter.main.cookiecutter", side_effect=RepositoryCloneFailed
+        )
+        mocked_git = mocker.patch("kedro.framework.cli.starters.git")
+        alternative_tags = "version1\nversion2"
+        mocked_git.cmd.Git.return_value.ls_remote.return_value = alternative_tags
+
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "--starter", starter_path, "--checkout", checkout_version],
+            input=_make_cli_prompt_input(
+                project_name=self.project_name,
+                python_package=self.package_name,
+                repo_name=self.repo_name,
+            ),
+        )
+        assert result.exit_code
+        tags = sorted(set(alternative_tags.split("\n")))
+        pattern = (
+            f"Kedro project template not found at {starter_path} with tag {checkout_version}. "
+            f"The following tags are available: {', '.join(tags)}"
+        )
+        assert pattern in result.output
+        mocked_git.cmd.Git.return_value.ls_remote.assert_called_once_with(
+            "--tags", starter_path.replace("git+", "")
+        )
+
+    def test_checkout_flag_without_starter(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
             ["new", "--checkout", "some-version"],
-            project_name=self.project_name,
-            python_package=self.package_name,
-            repo_name=self.repo_name,
+            input=_make_cli_prompt_input(
+                project_name=self.project_name,
+                python_package=self.package_name,
+                repo_name=self.repo_name,
+            ),
         )
         assert result.exit_code != 0
         assert (
             "Cannot use the --checkout flag without a --starter value." in result.output
         )
 
-    def test_directory_flag_without_starter(self, cli_runner):
-        result = _invoke(
-            cli_runner,
+    def test_directory_flag_without_starter(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
             ["new", "--directory", "some-dir"],
-            project_name=self.project_name,
-            python_package=self.package_name,
-            repo_name=self.repo_name,
+            input=_make_cli_prompt_input(
+                project_name=self.project_name,
+                python_package=self.package_name,
+                repo_name=self.repo_name,
+            ),
         )
         assert result.exit_code != 0
         assert (
@@ -451,70 +548,75 @@ class TestNewWithStarter:
             in result.output
         )
 
-    def test_directory_flag_with_starter_alias(self, cli_runner):
-        result = _invoke(
-            cli_runner,
+    def test_directory_flag_with_starter_alias(self, fake_kedro_cli):
+        result = CliRunner().invoke(
+            fake_kedro_cli,
             ["new", "--starter", "pyspark-iris", "--directory", "some-dir"],
-            project_name=self.project_name,
-            python_package=self.package_name,
-            repo_name=self.repo_name,
+            input=_make_cli_prompt_input(
+                project_name=self.project_name,
+                python_package=self.package_name,
+                repo_name=self.repo_name,
+            ),
         )
         assert result.exit_code != 0
         assert (
             "Cannot use the --directory flag with a --starter alias." in result.output
         )
 
-    def test_prompt_user_for_config(self, cli_runner, mocker):
+    def test_prompt_user_for_config(self, fake_kedro_cli, mocker):
         starter_path = Path(__file__).parents[3].resolve()
-        starter_path = starter_path / "features" / "steps" / "test_starter"
+        starter_path = str(starter_path / "features" / "steps" / "test_starter")
 
         output_dir = str(Path.cwd())
         mocked_cookiecutter = mocker.patch(
             "cookiecutter.main.cookiecutter", return_value=starter_path
         )
-        result = _invoke(
-            cli_runner,
+        result = CliRunner().invoke(
+            fake_kedro_cli,
             ["new", "--starter", starter_path],
-            project_name=self.project_name,
-            python_package=self.package_name,
-            repo_name=self.repo_name,
+            input=_make_cli_prompt_input(
+                project_name=self.project_name,
+                python_package=self.package_name,
+                repo_name=self.repo_name,
+            ),
         )
         assert result.exit_code == 0, result.output
         mocked_cookiecutter.assert_called_once_with(
-            str(starter_path),
-            checkout=version,
+            starter_path,
             extra_context={
                 "kedro_version": version,
-                "output_dir": output_dir,
                 "project_name": self.project_name,
                 "python_package": self.package_name,
                 "repo_name": self.repo_name,
             },
             no_input=True,
             output_dir=output_dir,
+            checkout=version,
         )
 
-    def test_raise_error_when_prompt_invalid(self, cli_runner, tmpdir):
-        starter_path = tmpdir / "starter"
+    def test_raise_error_when_prompt_invalid(self, fake_kedro_cli, tmp_path):
+        starter_path = tmp_path / "starter"
         shutil.copytree(TEMPLATE_PATH, str(starter_path))
         with open(starter_path / "prompts.yml", "w+") as prompts_file:
             yaml.dump({"repo_name": {}}, prompts_file)
 
-        result = _invoke(
-            cli_runner,
+        result = CliRunner().invoke(
+            fake_kedro_cli,
             ["new", "-v", "--starter", str(starter_path)],
-            project_name=self.project_name,
-            python_package=self.package_name,
-            repo_name=self.repo_name,
+            input=_make_cli_prompt_input(
+                project_name=self.project_name,
+                python_package=self.package_name,
+                repo_name=self.repo_name,
+            ),
         )
         assert result.exit_code != 0
         assert (
             "Each prompt must have a title field to be valid" in result.output
         ), result.output
 
-    def test_starter_list(self, cli_runner):
+    def test_starter_list(self, fake_kedro_cli):
         """Check that `kedro starter list` prints out all starter aliases."""
-        result = _invoke(cli_runner, ["starter", "list"])
+        result = CliRunner().invoke(fake_kedro_cli, ["starter", "list"])
 
         assert result.exit_code == 0, result.output
         for alias in _STARTER_ALIASES:

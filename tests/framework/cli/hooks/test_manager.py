@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
@@ -19,32 +19,40 @@
 # trademarks of QuantumBlack. The License does not grant you any right or
 # license to the QuantumBlack Trademarks. You may not use the QuantumBlack
 # Trademarks or any confusingly similar mark as a trademark for your product,
-#     or use the QuantumBlack Trademarks in any other manner that might cause
+# or use the QuantumBlack Trademarks in any other manner that might cause
 # confusion in the marketplace, including but not limited to in advertising,
 # on websites, or on software.
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+import pytest
 
-Feature: Jupyter targets in new project
+from kedro.framework.cli.hooks.manager import CLIHooksManager
+from kedro.framework.cli.hooks.specs import CLICommandSpecs
 
-  Background:
-    Given I have prepared a config file
-    And I have run a non-interactive kedro new with starter
 
-  Scenario: Execute jupyter-notebook target
-    When I execute the kedro jupyter command "notebook --no-browser"
-    Then jupyter notebook should run on port 8888
+@pytest.mark.parametrize(
+    "hook_specs,hook_name,hook_params",
+    [(CLICommandSpecs, "before_command_run", ("project_metadata", "command_args"))],
+)
+def test_hook_manager_can_call_hooks_defined_in_specs(
+    hook_specs, hook_name, hook_params
+):
+    """Tests to make sure that the hook manager can call all hooks defined by specs.
+    """
+    cli_hook_manager = CLIHooksManager()
+    hook = getattr(cli_hook_manager.hook, hook_name)
+    assert hook.spec.namespace == hook_specs
+    kwargs = {param: None for param in hook_params}
+    result = hook(**kwargs)
+    # since there hasn't been any hook implementation, the result should be empty
+    # but it shouldn't have raised
+    assert result == []
 
-  Scenario: Execute jupyter-lab target
-    When I execute the kedro jupyter command "lab --no-browser"
-    Then Jupyter Lab should run on port 8888
 
-  Scenario: Execute node convert into Python files
-    Given I have added a test jupyter notebook
-    When I execute the test jupyter notebook and save changes
-    And I execute the kedro jupyter command "convert --all"
-    And Wait until the process is finished
-    Then I should get a successful exit code
-    And Code cell with node tag should be converted into kedro node
+def test_hook_manager_cannot_call_non_existent_hook():
+    cli_hook_manager = CLIHooksManager()
+    with pytest.raises(
+        AttributeError, match="'_HookRelay' object has no attribute 'i_do_not_exist'"
+    ):
+        cli_hook_manager.hook.i_do_not_exist()  # pylint: disable=no-member

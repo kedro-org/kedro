@@ -43,7 +43,7 @@ from kedro import __version__ as kedro_version
 from kedro.framework.context import KedroContext
 from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import get_hook_manager
-from kedro.framework.project import settings
+from kedro.framework.project import configure_project, settings
 from kedro.framework.session.store import BaseSessionStore
 from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner, SequentialRunner
@@ -173,6 +173,14 @@ class KedroSession:
             A new ``KedroSession`` instance.
         """
         # pylint: disable=protected-access
+
+        # this is to make sure that for workflows that manually create session
+        # without going through one of our known entrypoints, e.g. some plugins like kedro-airflow,
+        # the project is still properly configured. This is for backward compatibility
+        # and should be removed in 0.18.
+        if package_name is not None:
+            configure_project(package_name)
+
         session = cls(
             package_name=package_name,
             project_path=project_path,

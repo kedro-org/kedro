@@ -573,7 +573,6 @@ def mock_settings_with_disabled_hooks(mocker, logging_hooks, naughty_plugin):
 def patched_configure_project(mocker):
     mocker.patch("kedro.framework.project._validate_module")
     configure_project(MOCK_PACKAGE_NAME)
-    yield
 
 
 @pytest.fixture
@@ -582,7 +581,6 @@ def mock_session_with_hooks(
 ):  # pylint: disable=unused-argument
     mocker.patch("kedro.framework.project._validate_module")
     logging_hooks.queue_listener.start()
-    configure_project(MOCK_PACKAGE_NAME)
     yield KedroSession.create(
         MOCK_PACKAGE_NAME, tmp_path, extra_params={"params:key": "value"}
     )
@@ -662,7 +660,6 @@ class TestKedroSessionHooks:
 
         mocker.patch("kedro.framework.project._validate_module")
         logging_hooks.queue_listener.start()
-        configure_project(MOCK_PACKAGE_NAME)
         KedroSession.create(
             MOCK_PACKAGE_NAME, tmp_path, extra_params={"params:key": "value"}
         )
@@ -1215,7 +1212,9 @@ class TestRegistrationHooks:
         assert record.load_versions is None
         assert record.journal is None
 
-    @pytest.mark.usefixtures("mock_settings_broken_config_loader_hooks")
+    @pytest.mark.usefixtures(
+        "mock_settings_broken_config_loader_hooks", "patched_configure_project"
+    )
     def test_broken_register_config_loader_hook(self, tmp_path):
         pattern = "Expected an instance of `ConfigLoader`, got `NoneType` instead."
         with pytest.raises(KedroContextError, match=re.escape(pattern)):

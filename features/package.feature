@@ -33,6 +33,7 @@ Feature: Package target in new project
     And I have run a non-interactive kedro new with starter
     And I have executed the kedro command "install --no-build-reqs"
 
+  @fresh_venv
   Scenario: Install package
     When I execute the kedro command "package"
     Then I should get a successful exit code

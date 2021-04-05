@@ -84,11 +84,3 @@ def test_hook_manager_can_call_hooks_defined_in_specs(
     # since there hasn't been any hook implementation, the result should be empty
     # but it shouldn't have raised
     assert result == []
-
-
-def test_hook_manager_cannot_call_non_existent_hook():
-    hook_manager = _create_hook_manager()
-    with pytest.raises(
-        AttributeError, match="'_HookRelay' object has no attribute 'i_do_not_exist'"
-    ):
-        hook_manager.hook.i_do_not_exist()  # pylint: disable=no-member

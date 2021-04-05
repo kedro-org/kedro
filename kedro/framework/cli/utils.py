@@ -28,7 +28,6 @@
 
 """Utilities for use with click."""
 import difflib
-import os
 import re
 import shlex
 import shutil
@@ -42,7 +41,7 @@ from contextlib import contextmanager
 from importlib import import_module
 from itertools import chain
 from pathlib import Path
-from typing import Iterable, List, Mapping, Sequence, Set, Tuple, Union
+from typing import Dict, Iterable, List, Mapping, Sequence, Set, Tuple, Union
 
 import click
 import pkg_resources
@@ -384,32 +383,86 @@ def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
     return entry_point_commands
 
 
-def _validate_source_path(source_path: Path, project_path: Path):
-    """Validate the source path exists and is relative to the project path.
+def _add_src_to_path(source_dir: Path, project_path: Path) -> None:  # pragma: no cover
+    # for backwards compatibility with ipython & deployment scripts
+    # pylint: disable=import-outside-toplevel
+    from kedro.framework.startup import _add_src_to_path as real_add_src_to_path
 
-    Args:
-        source_path: Absolute source path.
-        project_path: Path to the Kedro project.
+    msg = (
+        "kedro.framework.utils._add_src_to_path is deprecated. "
+        "Please import from new location kedro.framework.startup "
+        "or use `bootstrap_project()` instead for setting up "
+        "the Kedro project."
+    )
+    warnings.warn(msg, FutureWarning)
+    real_add_src_to_path(source_dir, project_path)
 
-    Raises:
-        ValueError: If source_path is not relative to project_path.
-        NotADirectoryError: If source_path does not exist.
+
+def _config_file_callback(ctx, param, value):  # pylint: disable=unused-argument
+    """CLI callback that replaces command line options
+    with values specified in a config file. If command line
+    options are passed, they override config file values.
     """
+    # for performance reasons
+    import anyconfig  # pylint: disable=import-outside-toplevel
+
+    ctx.default_map = ctx.default_map or {}
+    section = ctx.info_name
+
+    if value:
+        config = anyconfig.load(value)[section]
+        ctx.default_map.update(config)
+
+    return value
+
+
+def _reformat_load_versions(  # pylint: disable=unused-argument
+    ctx, param, value
+) -> Dict[str, str]:
+    """Reformat data structure from tuple to dictionary for `load-version`, e.g.:
+    ('dataset1:time1', 'dataset2:time2') -> {"dataset1": "time1", "dataset2": "time2"}.
+    """
+    load_versions_dict = {}
+
+    for load_version in value:
+        load_version_list = load_version.split(":", 1)
+        if len(load_version_list) != 2:
+            raise KedroCliError(
+                f"Expected the form of `load_version` to be "
+                f"`dataset_name:YYYY-MM-DDThh.mm.ss.sssZ`,"
+                f"found {load_version} instead"
+            )
+        load_versions_dict[load_version_list[0]] = load_version_list[1]
+
+    return load_versions_dict
+
+
+def _try_convert_to_numeric(value):
     try:
-        source_path.relative_to(project_path)
-    except ValueError as exc:
-        raise ValueError(
-            f"Source path '{source_path}' has to be relative to "
-            f"your project root '{project_path}'."
-        ) from exc
-    if not source_path.exists():
-        raise NotADirectoryError(f"Source path '{source_path}' cannot be found.")
+        value = float(value)
+    except ValueError:
+        return value
+    return int(value) if value.is_integer() else value
 
 
-def _add_src_to_path(source_dir: Path, project_path: Path):
-    _validate_source_path(source_dir, project_path)
-
-    if str(source_dir) not in sys.path:
-        sys.path.insert(0, str(source_dir))
-    if "PYTHONPATH" not in os.environ:
-        os.environ["PYTHONPATH"] = str(source_dir)
+def _split_params(ctx, param, value):
+    if isinstance(value, dict):
+        return value
+    result = {}
+    for item in split_string(ctx, param, value):
+        item = item.split(":", 1)
+        if len(item) != 2:
+            ctx.fail(
+                f"Invalid format of `{param.name}` option: "
+                f"Item `{item[0]}` must contain "
+                f"a key and a value separated by `:`."
+            )
+        key = item[0].strip()
+        if not key:
+            ctx.fail(
+                f"Invalid format of `{param.name}` option: Parameter key "
+                f"cannot be an empty string."
+            )
+        value = item[1].strip()
+        result[key] = _try_convert_to_numeric(value)
+    return result

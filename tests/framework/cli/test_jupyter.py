@@ -126,7 +126,7 @@ class TestJupyterNotebookCommand:
         self, python_call_mock, fake_project_cli, fake_ipython_message, fake_metadata
     ):
         result = CliRunner().invoke(
-            fake_project_cli.cli,
+            fake_project_cli,
             ["jupyter", "notebook", "--ip", "0.0.0.0"],
             obj=fake_metadata,
         )
@@ -140,7 +140,7 @@ class TestJupyterNotebookCommand:
         self, python_call_mock, fake_project_cli, fake_ipython_message, fake_metadata
     ):
         result = CliRunner().invoke(
-            fake_project_cli.cli,
+            fake_project_cli,
             ["jupyter", "notebook", "--all-kernels"],
             obj=fake_metadata,
         )
@@ -155,7 +155,7 @@ class TestJupyterNotebookCommand:
         self, help_flag, fake_project_cli, fake_ipython_message, fake_metadata
     ):
         result = CliRunner().invoke(
-            fake_project_cli.cli, ["jupyter", "notebook", help_flag], obj=fake_metadata
+            fake_project_cli, ["jupyter", "notebook", help_flag], obj=fake_metadata
         )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_not_called()
@@ -164,7 +164,7 @@ class TestJupyterNotebookCommand:
     def test_env(self, env_flag, fake_project_cli, python_call_mock, fake_metadata):
         """This tests passing an environment variable to the jupyter subprocess."""
         result = CliRunner().invoke(
-            fake_project_cli.cli,
+            fake_project_cli,
             ["jupyter", "notebook", env_flag, "base"],
             obj=fake_metadata,
         )
@@ -177,7 +177,7 @@ class TestJupyterNotebookCommand:
 
     def test_fail_no_jupyter_core(self, fake_project_cli, mocker):
         mocker.patch.dict("sys.modules", {"jupyter_core": None})
-        result = CliRunner().invoke(fake_project_cli.cli, ["jupyter", "notebook"])
+        result = CliRunner().invoke(fake_project_cli, ["jupyter", "notebook"])
 
         assert result.exit_code
         error = (
@@ -193,9 +193,7 @@ class TestJupyterLabCommand:
         self, python_call_mock, fake_project_cli, fake_ipython_message, fake_metadata
     ):
         result = CliRunner().invoke(
-            fake_project_cli.cli,
-            ["jupyter", "lab", "--ip", "0.0.0.0"],
-            obj=fake_metadata,
+            fake_project_cli, ["jupyter", "lab", "--ip", "0.0.0.0"], obj=fake_metadata,
         )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_called_once_with(False)
@@ -207,7 +205,7 @@ class TestJupyterLabCommand:
         self, python_call_mock, fake_project_cli, fake_ipython_message, fake_metadata
     ):
         result = CliRunner().invoke(
-            fake_project_cli.cli, ["jupyter", "lab", "--all-kernels"], obj=fake_metadata
+            fake_project_cli, ["jupyter", "lab", "--all-kernels"], obj=fake_metadata
         )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_called_once_with(True)
@@ -220,7 +218,7 @@ class TestJupyterLabCommand:
         self, help_flag, fake_project_cli, fake_ipython_message, fake_metadata
     ):
         result = CliRunner().invoke(
-            fake_project_cli.cli, ["jupyter", "lab", help_flag], obj=fake_metadata
+            fake_project_cli, ["jupyter", "lab", help_flag], obj=fake_metadata
         )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_not_called()
@@ -229,9 +227,7 @@ class TestJupyterLabCommand:
     def test_env(self, env_flag, fake_project_cli, python_call_mock, fake_metadata):
         """This tests passing an environment variable to the jupyter subprocess."""
         result = CliRunner().invoke(
-            fake_project_cli.cli,
-            ["jupyter", "lab", env_flag, "base"],
-            obj=fake_metadata,
+            fake_project_cli, ["jupyter", "lab", env_flag, "base"], obj=fake_metadata,
         )
         assert not result.exit_code
 
@@ -242,7 +238,7 @@ class TestJupyterLabCommand:
 
     def test_fail_no_jupyter_core(self, fake_project_cli, mocker):
         mocker.patch.dict("sys.modules", {"jupyter_core": None})
-        result = CliRunner().invoke(fake_project_cli.cli, ["jupyter", "lab"])
+        result = CliRunner().invoke(fake_project_cli, ["jupyter", "lab"])
 
         assert result.exit_code
         error = (
@@ -291,7 +287,7 @@ class TestConvertNotebookCommand:
         assert not output_dir.exists()
 
         result = CliRunner().invoke(
-            fake_project_cli.cli,
+            fake_project_cli,
             ["jupyter", "convert", str(tmp_file_path)],
             obj=fake_metadata,
         )
@@ -313,7 +309,7 @@ class TestConvertNotebookCommand:
         mocker.patch("click.confirm", return_value=False)
 
         result = CliRunner().invoke(
-            fake_project_cli.cli,
+            fake_project_cli,
             ["jupyter", "convert", str(tmp_file_path)],
             obj=fake_metadata,
         )
@@ -339,7 +335,7 @@ class TestConvertNotebookCommand:
         assert not output_dir.exists()
 
         result = CliRunner().invoke(
-            fake_project_cli.cli, ["jupyter", "convert", "--all"], obj=fake_metadata
+            fake_project_cli, ["jupyter", "convert", "--all"], obj=fake_metadata
         )
         assert not result.exit_code, result.stdout
 
@@ -356,7 +352,7 @@ class TestConvertNotebookCommand:
     ):
         """Neither path nor --all flag is provided."""
         result = CliRunner().invoke(
-            fake_project_cli.cli, ["jupyter", "convert"], obj=fake_metadata
+            fake_project_cli, ["jupyter", "convert"], obj=fake_metadata
         )
         expected_output = (
             "Please specify a notebook filepath or "
@@ -374,7 +370,7 @@ class TestConvertNotebookCommand:
         )
 
         result = CliRunner().invoke(
-            fake_project_cli.cli, ["jupyter", "convert", "--all"], obj=fake_metadata
+            fake_project_cli, ["jupyter", "convert", "--all"], obj=fake_metadata
         )
 
         expected_output = (
@@ -396,7 +392,7 @@ class TestConvertNotebookCommand:
         assert not output_dir.exists()
 
         result = CliRunner().invoke(
-            fake_project_cli.cli,
+            fake_project_cli,
             ["jupyter", "convert", str(tmp_file_path)],
             obj=fake_metadata,
         )
@@ -421,7 +417,7 @@ class TestConvertNotebookCommand:
         output_dir.mkdir()
 
         result = CliRunner().invoke(
-            fake_project_cli.cli,
+            fake_project_cli,
             ["jupyter", "convert", str(tmp_file_path)],
             obj=fake_metadata,
         )

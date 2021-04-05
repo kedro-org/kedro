@@ -17,6 +17,7 @@
 
 ## Major features and improvements
 * Kedro plugins can now override built-in CLI commands.
+* Added a `before_command_run` hook for plugins to add extra behaviour before Kedro CLI commands run.
 
 ## Bug fixes and other changes
 * `TemplatedConfigLoader` now correctly inserts default values when no globals are supplied.
@@ -24,6 +25,8 @@
 * Plugins with empty CLI groups are no longer displayed in the Kedro CLI help screen.
 * Duplicate commands will no longer appear twice in the Kedro CLI help screen.
 * CLI commands from sources with the same name will show under one list in the help screen.
+* The setup of a Kedro project, including adding src to path and configuring settings, is now handled via the `bootstrap_project` method.
+* Invoked `configure_project` if a `package_name` is supplied to `KedroSession.create`. This is added for backward-compatibility purpose to support workflow that creates a `Session` manually. It will only be removed in `0.18.0`.
 
 ## Minor breaking changes to the API
 

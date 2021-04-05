@@ -85,6 +85,7 @@ class StagedHiveDataSet:
         )
 
 
+# pylint: disable=too-many-instance-attributes
 class SparkHiveDataSet(AbstractDataSet):
     """``SparkHiveDataSet`` loads and saves Spark dataframes stored on Hive.
     This data set also handles some incompatible file types such as using partitioned parquet on
@@ -121,8 +122,7 @@ class SparkHiveDataSet(AbstractDataSet):
         >>> reloaded.take(4)
     """
 
-    # pylint: disable=too-many-arguments
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         database: str,
         table: str,
@@ -161,10 +161,10 @@ class SparkHiveDataSet(AbstractDataSet):
         self._partition = partition
 
         # get the name of each partition
-        self._partitions = []
+        self._partitions: List[str] = []
         if self._partition is not None:
-            for pt in self._partition.split(','):
-                self._partitions.append(pt.split("=")[0].strip())
+            for partition_set in self._partition.split(","):
+                self._partitions.append(partition_set.split("=")[0].strip())
 
         # self._table_columns is set up in _save() to speed up initialization
         self._table_columns = []  # type: List[str]
@@ -203,7 +203,9 @@ class SparkHiveDataSet(AbstractDataSet):
             self._create_empty_hive_table(data)
             self._table_columns = data.columns
         else:
-            self._table_columns = list(set(self._load().columns) - set(self._partitions))
+            self._table_columns = list(
+                set(self._load().columns) - set(self._partitions)
+            )
             if self._write_mode == "upsert":
                 non_existent_columns = set(self._table_pk) - set(self._table_columns)
                 if non_existent_columns:
@@ -225,7 +227,7 @@ class SparkHiveDataSet(AbstractDataSet):
         data.createOrReplaceTempView("tmp")
         columns = ", ".join(self._table_columns)
 
-        partition = ''
+        partition = ""
         if self._partition is not None:
             partition = f"partition ({self._partition.strip()})"
 
@@ -266,7 +268,7 @@ class SparkHiveDataSet(AbstractDataSet):
     def _validate_save(self, data: DataFrame):
         hive_dtypes = set(self._load().dtypes)
         if len(self._partitions) > 0:
-            hive_dtypes = {(k,v) for k,v in hive_dtypes if k not in self._partitions}
+            hive_dtypes = {(k, v) for k, v in hive_dtypes if k not in self._partitions}
         data_dtypes = set(data.dtypes)
 
         if data_dtypes != hive_dtypes:

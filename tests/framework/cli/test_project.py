@@ -450,6 +450,22 @@ class TestInstallCommand:
         assert result.exit_code, result.stdout
         assert "Error in dependencies" in result.output
 
+    def test_install_working_with_unimportable_pipelines(
+        self, fake_project_cli, mocker, fake_metadata,
+    ):
+        """Test kedro install works even if pipelines are not importable"""
+        mocker.patch("kedro.framework.cli.project.os").name = "posix"
+        pipeline_registry = (
+            fake_metadata.source_dir
+            / fake_metadata.package_name
+            / "pipeline_registry.py"
+        )
+        pipeline_registry.write_text("import this_is_not_a_real_thing")
+
+        result = CliRunner().invoke(fake_project_cli, ["install"], obj=fake_metadata)
+        assert not result.exit_code, result.output
+        assert "Requirements installed!" in result.output
+
 
 @pytest.fixture
 def os_mock(mocker):

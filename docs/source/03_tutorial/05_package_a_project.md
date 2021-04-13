@@ -19,7 +19,7 @@ To package your project, run the following in your project's root directory:
 kedro package
 ```
 
-Kedro builds the package into the `src/dist/` folder of your project, and creates one `.egg` file and one `.whl` file, which are [Python packaging formats for binary distribution](https://packaging.python.org/overview/).
+Kedro builds the package into the `src/dist/` folder of your project, and creates one `.egg` file and one `.whl` file, which are [Python packaging formats for binary distribution](https://packaging.python.org/).
 
 The resulting package only contains the Python source code of your Kedro pipeline, not any of the `conf/`, `data/` and `logs/` subfolders. This means that you can distribute the project to run elsewhere, such as on a separate computer with different configuration, data and logging. When distributed, the packaged project must be run from within a directory that contains the `conf/` subfolder (and `data/` and `logs/` if your pipeline loads/saves local data or uses logging).
 

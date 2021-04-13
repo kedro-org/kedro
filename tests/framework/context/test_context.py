@@ -54,6 +54,7 @@ from kedro.framework.project import (
     _ProjectPipelines,
     _ProjectSettings,
     configure_project,
+    pipelines,
 )
 from kedro.io import DataCatalog
 from kedro.io.core import Version, generate_timestamp
@@ -183,14 +184,11 @@ def mock_settings(mocker):
 
 @pytest.fixture(autouse=True)
 def mock_pipelines(mocker):
-    class MockPipelines(_ProjectPipelines):
-        def configure(self, pipelines_module=None, **kwargs):
-            for pipeline_name, pipeline_obj in _create_pipelines().items():
-                self[pipeline_name] = pipeline_obj
-
-    dummy = MockPipelines()
-    mocker.patch("kedro.framework.context.context.pipelines", dummy)
-    return mocker.patch("kedro.framework.project.pipelines", dummy)
+    mocker.patch.object(
+        _ProjectPipelines,
+        "_get_pipelines_registry_callable",
+        return_value=_create_pipelines,
+    )
 
 
 @pytest.fixture
@@ -290,7 +288,8 @@ def dummy_context(
         MOCK_PACKAGE_NAME, str(tmp_path), env=env, extra_params=extra_params
     )
 
-    return context
+    yield context
+    pipelines._clear(MOCK_PACKAGE_NAME)
 
 
 @pytest.fixture(autouse=True)

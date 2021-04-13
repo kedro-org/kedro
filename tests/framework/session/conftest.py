@@ -94,6 +94,10 @@ def _assert_hook_call_record_has_expected_parameters(
         assert hasattr(call_record, param)
 
 
+def _assert_pipeline_equal(p: Pipeline, q: Pipeline):
+    assert sorted(p.nodes) == sorted(q.nodes)
+
+
 @pytest.fixture
 def local_config(tmp_path):
     cars_filepath = str(tmp_path / "cars.csv")

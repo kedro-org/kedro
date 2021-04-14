@@ -154,7 +154,7 @@ def fake_project_cli(
     yield fake_kedro_cli
 
     # reset side-effects of configure_project
-    pipelines.clear()
+    pipelines._clear(PACKAGE_NAME)  # this resets pipelines loading state
     for key, value in old_settings.items():
         settings.set(key, value)
     sys.path = old_path

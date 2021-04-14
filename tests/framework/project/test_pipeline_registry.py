@@ -50,12 +50,31 @@ def mock_package_name_with_pipelines_file(tmpdir):
     sys.path.insert(0, project_path)
     yield package_name
     sys.path.pop(0)
-    # reset side-effect of configure_project
-    pipelines.pop("new_pipeline")
 
 
 def test_pipelines_without_configure_project_is_empty():
     assert pipelines == {}
+
+
+@pytest.fixture
+def mock_package_name_with_unimportable_pipelines_file(tmpdir):
+    pipelines_file_path = tmpdir.mkdir("test_broken_package") / "pipeline_registry.py"
+    pipelines_file_path.write(
+        textwrap.dedent(
+            """
+                import this_is_not_a_real_thing
+                from kedro.pipeline import Pipeline
+                def register_pipelines():
+                    return {"new_pipeline": Pipeline([])}
+            """
+        )
+    )
+    project_path, package_name, _ = str(pipelines_file_path).rpartition(
+        "test_broken_package"
+    )
+    sys.path.insert(0, project_path)
+    yield package_name
+    sys.path.pop(0)
 
 
 def test_pipelines_after_configuring_project_shows_updated_values(
@@ -64,3 +83,18 @@ def test_pipelines_after_configuring_project_shows_updated_values(
     mocker.patch("kedro.framework.project._validate_module")
     configure_project(mock_package_name_with_pipelines_file)
     assert isinstance(pipelines["new_pipeline"], Pipeline)
+
+
+def test_configure_project_should_not_raise_for_unimportable_pipelines(
+    mock_package_name_with_unimportable_pipelines_file, mocker
+):
+    mocker.patch("kedro.framework.project._validate_module")
+    # configure_project should not raise error for unimportable pipelines
+    # since pipelines loading is lazy
+    configure_project(mock_package_name_with_unimportable_pipelines_file)
+
+    # accessing data should raise for unimportable pipelines
+    with pytest.raises(
+        ModuleNotFoundError, match="No module named 'this_is_not_a_real_thing'"
+    ):
+        _ = pipelines["new_pipeline"]

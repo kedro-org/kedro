@@ -29,14 +29,17 @@
 configure a Kedro project and access its settings."""
 # pylint: disable=redefined-outer-name,unused-argument
 import importlib
+import operator
+from collections.abc import MutableMapping
+from typing import Dict, Optional
 from warnings import warn
 
 from dynaconf import LazySettings
-from dynaconf.utils.functional import LazyObject
 from dynaconf.validator import ValidationError, Validator
 
 from kedro.framework.hooks import get_hook_manager
 from kedro.framework.hooks.manager import _register_hooks, _register_hooks_setuptools
+from kedro.pipeline import Pipeline
 
 
 def _get_default_class(class_import_path):
@@ -99,30 +102,58 @@ class _ProjectSettings(LazySettings):
         super().__init__(*args, **kwargs)
 
 
-class _ProjectPipelines(LazyObject):
-    def _setup(self):
-        self._wrapped = {}
+def _load_data_wrapper(func):
+    """Wrap a method in _ProjectPipelines so that data is loaded on first access.
+    Taking inspiration from dynaconf.utils.functional.new_method_proxy
+    """
+    # pylint: disable=protected-access
+    def inner(self, *args, **kwargs):
+        self._load_data()
+        return func(self._content, *args, **kwargs)
 
-    def _get_register_pipelines(  # pylint: disable=no-self-use
-        self, pipelines_module: str
-    ):
+    return inner
+
+
+class _ProjectPipelines(MutableMapping):
+    """A read-only lazy dictionary-like object to hold the project pipelines.
+    On configure it will store the pipelines module.
+    On first data access, e.g. through __getitem__, it will load the registered pipelines and merge
+    them with pipelines defined from hooks.
+    """
+
+    def __init__(self) -> None:
+        self._pipelines_module: Optional[str] = None
+        self._is_data_loaded = False
+        self._content: Dict[str, Pipeline] = {}
+
+    @staticmethod
+    def _get_pipelines_registry_callable(pipelines_module: str):
         module_obj = importlib.import_module(pipelines_module)
         register_pipelines = getattr(module_obj, "register_pipelines")
         return register_pipelines
 
-    def configure(self, pipelines_module=None, **kwargs):
-        """Collect all pipelines from hooks and from
-        the project's pipeline registry module.
-        """
+    def _load_data(self):
+        """Lazily read pipelines defined in the pipelines registry module"""
+
+        # If the pipelines dictionary has not been configured with a pipelines module
+        # or if data has been loaded
+        if self._pipelines_module is None or self._is_data_loaded:
+            return
+
         try:
-            register_pipelines = self._get_register_pipelines(pipelines_module)
-        except (ModuleNotFoundError, AttributeError):
-            # for backwards compatibility, this is fine
-            project_pipelines = {}
+            register_pipelines = self._get_pipelines_registry_callable(
+                self._pipelines_module
+            )
+        except (ModuleNotFoundError, AttributeError) as exc:
+            # for backwards compatibility with templates < 0.17.2
+            # where no pipelines_registry is defined
+            if self._pipelines_module in str(exc):  # pragma: no cover
+                project_pipelines = {}
+            else:
+                raise
         else:
             project_pipelines = register_pipelines()
 
-        # get pipelines registered from external hooks
         hook_manager = get_hook_manager()
         pipelines_dicts = (
             hook_manager.hook.register_pipelines()  # pylint: disable=no-member
@@ -136,8 +167,33 @@ class _ProjectPipelines(LazyObject):
                 )
             project_pipelines.update(pipeline_collection)
 
-        for pipeline_name, pipeline in project_pipelines.items():
-            self[pipeline_name] = pipeline
+        self._content = project_pipelines
+        self._is_data_loaded = True
+
+    def configure(self, pipelines_module: str) -> None:
+        """Configure the pipelines_module to load the pipelines dictionary.
+        Reset the data loading state so that after every `configure` call,
+        data are reloaded.
+        """
+        self._clear(pipelines_module)
+
+    def _clear(self, pipelines_module: str) -> None:
+        """Helper method to clear the pipelines so new content will be reloaded
+        next time data is accessed. Useful for testing purpose.
+        """
+        self._is_data_loaded = False
+        self._pipelines_module = pipelines_module
+
+    # Dict-like interface
+    __getitem__ = _load_data_wrapper(operator.getitem)
+    __setitem__ = _load_data_wrapper(operator.setitem)
+    __delitem__ = _load_data_wrapper(operator.delitem)
+    __iter__ = _load_data_wrapper(iter)
+    __len__ = _load_data_wrapper(len)
+
+    # Presentation methods
+    __repr__ = _load_data_wrapper(repr)
+    __str__ = _load_data_wrapper(str)
 
 
 settings = _ProjectSettings()

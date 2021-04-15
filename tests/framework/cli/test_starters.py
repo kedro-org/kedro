@@ -362,12 +362,8 @@ class TestNewWithStarter:
         ],
     )
     def test_new_with_starter_alias(
-        self, alias, expected_starter_repo, fake_kedro_cli, mocker, tmp_path
+        self, alias, expected_starter_repo, fake_kedro_cli, mocker
     ):
-        mocker.patch(
-            "kedro.framework.cli.starters.tempfile.TemporaryDirectory",
-            return_value=tmp_path,
-        )
         mocked_cookie = mocker.patch("cookiecutter.main.cookiecutter")
         CliRunner().invoke(
             fake_kedro_cli,

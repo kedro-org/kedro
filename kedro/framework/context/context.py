@@ -291,7 +291,7 @@ class KedroContext:
         Returns:
             A dictionary of defined pipelines.
         """
-        return pipelines
+        return dict(pipelines)
 
     def _get_pipeline(  # pylint: disable=no-self-use
         self, name: str = None

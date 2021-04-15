@@ -136,11 +136,11 @@ class ConfigLoader:
         # for performance reasons
         import anyconfig  # pylint: disable=import-outside-toplevel
 
-        return {
-            k: v
-            for k, v in anyconfig.load(config_file).items()
-            if not k.startswith("_")
-        }
+        # Default to UTF-8, which is Python 3 default encoding, to decode the file
+        with open(config_file, encoding="utf8") as yml:
+            return {
+                k: v for k, v in anyconfig.load(yml).items() if not k.startswith("_")
+            }
 
     def _load_configs(self, config_filepaths: List[Path]) -> Dict[str, Any]:
         """Recursively load all configuration files, which satisfy

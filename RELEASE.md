@@ -20,6 +20,9 @@ print(pipelines["__default__"])  # pipeline loading is only triggered here
 * The setup of a Kedro project, including adding src to path and configuring settings, is now handled via the `bootstrap_project` method.
 * Invoked `configure_project` if a `package_name` is supplied to `KedroSession.create`. This is added for backward-compatibility purpose to support workflow that creates a `Session` manually. It will only be removed in `0.18.0`.
 * Stopped swallowing up all `ModuleNotFoundError` if `register_pipelines` not found, which will display a more helpful error when a dependency is missing, e.g. [Issue #722](https://github.com/quantumblacklabs/kedro/issues/722).
+* When `kedro new` is invoked using a configuration yaml file, `output_dir` is no longer a required key; by default the current working directory will be used.
+* When `kedro new` is invoked using a configuration yaml file, the appropriate `prompts.yml` file is now used for validating the provided configuration. Previously, validation was always performed against the kedro project template `prompts.yml` file.
+* When a relative path to a starter template is provided, `kedro new` now generates user prompts to obtain configuration rather than supplying empty configuration.
 
 ## Minor breaking changes to the API
 

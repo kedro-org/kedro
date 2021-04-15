@@ -40,6 +40,7 @@ print(pipelines["__default__"])  # pipeline loading is only triggered here
 * When `kedro new` is invoked using a configuration yaml file, the appropriate `prompts.yml` file is now used for validating the provided configuration. Previously, validation was always performed against the kedro project template `prompts.yml` file.
 * When a relative path to a starter template is provided, `kedro new` now generates user prompts to obtain configuration rather than supplying empty configuration.
 * Fixed error when using starter on Windows with Python 3.7 (Issue [#722](https://github.com/quantumblacklabs/kedro/issues/722))
+* Fixed decoding error of config file that contains accented characters by opening config files for reading in UTF-8.
 
 ## Minor breaking changes to the API
 

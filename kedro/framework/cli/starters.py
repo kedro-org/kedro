@@ -32,11 +32,14 @@
 This module implements commands available from the kedro CLI for creating
 projects.
 """
+import os
 import re
+import shutil
+import stat
 import tempfile
 from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import click
 import git
@@ -80,6 +83,15 @@ DIRECTORY_ARG_HELP = (
 )
 
 
+# pylint: disable=unused-argument
+def _remove_readonly(func: Callable, path: Path, excinfo: Tuple):  # pragma: no cover
+    """Remove readonly files on Windows
+    See: https://docs.python.org/3/library/shutil.html?highlight=shutil#rmtree-example
+    """
+    os.chmod(path, stat.S_IWRITE)
+    func(path)
+
+
 # pylint: disable=missing-function-docstring
 @click.group(context_settings=CONTEXT_SETTINGS, name="Kedro")
 def create_cli():  # pragma: no cover
@@ -121,16 +133,20 @@ def new(
         template_path = str(TEMPLATE_PATH)
 
     # Get prompts.yml to find what information the user needs to supply as config.
-    with tempfile.TemporaryDirectory() as tmpdir:
-        cookiecutter_dir = _get_cookiecutter_dir(
-            template_path, checkout, directory, tmpdir
-        )
-        prompts_required = _get_prompts_required(cookiecutter_dir)
-        # We only need to make cookiecutter_context if interactive prompts are needed.
-        if not config_path:
-            cookiecutter_context = _make_cookiecutter_context_for_prompts(
-                cookiecutter_dir
-            )
+
+    tmpdir = tempfile.mkdtemp()
+    cookiecutter_dir = _get_cookiecutter_dir(template_path, checkout, directory, tmpdir)
+    prompts_required = _get_prompts_required(cookiecutter_dir)
+    # We only need to make cookiecutter_context if interactive prompts are needed.
+    if not config_path:
+        cookiecutter_context = _make_cookiecutter_context_for_prompts(cookiecutter_dir)
+
+    # Cleanup the tmpdir after it's no longer required.
+    # Ideally we would want to be able to use tempfile.TemporaryDirectory() context manager
+    # but it causes an issue with readonly files on windows
+    # see: https://bugs.python.org/issue26660.
+    # So onerror, we will attempt to clear the readonly bits and re-attempt the cleanup
+    shutil.rmtree(tmpdir, onerror=_remove_readonly)
 
     # Obtain config, either from a file or from interactive user prompts.
     if not prompts_required:

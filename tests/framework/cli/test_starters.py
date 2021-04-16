@@ -45,7 +45,7 @@ FILES_IN_TEMPLATE = 37
 
 
 def _make_cli_prompt_input(
-    project_name=None, repo_name="repo_name", python_package="python_package",
+    project_name=None, repo_name="repo_name", python_package="python_package"
 ):
     prompts = (project_name, repo_name, python_package)
     return "\n".join(prompt or "" for prompt in prompts)
@@ -105,7 +105,7 @@ class TestInteractiveNew:
             fake_kedro_cli,
             ["new", "-v"],
             input=_make_cli_prompt_input(
-                project_name=project_name, repo_name=self.repo_name,
+                project_name=project_name, repo_name=self.repo_name
             ),
         )
         _assert_template_ok(
@@ -358,13 +358,13 @@ class TestNewWithStarter:
             (
                 "pyspark-iris",
                 "git+https://github.com/quantumblacklabs/kedro-starters.git",
-            ),
+            )
         ],
     )
     def test_new_with_starter_alias(
         self, alias, expected_starter_repo, fake_kedro_cli, mocker
     ):
-        mocked_cookie = mocker.patch("cookiecutter.main.cookiecutter")
+        mocked_cookie = mocker.patch("cookiecutter.repository.determine_repo_dir")
         CliRunner().invoke(
             fake_kedro_cli,
             ["new", "--starter", alias],
@@ -374,14 +374,15 @@ class TestNewWithStarter:
                 repo_name=self.repo_name,
             ),
         )
-        actual_starter_repo = mocked_cookie.call_args[0][0]
+        actual_starter_repo = mocked_cookie.call_args[1]["template"]
         starter_directory = mocked_cookie.call_args[1]["directory"]
         assert actual_starter_repo == expected_starter_repo
         assert starter_directory == alias
 
-    def test_new_starter_with_checkout(self, fake_kedro_cli, mocker):
+    def test_new_starter_with_checkout_and_directory(self, fake_kedro_cli, mocker):
         starter_path = "some-starter"
         checkout_version = "some-version"
+        directory = "some-directory"
         output_dir = str(Path.cwd())
         mocker.patch("cookiecutter.repository.repository_has_cookiecutter_json")
         mocker.patch("cookiecutter.generate.generate_context")
@@ -390,7 +391,15 @@ class TestNewWithStarter:
         )
         result = CliRunner().invoke(
             fake_kedro_cli,
-            ["new", "--starter", starter_path, "--checkout", checkout_version],
+            [
+                "new",
+                "--starter",
+                starter_path,
+                "--checkout",
+                checkout_version,
+                "--directory",
+                directory,
+            ],
             input=_make_cli_prompt_input(
                 project_name=self.project_name,
                 python_package=self.package_name,
@@ -401,6 +410,7 @@ class TestNewWithStarter:
         mocked_cookiecutter.assert_called_once_with(
             starter_path,
             checkout=checkout_version,
+            directory=directory,
             extra_context={"kedro_version": version},
             no_input=True,
             output_dir=output_dir,

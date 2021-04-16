@@ -40,7 +40,6 @@ from kedro.pipeline import Pipeline, node
 from kedro.pipeline.node import Node
 from kedro.runner import ParallelRunner
 from tests.framework.session.conftest import (
-    LoggingHooks,
     _assert_hook_call_record_has_expected_parameters,
     _assert_pipeline_equal,
     _mock_imported_settings_paths,
@@ -107,10 +106,7 @@ class TestCatalogHooks:
         config_loader = context.config_loader
 
         relevant_records = [
-            r
-            for r in caplog.records
-            if r.name == LoggingHooks.handler_name
-            and r.getMessage() == "Catalog created"
+            r for r in caplog.records if r.getMessage() == "Catalog created"
         ]
         assert len(relevant_records) == 1
         record = relevant_records[0]
@@ -201,7 +197,7 @@ class TestPipelineHooks:
 class TestNodeHooks:
     @pytest.mark.usefixtures("mock_pipelines")
     def test_before_and_after_node_run_hooks_sequential_runner(
-        self, project_hooks, mock_session, dummy_dataframe
+        self, caplog, mock_session, dummy_dataframe
     ):
         context = mock_session.load_context()
         catalog = context.catalog
@@ -210,9 +206,7 @@ class TestNodeHooks:
 
         # test before node run hook
         before_node_run_calls = [
-            record
-            for record in project_hooks.logs
-            if record.funcName == "before_node_run"
+            record for record in caplog.records if record.funcName == "before_node_run"
         ]
         assert len(before_node_run_calls) == 1
         call_record = before_node_run_calls[0]
@@ -225,9 +219,7 @@ class TestNodeHooks:
 
         # test after node run hook
         after_node_run_calls = [
-            record
-            for record in project_hooks.logs
-            if record.funcName == "after_node_run"
+            record for record in caplog.records if record.funcName == "after_node_run"
         ]
         assert len(after_node_run_calls) == 1
         call_record = after_node_run_calls[0]
@@ -240,7 +232,7 @@ class TestNodeHooks:
 
     @SKIP_ON_WINDOWS
     @pytest.mark.usefixtures("mock_broken_pipelines")
-    def test_on_node_error_hook_parallel_runner(self, mock_session, project_hooks):
+    def test_on_node_error_hook_parallel_runner(self, mock_session, logs_listener):
 
         with pytest.raises(ValueError, match="broken"):
             mock_session.run(
@@ -248,7 +240,7 @@ class TestNodeHooks:
             )
 
         on_node_error_records = [
-            r for r in project_hooks.logs if r.funcName == "on_node_error"
+            r for r in logs_listener.logs if r.funcName == "on_node_error"
         ]
         assert len(on_node_error_records) == 2
 
@@ -263,7 +255,7 @@ class TestNodeHooks:
     @SKIP_ON_WINDOWS
     @pytest.mark.usefixtures("mock_pipelines")
     def test_before_and_after_node_run_hooks_parallel_runner(
-        self, mock_session, project_hooks, dummy_dataframe
+        self, mock_session, logs_listener, dummy_dataframe
     ):
         context = mock_session.load_context()
         catalog = context.catalog
@@ -273,7 +265,7 @@ class TestNodeHooks:
         mock_session.run(runner=ParallelRunner(), node_names=["node1", "node2"])
 
         before_node_run_log_records = [
-            r for r in project_hooks.logs if r.funcName == "before_node_run"
+            r for r in logs_listener.logs if r.funcName == "before_node_run"
         ]
         assert len(before_node_run_log_records) == 2
         for record in before_node_run_log_records:
@@ -282,7 +274,7 @@ class TestNodeHooks:
             assert set(record.inputs.keys()) <= {"cars", "boats"}
 
         after_node_run_log_records = [
-            r for r in project_hooks.logs if r.funcName == "after_node_run"
+            r for r in logs_listener.logs if r.funcName == "after_node_run"
         ]
         assert len(after_node_run_log_records) == 2
         for record in after_node_run_log_records:
@@ -294,7 +286,7 @@ class TestNodeHooks:
 class TestDataSetHooks:
     @pytest.mark.usefixtures("mock_pipelines")
     def test_before_and_after_dataset_loaded_hooks_sequential_runner(
-        self, mock_session, project_hooks, dummy_dataframe
+        self, mock_session, caplog, dummy_dataframe
     ):
         context = mock_session.load_context()
         catalog = context.catalog
@@ -304,7 +296,7 @@ class TestDataSetHooks:
         # test before dataset loaded hook
         before_dataset_loaded_calls = [
             record
-            for record in project_hooks.logs
+            for record in caplog.records
             if record.funcName == "before_dataset_loaded"
         ]
         assert len(before_dataset_loaded_calls) == 1
@@ -316,7 +308,7 @@ class TestDataSetHooks:
         # test after dataset loaded hook
         after_dataset_loaded_calls = [
             record
-            for record in project_hooks.logs
+            for record in caplog.records
             if record.funcName == "after_dataset_loaded"
         ]
         assert len(after_dataset_loaded_calls) == 1
@@ -331,7 +323,7 @@ class TestDataSetHooks:
     @SKIP_ON_WINDOWS
     @pytest.mark.usefixtures("mock_settings")
     def test_before_and_after_dataset_loaded_hooks_parallel_runner(
-        self, mock_session, project_hooks, dummy_dataframe
+        self, mock_session, logs_listener, dummy_dataframe
     ):
         context = mock_session.load_context()
         catalog = context.catalog
@@ -341,7 +333,7 @@ class TestDataSetHooks:
         mock_session.run(runner=ParallelRunner(), node_names=["node1", "node2"])
 
         before_dataset_loaded_log_records = [
-            r for r in project_hooks.logs if r.funcName == "before_dataset_loaded"
+            r for r in logs_listener.logs if r.funcName == "before_dataset_loaded"
         ]
         assert len(before_dataset_loaded_log_records) == 2
         for record in before_dataset_loaded_log_records:
@@ -349,7 +341,7 @@ class TestDataSetHooks:
             assert record.dataset_name in ["cars", "boats"]
 
         after_dataset_loaded_log_records = [
-            r for r in project_hooks.logs if r.funcName == "after_dataset_loaded"
+            r for r in logs_listener.logs if r.funcName == "after_dataset_loaded"
         ]
         assert len(after_dataset_loaded_log_records) == 2
         for record in after_dataset_loaded_log_records:
@@ -358,7 +350,7 @@ class TestDataSetHooks:
             pd.testing.assert_frame_equal(record.data, dummy_dataframe)
 
     def test_before_and_after_dataset_saved_hooks_sequential_runner(
-        self, mock_session, project_hooks, dummy_dataframe
+        self, mock_session, caplog, dummy_dataframe
     ):
         context = mock_session.load_context()
         context.catalog.save("cars", dummy_dataframe)
@@ -367,7 +359,7 @@ class TestDataSetHooks:
         # test before dataset saved hook
         before_dataset_saved_calls = [
             record
-            for record in project_hooks.logs
+            for record in caplog.records
             if record.funcName == "before_dataset_saved"
         ]
         assert len(before_dataset_saved_calls) == 1
@@ -382,7 +374,7 @@ class TestDataSetHooks:
         # test after dataset saved hook
         after_dataset_saved_calls = [
             record
-            for record in project_hooks.logs
+            for record in caplog.records
             if record.funcName == "after_dataset_saved"
         ]
         assert len(after_dataset_saved_calls) == 1
@@ -396,7 +388,7 @@ class TestDataSetHooks:
 
     @SKIP_ON_WINDOWS
     def test_before_and_after_dataset_saved_hooks_parallel_runner(
-        self, mock_session, project_hooks, dummy_dataframe
+        self, mock_session, logs_listener, dummy_dataframe
     ):
         context = mock_session.load_context()
         catalog = context.catalog
@@ -406,7 +398,7 @@ class TestDataSetHooks:
         mock_session.run(runner=ParallelRunner(), node_names=["node1", "node2"])
 
         before_dataset_saved_log_records = [
-            r for r in project_hooks.logs if r.funcName == "before_dataset_saved"
+            r for r in logs_listener.logs if r.funcName == "before_dataset_saved"
         ]
         assert len(before_dataset_saved_log_records) == 2
         for record in before_dataset_saved_log_records:
@@ -415,7 +407,7 @@ class TestDataSetHooks:
             assert record.data.to_dict() == dummy_dataframe.to_dict()
 
         after_dataset_saved_log_records = [
-            r for r in project_hooks.logs if r.funcName == "after_dataset_saved"
+            r for r in logs_listener.logs if r.funcName == "after_dataset_saved"
         ]
         assert len(after_dataset_saved_log_records) == 2
         for record in after_dataset_saved_log_records:

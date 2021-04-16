@@ -133,7 +133,6 @@ def new(
         template_path = str(TEMPLATE_PATH)
 
     # Get prompts.yml to find what information the user needs to supply as config.
-
     tmpdir = tempfile.mkdtemp()
     cookiecutter_dir = _get_cookiecutter_dir(template_path, checkout, directory, tmpdir)
     prompts_required = _get_prompts_required(cookiecutter_dir)

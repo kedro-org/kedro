@@ -40,7 +40,6 @@ from kedro.framework.session import KedroSession
 from kedro.io import DataCatalog
 from kedro.versioning import Journal
 from tests.framework.session.conftest import (
-    LoggingHooks,
     _assert_hook_call_record_has_expected_parameters,
     _mock_imported_settings_paths,
 )
@@ -164,12 +163,11 @@ class TestRegistrationHooks:
         _ = context.config_loader
 
         relevant_records = [
-            r for r in caplog.records if r.name == LoggingHooks.handler_name
+            r for r in caplog.records if r.getMessage() == "Registering config loader"
         ]
         assert len(relevant_records) == 1
-        record = relevant_records[0]
-        assert record.getMessage() == "Registering config loader"
 
+        record = relevant_records[0]
         expected_conf_paths = [
             str(context.project_path / settings.CONF_ROOT / "base"),
             str(context.project_path / settings.CONF_ROOT / "local"),
@@ -184,10 +182,7 @@ class TestRegistrationHooks:
         assert isinstance(catalog, DataCatalog)
 
         relevant_records = [
-            r
-            for r in caplog.records
-            if r.name == LoggingHooks.handler_name
-            and r.getMessage() == "Registering catalog"
+            r for r in caplog.records if r.getMessage() == "Registering catalog"
         ]
         assert len(relevant_records) == 1
 

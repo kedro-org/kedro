@@ -48,6 +48,8 @@ from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node, node
 from kedro.versioning import Journal
 
+logger = logging.getLogger(__name__)
+
 
 @pytest.fixture
 def mock_package_name() -> str:
@@ -178,29 +180,40 @@ class LogRecorder(logging.Handler):  # pylint: disable=abstract-method
         self.log_records.append(record)
 
 
-class LoggingHooks:
-    """A set of test hooks that only log information when invoked"""
-
-    handler_name = "hooks_handler"
+class LogsListener(QueueListener):
+    """Listen to logs stream and capture log records with LogRecorder.
+    """
 
     def __init__(self):
-        self.logger = logging.getLogger(self.handler_name)
-        self.logger.handlers = []
-
-        # process-safe queue to record logs when a session runs
+        # Queue where logs will be sent to
         queue = Queue()
 
-        # handler for writing logs to the queue
-        queue_handler = QueueHandler(queue)
-        self.logger.addHandler(queue_handler)
+        # Tells python logging to send logs to this queue
+        self.log_handler = QueueHandler(queue)
+        logger.addHandler(self.log_handler)
 
-        # handler for recording logs from the queue for assertion purposes
-        self.logs_recorder = LogRecorder()
-        self.queue_listener = QueueListener(queue, self.logs_recorder)
+        # The listener listens to new logs on the queue and saves it to the recorder
+        self.log_recorder = LogRecorder()
+        super().__init__(queue, self.log_recorder)
 
     @property
-    def logs(self) -> List[str]:
-        return self.logs_recorder.log_records
+    def logs(self):
+        return self.log_recorder.log_records
+
+
+@pytest.fixture
+def logs_listener():
+    """Fixture to start the logs listener before a test and clean up after the test finishes
+    """
+    listener = LogsListener()
+    listener.start()
+    yield listener
+    logger.removeHandler(listener.log_handler)
+    listener.stop()
+
+
+class LoggingHooks:
+    """A set of test hooks that only log information when invoked"""
 
     @hook_impl
     def after_catalog_created(
@@ -213,7 +226,7 @@ class LoggingHooks:
         load_versions: Dict[str, str],
         run_id: str,
     ):
-        self.logger.info(
+        logger.info(
             "Catalog created",
             extra={
                 "catalog": catalog,
@@ -235,7 +248,7 @@ class LoggingHooks:
         is_async: str,
         run_id: str,
     ) -> None:
-        self.logger.info(
+        logger.info(
             "About to run node",
             extra={
                 "node": node,
@@ -256,7 +269,7 @@ class LoggingHooks:
         is_async: str,
         run_id: str,
     ) -> None:
-        self.logger.info(
+        logger.info(
             "Ran node",
             extra={
                 "node": node,
@@ -278,7 +291,7 @@ class LoggingHooks:
         is_async: bool,
         run_id: str,
     ):
-        self.logger.info(
+        logger.info(
             "Node error",
             extra={
                 "error": error,
@@ -294,7 +307,7 @@ class LoggingHooks:
     def before_pipeline_run(
         self, run_params: Dict[str, Any], pipeline: Pipeline, catalog: DataCatalog
     ) -> None:
-        self.logger.info(
+        logger.info(
             "About to run pipeline",
             extra={"pipeline": pipeline, "run_params": run_params, "catalog": catalog},
         )
@@ -307,7 +320,7 @@ class LoggingHooks:
         pipeline: Pipeline,
         catalog: DataCatalog,
     ) -> None:
-        self.logger.info(
+        logger.info(
             "Ran pipeline",
             extra={
                 "pipeline": pipeline,
@@ -325,7 +338,7 @@ class LoggingHooks:
         pipeline: Pipeline,
         catalog: DataCatalog,
     ) -> None:
-        self.logger.info(
+        logger.info(
             "Pipeline error",
             extra={
                 "error": error,
@@ -337,23 +350,23 @@ class LoggingHooks:
 
     @hook_impl
     def before_dataset_loaded(self, dataset_name: str) -> None:
-        self.logger.info("Before dataset loaded", extra={"dataset_name": dataset_name})
+        logger.info("Before dataset loaded", extra={"dataset_name": dataset_name})
 
     @hook_impl
     def after_dataset_loaded(self, dataset_name: str, data: Any) -> None:
-        self.logger.info(
+        logger.info(
             "After dataset loaded", extra={"dataset_name": dataset_name, "data": data}
         )
 
     @hook_impl
     def before_dataset_saved(self, dataset_name: str, data: Any) -> None:
-        self.logger.info(
+        logger.info(
             "Before dataset saved", extra={"dataset_name": dataset_name, "data": data}
         )
 
     @hook_impl
     def after_dataset_saved(self, dataset_name: str, data: Any) -> None:
-        self.logger.info(
+        logger.info(
             "After dataset saved", extra={"dataset_name": dataset_name, "data": data}
         )
 
@@ -361,7 +374,7 @@ class LoggingHooks:
     def register_config_loader(
         self, conf_paths: Iterable[str], env: str, extra_params: Dict[str, Any]
     ) -> ConfigLoader:
-        self.logger.info(
+        logger.info(
             "Registering config loader",
             extra={"conf_paths": conf_paths, "env": env, "extra_params": extra_params},
         )
@@ -376,7 +389,7 @@ class LoggingHooks:
         save_version: str,
         journal: Journal,
     ) -> DataCatalog:
-        self.logger.info(
+        logger.info(
             "Registering catalog",
             extra={
                 "catalog": catalog,
@@ -402,9 +415,7 @@ def patched_validate_module(mocker):
 @pytest.fixture
 def project_hooks():
     """A set of project hook implementations that log to stdout whenever it is invoked."""
-    hooks_instance = LoggingHooks()
-    hooks_instance.queue_listener.start()
-    yield hooks_instance
+    return LoggingHooks()
 
 
 @pytest.fixture(autouse=True)

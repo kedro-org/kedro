@@ -31,7 +31,13 @@ implementations.
 
 import logging
 from abc import ABC, abstractmethod
-from concurrent.futures import ALL_COMPLETED, ThreadPoolExecutor, as_completed, wait
+from concurrent.futures import (
+    ALL_COMPLETED,
+    Future,
+    ThreadPoolExecutor,
+    as_completed,
+    wait,
+)
 from typing import Any, Dict, Iterable
 
 from kedro.framework.hooks import get_hook_manager
@@ -308,18 +314,24 @@ def _run_node_sequential(node: Node, catalog: DataCatalog, run_id: str = None) -
 
 
 def _run_node_async(node: Node, catalog: DataCatalog, run_id: str = None) -> Node:
+    def _synchronous_dataset_load(dataset_name: str):
+        """Minimal wrapper to ensure Hooks are run synchronously
+        within an asynchronous dataset load."""
+        hook_manager.hook.before_dataset_loaded(  # pylint: disable=no-member
+            dataset_name=dataset_name
+        )
+        return_ds = catalog.load(dataset_name)
+        hook_manager.hook.after_dataset_loaded(  # pylint: disable=no-member
+            dataset_name=dataset_name, data=return_ds
+        )
+        return return_ds
+
     with ThreadPoolExecutor() as pool:
-        inputs = {}
+        inputs: Dict[str, Future] = {}
         hook_manager = get_hook_manager()
 
         for name in node.inputs:
-            hook_manager.hook.before_dataset_loaded(  # pylint: disable=no-member
-                dataset_name=name
-            )
-            inputs[name] = pool.submit(catalog.load, name)
-            hook_manager.hook.after_dataset_loaded(  # pylint: disable=no-member
-                dataset_name=name, data=inputs[name]
-            )
+            inputs[name] = pool.submit(_synchronous_dataset_load, name)
 
         wait(inputs.values(), return_when=ALL_COMPLETED)
         inputs = {key: value.result() for key, value in inputs.items()}

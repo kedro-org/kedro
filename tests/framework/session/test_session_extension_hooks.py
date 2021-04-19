@@ -25,8 +25,11 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import logging
 import re
 import sys
+import time
+from typing import Any
 
 import pandas as pd
 import pytest
@@ -36,9 +39,11 @@ from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import hook_impl
 from kedro.framework.project import _ProjectPipelines, _ProjectSettings
 from kedro.framework.session import KedroSession
+from kedro.io import DataCatalog, MemoryDataSet
 from kedro.pipeline import Pipeline, node
 from kedro.pipeline.node import Node
 from kedro.runner import ParallelRunner
+from kedro.runner.runner import _run_node_async
 from tests.framework.session.conftest import (
     _assert_hook_call_record_has_expected_parameters,
     _assert_pipeline_equal,
@@ -49,6 +54,8 @@ from tests.framework.session.conftest import (
 SKIP_ON_WINDOWS = pytest.mark.skipif(
     sys.platform.startswith("win"), reason="Due to bug in parallel runner"
 )
+
+logger = logging.getLogger("tests.framework.session.conftest")
 
 
 def broken_node():
@@ -514,3 +521,45 @@ class TestBeforeNodeRunHookWithInputUpdates:
         )
         with pytest.raises(TypeError, match=re.escape(pattern)):
             mock_session_with_broken_before_node_run_hooks.run(runner=ParallelRunner())
+
+
+@pytest.fixture
+def sample_node():
+    def wait_and_identity(x: Any):
+        time.sleep(0.1)
+        return x
+
+    return node(wait_and_identity, inputs="ds1", outputs="ds2", name="test-node")
+
+
+class LogCatalog(DataCatalog):
+    def load(self, name: str, version: str = None) -> Any:
+        dataset = super().load(name=name, version=version)
+        logger.info("Catalog load")
+        return dataset
+
+
+@pytest.fixture
+def memory_catalog():
+    ds1 = MemoryDataSet({"data": 42})
+    ds2 = MemoryDataSet({"data": 42})
+    return LogCatalog({"ds1": ds1, "ds2": ds2})
+
+
+class TestAsyncNodeDatasetHooks:
+    @pytest.mark.usefixtures("mock_settings")
+    def test_after_dataset_load_hook_async(
+        self, memory_catalog, mock_session, sample_node, logs_listener
+    ):
+        # load mock context to instantiate Hooks
+        mock_session.load_context()
+
+        # run the node asynchronously with an instance of `LogCatalog`
+        _run_node_async(node=sample_node, catalog=memory_catalog)
+
+        hooks_log_messages = [r.message for r in logs_listener.logs]
+
+        # check the logs are in the correct order
+        assert str(
+            ["Before dataset loaded", "Catalog load", "After dataset loaded"]
+        ).strip("[]") in str(hooks_log_messages).strip("[]")

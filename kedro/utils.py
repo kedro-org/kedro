@@ -54,3 +54,11 @@ def load_obj(obj_path: str, default_obj_path: str = "") -> Any:
     if not hasattr(module_obj, obj_name):
         raise AttributeError(f"Object `{obj_name}` cannot be loaded from `{obj_path}`.")
     return getattr(module_obj, obj_name)
+
+def dict_nested_update(lhs: dict, rhs: dict):
+    for k, v in rhs.items():
+        if isinstance(v, dict):
+            lhs[k] = dict_nested_update(lhs.get(k, {}) or {}, v)
+        elif v is not None:
+            lhs[k] = v
+    

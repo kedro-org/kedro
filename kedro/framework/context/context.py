@@ -47,6 +47,7 @@ from kedro.pipeline.pipeline import _transcode_split
 from kedro.runner.runner import AbstractRunner
 from kedro.runner.sequential_runner import SequentialRunner
 from kedro.versioning import Journal
+from kedro.utils import dict_nested_update
 
 
 def _deprecate(version):
@@ -347,7 +348,7 @@ class KedroContext:
         except MissingConfigException as exc:
             warn(f"Parameters not found in your Kedro project config.\n{str(exc)}")
             params = {}
-        params.update(self._extra_params or {})
+        dict_nested_update(params, self._extra_params)
         return params
 
     def _get_catalog(

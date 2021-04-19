@@ -1,6 +1,6 @@
 # Set up PyCharm
 
-> *Note:* This documentation is based on `Kedro 0.16.6`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 This section will present a quick guide on how to configure [PyCharm](https://www.jetbrains.com/pycharm/) as a development environment for working on Kedro projects.
 
@@ -124,7 +124,7 @@ You can enable the Kedro catalog validation schema in your PyCharm IDE to enable
 
 ![](../meta/images/pycharm_edit_schema_mapping.png)
 
-Add a new mapping using the "+" button in the top left of the window and select the name you want for it. Enter this URL `https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/static/jsonschema/kedro-catalog-0.16.json` in the "Schema URL" field and select "JSON Schema Version 7" in the "Schema version" field.
+Add a new mapping using the "+" button in the top left of the window and select the name you want for it. Enter this URL `https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/static/jsonschema/kedro-catalog-0.17.json` in the "Schema URL" field and select "JSON Schema Version 7" in the "Schema version" field.
 
 Add the following file path pattern to the mapping: `conf/**/*catalog*`.
 

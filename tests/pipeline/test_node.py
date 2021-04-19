@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import re
 from functools import partial, update_wrapper, wraps
 from typing import Callable
 
@@ -50,12 +51,6 @@ def triconcat(input1: str, input2: str, input3: str):
     return input1 + input2 + input3  # pragma: no cover
 
 
-def kwarg_node(
-    arg1, arg2, *args, arg3, arg_10=0, **extra  # pylint: disable=unused-argument
-):
-    pass  # pragma: no cover
-
-
 @pytest.fixture
 def simple_tuple_node_list():
     return [
@@ -79,6 +74,15 @@ class TestValidNode:
     def test_valid(self, simple_tuple_node_list):
         nodes = [node(*tup) for tup in simple_tuple_node_list]
         assert len(nodes) == len(simple_tuple_node_list)
+
+    def test_get_node_func(self):
+        test_node = node(identity, "A", "B")
+        assert test_node.func is identity
+
+    def test_set_node_func(self):
+        test_node = node(identity, "A", "B")
+        test_node.func = decorated_identity
+        assert test_node.func is decorated_identity
 
     def test_labelled(self):
         assert "labeled_node: <lambda>([input1]) -> [output1]" in str(
@@ -140,15 +144,6 @@ class TestValidNode:
         assert len(inputs) == 2
         assert set(inputs) == {"in1", "in2"}
 
-    def test_inputs_dict_order(self):
-        dummy = node(
-            kwarg_node,
-            {"arg5": "a", "arg4": "b", "arg3": "c", "arg2": "d", "arg1": "e"},
-            None,
-        )
-        # a and b and c are keyword args, so they should be sorted
-        assert dummy.inputs == ["e", "d", "a", "b", "c"]
-
     def test_inputs_list(self):
         dummy_node = node(
             triconcat,
@@ -199,8 +194,8 @@ class TestValidNode:
 
 class TestNodeComparisons:
     def test_node_equals(self):
-        first = node(identity, "input1", "output1", name="a node")
-        second = node(identity, "input1", "output1", name="a node")
+        first = node(identity, "input1", "output1", name="a_node")
+        second = node(identity, "input1", "output1", name="a_node")
         assert first == second
         assert first is not second
 
@@ -211,11 +206,11 @@ class TestNodeComparisons:
         assert first is not second
 
     def test_node_invalid_equals(self):
-        n = node(identity, "input1", "output1", name="a node")
+        n = node(identity, "input1", "output1", name="a_node")
         assert n != "hello"
 
     def test_node_invalid_less_than(self):
-        n = node(identity, "input1", "output1", name="a node")
+        n = node(identity, "input1", "output1", name="a_node")
         pattern = "'<' not supported between instances of 'Node' and 'str'"
 
         with pytest.raises(TypeError, match=pattern):
@@ -379,7 +374,7 @@ def test_bad_input(func, expected):
 def apply_f(func: Callable) -> Callable:
     @wraps(func)
     def with_f(*args, **kwargs):
-        return func(*["f(%s)" % a for a in args], **kwargs)
+        return func(*[f"f({a})" for a in args], **kwargs)
 
     return with_f
 
@@ -387,7 +382,7 @@ def apply_f(func: Callable) -> Callable:
 def apply_g(func: Callable) -> Callable:
     @wraps(func)
     def with_g(*args, **kwargs):
-        return func(*["g(%s)" % a for a in args], **kwargs)
+        return func(*[f"g({a})" for a in args], **kwargs)
 
     return with_g
 
@@ -395,7 +390,7 @@ def apply_g(func: Callable) -> Callable:
 def apply_h(func: Callable) -> Callable:
     @wraps(func)
     def with_h(*args, **kwargs):
-        return func(*["h(%s)" % a for a in args], **kwargs)
+        return func(*[f"h({a})" for a in args], **kwargs)
 
     return with_h
 
@@ -403,7 +398,7 @@ def apply_h(func: Callable) -> Callable:
 def apply_ij(func: Callable) -> Callable:
     @wraps(func)
     def with_ij(*args, **kwargs):
-        return func(*["ij(%s)" % a for a in args], **kwargs)
+        return func(*[f"ij({a})" for a in args], **kwargs)
 
     return with_ij
 
@@ -416,7 +411,14 @@ def decorated_identity(value):
 class TestTagDecorator:
     def test_apply_decorators(self):
         old_node = node(apply_g(decorated_identity), "input", "output", name="node")
-        new_node = old_node.decorate(apply_h, apply_ij)
+        pattern = (
+            "The node's `decorate` API will be deprecated in Kedro 0.18.0."
+            "Please use a node's Hooks to extend the node's behaviour in a pipeline."
+            "For more information, please visit"
+            "https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_hooks.html"
+        )
+        with pytest.warns(DeprecationWarning, match=re.escape(pattern)):
+            new_node = old_node.decorate(apply_h, apply_ij)
         result = new_node.run(dict(input=1))
 
         assert old_node.name == new_node.name
@@ -450,6 +452,16 @@ class TestNames:
         assert str(n) == "name: identity([in]) -> [out]"
         assert n.name == "name"
         assert n.short_name == "name"
+
+    @pytest.mark.parametrize("bad_name", ["name,with,comma", "name with space"])
+    def test_invalid_name(self, bad_name):
+        pattern = (
+            f"'{bad_name}' is not a valid node name. "
+            f"It must contain only letters, digits, hyphens, "
+            f"underscores and/or fullstops."
+        )
+        with pytest.raises(ValueError, match=re.escape(pattern)):
+            node(identity, ["in"], ["out"], name=bad_name)
 
     def test_namespaced(self):
         n = node(identity, ["in"], ["out"], namespace="namespace")

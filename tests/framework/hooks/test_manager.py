@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -84,11 +84,3 @@ def test_hook_manager_can_call_hooks_defined_in_specs(
     # since there hasn't been any hook implementation, the result should be empty
     # but it shouldn't have raised
     assert result == []
-
-
-def test_hook_manager_cannot_call_non_existent_hook():
-    hook_manager = _create_hook_manager()
-    with pytest.raises(
-        AttributeError, match="'_HookRelay' object has no attribute 'i_do_not_exist'"
-    ):
-        hook_manager.hook.i_do_not_exist()  # pylint: disable=no-member

@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -92,12 +92,10 @@ def _get_missing_module_error(import_error: ImportError) -> DataSetError:
 
     if missing_module_instruction is None:
         return DataSetError(
-            "{}Loading failed with error:\n\n{}".format(
-                DRIVER_ERROR_MESSAGE, str(import_error)
-            )
+            f"{DRIVER_ERROR_MESSAGE}Loading failed with error:\n\n{str(import_error)}"
         )
 
-    return DataSetError("{}{}".format(DRIVER_ERROR_MESSAGE, missing_module_instruction))
+    return DataSetError(f"{DRIVER_ERROR_MESSAGE}{missing_module_instruction}")
 
 
 def _get_sql_alchemy_missing_error() -> DataSetError:

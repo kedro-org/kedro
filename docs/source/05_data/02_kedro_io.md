@@ -3,7 +3,7 @@
 
 In this tutorial, we cover advanced uses of the [Kedro IO](/kedro.io.rst) module to understand the underlying implementation. The relevant API documentation is [kedro.io.AbstractDataSet](/kedro.io.AbstractDataSet) and [kedro.io.DataSetError](/kedro.io.DataSetError).
 
-> *Note:* This documentation is based on `Kedro 0.16.6`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 ## Error handling
 
@@ -35,7 +35,7 @@ parts_df = parts.load()
 
 However, we recommend using a `DataCatalog` instead (for more details, see [this section](../05_data/01_data_catalog.md) in the User Guide) as it has been designed to make all datasets available to project members.
 
-For contributors, if you would like to submit a new dataset, you will have to extend `AbstractDataSet`. For a complete guide, please read [Creating a new dataset](../07_extend_kedro/01_custom_datasets.md).
+For contributors, if you would like to submit a new dataset, you will have to extend `AbstractDataSet`. For a complete guide, please read [Creating a new dataset](../07_extend_kedro/03_custom_datasets.md).
 
 
 ## Versioning
@@ -59,7 +59,7 @@ from kedro.io import AbstractVersionedDataSet
 
 
 class MyOwnDataSet(AbstractVersionedDataSet):
-    def __init__(self, filepath, version,  param1, param2=True):
+    def __init__(self, filepath, version, param1, param2=True):
         super().__init__(PurePosixPath(filepath), version)
         self._param1 = param1
         self._param2 = param2
@@ -149,8 +149,9 @@ version = Version(
 )
 
 test_data_set = CSVDataSet(
-    filepath="data/01_raw/test.csv", save_args={"index": False}, version=version,
-
+    filepath="data/01_raw/test.csv",
+    save_args={"index": False},
+    version=version,
 )
 io = DataCatalog({"test_data_set": test_data_set})
 
@@ -173,8 +174,9 @@ version = Version(
 )
 
 test_data_set = CSVDataSet(
-    filepath="data/01_raw/test.csv", save_args={"index": False}, version=version,
-
+    filepath="data/01_raw/test.csv",
+    save_args={"index": False},
+    version=version,
 )
 io = DataCatalog({"test_data_set": test_data_set})
 
@@ -198,8 +200,9 @@ version = Version(
 )
 
 test_data_set = CSVDataSet(
-    filepath="data/01_raw/test.csv", save_args={"index": False}, version=version,
-
+    filepath="data/01_raw/test.csv",
+    save_args={"index": False},
+    version=version,
 )
 io = DataCatalog({"test_data_set": test_data_set})
 
@@ -531,7 +534,7 @@ Pipeline(
 ```
 
 Here are 2 important notes about the confirmation operation:
-1. Confirming a partitioned dataset does not affect any subsequent loads within the same run. All downstream nodes that input the same partitioned dataset as input will all receive the _same_ partitions. Partitions that are created externally during the run will also not affect the dataset loads and won't appear in the list of loaded partitions until the next run or until the dataset object is [released](/kedro.io.IncrementalDataSet#kedro.io.IncrementalDataSet.release).
+1. Confirming a partitioned dataset does not affect any subsequent loads within the same run. All downstream nodes that input the same partitioned dataset as input will all receive the _same_ partitions. Partitions that are created externally during the run will also not affect the dataset loads and won't appear in the list of loaded partitions until the next run or until the [`release()`](/kedro.io.IncrementalDataSet) method is called on the dataset object.
 2. A pipeline cannot contain more than one node confirming the same dataset.
 
 

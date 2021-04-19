@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -54,7 +54,8 @@ def before_all(context):
     """Environment preparation before other cli tests are run.
     Installs (core) kedro by running pip in the top level directory.
     """
-    context = _setup_kedro_install_venv(context)
+    context = _setup_minimal_env(context)
+    context = _install_project_requirements(context)
 
 
 def after_all(context):
@@ -65,7 +66,7 @@ def after_all(context):
 
 def before_scenario(context, scenario):
     if FRESH_VENV_TAG in scenario.tags:
-        context = _setup_kedro_install_venv(context)
+        context = _setup_minimal_env(context)
 
     context.temp_dir = Path(tempfile.mkdtemp()).resolve()
     _PATHS_TO_REMOVE.add(context.temp_dir)
@@ -122,7 +123,7 @@ def _create_tmp_dir() -> Path:
     return tmp_dir
 
 
-def _setup_kedro_install_venv(context):
+def _setup_minimal_env(context):
     kedro_install_venv_dir = _create_new_venv()
     context.kedro_install_venv_dir = kedro_install_venv_dir
     context = _setup_context_with_venv(context, kedro_install_venv_dir)
@@ -136,9 +137,14 @@ def _setup_kedro_install_venv(context):
             "pip>=20.0",
             "setuptools>=38.0",
             "wheel",
+            ".",
         ],
         env=context.env,
     )
+    return context
+
+
+def _install_project_requirements(context):
     install_reqs = (
         Path(
             "kedro/templates/project/{{ cookiecutter.repo_name }}/src/requirements.txt"

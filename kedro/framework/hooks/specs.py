@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ class NodeSpecs:
         inputs: Dict[str, Any],
         is_async: bool,
         run_id: str,
-    ) -> None:
+    ) -> Optional[Dict[str, Any]]:
         """Hook to be invoked before a node runs.
         The arguments received are the same as those used by ``kedro.runner.run_node``
 
@@ -97,6 +97,11 @@ class NodeSpecs:
                 not the dataset instance.
             is_async: Whether the node was run in ``async`` mode.
             run_id: The id of the run.
+
+        Returns:
+            Either None or a dictionary mapping dataset name(s) to new value(s).
+                If returned, this dictionary will be used to update the node inputs,
+                which allows to overwrite the node inputs.
         """
         pass
 
@@ -178,6 +183,7 @@ class PipelineSpecs:
                      "to_nodes": Optional[List[str]],
                      "node_names": Optional[List[str]],
                      "from_inputs": Optional[List[str]],
+                     "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
                      "pipeline_name": str,
                      "extra_params": Optional[Dict[str, Any]]
@@ -212,6 +218,7 @@ class PipelineSpecs:
                      "to_nodes": Optional[List[str]],
                      "node_names": Optional[List[str]],
                      "from_inputs": Optional[List[str]],
+                     "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
                      "pipeline_name": str,
                      "extra_params": Optional[Dict[str, Any]]
@@ -250,12 +257,59 @@ class PipelineSpecs:
                      "to_nodes": Optional[List[str]],
                      "node_names": Optional[List[str]],
                      "from_inputs": Optional[List[str]],
+                     "to_outputs": Optional[List[str]],
                      "load_versions": Optional[List[str]],
                      "pipeline_name": str,
                      "extra_params": Optional[Dict[str, Any]]
                    }
             pipeline: The ``Pipeline`` that will was run.
             catalog: The ``DataCatalog`` used during the run.
+        """
+        pass
+
+
+class DatasetSpecs:
+    """Namespace that defines all specifications for a dataset's lifecycle hooks."""
+
+    @hook_spec
+    def before_dataset_loaded(self, dataset_name: str) -> None:
+        """Hook to be invoked before a dataset is loaded from the catalog.
+
+           Args:
+               dataset_name: name of the dataset to be loaded from the catalog.
+
+        """
+        pass
+
+    @hook_spec
+    def after_dataset_loaded(self, dataset_name: str, data: Any) -> None:
+        """Hook to be invoked after a dataset is loaded from the catalog.
+
+           Args:
+               dataset_name: name of the dataset that was loaded from the catalog.
+               data: the actual data that was loaded from the catalog.
+
+        """
+        pass
+
+    @hook_spec
+    def before_dataset_saved(self, dataset_name: str, data: Any) -> None:
+        """Hook to be invoked before a dataset is saved to the catalog.
+
+           Args:
+               dataset_name: name of the dataset to be saved to the catalog.
+               data: the actual data to be saved to the catalog.
+
+        """
+        pass
+
+    @hook_spec
+    def after_dataset_saved(self, dataset_name: str, data: Any) -> None:
+        """Hook to be invoked after a dataset is saved in the catalog.
+
+           Args:
+               dataset_name: name of the dataset that was saved to the catalog.
+               data: the actual data that was saved to the catalog.
         """
         pass
 
@@ -276,8 +330,15 @@ class RegistrationSpecs:
         pass
 
     @hook_spec(firstresult=True)
-    def register_config_loader(self, conf_paths: Iterable[str]) -> ConfigLoader:
+    def register_config_loader(
+        self, conf_paths: Iterable[str], env: str, extra_params: Dict[str, Any]
+    ) -> ConfigLoader:
         """Hook to be invoked to register a project's config loader.
+
+        Args:
+            conf_paths: the paths to the conf directory to be supplied to the config loader
+            env: the environment with which the config loader will be instantiated
+            extra_params: the extra parameters passed to a Kedro run
 
         Returns:
             An instance of a ``ConfigLoader``.

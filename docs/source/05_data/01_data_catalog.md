@@ -1,6 +1,6 @@
 # The Data Catalog
 
-> *Note:* This documentation is based on `Kedro 0.16.6`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 This section introduces `catalog.yml`, the project-shareable Data Catalog. The file is located in `conf/base` and is a registry of all data sources available for use by a project; it manages loading and saving of data.
 
@@ -299,10 +299,23 @@ dev_abs:
   account_key: key
 ```
 
+## Creating a Data Catalog YAML configuration file via CLI
+
+You can use [`kedro catalog create` command](../09_development/03_commands_reference.md#create-a-data-catalog-yaml-configuration-file) to create a Data Catalog YAML configuration.
+
+It creates a `<conf_root>/<env>/catalog/<pipeline_name>.yml` configuration file with `MemoryDataSet` datasets for each dataset in a registered pipeline if it is missing from the `DataCatalog`.
+
+```yaml
+# <conf_root>/<env>/catalog/<pipeline_name>.yml
+rockets:
+  type: MemoryDataSet
+scooters:
+  type: MemoryDataSet
+```
 
 ## Adding parameters
 
-You can [configure parameters](../04_kedro_project_setup/02_configuration.md#loading-parameters) for your project and [reference them](../04_kedro_project_setup/02_configuration.md#using-parameters) in your nodes. The way to do this is via `add_feed_dict()` method (Relevant API documentation: [DataCatalog](/kedro.io.DataCatalog)). You can use this method to add any other entry / metadata you wish on the `DataCatalog`.
+You can [configure parameters](../04_kedro_project_setup/02_configuration.md#loading-parameters) for your project and [reference them](../04_kedro_project_setup/02_configuration.md#using-parameters) in your nodes. Do this using the `add_feed_dict()` method ([API documentation](/kedro.io.DataCatalog)). You can use this method to add any other entry / metadata you wish on the `DataCatalog`.
 
 
 ## Feeding in credentials
@@ -329,7 +342,12 @@ In the example above `catalog.yml` contains references to credentials keys `dev_
 ```python
 CSVDataSet(
     filepath="s3://test_bucket/data/02_intermediate/company/motorbikes.csv",
-    load_args=dict(sep=",", skiprows=5, skipfooter=1, na_values=["#NA", "NA"],),
+    load_args=dict(
+        sep=",",
+        skiprows=5,
+        skipfooter=1,
+        na_values=["#NA", "NA"],
+    ),
     credentials=dict(key="token", secret="key"),
 )
 ```
@@ -445,29 +463,29 @@ Here we cover the use case of _tracking operation performance_ by applying built
 
 Transformers are applied at the `DataCatalog` level. To apply the built-in `ProfileTimeTransformer`, you need to:
 
-1. Navigate to `src/<package_name>/run.py`
-2. Apply `ProfileTimeTransformer` in the hook implementation `TransformerHooks.after_catalog_created`.
-3. Register the hook in your `ProjectContext` as follows:
+1. Navigate to `src/<package_name>/hooks.py`
+2. Apply `ProfileTimeTransformer` in the hook implementation `TransformerHooks.after_catalog_created`
+3. Register the hook in your `src/<package_name>/settings.py`
 
 ```python
-from pathlib import Path
-from typing import Dict
+# src/<package_name>/hooks.py
 
-from kedro.extras.transformers import ProfileTimeTransformer # new import
-from kedro.framework.context import KedroContext, load_package_context
-from kedro.framework.hooks import hook_impl # new import
-from kedro.io import DataCatalog # new import
+from kedro.extras.transformers import ProfileTimeTransformer  # new import
+from kedro.framework.hooks import hook_impl  # new import
+from kedro.io import DataCatalog  # new import
 
 
 class TransformerHooks:
     @hook_impl
     def after_catalog_created(self, catalog: DataCatalog) -> None:
         catalog.add_transformer(ProfileTimeTransformer())
+```
 
-class ProjectContext(KedroContext):
+```python
+# src/<package_name>/settings.py
+from <package_name>.hooks import TransformerHooks
 
-    ...
-    hooks = (TransformerHooks(),)
+HOOKS = (TransformerHooks(),)
 ```
 
 Once complete, rerun the pipeline from the terminal and you should see the following logging output:
@@ -543,9 +561,7 @@ from kedro.extras.datasets.pandas import (
 io = DataCatalog(
     {
         "bikes": CSVDataSet(filepath="../data/01_raw/bikes.csv"),
-        "cars": CSVDataSet(
-            filepath="../data/01_raw/cars.csv", load_args=dict(sep=",")
-        ),
+        "cars": CSVDataSet(filepath="../data/01_raw/cars.csv", load_args=dict(sep=",")),
         "cars_table": SQLTableDataSet(
             table_name="cars", credentials=dict(con="sqlite:///kedro.db")
         ),

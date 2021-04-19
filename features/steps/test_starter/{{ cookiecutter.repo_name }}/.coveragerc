@@ -1,0 +1,6 @@
+[report]
+fail_under=0
+show_missing=True
+exclude_lines =
+    pragma: no cover
+    raise NotImplementedError

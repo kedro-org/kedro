@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@
 
 """``PickleDataSet`` loads/saves data from/to a Pickle file using an underlying
 filesystem (e.g.: local, S3, GCS). The underlying functionality is supported by
-the ``pickle`` and ``joblib`` libraries, so it supports all allowed options for
-loading and saving pickle files.
+the ``pickle``, ``joblib``, and ``compress_pickle`` libraries, so it supports
+all allowed options for loading and saving pickle files.
 """
 import pickle
 from copy import deepcopy
@@ -50,6 +50,11 @@ try:
     import joblib
 except ImportError:  # pragma: no cover
     joblib = None
+
+try:
+    import compress_pickle
+except ImportError:  # pragma: no cover
+    compress_pickle = None
 
 
 class PickleDataSet(AbstractVersionedDataSet):
@@ -73,11 +78,19 @@ class PickleDataSet(AbstractVersionedDataSet):
         >>> reloaded = data_set.load()
         >>> assert data.equals(reloaded)
 
+        >>> # Add "compress_pickle[lz4]" to requirements.txt
+        >>> data_set = PickleDataSet(filepath="test.pickle.lz4",
+        >>>                          backend="compress_pickle",
+        >>>                          load_args={"compression":"lz4"},
+        >>>                          save_args={"compression":"lz4"})
+        >>> data_set.save(data)
+        >>> reloaded = data_set.load()
+        >>> assert data.equals(reloaded)
     """
 
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
-    BACKENDS = {"pickle": pickle, "joblib": joblib}
+    BACKENDS = {"pickle": pickle, "joblib": joblib, "compress_pickle": compress_pickle}
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -146,6 +159,8 @@ class PickleDataSet(AbstractVersionedDataSet):
         _credentials = deepcopy(credentials) or {}
 
         protocol, path = get_protocol_and_path(filepath, version)
+        if protocol == "file":
+            _fs_args.setdefault("auto_mkdir", True)
 
         self._protocol = protocol
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
@@ -197,9 +212,7 @@ class PickleDataSet(AbstractVersionedDataSet):
                 self.BACKENDS[self._backend].dump(data, fs_file, **self._save_args)
             except Exception as exc:
                 raise DataSetError(
-                    "{} was not serialized due to: {}".format(
-                        str(data.__class__), str(exc)
-                    )
+                    f"{data.__class__} was not serialized due to: {exc}"
                 ) from exc
 
         self._invalidate_cache()

@@ -10,7 +10,7 @@ You can copy the example as one chunk of code from the bottom of this page.
 
 A `node` is a Kedro concept. It is a wrapper for a Python function that names the inputs and outputs of that function. It is the building block of a pipeline. Nodes can be linked when the output of one node is the input of another.
 
-Here, the `return_greeting` function is wrapped by a node called `return_greeting_node`, which has no inputs, and names a single output(`my_salutation`):
+Here, the `return_greeting` function is wrapped by a node called `return_greeting_node`, which has no inputs, and names a single output (`my_salutation`):
 
 ```python
 from kedro.pipeline import node
@@ -21,9 +21,7 @@ def return_greeting():
     return "Hello"
 
 
-return_greeting_node = node(
-    func=return_greeting, inputs=None, outputs="my_salutation"
-)
+return_greeting_node = node(func=return_greeting, inputs=None, outputs="my_salutation")
 ```
 
 The `join_statements` function is wrapped by a node called `join_statements_node`, which names a single input (`my_salutation`) and a single output (`my_message`):
@@ -62,7 +60,7 @@ A `DataCatalog` is a Kedro concept. It is the registry of all data sources that 
 from kedro.io import DataCatalog, MemoryDataSet
 
 # Prepare a data catalog
-data_catalog = DataCatalog({"example_data": MemoryDataSet()})
+data_catalog = DataCatalog({"my_salutation": MemoryDataSet()})
 ```
 
 Kedro provides a [number of different built-in datasets](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.html#data-sets) for different file types and file systems so you don’t have to write the logic for reading/writing data.
@@ -71,13 +69,11 @@ Kedro provides a [number of different built-in datasets](https://kedro.readthedo
 
 The Runner is an object that runs the pipeline. Kedro resolves the order in which the nodes are executed:
 
-1.  Kedro first executes `return_greeting_node`.
-2.  The node runs `return_greeting`, which takes no input but outputs the string "Hello".
-3.  The output string is stored in the `MemoryDataSet` named `example_data` with the key `my_salutation`.
-4.  Kedro then executes the second node, `join_statements_node`.
-5.  The node loads `my_salutation` from `example_data` and injects it into the `join_statements` function.
-6.  The function joins the input salutation with "Kedro!" to form the output string "Hello Kedro!"
-7.  The output string is stored within `example_data` as `my_message`.
+1.  Kedro first executes `return_greeting_node`. This runs `return_greeting`, which takes no input but outputs the string "Hello".
+2.  The output string is stored in the `MemoryDataSet` named `my_salutation`.
+3.  Kedro then executes the second node, `join_statements_node`. This loads the `my_salutation` dataset and injects it into the `join_statements` function.
+4.  The function joins the input salutation with "Kedro!" to form the output string "Hello Kedro!"
+5.  The output of the pipeline is returned in a dictionary with key `my_message`.
 
 ## Hello Kedro!
 
@@ -90,16 +86,14 @@ from kedro.pipeline import node, Pipeline
 from kedro.runner import SequentialRunner
 
 # Prepare a data catalog
-data_catalog = DataCatalog({"example_data": MemoryDataSet()})
+data_catalog = DataCatalog({"my_salutation": MemoryDataSet()})
 
 # Prepare first node
 def return_greeting():
     return "Hello"
 
 
-return_greeting_node = node(
-    return_greeting, inputs=None, outputs="my_salutation"
-)
+return_greeting_node = node(return_greeting, inputs=None, outputs="my_salutation")
 
 # Prepare second node
 def join_statements(greeting):
@@ -119,7 +113,6 @@ runner = SequentialRunner()
 # Run the pipeline
 print(runner.run(pipeline, data_catalog))
 ```
-
 Then open a terminal and run the following command:
 
 ```bash

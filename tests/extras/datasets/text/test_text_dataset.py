@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -129,9 +129,7 @@ class TestTextDataSetVersioned:
         assert "version" not in str(ds)
 
         assert filepath in str(ds_versioned)
-        ver_str = "version=Version(load={}, save='{}')".format(
-            load_version, save_version
-        )
+        ver_str = f"version=Version(load={load_version}, save='{save_version}')"
         assert ver_str in str(ds_versioned)
         assert "TextDataSet" in str(ds_versioned)
         assert "TextDataSet" in str(ds)

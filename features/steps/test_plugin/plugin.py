@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@
 import logging
 
 from kedro.framework.hooks import hook_impl
+from kedro.pipeline import Pipeline, node
 
 
 class MyPluginHook:
@@ -37,6 +38,12 @@ class MyPluginHook:
         self, catalog
     ):  # pylint: disable=unused-argument,no-self-use
         logging.info("Reached after_catalog_created hook")
+
+    @hook_impl
+    def register_pipelines(self):  # pylint: disable=no-self-use
+        return {
+            "from_plugin": Pipeline([node(lambda: "sth", inputs=None, outputs="x")])
+        }
 
 
 hooks = MyPluginHook()

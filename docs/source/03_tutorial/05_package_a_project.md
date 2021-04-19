@@ -4,11 +4,11 @@ This section explains how to build your project documentation, and how to bundle
 
 ## Add documentation to your project
 
-You can generate project-specific documentation by running `kedro build-docs` in the project's root directory. Kedro builds the resulting HTML files in `docs/build/html/`.
+You can generate project-specific documentation by running `kedro build-docs` in the project's root directory. Kedro builds the resulting HTML files in `docs/build/html/`. To browse the documentation generated, open `docs/build/html/index.html` in your browser, or run `kedro build-docs --open` to automatically open the documentation after building.
 
 The `build-docs` command creates documentation based on the code structure of your project. Documentation includes any [`docstrings`](https://www.datacamp.com/community/tutorials/docstrings-python) defined in your code.
 
-Kedro uses the [Sphinx](https://www.sphinx-doc.org) framework, so if you want to customise your documentation, please refer to `docs/source/conf.py` and the [corresponding section of the Sphinx documentation](http://www.sphinx-doc.org/en/master/usage/configuration.html).
+Kedro uses the [Sphinx](https://www.sphinx-doc.org) framework, so if you want to customise your documentation, please refer to `docs/source/conf.py` and the [corresponding section of the Sphinx documentation](https://www.sphinx-doc.org/en/master/usage/configuration.html).
 
 
 ## Package your project
@@ -19,7 +19,7 @@ To package your project, run the following in your project's root directory:
 kedro package
 ```
 
-Kedro builds the package into the `src/dist/` folder of your project, and creates one `.egg` file and one `.whl` file, which are [Python packaging formats for binary distribution](https://packaging.python.org/overview/).
+Kedro builds the package into the `src/dist/` folder of your project, and creates one `.egg` file and one `.whl` file, which are [Python packaging formats for binary distribution](https://packaging.python.org/).
 
 The resulting package only contains the Python source code of your Kedro pipeline, not any of the `conf/`, `data/` and `logs/` subfolders. This means that you can distribute the project to run elsewhere, such as on a separate computer with different configuration, data and logging. When distributed, the packaged project must be run from within a directory that contains the `conf/` subfolder (and `data/` and `logs/` if your pipeline loads/saves local data or uses logging).
 

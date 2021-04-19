@@ -29,7 +29,7 @@ First, you need to containerise your Kedro project, using any preferred containe
 
 For the purpose of this walk-through, we are going to assume a `Docker` workflow. We recommend the [`Kedro-Docker`](https://github.com/quantumblacklabs/kedro-docker) plugin to streamline the process. [Instructions for Kedro-Docker are in the plugin's README.md](https://github.com/quantumblacklabs/kedro-docker/blob/master/README.md).
 
-After you’ve built the Docker image for your project locally, [transfer the image to a container registry](./01_single_machine.md#how-to-use-container-registry).
+After you’ve built the Docker image for your project locally, [transfer the image to a container registry](./02_single_machine.md#how-to-use-container-registry).
 
 ### Create a workflow spec
 
@@ -42,10 +42,13 @@ from pathlib import Path
 from typing import Dict, Set
 
 import click
-from kedro.framework.context import load_context
-from kedro.pipeline.node import Node
+
 from kfp import aws, dsl
 from kfp.compiler.compiler import Compiler
+
+from kedro.framework.session import KedroSession
+from kedro.framework.startup import bootstrap_project
+from kedro.pipeline.node import Node
 
 _PIPELINE = None
 _IMAGE = None
@@ -68,8 +71,13 @@ def generate_kfp(image: str, pipeline_name: str, env: str) -> None:
     global _IMAGE
     _IMAGE = image
 
-    context = load_context(Path.cwd(), env=env)
-    project_name = context.project_name
+    project_path = Path.cwd()
+    metadata = bootstrap_project(project_path)
+    project_name = metadata.project_name
+
+    session = KedroSession.create(project_path=project_path, env=env)
+    context = session.load_context()
+
     pipeline_name = pipeline_name or "__default__"
     _PIPELINE = context.pipelines.get(pipeline_name)
 
@@ -180,7 +188,7 @@ You can find more information about AWS configuration in [the Kubeflow Pipelines
 
 ### Upload workflow spec and execute runs
 
-Once a Kubernetes Secrets is deployed, upload the workflow spec `<project_name>.yaml` to Kubeflow. Below is the example of how to upload and execute the Kubeflow Pipelines through the UI (see [how to open the pipelines dashboard](https://www.kubeflow.org/docs/pipelines/pipelines-quickstart/#deploy-kubeflow-and-open-the-pipelines-ui)).
+Once a Kubernetes Secrets is deployed, upload the workflow spec `<project_name>.yaml` to Kubeflow. Below is the example of how to upload and execute the Kubeflow Pipelines through the UI (see [how to open the pipelines dashboard](https://www.kubeflow.org/docs/components/pipelines/pipelines-quickstart/#deploy-kubeflow-and-open-the-kubeflow-pipelines-ui)).
 
 First, go to "Pipelines" on the left panel, and click "Upload pipeline", and you will see the following page to upload your workflow spec.
 ![context input graphic](../meta/images/kubeflow_pipelines_upload_pipeline.png)

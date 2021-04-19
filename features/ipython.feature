@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,14 +28,10 @@
 
 Feature: IPython target in new project
 
-  Background:
-    Given I have prepared a config file with example code
-    And I have run a non-interactive kedro new
-    And I have updated kedro requirements
-    And I have executed the kedro command "install"
-
   Scenario: Execute ipython target
+    Given I have prepared a config file
+    And I have run a non-interactive kedro new with starter
     When I execute the kedro command "ipython"
     Then I should get a message including "An enhanced Interactive Python"
     And I should get a message including "INFO - ** Kedro project project-dummy"
-    And I should get a message including "INFO - Defined global variable `context` and `catalog`"
+    And I should get a message including "INFO - Defined global variable `context`, `session` and `catalog`"

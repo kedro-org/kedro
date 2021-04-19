@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ class TestJSONDataSet:
         json_data_set.save(dummy_data)
         reloaded = json_data_set.load()
         assert dummy_data == reloaded
-        assert json_data_set._fs_open_args_load == {"mode": "r"}
+        assert json_data_set._fs_open_args_load == {}
         assert json_data_set._fs_open_args_save == {"mode": "w"}
 
     def test_exists(self, json_data_set, dummy_data):

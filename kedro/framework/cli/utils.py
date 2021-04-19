@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,22 +34,30 @@ import shutil
 import subprocess
 import sys
 import textwrap
+import traceback
 import warnings
+from collections import defaultdict
 from contextlib import contextmanager
 from importlib import import_module
 from itertools import chain
 from pathlib import Path
-from typing import Iterable, List, Sequence, Tuple, Union
+from typing import Dict, Iterable, List, Mapping, Sequence, Set, Tuple, Union
 
 import click
-
-from kedro.framework.context import get_static_project_data
+import pkg_resources
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 MAX_SUGGESTIONS = 3
 CUTOFF = 0.5
 
 ENV_HELP = "Kedro configuration environment name. Defaults to `local`."
+
+ENTRY_POINT_GROUPS = {
+    "global": "kedro.global_commands",
+    "project": "kedro.project_commands",
+    "init": "kedro.init",
+    "line_magic": "kedro.line_magic",
+}
 
 
 def call(cmd: List[str], **kwargs):  # pragma: no cover
@@ -89,7 +97,8 @@ def forward_command(group, name=None, forward_help=False):
 
     def wrapit(func):
         func = click.argument("args", nargs=-1, type=click.UNPROCESSED)(func)
-        func = group.command(
+        func = command_with_verbosity(
+            group,
             name=name,
             context_settings=dict(
                 ignore_unknown_options=True,
@@ -122,17 +131,71 @@ def _suggest_cli_command(
 class CommandCollection(click.CommandCollection):
     """Modified from the Click one to still run the source groups function."""
 
-    def __init__(self, *groups: Tuple[str, Sequence[click.core.MultiCommand]]):
-        self.groups = groups
-        sources = list(chain.from_iterable(cli_groups for title, cli_groups in groups))
-        help_strs = [source.help for source in sources if source.help]
+    def __init__(self, *groups: Tuple[str, Sequence[click.MultiCommand]]):
+        self.groups = [
+            (title, self._merge_same_name_collections(cli_list))
+            for title, cli_list in groups
+        ]
+        sources = list(chain.from_iterable(cli_list for _, cli_list in self.groups))
+
+        help_texts = [
+            cli.help
+            for cli_collection in sources
+            for cli in cli_collection.sources
+            if cli.help
+        ]
+        self._dedupe_commands(sources)
         super().__init__(
             sources=sources,
-            help="\n\n".join(help_strs),
+            help="\n\n".join(help_texts),
             context_settings=CONTEXT_SETTINGS,
         )
         self.params = sources[0].params
         self.callback = sources[0].callback
+
+    @staticmethod
+    def _dedupe_commands(cli_collections: Sequence[click.CommandCollection]):
+        """Deduplicate commands by keeping the ones from the last source
+        in the list.
+        """
+        seen_names: Set[str] = set()
+        for cli_collection in reversed(cli_collections):
+            for cmd_group in reversed(cli_collection.sources):
+                cmd_group.commands = {  # type: ignore
+                    cmd_name: cmd
+                    for cmd_name, cmd in cmd_group.commands.items()  # type: ignore
+                    if cmd_name not in seen_names
+                }
+                seen_names |= cmd_group.commands.keys()  # type: ignore
+
+        # remove empty command groups
+        for cli_collection in cli_collections:
+            cli_collection.sources = [
+                cmd_group
+                for cmd_group in cli_collection.sources
+                if cmd_group.commands  # type: ignore
+            ]
+
+    @staticmethod
+    def _merge_same_name_collections(groups: Sequence[click.MultiCommand]):
+        named_groups: Mapping[str, List[click.MultiCommand]] = defaultdict(list)
+        helps: Mapping[str, list] = defaultdict(list)
+        for group in groups:
+            named_groups[group.name].append(group)
+            if group.help:
+                helps[group.name].append(group.help)
+
+        return [
+            click.CommandCollection(
+                name=group_name,
+                sources=cli_list,
+                help="\n\n".join(helps[group_name]),
+                callback=cli_list[0].callback,
+                params=cli_list[0].params,
+            )
+            for group_name, cli_list in named_groups.items()
+            if cli_list
+        ]
 
     def resolve_command(self, ctx: click.core.Context, args: List):
         try:
@@ -148,10 +211,13 @@ class CommandCollection(click.CommandCollection):
     def format_commands(
         self, ctx: click.core.Context, formatter: click.formatting.HelpFormatter
     ):
-        for title, groups in self.groups:
-            for group in groups:
-                formatter.write(click.style(f"\n{title} from {group.name}", fg="green"))
-                group.format_commands(ctx, formatter)
+        for title, cli in self.groups:
+            for group in cli:
+                if group.sources:
+                    formatter.write(
+                        click.style(f"\n{title} from {group.name}", fg="green")
+                    )
+                    group.format_commands(ctx, formatter)
 
 
 def get_pkg_version(reqs_path: (Union[str, Path]), package_name: str) -> str:
@@ -182,14 +248,56 @@ def get_pkg_version(reqs_path: (Union[str, Path]), package_name: str) -> str:
     raise KedroCliError(f"Cannot find `{package_name}` package in `{reqs_path}`.")
 
 
+def _update_verbose_flag(ctx, param, value):  # pylint: disable=unused-argument
+    KedroCliError.VERBOSE_ERROR = value
+
+
+def _click_verbose(func):
+    """Click option for enabling verbose mode.
+    """
+    return click.option(
+        "--verbose",
+        "-v",
+        is_flag=True,
+        callback=_update_verbose_flag,
+        help="See extensive logging and error stack traces.",
+    )(func)
+
+
+def command_with_verbosity(group: click.core.Group, *args, **kwargs):
+    """Custom command decorator with verbose flag added.
+    """
+
+    def decorator(func):
+        func = _click_verbose(func)
+        func = group.command(*args, **kwargs)(func)
+        return func
+
+    return decorator
+
+
 class KedroCliError(click.exceptions.ClickException):
     """Exceptions generated from the Kedro CLI.
 
     Users should pass an appropriate message at the constructor.
     """
 
-    def format_message(self):
-        return click.style(self.message, fg="red")  # pragma: no cover
+    VERBOSE_ERROR = False
+
+    def show(self, file=None):
+        if file is None:
+            # pylint: disable=protected-access
+            file = click._compat.get_text_stderr()
+        if self.VERBOSE_ERROR:
+            click.secho(traceback.format_exc(), nl=False, fg="yellow")
+        else:
+            etype, value, _ = sys.exc_info()
+            formatted_exception = "".join(traceback.format_exception_only(etype, value))
+            click.secho(
+                f"{formatted_exception}Run with --verbose to see the full exception",
+                fg="yellow",
+            )
+        click.secho(f"Error: {self.message}", fg="red", file=file)
 
 
 def _clean_pycache(path: Path):
@@ -242,23 +350,6 @@ def _filter_deprecation_warnings():
         yield
 
 
-def get_source_dir(project_path: Path) -> Path:
-    """Returns project source path.
-
-    Args:
-        project_path: The path to the project root.
-
-    Returns:
-        The absolute path to the project source directory.
-    """
-    warnings.warn(
-        "This function is now deprecated and will be removed in Kedro 0.17.0.",
-        DeprecationWarning,
-    )
-
-    return get_static_project_data(project_path)["source_dir"]
-
-
 def _check_module_importable(module_name: str) -> None:
     try:
         import_module(module_name)
@@ -267,3 +358,111 @@ def _check_module_importable(module_name: str) -> None:
             f"Module `{module_name}` not found. Make sure to install required project "
             f"dependencies by running the `kedro install` command first."
         ) from exc
+
+
+def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
+    """Load package entry point commands.
+
+    Args:
+        name: The key value specified in ENTRY_POINT_GROUPS.
+
+    Raises:
+        KedroCliError: If loading an entry point failed.
+
+    Returns:
+        List of entry point commands.
+
+    """
+    entry_points = pkg_resources.iter_entry_points(group=ENTRY_POINT_GROUPS[name])
+    entry_point_commands = []
+    for entry_point in entry_points:
+        try:
+            entry_point_commands.append(entry_point.load())
+        except Exception as exc:
+            raise KedroCliError(f"Loading {name} commands from {entry_point}") from exc
+    return entry_point_commands
+
+
+def _add_src_to_path(source_dir: Path, project_path: Path) -> None:  # pragma: no cover
+    # for backwards compatibility with ipython & deployment scripts
+    # pylint: disable=import-outside-toplevel
+    from kedro.framework.startup import _add_src_to_path as real_add_src_to_path
+
+    msg = (
+        "kedro.framework.utils._add_src_to_path is deprecated. "
+        "Please import from new location kedro.framework.startup "
+        "or use `bootstrap_project()` instead for setting up "
+        "the Kedro project."
+    )
+    warnings.warn(msg, FutureWarning)
+    real_add_src_to_path(source_dir, project_path)
+
+
+def _config_file_callback(ctx, param, value):  # pylint: disable=unused-argument
+    """CLI callback that replaces command line options
+    with values specified in a config file. If command line
+    options are passed, they override config file values.
+    """
+    # for performance reasons
+    import anyconfig  # pylint: disable=import-outside-toplevel
+
+    ctx.default_map = ctx.default_map or {}
+    section = ctx.info_name
+
+    if value:
+        config = anyconfig.load(value)[section]
+        ctx.default_map.update(config)
+
+    return value
+
+
+def _reformat_load_versions(  # pylint: disable=unused-argument
+    ctx, param, value
+) -> Dict[str, str]:
+    """Reformat data structure from tuple to dictionary for `load-version`, e.g.:
+    ('dataset1:time1', 'dataset2:time2') -> {"dataset1": "time1", "dataset2": "time2"}.
+    """
+    load_versions_dict = {}
+
+    for load_version in value:
+        load_version_list = load_version.split(":", 1)
+        if len(load_version_list) != 2:
+            raise KedroCliError(
+                f"Expected the form of `load_version` to be "
+                f"`dataset_name:YYYY-MM-DDThh.mm.ss.sssZ`,"
+                f"found {load_version} instead"
+            )
+        load_versions_dict[load_version_list[0]] = load_version_list[1]
+
+    return load_versions_dict
+
+
+def _try_convert_to_numeric(value):
+    try:
+        value = float(value)
+    except ValueError:
+        return value
+    return int(value) if value.is_integer() else value
+
+
+def _split_params(ctx, param, value):
+    if isinstance(value, dict):
+        return value
+    result = {}
+    for item in split_string(ctx, param, value):
+        item = item.split(":", 1)
+        if len(item) != 2:
+            ctx.fail(
+                f"Invalid format of `{param.name}` option: "
+                f"Item `{item[0]}` must contain "
+                f"a key and a value separated by `:`."
+            )
+        key = item[0].strip()
+        if not key:
+            ctx.fail(
+                f"Invalid format of `{param.name}` option: Parameter key "
+                f"cannot be an empty string."
+            )
+        value = item[1].strip()
+        result[key] = _try_convert_to_numeric(value)
+    return result

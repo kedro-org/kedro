@@ -10,17 +10,17 @@ repos:
           - id: trailing-whitespace
           - id: end-of-file-fixer
           - id: check-yaml # Checks yaml files for parseable syntax.
-            exclude: "^kedro/templates/"
+            exclude: "^kedro/templates/|^features/steps/test_starter/"
           - id: check-json # Checks json files for parseable syntax.
           - id: check-added-large-files
           - id: check-case-conflict # Check for files that would conflict in case-insensitive filesystems
           - id: check-merge-conflict # Check for files that contain merge conflict strings.
           - id: debug-statements # Check for debugger imports and py37+ `breakpoint()` calls in python source.
-            exclude: "^kedro/templates/"
+            exclude: "^kedro/templates/|^features/steps/test_starter/"
           - id: requirements-txt-fixer # Sorts entries in requirements.txt
-            exclude: "^kedro/templates/"
+            exclude: "^kedro/templates/|^features/steps/test_starter/"
           - id: flake8
-            exclude: "^kedro/templates/"
+            exclude: "^kedro/templates/|^features/steps/test_starter/"
 
     - repo: https://github.com/pre-commit/mirrors-mypy
       rev: v0.720
@@ -30,8 +30,15 @@ repos:
             exclude: |
                 (?x)(
                   ^kedro/templates/|
-                  ^docs/
+                  ^docs/|
+                  ^features/steps/test_starter/
                 )
+
+    - repo: https://github.com/asottile/blacken-docs
+      rev: v1.9.2
+      hooks:
+        - id: blacken-docs
+          entry: blacken-docs --skip-errors
 
     - repo: local
       hooks:
@@ -39,58 +46,15 @@ repos:
             name: "Sort imports"
             language: system
             types: [file, python]
-            exclude: ^kedro/templates/
+            exclude: ^kedro/templates/|^features/steps/test_starter
             entry: isort
-          # It's impossible to specify per-directory configuration, so we just run it many times.
-          # https://github.com/PyCQA/pylint/issues/618
-          # The first set of pylint checks if for local pre-commit, it only runs on the files changed.
-          - id: pylint-quick-kedro
-            name: "Quick PyLint on kedro/*"
-            language: system
-            types: [file, python]
-            files: ^kedro/
-            exclude: ^kedro/templates/
-            entry: pylint --disable=unnecessary-pass
-            stages: [commit]
-          - id: pylint-quick-features
-            name: "Quick PyLint on features/*"
-            language: system
-            types: [file, python]
-            files: ^features/
-            entry: pylint --disable=missing-docstring,no-name-in-module
-            stages: [commit]
-          - id: pylint-quick-tests
-            name: "Quick PyLint on tests/*"
-            language: system
-            types: [file, python]
-            files: ^tests/
-            entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments,too-many-public-methods
-            stages: [commit]
-
-          # The same pylint checks, but running on all files. It's for manual run with `make lint`
-          - id: pylint-kedro
-            name: "PyLint on kedro/*"
-            language: system
-            pass_filenames: false
-            stages: [manual]
-            entry: pylint --disable=unnecessary-pass kedro
-          - id: pylint-features
-            name: "PyLint on features/*"
-            language: system
-            pass_filenames: false
-            stages: [manual]
-            entry: pylint --disable=missing-docstring,no-name-in-module features
-          - id: pylint-tests
-            name: "PyLint on tests/*"
-            language: system
-            pass_filenames: false
-            stages: [manual]
-            entry: pylint --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments,too-many-public-methods tests
           - id: black
             name: "Black"
             language: system
-            pass_filenames: false
-            entry: black kedro features tests
+            files: ^kedro/|^features/|^tests/
+            types: [file, python]
+            exclude: ^features/steps/test_starter|^kedro/templates/
+            entry: black
           - id: legal
             name: "Licence check"
             language: system
@@ -104,11 +68,60 @@ repos:
           - id: secret_scan
             name: "Secret scan"
             language: system
+            exclude: ^features/steps/test_starter
             pass_filenames: false
             entry: make secret-scan
           - id: bandit
             name: "Bandit security check"
             language: system
             types: [file, python]
-            exclude: ^kedro/templates/|^tests/
+            exclude: ^kedro/templates/|^tests/|^features/steps/test_starter
             entry: bandit -ll
+
+          # It's impossible to specify per-directory configuration, so we just run it many times.
+          # https://github.com/PyCQA/pylint/issues/618
+          # The first set of pylint checks if for local pre-commit, it only runs on the files changed.
+          - id: pylint-quick-kedro
+            name: "Quick PyLint on kedro/*"
+            language: system
+            types: [file, python]
+            files: ^kedro/
+            exclude: ^kedro/templates/
+            entry: pylint -j 4 --disable=unnecessary-pass
+            stages: [commit]
+          - id: pylint-quick-features
+            name: "Quick PyLint on features/*"
+            language: system
+            types: [file, python]
+            files: ^features/
+            exclude: ^features/steps/test_starter
+            entry: pylint -j 4 --disable=missing-docstring,no-name-in-module
+            stages: [commit]
+          - id: pylint-quick-tests
+            name: "Quick PyLint on tests/*"
+            language: system
+            types: [file, python]
+            files: ^tests/
+            entry: pylint -j 4 --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments,too-many-public-methods
+            stages: [commit]
+
+          # The same pylint checks, but running on all files. It's for manual run with `make lint`
+          - id: pylint-kedro
+            name: "PyLint on kedro/*"
+            language: system
+            pass_filenames: false
+            stages: [manual]
+            entry: pylint -j 4 --disable=unnecessary-pass --init-hook="import sys; sys.setrecursionlimit(2000)" kedro
+          - id: pylint-features
+            name: "PyLint on features/*"
+            language: system
+            pass_filenames: false
+            stages: [manual]
+            exclude: ^features/steps/test_starter
+            entry: pylint -j 4 --disable=missing-docstring,no-name-in-module features
+          - id: pylint-tests
+            name: "PyLint on tests/*"
+            language: system
+            pass_filenames: false
+            stages: [manual]
+            entry: pylint -j 4 --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments,too-many-public-methods tests

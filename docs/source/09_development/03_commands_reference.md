@@ -1,6 +1,6 @@
 # Kedro's command line interface
 
-> *Note:* This documentation is based on `Kedro 0.16.6`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
 Kedro's command line interface (CLI) is used to give commands to Kedro via a terminal shell (such as the terminal app on macOS, or cmd.exe or PowerShell on Windows). You need to use the CLI to set up a new Kedro project, and to run it.
 
@@ -54,7 +54,6 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
 
 * Global Kedro commands
   * [`kedro --help`](#get-help-on-kedro-commands)
-  * [`kedro --verbose`](#see-logging-and-error-stack-traces)
   * [`kedro --version`](#confirm-the-kedro-version)
   * [`kedro docs`](#open-the-kedro-documentation-in-your-browser)
   * [`kedro info`](#confirm-kedro-information)
@@ -63,8 +62,9 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
 * Project-specific Kedro commands
   * [`kedro activate-nbstripout`](#strip-output-cells)
   * [`kedro build-docs`](#build-the-project-documentation)
-  * [`kedro build-reqs`](#build-the-projects-dependency-tree)
+  * [`kedro build-reqs`](#build-the-project-s-dependency-tree)
   * [`kedro catalog list`](#list-datasets-per-pipeline-per-type)
+  * [`kedro catalog create`](#create-a-data-catalog-yaml-configuration-file)
   * [`kedro install`](#install-all-package-dependencies)
   * [`kedro ipython`](#notebooks)
   * [`kedro jupyter convert`](#copy-tagged-cells)
@@ -115,7 +115,7 @@ Returns output similar to the following, depending on the version of Kedro used 
 | |/ / _ \/ _` | '__/ _ \
 |   <  __/ (_| | | | (_) |
 |_|\_\___|\__,_|_|  \___/
-v0.16.6
+v0.17.2
 
 kedro allows teams to create analytics
 projects. It is developed as part of
@@ -124,13 +124,6 @@ the Kedro initiative at QuantumBlack.
 Installed plugins:
 kedro_viz: 3.4.0 (hooks:global,line_magic)
 
-```
-
-### See logging and error stack traces
-
-```bash
-kedro -v
-kedro --verbose
 ```
 
 ### Create a new Kedro project
@@ -151,7 +144,7 @@ kedro docs
 
 Kedro's command line interface (CLI) allows you to associate a set of commands and dependencies with a target, which you can then execute from inside the project directory.
 
-The commands a project supports are specified in its `kedro_cli.py` file, which can be extended, either by modifying the file or by injecting commands into it via the [`plugin` framework](../07_extend_kedro/05_plugins.md).
+The commands a project supports are specified in its `cli.py` file, which can be extended, either by modifying the file or by injecting commands into it via the [`plugin` framework](../07_extend_kedro/04_plugins.md).
 
 ### Project setup
 
@@ -177,11 +170,13 @@ For further information, see the [`kedro install` documentation](../04_kedro_pro
 
 
 ### Run the project
-Call the `run()` method of the `ProjectContext` defined in `run.py` (`src/project-name/run.py`)
+Call the `run()` method of the `KedroSession` defined in `kedro.framework.session`.
 
 ```bash
 kedro run
 ```
+
+> _Note:_ `KedroContext` can be extended in `run.py` (`src/project-name/run.py`). In order to use the extended `KedroContext` you need to set `context_path` in [`pyproject.toml`](../12_faq/02_architecture_overview) configuration file.
 
 #### Modifying a `kedro run`
 
@@ -226,7 +221,7 @@ kedro run --from-nodes split --to-nodes predict,report
 
 This functionality is extended to the `kedro run --config config.yml` command, which allows you to [specify run commands in a configuration file](../04_kedro_project_setup/02_configuration.md#configuring-kedro-run-arguments).
 
-> _Note:_ A parameterised run is best used for dynamic parameters, i.e. running the same pipeline with different inputs, for static parameters that do not change we recommend following the [Kedro project setup methodology](../04_kedro_project_setup/03_configuration.md#parameters).
+> _Note:_ A parameterised run is best used for dynamic parameters, i.e. running the same pipeline with different inputs, for static parameters that do not change we recommend following the [Kedro project setup methodology](../04_kedro_project_setup/02_configuration.md#parameters).
 
 ### Deploy the project
 
@@ -248,7 +243,7 @@ kedro pipeline pull <link-to-modular-pipeline-wheel-file>
 The above command will take the bundled `.whl` file and do the following:
 
 * Place source code in `src/<package_name>/pipelines/<pipeline_name>`
-* Place parameters in `conf/base/pipelines/<pipeline_name>`
+* Place parameters in `conf/base/parameters/<pipeline_name>.yml`
 * Pull out tests and place in `src/tests/pipelines/<pipeline_name>`
 
 `kedro pipeline pull` works with PyPI, local and cloud storage:
@@ -265,7 +260,7 @@ The above command will take the bundled `.whl` file and do the following:
 kedro build-docs
 ```
 
-The `build-docs` command builds [project documentation](../03_tutorial/05_package_a_project.html#add-documentation-to-your-project) using the [Sphinx](https://www.sphinx-doc.org) framework. To further customise your documentation, please refer to `docs/source/conf.py` and the [Sphinx documentation](http://www.sphinx-doc.org/en/master/usage/configuration.html).
+The `build-docs` command builds [project documentation](../03_tutorial/05_package_a_project.md#add-documentation-to-your-project) using the [Sphinx](https://www.sphinx-doc.org) framework. To further customise your documentation, please refer to `docs/source/conf.py` and the [Sphinx documentation](http://www.sphinx-doc.org/en/master/usage/configuration.html).
 
 
 #### Lint your project
@@ -274,7 +269,7 @@ The `build-docs` command builds [project documentation](../03_tutorial/05_packag
 kedro lint
 ```
 
-Your project is linted with [`black`](https://github.com/psf/black), [`flake8`](https://gitlab.com/pycqa/flake8) and [`isort`](https://github.com/timothycrosley/isort). See our [documentation about `kedro lint`](../09_development/04_lint.md#linting-your-kedro-project) for further details.
+Your project is linted with [`black`](https://github.com/psf/black), [`flake8`](https://gitlab.com/pycqa/flake8) and [`isort`](https://github.com/PyCQA/isort). See our [documentation about `kedro lint`](../09_development/04_lint.md#linting-your-kedro-project) for further details.
 
 
 #### Test your project
@@ -289,7 +284,7 @@ kedro test
 
 #### Modular pipelines
 
-##### Create a new [modular pipeline](../06_nodes_and_pipelines/02_pipelines.md#developing-modular-pipelines) in your project
+##### Create a new [modular pipeline](../06_nodes_and_pipelines/03_modular_pipelines) in your project
 ```bash
 kedro pipeline create <pipeline_name>
 ```
@@ -301,7 +296,7 @@ The following command packages all the files related to a modular pipeline into 
 kedro pipeline package <pipeline_name>
 ```
 
-Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/02_pipelines.md#packaging-a-modular-pipeline).
+Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/03_modular_pipelines.md#package-a-modular-pipeline).
 
 ##### Pull a modular pipeline in your project
 The following command pulls all the files related to a modular pipeline from either [Pypi](https://pypi.org/) or a storage location of a [wheel file](https://pythonwheels.com/).
@@ -309,7 +304,7 @@ The following command pulls all the files related to a modular pipeline from eit
 kedro pipeline pull <package_name> (or path to a wheel file)
 ```
 
-Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/02_pipelines.md#pulling-a-modular-pipeline).
+Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/03_modular_pipelines.md#pull-a-modular-pipeline).
 
 ##### Delete a modular pipeline
 The following command deletes all the files related to a modular pipeline in your Kedro project.
@@ -318,7 +313,7 @@ The following command deletes all the files related to a modular pipeline in you
 kedro pipeline delete <pipeline_name>
 ```
 
-Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/02_pipelines.md#how-do-i-delete-a-modular-pipeline).
+Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/03_modular_pipelines.md#pull-a-modular-pipeline).
 
 ##### Describe a pipeline
 
@@ -335,7 +330,7 @@ kedro pipeline list
 
 #### Datasets
 
-#### List datasets per pipeline per type
+##### List datasets per pipeline per type
 ```bash
 kedro catalog list
 ```
@@ -347,6 +342,19 @@ The command also accepts an optional `--pipeline` argument that allows you to sp
 kedro catalog list --pipeline "ds,de"
 ```
 
+#### Data Catalog
+
+##### Create a Data Catalog YAML configuration file
+
+The following command creates a Data Catalog YAML configuration file with `MemoryDataSet` datasets for each dataset in a registered pipeline, if it is missing from the `DataCatalog`.
+
+```bash
+kedro catalog create --pipeline <pipeline_name>
+```
+
+The command also accepts an optional `--env` argument that allows you to specify a configuration environment (defaults to `base`).
+
+The command creates the following file: `<conf_root>/<env>/catalog/<pipeline_name>.yml`
 
 #### Notebooks
 
@@ -370,16 +378,16 @@ kedro ipython
 
 Every time you start or restart a notebook kernel, a startup script (`<project-root>/.ipython/profile_default/startup/00-kedro-init.py`) will add the following variables in scope:
 
-- `context`: An instance of `ProjectContext` class defined in `src/project-name/run.py` (Further details of how to use `context` can be found [in the IPython documentation](../11_tools_integration/02_ipython.md))
+- `context`: An instance of `kedro.framework.context.KedroContext` class or custom context class extending `KedroContext` if one was set to `CONTEXT_CLASS` in `settings.py` file (further details of how to use `context` can be found [in the IPython documentation](../11_tools_integration/02_ipython.md))
 - `startup_error` (`Exception`)
 - `catalog`
 
 To reload these variables at any point in your notebook (e.g. if you updated `catalog.yml`) use the [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#line-magics) `%reload_kedro`, which can be also used to see the error message if any of the variables above are undefined.
 
-> *Note:* If you get an error message `Module ``<module_name>`` not found. Make sure to install required project dependencies by running ``kedro install`` command first.` when running any of those commands, it indicates that some Jupyter or IPython dependencies are not installed in your environment. To resolve this you will need to a) make sure the corresponding dependency is present in `src/requirements.in` (`src/requirements.txt` if not compiled), b) run [`kedro install`](#kedro-install) command from your terminal.
+> *Note:* If you get an error message `Module ``<module_name>`` not found. Make sure to install required project dependencies by running ``kedro install`` command first.` when running any of those commands, it indicates that some Jupyter or IPython dependencies are not installed in your environment. To resolve this you will need to a) make sure the corresponding dependency is present in `src/requirements.in` (`src/requirements.txt` if not compiled), b) run [`kedro install`](#install-all-package-dependencies) command from your terminal.
 
 ##### Copy tagged cells
-To copy the code from cells [tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) with `node` tag into Python files under `src/<package_name>/nodes/` in a Kedro project:
+To copy the code from cells [tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#release-5-0-0) with `node` tag into Python files under `src/<package_name>/nodes/` in a Kedro project:
 
 ```bash
 kedro jupyter convert --all

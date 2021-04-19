@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ underlying dataset definition. It also uses `fsspec` for filesystem level operat
 """
 import operator
 from copy import deepcopy
-from typing import Any, Callable, Dict, List, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Type, Union
 from urllib.parse import urlparse
 from warnings import warn
 
@@ -136,10 +136,8 @@ class PartitionedDataSet(AbstractDataSet):
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.filesystem
                 and the dataset initializer. If the dataset config contains
                 explicit credentials spec, then such spec will take precedence.
-                **Note:** ``dataset_credentials`` key has now been deprecated
-                and should not be specified.
                 All possible credentials management scenarios are documented here:
-                https://kedro.readthedocs.io/en/stable/04_user_guide/08_advanced_io.html#partitioned-dataset-credentials
+                https://kedro.readthedocs.io/en/stable/05_data/02_kedro_io.html#partitioned-dataset-credentials
             load_args: Keyword arguments to be passed into ``find()`` method of
                 the filesystem implementation.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
@@ -168,15 +166,16 @@ class PartitionedDataSet(AbstractDataSet):
                 )
             )
 
-        self._credentials, dataset_credentials = _split_credentials(credentials)
-        if dataset_credentials:
+        if credentials:
             if CREDENTIALS_KEY in self._dataset_config:
                 self._logger.warning(
                     KEY_PROPAGATION_WARNING,
                     {"keys": CREDENTIALS_KEY, "target": "underlying dataset"},
                 )
             else:
-                self._dataset_config[CREDENTIALS_KEY] = dataset_credentials
+                self._dataset_config[CREDENTIALS_KEY] = deepcopy(credentials)
+
+        self._credentials = deepcopy(credentials) or {}
 
         self._fs_args = deepcopy(fs_args) or {}
         if self._fs_args:
@@ -226,7 +225,7 @@ class PartitionedDataSet(AbstractDataSet):
         if self._path.startswith(self._protocol) and not path.startswith(
             self._protocol
         ):
-            return "{}://{}".format(self._protocol, path)
+            return f"{self._protocol}://{path}"
         return path
 
     def _partition_to_path(self, path: str):
@@ -254,7 +253,7 @@ class PartitionedDataSet(AbstractDataSet):
             partitions[partition_id] = dataset.load
 
         if not partitions:
-            raise DataSetError("No partitions found in `{}`".format(self._path))
+            raise DataSetError(f"No partitions found in `{self._path}`")
 
         return partitions
 
@@ -290,23 +289,6 @@ class PartitionedDataSet(AbstractDataSet):
     def _release(self) -> None:
         super()._release()
         self._invalidate_caches()
-
-
-def _split_credentials(
-    credentials: Union[Dict[str, Any], None]
-) -> Tuple[Dict[str, Any], Any]:
-    credentials = deepcopy(credentials) or {}
-    if DATASET_CREDENTIALS_KEY in credentials:
-        warn(
-            "Support for `{}` key in the credentials is now deprecated and will be "
-            "removed in the next version. Please specify the dataset credentials "
-            "explicitly inside the dataset config.".format(DATASET_CREDENTIALS_KEY),
-            DeprecationWarning,
-        )
-        dataset_credentials = credentials.pop(DATASET_CREDENTIALS_KEY)
-    else:
-        dataset_credentials = deepcopy(credentials)
-    return credentials, dataset_credentials
 
 
 class IncrementalDataSet(PartitionedDataSet):
@@ -385,7 +367,7 @@ class IncrementalDataSet(PartitionedDataSet):
                 with the corresponding dataset definition including ``filepath``
                 (unlike ``dataset`` argument). Checkpoint configuration is
                 described here:
-                https://kedro.readthedocs.io/en/stable/04_user_guide/08_advanced_io.html#checkpoint-configuration
+                https://kedro.readthedocs.io/en/stable/05_data/02_kedro_io.html#checkpoint-configuration
                 Credentials for the checkpoint can be explicitly specified
                 in this configuration.
             filepath_arg: Underlying dataset initializer argument that will
@@ -400,7 +382,7 @@ class IncrementalDataSet(PartitionedDataSet):
                 the dataset or the checkpoint configuration contains explicit
                 credentials spec, then such spec will take precedence.
                 All possible credentials management scenarios are documented here:
-                https://kedro.readthedocs.io/en/stable/04_user_guide/08_advanced_io.html#partitioned-dataset-credentials
+                https://kedro.readthedocs.io/en/stable/05_data/02_kedro_io.html#partitioned-dataset-credentials
             load_args: Keyword arguments to be passed into ``find()`` method of
                 the filesystem implementation.
             fs_args: Extra arguments to pass into underlying filesystem class constructor

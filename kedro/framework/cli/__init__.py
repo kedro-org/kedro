@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,4 +29,5 @@
 """``kedro.framework.cli`` implements commands available from Kedro's CLI.
 """
 
-from .cli import get_project_context, load_entry_points, main  # NOQA
+from .cli import get_project_context, main  # NOQA
+from .utils import command_with_verbosity, load_entry_points  # NOQA

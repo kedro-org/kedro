@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,10 +29,8 @@
 Feature: Activate_nbstripout target in new project
 
   Scenario: Check nbstripout git post commit hook functionality
-    Given I have prepared a config file with example code
-    And I have run a non-interactive kedro new
-    And I have updated kedro requirements
-    And I have executed the kedro command "install"
+    Given I have prepared a config file
+    And I have run a non-interactive kedro new with starter
     And I have added a test jupyter notebook
     And I have initialized a git repository
     And I have added the project directory to staging

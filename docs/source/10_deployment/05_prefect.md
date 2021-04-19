@@ -30,12 +30,15 @@ To build a Prefect [flow](https://docs.prefect.io/core/concepts/flows.html) for 
 from pathlib import Path
 
 import click
-from kedro.framework.context import load_context
+
+from prefect import Client, Flow, Task
+from prefect.utilities.exceptions import ClientError
+
+from kedro.framework.session import KedroSession
+from kedro.framework.startup import bootstrap_project
 from kedro.io import DataCatalog, MemoryDataSet
 from kedro.pipeline.node import Node
 from kedro.runner import run_node
-from prefect import Client, Flow, Task
-from prefect.utilities.exceptions import ClientError
 
 
 class KedroTask(Task):
@@ -55,7 +58,12 @@ class KedroTask(Task):
 @click.option("--env", "-e", type=str, default=None)
 def build_and_register_flow(pipeline_name, env):
     """Register a Kedro pipeline as a Prefect flow."""
-    context = load_context(project_path=Path.cwd(), env=env)
+    project_path = Path.cwd()
+    metadata = bootstrap_project(project_path)
+
+    session = KedroSession.create(project_path=project_path, env=env)
+    context = session.load_context()
+
     catalog = context.catalog
     pipeline_name = pipeline_name or "__default__"
     pipeline = context.pipelines.get(pipeline_name)
@@ -64,7 +72,7 @@ def build_and_register_flow(pipeline_name, env):
     for ds_name in unregistered_ds:
         catalog.add(ds_name, MemoryDataSet())
 
-    flow = Flow(context.project_name)
+    flow = Flow(metadata.project_name)
 
     tasks = {}
     for node, parent_nodes in pipeline.node_dependencies.items():
@@ -89,13 +97,13 @@ def build_and_register_flow(pipeline_name, env):
 
     client = Client()
     try:
-        client.create_project(project_name=context.project_name)
+        client.create_project(project_name=metadata.project_name)
     except ClientError:
-        # `context.project_name` project already exists
+        # `metadata.project_name` project already exists
         pass
 
     # Register the flow with the server
-    flow.register(project_name=context.project_name)
+    flow.register(project_name=metadata.project_name)
 
     # Start a local agent that can communicate between the server
     # and your flow code

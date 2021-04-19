@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ data pipelines by providing uniform project templates, data abstraction,
 configuration and pipeline assembly.
 """
 
-__version__ = "0.16.6"
+__version__ = "0.17.2"
 
 
 import logging

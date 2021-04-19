@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,10 +30,10 @@
 import json
 from pathlib import Path
 
+import boto3
 import matplotlib
 import matplotlib.pyplot as plt
 import pytest
-import s3fs
 from moto import mock_s3
 from s3fs import S3FileSystem
 
@@ -41,11 +41,10 @@ from kedro.extras.datasets.matplotlib import MatplotlibWriter
 from kedro.io import DataSetError, Version
 
 BUCKET_NAME = "test_bucket"
-AWS_CREDENTIALS = dict(aws_access_key_id="testing", aws_secret_access_key="testing")
-CREDENTIALS = {"client_kwargs": AWS_CREDENTIALS}
+AWS_CREDENTIALS = {"key": "testing", "secret": "testing"}
 KEY_PATH = "matplotlib"
 COLOUR_LIST = ["blue", "green", "red"]
-FULL_PATH = "s3://{}/{}".format(BUCKET_NAME, KEY_PATH)
+FULL_PATH = f"s3://{BUCKET_NAME}/{KEY_PATH}"
 
 matplotlib.use("Agg")  # Disable interactive mode
 
@@ -82,7 +81,11 @@ def mock_dict_plot():
 def mocked_s3_bucket():
     """Create a bucket for testing using moto."""
     with mock_s3():
-        conn = s3fs.core.boto3.client("s3", **AWS_CREDENTIALS)
+        conn = boto3.client(
+            "s3",
+            aws_access_key_id="fake_access_key",
+            aws_secret_access_key="fake_secret_key",
+        )
         conn.create_bucket(Bucket=BUCKET_NAME)
         yield conn
 
@@ -98,7 +101,7 @@ def mocked_encrypted_s3_bucket():
                 "Effect": "Deny",
                 "Principal": "*",
                 "Action": "s3:PutObject",
-                "Resource": "arn:aws:s3:::{}/*".format(BUCKET_NAME),
+                "Resource": f"arn:aws:s3:::{BUCKET_NAME}/*",
                 "Condition": {"Null": {"s3:x-amz-server-side-encryption": "aws:kms"}},
             }
         ],
@@ -106,7 +109,11 @@ def mocked_encrypted_s3_bucket():
     bucket_policy = json.dumps(bucket_policy)
 
     with mock_s3():
-        conn = s3fs.core.boto3.client("s3", **AWS_CREDENTIALS)
+        conn = boto3.client(
+            "s3",
+            aws_access_key_id="fake_access_key",
+            aws_secret_access_key="fake_secret_key",
+        )
         conn.create_bucket(Bucket=BUCKET_NAME)
         conn.put_bucket_policy(Bucket=BUCKET_NAME, Policy=bucket_policy)
         yield conn
@@ -125,7 +132,7 @@ def plot_writer(
 ):  # pylint: disable=unused-argument
     return MatplotlibWriter(
         filepath=FULL_PATH,
-        credentials=CREDENTIALS,
+        credentials=AWS_CREDENTIALS,
         fs_args=fs_args,
         save_args=save_args,
     )
@@ -175,7 +182,7 @@ class TestMatplotlibWriter:
             actual_filepath = tmp_path / "locally_saved.png"
 
             mock_list_plot[index].savefig(str(actual_filepath))
-            _key_path = "{}/{}.png".format(KEY_PATH, index)
+            _key_path = f"{KEY_PATH}/{index}.png"
             mocked_s3_bucket.download_file(BUCKET_NAME, _key_path, str(download_path))
 
             assert actual_filepath.read_bytes() == download_path.read_bytes()
@@ -192,7 +199,7 @@ class TestMatplotlibWriter:
 
             mock_dict_plot[colour].savefig(str(actual_filepath))
 
-            _key_path = "{}/{}".format(KEY_PATH, colour)
+            _key_path = f"{KEY_PATH}/{colour}"
 
             mocked_s3_bucket.download_file(BUCKET_NAME, _key_path, str(download_path))
 
@@ -203,7 +210,7 @@ class TestMatplotlibWriter:
         normal_encryped_writer = MatplotlibWriter(
             fs_args={"s3_additional_kwargs": {"ServerSideEncryption": "AES256"}},
             filepath=FULL_PATH,
-            credentials=CREDENTIALS,
+            credentials=AWS_CREDENTIALS,
         )
 
         normal_encryped_writer.save(mock_single_plot)
@@ -248,9 +255,7 @@ class TestMatplotlibWriter:
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         data_set = MatplotlibWriter(filepath=FULL_PATH)
         data_set.release()
-        fs_mock.invalidate_cache.assert_called_once_with(
-            "{}/{}".format(BUCKET_NAME, KEY_PATH)
-        )
+        fs_mock.invalidate_cache.assert_called_once_with(f"{BUCKET_NAME}/{KEY_PATH}")
 
 
 class TestMatplotlibWriterVersioned:
@@ -346,7 +351,7 @@ class TestMatplotlibWriterVersioned:
             versioned_filepath = str(versioned_plot_writer._get_load_path())
 
             mock_list_plot[index].savefig(str(test_path))
-            actual_filepath = Path("{}/{}.png".format(versioned_filepath, index))
+            actual_filepath = Path(f"{versioned_filepath}/{index}.png")
 
             assert actual_filepath.read_bytes() == test_path.read_bytes()
 
@@ -360,6 +365,6 @@ class TestMatplotlibWriterVersioned:
             versioned_filepath = str(versioned_plot_writer._get_load_path())
 
             mock_dict_plot[colour].savefig(str(test_path))
-            actual_filepath = Path("{}/{}".format(versioned_filepath, colour))
+            actual_filepath = Path(f"{versioned_filepath}/{colour}")
 
             assert actual_filepath.read_bytes() == test_path.read_bytes()

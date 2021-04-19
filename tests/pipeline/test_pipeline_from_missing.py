@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -53,11 +53,11 @@ def branched_pipeline():
     # #### Pipeline execution order ####
     # Inputs: A
     #
-    # left in: identity([A]) -> [B]
-    # right in: constant_output(None) -> [C]
+    # left_in: identity([A]) -> [B]
+    # right_in: constant_output(None) -> [C]
     # combine: biconcat([B,C]) -> [D]
     # split: identity([D]) -> [E,F]
-    # right out: identity([F]) -> None
+    # right_out: identity([F]) -> None
     # Outputs: E
     #
     #  A
@@ -79,11 +79,11 @@ def branched_pipeline():
     # ##################################
     return Pipeline(
         [
-            node(identity, "A", "B", name="left in"),
-            node(constant_output, None, "C", name="right in"),
+            node(identity, "A", "B", name="left_in"),
+            node(constant_output, None, "C", name="right_in"),
             node(biconcat, ["B", "C"], "D", name="combine"),
             node(identity, "D", ["E", "F"], name="split"),
-            node(identity, "F", None, name="right out"),
+            node(identity, "F", None, name="right_out"),
         ]
     )
 
@@ -152,14 +152,14 @@ class TestPipelineMissing:
         catalog = _make_catalog(non_existent=["B"], existent=["A", "C", "D", "E", "F"])
         new_pipeline = _from_missing(branched_pipeline, catalog)
         assert _pipeline_contains(
-            new_pipeline, ["left in", "combine", "split", "right out"]
+            new_pipeline, ["left_in", "combine", "split", "right_out"]
         )
 
     def test_last_missing(self, branched_pipeline):
         """r-out from F is missing."""
         catalog = _make_catalog(non_existent=["F"], existent=["A", "B", "C", "D", "E"])
         new_pipeline = _from_missing(branched_pipeline, catalog)
-        assert _pipeline_contains(new_pipeline, ["split", "right out"])
+        assert _pipeline_contains(new_pipeline, ["split", "right_out"])
 
     def test_missing_and_no_exists(self, branched_pipeline, caplog):
         """If F doesn't have exists(), F is treated as missing."""
@@ -167,7 +167,7 @@ class TestPipelineMissing:
             existent=["A", "B", "C", "D", "E"], no_exists_method=["F"]
         )
         new_pipeline = _from_missing(branched_pipeline, catalog)
-        assert _pipeline_contains(new_pipeline, ["split", "right out"])
+        assert _pipeline_contains(new_pipeline, ["split", "right_out"])
 
         log_record = caplog.records[0]
         assert log_record.levelname == "WARNING"
@@ -192,7 +192,7 @@ class TestPipelineMissing:
         catalog = _make_catalog(non_existent=["F"], existent=["D", "E"])
         catalog.add_feed_dict({"A": 1, "B": 2, "C": 3})
         new_pipeline = _from_missing(branched_pipeline, catalog)
-        assert _pipeline_contains(new_pipeline, ["split", "right out"])
+        assert _pipeline_contains(new_pipeline, ["split", "right_out"])
 
 
 class TestPipelineUnregistered:
@@ -203,7 +203,7 @@ class TestPipelineUnregistered:
         catalog = _make_catalog(existent=["A"], non_existent=["E"])
         new_pipeline = _from_missing(branched_pipeline, catalog)
         assert _pipeline_contains(
-            new_pipeline, ["left in", "right in", "combine", "split"]
+            new_pipeline, ["left_in", "right_in", "combine", "split"]
         )
 
     def test_propagate_down_then_up(self, branched_pipeline):
@@ -228,7 +228,7 @@ class TestPipelineUnregistered:
         """
         catalog = _make_catalog(existent=["A", "D"], no_exists_method=["F"])
         new_pipeline = _from_missing(branched_pipeline, catalog)
-        assert _pipeline_contains(new_pipeline, ["split", "right out"])
+        assert _pipeline_contains(new_pipeline, ["split", "right_out"])
 
     def test_partial_non_existent_propagation(self, branched_pipeline):
         """A non existent data set whose node has one unregistered input
@@ -237,7 +237,7 @@ class TestPipelineUnregistered:
         catalog = _make_catalog(existent=["A", "C", "E", "F"], non_existent=["D"])
         new_pipeline = _from_missing(branched_pipeline, catalog)
         assert _pipeline_contains(
-            new_pipeline, ["left in", "combine", "split", "right out"]
+            new_pipeline, ["left_in", "combine", "split", "right_out"]
         )
 
     def test_free_output(self, branched_pipeline):

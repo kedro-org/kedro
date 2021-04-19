@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ with the values from the passed dictionary.
 """
 import re
 from copy import deepcopy
+from pathlib import Path
 from typing import Any, Dict, Iterable, Optional, Union
 
 import jmespath
@@ -115,7 +116,7 @@ class TemplatedConfigLoader(ConfigLoader):
             filepath: "s3://${bucket}/data/${environment}/${folders.raw}/cars.csv"
 
     This uses ``jmespath`` in the background. For more information see:
-    https://github.com/jmespath/jmespath.py and http://jmespath.org/.
+    https://github.com/jmespath/jmespath.py and https://jmespath.org/.
     """
 
     def __init__(
@@ -145,6 +146,25 @@ class TemplatedConfigLoader(ConfigLoader):
         globals_dict = deepcopy(globals_dict) or {}
         self._arg_dict = {**self._arg_dict, **globals_dict}
 
+    @staticmethod
+    def _load_config_file(config_file: Path) -> Dict[str, Any]:
+        """Load an individual config file using `anyconfig` as a backend.
+
+        Args:
+            config_file: Path to a config file to process.
+
+        Returns:
+            Parsed configuration.
+        """
+        # for performance reasons
+        import anyconfig  # pylint: disable=import-outside-toplevel
+
+        return {
+            k: v
+            for k, v in anyconfig.load(config_file, ac_template=True).items()
+            if not k.startswith("_")
+        }
+
     def get(self, *patterns: str) -> Dict[str, Any]:
         """Tries to resolve the template variables in the config dictionary
         provided by the ``ConfigLoader`` (super class) ``get`` method using the
@@ -168,11 +188,7 @@ class TemplatedConfigLoader(ConfigLoader):
         """
 
         config_raw = super().get(*patterns)
-
-        if self._arg_dict:
-            return _format_object(config_raw, self._arg_dict)
-
-        return config_raw
+        return _format_object(config_raw, self._arg_dict)
 
 
 def _format_object(val: Any, format_dict: Dict[str, Any]) -> Any:

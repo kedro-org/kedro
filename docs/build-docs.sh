@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,6 +30,11 @@
 
 set -e
 
+# Exit script if you try to use an uninitialized variable.
+set -o nounset
+
+action=$1
+
 pip install -e ".[docs]"
 pip install -r test_requirements.txt
 python -m ipykernel install --user --name=kedro --display-name=Kedro
@@ -43,7 +48,11 @@ rm -rf docs/build
 mkdir docs/build/
 cp -r docs/_templates docs/conf.py docs/*.svg docs/*.json  docs/build/
 
-sphinx-build -c docs/ -WETan -j auto -D language=en docs/build/ docs/build/html
+if [ "$action" == "linkcheck" ]; then
+  sphinx-build -c docs/ -WETan -j auto -D language=en -b linkcheck docs/build/ docs/build/html
+elif [ "$action" == "docs" ]; then
+  sphinx-build -c docs/ -WETa -j auto -D language=en docs/build/ docs/build/html
+fi
 
 # Clean up build artefacts
 rm -rf docs/build/html/_sources

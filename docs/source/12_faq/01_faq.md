@@ -1,68 +1,76 @@
 # Frequently asked questions
 
-
-The following lists a set of questions that we have been asked about Kedro in the past. If you have a different question which isn't answered here, please consider asking it over on [Stack Overflow](https://stackoverflow.com/questions/tagged/kedro).
+The following lists a set of questions that we have been asked about Kedro in the past. If you have a different
+ question which isn't answered here, please consider asking it over on [Discourse](https://discourse.kedro.community/) or [Stack Overflow](https://stackoverflow.com/questions/tagged/kedro).
 
 ## What is Kedro?
 
-[Kedro](https://github.com/quantumblacklabs/kedro) is an open-source Python framework that applies software engineering best-practice to data and machine-learning pipelines.  You can use it, for example, to optimise the process of taking a machine learning model into a production environment. You can use Kedro to organise a single user project running on a local environment, or collaborate in a team on an enterprise-level project.
+Kedro is an open-source Python framework for creating reproducible, maintainable and modular data science code. It
+ borrows concepts from software engineering and applies them to machine-learning code; applied concepts include
+  modularity, separation of concerns and versioning.
 
 For the source code, take a look at the [Kedro repository on Github](https://github.com/quantumblacklabs/kedro).
 
-Kedro helps you build data pipelines that are robust, scaleable, deployable, reproducible and versioned. It was originally designed by [Aris Valtazanos](https://github.com/arisvqb) and [Nikolaos Tsaousis](https://github.com/tsanikgr) at [QuantumBlack](https://github.com/quantumblacklabs/) to solve the challenges they faced in their project work.
+## Who maintains Kedro?
 
-This work was later turned into a product thanks to the following contributors:
+Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) and [Nikolaos Tsaousis](https://github.com/tsanikgr) to solve challenges they faced in their project work.
 
-[Ivan Danov](https://github.com/idanov), [Dmitrii Deriabin](https://github.com/DmitryDeryabin), [Gordon Wrigley](https://github.com/tolomea), [Yetunde Dada](https://github.com/yetudada), [Nasef Khan](https://github.com/nakhan98), [Kiyohito Kunii](https://github.com/921kiyo), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae), [Peteris Erins](https://github.com/Pet3ris), [Lorena Balan](https://github.com/lorenabalan), [Richard Westenra](https://github.com/richardwestenra) and [Anton Kirilenko](https://github.com/Flid).
+Their work was later turned into an internal product by [Peteris Erins](https://github.com/Pet3ris), [Ivan Danov](https://github.com/idanov), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae) and [Nikolaos Tsaousis](https://github.com/tsanikgr).
+
+Currently, the core Kedro team consists of [Yetunde Dada](https://github.com/yetudada), [Ivan Danov](https://github.com/idanov), [Richard Westenra](https://github.com/richardwestenra), [Lorena Balan](https://github.com/lorenabalan), [Lim Hoang](https://github.com/limdauto), [Andrii Ivaniuk](https://github.com/andrii-ivaniuk), [Jo Stichbury](https://github.com/stichbury), [Merel Theisen](https://github.com/MerelTheisenQB), [Gabriel Comym](https://github.com/GabrielComymQB), [Liam Brummitt](https://github.com/bru5) and [Susanna Wong](https://github.com/studioswong).
+
+Former core team members with significant contributions include: [Gordon Wrigley](https://github.com/tolomea), [Nasef
+ Khan](https://github.com/nakhan98), [Anton Kirilenko](https://github.com/Flid), [Zain Patel](https://github.com/mzjp2), [Laís Carvalho](https://github.com/laisbsc), [Kiyohito Kunii](https://github.com/921kiyo) and [Dmitrii Deriabin](https://github.com/dmder).
+
+And last, but not least, all the open-source contributors whose work went into all Kedro [releases](https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md).
 
 ## What are the primary advantages of Kedro?
 
-It is important to consider the primary advantages of Kedro over existing tools.
+If you're a Data Scientist, then you should be interested in Kedro because it enables you to:
 
-As we see it, Kedro emphasises a seamless transition from development to production without slowing the pace of the experimentation stage, because it:
+- **Write cleaner code,** so that your Python code is easy to maintain and re-run in future; it does this by applying standardisation and software-engineering best practices
+- **Make a seamless transition from development to production,** as you can write quick, throw-away exploratory code and
+ transition to maintainable, easy-to-share, code experiments quickly
+- **Stay current in machine learning operations [(MLOps)](https://en.wikipedia.org/wiki/MLOps),** as Kedro takes care
+ of the principles you need to create data science code that lasts; you'll always be two steps in front of industry standards
+- **Integrate with your data science workflow,** and use tools in the data science ecosystem, like Tensorflow, SciKit-Learn or Jupyter notebooks for experimentation. You can also take advantage of tools to produce for producing
+  quality code like Sphinx (documentation); `black`, `isort` and `flake8` (code linting and formatting); and,`pytest` (unit tests)
 
-- **Simplifies data access,** using YAML configuration to define a single-source of truth for all data sources that your workflow requires
-- **Uses a familiar data interface,** by borrowing arguments from Pandas and Spark APIs meaning you do not have to learn a new API
-- **Has a minimal pipeline syntax,** that uses Python functions
-- **Makes datasets 1st-level citizens,**  resolving task running order according to what each task produces and consumes, meaning you do not need to explicitly define dependencies between tasks
-- **Has built-in runner selection,** choosing sequential, parallel or thread runner functionality is a `kedro run` argument
-- **Has a low-effort setup,** that does not need a scheduler or database
-- **Starts with a project template,** which has built-in conventions and best practices from 140+ analytics engagements
-- **Is flexible,** simplifying your extension or replacement of core functionality e.g. the whole Data Catalog could be replaced with another mechanism for data access like [`Haxl`](https://github.com/facebook/Haxl)
+If you're a Machine-Learning Engineer or Data Engineer, then you should be interested in Kedro because:
 
+- **Standardisation creates efficiency,** establishing proper analytics code foundations can save up to 80% of your hours down the road when putting models in production
+- **You can focus on solving problems, not setting up projects,** Kedro provides the scaffolding to build more
+ complex data and machine-learning pipelines. There's a focus on spending less time on the tedious "plumbing" required to maintain analytics code; this means that you have more time to solve new problems
+- **A data-driven framework makes pipelines easy,** by permitting data versioning, incremental computing and automatic pipeline running order resolution
+- **It is platform-agnostic,** allowing you to choose what compute or platform to run your Kedro workflow; Databricks
+ and products like Kubeflow, Argo, Prefect and Airflow are deployment targets
+- **It is easy to extend**, by using Hooks to add in tools like [MLFlow](https://mlflow.org/) (experiment tracking), [Great Expectations](https://greatexpectations.io/) (data validation and profiling) and [Grafana](https://grafana.com/) (pipeline monitoring)
+
+If you're a Project Lead, then you should be interested in Kedro because:
+
+- **It allows for effortless teamwork and an ability to scale analytics across an organisation.** Kedro standardises team workflows; the modular structure of Kedro facilitates a higher level of collaboration when teams solve problems together
+- We stand for **no more fire drills.**  You can remove long delays created because you have to refactor a data
+ science proof of concept into production
+- **You don't need to start from scratch,** standardisation and separation of concerns makes it possible to reuse analytics code
+- **See your project like never before,** Kedro’s pipeline visualization plugin lets you see a blueprint of your team's developing workflows and better collaborate with business stakeholders
 
 ## How does Kedro compare to other projects?
 
-Data pipelines consist of extract-transform-load (ETL) workflows. If we understand that data pipelines must be scaleable, monitored, versioned, testable and modular then this introduces us to a spectrum of tools that can be used to construct such data pipelines. `Pipeline` abstraction is implemented in workflow schedulers like Luigi and Airflow, as well as in ETL frameworks like Bonobo ETL and Bubbles.
+Some of our open-source users have called Kedro, the [React](https://medium.com/quantumblack/beyond-the-notebook-and-into-the-data-science-framework-revolution-a7fd364ab9c4) or Django for data science code and we think it's a
+ suitable framing for who we are. We exist to standardise how data science code is created.
 
-### Kedro vs workflow schedulers
+Everyone sees the pipeline abstraction in Kedro and gets excited, thinking that we're similar to orchestrators like
+ Airflow, Luigi, Prefect, Dagster, Flyte, Kubeflow and more. We focus on a different problem, which is the process of
+  _authoring_ pipelines, as opposed to _running, scheduling and monitoring_ them.
 
-Kedro is not a workflow scheduler like Airflow and Luigi. Kedro makes it easy to prototype your data pipeline, while Airflow and Luigi are complementary frameworks that are great at managing deployment, scheduling, monitoring and alerting. A Kedro pipeline is like a machine that builds a car part. Airflow and Luigi tell the different Kedro machines to switch on or off in order to work together to produce a car. We have built a [Kedro-Airflow](https://github.com/quantumblacklabs/kedro-airflow/) plugin, providing faster prototyping time and reducing the barriers to entry associated with moving pipelines to Airflow.
-
-### Kedro vs other ETL frameworks
-
-The primary differences to Bonobo ETL and Bubbles are related to the following features of Kedro:
-
- - **Ability to support big data operations**. Kedro supports big data operations by allowing you to use PySpark on your projects. We also look at processing dataframes differently to both tools as we consider entire dataframes and do not make use of the slower line-by-line data stream processing.
- - **Project structure**. Kedro provides a built-in project structure from the beginning of your project configured for best-practice project management.
- - **Automatic dependency resolution for pipelines**. The `Pipeline` module also maps out dependencies between nodes and displays the results of this in a sophisticated but easy to understand directed acyclic graph.
-
-
-## What is the philosophy behind Kedro?
-
-Kedro is a Python library and lightly opinionated framework. This means that we give you the flexibility and extensibility of a standard Python library and make very few assumptions on the _best_ way to do things. We have created independent but friendly modules – modules that understand each others' defaults and are compatible. You can use alternative methods and choose to use one or all of the modules but it is understood that using Kedro in its entirety is the best thing that you can do for your projects.
-
-The Kedro design principles are:
-
--   Declarative definitions
--   Composability
--   Flexibility
--   Extensibility
--   Simplicity
+The responsibility of _"What time will this pipeline run?"_, _"How do I manage my compute?"_ and _"How will I know if it
+ failed?"_ is left to the orchestrators. We also have deployment guidelines for using orchestrators as deployment
+  targets and are working in collaboration with the maintainers of some of those tools to make the deployment experience as enjoyable as possible.
 
 ## What is data engineering convention?
 
-[Bruce Philp](https://github.com/bruceaphilp) and [Guilherme Braccialli](https://github.com/gbraccialli-qb) at [QuantumBlack](https://github.com/quantumblacklabs) are the brains behind this model of managing data. To see which data layer to use, refer to the following table.
+[Bruce Philp](https://github.com/bruceaphilp) and [Guilherme Braccialli](https://github.com/gbraccialli-qb) at
+[QuantumBlack](https://github.com/quantumblacklabs) are the brains behind this model of managing data. To see which data layer to use, refer to the following table.
 
 > *Note:* The data layers don’t have to exist locally in the `data` folder within your project, but we recommend that you structure your S3 buckets or other data stores in a similar way.
 
@@ -103,13 +111,9 @@ The Kedro design principles are:
 +----------------+---------------------------------------------------------------------------------------------------+
 ```
 
-## What version of Python does Kedro support?
-
-Kedro is built for Python 3.6, 3.7 and 3.8.
-
 ## How do I upgrade Kedro?
 
-We use [Semantic Versioning](http://semver.org/). The best way to safely upgrade is to check our [release notes](https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md) for any notable breaking changes. Follow the steps in the migration guide included for that specific release.
+We use [Semantic Versioning](https://semver.org/). The best way to safely upgrade is to check our [release notes](https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md) for any notable breaking changes. Follow the steps in the migration guide included for that specific release.
 
 Once Kedro is installed, you can check your version as follows:
 
@@ -123,7 +127,7 @@ To later upgrade Kedro to a different version, simply run:
 pip install kedro -U
 ```
 
-When migrating an existing project to a newer Kedro version, make sure you also update the `project_version` in your `ProjectContext`, which is found in `src/<package_name>/run.py`.
+When migrating an existing project to a newer Kedro version, make sure you also update the `project_version` in your `pyproject.toml` file from the project root directory or, for projects generated with Kedro<0.17.0, in your `ProjectContext`, which is found in `src/<package_name>/run.py`.
 
 ## How can I use a development version of Kedro?
 
@@ -149,6 +153,10 @@ pip install kedro
 There are a host of articles, podcasts, talks and Kedro showcase projects in the [`kedro-community`](https://github.com/quantumblacklabs/kedro-community) repository.
 
 Our preferred Kedro-community channel for feedback is through [GitHub issues](https://github.com/quantumblacklabs/kedro/issues). We update the codebase regularly; you can find news about updates and features in the [RELEASE.md file on the Github repository](https://github.com/quantumblacklabs/kedro/blob/develop/RELEASE.md).
+
+## How can I cite Kedro?
+
+If you're an academic, Kedro can also help you, for example, as a tool to solve the problem of reproducible research. Find our citation reference on [Zenodo](https://zenodo.org/record/4336685).
 
 ## How can I get my question answered?
 

@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -136,20 +136,20 @@ class GBQTableDataSet(AbstractDataSet):
         )
 
     def _load(self) -> pd.DataFrame:
-        sql = "select * from {}.{}".format(self._dataset, self._table_name)  # nosec
+        sql = f"select * from {self._dataset}.{self._table_name}"  # nosec
         self._load_args.setdefault("query", sql)
         return pd.read_gbq(
             project_id=self._project_id,
             credentials=self._credentials,
-            **self._load_args
+            **self._load_args,
         )
 
     def _save(self, data: pd.DataFrame) -> None:
         data.to_gbq(
-            "{}.{}".format(self._dataset, self._table_name),
+            f"{self._dataset}.{self._table_name}",
             project_id=self._project_id,
             credentials=self._credentials,
-            **self._save_args
+            **self._save_args,
         )
 
     def _exists(self) -> bool:

@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -111,6 +111,9 @@ class BioSequenceDataSet(AbstractDataSet):
 
         self._filepath = PurePosixPath(path)
         self._protocol = protocol
+        if protocol == "file":
+            _fs_args.setdefault("auto_mkdir", True)
+
         self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
 
         # Handle default load and save arguments

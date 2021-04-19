@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,36 +32,14 @@ from typing import Any, Dict, Iterable, Optional
 from kedro.config import ConfigLoader
 from kedro.framework.hooks import hook_impl
 from kedro.io import DataCatalog
-from kedro.pipeline import Pipeline
 from kedro.versioning import Journal
-{%- if cookiecutter.include_example == "True" %}
-
-from {{ cookiecutter.python_package }}.pipelines import data_engineering as de
-from {{ cookiecutter.python_package }}.pipelines import data_science as ds{%- endif %}
 
 
 class ProjectHooks:
     @hook_impl
-    def register_pipelines(self) -> Dict[str, Pipeline]:
-        """Register the project's pipeline.
-
-        Returns:
-            A mapping from a pipeline name to a ``Pipeline`` object.
-
-        """
-        {% if cookiecutter.include_example == "True" -%}
-        data_engineering_pipeline = de.create_pipeline()
-        data_science_pipeline = ds.create_pipeline()
-
-        return {
-            "de": data_engineering_pipeline,
-            "ds": data_science_pipeline,
-            "__default__": data_engineering_pipeline + data_science_pipeline,
-        }
-        {%- else -%}return {"__default__": Pipeline([])}{%- endif %}
-
-    @hook_impl
-    def register_config_loader(self, conf_paths: Iterable[str]) -> ConfigLoader:
+    def register_config_loader(
+        self, conf_paths: Iterable[str], env: str, extra_params: Dict[str, Any],
+    ) -> ConfigLoader:
         return ConfigLoader(conf_paths)
 
     @hook_impl
@@ -76,6 +54,3 @@ class ProjectHooks:
         return DataCatalog.from_config(
             catalog, credentials, load_versions, save_version, journal
         )
-
-
-project_hooks = ProjectHooks()

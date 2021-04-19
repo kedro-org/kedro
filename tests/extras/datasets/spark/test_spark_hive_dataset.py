@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pylint: disable=import-error
 import gc
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -104,7 +103,7 @@ def spark_test_databases(spark_hive_session):
 
     # Setup the databases and test table before testing
     for database in databases:
-        spark_hive_session.sql("create database {database}".format(database=database))
+        spark_hive_session.sql(f"create database {database}")
     spark_hive_session.sql("use default_1")
     spark_hive_session.sql("create table table_1 as select * from tmp")
 
@@ -112,9 +111,7 @@ def spark_test_databases(spark_hive_session):
 
     # Drop the databases after testing
     for database in databases:
-        spark_hive_session.sql(
-            "drop database {database} cascade".format(database=database)
-        )
+        spark_hive_session.sql(f"drop database {database} cascade")
 
 
 def assert_df_equal(expected, result):

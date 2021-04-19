@@ -1,0 +1,29 @@
+@startuml
+title "$ kedro ipython"
+
+participant "$ kedro ipython" as cli
+participant "Environment variables" as env
+participant "IPython" as ipython
+participant "00-kedro-init.py\nreload_kedro" as entrypoint
+participant "Hook manager" as hook_manager
+participant "Kedro project directory" as project
+participant "KedroSession" as session
+participant "KedroContext" as context
+
+cli->cli: Check if IPython is importable
+cli->env: Set IPYTHONDIR to metadata.project_path / ".ipython"
+cli->env: Set KEDRO_ENV to the chosen Kedro environment
+cli->cli: Print an info message
+cli->ipython: Start ipython
+ipython->entrypoint: load startup script
+entrypoint->entrypoint: import Kedro
+entrypoint->hook_manager: clear the hook manager
+entrypoint->project: bootstrap the project
+entrypoint->entrypoint: remove imported project package modules
+entrypoint->session: create a KedroSession
+entrypoint->session: activate the session
+entrypoint->session: load KedroContext
+entrypoint->context: get the data catalog
+entrypoint->entrypoint: expose session, context and catalog variables
+entrypoint->entrypoint: register reload_kedro line magic
+@enduml

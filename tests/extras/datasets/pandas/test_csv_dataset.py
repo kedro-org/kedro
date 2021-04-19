@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -73,8 +73,8 @@ class TestCSVDataSet:
         csv_data_set.save(dummy_dataframe)
         reloaded = csv_data_set.load()
         assert_frame_equal(dummy_dataframe, reloaded)
-        assert csv_data_set._fs_open_args_load == {"mode": "r"}
-        assert csv_data_set._fs_open_args_save == {"mode": "w"}
+        assert csv_data_set._fs_open_args_load == {}
+        assert csv_data_set._fs_open_args_save == {"mode": "w", "newline": ""}
 
     def test_exists(self, csv_data_set, dummy_dataframe):
         """Test `exists` method invocation for both existing and
@@ -106,7 +106,10 @@ class TestCSVDataSet:
     )
     def test_open_extra_args(self, csv_data_set, fs_args):
         assert csv_data_set._fs_open_args_load == fs_args["open_args_load"]
-        assert csv_data_set._fs_open_args_save == {"mode": "w"}  # default unchanged
+        assert csv_data_set._fs_open_args_save == {
+            "mode": "w",
+            "newline": "",
+        }  # default unchanged
 
     def test_load_missing_file(self, csv_data_set):
         """Check the error when trying to load missing file."""
@@ -122,7 +125,11 @@ class TestCSVDataSet:
             ("/tmp/test.csv", LocalFileSystem, {}),
             ("gcs://bucket/file.csv", GCSFileSystem, {}),
             ("https://example.com/file.csv", HTTPFileSystem, {}),
-            ("abfs://bucket/file.csv", AzureBlobFileSystem, {"account_name": "test"}),
+            (
+                "abfs://bucket/file.csv",
+                AzureBlobFileSystem,
+                {"account_name": "test", "account_key": "test"},
+            ),
         ],
     )
     def test_protocol_usage(self, filepath, instance_type, credentials):

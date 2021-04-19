@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import re
 from typing import Any, Callable, Dict
 
 import pytest
@@ -159,3 +159,13 @@ class TestTransformers:
     def test_add_bad_transformer(self, catalog):
         with pytest.raises(TypeError, match="not an instance of AbstractTransformer"):
             catalog.add_transformer(object)
+
+    def test_deprecation_warning(self, catalog, fake_transformer):
+        pattern = (
+            "The transformer API will be deprecated in Kedro 0.18.0."
+            "Please use Dataset Hooks to customise the load and save methods."
+            "For more information, please visit"
+            "https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_hooks.html"
+        )
+        with pytest.warns(DeprecationWarning, match=re.escape(pattern)):
+            catalog.add_transformer(fake_transformer)

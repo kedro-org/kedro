@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,7 +32,4 @@ project context.
 
 from .context import KedroContext  # NOQA
 from .context import KedroContextError  # NOQA
-from .context import get_static_project_data  # NOQA
 from .context import load_context  # NOQA
-from .context import load_package_context  # NOQA
-from .context import validate_source_path  # NOQA

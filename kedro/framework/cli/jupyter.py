@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,17 +44,17 @@ from click import secho
 from jupyter_client.kernelspec import NATIVE_KERNEL_NAME, KernelSpecManager
 from traitlets import Unicode
 
-from kedro.framework.cli import load_entry_points
-from kedro.framework.cli.cli import _handle_exception
 from kedro.framework.cli.utils import (
     KedroCliError,
     _check_module_importable,
+    command_with_verbosity,
     env_option,
     forward_command,
     ipython_message,
+    load_entry_points,
     python_call,
 )
-from kedro.framework.context import get_static_project_data, load_context
+from kedro.framework.startup import ProjectMetadata
 
 JUPYTER_IP_HELP = "IP address of the Jupyter server."
 JUPYTER_ALL_KERNELS_HELP = "Display all available Python kernels."
@@ -67,18 +67,6 @@ including sub-folders."""
 
 OVERWRITE_HELP = """If Python file already exists for the equivalent notebook,
 overwrite its contents."""
-
-
-def _load_project_context(**kwargs):
-    """Returns project context."""
-    try:
-        return load_context(Path.cwd(), **kwargs)
-    except Exception as err:  # pylint: disable=broad-except
-        env = kwargs.get("env")
-        _handle_exception(
-            f"Unable to load Kedro context with environment `{env}`. "
-            f"Make sure it exists in the project configuration.\nError: {err}"
-        )
 
 
 def collect_line_magic():
@@ -116,7 +104,13 @@ def _update_ipython_dir(project_path: Path) -> None:
     os.environ["IPYTHONDIR"] = str(project_path / ".ipython")
 
 
-@click.group()
+# pylint: disable=missing-function-docstring
+@click.group(name="Kedro")
+def jupyter_cli():  # pragma: no cover
+    pass
+
+
+@jupyter_cli.group()
 def jupyter():
     """Open Jupyter Notebook / Lab with project specific variables loaded, or
     convert notebooks into Kedro code.
@@ -136,22 +130,30 @@ def jupyter():
 )
 @click.option("--idle-timeout", type=int, default=30, help=JUPYTER_IDLE_TIMEOUT_HELP)
 @env_option
-def jupyter_notebook(ip_address, all_kernels, env, idle_timeout, args):
+@click.pass_obj  # this will pass the metadata as first argument
+def jupyter_notebook(
+    metadata: ProjectMetadata,
+    ip_address,
+    all_kernels,
+    env,
+    idle_timeout,
+    args,
+    **kwargs,
+):  # pylint: disable=unused-argument,too-many-arguments
     """Open Jupyter Notebook with project specific variables loaded."""
-    context = _load_project_context(env=env)
     _check_module_importable("jupyter_core")
 
     if "-h" not in args and "--help" not in args:
         ipython_message(all_kernels)
 
-    _update_ipython_dir(context.project_path)
+    _update_ipython_dir(metadata.project_path)
     arguments = _build_jupyter_command(
         "notebook",
         ip_address=ip_address,
         all_kernels=all_kernels,
         args=args,
         idle_timeout=idle_timeout,
-        project_name=context.project_name,
+        project_name=metadata.project_name,
     )
 
     python_call_kwargs = _build_jupyter_env(env)
@@ -165,30 +167,38 @@ def jupyter_notebook(ip_address, all_kernels, env, idle_timeout, args):
 )
 @click.option("--idle-timeout", type=int, default=30, help=JUPYTER_IDLE_TIMEOUT_HELP)
 @env_option
-def jupyter_lab(ip_address, all_kernels, env, idle_timeout, args):
+@click.pass_obj  # this will pass the metadata as first argument
+def jupyter_lab(
+    metadata: ProjectMetadata,
+    ip_address,
+    all_kernels,
+    env,
+    idle_timeout,
+    args,
+    **kwargs,
+):  # pylint: disable=unused-argument,too-many-arguments
     """Open Jupyter Lab with project specific variables loaded."""
-    context = _load_project_context(env=env)
     _check_module_importable("jupyter_core")
 
     if "-h" not in args and "--help" not in args:
         ipython_message(all_kernels)
 
-    _update_ipython_dir(context.project_path)
+    _update_ipython_dir(metadata.project_path)
     arguments = _build_jupyter_command(
         "lab",
         ip_address=ip_address,
         all_kernels=all_kernels,
         args=args,
         idle_timeout=idle_timeout,
-        project_name=context.project_name,
+        project_name=metadata.project_name,
     )
 
     python_call_kwargs = _build_jupyter_env(env)
     python_call("jupyter", arguments, **python_call_kwargs)
 
 
-@jupyter.command("convert")
-@click.option("--all", "all_flag", is_flag=True, help=CONVERT_ALL_HELP)
+@command_with_verbosity(jupyter, "convert")
+@click.option("--all", "-a", "all_flag", is_flag=True, help=CONVERT_ALL_HELP)
 @click.option("-y", "overwrite_flag", is_flag=True, help=OVERWRITE_HELP)
 @click.argument(
     "filepath",
@@ -197,9 +207,10 @@ def jupyter_lab(ip_address, all_kernels, env, idle_timeout, args):
     nargs=-1,
 )
 @env_option
-def convert_notebook(  # pylint: disable=unused-argument,too-many-locals
-    all_flag, overwrite_flag, filepath, env
-):
+@click.pass_obj  # this will pass the metadata as first argument
+def convert_notebook(
+    metadata: ProjectMetadata, all_flag, overwrite_flag, filepath, env, **kwargs
+):  # pylint: disable=unused-argument, too-many-locals
     """Convert selected or all notebooks found in a Kedro project
     to Kedro code, by exporting code from the appropriately-tagged cells:
     Cells tagged as `node` will be copied over to a Python file matching
@@ -209,12 +220,9 @@ def convert_notebook(  # pylint: disable=unused-argument,too-many-locals
     relative and absolute paths are accepted.
     Should not be provided if --all flag is already present.
     """
-    project_path = Path.cwd()
-    static_data = get_static_project_data(project_path)
-    source_path = static_data["source_dir"]
-    package_name = (
-        static_data.get("package_name") or _load_project_context().package_name
-    )
+    project_path = metadata.project_path
+    source_path = metadata.source_dir
+    package_name = metadata.package_name
 
     _update_ipython_dir(project_path)
 
@@ -260,7 +268,7 @@ def convert_notebook(  # pylint: disable=unused-argument,too-many-locals
         else:
             _export_nodes(notebook, output_path)
 
-    secho("Done!", color="green")
+    secho("Done!", color="green")  # type: ignore
 
 
 def _build_jupyter_command(  # pylint: disable=too-many-arguments
@@ -320,7 +328,6 @@ def _export_nodes(filepath: Path, output_path: Path) -> None:
         raise KedroCliError(
             f"Provided filepath is not a Jupyter notebook: {filepath}"
         ) from exc
-
     cells = [
         cell
         for cell in content["cells"]

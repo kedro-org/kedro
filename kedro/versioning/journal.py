@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -135,7 +135,7 @@ class JournalFileHandler(logging.Handler):
 
         """
         self.base_dir.mkdir(parents=True, exist_ok=True)
-        handler_path = self.base_dir.resolve() / "journal_{}.log".format(run_id)
+        handler_path = self.base_dir.resolve() / f"journal_{run_id}.log"
         return logging.FileHandler(str(handler_path), mode="a")
 
     def emit(self, record: logging.LogRecord) -> None:

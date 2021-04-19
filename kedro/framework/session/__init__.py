@@ -1,4 +1,4 @@
-# Copyright 2020 QuantumBlack Visual Analytics Limited
+# Copyright 2021 QuantumBlack Visual Analytics Limited
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,4 +29,4 @@
 """``kedro.framework.session`` provides access to KedroSession responsible for
 project lifecycle.
 """
-from .session import KedroSession  # NOQA
+from .session import KedroSession, get_current_session  # NOQA

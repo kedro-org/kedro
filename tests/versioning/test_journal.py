@@ -110,6 +110,11 @@ class TestJournal:
             assert catalog_log["version"] == "fake_version"
             assert catalog_log["run_id"] == context_log["run_id"]
 
+    def test_deprecation_warning(self, tmp_path):
+        record_data = {"run_id": "fake_id", "project_path": str(tmp_path)}
+        with pytest.warns(DeprecationWarning):
+            Journal(record_data)
+
 
 def test_git_sha(tmp_path, mocker):
     mocker.patch("subprocess.check_output", return_value="mocked_return".encode())

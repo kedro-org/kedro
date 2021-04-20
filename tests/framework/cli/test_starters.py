@@ -39,17 +39,13 @@ from click.testing import CliRunner
 from cookiecutter.exceptions import RepositoryCloneFailed
 
 from kedro import __version__ as version
-from kedro.framework.cli.starters import (
-    _STARTER_ALIASES,
-    TEMPLATE_PATH,
-    _parse_prompts_from_file,
-)
+from kedro.framework.cli.starters import _STARTER_ALIASES, TEMPLATE_PATH
 
 FILES_IN_TEMPLATE = 37
 
 
 def _make_cli_prompt_input(
-    project_name=None, repo_name="repo_name", python_package="python_package",
+    project_name=None, repo_name="repo_name", python_package="python_package"
 ):
     prompts = (project_name, repo_name, python_package)
     return "\n".join(prompt or "" for prompt in prompts)
@@ -59,10 +55,10 @@ def _make_cli_prompt_input(
 def _assert_template_ok(
     result,
     files_in_template,
-    repo_name=None,
     project_name="New Kedro Project",
+    repo_name=None,
+    python_package="python_package",
     output_dir=".",
-    package_name="python_package",
 ):
     assert result.exit_code == 0, result.output
     assert "Change directory to the project generated in" in result.output
@@ -87,8 +83,8 @@ def _assert_template_ok(
         with (full_path / "src" / "requirements.txt").open() as file:
             assert version in file.read()
 
-        if package_name:
-            assert (full_path / "src" / package_name / "__init__.py").is_file()
+        if python_package:
+            assert (full_path / "src" / python_package / "__init__.py").is_file()
 
 
 @pytest.fixture(autouse=True)
@@ -109,30 +105,19 @@ class TestInteractiveNew:
             fake_kedro_cli,
             ["new", "-v"],
             input=_make_cli_prompt_input(
-                project_name=project_name, repo_name=self.repo_name,
+                project_name=project_name, repo_name=self.repo_name
             ),
         )
         _assert_template_ok(
             result,
             FILES_IN_TEMPLATE,
-            repo_name=self.repo_name,
             project_name=project_name,
+            repo_name=self.repo_name,
         )
 
     def test_new_custom_dir(self, fake_kedro_cli):
         """Test that default package name does not change if custom
         repo name was specified."""
-        result = CliRunner().invoke(
-            fake_kedro_cli,
-            ["new"],
-            input=_make_cli_prompt_input(repo_name=self.repo_name),
-        )
-        _assert_template_ok(
-            result, FILES_IN_TEMPLATE, repo_name=self.repo_name,
-        )
-
-    def test_new_correct_path(self, fake_kedro_cli):
-        """Test new project creation with the default project name."""
         result = CliRunner().invoke(
             fake_kedro_cli,
             ["new"],
@@ -235,10 +220,10 @@ class TestNewFromConfig:
         _assert_template_ok(
             result,
             FILES_IN_TEMPLATE,
-            self.repo_name,
             self.project_name,
-            output_dir,
+            self.repo_name,
             self.repo_name.replace("-", "_"),
+            output_dir,
         )
 
     def test_wrong_config(self, fake_kedro_cli):
@@ -254,7 +239,6 @@ class TestNewFromConfig:
         assert result.exit_code != 0
         assert "is not a valid output directory." in result.output
 
-    @pytest.mark.xfail
     def test_config_missing_key(self, fake_kedro_cli, tmp_path):
         """Check the error if keys are missing from config file."""
         output_dir = tmp_path / "test_dir"
@@ -275,7 +259,7 @@ class TestNewFromConfig:
         )
 
         assert result.exit_code != 0
-        assert "extra_key not found" in result.output  # pragma: no cover
+        assert "extra_key not found" in result.output
 
     def test_bad_yaml(self, fake_kedro_cli):
         """Check the error if config YAML is invalid."""
@@ -286,21 +270,7 @@ class TestNewFromConfig:
             fake_kedro_cli, ["new", "-v", "-c", self.config_path]
         )
         assert result.exit_code != 0
-        assert "Failed to parse config.yml" in result.output
-
-    def test_missing_output_dir(self, fake_kedro_cli):
-        """Check the error if config YAML does not contain the output
-        directory."""
-        _create_config_file(
-            self.config_path, self.project_name, self.repo_name, output_dir=None
-        )  # output dir missing
-        result = CliRunner().invoke(
-            fake_kedro_cli, ["new", "-v", "--config", self.config_path]
-        )
-
-        assert result.exit_code != 0
-        assert "output_dir not found in" in result.output
-        assert not Path(self.repo_name).exists()
+        assert "Failed to generate project: could not load config" in result.output
 
 
 def test_default_config_up_to_date():
@@ -311,7 +281,8 @@ def test_default_config_up_to_date():
     cookie_keys = [
         key for key in cookie if not key.startswith("_") and key != "kedro_version"
     ]
-    default_config_keys = _parse_prompts_from_file(TEMPLATE_PATH / "prompts.yml").keys()
+    with open(TEMPLATE_PATH / "prompts.yml") as prompts:
+        default_config_keys = yaml.safe_load(prompts)
 
     assert set(cookie_keys) == set(default_config_keys)
 
@@ -322,7 +293,7 @@ class TestNewWithStarter:
     package_name = "package_test"
     project_name = "Test"
 
-    def test_new_with_valid_starter(self, fake_kedro_cli, tmp_path):
+    def test_new_with_valid_starter_absolute_path(self, fake_kedro_cli, tmp_path):
         starter_path = tmp_path / "starter"
         shutil.copytree(TEMPLATE_PATH, str(starter_path))
 
@@ -338,9 +309,30 @@ class TestNewWithStarter:
         _assert_template_ok(
             result,
             FILES_IN_TEMPLATE,
-            repo_name=self.repo_name,
             project_name=self.project_name,
-            package_name=self.package_name,
+            repo_name=self.repo_name,
+            python_package=self.package_name,
+        )
+
+    def test_new_with_valid_starter_relative_path(self, fake_kedro_cli, tmp_path):
+        starter_path = tmp_path / "starter"
+        shutil.copytree(TEMPLATE_PATH, str(starter_path))
+
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "-v", "--starter", "starter"],
+            _make_cli_prompt_input(
+                project_name=self.project_name,
+                python_package=self.package_name,
+                repo_name=self.repo_name,
+            ),
+        )
+        _assert_template_ok(
+            result,
+            FILES_IN_TEMPLATE,
+            project_name=self.project_name,
+            repo_name=self.repo_name,
+            python_package=self.package_name,
         )
 
     def test_new_with_invalid_starter_path_should_raise(self, fake_kedro_cli):
@@ -366,17 +358,13 @@ class TestNewWithStarter:
             (
                 "pyspark-iris",
                 "git+https://github.com/quantumblacklabs/kedro-starters.git",
-            ),
+            )
         ],
     )
     def test_new_with_starter_alias(
-        self, alias, expected_starter_repo, fake_kedro_cli, mocker, tmp_path
+        self, alias, expected_starter_repo, fake_kedro_cli, mocker
     ):
-        mocker.patch(
-            "kedro.framework.cli.starters.tempfile.TemporaryDirectory",
-            return_value=tmp_path,
-        )
-        mocked_cookie = mocker.patch("cookiecutter.main.cookiecutter")
+        mocked_cookie = mocker.patch("cookiecutter.repository.determine_repo_dir")
         CliRunner().invoke(
             fake_kedro_cli,
             ["new", "--starter", alias],
@@ -386,22 +374,32 @@ class TestNewWithStarter:
                 repo_name=self.repo_name,
             ),
         )
-        actual_starter_repo = mocked_cookie.call_args[0][0]
+        actual_starter_repo = mocked_cookie.call_args[1]["template"]
         starter_directory = mocked_cookie.call_args[1]["directory"]
         assert actual_starter_repo == expected_starter_repo
         assert starter_directory == alias
 
-    def test_new_starter_with_checkout(self, fake_kedro_cli, mocker):
+    def test_new_starter_with_checkout_and_directory(self, fake_kedro_cli, mocker):
         starter_path = "some-starter"
         checkout_version = "some-version"
+        directory = "some-directory"
         output_dir = str(Path.cwd())
         mocker.patch("cookiecutter.repository.repository_has_cookiecutter_json")
+        mocker.patch("cookiecutter.generate.generate_context")
         mocked_cookiecutter = mocker.patch(
             "cookiecutter.main.cookiecutter", return_value=starter_path
         )
         result = CliRunner().invoke(
             fake_kedro_cli,
-            ["new", "--starter", starter_path, "--checkout", checkout_version],
+            [
+                "new",
+                "--starter",
+                starter_path,
+                "--checkout",
+                checkout_version,
+                "--directory",
+                directory,
+            ],
             input=_make_cli_prompt_input(
                 project_name=self.project_name,
                 python_package=self.package_name,
@@ -412,6 +410,7 @@ class TestNewWithStarter:
         mocked_cookiecutter.assert_called_once_with(
             starter_path,
             checkout=checkout_version,
+            directory=directory,
             extra_context={"kedro_version": version},
             no_input=True,
             output_dir=output_dir,
@@ -421,8 +420,9 @@ class TestNewWithStarter:
         starter_path = "some-starter"
         checkout_version = "some-version"
         mocker.patch("cookiecutter.repository.repository_has_cookiecutter_json")
-        mocked_cookiecutter = mocker.patch(
-            "cookiecutter.main.cookiecutter", side_effect=RepositoryCloneFailed
+        mocker.patch(
+            "cookiecutter.repository.determine_repo_dir",
+            side_effect=RepositoryCloneFailed,
         )
         result = CliRunner().invoke(
             fake_kedro_cli,
@@ -434,23 +434,14 @@ class TestNewWithStarter:
             ),
         )
         assert result.exit_code
-        assert (
-            f"Kedro project template not found at {starter_path} with tag {checkout_version}"
-            in result.output
+        pattern = (
+            f"Kedro project template not found at {starter_path}. "
+            f"Specified tag {checkout_version}"
         )
-        output_dir = str(Path.cwd())
-        mocked_cookiecutter.assert_called_once_with(
-            starter_path,
-            checkout=checkout_version,
-            extra_context={"kedro_version": version},
-            no_input=True,
-            output_dir=output_dir,
-        )
+        assert pattern in result.output
 
-    # TODO: merge this with test_new_starter_with_checkout_invalid_checkout_alternative_tags
-    # once _obtain_config_from_prompts/_create_project error handling tidied
     @pytest.mark.parametrize("starter_path", ["some-starter", "git+some-starter"])
-    def test_new_starter_with_checkout_invalid_checkout_alternative_tags_determine(
+    def test_new_starter_with_checkout_invalid_checkout_alternative_tags(
         self, fake_kedro_cli, mocker, starter_path
     ):
         checkout_version = "some-version"
@@ -476,41 +467,8 @@ class TestNewWithStarter:
         assert result.exit_code
         tags = sorted(set(alternative_tags.split("\n")))
         pattern = (
-            f"Kedro project template not found at {starter_path} with tag {checkout_version}. "
-            f"The following tags are available: {', '.join(tags)}"
-        )
-        assert pattern in result.output
-        mocked_git.cmd.Git.return_value.ls_remote.assert_called_once_with(
-            "--tags", starter_path.replace("git+", "")
-        )
-
-    @pytest.mark.parametrize("starter_path", ["some-starter", "git+some-starter"])
-    def test_new_starter_with_checkout_invalid_checkout_alternative_tags(
-        self, fake_kedro_cli, mocker, starter_path
-    ):
-        checkout_version = "some-version"
-        mocker.patch("cookiecutter.repository.repository_has_cookiecutter_json")
-        mocker.patch(
-            "cookiecutter.main.cookiecutter", side_effect=RepositoryCloneFailed
-        )
-        mocked_git = mocker.patch("kedro.framework.cli.starters.git")
-        alternative_tags = "version1\nversion2"
-        mocked_git.cmd.Git.return_value.ls_remote.return_value = alternative_tags
-
-        result = CliRunner().invoke(
-            fake_kedro_cli,
-            ["new", "--starter", starter_path, "--checkout", checkout_version],
-            input=_make_cli_prompt_input(
-                project_name=self.project_name,
-                python_package=self.package_name,
-                repo_name=self.repo_name,
-            ),
-        )
-        assert result.exit_code
-        tags = sorted(set(alternative_tags.split("\n")))
-        pattern = (
-            f"Kedro project template not found at {starter_path} with tag {checkout_version}. "
-            f"The following tags are available: {', '.join(tags)}"
+            f"Kedro project template not found at {starter_path}. "
+            f"Specified tag {checkout_version}. The following tags are available: {', '.join(tags)}"
         )
         assert pattern in result.output
         mocked_git.cmd.Git.return_value.ls_remote.assert_called_once_with(
@@ -594,7 +552,7 @@ class TestNewWithStarter:
             checkout=version,
         )
 
-    def test_raise_error_when_prompt_invalid(self, fake_kedro_cli, tmp_path):
+    def test_raise_error_when_prompt_no_title(self, fake_kedro_cli, tmp_path):
         starter_path = tmp_path / "starter"
         shutil.copytree(TEMPLATE_PATH, str(starter_path))
         with open(starter_path / "prompts.yml", "w+") as prompts_file:
@@ -612,6 +570,25 @@ class TestNewWithStarter:
         assert result.exit_code != 0
         assert (
             "Each prompt must have a title field to be valid" in result.output
+        ), result.output
+
+    def test_raise_error_when_prompt_invalid_yaml(self, fake_kedro_cli, tmp_path):
+        starter_path = tmp_path / "starter"
+        shutil.copytree(TEMPLATE_PATH, str(starter_path))
+        (starter_path / "prompts.yml").write_text("invalid\tyaml")
+
+        result = CliRunner().invoke(
+            fake_kedro_cli,
+            ["new", "-v", "--starter", str(starter_path)],
+            input=_make_cli_prompt_input(
+                project_name=self.project_name,
+                python_package=self.package_name,
+                repo_name=self.repo_name,
+            ),
+        )
+        assert result.exit_code != 0
+        assert (
+            "Failed to generate project: could not load prompts.yml." in result.output
         ), result.output
 
     def test_starter_list(self, fake_kedro_cli):

@@ -367,8 +367,7 @@ class KedroSession:
                 f"by the 'register_pipelines' function."
             ) from exc
 
-        filtered_pipeline = context._filter_pipeline(
-            pipeline=pipeline,
+        filtered_pipeline = pipeline.filter(
             tags=tags,
             from_nodes=from_nodes,
             to_nodes=to_nodes,

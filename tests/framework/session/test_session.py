@@ -38,7 +38,7 @@ import toml
 
 from kedro import __version__ as kedro_version
 from kedro.config import ConfigLoader
-from kedro.framework.context import KedroContext, KedroContextError
+from kedro.framework.context import KedroContext
 from kedro.framework.hooks import hook_impl
 from kedro.framework.project import (
     ValidationError,
@@ -571,7 +571,7 @@ class TestKedroSession:
             "It needs to be generated and returned "
             "by the 'register_pipelines' function."
         )
-        with pytest.raises(KedroContextError, match=re.escape(pattern)):
+        with pytest.raises(ValueError, match=re.escape(pattern)):
             with KedroSession.create(_FAKE_PACKAGE_NAME, fake_project) as session:
                 session.run(runner=mock_runner, pipeline_name="doesnotexist")
 

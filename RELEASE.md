@@ -36,7 +36,6 @@ print(pipelines["__default__"])  # pipeline loading is only triggered here
   * `io` in favour of `KedroContext.catalog`
   * `pipeline` (equivalent to `pipelines["__default__"]`)
   * `pipelines` in favour of `kedro.framework.project.pipelines`
-  * `project_path`in favour of `kedro.framework.startup.ProjectMetadata.project_path`
 
 ## Thanks for supporting contributions
 

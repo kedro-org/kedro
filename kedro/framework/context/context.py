@@ -307,8 +307,7 @@ class KedroContext:
         """
         return dict(pipelines)
 
-    @property  # type: ignore
-    @_deprecate(version="0.18.0")
+    @property
     def project_path(self) -> Path:
         """Read-only property containing Kedro's root project directory.
 

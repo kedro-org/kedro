@@ -29,7 +29,7 @@
 import pytest
 from pyspark.sql import DataFrame as SparkDataFrame
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, when  # pylint: disable=no-name-in-module
+from pyspark.sql.functions import col, when
 
 from kedro.io import MemoryDataSet
 

@@ -316,9 +316,7 @@ class TestKedroContext:
         with pytest.warns(DeprecationWarning, match=pattern):
             dummy_context.CONF_ROOT = "test_conf"
 
-    @pytest.mark.parametrize(
-        "property_name", ["io", "pipeline", "pipelines", "project_path"]
-    )
+    @pytest.mark.parametrize("property_name", ["io", "pipeline", "pipelines"])
     def test_deprecate_properties_on_context(self, property_name, dummy_context):
         pattern = f"Accessing {property_name} via the context will be deprecated in Kedro 0.18.0."
         with pytest.warns(DeprecationWarning, match=pattern):

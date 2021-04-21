@@ -42,7 +42,7 @@ isort>=4.3.21, <5.0 # Used for linting code with `kedro lint`
 jupyter~=1.0 # Used to open a Kedro-session in Jupyter Notebook & Lab
 jupyter_client>=5.1.0, <7.0 # Used to open a Kedro-session in Jupyter Notebook & Lab
 jupyterlab==0.31.1 # Used to open a Kedro-session in Jupyter Lab
-kedro==0.17.2
+kedro==0.17.3
 nbstripout==0.3.3 # Strips the output of a Jupyter Notebook and writes the outputless version to the original file
 pytest-cov~=2.5 # Produces test coverage reports
 pytest-mock>=1.7.1,<2.0 # Wrapper around the mock package for easier use with pytest
@@ -60,10 +60,10 @@ The dependencies above may be sufficient for some projects, but for the spacefli
 pip install "kedro[pandas.CSVDataSet,pandas.ExcelDataSet]"
 ```
 
-Alternatively, if you need to, you can edit `src/requirements.txt` directly to modify your list of dependencies by replacing the requirement `kedro==0.17.2` with the following (your version of Kedro may be different):
+Alternatively, if you need to, you can edit `src/requirements.txt` directly to modify your list of dependencies by replacing the requirement `kedro==0.17.3` with the following (your version of Kedro may be different):
 
 ```text
-kedro[pandas.CSVDataSet,pandas.ExcelDataSet]==0.17.2
+kedro[pandas.CSVDataSet,pandas.ExcelDataSet]==0.17.3
 ```
 
 Then run the following:

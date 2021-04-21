@@ -38,7 +38,7 @@ import toml
 
 from kedro import __version__ as kedro_version
 from kedro.config import ConfigLoader
-from kedro.framework.context import KedroContext
+from kedro.framework.context import KedroContext, KedroContextError
 from kedro.framework.hooks import hook_impl
 from kedro.framework.project import (
     ValidationError,
@@ -518,6 +518,13 @@ class TestKedroSession:
         mock_hook = mocker.patch(
             "kedro.framework.session.session.get_hook_manager"
         ).return_value.hook
+        mock_pipelines = {
+            _FAKE_PIPELINE_NAME: mocker.Mock(),
+            "__default__": mocker.Mock(),
+        }
+        mocker.patch(
+            "kedro.framework.session.session.pipelines", return_value=mock_pipelines
+        )
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
         mock_runner = mocker.Mock()
@@ -556,8 +563,21 @@ class TestKedroSession:
         )
 
     @pytest.mark.usefixtures("mock_settings_context_class")
+    def test_run_non_existent_pipeline(self, fake_project, mocker):
+        mock_runner = mocker.Mock()
+
+        pattern = (
+            "Failed to find the pipeline named 'doesnotexist'. "
+            "It needs to be generated and returned "
+            "by the 'register_pipelines' function."
+        )
+        with pytest.raises(KedroContextError, match=re.escape(pattern)):
+            with KedroSession.create(_FAKE_PACKAGE_NAME, fake_project) as session:
+                session.run(runner=mock_runner, pipeline_name="doesnotexist")
+
+    @pytest.mark.usefixtures("mock_settings_context_class")
     @pytest.mark.parametrize("fake_pipeline_name", [None, _FAKE_PIPELINE_NAME])
-    def test_run_exception(
+    def test_run_exception(  # pylint: disable=too-many-locals
         self,
         fake_project,
         fake_session_id,
@@ -569,6 +589,13 @@ class TestKedroSession:
         mock_hook = mocker.patch(
             "kedro.framework.session.session.get_hook_manager"
         ).return_value.hook
+        mock_pipelines = {
+            _FAKE_PIPELINE_NAME: mocker.Mock(),
+            "__default__": mocker.Mock(),
+        }
+        mocker.patch(
+            "kedro.framework.session.session.pipelines", return_value=mock_pipelines
+        )
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
         error = FakeException("You shall not pass!")

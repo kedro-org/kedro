@@ -636,7 +636,7 @@ def test_is_relative_path(path_string: str, expected: bool):
 
 
 def test_convert_paths_raises_error_on_relative_project_path():
-    path = Path("relative/path")
+    path = Path("relative") / "path"
 
     pattern = f"project_path must be an absolute path. Received: {path}"
     with pytest.raises(ValueError, match=re.escape(pattern)):

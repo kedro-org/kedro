@@ -260,7 +260,7 @@ def _create_project(template_path: str, cookiecutter_args: Dict[str, str]):
         from cookiecutter.main import cookiecutter  # for performance reasons
 
     try:
-        result_path = cookiecutter(template_path, **cookiecutter_args)
+        result_path = cookiecutter(template=template_path, **cookiecutter_args)
     except Exception as exc:
         raise KedroCliError(
             "Failed to generate project when running cookiecutter."

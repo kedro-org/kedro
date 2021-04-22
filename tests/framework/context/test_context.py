@@ -316,6 +316,12 @@ class TestKedroContext:
         with pytest.warns(DeprecationWarning, match=pattern):
             dummy_context.CONF_ROOT = "test_conf"
 
+    @pytest.mark.parametrize("property_name", ["io", "pipeline", "pipelines"])
+    def test_deprecate_properties_on_context(self, property_name, dummy_context):
+        pattern = f"Accessing {property_name} via the context will be deprecated in Kedro 0.18.0."
+        with pytest.warns(DeprecationWarning, match=pattern):
+            assert getattr(dummy_context, property_name)
+
     def test_attributes(self, tmp_path, dummy_context):
         project_metadata = pyproject_toml_payload["tool"]["kedro"]
         assert dummy_context.package_name == project_metadata["package_name"]
@@ -630,7 +636,7 @@ def test_is_relative_path(path_string: str, expected: bool):
 
 
 def test_convert_paths_raises_error_on_relative_project_path():
-    path = Path("relative/path")
+    path = Path("relative") / "path"
 
     pattern = f"project_path must be an absolute path. Received: {path}"
     with pytest.raises(ValueError, match=re.escape(pattern)):

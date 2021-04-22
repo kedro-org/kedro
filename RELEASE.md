@@ -9,13 +9,14 @@
 * Add namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/quantumblacklabs/kedro/issues/399).
 * `pandas.ExcelDataSet` now uses `openpyxl` engine instead of `xlrd`.
 * `KedroSession.run` now raises `ValueError` rather than `KedroContextError` when the pipeline contains no nodes. The same `ValueError` is raised when there are no matching tags.
+* `KedroSession.run` now raises `ValueError` rather than `KedroContextError` when the pipeline name doesn't exist in the pipeline registry.
 * Removed deprecated functions `load_context` and `get_project_context`.
 
 ## Migration guide from Kedro 0.17.* to 0.18.*
 * Optional: You can now remove all `params:` prefix when supplying values to `parameters` argument in a `pipeline()` call.
 * If you're using `pandas.ExcelDataSet`, make sure you have `openpyxl` installed in your environment. Note that this is automatically pulled if you specify `kedro[pandas.ExcelDataSet]==0.18.0` in your `requirements.in`. You can uninstall `xlrd` if you were only using it for this dataset.
 
-# Upcoming Release 0.17.3
+# Release 0.17.3
 
 ## Major features and improvements
 * Kedro plugins can now override built-in CLI commands.
@@ -35,19 +36,22 @@ print(pipelines["__default__"])  # pipeline loading is only triggered here
 * Duplicate commands will no longer appear twice in the Kedro CLI help screen.
 * CLI commands from sources with the same name will show under one list in the help screen.
 * The setup of a Kedro project, including adding src to path and configuring settings, is now handled via the `bootstrap_project` method.
-* Invoked `configure_project` if a `package_name` is supplied to `KedroSession.create`. This is added for backward-compatibility purpose to support workflow that creates a `Session` manually. It will only be removed in `0.18.0`.
-* Stopped swallowing up all `ModuleNotFoundError` if `register_pipelines` not found, which will display a more helpful error when a dependency is missing, e.g. [Issue #722](https://github.com/quantumblacklabs/kedro/issues/722).
+* `configure_project` is invoked if a `package_name` is supplied to `KedroSession.create`. This is added for backward-compatibility purpose to support a workflow that creates `Session` manually. It will be removed in `0.18.0`.
+* Stopped swallowing up all `ModuleNotFoundError` if `register_pipelines` not found, so that a more helpful error message will appear when a dependency is missing, e.g. [Issue #722](https://github.com/quantumblacklabs/kedro/issues/722).
 * When `kedro new` is invoked using a configuration yaml file, `output_dir` is no longer a required key; by default the current working directory will be used.
 * When `kedro new` is invoked using a configuration yaml file, the appropriate `prompts.yml` file is now used for validating the provided configuration. Previously, validation was always performed against the kedro project template `prompts.yml` file.
 * When a relative path to a starter template is provided, `kedro new` now generates user prompts to obtain configuration rather than supplying empty configuration.
-* Fixed error when using starter on Windows with Python 3.7 (Issue [#722](https://github.com/quantumblacklabs/kedro/issues/722))
-* Fixed decoding error of config file that contains accented characters by opening config files for reading in UTF-8.
+* Fixed error when using starters on Windows with Python 3.7 (Issue [#722](https://github.com/quantumblacklabs/kedro/issues/722)).
+* Fixed decoding error of config files that contain accented characters by opening them for reading in UTF-8.
 * Fixed an issue where `after_dataset_loaded` run would finish before a dataset is actually loaded when using `--async` flag.
-* Added `DeprecationWarning` to `kedro.versioning.journal.Journal` as it will be removed in release 0.18.0.
 
-## Minor breaking changes to the API
+## Upcoming deprecations for Kedro 0.18.0
 
-## Thanks for supporting contributions
+* `kedro.versioning.journal.Journal` will be removed.
+* The following properties on `kedro.framework.context.KedroContext` will be removed:
+  * `io` in favour of `KedroContext.catalog`
+  * `pipeline` (equivalent to `pipelines["__default__"]`)
+  * `pipelines` in favour of `kedro.framework.project.pipelines`
 
 # Release 0.17.2
 

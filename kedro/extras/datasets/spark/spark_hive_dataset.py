@@ -227,10 +227,7 @@ class SparkHiveDataSet(AbstractDataSet):
         data.createOrReplaceTempView("tmp")
         columns = ", ".join(self._table_columns)
 
-        partition = ""
-        if self._partition is not None:
-            partition = f"partition ({self._partition.strip()})"
-
+        partition =  f"partition ({self._partition})" if self._partition else ""
         self._get_spark().sql(
             f"""
             insert into {self._database}.{self._table} {partition}
@@ -267,7 +264,7 @@ class SparkHiveDataSet(AbstractDataSet):
 
     def _validate_save(self, data: DataFrame):
         hive_dtypes = set(self._load().dtypes)
-        if len(self._partitions) > 0:
+        if self._partitions:
             hive_dtypes = {(k, v) for k, v in hive_dtypes if k not in self._partitions}
         data_dtypes = set(data.dtypes)
 

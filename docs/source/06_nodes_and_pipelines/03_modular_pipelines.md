@@ -265,17 +265,10 @@ Consider this example:
 
 ```python
 cook_pipeline = Pipeline(
-    [
-        node(defrost, "frozen_meat", "meat"),
-        node(grill, "meat", "grilled_meat"),
-    ]
+    [node(defrost, "frozen_meat", "meat"), node(grill, "meat", "grilled_meat"),]
 )
 
-lunch_pipeline = Pipeline(
-    [
-        node(eat, "food", None),
-    ]
-)
+lunch_pipeline = Pipeline([node(eat, "food", None),])
 ```
 
 A simple `cook_pipeline + lunch_pipeline` doesn't work, because the `grilled_meat` output in the `cook_pipeline` needs to be mapped to the `food` input in the `lunch_pipeline`. This can be done in any of the following three (equivalent) ways:

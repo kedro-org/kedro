@@ -175,7 +175,6 @@ class KedroSession:
         Returns:
             A new ``KedroSession`` instance.
         """
-        # pylint: disable=protected-access
 
         # this is to make sure that for workflows that manually create session
         # without going through one of our known entrypoints, e.g. some plugins like kedro-airflow,

@@ -1,6 +1,6 @@
 # Deployment with Argo Workflows
 
-This page explains how to convert your Kedro pipeline to use [Argo Workflows](https://github.com/argoproj/argo), an open source container-native workflow engine for orchestrating parallel jobs on [Kubernetes](https://kubernetes.io/).
+This page explains how to convert your Kedro pipeline to use [Argo Workflows](https://github.com/argoproj/argo-workflows), an open source container-native workflow engine for orchestrating parallel jobs on [Kubernetes](https://kubernetes.io/).
 
 ## Why would you use Argo Workflows?
 

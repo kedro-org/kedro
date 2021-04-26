@@ -1,8 +1,15 @@
-# Upcoming Release 0.17.3
+# Release 0.17.3
 
 ## Major features and improvements
 * Kedro plugins can now override built-in CLI commands.
 * Added a `before_command_run` hook for plugins to add extra behaviour before Kedro CLI commands run.
+* `pipelines` from `pipeline_registry.py` and `register_pipeline` hooks are now loaded lazily when they are first accessed, not on startup:
+
+```python
+from kedro.framework.project import pipelines
+
+print(pipelines["__default__"])  # pipeline loading is only triggered here
+```
 
 ## Bug fixes and other changes
 * `TemplatedConfigLoader` now correctly inserts default values when no globals are supplied.
@@ -11,11 +18,22 @@
 * Duplicate commands will no longer appear twice in the Kedro CLI help screen.
 * CLI commands from sources with the same name will show under one list in the help screen.
 * The setup of a Kedro project, including adding src to path and configuring settings, is now handled via the `bootstrap_project` method.
-* Invoked `configure_project` if a `package_name` is supplied to `KedroSession.create`. This is added for backward-compatibility purpose to support workflow that creates a `Session` manually. It will only be removed in `0.18.0`.
+* `configure_project` is invoked if a `package_name` is supplied to `KedroSession.create`. This is added for backward-compatibility purpose to support a workflow that creates `Session` manually. It will be removed in `0.18.0`.
+* Stopped swallowing up all `ModuleNotFoundError` if `register_pipelines` not found, so that a more helpful error message will appear when a dependency is missing, e.g. [Issue #722](https://github.com/quantumblacklabs/kedro/issues/722).
+* When `kedro new` is invoked using a configuration yaml file, `output_dir` is no longer a required key; by default the current working directory will be used.
+* When `kedro new` is invoked using a configuration yaml file, the appropriate `prompts.yml` file is now used for validating the provided configuration. Previously, validation was always performed against the kedro project template `prompts.yml` file.
+* When a relative path to a starter template is provided, `kedro new` now generates user prompts to obtain configuration rather than supplying empty configuration.
+* Fixed error when using starters on Windows with Python 3.7 (Issue [#722](https://github.com/quantumblacklabs/kedro/issues/722)).
+* Fixed decoding error of config files that contain accented characters by opening them for reading in UTF-8.
+* Fixed an issue where `after_dataset_loaded` run would finish before a dataset is actually loaded when using `--async` flag.
 
-## Minor breaking changes to the API
+## Upcoming deprecations for Kedro 0.18.0
 
-## Thanks for supporting contributions
+* `kedro.versioning.journal.Journal` will be removed.
+* The following properties on `kedro.framework.context.KedroContext` will be removed:
+  * `io` in favour of `KedroContext.catalog`
+  * `pipeline` (equivalent to `pipelines["__default__"]`)
+  * `pipelines` in favour of `kedro.framework.project.pipelines`
 
 # Release 0.17.2
 

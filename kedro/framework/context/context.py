@@ -276,38 +276,36 @@ class KedroContext:
         """
         return self._package_name
 
-    @property
+    @property  # type: ignore
+    @_deprecate(version="0.18.0")
     def pipeline(self) -> Pipeline:
         """Read-only property for an instance of Pipeline.
 
         Returns:
-            Defined pipeline.
+            Default pipeline.
+        Raises:
+            KedroContextError: If the `__default__` pipeline is not
+                defined by `register_pipelines`.
 
         """
-        return self._get_pipeline()
+        try:
+            return pipelines["__default__"]
+        except (TypeError, KeyError) as exc:  # pragma: no cover
+            raise KedroContextError(
+                "Failed to find the pipeline named '__default__'. "
+                "It needs to be generated and returned "
+                "by the 'register_pipelines' function."
+            ) from exc
 
-    @property
+    @property  # type: ignore
+    @_deprecate(version="0.18.0")
     def pipelines(self) -> Dict[str, Pipeline]:
         """Read-only property for an instance of Pipeline.
 
         Returns:
             A dictionary of defined pipelines.
         """
-        return pipelines
-
-    def _get_pipeline(  # pylint: disable=no-self-use
-        self, name: str = None
-    ) -> Pipeline:
-        name = name or "__default__"
-
-        try:
-            return pipelines[name]
-        except (TypeError, KeyError) as exc:
-            raise KedroContextError(
-                f"Failed to find the pipeline named '{name}'. "
-                f"It needs to be generated and returned "
-                f"by the 'register_pipelines' function."
-            ) from exc
+        return dict(pipelines)
 
     @property
     def project_path(self) -> Path:
@@ -403,7 +401,8 @@ class KedroContext:
         )
         return catalog
 
-    @property
+    @property  # type: ignore
+    @_deprecate(version="0.18.0")
     def io(self) -> DataCatalog:
         """Read-only alias property referring to Kedro's ``DataCatalog`` for this
         context.
@@ -595,7 +594,17 @@ class KedroContext:
         # Report project name
         logging.info("** Kedro project %s", self.project_path.name)
 
-        pipeline = self._get_pipeline(name=pipeline_name)
+        name = pipeline_name or "__default__"
+
+        try:
+            pipeline = pipelines[name]
+        except (TypeError, KeyError) as exc:
+            raise KedroContextError(
+                f"Failed to find the pipeline named '{name}'. "
+                f"It needs to be generated and returned "
+                f"by the 'register_pipelines' function."
+            ) from exc
+
         filtered_pipeline = self._filter_pipeline(
             pipeline=pipeline,
             tags=tags,

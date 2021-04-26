@@ -30,7 +30,6 @@
 For more information about these specifications, please visit
 [Pluggy's documentation](https://pluggy.readthedocs.io/en/stable/#specs)
 """
-# pylint: disable=too-many-arguments
 from typing import List
 
 from kedro.framework.startup import ProjectMetadata

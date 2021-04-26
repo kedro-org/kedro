@@ -35,11 +35,7 @@ import uuid
 from typing import Any, Dict, List
 
 from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql.functions import ( 
-    coalesce,
-    col,
-    lit,
-)
+from pyspark.sql.functions import coalesce, col, lit
 
 from kedro.io.core import AbstractDataSet, DataSetError
 

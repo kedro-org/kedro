@@ -342,12 +342,7 @@ In the example above `catalog.yml` contains references to credentials keys `dev_
 ```python
 CSVDataSet(
     filepath="s3://test_bucket/data/02_intermediate/company/motorbikes.csv",
-    load_args=dict(
-        sep=",",
-        skiprows=5,
-        skipfooter=1,
-        na_values=["#NA", "NA"],
-    ),
+    load_args=dict(sep=",", skiprows=5, skipfooter=1, na_values=["#NA", "NA"],),
     credentials=dict(key="token", secret="key"),
 )
 ```

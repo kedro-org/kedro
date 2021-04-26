@@ -64,7 +64,7 @@ git remote add origin https://github.com/<your-repo>
 
 ### Submitting your changes to GitHub
 
-As you work on a project, you will periodically save your changes. In a team, we suggest that you each develop your code on a branch and create pull requests to submit it to the `develop` or `master` branches:
+As you work on a project, you will periodically save your changes. In a team, we suggest that you each develop your code on a branch and create pull requests to submit it to the `develop` or `main` branches:
 
 ```bash
 # create a new feature branch called 'feature/project-template'
@@ -77,13 +77,13 @@ git commit -m 'Create project template'
 git push origin feature/project-template
 ```
 
-It isn't necessary to branch, but if everyone in a team works on the same branch (e.g. `master`), you may have to resolve merge conflicts more often. Here is an example of working directly on `master`:
+It isn't necessary to branch, but if everyone in a team works on the same branch (e.g. `main`), you may have to resolve merge conflicts more often. Here is an example of working directly on `main`:
 
 ```bash
 # stage all files
 git add .
 # commit changes to git with an instructive message
 git commit -m 'Create project template'
-# push changes to remote master
-git push origin master
+# push changes to remote main
+git push origin main
 ```

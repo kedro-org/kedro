@@ -4,6 +4,7 @@ bandit>=1.6.2, <2.0
 behave==1.2.6
 biopython~=1.73
 black==v19.10.b0
+blacken-docs==1.9.2
 compress-pickle[lz4]~=1.2.0
 dask[complete]~=2.6
 flake8~=3.5

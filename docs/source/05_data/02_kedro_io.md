@@ -149,9 +149,7 @@ version = Version(
 )
 
 test_data_set = CSVDataSet(
-    filepath="data/01_raw/test.csv",
-    save_args={"index": False},
-    version=version,
+    filepath="data/01_raw/test.csv", save_args={"index": False}, version=version,
 )
 io = DataCatalog({"test_data_set": test_data_set})
 
@@ -174,9 +172,7 @@ version = Version(
 )
 
 test_data_set = CSVDataSet(
-    filepath="data/01_raw/test.csv",
-    save_args={"index": False},
-    version=version,
+    filepath="data/01_raw/test.csv", save_args={"index": False}, version=version,
 )
 io = DataCatalog({"test_data_set": test_data_set})
 
@@ -200,9 +196,7 @@ version = Version(
 )
 
 test_data_set = CSVDataSet(
-    filepath="data/01_raw/test.csv",
-    save_args={"index": False},
-    version=version,
+    filepath="data/01_raw/test.csv", save_args={"index": False}, version=version,
 )
 io = DataCatalog({"test_data_set": test_data_set})
 

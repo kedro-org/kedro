@@ -39,9 +39,7 @@ The plugin provides the following `entry_points` config in `setup.py`:
 
 ```python
 setup(
-    entry_points={
-        "kedro.project_commands": ["kedrojson = kedrojson.plugin:commands"],
-    }
+    entry_points={"kedro.project_commands": ["kedrojson = kedrojson.plugin:commands"],}
 )
 ```
 
@@ -94,9 +92,7 @@ We use the following command convention: `kedro <plugin-name> <command>`, with `
 You can develop hook implementations and have them automatically registered to the project context when the plugin is installed. To enable this for your custom plugin, simply add the following entry in your `setup.py`:
 
 ```python
-setup(
-    entry_points={"kedro.hooks": ["plugin_name = plugin_name.plugin:hooks"]},
-)
+setup(entry_points={"kedro.hooks": ["plugin_name = plugin_name.plugin:hooks"]},)
 ```
 
 where `plugin.py` is the module where you declare hook implementations:
@@ -124,9 +120,7 @@ hooks = MyHooks()
 You can also develop hook implementations to extend Kedro's CLI behaviour in your plugin. To find available CLI hooks, please visit [kedro.framework.cli.hooks](/kedro.framework.cli.hooks). To register CLI hooks developed in your plugin with Kedro, add the following entry in your project's `setup.py`:
 
 ```python
-setup(
-    entry_points={"kedro.cli_hooks": ["plugin_name = plugin_name.plugin:cli_hooks"]},
-)
+setup(entry_points={"kedro.cli_hooks": ["plugin_name = plugin_name.plugin:cli_hooks"]},)
 ```
 
 where `plugin.py` is the module where you declare hook implementations:

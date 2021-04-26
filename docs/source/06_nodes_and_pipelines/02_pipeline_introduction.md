@@ -70,8 +70,7 @@ You can also tag your pipeline by providing the `tags` argument, which will tag 
 
 ```python
 pipeline = Pipeline(
-    [node(..., name="node1"), node(..., name="node2")],
-    tags="pipeline_tag",
+    [node(..., name="node1"), node(..., name="node2")], tags="pipeline_tag",
 )
 ```
 

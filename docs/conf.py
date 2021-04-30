@@ -194,6 +194,7 @@ linkcheck_ignore = [
     "https://zenodo.org/record/4336685",
     "https://zenodo.org/badge/latestdoi/182067506",
     "https://eternallybored.org/misc/wget/",
+    "https://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table.from_pandas",
 ]
 
 # retry before render a link broken (fix for "too many requests")

@@ -4,6 +4,7 @@
 # ignore all local configuration
 conf/local/**
 !conf/local/.gitkeep
+.telemetry
 
 # ignore potentially sensitive credentials files
 conf/**/*credentials*

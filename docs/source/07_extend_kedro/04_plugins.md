@@ -39,9 +39,7 @@ The plugin provides the following `entry_points` config in `setup.py`:
 
 ```python
 setup(
-    entry_points={
-        "kedro.project_commands": ["kedrojson = kedrojson.plugin:commands"],
-    }
+    entry_points={"kedro.project_commands": ["kedrojson = kedrojson.plugin:commands"],}
 )
 ```
 
@@ -94,9 +92,7 @@ We use the following command convention: `kedro <plugin-name> <command>`, with `
 You can develop hook implementations and have them automatically registered to the project context when the plugin is installed. To enable this for your custom plugin, simply add the following entry in your `setup.py`:
 
 ```python
-setup(
-    entry_points={"kedro.hooks": ["plugin_name = plugin_name.plugin:hooks"]},
-)
+setup(entry_points={"kedro.hooks": ["plugin_name = plugin_name.plugin:hooks"]},)
 ```
 
 where `plugin.py` is the module where you declare hook implementations:
@@ -124,9 +120,7 @@ hooks = MyHooks()
 You can also develop hook implementations to extend Kedro's CLI behaviour in your plugin. To find available CLI hooks, please visit [kedro.framework.cli.hooks](/kedro.framework.cli.hooks). To register CLI hooks developed in your plugin with Kedro, add the following entry in your project's `setup.py`:
 
 ```python
-setup(
-    entry_points={"kedro.cli_hooks": ["plugin_name = plugin_name.plugin:cli_hooks"]},
-)
+setup(entry_points={"kedro.cli_hooks": ["plugin_name = plugin_name.plugin:cli_hooks"]},)
 ```
 
 where `plugin.py` is the module where you declare hook implementations:
@@ -180,4 +174,4 @@ When you are ready to submit your code:
 - [Kedro-Accelerator](https://github.com/deepyaman/kedro-accelerator), by [Deepyaman Datta](https://github.com/deepyaman), speeds up pipelines by parallelizing I/O in the background
 - [kedro-dataframe-dropin](https://github.com/mzjp2/kedro-dataframe-dropin), by [Zain Patel](https://github.com/mzjp2), lets you swap out pandas datasets for modin or RAPIDs equivalents for specialised use to speed up your workflows (e.g on GPUs)
 - [kedro-kubeflow](https://github.com/getindata/kedro-kubeflow), by [Mateusz Pytel](https://github.com/em-pe) and [Mariusz Strzelecki](https://github.com/szczeles), lets you run and schedule pipelines on Kubernetes clusters using [Kubeflow Pipelines](https://www.kubeflow.org/docs/pipelines/overview/pipelines-overview/)
-- [kedro-mlflow](https://github.com/Galileo-Galilei/kedro-mlflow), by [Yolan Honoré-Rougé](https://github.com/galileo-galilei), [Kajetan Maurycy Olszewski](https://github.com/kaemo), and [Takieddine Kadiri](https://github.com/takikadiri) facilitates [Mlflow](https://www.mlflow.org/) integration inside Kedro projects while enforcing [Kedro's principles](https://kedro.readthedocs.io/en/stable/12_faq/01_faq.html#what-are-the-primary-advantages-of-kedro). Its main features are modular configuration, automatic parameters tracking, datasets versioning, Kedro pipelines packaging and serving and automatic synchronization between training and inference pipelines for high reproducibility of machine learning experiments and ease of deployment. A tutorial is provided in the [kedro-mlflow-tutorial repo](https://github.com/Galileo-Galilei/kedro-mlflow-tutorial).
+- [kedro-mlflow](https://github.com/Galileo-Galilei/kedro-mlflow), by [Yolan Honoré-Rougé](https://github.com/galileo-galilei), and [Takieddine Kadiri](https://github.com/takikadiri) facilitates [Mlflow](https://www.mlflow.org/) integration inside Kedro projects while enforcing [Kedro's principles](https://kedro.readthedocs.io/en/stable/12_faq/01_faq.html#what-are-the-primary-advantages-of-kedro). Its main features are modular configuration, automatic parameters tracking, datasets versioning, Kedro pipelines packaging and serving and automatic synchronization between training and inference pipelines for high reproducibility of machine learning experiments and ease of deployment. A tutorial is provided in the [kedro-mlflow-tutorial repo](https://github.com/Galileo-Galilei/kedro-mlflow-tutorial).

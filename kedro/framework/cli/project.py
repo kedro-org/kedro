@@ -144,6 +144,7 @@ def install(metadata: ProjectMetadata, compile_flag):
     # we cannot use `context.project_path` as in other commands since
     # context instantiation might break due to missing dependencies
     # we attempt to install here
+    # pylint: disable=consider-using-with
     source_path = metadata.source_dir
     environment_yml = source_path / "environment.yml"
     requirements_in = source_path / "requirements.in"

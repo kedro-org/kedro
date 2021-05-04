@@ -50,7 +50,7 @@ pytest~=6.1.2 # Testing framework for Python code
 wheel==0.32.2 # The reference implementation of the Python wheel packaging standard
 ```
 
-> Note: If your project has `conda` dependencies, you can create a `src/environment.yml` file and list them there.
+> *Note:* If your project has `conda` dependencies, you can create a `src/environment.yml` file and list them there.
 
 ### Add and remove project-specific dependencies
 

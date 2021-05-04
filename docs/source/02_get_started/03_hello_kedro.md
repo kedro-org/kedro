@@ -4,7 +4,7 @@ It is time to introduce the most basic elements of Kedro. We have split a small 
 
 You can copy the example as one chunk of code from the bottom of this page.
 
-> Note: We do not create a Kedro project in this first example, but illustrate the concepts within a single `.py` file.
+> *Note:* We do not create a Kedro project in this first example, but illustrate the concepts within a single `.py` file.
 
 ## Node
 

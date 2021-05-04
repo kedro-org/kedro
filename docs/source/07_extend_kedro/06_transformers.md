@@ -1,6 +1,6 @@
 # Dataset transformers (deprecated)
 
-> _Note_: The transformer API will be deprecated in 0.18.0. We recommend using the `before_dataset_loaded`/`after_dataset_loaded` and `before_dataset_saved`/`after_dataset_saved` [Hooks](./02_hooks.md) to customise the dataset `load` and `save` methods where appropriate.
+> *Note:* The transformer API will be deprecated in 0.18.0. We recommend using the `before_dataset_loaded`/`after_dataset_loaded` and `before_dataset_saved`/`after_dataset_saved` [Hooks](./02_hooks.md) to customise the dataset `load` and `save` methods where appropriate.
 
 As we describe in the [documentation about how Kedro works with data](../05_data/01_data_catalog.md#transforming-datasets), Kedro transformers intercept the load and save operations on Kedro `DataSet`s.
 
@@ -14,7 +14,7 @@ Use cases for Kedro transformers include:
 
 To illustrate the use case for operation performance tracking, this section demonstrates how to build a transformer to track memory consumption. In fact, Kedro provides a built-in memory profiler, but this example shows how to build your own, using [memory-profiler](https://github.com/pythonprofilers/memory_profiler).
 
-> Note: To work with this example, you need to `pip install memory_profiler` before you start.
+> *Note:* To work with this example, you need to `pip install memory_profiler` before you start.
 
 
 A custom transformer should:
@@ -41,7 +41,7 @@ def _normalise_mem_usage(mem_usage):
 
 
 class ProfileMemoryTransformer(AbstractTransformer):
-    """ A transformer that logs the maximum memory consumption during load and save calls """
+    """A transformer that logs the maximum memory consumption during load and save calls"""
 
     @property
     def _logger(self):

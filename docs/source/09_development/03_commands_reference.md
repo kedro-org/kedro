@@ -85,7 +85,7 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
 
 The following are Kedro commands that apply globally and can be run from any directory location.
 
-> Note: you only need to use one (e.g. specify `kedro -V` ***OR*** `kedro --version`).
+> *Note:* you only need to use one (e.g. specify `kedro -V` ***OR*** `kedro --version`).
 
 ### Get help on Kedro commands
 
@@ -140,7 +140,7 @@ kedro docs
 
 ## Project-specific Kedro commands
 
-> _Note:_ All project related CLI commands should be run from the project’s root directory.
+> *Note:* All project related CLI commands should be run from the project’s root directory.
 
 Kedro's command line interface (CLI) allows you to associate a set of commands and dependencies with a target, which you can then execute from inside the project directory.
 
@@ -176,7 +176,7 @@ Call the `run()` method of the `KedroSession` defined in `kedro.framework.sessio
 kedro run
 ```
 
-> _Note:_ `KedroContext` can be extended in `run.py` (`src/project-name/run.py`). In order to use the extended `KedroContext` you need to set `context_path` in [`pyproject.toml`](../12_faq/02_architecture_overview) configuration file.
+> *Note:* `KedroContext` can be extended in `run.py` (`src/project-name/run.py`). In order to use the extended `KedroContext` you need to set `context_path` in [`pyproject.toml`](../12_faq/02_architecture_overview) configuration file.
 
 #### Modifying a `kedro run`
 
@@ -219,9 +219,9 @@ You can also combine these options together, so the following command runs all t
 kedro run --from-nodes split --to-nodes predict,report
 ```
 
-This functionality is extended to the `kedro run --config config.yml` command, which allows you to [specify run commands in a configuration file](../04_kedro_project_setup/02_configuration.md#configuring-kedro-run-arguments).
+This functionality is extended to the `kedro run --config config.yml` command, which allows you to [specify run commands in a configuration file](../04_kedro_project_setup/02_configuration.md#configure-kedro-run-arguments).
 
-> _Note:_ A parameterised run is best used for dynamic parameters, i.e. running the same pipeline with different inputs, for static parameters that do not change we recommend following the [Kedro project setup methodology](../04_kedro_project_setup/02_configuration.md#parameters).
+> *Note:* A parameterised run is best used for dynamic parameters, i.e. running the same pipeline with different inputs, for static parameters that do not change we recommend following the [Kedro project setup methodology](../04_kedro_project_setup/02_configuration.md#parameters).
 
 ### Deploy the project
 

@@ -94,7 +94,7 @@ class TransformerHooks:
         catalog.add_transformer(ProfileTimeTransformer())
 ```
 
-> Note: The name of a module that contains Hooks implementation is arbitrary and is not restricted to `hooks.py`.
+> *Note:* The name of a module that contains Hooks implementation is arbitrary and is not restricted to `hooks.py`.
 
 We recommend that you group related Hook implementations under a namespace, preferably a class, within a `hooks.py` file in your project.
 
@@ -115,7 +115,7 @@ HOOKS = (ProjectHooks(), TransformerHooks())
 
 Kedro also has auto-discovery enabled by default. This means that any installed plugins that declare a Hooks entry-point will be registered. To learn more about how to enable this for your custom plugin, see our [plugin development guide](04_plugins.md#hooks).
 
->Note: Auto-discovered Hooks will run *first*, followed by the ones specified in `settings.py`.
+> *Note:* Auto-discovered Hooks will run *first*, followed by the ones specified in `settings.py`.
 
 #### Disable auto-registered plugins' Hooks
 

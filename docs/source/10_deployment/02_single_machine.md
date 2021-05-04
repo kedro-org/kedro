@@ -32,7 +32,7 @@ Pull the image from Docker hub onto your production server:
 docker pull <DockerID>/<image-name>
 ```
 
-> _Note:_ Repositories on Docker Hub are set to public visibility by default. You can change your project to private on the Docker Hub website.
+> *Note:* Repositories on Docker Hub are set to public visibility by default. You can change your project to private on the Docker Hub website.
 
 The procedure for using other container registries, like AWS ECR or GitLab Container Registry, will be almost identical to the steps described above. However, authentication will be different for each solution.
 

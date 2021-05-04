@@ -20,7 +20,7 @@ Both section have the following prerequisites:
 
 In this section, we show how to create a sample Iris project with PySpark, connect it to the Databricks cluster using [Databricks Connect](https://docs.databricks.com/dev-tools/databricks-connect.html), and trigger a run from the local machine.
 
-> Note: Additional requirement in this section is to have [Java 8 installed](https://www.java.com/en/download/help/download_options.html) on your local machine (as Databricks Connect does not support Java 11).
+> *Note:* Additional requirement in this section is to have [Java 8 installed](https://www.java.com/en/download/help/download_options.html) on your local machine (as Databricks Connect does not support Java 11).
 
 ### 1. Project setup
 
@@ -92,7 +92,7 @@ pip install "databricks-connect==7.1"
 
 You can [create the personal access token](https://docs.databricks.com/dev-tools/api/latest/authentication.html#generate-a-personal-access-token) needed by Databricks Connect by following the official documentation.
 
-> Note: Databricks Community Edition does not allow to provision personal tokens, therefore won't work for this.
+> *Note:* Databricks Community Edition does not allow to provision personal tokens, therefore won't work for this.
 
 You also need to retrieve the [Databricks workspace URL](https://docs.databricks.com/workspace/workspace-details.html#workspace-instance-names-urls-and-ids) (the domain you log into when accessing your deployment), and the [Cluster ID](https://docs.databricks.com/workspace/workspace-details.html#cluster-url-and-id), which you connect to.
 
@@ -146,7 +146,7 @@ dbutils.fs.ls("dbfs:/iris-databricks/data/01_raw/")
 
 Then type `exit()` to terminate the Python session.
 
-Finally, modify the project catalog so that the `example_iris_data` dataset points to a new DBFS location instead of local. You can use Kedro [configuration environments](https://kedro.readthedocs.io/en/stable/04_kedro_project_setup/02_configuration.html#loading) fir this.
+Finally, modify the project catalog so that the `example_iris_data` dataset points to a new DBFS location instead of local. You can use Kedro [configuration environments](../04_kedro_project_setup/02_configuration.md#additional-configuration-environments) for this.
 
 Copy the `catalog.yml` from `base` into `dbfs` environment by running the CLI command:
 
@@ -224,7 +224,7 @@ As a result you should get:
 
 To synchronise the project between the local development environment and Databricks we will use a private GitHub repository that you will create in the next step. For authentication we will need a GitHub personal access token, so go ahead and [create such token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) in your GitHub developer settings.
 
-> Note: Make sure that `repo` scopes are enabled for your token.
+> *Note:* Make sure that `repo` scopes are enabled for your token.
 
 ### 3. Create a GitHub repository
 
@@ -287,11 +287,11 @@ Then in the `Environment Variables` section add your `GITHUB_USER` and `GITHUB_T
 
 ![](../meta/images/databricks_cluster_env_vars.png)
 
-> Note: For security purposes, we strongly recommend against hard-coding any secrets into your notebooks.
+> *Note:* For security purposes, we strongly recommend against hard-coding any secrets into your notebooks.
 
 Then press `Confirm` button.
 
-> Note: Your cluster will be restarted to apply the changes, this will take a few minutes.
+> *Note:* Your cluster will be restarted to apply the changes, this will take a few minutes.
 
 ### 6. Run your Kedro project from the Databricks notebook
 

@@ -31,7 +31,7 @@ import re
 import sys
 from pathlib import Path, PurePath, PurePosixPath, PureWindowsPath
 from time import sleep
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import pandas as pd
 import pytest
@@ -166,8 +166,10 @@ class RegistrationHooks:
         )
 
     @hook_impl
-    def register_config_loader(self, conf_paths) -> ConfigLoader:
-        return ConfigLoader(conf_paths)
+    def register_config_loader(
+        self, conf_root: str, env: Optional[str], extra_params: Optional[Dict[str, Any]]
+    ) -> ConfigLoader:
+        return ConfigLoader(conf_root, env, extra_params)
 
 
 class MockSettings(_ProjectSettings):

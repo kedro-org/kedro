@@ -31,7 +31,7 @@ import re
 import subprocess
 import textwrap
 from pathlib import Path
-from typing import Iterable
+from typing import Any, Dict, Optional
 
 import pytest
 import toml
@@ -74,8 +74,10 @@ def mock_context_class(mocker):
 
 class ConfigLoaderHooks:
     @hook_impl
-    def register_config_loader(self, conf_paths: Iterable[str]) -> ConfigLoader:
-        return ConfigLoader(conf_paths)
+    def register_config_loader(
+        self, conf_root: str, env: Optional[str], extra_params: Optional[Dict[str, Any]]
+    ) -> ConfigLoader:
+        return ConfigLoader(conf_root, env, extra_params)
 
 
 def _mock_imported_settings_paths(mocker, mock_settings):

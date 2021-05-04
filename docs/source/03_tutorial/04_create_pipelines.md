@@ -99,7 +99,7 @@ def create_pipeline(**kwargs):
 ```
 </details>
 
->Note: `companies` and `shuttles` refer to the datasets defined in `conf/base/catalog.yml`. These are inputs to the `preprocess_companies` and `preprocess_shuttles` functions. The named node inputs (and outputs) are used by the pipeline to determine interdependencies between the nodes, and hence, their execution order.
+> *Note:* `companies` and `shuttles` refer to the datasets defined in `conf/base/catalog.yml`. These are inputs to the `preprocess_companies` and `preprocess_shuttles` functions. The named node inputs (and outputs) are used by the pipeline to determine interdependencies between the nodes, and hence, their execution order.
 
 Be sure to import `node`, and your functions by adding them to the beginning of `pipeline.py`:
 

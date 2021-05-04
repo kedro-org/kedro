@@ -278,7 +278,7 @@ dev_minio:
   cleitn_kwargs:
     endpoint_url : 'http://localhost:9000'
 ```
-> Note: The easiest way to setup MinIO is to run a Docker image. After the following command, you can access to Minio server with http://localhost:9000 and create a bucket and add files as if it is on S3.
+> *Note:* The easiest way to setup MinIO is to run a Docker image. After the following command, you can access to Minio server with http://localhost:9000 and create a bucket and add files as if it is on S3.
 
 `docker run -p 9000:9000 -e "MINIO_ACCESS_KEY=token" -e "MINIO_SECRET_KEY=key" minio/minio server /data`
 
@@ -315,7 +315,7 @@ scooters:
 
 ## Adding parameters
 
-You can [configure parameters](../04_kedro_project_setup/02_configuration.md#loading-parameters) for your project and [reference them](../04_kedro_project_setup/02_configuration.md#using-parameters) in your nodes. Do this using the `add_feed_dict()` method ([API documentation](/kedro.io.DataCatalog)). You can use this method to add any other entry / metadata you wish on the `DataCatalog`.
+You can [configure parameters](../04_kedro_project_setup/02_configuration.md#load-parameters) for your project and [reference them](../04_kedro_project_setup/02_configuration.md#use-parameters) in your nodes. Do this using the `add_feed_dict()` method ([API documentation](/kedro.io.DataCatalog)). You can use this method to add any other entry / metadata you wish on the `DataCatalog`.
 
 
 ## Feeding in credentials
@@ -381,7 +381,7 @@ bikes:
 
 The syntax `&csv` names the following block `csv` and the syntax `<<: *csv` inserts the contents of the block named `csv`. Locally declared keys entirely override inserted ones as seen in `bikes`.
 
-> *Note*: It's important that the name of the template entry starts with a `_` so Kedro knows not to try and instantiate it as a dataset.
+> *Note:* It's important that the name of the template entry starts with a `_` so Kedro knows not to try and instantiate it as a dataset.
 
 You can also nest reuseable YAML syntax:
 

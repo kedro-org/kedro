@@ -77,7 +77,7 @@ kedro jupyter notebook
 
 This starts a Jupyter server and opens a window in your default browser.
 
-> Note: If you want Jupyter to listen to a different port number, then run `kedro jupyter notebook --port <port>`
+> *Note:* If you want Jupyter to listen to a different port number, then run `kedro jupyter notebook --port <port>`
 
 Navigate to the `notebooks` folder of your Kedro project and create a new notebook.
 
@@ -129,7 +129,7 @@ parameters["example_test_data_ratio"]
 # returns the value of 'example_test_data_ratio' key from 'conf/base/parameters.yml'
 ```
 
-> Note: You need to reload Kedro variables by calling `%reload_kedro` and re-run the code snippet above if you change the contents of `parameters.yml`.
+> *Note:* You need to reload Kedro variables by calling `%reload_kedro` and re-run the code snippet above if you change the contents of `parameters.yml`.
 
 ### Load/Save `DataCatalog` in Jupyter
 
@@ -204,7 +204,7 @@ Add customised global variables to `.ipython/profile_default/startup/00-kedro-in
 ```python
 @register_line_magic
 def reload_kedro(project_path, line=None):
-    """"Line magic which reloads all Kedro default variables."""
+    """Line magic which reloads all Kedro default variables."""
     # ...
     global parameters
     try:
@@ -369,7 +369,7 @@ To reload these variables at any point (e.g., if you update `catalog.yml`), use 
 
 ![reload kedro line magic graphic](../meta/images/jupyter_notebook_loading_context.png)
 
-Note that if you want to pass an argument to `reload_kedro` line magic function, you should call like a normal Python function (e.g `reload_kedro(extra_params=extra_params)` rather than using `%reload_kedro` in a notebook cell (e.g. `%reload_kedro(extra_params=extra_params)` wouldn't work).
+Note that if you want to pass an argument to `reload_kedro` line magic function, you should call it like a normal Python function (e.g `reload_kedro(extra_params=extra_params)` rather than using `%reload_kedro` in a notebook cell (e.g. `%reload_kedro(extra_params=extra_params)` wouldn't work).
 
 If the `KEDRO_ENV` environment variable is specified, the startup script loads that environment, otherwise it defaults to `local`. Instructions for setting the environment variable can be found in the [Kedro configuration documentation](../04_kedro_project_setup/02_configuration.md#additional-configuration-environments).
 

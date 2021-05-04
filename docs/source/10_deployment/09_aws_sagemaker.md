@@ -5,7 +5,7 @@
 
 This tutorial explains how to integrate a Kedro project with [Amazon SageMaker](https://aws.amazon.com/sagemaker/) in order to train a machine learning model. It shows how to build machine learning pipelines in Kedro and while taking advantage of the power of SageMaker for potentially compute-intensive machine learning tasks.
 
-> Note: The Kedro project will still run locally (or on one of many supported workflow engines like [Argo](./04_argo.md), [Prefect](./05_prefect.md), [Kubeflow](./06_kubeflow.md), [AWS Batch](./07_aws_batch.md) and others), but the model training step will be offloaded onto SageMaker.
+> *Note:* The Kedro project will still run locally (or on one of many supported workflow engines like [Argo](./04_argo.md), [Prefect](./05_prefect.md), [Kubeflow](./06_kubeflow.md), [AWS Batch](./07_aws_batch.md) and others), but the model training step will be offloaded onto SageMaker.
 
 ## Why would you use Amazon SageMaker?
 
@@ -41,7 +41,7 @@ cd <project_root>
 kedro install --build-reqs
 ```
 
-> Note: All CLI commands in the following sections should be executed from the project root directory.
+> *Note:* All CLI commands in the following sections should be executed from the project root directory.
 
 ### Create SageMaker execution role
 
@@ -66,9 +66,9 @@ Your bucket name should contain the word `sagemaker`, this way the role that we 
 
 ### Create the configuration environment
 
-Configuration in Kedro is logically separated into [configuration environments](https://kedro.readthedocs.io/en/stable/04_kedro_project_setup/02_configuration.html#additional-configuration-environments) which are loaded in specific order where the project is run. To separate SageMaker-specific configuration from the default one, let's create a new configuration environment. Go ahead and create a `conf/sagemaker` folder and then create the following files in it.
+Configuration in Kedro is logically separated into [configuration environments](../04_kedro_project_setup/02_configuration.md#additional-configuration-environments) which are loaded in specific order where the project is run. To separate SageMaker-specific configuration from the default one, let's create a new configuration environment. Go ahead and create a `conf/sagemaker` folder and then create the following files in it.
 
-> *Note:* `${key}` in the YAML snippets below is a special syntax which allows to [template the project configuration](https://kedro.readthedocs.io/en/stable/04_kedro_project_setup/02_configuration.html#templating-configuration). You don't need to replace those values, just paste them as-is.
+> *Note:* `${key}` in the YAML snippets below is a special syntax which allows to [template the project configuration](../04_kedro_project_setup/02_configuration.md#template-configuration). You don't need to replace those values, just paste them as-is.
 
 * `catalog.yml` - defines the datasets that need to be saved into S3 (rather than kept in memory):
 

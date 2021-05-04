@@ -1,19 +1,17 @@
 # Configuration
 
-
-This section contains detailed information about configuration, for which the relevant API documentation can be found in [kedro.config.ConfigLoader](/kedro.config.ConfigLoader)
+This section contains detailed information about configuration, for which the relevant API documentation can be found in [kedro.config.ConfigLoader](/kedro.config.ConfigLoader).
 
 > *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
 
-## Local and base configuration
+## Configuration root
 
 We recommend that you keep all configuration files in the `conf` directory of a Kedro project. However, if you prefer, you may point Kedro to any other directory and change the configuration paths by setting the `CONF_ROOT` variable in `src/<project-package>/settings.py` as follows:
 ```python
-# ...
 CONF_ROOT = "new_conf"
 ```
 
-## Loading
+## Local and base configuration environments
 
 Kedro-specific configuration (e.g., `DataCatalog` configuration for IO) is loaded using the `ConfigLoader` class:
 
@@ -27,44 +25,43 @@ conf_catalog = conf_loader.get("catalog*", "catalog*/**")
 
 This will recursively scan for configuration files firstly in `conf/base/` and then in `conf/local/` directory according to the following rules:
 
-* ANY of the following is true:
-  * filename starts with `catalog` OR
+* *Either* of the following is true:
+  * filename starts with `catalog`
   * file is located in a sub-directory whose name is prefixed with `catalog`
-* AND file extension is one of the following: `yaml`, `yml`, `json`, `ini`, `pickle`, `xml` or `properties`
+* *And* file extension is one of the following: `yaml`, `yml`, `json`, `ini`, `pickle`, `xml` or `properties`
 
 Configuration information from files stored in `base` or `local` that match these rules is merged at runtime and returned in the form of a config dictionary:
 
-* If any 2 configuration files located inside the same environment path (`conf/base/` or `conf/local/` in this example) contain the same top-level key, `load_config` will raise a `ValueError` indicating that the duplicates are not allowed.
+* If any two configuration files located inside the same environment path (`conf/base/` or `conf/local/` in this example) contain the same top-level key, `load_config` will raise a `ValueError` indicating that the duplicates are not allowed.
 
-> *Note:* Any top-level keys that start with `_` character are considered hidden (or reserved) and therefore are ignored right after the config load. Those keys will neither trigger a key duplication error mentioned above, nor will they appear in the resulting configuration dictionary. However, you may still use such keys for various purposes. For example, as [YAML anchors and aliases](https://support.atlassian.com/bitbucket-cloud/docs/yaml-anchors/).
+* If two configuration files have duplicate top-level keys but are in different environment paths (one in `conf/base/`, another in `conf/local/`, for example) then the last loaded path (`conf/local/` in this case) takes precedence and overrides that key value. `ConfigLoader.get` will not raise any errors, however a `DEBUG` level log message will be emitted with information on the overridden keys.
 
-* If 2 configuration files have duplicate top-level keys, but are placed into different environment paths (one in `conf/base/`, another in `conf/local/`, for example) then the last loaded path (`conf/local/` in this case) takes precedence and overrides that key value. `ConfigLoader.get(<pattern>, ...)` will not raise any errors, however a `DEBUG` level log message will be emitted with the information on the over-ridden keys.
-* If the same environment path is passed multiple times, a `UserWarning` will be emitted to draw attention to the duplicate loading attempt, and any subsequent loading after the first one will be skipped.
+> *Note:* Any top-level keys that start with `_` are considered hidden (or reserved) and are ignored after the config is loaded. Those keys will neither trigger a key duplication error nor appear in the resulting configuration dictionary. However, you may still use such keys, for example, as [YAML anchors and aliases](https://support.atlassian.com/bitbucket-cloud/docs/yaml-anchors/).
 
 
 ## Additional configuration environments
 
-In addition to the 2 built-in configuration environments, it is possible to create your own. Your project loads `conf/base/` as the bottom-level configuration environment but allows you to overwrite it with any other environments that you create. You are be able to create environments like `conf/server/`, `conf/test/`, etc. Any additional configuration environments can be created inside `conf` folder and loaded by running the following command:
+In addition to the two built-in local and base configuration environments, it is possible to create your own. Your project loads `conf/base/` as the bottom-level configuration environment but allows you to overwrite it with any other environments that you create such as `conf/server/` or `conf/test/`. Additional configuration environments are used by running the following command:
 
 ```bash
 kedro run --env=test
 ```
 
-If no `env` option is specified, this will default to using `local` environment to overwrite `conf/base`.
+If no `env` option is specified, this will default to using the `local` environment to overwrite `conf/base`.
 
-> *Note*: If, for some reason, your project does not have any other environments apart from `base`, i.e. no `local` environment to default to, you will need to customise `KedroContext` to take `env="base"` in the constructor and then specify your custom `KedroContext` subclass in `src/<python-package>/settings.py` under `CONTEXT_CLASS` key.
+> *Note:* If, for some reason, your project does not have any other environments apart from `base`, i.e. no `local` environment to default to, you will need to customise `KedroContext` to take `env="base"` in the constructor and then specify your custom `KedroContext` subclass in `src/<python-package>/settings.py` under the `CONTEXT_CLASS` key.
 
-If you set the `KEDRO_ENV` environment variable to the name of your environment, Kedro will load that environment for your `kedro run`, `kedro ipython`, `kedro jupyter notebook` and `kedro jupyter lab` sessions.
+If you set the `KEDRO_ENV` environment variable to the name of your environment, Kedro will load that environment for your `kedro run`, `kedro ipython`, `kedro jupyter notebook` and `kedro jupyter lab` sessions:
 
 ```bash
 export KEDRO_ENV=test
 ```
 
-> *Note*: If you specify both the `KEDRO_ENV` environment variable and provide the `--env` argument to a CLI command, the CLI argument takes precedence.
+> *Note:* If you specify both the `KEDRO_ENV` environment variable and provide the `--env` argument to a CLI command, the CLI argument takes precedence.
 
-## Templating configuration
+## Template configuration
 
-Kedro also provides an extension [TemplatedConfigLoader](/kedro.config.TemplatedConfigLoader) class that allows to template values in your configuration files. `TemplatedConfigLoader` is available in `kedro.config`, to apply templating to your project, you will need to update the `register_config_loader` hook implementation in your `src/<project-name>/hooks.py`:
+Kedro also provides an extension [TemplatedConfigLoader](/kedro.config.TemplatedConfigLoader) class that allows you to template values in configuration files. To apply templating in your project, you will need to update the `register_config_loader` hook implementation in your `src/<project-name>/hooks.py`:
 
 ```python
 from kedro.config import TemplatedConfigLoader  # new import
@@ -117,7 +114,7 @@ The contents of the dictionary resulting from `globals_pattern` get merged with 
 }
 ```
 
-Now the templating can be applied to the configs. Here is an example of a templated `conf/base/catalog.yml`:
+Now the templating can be applied to the configuration. Here is an example of a templated `conf/base/catalog.yml`:
 
 ```yaml
 raw_boat_data:
@@ -130,11 +127,11 @@ raw_car_data:
     filepath: "s3://${bucket_name}/data/${key_prefix}/${folders.raw}/${filename|cars.csv}"  # default to 'cars.csv' if the 'filename' key is not found in the global dict
 ```
 
-> Note: `TemplatedConfigLoader` uses `jmespath` package in the background to extract elements from global dictionary. For more information about JMESPath syntax please see: https://github.com/jmespath/jmespath.py.
+> *Note:* Under the hood, `TemplatedConfigLoader` uses [`JMESPath` syntax](https://github.com/jmespath/jmespath.py) to extract elements from the globals dictionary.
 
 ### Jinja2 support
 
-From version 0.17.0 `TemplateConfigLoader` also supports [Jinja2](https://palletsprojects.com/p/jinja/) template engine alongside the original template syntax. Below is the example of a `catalog.yml` file, which uses both features:
+From version 0.17.0 `TemplateConfigLoader` also supports [Jinja2](https://palletsprojects.com/p/jinja/) template engine alongside the original template syntax. Below is an example of a `catalog.yml` file that uses both features:
 
 ```
 {% for speed in ['fast', 'slow'] %}
@@ -153,8 +150,8 @@ From version 0.17.0 `TemplateConfigLoader` also supports [Jinja2](https://pallet
 When parsing this configuration file, `TemplateConfigLoader` will:
 
 1. Read the `catalog.yml` and compile it using Jinja2
-2. Use YAML parser to parse the compiled config into a Python dictionary
-3. Expand `${bucket_name}` in `filepath` using the `globals_*` arguments for the `TemplateConfigLoader` instance as in the previous examples
+2. Use a YAML parser to parse the compiled config into a Python dictionary
+3. Expand `${bucket_name}` in `filepath` using the `globals_pattern` and `globals_dict` arguments for the `TemplateConfigLoader` instance as in the previous examples
 
 The output Python dictionary will look as follows:
 
@@ -175,12 +172,12 @@ The output Python dictionary will look as follows:
 }
 ```
 
-> Note: Although Jinja2 is a very powerful and extremely flexible template engine, which comes with a wide range of features, we do _not_ recommend to use it to template your configuration unless absolutely necessary. The flexibility of dynamic configuration comes at a cost of significantly reduced readability and much higher maintenance overhead. We believe that, for the majority of analytics projects, dynamically compiled configuration does more harm than good.
+> *Note:* Although Jinja2 is a very powerful and extremely flexible template engine, which comes with a wide range of features, we do _not_ recommend using it to template your configuration unless absolutely necessary. The flexibility of dynamic configuration comes at a cost of significantly reduced readability and much higher maintenance overhead. We believe that, for the majority of analytics projects, dynamically compiled configuration does more harm than good.
 
 
 ## Parameters
 
-### Loading parameters
+### Load parameters
 
 Parameters project configuration can be loaded with the help of the `ConfigLoader` class:
 
@@ -192,9 +189,9 @@ conf_loader = ConfigLoader(conf_paths)
 parameters = conf_loader.get("parameters*", "parameters*/**")
 ```
 
-The code snippet above will load all configuration files from `conf/base` and `conf/local`, which either have the filename starting with `parameters` or are located inside a folder with name starting with `parameters`.
+This will load configuration files from `conf/base` and `conf/local` that have a filename starting with `parameters` or are located inside a folder with name starting with `parameters`.
 
-> *Note:* Configuration path `conf/local` takes precedence in the example above since it's loaded last, therefore any overlapping top-level keys from `conf/base` will be overwritten by the ones from `conf/local`.
+> *Note:* Since it is loaded after `conf/base`, the configuration path `conf/local` takes precedence in the example above. Hence any overlapping top-level keys from `conf/base` will be overwritten by the ones from `conf/local`.
 
 Calling `conf_loader.get()` in the example above will throw a `MissingConfigException` error if there are no configuration files matching the given patterns in any of the specified paths. If this is a valid workflow for your application, you can handle it as follows:
 
@@ -212,31 +209,28 @@ except MissingConfigException:
 
 > *Note:* `kedro.framework.context.KedroContext` class uses the approach above to load project parameters.
 
-Parameters can then be used on their own or fed in as function inputs, as described in [this section](#using-parameters) below.
+Parameters can then be used on their own or fed in as function inputs, as described [below](#use-parameters).
 
-### Specifying parameters at runtime
+### Specify parameters at runtime
 
-Kedro also allows you to specify runtime parameters for `kedro run` CLI command. To do that, you need to add the `--params` command line option and specify a comma-separated list of key-value pairs that will be added to [KedroContext](/kedro.framework.context.KedroContext) parameters and made available to pipeline nodes. Each key-value pair is split on the first colon. Here is an example of triggering Kedro run with extra parameters specified:
+Kedro also allows you to specify runtime parameters for the `kedro run` CLI command. To do so, you need to use the `--params` command line option and specify a comma-separated list of key-value pairs that will be added to [KedroContext](/kedro.framework.context.KedroContext) parameters and made available to pipeline nodes. Each key-value pair is split on the first colon. For example:
 
 ```bash
 kedro run --params param_key1:value1,param_key2:2.0  # this will add {"param_key1": "value1", "param_key2": 2} to parameters dictionary
 ```
 
-> Note: Parameter keys are _always_ treated as strings. Parameter values are converted to a float or an integer number if the corresponding conversion succeeds, otherwise they are also treated as string.
+Values provided in the CLI take precedence and overwrite parameters specified in configuration files. Parameter keys are _always_ treated as strings. Parameter values are converted to a float or an integer number if the corresponding conversion succeeds; otherwise they are also treated as string.
 
-> Note: If, for example, `param_key1` parameter has already been defined in the project configuration, the value provided in the CLI option will take precedence and will overwrite the one from the configuration.
+If any extra parameter key and/or value contains spaces, you should wrap the whole option contents in quotes:
+> `kedro run --params "key1:value with spaces,key2:value"`
 
-> Tip: Since key-value pairs are split on the first colon, values can contain colons, but the keys cannot. This is a valid CLI command:
+> *Note:* Since key-value pairs are split on the first colon, values can contain colons, but keys cannot. This is a valid CLI command:
 >
 > `kedro run --params endpoint_url:https://endpoint.example.com`
 
-> Tip: If any extra parameter key and/or value contains spaces, wrap the whole option contents into quotes:
->
-> `kedro run --params "key1:value with spaces,key2:value"`
+### Use parameters
 
-### Using parameters
-
-Say you have a set of parameters you're playing around with for your model. You can declare these in one place, for instance `conf/base/parameters.yml`, so that you isolate your changes to one central location.
+Say you have a set of parameters you're playing around with that specify modelling hyperparameters. You can declare these in one place, for instance `conf/base/parameters.yml`, so that you isolate your changes in one central location.
 
 ```yaml
 step_size: 1
@@ -299,9 +293,9 @@ node(
 )
 ```
 
-In both cases, what happened under the hood is that the parameters had been added to the Data Catalog through the method `add_feed_dict()` (Relevant API documentation: [DataCatalog](/kedro.io.DataCatalog)), where they live as `MemoryDataSet`s. This method is also what the `KedroContext` class uses when instantiating the catalog.
+In both cases, under the hood parameters are added to the Data Catalog through the method `add_feed_dict()` in [`DataCatalog`](/kedro.io.DataCatalog), where they live as `MemoryDataSet`s. This method is also what the `KedroContext` class uses when instantiating the catalog.
 
-> *Note*: You can use `add_feed_dict()` to inject any other entries into your `DataCatalog` as per your use case.
+> *Note:* You can use `add_feed_dict()` to inject any other entries into your `DataCatalog` as per your use case.
 
 
 
@@ -319,9 +313,9 @@ conf_loader = ConfigLoader(conf_paths)
 credentials = conf_loader.get("credentials*", "credentials*/**")
 ```
 
-This will load all configuration files from `conf/base` and `conf/local`, which either have the filename starting with `credentials` or are located inside a folder with name starting with `credentials`.
+This will load configuration files from `conf/base` and `conf/local` that have filename starting with `credentials` or are located inside a folder with name starting with `credentials`.
 
-> *Note:* Configuration path `conf/local` takes precedence in the example above since it's loaded last, therefore any overlapping top-level keys from `conf/base` will be overwritten by the ones from `conf/local`.
+> *Note:* Since it is loaded after `conf/base`, the configuration path `conf/local` takes precedence in the example above. Hence any overlapping top-level keys from `conf/base` will be overwritten by the ones from `conf/local`.
 
 Calling `conf_loader.get()` in the example above will throw a `MissingConfigException` error if there are no configuration files matching the given patterns in any of the specified paths. If this is a valid workflow for your application, you can handle it as follows:
 
@@ -339,15 +333,15 @@ except MissingConfigException:
 
 > *Note:* `kedro.framework.context.KedroContext` class uses the approach above to load project credentials.
 
-Credentials configuration can then be used on its own or fed into the `DataCatalog` as described in [this section](../05_data/01_data_catalog.md#feeding-in-credentials).
+Credentials configuration can then be used on its own or [fed into the `DataCatalog`](../05_data/01_data_catalog.md#feeding-in-credentials).
 
 ### AWS credentials
 
 When working with AWS credentials on datasets, you are not required to store AWS credentials in the project configuration files. Instead, you can specify them using environment variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and, optionally, `AWS_SESSION_TOKEN`. Please refer to the [official documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html) for more details.
 
-## Configuring `kedro run` arguments
+## Configure `kedro run` arguments
 
-An extensive list of CLI options for a `kedro run` is available in the [Kedro CLI documentation](../09_development/03_commands_reference.md#run-the-project). However, instead of specifying all the command line options to a `kedro run` via the CLI, you can specify a config file that contains the arguments, say `config.yml` and run:
+An extensive list of CLI options for a `kedro run` is available in the [Kedro CLI documentation](../09_development/03_commands_reference.md#run-the-project). However, instead of specifying all the command line options in a `kedro run` via the CLI, you can specify a config file that contains the arguments, say `config.yml` and run:
 
 ```console
 $ kedro run --config config.yml
@@ -369,4 +363,4 @@ run:
   env: env1
 ```
 
-> *Note*: If you pass both a configuration file and an option that clashes with one inside the configuration file, the provided option will override the configuration file.
+> *Note:* If you provide both a configuration file and a CLI option that clashes with the configuration file, the CLI option will take precedence.

@@ -120,7 +120,7 @@ $ kedro run --runner=src.<python_package>.runner.DryRunner
 
 ## Load and save asynchronously
 
->*Note*: `ThreadRunner` doesn't support asynchronous load-input or save-output operations.
+> *Note:* `ThreadRunner` doesn't support asynchronous load-input or save-output operations.
 
 When processing a node, both `SequentialRunner` and `ParallelRunner` perform the following steps in order:
 

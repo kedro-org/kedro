@@ -32,6 +32,7 @@ Data Sets
     kedro.extras.datasets.pandas.SQLTableDataSet
     kedro.extras.datasets.pickle.PickleDataSet
     kedro.extras.datasets.pillow.ImageDataSet
+    kedro.extras.datasets.plotly.PlotlyDataSet
     kedro.extras.datasets.spark.SparkDataSet
     kedro.extras.datasets.spark.SparkHiveDataSet
     kedro.extras.datasets.spark.SparkJDBCDataSet

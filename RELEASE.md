@@ -1,3 +1,20 @@
+# Upcoming release 0.17.4
+
+## Major features and improvements
+* Added the following new datasets:
+
+| Type                        | Description                                          | Location                          |
+| --------------------------- | ---------------------------------------------------- | --------------------------------- |
+| `plotly.PlotlyDataSet` | Works with plotly graph object Figures (saves as json file) | `kedro.extras.datasets.plotly` |
+
+## Bug fixes and other changes
+
+## Minor breaking changes to the API
+
+## Upcoming deprecations for Kedro 0.18.0
+
+## Thanks for supporting contributions
+
 # Release 0.17.3
 
 ## Major features and improvements

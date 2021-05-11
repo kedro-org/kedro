@@ -5,27 +5,36 @@ kedro.pipeline
 
 .. automodule:: kedro.pipeline
 
-   .. rubric:: Classes
+.. rubric:: Functions
 
-   .. autosummary::
-       :toctree:
-       :template: autosummary/class.rst
+.. autosummary::
+   :toctree:
+   :template: autosummary/base.rst
 
-       kedro.pipeline.Pipeline
-       kedro.pipeline.node.Node
+   kedro.pipeline.node
+   kedro.pipeline.modular_pipeline.pipeline
 
-   .. rubric:: Functions
+.. rubric:: Classes
 
-   .. autosummary::
-       :toctree:
-       :template: autosummary/base.rst
+.. autosummary::
+   :toctree:
+   :template: autosummary/class.rst
 
-       kedro.pipeline.node
+   kedro.pipeline.Pipeline
+   kedro.pipeline.node.Node
 
-   .. rubric:: Decorators
+.. rubric:: Modules
 
-   .. autosummary::
-       :toctree:
-       :template: autosummary/base.rst
+.. autosummary::
+   :toctree:
+   :recursive:
 
-       kedro.pipeline.decorators.log_time
+   kedro.pipeline.decorators
+
+.. rubric:: Exceptions
+
+.. autosummary::
+   :toctree:
+   :template: autosummary/class.rst
+
+   kedro.pipeline.modular_pipeline.ModularPipelineError

@@ -169,8 +169,9 @@ class KedroSession:
             save_on_close: Whether or not to save the session when it's closed.
             env: Environment for the KedroContext.
             extra_params: Optional dictionary containing extra project parameters
-            for underlying KedroContext. If specified, will update (and therefore take
-            precedence over) the parameters retrieved from the project configuration.
+                for underlying KedroContext. If specified, will update (and therefore
+                take precedence over) the parameters retrieved from the project
+                configuration.
 
         Returns:
             A new ``KedroSession`` instance.

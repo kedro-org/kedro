@@ -60,7 +60,7 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Get Started
+   :caption: Get started
 
    02_get_started/01_prerequisites
    02_get_started/02_install
@@ -82,7 +82,7 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Kedro Project Setup
+   :caption: Kedro project setup
 
    04_kedro_project_setup/01_dependencies
    04_kedro_project_setup/02_configuration
@@ -98,7 +98,7 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Nodes and Pipelines
+   :caption: Nodes and pipelines
 
    06_nodes_and_pipelines/01_nodes
    06_nodes_and_pipelines/02_pipeline_introduction
@@ -153,7 +153,7 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Tools Integration
+   :caption: Tools integration
 
    11_tools_integration/01_pyspark
    11_tools_integration/02_ipython
@@ -173,18 +173,14 @@ Welcome to Kedro's documentation!
    13_resources/02_glossary
 
 
-API Docs
-========
-
-.. toctree::
-   :maxdepth: 0
-   :caption: API Docs
-   :hidden:
-
-   kedro
+API documentation
+=================
 
 .. autosummary::
+   :toctree:
+   :caption: API documentation
    :template: autosummary/module.rst
+   :recursive:
 
    kedro
 
@@ -193,4 +189,3 @@ Indices and tables
 
 * :ref:`genindex`
 * :ref:`modindex`
-* :ref:`search`

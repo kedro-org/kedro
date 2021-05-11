@@ -5,7 +5,6 @@
 .. autoclass:: {{ objname }}
    :members:
    :undoc-members:
-   :show-inheritance:
    :inherited-members:
 
    {% block attributes %}
@@ -13,11 +12,9 @@
    .. rubric:: Attributes
 
    .. autosummary::
-      {% for item in all_attributes %}
-      {%- if not item.startswith('_') %}
-      {{ name }}.{{ item }}
-      {%- endif -%}
-      {%- endfor %}
+   {% for item in attributes %}
+      ~{{ name }}.{{ item }}
+   {%- endfor %}
    {% endif %}
    {% endblock %}
 
@@ -26,10 +23,10 @@
    .. rubric:: Methods
 
    .. autosummary::
-      {% for item in methods %}
+   {% for item in all_methods %}
       {%- if not item.startswith('_') %}
-      {{ name }}.{{ item }}
+      ~{{ name }}.{{ item }}
       {%- endif -%}
-      {%- endfor %}
-    {% endif %}
+   {%- endfor %}
+   {% endif %}
    {% endblock %}

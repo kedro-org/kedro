@@ -147,6 +147,7 @@ type_targets = {
     ),
     "py:exc": (
         "ValueError",
+        "BadConfigException",
         "MissingConfigException",
         "DataSetError",
         "ImportError",

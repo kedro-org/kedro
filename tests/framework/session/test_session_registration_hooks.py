@@ -27,7 +27,7 @@
 # limitations under the License.
 import logging
 import re
-from typing import Any, Dict, Iterable, Optional
+from typing import Any, Dict, Optional
 
 import pytest
 from dynaconf.validator import Validator
@@ -86,8 +86,10 @@ class RequiredRegistrationHooks:
     """Mandatory registration hooks"""
 
     @hook_impl
-    def register_config_loader(self, conf_paths: Iterable[str]) -> ConfigLoader:
-        return ConfigLoader(conf_paths)
+    def register_config_loader(
+        self, conf_root: str, env: Optional[str], extra_params: Optional[Dict[str, Any]]
+    ) -> ConfigLoader:
+        return ConfigLoader(conf_root, env, extra_params)
 
     @hook_impl
     def register_catalog(
@@ -168,11 +170,7 @@ class TestRegistrationHooks:
         assert len(relevant_records) == 1
 
         record = relevant_records[0]
-        expected_conf_paths = [
-            str(context.project_path / settings.CONF_ROOT / "base"),
-            str(context.project_path / settings.CONF_ROOT / "local"),
-        ]
-        assert record.conf_paths == expected_conf_paths
+        assert record.conf_root == str(context.project_path / settings.CONF_ROOT)
         assert record.env == context.env
         assert record.extra_params == {"params:key": "value"}
 

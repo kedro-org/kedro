@@ -30,8 +30,7 @@
 For more information about these specifications, please visit
 [Pluggy's documentation](https://pluggy.readthedocs.io/en/stable/#specs)
 """
-# pylint: disable=too-many-arguments
-from typing import Any, Dict, Iterable, Optional
+from typing import Any, Dict, Optional
 
 from kedro.config import ConfigLoader
 from kedro.io import DataCatalog
@@ -46,7 +45,7 @@ class DataCatalogSpecs:
     """Namespace that defines all specifications for a data catalog's lifecycle hooks."""
 
     @hook_spec
-    def after_catalog_created(
+    def after_catalog_created(  # pylint: disable=too-many-arguments
         self,
         catalog: DataCatalog,
         conf_catalog: Dict[str, Any],
@@ -78,7 +77,7 @@ class NodeSpecs:
     """Namespace that defines all specifications for a node's lifecycle hooks."""
 
     @hook_spec
-    def before_node_run(
+    def before_node_run(  # pylint: disable=too-many-arguments
         self,
         node: Node,
         catalog: DataCatalog,
@@ -134,7 +133,7 @@ class NodeSpecs:
         pass
 
     @hook_spec
-    def on_node_error(
+    def on_node_error(  # pylint: disable=too-many-arguments
         self,
         error: Exception,
         node: Node,
@@ -331,14 +330,14 @@ class RegistrationSpecs:
 
     @hook_spec(firstresult=True)
     def register_config_loader(
-        self, conf_paths: Iterable[str], env: str, extra_params: Dict[str, Any]
+        self, conf_root: str, env: Optional[str], extra_params: Optional[Dict[str, Any]]
     ) -> ConfigLoader:
         """Hook to be invoked to register a project's config loader.
 
         Args:
-            conf_paths: the paths to the conf directory to be supplied to the config loader
-            env: the environment with which the config loader will be instantiated
-            extra_params: the extra parameters passed to a Kedro run
+            conf_root: Path to use as root directory for loading configuration.
+            env: Environment that will take precedence over base.
+            extra_params: Extra parameters passed to a Kedro run.
 
         Returns:
             An instance of a ``ConfigLoader``.
@@ -346,7 +345,7 @@ class RegistrationSpecs:
         pass
 
     @hook_spec(firstresult=True)
-    def register_catalog(
+    def register_catalog(  # pylint: disable=too-many-arguments
         self,
         catalog: Optional[Dict[str, Dict[str, Any]]],
         credentials: Dict[str, Dict[str, Any]],

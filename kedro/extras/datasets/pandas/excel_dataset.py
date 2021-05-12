@@ -67,7 +67,7 @@ class ExcelDataSet(AbstractVersionedDataSet):
 
     """
 
-    DEFAULT_LOAD_ARGS = {"engine": "xlrd"}
+    DEFAULT_LOAD_ARGS = {"engine": "openpyxl"}
     DEFAULT_SAVE_ARGS = {"index": False}
 
     # pylint: disable=too-many-arguments

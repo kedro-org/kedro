@@ -118,7 +118,7 @@ This is the data engineering node function within `src/get_started/pipelines/dat
 | Node            | Description                                                    | Node Function Name       |
 +=================+================================================================+==========================+
 | Split data      | Splits the example                                             | :code:`split_data`       |
-|                 | `Iris dataset <https://archive.ics.uci.edu/ml/datasets/iris>`_ |                          |
+|                 | `Iris dataset <https://www.kaggle.com/uciml/iris>`             |                          |
 |                 | into train and test samples                                    |                          |
 +-----------------+----------------------------------------------------------------+--------------------------+
 ```

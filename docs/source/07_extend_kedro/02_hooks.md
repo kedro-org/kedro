@@ -253,7 +253,9 @@ Under the hood, we use [pytest's pluggy](https://pluggy.readthedocs.io/en/latest
 
 ## Hooks examples
 
-**Example 1:** Add data validation to the node's inputs and outputs using [Great Expectations](https://docs.greatexpectations.io/en/latest/).
+### Add data validation
+
+This example adds data validation to node inputs and outputs using [Great Expectations](https://docs.greatexpectations.io/en/latest/).
 
 * Install dependencies:
 
@@ -324,7 +326,9 @@ class DataValidationHooks:
 
 ![](../meta/images/data_validation.png)
 
-**Example 2:** Add observability to your pipeline with [statsd](https://statsd.readthedocs.io/en/v3.3/configure.html) and visualise it using [Grafana](https://grafana.com/).
+### Add observability to your pipeline
+
+This example adds observability to your pipeline using [statsd](https://statsd.readthedocs.io/en/v3.3/configure.html) and makes it possible to visualise dataset size and node execution time using [Grafana](https://grafana.com/).
 
 * Install dependencies:
 
@@ -372,7 +376,9 @@ class PipelineMonitoringHooks:
 
 ![](../meta/images/pipeline_observability.png)
 
-**Example 3:** Add metrics tracking to your model with [MLflow](https://mlflow.org/).
+### Add metrics tracking to your model
+
+This examples adds metrics tracking using [MLflow](https://mlflow.org/).
 
 * Install dependencies:
 
@@ -437,7 +443,7 @@ class ModelTrackingHooks:
 
 ![](../meta/images/mlflow.png)
 
-**Example 4:** Modify node inputs using `before_node_run` hook.
+### Modify node inputs using `before_node_run` hook
 
 If the `before_node_run` hook is implemented _and_ returns a dictionary, that dictionary is used to update the corresponding node inputs.
 

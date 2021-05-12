@@ -397,7 +397,7 @@ class KedroContext:
             feed_dict=feed_dict,
             save_version=save_version,
             load_versions=load_versions,
-            run_id=self.run_id,
+            run_id=self.run_id or save_version,
         )
         return catalog
 

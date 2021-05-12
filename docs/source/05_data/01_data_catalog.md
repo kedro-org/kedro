@@ -275,7 +275,7 @@ In `credentials.yml`, define the `key`, `secret` and the `endpoint_url` as follo
 dev_minio:
   key: token
   secret: key
-  cleitn_kwargs:
+  client_kwargs:
     endpoint_url : 'http://localhost:9000'
 ```
 > *Note:* The easiest way to setup MinIO is to run a Docker image. After the following command, you can access to Minio server with http://localhost:9000 and create a bucket and add files as if it is on S3.

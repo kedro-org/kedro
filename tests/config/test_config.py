@@ -28,13 +28,14 @@
 
 import configparser
 import json
+import re
 from pathlib import Path
 from typing import Dict
 
 import pytest
 import yaml
 
-from kedro.config import ConfigLoader, MissingConfigException
+from kedro.config import BadConfigException, ConfigLoader, MissingConfigException
 
 
 def _get_local_logging_config():
@@ -224,6 +225,15 @@ class TestConfigLoader:
         with pytest.raises(ValueError, match=pattern):
             conf.get("**/catalog*")
 
+    def test_bad_config_syntax(self, tmp_path):
+        conf_path = tmp_path / "base"
+        conf_path.mkdir(parents=True, exist_ok=True)
+        (conf_path / "catalog.yml").write_text("bad;config")
+
+        pattern = f"Couldn't load config file: {conf_path / 'catalog.yml'}"
+        with pytest.raises(BadConfigException, match=re.escape(pattern)):
+            ConfigLoader(str(tmp_path)).get("catalog*.yml")
+
     def test_lots_of_duplicates(self, tmp_path):
         """Check that the config key starting with `_` are ignored and also
         don't cause a config merge error"""
@@ -300,13 +310,17 @@ class TestConfigLoader:
         catalog = ConfigLoader(str(tmp_path), "dev").get(
             "catalog*", "catalog*/**", "user1/catalog2*", "../**/catalog2*"
         )
-        assert catalog == dict(
-            env="dev", common="common", dev_specific="wiz", user1_c2=True,
-        )
+        expected_catalog = {
+            "env": "dev",
+            "common": "common",
+            "dev_specific": "wiz",
+            "user1_c2": True,
+        }
+        assert catalog == expected_catalog
 
         log_messages = [record.getMessage() for record in caplog.records]
         expected_path = (tmp_path / "dev" / "user1" / "catalog2.yml").resolve()
-        expected_message = "Config file(s): {} already processed, skipping loading...".format(
-            str(expected_path)
+        expected_message = (
+            f"Config file(s): {expected_path} already processed, skipping loading..."
         )
         assert expected_message in log_messages

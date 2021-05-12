@@ -51,6 +51,14 @@ class MissingConfigException(Exception):
     pass
 
 
+class BadConfigException(Exception):
+    """Raised when a configuration file cannot be loaded, for instance
+    due to wrong syntax or poor formatting.
+    """
+
+    pass
+
+
 class ConfigLoader:
     """Recursively scan directories (config paths) contained in ``conf_root`` for
     configuration files with a ``yaml``, ``yml``, ``json``, ``ini``,
@@ -135,17 +143,28 @@ class ConfigLoader:
         Args:
             config_file: Path to a config file to process.
 
+        Raises:
+            BadConfigException: If configuration is poorly formatted and
+                cannot be loaded.
+
         Returns:
             Parsed configuration.
         """
         # for performance reasons
         import anyconfig  # pylint: disable=import-outside-toplevel
 
-        # Default to UTF-8, which is Python 3 default encoding, to decode the file
-        with open(config_file, encoding="utf8") as yml:
-            return {
-                k: v for k, v in anyconfig.load(yml).items() if not k.startswith("_")
-            }
+        try:
+            # Default to UTF-8, which is Python 3 default encoding, to decode the file
+            with open(config_file, encoding="utf8") as yml:
+                return {
+                    k: v
+                    for k, v in anyconfig.load(yml).items()
+                    if not k.startswith("_")
+                }
+        except AttributeError as exc:
+            raise BadConfigException(
+                f"Couldn't load config file: {config_file}"
+            ) from exc
 
     def _load_configs(self, config_filepaths: List[Path]) -> Dict[str, Any]:
         """Recursively load all configuration files, which satisfy
@@ -156,6 +175,8 @@ class ConfigLoader:
 
         Raises:
             ValueError: If 2 or more configuration files contain the same key(s).
+            BadConfigException: If configuration is poorly formatted and
+                cannot be loaded.
 
         Returns:
             Resulting configuration dictionary.
@@ -202,6 +223,8 @@ class ConfigLoader:
                 top-level key.
             MissingConfigException: If no configuration files exist within
                 a specified config path.
+            BadConfigException: If configuration is poorly formatted and
+                cannot be loaded.
 
         Returns:
             Dict[str, Any]:  A Python dictionary with the combined

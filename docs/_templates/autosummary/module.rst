@@ -4,19 +4,6 @@
 
 .. automodule:: {{ fullname }}
 
-   {% block public_modules %}
-   {% if public_modules %}
-   .. rubric:: Modules
-
-   .. autosummary::
-      :toctree:
-      :template: autosummary/module.rst
-   {% for item in public_modules %}
-      {{ item }}
-   {%- endfor %}
-   {% endif %}
-   {% endblock %}
-
    {% block functions %}
    {% if functions %}
    .. rubric:: Functions
@@ -24,9 +11,7 @@
    .. autosummary::
       :toctree:
    {% for item in functions %}
-      {%- if not item.startswith('_') %}
       {{ item }}
-      {% endif %}
    {%- endfor %}
    {% endif %}
    {% endblock %}
@@ -56,3 +41,16 @@
    {%- endfor %}
    {% endif %}
    {% endblock %}
+
+{% block modules %}
+{% if modules %}
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+{% for item in modules %}
+   {{ item }}
+{%- endfor %}
+{% endif %}
+{% endblock %}

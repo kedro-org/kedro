@@ -1,9 +1,20 @@
 kedro.runner
-=================
+============
 
 .. rubric:: Description
 
 .. automodule:: kedro.runner
+
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+
+      kedro.runner.run_node
+
+
+
+
 
    .. rubric:: Classes
 
@@ -12,6 +23,6 @@ kedro.runner
       :template: autosummary/class.rst
 
       kedro.runner.AbstractRunner
-      kedro.runner.SequentialRunner
       kedro.runner.ParallelRunner
+      kedro.runner.SequentialRunner
       kedro.runner.ThreadRunner

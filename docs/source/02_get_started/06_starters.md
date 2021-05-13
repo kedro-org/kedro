@@ -15,7 +15,10 @@ To create a Kedro project using a starter, apply the `--starter` flag to `kedro 
 ```bash
 kedro new --starter=<path-to-starter>
 ```
-> *Note:* `path-to-starter` could be a local directory or a VCS repository, as long as it is supported by [Cookiecutter](https://cookiecutter.readthedocs.io/en/1.7.2/usage.html).
+
+```eval_rst
+.. note::  ``path-to-starter`` could be a local directory or a VCS repository, as long as it is supported by `Cookiecutter <https://cookiecutter.readthedocs.io/en/1.7.2/usage.html>`_.
+```
 
 To create a project using the `PySpark` starter:
 

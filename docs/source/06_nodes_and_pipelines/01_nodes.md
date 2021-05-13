@@ -4,7 +4,9 @@ In this section we introduce the concept of a node, for which the relevant API d
 
 Nodes are the building blocks of pipelines and represent tasks. Pipelines are used to combine nodes to build workflows, which range from simple machine learning workflows to end-to-end production workflows.
 
-> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+```eval_rst
+.. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
+```
 
 You will first need to import libraries from Kedro and other standard tools to run the code snippets demonstrated below.
 
@@ -138,4 +140,6 @@ The output is as follows:
 Out[2]: {'sum': 5}
 ```
 
-> *Note:* It is also possible to call a node as a regular Python function: `adder_node(dict(a=2, b=3))`. This will call `adder_node.run(dict(a=2, b=3))` behind the scenes.
+```eval_rst
+.. note::  It is also possible to call a node as a regular Python function: ``adder_node(dict(a=2, b=3))``. This will call ``adder_node.run(dict(a=2, b=3))`` behind the scenes.
+```

@@ -1,7 +1,9 @@
 # How to deploy your Kedro pipeline with AWS Step Functions
 
 
-> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+```eval_rst
+.. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
+```
 
 This tutorial explains how to deploy a Kedro project with [AWS Step Functions](https://aws.amazon.com/step-functions/?step-functions.sort-by=item.additionalFields.postDateTime&step-functions.sort-order=desc) in order to run a Kedro pipeline in production on AWS [Serverless Computing](https://aws.amazon.com/serverless/) platform.
 
@@ -113,7 +115,9 @@ y_test:
 
 In December 2020, AWS [announced](https://aws.amazon.com/blogs/aws/new-for-aws-lambda-container-image-support/) that an AWS Lambda function can now use a container image up to **10 GB in size** as its deployment package, besides the original zip method. As it has a few [requirements](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html#images-reqs) for the container image to work properly, you will need to build your own custom Docker container image to both contain the Kedro pipeline and to comply with Lambda's requirements.
 
-> **Note**: All of the following steps should be done in the Kedro project's root directory.
+```eval_rst
+.. note::  All of the following steps should be done in the Kedro project's root directory.
+```
 
 * **Step 2.1**: Package the Kedro pipeline as a Python package so you can install it into the container later on:
 

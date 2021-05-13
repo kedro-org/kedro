@@ -310,8 +310,9 @@ $ ls -la data/01_raw/pokemon-images-and-types/images/images/*.png | wc -l
 
 ## Versioning
 
-> *Note:* Versioning doesn't work with PartitionedDataSet. You can't use both of them at the same time.
-
+```eval_rst
+.. note::  Versioning doesn't work with `PartitionedDataSet`. You can't use both of them at the same time.
+```
 To add [Versioning](../05_data/02_kedro_io.md#versioning) support to the new dataset we need to extend the
  [AbstractVersionedDataSet](/kedro.io.AbstractVersionedDataSet) to:
 
@@ -404,7 +405,9 @@ pikachu:
   versioned: true
 ```
 
-> *Note:* Using an HTTP(S)-based `filepath` with `versioned: true` is NOT supported.
+```eval_rst
+.. note::  Using an HTTP(S)-based ``filepath`` with ``versioned: true`` is NOT supported.
+```
 
 Create an initial version of the data by creating an example first version (e.g. `2020-02-22T00.00.00.000Z`):
 

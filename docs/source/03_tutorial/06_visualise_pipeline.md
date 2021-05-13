@@ -21,9 +21,7 @@ This command will run a server on http://127.0.0.1:4141 that will open up your v
 
 ![](../meta/images/pipeline_visualisation.png)
 
-> *Note:* If a visualisation panel opens up and a pipeline is not visible then please check that your [pipeline
-> definition](04_create_pipelines.md) is complete. All other errors can be logged as GitHub Issues on
-> the [Kedro-Viz repository](https://github.com/quantumblacklabs/kedro-viz).
+If a visualisation panel opens up and a pipeline is not visible then please check that your [pipeline definition](04_create_pipelines.md) is complete. All other errors can be logged as GitHub Issues on the [Kedro-Viz repository](https://github.com/quantumblacklabs/kedro-viz).
 
 ## Exit an open visualisation
 

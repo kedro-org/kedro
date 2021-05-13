@@ -1,6 +1,8 @@
 # Decorators (deprecated)
 
-> *Note:* The decorator API will be deprecated in 0.18.0. We recommend using [Hooks](./02_hooks.md#use-hooks-to-extend-a-node-s-behaviour) to extend a node's behaviour.
+```eval_rst
+.. warning::  The decorator API will be deprecated in 0.18.0. We recommend using Hooks to extend a node's behaviour.
+```
 
 A decorator is a computation that runs before and after execution. You can apply [Python decorators](https://wiki.python.org/moin/PythonDecorators) to Kedro nodes or an entire Kedro pipeline.
 

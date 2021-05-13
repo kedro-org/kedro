@@ -35,6 +35,20 @@ Please follow these simple rules. Where it's not obvious what the style should b
 * Don't put a period at the end unless it's a full sentence. Aim for consistency within a block of bullets if you have some bullets with full sentences and others without, you'll need to put a period at the end of each of them.
 * Don't use numbered bullets except for a sequence of activities or where you have to refer back to one of them in the text (or a diagram).
 
+### Notes
+We use callout sections formatted in `.rst` to bring attention to key points. For example:
+
+```eval_rst
+    .. note::  Do not pass "Go", do not collect £200.
+```
+
+* You will need to use [restructured text formatting](https://thomas-cokelaer.info/tutorials/sphinx/rest_syntax.html) within the box. Aim to keep the formatting of the callout text plain, although you can include bold, italic, code and links.
+* Keep the amount of text (and the number of callouts used) to a minimum.
+* Prefer to use `note`, `warning` and `important` only, rather than a number of different colours/types of callout.
+    * Use `note` for notable information
+    * Use `warning` to indicate a potential `gotcha`
+    * Use `important` when highlighting a key point that cannot be ignored
+
 ### Kedro lexicon
 
 * Name of our product: Kedro and Kedro-Viz (note capitalisation).

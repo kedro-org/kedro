@@ -20,7 +20,9 @@ You can use [DataSets](/kedro.extras.datasets) to interface with various differe
 
 To inject additional CLI commands intended to be reused across projects, please refer to our [plugins](./04_plugins.md) system. An example of one such command is the `kedro viz` command introduced by the official [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz) plugin. This command is intended to work on every Kedro project and therefore must be a standalone plugin. On the other hand, if you just want to customise built-in Kedro commands, such as `kedro run` for a specific project, please modify the `cli.py` file in your project instead.
 
-> *Note:* Please note that your plugin's implementation can take advantage of other extension mechanisms such as Hooks.
+```eval_rst
+.. note::  Your plugin's implementation can take advantage of other extension mechanisms such as Hooks.
+```
 
 ## Use Case 4: How to customise the initial boilerplate of your project
 

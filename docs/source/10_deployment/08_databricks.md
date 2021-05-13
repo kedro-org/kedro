@@ -1,7 +1,9 @@
 # Deployment to a Databricks cluster
 
 
-> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+```eval_rst
+.. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
+```
 
 This tutorial uses the [PySpark Iris Kedro Starter](https://github.com/quantumblacklabs/kedro-starters/tree/master/pyspark-iris) to illustrate how to bootstrap a Kedro project using Spark and deploy it to a [Databricks cluster on AWS](https://databricks.com/aws). It is split into 2 sections:
 
@@ -20,7 +22,9 @@ Both section have the following prerequisites:
 
 In this section, we show how to create a sample Iris project with PySpark, connect it to the Databricks cluster using [Databricks Connect](https://docs.databricks.com/dev-tools/databricks-connect.html), and trigger a run from the local machine.
 
-> *Note:* Additional requirement in this section is to have [Java 8 installed](https://www.java.com/en/download/help/download_options.html) on your local machine (as Databricks Connect does not support Java 11).
+```eval_rst
+.. note:: The additional requirement in this section is to have `Java 8 installed <https://www.java.com/en/download/help/download_options.html>`_ on your local machine (as Databricks Connect does not support Java 11).
+```
 
 ### 1. Project setup
 
@@ -92,7 +96,9 @@ pip install "databricks-connect==7.1"
 
 You can [create the personal access token](https://docs.databricks.com/dev-tools/api/latest/authentication.html#generate-a-personal-access-token) needed by Databricks Connect by following the official documentation.
 
-> *Note:* Databricks Community Edition does not allow to provision personal tokens, therefore won't work for this.
+```eval_rst
+.. note:: Databricks Community Edition does not allow you to provision personal tokens, therefore it won't work for this.
+```
 
 You also need to retrieve the [Databricks workspace URL](https://docs.databricks.com/workspace/workspace-details.html#workspace-instance-names-urls-and-ids) (the domain you log into when accessing your deployment), and the [Cluster ID](https://docs.databricks.com/workspace/workspace-details.html#cluster-url-and-id), which you connect to.
 
@@ -224,7 +230,9 @@ As a result you should get:
 
 To synchronise the project between the local development environment and Databricks we will use a private GitHub repository that you will create in the next step. For authentication we will need a GitHub personal access token, so go ahead and [create such token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) in your GitHub developer settings.
 
-> *Note:* Make sure that `repo` scopes are enabled for your token.
+```eval_rst
+.. note:: Make sure that ``repo`` scopes are enabled for your token.
+```
 
 ### 3. Create a GitHub repository
 
@@ -287,11 +295,12 @@ Then in the `Environment Variables` section add your `GITHUB_USER` and `GITHUB_T
 
 ![](../meta/images/databricks_cluster_env_vars.png)
 
-> *Note:* For security purposes, we strongly recommend against hard-coding any secrets into your notebooks.
 
-Then press `Confirm` button.
+```eval_rst
+.. note:: For security purposes, we strongly recommend against hard-coding any secrets into your notebooks.
+```
 
-> *Note:* Your cluster will be restarted to apply the changes, this will take a few minutes.
+Then press `Confirm` button. Your cluster will be restarted to apply the changes, this will take a few minutes.
 
 ### 6. Run your Kedro project from the Databricks notebook
 

@@ -1,7 +1,9 @@
 # Kedro plugins
 
 
-> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+```eval_rst
+.. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
+```
 
 Kedro plugins allow you to create new features for Kedro and inject additional commands into the CLI. Plugins are developed as separate Python packages that exist outside of any Kedro project.
 
@@ -112,8 +114,9 @@ class MyHooks:
 hooks = MyHooks()
 ```
 
-> *Note:* Here, `hooks` should be an instance of the class defining the hooks.
-
+```eval_rst
+.. note::  ``hooks`` should be an instance of the class defining the Hooks.
+```
 
 ## CLI Hooks
 
@@ -162,8 +165,12 @@ When you are ready to submit your code:
 
 ## Community-developed plugins
 
-> *Note:* See the full list of plugins using the GitHub tag [kedro-plugin](https://github.com/topics/kedro-plugin).
-> *Note:* Your plugin needs to have an [Apache 2.0 compatible license](https://www.apache.org/legal/resolved.html#category-a) to be considered for this list.
+See the full list of plugins using the GitHub tag [kedro-plugin](https://github.com/topics/kedro-plugin).
+
+
+```eval_rst
+.. note::  Your plugin needs to have an `Apache 2.0 compatible license <https://www.apache.org/legal/resolved.html#category-a>`_ to be considered for this list.
+```
 
 - [Kedro-Pandas-Profiling](https://github.com/BrickFrog/kedro-pandas-profiling), by [Justin Malloy](https://github.com/BrickFrog), uses [Pandas Profiling](https://github.com/pandas-profiling/pandas-profiling) to profile datasets in the Kedro catalog
 - [find-kedro](https://github.com/WaylonWalker/find-kedro), by [Waylon Walker](https://github.com/WaylonWalker), automatically constructs pipelines using `pytest`-style pattern matching

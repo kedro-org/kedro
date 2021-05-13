@@ -1,6 +1,9 @@
 # The Data Catalog
 
-> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+
+```eval_rst
+.. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
+```
 
 This section introduces `catalog.yml`, the project-shareable Data Catalog. The file is located in `conf/base` and is a registry of all data sources available for use by a project; it manages loading and saving of data.
 
@@ -52,7 +55,8 @@ Data Catalog accepts two different groups of `*_args` parameters that serve diff
 The `fs_args` is used to configure the interaction with a filesystem.
 All the top-level parameters of `fs_args` (except `open_args_load` and `open_args_save`) will be passed in an underlying filesystem class.
 
-Example 1: Provide the `project` value to the underlying filesystem class (`GCSFileSystem`) to interact with Google Cloud Storage (GCS).
+Example 1: Provide the `project` value to the underlying filesystem class (`GCSFileSystem`) to interact with Google Cloud Storage (GCS)
+
 ```yaml
 test_dataset:
   type: ...
@@ -62,7 +66,8 @@ test_dataset:
 
 The `open_args_load` and `open_args_save` parameters are passed to the filesystem's `open` method to configure how a dataset file (on a specific filesystem) is opened during a load or save operation, respectively.
 
-Example 2: Load data from a local binary file using `utf-8` encoding.
+Example 2: Load data from a local binary file using `utf-8` encoding
+
 ```yaml
 test_dataset:
   type: ...
@@ -74,7 +79,8 @@ test_dataset:
 
 `load_args` and `save_args` configure how a third-party library (e.g. `pandas` for `CSVDataSet`) loads/saves data from/to a file.
 
-Example 3: Save data to a CSV file without row names (index) using `utf-8` encoding.
+Example 3: Save data to a CSV file without row names (index) using `utf-8` encoding
+
 ```yaml
 test_dataset:
   type: pandas.CSVDataSet
@@ -91,6 +97,7 @@ The YAML API allows you to configure your datasets in a YAML configuration file,
 Here are some examples of data configuration in a `catalog.yml`:
 
 Example 1: Loads / saves a CSV file from / to a local file system
+
 ```yaml
 bikes:
   type: pandas.CSVDataSet
@@ -260,9 +267,10 @@ us_corn_yield_data:
     year: 2000
 ```
 
-> *Note:* When using [`pandas.SQLTableDataSet`](/kedro.extras.datasets.pandas.SQLTableDataSet) or [`pandas.SQLQueryDataSet`](/kedro.extras.datasets.pandas.SQLQueryDataSet) you must provide a database connection string. In the example above we pass it using `scooters_credentials` key from the credentials (see the details in [Feeding in credentials](#feeding-in-credentials) section below). `scooters_credentials` must have a top-level key `con` containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataSet` only).
+When using [`pandas.SQLTableDataSet`](/kedro.extras.datasets.pandas.SQLTableDataSet) or [`pandas.SQLQueryDataSet`](/kedro.extras.datasets.pandas.SQLQueryDataSet) you must provide a database connection string. In the example above we pass it using `scooters_credentials` key from the credentials (see the details in [Feeding in credentials](#feeding-in-credentials) section below). `scooters_credentials` must have a top-level key `con` containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) connection string. As an alternative to credentials, you could explicitly put `con` into `load_args` and `save_args` (`pandas.SQLTableDataSet` only).
 
 Example 14: Loading data from Minio (S3 API Compatible Storage)
+
 ```yaml
 test:
   type: pandas.CSVDataSet
@@ -278,7 +286,10 @@ dev_minio:
   client_kwargs:
     endpoint_url : 'http://localhost:9000'
 ```
-> *Note:* The easiest way to setup MinIO is to run a Docker image. After the following command, you can access to Minio server with http://localhost:9000 and create a bucket and add files as if it is on S3.
+
+```eval_rst
+.. note::  The easiest way to setup MinIO is to run a Docker image. After the following command, you can access to Minio server with ``http://localhost:9000`` and create a bucket and add files as if it is on S3.
+```
 
 `docker run -p 9000:9000 -e "MINIO_ACCESS_KEY=token" -e "MINIO_SECRET_KEY=key" minio/minio server /data`
 
@@ -381,7 +392,9 @@ bikes:
 
 The syntax `&csv` names the following block `csv` and the syntax `<<: *csv` inserts the contents of the block named `csv`. Locally declared keys entirely override inserted ones as seen in `bikes`.
 
-> *Note:* It's important that the name of the template entry starts with a `_` so Kedro knows not to try and instantiate it as a dataset.
+```eval_rst
+.. note::  It's important that the name of the template entry starts with a ``_`` so Kedro knows not to try and instantiate it as a dataset.
+```
 
 You can also nest reuseable YAML syntax:
 
@@ -569,7 +582,7 @@ io = DataCatalog(
 )
 ```
 
-> *Note:* When using `SQLTableDataSet` or `SQLQueryDataSet` you must provide a `con` key containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) database connection string. In the example above we pass it as part of `credentials` argument. Alternative to `credentials` is to put `con` into `load_args` and `save_args` (`SQLTableDataSet` only).
+When using `SQLTableDataSet` or `SQLQueryDataSet` you must provide a `con` key containing [SQLAlchemy compatible](https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls) database connection string. In the example above we pass it as part of `credentials` argument. Alternative to `credentials` is to put `con` into `load_args` and `save_args` (`SQLTableDataSet` only).
 
 ### Loading datasets
 
@@ -601,7 +614,9 @@ io.list()
 
 You can save data using an API similar to that used to load data.
 
-> *Note:* This use is not recommended unless you are prototyping in notebooks.
+```eval_rst
+.. caution::  This use is not recommended unless you are prototyping in notebooks.
+```
 
 #### Saving data to memory
 
@@ -639,4 +654,6 @@ Finally we can save the processed data in Parquet format.
 io.save("ranked", ranked)
 ```
 
-> *Note:* Saving `None` to a dataset is not allowed!
+```eval_rst
+.. attention::  Saving ``None`` to a dataset is not allowed!
+```

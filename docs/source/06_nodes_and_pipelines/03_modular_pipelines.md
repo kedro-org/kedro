@@ -1,6 +1,8 @@
 # Modular pipelines
 
-> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+```eval_rst
+.. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
+```
 
 ## What are modular pipelines?
 
@@ -14,7 +16,10 @@ You can use a [project-specific CLI command](../09_development/03_commands_refer
 * Must start with a letter or underscore
 * Must be at least 2 characters long
 
-> *Note:* Since `kedro pipeline` is a group of project-specific commands, those will only show up when your current working directory is the project root. If you see an error message like `Error: No such command 'pipeline'`, this indicates that your working directory does not point to a valid Kedro project.
+
+```eval_rst
+.. note::  Since ``kedro pipeline`` is a group of project-specific commands, those will only show up when your current working directory is the project root. If you see an error message like ``Error: No such command 'pipeline'``, this indicates that your working directory does not point to a valid Kedro project.
+```
 
 For the full list of available CLI options, you can always run `kedro pipeline create --help` for more information.
 
@@ -22,7 +27,9 @@ For the full list of available CLI options, you can always run `kedro pipeline c
 kedro pipeline create <pipeline_name>
 ```
 
-> *Note:* Although Kedro does not enforce the following project structure, we strongly encourage that you use it when you develop your modular pipelines. Future versions of Kedro may assume this structure.
+```eval_rst
+.. note::  Although Kedro does not enforce the following project structure, we strongly encourage that you use it when you develop your modular pipelines. Future versions of Kedro may assume this structure.
+```
 
 The `kedro pipeline create <pipeline_name>` command creates the following:
 
@@ -41,14 +48,15 @@ from <project-name>.pipelines import my_modular_pipeline_1
 pipeline = my_modular_pipeline_1.create_pipeline()
 ```
 
-> *Note:* When you run `kedro pipeline create` it does _not_ automatically add a corresponding entry to `register_pipelines()` in `src/<python_package>/pipeline_registry.py`.
-> In order to make your new pipeline runnable (using the `kedro run --pipeline <pipeline_name>` CLI command, for example), you need to modify `src/<python_package>/pipeline_registry.py` yourself.
+When you run `kedro pipeline create` it does _not_ automatically add a corresponding entry to `register_pipelines()` in `src/<python_package>/pipeline_registry.py`.
+
+In order to make your new pipeline runnable (using the `kedro run --pipeline <pipeline_name>` CLI command, for example), you need to modify `src/<python_package>/pipeline_registry.py` yourself.
 
 ***Boilerplate configuration files***
 
 The `kedro pipeline create <pipeline_name>` command also creates a boilerplate parameter configuration file, `<pipeline_name>.yml`, in `conf/<env>/parameters/`, where `<env>` defaults to `base`.
 
-> *Note:* project configuration from `conf/base/parameters/<pipeline_name>.yml` is automatically discoverable by [KedroContext](/kedro.framework.context.KedroContext) and requires no manual change.
+The project configuration from `conf/base/parameters/<pipeline_name>.yml` is automatically discoverable by [KedroContext](/kedro.framework.context.KedroContext) and requires no manual change.
 
 ***A placeholder folder for unit tests***
 
@@ -116,7 +124,9 @@ When you package your modular pipeline, Kedro will also automatically package fi
 *  Parameter files that match the glob pattern `conf/<env>/parameters*/**/*<pipeline_name>*`, where `<env>` defaults to `base`. If you need to capture the parameters from a different config environment, run `kedro pipeline package --env <env_name> <pipeline_name>`
 *  Pipeline unit tests in `src/tests/pipelines/<pipeline_name>`
 
-> *Note:* Kedro _will not_ package the catalog config files even if those are present in `conf/<env>/catalog/<pipeline_name>.yml`.
+```eval_rst
+.. note::  Kedro will not package the catalog config files even if those are present in ``conf/<env>/catalog/<pipeline_name>.yml``.
+```
 
 If you plan to publish your packaged modular pipeline to some Python package repository like [PyPI](https://pypi.org/), you need to make sure that your modular pipeline name doesn't clash with any of the existing packages in that repository. However, there is no need to rename any of your source files if that is the case. Simply alias your package with a new name by running `kedro pipeline package --alias <new_package_name> <pipeline_name>`.
 
@@ -304,7 +314,10 @@ final_pipeline = Pipeline(
 )
 ```
 
-> *Note:* `inputs` should correspond to the pipeline free inputs, while `outputs` are either free or intermediary outputs.
+```eval_rst
+.. note::  ``inputs`` should correspond to the pipeline free inputs, while ``outputs`` are either free or intermediary outputs.
+```
+
 
 ## How to use a modular pipeline twice
 Consider the example:
@@ -392,9 +405,11 @@ Note that similar to `inputs` and `outputs` namespacing rule, if you supply a `s
 You can manually delete all the files that belong to a modular pipeline. However, Kedro also provides a CLI command to clean up automatically. It deletes the following files when you call `kedro pipeline delete <pipeline_name>`:
 
 
-
 * All the modular pipeline code in `src/<python_package>/pipelines/<pipeline_name>/`
 * Configuration files `conf/<env>/parameters/<pipeline_name>.yml` and `conf/<env>/catalog/<pipeline_name>.yml`, where `<env>` defaults to `base`. If the files are located in a different config environment, run `kedro pipeline delete <pipeline_name> --env <env_name>`.
 * Pipeline unit tests in `tests/pipelines/<pipeline_name>/`
 
-> *Note:* `kedro pipeline delete` won't remove the entry from `pipeline_registry.py` if you have imported the modular pipeline there.You must remove it manually to clean up, otherwise it will break your project because the import will raise an error.
+
+```eval_rst
+.. note::  ``kedro pipeline delete`` won't remove the entry from ``pipeline_registry.py`` if you have imported the modular pipeline there. You must remove it manually to clean up, otherwise it will break your project because the import will raise an error.
+```

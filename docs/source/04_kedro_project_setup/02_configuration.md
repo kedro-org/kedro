@@ -2,7 +2,9 @@
 
 This section contains detailed information about configuration, for which the relevant API documentation can be found in [kedro.config.ConfigLoader](/kedro.config.ConfigLoader).
 
-> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+```eval_rst
+.. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
+```
 
 ## Configuration root
 
@@ -36,8 +38,7 @@ Configuration information from files stored in `base` or `local` that match thes
 
 * If two configuration files have duplicate top-level keys but are in different environment paths (one in `conf/base/`, another in `conf/local/`, for example) then the last loaded path (`conf/local/` in this case) takes precedence and overrides that key value. `ConfigLoader.get` will not raise any errors, however a `DEBUG` level log message will be emitted with information on the overridden keys.
 
-> *Note:* Any top-level keys that start with `_` are considered hidden (or reserved) and are ignored after the config is loaded. Those keys will neither trigger a key duplication error nor appear in the resulting configuration dictionary. However, you may still use such keys, for example, as [YAML anchors and aliases](https://support.atlassian.com/bitbucket-cloud/docs/yaml-anchors/).
-
+Any top-level keys that start with `_` are considered hidden (or reserved) and are ignored after the config is loaded. Those keys will neither trigger a key duplication error nor appear in the resulting configuration dictionary. However, you may still use such keys, for example, as [YAML anchors and aliases](https://support.atlassian.com/bitbucket-cloud/docs/yaml-anchors/).
 
 ## Additional configuration environments
 
@@ -49,7 +50,7 @@ kedro run --env=test
 
 If no `env` option is specified, this will default to using the `local` environment to overwrite `conf/base`.
 
-> *Note:* If, for some reason, your project does not have any other environments apart from `base`, i.e. no `local` environment to default to, you will need to customise `KedroContext` to take `env="base"` in the constructor and then specify your custom `KedroContext` subclass in `src/<python-package>/settings.py` under the `CONTEXT_CLASS` key.
+If, for some reason, your project does not have any other environments apart from `base`, i.e. no `local` environment to default to, you will need to customise `KedroContext` to take `env="base"` in the constructor and then specify your custom `KedroContext` subclass in `src/<python-package>/settings.py` under the `CONTEXT_CLASS` key.
 
 If you set the `KEDRO_ENV` environment variable to the name of your environment, Kedro will load that environment for your `kedro run`, `kedro ipython`, `kedro jupyter notebook` and `kedro jupyter lab` sessions:
 
@@ -57,7 +58,9 @@ If you set the `KEDRO_ENV` environment variable to the name of your environment,
 export KEDRO_ENV=test
 ```
 
-> *Note:* If you specify both the `KEDRO_ENV` environment variable and provide the `--env` argument to a CLI command, the CLI argument takes precedence.
+```eval_rst
+.. note::  If you specify both the ``KEDRO_ENV`` environment variable and provide the ``--env`` argument to a CLI command, the CLI argument takes precedence.
+```
 
 ## Template configuration
 
@@ -127,7 +130,7 @@ raw_car_data:
     filepath: "s3://${bucket_name}/data/${key_prefix}/${folders.raw}/${filename|cars.csv}"  # default to 'cars.csv' if the 'filename' key is not found in the global dict
 ```
 
-> *Note:* Under the hood, `TemplatedConfigLoader` uses [`JMESPath` syntax](https://github.com/jmespath/jmespath.py) to extract elements from the globals dictionary.
+Under the hood, `TemplatedConfigLoader` uses [`JMESPath` syntax](https://github.com/jmespath/jmespath.py) to extract elements from the globals dictionary.
 
 ### Jinja2 support
 
@@ -172,7 +175,9 @@ The output Python dictionary will look as follows:
 }
 ```
 
-> *Note:* Although Jinja2 is a very powerful and extremely flexible template engine, which comes with a wide range of features, we do _not_ recommend using it to template your configuration unless absolutely necessary. The flexibility of dynamic configuration comes at a cost of significantly reduced readability and much higher maintenance overhead. We believe that, for the majority of analytics projects, dynamically compiled configuration does more harm than good.
+```eval_rst
+.. warning::  Although Jinja2 is a very powerful and extremely flexible template engine, which comes with a wide range of features, we do not recommend using it to template your configuration unless absolutely necessary. The flexibility of dynamic configuration comes at a cost of significantly reduced readability and much higher maintenance overhead. We believe that, for the majority of analytics projects, dynamically compiled configuration does more harm than good.
+```
 
 
 ## Parameters
@@ -191,7 +196,9 @@ parameters = conf_loader.get("parameters*", "parameters*/**")
 
 This will load configuration files from `conf/base` and `conf/local` that have a filename starting with `parameters` or are located inside a folder with name starting with `parameters`.
 
-> *Note:* Since it is loaded after `conf/base`, the configuration path `conf/local` takes precedence in the example above. Hence any overlapping top-level keys from `conf/base` will be overwritten by the ones from `conf/local`.
+```eval_rst
+.. note::  Since it is loaded after ``conf/base``, the configuration path ``conf/local`` takes precedence in the example above. Hence any overlapping top-level keys from ``conf/base`` will be overwritten by the ones from ``conf/local``.
+```
 
 Calling `conf_loader.get()` in the example above will throw a `MissingConfigException` error if there are no configuration files matching the given patterns in any of the specified paths. If this is a valid workflow for your application, you can handle it as follows:
 
@@ -207,7 +214,9 @@ except MissingConfigException:
     parameters = {}
 ```
 
-> *Note:* `kedro.framework.context.KedroContext` class uses the approach above to load project parameters.
+```eval_rst
+.. note::  The ``kedro.framework.context.KedroContext`` class uses the approach above to load project parameters.
+```
 
 Parameters can then be used on their own or fed in as function inputs, as described [below](#use-parameters).
 
@@ -222,11 +231,16 @@ kedro run --params param_key1:value1,param_key2:2.0  # this will add {"param_key
 Values provided in the CLI take precedence and overwrite parameters specified in configuration files. Parameter keys are _always_ treated as strings. Parameter values are converted to a float or an integer number if the corresponding conversion succeeds; otherwise they are also treated as string.
 
 If any extra parameter key and/or value contains spaces, you should wrap the whole option contents in quotes:
-> `kedro run --params "key1:value with spaces,key2:value"`
 
-> *Note:* Since key-value pairs are split on the first colon, values can contain colons, but keys cannot. This is a valid CLI command:
->
-> `kedro run --params endpoint_url:https://endpoint.example.com`
+```bash
+kedro run --params "key1:value with spaces,key2:value"
+```
+
+Since key-value pairs are split on the first colon, values can contain colons, but keys cannot. This is a valid CLI command:
+
+```bash
+kedro run --params endpoint_url:https://endpoint.example.com
+```
 
 ### Use parameters
 
@@ -295,13 +309,13 @@ node(
 
 In both cases, under the hood parameters are added to the Data Catalog through the method `add_feed_dict()` in [`DataCatalog`](/kedro.io.DataCatalog), where they live as `MemoryDataSet`s. This method is also what the `KedroContext` class uses when instantiating the catalog.
 
-> *Note:* You can use `add_feed_dict()` to inject any other entries into your `DataCatalog` as per your use case.
-
-
+```eval_rst
+.. note::  You can use ``add_feed_dict()`` to inject any other entries into your ``DataCatalog`` as per your use case.
+```
 
 ## Credentials
 
-> *Note:* For security reasons, we strongly recommend *not* committing any credentials or other secrets to the Version Control System. Hence, by default any file inside the `conf/` folder (and its subfolders) containing `credentials` in its name will be ignored via `.gitignore` and not committed to your git repository.
+For security reasons, we strongly recommend *not* committing any credentials or other secrets to the Version Control System. Hence, by default any file inside the `conf/` folder (and its subfolders) containing `credentials` in its name will be ignored via `.gitignore` and not committed to your git repository.
 
 Credentials configuration can be loaded the same way as any other project configuration using the `ConfigLoader` class:
 
@@ -315,7 +329,9 @@ credentials = conf_loader.get("credentials*", "credentials*/**")
 
 This will load configuration files from `conf/base` and `conf/local` that have filename starting with `credentials` or are located inside a folder with name starting with `credentials`.
 
-> *Note:* Since it is loaded after `conf/base`, the configuration path `conf/local` takes precedence in the example above. Hence any overlapping top-level keys from `conf/base` will be overwritten by the ones from `conf/local`.
+```eval_rst
+.. note::  Since it is loaded after ``conf/base``, the configuration path ``conf/local`` takes precedence in the example above. Hence any overlapping top-level keys from ``conf/base`` will be overwritten by the ones from ``conf/local``.
+```
 
 Calling `conf_loader.get()` in the example above will throw a `MissingConfigException` error if there are no configuration files matching the given patterns in any of the specified paths. If this is a valid workflow for your application, you can handle it as follows:
 
@@ -331,7 +347,9 @@ except MissingConfigException:
     credentials = {}
 ```
 
-> *Note:* `kedro.framework.context.KedroContext` class uses the approach above to load project credentials.
+```eval_rst
+.. note::  The ``kedro.framework.context.KedroContext`` class uses the approach above to load project credentials.
+```
 
 Credentials configuration can then be used on its own or [fed into the `DataCatalog`](../05_data/01_data_catalog.md#feeding-in-credentials).
 
@@ -363,4 +381,6 @@ run:
   env: env1
 ```
 
-> *Note:* If you provide both a configuration file and a CLI option that clashes with the configuration file, the CLI option will take precedence.
+```eval_rst
+.. note::  If you provide both a configuration file and a CLI option that clashes with the configuration file, the CLI option will take precedence.
+```

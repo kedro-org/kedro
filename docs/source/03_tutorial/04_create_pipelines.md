@@ -99,7 +99,9 @@ def create_pipeline(**kwargs):
 ```
 </details>
 
-> *Note:* `companies` and `shuttles` refer to the datasets defined in `conf/base/catalog.yml`. These are inputs to the `preprocess_companies` and `preprocess_shuttles` functions. The named node inputs (and outputs) are used by the pipeline to determine interdependencies between the nodes, and hence, their execution order.
+```eval_rst
+.. note::  ``companies`` and ``shuttles`` refer to the datasets defined in ``conf/base/catalog.yml``. These are inputs to the ``preprocess_companies`` and ``preprocess_shuttles`` functions. The named node inputs (and outputs) are used by the pipeline to determine interdependencies between the nodes, and hence, their execution order.
+```
 
 Be sure to import `node`, and your functions by adding them to the beginning of `pipeline.py`:
 
@@ -307,8 +309,7 @@ We have created a modular pipeline for data processing, which merges three input
 ### Update dependencies
 We now need to add `scikit-learn` to the project's dependencies. This is a slightly different process from the initial change we made early in the tutorial.
 
-To **update** the project's dependencies, you should modify `src/requirements.in` to add the following. Note that you do not need to update `src/requirements.txt` as you did previously in the tutorial before you built the project's requirements with `kedro build-reqs`.
-
+To **update** the project's dependencies, you should modify `src/requirements.in` to add the following. Note that you do not need to update ``src/requirements.txt`` as you did previously in the tutorial before you built the project's requirements with ``kedro build-reqs``:
 
 ```text
 scikit-learn==0.23.1
@@ -420,7 +421,7 @@ regressor:
   versioned: true
 ```
 
-> *Note:* Versioning is enabled for `regressor`, which means that the pickled output of the `regressor` will be versioned and saved every time the pipeline is run. This allows us to keep the history of the models built using this pipeline. Further details can be found in the [Versioning](../05_data/02_kedro_io.md#versioning) section.
+Versioning is enabled for `regressor`, which means that the pickled output of the `regressor` will be versioned and saved every time the pipeline is run. This allows us to keep the history of the models built using this pipeline. Further details can be found in the [Versioning](../05_data/02_kedro_io.md#versioning) section.
 
 ### Assemble the data science pipeline
 To create a modular pipeline for the price prediction model, add the following to the top of `src/kedro_tutorial/pipelines/data_science/pipeline.py`:
@@ -496,8 +497,9 @@ from kedro_tutorial.pipelines import data_science as ds
 The two modular pipelines are merged together into a project default pipeline by the `__default__` key used in `"__default__": data_processing_pipeline + data_science_pipeline`.
 The `data_processing_pipeline` will preprocess the data, and `data_science_pipeline` will create features, train and evaluate the model.
 
-> *Note:* The order in which you add the pipelines together is not significant and `data_science_pipeline + data_processing_pipeline` will result in the same pipeline, since Kedro automatically detects the correct execution order for all the nodes in the resulting pipeline.
-
+```eval_rst
+.. note::  The order in which you add the pipelines together is not significant and ``data_science_pipeline + data_processing_pipeline`` will result in the same pipeline, since Kedro automatically detects the correct execution order for all the nodes in the resulting pipeline.
+```
 
 ### Test the pipelines
 Execute the default pipeline:
@@ -570,7 +572,9 @@ kedro run --runner=ThreadRunner
 kedro run --runner=module.path.to.my.runner
 ```
 
-> *Note:* `ParallelRunner` performs task parallelisation, which is different from data parallelisation as seen in PySpark.
+```eval_rst
+.. note::  ``ParallelRunner`` performs task parallelisation, which is different from data parallelisation as seen in PySpark.
+```
 
 You can find out more about the runners Kedro provides, and how to create your own, in the [pipeline documentation about runners](../06_nodes_and_pipelines/04_run_a_pipeline.md).
 
@@ -584,7 +588,9 @@ kedro run --pipeline=ds
 
 See the [pipeline slicing documentation](../06_nodes_and_pipelines/05_slice_a_pipeline.md) for other ways to run sections of your pipeline.
 
-> *Note:* To successfully run the pipeline, you need to make sure that all required input datasets already exist, otherwise you may get an error similar to this:
+```eval_rst
+.. note::  To successfully run the pipeline, you need to make sure that all required input datasets already exist, otherwise you may get an error similar to this:
+```
 
 ```bash
 kedro run --pipeline=ds

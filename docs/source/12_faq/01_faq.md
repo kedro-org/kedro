@@ -94,7 +94,9 @@ The responsibility of _"What time will this pipeline run?"_, _"How do I manage m
 [Bruce Philp](https://github.com/bruceaphilp) and [Guilherme Braccialli](https://github.com/gbraccialli-qb) at
 [QuantumBlack](https://github.com/quantumblacklabs) are the brains behind this model of managing data. To see which data layer to use, refer to the following table.
 
-> *Note:* The data layers don’t have to exist locally in the `data` folder within your project, but we recommend that you structure your S3 buckets or other data stores in a similar way.
+```eval_rst
+.. note:: The data layers don’t have to exist locally in the ``data`` folder within your project, but we recommend that you structure your S3 buckets or other data stores in a similar way.
+```
 
 ![](../meta/images/data_engineering_convention.png)
 

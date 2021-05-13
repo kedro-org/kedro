@@ -15,7 +15,9 @@ The `build-reqs` command will:
 2. [pip compile](https://github.com/jazzband/pip-tools#example-usage-for-pip-compile) the requirements listed in `src/requirements.in`
 3. Regenerate `src/requirements.txt` to specify a list of pinned project dependencies (those with a strict version)
 
-> *Note:* `src/requirements.in` contains "source" requirements, while `src/requirements.txt` contains the compiled version of those and requires no manual updates.
+```eval_rst
+.. note::  ``src/requirements.in`` contains "source" requirements, while ``src/requirements.txt`` contains the compiled version of those and requires no manual updates.
+```
 
 To further update the project requirements, you should modify `src/requirements.in` (not `src/requirements.txt`) and re-run `kedro build-reqs`.
 

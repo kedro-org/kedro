@@ -1,6 +1,8 @@
 # Use Kedro with IPython and Jupyter Notebooks/Lab
 
-> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+```eval_rst
+.. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
+```
 
 This section follows the [Iris dataset example](../02_get_started/05_example_project.md) and demonstrates how to use Kedro with IPython and Jupyter Notebooks / Lab. We also recommend a video that explains the transition from the use of vanilla Jupyter Notebooks to using Kedro, from [Data Engineer One](https://www.youtube.com/watch?v=dRnCovp1GRQ&t=50s&ab_channel=DataEngineerOne).
 
@@ -77,13 +79,17 @@ kedro jupyter notebook
 
 This starts a Jupyter server and opens a window in your default browser.
 
-> *Note:* If you want Jupyter to listen to a different port number, then run `kedro jupyter notebook --port <port>`
+```eval_rst
+.. note::  If you want Jupyter to listen to a different port number, then run ``kedro jupyter notebook --port <port>``.
+```
 
 Navigate to the `notebooks` folder of your Kedro project and create a new notebook.
 
 ![](../meta/images/jupyter_create_new_notebook.png)
 
-> *Note:* The only kernel available by default has a name of the current project. If you need to access all available kernels, add `--all-kernels` to the command above.
+```eval_rst
+.. note::  The only kernel available by default has a name of the current project. If you need to access all available kernels, add ``--all-kernels`` to the command above.
+```
 
 Every time you start or restart a Jupyter or IPython session in the CLI using a `kedro` command, a startup script in `.ipython/profile_default/startup/00-kedro-init.py` is executed. It adds the following variables in scope:
 
@@ -129,7 +135,9 @@ parameters["example_test_data_ratio"]
 # returns the value of 'example_test_data_ratio' key from 'conf/base/parameters.yml'
 ```
 
-> *Note:* You need to reload Kedro variables by calling `%reload_kedro` and re-run the code snippet above if you change the contents of `parameters.yml`.
+```eval_rst
+.. note::  You need to reload Kedro variables by calling `%reload_kedro` and re-run the code snippet above if you change the contents of ``parameters.yml``.
+```
 
 ### Load/Save `DataCatalog` in Jupyter
 
@@ -242,12 +250,17 @@ def some_action():
 * Add the `node` tag to the cell containing your function
 ![Add the node tag graphic](../meta/images/jupyter_notebook_workflow_tagging_nodes.png)
 
-> Tip: The notebook can contain multiple functions tagged as `node`, each of them will be exported into the resulting Python file
+```eval_rst
+.. tip:: The notebook can contain multiple functions tagged as ``node``, each of them will be exported into the resulting Python file
+```
 
 * Save your Jupyter notebook to `notebooks/my_notebook.ipynb`
 * Run `kedro jupyter convert notebooks/my_notebook.ipynb` from the terminal to create a Python file `src/<package_name>/nodes/my_notebook.py` containing `some_action` function definition
 
-> Tip: You can also convert all your notebooks at once by calling `kedro jupyter convert --all`
+
+```eval_rst
+.. tip:: You can also convert all your notebooks at once by calling ``kedro jupyter convert --all``.
+```
 
 * The `some_action` function can now be used in your Kedro pipelines
 
@@ -293,7 +306,10 @@ The script `tools/ipython/ipython_loader.py` helps to locate IPython startup dir
 
 The script automatically locates the `.ipython/profile_default/startup` directory by starting from the current working directory and going up the directory tree. If the directory is found, all Python scripts in it are executed.
 
-> *Note:* This script will only run startup scripts from the first encountered `.ipython/profile_default/startup` directory. All consecutive `.ipython` directories higher up in the directory tree will be disregarded.
+```eval_rst
+.. note:: This script will only run startup scripts from the first encountered ``.ipython/profile_default/startup`` directory. All consecutive ``.ipython`` directories higher up in the directory tree will be disregarded.
+```
+
 
 ### Installation
 
@@ -337,7 +353,10 @@ If your `Notebook.ipynb` is placed anywhere in the following, `.ipython/profile_
 * `new-kedro-project/notebooks/subdir1/subdir2/`
 * or even `new-kedro-project/` (although this is strongly discouraged).
 
-> *Note:* Given the example structure above, this script *will not* load your IPython startup scripts if the notebook is saved anywhere *outside* `new-kedro-project` directory.
+
+```eval_rst
+.. note:: Given the example structure above, this script will not load your IPython startup scripts if the notebook is saved anywhere outside ``new-kedro-project`` directory.
+```
 
 ### Troubleshooting and FAQs
 

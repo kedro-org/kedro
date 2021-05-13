@@ -1,6 +1,8 @@
 # Kedro's command line interface
 
-> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+```eval_rst
+.. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
+```
 
 Kedro's command line interface (CLI) is used to give commands to Kedro via a terminal shell (such as the terminal app on macOS, or cmd.exe or PowerShell on Windows). You need to use the CLI to set up a new Kedro project, and to run it.
 
@@ -85,7 +87,9 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
 
 The following are Kedro commands that apply globally and can be run from any directory location.
 
-> *Note:* you only need to use one (e.g. specify `kedro -V` ***OR*** `kedro --version`).
+```eval_rst
+.. note::  You only need to use one of those given below (e.g. specify ``kedro -V`` **OR** ``kedro --version``).
+```
 
 ### Get help on Kedro commands
 
@@ -140,7 +144,9 @@ kedro docs
 
 ## Project-specific Kedro commands
 
-> *Note:* All project related CLI commands should be run from the project’s root directory.
+```eval_rst
+.. note::  All project related CLI commands should be run from the project’s root directory.
+```
 
 Kedro's command line interface (CLI) allows you to associate a set of commands and dependencies with a target, which you can then execute from inside the project directory.
 
@@ -176,7 +182,7 @@ Call the `run()` method of the `KedroSession` defined in `kedro.framework.sessio
 kedro run
 ```
 
-> *Note:* `KedroContext` can be extended in `run.py` (`src/project-name/run.py`). In order to use the extended `KedroContext` you need to set `context_path` in [`pyproject.toml`](../12_faq/02_architecture_overview) configuration file.
+`KedroContext` can be extended in `run.py` (`src/project-name/run.py`). In order to use the extended `KedroContext` you need to set `context_path` in [`pyproject.toml`](../12_faq/02_architecture_overview) configuration file.
 
 #### Modifying a `kedro run`
 
@@ -221,7 +227,7 @@ kedro run --from-nodes split --to-nodes predict,report
 
 This functionality is extended to the `kedro run --config config.yml` command, which allows you to [specify run commands in a configuration file](../04_kedro_project_setup/02_configuration.md#configure-kedro-run-arguments).
 
-> *Note:* A parameterised run is best used for dynamic parameters, i.e. running the same pipeline with different inputs, for static parameters that do not change we recommend following the [Kedro project setup methodology](../04_kedro_project_setup/02_configuration.md#parameters).
+A parameterised run is best used for dynamic parameters, i.e. running the same pipeline with different inputs, for static parameters that do not change we recommend following the [Kedro project setup methodology](../04_kedro_project_setup/02_configuration.md#parameters).
 
 ### Deploy the project
 
@@ -384,7 +390,10 @@ Every time you start or restart a notebook kernel, a startup script (`<project-r
 
 To reload these variables at any point in your notebook (e.g. if you updated `catalog.yml`) use the [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#line-magics) `%reload_kedro`, which can be also used to see the error message if any of the variables above are undefined.
 
-> *Note:* If you get an error message `Module ``<module_name>`` not found. Make sure to install required project dependencies by running ``kedro install`` command first.` when running any of those commands, it indicates that some Jupyter or IPython dependencies are not installed in your environment. To resolve this you will need to a) make sure the corresponding dependency is present in `src/requirements.in` (`src/requirements.txt` if not compiled), b) run [`kedro install`](#install-all-package-dependencies) command from your terminal.
+If you get an error message `Module ``<module_name>`` not found. Make sure to install required project dependencies by running ``kedro install`` command first.` when running any of those commands, it indicates that some Jupyter or IPython dependencies are not installed in your environment. To resolve this you will need to do the following:
+
+1. Make sure the corresponding dependency is present in `src/requirements.in` (`src/requirements.txt` if not compiled)
+2. Run [`kedro install`](#install-all-package-dependencies) command from your terminal
 
 ##### Copy tagged cells
 To copy the code from cells [tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#release-5-0-0) with `node` tag into Python files under `src/<package_name>/nodes/` in a Kedro project:

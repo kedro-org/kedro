@@ -94,7 +94,9 @@ class TransformerHooks:
         catalog.add_transformer(ProfileTimeTransformer())
 ```
 
-> *Note:* The name of a module that contains Hooks implementation is arbitrary and is not restricted to `hooks.py`.
+```eval_rst
+.. note::  The name of a module that contains Hooks implementation is arbitrary and is not restricted to ``hooks.py``.
+```
 
 We recommend that you group related Hook implementations under a namespace, preferably a class, within a `hooks.py` file in your project.
 
@@ -115,7 +117,10 @@ HOOKS = (ProjectHooks(), TransformerHooks())
 
 Kedro also has auto-discovery enabled by default. This means that any installed plugins that declare a Hooks entry-point will be registered. To learn more about how to enable this for your custom plugin, see our [plugin development guide](04_plugins.md#hooks).
 
-> *Note:* Auto-discovered Hooks will run *first*, followed by the ones specified in `settings.py`.
+```eval_rst
+.. note::  Auto-discovered Hooks will run *first*, followed by the ones specified in `settings.py`.
+```
+
 
 #### Disable auto-registered plugins' Hooks
 
@@ -474,6 +479,10 @@ class NodeInputReplacementHook:
 
 Node input overwrites implemented in `before_node_run` affect only a specific node and do not modify the corresponding datasets in the `DataCatalog`.
 
-> *Note:* In the example above, the `before_node_run` hook implementation must return datasets present in the `inputs` dictionary. If they are not in `inputs`, the node fails with the following error: `Node <name> expected X input(s) <expected_inputs>, but got the following Y input(s) instead: <actual_inputs>`.
+
+```eval_rst
+.. note:: In the example above, the ``before_node_run`` hook implementation must return datasets present in the ``inputs`` dictionary. If they are not in ``inputs``, the node fails with the following error: ``Node <name> expected X input(s) <expected_inputs>, but got the following Y input(s) instead: <actual_inputs>``.
+```
+
 
 To apply the changes once you have implemented a new hook, you need to register it, as described [above](#registering-your-hook-implementations-with-kedro), and then run Kedro.

@@ -30,6 +30,7 @@
 ## Bug fixes and other changes
 * `ConfigLoader.get()` now raises a `BadConfigException`, with a more helpful error message, if a configuration file cannot be loaded (for instance due to wrong syntax or poor formatting).
 * `run_id` now defaults to `save_version` when `after_catalog_created` is called, similarly to what happens during a `kedro run`.
+* Fixed a bug where `kedro ipython` and `kedro jupyter notebook` didn't work if the `PYTHONPATH` was already set.
 
 ## Minor breaking changes to the API
 

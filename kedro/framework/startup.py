@@ -168,8 +168,11 @@ def _add_src_to_path(source_dir: Path, project_path: Path) -> None:
 
     if str(source_dir) not in sys.path:
         sys.path.insert(0, str(source_dir))
-    if "PYTHONPATH" not in os.environ:
-        os.environ["PYTHONPATH"] = str(source_dir)
+
+    python_path = os.getenv("PYTHONPATH") or ""
+    if str(source_dir) not in python_path:
+        sep = ";" if python_path else ""
+        os.environ["PYTHONPATH"] = f"{str(source_dir)}{sep}{python_path}"
 
 
 def bootstrap_project(project_path: Path) -> ProjectMetadata:

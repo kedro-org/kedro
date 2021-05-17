@@ -95,7 +95,9 @@ Job definitions provide the template for resources needed for running a job. Cre
 
 Next you need a compute environment where the work will be executed. Create a _managed_, on-demand one named `spaceflights_env` and let it choose to create new service and instance roles if you don't have any yet. Having a managed environment means that AWS will automatically handle the scaling of your instances.
 
->*Note:* This compute environment won't contain any instances until you trigger the pipeline run. Therefore, creating it does not incur any immediate costs.
+```eval_rst
+.. note::  This compute environment won't contain any instances until you trigger the pipeline run. Therefore, creating it does not incur any immediate costs.
+```
 
 #### Create AWS Batch job queue
 
@@ -105,7 +107,10 @@ A job queue is the bridge between the submitted jobs and the compute environment
 
 Ensure you have the necessary AWS credentials in place before moving on, so that your pipeline can access and interact with the AWS services. Check out [the AWS CLI documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html#cli-configure-quickstart-config) for instructions on how to set this up.
 
->*Note:* You should configure the `default region` to match the region where you've created the Batch resources.
+```eval_rst
+.. note::  You should configure the ``default region`` to match the region where you've created the Batch resources.
+```
+
 
 ### Submit AWS Batch jobs
 

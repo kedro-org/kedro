@@ -94,7 +94,9 @@ class TransformerHooks:
         catalog.add_transformer(ProfileTimeTransformer())
 ```
 
-> Note: The name of a module that contains Hooks implementation is arbitrary and is not restricted to `hooks.py`.
+```eval_rst
+.. note::  The name of a module that contains Hooks implementation is arbitrary and is not restricted to ``hooks.py``.
+```
 
 We recommend that you group related Hook implementations under a namespace, preferably a class, within a `hooks.py` file in your project.
 
@@ -115,7 +117,10 @@ HOOKS = (ProjectHooks(), TransformerHooks())
 
 Kedro also has auto-discovery enabled by default. This means that any installed plugins that declare a Hooks entry-point will be registered. To learn more about how to enable this for your custom plugin, see our [plugin development guide](04_plugins.md#hooks).
 
->Note: Auto-discovered Hooks will run *first*, followed by the ones specified in `settings.py`.
+```eval_rst
+.. note::  Auto-discovered Hooks will run *first*, followed by the ones specified in `settings.py`.
+```
+
 
 #### Disable auto-registered plugins' Hooks
 
@@ -253,7 +258,9 @@ Under the hood, we use [pytest's pluggy](https://pluggy.readthedocs.io/en/latest
 
 ## Hooks examples
 
-**Example 1:** Add data validation to the node's inputs and outputs using [Great Expectations](https://docs.greatexpectations.io/en/latest/).
+### Add data validation
+
+This example adds data validation to node inputs and outputs using [Great Expectations](https://docs.greatexpectations.io/en/latest/).
 
 * Install dependencies:
 
@@ -324,7 +331,9 @@ class DataValidationHooks:
 
 ![](../meta/images/data_validation.png)
 
-**Example 2:** Add observability to your pipeline with [statsd](https://statsd.readthedocs.io/en/v3.3/configure.html) and visualise it using [Grafana](https://grafana.com/).
+### Add observability to your pipeline
+
+This example adds observability to your pipeline using [statsd](https://statsd.readthedocs.io/en/v3.3/configure.html) and makes it possible to visualise dataset size and node execution time using [Grafana](https://grafana.com/).
 
 * Install dependencies:
 
@@ -372,7 +381,9 @@ class PipelineMonitoringHooks:
 
 ![](../meta/images/pipeline_observability.png)
 
-**Example 3:** Add metrics tracking to your model with [MLflow](https://mlflow.org/).
+### Add metrics tracking to your model
+
+This examples adds metrics tracking using [MLflow](https://mlflow.org/).
 
 * Install dependencies:
 
@@ -437,7 +448,7 @@ class ModelTrackingHooks:
 
 ![](../meta/images/mlflow.png)
 
-**Example 4:** Modify node inputs using `before_node_run` hook.
+### Modify node inputs using `before_node_run` hook
 
 If the `before_node_run` hook is implemented _and_ returns a dictionary, that dictionary is used to update the corresponding node inputs.
 
@@ -468,6 +479,10 @@ class NodeInputReplacementHook:
 
 Node input overwrites implemented in `before_node_run` affect only a specific node and do not modify the corresponding datasets in the `DataCatalog`.
 
-> *Note:* In the example above, the `before_node_run` hook implementation must return datasets present in the `inputs` dictionary. If they are not in `inputs`, the node fails with the following error: `Node <name> expected X input(s) <expected_inputs>, but got the following Y input(s) instead: <actual_inputs>`.
+
+```eval_rst
+.. note:: In the example above, the ``before_node_run`` hook implementation must return datasets present in the ``inputs`` dictionary. If they are not in ``inputs``, the node fails with the following error: ``Node <name> expected X input(s) <expected_inputs>, but got the following Y input(s) instead: <actual_inputs>``.
+```
+
 
 To apply the changes once you have implemented a new hook, you need to register it, as described [above](#registering-your-hook-implementations-with-kedro), and then run Kedro.

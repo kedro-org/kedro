@@ -3,7 +3,9 @@
 
 In this tutorial, we cover advanced uses of the [Kedro IO](/kedro.io.rst) module to understand the underlying implementation. The relevant API documentation is [kedro.io.AbstractDataSet](/kedro.io.AbstractDataSet) and [kedro.io.DataSetError](/kedro.io.DataSetError).
 
-> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+```eval_rst
+.. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
+```
 
 ## Error handling
 
@@ -46,7 +48,9 @@ In order to enable versioning, you need to update the `catalog.yml` config file 
   3. call `super().__init__()` with positional arguments `filepath`, `version`, and, optionally, with `glob` and `exists` functions if it uses a non-local filesystem (see [kedro.extras.datasets.pandas.CSVDataSet](/kedro.extras.datasets.pandas.CSVDataSet) as an example) AND
   4. modify its `_describe`, `_load` and `_save` methods respectively to support versioning (see [`kedro.extras.datasets.pandas.CSVDataSet`](/kedro.extras.datasets.pandas.CSVDataSet) for an example implementation)
 
- >*Note:* If a new version of a dataset is created mid-run, for instance by an external system adding new files, it will not interfere in the current run, i.e. the load version stays the same throughout subsequent loads.
+```eval_rst
+.. note::  If a new version of a dataset is created mid-run, for instance by an external system adding new files, it will not interfere in the current run, i.e. the load version stays the same throughout subsequent loads.
+```
 
 An example dataset could look similar to the below:
 
@@ -103,7 +107,7 @@ Versioned dataset `__init__` method must have an optional argument called `versi
 
 The easiest way to version a specific dataset is to change the corresponding entry in the `catalog.yml`.
 
-> *Note:* `catalog.yml` only allows you to choose to version your datasets but it does not allow to choose which version to load or save. In rare case it is strongly required you may want to instantiate your versioned datasets using Code API and define version parameter explicitly (see the [corresponding section](#versioning-using-the-code-api) below).
+`catalog.yml` only allows you to choose to version your datasets but it does not allow to choose which version to load or save. In rare case it is strongly required you may want to instantiate your versioned datasets using Code API and define version parameter explicitly (see the [corresponding section](#versioning-using-the-code-api) below).
 
 For example, if the following dataset was defined in the `catalog.yml`:
 
@@ -114,9 +118,11 @@ cars:
   versioned: true
 ```
 
-the `DataCatalog` will create a versioned `CSVDataSet` called `cars`. The actual csv file location will look like `data/01_raw/company/car_data.csv/<version>/car_data.csv`, where `<version>` corresponds to a global save version string formatted as `YYYY-MM-DDThh.mm.ss.sssZ`. Every time the `DataCatalog` is instantiated, it generates a new global save version, which is propagated to all versioned datasets it contains.
+The `DataCatalog` will create a versioned `CSVDataSet` called `cars`. The actual csv file location will look like `data/01_raw/company/car_data.csv/<version>/car_data.csv`, where `<version>` corresponds to a global save version string formatted as `YYYY-MM-DDThh.mm.ss.sssZ`. Every time the `DataCatalog` is instantiated, it generates a new global save version, which is propagated to all versioned datasets it contains.
 
-> **Important:** the `DataCatalog` does not re-generate save versions between instantiations. Therefore, if you call `catalog.save('cars', some_data)` twice, then the second call will fail, since it tries to overwrite a versioned dataset using the same save version. To mitigate this, reload your data catalog by calling `%reload_kedro` line magic. This limitation does not apply to `load` operation.
+```eval_rst
+.. attention::  The ``DataCatalog`` does not re-generate save versions between instantiations. Therefore, if you call ``catalog.save('cars', some_data)`` twice, then the second call will fail, since it tries to overwrite a versioned dataset using the same save version. To mitigate this, reload your data catalog by calling ``%reload_kedro`` line magic. This limitation does not apply to ``load`` operation.
+```
 
 By default, the `DataCatalog` will load the latest version of the dataset. However, it is also possible to specify an exact load version. In order to do that, you can pass a dictionary with exact load versions to `DataCatalog.from_config`:
 
@@ -126,11 +132,11 @@ io = DataCatalog.from_config(catalog_config, credentials, load_versions=load_ver
 cars = io.load("cars")
 ```
 
-The last row in the example above would attempt to load a CSV file from `data/01_raw/company/car_data.csv/2019-02-13T14.35.36.518Z/car_data.csv`.
+The last row in the example above would attempt to load a CSV file from `data/01_raw/company/car_data.csv/2019-02-13T14.35.36.518Z/car_data.csv`:
 
-> `load_versions` configuration has an effect only if a dataset versioning has been enabled in the catalog config file - see the example above.
+* `load_versions` configuration has an effect only if a dataset versioning has been enabled in the catalog config file - see the example above.
 
-> **Important:** we recommend not to override `save_version` argument in `DataCatalog.from_config` unless strongly required to do so, since it may lead to inconsistencies between loaded and saved versions of the versioned datasets.
+* We recommend that you do not override `save_version` argument in `DataCatalog.from_config` unless strongly required to do so, since it may lead to inconsistencies between loaded and saved versions of the versioned datasets.
 
 ### Versioning using the Code API
 
@@ -163,7 +169,9 @@ reloaded = io.load("test_data_set")
 assert data2.equals(reloaded)
 ```
 
-> *Note:* In the example above we did not fix any versions. If we do, then the behaviour of load and save operations becomes slightly different:
+```eval_rst
+.. note::  In the example above we did not fix any versions. If we do, then the behaviour of load and save operations becomes slightly different:
+```
 
 ```python
 version = Version(
@@ -187,7 +195,9 @@ assert data1.equals(reloaded)
 io.save("test_data_set", data2)
 ```
 
-> **Important:** Passing exact load and/or save versions to the dataset instantiation is not recommended, since it may lead to inconsistencies between operations. For example, if versions for load and save operations do not match, save operation would result in a `UserWarning` indicating that save a load versions do not match. Load after save may also return an error if the corresponding load version is not found:
+```eval_rst
+.. attention::  Passing exact load and/or save versions to the dataset instantiation is not recommended, since it may lead to inconsistencies between operations. For example, if versions for load and save operations do not match, save operation would result in a ``UserWarning`` indicating that save a load versions do not match. Load after save may also return an error if the corresponding load version is not found:
+```
 
 ```python
 version = Version(
@@ -229,18 +239,23 @@ Currently the following datasets support versioning:
 - `kedro.extras.datasets.tensorflow.TensorFlowModelDataset`
 - `kedro.extras.datasets.json.JSONDataSet`
 
-> _Note:_ Although, HTTPs is a supported file system in the dataset implementations, it does not support versioning.
+```eval_rst
+.. note::  Although, HTTPs is a supported file system in the dataset implementations, it does not support versioning.
+```
 
 ## Partitioned dataset
 
 These days distributed systems play an increasingly important role in ETL data pipelines. They significantly increase the processing throughput, enabling us to work with much larger volumes of input data. However, these benefits sometimes come at a cost. When dealing with the input data generated by such distributed systems, you may encounter a situation where your Kedro node needs to read the data from a directory full of uniform files of the same type (e.g. JSON, CSV, Parquet, etc.) rather than from a single file. Tools like `PySpark` and the corresponding [SparkDataSet](/kedro.extras.datasets.spark.SparkDataSet) cater for such use cases, but the use of Spark is not always feasible.
 
 This is the reason why Kedro provides a built-in [PartitionedDataSet](/kedro.io.PartitionedDataSet), which has the following features:
-1. `PartitionedDataSet` can recursively load all or specific files from a given location.
-2. Is platform agnostic and can work with any filesystem implementation supported by [fsspec](https://filesystem-spec.readthedocs.io/) including local, S3, GCS, and many more.
-3. Implements a [lazy loading](https://en.wikipedia.org/wiki/Lazy_loading) approach and does not attempt to load any partition data until a processing node explicitly requests it.
 
-> *Note:* In this section each individual file inside a given location is called a **partition**.
+* `PartitionedDataSet` can recursively load all or specific files from a given location.
+* Is platform agnostic and can work with any filesystem implementation supported by [fsspec](https://filesystem-spec.readthedocs.io/) including local, S3, GCS, and many more.
+* Implements a [lazy loading](https://en.wikipedia.org/wiki/Lazy_loading) approach and does not attempt to load any partition data until a processing node explicitly requests it.
+
+```eval_rst
+.. note::  In this section each individual file inside a given location is called a partition.
+```
 
 ### Partitioned dataset definition
 
@@ -259,7 +274,9 @@ my_partitioned_dataset:
     load_arg2: value2
 ```
 
-> Note: As any other dataset `PartitionedDataSet` can also be instantiated programmatically in Python:
+```eval_rst
+.. note::  As any other dataset ``PartitionedDataSet`` can also be instantiated programmatically in Python:
+```
 
 ```python
 from kedro.extras.datasets.pandas import CSVDataSet
@@ -337,7 +354,9 @@ Full notation allows you to specify a dictionary with the full underlying datase
 
 #### Partitioned dataset credentials
 
-> *Note:* Support for `dataset_credentials` key in the credentials for `PartitionedDataSet` is now deprecated. The dataset credentials should be specified explicitly inside the dataset config.
+```eval_rst
+.. note::  Support for ``dataset_credentials`` key in the credentials for ``PartitionedDataSet`` is now deprecated. The dataset credentials should be specified explicitly inside the dataset config.
+```
 
 Credentials management for `PartitionedDataSet` is somewhat special in a sense that it may contain credentials for both `PartitionedDataSet` itself _and_ the underlying dataset that is used for partition load and save. Top-level credentials are passed to the underlying dataset config (unless such config already has credentials configured), but not the other way around - dataset credentials are never propagated to the filesystem.
 
@@ -407,13 +426,14 @@ def concat_partitions(partitioned_input: Dict[str, Callable[[], Any]]) -> pd.Dat
 
 As you can see from the example above, on load `PartitionedDataSet` _does not_ automatically load the data from the located partitions. Instead, `PartitionedDataSet` returns a dictionary with partition IDs as keys and the corresponding load functions as values. It allows the node that consumes the `PartitionedDataSet` to implement the logic that defines what partitions need to be loaded and how this data is going to be processed.
 
-> *Note:* Partition ID _does not_ represent the whole partition path, but only a part of it that is unique for a given partition _and_ filename suffix:
->
-> Example 1: if `path=s3://my-bucket-name/folder` and partition is stored in `s3://my-bucket-name/folder/2019-12-04/data.csv` then its Partition ID is `2019-12-04/data.csv`.
->
-> Example 2: if `path=s3://my-bucket-name/folder` and `filename_suffix=".csv"` and partition is stored in `s3://my-bucket-name/folder/2019-12-04/data.csv` then its Partition ID is `2019-12-04/data`.
+Partition ID _does not_ represent the whole partition path, but only a part of it that is unique for a given partition _and_ filename suffix:
 
-> *Note:* `PartitionedDataSet` implements caching on load operation, which means that if multiple nodes consume the same `PartitionedDataSet`, they will all receive the same partition dictionary even if some new partitions were added to the folder after the first load has been completed. This is done deliberately to guarantee the consistency of load operations between the nodes and avoid race conditions. You can reset the cache by calling `release()` method of the partitioned dataset object.
+* Example 1: if `path=s3://my-bucket-name/folder` and partition is stored in `s3://my-bucket-name/folder/2019-12-04/data.csv` then its Partition ID is `2019-12-04/data.csv`.
+
+
+* Example 2: if `path=s3://my-bucket-name/folder` and `filename_suffix=".csv"` and partition is stored in `s3://my-bucket-name/folder/2019-12-04/data.csv` then its Partition ID is `2019-12-04/data`.
+
+`PartitionedDataSet` implements caching on load operation, which means that if multiple nodes consume the same `PartitionedDataSet`, they will all receive the same partition dictionary even if some new partitions were added to the folder after the first load has been completed. This is done deliberately to guarantee the consistency of load operations between the nodes and avoid race conditions. You can reset the cache by calling `release()` method of the partitioned dataset object.
 
 ### Partitioned dataset save
 
@@ -458,7 +478,9 @@ def create_partitions() -> Dict[str, Any]:
     }
 ```
 
-> *Note:* Writing to an existing partition may result in its data being overwritten, if this case is not specifically handled by the underlying dataset implementation. You should implement your own checks to ensure that no existing data is lost when writing to a `PartitionedDataSet`. The simplest safety mechanism could be to use *partition IDs* that have a high chance of uniqueness - for example, the current timestamp.
+```eval_rst
+.. note::  Writing to an existing partition may result in its data being overwritten, if this case is not specifically handled by the underlying dataset implementation. You should implement your own checks to ensure that no existing data is lost when writing to a ``PartitionedDataSet``. The simplest safety mechanism could be to use partition IDs that have a high chance of uniqueness: for example, the current timestamp.
+```
 
 ### Incremental loads with `IncrementalDataSet`
 
@@ -466,7 +488,7 @@ def create_partitions() -> Dict[str, Any]:
 
 This checkpoint, by default, is persisted to the location of the data partitions. For example, for `IncrementalDataSet` instantiated with path `s3://my-bucket-name/path/to/folder` the checkpoint will be saved to `s3://my-bucket-name/path/to/folder/CHECKPOINT`, unless the checkpoint configuration is [explicitly overwritten](#checkpoint-configuration).
 
-> *Note:* The checkpoint file is only created _after_ the partitioned dataset is explicitly [confirmed](#incremental-dataset-confirm).
+The checkpoint file is only created _after_ the partitioned dataset is explicitly [confirmed](#incremental-dataset-confirm).
 
 #### Incremental dataset load
 
@@ -480,7 +502,9 @@ Loading `IncrementalDataSet` works similarly to [`PartitionedDataSet`](#partitio
 
 #### Incremental dataset confirm
 
-> *Note:* The checkpoint value *is not* automatically updated by the fact that a new set of partitions was successfully loaded or saved.
+```eval_rst
+.. note::  The checkpoint value *is not* automatically updated by the fact that a new set of partitions was successfully loaded or saved.
+```
 
 Partitioned dataset checkpoint update is triggered by an explicit `confirms` instruction in one of the nodes downstream. It can be the same node, which processes the partitioned dataset:
 
@@ -527,9 +551,10 @@ Pipeline(
 )
 ```
 
-Here are 2 important notes about the confirmation operation:
-1. Confirming a partitioned dataset does not affect any subsequent loads within the same run. All downstream nodes that input the same partitioned dataset as input will all receive the _same_ partitions. Partitions that are created externally during the run will also not affect the dataset loads and won't appear in the list of loaded partitions until the next run or until the [`release()`](/kedro.io.IncrementalDataSet) method is called on the dataset object.
-2. A pipeline cannot contain more than one node confirming the same dataset.
+Important notes about the confirmation operation:
+
+* Confirming a partitioned dataset does not affect any subsequent loads within the same run. All downstream nodes that input the same partitioned dataset as input will all receive the _same_ partitions. Partitions that are created externally during the run will also not affect the dataset loads and won't appear in the list of loaded partitions until the next run or until the [`release()`](/kedro.io.IncrementalDataSet) method is called on the dataset object.
+* A pipeline cannot contain more than one node confirming the same dataset.
 
 
 #### Checkpoint configuration
@@ -573,7 +598,9 @@ my_partitioned_dataset:
     force_checkpoint: 2020-01-01/data.csv
 ```
 
-> *Note:* Specification of `force_checkpoint` is also supported via the shorthand notation as follows:
+```eval_rst
+.. note::  Specification of ``force_checkpoint`` is also supported via the shorthand notation as follows:
+```
 
 ```yaml
 my_partitioned_dataset:
@@ -583,7 +610,9 @@ my_partitioned_dataset:
   checkpoint: 2020-01-01/data.csv
 ```
 
-> *Note:* If you need to force the partitioned dataset to load all available partitions, set `checkpoint` to an empty string:
+```eval_rst
+.. note::  If you need to force the partitioned dataset to load all available partitions, set ``checkpoint`` to an empty string:
+```
 
 ```yaml
 my_partitioned_dataset:

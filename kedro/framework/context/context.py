@@ -395,7 +395,7 @@ class KedroContext:
             feed_dict=feed_dict,
             save_version=save_version,
             load_versions=load_versions,
-            run_id=self.run_id,
+            run_id=self.run_id or save_version,
         )
         return catalog
 
@@ -423,14 +423,11 @@ class KedroContext:
             KedroContextError: Incorrect ``ConfigLoader`` registered for the project.
 
         """
-        conf_root = settings.CONF_ROOT
-        conf_paths = [
-            str(self.project_path / conf_root / "base"),
-            str(self.project_path / conf_root / self.env),
-        ]
         hook_manager = get_hook_manager()
         config_loader = hook_manager.hook.register_config_loader(  # pylint: disable=no-member
-            conf_paths=conf_paths, env=self.env, extra_params=self._extra_params,
+            conf_root=str(self.project_path / settings.CONF_ROOT),
+            env=self.env,
+            extra_params=self._extra_params,
         )
         if not isinstance(config_loader, ConfigLoader):
             raise KedroContextError(

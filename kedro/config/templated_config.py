@@ -32,7 +32,7 @@ with the values from the passed dictionary.
 import re
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, Iterable, Optional, Union
+from typing import Any, Dict, Optional
 
 import jmespath
 
@@ -69,9 +69,13 @@ class TemplatedConfigLoader(ConfigLoader):
         >>>
         >>> class ProjectHooks:
         >>>     @hook_impl
-        >>>     def register_config_loader(self, conf_paths: Iterable[str]) -> ConfigLoader:
+        >>>     def register_config_loader(
+        >>>         self, conf_root: str, env: Optional[str], extra_params: Optional[Dict[str, Any]]
+        >>>     ) -> ConfigLoader:
         >>>         return TemplatedConfigLoader(
-        >>>             conf_paths,
+        >>>             conf_root,
+        >>>             env,
+        >>>             extra_params,
         >>>             globals_pattern="*globals.yml",
         >>>             globals_dict={"param1": "pandas.CSVDataSet"}
         >>>         )
@@ -121,16 +125,19 @@ class TemplatedConfigLoader(ConfigLoader):
 
     def __init__(
         self,
-        conf_paths: Union[str, Iterable[str]],
+        conf_root: str,
+        env: str = None,
+        extra_params: Dict[str, Any] = None,
         *,
         globals_pattern: Optional[str] = None,
         globals_dict: Optional[Dict[str, Any]] = None
     ):
-        """Instantiate a ``TemplatedConfigLoader``.
+        """Instantiates a ``TemplatedConfigLoader``.
 
         Args:
-            conf_paths: Non-empty path or list of paths to configuration
-                directories.
+            conf_root: Path to use as root directory for loading configuration.
+            env: Environment that will take precedence over base.
+            extra_params: Extra parameters passed to a Kedro run.
             globals_pattern: Optional keyword-only argument specifying a glob
                 pattern. Files that match the pattern will be loaded as a
                 formatting dictionary.
@@ -139,8 +146,7 @@ class TemplatedConfigLoader(ConfigLoader):
                 obtained from the globals_pattern. In case of duplicate keys, the
                 ``globals_dict`` keys take precedence.
         """
-
-        super().__init__(conf_paths)
+        super().__init__(conf_root, env, extra_params)
 
         self._arg_dict = super().get(globals_pattern) if globals_pattern else {}
         globals_dict = deepcopy(globals_dict) or {}

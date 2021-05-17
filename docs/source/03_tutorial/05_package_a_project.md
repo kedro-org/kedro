@@ -1,4 +1,4 @@
-# Packaging a project
+# Package a project
 
 This section explains how to build your project documentation, and how to bundle your project into a Python package.
 

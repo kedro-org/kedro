@@ -66,6 +66,7 @@ extensions = [
 # methods)
 autosummary_generate = True
 autosummary_generate_overwrite = False
+napoleon_include_init_with_doc = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -136,6 +137,7 @@ type_targets = {
         "CONF_ROOT",
         "integer -- return number of occurrences of value",
         "integer -- return first index of value.",
+        "kedro.extras.datasets.pandas.json_dataset.JSONDataSet"
     ),
     "py:data": (
         "typing.Any",
@@ -146,6 +148,7 @@ type_targets = {
     ),
     "py:exc": (
         "ValueError",
+        "BadConfigException",
         "MissingConfigException",
         "DataSetError",
         "ImportError",
@@ -467,12 +470,6 @@ def autodoc_process_docstring(app, what, name, obj, options, lines):
     remove_arrows_in_examples(lines)
 
 
-def skip(app, what, name, obj, skip, options):
-    if name == "__init__":
-        return False
-    return skip
-
-
 def _prepare_build_dir(app, config):
     """Get current working directory to the state expected
     by the ReadTheDocs builder. Shortly, it does the same as
@@ -516,7 +513,6 @@ def setup(app):
     app.connect("config-inited", _prepare_build_dir)
     app.connect("builder-inited", _add_jinja_filters)
     app.connect("autodoc-process-docstring", autodoc_process_docstring)
-    app.connect("autodoc-skip-member", skip)
     app.add_css_file("css/qb1-sphinx-rtd.css")
     # fix a bug with table wraps in Read the Docs Sphinx theme:
     # https://rackerlabs.github.io/docs-rackspace/tools/rtd-tables.html
@@ -524,16 +520,6 @@ def setup(app):
     # enable rendering RST tables in Markdown
     app.add_config_value("recommonmark_config", {"enable_eval_rst": True}, True)
     app.add_transform(AutoStructify)
-
-
-def fix_module_paths():
-    """
-    This method fixes the module paths of all class/functions we import in the
-    __init__.py file of the various kedro submodules.
-    """
-    for kedro_module in KEDRO_MODULES:
-        mod = importlib.import_module(kedro_module)
-        mod.__all__ = get_classes(kedro_module) + get_functions(kedro_module)
 
 
 # (regex, restructuredText link replacement, object) list
@@ -557,5 +543,3 @@ except Exception as e:
             fg="red",
         )
     )
-
-fix_module_paths()

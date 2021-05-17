@@ -127,6 +127,37 @@ class TestCatalogHooks:
         assert record.load_versions is None
         assert record.run_id is fake_run_id
 
+    def test_after_catalog_created_hook_default_run_id(
+        self, mocker, mock_session, dummy_dataframe, caplog
+    ):
+        context = mock_session.load_context()
+        fake_save_version = mocker.sentinel.fake_save_version
+        mocker.patch.object(
+            context, "_get_save_version", return_value=fake_save_version
+        )
+
+        catalog = context.catalog
+        config_loader = context.config_loader
+        project_path = context.project_path
+
+        catalog.save("cars", dummy_dataframe)
+        catalog.save("boats", dummy_dataframe)
+        context.run()
+
+        relevant_records = [
+            r for r in caplog.records if r.getMessage() == "Catalog created"
+        ]
+        # one for context.catalog, one for the run
+        assert len(relevant_records) == 2
+        record = relevant_records[1]
+        assert record.conf_creds == config_loader.get("credentials*")
+        assert record.conf_catalog == _convert_paths_to_absolute_posix(
+            project_path=project_path, conf_dictionary=config_loader.get("catalog*")
+        )
+        assert record.save_version is fake_save_version
+        assert record.load_versions is None
+        assert record.run_id is record.save_version
+
 
 class TestPipelineHooks:
     @pytest.mark.usefixtures("mock_pipelines")

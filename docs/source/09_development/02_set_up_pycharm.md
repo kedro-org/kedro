@@ -1,6 +1,8 @@
 # Set up PyCharm
 
-> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+```eval_rst
+.. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
+```
 
 This section will present a quick guide on how to configure [PyCharm](https://www.jetbrains.com/pycharm/) as a development environment for working on Kedro projects.
 
@@ -94,7 +96,9 @@ Then click the bug button in the toolbar (![](../meta/images/pycharm_debugger_bu
 
 ## Advanced: Remote SSH interpreter
 
-> *Note:* This section uses the features supported in PyCharm Professional Edition only.
+```eval_rst
+.. note::  This section uses features supported in PyCharm Professional Edition only.
+```
 
 Firstly, add an SSH interpreter. Go to **Preferences | Project Interpreter** as above and proceed to add a new interpreter. Select **SSH Interpreter** and fill in details of the remote computer:
 

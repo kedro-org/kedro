@@ -31,7 +31,7 @@ or more configuration files from specified paths.
 import logging
 from glob import iglob
 from pathlib import Path
-from typing import AbstractSet, Any, Dict, Iterable, List, Set, Union
+from typing import AbstractSet, Any, Dict, Iterable, List, Set
 from warnings import warn
 
 SUPPORTED_EXTENSIONS = [
@@ -51,20 +51,32 @@ class MissingConfigException(Exception):
     pass
 
 
+class BadConfigException(Exception):
+    """Raised when a configuration file cannot be loaded, for instance
+    due to wrong syntax or poor formatting.
+    """
+
+    pass
+
+
 class ConfigLoader:
-    """Recursively scan the directories specified in ``conf_paths`` for
+    """Recursively scan directories (config paths) contained in ``conf_root`` for
     configuration files with a ``yaml``, ``yml``, ``json``, ``ini``,
     ``pickle``, ``xml`` or ``properties`` extension, load them,
     and return them in the form of a config dictionary.
 
+    The first processed config path is the ``base`` directory inside
+    ``conf_root``. The optional ``env`` argument can be used to specify a
+    subdirectory of ``conf_root`` to process as a config path after ``base``.
+
     When the same top-level key appears in any 2 config files located in
-    the same ``conf_path`` (sub)directory, a ``ValueError`` is raised.
+    the same (sub)directory, a ``ValueError`` is raised.
 
     When the same key appears in any 2 config files located in different
-    ``conf_path`` directories, the last processed config path takes
-    precedence and overrides this key.
+    (sub)directories, the last processed config path takes precedence
+    and overrides this key.
 
-    For example, if your ``conf_path`` looks like this:
+    For example, if your ``conf_root`` looks like this:
     ::
 
         .
@@ -91,8 +103,7 @@ class ConfigLoader:
         >>> import logging.config
         >>> from kedro.config import ConfigLoader
         >>>
-        >>> conf_paths = ['conf/base', 'conf/local']
-        >>> conf_loader = ConfigLoader(conf_paths)
+        >>> conf_loader = ConfigLoader('conf', 'local')
         >>>
         >>> conf_logging = conf_loader.get('logging*')
         >>> logging.config.dictConfig(conf_logging)  # set logging conf
@@ -102,26 +113,28 @@ class ConfigLoader:
 
     """
 
-    def __init__(self, conf_paths: Union[str, Iterable[str]]):
-        """Instantiate a ConfigLoader.
+    def __init__(
+        self, conf_root: str, env: str = None, extra_params: Dict[str, Any] = None
+    ):
+        """Instantiates a ``ConfigLoader``.
 
         Args:
-            conf_paths: Non-empty path or list of paths to configuration
-                directories.
-        Raises:
-            ValueError: If ``conf_paths`` is empty.
-
+            conf_root: Path to use as root directory for loading configuration.
+            env: Environment that will take precedence over base.
+            extra_params: Extra parameters passed to a Kedro run.
         """
-        if not conf_paths:
-            raise ValueError(
-                "`conf_paths` must contain at least one path to "
-                "load configuration files from."
-            )
-        if isinstance(conf_paths, str):
-            conf_paths = [conf_paths]
-
-        self.conf_paths = _remove_duplicates(conf_paths)
+        self.conf_paths = _remove_duplicates(
+            self._build_conf_paths(Path(conf_root), env)
+        )
         self.logger = logging.getLogger(__name__)
+        self.extra_params = extra_params
+
+    @staticmethod
+    def _build_conf_paths(conf_root: Path, env: str = None) -> List[str]:
+        """Builds list of paths to use for configuration."""
+        if not env:
+            return [str(conf_root / "base")]
+        return [str(conf_root / "base"), str(conf_root / env)]
 
     @staticmethod
     def _load_config_file(config_file: Path) -> Dict[str, Any]:
@@ -130,17 +143,28 @@ class ConfigLoader:
         Args:
             config_file: Path to a config file to process.
 
+        Raises:
+            BadConfigException: If configuration is poorly formatted and
+                cannot be loaded.
+
         Returns:
             Parsed configuration.
         """
         # for performance reasons
         import anyconfig  # pylint: disable=import-outside-toplevel
 
-        # Default to UTF-8, which is Python 3 default encoding, to decode the file
-        with open(config_file, encoding="utf8") as yml:
-            return {
-                k: v for k, v in anyconfig.load(yml).items() if not k.startswith("_")
-            }
+        try:
+            # Default to UTF-8, which is Python 3 default encoding, to decode the file
+            with open(config_file, encoding="utf8") as yml:
+                return {
+                    k: v
+                    for k, v in anyconfig.load(yml).items()
+                    if not k.startswith("_")
+                }
+        except AttributeError as exc:
+            raise BadConfigException(
+                f"Couldn't load config file: {config_file}"
+            ) from exc
 
     def _load_configs(self, config_filepaths: List[Path]) -> Dict[str, Any]:
         """Recursively load all configuration files, which satisfy
@@ -151,6 +175,8 @@ class ConfigLoader:
 
         Raises:
             ValueError: If 2 or more configuration files contain the same key(s).
+            BadConfigException: If configuration is poorly formatted and
+                cannot be loaded.
 
         Returns:
             Resulting configuration dictionary.
@@ -197,6 +223,8 @@ class ConfigLoader:
                 top-level key.
             MissingConfigException: If no configuration files exist within
                 a specified config path.
+            BadConfigException: If configuration is poorly formatted and
+                cannot be loaded.
 
         Returns:
             Dict[str, Any]:  A Python dictionary with the combined

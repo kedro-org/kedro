@@ -5,49 +5,30 @@ kedro.io
 
 .. automodule:: kedro.io
 
-Data Catalog
-------------
+.. rubric:: Classes
 
 .. autosummary::
-    :toctree:
-    :template: autosummary/class.rst
+   :toctree:
+   :template: autosummary/class.rst
 
-    kedro.io.DataCatalog
+   kedro.io.AbstractDataSet
+   kedro.io.AbstractVersionedDataSet
+   kedro.io.AbstractTransformer
+   kedro.io.DataCatalog
+   kedro.io.LambdaDataSet
+   kedro.io.MemoryDataSet
+   kedro.io.PartitionedDataSet
+   kedro.io.IncrementalDataSet
+   kedro.io.CachedDataSet
+   kedro.io.DataCatalogWithDefault
+   kedro.io.Version
 
-Data Sets
----------
-
-.. autosummary::
-    :toctree:
-    :template: autosummary/class.rst
-
-    kedro.io.LambdaDataSet
-    kedro.io.MemoryDataSet
-    kedro.io.PartitionedDataSet
-    kedro.io.IncrementalDataSet
-    kedro.io.CachedDataSet
-    kedro.io.DataCatalogWithDefault
-
-Errors
-------
+.. rubric:: Exceptions
 
 .. autosummary::
-    :toctree:
-    :template: autosummary/class.rst
+   :toctree:
+   :template: autosummary/class.rst
 
-    kedro.io.DataSetAlreadyExistsError
-    kedro.io.DataSetError
-    kedro.io.DataSetNotFoundError
-
-
-Base Classes
-------------
-
-.. autosummary::
-    :toctree:
-    :template: autosummary/class.rst
-
-    kedro.io.AbstractDataSet
-    kedro.io.AbstractVersionedDataSet
-    kedro.io.AbstractTransformer
-    kedro.io.Version
+   kedro.io.DataSetAlreadyExistsError
+   kedro.io.DataSetError
+   kedro.io.DataSetNotFoundError

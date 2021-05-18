@@ -105,11 +105,7 @@ Versioned dataset `__init__` method must have an optional argument called `versi
 
 ### Versioning using the YAML API
 
-The easiest way to version a specific dataset is to change the corresponding entry in the `catalog.yml`.
-
-`catalog.yml` only allows you to choose to version your datasets but it does not allow to choose which version to load or save. In rare case it is strongly required you may want to instantiate your versioned datasets using Code API and define version parameter explicitly (see the [corresponding section](#versioning-using-the-code-api) below).
-
-For example, if the following dataset was defined in the `catalog.yml`:
+The easiest way to version a specific dataset is to change the corresponding entry in the `catalog.yml`. For example, if the following dataset was defined in the `catalog.yml`:
 
 ```yaml
 cars:
@@ -120,9 +116,7 @@ cars:
 
 The `DataCatalog` will create a versioned `CSVDataSet` called `cars`. The actual csv file location will look like `data/01_raw/company/car_data.csv/<version>/car_data.csv`, where `<version>` corresponds to a global save version string formatted as `YYYY-MM-DDThh.mm.ss.sssZ`. Every time the `DataCatalog` is instantiated, it generates a new global save version, which is propagated to all versioned datasets it contains.
 
-```eval_rst
-.. attention::  The ``DataCatalog`` does not re-generate save versions between instantiations. Therefore, if you call ``catalog.save('cars', some_data)`` twice, then the second call will fail, since it tries to overwrite a versioned dataset using the same save version. To mitigate this, reload your data catalog by calling ``%reload_kedro`` line magic. This limitation does not apply to ``load`` operation.
-```
+`catalog.yml` only allows you to version your datasets but it does not allow you to choose which version to load or save. This is deliberate because we have chosen to separate the data catalog from any runtime configuration. If you need to pin a dataset version, you can either [specify the versions in a separate `yml` file and call it at runtime](https://kedro.readthedocs.io/en/stable/04_kedro_project_setup/02_configuration.html#configuring-kedro-run-arguments) or [instantiate your versioned datasets using Code API and define a version parameter explicitly](#versioning-using-the-code-api).
 
 By default, the `DataCatalog` will load the latest version of the dataset. However, it is also possible to specify an exact load version. In order to do that, you can pass a dictionary with exact load versions to `DataCatalog.from_config`:
 
@@ -137,6 +131,10 @@ The last row in the example above would attempt to load a CSV file from `data/01
 * `load_versions` configuration has an effect only if a dataset versioning has been enabled in the catalog config file - see the example above.
 
 * We recommend that you do not override `save_version` argument in `DataCatalog.from_config` unless strongly required to do so, since it may lead to inconsistencies between loaded and saved versions of the versioned datasets.
+
+```eval_rst
+.. attention::  The ``DataCatalog`` does not re-generate save versions between instantiations. Therefore, if you call ``catalog.save('cars', some_data)`` twice, then the second call will fail, since it tries to overwrite a versioned dataset using the same save version. To mitigate this, reload your data catalog by calling ``%reload_kedro`` line magic. This limitation does not apply to ``load`` operation.
+```
 
 ### Versioning using the Code API
 

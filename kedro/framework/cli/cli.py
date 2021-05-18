@@ -95,20 +95,22 @@ def info():
     )
 
     plugin_versions = {}
-    plugin_hooks = defaultdict(set)
-    for hook, group in ENTRY_POINT_GROUPS.items():
+    plugin_entry_points = defaultdict(set)
+    for plugin_entry_point, group in ENTRY_POINT_GROUPS.items():
         for entry_point in pkg_resources.iter_entry_points(group=group):
             module_name = entry_point.module_name.split(".")[0]
             plugin_version = pkg_resources.get_distribution(module_name).version
             plugin_versions[module_name] = plugin_version
-            plugin_hooks[module_name].add(hook)
+            plugin_entry_points[module_name].add(plugin_entry_point)
 
     click.echo()
     if plugin_versions:
         click.echo("Installed plugins:")
         for plugin_name, plugin_version in sorted(plugin_versions.items()):
-            hooks = ",".join(sorted(plugin_hooks[plugin_name]))
-            click.echo(f"{plugin_name}: {plugin_version} (hooks:{hooks})")
+            entrypoints_str = ",".join(sorted(plugin_entry_points[plugin_name]))
+            click.echo(
+                f"{plugin_name}: {plugin_version} (entry points:{entrypoints_str})"
+            )
     else:
         click.echo("No plugins installed")
 
@@ -203,7 +205,7 @@ class KedroCLI(CommandCollection):
         # https://github.com/pallets/click/blob/master/src/click/core.py#L942-L945
         args = get_os_args() if args is None else list(args)
         self._cli_hook_manager.hook.before_command_run(
-            project_metadata=self._metadata, command_args=args,
+            project_metadata=self._metadata, command_args=args
         )
 
         super().main(
@@ -232,12 +234,7 @@ class KedroCLI(CommandCollection):
         if not self._metadata:
             return []
 
-        built_in = [
-            catalog_cli,
-            jupyter_cli,
-            pipeline_cli,
-            project_group,
-        ]
+        built_in = [catalog_cli, jupyter_cli, pipeline_cli, project_group]
 
         plugins = load_entry_points("project")
 

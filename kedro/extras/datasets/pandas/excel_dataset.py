@@ -94,7 +94,7 @@ class ExcelDataSet(AbstractVersionedDataSet):
             load_args: Pandas options for loading Excel files.
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_excel.html
-                All defaults are preserved, but "engine", which is set to "xlrd".
+                All defaults are preserved, but "engine", which is set to "openpyxl".
             save_args: Pandas options for saving Excel files.
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_excel.html

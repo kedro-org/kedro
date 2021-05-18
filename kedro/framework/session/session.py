@@ -86,7 +86,7 @@ def _deactivate_session() -> None:
     _active_session = None
 
 
-def _describe_git(project_path: Path) -> Dict[str, Dict[str, str]]:
+def _describe_git(project_path: Path) -> Dict[str, Dict[str, Any]]:
     project_path = str(project_path)
 
     try:
@@ -98,7 +98,7 @@ def _describe_git(project_path: Path) -> Dict[str, Dict[str, str]]:
         logging.getLogger(__name__).warning("Unable to git describe %s", project_path)
         return {}
 
-    git_data = {"commit_sha": res.decode().strip()}
+    git_data = {"commit_sha": res.decode().strip()}  # type: Dict[str, Any]
 
     res = subprocess.check_output(["git", "status", "--short"], cwd=project_path)
     git_data["dirty"] = bool(res.decode().strip())

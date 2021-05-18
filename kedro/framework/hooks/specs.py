@@ -32,7 +32,6 @@ For more information about these specifications, please visit
 """
 from typing import Any, Dict, Optional
 
-from kedro.config import ConfigLoader
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
@@ -325,22 +324,6 @@ class RegistrationSpecs:
         Returns:
             A mapping from a pipeline name to a ``Pipeline`` object.
 
-        """
-        pass
-
-    @hook_spec(firstresult=True)
-    def register_config_loader(
-        self, conf_root: str, env: Optional[str], extra_params: Optional[Dict[str, Any]]
-    ) -> ConfigLoader:
-        """Hook to be invoked to register a project's config loader.
-
-        Args:
-            conf_root: Path to use as root directory for loading configuration.
-            env: Environment that will take precedence over base.
-            extra_params: Extra parameters passed to a Kedro run.
-
-        Returns:
-            An instance of a ``ConfigLoader``.
         """
         pass
 

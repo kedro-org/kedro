@@ -31,15 +31,12 @@ import re
 import subprocess
 import textwrap
 from pathlib import Path
-from typing import Any, Dict, Optional
 
 import pytest
 import toml
 
 from kedro import __version__ as kedro_version
-from kedro.config import ConfigLoader
 from kedro.framework.context import KedroContext
-from kedro.framework.hooks import hook_impl
 from kedro.framework.project import (
     ValidationError,
     Validator,
@@ -72,14 +69,6 @@ def mock_context_class(mocker):
     return mocker.patch("kedro.framework.session.session.KedroContext", autospec=True)
 
 
-class ConfigLoaderHooks:
-    @hook_impl
-    def register_config_loader(
-        self, conf_root: str, env: Optional[str], extra_params: Optional[Dict[str, Any]]
-    ) -> ConfigLoader:
-        return ConfigLoader(conf_root, env, extra_params)
-
-
 def _mock_imported_settings_paths(mocker, mock_settings):
     for path in [
         "kedro.framework.project.settings",
@@ -92,16 +81,12 @@ def _mock_imported_settings_paths(mocker, mock_settings):
 
 @pytest.fixture
 def mock_settings(mocker):
-    class MockSettings(_ProjectSettings):
-        _HOOKS = Validator("HOOKS", default=(ConfigLoaderHooks(),))
-
-    return _mock_imported_settings_paths(mocker, MockSettings())
+    return _mock_imported_settings_paths(mocker, _ProjectSettings())
 
 
 @pytest.fixture
 def mock_settings_context_class(mocker, mock_context_class):
     class MockSettings(_ProjectSettings):
-        _HOOKS = Validator("HOOKS", default=(ConfigLoaderHooks(),))
         _CONTEXT_CLASS = Validator(
             "CONTEXT_CLASS", default=lambda *_: mock_context_class
         )
@@ -115,7 +100,6 @@ def mock_settings_custom_context_class(mocker):
         pass
 
     class MockSettings(_ProjectSettings):
-        _HOOKS = Validator("HOOKS", default=(ConfigLoaderHooks(),))
         _CONTEXT_CLASS = Validator("CONTEXT_CLASS", default=lambda *_: MyContext)
 
     return _mock_imported_settings_paths(mocker, MockSettings())
@@ -161,7 +145,6 @@ def mock_settings_shelve_session_store(mocker, fake_project):
     shelve_location = fake_project / "nested" / "sessions"
 
     class MockSettings(_ProjectSettings):
-        _HOOKS = Validator("HOOKS", default=(ConfigLoaderHooks(),))
         _SESSION_STORE_CLASS = Validator(
             "SESSION_STORE_CLASS", default=lambda *_: ShelveStore
         )

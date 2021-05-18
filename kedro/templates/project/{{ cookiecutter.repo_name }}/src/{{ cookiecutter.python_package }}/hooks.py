@@ -29,19 +29,12 @@
 """Project hooks."""
 from typing import Any, Dict, Optional
 
-from kedro.config import ConfigLoader
 from kedro.framework.hooks import hook_impl
 from kedro.io import DataCatalog
 from kedro.versioning import Journal
 
 
 class ProjectHooks:
-    @hook_impl
-    def register_config_loader(
-        self, conf_root: str, env: Optional[str], extra_params: Optional[Dict[str, Any]]
-    ) -> ConfigLoader:
-        return ConfigLoader(conf_root, env, extra_params)
-
     @hook_impl
     def register_catalog(
         self,

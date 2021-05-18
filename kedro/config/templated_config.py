@@ -36,7 +36,7 @@ from typing import Any, Dict, Optional
 
 import jmespath
 
-from kedro.config.config import ConfigLoader
+from kedro.config import ConfigLoader
 
 IDENTIFIER_PATTERN = re.compile(
     r"""\$\{
@@ -64,21 +64,10 @@ class TemplatedConfigLoader(ConfigLoader):
     Example:
     ::
 
+        >>> # in settings.py
         >>> from kedro.config import TemplatedConfigLoader
         >>>
-        >>>
-        >>> class ProjectHooks:
-        >>>     @hook_impl
-        >>>     def register_config_loader(
-        >>>         self, conf_root: str, env: Optional[str], extra_params: Optional[Dict[str, Any]]
-        >>>     ) -> ConfigLoader:
-        >>>         return TemplatedConfigLoader(
-        >>>             conf_root,
-        >>>             env,
-        >>>             extra_params,
-        >>>             globals_pattern="*globals.yml",
-        >>>             globals_dict={"param1": "pandas.CSVDataSet"}
-        >>>         )
+        >>> CONFIG_LOADER_CLASS = TemplatedConfigLoader
 
     The contents of the dictionary resulting from the `globals_pattern` get
     merged with the ``globals_dict``. In case of conflicts, the keys in

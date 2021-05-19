@@ -396,7 +396,7 @@ If you get an error message `Module ``<module_name>`` not found. Make sure to in
 2. Run [`kedro install`](#install-all-package-dependencies) command from your terminal
 
 ##### Copy tagged cells
-To copy the code from cells [tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) with `node` tag into Python files under `src/<package_name>/nodes/` in a Kedro project:
+To copy the code from cells [tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#id35) with `node` tag into Python files under `src/<package_name>/nodes/` in a Kedro project:
 
 ```bash
 kedro jupyter convert --all

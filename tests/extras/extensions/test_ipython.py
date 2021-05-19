@@ -31,7 +31,7 @@ import pytest
 from kedro.extras.extensions.ipython import (
     init_kedro,
     load_ipython_extension,
-    reload_kedro,
+    load_kedro_objects,
 )
 from kedro.framework.session.session import _deactivate_session
 from kedro.framework.startup import ProjectMetadata
@@ -115,53 +115,13 @@ class TestLoadKedroObjects:
         mock_context = mocker.patch("kedro.framework.session.KedroSession.load_context")
         mock_ipython = mocker.patch("kedro.extras.extensions.ipython.get_ipython")
 
-        reload_kedro(tmp_path)
+        load_kedro_objects(tmp_path)
 
         mock_ipython().push.assert_called_once_with(
             variables={
                 "context": mock_context(),
                 "catalog": mock_context().catalog,
                 "session": mocker.ANY,
-            }
-        )
-        assert mock_register_line_magic.call_count == 1
-
-    def test_load_kedro_objects_extra_args(self, tmp_path, mocker):
-        fake_metadata = ProjectMetadata(
-            source_dir=tmp_path / "src",  # default
-            config_file=tmp_path / "pyproject.toml",
-            package_name="fake_package_name",
-            project_name="fake_project_name",
-            project_version="0.1",
-            project_path=tmp_path,
-        )
-        mocker.patch("kedro.framework.session.session.configure_project")
-        mocker.patch(
-            "kedro.framework.startup.bootstrap_project", return_value=fake_metadata,
-        )
-        mock_line_magic = mocker.MagicMock()
-        mock_line_magic.__name__ = "abc"
-        mocker.patch(
-            "kedro.framework.cli.load_entry_points", return_value=[mock_line_magic]
-        )
-        mock_register_line_magic = mocker.patch(
-            "kedro.extras.extensions.ipython.register_line_magic"
-        )
-        mock_session_create = mocker.patch(
-            "kedro.framework.session.KedroSession.create"
-        )
-        mock_ipython = mocker.patch("kedro.extras.extensions.ipython.get_ipython")
-
-        reload_kedro(tmp_path, env="env1", extra_params={"key": "val"})
-
-        mock_session_create.assert_called_once_with(
-            "fake_package_name", tmp_path, env="env1", extra_params={"key": "val"}
-        )
-        mock_ipython().push.assert_called_once_with(
-            variables={
-                "context": mock_session_create().load_context(),
-                "catalog": mock_session_create().load_context().catalog,
-                "session": mock_session_create(),
             }
         )
         assert mock_register_line_magic.call_count == 1
@@ -173,7 +133,7 @@ class TestLoadKedroObjects:
         mock_ipython = mocker.patch("kedro.extras.extensions.ipython.get_ipython")
 
         with pytest.raises(RuntimeError):
-            reload_kedro(tmp_path)
+            load_kedro_objects(tmp_path)
         assert not mock_ipython().called
         assert not mock_ipython().push.called
 

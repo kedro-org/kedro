@@ -293,6 +293,10 @@ In [2]: %init_kedro <path_to_project_root>
 In [3]: %reload_kedro
 ```
 
+```eval_rst
+    .. note:: Note that if you want to pass an argument to `reload_kedro` line magic function, you should call it like a normal Python function (e.g `reload_kedro(path, env=env, extra_params=extra_params)` rather than using `%reload_kedro` in a notebook cell (e.g. `%reload_kedro(path, extra_params=extra_params)` wouldn’t work). You might have to call `%automagic False` beforehand to make this work.
+```
+
 To configure the extension to be loaded automatically every time when you open an IPython shell, do the following:
 
 * Run `ipython profile create` to create the config file `~/.ipython/profile_default/ipython_config.py` if it doesn't exist

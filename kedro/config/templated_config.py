@@ -56,10 +56,8 @@ class TemplatedConfigLoader(ConfigLoader):
     wrapped in brackets like: ${...}, to be automatically formatted
     based on the configs.
 
-    The easiest way to use this class is by registering it into the
-    ``KedroContext`` using hooks. This can be done by updating the
-    hook implementation `register_config_loader` in `hooks.py`, making it return
-    a ``TemplatedConfigLoader`` object instead of a ``ConfigLoader`` object.
+    The easiest way to use this class is by setting the `CONFIG_LOADER_CLASS` constant
+    in `settings.py`.
 
     Example:
     ::

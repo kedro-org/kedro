@@ -552,17 +552,17 @@ workflows:
             - unit_tests_38
             - linters_38
             - e2e_tests_38
-#            - unit_tests_39  # TODO: activate once image is auto-generated
-#            - linters_39  # TODO: activate once image is auto-generated
-#            - e2e_tests_39  # TODO: activate once image is auto-generated
+            - unit_tests_39
+            - linters_39
+            - e2e_tests_39
             - pip_compile_36
             - pip_compile_37
             - pip_compile_38
-#            - pip_compile_39  # TODO: activate once image is auto-generated
+            - pip_compile_39
             - win_pip_compile_36
             - win_pip_compile_37
             - win_pip_compile_38
-#            - win_pip_compile_39  # TODO: activate once image is auto-generated
+            - win_pip_compile_39
             - win_unit_tests_36
             - win_unit_tests_37
             - win_e2e_tests_36
@@ -571,4 +571,4 @@ workflows:
             # - win_unit_tests_39
             - win_e2e_tests_37
             - win_e2e_tests_38
-#            - win_e2e_tests_39  # TODO: activate once image is auto-generated
+            - win_e2e_tests_39

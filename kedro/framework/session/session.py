@@ -41,10 +41,7 @@ import click
 
 from kedro import __version__ as kedro_version
 from kedro.framework.context import KedroContext
-from kedro.framework.context.context import (
-    KedroContextError,
-    _convert_paths_to_absolute_posix,
-)
+from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import get_hook_manager
 from kedro.framework.project import configure_project, pipelines, settings
 from kedro.framework.session.store import BaseSessionStore
@@ -89,7 +86,7 @@ def _deactivate_session() -> None:
     _active_session = None
 
 
-def _describe_git(project_path: Path) -> Dict[str, Dict[str, str]]:
+def _describe_git(project_path: Path) -> Dict[str, Dict[str, Any]]:
     project_path = str(project_path)
 
     try:
@@ -101,7 +98,7 @@ def _describe_git(project_path: Path) -> Dict[str, Dict[str, str]]:
         logging.getLogger(__name__).warning("Unable to git describe %s", project_path)
         return {}
 
-    git_data = {"commit_sha": res.decode().strip()}
+    git_data = {"commit_sha": res.decode().strip()}  # type: Dict[str, Any]
 
     res = subprocess.check_output(["git", "status", "--short"], cwd=project_path)
     git_data["dirty"] = bool(res.decode().strip())
@@ -339,7 +336,7 @@ class KedroSession:
             load_versions: An optional flag to specify a particular dataset
                 version timestamp to load.
         Raises:
-            KedroContextError: If the named or `__default__` pipeline is not
+            ValueError: If the named or `__default__` pipeline is not
                 defined by `register_pipelines`.
             Exception: Any uncaught exception during the run will be re-raised
                 after being passed to ``on_pipeline_error`` hook.
@@ -361,14 +358,13 @@ class KedroSession:
         try:
             pipeline = pipelines[name]
         except (TypeError, KeyError) as exc:
-            raise KedroContextError(
+            raise ValueError(
                 f"Failed to find the pipeline named '{name}'. "
                 f"It needs to be generated and returned "
                 f"by the 'register_pipelines' function."
             ) from exc
 
-        filtered_pipeline = context._filter_pipeline(
-            pipeline=pipeline,
+        filtered_pipeline = pipeline.filter(
             tags=tags,
             from_nodes=from_nodes,
             to_nodes=to_nodes,

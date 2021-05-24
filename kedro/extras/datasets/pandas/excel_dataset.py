@@ -67,7 +67,7 @@ class ExcelDataSet(AbstractVersionedDataSet):
 
     """
 
-    DEFAULT_LOAD_ARGS = {"engine": "xlrd"}
+    DEFAULT_LOAD_ARGS = {"engine": "openpyxl"}
     DEFAULT_SAVE_ARGS = {"index": False}
 
     # pylint: disable=too-many-arguments
@@ -94,7 +94,7 @@ class ExcelDataSet(AbstractVersionedDataSet):
             load_args: Pandas options for loading Excel files.
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_excel.html
-                All defaults are preserved, but "engine", which is set to "xlrd".
+                All defaults are preserved, but "engine", which is set to "openpyxl".
             save_args: Pandas options for saving Excel files.
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_excel.html

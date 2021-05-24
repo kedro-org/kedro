@@ -31,12 +31,10 @@
 This module implements commands available from the kedro CLI.
 """
 import importlib
-import warnings
 import webbrowser
 from collections import defaultdict
-from copy import deepcopy
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Sequence
 
 import click
 import pkg_resources
@@ -58,7 +56,6 @@ from kedro.framework.cli.utils import (
     KedroCliError,
     load_entry_points,
 )
-from kedro.framework.context.context import load_context
 from kedro.framework.startup import _is_project, bootstrap_project
 
 LOGO = rf"""
@@ -123,43 +120,6 @@ def docs():
     index_path = f"file://{html_path}"
     click.echo(f"Opening {index_path}")
     webbrowser.open(index_path)
-
-
-def get_project_context(
-    key: str = "context", project_path: Path = None, **kwargs
-) -> Any:
-    """Gets the context value from context associated with the key.
-
-    Args:
-        key: Optional key to get associated value from Kedro context.
-            Supported keys are "verbose" and "context", and it defaults to "context".
-        project_path: Optional path to where the project root is to load the context.
-            If omitted, the current working directory will be used.
-        kwargs: Optional custom arguments defined by users, which will be passed into
-            the constructor of the projects KedroContext subclass.
-
-    Returns:
-        Requested value from Kedro context dictionary or the default if the key
-            was not found.
-
-    Raises:
-        KedroCliError: When the key is not found and the default value was not
-            specified.
-    """
-    warnings.warn(
-        "`get_project_context` is now deprecated and will be removed in Kedro 0.18.0. "
-        "Please use `KedroSession.load_context()` to access the "
-        "`KedroContext` object. For more information, please visit "
-        "https://kedro.readthedocs.io/en/stable/04_kedro_project_setup/03_session.html",
-        DeprecationWarning,
-    )
-    project_path = project_path or Path.cwd()
-    context = load_context(project_path, **kwargs)
-    # Dictionary to be compatible with existing Plugins. Future plugins should
-    # retrieve necessary Kedro project properties from context
-    value = {"context": context, "verbose": KedroCliError.VERBOSE_ERROR}[key]
-
-    return deepcopy(value)
 
 
 def _init_plugins():

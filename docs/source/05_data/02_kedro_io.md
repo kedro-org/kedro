@@ -480,6 +480,30 @@ def create_partitions() -> Dict[str, Any]:
 .. note::  Writing to an existing partition may result in its data being overwritten, if this case is not specifically handled by the underlying dataset implementation. You should implement your own checks to ensure that no existing data is lost when writing to a ``PartitionedDataSet``. The simplest safety mechanism could be to use partition IDs that have a high chance of uniqueness: for example, the current timestamp.
 ```
 
+`PartitionedDataSet` also supports lazy saving, where the partition's data is not materialized until it's time to write.
+To use this, simply return `Callable` types in the dictionary:
+
+```python
+from typing import Any, Dict, Callable
+import pandas as pd
+
+
+def create_partitions() -> Dict[str, Callable[[], Any]]:
+    """Create new partitions and save using PartitionedDataSet.
+
+    Returns:
+        Dictionary of the partitions to create to a function that creates them.
+    """
+    return {
+        # create a file "s3://my-bucket-name/part/foo.csv"
+        "part/foo": lambda: pd.DataFrame({"data": [1, 2]}),
+        # create a file "s3://my-bucket-name/part/bar.csv"
+        "part/bar": lambda: pd.DataFrame({"data": [3, 4]}),
+    }
+```
+
+> *Note:* When using lazy saving the dataset will be written _after_ the `after_node_run` [hook](../07_extend_kedro/02_hooks).
+
 ### Incremental loads with `IncrementalDataSet`
 
 [IncrementalDataSet](/kedro.io.IncrementalDataSet) is a subclass of `PartitionedDataSet`, which stores the information about the last processed partition in the so-called `checkpoint`. `IncrementalDataSet` addresses the use case when partitions have to be processed incrementally, i.e. each subsequent pipeline run should only process the partitions which were not processed by the previous runs.

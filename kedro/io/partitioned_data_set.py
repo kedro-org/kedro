@@ -76,7 +76,7 @@ class PartitionedDataSet(AbstractDataSet):
         >>>
         >>> data_set = PartitionedDataSet(
         >>>     path="s3://bucket-name/path/to/folder",
-        >>>     dataset="CSVDataSet",
+        >>>     dataset="pandas.CSVDataSet",
         >>>     credentials=credentials
         >>> )
         >>> loaded = data_set.load()

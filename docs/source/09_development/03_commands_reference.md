@@ -326,7 +326,7 @@ Further information is available in the [pipeline documentation](../06_nodes_and
 ```bash
 kedro pipeline describe <pipeline_name>
 ```
-The output includes all the nodes in the pipeline.
+The output includes all the nodes in the pipeline. If no pipeline name is provided, this command returns all nodes in the `__default__` pipeline.
 
 ##### List all pipelines in your project
 

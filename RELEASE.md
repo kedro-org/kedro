@@ -14,6 +14,7 @@
 * Update the IPython extension to allow passing `env` and `extra_params` to `reload_kedro`  similar to how the IPython script works.
 * `kedro info` now outputs if a plugin has any `hooks` or `cli_hooks` implemented.
 * `PartitionedDataSet` now supports lazily materializing data on save.
+* `kedro pipeline describe` now defaults to the `__default__` pipeline when no pipeline name is provided and also shows the namespace the nodes belong to.
 
 ## Minor breaking changes to the API
 

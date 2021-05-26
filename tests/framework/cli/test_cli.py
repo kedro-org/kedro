@@ -121,7 +121,10 @@ class TestCliCommands:
 
         result = CliRunner().invoke(cli, ["info"])
         assert result.exit_code == 0
-        assert "bob: 1.0.2 (hooks:global,init,line_magic,project)" in result.output
+        assert (
+            "bob: 1.0.2 (entry points:cli_hooks,global,hooks,init,line_magic,project)"
+            in result.output
+        )
 
         entry_point.load.assert_not_called()
 

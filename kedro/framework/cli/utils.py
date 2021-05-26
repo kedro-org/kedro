@@ -57,6 +57,8 @@ ENTRY_POINT_GROUPS = {
     "project": "kedro.project_commands",
     "init": "kedro.init",
     "line_magic": "kedro.line_magic",
+    "hooks": "kedro.hooks",
+    "cli_hooks": "kedro.cli_hooks",
 }
 
 

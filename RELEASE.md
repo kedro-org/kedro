@@ -35,12 +35,16 @@
 * `ConfigLoader.get()` now raises a `BadConfigException`, with a more helpful error message, if a configuration file cannot be loaded (for instance due to wrong syntax or poor formatting).
 * `run_id` now defaults to `save_version` when `after_catalog_created` is called, similarly to what happens during a `kedro run`.
 * Fixed a bug where `kedro ipython` and `kedro jupyter notebook` didn't work if the `PYTHONPATH` was already set.
+* Update the IPython extension to allow passing `env` and `extra_params` to `reload_kedro`  similar to how the IPython script works.
+* `kedro info` now outputs if a plugin has any `hooks` or `cli_hooks` implemented.
+* `PartitionedDataSet` now supports lazily materializing data on save.
 
 ## Minor breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.18.0
 
 ## Thanks for supporting contributions
+[Lou Kratz](https://github.com/lou-k)
 
 # Release 0.17.3
 

@@ -15,6 +15,7 @@
 * `kedro info` now outputs if a plugin has any `hooks` or `cli_hooks` implemented.
 * `PartitionedDataSet` now supports lazily materializing data on save.
 * `kedro pipeline describe` now defaults to the `__default__` pipeline when no pipeline name is provided and also shows the namespace the nodes belong to.
+* `EmailMessageDataSet` added to doctree.
 
 ## Minor breaking changes to the API
 
@@ -22,6 +23,7 @@
 
 ## Thanks for supporting contributions
 [Lou Kratz](https://github.com/lou-k)
+[Lucas Jamar](https://github.com/lucasjamar/)
 
 # Release 0.17.3
 

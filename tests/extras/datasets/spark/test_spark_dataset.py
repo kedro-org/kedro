@@ -33,7 +33,7 @@ from pathlib import Path, PurePosixPath
 import pandas as pd
 import pytest
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col  # pylint: disable=no-name-in-module
+from pyspark.sql.functions import col
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
 

@@ -110,6 +110,7 @@ There are Kedro users across the world, who work at start-ups, major enterprises
 [Telkomsel](https://www.linkedin.com/feed/update/urn:li:activity:6749338226403766272/updateEntityUrn=urn%3Ali%3Afs_feedUpdate%3A%28V2%2Curn%3Ali%3Aactivity%3A6749338226403766272%29),
 [Universidad Rey Juan Carlos](https://github.com/vchaparro/MasterThesis-wind-power-forecasting/blob/master/thesis.pdf),
 [UrbanLogiq](https://urbanlogiq.com/),
+[Wildlife Studios](https://wildlifestudios.com),
 [WovenLight](https://www.wovenlight.com/) and
 [XP](https://youtu.be/wgnGOVNkXqU?t=2210).
 

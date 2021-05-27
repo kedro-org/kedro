@@ -14,6 +14,7 @@
 * Update the IPython extension to allow passing `env` and `extra_params` to `reload_kedro`  similar to how the IPython script works.
 * `kedro info` now outputs if a plugin has any `hooks` or `cli_hooks` implemented.
 * `PartitionedDataSet` now supports lazily materializing data on save.
+* `kedro pipeline describe` now defaults to the `__default__` pipeline when no pipeline name is provided and also shows the namespace the nodes belong to.
 
 ## Minor breaking changes to the API
 
@@ -50,6 +51,7 @@ print(pipelines["__default__"])  # pipeline loading is only triggered here
 * Fixed error when using starters on Windows with Python 3.7 (Issue [#722](https://github.com/quantumblacklabs/kedro/issues/722)).
 * Fixed decoding error of config files that contain accented characters by opening them for reading in UTF-8.
 * Fixed an issue where `after_dataset_loaded` run would finish before a dataset is actually loaded when using `--async` flag.
+* Fixed an issue where `spark.SparkDataSet` with enabled versioning would throw a `VersionNotFoundError` when using `databricks-connect` from a remote machine and saving to `dbfs` filesystem.
 
 ## Upcoming deprecations for Kedro 0.18.0
 

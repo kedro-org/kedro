@@ -112,12 +112,13 @@ def yaml_dump_mock(mocker):
 @pytest.fixture
 def pipelines_dict():
     pipelines = {
-        "de": ["Split Data (split_data)"],
+        "de": ["split_data (split_data)"],
         "ds": [
-            "Train Model (train_model)",
-            "Predict (predict)",
-            "Report Accuracy (report_accuracy)",
+            "train_model (train_model)",
+            "predict (predict)",
+            "report_accuracy (report_accuracy)",
         ],
+        "dp": ["data_processing.split_data (split_data)"],
     }
     pipelines["__default__"] = pipelines["de"] + pipelines["ds"]
     return pipelines
@@ -570,7 +571,7 @@ def test_list_pipelines(
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
 class TestPipelineDescribeCommand:
-    @pytest.mark.parametrize("pipeline_name", ["de", "ds", "__default__"])
+    @pytest.mark.parametrize("pipeline_name", ["de", "ds", "dp", "__default__"])
     def test_describe_pipeline(
         self,
         fake_project_cli,
@@ -597,9 +598,20 @@ class TestPipelineDescribeCommand:
         assert result.exit_code
         expected_output = (
             "Error: `missing` pipeline not found. Existing pipelines: "
-            "[__default__, de, ds]\n"
+            "[__default__, de, dp, ds]\n"
         )
         assert expected_output in result.output
+
+    def test_describe_pipeline_default(
+        self, fake_project_cli, fake_metadata, yaml_dump_mock, pipelines_dict,
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli, ["pipeline", "describe"], obj=fake_metadata,
+        )
+
+        assert not result.exit_code
+        expected_dict = {"Nodes": pipelines_dict["__default__"]}
+        yaml_dump_mock.assert_called_once_with(expected_dict)
 
 
 class TestSyncDirs:

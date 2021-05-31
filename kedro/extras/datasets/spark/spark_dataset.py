@@ -114,6 +114,26 @@ def _get_dbutils(spark: SparkSession) -> Optional[Any]:
     return dbutils
 
 
+def _dbfs_exists(pattern: str, dbutils: Any) -> bool:
+    """Perform an `ls` list operation in DBFS using the provided pattern.
+    It is assumed that version paths are managed by Kedro.
+    Broad `Exception` is present due to `dbutils.fs.ExecutionError` that
+    cannot be imported directly.
+    Args:
+        pattern: Filepath to search for.
+        dbutils: dbutils instance to operate with DBFS.
+    Returns:
+        Boolean value if filepath exists.
+    """
+    pattern = _strip_dbfs_prefix(pattern)
+    file = _parse_glob_pattern(pattern)
+    try:
+        dbutils.fs.ls(file)
+        return True
+    except Exception:  # pylint: disable=broad-except
+        return False
+
+
 class KedroHdfsInsecureClient(InsecureClient):
     """Subclasses ``hdfs.InsecureClient`` and implements ``hdfs_exists``
     and ``hdfs_glob`` methods required by ``SparkDataSet``"""
@@ -270,6 +290,7 @@ class SparkDataSet(AbstractVersionedDataSet):
                 dbutils = _get_dbutils(self._get_spark())
                 if dbutils:
                     glob_function = partial(_dbfs_glob, dbutils=dbutils)
+                    exists_function = partial(_dbfs_exists, dbutils=dbutils)
 
         super().__init__(
             filepath=path,

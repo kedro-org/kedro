@@ -220,12 +220,12 @@ def list_pipelines():
 
 
 @command_with_verbosity(pipeline, "describe")
-@click.argument("name", nargs=1)
+@click.argument("name", nargs=1, default="__default__")
 @click.pass_obj
 def describe_pipeline(
     metadata: ProjectMetadata, name, **kwargs
-):  # pylint: disable=unused-argument
-    """Describe a pipeline by providing a pipeline name."""
+):  # pylint: disable=unused-argument, protected-access
+    """Describe a pipeline by providing a pipeline name. Defaults to the __default__ pipeline."""
     pipeline_obj = pipelines.get(name)
     if not pipeline_obj:
         all_pipeline_names = pipelines.keys()
@@ -234,12 +234,11 @@ def describe_pipeline(
             f"`{name}` pipeline not found. Existing pipelines: [{existing_pipelines}]"
         )
 
-    result = {
-        "Nodes": [
-            f"{node.short_name} ({node._func_name})"  # pylint: disable=protected-access
-            for node in pipeline_obj.nodes
-        ]
-    }
+    nodes = []
+    for node in pipeline_obj.nodes:
+        namespace = f"{node.namespace}." if node.namespace else ""
+        nodes.append(f"{namespace}{node._name or node._func_name} ({node._func_name})")
+    result = {"Nodes": nodes}
 
     click.echo(yaml.dump(result))
 
@@ -477,8 +476,8 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
     _validate_dir(artifacts_to_package.pipeline_dir)
     destination = Path(destination) if destination else package_dir.parent / "dist"
 
-    _generate_wheel_file(  # type: ignore
-        pipeline_name, destination, source_paths, version, alias=alias
+    _generate_wheel_file(
+        pipeline_name, destination, source_paths, version, alias=alias  # type: ignore
     )
 
     _clean_pycache(package_dir)

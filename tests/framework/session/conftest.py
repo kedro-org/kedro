@@ -38,7 +38,6 @@ import yaml
 from dynaconf.validator import Validator
 
 from kedro import __version__ as kedro_version
-from kedro.config import ConfigLoader
 from kedro.framework.hooks import hook_impl
 from kedro.framework.hooks.manager import get_hook_manager
 from kedro.framework.project import _ProjectPipelines, _ProjectSettings
@@ -373,16 +372,6 @@ class LoggingHooks:
         logger.info(
             "After dataset saved", extra={"dataset_name": dataset_name, "data": data}
         )
-
-    @hook_impl
-    def register_config_loader(
-        self, conf_root: str, env: Optional[str], extra_params: Optional[Dict[str, Any]]
-    ) -> ConfigLoader:
-        logger.info(
-            "Registering config loader",
-            extra={"conf_root": conf_root, "env": env, "extra_params": extra_params},
-        )
-        return ConfigLoader(conf_root, env, extra_params)
 
     @hook_impl
     def register_catalog(

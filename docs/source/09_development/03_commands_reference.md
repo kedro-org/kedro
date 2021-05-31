@@ -326,7 +326,7 @@ Further information is available in the [pipeline documentation](../06_nodes_and
 ```bash
 kedro pipeline describe <pipeline_name>
 ```
-The output includes all the nodes in the pipeline.
+The output includes all the nodes in the pipeline. If no pipeline name is provided, this command returns all nodes in the `__default__` pipeline.
 
 ##### List all pipelines in your project
 
@@ -396,7 +396,7 @@ If you get an error message `Module ``<module_name>`` not found. Make sure to in
 2. Run [`kedro install`](#install-all-package-dependencies) command from your terminal
 
 ##### Copy tagged cells
-To copy the code from cells [tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#release-5-0-0) with `node` tag into Python files under `src/<package_name>/nodes/` in a Kedro project:
+To copy the code from cells [tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) with `node` tag into Python files under `src/<package_name>/nodes/` in a Kedro project:
 
 ```bash
 kedro jupyter convert --all

@@ -33,14 +33,18 @@ from pathlib import Path, PurePosixPath
 import pandas as pd
 import pytest
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col  # pylint: disable=no-name-in-module
+from pyspark.sql.functions import col
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
 
 from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
 from kedro.extras.datasets.pickle import PickleDataSet
 from kedro.extras.datasets.spark import SparkDataSet
-from kedro.extras.datasets.spark.spark_dataset import _dbfs_glob, _get_dbutils
+from kedro.extras.datasets.spark.spark_dataset import (
+    _dbfs_exists,
+    _dbfs_glob,
+    _get_dbutils,
+)
 from kedro.io import DataCatalog, DataSetError, Version
 from kedro.io.core import generate_timestamp
 from kedro.pipeline import Pipeline, node
@@ -451,6 +455,22 @@ class TestSparkDataSetVersionedDBFS:
         result = _dbfs_glob(pattern, dbutils_mock)
         assert result == expected
         dbutils_mock.fs.ls.assert_called_once_with("/tmp/file")
+
+    def test_dbfs_exists(self, mocker):
+        dbutils_mock = mocker.Mock()
+        test_path = "/dbfs/tmp/file/date1/file"
+        dbutils_mock.fs.ls.return_value = [
+            FileInfo("/tmp/file/date1"),
+            FileInfo("/tmp/file/date2"),
+            FileInfo("/tmp/file/file.csv"),
+            FileInfo("/tmp/file/"),
+        ]
+
+        assert _dbfs_exists(test_path, dbutils_mock)
+
+        # add side effect to test that non-existence is handled
+        dbutils_mock.fs.ls.side_effect = Exception()
+        assert not _dbfs_exists(test_path, dbutils_mock)
 
     def test_ds_init_no_dbutils(self, mocker):
         get_dbutils_mock = mocker.patch(

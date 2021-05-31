@@ -33,6 +33,7 @@ local scope.
 import logging.config
 import sys
 from pathlib import Path
+from typing import Any, Dict
 
 from IPython import get_ipython
 from IPython.core.magic import needs_local_scope, register_line_magic
@@ -60,7 +61,7 @@ def _clear_hook_manager():
         hook_manager.unregister(name=name, plugin=plugin)  # pragma: no cover
 
 
-def load_kedro_objects(path, line=None):  # pylint: disable=unused-argument
+def reload_kedro(path, env: str = None, extra_params: Dict[str, Any] = None):
     """Line magic which reloads all Kedro default variables."""
 
     import kedro.config.default_logger  # noqa: F401 # pylint: disable=unused-import
@@ -73,15 +74,17 @@ def load_kedro_objects(path, line=None):  # pylint: disable=unused-argument
     global catalog
     global session
 
+    _clear_hook_manager()
+
     path = path or project_path
     metadata = bootstrap_project(path)
 
-    _clear_hook_manager()
-
     _remove_cached_modules(metadata.package_name)
 
-    session = KedroSession.create(metadata.package_name, path)
-    _activate_session(session)
+    session = KedroSession.create(
+        metadata.package_name, path, env=env, extra_params=extra_params
+    )
+    _activate_session(session, force=True)
     logging.debug("Loading the context from %s", str(path))
     context = session.load_context()
     catalog = context.catalog
@@ -95,7 +98,7 @@ def load_kedro_objects(path, line=None):  # pylint: disable=unused-argument
 
     for line_magic in load_entry_points("line_magic"):
         register_line_magic(needs_local_scope(line_magic))
-        logging.info("Registered line magic `%s`", line_magic.__name__)
+        logging.info("Registered line magic `%s`", line_magic.__name__)  # type: ignore
 
 
 def init_kedro(path=""):
@@ -113,10 +116,10 @@ def init_kedro(path=""):
 def load_ipython_extension(ipython):
     """Main entry point when %load_ext is executed"""
     ipython.register_magic_function(init_kedro, "line")
-    ipython.register_magic_function(load_kedro_objects, "line", "reload_kedro")
+    ipython.register_magic_function(reload_kedro, "line", "reload_kedro")
 
     try:
-        load_kedro_objects(project_path)
+        reload_kedro(project_path)
     except (ImportError, ModuleNotFoundError):
         logging.error("Kedro appears not to be installed in your current environment.")
     except Exception:  # pylint: disable=broad-except

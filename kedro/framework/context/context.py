@@ -210,7 +210,8 @@ class KedroContext:
         extra_params: Dict[str, Any] = None,
     ):
         """Create a context object by providing the root of a Kedro project and
-        the environment configuration subfolders (see ``kedro.config.ConfigLoader``)
+        the environment configuration subfolders
+        (see ``kedro.config.ConfigLoader``)
 
         Raises:
             KedroContextError: If there is a mismatch
@@ -418,23 +419,22 @@ class KedroContext:
         """A hook for changing the creation of a ConfigLoader instance.
 
         Returns:
-            Instance of `ConfigLoader` created by `register_config_loader` hook.
+            Instance of `ConfigLoader` created by `settings.py`.
         Raises:
             KedroContextError: Incorrect ``ConfigLoader`` registered for the project.
 
         """
-        hook_manager = get_hook_manager()
-        config_loader = hook_manager.hook.register_config_loader(  # pylint: disable=no-member
-            conf_root=str(self.project_path / settings.CONF_ROOT),
-            env=self.env,
-            extra_params=self._extra_params,
-        )
-        if not isinstance(config_loader, ConfigLoader):
+        try:
+            return settings.CONFIG_LOADER_CLASS(
+                conf_root=str(self.project_path / settings.CONF_ROOT),
+                env=self.env,
+                extra_params=self._extra_params,
+            )
+        except TypeError as exc:
             raise KedroContextError(
                 f"Expected an instance of `ConfigLoader`, "
-                f"got `{type(config_loader).__name__}` instead."
-            )
-        return config_loader
+                f"got `{type(settings.CONFIG_LOADER_CLASS)}` instead."
+            ) from exc
 
     @property
     def config_loader(self) -> ConfigLoader:

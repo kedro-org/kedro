@@ -164,8 +164,14 @@ def install(metadata: ProjectMetadata, compile_flag):
         python_call("pip", pip_command)
     else:
         command = [sys.executable, "-m", "pip"] + pip_command
+        # To comply with mypy, `shell=True` should be passed instead of
+        # `creationflags=subprocess.CREATE_NEW_CONSOLE`. However, bandit finds security
+        # issues for subprocess calls with `shell=True`, so we ignore type instead. See:
+        # https://bandit.readthedocs.io/en/latest/plugins/b602_subprocess_popen_with_shell_equals_true.html
         proc = subprocess.Popen(
-            command, creationflags=subprocess.CREATE_NEW_CONSOLE, stderr=subprocess.PIPE
+            command,
+            creationflags=subprocess.CREATE_NEW_CONSOLE,  # type: ignore
+            stderr=subprocess.PIPE,
         )
         _, errs = proc.communicate()
         if errs:

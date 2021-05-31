@@ -31,7 +31,7 @@ import re
 import sys
 from pathlib import Path, PurePath, PurePosixPath, PureWindowsPath
 from time import sleep
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import pandas as pd
 import pytest
@@ -40,7 +40,7 @@ import yaml
 from pandas.util.testing import assert_frame_equal
 
 from kedro import __version__ as kedro_version
-from kedro.config import ConfigLoader, MissingConfigException
+from kedro.config import MissingConfigException
 from kedro.extras.datasets.pandas import CSVDataSet
 from kedro.framework.context import KedroContext, KedroContextError
 from kedro.framework.context.context import (
@@ -165,15 +165,22 @@ class RegistrationHooks:
             catalog, credentials, load_versions, save_version, journal
         )
 
-    @hook_impl
-    def register_config_loader(
-        self, conf_root: str, env: Optional[str], extra_params: Optional[Dict[str, Any]]
-    ) -> ConfigLoader:
-        return ConfigLoader(conf_root, env, extra_params)
-
 
 class MockSettings(_ProjectSettings):
     _HOOKS = Validator("HOOKS", default=(RegistrationHooks(),))
+
+
+class BrokenSettings(_ProjectSettings):
+    _HOOKS = Validator("HOOKS", default=(RegistrationHooks(),))
+    _CONFIG_LOADER_CLASS = Validator("CONFIG_LOADER_CLASS", default="it breaks")
+
+
+@pytest.fixture
+def broken_settings(mocker):
+    mocked_settings = BrokenSettings()
+    mocker.patch("kedro.framework.session.session.settings", mocked_settings)
+    mocker.patch("kedro.framework.context.context.settings", mocked_settings)
+    return mocker.patch("kedro.framework.project.settings", mocked_settings)
 
 
 @pytest.fixture(autouse=True)
@@ -410,6 +417,12 @@ class TestKedroContext:
         assert catalog["cars"]["type"] == "pandas.CSVDataSet"
         assert catalog["boats"]["type"] == "pandas.CSVDataSet"
         assert not catalog["cars"]["save_args"]["index"]
+
+    # pylint: disable=unused-argument
+    def test_broken_config_loader(self, broken_settings, dummy_context):
+        pattern = f"Expected an instance of `ConfigLoader`, got `{type('')}` instead."
+        with pytest.raises(KedroContextError, match=re.escape(pattern)):
+            _ = dummy_context.config_loader
 
     def test_default_env(self, dummy_context):
         assert dummy_context.env == "local"

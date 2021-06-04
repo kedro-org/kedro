@@ -1,3 +1,31 @@
+# Upcoming Release 0.18.0
+
+## Major features and improvements
+* Added support for Python 3.9
+* Support specifying parameters mapping in `pipeline()` without the `params:` prefix.
+* Added new API `Pipeline.filter()` (previously in `KedroContext._filter_pipeline()`) to filter parts of a pipeline.
+* Added `partitionBy` support and exposed `save_args` for `SparkHiveDataSet`.
+* Exposed `open_args_save` in `fs_args` for `pandas.ParquetDataSet`.
+
+## Breaking changes to the API
+* Add namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/quantumblacklabs/kedro/issues/399)
+* `pandas.ExcelDataSet` now uses `openpyxl` engine instead of `xlrd`.
+* `pandas.ParquetDataSet` now calls `pd.to_parquet()` upon saving. Note that the argument `partition_cols` is not supported.
+* `KedroSession.run` now raises `ValueError` rather than `KedroContextError` when the pipeline contains no nodes. The same `ValueError` is raised when there are no matching tags.
+* `KedroSession.run` now raises `ValueError` rather than `KedroContextError` when the pipeline name doesn't exist in the pipeline registry.
+* Removed deprecated functions `load_context` and `get_project_context`.
+* `spark.SparkHiveDataSet` API has been updated to reflect `spark.SparkDataSet`. The `write_mode=insert` option has also been replaced with `write_mode=append` as per Spark styleguide. This change addresses [Issue 725](https://github.com/quantumblacklabs/kedro/issues/725) and [Issue 745](https://github.com/quantumblacklabs/kedro/issues/745). Additionally, `upsert` mode now leverages `checkpoint` functionality and requires a valid `checkpointDir` be set for current `SparkContext`.
+* Deprecated and removed `ProjectHooks.register_config_loader` `hook_spec` in favour of loading `CONFIG_LOADER_CLASS` directly from `settings.py`. The default option for `CONFIG_LOADER_CLASS` is now set to `kedro.config.ConfigLoader`.
+* `yaml.YAMLDataSet` can no longer save a `pandas.DataFrame` directly, but it can save a dictionary. Use `pandas.DataFrame.to_dict()` to convert your `pandas.DataFrame` to a dictionary before you attempt to save it to YAML.
+
+## Migration guide from Kedro 0.17.* to 0.18.*
+* Please remove any existing `hook_impl` of the `register_config_loader` method from `ProjectHooks` (or custom alternatives).
+* Populate `settings.py` with `CONFIG_LOADER_CLASS` set to your expected config loader class (for example `kedro.config.TemplatedConfigLoader` or custom implementation). If `CONFIG_LOADER_CLASS` value is not set, it will default to `kedro.config.ConfigLoader` at runtime.
+* Optional: You can now remove all `params:` prefix when supplying values to `parameters` argument in a `pipeline()` call.
+* If you're using `pandas.ExcelDataSet`, make sure you have `openpyxl` installed in your environment. Note that this is automatically pulled if you specify `kedro[pandas.ExcelDataSet]==0.18.0` in your `requirements.in`. You can uninstall `xlrd` if you were only using it for this dataset.
+* If you're using `pandas.ParquetDataSet`, please pass pandas saving arguments directly to `save_args` instead of nested in `from_pandas` (e.g. `save_args = {"preserve_index": False}` instead of `save_args = {"from_pandas": {"preserve_index": False}}`).
+* If you're using `spark.SparkHiveDataSet` with `write_mode` option set to `insert`, please update this to `append` in line with the Spark styleguide. If you're using `spark.SparkHiveDataSet` with `write_mode` option set to `upsert`, please make sure that your `SparkContext` has a valid `checkpointDir` set either by `SparkContext.setCheckpointDir` method or directly in the `conf` folder.
+
 # Upcoming release 0.17.4
 
 ## Major features and improvements
@@ -15,6 +43,7 @@
 * `kedro info` now outputs if a plugin has any `hooks` or `cli_hooks` implemented.
 * `PartitionedDataSet` now supports lazily materializing data on save.
 * `kedro pipeline describe` now defaults to the `__default__` pipeline when no pipeline name is provided and also shows the namespace the nodes belong to.
+* Fixed an issue where `spark.SparkDataSet` with enabled versioning would throw a `VersionNotFoundError` when using `databricks-connect` from a remote machine and saving to `dbfs` filesystem.
 * `EmailMessageDataSet` added to doctree.
 * `kedro pipeline package` now only packages the parameter file that exactly matches the pipeline name specified and the parameter files in a directory with the pipeline name.
 
@@ -54,7 +83,6 @@ print(pipelines["__default__"])  # pipeline loading is only triggered here
 * Fixed error when using starters on Windows with Python 3.7 (Issue [#722](https://github.com/quantumblacklabs/kedro/issues/722)).
 * Fixed decoding error of config files that contain accented characters by opening them for reading in UTF-8.
 * Fixed an issue where `after_dataset_loaded` run would finish before a dataset is actually loaded when using `--async` flag.
-* Fixed an issue where `spark.SparkDataSet` with enabled versioning would throw a `VersionNotFoundError` when using `databricks-connect` from a remote machine and saving to `dbfs` filesystem.
 
 ## Upcoming deprecations for Kedro 0.18.0
 

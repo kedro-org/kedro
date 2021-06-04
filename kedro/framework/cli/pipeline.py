@@ -478,8 +478,8 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
     _validate_dir(artifacts_to_package.pipeline_dir)
     destination = Path(destination) if destination else package_dir.parent / "dist"
 
-    _generate_wheel_file(  # type: ignore
-        pipeline_name, destination, source_paths, version, alias=alias
+    _generate_wheel_file(
+        pipeline_name, destination, source_paths, version, alias=alias  # type: ignore
     )
 
     _clean_pycache(package_dir)

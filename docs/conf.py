@@ -137,7 +137,7 @@ type_targets = {
         "CONF_ROOT",
         "integer -- return number of occurrences of value",
         "integer -- return first index of value.",
-        "kedro.extras.datasets.pandas.json_dataset.JSONDataSet"
+        "kedro.extras.datasets.pandas.json_dataset.JSONDataSet",
     ),
     "py:data": (
         "typing.Any",

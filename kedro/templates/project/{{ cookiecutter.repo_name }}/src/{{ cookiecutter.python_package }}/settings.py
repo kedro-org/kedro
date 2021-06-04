@@ -49,3 +49,9 @@ HOOKS = (ProjectHooks(),)
 
 # Define the configuration folder. Defaults to `conf`
 # CONF_ROOT = "conf"
+
+# Select the project ConfigLoader class here.
+# Defaults to kedro.config.ConfigLoader
+# Kedro alternatives are kedro.config.TemplatedConfigLoader
+# from kedro.config import ConfigLoader
+# CONFIG_LOADER_CLASS = ConfigLoader

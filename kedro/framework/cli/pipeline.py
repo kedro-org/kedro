@@ -430,13 +430,14 @@ def _install_files(
 
 
 def _find_config_files(
-    source_config_dir: Path, glob_pattern: str
+    source_config_dir: Path, glob_patterns: List[str]
 ) -> List[Tuple[Path, str]]:
     config_files = []  # type: List[Tuple[Path, str]]
 
     if source_config_dir.is_dir():
         config_files = [
             (path, path.parent.relative_to(source_config_dir).as_posix())
+            for glob_pattern in glob_patterns
             for path in source_config_dir.glob(glob_pattern)
             if path.is_file()
         ]
@@ -462,9 +463,10 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
         metadata, pipeline_name=pipeline_name, env=env
     )
     # as the wheel file will only contain parameters, we aren't listing other
-    # config files not to confused users and avoid useless file copies
+    # config files not to confuse users and avoid useless file copies
     configs_to_package = _find_config_files(
-        artifacts_to_package.pipeline_conf, f"parameters*/**/*{pipeline_name}*"
+        artifacts_to_package.pipeline_conf,
+        [f"parameters*/**/{pipeline_name}.yml", f"parameters*/**/{pipeline_name}/*"],
     )
     source_paths = (
         artifacts_to_package.pipeline_dir,
@@ -565,6 +567,7 @@ def _generate_setup_file(package_name: str, version: str, output_dir: Path) -> P
             "config/parameters*",
             "config/**/parameters*",
             "config/parameters*/**",
+            "config/parameters*/**/*",
         ]
     }
     setup_file_context = dict(

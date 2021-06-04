@@ -360,7 +360,7 @@ class KedroSession:
 
         try:
             pipeline = pipelines[name]
-        except (TypeError, KeyError) as exc:
+        except KeyError as exc:
             raise KedroContextError(
                 f"Failed to find the pipeline named '{name}'. "
                 f"It needs to be generated and returned "

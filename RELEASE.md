@@ -16,6 +16,7 @@
 * `PartitionedDataSet` now supports lazily materializing data on save.
 * `kedro pipeline describe` now defaults to the `__default__` pipeline when no pipeline name is provided and also shows the namespace the nodes belong to.
 * `EmailMessageDataSet` added to doctree.
+* When node inputs do not pass validation, the error message is now shown as the most recent exception in the traceback ([Issue #761](https://github.com/quantumblacklabs/kedro/issues/761)).
 * `kedro pipeline package` now only packages the parameter file that exactly matches the pipeline name specified and the parameter files in a directory with the pipeline name.
 
 ## Minor breaking changes to the API

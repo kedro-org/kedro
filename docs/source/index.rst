@@ -164,6 +164,7 @@ Welcome to Kedro's documentation!
 
    12_faq/01_faq
    12_faq/02_architecture_overview
+   12_faq/03_kedro_principles
 
 .. toctree::
    :maxdepth: 2

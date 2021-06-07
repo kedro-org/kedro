@@ -93,6 +93,10 @@ class TestCoreFunctions:
             ("adl://bucket/file.txt", {"protocol": "adl", "path": "bucket/file.txt"}),
             ("abfs://bucket/file.txt", {"protocol": "abfs", "path": "bucket/file.txt"}),
             (
+                    "smb://username:password@myhost:8080/folder/file.txt",
+                    {"protocol": "smb", "path": "username:password@myhost:8080/folder/file.txt"}
+            ),
+            (
                 "hdfs://namenode:8020/file.txt",
                 {"protocol": "hdfs", "path": "/file.txt"},
             ),

@@ -129,7 +129,7 @@ extras_require = {
         "sphinx~=3.4.3",
         "sphinx_rtd_theme==0.4.1",
         "nbsphinx==0.8.1",
-        "nbstripout==0.3.3",
+        "nbstripout~=0.4",
         "recommonmark==0.7.1",
         "sphinx-autodoc-typehints==1.11.1",
         "sphinx_copybutton==0.3.1",

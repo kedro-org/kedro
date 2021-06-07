@@ -220,7 +220,9 @@ class TestSparkDataSet:
         with tempfile.NamedTemporaryFile() as temp_data_file:
             filepath = Path(temp_data_file.name).as_posix()
             spark_data_set = SparkDataSet(
-                filepath=filepath, file_format="csv", load_args={"header": True},
+                filepath=filepath,
+                file_format="csv",
+                load_args={"header": True},
             )
             assert "SparkDataSet" in str(spark_data_set)
             assert f"filepath={filepath}" in str(spark_data_set)
@@ -286,8 +288,7 @@ class TestSparkDataSet:
 
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_runner(self, is_async, spark_in):
-        """Test ParallelRunner with SparkDataSet fails.
-        """
+        """Test ParallelRunner with SparkDataSet fails."""
         catalog = DataCatalog(data_sets={"spark_in": spark_in})
         pipeline = Pipeline([node(identity, "spark_in", "spark_out")])
         pattern = (

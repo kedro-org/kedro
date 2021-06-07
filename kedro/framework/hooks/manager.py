@@ -49,8 +49,7 @@ _PLUGIN_HOOKS = "kedro.hooks"  # entry-point to load hooks from for installed pl
 
 
 def _create_hook_manager() -> PluginManager:
-    """Create a new PluginManager instance and register Kedro's hook specs.
-    """
+    """Create a new PluginManager instance and register Kedro's hook specs."""
     manager = PluginManager(HOOK_NAMESPACE)
     manager.add_hookspecs(NodeSpecs)
     manager.add_hookspecs(PipelineSpecs)
@@ -61,8 +60,7 @@ def _create_hook_manager() -> PluginManager:
 
 
 def get_hook_manager():
-    """Create or return the global _hook_manager singleton instance.
-    """
+    """Create or return the global _hook_manager singleton instance."""
     global _hook_manager
     if _hook_manager is None:
         _hook_manager = _create_hook_manager()

@@ -255,8 +255,7 @@ def _update_verbose_flag(ctx, param, value):  # pylint: disable=unused-argument
 
 
 def _click_verbose(func):
-    """Click option for enabling verbose mode.
-    """
+    """Click option for enabling verbose mode."""
     return click.option(
         "--verbose",
         "-v",
@@ -267,8 +266,7 @@ def _click_verbose(func):
 
 
 def command_with_verbosity(group: click.core.Group, *args, **kwargs):
-    """Custom command decorator with verbose flag added.
-    """
+    """Custom command decorator with verbose flag added."""
 
     def decorator(func):
         func = _click_verbose(func)

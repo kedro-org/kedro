@@ -267,8 +267,7 @@ def describe_pipeline(
 def pull_package(
     metadata: ProjectMetadata, package_path, env, alias, fs_args, **kwargs
 ):  # pylint:disable=unused-argument
-    """Pull and unpack a modular pipeline in your project.
-    """
+    """Pull and unpack a modular pipeline in your project."""
 
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_dir_path = Path(temp_dir).resolve()

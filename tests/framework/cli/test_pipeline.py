@@ -133,7 +133,12 @@ TOO_SHORT_ERROR = "It must be at least 2 characters long."
 class TestPipelineCreateCommand:
     @pytest.mark.parametrize("env", [None, "local"])
     def test_create_pipeline(  # pylint: disable=too-many-locals
-        self, fake_repo_path, fake_project_cli, fake_metadata, env, fake_package_path,
+        self,
+        fake_repo_path,
+        fake_project_cli,
+        fake_metadata,
+        env,
+        fake_package_path,
     ):
         """Test creation of a pipeline"""
         pipelines_dir = fake_package_path / "pipelines"
@@ -455,7 +460,9 @@ class TestPipelineDeleteCommand:
     ):
         """Test error message when bad pipeline name was provided."""
         result = CliRunner().invoke(
-            fake_project_cli, ["pipeline", "delete", "-y", bad_name], obj=fake_metadata,
+            fake_project_cli,
+            ["pipeline", "delete", "-y", bad_name],
+            obj=fake_metadata,
         )
         assert result.exit_code
         assert error_message in result.output
@@ -603,10 +610,16 @@ class TestPipelineDescribeCommand:
         assert expected_output in result.output
 
     def test_describe_pipeline_default(
-        self, fake_project_cli, fake_metadata, yaml_dump_mock, pipelines_dict,
+        self,
+        fake_project_cli,
+        fake_metadata,
+        yaml_dump_mock,
+        pipelines_dict,
     ):
         result = CliRunner().invoke(
-            fake_project_cli, ["pipeline", "describe"], obj=fake_metadata,
+            fake_project_cli,
+            ["pipeline", "describe"],
+            obj=fake_metadata,
         )
 
         assert not result.exit_code

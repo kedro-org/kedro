@@ -76,8 +76,7 @@ def train_model(
 
 
 def predict(model: np.ndarray, test_x: pd.DataFrame) -> np.ndarray:
-    """Node for making predictions given a pre-trained model and a test set.
-    """
+    """Node for making predictions given a pre-trained model and a test set."""
     X = test_x.to_numpy()
 
     # Add bias to the features

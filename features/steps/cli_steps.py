@@ -293,8 +293,7 @@ def add_test_jupyter_nb(context):
 @given("I have run a non-interactive kedro new with starter")
 @when("I run a non-interactive kedro new with starter")
 def create_project_with_starter(context):
-    """Behave step to run kedro new given the config I previously created.
-    """
+    """Behave step to run kedro new given the config I previously created."""
     starter_dir = Path(__file__).parent / "test_starter"
     res = run(
         [
@@ -314,8 +313,7 @@ def create_project_with_starter(context):
 @given("I have run a non-interactive kedro new without starter")
 @when("I run a non-interactive kedro new without starter")
 def create_project_without_starter(context):
-    """Behave step to run kedro new given the config I previously created.
-    """
+    """Behave step to run kedro new given the config I previously created."""
     res = run(
         [context.kedro, "new", "-c", str(context.config_file)],
         env=context.env,
@@ -687,6 +685,7 @@ def check_jupyter_lab_proc_on_port(context: behave.runner.Context, port: int):
     try:
         util.wait_for(
             func=_check_service_up,
+            timeout_=20,
             context=context,
             url=url,
             string='<a href="/lab"',

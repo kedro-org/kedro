@@ -19,6 +19,7 @@
 * `EmailMessageDataSet` added to doctree.
 * When node inputs do not pass validation, the error message is now shown as the most recent exception in the traceback ([Issue #761](https://github.com/quantumblacklabs/kedro/issues/761)).
 * `kedro pipeline package` now only packages the parameter file that exactly matches the pipeline name specified and the parameter files in a directory with the pipeline name.
+* Extended support to newer versions of third-party dependencies, which addresses [Issue 735](https://github.com/quantumblacklabs/kedro/issues/735)
 
 ## Minor breaking changes to the API
 

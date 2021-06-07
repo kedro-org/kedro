@@ -137,7 +137,7 @@ type_targets = {
         "CONF_ROOT",
         "integer -- return number of occurrences of value",
         "integer -- return first index of value.",
-        "kedro.extras.datasets.pandas.json_dataset.JSONDataSet"
+        "kedro.extras.datasets.pandas.json_dataset.JSONDataSet",
     ),
     "py:data": (
         "typing.Any",
@@ -371,7 +371,11 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
         if what == "class":
             # first do plural only for classes
             replacements += [
-                (r"``{}``s".format(obj), f":{what}:`~{module}.{obj}`\\\\s", obj,)
+                (
+                    r"``{}``s".format(obj),
+                    f":{what}:`~{module}.{obj}`\\\\s",
+                    obj,
+                )
                 for obj in objects
             ]
 

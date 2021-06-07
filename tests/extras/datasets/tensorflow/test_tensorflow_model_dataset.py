@@ -236,9 +236,7 @@ class TestTensorFlowModelDataset:
         ],
     )
     def test_protocol_usage(self, filepath, instance_type, tensorflow_model_dataset):
-        """Test that can be instantiated with mocked arbitrary file systems.
-
-        """
+        """Test that can be instantiated with mocked arbitrary file systems."""
         data_set = tensorflow_model_dataset(filepath=filepath)
         assert isinstance(data_set._fs, instance_type)
 

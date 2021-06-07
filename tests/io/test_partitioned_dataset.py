@@ -442,7 +442,9 @@ def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas):
     prefix = "csvs"
     for key, data in partitioned_data_pandas.items():
         mocked_s3_bucket.put_object(
-            Bucket=BUCKET_NAME, Key=f"{prefix}/{key}", Body=data.to_csv(index=False),
+            Bucket=BUCKET_NAME,
+            Key=f"{prefix}/{key}",
+            Body=data.to_csv(index=False),
         )
     return f"s3://{BUCKET_NAME}/{prefix}"
 

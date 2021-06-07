@@ -218,7 +218,7 @@ In this tutorial, we chose `pandas.CSVDataSet` for its simplicity, but you can u
 
 ### Extend the data processing pipeline
 
-The next step in the tutorial is to add another node for a function to join together the three dataframes into a single master table. First, add the `create_master_table()` function from the snippet above to `src/kedro_tutorial/pipelines/data_processing/nodes.py`.
+The next step in the tutorial is to add another node for a function to join together the three dataframes into a single master table. First, add the `create_master_table()` function from the snippet below to `src/kedro_tutorial/pipelines/data_processing/nodes.py`.
 
 <details>
 <summary><b>Click to expand</b></summary>

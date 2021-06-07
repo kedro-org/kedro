@@ -66,6 +66,9 @@ class TemplatedConfigLoader(ConfigLoader):
         >>> from kedro.config import TemplatedConfigLoader
         >>>
         >>> CONFIG_LOADER_CLASS = TemplatedConfigLoader
+        >>> CONFIG_LOADER_ARGS = {
+        >>>     "globals_pattern": "*globals.yml",
+        >>> }
 
     The contents of the dictionary resulting from the `globals_pattern` get
     merged with the ``globals_dict``. In case of conflicts, the keys in

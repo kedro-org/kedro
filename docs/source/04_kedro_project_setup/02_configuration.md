@@ -3,7 +3,7 @@
 This section contains detailed information about configuration, for which the relevant API documentation can be found in [kedro.config.ConfigLoader](/kedro.config.ConfigLoader).
 
 ```eval_rst
-.. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
+.. note::  This documentation is based on ``Kedro 0.18.0``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
 ```
 
 ## Configuration root
@@ -20,12 +20,11 @@ Kedro-specific configuration (e.g., `DataCatalog` configuration for IO) is loade
 ```python
 from kedro.config import ConfigLoader
 
-conf_paths = ["conf/base", "conf/local"]
-conf_loader = ConfigLoader(conf_paths)
+conf_loader = ConfigLoader(conf_root="conf", env="local")
 conf_catalog = conf_loader.get("catalog*", "catalog*/**")
 ```
 
-This will recursively scan for configuration files firstly in `conf/base/` and then in `conf/local/` directory according to the following rules:
+This recursively scans for configuration files firstly in `conf/base/` (`base` being the default environment) and then in `conf/local/` (`local` being the designated overriding environment) directory according to the following rules:
 
 * *Either* of the following is true:
   * filename starts with `catalog`
@@ -64,23 +63,14 @@ export KEDRO_ENV=test
 
 ## Template configuration
 
-Kedro also provides an extension [TemplatedConfigLoader](/kedro.config.TemplatedConfigLoader) class that allows you to template values in configuration files. To apply templating in your project, you will need to update the `register_config_loader` hook implementation in your `src/<project-name>/hooks.py`:
+Kedro also provides an extension [TemplatedConfigLoader](/kedro.config.TemplatedConfigLoader) class that allows you to template values in configuration files. To apply templating in your project, you will need to set the `CONFIG_LOADER_CLASS` constant in your `src/<project-name>/settings.py`:
 
 ```python
 from kedro.config import TemplatedConfigLoader  # new import
 
-
-class ProjectHooks:
-    @hook_impl
-    def register_config_loader(self, conf_paths: Iterable[str]) -> ConfigLoader:
-        return TemplatedConfigLoader(
-            conf_paths,
-            globals_pattern="*globals.yml",  # read the globals dictionary from project config
-            globals_dict={  # extra keys to add to the globals dictionary, take precedence over globals_pattern
-                "bucket_name": "another_bucket_name",
-                "non_string_key": 10,
-            },
-        )
+...
+CONFIG_LOADER_CLASS = TemplatedConfigLoader
+...
 ```
 
 Let's assume the project contains a `conf/base/globals.yml` file with the following contents:

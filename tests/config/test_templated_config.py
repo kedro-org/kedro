@@ -43,11 +43,6 @@ def _write_yaml(filepath: Path, config: Dict):
 
 
 @pytest.fixture
-def conf_paths(tmp_path):
-    return [str(tmp_path / "base"), str(tmp_path / "local")]
-
-
-@pytest.fixture
 def param_config():
     return {
         "boats": {
@@ -238,13 +233,11 @@ def proj_catalog_param_with_default(tmp_path, param_config_with_default):
 
 class TestTemplatedConfigLoader:
     @pytest.mark.usefixtures("proj_catalog_param")
-    def test_catalog_parameterized_w_dict(self, tmp_path, conf_paths, template_config):
+    def test_catalog_parameterized_w_dict(self, tmp_path, template_config):
         """Test parameterized config with input from dictionary with values"""
-        (tmp_path / "local").mkdir(exist_ok=True)
-
-        catalog = TemplatedConfigLoader(conf_paths, globals_dict=template_config).get(
-            "catalog*.yml"
-        )
+        catalog = TemplatedConfigLoader(
+            str(tmp_path), globals_dict=template_config
+        ).get("catalog*.yml")
 
         assert catalog["boats"]["type"] == "SparkDataSet"
         assert (
@@ -256,13 +249,11 @@ class TestTemplatedConfigLoader:
         assert catalog["boats"]["users"] == ["fred", "ron"]
 
     @pytest.mark.usefixtures("proj_catalog_param", "proj_catalog_globals")
-    def test_catalog_parameterized_w_globals(self, tmp_path, conf_paths):
+    def test_catalog_parameterized_w_globals(self, tmp_path):
         """Test parameterized config with globals yaml file"""
-        (tmp_path / "local").mkdir(exist_ok=True)
-
-        catalog = TemplatedConfigLoader(conf_paths, globals_pattern="*globals.yml").get(
-            "catalog*.yml"
-        )
+        catalog = TemplatedConfigLoader(
+            str(tmp_path), globals_pattern="*globals.yml"
+        ).get("catalog*.yml")
 
         assert catalog["boats"]["type"] == "SparkDataSet"
         assert (
@@ -274,34 +265,26 @@ class TestTemplatedConfigLoader:
         assert catalog["boats"]["users"] == ["fred", "ron"]
 
     @pytest.mark.usefixtures("proj_catalog_param")
-    def test_catalog_parameterized_no_params_no_default(self, tmp_path, conf_paths):
+    def test_catalog_parameterized_no_params_no_default(self, tmp_path):
         """Test parameterized config without input"""
-        (tmp_path / "local").mkdir(exist_ok=True)
-
         with pytest.raises(ValueError, match="Failed to format pattern"):
-            TemplatedConfigLoader(conf_paths).get("catalog*.yml")
+            TemplatedConfigLoader(str(tmp_path)).get("catalog*.yml")
 
     @pytest.mark.usefixtures("proj_catalog_param_with_default")
-    def test_catalog_parameterized_empty_params_with_default(
-        self, tmp_path, conf_paths
-    ):
+    def test_catalog_parameterized_empty_params_with_default(self, tmp_path):
         """Test parameterized config with empty globals dictionary"""
-        (tmp_path / "local").mkdir(exist_ok=True)
-
-        catalog = TemplatedConfigLoader(conf_paths, globals_dict=dict()).get(
+        catalog = TemplatedConfigLoader(str(tmp_path), globals_dict=dict()).get(
             "catalog*.yml"
         )
 
         assert catalog["boats"]["users"] == ["fred", "ron"]
 
     @pytest.mark.usefixtures("proj_catalog_advanced")
-    def test_catalog_advanced(self, tmp_path, conf_paths, normal_config_advanced):
+    def test_catalog_advanced(self, tmp_path, normal_config_advanced):
         """Test whether it responds well to advanced yaml values
         (i.e. nested dicts, booleans, lists, etc.)"""
-        (tmp_path / "local").mkdir(exist_ok=True)
-
         catalog = TemplatedConfigLoader(
-            conf_paths, globals_dict=normal_config_advanced
+            str(tmp_path), globals_dict=normal_config_advanced
         ).get("catalog*.yml")
 
         assert catalog["planes"]["type"] == "SparkJDBCDataSet"
@@ -312,14 +295,10 @@ class TestTemplatedConfigLoader:
         assert catalog["planes"]["secret_tables"] == ["models", "pilots", "engines"]
 
     @pytest.mark.usefixtures("proj_catalog_param_w_vals_advanced")
-    def test_catalog_parameterized_advanced(
-        self, tmp_path, conf_paths, template_config_advanced
-    ):
+    def test_catalog_parameterized_advanced(self, tmp_path, template_config_advanced):
         """Test advanced templating (i.e. nested dicts, booleans, lists, etc.)"""
-        (tmp_path / "local").mkdir(exist_ok=True)
-
         catalog = TemplatedConfigLoader(
-            conf_paths, globals_dict=template_config_advanced
+            str(tmp_path), globals_dict=template_config_advanced
         ).get("catalog*.yml")
 
         assert catalog["planes"]["type"] == "SparkJDBCDataSet"
@@ -330,15 +309,11 @@ class TestTemplatedConfigLoader:
         assert catalog["planes"]["secret_tables"] == ["models", "pilots", "engines"]
 
     @pytest.mark.usefixtures("proj_catalog_param_mixed", "proj_catalog_globals")
-    def test_catalog_parameterized_w_dict_mixed(
-        self, tmp_path, conf_paths, get_environ
-    ):
+    def test_catalog_parameterized_w_dict_mixed(self, tmp_path, get_environ):
         """Test parameterized config with input from dictionary with values
         and globals.yml"""
-        (tmp_path / "local").mkdir(exist_ok=True)
-
         catalog = TemplatedConfigLoader(
-            conf_paths, globals_pattern="*globals.yml", globals_dict=get_environ
+            str(tmp_path), globals_pattern="*globals.yml", globals_dict=get_environ
         ).get("catalog*.yml")
 
         assert catalog["boats"]["type"] == "SparkDataSet"
@@ -352,13 +327,11 @@ class TestTemplatedConfigLoader:
 
     @pytest.mark.usefixtures("proj_catalog_param_namespaced")
     def test_catalog_parameterized_w_dict_namespaced(
-        self, tmp_path, conf_paths, template_config, get_environ
+        self, tmp_path, template_config, get_environ
     ):
         """Test parameterized config with namespacing in the template values"""
-        (tmp_path / "local").mkdir(exist_ok=True)
-
         catalog = TemplatedConfigLoader(
-            conf_paths, globals_dict={"global": template_config, "env": get_environ}
+            str(tmp_path), globals_dict={"global": template_config, "env": get_environ}
         ).get("catalog*.yml")
 
         assert catalog["boats"]["type"] == "SparkDataSet"
@@ -372,23 +345,20 @@ class TestTemplatedConfigLoader:
 
     @pytest.mark.usefixtures("proj_catalog_param_w_vals_exceptional")
     def test_catalog_parameterized_exceptional(
-        self, tmp_path, conf_paths, template_config_exceptional
+        self, tmp_path, template_config_exceptional
     ):
         """Test templating with mixed type replacement values going into one string"""
-        (tmp_path / "local").mkdir(exist_ok=True)
-
         catalog = TemplatedConfigLoader(
-            conf_paths, globals_dict=template_config_exceptional
+            str(tmp_path), globals_dict=template_config_exceptional
         ).get("catalog*.yml")
 
         assert catalog["postcode"] == "NW10 2JK"
 
     @pytest.mark.usefixtures("catalog_with_jinja2_syntax")
-    def test_catalog_with_jinja2_syntax(self, tmp_path, conf_paths, template_config):
-        (tmp_path / "local").mkdir(exist_ok=True)
-        catalog = TemplatedConfigLoader(conf_paths, globals_dict=template_config).get(
-            "catalog*.yml"
-        )
+    def test_catalog_with_jinja2_syntax(self, tmp_path, template_config):
+        catalog = TemplatedConfigLoader(
+            str(tmp_path), globals_dict=template_config
+        ).get("catalog*.yml")
         expected_catalog = {
             "fast-trains": {"type": "MemoryDataSet"},
             "fast-cars": {

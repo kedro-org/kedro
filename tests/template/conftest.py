@@ -42,11 +42,6 @@ _FAKE_REPO_NAME = "fake_repo"
 _FAKE_PACKAGE_NAME = "fake_package"
 
 
-@pytest.fixture
-def fake_package_name():
-    return _FAKE_PACKAGE_NAME
-
-
 @pytest.fixture(scope="session")
 def fake_root_dir():
     try:

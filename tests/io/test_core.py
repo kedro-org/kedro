@@ -96,8 +96,8 @@ class TestCoreFunctions:
                 "smb://username:password@myhost:8080/folder/file.txt",
                 {
                     "protocol": "smb",
-                    "path": "username:password@myhost:8080/folder/file.txt"
-                }
+                    "path": "username:password@myhost:8080/folder/file.txt",
+                },
             ),
             (
                 "hdfs://namenode:8020/file.txt",

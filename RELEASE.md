@@ -19,6 +19,7 @@
 * `EmailMessageDataSet` added to doctree.
 * When node inputs do not pass validation, the error message is now shown as the most recent exception in the traceback ([Issue #761](https://github.com/quantumblacklabs/kedro/issues/761)).
 * `kedro pipeline package` now only packages the parameter file that exactly matches the pipeline name specified and the parameter files in a directory with the pipeline name.
+* Added [smb](https://filesystem-spec.readthedocs.io/en/latest/_modules/fsspec/implementations/smb.html) to supported filesystem protocols.
 
 ## Minor breaking changes to the API
 

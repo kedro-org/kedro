@@ -57,6 +57,7 @@ VERSION_KEY = "version"
 HTTP_PROTOCOLS = ("http", "https")
 PROTOCOL_DELIMITER = "://"
 CLOUD_PROTOCOLS = ("s3", "gcs", "gs", "adl", "abfs")
+SMB_PROTOCOLS = ("smb")
 
 
 class DataSetError(Exception):
@@ -682,7 +683,7 @@ def _parse_filepath(filepath: str) -> Dict[str, str]:
             host_with_port = parsed_path.netloc.rsplit("@", 1)[-1]
             host = host_with_port.rsplit(":", 1)[0]
             options["path"] = host + options["path"]
-        else:
+        elif protocol in SMB_PROTOCOLS:
             options["path"] = parsed_path.netloc + options["path"]
 
     return options

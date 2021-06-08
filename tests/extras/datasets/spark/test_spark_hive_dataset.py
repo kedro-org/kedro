@@ -98,8 +98,7 @@ def spark_hive_session(replace_spark_default_getorcreate):
 
 @pytest.fixture(scope="module", autouse=True)
 def spark_test_databases(spark_hive_session):
-    """ Setup spark test databases for all tests in this module
-    """
+    """Setup spark test databases for all tests in this module."""
     dataset = _generate_spark_df_one()
     dataset.createOrReplaceTempView("tmp")
     databases = ["default_1", "default_2"]

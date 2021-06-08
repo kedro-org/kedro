@@ -202,7 +202,7 @@ ENTRYPOINT [ "/usr/local/bin/python", "-m", "awslambdaric" ]
 CMD [ "lambda_handler.handler" ]
 ```
 
-This `Dockerfile` is adapted from the official guide on [how to create a custom image](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html) for Lambda to include Kedro-specific steps.
+This `Dockerfile` is adapted from the official guide on [how to create a custom image](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html#images-create-from-alt) for Lambda to include Kedro-specific steps.
 
 * **Step 2.4**: Build the Docker image and push it to AWS Elastic Container Registry (ECR):
 

@@ -52,7 +52,9 @@ class FakeEntryPoint:
         class FakeCLIHooks:
             @cli_hook_impl
             def before_command_run(
-                self, project_metadata: ProjectMetadata, command_args: List[str],
+                self,
+                project_metadata: ProjectMetadata,
+                command_args: List[str],
             ):
                 print(
                     f"Before command `{' '.join(command_args)}` run for project {project_metadata}"
@@ -78,10 +80,16 @@ def fake_plugin_distribution(mocker):
 
 class TestKedroCLIHooks:
     @pytest.mark.parametrize(
-        "command", ["-V", "info", "pipeline list", "run --pipeline=test"],
+        "command",
+        ["-V", "info", "pipeline list", "run --pipeline=test"],
     )
     def test_kedro_cli_should_invoke_cli_hooks_from_plugin(
-        self, caplog, command, mocker, fake_metadata, fake_plugin_distribution,
+        self,
+        caplog,
+        command,
+        mocker,
+        fake_metadata,
+        fake_plugin_distribution,
     ):
         Module = namedtuple("Module", ["cli"])
         mocker.patch(
@@ -89,10 +97,12 @@ class TestKedroCLIHooks:
             return_value=Module(cli=cli),
         )
         mocker.patch(
-            "kedro.framework.cli.cli._is_project", return_value=True,
+            "kedro.framework.cli.cli._is_project",
+            return_value=True,
         )
         mocker.patch(
-            "kedro.framework.cli.cli.bootstrap_project", return_value=fake_metadata,
+            "kedro.framework.cli.cli.bootstrap_project",
+            return_value=fake_metadata,
         )
         kedro_cli = KedroCLI(fake_metadata.project_path)
         result = CliRunner().invoke(kedro_cli, [command])

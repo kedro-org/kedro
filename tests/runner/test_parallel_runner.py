@@ -487,7 +487,12 @@ class TestRunNodeSynchronisationHelper:
         mock_configure_project.assert_called_once_with(package_name)
 
     def test_package_name_provided(
-        self, mock_logging, mock_run_node, mock_configure_project, is_async, mocker,
+        self,
+        mock_logging,
+        mock_run_node,
+        mock_configure_project,
+        is_async,
+        mocker,
     ):
         mocker.patch("multiprocessing.get_start_method", return_value="spawn")
         node_ = mocker.sentinel.node

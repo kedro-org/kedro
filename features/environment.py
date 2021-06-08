@@ -30,6 +30,7 @@
 
 import os
 import shutil
+import sys
 import tempfile
 import venv
 from pathlib import Path
@@ -154,6 +155,13 @@ def _install_project_requirements(context):
     )
     install_reqs = [req for req in install_reqs if "{" not in req]
     install_reqs.append(".[pandas.CSVDataSet]")
+
+    # JupyterLab indirectly depends on pywin32 on Windows. Newer versions of pywin32
+    # (e.g. 3xx, to which jupyterlab~=3.0 defaults) have a bug that prevents
+    # JupyterLab from running, hence the version is forcefully set to 225.
+    # More details: https://github.com/mhammond/pywin32/issues/1431
+    if sys.platform.startswith("win"):
+        install_reqs.append("pywin32==225")
 
     call([context.pip, "install", *install_reqs], env=context.env)
     return context

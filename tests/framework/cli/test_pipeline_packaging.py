@@ -145,7 +145,9 @@ class TestPipelinePackageCommand:
         fake_metadata,
     ):
         result = CliRunner().invoke(
-            fake_project_cli, ["pipeline", "create", PIPELINE_NAME], obj=fake_metadata,
+            fake_project_cli,
+            ["pipeline", "create", PIPELINE_NAME],
+            obj=fake_metadata,
         )
         assert result.exit_code == 0
         result = CliRunner().invoke(
@@ -173,7 +175,9 @@ class TestPipelinePackageCommand:
             destination.mkdir(parents=True)
 
         result = CliRunner().invoke(
-            fake_project_cli, ["pipeline", "create", PIPELINE_NAME], obj=fake_metadata,
+            fake_project_cli,
+            ["pipeline", "create", PIPELINE_NAME],
+            obj=fake_metadata,
         )
         assert result.exit_code == 0
         result = CliRunner().invoke(
@@ -199,7 +203,9 @@ class TestPipelinePackageCommand:
         wheel_file.touch()
 
         result = CliRunner().invoke(
-            fake_project_cli, ["pipeline", "create", PIPELINE_NAME], obj=fake_metadata,
+            fake_project_cli,
+            ["pipeline", "create", PIPELINE_NAME],
+            obj=fake_metadata,
         )
         assert result.exit_code == 0
         result = CliRunner().invoke(
@@ -247,7 +253,9 @@ class TestPipelinePackageCommand:
         )
         assert result.exit_code == 0
         result = CliRunner().invoke(
-            fake_project_cli, ["pipeline", "package", PIPELINE_NAME], obj=fake_metadata,
+            fake_project_cli,
+            ["pipeline", "package", PIPELINE_NAME],
+            obj=fake_metadata,
         )
 
         assert result.exit_code == 0
@@ -294,14 +302,19 @@ class TestPipelinePackageCommand:
         pipeline_dir.mkdir()
 
         result = CliRunner().invoke(
-            fake_project_cli, ["pipeline", "package", "empty_dir"], obj=fake_metadata,
+            fake_project_cli,
+            ["pipeline", "package", "empty_dir"],
+            obj=fake_metadata,
         )
         assert result.exit_code == 1
         error_message = f"Error: '{pipeline_dir}' is an empty directory."
         assert error_message in result.output
 
     def test_package_modular_pipeline_with_nested_parameters(
-        self, fake_repo_path, fake_project_cli, fake_metadata,
+        self,
+        fake_repo_path,
+        fake_project_cli,
+        fake_metadata,
     ):
         """
         The setup for the test is as follows:
@@ -318,7 +331,9 @@ class TestPipelinePackageCommand:
                 └── params1.ym
         """
         CliRunner().invoke(
-            fake_project_cli, ["pipeline", "create", "retail"], obj=fake_metadata,
+            fake_project_cli,
+            ["pipeline", "create", "retail"],
+            obj=fake_metadata,
         )
         CliRunner().invoke(
             fake_project_cli,
@@ -332,7 +347,9 @@ class TestPipelinePackageCommand:
         (nested_param_path / "params1.yml").touch()
 
         result = CliRunner().invoke(
-            fake_project_cli, ["pipeline", "package", "retail"], obj=fake_metadata,
+            fake_project_cli,
+            ["pipeline", "package", "retail"],
+            obj=fake_metadata,
         )
 
         assert result.exit_code == 0
@@ -567,7 +584,9 @@ class TestPipelinePullCommand:
             return_value=tmp_path,
         )
         result = CliRunner().invoke(
-            fake_project_cli, ["pipeline", "pull", str(wheel_file)], obj=fake_metadata,
+            fake_project_cli,
+            ["pipeline", "pull", str(wheel_file)],
+            obj=fake_metadata,
         )
         assert result.exit_code
         assert "Error: More than 1 or no dist-info files found" in result.output
@@ -766,7 +785,8 @@ class TestPipelinePullCommand:
         assert result.exit_code == 0
 
         python_call_mock.assert_called_once_with(
-            "pip", ["download", "--no-deps", "--dest", str(tmp_path), PIPELINE_NAME],
+            "pip",
+            ["download", "--no-deps", "--dest", str(tmp_path), PIPELINE_NAME],
         )
 
         pipeline_name = alias or PIPELINE_NAME

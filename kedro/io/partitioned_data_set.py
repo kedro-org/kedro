@@ -449,8 +449,10 @@ class IncrementalDataSet(PartitionedDataSet):
     @cachedmethod(cache=operator.attrgetter("_partition_cache"))
     def _list_partitions(self) -> List[str]:
         checkpoint = self._read_checkpoint()
-        checkpoint_path = self._filesystem._strip_protocol(  # pylint: disable=protected-access
-            self._checkpoint_config[self._filepath_arg]
+        checkpoint_path = (
+            self._filesystem._strip_protocol(  # pylint: disable=protected-access
+                self._checkpoint_config[self._filepath_arg]
+            )
         )
 
         def _is_valid_partition(partition) -> bool:

@@ -82,8 +82,7 @@ def cli():  # pragma: no cover
 
 @cli.command()
 def info():
-    """Get more information about kedro.
-    """
+    """Get more information about kedro."""
     click.secho(LOGO, fg="green")
     click.echo(
         "kedro allows teams to create analytics\n"

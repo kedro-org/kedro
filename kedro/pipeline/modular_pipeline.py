@@ -62,9 +62,9 @@ def _validate_inputs_outputs(
     inputs: AbstractSet[str], outputs: AbstractSet[str], pipe: Pipeline
 ) -> None:
     """Safeguards to ensure that:
-        - parameters are not specified under inputs
-        - inputs are only free inputs
-        - outputs do not contain free inputs
+    - parameters are not specified under inputs
+    - inputs are only free inputs
+    - outputs do not contain free inputs
     """
     inputs = {_strip_transcoding(k) for k in inputs}
     outputs = {_strip_transcoding(k) for k in outputs}

@@ -36,15 +36,15 @@ from typing import Any
 def load_obj(obj_path: str, default_obj_path: str = "") -> Any:
     """Extract an object from a given path.
 
-        Args:
-            obj_path: Path to an object to be extracted, including the object name.
-            default_obj_path: Default object path.
+    Args:
+        obj_path: Path to an object to be extracted, including the object name.
+        default_obj_path: Default object path.
 
-        Returns:
-            Extracted object.
+    Returns:
+        Extracted object.
 
-        Raises:
-            AttributeError: When the object does not have the given named attribute.
+    Raises:
+        AttributeError: When the object does not have the given named attribute.
 
     """
     obj_path_list = obj_path.rsplit(".", 1)

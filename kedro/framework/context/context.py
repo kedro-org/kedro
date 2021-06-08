@@ -48,8 +48,7 @@ from kedro.versioning import Journal
 
 
 def _deprecate(version):
-    """Decorator to deprecate a few of the context's properties
-    """
+    """Decorator to deprecate a few of the context's properties."""
 
     def decorator(func):
         @functools.wraps(func)
@@ -289,7 +288,7 @@ class KedroContext:
         """
         try:
             return pipelines["__default__"]
-        except (TypeError, KeyError) as exc:  # pragma: no cover
+        except KeyError as exc:  # pragma: no cover
             raise KedroContextError(
                 "Failed to find the pipeline named '__default__'. "
                 "It needs to be generated and returned "
@@ -556,7 +555,7 @@ class KedroContext:
 
         try:
             pipeline = pipelines[name]
-        except (TypeError, KeyError) as exc:
+        except KeyError as exc:
             raise KedroContextError(
                 f"Failed to find the pipeline named '{name}'. "
                 f"It needs to be generated and returned "

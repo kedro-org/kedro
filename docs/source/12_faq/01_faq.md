@@ -32,7 +32,8 @@ Currently, the core Kedro team consists of
 [Joel Schwarzmann](https://github.com/datajoely),
 [Antony Milne](https://github.com/AntonyMilneQB),
 [Jiri Klein](https://github.com/jiriklein),
-[Ignacio Paricio](https://github.com/ignacioparicio).
+[Ignacio Paricio](https://github.com/ignacioparicio) and
+[Hamza Oza](https://github.com/hamzaoza).
 
 Former core team members with significant contributions include:
 [Gordon Wrigley](https://github.com/tolomea),

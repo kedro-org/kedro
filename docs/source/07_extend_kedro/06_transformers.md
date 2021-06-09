@@ -99,8 +99,8 @@ class TransformerHooks:
         catalog.add_transformer(ProfileTimeTransformer())
 
         # as memory tracking is quite time-consuming, for demonstration purposes
-        # let's apply profile_memory only to the master_table
-        catalog.add_transformer(ProfileMemoryTransformer(), "master_table")
+        # let's apply profile_memory only to the model_input_table
+        catalog.add_transformer(ProfileMemoryTransformer(), "model_input_table")
 ```
 </details>
 
@@ -120,12 +120,12 @@ The output should look similar to the following:
 
 ```
 ...
-2019-11-13 15:55:01,674 - kedro.io.data_catalog - INFO - Saving data to `master_table` (CSVDataSet)...
-2019-11-13 15:55:12,322 - ProfileMemoryTransformer - INFO - Saving master_table consumed 606.98MiB memory at peak time
-2019-11-13 15:55:12,322 - ProfileTimeTransformer - INFO - Saving master_table took 10.648 seconds
+2019-11-13 15:55:01,674 - kedro.io.data_catalog - INFO - Saving data to `model_input_table` (CSVDataSet)...
+2019-11-13 15:55:12,322 - ProfileMemoryTransformer - INFO - Saving model_input_table consumed 606.98MiB memory at peak time
+2019-11-13 15:55:12,322 - ProfileTimeTransformer - INFO - Saving model_input_table took 10.648 seconds
 2019-11-13 15:55:12,357 - kedro.runner.sequential_runner - INFO - Completed 3 out of 6 tasks
-2019-11-13 15:55:12,358 - kedro.io.data_catalog - INFO - Loading data from `master_table` (CSVDataSet)...
-2019-11-13 15:55:13,933 - ProfileMemoryTransformer - INFO - Loading master_table consumed 533.05MiB memory at peak time
-2019-11-13 15:55:13,933 - ProfileTimeTransformer - INFO - Loading master_table took 1.576 seconds
+2019-11-13 15:55:12,358 - kedro.io.data_catalog - INFO - Loading data from `model_input_table` (CSVDataSet)...
+2019-11-13 15:55:13,933 - ProfileMemoryTransformer - INFO - Loading model_input_table consumed 533.05MiB memory at peak time
+2019-11-13 15:55:13,933 - ProfileTimeTransformer - INFO - Loading model_input_table took 1.576 seconds
 ...
 ```

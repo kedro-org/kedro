@@ -45,7 +45,6 @@ The following prepends are available:
 - **HTTP(s)**: ``http://`` or ``https://`` for reading data directly from HTTP web servers.
 - **SMB**: ``smb://`` for reading and writing data to a shared network drive.
 
-
 `fsspec` also provides other file systems, such as SSH, FTP and WebHDFS. See the [documentation](https://filesystem-spec.readthedocs.io/en/latest/api.html#implementations) for more information.
 
 ## Data Catalog `*_args` parameters

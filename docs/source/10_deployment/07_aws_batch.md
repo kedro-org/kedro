@@ -39,9 +39,9 @@ preprocessed_shuttles:
   type: pandas.CSVDataSet
   filepath: s3://<your-bucket>/preprocessed_shuttles.csv
 
-master_table:
+model_input_table:
   type: pandas.CSVDataSet
-  filepath: s3://<your-bucket>/master_table.csv
+  filepath: s3://<your-bucket>/model_input_table.csv
 
 regressor:
   type: pickle.PickleDataSet

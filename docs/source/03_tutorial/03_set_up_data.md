@@ -10,7 +10,7 @@ You can find further information about [the Data Catalog](../05_data/01_data_cat
 
 ## Add your datasets to `data`
 
-The spaceflights tutorial makes use of fictional datasets of companies shuttling customers to the Moon and back. You will use the data to train a model to predict the price of shuttle hire. However, before you get to train the model, you will need to prepare the data for model building by creating a master table.
+The spaceflights tutorial makes use of fictional datasets of companies shuttling customers to the Moon and back. You will use the data to train a model to predict the price of shuttle hire. However, before you get to train the model, you will need to prepare the data for model building by creating a model input table.
 
 The spaceflight tutorial has three files and uses two data formats: `.csv` and `.xlsx`. Download and save the files to the `data/01_raw/` folder of your project directory:
 

@@ -184,8 +184,7 @@ class LogRecorder(logging.Handler):  # pylint: disable=abstract-method
 
 
 class LogsListener(QueueListener):
-    """Listen to logs stream and capture log records with LogRecorder.
-    """
+    """Listen to logs stream and capture log records with LogRecorder."""
 
     def __init__(self):
         # Queue where logs will be sent to
@@ -206,8 +205,7 @@ class LogsListener(QueueListener):
 
 @pytest.fixture
 def logs_listener():
-    """Fixture to start the logs listener before a test and clean up after the test finishes
-    """
+    """Fixture to start the logs listener before a test and clean up after the test finishes"""
     listener = LogsListener()
     listener.start()
     yield listener

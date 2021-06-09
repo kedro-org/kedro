@@ -17,11 +17,13 @@
 * Removed deprecated functions `load_context` and `get_project_context`.
 * `spark.SparkHiveDataSet` API has been updated to reflect `spark.SparkDataSet`. The `write_mode=insert` option has also been replaced with `write_mode=append` as per Spark styleguide. This change addresses [Issue 725](https://github.com/quantumblacklabs/kedro/issues/725) and [Issue 745](https://github.com/quantumblacklabs/kedro/issues/745). Additionally, `upsert` mode now leverages `checkpoint` functionality and requires a valid `checkpointDir` be set for current `SparkContext`.
 * Deprecated and removed `ProjectHooks.register_config_loader` `hook_spec` in favour of loading `CONFIG_LOADER_CLASS` directly from `settings.py`. The default option for `CONFIG_LOADER_CLASS` is now set to `kedro.config.ConfigLoader`.
+* Added `CONFIG_LOADER_ARGS` to `settings.py` to facilitate the provision of additional keyword arguments to the constructor of the project `config_loader`. The default option for `CONFIG_LOADER_ARGS` is an empty dictionary.
 * `yaml.YAMLDataSet` can no longer save a `pandas.DataFrame` directly, but it can save a dictionary. Use `pandas.DataFrame.to_dict()` to convert your `pandas.DataFrame` to a dictionary before you attempt to save it to YAML.
 
 ## Migration guide from Kedro 0.17.* to 0.18.*
 * Please remove any existing `hook_impl` of the `register_config_loader` method from `ProjectHooks` (or custom alternatives).
 * Populate `settings.py` with `CONFIG_LOADER_CLASS` set to your expected config loader class (for example `kedro.config.TemplatedConfigLoader` or custom implementation). If `CONFIG_LOADER_CLASS` value is not set, it will default to `kedro.config.ConfigLoader` at runtime.
+* Populate `settings.py` with `CONFIG_LOADER_ARGS` set to a dictionary with expected keyword arguments. If `CONFIG_LOADER_ARGS` is not set, it will default to an empty dictionary.
 * Optional: You can now remove all `params:` prefix when supplying values to `parameters` argument in a `pipeline()` call.
 * If you're using `pandas.ExcelDataSet`, make sure you have `openpyxl` installed in your environment. Note that this is automatically pulled if you specify `kedro[pandas.ExcelDataSet]==0.18.0` in your `requirements.in`. You can uninstall `xlrd` if you were only using it for this dataset.
 * If you're using `pandas.ParquetDataSet`, please pass pandas saving arguments directly to `save_args` instead of nested in `from_pandas` (e.g. `save_args = {"preserve_index": False}` instead of `save_args = {"from_pandas": {"preserve_index": False}}`).
@@ -37,6 +39,7 @@
 | `plotly.PlotlyDataSet` | Works with plotly graph object Figures (saves as json file) | `kedro.extras.datasets.plotly` |
 
 ## Bug fixes and other changes
+* Defined our set of Kedro Principles! Have a read through [our docs](https://kedro.readthedocs.io/en/0.17.4/12_faq/03_kedro_principles.html).
 * `ConfigLoader.get()` now raises a `BadConfigException`, with a more helpful error message, if a configuration file cannot be loaded (for instance due to wrong syntax or poor formatting).
 * `run_id` now defaults to `save_version` when `after_catalog_created` is called, similarly to what happens during a `kedro run`.
 * Fixed a bug where `kedro ipython` and `kedro jupyter notebook` didn't work if the `PYTHONPATH` was already set.
@@ -45,6 +48,10 @@
 * `PartitionedDataSet` now supports lazily materializing data on save.
 * `kedro pipeline describe` now defaults to the `__default__` pipeline when no pipeline name is provided and also shows the namespace the nodes belong to.
 * Fixed an issue where `spark.SparkDataSet` with enabled versioning would throw a `VersionNotFoundError` when using `databricks-connect` from a remote machine and saving to `dbfs` filesystem.
+* `EmailMessageDataSet` added to doctree.
+* When node inputs do not pass validation, the error message is now shown as the most recent exception in the traceback ([Issue #761](https://github.com/quantumblacklabs/kedro/issues/761)).
+* `kedro pipeline package` now only packages the parameter file that exactly matches the pipeline name specified and the parameter files in a directory with the pipeline name.
+* Extended support to newer versions of third-party dependencies, which addresses [Issue 735](https://github.com/quantumblacklabs/kedro/issues/735)
 
 ## Minor breaking changes to the API
 
@@ -52,6 +59,7 @@
 
 ## Thanks for supporting contributions
 [Lou Kratz](https://github.com/lou-k)
+[Lucas Jamar](https://github.com/lucasjamar/)
 
 # Release 0.17.3
 

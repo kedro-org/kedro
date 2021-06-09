@@ -48,8 +48,7 @@ from kedro.versioning import Journal
 
 
 def _deprecate(version):
-    """Decorator to deprecate a few of the context's properties
-    """
+    """Decorator to deprecate a few of the context's properties."""
 
     def decorator(func):
         @functools.wraps(func)
@@ -289,7 +288,7 @@ class KedroContext:
         """
         try:
             return pipelines["__default__"]
-        except (TypeError, KeyError) as exc:  # pragma: no cover
+        except KeyError as exc:  # pragma: no cover
             raise KedroContextError(
                 "Failed to find the pipeline named '__default__'. "
                 "It needs to be generated and returned "
@@ -429,11 +428,13 @@ class KedroContext:
                 conf_root=str(self.project_path / settings.CONF_ROOT),
                 env=self.env,
                 extra_params=self._extra_params,
+                **settings.CONFIG_LOADER_ARGS,
             )
         except TypeError as exc:
             raise KedroContextError(
                 f"Expected an instance of `ConfigLoader`, "
-                f"got `{type(settings.CONFIG_LOADER_CLASS)}` instead."
+                f"got `{type(settings.CONFIG_LOADER_CLASS)}` instead.\n"
+                f"The provided `CONFIG_LOADER_ARGS were: {settings.CONFIG_LOADER_ARGS}"
             ) from exc
 
     @property
@@ -554,7 +555,7 @@ class KedroContext:
 
         try:
             pipeline = pipelines[name]
-        except (TypeError, KeyError) as exc:
+        except KeyError as exc:
             raise KedroContextError(
                 f"Failed to find the pipeline named '{name}'. "
                 f"It needs to be generated and returned "

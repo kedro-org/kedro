@@ -310,7 +310,7 @@ class TestPipelineHelper:
     def test_parameters_left_intact_when_defined_as_str(self):
         raw_pipeline = Pipeline([node(biconcat, ["A", "params:x"], "AA", name="node1")])
         resulting_pipeline = pipeline(
-            raw_pipeline, outputs={"AA": "B"}, parameters="x", namespace="PREFIX",
+            raw_pipeline, outputs={"AA": "B"}, parameters="x", namespace="PREFIX"
         )
         actual_nodes = resulting_pipeline.nodes
 

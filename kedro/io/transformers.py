@@ -33,7 +33,7 @@ from typing import Any, Callable
 
 
 class AbstractTransformer(abc.ABC):
-    """ Transformers will be deprecated in Kedro 0.18.0 in favour of the Dataset Hooks.
+    """Transformers will be deprecated in Kedro 0.18.0 in favour of the Dataset Hooks.
 
     ``AbstractTransformer`` is the base class for all transformer implementations.
     All transformer implementations should extend this abstract class

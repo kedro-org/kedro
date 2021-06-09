@@ -54,9 +54,9 @@ class AbstractRunner(ABC):
     def __init__(self, is_async: bool = False):
         """Instantiates the runner classs.
 
-            Args:
-                is_async: If True, the node inputs and outputs are loaded and saved
-                    asynchronously with threads. Defaults to False.
+        Args:
+            is_async: If True, the node inputs and outputs are loaded and saved
+                asynchronously with threads. Defaults to False.
 
         """
         self._is_async = is_async
@@ -232,7 +232,11 @@ def _collect_inputs_from_hook(
     inputs = inputs.copy()  # shallow copy to prevent in-place modification by the hook
     hook_manager = get_hook_manager()
     hook_response = hook_manager.hook.before_node_run(  # pylint: disable=no-member
-        node=node, catalog=catalog, inputs=inputs, is_async=is_async, run_id=run_id,
+        node=node,
+        catalog=catalog,
+        inputs=inputs,
+        is_async=is_async,
+        run_id=run_id,
     )
 
     additional_inputs = {}

@@ -129,7 +129,11 @@ def _map_type_to_datasets(datasets, datasets_meta):
 @catalog.command("create")
 @env_option(help="Environment to create Data Catalog YAML file in. Defaults to `base`.")
 @click.option(
-    "--pipeline", "pipeline_name", type=str, required=True, help="Name of a pipeline.",
+    "--pipeline",
+    "pipeline_name",
+    type=str,
+    required=True,
+    help="Name of a pipeline.",
 )
 @click.pass_obj
 def create_catalog(metadata: ProjectMetadata, pipeline_name, env):

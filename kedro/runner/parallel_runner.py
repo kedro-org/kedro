@@ -72,8 +72,7 @@ class _SharedMemoryDataSet:
         return getattr(self.shared_memory_dataset, name)
 
     def save(self, data: Any):
-        """Calls save method of a shared MemoryDataSet in SyncManager.
-        """
+        """Calls save method of a shared MemoryDataSet in SyncManager."""
         try:
             self.shared_memory_dataset.save(data)
         except Exception as exc:  # pylint: disable=broad-except

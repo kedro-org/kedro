@@ -113,7 +113,13 @@ class TestSessionHookManager:
 
     @pytest.mark.usefixtures("mock_settings_with_disabled_hooks")
     def test_disabling_auto_discovered_hooks(
-        self, mocker, caplog, tmp_path, mock_package_name, naughty_plugin, good_plugin,
+        self,
+        mocker,
+        caplog,
+        tmp_path,
+        mock_package_name,
+        naughty_plugin,
+        good_plugin,
     ):
         hook_manager = get_hook_manager()
         assert not hook_manager.get_plugins()

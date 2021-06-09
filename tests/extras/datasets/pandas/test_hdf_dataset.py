@@ -155,7 +155,7 @@ class TestHDFDataSet:
         assert_frame_equal(df, reloaded)
 
     def test_thread_lock_usage(self, hdf_data_set, dummy_dataframe, mocker):
-        """Test thread lock usage. """
+        """Test thread lock usage."""
         # pylint: disable=no-member
         mocked_lock = HDFDataSet._lock
         mocked_lock.assert_not_called()

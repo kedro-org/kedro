@@ -371,7 +371,11 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
         if what == "class":
             # first do plural only for classes
             replacements += [
-                (r"``{}``s".format(obj), f":{what}:`~{module}.{obj}`\\\\s", obj,)
+                (
+                    r"``{}``s".format(obj),
+                    f":{what}:`~{module}.{obj}`\\\\s",
+                    obj,
+                )
                 for obj in objects
             ]
 

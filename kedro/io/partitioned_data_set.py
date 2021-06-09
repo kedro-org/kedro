@@ -89,7 +89,7 @@ class PartitionedDataSet(AbstractDataSet):
         >>>
         >>> data_set = PartitionedDataSet(
         >>>     path="s3://bucket-name/path/to/folder",
-        >>>     dataset="CSVDataSet",
+        >>>     dataset="pandas.CSVDataSet",
         >>>     credentials=credentials
         >>> )
         >>> loaded = data_set.load()
@@ -319,7 +319,7 @@ class IncrementalDataSet(PartitionedDataSet):
         >>>
         >>> data_set = IncrementalDataSet(
         >>>     path="s3://bucket-name/path/to/folder",
-        >>>     dataset="CSVDataSet",
+        >>>     dataset="pandas.CSVDataSet",
         >>>     credentials=credentials
         >>> )
         >>> loaded = data_set.load()  # loads all available partitions
@@ -453,8 +453,10 @@ class IncrementalDataSet(PartitionedDataSet):
     @cachedmethod(cache=operator.attrgetter("_partition_cache"))
     def _list_partitions(self) -> List[str]:
         checkpoint = self._read_checkpoint()
-        checkpoint_path = self._filesystem._strip_protocol(  # pylint: disable=protected-access
-            self._checkpoint_config[self._filepath_arg]
+        checkpoint_path = (
+            self._filesystem._strip_protocol(  # pylint: disable=protected-access
+                self._checkpoint_config[self._filepath_arg]
+            )
         )
         dataset_is_versioned = VERSION_KEY in self._dataset_config
 

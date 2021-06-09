@@ -495,10 +495,12 @@ def mock_session_with_broken_before_node_run_hooks(
 
 
 class TestBeforeNodeRunHookWithInputUpdates:
-    """Test the behavior of `before_node_run_hook` when updating node inputs"""
+    """Test the behavior of `before_node_run_hook` when updating node inputs."""
 
     def test_correct_input_update(
-        self, mock_session_with_before_node_run_hooks, dummy_dataframe,
+        self,
+        mock_session_with_before_node_run_hooks,
+        dummy_dataframe,
     ):
         context = mock_session_with_before_node_run_hooks.load_context()
         catalog = context.catalog
@@ -511,7 +513,9 @@ class TestBeforeNodeRunHookWithInputUpdates:
 
     @SKIP_ON_WINDOWS
     def test_correct_input_update_parallel(
-        self, mock_session_with_before_node_run_hooks, dummy_dataframe,
+        self,
+        mock_session_with_before_node_run_hooks,
+        dummy_dataframe,
     ):
         context = mock_session_with_before_node_run_hooks.load_context()
         catalog = context.catalog

@@ -102,7 +102,8 @@ class TestLoadKedroObjects:
         )
         mocker.patch("kedro.framework.session.session.configure_project")
         mocker.patch(
-            "kedro.framework.startup.bootstrap_project", return_value=fake_metadata,
+            "kedro.framework.startup.bootstrap_project",
+            return_value=fake_metadata,
         )
         mock_line_magic = mocker.MagicMock()
         mock_line_magic.__name__ = "abc"
@@ -137,7 +138,8 @@ class TestLoadKedroObjects:
         )
         mocker.patch("kedro.framework.session.session.configure_project")
         mocker.patch(
-            "kedro.framework.startup.bootstrap_project", return_value=fake_metadata,
+            "kedro.framework.startup.bootstrap_project",
+            return_value=fake_metadata,
         )
         mock_line_magic = mocker.MagicMock()
         mock_line_magic.__name__ = "abc"
@@ -168,7 +170,8 @@ class TestLoadKedroObjects:
 
     def test_load_kedro_objects_not_in_kedro_project(self, tmp_path, mocker):
         mocker.patch(
-            "kedro.framework.startup._get_project_metadata", side_effect=RuntimeError,
+            "kedro.framework.startup._get_project_metadata",
+            side_effect=RuntimeError,
         )
         mock_ipython = mocker.patch("kedro.extras.extensions.ipython.get_ipython")
 
@@ -199,7 +202,8 @@ class TestLoadIPythonExtension:
         self, error, expected_log_message, level, mocker, caplog
     ):
         mocker.patch(
-            "kedro.framework.startup._get_project_metadata", side_effect=error,
+            "kedro.framework.startup._get_project_metadata",
+            side_effect=error,
         )
         mock_ipython = mocker.patch("kedro.extras.extensions.ipython.get_ipython")
 

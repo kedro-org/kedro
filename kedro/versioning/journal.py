@@ -122,8 +122,7 @@ def _git_sha(proj_dir: Union[str, Path] = None) -> Optional[str]:
 
 
 class JournalFileHandler(logging.Handler):
-    """Handler for logging journal record to a file based on journal ID.
-    """
+    """Handler for logging journal record to a file based on journal ID."""
 
     def __init__(self, base_dir: Union[str, Path]):
         """Initialise ``JournalFileHandler`` which will handle logging journal record.

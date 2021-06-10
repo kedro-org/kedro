@@ -22,6 +22,7 @@
 * `kedro pipeline package` now only packages the parameter file that exactly matches the pipeline name specified and the parameter files in a directory with the pipeline name.
 * Extended support to newer versions of third-party dependencies, which addresses [Issue 735](https://github.com/quantumblacklabs/kedro/issues/735)
 * Ensured consistent references to `model input` tables in accordance with our Data Engineering convention.
+* Changed behaviour where `kedro pipeline package` takes the pipeline package version, rather than the kedro package version. If the pipeline package version is not present, then the package version is used.
 
 ## Minor breaking changes to the API
 

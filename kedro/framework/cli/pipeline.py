@@ -309,7 +309,9 @@ def pull_package(
     "-v",
     "--version",
     type=str,
-    help="Version to package under. Defaults to project package version.",
+    help="Version to package under. "
+    "Defaults to pipeline package version or, "
+    "if that is not defined, the project package version.",
 )
 @click.argument("name", nargs=1)
 @click.pass_obj  # this will pass the metadata as first argument
@@ -454,9 +456,6 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
 ) -> Path:
     package_dir = metadata.source_dir / metadata.package_name
     env = env or "base"
-    if not version:  # default to project package version
-        project_module = import_module(f"{metadata.package_name}")
-        version = project_module.__version__  # type: ignore
 
     artifacts_to_package = _get_pipeline_artifacts(
         metadata, pipeline_name=pipeline_name, env=env
@@ -476,6 +475,17 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
     # Check that pipeline directory exists and not empty
     _validate_dir(artifacts_to_package.pipeline_dir)
     destination = Path(destination) if destination else package_dir.parent / "dist"
+
+    if not version:  # default to pipeline package version
+        try:
+            pipeline_module = import_module(
+                f"{metadata.package_name}.pipelines.{pipeline_name}"
+            )
+            version = pipeline_module.__version__  # type: ignore
+        except (AttributeError, ModuleNotFoundError):
+            # if pipeline version doesn't exist, take the project one
+            project_module = import_module(f"{metadata.package_name}")
+            version = project_module.__version__  # type: ignore
 
     _generate_wheel_file(  # type: ignore
         pipeline_name, destination, source_paths, version, alias=alias

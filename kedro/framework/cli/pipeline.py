@@ -487,8 +487,8 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
             project_module = import_module(f"{metadata.package_name}")
             version = project_module.__version__  # type: ignore
 
-    _generate_wheel_file(  # type: ignore
-        pipeline_name, destination, source_paths, version, alias=alias
+    _generate_wheel_file(
+        pipeline_name, destination, source_paths, version, alias=alias  # type: ignore
     )
 
     _clean_pycache(package_dir)

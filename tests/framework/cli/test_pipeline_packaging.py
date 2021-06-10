@@ -368,6 +368,32 @@ class TestPipelinePackageCommand:
         assert "retail/config/parameters/retail.yml" in wheel_contents
         assert "retail/config/parameters/retail_banking.yml" not in wheel_contents
 
+    def test_pipeline_package_version(
+        self, fake_repo_path, fake_package_path, fake_project_cli, fake_metadata
+    ):
+        _pipeline_name = "data_engineering"
+        # the test version value is set separately in
+        # features/steps/test_starter/<repo>/src/<package>/pipelines/data_engineering/__init__.py
+        _test_version = "4.20.69"
+
+        pipelines_dir = fake_package_path / "pipelines" / _pipeline_name
+        assert pipelines_dir.is_dir()
+
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["pipeline", "package", _pipeline_name],
+            obj=fake_metadata,
+        )
+        assert result.exit_code == 0
+
+        # test for actual version
+        wheel_location = fake_repo_path / "src" / "dist"
+        wheel_name = _get_wheel_name(name=_pipeline_name, version=_test_version)
+        wheel_file = wheel_location / wheel_name
+
+        assert wheel_file.is_file()
+        assert len(list(wheel_location.iterdir())) == 1
+
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
 class TestPipelinePullCommand:

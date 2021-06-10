@@ -111,7 +111,9 @@ class ChildTerminatingPopen(subprocess.Popen):
             **kwargs: keyword arguments such as env and cwd
 
         """
-        super().__init__(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)
+        super().__init__(  # type: ignore
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs
+        )
 
     def terminate(self) -> None:
         """Terminate process and children."""

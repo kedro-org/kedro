@@ -23,6 +23,7 @@
 * Extended support to newer versions of third-party dependencies, which addresses [Issue 735](https://github.com/quantumblacklabs/kedro/issues/735)
 * Ensured consistent references to `model input` tables in accordance with our Data Engineering convention.
 * Changed behaviour where `kedro pipeline package` takes the pipeline package version, rather than the kedro package version. If the pipeline package version is not present, then the package version is used.
+* Launched [GitHub Discussions](https://github.com/quantumblacklabs/kedro/discussions/) and [Kedro Discord Server](https://discord.gg/akJDeVaxnB)
 
 ## Minor breaking changes to the API
 

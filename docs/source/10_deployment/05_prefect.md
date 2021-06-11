@@ -36,6 +36,7 @@ import click
 from prefect import Client, Flow, Task
 from prefect.utilities.exceptions import ClientError
 
+from kedro.framework.project import pipelines
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import bootstrap_project
 from kedro.io import DataCatalog, MemoryDataSet
@@ -68,7 +69,7 @@ def build_and_register_flow(pipeline_name, env):
 
     catalog = context.catalog
     pipeline_name = pipeline_name or "__default__"
-    pipeline = context.pipelines.get(pipeline_name)
+    pipeline = pipelines.get(pipeline_name)
 
     unregistered_ds = pipeline.data_sets() - set(catalog.list())
     for ds_name in unregistered_ds:

@@ -122,7 +122,7 @@ class DryRunner(AbstractRunner):
 And use it with `kedro run` through the `--runner` flag:
 
 ```console
-$ kedro run --runner=src.<python_package>.runner.DryRunner
+$ kedro run --runner=<python_package>.runner.DryRunner
 ```
 
 ## Load and save asynchronously

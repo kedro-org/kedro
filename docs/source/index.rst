@@ -39,9 +39,9 @@ Welcome to Kedro's documentation!
     :target: https://kedro.readthedocs.io/
     :alt: Docs build status
 
-.. image:: https://img.shields.io/discourse/users?server=https%3A%2F%2Fdiscourse.kedro.community%2F
-    :target: https://discourse.kedro.community/
-    :alt: Discourse users
+.. image:: https://img.shields.io/discord/778216384475693066.svg?color=7289da&label=Kedro%20Discord&logo=discord&style=flat-square
+    :target: https://discord.gg/akJDeVaxnB
+    :alt: Discord Server
 
 .. image:: https://img.shields.io/badge/code%20style-black-black.svg
     :target: https://github.com/psf/black

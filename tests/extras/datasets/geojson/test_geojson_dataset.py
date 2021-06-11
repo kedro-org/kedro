@@ -25,7 +25,7 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 
 import geopandas as gpd
 import pytest
@@ -237,3 +237,23 @@ class TestGeoJSONDataSetVersioned:
             GeoJSONDataSet(
                 filepath="https://example/file.geojson", version=Version(None, None)
             )
+
+    def test_versioning_existing_dataset(
+        self, geojson_data_set, versioned_geojson_data_set, dummy_dataframe
+    ):
+        """Check the error when attempting to save a versioned dataset on top of an
+        already existing (non-versioned) dataset."""
+        geojson_data_set.save(dummy_dataframe)
+        assert geojson_data_set.exists()
+        assert geojson_data_set._filepath == versioned_geojson_data_set._filepath
+        pattern = (
+            f"(?=.*file with the same name already exists in the directory)"
+            f"(?=.*{versioned_geojson_data_set._filepath.parent.as_posix()})"
+        )
+        with pytest.raises(DataSetError, match=pattern):
+            versioned_geojson_data_set.save(dummy_dataframe)
+
+        # Remove non-versioned dataset and try again
+        Path(geojson_data_set._filepath.as_posix()).unlink()
+        versioned_geojson_data_set.save(dummy_dataframe)
+        assert versioned_geojson_data_set.exists()

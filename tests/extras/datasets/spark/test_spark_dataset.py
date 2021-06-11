@@ -381,6 +381,20 @@ class TestSparkDataSetVersionedLocal:
         with pytest.raises(DataSetError, match=pattern):
             versioned_local.save(sample_spark_df)
 
+    def test_versioning_existing_dataset(
+        self, versioned_dataset_local, sample_spark_df
+    ):
+        """Check behavior when attempting to save a versioned dataset on top of an
+        already existing (non-versioned) dataset. Note: because SparkDataSet saves to a
+        directory even if non-versioned, an error is not expected."""
+        spark_data_set = SparkDataSet(
+            filepath=versioned_dataset_local._filepath.as_posix()
+        )
+        spark_data_set.save(sample_spark_df)
+        assert spark_data_set.exists()
+        versioned_dataset_local.save(sample_spark_df)
+        assert versioned_dataset_local.exists()
+
 
 @pytest.mark.skipif(
     sys.platform.startswith("win"), reason="DBFS doesn't work on Windows"

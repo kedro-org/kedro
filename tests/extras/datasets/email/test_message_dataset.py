@@ -28,7 +28,7 @@
 
 from email.message import EmailMessage
 from email.policy import default
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 
 import pytest
 from fsspec.implementations.http import HTTPFileSystem
@@ -65,7 +65,7 @@ def versioned_message_data_set(filepath_message, load_version, save_version):
 
 @pytest.fixture
 def dummy_msg():
-    string_to_write = "what would you do if you were invisable for one day????"
+    string_to_write = "what would you do if you were invisible for one day????"
 
     # Create a text/plain message
     msg = EmailMessage()
@@ -232,3 +232,23 @@ class TestEmailMessageDataSetVersioned:
             EmailMessageDataSet(
                 filepath="https://example.com/file", version=Version(None, None)
             )
+
+    def test_versioning_existing_dataset(
+        self, message_data_set, versioned_message_data_set, dummy_msg
+    ):
+        """Check the error when attempting to save a versioned dataset on top of an
+        already existing (non-versioned) dataset."""
+        message_data_set.save(dummy_msg)
+        assert message_data_set.exists()
+        assert message_data_set._filepath == versioned_message_data_set._filepath
+        pattern = (
+            f"(?=.*file with the same name already exists in the directory)"
+            f"(?=.*{versioned_message_data_set._filepath.parent.as_posix()})"
+        )
+        with pytest.raises(DataSetError, match=pattern):
+            versioned_message_data_set.save(dummy_msg)
+
+        # Remove non-versioned dataset and try again
+        Path(message_data_set._filepath.as_posix()).unlink()
+        versioned_message_data_set.save(dummy_msg)
+        assert versioned_message_data_set.exists()

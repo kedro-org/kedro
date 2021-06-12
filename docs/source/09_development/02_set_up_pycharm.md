@@ -122,6 +122,33 @@ Click **OK** and then select **Remote Run** from the toolbar and click **Run** t
 
 To remotely debug, click the debugger button as [described above](#debugging).
 
+
+## Advanced: Docker interpreter
+
+```eval_rst
+.. note::  This section uses features supported in PyCharm Professional Edition only.
+```
+
+Firstly, add a Docker interpreter. Go to **Preferences | Project Interpreter** as above and proceed to add a new interpreter. Select **Docker Interpreter** and select the target Docker image:
+
+![](../meta/images/pycharm_docker_interpreter_1.png)
+
+Click **Next** and check that the required packages appear:
+
+![](../meta/images/pycharm_docker_interpreter_2.png)
+
+Click **Next** and wait for PyCharm to index your new Python interpreter.
+
+Click **OK**. Go to **Run / Debug Configurations** to add a **Python Run**. For the script path, get the path of the Kedro CLI on the remote computer by running `which kedro` (macOS / Linux) in the appropriate environment (/usr/local/bin/kedro in this case). Specify `run` as the parameter. Specify your working directory as the directory that contains your kedro project directory on your local machine. Optional: Edit the Docker container volume mount settings if it does not match the directory that contains your kedro project directory.   
+
+![](../meta/images/pycharm_docker_interpreter_3.png)
+
+Click **OK** and then select your run configuration from the toolbar and click **Run** to execute.
+
+![](../meta/images/pycharm_docker_interpreter_4.png)
+
+To debug, click the debugger button as [described above](#debugging).
+
 ## Configuring the Kedro catalog validation schema
 
 You can enable the Kedro catalog validation schema in your PyCharm IDE to enable real-time validation, autocompletion and see information about the different fields in your `catalog` as you write it. To enable this, open a `catalog.yml` file and you should see "No JSON Schema" in the bottom right corner of your window. Click it and select "Edit Schema Mapping".

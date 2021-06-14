@@ -401,3 +401,15 @@ class TestTensorFlowModelDatasetVersioned:
         assert ver_str in str(versioned_tf_model_dataset)
         assert "protocol" in str(versioned_tf_model_dataset)
         assert "save_args" in str(versioned_tf_model_dataset)
+
+    def test_versioning_existing_dataset(
+        self, tf_model_dataset, versioned_tf_model_dataset, dummy_tf_base_model
+    ):
+        """Check behavior when attempting to save a versioned dataset on top of an
+        already existing (non-versioned) dataset. Note: because TensorFlowModelDataset
+        saves to a directory even if non-versioned, an error is not expected."""
+        tf_model_dataset.save(dummy_tf_base_model)
+        assert tf_model_dataset.exists()
+        assert tf_model_dataset._filepath == versioned_tf_model_dataset._filepath
+        versioned_tf_model_dataset.save(dummy_tf_base_model)
+        assert versioned_tf_model_dataset.exists()

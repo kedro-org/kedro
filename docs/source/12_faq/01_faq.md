@@ -1,8 +1,7 @@
 # Frequently asked questions
 
 The following lists a set of questions that we have been asked about Kedro in the past. If you have a different
- question which isn't answered here, please consider asking it over on [Discourse](https://discourse.kedro.community/) or [Stack Overflow](https://stackoverflow.com/questions/tagged/kedro).
-
+ question which isn't answered here, check out [GitHub Discussions](https://github.com/quantumblacklabs/kedro/discussions) or talk to the community on the [Discord Server](https://discord.gg/akJDeVaxnB).
 ## What is Kedro?
 
 Kedro is an open-source Python framework for creating reproducible, maintainable and modular data science code. It
@@ -185,4 +184,4 @@ If you're an academic, Kedro can also help you, for example, as a tool to solve 
 
 ## How can I get my question answered?
 
-If your question isn't answered above, please consider asking it over on [Stack Overflow](https://stackoverflow.com/questions/tagged/kedro) or refer to the [Kedro.Community Discourse channel](https://discourse.kedro.community/) that is managed by Kedroids all over the world.
+If your question isn't answered above, check out [GitHub Discussions](https://github.com/quantumblacklabs/kedro/discussions) or talk to the community on the [Discord Server](https://discord.gg/akJDeVaxnB).

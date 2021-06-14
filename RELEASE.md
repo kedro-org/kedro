@@ -33,6 +33,7 @@
 ## Thanks for supporting contributions
 [Lou Kratz](https://github.com/lou-k)
 [Lucas Jamar](https://github.com/lucasjamar/)
+[Moussa Taifi](https://github.com/moutai/)
 
 # Release 0.17.3
 

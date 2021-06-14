@@ -133,7 +133,7 @@ Firstly, add a Docker interpreter. Go to **Preferences | Project Interpreter** a
 
 ![](../meta/images/pycharm_docker_interpreter_1.png)
 
-Click **Next** and check that the required packages appear:
+Click **OK** and check that the required packages appear:
 
 ![](../meta/images/pycharm_docker_interpreter_2.png)
 

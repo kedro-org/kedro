@@ -320,6 +320,9 @@ def create_project_without_starter(context):
         cwd=context.temp_dir,
     )
     assert res.returncode == OK_EXIT_CODE, res
+    # prevent telemetry from prompting for input during e2e tests
+    telemetry_file = context.root_project_dir / ".telemetry"
+    telemetry_file.write_text("consent: false", encoding="utf-8")
 
 
 @given("I have deleted the credentials file")

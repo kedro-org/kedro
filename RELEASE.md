@@ -1,4 +1,4 @@
-# Upcoming release 0.17.4
+# Release 0.17.4
 
 ## Major features and improvements
 * Added the following new datasets:

@@ -28,7 +28,7 @@
 * If you're using `pandas.ParquetDataSet`, please pass pandas saving arguments directly to `save_args` instead of nested in `from_pandas` (e.g. `save_args = {"preserve_index": False}` instead of `save_args = {"from_pandas": {"preserve_index": False}}`).
 * If you're using `spark.SparkHiveDataSet` with `write_mode` option set to `insert`, please update this to `append` in line with the Spark styleguide. If you're using `spark.SparkHiveDataSet` with `write_mode` option set to `upsert`, please make sure that your `SparkContext` has a valid `checkpointDir` set either by `SparkContext.setCheckpointDir` method or directly in the `conf` folder.
 
-# Release 0.17.4
+# Upcoming release 0.17.4
 
 ## Major features and improvements
 * Added the following new datasets:

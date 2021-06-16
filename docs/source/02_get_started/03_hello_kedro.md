@@ -65,7 +65,7 @@ from kedro.io import DataCatalog, MemoryDataSet
 data_catalog = DataCatalog({"my_salutation": MemoryDataSet()})
 ```
 
-Kedro provides a [number of different built-in datasets](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.html#data-sets) for different file types and file systems so you don’t have to write the logic for reading/writing data.
+Kedro provides a [number of different built-in datasets](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.html#kedro-extras-datasets) for different file types and file systems so you don’t have to write the logic for reading/writing data.
 
 ## Runner
 

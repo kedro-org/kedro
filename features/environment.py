@@ -69,8 +69,7 @@ def before_scenario(context, scenario):
     if FRESH_VENV_TAG in scenario.tags:
         context = _setup_minimal_env(context)
 
-    context.temp_dir = Path(tempfile.mkdtemp()).resolve()
-    _PATHS_TO_REMOVE.add(context.temp_dir)
+    context.temp_dir = _create_tmp_dir()
 
 
 def _setup_context_with_venv(context, venv_dir):

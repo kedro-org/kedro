@@ -23,9 +23,9 @@ Welcome to Kedro's documentation!
     :target: https://opensource.org/licenses/Apache-2.0
     :alt: License is Apache 2.0
 
-.. image:: https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue.svg
+.. image:: https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9-blue.svg
     :target: https://pypi.org/project/kedro/
-    :alt: Python version 3.6, 3.7, 3.8
+    :alt: Python version 3.7, 3.8, 3.9
 
 .. image:: https://badge.fury.io/py/kedro.svg
     :target: https://pypi.org/project/kedro/
@@ -65,9 +65,15 @@ Welcome to Kedro's documentation!
    02_get_started/01_prerequisites
    02_get_started/02_install
    02_get_started/03_hello_kedro
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Make a project
+
    02_get_started/04_new_project
    02_get_started/05_example_project
    02_get_started/06_starters
+   02_get_started/07_standalone_use_of_datacatalog
 
 .. toctree::
    :maxdepth: 2
@@ -87,7 +93,6 @@ Welcome to Kedro's documentation!
    04_kedro_project_setup/01_dependencies
    04_kedro_project_setup/02_configuration
    04_kedro_project_setup/03_session
-   04_kedro_project_setup/04_mini_kedro
 
 .. toctree::
    :maxdepth: 2

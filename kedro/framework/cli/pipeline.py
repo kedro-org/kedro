@@ -215,7 +215,13 @@ def delete_pipeline(
 
 @pipeline.command("list")
 def list_pipelines():
-    """List all pipelines defined in your pipeline_registry.py file."""
+    """List all pipelines defined in your pipeline_registry.py file. (DEPRECATED)"""
+    deprecation_message = (
+        "DeprecationWarning: Command `kedro pipeline list` is deprecated. "
+        "Please use `kedro registry list` instead."
+    )
+    click.secho(deprecation_message, fg="red")
+
     click.echo(yaml.dump(sorted(pipelines)))
 
 
@@ -225,7 +231,15 @@ def list_pipelines():
 def describe_pipeline(
     metadata: ProjectMetadata, name, **kwargs
 ):  # pylint: disable=unused-argument, protected-access
-    """Describe a pipeline by providing a pipeline name. Defaults to the __default__ pipeline."""
+    """Describe a pipeline by providing a pipeline name.
+    Defaults to the __default__ pipeline. (DEPRECATED)
+    """
+    deprecation_message = (
+        "DeprecationWarning: Command `kedro pipeline describe` is deprecated. "
+        "Please use `kedro registry describe` instead."
+    )
+    click.secho(deprecation_message, fg="red")
+
     pipeline_obj = pipelines.get(name)
     if not pipeline_obj:
         all_pipeline_names = pipelines.keys()

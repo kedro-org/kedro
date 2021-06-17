@@ -50,6 +50,7 @@ from kedro.framework.cli.hooks import CLIHooksManager
 from kedro.framework.cli.jupyter import jupyter_cli
 from kedro.framework.cli.pipeline import pipeline_cli
 from kedro.framework.cli.project import project_group
+from kedro.framework.cli.registry import registry_cli
 from kedro.framework.cli.starters import create_cli
 from kedro.framework.cli.utils import (
     CONTEXT_SETTINGS,
@@ -233,7 +234,7 @@ class KedroCLI(CommandCollection):
         if not self._metadata:
             return []
 
-        built_in = [catalog_cli, jupyter_cli, pipeline_cli, project_group]
+        built_in = [catalog_cli, jupyter_cli, pipeline_cli, project_group, registry_cli]
 
         plugins = load_entry_points("project")
 

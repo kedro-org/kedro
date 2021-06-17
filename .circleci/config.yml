@@ -4,9 +4,6 @@ orbs:
   win: circleci/windows@2.2.0
 
 executors:
-  py36:
-    docker:
-      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.6
   py37:
     docker:
       - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.7
@@ -279,22 +276,6 @@ commands:
           command: conda activate kedro_builder; make pip-compile
 
 jobs:
-  unit_tests_36:
-    executor: py36
-    steps: [unit_tests]
-
-  linters_36:
-    executor: py36
-    steps: [lint]
-
-  e2e_tests_36:
-    executor: py36
-    steps: [e2e_tests]
-
-  docs_36:
-    executor: py36
-    steps: [build_docs]
-
   unit_tests_37:
     executor: py37
     steps: [unit_tests]
@@ -351,10 +332,6 @@ jobs:
     executor: py39
     steps: [e2e_tests]
 
-  pip_compile_36:
-    executor: py36
-    steps: [pip_compile]
-
   pip_compile_37:
     executor: py37
     steps: [pip_compile]
@@ -377,14 +354,6 @@ jobs:
           command: echo "All checks passed"
 
   # Windows-related jobs
-  win_unit_tests_36:
-    executor:
-      name: win/default
-    steps:
-      - win_setup_conda:
-          python_version: "3.6"
-      - win_unit_tests
-
   win_unit_tests_37:
     executor:
       name: win/default
@@ -437,14 +406,6 @@ jobs:
             pytest .\tests --ignore .\tests\extras\datasets\spark --ignore .\tests\extras\datasets\tensorflow --ignore tests\framework\session\test_session_hooks.py --ignore .\tests\runner\test_parallel_runner.py --no-cov
             if ($?) { pytest .\tests\runner\test_parallel_runner.py --no-cov }
 
-  win_e2e_tests_36:
-    executor:
-      name: win/default
-    steps:
-      - win_setup_conda:
-          python_version: "3.6"
-      - win_e2e_tests
-
   win_e2e_tests_37:
     executor:
       name: win/default
@@ -468,14 +429,6 @@ jobs:
       - win_setup_conda:
           python_version: "3.9"
       - win_e2e_tests
-
-  win_pip_compile_36:
-    executor:
-      name: win/default
-    steps:
-      - win_setup_conda:
-          python_version: "3.6"
-      - win_pip_compile
 
   win_pip_compile_37:
     executor:
@@ -507,10 +460,6 @@ workflows:
   version: 2
   regular:
     jobs:
-      - unit_tests_36
-      - linters_36
-      - e2e_tests_36
-      - docs_36
       - docs_linkcheck_37
       - unit_tests_37
       - linters_37
@@ -522,28 +471,20 @@ workflows:
       - unit_tests_39
       - linters_39
       - e2e_tests_39
-      - pip_compile_36
       - pip_compile_37
       - pip_compile_38
       - pip_compile_39
-      - win_unit_tests_36
       - win_unit_tests_37
       - win_unit_tests_38
       - win_unit_tests_39
-      - win_pip_compile_36
       - win_pip_compile_37
       - win_pip_compile_38
       - win_pip_compile_39
-      - win_e2e_tests_36
       - win_e2e_tests_37
       - win_e2e_tests_38
       - win_e2e_tests_39
       - all_circleci_checks_succeeded:
           requires:
-            - unit_tests_36
-            - linters_36
-            - e2e_tests_36
-            - docs_36
             - unit_tests_37
             - linters_37
             - e2e_tests_37
@@ -555,17 +496,13 @@ workflows:
             - unit_tests_39
             - linters_39
             - e2e_tests_39
-            - pip_compile_36
             - pip_compile_37
             - pip_compile_38
             - pip_compile_39
-            - win_pip_compile_36
             - win_pip_compile_37
             - win_pip_compile_38
             - win_pip_compile_39
-            - win_unit_tests_36
             - win_unit_tests_37
-            - win_e2e_tests_36
             # Skipped due to Windows fatal exception: stack overflow
             # - win_unit_tests_38
             # - win_unit_tests_39

@@ -305,22 +305,14 @@ def pull_package(
     type=click.Path(resolve_path=True, file_okay=False),
     help="Location where to create the wheel file. Defaults to `src/dist`.",
 )
-@click.option(
-    "-v",
-    "--version",
-    type=str,
-    help="Version to package under. "
-    "Defaults to pipeline package version or, "
-    "if that is not defined, the project package version.",
-)
 @click.argument("name", nargs=1)
 @click.pass_obj  # this will pass the metadata as first argument
 def package_pipeline(
-    metadata: ProjectMetadata, name, env, alias, destination, version
+    metadata: ProjectMetadata, name, env, alias, destination
 ):  # pylint: disable=too-many-arguments
     """Package up a modular pipeline as a Python .whl."""
     result_path = _package_pipeline(
-        name, metadata, alias=alias, destination=destination, env=env, version=version
+        name, metadata, alias=alias, destination=destination, env=env
     )
 
     as_alias = f" as `{alias}`" if alias else ""
@@ -452,7 +444,6 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
     alias: str = None,
     destination: str = None,
     env: str = None,
-    version: str = None,
 ) -> Path:
     package_dir = metadata.source_dir / metadata.package_name
     env = env or "base"
@@ -476,16 +467,16 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
     _validate_dir(artifacts_to_package.pipeline_dir)
     destination = Path(destination) if destination else package_dir.parent / "dist"
 
-    if not version:  # default to pipeline package version
-        try:
-            pipeline_module = import_module(
-                f"{metadata.package_name}.pipelines.{pipeline_name}"
-            )
-            version = pipeline_module.__version__  # type: ignore
-        except (AttributeError, ModuleNotFoundError):
-            # if pipeline version doesn't exist, take the project one
-            project_module = import_module(f"{metadata.package_name}")
-            version = project_module.__version__  # type: ignore
+    # default to pipeline package version
+    try:
+        pipeline_module = import_module(
+            f"{metadata.package_name}.pipelines.{pipeline_name}"
+        )
+        version = pipeline_module.__version__  # type: ignore
+    except (AttributeError, ModuleNotFoundError):
+        # if pipeline version doesn't exist, take the project one
+        project_module = import_module(f"{metadata.package_name}")
+        version = project_module.__version__  # type: ignore
 
     _generate_wheel_file(
         pipeline_name, destination, source_paths, version, alias=alias  # type: ignore

@@ -18,6 +18,7 @@
 * Deprecated and removed `ProjectHooks.register_config_loader` `hook_spec` in favour of loading `CONFIG_LOADER_CLASS` directly from `settings.py`. The default option for `CONFIG_LOADER_CLASS` is now set to `kedro.config.ConfigLoader`.
 * Added `CONFIG_LOADER_ARGS` to `settings.py` to facilitate the provision of additional keyword arguments to the constructor of the project `config_loader`. The default option for `CONFIG_LOADER_ARGS` is an empty dictionary.
 * `yaml.YAMLDataSet` can no longer save a `pandas.DataFrame` directly, but it can save a dictionary. Use `pandas.DataFrame.to_dict()` to convert your `pandas.DataFrame` to a dictionary before you attempt to save it to YAML.
+* Deprecated `--version` CLI option for `kedro pipeline package` command. Specific pipeline package version can be added by setting the `__version__` variable in the pipeline package's `__init__.py` file.
 
 ## Migration guide from Kedro 0.17.* to 0.18.*
 * Please remove any existing `hook_impl` of the `register_config_loader` method from `ProjectHooks` (or custom alternatives).
@@ -27,6 +28,7 @@
 * If you're using `pandas.ExcelDataSet`, make sure you have `openpyxl` installed in your environment. Note that this is automatically pulled if you specify `kedro[pandas.ExcelDataSet]==0.18.0` in your `requirements.in`. You can uninstall `xlrd` if you were only using it for this dataset.
 * If you're using `pandas.ParquetDataSet`, please pass pandas saving arguments directly to `save_args` instead of nested in `from_pandas` (e.g. `save_args = {"preserve_index": False}` instead of `save_args = {"from_pandas": {"preserve_index": False}}`).
 * If you're using `spark.SparkHiveDataSet` with `write_mode` option set to `insert`, please update this to `append` in line with the Spark styleguide. If you're using `spark.SparkHiveDataSet` with `write_mode` option set to `upsert`, please make sure that your `SparkContext` has a valid `checkpointDir` set either by `SparkContext.setCheckpointDir` method or directly in the `conf` folder.
+* Edit any scripts containing `kedro pipeline package --version` to remove the `--version` option. If you wish to set a specific pipeline package version, set the `__version__` variable in the pipeline package's `__init__.py` file.
 
 # Upcoming release 0.17.4
 

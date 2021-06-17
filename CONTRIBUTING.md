@@ -88,7 +88,7 @@ make build-docs
 * We use [Anaconda](https://www.anaconda.com/distribution/) as a preferred virtual environment
 * We use [SemVer](https://semver.org/) for versioning
 
-Our code is designed to be compatible with Python 3.6 onwards and our style guidelines are (in cascading order):
+Our code is designed to be compatible with Python 3.7 onwards and our style guidelines are (in cascading order):
 
 * [PEP 8 conventions](https://www.python.org/dev/peps/pep-0008/) for all Python code
 * [Google docstrings](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) for code comments

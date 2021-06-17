@@ -48,6 +48,7 @@ from kedro.framework.cli.cli import cli
 from kedro.framework.cli.jupyter import jupyter_cli
 from kedro.framework.cli.pipeline import pipeline_cli
 from kedro.framework.cli.project import project_group
+from kedro.framework.cli.registry import registry_cli
 from kedro.framework.cli.starters import create_cli
 from kedro.framework.project import configure_project, pipelines, settings
 from kedro.framework.startup import ProjectMetadata
@@ -127,6 +128,7 @@ def fake_kedro_cli():
             jupyter_cli,
             pipeline_cli,
             project_group,
+            registry_cli,
         ],
     )
 

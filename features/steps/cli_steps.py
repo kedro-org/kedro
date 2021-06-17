@@ -177,8 +177,7 @@ def create_config_file(context):
     """
     context.config_file = context.temp_dir / "config.yml"
     context.project_name = "project-dummy"
-    root_project_dir = context.temp_dir / context.project_name
-    context.root_project_dir = root_project_dir
+    context.root_project_dir = context.temp_dir / context.project_name
     context.package_name = context.project_name.replace("-", "_")
     config = {
         "project_name": context.project_name,

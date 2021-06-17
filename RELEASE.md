@@ -1,4 +1,18 @@
-# Upcoming release 0.17.4
+# Upcoming Release 0.17.5
+
+## Major features and improvements
+* Added new CLI group `registry`, with the associated commands `kedro registry list` and `kedro registry describe`, to replace `kedro pipeline list` and `kedro pipeline describe`.
+
+## Bug fixes and other changes
+
+## Minor breaking changes to the API
+
+## Upcoming deprecations for Kedro 0.18.0
+* `kedro pipeline list` and `kedro pipeline describe` are being deprecated in favour of new commands `kedro registry list ` and `kedro registry describe`
+
+## Thanks for supporting contributions
+
+# Release 0.17.4
 
 ## Major features and improvements
 * Added the following new datasets:

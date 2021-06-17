@@ -119,7 +119,7 @@ Returns output similar to the following, depending on the version of Kedro used 
 | |/ / _ \/ _` | '__/ _ \
 |   <  __/ (_| | | | (_) |
 |_|\_\___|\__,_|_|  \___/
-v0.17.3
+v0.17.4
 
 kedro allows teams to create analytics
 projects. It is developed as part of

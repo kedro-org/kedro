@@ -39,7 +39,6 @@ from typing import Any, List, NamedTuple, Optional, Tuple, Union
 from zipfile import ZipFile
 
 import click
-import yaml
 from setuptools.dist import Distribution
 
 import kedro
@@ -52,7 +51,7 @@ from kedro.framework.cli.utils import (
     env_option,
     python_call,
 )
-from kedro.framework.project import pipelines, settings
+from kedro.framework.project import settings
 from kedro.framework.startup import ProjectMetadata
 
 _SETUP_PY_TEMPLATE = """# -*- coding: utf-8 -*-
@@ -211,50 +210,6 @@ def delete_pipeline(
         f"`{package_dir / 'pipeline_registry.py'}`, you will need to remove it.",
         fg="yellow",
     )
-
-
-@pipeline.command("list")
-def list_pipelines():
-    """List all pipelines defined in your pipeline_registry.py file. (DEPRECATED)"""
-    deprecation_message = (
-        "DeprecationWarning: Command `kedro pipeline list` is deprecated. "
-        "Please use `kedro registry list` instead."
-    )
-    click.secho(deprecation_message, fg="red")
-
-    click.echo(yaml.dump(sorted(pipelines)))
-
-
-@command_with_verbosity(pipeline, "describe")
-@click.argument("name", nargs=1, default="__default__")
-@click.pass_obj
-def describe_pipeline(
-    metadata: ProjectMetadata, name, **kwargs
-):  # pylint: disable=unused-argument, protected-access
-    """Describe a pipeline by providing a pipeline name.
-    Defaults to the __default__ pipeline. (DEPRECATED)
-    """
-    deprecation_message = (
-        "DeprecationWarning: Command `kedro pipeline describe` is deprecated. "
-        "Please use `kedro registry describe` instead."
-    )
-    click.secho(deprecation_message, fg="red")
-
-    pipeline_obj = pipelines.get(name)
-    if not pipeline_obj:
-        all_pipeline_names = pipelines.keys()
-        existing_pipelines = ", ".join(sorted(all_pipeline_names))
-        raise KedroCliError(
-            f"`{name}` pipeline not found. Existing pipelines: [{existing_pipelines}]"
-        )
-
-    nodes = []
-    for node in pipeline_obj.nodes:
-        namespace = f"{node.namespace}." if node.namespace else ""
-        nodes.append(f"{namespace}{node._name or node._func_name} ({node._func_name})")
-    result = {"Nodes": nodes}
-
-    click.echo(yaml.dump(result))
 
 
 @command_with_verbosity(pipeline, "pull")

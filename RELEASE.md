@@ -18,8 +18,9 @@
 * Deprecated and removed `ProjectHooks.register_config_loader` `hook_spec` in favour of loading `CONFIG_LOADER_CLASS` directly from `settings.py`. The default option for `CONFIG_LOADER_CLASS` is now set to `kedro.config.ConfigLoader`.
 * Added `CONFIG_LOADER_ARGS` to `settings.py` to facilitate the provision of additional keyword arguments to the constructor of the project `config_loader`. The default option for `CONFIG_LOADER_ARGS` is an empty dictionary.
 * `yaml.YAMLDataSet` can no longer save a `pandas.DataFrame` directly, but it can save a dictionary. Use `pandas.DataFrame.to_dict()` to convert your `pandas.DataFrame` to a dictionary before you attempt to save it to YAML.
-* Deprecated `--version` CLI option for `kedro pipeline package` command. Specific pipeline package version can be added by setting the `__version__` variable in the pipeline package's `__init__.py` file.
+* Removed `--version` CLI option for `kedro pipeline package` command. Specific pipeline package version can be added by setting the `__version__` variable in the pipeline package's `__init__.py` file.
 * The `kedro package` and `kedro pipeline package` now save `egg` and `whl` files in the `<project_root>/dist` folder (previously `<project_root>/src/dist`).
+* Removed `kedro pipeline list` and `kedro pipeline describe` commands in favour of `kedro registry list` and `kedro registry describe`.
 
 ## Migration guide from Kedro 0.17.* to 0.18.*
 * Please remove any existing `hook_impl` of the `register_config_loader` method from `ProjectHooks` (or custom alternatives).

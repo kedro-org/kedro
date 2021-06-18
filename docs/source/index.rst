@@ -39,9 +39,9 @@ Welcome to Kedro's documentation!
     :target: https://kedro.readthedocs.io/
     :alt: Docs build status
 
-.. image:: https://img.shields.io/discourse/users?server=https%3A%2F%2Fdiscourse.kedro.community%2F
-    :target: https://discourse.kedro.community/
-    :alt: Discourse users
+.. image:: https://img.shields.io/discord/778216384475693066.svg?color=7289da&label=Kedro%20Discord&logo=discord&style=flat-square
+    :target: https://discord.gg/akJDeVaxnB
+    :alt: Discord Server
 
 .. image:: https://img.shields.io/badge/code%20style-black-black.svg
     :target: https://github.com/psf/black
@@ -60,7 +60,7 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Get Started
+   :caption: Get started
 
    02_get_started/01_prerequisites
    02_get_started/02_install
@@ -82,7 +82,7 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Kedro Project Setup
+   :caption: Kedro project setup
 
    04_kedro_project_setup/01_dependencies
    04_kedro_project_setup/02_configuration
@@ -98,7 +98,7 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Nodes and Pipelines
+   :caption: Nodes and pipelines
 
    06_nodes_and_pipelines/01_nodes
    06_nodes_and_pipelines/02_pipeline_introduction
@@ -153,7 +153,7 @@ Welcome to Kedro's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Tools Integration
+   :caption: Tools integration
 
    11_tools_integration/01_pyspark
    11_tools_integration/02_ipython
@@ -164,6 +164,7 @@ Welcome to Kedro's documentation!
 
    12_faq/01_faq
    12_faq/02_architecture_overview
+   12_faq/03_kedro_principles
 
 .. toctree::
    :maxdepth: 2
@@ -173,18 +174,14 @@ Welcome to Kedro's documentation!
    13_resources/02_glossary
 
 
-API Docs
-========
-
-.. toctree::
-   :maxdepth: 0
-   :caption: API Docs
-   :hidden:
-
-   kedro
+API documentation
+=================
 
 .. autosummary::
+   :toctree:
+   :caption: API documentation
    :template: autosummary/module.rst
+   :recursive:
 
    kedro
 
@@ -193,4 +190,3 @@ Indices and tables
 
 * :ref:`genindex`
 * :ref:`modindex`
-* :ref:`search`

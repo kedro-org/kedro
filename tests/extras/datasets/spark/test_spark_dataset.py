@@ -33,14 +33,18 @@ from pathlib import Path, PurePosixPath
 import pandas as pd
 import pytest
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col  # pylint: disable=no-name-in-module
+from pyspark.sql.functions import col
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
 
 from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
 from kedro.extras.datasets.pickle import PickleDataSet
 from kedro.extras.datasets.spark import SparkDataSet
-from kedro.extras.datasets.spark.spark_dataset import _dbfs_glob, _get_dbutils
+from kedro.extras.datasets.spark.spark_dataset import (
+    _dbfs_exists,
+    _dbfs_glob,
+    _get_dbutils,
+)
 from kedro.io import DataCatalog, DataSetError, Version
 from kedro.io.core import generate_timestamp
 from kedro.pipeline import Pipeline, node
@@ -216,7 +220,9 @@ class TestSparkDataSet:
         with tempfile.NamedTemporaryFile() as temp_data_file:
             filepath = Path(temp_data_file.name).as_posix()
             spark_data_set = SparkDataSet(
-                filepath=filepath, file_format="csv", load_args={"header": True},
+                filepath=filepath,
+                file_format="csv",
+                load_args={"header": True},
             )
             assert "SparkDataSet" in str(spark_data_set)
             assert f"filepath={filepath}" in str(spark_data_set)
@@ -282,8 +288,7 @@ class TestSparkDataSet:
 
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_runner(self, is_async, spark_in):
-        """Test ParallelRunner with SparkDataSet fails.
-        """
+        """Test ParallelRunner with SparkDataSet fails."""
         catalog = DataCatalog(data_sets={"spark_in": spark_in})
         pipeline = Pipeline([node(identity, "spark_in", "spark_out")])
         pattern = (
@@ -376,6 +381,20 @@ class TestSparkDataSetVersionedLocal:
         with pytest.raises(DataSetError, match=pattern):
             versioned_local.save(sample_spark_df)
 
+    def test_versioning_existing_dataset(
+        self, versioned_dataset_local, sample_spark_df
+    ):
+        """Check behavior when attempting to save a versioned dataset on top of an
+        already existing (non-versioned) dataset. Note: because SparkDataSet saves to a
+        directory even if non-versioned, an error is not expected."""
+        spark_data_set = SparkDataSet(
+            filepath=versioned_dataset_local._filepath.as_posix()
+        )
+        spark_data_set.save(sample_spark_df)
+        assert spark_data_set.exists()
+        versioned_dataset_local.save(sample_spark_df)
+        assert versioned_dataset_local.exists()
+
 
 @pytest.mark.skipif(
     sys.platform.startswith("win"), reason="DBFS doesn't work on Windows"
@@ -451,6 +470,22 @@ class TestSparkDataSetVersionedDBFS:
         result = _dbfs_glob(pattern, dbutils_mock)
         assert result == expected
         dbutils_mock.fs.ls.assert_called_once_with("/tmp/file")
+
+    def test_dbfs_exists(self, mocker):
+        dbutils_mock = mocker.Mock()
+        test_path = "/dbfs/tmp/file/date1/file"
+        dbutils_mock.fs.ls.return_value = [
+            FileInfo("/tmp/file/date1"),
+            FileInfo("/tmp/file/date2"),
+            FileInfo("/tmp/file/file.csv"),
+            FileInfo("/tmp/file/"),
+        ]
+
+        assert _dbfs_exists(test_path, dbutils_mock)
+
+        # add side effect to test that non-existence is handled
+        dbutils_mock.fs.ls.side_effect = Exception()
+        assert not _dbfs_exists(test_path, dbutils_mock)
 
     def test_ds_init_no_dbutils(self, mocker):
         get_dbutils_mock = mocker.patch(

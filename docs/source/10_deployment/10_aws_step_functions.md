@@ -1,7 +1,9 @@
 # How to deploy your Kedro pipeline with AWS Step Functions
 
 
-> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+```eval_rst
+.. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
+```
 
 This tutorial explains how to deploy a Kedro project with [AWS Step Functions](https://aws.amazon.com/step-functions/?step-functions.sort-by=item.additionalFields.postDateTime&step-functions.sort-order=desc) in order to run a Kedro pipeline in production on AWS [Serverless Computing](https://aws.amazon.com/serverless/) platform.
 
@@ -81,9 +83,9 @@ preprocessed_shuttles:
   type: pandas.CSVDataSet
   filepath: s3://<your-bucket>/preprocessed_shuttles.csv
 
-master_table:
+model_input_table:
   type: pandas.CSVDataSet
-  filepath: s3://<your-bucket>/master_table.csv
+  filepath: s3://<your-bucket>/model_input_table.csv
 
 regressor:
   type: pickle.PickleDataSet
@@ -113,7 +115,9 @@ y_test:
 
 In December 2020, AWS [announced](https://aws.amazon.com/blogs/aws/new-for-aws-lambda-container-image-support/) that an AWS Lambda function can now use a container image up to **10 GB in size** as its deployment package, besides the original zip method. As it has a few [requirements](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html#images-reqs) for the container image to work properly, you will need to build your own custom Docker container image to both contain the Kedro pipeline and to comply with Lambda's requirements.
 
-> **Note**: All of the following steps should be done in the Kedro project's root directory.
+```eval_rst
+.. note::  All of the following steps should be done in the Kedro project's root directory.
+```
 
 * **Step 2.1**: Package the Kedro pipeline as a Python package so you can install it into the container later on:
 
@@ -198,7 +202,7 @@ ENTRYPOINT [ "/usr/local/bin/python", "-m", "awslambdaric" ]
 CMD [ "lambda_handler.handler" ]
 ```
 
-This `Dockerfile` is adapted from the official guide on [how to create a custom image](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html#images-create-2) for Lambda to include Kedro-specific steps.
+This `Dockerfile` is adapted from the official guide on [how to create a custom image](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html#images-create-from-alt) for Lambda to include Kedro-specific steps.
 
 * **Step 2.4**: Build the Docker image and push it to AWS Elastic Container Registry (ECR):
 
@@ -244,10 +248,9 @@ from aws_cdk import aws_s3 as s3
 from aws_cdk import core, aws_lambda, aws_ecr
 from aws_cdk.aws_lambda import IFunction
 from aws_cdk.aws_stepfunctions_tasks import LambdaInvoke
-from kedro.framework.cli.utils import _add_src_to_path
-from kedro.framework.project import configure_project
+from kedro.framework.project import pipelines
 from kedro.framework.session import KedroSession
-from kedro.framework.startup import _get_project_metadata
+from kedro.framework.startup import bootstrap_project
 from kedro.pipeline.node import Node
 
 
@@ -281,14 +284,10 @@ class KedroStepFunctionsStack(core.Stack):
 
     def _parse_kedro_pipeline(self) -> None:
         """Extract the Kedro pipeline from the project"""
-        metadata = _get_project_metadata(self.project_path)
-        _add_src_to_path(metadata.source_dir, self.project_path)
-        configure_project(metadata.package_name)
-        session = KedroSession.create(project_path=self.project_path, env=self.env)
-        context = session.load_context()
+        metadata = bootstrap_project(self.project_path)
 
         self.project_name = metadata.project_name
-        self.pipeline = context.pipelines.get("__default__")
+        self.pipeline = pipelines.get("__default__")
 
     def _set_ecr_repository(self) -> None:
         """Set the ECR repository for the Lambda base image"""

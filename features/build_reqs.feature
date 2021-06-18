@@ -36,7 +36,7 @@ Feature: build-reqs target in new project
     And I have updated kedro requirements
     And I have executed the kedro command "build-reqs"
     When I add scrapy>=1.7.3 to the requirements
-    When I execute the kedro command "build-reqs"
+    And I execute the kedro command "build-reqs"
     Then I should get a successful exit code
-    Then requirements should be generated
+    And requirements should be generated
     And scrapy should be in the requirements

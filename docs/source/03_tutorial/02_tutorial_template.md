@@ -16,9 +16,7 @@ Navigate to your chosen working directory and run the following to [create a new
 kedro new
 ```
 
-Feel free to name your project as you like, but this guide will assume the project is named **`Kedro Tutorial`**.
-
-Keep the default names for the `repo_name` and `python_package` when prompted.
+When prompted for a project name, enter `Kedro Tutorial`. Subsequently, accept the default suggestions for `repo_name` and `python_package` by pressing enter.
 
 ## Install project dependencies with `kedro install`
 
@@ -35,22 +33,25 @@ Up to this point, we haven't discussed project dependencies, so now is a good ti
 The generic project template bundles some typical dependencies, in `src/requirements.txt`. Here's a typical example, although you may find that the version numbers are slightly different depending on the version of Kedro that you are using:
 
 ```text
-black==v19.10b0 # Used for formatting code with `kedro lint`
+black==21.5b1 # Used for formatting code with `kedro lint`
 flake8>=3.7.9, <4.0 # Used for linting code with `kedro lint`
 ipython==7.0 # Used for an IPython session with `kedro ipython`
-isort>=4.3.21, <5.0 # Used for linting code with `kedro lint`
+isort~=5.0 # Used for linting code with `kedro lint`
 jupyter~=1.0 # Used to open a Kedro-session in Jupyter Notebook & Lab
 jupyter_client>=5.1.0, <7.0 # Used to open a Kedro-session in Jupyter Notebook & Lab
-jupyterlab==0.31.1 # Used to open a Kedro-session in Jupyter Lab
-kedro==0.17.2
-nbstripout==0.3.3 # Strips the output of a Jupyter Notebook and writes the outputless version to the original file
+jupyterlab~=3.0 # Used to open a Kedro-session in Jupyter Lab
+kedro==0.17.4
+nbstripout~=0.4 # Strips the output of a Jupyter Notebook and writes the outputless version to the original file
 pytest-cov~=2.5 # Produces test coverage reports
-pytest-mock>=1.7.1,<2.0 # Wrapper around the mock package for easier use with pytest
-pytest~=6.1.2 # Testing framework for Python code
-wheel==0.32.2 # The reference implementation of the Python wheel packaging standard
+pytest-mock>=1.7.1, <2.0 # Wrapper around the mock package for easier use with pytest
+pytest~=6.2 # Testing framework for Python code
+wheel>=0.35, <0.37 # The reference implementation of the Python wheel packaging standard
 ```
 
-> Note: If your project has `conda` dependencies, you can create a `src/environment.yml` file and list them there.
+```eval_rst
+.. note::  If your project has ``conda`` dependencies, you can create a ``src/environment.yml`` file and list them there.
+```
+
 
 ### Add and remove project-specific dependencies
 
@@ -60,10 +61,10 @@ The dependencies above may be sufficient for some projects, but for the spacefli
 pip install "kedro[pandas.CSVDataSet,pandas.ExcelDataSet]"
 ```
 
-Alternatively, if you need to, you can edit `src/requirements.txt` directly to modify your list of dependencies by replacing the requirement `kedro==0.17.2` with the following (your version of Kedro may be different):
+Alternatively, if you need to, you can edit `src/requirements.txt` directly to modify your list of dependencies by replacing the requirement `kedro==0.17.4` with the following (your version of Kedro may be different):
 
 ```text
-kedro[pandas.CSVDataSet,pandas.ExcelDataSet]==0.17.2
+kedro[pandas.CSVDataSet,pandas.ExcelDataSet]==0.17.4
 ```
 
 Then run the following:

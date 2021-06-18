@@ -1,7 +1,9 @@
 # Set up Visual Studio Code
 
 
-> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+```eval_rst
+.. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
+```
 
 Start by opening a new project directory in VS Code and installing the Python plugin under **Tools and languages**:
 
@@ -114,7 +116,9 @@ You can find more information about setting up environmental variables [here](ht
 
 Go to **Debug > Add Configurations**.
 
-> *Note:* If you encounter the following error: `Cannot read property 'openConfigFile' of undefined`, you can manually create `launch.json` file in `.vscode` directory and paste the configuration from below.
+```eval_rst
+.. note::  If you encounter the following error: ``Cannot read property 'openConfigFile' of undefined``, you can manually create ``launch.json`` file in ``.vscode`` directory and paste the configuration from below.
+```
 
 Edit the `launch.json` that opens in the editor with:
 
@@ -214,7 +218,12 @@ scp -r /path/to/<your_project_name> <your_username>@<remote_server>:projects/
 }
 ```
 
-> *Note:* There is also a third-party plugin for VS Code that supports remote workspaces, click [here](https://marketplace.visualstudio.com/items?itemName=Liveecommerce.vscode-remote-workspace) to find it.
+
+
+
+```eval_rst
+.. note:: `There is also a third-party plugin for VS Code that supports remote workspaces <https://marketplace.visualstudio.com/items?itemName=Liveecommerce.vscode-remote-workspace>`_.
+```
 
 Start executing the pipeline on your remote computer:
 
@@ -240,7 +249,7 @@ Go to the **Debugging** section in VS Code and select the newly created remote d
 
 You will need to set a breakpoint in VS Code as described [above](#debugging) and start the debugger by clicking the green play triangle:
 
-> *Note:* You can find more information on debugging in VS Code [here](https://code.visualstudio.com/docs/python/debugging)
+[Find more information on debugging in VS Code](https://code.visualstudio.com/docs/python/debugging).
 
 ## Configuring the Kedro catalog validation schema
 

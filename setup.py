@@ -105,6 +105,7 @@ pandas_require = {
     "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy~=1.2"],
 }
 pillow_require = {"pillow.ImageDataSet": ["Pillow~=7.1.2"]}
+plotly_require = {"plotly.PlotlyDataSet": [PANDAS, "plotly~=4.14"]}
 spark_require = {
     "spark.SparkDataSet": [SPARK, HDFS, S3FS],
     "spark.SparkHiveDataSet": [SPARK, HDFS, S3FS],
@@ -124,10 +125,11 @@ extras_require = {
     "biosequence": _collect_requirements(biosequence_require),
     "dask": _collect_requirements(dask_require),
     "docs": [
+        "docutils==0.16",
         "sphinx~=3.4.3",
         "sphinx_rtd_theme==0.4.1",
         "nbsphinx==0.8.1",
-        "nbstripout==0.3.3",
+        "nbstripout~=0.4",
         "recommonmark==0.7.1",
         "sphinx-autodoc-typehints==1.11.1",
         "sphinx_copybutton==0.3.1",
@@ -141,6 +143,7 @@ extras_require = {
     "notebook_templates": ["nbconvert>=5.3.1, <6.0", "nbformat~=4.4"],
     "pandas": _collect_requirements(pandas_require),
     "pillow": _collect_requirements(pillow_require),
+    "plotly": _collect_requirements(plotly_require),
     "profilers": ["memory_profiler>=0.50.0, <1.0"],
     "spark": _collect_requirements(spark_require),
     "tensorflow": _collect_requirements(tensorflow_required),
@@ -154,6 +157,7 @@ extras_require = {
     **networkx_require,
     **pandas_require,
     **pillow_require,
+    **plotly_require,
     **spark_require,
     **tensorflow_required,
     **yaml_require,

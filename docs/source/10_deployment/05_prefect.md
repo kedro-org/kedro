@@ -4,7 +4,9 @@ This page explains how to run your Kedro pipeline using [Prefect Core](https://w
 
 In scope of this deployment we are interested in [Prefect Server](https://docs.prefect.io/orchestration/server/overview.html#what-is-prefect-server) which is an open-source backend that makes it easy to monitor and execute your Prefect flows and automatically extends the Prefect Core.
 
-> _Note:_ Prefect Server ships out-of-the-box with a fully featured User Interface.
+```eval_rst
+.. note::  Prefect Server ships out-of-the-box with a fully featured user interface.
+```
 
 ## Prerequisites
 
@@ -34,10 +36,9 @@ import click
 from prefect import Client, Flow, Task
 from prefect.utilities.exceptions import ClientError
 
-from kedro.framework.cli.utils import _add_src_to_path
-from kedro.framework.project import configure_project
+from kedro.framework.project import pipelines
 from kedro.framework.session import KedroSession
-from kedro.framework.startup import _get_project_metadata
+from kedro.framework.startup import bootstrap_project
 from kedro.io import DataCatalog, MemoryDataSet
 from kedro.pipeline.node import Node
 from kedro.runner import run_node
@@ -61,16 +62,14 @@ class KedroTask(Task):
 def build_and_register_flow(pipeline_name, env):
     """Register a Kedro pipeline as a Prefect flow."""
     project_path = Path.cwd()
-    metadata = _get_project_metadata(project_path)
-    _add_src_to_path(metadata.source_dir, project_path)
-    configure_project(metadata.package_name)
+    metadata = bootstrap_project(project_path)
 
     session = KedroSession.create(project_path=project_path, env=env)
     context = session.load_context()
 
     catalog = context.catalog
     pipeline_name = pipeline_name or "__default__"
-    pipeline = context.pipelines.get(pipeline_name)
+    pipeline = pipelines.get(pipeline_name)
 
     unregistered_ds = pipeline.data_sets() - set(catalog.list())
     for ds_name in unregistered_ds:
@@ -118,7 +117,10 @@ if __name__ == "__main__":
     build_and_register_flow()
 ```
 
-> _Note:_ The script launches a [local agent](https://docs.prefect.io/orchestration/agents/local.html). Remember to stop the agent with Ctrl-C when you complete.
+```eval_rst
+.. note::  The script launches a `local agent <https://docs.prefect.io/orchestration/agents/local.html>`_. Remember to stop the agent with Ctrl-C when you complete.
+```
+
 
 ### Run Prefect flow
 

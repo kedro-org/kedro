@@ -74,8 +74,7 @@ from kedro.framework.hooks.specs import DataCatalogSpecs, NodeSpecs, PipelineSpe
 def test_hook_manager_can_call_hooks_defined_in_specs(
     hook_specs, hook_name, hook_params
 ):
-    """Tests to make sure that the hook manager can call all hooks defined by specs.
-    """
+    """Tests to make sure that the hook manager can call all hooks defined by specs."""
     hook_manager = _create_hook_manager()
     hook = getattr(hook_manager.hook, hook_name)
     assert hook.spec.namespace == hook_specs
@@ -84,11 +83,3 @@ def test_hook_manager_can_call_hooks_defined_in_specs(
     # since there hasn't been any hook implementation, the result should be empty
     # but it shouldn't have raised
     assert result == []
-
-
-def test_hook_manager_cannot_call_non_existent_hook():
-    hook_manager = _create_hook_manager()
-    with pytest.raises(
-        AttributeError, match="'_HookRelay' object has no attribute 'i_do_not_exist'"
-    ):
-        hook_manager.hook.i_do_not_exist()  # pylint: disable=no-member

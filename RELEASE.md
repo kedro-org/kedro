@@ -1,7 +1,65 @@
-# Upcoming Release 0.17.3
+# Upcoming Release 0.17.5
+
+## Major features and improvements
+* Added new CLI group `registry`, with the associated commands `kedro registry list` and `kedro registry describe`, to replace `kedro pipeline list` and `kedro pipeline describe`.
+
+## Bug fixes and other changes
+
+## Minor breaking changes to the API
+
+## Upcoming deprecations for Kedro 0.18.0
+* `kedro pipeline list` and `kedro pipeline describe` are being deprecated in favour of new commands `kedro registry list ` and `kedro registry describe`
+
+## Thanks for supporting contributions
+
+# Release 0.17.4
+
+## Major features and improvements
+* Added the following new datasets:
+
+| Type                        | Description                                          | Location                          |
+| --------------------------- | ---------------------------------------------------- | --------------------------------- |
+| `plotly.PlotlyDataSet` | Works with plotly graph object Figures (saves as json file) | `kedro.extras.datasets.plotly` |
+
+## Bug fixes and other changes
+* Defined our set of Kedro Principles! Have a read through [our docs](https://kedro.readthedocs.io/en/0.17.4/12_faq/03_kedro_principles.html).
+* `ConfigLoader.get()` now raises a `BadConfigException`, with a more helpful error message, if a configuration file cannot be loaded (for instance due to wrong syntax or poor formatting).
+* `run_id` now defaults to `save_version` when `after_catalog_created` is called, similarly to what happens during a `kedro run`.
+* Fixed a bug where `kedro ipython` and `kedro jupyter notebook` didn't work if the `PYTHONPATH` was already set.
+* Update the IPython extension to allow passing `env` and `extra_params` to `reload_kedro`  similar to how the IPython script works.
+* `kedro info` now outputs if a plugin has any `hooks` or `cli_hooks` implemented.
+* `PartitionedDataSet` now supports lazily materializing data on save.
+* `kedro pipeline describe` now defaults to the `__default__` pipeline when no pipeline name is provided and also shows the namespace the nodes belong to.
+* Fixed an issue where spark.SparkDataSet with enabled versioning would throw a VersionNotFoundError when using databricks-connect from a remote machine and saving to dbfs filesystem.
+* `EmailMessageDataSet` added to doctree.
+* When node inputs do not pass validation, the error message is now shown as the most recent exception in the traceback ([Issue #761](https://github.com/quantumblacklabs/kedro/issues/761)).
+* `kedro pipeline package` now only packages the parameter file that exactly matches the pipeline name specified and the parameter files in a directory with the pipeline name.
+* Extended support to newer versions of third-party dependencies ([Issue #735](https://github.com/quantumblacklabs/kedro/issues/735)).
+* Ensured consistent references to `model input` tables in accordance with our Data Engineering convention.
+* Changed behaviour where `kedro pipeline package` takes the pipeline package version, rather than the kedro package version. If the pipeline package version is not present, then the package version is used.
+* Launched [GitHub Discussions](https://github.com/quantumblacklabs/kedro/discussions/) and [Kedro Discord Server](https://discord.gg/akJDeVaxnB)
+* Improved error message when versioning is enabled for a dataset previously saved as non-versioned ([Issue #625](https://github.com/quantumblacklabs/kedro/issues/625)).
+
+## Minor breaking changes to the API
+
+## Upcoming deprecations for Kedro 0.18.0
+
+## Thanks for supporting contributions
+[Lou Kratz](https://github.com/lou-k)
+[Lucas Jamar](https://github.com/lucasjamar/)
+
+# Release 0.17.3
 
 ## Major features and improvements
 * Kedro plugins can now override built-in CLI commands.
+* Added a `before_command_run` hook for plugins to add extra behaviour before Kedro CLI commands run.
+* `pipelines` from `pipeline_registry.py` and `register_pipeline` hooks are now loaded lazily when they are first accessed, not on startup:
+
+```python
+from kedro.framework.project import pipelines
+
+print(pipelines["__default__"])  # pipeline loading is only triggered here
+```
 
 ## Bug fixes and other changes
 * `TemplatedConfigLoader` now correctly inserts default values when no globals are supplied.
@@ -9,10 +67,23 @@
 * Plugins with empty CLI groups are no longer displayed in the Kedro CLI help screen.
 * Duplicate commands will no longer appear twice in the Kedro CLI help screen.
 * CLI commands from sources with the same name will show under one list in the help screen.
+* The setup of a Kedro project, including adding src to path and configuring settings, is now handled via the `bootstrap_project` method.
+* `configure_project` is invoked if a `package_name` is supplied to `KedroSession.create`. This is added for backward-compatibility purpose to support a workflow that creates `Session` manually. It will be removed in `0.18.0`.
+* Stopped swallowing up all `ModuleNotFoundError` if `register_pipelines` not found, so that a more helpful error message will appear when a dependency is missing, e.g. [Issue #722](https://github.com/quantumblacklabs/kedro/issues/722).
+* When `kedro new` is invoked using a configuration yaml file, `output_dir` is no longer a required key; by default the current working directory will be used.
+* When `kedro new` is invoked using a configuration yaml file, the appropriate `prompts.yml` file is now used for validating the provided configuration. Previously, validation was always performed against the kedro project template `prompts.yml` file.
+* When a relative path to a starter template is provided, `kedro new` now generates user prompts to obtain configuration rather than supplying empty configuration.
+* Fixed error when using starters on Windows with Python 3.7 (Issue [#722](https://github.com/quantumblacklabs/kedro/issues/722)).
+* Fixed decoding error of config files that contain accented characters by opening them for reading in UTF-8.
+* Fixed an issue where `after_dataset_loaded` run would finish before a dataset is actually loaded when using `--async` flag.
 
-## Minor breaking changes to the API
+## Upcoming deprecations for Kedro 0.18.0
 
-## Thanks for supporting contributions
+* `kedro.versioning.journal.Journal` will be removed.
+* The following properties on `kedro.framework.context.KedroContext` will be removed:
+  * `io` in favour of `KedroContext.catalog`
+  * `pipeline` (equivalent to `pipelines["__default__"]`)
+  * `pipelines` in favour of `kedro.framework.project.pipelines`
 
 # Release 0.17.2
 

@@ -21,9 +21,7 @@ This command will run a server on http://127.0.0.1:4141 that will open up your v
 
 ![](../meta/images/pipeline_visualisation.png)
 
-> _Note_: If a visualisation panel opens up and a pipeline is not visible then please check that your [pipeline
-> definition](04_create_pipelines.md) is complete. All other errors can be logged as GitHub Issues on
-> the [Kedro-Viz repository](https://github.com/quantumblacklabs/kedro-viz).
+If a visualisation panel opens up and a pipeline is not visible then please check that your [pipeline definition](04_create_pipelines.md) is complete. All other errors can be logged as GitHub Issues on the [Kedro-Viz repository](https://github.com/quantumblacklabs/kedro-viz).
 
 ## Exit an open visualisation
 
@@ -61,9 +59,9 @@ preprocessed_shuttles:
   filepath: data/02_intermediate/preprocessed_shuttles.csv
   layer: intermediate
 
-master_table:
+model_input_table:
   type: pandas.CSVDataSet
-  filepath: data/03_primary/master_table.csv
+  filepath: data/03_primary/model_input_table.csv
   layer: primary
 
 regressor:

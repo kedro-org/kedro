@@ -5,30 +5,18 @@ kedro.framework.context
 
 .. automodule:: kedro.framework.context
 
-Base Classes
-------------
+.. rubric:: Classes
 
 .. autosummary::
-    :toctree:
-    :template: autosummary/class.rst
+   :toctree:
+   :template: autosummary/class.rst
 
-    kedro.framework.context.KedroContext
+   kedro.framework.context.KedroContext
 
-Functions
----------
-
-.. autosummary::
-    :toctree:
-    :template: autosummary/base.rst
-
-    kedro.framework.context.load_context
-
-
-Errors
-------
+.. rubric:: Exceptions
 
 .. autosummary::
-    :toctree:
-    :template: autosummary/class.rst
+   :toctree:
+   :template: autosummary/class.rst
 
-    kedro.framework.context.KedroContextError
+   kedro.framework.context.KedroContextError

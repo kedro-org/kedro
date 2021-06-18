@@ -38,7 +38,7 @@ from kedro.io import AbstractTransformer
 
 
 class ProfileTimeTransformer(AbstractTransformer):
-    """ A transformer that logs the runtime of data set load and save calls """
+    """A transformer that logs the runtime of data set load and save calls."""
 
     @property
     def _logger(self):

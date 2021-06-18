@@ -215,17 +215,31 @@ def delete_pipeline(
 
 @pipeline.command("list")
 def list_pipelines():
-    """List all pipelines defined in your pipeline_registry.py file."""
+    """List all pipelines defined in your pipeline_registry.py file. (DEPRECATED)"""
+    deprecation_message = (
+        "DeprecationWarning: Command `kedro pipeline list` is deprecated. "
+        "Please use `kedro registry list` instead."
+    )
+    click.secho(deprecation_message, fg="red")
+
     click.echo(yaml.dump(sorted(pipelines)))
 
 
 @command_with_verbosity(pipeline, "describe")
-@click.argument("name", nargs=1)
+@click.argument("name", nargs=1, default="__default__")
 @click.pass_obj
 def describe_pipeline(
     metadata: ProjectMetadata, name, **kwargs
-):  # pylint: disable=unused-argument
-    """Describe a pipeline by providing a pipeline name."""
+):  # pylint: disable=unused-argument, protected-access
+    """Describe a pipeline by providing a pipeline name.
+    Defaults to the __default__ pipeline. (DEPRECATED)
+    """
+    deprecation_message = (
+        "DeprecationWarning: Command `kedro pipeline describe` is deprecated. "
+        "Please use `kedro registry describe` instead."
+    )
+    click.secho(deprecation_message, fg="red")
+
     pipeline_obj = pipelines.get(name)
     if not pipeline_obj:
         all_pipeline_names = pipelines.keys()
@@ -234,12 +248,11 @@ def describe_pipeline(
             f"`{name}` pipeline not found. Existing pipelines: [{existing_pipelines}]"
         )
 
-    result = {
-        "Nodes": [
-            f"{node.short_name} ({node._func_name})"  # pylint: disable=protected-access
-            for node in pipeline_obj.nodes
-        ]
-    }
+    nodes = []
+    for node in pipeline_obj.nodes:
+        namespace = f"{node.namespace}." if node.namespace else ""
+        nodes.append(f"{namespace}{node._name or node._func_name} ({node._func_name})")
+    result = {"Nodes": nodes}
 
     click.echo(yaml.dump(result))
 
@@ -268,8 +281,7 @@ def describe_pipeline(
 def pull_package(
     metadata: ProjectMetadata, package_path, env, alias, fs_args, **kwargs
 ):  # pylint:disable=unused-argument
-    """Pull and unpack a modular pipeline in your project.
-    """
+    """Pull and unpack a modular pipeline in your project."""
 
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_dir_path = Path(temp_dir).resolve()
@@ -311,7 +323,9 @@ def pull_package(
     "-v",
     "--version",
     type=str,
-    help="Version to package under. Defaults to project package version.",
+    help="Version to package under. "
+    "Defaults to pipeline package version or, "
+    "if that is not defined, the project package version.",
 )
 @click.argument("name", nargs=1)
 @click.pass_obj  # this will pass the metadata as first argument
@@ -431,13 +445,14 @@ def _install_files(
 
 
 def _find_config_files(
-    source_config_dir: Path, glob_pattern: str
+    source_config_dir: Path, glob_patterns: List[str]
 ) -> List[Tuple[Path, str]]:
     config_files = []  # type: List[Tuple[Path, str]]
 
     if source_config_dir.is_dir():
         config_files = [
             (path, path.parent.relative_to(source_config_dir).as_posix())
+            for glob_pattern in glob_patterns
             for path in source_config_dir.glob(glob_pattern)
             if path.is_file()
         ]
@@ -455,17 +470,15 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
 ) -> Path:
     package_dir = metadata.source_dir / metadata.package_name
     env = env or "base"
-    if not version:  # default to project package version
-        project_module = import_module(f"{metadata.package_name}")
-        version = project_module.__version__  # type: ignore
 
     artifacts_to_package = _get_pipeline_artifacts(
         metadata, pipeline_name=pipeline_name, env=env
     )
     # as the wheel file will only contain parameters, we aren't listing other
-    # config files not to confused users and avoid useless file copies
+    # config files not to confuse users and avoid useless file copies
     configs_to_package = _find_config_files(
-        artifacts_to_package.pipeline_conf, f"parameters*/**/*{pipeline_name}*"
+        artifacts_to_package.pipeline_conf,
+        [f"parameters*/**/{pipeline_name}.yml", f"parameters*/**/{pipeline_name}/*"],
     )
     source_paths = (
         artifacts_to_package.pipeline_dir,
@@ -476,6 +489,17 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
     # Check that pipeline directory exists and not empty
     _validate_dir(artifacts_to_package.pipeline_dir)
     destination = Path(destination) if destination else package_dir.parent / "dist"
+
+    if not version:  # default to pipeline package version
+        try:
+            pipeline_module = import_module(
+                f"{metadata.package_name}.pipelines.{pipeline_name}"
+            )
+            version = pipeline_module.__version__  # type: ignore
+        except (AttributeError, ModuleNotFoundError):
+            # if pipeline version doesn't exist, take the project one
+            project_module = import_module(f"{metadata.package_name}")
+            version = project_module.__version__  # type: ignore
 
     _generate_wheel_file(  # type: ignore
         pipeline_name, destination, source_paths, version, alias=alias
@@ -566,6 +590,7 @@ def _generate_setup_file(package_name: str, version: str, output_dir: Path) -> P
             "config/parameters*",
             "config/**/parameters*",
             "config/parameters*/**",
+            "config/parameters*/**/*",
         ]
     }
     setup_file_context = dict(

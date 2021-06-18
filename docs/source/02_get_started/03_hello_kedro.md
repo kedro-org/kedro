@@ -4,7 +4,9 @@ It is time to introduce the most basic elements of Kedro. We have split a small 
 
 You can copy the example as one chunk of code from the bottom of this page.
 
-> Note: We do not create a Kedro project in this first example, but illustrate the concepts within a single `.py` file.
+```eval_rst
+.. note::  We do not create a Kedro project in this first example, but illustrate the concepts within a single ``.py`` file.
+```
 
 ## Node
 
@@ -63,7 +65,7 @@ from kedro.io import DataCatalog, MemoryDataSet
 data_catalog = DataCatalog({"my_salutation": MemoryDataSet()})
 ```
 
-Kedro provides a [number of different built-in datasets](https://kedro.readthedocs.io/en/stable/kedro.extras.datasets.html#data-sets) for different file types and file systems so you don’t have to write the logic for reading/writing data.
+Kedro provides a [number of different built-in datasets](/kedro.extras.datasets) for different file types and file systems so you don’t have to write the logic for reading/writing data.
 
 ## Runner
 

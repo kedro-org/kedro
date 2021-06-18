@@ -177,8 +177,7 @@ def create_config_file(context):
     """
     context.config_file = context.temp_dir / "config.yml"
     context.project_name = "project-dummy"
-    root_project_dir = context.temp_dir / context.project_name
-    context.root_project_dir = root_project_dir
+    context.root_project_dir = context.temp_dir / context.project_name
     context.package_name = context.project_name.replace("-", "_")
     config = {
         "project_name": context.project_name,
@@ -293,8 +292,7 @@ def add_test_jupyter_nb(context):
 @given("I have run a non-interactive kedro new with starter")
 @when("I run a non-interactive kedro new with starter")
 def create_project_with_starter(context):
-    """Behave step to run kedro new given the config I previously created.
-    """
+    """Behave step to run kedro new given the config I previously created."""
     starter_dir = Path(__file__).parent / "test_starter"
     res = run(
         [
@@ -314,14 +312,16 @@ def create_project_with_starter(context):
 @given("I have run a non-interactive kedro new without starter")
 @when("I run a non-interactive kedro new without starter")
 def create_project_without_starter(context):
-    """Behave step to run kedro new given the config I previously created.
-    """
+    """Behave step to run kedro new given the config I previously created."""
     res = run(
         [context.kedro, "new", "-c", str(context.config_file)],
         env=context.env,
         cwd=context.temp_dir,
     )
     assert res.returncode == OK_EXIT_CODE, res
+    # prevent telemetry from prompting for input during e2e tests
+    telemetry_file = context.root_project_dir / ".telemetry"
+    telemetry_file.write_text("consent: false", encoding="utf-8")
 
 
 @given("I have deleted the credentials file")
@@ -687,6 +687,7 @@ def check_jupyter_lab_proc_on_port(context: behave.runner.Context, port: int):
     try:
         util.wait_for(
             func=_check_service_up,
+            timeout_=20,
             context=context,
             url=url,
             string='<a href="/lab"',

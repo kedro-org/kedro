@@ -30,6 +30,7 @@ Kedro project."""
 import json
 import logging
 import subprocess
+import warnings
 from pathlib import Path
 from typing import Any, Dict, Mapping, Optional, Union
 
@@ -47,8 +48,16 @@ class Journal:
 
         Args:
             record_data: JSON serializable dictionary specific to project context.
-
+        Raises:
+            DeprecationWarning
         """
+        warnings.warn(
+            "`Journal` is now deprecated and will be removed in Kedro 0.18.0."
+            "For more information, please visit "
+            "https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md",
+            DeprecationWarning,
+        )
+
         self.run_id = record_data["run_id"]
         record_data["git_sha"] = _git_sha(record_data["project_path"])
         self._log_journal("ContextJournalRecord", record_data)
@@ -113,8 +122,7 @@ def _git_sha(proj_dir: Union[str, Path] = None) -> Optional[str]:
 
 
 class JournalFileHandler(logging.Handler):
-    """Handler for logging journal record to a file based on journal ID.
-    """
+    """Handler for logging journal record to a file based on journal ID."""
 
     def __init__(self, base_dir: Union[str, Path]):
         """Initialise ``JournalFileHandler`` which will handle logging journal record.

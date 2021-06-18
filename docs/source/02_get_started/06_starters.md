@@ -15,7 +15,10 @@ To create a Kedro project using a starter, apply the `--starter` flag to `kedro 
 ```bash
 kedro new --starter=<path-to-starter>
 ```
-> Note: `path-to-starter` could be a local directory or a VCS repository, as long as it is supported by [Cookiecutter](https://cookiecutter.readthedocs.io/en/1.7.2/usage.html).
+
+```eval_rst
+.. note::  ``path-to-starter`` could be a local directory or a VCS repository, as long as it is supported by `Cookiecutter <https://cookiecutter.readthedocs.io/en/1.7.2/usage.html>`_.
+```
 
 To create a project using the `PySpark` starter:
 
@@ -43,6 +46,7 @@ kedro starter list
 
 The Kedro team maintains the following starters to bootstrap new Kedro projects:
 
+* [Alias `astro-iris`](https://github.com/quantumblacklabs/kedro-starters/tree/master/astro-iris): The [Kedro Iris dataset example project](https://kedro.readthedocs.io/en/stable/02_get_started/05_example_project.html) with a minimal setup for deploying the pipeline on Airflow with [Astronomer](https://www.astronomer.io/).
 * [Alias `mini-kedro`](https://github.com/quantumblacklabs/kedro-starters/tree/master/mini-kedro): A minimum setup to use the traditional [Iris dataset](https://www.kaggle.com/uciml/iris) with Kedro's [`DataCatalog`](../05_data/01_data_catalog.md), which is a core component of Kedro. This starter is of use in the exploratory phase of a project. For more information, please read the [Mini-Kedro](../04_kedro_project_setup/04_mini_kedro.md) guide.
 * [Alias `pandas-iris`](https://github.com/quantumblacklabs/kedro-starters/tree/master/pandas-iris): The [Kedro Iris dataset example project](./05_example_project.md)
 * [Alias `pyspark-iris`](https://github.com/quantumblacklabs/kedro-starters/tree/master/pyspark-iris): An alternative Kedro Iris dataset example, using [PySpark](../11_tools_integration/01_pyspark.md)

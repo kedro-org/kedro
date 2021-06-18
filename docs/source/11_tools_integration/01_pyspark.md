@@ -1,6 +1,8 @@
 # Build a Kedro pipeline with PySpark
 
-> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+```eval_rst
+.. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
+```
 
 This page outlines some best practices when building a Kedro pipeline with [`PySpark`](https://spark.apache.org/docs/latest/api/python/index.html). It assumes a basic understanding of both Kedro and `PySpark`.
 
@@ -13,7 +15,9 @@ spark.driver.maxResultSize: 3g
 spark.scheduler.mode: FAIR
 ```
 
->_Note:_ Optimal configuration for Spark depends on the setup of your Spark cluster.
+```eval_rst
+.. note::  Optimal configuration for Spark depends on the setup of your Spark cluster.
+```
 
 ## Initialise a `SparkSession` in custom project context class
 
@@ -146,11 +150,7 @@ def predict(model: RandomForestClassifier, testing_data: DataFrame) -> DataFrame
 def create_pipeline(**kwargs):
     return Pipeline(
         [
-            node(
-                train_model,
-                inputs=["training_data"],
-                outputs="example_classifier",
-            ),
+            node(train_model, inputs=["training_data"], outputs="example_classifier"),
             node(
                 predict,
                 inputs=dict(model="example_classifier", testing_data="testing_data"),

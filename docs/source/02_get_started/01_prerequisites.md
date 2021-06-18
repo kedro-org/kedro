@@ -1,6 +1,6 @@
 # Installation prerequisites
 
-- Kedro supports macOS, Linux and Windows (7 / 8 / 10 and Windows Server 2016+). If you encounter any problems on these platforms, please check the [frequently asked questions](../12_faq/01_faq.md), and / or the Kedro community support on [Stack Overflow](https://stackoverflow.com/questions/tagged/kedro).
+- Kedro supports macOS, Linux and Windows (7 / 8 / 10 and Windows Server 2016+). If you encounter any problems on these platforms, please check the [frequently asked questions](../12_faq/01_faq.md), [GitHub Discussions](https://github.com/quantumblacklabs/kedro/discussions) or the  [Discord Server](https://discord.gg/akJDeVaxnB).
 
 - To work with Kedro, we highly recommend that you [download and install Anaconda](https://www.anaconda.com/products/individual#Downloads) (Python 3.x version).
 
@@ -40,7 +40,9 @@ To exit `kedro-environment`:
 conda deactivate
 ```
 
-> *Note:* The `conda` virtual environment is not dependent on your current working directory and can be activated from any directory.
+```eval_rst
+.. note::  The ``conda`` virtual environment is not dependent on your current working directory and can be activated from any directory.
+```
 
 ### `venv` (instead of `conda`)
 
@@ -60,7 +62,7 @@ python -m venv env\kedro-environment  # Windows
 Activate this virtual environment:
 
 ```bash
-source env/bin/activate # macOS / Linux
+source env/kedro-environment/bin/activate # macOS / Linux
 .\env\Scripts\activate  # Windows
 ```
 

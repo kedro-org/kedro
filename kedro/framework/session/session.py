@@ -42,9 +42,12 @@ import click
 from kedro import __version__ as kedro_version
 from kedro.errors import KedroSessionError
 from kedro.framework.context import KedroContext
-from kedro.framework.context.context import _convert_paths_to_absolute_posix
+from kedro.framework.context.context import (
+    KedroContextError,
+    _convert_paths_to_absolute_posix,
+)
 from kedro.framework.hooks import get_hook_manager
-from kedro.framework.project import settings
+from kedro.framework.project import configure_project, pipelines, settings
 from kedro.framework.session.store import BaseSessionStore
 from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner, SequentialRunner
@@ -167,13 +170,21 @@ class KedroSession:
             save_on_close: Whether or not to save the session when it's closed.
             env: Environment for the KedroContext.
             extra_params: Optional dictionary containing extra project parameters
-            for underlying KedroContext. If specified, will update (and therefore take
-            precedence over) the parameters retrieved from the project configuration.
+                for underlying KedroContext. If specified, will update (and therefore
+                take precedence over) the parameters retrieved from the project
+                configuration.
 
         Returns:
             A new ``KedroSession`` instance.
         """
-        # pylint: disable=protected-access
+
+        # this is to make sure that for workflows that manually create session
+        # without going through one of our known entrypoints, e.g. some plugins like kedro-airflow,
+        # the project is still properly configured. This is for backward compatibility
+        # and should be removed in 0.18.
+        if package_name is not None:
+            configure_project(package_name)
+
         session = cls(
             package_name=package_name,
             project_path=project_path,
@@ -181,7 +192,7 @@ class KedroSession:
             save_on_close=save_on_close,
         )
 
-        # have to explicity type session_data otherwise mypy will complain
+        # have to explicitly type session_data otherwise mypy will complain
         # possibly related to this: https://github.com/python/mypy/issues/1430
         session_data: Dict[str, Any] = {
             "package_name": session._package_name,
@@ -329,6 +340,8 @@ class KedroSession:
             load_versions: An optional flag to specify a particular dataset
                 version timestamp to load.
         Raises:
+            KedroContextError: If the named or `__default__` pipeline is not
+                defined by `register_pipelines`.
             Exception: Any uncaught exception during the run will be re-raised
                 after being passed to ``on_pipeline_error`` hook.
         Returns:
@@ -344,7 +357,17 @@ class KedroSession:
         extra_params = self.store.get("extra_params") or {}
         context = self.load_context()
 
-        pipeline = context._get_pipeline(name=pipeline_name)
+        name = pipeline_name or "__default__"
+
+        try:
+            pipeline = pipelines[name]
+        except KeyError as exc:
+            raise KedroContextError(
+                f"Failed to find the pipeline named '{name}'. "
+                f"It needs to be generated and returned "
+                f"by the 'register_pipelines' function."
+            ) from exc
+
         filtered_pipeline = context._filter_pipeline(
             pipeline=pipeline,
             tags=tags,

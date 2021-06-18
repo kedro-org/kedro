@@ -17,9 +17,8 @@ entrypoint->init_plugins: load and run all installed
 entrypoint->kedro_cli: collect built-in commands
 entrypoint->global_plugins: load and collect global plugin commands
 entrypoint->pyproject.toml: check current dir for a Kedro project
-entrypoint->pyproject.toml: get project metadata
+entrypoint->pyproject.toml: bootstrap the project
 entrypoint->entrypoint: add project metadata to the click cli context
-entrypoint->entrypoint: add src to Python path
 entrypoint->project_plugins: load and collect project plugin commands
 entrypoint->kedro_project: load and collect project cli commands
 entrypoint->click: combine all command collections and run click

@@ -58,7 +58,7 @@ class MyContext(KedroContext):
 
 class MockSettings(_ProjectSettings):
     _HOOKS = Validator("HOOKS", default=())
-    _CONTEXT_CLASS = Validator("CONTEXT_CLASS", default=lambda *_: MyContext,)
+    _CONTEXT_CLASS = Validator("CONTEXT_CLASS", default=lambda *_: MyContext)
 
 
 @pytest.fixture
@@ -91,7 +91,7 @@ class TestLoadContext:
         assert result.env == "my_fake_env"
 
     def test_invalid_path(self, tmp_path):
-        """Test for loading context from an invalid path. """
+        """Test for loading context from an invalid path."""
         other_path = tmp_path / "other"
         other_path.mkdir()
         pattern = "Could not find the project configuration file 'pyproject.toml'"
@@ -136,7 +136,7 @@ class TestLoadContext:
             load_context(str(fake_repo_path))
 
     def test_settings_py_has_no_context_path(self, fake_repo_path):
-        """Test for loading default `KedroContext` context. """
+        """Test for loading default `KedroContext` context."""
         payload = {
             "tool": {
                 "kedro": {
@@ -154,9 +154,11 @@ class TestLoadContext:
 
     @pytest.mark.usefixtures("mock_settings")
     def test_settings_py_has_context_path(
-        self, fake_repo_path, fake_package_name,
+        self,
+        fake_repo_path,
+        fake_package_name,
     ):
-        """Test for loading custom `ProjectContext` context. """
+        """Test for loading custom `ProjectContext` context."""
         payload = {
             "tool": {
                 "kedro": {

@@ -1,11 +1,13 @@
 # How to integrate Amazon SageMaker into your Kedro pipeline
 
 
-> *Note:* This documentation is based on `Kedro 0.17.1`, if you spot anything that is incorrect then please create an [issue](https://github.com/quantumblacklabs/kedro/issues) or pull request.
+```eval_rst
+.. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
+```
 
 This tutorial explains how to integrate a Kedro project with [Amazon SageMaker](https://aws.amazon.com/sagemaker/) in order to train a machine learning model. It shows how to build machine learning pipelines in Kedro and while taking advantage of the power of SageMaker for potentially compute-intensive machine learning tasks.
 
-> Note: The Kedro project will still run locally (or on one of many supported workflow engines like [Argo](./04_argo.md), [Prefect](./05_prefect.md), [Kubeflow](./06_kubeflow.md), [AWS Batch](./07_aws_batch.md) and others), but the model training step will be offloaded onto SageMaker.
+The Kedro project will still run locally (or on one of many supported workflow engines like [Argo](./04_argo.md), [Prefect](./05_prefect.md), [Kubeflow](./06_kubeflow.md), [AWS Batch](./07_aws_batch.md) and others), but the model training step will be offloaded onto SageMaker.
 
 ## Why would you use Amazon SageMaker?
 
@@ -41,7 +43,9 @@ cd <project_root>
 kedro install --build-reqs
 ```
 
-> Note: All CLI commands in the following sections should be executed from the project root directory.
+```eval_rst
+.. note:: All CLI commands in the following sections should be executed from the project root directory.
+```
 
 ### Create SageMaker execution role
 
@@ -60,15 +64,17 @@ You should [create a new S3 bucket](https://docs.aws.amazon.com/AmazonS3/latest/
 
 Your bucket name should contain the word `sagemaker`, this way the role that we created earlier will automatically have all necessary access permissions to it. Your new bucket does not require public access, so you can leave `Block all public access` setting enabled and preserve other defaults.
 
-> *Note:* It's generally a good practice to create AWS resources (like S3 bucket above) for the tutorial within the same [region](https://aws.amazon.com/about-aws/global-infrastructure/regions_az/#Regions) that you have in your [local configuration](#prerequisites) where possible. It helps reduce the network transmission latency and ensure that different services can talk to each other.
+It's generally a good practice to create AWS resources (like S3 bucket above) for the tutorial within the same [region](https://aws.amazon.com/about-aws/global-infrastructure/regions_az/#Regions) that you have in your [local configuration](#prerequisites) where possible. It helps reduce the network transmission latency and ensure that different services can talk to each other.
 
 ## Update the Kedro project
 
 ### Create the configuration environment
 
-Configuration in Kedro is logically separated into [configuration environments](https://kedro.readthedocs.io/en/stable/04_kedro_project_setup/02_configuration.html#additional-configuration-environments) which are loaded in specific order where the project is run. To separate SageMaker-specific configuration from the default one, let's create a new configuration environment. Go ahead and create a `conf/sagemaker` folder and then create the following files in it.
+Configuration in Kedro is logically separated into [configuration environments](../04_kedro_project_setup/02_configuration.md#additional-configuration-environments) which are loaded in specific order where the project is run. To separate SageMaker-specific configuration from the default one, let's create a new configuration environment. Go ahead and create a `conf/sagemaker` folder and then create the following files in it.
 
-> *Note:* `${key}` in the YAML snippets below is a special syntax which allows to [template the project configuration](https://kedro.readthedocs.io/en/stable/04_kedro_project_setup/02_configuration.html#templating-configuration). You don't need to replace those values, just paste them as-is.
+```eval_rst
+.. note:: ``${key}`` in the YAML snippets below is a special syntax which allows you to template the project configuration. You don't need to replace those values, just paste them as-is.
+```
 
 * `catalog.yml` - defines the datasets that need to be saved into S3 (rather than kept in memory):
 
@@ -228,7 +234,7 @@ def create_pipeline(**kwargs):
         [
             node(
                 func=split_data,
-                inputs=["master_table", "parameters"],
+                inputs=["model_input_table", "parameters"],
                 outputs=["X_train@pickle", "X_test", "y_train", "y_test"],
             ),
             node(

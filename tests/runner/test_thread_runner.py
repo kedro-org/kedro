@@ -108,7 +108,12 @@ class TestMaxWorkers:
         ],
     )
     def test_specified_max_workers(
-        self, mocker, fan_out_fan_in, catalog, user_specified_number, expected_number,
+        self,
+        mocker,
+        fan_out_fan_in,
+        catalog,
+        user_specified_number,
+        expected_number,
     ):  # pylint: disable=too-many-arguments
         """
         We initialize the runner with max_workers=4.
@@ -116,7 +121,8 @@ class TestMaxWorkers:
         A pool with 3 workers should be used.
         """
         executor_cls_mock = mocker.patch(
-            "kedro.runner.thread_runner.ThreadPoolExecutor", wraps=ThreadPoolExecutor,
+            "kedro.runner.thread_runner.ThreadPoolExecutor",
+            wraps=ThreadPoolExecutor,
         )
 
         catalog.add_feed_dict(dict(A=42))

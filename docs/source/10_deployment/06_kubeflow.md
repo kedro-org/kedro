@@ -19,7 +19,10 @@ To use Kubeflow Pipelines, make sure you have the following prerequisites in pla
 - Kubeflow Pipelines SDK is [installed](https://www.kubeflow.org/docs/pipelines/sdk/install-sdk/) locally
 - A `name` attribute is set for each Kedro [node](/kedro.pipeline.node) since it is used to trigger runs
 - All node input/output DataSets must be configured in `catalog.yml` and refer to an external location (e.g. [AWS S3](../05_data/01_data_catalog.md#using-the-data-catalog-with-the-yaml-api)); you cannot use the `MemoryDataSet` in your workflow
-> _Note:_ Each node will run in its own container.
+
+```eval_rst
+.. note::  Each node runs in its own container.
+```
 
 ## How to run your Kedro pipeline using Kubeflow Pipelines
 
@@ -46,10 +49,8 @@ import click
 from kfp import aws, dsl
 from kfp.compiler.compiler import Compiler
 
-from kedro.framework.cli.utils import _add_src_to_path
-from kedro.framework.project import configure_project
-from kedro.framework.session import KedroSession
-from kedro.framework.startup import _get_project_metadata
+from kedro.framework.project import pipelines
+from kedro.framework.startup import bootstrap_project
 from kedro.pipeline.node import Node
 
 _PIPELINE = None
@@ -74,16 +75,11 @@ def generate_kfp(image: str, pipeline_name: str, env: str) -> None:
     _IMAGE = image
 
     project_path = Path.cwd()
-    metadata = _get_project_metadata(project_path)
-    _add_src_to_path(metadata.source_dir, project_path)
-    configure_project(metadata.package_name)
+    metadata = bootstrap_project(project_path)
     project_name = metadata.project_name
 
-    session = KedroSession.create(project_path=project_path, env=env)
-    context = session.load_context()
-
     pipeline_name = pipeline_name or "__default__"
-    _PIPELINE = context.pipelines.get(pipeline_name)
+    _PIPELINE = pipelines.get(pipeline_name)
 
     Compiler().compile(convert_kedro_pipeline_to_kfp, project_name + ".yaml")
 
@@ -101,7 +97,7 @@ def convert_kedro_pipeline_to_kfp() -> None:
 def _build_kfp_ops(
     node_dependencies: Dict[Node, Set[Node]]
 ) -> Dict[str, dsl.ContainerOp]:
-    """Build kfp container graph from Kedro node dependencies. """
+    """Build kfp container graph from Kedro node dependencies."""
     kfp_ops = {}
 
     for node in node_dependencies:
@@ -143,9 +139,7 @@ You can also specify two optional arguments:
 - `--pipeline`: pipeline name for which you want to build a workflow spec
 - `--env`: Kedro configuration environment name, defaults to `local`
 
-> _Note:_ For the purpose of this walk-through, we are going to use AWS S3 bucket for DataSets therefore `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables must be set to have an ability to communicate with S3.
-
-> _Note:_ The `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` values should be stored in [Kubernetes Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) (an example Kubernetes Secrets spec is given [below](#authenticate-kubeflow-pipelines)).
+For the purpose of this walk-through, we are going to use AWS S3 bucket for DataSets therefore `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables must be set to have an ability to communicate with S3. The `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` values should be stored in [Kubernetes Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) (an example Kubernetes Secrets spec is given [below](#authenticate-kubeflow-pipelines)).
 
 
 Finally, run the helper script from project's directory to build the workflow spec (the spec will be saved to `<project_root>/<project_name>.yaml` file).
@@ -173,7 +167,10 @@ data:
   AWS_SECRET_ACCESS_KEY: <AWS_SECRET_ACCESS_KEY value encoded with base64>
 type: Opaque
 ```
-> _Note:_ Kubeflow uses `kubeflow` as the default namespace.
+
+```eval_rst
+.. note::  Kubeflow uses `kubeflow` as the default namespace.
+```
 
 You can use the following command to encode AWS keys to base64:
 

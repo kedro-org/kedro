@@ -6,8 +6,9 @@ To install Kedro from the Python Package Index (PyPI) simply run:
 pip install kedro
 ```
 
->_Note:_ It is also possible to install Kedro using `conda`, as follows, but we recommend using `pip` at this point to eliminate any potential dependency issues:
-
+```eval_rst
+.. note::  It is also possible to install Kedro using ``conda``, as follows, but we recommend using ``pip`` at this point to eliminate any potential dependency issues, as follows:
+```
 
 ```bash
 conda install -c conda-forge kedro
@@ -27,7 +28,8 @@ You should see an ASCII art graphic and the Kedro version number. For example:
 
 ![](../meta/images/kedro_graphic.png)
 
-If you do not see the graphic displayed, or have any issues with your installation, see the [frequently asked questions](../12_faq/01_faq.md) or Kedro community support on [Stack Overflow](https://stackoverflow.com/questions/tagged/kedro).
+If you do not see the graphic displayed, or have any issues with your installation, see the [frequently asked questions](../12_faq/01_faq.md), check out [GitHub Discussions](https://github.com/quantumblacklabs/kedro/discussions) or talk to the community on the [Discord Server](https://discord.gg/akJDeVaxnB)
+.
 
 ## Install a development version
 

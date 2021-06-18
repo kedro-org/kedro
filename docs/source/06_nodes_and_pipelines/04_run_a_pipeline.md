@@ -1,5 +1,9 @@
 # Run a pipeline
 
+```eval_rst
+.. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
+```
+
 ## Runners
 
 Runners are the execution mechanisms used to run pipelines. They all inherit from `AbstractRunner`.
@@ -42,7 +46,9 @@ or
 kedro run --runner=ParallelRunner
 ```
 
-> *Note:* You cannot use both `--parallel` and `--runner` flags at the same time (e.g. `kedro run --parallel --runner=SequentialRunner` raises an exception).
+```eval_rst
+.. note::  You cannot use both ``--parallel`` and ``--runner`` flags at the same time. (That is, ``kedro run --parallel --runner=SequentialRunner`` raises an exception).
+```
 
 #### Multithreading
 While `ParallelRunner` uses multiprocessing, you can also run the pipeline with multithreading for concurrent execution by specifying `ThreadRunner` as follows:
@@ -51,10 +57,11 @@ While `ParallelRunner` uses multiprocessing, you can also run the pipeline with 
 kedro run --runner=ThreadRunner
 ```
 
+```eval_rst
+.. note::  ``SparkDataSet`` doesn't work correctly with ``ParallelRunner``. To add concurrency to the pipeline with ``SparkDataSet``, you must use ``ThreadRunner``.
+```
 
-> *Note:* `SparkDataSet` doesn't work correctly with `ParallelRunner`. To add concurrency to the pipeline with `SparkDataSet`, you must use `ThreadRunner`.
->
-> For more information on how to maximise concurrency when using Kedro with PySpark, please visit our guide on [how to build a Kedro pipeline with PySpark](../11_tools_integration/01_pyspark.md).
+For more information on how to maximise concurrency when using Kedro with PySpark, please visit our guide on [how to build a Kedro pipeline with PySpark](../11_tools_integration/01_pyspark.md).
 
 
 
@@ -115,12 +122,14 @@ class DryRunner(AbstractRunner):
 And use it with `kedro run` through the `--runner` flag:
 
 ```console
-$ kedro run --runner=src.<python_package>.runner.DryRunner
+$ kedro run --runner=<python_package>.runner.DryRunner
 ```
 
 ## Load and save asynchronously
 
->*Note*: `ThreadRunner` doesn't support asynchronous load-input or save-output operations.
+```eval_rst
+.. note::  ``ThreadRunner`` doesn't support asynchronous load-input or save-output operations.
+```
 
 When processing a node, both `SequentialRunner` and `ParallelRunner` perform the following steps in order:
 
@@ -138,7 +147,9 @@ $ kedro run --async
 ...
 ```
 
-> *Note:* All the datasets used in the run have to be [thread-safe](https://www.quora.com/What-is-thread-safety-in-Python) in order for asynchronous loading/saving to work properly.
+```eval_rst
+.. note::  All the datasets used in the run have to be `thread-safe <https://www.quora.com/What-is-thread-safety-in-Python>`_ in order for asynchronous loading/saving to work properly.
+```
 
 ## Run a pipeline by name
 
@@ -178,7 +189,9 @@ Then from the command line, execute the following:
 kedro run --pipeline my_pipeline
 ```
 
-> *Note:* If you specify `kedro run` without the `--pipeline` option, it runs the `__default__` pipeline from the dictionary returned by `register_pipelines()`.
+```eval_rst
+.. note::  If you specify ``kedro run`` without the ``--pipeline`` option, it runs the ``__default__`` pipeline from the dictionary returned by ``register_pipelines()``.
+```
 
 Further information about `kedro run` can be found in the [Kedro CLI documentation](../09_development/03_commands_reference.md#run-the-project).
 

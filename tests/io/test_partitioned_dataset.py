@@ -108,6 +108,23 @@ class TestPartitionedDataSetLocal:
         reloaded_data = loaded_partitions[part_id]()
         assert_frame_equal(reloaded_data, original_data)
 
+    @pytest.mark.parametrize("dataset", LOCAL_DATASET_DEFINITION)
+    @pytest.mark.parametrize("suffix", ["", ".csv"])
+    def test_lazy_save(self, dataset, local_csvs, suffix):
+        pds = PartitionedDataSet(str(local_csvs), dataset, filename_suffix=suffix)
+
+        def original_data():
+            return pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
+
+        part_id = "new/data"
+        pds.save({part_id: original_data})
+
+        assert (local_csvs / "new" / ("data" + suffix)).is_file()
+        loaded_partitions = pds.load()
+        assert part_id in loaded_partitions
+        reloaded_data = loaded_partitions[part_id]()
+        assert_frame_equal(reloaded_data, original_data())
+
     def test_save_invalidates_cache(self, local_csvs, mocker):
         """Test that save calls invalidate partition cache"""
         pds = PartitionedDataSet(str(local_csvs), "pandas.CSVDataSet")
@@ -425,7 +442,9 @@ def mocked_csvs_in_s3(mocked_s3_bucket, partitioned_data_pandas):
     prefix = "csvs"
     for key, data in partitioned_data_pandas.items():
         mocked_s3_bucket.put_object(
-            Bucket=BUCKET_NAME, Key=f"{prefix}/{key}", Body=data.to_csv(index=False),
+            Bucket=BUCKET_NAME,
+            Key=f"{prefix}/{key}",
+            Body=data.to_csv(index=False),
         )
     return f"s3://{BUCKET_NAME}/{prefix}"
 

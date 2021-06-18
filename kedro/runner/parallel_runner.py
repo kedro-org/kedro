@@ -41,6 +41,7 @@ from multiprocessing.reduction import ForkingPickler
 from pickle import PicklingError
 from typing import Any, Dict, Iterable, Set
 
+from kedro.errors import KedroRunnerError
 from kedro.io import DataCatalog, DataSetError, MemoryDataSet
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
@@ -287,7 +288,7 @@ class ParallelRunner(AbstractRunner):
         Raises:
             AttributeError: When the provided pipeline is not suitable for
                 parallel execution.
-            RuntimeError: If the runner is unable to schedule the execution of
+            KedroRunnerError: If the runner is unable to schedule the execution of
                 all pipeline nodes.
             Exception: In case of any downstream node failure.
 
@@ -339,7 +340,7 @@ class ParallelRunner(AbstractRunner):
                         debug_data_str = "\n".join(
                             f"{k} = {v}" for k, v in debug_data.items()
                         )
-                        raise RuntimeError(
+                        raise KedroRunnerError(
                             f"Unable to schedule new tasks although some nodes "
                             f"have not been run:\n{debug_data_str}"
                         )

@@ -32,9 +32,7 @@ Expose public exceptions and warnings.
 
 
 class KedroConfigError(RuntimeError):
-    """
-    Error raised when kedro fails to startup due to configuration.
-    """
+    """Error raised when kedro fails to startup due to configuration."""
 
 
 class KedroSessionError(RuntimeError):

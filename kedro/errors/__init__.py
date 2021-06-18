@@ -34,9 +34,7 @@ class KedroConfigError(RuntimeError):
 
 
 class KedroSessionError(RuntimeError):
-    """
-    Error raised when kedro fails to create a new Session.
-    """
+    """Error raised when kedro fails to create a new Session."""
 
 
 class KedroRunnerError(RuntimeError):

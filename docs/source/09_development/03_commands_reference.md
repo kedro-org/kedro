@@ -231,7 +231,7 @@ A parameterised run is best used for dynamic parameters, i.e. running the same p
 
 ### Deploy the project
 
-The following packages your application as one `.egg` file  and one `.whl` file within the `src/dist/` folder of your project:
+The following packages your application as one `.egg` file  and one `.whl` file within the `dist/` folder of your project:
 
 ```bash
 kedro package
@@ -255,7 +255,7 @@ The above command will take the bundled `.whl` file and do the following:
 `kedro pipeline pull` works with PyPI, local and cloud storage:
 
 * PyPI: `kedro pipeline pull <my-pipeline>` with `<my-pipeline>` being a package on PyPI
-* Local storage: `kedro pipeline pull <path-to-your-project-root>/src/dist/<my-pipeline>-0.1-py3-none-any.whl`
+* Local storage: `kedro pipeline pull <path-to-your-project-root>/dist/<my-pipeline>-0.1-py3-none-any.whl`
 * Cloud storage: `kedro pipeline pull s3://<my-bucket>/<my-pipeline>-0.1-py3-none-any.whl`
 
 ### Project quality

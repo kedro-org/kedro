@@ -317,7 +317,7 @@ def pull_package(
     "-d",
     "--destination",
     type=click.Path(resolve_path=True, file_okay=False),
-    help="Location where to create the wheel file. Defaults to `src/dist`.",
+    help="Location where to create the wheel file. Defaults to `dist/`.",
 )
 @click.argument("name", nargs=1)
 @click.pass_obj  # this will pass the metadata as first argument
@@ -479,7 +479,7 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
 
     # Check that pipeline directory exists and not empty
     _validate_dir(artifacts_to_package.pipeline_dir)
-    destination = Path(destination) if destination else package_dir.parent / "dist"
+    destination = Path(destination) if destination else metadata.project_path / "dist"
 
     # default to pipeline package version
     try:

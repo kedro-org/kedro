@@ -116,7 +116,7 @@ kedro run --pipeline mp2
 ## How to share a modular pipeline
 
 ### Package a modular pipeline
-Since Kedro 0.16.4 you can package a modular pipeline by executing `kedro pipeline package <pipeline_name>` command, which will generate a new [wheel file](https://pythonwheels.com/) for it. By default, the wheel file will be saved into `src/dist` directory inside your project, however this can be changed using the `--destination` (`-d`) option.
+Since Kedro 0.16.4 you can package a modular pipeline by executing `kedro pipeline package <pipeline_name>` command, which will generate a new [wheel file](https://pythonwheels.com/) for it. By default, the wheel file will be saved into `dist/` directory inside your project, however this can be changed using the `--destination` (`-d`) option.
 
 When you package your modular pipeline, Kedro will also automatically package files from 3 locations:
 
@@ -145,7 +145,7 @@ You can pull a modular pipeline from different locations, including local storag
 - Pulling a modular pipeline from a local directory:
 
 ```bash
-kedro pipeline pull <path-to-your-project-root>/src/dist/<pipeline_name>-0.1-py3-none-any.whl
+kedro pipeline pull <path-to-your-project-root>/dist/<pipeline_name>-0.1-py3-none-any.whl
 ```
 
 - Pulling a modular pipeline from S3:

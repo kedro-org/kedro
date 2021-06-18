@@ -26,9 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-Expose public exceptions and warnings.
-"""
+"""Expose public exceptions and warnings."""
 
 
 class KedroConfigError(RuntimeError):

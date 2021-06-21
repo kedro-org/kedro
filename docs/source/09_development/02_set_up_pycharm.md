@@ -126,7 +126,7 @@ To remotely debug, click the debugger button as [described above](#debugging).
 ## Advanced: Docker interpreter
 
 ```eval_rst
-.. note::  This section uses features supported in PyCharm Professional Edition only.
+.. note::  This section uses features supported by PyCharm Professional Edition only.
 ```
 
 Firstly, add a Docker interpreter. Go to **Preferences | Project Interpreter** as above and proceed to add a new interpreter. Select **Docker Interpreter** and select the target Docker image:

@@ -145,7 +145,7 @@ Click **OK**. Go to **Run / Debug Configurations** to add a **Python Run**. For 
 
 Click **OK** and then select your run configuration from the toolbar and click **Run** to execute.
 
-To debug, click the debugger button as [described above](#debugging).
+[To debug, click the debugger button as described above](#debugging).
 
 ## Configuring the Kedro catalog validation schema
 

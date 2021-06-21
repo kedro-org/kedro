@@ -45,6 +45,7 @@
 * `kedro pipeline list` and `kedro pipeline describe` are being deprecated in favour of new commands `kedro registry list ` and `kedro registry describe`
 
 ## Thanks for supporting contributions
+[Moussa Taifi](https://github.com/moutai/)
 
 # Release 0.17.4
 
@@ -79,7 +80,7 @@
 ## Upcoming deprecations for Kedro 0.18.0
 
 ## Thanks for supporting contributions
-[Lou Kratz](https://github.com/lou-k)
+[Lou Kratz](https://github.com/lou-k),
 [Lucas Jamar](https://github.com/lucasjamar/)
 
 # Release 0.17.3

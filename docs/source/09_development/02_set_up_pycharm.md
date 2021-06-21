@@ -139,7 +139,7 @@ Click **OK** and check that the required packages appear:
 
 Click **OK** and wait for PyCharm to index your new Python interpreter.
 
-Click **OK**. Go to **Run / Debug Configurations** to add a **Python Run**. For the script path, get the path of the Kedro CLI on an instantiated image by running `which kedro` (macOS / Linux) in a container environment. Specify `run` as the parameter. Specify your working directory as the directory that contains your kedro project on your local machine. Optional: Edit the Docker container volume mount settings if it does not match the directory that contains your kedro project directory.
+Click **OK**. Go to **Run / Debug Configurations** to add a **Python Run**. For the script path, get the path to the Kedro CLI on an instantiated image by running `which kedro` (macOS / Linux) in a container environment. Specify `run` as the parameter. Specify your working directory as the directory that contains your Kedro project on your local machine. Optional: Edit the Docker container volume mount setting if it does not match the directory that contains your Kedro project directory.
 
 ![](../meta/images/pycharm_docker_interpreter_3.png)
 

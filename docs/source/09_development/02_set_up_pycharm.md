@@ -129,7 +129,7 @@ To remotely debug, click the debugger button as [described above](#debugging).
 .. note::  This section uses features supported by PyCharm Professional Edition only.
 ```
 
-Firstly, add a Docker interpreter. Go to **Preferences | Project Interpreter** as above and proceed to add a new interpreter. Select **Docker Interpreter** and select the target Docker image:
+First, add a Docker interpreter. Go to **Preferences | Project Interpreter** as above and proceed to add a new interpreter. Select **Docker Interpreter** and then choose the target Docker image:
 
 ![](../meta/images/pycharm_docker_interpreter_1.png)
 

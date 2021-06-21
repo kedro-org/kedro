@@ -1,7 +1,7 @@
 # Upcoming Release 0.18.0
 
 ## Major features and improvements
-* Added support for Python 3.9
+* Added support for Python 3.9, dropped support for Python 3.6.
 * Support specifying parameters mapping in `pipeline()` without the `params:` prefix.
 * `PartitionedDataSet` and `IncrementalDataSet` now both support versioning of the underlying dataset.
 * Added new API `Pipeline.filter()` (previously in `KedroContext._filter_pipeline()`) to filter parts of a pipeline.
@@ -19,6 +19,9 @@
 * Deprecated and removed `ProjectHooks.register_config_loader` `hook_spec` in favour of loading `CONFIG_LOADER_CLASS` directly from `settings.py`. The default option for `CONFIG_LOADER_CLASS` is now set to `kedro.config.ConfigLoader`.
 * Added `CONFIG_LOADER_ARGS` to `settings.py` to facilitate the provision of additional keyword arguments to the constructor of the project `config_loader`. The default option for `CONFIG_LOADER_ARGS` is an empty dictionary.
 * `yaml.YAMLDataSet` can no longer save a `pandas.DataFrame` directly, but it can save a dictionary. Use `pandas.DataFrame.to_dict()` to convert your `pandas.DataFrame` to a dictionary before you attempt to save it to YAML.
+* Removed `--version` CLI option for `kedro pipeline package` command. Specific pipeline package version can be added by setting the `__version__` variable in the pipeline package's `__init__.py` file.
+* The `kedro package` and `kedro pipeline package` now save `egg` and `whl` files in the `<project_root>/dist` folder (previously `<project_root>/src/dist`).
+* Removed `kedro pipeline list` and `kedro pipeline describe` commands in favour of `kedro registry list` and `kedro registry describe`.
 
 ## Migration guide from Kedro 0.17.* to 0.18.*
 * Please remove any existing `hook_impl` of the `register_config_loader` method from `ProjectHooks` (or custom alternatives).
@@ -28,8 +31,24 @@
 * If you're using `pandas.ExcelDataSet`, make sure you have `openpyxl` installed in your environment. Note that this is automatically pulled if you specify `kedro[pandas.ExcelDataSet]==0.18.0` in your `requirements.in`. You can uninstall `xlrd` if you were only using it for this dataset.
 * If you're using `pandas.ParquetDataSet`, please pass pandas saving arguments directly to `save_args` instead of nested in `from_pandas` (e.g. `save_args = {"preserve_index": False}` instead of `save_args = {"from_pandas": {"preserve_index": False}}`).
 * If you're using `spark.SparkHiveDataSet` with `write_mode` option set to `insert`, please update this to `append` in line with the Spark styleguide. If you're using `spark.SparkHiveDataSet` with `write_mode` option set to `upsert`, please make sure that your `SparkContext` has a valid `checkpointDir` set either by `SparkContext.setCheckpointDir` method or directly in the `conf` folder.
+* Edit any scripts containing `kedro pipeline package --version` to remove the `--version` option. If you wish to set a specific pipeline package version, set the `__version__` variable in the pipeline package's `__init__.py` file.
 
-# Upcoming release 0.17.4
+# Upcoming Release 0.17.5
+
+## Major features and improvements
+* Added new CLI group `registry`, with the associated commands `kedro registry list` and `kedro registry describe`, to replace `kedro pipeline list` and `kedro pipeline describe`.
+
+## Bug fixes and other changes
+
+## Minor breaking changes to the API
+
+## Upcoming deprecations for Kedro 0.18.0
+* `kedro pipeline list` and `kedro pipeline describe` are being deprecated in favour of new commands `kedro registry list ` and `kedro registry describe`
+
+## Thanks for supporting contributions
+[Moussa Taifi](https://github.com/moutai/)
+
+# Release 0.17.4
 
 ## Major features and improvements
 * Added the following new datasets:
@@ -47,18 +66,22 @@
 * `kedro info` now outputs if a plugin has any `hooks` or `cli_hooks` implemented.
 * `PartitionedDataSet` now supports lazily materializing data on save.
 * `kedro pipeline describe` now defaults to the `__default__` pipeline when no pipeline name is provided and also shows the namespace the nodes belong to.
-* Fixed an issue where `spark.SparkDataSet` with enabled versioning would throw a `VersionNotFoundError` when using `databricks-connect` from a remote machine and saving to `dbfs` filesystem.
+* Fixed an issue where spark.SparkDataSet with enabled versioning would throw a VersionNotFoundError when using databricks-connect from a remote machine and saving to dbfs filesystem.
 * `EmailMessageDataSet` added to doctree.
 * When node inputs do not pass validation, the error message is now shown as the most recent exception in the traceback ([Issue #761](https://github.com/quantumblacklabs/kedro/issues/761)).
 * `kedro pipeline package` now only packages the parameter file that exactly matches the pipeline name specified and the parameter files in a directory with the pipeline name.
-* Extended support to newer versions of third-party dependencies, which addresses [Issue 735](https://github.com/quantumblacklabs/kedro/issues/735)
+* Extended support to newer versions of third-party dependencies ([Issue #735](https://github.com/quantumblacklabs/kedro/issues/735)).
+* Ensured consistent references to `model input` tables in accordance with our Data Engineering convention.
+* Changed behaviour where `kedro pipeline package` takes the pipeline package version, rather than the kedro package version. If the pipeline package version is not present, then the package version is used.
+* Launched [GitHub Discussions](https://github.com/quantumblacklabs/kedro/discussions/) and [Kedro Discord Server](https://discord.gg/akJDeVaxnB)
+* Improved error message when versioning is enabled for a dataset previously saved as non-versioned ([Issue #625](https://github.com/quantumblacklabs/kedro/issues/625)).
 
 ## Minor breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.18.0
 
 ## Thanks for supporting contributions
-[Lou Kratz](https://github.com/lou-k)
+[Lou Kratz](https://github.com/lou-k),
 [Lucas Jamar](https://github.com/lucasjamar/)
 
 # Release 0.17.3

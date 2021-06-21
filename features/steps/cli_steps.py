@@ -177,8 +177,7 @@ def create_config_file(context):
     """
     context.config_file = context.temp_dir / "config.yml"
     context.project_name = "project-dummy"
-    root_project_dir = context.temp_dir / context.project_name
-    context.root_project_dir = root_project_dir
+    context.root_project_dir = context.temp_dir / context.project_name
     context.package_name = context.project_name.replace("-", "_")
     config = {
         "project_name": context.project_name,
@@ -248,7 +247,7 @@ def uninstall_package_via_pip(context, package):
 @when("I install the project's python package")
 def install_project_package_via_pip(context):
     """Install a python package using pip."""
-    dist_dir = context.root_project_dir / "src" / "dist"
+    dist_dir = context.root_project_dir / "dist"
     (whl_file,) = dist_dir.glob("*.whl")
     run([context.pip, "install", str(whl_file)], env=context.env)
 
@@ -320,6 +319,9 @@ def create_project_without_starter(context):
         cwd=context.temp_dir,
     )
     assert res.returncode == OK_EXIT_CODE, res
+    # prevent telemetry from prompting for input during e2e tests
+    telemetry_file = context.root_project_dir / ".telemetry"
+    telemetry_file.write_text("consent: false", encoding="utf-8")
 
 
 @given("I have deleted the credentials file")
@@ -575,7 +577,7 @@ def check_failed_status_code(context):
 @then("the relevant packages should be created")
 def check_python_packages_created(context):
     """Check that egg and whl files exist in dist dir."""
-    dist_dir = context.root_project_dir / "src" / "dist"
+    dist_dir = context.root_project_dir / "dist"
     egg_file = dist_dir.glob("*.egg")
     whl_file = dist_dir.glob("*.whl")
     assert any(egg_file)

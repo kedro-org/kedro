@@ -237,3 +237,23 @@ class TestImageDataSetVersioned:
             ImageDataSet(
                 filepath="https://example.com/file.png", version=Version(None, None)
             )
+
+    def test_versioning_existing_dataset(
+        self, image_dataset, versioned_image_dataset, image_object
+    ):
+        """Check the error when attempting to save a versioned dataset on top of an
+        already existing (non-versioned) dataset."""
+        image_dataset.save(image_object)
+        assert image_dataset.exists()
+        assert image_dataset._filepath == versioned_image_dataset._filepath
+        pattern = (
+            f"(?=.*file with the same name already exists in the directory)"
+            f"(?=.*{versioned_image_dataset._filepath.parent.as_posix()})"
+        )
+        with pytest.raises(DataSetError, match=pattern):
+            versioned_image_dataset.save(image_object)
+
+        # Remove non-versioned dataset and try again
+        Path(image_dataset._filepath.as_posix()).unlink()
+        versioned_image_dataset.save(image_object)
+        assert versioned_image_dataset.exists()

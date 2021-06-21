@@ -6,6 +6,7 @@ jupyter~=1.0
 jupyter_client>=5.1, <7.0
 jupyterlab~=3.0
 kedro=={{ cookiecutter.kedro_version }}
+kedro-telemetry~=0.1.0; python_version < '3.9'
 nbstripout~=0.4
 pytest-cov~=2.5
 pytest-mock>=1.7.1, <2.0

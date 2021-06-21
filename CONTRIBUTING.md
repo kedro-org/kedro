@@ -16,7 +16,7 @@ The Kedro team pledges to foster and maintain a welcoming and friendly community
 
 We use [GitHub Issues](https://github.com/quantumblacklabs/kedro/issues) to keep track of known bugs. We keep a close eye on them and try to make it clear when we have an internal fix in progress. Before reporting a new issue, please do your best to ensure your problem hasn't already been reported. If so, it's often better to just leave a comment on an existing issue, rather than create a new one. Old issues also can often include helpful tips and solutions to common problems.
 
-For help with your code, if the [FAQs](docs/source/12_faq/01_faq.md) in our documentation haven't helped you, post a question on [Stack Overflow](https://stackoverflow.com/questions/tagged/kedro). If you tag it `kedro` and `python`, more people will see it and may be able to help. We are unable to provide individual support via email. In the interest of community engagement we also believe that help is much more valuable if it's shared publicly, so that more people can benefit from it.
+For help with your code, if the [FAQs](docs/source/12_faq/01_faq.md) in our documentation haven't helped you, check out [GitHub Discussions](https://github.com/quantumblacklabs/kedro/discussions) or talk to the community on the [Discord Server](https://discord.gg/akJDeVaxnB). We are unable to provide individual support via email. In the interest of community engagement we also believe that help is much more valuable if it's shared publicly, so that more people can benefit from it.
 
 If you're over on Stack Overflow and want to boost your points, take a look at the `kedro` tag and see if you can help others out by sharing your knowledge. It's another great way to contribute.
 
@@ -88,7 +88,7 @@ make build-docs
 * We use [Anaconda](https://www.anaconda.com/distribution/) as a preferred virtual environment
 * We use [SemVer](https://semver.org/) for versioning
 
-Our code is designed to be compatible with Python 3.6 onwards and our style guidelines are (in cascading order):
+Our code is designed to be compatible with Python 3.7 onwards and our style guidelines are (in cascading order):
 
 * [PEP 8 conventions](https://www.python.org/dev/peps/pep-0008/) for all Python code
 * [Google docstrings](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) for code comments

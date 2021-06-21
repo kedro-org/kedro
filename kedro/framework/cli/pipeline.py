@@ -39,7 +39,6 @@ from typing import Any, List, NamedTuple, Optional, Tuple, Union
 from zipfile import ZipFile
 
 import click
-import yaml
 from setuptools.dist import Distribution
 
 import kedro
@@ -52,7 +51,7 @@ from kedro.framework.cli.utils import (
     env_option,
     python_call,
 )
-from kedro.framework.project import pipelines, settings
+from kedro.framework.project import settings
 from kedro.framework.startup import ProjectMetadata
 
 _SETUP_PY_TEMPLATE = """# -*- coding: utf-8 -*-
@@ -213,36 +212,6 @@ def delete_pipeline(
     )
 
 
-@pipeline.command("list")
-def list_pipelines():
-    """List all pipelines defined in your pipeline_registry.py file."""
-    click.echo(yaml.dump(sorted(pipelines)))
-
-
-@command_with_verbosity(pipeline, "describe")
-@click.argument("name", nargs=1, default="__default__")
-@click.pass_obj
-def describe_pipeline(
-    metadata: ProjectMetadata, name, **kwargs
-):  # pylint: disable=unused-argument, protected-access
-    """Describe a pipeline by providing a pipeline name. Defaults to the __default__ pipeline."""
-    pipeline_obj = pipelines.get(name)
-    if not pipeline_obj:
-        all_pipeline_names = pipelines.keys()
-        existing_pipelines = ", ".join(sorted(all_pipeline_names))
-        raise KedroCliError(
-            f"`{name}` pipeline not found. Existing pipelines: [{existing_pipelines}]"
-        )
-
-    nodes = []
-    for node in pipeline_obj.nodes:
-        namespace = f"{node.namespace}." if node.namespace else ""
-        nodes.append(f"{namespace}{node._name or node._func_name} ({node._func_name})")
-    result = {"Nodes": nodes}
-
-    click.echo(yaml.dump(result))
-
-
 @command_with_verbosity(pipeline, "pull")
 @click.argument("package_path", nargs=1)
 @env_option(
@@ -303,22 +272,16 @@ def pull_package(
     "-d",
     "--destination",
     type=click.Path(resolve_path=True, file_okay=False),
-    help="Location where to create the wheel file. Defaults to `src/dist`.",
-)
-@click.option(
-    "-v",
-    "--version",
-    type=str,
-    help="Version to package under. Defaults to project package version.",
+    help="Location where to create the wheel file. Defaults to `dist/`.",
 )
 @click.argument("name", nargs=1)
 @click.pass_obj  # this will pass the metadata as first argument
 def package_pipeline(
-    metadata: ProjectMetadata, name, env, alias, destination, version
+    metadata: ProjectMetadata, name, env, alias, destination
 ):  # pylint: disable=too-many-arguments
     """Package up a modular pipeline as a Python .whl."""
     result_path = _package_pipeline(
-        name, metadata, alias=alias, destination=destination, env=env, version=version
+        name, metadata, alias=alias, destination=destination, env=env
     )
 
     as_alias = f" as `{alias}`" if alias else ""
@@ -450,13 +413,9 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
     alias: str = None,
     destination: str = None,
     env: str = None,
-    version: str = None,
 ) -> Path:
     package_dir = metadata.source_dir / metadata.package_name
     env = env or "base"
-    if not version:  # default to project package version
-        project_module = import_module(f"{metadata.package_name}")
-        version = project_module.__version__  # type: ignore
 
     artifacts_to_package = _get_pipeline_artifacts(
         metadata, pipeline_name=pipeline_name, env=env
@@ -475,7 +434,18 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
 
     # Check that pipeline directory exists and not empty
     _validate_dir(artifacts_to_package.pipeline_dir)
-    destination = Path(destination) if destination else package_dir.parent / "dist"
+    destination = Path(destination) if destination else metadata.project_path / "dist"
+
+    # default to pipeline package version
+    try:
+        pipeline_module = import_module(
+            f"{metadata.package_name}.pipelines.{pipeline_name}"
+        )
+        version = pipeline_module.__version__  # type: ignore
+    except (AttributeError, ModuleNotFoundError):
+        # if pipeline version doesn't exist, take the project one
+        project_module = import_module(f"{metadata.package_name}")
+        version = project_module.__version__  # type: ignore
 
     _generate_wheel_file(
         pipeline_name, destination, source_paths, version, alias=alias  # type: ignore

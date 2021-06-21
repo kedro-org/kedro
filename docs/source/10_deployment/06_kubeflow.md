@@ -49,7 +49,7 @@ import click
 from kfp import aws, dsl
 from kfp.compiler.compiler import Compiler
 
-from kedro.framework.session import KedroSession
+from kedro.framework.project import pipelines
 from kedro.framework.startup import bootstrap_project
 from kedro.pipeline.node import Node
 
@@ -78,11 +78,8 @@ def generate_kfp(image: str, pipeline_name: str, env: str) -> None:
     metadata = bootstrap_project(project_path)
     project_name = metadata.project_name
 
-    session = KedroSession.create(project_path=project_path, env=env)
-    context = session.load_context()
-
     pipeline_name = pipeline_name or "__default__"
-    _PIPELINE = context.pipelines.get(pipeline_name)
+    _PIPELINE = pipelines.get(pipeline_name)
 
     Compiler().compile(convert_kedro_pipeline_to_kfp, project_name + ".yaml")
 

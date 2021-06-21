@@ -47,7 +47,7 @@ from pathlib import Path
 import click
 from jinja2 import Environment, FileSystemLoader
 
-from kedro.framework.session import KedroSession
+from kedro.framework.project import pipelines
 from kedro.framework.startup import bootstrap_project
 
 TEMPLATE_FILE = "argo_spec.tmpl"
@@ -67,11 +67,8 @@ def generate_argo_config(image, pipeline_name, env):
     metadata = bootstrap_project(project_path)
     project_name = metadata.project_name
 
-    session = KedroSession.create(project_path=project_path, env=env)
-    context = session.load_context()
-
     pipeline_name = pipeline_name or "__default__"
-    pipeline = context.pipelines.get(pipeline_name)
+    pipeline = pipelines.get(pipeline_name)
 
     tasks = get_dependencies(pipeline.node_dependencies)
 

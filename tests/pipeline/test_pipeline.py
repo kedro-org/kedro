@@ -585,8 +585,8 @@ class TestPipelineOperators:
         pipeline1 = Pipeline([node(identity, "input1", "output1", confirms="output1")])
         pipeline2 = Pipeline([node(identity, "input2", "output2", confirms="other")])
         pipeline3 = Pipeline([node(identity, "input3", "output3")])
-        master = pipeline1 + pipeline2 + pipeline3
-        assert len(master.nodes) == 3
+        combined = pipeline1 + pipeline2 + pipeline3
+        assert len(combined.nodes) == 3
 
     def test_connected_pipeline(self, disjoint_pipeline):
         """Connect two separate pipelines."""

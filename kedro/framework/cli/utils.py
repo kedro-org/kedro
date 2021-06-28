@@ -451,3 +451,7 @@ def _split_params(ctx, param, value):
         value = item[1].strip()
         result[key] = _try_convert_to_numeric(value)
     return result
+
+
+def _get_values_as_tuple(values: Iterable[str]) -> Tuple[str, ...]:
+    return tuple(chain.from_iterable(value.split(",") for value in values))

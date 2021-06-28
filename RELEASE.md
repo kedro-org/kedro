@@ -8,6 +8,7 @@
 * Exposed `open_args_save` in `fs_args` for `pandas.ParquetDataSet`.
 * Bumped the minimum version of `pandas` to 1.2.
 * Refactored the `load` and `save` operations for `pandas` datasets in order to leverage `pandas` own API and delegate `fsspec` operations to them. This reduces the need to have our own `fsspec` wrappers.
+* Removed `cli.py` from the Kedro project template. By default all CLI commands, including `kedro run`, are now defined on the Kedro framework side. These can be overridden in turn by a plugin or a `cli.py` file in your project. A packaged Kedro project will respect the same hierarchy when executed with `python -m my_package`.
 
 ## Breaking changes to the API
 * Add namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/quantumblacklabs/kedro/issues/399)

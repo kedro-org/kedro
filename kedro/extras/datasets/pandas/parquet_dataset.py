@@ -39,6 +39,7 @@ import pandas as pd
 import pyarrow.parquet as pq
 
 from kedro.io.core import (
+    PROTOCOL_DELIMITER,
     AbstractVersionedDataSet,
     DataSetError,
     Version,
@@ -107,16 +108,9 @@ class ParquetDataSet(AbstractVersionedDataSet):
             credentials: Credentials required to get access to the underlying filesystem.
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
-                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``), as well as
-                to pass to the filesystem's `open` method through nested keys
-                `open_args_load` and `open_args_save`.
-                Here you can find all available arguments for `open`:
-                https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
-                All defaults are preserved, except `mode`, which is set `wb` when saving.
+                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
         """
         _fs_args = deepcopy(fs_args) or {}
-        _fs_open_args_load = _fs_args.pop("open_args_load", {})
-        _fs_open_args_save = _fs_args.pop("open_args_save", {})
         _credentials = deepcopy(credentials) or {}
 
         protocol, path = get_protocol_and_path(filepath, version)
@@ -141,10 +135,6 @@ class ParquetDataSet(AbstractVersionedDataSet):
         if save_args is not None:
             self._save_args.update(save_args)
 
-        _fs_open_args_save.setdefault("mode", "wb")
-        self._fs_open_args_load = _fs_open_args_load
-        self._fs_open_args_save = _fs_open_args_save
-
     def _describe(self) -> Dict[str, Any]:
         return dict(
             filepath=self._filepath,
@@ -166,8 +156,13 @@ class ParquetDataSet(AbstractVersionedDataSet):
                 .to_pandas()
             )
         else:
-            with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
-                data = pd.read_parquet(fs_file, **self._load_args)
+            load_path = str(self._get_load_path())
+            if self._protocol != "file":  # pragma: no cover
+                # file:// protocol seems to misbehave on Windows
+                # (<urlopen error file not on local host>),
+                # so we don't join that back to the filepath
+                load_path = f"{self._protocol}{PROTOCOL_DELIMITER}{load_path}"
+            data = pd.read_parquet(load_path, **self._load_args)
 
         return data
 
@@ -188,7 +183,7 @@ class ParquetDataSet(AbstractVersionedDataSet):
         bytes_buffer = BytesIO()
         data.to_parquet(bytes_buffer, **self._save_args)
 
-        with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
+        with self._fs.open(save_path, mode="wb") as fs_file:
             fs_file.write(bytes_buffer.getvalue())
 
         self._invalidate_cache()

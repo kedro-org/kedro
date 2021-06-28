@@ -74,8 +74,6 @@ class TestExcelDataSet:
         excel_data_set.save(dummy_dataframe)
         reloaded = excel_data_set.load()
         assert_frame_equal(dummy_dataframe, reloaded)
-        assert excel_data_set._fs_open_args_load == {}
-        assert excel_data_set._fs_open_args_save == {"mode": "wb"}
 
     def test_exists(self, excel_data_set, dummy_dataframe):
         """Test `exists` method invocation for both existing and
@@ -100,15 +98,6 @@ class TestExcelDataSet:
         for key, value in save_args.items():
             assert excel_data_set._save_args[key] == value
 
-    @pytest.mark.parametrize(
-        "fs_args",
-        [{"open_args_load": {"mode": "rb", "compression": "gzip"}}],
-        indirect=True,
-    )
-    def test_open_extra_args(self, excel_data_set, fs_args):
-        assert excel_data_set._fs_open_args_load == fs_args["open_args_load"]
-        assert excel_data_set._fs_open_args_save == {"mode": "wb"}  # default unchanged
-
     def test_load_missing_file(self, excel_data_set):
         """Check the error when trying to load missing file."""
         pattern = r"Failed while loading data from data set ExcelDataSet\(.*\)"
@@ -116,16 +105,20 @@ class TestExcelDataSet:
             excel_data_set.load()
 
     @pytest.mark.parametrize(
-        "filepath,instance_type",
+        "filepath,instance_type,load_path",
         [
-            ("s3://bucket/file.xlsx", S3FileSystem),
-            ("file:///tmp/test.xlsx", LocalFileSystem),
-            ("/tmp/test.xlsx", LocalFileSystem),
-            ("gcs://bucket/file.xlsx", GCSFileSystem),
-            ("https://example.com/file.xlsx", HTTPFileSystem),
+            ("s3://bucket/file.xlsx", S3FileSystem, "s3://bucket/file.xlsx"),
+            ("file:///tmp/test.xlsx", LocalFileSystem, "/tmp/test.xlsx"),
+            ("/tmp/test.xlsx", LocalFileSystem, "/tmp/test.xlsx"),
+            ("gcs://bucket/file.xlsx", GCSFileSystem, "gcs://bucket/file.xlsx"),
+            (
+                "https://example.com/file.xlsx",
+                HTTPFileSystem,
+                "https://example.com/file.xlsx",
+            ),
         ],
     )
-    def test_protocol_usage(self, filepath, instance_type):
+    def test_protocol_usage(self, filepath, instance_type, load_path, mocker):
         data_set = ExcelDataSet(filepath=filepath)
         assert isinstance(data_set._fs, instance_type)
 
@@ -133,6 +126,11 @@ class TestExcelDataSet:
 
         assert str(data_set._filepath) == path
         assert isinstance(data_set._filepath, PurePosixPath)
+
+        mock_pandas_call = mocker.patch("pandas.read_excel")
+        data_set.load()
+        assert mock_pandas_call.call_count == 1
+        assert mock_pandas_call.call_args_list[0][0][0] == load_path
 
     def test_catalog_release(self, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value

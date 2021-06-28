@@ -89,7 +89,6 @@ class TestParquetDataSet:
         data_set.save(dummy_dataframe)
         reloaded = data_set.load()
         assert_frame_equal(dummy_dataframe, reloaded)
-        assert data_set._fs_open_args_load == {}
 
         files = [child.is_file() for child in tmp_path.iterdir()]
         assert all(files)
@@ -125,14 +124,6 @@ class TestParquetDataSet:
         """Test overriding the default save arguments."""
         for key, value in save_args.items():
             assert parquet_data_set._save_args[key] == value
-
-    @pytest.mark.parametrize(
-        "fs_args",
-        [{"open_args_load": {"mode": "r", "compression": "gzip"}}],
-        indirect=True,
-    )
-    def test_open_extra_args(self, parquet_data_set, fs_args):
-        assert parquet_data_set._fs_open_args_load == fs_args["open_args_load"]
 
     def test_load_missing_file(self, parquet_data_set):
         """Check the error when trying to load missing file."""
@@ -218,7 +209,6 @@ class TestParquetDataSet:
 
         data_set.load()
         fs_mock.isdir.assert_called_once()
-        fs_mock.open.assert_called_once()
 
     def test_arg_partition_cols(self, dummy_dataframe, tmp_path):
         data_set = ParquetDataSet(

@@ -180,6 +180,20 @@ class TestExcelDataSetVersioned:
         with pytest.raises(DataSetError, match=pattern):
             versioned_excel_data_set.load()
 
+    def test_versioning_not_supported_in_append_mode(
+        self, tmp_path, load_version, save_version
+    ):
+        filepath = str(tmp_path / "test.xlsx")
+        save_args = {"writer": {"mode": "a"}}
+
+        pattern = "`ExcelDataSet` doesn't support versioning in append mode."
+        with pytest.raises(DataSetError, match=pattern):
+            ExcelDataSet(
+                filepath=filepath,
+                version=Version(load_version, save_version),
+                save_args=save_args,
+            )
+
     def test_exists(self, versioned_excel_data_set, dummy_dataframe):
         """Test `exists` method invocation for versioned data set."""
         assert not versioned_excel_data_set.exists()

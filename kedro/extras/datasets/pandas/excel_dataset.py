@@ -112,6 +112,9 @@ class ExcelDataSet(AbstractVersionedDataSet):
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
+
+        Raises:
+            DataSetError: If versioning is enabled while in append mode.
         """
         _fs_args = deepcopy(fs_args) or {}
         _credentials = deepcopy(credentials) or {}
@@ -139,7 +142,13 @@ class ExcelDataSet(AbstractVersionedDataSet):
         self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
             self._save_args.update(save_args)
-        self._writer_args = self._save_args.pop("writer", {"engine": engine})
+        self._writer_args = self._save_args.pop("writer", {})  # type: ignore
+        self._writer_args.setdefault("engine", engine or "openpyxl")  # type: ignore
+
+        if version and self._writer_args.get("mode") == "a":  # type: ignore
+            raise DataSetError(
+                "`ExcelDataSet` doesn't support versioning in append mode."
+            )
 
     def _describe(self) -> Dict[str, Any]:
         return dict(

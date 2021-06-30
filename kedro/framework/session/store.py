@@ -25,7 +25,6 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# pylint: disable=too-many-ancestors
 """This module implements a dict-like store object used to persist Kedro sessions."""
 import dbm
 import logging

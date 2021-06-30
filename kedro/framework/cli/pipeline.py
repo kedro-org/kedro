@@ -379,6 +379,7 @@ def _unpack_wheel(location: str, destination: Path, fs_args: Optional[str]) -> N
 
     if location.endswith(".whl") and filesystem and filesystem.exists(location):
         with filesystem.open(location) as fs_file:
+            # pylint: disable=consider-using-with
             ZipFile(fs_file).extractall(destination)
     else:
         python_call(
@@ -393,6 +394,7 @@ def _unpack_wheel(location: str, destination: Path, fs_args: Optional[str]) -> N
                 f"More than 1 or no wheel files found: {file_names}. "
                 f"There has to be exactly one distribution file."
             )
+        # pylint: disable=consider-using-with
         ZipFile(wheel_file[0]).extractall(destination)
 
 

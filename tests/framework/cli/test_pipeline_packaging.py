@@ -104,6 +104,7 @@ class TestPipelinePackageCommand:
         assert wheel_file.is_file()
         assert len(list((wheel_location).iterdir())) == 1
 
+        # pylint: disable=consider-using-with
         wheel_contents = set(ZipFile(str(wheel_file)).namelist())
         expected_files = {
             f"{package_name}/__init__.py",
@@ -270,6 +271,7 @@ class TestPipelinePackageCommand:
         assert wheel_file.is_file()
         assert len(list((fake_repo_path / "src" / "dist").iterdir())) == 1
 
+        # pylint: disable=consider-using-with
         wheel_contents = set(ZipFile(str(wheel_file)).namelist())
         expected_files = {
             f"{PIPELINE_NAME}/__init__.py",
@@ -363,6 +365,7 @@ class TestPipelinePackageCommand:
         assert wheel_file.is_file()
         assert len(list(wheel_location.iterdir())) == 1
 
+        # pylint: disable=consider-using-with
         wheel_contents = set(ZipFile(str(wheel_file)).namelist())
         assert "retail/config/parameters/retail/params1.yml" in wheel_contents
         assert "retail/config/parameters/retail.yml" in wheel_contents

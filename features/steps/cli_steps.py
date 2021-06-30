@@ -42,8 +42,8 @@ import toml
 import yaml
 from behave import given, then, when
 
-import features.steps.util as util
 import kedro
+from features.steps import util
 from features.steps.sh_run import ChildTerminatingPopen, check_run, run
 
 OK_EXIT_CODE = 0

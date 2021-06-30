@@ -164,7 +164,7 @@ class ParallelRunner(AbstractRunner):
         """
         super().__init__(is_async=is_async)
         self._manager = ParallelRunnerManager()
-        self._manager.start()
+        self._manager.start()  # pylint: disable=consider-using-with
 
         # This code comes from the concurrent.futures library
         # https://github.com/python/cpython/blob/master/Lib/concurrent/futures/process.py#L588

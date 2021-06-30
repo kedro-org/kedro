@@ -164,7 +164,7 @@ class KedroCLI(CommandCollection):
         # so we have to re-do it.
         # https://github.com/pallets/click/blob/master/src/click/core.py#L942-L945
         args = get_os_args() if args is None else list(args)
-        self._cli_hook_manager.hook.before_command_run(
+        self._cli_hook_manager.hook.before_command_run(  # pylint: disable=no-member
             project_metadata=self._metadata, command_args=args
         )
 

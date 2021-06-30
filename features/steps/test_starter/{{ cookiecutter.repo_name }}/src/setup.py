@@ -59,7 +59,7 @@ setup(
             "recommonmark==0.7.1",
             "sphinx-autodoc-typehints==1.11.1",
             "sphinx_copybutton==0.3.1",
-            "ipykernel~=5.3",
+            "ipykernel>=5.3, <7.0",
         ]
     },
 )

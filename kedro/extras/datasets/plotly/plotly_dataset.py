@@ -34,8 +34,8 @@ from typing import Any, Dict
 
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as graph_objects
 import plotly.io as pio
+from plotly import graph_objects
 
 from kedro.extras.datasets.pandas import JSONDataSet
 from kedro.io.core import Version, get_filepath_str

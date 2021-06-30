@@ -75,8 +75,6 @@ def cli():  # pragma: no cover
     """Kedro is a CLI for creating and using Kedro projects. For more
     information, type ``kedro info``.
 
-    When inside a Kedro project (created with ``kedro new``) commands from
-    the project's ``cli.py`` file will also be available here.
     """
     pass
 
@@ -186,10 +184,13 @@ class KedroCLI(CommandCollection):
 
     @property
     def project_groups(self) -> Sequence[click.MultiCommand]:
+        # pylint: disable=line-too-long
         """Property which loads all project command groups from the
         project and the plugins, then combines them with the built-in ones.
         Built-in commands can be overridden by plugins, which can be
-        overridden by the project's cli.py.
+        overridden by a custom project cli.py.
+        See https://kedro.readthedocs.io/en/stable/07_extend_kedro/01_common_use_cases.html#use-case-3-how-to-add-or-modify-cli-commands
+        on how to add this.
         """
         if not self._metadata:
             return []

@@ -162,6 +162,7 @@ class ParallelRunner(AbstractRunner):
         Raises:
             ValueError: bad parameters passed
         """
+        # pylint: disable=consider-using-with
         super().__init__(is_async=is_async)
         self._manager = ParallelRunnerManager()
         self._manager.start()  # pylint: disable=consider-using-with

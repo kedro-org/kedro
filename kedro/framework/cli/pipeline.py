@@ -25,7 +25,7 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+# pylint: disable=consider-using-with
 """A collection of CLI commands for working with Kedro pipelines."""
 import json
 import re
@@ -276,9 +276,7 @@ def pull_package(
 )
 @click.argument("name", nargs=1)
 @click.pass_obj  # this will pass the metadata as first argument
-def package_pipeline(
-    metadata: ProjectMetadata, name, env, alias, destination
-):  # pylint: disable=too-many-arguments
+def package_pipeline(metadata: ProjectMetadata, name, env, alias, destination):
     """Package up a modular pipeline as a Python .whl."""
     result_path = _package_pipeline(
         name, metadata, alias=alias, destination=destination, env=env
@@ -409,7 +407,7 @@ def _find_config_files(
     return config_files
 
 
-def _package_pipeline(  # pylint: disable=too-many-arguments
+def _package_pipeline(
     pipeline_name: str,
     metadata: ProjectMetadata,
     alias: str = None,

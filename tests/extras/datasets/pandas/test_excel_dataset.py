@@ -98,6 +98,28 @@ class TestExcelDataSet:
         for key, value in save_args.items():
             assert excel_data_set._save_args[key] == value
 
+    @pytest.mark.parametrize(
+        "load_args,save_args",
+        [
+            ({"storage_options": {"a": "b"}}, {}),
+            ({}, {"storage_options": {"a": "b"}}),
+            ({"storage_options": {"a": "b"}}, {"storage_options": {"x": "y"}}),
+        ],
+    )
+    def test_storage_options_dropped(self, load_args, save_args, caplog, tmp_path):
+        filepath = str(tmp_path / "test.csv")
+
+        ds = ExcelDataSet(filepath=filepath, load_args=load_args, save_args=save_args)
+
+        records = [r for r in caplog.records if r.levelname == "WARNING"]
+        expected_log_message = (
+            f"Dropping `storage_options` for {filepath}, "
+            f"please specify them under `fs_args` or `credentials`."
+        )
+        assert records[0].getMessage() == expected_log_message
+        assert "storage_options" not in ds._save_args
+        assert "storage_options" not in ds._load_args
+
     def test_load_missing_file(self, excel_data_set):
         """Check the error when trying to load missing file."""
         pattern = r"Failed while loading data from data set ExcelDataSet\(.*\)"

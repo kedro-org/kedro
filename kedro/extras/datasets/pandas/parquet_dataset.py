@@ -29,6 +29,7 @@
 """``ParquetDataSet`` loads/saves data from/to a Parquet file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Parquet file.
 """
+import logging
 from copy import deepcopy
 from io import BytesIO
 from pathlib import Path, PurePosixPath
@@ -46,6 +47,8 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class ParquetDataSet(AbstractVersionedDataSet):
@@ -118,7 +121,8 @@ class ParquetDataSet(AbstractVersionedDataSet):
             _fs_args.setdefault("auto_mkdir", True)
 
         self._protocol = protocol
-        self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
+        self._storage_options = {**_credentials, **_fs_args}
+        self._fs = fsspec.filesystem(self._protocol, **self._storage_options)
 
         super().__init__(
             filepath=PurePosixPath(path),
@@ -134,6 +138,15 @@ class ParquetDataSet(AbstractVersionedDataSet):
         self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
             self._save_args.update(save_args)
+
+        if "storage_options" in self._save_args or "storage_options" in self._load_args:
+            logger.warning(
+                "Dropping `storage_options` for %s, "
+                "please specify them under `fs_args` or `credentials`.",
+                self._filepath,
+            )
+            self._save_args.pop("storage_options", None)
+            self._load_args.pop("storage_options", None)
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
@@ -156,15 +169,23 @@ class ParquetDataSet(AbstractVersionedDataSet):
                 .to_pandas()
             )
         else:
-            load_path = str(self._get_load_path())
-            if self._protocol != "file":  # pragma: no cover
-                # file:// protocol seems to misbehave on Windows
-                # (<urlopen error file not on local host>),
-                # so we don't join that back to the filepath
-                load_path = f"{self._protocol}{PROTOCOL_DELIMITER}{load_path}"
-            data = pd.read_parquet(load_path, **self._load_args)
+            data = self._load_from_pandas()
 
         return data
+
+    def _load_from_pandas(self):
+        load_path = str(self._get_load_path())
+        if self._protocol == "file":
+            # file:// protocol seems to misbehave on Windows
+            # (<urlopen error file not on local host>),
+            # so we don't join that back to the filepath;
+            # storage_options also don't work with local paths
+            return pd.read_parquet(load_path, **self._load_args)
+
+        load_path = f"{self._protocol}{PROTOCOL_DELIMITER}{load_path}"
+        return pd.read_parquet(
+            load_path, storage_options=self._storage_options, **self._load_args
+        )
 
     def _save(self, data: pd.DataFrame) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)

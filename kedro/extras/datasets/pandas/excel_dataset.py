@@ -29,6 +29,7 @@
 """``ExcelDataSet`` loads/saves data from/to a Excel file using an underlying
 filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Excel file.
 """
+import logging
 from copy import deepcopy
 from io import BytesIO
 from pathlib import PurePosixPath
@@ -45,6 +46,8 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class ExcelDataSet(AbstractVersionedDataSet):
@@ -124,7 +127,8 @@ class ExcelDataSet(AbstractVersionedDataSet):
             _fs_args.setdefault("auto_mkdir", True)
 
         self._protocol = protocol
-        self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
+        self._storage_options = {**_credentials, **_fs_args}
+        self._fs = fsspec.filesystem(self._protocol, **self._storage_options)
 
         super().__init__(
             filepath=PurePosixPath(path),
@@ -150,6 +154,15 @@ class ExcelDataSet(AbstractVersionedDataSet):
                 "`ExcelDataSet` doesn't support versioning in append mode."
             )
 
+        if "storage_options" in self._save_args or "storage_options" in self._load_args:
+            logger.warning(
+                "Dropping `storage_options` for %s, "
+                "please specify them under `fs_args` or `credentials`.",
+                self._filepath,
+            )
+            self._save_args.pop("storage_options", None)
+            self._load_args.pop("storage_options", None)
+
     def _describe(self) -> Dict[str, Any]:
         return dict(
             filepath=self._filepath,
@@ -162,12 +175,17 @@ class ExcelDataSet(AbstractVersionedDataSet):
 
     def _load(self) -> pd.DataFrame:
         load_path = str(self._get_load_path())
-        if self._protocol != "file":
+        if self._protocol == "file":
             # file:// protocol seems to misbehave on Windows
             # (<urlopen error file not on local host>),
-            # so we don't join that back to the filepath
-            load_path = f"{self._protocol}{PROTOCOL_DELIMITER}{load_path}"
-        return pd.read_excel(load_path, **self._load_args)
+            # so we don't join that back to the filepath;
+            # storage_options also don't work with local paths
+            return pd.read_excel(load_path, **self._load_args)
+
+        load_path = f"{self._protocol}{PROTOCOL_DELIMITER}{load_path}"
+        return pd.read_excel(
+            load_path, storage_options=self._storage_options, **self._load_args
+        )
 
     def _save(self, data: pd.DataFrame) -> None:
         output = BytesIO()

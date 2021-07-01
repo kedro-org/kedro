@@ -42,20 +42,55 @@ from click import secho
 from kedro.framework.cli.utils import (
     KedroCliError,
     _check_module_importable,
+    _config_file_callback,
+    _get_values_as_tuple,
+    _reformat_load_versions,
+    _split_params,
     call,
     command_with_verbosity,
     env_option,
     forward_command,
     ipython_message,
     python_call,
+    split_string,
 )
+from kedro.framework.session import KedroSession
 from kedro.framework.startup import ProjectMetadata
+from kedro.utils import load_obj
 
 NO_DEPENDENCY_MESSAGE = """{module} is not installed. Please make sure {module} is in
 {src}/requirements.txt and run `kedro install`."""
 LINT_CHECK_ONLY_HELP = """Check the files for style guide violations, unsorted /
 unformatted imports, and unblackened Python code without modifying the files."""
 OPEN_ARG_HELP = """Open the documentation in your default browser after building."""
+FROM_INPUTS_HELP = (
+    """A list of dataset names which should be used as a starting point."""
+)
+TO_OUTPUTS_HELP = """A list of dataset names which should be used as an end point."""
+FROM_NODES_HELP = """A list of node names which should be used as a starting point."""
+TO_NODES_HELP = """A list of node names which should be used as an end point."""
+NODE_ARG_HELP = """Run only nodes with specified names."""
+RUNNER_ARG_HELP = """Specify a runner that you want to run the pipeline with.
+Available runners: `SequentialRunner`, `ParallelRunner` and `ThreadRunner`.
+This option cannot be used together with --parallel."""
+PARALLEL_ARG_HELP = """Run the pipeline using the `ParallelRunner`.
+If not specified, use the `SequentialRunner`. This flag cannot be used together
+with --runner."""
+ASYNC_ARG_HELP = """Load and save node inputs and outputs asynchronously
+with threads. If not specified, load and save datasets synchronously."""
+TAG_ARG_HELP = """Construct the pipeline using only nodes which have this tag
+attached. Option can be used multiple times, what results in a
+pipeline constructed from nodes having any of those tags."""
+LOAD_VERSION_HELP = """Specify a particular dataset version (timestamp) for loading."""
+CONFIG_FILE_HELP = """Specify a YAML configuration file to load the run
+command arguments from. If command line arguments are provided, they will
+override the loaded ones."""
+PIPELINE_ARG_HELP = """Name of the modular pipeline to run.
+If not set, the project pipeline is run by default."""
+PARAMS_ARG_HELP = """Specify extra parameters that you want to pass
+to the context initializer. Items must be separated by comma, keys - by colon,
+example: param1:value1,param2:value2. Each parameter is split by the first comma,
+so parameter values are allowed to contain colons, parameter keys are not."""
 
 
 def _build_reqs(source_path: Path, args: Sequence[str] = ()):
@@ -144,7 +179,6 @@ def install(metadata: ProjectMetadata, compile_flag):
     # we cannot use `context.project_path` as in other commands since
     # context instantiation might break due to missing dependencies
     # we attempt to install here
-    # pylint: disable=consider-using-with
     source_path = metadata.source_dir
     environment_yml = source_path / "environment.yml"
     requirements_in = source_path / "requirements.in"
@@ -164,8 +198,14 @@ def install(metadata: ProjectMetadata, compile_flag):
         python_call("pip", pip_command)
     else:
         command = [sys.executable, "-m", "pip"] + pip_command
-        proc = subprocess.Popen(
-            command, creationflags=subprocess.CREATE_NEW_CONSOLE, stderr=subprocess.PIPE
+        # To comply with mypy, `shell=True` should be passed instead of
+        # `creationflags=subprocess.CREATE_NEW_CONSOLE`. However, bandit finds security
+        # issues for subprocess calls with `shell=True`, so we ignore type instead. See:
+        # https://bandit.readthedocs.io/en/latest/plugins/b602_subprocess_popen_with_shell_equals_true.html
+        proc = subprocess.Popen(  # pylint: disable=consider-using-with
+            command,
+            creationflags=subprocess.CREATE_NEW_CONSOLE,  # type: ignore
+            stderr=subprocess.PIPE,
         )
         _, errs = proc.communicate()
         if errs:
@@ -197,11 +237,27 @@ def package(metadata: ProjectMetadata):
     """Package the project as a Python egg and wheel."""
     source_path = metadata.source_dir
     call(
-        [sys.executable, "setup.py", "clean", "--all", "bdist_egg"],
+        [
+            sys.executable,
+            "setup.py",
+            "clean",
+            "--all",
+            "bdist_egg",
+            "--dist-dir",
+            "../dist",
+        ],
         cwd=str(source_path),
     )
     call(
-        [sys.executable, "setup.py", "clean", "--all", "bdist_wheel"],
+        [
+            sys.executable,
+            "setup.py",
+            "clean",
+            "--all",
+            "bdist_wheel",
+            "--dist-dir",
+            "../dist",
+        ],
         cwd=str(source_path),
     )
 
@@ -292,3 +348,88 @@ def activate_nbstripout(
         raise KedroCliError("Git executable not found. Install Git first.") from exc
 
     call(["nbstripout", "--install"])
+
+
+@project_group.command()
+@click.option(
+    "--from-inputs", type=str, default="", help=FROM_INPUTS_HELP, callback=split_string
+)
+@click.option(
+    "--to-outputs", type=str, default="", help=TO_OUTPUTS_HELP, callback=split_string
+)
+@click.option(
+    "--from-nodes", type=str, default="", help=FROM_NODES_HELP, callback=split_string
+)
+@click.option(
+    "--to-nodes", type=str, default="", help=TO_NODES_HELP, callback=split_string
+)
+@click.option("--node", "-n", "node_names", type=str, multiple=True, help=NODE_ARG_HELP)
+@click.option(
+    "--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP
+)
+@click.option("--parallel", "-p", is_flag=True, multiple=False, help=PARALLEL_ARG_HELP)
+@click.option("--async", "is_async", is_flag=True, multiple=False, help=ASYNC_ARG_HELP)
+@env_option
+@click.option("--tag", "-t", type=str, multiple=True, help=TAG_ARG_HELP)
+@click.option(
+    "--load-version",
+    "-lv",
+    type=str,
+    multiple=True,
+    help=LOAD_VERSION_HELP,
+    callback=_reformat_load_versions,
+)
+@click.option("--pipeline", type=str, default=None, help=PIPELINE_ARG_HELP)
+@click.option(
+    "--config",
+    "-c",
+    type=click.Path(exists=True, dir_okay=False, resolve_path=True),
+    help=CONFIG_FILE_HELP,
+    callback=_config_file_callback,
+)
+@click.option(
+    "--params", type=str, default="", help=PARAMS_ARG_HELP, callback=_split_params
+)
+# pylint: disable=too-many-arguments,unused-argument,too-many-locals
+def run(
+    tag,
+    env,
+    parallel,
+    runner,
+    is_async,
+    node_names,
+    to_nodes,
+    from_nodes,
+    from_inputs,
+    to_outputs,
+    load_version,
+    pipeline,
+    config,
+    params,
+):
+    """Run the pipeline."""
+    if parallel and runner:
+        raise KedroCliError(
+            "Both --parallel and --runner options cannot be used together. "
+            "Please use either --parallel or --runner."
+        )
+    runner = runner or "SequentialRunner"
+    if parallel:
+        runner = "ParallelRunner"
+    runner_class = load_obj(runner, "kedro.runner")
+
+    tag = _get_values_as_tuple(tag) if tag else tag
+    node_names = _get_values_as_tuple(node_names) if node_names else node_names
+
+    with KedroSession.create(env=env, extra_params=params) as session:
+        session.run(
+            tags=tag,
+            runner=runner_class(is_async=is_async),
+            node_names=node_names,
+            from_nodes=from_nodes,
+            to_nodes=to_nodes,
+            from_inputs=from_inputs,
+            to_outputs=to_outputs,
+            load_versions=load_version,
+            pipeline_name=pipeline,
+        )

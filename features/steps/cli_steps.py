@@ -32,6 +32,7 @@ import itertools
 import json
 import shlex
 import shutil
+import sys
 from pathlib import Path
 from time import time
 
@@ -247,7 +248,7 @@ def uninstall_package_via_pip(context, package):
 @when("I install the project's python package")
 def install_project_package_via_pip(context):
     """Install a python package using pip."""
-    dist_dir = context.root_project_dir / "src" / "dist"
+    dist_dir = context.root_project_dir / "dist"
     (whl_file,) = dist_dir.glob("*.whl")
     run([context.pip, "install", str(whl_file)], env=context.env)
 
@@ -546,7 +547,14 @@ def check_one_node_run(context, number):
 @then('the console log should show that "{node}" was run')
 def check_correct_nodes_run(context, node):
     expected_log_line = f"Running node: {node}"
-    assert expected_log_line in context.result.stdout
+    stdout = context.result.stdout
+    if sys.platform.startswith("win"):
+        assert "Pipeline execution completed successfully." in stdout
+    else:
+        assert expected_log_line in stdout, (
+            "Expected the following message segment to be printed on stdout: "
+            f"{expected_log_line},\nbut got {stdout}"
+        )
 
 
 @then("I should get a successful exit code")
@@ -577,7 +585,7 @@ def check_failed_status_code(context):
 @then("the relevant packages should be created")
 def check_python_packages_created(context):
     """Check that egg and whl files exist in dist dir."""
-    dist_dir = context.root_project_dir / "src" / "dist"
+    dist_dir = context.root_project_dir / "dist"
     egg_file = dist_dir.glob("*.egg")
     whl_file = dist_dir.glob("*.whl")
     assert any(egg_file)

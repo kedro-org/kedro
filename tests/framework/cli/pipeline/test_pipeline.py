@@ -43,47 +43,6 @@ PACKAGE_NAME = "dummy_package"
 PIPELINE_NAME = "my_pipeline"
 
 
-@pytest.fixture(autouse=True)
-def mocked_logging(mocker):
-    # Disable logging.config.dictConfig in KedroSession._setup_logging as
-    # it changes logging.config and affects other unit tests
-    return mocker.patch("logging.config.dictConfig")
-
-
-@pytest.fixture(autouse=True)
-def cleanup_pipelines(fake_repo_path, fake_package_path):
-    pipes_path = fake_package_path / "pipelines"
-    old_pipelines = {p.name for p in pipes_path.iterdir() if p.is_dir()}
-    yield
-
-    # remove created pipeline files after the test
-    created_pipelines = {
-        p.name for p in pipes_path.iterdir() if p.is_dir() and p.name != "__pycache__"
-    }
-    created_pipelines -= old_pipelines
-
-    for pipeline in created_pipelines:
-        shutil.rmtree(str(pipes_path / pipeline))
-
-        confs = fake_repo_path / settings.CONF_ROOT
-        for each in confs.rglob(f"*{pipeline}*"):  # clean all pipeline config files
-            if each.is_file():
-                each.unlink()
-
-        dirs_to_delete = (
-            dirpath
-            for pattern in ("parameters", "catalog")
-            for dirpath in confs.rglob(pattern)
-            if dirpath.is_dir() and not any(dirpath.iterdir())
-        )
-        for dirpath in dirs_to_delete:
-            dirpath.rmdir()
-
-        tests = fake_repo_path / "src" / "tests" / "pipelines" / pipeline
-        if tests.is_dir():
-            shutil.rmtree(str(tests))
-
-
 @pytest.fixture(params=["base"])
 def make_pipelines(request, fake_repo_path, fake_package_path, mocker):
     source_path = fake_package_path / "pipelines" / PIPELINE_NAME

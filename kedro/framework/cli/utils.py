@@ -466,3 +466,42 @@ def _split_params(ctx, param, value):
         value = item[1].strip()
         result[key] = _try_convert_to_numeric(value)
     return result
+
+
+def _get_requirements_in(source_path: Path, create_empty: bool = False) -> Path:
+    """Get path to project level requirements.in, creating it if required.
+
+    Args:
+        source_path: Path to the project `src` folder.
+        create_empty: Whether an empty requirements.in file should be created if
+            requirements.in does not exist and there is also no requirements.txt to
+            copy requirements from.
+
+    Returns:
+        Path to requirements.in.
+
+    Raises:
+        FileNotFoundError: If neither requirements.in nor requirements.txt is found.
+
+    """
+    requirements_in = source_path / "requirements.in"
+    if requirements_in.is_file():
+        return requirements_in
+
+    requirements_txt = source_path / "requirements.txt"
+    if requirements_txt.is_file():
+        click.secho(
+            "No requirements.in found. Copying contents from requirements.txt..."
+        )
+        shutil.copyfile(str(requirements_txt), str(requirements_in))
+        return requirements_in
+
+    if create_empty:
+        click.secho("Creating empty requirements.in...")
+        requirements_in.touch()
+        return requirements_in
+
+    raise FileNotFoundError(
+        "No project requirements.in or requirements.txt found in `/src`. "
+        "Please create either and try again."
+    )

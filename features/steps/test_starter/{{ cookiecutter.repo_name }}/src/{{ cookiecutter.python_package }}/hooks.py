@@ -27,19 +27,14 @@
 # limitations under the License.
 
 """Project hooks."""
-from typing import Any, Dict, Iterable, Optional
+from typing import Any, Dict, Optional
 
-from kedro.config import ConfigLoader
 from kedro.framework.hooks import hook_impl
 from kedro.io import DataCatalog
 from kedro.versioning import Journal
 
 
 class ProjectHooks:
-    @hook_impl
-    def register_config_loader(self, conf_paths: Iterable[str]) -> ConfigLoader:
-        return ConfigLoader(conf_paths)
-
     @hook_impl
     def register_catalog(
         self,

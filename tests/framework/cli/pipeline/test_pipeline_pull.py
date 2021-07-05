@@ -25,6 +25,7 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# pylint: disable=consider-using-with
 import filecmp
 import shutil
 
@@ -101,10 +102,7 @@ class TestPipelinePullCommand:
         assert not config_path.exists()
 
         wheel_file = (
-            fake_repo_path
-            / "src"
-            / "dist"
-            / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
+            fake_repo_path / "dist" / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
         )
         assert wheel_file.is_file()
 
@@ -166,10 +164,7 @@ class TestPipelinePullCommand:
         )
 
         wheel_file = (
-            fake_repo_path
-            / "src"
-            / "dist"
-            / _get_wheel_name(name=pipeline_name, version="0.1")
+            fake_repo_path / "dist" / _get_wheel_name(name=pipeline_name, version="0.1")
         )
         assert wheel_file.is_file()
 
@@ -214,10 +209,7 @@ class TestPipelinePullCommand:
         mocked_filesystem = mocker.patch("fsspec.filesystem")
 
         wheel_file = (
-            fake_repo_path
-            / "src"
-            / "dist"
-            / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
+            fake_repo_path / "dist" / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
         )
 
         options = ["--fs-args", str(fs_args_config)]
@@ -238,10 +230,7 @@ class TestPipelinePullCommand:
         self.call_pipeline_create(fake_project_cli, fake_metadata)
         self.call_pipeline_package(fake_project_cli, fake_metadata)
         wheel_file = (
-            fake_repo_path
-            / "src"
-            / "dist"
-            / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
+            fake_repo_path / "dist" / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
         )
         assert wheel_file.is_file()
 
@@ -295,10 +284,7 @@ class TestPipelinePullCommand:
         assert not source_params_config.exists()
 
         wheel_file = (
-            fake_repo_path
-            / "src"
-            / "dist"
-            / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
+            fake_repo_path / "dist" / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
         )
         assert wheel_file.is_file()
 
@@ -362,10 +348,7 @@ class TestPipelinePullCommand:
         assert not test_path.exists()
 
         wheel_file = (
-            fake_repo_path
-            / "src"
-            / "dist"
-            / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
+            fake_repo_path / "dist" / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
         )
         assert wheel_file.is_file()
 

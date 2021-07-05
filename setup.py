@@ -38,7 +38,7 @@ name = "kedro"
 here = path.abspath(path.dirname(__file__))
 
 
-PANDAS = "pandas>=0.24"
+PANDAS = "pandas~=1.2"  # in 1.1 pandas started using fsspec, in 1.2 they fixed a lot of bugs
 SPARK = "pyspark>=2.2, <4.0"
 HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.5"
@@ -86,17 +86,16 @@ def _collect_requirements(requires):
 
 api_require = {"api.APIDataSet": ["requests~=2.20"]}
 biosequence_require = {"biosequence.BioSequenceDataSet": ["biopython~=1.73"]}
-dask_require = {"dask.ParquetDataSet": ["dask[complete]~=2.6"]}
+dask_require = {"dask.ParquetDataSet": ["dask[complete]~=2021.1"]}
 geopandas_require = {
-    "geopandas.GeoJSONDataSet": ["geopandas>=0.6.0, <1.0", "pyproj>=2.2.0, <3.0"]
+    "geopandas.GeoJSONDataSet": ["geopandas>=0.6.0, <1.0", "pyproj~=3.0"]
 }
 matplotlib_require = {"matplotlib.MatplotlibWriter": ["matplotlib>=3.0.3, <4.0"]}
 holoviews_require = {"holoviews.HoloviewsWriter": ["holoviews~=1.13.0"]}
 networkx_require = {"networkx.NetworkXDataSet": ["networkx~=2.4"]}
 pandas_require = {
     "pandas.CSVDataSet": [PANDAS],
-    "pandas.ExcelDataSet": [PANDAS, "xlrd~=1.0", "xlsxwriter~=1.0"],
-    "pandas.AppendableExcelDataSet": [PANDAS, "openpyxl>=3.0.3, <4.0"],
+    "pandas.ExcelDataSet": [PANDAS, "openpyxl>=3.0.6, <4.0"],
     "pandas.FeatherDataSet": [PANDAS],
     "pandas.GBQTableDataSet": [PANDAS, "pandas-gbq>=0.12.0, <1.0"],
     "pandas.HDFDataSet": [PANDAS, "tables~=3.6"],
@@ -104,7 +103,7 @@ pandas_require = {
     "pandas.ParquetDataSet": [PANDAS, "pyarrow>=0.12.0, <4.0.0"],
     "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy~=1.2"],
 }
-pillow_require = {"pillow.ImageDataSet": ["Pillow~=7.1.2"]}
+pillow_require = {"pillow.ImageDataSet": ["Pillow~=8.0"]}
 plotly_require = {"plotly.PlotlyDataSet": [PANDAS, "plotly~=4.14"]}
 spark_require = {
     "spark.SparkDataSet": [SPARK, HDFS, S3FS],
@@ -114,7 +113,7 @@ spark_require = {
 tensorflow_required = {
     "tensorflow.TensorflowModelDataset": [
         # currently only TensorFlow V2 supported for saving and loading.
-        # V1 requires HDF5 and serializes differently
+        # V1 requires HDF5 and serialises differently
         "tensorflow~=2.0",
     ]
 }
@@ -173,7 +172,7 @@ setup(
     long_description=readme,
     long_description_content_type="text/markdown",
     url="https://github.com/quantumblacklabs/kedro",
-    python_requires=">=3.6, <3.9",
+    python_requires=">=3.7, <3.10",
     packages=find_packages(exclude=["docs*", "tests*", "tools*", "features*"]),
     include_package_data=True,
     tests_require=test_requires,
@@ -187,9 +186,9 @@ setup(
     keywords="pipelines, machine learning, data pipelines, data science, data engineering",
     classifiers=[
         "Development Status :: 4 - Beta",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
     extras_require=extras_require,
 )

@@ -87,7 +87,6 @@ class TestPipelineRequirements:
     def call_pipeline_pull(self, cli, metadata, repo_path):
         wheel_file = (
             repo_path
-            / "src"
             / "dist"
             / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
         )

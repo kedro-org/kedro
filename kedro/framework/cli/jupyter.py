@@ -70,8 +70,7 @@ overwrite its contents."""
 
 
 def collect_line_magic():
-    """Interface function for collecting line magic functions from plugin entry points.
-    """
+    """Interface function for collecting line magic functions from plugin entry points."""
     return load_entry_points("line_magic")
 
 

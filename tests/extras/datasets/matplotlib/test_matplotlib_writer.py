@@ -368,3 +368,54 @@ class TestMatplotlibWriterVersioned:
             actual_filepath = Path(f"{versioned_filepath}/{colour}")
 
             assert actual_filepath.read_bytes() == test_path.read_bytes()
+
+    def test_versioning_existing_dataset_single_plot(
+        self, plot_writer, versioned_plot_writer, mock_single_plot
+    ):
+        """Check the error when attempting to save a versioned dataset on top of an
+        already existing (non-versioned) dataset, using a single plot."""
+
+        plot_writer = MatplotlibWriter(
+            filepath=versioned_plot_writer._filepath.as_posix()
+        )
+        plot_writer.save(mock_single_plot)
+        assert plot_writer.exists()
+        pattern = (
+            f"(?=.*file with the same name already exists in the directory)"
+            f"(?=.*{versioned_plot_writer._filepath.parent.as_posix()})"
+        )
+        with pytest.raises(DataSetError, match=pattern):
+            versioned_plot_writer.save(mock_single_plot)
+
+        # Remove non-versioned dataset and try again
+        Path(plot_writer._filepath.as_posix()).unlink()
+        versioned_plot_writer.save(mock_single_plot)
+        assert versioned_plot_writer.exists()
+
+    def test_versioning_existing_dataset_list_plot(
+        self, plot_writer, versioned_plot_writer, mock_list_plot
+    ):
+        """Check the behavior when attempting to save a versioned dataset on top of an
+        already existing (non-versioned) dataset, using a list of plots. Note: because
+        a list of plots saves to a directory, an error is not expected."""
+        plot_writer = MatplotlibWriter(
+            filepath=versioned_plot_writer._filepath.as_posix()
+        )
+        plot_writer.save(mock_list_plot)
+        assert plot_writer.exists()
+        versioned_plot_writer.save(mock_list_plot)
+        assert versioned_plot_writer.exists()
+
+    def test_versioning_existing_dataset_dict_plot(
+        self, plot_writer, versioned_plot_writer, mock_dict_plot
+    ):
+        """Check the behavior when attempting to save a versioned dataset on top of an
+        already existing (non-versioned) dataset, using a dict of plots. Note: because
+        a dict of plots saves to a directory, an error is not expected."""
+        plot_writer = MatplotlibWriter(
+            filepath=versioned_plot_writer._filepath.as_posix()
+        )
+        plot_writer.save(mock_dict_plot)
+        assert plot_writer.exists()
+        versioned_plot_writer.save(mock_dict_plot)
+        assert versioned_plot_writer.exists()

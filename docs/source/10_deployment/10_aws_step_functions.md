@@ -83,9 +83,9 @@ preprocessed_shuttles:
   type: pandas.CSVDataSet
   filepath: s3://<your-bucket>/preprocessed_shuttles.csv
 
-master_table:
+model_input_table:
   type: pandas.CSVDataSet
-  filepath: s3://<your-bucket>/master_table.csv
+  filepath: s3://<your-bucket>/model_input_table.csv
 
 regressor:
   type: pickle.PickleDataSet
@@ -202,7 +202,7 @@ ENTRYPOINT [ "/usr/local/bin/python", "-m", "awslambdaric" ]
 CMD [ "lambda_handler.handler" ]
 ```
 
-This `Dockerfile` is adapted from the official guide on [how to create a custom image](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html#images-create-2) for Lambda to include Kedro-specific steps.
+This `Dockerfile` is adapted from the official guide on [how to create a custom image](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html#images-create-from-alt) for Lambda to include Kedro-specific steps.
 
 * **Step 2.4**: Build the Docker image and push it to AWS Elastic Container Registry (ECR):
 
@@ -248,6 +248,7 @@ from aws_cdk import aws_s3 as s3
 from aws_cdk import core, aws_lambda, aws_ecr
 from aws_cdk.aws_lambda import IFunction
 from aws_cdk.aws_stepfunctions_tasks import LambdaInvoke
+from kedro.framework.project import pipelines
 from kedro.framework.session import KedroSession
 from kedro.framework.startup import bootstrap_project
 from kedro.pipeline.node import Node
@@ -284,11 +285,9 @@ class KedroStepFunctionsStack(core.Stack):
     def _parse_kedro_pipeline(self) -> None:
         """Extract the Kedro pipeline from the project"""
         metadata = bootstrap_project(self.project_path)
-        session = KedroSession.create(project_path=self.project_path, env=self.env)
-        context = session.load_context()
 
         self.project_name = metadata.project_name
-        self.pipeline = context.pipelines.get("__default__")
+        self.pipeline = pipelines.get("__default__")
 
     def _set_ecr_repository(self) -> None:
         """Set the ECR repository for the Lambda base image"""

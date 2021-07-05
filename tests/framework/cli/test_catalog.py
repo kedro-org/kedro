@@ -126,7 +126,9 @@ class TestCatalogListCommand:
         )
 
         result = CliRunner().invoke(
-            fake_project_cli, ["catalog", "list"], obj=fake_metadata,
+            fake_project_cli,
+            ["catalog", "list"],
+            obj=fake_metadata,
         )
 
         assert not result.exit_code
@@ -161,7 +163,9 @@ class TestCatalogListCommand:
         )
 
         result = CliRunner().invoke(
-            fake_project_cli, ["catalog", "list"], obj=fake_metadata,
+            fake_project_cli,
+            ["catalog", "list"],
+            obj=fake_metadata,
         )
 
         assert not result.exit_code

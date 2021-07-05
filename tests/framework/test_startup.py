@@ -52,7 +52,7 @@ class TestIsProject:
         assert not _is_project(self.project_path)
 
     def test_toml_invalid_format(self, tmp_path):
-        """Test for loading context from an invalid path. """
+        """Test for loading context from an invalid path."""
         toml_path = tmp_path / "pyproject.toml"
         toml_path.write_text("!!")  # Invalid TOML
 
@@ -87,7 +87,7 @@ class TestGetProjectMetadata:
             _get_project_metadata(self.project_path)
 
     def test_toml_invalid_format(self, tmp_path):
-        """Test for loading context from an invalid path. """
+        """Test for loading context from an invalid path."""
         toml_path = tmp_path / "pyproject.toml"
         toml_path.write_text("!!")  # Invalid TOML
         pattern = "Failed to parse 'pyproject.toml' file"

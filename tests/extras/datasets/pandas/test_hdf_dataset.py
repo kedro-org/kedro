@@ -26,7 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 
 import pandas as pd
 import pytest
@@ -155,7 +155,7 @@ class TestHDFDataSet:
         assert_frame_equal(df, reloaded)
 
     def test_thread_lock_usage(self, hdf_data_set, dummy_dataframe, mocker):
-        """Test thread lock usage. """
+        """Test thread lock usage."""
         # pylint: disable=no-member
         mocked_lock = HDFDataSet._lock
         mocked_lock.assert_not_called()
@@ -248,3 +248,23 @@ class TestHDFDataSetVersioned:
                 key=HDF_KEY,
                 version=Version(None, None),
             )
+
+    def test_versioning_existing_dataset(
+        self, hdf_data_set, versioned_hdf_data_set, dummy_dataframe
+    ):
+        """Check the error when attempting to save a versioned dataset on top of an
+        already existing (non-versioned) dataset."""
+        hdf_data_set.save(dummy_dataframe)
+        assert hdf_data_set.exists()
+        assert hdf_data_set._filepath == versioned_hdf_data_set._filepath
+        pattern = (
+            f"(?=.*file with the same name already exists in the directory)"
+            f"(?=.*{versioned_hdf_data_set._filepath.parent.as_posix()})"
+        )
+        with pytest.raises(DataSetError, match=pattern):
+            versioned_hdf_data_set.save(dummy_dataframe)
+
+        # Remove non-versioned dataset and try again
+        Path(hdf_data_set._filepath.as_posix()).unlink()
+        versioned_hdf_data_set.save(dummy_dataframe)
+        assert versioned_hdf_data_set.exists()

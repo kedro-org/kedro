@@ -88,10 +88,10 @@ class TestCachedDataset:
 
         cached_ds.save(42)
         assert cached_ds.load() == 42
-        assert wrapped.load.call_count == 0
-        assert wrapped.save.call_count == 1
-        assert cached_ds._cache.load.call_count == 1
-        assert cached_ds._cache.save.call_count == 1
+        assert wrapped.load.call_count == 0  # pylint: disable=no-member
+        assert wrapped.save.call_count == 1  # pylint: disable=no-member
+        assert cached_ds._cache.load.call_count == 1  # pylint: disable=no-member
+        assert cached_ds._cache.save.call_count == 1  # pylint: disable=no-member
 
     def test_load_empty_cache(self, mocker):
         wrapped = MemoryDataSet(-42)
@@ -101,8 +101,8 @@ class TestCachedDataset:
         mocker.spy(cached_ds._cache, "load")
 
         assert cached_ds.load() == -42
-        assert wrapped.load.call_count == 1
-        assert cached_ds._cache.load.call_count == 0
+        assert wrapped.load.call_count == 1  # pylint: disable=no-member
+        assert cached_ds._cache.load.call_count == 0  # pylint: disable=no-member
 
     def test_from_yaml(self, mocker):
         config = yaml.safe_load(StringIO(YML_CONFIG))

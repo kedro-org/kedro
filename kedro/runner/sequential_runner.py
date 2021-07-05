@@ -47,9 +47,9 @@ class SequentialRunner(AbstractRunner):
     def __init__(self, is_async: bool = False):
         """Instantiates the runner classs.
 
-            Args:
-                is_async: If True, the node inputs and outputs are loaded and saved
-                    asynchronously with threads. Defaults to False.
+        Args:
+            is_async: If True, the node inputs and outputs are loaded and saved
+                asynchronously with threads. Defaults to False.
 
         """
         super().__init__(is_async=is_async)

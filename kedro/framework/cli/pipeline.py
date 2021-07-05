@@ -215,7 +215,13 @@ def delete_pipeline(
 
 @pipeline.command("list")
 def list_pipelines():
-    """List all pipelines defined in your pipeline_registry.py file."""
+    """List all pipelines defined in your pipeline_registry.py file. (DEPRECATED)"""
+    deprecation_message = (
+        "DeprecationWarning: Command `kedro pipeline list` is deprecated. "
+        "Please use `kedro registry list` instead."
+    )
+    click.secho(deprecation_message, fg="red")
+
     click.echo(yaml.dump(sorted(pipelines)))
 
 
@@ -225,7 +231,15 @@ def list_pipelines():
 def describe_pipeline(
     metadata: ProjectMetadata, name, **kwargs
 ):  # pylint: disable=unused-argument, protected-access
-    """Describe a pipeline by providing a pipeline name. Defaults to the __default__ pipeline."""
+    """Describe a pipeline by providing a pipeline name.
+    Defaults to the __default__ pipeline. (DEPRECATED)
+    """
+    deprecation_message = (
+        "DeprecationWarning: Command `kedro pipeline describe` is deprecated. "
+        "Please use `kedro registry describe` instead."
+    )
+    click.secho(deprecation_message, fg="red")
+
     pipeline_obj = pipelines.get(name)
     if not pipeline_obj:
         all_pipeline_names = pipelines.keys()
@@ -267,8 +281,7 @@ def describe_pipeline(
 def pull_package(
     metadata: ProjectMetadata, package_path, env, alias, fs_args, **kwargs
 ):  # pylint:disable=unused-argument
-    """Pull and unpack a modular pipeline in your project.
-    """
+    """Pull and unpack a modular pipeline in your project."""
 
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_dir_path = Path(temp_dir).resolve()
@@ -310,7 +323,9 @@ def pull_package(
     "-v",
     "--version",
     type=str,
-    help="Version to package under. Defaults to project package version.",
+    help="Version to package under. "
+    "Defaults to pipeline package version or, "
+    "if that is not defined, the project package version.",
 )
 @click.argument("name", nargs=1)
 @click.pass_obj  # this will pass the metadata as first argument
@@ -364,6 +379,7 @@ def _unpack_wheel(location: str, destination: Path, fs_args: Optional[str]) -> N
 
     if location.endswith(".whl") and filesystem and filesystem.exists(location):
         with filesystem.open(location) as fs_file:
+            # pylint: disable=consider-using-with
             ZipFile(fs_file).extractall(destination)
     else:
         python_call(
@@ -378,6 +394,7 @@ def _unpack_wheel(location: str, destination: Path, fs_args: Optional[str]) -> N
                 f"More than 1 or no wheel files found: {file_names}. "
                 f"There has to be exactly one distribution file."
             )
+        # pylint: disable=consider-using-with
         ZipFile(wheel_file[0]).extractall(destination)
 
 
@@ -455,9 +472,6 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
 ) -> Path:
     package_dir = metadata.source_dir / metadata.package_name
     env = env or "base"
-    if not version:  # default to project package version
-        project_module = import_module(f"{metadata.package_name}")
-        version = project_module.__version__  # type: ignore
 
     artifacts_to_package = _get_pipeline_artifacts(
         metadata, pipeline_name=pipeline_name, env=env
@@ -477,6 +491,17 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
     # Check that pipeline directory exists and not empty
     _validate_dir(artifacts_to_package.pipeline_dir)
     destination = Path(destination) if destination else package_dir.parent / "dist"
+
+    if not version:  # default to pipeline package version
+        try:
+            pipeline_module = import_module(
+                f"{metadata.package_name}.pipelines.{pipeline_name}"
+            )
+            version = pipeline_module.__version__  # type: ignore
+        except (AttributeError, ModuleNotFoundError):
+            # if pipeline version doesn't exist, take the project one
+            project_module = import_module(f"{metadata.package_name}")
+            version = project_module.__version__  # type: ignore
 
     _generate_wheel_file(  # type: ignore
         pipeline_name, destination, source_paths, version, alias=alias

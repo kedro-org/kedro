@@ -119,7 +119,9 @@ class TextDataSet(AbstractVersionedDataSet):
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
-            filepath=self._filepath, protocol=self._protocol, version=self._version,
+            filepath=self._filepath,
+            protocol=self._protocol,
+            version=self._version,
         )
 
     def _load(self) -> str:

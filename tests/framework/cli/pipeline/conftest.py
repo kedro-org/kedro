@@ -84,6 +84,6 @@ def cleanup_pipelines(fake_repo_path, fake_package_path):
 @pytest.fixture
 def cleanup_dist(fake_repo_path):
     yield
-    dist_dir = fake_repo_path / "src" / "dist"
+    dist_dir = fake_repo_path / "dist"
     if dist_dir.exists():
         shutil.rmtree(str(dist_dir))

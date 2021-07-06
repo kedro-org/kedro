@@ -171,7 +171,7 @@ class XMLDataSet(AbstractVersionedDataSet):
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         buf = BytesIO()
-        data.to_xml(path_or_buf=buf, **self._save_args)
+        data.to_xml(path_or_buffer=buf, **self._save_args)
 
         with self._fs.open(save_path, mode="wb") as fs_file:
             fs_file.write(buf.getvalue())

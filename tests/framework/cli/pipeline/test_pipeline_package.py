@@ -64,20 +64,13 @@ class TestPipelinePackageCommand:
         assert expected_files <= wheel_contents
 
     @pytest.mark.parametrize(
-        "options,package_name,version,success_message",
+        "options,package_name,success_message",
         [
-            ([], PIPELINE_NAME, "0.1", f"Pipeline `{PIPELINE_NAME}` packaged!"),
+            ([], PIPELINE_NAME, f"Pipeline `{PIPELINE_NAME}` packaged!"),
             (
                 ["--alias", "alternative"],
                 "alternative",
-                "0.1",
                 f"Pipeline `{PIPELINE_NAME}` packaged as `alternative`!",
-            ),
-            (
-                ["--version", "0.3"],
-                PIPELINE_NAME,
-                "0.3",
-                f"Pipeline `{PIPELINE_NAME}` packaged!",
             ),
         ],
     )

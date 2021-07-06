@@ -11,6 +11,12 @@
 * Removed `cli.py` from the Kedro project template. By default, all CLI commands, including `kedro run`, are now defined on the Kedro framework side. These can be overridden in turn by a plugin or a `cli.py` file in your project. A packaged Kedro project will respect the same hierarchy when executed with `python -m my_package`.
 * Merged `pandas.AppendableExcelDataSet` into `pandas.ExcelDataSet`.
 * Added `save_args` to `feather.FeatherDataSet`.
+* Added the following new datasets:
+
+| Type                | Description                                                    | Location                       |
+| ------------------- | -------------------------------------------------------------- | ------------------------------ |
+| `pandas.XMLDataSet` | Read XML into Pandas DataFrame. Write Pandas DataFrame to XML. | `kedro.extras.datasets.pandas` |
+
 
 ## Breaking changes to the API
 * Add namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/quantumblacklabs/kedro/issues/399)

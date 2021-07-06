@@ -39,6 +39,7 @@ __all__ = [
     "ParquetDataSet",
     "SQLQueryDataSet",
     "SQLTableDataSet",
+    "XMLDataSet",
 ]
 
 from contextlib import suppress
@@ -59,3 +60,5 @@ with suppress(ImportError):
     from .parquet_dataset import ParquetDataSet  # NOQA
 with suppress(ImportError):
     from .sql_dataset import SQLQueryDataSet, SQLTableDataSet  # NOQA
+with suppress(ImportError):
+    from .xml_dataset import XMLDataSet  # NOQA

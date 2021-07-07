@@ -72,7 +72,7 @@ class XMLDataSet(AbstractVersionedDataSet):
     """
 
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
-    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_SAVE_ARGS = {"index": False}  # type: Dict[str, Any]
 
     # pylint: disable=too-many-arguments
     def __init__(

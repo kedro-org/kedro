@@ -30,6 +30,7 @@ from pathlib import Path, PurePosixPath
 
 import pandas as pd
 import pytest
+from adlfs import AzureBlobFileSystem
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
@@ -127,21 +128,30 @@ class TestXMLDataSet:
             xml_data_set.load()
 
     @pytest.mark.parametrize(
-        "filepath,instance_type,load_path",
+        "filepath,instance_type,credentials,load_path",
         [
-            ("s3://bucket/file.xml", S3FileSystem, "s3://bucket/file.xml"),
-            ("file:///tmp/test.xml", LocalFileSystem, "/tmp/test.xml"),
-            ("/tmp/test.xml", LocalFileSystem, "/tmp/test.xml"),
-            ("gcs://bucket/file.xml", GCSFileSystem, "gcs://bucket/file.xml"),
+            ("s3://bucket/file.xml", S3FileSystem, {}, "s3://bucket/file.xml"),
+            ("file:///tmp/test.xml", LocalFileSystem, {}, "/tmp/test.xml"),
+            ("/tmp/test.xml", LocalFileSystem, {}, "/tmp/test.xml"),
+            ("gcs://bucket/file.xml", GCSFileSystem, {}, "gcs://bucket/file.xml"),
             (
                 "https://example.com/file.xml",
                 HTTPFileSystem,
+                {},
                 "https://example.com/file.xml",
+            ),
+            (
+                "abfs://bucket/file.csv",
+                AzureBlobFileSystem,
+                {"account_name": "test", "account_key": "test"},
+                "abfs://bucket/file.csv",
             ),
         ],
     )
-    def test_protocol_usage(self, filepath, instance_type, load_path, mocker):
-        data_set = XMLDataSet(filepath=filepath)
+    def test_protocol_usage(
+        self, filepath, instance_type, credentials, load_path, mocker
+    ):
+        data_set = XMLDataSet(filepath=filepath, credentials=credentials)
         assert isinstance(data_set._fs, instance_type)
 
         path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
@@ -181,13 +191,6 @@ class TestXMLDataSetVersioned:
         assert "XMLDataSet" in str(ds)
         assert "protocol" in str(ds_versioned)
         assert "protocol" in str(ds)
-        assert "writer_args" in str(ds_versioned)
-        assert "writer_args" in str(ds)
-        # Default save_args and load_args
-        assert "save_args={'index': False}" in str(ds)
-        assert "save_args={'index': False}" in str(ds_versioned)
-        assert "load_args={'engine': openpyxl}" in str(ds_versioned)
-        assert "load_args={'engine': openpyxl}" in str(ds)
 
     def test_save_and_load(self, versioned_xml_data_set, dummy_dataframe):
         """Test that saved and reloaded data matches the original one for
@@ -202,20 +205,6 @@ class TestXMLDataSetVersioned:
         with pytest.raises(DataSetError, match=pattern):
             versioned_xml_data_set.load()
 
-    def test_versioning_not_supported_in_append_mode(
-        self, tmp_path, load_version, save_version
-    ):
-        filepath = str(tmp_path / "test.xml")
-        save_args = {"writer": {"mode": "a"}}
-
-        pattern = "`XMLDataSet` doesn't support versioning in append mode."
-        with pytest.raises(DataSetError, match=pattern):
-            XMLDataSet(
-                filepath=filepath,
-                version=Version(load_version, save_version),
-                save_args=save_args,
-            )
-
     def test_exists(self, versioned_xml_data_set, dummy_dataframe):
         """Test `exists` method invocation for versioned data set."""
         assert not versioned_xml_data_set.exists()
@@ -224,7 +213,7 @@ class TestXMLDataSetVersioned:
 
     def test_prevent_overwrite(self, versioned_xml_data_set, dummy_dataframe):
         """Check the error when attempting to override the data set if the
-        corresponding XML file for a given save version already exists."""
+        corresponding hdf file for a given save version already exists."""
         versioned_xml_data_set.save(dummy_dataframe)
         pattern = (
             r"Save path \`.+\` for XMLDataSet\(.+\) must "

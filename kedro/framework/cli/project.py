@@ -43,6 +43,7 @@ from kedro.framework.cli.utils import (
     KedroCliError,
     _check_module_importable,
     _config_file_callback,
+    _get_requirements_in,
     _get_values_as_tuple,
     _reformat_load_versions,
     _split_params,
@@ -101,13 +102,7 @@ def _build_reqs(source_path: Path, args: Sequence[str] = ()):
         args: Optional arguments for `pip-compile` call, e.g. `--generate-hashes`.
 
     """
-    requirements_in = source_path / "requirements.in"
-
-    if not requirements_in.is_file():
-        secho("No requirements.in found. Copying contents from requirements.txt...")
-        requirements_txt = source_path / "requirements.txt"
-        shutil.copyfile(str(requirements_txt), str(requirements_in))
-
+    requirements_in = _get_requirements_in(source_path)
     python_call("piptools", ["compile", "-q", *args, str(requirements_in)])
 
 

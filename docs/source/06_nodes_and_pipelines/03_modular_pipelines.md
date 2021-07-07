@@ -124,6 +124,8 @@ When you package your modular pipeline, Kedro will also automatically package fi
 *  Parameter files that match either the glob pattern `conf/<env>/parameters*/**/<pipeline_name>.yml` or `conf/<env>/parameters*/**/<pipeline_name>/*, where `<env>` defaults to `base`. If you need to capture the parameters from a different config environment, run `kedro pipeline package --env <env_name> <pipeline_name>`
 *  Pipeline unit tests in `src/tests/pipelines/<pipeline_name>`
 
+Kedro will also include any requirements found in `src/<python_package>/pipelines/<pipeline_name>/requirements.txt` in the modular pipeline wheel file. These requirements will later be taken into account when pulling a pipeline via `kedro pipeline pull`.
+
 ```eval_rst
 .. note::  Kedro will not package the catalog config files even if those are present in ``conf/<env>/catalog/<pipeline_name>.yml``.
 ```
@@ -139,6 +141,12 @@ You can pull a modular pipeline from a wheel file by executing `kedro pipeline p
 *  All the modular pipeline code in `src/<python_package>/pipelines/<pipeline_name>/`
 *  Configuration files in `conf/<env>/parameters/<pipeline_name>.yml`, where `<env>` defaults to `base`. If you want to place the parameters from a different config environment, run `kedro pipeline pull <pipeline_name> --env <env_name>`
 *  Pipeline unit tests in `src/tests/pipelines/<pipeline_name>`
+
+Kedro will also parse any requirements packaged with the modular pipeline and add them to project level `requirements.in`. It is advised to do `kedro install --build-reqs` to compile and install the updated list of requirements after pulling a modular pipeline.
+
+```eval_rst
+.. note::  If a modular pipeline has embedded requirements and a project `requirements.in` file does not already exist, it will be generated based on the project `requirements.txt` before appending the modular pipeline requirements.
+```
 
 You can pull a modular pipeline from different locations, including local storage, PyPI and the cloud:
 

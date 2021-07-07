@@ -14,7 +14,7 @@ As a data pipeline developer, you will interact with a Kedro project, which cons
 
 * The **`conf/`** directory, which contains configuration for the project, such as data catalog configuration, parameters, etc.
 * The **`src`** directory, which contains the source code for the project, including:
-  * The **`pipeline`**  directory, which contains the source code for your pipeline.
+  * The **`pipelines`**  directory, which contains the source code for your pipelines.
   * **`settings.py`** file contains the settings for the project, such as library component registration, custom hooks registration, etc.
   * **`hooks.py`**, which contains custom [Hooks implementations](../07_extend_kedro/02_hooks) in the project, including both registration hooks and extension hooks.
   * **`cli.py`** file contains project specific CLI commands (e.g., `kedro run`, `kedro test`, etc.).

@@ -38,7 +38,7 @@ name = "kedro"
 here = path.abspath(path.dirname(__file__))
 
 
-PANDAS = "pandas~=1.3"  # in 1.1 pandas started using fsspec, in 1.2 they fixed a lot of bugs
+PANDAS = "pandas~=1.3"  # to be able to use XMLDataSet and pandas integration with fsspec
 SPARK = "pyspark>=2.2, <4.0"
 HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.5"
@@ -102,7 +102,7 @@ pandas_require = {
     "pandas.JSONDataSet": [PANDAS],
     "pandas.ParquetDataSet": [PANDAS, "pyarrow>=0.12.0, <4.0.0"],
     "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy~=1.2"],
-    "pandas.XMLDataSet": [PANDAS, "lxml~=4.6.0"],
+    "pandas.XMLDataSet": [PANDAS, "lxml~=4.6"],
 }
 pillow_require = {"pillow.ImageDataSet": ["Pillow~=8.0"]}
 plotly_require = {"plotly.PlotlyDataSet": [PANDAS, "plotly~=4.14"]}

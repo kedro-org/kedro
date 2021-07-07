@@ -27,11 +27,9 @@
 # limitations under the License.
 
 from pathlib import Path, PurePosixPath
-from time import sleep
 
 import pandas as pd
 import pytest
-from adlfs import AzureBlobFileSystem
 from fsspec.implementations.http import HTTPFileSystem
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
@@ -40,7 +38,7 @@ from s3fs.core import S3FileSystem
 
 from kedro.extras.datasets.pandas import XMLDataSet
 from kedro.io import DataSetError
-from kedro.io.core import PROTOCOL_DELIMITER, Version, generate_timestamp
+from kedro.io.core import PROTOCOL_DELIMITER, Version
 
 
 @pytest.fixture
@@ -51,7 +49,10 @@ def filepath_xml(tmp_path):
 @pytest.fixture
 def xml_data_set(filepath_xml, load_args, save_args, fs_args):
     return XMLDataSet(
-        filepath=filepath_xml, load_args=load_args, save_args=save_args, fs_args=fs_args
+        filepath=filepath_xml,
+        load_args=load_args,
+        save_args=save_args,
+        fs_args=fs_args,
     )
 
 
@@ -106,7 +107,7 @@ class TestXMLDataSet:
         ],
     )
     def test_storage_options_dropped(self, load_args, save_args, caplog, tmp_path):
-        filepath = str(tmp_path / "test.xml")
+        filepath = str(tmp_path / "test.csv")
 
         ds = XMLDataSet(filepath=filepath, load_args=load_args, save_args=save_args)
 
@@ -126,22 +127,21 @@ class TestXMLDataSet:
             xml_data_set.load()
 
     @pytest.mark.parametrize(
-        "filepath,instance_type,credentials",
+        "filepath,instance_type,load_path",
         [
-            ("s3://bucket/file.xml", S3FileSystem, {}),
-            ("file:///tmp/test.xml", LocalFileSystem, {}),
-            ("/tmp/test.xml", LocalFileSystem, {}),
-            ("gcs://bucket/file.xml", GCSFileSystem, {}),
-            ("https://example.com/file.xml", HTTPFileSystem, {}),
+            ("s3://bucket/file.xml", S3FileSystem, "s3://bucket/file.xml"),
+            ("file:///tmp/test.xml", LocalFileSystem, "/tmp/test.xml"),
+            ("/tmp/test.xml", LocalFileSystem, "/tmp/test.xml"),
+            ("gcs://bucket/file.xml", GCSFileSystem, "gcs://bucket/file.xml"),
             (
-                "abfs://bucket/file.xml",
-                AzureBlobFileSystem,
-                {"account_name": "test", "account_key": "test"},
+                "https://example.com/file.xml",
+                HTTPFileSystem,
+                "https://example.com/file.xml",
             ),
         ],
     )
-    def test_protocol_usage(self, filepath, instance_type, credentials):
-        data_set = XMLDataSet(filepath=filepath, credentials=credentials)
+    def test_protocol_usage(self, filepath, instance_type, load_path, mocker):
+        data_set = XMLDataSet(filepath=filepath)
         assert isinstance(data_set._fs, instance_type)
 
         path = filepath.split(PROTOCOL_DELIMITER, 1)[-1]
@@ -149,14 +149,17 @@ class TestXMLDataSet:
         assert str(data_set._filepath) == path
         assert isinstance(data_set._filepath, PurePosixPath)
 
+        mock_pandas_call = mocker.patch("pandas.read_xml")
+        data_set.load()
+        assert mock_pandas_call.call_count == 1
+        assert mock_pandas_call.call_args_list[0][0][0] == load_path
+
     def test_catalog_release(self, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.xml"
         data_set = XMLDataSet(filepath=filepath)
-        assert data_set._version_cache.currsize == 0  # no cache if unversioned
         data_set.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
-        assert data_set._version_cache.currsize == 0
 
 
 class TestXMLDataSetVersioned:
@@ -178,9 +181,13 @@ class TestXMLDataSetVersioned:
         assert "XMLDataSet" in str(ds)
         assert "protocol" in str(ds_versioned)
         assert "protocol" in str(ds)
-        # Default save_args
+        assert "writer_args" in str(ds_versioned)
+        assert "writer_args" in str(ds)
+        # Default save_args and load_args
         assert "save_args={'index': False}" in str(ds)
         assert "save_args={'index': False}" in str(ds_versioned)
+        assert "load_args={'engine': openpyxl}" in str(ds_versioned)
+        assert "load_args={'engine': openpyxl}" in str(ds)
 
     def test_save_and_load(self, versioned_xml_data_set, dummy_dataframe):
         """Test that saved and reloaded data matches the original one for
@@ -189,80 +196,25 @@ class TestXMLDataSetVersioned:
         reloaded_df = versioned_xml_data_set.load()
         assert_frame_equal(dummy_dataframe, reloaded_df)
 
-    def test_multiple_loads(
-        self, versioned_xml_data_set, dummy_dataframe, filepath_xml
-    ):
-        """Test that if a new version is created mid-run, by an
-        external system, it won't be loaded in the current run."""
-        versioned_xml_data_set.save(dummy_dataframe)
-        versioned_xml_data_set.load()
-        v1 = versioned_xml_data_set.resolve_load_version()
-
-        sleep(0.5)
-        # force-drop a newer version into the same location
-        v_new = generate_timestamp()
-        XMLDataSet(filepath=filepath_xml, version=Version(v_new, v_new)).save(
-            dummy_dataframe
-        )
-
-        versioned_xml_data_set.load()
-        v2 = versioned_xml_data_set.resolve_load_version()
-
-        assert v2 == v1  # v2 should not be v_new!
-        ds_new = XMLDataSet(filepath=filepath_xml, version=Version(None, None))
-        assert (
-            ds_new.resolve_load_version() == v_new
-        )  # new version is discoverable by a new instance
-
-    def test_multiple_saves(self, dummy_dataframe, filepath_xml):
-        """Test multiple cycles of save followed by load for the same dataset"""
-        ds_versioned = XMLDataSet(filepath=filepath_xml, version=Version(None, None))
-
-        # first save
-        ds_versioned.save(dummy_dataframe)
-        first_save_version = ds_versioned.resolve_save_version()
-        first_load_version = ds_versioned.resolve_load_version()
-        assert first_load_version == first_save_version
-
-        # second save
-        sleep(0.5)
-        ds_versioned.save(dummy_dataframe)
-        second_save_version = ds_versioned.resolve_save_version()
-        second_load_version = ds_versioned.resolve_load_version()
-        assert second_load_version == second_save_version
-        assert second_load_version > first_load_version
-
-        # another dataset
-        ds_new = XMLDataSet(filepath=filepath_xml, version=Version(None, None))
-        assert ds_new.resolve_load_version() == second_load_version
-
-    def test_release_instance_cache(self, dummy_dataframe, filepath_xml):
-        """Test that cache invalidation does not affect other instances"""
-        ds_a = XMLDataSet(filepath=filepath_xml, version=Version(None, None))
-        assert ds_a._version_cache.currsize == 0
-        ds_a.save(dummy_dataframe)  # create a version
-        assert ds_a._version_cache.currsize == 2
-
-        ds_b = XMLDataSet(filepath=filepath_xml, version=Version(None, None))
-        assert ds_b._version_cache.currsize == 0
-        ds_b.resolve_save_version()
-        assert ds_b._version_cache.currsize == 1
-        ds_b.resolve_load_version()
-        assert ds_b._version_cache.currsize == 2
-
-        ds_a.release()
-
-        # dataset A cache is cleared
-        assert ds_a._version_cache.currsize == 0
-
-        # dataset B cache is unaffected
-        assert ds_b._version_cache.currsize == 2
-
     def test_no_versions(self, versioned_xml_data_set):
         """Check the error if no versions are available for load."""
         pattern = r"Did not find any versions for XMLDataSet\(.+\)"
         with pytest.raises(DataSetError, match=pattern):
             versioned_xml_data_set.load()
+
+    def test_versioning_not_supported_in_append_mode(
+        self, tmp_path, load_version, save_version
+    ):
+        filepath = str(tmp_path / "test.xml")
+        save_args = {"writer": {"mode": "a"}}
+
+        pattern = "`XMLDataSet` doesn't support versioning in append mode."
+        with pytest.raises(DataSetError, match=pattern):
+            XMLDataSet(
+                filepath=filepath,
+                version=Version(load_version, save_version),
+                save_args=save_args,
+            )
 
     def test_exists(self, versioned_xml_data_set, dummy_dataframe):
         """Test `exists` method invocation for versioned data set."""

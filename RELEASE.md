@@ -7,6 +7,11 @@
 * Added new API `Pipeline.filter()` (previously in `KedroContext._filter_pipeline()`) to filter parts of a pipeline.
 * Added `partitionBy` support and exposed `save_args` for `SparkHiveDataSet`.
 * Exposed `open_args_save` in `fs_args` for `pandas.ParquetDataSet`.
+* Bumped the minimum version of `pandas` to 1.2. Any `storage_options` should continue to be specified under `fs_args` and/or `credentials`.
+* Refactored the `load` and `save` operations for `pandas` datasets in order to leverage `pandas` own API and delegate `fsspec` operations to them. This reduces the need to have our own `fsspec` wrappers.
+* Removed `cli.py` from the Kedro project template. By default, all CLI commands, including `kedro run`, are now defined on the Kedro framework side. These can be overridden in turn by a plugin or a `cli.py` file in your project. A packaged Kedro project will respect the same hierarchy when executed with `python -m my_package`.
+* Merged `pandas.AppendableExcelDataSet` into `pandas.ExcelDataSet`.
+* Added `save_args` to `feather.FeatherDataSet`.
 
 ## Breaking changes to the API
 * Add namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/quantumblacklabs/kedro/issues/399).
@@ -22,6 +27,18 @@
 * Removed `--version` CLI option for `kedro pipeline package` command. Specific pipeline package version can be added by setting the `__version__` variable in the pipeline package's `__init__.py` file.
 * The `kedro package` and `kedro pipeline package` now save `egg` and `whl` files in the `<project_root>/dist` folder (previously `<project_root>/src/dist`).
 * Removed `kedro pipeline list` and `kedro pipeline describe` commands in favour of `kedro registry list` and `kedro registry describe`.
+* Removed `open_args_load` and `open_args_save` from the following datasets:
+  * pandas.CSVDataSet
+  * pandas.ExcelDataSet
+  * pandas.FeatherDataSet
+  * pandas.JSONDataSet
+  * pandas.ParquetDataSet
+* `storage_options` are now dropped if they are specified under `load_args` or `save_args` for the following datasets:
+  * pandas.CSVDataSet
+  * pandas.ExcelDataSet
+  * pandas.FeatherDataSet
+  * pandas.JSONDataSet
+  * pandas.ParquetDataSet
 
 ## Migration guide from Kedro 0.17.* to 0.18.*
 * Please remove any existing `hook_impl` of the `register_config_loader` method from `ProjectHooks` (or custom alternatives).
@@ -32,11 +49,14 @@
 * If you're using `pandas.ParquetDataSet`, please pass pandas saving arguments directly to `save_args` instead of nested in `from_pandas` (e.g. `save_args = {"preserve_index": False}` instead of `save_args = {"from_pandas": {"preserve_index": False}}`).
 * If you're using `spark.SparkHiveDataSet` with `write_mode` option set to `insert`, please update this to `append` in line with the Spark styleguide. If you're using `spark.SparkHiveDataSet` with `write_mode` option set to `upsert`, please make sure that your `SparkContext` has a valid `checkpointDir` set either by `SparkContext.setCheckpointDir` method or directly in the `conf` folder.
 * Edit any scripts containing `kedro pipeline package --version` to remove the `--version` option. If you wish to set a specific pipeline package version, set the `__version__` variable in the pipeline package's `__init__.py` file.
+* If you had any `pandas.AppendableExcelDataSet` entries in your catalog, replace them with `pandas.ExcelDataSet`.
+* If you were using `pandas~=1.2.0` and passing `storage_options` through `load_args` or `savs_args`, please specify them under `fs_args` or via `credentials` instead.
 
 # Upcoming Release 0.17.5
 
 ## Major features and improvements
 * Added new CLI group `registry`, with the associated commands `kedro registry list` and `kedro registry describe`, to replace `kedro pipeline list` and `kedro pipeline describe`.
+* Added support for dependency management at a modular pipeline level. When a pipeline with `requirements.txt` is packaged, its dependencies are embedded in the modular pipeline wheel file. Upon pulling the pipeline, Kedro will append dependencies to the project's `requirements.in`. More information is available in [our documentation](https://kedro.readthedocs.io/en/stable/06_nodes_and_pipelines/03_modular_pipelines.html#package-a-modular-pipeline).
 
 ## Bug fixes and other changes
 

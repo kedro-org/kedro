@@ -13,7 +13,7 @@ geopandas>=0.6.0, <1.0
 hdfs>=2.5.8, <3.0
 holoviews~=1.13.0
 import-linter==1.0
-ipython==7.10  # Due to https://github.com/ipython/ipykernel/issues/540, should be fixed once ipykernel==6.0 is released
+ipython~=7.10
 joblib>=0.14
 matplotlib>=3.0.3, <3.4  # 3.4.0 breaks holoviews
 memory_profiler>=0.50.0, <1.0
@@ -24,7 +24,7 @@ nbformat~=4.4
 networkx~=2.4
 openpyxl>=3.0.3, <4.0
 pandas-gbq>=0.12.0, <1.0
-pandas~=1.0
+pandas~=1.2
 Pillow~=8.0
 plotly~=4.14
 pre-commit~=1.17

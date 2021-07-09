@@ -32,7 +32,7 @@ from time import sleep
 
 import pytest
 
-import kedro.extras.decorators.memory_profiler as memory_profiler
+from kedro.extras.decorators import memory_profiler
 
 
 def sleeping_identity(inp):

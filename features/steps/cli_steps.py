@@ -32,6 +32,7 @@ import itertools
 import json
 import shlex
 import shutil
+import sys
 from pathlib import Path
 from time import time
 
@@ -41,8 +42,8 @@ import toml
 import yaml
 from behave import given, then, when
 
-import features.steps.util as util
 import kedro
+from features.steps import util
 from features.steps.sh_run import ChildTerminatingPopen, check_run, run
 
 OK_EXIT_CODE = 0
@@ -546,7 +547,14 @@ def check_one_node_run(context, number):
 @then('the console log should show that "{node}" was run')
 def check_correct_nodes_run(context, node):
     expected_log_line = f"Running node: {node}"
-    assert expected_log_line in context.result.stdout
+    stdout = context.result.stdout
+    if sys.platform.startswith("win"):
+        assert "Pipeline execution completed successfully." in stdout
+    else:
+        assert expected_log_line in stdout, (
+            "Expected the following message segment to be printed on stdout: "
+            f"{expected_log_line},\nbut got {stdout}"
+        )
 
 
 @then("I should get a successful exit code")

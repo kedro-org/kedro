@@ -38,7 +38,7 @@ name = "kedro"
 here = path.abspath(path.dirname(__file__))
 
 
-PANDAS = "pandas~=1.0"
+PANDAS = "pandas~=1.2"  # in 1.1 pandas started using fsspec, in 1.2 they fixed a lot of bugs
 SPARK = "pyspark>=2.2, <4.0"
 HDFS = "hdfs>=2.5.8, <3.0"
 S3FS = "s3fs>=0.3.0, <0.5"
@@ -96,7 +96,6 @@ networkx_require = {"networkx.NetworkXDataSet": ["networkx~=2.4"]}
 pandas_require = {
     "pandas.CSVDataSet": [PANDAS],
     "pandas.ExcelDataSet": [PANDAS, "openpyxl>=3.0.6, <4.0"],
-    "pandas.AppendableExcelDataSet": [PANDAS, "openpyxl>=3.0.3, <4.0"],
     "pandas.FeatherDataSet": [PANDAS],
     "pandas.GBQTableDataSet": [PANDAS, "pandas-gbq>=0.12.0, <1.0"],
     "pandas.HDFDataSet": [PANDAS, "tables~=3.6"],
@@ -133,7 +132,7 @@ extras_require = {
         "recommonmark==0.7.1",
         "sphinx-autodoc-typehints==1.11.1",
         "sphinx_copybutton==0.3.1",
-        "ipykernel~=5.3",
+        "ipykernel>=5.3, <7.0",
     ],
     "geopandas": _collect_requirements(geopandas_require),
     "ipython": ["ipython==7.10"],

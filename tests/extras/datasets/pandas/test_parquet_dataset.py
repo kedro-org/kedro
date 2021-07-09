@@ -89,7 +89,6 @@ class TestParquetDataSet:
         data_set.save(dummy_dataframe)
         reloaded = data_set.load()
         assert_frame_equal(dummy_dataframe, reloaded)
-        assert data_set._fs_open_args_load == {}
 
         files = [child.is_file() for child in tmp_path.iterdir()]
         assert all(files)
@@ -127,12 +126,26 @@ class TestParquetDataSet:
             assert parquet_data_set._save_args[key] == value
 
     @pytest.mark.parametrize(
-        "fs_args",
-        [{"open_args_load": {"mode": "r", "compression": "gzip"}}],
-        indirect=True,
+        "load_args,save_args",
+        [
+            ({"storage_options": {"a": "b"}}, {}),
+            ({}, {"storage_options": {"a": "b"}}),
+            ({"storage_options": {"a": "b"}}, {"storage_options": {"x": "y"}}),
+        ],
     )
-    def test_open_extra_args(self, parquet_data_set, fs_args):
-        assert parquet_data_set._fs_open_args_load == fs_args["open_args_load"]
+    def test_storage_options_dropped(self, load_args, save_args, caplog, tmp_path):
+        filepath = str(tmp_path / "test.csv")
+
+        ds = ParquetDataSet(filepath=filepath, load_args=load_args, save_args=save_args)
+
+        records = [r for r in caplog.records if r.levelname == "WARNING"]
+        expected_log_message = (
+            f"Dropping `storage_options` for {filepath}, "
+            f"please specify them under `fs_args` or `credentials`."
+        )
+        assert records[0].getMessage() == expected_log_message
+        assert "storage_options" not in ds._save_args
+        assert "storage_options" not in ds._load_args
 
     def test_load_missing_file(self, parquet_data_set):
         """Check the error when trying to load missing file."""
@@ -141,16 +154,20 @@ class TestParquetDataSet:
             parquet_data_set.load()
 
     @pytest.mark.parametrize(
-        "filepath,instance_type",
+        "filepath,instance_type,load_path",
         [
-            ("s3://bucket/file.parquet", S3FileSystem),
-            ("file:///tmp/test.parquet", LocalFileSystem),
-            ("/tmp/test.parquet", LocalFileSystem),
-            ("gcs://bucket/file.parquet", GCSFileSystem),
-            ("https://example.com/file.parquet", HTTPFileSystem),
+            ("s3://bucket/file.parquet", S3FileSystem, "s3://bucket/file.parquet"),
+            ("file:///tmp/test.parquet", LocalFileSystem, "/tmp/test.parquet"),
+            ("/tmp/test.parquet", LocalFileSystem, "/tmp/test.parquet"),
+            ("gcs://bucket/file.parquet", GCSFileSystem, "gcs://bucket/file.parquet"),
+            (
+                "https://example.com/file.parquet",
+                HTTPFileSystem,
+                "https://example.com/file.parquet",
+            ),
         ],
     )
-    def test_protocol_usage(self, filepath, instance_type):
+    def test_protocol_usage(self, filepath, instance_type, load_path, mocker):
         data_set = ParquetDataSet(filepath=filepath)
         assert isinstance(data_set._fs, instance_type)
 
@@ -158,6 +175,12 @@ class TestParquetDataSet:
 
         assert str(data_set._filepath) == path
         assert isinstance(data_set._filepath, PurePosixPath)
+
+        mocker.patch.object(data_set._fs, "isdir", return_value=False)
+        mock_pandas_call = mocker.patch("pandas.read_parquet")
+        data_set.load()
+        assert mock_pandas_call.call_count == 1
+        assert mock_pandas_call.call_args_list[0][0][0] == load_path
 
     @pytest.mark.parametrize(
         "protocol,path", [("https://", "example.com/"), ("s3://", "bucket/")]
@@ -218,7 +241,6 @@ class TestParquetDataSet:
 
         data_set.load()
         fs_mock.isdir.assert_called_once()
-        fs_mock.open.assert_called_once()
 
     def test_arg_partition_cols(self, dummy_dataframe, tmp_path):
         data_set = ParquetDataSet(

@@ -150,7 +150,7 @@ kedro docs
 
 Kedro's command line interface (CLI) allows you to associate a set of commands and dependencies with a target, which you can then execute from inside the project directory.
 
-The commands a project supports are specified in its `cli.py` file, which can be extended, either by modifying the file or by injecting commands into it via the [`plugin` framework](../07_extend_kedro/04_plugins.md).
+The commands a project supports are specified on the framework side. If you want to customise any of the Kedro commands you can do this either by adding a file called `cli.py` or by injecting commands into it via the [`plugin` framework](../07_extend_kedro/04_plugins.md). Find the template for the `cli.py` file [here](../07_extend_kedro/01_common_use_cases.md#use-case-3-how-to-add-or-modify-cli-commands).
 
 ### Project setup
 
@@ -275,7 +275,7 @@ The `build-docs` command builds [project documentation](../03_tutorial/05_packag
 kedro lint
 ```
 
-Your project is linted with [`black`](https://github.com/psf/black), [`flake8`](https://gitlab.com/pycqa/flake8) and [`isort`](https://github.com/PyCQA/isort). See our [documentation about `kedro lint`](../09_development/04_lint.md#linting-your-kedro-project) for further details.
+Your project is linted with [`black`](https://github.com/psf/black), [`flake8`](https://gitlab.com/pycqa/flake8) and [`isort`](https://github.com/PyCQA/isort).
 
 
 #### Test your project

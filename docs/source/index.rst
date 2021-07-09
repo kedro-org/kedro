@@ -137,8 +137,7 @@ Welcome to Kedro's documentation!
    09_development/01_set_up_vscode
    09_development/02_set_up_pycharm
    09_development/03_commands_reference
-   09_development/04_lint
-   09_development/05_debugging
+   09_development/04_debugging
 
 .. toctree::
    :maxdepth: 2

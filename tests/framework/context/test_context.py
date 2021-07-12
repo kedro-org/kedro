@@ -311,19 +311,19 @@ def clear_hook_manager():
 
 
 class TestKedroContext:
-    def test_deprecate_reading_conf_root_from_context(self, dummy_context):
+    def test_deprecate_reading_conf_source_from_context(self, dummy_context):
         pattern = (
-            "Accessing CONF_ROOT via the context will be deprecated in Kedro 0.18.0."
+            "Accessing CONF_SOURCE via the context will be deprecated in Kedro 0.18.0."
         )
         with pytest.warns(DeprecationWarning, match=pattern):
-            assert dummy_context.CONF_ROOT == "conf"
+            assert dummy_context.CONF_SOURCE == "conf"
 
-    def test_deprecate_setting_conf_root_on_context(self, dummy_context):
+    def test_deprecate_setting_conf_source_on_context(self, dummy_context):
         pattern = (
-            "Accessing CONF_ROOT via the context will be deprecated in Kedro 0.18.0."
+            "Accessing CONF_SOURCE via the context will be deprecated in Kedro 0.18.0."
         )
         with pytest.warns(DeprecationWarning, match=pattern):
-            dummy_context.CONF_ROOT = "test_conf"
+            dummy_context.CONF_SOURCE = "test_conf"
 
     @pytest.mark.parametrize("property_name", ["io", "pipeline", "pipelines"])
     def test_deprecate_properties_on_context(self, property_name, dummy_context):
@@ -425,7 +425,12 @@ class TestKedroContext:
             _ = dummy_context.config_loader
 
     def test_default_env(self, dummy_context):
-        assert dummy_context.env == "local"
+        # default environment setting is delegated to config_loader,
+        # rather than `KedroContext`
+        assert not dummy_context.env
+        assert not dummy_context.config_loader.env
+        assert dummy_context.config_loader.default_run_env == "local"
+        assert dummy_context.config_loader.base_env == "base"
 
     @pytest.mark.parametrize("env", ["custom_env"], indirect=True)
     def test_custom_env(self, dummy_context, env):

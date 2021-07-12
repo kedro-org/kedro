@@ -31,7 +31,7 @@ import functools
 import logging
 from copy import deepcopy
 from pathlib import Path, PurePosixPath, PureWindowsPath
-from typing import Any, Dict, Iterable, Union
+from typing import Any, Dict, Iterable, Optional, Union
 from urllib.parse import urlparse
 from warnings import warn
 
@@ -197,8 +197,8 @@ class KedroContext:
     Kedro's main functionality.
     """
 
-    _CONF_ROOT = "conf"
-    """CONF_ROOT: Name of root directory containing project configuration.
+    _CONF_SOURCE = "conf"
+    """CONF_SOURCE: Name of root directory containing project configuration.
     Default name is "conf"."""
 
     def __init__(
@@ -229,32 +229,32 @@ class KedroContext:
         self._project_path = Path(project_path).expanduser().resolve()
         self._package_name = package_name
 
-        self._env = env or "local"
+        self._env = env
         self._extra_params = deepcopy(extra_params)
 
     @property  # type: ignore
     @_deprecate(version="0.18.0")
-    def CONF_ROOT(self) -> str:  # pylint: disable=invalid-name
-        """Deprecated in favour of settings.CONF_ROOT
+    def CONF_SOURCE(self) -> str:  # pylint: disable=invalid-name
+        """Deprecated in favour of settings.CONF_SOURCE
 
         Returns:
             The root directory of the configuration directory of the project.
         Raises:
             DeprecationWarning
         """
-        return self._CONF_ROOT
+        return self._CONF_SOURCE
 
-    @CONF_ROOT.setter  # type: ignore
+    @CONF_SOURCE.setter  # type: ignore
     @_deprecate(version="0.18.0")
-    def CONF_ROOT(self, value: str) -> None:  # pylint: disable=invalid-name
-        """Deprecated in favour of settings.CONF_ROOT
+    def CONF_SOURCE(self, value: str) -> None:  # pylint: disable=invalid-name
+        """Deprecated in favour of settings.CONF_SOURCE
         Raises:
             DeprecationWarning
         """
-        self._CONF_ROOT = value  # pylint: disable=invalid-name
+        self._CONF_SOURCE = value  # pylint: disable=invalid-name
 
     @property  # type: ignore
-    def env(self) -> str:
+    def env(self) -> Optional[str]:
         """Property for the current Kedro environment.
 
         Returns:
@@ -425,11 +425,12 @@ class KedroContext:
         """
         try:
             return settings.CONFIG_LOADER_CLASS(
-                conf_root=str(self.project_path / settings.CONF_ROOT),
+                conf_source=str(self.project_path / settings.CONF_SOURCE),
                 env=self.env,
                 extra_params=self._extra_params,
                 **settings.CONFIG_LOADER_ARGS,
             )
+
         except TypeError as exc:
             raise KedroContextError(
                 f"Expected an instance of `ConfigLoader`, "

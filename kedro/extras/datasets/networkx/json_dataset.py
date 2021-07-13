@@ -27,7 +27,7 @@
 # limitations under the License.
 
 
-"""``NetworkXDataSet`` loads and saves graphs to a JSON file using an underlying
+"""NetworkX ``JsonDataSet`` loads and saves graphs to a JSON file using an underlying
 filesystem (e.g.: local, S3, GCS). ``NetworkX`` is used to create JSON data.
 """
 
@@ -47,8 +47,8 @@ from kedro.io.core import (
 )
 
 
-class NetworkXDataSet(AbstractVersionedDataSet):
-    """``NetworkXDataSet`` loads and saves graphs to a JSON file using an
+class JsonDataSet(AbstractVersionedDataSet):
+    """``JsonDataSet`` loads and saves graphs to a JSON file using an
     underlying filesystem (e.g.: local, S3, GCS). ``NetworkX`` is used to
     create JSON data.
     See https://networkx.org/documentation/stable/tutorial.html for details.
@@ -56,10 +56,10 @@ class NetworkXDataSet(AbstractVersionedDataSet):
     Example:
     ::
 
-        >>> from kedro.extras.datasets.networkx import NetworkXDataSet
+        >>> from kedro.extras.datasets.networkx import JsonDataSet
         >>> import networkx as nx
         >>> graph = nx.complete_graph(100)
-        >>> graph_dataset = NetworkXDataSet(filepath="test.json")
+        >>> graph_dataset = JsonDataSet(filepath="test.json")
         >>> graph_dataset.save(graph)
         >>> reloaded = graph_dataset.load()
         >>> assert nx.is_isomorphic(graph, reloaded)
@@ -79,7 +79,7 @@ class NetworkXDataSet(AbstractVersionedDataSet):
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``NetworkXDataSet``.
+        """Creates a new instance of ``JsonDataSet``.
 
         Args:
             filepath: Filepath in POSIX format to the NetworkX graph JSON file.
@@ -157,13 +157,13 @@ class NetworkXDataSet(AbstractVersionedDataSet):
         return self._fs.exists(load_path)
 
     def _describe(self) -> Dict[str, Any]:
-        return dict(
-            filepath=self._filepath,
-            protocol=self._protocol,
-            load_args=self._load_args,
-            save_args=self._save_args,
-            version=self._version,
-        )
+        return {
+            "filepath": self._filepath,
+            "protocol": self._protocol,
+            "load_args": self._load_args,
+            "save_args": self._save_args,
+            "version": self._version,
+        }
 
     def _release(self) -> None:
         super()._release()

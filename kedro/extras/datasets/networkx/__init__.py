@@ -26,12 +26,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``AbstractDataSet`` implementation to save and load NetworkX graphs in JSON
-format using ``NetworkX``."""
+"""``AbstractDataSet`` implementation to save and load NetworkX graphs in JSON,
+GML and GPickle formats using ``NetworkX``."""
 
-__all__ = ["NetworkXDataSet"]
+__all__ = ["JsonDataSet", "GPickleDataSet", "GMLDataSet"]
 
 from contextlib import suppress
 
 with suppress(ImportError):
-    from .networkx_dataset import NetworkXDataSet  # NOQA
+    from .json_dataset import JsonDataSet  # NOQA
+
+with suppress(ImportError):
+    from .gpickle_dataset import GPickleDataSet  # NOQA
+
+with suppress(ImportError):
+    from .gml_dataset import GMLDataSet  # NOQA

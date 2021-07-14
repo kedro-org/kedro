@@ -65,7 +65,7 @@ class MatplotlibWriter(AbstractVersionedDataSet):
         >>> plt.close()
         >>> single_plot_writer.save(plt)
         >>>
-        >>> # MatplotlibWriter can output other formats as well, such as PDF files. 
+        >>> # MatplotlibWriter can output other formats as well, such as PDF files.
         >>> # For this, we need to specify the format:
         >>> plt.plot([1, 2, 3], [4, 5, 6])
         >>> single_plot_writer = MatplotlibWriter(

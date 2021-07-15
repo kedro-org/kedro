@@ -56,7 +56,7 @@ def cleanup_pipelines(fake_repo_path, fake_package_path):
     for pipeline in created_pipelines:
         shutil.rmtree(str(pipes_path / pipeline))
 
-        confs = fake_repo_path / settings.CONF_ROOT
+        confs = fake_repo_path / settings.CONF_SOURCE
         for each in confs.rglob(f"*{pipeline}*"):  # clean all pipeline config files
             if each.is_file():
                 each.unlink()

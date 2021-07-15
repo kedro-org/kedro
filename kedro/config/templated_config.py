@@ -115,17 +115,18 @@ class TemplatedConfigLoader(ConfigLoader):
 
     def __init__(
         self,
-        conf_root: str,
+        conf_source: str,
         env: str = None,
         extra_params: Dict[str, Any] = None,
         *,
         globals_pattern: Optional[str] = None,
-        globals_dict: Optional[Dict[str, Any]] = None
+        globals_dict: Optional[Dict[str, Any]] = None,
+        **kwargs,
     ):
         """Instantiates a ``TemplatedConfigLoader``.
 
         Args:
-            conf_root: Path to use as root directory for loading configuration.
+            conf_source: Path to use as root directory for loading configuration.
             env: Environment that will take precedence over base.
             extra_params: Extra parameters passed to a Kedro run.
             globals_pattern: Optional keyword-only argument specifying a glob
@@ -136,7 +137,7 @@ class TemplatedConfigLoader(ConfigLoader):
                 obtained from the globals_pattern. In case of duplicate keys, the
                 ``globals_dict`` keys take precedence.
         """
-        super().__init__(conf_root, env, extra_params)
+        super().__init__(conf_source, env, extra_params, **kwargs)
 
         self._arg_dict = super().get(globals_pattern) if globals_pattern else {}
         globals_dict = deepcopy(globals_dict) or {}

@@ -60,14 +60,14 @@ class BadConfigException(Exception):
 
 
 class ConfigLoader:
-    """Recursively scan directories (config paths) contained in ``conf_root`` for
+    """Recursively scan directories (config paths) contained in ``conf_source`` for
     configuration files with a ``yaml``, ``yml``, ``json``, ``ini``,
     ``pickle``, ``xml`` or ``properties`` extension, load them,
     and return them in the form of a config dictionary.
 
     The first processed config path is the ``base`` directory inside
-    ``conf_root``. The optional ``env`` argument can be used to specify a
-    subdirectory of ``conf_root`` to process as a config path after ``base``.
+    ``conf_source``. The optional ``env`` argument can be used to specify a
+    subdirectory of ``conf_source`` to process as a config path after ``base``.
 
     When the same top-level key appears in any 2 config files located in
     the same (sub)directory, a ``ValueError`` is raised.
@@ -76,7 +76,7 @@ class ConfigLoader:
     (sub)directories, the last processed config path takes precedence
     and overrides this key.
 
-    For example, if your ``conf_root`` looks like this:
+    For example, if your ``conf_source`` looks like this:
     ::
 
         .
@@ -114,27 +114,37 @@ class ConfigLoader:
     """
 
     def __init__(
-        self, conf_root: str, env: str = None, extra_params: Dict[str, Any] = None
+        self,
+        conf_source: str,
+        env: str = None,
+        extra_params: Dict[str, Any] = None,
+        **kwargs,
     ):
         """Instantiates a ``ConfigLoader``.
 
         Args:
-            conf_root: Path to use as root directory for loading configuration.
+            conf_source: Path to use as root directory for loading configuration.
             env: Environment that will take precedence over base.
             extra_params: Extra parameters passed to a Kedro run.
         """
-        self.conf_paths = _remove_duplicates(
-            self._build_conf_paths(Path(conf_root), env)
-        )
+        self.conf_source = conf_source
+        self.env = env
         self.logger = logging.getLogger(__name__)
         self.extra_params = extra_params
+        self.base_env = kwargs.get("base_env") or "base"
+        self.default_run_env = kwargs.get("default_run_env") or "local"
 
-    @staticmethod
-    def _build_conf_paths(conf_root: Path, env: str = None) -> List[str]:
-        """Builds list of paths to use for configuration."""
-        if not env:
-            return [str(conf_root / "base")]
-        return [str(conf_root / "base"), str(conf_root / env)]
+    @property
+    def conf_paths(self):
+        """Property method to return deduplicated configuration paths."""
+        return _remove_duplicates(self._build_conf_paths())
+
+    def _build_conf_paths(self) -> Iterable[str]:
+        run_env = self.env or self.default_run_env
+        return [
+            str(Path(self.conf_source) / self.base_env),
+            str(Path(self.conf_source) / run_env),
+        ]
 
     @staticmethod
     def _load_config_file(config_file: Path) -> Dict[str, Any]:

@@ -131,8 +131,8 @@ def create_pipeline(
 ):  # pylint: disable=unused-argument
     """Create a new modular pipeline by providing a name."""
     package_dir = metadata.source_dir / metadata.package_name
-    conf_root = settings.CONF_ROOT
-    project_conf_path = metadata.project_path / conf_root
+    conf_source = settings.CONF_SOURCE
+    project_conf_path = metadata.project_path / conf_source
 
     env = env or "base"
     if not skip_config and not (project_conf_path / env).exists():
@@ -167,8 +167,8 @@ def delete_pipeline(
 ):  # pylint: disable=unused-argument
     """Delete a modular pipeline by providing a name."""
     package_dir = metadata.source_dir / metadata.package_name
-    conf_root = settings.CONF_ROOT
-    project_conf_path = metadata.project_path / conf_root
+    conf_source = settings.CONF_SOURCE
+    project_conf_path = metadata.project_path / conf_source
 
     env = env or "base"
     if not (project_conf_path / env).exists():
@@ -674,8 +674,8 @@ def _get_pipeline_artifacts(
 ) -> PipelineArtifacts:
     """From existing project, returns in order: source_path, tests_path, config_paths"""
     package_dir = project_metadata.source_dir / project_metadata.package_name
-    conf_root = settings.CONF_ROOT
-    project_conf_path = project_metadata.project_path / conf_root
+    conf_source = settings.CONF_SOURCE
+    project_conf_path = project_metadata.project_path / conf_source
     artifacts = PipelineArtifacts(
         package_dir / "pipelines" / pipeline_name,
         package_dir.parent / "tests" / "pipelines" / pipeline_name,

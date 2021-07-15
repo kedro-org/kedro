@@ -93,7 +93,7 @@ class TestPipelinePullCommand:
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
         config_path = (
-            fake_repo_path / settings.CONF_ROOT / "base" / "pipelines" / PIPELINE_NAME
+            fake_repo_path / settings.CONF_SOURCE / "base" / "pipelines" / PIPELINE_NAME
         )
         test_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
         # Make sure the files actually deleted before pulling from the wheel file.
@@ -121,7 +121,7 @@ class TestPipelinePullCommand:
         config_env = env or "base"
         params_config = (
             fake_repo_path
-            / settings.CONF_ROOT
+            / settings.CONF_SOURCE
             / config_env
             / "parameters"
             / f"{pipeline_name}.yml"
@@ -157,7 +157,7 @@ class TestPipelinePullCommand:
         test_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
         source_params_config = (
             fake_repo_path
-            / settings.CONF_ROOT
+            / settings.CONF_SOURCE
             / "base"
             / "parameters"
             / f"{PIPELINE_NAME}.yml"
@@ -183,7 +183,7 @@ class TestPipelinePullCommand:
         config_env = env or "base"
         dest_params_config = (
             fake_repo_path
-            / settings.CONF_ROOT
+            / settings.CONF_SOURCE
             / config_env
             / "parameters"
             / f"{pipeline_name}.yml"
@@ -274,7 +274,7 @@ class TestPipelinePullCommand:
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
         source_params_config = (
             fake_repo_path
-            / settings.CONF_ROOT
+            / settings.CONF_SOURCE
             / "base"
             / "parameters"
             / f"{PIPELINE_NAME}.yml"
@@ -303,7 +303,7 @@ class TestPipelinePullCommand:
         config_env = env or "base"
         params_config = (
             fake_repo_path
-            / settings.CONF_ROOT
+            / settings.CONF_SOURCE
             / config_env
             / "parameters"
             / f"{pipeline_name}.yml"
@@ -332,7 +332,7 @@ class TestPipelinePullCommand:
         self.call_pipeline_create(fake_project_cli, fake_metadata)
         source_params_config = (
             fake_repo_path
-            / settings.CONF_ROOT
+            / settings.CONF_SOURCE
             / "base"
             / "parameters"
             / f"{PIPELINE_NAME}.yml"
@@ -367,7 +367,7 @@ class TestPipelinePullCommand:
         config_env = env or "base"
         dest_params_config = (
             fake_repo_path
-            / settings.CONF_ROOT
+            / settings.CONF_SOURCE
             / config_env
             / "parameters"
             / f"{pipeline_name}.yml"
@@ -410,7 +410,7 @@ class TestPipelinePullCommand:
         test_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
         source_params_config = (
             fake_repo_path
-            / settings.CONF_ROOT
+            / settings.CONF_SOURCE
             / "base"
             / "parameters"
             / f"{PIPELINE_NAME}.yml"
@@ -446,7 +446,7 @@ class TestPipelinePullCommand:
         config_env = env or "base"
         dest_params_config = (
             fake_repo_path
-            / settings.CONF_ROOT
+            / settings.CONF_SOURCE
             / config_env
             / "parameters"
             / f"{pipeline_name}.yml"

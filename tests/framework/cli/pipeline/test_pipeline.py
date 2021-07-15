@@ -47,7 +47,7 @@ PIPELINE_NAME = "my_pipeline"
 def make_pipelines(request, fake_repo_path, fake_package_path, mocker):
     source_path = fake_package_path / "pipelines" / PIPELINE_NAME
     tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
-    conf_path = fake_repo_path / settings.CONF_ROOT / request.param / "parameters"
+    conf_path = fake_repo_path / settings.CONF_SOURCE / request.param / "parameters"
 
     for path in (source_path, tests_path, conf_path):
         path.mkdir(parents=True, exist_ok=True)
@@ -102,7 +102,7 @@ class TestPipelineCreateCommand:
 
         # config
         conf_env = env or "base"
-        conf_dir = (fake_repo_path / settings.CONF_ROOT / conf_env).resolve()
+        conf_dir = (fake_repo_path / settings.CONF_SOURCE / conf_env).resolve()
         actual_configs = list(conf_dir.glob(f"**/{PIPELINE_NAME}.yml"))
         expected_configs = [conf_dir / "parameters" / f"{PIPELINE_NAME}.yml"]
         assert actual_configs == expected_configs
@@ -131,7 +131,7 @@ class TestPipelineCreateCommand:
         assert f"Creating the pipeline `{PIPELINE_NAME}`: OK" in result.output
         assert f"Pipeline `{PIPELINE_NAME}` was successfully created." in result.output
 
-        conf_dirs = list((fake_repo_path / settings.CONF_ROOT).rglob(PIPELINE_NAME))
+        conf_dirs = list((fake_repo_path / settings.CONF_SOURCE).rglob(PIPELINE_NAME))
         assert conf_dirs == []  # no configs created for the pipeline
 
         test_dir = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
@@ -150,7 +150,7 @@ class TestPipelineCreateCommand:
         assert result.exit_code == 0
 
         # write pipeline catalog
-        conf_dir = fake_repo_path / settings.CONF_ROOT / "base"
+        conf_dir = fake_repo_path / settings.CONF_SOURCE / "base"
         catalog_dict = {
             "ds_from_pipeline": {
                 "type": "pandas.CSVDataSet",
@@ -181,7 +181,7 @@ class TestPipelineCreateCommand:
         for dirname in ("catalog", "parameters"):
             path = (
                 fake_repo_path
-                / settings.CONF_ROOT
+                / settings.CONF_SOURCE
                 / "base"
                 / dirname
                 / f"{PIPELINE_NAME}.yml"
@@ -311,7 +311,7 @@ class TestPipelineDeleteCommand:
         tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
         params_path = (
             fake_repo_path
-            / settings.CONF_ROOT
+            / settings.CONF_SOURCE
             / expected_conf
             / "parameters"
             / f"{PIPELINE_NAME}.yml"
@@ -347,7 +347,7 @@ class TestPipelineDeleteCommand:
         tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
         params_path = (
             fake_repo_path
-            / settings.CONF_ROOT
+            / settings.CONF_SOURCE
             / "base"
             / "parameters"
             / f"{PIPELINE_NAME}.yml"
@@ -441,7 +441,7 @@ class TestPipelineDeleteCommand:
         tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
         params_path = (
             fake_repo_path
-            / settings.CONF_ROOT
+            / settings.CONF_SOURCE
             / "base"
             / "parameters"
             / f"{PIPELINE_NAME}.yml"
@@ -482,7 +482,7 @@ class TestPipelineDeleteCommand:
         tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
         params_path = (
             fake_repo_path
-            / settings.CONF_ROOT
+            / settings.CONF_SOURCE
             / "base"
             / "parameters"
             / f"{PIPELINE_NAME}.yml"

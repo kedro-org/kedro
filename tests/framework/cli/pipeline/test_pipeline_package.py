@@ -25,10 +25,12 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import textwrap
 from pathlib import Path
 from zipfile import ZipFile
 
 import pytest
+import toml
 from click.testing import CliRunner
 
 from kedro.framework.cli.pipeline import _get_wheel_name
@@ -48,7 +50,7 @@ class TestPipelinePackageCommand:
         wheel_name = _get_wheel_name(name=package_name, version=version)
         wheel_file = wheel_location / wheel_name
         assert wheel_file.is_file()
-        assert len(list((wheel_location).iterdir())) == 1
+        assert len(list(wheel_location.iterdir())) == 1
 
         # pylint: disable=consider-using-with
         wheel_contents = set(ZipFile(str(wheel_file)).namelist())
@@ -92,9 +94,7 @@ class TestPipelinePackageCommand:
         fake_metadata,
     ):
         result = CliRunner().invoke(
-            fake_project_cli,
-            ["pipeline", "create", PIPELINE_NAME],
-            obj=fake_metadata,
+            fake_project_cli, ["pipeline", "create", PIPELINE_NAME], obj=fake_metadata
         )
         assert result.exit_code == 0
         result = CliRunner().invoke(
@@ -122,9 +122,7 @@ class TestPipelinePackageCommand:
             destination.mkdir(parents=True)
 
         result = CliRunner().invoke(
-            fake_project_cli,
-            ["pipeline", "create", PIPELINE_NAME],
-            obj=fake_metadata,
+            fake_project_cli, ["pipeline", "create", PIPELINE_NAME], obj=fake_metadata
         )
         assert result.exit_code == 0
         result = CliRunner().invoke(
@@ -150,9 +148,7 @@ class TestPipelinePackageCommand:
         wheel_file.touch()
 
         result = CliRunner().invoke(
-            fake_project_cli,
-            ["pipeline", "create", PIPELINE_NAME],
-            obj=fake_metadata,
+            fake_project_cli, ["pipeline", "create", PIPELINE_NAME], obj=fake_metadata
         )
         assert result.exit_code == 0
         result = CliRunner().invoke(
@@ -200,9 +196,7 @@ class TestPipelinePackageCommand:
         )
         assert result.exit_code == 0
         result = CliRunner().invoke(
-            fake_project_cli,
-            ["pipeline", "package", PIPELINE_NAME],
-            obj=fake_metadata,
+            fake_project_cli, ["pipeline", "package", PIPELINE_NAME], obj=fake_metadata
         )
 
         assert result.exit_code == 0
@@ -234,9 +228,7 @@ class TestPipelinePackageCommand:
         self, fake_package_path, fake_project_cli, fake_metadata
     ):
         result = CliRunner().invoke(
-            fake_project_cli,
-            ["pipeline", "package", "non_existing"],
-            obj=fake_metadata,
+            fake_project_cli, ["pipeline", "package", "non_existing"], obj=fake_metadata
         )
         assert result.exit_code == 1
         pipeline_dir = fake_package_path / "pipelines" / "non_existing"
@@ -250,19 +242,14 @@ class TestPipelinePackageCommand:
         pipeline_dir.mkdir()
 
         result = CliRunner().invoke(
-            fake_project_cli,
-            ["pipeline", "package", "empty_dir"],
-            obj=fake_metadata,
+            fake_project_cli, ["pipeline", "package", "empty_dir"], obj=fake_metadata
         )
         assert result.exit_code == 1
         error_message = f"Error: '{pipeline_dir}' is an empty directory."
         assert error_message in result.output
 
     def test_package_modular_pipeline_with_nested_parameters(
-        self,
-        fake_repo_path,
-        fake_project_cli,
-        fake_metadata,
+        self, fake_repo_path, fake_project_cli, fake_metadata
     ):
         """
         The setup for the test is as follows:
@@ -279,9 +266,7 @@ class TestPipelinePackageCommand:
                 └── params1.ym
         """
         CliRunner().invoke(
-            fake_project_cli,
-            ["pipeline", "create", "retail"],
-            obj=fake_metadata,
+            fake_project_cli, ["pipeline", "create", "retail"], obj=fake_metadata
         )
         CliRunner().invoke(
             fake_project_cli,
@@ -295,9 +280,7 @@ class TestPipelinePackageCommand:
         (nested_param_path / "params1.yml").touch()
 
         result = CliRunner().invoke(
-            fake_project_cli,
-            ["pipeline", "package", "retail"],
-            obj=fake_metadata,
+            fake_project_cli, ["pipeline", "package", "retail"], obj=fake_metadata
         )
 
         assert result.exit_code == 0
@@ -329,9 +312,7 @@ class TestPipelinePackageCommand:
         assert pipelines_dir.is_dir()
 
         result = CliRunner().invoke(
-            fake_project_cli,
-            ["pipeline", "package", _pipeline_name],
-            obj=fake_metadata,
+            fake_project_cli, ["pipeline", "package", _pipeline_name], obj=fake_metadata
         )
         assert result.exit_code == 0
 
@@ -342,3 +323,101 @@ class TestPipelinePackageCommand:
 
         assert wheel_file.is_file()
         assert len(list(wheel_location.iterdir())) == 1
+
+
+@pytest.fixture
+def cleanup_pyproject_toml(fake_repo_path):
+    pyproject_toml = fake_repo_path / "pyproject.toml"
+    existing_toml = pyproject_toml.read_text()
+
+    yield
+
+    pyproject_toml.write_text(existing_toml)
+
+
+@pytest.mark.usefixtures(
+    "chdir_to_dummy_project", "patch_log", "cleanup_dist", "cleanup_pyproject_toml"
+)
+class TestPipelinePackageFromManifest:
+    def test_pipeline_package_all(  # pylint: disable=too-many-locals
+        self, fake_repo_path, fake_project_cli, fake_metadata, tmp_path, mocker
+    ):
+        # pylint: disable=import-outside-toplevel
+        from kedro.framework.cli import pipeline
+
+        spy = mocker.spy(pipeline, "_package_pipeline")
+        pyproject_toml = fake_repo_path / "pyproject.toml"
+        other_dest = tmp_path / "here"
+        other_dest.mkdir()
+        project_toml_str = textwrap.dedent(
+            f"""
+            [tool.kedro.pipeline.package]
+            first = {{destination = "{other_dest.as_posix()}"}}
+            second = {{alias = "ds", env = "local"}}
+            third = {{}}
+            """
+        )
+        with pyproject_toml.open(mode="a") as file:
+            file.write(project_toml_str)
+
+        for name in ("first", "second", "third"):
+            CliRunner().invoke(
+                fake_project_cli, ["pipeline", "create", name], obj=fake_metadata
+            )
+
+        result = CliRunner().invoke(
+            fake_project_cli, ["pipeline", "package", "--all"], obj=fake_metadata
+        )
+
+        assert result.exit_code == 0
+        assert "Pipelines packaged!" in result.output
+        assert spy.call_count == 3
+
+        build_config = toml.loads(project_toml_str)
+        package_manifest = build_config["tool"]["kedro"]["pipeline"]["package"]
+        for pipeline_name, packaging_specs in package_manifest.items():
+            expected_call = mocker.call(pipeline_name, fake_metadata, **packaging_specs)
+            assert expected_call in spy.call_args_list
+
+    def test_pipeline_package_all_empty_toml(
+        self, fake_repo_path, fake_project_cli, fake_metadata, mocker
+    ):
+        # pylint: disable=import-outside-toplevel
+        from kedro.framework.cli import pipeline
+
+        spy = mocker.spy(pipeline, "_package_pipeline")
+        pyproject_toml = fake_repo_path / "pyproject.toml"
+        with pyproject_toml.open(mode="a") as file:
+            file.write("\n[tool.kedro.pipeline.package]\n")
+
+        result = CliRunner().invoke(
+            fake_project_cli, ["pipeline", "package", "--all"], obj=fake_metadata
+        )
+
+        assert result.exit_code == 0
+        expected_message = "Nothing to package. Please update your `pyproject.toml`."
+        assert expected_message in result.output
+        assert not spy.called
+
+    def test_invalid_toml(self, fake_repo_path, fake_project_cli, fake_metadata):
+        pyproject_toml = fake_repo_path / "pyproject.toml"
+        with pyproject_toml.open(mode="a") as file:
+            file.write("what/toml?")
+
+        result = CliRunner().invoke(
+            fake_project_cli, ["pipeline", "package", "--all"], obj=fake_metadata
+        )
+
+        assert result.exit_code
+        assert isinstance(result.exception, toml.TomlDecodeError)
+
+    def test_pipeline_package_no_arg_provided(self, fake_project_cli, fake_metadata):
+        result = CliRunner().invoke(
+            fake_project_cli, ["pipeline", "package"], obj=fake_metadata
+        )
+        assert result.exit_code
+        expected_message = (
+            "Please specify a pipeline name or add "
+            "'--all' to package all pipelines in `pyproject.toml`."
+        )
+        assert expected_message in result.output

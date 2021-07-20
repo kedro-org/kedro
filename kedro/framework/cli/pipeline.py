@@ -314,6 +314,27 @@ def pull_package(
             _append_package_reqs(requirements_in, package_reqs, package_name)
 
 
+def _package_pipelines_from_manifest(metadata: ProjectMetadata) -> None:
+    # pylint: disable=import-outside-toplevel
+    import anyconfig  # for performance reasons
+
+    config_dict = anyconfig.load(metadata.config_file)
+    config_dict = config_dict["tool"]["kedro"]
+    build_specs = config_dict.get("pipeline", {}).get("package")
+
+    if not build_specs:
+        click.secho(
+            "Nothing to package. Please update your `pyproject.toml`.", fg="yellow"
+        )
+        return
+
+    for pipeline_name, specs in build_specs.items():
+        _package_pipeline(pipeline_name, metadata, **specs)
+        click.secho(f"Packaged `{pipeline_name}` pipeline!")
+
+    click.secho("Pipelines packaged!", fg="green")
+
+
 @pipeline.command("package")
 @env_option(
     help="Environment where the pipeline configuration lives. Defaults to `base`."
@@ -339,12 +360,24 @@ def pull_package(
     "Defaults to pipeline package version or, "
     "if that is not defined, the project package version.",
 )
-@click.argument("name", nargs=1)
+@click.option("--all", "-a", "all_flag", is_flag=True)
+@click.argument("name", nargs=1, required=False)
 @click.pass_obj  # this will pass the metadata as first argument
 def package_pipeline(
-    metadata: ProjectMetadata, name, env, alias, destination, version
+    metadata: ProjectMetadata, name, env, alias, destination, version, all_flag
 ):  # pylint: disable=too-many-arguments
     """Package up a modular pipeline as a Python .whl."""
+    if not name and not all_flag:
+        click.secho(
+            "Please specify a pipeline name or add "
+            "'--all' to package all pipelines in `pyproject.toml`."
+        )
+        sys.exit(1)
+
+    if all_flag:
+        _package_pipelines_from_manifest(metadata)
+        return
+
     result_path = _package_pipeline(
         name, metadata, alias=alias, destination=destination, env=env, version=version
     )

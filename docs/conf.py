@@ -198,6 +198,7 @@ linkcheck_ignore = [
     "https://zenodo.org/badge/latestdoi/182067506",
     "https://eternallybored.org/misc/wget/",
     "https://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table.from_pandas",
+    "https://www.oracle.com/java/technologies/javase-downloads.html",   # "forbidden" url
 ]
 
 # retry before render a link broken (fix for "too many requests")

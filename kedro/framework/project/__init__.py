@@ -74,7 +74,7 @@ class _ProjectSettings(LazySettings):
     Use Dynaconf's LazySettings as base.
     """
 
-    _CONF_ROOT = Validator("CONF_ROOT", default="conf")
+    _CONF_SOURCE = Validator("CONF_SOURCE", default="conf")
     _HOOKS = Validator("HOOKS", default=tuple())
     _CONTEXT_CLASS = Validator(
         "CONTEXT_CLASS",
@@ -95,7 +95,7 @@ class _ProjectSettings(LazySettings):
 
         kwargs.update(
             validators=[
-                self._CONF_ROOT,
+                self._CONF_SOURCE,
                 self._HOOKS,
                 self._CONTEXT_CLASS,
                 self._SESSION_STORE_CLASS,

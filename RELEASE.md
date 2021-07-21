@@ -11,12 +11,12 @@
 * Removed `cli.py` from the Kedro project template. By default, all CLI commands, including `kedro run`, are now defined on the Kedro framework side. These can be overridden in turn by a plugin or a `cli.py` file in your project. A packaged Kedro project will respect the same hierarchy when executed with `python -m my_package`.
 * Merged `pandas.AppendableExcelDataSet` into `pandas.ExcelDataSet`.
 * Added `save_args` to `feather.FeatherDataSet`.
+* The default `kedro` environment names can now be set in `settings.py` with the help of the `CONFIG_LOADER_ARGS` variable. The relevant keys to be supplied are `base_env` and `default_run_env`. These values are set to `base` and `local` respectively as a default.
 * Added the following new datasets:
 
 | Type                | Description                                                    | Location                       |
 | ------------------- | -------------------------------------------------------------- | ------------------------------ |
 | `pandas.XMLDataSet` | Read XML into Pandas DataFrame. Write Pandas DataFrame to XML. | `kedro.extras.datasets.pandas` |
-
 
 ## Breaking changes to the API
 * Add namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/quantumblacklabs/kedro/issues/399)
@@ -44,6 +44,9 @@
   * pandas.FeatherDataSet
   * pandas.JSONDataSet
   * pandas.ParquetDataSet
+* The environment defaulting behaviour has been removed from `KedroContext` and is now implemented in a `ConfigLoader` class (or equivalent) with the `base_env` and `default_run_env` attributes.
+* `ConfigLoader` and `TemplatedConfigLoader` argument `conf_root` has been renamed to `conf_source` to align the API.
+* The `settings.py` setting `CONF_ROOT` has been renamed to `CONF_SOURCE` to align the API. Default value of `conf` remains unchanged.
 
 ## Migration guide from Kedro 0.17.* to 0.18.*
 * Please remove any existing `hook_impl` of the `register_config_loader` method from `ProjectHooks` (or custom alternatives).
@@ -56,6 +59,8 @@
 * Edit any scripts containing `kedro pipeline package --version` to remove the `--version` option. If you wish to set a specific pipeline package version, set the `__version__` variable in the pipeline package's `__init__.py` file.
 * If you had any `pandas.AppendableExcelDataSet` entries in your catalog, replace them with `pandas.ExcelDataSet`.
 * If you were using `pandas~=1.2.0` and passing `storage_options` through `load_args` or `savs_args`, please specify them under `fs_args` or via `credentials` instead.
+* Update the `settings.py` setting `CONF_ROOT` to `CONF_SOURCE`.
+* Update the key-word argument `conf_root` to `conf_source` when calling `ConfigLoader` or `TemplatedConfigLoader` directly.
 
 # Upcoming Release 0.17.5
 

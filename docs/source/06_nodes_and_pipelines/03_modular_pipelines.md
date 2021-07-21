@@ -121,7 +121,7 @@ Since Kedro 0.16.4 you can package a modular pipeline by executing `kedro pipeli
 When you package your modular pipeline, Kedro will also automatically package files from 3 locations:
 
 *  All the modular pipeline code in `src/<python_package>/pipelines/<pipeline_name>/`
-*  Parameter files that match either the glob pattern `conf/<env>/parameters*/**/<pipeline_name>.yml` or `conf/<env>/parameters*/**/<pipeline_name>/*, where `<env>` defaults to `base`. If you need to capture the parameters from a different config environment, run `kedro pipeline package --env <env_name> <pipeline_name>`
+*  Parameter files that match either the glob pattern `conf/<env>/parameters*/**/<pipeline_name>.yml` or `conf/<env>/parameters*/**/<pipeline_name>/*`, where `<env>` defaults to `base`. If you need to capture the parameters from a different config environment, run `kedro pipeline package --env <env_name> <pipeline_name>`
 *  Pipeline unit tests in `src/tests/pipelines/<pipeline_name>`
 
 Kedro will also include any requirements found in `src/<python_package>/pipelines/<pipeline_name>/requirements.txt` in the modular pipeline wheel file. These requirements will later be taken into account when pulling a pipeline via `kedro pipeline pull`.

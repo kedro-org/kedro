@@ -37,6 +37,9 @@ import yaml
 
 from kedro.config import BadConfigException, ConfigLoader, MissingConfigException
 
+_DEFAULT_RUN_ENV = "local"
+_BASE_ENV = "base"
+
 
 def _get_local_logging_config():
     return {
@@ -108,11 +111,11 @@ def local_config(tmp_path):
 
 @pytest.fixture
 def create_config_dir(tmp_path, base_config, local_config):
-    proj_catalog = tmp_path / "base" / "catalog.yml"
-    local_catalog = tmp_path / "local" / "catalog.yml"
-    local_logging = tmp_path / "local" / "logging.yml"
-    parameters = tmp_path / "base" / "parameters.json"
-    db_config_path = tmp_path / "base" / "db.ini"
+    proj_catalog = tmp_path / _BASE_ENV / "catalog.yml"
+    local_catalog = tmp_path / _DEFAULT_RUN_ENV / "catalog.yml"
+    local_logging = tmp_path / _DEFAULT_RUN_ENV / "logging.yml"
+    parameters = tmp_path / _BASE_ENV / "parameters.json"
+    db_config_path = tmp_path / _BASE_ENV / "db.ini"
     project_parameters = dict(param1=1, param2=2)
 
     _write_yaml(proj_catalog, base_config)
@@ -124,13 +127,13 @@ def create_config_dir(tmp_path, base_config, local_config):
 
 @pytest.fixture
 def proj_catalog(tmp_path, base_config):
-    proj_catalog = tmp_path / "base" / "catalog.yml"
+    proj_catalog = tmp_path / _BASE_ENV / "catalog.yml"
     _write_yaml(proj_catalog, base_config)
 
 
 @pytest.fixture
 def proj_catalog_nested(tmp_path):
-    path = tmp_path / "base" / "catalog" / "dir" / "nested.yml"
+    path = tmp_path / _BASE_ENV / "catalog" / "dir" / "nested.yml"
     _write_yaml(path, {"nested": {"type": "MemoryDataSet"}})
 
 
@@ -143,7 +146,7 @@ class TestConfigLoader:
     def test_load_local_config(self, tmp_path):
         """Make sure that configs from `local/` override the ones
         from `base/`"""
-        conf = ConfigLoader(str(tmp_path), "local")
+        conf = ConfigLoader(str(tmp_path), _DEFAULT_RUN_ENV)
         params = conf.get("parameters*")
         db_conf = conf.get("db*")
         catalog = conf.get("catalog*")
@@ -159,15 +162,15 @@ class TestConfigLoader:
     @use_proj_catalog
     def test_load_base_config(self, tmp_path, base_config):
         """Test config loading if `local/` directory is empty"""
-        (tmp_path / "local").mkdir(exist_ok=True)
-        catalog = ConfigLoader(str(tmp_path), "local").get("catalog*.yml")
+        (tmp_path / _DEFAULT_RUN_ENV).mkdir(exist_ok=True)
+        catalog = ConfigLoader(str(tmp_path), _DEFAULT_RUN_ENV).get("catalog*.yml")
         assert catalog == base_config
 
     @use_proj_catalog
     def test_duplicate_patterns(self, tmp_path, base_config):
         """Test config loading if the glob patterns cover the same file"""
-        (tmp_path / "local").mkdir(exist_ok=True)
-        conf = ConfigLoader(str(tmp_path), "local")
+        (tmp_path / _DEFAULT_RUN_ENV).mkdir(exist_ok=True)
+        conf = ConfigLoader(str(tmp_path), _DEFAULT_RUN_ENV)
         catalog1 = conf.get("catalog*.yml", "catalog*.yml")
         catalog2 = conf.get("catalog*.yml", "catalog.yml")
         assert catalog1 == catalog2 == base_config
@@ -181,14 +184,16 @@ class TestConfigLoader:
         with pytest.raises(ValueError, match=pattern.format(".*base")):
             ConfigLoader(str(tmp_path)).get("catalog*")
         with pytest.raises(ValueError, match=pattern.format(".*local")):
-            proj_catalog = tmp_path / "base" / "catalog.yml"
+            proj_catalog = tmp_path / _BASE_ENV / "catalog.yml"
             _write_yaml(proj_catalog, base_config)
-            ConfigLoader(str(tmp_path), "local").get("catalog*")
+            ConfigLoader(str(tmp_path), _DEFAULT_RUN_ENV).get("catalog*")
 
     @pytest.mark.usefixtures("create_config_dir", "proj_catalog", "proj_catalog_nested")
     def test_nested(self, tmp_path):
         """Test loading the config from subdirectories"""
-        catalog = ConfigLoader(str(tmp_path)).get("catalog*", "catalog*/**")
+        config_loader = ConfigLoader(str(tmp_path))
+        config_loader.default_run_env = ""
+        catalog = config_loader.get("catalog*", "catalog*/**")
         assert catalog.keys() == {"cars", "trains", "nested"}
         assert catalog["cars"]["type"] == "pandas.CSVDataSet"
         assert catalog["cars"]["save_args"]["index"] is True
@@ -198,7 +203,7 @@ class TestConfigLoader:
     def test_nested_subdirs_duplicate(self, tmp_path, base_config):
         """Check the error when the configs from subdirectories contain
         duplicate keys"""
-        nested = tmp_path / "base" / "catalog" / "dir" / "nested.yml"
+        nested = tmp_path / _BASE_ENV / "catalog" / "dir" / "nested.yml"
         _write_yaml(nested, base_config)
 
         pattern = (
@@ -211,14 +216,15 @@ class TestConfigLoader:
     def test_ignore_hidden_keys(self, tmp_path):
         """Check that the config key starting with `_` are ignored and also
         don't cause a config merge error"""
-        _write_yaml(tmp_path / "base" / "catalog1.yml", {"k1": "v1", "_k2": "v2"})
-        _write_yaml(tmp_path / "base" / "catalog2.yml", {"k3": "v3", "_k2": "v4"})
+        _write_yaml(tmp_path / _BASE_ENV / "catalog1.yml", {"k1": "v1", "_k2": "v2"})
+        _write_yaml(tmp_path / _BASE_ENV / "catalog2.yml", {"k3": "v3", "_k2": "v4"})
 
         conf = ConfigLoader(str(tmp_path))
+        conf.default_run_env = ""
         catalog = conf.get("**/catalog*")
         assert catalog.keys() == {"k1", "k3"}
 
-        _write_yaml(tmp_path / "base" / "catalog3.yml", {"k1": "dup", "_k2": "v5"})
+        _write_yaml(tmp_path / _BASE_ENV / "catalog3.yml", {"k1": "dup", "_k2": "v5"})
         pattern = (
             r"^Duplicate keys found in .*catalog3\.yml and\:\n\- .*catalog1\.yml\: k1$"
         )
@@ -226,7 +232,7 @@ class TestConfigLoader:
             conf.get("**/catalog*")
 
     def test_bad_config_syntax(self, tmp_path):
-        conf_path = tmp_path / "base"
+        conf_path = tmp_path / _BASE_ENV
         conf_path.mkdir(parents=True, exist_ok=True)
         (conf_path / "catalog.yml").write_text("bad;config")
 
@@ -238,8 +244,8 @@ class TestConfigLoader:
         """Check that the config key starting with `_` are ignored and also
         don't cause a config merge error"""
         data = {str(i): i for i in range(100)}
-        _write_yaml(tmp_path / "base" / "catalog1.yml", data)
-        _write_yaml(tmp_path / "base" / "catalog2.yml", data)
+        _write_yaml(tmp_path / _BASE_ENV / "catalog1.yml", data)
+        _write_yaml(tmp_path / _BASE_ENV / "catalog2.yml", data)
 
         conf = ConfigLoader(str(tmp_path))
         pattern = r"^Duplicate keys found in .*catalog2\.yml and\:\n\- .*catalog1\.yml\: .*\.\.\.$"
@@ -250,7 +256,7 @@ class TestConfigLoader:
     def test_same_key_in_same_dir(self, tmp_path, base_config):
         """Check the error if 2 files in the same config dir contain
         the same top-level key"""
-        dup_json = tmp_path / "base" / "catalog.json"
+        dup_json = tmp_path / _BASE_ENV / "catalog.json"
         _write_json(dup_json, base_config)
 
         pattern = (
@@ -281,25 +287,27 @@ class TestConfigLoader:
             r"\[\'non\-existent\-pattern\'\]"
         )
         with pytest.raises(MissingConfigException, match=pattern):
-            ConfigLoader(str(tmp_path), "local").get("non-existent-pattern")
+            ConfigLoader(str(tmp_path), _DEFAULT_RUN_ENV).get("non-existent-pattern")
 
     def test_duplicate_paths(self, tmp_path, caplog):
         """Check that trying to load the same environment config multiple times logs a
         warning and skips the reload"""
-        _write_yaml(tmp_path / "base" / "catalog.yml", {"env": "base", "a": "a"})
+        _write_yaml(tmp_path / _BASE_ENV / "catalog.yml", {"env": _BASE_ENV, "a": "a"})
+        config_loader = ConfigLoader(str(tmp_path), _BASE_ENV)
 
         with pytest.warns(UserWarning, match="Duplicate environment detected"):
-            conf = ConfigLoader(str(tmp_path), "base")
-        assert conf.conf_paths == [str(tmp_path / "base")]
+            config_paths = config_loader.conf_paths
+        assert config_paths == [str(tmp_path / _BASE_ENV)]
 
-        conf.get("catalog*", "catalog*/**")
+        config_loader.get("catalog*", "catalog*/**")
         log_messages = [record.getMessage() for record in caplog.records]
         assert not log_messages
 
     def test_overlapping_patterns(self, tmp_path, caplog):
         """Check that same configuration file is not loaded more than once."""
         _write_yaml(
-            tmp_path / "base" / "catalog0.yml", {"env": "base", "common": "common"}
+            tmp_path / _BASE_ENV / "catalog0.yml",
+            {"env": _BASE_ENV, "common": "common"},
         )
         _write_yaml(
             tmp_path / "dev" / "catalog1.yml", {"env": "dev", "dev_specific": "wiz"}

@@ -134,7 +134,7 @@ type_targets = {
         "requests.auth.AuthBase",
         "google.oauth2.credentials.Credentials",
         "Exception",
-        "CONF_ROOT",
+        "CONF_SOURCE",
         "integer -- return number of occurrences of value",
         "integer -- return first index of value.",
         "kedro.extras.datasets.pandas.json_dataset.JSONDataSet",

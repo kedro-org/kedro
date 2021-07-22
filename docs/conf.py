@@ -198,7 +198,7 @@ linkcheck_ignore = [
     "https://zenodo.org/badge/latestdoi/182067506",
     "https://eternallybored.org/misc/wget/",
     "https://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table.from_pandas",
-    "https://github.com/quantumblacklabs/kedro-starters/tree/master/standalone-datacatalog"     # temporary until 0.18
+    "https://github.com/quantumblacklabs/kedro-starters/tree/master/standalone-datacatalog",     # temporary until 0.18
     "https://www.oracle.com/java/technologies/javase-downloads.html",   # "forbidden" url
 ]
 

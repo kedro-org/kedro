@@ -540,7 +540,7 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
         self._exists_function = exists_function or _local_exists
         self._glob_function = glob_function or iglob
         # 1 entry for load version, 1 for save version
-        self._version_cache = Cache(maxsize=2)
+        self._version_cache = Cache(maxsize=2)  # type: Cache
 
     # 'key' is set to prevent cache key overlapping for load and save:
     # https://cachetools.readthedocs.io/en/stable/#cachetools.cachedmethod

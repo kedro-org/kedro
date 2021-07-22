@@ -76,10 +76,10 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
   * [`kedro package`](#deploy-the-project)
   * [`kedro pipeline create <pipeline_name>`](#create-a-new-modular-pipeline-in-your-project)
   * [`kedro pipeline delete <pipeline_name>`](#delete-a-modular-pipeline)
-  * [`kedro pipeline describe <pipeline_name>`](#describe-a-pipeline)
-  * [`kedro pipeline list`](#list-all-pipelines-in-your-project)
   * [`kedro pipeline package <pipeline_name>`](#package-a-modular-pipeline)
   * [`kedro pipeline pull <package_name>`](#pull-a-modular-pipeline)
+  * [`kedro registry describe <pipeline_name>`](#describe-a-registered-pipeline)
+  * [`kedro registry list`](#list-all-registered-pipelines-in-your-project)
   * [`kedro run`](#run-the-project)
   * [`kedro test`](#test-your-project)
 
@@ -150,7 +150,7 @@ kedro docs
 
 Kedro's command line interface (CLI) allows you to associate a set of commands and dependencies with a target, which you can then execute from inside the project directory.
 
-The commands a project supports are specified in its `cli.py` file, which can be extended, either by modifying the file or by injecting commands into it via the [`plugin` framework](../07_extend_kedro/04_plugins.md).
+The commands a project supports are specified on the framework side. If you want to customise any of the Kedro commands you can do this either by adding a file called `cli.py` or by injecting commands into it via the [`plugin` framework](../07_extend_kedro/04_plugins.md). Find the template for the `cli.py` file [here](../07_extend_kedro/01_common_use_cases.md#use-case-3-how-to-add-or-modify-cli-commands).
 
 ### Project setup
 
@@ -231,7 +231,7 @@ A parameterised run is best used for dynamic parameters, i.e. running the same p
 
 ### Deploy the project
 
-The following packages your application as one `.egg` file  and one `.whl` file within the `src/dist/` folder of your project:
+The following packages your application as one `.egg` file  and one `.whl` file within the `dist/` folder of your project:
 
 ```bash
 kedro package
@@ -255,7 +255,7 @@ The above command will take the bundled `.whl` file and do the following:
 `kedro pipeline pull` works with PyPI, local and cloud storage:
 
 * PyPI: `kedro pipeline pull <my-pipeline>` with `<my-pipeline>` being a package on PyPI
-* Local storage: `kedro pipeline pull <path-to-your-project-root>/src/dist/<my-pipeline>-0.1-py3-none-any.whl`
+* Local storage: `kedro pipeline pull <path-to-your-project-root>/dist/<my-pipeline>-0.1-py3-none-any.whl`
 * Cloud storage: `kedro pipeline pull s3://<my-bucket>/<my-pipeline>-0.1-py3-none-any.whl`
 
 ### Project quality
@@ -275,7 +275,7 @@ The `build-docs` command builds [project documentation](../03_tutorial/05_packag
 kedro lint
 ```
 
-Your project is linted with [`black`](https://github.com/psf/black), [`flake8`](https://gitlab.com/pycqa/flake8) and [`isort`](https://github.com/PyCQA/isort). See our [documentation about `kedro lint`](../09_development/04_lint.md#linting-your-kedro-project) for further details.
+Your project is linted with [`black`](https://github.com/psf/black), [`flake8`](https://gitlab.com/pycqa/flake8) and [`isort`](https://github.com/PyCQA/isort).
 
 
 #### Test your project
@@ -291,6 +291,7 @@ kedro test
 #### Modular pipelines
 
 ##### Create a new [modular pipeline](../06_nodes_and_pipelines/03_modular_pipelines) in your project
+
 ```bash
 kedro pipeline create <pipeline_name>
 ```
@@ -306,6 +307,7 @@ Further information is available in the [pipeline documentation](../06_nodes_and
 
 ##### Pull a modular pipeline in your project
 The following command pulls all the files related to a modular pipeline from either [Pypi](https://pypi.org/) or a storage location of a [wheel file](https://pythonwheels.com/).
+
 ```bash
 kedro pipeline pull <package_name> (or path to a wheel file)
 ```
@@ -321,22 +323,26 @@ kedro pipeline delete <pipeline_name>
 
 Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/03_modular_pipelines.md#pull-a-modular-pipeline).
 
-##### Describe a pipeline
+
+#### Registered pipelines
+
+##### Describe a registered pipeline
 
 ```bash
-kedro pipeline describe <pipeline_name>
+kedro registry describe <pipeline_name>
 ```
 The output includes all the nodes in the pipeline. If no pipeline name is provided, this command returns all nodes in the `__default__` pipeline.
 
-##### List all pipelines in your project
+##### List all registered pipelines in your project
 
 ```bash
-kedro pipeline list
+kedro registry list
 ```
 
 #### Datasets
 
 ##### List datasets per pipeline per type
+
 ```bash
 kedro catalog list
 ```

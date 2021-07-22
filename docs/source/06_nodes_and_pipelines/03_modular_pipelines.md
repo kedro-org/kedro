@@ -116,7 +116,7 @@ kedro run --pipeline mp2
 ## How to share a modular pipeline
 
 ### Package a modular pipeline
-Since Kedro 0.16.4 you can package a modular pipeline by executing `kedro pipeline package <pipeline_name>` command, which will generate a new [wheel file](https://pythonwheels.com/) for it. By default, the wheel file will be saved into `src/dist` directory inside your project, however this can be changed using the `--destination` (`-d`) option.
+Since Kedro 0.16.4 you can package a modular pipeline by executing `kedro pipeline package <pipeline_name>` command, which will generate a new [wheel file](https://pythonwheels.com/) for it. By default, the wheel file will be saved into `dist/` directory inside your project, however this can be changed using the `--destination` (`-d`) option.
 
 When you package your modular pipeline, Kedro will also automatically package files from 3 locations:
 
@@ -153,7 +153,7 @@ You can pull a modular pipeline from different locations, including local storag
 - Pulling a modular pipeline from a local directory:
 
 ```bash
-kedro pipeline pull <path-to-your-project-root>/src/dist/<pipeline_name>-0.1-py3-none-any.whl
+kedro pipeline pull <path-to-your-project-root>/dist/<pipeline_name>-0.1-py3-none-any.whl
 ```
 
 - Pulling a modular pipeline from S3:
@@ -228,7 +228,6 @@ new-kedro-project
 │   │   │   │   └── README.md
 │   │   │   └── __init__.py
 │   │   ├── __init__.py
-|   |   ├── cli.py
 │   │   ├── hooks.py
 │   │   ├── pipeline_registry.py
 │   │   ├── __main__.py
@@ -374,14 +373,14 @@ Remapping free outputs is required since "breakfast_food" and "lunch_food" are t
 
 The resulting pipeline now has two separate nodes, `breakfast.defrost_node` and `lunch.defrost_node`. Also two separate datasets `breakfast.meat` and `lunch.meat` connect the nodes inside the pipelines, causing no confusion between them.
 
-Note that `pipeline()` will skip prefixing when node inputs contain parameter references (`params:` and `parameters`).
+Note that `pipeline()` will also prefix single parameter referenced with `params:` in a node's inputs. However, it won't prefix `parameters`.
 
 For example:
 
 ```python
 raw_pipeline = Pipeline([node(node_func, ["input", "params:x"], "output")])
 final_pipeline = pipeline(raw_pipeline, namespace="new")
-# `final_pipeline` will be `Pipeline([node(node_func, ["new.input", "params:x"], "new.output")])`
+# `final_pipeline` will be `Pipeline([node(node_func, ["new.input", "params:new.x"], "new.output")])`
 ```
 
 ## How to use a modular pipeline with different parameters
@@ -398,7 +397,7 @@ alpha_pipeline = Pipeline(
 beta_pipeline = pipeline(
     alpha_pipeline,
     inputs={"input1", "input2"},
-    parameters={"params:alpha": "params:beta"},
+    parameters={"alpha": "beta"},
     namespace="beta",
 )
 
@@ -406,6 +405,8 @@ final_pipeline = alpha_pipeline + beta_pipeline
 ```
 
 The value of parameter `alpha` is replaced with the value of parameter `beta`, assuming they both live in your parameters configuration (`parameters.yml`). The namespace ensures that outputs are not overwritten, so intermediate and final outputs are prefixed, i.e. `beta.intermediary_output`, `beta.output`.
+
+Note that similar to `inputs` and `outputs` namespacing rule, if you supply a `str` or a `Set[str]`, these explicitly listed parameters won't be namespaced.
 
 ## How to clean up a modular pipeline
 You can manually delete all the files that belong to a modular pipeline. However, Kedro also provides a CLI command to clean up automatically. It deletes the following files when you call `kedro pipeline delete <pipeline_name>`:

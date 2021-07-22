@@ -25,7 +25,6 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# pylint: disable=consider-using-with
 """A collection of CLI commands for working with Kedro pipelines."""
 import json
 import re

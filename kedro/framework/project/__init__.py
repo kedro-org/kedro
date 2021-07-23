@@ -27,7 +27,7 @@
 # limitations under the License.
 """``kedro.framework.project`` module provides utitlity to
 configure a Kedro project and access its settings."""
-# pylint: disable=redefined-outer-name,unused-argument
+# pylint: disable=redefined-outer-name,unused-argument,global-statement
 import importlib
 import operator
 from collections.abc import MutableMapping
@@ -202,8 +202,9 @@ class _ProjectPipelines(MutableMapping):
     __str__ = _load_data_wrapper(str)
 
 
-settings = _ProjectSettings()
+PACKAGE_NAME = None
 
+settings = _ProjectSettings()
 
 pipelines = _ProjectPipelines()
 
@@ -231,3 +232,9 @@ def configure_project(package_name: str):
 
     pipelines_module = f"{package_name}.pipeline_registry"
     pipelines.configure(pipelines_module)
+
+    # Once the project is successfully configured once, store PACKAGE_NAME as a
+    # global variable to make it easily accessible. This is used by ParallelRunner on
+    # Windows, as package_name is required every time a new subprocess is spawned.
+    global PACKAGE_NAME
+    PACKAGE_NAME = package_name

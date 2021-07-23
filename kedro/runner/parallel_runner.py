@@ -162,7 +162,6 @@ class ParallelRunner(AbstractRunner):
         Raises:
             ValueError: bad parameters passed
         """
-        # pylint: disable=consider-using-with
         super().__init__(is_async=is_async)
         self._manager = ParallelRunnerManager()
         self._manager.start()  # pylint: disable=consider-using-with
@@ -308,9 +307,10 @@ class ParallelRunner(AbstractRunner):
         done = None
         max_workers = self._get_required_workers_count(pipeline)
 
+        from kedro.framework.project import PACKAGE_NAME
+
         session = get_current_session(silent=True)
         # pylint: disable=protected-access
-        package_name = session._package_name if session else None
         conf_logging = session._get_logging_config() if session else None
 
         with ProcessPoolExecutor(max_workers=max_workers) as pool:
@@ -325,7 +325,7 @@ class ParallelRunner(AbstractRunner):
                             catalog,
                             self._is_async,
                             run_id,
-                            package_name=package_name,
+                            package_name=PACKAGE_NAME,
                             conf_logging=conf_logging,
                         )
                     )

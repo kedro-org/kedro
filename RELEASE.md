@@ -4,6 +4,7 @@
 * Added new CLI group `registry`, with the associated commands `kedro registry list` and `kedro registry describe`, to replace `kedro pipeline list` and `kedro pipeline describe`.
 * Added support for dependency management at a modular pipeline level. When a pipeline with `requirements.txt` is packaged, its dependencies are embedded in the modular pipeline wheel file. Upon pulling the pipeline, Kedro will append dependencies to the project's `requirements.in`. More information is available in [our documentation](https://kedro.readthedocs.io/en/stable/06_nodes_and_pipelines/03_modular_pipelines.html#package-a-modular-pipeline).
 * Added support for bulk packaging modular pipelines using `kedro pipeline package --all` and `pyproject.toml`.
+* Removed `cli.py` from the Kedro project template. By default all CLI commands, including `kedro run`, are now defined on the Kedro framework side. These can be overridden in turn by a plugin or a `cli.py` file in your project. A packaged Kedro project will respect the same hierarchy when executed with `python -m my_package`.
 
 ## Bug fixes and other changes
 

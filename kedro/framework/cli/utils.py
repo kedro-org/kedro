@@ -494,7 +494,3 @@ def _get_requirements_in(source_path: Path, create_empty: bool = False) -> Path:
         "No project requirements.in or requirements.txt found in `/src`. "
         "Please create either and try again."
     )
-
-
-def _get_values_as_tuple(values: Iterable[str]) -> Tuple[str, ...]:
-    return tuple(chain.from_iterable(value.split(",") for value in values))

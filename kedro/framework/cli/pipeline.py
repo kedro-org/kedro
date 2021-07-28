@@ -40,7 +40,6 @@ from zipfile import ZipFile
 
 import click
 import pkg_resources
-import yaml
 from setuptools.dist import Distribution
 
 import kedro
@@ -54,7 +53,7 @@ from kedro.framework.cli.utils import (
     env_option,
     python_call,
 )
-from kedro.framework.project import pipelines, settings
+from kedro.framework.project import settings
 from kedro.framework.startup import ProjectMetadata
 
 _SETUP_PY_TEMPLATE = """# -*- coding: utf-8 -*-
@@ -132,8 +131,8 @@ def create_pipeline(
 ):  # pylint: disable=unused-argument
     """Create a new modular pipeline by providing a name."""
     package_dir = metadata.source_dir / metadata.package_name
-    conf_root = settings.CONF_ROOT
-    project_conf_path = metadata.project_path / conf_root
+    conf_source = settings.CONF_SOURCE
+    project_conf_path = metadata.project_path / conf_source
 
     env = env or "base"
     if not skip_config and not (project_conf_path / env).exists():
@@ -168,8 +167,8 @@ def delete_pipeline(
 ):  # pylint: disable=unused-argument
     """Delete a modular pipeline by providing a name."""
     package_dir = metadata.source_dir / metadata.package_name
-    conf_root = settings.CONF_ROOT
-    project_conf_path = metadata.project_path / conf_root
+    conf_source = settings.CONF_SOURCE
+    project_conf_path = metadata.project_path / conf_source
 
     env = env or "base"
     if not (project_conf_path / env).exists():
@@ -214,50 +213,6 @@ def delete_pipeline(
         f"`{package_dir / 'pipeline_registry.py'}`, you will need to remove it.",
         fg="yellow",
     )
-
-
-@pipeline.command("list")
-def list_pipelines():
-    """List all pipelines defined in your pipeline_registry.py file. (DEPRECATED)"""
-    deprecation_message = (
-        "DeprecationWarning: Command `kedro pipeline list` is deprecated. "
-        "Please use `kedro registry list` instead."
-    )
-    click.secho(deprecation_message, fg="red")
-
-    click.echo(yaml.dump(sorted(pipelines)))
-
-
-@command_with_verbosity(pipeline, "describe")
-@click.argument("name", nargs=1, default="__default__")
-@click.pass_obj
-def describe_pipeline(
-    metadata: ProjectMetadata, name, **kwargs
-):  # pylint: disable=unused-argument, protected-access
-    """Describe a pipeline by providing a pipeline name.
-    Defaults to the __default__ pipeline. (DEPRECATED)
-    """
-    deprecation_message = (
-        "DeprecationWarning: Command `kedro pipeline describe` is deprecated. "
-        "Please use `kedro registry describe` instead."
-    )
-    click.secho(deprecation_message, fg="red")
-
-    pipeline_obj = pipelines.get(name)
-    if not pipeline_obj:
-        all_pipeline_names = pipelines.keys()
-        existing_pipelines = ", ".join(sorted(all_pipeline_names))
-        raise KedroCliError(
-            f"`{name}` pipeline not found. Existing pipelines: [{existing_pipelines}]"
-        )
-
-    nodes = []
-    for node in pipeline_obj.nodes:
-        namespace = f"{node.namespace}." if node.namespace else ""
-        nodes.append(f"{namespace}{node._name or node._func_name} ({node._func_name})")
-    result = {"Nodes": nodes}
-
-    click.echo(yaml.dump(result))
 
 
 @command_with_verbosity(pipeline, "pull")
@@ -350,21 +305,13 @@ def _package_pipelines_from_manifest(metadata: ProjectMetadata) -> None:
     "-d",
     "--destination",
     type=click.Path(resolve_path=True, file_okay=False),
-    help="Location where to create the wheel file. Defaults to `src/dist`.",
-)
-@click.option(
-    "-v",
-    "--version",
-    type=str,
-    help="Version to package under. "
-    "Defaults to pipeline package version or, "
-    "if that is not defined, the project package version.",
+    help="Location where to create the wheel file. Defaults to `dist/`.",
 )
 @click.option("--all", "-a", "all_flag", is_flag=True)
 @click.argument("name", nargs=1, required=False)
 @click.pass_obj  # this will pass the metadata as first argument
 def package_pipeline(
-    metadata: ProjectMetadata, name, env, alias, destination, version, all_flag
+    metadata: ProjectMetadata, name, env, alias, destination, all_flag
 ):  # pylint: disable=too-many-arguments
     """Package up a modular pipeline as a Python .whl."""
     if not name and not all_flag:
@@ -379,7 +326,7 @@ def package_pipeline(
         return
 
     result_path = _package_pipeline(
-        name, metadata, alias=alias, destination=destination, env=env, version=version
+        name, metadata, alias=alias, destination=destination, env=env
     )
 
     as_alias = f" as `{alias}`" if alias else ""
@@ -507,13 +454,12 @@ def _find_config_files(
     return config_files
 
 
-def _package_pipeline(  # pylint: disable=too-many-arguments
+def _package_pipeline(
     pipeline_name: str,
     metadata: ProjectMetadata,
     alias: str = None,
     destination: str = None,
     env: str = None,
-    version: str = None,
 ) -> Path:
     package_dir = metadata.source_dir / metadata.package_name
     env = env or "base"
@@ -536,21 +482,21 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
 
     # Check that pipeline directory exists and not empty
     _validate_dir(artifacts_to_package.pipeline_dir)
-    destination = Path(destination) if destination else package_dir.parent / "dist"
+    destination = Path(destination) if destination else metadata.project_path / "dist"
 
-    if not version:  # default to pipeline package version
-        try:
-            pipeline_module = import_module(
-                f"{metadata.package_name}.pipelines.{pipeline_name}"
-            )
-            version = pipeline_module.__version__  # type: ignore
-        except (AttributeError, ModuleNotFoundError):
-            # if pipeline version doesn't exist, take the project one
-            project_module = import_module(f"{metadata.package_name}")
-            version = project_module.__version__  # type: ignore
+    # default to pipeline package version
+    try:
+        pipeline_module = import_module(
+            f"{metadata.package_name}.pipelines.{pipeline_name}"
+        )
+        version = pipeline_module.__version__  # type: ignore
+    except (AttributeError, ModuleNotFoundError):
+        # if pipeline version doesn't exist, take the project one
+        project_module = import_module(f"{metadata.package_name}")
+        version = project_module.__version__  # type: ignore
 
-    _generate_wheel_file(  # type: ignore
-        pipeline_name, destination, source_paths, version, alias=alias
+    _generate_wheel_file(
+        pipeline_name, destination, source_paths, version, alias=alias  # type: ignore
     )
 
     _clean_pycache(package_dir)
@@ -763,8 +709,8 @@ def _get_pipeline_artifacts(
 ) -> PipelineArtifacts:
     """From existing project, returns in order: source_path, tests_path, config_paths"""
     package_dir = project_metadata.source_dir / project_metadata.package_name
-    conf_root = settings.CONF_ROOT
-    project_conf_path = project_metadata.project_path / conf_root
+    conf_source = settings.CONF_SOURCE
+    project_conf_path = project_metadata.project_path / conf_source
     artifacts = PipelineArtifacts(
         package_dir / "pipelines" / pipeline_name,
         package_dir.parent / "tests" / "pipelines" / pipeline_name,

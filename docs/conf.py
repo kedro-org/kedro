@@ -134,7 +134,7 @@ type_targets = {
         "requests.auth.AuthBase",
         "google.oauth2.credentials.Credentials",
         "Exception",
-        "CONF_ROOT",
+        "CONF_SOURCE",
         "integer -- return number of occurrences of value",
         "integer -- return first index of value.",
         "kedro.extras.datasets.pandas.json_dataset.JSONDataSet",
@@ -198,6 +198,7 @@ linkcheck_ignore = [
     "https://zenodo.org/badge/latestdoi/182067506",
     "https://eternallybored.org/misc/wget/",
     "https://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table.from_pandas",
+    "https://github.com/quantumblacklabs/kedro-starters/tree/master/standalone-datacatalog",     # temporary until 0.18
     "https://www.oracle.com/java/technologies/javase-downloads.html",   # "forbidden" url
 ]
 

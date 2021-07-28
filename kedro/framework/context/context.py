@@ -427,14 +427,15 @@ class KedroContext:
             return settings.CONFIG_LOADER_CLASS(
                 conf_source=str(self.project_path / settings.CONF_SOURCE),
                 env=self.env,
-                extra_params=self._extra_params,
+                runtime_params=self._extra_params,
                 **settings.CONFIG_LOADER_ARGS,
             )
 
         except TypeError as exc:
             raise KedroContextError(
                 f"Expected an instance of `ConfigLoader`, "
-                f"got `{type(settings.CONFIG_LOADER_CLASS)}` instead.\n"
+                f"got `{settings.CONFIG_LOADER_CLASS}` of class "
+                f"`{type(settings.CONFIG_LOADER_CLASS)}` instead.\n"
                 f"The provided `CONFIG_LOADER_ARGS were: {settings.CONFIG_LOADER_ARGS}"
             ) from exc
 

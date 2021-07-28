@@ -32,11 +32,12 @@ with the values from the passed dictionary.
 import re
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Iterable, Optional
 
 import jmespath
 
-from kedro.config import ConfigLoader
+from kedro.config import AbstractConfigLoader
+from kedro.config.common import _get_config_from_patterns, _remove_duplicates
 
 IDENTIFIER_PATTERN = re.compile(
     r"""\$\{
@@ -50,7 +51,7 @@ FULL_STRING_IDENTIFIER_PATTERN = re.compile(
 )
 
 
-class TemplatedConfigLoader(ConfigLoader):
+class TemplatedConfigLoader(AbstractConfigLoader):
     """
     Extension of the ``ConfigLoader`` class that allows for template values,
     wrapped in brackets like: ${...}, to be automatically formatted
@@ -117,18 +118,21 @@ class TemplatedConfigLoader(ConfigLoader):
         self,
         conf_source: str,
         env: str = None,
-        extra_params: Dict[str, Any] = None,
+        runtime_params: Dict[str, Any] = None,
         *,
+        base_env: str = "base",
+        default_run_env: str = "local",
         globals_pattern: Optional[str] = None,
         globals_dict: Optional[Dict[str, Any]] = None,
-        **kwargs,
     ):
         """Instantiates a ``TemplatedConfigLoader``.
 
         Args:
             conf_source: Path to use as root directory for loading configuration.
             env: Environment that will take precedence over base.
-            extra_params: Extra parameters passed to a Kedro run.
+            runtime_params: Extra parameters passed to a Kedro run.
+            base_env:
+            default_run_env:
             globals_pattern: Optional keyword-only argument specifying a glob
                 pattern. Files that match the pattern will be loaded as a
                 formatting dictionary.
@@ -137,30 +141,28 @@ class TemplatedConfigLoader(ConfigLoader):
                 obtained from the globals_pattern. In case of duplicate keys, the
                 ``globals_dict`` keys take precedence.
         """
-        super().__init__(conf_source, env, extra_params, **kwargs)
+        super().__init__(
+            conf_source=conf_source, env=env, runtime_params=runtime_params
+        )
+        self.base_env = base_env
+        self.default_run_env = default_run_env
 
-        self._arg_dict = super().get(globals_pattern) if globals_pattern else {}
+        self._config_mapping = (
+            _get_config_from_patterns(
+                conf_paths=self.conf_paths,
+                patterns=list(globals_pattern),
+                ac_template=False,
+            )
+            if globals_pattern
+            else {}
+        )
         globals_dict = deepcopy(globals_dict) or {}
-        self._arg_dict = {**self._arg_dict, **globals_dict}
+        self._config_mapping = {**self._config_mapping, **globals_dict}
 
-    @staticmethod
-    def _load_config_file(config_file: Path) -> Dict[str, Any]:
-        """Load an individual config file using `anyconfig` as a backend.
-
-        Args:
-            config_file: Path to a config file to process.
-
-        Returns:
-            Parsed configuration.
-        """
-        # for performance reasons
-        import anyconfig  # pylint: disable=import-outside-toplevel
-
-        return {
-            k: v
-            for k, v in anyconfig.load(config_file, ac_template=True).items()
-            if not k.startswith("_")
-        }
+    @property
+    def conf_paths(self):
+        """Property method to return deduplicated configuration paths."""
+        return _remove_duplicates(self._build_conf_paths())
 
     def get(self, *patterns: str) -> Dict[str, Any]:
         """Tries to resolve the template variables in the config dictionary
@@ -183,9 +185,17 @@ class TemplatedConfigLoader(ConfigLoader):
         Raises:
             ValueError: malformed config found.
         """
+        config_raw = _get_config_from_patterns(
+            conf_paths=self.conf_paths, patterns=list(patterns), ac_template=True
+        )
+        return _format_object(config_raw, self._config_mapping)
 
-        config_raw = super().get(*patterns)
-        return _format_object(config_raw, self._arg_dict)
+    def _build_conf_paths(self) -> Iterable[str]:
+        run_env = self.env or self.default_run_env
+        return [
+            str(Path(self.conf_source) / self.base_env),
+            str(Path(self.conf_source) / run_env),
+        ]
 
 
 def _format_object(val: Any, format_dict: Dict[str, Any]) -> Any:

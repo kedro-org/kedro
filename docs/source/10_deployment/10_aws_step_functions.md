@@ -384,7 +384,7 @@ As well as the corresponding Lambda functions for each Kedro node:
 
 ![](../meta/images/aws_lambda_functions.png)
 
-If you go into the state machine and click on `Start Execution`, you will be able to see a full end-to-end run of the Kedro pipeline on AWS Step Functions.
+If you go into the state machine and click on `Start Execution`, you will be able to see a full end-to-end (E2E) run of the Kedro pipeline on AWS Step Functions.
 
 ## Limitations
 

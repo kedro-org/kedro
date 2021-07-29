@@ -34,7 +34,6 @@ __all__ = [
     "FeatherDataSet",
     "GBQTableDataSet",
     "ExcelDataSet",
-    "AppendableExcelDataSet",
     "HDFDataSet",
     "JSONDataSet",
     "ParquetDataSet",
@@ -48,8 +47,6 @@ with suppress(ImportError):
     from .csv_dataset import CSVDataSet  # NOQA
 with suppress(ImportError):
     from .excel_dataset import ExcelDataSet  # NOQA
-with suppress(ImportError):
-    from .appendable_excel_dataset import AppendableExcelDataSet  # NOQA
 with suppress(ImportError):
     from .feather_dataset import FeatherDataSet  # NOQA
 with suppress(ImportError):

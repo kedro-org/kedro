@@ -35,7 +35,7 @@ from kedro.framework.project import _ProjectSettings
 from kedro.framework.session import KedroSession
 from tests.framework.session.conftest import _mock_imported_settings_paths
 
-MockDistInfo = namedtuple("Distinfo", ["project_name", "version"])
+MockDistInfo = namedtuple("MockDistInfo", ["project_name", "version"])
 
 
 @pytest.fixture

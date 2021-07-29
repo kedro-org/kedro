@@ -174,7 +174,6 @@ def install(metadata: ProjectMetadata, compile_flag):
     # we cannot use `context.project_path` as in other commands since
     # context instantiation might break due to missing dependencies
     # we attempt to install here
-    # pylint: disable=consider-using-with
     source_path = metadata.source_dir
     environment_yml = source_path / "environment.yml"
     requirements_in = source_path / "requirements.in"
@@ -194,8 +193,14 @@ def install(metadata: ProjectMetadata, compile_flag):
         python_call("pip", pip_command)
     else:
         command = [sys.executable, "-m", "pip"] + pip_command
-        proc = subprocess.Popen(
-            command, creationflags=subprocess.CREATE_NEW_CONSOLE, stderr=subprocess.PIPE
+        # To comply with mypy, `shell=True` should be passed instead of
+        # `creationflags=subprocess.CREATE_NEW_CONSOLE`. However, bandit finds security
+        # issues for subprocess calls with `shell=True`, so we ignore type instead. See:
+        # https://bandit.readthedocs.io/en/latest/plugins/b602_subprocess_popen_with_shell_equals_true.html
+        proc = subprocess.Popen(  # pylint: disable=consider-using-with
+            command,
+            creationflags=subprocess.CREATE_NEW_CONSOLE,  # type: ignore
+            stderr=subprocess.PIPE,
         )
         _, errs = proc.communicate()
         if errs:
@@ -227,11 +232,27 @@ def package(metadata: ProjectMetadata):
     """Package the project as a Python egg and wheel."""
     source_path = metadata.source_dir
     call(
-        [sys.executable, "setup.py", "clean", "--all", "bdist_egg"],
+        [
+            sys.executable,
+            "setup.py",
+            "clean",
+            "--all",
+            "bdist_egg",
+            "--dist-dir",
+            "../dist",
+        ],
         cwd=str(source_path),
     )
     call(
-        [sys.executable, "setup.py", "clean", "--all", "bdist_wheel"],
+        [
+            sys.executable,
+            "setup.py",
+            "clean",
+            "--all",
+            "bdist_wheel",
+            "--dist-dir",
+            "../dist",
+        ],
         cwd=str(source_path),
     )
 

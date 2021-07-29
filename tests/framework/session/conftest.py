@@ -29,7 +29,7 @@ import logging
 from logging.handlers import QueueHandler, QueueListener
 from multiprocessing import Queue
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, List, Optional
 
 import pandas as pd
 import pytest
@@ -38,7 +38,6 @@ import yaml
 from dynaconf.validator import Validator
 
 from kedro import __version__ as kedro_version
-from kedro.config import ConfigLoader
 from kedro.framework.hooks import hook_impl
 from kedro.framework.hooks.manager import get_hook_manager
 from kedro.framework.project import _ProjectPipelines, _ProjectSettings
@@ -94,6 +93,10 @@ def _assert_hook_call_record_has_expected_parameters(
     """Assert the given call record has all expected parameters."""
     for param in expected_parameters:
         assert hasattr(call_record, param)
+
+
+def _assert_pipeline_equal(p: Pipeline, q: Pipeline):
+    assert sorted(p.nodes) == sorted(q.nodes)
 
 
 @pytest.fixture
@@ -367,16 +370,6 @@ class LoggingHooks:
         logger.info(
             "After dataset saved", extra={"dataset_name": dataset_name, "data": data}
         )
-
-    @hook_impl
-    def register_config_loader(
-        self, conf_paths: Iterable[str], env: str, extra_params: Dict[str, Any]
-    ) -> ConfigLoader:
-        logger.info(
-            "Registering config loader",
-            extra={"conf_paths": conf_paths, "env": env, "extra_params": extra_params},
-        )
-        return ConfigLoader(conf_paths)
 
     @hook_impl
     def register_catalog(

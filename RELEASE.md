@@ -1,3 +1,66 @@
+# Upcoming Release 0.18.0
+
+## Major features and improvements
+* Added support for Python 3.9, dropped support for Python 3.6.
+* Support specifying parameters mapping in `pipeline()` without the `params:` prefix.
+* Added new API `Pipeline.filter()` (previously in `KedroContext._filter_pipeline()`) to filter parts of a pipeline.
+* Added `partitionBy` support and exposed `save_args` for `SparkHiveDataSet`.
+* Exposed `open_args_save` in `fs_args` for `pandas.ParquetDataSet`.
+* Bumped the minimum version of `pandas` to 1.2. Any `storage_options` should continue to be specified under `fs_args` and/or `credentials`.
+* Refactored the `load` and `save` operations for `pandas` datasets in order to leverage `pandas` own API and delegate `fsspec` operations to them. This reduces the need to have our own `fsspec` wrappers.
+* Removed `cli.py` from the Kedro project template. By default, all CLI commands, including `kedro run`, are now defined on the Kedro framework side. These can be overridden in turn by a plugin or a `cli.py` file in your project. A packaged Kedro project will respect the same hierarchy when executed with `python -m my_package`.
+* Merged `pandas.AppendableExcelDataSet` into `pandas.ExcelDataSet`.
+* Added `save_args` to `feather.FeatherDataSet`.
+* The default `kedro` environment names can now be set in `settings.py` with the help of the `CONFIG_LOADER_ARGS` variable. The relevant keys to be supplied are `base_env` and `default_run_env`. These values are set to `base` and `local` respectively as a default.
+* Added `kedro.config.abstract_config.AbstractConfigLoader` as an abstract base class for all `ConfigLoader` implementations. `ConfigLoader` and `TemplatedConfigLoader` now inherit directly from this base class.
+* Streamlined the `ConfigLoader.get` and `TemplatedConfigLoader.get` API and delegated the actual `get` method functional implementation to the `kedro.config.common` module.
+
+## Breaking changes to the API
+* Add namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/quantumblacklabs/kedro/issues/399)
+* `pandas.ExcelDataSet` now uses `openpyxl` engine instead of `xlrd`.
+* `pandas.ParquetDataSet` now calls `pd.to_parquet()` upon saving. Note that the argument `partition_cols` is not supported.
+* `KedroSession.run` now raises `ValueError` rather than `KedroContextError` when the pipeline contains no nodes. The same `ValueError` is raised when there are no matching tags.
+* `KedroSession.run` now raises `ValueError` rather than `KedroContextError` when the pipeline name doesn't exist in the pipeline registry.
+* Removed deprecated functions `load_context` and `get_project_context`.
+* `spark.SparkHiveDataSet` API has been updated to reflect `spark.SparkDataSet`. The `write_mode=insert` option has also been replaced with `write_mode=append` as per Spark styleguide. This change addresses [Issue 725](https://github.com/quantumblacklabs/kedro/issues/725) and [Issue 745](https://github.com/quantumblacklabs/kedro/issues/745). Additionally, `upsert` mode now leverages `checkpoint` functionality and requires a valid `checkpointDir` be set for current `SparkContext`.
+* Deprecated and removed `ProjectHooks.register_config_loader` `hook_spec` in favour of loading `CONFIG_LOADER_CLASS` directly from `settings.py`. The default option for `CONFIG_LOADER_CLASS` is now set to `kedro.config.ConfigLoader`.
+* Added `CONFIG_LOADER_ARGS` to `settings.py` to facilitate the provision of additional keyword arguments to the constructor of the project `config_loader`. The default option for `CONFIG_LOADER_ARGS` is an empty dictionary.
+* `yaml.YAMLDataSet` can no longer save a `pandas.DataFrame` directly, but it can save a dictionary. Use `pandas.DataFrame.to_dict()` to convert your `pandas.DataFrame` to a dictionary before you attempt to save it to YAML.
+* Removed `--version` CLI option for `kedro pipeline package` command. Specific pipeline package version can be added by setting the `__version__` variable in the pipeline package's `__init__.py` file.
+* The `kedro package` and `kedro pipeline package` now save `egg` and `whl` files in the `<project_root>/dist` folder (previously `<project_root>/src/dist`).
+* Removed `kedro pipeline list` and `kedro pipeline describe` commands in favour of `kedro registry list` and `kedro registry describe`.
+* Removed `open_args_load` and `open_args_save` from the following datasets:
+  * pandas.CSVDataSet
+  * pandas.ExcelDataSet
+  * pandas.FeatherDataSet
+  * pandas.JSONDataSet
+  * pandas.ParquetDataSet
+* `storage_options` are now dropped if they are specified under `load_args` or `save_args` for the following datasets:
+  * pandas.CSVDataSet
+  * pandas.ExcelDataSet
+  * pandas.FeatherDataSet
+  * pandas.JSONDataSet
+  * pandas.ParquetDataSet
+* The environment defaulting behaviour has been removed from `KedroContext` and is now implemented in a `ConfigLoader` class (or equivalent) with the `base_env` and `default_run_env` attributes.
+* `ConfigLoader` and `TemplatedConfigLoader` argument `conf_root` has been renamed to `conf_source` to align the API.
+* The `settings.py` setting `CONF_ROOT` has been renamed to `CONF_SOURCE` to align the API. Default value of `conf` remains unchanged.
+* Renamed `extra_params` to `runtime_params` in `kedro.config.config.ConfigLoader` and `kedro.config.templated_config.TemplatedConfigLoader`.
+
+## Migration guide from Kedro 0.17.* to 0.18.*
+* Please remove any existing `hook_impl` of the `register_config_loader` method from `ProjectHooks` (or custom alternatives).
+* Populate `settings.py` with `CONFIG_LOADER_CLASS` set to your expected config loader class (for example `kedro.config.TemplatedConfigLoader` or custom implementation). If `CONFIG_LOADER_CLASS` value is not set, it will default to `kedro.config.ConfigLoader` at runtime.
+* Populate `settings.py` with `CONFIG_LOADER_ARGS` set to a dictionary with expected keyword arguments. If `CONFIG_LOADER_ARGS` is not set, it will default to an empty dictionary.
+* Optional: You can now remove all `params:` prefix when supplying values to `parameters` argument in a `pipeline()` call.
+* If you're using `pandas.ExcelDataSet`, make sure you have `openpyxl` installed in your environment. Note that this is automatically pulled if you specify `kedro[pandas.ExcelDataSet]==0.18.0` in your `requirements.in`. You can uninstall `xlrd` if you were only using it for this dataset.
+* If you're using `pandas.ParquetDataSet`, please pass pandas saving arguments directly to `save_args` instead of nested in `from_pandas` (e.g. `save_args = {"preserve_index": False}` instead of `save_args = {"from_pandas": {"preserve_index": False}}`).
+* If you're using `spark.SparkHiveDataSet` with `write_mode` option set to `insert`, please update this to `append` in line with the Spark styleguide. If you're using `spark.SparkHiveDataSet` with `write_mode` option set to `upsert`, please make sure that your `SparkContext` has a valid `checkpointDir` set either by `SparkContext.setCheckpointDir` method or directly in the `conf` folder.
+* Edit any scripts containing `kedro pipeline package --version` to remove the `--version` option. If you wish to set a specific pipeline package version, set the `__version__` variable in the pipeline package's `__init__.py` file.
+* If you had any `pandas.AppendableExcelDataSet` entries in your catalog, replace them with `pandas.ExcelDataSet`.
+* If you were using `pandas~=1.2.0` and passing `storage_options` through `load_args` or `savs_args`, please specify them under `fs_args` or via `credentials` instead.
+* Update the `settings.py` setting `CONF_ROOT` to `CONF_SOURCE`.
+* Update the key-word argument `conf_root` to `conf_source` when calling `ConfigLoader` or `TemplatedConfigLoader` directly.
+* Rename `extra_params` to `runtime_params` in `kedro.config.config.ConfigLoader` and `kedro.config.templated_config.TemplatedConfigLoader`, or your custom implementation, if it calls to `ConfigLoader` or any of its parent classes.
+
 # Upcoming Release 0.17.5
 
 ## Major features and improvements

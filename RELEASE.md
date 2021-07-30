@@ -8,6 +8,7 @@
 * Removed `.ipython/profile_default/startup/` from the Kedro project template in favour of `.ipython/profile_default/ipython_config.py` and the `kedro.extras.extensions.ipython`.
 
 ## Bug fixes and other changes
+* Bumped minimum required `fsspec` version to 2021.04.
 
 ## Minor breaking changes to the API
 

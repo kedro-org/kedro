@@ -31,7 +31,8 @@ configuration from different file formats.
 """
 
 
-from .config import BadConfigException  # NOQA
+from .abstract_config import AbstractConfigLoader  # NOQA
+from .abstract_config import BadConfigException  # NOQA
+from .abstract_config import MissingConfigException  # NOQA
 from .config import ConfigLoader  # NOQA
-from .config import MissingConfigException  # NOQA
 from .templated_config import TemplatedConfigLoader  # NOQA

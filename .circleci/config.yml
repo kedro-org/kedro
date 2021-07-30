@@ -33,7 +33,7 @@ commands:
           command: make install-pip-setuptools
       - run:
           name: Install requirements and test requirements
-          command: pip install -upgrade -r requirements.txt -r test_requirements.txt
+          command: pip install --upgrade -r requirements.txt -r test_requirements.txt
       - run:
           # Virtualenv 20.0.20 broke pre-commit, capped for now
           name: Install venv for some pre-commit hooks

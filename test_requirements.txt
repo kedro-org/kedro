@@ -1,5 +1,5 @@
 -r requirements.txt
-adlfs>=0.2.4, <0.6
+adlfs~=0.7
 bandit>=1.6.2, <2.0
 behave==1.2.6
 biopython~=1.73
@@ -8,7 +8,7 @@ blacken-docs==1.9.2
 compress-pickle[lz4]~=1.2.0
 dask[complete]~=2021.1
 flake8~=3.5
-gcsfs>=0.3.0, <0.8.0
+gcsfs>=2021.04, <2022.01  # Upper bound set arbitrarily, to be reassessed in early 2022
 geopandas>=0.6.0, <1.0
 hdfs>=2.5.8, <3.0
 holoviews~=1.13.0

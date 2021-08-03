@@ -98,7 +98,9 @@ class AbstractDataSet(abc.ABC):
     """``AbstractDataSet`` is the base class for all data set implementations.
     All data set implementations should extend this abstract class
     and implement the methods marked as abstract.
-
+    If a specific dataset implementation cannot be used in conjunction with
+    the ``ParallelRunner``, such user-defined dataset should have the
+    attribute `_SINGLE_PROCESS = True`.
     Example:
     ::
 

@@ -202,6 +202,7 @@ linkcheck_ignore = [
     "https://www.oracle.com/java/technologies/javase-downloads.html",  # "forbidden" url
     "https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71",
     "https://medium.com/quantumblack/beyond-the-notebook-and-into-the-data-science-framework-revolution-a7fd364ab9c4",
+    "https://www.java.com/en/download/help/download_options.html",  # "403 Client Error: Forbidden for url"
 ]
 
 # retry before render a link broken (fix for "too many requests")

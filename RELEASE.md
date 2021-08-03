@@ -135,6 +135,8 @@ from kedro.framework.project import settings
 
 print(settings.CONF_ROOT)
 ```
+* Added a check on `kedro.runner.parallel_runner.ParallelRunner` which checks datasets for the `_SINGLE_PROCESS` attribute in the `_validate_catalog` method. If this attribute is set to `True` in an instance of a dataset (e.g. `SparkDataSet`), the `ParallelRunner` will raise an `AttributeError`.
+* Any user-defined dataset that should not be used with `ParallelRunner` may now have the `_SINGLE_PROCESS` attribute set to `True`.
 
 ## Bug fixes and other changes
 * The version of a packaged modular pipeline now defaults to the version of the project package.

@@ -131,7 +131,6 @@ spec:
       parameters:
       - name: kedro_node
     container:
-      imagePullPolicy: Always
       image: {{ image }}
       env:
         - name: AWS_ACCESS_KEY_ID

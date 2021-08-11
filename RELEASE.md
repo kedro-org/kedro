@@ -1,4 +1,24 @@
-# Upcoming release 0.17.4
+# Upcoming Release 0.17.5
+
+## Major features and improvements
+* Added new CLI group `registry`, with the associated commands `kedro registry list` and `kedro registry describe`, to replace `kedro pipeline list` and `kedro pipeline describe`.
+* Added support for dependency management at a modular pipeline level. When a pipeline with `requirements.txt` is packaged, its dependencies are embedded in the modular pipeline wheel file. Upon pulling the pipeline, Kedro will append dependencies to the project's `requirements.in`. More information is available in [our documentation](https://kedro.readthedocs.io/en/stable/06_nodes_and_pipelines/03_modular_pipelines.html#package-a-modular-pipeline).
+* Added support for bulk packaging modular pipelines using `kedro pipeline package --all` and `pyproject.toml`.
+* Removed `cli.py` from the Kedro project template. By default all CLI commands, including `kedro run`, are now defined on the Kedro framework side. These can be overridden in turn by a plugin or a `cli.py` file in your project. A packaged Kedro project will respect the same hierarchy when executed with `python -m my_package`.
+* Removed `.ipython/profile_default/startup/` from the Kedro project template in favour of `.ipython/profile_default/ipython_config.py` and the `kedro.extras.extensions.ipython`.
+
+## Bug fixes and other changes
+* Bumped minimum required `fsspec` version to 2021.04.
+
+## Minor breaking changes to the API
+
+## Upcoming deprecations for Kedro 0.18.0
+* `kedro pipeline list` and `kedro pipeline describe` are being deprecated in favour of new commands `kedro registry list ` and `kedro registry describe`
+
+## Thanks for supporting contributions
+[Moussa Taifi](https://github.com/moutai/)
+
+# Release 0.17.4
 
 ## Major features and improvements
 * Added the following new datasets:
@@ -8,6 +28,7 @@
 | `plotly.PlotlyDataSet` | Works with plotly graph object Figures (saves as json file) | `kedro.extras.datasets.plotly` |
 
 ## Bug fixes and other changes
+* Defined our set of Kedro Principles! Have a read through [our docs](https://kedro.readthedocs.io/en/0.17.4/12_faq/03_kedro_principles.html).
 * `ConfigLoader.get()` now raises a `BadConfigException`, with a more helpful error message, if a configuration file cannot be loaded (for instance due to wrong syntax or poor formatting).
 * `run_id` now defaults to `save_version` when `after_catalog_created` is called, similarly to what happens during a `kedro run`.
 * Fixed a bug where `kedro ipython` and `kedro jupyter notebook` didn't work if the `PYTHONPATH` was already set.
@@ -15,13 +36,23 @@
 * `kedro info` now outputs if a plugin has any `hooks` or `cli_hooks` implemented.
 * `PartitionedDataSet` now supports lazily materializing data on save.
 * `kedro pipeline describe` now defaults to the `__default__` pipeline when no pipeline name is provided and also shows the namespace the nodes belong to.
+* Fixed an issue where spark.SparkDataSet with enabled versioning would throw a VersionNotFoundError when using databricks-connect from a remote machine and saving to dbfs filesystem.
+* `EmailMessageDataSet` added to doctree.
+* When node inputs do not pass validation, the error message is now shown as the most recent exception in the traceback ([Issue #761](https://github.com/quantumblacklabs/kedro/issues/761)).
+* `kedro pipeline package` now only packages the parameter file that exactly matches the pipeline name specified and the parameter files in a directory with the pipeline name.
+* Extended support to newer versions of third-party dependencies ([Issue #735](https://github.com/quantumblacklabs/kedro/issues/735)).
+* Ensured consistent references to `model input` tables in accordance with our Data Engineering convention.
+* Changed behaviour where `kedro pipeline package` takes the pipeline package version, rather than the kedro package version. If the pipeline package version is not present, then the package version is used.
+* Launched [GitHub Discussions](https://github.com/quantumblacklabs/kedro/discussions/) and [Kedro Discord Server](https://discord.gg/akJDeVaxnB)
+* Improved error message when versioning is enabled for a dataset previously saved as non-versioned ([Issue #625](https://github.com/quantumblacklabs/kedro/issues/625)).
 
 ## Minor breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.18.0
 
 ## Thanks for supporting contributions
-[Lou Kratz](https://github.com/lou-k)
+[Lou Kratz](https://github.com/lou-k),
+[Lucas Jamar](https://github.com/lucasjamar/)
 
 # Release 0.17.3
 
@@ -51,7 +82,6 @@ print(pipelines["__default__"])  # pipeline loading is only triggered here
 * Fixed error when using starters on Windows with Python 3.7 (Issue [#722](https://github.com/quantumblacklabs/kedro/issues/722)).
 * Fixed decoding error of config files that contain accented characters by opening them for reading in UTF-8.
 * Fixed an issue where `after_dataset_loaded` run would finish before a dataset is actually loaded when using `--async` flag.
-* Fixed an issue where `spark.SparkDataSet` with enabled versioning would throw a `VersionNotFoundError` when using `databricks-connect` from a remote machine and saving to `dbfs` filesystem.
 
 ## Upcoming deprecations for Kedro 0.18.0
 
@@ -105,6 +135,8 @@ from kedro.framework.project import settings
 
 print(settings.CONF_ROOT)
 ```
+* Added a check on `kedro.runner.parallel_runner.ParallelRunner` which checks datasets for the `_SINGLE_PROCESS` attribute in the `_validate_catalog` method. If this attribute is set to `True` in an instance of a dataset (e.g. `SparkDataSet`), the `ParallelRunner` will raise an `AttributeError`.
+* Any user-defined dataset that should not be used with `ParallelRunner` may now have the `_SINGLE_PROCESS` attribute set to `True`.
 
 ## Bug fixes and other changes
 * The version of a packaged modular pipeline now defaults to the version of the project package.

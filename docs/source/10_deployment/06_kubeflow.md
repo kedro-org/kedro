@@ -3,13 +3,13 @@
 This page explains how to convert your Kedro pipeline to use [Kubeflow Pipelines](https://github.com/kubeflow/pipelines), an open-source toolkit for machine learning (ML). You can use it to deploy ML workflows onto [Kubernetes](https://kubernetes.io/).
 
 ## Why would you use Kubeflow Pipelines?
-Kubeflow Pipelines is an end-to-end orchestration tool to deploy, scale and manage your machine learning systems within Docker containers. You can schedule and compare runs, and examine detailed reports on each run.
+Kubeflow Pipelines is an end-to-end (E2E) orchestration tool to deploy, scale and manage your machine learning systems within Docker containers. You can schedule and compare runs, and examine detailed reports on each run.
 
 Here are the main reasons to use Kubeflow Pipelines:
 
 - It is cloud-agnostic and can run on any Kubernetes cluster
 - Kubeflow is tailored towards machine learning workflows for model deployment, experiment tracking, and hyperparameter tuning
-- You can re-use components and pipelines to create end-to-end solutions
+- You can re-use components and pipelines to create E2E solutions
 
 ## Prerequisites
 
@@ -49,7 +49,7 @@ import click
 from kfp import aws, dsl
 from kfp.compiler.compiler import Compiler
 
-from kedro.framework.session import KedroSession
+from kedro.framework.project import pipelines
 from kedro.framework.startup import bootstrap_project
 from kedro.pipeline.node import Node
 
@@ -78,11 +78,8 @@ def generate_kfp(image: str, pipeline_name: str, env: str) -> None:
     metadata = bootstrap_project(project_path)
     project_name = metadata.project_name
 
-    session = KedroSession.create(project_path=project_path, env=env)
-    context = session.load_context()
-
     pipeline_name = pipeline_name or "__default__"
-    _PIPELINE = context.pipelines.get(pipeline_name)
+    _PIPELINE = pipelines.get(pipeline_name)
 
     Compiler().compile(convert_kedro_pipeline_to_kfp, project_name + ".yaml")
 

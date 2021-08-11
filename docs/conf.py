@@ -94,7 +94,7 @@ exclude_patterns = [
     "_templates",
     "modules.rst",
     "source",
-    "README.md",
+    "kedro_docs_style_guide.md",
 ]
 
 type_targets = {
@@ -137,7 +137,7 @@ type_targets = {
         "CONF_ROOT",
         "integer -- return number of occurrences of value",
         "integer -- return first index of value.",
-        "kedro.extras.datasets.pandas.json_dataset.JSONDataSet"
+        "kedro.extras.datasets.pandas.json_dataset.JSONDataSet",
     ),
     "py:data": (
         "typing.Any",
@@ -198,6 +198,10 @@ linkcheck_ignore = [
     "https://zenodo.org/badge/latestdoi/182067506",
     "https://eternallybored.org/misc/wget/",
     "https://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table.from_pandas",
+    "https://www.oracle.com/java/technologies/javase-downloads.html",  # "forbidden" url
+    "https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71",
+    "https://medium.com/quantumblack/beyond-the-notebook-and-into-the-data-science-framework-revolution-a7fd364ab9c4",
+    "https://www.java.com/en/download/help/download_options.html",  # "403 Client Error: Forbidden for url"
 ]
 
 # retry before render a link broken (fix for "too many requests")
@@ -371,7 +375,11 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
         if what == "class":
             # first do plural only for classes
             replacements += [
-                (r"``{}``s".format(obj), f":{what}:`~{module}.{obj}`\\\\s", obj,)
+                (
+                    r"``{}``s".format(obj),
+                    f":{what}:`~{module}.{obj}`\\\\s",
+                    obj,
+                )
                 for obj in objects
             ]
 
@@ -477,8 +485,8 @@ def _prepare_build_dir(app, config):
     build_root = Path(app.srcdir)
     build_out = Path(app.outdir)
     copy_tree(str(here / "source"), str(build_root))
-    copy_tree(str(build_root / "14_api_docs"), str(build_root))
-    shutil.rmtree(str(build_root / "14_api_docs"))
+    copy_tree(str(build_root / "15_api_docs"), str(build_root))
+    shutil.rmtree(str(build_root / "15_api_docs"))
     shutil.rmtree(str(build_out), ignore_errors=True)
     copy_tree(str(build_root / "css"), str(build_out / "_static" / "css"))
     shutil.rmtree(str(build_root / "css"))

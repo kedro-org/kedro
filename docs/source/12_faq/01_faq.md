@@ -1,8 +1,7 @@
 # Frequently asked questions
 
 The following lists a set of questions that we have been asked about Kedro in the past. If you have a different
- question which isn't answered here, please consider asking it over on [Discourse](https://discourse.kedro.community/) or [Stack Overflow](https://stackoverflow.com/questions/tagged/kedro).
-
+ question which isn't answered here, check out [GitHub Discussions](https://github.com/quantumblacklabs/kedro/discussions) or talk to the community on the [Discord Server](https://discord.gg/akJDeVaxnB).
 ## What is Kedro?
 
 Kedro is an open-source Python framework for creating reproducible, maintainable and modular data science code. It
@@ -32,7 +31,8 @@ Currently, the core Kedro team consists of
 [Joel Schwarzmann](https://github.com/datajoely),
 [Antony Milne](https://github.com/AntonyMilneQB),
 [Jiri Klein](https://github.com/jiriklein),
-[Ignacio Paricio](https://github.com/ignacioparicio).
+[Ignacio Paricio](https://github.com/ignacioparicio) and
+[Hamza Oza](https://github.com/hamzaoza).
 
 Former core team members with significant contributions include:
 [Gordon Wrigley](https://github.com/tolomea),
@@ -92,7 +92,9 @@ The responsibility of _"What time will this pipeline run?"_, _"How do I manage m
 ## What is data engineering convention?
 
 [Bruce Philp](https://github.com/bruceaphilp) and [Guilherme Braccialli](https://github.com/gbraccialli-qb) at
-[QuantumBlack](https://github.com/quantumblacklabs) are the brains behind this model of managing data. To see which data layer to use, refer to the following table.
+[QuantumBlack](https://github.com/quantumblacklabs) are the brains behind a layered data-engineering convention as a model of managing data. You can find an [in-depth walk through of their convention](https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71) as a blog post on Medium.
+
+Refer to the following table below for a high level guide to each layer's purpose
 
 ```eval_rst
 .. note:: The data layers don’t have to exist locally in the ``data`` folder within your project, but we recommend that you structure your S3 buckets or other data stores in a similar way.
@@ -184,4 +186,4 @@ If you're an academic, Kedro can also help you, for example, as a tool to solve 
 
 ## How can I get my question answered?
 
-If your question isn't answered above, please consider asking it over on [Stack Overflow](https://stackoverflow.com/questions/tagged/kedro) or refer to the [Kedro.Community Discourse channel](https://discourse.kedro.community/) that is managed by Kedroids all over the world.
+If your question isn't answered above, check out [GitHub Discussions](https://github.com/quantumblacklabs/kedro/discussions) or talk to the community on the [Discord Server](https://discord.gg/akJDeVaxnB).

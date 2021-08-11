@@ -42,7 +42,9 @@ class CLICommandSpecs:
 
     @cli_hook_spec
     def before_command_run(
-        self, project_metadata: ProjectMetadata, command_args: List[str],
+        self,
+        project_metadata: ProjectMetadata,
+        command_args: List[str],
     ):
         """Hooks to be invoked before a CLI command runs.
         It receives the ``project_metadata`` as well as

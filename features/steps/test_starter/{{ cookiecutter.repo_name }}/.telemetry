@@ -1,0 +1,2 @@
+# this file exists to prevent telemetry from prompting for input during e2e tests
+consent: false

@@ -50,20 +50,20 @@ HoloViews = TypeVar("HoloViews")
 
 class HoloviewsWriter(AbstractVersionedDataSet):
     """``HoloviewsWriter`` saves Holoviews objects to image file(s) in an underlying
-        filesystem (e.g. local, S3, GCS).
+    filesystem (e.g. local, S3, GCS).
 
-        Example:
-        ::
+    Example:
+    ::
 
-            >>> import holoviews as hv
-            >>> from kedro.extras.datasets.holoviews import HoloviewsWriter
-            >>>
-            >>> curve = hv.Curve(range(10))
-            >>> holoviews_writer = HoloviewsWriter("/tmp/holoviews")
-            >>>
-            >>> holoviews_writer.save(curve)
+        >>> import holoviews as hv
+        >>> from kedro.extras.datasets.holoviews import HoloviewsWriter
+        >>>
+        >>> curve = hv.Curve(range(10))
+        >>> holoviews_writer = HoloviewsWriter("/tmp/holoviews")
+        >>>
+        >>> holoviews_writer.save(curve)
 
-        """
+    """
 
     DEFAULT_SAVE_ARGS = {"fmt": "png"}  # type: Dict[str, Any]
 

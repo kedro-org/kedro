@@ -89,9 +89,9 @@ class ParquetDataSet(AbstractDataSet):
             filepath: Filepath in POSIX format to a parquet file
                 parquet collection or the directory of a multipart parquet.
             load_args: Additional loading options `dask.dataframe.read_parquet`:
-                https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.read_parquet
+                https://docs.dask.org/en/latest/generated/dask.dataframe.read_parquet.html
             save_args: Additional saving options for `dask.dataframe.to_parquet`:
-                https://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.to_parquet
+                https://docs.dask.org/en/latest/generated/dask.dataframe.to_parquet.html
             credentials: Credentials required to get access to the underlying filesystem.
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Optional parameters to the backend file system driver:

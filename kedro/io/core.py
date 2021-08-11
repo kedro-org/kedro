@@ -98,7 +98,9 @@ class AbstractDataSet(abc.ABC):
     """``AbstractDataSet`` is the base class for all data set implementations.
     All data set implementations should extend this abstract class
     and implement the methods marked as abstract.
-
+    If a specific dataset implementation cannot be used in conjunction with
+    the ``ParallelRunner``, such user-defined dataset should have the
+    attribute `_SINGLE_PROCESS = True`.
     Example:
     ::
 
@@ -224,7 +226,8 @@ class AbstractDataSet(abc.ABC):
 
         Raises:
             DataSetError: when underlying save method raises error.
-
+            FileNotFoundError: when save method got file instead of dir, on Windows.
+            NotADirectoryError: when save method got file instead of dir, on Unix.
         """
 
         if data is None:
@@ -234,6 +237,8 @@ class AbstractDataSet(abc.ABC):
             self._logger.debug("Saving %s", str(self))
             self._save(data)
         except DataSetError:
+            raise
+        except (FileNotFoundError, NotADirectoryError):
             raise
         except Exception as exc:
             message = f"Failed while saving data to data set {str(self)}.\n{str(exc)}"
@@ -410,7 +415,10 @@ def parse_dataset_definition(
         try:
             class_obj = next(obj for obj in trials if obj is not None)
         except StopIteration as exc:
-            raise DataSetError(f"Class `{class_obj}` not found.") from exc
+            raise DataSetError(
+                f"Class `{class_obj}` not found or one of its dependencies"
+                f"has not been installed."
+            ) from exc
 
     if not issubclass(class_obj, AbstractDataSet):
         raise DataSetError(
@@ -613,7 +621,22 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
     def save(self, data: Any) -> None:
         self._version_cache.clear()
         save_version = self.resolve_save_version()  # Make sure last save version is set
-        super().save(data)
+        try:
+            super().save(data)
+        except (FileNotFoundError, NotADirectoryError) as err:
+            # FileNotFoundError raised in Win, NotADirectoryError raised in Unix
+            _default_version = "YYYY-MM-DDThh.mm.ss.sssZ"
+            raise DataSetError(
+                f"Cannot save versioned dataset `{self._filepath.name}` to "
+                f"`{self._filepath.parent.as_posix()}` because a file with the same "
+                f"name already exists in the directory. This is likely because "
+                f"versioning was enabled on a dataset already saved previously. Either "
+                f"remove `{self._filepath.name}` from the directory or manually "
+                f"convert it into a versioned dataset by placing it in a versioned "
+                f"directory (e.g. with default versioning format "
+                f"`{self._filepath.as_posix()}/{_default_version}/{self._filepath.name}"
+                f"`)."
+            ) from err
 
         load_version = self.resolve_load_version()
         if load_version != save_version:

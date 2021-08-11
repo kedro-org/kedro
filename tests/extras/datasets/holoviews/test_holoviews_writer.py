@@ -215,3 +215,23 @@ class TestHoloviewsWriterVersioned:
         hv.save(dummy_hv_object, test_filepath)
 
         assert actual_filepath.read_bytes() == test_filepath.read_bytes()
+
+    def test_versioning_existing_dataset(
+        self, hv_writer, versioned_hv_writer, dummy_hv_object
+    ):
+        """Check the error when attempting to save a versioned dataset on top of an
+        already existing (non-versioned) dataset."""
+        hv_writer.save(dummy_hv_object)
+        assert hv_writer.exists()
+        assert hv_writer._filepath == versioned_hv_writer._filepath
+        pattern = (
+            f"(?=.*file with the same name already exists in the directory)"
+            f"(?=.*{versioned_hv_writer._filepath.parent.as_posix()})"
+        )
+        with pytest.raises(DataSetError, match=pattern):
+            versioned_hv_writer.save(dummy_hv_object)
+
+        # Remove non-versioned dataset and try again
+        Path(hv_writer._filepath.as_posix()).unlink()
+        versioned_hv_writer.save(dummy_hv_object)
+        assert versioned_hv_writer.exists()

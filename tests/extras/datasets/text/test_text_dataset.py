@@ -26,7 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 
 import pytest
 from fsspec.implementations.http import HTTPFileSystem
@@ -191,3 +191,25 @@ class TestTextDataSetVersioned:
             TextDataSet(
                 filepath="https://example.com/file.txt", version=Version(None, None)
             )
+
+    def test_versioning_existing_dataset(
+        self,
+        txt_data_set,
+        versioned_txt_data_set,
+    ):
+        """Check the error when attempting to save a versioned dataset on top of an
+        already existing (non-versioned) dataset."""
+        txt_data_set.save(STRING)
+        assert txt_data_set.exists()
+        assert txt_data_set._filepath == versioned_txt_data_set._filepath
+        pattern = (
+            f"(?=.*file with the same name already exists in the directory)"
+            f"(?=.*{versioned_txt_data_set._filepath.parent.as_posix()})"
+        )
+        with pytest.raises(DataSetError, match=pattern):
+            versioned_txt_data_set.save(STRING)
+
+        # Remove non-versioned dataset and try again
+        Path(txt_data_set._filepath.as_posix()).unlink()
+        versioned_txt_data_set.save(STRING)
+        assert versioned_txt_data_set.exists()

@@ -39,9 +39,9 @@ Welcome to Kedro's documentation!
     :target: https://kedro.readthedocs.io/
     :alt: Docs build status
 
-.. image:: https://img.shields.io/discourse/users?server=https%3A%2F%2Fdiscourse.kedro.community%2F
-    :target: https://discourse.kedro.community/
-    :alt: Discourse users
+.. image:: https://img.shields.io/discord/778216384475693066.svg?color=7289da&label=Kedro%20Discord&logo=discord&style=flat-square
+    :target: https://discord.gg/akJDeVaxnB
+    :alt: Discord Server
 
 .. image:: https://img.shields.io/badge/code%20style-black-black.svg
     :target: https://github.com/psf/black
@@ -164,6 +164,7 @@ Welcome to Kedro's documentation!
 
    12_faq/01_faq
    12_faq/02_architecture_overview
+   12_faq/03_kedro_principles
 
 .. toctree::
    :maxdepth: 2
@@ -172,6 +173,14 @@ Welcome to Kedro's documentation!
    13_resources/01_logos
    13_resources/02_glossary
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Contribute to Kedro
+
+   14_contribution/01_contribute_to_kedro
+   14_contribution/02_developer_contributor_guidelines
+   14_contribution/03_backwards_compatibility
+   14_contribution/04_documentation_contributor_guidelines
 
 API documentation
 =================

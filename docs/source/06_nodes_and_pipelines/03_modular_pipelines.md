@@ -121,8 +121,10 @@ Since Kedro 0.16.4 you can package a modular pipeline by executing `kedro pipeli
 When you package your modular pipeline, Kedro will also automatically package files from 3 locations:
 
 *  All the modular pipeline code in `src/<python_package>/pipelines/<pipeline_name>/`
-*  Parameter files that match the glob pattern `conf/<env>/parameters*/**/*<pipeline_name>*`, where `<env>` defaults to `base`. If you need to capture the parameters from a different config environment, run `kedro pipeline package --env <env_name> <pipeline_name>`
+*  Parameter files that match either the glob pattern `conf/<env>/parameters*/**/<pipeline_name>.yml` or `conf/<env>/parameters*/**/<pipeline_name>/*`, where `<env>` defaults to `base`. If you need to capture the parameters from a different config environment, run `kedro pipeline package --env <env_name> <pipeline_name>`
 *  Pipeline unit tests in `src/tests/pipelines/<pipeline_name>`
+
+Kedro will also include any requirements found in `src/<python_package>/pipelines/<pipeline_name>/requirements.txt` in the modular pipeline wheel file. These requirements will later be taken into account when pulling a pipeline via `kedro pipeline pull`.
 
 ```eval_rst
 .. note::  Kedro will not package the catalog config files even if those are present in ``conf/<env>/catalog/<pipeline_name>.yml``.
@@ -132,6 +134,22 @@ If you plan to publish your packaged modular pipeline to some Python package rep
 
 In addition to [PyPI](https://pypi.org/), you can also share the packaged wheel file directly, or via a cloud storage such as AWS S3.
 
+#### Package multiple modular pipelines
+
+If you are packaging multiple modular pipelines, you have the option to do it in bulk, by defining the specifications in the project's `pyproject.toml`:
+
+```toml
+[tool.kedro.pipeline.package]
+first_pipeline = {alias = "aliased_pipeline", destination = "somewhere/else", env = "uat"}
+second_pipeline = {}
+```
+
+Where the keys (e.g. `first_pipeline`, `second_pipeline`) are the modular pipelines' folder names, and the values are the options that `kedro pipeline package <pipeline_name>` accepts.
+
+```eval_rst
+.. note::  Make sure `destination` is specified as a POSIX path even when working on a Windows machine.
+```
+
 ### Pull a modular pipeline
 
 You can pull a modular pipeline from a wheel file by executing `kedro pipeline pull <package_name>`, where `<package_name>` is either a package name on PyPI or a path to the wheel file. Kedro will unpack the wheel file, and install the files in following locations in your Kedro project:
@@ -139,6 +157,12 @@ You can pull a modular pipeline from a wheel file by executing `kedro pipeline p
 *  All the modular pipeline code in `src/<python_package>/pipelines/<pipeline_name>/`
 *  Configuration files in `conf/<env>/parameters/<pipeline_name>.yml`, where `<env>` defaults to `base`. If you want to place the parameters from a different config environment, run `kedro pipeline pull <pipeline_name> --env <env_name>`
 *  Pipeline unit tests in `src/tests/pipelines/<pipeline_name>`
+
+Kedro will also parse any requirements packaged with the modular pipeline and add them to project level `requirements.in`. It is advised to do `kedro install --build-reqs` to compile and install the updated list of requirements after pulling a modular pipeline.
+
+```eval_rst
+.. note::  If a modular pipeline has embedded requirements and a project `requirements.in` file does not already exist, it will be generated based on the project `requirements.txt` before appending the modular pipeline requirements.
+```
 
 You can pull a modular pipeline from different locations, including local storage, PyPI and the cloud:
 
@@ -275,10 +299,10 @@ Consider this example:
 
 ```python
 cook_pipeline = Pipeline(
-    [node(defrost, "frozen_meat", "meat"), node(grill, "meat", "grilled_meat"),]
+    [node(defrost, "frozen_meat", "meat"), node(grill, "meat", "grilled_meat")]
 )
 
-lunch_pipeline = Pipeline([node(eat, "food", None),])
+lunch_pipeline = Pipeline([node(eat, "food", None)])
 ```
 
 A simple `cook_pipeline + lunch_pipeline` doesn't work, because the `grilled_meat` output in the `cook_pipeline` needs to be mapped to the `food` input in the `lunch_pipeline`. This can be done in any of the following three (equivalent) ways:

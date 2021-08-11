@@ -33,7 +33,7 @@ from pathlib import Path, PurePosixPath
 import pandas as pd
 import pytest
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col  # pylint: disable=no-name-in-module
+from pyspark.sql.functions import col
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
 
@@ -220,7 +220,9 @@ class TestSparkDataSet:
         with tempfile.NamedTemporaryFile() as temp_data_file:
             filepath = Path(temp_data_file.name).as_posix()
             spark_data_set = SparkDataSet(
-                filepath=filepath, file_format="csv", load_args={"header": True},
+                filepath=filepath,
+                file_format="csv",
+                load_args={"header": True},
             )
             assert "SparkDataSet" in str(spark_data_set)
             assert f"filepath={filepath}" in str(spark_data_set)
@@ -286,8 +288,7 @@ class TestSparkDataSet:
 
     @pytest.mark.parametrize("is_async", [False, True])
     def test_parallel_runner(self, is_async, spark_in):
-        """Test ParallelRunner with SparkDataSet fails.
-        """
+        """Test ParallelRunner with SparkDataSet fails."""
         catalog = DataCatalog(data_sets={"spark_in": spark_in})
         pipeline = Pipeline([node(identity, "spark_in", "spark_out")])
         pattern = (
@@ -379,6 +380,20 @@ class TestSparkDataSetVersionedLocal:
         )
         with pytest.raises(DataSetError, match=pattern):
             versioned_local.save(sample_spark_df)
+
+    def test_versioning_existing_dataset(
+        self, versioned_dataset_local, sample_spark_df
+    ):
+        """Check behavior when attempting to save a versioned dataset on top of an
+        already existing (non-versioned) dataset. Note: because SparkDataSet saves to a
+        directory even if non-versioned, an error is not expected."""
+        spark_data_set = SparkDataSet(
+            filepath=versioned_dataset_local._filepath.as_posix()
+        )
+        spark_data_set.save(sample_spark_df)
+        assert spark_data_set.exists()
+        versioned_dataset_local.save(sample_spark_df)
+        assert versioned_dataset_local.exists()
 
 
 @pytest.mark.skipif(

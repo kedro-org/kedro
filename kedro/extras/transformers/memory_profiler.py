@@ -50,7 +50,7 @@ def _normalise_mem_usage(mem_usage):
 
 
 class ProfileMemoryTransformer(AbstractTransformer):
-    """ A transformer that logs the maximum memory consumption during load and save calls """
+    """A transformer that logs the maximum memory consumption during load and save calls."""
 
     @property
     def _logger(self):

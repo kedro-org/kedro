@@ -33,8 +33,8 @@ from typing import Any, Dict
 
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as graph_objects
 import plotly.io as pio
+from plotly import graph_objects
 
 from kedro.extras.datasets.pandas import JSONDataSet
 from kedro.io.core import Version, get_filepath_str
@@ -91,7 +91,7 @@ class PlotlyDataSet(JSONDataSet):
                 representing the plotted data.
             load_args: Plotly options for loading JSON files.
                 Here you can find all available arguments:
-                https://plotly.com/python-api-reference/generated/plotly.io.read_json.html
+                https://plotly.com/python-api-reference/generated/plotly.io.from_json.html#plotly.io.from_json
                 All defaults are preserved.
             save_args: Plotly options for saving JSON files.
                 Here you can find all available arguments:
@@ -129,7 +129,10 @@ class PlotlyDataSet(JSONDataSet):
 
     def _load(self) -> graph_objects.Figure:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        return pio.read_json(load_path, **self._load_args)
+        with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
+            # read_json doesn't work correctly with file handler, so we have to read the file,
+            # decode it manually and pass to the low-level from_json instead.
+            return pio.from_json(str(fs_file.read(), "utf-8"), **self._load_args)
 
 
 def _plotly_express_wrapper(

@@ -193,7 +193,9 @@ class TestJupyterLabCommand:
         self, python_call_mock, fake_project_cli, fake_ipython_message, fake_metadata
     ):
         result = CliRunner().invoke(
-            fake_project_cli, ["jupyter", "lab", "--ip", "0.0.0.0"], obj=fake_metadata,
+            fake_project_cli,
+            ["jupyter", "lab", "--ip", "0.0.0.0"],
+            obj=fake_metadata,
         )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_called_once_with(False)
@@ -227,7 +229,9 @@ class TestJupyterLabCommand:
     def test_env(self, env_flag, fake_project_cli, python_call_mock, fake_metadata):
         """This tests passing an environment variable to the jupyter subprocess."""
         result = CliRunner().invoke(
-            fake_project_cli, ["jupyter", "lab", env_flag, "base"], obj=fake_metadata,
+            fake_project_cli,
+            ["jupyter", "lab", env_flag, "base"],
+            obj=fake_metadata,
         )
         assert not result.exit_code
 

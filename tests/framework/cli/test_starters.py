@@ -42,7 +42,7 @@ from cookiecutter.exceptions import RepositoryCloneFailed
 from kedro import __version__ as version
 from kedro.framework.cli.starters import _STARTER_ALIASES, TEMPLATE_PATH
 
-FILES_IN_TEMPLATE = 37
+FILES_IN_TEMPLATE = 36
 
 
 @pytest.fixture
@@ -141,7 +141,9 @@ class TestNewFromUserPromptsValid:
 
     def test_custom_repo_name(self, fake_kedro_cli):
         result = CliRunner().invoke(
-            fake_kedro_cli, ["new"], input=_make_cli_prompt_input(repo_name="my-repo"),
+            fake_kedro_cli,
+            ["new"],
+            input=_make_cli_prompt_input(repo_name="my-repo"),
         )
         _assert_template_ok(
             result,

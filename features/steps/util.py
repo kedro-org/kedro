@@ -91,7 +91,7 @@ def wait_for(
     timeout_: int = 10,
     print_error: bool = False,
     sleep_for: int = 1,
-    **kwargs
+    **kwargs,
 ) -> Any:
     """Run specified function until it returns expected result until timeout.
 

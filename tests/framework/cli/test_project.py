@@ -451,7 +451,10 @@ class TestInstallCommand:
         assert "Error in dependencies" in result.output
 
     def test_install_working_with_unimportable_pipelines(
-        self, fake_project_cli, mocker, fake_metadata,
+        self,
+        fake_project_cli,
+        mocker,
+        fake_metadata,
     ):
         """Test kedro install works even if pipelines are not importable"""
         mocker.patch("kedro.framework.cli.project.os").name = "posix"
@@ -465,6 +468,22 @@ class TestInstallCommand:
         result = CliRunner().invoke(fake_project_cli, ["install"], obj=fake_metadata)
         assert not result.exit_code, result.output
         assert "Requirements installed!" in result.output
+
+    @pytest.mark.parametrize("os_name", ["posix", "nt"])
+    def test_install_missing_requirements_in_and_txt(
+        self, fake_project_cli, mocker, fake_metadata, os_name
+    ):
+        """Test error when neither requirements.txt nor requirements.in exists."""
+        mocker.patch("kedro.framework.cli.project.os").name = os_name
+        mocker.patch.object(Path, "is_file", return_value=False)
+        result = CliRunner().invoke(
+            fake_project_cli, ["install", "--build-reqs"], obj=fake_metadata
+        )
+        assert result.exit_code  # Error expected
+        assert isinstance(result.exception, FileNotFoundError)
+        assert "No project requirements.in or requirements.txt found" in str(
+            result.exception
+        )
 
 
 @pytest.fixture
@@ -484,7 +503,9 @@ class TestIpythonCommand:
         fake_metadata,
     ):
         result = CliRunner().invoke(
-            fake_project_cli, ["ipython", "--random-arg", "value"], obj=fake_metadata,
+            fake_project_cli,
+            ["ipython", "--random-arg", "value"],
+            obj=fake_metadata,
         )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_called_once_with()

@@ -59,9 +59,9 @@ preprocessed_shuttles:
   filepath: data/02_intermediate/preprocessed_shuttles.csv
   layer: intermediate
 
-master_table:
+model_input_table:
   type: pandas.CSVDataSet
-  filepath: data/03_primary/master_table.csv
+  filepath: data/03_primary/model_input_table.csv
   layer: primary
 
 regressor:

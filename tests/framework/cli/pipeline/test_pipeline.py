@@ -43,47 +43,6 @@ PACKAGE_NAME = "dummy_package"
 PIPELINE_NAME = "my_pipeline"
 
 
-@pytest.fixture(autouse=True)
-def mocked_logging(mocker):
-    # Disable logging.config.dictConfig in KedroSession._setup_logging as
-    # it changes logging.config and affects other unit tests
-    return mocker.patch("logging.config.dictConfig")
-
-
-@pytest.fixture(autouse=True)
-def cleanup_pipelines(fake_repo_path, fake_package_path):
-    pipes_path = fake_package_path / "pipelines"
-    old_pipelines = {p.name for p in pipes_path.iterdir() if p.is_dir()}
-    yield
-
-    # remove created pipeline files after the test
-    created_pipelines = {
-        p.name for p in pipes_path.iterdir() if p.is_dir() and p.name != "__pycache__"
-    }
-    created_pipelines -= old_pipelines
-
-    for pipeline in created_pipelines:
-        shutil.rmtree(str(pipes_path / pipeline))
-
-        confs = fake_repo_path / settings.CONF_ROOT
-        for each in confs.rglob(f"*{pipeline}*"):  # clean all pipeline config files
-            if each.is_file():
-                each.unlink()
-
-        dirs_to_delete = (
-            dirpath
-            for pattern in ("parameters", "catalog")
-            for dirpath in confs.rglob(pattern)
-            if dirpath.is_dir() and not any(dirpath.iterdir())
-        )
-        for dirpath in dirs_to_delete:
-            dirpath.rmdir()
-
-        tests = fake_repo_path / "src" / "tests" / "pipelines" / pipeline
-        if tests.is_dir():
-            shutil.rmtree(str(tests))
-
-
 @pytest.fixture(params=["base"])
 def make_pipelines(request, fake_repo_path, fake_package_path, mocker):
     source_path = fake_package_path / "pipelines" / PIPELINE_NAME
@@ -133,7 +92,12 @@ TOO_SHORT_ERROR = "It must be at least 2 characters long."
 class TestPipelineCreateCommand:
     @pytest.mark.parametrize("env", [None, "local"])
     def test_create_pipeline(  # pylint: disable=too-many-locals
-        self, fake_repo_path, fake_project_cli, fake_metadata, env, fake_package_path,
+        self,
+        fake_repo_path,
+        fake_project_cli,
+        fake_metadata,
+        env,
+        fake_package_path,
     ):
         """Test creation of a pipeline"""
         pipelines_dir = fake_package_path / "pipelines"
@@ -455,7 +419,9 @@ class TestPipelineDeleteCommand:
     ):
         """Test error message when bad pipeline name was provided."""
         result = CliRunner().invoke(
-            fake_project_cli, ["pipeline", "delete", "-y", bad_name], obj=fake_metadata,
+            fake_project_cli,
+            ["pipeline", "delete", "-y", bad_name],
+            obj=fake_metadata,
         )
         assert result.exit_code
         assert error_message in result.output
@@ -603,10 +569,16 @@ class TestPipelineDescribeCommand:
         assert expected_output in result.output
 
     def test_describe_pipeline_default(
-        self, fake_project_cli, fake_metadata, yaml_dump_mock, pipelines_dict,
+        self,
+        fake_project_cli,
+        fake_metadata,
+        yaml_dump_mock,
+        pipelines_dict,
     ):
         result = CliRunner().invoke(
-            fake_project_cli, ["pipeline", "describe"], obj=fake_metadata,
+            fake_project_cli,
+            ["pipeline", "describe"],
+            obj=fake_metadata,
         )
 
         assert not result.exit_code

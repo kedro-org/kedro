@@ -100,7 +100,11 @@ def create_cli():  # pragma: no cover
 
 @command_with_verbosity(create_cli, short_help="Create a new kedro project.")
 @click.option(
-    "--config", "-c", "config_path", type=click.Path(exists=True), help=CONFIG_ARG_HELP,
+    "--config",
+    "-c",
+    "config_path",
+    type=click.Path(exists=True),
+    help=CONFIG_ARG_HELP,
 )
 @click.option("--starter", "-s", "starter_name", help=STARTER_ARG_HELP)
 @click.option("--checkout", help=CHECKOUT_ARG_HELP)
@@ -108,8 +112,7 @@ def create_cli():  # pragma: no cover
 def new(
     config_path, starter_name, checkout, directory, **kwargs
 ):  # pylint: disable=unused-argument
-    """Create a new kedro project.
-    """
+    """Create a new kedro project."""
     if checkout and not starter_name:
         raise KedroCliError("Cannot use the --checkout flag without a --starter value.")
 
@@ -208,7 +211,9 @@ def _fetch_config_from_file(config_path: str) -> Dict[str, str]:
 
 
 def _make_cookiecutter_args(
-    config: Dict[str, str], checkout: str, directory: str,
+    config: Dict[str, str],
+    checkout: str,
+    directory: str,
 ) -> Dict[str, Any]:
     """Creates a dictionary of arguments to pass to cookiecutter.
 
@@ -268,7 +273,8 @@ def _create_project(template_path: str, cookiecutter_args: Dict[str, str]):
 
     _clean_pycache(Path(result_path))
     click.secho(
-        f"\nChange directory to the project generated in {result_path}", fg="green",
+        f"\nChange directory to the project generated in {result_path}",
+        fg="green",
     )
     click.secho(
         "\nA best-practice setup includes initialising git and creating "
@@ -312,8 +318,7 @@ def _get_cookiecutter_dir(
 
 
 def _get_prompts_required(cookiecutter_dir: Path) -> Optional[Dict[str, Any]]:
-    """Finds the information a user must supply according to prompts.yml.
-    """
+    """Finds the information a user must supply according to prompts.yml."""
     prompts_yml = cookiecutter_dir / "prompts.yml"
     if not prompts_yml.is_file():
         return None
@@ -373,8 +378,7 @@ def _make_cookiecutter_context_for_prompts(cookiecutter_dir: Path):
 
 
 class _Prompt:
-    """Represent a single CLI prompt for `kedro new`
-    """
+    """Represent a single CLI prompt for `kedro new`"""
 
     def __init__(self, *args, **kwargs) -> None:  # pylint: disable=unused-argument
         try:
@@ -396,8 +400,7 @@ class _Prompt:
         return f"\n{prompt_text}\n"
 
     def validate(self, user_input: str) -> None:
-        """Validate a given prompt value against the regex validator
-        """
+        """Validate a given prompt value against the regex validator"""
         if self.regexp and not re.match(self.regexp, user_input):
             click.secho(f"`{user_input}` is an invalid value.", fg="red", err=True)
             click.secho(self.error_message, fg="red", err=True)

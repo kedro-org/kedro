@@ -32,6 +32,7 @@ this directory. You don't need to import the fixtures as pytest will
 discover them automatically. More info here:
 https://docs.pytest.org/en/latest/fixture.html
 """
+import shutil
 import sys
 import tempfile
 from importlib import import_module
@@ -48,6 +49,7 @@ from kedro.framework.cli.cli import cli
 from kedro.framework.cli.jupyter import jupyter_cli
 from kedro.framework.cli.pipeline import pipeline_cli
 from kedro.framework.cli.project import project_group
+from kedro.framework.cli.registry import registry_cli
 from kedro.framework.cli.starters import create_cli
 from kedro.framework.project import configure_project, pipelines, settings
 from kedro.framework.startup import ProjectMetadata
@@ -71,8 +73,11 @@ def entry_point(mocker, entry_points):
 @fixture(scope="module")
 def fake_root_dir():
     # using tempfile as tmp_path fixture doesn't support module scope
-    with tempfile.TemporaryDirectory() as tmp_root:
-        yield Path(tmp_root).resolve()
+    tmpdir = tempfile.mkdtemp()
+    try:
+        yield Path(tmpdir).resolve()
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
 
 
 @fixture(scope="module")
@@ -127,6 +132,7 @@ def fake_kedro_cli():
             jupyter_cli,
             pipeline_cli,
             project_group,
+            registry_cli,
         ],
     )
 

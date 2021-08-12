@@ -9,6 +9,7 @@
 
 ## Bug fixes and other changes
 * Bumped minimum required `fsspec` version to 2021.04.
+* Fixed the `kedro install` and `kedro build-reqs` flows when uninstalled dependencies are present in a project's `settings.py`, `context.py` or `hooks.py` ([Issue #829](https://github.com/quantumblacklabs/kedro/issues/829)).
 
 ## Minor breaking changes to the API
 

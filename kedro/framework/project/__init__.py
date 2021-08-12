@@ -203,20 +203,11 @@ settings = _ProjectSettings()
 pipelines = _ProjectPipelines()
 
 
-def _validate_module(settings_module):
-    """Eagerly validate that the module is importable.
-    This ensures that the settings module is syntactically
-    correct so that any import errors are surfaced early.
-    """
-    importlib.import_module(settings_module)
-
-
 def configure_project(package_name: str):
     """Configure a Kedro project by populating its settings with values
     defined in user's settings.py and pipeline_registry.py.
     """
     settings_module = f"{package_name}.settings"
-    _validate_module(settings_module)
     settings.configure(settings_module)
 
     # set up all hooks so we can discover all pipelines
@@ -228,7 +219,19 @@ def configure_project(package_name: str):
     pipelines.configure(pipelines_module)
 
     # Once the project is successfully configured once, store PACKAGE_NAME as a
-    # global variable to make it easily accessible. This is used by ParallelRunner on
-    # Windows, as package_name is required every time a new subprocess is spawned.
+    # global variable to make it easily accessible. This is used by validate_settings()
+    # below, and also by ParallelRunner on Windows, as package_name is required every
+    # time a new subprocess is spawned.
     global PACKAGE_NAME
     PACKAGE_NAME = package_name
+
+
+def validate_settings():
+    """Eagerly validate that the settings module is importable. This is desirable to
+    surface any syntax or import errors early. In particular, without eagerly importing
+    the settings module, dynaconf would silence any import error (e.g. missing
+    dependency, missing/mislabelled pipeline), and users would instead get a cryptic
+    error message ``Expected an instance of `ConfigLoader`, got `NoneType` instead``.
+    More info on the dynaconf issue: https://github.com/rochacbruno/dynaconf/issues/460
+    """
+    importlib.import_module(f"{PACKAGE_NAME}.settings")

@@ -66,20 +66,13 @@ class TestPipelinePackageCommand:
         assert expected_files <= wheel_contents
 
     @pytest.mark.parametrize(
-        "options,package_name,version,success_message",
+        "options,package_name,success_message",
         [
-            ([], PIPELINE_NAME, "0.1", f"Pipeline `{PIPELINE_NAME}` packaged!"),
+            ([], PIPELINE_NAME, f"Pipeline `{PIPELINE_NAME}` packaged!"),
             (
                 ["--alias", "alternative"],
                 "alternative",
-                "0.1",
                 f"Pipeline `{PIPELINE_NAME}` packaged as `alternative`!",
-            ),
-            (
-                ["--version", "0.3"],
-                PIPELINE_NAME,
-                "0.3",
-                f"Pipeline `{PIPELINE_NAME}` packaged!",
             ),
         ],
     )
@@ -89,7 +82,6 @@ class TestPipelinePackageCommand:
         fake_project_cli,
         options,
         package_name,
-        version,
         success_message,
         fake_metadata,
     ):
@@ -106,11 +98,11 @@ class TestPipelinePackageCommand:
         assert result.exit_code == 0
         assert success_message in result.output
 
-        wheel_location = fake_repo_path / "src" / "dist"
+        wheel_location = fake_repo_path / "dist"
         assert f"Location: {wheel_location}" in result.output
 
         self.assert_wheel_contents_correct(
-            wheel_location=wheel_location, package_name=package_name, version=version
+            wheel_location=wheel_location, package_name=package_name, version="0.1"
         )
 
     @pytest.mark.parametrize("existing_dir", [True, False])
@@ -202,14 +194,14 @@ class TestPipelinePackageCommand:
         assert result.exit_code == 0
         assert f"Pipeline `{PIPELINE_NAME}` packaged!" in result.output
 
-        wheel_location = fake_repo_path / "src" / "dist"
+        wheel_location = fake_repo_path / "dist"
         assert f"Location: {wheel_location}" in result.output
 
         # the wheel contents are slightly different (config shouldn't be included),
         # which is why we can't call self.assert_wheel_contents_correct here
         wheel_file = wheel_location / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
         assert wheel_file.is_file()
-        assert len(list((fake_repo_path / "src" / "dist").iterdir())) == 1
+        assert len(list((fake_repo_path / "dist").iterdir())) == 1
 
         # pylint: disable=consider-using-with
         wheel_contents = set(ZipFile(str(wheel_file)).namelist())
@@ -286,7 +278,7 @@ class TestPipelinePackageCommand:
         assert result.exit_code == 0
         assert "Pipeline `retail` packaged!" in result.output
 
-        wheel_location = fake_repo_path / "src" / "dist"
+        wheel_location = fake_repo_path / "dist"
         assert f"Location: {wheel_location}" in result.output
 
         wheel_name = _get_wheel_name(name="retail", version="0.1")
@@ -300,13 +292,10 @@ class TestPipelinePackageCommand:
         assert "retail/config/parameters/retail.yml" in wheel_contents
         assert "retail/config/parameters/retail_banking.yml" not in wheel_contents
 
-    def test_pipeline_package_version(
+    def test_pipeline_package_default(
         self, fake_repo_path, fake_package_path, fake_project_cli, fake_metadata
     ):
         _pipeline_name = "data_engineering"
-        # the test version value is set separately in
-        # features/steps/test_starter/<repo>/src/<package>/pipelines/data_engineering/__init__.py
-        _test_version = "4.20.69"
 
         pipelines_dir = fake_package_path / "pipelines" / _pipeline_name
         assert pipelines_dir.is_dir()
@@ -317,8 +306,8 @@ class TestPipelinePackageCommand:
         assert result.exit_code == 0
 
         # test for actual version
-        wheel_location = fake_repo_path / "src" / "dist"
-        wheel_name = _get_wheel_name(name=_pipeline_name, version=_test_version)
+        wheel_location = fake_repo_path / "dist"
+        wheel_name = _get_wheel_name(name=_pipeline_name, version="0.1")
         wheel_file = wheel_location / wheel_name
 
         assert wheel_file.is_file()

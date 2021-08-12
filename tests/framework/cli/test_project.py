@@ -576,11 +576,27 @@ class TestPackageCommand:
         call_mock.assert_has_calls(
             [
                 mocker.call(
-                    [sys.executable, "setup.py", "clean", "--all", "bdist_egg"],
+                    [
+                        sys.executable,
+                        "setup.py",
+                        "clean",
+                        "--all",
+                        "bdist_egg",
+                        "--dist-dir",
+                        "../dist",
+                    ],
                     cwd=str(fake_repo_path / "src"),
                 ),
                 mocker.call(
-                    [sys.executable, "setup.py", "clean", "--all", "bdist_wheel"],
+                    [
+                        sys.executable,
+                        "setup.py",
+                        "clean",
+                        "--all",
+                        "bdist_wheel",
+                        "--dist-dir",
+                        "../dist",
+                    ],
                     cwd=str(fake_repo_path / "src"),
                 ),
             ]

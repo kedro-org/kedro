@@ -116,23 +116,13 @@ s3:
 
 ### Update the project hooks
 
-Now you need to tell Kedro to use the [`TemplatedConfigLoader`](https://kedro.readthedocs.io/en/stable/kedro.config.TemplatedConfigLoader.html) instead of the default `ConfigLoader` class to read the project configuration. It is very easy to do via [Kedro hooks](https://kedro.readthedocs.io/en/stable/07_extend_kedro/02_hooks.html) - open `src/kedro_tutorial/hooks.py` file, locate the definition of `ProjectHooks` and add the following method to it:
+Now you need to tell Kedro to use the [`TemplatedConfigLoader`](https://kedro.readthedocs.io/en/stable/kedro.config.TemplatedConfigLoader.html) instead of the default `ConfigLoader` class to read the project configuration. It is very easy to do via `settings.py` file - open `src/kedro_tutorial/settings.py` file and set the `CONFIG_LOADER_CLASS` constant:
 
 ```python
-from typing import Iterable
-
 from kedro.config import TemplatedConfigLoader
-from kedro.framework.hooks import hook_impl
 
 
-class ProjectHooks:
-    # <other hooks>
-
-    @hook_impl
-    def register_config_loader(
-        self, conf_paths: Iterable[str]
-    ) -> TemplatedConfigLoader:
-        return TemplatedConfigLoader(conf_paths, globals_pattern="*globals.yml")
+CONFIG_LOADER_CLASS = TemplatedConfigLoader
 ```
 
 ### Update the data science pipeline

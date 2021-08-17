@@ -34,7 +34,7 @@ import pandas as pd
 import pytest
 
 from kedro.io import DataSetError, MemoryDataSet
-from kedro.io.memory_data_set import _copy_with_mode, _infer_copy_mode
+from kedro.io.memory_dataset import _copy_with_mode, _infer_copy_mode
 
 
 def _update_data(data, idx, jdx, value):

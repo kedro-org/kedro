@@ -72,7 +72,7 @@ def test_valid_nodes(valid_nodes_with_inputs):
 def test_run_got_dataframe(mocked_dataset):
     """Check an exception when non-dictionary (class object) is passed."""
     pattern = r"Node.run\(\) expects a dictionary or None, "
-    pattern += r"but got <class \'kedro.io.lambda_data_set.LambdaDataSet\'> instead"
+    pattern += r"but got <class \'kedro.io.lambda_dataset.LambdaDataSet\'> instead"
     with pytest.raises(ValueError, match=pattern):
         node(one_in_one_out, dict(arg="ds1"), "A").run(mocked_dataset)
 

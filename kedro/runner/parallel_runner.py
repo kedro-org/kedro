@@ -247,20 +247,20 @@ class ParallelRunner(AbstractRunner):
                 "functools.wraps().".format(sorted(unserializable))
             )
 
-        memory_data_sets = []
+        memory_datasets = []
         for name, data_set in data_sets.items():
             if (
                 name in pipeline.all_outputs()
                 and isinstance(data_set, MemoryDataSet)
                 and not isinstance(data_set, BaseProxy)
             ):
-                memory_data_sets.append(name)
+                memory_datasets.append(name)
 
-        if memory_data_sets:
+        if memory_datasets:
             raise AttributeError(
                 "The following data sets are memory data sets: {}\n"
                 "ParallelRunner does not support output to externally created "
-                "MemoryDataSets".format(sorted(memory_data_sets))
+                "MemoryDataSets".format(sorted(memory_datasets))
             )
 
     def _get_required_workers_count(self, pipeline: Pipeline):

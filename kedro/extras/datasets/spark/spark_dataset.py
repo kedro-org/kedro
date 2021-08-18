@@ -178,7 +178,6 @@ class KedroHdfsInsecureClient(InsecureClient):
 
 class SparkDataSet(AbstractVersionedDataSet):
     """``SparkDataSet`` loads and saves Spark dataframes.
-
     Example:
     ::
 
@@ -203,6 +202,10 @@ class SparkDataSet(AbstractVersionedDataSet):
         >>> reloaded.take(4)
     """
 
+    # this dataset cannot be used with ``ParallelRunner``,
+    # therefore it has the attribute ``_SINGLE_PROCESS = True``
+    # for parallelism within a Spark pipeline please consider
+    # ``ThreadRunner`` instead
     _SINGLE_PROCESS = True
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]

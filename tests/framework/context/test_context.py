@@ -420,7 +420,10 @@ class TestKedroContext:
 
     # pylint: disable=unused-argument
     def test_broken_config_loader(self, broken_settings, dummy_context):
-        pattern = f"Expected an instance of `ConfigLoader`, got `{type('')}` instead."
+        pattern = (
+            f"Expected an instance of `ConfigLoader`, "
+            f"got `it breaks` of class `{type('')}` instead."
+        )
         with pytest.raises(KedroContextError, match=re.escape(pattern)):
             _ = dummy_context.config_loader
 

@@ -38,10 +38,8 @@ from typing import Any, Dict
 from IPython import get_ipython
 from IPython.core.magic import needs_local_scope, register_line_magic
 
-project_path = Path.cwd()
-catalog = None
-context = None
-session = None
+startup_path = Path.cwd()
+project_path = startup_path
 
 
 def _remove_cached_modules(package_name):
@@ -61,6 +59,17 @@ def _clear_hook_manager():
         hook_manager.unregister(name=name, plugin=plugin)  # pragma: no cover
 
 
+def _find_kedro_project(current_dir):  # pragma: no cover
+    from kedro.framework.startup import _is_project
+
+    while current_dir != current_dir.parent:
+        if _is_project(current_dir):
+            return current_dir
+        current_dir = current_dir.parent
+
+    return None
+
+
 def reload_kedro(path, env: str = None, extra_params: Dict[str, Any] = None):
     """Line magic which reloads all Kedro default variables."""
 
@@ -69,10 +78,6 @@ def reload_kedro(path, env: str = None, extra_params: Dict[str, Any] = None):
     from kedro.framework.session import KedroSession
     from kedro.framework.session.session import _activate_session
     from kedro.framework.startup import bootstrap_project
-
-    global context
-    global catalog
-    global session
 
     _clear_hook_manager()
 
@@ -115,8 +120,14 @@ def init_kedro(path=""):
 
 def load_ipython_extension(ipython):
     """Main entry point when %load_ext is executed"""
+
+    global project_path
+    global startup_path
+
     ipython.register_magic_function(init_kedro, "line")
     ipython.register_magic_function(reload_kedro, "line", "reload_kedro")
+
+    project_path = _find_kedro_project(startup_path)
 
     try:
         reload_kedro(project_path)

@@ -13,6 +13,8 @@
 * Merged `pandas.AppendableExcelDataSet` into `pandas.ExcelDataSet`.
 * Added `save_args` to `feather.FeatherDataSet`.
 * The default `kedro` environment names can now be set in `settings.py` with the help of the `CONFIG_LOADER_ARGS` variable. The relevant keys to be supplied are `base_env` and `default_run_env`. These values are set to `base` and `local` respectively as a default.
+* Added `kedro.config.abstract_config.AbstractConfigLoader` as an abstract base class for all `ConfigLoader` implementations. `ConfigLoader` and `TemplatedConfigLoader` now inherit directly from this base class.
+* Streamlined the `ConfigLoader.get` and `TemplatedConfigLoader.get` API and delegated the actual `get` method functional implementation to the `kedro.config.common` module.
 
 ## Breaking changes to the API
 * Add namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/quantumblacklabs/kedro/issues/399).
@@ -43,6 +45,7 @@
 * The environment defaulting behaviour has been removed from `KedroContext` and is now implemented in a `ConfigLoader` class (or equivalent) with the `base_env` and `default_run_env` attributes.
 * `ConfigLoader` and `TemplatedConfigLoader` argument `conf_root` has been renamed to `conf_source` to align the API.
 * The `settings.py` setting `CONF_ROOT` has been renamed to `CONF_SOURCE` to align the API. Default value of `conf` remains unchanged.
+* Renamed `extra_params` to `runtime_params` in `kedro.config.config.ConfigLoader` and `kedro.config.templated_config.TemplatedConfigLoader`.
 
 ## Migration guide from Kedro 0.17.* to 0.18.*
 * Please remove any existing `hook_impl` of the `register_config_loader` method from `ProjectHooks` (or custom alternatives).
@@ -57,14 +60,19 @@
 * If you were using `pandas~=1.2.0` and passing `storage_options` through `load_args` or `savs_args`, please specify them under `fs_args` or via `credentials` instead.
 * Update the `settings.py` setting `CONF_ROOT` to `CONF_SOURCE`.
 * Update the key-word argument `conf_root` to `conf_source` when calling `ConfigLoader` or `TemplatedConfigLoader` directly.
+* Rename `extra_params` to `runtime_params` in `kedro.config.config.ConfigLoader` and `kedro.config.templated_config.TemplatedConfigLoader`, or your custom implementation, if it calls to `ConfigLoader` or any of its parent classes.
 
 # Upcoming Release 0.17.5
 
 ## Major features and improvements
 * Added new CLI group `registry`, with the associated commands `kedro registry list` and `kedro registry describe`, to replace `kedro pipeline list` and `kedro pipeline describe`.
 * Added support for dependency management at a modular pipeline level. When a pipeline with `requirements.txt` is packaged, its dependencies are embedded in the modular pipeline wheel file. Upon pulling the pipeline, Kedro will append dependencies to the project's `requirements.in`. More information is available in [our documentation](https://kedro.readthedocs.io/en/stable/06_nodes_and_pipelines/03_modular_pipelines.html#package-a-modular-pipeline).
+* Added support for bulk packaging modular pipelines using `kedro pipeline package --all` and `pyproject.toml`.
+* Removed `cli.py` from the Kedro project template. By default all CLI commands, including `kedro run`, are now defined on the Kedro framework side. These can be overridden in turn by a plugin or a `cli.py` file in your project. A packaged Kedro project will respect the same hierarchy when executed with `python -m my_package`.
+* Removed `.ipython/profile_default/startup/` from the Kedro project template in favour of `.ipython/profile_default/ipython_config.py` and the `kedro.extras.extensions.ipython`.
 
 ## Bug fixes and other changes
+* Bumped minimum required `fsspec` version to 2021.04.
 
 ## Minor breaking changes to the API
 
@@ -191,6 +199,8 @@ from kedro.framework.project import settings
 
 print(settings.CONF_ROOT)
 ```
+* Added a check on `kedro.runner.parallel_runner.ParallelRunner` which checks datasets for the `_SINGLE_PROCESS` attribute in the `_validate_catalog` method. If this attribute is set to `True` in an instance of a dataset (e.g. `SparkDataSet`), the `ParallelRunner` will raise an `AttributeError`.
+* Any user-defined dataset that should not be used with `ParallelRunner` may now have the `_SINGLE_PROCESS` attribute set to `True`.
 
 ## Bug fixes and other changes
 * The version of a packaged modular pipeline now defaults to the version of the project package.

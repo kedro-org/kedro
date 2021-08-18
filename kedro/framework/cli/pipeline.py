@@ -27,20 +27,18 @@
 # limitations under the License.
 
 """A collection of CLI commands for working with Kedro pipelines."""
-import json
 import re
 import shutil
 import sys
+import tarfile
 import tempfile
 from importlib import import_module
 from pathlib import Path
 from textwrap import indent
-from typing import Any, List, NamedTuple, Optional, Tuple, Union
-from zipfile import ZipFile
+from typing import List, NamedTuple, Optional, Tuple, Union
 
 import click
 import pkg_resources
-from setuptools.dist import Distribution
 
 import kedro
 from kedro.framework.cli.utils import (
@@ -65,7 +63,6 @@ setup(
     description="Modular pipeline `{name}`",
     packages=find_packages(),
     include_package_data=True,
-    package_data={package_data},
     install_requires={install_requires},
 )
 """
@@ -244,29 +241,33 @@ def pull_package(
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_dir_path = Path(temp_dir).resolve()
 
-        _unpack_wheel(package_path, temp_dir_path, fs_args)
+        _unpack_sdist(package_path, temp_dir_path, fs_args)
 
-        dist_info_file = list(temp_dir_path.glob("*.dist-info"))
-        if len(dist_info_file) != 1:
+        sdist_file_name = Path(package_path).name.rstrip(".tar.gz")
+        egg_info_file = list(Path(temp_dir_path, sdist_file_name).glob("*.egg-info"))
+        if len(egg_info_file) != 1:
             raise KedroCliError(
-                f"More than 1 or no dist-info files found from {package_path}. "
-                f"There has to be exactly one dist-info directory."
+                f"More than 1 or no egg-info files found from {package_path}. "
+                f"There has to be exactly one egg-info directory."
             )
-        # Extract package name, based on the naming convention for wheel files
-        # https://www.python.org/dev/peps/pep-0427/#file-name-convention
-        package_name = dist_info_file[0].stem.split("-")[0]
-        package_metadata = dist_info_file[0] / "METADATA"
+        package_name = egg_info_file[0].stem
+        package_requirements = egg_info_file[0] / "requires.txt"
 
         _clean_pycache(temp_dir_path)
-        _install_files(metadata, package_name, temp_dir_path, env, alias)
+        _install_files(
+            metadata,
+            package_name,
+            temp_dir_path / sdist_file_name,
+            env,
+            alias,
+        )
 
-        req_pattern = r"Requires-Dist: (.*?)\n"
-        package_reqs = re.findall(req_pattern, package_metadata.read_text())
-        if package_reqs:
+        if package_requirements.is_file():
             requirements_in = _get_requirements_in(
                 metadata.source_dir, create_empty=True
             )
-            _append_package_reqs(requirements_in, package_reqs, package_name)
+            package_reqs = _parse_package_reqs(egg_info_file[0], package_name)
+            _append_package_reqs(requirements_in, package_name, package_reqs)
 
 
 def _package_pipelines_from_manifest(metadata: ProjectMetadata) -> None:
@@ -305,7 +306,7 @@ def _package_pipelines_from_manifest(metadata: ProjectMetadata) -> None:
     "-d",
     "--destination",
     type=click.Path(resolve_path=True, file_okay=False),
-    help="Location where to create the wheel file. Defaults to `dist/`.",
+    help="Location where to create the source distribution file. Defaults to `dist/`.",
 )
 @click.option("--all", "-a", "all_flag", is_flag=True)
 @click.argument("name", nargs=1, required=False)
@@ -366,28 +367,28 @@ def _get_fsspec_filesystem(location: str, fs_args: Optional[str]):
         return None
 
 
-def _unpack_wheel(location: str, destination: Path, fs_args: Optional[str]) -> None:
+def _unpack_sdist(location: str, destination: Path, fs_args: Optional[str]) -> None:
     filesystem = _get_fsspec_filesystem(location, fs_args)
 
-    if location.endswith(".whl") and filesystem and filesystem.exists(location):
+    if location.endswith(".tar.gz") and filesystem and filesystem.exists(location):
         with filesystem.open(location) as fs_file:
-            # pylint: disable=consider-using-with
-            ZipFile(fs_file).extractall(destination)
+            with tarfile.open(fileobj=fs_file, mode="r:gz") as tar_file:
+                tar_file.extractall(destination)
     else:
         python_call(
             "pip", ["download", "--no-deps", "--dest", str(destination), location]
         )
-        wheel_file = list(destination.glob("*.whl"))
-        # `--no-deps` should fetch only one wheel file, and CLI should fail if that's
+        sdist_file = list(destination.glob("*.tar.gz"))
+        # `--no-deps` should fetch only one source distribution file, and CLI should fail if that's
         # not the case.
-        if len(wheel_file) != 1:
-            file_names = [wf.name for wf in wheel_file]
+        if len(sdist_file) != 1:
+            file_names = [sf.name for sf in sdist_file]
             raise KedroCliError(
-                f"More than 1 or no wheel files found: {file_names}. "
-                f"There has to be exactly one distribution file."
+                f"More than 1 or no sdist files found: {file_names}. "
+                f"There has to be exactly one source distribution file."
             )
-        # pylint: disable=consider-using-with
-        ZipFile(wheel_file[0]).extractall(destination)
+        with tarfile.open(sdist_file[0], "r:gz") as fs_file:
+            fs_file.extractall(destination)
 
 
 def _rename_files(conf_source: Path, old_name: str, new_name: str):
@@ -467,7 +468,7 @@ def _package_pipeline(
     artifacts_to_package = _get_pipeline_artifacts(
         metadata, pipeline_name=pipeline_name, env=env
     )
-    # as the wheel file will only contain parameters, we aren't listing other
+    # as the source distribution will only contain parameters, we aren't listing other
     # config files not to confuse users and avoid useless file copies
     configs_to_package = _find_config_files(
         artifacts_to_package.pipeline_conf,
@@ -495,7 +496,7 @@ def _package_pipeline(
         project_module = import_module(f"{metadata.package_name}")
         version = project_module.__version__  # type: ignore
 
-    _generate_wheel_file(
+    _generate_sdist_file(
         pipeline_name, destination, source_paths, version, alias=alias  # type: ignore
     )
 
@@ -512,15 +513,8 @@ def _validate_dir(path: Path) -> None:
         raise KedroCliError(f"'{path}' is an empty directory.")
 
 
-def _get_wheel_name(**kwargs: Any) -> str:
-    # https://stackoverflow.com/q/51939257/3364156
-    dist = Distribution(attrs=kwargs)
-    bdist_wheel_cmd = dist.get_command_obj("bdist_wheel")
-    bdist_wheel_cmd.ensure_finalized()
-
-    distname = bdist_wheel_cmd.wheel_dist_name
-    tag = "-".join(bdist_wheel_cmd.get_tag())
-    return f"{distname}-{tag}.whl"
+def _get_sdist_name(name, version):
+    return f"{name}-{version}.tar.gz"
 
 
 def _sync_path_list(source: List[Tuple[Path, str]], target: Path) -> None:
@@ -542,7 +536,7 @@ _SourcePathType = Union[Path, List[Tuple[Path, str]]]
 
 
 # pylint: disable=too-many-locals
-def _generate_wheel_file(
+def _generate_sdist_file(
     pipeline_name: str,
     destination: Path,
     source_paths: Tuple[_SourcePathType, ...],
@@ -574,22 +568,25 @@ def _generate_wheel_file(
             cls = exc.__class__
             raise KedroCliError(f"{cls.__module__}.{cls.__qualname__}: {exc}") from exc
 
+        _generate_manifest_file(temp_dir_path)
         setup_file = _generate_setup_file(
             package_name, version, install_requires, temp_dir_path
         )
 
-        package_file = destination / _get_wheel_name(name=package_name, version=version)
+        package_file = destination / _get_sdist_name(name=package_name, version=version)
+
         if package_file.is_file():
             click.secho(
                 f"Package file {package_file} will be overwritten!", fg="yellow"
             )
 
-        # python setup.py bdist_wheel --dist-dir <destination>
+        # python setup.py sdist --formats=gztar --dist-dir <destination>
         call(
             [
                 sys.executable,
                 str(setup_file.resolve()),
-                "bdist_wheel",
+                "sdist",
+                "--formats=gztar",
                 "--dist-dir",
                 str(destination),
             ],
@@ -597,23 +594,27 @@ def _generate_wheel_file(
         )
 
 
+def _generate_manifest_file(output_dir: Path):
+    manifest_file = output_dir / "MANIFEST.in"
+    manifest_file.write_text(
+        """
+        global-include README.md
+        global-include config/parameters*
+        global-include config/**/parameters*
+        global-include config/parameters*/**
+        global-include config/parameters*/**/*
+        """
+    )
+
+
 def _generate_setup_file(
     package_name: str, version: str, install_requires: List[str], output_dir: Path
 ) -> Path:
     setup_file = output_dir / "setup.py"
-    package_data = {
-        package_name: [
-            "README.md",
-            "config/parameters*",
-            "config/**/parameters*",
-            "config/parameters*/**",
-            "config/parameters*/**/*",
-        ]
-    }
+
     setup_file_context = dict(
         name=package_name,
         version=version,
-        package_data=json.dumps(package_data),
         install_requires=install_requires,
     )
 
@@ -722,7 +723,7 @@ def _get_pipeline_artifacts(
 def _get_package_artifacts(
     source_path: Path, package_name: str
 ) -> Tuple[Path, Path, Path]:
-    """From existing unpacked wheel, returns in order:
+    """From existing package, returns in order:
     source_path, tests_path, config_path
     """
     artifacts = (
@@ -771,13 +772,40 @@ def _delete_artifacts(*artifacts: Path):
             click.secho("OK", fg="green")
 
 
+def _parse_package_reqs(egg_info_file, dist_name) -> list:
+    # pylint: disable=protected-access, line-too-long
+    base_dir = egg_info_file.parent
+    metadata = pkg_resources.PathMetadata(base_dir, egg_info_file)
+    dist = pkg_resources.Distribution(
+        base_dir, project_name=dist_name, metadata=metadata
+    )
+
+    # Extract requirements that are marked for a specific environment
+    # see: https://www.python.org/dev/peps/pep-0508/#environment-markers
+    # and https://stackoverflow.com/questions/50130706/how-do-i-read-dependencies-from-requires-txt-of-a-python-package
+    dep_map_pep508 = {
+        k: v for k, v in dist._build_dep_map().items() if k and k.startswith(":")  # type: ignore
+    }
+    marked_reqs = [
+        str(r).replace(" ", "") + ";" + k.lstrip(":").replace(" ", "")
+        for k, v in dep_map_pep508.items()
+        for r in v
+    ]
+    # Extract all regular requirements
+    reqs_no_platform = [str(r).replace(" ", "") for r in dist.requires()]
+    return marked_reqs + reqs_no_platform
+
+
 def _append_package_reqs(
-    requirements_in: Path, package_reqs: List[str], pipeline_name: str
+    requirements_in: Path, pipeline_name: str, package_reqs: list
 ) -> None:
     """Appends modular pipeline requirements to project level requirements.in"""
-    existing_reqs = pkg_resources.parse_requirements(requirements_in.read_text())
-    new_reqs = pkg_resources.parse_requirements(package_reqs)
-    reqs_to_add = set(new_reqs) - set(existing_reqs)
+    existing_reqs = [
+        str(r).replace(" ", "")
+        for r in pkg_resources.parse_requirements(requirements_in.read_text())
+    ]
+
+    reqs_to_add = set(package_reqs) - set(existing_reqs)
     if not reqs_to_add:
         return
 

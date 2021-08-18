@@ -6,6 +6,7 @@
 * Added support for bulk packaging modular pipelines using `kedro pipeline package --all` and `pyproject.toml`.
 * Removed `cli.py` from the Kedro project template. By default all CLI commands, including `kedro run`, are now defined on the Kedro framework side. These can be overridden in turn by a plugin or a `cli.py` file in your project. A packaged Kedro project will respect the same hierarchy when executed with `python -m my_package`.
 * Removed `.ipython/profile_default/startup/` from the Kedro project template in favour of `.ipython/profile_default/ipython_config.py` and the `kedro.extras.extensions.ipython`.
+* Added support for `dill` backend to `PickleDataSet`.
 
 ## Bug fixes and other changes
 * Bumped minimum required `fsspec` version to 2021.04.
@@ -17,7 +18,8 @@
 * `kedro pipeline list` and `kedro pipeline describe` are being deprecated in favour of new commands `kedro registry list ` and `kedro registry describe`
 
 ## Thanks for supporting contributions
-[Moussa Taifi](https://github.com/moutai/)
+[Moussa Taifi](https://github.com/moutai),
+[Deepyaman Datta](https://github.com/deepyaman)
 
 # Release 0.17.4
 
@@ -53,7 +55,7 @@
 
 ## Thanks for supporting contributions
 [Lou Kratz](https://github.com/lou-k),
-[Lucas Jamar](https://github.com/lucasjamar/)
+[Lucas Jamar](https://github.com/lucasjamar)
 
 # Release 0.17.3
 
@@ -120,7 +122,7 @@ print(pipelines)
 * `kedro.framework.context.KedroContext.run` will be removed in release 0.18.0.
 
 ## Thanks for supporting contributions
-[Sasaki Takeru](https://github.com/takeru/)
+[Sasaki Takeru](https://github.com/takeru)
 
 # Release 0.17.1
 

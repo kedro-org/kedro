@@ -130,7 +130,7 @@ class PickleDataSet(AbstractVersionedDataSet):
                 joblib.load: https://joblib.readthedocs.io/en/latest/generated/joblib.load.html
                 dill.load: https://dill.readthedocs.io/en/latest/dill.html#dill._dill.load
                 compress_pickle.load:
-                     https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.load
+                https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.load
                 All defaults are preserved.
             save_args: Pickle options for saving pickle files.
                 Here you can find all available arguments for different backends:
@@ -138,7 +138,7 @@ class PickleDataSet(AbstractVersionedDataSet):
                 joblib.dump: https://joblib.readthedocs.io/en/latest/generated/joblib.dump.html
                 dill.dump: https://dill.readthedocs.io/en/latest/dill.html#dill._dill.dump
                 compress_pickle.dump:
-                    https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.dump
+                https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.dump
                 All defaults are preserved.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is

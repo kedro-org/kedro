@@ -129,14 +129,16 @@ class PickleDataSet(AbstractVersionedDataSet):
                 pickle.load: https://docs.python.org/3/library/pickle.html#pickle.load
                 joblib.load: https://joblib.readthedocs.io/en/latest/generated/joblib.load.html
                 dill.load: https://dill.readthedocs.io/en/latest/dill.html#dill._dill.load
-                compress_pickle.load: https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.load
+                compress_pickle.load:
+                     https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.load
                 All defaults are preserved.
             save_args: Pickle options for saving pickle files.
                 Here you can find all available arguments for different backends:
                 pickle.dump: https://docs.python.org/3/library/pickle.html#pickle.dump
                 joblib.dump: https://joblib.readthedocs.io/en/latest/generated/joblib.dump.html
                 dill.dump: https://dill.readthedocs.io/en/latest/dill.html#dill._dill.dump
-                compress_pickle.dump: https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.dump
+                compress_pickle.dump:
+                    https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.dump
                 All defaults are preserved.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
@@ -153,7 +155,8 @@ class PickleDataSet(AbstractVersionedDataSet):
                 All defaults are preserved, except `mode`, which is set to `wb` when saving.
 
         Raises:
-            ValueError: If ``backend`` is not one of ['pickle', 'joblib', 'dill', 'compress_pickle'].
+            ValueError: If ``backend`` is not one of ['pickle', 'joblib', 'dill',
+                'compress_pickle'].
             ImportError: If ``backend`` library could not be imported.
         """
         if backend not in self.BACKENDS:

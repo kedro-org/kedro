@@ -101,6 +101,7 @@ class TestLoadKedroObjects:
             project_path=tmp_path,
         )
         mocker.patch("kedro.framework.session.session.configure_project")
+        mocker.patch("kedro.framework.session.session.validate_settings")
         mocker.patch(
             "kedro.framework.startup.bootstrap_project",
             return_value=fake_metadata,
@@ -125,7 +126,7 @@ class TestLoadKedroObjects:
                 "session": mocker.ANY,
             }
         )
-        assert mock_register_line_magic.call_count == 1
+        mock_register_line_magic.assert_called_once()
 
     def test_load_kedro_objects_extra_args(self, tmp_path, mocker):
         fake_metadata = ProjectMetadata(

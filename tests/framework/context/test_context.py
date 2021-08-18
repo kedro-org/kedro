@@ -291,7 +291,6 @@ def mocked_logging(mocker):
 def dummy_context(
     tmp_path, prepare_project_dir, env, extra_params, mocker
 ):  # pylint: disable=unused-argument
-    mocker.patch("kedro.framework.project._validate_module")
     configure_project(MOCK_PACKAGE_NAME)
     context = KedroContext(
         MOCK_PACKAGE_NAME, str(tmp_path), env=env, extra_params=extra_params

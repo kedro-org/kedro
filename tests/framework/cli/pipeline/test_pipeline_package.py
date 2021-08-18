@@ -25,15 +25,15 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import tarfile
 import textwrap
 from pathlib import Path
-from zipfile import ZipFile
 
 import pytest
 import toml
 from click.testing import CliRunner
 
-from kedro.framework.cli.pipeline import _get_wheel_name
+from kedro.framework.cli.pipeline import _get_sdist_name
 
 PIPELINE_NAME = "my_pipeline"
 
@@ -44,26 +44,27 @@ TOO_SHORT_ERROR = "It must be at least 2 characters long."
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log", "cleanup_dist")
 class TestPipelinePackageCommand:
-    def assert_wheel_contents_correct(
-        self, wheel_location, package_name=PIPELINE_NAME, version="0.1"
+    def assert_sdist_contents_correct(
+        self, sdist_location, package_name=PIPELINE_NAME, version="0.1"
     ):
-        wheel_name = _get_wheel_name(name=package_name, version=version)
-        wheel_file = wheel_location / wheel_name
-        assert wheel_file.is_file()
-        assert len(list(wheel_location.iterdir())) == 1
+        sdist_name = _get_sdist_name(name=package_name, version=version)
+        sdist_file = sdist_location / sdist_name
+        assert sdist_file.is_file()
+        assert len(list(sdist_location.iterdir())) == 1
 
-        # pylint: disable=consider-using-with
-        wheel_contents = set(ZipFile(str(wheel_file)).namelist())
+        with tarfile.open(sdist_file, "r") as tar:
+            sdist_contents = set(tar.getnames())
+
         expected_files = {
-            f"{package_name}/__init__.py",
-            f"{package_name}/README.md",
-            f"{package_name}/nodes.py",
-            f"{package_name}/pipeline.py",
-            f"{package_name}/config/parameters/{package_name}.yml",
-            "tests/__init__.py",
-            "tests/test_pipeline.py",
+            f"{package_name}-{version}/{package_name}/__init__.py",
+            f"{package_name}-{version}/{package_name}/README.md",
+            f"{package_name}-{version}/{package_name}/nodes.py",
+            f"{package_name}-{version}/{package_name}/pipeline.py",
+            f"{package_name}-{version}/{package_name}/config/parameters/{package_name}.yml",
+            f"{package_name}-{version}/tests/__init__.py",
+            f"{package_name}-{version}/tests/test_pipeline.py",
         }
-        assert expected_files <= wheel_contents
+        assert expected_files <= sdist_contents
 
     @pytest.mark.parametrize(
         "options,package_name,success_message",
@@ -98,11 +99,11 @@ class TestPipelinePackageCommand:
         assert result.exit_code == 0
         assert success_message in result.output
 
-        wheel_location = fake_repo_path / "dist"
-        assert f"Location: {wheel_location}" in result.output
+        sdist_location = fake_repo_path / "dist"
+        assert f"Location: {sdist_location}" in result.output
 
-        self.assert_wheel_contents_correct(
-            wheel_location=wheel_location, package_name=package_name, version="0.1"
+        self.assert_sdist_contents_correct(
+            sdist_location=sdist_location, package_name=package_name, version="0.1"
         )
 
     @pytest.mark.parametrize("existing_dir", [True, False])
@@ -129,15 +130,15 @@ class TestPipelinePackageCommand:
         )
         assert success_message in result.output
 
-        self.assert_wheel_contents_correct(wheel_location=destination)
+        self.assert_sdist_contents_correct(sdist_location=destination)
 
-    def test_pipeline_package_overwrites_wheel(
+    def test_pipeline_package_overwrites_sdist(
         self, fake_project_cli, tmp_path, fake_metadata
     ):
         destination = (tmp_path / "in" / "here").resolve()
         destination.mkdir(parents=True)
-        wheel_file = destination / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
-        wheel_file.touch()
+        sdist_file = destination / _get_sdist_name(name=PIPELINE_NAME, version="0.1")
+        sdist_file.touch()
 
         result = CliRunner().invoke(
             fake_project_cli, ["pipeline", "create", PIPELINE_NAME], obj=fake_metadata
@@ -150,14 +151,14 @@ class TestPipelinePackageCommand:
         )
         assert result.exit_code == 0
 
-        warning_message = f"Package file {wheel_file} will be overwritten!"
+        warning_message = f"Package file {sdist_file} will be overwritten!"
         success_message = (
             f"Pipeline `{PIPELINE_NAME}` packaged! Location: {destination}"
         )
         assert warning_message in result.output
         assert success_message in result.output
 
-        self.assert_wheel_contents_correct(wheel_location=destination)
+        self.assert_sdist_contents_correct(sdist_location=destination)
 
     @pytest.mark.parametrize(
         "bad_alias,error_message",
@@ -181,6 +182,7 @@ class TestPipelinePackageCommand:
     def test_package_pipeline_no_config(
         self, fake_repo_path, fake_project_cli, fake_metadata
     ):
+        version = "0.1"
         result = CliRunner().invoke(
             fake_project_cli,
             ["pipeline", "create", PIPELINE_NAME, "--skip-config"],
@@ -194,27 +196,30 @@ class TestPipelinePackageCommand:
         assert result.exit_code == 0
         assert f"Pipeline `{PIPELINE_NAME}` packaged!" in result.output
 
-        wheel_location = fake_repo_path / "dist"
-        assert f"Location: {wheel_location}" in result.output
+        sdist_location = fake_repo_path / "dist"
+        assert f"Location: {sdist_location}" in result.output
 
-        # the wheel contents are slightly different (config shouldn't be included),
-        # which is why we can't call self.assert_wheel_contents_correct here
-        wheel_file = wheel_location / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
-        assert wheel_file.is_file()
+        # the sdist contents are slightly different (config shouldn't be included),
+        # which is why we can't call self.assert_sdist_contents_correct here
+        sdist_file = sdist_location / _get_sdist_name(
+            name=PIPELINE_NAME, version=version
+        )
+        assert sdist_file.is_file()
         assert len(list((fake_repo_path / "dist").iterdir())) == 1
 
-        # pylint: disable=consider-using-with
-        wheel_contents = set(ZipFile(str(wheel_file)).namelist())
+        with tarfile.open(sdist_file, "r") as tar:
+            sdist_contents = set(tar.getnames())
+
         expected_files = {
-            f"{PIPELINE_NAME}/__init__.py",
-            f"{PIPELINE_NAME}/README.md",
-            f"{PIPELINE_NAME}/nodes.py",
-            f"{PIPELINE_NAME}/pipeline.py",
-            "tests/__init__.py",
-            "tests/test_pipeline.py",
+            f"{PIPELINE_NAME}-{version}/{PIPELINE_NAME}/__init__.py",
+            f"{PIPELINE_NAME}-{version}/{PIPELINE_NAME}/README.md",
+            f"{PIPELINE_NAME}-{version}/{PIPELINE_NAME}/nodes.py",
+            f"{PIPELINE_NAME}-{version}/{PIPELINE_NAME}/pipeline.py",
+            f"{PIPELINE_NAME}-{version}/tests/__init__.py",
+            f"{PIPELINE_NAME}-{version}/tests/test_pipeline.py",
         }
-        assert expected_files <= wheel_contents
-        assert f"{PIPELINE_NAME}/config/parameters.yml" not in wheel_contents
+        assert expected_files <= sdist_contents
+        assert f"{PIPELINE_NAME}/config/parameters.yml" not in sdist_contents
 
     def test_package_non_existing_pipeline_dir(
         self, fake_package_path, fake_project_cli, fake_metadata
@@ -278,19 +283,25 @@ class TestPipelinePackageCommand:
         assert result.exit_code == 0
         assert "Pipeline `retail` packaged!" in result.output
 
-        wheel_location = fake_repo_path / "dist"
-        assert f"Location: {wheel_location}" in result.output
+        sdist_location = fake_repo_path / "dist"
+        assert f"Location: {sdist_location}" in result.output
 
-        wheel_name = _get_wheel_name(name="retail", version="0.1")
-        wheel_file = wheel_location / wheel_name
-        assert wheel_file.is_file()
-        assert len(list(wheel_location.iterdir())) == 1
+        sdist_name = _get_sdist_name(name="retail", version="0.1")
+        sdist_file = sdist_location / sdist_name
+        assert sdist_file.is_file()
+        assert len(list(sdist_location.iterdir())) == 1
 
-        # pylint: disable=consider-using-with
-        wheel_contents = set(ZipFile(str(wheel_file)).namelist())
-        assert "retail/config/parameters/retail/params1.yml" in wheel_contents
-        assert "retail/config/parameters/retail.yml" in wheel_contents
-        assert "retail/config/parameters/retail_banking.yml" not in wheel_contents
+        with tarfile.open(sdist_file, "r") as tar:
+            sdist_contents = set(tar.getnames())
+
+        assert (
+            "retail-0.1/retail/config/parameters/retail/params1.yml" in sdist_contents
+        )
+        assert "retail-0.1/retail/config/parameters/retail.yml" in sdist_contents
+        assert (
+            "retail-0.1/retail/config/parameters/retail_banking.yml"
+            not in sdist_contents
+        )
 
     def test_pipeline_package_default(
         self, fake_repo_path, fake_package_path, fake_project_cli, fake_metadata
@@ -306,12 +317,12 @@ class TestPipelinePackageCommand:
         assert result.exit_code == 0
 
         # test for actual version
-        wheel_location = fake_repo_path / "dist"
-        wheel_name = _get_wheel_name(name=_pipeline_name, version="0.1")
-        wheel_file = wheel_location / wheel_name
+        sdist_location = fake_repo_path / "dist"
+        sdist_name = _get_sdist_name(name=_pipeline_name, version="0.1")
+        sdist_file = sdist_location / sdist_name
 
-        assert wheel_file.is_file()
-        assert len(list(wheel_location.iterdir())) == 1
+        assert sdist_file.is_file()
+        assert len(list(sdist_location.iterdir())) == 1
 
 
 @pytest.fixture

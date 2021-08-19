@@ -78,17 +78,15 @@ def mock_package_name_with_unimportable_pipelines_file(tmpdir):
 
 
 def test_pipelines_after_configuring_project_shows_updated_values(
-    mock_package_name_with_pipelines_file, mocker
+    mock_package_name_with_pipelines_file,
 ):
-    mocker.patch("kedro.framework.project._validate_module")
     configure_project(mock_package_name_with_pipelines_file)
     assert isinstance(pipelines["new_pipeline"], Pipeline)
 
 
 def test_configure_project_should_not_raise_for_unimportable_pipelines(
-    mock_package_name_with_unimportable_pipelines_file, mocker
+    mock_package_name_with_unimportable_pipelines_file,
 ):
-    mocker.patch("kedro.framework.project._validate_module")
     # configure_project should not raise error for unimportable pipelines
     # since pipelines loading is lazy
     configure_project(mock_package_name_with_unimportable_pipelines_file)

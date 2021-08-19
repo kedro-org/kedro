@@ -27,7 +27,6 @@
 # limitations under the License.
 # pylint: disable=invalid-name,global-statement
 """This module implements Kedro session responsible for project lifecycle."""
-
 import logging
 import logging.config
 import os
@@ -46,7 +45,12 @@ from kedro.framework.context.context import (
     _convert_paths_to_absolute_posix,
 )
 from kedro.framework.hooks import get_hook_manager
-from kedro.framework.project import configure_project, pipelines, settings
+from kedro.framework.project import (
+    configure_project,
+    pipelines,
+    settings,
+    validate_settings,
+)
 from kedro.framework.session.store import BaseSessionStore
 from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner, SequentialRunner
@@ -177,12 +181,14 @@ class KedroSession:
             A new ``KedroSession`` instance.
         """
 
-        # this is to make sure that for workflows that manually create session
-        # without going through one of our known entrypoints, e.g. some plugins like kedro-airflow,
-        # the project is still properly configured. This is for backward compatibility
-        # and should be removed in 0.18.
+        # This is to make sure that for workflows that manually create session
+        # without going through one of our known entrypoints, e.g. some plugins
+        # like kedro-airflow, the project is still properly configured. This
+        # is for backward compatibility and should be removed in 0.18.
         if package_name is not None:
             configure_project(package_name)
+
+        validate_settings()
 
         session = cls(
             package_name=package_name,

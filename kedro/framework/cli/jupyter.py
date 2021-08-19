@@ -54,6 +54,7 @@ from kedro.framework.cli.utils import (
     load_entry_points,
     python_call,
 )
+from kedro.framework.project import validate_settings
 from kedro.framework.startup import ProjectMetadata
 
 JUPYTER_IP_HELP = "IP address of the Jupyter server."
@@ -142,6 +143,8 @@ def jupyter_notebook(
     """Open Jupyter Notebook with project specific variables loaded."""
     _check_module_importable("jupyter_core")
 
+    validate_settings()
+
     if "-h" not in args and "--help" not in args:
         ipython_message(all_kernels)
 
@@ -178,6 +181,8 @@ def jupyter_lab(
 ):  # pylint: disable=unused-argument,too-many-arguments
     """Open Jupyter Lab with project specific variables loaded."""
     _check_module_importable("jupyter_core")
+
+    validate_settings()
 
     if "-h" not in args and "--help" not in args:
         ipython_message(all_kernels)

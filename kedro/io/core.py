@@ -98,7 +98,9 @@ class AbstractDataSet(abc.ABC):
     """``AbstractDataSet`` is the base class for all data set implementations.
     All data set implementations should extend this abstract class
     and implement the methods marked as abstract.
-
+    If a specific dataset implementation cannot be used in conjunction with
+    the ``ParallelRunner``, such user-defined dataset should have the
+    attribute `_SINGLE_PROCESS = True`.
     Example:
     ::
 
@@ -413,7 +415,10 @@ def parse_dataset_definition(
         try:
             class_obj = next(obj for obj in trials if obj is not None)
         except StopIteration as exc:
-            raise DataSetError(f"Class `{class_obj}` not found.") from exc
+            raise DataSetError(
+                f"Class `{class_obj}` not found or one of its dependencies"
+                f"has not been installed."
+            ) from exc
 
     if not issubclass(class_obj, AbstractDataSet):
         raise DataSetError(

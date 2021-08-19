@@ -145,6 +145,9 @@ def _run_node_synchronization(  # pylint: disable=too-many-arguments
 class ParallelRunner(AbstractRunner):
     """``ParallelRunner`` is an ``AbstractRunner`` implementation. It can
     be used to run the ``Pipeline`` in parallel groups formed by toposort.
+    Please note that this `runner` implementation validates dataset using the
+    ``_validate_catalog`` method, which checks if any of the datasets are
+    single process only using the `_SINGLE_PROCESS` dataset attribute.
     """
 
     def __init__(self, max_workers: int = None, is_async: bool = False):

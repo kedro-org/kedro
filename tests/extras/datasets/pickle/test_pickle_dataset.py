@@ -81,6 +81,7 @@ class TestPickleDataSet:
         [
             ("pickle", None, None),
             ("joblib", None, None),
+            ("dill", None, None),
             ("compress_pickle", {"compression": "lz4"}, {"compression": "lz4"}),
         ],
         indirect=True,
@@ -164,21 +165,17 @@ class TestPickleDataSet:
 
     def test_invalid_backend(self):
         pattern = (
-            r"'backend' should be one of \['pickle', 'joblib', 'compress_pickle'\], "
-            r"got 'invalid'\."
+            r"'backend' should be one of \['pickle', 'joblib', 'dill', "
+            r"'compress_pickle'\], got 'invalid'\."
         )
         with pytest.raises(ValueError, match=pattern):
             PickleDataSet(filepath="test.pkl", backend="invalid")
 
-    def test_no_joblib(self, mocker):
-        mocker.patch.object(PickleDataSet, "BACKENDS", {"joblib": None})
+    @pytest.mark.parametrize("backend", ["joblib", "dill", "compress_pickle"])
+    def test_no_backend(self, mocker, backend):
+        mocker.patch.object(PickleDataSet, "BACKENDS", {backend: None})
         with pytest.raises(ImportError):
-            PickleDataSet(filepath="test.pkl", backend="joblib")
-
-    def test_no_compress_pickle(self, mocker):
-        mocker.patch.object(PickleDataSet, "BACKENDS", {"compress_pickle": None})
-        with pytest.raises(ImportError):
-            PickleDataSet(filepath="test.pkl", backend="compress_pickle")
+            PickleDataSet(filepath="test.pkl", backend=backend)
 
 
 class TestPickleDataSetVersioned:

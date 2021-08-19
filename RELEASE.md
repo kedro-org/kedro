@@ -70,6 +70,7 @@
 * Added support for bulk packaging modular pipelines using `kedro pipeline package --all` and `pyproject.toml`.
 * Removed `cli.py` from the Kedro project template. By default all CLI commands, including `kedro run`, are now defined on the Kedro framework side. These can be overridden in turn by a plugin or a `cli.py` file in your project. A packaged Kedro project will respect the same hierarchy when executed with `python -m my_package`.
 * Removed `.ipython/profile_default/startup/` from the Kedro project template in favour of `.ipython/profile_default/ipython_config.py` and the `kedro.extras.extensions.ipython`.
+* Added support for `dill` backend to `PickleDataSet`.
 
 ## Bug fixes and other changes
 * Bumped minimum required `fsspec` version to 2021.04.
@@ -81,7 +82,8 @@
 * `kedro pipeline list` and `kedro pipeline describe` are being deprecated in favour of new commands `kedro registry list ` and `kedro registry describe`
 
 ## Thanks for supporting contributions
-[Moussa Taifi](https://github.com/moutai/)
+[Moussa Taifi](https://github.com/moutai),
+[Deepyaman Datta](https://github.com/deepyaman)
 
 # Release 0.17.4
 
@@ -117,7 +119,7 @@
 
 ## Thanks for supporting contributions
 [Lou Kratz](https://github.com/lou-k),
-[Lucas Jamar](https://github.com/lucasjamar/)
+[Lucas Jamar](https://github.com/lucasjamar)
 
 # Release 0.17.3
 
@@ -126,11 +128,11 @@
 * Added a `before_command_run` hook for plugins to add extra behaviour before Kedro CLI commands run.
 * `pipelines` from `pipeline_registry.py` and `register_pipeline` hooks are now loaded lazily when they are first accessed, not on startup:
 
-```python
-from kedro.framework.project import pipelines
+    ```python
+    from kedro.framework.project import pipelines
 
-print(pipelines["__default__"])  # pipeline loading is only triggered here
-```
+    print(pipelines["__default__"])  # pipeline loading is only triggered here
+    ```
 
 ## Bug fixes and other changes
 * `TemplatedConfigLoader` now correctly inserts default values when no globals are supplied.
@@ -162,11 +164,11 @@ print(pipelines["__default__"])  # pipeline loading is only triggered here
 * Added support for `compress_pickle` backend to `PickleDataSet`.
 * Enabled loading pipelines without creating a `KedroContext` instance:
 
-```python
-from kedro.framework.project import pipelines
+    ```python
+    from kedro.framework.project import pipelines
 
-print(pipelines)
-```
+    print(pipelines)
+    ```
 
 * Projects generated with kedro>=0.17.2:
   - should define pipelines in `pipeline_registry.py` rather than `hooks.py`.
@@ -184,7 +186,7 @@ print(pipelines)
 * `kedro.framework.context.KedroContext.run` will be removed in release 0.18.0.
 
 ## Thanks for supporting contributions
-[Sasaki Takeru](https://github.com/takeru/)
+[Sasaki Takeru](https://github.com/takeru)
 
 # Release 0.17.1
 
@@ -195,11 +197,12 @@ print(pipelines)
 * Added the `env` and `extra_params` arguments to `register_config_loader` hook.
 * Refactored the way `settings` are loaded. You will now be able to run:
 
-```python
-from kedro.framework.project import settings
+    ```python
+    from kedro.framework.project import settings
 
-print(settings.CONF_ROOT)
-```
+    print(settings.CONF_ROOT)
+    ```
+
 * Added a check on `kedro.runner.parallel_runner.ParallelRunner` which checks datasets for the `_SINGLE_PROCESS` attribute in the `_validate_catalog` method. If this attribute is set to `True` in an instance of a dataset (e.g. `SparkDataSet`), the `ParallelRunner` will raise an `AttributeError`.
 * Any user-defined dataset that should not be used with `ParallelRunner` may now have the `_SINGLE_PROCESS` attribute set to `True`.
 
@@ -331,12 +334,12 @@ To create a new, blank Kedro 0.17.0 project to drop your existing code into, you
 * **Update `pyproject.toml`**: Copy the following three keys from the `.kedro.yml` of your existing Kedro project into the `pyproject.toml` file of your new Kedro 0.17.0 project:
 
 
-```toml
-[tools.kedro]
-package_name = "<package_name>"
-project_name = "<project_name>"
-project_version = "0.17.0"
-```
+    ```toml
+    [tools.kedro]
+    package_name = "<package_name>"
+    project_name = "<project_name>"
+    project_version = "0.17.0"
+    ```
 
 Check your source directory. If you defined a different source directory (`source_dir`), make sure you also move that to `pyproject.toml`.
 
@@ -354,23 +357,22 @@ Check your source directory. If you defined a different source directory (`sourc
 
 * **Update `settings.py`**: For example, if you specified additional Hook implementations in `hooks`, or listed plugins under `disable_hooks_by_plugin` in your `.kedro.yml`, you will need to move them to `settings.py` accordingly:
 
-```python
-from <package_name>.hooks import MyCustomHooks, ProjectHooks
+    ```python
+    from <package_name>.hooks import MyCustomHooks, ProjectHooks
 
+    HOOKS = (ProjectHooks(), MyCustomHooks())
 
-HOOKS = (ProjectHooks(), MyCustomHooks())
-
-DISABLE_HOOKS_FOR_PLUGINS = ("my_plugin1",)
-```
+    DISABLE_HOOKS_FOR_PLUGINS = ("my_plugin1",)
+    ```
 
 * **Migration for `node` names**. From 0.17.0 the only allowed characters for node names are letters, digits, hyphens, underscores and/or fullstops. If you have previously defined node names that have special characters, spaces or other characters that are no longer permitted, you will need to rename those nodes.
 
 * **Copy changes to `kedro_cli.py`**. If you previously customised the `kedro run` command or added more CLI commands to your `kedro_cli.py`, you should move them into `<project_root>/src/<package_name>/cli.py`. Note, however, that the new way to run a Kedro pipeline is via a `KedroSession`, rather than using the `KedroContext`:
 
-```python
-with KedroSession.create(package_name=...) as session:
-    session.run()
-```
+    ```python
+    with KedroSession.create(package_name=...) as session:
+        session.run()
+    ```
 
 * **Copy changes made to `ConfigLoader`**. If you have defined a custom class, such as `TemplatedConfigLoader`, by overriding `ProjectContext._create_config_loader`, you should move the contents of the function in `src/<package_name>/hooks.py`, under `register_config_loader`.
 

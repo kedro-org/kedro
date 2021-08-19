@@ -7,6 +7,7 @@ black==21.5b1
 blacken-docs==1.9.2
 compress-pickle[lz4]~=1.2.0
 dask[complete]~=2021.1
+dill~=0.3.1
 flake8~=3.5
 gcsfs>=2021.04, <2022.01  # Upper bound set arbitrarily, to be reassessed in early 2022
 geopandas>=0.6.0, <1.0

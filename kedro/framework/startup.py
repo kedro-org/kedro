@@ -133,6 +133,7 @@ def _get_project_metadata(project_path: Union[str, Path]) -> ProjectMetadata:
     metadata_dict["source_dir"] = source_dir
     metadata_dict["config_file"] = pyproject_toml
     metadata_dict["project_path"] = project_path
+    metadata_dict.pop("pipeline", {})  # don't include micro-packaging specs
 
     try:
         return ProjectMetadata(**metadata_dict)

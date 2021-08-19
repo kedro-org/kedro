@@ -79,4 +79,3 @@ Feature: Run Project
     When I execute the kedro command "run --params extra1:1,extra2:value2"
     Then I should get a successful exit code
     And the console log should show that 4 nodes were run
-    And I should get a message including ""extra1": 1, "extra2": "value2""

@@ -25,6 +25,7 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import importlib
 import logging
 from logging.handlers import QueueHandler, QueueListener
 from multiprocessing import Queue
@@ -50,10 +51,12 @@ from kedro.versioning import Journal
 
 logger = logging.getLogger(__name__)
 
+MOCK_PACKAGE_NAME = "fake_package"
+
 
 @pytest.fixture
 def mock_package_name() -> str:
-    return "mock_package_name"
+    return MOCK_PACKAGE_NAME
 
 
 @pytest.fixture
@@ -402,14 +405,6 @@ class LoggingHooks:
         )
 
 
-@pytest.fixture(autouse=True)
-def patched_validate_module(mocker):
-    """Patching this so KedroSession could be created for testing purpose
-    since KedroSession.create is still calling configure_project at the moment
-    """
-    mocker.patch("kedro.framework.project._validate_module")
-
-
 @pytest.fixture
 def project_hooks():
     """A set of project hook implementations that log to stdout whenever it is invoked."""
@@ -463,4 +458,17 @@ def mock_session(
 ):  # pylint: disable=unused-argument
     return KedroSession.create(
         mock_package_name, tmp_path, extra_params={"params:key": "value"}
+    )
+
+
+@pytest.fixture(autouse=True)
+def mock_import(mocker):
+    # KedroSession eagerly validates that a project's settings.py is correct by
+    # importing it. settings.py does not actually exists as part of this test suite,
+    # so its import is mocked.
+    settings_module = f"{MOCK_PACKAGE_NAME}.settings"
+    mocker.patch(
+        "importlib.import_module",
+        wraps=importlib.import_module,
+        side_effect=(lambda x: None if x == settings_module else mocker.DEFAULT),
     )

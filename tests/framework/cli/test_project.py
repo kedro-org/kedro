@@ -469,6 +469,22 @@ class TestInstallCommand:
         assert not result.exit_code, result.output
         assert "Requirements installed!" in result.output
 
+    @pytest.mark.parametrize("os_name", ["posix", "nt"])
+    def test_install_missing_requirements_in_and_txt(
+        self, fake_project_cli, mocker, fake_metadata, os_name
+    ):
+        """Test error when neither requirements.txt nor requirements.in exists."""
+        mocker.patch("kedro.framework.cli.project.os").name = os_name
+        mocker.patch.object(Path, "is_file", return_value=False)
+        result = CliRunner().invoke(
+            fake_project_cli, ["install", "--build-reqs"], obj=fake_metadata
+        )
+        assert result.exit_code  # Error expected
+        assert isinstance(result.exception, FileNotFoundError)
+        assert "No project requirements.in or requirements.txt found" in str(
+            result.exception
+        )
+
 
 @pytest.fixture
 def os_mock(mocker):

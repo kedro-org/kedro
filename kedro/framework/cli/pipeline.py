@@ -39,6 +39,7 @@ from typing import Any, List, NamedTuple, Optional, Tuple, Union
 from zipfile import ZipFile
 
 import click
+import pkg_resources
 import yaml
 from setuptools.dist import Distribution
 
@@ -47,6 +48,7 @@ from kedro.framework.cli.utils import (
     KedroCliError,
     _clean_pycache,
     _filter_deprecation_warnings,
+    _get_requirements_in,
     call,
     command_with_verbosity,
     env_option,
@@ -65,6 +67,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     package_data={package_data},
+    install_requires={install_requires},
 )
 """
 
@@ -297,9 +300,39 @@ def pull_package(
         # Extract package name, based on the naming convention for wheel files
         # https://www.python.org/dev/peps/pep-0427/#file-name-convention
         package_name = dist_info_file[0].stem.split("-")[0]
+        package_metadata = dist_info_file[0] / "METADATA"
 
         _clean_pycache(temp_dir_path)
         _install_files(metadata, package_name, temp_dir_path, env, alias)
+
+        req_pattern = r"Requires-Dist: (.*?)\n"
+        package_reqs = re.findall(req_pattern, package_metadata.read_text())
+        if package_reqs:
+            requirements_in = _get_requirements_in(
+                metadata.source_dir, create_empty=True
+            )
+            _append_package_reqs(requirements_in, package_reqs, package_name)
+
+
+def _package_pipelines_from_manifest(metadata: ProjectMetadata) -> None:
+    # pylint: disable=import-outside-toplevel
+    import anyconfig  # for performance reasons
+
+    config_dict = anyconfig.load(metadata.config_file)
+    config_dict = config_dict["tool"]["kedro"]
+    build_specs = config_dict.get("pipeline", {}).get("package")
+
+    if not build_specs:
+        click.secho(
+            "Nothing to package. Please update your `pyproject.toml`.", fg="yellow"
+        )
+        return
+
+    for pipeline_name, specs in build_specs.items():
+        _package_pipeline(pipeline_name, metadata, **specs)
+        click.secho(f"Packaged `{pipeline_name}` pipeline!")
+
+    click.secho("Pipelines packaged!", fg="green")
 
 
 @pipeline.command("package")
@@ -327,12 +360,24 @@ def pull_package(
     "Defaults to pipeline package version or, "
     "if that is not defined, the project package version.",
 )
-@click.argument("name", nargs=1)
+@click.option("--all", "-a", "all_flag", is_flag=True)
+@click.argument("name", nargs=1, required=False)
 @click.pass_obj  # this will pass the metadata as first argument
 def package_pipeline(
-    metadata: ProjectMetadata, name, env, alias, destination, version
+    metadata: ProjectMetadata, name, env, alias, destination, version, all_flag
 ):  # pylint: disable=too-many-arguments
     """Package up a modular pipeline as a Python .whl."""
+    if not name and not all_flag:
+        click.secho(
+            "Please specify a pipeline name or add "
+            "'--all' to package all pipelines in `pyproject.toml`."
+        )
+        sys.exit(1)
+
+    if all_flag:
+        _package_pipelines_from_manifest(metadata)
+        return
+
     result_path = _package_pipeline(
         name, metadata, alias=alias, destination=destination, env=env, version=version
     )
@@ -379,6 +424,7 @@ def _unpack_wheel(location: str, destination: Path, fs_args: Optional[str]) -> N
 
     if location.endswith(".whl") and filesystem and filesystem.exists(location):
         with filesystem.open(location) as fs_file:
+            # pylint: disable=consider-using-with
             ZipFile(fs_file).extractall(destination)
     else:
         python_call(
@@ -393,6 +439,7 @@ def _unpack_wheel(location: str, destination: Path, fs_args: Optional[str]) -> N
                 f"More than 1 or no wheel files found: {file_names}. "
                 f"There has to be exactly one distribution file."
             )
+        # pylint: disable=consider-using-with
         ZipFile(wheel_file[0]).extractall(destination)
 
 
@@ -480,6 +527,7 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
         artifacts_to_package.pipeline_conf,
         [f"parameters*/**/{pipeline_name}.yml", f"parameters*/**/{pipeline_name}/*"],
     )
+
     source_paths = (
         artifacts_to_package.pipeline_dir,
         artifacts_to_package.pipeline_tests,
@@ -535,9 +583,19 @@ def _sync_path_list(source: List[Tuple[Path, str]], target: Path) -> None:
         _sync_dirs(source_path, target_with_suffix)
 
 
+def _make_install_requires(requirements_txt: Path) -> List[str]:
+    """Parses each line of requirements.txt into a version specifier valid to put in
+    install_requires."""
+    if not requirements_txt.exists():
+        return []
+    requirements = pkg_resources.parse_requirements(requirements_txt.read_text())
+    return [str(requirement) for requirement in requirements]
+
+
 _SourcePathType = Union[Path, List[Tuple[Path, str]]]
 
 
+# pylint: disable=too-many-locals
 def _generate_wheel_file(
     pipeline_name: str,
     destination: Path,
@@ -552,16 +610,27 @@ def _generate_wheel_file(
 
         # Copy source folders
         target_paths = _get_package_artifacts(temp_dir_path, package_name)
+        source_target, _, conf_target = target_paths
         for source, target in zip(source_paths, target_paths):
             sync_func = _sync_path_list if isinstance(source, list) else _sync_dirs
             sync_func(source, target)  # type: ignore
 
-        conf_target = target_paths[-1]
         if conf_target.is_dir() and alias:
             _rename_files(conf_target, pipeline_name, alias)
 
         # Build a setup.py on the fly
-        setup_file = _generate_setup_file(package_name, version, temp_dir_path)
+        try:
+            install_requires = _make_install_requires(
+                source_target / "requirements.txt"
+            )
+        except Exception as exc:
+            click.secho("FAILED", fg="red")
+            cls = exc.__class__
+            raise KedroCliError(f"{cls.__module__}.{cls.__qualname__}: {exc}") from exc
+
+        setup_file = _generate_setup_file(
+            package_name, version, install_requires, temp_dir_path
+        )
 
         package_file = destination / _get_wheel_name(name=package_name, version=version)
         if package_file.is_file():
@@ -582,7 +651,9 @@ def _generate_wheel_file(
         )
 
 
-def _generate_setup_file(package_name: str, version: str, output_dir: Path) -> Path:
+def _generate_setup_file(
+    package_name: str, version: str, install_requires: List[str], output_dir: Path
+) -> Path:
     setup_file = output_dir / "setup.py"
     package_data = {
         package_name: [
@@ -594,8 +665,12 @@ def _generate_setup_file(package_name: str, version: str, output_dir: Path) -> P
         ]
     }
     setup_file_context = dict(
-        name=package_name, version=version, package_data=json.dumps(package_data)
+        name=package_name,
+        version=version,
+        package_data=json.dumps(package_data),
+        install_requires=install_requires,
     )
+
     setup_file.write_text(_SETUP_PY_TEMPLATE.format(**setup_file_context))
     return setup_file
 
@@ -748,3 +823,29 @@ def _delete_artifacts(*artifacts: Path):
             raise KedroCliError(f"{cls.__module__}.{cls.__qualname__}: {exc}") from exc
         else:
             click.secho("OK", fg="green")
+
+
+def _append_package_reqs(
+    requirements_in: Path, package_reqs: List[str], pipeline_name: str
+) -> None:
+    """Appends modular pipeline requirements to project level requirements.in"""
+    existing_reqs = pkg_resources.parse_requirements(requirements_in.read_text())
+    new_reqs = pkg_resources.parse_requirements(package_reqs)
+    reqs_to_add = set(new_reqs) - set(existing_reqs)
+    if not reqs_to_add:
+        return
+
+    sorted_reqs = sorted(str(req) for req in reqs_to_add)
+    with open(requirements_in, "a") as file:
+        file.write(
+            f"\n\n# Additional requirements from modular pipeline `{pipeline_name}`:\n"
+        )
+        file.write("\n".join(sorted_reqs))
+    click.secho(
+        "Added the following requirements from modular pipeline `{}` to "
+        "requirements.in:\n{}".format(pipeline_name, "\n".join(sorted_reqs))
+    )
+    click.secho(
+        "Use `kedro install --build-reqs` to compile and install the updated list of "
+        "requirements."
+    )

@@ -2,7 +2,7 @@
 
 In this section we introduce the concept of a node, for which the relevant API documentation is [kedro.pipeline.node](/kedro.pipeline.node).
 
-Nodes are the building blocks of pipelines and represent tasks. Pipelines are used to combine nodes to build workflows, which range from simple machine learning workflows to end-to-end production workflows.
+Nodes are the building blocks of pipelines and represent tasks. Pipelines are used to combine nodes to build workflows, which range from simple machine learning workflows to end-to-end (E2E) production workflows.
 
 ```eval_rst
 .. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.

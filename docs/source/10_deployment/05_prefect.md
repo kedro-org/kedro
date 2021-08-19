@@ -14,7 +14,7 @@ To use Prefect Core and Prefect Server, make sure you have the following prerequ
 
 - Prefect Core is [installed](https://docs.prefect.io/core/getting_started/installation.html#installation) on your machine
 - [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) are installed and Docker Engine is running
-- Prefect Server is [up and running](https://docs.prefect.io/core/getting_started/installation.html#running-the-local-server-and-ui)
+- Prefect Server is [up and running](https://docs.prefect.io/orchestration/#prefect-core-server)
 - `PREFECT__LOGGING__EXTRA_LOGGERS` environment variable is set (it is required to get Kedro logs emitted):
 
 ```console

@@ -46,7 +46,6 @@ from kedro.framework.project import (
 from kedro.framework.session import KedroSession, get_current_session
 from kedro.framework.session.store import BaseSessionStore, ShelveStore
 
-_FAKE_PACKAGE_NAME = "fake_package"
 _FAKE_PROJECT_NAME = "fake_project"
 _FAKE_PIPELINE_NAME = "fake_pipeline"
 
@@ -193,7 +192,7 @@ def local_logging_config():
 
 
 @pytest.fixture
-def fake_project(mocker, tmp_path, local_logging_config):
+def fake_project(tmp_path, local_logging_config, mock_package_name):
     fake_project_dir = Path(tmp_path) / "fake_project"
     (fake_project_dir / "src").mkdir(parents=True)
 
@@ -203,7 +202,7 @@ def fake_project(mocker, tmp_path, local_logging_config):
             "kedro": {
                 "project_version": kedro_version,
                 "project_name": _FAKE_PROJECT_NAME,
-                "package_name": _FAKE_PACKAGE_NAME,
+                "package_name": mock_package_name,
             }
         }
     }
@@ -214,8 +213,6 @@ def fake_project(mocker, tmp_path, local_logging_config):
     env_logging.parent.mkdir(parents=True)
     env_logging.write_text(json.dumps(local_logging_config))
     (fake_project_dir / "conf" / "local").mkdir()
-
-    mocker.patch("kedro.framework.project._validate_module")
     return fake_project_dir
 
 
@@ -236,13 +233,14 @@ class TestKedroSession:
         fake_project,
         mock_context_class,
         fake_session_id,
+        mock_package_name,
         mocker,
         env,
         extra_params,
     ):
         mock_click_ctx = mocker.patch("click.get_current_context").return_value
         session = KedroSession.create(
-            _FAKE_PACKAGE_NAME, fake_project, env=env, extra_params=extra_params
+            mock_package_name, fake_project, env=env, extra_params=extra_params
         )
 
         expected_cli_data = {
@@ -254,7 +252,7 @@ class TestKedroSession:
         expected_store = {
             "project_path": fake_project,
             "session_id": fake_session_id,
-            "package_name": _FAKE_PACKAGE_NAME,
+            "package_name": mock_package_name,
             "cli": expected_cli_data,
         }
         if env:
@@ -266,7 +264,7 @@ class TestKedroSession:
         # called for logging setup
         mock_context_class.assert_called_once_with(
             project_path=fake_project,
-            package_name=_FAKE_PACKAGE_NAME,
+            package_name=mock_package_name,
             env=env,
             extra_params=extra_params,
         )
@@ -275,10 +273,15 @@ class TestKedroSession:
 
     @pytest.mark.usefixtures("mock_settings_context_class")
     def test_create_no_env_extra_params(
-        self, fake_project, mock_context_class, fake_session_id, mocker
+        self,
+        fake_project,
+        mock_context_class,
+        fake_session_id,
+        mock_package_name,
+        mocker,
     ):
         mock_click_ctx = mocker.patch("click.get_current_context").return_value
-        session = KedroSession.create(_FAKE_PACKAGE_NAME, fake_project)
+        session = KedroSession.create(mock_package_name, fake_project)
 
         expected_cli_data = {
             "args": mock_click_ctx.args,
@@ -289,14 +292,14 @@ class TestKedroSession:
         expected_store = {
             "project_path": fake_project,
             "session_id": fake_session_id,
-            "package_name": _FAKE_PACKAGE_NAME,
+            "package_name": mock_package_name,
             "cli": expected_cli_data,
         }
 
         assert session.store == expected_store
         mock_context_class.assert_called_once_with(
             project_path=fake_project,
-            package_name=_FAKE_PACKAGE_NAME,
+            package_name=mock_package_name,
             env=None,
             extra_params=None,
         )
@@ -304,11 +307,13 @@ class TestKedroSession:
         assert session.load_context() is mock_context_class.return_value
 
     @pytest.mark.usefixtures("mock_settings")
-    def test_load_context_with_envvar(self, fake_project, monkeypatch, mocker):
+    def test_load_context_with_envvar(
+        self, fake_project, monkeypatch, mock_package_name, mocker
+    ):
         mocker.patch("kedro.config.config.ConfigLoader.get")
         monkeypatch.setenv("KEDRO_ENV", "my_fake_env")
 
-        session = KedroSession.create(_FAKE_PACKAGE_NAME, fake_project)
+        session = KedroSession.create(mock_package_name, fake_project)
         result = session.load_context()
 
         assert isinstance(result, KedroContext)
@@ -316,16 +321,18 @@ class TestKedroSession:
         assert result.env == "my_fake_env"
 
     @pytest.mark.usefixtures("mock_settings_custom_context_class")
-    def test_load_context_custom_context_class(self, fake_project):
-        session = KedroSession.create(_FAKE_PACKAGE_NAME, fake_project)
+    def test_load_context_custom_context_class(self, fake_project, mock_package_name):
+        session = KedroSession.create(mock_package_name, fake_project)
         result = session.load_context()
 
         assert isinstance(result, KedroContext)
         assert result.__class__.__name__ == "MyContext"
 
     @pytest.mark.usefixtures("mock_settings_context_class")
-    def test_default_store(self, fake_project, fake_session_id, caplog):
-        session = KedroSession.create(_FAKE_PACKAGE_NAME, fake_project)
+    def test_default_store(
+        self, fake_project, fake_session_id, caplog, mock_package_name
+    ):
+        session = KedroSession.create(mock_package_name, fake_project)
         assert isinstance(session.store, dict)
         assert session._store.__class__ is BaseSessionStore
         assert session._store._path == (fake_project / "sessions").as_posix()
@@ -343,10 +350,12 @@ class TestKedroSession:
         assert actual_log_messages == expected_log_messages
 
     @pytest.mark.usefixtures("mock_settings_shelve_session_store")
-    def test_shelve_store(self, fake_project, fake_session_id, caplog, mocker):
+    def test_shelve_store(
+        self, fake_project, fake_session_id, caplog, mock_package_name, mocker
+    ):
         mocker.patch("pathlib.Path.is_file", return_value=True)
         shelve_location = fake_project / "nested" / "sessions"
-        other = KedroSession.create(_FAKE_PACKAGE_NAME, fake_project)
+        other = KedroSession.create(mock_package_name, fake_project)
         assert other._store.__class__ is ShelveStore
         assert other._store._path == shelve_location.as_posix()
         assert other._store._location == shelve_location / fake_session_id / "store"
@@ -376,25 +385,26 @@ class TestKedroSession:
             assert mock_settings.SESSION_STORE_CLASS
 
     @pytest.mark.usefixtures("mock_settings_bad_session_store_args")
-    def test_wrong_store_args(self, fake_project):
+    def test_wrong_store_args(self, fake_project, mock_package_name):
         classpath = f"{BaseSessionStore.__module__}.{BaseSessionStore.__qualname__}"
         pattern = (
             f"Store config must only contain arguments valid for "
             f"the constructor of `{classpath}`."
         )
         with pytest.raises(ValueError, match=re.escape(pattern)):
-            KedroSession.create(_FAKE_PACKAGE_NAME, fake_project)
+            KedroSession.create(mock_package_name, fake_project)
 
     def test_store_uncaught_error(
         self,
         fake_project,
         fake_session_id,
         mock_settings_uncaught_session_store_exception,
+        mock_package_name,
     ):
         classpath = f"{BaseSessionStore.__module__}.{BaseSessionStore.__qualname__}"
         pattern = f"Failed to instantiate session store of type `{classpath}`."
         with pytest.raises(ValueError, match=re.escape(pattern)):
-            KedroSession.create(_FAKE_PACKAGE_NAME, fake_project)
+            KedroSession.create(mock_package_name, fake_project)
 
         mock_settings_uncaught_session_store_exception.assert_called_once_with(
             path="path", session_id=fake_session_id
@@ -404,7 +414,7 @@ class TestKedroSession:
     @pytest.mark.parametrize("fake_git_status", ["dirty", ""])
     @pytest.mark.parametrize("fake_commit_hash", ["fake_commit_hash"])
     def test_git_describe(
-        self, fake_project, fake_commit_hash, fake_git_status, mocker
+        self, fake_project, fake_commit_hash, fake_git_status, mock_package_name, mocker
     ):
         """Test that git information is added to the session store"""
         mocker.patch(
@@ -412,7 +422,7 @@ class TestKedroSession:
             side_effect=[fake_commit_hash.encode(), fake_git_status.encode()],
         )
 
-        session = KedroSession.create(_FAKE_PACKAGE_NAME, fake_project)
+        session = KedroSession.create(mock_package_name, fake_project)
         expected_git_info = {
             "commit_sha": fake_commit_hash,
             "dirty": bool(fake_git_status),
@@ -428,12 +438,14 @@ class TestKedroSession:
             NotADirectoryError,
         ],
     )
-    def test_git_describe_error(self, fake_project, exception, mocker, caplog):
+    def test_git_describe_error(
+        self, fake_project, exception, mock_package_name, mocker, caplog
+    ):
         """Test that git information is not added to the session store
         if call to git fails
         """
         mocker.patch("subprocess.check_output", side_effect=exception)
-        session = KedroSession.create(_FAKE_PACKAGE_NAME, fake_project)
+        session = KedroSession.create(mock_package_name, fake_project)
         assert "git" not in session.store
 
         expected_log_messages = [f"Unable to git describe {fake_project}"]
@@ -445,11 +457,11 @@ class TestKedroSession:
         assert actual_log_messages == expected_log_messages
 
     @pytest.mark.usefixtures("mock_settings")
-    def test_log_error(self, fake_project):
+    def test_log_error(self, fake_project, mock_package_name):
         """Test logging the error by the session"""
         # test that the error is not swallowed by the session
         with pytest.raises(FakeException), KedroSession.create(
-            _FAKE_PACKAGE_NAME, fake_project
+            mock_package_name, fake_project
         ) as session:
             raise FakeException
 
@@ -461,17 +473,16 @@ class TestKedroSession:
         )
 
     @pytest.mark.usefixtures("mock_settings")
-    def test_get_current_session(self, fake_project, mocker):
+    def test_get_current_session(self, fake_project, mock_package_name):
         assert get_current_session(silent=True) is None  # no sessions yet
 
         pattern = "There is no active Kedro session"
         with pytest.raises(RuntimeError, match=pattern):
             get_current_session()
 
-        mocker.patch("kedro.framework.project._validate_module")
-        configure_project(_FAKE_PACKAGE_NAME)
-        session1 = KedroSession.create(_FAKE_PACKAGE_NAME, fake_project)
-        session2 = KedroSession.create(_FAKE_PACKAGE_NAME, fake_project)
+        configure_project(mock_package_name)
+        session1 = KedroSession.create(mock_package_name, fake_project)
+        session2 = KedroSession.create(mock_package_name, fake_project)
 
         with session1:
             assert get_current_session() is session1
@@ -496,6 +507,7 @@ class TestKedroSession:
         fake_session_id,
         fake_pipeline_name,
         mock_context_class,
+        mock_package_name,
         mocker,
     ):
         """Test running the project via the session"""
@@ -515,7 +527,7 @@ class TestKedroSession:
         mock_runner = mocker.Mock()
         mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
 
-        with KedroSession.create(_FAKE_PACKAGE_NAME, fake_project) as session:
+        with KedroSession.create(mock_package_name, fake_project) as session:
             session.run(runner=mock_runner, pipeline_name=fake_pipeline_name)
 
         record_data = {
@@ -548,7 +560,7 @@ class TestKedroSession:
         )
 
     @pytest.mark.usefixtures("mock_settings_context_class")
-    def test_run_non_existent_pipeline(self, fake_project, mocker):
+    def test_run_non_existent_pipeline(self, fake_project, mock_package_name, mocker):
         mock_runner = mocker.Mock()
 
         pattern = (
@@ -557,7 +569,7 @@ class TestKedroSession:
             "by the 'register_pipelines' function."
         )
         with pytest.raises(ValueError, match=re.escape(pattern)):
-            with KedroSession.create(_FAKE_PACKAGE_NAME, fake_project) as session:
+            with KedroSession.create(mock_package_name, fake_project) as session:
                 session.run(runner=mock_runner, pipeline_name="doesnotexist")
 
     @pytest.mark.usefixtures("mock_settings_context_class")
@@ -568,6 +580,7 @@ class TestKedroSession:
         fake_session_id,
         fake_pipeline_name,
         mock_context_class,
+        mock_package_name,
         mocker,
     ):
         """Test exception being raise during the run"""
@@ -589,7 +602,7 @@ class TestKedroSession:
         mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
 
         with pytest.raises(FakeException), KedroSession.create(
-            _FAKE_PACKAGE_NAME, fake_project
+            mock_package_name, fake_project
         ) as session:
             session.run(runner=mock_runner, pipeline_name=fake_pipeline_name)
 
@@ -625,8 +638,10 @@ class TestKedroSession:
 
 
 @pytest.mark.usefixtures("mock_settings")
-def test_setup_logging_using_absolute_path(fake_project, mocked_logging):
-    KedroSession.create(_FAKE_PACKAGE_NAME, fake_project)
+def test_setup_logging_using_absolute_path(
+    fake_project, mocked_logging, mock_package_name
+):
+    KedroSession.create(mock_package_name, fake_project)
 
     mocked_logging.assert_called_once()
     call_args = mocked_logging.call_args[0][0]

@@ -25,7 +25,6 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# pylint: disable=consider-using-with
 import filecmp
 import shutil
 
@@ -34,7 +33,7 @@ import yaml
 from click import ClickException
 from click.testing import CliRunner
 
-from kedro.framework.cli.pipeline import _get_wheel_name
+from kedro.framework.cli.pipeline import _get_sdist_name
 from kedro.framework.project import settings
 
 PIPELINE_NAME = "my_pipeline"
@@ -84,7 +83,7 @@ class TestPipelinePullCommand:
         fake_metadata,
     ):
         """
-        Test for pulling a valid wheel file locally.
+        Test for pulling a valid sdist file locally.
         """
         # pylint: disable=too-many-locals
         self.call_pipeline_create(fake_project_cli, fake_metadata)
@@ -96,21 +95,21 @@ class TestPipelinePullCommand:
             fake_repo_path / settings.CONF_SOURCE / "base" / "pipelines" / PIPELINE_NAME
         )
         test_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
-        # Make sure the files actually deleted before pulling from the wheel file.
+        # Make sure the files actually deleted before pulling from the sdist file.
         assert not source_path.exists()
         assert not test_path.exists()
         assert not config_path.exists()
 
-        wheel_file = (
-            fake_repo_path / "dist" / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
+        sdist_file = (
+            fake_repo_path / "dist" / _get_sdist_name(name=PIPELINE_NAME, version="0.1")
         )
-        assert wheel_file.is_file()
+        assert sdist_file.is_file()
 
         options = ["-e", env] if env else []
         options += ["--alias", alias] if alias else []
         result = CliRunner().invoke(
             fake_project_cli,
-            ["pipeline", "pull", str(wheel_file), *options],
+            ["pipeline", "pull", str(sdist_file), *options],
             obj=fake_metadata,
         )
         assert result.exit_code == 0
@@ -145,13 +144,15 @@ class TestPipelinePullCommand:
         fake_metadata,
     ):
         """
-        Test for pulling a valid wheel file locally, unpack it into another location and
+        Test for pulling a valid sdist file locally, unpack it into another location and
         check that unpacked files are identical to the ones in the original modular pipeline.
         """
         # pylint: disable=too-many-locals
         pipeline_name = "another_pipeline"
         self.call_pipeline_create(fake_project_cli, fake_metadata)
-        self.call_pipeline_package(fake_project_cli, fake_metadata, pipeline_name)
+        self.call_pipeline_package(
+            cli=fake_project_cli, metadata=fake_metadata, alias=pipeline_name
+        )
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
         test_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
@@ -163,16 +164,16 @@ class TestPipelinePullCommand:
             / f"{PIPELINE_NAME}.yml"
         )
 
-        wheel_file = (
-            fake_repo_path / "dist" / _get_wheel_name(name=pipeline_name, version="0.1")
+        sdist_file = (
+            fake_repo_path / "dist" / _get_sdist_name(name=pipeline_name, version="0.1")
         )
-        assert wheel_file.is_file()
+        assert sdist_file.is_file()
 
         options = ["-e", env] if env else []
         options += ["--alias", alias] if alias else []
         result = CliRunner().invoke(
             fake_project_cli,
-            ["pipeline", "pull", str(wheel_file), *options],
+            ["pipeline", "pull", str(sdist_file), *options],
             obj=fake_metadata,
         )
         assert result.exit_code == 0
@@ -197,7 +198,7 @@ class TestPipelinePullCommand:
         self, fake_project_cli, fake_repo_path, mocker, tmp_path, fake_metadata
     ):
         """
-        Test for pulling a wheel file with custom fs_args specified.
+        Test for pulling a sdist file with custom fs_args specified.
         """
         self.call_pipeline_create(fake_project_cli, fake_metadata)
         self.call_pipeline_package(fake_project_cli, fake_metadata)
@@ -208,33 +209,33 @@ class TestPipelinePullCommand:
             yaml.dump({"fs_arg_1": 1, "fs_arg_2": {"fs_arg_2_nested_1": 2}}, f)
         mocked_filesystem = mocker.patch("fsspec.filesystem")
 
-        wheel_file = (
-            fake_repo_path / "dist" / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
+        sdist_file = (
+            fake_repo_path / "dist" / _get_sdist_name(name=PIPELINE_NAME, version="0.1")
         )
 
         options = ["--fs-args", str(fs_args_config)]
         CliRunner().invoke(
-            fake_project_cli, ["pipeline", "pull", str(wheel_file), *options]
+            fake_project_cli, ["pipeline", "pull", str(sdist_file), *options]
         )
 
         mocked_filesystem.assert_called_once_with(
             "file", fs_arg_1=1, fs_arg_2=dict(fs_arg_2_nested_1=2)
         )
 
-    def test_pull_two_dist_info(
+    def test_pull_two_egg_info(
         self, fake_project_cli, fake_repo_path, mocker, tmp_path, fake_metadata
     ):
         """
-        Test for pulling a wheel file with more than one dist-info directory.
+        Test for pulling a sdist file with more than one dist-info directory.
         """
         self.call_pipeline_create(fake_project_cli, fake_metadata)
         self.call_pipeline_package(fake_project_cli, fake_metadata)
-        wheel_file = (
-            fake_repo_path / "dist" / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
+        sdist_file = (
+            fake_repo_path / "dist" / _get_sdist_name(name=PIPELINE_NAME, version="0.1")
         )
-        assert wheel_file.is_file()
+        assert sdist_file.is_file()
 
-        (tmp_path / "dummy.dist-info").mkdir()
+        (tmp_path / f"{PIPELINE_NAME}-0.1" / "dummy.egg-info").mkdir(parents=True)
 
         mocker.patch(
             "kedro.framework.cli.pipeline.tempfile.TemporaryDirectory",
@@ -242,11 +243,11 @@ class TestPipelinePullCommand:
         )
         result = CliRunner().invoke(
             fake_project_cli,
-            ["pipeline", "pull", str(wheel_file)],
+            ["pipeline", "pull", str(sdist_file)],
             obj=fake_metadata,
         )
         assert result.exit_code
-        assert "Error: More than 1 or no dist-info files found" in result.output
+        assert "Error: More than 1 or no egg-info files found" in result.output
 
     @pytest.mark.parametrize("env", [None, "local"])
     @pytest.mark.parametrize("alias", [None, "alias_path"])
@@ -260,8 +261,8 @@ class TestPipelinePullCommand:
         fake_metadata,
     ):
         """
-        Test for pulling a valid wheel file locally, but `tests` directory is missing
-        from the wheel file.
+        Test for pulling a valid sdist file locally, but `tests` directory is missing
+        from the sdist file.
         """
         # pylint: disable=too-many-locals
         self.call_pipeline_create(fake_project_cli, fake_metadata)
@@ -279,20 +280,20 @@ class TestPipelinePullCommand:
             / "parameters"
             / f"{PIPELINE_NAME}.yml"
         )
-        # Make sure the files actually deleted before pulling from the wheel file.
+        # Make sure the files actually deleted before pulling from the sdist file.
         assert not source_path.exists()
         assert not source_params_config.exists()
 
-        wheel_file = (
-            fake_repo_path / "dist" / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
+        sdist_file = (
+            fake_repo_path / "dist" / _get_sdist_name(name=PIPELINE_NAME, version="0.1")
         )
-        assert wheel_file.is_file()
+        assert sdist_file.is_file()
 
         options = ["-e", env] if env else []
         options += ["--alias", alias] if alias else []
         result = CliRunner().invoke(
             fake_project_cli,
-            ["pipeline", "pull", str(wheel_file), *options],
+            ["pipeline", "pull", str(sdist_file), *options],
             obj=fake_metadata,
         )
         assert result.exit_code == 0
@@ -325,8 +326,8 @@ class TestPipelinePullCommand:
         fake_metadata,
     ):
         """
-        Test for pulling a valid wheel file locally, but `config` directory is missing
-        from the wheel file.
+        Test for pulling a valid sdist file locally, but `config` directory is missing
+        from the sdist file.
         """
         # pylint: disable=too-many-locals
         self.call_pipeline_create(fake_project_cli, fake_metadata)
@@ -343,20 +344,20 @@ class TestPipelinePullCommand:
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
         test_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
-        # Make sure the files actually deleted before pulling from the wheel file.
+        # Make sure the files actually deleted before pulling from the sdist file.
         assert not source_path.exists()
         assert not test_path.exists()
 
-        wheel_file = (
-            fake_repo_path / "dist" / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
+        sdist_file = (
+            fake_repo_path / "dist" / _get_sdist_name(name=PIPELINE_NAME, version="0.1")
         )
-        assert wheel_file.is_file()
+        assert sdist_file.is_file()
 
         options = ["-e", env] if env else []
         options += ["--alias", alias] if alias else []
         result = CliRunner().invoke(
             fake_project_cli,
-            ["pipeline", "pull", str(wheel_file), *options],
+            ["pipeline", "pull", str(sdist_file), *options],
             obj=fake_metadata,
         )
         assert result.exit_code == 0
@@ -393,17 +394,18 @@ class TestPipelinePullCommand:
         fake_metadata,
     ):
         """
-        Test for pulling a valid wheel file from pypi.
+        Test for pulling a valid sdist file from pypi.
         """
         # pylint: disable=too-many-locals
         self.call_pipeline_create(fake_project_cli, fake_metadata)
-        # We mock the `pip download` call, and manually create a package wheel file
+        # We mock the `pip download` call, and manually create a package sdist file
         # to simulate the pypi scenario instead
         self.call_pipeline_package(
             fake_project_cli, fake_metadata, destination=tmp_path
         )
-        wheel_file = tmp_path / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
-        assert wheel_file.is_file()
+        version = "0.1"
+        sdist_file = tmp_path / _get_sdist_name(name=PIPELINE_NAME, version=version)
+        assert sdist_file.is_file()
         self.call_pipeline_delete(fake_project_cli, fake_metadata)
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
@@ -430,14 +432,20 @@ class TestPipelinePullCommand:
         options += ["--alias", alias] if alias else []
         result = CliRunner().invoke(
             fake_project_cli,
-            ["pipeline", "pull", PIPELINE_NAME, *options],
+            ["pipeline", "pull", f"{PIPELINE_NAME}-{version}", *options],
             obj=fake_metadata,
         )
         assert result.exit_code == 0
 
         python_call_mock.assert_called_once_with(
             "pip",
-            ["download", "--no-deps", "--dest", str(tmp_path), PIPELINE_NAME],
+            [
+                "download",
+                "--no-deps",
+                "--dest",
+                str(tmp_path),
+                f"{PIPELINE_NAME}-{version}",
+            ],
         )
 
         pipeline_name = alias or PIPELINE_NAME
@@ -491,14 +499,14 @@ class TestPipelinePullCommand:
 
         assert pypi_error_message in result.stdout
 
-    def test_pull_from_pypi_more_than_one_wheel_file(
+    def test_pull_from_pypi_more_than_one_sdist_file(
         self, fake_project_cli, mocker, tmp_path, fake_metadata
     ):
         """
-        Test for pulling a wheel file with `pip download`, but there are more than one wheel
+        Test for pulling a sdist file with `pip download`, but there are more than one sdist
         file to unzip.
         """
-        # We mock the `pip download` call, and manually create a package wheel file
+        # We mock the `pip download` call, and manually create a package sdist file
         # to simulate the pypi scenario instead
         self.call_pipeline_create(fake_project_cli, fake_metadata)
         self.call_pipeline_package(
@@ -517,14 +525,14 @@ class TestPipelinePullCommand:
         )
 
         assert result.exit_code
-        assert "Error: More than 1 or no wheel files found:" in result.output
+        assert "Error: More than 1 or no sdist files found:" in result.output
 
     def test_pull_unsupported_protocol_by_fsspec(
         self, fake_project_cli, fake_metadata, tmp_path, mocker
     ):
         protocol = "unsupported"
         exception_message = f"Protocol not known: {protocol}"
-        error_message = "Error: More than 1 or no wheel files found:"
+        error_message = "Error: More than 1 or no sdist files found:"
         package_path = f"{protocol}://{PIPELINE_NAME}"
 
         python_call_mock = mocker.patch("kedro.framework.cli.pipeline.python_call")

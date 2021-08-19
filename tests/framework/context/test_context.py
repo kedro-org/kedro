@@ -291,7 +291,6 @@ def mocked_logging(mocker):
 def dummy_context(
     tmp_path, prepare_project_dir, env, extra_params, mocker
 ):  # pylint: disable=unused-argument
-    mocker.patch("kedro.framework.project._validate_module")
     configure_project(MOCK_PACKAGE_NAME)
     context = KedroContext(
         MOCK_PACKAGE_NAME, str(tmp_path), env=env, extra_params=extra_params
@@ -420,7 +419,10 @@ class TestKedroContext:
 
     # pylint: disable=unused-argument
     def test_broken_config_loader(self, broken_settings, dummy_context):
-        pattern = f"Expected an instance of `ConfigLoader`, got `{type('')}` instead."
+        pattern = (
+            f"Expected an instance of `ConfigLoader`, "
+            f"got `it breaks` of class `{type('')}` instead."
+        )
         with pytest.raises(KedroContextError, match=re.escape(pattern)):
             _ = dummy_context.config_loader
 

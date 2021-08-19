@@ -6,7 +6,7 @@
 * Added new API `Pipeline.filter()` (previously in `KedroContext._filter_pipeline()`) to filter parts of a pipeline.
 * Added `partitionBy` support and exposed `save_args` for `SparkHiveDataSet`.
 * Exposed `open_args_save` in `fs_args` for `pandas.ParquetDataSet`.
-* Bumped the minimum version of `pandas` to 1.2. Any `storage_options` should continue to be specified under `fs_args` and/or `credentials`.
+* Bumped the minimum version of `pandas` to 1.3. Any `storage_options` should continue to be specified under `fs_args` and/or `credentials`.
 * Refactored the `load` and `save` operations for `pandas` datasets in order to leverage `pandas` own API and delegate `fsspec` operations to them. This reduces the need to have our own `fsspec` wrappers.
 * Removed `cli.py` from the Kedro project template. By default, all CLI commands, including `kedro run`, are now defined on the Kedro framework side. These can be overridden in turn by a plugin or a `cli.py` file in your project. A packaged Kedro project will respect the same hierarchy when executed with `python -m my_package`.
 * Merged `pandas.AppendableExcelDataSet` into `pandas.ExcelDataSet`.
@@ -14,6 +14,11 @@
 * The default `kedro` environment names can now be set in `settings.py` with the help of the `CONFIG_LOADER_ARGS` variable. The relevant keys to be supplied are `base_env` and `default_run_env`. These values are set to `base` and `local` respectively as a default.
 * Added `kedro.config.abstract_config.AbstractConfigLoader` as an abstract base class for all `ConfigLoader` implementations. `ConfigLoader` and `TemplatedConfigLoader` now inherit directly from this base class.
 * Streamlined the `ConfigLoader.get` and `TemplatedConfigLoader.get` API and delegated the actual `get` method functional implementation to the `kedro.config.common` module.
+* Added the following new datasets:
+
+| Type                | Description                                                    | Location                       |
+| ------------------- | -------------------------------------------------------------- | ------------------------------ |
+| `pandas.XMLDataSet` | Read XML into Pandas DataFrame. Write Pandas DataFrame to XML. | `kedro.extras.datasets.pandas` |
 
 ## Breaking changes to the API
 * Add namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/quantumblacklabs/kedro/issues/399)

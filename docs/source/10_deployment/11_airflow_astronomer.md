@@ -115,7 +115,7 @@ This ensures that all datasets are persisted so all Airflow tasks can read them 
 kedro package
 ```
 
-This step should produce a wheel file called `new_kedro_project-0.1-py3-none-any.whl` located at `src/dist`.
+This step should produce a wheel file called `new_kedro_project-0.1-py3-none-any.whl` located at `dist/`.
 
 * **Step 2.2**: Add the `src/` directory to `.dockerignore`, as it's not necessary to bundle the entire code base with the container once we have the packaged wheel file.
 
@@ -128,7 +128,7 @@ echo "src/" >> .dockerignore
 ```Dockerfile
 FROM quay.io/astronomer/ap-airflow:2.0.0-buster-onbuild
 
-RUN pip install --user src/dist/new_kedro_project-0.1-py3-none-any.whl
+RUN pip install --user dist/new_kedro_project-0.1-py3-none-any.whl
 ```
 
 ### Step 3. Convert the Kedro pipeline into an Airflow DAG with `kedro airflow`

@@ -40,8 +40,8 @@ from .core import DataSetNotFoundError  # NOQA
 from .core import Version  # NOQA
 from .data_catalog import DataCatalog  # NOQA
 from .data_catalog_with_default import DataCatalogWithDefault  # NOQA
-from .lambda_data_set import LambdaDataSet  # NOQA
-from .memory_data_set import MemoryDataSet  # NOQA
-from .partitioned_data_set import IncrementalDataSet  # NOQA
-from .partitioned_data_set import PartitionedDataSet  # NOQA
+from .lambda_dataset import LambdaDataSet  # NOQA
+from .memory_dataset import MemoryDataSet  # NOQA
+from .partitioned_dataset import IncrementalDataSet  # NOQA
+from .partitioned_dataset import PartitionedDataSet  # NOQA
 from .transformers import AbstractTransformer  # NOQA

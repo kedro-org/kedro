@@ -35,22 +35,26 @@
 * The `kedro package` and `kedro pipeline package` now save `egg` and `whl` files in the `<project_root>/dist` folder (previously `<project_root>/src/dist`).
 * Removed `kedro pipeline list` and `kedro pipeline describe` commands in favour of `kedro registry list` and `kedro registry describe`.
 * Removed `open_args_load` and `open_args_save` from the following datasets:
-  * pandas.CSVDataSet
-  * pandas.ExcelDataSet
-  * pandas.FeatherDataSet
-  * pandas.JSONDataSet
-  * pandas.ParquetDataSet
+  * `pandas.CSVDataSet`
+  * `pandas.ExcelDataSet`
+  * `pandas.FeatherDataSet`
+  * `pandas.JSONDataSet`
+  * `pandas.ParquetDataSet`
 * `storage_options` are now dropped if they are specified under `load_args` or `save_args` for the following datasets:
-  * pandas.CSVDataSet
-  * pandas.ExcelDataSet
-  * pandas.FeatherDataSet
-  * pandas.JSONDataSet
-  * pandas.ParquetDataSet
+  * `pandas.CSVDataSet`
+  * `pandas.ExcelDataSet`
+  * `pandas.FeatherDataSet`
+  * `pandas.JSONDataSet`
+  * `pandas.ParquetDataSet`
 * The environment defaulting behaviour has been removed from `KedroContext` and is now implemented in a `ConfigLoader` class (or equivalent) with the `base_env` and `default_run_env` attributes.
 * `ConfigLoader` and `TemplatedConfigLoader` argument `conf_root` has been renamed to `conf_source` to align the API.
 * The `settings.py` setting `CONF_ROOT` has been renamed to `CONF_SOURCE` to align the API. Default value of `conf` remains unchanged.
 * Renamed `extra_params` to `runtime_params` in `kedro.config.config.ConfigLoader` and `kedro.config.templated_config.TemplatedConfigLoader`.
-* Switched from packaging pipelines as wheel files to tar archive files compressed with gzip (`.tar.gz`)
+* Switched from packaging pipelines as wheel files to tar archive files compressed with gzip (`.tar.gz`).
+* Renamed `lambda_data_set`, `memory_data_set`, and `partitioned_data_set` to `lambda_dataset`, `memory_dataset`, and `partitioned_dataset`, respectively, in `kedro.io`.
+
+## Thanks for supporting contributions
+[Deepyaman Datta](https://github.com/deepyaman)
 
 ## Migration guide from Kedro 0.17.* to 0.18.*
 * Please remove any existing `hook_impl` of the `register_config_loader` method from `ProjectHooks` (or custom alternatives).
@@ -66,6 +70,7 @@
 * Update the `settings.py` setting `CONF_ROOT` to `CONF_SOURCE`.
 * Update the key-word argument `conf_root` to `conf_source` when calling `ConfigLoader` or `TemplatedConfigLoader` directly.
 * Rename `extra_params` to `runtime_params` in `kedro.config.config.ConfigLoader` and `kedro.config.templated_config.TemplatedConfigLoader`, or your custom implementation, if it calls to `ConfigLoader` or any of its parent classes.
+* If you were importing from `kedro.io.lambda_data_set`, `kedro.io.memory_data_set`, or `kedro.io.partitioned_data_set`, change the import to `kedro.io.lambda_dataset`, `kedro.io.memory_dataset`, or `kedro.io.partitioned_dataset`, respectively (or import the dataset directly from `kedro.io`).
 
 # Upcoming Release 0.17.5
 

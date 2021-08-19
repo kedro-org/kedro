@@ -121,7 +121,7 @@ type_targets = {
         "kedro.io.data_catalog.DataCatalog",
         "kedro.io.transformers.AbstractTransformer",
         "kedro.io.data_catalog_with_default.DataCatalogWithDefault",
-        "kedro.io.partitioned_data_set.PartitionedDataSet",
+        "kedro.io.partitioned_dataset.PartitionedDataSet",
         "kedro.pipeline.pipeline.Pipeline",
         "kedro.runner.runner.AbstractRunner",
         "kedro.runner.parallel_runner._SharedMemoryDataSet",

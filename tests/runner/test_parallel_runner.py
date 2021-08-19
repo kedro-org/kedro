@@ -115,7 +115,7 @@ class TestValidParallelRunner:
         assert result["Z"] == (42, 42, 42)
 
     @pytest.mark.parametrize("is_async", [False, True])
-    def test_memory_data_set_input(self, is_async, fan_out_fan_in):
+    def test_memory_dataset_input(self, is_async, fan_out_fan_in):
         pipeline = Pipeline([fan_out_fan_in])
         catalog = DataCatalog({"A": MemoryDataSet("42")})
         result = ParallelRunner(is_async=is_async).run(pipeline, catalog)
@@ -201,7 +201,7 @@ class TestInvalidParallelRunner:
         with pytest.raises(Exception, match="test exception"):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
 
-    def test_memory_data_set_output(self, is_async, fan_out_fan_in):
+    def test_memory_dataset_output(self, is_async, fan_out_fan_in):
         """ParallelRunner does not support output to externally
         created MemoryDataSets.
         """

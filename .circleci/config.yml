@@ -32,15 +32,12 @@ commands:
           name: Install pip setuptools
           command: make install-pip-setuptools
       - run:
-          name: Install requirements
-          command: pip install -r requirements.txt -U
-      - run:
           # Virtualenv 20.0.20 broke pre-commit, capped for now
           name: Install venv for some pre-commit hooks
           command: conda install -y "virtualenv<20.0"
       - run:
-          name: Install test requirements
-          command: pip install -r test_requirements.txt -U
+          name: Install requirements and test requirements
+          command: pip install --upgrade -r test_requirements.txt
       - run:
           # Since recently Spark installation for some reason does not have enough permissions to execute
           # /home/circleci/miniconda/envs/kedro_builder/lib/python3.X/site-packages/pyspark/bin/spark-class.

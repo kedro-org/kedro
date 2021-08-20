@@ -243,10 +243,10 @@ See the Python documentation for [further information about packaging](https://p
 Since Kedro 0.16.4 you can pull a modular pipeline into your Kedro project as follows:
 
 ```bash
-kedro pipeline pull <link-to-modular-pipeline-wheel-file>
+kedro pipeline pull <link-to-modular-pipeline-sdist-file>
 ```
 
-The above command will take the bundled `.whl` file and do the following:
+The above command will take the bundled `.tar.gz` file and do the following:
 
 * Place source code in `src/<package_name>/pipelines/<pipeline_name>`
 * Place parameters in `conf/base/parameters/<pipeline_name>.yml`
@@ -255,8 +255,8 @@ The above command will take the bundled `.whl` file and do the following:
 `kedro pipeline pull` works with PyPI, local and cloud storage:
 
 * PyPI: `kedro pipeline pull <my-pipeline>` with `<my-pipeline>` being a package on PyPI
-* Local storage: `kedro pipeline pull <path-to-your-project-root>/dist/<my-pipeline>-0.1-py3-none-any.whl`
-* Cloud storage: `kedro pipeline pull s3://<my-bucket>/<my-pipeline>-0.1-py3-none-any.whl`
+* Local storage: `kedro pipeline pull <path-to-your-project-root>/dist/<my-pipeline>-0.1.tar.gz`
+* Cloud storage: `kedro pipeline pull s3://<my-bucket>/<my-pipeline>-0.1.tar.gz`
 
 ### Project quality
 
@@ -297,7 +297,7 @@ kedro pipeline create <pipeline_name>
 ```
 
 ##### Package a modular pipeline
-The following command packages all the files related to a modular pipeline into a [wheel file](https://pythonwheels.com/):
+The following command packages all the files related to a modular pipeline into a [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions):
 
 ```bash
 kedro pipeline package <pipeline_name>
@@ -306,10 +306,10 @@ kedro pipeline package <pipeline_name>
 Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/03_modular_pipelines.md#package-a-modular-pipeline).
 
 ##### Pull a modular pipeline in your project
-The following command pulls all the files related to a modular pipeline from either [Pypi](https://pypi.org/) or a storage location of a [wheel file](https://pythonwheels.com/).
+The following command pulls all the files related to a modular pipeline from either [Pypi](https://pypi.org/) or a storage location of a [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions).
 
 ```bash
-kedro pipeline pull <package_name> (or path to a wheel file)
+kedro pipeline pull <package_name> (or path to a sdist file)
 ```
 
 Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/03_modular_pipelines.md#pull-a-modular-pipeline).

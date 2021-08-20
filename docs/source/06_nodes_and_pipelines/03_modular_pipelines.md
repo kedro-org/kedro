@@ -116,7 +116,7 @@ kedro run --pipeline mp2
 ## How to share a modular pipeline
 
 ### Package a modular pipeline
-Since Kedro 0.16.4 you can package a modular pipeline by executing `kedro pipeline package <pipeline_name>` command, which will generate a new [wheel file](https://pythonwheels.com/) for it. By default, the wheel file will be saved into `dist/` directory inside your project, however this can be changed using the `--destination` (`-d`) option.
+Since Kedro 0.16.4 you can package a modular pipeline by executing `kedro pipeline package <pipeline_name>` command. From Kedro 0.18.0 this will generate a new [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions) (sdist) for it. Older versions of Kedro will generate a wheel file. By default, the sdist file, with extension `.tar.gz`, will be saved into `dist/` directory inside your project, however this can be changed using the `--destination` (`-d`) option.
 
 When you package your modular pipeline, Kedro will also automatically package files from 3 locations:
 
@@ -124,7 +124,7 @@ When you package your modular pipeline, Kedro will also automatically package fi
 *  Parameter files that match either the glob pattern `conf/<env>/parameters*/**/<pipeline_name>.yml` or `conf/<env>/parameters*/**/<pipeline_name>/*`, where `<env>` defaults to `base`. If you need to capture the parameters from a different config environment, run `kedro pipeline package --env <env_name> <pipeline_name>`
 *  Pipeline unit tests in `src/tests/pipelines/<pipeline_name>`
 
-Kedro will also include any requirements found in `src/<python_package>/pipelines/<pipeline_name>/requirements.txt` in the modular pipeline wheel file. These requirements will later be taken into account when pulling a pipeline via `kedro pipeline pull`.
+Kedro will also include any requirements found in `src/<python_package>/pipelines/<pipeline_name>/requirements.txt` in the modular pipeline sdist file. These requirements will later be taken into account when pulling a pipeline via `kedro pipeline pull`.
 
 ```eval_rst
 .. note::  Kedro will not package the catalog config files even if those are present in ``conf/<env>/catalog/<pipeline_name>.yml``.
@@ -132,7 +132,9 @@ Kedro will also include any requirements found in `src/<python_package>/pipeline
 
 If you plan to publish your packaged modular pipeline to some Python package repository like [PyPI](https://pypi.org/), you need to make sure that your modular pipeline name doesn't clash with any of the existing packages in that repository. However, there is no need to rename any of your source files if that is the case. Simply alias your package with a new name by running `kedro pipeline package --alias <new_package_name> <pipeline_name>`.
 
-In addition to [PyPI](https://pypi.org/), you can also share the packaged wheel file directly, or via a cloud storage such as AWS S3.
+In addition to [PyPI](https://pypi.org/), you can also share the packaged sdist file directly, or via a cloud storage such as AWS S3.
+
+If you want to generate a wheel file from the sdist file you can run `pip wheel <path-to-your-project-root>/dist/<pipeline_name>-<version>.tar.gz`
 
 #### Package multiple modular pipelines
 
@@ -152,7 +154,7 @@ Where the keys (e.g. `first_pipeline`, `second_pipeline`) are the modular pipeli
 
 ### Pull a modular pipeline
 
-You can pull a modular pipeline from a wheel file by executing `kedro pipeline pull <package_name>`, where `<package_name>` is either a package name on PyPI or a path to the wheel file. Kedro will unpack the wheel file, and install the files in following locations in your Kedro project:
+You can pull a modular pipeline from a source distribution (sdist) file by executing `kedro pipeline pull <package_name>`, where `<package_name>` is either a package name on PyPI or a path to the source distribution file. Kedro will unpack the sdist file, and install the files in the following locations in your Kedro project:
 
 *  All the modular pipeline code in `src/<python_package>/pipelines/<pipeline_name>/`
 *  Configuration files in `conf/<env>/parameters/<pipeline_name>.yml`, where `<env>` defaults to `base`. If you want to place the parameters from a different config environment, run `kedro pipeline pull <pipeline_name> --env <env_name>`
@@ -169,13 +171,13 @@ You can pull a modular pipeline from different locations, including local storag
 - Pulling a modular pipeline from a local directory:
 
 ```bash
-kedro pipeline pull <path-to-your-project-root>/dist/<pipeline_name>-0.1-py3-none-any.whl
+kedro pipeline pull <path-to-your-project-root>/dist/<pipeline_name>-0.1.tar.gz
 ```
 
 - Pulling a modular pipeline from S3:
 
 ```bash
-kedro pipeline pull https://<bucket_name>.s3.<aws-region>.amazonaws.com/<pipeline_name>-0.1-py3-none-any.whl
+kedro pipeline pull https://<bucket_name>.s3.<aws-region>.amazonaws.com/<pipeline_name>-0.1.tar.gz
 ```
 
 - Pulling a modular pipeline from PyPI:
@@ -187,7 +189,7 @@ kedro pipeline pull <pypi-package-name>
 If you are pulling the pipeline from a location that isn't PyPI, Kedro uses [`fsspec`](https://filesystem-spec.readthedocs.io/en/latest/) to locate and pull down your pipeline. If you need to provide any `fsspec`-specific arguments (say, if you're pulling your pipeline down from an S3 bucket and want to provide the S3 credentials inline or from a local server that requires tokens in the header) then you can use the `--fs-args` option to point to a YAML (or any `anyconfig`-supported configuration) file that contains the required configuration.
 
 ```bash
-kedro pipeline pull https://<url-to-pipeline.whl> --fs-args pipeline_pull_args.yml
+kedro pipeline pull https://<url-to-pipeline.tar.gz> --fs-args pipeline_pull_args.yml
 ```
 
 where

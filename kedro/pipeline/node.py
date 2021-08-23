@@ -448,7 +448,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
             )
 
         try:
-            inputs = dict() if inputs is None else inputs
+            inputs = {} if inputs is None else inputs
             if not self._inputs:
                 outputs = self._run_with_no_inputs(inputs)
             elif isinstance(self._inputs, str):

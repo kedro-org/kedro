@@ -152,7 +152,7 @@ def new(
 
     # Obtain config, either from a file or from interactive user prompts.
     if not prompts_required:
-        config = dict()
+        config = {}
     elif config_path:
         config = _fetch_config_from_file(config_path)
         _validate_config_file(config, prompts_required)
@@ -196,7 +196,7 @@ def _fetch_config_from_file(config_path: str) -> Dict[str, str]:
 
     """
     try:
-        with open(config_path, "r") as config_file:
+        with open(config_path, "r", encoding="utf-8") as config_file:
             config = yaml.safe_load(config_file)
 
         if KedroCliError.VERBOSE_ERROR:
@@ -298,7 +298,7 @@ def _get_cookiecutter_dir(
     try:
         cookiecutter_dir, _ = determine_repo_dir(
             template=template_path,
-            abbreviations=dict(),
+            abbreviations={},
             clone_to_dir=Path(tmpdir).resolve(),
             checkout=checkout,
             no_input=True,
@@ -349,7 +349,7 @@ def _fetch_config_from_user_prompts(
     from cookiecutter.environment import StrictEnvironment
     from cookiecutter.prompt import read_user_variable, render_variable
 
-    config: Dict[str, str] = dict()
+    config: Dict[str, str] = {}
 
     for variable_name, prompt_dict in prompts.items():
         prompt = _Prompt(**prompt_dict)

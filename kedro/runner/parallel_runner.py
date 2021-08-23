@@ -136,7 +136,7 @@ def _run_node_synchronization(  # pylint: disable=too-many-arguments
 
     """
     if multiprocessing.get_start_method() == "spawn" and package_name:  # type: ignore
-        conf_logging = conf_logging or dict()
+        conf_logging = conf_logging or {}
         _bootstrap_subprocess(package_name, conf_logging)
 
     return run_node(node, catalog, is_async, run_id)

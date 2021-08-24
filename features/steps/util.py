@@ -59,7 +59,7 @@ def create_temp_csv():
 
 def create_sample_csv():
     csv_file_path = create_temp_csv()
-    with open(csv_file_path, mode="w") as output_file:
+    with open(csv_file_path, mode="w", encoding="utf-8") as output_file:
         output_file.write(get_sample_csv_content())
     return csv_file_path
 
@@ -139,7 +139,7 @@ def get_logline_count(logfile: str) -> int:
         line count of logfile
     """
     try:
-        with open(logfile) as file_handle:
+        with open(logfile, encoding="utf-8") as file_handle:
             return sum(1 for i in file_handle)
     except FileNotFoundError:
         return 0
@@ -155,7 +155,7 @@ def get_last_logline(logfile: str) -> str:
         last line of logfile
     """
     line = ""
-    with open(logfile) as file_handle:
+    with open(logfile, encoding="utf-8") as file_handle:
         for line in file_handle:
             pass
 

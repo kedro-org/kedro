@@ -281,7 +281,7 @@ class TestTemplatedConfigLoader:
     @pytest.mark.usefixtures("proj_catalog_param_with_default")
     def test_catalog_parameterized_empty_params_with_default(self, tmp_path):
         """Test parameterized config with empty globals dictionary"""
-        config_loader = TemplatedConfigLoader(str(tmp_path), globals_dict=dict())
+        config_loader = TemplatedConfigLoader(str(tmp_path), globals_dict={})
         config_loader.default_run_env = ""
         catalog = config_loader.get("catalog*.yml")
 

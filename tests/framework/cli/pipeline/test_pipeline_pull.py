@@ -51,11 +51,9 @@ class TestPipelinePullCommand:
         options = ["--alias", alias] if alias else []
         options += ["--destination", str(destination)] if destination else []
         result = CliRunner().invoke(
-            cli,
-            ["pipeline", "package", PIPELINE_NAME, *options],
-            obj=metadata,
+            cli, ["pipeline", "package", PIPELINE_NAME, *options], obj=metadata
         )
-        assert result.exit_code == 0
+        assert result.exit_code == 0, result.output
 
     def call_pipeline_delete(self, cli, metadata):
         result = CliRunner().invoke(
@@ -82,9 +80,7 @@ class TestPipelinePullCommand:
         alias,
         fake_metadata,
     ):
-        """
-        Test for pulling a valid sdist file locally.
-        """
+        """Test for pulling a valid sdist file locally."""
         # pylint: disable=too-many-locals
         self.call_pipeline_create(fake_project_cli, fake_metadata)
         self.call_pipeline_package(fake_project_cli, fake_metadata)
@@ -112,7 +108,7 @@ class TestPipelinePullCommand:
             ["pipeline", "pull", str(sdist_file), *options],
             obj=fake_metadata,
         )
-        assert result.exit_code == 0
+        assert result.exit_code == 0, result.output
 
         pipeline_name = alias or PIPELINE_NAME
         source_dest = fake_package_path / "pipelines" / pipeline_name
@@ -143,9 +139,9 @@ class TestPipelinePullCommand:
         alias,
         fake_metadata,
     ):
-        """
-        Test for pulling a valid sdist file locally, unpack it into another location and
-        check that unpacked files are identical to the ones in the original modular pipeline.
+        """Test for pulling a valid sdist file locally, unpack it
+        into another location and check that unpacked files
+        are identical to the ones in the original modular pipeline.
         """
         # pylint: disable=too-many-locals
         pipeline_name = "another_pipeline"
@@ -176,7 +172,7 @@ class TestPipelinePullCommand:
             ["pipeline", "pull", str(sdist_file), *options],
             obj=fake_metadata,
         )
-        assert result.exit_code == 0
+        assert result.exit_code == 0, result.output
 
         pipeline_name = alias or pipeline_name
         source_dest = fake_package_path / "pipelines" / pipeline_name
@@ -194,12 +190,48 @@ class TestPipelinePullCommand:
         assert not filecmp.dircmp(test_path, test_dest).diff_files
         assert source_params_config.read_bytes() == dest_params_config.read_bytes()
 
+    def test_pipeline_alias_refactors_imports(
+        self, fake_project_cli, fake_package_path, fake_repo_path, fake_metadata
+    ):
+        self.call_pipeline_create(fake_project_cli, fake_metadata)
+        pipeline_file = fake_package_path / "pipelines" / PIPELINE_NAME / "pipeline.py"
+        import_stmt = (
+            f"import {fake_metadata.package_name}.pipelines.{PIPELINE_NAME}.nodes"
+        )
+        with pipeline_file.open("a") as f:
+            f.write(import_stmt)
+
+        package_alias = "alpha"
+        pull_alias = "beta"
+
+        self.call_pipeline_package(
+            cli=fake_project_cli, metadata=fake_metadata, alias=package_alias
+        )
+
+        sdist_file = (
+            fake_repo_path / "dist" / _get_sdist_name(name=package_alias, version="0.1")
+        )
+        CliRunner().invoke(
+            fake_project_cli, ["pipeline", "pull", str(sdist_file)], obj=fake_metadata
+        )
+        CliRunner().invoke(
+            fake_project_cli,
+            ["pipeline", "pull", str(sdist_file), "--alias", pull_alias],
+            obj=fake_metadata,
+        )
+
+        for alias in (package_alias, pull_alias):
+            path = fake_package_path / "pipelines" / alias / "pipeline.py"
+            file_content = path.read_text()
+            expected_stmt = (
+                f"import {fake_metadata.package_name}.pipelines.{alias}.nodes"
+            )
+            assert expected_stmt in file_content
+
     def test_pull_whl_fs_args(
         self, fake_project_cli, fake_repo_path, mocker, tmp_path, fake_metadata
     ):
-        """
-        Test for pulling a sdist file with custom fs_args specified.
-        """
+        """Test for pulling a sdist file with custom fs_args specified."""
         self.call_pipeline_create(fake_project_cli, fake_metadata)
         self.call_pipeline_package(fake_project_cli, fake_metadata)
         self.call_pipeline_delete(fake_project_cli, fake_metadata)
@@ -260,9 +292,8 @@ class TestPipelinePullCommand:
         alias,
         fake_metadata,
     ):
-        """
-        Test for pulling a valid sdist file locally, but `tests` directory is missing
-        from the sdist file.
+        """Test for pulling a valid sdist file locally,
+        but `tests` directory is missing from the sdist file.
         """
         # pylint: disable=too-many-locals
         self.call_pipeline_create(fake_project_cli, fake_metadata)
@@ -487,9 +518,7 @@ class TestPipelinePullCommand:
 
         invalid_pypi_name = "non_existent"
         result = CliRunner().invoke(
-            fake_project_cli,
-            ["pipeline", "pull", invalid_pypi_name],
-            obj=fake_metadata,
+            fake_project_cli, ["pipeline", "pull", invalid_pypi_name], obj=fake_metadata
         )
         assert result.exit_code
 

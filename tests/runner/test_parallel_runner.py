@@ -458,7 +458,7 @@ class TestRunNodeSynchronisationHelper:
     def mock_configure_project(self, mocker):
         return mocker.patch("kedro.framework.project.configure_project")
 
-    @pytest.mark.parametrize("conf_logging", [{"fake_logging_config": True}, dict()])
+    @pytest.mark.parametrize("conf_logging", [{"fake_logging_config": True}, {}])
     def test_package_name_and_logging_provided(
         self,
         mock_logging,

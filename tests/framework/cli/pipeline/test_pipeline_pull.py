@@ -51,7 +51,9 @@ class TestPipelinePullCommand:
         options = ["--alias", alias] if alias else []
         options += ["--destination", str(destination)] if destination else []
         result = CliRunner().invoke(
-            cli, ["pipeline", "package", PIPELINE_NAME, *options], obj=metadata
+            cli,
+            ["pipeline", "package", f"pipelines.{PIPELINE_NAME}", *options],
+            obj=metadata,
         )
         assert result.exit_code == 0, result.output
 

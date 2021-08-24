@@ -50,7 +50,8 @@
 * `ConfigLoader` and `TemplatedConfigLoader` argument `conf_root` has been renamed to `conf_source` to align the API.
 * The `settings.py` setting `CONF_ROOT` has been renamed to `CONF_SOURCE` to align the API. Default value of `conf` remains unchanged.
 * Renamed `extra_params` to `runtime_params` in `kedro.config.config.ConfigLoader` and `kedro.config.templated_config.TemplatedConfigLoader`.
-* Switched from packaging pipelines as wheel files to tar archive files compressed with gzip (`.tar.gz`).
+* Switched from packaging pipelines as wheel files to tar archive files compressed with gzip (`.tar.gz`)
+* `kedro pipeline package` now accepts a module path to the pipeline or utility module to package, relative to the `src/<package_name>/`.
 * Renamed `lambda_data_set`, `memory_data_set`, and `partitioned_data_set` to `lambda_dataset`, `memory_dataset`, and `partitioned_dataset`, respectively, in `kedro.io`.
 
 ## Thanks for supporting contributions
@@ -71,6 +72,22 @@
 * Update the key-word argument `conf_root` to `conf_source` when calling `ConfigLoader` or `TemplatedConfigLoader` directly.
 * Rename `extra_params` to `runtime_params` in `kedro.config.config.ConfigLoader` and `kedro.config.templated_config.TemplatedConfigLoader`, or your custom implementation, if it calls to `ConfigLoader` or any of its parent classes.
 * If you were importing from `kedro.io.lambda_data_set`, `kedro.io.memory_data_set`, or `kedro.io.partitioned_data_set`, change the import to `kedro.io.lambda_dataset`, `kedro.io.memory_dataset`, or `kedro.io.partitioned_dataset`, respectively (or import the dataset directly from `kedro.io`).
+* If you were packaging any modular pipelines with `kedro pipeline package my_pipeline`, please use `kedro pipeline package pipelines.my_pipeline` instead.
+* Similarly, if you were packaging any modular pipelines using `pyproject.toml`, you should modify the keys to include the full module path, and wrapped in double-quotes, e.g:
+
+  ```toml
+  [tool.kedro.pipeline.package]
+  data_engineering = {destination = "path/to/here"}
+  data_science = {alias = "ds", env = "local"}
+  ```
+
+  becomes
+
+  ```toml
+  [tool.kedro.pipeline.package]
+  "pipelines.data_engineering" = {destination = "path/to/here"}
+  "pipelines.data_science" = {alias = "ds", env = "local"}
+  ```
 
 # Upcoming Release 0.17.5
 

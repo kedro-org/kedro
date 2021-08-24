@@ -116,21 +116,21 @@ kedro run --pipeline mp2
 ## How to share a modular pipeline
 
 ### Package a modular pipeline
-Since Kedro 0.16.4 you can package a modular pipeline by executing `kedro pipeline package <pipeline_name>` command. From Kedro 0.18.0 this will generate a new [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions) (sdist) for it. Older versions of Kedro will generate a wheel file. By default, the sdist file, with extension `.tar.gz`, will be saved into `dist/` directory inside your project, however this can be changed using the `--destination` (`-d`) option.
+Since Kedro 0.16.4 you can package a modular pipeline by executing `kedro pipeline package <pipeline_module_path>` command (e.g. `kedro pipeline package pipelines.data_science.training`). From Kedro 0.18.0 this will generate a new [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions) (sdist) for it. Older versions of Kedro will generate a wheel file. By default, the sdist file, with extension `.tar.gz`, will be saved into `dist/` directory inside your project, however this can be changed using the `--destination` (`-d`) option.
 
 When you package your modular pipeline, Kedro will also automatically package files from 3 locations:
 
-*  All the modular pipeline code in `src/<python_package>/pipelines/<pipeline_name>/`
+*  All the modular pipeline code in `src/<python_package>/<pipeline_module_path>...`
 *  Parameter files that match either the glob pattern `conf/<env>/parameters*/**/<pipeline_name>.yml` or `conf/<env>/parameters*/**/<pipeline_name>/*`, where `<env>` defaults to `base`. If you need to capture the parameters from a different config environment, run `kedro pipeline package --env <env_name> <pipeline_name>`
-*  Pipeline unit tests in `src/tests/pipelines/<pipeline_name>`
+*  Pipeline unit tests in `src/tests/<pipeline_module_path>...`
 
-Kedro will also include any requirements found in `src/<python_package>/pipelines/<pipeline_name>/requirements.txt` in the modular pipeline sdist file. These requirements will later be taken into account when pulling a pipeline via `kedro pipeline pull`.
+Kedro will also include any requirements found in `src/<python_package>/<pipeline_module_path>/requirements.txt` in the modular pipeline sdist file. These requirements will later be taken into account when pulling a pipeline via `kedro pipeline pull`.
 
 ```eval_rst
 .. note::  Kedro will not package the catalog config files even if those are present in ``conf/<env>/catalog/<pipeline_name>.yml``.
 ```
 
-If you plan to publish your packaged modular pipeline to some Python package repository like [PyPI](https://pypi.org/), you need to make sure that your modular pipeline name doesn't clash with any of the existing packages in that repository. However, there is no need to rename any of your source files if that is the case. Simply alias your package with a new name by running `kedro pipeline package --alias <new_package_name> <pipeline_name>`.
+If you plan to publish your packaged modular pipeline to some Python package repository like [PyPI](https://pypi.org/), you need to make sure that your modular pipeline name doesn't clash with any of the existing packages in that repository. However, there is no need to rename any of your source files if that is the case. Simply alias your package with a new name by running `kedro pipeline package --alias <new_package_name> <pipeline_module_path>`.
 
 In addition to [PyPI](https://pypi.org/), you can also share the packaged sdist file directly, or via a cloud storage such as AWS S3.
 
@@ -142,11 +142,11 @@ If you are packaging multiple modular pipelines, you have the option to do it in
 
 ```toml
 [tool.kedro.pipeline.package]
-first_pipeline = {alias = "aliased_pipeline", destination = "somewhere/else", env = "uat"}
-second_pipeline = {}
+"pipelines.first_pipeline" = {alias = "aliased_pipeline", destination = "somewhere/else", env = "uat"}
+"pipelines.second_pipeline" = {}
 ```
 
-Where the keys (e.g. `first_pipeline`, `second_pipeline`) are the modular pipelines' folder names, and the values are the options that `kedro pipeline package <pipeline_name>` accepts.
+Where the keys (e.g. `pipelines.first_pipeline`, `pipelines.second_pipeline`) are the Python module paths to the modular pipelines, relative to the project's package name, and the values are the options that `kedro pipeline package <pipeline_module_path>` accepts.
 
 ```eval_rst
 .. note::  Make sure `destination` is specified as a POSIX path even when working on a Windows machine.

@@ -260,11 +260,7 @@ def pull_package(
 
         _clean_pycache(temp_dir_path)
         _install_files(
-            metadata,
-            package_name,
-            temp_dir_path / sdist_file_name,
-            env,
-            alias,
+            metadata, package_name, temp_dir_path / sdist_file_name, env, alias
         )
 
         if package_requirements.is_file():
@@ -314,13 +310,13 @@ def _package_pipelines_from_manifest(metadata: ProjectMetadata) -> None:
     help="Location where to create the source distribution file. Defaults to `dist/`.",
 )
 @click.option("--all", "-a", "all_flag", is_flag=True)
-@click.argument("name", nargs=1, required=False)
+@click.argument("module_path", nargs=1, required=False)
 @click.pass_obj  # this will pass the metadata as first argument
 def package_pipeline(
-    metadata: ProjectMetadata, name, env, alias, destination, all_flag
+    metadata: ProjectMetadata, module_path, env, alias, destination, all_flag
 ):  # pylint: disable=too-many-arguments
-    """Package up a modular pipeline as a Python .whl."""
-    if not name and not all_flag:
+    """Package up a modular pipeline as Python source distribution."""
+    if not module_path and not all_flag:
         click.secho(
             "Please specify a pipeline name or add "
             "'--all' to package all pipelines in `pyproject.toml`."
@@ -332,11 +328,14 @@ def package_pipeline(
         return
 
     result_path = _package_pipeline(
-        name, metadata, alias=alias, destination=destination, env=env
+        module_path, metadata, alias=alias, destination=destination, env=env
     )
 
     as_alias = f" as `{alias}`" if alias else ""
-    message = f"Pipeline `{name}` packaged{as_alias}! Location: {result_path}"
+    message = (
+        f"`{metadata.package_name}.{module_path}` packaged{as_alias}! "
+        f"Location: {result_path}"
+    )
     click.secho(message, fg="green")
 
 
@@ -525,11 +524,11 @@ def _find_config_files(
     return config_files
 
 
-def _get_default_version(metadata: ProjectMetadata, pipeline_name: str) -> str:
+def _get_default_version(metadata: ProjectMetadata, pipeline_module_path: str) -> str:
     # default to pipeline package version
     try:
         pipeline_module = import_module(
-            f"{metadata.package_name}.pipelines.{pipeline_name}"
+            f"{metadata.package_name}.{pipeline_module_path}"
         )
         return pipeline_module.__version__  # type: ignore
     except (AttributeError, ModuleNotFoundError):
@@ -538,37 +537,34 @@ def _get_default_version(metadata: ProjectMetadata, pipeline_name: str) -> str:
         return project_module.__version__  # type: ignore
 
 
-def _package_pipeline(  # pylint: disable=too-many-arguments
-    pipeline_name: str,
+def _package_pipeline(
+    pipeline_module_path: str,
     metadata: ProjectMetadata,
     alias: str = None,
     destination: str = None,
     env: str = None,
 ) -> Path:
+    pipeline_name = pipeline_module_path.split(".")[-1]
     package_dir = metadata.source_dir / metadata.package_name
     env = env or "base"
 
-    artifacts_to_package = _get_pipeline_artifacts(
-        metadata, pipeline_name=pipeline_name, env=env
+    package_source, package_tests, package_conf = _get_artifacts_to_package(
+        metadata, module_path=pipeline_module_path, env=env
     )
     # as the source distribution will only contain parameters, we aren't listing other
     # config files not to confuse users and avoid useless file copies
     configs_to_package = _find_config_files(
-        artifacts_to_package.pipeline_conf,
+        package_conf,
         [f"parameters*/**/{pipeline_name}.yml", f"parameters*/**/{pipeline_name}/*"],
     )
 
-    source_paths = (
-        artifacts_to_package.pipeline_dir,
-        artifacts_to_package.pipeline_tests,
-        configs_to_package,
-    )
+    source_paths = (package_source, package_tests, configs_to_package)
 
     # Check that pipeline directory exists and not empty
-    _validate_dir(artifacts_to_package.pipeline_dir)
+    _validate_dir(package_source)
 
     destination = Path(destination) if destination else metadata.project_path / "dist"
-    version = _get_default_version(metadata, pipeline_name)
+    version = _get_default_version(metadata, pipeline_module_path)
 
     _generate_sdist_file(
         pipeline_name=pipeline_name,
@@ -820,9 +816,7 @@ def _generate_setup_file(
     setup_file = output_dir / "setup.py"
 
     setup_file_context = dict(
-        name=package_name,
-        version=version,
-        install_requires=install_requires,
+        name=package_name, version=version, install_requires=install_requires
     )
 
     setup_file.write_text(_SETUP_PY_TEMPLATE.format(**setup_file_context))
@@ -918,13 +912,21 @@ def _sync_dirs(source: Path, target: Path, prefix: str = "", overwrite: bool = F
 def _get_pipeline_artifacts(
     project_metadata: ProjectMetadata, pipeline_name: str, env: str
 ) -> PipelineArtifacts:
+    artifacts = _get_artifacts_to_package(
+        project_metadata, f"pipelines.{pipeline_name}", env
+    )
+    return PipelineArtifacts(*artifacts)
+
+
+def _get_artifacts_to_package(
+    project_metadata: ProjectMetadata, module_path: str, env: str
+) -> Tuple[Path, Path, Path]:
     """From existing project, returns in order: source_path, tests_path, config_paths"""
     package_dir = project_metadata.source_dir / project_metadata.package_name
-    conf_source = settings.CONF_SOURCE
-    project_conf_path = project_metadata.project_path / conf_source
-    artifacts = PipelineArtifacts(
-        package_dir / "pipelines" / pipeline_name,
-        package_dir.parent / "tests" / "pipelines" / pipeline_name,
+    project_conf_path = project_metadata.project_path / settings.CONF_SOURCE
+    artifacts = (
+        Path(package_dir, *module_path.split(".")),
+        Path(package_dir.parent, "tests", *module_path.split(".")),
         project_conf_path / env,
     )
     return artifacts
@@ -994,7 +996,9 @@ def _parse_package_reqs(egg_info_file, dist_name) -> list:
     # see: https://www.python.org/dev/peps/pep-0508/#environment-markers
     # and https://stackoverflow.com/questions/50130706/how-do-i-read-dependencies-from-requires-txt-of-a-python-package
     dep_map_pep508 = {
-        k: v for k, v in dist._build_dep_map().items() if k and k.startswith(":")  # type: ignore
+        k: v
+        for k, v in dist._build_dep_map().items()  # type: ignore
+        if k and k.startswith(":")
     }
     marked_reqs = [
         str(r).replace(" ", "") + ";" + k.lstrip(":").replace(" ", "")

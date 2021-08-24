@@ -73,7 +73,7 @@ class TestPipelineRequirements:
     def call_pipeline_package(self, cli, metadata):
         result = CliRunner().invoke(
             cli,
-            ["pipeline", "package", PIPELINE_NAME],
+            ["pipeline", "package", f"pipelines.{PIPELINE_NAME}"],
             obj=metadata,
         )
         assert result.exit_code == 0
@@ -296,7 +296,7 @@ class TestPipelineRequirements:
 
         result = CliRunner().invoke(
             fake_project_cli,
-            ["pipeline", "package", PIPELINE_NAME],
+            ["pipeline", "package", f"pipelines.{PIPELINE_NAME}"],
             obj=fake_metadata,
         )
         assert result.exit_code == 1

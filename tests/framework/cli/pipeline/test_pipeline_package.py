@@ -69,11 +69,11 @@ class TestPipelinePackageCommand:
     @pytest.mark.parametrize(
         "options,package_name,success_message",
         [
-            ([], PIPELINE_NAME, f"Pipeline `{PIPELINE_NAME}` packaged!"),
+            ([], PIPELINE_NAME, f"`dummy_package.pipelines.{PIPELINE_NAME}` packaged!"),
             (
                 ["--alias", "alternative"],
                 "alternative",
-                f"Pipeline `{PIPELINE_NAME}` packaged as `alternative`!",
+                f"`dummy_package.pipelines.{PIPELINE_NAME}` packaged as `alternative`!",
             ),
         ],
     )
@@ -92,7 +92,7 @@ class TestPipelinePackageCommand:
         assert result.exit_code == 0
         result = CliRunner().invoke(
             fake_project_cli,
-            ["pipeline", "package", PIPELINE_NAME] + options,
+            ["pipeline", "package", f"pipelines.{PIPELINE_NAME}"] + options,
             obj=fake_metadata,
         )
 
@@ -120,13 +120,20 @@ class TestPipelinePackageCommand:
         assert result.exit_code == 0
         result = CliRunner().invoke(
             fake_project_cli,
-            ["pipeline", "package", PIPELINE_NAME, "--destination", str(destination)],
+            [
+                "pipeline",
+                "package",
+                f"pipelines.{PIPELINE_NAME}",
+                "--destination",
+                str(destination),
+            ],
             obj=fake_metadata,
         )
 
         assert result.exit_code == 0
         success_message = (
-            f"Pipeline `{PIPELINE_NAME}` packaged! Location: {destination}"
+            f"`dummy_package.pipelines.{PIPELINE_NAME}` packaged! "
+            f"Location: {destination}"
         )
         assert success_message in result.output
 
@@ -146,14 +153,21 @@ class TestPipelinePackageCommand:
         assert result.exit_code == 0
         result = CliRunner().invoke(
             fake_project_cli,
-            ["pipeline", "package", PIPELINE_NAME, "--destination", str(destination)],
+            [
+                "pipeline",
+                "package",
+                f"pipelines.{PIPELINE_NAME}",
+                "--destination",
+                str(destination),
+            ],
             obj=fake_metadata,
         )
         assert result.exit_code == 0
 
         warning_message = f"Package file {sdist_file} will be overwritten!"
         success_message = (
-            f"Pipeline `{PIPELINE_NAME}` packaged! Location: {destination}"
+            f"`dummy_package.pipelines.{PIPELINE_NAME}` packaged! "
+            f"Location: {destination}"
         )
         assert warning_message in result.output
         assert success_message in result.output
@@ -174,7 +188,7 @@ class TestPipelinePackageCommand:
     ):
         result = CliRunner().invoke(
             fake_project_cli,
-            ["pipeline", "package", PIPELINE_NAME, "--alias", bad_alias],
+            ["pipeline", "package", f"pipelines.{PIPELINE_NAME}", "--alias", bad_alias],
         )
         assert result.exit_code
         assert error_message in result.output
@@ -190,11 +204,13 @@ class TestPipelinePackageCommand:
         )
         assert result.exit_code == 0
         result = CliRunner().invoke(
-            fake_project_cli, ["pipeline", "package", PIPELINE_NAME], obj=fake_metadata
+            fake_project_cli,
+            ["pipeline", "package", f"pipelines.{PIPELINE_NAME}"],
+            obj=fake_metadata,
         )
 
         assert result.exit_code == 0
-        assert f"Pipeline `{PIPELINE_NAME}` packaged!" in result.output
+        assert f"`dummy_package.pipelines.{PIPELINE_NAME}` packaged!" in result.output
 
         sdist_location = fake_repo_path / "dist"
         assert f"Location: {sdist_location}" in result.output
@@ -225,7 +241,9 @@ class TestPipelinePackageCommand:
         self, fake_package_path, fake_project_cli, fake_metadata
     ):
         result = CliRunner().invoke(
-            fake_project_cli, ["pipeline", "package", "non_existing"], obj=fake_metadata
+            fake_project_cli,
+            ["pipeline", "package", "pipelines.non_existing"],
+            obj=fake_metadata,
         )
         assert result.exit_code == 1
         pipeline_dir = fake_package_path / "pipelines" / "non_existing"
@@ -239,7 +257,9 @@ class TestPipelinePackageCommand:
         pipeline_dir.mkdir()
 
         result = CliRunner().invoke(
-            fake_project_cli, ["pipeline", "package", "empty_dir"], obj=fake_metadata
+            fake_project_cli,
+            ["pipeline", "package", "pipelines.empty_dir"],
+            obj=fake_metadata,
         )
         assert result.exit_code == 1
         error_message = f"Error: '{pipeline_dir}' is an empty directory."
@@ -277,11 +297,13 @@ class TestPipelinePackageCommand:
         (nested_param_path / "params1.yml").touch()
 
         result = CliRunner().invoke(
-            fake_project_cli, ["pipeline", "package", "retail"], obj=fake_metadata
+            fake_project_cli,
+            ["pipeline", "package", "pipelines.retail"],
+            obj=fake_metadata,
         )
 
         assert result.exit_code == 0
-        assert "Pipeline `retail` packaged!" in result.output
+        assert "`dummy_package.pipelines.retail` packaged!" in result.output
 
         sdist_location = fake_repo_path / "dist"
         assert f"Location: {sdist_location}" in result.output
@@ -312,7 +334,9 @@ class TestPipelinePackageCommand:
         assert pipelines_dir.is_dir()
 
         result = CliRunner().invoke(
-            fake_project_cli, ["pipeline", "package", _pipeline_name], obj=fake_metadata
+            fake_project_cli,
+            ["pipeline", "package", f"pipelines.{_pipeline_name}"],
+            obj=fake_metadata,
         )
         assert result.exit_code == 0
 
@@ -323,6 +347,41 @@ class TestPipelinePackageCommand:
 
         assert sdist_file.is_file()
         assert len(list(sdist_location.iterdir())) == 1
+
+    def test_pipeline_package_nested_module(
+        self, fake_project_cli, fake_metadata, fake_repo_path, fake_package_path
+    ):
+        CliRunner().invoke(
+            fake_project_cli, ["pipeline", "create", PIPELINE_NAME], obj=fake_metadata
+        )
+
+        nested_utils = fake_package_path / "pipelines" / PIPELINE_NAME / "utils"
+        nested_utils.mkdir(parents=True)
+        (nested_utils / "__init__.py").touch()
+        (nested_utils / "useful.py").touch()
+
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["pipeline", "package", f"pipelines.{PIPELINE_NAME}.utils"],
+            obj=fake_metadata,
+        )
+        assert result.exit_code == 0
+
+        sdist_location = fake_repo_path / "dist"
+        sdist_name = _get_sdist_name(name="utils", version="0.1")
+        sdist_file = sdist_location / sdist_name
+
+        assert sdist_file.is_file()
+        assert len(list(sdist_location.iterdir())) == 1
+
+        with tarfile.open(sdist_file, "r") as tar:
+            sdist_contents = set(tar.getnames())
+        expected_files = {
+            "utils-0.1/utils/__init__.py",
+            "utils-0.1/utils/useful.py",
+        }
+        assert expected_files <= sdist_contents
+        assert f"{PIPELINE_NAME}/pipeline.py" not in sdist_contents
 
 
 @pytest.fixture
@@ -352,9 +411,9 @@ class TestPipelinePackageFromManifest:
         project_toml_str = textwrap.dedent(
             f"""
             [tool.kedro.pipeline.package]
-            first = {{destination = "{other_dest.as_posix()}"}}
-            second = {{alias = "ds", env = "local"}}
-            third = {{}}
+            "pipelines.first" = {{destination = "{other_dest.as_posix()}"}}
+            "pipelines.second" = {{alias = "ds", env = "local"}}
+            "pipelines.third" = {{}}
             """
         )
         with pyproject_toml.open(mode="a") as file:

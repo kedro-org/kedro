@@ -300,7 +300,7 @@ kedro pipeline create <pipeline_name>
 The following command packages all the files related to a modular pipeline into a [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions):
 
 ```bash
-kedro pipeline package <pipeline_name>
+kedro pipeline package <pipeline_module_path>
 ```
 
 Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/03_modular_pipelines.md#package-a-modular-pipeline).

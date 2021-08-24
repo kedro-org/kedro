@@ -29,7 +29,7 @@ import pkg_resources
 import pytest
 from click.testing import CliRunner
 
-from kedro.framework.cli.pipeline import _get_wheel_name
+from kedro.framework.cli.pipeline import _get_sdist_name
 
 PIPELINE_NAME = "my_pipeline"
 
@@ -85,20 +85,20 @@ class TestPipelineRequirements:
         assert result.exit_code == 0
 
     def call_pipeline_pull(self, cli, metadata, repo_path):
-        wheel_file = (
-            repo_path
-            / "src"
-            / "dist"
-            / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
+        sdist_file = (
+            repo_path / "dist" / _get_sdist_name(name=PIPELINE_NAME, version="0.1")
         )
-        assert wheel_file.is_file()
+        assert sdist_file.is_file()
 
         result = CliRunner().invoke(
             cli,
-            ["pipeline", "pull", str(wheel_file)],
+            ["pipeline", "pull", str(sdist_file)],
             obj=metadata,
         )
         assert result.exit_code == 0
+
+    def _remove_spaces_from_reqs(self, requirements_file):
+        return [str(r).replace(" ", "") for r in requirements_file]
 
     def test_existing_project_requirements_txt(
         self, fake_project_cli, fake_metadata, fake_package_path, fake_repo_path
@@ -122,8 +122,11 @@ class TestPipelineRequirements:
         )
         # Packaged requirements expected to be a subset of pulled requirements due to
         # default project level requirements.txt (e.g. black, flake8), which should be
-        # preserved
-        assert set(packaged_requirements) <= set(pulled_requirements)
+        # preserved. Spaces are removed for the check, to make sure they don't interfere with
+        # the equality checks.
+        pulled_reqs_cleaned = self._remove_spaces_from_reqs(pulled_requirements)
+        packaged_reqs_cleaned = self._remove_spaces_from_reqs(packaged_requirements)
+        assert set(packaged_reqs_cleaned) <= set(pulled_reqs_cleaned)
 
     def test_existing_project_requirements_in(
         self, fake_project_cli, fake_metadata, fake_package_path, fake_repo_path
@@ -149,8 +152,13 @@ class TestPipelineRequirements:
         )
         # Requirements after pulling a pipeline expected to be the union of
         # requirements packaged and requirements already existing at project level
-        assert set(pulled_requirements) == set(packaged_requirements) | set(
-            existing_requirements
+        # Spaces are removed for the check, to make sure they don't interfere with
+        # the equality checks.
+        pulled_reqs_cleaned = self._remove_spaces_from_reqs(pulled_requirements)
+        packaged_reqs_cleaned = self._remove_spaces_from_reqs(packaged_requirements)
+        existing_reqs_cleaned = self._remove_spaces_from_reqs(existing_requirements)
+        assert set(pulled_reqs_cleaned) == set(packaged_reqs_cleaned) | set(
+            existing_reqs_cleaned
         )
 
     def test_missing_project_requirements_in_and_txt(
@@ -185,7 +193,11 @@ class TestPipelineRequirements:
         pulled_requirements = pkg_resources.parse_requirements(
             project_requirements_in.read_text()
         )
-        assert set(packaged_requirements) == set(pulled_requirements)
+        # Spaces are removed for the check, to make sure they don't interfere with
+        # the equality checks.
+        pulled_reqs_cleaned = self._remove_spaces_from_reqs(pulled_requirements)
+        packaged_reqs_cleaned = self._remove_spaces_from_reqs(packaged_requirements)
+        assert set(packaged_reqs_cleaned) == set(pulled_reqs_cleaned)
 
     def test_no_requirements(
         self,

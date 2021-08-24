@@ -383,21 +383,6 @@ def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
     return entry_point_commands
 
 
-def _add_src_to_path(source_dir: Path, project_path: Path) -> None:  # pragma: no cover
-    # for backwards compatibility with ipython & deployment scripts
-    # pylint: disable=import-outside-toplevel
-    from kedro.framework.startup import _add_src_to_path as real_add_src_to_path
-
-    msg = (
-        "kedro.framework.utils._add_src_to_path is deprecated. "
-        "Please import from new location kedro.framework.startup "
-        "or use `bootstrap_project()` instead for setting up "
-        "the Kedro project."
-    )
-    warnings.warn(msg, FutureWarning)
-    real_add_src_to_path(source_dir, project_path)
-
-
 def _config_file_callback(ctx, param, value):  # pylint: disable=unused-argument
     """CLI callback that replaces command line options
     with values specified in a config file. If command line
@@ -468,6 +453,10 @@ def _split_params(ctx, param, value):
     return result
 
 
+def _get_values_as_tuple(values: Iterable[str]) -> Tuple[str, ...]:
+    return tuple(chain.from_iterable(value.split(",") for value in values))
+
+
 def _get_requirements_in(source_path: Path, create_empty: bool = False) -> Path:
     """Get path to project level requirements.in, creating it if required.
 
@@ -505,7 +494,3 @@ def _get_requirements_in(source_path: Path, create_empty: bool = False) -> Path:
         "No project requirements.in or requirements.txt found in `/src`. "
         "Please create either and try again."
     )
-
-
-def _get_values_as_tuple(values: Iterable[str]) -> Tuple[str, ...]:
-    return tuple(chain.from_iterable(value.split(",") for value in values))

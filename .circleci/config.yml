@@ -295,13 +295,7 @@ jobs:
 
   unit_tests_38:
     executor: py38
-    steps:
-      - checkout
-      - setup_conda
-      - setup_requirements
-      - run:
-          name: Run unit tests without Spark
-          command: make test-no-spark
+    steps: [unit_tests]
 
   linters_38:
     executor: py38
@@ -313,13 +307,7 @@ jobs:
 
   unit_tests_39:
     executor: py39
-    steps:
-      - checkout
-      - setup_conda
-      - setup_requirements
-      - run:
-          name: Run unit tests without Spark
-          command: make test-no-spark
+    steps: [unit_tests]
 
   linters_39:
     executor: py39

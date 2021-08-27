@@ -1,6 +1,6 @@
 black==21.5b1
 flake8>=3.7.9, <4.0
-ipython~=7.10
+ipython~=7.0
 isort~=5.0
 jupyter~=1.0
 jupyter_client>=5.1, <7.0

@@ -30,6 +30,7 @@ from itertools import cycle
 from os.path import join
 from pathlib import Path
 
+import anyconfig
 import click
 from click.testing import CliRunner
 from mock import patch
@@ -51,6 +52,8 @@ from kedro.framework.cli.utils import (
     forward_command,
     get_pkg_version,
 )
+from kedro.framework.session import KedroSession
+from kedro.runner import ParallelRunner, SequentialRunner
 
 
 @click.group(name="stub_cli")
@@ -85,6 +88,13 @@ def requirements_file(tmp_path):
     reqs_file = tmp_path / "requirements.txt"
     reqs_file.write_text(body)
     yield reqs_file
+
+
+@fixture
+def fake_session(mocker):
+    mock_session_create = mocker.patch.object(KedroSession, "create")
+    mocked_session = mock_session_create.return_value.__enter__.return_value
+    return mocked_session
 
 
 # pylint:disable=too-few-public-methods
@@ -478,3 +488,306 @@ class TestKedroCLI:
         assert result.exit_code == 0
         assert "Global commands from Kedro" in result.output
         assert "Project specific commands from Kedro" in result.output
+
+
+@mark.usefixtures("chdir_to_dummy_project", "patch_log")
+class TestRunCommand:
+    @staticmethod
+    @fixture(params=["run_config.yml", "run_config.json"])
+    def fake_run_config(request, fake_root_dir):
+        config_path = str(fake_root_dir / request.param)
+        anyconfig.dump(
+            {
+                "run": {
+                    "pipeline": "pipeline1",
+                    "tag": ["tag1", "tag2"],
+                    "node_names": ["node1", "node2"],
+                }
+            },
+            config_path,
+        )
+        return config_path
+
+    @staticmethod
+    @fixture()
+    def fake_run_config_with_params(fake_run_config, request):
+        config = anyconfig.load(fake_run_config)
+        config["run"].update(request.param)
+        anyconfig.dump(config, fake_run_config)
+        return fake_run_config
+
+    def test_run_successfully(
+        self, fake_project_cli, fake_metadata, fake_session, mocker
+    ):
+        result = CliRunner().invoke(fake_project_cli, ["run"], obj=fake_metadata)
+        assert not result.exit_code
+
+        fake_session.run.assert_called_once_with(
+            tags=(),
+            runner=mocker.ANY,
+            node_names=(),
+            from_nodes=[],
+            to_nodes=[],
+            from_inputs=[],
+            to_outputs=[],
+            load_versions={},
+            pipeline_name=None,
+        )
+
+        runner = fake_session.run.call_args_list[0][1]["runner"]
+        assert isinstance(runner, SequentialRunner)
+        assert not runner._is_async
+
+    def test_run_with_pipeline_filters(
+        self, fake_project_cli, fake_metadata, fake_session, mocker
+    ):
+        from_nodes = ["--from-nodes", "splitting_data"]
+        to_nodes = ["--to-nodes", "training_model"]
+        tags = ["--tag", "de"]
+        result = CliRunner().invoke(
+            fake_project_cli, ["run", *from_nodes, *to_nodes, *tags], obj=fake_metadata
+        )
+        assert not result.exit_code
+
+        fake_session.run.assert_called_once_with(
+            tags=("de",),
+            runner=mocker.ANY,
+            node_names=(),
+            from_nodes=from_nodes[1:],
+            to_nodes=to_nodes[1:],
+            from_inputs=[],
+            to_outputs=[],
+            load_versions={},
+            pipeline_name=None,
+        )
+
+        runner = fake_session.run.call_args_list[0][1]["runner"]
+        assert isinstance(runner, SequentialRunner)
+        assert not runner._is_async
+
+    def test_with_sequential_runner_and_parallel_flag(
+        self, fake_project_cli, fake_session
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli, ["run", "--parallel", "--runner=SequentialRunner"]
+        )
+        assert result.exit_code
+        assert "Please use either --parallel or --runner" in result.stdout
+
+        fake_session.return_value.run.assert_not_called()
+
+    def test_run_successfully_parallel_via_flag(
+        self, fake_project_cli, fake_metadata, fake_session, mocker
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli, ["run", "--parallel"], obj=fake_metadata
+        )
+        assert not result.exit_code
+        fake_session.run.assert_called_once_with(
+            tags=(),
+            runner=mocker.ANY,
+            node_names=(),
+            from_nodes=[],
+            to_nodes=[],
+            from_inputs=[],
+            to_outputs=[],
+            load_versions={},
+            pipeline_name=None,
+        )
+
+        runner = fake_session.run.call_args_list[0][1]["runner"]
+        assert isinstance(runner, ParallelRunner)
+        assert not runner._is_async
+
+    def test_run_successfully_parallel_via_name(
+        self, fake_project_cli, fake_metadata, fake_session
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli, ["run", "--runner=ParallelRunner"], obj=fake_metadata
+        )
+        assert not result.exit_code
+        runner = fake_session.run.call_args_list[0][1]["runner"]
+        assert isinstance(runner, ParallelRunner)
+        assert not runner._is_async
+
+    def test_run_async(self, fake_project_cli, fake_metadata, fake_session):
+        result = CliRunner().invoke(
+            fake_project_cli, ["run", "--async"], obj=fake_metadata
+        )
+        assert not result.exit_code
+        runner = fake_session.run.call_args_list[0][1]["runner"]
+        assert isinstance(runner, SequentialRunner)
+        assert runner._is_async
+
+    @mark.parametrize("config_flag", ["--config", "-c"])
+    def test_run_with_config(
+        self,
+        config_flag,
+        fake_project_cli,
+        fake_metadata,
+        fake_session,
+        fake_run_config,
+        mocker,
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli, ["run", config_flag, fake_run_config], obj=fake_metadata
+        )
+        assert not result.exit_code
+        fake_session.run.assert_called_once_with(
+            tags=("tag1", "tag2"),
+            runner=mocker.ANY,
+            node_names=("node1", "node2"),
+            from_nodes=[],
+            to_nodes=[],
+            from_inputs=[],
+            to_outputs=[],
+            load_versions={},
+            pipeline_name="pipeline1",
+        )
+
+    @mark.parametrize(
+        "fake_run_config_with_params,expected",
+        [
+            ({}, {}),
+            ({"params": {"foo": "baz"}}, {"foo": "baz"}),
+            ({"params": "foo:baz"}, {"foo": "baz"}),
+            (
+                {"params": {"foo": "123.45", "baz": "678", "bar": 9}},
+                {"foo": "123.45", "baz": "678", "bar": 9},
+            ),
+        ],
+        indirect=["fake_run_config_with_params"],
+    )
+    def test_run_with_params_in_config(
+        self,
+        expected,
+        fake_project_cli,
+        fake_metadata,
+        fake_run_config_with_params,
+        mocker,
+    ):
+        mock_session_create = mocker.patch.object(KedroSession, "create")
+        mocked_session = mock_session_create.return_value.__enter__.return_value
+
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["run", "-c", fake_run_config_with_params],
+            obj=fake_metadata,
+        )
+
+        assert not result.exit_code
+        mocked_session.run.assert_called_once_with(
+            tags=("tag1", "tag2"),
+            runner=mocker.ANY,
+            node_names=("node1", "node2"),
+            from_nodes=[],
+            to_nodes=[],
+            from_inputs=[],
+            to_outputs=[],
+            load_versions={},
+            pipeline_name="pipeline1",
+        )
+        mock_session_create.assert_called_once_with(
+            env=mocker.ANY, extra_params=expected
+        )
+
+    @mark.parametrize(
+        "cli_arg,expected_extra_params",
+        [
+            ("foo:bar", {"foo": "bar"}),
+            (
+                "foo:123.45, bar:1a,baz:678. ,qux:1e-2,quux:0,quuz:",
+                {
+                    "foo": 123.45,
+                    "bar": "1a",
+                    "baz": 678,
+                    "qux": 0.01,
+                    "quux": 0,
+                    "quuz": "",
+                },
+            ),
+            ("foo:bar,baz:fizz:buzz", {"foo": "bar", "baz": "fizz:buzz"}),
+            (
+                "foo:bar, baz: https://example.com",
+                {"foo": "bar", "baz": "https://example.com"},
+            ),
+            ("foo:bar,baz:fizz buzz", {"foo": "bar", "baz": "fizz buzz"}),
+            ("foo:bar, foo : fizz buzz  ", {"foo": "fizz buzz"}),
+        ],
+    )
+    def test_run_extra_params(
+        self,
+        mocker,
+        fake_project_cli,
+        fake_metadata,
+        cli_arg,
+        expected_extra_params,
+    ):
+        mock_session_create = mocker.patch.object(KedroSession, "create")
+
+        result = CliRunner().invoke(
+            fake_project_cli, ["run", "--params", cli_arg], obj=fake_metadata
+        )
+
+        assert not result.exit_code
+        mock_session_create.assert_called_once_with(
+            env=mocker.ANY, extra_params=expected_extra_params
+        )
+
+    @mark.parametrize("bad_arg", ["bad", "foo:bar,bad"])
+    def test_bad_extra_params(self, fake_project_cli, fake_metadata, bad_arg):
+        result = CliRunner().invoke(
+            fake_project_cli, ["run", "--params", bad_arg], obj=fake_metadata
+        )
+        assert result.exit_code
+        assert (
+            "Item `bad` must contain a key and a value separated by `:`"
+            in result.stdout
+        )
+
+    @mark.parametrize("bad_arg", [":", ":value", " :value"])
+    def test_bad_params_key(self, fake_project_cli, fake_metadata, bad_arg):
+        result = CliRunner().invoke(
+            fake_project_cli, ["run", "--params", bad_arg], obj=fake_metadata
+        )
+        assert result.exit_code
+        assert "Parameter key cannot be an empty string" in result.stdout
+
+    @mark.parametrize(
+        "option,value",
+        [("--load-version", "dataset1:time1"), ("-lv", "dataset2:time2")],
+    )
+    def test_reformat_load_versions(
+        self, fake_project_cli, fake_metadata, fake_session, option, value, mocker
+    ):
+        result = CliRunner().invoke(
+            fake_project_cli, ["run", option, value], obj=fake_metadata
+        )
+        assert not result.exit_code, result.output
+
+        ds, t = value.split(":", 1)
+        fake_session.run.assert_called_once_with(
+            tags=(),
+            runner=mocker.ANY,
+            node_names=(),
+            from_nodes=[],
+            to_nodes=[],
+            from_inputs=[],
+            to_outputs=[],
+            load_versions={ds: t},
+            pipeline_name=None,
+        )
+
+    def test_fail_reformat_load_versions(self, fake_project_cli, fake_metadata):
+        load_version = "2020-05-12T12.00.00"
+        result = CliRunner().invoke(
+            fake_project_cli, ["run", "-lv", load_version], obj=fake_metadata
+        )
+        assert result.exit_code, result.output
+
+        expected_output = (
+            f"Error: Expected the form of `load_version` to be "
+            f"`dataset_name:YYYY-MM-DDThh.mm.ss.sssZ`,"
+            f"found {load_version} instead\n"
+        )
+        assert expected_output in result.output

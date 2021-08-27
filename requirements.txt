@@ -3,7 +3,7 @@ cachetools~=4.1
 click<8.0
 cookiecutter~=1.7.0
 dynaconf~=3.1.2
-fsspec>=0.5.1, <0.9
+fsspec>=2021.04, <2022.01  # Upper bound set arbitrarily, to be reassessed in early 2022
 gitpython~=3.0
 jmespath>=0.9.5, <1.0
 jupyter_client>=5.1, <7.0
@@ -11,6 +11,7 @@ pip-tools~=5.0
 pluggy~=0.13.0
 python-json-logger~=2.0
 PyYAML>=4.2, <6.0
+rope~=0.19.0  # subject to LGPLv3 license
 setuptools>=38.0
 toml~=0.10
 toposort~=1.5  # Needs to be at least 1.5 to be able to raise CircularDependencyError

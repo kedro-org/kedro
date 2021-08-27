@@ -28,8 +28,8 @@
 
 """``PickleDataSet`` loads/saves data from/to a Pickle file using an underlying
 filesystem (e.g.: local, S3, GCS). The underlying functionality is supported by
-the ``pickle``, ``joblib``, and ``compress_pickle`` libraries, so it supports
-all allowed options for loading and saving pickle files.
+the ``pickle``, ``joblib``, ``dill``, and ``compress_pickle`` libraries, so it
+supports all allowed options for loading and saving pickle files.
 """
 import pickle
 from copy import deepcopy
@@ -52,6 +52,11 @@ except ImportError:  # pragma: no cover
     joblib = None
 
 try:
+    import dill
+except ImportError:  # pragma: no cover
+    dill = None
+
+try:
     import compress_pickle
 except ImportError:  # pragma: no cover
     compress_pickle = None
@@ -60,8 +65,8 @@ except ImportError:  # pragma: no cover
 class PickleDataSet(AbstractVersionedDataSet):
     """``PickleDataSet`` loads/saves data from/to a Pickle file using an underlying
     filesystem (e.g.: local, S3, GCS). The underlying functionality is supported by
-    the ``pickle`` and ``joblib`` libraries, so it supports all allowed options for
-    loading and saving pickle files.
+    the ``pickle``, ``joblib``, ``dill``, and ``compress_pickle`` libraries, so it
+    supports all allowed options for loading and saving pickle files.
 
     Example:
     ::
@@ -77,7 +82,7 @@ class PickleDataSet(AbstractVersionedDataSet):
         >>> data_set.save(data)
         >>> reloaded = data_set.load()
         >>> assert data.equals(reloaded)
-
+        >>>
         >>> # Add "compress_pickle[lz4]" to requirements.txt
         >>> data_set = PickleDataSet(filepath="test.pickle.lz4",
         >>>                          backend="compress_pickle",
@@ -90,7 +95,12 @@ class PickleDataSet(AbstractVersionedDataSet):
 
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
-    BACKENDS = {"pickle": pickle, "joblib": joblib, "compress_pickle": compress_pickle}
+    BACKENDS = {
+        "pickle": pickle,
+        "joblib": joblib,
+        "dill": dill,
+        "compress_pickle": compress_pickle,
+    }
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -104,24 +114,31 @@ class PickleDataSet(AbstractVersionedDataSet):
         fs_args: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``PickleDataSet`` pointing to a concrete Pickle
-        file on a specific filesystem. ``PickleDataSet`` supports two backends to
-        serialize/deserialize objects: `pickle` and `joblib`.
+        file on a specific filesystem. ``PickleDataSet`` supports four backends to
+        serialize/deserialize objects: `pickle`, `joblib`, `dill`, and `compress_pickle`.
 
         Args:
             filepath: Filepath in POSIX format to a Pickle file prefixed with a protocol like
                 `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.
-            backend: Backend to use, must be one of ['pickle', 'joblib']. Defaults to 'pickle'.
+            backend: Backend to use, must be one of ['pickle', 'joblib', 'dill', 'compress_pickle'].
+                Defaults to 'pickle'.
             load_args: Pickle options for loading pickle files.
                 Here you can find all available arguments for different backends:
                 pickle.load: https://docs.python.org/3/library/pickle.html#pickle.load
                 joblib.load: https://joblib.readthedocs.io/en/latest/generated/joblib.load.html
+                dill.load: https://dill.readthedocs.io/en/latest/dill.html#dill._dill.load
+                compress_pickle.load:
+                https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.load
                 All defaults are preserved.
             save_args: Pickle options for saving pickle files.
                 Here you can find all available arguments for different backends:
                 pickle.dump: https://docs.python.org/3/library/pickle.html#pickle.dump
                 joblib.dump: https://joblib.readthedocs.io/en/latest/generated/joblib.dump.html
+                dill.dump: https://dill.readthedocs.io/en/latest/dill.html#dill._dill.dump
+                compress_pickle.dump:
+                https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.dump
                 All defaults are preserved.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
@@ -138,7 +155,8 @@ class PickleDataSet(AbstractVersionedDataSet):
                 All defaults are preserved, except `mode`, which is set to `wb` when saving.
 
         Raises:
-            ValueError: If ``backend`` is not one of ['pickle', 'joblib'].
+            ValueError: If ``backend`` is not one of ['pickle', 'joblib', 'dill',
+                'compress_pickle'].
             ImportError: If ``backend`` library could not be imported.
         """
         if backend not in self.BACKENDS:

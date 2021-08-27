@@ -134,6 +134,22 @@ If you plan to publish your packaged modular pipeline to some Python package rep
 
 In addition to [PyPI](https://pypi.org/), you can also share the packaged wheel file directly, or via a cloud storage such as AWS S3.
 
+#### Package multiple modular pipelines
+
+If you are packaging multiple modular pipelines, you have the option to do it in bulk, by defining the specifications in the project's `pyproject.toml`:
+
+```toml
+[tool.kedro.pipeline.package]
+first_pipeline = {alias = "aliased_pipeline", destination = "somewhere/else", env = "uat"}
+second_pipeline = {}
+```
+
+Where the keys (e.g. `first_pipeline`, `second_pipeline`) are the modular pipelines' folder names, and the values are the options that `kedro pipeline package <pipeline_name>` accepts.
+
+```eval_rst
+.. note::  Make sure `destination` is specified as a POSIX path even when working on a Windows machine.
+```
+
 ### Pull a modular pipeline
 
 You can pull a modular pipeline from a wheel file by executing `kedro pipeline pull <package_name>`, where `<package_name>` is either a package name on PyPI or a path to the wheel file. Kedro will unpack the wheel file, and install the files in following locations in your Kedro project:

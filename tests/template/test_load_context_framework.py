@@ -77,7 +77,7 @@ class TestLoadContext:
             wraps=_get_project_metadata,
         )
         result = load_context(str(fake_repo_path))
-        assert result.package_name == "fake_package"
+        assert result.package_name == "dummy_package"
         assert str(fake_repo_path.resolve() / "src") in sys.path
         get_project_metadata_mock.assert_called_with(fake_repo_path)
 
@@ -113,14 +113,14 @@ class TestLoadContext:
         with pytest.raises(RuntimeError, match=re.escape(pattern)):
             load_context(str(fake_repo_path))
 
-    def test_pyproject_toml_has_extra_keys(self, fake_repo_path, fake_package_name):
+    def test_pyproject_toml_has_extra_keys(self, fake_repo_path, fake_metadata):
         project_name = "Test Project"
         payload = {
             "tool": {
                 "kedro": {
                     "project_version": kedro_version,
                     "project_name": project_name,
-                    "package_name": fake_package_name,
+                    "package_name": fake_metadata.package_name,
                     "unexpected_key": "hello",
                 }
             }
@@ -140,7 +140,7 @@ class TestLoadContext:
         payload = {
             "tool": {
                 "kedro": {
-                    "package_name": "fake_package",
+                    "package_name": "dummy_package",
                     "project_version": kedro_version,
                     "project_name": "fake_project",
                 }
@@ -156,13 +156,13 @@ class TestLoadContext:
     def test_settings_py_has_context_path(
         self,
         fake_repo_path,
-        fake_package_name,
+        fake_metadata,
     ):
         """Test for loading custom `ProjectContext` context."""
         payload = {
             "tool": {
                 "kedro": {
-                    "package_name": fake_package_name,
+                    "package_name": fake_metadata.package_name,
                     "project_version": kedro_version,
                     "project_name": "fake_project",
                 }

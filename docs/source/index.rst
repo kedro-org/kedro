@@ -173,6 +173,14 @@ Welcome to Kedro's documentation!
    13_resources/01_logos
    13_resources/02_glossary
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Contribute to Kedro
+
+   14_contribution/01_contribute_to_kedro
+   14_contribution/02_developer_contributor_guidelines
+   14_contribution/03_backwards_compatibility
+   14_contribution/04_documentation_contributor_guidelines
 
 API documentation
 =================

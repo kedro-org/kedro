@@ -241,10 +241,8 @@ class TestValidateSourcePath:
 
 
 class TestBootstrapProject:
-    def test_bootstrap_project(self, mocker, monkeypatch, tmp_path):
+    def test_bootstrap_project(self, monkeypatch, tmp_path):
         monkeypatch.delenv("PYTHONPATH", raising=False)
-        # assume settings.py is okay
-        mocker.patch("kedro.framework.project._validate_module")
         pyproject_toml_payload = {
             "tool": {
                 "kedro": {

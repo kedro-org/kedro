@@ -25,6 +25,7 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# pylint: disable=too-many-lines
 
 """A collection of CLI commands for working with Kedro pipelines."""
 import json
@@ -41,6 +42,10 @@ from zipfile import ZipFile
 import click
 import pkg_resources
 import yaml
+from rope.base.project import Project
+from rope.contrib import generate
+from rope.refactor.move import MoveModule
+from rope.refactor.rename import Rename
 from setuptools.dist import Distribution
 
 import kedro
@@ -314,6 +319,27 @@ def pull_package(
             _append_package_reqs(requirements_in, package_reqs, package_name)
 
 
+def _package_pipelines_from_manifest(metadata: ProjectMetadata) -> None:
+    # pylint: disable=import-outside-toplevel
+    import anyconfig  # for performance reasons
+
+    config_dict = anyconfig.load(metadata.config_file)
+    config_dict = config_dict["tool"]["kedro"]
+    build_specs = config_dict.get("pipeline", {}).get("package")
+
+    if not build_specs:
+        click.secho(
+            "Nothing to package. Please update your `pyproject.toml`.", fg="yellow"
+        )
+        return
+
+    for pipeline_name, specs in build_specs.items():
+        _package_pipeline(pipeline_name, metadata, **specs)
+        click.secho(f"Packaged `{pipeline_name}` pipeline!")
+
+    click.secho("Pipelines packaged!", fg="green")
+
+
 @pipeline.command("package")
 @env_option(
     help="Environment where the pipeline configuration lives. Defaults to `base`."
@@ -339,12 +365,24 @@ def pull_package(
     "Defaults to pipeline package version or, "
     "if that is not defined, the project package version.",
 )
-@click.argument("name", nargs=1)
+@click.option("--all", "-a", "all_flag", is_flag=True)
+@click.argument("name", nargs=1, required=False)
 @click.pass_obj  # this will pass the metadata as first argument
 def package_pipeline(
-    metadata: ProjectMetadata, name, env, alias, destination, version
+    metadata: ProjectMetadata, name, env, alias, destination, version, all_flag
 ):  # pylint: disable=too-many-arguments
     """Package up a modular pipeline as a Python .whl."""
+    if not name and not all_flag:
+        click.secho(
+            "Please specify a pipeline name or add "
+            "'--all' to package all pipelines in `pyproject.toml`."
+        )
+        sys.exit(1)
+
+    if all_flag:
+        _package_pipelines_from_manifest(metadata)
+        return
+
     result_path = _package_pipeline(
         name, metadata, alias=alias, destination=destination, env=env, version=version
     )
@@ -421,6 +459,65 @@ def _rename_files(conf_source: Path, old_name: str, new_name: str):
         config_file.rename(config_file.parent / new_config_name)
 
 
+def _refactor_code_for_unpacking(
+    project: Project,
+    package_path: Path,
+    tests_path: Path,
+    alias: Optional[str],
+    project_metadata: ProjectMetadata,
+) -> Tuple[Path, Path]:
+    """This is the reverse operation of `_refactor_code_for_package`, i.e
+    we go from:
+    <temp_dir>  # also the root of the Rope project
+    |__ <pipeline_name>  # or <alias>
+        |__ __init__.py
+    |__ tests  # only tests for <pipeline_name>
+        |__ __init__.py
+        |__ test_pipeline.py
+
+    to:
+    <temp_dir>  # also the root of the Rope project
+    |__ <package>
+        |__ __init__.py
+        |__ pipelines
+            |__ __init__.py
+            |__ <pipeline_name>
+                |__ __init__.py
+    |__ tests
+        |__ __init__.py
+        |__ pipelines
+            |__ __init__.py
+            |__ <pipeline_name>
+                |__ __init__.py
+    """
+    pipeline_name = package_path.stem
+    if alias:
+        _rename_package(project, pipeline_name, alias)
+        pipeline_name = alias
+
+    package_target = Path(project_metadata.package_name) / "pipelines"
+    full_path = _create_nested_package(project, package_target)
+    _move_package(project, pipeline_name, package_target.as_posix())
+    refactored_package_path = full_path / pipeline_name
+
+    if not tests_path.exists():
+        return refactored_package_path, tests_path
+
+    # we can't rename the tests package to <pipeline_name>
+    # because it will conflict with existing top-level package;
+    # hence we give it a temp name, create the expected
+    # nested folder structure, move the contents there,
+    # then rename the temp name to <pipeline_name>.
+    _rename_package(project, "tests", "tmp_name")
+    tests_target = Path("tests") / "pipelines"
+    full_path = _create_nested_package(project, tests_target)
+    _move_package(project, "tmp_name", tests_target.as_posix())
+    _rename_package(project, (tests_target / "tmp_name").as_posix(), pipeline_name)
+    refactored_tests_path = full_path / pipeline_name
+
+    return refactored_package_path, refactored_tests_path
+
+
 def _install_files(
     project_metadata: ProjectMetadata,
     package_name: str,
@@ -449,13 +546,19 @@ def _install_files(
         # we don't want to copy it again when syncing the package, so we remove it.
         shutil.rmtree(str(conf_source))
 
-    if test_source.is_dir():
-        _sync_dirs(test_source, test_dest)
+    project = Project(source_path)
+    refactored_package_source, refactored_test_source = _refactor_code_for_unpacking(
+        project, package_source, test_source, alias, project_metadata
+    )
+    project.close()
+
+    if refactored_test_source.is_dir():
+        _sync_dirs(refactored_test_source, test_dest)
 
     # Sync everything under package directory, except `config`
     # since it has already been copied.
-    if package_source.is_dir():
-        _sync_dirs(package_source, package_dest)
+    if refactored_package_source.is_dir():
+        _sync_dirs(refactored_package_source, package_dest)
 
 
 def _find_config_files(
@@ -472,6 +575,19 @@ def _find_config_files(
         ]
 
     return config_files
+
+
+def _get_default_version(metadata: ProjectMetadata, pipeline_name: str) -> str:
+    # default to pipeline package version
+    try:
+        pipeline_module = import_module(
+            f"{metadata.package_name}.pipelines.{pipeline_name}"
+        )
+        return pipeline_module.__version__  # type: ignore
+    except (AttributeError, ModuleNotFoundError):
+        # if pipeline version doesn't exist, take the project one
+        project_module = import_module(f"{metadata.package_name}")
+        return project_module.__version__  # type: ignore
 
 
 def _package_pipeline(  # pylint: disable=too-many-arguments
@@ -503,21 +619,17 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
 
     # Check that pipeline directory exists and not empty
     _validate_dir(artifacts_to_package.pipeline_dir)
+
     destination = Path(destination) if destination else package_dir.parent / "dist"
+    version = version or _get_default_version(metadata, pipeline_name)
 
-    if not version:  # default to pipeline package version
-        try:
-            pipeline_module = import_module(
-                f"{metadata.package_name}.pipelines.{pipeline_name}"
-            )
-            version = pipeline_module.__version__  # type: ignore
-        except (AttributeError, ModuleNotFoundError):
-            # if pipeline version doesn't exist, take the project one
-            project_module = import_module(f"{metadata.package_name}")
-            version = project_module.__version__  # type: ignore
-
-    _generate_wheel_file(  # type: ignore
-        pipeline_name, destination, source_paths, version, alias=alias
+    _generate_wheel_file(
+        pipeline_name=pipeline_name,
+        destination=destination,
+        source_paths=source_paths,
+        version=version,
+        metadata=metadata,
+        alias=alias,
     )
 
     _clean_pycache(package_dir)
@@ -559,36 +671,164 @@ def _make_install_requires(requirements_txt: Path) -> List[str]:
     return [str(requirement) for requirement in requirements]
 
 
+def _create_nested_package(project: Project, package_path: Path) -> Path:
+    # fails if parts of the path exists already
+    packages = package_path.parts
+    parent = generate.create_package(project, packages[0])
+    nested_path = Path(project.address) / packages[0]
+    for package in packages[1:]:
+        parent = generate.create_package(project, package, sourcefolder=parent)
+        nested_path = nested_path / package
+    return nested_path
+
+
+def _move_package(project: Project, source: str, target: str) -> None:
+    """
+    Move a Python package, refactoring relevant imports along the way.
+    A target of empty string means moving to the root of the `project`.
+
+    Args:
+        project: rope.base.Project holding the scope of the refactoring.
+        source: Name of the Python package to be moved. Can be a fully
+            qualified module path relative to the `project` root, e.g.
+            "package.pipelines.pipeline" or "package/pipelines/pipeline".
+        target: Destination of the Python package to be moved. Can be a fully
+            qualified module path relative to the `project` root, e.g.
+            "package.pipelines.pipeline" or "package/pipelines/pipeline".
+    """
+    src_folder = project.get_module(source).get_resource()
+    target_folder = project.get_module(target).get_resource()
+    change = MoveModule(project, src_folder).get_changes(dest=target_folder)
+    project.do(change)
+
+
+def _rename_package(project: Project, old_name: str, new_name: str) -> None:
+    """
+    Rename a Python package, refactoring relevant imports along the way,
+    as well as references in comments.
+
+    Args:
+        project: rope.base.Project holding the scope of the refactoring.
+        old_name: Old module name. Can be a fully qualified module path,
+            e.g. "package.pipelines.pipeline" or "package/pipelines/pipeline",
+            relative to the `project` root.
+        new_name: New module name. Can't be a fully qualified module path.
+    """
+    folder = project.get_folder(old_name)
+    change = Rename(project, folder).get_changes(new_name, docs=True)
+    project.do(change)
+
+
+def _refactor_code_for_package(
+    project: Project,
+    package_path: Path,
+    tests_path: Path,
+    alias: Optional[str],
+    project_metadata: ProjectMetadata,
+) -> None:
+    """In order to refactor the imports properly, we need to recreate
+    the same nested structure as in the project. Therefore, we create:
+    <temp_dir>  # also the root of the Rope project
+    |__ <package>
+        |__ __init__.py
+        |__ pipelines
+            |__ __init__.py
+            |__ <pipeline_name>
+                |__ __init__.py
+    |__ tests
+        |__ __init__.py
+        |__ pipelines
+            |__ __init__.py
+            |__ <pipeline_name>
+                |__ __init__.py
+    We then move <pipeline_name> outside of package src to top level ("")
+    in temp_dir, and rename folder & imports if alias provided.
+
+    For tests, we need to extract all the contents of <pipeline_name>
+    at into top-level `tests` folder. This is not possible in one go with
+    the Rope API, so we have to do it in a bit of a hacky way.
+    We rename <pipeline_name> to a `tmp_name` and move it at top-level ("")
+    in temp_dir. We remove the old `tests` folder and rename `tmp_name` to `tests`.
+
+    The final structure should be:
+    <temp_dir>  # also the root of the Rope project
+    |__ <pipeline_name>  # or <alias>
+        |__ __init__.py
+    |__ tests  # only tests for <pipeline_name>
+        |__ __init__.py
+        |__ test_pipeline.py
+    """
+    # Copy source in appropriate folder structure
+    package_target = package_path.relative_to(project_metadata.source_dir)
+    full_path = _create_nested_package(project, package_target)
+    # overwrite=True to update the __init__.py files generated by create_package
+    _sync_dirs(package_path, full_path, overwrite=True)
+
+    # Copy tests in appropriate folder structure
+    if tests_path.exists():
+        tests_target = tests_path.relative_to(project_metadata.source_dir)
+        full_path = _create_nested_package(project, tests_target)
+        # overwrite=True to update the __init__.py files generated by create_package
+        _sync_dirs(tests_path, full_path, overwrite=True)
+
+    # Refactor imports in src/package_name/pipelines/pipeline_name
+    # and imports of `pipeline_name` in tests
+    _move_package(project, package_target.as_posix(), "")
+    if alias:
+        pipeline_name = package_target.stem
+        _rename_package(project, pipeline_name, alias)
+
+    if tests_path.exists():
+        # we can't move the relevant tests folder as is because
+        # it will conflict with the top-level package <pipeline_name>;
+        # we can't rename it "tests" and move it, because it will conflict
+        # with the existing "tests" folder at top level;
+        # hence we give it a temp name, move it, delete tests/ and
+        # rename the temp name to tests.
+        tmp_name = "extracted_tests"
+        tmp_module = tests_target.parent / tmp_name
+        _rename_package(project, tests_target.as_posix(), tmp_name)
+        _move_package(project, tmp_module.as_posix(), "")
+        shutil.rmtree(Path(project.address) / "tests")
+        _rename_package(project, tmp_name, "tests")
+
+    shutil.rmtree(Path(project.address) / project_metadata.package_name)
+
+
 _SourcePathType = Union[Path, List[Tuple[Path, str]]]
 
 
-# pylint: disable=too-many-locals
+# pylint: disable=too-many-arguments,too-many-locals
 def _generate_wheel_file(
     pipeline_name: str,
     destination: Path,
     source_paths: Tuple[_SourcePathType, ...],
     version: str,
+    metadata: ProjectMetadata,
     alias: str = None,
 ) -> None:
     package_name = alias or pipeline_name
+    package_source, tests_source, conf_source = source_paths
 
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_dir_path = Path(temp_dir).resolve()
 
-        # Copy source folders
-        target_paths = _get_package_artifacts(temp_dir_path, package_name)
-        source_target, _, conf_target = target_paths
-        for source, target in zip(source_paths, target_paths):
-            sync_func = _sync_path_list if isinstance(source, list) else _sync_dirs
-            sync_func(source, target)  # type: ignore
+        project = Project(temp_dir_path)  # project where to do refactoring
+        _refactor_code_for_package(  # type: ignore
+            project, package_source, tests_source, alias, metadata
+        )
+        project.close()
 
+        # Copy & "refactor" config
+        _, _, conf_target = _get_package_artifacts(temp_dir_path, package_name)
+        _sync_path_list(conf_source, conf_target)  # type: ignore
         if conf_target.is_dir() and alias:
             _rename_files(conf_target, pipeline_name, alias)
 
         # Build a setup.py on the fly
         try:
             install_requires = _make_install_requires(
-                source_target / "requirements.txt"
+                package_source / "requirements.txt"  # type: ignore
             )
         except Exception as exc:
             click.secho("FAILED", fg="red")
@@ -675,11 +915,12 @@ def _create_pipeline(name: str, output_dir: Path) -> Path:
 
 
 # pylint: disable=missing-raises-doc
-def _sync_dirs(source: Path, target: Path, prefix: str = ""):
+def _sync_dirs(source: Path, target: Path, prefix: str = "", overwrite: bool = False):
     """Recursively copies `source` directory (or file) into `target` directory without
     overwriting any existing files/directories in the target using the following
     rules:
-        1) Skip any files/directories which names match with files in target.
+        1) Skip any files/directories which names match with files in target,
+        unless overwrite=True.
         2) Copy all files from source to target.
         3) Recursively copy all directories from source to target.
 
@@ -698,7 +939,8 @@ def _sync_dirs(source: Path, target: Path, prefix: str = ""):
     elif source.is_file():
         content = [source]
     else:
-        content = []  # nothing to copy
+        # nothing to copy
+        content = []  # pragma: no cover
 
     for source_path in content:
         source_name = source_path.name
@@ -706,7 +948,8 @@ def _sync_dirs(source: Path, target: Path, prefix: str = ""):
         click.echo(indent(f"Creating `{target_path}`: ", prefix), nl=False)
 
         if (  # rule #1
-            source_name in existing_files
+            not overwrite
+            and source_name in existing_files
             or source_path.is_file()
             and source_name in existing_folders
         ):
@@ -803,7 +1046,7 @@ def _append_package_reqs(
         return
 
     sorted_reqs = sorted(str(req) for req in reqs_to_add)
-    with open(requirements_in, "a") as file:
+    with open(requirements_in, "a", encoding="utf-8") as file:
         file.write(
             f"\n\n# Additional requirements from modular pipeline `{pipeline_name}`:\n"
         )

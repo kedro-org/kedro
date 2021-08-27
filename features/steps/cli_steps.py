@@ -284,7 +284,9 @@ def init_git_repo(context):
 def add_test_jupyter_nb(context):
     """Create a test jupyter notebook using TEST_JUPYTER_ORG."""
     with open(
-        str(context.root_project_dir / "notebooks" / "hello_world.ipynb"), "wt"
+        str(context.root_project_dir / "notebooks" / "hello_world.ipynb"),
+        "wt",
+        encoding="utf-8",
     ) as test_nb_fh:
         test_nb_fh.write(TEST_JUPYTER_ORG)
 
@@ -423,7 +425,9 @@ def simulate_nb_execution(context):
     simulate that it was executed and output was saved.
     """
     with open(
-        str(context.root_project_dir / "notebooks" / "hello_world.ipynb"), "wt"
+        str(context.root_project_dir / "notebooks" / "hello_world.ipynb"),
+        "wt",
+        encoding="utf-8",
     ) as test_nb_fh:
         test_nb_fh.write(TEST_JUPYTER_AFTER_EXEC)
 
@@ -546,7 +550,11 @@ def check_one_node_run(context, number):
 @then('the console log should show that "{node}" was run')
 def check_correct_nodes_run(context, node):
     expected_log_line = f"Running node: {node}"
-    assert expected_log_line in context.result.stdout
+    stdout = context.result.stdout
+    assert expected_log_line in stdout, (
+        "Expected the following message segment to be printed on stdout: "
+        f"{expected_log_line},\nbut got {stdout}"
+    )
 
 
 @then("I should get a successful exit code")
@@ -638,7 +646,8 @@ def check_additional_cell_added(context):
     coded by TEST_JUPYTER_ORG.
     """
     with open(
-        str(context.root_project_dir / "notebooks" / "hello_world.ipynb")
+        str(context.root_project_dir / "notebooks" / "hello_world.ipynb"),
+        encoding="utf-8",
     ) as test_nb_fh:
         context.nb_data = json.load(test_nb_fh)
         assert len(context.nb_data["cells"]) == 2

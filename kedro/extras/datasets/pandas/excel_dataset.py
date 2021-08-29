@@ -216,3 +216,35 @@ class ExcelDataSet(AbstractVersionedDataSet):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
+
+
+class MultisheetExcelDataSet(ExcelDataSet):
+    """Extends AppendableExcelDataSet by saving / loading a
+    dictionary of dataframes"""
+    def _save(self, dataframes: Dict[str, pd.DataFrame]):
+
+        try:
+            output = BytesIO()
+            save_path = get_filepath_str(self._get_save_path(), self._protocol)
+
+            with pd.ExcelWriter(output, **self._writer_args) as writer:
+                for sheet, data in dataframes.items():
+                    data.to_excel(writer, sheet_name=sheet, **self._save_args)
+
+            with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
+                fs_file.write(output.getvalue())
+
+            self._invalidate_cache()
+
+        except FileNotFoundError as exc:
+            raise DataSetError(
+                f"`{self._filepath}` Excel file not found. The file cannot be opened."
+            ) from exc
+
+    def _load(self):
+
+        raise NotImplementedError(
+            "Multisheet loading is not implemented, "
+            "but you could read the same filepath with an "
+            "excel dataset while specifying the sheet name"
+        )

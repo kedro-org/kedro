@@ -8,6 +8,12 @@
 * Removed `.ipython/profile_default/startup/` from the Kedro project template in favour of `.ipython/profile_default/ipython_config.py` and the `kedro.extras.extensions.ipython`.
 * Added support for `dill` backend to `PickleDataSet`.
 * Imports are now refactored at `kedro pipeline package` and `kedro pipeline pull` time, so that _aliasing_ a modular pipeline doesn't break it.
+* Added the following new datasets to support basic Experiment Tracking:
+
+| Type                        | Description                                          | Location                          |
+| --------------------------- | ---------------------------------------------------- | --------------------------------- |
+| `tracking.MetricsDataSet` | Dataset to track numeric metrics for experiment tracking | `kedro.extras.datasets.tracking` |
+
 
 ## Bug fixes and other changes
 * Bumped minimum required `fsspec` version to 2021.04.

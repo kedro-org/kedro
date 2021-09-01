@@ -38,4 +38,5 @@ kedro.extras.datasets
    kedro.extras.datasets.spark.SparkJDBCDataSet
    kedro.extras.datasets.tensorflow.TensorFlowModelDataset
    kedro.extras.datasets.text.TextDataSet
+   kedro.extras.datasets.tracking.MetricsDataSet
    kedro.extras.datasets.yaml.YAMLDataSet

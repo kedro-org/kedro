@@ -26,11 +26,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``MetricsDataSet`` implementation to save metrics data for Kedro Experiment Tracking"""
+"""Dataset implementations to save data for Kedro Experiment Tracking"""
 
-__all__ = ["MetricsDataSet"]
+__all__ = ["MetricsDataSet", "JSONDataSet"]
+
 
 from contextlib import suppress
 
 with suppress(ImportError):
     from kedro.extras.datasets.tracking.metrics_dataset import MetricsDataSet  # NOQA
+with suppress(ImportError):
+    from kedro.extras.datasets.tracking.json_dataset import JSONDataSet  # NOQA

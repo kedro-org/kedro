@@ -14,6 +14,7 @@
 * The default `kedro` environment names can now be set in `settings.py` with the help of the `CONFIG_LOADER_ARGS` variable. The relevant keys to be supplied are `base_env` and `default_run_env`. These values are set to `base` and `local` respectively as a default.
 * Added `kedro.config.abstract_config.AbstractConfigLoader` as an abstract base class for all `ConfigLoader` implementations. `ConfigLoader` and `TemplatedConfigLoader` now inherit directly from this base class.
 * Streamlined the `ConfigLoader.get` and `TemplatedConfigLoader.get` API and delegated the actual `get` method functional implementation to the `kedro.config.common` module.
+* Ordered DataCatalog JSON alphabetically and added new datasets.
 * Added the following new datasets:
 
 | Type                | Description                                                    | Location                       |

@@ -88,7 +88,7 @@
                 "description": "If specified, only partitions that end with this\nstring will be processed."
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "Protocol-specific options that will be passed to\n``fsspec.filesystem``\nhttps://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.filesystem\nand the dataset initializer. If the dataset config contains\nexplicit credentials spec, then such spec will take precedence.\nAll possible credentials management scenarios are documented here:\nhttps://kedro.readthedocs.io/en/stable/04_user_guide/08_advanced_io.html#partitioned-dataset-credentials"
               },
               "load_args": {
@@ -164,7 +164,7 @@
                 "description": "If specified, only partitions that end with this\nstring will be processed."
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "Protocol-specific options that will be passed to\n``fsspec.filesystem``\nhttps://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.filesystem\nand the dataset initializer. If the dataset config contains\nexplicit credentials spec, then such spec will take precedence.\nAll possible credentials management scenarios are documented here:\nhttps://kedro.readthedocs.io/en/stable/04_user_guide/08_advanced_io.html#partitioned-dataset-credentials"
               },
               "load_args": {
@@ -240,7 +240,7 @@
                 "description": "file format supported by Biopython ``SeqIO.write()``.\nE.g. `{\"format\": \"fasta\"}`."
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -270,7 +270,7 @@
                 "description": "Additional saving options for `dask.dataframe.to_parquet`:\nhttps://docs.dask.org/en/latest/dataframe-api.html#dask.dataframe.to_parquet"
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -300,7 +300,7 @@
                 "description": "``email`` options for generating MIME documents (arguments passed into\n``email.generator.Generator.flatten``). Here you can find all available arguments:\nhttps://docs.python.org/3/library/email.generator.html#email.generator.Generator.flatten\nIf you would like to specify options for the `Generator`,\nyou can include them under the \"generator\" key. Here you can\nfind all available arguments:\nhttps://docs.python.org/3/library/email.generator.html#email.generator.Generator\nAll defaults are preserved."
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -330,7 +330,7 @@
                 "description": "GeoPandas options for saving geojson files.\nHere you can find all available arguments:\nhttps://geopandas.org/reference.html#geopandas.GeoDataFrame.to_file\nThe default_save_arg driver is 'GeoJSON', all others preserved."
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "credentials required to access the underlying filesystem.\nEg. for ``GCFileSystem`` it would look like `{'token': None}`."
               },
               "fs_args": {
@@ -356,7 +356,7 @@
                 "description": "Extra arguments to pass into underlying filesystem class constructor\n(e.g. `{\"project\": \"my-project\"}` for ``GCSFileSystem``), as well as\nto pass to the filesystem's `open` method through nested key `open_args_save`.\nHere you can find all available arguments for `open`:\nhttps://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open\nAll defaults are preserved, except `mode`, which is set to `wb` when saving."
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``S3FileSystem`` it should look like:\n`{'key': '<id>', 'secret': '<key>'}}`"
               },
               "save_args": {
@@ -380,7 +380,7 @@
                 "description": "json options for saving JSON files (arguments passed\ninto ```json.dump``). Here you can find all available arguments:\nhttps://docs.python.org/3/library/json.html\nAll defaults are preserved, but \"default_flow_style\", which is set to False."
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -406,7 +406,7 @@
                 "description": "Extra arguments to pass into underlying filesystem class constructor\n(e.g. `{\"project\": \"my-project\"}` for ``GCSFileSystem``), as well as\nto pass to the filesystem's `open` method through nested key `open_args_save`.\nHere you can find all available arguments for `open`:\nhttps://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open\nAll defaults are preserved, except `mode`, which is set to `wb` when saving."
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``S3FileSystem`` it should look like:\n`{'key': '<id>', 'secret': '<key>'}}`"
               },
               "save_args": {
@@ -436,7 +436,7 @@
                 "description": "Arguments passed on to ```networkx.node_link_data``.\nSee the details in\nhttps://networkx.github.io/documentation/networkx-1.9.1/reference/generated/networkx.readwrite.json_graph.node_link_data.html"
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -464,7 +464,7 @@
                 "description": "Pandas options for saving CSV files.\nHere you can find all available arguments:\nhttps://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_csv.html\nAll defaults are preserved, but \"index\", which is set to False."
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -498,7 +498,7 @@
                 "description": "Pandas options for saving Excel files.\nHere you can find all available arguments:\nhttps://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_excel.html\nAll defaults are preserved, but \"index\", which is set to False.\nIf you would like to specify options for the `ExcelWriter`,\nyou can include them under the \"writer\" key. Here you can\nfind all available arguments:\nhttps://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.ExcelWriter.html"
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -524,7 +524,7 @@
                 "description": "Pandas options for loading feather files.\nHere you can find all available arguments:\nhttps://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_feather.html\nAll defaults are preserved."
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -590,7 +590,7 @@
                 "description": "PyTables options for saving hdf files.\nYou can find all available arguments at:\nhttps://www.pytables.org/usersguide/libref/top_level.html#tables.open_file\nAll defaults are preserved."
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -618,7 +618,7 @@
                 "description": "Pandas options for saving JSON files.\nHere you can find all available arguments:\nhttps://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_json.html\nAll defaults are preserved, but \"index\", which is set to False."
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{'token': None}`."
               },
               "fs_args": {
@@ -648,7 +648,7 @@
                 "description": "Additional saving options for `pyarrow.parquet.write_table` and\n`pyarrow.Table.from_pandas`.\nHere you can find all available arguments for `write_table()`:\nhttps://arrow.apache.org/docs/python/generated/pyarrow.parquet.write_table.html?highlight=write_table#pyarrow.parquet.write_table\nThe arguments for `from_pandas()` should be passed through a nested\nkey: `from_pandas`. E.g.: `save_args = {\"from_pandas\": {\"preserve_index\": False}}`\nHere you can find all available arguments for `from_pandas()`:\nhttps://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table.from_pandas"
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -670,7 +670,7 @@
                 "description": "The table name to load or save data to. It\noverwrites name in ``save_args`` and ``table_name``\nparameters in ``load_args``."
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "A dictionary with a ``SQLAlchemy`` connection string.\nUsers are supposed to provide the connection string 'con'\nthrough credentials. It overwrites `con` parameter in\n``load_args`` and ``save_args`` in case it is provided. To find\nall supported connection string formats, see here:\nhttps://docs.sqlalchemy.org/en/13/core/engines.html#database-urls"
               },
               "load_args": {
@@ -696,7 +696,7 @@
                 "description": "The sql query statement."
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "A dictionary with a ``SQLAlchemy`` connection string.\nUsers are supposed to provide the connection string 'con'\nthrough credentials. It overwrites `con` parameter in\n``load_args`` and ``save_args`` in case it is provided. To find\nall supported connection string formats, see here:\nhttps://docs.sqlalchemy.org/en/13/core/engines.html#database-urls"
               },
               "load_args": {
@@ -724,7 +724,7 @@
                 "description": "Pandas options for saving XML files.\nHere you can find all available arguments:\nhttps://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_xml.html\nAll defaults are preserved, but \"index\", which is set to False."
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -758,7 +758,7 @@
                 "description": "Pickle options for saving pickle files.\nHere you can find all available arguments for different backends:\npickle.dump: https://docs.python.org/3/library/pickle.html#pickle.dump\njoblib.dump: https://joblib.readthedocs.io/en/latest/generated/joblib.dump.html\nAll defaults are preserved."
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -784,7 +784,7 @@
                 "description": "Pillow options for saving image files.\nHere you can find all available arguments:\nhttps://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save\nAll defaults are preserved."
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -818,7 +818,7 @@
                 "description": "Plotly options for saving JSON files.\nHere you can find all available arguments:\nhttps://plotly.com/python-api-reference/generated/plotly.io.write_json.html\nAll defaults are preserved, but \"index\", which is set to False."
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{'token': None}`."
               },
               "fs_args": {
@@ -850,7 +850,7 @@
                 "description": "Save args passed to Spark DataFrame write options.\nSimilar to load_args this is dependent on the selected file\nformat. You can pass ``mode`` and ``partitionBy`` to specify\nyour overwrite mode and partitioning respectively. You can find\na list of options for each format in Spark DataFrame\nwrite documentation:\nhttps://spark.apache.org/docs/latest/api/python/reference/api/pyspark.sql.DataFrame.html"
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "Credentials to access the S3 bucket, such as\n``key``, ``secret``, if ``filepath`` prefix is ``s3a://`` or ``s3n://``.\nOptional keyword arguments passed to ``hdfs.client.InsecureClient``\nif ``filepath`` prefix is ``hdfs://``. Ignored otherwise."
               }
             }
@@ -898,7 +898,7 @@
                 "description": "The name of the table to load or save data to."
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "A dictionary of JDBC database connection arguments.\nNormally at least properties ``user`` and ``password`` with\ntheir corresponding values.  It updates ``properties``\nparameter in ``load_args`` and ``save_args`` in case it is\nprovided."
               },
               "load_args": {
@@ -934,7 +934,7 @@
                 "description": "TensorFlow options for saving models.\nHere you can find all available arguments:\nhttps://www.tensorflow.org/api_docs/python/tf/keras/models/save_model\nAll defaults are preserved, except for \"save_format\", which is set to \"tf\"."
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{'token': None}`."
               },
               "fs_args": {
@@ -954,7 +954,7 @@
                 "description": "Filepath in POSIX format to a text file prefixed with a protocol like `s3://`.\nIf prefix is not provided, `file` protocol (local filesystem) will be used.\nThe prefix should be any protocol supported by ``fsspec``.\nNote: `http(s)` doesn't support versioning."
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -978,7 +978,7 @@
                 "description": "json options for saving JSON files (arguments passed\ninto ```json.dump``). Here you can find all available arguments:\nhttps://docs.python.org/3/library/json.html\nAll defaults are preserved, but \"default_flow_style\", which is set to False."
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -1002,7 +1002,7 @@
                 "description": "json options for saving JSON files (arguments passed\ninto ```json.dump``). Here you can find all available arguments:\nhttps://docs.python.org/3/library/json.html\nAll defaults are preserved, but \"default_flow_style\", which is set to False."
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {
@@ -1026,7 +1026,7 @@
                 "description": "PyYAML options for saving YAML files (arguments passed\ninto ```yaml.dump``). Here you can find all available arguments:\nhttps://pyyaml.org/wiki/PyYAMLDocumentation\nAll defaults are preserved, but \"default_flow_style\", which is set to False."
               },
               "credentials": {
-                "type": "object",
+                "type": ["object", "string"],
                 "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
               },
               "fs_args": {

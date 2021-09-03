@@ -38,5 +38,8 @@ class KedroSessionError(RuntimeError):
 
 
 class KedroRunnerError(RuntimeError):
-    """Error raised when kedro runner hits a runtime error before all nodes are complete.
-    """
+    """Error raised when kedro runner hits a runtime error before all nodes are complete."""
+
+
+class KedroContextError(Exception):
+    """Error occurred when loading project and running context pipeline."""

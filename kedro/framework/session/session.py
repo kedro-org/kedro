@@ -39,12 +39,9 @@ from typing import Any, Dict, Iterable, Optional, Union
 import click
 
 from kedro import __version__ as kedro_version
-from kedro.errors import KedroSessionError
+from kedro.errors import KedroSessionError, KedroContextError
 from kedro.framework.context import KedroContext
-from kedro.framework.context.context import (
-    KedroContextError,
-    _convert_paths_to_absolute_posix,
-)
+from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import get_hook_manager
 from kedro.framework.project import (
     configure_project,

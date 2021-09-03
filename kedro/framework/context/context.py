@@ -37,6 +37,7 @@ from urllib.parse import urlparse
 from warnings import warn
 
 from kedro.config import ConfigLoader, MissingConfigException
+from kedro.errors import KedroContextError
 from kedro.framework.hooks import get_hook_manager
 from kedro.framework.project import pipelines, settings
 from kedro.framework.startup import _get_project_metadata
@@ -729,7 +730,3 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
         package_name=metadata.package_name, project_path=project_path, **kwargs
     )
     return context
-
-
-class KedroContextError(Exception):
-    """Error occurred when loading project and running context pipeline."""

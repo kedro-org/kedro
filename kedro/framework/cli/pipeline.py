@@ -693,12 +693,13 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
     # Check that pipeline directory exists and not empty
     _validate_dir(artifacts_to_package.pipeline_dir)
 
-    destination = Path(destination) if destination else package_dir.parent / "dist"
+    destination_path = Path(destination) if destination else package_dir.parent / "dist"
     version = version or _get_default_version(metadata, pipeline_name)
 
     _generate_wheel_file(
         pipeline_name=pipeline_name,
         destination=destination.resolve(),
+        destination=destination_path.resolve(),
         source_paths=source_paths,
         version=version,
         metadata=metadata,
@@ -708,7 +709,7 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
     _clean_pycache(package_dir)
     _clean_pycache(metadata.project_path)
 
-    return destination
+    return destination_path
 
 
 def _validate_dir(path: Path) -> None:

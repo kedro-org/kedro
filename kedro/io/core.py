@@ -470,8 +470,8 @@ def _load_obj(class_path: str) -> Optional[object]:
 
 
 def _local_exists(filepath: str) -> bool:  # SKIP_IF_NO_SPARK
-    filepath = Path(filepath)
-    return filepath.exists() or any(par.is_file() for par in filepath.parents)
+    path = Path(filepath)
+    return path.exists() or any(par.is_file() for par in path.parents)
 
 
 class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
@@ -748,10 +748,10 @@ def get_filepath_str(path: PurePath, protocol: str) -> str:
     Returns:
         Filepath string.
     """
-    path = path.as_posix()
+    posix_path = path.as_posix()
     if protocol in HTTP_PROTOCOLS:
-        path = "".join((protocol, PROTOCOL_DELIMITER, path))
-    return path
+        posix_path = "".join((protocol, PROTOCOL_DELIMITER, posix_path))
+    return posix_path
 
 
 def validate_on_forbidden_chars(**kwargs):

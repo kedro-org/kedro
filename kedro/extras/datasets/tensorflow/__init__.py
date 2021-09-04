@@ -33,4 +33,4 @@ __all__ = ["TensorFlowModelDataset"]
 from contextlib import suppress
 
 with suppress(ImportError):
-    from .tensorflow_model_dataset import TensorFlowModelDataset  # NOQA
+    from .tensorflow_model_dataset import TensorFlowModelDataset

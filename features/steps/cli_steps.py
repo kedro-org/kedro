@@ -284,7 +284,9 @@ def init_git_repo(context):
 def add_test_jupyter_nb(context):
     """Create a test jupyter notebook using TEST_JUPYTER_ORG."""
     with open(
-        str(context.root_project_dir / "notebooks" / "hello_world.ipynb"), "wt"
+        str(context.root_project_dir / "notebooks" / "hello_world.ipynb"),
+        "wt",
+        encoding="utf-8",
     ) as test_nb_fh:
         test_nb_fh.write(TEST_JUPYTER_ORG)
 
@@ -423,7 +425,9 @@ def simulate_nb_execution(context):
     simulate that it was executed and output was saved.
     """
     with open(
-        str(context.root_project_dir / "notebooks" / "hello_world.ipynb"), "wt"
+        str(context.root_project_dir / "notebooks" / "hello_world.ipynb"),
+        "wt",
+        encoding="utf-8",
     ) as test_nb_fh:
         test_nb_fh.write(TEST_JUPYTER_AFTER_EXEC)
 
@@ -642,7 +646,8 @@ def check_additional_cell_added(context):
     coded by TEST_JUPYTER_ORG.
     """
     with open(
-        str(context.root_project_dir / "notebooks" / "hello_world.ipynb")
+        str(context.root_project_dir / "notebooks" / "hello_world.ipynb"),
+        encoding="utf-8",
     ) as test_nb_fh:
         context.nb_data = json.load(test_nb_fh)
         assert len(context.nb_data["cells"]) == 2

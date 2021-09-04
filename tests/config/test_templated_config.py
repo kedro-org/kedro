@@ -288,9 +288,7 @@ class TestTemplatedConfigLoader:
         """Test parameterized config with empty globals dictionary"""
         (tmp_path / "local").mkdir(exist_ok=True)
 
-        catalog = TemplatedConfigLoader(conf_paths, globals_dict=dict()).get(
-            "catalog*.yml"
-        )
+        catalog = TemplatedConfigLoader(conf_paths, globals_dict={}).get("catalog*.yml")
 
         assert catalog["boats"]["users"] == ["fred", "ron"]
 

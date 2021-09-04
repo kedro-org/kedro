@@ -25,19 +25,15 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This module facilitates the loading of the default ``kedro.config``
-for setting up the logging
-"""
 
-import logging.config
-import os
+"""Dataset implementations to save data for Kedro Experiment Tracking"""
 
-import yaml
+__all__ = ["MetricsDataSet", "JSONDataSet"]
 
-CURRENT_DIR = os.path.dirname(__file__)
 
-with open(
-    os.path.join(CURRENT_DIR, "logging.yml"), "rt", encoding="utf-8"
-) as conf_file:
-    LOGGING_CONFIG = yaml.safe_load(conf_file.read())
-    logging.config.dictConfig(LOGGING_CONFIG)
+from contextlib import suppress
+
+with suppress(ImportError):
+    from kedro.extras.datasets.tracking.metrics_dataset import MetricsDataSet  # NOQA
+with suppress(ImportError):
+    from kedro.extras.datasets.tracking.json_dataset import JSONDataSet  # NOQA

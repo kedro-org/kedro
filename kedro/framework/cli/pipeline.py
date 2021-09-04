@@ -870,7 +870,7 @@ def _generate_wheel_file(
     pipeline_name: str,
     destination: Path,
     source_paths: Tuple[_SourcePathType, ...],
-    version: str,
+    version: Optional[str],
     metadata: ProjectMetadata,
     alias: str = None,
 ) -> None:
@@ -926,7 +926,10 @@ def _generate_wheel_file(
 
 
 def _generate_setup_file(
-    package_name: str, version: str, install_requires: List[str], output_dir: Path
+    package_name: str,
+    version: Optional[str],
+    install_requires: List[str],
+    output_dir: Path,
 ) -> Path:
     setup_file = output_dir / "setup.py"
     package_data = {

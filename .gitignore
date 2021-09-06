@@ -114,6 +114,7 @@ celerybeat-schedule
 
 # Environments
 .env
+.envrc
 .venv
 env/
 venv/
@@ -155,4 +156,3 @@ docs/source/04_user_guide/source/.ipynb
 tests/template/fake_project/
 
 default.profraw
-.envrc

@@ -334,6 +334,8 @@ def _package_pipelines_from_manifest(metadata: ProjectMetadata) -> None:
         return
 
     for pipeline_name, specs in build_specs.items():
+        if "alias" in specs:
+            _assert_pkg_name_ok(specs["alias"])
         _package_pipeline(pipeline_name, metadata, **specs)
         click.secho(f"Packaged `{pipeline_name}` pipeline!")
 
@@ -625,7 +627,7 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
 
     _generate_wheel_file(
         pipeline_name=pipeline_name,
-        destination=destination,
+        destination=destination.resolve(),
         source_paths=source_paths,
         version=version,
         metadata=metadata,

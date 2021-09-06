@@ -60,6 +60,7 @@ extensions = [
     "nbsphinx",
     "recommonmark",
     "sphinx_copybutton",
+    "sphinx_reredirects",
 ]
 
 # enable autosummary plugin (table of contents for modules/classes/class
@@ -211,6 +212,15 @@ linkcheck_rate_limit_timeout = 2.0
 html_context = {
     "display_github": True,
     "github_url": "https://github.com/quantumblacklabs/kedro/tree/master/docs/source",
+}
+
+
+# sphinx-reredirects
+# redirects old page names to the latest page name so that bookmarked pages
+# still work
+
+redirects = {
+    "13_deployment/04_argo.html": "10_deployment/04_argo.html",
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,

@@ -49,9 +49,9 @@ mkdir docs/build/
 cp -r docs/_templates docs/conf.py docs/*.svg docs/*.json  docs/build/
 
 if [ "$action" == "linkcheck" ]; then
-  sphinx-build -c docs/ -WETan -j auto -D language=en -b linkcheck docs/build/ docs/build/html
+  sphinx-build -c docs/ -ETan -j auto -D language=en -b linkcheck docs/build/ docs/build/html
 elif [ "$action" == "docs" ]; then
-  sphinx-build -c docs/ -WETa -j auto -D language=en docs/build/ docs/build/html
+  sphinx-build -c docs/ -ETa -j auto -D language=en docs/build/ docs/build/html
 fi
 
 # Clean up build artefacts

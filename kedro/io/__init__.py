@@ -32,18 +32,19 @@ which allows implementation of various ``AbstractDataSet``s.
 """
 
 from .cached_dataset import CachedDataSet
-from .core import AbstractDataSet
-from .core import AbstractVersionedDataSet
-from .core import DataSetAlreadyExistsError
-from .core import DataSetError
-from .core import DataSetNotFoundError
-from .core import Version
+from .core import (
+    AbstractDataSet,
+    AbstractVersionedDataSet,
+    DataSetAlreadyExistsError,
+    DataSetError,
+    DataSetNotFoundError,
+    Version,
+)
 from .data_catalog import DataCatalog
 from .data_catalog_with_default import DataCatalogWithDefault
 from .lambda_data_set import LambdaDataSet
 from .memory_data_set import MemoryDataSet
-from .partitioned_data_set import IncrementalDataSet
-from .partitioned_data_set import PartitionedDataSet
+from .partitioned_data_set import IncrementalDataSet, PartitionedDataSet
 from .transformers import AbstractTransformer
 
 __all__ = [

@@ -31,9 +31,7 @@ configuration from different file formats.
 """
 
 
-from .config import BadConfigException
-from .config import ConfigLoader
-from .config import MissingConfigException
+from .config import BadConfigException, ConfigLoader, MissingConfigException
 from .templated_config import TemplatedConfigLoader
 
 __all__ = [

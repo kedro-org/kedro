@@ -365,7 +365,6 @@ def _package_pipelines_from_manifest(metadata: ProjectMetadata) -> None:
     "--destination",
     type=click.Path(resolve_path=True, file_okay=False),
     help="Location where to create the source distribution file. Defaults to `dist/`.",
-)
 @click.option(
     "--all",
     "-a",

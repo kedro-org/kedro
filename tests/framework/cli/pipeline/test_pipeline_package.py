@@ -325,16 +325,6 @@ class TestPipelinePackageCommand:
         assert len(list(wheel_location.iterdir())) == 1
 
 
-@pytest.fixture
-def cleanup_pyproject_toml(fake_repo_path):
-    pyproject_toml = fake_repo_path / "pyproject.toml"
-    existing_toml = pyproject_toml.read_text()
-
-    yield
-
-    pyproject_toml.write_text(existing_toml)
-
-
 @pytest.mark.usefixtures(
     "chdir_to_dummy_project", "patch_log", "cleanup_dist", "cleanup_pyproject_toml"
 )
@@ -395,7 +385,10 @@ class TestPipelinePackageFromManifest:
         )
 
         assert result.exit_code == 0
-        expected_message = "Nothing to package. Please update your `pyproject.toml`."
+        expected_message = (
+            "Nothing to package. Please update the `pyproject.toml` "
+            "package manifest section."
+        )
         assert expected_message in result.output
         assert not spy.called
 
@@ -417,7 +410,7 @@ class TestPipelinePackageFromManifest:
         )
         assert result.exit_code
         expected_message = (
-            "Please specify a pipeline name or add "
-            "'--all' to package all pipelines in `pyproject.toml`."
+            "Please specify a pipeline name or add '--all' to package all pipelines in "
+            "the `pyproject.toml` package manifest section."
         )
         assert expected_message in result.output

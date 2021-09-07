@@ -266,7 +266,14 @@ def describe_pipeline(
 
 
 @command_with_verbosity(pipeline, "pull")
-@click.argument("package_path", nargs=1)
+@click.argument("package_path", nargs=1, required=False)
+@click.option(
+    "--all",
+    "-a",
+    "all_flag",
+    is_flag=True,
+    help="Pull and unpack all pipelines in the `pyproject.toml` package manifest section.",
+)
 @env_option(
     help="Environment to install the pipeline configuration to. Defaults to `base`."
 )
@@ -286,11 +293,34 @@ def describe_pipeline(
     help="Location of a configuration file for the fsspec filesystem used to pull the package.",
 )
 @click.pass_obj  # this will pass the metadata as first argument
-def pull_package(
-    metadata: ProjectMetadata, package_path, env, alias, fs_args, **kwargs
-):  # pylint:disable=unused-argument
+def pull_package(  # pylint:disable=unused-argument, too-many-arguments
+    metadata: ProjectMetadata, package_path, env, alias, fs_args, all_flag, **kwargs
+) -> None:
     """Pull and unpack a modular pipeline in your project."""
+    if not package_path and not all_flag:
+        click.secho(
+            "Please specify a package path or add '--all' to pull all pipelines in the "
+            "`pyproject.toml` package manifest section."
+        )
+        sys.exit(1)
 
+    if all_flag:
+        _pull_packages_from_manifest(metadata)
+        return
+
+    _pull_package(package_path, metadata, env=env, alias=alias, fs_args=fs_args)
+    as_alias = f" as `{alias}`" if alias else ""
+    message = f"Pipeline {package_path} pulled and unpacked{as_alias}!"
+    click.secho(message, fg="green")
+
+
+def _pull_package(
+    package_path: str,
+    metadata: ProjectMetadata,
+    env: str = None,
+    alias: str = None,
+    fs_args: str = None,
+):
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_dir_path = Path(temp_dir).resolve()
 
@@ -319,6 +349,30 @@ def pull_package(
             _append_package_reqs(requirements_in, package_reqs, package_name)
 
 
+def _pull_packages_from_manifest(metadata: ProjectMetadata) -> None:
+    # pylint: disable=import-outside-toplevel
+    import anyconfig  # for performance reasons
+
+    config_dict = anyconfig.load(metadata.config_file)
+    config_dict = config_dict["tool"]["kedro"]
+    build_specs = config_dict.get("pipeline", {}).get("pull")
+
+    if not build_specs:
+        click.secho(
+            "Nothing to pull. Please update the `pyproject.toml` package manifest section.",
+            fg="yellow",
+        )
+        return
+
+    for package_path, specs in build_specs.items():
+        if "alias" in specs:
+            _assert_pkg_name_ok(specs["alias"])
+        _pull_package(package_path, metadata, **specs)
+        click.secho(f"Pulled and unpacked `{package_path}`!")
+
+    click.secho("Pipelines pulled and unpacked!", fg="green")
+
+
 def _package_pipelines_from_manifest(metadata: ProjectMetadata) -> None:
     # pylint: disable=import-outside-toplevel
     import anyconfig  # for performance reasons
@@ -329,7 +383,8 @@ def _package_pipelines_from_manifest(metadata: ProjectMetadata) -> None:
 
     if not build_specs:
         click.secho(
-            "Nothing to package. Please update your `pyproject.toml`.", fg="yellow"
+            "Nothing to package. Please update the `pyproject.toml` package manifest section.",
+            fg="yellow",
         )
         return
 
@@ -367,7 +422,13 @@ def _package_pipelines_from_manifest(metadata: ProjectMetadata) -> None:
     "Defaults to pipeline package version or, "
     "if that is not defined, the project package version.",
 )
-@click.option("--all", "-a", "all_flag", is_flag=True)
+@click.option(
+    "--all",
+    "-a",
+    "all_flag",
+    is_flag=True,
+    help="Package all pipelines in the `pyproject.toml` package manifest section.",
+)
 @click.argument("name", nargs=1, required=False)
 @click.pass_obj  # this will pass the metadata as first argument
 def package_pipeline(
@@ -376,8 +437,8 @@ def package_pipeline(
     """Package up a modular pipeline as a Python .whl."""
     if not name and not all_flag:
         click.secho(
-            "Please specify a pipeline name or add "
-            "'--all' to package all pipelines in `pyproject.toml`."
+            "Please specify a pipeline name or add '--all' to package all pipelines in "
+            "the `pyproject.toml` package manifest section."
         )
         sys.exit(1)
 

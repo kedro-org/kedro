@@ -27,8 +27,10 @@
 # limitations under the License.
 import filecmp
 import shutil
+import textwrap
 
 import pytest
+import toml
 import yaml
 from click import ClickException
 from click.testing import CliRunner
@@ -39,28 +41,33 @@ from kedro.framework.project import settings
 PIPELINE_NAME = "my_pipeline"
 
 
+def call_pipeline_create(cli, metadata, pipeline_name=PIPELINE_NAME):
+    result = CliRunner().invoke(
+        cli, ["pipeline", "create", pipeline_name], obj=metadata
+    )
+    assert result.exit_code == 0
+
+
+def call_pipeline_package(
+    cli, metadata, alias=None, destination=None, pipeline_name=PIPELINE_NAME
+):
+    options = ["--alias", alias] if alias else []
+    options += ["--destination", str(destination)] if destination else []
+    result = CliRunner().invoke(
+        cli, ["pipeline", "package", pipeline_name, *options], obj=metadata
+    )
+    assert result.exit_code == 0, result.output
+
+
+def call_pipeline_delete(cli, metadata, pipeline_name=PIPELINE_NAME):
+    result = CliRunner().invoke(
+        cli, ["pipeline", "delete", "-y", pipeline_name], obj=metadata
+    )
+    assert result.exit_code == 0
+
+
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log", "cleanup_dist")
 class TestPipelinePullCommand:
-    def call_pipeline_create(self, cli, metadata):
-        result = CliRunner().invoke(
-            cli, ["pipeline", "create", PIPELINE_NAME], obj=metadata
-        )
-        assert result.exit_code == 0
-
-    def call_pipeline_package(self, cli, metadata, alias=None, destination=None):
-        options = ["--alias", alias] if alias else []
-        options += ["--destination", str(destination)] if destination else []
-        result = CliRunner().invoke(
-            cli, ["pipeline", "package", PIPELINE_NAME, *options], obj=metadata
-        )
-        assert result.exit_code == 0, result.output
-
-    def call_pipeline_delete(self, cli, metadata):
-        result = CliRunner().invoke(
-            cli, ["pipeline", "delete", "-y", PIPELINE_NAME], obj=metadata
-        )
-        assert result.exit_code == 0
-
     def assert_package_files_exist(self, source_path):
         assert {f.name for f in source_path.iterdir()} == {
             "__init__.py",
@@ -82,9 +89,9 @@ class TestPipelinePullCommand:
     ):
         """Test for pulling a valid wheel file locally."""
         # pylint: disable=too-many-locals
-        self.call_pipeline_create(fake_project_cli, fake_metadata)
-        self.call_pipeline_package(fake_project_cli, fake_metadata)
-        self.call_pipeline_delete(fake_project_cli, fake_metadata)
+        call_pipeline_create(fake_project_cli, fake_metadata)
+        call_pipeline_package(fake_project_cli, fake_metadata)
+        call_pipeline_delete(fake_project_cli, fake_metadata)
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
         config_path = (
@@ -112,6 +119,7 @@ class TestPipelinePullCommand:
             obj=fake_metadata,
         )
         assert result.exit_code == 0, result.output
+        assert "pulled and unpacked" in result.output
 
         pipeline_name = alias or PIPELINE_NAME
         source_dest = fake_package_path / "pipelines" / pipeline_name
@@ -148,8 +156,8 @@ class TestPipelinePullCommand:
         """
         # pylint: disable=too-many-locals
         pipeline_name = "another_pipeline"
-        self.call_pipeline_create(fake_project_cli, fake_metadata)
-        self.call_pipeline_package(fake_project_cli, fake_metadata, alias=pipeline_name)
+        call_pipeline_create(fake_project_cli, fake_metadata)
+        call_pipeline_package(fake_project_cli, fake_metadata, alias=pipeline_name)
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
         test_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
@@ -177,6 +185,7 @@ class TestPipelinePullCommand:
             obj=fake_metadata,
         )
         assert result.exit_code == 0, result.output
+        assert "pulled and unpacked" in result.output
 
         pipeline_name = alias or pipeline_name
         source_dest = fake_package_path / "pipelines" / pipeline_name
@@ -197,7 +206,7 @@ class TestPipelinePullCommand:
     def test_pipeline_alias_refactors_imports(
         self, fake_project_cli, fake_package_path, fake_repo_path, fake_metadata
     ):
-        self.call_pipeline_create(fake_project_cli, fake_metadata)
+        call_pipeline_create(fake_project_cli, fake_metadata)
         pipeline_file = fake_package_path / "pipelines" / PIPELINE_NAME / "pipeline.py"
         import_stmt = (
             f"import {fake_metadata.package_name}.pipelines.{PIPELINE_NAME}.nodes"
@@ -208,7 +217,7 @@ class TestPipelinePullCommand:
         package_alias = "alpha"
         pull_alias = "beta"
 
-        self.call_pipeline_package(
+        call_pipeline_package(
             cli=fake_project_cli, metadata=fake_metadata, alias=package_alias
         )
 
@@ -239,9 +248,9 @@ class TestPipelinePullCommand:
         self, fake_project_cli, fake_repo_path, mocker, tmp_path, fake_metadata
     ):
         """Test for pulling a wheel file with custom fs_args specified."""
-        self.call_pipeline_create(fake_project_cli, fake_metadata)
-        self.call_pipeline_package(fake_project_cli, fake_metadata)
-        self.call_pipeline_delete(fake_project_cli, fake_metadata)
+        call_pipeline_create(fake_project_cli, fake_metadata)
+        call_pipeline_package(fake_project_cli, fake_metadata)
+        call_pipeline_delete(fake_project_cli, fake_metadata)
 
         fs_args_config = tmp_path / "fs_args_config.yml"
         with fs_args_config.open(mode="w") as f:
@@ -270,8 +279,8 @@ class TestPipelinePullCommand:
         """
         Test for pulling a wheel file with more than one dist-info directory.
         """
-        self.call_pipeline_create(fake_project_cli, fake_metadata)
-        self.call_pipeline_package(fake_project_cli, fake_metadata)
+        call_pipeline_create(fake_project_cli, fake_metadata)
+        call_pipeline_package(fake_project_cli, fake_metadata)
         wheel_file = (
             fake_repo_path
             / "src"
@@ -307,12 +316,12 @@ class TestPipelinePullCommand:
         but `tests` directory is missing from the wheel file.
         """
         # pylint: disable=too-many-locals
-        self.call_pipeline_create(fake_project_cli, fake_metadata)
+        call_pipeline_create(fake_project_cli, fake_metadata)
         test_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
         shutil.rmtree(test_path)
         assert not test_path.exists()
-        self.call_pipeline_package(fake_project_cli, fake_metadata)
-        self.call_pipeline_delete(fake_project_cli, fake_metadata)
+        call_pipeline_package(fake_project_cli, fake_metadata)
+        call_pipeline_delete(fake_project_cli, fake_metadata)
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
         source_params_config = (
@@ -375,7 +384,7 @@ class TestPipelinePullCommand:
         from the wheel file.
         """
         # pylint: disable=too-many-locals
-        self.call_pipeline_create(fake_project_cli, fake_metadata)
+        call_pipeline_create(fake_project_cli, fake_metadata)
         source_params_config = (
             fake_repo_path
             / settings.CONF_ROOT
@@ -384,8 +393,8 @@ class TestPipelinePullCommand:
             / f"{PIPELINE_NAME}.yml"
         )
         source_params_config.unlink()
-        self.call_pipeline_package(fake_project_cli, fake_metadata)
-        self.call_pipeline_delete(fake_project_cli, fake_metadata)
+        call_pipeline_package(fake_project_cli, fake_metadata)
+        call_pipeline_delete(fake_project_cli, fake_metadata)
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
         test_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
@@ -445,15 +454,13 @@ class TestPipelinePullCommand:
         Test for pulling a valid wheel file from pypi.
         """
         # pylint: disable=too-many-locals
-        self.call_pipeline_create(fake_project_cli, fake_metadata)
+        call_pipeline_create(fake_project_cli, fake_metadata)
         # We mock the `pip download` call, and manually create a package wheel file
         # to simulate the pypi scenario instead
-        self.call_pipeline_package(
-            fake_project_cli, fake_metadata, destination=tmp_path
-        )
+        call_pipeline_package(fake_project_cli, fake_metadata, destination=tmp_path)
         wheel_file = tmp_path / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
         assert wheel_file.is_file()
-        self.call_pipeline_delete(fake_project_cli, fake_metadata)
+        call_pipeline_delete(fake_project_cli, fake_metadata)
 
         source_path = fake_package_path / "pipelines" / PIPELINE_NAME
         test_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
@@ -483,6 +490,7 @@ class TestPipelinePullCommand:
             obj=fake_metadata,
         )
         assert result.exit_code == 0
+        assert "pulled and unpacked" in result.output
 
         python_call_mock.assert_called_once_with(
             "pip", ["download", "--no-deps", "--dest", str(tmp_path), PIPELINE_NAME]
@@ -546,11 +554,9 @@ class TestPipelinePullCommand:
         """
         # We mock the `pip download` call, and manually create a package wheel file
         # to simulate the pypi scenario instead
-        self.call_pipeline_create(fake_project_cli, fake_metadata)
-        self.call_pipeline_package(
-            fake_project_cli, fake_metadata, destination=tmp_path
-        )
-        self.call_pipeline_package(
+        call_pipeline_create(fake_project_cli, fake_metadata)
+        call_pipeline_package(fake_project_cli, fake_metadata, destination=tmp_path)
+        call_pipeline_package(
             fake_project_cli, fake_metadata, alias="another", destination=tmp_path
         )
         mocker.patch("kedro.framework.cli.pipeline.python_call")
@@ -594,3 +600,99 @@ class TestPipelinePullCommand:
         assert exception_message in result.output
         assert "Trying to use 'pip download'..." in result.output
         assert error_message in result.output
+
+
+@pytest.mark.usefixtures(
+    "chdir_to_dummy_project", "patch_log", "cleanup_dist", "cleanup_pyproject_toml"
+)
+class TestPipelinePullFromManifest:
+    def test_pipeline_pull_all(  # pylint: disable=too-many-locals
+        self, fake_repo_path, fake_project_cli, fake_metadata, mocker
+    ):
+        # pylint: disable=import-outside-toplevel
+        from kedro.framework.cli import pipeline
+
+        spy = mocker.spy(pipeline, "_pull_package")
+        pyproject_toml = fake_repo_path / "pyproject.toml"
+        wheel_file = (
+            lambda name: fake_repo_path
+            / "src"
+            / "dist"
+            / _get_wheel_name(name=name, version="0.1")
+        )
+        project_toml_str = textwrap.dedent(
+            f"""
+            [tool.kedro.pipeline.pull]
+            "{wheel_file("first")}" = {{alias = "dp"}}
+            "{wheel_file("second")}" = {{alias = "ds", env = "local"}}
+            "{wheel_file("third")}" = {{}}
+            """
+        )
+
+        with pyproject_toml.open(mode="a") as file:
+            file.write(project_toml_str)
+
+        for name in ("first", "second", "third"):
+            call_pipeline_create(fake_project_cli, fake_metadata, pipeline_name=name)
+            call_pipeline_package(fake_project_cli, fake_metadata, pipeline_name=name)
+            call_pipeline_delete(fake_project_cli, fake_metadata, pipeline_name=name)
+
+        result = CliRunner().invoke(
+            fake_project_cli, ["pipeline", "pull", "--all"], obj=fake_metadata
+        )
+
+        assert result.exit_code == 0
+        assert "Pipelines pulled and unpacked!" in result.output
+        assert spy.call_count == 3
+
+        build_config = toml.loads(project_toml_str)
+        pull_manifest = build_config["tool"]["kedro"]["pipeline"]["pull"]
+        for wheel_file, pull_specs in pull_manifest.items():
+            expected_call = mocker.call(wheel_file, fake_metadata, **pull_specs)
+            assert expected_call in spy.call_args_list
+
+    def test_pipeline_pull_all_empty_toml(
+        self, fake_repo_path, fake_project_cli, fake_metadata, mocker
+    ):
+        # pylint: disable=import-outside-toplevel
+        from kedro.framework.cli import pipeline
+
+        spy = mocker.spy(pipeline, "_pull_package")
+        pyproject_toml = fake_repo_path / "pyproject.toml"
+        with pyproject_toml.open(mode="a") as file:
+            file.write("\n[tool.kedro.pipeline.pull]\n")
+
+        result = CliRunner().invoke(
+            fake_project_cli, ["pipeline", "pull", "--all"], obj=fake_metadata
+        )
+
+        assert result.exit_code == 0
+        expected_message = (
+            "Nothing to pull. Please update the `pyproject.toml` package "
+            "manifest section."
+        )
+        assert expected_message in result.output
+        assert not spy.called
+
+    def test_invalid_toml(self, fake_repo_path, fake_project_cli, fake_metadata):
+        pyproject_toml = fake_repo_path / "pyproject.toml"
+        with pyproject_toml.open(mode="a") as file:
+            file.write("what/toml?")
+
+        result = CliRunner().invoke(
+            fake_project_cli, ["pipeline", "pull", "--all"], obj=fake_metadata
+        )
+
+        assert result.exit_code
+        assert isinstance(result.exception, toml.TomlDecodeError)
+
+    def test_pipeline_pull_no_arg_provided(self, fake_project_cli, fake_metadata):
+        result = CliRunner().invoke(
+            fake_project_cli, ["pipeline", "pull"], obj=fake_metadata
+        )
+        assert result.exit_code
+        expected_message = (
+            "Please specify a package path or add '--all' to pull all pipelines in the"
+            " `pyproject.toml` package manifest section."
+        )
+        assert expected_message in result.output

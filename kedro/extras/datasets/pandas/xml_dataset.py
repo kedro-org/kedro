@@ -26,8 +26,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``CSVDataSet`` loads/saves data from/to a CSV file using an underlying
-filesystem (e.g.: local, S3, GCS). It uses pandas to handle the CSV file.
+"""``XMLDataSet`` loads/saves data from/to a XML file using an underlying
+filesystem (e.g.: local, S3, GCS). It uses pandas to handle the XML file.
 """
 import logging
 from copy import deepcopy
@@ -50,21 +50,21 @@ from kedro.io.core import (
 logger = logging.getLogger(__name__)
 
 
-class CSVDataSet(AbstractVersionedDataSet):
-    """``CSVDataSet`` loads/saves data from/to a CSV file using an underlying
-    filesystem (e.g.: local, S3, GCS). It uses pandas to handle the CSV file.
+class XMLDataSet(AbstractVersionedDataSet):
+    """``XMLDataSet`` loads/saves data from/to a XML file using an underlying
+    filesystem (e.g.: local, S3, GCS). It uses pandas to handle the XML file.
 
     Example:
     ::
 
-        >>> from kedro.extras.datasets.pandas import CSVDataSet
+        >>> from kedro.extras.datasets.pandas import XMLDataSet
         >>> import pandas as pd
         >>>
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
         >>>
-        >>> # data_set = CSVDataSet(filepath="gcs://bucket/test.csv")
-        >>> data_set = CSVDataSet(filepath="test.csv")
+        >>> # data_set = XMLDataSet(filepath="gcs://bucket/test.xml")
+        >>> data_set = XMLDataSet(filepath="test.xml")
         >>> data_set.save(data)
         >>> reloaded = data_set.load()
         >>> assert data.equals(reloaded)
@@ -84,21 +84,21 @@ class CSVDataSet(AbstractVersionedDataSet):
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``CSVDataSet`` pointing to a concrete CSV file
+        """Creates a new instance of ``XMLDataSet`` pointing to a concrete XML file
         on a specific filesystem.
 
         Args:
-            filepath: Filepath in POSIX format to a CSV file prefixed with a protocol like `s3://`.
+            filepath: Filepath in POSIX format to a XML file prefixed with a protocol like `s3://`.
                 If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.
-            load_args: Pandas options for loading CSV files.
+            load_args: Pandas options for loading XML files.
                 Here you can find all available arguments:
-                https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_csv.html
+                https://pandas.pydata.org/docs/reference/api/pandas.read_xml.html
                 All defaults are preserved.
-            save_args: Pandas options for saving CSV files.
+            save_args: Pandas options for saving XML files.
                 Here you can find all available arguments:
-                https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_csv.html
+                https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.to_xml.html
                 All defaults are preserved, but "index", which is set to False.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
@@ -160,10 +160,10 @@ class CSVDataSet(AbstractVersionedDataSet):
             # (<urlopen error file not on local host>),
             # so we don't join that back to the filepath;
             # storage_options also don't work with local paths
-            return pd.read_csv(load_path, **self._load_args)
+            return pd.read_xml(load_path, **self._load_args)
 
         load_path = f"{self._protocol}{PROTOCOL_DELIMITER}{load_path}"
-        return pd.read_csv(
+        return pd.read_xml(
             load_path, storage_options=self._storage_options, **self._load_args
         )
 
@@ -171,7 +171,7 @@ class CSVDataSet(AbstractVersionedDataSet):
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         buf = BytesIO()
-        data.to_csv(path_or_buf=buf, **self._save_args)
+        data.to_xml(path_or_buffer=buf, **self._save_args)
 
         with self._fs.open(save_path, mode="wb") as fs_file:
             fs_file.write(buf.getvalue())

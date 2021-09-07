@@ -4,15 +4,15 @@ orbs:
   win: circleci/windows@2.2.0
 
 executors:
-  py36:
-    docker:
-      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.6
   py37:
     docker:
       - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.7
   py38:
     docker:
       - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.8
+  py39:
+    docker:
+      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.9
 
 commands:
   setup_conda:
@@ -24,6 +24,11 @@ commands:
       - run:
           name: Activate conda environment
           command: echo "conda deactivate; conda activate kedro_builder" >> $BASH_ENV
+      - run:
+          # pytables does not work properly with python 3.9 to handle our HDFDataSet
+          # if pip-installed, so we install this dependency via conda
+          name: Install conda packages
+          command: echo "conda install -c conda-forge pytables -y" >> $BASH_ENV
 
   setup_requirements:
     description: Install PIP dependencies
@@ -181,6 +186,11 @@ commands:
   win_setup_requirements:
     description: Install Kedro dependencies
     steps:
+      # pytables and Fiona have a series of binary dependencies under Windows that
+      # are best handled by conda-installing instead of pip-installing them.
+      - run:
+          name: Install pytables
+          command: conda activate kedro_builder; conda install -c conda-forge pytables -y
       - run:
           name: Install Fiona
           command: conda activate kedro_builder; conda install -c conda-forge fiona -y
@@ -263,22 +273,6 @@ commands:
           command: conda activate kedro_builder; make pip-compile
 
 jobs:
-  unit_tests_36:
-    executor: py36
-    steps: [unit_tests]
-
-  linters_36:
-    executor: py36
-    steps: [lint]
-
-  e2e_tests_36:
-    executor: py36
-    steps: [e2e_tests]
-
-  docs_36:
-    executor: py36
-    steps: [build_docs]
-
   unit_tests_37:
     executor: py37
     steps: [unit_tests]
@@ -301,13 +295,7 @@ jobs:
 
   unit_tests_38:
     executor: py38
-    steps:
-      - checkout
-      - setup_conda
-      - setup_requirements
-      - run:
-          name: Run unit tests without Spark
-          command: make test-no-spark
+    steps: [unit_tests]
 
   linters_38:
     executor: py38
@@ -317,9 +305,17 @@ jobs:
     executor: py38
     steps: [e2e_tests]
 
-  pip_compile_36:
-    executor: py36
-    steps: [pip_compile]
+  unit_tests_39:
+    executor: py39
+    steps: [unit_tests]
+
+  linters_39:
+    executor: py39
+    steps: [lint]
+
+  e2e_tests_39:
+    executor: py39
+    steps: [e2e_tests]
 
   pip_compile_37:
     executor: py37
@@ -327,6 +323,10 @@ jobs:
 
   pip_compile_38:
     executor: py38
+    steps: [pip_compile]
+
+  pip_compile_39:
+    executor: py39
     steps: [pip_compile]
 
   all_circleci_checks_succeeded:
@@ -339,14 +339,6 @@ jobs:
           command: echo "All checks passed"
 
   # Windows-related jobs
-  win_unit_tests_36:
-    executor:
-      name: win/default
-    steps:
-      - win_setup_conda:
-          python_version: "3.6"
-      - win_unit_tests
-
   win_unit_tests_37:
     executor:
       name: win/default
@@ -377,13 +369,27 @@ jobs:
             pytest .\tests --ignore .\tests\extras\datasets\spark --ignore .\tests\extras\datasets\tensorflow --ignore tests\framework\session\test_session_hooks.py --ignore .\tests\runner\test_parallel_runner.py --no-cov
             if ($?) { pytest .\tests\runner\test_parallel_runner.py --no-cov }
 
-  win_e2e_tests_36:
+  win_unit_tests_39:
     executor:
       name: win/default
     steps:
       - win_setup_conda:
-          python_version: "3.6"
-      - win_e2e_tests
+          python_version: "3.9"
+      - checkout
+      - win_setup_env
+      - restore_cache:
+          key: kedro-deps-v1-win-{{ checksum "requirements.txt" }}-{{ checksum "test_requirements.txt" }}
+      - win_setup_requirements
+      - run:
+          name: Set HDF5_DISABLE_VERSION_CHECK environment variable
+          command: setx /m HDF5_DISABLE_VERSION_CHECK 1
+      - run:
+          name: Run unit tests without Spark and TensorFlow
+          # Run `test_parallel_runner.py` separately because of `Windows fatal exception: stack overflow`
+          command: |
+            conda activate kedro_builder
+            pytest .\tests --ignore .\tests\extras\datasets\spark --ignore .\tests\extras\datasets\tensorflow --ignore tests\framework\session\test_session_hooks.py --ignore .\tests\runner\test_parallel_runner.py --no-cov
+            if ($?) { pytest .\tests\runner\test_parallel_runner.py --no-cov }
 
   win_e2e_tests_37:
     executor:
@@ -401,13 +407,13 @@ jobs:
           python_version: "3.8"
       - win_e2e_tests
 
-  win_pip_compile_36:
+  win_e2e_tests_39:
     executor:
       name: win/default
     steps:
       - win_setup_conda:
-          python_version: "3.6"
-      - win_pip_compile
+          python_version: "3.9"
+      - win_e2e_tests
 
   win_pip_compile_37:
     executor:
@@ -427,14 +433,18 @@ jobs:
           python_version: "3.8"
       - win_pip_compile
 
+  win_pip_compile_39:
+    executor:
+      name: win/default
+    steps:
+      - win_setup_conda:
+          python_version: "3.9"
+      - win_pip_compile
+
 workflows:
   version: 2
   regular:
     jobs:
-      - unit_tests_36
-      - linters_36
-      - e2e_tests_36
-      - docs_36
       - docs_linkcheck_37
       - unit_tests_37
       - linters_37
@@ -443,24 +453,23 @@ workflows:
       - unit_tests_38
       - linters_38
       - e2e_tests_38
-      - pip_compile_36
+      - unit_tests_39
+      - linters_39
+      - e2e_tests_39
       - pip_compile_37
       - pip_compile_38
-      - win_unit_tests_36
+      - pip_compile_39
       - win_unit_tests_37
       - win_unit_tests_38
-      - win_pip_compile_36
+      - win_unit_tests_39
       - win_pip_compile_37
       - win_pip_compile_38
-      - win_e2e_tests_36
+      - win_pip_compile_39
       - win_e2e_tests_37
       - win_e2e_tests_38
+      - win_e2e_tests_39
       - all_circleci_checks_succeeded:
           requires:
-            - unit_tests_36
-            - linters_36
-            - e2e_tests_36
-            - docs_36
             - unit_tests_37
             - linters_37
             - e2e_tests_37
@@ -469,16 +478,19 @@ workflows:
             - unit_tests_38
             - linters_38
             - e2e_tests_38
-            - pip_compile_36
+            - unit_tests_39
+            - linters_39
+            - e2e_tests_39
             - pip_compile_37
             - pip_compile_38
-            - win_pip_compile_36
+            - pip_compile_39
             - win_pip_compile_37
             - win_pip_compile_38
-            - win_unit_tests_36
+            - win_pip_compile_39
             - win_unit_tests_37
-            - win_e2e_tests_36
             # Skipped due to Windows fatal exception: stack overflow
             # - win_unit_tests_38
+            # - win_unit_tests_39
             - win_e2e_tests_37
             - win_e2e_tests_38
+            - win_e2e_tests_39

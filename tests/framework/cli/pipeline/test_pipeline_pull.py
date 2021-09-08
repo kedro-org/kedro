@@ -80,7 +80,7 @@ class TestPipelinePullCommand:
 
     @pytest.mark.parametrize("env", [None, "local"])
     @pytest.mark.parametrize("alias", [None, "alias_path"])
-    def test_pull_local_whl(
+    def test_pull_local_sdist(
         self,
         fake_project_cli,
         fake_repo_path,
@@ -140,7 +140,7 @@ class TestPipelinePullCommand:
 
     @pytest.mark.parametrize("env", [None, "local"])
     @pytest.mark.parametrize("alias", [None, "alias_path"])
-    def test_pull_local_whl_compare(
+    def test_pull_local_sdist_compare(
         self,
         fake_project_cli,
         fake_repo_path,
@@ -237,7 +237,7 @@ class TestPipelinePullCommand:
             )
             assert expected_stmt in file_content
 
-    def test_pull_whl_fs_args(
+    def test_pull_sdist_fs_args(
         self, fake_project_cli, fake_repo_path, mocker, tmp_path, fake_metadata
     ):
         """Test for pulling a sdist file with custom fs_args specified."""
@@ -438,7 +438,7 @@ class TestPipelinePullCommand:
         """
         # pylint: disable=too-many-locals
         call_pipeline_create(fake_project_cli, fake_metadata)
-        # We mock the `pip download` call, and manually create a package wheel file
+        # We mock the `pip download` call, and manually create a package sdist file
         # to simulate the pypi scenario instead
         call_pipeline_package(fake_project_cli, fake_metadata, destination=tmp_path)
         version = "0.1"
@@ -605,18 +605,13 @@ class TestPipelinePullFromManifest:
 
         spy = mocker.spy(pipeline, "_pull_package")
         pyproject_toml = fake_repo_path / "pyproject.toml"
-        wheel_file = (
-            lambda name: fake_repo_path
-            / "src"
-            / "dist"
-            / _get_sdist_name(name=name, version="0.1")
-        )
+        sdist_file = fake_repo_path / "dist" / _get_sdist_name("{}", "0.1")
         project_toml_str = textwrap.dedent(
             f"""
             [tool.kedro.pipeline.pull]
-            "{wheel_file("first")}" = {{alias = "dp"}}
-            "{wheel_file("second")}" = {{alias = "ds", env = "local"}}
-            "{wheel_file("third")}" = {{}}
+            "{sdist_file.format("first")}" = {{alias = "dp"}}
+            "{sdist_file.format("second")}" = {{alias = "ds", env = "local"}}
+            "{sdist_file.format("third")}" = {{}}
             """
         )
 
@@ -638,8 +633,8 @@ class TestPipelinePullFromManifest:
 
         build_config = toml.loads(project_toml_str)
         pull_manifest = build_config["tool"]["kedro"]["pipeline"]["pull"]
-        for wheel_file, pull_specs in pull_manifest.items():
-            expected_call = mocker.call(wheel_file, fake_metadata, **pull_specs)
+        for sdist_file, pull_specs in pull_manifest.items():
+            expected_call = mocker.call(sdist_file, fake_metadata, **pull_specs)
             assert expected_call in spy.call_args_list
 
     def test_pipeline_pull_all_empty_toml(

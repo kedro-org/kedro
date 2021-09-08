@@ -116,7 +116,7 @@ kedro run --pipeline mp2
 ## How to share a modular pipeline
 
 ### Package a modular pipeline
-Since Kedro 0.16.4 you can package a modular pipeline by executing `kedro pipeline package <pipeline_module_path>` command (e.g. `kedro pipeline package pipelines.data_science.training`). From Kedro 0.18.0 this will generate a new [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions) (sdist) for it. Older versions of Kedro will generate a wheel file. By default, the sdist file, with extension `.tar.gz`, will be saved into `dist/` directory inside your project, however this can be changed using the `--destination` (`-d`) option.
+Since Kedro 0.16.4 you can package a modular pipeline by executing `kedro pipeline package <pipeline_module_path>` (e.g. `kedro pipeline package pipelines.data_science.training`). From Kedro 0.18.0 this will generate a new [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions) (sdist) for it. Older versions of Kedro will generate a wheel file. By default, the sdist file, with extension `.tar.gz`, will be saved into `dist/` directory inside your project, however this can be changed using the `--destination` (`-d`) option.
 
 When you package your modular pipeline, Kedro will also automatically package files from 3 locations:
 
@@ -207,8 +207,8 @@ To pull multiple modular pipelines in bulk, run `kedro pipeline pull --all`. Thi
 
 ```toml
 [tool.kedro.pipeline.pull]
-"src/dist/first-pipeline-0.1-py3-none-any.whl" = {}
-"https://www.url.to/second-pipeline.whl" = {alias = "aliased_pipeline", fs-args = "pipeline_pull_args.yml"}
+"dist/first-pipeline-0.1.tar.gz" = {}
+"https://www.url.to/second-pipeline-0.1.tar.gz" = {alias = "aliased_pipeline", fs-args = "pipeline_pull_args.yml"}
 ```
 
 Here the keys are the package paths, and the values are the options that `kedro pipeline pull <package_path>` accepts. Package paths can be any of the locations allowed by `kedro pipeline pull`, including local storage, PyPI and the cloud.

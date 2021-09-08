@@ -84,7 +84,6 @@ class SQLConnectionDataSet(AbstractDataSet):
             engine = create_engine(self._load_args["con"])
             conn = engine.connect()
             return conn
-        # TODO: (BL) Need to find out what the sqlalchemy exceptions are
         except (sqlalchemy.exc.ArgumentError, NoSuchModuleError) as exc:
             raise DataSetError(
                 "Provided connection string is invalid. Please check credentials."

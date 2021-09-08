@@ -170,7 +170,16 @@ def lint(
 @click.pass_obj  # this will pass the metadata as first argument
 def install(metadata: ProjectMetadata, compile_flag):
     """Install project dependencies from both requirements.txt
-    and environment.yml (optional)."""
+    and environment.yml (DEPRECATED)."""
+
+    deprecation_message = (
+        "DeprecationWarning: Command `kedro install` will be deprecated in Kedro 0.18.0. "
+        "In the future use `pip install -r src/requirements.txt` instead. "
+        "If you were running `kedro install` with the `--build-reqs` flag, "
+        "we recommend running `kedro build-reqs` followed by `pip install -r src/requirements.txt`"
+    )
+    click.secho(deprecation_message, fg="red")
+
     # we cannot use `context.project_path` as in other commands since
     # context instantiation might break due to missing dependencies
     # we attempt to install here

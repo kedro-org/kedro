@@ -278,7 +278,7 @@ def _create_project(template_path: str, cookiecutter_args: Dict[str, str]):
     )
     click.secho(
         "\nA best-practice setup includes initialising git and creating "
-        "a virtual environment before running ``kedro install`` to install "
+        "a virtual environment before running ``pip install -r src/requirements.txt`` to install "
         "project-specific dependencies. Refer to the Kedro documentation: "
         "https://kedro.readthedocs.io/"
     )

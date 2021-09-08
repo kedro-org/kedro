@@ -22,7 +22,7 @@ Declare any dependencies in `src/requirements.txt` for `pip` installation and `s
 To install them, run:
 
 ```
-kedro install
+pip install -r src/requirements.txt
 ```
 
 ## How to run Kedro

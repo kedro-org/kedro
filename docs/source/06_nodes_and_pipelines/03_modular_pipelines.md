@@ -66,8 +66,7 @@ Finally, `kedro pipeline create <pipeline_name>` also creates a placeholder for 
 For ease of use and portability, consider these recommendations as you develop a modular pipeline:
 
 * A modular pipeline should include a `README.md`, with all the information regarding its execution
-* A modular pipeline _may_ have external dependencies specified in `requirements.txt`. These dependencies are _not_
- currently installed by the [`kedro install`](../09_development/03_commands_reference.md#install-all-package-dependencies) command, so users of your pipeline would have to run `pip install -r src/<python_package>/pipelines/<pipeline_name>/requirements.txt` before using the pipeline
+* A modular pipeline _may_ have external dependencies specified in `requirements.txt`. Users of your pipeline would have to run `pip install -r src/<python_package>/pipelines/<pipeline_name>/requirements.txt` before using the pipeline
 * To ensure portability, modular pipelines should use relative imports when accessing their own objects and absolute imports otherwise. For example, in `pipeline.py`:
 
 ```python
@@ -160,7 +159,7 @@ You can pull a modular pipeline from a source distribution (sdist) file by execu
 *  Configuration files in `conf/<env>/parameters/<pipeline_name>.yml`, where `<env>` defaults to `base`. If you want to place the parameters from a different config environment, run `kedro pipeline pull <pipeline_name> --env <env_name>`
 *  Pipeline unit tests in `src/tests/pipelines/<pipeline_name>`
 
-Kedro will also parse any requirements packaged with the modular pipeline and add them to project level `requirements.in`. It is advised to do `kedro install --build-reqs` to compile and install the updated list of requirements after pulling a modular pipeline.
+Kedro will also parse any requirements packaged with the modular pipeline and add them to project level `requirements.in`. It is advised to run `kedro build-reqs` to compile and `pip install -r src/requirements.txt` to install the updated list of requirements after pulling a modular pipeline.
 
 ```eval_rst
 .. note::  If a modular pipeline has embedded requirements and a project `requirements.in` file does not already exist, it will be generated based on the project `requirements.txt` before appending the modular pipeline requirements.

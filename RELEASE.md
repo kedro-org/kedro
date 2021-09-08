@@ -53,6 +53,7 @@
 * Switched from packaging pipelines as wheel files to tar archive files compressed with gzip (`.tar.gz`)
 * `kedro pipeline package` now accepts a module path to the pipeline or utility module to package, relative to the `src/<package_name>/`.
 * Renamed `lambda_data_set`, `memory_data_set`, and `partitioned_data_set` to `lambda_dataset`, `memory_dataset`, and `partitioned_dataset`, respectively, in `kedro.io`.
+* Removed the `kedro install` command in favour of using `pip install -r src/requirements.txt` to install project dependencies.
 
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman)

@@ -263,229 +263,6 @@ class TestLintCommand:
         assert mocked_environ == {"PYTHONPATH": str(fake_repo_path / "src")}
 
 
-@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log", "fake_copyfile")
-class TestInstallCommand:
-    def test_install_compile_default(
-        self,
-        python_call_mock,
-        fake_project_cli,
-        fake_repo_path,
-        fake_copyfile,
-        mocker,
-        fake_metadata,
-    ):
-        """Test that the requirements are compiled by default
-        if requirements.in doesn't exist"""
-        mocker.patch("kedro.framework.cli.project.os").name = "posix"
-        result = CliRunner().invoke(fake_project_cli, ["install"], obj=fake_metadata)
-        assert not result.exit_code, result.output
-        assert "Requirements installed!" in result.output
-
-        requirements_in = fake_repo_path / "src" / "requirements.in"
-        requirements_txt = fake_repo_path / "src" / "requirements.txt"
-        expected_calls = [
-            mocker.call("piptools", ["compile", "-q", str(requirements_in)]),
-            mocker.call("pip", ["install", "-U", "-r", str(requirements_txt)]),
-        ]
-        assert python_call_mock.mock_calls == expected_calls
-        fake_copyfile.assert_called_once_with(
-            str(requirements_txt), str(requirements_in)
-        )
-
-    def test_install_compile_force(
-        self,
-        python_call_mock,
-        fake_project_cli,
-        fake_repo_path,
-        fake_copyfile,
-        mocker,
-        fake_metadata,
-    ):
-        """Test that the requirements are compiled if requirements.in exists
-        and --build-reqs CLI option is specified"""
-        mocker.patch("kedro.framework.cli.project.os").name = "posix"
-        mocker.patch.object(Path, "is_file", return_value=True)
-        result = CliRunner().invoke(
-            fake_project_cli, ["install", "--build-reqs"], obj=fake_metadata
-        )
-        assert not result.exit_code, result.output
-        assert "Requirements installed!" in result.output
-
-        requirements_in = fake_repo_path / "src" / "requirements.in"
-        requirements_txt = fake_repo_path / "src" / "requirements.txt"
-        expected_calls = [
-            mocker.call("piptools", ["compile", "-q", str(requirements_in)]),
-            mocker.call("pip", ["install", "-U", "-r", str(requirements_txt)]),
-        ]
-        assert python_call_mock.mock_calls == expected_calls
-        fake_copyfile.assert_not_called()
-
-    def test_install_no_compile_default(
-        self,
-        python_call_mock,
-        fake_project_cli,
-        fake_repo_path,
-        fake_copyfile,
-        mocker,
-        fake_metadata,
-    ):
-        """Test that the requirements aren't compiled by default
-        if requirements.in exists"""
-        mocker.patch("kedro.framework.cli.project.os").name = "posix"
-        mocker.patch.object(Path, "is_file", return_value=True)
-        result = CliRunner().invoke(fake_project_cli, ["install"], obj=fake_metadata)
-        assert not result.exit_code, result.output
-        assert "Requirements installed!" in result.output
-
-        requirements_txt = fake_repo_path / "src" / "requirements.txt"
-        python_call_mock.assert_called_once_with(
-            "pip", ["install", "-U", "-r", str(requirements_txt)]
-        )
-        fake_copyfile.assert_not_called()
-
-    def test_install_no_compile_force(
-        self,
-        python_call_mock,
-        fake_project_cli,
-        fake_repo_path,
-        fake_copyfile,
-        mocker,
-        fake_metadata,
-    ):
-        """Test that the requirements aren't compiled if requirements.in doesn't exist
-        and --no-build-reqs CLI option is specified"""
-        mocker.patch("kedro.framework.cli.project.os").name = "posix"
-        result = CliRunner().invoke(
-            fake_project_cli, ["install", "--no-build-reqs"], obj=fake_metadata
-        )
-        assert not result.exit_code, result.output
-        assert "Requirements installed!" in result.output
-
-        requirements_txt = fake_repo_path / "src" / "requirements.txt"
-        python_call_mock.assert_called_once_with(
-            "pip", ["install", "-U", "-r", str(requirements_txt)]
-        )
-        fake_copyfile.assert_not_called()
-
-    def test_with_env_file(
-        self,
-        python_call_mock,
-        call_mock,
-        fake_project_cli,
-        mocker,
-        fake_repo_path,
-        fake_copyfile,
-        fake_metadata,
-    ):
-        mocker.patch("kedro.framework.cli.project.os").name = "posix"
-        # Pretend env file exists:
-        mocker.patch.object(Path, "is_file", return_value=True)
-
-        result = CliRunner().invoke(fake_project_cli, ["install"], obj=fake_metadata)
-        assert not result.exit_code, result.stdout
-        assert "Requirements installed!" in result.output
-
-        requirements_txt = fake_repo_path / "src" / "requirements.txt"
-        expected_calls = [
-            mocker.call("pip", ["install", "-U", "-r", str(requirements_txt)])
-        ]
-        assert python_call_mock.mock_calls == expected_calls
-
-        call_mock.assert_called_once_with(
-            [
-                "conda",
-                "env",
-                "update",
-                "--file",
-                str(fake_repo_path / "src/environment.yml"),
-                "--prune",
-            ]
-        )
-        fake_copyfile.assert_not_called()
-
-    def test_windows(
-        self, fake_project_cli, mocker, fake_repo_path, fake_copyfile, fake_metadata
-    ):
-        mock_subprocess = mocker.patch("kedro.framework.cli.project.subprocess")
-        mock_subprocess.Popen.return_value.communicate.return_value = ("", b"")
-        # pretend we are on Windows
-        mocker.patch("kedro.framework.cli.project.os").name = "nt"
-
-        result = CliRunner().invoke(fake_project_cli, ["install"], obj=fake_metadata)
-        assert not result.exit_code, result.stdout
-        assert "Requirements installed!" in result.output
-
-        requirements_in = fake_repo_path / "src" / "requirements.in"
-        requirements_txt = fake_repo_path / "src" / "requirements.txt"
-        command = [
-            sys.executable,
-            "-m",
-            "pip",
-            "install",
-            "-U",
-            "-r",
-            str(requirements_txt),
-        ]
-        mock_subprocess.Popen.assert_called_once_with(
-            command,
-            creationflags=mock_subprocess.CREATE_NEW_CONSOLE,
-            stderr=mock_subprocess.PIPE,
-        )
-        fake_copyfile.assert_called_once_with(
-            str(requirements_txt), str(requirements_in)
-        )
-
-    def test_windows_err(
-        self, fake_project_cli, mocker, fake_repo_path, fake_copyfile, fake_metadata
-    ):
-        mock_subprocess = mocker.patch("kedro.framework.cli.project.subprocess")
-        mock_subprocess.Popen.return_value.communicate.return_value = (
-            "",
-            b"Error in dependencies",
-        )
-        # pretend we are on Windows
-        mocker.patch("kedro.framework.cli.project.os").name = "nt"
-
-        result = CliRunner().invoke(fake_project_cli, ["install"], obj=fake_metadata)
-        assert result.exit_code, result.stdout
-        assert "Error in dependencies" in result.output
-
-    def test_install_working_with_unimportable_pipelines(
-        self,
-        fake_project_cli,
-        mocker,
-        fake_metadata,
-    ):
-        """Test kedro install works even if pipelines are not importable"""
-        mocker.patch("kedro.framework.cli.project.os").name = "posix"
-        pipeline_registry = (
-            fake_metadata.source_dir
-            / fake_metadata.package_name
-            / "pipeline_registry.py"
-        )
-        pipeline_registry.write_text("import this_is_not_a_real_thing")
-
-        result = CliRunner().invoke(fake_project_cli, ["install"], obj=fake_metadata)
-        assert not result.exit_code, result.output
-        assert "Requirements installed!" in result.output
-
-    @pytest.mark.parametrize("os_name", ["posix", "nt"])
-    def test_install_missing_requirements_in_and_txt(
-        self, fake_project_cli, mocker, fake_metadata, os_name
-    ):
-        """Test error when neither requirements.txt nor requirements.in exists."""
-        mocker.patch("kedro.framework.cli.project.os").name = os_name
-        mocker.patch.object(Path, "is_file", return_value=False)
-        result = CliRunner().invoke(
-            fake_project_cli, ["install", "--build-reqs"], obj=fake_metadata
-        )
-        assert result.exit_code  # Error expected
-        assert isinstance(result.exception, FileNotFoundError)
-        assert "No project requirements.in or requirements.txt found" in str(
-            result.exception
-        )
-
-
 @pytest.fixture
 def os_mock(mocker):
     return mocker.patch("kedro.framework.cli.project.os")
@@ -561,7 +338,7 @@ class TestIpythonCommand:
         assert result.exit_code
         error = (
             "Module `IPython` not found. Make sure to install required project "
-            "dependencies by running the `kedro install` command first."
+            "dependencies by running the `pip install -r src/requirements.txt` command first."
         )
         assert error in result.output
 
@@ -726,3 +503,17 @@ class TestBuildReqsCommand:
 
         call_args = ["compile", "-q"] + extra_args + [str(requirements_in)]
         python_call_mock.assert_called_once_with("piptools", call_args)
+
+    @pytest.mark.parametrize("os_name", ["posix", "nt"])
+    def test_missing_requirements_in_and_txt(
+        self, fake_project_cli, mocker, fake_metadata, os_name
+    ):
+        """Test error when neither requirements.txt nor requirements.in exists."""
+        mocker.patch("kedro.framework.cli.project.os").name = os_name
+        mocker.patch.object(Path, "is_file", return_value=False)
+        result = CliRunner().invoke(fake_project_cli, ["build-reqs"], obj=fake_metadata)
+        assert result.exit_code  # Error expected
+        assert isinstance(result.exception, FileNotFoundError)
+        assert "No project requirements.in or requirements.txt found" in str(
+            result.exception
+        )

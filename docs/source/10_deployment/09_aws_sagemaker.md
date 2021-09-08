@@ -29,18 +29,18 @@ To use Amazon SageMaker, make sure you have the following prerequisites in place
 
 First, you should add extra package dependencies that are required to communicate with SageMaker via its [Python SDK](https://sagemaker.readthedocs.io/en/stable/).
 
-If you have run `kedro install` at least once for your project, you should already have the `src/requirements.in` file, so you need to modify that. Otherwise, if you have never run `kedro install` for your project, you should modify `src/requirements.txt`. Open the corresponding file with a text editor and add the following lines at the end of the file:
+Add the dependencies by modifying `src/requirements.txt`. Open the corresponding file with a text editor and add the following lines at the end of the file:
 
 ```text
 sagemaker>=2.13.0
 s3fs>=0.3.0, <0.4.1  # will be needed to work with AWS S3
 ```
 
-Since you have added two extra dependencies, you should compile and install the updated project dependencies by running the following from your terminal:
+Since you have added two extra dependencies, you should install the updated project dependencies by running the following from your terminal:
 
 ```bash
 cd <project_root>
-kedro install --build-reqs
+pip install -r src/requirements.txt
 ```
 
 ```eval_rst

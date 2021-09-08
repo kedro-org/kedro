@@ -1097,6 +1097,6 @@ def _append_package_reqs(
         "requirements.in:\n{}".format(pipeline_name, "\n".join(sorted_reqs))
     )
     click.secho(
-        "Use `kedro install --build-reqs` to compile and install the updated list of "
-        "requirements."
+        "Use `kedro build-reqs` to compile and `pip install -r src/requirements.txt` to install "
+        "the updated list of requirements."
     )

@@ -182,7 +182,7 @@ class TestJupyterNotebookCommand:
         assert result.exit_code
         error = (
             "Module `jupyter_core` not found. Make sure to install required project "
-            "dependencies by running the `kedro install` command first."
+            "dependencies by running the `pip install -r src/requirements.txt` command first."
         )
         assert error in result.output
 
@@ -247,7 +247,7 @@ class TestJupyterLabCommand:
         assert result.exit_code
         error = (
             "Module `jupyter_core` not found. Make sure to install required project "
-            "dependencies by running the `kedro install` command first."
+            "dependencies by running the `pip install -r src/requirements.txt` command first."
         )
         assert error in result.output
 

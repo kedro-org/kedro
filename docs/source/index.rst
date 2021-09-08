@@ -129,6 +129,7 @@ Welcome to Kedro's documentation!
    :caption: Logging
 
    08_logging/01_logging
+   08_logging/02_experiment_tracking
 
 .. toctree::
    :maxdepth: 2

@@ -34,12 +34,12 @@ __all__ = [
     "FeatherDataSet",
     "GBQTableDataSet",
     "ExcelDataSet",
-    "AppendableExcelDataSet",
     "HDFDataSet",
     "JSONDataSet",
     "ParquetDataSet",
     "SQLQueryDataSet",
     "SQLTableDataSet",
+    "XMLDataSet",
 ]
 
 from contextlib import suppress
@@ -48,8 +48,6 @@ with suppress(ImportError):
     from .csv_dataset import CSVDataSet  # NOQA
 with suppress(ImportError):
     from .excel_dataset import ExcelDataSet  # NOQA
-with suppress(ImportError):
-    from .appendable_excel_dataset import AppendableExcelDataSet  # NOQA
 with suppress(ImportError):
     from .feather_dataset import FeatherDataSet  # NOQA
 with suppress(ImportError):
@@ -62,3 +60,5 @@ with suppress(ImportError):
     from .parquet_dataset import ParquetDataSet  # NOQA
 with suppress(ImportError):
     from .sql_dataset import SQLQueryDataSet, SQLTableDataSet  # NOQA
+with suppress(ImportError):
+    from .xml_dataset import XMLDataSet  # NOQA

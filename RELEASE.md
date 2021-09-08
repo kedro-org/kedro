@@ -19,6 +19,8 @@
 | Type                | Description                                                    | Location                       |
 | ------------------- | -------------------------------------------------------------- | ------------------------------ |
 | `pandas.XMLDataSet` | Read XML into Pandas DataFrame. Write Pandas DataFrame to XML. | `kedro.extras.datasets.pandas` |
+| `networkx.GraphMLDataSet`       |  Work with NetworkX using GraphML files            | `kedro.extras.datasets.networkx` |
+| `networkx.GMLDataSet`      | Work with NetworkX using Graph Modelling Language files | `kedro.extras.datasets.networkx` |
 
 ## Breaking changes to the API
 * Add namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/quantumblacklabs/kedro/issues/399)
@@ -54,9 +56,11 @@
 * `kedro pipeline package` now accepts a module path to the pipeline or utility module to package, relative to the `src/<package_name>/`.
 * Renamed `lambda_data_set`, `memory_data_set`, and `partitioned_data_set` to `lambda_dataset`, `memory_dataset`, and `partitioned_dataset`, respectively, in `kedro.io`.
 * Removed the `kedro install` command in favour of using `pip install -r src/requirements.txt` to install project dependencies.
+* The dataset `networkx.NetworkXDataSet` has been renamed to `networkx.JSONDataSet`.
 
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman)
+[Simon Brugman](https://github.com/sbrugman)
 
 ## Migration guide from Kedro 0.17.* to 0.18.*
 * Please remove any existing `hook_impl` of the `register_config_loader` method from `ProjectHooks` (or custom alternatives).
@@ -89,6 +93,8 @@
   "pipelines.data_engineering" = {destination = "path/to/here"}
   "pipelines.data_science" = {alias = "ds", env = "local"}
   ```
+
+* If you had any `networkx.NetworkXDataSet` entries in your catalog, replace them with `networkx.JSONDataSet`.
 
 # Upcoming Release 0.17.5
 

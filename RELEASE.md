@@ -3,7 +3,7 @@
 ## Major features and improvements
 * Added new CLI group `registry`, with the associated commands `kedro registry list` and `kedro registry describe`, to replace `kedro pipeline list` and `kedro pipeline describe`.
 * Added support for dependency management at a modular pipeline level. When a pipeline with `requirements.txt` is packaged, its dependencies are embedded in the modular pipeline wheel file. Upon pulling the pipeline, Kedro will append dependencies to the project's `requirements.in`. More information is available in [our documentation](https://kedro.readthedocs.io/en/stable/06_nodes_and_pipelines/03_modular_pipelines.html#package-a-modular-pipeline).
-* Added support for bulk packaging modular pipelines using `kedro pipeline package --all` and `pyproject.toml`.
+* Added support for bulk packaging/pulling modular pipelines using `kedro pipeline package/pull --all` and `pyproject.toml`.
 * Removed `cli.py` from the Kedro project template. By default all CLI commands, including `kedro run`, are now defined on the Kedro framework side. These can be overridden in turn by a plugin or a `cli.py` file in your project. A packaged Kedro project will respect the same hierarchy when executed with `python -m my_package`.
 * Removed `.ipython/profile_default/startup/` from the Kedro project template in favour of `.ipython/profile_default/ipython_config.py` and the `kedro.extras.extensions.ipython`.
 * Added support for `dill` backend to `PickleDataSet`.
@@ -24,7 +24,8 @@
 ## Minor breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.18.0
-* `kedro pipeline list` and `kedro pipeline describe` are being deprecated in favour of new commands `kedro registry list ` and `kedro registry describe`
+* `kedro pipeline list` and `kedro pipeline describe` are being deprecated in favour of new commands `kedro registry list ` and `kedro registry describe`.
+* `kedro install` is being deprecated in favour of using `pip install -r src/requirements.txt` to install project dependencies.
 
 ## Thanks for supporting contributions
 [Moussa Taifi](https://github.com/moutai),

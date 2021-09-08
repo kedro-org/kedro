@@ -605,7 +605,7 @@ class TestPipelinePullFromManifest:
 
         spy = mocker.spy(pipeline, "_pull_package")
         pyproject_toml = fake_repo_path / "pyproject.toml"
-        sdist_file = fake_repo_path / "dist" / _get_sdist_name("{}", "0.1")
+        sdist_file = str(fake_repo_path / "dist" / _get_sdist_name("{}", "0.1"))
         project_toml_str = textwrap.dedent(
             f"""
             [tool.kedro.pipeline.pull]

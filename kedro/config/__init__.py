@@ -31,7 +31,12 @@ configuration from different file formats.
 """
 
 
-from .config import BadConfigException  # NOQA
-from .config import ConfigLoader  # NOQA
-from .config import MissingConfigException  # NOQA
-from .templated_config import TemplatedConfigLoader  # NOQA
+from .config import BadConfigException, ConfigLoader, MissingConfigException
+from .templated_config import TemplatedConfigLoader
+
+__all__ = [
+    "BadConfigException",
+    "ConfigLoader",
+    "MissingConfigException",
+    "TemplatedConfigLoader",
+]

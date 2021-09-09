@@ -34,6 +34,6 @@ __all__ = ["MetricsDataSet", "JSONDataSet"]
 from contextlib import suppress
 
 with suppress(ImportError):
-    from kedro.extras.datasets.tracking.metrics_dataset import MetricsDataSet  # NOQA
+    from kedro.extras.datasets.tracking.metrics_dataset import MetricsDataSet
 with suppress(ImportError):
-    from kedro.extras.datasets.tracking.json_dataset import JSONDataSet  # NOQA
+    from kedro.extras.datasets.tracking.json_dataset import JSONDataSet

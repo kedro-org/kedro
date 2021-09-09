@@ -51,6 +51,14 @@ def dummy_dataframe():
     return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
 
 
+@pytest.fixture
+def sql_file(tmp_path):
+    file = tmp_path / "test.sql"
+    with file.open("w") as f:
+        f.write(SQL_QUERY)
+    return f.as_posix()
+
+
 @pytest.fixture(params=[{}])
 def table_data_set(request):
     kwargs = dict(table_name=TABLE_NAME, credentials=dict(con=CONNECTION))
@@ -61,6 +69,13 @@ def table_data_set(request):
 @pytest.fixture(params=[{}])
 def query_data_set(request):
     kwargs = dict(sql=SQL_QUERY, credentials=dict(con=CONNECTION))
+    kwargs.update(request.param)
+    return SQLQueryDataSet(**kwargs)
+
+
+@pytest.fixture(params=[{}])
+def query_file_data_set(request, sql_file):
+    kwargs = dict(filepath=sql_file, credentials=dict(con=CONNECTION))
     kwargs.update(request.param)
     return SQLQueryDataSet(**kwargs)
 
@@ -244,10 +259,13 @@ class TestSQLQueryDataSet:
         _callable.assert_called_once_with(sql=SQL_QUERY, con=CONNECTION)
 
     def test_empty_query_error(self):
-        """Check the error when instantiating with empty query"""
-        pattern = r"`sql` argument cannot be empty\. Please provide a sql query"
+        """Check the error when instantiating with empty query or file"""
+        pattern = (
+            r"`sql` and `filepath` arguments cannot both be empty\."
+            r"Please provide a sql query or path to a sql query file\."
+        )
         with pytest.raises(DataSetError, match=pattern):
-            SQLQueryDataSet(sql="", credentials=dict(con=CONNECTION))
+            SQLQueryDataSet(sql="", filepath="", credentials=dict(con=CONNECTION))
 
     def test_empty_con_error(self):
         """Check the error when instantiating with empty connection string"""
@@ -262,6 +280,12 @@ class TestSQLQueryDataSet:
         """Test `load` method invocation"""
         mocker.patch("pandas.read_sql_query")
         query_data_set.load()
+        self._assert_pd_called_once()
+
+    def test_load_query_file(self, mocker, query_file_data_set):
+        """Test `load` method with a query file"""
+        mocker.patch("pandas.read_sql_query")
+        query_file_data_set.load()
         self._assert_pd_called_once()
 
     def test_load_driver_missing(self, mocker, query_data_set):

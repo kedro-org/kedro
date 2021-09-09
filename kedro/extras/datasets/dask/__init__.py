@@ -33,4 +33,4 @@ __all__ = ["ParquetDataSet"]
 from contextlib import suppress
 
 with suppress(ImportError):
-    from .parquet_dataset import ParquetDataSet  # NOQA
+    from .parquet_dataset import ParquetDataSet

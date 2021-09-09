@@ -29,13 +29,20 @@
 
 import copy
 import re
+from pathlib import PurePosixPath
 from typing import Any, Dict, Optional
 
+import fsspec
 import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy.exc import NoSuchModuleError
 
-from kedro.io.core import AbstractDataSet, DataSetError
+from kedro.io.core import (
+    AbstractDataSet,
+    DataSetError,
+    get_filepath_str,
+    get_protocol_and_path,
+)
 
 __all__ = ["SQLTableDataSet", "SQLQueryDataSet"]
 
@@ -278,13 +285,19 @@ class SQLQueryDataSet(AbstractDataSet):
 
     """
 
-    def __init__(
-        self, sql: str, credentials: Dict[str, Any], load_args: Dict[str, Any] = None
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        sql: str = None,
+        filepath: str = None,
+        credentials: Dict[str, Any] = None,
+        load_args: Dict[str, Any] = None,
+        fs_args: Dict[str, Any] = None,
     ) -> None:
         """Creates a new ``SQLQueryDataSet``.
 
         Args:
             sql: The sql query statement.
+            filepath: A path to a file with a sql query statement
             credentials: A dictionary with a ``SQLAlchemy`` connection string.
                 Users are supposed to provide the connection string 'con'
                 through credentials. It overwrites `con` parameter in
@@ -297,14 +310,23 @@ class SQLQueryDataSet(AbstractDataSet):
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_sql_query.html
                 To find all supported connection string formats, see here:
                 https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls
+            fs_args: Extra arguments to pass into underlying filesystem class constructor
+                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``), as well as
+                to pass to the filesystem's `open` method through nested keys
+                `open_args_load` and `open_args_save`.
+                Here you can find all available arguments for `open`:
+                https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
+                All defaults are preserved, except `mode`, which is set to `r` when loading
+                and to `w` when saving.
 
         Raises:
             DataSetError: When either ``sql`` or ``con`` parameters is emtpy.
         """
 
-        if not sql:
+        if not (sql or filepath):
             raise DataSetError(
-                "`sql` argument cannot be empty. Please provide a sql query"
+                "`sql` and `filepath` arguments cannot both be empty."
+                "Please provide a sql query or path to a sql query file."
             )
 
         if not (credentials and "con" in credentials and credentials["con"]):
@@ -321,7 +343,24 @@ class SQLQueryDataSet(AbstractDataSet):
             else default_load_args
         )
 
-        self._load_args["sql"] = sql
+        # load sql query from file
+        if not sql:
+            # filesystem for loading sql file
+            _fs_args = copy.deepcopy(fs_args) or {}
+            _fs_open_args_load = _fs_args.pop("open_args_load", {})
+            _fs_credentials = _fs_args.pop("credentials", {})
+
+            protocol, path = get_protocol_and_path(str(filepath))
+
+            self._protocol = protocol
+            self._fs = fsspec.filesystem(self._protocol, **_fs_credentials, **_fs_args)
+
+            _fs_open_args_load.setdefault("mode", "r")
+            self._fs_open_args_load = _fs_open_args_load
+
+            self._load_args["filepath"] = path
+        else:
+            self._load_args["sql"] = sql
         self._load_args["con"] = credentials["con"]
 
     def _describe(self) -> Dict[str, Any]:
@@ -331,8 +370,17 @@ class SQLQueryDataSet(AbstractDataSet):
         return dict(sql=self._load_args["sql"], load_args=load_args)
 
     def _load(self) -> pd.DataFrame:
+        load_args = self._load_args.copy()
+
+        if "sql" not in load_args:
+            filepath = load_args.pop("filepath")
+            load_path = get_filepath_str(PurePosixPath(filepath), self._protocol)
+
+            with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
+                load_args["sql"] = fs_file.read()
+
         try:
-            return pd.read_sql_query(**self._load_args)
+            return pd.read_sql_query(**load_args)
         except ImportError as import_error:
             raise _get_missing_module_error(import_error) from import_error
         except NoSuchModuleError as exc:

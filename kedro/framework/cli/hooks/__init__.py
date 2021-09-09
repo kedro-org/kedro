@@ -26,5 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """``kedro.framework.cli.hooks`` provides primitives to use hooks to extend KedroCLI's behaviour"""
-from .manager import CLIHooksManager  # NOQA
-from .markers import cli_hook_impl  # NOQA
+from .manager import CLIHooksManager
+from .markers import cli_hook_impl
+
+__all__ = ["CLIHooksManager", "cli_hook_impl"]

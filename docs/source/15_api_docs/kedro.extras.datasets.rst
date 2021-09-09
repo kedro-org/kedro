@@ -19,7 +19,9 @@ kedro.extras.datasets
    kedro.extras.datasets.holoviews.HoloviewsWriter
    kedro.extras.datasets.json.JSONDataSet
    kedro.extras.datasets.matplotlib.MatplotlibWriter
-   kedro.extras.datasets.networkx.NetworkXDataSet
+   kedro.extras.datasets.networkx.GMLDataSet
+   kedro.extras.datasets.networkx.GraphMLDataSet
+   kedro.extras.datasets.networkx.JSONDataSet
    kedro.extras.datasets.pandas.CSVDataSet
    kedro.extras.datasets.pandas.ExcelDataSet
    kedro.extras.datasets.pandas.FeatherDataSet

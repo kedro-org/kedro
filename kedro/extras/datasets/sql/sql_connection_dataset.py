@@ -42,13 +42,17 @@ class SQLConnectionDataSet(AbstractDataSet):
     SQL database backend. The load method creates and returns the connection
     object, which can be used in a function as normally in Python.
 
-    [TBD] Save function options:
-        1. Not implemented
-        2. Calls the `execute` method
+    The save method is not supported. To save data, use the sqlalchemy
+    connection directly.
 
     Example:
     ::
-        # to be written
+       >>> from kedro.extras.datasets.sql import SQLConnectionDataSet
+       >>>
+       >>> credentials = {"con": "sqlite:///kedro.db"}
+       >>> data_set = SQLConnectionDataSet(credentials)
+       >>> conn = data_set.load()
+       >>>
 
     """
 

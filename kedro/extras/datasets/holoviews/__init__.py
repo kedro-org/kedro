@@ -33,4 +33,4 @@ __all__ = ["HoloviewsWriter"]
 from contextlib import suppress
 
 with suppress(ImportError):
-    from .holoviews_writer import HoloviewsWriter  # NOQA
+    from .holoviews_writer import HoloviewsWriter

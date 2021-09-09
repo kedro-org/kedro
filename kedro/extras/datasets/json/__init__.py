@@ -33,4 +33,4 @@ __all__ = ["JSONDataSet"]
 from contextlib import suppress
 
 with suppress(ImportError):
-    from .json_dataset import JSONDataSet  # NOQA
+    from .json_dataset import JSONDataSet

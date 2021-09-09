@@ -36,4 +36,4 @@ __all__ = ["APIDataSet"]
 from contextlib import suppress
 
 with suppress(ImportError):
-    from .api_dataset import APIDataSet  # NOQA
+    from .api_dataset import APIDataSet

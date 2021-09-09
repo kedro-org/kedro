@@ -30,4 +30,6 @@
 capturing information required to reproduce a Kedro run.
 """
 
-from .journal import Journal  # NOQA
+from .journal import Journal
+
+__all__ = ["Journal"]

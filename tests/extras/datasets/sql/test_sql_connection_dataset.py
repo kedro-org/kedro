@@ -97,3 +97,10 @@ class TestSQLConnectionDataSetLoad:
         conn = connection_data_set.load()
         engine = conn.engine
         assert CONNECTION in str(engine)
+
+    def test_save_error(self, connection_data_set):
+        """Check the error when attempting to save the dataset."""
+        pattern = r"`save` is not supported on a SQLConnectionDataSet\."
+        fake_data = "foo"
+        with pytest.raises(DataSetError, match=pattern):
+            connection_data_set.save(fake_data)

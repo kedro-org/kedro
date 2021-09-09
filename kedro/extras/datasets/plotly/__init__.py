@@ -33,4 +33,4 @@ __all__ = ["PlotlyDataSet"]
 from contextlib import suppress
 
 with suppress(ImportError):
-    from .plotly_dataset import PlotlyDataSet  # NOQA
+    from .plotly_dataset import PlotlyDataSet

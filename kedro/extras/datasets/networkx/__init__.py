@@ -34,4 +34,4 @@ __all__ = ["NetworkXDataSet"]
 from contextlib import suppress
 
 with suppress(ImportError):
-    from .networkx_dataset import NetworkXDataSet  # NOQA
+    from .networkx_dataset import NetworkXDataSet

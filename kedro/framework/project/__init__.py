@@ -58,7 +58,7 @@ class _IsSubclassValidator(Validator):
         self,
         settings: Any,
         env: Optional[str] = None,
-        **kwargs: Any,
+        **kwargs: Any,  # pylint: disable=arguments-differ; work with ``dynaconf<3.1.6``
     ) -> None:
         super()._validate_items(settings, env, **kwargs)
 

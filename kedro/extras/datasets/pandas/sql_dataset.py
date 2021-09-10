@@ -364,9 +364,15 @@ class SQLQueryDataSet(AbstractDataSet):
 
     def _describe(self) -> Dict[str, Any]:
         load_args = self._load_args.copy()
-        del load_args["sql"]
+        desc = {}
+        if "sql" in load_args:
+            desc["sql"] = load_args.pop("sql")
+        if "filepath" in load_args:
+            desc["filepath"] = str(load_args.pop("filepath"))
         del load_args["con"]
-        return dict(sql=self._load_args["sql"], load_args=load_args)
+        desc["load_args"] = load_args
+
+        return desc
 
     def _load(self) -> pd.DataFrame:
         load_args = self._load_args.copy()

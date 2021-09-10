@@ -56,7 +56,7 @@ def sql_file(tmp_path):
     file = tmp_path / "test.sql"
     with file.open("w") as f:
         f.write(SQL_QUERY)
-    return f.as_posix()
+    return file.as_posix()
 
 
 @pytest.fixture(params=[{}])
@@ -330,8 +330,16 @@ class TestSQLQueryDataSet:
         with pytest.raises(DataSetError, match=pattern):
             query_data_set.save(dummy_dataframe)
 
-    def test_str_representation_sql(self, query_data_set):
+    def test_str_representation_sql(self, query_data_set, sql_file):
         """Test the data set instance string representation"""
         str_repr = str(query_data_set)
         assert f"SQLQueryDataSet(load_args={{}}, sql={SQL_QUERY})" in str_repr
         assert CONNECTION not in str_repr
+        assert sql_file not in str_repr
+
+    def test_str_representation_filepath(self, query_file_data_set, sql_file):
+        """Test the data set instance string representation with filepath arg."""
+        str_repr = str(query_file_data_set)
+        assert f"SQLQueryDataSet(filepath={str(sql_file)}, load_args={{}}" in str_repr
+        assert CONNECTION not in str_repr
+        assert SQL_QUERY not in str_repr

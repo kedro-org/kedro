@@ -470,5 +470,5 @@ def mock_import(mocker):
     mocker.patch(
         "importlib.import_module",
         wraps=importlib.import_module,
-        side_effect=(lambda x: None if x == settings_module else mocker.DEFAULT),
+        side_effect=(lambda x: {} if x == settings_module else mocker.DEFAULT),
     )

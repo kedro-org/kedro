@@ -31,7 +31,7 @@ configure a Kedro project and access its settings."""
 import importlib
 import operator
 from collections.abc import MutableMapping
-from typing import Any, Dict, Optional, Sequence, Union
+from typing import Any, Dict, Optional
 from warnings import warn
 
 from dynaconf import LazySettings

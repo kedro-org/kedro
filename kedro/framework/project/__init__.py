@@ -54,11 +54,11 @@ def _get_default_class(class_import_path):
 class _IsSubclassValidator(Validator):
     """A validator to check if the supplied setting value is a subclass of the default class"""
 
-    def _validate_items(
+    def _validate_items(  # pylint: disable=arguments-differ; work with `dynaconf<3.1.6`
         self,
         settings: Any,
         env: Optional[str] = None,
-        **kwargs: Any,  # pylint: disable=arguments-differ; work with ``dynaconf<3.1.6``
+        **kwargs: Any,
     ) -> None:
         super()._validate_items(settings, env, **kwargs)
 

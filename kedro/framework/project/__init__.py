@@ -58,10 +58,9 @@ class _IsSubclassValidator(Validator):
         self,
         settings: Any,
         env: Optional[str] = None,
-        only: Optional[Union[str, Sequence]] = None,
-        exclude: Optional[Union[str, Sequence]] = None,
+        **kwargs: Any,
     ) -> None:
-        super()._validate_items(settings, env, only, exclude)
+        super()._validate_items(settings, env, **kwargs)
 
         default_class = self.default(settings, self)
         for name in self.names:

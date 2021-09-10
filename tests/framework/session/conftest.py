@@ -468,7 +468,7 @@ def mock_import(mocker):
     # importing it. settings.py does not actually exists as part of this test suite,
     # so its import is mocked.
     settings_module_name = f"{MOCK_PACKAGE_NAME}.settings"
-    settings_module_location = f"src/{MOCK_PACKAGE_NAME}/settings.py"
+    settings_module_location = Path(f"src/{MOCK_PACKAGE_NAME}/settings.py").resolve()
     settings_module = module_from_spec(
         spec_from_file_location(settings_module_name, settings_module_location)
     )

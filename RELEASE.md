@@ -20,6 +20,7 @@
 * Bumped minimum required `fsspec` version to 2021.04.
 * Fixed the `kedro install` and `kedro build-reqs` flows when uninstalled dependencies are present in a project's `settings.py`, `context.py` or `hooks.py` ([Issue #829](https://github.com/quantumblacklabs/kedro/issues/829)).
 * Imports are now refactored at `kedro pipeline package` and `kedro pipeline pull` time, so that _aliasing_ a modular pipeline doesn't break it.
+* Added option in `SQLQueryDataSet` to specify a `filepath` with a sql query, in addition to supplying the entire query in the constructor
 
 ## Minor breaking changes to the API
 
@@ -30,6 +31,7 @@
 ## Thanks for supporting contributions
 [Moussa Taifi](https://github.com/moutai),
 [Deepyaman Datta](https://github.com/deepyaman)
+[Benjamin Levy](https://github.com/BenjaminLevyQB)
 
 # Release 0.17.4
 

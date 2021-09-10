@@ -27,10 +27,10 @@
 # limitations under the License.
 import importlib
 import logging
+from importlib.util import module_from_spec, spec_from_file_location
 from logging.handlers import QueueHandler, QueueListener
 from multiprocessing import Queue
 from pathlib import Path
-from types import ModuleType
 from typing import Any, Dict, Iterable, List, Optional
 
 import pandas as pd
@@ -467,13 +467,15 @@ def mock_import(mocker):
     # KedroSession eagerly validates that a project's settings.py is correct by
     # importing it. settings.py does not actually exists as part of this test suite,
     # so its import is mocked.
-    settings_module = f"{MOCK_PACKAGE_NAME}.settings"
+    settings_module_name = f"{MOCK_PACKAGE_NAME}.settings"
+    settings_module_location = Path(f"src/{MOCK_PACKAGE_NAME}/settings.py").resolve()
+    settings_module = module_from_spec(
+        spec_from_file_location(settings_module_name, settings_module_location)
+    )
     mocker.patch(
         "importlib.import_module",
         wraps=importlib.import_module,
         side_effect=(
-            lambda x: ModuleType(settings_module)
-            if x == settings_module
-            else mocker.DEFAULT
+            lambda x: settings_module if x == settings_module_name else mocker.DEFAULT
         ),
     )

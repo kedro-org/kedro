@@ -24,7 +24,8 @@
 ## Minor breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.18.0
-* `kedro pipeline list` and `kedro pipeline describe` are being deprecated in favour of new commands `kedro registry list ` and `kedro registry describe`
+* `kedro pipeline list` and `kedro pipeline describe` are being deprecated in favour of new commands `kedro registry list ` and `kedro registry describe`.
+* `kedro install` is being deprecated in favour of using `pip install -r src/requirements.txt` to install project dependencies.
 
 ## Thanks for supporting contributions
 [Moussa Taifi](https://github.com/moutai),

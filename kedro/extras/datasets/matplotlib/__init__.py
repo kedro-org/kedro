@@ -33,4 +33,4 @@ __all__ = ["MatplotlibWriter"]
 from contextlib import suppress
 
 with suppress(ImportError):
-    from .matplotlib_writer import MatplotlibWriter  # NOQA
+    from .matplotlib_writer import MatplotlibWriter

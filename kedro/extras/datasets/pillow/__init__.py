@@ -33,4 +33,4 @@ __all__ = ["ImageDataSet"]
 from contextlib import suppress
 
 with suppress(ImportError):
-    from .image_dataset import ImageDataSet  # NOQA
+    from .image_dataset import ImageDataSet

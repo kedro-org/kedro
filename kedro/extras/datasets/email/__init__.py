@@ -33,4 +33,4 @@ __all__ = ["EmailMessageDataSet"]
 from contextlib import suppress
 
 with suppress(ImportError):
-    from .message_dataset import EmailMessageDataSet  # NOQA
+    from .message_dataset import EmailMessageDataSet

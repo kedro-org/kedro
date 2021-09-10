@@ -30,6 +30,7 @@ import logging
 from logging.handlers import QueueHandler, QueueListener
 from multiprocessing import Queue
 from pathlib import Path
+from types import ModuleType
 from typing import Any, Dict, Iterable, List, Optional
 
 import pandas as pd
@@ -470,5 +471,9 @@ def mock_import(mocker):
     mocker.patch(
         "importlib.import_module",
         wraps=importlib.import_module,
-        side_effect=(lambda x: {} if x == settings_module else mocker.DEFAULT),
+        side_effect=(
+            lambda x: ModuleType(settings_module)
+            if x == settings_module
+            else mocker.DEFAULT
+        ),
     )

@@ -481,5 +481,9 @@ def mock_import(mocker):
     )
     mocker.patch(
         "dynaconf.base.Settings.find_file",
-        side_effect=(lambda x: "" if settings_module_name in x else mocker.DEFAULT),
+        side_effect=(
+            lambda *args, **kwargs: ""
+            if settings_module_name in args[0]
+            else mocker.DEFAULT
+        ),
     )

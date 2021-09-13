@@ -40,7 +40,7 @@ import yaml
 from pandas.util.testing import assert_frame_equal
 
 from kedro import __version__ as kedro_version
-from kedro.config import ConfigLoader, MissingConfigException
+from kedro.config import MissingConfigException
 from kedro.extras.datasets.pandas import CSVDataSet
 from kedro.framework.context import KedroContext, KedroContextError
 from kedro.framework.context.context import (
@@ -165,13 +165,22 @@ class RegistrationHooks:
             catalog, credentials, load_versions, save_version, journal
         )
 
-    @hook_impl
-    def register_config_loader(self, conf_paths) -> ConfigLoader:
-        return ConfigLoader(conf_paths)
-
 
 class MockSettings(_ProjectSettings):
     _HOOKS = Validator("HOOKS", default=(RegistrationHooks(),))
+
+
+class BrokenSettings(_ProjectSettings):
+    _HOOKS = Validator("HOOKS", default=(RegistrationHooks(),))
+    _CONFIG_LOADER_CLASS = Validator("CONFIG_LOADER_CLASS", default="it breaks")
+
+
+@pytest.fixture
+def broken_settings(mocker):
+    mocked_settings = BrokenSettings()
+    mocker.patch("kedro.framework.session.session.settings", mocked_settings)
+    mocker.patch("kedro.framework.context.context.settings", mocked_settings)
+    return mocker.patch("kedro.framework.project.settings", mocked_settings)
 
 
 @pytest.fixture(autouse=True)
@@ -301,19 +310,19 @@ def clear_hook_manager():
 
 
 class TestKedroContext:
-    def test_deprecate_reading_conf_root_from_context(self, dummy_context):
+    def test_deprecate_reading_conf_source_from_context(self, dummy_context):
         pattern = (
-            "Accessing CONF_ROOT via the context will be deprecated in Kedro 0.18.0."
+            "Accessing CONF_SOURCE via the context will be deprecated in Kedro 0.18.0."
         )
         with pytest.warns(DeprecationWarning, match=pattern):
-            assert dummy_context.CONF_ROOT == "conf"
+            assert dummy_context.CONF_SOURCE == "conf"
 
-    def test_deprecate_setting_conf_root_on_context(self, dummy_context):
+    def test_deprecate_setting_conf_source_on_context(self, dummy_context):
         pattern = (
-            "Accessing CONF_ROOT via the context will be deprecated in Kedro 0.18.0."
+            "Accessing CONF_SOURCE via the context will be deprecated in Kedro 0.18.0."
         )
         with pytest.warns(DeprecationWarning, match=pattern):
-            dummy_context.CONF_ROOT = "test_conf"
+            dummy_context.CONF_SOURCE = "test_conf"
 
     @pytest.mark.parametrize("property_name", ["io", "pipeline", "pipelines"])
     def test_deprecate_properties_on_context(self, property_name, dummy_context):
@@ -408,8 +417,22 @@ class TestKedroContext:
         assert catalog["boats"]["type"] == "pandas.CSVDataSet"
         assert not catalog["cars"]["save_args"]["index"]
 
+    # pylint: disable=unused-argument
+    def test_broken_config_loader(self, broken_settings, dummy_context):
+        pattern = (
+            f"Expected an instance of `ConfigLoader`, "
+            f"got `it breaks` of class `{type('')}` instead."
+        )
+        with pytest.raises(KedroContextError, match=re.escape(pattern)):
+            _ = dummy_context.config_loader
+
     def test_default_env(self, dummy_context):
-        assert dummy_context.env == "local"
+        # default environment setting is delegated to config_loader,
+        # rather than `KedroContext`
+        assert not dummy_context.env
+        assert not dummy_context.config_loader.env
+        assert dummy_context.config_loader.default_run_env == "local"
+        assert dummy_context.config_loader.base_env == "base"
 
     @pytest.mark.parametrize("env", ["custom_env"], indirect=True)
     def test_custom_env(self, dummy_context, env):
@@ -486,110 +509,13 @@ class TestKedroContextRun:
     @pytest.mark.skipif(
         sys.platform.startswith("win"), reason="Due to bug in parallel runner"
     )
-    def test_parallel_run_arg(self, dummy_context, dummy_dataframe, caplog, mocker):
-        mocker.patch(
-            "kedro.framework.context.context.load_context", return_value=dummy_context
-        )
+    def test_parallel_run_arg(self, dummy_context, dummy_dataframe, caplog):
         dummy_context.catalog.save("cars", dummy_dataframe)
         dummy_context.run(runner=ParallelRunner())
 
         log_msgs = [record.getMessage() for record in caplog.records]
         log_names = [record.name for record in caplog.records]
         assert "kedro.runner.parallel_runner" in log_names
-        assert "Pipeline execution completed successfully." in log_msgs
-
-    def test_run_with_node_names(self, dummy_context, dummy_dataframe, caplog):
-        dummy_context.catalog.save("cars", dummy_dataframe)
-        dummy_context.run(node_names=["node1"])
-
-        log_msgs = [record.getMessage() for record in caplog.records]
-        assert "Running node: node1: identity([cars]) -> [boats]" in log_msgs
-        assert "Pipeline execution completed successfully." in log_msgs
-        assert "Running node: node2: identity([boats]) -> [trains]" not in log_msgs
-
-    def test_run_with_node_names_and_tags(self, dummy_context, dummy_dataframe, caplog):
-        dummy_context.catalog.save("cars", dummy_dataframe)
-        dummy_context.run(node_names=["node1"], tags=["tag1", "pipeline"])
-
-        log_msgs = [record.getMessage() for record in caplog.records]
-        assert "Running node: node1: identity([cars]) -> [boats]" in log_msgs
-        assert "Pipeline execution completed successfully." in log_msgs
-        assert "Running node: node2: identity([boats]) -> [trains]" not in log_msgs
-
-    def test_run_with_tags(self, dummy_context, dummy_dataframe, caplog):
-        dummy_context.catalog.save("cars", dummy_dataframe)
-        dummy_context.run(tags=["tag1"])
-        log_msgs = [record.getMessage() for record in caplog.records]
-
-        assert "Completed 1 out of 1 tasks" in log_msgs
-        assert "Running node: node1: identity([cars]) -> [boats]" in log_msgs
-        assert "Running node: node2: identity([boats]) -> [trains]" not in log_msgs
-        assert "Pipeline execution completed successfully." in log_msgs
-
-    def test_run_with_wrong_tags(self, dummy_context, dummy_dataframe):
-        dummy_context.catalog.save("cars", dummy_dataframe)
-        pattern = r"Pipeline contains no nodes with tags: \['non\-existent'\]"
-        with pytest.raises(KedroContextError, match=pattern):
-            dummy_context.run(tags=["non-existent"])
-
-    def test_run_from_nodes(self, dummy_context, dummy_dataframe, caplog):
-        dummy_context.catalog.save("cars", dummy_dataframe)
-        dummy_context.run(from_nodes=["node1"])
-
-        log_msgs = [record.getMessage() for record in caplog.records]
-        assert "Completed 4 out of 4 tasks" in log_msgs
-        assert "Running node: node1: identity([cars]) -> [boats]" in log_msgs
-        assert "Pipeline execution completed successfully." in log_msgs
-
-    def test_run_to_nodes(self, dummy_context, dummy_dataframe, caplog):
-        dummy_context.catalog.save("cars", dummy_dataframe)
-        dummy_context.run(to_nodes=["node2"])
-
-        log_msgs = [record.getMessage() for record in caplog.records]
-        assert "Completed 2 out of 2 tasks" in log_msgs
-        assert "Running node: node1: identity([cars]) -> [boats]" in log_msgs
-        assert "Running node: node2: identity([boats]) -> [trains]" in log_msgs
-        assert "Running node: node3: identity([trains]) -> [ships]" not in log_msgs
-        assert "Pipeline execution completed successfully." in log_msgs
-
-    def test_run_with_node_range(self, dummy_context, dummy_dataframe, caplog):
-        dummy_context.catalog.save("cars", dummy_dataframe)
-        dummy_context.run(from_nodes=["node1"], to_nodes=["node3"])
-
-        log_msgs = [record.getMessage() for record in caplog.records]
-        assert "Completed 3 out of 3 tasks" in log_msgs
-        assert "Running node: node1: identity([cars]) -> [boats]" in log_msgs
-        assert "Running node: node2: identity([boats]) -> [trains]" in log_msgs
-        assert "Running node: node3: identity([trains]) -> [ships]" in log_msgs
-        assert "Pipeline execution completed successfully." in log_msgs
-
-    def test_run_with_invalid_node_range(self, dummy_context, dummy_dataframe):
-        dummy_context.catalog.save("cars", dummy_dataframe)
-        pattern = "Pipeline contains no nodes"
-
-        with pytest.raises(KedroContextError, match=pattern):
-            dummy_context.run(from_nodes=["node3"], to_nodes=["node1"])
-
-    def test_run_from_inputs(self, dummy_context, dummy_dataframe, caplog):
-        for dataset in ("cars", "trains", "boats"):
-            dummy_context.catalog.save(dataset, dummy_dataframe)
-        dummy_context.run(from_inputs=["trains"])
-
-        log_msgs = [record.getMessage() for record in caplog.records]
-        assert "Completed 2 out of 2 tasks" in log_msgs
-        assert "Running node: node3: identity([trains]) -> [ships]" in log_msgs
-        assert "Running node: node4: identity([ships]) -> [planes]" in log_msgs
-        assert "Pipeline execution completed successfully." in log_msgs
-
-    def test_run_to_outputs(self, dummy_context, dummy_dataframe, caplog):
-        dummy_context.catalog.save("cars", dummy_dataframe)
-        dummy_context.run(to_outputs=["trains"])
-
-        log_msgs = [record.getMessage() for record in caplog.records]
-        assert "Completed 2 out of 2 tasks" in log_msgs
-        assert "Running node: node1: identity([cars]) -> [boats]" in log_msgs
-        assert "Running node: node2: identity([boats]) -> [trains]" in log_msgs
-        assert "Running node: node3: identity([trains]) -> [ships]" not in log_msgs
         assert "Pipeline execution completed successfully." in log_msgs
 
     def test_run_load_versions(self, dummy_context, dummy_dataframe):
@@ -619,7 +545,7 @@ class TestKedroContextRun:
         assert dummy_context.catalog.load("boats").equals(old_df)
 
     def test_run_with_empty_pipeline(self, dummy_context):
-        with pytest.raises(KedroContextError, match="Pipeline contains no nodes"):
+        with pytest.raises(ValueError, match="Pipeline contains no nodes"):
             dummy_context.run(pipeline_name="empty")
 
     @pytest.mark.parametrize(

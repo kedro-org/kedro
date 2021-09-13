@@ -60,7 +60,7 @@ from kedro.framework.startup import ProjectMetadata
 from kedro.utils import load_obj
 
 NO_DEPENDENCY_MESSAGE = """{module} is not installed. Please make sure {module} is in
-{src}/requirements.txt and run `kedro install`."""
+{src}/requirements.txt and run `pip install -r src/requirements.txt`."""
 LINT_CHECK_ONLY_HELP = """Check the files for style guide violations, unsorted /
 unformatted imports, and unblackened Python code without modifying the files."""
 OPEN_ARG_HELP = """Open the documentation in your default browser after building."""
@@ -159,60 +159,6 @@ def lint(
     python_call("isort", (*check_flag, "-rc") + files)  # type: ignore
 
 
-@project_group.command()
-@click.option(
-    "--build-reqs/--no-build-reqs",
-    "compile_flag",
-    default=None,
-    help="Run `pip-compile` on project requirements before install. "
-    "By default runs only if `src/requirements.in` file doesn't exist.",
-)
-@click.pass_obj  # this will pass the metadata as first argument
-def install(metadata: ProjectMetadata, compile_flag):
-    """Install project dependencies from both requirements.txt
-    and environment.yml (DEPRECATED)."""
-
-    deprecation_message = (
-        "DeprecationWarning: Command `kedro install` will be deprecated in Kedro 0.18.0. "
-        "In the future use `pip install -r src/requirements.txt` instead. "
-        "If you were running `kedro install` with the `--build-reqs` flag, "
-        "we recommend running `kedro build-reqs` followed by `pip install -r src/requirements.txt`"
-    )
-    click.secho(deprecation_message, fg="red")
-
-    # we cannot use `context.project_path` as in other commands since
-    # context instantiation might break due to missing dependencies
-    # we attempt to install here
-    # pylint: disable=consider-using-with
-    source_path = metadata.source_dir
-    environment_yml = source_path / "environment.yml"
-    requirements_in = source_path / "requirements.in"
-    requirements_txt = source_path / "requirements.txt"
-
-    if environment_yml.is_file():
-        call(["conda", "env", "update", "--file", str(environment_yml), "--prune"])
-
-    default_compile = bool(compile_flag is None and not requirements_in.is_file())
-    do_compile = compile_flag or default_compile
-    if do_compile:
-        _build_reqs(source_path)
-
-    pip_command = ["install", "-U", "-r", str(requirements_txt)]
-
-    if os.name == "posix":
-        python_call("pip", pip_command)
-    else:
-        command = [sys.executable, "-m", "pip"] + pip_command
-        proc = subprocess.Popen(
-            command, creationflags=subprocess.CREATE_NEW_CONSOLE, stderr=subprocess.PIPE
-        )
-        _, errs = proc.communicate()
-        if errs:
-            secho(errs.decode(), fg="red")
-            raise click.exceptions.Exit(code=1)
-    secho("Requirements installed!", fg="green")
-
-
 @forward_command(project_group, forward_help=True)
 @env_option
 @click.pass_obj  # this will pass the metadata as first argument
@@ -236,11 +182,27 @@ def package(metadata: ProjectMetadata):
     """Package the project as a Python egg and wheel."""
     source_path = metadata.source_dir
     call(
-        [sys.executable, "setup.py", "clean", "--all", "bdist_egg"],
+        [
+            sys.executable,
+            "setup.py",
+            "clean",
+            "--all",
+            "bdist_egg",
+            "--dist-dir",
+            "../dist",
+        ],
         cwd=str(source_path),
     )
     call(
-        [sys.executable, "setup.py", "clean", "--all", "bdist_wheel"],
+        [
+            sys.executable,
+            "setup.py",
+            "clean",
+            "--all",
+            "bdist_wheel",
+            "--dist-dir",
+            "../dist",
+        ],
         cwd=str(source_path),
     )
 

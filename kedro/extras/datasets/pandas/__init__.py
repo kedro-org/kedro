@@ -34,12 +34,12 @@ __all__ = [
     "FeatherDataSet",
     "GBQTableDataSet",
     "ExcelDataSet",
-    "AppendableExcelDataSet",
     "HDFDataSet",
     "JSONDataSet",
     "ParquetDataSet",
     "SQLQueryDataSet",
     "SQLTableDataSet",
+    "XMLDataSet",
 ]
 
 from contextlib import suppress
@@ -62,3 +62,5 @@ with suppress(ImportError):
     from .parquet_dataset import ParquetDataSet
 with suppress(ImportError):
     from .sql_dataset import SQLQueryDataSet, SQLTableDataSet
+with suppress(ImportError):
+    from .xml_dataset import XMLDataSet

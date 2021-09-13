@@ -90,11 +90,11 @@ This subfolder contains the project's source code. It contains 2 subfolders:
 
 Once you have created the project, to run project-specific Kedro commands, you need to navigate to the directory in which it has been created.
 
-Call `kedro install` to install the project's dependencies. Next, call `kedro run`:
+Call `pip install -r src/requirements.txt` to install the project's dependencies. Next, call `kedro run`:
 
 ```bash
 cd getting-started
-kedro install
+pip install -r src/requirements.txt
 kedro run
 ```
 
@@ -123,7 +123,7 @@ This is the data engineering node function within `src/get_started/pipelines/dat
 | Node            | Description                                                    | Node Function Name       |
 +=================+================================================================+==========================+
 | Split data      | Splits the example                                             | :code:`split_data`       |
-|                 | `Iris dataset <https://archive.ics.uci.edu/ml/datasets/iris>`_ |                          |
+|                 | `Iris dataset <https://www.kaggle.com/uciml/iris>`             |                          |
 |                 | into train and test samples                                    |                          |
 +-----------------+----------------------------------------------------------------+--------------------------+
 ```

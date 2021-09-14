@@ -49,8 +49,6 @@ with suppress(ImportError):
 with suppress(ImportError):
     from .excel_dataset import ExcelDataSet
 with suppress(ImportError):
-    from .appendable_excel_dataset import AppendableExcelDataSet
-with suppress(ImportError):
     from .feather_dataset import FeatherDataSet
 with suppress(ImportError):
     from .gbq_dataset import GBQTableDataSet

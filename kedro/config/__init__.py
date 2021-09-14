@@ -30,7 +30,11 @@
 configuration from different file formats.
 """
 
-from .abstract_config import AbstractConfigLoader, BadConfigException, MissingConfigException
+from .abstract_config import (
+    AbstractConfigLoader,
+    BadConfigException,
+    MissingConfigException,
+)
 from .config import ConfigLoader
 from .templated_config import TemplatedConfigLoader
 

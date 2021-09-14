@@ -54,8 +54,8 @@ def _get_default_class(class_import_path):
 class _IsSubclassValidator(Validator):
     """A validator to check if the supplied setting value is a subclass of the default class"""
 
-    def validate(self, settings):
-        super().validate(settings)
+    def validate(self, settings, *args, **kwargs):
+        super().validate(settings, *args, **kwargs)
 
         default_class = self.default(settings, self)
         for name in self.names:

@@ -1,4 +1,4 @@
-# Upcoming Release 0.17.5
+# Release 0.17.5
 
 ## Major features and improvements
 * Added new CLI group `registry`, with the associated commands `kedro registry list` and `kedro registry describe`, to replace `kedro pipeline list` and `kedro pipeline describe`.

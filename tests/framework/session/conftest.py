@@ -462,15 +462,8 @@ def mock_session(
 
 
 @pytest.fixture(autouse=True)
-def mock_import(mocker):
+def mock_validate_settings(mocker):
     # KedroSession eagerly validates that a project's settings.py is correct by
-    # importing it. settings.py does not actually exists as part of this test suite,
-    # so its import is mocked.
-    settings_module = f"{MOCK_PACKAGE_NAME}.settings"
-    mocker.patch(
-        "importlib.import_module",
-        wraps=importlib.import_module,
-        side_effect=(
-            lambda x: mocker.MagicMock() if x == settings_module else mocker.DEFAULT
-        ),
-    )
+    # importing it. settings.py does not actually exists as part of this test suite
+    # since we are testing session in isolation, so the validation is patched.
+    mocker.patch("kedro.framework.session.session.validate_settings")

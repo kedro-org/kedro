@@ -45,20 +45,20 @@ __all__ = [
 from contextlib import suppress
 
 with suppress(ImportError):
-    from .csv_dataset import CSVDataSet  # NOQA
+    from .csv_dataset import CSVDataSet
 with suppress(ImportError):
-    from .excel_dataset import ExcelDataSet  # NOQA
+    from .excel_dataset import ExcelDataSet
 with suppress(ImportError):
-    from .feather_dataset import FeatherDataSet  # NOQA
+    from .feather_dataset import FeatherDataSet
 with suppress(ImportError):
-    from .gbq_dataset import GBQTableDataSet  # NOQA
+    from .gbq_dataset import GBQTableDataSet
 with suppress(ImportError):
-    from .hdf_dataset import HDFDataSet  # NOQA
+    from .hdf_dataset import HDFDataSet
 with suppress(ImportError):
-    from .json_dataset import JSONDataSet  # NOQA
+    from .json_dataset import JSONDataSet
 with suppress(ImportError):
-    from .parquet_dataset import ParquetDataSet  # NOQA
+    from .parquet_dataset import ParquetDataSet
 with suppress(ImportError):
-    from .sql_dataset import SQLQueryDataSet, SQLTableDataSet  # NOQA
+    from .sql_dataset import SQLQueryDataSet, SQLTableDataSet
 with suppress(ImportError):
-    from .xml_dataset import XMLDataSet  # NOQA
+    from .xml_dataset import XMLDataSet

@@ -72,7 +72,7 @@ To follow along with this tutorial, make sure you have the following:
     pip install kedro-airflow~=0.4
     ```
 
-5. Run `kedro install` to install all dependencies.
+5. Run `pip install -r src/requirements.txt` to install all dependencies.
 
 ## Deployment process
 

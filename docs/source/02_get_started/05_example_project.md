@@ -90,11 +90,11 @@ This subfolder contains the project's source code. It contains 2 subfolders:
 
 Once you have created the project, to run project-specific Kedro commands, you need to navigate to the directory in which it has been created.
 
-Call `kedro install` to install the project's dependencies. Next, call `kedro run`:
+Call `pip install -r src/requirements.txt` to install the project's dependencies. Next, call `kedro run`:
 
 ```bash
 cd getting-started
-kedro install
+pip install -r src/requirements.txt
 kedro run
 ```
 

@@ -87,3 +87,13 @@ def cleanup_dist(fake_repo_path):
     dist_dir = fake_repo_path / "dist"
     if dist_dir.exists():
         shutil.rmtree(str(dist_dir))
+
+
+@pytest.fixture
+def cleanup_pyproject_toml(fake_repo_path):
+    pyproject_toml = fake_repo_path / "pyproject.toml"
+    existing_toml = pyproject_toml.read_text()
+
+    yield
+
+    pyproject_toml.write_text(existing_toml)

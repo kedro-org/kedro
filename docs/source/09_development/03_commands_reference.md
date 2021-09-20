@@ -67,7 +67,6 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
   * [`kedro build-reqs`](#build-the-project-s-dependency-tree)
   * [`kedro catalog list`](#list-datasets-per-pipeline-per-type)
   * [`kedro catalog create`](#create-a-data-catalog-yaml-configuration-file)
-  * [`kedro install`](#install-all-package-dependencies)
   * [`kedro ipython`](#notebooks)
   * [`kedro jupyter convert`](#copy-tagged-cells)
   * [`kedro jupyter lab`](#notebooks)
@@ -119,7 +118,7 @@ Returns output similar to the following, depending on the version of Kedro used 
 | |/ / _ \/ _` | '__/ _ \
 |   <  __/ (_| | | | (_) |
 |_|\_\___|\__,_|_|  \___/
-v0.17.4
+v0.17.5
 
 kedro allows teams to create analytics
 projects. It is developed as part of
@@ -169,10 +168,10 @@ This command runs [`pip-compile`](https://github.com/jazzband/pip-tools#example-
 The following runs [`pip`](https://github.com/pypa/pip) to install all package dependencies specified in `src/requirements.txt`:
 
 ```bash
-kedro install
+pip install -r src/requirements.txt
 ```
 
-For further information, see the [`kedro install` documentation](../04_kedro_project_setup/01_dependencies.md#kedro-install).
+For further information, see the [documentation on installing project-specific dependencies](../04_kedro_project_setup/01_dependencies.md#install-project-specific-dependencies).
 
 
 ### Run the project
@@ -396,10 +395,10 @@ Every time you start or restart a notebook kernel, a startup script (`<project-r
 
 To reload these variables at any point in your notebook (e.g. if you updated `catalog.yml`) use the [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#line-magics) `%reload_kedro`, which can be also used to see the error message if any of the variables above are undefined.
 
-If you get an error message `Module ``<module_name>`` not found. Make sure to install required project dependencies by running ``kedro install`` command first.` when running any of those commands, it indicates that some Jupyter or IPython dependencies are not installed in your environment. To resolve this you will need to do the following:
+If you get an error message `Module ``<module_name>`` not found. Make sure to install required project dependencies by running ``pip install -r requirements.txt`` first.` when running any of those commands, it indicates that some Jupyter or IPython dependencies are not installed in your environment. To resolve this you will need to do the following:
 
-1. Make sure the corresponding dependency is present in `src/requirements.in` (`src/requirements.txt` if not compiled)
-2. Run [`kedro install`](#install-all-package-dependencies) command from your terminal
+1. Make sure the corresponding dependency is present in `src/requirements.txt`
+2. Run [`pip install -r src/requirements.txt`](#install-all-package-dependencies) command from your terminal
 
 ##### Copy tagged cells
 To copy the code from cells [tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) with `node` tag into Python files under `src/<package_name>/nodes/` in a Kedro project:

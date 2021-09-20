@@ -30,5 +30,6 @@
 project context.
 """
 
-from .context import KedroContext  # NOQA
-from .context import KedroContextError  # NOQA
+from .context import KedroContext, KedroContextError
+
+__all__ = ["KedroContext", "KedroContextError"]

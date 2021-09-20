@@ -33,4 +33,4 @@ __all__ = ["YAMLDataSet"]
 from contextlib import suppress
 
 with suppress(ImportError):
-    from .yaml_dataset import YAMLDataSet  # NOQA
+    from .yaml_dataset import YAMLDataSet

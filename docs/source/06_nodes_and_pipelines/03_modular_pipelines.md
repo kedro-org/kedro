@@ -66,8 +66,7 @@ Finally, `kedro pipeline create <pipeline_name>` also creates a placeholder for 
 For ease of use and portability, consider these recommendations as you develop a modular pipeline:
 
 * A modular pipeline should include a `README.md`, with all the information regarding its execution
-* A modular pipeline _may_ have external dependencies specified in `requirements.txt`. These dependencies are _not_
- currently installed by the [`kedro install`](../09_development/03_commands_reference.md#install-all-package-dependencies) command, so users of your pipeline would have to run `pip install -r src/<python_package>/pipelines/<pipeline_name>/requirements.txt` before using the pipeline
+* A modular pipeline _may_ have external dependencies specified in `requirements.txt`. Users of your pipeline would have to run `pip install -r src/<python_package>/pipelines/<pipeline_name>/requirements.txt` before using the pipeline
 * To ensure portability, modular pipelines should use relative imports when accessing their own objects and absolute imports otherwise. For example, in `pipeline.py`:
 
 ```python
@@ -116,7 +115,7 @@ kedro run --pipeline mp2
 ## How to share a modular pipeline
 
 ### Package a modular pipeline
-Since Kedro 0.16.4 you can package a modular pipeline by executing `kedro pipeline package <pipeline_module_path>` command (e.g. `kedro pipeline package pipelines.data_science.training`). From Kedro 0.18.0 this will generate a new [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions) (sdist) for it. Older versions of Kedro will generate a wheel file. By default, the sdist file, with extension `.tar.gz`, will be saved into `dist/` directory inside your project, however this can be changed using the `--destination` (`-d`) option.
+Since Kedro 0.16.4 you can package a modular pipeline by executing `kedro pipeline package <pipeline_module_path>` (e.g. `kedro pipeline package pipelines.data_science.training`). From Kedro 0.18.0 this will generate a new [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions) (sdist) for it. Older versions of Kedro will generate a wheel file. By default, the sdist file, with extension `.tar.gz`, will be saved into `dist/` directory inside your project, however this can be changed using the `--destination` (`-d`) option.
 
 When you package your modular pipeline, Kedro will also automatically package files from 3 locations:
 
@@ -138,7 +137,7 @@ If you want to generate a wheel file from the sdist file you can run `pip wheel 
 
 #### Package multiple modular pipelines
 
-If you are packaging multiple modular pipelines, you have the option to do it in bulk, by defining the specifications in the project's `pyproject.toml`:
+To package multiple modular pipelines in bulk, run `kedro pipeline package --all`. This will package all pipelines specified in the `tool.kedro.pipeline.package` manifest section of the project's `pyproject.toml` file:
 
 ```toml
 [tool.kedro.pipeline.package]
@@ -146,7 +145,7 @@ If you are packaging multiple modular pipelines, you have the option to do it in
 "pipelines.second_pipeline" = {}
 ```
 
-Where the keys (e.g. `pipelines.first_pipeline`, `pipelines.second_pipeline`) are the Python module paths to the modular pipelines, relative to the project's package name, and the values are the options that `kedro pipeline package <pipeline_module_path>` accepts.
+Here the keys (e.g. `pipelines.first_pipeline`, `pipelines.second_pipeline`) are the Python module paths to the modular pipelines, relative to the project's package name, and the values are the options that `kedro pipeline package <pipeline_module_path>` accepts.
 
 ```eval_rst
 .. note::  Make sure `destination` is specified as a POSIX path even when working on a Windows machine.
@@ -160,7 +159,7 @@ You can pull a modular pipeline from a source distribution (sdist) file by execu
 *  Configuration files in `conf/<env>/parameters/<pipeline_name>.yml`, where `<env>` defaults to `base`. If you want to place the parameters from a different config environment, run `kedro pipeline pull <pipeline_name> --env <env_name>`
 *  Pipeline unit tests in `src/tests/pipelines/<pipeline_name>`
 
-Kedro will also parse any requirements packaged with the modular pipeline and add them to project level `requirements.in`. It is advised to do `kedro install --build-reqs` to compile and install the updated list of requirements after pulling a modular pipeline.
+Kedro will also parse any requirements packaged with the modular pipeline and add them to project level `requirements.in`. It is advised to run `kedro build-reqs` to compile and `pip install -r src/requirements.txt` to install the updated list of requirements after pulling a modular pipeline.
 
 ```eval_rst
 .. note::  If a modular pipeline has embedded requirements and a project `requirements.in` file does not already exist, it will be generated based on the project `requirements.txt` before appending the modular pipeline requirements.
@@ -199,6 +198,22 @@ where
 client_kwargs:
   headers:
     Authorization: token <token>
+```
+
+#### Pull multiple modular pipelines
+
+To pull multiple modular pipelines in bulk, run `kedro pipeline pull --all`. This will pull and unpack all pipelines specified in the `tool.kedro.pipeline.pull` manifest section of the project's `pyproject.toml` file:
+
+```toml
+[tool.kedro.pipeline.pull]
+"dist/first-pipeline-0.1.tar.gz" = {}
+"https://www.url.to/second-pipeline-0.1.tar.gz" = {alias = "aliased_pipeline", fs-args = "pipeline_pull_args.yml"}
+```
+
+Here the keys are the package paths, and the values are the options that `kedro pipeline pull <package_path>` accepts. Package paths can be any of the locations allowed by `kedro pipeline pull`, including local storage, PyPI and the cloud.
+
+```eval_rst
+.. attention:: As per the `TOML specification <https://toml.io/en/v1.0.0#keys>`_, a key that contains any character outside ``A-Za-z0-9_-`` must be quoted.
 ```
 
 ## A modular pipeline example template
@@ -424,7 +439,7 @@ final_pipeline = alpha_pipeline + beta_pipeline
 
 The value of parameter `alpha` is replaced with the value of parameter `beta`, assuming they both live in your parameters configuration (`parameters.yml`). The namespace ensures that outputs are not overwritten, so intermediate and final outputs are prefixed, i.e. `beta.intermediary_output`, `beta.output`.
 
-Note that similar to `inputs` and `outputs` namespacing rule, if you supply a `str` or a `Set[str]`, these explicitly listed parameters won't be namespaced.
+Note that similar to the `inputs` and `outputs` namespacing rule, if you supply a `str` or a `Set[str]`, these explicitly listed parameters won't be namespaced.
 
 ## How to clean up a modular pipeline
 You can manually delete all the files that belong to a modular pipeline. However, Kedro also provides a CLI command to clean up automatically. It deletes the following files when you call `kedro pipeline delete <pipeline_name>`:

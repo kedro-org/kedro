@@ -189,12 +189,16 @@ def create_config_file(context):
         yaml.dump(config, config_file, default_flow_style=False)
 
 
-@given('I have executed the kedro command "{command}"')
-def exec_kedro_target_checked(context, command):
-    """Execute Kedro command and check the status."""
-    cmd = [context.kedro] + command.split()
-
-    res = run(cmd, env=context.env, cwd=str(context.root_project_dir))
+@given("I have installed the project dependencies")
+@when("I install the project dependencies")
+def pip_install_dependencies(context):
+    """Install project dependencies using pip."""
+    reqs_path = "src/requirements.txt"
+    res = run(
+        [context.pip, "install", "-r", reqs_path],
+        env=context.env,
+        cwd=str(context.root_project_dir),
+    )
 
     if res.returncode != OK_EXIT_CODE:
         print(res.stdout)
@@ -349,6 +353,7 @@ def commit_changes_to_git(context):
         check_run(f"git commit -m 'Change {time()}'")
 
 
+@given('I have executed the kedro command "{command}"')
 @when('I execute the kedro command "{command}"')
 def exec_kedro_target(context, command):
     """Execute Kedro target."""

@@ -30,6 +30,8 @@
 data-driven pipelines.
 """
 
-from .modular_pipeline import pipeline  # NOQA
-from .node import node  # NOQA
-from .pipeline import Pipeline  # NOQA
+from .modular_pipeline import pipeline
+from .node import node
+from .pipeline import Pipeline
+
+__all__ = ["pipeline", "node", "Pipeline"]

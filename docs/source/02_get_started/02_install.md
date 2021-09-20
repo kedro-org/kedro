@@ -28,8 +28,7 @@ You should see an ASCII art graphic and the Kedro version number. For example:
 
 ![](../meta/images/kedro_graphic.png)
 
-If you do not see the graphic displayed, or have any issues with your installation, see the [frequently asked questions](../12_faq/01_faq.md), check out [GitHub Discussions](https://github.com/quantumblacklabs/kedro/discussions) or talk to the community on the [Discord Server](https://discord.gg/akJDeVaxnB)
-.
+If you do not see the graphic displayed, or have any issues with your installation, see the [frequently asked questions](../12_faq/01_faq.md), check out [GitHub Discussions](https://github.com/quantumblacklabs/kedro/discussions) or talk to the community on the [Discord Server](https://discord.gg/akJDeVaxnB).
 
 ## Install a development version
 

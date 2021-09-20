@@ -233,7 +233,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
             All node input names as a Set.
 
         """
-        return set.union(set(), *[node.inputs for node in self.nodes])
+        return set.union(set(), *(node.inputs for node in self.nodes))
 
     def all_outputs(self) -> Set[str]:
         """All outputs of all nodes in the pipeline.
@@ -242,7 +242,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
             All node outputs.
 
         """
-        return set.union(set(), *[node.outputs for node in self.nodes])
+        return set.union(set(), *(node.outputs for node in self.nodes))
 
     def _remove_intermediates(self, datasets: Set[str]) -> Set[str]:
         intermediate = {_strip_transcoding(i) for i in self.all_inputs()} & {

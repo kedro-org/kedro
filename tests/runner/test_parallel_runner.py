@@ -254,7 +254,7 @@ class TestInvalidParallelRunner:
         pipeline = Pipeline([node(return_not_serializable, "A", "B")])
         catalog.add_feed_dict(feed_dict=dict(A=42))
         pattern = (
-            r"{0} cannot be serialized. ParallelRunner implicit memory datasets "
+            r"{} cannot be serialized. ParallelRunner implicit memory datasets "
             r"can only be used with serializable data".format(str(data.__class__))
         )
 

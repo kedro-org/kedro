@@ -76,10 +76,10 @@ setup(
 )
 """
 
-PipelineArtifacts = NamedTuple(
-    "PipelineArtifacts",
-    [("pipeline_dir", Path), ("pipeline_tests", Path), ("pipeline_conf", Path)],
-)
+class PipelineArtifacts(NamedTuple):
+    pipeline_dir: Path
+    pipeline_tests: Path
+    pipeline_conf: Path
 
 
 def _assert_pkg_name_ok(pkg_name: str):

@@ -501,7 +501,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
                 )
             )
         # Ensure the function gets the inputs in the correct order
-        return self._decorated_func(*[inputs[item] for item in node_inputs])
+        return self._decorated_func(*(inputs[item] for item in node_inputs))
 
     def _run_with_dict(self, inputs: Dict[str, Any], node_inputs: Dict[str, str]):
         # Node inputs and provided run inputs should completely overlap

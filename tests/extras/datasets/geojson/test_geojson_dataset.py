@@ -224,7 +224,7 @@ class TestGeoJSONDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            r"Save version `{0}` did not match load version `{1}` "
+            r"Save version `{}` did not match load version `{}` "
             r"for GeoJSONDataSet\(.+\)".format(save_version, load_version)
         )
         with pytest.warns(UserWarning, match=pattern):

@@ -33,7 +33,7 @@ from pathlib import Path
 import anyconfig
 import click
 from click.testing import CliRunner
-from mock import patch
+from unittest.mock import patch
 from pytest import fixture, mark, raises
 
 from kedro import __version__ as version

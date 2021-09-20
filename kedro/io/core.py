@@ -171,8 +171,8 @@ class AbstractDataSet(abc.ABC):
             )
         except Exception as exc:
             raise DataSetError(
-                "An exception occurred when parsing config "
-                "for DataSet `{}`:\n{}".format(name, str(exc))
+                f"An exception occurred when parsing config "
+                f"for DataSet `{name}`:\n{str(exc)}"
             ) from exc
 
         try:

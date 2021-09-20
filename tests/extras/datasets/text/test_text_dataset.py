@@ -178,8 +178,8 @@ class TestTextDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            r"Save version `{}` did not match load version `{}` "
-            r"for TextDataSet\(.+\)".format(save_version, load_version)
+            fr"Save version `{save_version}` did not match load version "
+            fr"`{load_version}` for TextDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_txt_data_set.save(STRING)

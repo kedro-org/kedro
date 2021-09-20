@@ -54,9 +54,9 @@ def test_log_time(caplog):
     assert res == 1
     assert logger_name == "kedro.pipeline.decorators"
     assert severity == logging.INFO
-    expected = "Running '{}.{}' took".format(
-        sleeping_identity.__module__,
-        sleeping_identity.__qualname__,
+    expected = (
+        f"Running '{sleeping_identity.__module__}.{sleeping_identity.__qualname__}' "
+        f"took"
     )
     assert expected in message
 

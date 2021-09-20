@@ -669,7 +669,7 @@ def check_jupyter_nb_proc_on_port(context: behave.runner.Context, port: int):
         port: Port to check
 
     """
-    url = "http://localhost:%d" % int(port)
+    url = f"http://localhost:{int(port)}"
     try:
         util.wait_for(
             func=_check_service_up,

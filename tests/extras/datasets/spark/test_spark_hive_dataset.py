@@ -59,7 +59,7 @@ def spark_hive_session(replace_spark_default_getorcreate):
                 .config(
                     "javax.jdo.option.ConnectionURL",
                     f"jdbc:derby:;"
-                    f"databaseName={(Path(tmpdir) / "warehouse_db").absolute()};"
+                    f"databaseName={(Path(tmpdir) / 'warehouse_db').absolute()};"
                     f"create=true",
                 )
                 .enableHiveSupport()

@@ -383,7 +383,7 @@ from kedro.framework.session.session import _activate_session
 current_dir = Path.cwd()  # this points to 'notebooks/' folder
 project_path = current_dir.parent  # point back to the root of the project
 bootstrap_project(project_path)
-session = KedroSession.create("<your-kedro-project-package-name>", project_path) ### ppr is the name of the package
+session = KedroSession.create("<your-kedro-project-package-name>", project_path)
 _activate_session(session)
 context = session.load_context()
 ```

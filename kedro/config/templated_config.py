@@ -240,8 +240,8 @@ def _format_object(val: Any, format_dict: Dict[str, Any]) -> Any:
         if value is None:
             if match.group("default") is None:
                 raise ValueError(
-                    "Failed to format pattern '{}': "
-                    "no config value found, no default provided".format(match.group(0))
+                    f"Failed to format pattern '{match.group(0)}': "
+                    f"no config value found, no default provided"
                 )
             return match.group("default")
 
@@ -255,8 +255,8 @@ def _format_object(val: Any, format_dict: Dict[str, Any]) -> Any:
                 formatted_key = _format_object(key, format_dict)
                 if not isinstance(formatted_key, str):
                     raise ValueError(
-                        "When formatting '{}' key, only string values can be used. "
-                        "'{}' found".format(key, formatted_key)
+                        f"When formatting '{key}' key, only string values can be used. "
+                        f"'{formatted_key}' found"
                     )
 
                 key = formatted_key

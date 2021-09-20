@@ -45,9 +45,9 @@ def _human_readable_time(elapsed: float):  # pragma: no cover
     hours, mins = divmod(mins, 60)
 
     if hours > 0:
-        message = "%dh%02dm%02ds" % (hours, mins, secs)
+        message = f"{hours}h{mins:02}m{secs:02d}s"
     elif mins > 0:
-        message = "%dm%02ds" % (mins, secs)
+        message = f"{mins}m{secs:02d}s"
     elif secs >= 1:
         message = f"{secs:.2f}s"
     else:

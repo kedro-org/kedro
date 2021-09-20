@@ -60,9 +60,8 @@ def _transcode_split(element: str) -> Tuple[str, str]:
 
     if len(split_name) > 2:
         raise ValueError(
-            "Expected maximum 1 transcoding separator, found {} instead: '{}'.".format(
-                len(split_name) - 1, element
-            )
+            f"Expected maximum 1 transcoding separator, found {len(split_name) - 1} "
+            f"instead: '{element}'."
         )
     if len(split_name) == 1:
         split_name.append("")
@@ -201,7 +200,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         if len(self.nodes) > max_nodes_to_display:
             nodes_reprs.append("...")
         nodes_reprs_str = (
-            "[\n{}\n]".format(",\n".join(nodes_reprs)) if nodes_reprs else "[]"
+            f"[\n{',\n'.join(nodes_reprs))}\n]" if nodes_reprs else "[]"
         )
         constructor_repr = f"({nodes_reprs_str})"
         return f"{self.__class__.__name__}{constructor_repr}"
@@ -433,9 +432,8 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         ]
         if not nodes:
             raise ValueError(
-                "Pipeline does not contain nodes with namespace(s) {}.".format(
-                    list(node_namespace)
-                )
+                f"Pipeline does not contain nodes with namespace(s) "
+                f"{list(node_namespace)}."
             )
         return Pipeline(nodes)
 
@@ -785,8 +783,8 @@ def _validate_unique_outputs(nodes: List[Node]) -> None:
     duplicates = [key for key, value in Counter(outputs).items() if value > 1]
     if duplicates:
         raise OutputNotUniqueError(
-            "Output(s) {} are returned by more than one nodes. Node "
-            "outputs must be unique.".format(sorted(duplicates))
+            f"Output(s) {sorted(duplicates)} are returned by more than one nodes. Node "
+            f"outputs must be unique."
         )
 
 
@@ -796,8 +794,8 @@ def _validate_unique_confirms(nodes: List[Node]) -> None:
     duplicates = [key for key, value in Counter(confirms).items() if value > 1]
     if duplicates:
         raise ConfirmNotUniqueError(
-            "{} datasets are confirmed by more than one node. Node "
-            "confirms must be unique.".format(sorted(duplicates))
+            f"{sorted(duplicates)} datasets are confirmed by more than one node. Node "
+            f"confirms must be unique."
         )
 
 
@@ -821,9 +819,9 @@ def _validate_transcoded_inputs_outputs(nodes: List[Node]) -> None:
     if invalid:
         raise ValueError(
             "The following datasets are used with transcoding, but "
-            "were referenced without the separator: {}.\n"
+            "were referenced without the separator: {', '.join(invalid)}.\n"
             "Please specify a transcoding option or "
-            "rename the datasets.".format(", ".join(invalid))
+            "rename the datasets."
         )
 
 

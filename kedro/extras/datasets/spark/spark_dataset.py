@@ -271,10 +271,9 @@ class SparkDataSet(AbstractVersionedDataSet):
 
         elif fs_prefix == "hdfs://" and version:
             warn(
-                "HDFS filesystem support for versioned {} is in beta and uses "
-                "`hdfs.client.InsecureClient`, please use with caution".format(
-                    self.__class__.__name__
-                )
+                f"HDFS filesystem support for versioned {self.__class__.__name__} is "
+                f"in beta and uses `hdfs.client.InsecureClient`, please use with "
+                f"caution"
             )
 
             # default namenode address

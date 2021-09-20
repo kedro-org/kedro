@@ -29,7 +29,6 @@
 """``APIDataSet`` loads the data from HTTP(S) APIs.
 It uses the python requests library: https://requests.readthedocs.io/en/master/
 """
-import socket
 from typing import Any, Dict, List, Tuple, Union
 
 import requests

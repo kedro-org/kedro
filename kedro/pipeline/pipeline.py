@@ -817,10 +817,10 @@ def _validate_transcoded_inputs_outputs(nodes: List[Node]) -> None:
 
     if invalid:
         raise ValueError(
-            "The following datasets are used with transcoding, but "
-            "were referenced without the separator: {', '.join(invalid)}.\n"
-            "Please specify a transcoding option or "
-            "rename the datasets."
+            f"The following datasets are used with transcoding, but "
+            f"were referenced without the separator: {', '.join(invalid)}.\n"
+            f"Please specify a transcoding option or "
+            f"rename the datasets."
         )
 
 

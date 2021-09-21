@@ -1117,7 +1117,7 @@ def _append_package_reqs(
         file.write("\n".join(sorted_reqs))
     click.secho(
         f"Added the following requirements from modular pipeline `{pipeline_name}` to "
-        f"requirements.in:\n{'\n'.join(sorted_reqs)}"
+        f"requirements.in:\n{chr(10).join(sorted_reqs)}"
     )
     click.secho(
         "Use `kedro install --build-reqs` to compile and install the updated list of "

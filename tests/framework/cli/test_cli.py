@@ -29,11 +29,11 @@ from collections import namedtuple
 from itertools import cycle
 from os.path import join
 from pathlib import Path
+from unittest.mock import patch
 
 import anyconfig
 import click
 from click.testing import CliRunner
-from unittest.mock import patch
 from pytest import fixture, mark, raises
 
 from kedro import __version__ as version

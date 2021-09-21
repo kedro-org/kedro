@@ -200,7 +200,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         if len(self.nodes) > max_nodes_to_display:
             nodes_reprs.append("...")
         sep = ",\n"
-        nodes_reprs_str = f"[\n{sep.join(nodes_reprs))}\n]" if nodes_reprs else "[]"
+        nodes_reprs_str = f"[\n{sep.join(nodes_reprs)}\n]" if nodes_reprs else "[]"
         constructor_repr = f"({nodes_reprs_str})"
         return f"{self.__class__.__name__}{constructor_repr}"
 

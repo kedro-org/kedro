@@ -124,7 +124,7 @@ class TemplatedConfigLoader(ConfigLoader):
         conf_paths: Union[str, Iterable[str]],
         *,
         globals_pattern: Optional[str] = None,
-        globals_dict: Optional[Dict[str, Any]] = None
+        globals_dict: Optional[Dict[str, Any]] = None,
     ):
         """Instantiate a ``TemplatedConfigLoader``.
 

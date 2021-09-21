@@ -79,6 +79,7 @@ setup(
 
 class PipelineArtifacts(NamedTuple):
     """An ordered collection of source_path, tests_path, config_paths"""
+
     pipeline_dir: Path
     pipeline_tests: Path
     pipeline_conf: Path

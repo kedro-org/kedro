@@ -210,12 +210,12 @@ class ParallelRunner(AbstractRunner):
 
         if unserializable:
             raise AttributeError(
-                "The following nodes cannot be serialized: {}\nIn order to "
-                "utilize multiprocessing you need to make sure all nodes are "
-                "serializable, i.e. nodes should not include lambda "
-                "functions, nested functions, closures, etc.\nIf you "
-                "are using custom decorators ensure they are correctly using "
-                "functools.wraps().".format(sorted(unserializable))
+                f"The following nodes cannot be serialized: {sorted(unserializable)}\n"
+                f"In order to utilize multiprocessing you need to make sure all nodes "
+                f"are serializable, i.e. nodes should not include lambda "
+                f"functions, nested functions, closures, etc.\nIf you "
+                f"are using custom decorators ensure they are correctly using "
+                f"functools.wraps()."
             )
 
     @classmethod
@@ -239,12 +239,12 @@ class ParallelRunner(AbstractRunner):
 
         if unserializable:
             raise AttributeError(
-                "The following data sets cannot be used with multiprocessing: "
-                "{}\nIn order to utilize multiprocessing you need to make sure "
-                "all data sets are serializable, i.e. data sets should not make "
-                "use of lambda functions, nested functions, closures etc.\nIf you "
-                "are using custom decorators ensure they are correctly using "
-                "functools.wraps().".format(sorted(unserializable))
+                f"The following data sets cannot be used with multiprocessing: "
+                f"{sorted(unserializable)}\nIn order to utilize multiprocessing you "
+                f"need to make sure all data sets are serializable, i.e. data sets "
+                f"should not make use of lambda functions, nested functions, closures "
+                f"etc.\nIf you are using custom decorators ensure they are correctly "
+                f"using functools.wraps()."
             )
 
         memory_data_sets = []
@@ -258,9 +258,10 @@ class ParallelRunner(AbstractRunner):
 
         if memory_data_sets:
             raise AttributeError(
-                "The following data sets are memory data sets: {}\n"
-                "ParallelRunner does not support output to externally created "
-                "MemoryDataSets".format(sorted(memory_data_sets))
+                f"The following data sets are memory data sets: "
+                f"{sorted(memory_data_sets)}\n"
+                f"ParallelRunner does not support output to externally created "
+                f"MemoryDataSets"
             )
 
     def _get_required_workers_count(self, pipeline: Pipeline):

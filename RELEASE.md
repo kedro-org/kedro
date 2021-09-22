@@ -10,6 +10,7 @@
 ## Upcoming deprecations for Kedro 0.18.0
 
 ## Thanks for supporting contributions
+[Deepyaman Datta](https://github.com/deepyaman)
 
 # Release 0.17.5
 
@@ -27,7 +28,6 @@
 | --------------------------- | ---------------------------------------------------- | --------------------------------- |
 | `tracking.MetricsDataSet` | Dataset to track numeric metrics for experiment tracking | `kedro.extras.datasets.tracking` |
 | `tracking.JSONDataSet` | Dataset to track data for experiment tracking | `kedro.extras.datasets.tracking` |
-
 
 ## Bug fixes and other changes
 * Bumped minimum required `fsspec` version to 2021.04.

@@ -499,8 +499,8 @@ class TestPartitionedDataSetS3:
         in S3 if the checkpoint file exists"""
         # create checkpoint and assert that it exists
         IncrementalDataSet(mocked_csvs_in_s3, DATASET).confirm()
-        checkpoint_path = "{}/{}".format(
-            mocked_csvs_in_s3, IncrementalDataSet.DEFAULT_CHECKPOINT_FILENAME
+        checkpoint_path = (
+            f"{mocked_csvs_in_s3}/{IncrementalDataSet.DEFAULT_CHECKPOINT_FILENAME}"
         )
         checkpoint_value = TextDataSet(checkpoint_path).load()
         assert checkpoint_value == "p04/data.csv"

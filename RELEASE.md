@@ -3,6 +3,7 @@
 ## Major features and improvements
 
 ## Bug fixes and other changes
+* Fixed an issue where `kedro new --config config.yml` was ignoring the config file when `prompts.yml` didn't exist.
 
 ## Minor breaking changes to the API
 

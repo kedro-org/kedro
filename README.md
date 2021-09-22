@@ -102,6 +102,7 @@ There are Kedro users across the world, who work at start-ups, major enterprises
 [Modec](https://www.modec.com/),
 [Mosaic Data Science](https://www.youtube.com/watch?v=fCWGevB366g),
 [NaranjaX](https://www.youtube.com/watch?v=_0kMmRfltEQ),
+[NASA](https://github.com/nasa/ML-airport-taxi-out),
 [Open Data Science LatAm](https://www.odesla.org/),
 [Prediqt](https://prediqt.co/),
 [QuantumBlack](https://medium.com/quantumblack/introducing-kedro-the-open-source-library-for-production-ready-machine-learning-code-d1c6d26ce2cf),

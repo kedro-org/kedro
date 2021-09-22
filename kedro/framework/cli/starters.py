@@ -198,7 +198,7 @@ def _fetch_config_from_file(config_path: str) -> Dict[str, str]:
 
     """
     try:
-        with open(config_path, "r", encoding="utf-8") as config_file:
+        with open(config_path, encoding="utf-8") as config_file:
             config = yaml.safe_load(config_file)
 
         if KedroCliError.VERBOSE_ERROR:

@@ -44,7 +44,7 @@ def files_at_path(path: str):
 
 def files_missing_substring(file_names, substring):
     for file_name in file_names:
-        with open(file_name, "r", encoding="utf-8") as current_file:
+        with open(file_name, encoding="utf-8") as current_file:
             content = current_file.read()
 
             if content.strip() and substring not in content:

@@ -213,8 +213,8 @@ class AbstractDataSet(abc.ABC):
         except Exception as exc:
             # This exception handling is by design as the composed data sets
             # can throw any type of exception.
-            message = "Failed while loading data from data set {}.\n{}".format(
-                str(self), str(exc)
+            message = (
+                f"Failed while loading data from data set {str(self)}.\n{str(exc)}"
             )
             raise DataSetError(message) from exc
 
@@ -274,22 +274,22 @@ class AbstractDataSet(abc.ABC):
     @abc.abstractmethod
     def _load(self) -> Any:
         raise NotImplementedError(
-            "`{}` is a subclass of AbstractDataSet and"
-            "it must implement the `_load` method".format(self.__class__.__name__)
+            f"`{self.__class__.__name__}` is a subclass of AbstractDataSet and "
+            f"it must implement the `_load` method"
         )
 
     @abc.abstractmethod
     def _save(self, data: Any) -> None:
         raise NotImplementedError(
-            "`{}` is a subclass of AbstractDataSet and"
-            "it must implement the `_save` method".format(self.__class__.__name__)
+            f"`{self.__class__.__name__}` is a subclass of AbstractDataSet and "
+            f"it must implement the `_save` method"
         )
 
     @abc.abstractmethod
     def _describe(self) -> Dict[str, Any]:
         raise NotImplementedError(
-            "`{}` is a subclass of AbstractDataSet and"
-            "it must implement the `_describe` method".format(self.__class__.__name__)
+            f"`{self.__class__.__name__}` is a subclass of AbstractDataSet and "
+            f"it must implement the `_describe` method"
         )
 
     def exists(self) -> bool:
@@ -307,8 +307,8 @@ class AbstractDataSet(abc.ABC):
             self._logger.debug("Checking whether target of %s exists", str(self))
             return self._exists()
         except Exception as exc:
-            message = "Failed during exists check for data set {}.\n{}".format(
-                str(self), str(exc)
+            message = (
+                f"Failed during exists check for data set {str(self)}.\n{str(exc)}"
             )
             raise DataSetError(message) from exc
 
@@ -605,8 +605,8 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
 
         if self._exists_function(str(versioned_path)):
             raise DataSetError(
-                "Save path `{}` for {} must not exist if versioning "
-                "is enabled.".format(versioned_path, str(self))
+                f"Save path `{versioned_path}` for {str(self)} must not exist if "
+                f"versioning is enabled."
             )
 
         return versioned_path
@@ -661,8 +661,8 @@ class AbstractVersionedDataSet(AbstractDataSet, abc.ABC):
         except VersionNotFoundError:
             return False
         except Exception as exc:  # SKIP_IF_NO_SPARK
-            message = "Failed during exists check for data set {}.\n{}".format(
-                str(self), str(exc)
+            message = (
+                f"Failed during exists check for data set {str(self)}.\n{str(exc)}"
             )
             raise DataSetError(message) from exc
 
@@ -696,7 +696,7 @@ def _parse_filepath(filepath: str) -> Dict[str, str]:
     if protocol == "file":
         windows_path = re.match(r"^/([a-zA-Z])[:|]([\\/].*)$", path)
         if windows_path:
-            path = "{}:{}".format(*windows_path.groups())
+            path = ":".join(windows_path.groups())
 
     options = {"protocol": protocol, "path": path}
 

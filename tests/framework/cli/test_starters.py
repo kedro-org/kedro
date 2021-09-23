@@ -328,7 +328,7 @@ class TestNewFromConfigFileValid:
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "--starter", "template", "--config", "config.yml"]
         )
-        _assert_template_ok(result)
+        _assert_template_ok(result, **config)
 
     def test_empty_prompts(self, fake_kedro_cli):
         config = {
@@ -342,7 +342,7 @@ class TestNewFromConfigFileValid:
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "--starter", "template", "--config", "config.yml"]
         )
-        _assert_template_ok(result)
+        _assert_template_ok(result, **config)
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")

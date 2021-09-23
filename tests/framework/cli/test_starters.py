@@ -93,9 +93,11 @@ def _assert_template_ok(
     assert len(generated_files) == FILES_IN_TEMPLATE
     assert full_path.exists()
     assert (full_path / ".gitignore").is_file()
-    assert project_name in (full_path / "README.md").read_text()
-    assert "KEDRO" in (full_path / ".gitignore").read_text()
-    assert kedro_version in (full_path / "src" / "requirements.txt").read_text()
+    assert project_name in (full_path / "README.md").read_text(encoding="utf-8")
+    assert "KEDRO" in (full_path / ".gitignore").read_text(encoding="utf-8")
+    assert kedro_version in (full_path / "src" / "requirements.txt").read_text(
+        encoding="utf-8"
+    )
     assert (full_path / "src" / python_package / "__init__.py").is_file()
 
 
@@ -110,8 +112,12 @@ def test_starter_list(fake_kedro_cli):
 
 def test_cookiecutter_json_matches_prompts_yml():
     """Validate the contents of the default config file."""
-    cookiecutter_json = json.loads((TEMPLATE_PATH / "cookiecutter.json").read_text())
-    prompts_yml = yaml.safe_load((TEMPLATE_PATH / "prompts.yml").read_text())
+    cookiecutter_json = json.loads(
+        (TEMPLATE_PATH / "cookiecutter.json").read_text(encoding="utf-8")
+    )
+    prompts_yml = yaml.safe_load(
+        (TEMPLATE_PATH / "prompts.yml").read_text(encoding="utf-8")
+    )
     assert set(cookiecutter_json) == set(prompts_yml) | {"kedro_version"}
 
 
@@ -245,7 +251,7 @@ class TestNewFromUserPromptsInvalid:
 
     def test_prompt_bad_yaml(self, fake_kedro_cli):
         shutil.copytree(TEMPLATE_PATH, "template")
-        (Path("template") / "prompts.yml").write_text("invalid\tyaml")
+        (Path("template") / "prompts.yml").write_text("invalid\tyaml", encoding="utf-8")
         result = CliRunner().invoke(fake_kedro_cli, ["new", "--starter", "template"])
         assert result.exit_code != 0
         assert "Failed to generate project: could not load prompts.yml" in result.output
@@ -322,7 +328,7 @@ class TestNewFromConfigFileValid:
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "--starter", "template", "--config", "config.yml"]
         )
-        _assert_template_ok(result)
+        _assert_template_ok(result, **config)
 
     def test_empty_prompts(self, fake_kedro_cli):
         config = {
@@ -336,7 +342,7 @@ class TestNewFromConfigFileValid:
         result = CliRunner().invoke(
             fake_kedro_cli, ["new", "--starter", "template", "--config", "config.yml"]
         )
-        _assert_template_ok(result)
+        _assert_template_ok(result, **config)
 
 
 @pytest.mark.usefixtures("chdir_to_tmp")
@@ -380,7 +386,7 @@ class TestNewFromConfigFileInvalid:
 
     def test_config_bad_yaml(self, fake_kedro_cli):
         """Check the error if config YAML is invalid."""
-        Path("config.yml").write_text("invalid\tyaml")
+        Path("config.yml").write_text("invalid\tyaml", encoding="utf-8")
         result = CliRunner().invoke(fake_kedro_cli, ["new", "-v", "-c", "config.yml"])
         assert result.exit_code != 0
         assert "Failed to generate project: could not load config" in result.output

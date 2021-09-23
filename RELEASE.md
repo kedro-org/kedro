@@ -1,4 +1,18 @@
-# Upcoming Release 0.17.5
+# Upcoming Release 0.17.6
+
+## Major features and improvements
+
+## Bug fixes and other changes
+* Fixed an issue where `kedro new --config config.yml` was ignoring the config file when `prompts.yml` didn't exist.
+
+## Minor breaking changes to the API
+
+## Upcoming deprecations for Kedro 0.18.0
+
+## Thanks for supporting contributions
+[Deepyaman Datta](https://github.com/deepyaman)
+
+# Release 0.17.5
 
 ## Major features and improvements
 * Added new CLI group `registry`, with the associated commands `kedro registry list` and `kedro registry describe`, to replace `kedro pipeline list` and `kedro pipeline describe`.
@@ -15,13 +29,11 @@
 | `tracking.MetricsDataSet` | Dataset to track numeric metrics for experiment tracking | `kedro.extras.datasets.tracking` |
 | `tracking.JSONDataSet` | Dataset to track data for experiment tracking | `kedro.extras.datasets.tracking` |
 
-
 ## Bug fixes and other changes
 * Bumped minimum required `fsspec` version to 2021.04.
 * Fixed the `kedro install` and `kedro build-reqs` flows when uninstalled dependencies are present in a project's `settings.py`, `context.py` or `hooks.py` ([Issue #829](https://github.com/quantumblacklabs/kedro/issues/829)).
 * Imports are now refactored at `kedro pipeline package` and `kedro pipeline pull` time, so that _aliasing_ a modular pipeline doesn't break it.
-
-## Minor breaking changes to the API
+* Pinned `dynaconf` to `<3.1.6` because the method signature for `_validate_items` changed which is used in Kedro.
 
 ## Upcoming deprecations for Kedro 0.18.0
 * `kedro pipeline list` and `kedro pipeline describe` are being deprecated in favour of new commands `kedro registry list ` and `kedro registry describe`.

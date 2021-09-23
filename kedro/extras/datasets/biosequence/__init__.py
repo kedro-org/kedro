@@ -33,4 +33,4 @@ __all__ = ["BioSequenceDataSet"]
 from contextlib import suppress
 
 with suppress(ImportError):
-    from .biosequence_dataset import BioSequenceDataSet  # NOQA
+    from .biosequence_dataset import BioSequenceDataSet

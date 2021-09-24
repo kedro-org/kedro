@@ -90,9 +90,8 @@ def _validate_datasets_exist(
     non_existent = (inputs | outputs | parameters) - existing
     if non_existent:
         raise ModularPipelineError(
-            "Failed to map datasets and/or parameters: {}".format(
-                ", ".join(sorted(non_existent))
-            )
+            f"Failed to map datasets and/or parameters: "
+            f"{', '.join(sorted(non_existent))}"
         )
 
 

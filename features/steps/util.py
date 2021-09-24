@@ -123,7 +123,7 @@ def wait_for(
 
         sleep(sleep_for)
     raise WaitForException(
-        "func: %s, didn't return within specified timeout: %d" % (func, timeout_)
+        f"func: {func}, didn't return within specified timeout: {timeout_}"
     )
 
 

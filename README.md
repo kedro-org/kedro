@@ -94,6 +94,7 @@ There are Kedro users across the world, who work at start-ups, major enterprises
 [Element AI](https://www.elementai.com/),
 [GMO](https://recruit.gmo.jp/engineer/jisedai/engineer/jisedai/engineer/jisedai/engineer/jisedai/engineer/jisedai/blog/kedro_and_mlflow_tracking/),
 [Imperial College London](https://github.com/dssg/barefoot-winnie-public),
+[ING](https://www.ing.com),
 [Jungle Scout](https://junglescouteng.medium.com/jungle-scout-case-study-kedro-airflow-and-mlflow-use-on-production-code-150d7231d42e),
 [Helvetas](https://www.linkedin.com/posts/lionel-trebuchon_mlflow-kedro-ml-ugcPost-6747074322164154368-umKw),
 [Leapfrog](https://www.lftechnology.com/blog/ai-pipeline-kedro/),

@@ -189,12 +189,16 @@ def create_config_file(context):
         yaml.dump(config, config_file, default_flow_style=False)
 
 
-@given('I have executed the kedro command "{command}"')
-def exec_kedro_target_checked(context, command):
-    """Execute Kedro command and check the status."""
-    cmd = [context.kedro] + command.split()
-
-    res = run(cmd, env=context.env, cwd=str(context.root_project_dir))
+@given("I have installed the project dependencies")
+@when("I install the project dependencies")
+def pip_install_dependencies(context):
+    """Install project dependencies using pip."""
+    reqs_path = "src/requirements.txt"
+    res = run(
+        [context.pip, "install", "-r", reqs_path],
+        env=context.env,
+        cwd=str(context.root_project_dir),
+    )
 
     if res.returncode != OK_EXIT_CODE:
         print(res.stdout)
@@ -247,7 +251,7 @@ def uninstall_package_via_pip(context, package):
 @when("I install the project's python package")
 def install_project_package_via_pip(context):
     """Install a python package using pip."""
-    dist_dir = context.root_project_dir / "src" / "dist"
+    dist_dir = context.root_project_dir / "dist"
     (whl_file,) = dist_dir.glob("*.whl")
     run([context.pip, "install", str(whl_file)], env=context.env)
 
@@ -349,6 +353,7 @@ def commit_changes_to_git(context):
         check_run(f"git commit -m 'Change {time()}'")
 
 
+@given('I have executed the kedro command "{command}"')
 @when('I execute the kedro command "{command}"')
 def exec_kedro_target(context, command):
     """Execute Kedro target."""
@@ -585,7 +590,7 @@ def check_failed_status_code(context):
 @then("the relevant packages should be created")
 def check_python_packages_created(context):
     """Check that egg and whl files exist in dist dir."""
-    dist_dir = context.root_project_dir / "src" / "dist"
+    dist_dir = context.root_project_dir / "dist"
     egg_file = dist_dir.glob("*.egg")
     whl_file = dist_dir.glob("*.whl")
     assert any(egg_file)

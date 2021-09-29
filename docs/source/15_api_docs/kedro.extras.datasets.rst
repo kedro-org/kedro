@@ -19,10 +19,11 @@ kedro.extras.datasets
    kedro.extras.datasets.holoviews.HoloviewsWriter
    kedro.extras.datasets.json.JSONDataSet
    kedro.extras.datasets.matplotlib.MatplotlibWriter
-   kedro.extras.datasets.networkx.NetworkXDataSet
+   kedro.extras.datasets.networkx.GMLDataSet
+   kedro.extras.datasets.networkx.GraphMLDataSet
+   kedro.extras.datasets.networkx.JSONDataSet
    kedro.extras.datasets.pandas.CSVDataSet
    kedro.extras.datasets.pandas.ExcelDataSet
-   kedro.extras.datasets.pandas.AppendableExcelDataSet
    kedro.extras.datasets.pandas.FeatherDataSet
    kedro.extras.datasets.pandas.GBQTableDataSet
    kedro.extras.datasets.pandas.HDFDataSet
@@ -30,6 +31,7 @@ kedro.extras.datasets
    kedro.extras.datasets.pandas.ParquetDataSet
    kedro.extras.datasets.pandas.SQLQueryDataSet
    kedro.extras.datasets.pandas.SQLTableDataSet
+   kedro.extras.datasets.pandas.XMLDataSet
    kedro.extras.datasets.pickle.PickleDataSet
    kedro.extras.datasets.pillow.ImageDataSet
    kedro.extras.datasets.plotly.PlotlyDataSet

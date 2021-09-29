@@ -22,31 +22,13 @@ The `build-reqs` command will:
 To further update the project requirements, you should modify `src/requirements.in` (not `src/requirements.txt`) and re-run `kedro build-reqs`.
 
 
-## `kedro install`
+## Install project-specific dependencies
 
 To install the project-specific dependencies, navigate to the root directory of the project and run:
 
 ```bash
-kedro install
+pip install -r src/requirements.txt
 ```
-
-`kedro install` automatically compiles project dependencies by running `kedro build-reqs` behind the scenes if the `src/requirements.in` file doesn't exist.
-
-To skip the compilation step and install requirements as-is from `src/requirements.txt`, run the following:
-```bash
-kedro install --no-build-reqs
-```
-
-This takes the latest version of a dependency that is available within the range specified. It allows flexibility in the version of the dependency that `pip` installs. For example, if `ipython>=7.0.0,<8.0` is specified, then the most up-to-date version available is installed.
-
-
-To force the compilation, even if `src/requirements.in` already exists, run the following:
-
-```bash
-kedro install --build-reqs
-```
-
-In some cases, such as a production setting, this is useful to eliminate ambiguity and specify exactly the version of each dependency that is installed.
 
 ## Workflow dependencies
 

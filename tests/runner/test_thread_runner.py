@@ -91,7 +91,7 @@ class TestValidThreadRunner:
         assert "Z" in result
         assert result["Z"] == (42, 42, 42)
 
-    def test_memory_data_set_input(self, fan_out_fan_in):
+    def test_memory_dataset_input(self, fan_out_fan_in):
         catalog = DataCatalog({"A": MemoryDataSet("42")})
         result = ThreadRunner().run(fan_out_fan_in, catalog)
         assert "Z" in result

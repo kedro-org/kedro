@@ -34,7 +34,7 @@ import pandas as pd
 import pytest
 
 from kedro.io import DataSetError, MemoryDataSet
-from kedro.io.memory_data_set import _copy_with_mode, _infer_copy_mode
+from kedro.io.memory_dataset import _copy_with_mode, _infer_copy_mode
 
 
 def _update_data(data, idx, jdx, value):
@@ -76,24 +76,24 @@ def new_data():
 
 
 @pytest.fixture
-def memory_data_set(input_data):
+def memory_dataset(input_data):
     return MemoryDataSet(data=input_data)
 
 
 @pytest.fixture
 def mocked_infer_mode(mocker):
-    return mocker.patch("kedro.io.memory_data_set._infer_copy_mode")
+    return mocker.patch("kedro.io.memory_dataset._infer_copy_mode")
 
 
 @pytest.fixture
 def mocked_copy_with_mode(mocker):
-    return mocker.patch("kedro.io.memory_data_set._copy_with_mode")
+    return mocker.patch("kedro.io.memory_dataset._copy_with_mode")
 
 
 class TestMemoryDataSet:
-    def test_load(self, memory_data_set, input_data):
+    def test_load(self, memory_dataset, input_data):
         """Test basic load"""
-        loaded_data = memory_data_set.load()
+        loaded_data = memory_dataset.load()
         assert _check_equals(loaded_data, input_data)
 
     def test_load_none(self):
@@ -101,10 +101,10 @@ class TestMemoryDataSet:
         assert loaded_data is None
 
     def test_load_infer_mode(
-        self, memory_data_set, input_data, mocked_infer_mode, mocked_copy_with_mode
+        self, memory_dataset, input_data, mocked_infer_mode, mocked_copy_with_mode
     ):
         """Test load calls infer_mode and copy_mode_with"""
-        memory_data_set.load()
+        memory_dataset.load()
         assert mocked_infer_mode.call_count == 1
         assert mocked_copy_with_mode.call_count == 1
 
@@ -115,18 +115,18 @@ class TestMemoryDataSet:
         assert mocked_copy_with_mode.call_args[0]
         assert _check_equals(mocked_copy_with_mode.call_args[0][0], input_data)
 
-    def test_save(self, memory_data_set, input_data, new_data):
+    def test_save(self, memory_dataset, input_data, new_data):
         """Test overriding the data set"""
-        memory_data_set.save(data=new_data)
-        reloaded = memory_data_set.load()
+        memory_dataset.save(data=new_data)
+        reloaded = memory_dataset.load()
         assert not _check_equals(reloaded, input_data)
         assert _check_equals(reloaded, new_data)
 
     def test_save_infer_mode(
-        self, memory_data_set, new_data, mocked_infer_mode, mocked_copy_with_mode
+        self, memory_dataset, new_data, mocked_infer_mode, mocked_copy_with_mode
     ):
         """Test save calls infer_mode and copy_mode_with"""
-        memory_data_set.save(data=new_data)
+        memory_dataset.save(data=new_data)
         assert mocked_infer_mode.call_count == 1
         assert mocked_copy_with_mode.call_count == 1
 
@@ -137,28 +137,28 @@ class TestMemoryDataSet:
         assert mocked_copy_with_mode.call_args[0]
         assert _check_equals(mocked_copy_with_mode.call_args[0][0], new_data)
 
-    def test_load_modify_original_data(self, memory_data_set, input_data):
+    def test_load_modify_original_data(self, memory_dataset, input_data):
         """Check that the data set object is not updated when the original
         object is changed."""
         input_data = _update_data(input_data, 1, 1, -5)
-        assert not _check_equals(memory_data_set.load(), input_data)
+        assert not _check_equals(memory_dataset.load(), input_data)
 
-    def test_save_modify_original_data(self, memory_data_set, new_data):
+    def test_save_modify_original_data(self, memory_dataset, new_data):
         """Check that the data set object is not updated when the original
         object is changed."""
-        memory_data_set.save(new_data)
+        memory_dataset.save(new_data)
         new_data = _update_data(new_data, 1, 1, "new value")
 
-        assert not _check_equals(memory_data_set.load(), new_data)
+        assert not _check_equals(memory_dataset.load(), new_data)
 
     @pytest.mark.parametrize(
         "input_data", ["dummy_dataframe", "dummy_numpy_array"], indirect=True
     )
-    def test_load_returns_new_object(self, memory_data_set, input_data):
+    def test_load_returns_new_object(self, memory_dataset, input_data):
         """Test that consecutive loads point to different objects in case of a
         pandas DataFrame and numpy array"""
-        loaded_data = memory_data_set.load()
-        reloaded_data = memory_data_set.load()
+        loaded_data = memory_dataset.load()
+        reloaded_data = memory_dataset.load()
         assert _check_equals(loaded_data, input_data)
         assert _check_equals(reloaded_data, input_data)
         assert loaded_data is not reloaded_data
@@ -189,9 +189,9 @@ class TestMemoryDataSet:
         ],
         indirect=["input_data"],
     )
-    def test_str_representation(self, memory_data_set, input_data, expected):
+    def test_str_representation(self, memory_dataset, input_data, expected):
         """Test string representation of the data set"""
-        assert expected in str(memory_data_set)
+        assert expected in str(memory_dataset)
 
     def test_exists(self, new_data):
         """Test `exists` method invocation"""

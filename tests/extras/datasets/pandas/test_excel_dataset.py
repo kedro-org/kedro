@@ -74,8 +74,6 @@ class TestExcelDataSet:
         excel_data_set.save(dummy_dataframe)
         reloaded = excel_data_set.load()
         assert_frame_equal(dummy_dataframe, reloaded)
-        assert excel_data_set._fs_open_args_load == {}
-        assert excel_data_set._fs_open_args_save == {"mode": "wb"}
 
     def test_exists(self, excel_data_set, dummy_dataframe):
         """Test `exists` method invocation for both existing and
@@ -101,13 +99,26 @@ class TestExcelDataSet:
             assert excel_data_set._save_args[key] == value
 
     @pytest.mark.parametrize(
-        "fs_args",
-        [{"open_args_load": {"mode": "rb", "compression": "gzip"}}],
-        indirect=True,
+        "load_args,save_args",
+        [
+            ({"storage_options": {"a": "b"}}, {}),
+            ({}, {"storage_options": {"a": "b"}}),
+            ({"storage_options": {"a": "b"}}, {"storage_options": {"x": "y"}}),
+        ],
     )
-    def test_open_extra_args(self, excel_data_set, fs_args):
-        assert excel_data_set._fs_open_args_load == fs_args["open_args_load"]
-        assert excel_data_set._fs_open_args_save == {"mode": "wb"}  # default unchanged
+    def test_storage_options_dropped(self, load_args, save_args, caplog, tmp_path):
+        filepath = str(tmp_path / "test.csv")
+
+        ds = ExcelDataSet(filepath=filepath, load_args=load_args, save_args=save_args)
+
+        records = [r for r in caplog.records if r.levelname == "WARNING"]
+        expected_log_message = (
+            f"Dropping `storage_options` for {filepath}, "
+            f"please specify them under `fs_args` or `credentials`."
+        )
+        assert records[0].getMessage() == expected_log_message
+        assert "storage_options" not in ds._save_args
+        assert "storage_options" not in ds._load_args
 
     def test_load_missing_file(self, excel_data_set):
         """Check the error when trying to load missing file."""
@@ -116,16 +127,20 @@ class TestExcelDataSet:
             excel_data_set.load()
 
     @pytest.mark.parametrize(
-        "filepath,instance_type",
+        "filepath,instance_type,load_path",
         [
-            ("s3://bucket/file.xlsx", S3FileSystem),
-            ("file:///tmp/test.xlsx", LocalFileSystem),
-            ("/tmp/test.xlsx", LocalFileSystem),
-            ("gcs://bucket/file.xlsx", GCSFileSystem),
-            ("https://example.com/file.xlsx", HTTPFileSystem),
+            ("s3://bucket/file.xlsx", S3FileSystem, "s3://bucket/file.xlsx"),
+            ("file:///tmp/test.xlsx", LocalFileSystem, "/tmp/test.xlsx"),
+            ("/tmp/test.xlsx", LocalFileSystem, "/tmp/test.xlsx"),
+            ("gcs://bucket/file.xlsx", GCSFileSystem, "gcs://bucket/file.xlsx"),
+            (
+                "https://example.com/file.xlsx",
+                HTTPFileSystem,
+                "https://example.com/file.xlsx",
+            ),
         ],
     )
-    def test_protocol_usage(self, filepath, instance_type):
+    def test_protocol_usage(self, filepath, instance_type, load_path, mocker):
         data_set = ExcelDataSet(filepath=filepath)
         assert isinstance(data_set._fs, instance_type)
 
@@ -133,6 +148,11 @@ class TestExcelDataSet:
 
         assert str(data_set._filepath) == path
         assert isinstance(data_set._filepath, PurePosixPath)
+
+        mock_pandas_call = mocker.patch("pandas.read_excel")
+        data_set.load()
+        assert mock_pandas_call.call_count == 1
+        assert mock_pandas_call.call_args_list[0][0][0] == load_path
 
     def test_catalog_release(self, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
@@ -166,8 +186,8 @@ class TestExcelDataSetVersioned:
         # Default save_args and load_args
         assert "save_args={'index': False}" in str(ds)
         assert "save_args={'index': False}" in str(ds_versioned)
-        assert "load_args={'engine': xlrd}" in str(ds_versioned)
-        assert "load_args={'engine': xlrd}" in str(ds)
+        assert "load_args={'engine': openpyxl}" in str(ds_versioned)
+        assert "load_args={'engine': openpyxl}" in str(ds)
 
     def test_save_and_load(self, versioned_excel_data_set, dummy_dataframe):
         """Test that saved and reloaded data matches the original one for
@@ -181,6 +201,20 @@ class TestExcelDataSetVersioned:
         pattern = r"Did not find any versions for ExcelDataSet\(.+\)"
         with pytest.raises(DataSetError, match=pattern):
             versioned_excel_data_set.load()
+
+    def test_versioning_not_supported_in_append_mode(
+        self, tmp_path, load_version, save_version
+    ):
+        filepath = str(tmp_path / "test.xlsx")
+        save_args = {"writer": {"mode": "a"}}
+
+        pattern = "`ExcelDataSet` doesn't support versioning in append mode."
+        with pytest.raises(DataSetError, match=pattern):
+            ExcelDataSet(
+                filepath=filepath,
+                version=Version(load_version, save_version),
+                save_args=save_args,
+            )
 
     def test_exists(self, versioned_excel_data_set, dummy_dataframe):
         """Test `exists` method invocation for versioned data set."""

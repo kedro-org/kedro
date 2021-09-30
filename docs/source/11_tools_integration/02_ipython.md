@@ -377,10 +377,12 @@ In certain cases, you may not be able to run `kedro jupyter notebook`, which mea
 ```python
 from pathlib import Path
 from kedro.framework.session import KedroSession
+from kedro.framework.startup import bootstrap_project
 from kedro.framework.session.session import _activate_session
 
 current_dir = Path.cwd()  # this points to 'notebooks/' folder
 project_path = current_dir.parent  # point back to the root of the project
+bootstrap_project(project_path)
 session = KedroSession.create("<your-kedro-project-package-name>", project_path)
 _activate_session(session)
 context = session.load_context()

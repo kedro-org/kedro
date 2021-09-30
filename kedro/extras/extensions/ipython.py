@@ -122,7 +122,7 @@ def load_ipython_extension(ipython):
     """Main entry point when %load_ext is executed"""
 
     global project_path
-    global startup_path
+    global startup_path  # pylint:disable=global-variable-not-assigned
 
     ipython.register_magic_function(init_kedro, "line")
     ipython.register_magic_function(reload_kedro, "line", "reload_kedro")

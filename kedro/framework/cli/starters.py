@@ -153,6 +153,8 @@ def new(
     # Obtain config, either from a file or from interactive user prompts.
     if not prompts_required:
         config = {}
+        if config_path:
+            config = _fetch_config_from_file(config_path)
     elif config_path:
         config = _fetch_config_from_file(config_path)
         _validate_config_file(config, prompts_required)
@@ -196,7 +198,7 @@ def _fetch_config_from_file(config_path: str) -> Dict[str, str]:
 
     """
     try:
-        with open(config_path, "r", encoding="utf-8") as config_file:
+        with open(config_path, encoding="utf-8") as config_file:
             config = yaml.safe_load(config_file)
 
         if KedroCliError.VERBOSE_ERROR:
@@ -436,7 +438,6 @@ def _validate_config_file(config: Dict[str, str], prompts: Dict[str, Any]):
     """
     if config is None:
         raise KedroCliError("Config file is empty.")
-
     missing_keys = set(prompts) - set(config)
     if missing_keys:
         click.echo(yaml.dump(config, default_flow_style=False))

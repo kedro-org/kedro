@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # Kedro documentation build configuration file, created by
 # sphinx-quickstart on Mon Dec 18 11:31:24 2017.
@@ -377,7 +376,7 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
             # first do plural only for classes
             replacements += [
                 (
-                    r"``{}``s".format(obj),
+                    fr"``{obj}``s",
                     f":{what}:`~{module}.{obj}`\\\\s",
                     obj,
                 )
@@ -386,7 +385,7 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
 
         # singular
         replacements += [
-            (r"``{}``".format(obj), f":{what}:`~{module}.{obj}`", obj)
+            (fr"``{obj}``", f":{what}:`~{module}.{obj}`", obj)
             for obj in objects
         ]
 
@@ -396,13 +395,13 @@ def autolink_replacements(what: str) -> List[Tuple[str, str, str]]:
         if what == "class":
             # first do plural only for classes
             suggestions += [
-                (r"(?<!\w|`){}s(?!\w|`{{2}})".format(obj), f"``{obj}``s", obj)
+                (fr"(?<!\w|`){obj}s(?!\w|`{{2}})", f"``{obj}``s", obj)
                 for obj in objects
             ]
 
         # then singular
         suggestions += [
-            (r"(?<!\w|`){}(?!\w|`{{2}})".format(obj), f"``{obj}``", obj)
+            (fr"(?<!\w|`){obj}(?!\w|`{{2}})", f"``{obj}``", obj)
             for obj in objects
         ]
 
@@ -425,7 +424,7 @@ def log_suggestions(lines: List[str], name: str):
             continue
 
         for existing, replacement, obj in suggestions:
-            new = re.sub(existing, r"{}".format(replacement), lines[i])
+            new = re.sub(existing, fr"{replacement}", lines[i])
             if new == lines[i]:
                 continue
             if ":rtype:" in lines[i] or ":type " in lines[i]:
@@ -458,7 +457,7 @@ def autolink_classes_and_methods(lines):
             continue
 
         for existing, replacement, obj in replacements:
-            lines[i] = re.sub(existing, r"{}".format(replacement), lines[i])
+            lines[i] = re.sub(existing, fr"{replacement}", lines[i])
 
 
 def autodoc_process_docstring(app, what, name, obj, options, lines):

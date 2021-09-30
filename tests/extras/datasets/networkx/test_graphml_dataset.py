@@ -170,8 +170,8 @@ class TestGraphMLDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            r"Save version `{0}` did not match load version `{1}` "
-            r"for GraphMLDataSet\(.+\)".format(save_version, load_version)
+            fr"Save version `{save_version}` did not match "
+            fr"load version `{load_version}` for GraphMLDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_graphml_data_set.save(dummy_graph_data)

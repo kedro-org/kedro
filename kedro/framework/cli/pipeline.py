@@ -72,10 +72,13 @@ setup(
 )
 """
 
-PipelineArtifacts = NamedTuple(
-    "PipelineArtifacts",
-    [("pipeline_dir", Path), ("pipeline_tests", Path), ("pipeline_conf", Path)],
-)
+
+class PipelineArtifacts(NamedTuple):
+    """An ordered collection of source_path, tests_path, config_paths"""
+
+    pipeline_dir: Path
+    pipeline_tests: Path
+    pipeline_conf: Path
 
 
 def _assert_pkg_name_ok(pkg_name: str):
@@ -1087,14 +1090,15 @@ def _append_package_reqs(
         return
 
     sorted_reqs = sorted(str(req) for req in reqs_to_add)
+    sep = "\n"
     with open(requirements_in, "a", encoding="utf-8") as file:
         file.write(
             f"\n\n# Additional requirements from modular pipeline `{pipeline_name}`:\n"
         )
-        file.write("\n".join(sorted_reqs))
+        file.write(sep.join(sorted_reqs))
     click.secho(
-        "Added the following requirements from modular pipeline `{}` to "
-        "requirements.in:\n{}".format(pipeline_name, "\n".join(sorted_reqs))
+        f"Added the following requirements from modular pipeline `{pipeline_name}` to "
+        f"requirements.in:\n{sep.join(sorted_reqs)}"
     )
     click.secho(
         "Use `kedro build-reqs` to compile and `pip install -r src/requirements.txt` to install "

@@ -37,9 +37,15 @@ repos:
     - repo: https://github.com/asottile/blacken-docs
       rev: v1.9.2
       hooks:
-        - id: blacken-docs
-          additional_dependencies: [black==21.5b1]
-          entry: blacken-docs --skip-errors
+          - id: blacken-docs
+            additional_dependencies: [black==21.5b1]
+            entry: blacken-docs --skip-errors
+
+    - repo: https://github.com/asottile/pyupgrade
+      rev: v2.26.0
+      hooks:
+          - id: pyupgrade
+            args: [--py36-plus]
 
     - repo: local
       hooks:

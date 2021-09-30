@@ -207,11 +207,11 @@ def fake_project(tmp_path, local_logging_config, mock_package_name):
         }
     }
     toml_str = toml.dumps(payload)
-    pyproject_toml_path.write_text(toml_str)
+    pyproject_toml_path.write_text(toml_str, encoding="utf-8")
 
     env_logging = fake_project_dir / "conf" / "base" / "logging.yml"
     env_logging.parent.mkdir(parents=True)
-    env_logging.write_text(json.dumps(local_logging_config))
+    env_logging.write_text(json.dumps(local_logging_config), encoding="utf-8")
     (fake_project_dir / "conf" / "local").mkdir()
     return fake_project_dir
 

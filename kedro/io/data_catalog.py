@@ -135,7 +135,7 @@ class _FrozenDatasets:
     # Don't allow users to add/change attributes on the fly
     def __setattr__(self, key, value):
         msg = "Operation not allowed! "
-        if key in self.__dict__.keys():
+        if key in self.__dict__:
             msg += "Please change datasets through configuration."
         else:
             msg += "Please use DataCatalog.add() instead."
@@ -218,9 +218,7 @@ class DataCatalog:
 
         if excess_transformers:
             raise DataSetNotFoundError(
-                "Unexpected transformers for missing data_sets {}".format(
-                    ", ".join(excess_transformers)
-                )
+                f"Unexpected transformers for missing data_sets {', '.join(excess_transformers)}"
             )
 
         for data_set_name in missing_transformers:
@@ -624,9 +622,7 @@ class DataCatalog:
 
         if not isinstance(transformer, AbstractTransformer):
             raise TypeError(
-                "Object of type {} is not an instance of AbstractTransformer".format(
-                    type(transformer)
-                )
+                f"Object of type {type(transformer)} is not an instance of AbstractTransformer"
             )
         if data_set_names is None:
             self._default_transformers.append(transformer)

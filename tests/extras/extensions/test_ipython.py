@@ -35,6 +35,7 @@ from kedro.extras.extensions.ipython import (
 )
 from kedro.framework.session.session import _deactivate_session
 from kedro.framework.startup import ProjectMetadata
+from kedro.pipeline import Pipeline
 
 
 @pytest.fixture(autouse=True)
@@ -90,7 +91,17 @@ class TestInitKedro:
         assert project_path == tmp_path
 
 
+@pytest.fixture()
+def pipeline_cleanup():
+    yield
+    from kedro.framework.project import pipelines
+
+    pipelines.configure(None)
+    pipelines._content = {}
+
+
 class TestLoadKedroObjects:
+    @pytest.mark.usefixtures("pipeline_cleanup")
     def test_load_kedro_objects(self, tmp_path, mocker):
         fake_metadata = ProjectMetadata(
             source_dir=tmp_path / "src",  # default
@@ -100,7 +111,16 @@ class TestLoadKedroObjects:
             project_version="0.1",
             project_path=tmp_path,
         )
-        mocker.patch("kedro.framework.session.session.configure_project")
+        my_pipelines = {"ds": Pipeline([])}
+
+        def my_register_pipeline():
+            return my_pipelines
+
+        mocker.patch(
+            "kedro.framework.project._ProjectPipelines._get_pipelines_registry_callable",
+            return_value=my_register_pipeline,
+        )
+        mocker.patch("kedro.framework.project.settings.configure")
         mocker.patch("kedro.framework.session.session.validate_settings")
         mocker.patch(
             "kedro.framework.startup.bootstrap_project",
@@ -124,6 +144,7 @@ class TestLoadKedroObjects:
                 "context": mock_context(),
                 "catalog": mock_context().catalog,
                 "session": mocker.ANY,
+                "pipelines": my_pipelines,
             }
         )
         mock_register_line_magic.assert_called_once()
@@ -165,6 +186,7 @@ class TestLoadKedroObjects:
                 "context": mock_session_create().load_context(),
                 "catalog": mock_session_create().load_context().catalog,
                 "session": mock_session_create(),
+                "pipelines": {},
             }
         )
         assert mock_register_line_magic.call_count == 1

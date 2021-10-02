@@ -35,7 +35,7 @@ Our [Get Started guide](https://kedro.readthedocs.io/en/stable/02_get_started/01
 
 ## What are the main features of Kedro?
 
-![Kedro-Viz Pipeline Visualisation](https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/static/img/pipeline_visualisation.png)
+![Kedro-Viz Pipeline Visualisation](https://github.com/quantumblacklabs/kedro-viz/blob/main/.github/img/banner.png)
 *A pipeline visualisation generated using [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz)*
 
 

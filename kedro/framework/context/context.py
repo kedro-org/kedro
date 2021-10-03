@@ -193,6 +193,22 @@ def _validate_layers_for_transcoding(catalog: DataCatalog) -> None:
             f"Transcoded datasets should have the same layer. Mismatch found for: {error_str}"
         )
 
+def _update_nested_dict(old_dict: Dict, new_dict: Dict) -> None:
+    """Update a nested dict with values of new_dict.
+
+    Args:
+        old_dict: dict to be updated
+        new_dict: dict to use for updating old_dict
+
+    """
+    for key, value in new_dict.items():
+        if key not in old_dict:
+            old_dict[key] = value
+        else:
+            if isinstance(old_dict[key], dict) and isinstance(value, dict):
+                _update_nested_dict(old_dict[key], value)
+            else:
+                old_dict[key] = value
 
 class KedroContext:
     """``KedroContext`` is the base class which holds the configuration and
@@ -344,7 +360,7 @@ class KedroContext:
         except MissingConfigException as exc:
             warn(f"Parameters not found in your Kedro project config.\n{str(exc)}")
             params = {}
-        params.update(self._extra_params or {})
+        _update_nested_dict(params, self._extra_params or {})
         return params
 
     def _get_catalog(

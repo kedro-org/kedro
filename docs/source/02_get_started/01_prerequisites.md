@@ -63,7 +63,7 @@ Activate this virtual environment:
 
 ```bash
 source env/kedro-environment/bin/activate # macOS / Linux
-.\env\Scripts\activate  # Windows
+.\env\kedro-environment\Scripts\activate  # Windows
 ```
 
 To exit the environment:

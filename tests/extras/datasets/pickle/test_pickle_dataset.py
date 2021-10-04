@@ -163,19 +163,23 @@ class TestPickleDataSet:
         with pytest.raises(DataSetError, match=pattern):
             pickle_data_set.save(dummy_dataframe)
 
-    def test_invalid_backend(self):
+    def test_invalid_backend(self, mocker):
         pattern = (
-            r"'backend' should be one of \['pickle', 'joblib', 'dill', "
-            r"'compress_pickle'\], got 'invalid'\."
+            r"Selected backend 'invalid' should satisfy the pickle interface. "
+            r"Missing one of `load` and `dump` on the backend."
         )
+        mocker.patch("kedro.extras.datasets.pickle.pickle_dataset.importlib.import_module", return_value=object)
         with pytest.raises(ValueError, match=pattern):
             PickleDataSet(filepath="test.pkl", backend="invalid")
 
-    @pytest.mark.parametrize("backend", ["joblib", "dill", "compress_pickle"])
     def test_no_backend(self, mocker, backend):
-        mocker.patch.object(PickleDataSet, "BACKENDS", {backend: None})
-        with pytest.raises(ImportError):
-            PickleDataSet(filepath="test.pkl", backend=backend)
+        pattern = (
+            r"Selected backend 'fake.backend.does.not.exist' could not be imported. "
+            r"Make sure it is installed and importable."
+        )
+        mocker.patch("kedro.extras.datasets.pickle.pickle_dataset.importlib.import_module", side_effect=ImportError)
+        with pytest.raises(ImportError, match=pattern):
+            PickleDataSet(filepath="test.pkl", backend="fake.backend.does.not.exist")
 
 
 class TestPickleDataSetVersioned:

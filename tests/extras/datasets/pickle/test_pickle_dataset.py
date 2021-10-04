@@ -175,7 +175,7 @@ class TestPickleDataSet:
         with pytest.raises(ValueError, match=pattern):
             PickleDataSet(filepath="test.pkl", backend="invalid")
 
-    def test_no_backend(self, mocker, backend):
+    def test_no_backend(self, mocker):
         pattern = (
             r"Selected backend 'fake.backend.does.not.exist' could not be imported. "
             r"Make sure it is installed and importable."

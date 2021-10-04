@@ -81,7 +81,7 @@ class PickleDataSet(AbstractVersionedDataSet):
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,too-many-locals
     def __init__(
         self,
         filepath: str,
@@ -105,7 +105,7 @@ class PickleDataSet(AbstractVersionedDataSet):
                 ``pickle`` interface. That is, contains a `load` and `dump` function.
                 Defaults to 'pickle'.
             load_args: Pickle options for loading pickle files.
-                You can pass in the arguments that the relevant backend load function specified accepts, e.g:
+                You can pass in arguments that the backend load function specified accepts, e.g:
                 pickle.load: https://docs.python.org/3/library/pickle.html#pickle.load
                 joblib.load: https://joblib.readthedocs.io/en/latest/generated/joblib.load.html
                 dill.load: https://dill.readthedocs.io/en/latest/dill.html#dill._dill.load
@@ -113,7 +113,7 @@ class PickleDataSet(AbstractVersionedDataSet):
                 https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.load
                 All defaults are preserved.
             save_args: Pickle options for saving pickle files.
-                You can pass in the arguments that the relevant backend dump function specified accepts, e.g:
+                You can pass in arguments that the backend dump function specified accepts, e.g:
                 pickle.dump: https://docs.python.org/3/library/pickle.html#pickle.dump
                 joblib.dump: https://joblib.readthedocs.io/en/latest/generated/joblib.dump.html
                 dill.dump: https://dill.readthedocs.io/en/latest/dill.html#dill._dill.dump

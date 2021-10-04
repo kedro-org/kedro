@@ -31,10 +31,10 @@ filesystem (e.g.: local, S3, GCS). The underlying functionality is supported by
 the specified backend library passed in (defaults to the ``pickle`` library), so it
 supports all allowed options for loading and saving pickle files.
 """
+import importlib
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any, Dict
-import importlib
 
 import fsspec
 
@@ -146,11 +146,13 @@ class PickleDataSet(AbstractVersionedDataSet):
                 "Make sure it is installed and importable."
             ) from exc
 
-        if not (hasattr(imported_backend, "load") and hasattr(imported_backend, "dump")):
+        if not (
+            hasattr(imported_backend, "load") and hasattr(imported_backend, "dump")
+        ):
             raise ValueError(
                 f"Selected backend '{backend}' should satisfy the pickle interface. "
                 "Missing one of `load` and `dump` on the backend."
-                )
+            )
 
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
@@ -199,16 +201,14 @@ class PickleDataSet(AbstractVersionedDataSet):
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
-            return self._backend.load(
-                fs_file, **self._load_args
-            ) # nosec
+            return self._backend.load(fs_file, **self._load_args)  # type: ignore
 
     def _save(self, data: Any) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
             try:
-                self._backend.dump(data, fs_file, **self._save_args)
+                self._backend.dump(data, fs_file, **self._save_args)  # type: ignore
             except Exception as exc:
                 raise DataSetError(
                     f"{data.__class__} was not serialized due to: {exc}"

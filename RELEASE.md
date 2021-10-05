@@ -13,6 +13,7 @@
 
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman),
+[Manish Swami](https://github.com/ManishS6),
 [Zain Patel](https://github.com/mzjp2)
 
 # Release 0.17.5

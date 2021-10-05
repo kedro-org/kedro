@@ -73,8 +73,6 @@ class TestCSVDataSet:
         csv_data_set.save(dummy_dataframe)
         reloaded = csv_data_set.load()
         assert_frame_equal(dummy_dataframe, reloaded)
-        assert csv_data_set._fs_open_args_load == {}
-        assert csv_data_set._fs_open_args_save == {"mode": "w", "newline": ""}
 
     def test_exists(self, csv_data_set, dummy_dataframe):
         """Test `exists` method invocation for both existing and
@@ -100,16 +98,26 @@ class TestCSVDataSet:
             assert csv_data_set._save_args[key] == value
 
     @pytest.mark.parametrize(
-        "fs_args",
-        [{"open_args_load": {"mode": "rb", "compression": "gzip"}}],
-        indirect=True,
+        "load_args,save_args",
+        [
+            ({"storage_options": {"a": "b"}}, {}),
+            ({}, {"storage_options": {"a": "b"}}),
+            ({"storage_options": {"a": "b"}}, {"storage_options": {"x": "y"}}),
+        ],
     )
-    def test_open_extra_args(self, csv_data_set, fs_args):
-        assert csv_data_set._fs_open_args_load == fs_args["open_args_load"]
-        assert csv_data_set._fs_open_args_save == {
-            "mode": "w",
-            "newline": "",
-        }  # default unchanged
+    def test_storage_options_dropped(self, load_args, save_args, caplog, tmp_path):
+        filepath = str(tmp_path / "test.csv")
+
+        ds = CSVDataSet(filepath=filepath, load_args=load_args, save_args=save_args)
+
+        records = [r for r in caplog.records if r.levelname == "WARNING"]
+        expected_log_message = (
+            f"Dropping `storage_options` for {filepath}, "
+            f"please specify them under `fs_args` or `credentials`."
+        )
+        assert records[0].getMessage() == expected_log_message
+        assert "storage_options" not in ds._save_args
+        assert "storage_options" not in ds._load_args
 
     def test_load_missing_file(self, csv_data_set):
         """Check the error when trying to load missing file."""

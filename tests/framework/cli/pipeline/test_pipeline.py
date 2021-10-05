@@ -47,7 +47,7 @@ PIPELINE_NAME = "my_pipeline"
 def make_pipelines(request, fake_repo_path, fake_package_path, mocker):
     source_path = fake_package_path / "pipelines" / PIPELINE_NAME
     tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
-    conf_path = fake_repo_path / settings.CONF_ROOT / request.param / "parameters"
+    conf_path = fake_repo_path / settings.CONF_SOURCE / request.param / "parameters"
 
     for path in (source_path, tests_path, conf_path):
         path.mkdir(parents=True, exist_ok=True)
@@ -61,26 +61,6 @@ def make_pipelines(request, fake_repo_path, fake_package_path, mocker):
     shutil.rmtree(str(source_path), ignore_errors=True)
     shutil.rmtree(str(tests_path), ignore_errors=True)
     shutil.rmtree(str(conf_path), ignore_errors=True)
-
-
-@pytest.fixture
-def yaml_dump_mock(mocker):
-    return mocker.patch("yaml.dump", return_value="Result YAML")
-
-
-@pytest.fixture
-def pipelines_dict():
-    pipelines = {
-        "de": ["split_data (split_data)"],
-        "ds": [
-            "train_model (train_model)",
-            "predict (predict)",
-            "report_accuracy (report_accuracy)",
-        ],
-        "dp": ["data_processing.split_data (split_data)"],
-    }
-    pipelines["__default__"] = pipelines["de"] + pipelines["ds"]
-    return pipelines
 
 
 LETTER_ERROR = "It must contain only letters, digits, and/or underscores."
@@ -117,7 +97,7 @@ class TestPipelineCreateCommand:
 
         # config
         conf_env = env or "base"
-        conf_dir = (fake_repo_path / settings.CONF_ROOT / conf_env).resolve()
+        conf_dir = (fake_repo_path / settings.CONF_SOURCE / conf_env).resolve()
         actual_configs = list(conf_dir.glob(f"**/{PIPELINE_NAME}.yml"))
         expected_configs = [conf_dir / "parameters" / f"{PIPELINE_NAME}.yml"]
         assert actual_configs == expected_configs
@@ -146,7 +126,7 @@ class TestPipelineCreateCommand:
         assert f"Creating the pipeline `{PIPELINE_NAME}`: OK" in result.output
         assert f"Pipeline `{PIPELINE_NAME}` was successfully created." in result.output
 
-        conf_dirs = list((fake_repo_path / settings.CONF_ROOT).rglob(PIPELINE_NAME))
+        conf_dirs = list((fake_repo_path / settings.CONF_SOURCE).rglob(PIPELINE_NAME))
         assert conf_dirs == []  # no configs created for the pipeline
 
         test_dir = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
@@ -165,7 +145,7 @@ class TestPipelineCreateCommand:
         assert result.exit_code == 0
 
         # write pipeline catalog
-        conf_dir = fake_repo_path / settings.CONF_ROOT / "base"
+        conf_dir = fake_repo_path / settings.CONF_SOURCE / "base"
         catalog_dict = {
             "ds_from_pipeline": {
                 "type": "pandas.CSVDataSet",
@@ -196,7 +176,7 @@ class TestPipelineCreateCommand:
         for dirname in ("catalog", "parameters"):
             path = (
                 fake_repo_path
-                / settings.CONF_ROOT
+                / settings.CONF_SOURCE
                 / "base"
                 / dirname
                 / f"{PIPELINE_NAME}.yml"
@@ -326,7 +306,7 @@ class TestPipelineDeleteCommand:
         tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
         params_path = (
             fake_repo_path
-            / settings.CONF_ROOT
+            / settings.CONF_SOURCE
             / expected_conf
             / "parameters"
             / f"{PIPELINE_NAME}.yml"
@@ -362,7 +342,7 @@ class TestPipelineDeleteCommand:
         tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
         params_path = (
             fake_repo_path
-            / settings.CONF_ROOT
+            / settings.CONF_SOURCE
             / "base"
             / "parameters"
             / f"{PIPELINE_NAME}.yml"
@@ -454,7 +434,7 @@ class TestPipelineDeleteCommand:
         tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
         params_path = (
             fake_repo_path
-            / settings.CONF_ROOT
+            / settings.CONF_SOURCE
             / "base"
             / "parameters"
             / f"{PIPELINE_NAME}.yml"
@@ -495,7 +475,7 @@ class TestPipelineDeleteCommand:
         tests_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
         params_path = (
             fake_repo_path
-            / settings.CONF_ROOT
+            / settings.CONF_SOURCE
             / "base"
             / "parameters"
             / f"{PIPELINE_NAME}.yml"
@@ -514,61 +494,6 @@ class TestPipelineDeleteCommand:
 
         assert tests_path.is_dir()
         assert params_path.is_file()
-
-
-@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
-def test_list_pipelines(
-    fake_project_cli, fake_metadata, yaml_dump_mock, pipelines_dict
-):
-    result = CliRunner().invoke(
-        fake_project_cli, ["pipeline", "list"], obj=fake_metadata
-    )
-
-    assert not result.exit_code
-    yaml_dump_mock.assert_called_once_with(sorted(pipelines_dict.keys()))
-
-
-@pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log")
-class TestPipelineDescribeCommand:
-    @pytest.mark.parametrize("pipeline_name", ["de", "ds", "dp", "__default__"])
-    def test_describe_pipeline(
-        self,
-        fake_project_cli,
-        fake_metadata,
-        yaml_dump_mock,
-        pipeline_name,
-        pipelines_dict,
-    ):
-        result = CliRunner().invoke(
-            fake_project_cli, ["pipeline", "describe", pipeline_name], obj=fake_metadata
-        )
-
-        assert not result.exit_code
-        expected_dict = {"Nodes": pipelines_dict[pipeline_name]}
-        yaml_dump_mock.assert_called_once_with(expected_dict)
-
-    def test_not_found_pipeline(self, fake_project_cli, fake_metadata):
-        result = CliRunner().invoke(
-            fake_project_cli, ["pipeline", "describe", "missing"], obj=fake_metadata
-        )
-
-        assert result.exit_code
-        expected_output = (
-            "Error: `missing` pipeline not found. Existing pipelines: "
-            "[__default__, de, dp, ds]\n"
-        )
-        assert expected_output in result.output
-
-    def test_describe_pipeline_default(
-        self, fake_project_cli, fake_metadata, yaml_dump_mock, pipelines_dict
-    ):
-        result = CliRunner().invoke(
-            fake_project_cli, ["pipeline", "describe"], obj=fake_metadata
-        )
-
-        assert not result.exit_code
-        expected_dict = {"Nodes": pipelines_dict["__default__"]}
-        yaml_dump_mock.assert_called_once_with(expected_dict)
 
 
 class TestSyncDirs:

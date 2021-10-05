@@ -96,6 +96,15 @@ class PickleDataSet(AbstractVersionedDataSet):
         file on a specific filesystem. ``PickleDataSet`` supports custom backends to
         serialize/deserialize objects.
 
+        Example backends that are compatible (non-exhaustive):
+            * `pickle`
+            * `joblib`
+            * `dill`
+            * `compress_pickle`
+        
+        Example backends that are incompatible:
+            * `torch`
+
         Args:
             filepath: Filepath in POSIX format to a Pickle file prefixed with a protocol like
                 `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be used.

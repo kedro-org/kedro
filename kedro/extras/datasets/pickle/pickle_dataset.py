@@ -101,7 +101,7 @@ class PickleDataSet(AbstractVersionedDataSet):
             * `joblib`
             * `dill`
             * `compress_pickle`
-        
+
         Example backends that are incompatible:
             * `torch`
 

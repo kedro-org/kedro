@@ -1,6 +1,7 @@
 # Upcoming Release 0.17.6
 
 ## Major features and improvements
+* Added `pipelines` global variable to IPython extension, allowing you to access the project's pipelines in `kedro ipython` or `kedro jupyter notebook`.
 
 ## Bug fixes and other changes
 * Fixed an issue where `kedro new --config config.yml` was ignoring the config file when `prompts.yml` didn't exist.
@@ -10,7 +11,8 @@
 ## Upcoming deprecations for Kedro 0.18.0
 
 ## Thanks for supporting contributions
-[Deepyaman Datta](https://github.com/deepyaman)
+[Deepyaman Datta](https://github.com/deepyaman),
+[Manish Swami](https://github.com/ManishS6)
 
 # Release 0.17.5
 

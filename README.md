@@ -35,7 +35,7 @@ Our [Get Started guide](https://kedro.readthedocs.io/en/stable/02_get_started/01
 
 ## What are the main features of Kedro?
 
-![Kedro-Viz Pipeline Visualisation](https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/static/img/pipeline_visualisation.png)
+![Kedro-Viz Pipeline Visualisation](https://github.com/quantumblacklabs/kedro-viz/blob/main/.github/img/banner.png)
 *A pipeline visualisation generated using [Kedro-Viz](https://github.com/quantumblacklabs/kedro-viz)*
 
 
@@ -94,6 +94,7 @@ There are Kedro users across the world, who work at start-ups, major enterprises
 [Element AI](https://www.elementai.com/),
 [GMO](https://recruit.gmo.jp/engineer/jisedai/engineer/jisedai/engineer/jisedai/engineer/jisedai/engineer/jisedai/blog/kedro_and_mlflow_tracking/),
 [Imperial College London](https://github.com/dssg/barefoot-winnie-public),
+[ING](https://www.ing.com),
 [Jungle Scout](https://junglescouteng.medium.com/jungle-scout-case-study-kedro-airflow-and-mlflow-use-on-production-code-150d7231d42e),
 [Helvetas](https://www.linkedin.com/posts/lionel-trebuchon_mlflow-kedro-ml-ugcPost-6747074322164154368-umKw),
 [Leapfrog](https://www.lftechnology.com/blog/ai-pipeline-kedro/),
@@ -102,6 +103,7 @@ There are Kedro users across the world, who work at start-ups, major enterprises
 [Modec](https://www.modec.com/),
 [Mosaic Data Science](https://www.youtube.com/watch?v=fCWGevB366g),
 [NaranjaX](https://www.youtube.com/watch?v=_0kMmRfltEQ),
+[NASA](https://github.com/nasa/ML-airport-taxi-out),
 [Open Data Science LatAm](https://www.odesla.org/),
 [Prediqt](https://prediqt.co/),
 [QuantumBlack](https://medium.com/quantumblack/introducing-kedro-the-open-source-library-for-production-ready-machine-learning-code-d1c6d26ce2cf),

@@ -6,6 +6,7 @@ biopython~=1.73
 black==21.5b1
 blacken-docs==1.9.2
 compress-pickle[lz4]~=1.2.0
+coverage[toml]
 dask[complete]~=2.6
 dill~=0.3.1
 flake8~=3.5

@@ -57,6 +57,7 @@
 * Renamed `lambda_data_set`, `memory_data_set`, and `partitioned_data_set` to `lambda_dataset`, `memory_dataset`, and `partitioned_dataset`, respectively, in `kedro.io`.
 * Removed the `kedro install` command in favour of using `pip install -r src/requirements.txt` to install project dependencies.
 * The dataset `networkx.NetworkXDataSet` has been renamed to `networkx.JSONDataSet`.
+* Removed the `config_loader` property from `KedroContext`.
 
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman)
@@ -95,6 +96,7 @@
   ```
 
 * If you had any `networkx.NetworkXDataSet` entries in your catalog, replace them with `networkx.JSONDataSet`.
+* If you were using the `KedroContext` to access `ConfigLoader`, please use `settings.CONFIG_LOADER_CLASS` to access the currently used `ConfigLoader` instead.
 
 # Upcoming Release 0.17.6
 

@@ -110,7 +110,7 @@ class TestCatalogHooks:
 
         project_path = context.project_path
         catalog = context.catalog
-        config_loader = context.config_loader
+        config_loader = mock_session._get_config_loader()
 
         relevant_records = [
             r for r in caplog.records if r.getMessage() == "Catalog created"
@@ -137,7 +137,7 @@ class TestCatalogHooks:
         )
 
         catalog = context.catalog
-        config_loader = context.config_loader
+        config_loader = mock_session._get_config_loader()
         project_path = context.project_path
 
         catalog.save("cars", dummy_dataframe)

@@ -37,7 +37,7 @@ from warnings import warn
 
 from kedro.config import ConfigLoader, MissingConfigException
 from kedro.framework.hooks import get_hook_manager
-from kedro.framework.project import pipelines, settings
+from kedro.framework.project import pipelines
 from kedro.io import DataCatalog
 from kedro.io.core import generate_timestamp
 from kedro.pipeline import Pipeline
@@ -205,9 +205,10 @@ class KedroContext:
         self,
         package_name: str,
         project_path: Union[Path, str],
+        config_loader: ConfigLoader,
         env: str = None,
         extra_params: Dict[str, Any] = None,
-    ):
+    ):  # pylint: disable=too-many-arguments
         """Create a context object by providing the root of a Kedro project and
         the environment configuration subfolders
         (see ``kedro.config.ConfigLoader``)
@@ -228,7 +229,7 @@ class KedroContext:
         """
         self._project_path = Path(project_path).expanduser().resolve()
         self._package_name = package_name
-
+        self._config_loader = config_loader
         self._env = env
         self._extra_params = deepcopy(extra_params)
 
@@ -337,7 +338,7 @@ class KedroContext:
         """
         try:
             # '**/parameters*' reads modular pipeline configs
-            params = self.config_loader.get(
+            params = self._config_loader.get(
                 "parameters*", "parameters*/**", "**/parameters*"
             )
         except MissingConfigException as exc:
@@ -361,7 +362,7 @@ class KedroContext:
 
         """
         # '**/catalog*' reads modular pipeline configs
-        conf_catalog = self.config_loader.get("catalog*", "catalog*/**", "**/catalog*")
+        conf_catalog = self._config_loader.get("catalog*", "catalog*/**", "**/catalog*")
         # turn relative paths in conf_catalog into absolute paths
         # before initializing the catalog
         conf_catalog = _convert_paths_to_absolute_posix(
@@ -414,44 +415,6 @@ class KedroContext:
         # pylint: disable=invalid-name
         return self.catalog
 
-    def _get_config_loader(self) -> ConfigLoader:
-        """A hook for changing the creation of a ConfigLoader instance.
-
-        Returns:
-            Instance of `ConfigLoader` created by `settings.py`.
-        Raises:
-            KedroContextError: Incorrect ``ConfigLoader`` registered for the project.
-
-        """
-        try:
-            return settings.CONFIG_LOADER_CLASS(
-                conf_source=str(self.project_path / settings.CONF_SOURCE),
-                env=self.env,
-                runtime_params=self._extra_params,
-                **settings.CONFIG_LOADER_ARGS,
-            )
-
-        except TypeError as exc:
-            raise KedroContextError(
-                f"Expected an instance of `ConfigLoader`, "
-                f"got `{settings.CONFIG_LOADER_CLASS}` of class "
-                f"`{type(settings.CONFIG_LOADER_CLASS)}` instead.\n"
-                f"The provided `CONFIG_LOADER_ARGS were: {settings.CONFIG_LOADER_ARGS}"
-            ) from exc
-
-    @property
-    def config_loader(self) -> ConfigLoader:
-        """Read-only property referring to Kedro's ``ConfigLoader`` for this
-        context.
-
-        Returns:
-            Instance of `ConfigLoader`.
-        Raises:
-            KedroContextError: Incorrect ``ConfigLoader`` registered for the project.
-
-        """
-        return self._get_config_loader()
-
     def _get_feed_dict(self) -> Dict[str, Any]:
         """Get parameters and return the feed dictionary."""
         params = self.params
@@ -485,7 +448,7 @@ class KedroContext:
     def _get_config_credentials(self) -> Dict[str, Any]:
         """Getter for credentials specified in credentials directory."""
         try:
-            conf_creds = self.config_loader.get(
+            conf_creds = self._config_loader.get(
                 "credentials*", "credentials*/**", "**/credentials*"
             )
         except MissingConfigException as exc:

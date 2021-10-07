@@ -60,7 +60,8 @@ class HDFDataSet(AbstractVersionedDataSet):
 
         >>> hdf_dataset:
         >>>   type: pandas.HDFDataSet
-        >>>   filepath: test.h5
+        >>>   filepath: s3://my_bucket/raw/sensor_reading.h5
+        >>>   credentials: aws_s3_creds
         >>>   key: data
 
     Example using Python API:

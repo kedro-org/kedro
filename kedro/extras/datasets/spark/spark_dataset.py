@@ -185,9 +185,9 @@ class SparkDataSet(AbstractVersionedDataSet):
 
     .. code-block:: yaml
 
-        >>> weather:
+        >>> weather: #reads all the partitions using save_args
         >>>   type: spark.SparkDataSet
-        >>>   filepath: s3a://your_bucket/data/01_raw/weather*
+        >>>   filepath: s3a://your_bucket/data/01_raw/weather/*
         >>>   file_format: csv
         >>>   load_args:
         >>>     header: True
@@ -195,6 +195,11 @@ class SparkDataSet(AbstractVersionedDataSet):
         >>>   save_args:
         >>>     sep: '|'
         >>>     header: True
+        >>>
+        >>> weather_cleaned:
+        >>>   type: spark.SparkDataSet
+        >>>   filepath: data/02_intermediate/data.parquet
+        >>>   file_format: parquet
 
     Example using Python API:
     ::

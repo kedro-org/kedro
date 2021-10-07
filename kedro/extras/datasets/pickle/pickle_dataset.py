@@ -74,15 +74,15 @@ class PickleDataSet(AbstractVersionedDataSet):
 
     .. code-block:: yaml
 
-        >>> test_model: # simple example with compression
+        >>> test_model: # simple example without compression
         >>>   type: pickle.PickleDataSet
         >>>   filepath: data/07_model_output/test_model.pkl
         >>>   backend: pickle
         >>>
-        >>> final_model: # complex example with compression
+        >>> final_model: # example with load and save args
         >>>   type: pickle.PickleDataSet
         >>>   filepath: s3://your_bucket/final_model.pkl.lz4
-        >>>   backend: compress_pickle
+        >>>   backend: joblib
         >>>   credentials: s3_credentials
         >>>   save_args:
         >>>     compression: lz4

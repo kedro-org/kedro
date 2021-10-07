@@ -73,14 +73,24 @@ class PartitionedDataSet(AbstractDataSet):
 
     .. code-block:: yaml
 
-        >>> my_partitioned_dataset:
+        >>> cv_results_partitioned: # example to save results to multiple partitions
         >>>   type: PartitionedDataSet
-        >>>   path: s3://my-bucket-name/path/to/folder
-        >>>   dataset: pandas.CSVDataSet
-        >>>   credentials: my_credentials
-        >>>   load_args:
-        >>>     load_arg1: value1
-        >>>     load_arg2: value2
+        >>>   dataset:
+        >>>     type: pandas.CSVDataSet
+        >>>     save_args:
+        >>>       index: False
+        >>>   path: data/04_cv/
+        >>>   filename_suffix: ".csv"
+        >>>
+        >>>   downloaded_data: # example with data available in multiple partitions
+        >>>     type: PartitionedDataSet
+        >>>     path: demo/01_raw/downloaded_station_data
+        >>>     dataset:
+        >>>       type: pandas.CSVDataSet
+        >>>       load_args:
+        >>>         sep: ','
+        >>>         index_col: 0
+        >>>     filename_suffix: '.csv'
 
 
     Example using Python API:

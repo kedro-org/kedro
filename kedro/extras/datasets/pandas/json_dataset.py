@@ -55,9 +55,16 @@ class JSONDataSet(AbstractVersionedDataSet):
 
     .. code-block:: yaml
 
+        >>> clickstream_dataset:
+        >>>   type: pandas.JSONDataSet
+        >>>   filepath: abfs://landing_area/primary/click_stream.json
+        >>>   credentials: abfs_creds
+        >>>
         >>> json_dataset:
         >>>   type: pandas.JSONDataSet
-        >>>   filepath: test.json
+        >>>   filepath: data/01_raw/Video_Games.json
+        >>>   load_args:
+        >>>     lines: True
 
 
 

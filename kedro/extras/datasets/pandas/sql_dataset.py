@@ -290,7 +290,7 @@ class SQLQueryDataSet(AbstractDataSet):
 
         >>> shuttle_id_dataset:
         >>>   type: pandas.SQLQueryDataSet
-        >>>   sql: "select  shuttle, shuttle_id from spaceflights.shuttles"
+        >>>   sql: "select shuttle, shuttle_id from spaceflights.shuttles;"
         >>>   credentials: db_credentials
         >>>   layer: raw
 

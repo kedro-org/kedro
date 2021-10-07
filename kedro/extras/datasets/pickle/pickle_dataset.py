@@ -68,7 +68,28 @@ class PickleDataSet(AbstractVersionedDataSet):
     the ``pickle``, ``joblib``, ``dill``, and ``compress_pickle`` libraries, so it
     supports all allowed options for loading and saving pickle files.
 
-    Example:
+    Example adding a catalog entry with
+    `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
+        01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+
+    .. code-block:: yaml
+
+        >>> test_model: # simple example with compression
+        >>>   type: pickle.PickleDataSet
+        >>>   filepath: data/07_model_output/test_model.pkl
+        >>>   backend: pickle
+        >>>
+        >>> final_model: # complex example with compression
+        >>>   type: pickle.PickleDataSet
+        >>>   filepath: s3://your_bucket/final_model.pkl.lz4
+        >>>   backend: compress_pickle
+        >>>   credentials: s3_credentials
+        >>>   save_args:
+        >>>     compression: lz4
+        >>>   load_args:
+        >>>     compression: lz4
+
+    Example using Python API:
     ::
 
         >>> from kedro.extras.datasets.pickle import PickleDataSet

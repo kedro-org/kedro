@@ -64,7 +64,26 @@ class PartitionedDataSet(AbstractDataSet):
     underlying dataset definition. For filesystem level operations it uses `fsspec`:
     https://github.com/intake/filesystem_spec.
 
-    Example:
+    Example adding a
+    `PartitionedDataSet <https://kedro.readthedocs.io/en/stable/05_data/\
+        02_kedro_io.html#partitioned-dataset>`_
+    catalog entry with
+    `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
+        01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+
+    .. code-block:: yaml
+
+        >>> my_partitioned_dataset:
+        >>>   type: PartitionedDataSet
+        >>>   path: s3://my-bucket-name/path/to/folder
+        >>>   dataset: pandas.CSVDataSet
+        >>>   credentials: my_credentials
+        >>>   load_args:
+        >>>     load_arg1: value1
+        >>>     load_arg2: value2
+
+
+    Example using Python API:
     ::
 
         >>> import pandas as pd

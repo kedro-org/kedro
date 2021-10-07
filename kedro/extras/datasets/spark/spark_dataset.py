@@ -178,7 +178,25 @@ class KedroHdfsInsecureClient(InsecureClient):
 
 class SparkDataSet(AbstractVersionedDataSet):
     """``SparkDataSet`` loads and saves Spark dataframes.
-    Example:
+
+    Example adding a catalog entry with
+    `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
+        01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+
+    .. code-block:: yaml
+
+        >>> weather:
+        >>>   type: spark.SparkDataSet
+        >>>   filepath: s3a://your_bucket/data/01_raw/weather*
+        >>>   file_format: csv
+        >>>   load_args:
+        >>>     header: True
+        >>>     inferSchema: True
+        >>>   save_args:
+        >>>     sep: '|'
+        >>>     header: True
+
+    Example using Python API:
     ::
 
         >>> from pyspark.sql import SparkSession

@@ -46,7 +46,25 @@ class SparkJDBCDataSet(AbstractDataSet):
     internally, so it supports all allowed PySpark options on ``jdbc``.
 
 
-    Example:
+    Example adding a catalog entry with
+    `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
+        01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+
+    .. code-block:: yaml
+
+        >>> weather:
+        >>>   type: spark.SparkJDBCDataSet
+        >>>   table: weather_table
+        >>>   url: jdbc:postgresql://localhost/test
+        >>>   credentials: db_credentials
+        >>>   load_args:
+        >>>     properties:
+        >>>       driver: org.postgresql.Driver
+        >>>   save_args:
+        >>>     properties:
+        >>>       driver: org.postgresql.Driver
+
+    Example using Python API:
     ::
 
         >>> import pandas as pd

@@ -117,7 +117,7 @@ class TestJournal:
 
 
 def test_git_sha(tmp_path, mocker):
-    mocker.patch("subprocess.check_output", return_value="mocked_return".encode())
+    mocker.patch("subprocess.check_output", return_value=b"mocked_return")
     result = _git_sha(tmp_path)
     assert result == "mocked_return"
 

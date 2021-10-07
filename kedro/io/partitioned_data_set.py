@@ -160,10 +160,9 @@ class PartitionedDataSet(AbstractDataSet):
         self._dataset_type, self._dataset_config = parse_dataset_definition(dataset)
         if VERSION_KEY in self._dataset_config:
             raise DataSetError(
-                "`{}` does not support versioning of the underlying dataset. "
-                "Please remove `{}` flag from the dataset definition.".format(
-                    self.__class__.__name__, VERSIONED_FLAG_KEY
-                )
+                f"`{self.__class__.__name__}` does not support versioning of the "
+                f"underlying dataset. Please remove `{VERSIONED_FLAG_KEY}` flag from "
+                f"the dataset definition."
             )
 
         if credentials:
@@ -190,8 +189,8 @@ class PartitionedDataSet(AbstractDataSet):
         self._filepath_arg = filepath_arg
         if self._filepath_arg in self._dataset_config:
             warn(
-                "`{}` key must not be specified in the dataset definition as it "
-                "will be overwritten by partition path".format(self._filepath_arg)
+                f"`{self._filepath_arg}` key must not be specified in the dataset "
+                f"definition as it will be overwritten by partition path"
             )
 
         self._load_args = deepcopy(load_args) or {}
@@ -422,10 +421,8 @@ class IncrementalDataSet(PartitionedDataSet):
 
         for key in {VERSION_KEY, VERSIONED_FLAG_KEY} & checkpoint_config.keys():
             raise DataSetError(
-                "`{}` does not support versioning of the checkpoint. "
-                "Please remove `{}` key from the checkpoint definition.".format(
-                    self.__class__.__name__, key
-                )
+                f"`{self.__class__.__name__}` does not support versioning of the "
+                f"checkpoint. Please remove `{key}` key from the checkpoint definition."
             )
 
         default_checkpoint_path = self._sep.join(

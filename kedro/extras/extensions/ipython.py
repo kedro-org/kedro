@@ -75,6 +75,7 @@ def reload_kedro(path, env: str = None, extra_params: Dict[str, Any] = None):
 
     import kedro.config.default_logger  # noqa: F401 # pylint: disable=unused-import
     from kedro.framework.cli import load_entry_points
+    from kedro.framework.project import pipelines
     from kedro.framework.session import KedroSession
     from kedro.framework.session.session import _activate_session
     from kedro.framework.startup import bootstrap_project
@@ -95,11 +96,18 @@ def reload_kedro(path, env: str = None, extra_params: Dict[str, Any] = None):
     catalog = context.catalog
 
     get_ipython().push(
-        variables={"context": context, "catalog": catalog, "session": session}
+        variables={
+            "context": context,
+            "catalog": catalog,
+            "session": session,
+            "pipelines": pipelines,
+        }
     )
 
     logging.info("** Kedro project %s", str(metadata.project_name))
-    logging.info("Defined global variable `context`, `session` and `catalog`")
+    logging.info(
+        "Defined global variable `context`, `session`, `catalog` and `pipelines`"
+    )
 
     for line_magic in load_entry_points("line_magic"):
         register_line_magic(needs_local_scope(line_magic))
@@ -122,7 +130,7 @@ def load_ipython_extension(ipython):
     """Main entry point when %load_ext is executed"""
 
     global project_path
-    global startup_path
+    global startup_path  # pylint:disable=global-variable-not-assigned
 
     ipython.register_magic_function(init_kedro, "line")
     ipython.register_magic_function(reload_kedro, "line", "reload_kedro")

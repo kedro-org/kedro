@@ -29,7 +29,6 @@
 """``APIDataSet`` loads the data from HTTP(S) APIs.
 It uses the python requests library: https://requests.readthedocs.io/en/master/
 """
-import socket
 from typing import Any, Dict, List, Tuple, Union
 
 import requests
@@ -115,7 +114,7 @@ class APIDataSet(AbstractDataSet):
             response.raise_for_status()
         except requests.exceptions.HTTPError as exc:
             raise DataSetError("Failed to fetch data", exc) from exc
-        except socket.error as exc:
+        except OSError as exc:
             raise DataSetError("Failed to connect to the remote server") from exc
 
         return response

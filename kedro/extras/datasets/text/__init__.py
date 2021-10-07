@@ -33,4 +33,4 @@ __all__ = ["TextDataSet"]
 from contextlib import suppress
 
 with suppress(ImportError):
-    from .text_dataset import TextDataSet  # NOQA
+    from .text_dataset import TextDataSet

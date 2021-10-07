@@ -33,4 +33,4 @@ __all__ = ["PickleDataSet"]
 from contextlib import suppress
 
 with suppress(ImportError):
-    from .pickle_dataset import PickleDataSet  # NOQA
+    from .pickle_dataset import PickleDataSet

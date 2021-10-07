@@ -37,9 +37,15 @@ repos:
     - repo: https://github.com/asottile/blacken-docs
       rev: v1.9.2
       hooks:
-        - id: blacken-docs
-          additional_dependencies: [black==21.5b1]
-          entry: blacken-docs --skip-errors
+          - id: blacken-docs
+            additional_dependencies: [black==21.5b1]
+            entry: blacken-docs --skip-errors
+
+    - repo: https://github.com/asottile/pyupgrade
+      rev: v2.26.0
+      hooks:
+          - id: pyupgrade
+            args: [--py36-plus]
 
     - repo: local
       hooks:
@@ -83,7 +89,7 @@ repos:
           # https://github.com/PyCQA/pylint/issues/618
           # The first set of pylint checks if for local pre-commit, it only runs on the files changed.
           - id: pylint-quick-kedro
-            name: "Quick PyLint on kedro/*"
+            name: "Quick Pylint on kedro/*"
             language: system
             types: [file, python]
             files: ^kedro/
@@ -91,7 +97,7 @@ repos:
             entry: pylint -j 4 --disable=unnecessary-pass
             stages: [commit]
           - id: pylint-quick-features
-            name: "Quick PyLint on features/*"
+            name: "Quick Pylint on features/*"
             language: system
             types: [file, python]
             files: ^features/
@@ -99,7 +105,7 @@ repos:
             entry: pylint -j 4 --disable=missing-docstring,no-name-in-module
             stages: [commit]
           - id: pylint-quick-tests
-            name: "Quick PyLint on tests/*"
+            name: "Quick Pylint on tests/*"
             language: system
             types: [file, python]
             files: ^tests/
@@ -108,20 +114,20 @@ repos:
 
           # The same pylint checks, but running on all files. It's for manual run with `make lint`
           - id: pylint-kedro
-            name: "PyLint on kedro/*"
+            name: "Pylint on kedro/*"
             language: system
             pass_filenames: false
             stages: [manual]
             entry: pylint -j 4 --disable=unnecessary-pass --init-hook="import sys; sys.setrecursionlimit(2000)" kedro
           - id: pylint-features
-            name: "PyLint on features/*"
+            name: "Pylint on features/*"
             language: system
             pass_filenames: false
             stages: [manual]
             exclude: ^features/steps/test_starter
             entry: pylint -j 4 --disable=missing-docstring,no-name-in-module features
           - id: pylint-tests
-            name: "PyLint on tests/*"
+            name: "Pylint on tests/*"
             language: system
             pass_filenames: false
             stages: [manual]

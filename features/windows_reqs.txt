@@ -3,7 +3,7 @@
 # everything, so just this subset will be enough for CI
 behave==1.2.6
 pandas>=0.24.0, <1.0.4
-psutil==5.6.6
+psutil==5.6.7
 requests~=2.20
 toml~=0.10.1
 PyYAML>=4.2, <6.0

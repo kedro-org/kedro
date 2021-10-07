@@ -48,13 +48,24 @@ class AppendableExcelDataSet(AbstractDataSet):
 
     .. code-block:: yaml
 
-        >>> rockets:
+        >>> # AppendableExcelDataSet creates a new sheet for every dataset
+        >>> # ExcelDataSet restricts one dataset per file as it is overwritten
+        >>>
+        >>> preprocessed_companies:
         >>>   type: pandas.AppendableExcelDataSet
-        >>>   filepath: data/01_raw/rockets.xlsx
+        >>>   filepath: data/02_intermediate/preprocessed.xlsx # assumes file already exists
         >>>   save_args:
-        >>>     sheet_name: Sheet1
+        >>>     sheet_name: preprocessed_companies
         >>>   load_args:
-        >>>     sheet_name: Sheet1
+        >>>     sheet_name: preprocessed_companies
+        >>>
+        >>> preprocessed_shuttles:
+        >>>   type: pandas.AppendableExcelDataSet
+        >>>   filepath: data/02_intermediate/preprocessed.xlsx
+        >>>   save_args:
+        >>>     sheet_name: preprocessed_shuttles
+        >>>   load_args:
+        >>>     sheet_name: preprocessed_shuttles
 
     Example using Python API:
     ::

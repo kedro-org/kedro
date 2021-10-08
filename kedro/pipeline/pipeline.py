@@ -209,6 +209,11 @@ class Pipeline:  # pylint: disable=too-many-public-methods
             return NotImplemented
         return Pipeline(set(self.nodes + other.nodes))
 
+    def __radd__(self, other):
+        if isinstance(other, int) and other == 0:
+            return self
+        return self.__add__(other)
+
     def __sub__(self, other):
         if not isinstance(other, Pipeline):
             return NotImplemented

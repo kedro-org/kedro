@@ -333,10 +333,18 @@ class TestValidPipeline:
 
         assert pipeline.outputs() == set(outputs)
 
-    def test_combine(self):
+    def test_combine_add(self):
         pipeline1 = Pipeline([node(biconcat, ["input", "input1"], "output1", name="a")])
         pipeline2 = Pipeline([node(biconcat, ["input", "input2"], "output2", name="b")])
         new_pipeline = pipeline1 + pipeline2
+        assert new_pipeline.inputs() == {"input", "input1", "input2"}
+        assert new_pipeline.outputs() == {"output1", "output2"}
+        assert {n.name for n in new_pipeline.nodes} == {"a", "b"}
+
+    def test_combine_sum(self):
+        pipeline1 = Pipeline([node(biconcat, ["input", "input1"], "output1", name="a")])
+        pipeline2 = Pipeline([node(biconcat, ["input", "input2"], "output2", name="b")])
+        new_pipeline = sum([pipeline1, pipeline2])
         assert new_pipeline.inputs() == {"input", "input1", "input2"}
         assert new_pipeline.outputs() == {"output1", "output2"}
         assert {n.name for n in new_pipeline.nodes} == {"a", "b"}

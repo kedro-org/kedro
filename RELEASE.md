@@ -113,6 +113,7 @@
 
 ## Bug fixes and other changes
 * Fixed an issue where `kedro new --config config.yml` was ignoring the config file when `prompts.yml` didn't exist.
+* Added support for arbitrary backends (via importable module paths) that satisfy the `pickle` interface to `PickleDataSet`
 
 ## Minor breaking changes to the API
 
@@ -120,7 +121,8 @@
 
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman),
-[Manish Swami](https://github.com/ManishS6)
+[Manish Swami](https://github.com/ManishS6),
+[Zain Patel](https://github.com/mzjp2)
 
 # Release 0.17.5
 

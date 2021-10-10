@@ -37,7 +37,7 @@ from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, wait
 from itertools import chain
 from multiprocessing.managers import BaseProxy, SyncManager  # type: ignore
-from multiprocessing.reduction import ForkingPickler
+from multiprocessing.reduction import ForkingPickler # type: ignore
 from pickle import PicklingError
 from typing import Any, Dict, Iterable, Set
 
@@ -79,11 +79,11 @@ class _SharedMemoryDataSet:
             # Checks if the error is due to serialisation or not
             try:
                 pickle.dumps(data)
-            except Exception as exc:  # SKIP_IF_NO_SPARK
+            except Exception as inner_exc:  # SKIP_IF_NO_SPARK
                 raise DataSetError(
                     f"{str(data.__class__)} cannot be serialized. ParallelRunner "
                     "implicit memory datasets can only be used with serializable data"
-                ) from exc
+                ) from inner_exc
             else:
                 raise exc
 

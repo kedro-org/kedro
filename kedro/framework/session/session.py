@@ -94,20 +94,20 @@ def _deactivate_session() -> None:
 
 
 def _describe_git(project_path: Path) -> Dict[str, Dict[str, str]]:
-    project_path = str(project_path)
+    project_path_str = str(project_path)
 
     try:
         res = subprocess.check_output(
-            ["git", "rev-parse", "--short", "HEAD"], cwd=project_path
+            ["git", "rev-parse", "--short", "HEAD"], cwd=project_path_str
         )
     # `subprocess.check_output()` raises `NotADirectoryError` on Windows
     except (subprocess.CalledProcessError, FileNotFoundError, NotADirectoryError):
-        logging.getLogger(__name__).warning("Unable to git describe %s", project_path)
+        logging.getLogger(__name__).warning("Unable to git describe %s", project_path_str)
         return {}
 
     git_data = {"commit_sha": res.decode().strip()}
 
-    res = subprocess.check_output(["git", "status", "--short"], cwd=project_path)
+    res = subprocess.check_output(["git", "status", "--short"], cwd=project_path_str)
     git_data["dirty"] = bool(res.decode().strip())
 
     return {"git": git_data}

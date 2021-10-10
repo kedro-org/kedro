@@ -160,36 +160,39 @@ class Pipeline:  # pylint: disable=too-many-public-methods
                 "`nodes` argument of `Pipeline` is None. It must be an "
                 "iterable of nodes and/or pipelines instead."
             )
-        nodes = list(nodes)  # in case it's a generator
+        # in case it's a generator explicityly make it a list
+        # Now it can be a list of pipelines or Nodes
+        nodes_pipeline_list = list(nodes)
         _validate_duplicate_nodes(nodes)
 
-        nodes = list(
+        # Now it must be a list of Nodes
+        nodes_list = list(
             chain.from_iterable(
-                [[n] if isinstance(n, Node) else n.nodes for n in nodes]
+                [[n] if isinstance(n, Node) else n.nodes for n in nodes_pipeline_list]
             )
         )
-        _validate_transcoded_inputs_outputs(nodes)
+        _validate_transcoded_inputs_outputs(nodes_list)
         _tags = set(_to_list(tags))
 
         nodes = [n.tag(_tags) for n in nodes]
 
-        self._nodes_by_name = {node.name: node for node in nodes}
-        _validate_unique_outputs(nodes)
-        _validate_unique_confirms(nodes)
+        self._nodes_by_name = {node.name: node for node in nodes_list}
+        _validate_unique_outputs(nodes_list)
+        _validate_unique_confirms(nodes_list)
 
         # input -> nodes with input
         self._nodes_by_input = defaultdict(set)  # type: Dict[str, Set[Node]]
-        for node in nodes:
+        for node in nodes_list:
             for input_ in node.inputs:
                 self._nodes_by_input[_strip_transcoding(input_)].add(node)
 
         # output -> node with output
         self._nodes_by_output = {}  # type: Dict[str, Node]
-        for node in nodes:
+        for node in nodes_list:
             for output in node.outputs:
                 self._nodes_by_output[_strip_transcoding(output)] = node
 
-        self._nodes = nodes
+        self._nodes = nodes_list
         self._topo_sorted_nodes = _topologically_sorted(self.node_dependencies)
 
     def __repr__(self):  # pragma: no cover
@@ -685,8 +688,8 @@ class Pipeline:  # pylint: disable=too-many-public-methods
                 nodes of the current one such that only nodes containing *any*
                 of the tags provided are being copied.
         """
-        tags = set(tags)
-        nodes = [node for node in self.nodes if tags & node.tags]
+        unique_tags = set(tags)
+        nodes = [node for node in self.nodes if unique_tags & node.tags]
         return Pipeline(nodes)
 
     def decorate(self, *decorators: Callable) -> "Pipeline":

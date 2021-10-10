@@ -722,10 +722,10 @@ def _get_wheel_name(**kwargs: Any) -> str:
     # https://stackoverflow.com/q/51939257/3364156
     dist = Distribution(attrs=kwargs)
     bdist_wheel_cmd = dist.get_command_obj("bdist_wheel")
-    bdist_wheel_cmd.ensure_finalized()
+    bdist_wheel_cmd.ensure_finalized()  # type: ignore
 
-    distname = bdist_wheel_cmd.wheel_dist_name
-    tag = "-".join(bdist_wheel_cmd.get_tag())
+    distname = bdist_wheel_cmd.wheel_dist_name  # type: ignore
+    tag = "-".join(bdist_wheel_cmd.get_tag())  # type: ignore
     return f"{distname}-{tag}.whl"
 
 

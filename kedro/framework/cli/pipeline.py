@@ -880,8 +880,8 @@ def _generate_wheel_file(
         temp_dir_path = Path(temp_dir).resolve()
 
         project = Project(temp_dir_path)  # project where to do refactoring
-        _refactor_code_for_package(  # type: ignore
-            project, package_source, tests_source, alias, metadata
+        _refactor_code_for_package(
+            project, package_source, tests_source, alias, metadata  # type: ignore
         )
         project.close()
 

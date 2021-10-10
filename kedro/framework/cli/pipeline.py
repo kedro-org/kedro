@@ -691,7 +691,6 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
 
     _generate_wheel_file(
         pipeline_name=pipeline_name,
-        destination=destination.resolve(),
         destination=destination_path.resolve(),
         source_paths=source_paths,
         version=version,

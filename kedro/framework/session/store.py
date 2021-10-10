@@ -85,7 +85,8 @@ class ShelveStore(BaseSessionStore):
         try:
             with shelve.open(str(self._location), flag="r") as _sh:  # nosec
                 data = dict(_sh)
-        except dbm.error:
+        # dbm.error is not derived from BaseException, but that is out of our control
+        except dbm.error:  # type: ignore
             pass
         return data
 

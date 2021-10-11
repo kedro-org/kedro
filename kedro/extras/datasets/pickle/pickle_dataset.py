@@ -28,10 +28,10 @@
 
 """``PickleDataSet`` loads/saves data from/to a Pickle file using an underlying
 filesystem (e.g.: local, S3, GCS). The underlying functionality is supported by
-the ``pickle``, ``joblib``, ``dill``, and ``compress_pickle`` libraries, so it
+the specified backend library passed in (defaults to the ``pickle`` library), so it
 supports all allowed options for loading and saving pickle files.
 """
-import pickle
+import importlib
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any, Dict
@@ -46,26 +46,11 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
-try:
-    import joblib
-except ImportError:  # pragma: no cover
-    joblib = None
-
-try:
-    import dill
-except ImportError:  # pragma: no cover
-    dill = None
-
-try:
-    import compress_pickle
-except ImportError:  # pragma: no cover
-    compress_pickle = None
-
 
 class PickleDataSet(AbstractVersionedDataSet):
     """``PickleDataSet`` loads/saves data from/to a Pickle file using an underlying
     filesystem (e.g.: local, S3, GCS). The underlying functionality is supported by
-    the ``pickle``, ``joblib``, ``dill``, and ``compress_pickle`` libraries, so it
+    the specified backend library passed in (defaults to the ``pickle`` library), so it
     supports all allowed options for loading and saving pickle files.
 
     Example:
@@ -95,14 +80,8 @@ class PickleDataSet(AbstractVersionedDataSet):
 
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
     DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
-    BACKENDS = {
-        "pickle": pickle,
-        "joblib": joblib,
-        "dill": dill,
-        "compress_pickle": compress_pickle,
-    }
 
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,too-many-locals
     def __init__(
         self,
         filepath: str,
@@ -114,18 +93,28 @@ class PickleDataSet(AbstractVersionedDataSet):
         fs_args: Dict[str, Any] = None,
     ) -> None:
         """Creates a new instance of ``PickleDataSet`` pointing to a concrete Pickle
-        file on a specific filesystem. ``PickleDataSet`` supports four backends to
-        serialize/deserialize objects: `pickle`, `joblib`, `dill`, and `compress_pickle`.
+        file on a specific filesystem. ``PickleDataSet`` supports custom backends to
+        serialize/deserialize objects.
+
+        Example backends that are compatible (non-exhaustive):
+            * `pickle`
+            * `joblib`
+            * `dill`
+            * `compress_pickle`
+
+        Example backends that are incompatible:
+            * `torch`
 
         Args:
             filepath: Filepath in POSIX format to a Pickle file prefixed with a protocol like
                 `s3://`. If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.
-            backend: Backend to use, must be one of ['pickle', 'joblib', 'dill', 'compress_pickle'].
+            backend: Backend to use, must be an import path to a module which satisfies the
+                ``pickle`` interface. That is, contains a `load` and `dump` function.
                 Defaults to 'pickle'.
             load_args: Pickle options for loading pickle files.
-                Here you can find all available arguments for different backends:
+                You can pass in arguments that the backend load function specified accepts, e.g:
                 pickle.load: https://docs.python.org/3/library/pickle.html#pickle.load
                 joblib.load: https://joblib.readthedocs.io/en/latest/generated/joblib.load.html
                 dill.load: https://dill.readthedocs.io/en/latest/dill.html#dill._dill.load
@@ -133,7 +122,7 @@ class PickleDataSet(AbstractVersionedDataSet):
                 https://lucianopaz.github.io/compress_pickle/html/api/compress_pickle.html#compress_pickle.compress_pickle.load
                 All defaults are preserved.
             save_args: Pickle options for saving pickle files.
-                Here you can find all available arguments for different backends:
+                You can pass in arguments that the backend dump function specified accepts, e.g:
                 pickle.dump: https://docs.python.org/3/library/pickle.html#pickle.dump
                 joblib.dump: https://joblib.readthedocs.io/en/latest/generated/joblib.dump.html
                 dill.dump: https://dill.readthedocs.io/en/latest/dill.html#dill._dill.dump
@@ -155,20 +144,23 @@ class PickleDataSet(AbstractVersionedDataSet):
                 All defaults are preserved, except `mode`, which is set to `wb` when saving.
 
         Raises:
-            ValueError: If ``backend`` is not one of ['pickle', 'joblib', 'dill',
-                'compress_pickle'].
-            ImportError: If ``backend`` library could not be imported.
+            ValueError: If ``backend`` does not satisfy the `pickle` interface.
+            ImportError: If the ``backend`` module could not be imported.
         """
-        if backend not in self.BACKENDS:
-            raise ValueError(
-                f"'backend' should be one of {list(self.BACKENDS.keys())}, "
-                f"got '{backend}'."
-            )
-
-        if not self.BACKENDS[backend]:
+        try:
+            imported_backend = importlib.import_module(backend)
+        except ImportError as exc:
             raise ImportError(
-                f"Selected backend '{backend}' could not be "
-                "imported. Make sure it is installed."
+                f"Selected backend '{backend}' could not be imported. "
+                "Make sure it is installed and importable."
+            ) from exc
+
+        if not (
+            hasattr(imported_backend, "load") and hasattr(imported_backend, "dump")
+        ):
+            raise ValueError(
+                f"Selected backend '{backend}' should satisfy the pickle interface. "
+                "Missing one of `load` and `dump` on the backend."
             )
 
         _fs_args = deepcopy(fs_args) or {}
@@ -190,7 +182,7 @@ class PickleDataSet(AbstractVersionedDataSet):
             glob_function=self._fs.glob,
         )
 
-        self._backend = backend
+        self._backend = imported_backend
 
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
@@ -218,16 +210,14 @@ class PickleDataSet(AbstractVersionedDataSet):
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
-            return self.BACKENDS[self._backend].load(
-                fs_file, **self._load_args
-            )  # nosec
+            return self._backend.load(fs_file, **self._load_args)  # type: ignore
 
     def _save(self, data: Any) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
             try:
-                self.BACKENDS[self._backend].dump(data, fs_file, **self._save_args)
+                self._backend.dump(data, fs_file, **self._save_args)  # type: ignore
             except Exception as exc:
                 raise DataSetError(
                     f"{data.__class__} was not serialized due to: {exc}"

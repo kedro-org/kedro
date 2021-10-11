@@ -28,11 +28,12 @@ If you want to customise a built-in Kedro command, such as `kedro run`, for a sp
 Intended to be invoked via `kedro`."""
 import click
 from kedro.framework.cli.utils import (
+    CONTEXT_SETTINGS,
     _config_file_callback,
     _reformat_load_versions,
     _split_params,
     env_option,
-    split_string, CONTEXT_SETTINGS,
+    split_string,
 )
 
 from kedro.framework.cli.project import (

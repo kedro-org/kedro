@@ -111,6 +111,13 @@ def _check_pipeline_name(ctx, param, value):  # pylint: disable=unused-argument
     return value
 
 
+def _check_module_path(ctx, param, value):  # pylint: disable=unused-argument
+    if value and not re.match(r"^[\w.]+$", value):
+        message = "The pipeline location you provided is not a valid Python module path"
+        raise KedroCliError(message)
+    return value
+
+
 # pylint: disable=missing-function-docstring
 @click.group(name="Kedro")
 def pipeline_cli():  # pragma: no cover
@@ -372,7 +379,7 @@ def _package_pipelines_from_manifest(metadata: ProjectMetadata) -> None:
     is_flag=True,
     help="Package all pipelines in the `pyproject.toml` package manifest section.",
 )
-@click.argument("module_path", nargs=1, required=False)
+@click.argument("module_path", nargs=1, required=False, callback=_check_module_path)
 @click.pass_obj  # this will pass the metadata as first argument
 def package_pipeline(
     metadata: ProjectMetadata, module_path, env, alias, destination, all_flag

@@ -136,7 +136,7 @@ In addition to [PyPI](https://pypi.org/), you can also share the packaged wheel 
 
 #### Package multiple modular pipelines
 
-If you are packaging multiple modular pipelines, you have the option to do it in bulk, by defining the specifications in the project's `pyproject.toml`:
+To package multiple modular pipelines in bulk, run `kedro pipeline package --all`. This will package all pipelines specified in the `tool.kedro.pipeline.package` manifest section of the project's `pyproject.toml` file:
 
 ```toml
 [tool.kedro.pipeline.package]
@@ -144,7 +144,7 @@ first_pipeline = {alias = "aliased_pipeline", destination = "somewhere/else", en
 second_pipeline = {}
 ```
 
-Where the keys (e.g. `first_pipeline`, `second_pipeline`) are the modular pipelines' folder names, and the values are the options that `kedro pipeline package <pipeline_name>` accepts.
+Here the keys (e.g. `first_pipeline`, `second_pipeline`) are the modular pipelines' folder names, and the values are the options that `kedro pipeline package <pipeline_name>` accepts.
 
 ```eval_rst
 .. note::  Make sure `destination` is specified as a POSIX path even when working on a Windows machine.
@@ -197,6 +197,22 @@ where
 client_kwargs:
   headers:
     Authorization: token <token>
+```
+
+#### Pull multiple modular pipelines
+
+To pull multiple modular pipelines in bulk, run `kedro pipeline pull --all`. This will pull and unpack all pipelines specified in the `tool.kedro.pipeline.pull` manifest section of the project's `pyproject.toml` file:
+
+```toml
+[tool.kedro.pipeline.pull]
+"src/dist/first-pipeline-0.1-py3-none-any.whl" = {}
+"https://www.url.to/second-pipeline.whl" = {alias = "aliased_pipeline", fs-args = "pipeline_pull_args.yml"}
+```
+
+Here the keys are the package paths, and the values are the options that `kedro pipeline pull <package_path>` accepts. Package paths can be any of the locations allowed by `kedro pipeline pull`, including local storage, PyPI and the cloud.
+
+```eval_rst
+.. attention:: As per the `TOML specification <https://toml.io/en/v1.0.0#keys>`_, a key that contains any character outside ``A-Za-z0-9_-`` must be quoted.
 ```
 
 ## A modular pipeline example template

@@ -53,11 +53,11 @@ with open(path.join(here, name, "__init__.py"), encoding="utf-8") as f:
     version = result.group(1)
 
 # get the dependencies and installs
-with open("requirements.txt", "r", encoding="utf-8") as f:
+with open("requirements.txt", encoding="utf-8") as f:
     requires = [x.strip() for x in f if x.strip()]
 
 # get test dependencies and installs
-with open("test_requirements.txt", "r", encoding="utf-8") as f:
+with open("test_requirements.txt", encoding="utf-8") as f:
     test_requires = [x.strip() for x in f if x.strip() and not x.startswith("-r")]
 
 
@@ -104,7 +104,7 @@ pandas_require = {
     "pandas.ParquetDataSet": [PANDAS, "pyarrow>=0.12.0, <4.0.0"],
     "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy~=1.2"],
 }
-pillow_require = {"pillow.ImageDataSet": ["Pillow~=7.1.2"]}
+pillow_require = {"pillow.ImageDataSet": ["Pillow~=8.0"]}
 plotly_require = {"plotly.PlotlyDataSet": [PANDAS, "plotly~=4.14"]}
 spark_require = {
     "spark.SparkDataSet": [SPARK, HDFS, S3FS],

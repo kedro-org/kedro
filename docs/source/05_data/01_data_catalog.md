@@ -361,7 +361,7 @@ CSVDataSet(
 
 ## Loading multiple datasets that have similar configuration
 
-You may encounter situations where your datasets use the same file format, load and save arguments, and are stored in the same folder. YAML has a [built-in syntax](https://yaml.org/spec/1.2/spec.html#id2765878) for factorising parts of a YAML file, which means that you can decide what is generalisable across your datasets so that you do not have to spend time copying and pasting dataset configurations in `catalog.yml`.
+You may encounter situations where your datasets use the same file format, load and save arguments, and are stored in the same folder. YAML has a [built-in syntax](https://yaml.org/spec/1.2.1/#Syntax) for factorising parts of a YAML file, which means that you can decide what is generalisable across your datasets so that you do not have to spend time copying and pasting dataset configurations in `catalog.yml`.
 
 You can see this in the following example:
 

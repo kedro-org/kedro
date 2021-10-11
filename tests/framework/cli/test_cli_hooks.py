@@ -33,7 +33,7 @@ import pytest
 from click.testing import CliRunner
 
 from kedro.framework.cli.cli import KedroCLI, cli
-from kedro.framework.cli.hooks import cli_hook_impl
+from kedro.framework.cli.hooks import cli_hook_impl, get_cli_hook_manager, manager
 from kedro.framework.startup import ProjectMetadata
 
 logger = logging.getLogger(__name__)
@@ -41,6 +41,22 @@ logger = logging.getLogger(__name__)
 FakeDistribution = namedtuple(
     "FakeDistribution", ["entry_points", "metadata", "version"]
 )
+
+
+@pytest.fixture(autouse=True)
+def reset_hook_manager():
+    """Due to singleton nature of the `_cli_hook_manager`, the `_cli_hook_manager`
+    must be reset to `None` so that a new `CLIHookManager` gets created at the point
+    where `FakeEntryPoint` and `fake_plugin_distribution` exist within the same scope.
+    Additionally, this prevents `CLIHookManager` to be set from scope outside of this
+    testing module.
+    """
+    manager._cli_hook_manager = None
+    yield
+    hook_manager = get_cli_hook_manager()
+    plugins = hook_manager.get_plugins()
+    for plugin in plugins:
+        hook_manager.unregister(plugin)
 
 
 class FakeEntryPoint:

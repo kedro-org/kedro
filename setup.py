@@ -105,7 +105,7 @@ pandas_require = {
     "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy~=1.2"],
 }
 pillow_require = {"pillow.ImageDataSet": ["Pillow~=8.0"]}
-plotly_require = {"plotly.PlotlyDataSet": [PANDAS, "plotly~=4.14"]}
+plotly_require = {"plotly.PlotlyDataSet": [PANDAS, "plotly>=4.0, <6.0"]}
 spark_require = {
     "spark.SparkDataSet": [SPARK, HDFS, S3FS],
     "spark.SparkHiveDataSet": [SPARK, HDFS, S3FS],

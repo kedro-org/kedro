@@ -28,7 +28,7 @@ openpyxl>=3.0.3, <4.0
 pandas-gbq>=0.12.0, <1.0
 pandas>=0.24.0  # Needs to be at least 0.24.0 to make use of `pandas.DataFrame.to_numpy` (recommended alternative to `pandas.DataFrame.values`)
 Pillow~=8.0
-plotly~=4.14
+plotly==4.0
 pre-commit~=1.17
 psutil==5.6.7
 pyarrow>=0.12.0, <4.0.0

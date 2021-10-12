@@ -92,12 +92,7 @@ TOO_SHORT_ERROR = "It must be at least 2 characters long."
 class TestPipelineCreateCommand:
     @pytest.mark.parametrize("env", [None, "local"])
     def test_create_pipeline(  # pylint: disable=too-many-locals
-        self,
-        fake_repo_path,
-        fake_project_cli,
-        fake_metadata,
-        env,
-        fake_package_path,
+        self, fake_repo_path, fake_project_cli, fake_metadata, env, fake_package_path
     ):
         """Test creation of a pipeline"""
         pipelines_dir = fake_package_path / "pipelines"
@@ -419,9 +414,7 @@ class TestPipelineDeleteCommand:
     ):
         """Test error message when bad pipeline name was provided."""
         result = CliRunner().invoke(
-            fake_project_cli,
-            ["pipeline", "delete", "-y", bad_name],
-            obj=fake_metadata,
+            fake_project_cli, ["pipeline", "delete", "-y", bad_name], obj=fake_metadata
         )
         assert result.exit_code
         assert error_message in result.output
@@ -547,9 +540,7 @@ class TestPipelineDescribeCommand:
         pipelines_dict,
     ):
         result = CliRunner().invoke(
-            fake_project_cli,
-            ["pipeline", "describe", pipeline_name],
-            obj=fake_metadata,
+            fake_project_cli, ["pipeline", "describe", pipeline_name], obj=fake_metadata
         )
 
         assert not result.exit_code
@@ -569,16 +560,10 @@ class TestPipelineDescribeCommand:
         assert expected_output in result.output
 
     def test_describe_pipeline_default(
-        self,
-        fake_project_cli,
-        fake_metadata,
-        yaml_dump_mock,
-        pipelines_dict,
+        self, fake_project_cli, fake_metadata, yaml_dump_mock, pipelines_dict
     ):
         result = CliRunner().invoke(
-            fake_project_cli,
-            ["pipeline", "describe"],
-            obj=fake_metadata,
+            fake_project_cli, ["pipeline", "describe"], obj=fake_metadata
         )
 
         assert not result.exit_code
@@ -597,7 +582,7 @@ class TestSyncDirs:
         source_dir.mkdir()
         (source_dir / "existing").mkdir()
         (source_dir / "existing" / "source_file").touch()
-        (source_dir / "existing" / "common").write_text("source")
+        (source_dir / "existing" / "common").write_text("source", encoding="utf-8")
         (source_dir / "new").mkdir()
         (source_dir / "new" / "source_file").touch()
         return source_dir
@@ -608,7 +593,7 @@ class TestSyncDirs:
         target.mkdir()
         (target / "existing").mkdir()
         (target / "existing" / "target_file").touch()
-        (target / "existing" / "common").write_text("target")
+        (target / "existing" / "common").write_text("target", encoding="utf-8")
 
         _sync_dirs(source, target)
 
@@ -618,7 +603,7 @@ class TestSyncDirs:
         assert (source / "new" / "source_file").is_file()
 
         assert (target / "existing" / "source_file").is_file()
-        assert (target / "existing" / "common").read_text() == "target"
+        assert (target / "existing" / "common").read_text(encoding="utf-8") == "target"
         assert (target / "existing" / "target_file").exists()
         assert (target / "new" / "source_file").is_file()
 
@@ -634,6 +619,6 @@ class TestSyncDirs:
         assert (source / "new" / "source_file").is_file()
 
         assert (target / "existing" / "source_file").is_file()
-        assert (target / "existing" / "common").read_text() == "source"
+        assert (target / "existing" / "common").read_text(encoding="utf-8") == "source"
         assert not (target / "existing" / "target_file").exists()
         assert (target / "new" / "source_file").is_file()

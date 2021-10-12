@@ -149,7 +149,7 @@ def _install_project_requirements(context):
         Path(
             "kedro/templates/project/{{ cookiecutter.repo_name }}/src/requirements.txt"
         )
-        .read_text()
+        .read_text(encoding="utf-8")
         .splitlines()
     )
     install_reqs = [req for req in install_reqs if "{" not in req]

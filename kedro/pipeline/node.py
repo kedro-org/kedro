@@ -197,8 +197,9 @@ class Node:  # pylint: disable=too-many-instance-attributes
         return prefix + f"{self._func_name}({in_str}) -> {out_str}"
 
     def __repr__(self):  # pragma: no cover
-        return "Node({}, {!r}, {!r}, {!r})".format(
-            self._func_name, self._inputs, self._outputs, self._name
+        return (
+            f"Node({self._func_name}, {repr(self._inputs)}, {repr(self._outputs)}, "
+            f"{repr(self._name)})"
         )
 
     def __call__(self, **kwargs) -> Dict[str, Any]:
@@ -468,10 +469,9 @@ class Node:  # pylint: disable=too-many-instance-attributes
     def _run_with_no_inputs(self, inputs: Dict[str, Any]):
         if inputs:
             raise ValueError(
-                "Node {} expected no inputs, "
-                "but got the following {} input(s) instead: {}".format(
-                    str(self), len(inputs), list(sorted(inputs.keys()))
-                )
+                f"Node {str(self)} expected no inputs, "
+                f"but got the following {len(inputs)} input(s) instead: "
+                f"{sorted(inputs.keys())}."
             )
 
         return self._decorated_func()
@@ -479,10 +479,9 @@ class Node:  # pylint: disable=too-many-instance-attributes
     def _run_with_one_input(self, inputs: Dict[str, Any], node_input: str):
         if len(inputs) != 1 or node_input not in inputs:
             raise ValueError(
-                "Node {} expected one input named '{}', "
-                "but got the following {} input(s) instead: {}".format(
-                    str(self), node_input, len(inputs), list(sorted(inputs.keys()))
-                )
+                f"Node {str(self)} expected one input named '{node_input}', "
+                f"but got the following {len(inputs)} input(s) instead: "
+                f"{sorted(inputs.keys())}."
             )
 
         return self._decorated_func(inputs[node_input])
@@ -491,30 +490,21 @@ class Node:  # pylint: disable=too-many-instance-attributes
         # Node inputs and provided run inputs should completely overlap
         if set(node_inputs) != set(inputs.keys()):
             raise ValueError(
-                "Node {} expected {} input(s) {}, "
-                "but got the following {} input(s) instead: {}.".format(
-                    str(self),
-                    len(node_inputs),
-                    node_inputs,
-                    len(inputs),
-                    list(sorted(inputs.keys())),
-                )
+                f"Node {str(self)} expected {len(node_inputs)} input(s) {node_inputs}, "
+                f"but got the following {len(inputs)} input(s) instead: "
+                f"{sorted(inputs.keys())}."
             )
         # Ensure the function gets the inputs in the correct order
-        return self._decorated_func(*[inputs[item] for item in node_inputs])
+        return self._decorated_func(*(inputs[item] for item in node_inputs))
 
     def _run_with_dict(self, inputs: Dict[str, Any], node_inputs: Dict[str, str]):
         # Node inputs and provided run inputs should completely overlap
         if set(node_inputs.values()) != set(inputs.keys()):
             raise ValueError(
-                "Node {} expected {} input(s) {}, "
-                "but got the following {} input(s) instead: {}.".format(
-                    str(self),
-                    len(set(node_inputs.values())),
-                    list(sorted(set(node_inputs.values()))),
-                    len(inputs),
-                    list(sorted(inputs.keys())),
-                )
+                f"Node {str(self)} expected {len(set(node_inputs.values()))} input(s) "
+                f"{sorted(set(node_inputs.values()))}, "
+                f"but got the following {len(inputs)} input(s) instead: "
+                f"{sorted(inputs.keys())}."
             )
         kwargs = {arg: inputs[alias] for arg, alias in node_inputs.items()}
         return self._decorated_func(**kwargs)
@@ -523,30 +513,26 @@ class Node:  # pylint: disable=too-many-instance-attributes
         def _from_dict():
             if set(self._outputs.keys()) != set(outputs.keys()):
                 raise ValueError(
-                    "Failed to save outputs of node {}.\n"
-                    "The node's output keys {} do not "
-                    "match with the returned output's keys {}.".format(
-                        str(self), set(outputs.keys()), set(self._outputs.keys())
-                    )
+                    f"Failed to save outputs of node {str(self)}.\n"
+                    f"The node's output keys {set(outputs.keys())} do not match with "
+                    f"the returned output's keys {set(self._outputs.keys())}."
                 )
             return {name: outputs[key] for key, name in self._outputs.items()}
 
         def _from_list():
             if not isinstance(outputs, (list, tuple)):
                 raise ValueError(
-                    "Failed to save outputs of node {}.\n"
-                    "The node definition contains a list of "
-                    "outputs {}, whereas the node function "
-                    "returned a `{}`.".format(
-                        str(self), self._outputs, type(outputs).__name__
-                    )
+                    f"Failed to save outputs of node {str(self)}.\n"
+                    f"The node definition contains a list of "
+                    f"outputs {self._outputs}, whereas the node function "
+                    f"returned a `{type(outputs).__name__}`."
                 )
             if len(outputs) != len(self._outputs):
                 raise ValueError(
-                    "Failed to save outputs of node {}.\n"
-                    "The node function returned {} output(s), "
-                    "whereas the node definition contains {} "
-                    "output(s).".format(str(self), len(outputs), len(self._outputs))
+                    f"Failed to save outputs of node {str(self)}.\n"
+                    f"The node function returned {len(outputs)} output(s), "
+                    f"whereas the node definition contains {len(self._outputs)} "
+                    f"output(s)."
                 )
 
             return dict(zip(self._outputs, outputs))
@@ -618,9 +604,9 @@ class Node:  # pylint: disable=too-many-instance-attributes
 
 def _node_error_message(msg) -> str:
     return (
-        "Invalid Node definition: {}\n"
-        "Format should be: node(function, inputs, outputs)"
-    ).format(msg)
+        f"Invalid Node definition: {msg}\n"
+        f"Format should be: node(function, inputs, outputs)"
+    )
 
 
 def node(

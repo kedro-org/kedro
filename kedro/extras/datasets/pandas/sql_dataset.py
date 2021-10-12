@@ -87,8 +87,8 @@ def _find_known_drivers(module_import_error: ImportError) -> Optional[str]:
 
     if KNOWN_PIP_INSTALL.get(missing_module):
         return (
-            "You can also try installing missing driver with\n"
-            "\npip install {}".format(KNOWN_PIP_INSTALL.get(missing_module))
+            f"You can also try installing missing driver with\n"
+            f"\npip install {KNOWN_PIP_INSTALL.get(missing_module)}"
         )
 
     return None

@@ -1,4 +1,22 @@
-# Upcoming Release 0.17.5
+# Upcoming Release 0.17.6
+
+## Major features and improvements
+* Added `pipelines` global variable to IPython extension, allowing you to access the project's pipelines in `kedro ipython` or `kedro jupyter notebook`.
+
+## Bug fixes and other changes
+* Fixed an issue where `kedro new --config config.yml` was ignoring the config file when `prompts.yml` didn't exist.
+* Added support for arbitrary backends (via importable module paths) that satisfy the `pickle` interface to `PickleDataSet`
+
+## Minor breaking changes to the API
+
+## Upcoming deprecations for Kedro 0.18.0
+
+## Thanks for supporting contributions
+[Deepyaman Datta](https://github.com/deepyaman),
+[Manish Swami](https://github.com/ManishS6),
+[Zain Patel](https://github.com/mzjp2)
+
+# Release 0.17.5
 
 ## Major features and improvements
 * Added new CLI group `registry`, with the associated commands `kedro registry list` and `kedro registry describe`, to replace `kedro pipeline list` and `kedro pipeline describe`.
@@ -15,7 +33,6 @@
 | `tracking.MetricsDataSet` | Dataset to track numeric metrics for experiment tracking | `kedro.extras.datasets.tracking` |
 | `tracking.JSONDataSet` | Dataset to track data for experiment tracking | `kedro.extras.datasets.tracking` |
 
-
 ## Bug fixes and other changes
 * Bumped minimum required `fsspec` version to 2021.04.
 * Fixed the `kedro install` and `kedro build-reqs` flows when uninstalled dependencies are present in a project's `settings.py`, `context.py` or `hooks.py` ([Issue #829](https://github.com/quantumblacklabs/kedro/issues/829)).
@@ -23,6 +40,7 @@
 * Added option in `SQLQueryDataSet` to specify a `filepath` with a sql query, in addition to supplying the entire query in the constructor
 
 ## Minor breaking changes to the API
+* Pinned `dynaconf` to `<3.1.6` because the method signature for `_validate_items` changed which is used in Kedro.
 
 ## Upcoming deprecations for Kedro 0.18.0
 * `kedro pipeline list` and `kedro pipeline describe` are being deprecated in favour of new commands `kedro registry list ` and `kedro registry describe`.

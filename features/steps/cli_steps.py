@@ -660,7 +660,7 @@ def check_output_cells_empty(context):
         assert cell["outputs"] == []
 
 
-@then("jupyter notebook should run on port {port}")
+@then("jupyter notebook should run on port {port:d}")
 def check_jupyter_nb_proc_on_port(context: behave.runner.Context, port: int):
     """Check that jupyter notebook service is running on specified port.
 
@@ -669,7 +669,7 @@ def check_jupyter_nb_proc_on_port(context: behave.runner.Context, port: int):
         port: Port to check
 
     """
-    url = "http://localhost:%d" % int(port)
+    url = f"http://localhost:{port}"
     try:
         util.wait_for(
             func=_check_service_up,
@@ -683,7 +683,7 @@ def check_jupyter_nb_proc_on_port(context: behave.runner.Context, port: int):
         context.result.terminate()
 
 
-@then("Jupyter Lab should run on port {port}")
+@then("Jupyter Lab should run on port {port:d}")
 def check_jupyter_lab_proc_on_port(context: behave.runner.Context, port: int):
     """Check that jupyter lab service is running on specified port.
 
@@ -692,7 +692,7 @@ def check_jupyter_lab_proc_on_port(context: behave.runner.Context, port: int):
         port: Port to check
 
     """
-    url = "http://localhost:%d" % int(port)
+    url = f"http://localhost:{port}"
     try:
         util.wait_for(
             func=_check_service_up,

@@ -288,16 +288,15 @@ class SQLQueryDataSet(AbstractDataSet):
     def __init__(  # pylint: disable=too-many-arguments
         self,
         sql: str = None,
-        filepath: str = None,
         credentials: Dict[str, Any] = None,
         load_args: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        filepath: str = None,
     ) -> None:
         """Creates a new ``SQLQueryDataSet``.
 
         Args:
             sql: The sql query statement.
-            filepath: A path to a file with a sql query statement.
             credentials: A dictionary with a ``SQLAlchemy`` connection string.
                 Users are supposed to provide the connection string 'con'
                 through credentials. It overwrites `con` parameter in
@@ -318,6 +317,7 @@ class SQLQueryDataSet(AbstractDataSet):
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
                 All defaults are preserved, except `mode`, which is set to `r` when loading
                 and to `w` when saving.
+            filepath: A path to a file with a sql query statement.
 
         Raises:
             DataSetError: When either ``sql`` or ``con`` parameters is emtpy.

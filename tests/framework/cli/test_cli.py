@@ -745,6 +745,12 @@ class TestRunCommand:
             ),
             ("foo:bar,baz:fizz buzz", {"foo": "bar", "baz": "fizz buzz"}),
             ("foo:bar, foo : fizz buzz  ", {"foo": "fizz buzz"}),
+            ("foo.nested:bar", {"foo": {"nested": "bar"}}),
+            ("foo.nested:123.45", {"foo": {"nested": 123.45}}),
+            (
+                "foo.nested_1.double_nest:123.45,foo.nested_2:1a",
+                {"foo": {"nested_1": {"double_nest": 123.45}, "nested_2": "1a"}},
+            ),
         ],
     )
     def test_run_extra_params(

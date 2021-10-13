@@ -322,6 +322,11 @@ class SQLQueryDataSet(AbstractDataSet):
         Raises:
             DataSetError: When either ``sql`` or ``con`` parameters is emtpy.
         """
+        if sql and filepath:
+            raise DataSetError(
+                "`sql` and `filepath` arguments cannot both be provided."
+                "Please only provide one."
+            )
 
         if not (sql or filepath):
             raise DataSetError(

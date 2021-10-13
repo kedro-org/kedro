@@ -5,7 +5,8 @@
 
 ## Bug fixes and other changes
 * Fixed an issue where `kedro new --config config.yml` was ignoring the config file when `prompts.yml` didn't exist.
-* Added support for arbitrary backends (via importable module paths) that satisfy the `pickle` interface to `PickleDataSet`
+* Added support for arbitrary backends (via importable module paths) that satisfy the `pickle` interface to `PickleDataSet`.
+* Relaxed the bounds on the `plotly` requirement for `plotly.PlotlyDataSet`.
 
 ## Minor breaking changes to the API
 

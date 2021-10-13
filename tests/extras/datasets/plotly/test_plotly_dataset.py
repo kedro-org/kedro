@@ -72,24 +72,26 @@ def plotly_args(request):
 
 
 @pytest.fixture
-def dummy_dataframe():
-    return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+def dummy_plot():
+    pd.options.plotting.backend = "plotly"
+    data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
+    return data.plot()
 
 
 class TestPlotlyDataSet:
-    def test_save_and_load(self, plotly_data_set, dummy_dataframe):
+    def test_save_and_load(self, plotly_data_set, dummy_plot):
         """Test saving and reloading the data set."""
-        plotly_data_set.save(dummy_dataframe)
+        plotly_data_set.save(dummy_plot)
         reloaded = plotly_data_set.load()
         assert isinstance(reloaded, graph_objects.Figure)
         assert "Test" in str(reloaded["layout"]["title"])
         assert isinstance(reloaded["data"][0], Scatter)
 
-    def test_exists(self, plotly_data_set, dummy_dataframe):
+    def test_exists(self, plotly_data_set, dummy_plot):
         """Test `exists` method invocation for both existing and
         nonexistent data set."""
         assert not plotly_data_set.exists()
-        plotly_data_set.save(dummy_dataframe)
+        plotly_data_set.save(dummy_plot)
         assert plotly_data_set.exists()
 
     def test_load_missing_file(self, plotly_data_set):
@@ -136,4 +138,4 @@ class TestPlotlyDataSet:
         filepath = "test.json"
         data_set = PlotlyDataSet(filepath=filepath, plotly_args=plotly_args)
         with pytest.raises(DataSetError):
-            data_set.save(dummy_dataframe)
+            data_set.save(dummy_plot)

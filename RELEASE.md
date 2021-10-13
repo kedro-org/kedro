@@ -10,17 +10,18 @@
 * Refactored the `load` and `save` operations for `pandas` datasets in order to leverage `pandas` own API and delegate `fsspec` operations to them. This reduces the need to have our own `fsspec` wrappers.
 * Removed `cli.py` from the Kedro project template. By default, all CLI commands, including `kedro run`, are now defined on the Kedro framework side. These can be overridden in turn by a plugin or a `cli.py` file in your project. A packaged Kedro project will respect the same hierarchy when executed with `python -m my_package`.
 * Merged `pandas.AppendableExcelDataSet` into `pandas.ExcelDataSet`.
+* Changed `PlotlyDataSet` to accept Plotly's Figure object for `_save` instead of `pd.DataFrame`.
 * Added `save_args` to `feather.FeatherDataSet`.
 * The default `kedro` environment names can now be set in `settings.py` with the help of the `CONFIG_LOADER_ARGS` variable. The relevant keys to be supplied are `base_env` and `default_run_env`. These values are set to `base` and `local` respectively as a default.
 * Added `kedro.config.abstract_config.AbstractConfigLoader` as an abstract base class for all `ConfigLoader` implementations. `ConfigLoader` and `TemplatedConfigLoader` now inherit directly from this base class.
 * Streamlined the `ConfigLoader.get` and `TemplatedConfigLoader.get` API and delegated the actual `get` method functional implementation to the `kedro.config.common` module.
 * Added the following new datasets:
 
-| Type                | Description                                                    | Location                       |
-| ------------------- | -------------------------------------------------------------- | ------------------------------ |
-| `pandas.XMLDataSet` | Read XML into Pandas DataFrame. Write Pandas DataFrame to XML. | `kedro.extras.datasets.pandas` |
-| `networkx.GraphMLDataSet`       |  Work with NetworkX using GraphML files            | `kedro.extras.datasets.networkx` |
-| `networkx.GMLDataSet`      | Work with NetworkX using Graph Modelling Language files | `kedro.extras.datasets.networkx` |
+| Type                      | Description                                                    | Location                         |
+| ------------------------- | -------------------------------------------------------------- | -------------------------------- |
+| `pandas.XMLDataSet`       | Read XML into Pandas DataFrame. Write Pandas DataFrame to XML. | `kedro.extras.datasets.pandas`   |
+| `networkx.GraphMLDataSet` | Work with NetworkX using GraphML files                         | `kedro.extras.datasets.networkx` |
+| `networkx.GMLDataSet`     | Work with NetworkX using Graph Modelling Language files        | `kedro.extras.datasets.networkx` |
 
 ## Breaking changes to the API
 * Add namespace to parameters in a modular pipeline, which addresses [Issue 399](https://github.com/quantumblacklabs/kedro/issues/399)
@@ -61,6 +62,7 @@
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman)
 [Simon Brugman](https://github.com/sbrugman)
+[Kiyo Kunii](https://github.com/921kiyo)
 
 ## Migration guide from Kedro 0.17.* to 0.18.*
 * Please remove any existing `hook_impl` of the `register_config_loader` method from `ProjectHooks` (or custom alternatives).
@@ -108,10 +110,10 @@
 * Imports are now refactored at `kedro pipeline package` and `kedro pipeline pull` time, so that _aliasing_ a modular pipeline doesn't break it.
 * Added the following new datasets to support basic Experiment Tracking:
 
-| Type                        | Description                                          | Location                          |
-| --------------------------- | ---------------------------------------------------- | --------------------------------- |
+| Type                      | Description                                              | Location                         |
+| ------------------------- | -------------------------------------------------------- | -------------------------------- |
 | `tracking.MetricsDataSet` | Dataset to track numeric metrics for experiment tracking | `kedro.extras.datasets.tracking` |
-| `tracking.JSONDataSet` | Dataset to track data for experiment tracking | `kedro.extras.datasets.tracking` |
+| `tracking.JSONDataSet`    | Dataset to track data for experiment tracking            | `kedro.extras.datasets.tracking` |
 
 
 ## Bug fixes and other changes
@@ -135,8 +137,8 @@
 ## Major features and improvements
 * Added the following new datasets:
 
-| Type                        | Description                                          | Location                          |
-| --------------------------- | ---------------------------------------------------- | --------------------------------- |
+| Type                   | Description                                                 | Location                       |
+| ---------------------- | ----------------------------------------------------------- | ------------------------------ |
 | `plotly.PlotlyDataSet` | Works with plotly graph object Figures (saves as json file) | `kedro.extras.datasets.plotly` |
 
 ## Bug fixes and other changes

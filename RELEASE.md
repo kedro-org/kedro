@@ -5,6 +5,8 @@
 
 ## Bug fixes and other changes
 * Fixed an issue where `kedro new --config config.yml` was ignoring the config file when `prompts.yml` didn't exist.
+* Added support for arbitrary backends (via importable module paths) that satisfy the `pickle` interface to `PickleDataSet`.
+* Upgraded `pip-tools`, which is used by `kedro build-reqs`, to 6.4. This `pip-tools` version requires `pip>=21.2` while [adding support for `pip>=21.3`](https://github.com/jazzband/pip-tools/pull/1501). To upgrade `pip`, please refer to [their documentation](https://pip.pypa.io/en/stable/installing/#upgrading-pip).
 
 ## Minor breaking changes to the API
 
@@ -12,7 +14,8 @@
 
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman),
-[Manish Swami](https://github.com/ManishS6)
+[Manish Swami](https://github.com/ManishS6),
+[Zain Patel](https://github.com/mzjp2)
 
 # Release 0.17.5
 

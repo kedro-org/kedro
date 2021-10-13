@@ -54,10 +54,11 @@
 * The `settings.py` setting `CONF_ROOT` has been renamed to `CONF_SOURCE` to align the API. Default value of `conf` remains unchanged.
 * Renamed `extra_params` to `runtime_params` in `kedro.config.config.ConfigLoader` and `kedro.config.templated_config.TemplatedConfigLoader`.
 * Switched from packaging pipelines as wheel files to tar archive files compressed with gzip (`.tar.gz`)
-* `kedro pipeline package` now accepts a module path to the pipeline or utility module to package, relative to the `src/<package_name>/`.
+* `kedro pipeline package` and `kedro pipeline pull --alias` now accept a module path to the pipeline or utility module to package, relative to the `src/<package_name>/`.
 * Renamed `lambda_data_set`, `memory_data_set`, and `partitioned_data_set` to `lambda_dataset`, `memory_dataset`, and `partitioned_dataset`, respectively, in `kedro.io`.
 * Removed the `kedro install` command in favour of using `pip install -r src/requirements.txt` to install project dependencies.
 * The dataset `networkx.NetworkXDataSet` has been renamed to `networkx.JSONDataSet`.
+* Removed the `config_loader` property from `KedroContext`.
 
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman)
@@ -79,6 +80,7 @@
 * Update the key-word argument `conf_root` to `conf_source` when calling `ConfigLoader` or `TemplatedConfigLoader` directly.
 * Rename `extra_params` to `runtime_params` in `kedro.config.config.ConfigLoader` and `kedro.config.templated_config.TemplatedConfigLoader`, or your custom implementation, if it calls to `ConfigLoader` or any of its parent classes.
 * If you were importing from `kedro.io.lambda_data_set`, `kedro.io.memory_data_set`, or `kedro.io.partitioned_data_set`, change the import to `kedro.io.lambda_dataset`, `kedro.io.memory_dataset`, or `kedro.io.partitioned_dataset`, respectively (or import the dataset directly from `kedro.io`).
+* If you were pulling any modular pipelines with `kedro pipeline pull my_pipeline --alias other_pipeline`, please use `kedro pipeline pull my_pipeline --alias pipelines.other_pipeline` instead.
 * If you were packaging any modular pipelines with `kedro pipeline package my_pipeline`, please use `kedro pipeline package pipelines.my_pipeline` instead.
 * Similarly, if you were packaging any modular pipelines using `pyproject.toml`, you should modify the keys to include the full module path, and wrapped in double-quotes, e.g:
 
@@ -86,6 +88,9 @@
   [tool.kedro.pipeline.package]
   data_engineering = {destination = "path/to/here"}
   data_science = {alias = "ds", env = "local"}
+
+  [tool.kedro.pipeline.pull]
+  "s3://my_bucket/my_pipeline" = {alias = "aliased_pipeline"}
   ```
 
   becomes
@@ -94,9 +99,32 @@
   [tool.kedro.pipeline.package]
   "pipelines.data_engineering" = {destination = "path/to/here"}
   "pipelines.data_science" = {alias = "ds", env = "local"}
+
+  [tool.kedro.pipeline.pull]
+  "s3://my_bucket/my_pipeline" = {alias = "pipelines.aliased_pipeline"}
+
   ```
 
 * If you had any `networkx.NetworkXDataSet` entries in your catalog, replace them with `networkx.JSONDataSet`.
+* If you were using the `KedroContext` to access `ConfigLoader`, please use `settings.CONFIG_LOADER_CLASS` to access the currently used `ConfigLoader` instead.
+
+# Upcoming Release 0.17.6
+
+## Major features and improvements
+* Added `pipelines` global variable to IPython extension, allowing you to access the project's pipelines in `kedro ipython` or `kedro jupyter notebook`.
+
+## Bug fixes and other changes
+* Fixed an issue where `kedro new --config config.yml` was ignoring the config file when `prompts.yml` didn't exist.
+* Added support for arbitrary backends (via importable module paths) that satisfy the `pickle` interface to `PickleDataSet`
+
+## Minor breaking changes to the API
+
+## Upcoming deprecations for Kedro 0.18.0
+
+## Thanks for supporting contributions
+[Deepyaman Datta](https://github.com/deepyaman),
+[Manish Swami](https://github.com/ManishS6),
+[Zain Patel](https://github.com/mzjp2)
 
 # Release 0.17.5
 
@@ -115,14 +143,11 @@
 | `tracking.MetricsDataSet` | Dataset to track numeric metrics for experiment tracking | `kedro.extras.datasets.tracking` |
 | `tracking.JSONDataSet`    | Dataset to track data for experiment tracking            | `kedro.extras.datasets.tracking` |
 
-
 ## Bug fixes and other changes
 * Bumped minimum required `fsspec` version to 2021.04.
 * Fixed the `kedro install` and `kedro build-reqs` flows when uninstalled dependencies are present in a project's `settings.py`, `context.py` or `hooks.py` ([Issue #829](https://github.com/quantumblacklabs/kedro/issues/829)).
 * Imports are now refactored at `kedro pipeline package` and `kedro pipeline pull` time, so that _aliasing_ a modular pipeline doesn't break it.
 * Pinned `dynaconf` to `<3.1.6` because the method signature for `_validate_items` changed which is used in Kedro.
-
-## Minor breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.18.0
 * `kedro pipeline list` and `kedro pipeline describe` are being deprecated in favour of new commands `kedro registry list ` and `kedro registry describe`.

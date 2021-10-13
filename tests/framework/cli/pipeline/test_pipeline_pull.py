@@ -28,6 +28,7 @@
 import filecmp
 import shutil
 import textwrap
+from pathlib import Path
 
 import pytest
 import toml
@@ -79,7 +80,7 @@ class TestPipelinePullCommand:
         }
 
     @pytest.mark.parametrize("env", [None, "local"])
-    @pytest.mark.parametrize("alias", [None, "alias_path"])
+    @pytest.mark.parametrize("alias", [None, "aliased", "pipelines.aliased"])
     def test_pull_local_sdist(
         self,
         fake_project_cli,
@@ -120,9 +121,10 @@ class TestPipelinePullCommand:
         assert result.exit_code == 0, result.output
         assert "pulled and unpacked" in result.output
 
-        pipeline_name = alias or PIPELINE_NAME
-        source_dest = fake_package_path / "pipelines" / pipeline_name
-        test_dest = fake_repo_path / "src" / "tests" / "pipelines" / pipeline_name
+        alias_path = Path(*(alias.split("."))) if alias else Path(PIPELINE_NAME)
+        pipeline_name = alias_path.stem
+        source_dest = fake_package_path / alias_path
+        test_dest = fake_repo_path / "src" / "tests" / alias_path
         config_env = env or "base"
         params_config = (
             fake_repo_path
@@ -139,7 +141,7 @@ class TestPipelinePullCommand:
         assert actual_test_files == expected_test_files
 
     @pytest.mark.parametrize("env", [None, "local"])
-    @pytest.mark.parametrize("alias", [None, "alias_path"])
+    @pytest.mark.parametrize("alias", [None, "alias", "pipelines.aliased"])
     def test_pull_local_sdist_compare(
         self,
         fake_project_cli,
@@ -183,9 +185,10 @@ class TestPipelinePullCommand:
         assert result.exit_code == 0, result.output
         assert "pulled and unpacked" in result.output
 
-        pipeline_name = alias or pipeline_name
-        source_dest = fake_package_path / "pipelines" / pipeline_name
-        test_dest = fake_repo_path / "src" / "tests" / "pipelines" / pipeline_name
+        alias_path = Path(*(alias.split("."))) if alias else Path(pipeline_name)
+        pipeline_name = alias_path.stem
+        source_dest = fake_package_path / alias_path
+        test_dest = fake_repo_path / "src" / "tests" / alias_path
         config_env = env or "base"
         dest_params_config = (
             fake_repo_path
@@ -199,7 +202,7 @@ class TestPipelinePullCommand:
         assert not filecmp.dircmp(test_path, test_dest).diff_files
         assert source_params_config.read_bytes() == dest_params_config.read_bytes()
 
-    def test_pipeline_alias_refactors_imports(
+    def test_pipeline_alias_refactors_imports(  # pylint: disable=too-many-locals
         self, fake_project_cli, fake_package_path, fake_repo_path, fake_metadata
     ):
         call_pipeline_create(fake_project_cli, fake_metadata)
@@ -211,7 +214,7 @@ class TestPipelinePullCommand:
             f.write(import_stmt)
 
         package_alias = "alpha"
-        pull_alias = "beta"
+        pull_alias = "pipelines.lib.beta"
 
         call_pipeline_package(
             cli=fake_project_cli, metadata=fake_metadata, alias=package_alias
@@ -230,11 +233,10 @@ class TestPipelinePullCommand:
         )
 
         for alias in (package_alias, pull_alias):
-            path = fake_package_path / "pipelines" / alias / "pipeline.py"
+            alias_path = Path(*alias.split("."))
+            path = fake_package_path / alias_path / "pipeline.py"
             file_content = path.read_text()
-            expected_stmt = (
-                f"import {fake_metadata.package_name}.pipelines.{alias}.nodes"
-            )
+            expected_stmt = f"import {fake_metadata.package_name}.{alias}.nodes"
             assert expected_stmt in file_content
 
     def test_pull_sdist_fs_args(
@@ -266,8 +268,8 @@ class TestPipelinePullCommand:
     def test_pull_two_egg_info(
         self, fake_project_cli, fake_repo_path, mocker, tmp_path, fake_metadata
     ):
-        """
-        Test for pulling a sdist file with more than one dist-info directory.
+        """Test for pulling an sdist file with more than one
+        dist-info directory.
         """
         call_pipeline_create(fake_project_cli, fake_metadata)
         call_pipeline_package(fake_project_cli, fake_metadata)
@@ -339,8 +341,8 @@ class TestPipelinePullCommand:
         assert result.exit_code == 0
 
         pipeline_name = alias or PIPELINE_NAME
-        source_dest = fake_package_path / "pipelines" / pipeline_name
-        test_dest = fake_repo_path / "src" / "tests" / "pipelines" / pipeline_name
+        source_dest = fake_package_path / pipeline_name
+        test_dest = fake_repo_path / "src" / "tests" / pipeline_name
         config_env = env or "base"
         params_config = (
             fake_repo_path
@@ -403,8 +405,8 @@ class TestPipelinePullCommand:
         assert result.exit_code == 0
 
         pipeline_name = alias or PIPELINE_NAME
-        source_dest = fake_package_path / "pipelines" / pipeline_name
-        test_dest = fake_repo_path / "src" / "tests" / "pipelines" / pipeline_name
+        source_dest = fake_package_path / pipeline_name
+        test_dest = fake_repo_path / "src" / "tests" / pipeline_name
         config_env = env or "base"
         dest_params_config = (
             fake_repo_path
@@ -488,8 +490,8 @@ class TestPipelinePullCommand:
         )
 
         pipeline_name = alias or PIPELINE_NAME
-        source_dest = fake_package_path / "pipelines" / pipeline_name
-        test_dest = fake_repo_path / "src" / "tests" / "pipelines" / pipeline_name
+        source_dest = fake_package_path / pipeline_name
+        test_dest = fake_repo_path / "src" / "tests" / pipeline_name
         config_env = env or "base"
         dest_params_config = (
             fake_repo_path
@@ -609,8 +611,8 @@ class TestPipelinePullFromManifest:
         project_toml_str = textwrap.dedent(
             f"""
             [tool.kedro.pipeline.pull]
-            "{sdist_file.format("first")}" = {{alias = "dp"}}
-            "{sdist_file.format("second")}" = {{alias = "ds", env = "local"}}
+            "{sdist_file.format("first")}" = {{alias = "pipelines.dp"}}
+            "{sdist_file.format("second")}" = {{alias = "pipelines.ds", env = "local"}}
             "{sdist_file.format("third")}" = {{}}
             """
         )

@@ -107,9 +107,8 @@ The `context` variable allows you to interact with Kedro library components from
 With `context`, you can access the following variables and methods:
 
 - `context.project_path` (`Path`) - Root directory of the project
-- `context.project_name` (`str`) - Project folder name
+- `context.package_name` (`str`) - Project folder name
 - `context.catalog` (`DataCatalog`) - An instance of [DataCatalog](/kedro.io.DataCatalog)
-- `context.config_loader` (`ConfigLoader`) - An instance of [ConfigLoader](/kedro.config.ConfigLoader)
 - `context.pipeline` (`Pipeline`) - The `__default__` pipeline
 
 ### Run the pipeline
@@ -377,10 +376,12 @@ In certain cases, you may not be able to run `kedro jupyter notebook`, which mea
 ```python
 from pathlib import Path
 from kedro.framework.session import KedroSession
+from kedro.framework.startup import bootstrap_project
 from kedro.framework.session.session import _activate_session
 
 current_dir = Path.cwd()  # this points to 'notebooks/' folder
 project_path = current_dir.parent  # point back to the root of the project
+bootstrap_project(project_path)
 session = KedroSession.create("<your-kedro-project-package-name>", project_path)
 _activate_session(session)
 context = session.load_context()

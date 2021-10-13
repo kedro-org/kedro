@@ -241,7 +241,7 @@ def get_pkg_version(reqs_path: (Union[str, Path]), package_name: str) -> str:
         raise KedroCliError(f"Given path `{reqs_path}` is not a regular file.")
 
     pattern = re.compile(package_name + r"([^\w]|$)")
-    with reqs_path.open("r") as reqs_file:
+    with reqs_path.open("r", encoding="utf-8") as reqs_file:
         for req_line in reqs_file:
             req_line = req_line.strip()
             if pattern.search(req_line):

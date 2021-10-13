@@ -141,8 +141,8 @@ class SparkJDBCDataSet(AbstractDataSet):
             for cred_key, cred_value in credentials.items():
                 if cred_value is None:
                     raise DataSetError(
-                        "Credential property `{}` cannot be None. "
-                        "Please provide a value.".format(cred_key)
+                        f"Credential property `{cred_key}` cannot be None. "
+                        f"Please provide a value."
                     )
 
             load_properties = self._load_args.get("properties", {})

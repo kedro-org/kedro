@@ -257,6 +257,99 @@ Under the hood, we use [pytest's pluggy](https://pluggy.readthedocs.io/en/latest
 
 ## Hooks examples
 
+### Add memory consumption tracking
+
+This example illustrates how to track memory consumption using `memory_profiler`.
+
+* Install dependencies:
+
+```console
+pip install memory_profiler
+```
+
+* Implement `before_dataset_loaded` and `after_dataset_loaded`
+
+<details>
+<summary><b>Click to expand</b></summary>
+
+```python
+...
+from memory_profiler import memory_usage
+import logging
+
+
+def _normalise_mem_usage(mem_usage):
+    # memory_profiler < 0.56.0 returns list instead of float
+    return mem_usage[0] if isinstance(mem_usage, (list, tuple)) else mem_usage
+
+
+class MemoryProfilingHooks:
+    def __init__(self):
+        self._mem_usage = {}
+
+    @property
+    def _logger(self):
+        return logging.getLogger(self.__class__.__name__)
+
+    @hook_impl
+    def before_dataset_loaded(self, dataset_name: str) -> None:
+        before_mem_usage = memory_usage(
+            -1,
+            interval=0.1,
+            max_usage=True,
+            retval=True,
+            include_children=True,
+        )
+        before_mem_usage = _normalise_mem_usage(before_mem_usage)
+        self._mem_usage[dataset_name] = before_mem_usage
+        )
+
+    @hook_impl
+    def after_dataset_loaded(self, dataset_name: str) -> None:
+        after_mem_usage = memory_usage(
+            -1,
+            interval=0.1,
+            max_usage=True,
+            retval=True,
+            include_children=True,
+        )
+        # memory_profiler < 0.56.0 returns list instead of float
+        after_mem_usage = _normalise_mem_usage(after_mem_usage)
+
+        self._logger.info(
+            "Loading %s consumed %2.2fMiB memory",
+            dataset_name,
+            after_mem_usage - self._mem_usage[dataset_name],
+        )
+```
+</details>
+
+* Register Hooks implementation by updating the `HOOKS` variable in `settings.py` as follows:
+
+```python
+HOOKS = (MemoryProfilingHooks(),)
+```
+
+Then re-run the pipeline:
+
+```console
+$ kedro run
+```
+
+The output should look similar to the following:
+
+```
+...
+2021-10-05 12:02:34,946 - kedro.io.data_catalog - INFO - Loading data from `shuttles` (ExcelDataSet)...
+2021-10-05 12:02:43,358 - MemoryProfilingHooks - INFO - Loading shuttles consumed 82.67MiB memory
+2021-10-05 12:02:43,358 - kedro.pipeline.node - INFO - Running node: preprocess_shuttles_node: preprocess_shuttles([shuttles]) -> [preprocessed_shuttles]
+2021-10-05 12:02:43,440 - kedro.io.data_catalog - INFO - Saving data to `preprocessed_shuttles` (MemoryDataSet)...
+2021-10-05 12:02:43,446 - kedro.runner.sequential_runner - INFO - Completed 1 out of 2 tasks
+2021-10-05 12:02:43,559 - kedro.io.data_catalog - INFO - Loading data from `companies` (CSVDataSet)...
+2021-10-05 12:02:43,727 - MemoryProfilingHooks - INFO - Loading companies consumed 4.16MiB memory
+...
+```
+
 ### Add data validation
 
 This example adds data validation to node inputs and outputs using [Great Expectations](https://docs.greatexpectations.io/en/latest/).

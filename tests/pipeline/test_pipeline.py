@@ -650,7 +650,7 @@ class TestPipelineDescribe:
 def apply_f(func: Callable) -> Callable:
     @wraps(func)
     def with_f(*args, **kwargs):
-        return func(*[f"f({a})" for a in args], **kwargs)
+        return func(*(f"f({a})" for a in args), **kwargs)
 
     return with_f
 
@@ -658,7 +658,7 @@ def apply_f(func: Callable) -> Callable:
 def apply_g(func: Callable) -> Callable:
     @wraps(func)
     def with_g(*args, **kwargs):
-        return func(*[f"g({a})" for a in args], **kwargs)
+        return func(*(f"g({a})" for a in args), **kwargs)
 
     return with_g
 

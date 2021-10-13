@@ -67,10 +67,16 @@ class TestIsProject:
 
     def test_valid_toml_file(self, mocker):
         mocker.patch.object(Path, "is_file", return_value=True)
-        pyproject_toml_payload = {"tool": {"kedro": {}}}
-        mocker.patch("anyconfig.load", return_value=pyproject_toml_payload)
+        pyproject_toml_payload = "[tool.kedro]"  # \nproject_name = 'proj'"
+        mocker.patch.object(Path, "read_text", return_value=pyproject_toml_payload)
 
         assert _is_project(self.project_path)
+
+    def test_toml_bad_encoding(self, mocker):
+        mocker.patch.object(Path, "is_file", return_value=True)
+        mocker.patch.object(Path, "read_text", side_effect=UnicodeDecodeError)
+
+        assert not _is_project(self.project_path)
 
 
 class TestGetProjectMetadata:

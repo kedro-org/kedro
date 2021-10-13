@@ -72,10 +72,13 @@ setup(
 )
 """
 
-PipelineArtifacts = NamedTuple(
-    "PipelineArtifacts",
-    [("pipeline_dir", Path), ("pipeline_tests", Path), ("pipeline_conf", Path)],
-)
+
+class PipelineArtifacts(NamedTuple):
+    """An ordered collection of source_path, tests_path, config_paths"""
+
+    pipeline_dir: Path
+    pipeline_tests: Path
+    pipeline_conf: Path
 
 
 def _assert_pkg_name_ok(pkg_name: str):
@@ -105,6 +108,13 @@ def _assert_pkg_name_ok(pkg_name: str):
 def _check_pipeline_name(ctx, param, value):  # pylint: disable=unused-argument
     if value:
         _assert_pkg_name_ok(value)
+    return value
+
+
+def _check_module_path(ctx, param, value):  # pylint: disable=unused-argument
+    if value and not re.match(r"^[\w.]+$", value):
+        message = "The pipeline location you provided is not a valid Python module path"
+        raise KedroCliError(message)
     return value
 
 
@@ -230,11 +240,7 @@ def delete_pipeline(
     help="Environment to install the pipeline configuration to. Defaults to `base`."
 )
 @click.option(
-    "--alias",
-    type=str,
-    default="",
-    callback=_check_pipeline_name,
-    help="Alternative name to unpackage under.",
+    "--alias", type=str, default="", help="Module location to unpackage under."
 )
 @click.option(
     "--fs-args",
@@ -279,7 +285,7 @@ def _pull_package(
         _unpack_sdist(package_path, temp_dir_path, fs_args)
 
         sdist_file_name = Path(package_path).name.rstrip(".tar.gz")
-        egg_info_file = list(Path(temp_dir_path, sdist_file_name).glob("*.egg-info"))
+        egg_info_file = list((temp_dir_path / sdist_file_name).glob("*.egg-info"))
         if len(egg_info_file) != 1:
             raise KedroCliError(
                 f"More than 1 or no egg-info files found from {package_path}. "
@@ -318,7 +324,7 @@ def _pull_packages_from_manifest(metadata: ProjectMetadata) -> None:
 
     for package_path, specs in build_specs.items():
         if "alias" in specs:
-            _assert_pkg_name_ok(specs["alias"])
+            _assert_pkg_name_ok(specs["alias"].split(".")[-1])
         _pull_package(package_path, metadata, **specs)
         click.secho(f"Pulled and unpacked `{package_path}`!")
 
@@ -373,7 +379,7 @@ def _package_pipelines_from_manifest(metadata: ProjectMetadata) -> None:
     is_flag=True,
     help="Package all pipelines in the `pyproject.toml` package manifest section.",
 )
-@click.argument("module_path", nargs=1, required=False)
+@click.argument("module_path", nargs=1, required=False, callback=_check_module_path)
 @click.pass_obj  # this will pass the metadata as first argument
 def package_pipeline(
     metadata: ProjectMetadata, module_path, env, alias, destination, all_flag
@@ -489,23 +495,30 @@ def _refactor_code_for_unpacking(
     <temp_dir>  # also the root of the Rope project
     |__ <package>
         |__ __init__.py
-        |__ pipelines
+        |__ <path_to_pipeline>
             |__ __init__.py
             |__ <pipeline_name>
                 |__ __init__.py
     |__ tests
         |__ __init__.py
-        |__ pipelines
+        |__ <path_to_pipeline>
             |__ __init__.py
             |__ <pipeline_name>
                 |__ __init__.py
     """
     pipeline_name = package_path.stem
-    if alias:
-        _rename_package(project, pipeline_name, alias)
-        pipeline_name = alias
+    package_target = Path(project_metadata.package_name)
+    tests_target = Path("tests")
 
-    package_target = Path(project_metadata.package_name) / "pipelines"
+    if alias:
+        alias_path = Path(*alias.split("."))
+        alias_name = alias_path.stem
+        _rename_package(project, pipeline_name, alias_name)
+
+        pipeline_name = alias_name
+        package_target = package_target / alias_path.parent
+        tests_target = tests_target / alias_path.parent
+
     full_path = _create_nested_package(project, package_target)
     _move_package(project, pipeline_name, package_target.as_posix())
     refactored_package_path = full_path / pipeline_name
@@ -519,7 +532,6 @@ def _refactor_code_for_unpacking(
     # nested folder structure, move the contents there,
     # then rename the temp name to <pipeline_name>.
     _rename_package(project, "tests", "tmp_name")
-    tests_target = Path("tests") / "pipelines"
     full_path = _create_nested_package(project, tests_target)
     _move_package(project, "tmp_name", tests_target.as_posix())
     _rename_package(project, (tests_target / "tmp_name").as_posix(), pipeline_name)
@@ -528,7 +540,7 @@ def _refactor_code_for_unpacking(
     return refactored_package_path, refactored_tests_path
 
 
-def _install_files(
+def _install_files(  # pylint: disable=too-many-locals
     project_metadata: ProjectMetadata,
     package_name: str,
     source_path: Path,
@@ -542,11 +554,12 @@ def _install_files(
     )
 
     if conf_source.is_dir() and alias:
-        _rename_files(conf_source, package_name, alias)
+        alias_name = alias.split(".")[-1]
+        _rename_files(conf_source, package_name, alias_name)
 
-    pipeline_name = alias or package_name
-    package_dest, test_dest, conf_dest = _get_pipeline_artifacts(
-        project_metadata, pipeline_name=pipeline_name, env=env
+    module_path = alias or package_name
+    package_dest, test_dest, conf_dest = _get_artifacts_to_package(
+        project_metadata, module_path=module_path, env=env
     )
 
     if conf_source.is_dir():
@@ -1087,14 +1100,15 @@ def _append_package_reqs(
         return
 
     sorted_reqs = sorted(str(req) for req in reqs_to_add)
+    sep = "\n"
     with open(requirements_in, "a", encoding="utf-8") as file:
         file.write(
             f"\n\n# Additional requirements from modular pipeline `{pipeline_name}`:\n"
         )
-        file.write("\n".join(sorted_reqs))
+        file.write(sep.join(sorted_reqs))
     click.secho(
-        "Added the following requirements from modular pipeline `{}` to "
-        "requirements.in:\n{}".format(pipeline_name, "\n".join(sorted_reqs))
+        f"Added the following requirements from modular pipeline `{pipeline_name}` to "
+        f"requirements.in:\n{sep.join(sorted_reqs)}"
     )
     click.secho(
         "Use `kedro build-reqs` to compile and `pip install -r src/requirements.txt` to install "

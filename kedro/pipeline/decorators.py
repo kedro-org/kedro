@@ -40,14 +40,14 @@ def _func_full_name(func: Callable):
     return f"{func.__module__}.{func.__qualname__}"
 
 
-def _human_readable_time(elapsed: float):  # pragma: no cover
+def _human_readable_time(elapsed: float):
     mins, secs = divmod(elapsed, 60)
     hours, mins = divmod(mins, 60)
 
     if hours > 0:
-        message = "%dh%02dm%02ds" % (hours, mins, secs)
+        message = f"{int(hours)}h{int(mins):02}m{int(secs):02}s"
     elif mins > 0:
-        message = "%dm%02ds" % (mins, secs)
+        message = f"{int(mins)}m{int(secs):02}s"
     elif secs >= 1:
         message = f"{secs:.2f}s"
     else:

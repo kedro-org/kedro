@@ -192,6 +192,9 @@ commands:
           name: Install pytables
           command: conda activate kedro_builder; conda install -c conda-forge pytables -y
       - run:
+          name: Install GDAL
+          command: conda activate kedro_builder; conda install -c conda-forge gdal -y
+      - run:
           name: Install Fiona
           command: conda activate kedro_builder; conda install -c conda-forge fiona -y
       - run:

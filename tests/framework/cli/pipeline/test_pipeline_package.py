@@ -193,6 +193,18 @@ class TestPipelinePackageCommand:
         assert result.exit_code
         assert error_message in result.output
 
+    def test_package_pipeline_invalid_module_path(self, fake_project_cli):
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["pipeline", "package", f"pipelines/{PIPELINE_NAME}"],
+        )
+        error_message = (
+            "The pipeline location you provided is not a valid Python module path"
+        )
+
+        assert result.exit_code
+        assert error_message in result.output
+
     def test_package_pipeline_no_config(
         self, fake_repo_path, fake_project_cli, fake_metadata
     ):

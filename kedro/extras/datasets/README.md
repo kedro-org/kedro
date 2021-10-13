@@ -15,4 +15,4 @@ Here is a full list of [supported data descriptions and APIs](https://kedro.read
 ## How can I create my own `AbstractDataSet` implementation?
 
 
-Take a look at our [instructions on how to create your own `AbstractDataSet` implementation](https://kedro.readthedocs.io/en/stable/07_extend_kedro/01_custom_datasets.html).
+Take a look at our [instructions on how to create your own `AbstractDataSet` implementation](https://kedro.readthedocs.io/en/stable/07_extend_kedro/03_custom_datasets.html).

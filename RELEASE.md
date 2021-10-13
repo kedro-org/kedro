@@ -48,7 +48,7 @@
 
 ## Thanks for supporting contributions
 [Moussa Taifi](https://github.com/moutai),
-[Deepyaman Datta](https://github.com/deepyaman)
+[Deepyaman Datta](https://github.com/deepyaman),
 [Benjamin Levy](https://github.com/BenjaminLevyQB)
 
 # Release 0.17.4

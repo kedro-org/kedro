@@ -578,12 +578,19 @@ class TestInvalidPipeline:
             # 'another_node' passes the check, 'pipeline' doesn't
             Pipeline([another_node, pipeline])
 
-    def test_bad_combine(self):
+    def test_bad_combine_node(self):
         """Node cannot be combined to pipeline."""
         fred = node(identity, "input", "output")
         pipeline = Pipeline([fred])
         with pytest.raises(TypeError):
             pipeline + fred  # pylint: disable=pointless-statement
+
+    def test_bad_combine_int(self):
+        """int cannot be combined to pipeline, tests __radd__"""
+        fred = node(identity, "input", "output")
+        pipeline = Pipeline([fred])
+        with pytest.raises(TypeError):
+            _ = 1 + pipeline
 
     def test_conflicting_names(self):
         """Node names must be unique."""

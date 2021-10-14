@@ -21,6 +21,6 @@ We also recommend the [frequently asked questions](../12_faq/01_faq.md) and the 
 We have designed the documentation and the [spaceflights tutorial](../03_tutorial/01_spaceflights_tutorial.md) for anyone new to Kedro. The more knowledge of Python you have, the easier you will find the learning curve.
 
 ```eval_rst
-.. note::  There are a number of excellent online resources for learning Python, but you should choose those that reference Python 3, as Kedro is built for Python 3.6+. There are many curated lists of online resources, such as the `official Python programming language website <https://www.python.org/>`_ and `this list of free programming books and tutorials <https://github.com/EbookFoundation/free-programming-books/blob/master/books/free-programming-books.md#python>`_.
+.. note::  There are a number of excellent online resources for learning Python, but you should choose those that reference Python 3, as Kedro is built for Python 3.6+. There are many curated lists of online resources, such as the `official Python programming language website <https://www.python.org/>`_ and `this list of free programming books and tutorials <https://github.com/EbookFoundation/free-programming-books/blob/master/books/free-programming-books-langs.md#python>`_.
 
 ```

@@ -185,11 +185,11 @@ html_theme_options = {"collapse_navigation": False, "style_external_links": True
 # some of these complain that the sections don't exist (which is not true),
 # too many requests, or forbidden URL
 linkcheck_ignore = [
-    "https://www.datacamp.com/community/tutorials/docstrings-python",  # "forbidden" url
+    "https://datacamp.com/community/tutorials/docstrings-python",  # "forbidden" url
     "https://setuptools.readthedocs.io/en/latest/setuptools.html#dynamic-discovery-of-services-and-plugins",
     "https://github.com/argoproj/argo/blob/master/README.md#quickstart",
     "https://console.aws.amazon.com/batch/home#/jobs",
-    "https://github.com/EbookFoundation/free-programming-books/blob/master/books/free-programming-books.md#python",
+    "https://github.com/EbookFoundation/free-programming-books/blob/master/books/free-programming-books-langs.md#python",
     "https://github.com/jazzband/pip-tools#example-usage-for-pip-compile",
     "https://www.astronomer.io/docs/cloud/stable/get-started/quickstart#",
     "https://github.com/quantumblacklabs/private-kedro/blob/master/kedro/templates/project/*",

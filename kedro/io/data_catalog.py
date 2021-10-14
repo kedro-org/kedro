@@ -616,7 +616,7 @@ class DataCatalog:
             "The transformer API will be deprecated in Kedro 0.18.0."
             "Please use Dataset Hooks to customise the load and save methods."
             "For more information, please visit"
-            "https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_hooks.html",
+            "https://kedro.readthedocs.io/en/stable/07_extend_kedro/02_hooks.html",
             DeprecationWarning,
         )
 

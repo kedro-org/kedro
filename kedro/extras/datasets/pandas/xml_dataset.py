@@ -26,48 +26,53 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-"""``NetworkXDataSet`` loads and saves graphs to a JSON file using an underlying
-filesystem (e.g.: local, S3, GCS). ``NetworkX`` is used to create JSON data.
+"""``XMLDataSet`` loads/saves data from/to a XML file using an underlying
+filesystem (e.g.: local, S3, GCS). It uses pandas to handle the XML file.
 """
-
-import json
+import logging
 from copy import deepcopy
+from io import BytesIO
 from pathlib import PurePosixPath
 from typing import Any, Dict
 
 import fsspec
-import networkx
+import pandas as pd
 
 from kedro.io.core import (
+    PROTOCOL_DELIMITER,
     AbstractVersionedDataSet,
+    DataSetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
 )
 
+logger = logging.getLogger(__name__)
 
-class NetworkXDataSet(AbstractVersionedDataSet):
-    """``NetworkXDataSet`` loads and saves graphs to a JSON file using an
-    underlying filesystem (e.g.: local, S3, GCS). ``NetworkX`` is used to
-    create JSON data.
-    See https://networkx.org/documentation/stable/tutorial.html for details.
+
+class XMLDataSet(AbstractVersionedDataSet):
+    """``XMLDataSet`` loads/saves data from/to a XML file using an underlying
+    filesystem (e.g.: local, S3, GCS). It uses pandas to handle the XML file.
 
     Example:
     ::
 
-        >>> from kedro.extras.datasets.networkx import NetworkXDataSet
-        >>> import networkx as nx
-        >>> graph = nx.complete_graph(100)
-        >>> graph_dataset = NetworkXDataSet(filepath="test.json")
-        >>> graph_dataset.save(graph)
-        >>> reloaded = graph_dataset.load()
-        >>> assert nx.is_isomorphic(graph, reloaded)
+        >>> from kedro.extras.datasets.pandas import XMLDataSet
+        >>> import pandas as pd
+        >>>
+        >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
+        >>>                      'col3': [5, 6]})
+        >>>
+        >>> # data_set = XMLDataSet(filepath="gcs://bucket/test.xml")
+        >>> data_set = XMLDataSet(filepath="test.xml")
+        >>> data_set.save(data)
+        >>> reloaded = data_set.load()
+        >>> assert data.equals(reloaded)
 
     """
 
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
-    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_SAVE_ARGS = {"index": False}  # type: Dict[str, Any]
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -79,16 +84,22 @@ class NetworkXDataSet(AbstractVersionedDataSet):
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``NetworkXDataSet``.
+        """Creates a new instance of ``XMLDataSet`` pointing to a concrete XML file
+        on a specific filesystem.
 
         Args:
-            filepath: Filepath in POSIX format to the NetworkX graph JSON file.
-            load_args: Arguments passed on to ```networkx.node_link_graph``.
-                See the details in
-                https://networkx.org/documentation/networkx-1.9.1/reference/generated/networkx.readwrite.json_graph.node_link_graph.html
-            save_args: Arguments passed on to ```networkx.node_link_data``.
-                See the details in
-                https://networkx.org/documentation/networkx-1.9.1/reference/generated/networkx.readwrite.json_graph.node_link_data.html
+            filepath: Filepath in POSIX format to a XML file prefixed with a protocol like `s3://`.
+                If prefix is not provided, `file` protocol (local filesystem) will be used.
+                The prefix should be any protocol supported by ``fsspec``.
+                Note: `http(s)` doesn't support versioning.
+            load_args: Pandas options for loading XML files.
+                Here you can find all available arguments:
+                https://pandas.pydata.org/docs/reference/api/pandas.read_xml.html
+                All defaults are preserved.
+            save_args: Pandas options for saving XML files.
+                Here you can find all available arguments:
+                https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.to_xml.html
+                All defaults are preserved, but "index", which is set to False.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -96,17 +107,9 @@ class NetworkXDataSet(AbstractVersionedDataSet):
             credentials: Credentials required to get access to the underlying filesystem.
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
-                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``), as well as
-                to pass to the filesystem's `open` method through nested keys
-                `open_args_load` and `open_args_save`.
-                Here you can find all available arguments for `open`:
-                https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
-                All defaults are preserved, except `mode`, which is set to `r` when loading
-                and to `w` when saving.
+                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``).
         """
         _fs_args = deepcopy(fs_args) or {}
-        _fs_open_args_load = _fs_args.pop("open_args_load", {})
-        _fs_open_args_save = _fs_args.pop("open_args_save", {})
         _credentials = deepcopy(credentials) or {}
 
         protocol, path = get_protocol_and_path(filepath, version)
@@ -114,7 +117,8 @@ class NetworkXDataSet(AbstractVersionedDataSet):
             _fs_args.setdefault("auto_mkdir", True)
 
         self._protocol = protocol
-        self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
+        self._storage_options = {**_credentials, **_fs_args}
+        self._fs = fsspec.filesystem(self._protocol, **self._storage_options)
 
         super().__init__(
             filepath=PurePosixPath(path),
@@ -131,30 +135,14 @@ class NetworkXDataSet(AbstractVersionedDataSet):
         if save_args is not None:
             self._save_args.update(save_args)
 
-        _fs_open_args_save.setdefault("mode", "w")
-        self._fs_open_args_load = _fs_open_args_load
-        self._fs_open_args_save = _fs_open_args_save
-
-    def _load(self) -> networkx.Graph:
-        load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
-            json_payload = json.load(fs_file)
-
-        return networkx.node_link_graph(json_payload, **self._load_args)
-
-    def _save(self, data: networkx.Graph) -> None:
-        save_path = get_filepath_str(self._get_save_path(), self._protocol)
-
-        json_graph = networkx.node_link_data(data, **self._save_args)
-        with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
-            json.dump(json_graph, fs_file)
-
-        self._invalidate_cache()
-
-    def _exists(self) -> bool:
-        load_path = get_filepath_str(self._get_load_path(), self._protocol)
-
-        return self._fs.exists(load_path)
+        if "storage_options" in self._save_args or "storage_options" in self._load_args:
+            logger.warning(
+                "Dropping `storage_options` for %s, "
+                "please specify them under `fs_args` or `credentials`.",
+                self._filepath,
+            )
+            self._save_args.pop("storage_options", None)
+            self._load_args.pop("storage_options", None)
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
@@ -164,6 +152,39 @@ class NetworkXDataSet(AbstractVersionedDataSet):
             save_args=self._save_args,
             version=self._version,
         )
+
+    def _load(self) -> pd.DataFrame:
+        load_path = str(self._get_load_path())
+        if self._protocol == "file":
+            # file:// protocol seems to misbehave on Windows
+            # (<urlopen error file not on local host>),
+            # so we don't join that back to the filepath;
+            # storage_options also don't work with local paths
+            return pd.read_xml(load_path, **self._load_args)
+
+        load_path = f"{self._protocol}{PROTOCOL_DELIMITER}{load_path}"
+        return pd.read_xml(
+            load_path, storage_options=self._storage_options, **self._load_args
+        )
+
+    def _save(self, data: pd.DataFrame) -> None:
+        save_path = get_filepath_str(self._get_save_path(), self._protocol)
+
+        buf = BytesIO()
+        data.to_xml(path_or_buffer=buf, **self._save_args)
+
+        with self._fs.open(save_path, mode="wb") as fs_file:
+            fs_file.write(buf.getvalue())
+
+        self._invalidate_cache()
+
+    def _exists(self) -> bool:
+        try:
+            load_path = get_filepath_str(self._get_load_path(), self._protocol)
+        except DataSetError:
+            return False
+
+        return self._fs.exists(load_path)
 
     def _release(self) -> None:
         super()._release()

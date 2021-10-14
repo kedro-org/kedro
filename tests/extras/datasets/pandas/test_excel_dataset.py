@@ -57,6 +57,17 @@ def excel_data_set(filepath_excel, load_args, save_args, fs_args):
 
 
 @pytest.fixture
+def excel_multisheet_data_set(filepath_excel, save_args, fs_args):
+    load_args = {"sheet_name": None}
+    return ExcelDataSet(
+        filepath=filepath_excel,
+        load_args=load_args,
+        save_args=save_args,
+        fs_args=fs_args,
+    )
+
+
+@pytest.fixture
 def versioned_excel_data_set(filepath_excel, load_version, save_version):
     return ExcelDataSet(
         filepath=filepath_excel, version=Version(load_version, save_version)
@@ -76,6 +87,16 @@ class TestExcelDataSet:
         assert_frame_equal(dummy_dataframe, reloaded)
         assert excel_data_set._fs_open_args_load == {}
         assert excel_data_set._fs_open_args_save == {"mode": "wb"}
+
+    def test_save_and_load_multiple_sheets(
+        self, excel_multisheet_data_set, dummy_dataframe
+    ):
+        """Test saving and reloading the data set with multiple sheets."""
+        dummy_multisheet = {"sheet 1": dummy_dataframe, "sheet 2": dummy_dataframe}
+        excel_multisheet_data_set.save(dummy_multisheet)
+        reloaded = excel_multisheet_data_set.load()
+        assert_frame_equal(dummy_multisheet["sheet 1"], reloaded["sheet 1"])
+        assert_frame_equal(dummy_multisheet["sheet 2"], reloaded["sheet 2"])
 
     def test_exists(self, excel_data_set, dummy_dataframe):
         """Test `exists` method invocation for both existing and

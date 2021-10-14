@@ -32,8 +32,6 @@ into plotly.graph_objects.Figure objects.
 from copy import deepcopy
 from typing import Any, Dict
 
-import pandas as pd
-import plotly.express as px
 import plotly.io as pio
 from plotly import graph_objects
 

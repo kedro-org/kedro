@@ -75,7 +75,7 @@ def plotly_args(request):
 def dummy_plot():
     pd.options.plotting.backend = "plotly"
     data = pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-    return data.plot()
+    return data.plot(title="Test")
 
 
 class TestPlotlyDataSet:

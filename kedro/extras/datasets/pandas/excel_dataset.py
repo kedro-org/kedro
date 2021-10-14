@@ -175,8 +175,10 @@ class ExcelDataSet(AbstractVersionedDataSet):
         # pylint: disable=abstract-class-instantiated
         with pd.ExcelWriter(output, **self._writer_args) as writer:
             if isinstance(data, dict):
-                for sheet, data in data.items():
-                    data.to_excel(writer, sheet_name=sheet, **self._save_args)
+                for sheet_name, sheet_data in data.items():
+                    sheet_data.to_excel(
+                        writer, sheet_name=sheet_name, **self._save_args
+                    )
             else:
                 data.to_excel(writer, **self._save_args)
 

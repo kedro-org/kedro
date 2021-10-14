@@ -79,6 +79,11 @@ def dummy_dataframe():
     return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
 
 
+@pytest.fixture
+def another_dummy_dataframe():
+    return pd.DataFrame({"x": [10, 20], "y": ["hello", "world"]})
+
+
 class TestExcelDataSet:
     def test_save_and_load(self, excel_data_set, dummy_dataframe):
         """Test saving and reloading the data set."""
@@ -89,10 +94,13 @@ class TestExcelDataSet:
         assert excel_data_set._fs_open_args_save == {"mode": "wb"}
 
     def test_save_and_load_multiple_sheets(
-        self, excel_multisheet_data_set, dummy_dataframe
+        self, excel_multisheet_data_set, dummy_dataframe, another_dummy_dataframe
     ):
         """Test saving and reloading the data set with multiple sheets."""
-        dummy_multisheet = {"sheet 1": dummy_dataframe, "sheet 2": dummy_dataframe}
+        dummy_multisheet = {
+            "sheet 1": dummy_dataframe,
+            "sheet 2": another_dummy_dataframe,
+        }
         excel_multisheet_data_set.save(dummy_multisheet)
         reloaded = excel_multisheet_data_set.load()
         assert_frame_equal(dummy_multisheet["sheet 1"], reloaded["sheet 1"])

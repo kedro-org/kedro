@@ -335,14 +335,8 @@ class TestCliUtils:
         ]
         assert mocked_rmtree.mock_calls == expected_calls
 
-    def test_update_value_nested_dict(
-        self,
-        nested_dict,
-        value_for_nested_dict,
-        walking_path_for_nested_dict,
-        nested_dict_updated,
-    ):
-
+    def test_update_value_nested_dict(self):
+        """Test `_update_value_nested_dict` utility function."""
         nested_dict = {"foo": {"hello": "world", "bar": 1}}
         value_for_nested_dict = 2
         walking_path_for_nested_dict = ["foo", "bar"]

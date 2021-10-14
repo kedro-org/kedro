@@ -155,11 +155,11 @@ Click **PyCharm | Preferences** for macOS or **File | Settings**, inside **Build
 
 You can append to **Starting script** the configuration necessary to use kedro ipython, as described in the [ipython configuring documentation](https://kedro.readthedocs.io/en/latest/11_tools_integration/02_ipython.html).
 
-![image](https://user-images.githubusercontent.com/49595821/137316893-7a9f8b65-25dc-4d53-9ca7-e687391ebed9.png)
+![](../meta/images/pycharm_ipython_starting_script.png)
 
 With this configuration, when you create a Python Console you should be able to use context, session and catalog.
 
-![image](https://user-images.githubusercontent.com/49595821/137317293-c18688b7-1ceb-4b92-b9b8-1b1439d905d7.png)
+![](../meta/images/pycharm_ipython_working_example.png)
 
 ## Configuring the Kedro catalog validation schema
 

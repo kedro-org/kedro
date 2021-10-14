@@ -193,6 +193,7 @@ def _validate_layers_for_transcoding(catalog: DataCatalog) -> None:
             f"Transcoded datasets should have the same layer. Mismatch found for: {error_str}"
         )
 
+
 def _update_nested_dict(old_dict: Dict, new_dict: Dict) -> None:
     """Update a nested dict with values of new_dict.
 
@@ -209,6 +210,7 @@ def _update_nested_dict(old_dict: Dict, new_dict: Dict) -> None:
                 _update_nested_dict(old_dict[key], value)
             else:
                 old_dict[key] = value
+
 
 class KedroContext:
     """``KedroContext`` is the base class which holds the configuration and

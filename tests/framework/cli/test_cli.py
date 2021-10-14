@@ -49,9 +49,9 @@ from kedro.framework.cli.utils import (
     CommandCollection,
     KedroCliError,
     _clean_pycache,
+    _update_value_nested_dict,
     forward_command,
     get_pkg_version,
-    _update_value_nested_dict,
 )
 from kedro.framework.session import KedroSession
 from kedro.runner import ParallelRunner, SequentialRunner
@@ -739,7 +739,12 @@ class TestRunCommand:
         ],
     )
     def test_run_extra_params(
-        self, mocker, fake_project_cli, fake_metadata, cli_arg, expected_extra_params,
+        self,
+        mocker,
+        fake_project_cli,
+        fake_metadata,
+        cli_arg,
+        expected_extra_params,
     ):
         mock_session_create = mocker.patch.object(KedroSession, "create")
 

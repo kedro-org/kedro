@@ -41,7 +41,7 @@ from contextlib import contextmanager
 from importlib import import_module
 from itertools import chain
 from pathlib import Path
-from typing import Dict, Iterable, List, Mapping, Sequence, Set, Tuple, Union, Any
+from typing import Any, Dict, Iterable, List, Mapping, Sequence, Set, Tuple, Union
 
 import click
 import pkg_resources
@@ -470,7 +470,9 @@ def _split_params(ctx, param, value):
     return result
 
 
-def _update_value_nested_dict(nested_dict: Dict, value: Any, walking_path: List) -> Dict:
+def _update_value_nested_dict(
+    nested_dict: Dict, value: Any, walking_path: List
+) -> Dict:
     """Update nested dict with value using walking_path as a parse tree to walk
     down the nested dict.
 

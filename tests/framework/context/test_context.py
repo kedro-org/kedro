@@ -46,8 +46,8 @@ from kedro.framework.context import KedroContext, KedroContextError
 from kedro.framework.context.context import (
     _convert_paths_to_absolute_posix,
     _is_relative_path,
+    _update_nested_dict,
     _validate_layers_for_transcoding,
-    _update_nested_dict
 )
 from kedro.framework.hooks import get_hook_manager, hook_impl
 from kedro.framework.project import (
@@ -856,9 +856,19 @@ def test_validate_layers_error(layers, conflicting_datasets, mocker):
 @pytest.mark.parametrize(
     "old_dict,new_dict,expected",
     [
-        {"a": 1, "b": 2, "c": {"d": 3,}},
+        {
+            "a": 1,
+            "b": 2,
+            "c": {
+                "d": 3,
+            },
+        },
         {"c": {"d": 5, "e": 4}},
-        {"a": 1, "b": 2, "c": {"d": 5, "e": 4},},
+        {
+            "a": 1,
+            "b": 2,
+            "c": {"d": 5, "e": 4},
+        },
     ],
 )
 def test_update_nested_dict(old_dict: Dict, new_dict: Dict, expected: Dict):

@@ -185,7 +185,7 @@ html_theme_options = {"collapse_navigation": False, "style_external_links": True
 # some of these complain that the sections don't exist (which is not true),
 # too many requests, or forbidden URL
 linkcheck_ignore = [
-    "https://www.datacamp.com/community/tutorials/docstrings-python",  # "forbidden" url
+    "https://datacamp.com/community/tutorials/docstrings-python",  # "forbidden" url
     "https://setuptools.readthedocs.io/en/latest/setuptools.html#dynamic-discovery-of-services-and-plugins",
     "https://github.com/argoproj/argo/blob/master/README.md#quickstart",
     "https://console.aws.amazon.com/batch/home#/jobs",

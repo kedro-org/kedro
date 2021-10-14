@@ -51,7 +51,7 @@ from kedro.framework.cli.utils import (
     _clean_pycache,
     forward_command,
     get_pkg_version,
-    _add_value_nested_dict,
+    _update_value_nested_dict,
 )
 from kedro.framework.session import KedroSession
 from kedro.runner import ParallelRunner, SequentialRunner
@@ -96,26 +96,6 @@ def fake_session(mocker):
     mock_session_create = mocker.patch.object(KedroSession, "create")
     mocked_session = mock_session_create.return_value.__enter__.return_value
     return mocked_session
-
-
-@fixture
-def nested_dict():
-    return {"foo": {"hello": "world", "bar": 1}}
-
-
-@fixture
-def value_for_nested():
-    return 2
-
-
-@fixture
-def walking_path_for_nested_dict():
-    return ["foo", "bar"]
-
-
-@fixture
-def nested_dict_udapted():
-    return {"foo": {"hello": "world", "bar": 2}}
 
 
 # pylint:disable=too-few-public-methods
@@ -355,14 +335,19 @@ class TestCliUtils:
         ]
         assert mocked_rmtree.mock_calls == expected_calls
 
-    def test_add_value_nested_dict(
+    def test_update_value_nested_dict(
         self,
         nested_dict,
         value_for_nested_dict,
         walking_path_for_nested_dict,
         nested_dict_updated,
     ):
-        assert nested_dict_updated == _add_value_nested_dict(
+
+        nested_dict = {"foo": {"hello": "world", "bar": 1}}
+        value_for_nested_dict = 2
+        walking_path_for_nested_dict = ["foo", "bar"]
+        nested_dict_updated = {"foo": {"hello": "world", "bar": 2}}
+        assert nested_dict_updated == _update_value_nested_dict(
             nested_dict, value_for_nested_dict, walking_path_for_nested_dict
         )
 

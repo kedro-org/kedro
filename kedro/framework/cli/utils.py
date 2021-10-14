@@ -464,13 +464,13 @@ def _split_params(ctx, param, value):
                 f"cannot be an empty string."
             )
         value = item[1].strip()
-        result = _add_value_nested_dict(
+        result = _update_value_nested_dict(
             result, _try_convert_to_numeric(value), key.split(".")
         )
     return result
 
 
-def _add_value_nested_dict(nested_dict: Dict, value: Any, walking_path: List) -> Dict:
+def _update_value_nested_dict(nested_dict: Dict, value: Any, walking_path: List) -> Dict:
     """Update nested dict with value using walking_path as a parse tree to walk
     down the nested dict.
 
@@ -493,7 +493,7 @@ def _add_value_nested_dict(nested_dict: Dict, value: Any, walking_path: List) ->
     if len(walking_path) == 0:
         nested_dict[key] = value
         return nested_dict
-    nested_dict[key] = _add_value_nested_dict(
+    nested_dict[key] = _update_value_nested_dict(
         nested_dict.get(key, {}), value, walking_path
     )
     return nested_dict

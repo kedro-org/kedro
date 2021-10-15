@@ -854,12 +854,22 @@ def test_validate_layers_error(layers, conflicting_datasets, mocker):
 
 
 @pytest.mark.parametrize(
-    "old_dict,new_dict,expected",
+    "old_dict, new_dict, expected",
     [
         (
-            {"a": 1, "b": 2, "c": {"d": 3,},},
+            {
+                "a": 1,
+                "b": 2,
+                "c": {
+                    "d": 3,
+                },
+            },
             {"c": {"d": 5, "e": 4}},
-            {"a": 1, "b": 2, "c": {"d": 5, "e": 4},},
+            {
+                "a": 1,
+                "b": 2,
+                "c": {"d": 5, "e": 4},
+            },
         ),
         ({"a": 1}, {"b": 2}, {"a": 1, "b": 2}),
         ({"a": 1, "b": 2}, {"b": 3}, {"a": 1, "b": 3}),

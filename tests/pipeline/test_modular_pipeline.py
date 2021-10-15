@@ -318,7 +318,7 @@ class TestPipelineHelper:
         assert actual_nodes[0]._outputs == "B"
 
     @pytest.mark.parametrize(
-        "parameters", ["params:x", set(["params:x"]), {"params:x": "params:x"}]
+        "parameters", ["params:x", {"params:x"}, {"params:x": "params:x"}]
     )
     def test_parameters_left_intact_when_defined_as_(self, parameters):
         raw_pipeline = Pipeline(
@@ -368,7 +368,7 @@ class TestPipelineHelper:
         resulting_pipeline = pipeline(
             raw_pipeline,
             outputs={"AA": "B"},
-            parameters=set(["params:x"]),
+            parameters={"params:x"},
             namespace="PREFIX",
         )
         actual_nodes = resulting_pipeline.nodes

@@ -36,6 +36,7 @@ import pytest
 import toml
 
 from kedro import __version__ as kedro_version
+from kedro.config import ConfigLoader
 from kedro.framework.context import KedroContext
 from kedro.framework.project import (
     ValidationError,
@@ -72,7 +73,6 @@ def _mock_imported_settings_paths(mocker, mock_settings):
     for path in [
         "kedro.framework.project.settings",
         "kedro.framework.session.session.settings",
-        "kedro.framework.context.context.settings",
     ]:
         mocker.patch(path, mock_settings)
     return mock_settings
@@ -100,6 +100,42 @@ def mock_settings_custom_context_class(mocker):
 
     class MockSettings(_ProjectSettings):
         _CONTEXT_CLASS = Validator("CONTEXT_CLASS", default=lambda *_: MyContext)
+
+    return _mock_imported_settings_paths(mocker, MockSettings())
+
+
+@pytest.fixture
+def mock_config_loader_class(mocker):
+    return mocker.patch("kedro.config.ConfigLoader", autospec=True)
+
+
+@pytest.fixture
+def mock_settings_config_loader_class(mocker, mock_config_loader_class):
+    class MockSettings(_ProjectSettings):
+        _CONFIG_LOADER_CLASS = Validator(
+            "CONFIG_LOADER_CLASS", default=lambda *_: mock_config_loader_class
+        )
+
+    return _mock_imported_settings_paths(mocker, MockSettings())
+
+
+@pytest.fixture
+def mock_settings_broken_config_loader_class(mocker):
+    class MockSettings(_ProjectSettings):
+        _CONFIG_LOADER_CLASS = Validator("CONFIG_LOADER_CLASS", default="it breaks")
+
+    return _mock_imported_settings_paths(mocker, MockSettings())
+
+
+@pytest.fixture
+def mock_settings_custom_config_loader_class(mocker):
+    class MyConfigLoader(ConfigLoader):
+        pass
+
+    class MockSettings(_ProjectSettings):
+        _CONFIG_LOADER_CLASS = Validator(
+            "CONFIG_LOADER_CLASS", default=lambda *_: MyConfigLoader
+        )
 
     return _mock_imported_settings_paths(mocker, MockSettings())
 
@@ -207,11 +243,11 @@ def fake_project(tmp_path, local_logging_config, mock_package_name):
         }
     }
     toml_str = toml.dumps(payload)
-    pyproject_toml_path.write_text(toml_str)
+    pyproject_toml_path.write_text(toml_str, encoding="utf-8")
 
     env_logging = fake_project_dir / "conf" / "base" / "logging.yml"
     env_logging.parent.mkdir(parents=True)
-    env_logging.write_text(json.dumps(local_logging_config))
+    env_logging.write_text(json.dumps(local_logging_config), encoding="utf-8")
     (fake_project_dir / "conf" / "local").mkdir()
     return fake_project_dir
 
@@ -226,12 +262,14 @@ STORE_LOGGER_NAME = "kedro.framework.session.store"
 
 class TestKedroSession:
     @pytest.mark.usefixtures("mock_settings_context_class")
+    @pytest.mark.usefixtures("mock_settings_config_loader_class")
     @pytest.mark.parametrize("env", [None, "env1"])
     @pytest.mark.parametrize("extra_params", [None, {"key": "val"}])
     def test_create(
         self,
         fake_project,
         mock_context_class,
+        mock_config_loader_class,
         fake_session_id,
         mock_package_name,
         mocker,
@@ -261,21 +299,16 @@ class TestKedroSession:
             expected_store["extra_params"] = extra_params
 
         assert session.store == expected_store
-        # called for logging setup
-        mock_context_class.assert_called_once_with(
-            project_path=fake_project,
-            package_name=mock_package_name,
-            env=env,
-            extra_params=extra_params,
-        )
-
         assert session.load_context() is mock_context_class.return_value
+        assert session._get_config_loader() is mock_config_loader_class.return_value
 
     @pytest.mark.usefixtures("mock_settings_context_class")
+    @pytest.mark.usefixtures("mock_settings_config_loader_class")
     def test_create_no_env_extra_params(
         self,
         fake_project,
         mock_context_class,
+        mock_config_loader_class,
         fake_session_id,
         mock_package_name,
         mocker,
@@ -297,14 +330,8 @@ class TestKedroSession:
         }
 
         assert session.store == expected_store
-        mock_context_class.assert_called_once_with(
-            project_path=fake_project,
-            package_name=mock_package_name,
-            env=None,
-            extra_params=None,
-        )
-
         assert session.load_context() is mock_context_class.return_value
+        assert session._get_config_loader() is mock_config_loader_class.return_value
 
     @pytest.mark.usefixtures("mock_settings")
     def test_load_context_with_envvar(
@@ -320,6 +347,20 @@ class TestKedroSession:
         assert result.__class__.__name__ == "KedroContext"
         assert result.env == "my_fake_env"
 
+    @pytest.mark.usefixtures("mock_settings")
+    def test_load_config_loader_with_envvar(
+        self, fake_project, monkeypatch, mock_package_name, mocker
+    ):
+        mocker.patch("kedro.config.config.ConfigLoader.get")
+        monkeypatch.setenv("KEDRO_ENV", "my_fake_env")
+
+        session = KedroSession.create(mock_package_name, fake_project)
+        result = session._get_config_loader()
+
+        assert isinstance(result, ConfigLoader)
+        assert result.__class__.__name__ == "ConfigLoader"
+        assert result.env == "my_fake_env"
+
     @pytest.mark.usefixtures("mock_settings_custom_context_class")
     def test_load_context_custom_context_class(self, fake_project, mock_package_name):
         session = KedroSession.create(mock_package_name, fake_project)
@@ -327,6 +368,25 @@ class TestKedroSession:
 
         assert isinstance(result, KedroContext)
         assert result.__class__.__name__ == "MyContext"
+
+    @pytest.mark.usefixtures("mock_settings_custom_config_loader_class")
+    def test_load_config_loader_custom_config_loader_class(
+        self, fake_project, mock_package_name
+    ):
+        session = KedroSession.create(mock_package_name, fake_project)
+        result = session._get_config_loader()
+
+        assert isinstance(result, ConfigLoader)
+        assert result.__class__.__name__ == "MyConfigLoader"
+
+    @pytest.mark.usefixtures("mock_settings_broken_config_loader_class")
+    def test_broken_config_loader(self, fake_project, mock_package_name):
+        pattern = (
+            f"Expected an instance of `ConfigLoader`, "
+            f"got `it breaks` of class `{type('')}` instead."
+        )
+        with pytest.raises(TypeError, match=re.escape(pattern)):
+            KedroSession.create(mock_package_name, fake_project)
 
     @pytest.mark.usefixtures("mock_settings_context_class")
     def test_default_store(

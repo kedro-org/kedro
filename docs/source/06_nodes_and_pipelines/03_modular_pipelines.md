@@ -155,9 +155,9 @@ Here the keys (e.g. `pipelines.first_pipeline`, `pipelines.second_pipeline`) are
 
 You can pull a modular pipeline from a source distribution (sdist) file by executing `kedro pipeline pull <package_name>`, where `<package_name>` is either a package name on PyPI or a path to the source distribution file. Kedro will unpack the sdist file, and install the files in the following locations in your Kedro project:
 
-*  All the modular pipeline code in `src/<python_package>/pipelines/<pipeline_name>/`
+*  All the modular pipeline code in `src/<python_package>/<pipeline_name>/`
 *  Configuration files in `conf/<env>/parameters/<pipeline_name>.yml`, where `<env>` defaults to `base`. If you want to place the parameters from a different config environment, run `kedro pipeline pull <pipeline_name> --env <env_name>`
-*  Pipeline unit tests in `src/tests/pipelines/<pipeline_name>`
+*  Pipeline unit tests in `src/tests/<pipeline_name>`
 
 Kedro will also parse any requirements packaged with the modular pipeline and add them to project level `requirements.in`. It is advised to run `kedro build-reqs` to compile and `pip install -r src/requirements.txt` to install the updated list of requirements after pulling a modular pipeline.
 
@@ -207,7 +207,7 @@ To pull multiple modular pipelines in bulk, run `kedro pipeline pull --all`. Thi
 ```toml
 [tool.kedro.pipeline.pull]
 "dist/first-pipeline-0.1.tar.gz" = {}
-"https://www.url.to/second-pipeline-0.1.tar.gz" = {alias = "aliased_pipeline", fs-args = "pipeline_pull_args.yml"}
+"https://www.url.to/second-pipeline-0.1.tar.gz" = {alias = "pipelines.aliased_pipeline", fs-args = "pipeline_pull_args.yml"}
 ```
 
 Here the keys are the package paths, and the values are the options that `kedro pipeline pull <package_path>` accepts. Package paths can be any of the locations allowed by `kedro pipeline pull`, including local storage, PyPI and the cloud.

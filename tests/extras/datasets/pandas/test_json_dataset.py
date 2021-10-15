@@ -234,8 +234,8 @@ class TestJSONDataSetVersioned:
         """Check the warning when saving to the path that differs from
         the subsequent load path."""
         pattern = (
-            r"Save version `{0}` did not match load version `{1}` "
-            r"for JSONDataSet\(.+\)".format(save_version, load_version)
+            fr"Save version `{save_version}` did not match load version "
+            fr"`{load_version}` for JSONDataSet\(.+\)"
         )
         with pytest.warns(UserWarning, match=pattern):
             versioned_json_data_set.save(dummy_dataframe)

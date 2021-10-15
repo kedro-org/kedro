@@ -39,6 +39,7 @@ from typing import Any, Dict, Iterable, Optional, Union
 import click
 
 from kedro import __version__ as kedro_version
+from kedro.config import ConfigLoader
 from kedro.framework.context import KedroContext
 from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import get_hook_manager
@@ -221,9 +222,7 @@ class KedroSession:
         return session
 
     def _get_logging_config(self) -> Dict[str, Any]:
-        context = self.load_context()
-
-        conf_logging = context.config_loader.get(
+        conf_logging = self._get_config_loader().get(
             "logging*", "logging*/**", "**/logging*"
         )
         # turn relative paths in logging config into absolute path
@@ -277,15 +276,38 @@ class KedroSession:
         """An instance of the project context."""
         env = self.store.get("env")
         extra_params = self.store.get("extra_params")
+        config_loader = self._get_config_loader()
 
         context_class = settings.CONTEXT_CLASS
         context = context_class(
             package_name=self._package_name,
             project_path=self._project_path,
+            config_loader=config_loader,
             env=env,
             extra_params=extra_params,
         )
         return context
+
+    def _get_config_loader(self) -> ConfigLoader:
+        """An instance of the config loader."""
+        env = self.store.get("env")
+        extra_params = self.store.get("extra_params")
+
+        config_loader_class = settings.CONFIG_LOADER_CLASS
+        try:
+            return config_loader_class(
+                conf_source=str(self._project_path / settings.CONF_SOURCE),
+                env=env,
+                runtime_params=extra_params,
+                **settings.CONFIG_LOADER_ARGS,
+            )
+        except TypeError as exc:
+            raise TypeError(
+                f"Expected an instance of `ConfigLoader`, "
+                f"got `{settings.CONFIG_LOADER_CLASS}` of class "
+                f"`{type(settings.CONFIG_LOADER_CLASS)}` instead.\n"
+                f"The provided `CONFIG_LOADER_ARGS were: {settings.CONFIG_LOADER_ARGS}"
+            ) from exc
 
     def close(self):
         """Close the current session and save its store to disk

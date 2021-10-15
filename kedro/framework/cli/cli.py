@@ -44,7 +44,7 @@ from click.utils import get_os_args
 import kedro.config.default_logger  # noqa
 from kedro import __version__ as version
 from kedro.framework.cli.catalog import catalog_cli
-from kedro.framework.cli.hooks import CLIHooksManager
+from kedro.framework.cli.hooks import get_cli_hook_manager
 from kedro.framework.cli.jupyter import jupyter_cli
 from kedro.framework.cli.pipeline import pipeline_cli
 from kedro.framework.cli.project import project_group
@@ -139,7 +139,7 @@ class KedroCLI(CommandCollection):
         self._metadata = None  # running in package mode
         if _is_project(project_path):
             self._metadata = bootstrap_project(project_path)
-        self._cli_hook_manager = CLIHooksManager()
+        self._cli_hook_manager = get_cli_hook_manager()
 
         super().__init__(
             ("Global commands", self.global_groups),

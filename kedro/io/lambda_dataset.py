@@ -130,10 +130,8 @@ class LambdaDataSet(AbstractDataSet):
         ]:
             if value is not None and not callable(value):
                 raise DataSetError(
-                    "`{}` function for LambdaDataSet must be a Callable. "
-                    "Object of type `{}` provided instead.".format(
-                        name, value.__class__.__name__
-                    )
+                    f"`{name}` function for LambdaDataSet must be a Callable. "
+                    f"Object of type `{value.__class__.__name__}` provided instead."
                 )
 
         self.__load = load

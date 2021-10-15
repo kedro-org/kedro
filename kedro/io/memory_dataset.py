@@ -153,9 +153,8 @@ def _copy_with_mode(data: Any, copy_mode: str) -> Any:
         copied_data = data
     else:
         raise DataSetError(
-            "Invalid copy mode: {}. Possible values are: deepcopy, copy, assign.".format(
-                copy_mode
-            )
+            f"Invalid copy mode: {copy_mode}. "
+            f"Possible values are: deepcopy, copy, assign."
         )
 
     return copied_data

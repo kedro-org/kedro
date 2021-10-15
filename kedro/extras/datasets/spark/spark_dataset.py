@@ -164,11 +164,11 @@ class KedroHdfsInsecureClient(InsecureClient):
             for dpath, _, fnames in self.walk(prefix):
                 if fnmatch(dpath, pattern):
                     matched.add(dpath)
-                matched |= set(
+                matched |= {
                     f"{dpath}/{fname}"
                     for fname in fnames
                     if fnmatch(f"{dpath}/{fname}", pattern)
-                )
+                }
         except HdfsError:  # pragma: no cover
             # HdfsError is raised by `self.walk()` if prefix does not exist in HDFS.
             # Ignore and return an empty list.
@@ -271,10 +271,9 @@ class SparkDataSet(AbstractVersionedDataSet):
 
         elif fs_prefix == "hdfs://" and version:
             warn(
-                "HDFS filesystem support for versioned {} is in beta and uses "
-                "`hdfs.client.InsecureClient`, please use with caution".format(
-                    self.__class__.__name__
-                )
+                f"HDFS filesystem support for versioned {self.__class__.__name__} is "
+                f"in beta and uses `hdfs.client.InsecureClient`, please use with "
+                f"caution"
             )
 
             # default namenode address

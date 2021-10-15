@@ -26,6 +26,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """This module defines a dedicated hook manager for hooks that extends Kedro CLI behaviour."""
+# pylint: disable=global-statement,invalid-name
 import logging
 
 from pluggy import PluginManager
@@ -33,7 +34,17 @@ from pluggy import PluginManager
 from .markers import CLI_HOOK_NAMESPACE
 from .specs import CLICommandSpecs
 
+_cli_hook_manager = None
+
 _CLI_PLUGIN_HOOKS = "kedro.cli_hooks"
+
+
+def get_cli_hook_manager():
+    """Create or return the global _hook_manager singleton instance."""
+    global _cli_hook_manager
+    if _cli_hook_manager is None:
+        _cli_hook_manager = CLIHooksManager()
+    return _cli_hook_manager
 
 
 class CLIHooksManager(PluginManager):

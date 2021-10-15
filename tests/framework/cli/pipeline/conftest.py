@@ -40,6 +40,32 @@ def mocked_logging(mocker):
 
 
 @pytest.fixture(autouse=True)
+def cleanup_micropackages(fake_repo_path, fake_package_path):
+    packages = {p.name for p in fake_package_path.iterdir() if p.is_dir()}
+
+    yield
+
+    created_packages = {
+        p.name
+        for p in fake_package_path.iterdir()
+        if p.is_dir() and p.name != "__pycache__"
+    }
+    created_packages -= packages
+
+    for micropackage in created_packages:
+        shutil.rmtree(str(fake_package_path / micropackage))
+
+        confs = fake_repo_path / settings.CONF_SOURCE
+        for each in confs.rglob(f"*{micropackage}*"):
+            if each.is_file():
+                each.unlink()
+
+        tests = fake_repo_path / "src" / "tests" / micropackage
+        if tests.is_dir():
+            shutil.rmtree(str(tests))
+
+
+@pytest.fixture(autouse=True)
 def cleanup_pipelines(fake_repo_path, fake_package_path):
     pipes_path = fake_package_path / "pipelines"
     old_pipelines = {p.name for p in pipes_path.iterdir() if p.is_dir()}
@@ -61,14 +87,10 @@ def cleanup_pipelines(fake_repo_path, fake_package_path):
             if each.is_file():
                 each.unlink()
 
-        dirs_to_delete = (
-            dirpath
-            for pattern in ("parameters", "catalog")
-            for dirpath in confs.rglob(pattern)
-            if dirpath.is_dir() and not any(dirpath.iterdir())
-        )
-        for dirpath in dirs_to_delete:
-            dirpath.rmdir()
+        for pattern in ("parameter", "catalog"):
+            for dirpath in confs.rglob(pattern):
+                if dirpath.is_dir() and not any(dirpath.iterdir()):
+                    dirpath.rmdir()
 
         tests = fake_repo_path / "src" / "tests" / "pipelines" / pipeline
         if tests.is_dir():

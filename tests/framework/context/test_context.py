@@ -40,7 +40,7 @@ import yaml
 from pandas.util.testing import assert_frame_equal
 
 from kedro import __version__ as kedro_version
-from kedro.config import MissingConfigException
+from kedro.config import ConfigLoader, MissingConfigException
 from kedro.extras.datasets.pandas import CSVDataSet
 from kedro.framework.context import KedroContext, KedroContextError
 from kedro.framework.context.context import (
@@ -133,22 +133,44 @@ def local_config(tmp_path):
     }
 
 
+@pytest.fixture
+def local_logging_config() -> Dict[str, Any]:
+    return {
+        "version": 1,
+        "formatters": {
+            "simple": {"format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"}
+        },
+        "root": {"level": "INFO", "handlers": ["console"]},
+        "loggers": {"kedro": {"level": "INFO", "handlers": ["console"]}},
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+                "level": "INFO",
+                "formatter": "simple",
+                "stream": "ext://sys.stdout",
+            }
+        },
+    }
+
+
 @pytest.fixture(params=[None])
 def env(request):
     return request.param
 
 
 @pytest.fixture
-def prepare_project_dir(tmp_path, base_config, local_config, env):
+def prepare_project_dir(tmp_path, base_config, local_config, local_logging_config, env):
     env = "local" if env is None else env
     proj_catalog = tmp_path / "conf" / "base" / "catalog.yml"
     env_catalog = tmp_path / "conf" / str(env) / "catalog.yml"
+    logging = tmp_path / "conf" / "local" / "logging.yml"
     env_credentials = tmp_path / "conf" / str(env) / "credentials.yml"
     parameters = tmp_path / "conf" / "base" / "parameters.json"
     db_config_path = tmp_path / "conf" / "base" / "db.ini"
     project_parameters = {"param1": 1, "param2": 2, "param3": {"param4": 3}}
     _write_yaml(proj_catalog, base_config)
     _write_yaml(env_catalog, local_config)
+    _write_yaml(logging, local_logging_config)
     _write_yaml(env_credentials, local_config)
     _write_json(parameters, project_parameters)
     _write_dummy_ini(db_config_path)
@@ -170,24 +192,10 @@ class MockSettings(_ProjectSettings):
     _HOOKS = Validator("HOOKS", default=(RegistrationHooks(),))
 
 
-class BrokenSettings(_ProjectSettings):
-    _HOOKS = Validator("HOOKS", default=(RegistrationHooks(),))
-    _CONFIG_LOADER_CLASS = Validator("CONFIG_LOADER_CLASS", default="it breaks")
-
-
-@pytest.fixture
-def broken_settings(mocker):
-    mocked_settings = BrokenSettings()
-    mocker.patch("kedro.framework.session.session.settings", mocked_settings)
-    mocker.patch("kedro.framework.context.context.settings", mocked_settings)
-    return mocker.patch("kedro.framework.project.settings", mocked_settings)
-
-
 @pytest.fixture(autouse=True)
 def mock_settings(mocker):
     mocked_settings = MockSettings()
     mocker.patch("kedro.framework.session.session.settings", mocked_settings)
-    mocker.patch("kedro.framework.context.context.settings", mocked_settings)
     return mocker.patch("kedro.framework.project.settings", mocked_settings)
 
 
@@ -289,11 +297,16 @@ def mocked_logging(mocker):
 
 @pytest.fixture
 def dummy_context(
-    tmp_path, prepare_project_dir, env, extra_params, mocker
+    tmp_path, prepare_project_dir, env, extra_params
 ):  # pylint: disable=unused-argument
     configure_project(MOCK_PACKAGE_NAME)
+    config_loader = ConfigLoader(str(tmp_path / "conf"), env=env)
     context = KedroContext(
-        MOCK_PACKAGE_NAME, str(tmp_path), env=env, extra_params=extra_params
+        MOCK_PACKAGE_NAME,
+        str(tmp_path),
+        config_loader=config_loader,
+        env=env,
+        extra_params=extra_params,
     )
 
     yield context
@@ -337,7 +350,8 @@ class TestKedroContext:
         assert dummy_context.project_path == tmp_path.resolve()
 
     def test_get_catalog_always_using_absolute_path(self, dummy_context):
-        conf_catalog = dummy_context.config_loader.get("catalog*")
+        config_loader = dummy_context._config_loader
+        conf_catalog = config_loader.get("catalog*")
 
         # even though the raw configuration uses relative path
         assert conf_catalog["horses"]["filepath"] == "horses.csv"
@@ -395,44 +409,14 @@ class TestKedroContext:
         indirect=True,
     )
     def test_params_missing(self, mocker, extra_params, dummy_context):
-        mock_config_loader = mocker.patch.object(KedroContext, "config_loader")
-        mock_config_loader.get.side_effect = MissingConfigException("nope")
+        mock_config_loader = mocker.patch("kedro.config.ConfigLoader.get")
+        mock_config_loader.side_effect = MissingConfigException("nope")
         extra_params = extra_params or {}
 
         pattern = "Parameters not found in your Kedro project config"
         with pytest.warns(UserWarning, match=pattern):
             actual = dummy_context.params
         assert actual == extra_params
-
-    def test_config_loader(self, dummy_context):
-        params = dummy_context.config_loader.get("parameters*")
-        db_conf = dummy_context.config_loader.get("db*")
-        catalog = dummy_context.config_loader.get("catalog*")
-
-        assert params["param1"] == 1
-        assert db_conf["prod"]["url"] == "postgresql://user:pass@url_prod/db"
-
-        assert catalog["trains"]["type"] == "pandas.CSVDataSet"
-        assert catalog["cars"]["type"] == "pandas.CSVDataSet"
-        assert catalog["boats"]["type"] == "pandas.CSVDataSet"
-        assert not catalog["cars"]["save_args"]["index"]
-
-    # pylint: disable=unused-argument
-    def test_broken_config_loader(self, broken_settings, dummy_context):
-        pattern = (
-            f"Expected an instance of `ConfigLoader`, "
-            f"got `it breaks` of class `{type('')}` instead."
-        )
-        with pytest.raises(KedroContextError, match=re.escape(pattern)):
-            _ = dummy_context.config_loader
-
-    def test_default_env(self, dummy_context):
-        # default environment setting is delegated to config_loader,
-        # rather than `KedroContext`
-        assert not dummy_context.env
-        assert not dummy_context.config_loader.env
-        assert dummy_context.config_loader.default_run_env == "local"
-        assert dummy_context.config_loader.base_env == "base"
 
     @pytest.mark.parametrize("env", ["custom_env"], indirect=True)
     def test_custom_env(self, dummy_context, env):

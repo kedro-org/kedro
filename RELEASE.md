@@ -60,8 +60,8 @@
 * Removed the `config_loader` property from `KedroContext`.
 
 ## Thanks for supporting contributions
-[Deepyaman Datta](https://github.com/deepyaman)
-[Simon Brugman](https://github.com/sbrugman)
+
+[Deepyaman Datta](https://github.com/deepyaman), [Lucas Jamar](https://github.com/lucasjamar), [Simon Brugman](https://github.com/sbrugman)
 
 ## Migration guide from Kedro 0.17.* to 0.18.*
 * Please remove any existing `hook_impl` of the `register_config_loader` method from `ProjectHooks` (or custom alternatives).

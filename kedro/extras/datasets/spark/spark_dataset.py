@@ -29,6 +29,7 @@
 """``AbstractDataSet`` implementation to access Spark dataframes using
 ``pyspark``
 """
+
 from copy import deepcopy
 from fnmatch import fnmatch
 from functools import partial
@@ -39,9 +40,19 @@ from warnings import warn
 from hdfs import HdfsError, InsecureClient
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.utils import AnalysisException
+from pyspark.sql.types import StructType
 from s3fs import S3FileSystem
 
-from kedro.io.core import AbstractVersionedDataSet, Version
+import fsspec
+import json
+
+from kedro.io.core import (
+    AbstractVersionedDataSet,
+    DataSetError,
+    Version,
+    get_filepath_str,
+    get_protocol_and_path,
+)
 
 
 def _parse_glob_pattern(pattern: str) -> str:
@@ -176,7 +187,7 @@ class KedroHdfsInsecureClient(InsecureClient):
         return sorted(matched)
 
 
-class SparkDataSet(AbstractVersionedDataSet):
+class SparkDataSet(Abstrac2tVersionedDataSet):
     """``SparkDataSet`` loads and saves Spark dataframes.
     Example:
     ::
@@ -301,6 +312,27 @@ class SparkDataSet(AbstractVersionedDataSet):
             glob_function=glob_function,
         )
 
+        # Handle schema
+        self._schema = None
+        schema_json_path = load_args.pop("schema_json_path", None)
+        if schema_json_path:
+
+            # TODO Limit protocols to file only?
+            # TODO What about files in HDFS?
+            # TODO What happens if file does not exist?
+            protocol, path = get_protocol_and_path(filepath, version)
+            fs = fsspec.filesystem(self._protocol)
+            pure_posix_path = PurePosixPath(path)
+            load_path = get_filepath_str(pure_posix_path, protocol)
+
+            # Open schema file
+            with fs.open(load_path) as fs_file:
+
+                # Load file through provided filesystem
+                # TODO lazy load schema when loading dataframe?
+                # TODO Support other input types?
+                self._schema = StructType.fromJson(json.loads(fs_file.read()))
+
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args is not None:
@@ -328,7 +360,8 @@ class SparkDataSet(AbstractVersionedDataSet):
     def _load(self) -> DataFrame:
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_load_path()))
 
-        return self._get_spark().read.load(
+        # What happens when schema is None?
+        return self._get_spark().read.schema(self._schema).load(
             load_path, self._file_format, **self._load_args
         )
 

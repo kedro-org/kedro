@@ -153,7 +153,7 @@ You can configure Pycharm's IPython to load Kedro's Extension.
 
 Click **PyCharm | Preferences** for macOS or **File | Settings**, inside **Build, Execution, Deployment** and **Console**, enter the **Python Console** configuration.
 
-You can append to **Starting script** the configuration necessary to use kedro ipython, as described in the [ipython configuring documentation](https://kedro.readthedocs.io/en/latest/11_tools_integration/02_ipython.html).
+You can append the configuration necessary to use Kedro IPython to the **Starting script** as described in the [IPython configuring documentation](https://kedro.readthedocs.io/en/latest/11_tools_integration/02_ipython.html).
 
 ![](../meta/images/pycharm_ipython_starting_script.png)
 

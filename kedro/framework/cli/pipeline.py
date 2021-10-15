@@ -272,6 +272,7 @@ def pull_package(  # pylint:disable=unused-argument, too-many-arguments
     click.secho(message, fg="green")
 
 
+# pylint: disable=too-many-locals
 def _pull_package(
     package_path: str,
     metadata: ProjectMetadata,
@@ -292,19 +293,28 @@ def _pull_package(
                 f"There has to be exactly one egg-info directory."
             )
         package_name = egg_info_file[0].stem
-        package_requirements = egg_info_file[0] / "requires.txt"
+        package_requirements = temp_dir_path / sdist_file_name / "setup.py"
 
         _clean_pycache(temp_dir_path)
         _install_files(
             metadata, package_name, temp_dir_path / sdist_file_name, env, alias
         )
 
-        if package_requirements.is_file():
+        # Finds a string representation of 'install_requires' list from setup.py
+        reqs_list_pattern = r"install_requires\=(.*?)\,\n"
+        list_reqs = re.findall(
+            reqs_list_pattern, package_requirements.read_text(encoding="utf-8")
+        )
+
+        # Finds all elements from the above string representation of a list
+        reqs_element_pattern = r"\'(.*?)\'"
+        package_reqs = re.findall(reqs_element_pattern, list_reqs[0])
+
+        if package_reqs:
             requirements_in = _get_requirements_in(
                 metadata.source_dir, create_empty=True
             )
-            package_reqs = _parse_package_reqs(egg_info_file[0], package_name)
-            _append_package_reqs(requirements_in, package_name, package_reqs)
+            _append_package_reqs(requirements_in, package_reqs, package_name)
 
 
 def _pull_packages_from_manifest(metadata: ProjectMetadata) -> None:
@@ -1060,42 +1070,13 @@ def _delete_artifacts(*artifacts: Path):
             click.secho("OK", fg="green")
 
 
-def _parse_package_reqs(egg_info_file, dist_name) -> list:
-    # pylint: disable=protected-access, line-too-long
-    base_dir = egg_info_file.parent
-    metadata = pkg_resources.PathMetadata(base_dir, egg_info_file)
-    dist = pkg_resources.Distribution(
-        base_dir, project_name=dist_name, metadata=metadata
-    )
-
-    # Extract requirements that are marked for a specific environment
-    # see: https://www.python.org/dev/peps/pep-0508/#environment-markers
-    # and https://stackoverflow.com/questions/50130706/how-do-i-read-dependencies-from-requires-txt-of-a-python-package
-    dep_map_pep508 = {
-        k: v
-        for k, v in dist._build_dep_map().items()  # type: ignore
-        if k and k.startswith(":")
-    }
-    marked_reqs = [
-        str(r).replace(" ", "") + ";" + k.lstrip(":").replace(" ", "")
-        for k, v in dep_map_pep508.items()
-        for r in v
-    ]
-    # Extract all regular requirements
-    reqs_no_platform = [str(r).replace(" ", "") for r in dist.requires()]
-    return marked_reqs + reqs_no_platform
-
-
 def _append_package_reqs(
-    requirements_in: Path, pipeline_name: str, package_reqs: list
+    requirements_in: Path, package_reqs: List[str], pipeline_name: str
 ) -> None:
     """Appends modular pipeline requirements to project level requirements.in"""
-    existing_reqs = [
-        str(r).replace(" ", "")
-        for r in pkg_resources.parse_requirements(requirements_in.read_text())
-    ]
-
-    reqs_to_add = set(package_reqs) - set(existing_reqs)
+    existing_reqs = pkg_resources.parse_requirements(requirements_in.read_text())
+    new_reqs = pkg_resources.parse_requirements(package_reqs)
+    reqs_to_add = set(new_reqs) - set(existing_reqs)
     if not reqs_to_add:
         return
 

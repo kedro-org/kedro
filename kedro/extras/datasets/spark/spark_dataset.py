@@ -313,12 +313,14 @@ class SparkDataSet(Abstrac2tVersionedDataSet):
         )
 
         # Handle schema
+        # TODO Add schema information as higher-level entity?
         self._schema = None
         schema_json_path = load_args.pop("schema_json_path", None)
         if schema_json_path:
 
             # TODO Limit protocols to file only?
             # TODO What about files in HDFS?
+            # TODO What about credentials, e.g., for GCS buckets?
             # TODO What happens if file does not exist?
             protocol, path = get_protocol_and_path(filepath, version)
             fs = fsspec.filesystem(self._protocol)

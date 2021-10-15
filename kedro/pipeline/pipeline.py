@@ -797,7 +797,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
             "The pipeline's `decorate` API will be deprecated in Kedro 0.18.0."
             "Please use a node's Hooks to extend the node's behaviour in a pipeline."
             "For more information, please visit"
-            "https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_hooks.html",
+            "https://kedro.readthedocs.io/en/stable/07_extend_kedro/02_hooks.html",
             DeprecationWarning,
         )
         nodes = [node.decorate(*decorators) for node in self.nodes]

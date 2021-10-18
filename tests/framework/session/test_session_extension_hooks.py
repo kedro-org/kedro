@@ -46,6 +46,7 @@ from kedro.runner import ParallelRunner
 from kedro.runner.runner import _run_node_async
 from tests.framework.session.conftest import (
     _assert_hook_call_record_has_expected_parameters,
+    _assert_pipeline_equal,
     _mock_imported_settings_paths,
     assert_exceptions_equal,
 )
@@ -109,7 +110,7 @@ class TestCatalogHooks:
 
         project_path = context.project_path
         catalog = context.catalog
-        config_loader = context.config_loader
+        config_loader = mock_session._get_config_loader()
 
         relevant_records = [
             r for r in caplog.records if r.getMessage() == "Catalog created"
@@ -136,7 +137,7 @@ class TestCatalogHooks:
         )
 
         catalog = context.catalog
-        config_loader = context.config_loader
+        config_loader = mock_session._get_config_loader()
         project_path = context.project_path
 
         catalog.save("cars", dummy_dataframe)
@@ -178,7 +179,7 @@ class TestPipelineHooks:
         ]
         assert len(before_pipeline_run_calls) == 1
         call_record = before_pipeline_run_calls[0]
-        assert call_record.pipeline is default_pipeline
+        _assert_pipeline_equal(call_record.pipeline, default_pipeline)
         _assert_hook_call_record_has_expected_parameters(
             call_record, ["pipeline", "catalog", "run_params"]
         )
@@ -194,7 +195,7 @@ class TestPipelineHooks:
         _assert_hook_call_record_has_expected_parameters(
             call_record, ["pipeline", "catalog", "run_params"]
         )
-        assert call_record.pipeline is default_pipeline
+        _assert_pipeline_equal(call_record.pipeline, default_pipeline)
 
     @pytest.mark.usefixtures("mock_broken_pipelines")
     def test_on_pipeline_error_hook(self, caplog, mock_session):

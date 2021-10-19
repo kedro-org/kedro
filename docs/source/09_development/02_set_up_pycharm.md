@@ -147,6 +147,20 @@ Click **OK** and then select your run configuration from the toolbar and click *
 
 [To debug, click the debugger button as described above](#debugging).
 
+## Configure Python Console
+
+You can configure Pycharm's IPython to load Kedro's Extension.
+
+Click **PyCharm | Preferences** for macOS or **File | Settings**, inside **Build, Execution, Deployment** and **Console**, enter the **Python Console** configuration.
+
+You can append the configuration necessary to use Kedro IPython to the **Starting script** as described in the [IPython configuring documentation](https://kedro.readthedocs.io/en/latest/11_tools_integration/02_ipython.html).
+
+![](../meta/images/pycharm_ipython_starting_script.png)
+
+With this configuration, when you create a Python Console you should be able to use context, session and catalog.
+
+![](../meta/images/pycharm_ipython_working_example.png)
+
 ## Configuring the Kedro catalog validation schema
 
 You can enable the Kedro catalog validation schema in your PyCharm IDE to enable real-time validation, autocompletion and see information about the different fields in your `catalog` as you write it. To enable this, open a `catalog.yml` file and you should see "No JSON Schema" in the bottom right corner of your window. Click it and select "Edit Schema Mapping".

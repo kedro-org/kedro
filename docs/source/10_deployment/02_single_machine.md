@@ -64,7 +64,7 @@ easy_install <path-to-egg-file>
 After having installed your project on the remote server, run the Kedro project as follows from the root of the project:
 
 ```console
-python -m project_name.run
+python -m project_name
 ```
 
 ## CLI based

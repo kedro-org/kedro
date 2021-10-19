@@ -102,6 +102,7 @@ class PartitionedDataSet(AbstractDataSet):
         dataset: Union[str, Type[AbstractDataSet], Dict[str, Any]],
         filepath_arg: str = "filepath",
         filename_suffix: str = "",
+        overwrite: bool = False,
         credentials: Dict[str, Any] = None,
         load_args: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
@@ -131,6 +132,7 @@ class PartitionedDataSet(AbstractDataSet):
                 If unspecified, defaults to "filepath".
             filename_suffix: If specified, only partitions that end with this
                 string will be processed.
+            overwrite: If True, any existing partitions will be removed.
             credentials: Protocol-specific options that will be passed to
                 ``fsspec.filesystem``
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.filesystem
@@ -153,6 +155,7 @@ class PartitionedDataSet(AbstractDataSet):
 
         self._path = path
         self._filename_suffix = filename_suffix
+        self._overwrite = overwrite
         self._protocol = infer_storage_options(self._path)["protocol"]
         self._partition_cache = Cache(maxsize=1)
 
@@ -257,6 +260,9 @@ class PartitionedDataSet(AbstractDataSet):
         return partitions
 
     def _save(self, data: Dict[str, Any]) -> None:
+        if self._overwrite and self._filesystem.exists(self._path):
+            self._filesystem.rm(self._path, recursive=True)
+
         for partition_id, partition_data in sorted(data.items()):
             kwargs = deepcopy(self._dataset_config)
             partition = self._partition_to_path(partition_id)

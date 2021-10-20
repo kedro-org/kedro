@@ -27,20 +27,19 @@
 # limitations under the License.
 """Databricks specific DataSets"""
 import functools
-from typing import Any, Dict
+from typing import Any, Dict, Union
 
 from delta.tables import DeltaTable
 from pyspark.sql import DataFrame, DataFrameWriter
 
 from kedro.extras.datasets.spark import SparkDataSet
-from kedro.io.core import Version
+from kedro.io.core import Version, DataSetError, NodeStatus
 
 
 class DeltaTableDataset(SparkDataSet):
     """
     Schema validation: https://docs.databricks.com/delta/delta-batch.html#schema-validation-1
     """
-
     def __init__(  # pylint: disable=too-many-arguments
         self,
         filepath: str,
@@ -58,16 +57,9 @@ class DeltaTableDataset(SparkDataSet):
             version=version,
             credentials=credentials,
         )
+        self._read_mode = delta_options.pop("read_mode")  # better impl?
+        self._write_mode = delta_options.pop("write_mode")  # this one can be a first-class arg as well
         self._delta_options = delta_options
-        self._update_options = save_args.pop(
-            "insert_options"
-        )  # TBD - maybe better solution?
-        self._insert_options = save_args.pop(
-            "update_options"
-        )  # TBD - maybe better solution?
-        self._upsert_columns = save_args.pop(
-            "upsert_columns"
-        )  # TBD - maybe better solution?
 
     def _add_options(self, df: DataFrame) -> DataFrameWriter:
         # DeltaTable specific opts, such as `schemaValidation`
@@ -81,35 +73,20 @@ class DeltaTableDataset(SparkDataSet):
         return df.write
 
     def _load(self):
+        # align the Spark and DeltaTable APIs
+        # allow the user to provide
+        # 1. a parquet to be converted (but this is a one-off)??
+        # 2. a delta table
         load_path = self._fs_prefix + str(self._get_load_path())
         return DeltaTable.forPath(self._get_spark(), load_path)
 
-    def _overwrite(self, df: DataFrame):
-        save_path = self._fs_prefix + str(self._get_save_path())
-        self._add_options(df).format(self._file_format).mode("overwrite").save(
-            save_path
-        )
-
-    def _append(self, df: DataFrame):
-        save_path = self._fs_prefix + str(self._get_save_path())
-        self._add_options(df).format(self._file_format).mode("append").save(save_path)
-
-    def _update(self, df: DeltaTable):
-        # this should be define and retrievable from conf
-        df.update(self._update_options["foo"], self._update_options["bar"])
-
-    def _upsert(self, df: DeltaTable, other: DeltaTable):
-        # how to handle `other`?
-        df.alias("a").merge(
-            other.alias("b"), f"a.{self._upsert_columns} = b.{self._upsert_columns}"
-        ).whenMatchedUpdate(set=self._update_options).whenNotMatchedInsert(
-            values=self._insert_options
-        ).execute()
-
-    def _delete(self, df: DeltaTable):
-        df.delete("delete predicate here")
-
-    def _save(self, df: DataFrame):
-        # this needs a strat pattern to resolve the methods above
-        # also - remove super call
-        super()._save(data=df)
+    def _save(self, io: Union[DataFrame, NodeStatus]):
+        # align the Spark and DeltaTable APIs
+        if isinstance(io, DataFrame):
+            super()._save(data=io)  # there is still `_strip_dbfs_prefix` -- will this work?
+        # allow the user to handle DeltaTable IO in node and return success status
+        elif isinstance(io, NodeStatus):
+            if io != NodeStatus.SUCCESS:
+                raise DataSetError("`NodeStatus` returned something other than SUCCESS")
+        else:
+            raise DataSetError("Incorrect return from node func.")

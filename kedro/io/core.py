@@ -32,6 +32,7 @@ saving functionality provided by ``kedro.io``.
 
 import abc
 import copy
+from enum import Enum
 import logging
 import re
 import warnings
@@ -92,6 +93,11 @@ class VersionNotFoundError(DataSetError):
     """
 
     pass
+
+
+class NodeStatus(Enum):
+    SUCCESS = 0
+    FAILURE = 1
 
 
 class AbstractDataSet(abc.ABC):

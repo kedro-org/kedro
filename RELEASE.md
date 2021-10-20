@@ -5,6 +5,7 @@
 
 ## Bug fixes and other changes
 * Fixed an issue where `kedro new --config config.yml` was ignoring the config file when `prompts.yml` didn't exist.
+* Added documentation for `kedro viz --autoreloader`
 
 ## Minor breaking changes to the API
 
@@ -12,7 +13,7 @@
 
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman)
-
+[Brites](https://github.com/brites101)
 # Release 0.17.5
 
 ## Major features and improvements

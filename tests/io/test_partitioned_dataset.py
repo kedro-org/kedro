@@ -150,7 +150,9 @@ class TestPartitionedDataSetLocal:
 
     @pytest.mark.parametrize("overwrite,expected_num_parts", [(False, 6), (True, 1)])
     def test_overwrite(self, local_csvs, overwrite, expected_num_parts):
-        pds = PartitionedDataSet(str(local_csvs), "pandas.CSVDataSet", overwrite=overwrite)
+        pds = PartitionedDataSet(
+            str(local_csvs), "pandas.CSVDataSet", overwrite=overwrite
+        )
         original_data = pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
         part_id = "new/data"
         pds.save({part_id: original_data})

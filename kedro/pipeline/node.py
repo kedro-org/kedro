@@ -509,33 +509,33 @@ class Node:  # pylint: disable=too-many-instance-attributes
         kwargs = {arg: inputs[alias] for arg, alias in node_inputs.items()}
         return self._decorated_func(**kwargs)
 
-    def _outputs_to_dictionary(self, outputs):
-        def _from_dict():
-            if set(self._outputs.keys()) != set(outputs.keys()):
+    def _outputs_to_dictionary(self, outputs: Union[None, str, List[str], Dict[str, str]]):
+        def _from_dict(outputs: Dict[str, str]):
+            if set(outputs.keys()) != set(outputs.keys()):
                 raise ValueError(
                     f"Failed to save outputs of node {str(self)}.\n"
                     f"The node's output keys {set(outputs.keys())} do not match with "
-                    f"the returned output's keys {set(self._outputs.keys())}."
+                    f"the returned output's keys {set(outputs.keys())}."
                 )
-            return {name: outputs[key] for key, name in self._outputs.items()}
+            return {name: outputs[key] for key, name in outputs.items()}
 
-        def _from_list():
+        def _from_list(outputs: List[str]):
             if not isinstance(outputs, (list, tuple)):
                 raise ValueError(
                     f"Failed to save outputs of node {str(self)}.\n"
                     f"The node definition contains a list of "
-                    f"outputs {self._outputs}, whereas the node function "
+                    f"outputs {outputs}, whereas the node function "
                     f"returned a `{type(outputs).__name__}`."
                 )
-            if len(outputs) != len(self._outputs):
+            if len(outputs) != len(outputs):
                 raise ValueError(
                     f"Failed to save outputs of node {str(self)}.\n"
                     f"The node function returned {len(outputs)} output(s), "
-                    f"whereas the node definition contains {len(self._outputs)} "
+                    f"whereas the node definition contains {len(outputs)} "
                     f"output(s)."
                 )
 
-            return dict(zip(self._outputs, outputs))
+            return dict(zip(outputs, outputs))
 
         if isinstance(self._outputs, dict) and not isinstance(outputs, dict):
             raise ValueError(
@@ -549,8 +549,8 @@ class Node:  # pylint: disable=too-many-instance-attributes
         if isinstance(self._outputs, str):
             return {self._outputs: outputs}
         if isinstance(self._outputs, dict):
-            return _from_dict()
-        return _from_list()
+            return _from_dict(self._outputs)
+        return _from_list(self._outputs)
 
     def _validate_inputs(self, func, inputs):
         # inspect does not support built-in Python functions written in C.

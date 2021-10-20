@@ -15,3 +15,8 @@ fail_under = 100
 show_missing = true
 omit = ["kedro/templates/*", "kedro/framework/cli/hooks/specs.py", "kedro/framework/hooks/specs.py", "kedro/extras/datasets/tensorflow/*"]
 exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
+
+[tool.mypy]
+exclude = "/templates/"
+ignore_missing_imports = true
+check_untyped_defs = true

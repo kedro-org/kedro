@@ -14,6 +14,7 @@
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman)
 [Brites](https://github.com/brites101)
+
 # Release 0.17.5
 
 ## Major features and improvements

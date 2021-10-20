@@ -102,6 +102,7 @@ pandas_require = {
     "pandas.JSONDataSet": [PANDAS],
     "pandas.ParquetDataSet": [PANDAS, "pyarrow>=0.12.0, <4.0.0"],
     "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy~=1.2"],
+    "pandas.SQLQueryDataSet": [PANDAS, "SQLAlchemy~=1.2"],
     "pandas.XMLDataSet": [PANDAS, "lxml~=4.6"],
 }
 pillow_require = {"pillow.ImageDataSet": ["Pillow~=8.0"]}

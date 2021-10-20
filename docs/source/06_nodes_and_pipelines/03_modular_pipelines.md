@@ -354,6 +354,25 @@ final_pipeline = Pipeline(
 )
 ```
 
+The ``sum`` syntax is also supported for connecting pipelines. Similar to the previous example, using the ``sum`` syntax:
+
+```python
+final_pipeline = sum(
+    [
+        pipeline(cook_pipeline, outputs={"grilled_meat": "new_name"}),
+        pipeline(lunch_pipeline, inputs={"food": "new_name"}),
+        ...,
+    ]
+)
+
+# equivalent to
+final_pipeline = (
+    pipeline(cook_pipeline, outputs={"grilled_meat": "new_name"})
+    + pipeline(lunch_pipeline, inputs={"food": "new_name"}),
+    +...,
+)
+```
+
 ```eval_rst
 .. note::  ``inputs`` should correspond to the pipeline free inputs, while ``outputs`` are either free or intermediary outputs.
 ```

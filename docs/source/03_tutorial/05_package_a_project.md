@@ -32,7 +32,7 @@ pip install <path-to-wheel-file>
 For example, having installed project `kedro-spaceflights` and package `kedro_spaceflights`, a recipient can run the Kedro project as follows from the root of the project:
 
 ```bash
-python -m kedro_spaceflights.run
+python -m kedro_spaceflights
 ```
 
 An executable, `kedro-spaceflights`, is also placed in the `bin/` subfolder of the Python installation location.

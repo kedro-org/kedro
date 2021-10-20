@@ -182,6 +182,10 @@ html_logo = str(here / "kedro_logo.svg")
 #
 html_theme_options = {"collapse_navigation": False, "style_external_links": True}
 
+# html_extra_path used to define a path to robots.txt which is used by webcrawlers
+# to ignore or allow certain links.
+html_extra_path = [str(here / "robots.txt")]
+
 # some of these complain that the sections don't exist (which is not true),
 # too many requests, or forbidden URL
 linkcheck_ignore = [

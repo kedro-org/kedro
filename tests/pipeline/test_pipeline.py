@@ -407,12 +407,19 @@ class TestInvalidPipeline:
             # 'another_node' passes the check, 'pipeline' doesn't
             Pipeline([another_node, pipeline])
 
-    def test_bad_combine(self):
+    def test_bad_combine_node(self):
         """Node cannot be combined to pipeline."""
         fred = node(identity, "input", "output")
         pipeline = Pipeline([fred])
         with pytest.raises(TypeError):
             pipeline + fred  # pylint: disable=pointless-statement
+
+    def test_bad_combine_int(self):
+        """int cannot be combined to pipeline, tests __radd__"""
+        fred = node(identity, "input", "output")
+        pipeline = Pipeline([fred])
+        with pytest.raises(TypeError):
+            _ = 1 + pipeline
 
     def test_conflicting_names(self):
         """Node names must be unique."""
@@ -451,10 +458,18 @@ class TestInvalidPipeline:
 
 
 class TestPipelineOperators:
-    def test_combine(self):
+    def test_combine_add(self):
         pipeline1 = Pipeline([node(biconcat, ["input", "input1"], "output1", name="a")])
         pipeline2 = Pipeline([node(biconcat, ["input", "input2"], "output2", name="b")])
         new_pipeline = pipeline1 + pipeline2
+        assert new_pipeline.inputs() == {"input", "input1", "input2"}
+        assert new_pipeline.outputs() == {"output1", "output2"}
+        assert {n.name for n in new_pipeline.nodes} == {"a", "b"}
+
+    def test_combine_sum(self):
+        pipeline1 = Pipeline([node(biconcat, ["input", "input1"], "output1", name="a")])
+        pipeline2 = Pipeline([node(biconcat, ["input", "input2"], "output2", name="b")])
+        new_pipeline = sum([pipeline1, pipeline2])
         assert new_pipeline.inputs() == {"input", "input1", "input2"}
         assert new_pipeline.outputs() == {"output1", "output2"}
         assert {n.name for n in new_pipeline.nodes} == {"a", "b"}

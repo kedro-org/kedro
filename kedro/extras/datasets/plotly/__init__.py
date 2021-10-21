@@ -28,9 +28,9 @@
 
 """``PlotlyDataSet`` implementation to load/save plotly data."""
 
-__all__ = ["PlotlyDataSet"]
+__all__ = ["PlotlyDataSet", "JSONDataSet"]
 
 from contextlib import suppress
 
 with suppress(ImportError):
-    from .plotly_dataset import PlotlyDataSet
+    from .plotly_dataset import PlotlyDataSet, JSONDataSet

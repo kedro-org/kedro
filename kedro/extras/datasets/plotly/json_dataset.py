@@ -34,18 +34,21 @@ from pathlib import PurePosixPath
 from typing import Any, Dict
 
 import fsspec
-
 import plotly.io as pio
 from plotly import graph_objects as go
 
-from kedro.io.core import Version, get_filepath_str, AbstractVersionedDataSet, \
-    get_protocol_and_path
+from kedro.io.core import (
+    AbstractVersionedDataSet,
+    Version,
+    get_filepath_str,
+    get_protocol_and_path,
+)
 
-# TODO: ticket for tidying PlotlyDataSet, inheriting from something else, rename it. e.g. should it have load_args?
 
-
-# JSONDataSet
 # DOCSTRINGS
+# MANUAL TEST
+# NEW TESTS FOR jsondataset
+
 
 class JSONDataSet(AbstractVersionedDataSet):
     """``PlotlyDataSet`` saves a pandas DataFrame to a plotly JSON file.
@@ -148,7 +151,6 @@ class JSONDataSet(AbstractVersionedDataSet):
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
 
-
     def _describe(self) -> Dict[str, Any]:
         return dict(
             filepath=self._filepath,
@@ -158,7 +160,6 @@ class JSONDataSet(AbstractVersionedDataSet):
             version=self._version,
         )
 
-
     def _load(self) -> go.Figure:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
@@ -166,7 +167,6 @@ class JSONDataSet(AbstractVersionedDataSet):
             # read_json doesn't work correctly with file handler, so we have to read the file,
             # decode it manually and pass to the low-level from_json instead.
             return pio.from_json(str(fs_file.read(), "utf-8"), **self._load_args)
-
 
     def _save(self, data: go.Figure) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
@@ -181,7 +181,6 @@ class JSONDataSet(AbstractVersionedDataSet):
 
         return self._fs.exists(load_path)
 
-
     def _release(self) -> None:
         super()._release()
         self._invalidate_cache()
@@ -190,4 +189,3 @@ class JSONDataSet(AbstractVersionedDataSet):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
-

@@ -32,12 +32,11 @@ into plotly.graph_objects.Figure objects.
 from typing import Any, Dict
 
 import pandas as pd
-import plotly
-from plotly import graph_objects as go
+import plotly.express as px
 
-from kedro.extras.datasets.pandas import JSONDataSet
-from kedro.io.core import Version, get_filepath_str
+from kedro.io.core import Version
 
+from .json_dataset import JSONDataSet
 
 
 class PlotlyDataSet(JSONDataSet):
@@ -65,7 +64,6 @@ class PlotlyDataSet(JSONDataSet):
         >>>             yaxis_title: 'y'
         >>>             title: 'Test'
     """
-
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -120,7 +118,7 @@ class PlotlyDataSet(JSONDataSet):
     def _save(self, data: pd.DataFrame) -> None:
         plot_type = self._plotly_args.get("type")
         fig_params = self._plotly_args.get("fig", {})
-        fig = getattr(plotly.express, plot_type)(data, **fig_params)  # type: ignore
+        fig = getattr(px, plot_type)(data, **fig_params)  # type: ignore
         fig.update_layout(template=self._plotly_args.get("theme", "plotly"))
         fig.update_layout(self._plotly_args.get("layout", {}))
         super()._save(fig)

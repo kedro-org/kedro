@@ -492,7 +492,7 @@ def _update_value_nested_dict(
         nested_dict updated with value at path `walking_path`
     """
     key = walking_path.pop(0)
-    if len(walking_path) == 0:
+    if not walking_path:
         nested_dict[key] = value
         return nested_dict
     nested_dict[key] = _update_value_nested_dict(

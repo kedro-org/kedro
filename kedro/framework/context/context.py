@@ -194,7 +194,7 @@ def _validate_layers_for_transcoding(catalog: DataCatalog) -> None:
         )
 
 
-def _update_nested_dict(old_dict: Dict, new_dict: Dict) -> None:
+def _update_nested_dict(old_dict: Dict[Any, Any], new_dict: Dict[Any, Any]) -> None:
     """Update a nested dict with values of new_dict.
 
     Args:

@@ -471,7 +471,7 @@ def _split_params(ctx, param, value):
 
 
 def _update_value_nested_dict(
-    nested_dict: Dict, value: Any, walking_path: List
+    nested_dict: Dict[str, Any], value: Any, walking_path: List[str]
 ) -> Dict:
     """Update nested dict with value using walking_path as a parse tree to walk
     down the nested dict.

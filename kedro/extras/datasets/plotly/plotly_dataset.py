@@ -32,12 +32,12 @@ into plotly.graph_objects.Figure objects.
 from typing import Any, Dict
 
 import pandas as pd
-import plotly.express as px
-import plotly.io as pio
-from plotly import graph_objects
+import plotly
+from plotly import graph_objects as go
 
 from kedro.extras.datasets.pandas import JSONDataSet
 from kedro.io.core import Version, get_filepath_str
+
 
 
 class PlotlyDataSet(JSONDataSet):
@@ -66,7 +66,6 @@ class PlotlyDataSet(JSONDataSet):
         >>>             title: 'Test'
     """
 
-    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -119,40 +118,9 @@ class PlotlyDataSet(JSONDataSet):
         return {**super()._describe(), "plotly_args": self._plotly_args}
 
     def _save(self, data: pd.DataFrame) -> None:
-        plot_data = _plotly_express_wrapper(data, self._plotly_args)
-
-        full_key_path = get_filepath_str(self._get_save_path(), self._protocol)
-        with self._fs.open(full_key_path, **self._fs_open_args_save) as fs_file:
-            plot_data.write_json(fs_file, **self._save_args)
-
-        self._invalidate_cache()
-
-    def _load(self) -> graph_objects.Figure:
-        load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
-            # read_json doesn't work correctly with file handler, so we have to read the file,
-            # decode it manually and pass to the low-level from_json instead.
-            return pio.from_json(str(fs_file.read(), "utf-8"), **self._load_args)
-
-
-def _plotly_express_wrapper(
-    data: pd.DataFrame, plotly_config: Dict[str, Any]
-) -> graph_objects.Figure:
-    """Generates plotly graph object Figure based on the type of plotting
-    and config provided in the catalog.
-
-    Args:
-        data: pandas dataframe to generate plotly Figure for
-        plotly_config: plotly configurations specified in the catalog to be used
-
-    Returns:
-        A plotly graph_object figure representing the plotted data
-    """
-    fig_params = plotly_config.get("fig")
-    plot = plotly_config.get("type")
-    theme = plotly_config.get("theme", "plotly")
-    layout_params = plotly_config.get("layout", {})
-    fig = getattr(px, plot)(data, **fig_params)  # type: ignore
-    fig.update_layout(template=theme)
-    fig.update_layout(layout_params)
-    return fig
+        plot_type = self._plotly_args.get("type")
+        fig_params = self._plotly_args.get("fig", {})
+        fig = getattr(plotly.express, plot_type)(data, **fig_params)  # type: ignore
+        fig.update_layout(template=self._plotly_args.get("theme", "plotly"))
+        fig.update_layout(self._plotly_args.get("layout", {}))
+        super()._save(fig)

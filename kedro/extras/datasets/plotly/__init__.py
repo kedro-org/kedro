@@ -33,4 +33,6 @@ __all__ = ["PlotlyDataSet", "JSONDataSet"]
 from contextlib import suppress
 
 with suppress(ImportError):
-    from .plotly_dataset import PlotlyDataSet, JSONDataSet
+    from .plotly_dataset import PlotlyDataSet
+with suppress(ImportError):
+    from .json_dataset import JSONDataSet

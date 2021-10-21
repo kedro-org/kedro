@@ -479,7 +479,7 @@ def _update_value_nested_dict(
     Example:
     ::
         >>> nested_dict = {"foo": {"hello": "world", "bar": 1}}
-        >>> _add_value_nested_dict(nested_dict, value=2, walking_path=["foo", "bar"])
+        >>> _update_value_nested_dict(nested_dict, value=2, walking_path=["foo", "bar"])
         >>> print(nested_dict)
         >>> {'foo': {'hello': 'world', 'bar': 2}}
 

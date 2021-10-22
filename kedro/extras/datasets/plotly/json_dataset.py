@@ -31,7 +31,7 @@ filesystem (e.g.: local, S3, GCS).
 """
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict
+from typing import Any, Dict, Union
 
 import fsspec
 import plotly.io as pio
@@ -148,7 +148,7 @@ class JSONDataSet(AbstractVersionedDataSet):
             version=self._version,
         )
 
-    def _load(self) -> go.Figure:
+    def _load(self) -> Union[go.Figure, go.FigureWidget]:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:

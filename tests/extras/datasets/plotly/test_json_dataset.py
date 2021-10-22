@@ -82,6 +82,20 @@ class TestJSONDataSet:
         with pytest.raises(DataSetError, match=pattern):
             json_data_set.load()
 
+    @pytest.mark.parametrize("save_args", [{"pretty": True}])
+    def test_save_extra_params(self, json_data_set, save_args):
+        """Test overriding default save args"""
+        for k, v in save_args.items():
+            assert json_data_set._save_args[k] == v
+
+    @pytest.mark.parametrize(
+        "load_args", [{"output_type": "FigureWidget", "skip_invalid": True}]
+    )
+    def test_load_extra_params(self, json_data_set, load_args):
+        """Test overriding default save args"""
+        for k, v in load_args.items():
+            assert json_data_set._load_args[k] == v
+
     @pytest.mark.parametrize(
         "filepath,instance_type,credentials",
         [

@@ -27,7 +27,7 @@
 # limitations under the License.
 
 """``PlotlyDataSet`` generates a plot from a pandas DataFrame and saves it to a JSON
-file using an underlying filesystem (e.g.: local, S3, GCS). It loads the JSON into a 
+file using an underlying filesystem (e.g.: local, S3, GCS). It loads the JSON into a
 plotly figure.
 """
 from typing import Any, Dict
@@ -130,4 +130,3 @@ class PlotlyDataSet(JSONDataSet):
         fig.update_layout(template=self._plotly_args.get("theme", "plotly"))
         fig.update_layout(self._plotly_args.get("layout", {}))
         return fig
-

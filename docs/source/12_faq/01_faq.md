@@ -31,8 +31,8 @@ Currently, the core Kedro team consists of
 [Joel Schwarzmann](https://github.com/datajoely),
 [Antony Milne](https://github.com/AntonyMilneQB),
 [Jiri Klein](https://github.com/jiriklein),
-[Ignacio Paricio](https://github.com/ignacioparicio) and
-[Hamza Oza](https://github.com/hamzaoza).
+[Hamza Oza](https://github.com/hamzaoza) and
+[Sajid Alam](https://github.com/SajidAlamQB).
 
 Former core team members with significant contributions include:
 [Gordon Wrigley](https://github.com/tolomea),
@@ -42,7 +42,8 @@ Former core team members with significant contributions include:
 [Laís Carvalho](https://github.com/laisbsc),
 [Kiyohito Kunii](https://github.com/921kiyo),
 [Dmitrii Deriabin](https://github.com/dmder),
-[Andrii Ivaniuk](https://github.com/andrii-ivaniuk).
+[Andrii Ivaniuk](https://github.com/andrii-ivaniuk),
+[Ignacio Paricio](https://github.com/ignacioparicio).
 
 And last, but not least, all the open-source contributors whose work went into all Kedro [releases](https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md).
 

@@ -44,8 +44,7 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
-# MANUAL TEST
-# NEW TESTS FOR jsondataset
+# ADD TO DOCS, release notes, ETC.
 
 
 class JSONDataSet(AbstractVersionedDataSet):

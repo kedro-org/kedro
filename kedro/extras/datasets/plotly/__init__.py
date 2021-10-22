@@ -26,7 +26,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``PlotlyDataSet`` implementation to load/save plotly data."""
+"""``AbstractDataSet`` implementations to load/save a plotly figures from/to a JSON
+file."""
 
 __all__ = ["PlotlyDataSet", "JSONDataSet"]
 

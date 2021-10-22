@@ -23,7 +23,8 @@
 [Deepyaman Datta](https://github.com/deepyaman),
 [Manish Swami](https://github.com/ManishS6),
 [Zain Patel](https://github.com/mzjp2),
-[Simon Brugman](https://github.com/sbrugman)
+[Simon Brugman](https://github.com/sbrugman),
+[Kiyo Kunii](https://github.com/921kiyo)
 
 # Release 0.17.5
 

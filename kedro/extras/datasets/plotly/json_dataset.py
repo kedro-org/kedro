@@ -53,6 +53,7 @@ class JSONDataSet(AbstractVersionedDataSet):
 
     Example:
     ::
+
         >>> from kedro.extras.datasets.plotly import JSONDataSet
         >>> import plotly.express as px
         >>>
@@ -61,7 +62,6 @@ class JSONDataSet(AbstractVersionedDataSet):
         >>> data_set.save(fig)
         >>> reloaded = data_set.load()
         >>> assert fig == reloaded
-
     """
 
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]

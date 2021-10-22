@@ -207,9 +207,9 @@ def install(metadata: ProjectMetadata, compile_flag):
         command = [sys.executable, "-m", "pip"] + pip_command
         # CREATE_NEW_CONSOLE does not exist on posix systems
         proc = subprocess.Popen(
-            command, 
+            command,
             creationflags=subprocess.CREATE_NEW_CONSOLE,  # type: ignore
-            stderr=subprocess.PIPE
+            stderr=subprocess.PIPE,
         )
         _, errs = proc.communicate()
         if errs:

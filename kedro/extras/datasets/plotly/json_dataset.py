@@ -26,8 +26,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``PlotlyDataSet`` saves plotly objects to a JSON file and loads JSON plotly figures
-into plotly.graph_objects.Figure objects.
+"""``JSONDataSet`` loads/saves a plotly figure from/to a JSON file using an underlying
+filesystem (e.g.: local, S3, GCS).
 """
 from copy import deepcopy
 from pathlib import PurePosixPath
@@ -45,35 +45,25 @@ from kedro.io.core import (
 )
 
 
-# DOCSTRINGS
 # MANUAL TEST
 # NEW TESTS FOR jsondataset
 
 
 class JSONDataSet(AbstractVersionedDataSet):
-    """``PlotlyDataSet`` saves a pandas DataFrame to a plotly JSON file.
+    """``JSONDataSet`` loads/saves a plotly figure from/to a JSON file using an
+    underlying filesystem (e.g.: local, S3, GCS).
 
-    The plotly JSON file can be saved to any underlying filesystem
-    supported by fsspec (e.g. local, S3, GCS).
-    Warning: This DataSet is not symmetric and doesn't load back
-    into pandas DataFrames, but into plotly.graph_objects.Figure.
-
-    Example configuration for a PlotlyDataSet in the catalog:
+    Example:
     ::
+        >>> from kedro.extras.datasets.plotly import JSONDataSet
+        >>> import plotly.express as px
+        >>>
+        >>> fig = px.bar(x=["a", "b", "c"], y=[1, 3, 2])
+        >>> data_set = JSONDataSet(filepath="test.json")
+        >>> data_set.save(fig)
+        >>> reloaded = data_set.load()
+        >>> assert fig == reloaded
 
-        >>> bar_plot:
-        >>>     type: plotly.PlotlyDataSet
-        >>>     filepath: data/08_reporting/bar_plot.json
-        >>>     plotly_args:
-        >>>         type: bar
-        >>>         fig:
-        >>>             x: features
-        >>>             y: importance
-        >>>             orientation: 'h'
-        >>>         layout:
-        >>>             xaxis_title: 'x'
-        >>>             yaxis_title: 'y'
-        >>>             title: 'Test'
     """
 
     DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
@@ -89,8 +79,8 @@ class JSONDataSet(AbstractVersionedDataSet):
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``PlotlyDataSet`` pointing to a plotly.graph_objects.Figure
-         saved as a concrete JSON file on a specific filesystem.
+        """Creates a new instance of ``JSONDataSet`` pointing to a concrete JSON file
+        on a specific filesystem.
 
         Args:
             filepath: Filepath in POSIX format to a JSON file prefixed with a protocol like `s3://`.
@@ -104,7 +94,7 @@ class JSONDataSet(AbstractVersionedDataSet):
             save_args: Plotly options for saving JSON files.
                 Here you can find all available arguments:
                 https://plotly.com/python-api-reference/generated/plotly.io.write_json.html
-                All defaults are preserved, but "index", which is set to False.
+                All defaults are preserved.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -117,8 +107,8 @@ class JSONDataSet(AbstractVersionedDataSet):
                 `open_args_load` and `open_args_save`.
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
-                All defaults are preserved, except `mode`, which is set to `r` when loading
-                and to `w` when saving.
+                All defaults are preserved, except `mode`, which is set to `w` when
+                saving.
         """
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
@@ -164,8 +154,8 @@ class JSONDataSet(AbstractVersionedDataSet):
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
-            # read_json doesn't work correctly with file handler, so we have to read the file,
-            # decode it manually and pass to the low-level from_json instead.
+            # read_json doesn't work correctly with file handler, so we have to read
+            # the file, decode it manually and pass to the low-level from_json instead.
             return pio.from_json(str(fs_file.read(), "utf-8"), **self._load_args)
 
     def _save(self, data: go.Figure) -> None:
@@ -186,6 +176,5 @@ class JSONDataSet(AbstractVersionedDataSet):
         self._invalidate_cache()
 
     def _invalidate_cache(self) -> None:
-        """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)

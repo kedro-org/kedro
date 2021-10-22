@@ -32,12 +32,12 @@ saving functionality provided by ``kedro.io``.
 
 import abc
 import copy
-from enum import Enum
 import logging
 import re
 import warnings
 from collections import namedtuple
 from datetime import datetime, timezone
+from enum import Enum
 from functools import partial
 from glob import iglob
 from operator import attrgetter

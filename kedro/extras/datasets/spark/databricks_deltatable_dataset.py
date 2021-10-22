@@ -27,19 +27,23 @@
 # limitations under the License.
 """Databricks specific DataSets"""
 import functools
-from typing import Any, Dict, Union
+import logging
+from typing import Any, Dict
 
 from delta.tables import DeltaTable
 from pyspark.sql import DataFrame, DataFrameWriter
 
 from kedro.extras.datasets.spark import SparkDataSet
-from kedro.io.core import Version, DataSetError, NodeStatus
+from kedro.io.core import DataSetError, NodeStatus, Version
+
+logger = logging.getLogger(__name__)
 
 
 class DeltaTableDataset(SparkDataSet):
     """
     Schema validation: https://docs.databricks.com/delta/delta-batch.html#schema-validation-1
     """
+
     def __init__(  # pylint: disable=too-many-arguments
         self,
         filepath: str,
@@ -57,8 +61,6 @@ class DeltaTableDataset(SparkDataSet):
             version=version,
             credentials=credentials,
         )
-        self._read_mode = delta_options.pop("read_mode")  # better impl?
-        self._write_mode = delta_options.pop("write_mode")  # this one can be a first-class arg as well
         self._delta_options = delta_options
 
     def _add_options(self, df: DataFrame) -> DataFrameWriter:
@@ -73,20 +75,14 @@ class DeltaTableDataset(SparkDataSet):
         return df.write
 
     def _load(self):
-        # align the Spark and DeltaTable APIs
-        # allow the user to provide
-        # 1. a parquet to be converted (but this is a one-off)??
-        # 2. a delta table
         load_path = self._fs_prefix + str(self._get_load_path())
         return DeltaTable.forPath(self._get_spark(), load_path)
 
-    def _save(self, io: Union[DataFrame, NodeStatus]):
-        # align the Spark and DeltaTable APIs
-        if isinstance(io, DataFrame):
-            super()._save(data=io)  # there is still `_strip_dbfs_prefix` -- will this work?
-        # allow the user to handle DeltaTable IO in node and return success status
-        elif isinstance(io, NodeStatus):
-            if io != NodeStatus.SUCCESS:
-                raise DataSetError("`NodeStatus` returned something other than SUCCESS")
+    def _save(self, io: NodeStatus):
+        if io == NodeStatus.SUCCESS:
+            logger.info(
+                "`NodeStatus` returned SUCCESS, `save` operation was performed"
+                "within the context of the node."
+            )
         else:
-            raise DataSetError("Incorrect return from node func.")
+            raise DataSetError("`NodeStatus` returned something other than SUCCESS")

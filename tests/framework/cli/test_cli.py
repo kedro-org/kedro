@@ -49,6 +49,7 @@ from kedro.framework.cli.utils import (
     CommandCollection,
     KedroCliError,
     _clean_pycache,
+    _update_value_nested_dict,
     forward_command,
     get_pkg_version,
 )
@@ -333,6 +334,19 @@ class TestCliUtils:
             mocker.call(pycache2, ignore_errors=True),
         ]
         assert mocked_rmtree.mock_calls == expected_calls
+
+    def test_update_value_nested_dict(self):
+        """Test `_update_value_nested_dict` utility function."""
+
+        nested_dict = {"foo": {"hello": "world", "bar": 1}}
+        value_for_nested_dict = 2
+        walking_path_for_nested_dict = ["foo", "bar"]
+
+        expected = {"foo": {"hello": "world", "bar": 2}}
+        actual = _update_value_nested_dict(
+            nested_dict, value_for_nested_dict, walking_path_for_nested_dict
+        )
+        assert actual == expected
 
 
 @mark.usefixtures("mocked_load_context")
@@ -713,6 +727,12 @@ class TestRunCommand:
             ),
             ("foo:bar,baz:fizz buzz", {"foo": "bar", "baz": "fizz buzz"}),
             ("foo:bar, foo : fizz buzz  ", {"foo": "fizz buzz"}),
+            ("foo.nested:bar", {"foo": {"nested": "bar"}}),
+            ("foo.nested:123.45", {"foo": {"nested": 123.45}}),
+            (
+                "foo.nested_1.double_nest:123.45,foo.nested_2:1a",
+                {"foo": {"nested_1": {"double_nest": 123.45}, "nested_2": "1a"}},
+            ),
         ],
     )
     def test_run_extra_params(

@@ -2,6 +2,7 @@
 
 ## Major features and improvements
 * Added `pipelines` global variable to IPython extension, allowing you to access the project's pipelines in `kedro ipython` or `kedro jupyter notebook`.
+* Enabled overriding nested parameters with `params` in CLI, i.e. `kedro run --params="model.model_tuning.booster:gbtree"` updates parameters to `{"model": {"model_tuning": {"booster": "gbtree"}}}`.
 * Added the following new dataset (see ([Issue #839](https://github.com/quantumblacklabs/kedro/issues/839)):
 
 | Type                        | Description                                          | Location                          |
@@ -24,7 +25,8 @@
 [Manish Swami](https://github.com/ManishS6),
 [Zain Patel](https://github.com/mzjp2),
 [Simon Brugman](https://github.com/sbrugman),
-[Kiyo Kunii](https://github.com/921kiyo)
+[Kiyo Kunii](https://github.com/921kiyo),
+[Louis de Charsonville](https://github.com/louisdecharson)
 
 # Release 0.17.5
 

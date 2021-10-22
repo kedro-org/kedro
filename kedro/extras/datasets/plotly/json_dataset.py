@@ -44,8 +44,6 @@ from kedro.io.core import (
     get_protocol_and_path,
 )
 
-# ADD TO DOCS, release notes, ETC.
-
 
 class JSONDataSet(AbstractVersionedDataSet):
     """``JSONDataSet`` loads/saves a plotly figure from/to a JSON file using an

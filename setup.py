@@ -107,8 +107,8 @@ pandas_require = {
 }
 pillow_require = {"pillow.ImageDataSet": ["Pillow~=8.0"]}
 plotly_require = {
-    "plotly.PlotlyDataSet": [PANDAS, "plotly~=4.14"],
-    "plotly.JSONDataSet": ["plotly~=4.14"],
+    "plotly.PlotlyDataSet": [PANDAS, "plotly~=4.0"],
+    "plotly.JSONDataSet": ["plotly~=4.0"],
 }
 spark_require = {
     "spark.SparkDataSet": [SPARK, HDFS, S3FS],

@@ -1,10 +1,5 @@
 # Set up Visual Studio Code
 
-
-```eval_rst
-.. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
-```
-
 Start by opening a new project directory in VS Code and installing the Python plugin under **Tools and languages**:
 
 ![](../meta/images/vscode_startup.png)

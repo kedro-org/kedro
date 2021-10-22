@@ -1,9 +1,5 @@
 # Debugging
 
-```eval_rst
-.. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
-```
-
 ## Introduction
 
 If you're running your Kedro pipeline from the CLI or you can't/don't want to run Kedro from within your IDE debugging framework, it can be hard to debug your Kedro pipeline or nodes. This is particularly frustrating because:

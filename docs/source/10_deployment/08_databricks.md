@@ -1,10 +1,5 @@
 # Deployment to a Databricks cluster
 
-
-```eval_rst
-.. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
-```
-
 This tutorial uses the [PySpark Iris Kedro Starter](https://github.com/quantumblacklabs/kedro-starters/tree/master/pyspark-iris) to illustrate how to bootstrap a Kedro project using Spark and deploy it to a [Databricks cluster on AWS](https://databricks.com/aws). It is split into 2 sections:
 
 * [Databricks Connect workflow](#run-the-kedro-project-with-databricks-connect) (recommended)

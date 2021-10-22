@@ -1,9 +1,5 @@
 # Run a pipeline
 
-```eval_rst
-.. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
-```
-
 ## Runners
 
 Runners are the execution mechanisms used to run pipelines. They all inherit from `AbstractRunner`.

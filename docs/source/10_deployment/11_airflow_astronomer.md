@@ -1,10 +1,5 @@
 # How to deploy your Kedro pipeline on Apache Airflow with Astronomer
 
-
-```eval_rst
-.. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
-```
-
 This tutorial explains how to deploy a Kedro project on [Apache Airflow](https://airflow.apache.org/) with [Astronomer](https://www.astronomer.io/). Apache Airflow is an extremely popular open-source workflow management platform. Workflows in Airflow are modelled and organised as [DAGs](https://en.wikipedia.org/wiki/Directed_acyclic_graph), making it a suitable engine to orchestrate and execute a pipeline authored with Kedro. [Astronomer](https://www.astronomer.io/docs/cloud/stable/develop/cli-quickstart) is a managed Airflow platform which allows users to spin up and run an Airflow cluster easily in production. Additionally, it also provides a set of tools to help users get started with Airflow locally in the easiest way possible.
 
 The following discusses how to run the [example Iris classification pipeline](../02_get_started/05_example_project) on a local Airflow cluster with Astronomer.

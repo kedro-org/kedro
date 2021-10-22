@@ -2,10 +2,6 @@
 
 This section contains detailed information about configuration, for which the relevant API documentation can be found in [kedro.config.ConfigLoader](/kedro.config.ConfigLoader).
 
-```eval_rst
-.. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
-```
-
 ## Configuration root
 
 We recommend that you keep all configuration files in the `conf` directory of a Kedro project. However, if you prefer, you may point Kedro to any other directory and change the configuration paths by setting the `CONF_ROOT` variable in `src/<project-package>/settings.py` as follows:

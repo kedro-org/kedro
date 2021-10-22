@@ -3,10 +3,6 @@
 
 In this tutorial, we cover advanced uses of the [Kedro IO](/kedro.io.rst) module to understand the underlying implementation. The relevant API documentation is [kedro.io.AbstractDataSet](/kedro.io.AbstractDataSet) and [kedro.io.DataSetError](/kedro.io.DataSetError).
 
-```eval_rst
-.. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
-```
-
 ## Error handling
 
 We have custom exceptions for the main classes of errors that you can handle to deal with failures.

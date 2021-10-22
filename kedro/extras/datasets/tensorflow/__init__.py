@@ -28,9 +28,10 @@
 
 """Provides I/O for TensorFlow Models."""
 
-__all__ = ["TensorFlowModelDataset"]
+__all__ = ["TensorFlowModelDataset", "SklearnPipelineTFDataSet"]
 
 from contextlib import suppress
 
 with suppress(ImportError):
+    from .sklearn_tf_dataset import SklearnPipelineTFDataSet
     from .tensorflow_model_dataset import TensorFlowModelDataset

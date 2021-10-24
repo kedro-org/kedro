@@ -18,6 +18,7 @@
 [Manish Swami](https://github.com/ManishS6),
 [Zain Patel](https://github.com/mzjp2),
 [Simon Brugman](https://github.com/sbrugman)
+[Laurens Vijnck](https://github.com/lvijnck)
 
 # Release 0.17.5
 

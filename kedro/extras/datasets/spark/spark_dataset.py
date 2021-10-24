@@ -30,6 +30,7 @@
 ``pyspark``
 """
 
+import json
 from copy import deepcopy
 from fnmatch import fnmatch
 from functools import partial
@@ -37,18 +38,15 @@ from pathlib import PurePosixPath
 from typing import Any, Dict, List, Optional, Tuple
 from warnings import warn
 
+import fsspec
 from hdfs import HdfsError, InsecureClient
 from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql.utils import AnalysisException
 from pyspark.sql.types import StructType
+from pyspark.sql.utils import AnalysisException
 from s3fs import S3FileSystem
-
-import fsspec
-import json
 
 from kedro.io.core import (
     AbstractVersionedDataSet,
-    DataSetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
@@ -187,7 +185,7 @@ class KedroHdfsInsecureClient(InsecureClient):
         return sorted(matched)
 
 
-class SparkDataSet(Abstrac2tVersionedDataSet):
+class SparkDataSet(AbstractVersionedDataSet):
     """``SparkDataSet`` loads and saves Spark dataframes.
     Example:
     ::
@@ -312,29 +310,6 @@ class SparkDataSet(Abstrac2tVersionedDataSet):
             glob_function=glob_function,
         )
 
-        # Handle schema
-        # TODO Add schema information as higher-level entity?
-        self._schema = None
-        schema_json_path = load_args.pop("schema_json_path", None)
-        if schema_json_path:
-
-            # TODO Limit protocols to file only?
-            # TODO What about files in HDFS?
-            # TODO What about credentials, e.g., for GCS buckets?
-            # TODO What happens if file does not exist?
-            protocol, path = get_protocol_and_path(filepath, version)
-            fs = fsspec.filesystem(self._protocol)
-            pure_posix_path = PurePosixPath(path)
-            load_path = get_filepath_str(pure_posix_path, protocol)
-
-            # Open schema file
-            with fs.open(load_path) as fs_file:
-
-                # Load file through provided filesystem
-                # TODO lazy load schema when loading dataframe?
-                # TODO Support other input types?
-                self._schema = StructType.fromJson(json.loads(fs_file.read()))
-
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args is not None:
@@ -343,8 +318,29 @@ class SparkDataSet(Abstrac2tVersionedDataSet):
         if save_args is not None:
             self._save_args.update(save_args)
 
+        # Handle schema
+        self._load_schema(self._load_args.pop("schema_json_path", None))
         self._file_format = file_format
         self._fs_prefix = fs_prefix
+
+    def _load_schema(self, schema_json_path: str):
+        if schema_json_path is None:
+            return
+
+        # TODO Limit protocols to file only?
+        # TODO What about files in HDFS?
+        # TODO What about credentials, e.g., for GCS buckets?
+        # TODO What happens if file does not exist?
+        protocol, schema_path = get_protocol_and_path(schema_json_path)
+        file_system = fsspec.filesystem(protocol)
+        pure_posix_path = PurePosixPath(schema_path)
+        load_path = get_filepath_str(pure_posix_path, protocol)
+
+        # Open schema file
+        with file_system.open(load_path) as fs_file:
+            # TODO lazy load schema when loading dataframe?
+            # TODO Support other schema input formats?
+            self._schema = StructType.fromJson(json.loads(fs_file.read()))
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
@@ -361,11 +357,13 @@ class SparkDataSet(Abstrac2tVersionedDataSet):
 
     def _load(self) -> DataFrame:
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_load_path()))
+        read_obj = self._get_spark().read
 
-        # What happens when schema is None?
-        return self._get_spark().read.schema(self._schema).load(
-            load_path, self._file_format, **self._load_args
-        )
+        # Pass schema if defined
+        if self._schema is not None:
+            read_obj = read_obj.schema(self._schema)
+
+        return read_obj.load(load_path, self._file_format, **self._load_args)
 
     def _save(self, data: DataFrame) -> None:
         save_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_save_path()))

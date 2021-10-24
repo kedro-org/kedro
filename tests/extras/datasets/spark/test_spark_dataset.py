@@ -25,7 +25,6 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import sys
 import tempfile
 from pathlib import Path, PurePosixPath
@@ -34,7 +33,13 @@ import pandas as pd
 import pytest
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
-from pyspark.sql.types import IntegerType, StringType, StructField, StructType
+from pyspark.sql.types import (
+    FloatType,
+    IntegerType,
+    StringType,
+    StructField,
+    StructType,
+)
 from pyspark.sql.utils import AnalysisException
 
 from kedro.extras.datasets.pandas import CSVDataSet, ParquetDataSet
@@ -133,6 +138,17 @@ def sample_spark_df():
     return SparkSession.builder.getOrCreate().createDataFrame(data, schema)
 
 
+@pytest.fixture
+def sample_spark_df_schema() -> StructType:
+    return StructType(
+        [
+            StructField("name", StringType(), True),
+            StructField("age", IntegerType(), True),
+            StructField("height", FloatType(), True),
+        ]
+    )
+
+
 def identity(arg):
     return arg  # pragma: no cover
 
@@ -191,6 +207,33 @@ class TestSparkDataSet:
         )
         spark_df = spark_data_set.load()
         assert spark_df.filter(col("Name") == "Alex").count() == 1
+
+    def test_load_options_schema(
+        self, tmp_path, sample_pandas_df, sample_spark_df_schema
+    ):
+        filepath = (tmp_path / "data").as_posix()
+        schemapath = (tmp_path / "schema.json").as_posix()
+
+        # Write CSV dataset
+        local_csv_data_set = CSVDataSet(filepath=filepath)
+        local_csv_data_set.save(sample_pandas_df)
+
+        # Write schema
+        # TODO: Should this be tackled in another way?
+        with open(schemapath, "w", encoding="utf-8") as f:
+            f.write(sample_spark_df_schema.json())
+
+        # Load CSV dataset
+        spark_data_set = SparkDataSet(
+            filepath=filepath,
+            file_format="csv",
+            load_args={"header": True, "schema_json_path": schemapath},
+        )
+
+        spark_df = spark_data_set.load()
+        spark_df.printSchema()
+        spark_df.show()
+        assert spark_df.schema == sample_spark_df_schema
 
     def test_save_options_csv(self, tmp_path, sample_spark_df):
         # To cross check the correct Spark save operation we save to

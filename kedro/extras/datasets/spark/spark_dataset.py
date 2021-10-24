@@ -35,7 +35,7 @@ from copy import deepcopy
 from fnmatch import fnmatch
 from functools import partial
 from pathlib import PurePosixPath
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 from warnings import warn
 
 import fsspec
@@ -324,7 +324,7 @@ class SparkDataSet(AbstractVersionedDataSet):
         self._fs_prefix = fs_prefix
 
     @staticmethod
-    def _load_schema(schema_json_path: str) -> Union[None, StructType]:
+    def _load_schema(schema_json_path: str) -> Optional[StructType]:
         if schema_json_path is None:
             return None
 

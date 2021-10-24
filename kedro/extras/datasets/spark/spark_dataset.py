@@ -29,7 +29,6 @@
 """``AbstractDataSet`` implementation to access Spark dataframes using
 ``pyspark``
 """
-
 import json
 from copy import deepcopy
 from fnmatch import fnmatch

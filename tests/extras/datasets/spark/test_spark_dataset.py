@@ -231,8 +231,6 @@ class TestSparkDataSet:
         )
 
         spark_df = spark_data_set.load()
-        spark_df.printSchema()
-        spark_df.show()
         assert spark_df.schema == sample_spark_df_schema
 
     def test_save_options_csv(self, tmp_path, sample_spark_df):

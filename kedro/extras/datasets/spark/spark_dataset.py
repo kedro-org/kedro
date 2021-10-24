@@ -35,7 +35,7 @@ from copy import deepcopy
 from fnmatch import fnmatch
 from functools import partial
 from pathlib import PurePosixPath
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 from warnings import warn
 
 import fsspec
@@ -319,18 +319,18 @@ class SparkDataSet(AbstractVersionedDataSet):
             self._save_args.update(save_args)
 
         # Handle schema
-        self._load_schema(self._load_args.pop("schema_json_path", None))
+        self._schema = self._load_schema(self._load_args.pop("schema_json_path", None))
         self._file_format = file_format
         self._fs_prefix = fs_prefix
 
-    def _load_schema(self, schema_json_path: str):
+    @staticmethod
+    def _load_schema(schema_json_path: str) -> Union[None, StructType]:
         if schema_json_path is None:
-            return
+            return None
 
         # TODO Limit protocols to file only?
         # TODO What about files in HDFS?
-        # TODO What about credentials, e.g., for GCS buckets?
-        # TODO What happens if file does not exist?
+        # TODO What about credentials, e.g., schema stored in separate GCS bucket?
         protocol, schema_path = get_protocol_and_path(schema_json_path)
         file_system = fsspec.filesystem(protocol)
         pure_posix_path = PurePosixPath(schema_path)
@@ -338,9 +338,11 @@ class SparkDataSet(AbstractVersionedDataSet):
 
         # Open schema file
         with file_system.open(load_path) as fs_file:
+
             # TODO lazy load schema when loading dataframe?
             # TODO Support other schema input formats?
-            self._schema = StructType.fromJson(json.loads(fs_file.read()))
+            # TODO What if file is in the wrong format?
+            return StructType.fromJson(json.loads(fs_file.read()))
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
@@ -360,7 +362,7 @@ class SparkDataSet(AbstractVersionedDataSet):
         read_obj = self._get_spark().read
 
         # Pass schema if defined
-        if self._schema is not None:
+        if self._schema:
             read_obj = read_obj.schema(self._schema)
 
         return read_obj.load(load_path, self._file_format, **self._load_args)

@@ -10,8 +10,107 @@ line_length = 88
 known_first_party = ["features", "kedro", "tests", "tools"]
 default_section = "THIRDPARTY"
 
+[tool.pylint]
+[tool.pylint.master]
+ignore = "CVS"
+ignore-patterns = "kedro/templates/*"
+load-plugins = "pylint.extensions.docparams"
+unsafe-load-any-extension = false
+[tool.pylint.messages_control]
+disable = [
+    "ungrouped-imports",
+    "bad-continuation",
+    "duplicate-code"
+]
+enable = ["useless-suppression"]
+[tool.pylint.refactoring]
+max-nested-blocks = 5
+[tool.pylint.format]
+indent-after-paren=4
+indent-string="    "
+[tool.pylint.miscellaneous]
+notes = [
+    "FIXME",
+    "XXX"
+]
+[tool.pylint.design]
+min-public-methods = 1
+
 [tool.coverage.report]
 fail_under = 100
 show_missing = true
 omit = ["kedro/templates/*", "kedro/framework/cli/hooks/specs.py", "kedro/framework/hooks/specs.py", "kedro/extras/datasets/tensorflow/*"]
 exclude_lines = ["pragma: no cover", "raise NotImplementedError"]
+
+[tool.pytest.ini_options]
+addopts="""
+--cov-report xml:coverage.xml \
+--cov-report term-missing \
+--cov kedro \
+--cov tests \
+--ignore tests/template/fake_repo \
+--no-cov-on-fail \
+-ra \
+-W ignore"""
+
+[tool.importlinter]
+root_package = "kedro"
+
+[[tool.importlinter.contracts]]
+name = "CLI > Context > Library, Runner > Extras > IO & Pipeline"
+type = "layers"
+containers = "kedro"
+layers = [
+    "framework.cli",
+    "framework.session",
+    "framework.context",
+    "framework.project",
+    "runner",
+    "extras.datasets",
+    "io",
+    "pipeline",
+    "config",
+    "versioning"
+]
+ignore_imports = [
+    "kedro.runner.parallel_runner -> kedro.framework.project",
+    "kedro.runner.parallel_runner -> kedro.framework.session.session"
+]
+
+[[tool.importlinter.contracts]]
+name = "Pipeline and IO are independent"
+type = "independence"
+modules = [
+    "kedro.pipeline",
+    "kedro.io"
+]
+
+[[tool.importlinter.contracts]]
+name = "Config cannot import Runner et al"
+type = "forbidden"
+source_modules = [
+    "kedro.config"
+]
+forbidden_modules = [
+    "kedro.runner",
+    "kedro.io",
+    "kedro.pipeline",
+    "kedro.extras.datasets"
+]
+
+[[tool.importlinter.contracts]]
+name = "Runner et al cannot import Config"
+type = "forbidden"
+source_modules = [
+    "kedro.runner",
+    "kedro.io",
+    "kedro.pipeline",
+    "kedro.extras.datasets"
+]
+forbidden_modules = [
+    "kedro.config"
+]
+ignore_imports = [
+    "kedro.framework.context.context -> kedro.config",
+    "kedro.framework.hooks.specs -> kedro.config"
+]

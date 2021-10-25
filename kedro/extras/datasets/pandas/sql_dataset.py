@@ -315,8 +315,7 @@ class SQLQueryDataSet(AbstractDataSet):
                 `open_args_load` and `open_args_save`.
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
-                All defaults are preserved, except `mode`, which is set to `r` when loading
-                and to `w` when saving.
+                All defaults are preserved, except `mode`, which is set to `r` when loading.
             filepath: A path to a file with a sql query statement.
 
         Raises:
@@ -349,44 +348,38 @@ class SQLQueryDataSet(AbstractDataSet):
         )
 
         # load sql query from file
-        if not sql:
+        if sql:
+            self._load_args["sql"] = sql
+            self._filepath = None
+        else:
             # filesystem for loading sql file
             _fs_args = copy.deepcopy(fs_args) or {}
-            _fs_open_args_load = _fs_args.pop("open_args_load", {})
             _fs_credentials = _fs_args.pop("credentials", {})
             protocol, path = get_protocol_and_path(str(filepath))
 
             self._protocol = protocol
             self._fs = fsspec.filesystem(self._protocol, **_fs_credentials, **_fs_args)
 
-            _fs_open_args_load.setdefault("mode", "r")
-            self._fs_open_args_load = _fs_open_args_load
-
-            self._load_args["filepath"] = path
-        else:
-            self._load_args["sql"] = sql
+            # self._load_args["filepath"] = path
+            self._filepath = path
         self._load_args["con"] = credentials["con"]
 
     def _describe(self) -> Dict[str, Any]:
-        load_args = self._load_args.copy()
+        load_args = copy.deepcopy(self._load_args)
         desc = {}
-        if "sql" in load_args:
-            desc["sql"] = load_args.pop("sql")
-        if "filepath" in load_args:
-            desc["filepath"] = str(load_args.pop("filepath"))
+        desc["sql"] = str(load_args.pop("sql", None))
+        desc["filepath"] = str(self._filepath)
         del load_args["con"]
-        desc["load_args"] = load_args
+        desc["load_args"] = str(load_args)
 
         return desc
 
     def _load(self) -> pd.DataFrame:
-        load_args = self._load_args.copy()
+        load_args = copy.deepcopy(self._load_args)
 
-        if "sql" not in load_args:
-            filepath = load_args.pop("filepath")
-            load_path = get_filepath_str(PurePosixPath(filepath), self._protocol)
-
-            with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
+        if self._filepath:
+            load_path = get_filepath_str(PurePosixPath(self._filepath), self._protocol)
+            with self._fs.open(load_path, mode="r") as fs_file:
                 load_args["sql"] = fs_file.read()
 
         try:

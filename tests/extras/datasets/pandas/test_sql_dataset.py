@@ -28,6 +28,7 @@
 
 # pylint: disable=no-member
 
+from pathlib import PosixPath
 from typing import Any
 
 import pandas as pd
@@ -52,10 +53,11 @@ def dummy_dataframe():
 
 
 @pytest.fixture
-def sql_file(tmp_path):
+def sql_file(tmp_path: PosixPath):
     file = tmp_path / "test.sql"
-    with file.open("w") as f:
-        f.write(SQL_QUERY)
+    # with file.open("w") as f:
+    #     f.write(SQL_QUERY)
+    file.write_text(SQL_QUERY)
     return file.as_posix()
 
 
@@ -333,13 +335,28 @@ class TestSQLQueryDataSet:
     def test_str_representation_sql(self, query_data_set, sql_file):
         """Test the data set instance string representation"""
         str_repr = str(query_data_set)
-        assert f"SQLQueryDataSet(load_args={{}}, sql={SQL_QUERY})" in str_repr
+        assert (
+            f"SQLQueryDataSet(filepath=None, load_args={{}}, sql={SQL_QUERY})"
+            in str_repr
+        )
         assert CONNECTION not in str_repr
         assert sql_file not in str_repr
 
     def test_str_representation_filepath(self, query_file_data_set, sql_file):
         """Test the data set instance string representation with filepath arg."""
         str_repr = str(query_file_data_set)
-        assert f"SQLQueryDataSet(filepath={str(sql_file)}, load_args={{}}" in str_repr
+        assert (
+            f"SQLQueryDataSet(filepath={str(sql_file)}, load_args={{}}, sql=None)"
+            in str_repr
+        )
         assert CONNECTION not in str_repr
         assert SQL_QUERY not in str_repr
+
+    def test_sql_and_filepath_args(self, sql_file):
+        """Test that an error is raised when both `sql` and `filepath` args are given."""
+        pattern = (
+            r"`sql` and `filepath` arguments cannot both be provided."
+            r"Please only provide one."
+        )
+        with pytest.raises(DataSetError, match=pattern):
+            SQLQueryDataSet(sql=SQL_QUERY, filepath=sql_file)

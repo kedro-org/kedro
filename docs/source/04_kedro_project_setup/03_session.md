@@ -22,8 +22,11 @@ The following code creates a `KedroSession` object as a context manager and runs
 
 ```python
 from kedro.framework.session import KedroSession
+from kedro.framework.startup import bootstrap_project
+from pathlib import Path
 
-with KedroSession.create("<your-kedro-project-package-name>") as session:
+metadata = bootstrap_project(Path.cwd())
+with KedroSession.create(metadata.package_name) as session:
     session.run()
 ```
 

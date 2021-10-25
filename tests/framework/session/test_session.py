@@ -31,15 +31,13 @@ import re
 import subprocess
 import textwrap
 from pathlib import Path
-from typing import Iterable
 
 import pytest
 import toml
 
 from kedro import __version__ as kedro_version
 from kedro.config import ConfigLoader
-from kedro.framework.context import KedroContext, KedroContextError
-from kedro.framework.hooks import hook_impl
+from kedro.framework.context import KedroContext
 from kedro.framework.project import (
     ValidationError,
     Validator,
@@ -71,17 +69,10 @@ def mock_context_class(mocker):
     return mocker.patch("kedro.framework.session.session.KedroContext", autospec=True)
 
 
-class ConfigLoaderHooks:
-    @hook_impl
-    def register_config_loader(self, conf_paths: Iterable[str]) -> ConfigLoader:
-        return ConfigLoader(conf_paths)
-
-
 def _mock_imported_settings_paths(mocker, mock_settings):
     for path in [
         "kedro.framework.project.settings",
         "kedro.framework.session.session.settings",
-        "kedro.framework.context.context.settings",
     ]:
         mocker.patch(path, mock_settings)
     return mock_settings
@@ -89,16 +80,12 @@ def _mock_imported_settings_paths(mocker, mock_settings):
 
 @pytest.fixture
 def mock_settings(mocker):
-    class MockSettings(_ProjectSettings):
-        _HOOKS = Validator("HOOKS", default=(ConfigLoaderHooks(),))
-
-    return _mock_imported_settings_paths(mocker, MockSettings())
+    return _mock_imported_settings_paths(mocker, _ProjectSettings())
 
 
 @pytest.fixture
 def mock_settings_context_class(mocker, mock_context_class):
     class MockSettings(_ProjectSettings):
-        _HOOKS = Validator("HOOKS", default=(ConfigLoaderHooks(),))
         _CONTEXT_CLASS = Validator(
             "CONTEXT_CLASS", default=lambda *_: mock_context_class
         )
@@ -112,8 +99,43 @@ def mock_settings_custom_context_class(mocker):
         pass
 
     class MockSettings(_ProjectSettings):
-        _HOOKS = Validator("HOOKS", default=(ConfigLoaderHooks(),))
         _CONTEXT_CLASS = Validator("CONTEXT_CLASS", default=lambda *_: MyContext)
+
+    return _mock_imported_settings_paths(mocker, MockSettings())
+
+
+@pytest.fixture
+def mock_config_loader_class(mocker):
+    return mocker.patch("kedro.config.ConfigLoader", autospec=True)
+
+
+@pytest.fixture
+def mock_settings_config_loader_class(mocker, mock_config_loader_class):
+    class MockSettings(_ProjectSettings):
+        _CONFIG_LOADER_CLASS = Validator(
+            "CONFIG_LOADER_CLASS", default=lambda *_: mock_config_loader_class
+        )
+
+    return _mock_imported_settings_paths(mocker, MockSettings())
+
+
+@pytest.fixture
+def mock_settings_broken_config_loader_class(mocker):
+    class MockSettings(_ProjectSettings):
+        _CONFIG_LOADER_CLASS = Validator("CONFIG_LOADER_CLASS", default="it breaks")
+
+    return _mock_imported_settings_paths(mocker, MockSettings())
+
+
+@pytest.fixture
+def mock_settings_custom_config_loader_class(mocker):
+    class MyConfigLoader(ConfigLoader):
+        pass
+
+    class MockSettings(_ProjectSettings):
+        _CONFIG_LOADER_CLASS = Validator(
+            "CONFIG_LOADER_CLASS", default=lambda *_: MyConfigLoader
+        )
 
     return _mock_imported_settings_paths(mocker, MockSettings())
 
@@ -158,7 +180,6 @@ def mock_settings_shelve_session_store(mocker, fake_project):
     shelve_location = fake_project / "nested" / "sessions"
 
     class MockSettings(_ProjectSettings):
-        _HOOKS = Validator("HOOKS", default=(ConfigLoaderHooks(),))
         _SESSION_STORE_CLASS = Validator(
             "SESSION_STORE_CLASS", default=lambda *_: ShelveStore
         )
@@ -241,12 +262,14 @@ STORE_LOGGER_NAME = "kedro.framework.session.store"
 
 class TestKedroSession:
     @pytest.mark.usefixtures("mock_settings_context_class")
+    @pytest.mark.usefixtures("mock_settings_config_loader_class")
     @pytest.mark.parametrize("env", [None, "env1"])
     @pytest.mark.parametrize("extra_params", [None, {"key": "val"}])
     def test_create(
         self,
         fake_project,
         mock_context_class,
+        mock_config_loader_class,
         fake_session_id,
         mock_package_name,
         mocker,
@@ -276,21 +299,16 @@ class TestKedroSession:
             expected_store["extra_params"] = extra_params
 
         assert session.store == expected_store
-        # called for logging setup
-        mock_context_class.assert_called_once_with(
-            project_path=fake_project,
-            package_name=mock_package_name,
-            env=env,
-            extra_params=extra_params,
-        )
-
         assert session.load_context() is mock_context_class.return_value
+        assert session._get_config_loader() is mock_config_loader_class.return_value
 
     @pytest.mark.usefixtures("mock_settings_context_class")
+    @pytest.mark.usefixtures("mock_settings_config_loader_class")
     def test_create_no_env_extra_params(
         self,
         fake_project,
         mock_context_class,
+        mock_config_loader_class,
         fake_session_id,
         mock_package_name,
         mocker,
@@ -312,14 +330,8 @@ class TestKedroSession:
         }
 
         assert session.store == expected_store
-        mock_context_class.assert_called_once_with(
-            project_path=fake_project,
-            package_name=mock_package_name,
-            env=None,
-            extra_params=None,
-        )
-
         assert session.load_context() is mock_context_class.return_value
+        assert session._get_config_loader() is mock_config_loader_class.return_value
 
     @pytest.mark.usefixtures("mock_settings")
     def test_load_context_with_envvar(
@@ -335,6 +347,20 @@ class TestKedroSession:
         assert result.__class__.__name__ == "KedroContext"
         assert result.env == "my_fake_env"
 
+    @pytest.mark.usefixtures("mock_settings")
+    def test_load_config_loader_with_envvar(
+        self, fake_project, monkeypatch, mock_package_name, mocker
+    ):
+        mocker.patch("kedro.config.config.ConfigLoader.get")
+        monkeypatch.setenv("KEDRO_ENV", "my_fake_env")
+
+        session = KedroSession.create(mock_package_name, fake_project)
+        result = session._get_config_loader()
+
+        assert isinstance(result, ConfigLoader)
+        assert result.__class__.__name__ == "ConfigLoader"
+        assert result.env == "my_fake_env"
+
     @pytest.mark.usefixtures("mock_settings_custom_context_class")
     def test_load_context_custom_context_class(self, fake_project, mock_package_name):
         session = KedroSession.create(mock_package_name, fake_project)
@@ -342,6 +368,25 @@ class TestKedroSession:
 
         assert isinstance(result, KedroContext)
         assert result.__class__.__name__ == "MyContext"
+
+    @pytest.mark.usefixtures("mock_settings_custom_config_loader_class")
+    def test_load_config_loader_custom_config_loader_class(
+        self, fake_project, mock_package_name
+    ):
+        session = KedroSession.create(mock_package_name, fake_project)
+        result = session._get_config_loader()
+
+        assert isinstance(result, ConfigLoader)
+        assert result.__class__.__name__ == "MyConfigLoader"
+
+    @pytest.mark.usefixtures("mock_settings_broken_config_loader_class")
+    def test_broken_config_loader(self, fake_project, mock_package_name):
+        pattern = (
+            f"Expected an instance of `ConfigLoader`, "
+            f"got `it breaks` of class `{type('')}` instead."
+        )
+        with pytest.raises(TypeError, match=re.escape(pattern)):
+            KedroSession.create(mock_package_name, fake_project)
 
     @pytest.mark.usefixtures("mock_settings_context_class")
     def test_default_store(
@@ -530,17 +575,17 @@ class TestKedroSession:
         mock_hook = mocker.patch(
             "kedro.framework.session.session.get_hook_manager"
         ).return_value.hook
-        mock_pipelines = {
-            _FAKE_PIPELINE_NAME: mocker.Mock(),
-            "__default__": mocker.Mock(),
-        }
-        mocker.patch(
-            "kedro.framework.session.session.pipelines", return_value=mock_pipelines
+        mock_pipelines = mocker.patch(
+            "kedro.framework.session.session.pipelines",
+            return_value={
+                _FAKE_PIPELINE_NAME: mocker.Mock(),
+                "__default__": mocker.Mock(),
+            },
         )
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
         mock_runner = mocker.Mock()
-        mock_pipeline = mock_context._filter_pipeline.return_value
+        mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
 
         with KedroSession.create(mock_package_name, fake_project) as session:
             session.run(runner=mock_runner, pipeline_name=fake_pipeline_name)
@@ -583,7 +628,7 @@ class TestKedroSession:
             "It needs to be generated and returned "
             "by the 'register_pipelines' function."
         )
-        with pytest.raises(KedroContextError, match=re.escape(pattern)):
+        with pytest.raises(ValueError, match=re.escape(pattern)):
             with KedroSession.create(mock_package_name, fake_project) as session:
                 session.run(runner=mock_runner, pipeline_name="doesnotexist")
 
@@ -602,19 +647,19 @@ class TestKedroSession:
         mock_hook = mocker.patch(
             "kedro.framework.session.session.get_hook_manager"
         ).return_value.hook
-        mock_pipelines = {
-            _FAKE_PIPELINE_NAME: mocker.Mock(),
-            "__default__": mocker.Mock(),
-        }
-        mocker.patch(
-            "kedro.framework.session.session.pipelines", return_value=mock_pipelines
+        mock_pipelines = mocker.patch(
+            "kedro.framework.session.session.pipelines",
+            return_value={
+                _FAKE_PIPELINE_NAME: mocker.Mock(),
+                "__default__": mocker.Mock(),
+            },
         )
         mock_context = mock_context_class.return_value
         mock_catalog = mock_context._get_catalog.return_value
         error = FakeException("You shall not pass!")
         mock_runner = mocker.Mock()
         mock_runner.run.side_effect = error  # runner.run() raises an error
-        mock_pipeline = mock_context._filter_pipeline.return_value
+        mock_pipeline = mock_pipelines.__getitem__.return_value.filter.return_value
 
         with pytest.raises(FakeException), KedroSession.create(
             mock_package_name, fake_project

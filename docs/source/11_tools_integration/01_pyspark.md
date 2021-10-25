@@ -28,6 +28,7 @@ from pathlib import Path
 from pyspark import SparkConf
 from pyspark.sql import SparkSession
 
+from kedro.config import ConfigLoader
 from kedro.framework.context import KedroContext
 
 
@@ -36,17 +37,18 @@ class CustomContext(KedroContext):
         self,
         package_name: str,
         project_path: Union[Path, str],
+        config_loader: ConfigLoader,
         env: str = None,
         extra_params: Dict[str, Any] = None,
     ):
-        super().__init__(package_name, project_path, env, extra_params)
+        super().__init__(package_name, project_path, config_loader, env, extra_params)
         self.init_spark_session()
 
     def init_spark_session(self) -> None:
         """Initialises a SparkSession using the config defined in project's conf folder."""
 
         # Load the spark configuration in spark.yaml using the config loader
-        parameters = self.config_loader.get("spark*", "spark*/**")
+        parameters = self._config_loader.get("spark*", "spark*/**")
         spark_conf = SparkConf().setAll(parameters.items())
 
         # Initialise the spark session
@@ -75,7 +77,7 @@ CONTEXT_CLASS = CustomContext
 
 ## Use Kedro's built-in Spark datasets to load and save raw data
 
-We recommend using Kedro's built-in Spark datasets to load raw data into Spark's [DataFrame](https://spark.apache.org/docs/latest/api/python/reference/api/pyspark.sql.DataFrame.html), as well as to write them back to storage. Some of our built-in Spark datasets include:
+We recommend using Kedro's built-in Spark datasets to load raw data into Spark's [DataFrame](https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql.html#dataframe-apis), as well as to write them back to storage. Some of our built-in Spark datasets include:
 
 * [spark.SparkDataSet](/kedro.extras.datasets.spark.SparkDataSet)
 * [spark.SparkJDBCDataSet](/kedro.extras.datasets.spark.SparkJDBCDataSet)

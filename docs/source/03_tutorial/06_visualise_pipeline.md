@@ -21,7 +21,7 @@ This command will run a server on http://127.0.0.1:4141 that will open up your v
 
 ![](../meta/images/pipeline_visualisation.png)
 
-You may also use the `--autoreload` flag to autoreload Kedro Viz when the a `Python` or `YAML` file has changed in the corresponding Kedro project.
+You may also use the `--autoreload` flag to autoreload Kedro Viz when a `Python` or `YAML` file has changed in the corresponding Kedro project.
 
 ![](../meta/images/pipeline_viz_autoreload.gif)
 

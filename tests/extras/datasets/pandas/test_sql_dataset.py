@@ -55,8 +55,6 @@ def dummy_dataframe():
 @pytest.fixture
 def sql_file(tmp_path: PosixPath):
     file = tmp_path / "test.sql"
-    # with file.open("w") as f:
-    #     f.write(SQL_QUERY)
     file.write_text(SQL_QUERY)
     return file.as_posix()
 

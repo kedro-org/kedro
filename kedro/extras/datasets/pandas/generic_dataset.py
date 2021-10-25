@@ -170,13 +170,6 @@ class GenericDataSet(AbstractVersionedDataSet):
 
         self._kind = kind.lower()
 
-        # Fail fast if provided a known non-filesystem target
-        if self._kind in NON_FILE_SYSTEM_TARGETS:
-            raise DataSetError(
-                f"Cannot create a dataset of kind `{self._kind}` as it "
-                f"it does not support a filepath target/source"
-            )
-
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
         _fs_open_args_save = _fs_args.pop("open_args_save", {})
@@ -208,7 +201,17 @@ class GenericDataSet(AbstractVersionedDataSet):
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
 
+    def _ensure_file_system_target(self) -> None:
+        # Fail fast if provided a known non-filesystem target
+        if self._kind in NON_FILE_SYSTEM_TARGETS:
+            raise DataSetError(
+                f"Cannot create a dataset of kind `{self._kind}` as it "
+                f"it does not support a filepath target/source"
+            )
+
     def _load(self) -> Any:
+
+        self._ensure_file_system_target()
 
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         load_method = _get_method_from_object(self._kind, "read", pd)
@@ -222,6 +225,8 @@ class GenericDataSet(AbstractVersionedDataSet):
         )
 
     def _save(self, data: pd.DataFrame) -> None:
+
+        self._ensure_file_system_target()
 
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
         save_method = _get_method_from_object(self._kind, "to", pd.DataFrame)

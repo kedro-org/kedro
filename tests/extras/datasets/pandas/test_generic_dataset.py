@@ -353,7 +353,7 @@ class TestGenericHtmlDataSet:
 
 
 class TestBadGenericDataSet:
-    def test_bad_instantiation(self):
+    def test_bad_kind_argument(self):
         ds = GenericDataSet(kind="kedro", filepath="test.kedro")
 
         with pytest.raises(DataSetError) as e:
@@ -383,10 +383,17 @@ class TestBadGenericDataSet:
         ],
     )
     def test_generic_no_filepaths(self, kind):
-        with pytest.raises(DataSetError) as e:
-            _ = GenericDataSet(kind=kind, filepath="/file/thing.file")
         error = (
             "Cannot create a dataset of kind "
             f"`{kind}` as it it does not support a filepath target/source"
         )
+
+        with pytest.raises(DataSetError) as e:
+            _ = GenericDataSet(kind=kind, filepath="/file/thing.file").load()
+        with pytest.raises(DataSetError) as e2:
+            GenericDataSet(kind=kind, filepath="/file/thing.file").save(
+                pd.DataFrame([1])
+            )
+
         assert error in str(e.value)
+        assert error in str(e2.value)

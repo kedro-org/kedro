@@ -34,7 +34,7 @@ type of read/write target.
 """
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Dict
 
 import fsspec
 import pandas as pd
@@ -214,7 +214,7 @@ class GenericDataSet(AbstractVersionedDataSet):
         self._ensure_file_system_target()
 
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        load_method = _get_method_from_object(self._kind, "read", pd)
+        load_method = getattr(pd, "read_" + self._kind, None)
         if load_method:
             with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
                 return load_method(fs_file, **self._load_args)
@@ -229,13 +229,11 @@ class GenericDataSet(AbstractVersionedDataSet):
         self._ensure_file_system_target()
 
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
-        save_method = _get_method_from_object(self._kind, "to", pd.DataFrame)
+        save_method = getattr(data, "to_" + self._kind, None)
         if save_method:
             with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
-                # Retrieve save method from instantiated DataFrame
-                df_save_method = getattr(data, getattr(save_method, "__name__"))
                 # KEY ASSUMPTION - first argument is path/buffer/io
-                df_save_method(fs_file, **self._save_args)
+                save_method(fs_file, **self._save_args)
                 self._invalidate_cache()
         else:
             raise DataSetError(
@@ -270,28 +268,3 @@ class GenericDataSet(AbstractVersionedDataSet):
         """Invalidate underlying filesystem caches."""
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
-
-
-def _get_method_from_object(
-    suffix: str, prefix: str, obj: Union[Callable, Any]
-) -> Optional[Callable]:
-    """
-    This method retrieves a method from a given module/callable. In this
-    context it is used to get a DataFrame read or write method from the top
-    level pandas Module (for read) and the DataFrame class (for write).
-
-    Args:
-        suffix: The kind of read/write necessary i.e. csv, excel,
-        prefix: The prefix to ignore i.e. 'read_' or 'to_'
-        obj: The object to inspect i.e. `pandas` or `pandas.DataFrame`
-
-    Returns:
-        The relevant callable method from the object which matches the suffix
-    """
-
-    relevant_methods = [x for x in dir(obj) if x.lower().startswith(prefix.lower())]
-    named_methods = {x.replace(f"{prefix}_", "").lower(): x for x in relevant_methods}
-    mapped_method_name = named_methods.get(suffix.lower())
-    if mapped_method_name:
-        return getattr(obj, mapped_method_name)
-    return None

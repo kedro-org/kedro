@@ -60,17 +60,16 @@ NON_FILE_SYSTEM_TARGETS = [
 
 
 class GenericDataSet(AbstractVersionedDataSet):
-    """`GenericDataSet`` loads/saves data from/to a data file using an underlying
+    """`pandas.GenericDataSet` loads/saves data from/to a data file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to dynamically select the
     appropriate type of read/write target on a best effort basis.
 
-     Example adding a catalog entry with
-    `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
+    Example using `YAML API
+    <https://kedro.readthedocs.io/en/stable/05_data/\
         01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+
     .. code-block:: yaml
 
-        >>> # CSV example:
-        >>> This retrieves `pd.read_csv` and `pd.DataFrame.to_csv` methods from pandas
         >>> cars:
         >>>   type: pandas.GenericDataSet
         >>>   kind: csv
@@ -80,13 +79,14 @@ class GenericDataSet(AbstractVersionedDataSet):
         >>>     na_values: ["#NA", NA]
         >>>   save_args:
         >>>     index: False
-        >>>     date_format: "%Y-%m-%d %H:%M"
-        >>>     decimal: .
-        >>>
-        >>> # SAS example:
-        >>> # This retrieves `pd.read_sas(filepath, format='sas7bdat')`
-        >>> # from pandas, not an equivalent write method does not exist.
-        >>>
+        >>>     date_format: "%Y-%m-%d"
+
+    This second example is able to load a SAS7BDAT file via the `pd.read_sas` method.
+    Trying to save this dataset will raise a `DataSetError` since pandas does not provide an
+    equivalent `to_sas` write method.
+
+    .. code-block:: yaml
+
         >>> flights:
         >>>    type: pandas.GenericDataSet
         >>>    kind: sas

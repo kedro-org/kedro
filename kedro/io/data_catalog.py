@@ -56,6 +56,7 @@ from kedro.versioning import Journal
 
 CATALOG_KEY = "catalog"
 CREDENTIALS_KEY = "credentials"
+WORDS_REGEX_PATTERN = re.compile(r"\W+")
 
 
 def _get_credentials(
@@ -111,9 +112,6 @@ def _resolve_credentials(
     return {k: _map_value(k, v) for k, v in config.items()}
 
 
-count = 0
-
-
 def _sub_nonword_chars(data_set_name: str) -> str:
     """Replace non-word characters in data set names since Kedro 0.16.2.
 
@@ -123,7 +121,7 @@ def _sub_nonword_chars(data_set_name: str) -> str:
     Returns:
         The name used in `DataCatalog.datasets`.
     """
-    return re.sub(r"\W+", "__", data_set_name)
+    return re.sub(WORDS_REGEX_PATTERN, "__", data_set_name)
 
 
 class _FrozenDatasets:

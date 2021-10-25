@@ -359,8 +359,6 @@ class SQLQueryDataSet(AbstractDataSet):
 
             self._protocol = protocol
             self._fs = fsspec.filesystem(self._protocol, **_fs_credentials, **_fs_args)
-
-            # self._load_args["filepath"] = path
             self._filepath = path
         self._load_args["con"] = credentials["con"]
 

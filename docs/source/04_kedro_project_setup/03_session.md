@@ -1,9 +1,5 @@
 # Lifecycle management with `KedroSession`
 
-```eval_rst
-.. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
-```
-
 ### Overview
 A `KedroSession` allows you to:
 
@@ -26,8 +22,11 @@ The following code creates a `KedroSession` object as a context manager and runs
 
 ```python
 from kedro.framework.session import KedroSession
+from kedro.framework.startup import bootstrap_project
+from pathlib import Path
 
-with KedroSession.create("<your-kedro-project-package-name>") as session:
+metadata = bootstrap_project(Path.cwd())
+with KedroSession.create(metadata.package_name) as session:
     session.run()
 ```
 

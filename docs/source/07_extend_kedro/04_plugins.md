@@ -1,10 +1,5 @@
 # Kedro plugins
 
-
-```eval_rst
-.. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
-```
-
 Kedro plugins allow you to create new features for Kedro and inject additional commands into the CLI. Plugins are developed as separate Python packages that exist outside of any Kedro project.
 
 ## Overview
@@ -183,3 +178,4 @@ See the full list of plugins using the GitHub tag [kedro-plugin](https://github.
 - [kedro-kubeflow](https://github.com/getindata/kedro-kubeflow), by [Mateusz Pytel](https://github.com/em-pe) and [Mariusz Strzelecki](https://github.com/szczeles), lets you run and schedule pipelines on Kubernetes clusters using [Kubeflow Pipelines](https://www.kubeflow.org/docs/pipelines/overview/pipelines-overview/)
 - [kedro-mlflow](https://github.com/Galileo-Galilei/kedro-mlflow), by [Yolan Honoré-Rougé](https://github.com/galileo-galilei), and [Takieddine Kadiri](https://github.com/takikadiri) facilitates [Mlflow](https://www.mlflow.org/) integration inside Kedro projects while enforcing [Kedro's principles](https://kedro.readthedocs.io/en/stable/12_faq/01_faq.html#what-are-the-primary-advantages-of-kedro). Its main features are modular configuration, automatic parameters tracking, datasets versioning, Kedro pipelines packaging and serving and automatic synchronization between training and inference pipelines for high reproducibility of machine learning experiments and ease of deployment. A tutorial is provided in the [kedro-mlflow-tutorial repo](https://github.com/Galileo-Galilei/kedro-mlflow-tutorial). You can find more information in [the documentation](https://kedro-mlflow.readthedocs.io/en/stable/).
 - [kedro-neptune](https://github.com/neptune-ai/kedro-neptune), by [Jakub Czakon](https://github.com/jakubczakon) and [Rafał Jankowski](https://github.com/Raalsky), lets you have all the benefits of a nicely organized Kedro pipeline with Neptune: a powerful user interface built for ML metadata management. You can find more information in [the documentation](https://docs.neptune.ai/integrations-and-supported-tools/automation-pipelines/kedro).
+- [kedro-dolt](https://www.dolthub.com/blog/2021-06-16-kedro-dolt-plugin/), [Max Hoffman](https://github.com/max-hoffman) and [Oscar Batori](https://github.com/oscarbatori), a plugin that allows you to expand the data versioning abilities of data scientists and engineers.

@@ -1,9 +1,5 @@
 # Set up PyCharm
 
-```eval_rst
-.. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
-```
-
 This section will present a quick guide on how to configure [PyCharm](https://www.jetbrains.com/pycharm/) as a development environment for working on Kedro projects.
 
 Open a new project directory in PyCharm. You will need to add your **Project Interpreter**, so go to **PyCharm | Preferences** for macOS or **File | Settings** for Windows and Linux:
@@ -146,6 +142,20 @@ Click **OK**. Go to **Run / Debug Configurations** to add a **Python Run**. For 
 Click **OK** and then select your run configuration from the toolbar and click **Run** to execute.
 
 [To debug, click the debugger button as described above](#debugging).
+
+## Configure Python Console
+
+You can configure Pycharm's IPython to load Kedro's Extension.
+
+Click **PyCharm | Preferences** for macOS or **File | Settings**, inside **Build, Execution, Deployment** and **Console**, enter the **Python Console** configuration.
+
+You can append the configuration necessary to use Kedro IPython to the **Starting script** as described in the [IPython configuring documentation](https://kedro.readthedocs.io/en/latest/11_tools_integration/02_ipython.html).
+
+![](../meta/images/pycharm_ipython_starting_script.png)
+
+With this configuration, when you create a Python Console you should be able to use context, session and catalog.
+
+![](../meta/images/pycharm_ipython_working_example.png)
 
 ## Configuring the Kedro catalog validation schema
 

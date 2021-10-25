@@ -9,18 +9,16 @@ compress-pickle[lz4]~=1.2.0
 coverage[toml]
 dask[complete]~=2.6
 dill~=0.3.1
-flake8~=3.5
 gcsfs>=2021.04, <2022.01  # Upper bound set arbitrarily, to be reassessed in early 2022
 geopandas>=0.6.0, <1.0
 hdfs>=2.5.8, <3.0
 holoviews~=1.13.0
-import-linter==1.0
+import-linter[toml]==1.2.6
 ipython~=7.10
 joblib>=0.14
 matplotlib>=3.0.3, <3.4  # 3.4.0 breaks holoviews
 memory_profiler>=0.50.0, <1.0
 moto==1.3.7
-mypy<=1.0
 nbconvert>=5.3.1, <6.0
 nbformat~=4.4
 networkx~=2.4

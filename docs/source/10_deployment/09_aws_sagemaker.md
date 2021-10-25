@@ -1,10 +1,5 @@
 # How to integrate Amazon SageMaker into your Kedro pipeline
 
-
-```eval_rst
-.. note::  This documentation is based on ``Kedro 0.17.1``. If you spot anything that is incorrect then please create an `issue <https://github.com/quantumblacklabs/kedro/issues>`_ or pull request.
-```
-
 This tutorial explains how to integrate a Kedro project with [Amazon SageMaker](https://aws.amazon.com/sagemaker/) in order to train a machine learning model. It shows how to build machine learning pipelines in Kedro and while taking advantage of the power of SageMaker for potentially compute-intensive machine learning tasks.
 
 The Kedro project will still run locally (or on one of many supported workflow engines like [Argo](./04_argo.md), [Prefect](./05_prefect.md), [Kubeflow](./06_kubeflow.md), [AWS Batch](./07_aws_batch.md) and others), but the model training step will be offloaded onto SageMaker.

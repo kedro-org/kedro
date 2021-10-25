@@ -12,7 +12,7 @@
 ## Upcoming deprecations for Kedro 0.18.0
 
 ## Thanks for supporting contributions
-[Deepyaman Datta](https://github.com/deepyaman)
+[Deepyaman Datta](https://github.com/deepyaman),
 [Brites](https://github.com/brites101)
 
 # Release 0.17.5

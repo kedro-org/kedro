@@ -2,12 +2,14 @@
 
 ## Major features and improvements
 * Added `pipelines` global variable to IPython extension, allowing you to access the project's pipelines in `kedro ipython` or `kedro jupyter notebook`.
+* Enabled overriding nested parameters with `params` in CLI, i.e. `kedro run --params="model.model_tuning.booster:gbtree"` updates parameters to `{"model": {"model_tuning": {"booster": "gbtree"}}}`.
 
 ## Bug fixes and other changes
 * Fixed an issue where `kedro new --config config.yml` was ignoring the config file when `prompts.yml` didn't exist.
 * Added support for arbitrary backends (via importable module paths) that satisfy the `pickle` interface to `PickleDataSet`.
 * Added support for `sum` syntax for connecting pipeline objects.
 * Upgraded `pip-tools`, which is used by `kedro build-reqs`, to 6.4. This `pip-tools` version requires `pip>=21.2` while [adding support for `pip>=21.3`](https://github.com/jazzband/pip-tools/pull/1501). To upgrade `pip`, please refer to [their documentation](https://pip.pypa.io/en/stable/installing/#upgrading-pip).
+* Extended ``ExcelDataSet`` to support saving Excel files with multiple sheets.
 * `kedro pipeline package <pipeline>` now raises an error if the `<pipeline>` argument doesn't look like a valid Python module path (e.g. has `/` instead of `.`).
 
 ## Minor breaking changes to the API
@@ -17,8 +19,9 @@
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman),
 [Manish Swami](https://github.com/ManishS6),
-[Zain Patel](https://github.com/mzjp2),
+[Zain Patel](https://github.com/mzjp2)
 [Simon Brugman](https://github.com/sbrugman)
+[Louis de Charsonville](https://github.com/louisdecharson)
 
 # Release 0.17.5
 

@@ -3,6 +3,11 @@
 ## Major features and improvements
 * Added `pipelines` global variable to IPython extension, allowing you to access the project's pipelines in `kedro ipython` or `kedro jupyter notebook`.
 * Enabled overriding nested parameters with `params` in CLI, i.e. `kedro run --params="model.model_tuning.booster:gbtree"` updates parameters to `{"model": {"model_tuning": {"booster": "gbtree"}}}`.
+* Added the following new dataset (see ([Issue #839](https://github.com/quantumblacklabs/kedro/issues/839)):
+
+| Type                        | Description                                          | Location                          |
+| --------------------------- | ---------------------------------------------------- | --------------------------------- |
+| `plotly.JSONDataSet` | Works with plotly graph object Figures (saves as json file) | `kedro.extras.datasets.plotly` |
 
 ## Bug fixes and other changes
 * Fixed an issue where `kedro new --config config.yml` was ignoring the config file when `prompts.yml` didn't exist.
@@ -20,8 +25,9 @@
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman),
 [Manish Swami](https://github.com/ManishS6),
-[Zain Patel](https://github.com/mzjp2)
-[Simon Brugman](https://github.com/sbrugman)
+[Zain Patel](https://github.com/mzjp2),
+[Simon Brugman](https://github.com/sbrugman),
+[Kiyo Kunii](https://github.com/921kiyo),
 [Louis de Charsonville](https://github.com/louisdecharson)
 
 # Release 0.17.5

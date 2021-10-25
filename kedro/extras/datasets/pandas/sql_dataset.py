@@ -319,7 +319,7 @@ class SQLQueryDataSet(AbstractDataSet):
             filepath: A path to a file with a sql query statement.
 
         Raises:
-            DataSetError: When either ``sql`` or ``con`` parameters is emtpy.
+            DataSetError: When either ``sql`` or ``con`` parameters is empty.
         """
         if sql and filepath:
             raise DataSetError(

@@ -111,6 +111,9 @@ def _resolve_credentials(
     return {k: _map_value(k, v) for k, v in config.items()}
 
 
+count = 0
+
+
 def _sub_nonword_chars(data_set_name: str) -> str:
     """Replace non-word characters in data set names since Kedro 0.16.2.
 
@@ -126,11 +129,25 @@ def _sub_nonword_chars(data_set_name: str) -> str:
 class _FrozenDatasets:
     """Helper class to access underlying loaded datasets"""
 
-    def __init__(self, datasets):
-        # Non-word characters in dataset names are replaced with `__`
-        # for easy access to transcoded/prefixed datasets.
-        datasets = {_sub_nonword_chars(key): value for key, value in datasets.items()}
-        self.__dict__.update(**datasets)
+    def __init__(
+        self,
+        *datasets_collections: Union["_FrozenDatasets", Dict[str, AbstractDataSet]],
+    ):
+        """Return a _FrozenDatasets instance from some datasets collections.
+        Each collection could either be another _FrozenDatasets or a dictionary.
+        """
+        for collection in datasets_collections:
+            if isinstance(collection, _FrozenDatasets):
+                self.__dict__.update(collection.__dict__)
+            else:
+                # Non-word characters in dataset names are replaced with `__`
+                # for easy access to transcoded/prefixed datasets.
+                self.__dict__.update(
+                    {
+                        _sub_nonword_chars(dataset_name): dataset
+                        for dataset_name, dataset in collection.items()
+                    }
+                )
 
     # Don't allow users to add/change attributes on the fly
     def __setattr__(self, key, value):
@@ -524,7 +541,7 @@ class DataCatalog:
                 )
         self._data_sets[data_set_name] = data_set
         self._transformers[data_set_name] = list(self._default_transformers)
-        self.datasets = _FrozenDatasets(self._data_sets)
+        self.datasets = _FrozenDatasets(self.datasets, {data_set_name: data_set})
 
     def add_all(
         self, data_sets: Dict[str, AbstractDataSet], replace: bool = False

@@ -48,8 +48,6 @@ eval_command PYLINT "python -m pylint --version"
 eval_command PYTEST "python -m pytest --version"
 eval_command BLACK "python -m black --version"
 eval_command BEHAVE "python -m behave --version"
-eval_command MYPY "python -m mypy --version"
-eval_command FLAKE8 "python -m flake8 --version"
 eval_command ISORT "python -m isort --version"
 eval_command PRE-COMMIT "python -m pre_commit --version"
 eval_command SPARK "python -c \\

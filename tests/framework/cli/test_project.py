@@ -181,6 +181,7 @@ class TestLintCommand:
         fake_repo_path,
         fake_metadata,
     ):
+        mocker.patch("kedro.framework.cli.project._check_module_importable")
         result = CliRunner().invoke(
             fake_project_cli, ["lint", *files], obj=fake_metadata
         )
@@ -217,6 +218,7 @@ class TestLintCommand:
         fake_repo_path,
         fake_metadata,
     ):
+        mocker.patch("kedro.framework.cli.project._check_module_importable")
         result = CliRunner().invoke(
             fake_project_cli, ["lint", check_flag, *files], obj=fake_metadata
         )
@@ -234,17 +236,24 @@ class TestLintCommand:
 
         assert python_call_mock.call_args_list == expected_calls
 
-    @pytest.mark.parametrize("module_name", ["flake8", "isort"])
+    @pytest.mark.parametrize(
+        "module_name,side_effects",
+        [("flake8", [ImportError, None, None]), ("isort", [None, ImportError, None])],
+    )
     def test_import_not_installed(
         self,
         fake_project_cli,
         python_call_mock,
         module_name,
+        side_effects,
         mocker,
         fake_repo_path,
         fake_metadata,
     ):
-        mocker.patch.dict("sys.modules", {module_name: None})
+        # pretending we have the other linting dependencies, but not the <module_name>
+        mocker.patch(
+            "kedro.framework.cli.utils.import_module", side_effect=side_effects
+        )
 
         result = CliRunner().invoke(fake_project_cli, ["lint"], obj=fake_metadata)
         expected_message = NO_DEPENDENCY_MESSAGE.format(
@@ -451,10 +460,7 @@ class TestInstallCommand:
         assert "Error in dependencies" in result.output
 
     def test_install_working_with_unimportable_pipelines(
-        self,
-        fake_project_cli,
-        mocker,
-        fake_metadata,
+        self, fake_project_cli, mocker, fake_metadata
     ):
         """Test kedro install works even if pipelines are not importable"""
         mocker.patch("kedro.framework.cli.project.os").name = "posix"
@@ -503,9 +509,7 @@ class TestIpythonCommand:
         fake_metadata,
     ):
         result = CliRunner().invoke(
-            fake_project_cli,
-            ["ipython", "--random-arg", "value"],
-            obj=fake_metadata,
+            fake_project_cli, ["ipython", "--random-arg", "value"], obj=fake_metadata
         )
         assert not result.exit_code, result.stdout
         fake_ipython_message.assert_called_once_with()

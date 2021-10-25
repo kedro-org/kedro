@@ -5,7 +5,7 @@
 
 ## Bug fixes and other changes
 * Fixed an issue where `kedro new --config config.yml` was ignoring the config file when `prompts.yml` didn't exist.
-* Added documentation for `kedro viz --autoreloader`
+* Added documentation for `kedro viz --autoreload`.
 
 ## Minor breaking changes to the API
 

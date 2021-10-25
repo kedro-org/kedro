@@ -1,0 +1,292 @@
+# Copyright 2021 QuantumBlack Visual Analytics Limited
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
+# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
+# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
+# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#
+# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
+# (either separately or in combination, "QuantumBlack Trademarks") are
+# trademarks of QuantumBlack. The License does not grant you any right or
+# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
+# Trademarks or any confusingly similar mark as a trademark for your product,
+# or use the QuantumBlack Trademarks in any other manner that might cause
+# confusion in the marketplace, including but not limited to in advertising,
+# on websites, or on software.
+#
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# pylint: disable=too-many-arguments
+
+"""``GenericDataSet`` loads/saves data from/to a data file using an underlying
+filesystem (e.g.: local, S3, GCS). It uses pandas to handle the
+type of read/write target.
+"""
+from copy import deepcopy
+from pathlib import PurePosixPath
+from typing import Any, Callable, Dict, Optional, Union
+
+import fsspec
+import pandas as pd
+
+from kedro.io.core import (
+    AbstractVersionedDataSet,
+    DataSetError,
+    Version,
+    get_filepath_str,
+    get_protocol_and_path,
+)
+
+NON_FILE_SYSTEM_TARGETS = [
+    "clipboard",
+    "numpy",
+    "sql",
+    "period",
+    "records",
+    "timestamp",
+    "xarray",
+    "sql_table",
+]
+
+
+class GenericDataSet(AbstractVersionedDataSet):
+    """`GenericDataSet`` loads/saves data from/to a data file using an underlying
+    filesystem (e.g.: local, S3, GCS). It uses pandas to dynamically select the
+    appropriate type of read/write target on a best effort basis.
+
+     Example adding a catalog entry with
+    `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
+        01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+    .. code-block:: yaml
+
+        >>> # CSV example:
+        >>> This retrieves `pd.read_csv` and `pd.DataFrame.to_csv` methods from pandas
+        >>> cars:
+        >>>   type: pandas.GenericDataSet
+        >>>   kind: csv
+        >>>   filepath: s3://data/01_raw/company/cars.csv
+        >>>   load_args:
+        >>>     sep: ","
+        >>>     na_values: ["#NA", NA]
+        >>>   save_args:
+        >>>     index: False
+        >>>     date_format: "%Y-%m-%d %H:%M"
+        >>>     decimal: .
+        >>>
+        >>> # SAS example:
+        >>> # This retrieves `pd.read_sas(filepath, format='sas7bdat')`
+        >>> # from pandas, not an equivalent write method does not exist.
+        >>>
+        >>> flights:
+        >>>    type: pandas.GenericDataSet
+        >>>    kind: sas
+        >>>    filepath: data/01_raw/airplanes.sas7bdat
+        >>>    load_args:
+        >>>       format: sas7bdat
+
+    Example using Python API:
+    ::
+
+        >>> from kedro.extras.datasets.pandas import GenericDataSet
+        >>> import pandas as pd
+        >>>
+        >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
+        >>>                      'col3': [5, 6]})
+        >>>
+        >>> # data_set = GenericDataSet(kind='csv', filepath="s3://test.csv")
+        >>> data_set = GenericDataSet(kind='csv', filepath="test.csv")
+        >>> data_set.save(data)
+        >>> reloaded = data_set.load()
+        >>> assert data.equals(reloaded)
+
+    """
+
+    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
+
+    def __init__(
+        self,
+        kind: str,
+        filepath: str,
+        load_args: Dict[str, Any] = None,
+        save_args: Dict[str, Any] = None,
+        version: Version = None,
+        credentials: Dict[str, Any] = None,
+        fs_args: Dict[str, Any] = None,
+    ):
+        """Creates a new instance of ``GenericDataSet`` pointing to a concrete data file
+        on a specific filesystem. The appropriate pandas load/save methods are
+        dynamically identified by string matching on a best effort basis.
+
+        Args:
+            kind: String which is used to match the appropriate load/save method on a best
+                effort basis. For example if 'csv' is passed in the `pandas.read_csv` and
+                `pandas.DataFrame.to_csv` will be identified. An error will be raised unless
+                at least matching `read_{kind}` or `to_{kind}` method is identified.
+            filepath: Filepath in POSIX format to a file prefixed with a protocol like `s3://`.
+                If prefix is not provided, `file` protocol (local filesystem) will be used.
+                The prefix should be any protocol supported by ``fsspec``.
+                Key assumption: The first argument of either load/save method points to a
+                filepath/buffer/io type location. There are some read/write targets such
+                as 'clipboard' or 'records' that will fail since they do not take a
+                filepath like argument.
+            load_args: Pandas options for loading files.
+                Here you can find all available arguments:
+                https://pandas.pydata.org/pandas-docs/stable/reference/io.html
+                All defaults are preserved.
+            save_args: Pandas options for saving files.
+                Here you can find all available arguments:
+                https://pandas.pydata.org/pandas-docs/stable/reference/io.html
+                All defaults are preserved, but "index", which is set to False.
+            version: If specified, should be an instance of
+                ``kedro.io.core.Version``. If its ``load`` attribute is
+                None, the latest version will be loaded. If its ``save``
+                attribute is None, save version will be autogenerated.
+            credentials: Credentials required to get access to the underlying filesystem.
+                E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
+            fs_args: Extra arguments to pass into underlying filesystem class constructor
+                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``), as well as
+                to pass to the filesystem's `open` method through nested keys
+                `open_args_load` and `open_args_save`.
+                Here you can find all available arguments for `open`:
+                https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
+                All defaults are preserved, except `mode`, which is set to `r` when loading
+                and to `w` when saving.
+
+        Raises:
+            DataSetError: Will be raised if at least less than one appropriate
+                read or write methods are identified.
+        """
+
+        self._kind = kind.lower()
+
+        # Fail fast if provided a known non-filesystem target
+        if self._kind in NON_FILE_SYSTEM_TARGETS:
+            raise DataSetError(
+                f"Cannot create a dataset of kind `{self._kind}` as it "
+                f"it does not support a filepath target/source"
+            )
+
+        _fs_args = deepcopy(fs_args) or {}
+        _fs_open_args_load = _fs_args.pop("open_args_load", {})
+        _fs_open_args_save = _fs_args.pop("open_args_save", {})
+        _credentials = deepcopy(credentials) or {}
+
+        protocol, path = get_protocol_and_path(filepath)
+        if protocol == "file":
+            _fs_args.setdefault("auto_mkdir", True)
+
+        self._protocol = protocol
+        self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
+
+        super().__init__(
+            filepath=PurePosixPath(path),
+            version=version,
+            exists_function=self._fs.exists,
+            glob_function=self._fs.glob,
+        )
+
+        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
+        if load_args is not None:
+            self._load_args.update(load_args)
+        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
+        if save_args is not None:
+            self._save_args.update(save_args)
+
+        _fs_open_args_save.setdefault("mode", "w")
+        _fs_open_args_save.setdefault("newline", "")
+        self._fs_open_args_load = _fs_open_args_load
+        self._fs_open_args_save = _fs_open_args_save
+
+    def _load(self) -> Any:
+
+        load_path = get_filepath_str(self._get_load_path(), self._protocol)
+        load_method = _get_method_from_object(self._kind, "read", pd)
+        if load_method:
+            with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
+                return load_method(fs_file, **self._load_args)
+        raise DataSetError(
+            f"Unable to retrieve `pandas.read_{self._kind}` method, please ensure that your 'kind' "
+            "parameter has been defined correctly as per the Pandas API "
+            "https://pandas.pydata.org/docs/reference/io.html"
+        )
+
+    def _save(self, data: pd.DataFrame) -> None:
+
+        save_path = get_filepath_str(self._get_save_path(), self._protocol)
+        save_method = _get_method_from_object(self._kind, "to", pd.DataFrame)
+        if save_method:
+            with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
+                # Retrieve save method from instantiated DataFrame
+                df_save_method = getattr(data, getattr(save_method, "__name__"))
+                # KEY ASSUMPTION - first argument is path/buffer/io
+                df_save_method(fs_file, **self._save_args)
+                self._invalidate_cache()
+        else:
+            raise DataSetError(
+                f"Unable to retrieve `pandas.DataFrame.to_{self._kind}` method, please ensure "
+                "that your 'kind' parameter has been defined correctly as per the Pandas API "
+                "https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html"
+            )
+
+    def _exists(self) -> bool:
+        try:
+            load_path = get_filepath_str(self._get_load_path(), self._protocol)
+        except DataSetError:
+            return False
+
+        return self._fs.exists(load_path)
+
+    def _describe(self) -> Dict[str, Any]:
+        return dict(
+            kind=self._kind,
+            filepath=self._filepath,
+            protocol=self._protocol,
+            load_args=self._load_args,
+            save_args=self._save_args,
+            version=self._version,
+        )
+
+    def _release(self) -> None:
+        super()._release()
+        self._invalidate_cache()
+
+    def _invalidate_cache(self) -> None:
+        """Invalidate underlying filesystem caches."""
+        filepath = get_filepath_str(self._filepath, self._protocol)
+        self._fs.invalidate_cache(filepath)
+
+
+def _get_method_from_object(
+    suffix: str, prefix: str, obj: Union[Callable, Any]
+) -> Optional[Callable]:
+    """
+    This method retrieves a method from a given module/callable. In this
+    context it is used to get a DataFrame read or write method from the top
+    level pandas Module (for read) and the DataFrame class (for write).
+
+    Args:
+        suffix: The kind of read/write necessary i.e. csv, excel,
+        prefix: The prefix to ignore i.e. 'read_' or 'to_'
+        obj: The object to inspect i.e. `pandas` or `pandas.DataFrame`
+
+    Returns:
+        The relevant callable method from the object which matches the suffix
+    """
+
+    relevant_methods = [x for x in dir(obj) if x.lower().startswith(prefix.lower())]
+    named_methods = {x.replace(f"{prefix}_", "").lower(): x for x in relevant_methods}
+    mapped_method_name = named_methods.get(suffix.lower())
+    if mapped_method_name:
+        return getattr(obj, mapped_method_name)
+    return None

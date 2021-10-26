@@ -117,6 +117,10 @@ You can add new work to `extras` if you do not need to create a new Kedro CLI co
 .. note::  We will work with you to complete your contribution but we reserve the right to take over abandoned PRs.
 ```
 
+```eval_rst
+.. note::  When contributing a dataset be sure to add the classpath to `kedro.extras.datasets.rst` so that it appears correctly when the API section is built.
+```
+
 ## Create a pull request
 
 Create your pull request with a descriptive title. Before you submit it, consider the following:

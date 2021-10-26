@@ -26,59 +26,56 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``PlotlyDataSet`` generates a plot from a pandas DataFrame and saves it to a JSON
-file using an underlying filesystem (e.g.: local, S3, GCS). It loads the JSON into a
-plotly figure.
+"""``JSONDataSet`` loads/saves a plotly figure from/to a JSON file using an underlying
+filesystem (e.g.: local, S3, GCS).
 """
-from typing import Any, Dict
+from copy import deepcopy
+from pathlib import PurePosixPath
+from typing import Any, Dict, Union
 
-import pandas as pd
-import plotly.express as px
+import fsspec
+import plotly.io as pio
 from plotly import graph_objects as go
 
-from kedro.io.core import Version
+from kedro.io.core import (
+    AbstractVersionedDataSet,
+    Version,
+    get_filepath_str,
+    get_protocol_and_path,
+)
 
-from .json_dataset import JSONDataSet
 
+class JSONDataSet(AbstractVersionedDataSet):
+    """``JSONDataSet`` loads/saves a plotly figure from/to a JSON file using an
+    underlying filesystem (e.g.: local, S3, GCS).
 
-class PlotlyDataSet(JSONDataSet):
-    """``PlotlyDataSet`` generates a plot from a pandas DataFrame and saves it to a JSON
-    file using an underlying filesystem (e.g.: local, S3, GCS). It loads the JSON into a
-    plotly figure.
-
-    ``PlotlyDataSet`` is a convenience wrapper for ``plotly.JSONDataSet``. It generates
-    the JSON file directly from a pandas DataFrame through ``plotly_args``.
-
-    Example configuration for a PlotlyDataSet in the catalog:
+    Example:
     ::
 
-        >>> bar_plot:
-        >>>     type: plotly.PlotlyDataSet
-        >>>     filepath: data/08_reporting/bar_plot.json
-        >>>     plotly_args:
-        >>>         type: bar
-        >>>         fig:
-        >>>             x: features
-        >>>             y: importance
-        >>>             orientation: h
-        >>>         layout:
-        >>>             xaxis_title: x
-        >>>             yaxis_title: y
-        >>>             title: Test
+        >>> from kedro.extras.datasets.plotly import JSONDataSet
+        >>> import plotly.express as px
+        >>>
+        >>> fig = px.bar(x=["a", "b", "c"], y=[1, 3, 2])
+        >>> data_set = JSONDataSet(filepath="test.json")
+        >>> data_set.save(fig)
+        >>> reloaded = data_set.load()
+        >>> assert fig == reloaded
     """
+
+    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
+    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
     # pylint: disable=too-many-arguments
     def __init__(
         self,
         filepath: str,
-        plotly_args: Dict[str, Any],
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``PlotlyDataSet`` pointing to a concrete JSON file
+        """Creates a new instance of ``JSONDataSet`` pointing to a concrete JSON file
         on a specific filesystem.
 
         Args:
@@ -86,10 +83,6 @@ class PlotlyDataSet(JSONDataSet):
                 If prefix is not provided `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.
-            plotly_args: Plotly configuration for generating a plotly figure from the
-                dataframe. Keys are `type` (plotly express function, e.g. bar,
-                line, scatter), `fig` (kwargs passed to the plotting function), theme
-                (defaults to `plotly`), `layout`.
             load_args: Plotly options for loading JSON files.
                 Here you can find all available arguments:
                 https://plotly.com/python-api-reference/generated/plotly.io.from_json.html#plotly.io.from_json
@@ -113,20 +106,71 @@ class PlotlyDataSet(JSONDataSet):
                 All defaults are preserved, except `mode`, which is set to `w` when
                 saving.
         """
-        super().__init__(filepath, load_args, save_args, version, credentials, fs_args)
-        self._plotly_args = plotly_args
+        _fs_args = deepcopy(fs_args) or {}
+        _fs_open_args_load = _fs_args.pop("open_args_load", {})
+        _fs_open_args_save = _fs_args.pop("open_args_save", {})
+        _credentials = deepcopy(credentials) or {}
+
+        protocol, path = get_protocol_and_path(filepath, version)
+        if protocol == "file":
+            _fs_args.setdefault("auto_mkdir", True)
+
+        self._protocol = protocol
+        self._fs = fsspec.filesystem(self._protocol, **_credentials, **_fs_args)
+
+        super().__init__(
+            filepath=PurePosixPath(path),
+            version=version,
+            exists_function=self._fs.exists,
+            glob_function=self._fs.glob,
+        )
+
+        # Handle default load and save arguments
+        self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
+        if load_args is not None:
+            self._load_args.update(load_args)
+        self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
+        if save_args is not None:
+            self._save_args.update(save_args)
+
+        _fs_open_args_save.setdefault("mode", "w")
+        self._fs_open_args_load = _fs_open_args_load
+        self._fs_open_args_save = _fs_open_args_save
 
     def _describe(self) -> Dict[str, Any]:
-        return {**super()._describe(), "plotly_args": self._plotly_args}
+        return dict(
+            filepath=self._filepath,
+            protocol=self._protocol,
+            load_args=self._load_args,
+            save_args=self._save_args,
+            version=self._version,
+        )
 
-    def _save(self, data: pd.DataFrame) -> None:
-        fig = self._plot_dataframe(data)
-        super()._save(fig)
+    def _load(self) -> Union[go.Figure, go.FigureWidget]:
+        load_path = get_filepath_str(self._get_load_path(), self._protocol)
 
-    def _plot_dataframe(self, data: pd.DataFrame) -> go.Figure:
-        plot_type = self._plotly_args.get("type")
-        fig_params = self._plotly_args.get("fig", {})
-        fig = getattr(px, plot_type)(data, **fig_params)  # type: ignore
-        fig.update_layout(template=self._plotly_args.get("theme", "plotly"))
-        fig.update_layout(self._plotly_args.get("layout", {}))
-        return fig
+        with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
+            # read_json doesn't work correctly with file handler, so we have to read
+            # the file, decode it manually and pass to the low-level from_json instead.
+            return pio.from_json(str(fs_file.read(), "utf-8"), **self._load_args)
+
+    def _save(self, data: go.Figure) -> None:
+        save_path = get_filepath_str(self._get_save_path(), self._protocol)
+
+        with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
+            data.write_json(fs_file, **self._save_args)
+
+        self._invalidate_cache()
+
+    def _exists(self) -> bool:
+        load_path = get_filepath_str(self._get_load_path(), self._protocol)
+
+        return self._fs.exists(load_path)
+
+    def _release(self) -> None:
+        super()._release()
+        self._invalidate_cache()
+
+    def _invalidate_cache(self) -> None:
+        filepath = get_filepath_str(self._filepath, self._protocol)
+        self._fs.invalidate_cache(filepath)

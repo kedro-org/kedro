@@ -101,12 +101,15 @@ pandas_require = {
     "pandas.GBQTableDataSet": [PANDAS, "pandas-gbq>=0.12.0, <1.0"],
     "pandas.HDFDataSet": [PANDAS, "tables~=3.6"],
     "pandas.JSONDataSet": [PANDAS],
-    "pandas.ParquetDataSet": [PANDAS, "pyarrow>=0.12.0, <4.0.0"],
+    "pandas.ParquetDataSet": [PANDAS, "pyarrow>=0.12.0, <4.0"],
     "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy~=1.2"],
     "pandas.SQLQueryDataSet": [PANDAS, "SQLAlchemy~=1.2"],
 }
 pillow_require = {"pillow.ImageDataSet": ["Pillow~=8.0"]}
-plotly_require = {"plotly.PlotlyDataSet": [PANDAS, "plotly~=4.14"]}
+plotly_require = {
+    "plotly.PlotlyDataSet": [PANDAS, "plotly>=4.8.0, <6.0"],
+    "plotly.JSONDataSet": ["plotly>=4.8.0, <6.0"],
+}
 spark_require = {
     "spark.SparkDataSet": [SPARK, HDFS, S3FS],
     "spark.SparkHiveDataSet": [SPARK, HDFS, S3FS],

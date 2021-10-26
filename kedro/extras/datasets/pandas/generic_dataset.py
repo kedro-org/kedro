@@ -81,9 +81,9 @@ class GenericDataSet(AbstractVersionedDataSet):
         >>>     index: False
         >>>     date_format: "%Y-%m-%d"
 
-    This second example is able to load a SAS7BDAT file via the `pd.read_sas` method.
+    This second example is able to load a SAS7BDAT file via the :code:`pd.read_sas` method.
     Trying to save this dataset will raise a `DataSetError` since pandas does not provide an
-    equivalent `to_sas` write method.
+    equivalent :code:`pd.DataFrame.to_sas` write method.
 
     .. code-block:: yaml
 

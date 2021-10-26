@@ -26,27 +26,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""``PlotlyDataSet`` saves plotly objects to a JSON file and loads JSON plotly figures
-into plotly.graph_objects.Figure objects.
+"""``PlotlyDataSet`` generates a plot from a pandas DataFrame and saves it to a JSON
+file using an underlying filesystem (e.g.: local, S3, GCS). It loads the JSON into a
+plotly figure.
 """
 from typing import Any, Dict
 
 import pandas as pd
 import plotly.express as px
-import plotly.io as pio
-from plotly import graph_objects
+from plotly import graph_objects as go
 
-from kedro.extras.datasets.pandas import JSONDataSet
-from kedro.io.core import Version, get_filepath_str
+from kedro.io.core import Version
+
+from .json_dataset import JSONDataSet
 
 
 class PlotlyDataSet(JSONDataSet):
-    """``PlotlyDataSet`` saves a pandas DataFrame to a plotly JSON file.
+    """``PlotlyDataSet`` generates a plot from a pandas DataFrame and saves it to a JSON
+    file using an underlying filesystem (e.g.: local, S3, GCS). It loads the JSON into a
+    plotly figure.
 
-    The plotly JSON file can be saved to any underlying filesystem
-    supported by fsspec (e.g. local, S3, GCS).
-    Warning: This DataSet is not symmetric and doesn't load back
-    into pandas DataFrames, but into plotly.graph_objects.Figure.
+    ``PlotlyDataSet`` is a convenience wrapper for ``plotly.JSONDataSet``. It generates
+    the JSON file directly from a pandas DataFrame through ``plotly_args``.
 
     Example configuration for a PlotlyDataSet in the catalog:
     ::
@@ -59,14 +60,12 @@ class PlotlyDataSet(JSONDataSet):
         >>>         fig:
         >>>             x: features
         >>>             y: importance
-        >>>             orientation: 'h'
+        >>>             orientation: h
         >>>         layout:
-        >>>             xaxis_title: 'x'
-        >>>             yaxis_title: 'y'
-        >>>             title: 'Test'
+        >>>             xaxis_title: x
+        >>>             yaxis_title: y
+        >>>             title: Test
     """
-
-    DEFAULT_SAVE_ARGS = {}  # type: Dict[str, Any]
 
     # pylint: disable=too-many-arguments
     def __init__(
@@ -79,16 +78,18 @@ class PlotlyDataSet(JSONDataSet):
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
     ) -> None:
-        """Creates a new instance of ``PlotlyDataSet`` pointing to a plotly.graph_objects.Figure
-         saved as a concrete JSON file on a specific filesystem.
+        """Creates a new instance of ``PlotlyDataSet`` pointing to a concrete JSON file
+        on a specific filesystem.
 
         Args:
             filepath: Filepath in POSIX format to a JSON file prefixed with a protocol like `s3://`.
                 If prefix is not provided `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
                 Note: `http(s)` doesn't support versioning.
-            plotly_args: Plotly configuration for generating a plotly graph object Figure
-                representing the plotted data.
+            plotly_args: Plotly configuration for generating a plotly figure from the
+                dataframe. Keys are `type` (plotly express function, e.g. bar,
+                line, scatter), `fig` (kwargs passed to the plotting function), theme
+                (defaults to `plotly`), `layout`.
             load_args: Plotly options for loading JSON files.
                 Here you can find all available arguments:
                 https://plotly.com/python-api-reference/generated/plotly.io.from_json.html#plotly.io.from_json
@@ -96,7 +97,7 @@ class PlotlyDataSet(JSONDataSet):
             save_args: Plotly options for saving JSON files.
                 Here you can find all available arguments:
                 https://plotly.com/python-api-reference/generated/plotly.io.write_json.html
-                All defaults are preserved, but "index", which is set to False.
+                All defaults are preserved.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -109,8 +110,8 @@ class PlotlyDataSet(JSONDataSet):
                 `open_args_load` and `open_args_save`.
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
-                All defaults are preserved, except `mode`, which is set to `r` when loading
-                and to `w` when saving.
+                All defaults are preserved, except `mode`, which is set to `w` when
+                saving.
         """
         super().__init__(filepath, load_args, save_args, version, credentials, fs_args)
         self._plotly_args = plotly_args
@@ -119,40 +120,13 @@ class PlotlyDataSet(JSONDataSet):
         return {**super()._describe(), "plotly_args": self._plotly_args}
 
     def _save(self, data: pd.DataFrame) -> None:
-        plot_data = _plotly_express_wrapper(data, self._plotly_args)
+        fig = self._plot_dataframe(data)
+        super()._save(fig)
 
-        full_key_path = get_filepath_str(self._get_save_path(), self._protocol)
-        with self._fs.open(full_key_path, **self._fs_open_args_save) as fs_file:
-            plot_data.write_json(fs_file, **self._save_args)
-
-        self._invalidate_cache()
-
-    def _load(self) -> graph_objects.Figure:
-        load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
-            # read_json doesn't work correctly with file handler, so we have to read the file,
-            # decode it manually and pass to the low-level from_json instead.
-            return pio.from_json(str(fs_file.read(), "utf-8"), **self._load_args)
-
-
-def _plotly_express_wrapper(
-    data: pd.DataFrame, plotly_config: Dict[str, Any]
-) -> graph_objects.Figure:
-    """Generates plotly graph object Figure based on the type of plotting
-    and config provided in the catalog.
-
-    Args:
-        data: pandas dataframe to generate plotly Figure for
-        plotly_config: plotly configurations specified in the catalog to be used
-
-    Returns:
-        A plotly graph_object figure representing the plotted data
-    """
-    fig_params = plotly_config.get("fig")
-    plot = plotly_config.get("type")
-    theme = plotly_config.get("theme", "plotly")
-    layout_params = plotly_config.get("layout", {})
-    fig = getattr(px, plot)(data, **fig_params)  # type: ignore
-    fig.update_layout(template=theme)
-    fig.update_layout(layout_params)
-    return fig
+    def _plot_dataframe(self, data: pd.DataFrame) -> go.Figure:
+        plot_type = self._plotly_args.get("type")
+        fig_params = self._plotly_args.get("fig", {})
+        fig = getattr(px, plot_type)(data, **fig_params)  # type: ignore
+        fig.update_layout(template=self._plotly_args.get("theme", "plotly"))
+        fig.update_layout(self._plotly_args.get("layout", {}))
+        return fig

@@ -6,6 +6,7 @@
 
 ## Bug fixes and other changes
 * Fixed an issue where `kedro new --config config.yml` was ignoring the config file when `prompts.yml` didn't exist.
+* Added documentation for `kedro viz --autoreload`.
 * Added support for arbitrary backends (via importable module paths) that satisfy the `pickle` interface to `PickleDataSet`.
 * Added support for `sum` syntax for connecting pipeline objects.
 * Upgraded `pip-tools`, which is used by `kedro build-reqs`, to 6.4. This `pip-tools` version requires `pip>=21.2` while [adding support for `pip>=21.3`](https://github.com/jazzband/pip-tools/pull/1501). To upgrade `pip`, please refer to [their documentation](https://pip.pypa.io/en/stable/installing/#upgrading-pip).
@@ -19,9 +20,10 @@
 
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman),
+[Brites](https://github.com/brites101),
 [Manish Swami](https://github.com/ManishS6),
-[Zain Patel](https://github.com/mzjp2)
-[Simon Brugman](https://github.com/sbrugman)
+[Zain Patel](https://github.com/mzjp2),
+[Simon Brugman](https://github.com/sbrugman),
 [Louis de Charsonville](https://github.com/louisdecharson)
 
 # Release 0.17.5
@@ -45,6 +47,9 @@
 * Bumped minimum required `fsspec` version to 2021.04.
 * Fixed the `kedro install` and `kedro build-reqs` flows when uninstalled dependencies are present in a project's `settings.py`, `context.py` or `hooks.py` ([Issue #829](https://github.com/quantumblacklabs/kedro/issues/829)).
 * Imports are now refactored at `kedro pipeline package` and `kedro pipeline pull` time, so that _aliasing_ a modular pipeline doesn't break it.
+* Added option to `pandas.SQLQueryDataSet` to specify a `filepath` with a SQL query, in addition to the current method of supplying the query itself in the `sql` argument.
+
+## Minor breaking changes to the API
 * Pinned `dynaconf` to `<3.1.6` because the method signature for `_validate_items` changed which is used in Kedro.
 
 ## Upcoming deprecations for Kedro 0.18.0
@@ -53,7 +58,8 @@
 
 ## Thanks for supporting contributions
 [Moussa Taifi](https://github.com/moutai),
-[Deepyaman Datta](https://github.com/deepyaman)
+[Deepyaman Datta](https://github.com/deepyaman),
+[Benjamin Levy](https://github.com/BenjaminLevyQB)
 
 # Release 0.17.4
 

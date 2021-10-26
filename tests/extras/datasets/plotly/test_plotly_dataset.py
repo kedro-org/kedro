@@ -58,17 +58,13 @@ def plotly_data_set(filepath_json, load_args, save_args, fs_args, plotly_args):
     )
 
 
-@pytest.fixture(
-    params=[
-        {
-            "fig": {"orientation": "h", "x": "col1", "y": "col2"},
-            "layout": {"title": "Test", "xaxis_title": "x", "yaxis_title": "y"},
-            "type": "scatter",
-        }
-    ]
-)
-def plotly_args(request):
-    return request.param
+@pytest.fixture
+def plotly_args():
+    return {
+        "fig": {"orientation": "h", "x": "col1", "y": "col2"},
+        "layout": {"title": "Test", "xaxis_title": "x", "yaxis_title": "y"},
+        "type": "scatter",
+    }
 
 
 @pytest.fixture

@@ -20,6 +20,7 @@
 * Relaxed the bounds on the `plotly` requirement for `plotly.PlotlyDataSet`.
 * `kedro pipeline package <pipeline>` now raises an error if the `<pipeline>` argument doesn't look like a valid Python module path (e.g. has `/` instead of `.`).
 * Fixed slow startup because of catalog processing by reducing the exponential growth of extra processing during `_FrozenDatasets` creations.
+* Fixed an issue where nested pipeline configuration was not included in the packaged pipeline.
 
 ## Minor breaking changes to the API
 

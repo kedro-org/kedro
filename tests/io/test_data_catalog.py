@@ -302,6 +302,18 @@ class TestDataCatalog:
         with pytest.raises(AttributeError, match=pattern):
             data_catalog_from_config.datasets.new_dataset = None
 
+    def test_add_feed_dict_should_grow_linearly(self, mocker, data_catalog_from_config):
+        """Check number of calls to `_sub_nonword_chars` when adding feed dict
+        should grow linearly with the number of keys in the dict.
+        Simulate this issue: https://github.com/quantumblacklabs/kedro/issues/951
+        """
+        mock_sub_nonword_chars = mocker.patch(
+            "kedro.io.data_catalog._sub_nonword_chars"
+        )
+        feed_dict = {"key1": "val1", "key2": "val2", "key3": "val3", "key4": "val4"}
+        data_catalog_from_config.add_feed_dict(feed_dict)
+        assert mock_sub_nonword_chars.call_count == len(feed_dict)
+
     def test_mutating_datasets_not_allowed(self, data_catalog_from_config):
         """Check error if user tries to update the datasets attribute"""
         pattern = "Please change datasets through configuration."

@@ -312,6 +312,52 @@ class TestPipelinePackageCommand:
         assert "retail/config/parameters/retail.yml" in wheel_contents
         assert "retail/config/parameters/retail_banking.yml" not in wheel_contents
 
+    def test_package_pipeline_with_deep_nested_parameters(
+        self, fake_repo_path, fake_project_cli, fake_metadata
+    ):
+        CliRunner().invoke(
+            fake_project_cli, ["pipeline", "create", "retail"], obj=fake_metadata
+        )
+        deep_nested_param_path = Path(
+            fake_repo_path / "conf" / "base" / "parameters" / "deep" / "retail"
+        )
+        deep_nested_param_path.mkdir(parents=True, exist_ok=True)
+        (deep_nested_param_path / "params1.yml").touch()
+
+        deep_nested_param_path2 = Path(
+            fake_repo_path / "conf" / "base" / "parameters" / "retail" / "deep"
+        )
+        deep_nested_param_path2.mkdir(parents=True, exist_ok=True)
+        (deep_nested_param_path2 / "params1.yml").touch()
+
+        deep_nested_param_path3 = Path(
+            fake_repo_path / "conf" / "base" / "parameters" / "deep"
+        )
+        deep_nested_param_path3.mkdir(parents=True, exist_ok=True)
+        (deep_nested_param_path3 / "retail.yml").touch()
+
+        result = CliRunner().invoke(
+            fake_project_cli, ["pipeline", "package", "retail"], obj=fake_metadata
+        )
+
+        assert result.exit_code == 0
+        assert "Pipeline `retail` packaged!" in result.output
+
+        wheel_location = fake_repo_path / "src" / "dist"
+        assert f"Location: {wheel_location}" in result.output
+
+        wheel_name = _get_wheel_name(name="retail", version="0.1")
+        wheel_file = wheel_location / wheel_name
+        assert wheel_file.is_file()
+        assert len(list(wheel_location.iterdir())) == 1
+
+        # pylint: disable=consider-using-with
+        wheel_contents = set(ZipFile(str(wheel_file)).namelist())
+        assert "retail/config/parameters/deep/retail/params1.yml" in wheel_contents
+        assert "retail/config/parameters/retail/deep/params1.yml" in wheel_contents
+        assert "retail/config/parameters/retail.yml" in wheel_contents
+        assert "retail/config/parameters/deep/retail.yml" in wheel_contents
+
     def test_pipeline_package_version(
         self, fake_repo_path, fake_package_path, fake_project_cli, fake_metadata
     ):

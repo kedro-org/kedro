@@ -681,7 +681,7 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
     # config files not to confuse users and avoid useless file copies
     configs_to_package = _find_config_files(
         artifacts_to_package.pipeline_conf,
-        [f"parameters*/**/{pipeline_name}.yml", f"parameters*/**/{pipeline_name}/*"],
+        [f"parameters*/**/{pipeline_name}.yml", f"parameters*/**/{pipeline_name}/**/*"],
     )
 
     source_paths = (
@@ -942,6 +942,7 @@ def _generate_setup_file(
             "config/**/parameters*",
             "config/parameters*/**",
             "config/parameters*/**/*",
+            "config/parameters*/**/**/*",
         ]
     }
     setup_file_context = dict(

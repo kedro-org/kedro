@@ -182,6 +182,9 @@ commands:
     description: Install Kedro dependencies
     steps:
       - run:
+          name: Install GDAL
+          command: conda activate kedro_builder; conda install -c conda-forge gdal -y
+      - run:
           name: Install Fiona
           command: conda activate kedro_builder; conda install -c conda-forge fiona -y
       - run:
@@ -477,7 +480,8 @@ workflows:
             - win_pip_compile_38
             - win_unit_tests_36
             - win_unit_tests_37
-            - win_e2e_tests_36
+            # Skipped due to `pywin32 is in an unsupported or invalid wheel`
+            # - win_e2e_tests_36
             # Skipped due to Windows fatal exception: stack overflow
             # - win_unit_tests_38
             - win_e2e_tests_37

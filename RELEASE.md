@@ -2,10 +2,16 @@
 
 ## Major features and improvements
 * Added `pipelines` global variable to IPython extension, allowing you to access the project's pipelines in `kedro ipython` or `kedro jupyter notebook`.
+* Enabled overriding nested parameters with `params` in CLI, i.e. `kedro run --params="model.model_tuning.booster:gbtree"` updates parameters to `{"model": {"model_tuning": {"booster": "gbtree"}}}`.
 
 ## Bug fixes and other changes
 * Fixed an issue where `kedro new --config config.yml` was ignoring the config file when `prompts.yml` didn't exist.
 * Added documentation for `kedro viz --autoreload`.
+* Added support for arbitrary backends (via importable module paths) that satisfy the `pickle` interface to `PickleDataSet`.
+* Added support for `sum` syntax for connecting pipeline objects.
+* Upgraded `pip-tools`, which is used by `kedro build-reqs`, to 6.4. This `pip-tools` version requires `pip>=21.2` while [adding support for `pip>=21.3`](https://github.com/jazzband/pip-tools/pull/1501). To upgrade `pip`, please refer to [their documentation](https://pip.pypa.io/en/stable/installing/#upgrading-pip).
+* Extended ``ExcelDataSet`` to support saving Excel files with multiple sheets.
+* `kedro pipeline package <pipeline>` now raises an error if the `<pipeline>` argument doesn't look like a valid Python module path (e.g. has `/` instead of `.`).
 
 ## Minor breaking changes to the API
 
@@ -13,7 +19,11 @@
 
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman),
-[Brites](https://github.com/brites101)
+[Brites](https://github.com/brites101),
+[Manish Swami](https://github.com/ManishS6),
+[Zain Patel](https://github.com/mzjp2),
+[Simon Brugman](https://github.com/sbrugman),
+[Louis de Charsonville](https://github.com/louisdecharson)
 
 # Release 0.17.5
 
@@ -36,6 +46,9 @@
 * Bumped minimum required `fsspec` version to 2021.04.
 * Fixed the `kedro install` and `kedro build-reqs` flows when uninstalled dependencies are present in a project's `settings.py`, `context.py` or `hooks.py` ([Issue #829](https://github.com/quantumblacklabs/kedro/issues/829)).
 * Imports are now refactored at `kedro pipeline package` and `kedro pipeline pull` time, so that _aliasing_ a modular pipeline doesn't break it.
+* Added option to `pandas.SQLQueryDataSet` to specify a `filepath` with a SQL query, in addition to the current method of supplying the query itself in the `sql` argument.
+
+## Minor breaking changes to the API
 * Pinned `dynaconf` to `<3.1.6` because the method signature for `_validate_items` changed which is used in Kedro.
 
 ## Upcoming deprecations for Kedro 0.18.0
@@ -44,7 +57,8 @@
 
 ## Thanks for supporting contributions
 [Moussa Taifi](https://github.com/moutai),
-[Deepyaman Datta](https://github.com/deepyaman)
+[Deepyaman Datta](https://github.com/deepyaman),
+[Benjamin Levy](https://github.com/BenjaminLevyQB)
 
 # Release 0.17.4
 
@@ -225,7 +239,7 @@ from kedro.framework.session import KedroSession
 * `ProjectContext` is no longer needed, unless for very complex customisations. `KedroContext`, `ProjectHooks` and `settings.py` together implement sensible default behaviour. As a result `context_path` is also now an _optional_ key in `pyproject.toml`.
 * Removed `ProjectContext` from `src/<package_name>/run.py`.
 * `TemplatedConfigLoader` now supports [Jinja2 template syntax](https://jinja.palletsprojects.com/en/2.11.x/templates/) alongside its original syntax.
-* Made [registration Hooks](https://kedro.readthedocs.io/en/stable/07_extend_kedro/04_hooks.html#registration-hooks) mandatory, as the only way to customise the `ConfigLoader` or the `DataCatalog` used in a project. If no such Hook is provided in `src/<package_name>/hooks.py`, a `KedroContextError` is raised. There are sensible defaults defined in any project generated with Kedro >= 0.16.5.
+* Made [registration Hooks](https://kedro.readthedocs.io/en/stable/07_extend_kedro/02_hooks.html#registration-hooks) mandatory, as the only way to customise the `ConfigLoader` or the `DataCatalog` used in a project. If no such Hook is provided in `src/<package_name>/hooks.py`, a `KedroContextError` is raised. There are sensible defaults defined in any project generated with Kedro >= 0.16.5.
 
 ## Bug fixes and other changes
 

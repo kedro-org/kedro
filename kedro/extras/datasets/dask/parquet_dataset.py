@@ -41,7 +41,7 @@ from kedro.io.core import AbstractDataSet, get_protocol_and_path
 class ParquetDataSet(AbstractDataSet):
     """``ParquetDataSet`` loads and saves data to parquet file(s). It uses Dask
     remote data services to handle the corresponding load and save operations:
-    https://docs.dask.org/en/latest/remote-data-services.html
+    https://docs.dask.org/en/latest/how-to/connect-to-remote-data.html
 
         Example (AWS S3):
         ::
@@ -95,7 +95,7 @@ class ParquetDataSet(AbstractDataSet):
             credentials: Credentials required to get access to the underlying filesystem.
                 E.g. for ``GCSFileSystem`` it should look like `{"token": None}`.
             fs_args: Optional parameters to the backend file system driver:
-                https://docs.dask.org/en/latest/remote-data-services.html#optional-parameters
+                https://docs.dask.org/en/latest/how-to/connect-to-remote-data.html#optional-parameters
         """
         self._filepath = filepath
         self._fs_args = deepcopy(fs_args) or {}

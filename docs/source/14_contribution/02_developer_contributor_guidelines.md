@@ -118,7 +118,11 @@ You can add new work to `extras` if you do not need to create a new Kedro CLI co
 ```
 
 ```eval_rst
-.. note::  When contributing a dataset be sure to add the classpath to `kedro.extras.datasets.rst` so that it appears correctly when the API section is built.
+.. note::  There are two special considerations for when contributing a dataset
+
+   1. Add the dataset to the the `doctree <kedro.extras.datasets.rst>`_ so it shows up in the API documentation.
+   2. Add the dataset to catalog `jsonschema <https://github.com/quantumblacklabs/kedro/blob/master/static/jsonschema/kedro-catalog-0.17.json>`_ for IDE validation.
+
 ```
 
 ## Create a pull request

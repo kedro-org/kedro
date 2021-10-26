@@ -211,8 +211,8 @@ Kedro has options to modify pipeline runs. Here is a list of CLI arguments suppo
 +---------------------------------------------------------------------------+-----------------------------------------------------------------------------------------+---------------------------+
 | :code:`kedro run --config config.yml`                                     | Specify all command line options in a configuration file called config.yml              | No                        |
 +---------------------------------------------------------------------------+-----------------------------------------------------------------------------------------+---------------------------+
-| :code:`kedro run --params param_key1:value1,param_key2:2.0`               | Does a parametrised kedro run with :code:`{"param_key1": "value1", "param_key2": 2}`.   | Yes                       |
-|                                                                           | This will take precedence over parameters defined in :code:`conf` directory             |                           |
+| :code:`kedro run --params param_key1:value1,param_key2:2.0`               | Does a parametrised kedro run with :code:`{"param_key1": "value1", "param_key2": 2}`,   | Yes                       |
+|                                                                           | these will take precedence over parameters defined in the :code:`conf` directory        |                           |
 +---------------------------------------------------------------------------+-----------------------------------------------------------------------------------------+---------------------------+
 | :code:`kedro run --params param_level1.param_level2:value`                | Does a parametrised Kedro run (referencing a specific level of nesting) equivalent to   | Yes                       |
 |                                                                           | :code:`{"param_level1": {"param_level2": 2}}`                                           |                           |

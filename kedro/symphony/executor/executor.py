@@ -69,7 +69,7 @@ class AbstractExecutor(ABC):
 
     def run(
         self, nodes: Iterable[Node], catalog: DataCatalog, run_id: str = None
-    ) -> Dict[str, Any]:
+    ) -> None:
         """Run the nodes using the ``DataSet``s provided by ``catalog``
         and save results back to the same objects.
 
@@ -109,8 +109,6 @@ class AbstractExecutor(ABC):
         self._run(nodes, catalog, run_id)
 
         self._logger.debug("Node execution completed successfully.")
-
-        return {ds_name: catalog.load(ds_name) for ds_name in free_outputs}
 
     @abstractmethod  # pragma: no cover
     def _run(

@@ -129,8 +129,9 @@ extras_require = {
     "biosequence": _collect_requirements(biosequence_require),
     "dask": _collect_requirements(dask_require),
     "docs": [
-        "sphinx~=4.0",
-        "sphinx_rtd_theme==1.0.0",
+        "docutils==0.16",
+        "sphinx~=3.4.3",
+        "sphinx_rtd_theme==0.4.1",
         "nbsphinx==0.8.1",
         "nbstripout~=0.4",
         "recommonmark==0.7.1",

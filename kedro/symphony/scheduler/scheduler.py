@@ -1,0 +1,2 @@
+"""``AbstractScheduler`` class definition.
+"""

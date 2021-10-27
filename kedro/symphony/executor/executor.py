@@ -1,0 +1,2 @@
+"""``AbstractExecutor`` class definition.
+"""

@@ -845,8 +845,19 @@ def _refactor_code_for_package(
         _sync_dirs(tests_path, full_path, overwrite=True)
 
     # Refactor imports in src/package_name/pipelines/pipeline_name
-    # and imports of `pipeline_name` in tests
-    _move_package(project, package_target.as_posix(), "")
+    # and imports of `pipeline_name` in tests.
+    # We can only rename top-level packages, not nested structures,
+    # therefore we move it to top level first, then rename
+    if package_target.stem == project_metadata.package_name:
+        tmp_name = "extracted_src"
+        tmp_module = package_target.parent / tmp_name
+        _rename_package(project, package_target.as_posix(), tmp_name)
+        _move_package(project, tmp_module.as_posix(), "")
+        shutil.rmtree(Path(project.address) / project_metadata.package_name)
+        _rename_package(project, tmp_name, project_metadata.package_name)
+    else:
+        _move_package(project, package_target.as_posix(), "")
+        shutil.rmtree(Path(project.address) / project_metadata.package_name)
     if alias:
         pipeline_name = package_target.stem
         _rename_package(project, pipeline_name, alias)
@@ -864,8 +875,6 @@ def _refactor_code_for_package(
         _move_package(project, tmp_module.as_posix(), "")
         shutil.rmtree(Path(project.address) / "tests")
         _rename_package(project, tmp_name, "tests")
-
-    shutil.rmtree(Path(project.address) / project_metadata.package_name)
 
 
 _SourcePathType = Union[Path, List[Tuple[Path, str]]]

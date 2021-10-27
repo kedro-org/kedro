@@ -9,7 +9,7 @@ Kedro plugins allow you to create new features for Kedro and inject additional c
 
 ## Overview
 
-Kedro uses [`setuptools`](https://setuptools.readthedocs.io/en/latest/setuptools.html), which is a collection of enhancements to the Python `distutils` to allow developers to build and distribute Python packages. Kedro uses various entry points in [`pkg_resources`](https://setuptools.readthedocs.io/en/latest/setuptools.html#dynamic-discovery-of-services-and-plugins) to provide plugin functionality.
+Kedro uses [`setuptools`](https://setuptools.pypa.io/en/latest/setuptools.html), which is a collection of enhancements to the Python `distutils` to allow developers to build and distribute Python packages. Kedro uses various entry points in [`pkg_resources`](https://setuptools.readthedocs.io/en/latest/setuptools.html#dynamic-discovery-of-services-and-plugins) to provide plugin functionality.
 
 ## Example of a simple plugin
 
@@ -153,7 +153,7 @@ When you are ready to submit your code:
 2. Choose a command approach: `global` and / or `project` commands:
    - All `global` commands should be provided as a single `click` group
    - All `project` commands should be provided as another `click` group
-   - The `click` groups are declared through the [`pkg_resources` entry_point system](https://setuptools.readthedocs.io/en/latest/setuptools.html#dynamic-discovery-of-services-and-plugins)
+   - The `click` groups are declared through the [`pkg_resources` entry_point system](https://setuptools.pypa.io/en/latest/setuptools.html#dynamic-discovery-of-services-and-plugins)
 3. Include a `README.md` describing your plugin's functionality and all dependencies that should be included
 4. Use GitHub tagging to tag your plugin as a `kedro-plugin` so that we can find it
 

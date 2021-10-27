@@ -312,17 +312,13 @@ implementation from the [scikit-learn](https://scikit-learn.org/stable/) library
 ### Update dependencies
 We now need to add `scikit-learn` to the project's dependencies. This is a slightly different process from the initial change we made early in the tutorial.
 
-To **update** the project's dependencies, you should modify `src/requirements.in` to add the following. Note that you do not need to update ``src/requirements.txt`` as you did previously in the tutorial before you built the project's requirements with ``kedro build-reqs``:
+To **update** the project's dependencies, you should modify `src/requirements.txt` to add the following:
 
 ```text
 scikit-learn==0.23.1
 ```
 
-Then, re-run `kedro install` with a flag telling Kedro to recompile the requirements:
-
-```bash
-kedro install --build-reqs
-```
+Then, re-run `pip install -r src/requirements.txt` to install the updated project requirements.
 
 You can find out more about [how to work with project dependencies](../04_kedro_project_setup/01_dependencies) in the Kedro project documentation.
 

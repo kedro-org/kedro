@@ -53,6 +53,9 @@ from kedro.framework.session.store import BaseSessionStore
 from kedro.io.core import generate_timestamp
 from kedro.runner import AbstractRunner, SequentialRunner
 
+from kedro.symphony.conductor import Conductor
+from kedro.symphony.scheduler.toposort_scheduler import ToposortScheduler
+
 _active_session = None
 
 
@@ -421,15 +424,17 @@ class KedroSession:
             save_version=save_version, load_versions=load_versions
         )
 
-        # Run the runner
-        runner = runner or SequentialRunner()
+        scheduler = ToposortScheduler(filtered_pipeline)
+        conductor = Conductor(scheduler, catalog)  # TODO: Accept run_id.
+
         hook_manager = get_hook_manager()
         hook_manager.hook.before_pipeline_run(  # pylint: disable=no-member
             run_params=record_data, pipeline=filtered_pipeline, catalog=catalog
         )
 
         try:
-            run_result = runner.run(filtered_pipeline, catalog, run_id)
+            conductor.run()
+            run_result = {}
         except Exception as error:
             hook_manager.hook.on_pipeline_error(
                 error=error,

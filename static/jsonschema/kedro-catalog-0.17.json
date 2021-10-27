@@ -353,15 +353,15 @@
               },
               "data": {
                 "pattern": ".*",
-                "description": "The request payload, used for POST, PUT, etc requests\nhttps://requests.readthedocs.io/en/master/user/quickstart/#more-complicated-post-requests"
+                "description": "The request payload, used for POST, PUT, etc requests\nhttps://docs.python-requests.org/en/master/user/quickstart/#more-complicated-post-requests"
               },
               "params": {
                 "type": "object",
-                "description": "The url parameters of the API.\nhttps://requests.readthedocs.io/en/master/user/quickstart/#passing-parameters-in-urls"
+                "description": "The url parameters of the API.\nhttps://docs.python-requests.org/en/master/user/quickstart/#passing-parameters-in-urls"
               },
               "headers": {
                 "type": "object",
-                "description": "The HTTP headers.\nhttps://requests.readthedocs.io/en/master/user/quickstart/#custom-headers"
+                "description": "The HTTP headers.\nhttps://docs.python-requests.org/en/master/user/quickstart/#custom-headers"
               },
               "auth": {
                 "pattern": ".*",
@@ -369,11 +369,11 @@
               },
               "json": {
                 "pattern": ".*",
-                "description": "The request payload, used for POST, PUT, etc requests, passed in\nto the json kwarg in the requests object.\nhttps://requests.readthedocs.io/en/master/user/quickstart/#more-complicated-post-requests"
+                "description": "The request payload, used for POST, PUT, etc requests, passed in\nto the json kwarg in the requests object.\nhttps://docs.python-requests.org/en/master/user/quickstart/#more-complicated-post-requests"
               },
               "timeout": {
                 "type": "integer",
-                "description": "The wait time in seconds for a response, defaults to 1 minute.\nhttps://requests.readthedocs.io/en/master/user/quickstart/#timeouts"
+                "description": "The wait time in seconds for a response, defaults to 1 minute.\nhttps://docs.python-requests.org/en/master/user/quickstart/#timeouts"
               }
             }
           }

@@ -27,7 +27,7 @@
 # limitations under the License.
 
 """``APIDataSet`` loads the data from HTTP(S) APIs.
-It uses the python requests library: https://requests.readthedocs.io/en/master/
+It uses the python requests library: https://docs.python-requests.org/en/master/
 """
 import socket
 from typing import Any, Dict, List, Tuple, Union
@@ -40,7 +40,7 @@ from kedro.io.core import AbstractDataSet, DataSetError
 
 class APIDataSet(AbstractDataSet):
     """``APIDataSet`` loads the data from HTTP(S) APIs.
-    It uses the python requests library: https://requests.readthedocs.io/en/master/
+    It uses the python requests library: https://docs.python-requests.org/en/master/
 
     Example:
     ::
@@ -80,18 +80,18 @@ class APIDataSet(AbstractDataSet):
             url: The API URL endpoint.
             method: The Method of the request, GET, POST, PUT, DELETE, HEAD, etc...
             data: The request payload, used for POST, PUT, etc requests
-                https://requests.readthedocs.io/en/master/user/quickstart/#more-complicated-post-requests
+                https://docs.python-requests.org/en/master/user/quickstart/#more-complicated-post-requests
             params: The url parameters of the API.
-                https://requests.readthedocs.io/en/master/user/quickstart/#passing-parameters-in-urls
+                https://docs.python-requests.org/en/master/user/quickstart/#passing-parameters-in-urls
             headers: The HTTP headers.
-                https://requests.readthedocs.io/en/master/user/quickstart/#custom-headers
+                https://docs.python-requests.org/en/master/user/quickstart/#custom-headers
             auth: Anything ``requests`` accepts. Normally it's either ``('login', 'password')``,
                 or ``AuthBase``, ``HTTPBasicAuth`` instance for more complex cases.
             json: The request payload, used for POST, PUT, etc requests, passed in
                 to the json kwarg in the requests object.
-                https://requests.readthedocs.io/en/master/user/quickstart/#more-complicated-post-requests
+                https://docs.python-requests.org/en/master/user/quickstart/#more-complicated-post-requests
             timeout: The wait time in seconds for a response, defaults to 1 minute.
-                https://requests.readthedocs.io/en/master/user/quickstart/#timeouts
+                https://docs.python-requests.org/en/master/user/quickstart/#timeouts
 
         """
         super().__init__()

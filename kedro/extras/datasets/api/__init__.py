@@ -28,7 +28,7 @@
 
 """``APIDataSet`` loads the data from HTTP(S) APIs
 and returns them into either as string or json Dict.
-It uses the python requests library: https://requests.readthedocs.io/en/master/
+It uses the python requests library: https://docs.python-requests.org/en/master/
 """
 
 __all__ = ["APIDataSet"]

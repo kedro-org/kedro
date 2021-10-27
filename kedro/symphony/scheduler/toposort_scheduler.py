@@ -13,6 +13,7 @@ class ToposortScheduler(AbstractScheduler):
 
     Returns the nodes that are next in the topologically sorted order.
     """
+
     def __init__(self, pipeline: Pipeline):
         """Constructor.
 

@@ -91,9 +91,6 @@ class AbstractExecutor(ABC):
         # TODO(deepyaman): Don't construct pipeline objects just to make
         #     checking catalog entries easier.
         pipeline = Pipeline(nodes)
-
-        catalog = catalog.shallow_copy()
-
         unsatisfied = pipeline.inputs() - set(catalog.list())
         if unsatisfied:
             raise ValueError(

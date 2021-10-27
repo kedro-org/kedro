@@ -24,11 +24,11 @@ class Conductor:
         self,
         scheduler: AbstractScheduler,
         catalog: DataCatalog,
-        default_executor: str = "SequentialExecutor",
+        default_executor: str = "executor:kedro.symphony.executor.sequential_executor.SequentialExecutor",
     ):
         self.scheduler = scheduler
         self.default_executor = default_executor
-        self.catalog = catalog
+        self.catalog = catalog.shallow_copy()
         self.allocated_nodes = {}
 
     def run(self):
@@ -39,8 +39,9 @@ class Conductor:
             ] = self._allocate_nodes_to_executors(ready_nodes)
             for executor_name, nodes in allocated_ready_nodes.items():
                 # this should be a singleton and not instantiated every time
-                executor = load_obj(executor_name.split(_EXECUTOR_TAG_PREFIX)[1])
-                executor.run(nodes, self.catalog)
+                executor_class = load_obj(executor_name.split(_EXECUTOR_TAG_PREFIX)[1])
+                executor = executor_class(nodes, False)
+                executor.run(nodes=nodes, catalog=self.catalog)
 
     def _allocate_nodes_to_executors(
         self, ready_nodes: List[Node]

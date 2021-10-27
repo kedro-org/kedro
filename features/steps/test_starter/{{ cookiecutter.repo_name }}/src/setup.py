@@ -53,7 +53,7 @@ setup(
     extras_require={
         "docs": [
             "sphinx~=4.0",
-            "sphinx_rtd_theme==0.5.1",
+            "sphinx_rtd_theme==1.0.0",
             "nbsphinx==0.8.1",
             "nbstripout~=0.4",
             "recommonmark==0.7.1",

@@ -71,7 +71,7 @@ class SequentialExecutor(AbstractExecutor):
         """The method implementing sequential node running.
 
         Args:
-            pipeline: The nodes to run.
+            nodes: The nodes to run.
             catalog: The ``DataCatalog`` from which to fetch data.
             run_id: The id of the run.
 

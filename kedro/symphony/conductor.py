@@ -10,6 +10,9 @@ from kedro.io.data_catalog import DataCatalog
 
 
 _EXECUTOR_TAG_PREFIX = "executor:"
+DEFAULT_EXECUTOR = (
+    "executor:kedro.symphony.executor.sequential_executor.SequentialExecutor"
+)
 
 
 class Conductor:
@@ -24,7 +27,7 @@ class Conductor:
         self,
         scheduler: AbstractScheduler,
         catalog: DataCatalog,
-        default_executor: str = "executor:kedro.symphony.executor.sequential_executor.SequentialExecutor",
+        default_executor: str = DEFAULT_EXECUTOR,
     ):
         self.scheduler = scheduler
         self.default_executor = default_executor
@@ -36,15 +39,16 @@ class Conductor:
         for ready_nodes in self.scheduler:
             allocated_ready_nodes: Dict[
                 str, List[Node]
-            ] = self._allocate_nodes_to_executors(ready_nodes)
+            ] = self.allocate_nodes_to_executors(ready_nodes, self.default_executor)
             for executor_name, nodes in allocated_ready_nodes.items():
                 # this should be a singleton and not instantiated every time
                 executor_class = load_obj(executor_name.split(_EXECUTOR_TAG_PREFIX)[1])
                 executor = executor_class(nodes, False)
                 executor.run(nodes=nodes, catalog=self.catalog)
 
-    def _allocate_nodes_to_executors(
-        self, ready_nodes: List[Node]
+    @staticmethod
+    def allocate_nodes_to_executors(
+        ready_nodes: List[Node], default_executor: str,
     ) -> Dict[str, List[Node]]:
         output = defaultdict(list)
         for node in ready_nodes:
@@ -54,7 +58,7 @@ class Conductor:
             assert (
                 len(executor_tags) <= 1
             )  # there should not be more than one executor tag
-            executor_tag = next(iter(executor_tags), self.default_executor)
+            executor_tag = next(iter(executor_tags), default_executor)
 
             output[executor_tag].append(node)  # this is where nodes will go
 

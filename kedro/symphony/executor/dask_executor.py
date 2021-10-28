@@ -29,7 +29,9 @@
 used to delegate execution of the provided nodes to Dask.
 """
 
+import logging
 from contextlib import contextmanager
+from datetime import datetime
 from typing import Any, Iterable
 
 from distributed import Client, get_worker, wait, worker_client
@@ -115,7 +117,12 @@ def get_node_future(client, futures, node, catalog, is_async, run_id, dependenci
 
 def node_wrapper(node, catalog, is_async, run_id, *args, **kwargs):
     with maybe_worker_client() as c:
+        logger = logging.getLogger(__name__)
+        logger.info("Running node %s using `DaskExecutor`...", node.name)
+        print(f"{datetime.now()} - Running node {node.name} using `DaskExecutor`...")
         run_node(node, catalog, is_async, run_id)
+        logger.info("Node %s finished.", node.name)
+        print(f"{datetime.now()} - Node {node.name} finished.")
 
 
 @contextmanager

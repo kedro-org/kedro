@@ -1,5 +1,7 @@
 """``Conductor`` class definition.
 """
+
+import logging
 from collections import defaultdict
 from typing import Dict, List, Set
 
@@ -34,6 +36,10 @@ class Conductor:
         self.catalog = catalog.shallow_copy()
         self.allocated_nodes = {}
 
+    @property
+    def _logger(self):
+        return logging.getLogger(self.__module__)
+
     def run(self):
         # group all ready nodes on available executors
         for ready_nodes in self.scheduler:
@@ -44,7 +50,9 @@ class Conductor:
                 # this should be a singleton and not instantiated every time
                 executor_class = load_obj(executor_name.split(_EXECUTOR_TAG_PREFIX)[1])
                 executor = executor_class(nodes, False)
+                self._logger.info(f"Running nodes %s on executor %s...", nodes, executor)
                 executor.run(nodes=nodes, catalog=self.catalog)
+                self._logger.info("Executor %s finished.", executor)
 
     @staticmethod
     def allocate_nodes_to_executors(

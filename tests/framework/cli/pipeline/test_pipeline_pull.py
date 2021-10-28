@@ -244,6 +244,60 @@ class TestPipelinePullCommand:
             )
             assert expected_stmt in file_content
 
+    def test_pipeline_pull_from_aliased_pipeline_conflicting_name(
+        self, fake_project_cli, fake_package_path, fake_repo_path, fake_metadata
+    ):
+        package_name = fake_metadata.package_name
+        call_pipeline_create(fake_project_cli, fake_metadata)
+        pipeline_file = fake_package_path / "pipelines" / PIPELINE_NAME / "pipeline.py"
+        import_stmt = f"import {package_name}.pipelines.{PIPELINE_NAME}.nodes"
+        with pipeline_file.open("a") as f:
+            f.write(import_stmt)
+
+        call_pipeline_package(
+            cli=fake_project_cli, metadata=fake_metadata, alias=package_name
+        )
+        wheel_file = (
+            fake_repo_path
+            / "src"
+            / "dist"
+            / _get_wheel_name(name=package_name, version="0.1")
+        )
+        assert wheel_file.is_file()
+
+        result = CliRunner().invoke(
+            fake_project_cli, ["pipeline", "pull", str(wheel_file)], obj=fake_metadata
+        )
+        assert result.exit_code == 0, result.output
+        # TODO: check imports are refactored
+
+    def test_pipeline_pull_as_aliased_pipeline_conflicting_name(
+        self, fake_project_cli, fake_package_path, fake_repo_path, fake_metadata
+    ):
+        package_name = fake_metadata.package_name
+        call_pipeline_create(fake_project_cli, fake_metadata)
+        pipeline_file = fake_package_path / "pipelines" / PIPELINE_NAME / "pipeline.py"
+        import_stmt = f"import {package_name}.pipelines.{PIPELINE_NAME}.nodes"
+        with pipeline_file.open("a") as f:
+            f.write(import_stmt)
+
+        call_pipeline_package(cli=fake_project_cli, metadata=fake_metadata)
+        wheel_file = (
+            fake_repo_path
+            / "src"
+            / "dist"
+            / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
+        )
+        assert wheel_file.is_file()
+
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["pipeline", "pull", str(wheel_file), "--alias", package_name],
+            obj=fake_metadata,
+        )
+        assert result.exit_code == 0, result.output
+        # TODO: check imports are refactored
+
     def test_pull_whl_fs_args(
         self, fake_project_cli, fake_repo_path, mocker, tmp_path, fake_metadata
     ):

@@ -34,7 +34,8 @@ from typing import Any, Iterable
 
 from distributed import Client, get_worker, wait, worker_client
 
-from kedro.io import AbstractDataSet, DataCatalog, MemoryDataSet
+from kedro.io import AbstractDataSet, DataCatalog
+from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
 from kedro.symphony.executor.executor import AbstractExecutor, run_node
 
@@ -54,7 +55,9 @@ class DaskExecutor(AbstractExecutor):
 
         """
         super().__init__(nodes, is_async=is_async)
-        self._client = Client("tcp://127.0.0.1:8786")  # TODO(deepyaman): Create client from config.
+        self._client = Client(
+            "tcp://127.0.0.1:8786"
+        )  # TODO(deepyaman): Create client from config.
 
     def create_default_data_set(self, ds_name: str) -> AbstractDataSet:
         """Factory method for creating the default data set for the runner.
@@ -72,7 +75,7 @@ class DaskExecutor(AbstractExecutor):
     def _run(
         self, nodes: Iterable[Node], catalog: DataCatalog, run_id: str = None
     ) -> None:
-        """The method implementing sequential node running.
+        """The method implementing distributed node running.
 
         Args:
             nodes: The nodes to run.
@@ -82,11 +85,37 @@ class DaskExecutor(AbstractExecutor):
         Raises:
             Exception: in case of any downstream node failure.
         """
-        futures = [
-            self._client.submit(run_node, node, catalog, self._is_async, run_id)
-            for node in nodes
-        ]
+        pipeline = Pipeline(nodes)
+        futures = {}
+        for node, parent_nodes in pipeline.node_dependencies.items():
+            get_node_future(
+                self._client,
+                futures,
+                node,
+                catalog,
+                run_id,
+                self._is_async,
+                pipeline.node_dependencies,
+            )
         wait(futures)
+
+
+def get_node_future(client, futures, node, catalog, is_async, run_id, dependencies):
+    if node._unique_key in futures:
+        return futures[node._unique_key]
+    deps = dependencies[node]
+    dep_futures = [
+        get_node_future(client, futures, x, catalog, is_async, run_id, dependencies)
+        for x in deps
+    ]
+    fut = client.submit(node_wrapper, node, catalog, is_async, run_id, *dep_futures)
+    futures[node._unique_key] = fut
+    return fut
+
+
+def node_wrapper(node, catalog, is_async, run_id, *args, **kwargs):
+    with maybe_worker_client() as c:
+        run_node(node, catalog, is_async, run_id)
 
 
 @contextmanager

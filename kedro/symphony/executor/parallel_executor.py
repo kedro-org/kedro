@@ -14,8 +14,10 @@ class MultiprocessingExecutor(AbstractExecutor):
 
     Using the Python multiprocessing library.
     """
-    def _run(self, nodes: Iterable[Node], catalog: DataCatalog,
-             run_id: str = None) -> None:
+
+    def _run(
+        self, nodes: Iterable[Node], catalog: DataCatalog, run_id: str = None
+    ) -> None:
         pass
 
     def create_default_data_set(self, ds_name: str) -> AbstractDataSet:

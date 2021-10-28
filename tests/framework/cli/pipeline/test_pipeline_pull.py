@@ -269,7 +269,11 @@ class TestPipelinePullCommand:
             fake_project_cli, ["pipeline", "pull", str(wheel_file)], obj=fake_metadata
         )
         assert result.exit_code == 0, result.output
-        # TODO: check imports are refactored
+
+        path = fake_package_path / "pipelines" / package_name / "pipeline.py"
+        file_content = path.read_text()
+        expected_stmt = f"import {package_name}.pipelines.{package_name}.nodes"
+        assert expected_stmt in file_content
 
     def test_pipeline_pull_as_aliased_pipeline_conflicting_name(
         self, fake_project_cli, fake_package_path, fake_repo_path, fake_metadata
@@ -296,7 +300,10 @@ class TestPipelinePullCommand:
             obj=fake_metadata,
         )
         assert result.exit_code == 0, result.output
-        # TODO: check imports are refactored
+        path = fake_package_path / "pipelines" / package_name / "pipeline.py"
+        file_content = path.read_text()
+        expected_stmt = f"import {package_name}.pipelines.{package_name}.nodes"
+        assert expected_stmt in file_content
 
     def test_pull_whl_fs_args(
         self, fake_project_cli, fake_repo_path, mocker, tmp_path, fake_metadata

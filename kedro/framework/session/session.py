@@ -424,7 +424,7 @@ class KedroSession:
             save_version=save_version, load_versions=load_versions
         )
 
-        scheduler = ToposortScheduler(filtered_pipeline)
+        scheduler = settings.SCHEDULER_CLASS(filtered_pipeline)
         conductor = Conductor(scheduler, catalog)  # TODO: Accept run_id.
 
         hook_manager = get_hook_manager()

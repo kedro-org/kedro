@@ -63,3 +63,6 @@ HOOKS = (ProjectHooks(),)
 #     "base_env": "base",
 #     "default_run_env": "local",
 # }
+
+# Scheduler class for ordering ready node in conductor.
+# SCHEDULER_CLASS = ToposortScheduler

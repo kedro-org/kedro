@@ -868,18 +868,14 @@ def _refactor_code_for_package(
 
     # Refactor imports in src/package_name/pipelines/pipeline_name
     # and imports of `pipeline_name` in tests.
-    # We can only rename top-level packages, not nested structures,
-    # therefore we move it to top level first, then rename
-    if package_target.stem == project_metadata.package_name:
-        _move_package_with_conflicting_name(
-            package_target, project_metadata.package_name
-        )
+    pipeline_name = package_target.stem
+    if pipeline_name == project_metadata.package_name:
+        _move_package_with_conflicting_name(package_target, pipeline_name)
     else:
         _move_package(project, package_target.as_posix(), "")
         shutil.rmtree(Path(project.address) / project_metadata.package_name)
 
     if alias:
-        pipeline_name = package_target.stem
         _rename_package(project, pipeline_name, alias)
 
     if tests_path.exists():

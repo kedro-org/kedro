@@ -568,13 +568,17 @@ def _refactor_code_for_unpacking(
         _rename_package(project, pipeline_name, alias)
         pipeline_name = alias
 
+    package_target = Path(project_metadata.package_name) / "pipelines"
     if pipeline_name == project_metadata.package_name:
         _rename_package(project, pipeline_name, "tmp_name")
-        pipeline_name = "tmp_name"
-
-    package_target = Path(project_metadata.package_name) / "pipelines"
-    full_path = _create_nested_package(project, package_target)
-    _move_package(project, pipeline_name, package_target.as_posix())
+        full_path = _create_nested_package(project, package_target)
+        _move_package(project, "tmp_name", package_target.as_posix())
+        _rename_package(
+            project, (package_target / "tmp_name").as_posix(), pipeline_name
+        )
+    else:
+        full_path = _create_nested_package(project, package_target)
+        _move_package(project, pipeline_name, package_target.as_posix())
     refactored_package_path = full_path / pipeline_name
 
     if not tests_path.exists():

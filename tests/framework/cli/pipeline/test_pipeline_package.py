@@ -137,6 +137,32 @@ class TestPipelinePackageCommand:
             wheel_location=wheel_location, package_name=pipeline_name
         )
 
+    def test_pipeline_package_same_name_as_package_name_alias(
+        self, fake_metadata, fake_project_cli, fake_repo_path
+    ):
+        """Create modular pipeline, then package under alias
+        the same name as the package name. The command should run
+        and the resulting wheel should have all expected contents.
+        """
+        alias = fake_metadata.package_name
+        result = CliRunner().invoke(
+            fake_project_cli, ["pipeline", "create", PIPELINE_NAME], obj=fake_metadata
+        )
+        assert result.exit_code == 0
+
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["pipeline", "package", PIPELINE_NAME, "--alias", alias],
+            obj=fake_metadata,
+        )
+        wheel_location = fake_repo_path / "src" / "dist"
+
+        assert result.exit_code == 0
+        assert f"Location: {wheel_location}" in result.output
+        self.assert_wheel_contents_correct(
+            wheel_location=wheel_location, package_name=alias
+        )
+
     @pytest.mark.parametrize("existing_dir", [True, False])
     def test_pipeline_package_to_destination(
         self, fake_project_cli, existing_dir, tmp_path, fake_metadata

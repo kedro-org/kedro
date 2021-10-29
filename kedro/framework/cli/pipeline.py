@@ -563,14 +563,28 @@ def _refactor_code_for_unpacking(
             |__ <pipeline_name>
                 |__ __init__.py
     """
+
+    def _move_package_with_conflicting_name(
+        target: Path, original_name: str, desired_name: str = None
+    ) -> Path:
+        _rename_package(project, original_name, "tmp_name")
+        full_path = _create_nested_package(project, target)
+        _move_package(project, "tmp_name", target.as_posix())
+        desired_name = desired_name or original_name
+        _rename_package(project, (target / "tmp_name").as_posix(), desired_name)
+        return full_path
+
     pipeline_name = package_path.stem
     if alias:
         _rename_package(project, pipeline_name, alias)
         pipeline_name = alias
 
     package_target = Path(project_metadata.package_name) / "pipelines"
-    full_path = _create_nested_package(project, package_target)
-    _move_package(project, pipeline_name, package_target.as_posix())
+    if pipeline_name == project_metadata.package_name:
+        full_path = _move_package_with_conflicting_name(package_target, pipeline_name)
+    else:
+        full_path = _create_nested_package(project, package_target)
+        _move_package(project, pipeline_name, package_target.as_posix())
     refactored_package_path = full_path / pipeline_name
 
     if not tests_path.exists():
@@ -581,11 +595,10 @@ def _refactor_code_for_unpacking(
     # hence we give it a temp name, create the expected
     # nested folder structure, move the contents there,
     # then rename the temp name to <pipeline_name>.
-    _rename_package(project, "tests", "tmp_name")
     tests_target = Path("tests") / "pipelines"
-    full_path = _create_nested_package(project, tests_target)
-    _move_package(project, "tmp_name", tests_target.as_posix())
-    _rename_package(project, (tests_target / "tmp_name").as_posix(), pipeline_name)
+    full_path = _move_package_with_conflicting_name(
+        tests_target, original_name="tests", desired_name=pipeline_name
+    )
     refactored_tests_path = full_path / pipeline_name
 
     return refactored_package_path, refactored_tests_path

@@ -33,7 +33,7 @@ import logging
 from copy import deepcopy
 from io import BytesIO
 from pathlib import PurePosixPath
-from typing import Any, Dict
+from typing import Any, Dict, Union
 
 import fsspec
 import pandas as pd
@@ -99,6 +99,7 @@ class ExcelDataSet(AbstractVersionedDataSet):
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_excel.html
                 All defaults are preserved, but "engine", which is set to "openpyxl".
+                Supports multi-sheet Excel files (include `sheet_name = None` in `load_args`).
             save_args: Pandas options for saving Excel files.
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_excel.html
@@ -173,7 +174,7 @@ class ExcelDataSet(AbstractVersionedDataSet):
             version=self._version,
         )
 
-    def _load(self) -> pd.DataFrame:
+    def _load(self) -> Union[pd.DataFrame, Dict[str, pd.DataFrame]]:
         load_path = str(self._get_load_path())
         if self._protocol == "file":
             # file:// protocol seems to misbehave on Windows
@@ -187,13 +188,19 @@ class ExcelDataSet(AbstractVersionedDataSet):
             load_path, storage_options=self._storage_options, **self._load_args
         )
 
-    def _save(self, data: pd.DataFrame) -> None:
+    def _save(self, data: Union[pd.DataFrame, Dict[str, pd.DataFrame]]) -> None:
         output = BytesIO()
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
 
         # pylint: disable=abstract-class-instantiated
         with pd.ExcelWriter(output, **self._writer_args) as writer:
-            data.to_excel(writer, **self._save_args)
+            if isinstance(data, dict):
+                for sheet_name, sheet_data in data.items():
+                    sheet_data.to_excel(
+                        writer, sheet_name=sheet_name, **self._save_args
+                    )
+            else:
+                data.to_excel(writer, **self._save_args)
 
         with self._fs.open(save_path, mode="wb") as fs_file:
             fs_file.write(output.getvalue())

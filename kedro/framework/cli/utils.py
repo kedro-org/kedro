@@ -41,7 +41,7 @@ from contextlib import contextmanager
 from importlib import import_module
 from itertools import chain
 from pathlib import Path
-from typing import Dict, Iterable, List, Mapping, Sequence, Set, Tuple, Union
+from typing import Any, Dict, Iterable, List, Mapping, Sequence, Set, Tuple, Union
 
 import click
 import pkg_resources
@@ -449,8 +449,41 @@ def _split_params(ctx, param, value):
                 f"cannot be an empty string."
             )
         value = item[1].strip()
-        result[key] = _try_convert_to_numeric(value)
+        result = _update_value_nested_dict(
+            result, _try_convert_to_numeric(value), key.split(".")
+        )
     return result
+
+
+def _update_value_nested_dict(
+    nested_dict: Dict[str, Any], value: Any, walking_path: List[str]
+) -> Dict:
+    """Update nested dict with value using walking_path as a parse tree to walk
+    down the nested dict.
+
+    Example:
+    ::
+        >>> nested_dict = {"foo": {"hello": "world", "bar": 1}}
+        >>> _update_value_nested_dict(nested_dict, value=2, walking_path=["foo", "bar"])
+        >>> print(nested_dict)
+        >>> {'foo': {'hello': 'world', 'bar': 2}}
+
+    Args:
+        nested_dict: dict to be updated
+        value: value to update the nested_dict with
+        walking_path: list of nested keys to use to walk down the nested_dict
+
+    Returns:
+        nested_dict updated with value at path `walking_path`
+    """
+    key = walking_path.pop(0)
+    if not walking_path:
+        nested_dict[key] = value
+        return nested_dict
+    nested_dict[key] = _update_value_nested_dict(
+        nested_dict.get(key, {}), value, walking_path
+    )
+    return nested_dict
 
 
 def _get_values_as_tuple(values: Iterable[str]) -> Tuple[str, ...]:

@@ -179,7 +179,7 @@ COPY lambda_handler.py ${FUNCTION_DIR}
 # Add conf/ directory
 COPY conf ${FUNCTION_DIR}/conf
 # Install Kedro pipeline
-COPY src/dist/spaceflights_steps_function-0.1-py3-none-any.whl .
+COPY dist/spaceflights_steps_function-0.1-py3-none-any.whl .
 RUN python${RUNTIME_VERSION} -m pip install --no-cache-dir spaceflights_steps_function-0.1-py3-none-any.whl --target ${FUNCTION_DIR}
 # Install Lambda Runtime Interface Client for Python
 RUN python${RUNTIME_VERSION} -m pip install --no-cache-dir awslambdaric --target ${FUNCTION_DIR}

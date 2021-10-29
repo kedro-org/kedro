@@ -40,13 +40,13 @@ kedro new --starter pyspark-iris
 
 ### 2. Install dependencies and run locally
 
-Now, as the project has been successfully created, we should move into the project root directory, install project dependencies, and then start a local test run using [Spark local execution mode](https://stackoverflow.com/a/54064507/3364156), which means that all Spark jobs will be executed in a single JVM locally, rather than in a cluster. `pyspark-iris` Kedro starter used to generate the project already has all necessary configuration for it to work, you just need to have `pyspark` Python package installed, which is done for you by `kedro install` command below.
+Now, as the project has been successfully created, we should move into the project root directory, install project dependencies, and then start a local test run using [Spark local execution mode](https://stackoverflow.com/a/54064507/3364156), which means that all Spark jobs will be executed in a single JVM locally, rather than in a cluster. `pyspark-iris` Kedro starter used to generate the project already has all necessary configuration for it to work, you just need to have `pyspark` Python package installed, which is done for you by `pip install -r src/requirements.txt` command below.
 
 ```bash
 # change the directory to the project root
 cd iris-databricks/
 # compile and install the project dependencies, this may take a few minutes
-kedro install
+pip install -r src/requirements.txt
 # start a local run
 kedro run
 ```

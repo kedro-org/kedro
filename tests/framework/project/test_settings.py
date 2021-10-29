@@ -41,7 +41,7 @@ MOCK_CONTEXT_CLASS = mock.patch(
 
 
 def test_settings_without_configure_project_show_default_values():
-    assert settings.CONF_ROOT == "conf"
+    assert settings.CONF_SOURCE == "conf"
     assert settings.CONTEXT_CLASS is KedroContext
     assert settings.SESSION_STORE_CLASS is BaseSessionStore
     assert settings.SESSION_STORE_ARGS == {}
@@ -56,7 +56,7 @@ def mock_package_name_with_settings_file(tmpdir):
         textwrap.dedent(
             f"""
                 from {__name__} import MOCK_CONTEXT_CLASS
-                CONF_ROOT = "test_conf"
+                CONF_SOURCE = "test_conf"
                 CONTEXT_CLASS = MOCK_CONTEXT_CLASS
             """
         )
@@ -74,5 +74,5 @@ def test_settings_after_configuring_project_shows_updated_values(
     mock_package_name_with_settings_file,
 ):
     configure_project(mock_package_name_with_settings_file)
-    assert settings.CONF_ROOT == "test_conf"
+    assert settings.CONF_SOURCE == "test_conf"
     assert settings.CONTEXT_CLASS is MOCK_CONTEXT_CLASS

@@ -18,12 +18,12 @@ kedro new
 
 When prompted for a project name, enter `Kedro Tutorial`. Subsequently, accept the default suggestions for `repo_name` and `python_package` by pressing enter.
 
-## Install project dependencies with `kedro install`
+## Install project dependencies
 
 To install the project-specific dependencies, navigate to the root directory of the project and run:
 
 ```bash
-kedro install
+pip install -r src/requirements.txt
 ```
 
 ### More about project dependencies

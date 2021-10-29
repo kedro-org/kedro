@@ -545,6 +545,7 @@ def _refactor_code_for_unpacking(
     else:
         full_path = _create_nested_package(project, package_target)
         _move_package(project, pipeline_name, package_target.as_posix())
+
     refactored_package_path = full_path / pipeline_name
 
     if not tests_path.exists():
@@ -558,6 +559,7 @@ def _refactor_code_for_unpacking(
     full_path = _move_package_with_conflicting_name(
         tests_target, original_name="tests", desired_name=pipeline_name
     )
+
     refactored_tests_path = full_path / pipeline_name
 
     return refactored_package_path, refactored_tests_path

@@ -30,6 +30,7 @@
 file using an underlying filesystem (e.g.: local, S3, GCS). It loads the JSON into a
 plotly figure.
 """
+from copy import deepcopy
 from typing import Any, Dict
 
 import pandas as pd
@@ -110,11 +111,18 @@ class PlotlyDataSet(JSONDataSet):
                 `open_args_load` and `open_args_save`.
                 Here you can find all available arguments for `open`:
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
-                All defaults are preserved, except `mode`, which is set to `w` when
-                saving.
+                All defaults are preserved, except `mode`, which is set to `w` when saving.
         """
         super().__init__(filepath, load_args, save_args, version, credentials, fs_args)
         self._plotly_args = plotly_args
+
+        _fs_args = deepcopy(fs_args) or {}
+        _fs_open_args_load = _fs_args.pop("open_args_load", {})
+        _fs_open_args_save = _fs_args.pop("open_args_save", {})
+        _fs_open_args_save.setdefault("mode", "w")
+
+        self._fs_open_args_load = _fs_open_args_load
+        self._fs_open_args_save = _fs_open_args_save
 
     def _describe(self) -> Dict[str, Any]:
         return {**super()._describe(), "plotly_args": self._plotly_args}

@@ -110,17 +110,17 @@ def pipeline_list_with_lists():
             node(identity, "F", ["G", "M"], name="node3"),
             node(identity, "E", ["F", "H"], name="node4"),
             node(identity, "D", None, name="node5"),
-            node(identity, "C", "D", name="node6"),
-            node(identity, "B", ["C", "E"], name="node7"),
+            node(identity, "C", "D", name="node6", tags=["foo"]),
+            node(identity, "B", ["C", "E"], name="node7", tags=["foo"]),
             node(identity, "A", ["B", "L"], name="node8"),
             node(constant_output, None, "A", name="node9"),
         ],
         "expected": [
             {node(constant_output, None, "A", name="node9")},
             {node(identity, "A", ["B", "L"], name="node8")},
-            {node(identity, "B", ["C", "E"], name="node7")},
+            {node(identity, "B", ["C", "E"], name="node7", tags=["foo"])},
             {
-                node(identity, "C", "D", name="node6"),
+                node(identity, "C", "D", name="node6", tags=["foo"]),
                 node(identity, "E", ["F", "H"], name="node4"),
             },
             {
@@ -144,17 +144,17 @@ def pipeline_with_dicts():
             node(identity, "F", dict(M="M", N="G"), name="node3"),
             node(identity, "E", dict(O="F", P="H"), name="node4"),  # NOQA
             node(identity, dict(input1="D"), None, name="node5"),
-            node(identity, "C", "D", name="node6"),
-            node(identity, "B", dict(P="C", Q="E"), name="node7"),
+            node(identity, "C", "D", name="node6", tags=["foo"]),
+            node(identity, "B", dict(P="C", Q="E"), name="node7", tags=["foo"]),
             node(identity, "A", dict(R="B", S="L"), name="node8"),
             node(constant_output, None, "A", name="node9"),
         ],
         "expected": [
             {node(constant_output, None, "A", name="node9")},
             {node(identity, "A", dict(R="B", S="L"), name="node8")},
-            {node(identity, "B", dict(P="C", Q="E"), name="node7")},
+            {node(identity, "B", dict(P="C", Q="E"), name="node7", tags=["foo"])},
             {
-                node(identity, "C", "D", name="node6"),
+                node(identity, "C", "D", name="node6", tags=["foo"]),
                 node(identity, "E", dict(O="F", P="H"), name="node4"),  # NOQA
             },
             {
@@ -246,6 +246,13 @@ def str_node_inputs_list():
     }
 
 
+@pytest.fixture
+def complex_pipeline(pipeline_list_with_lists):
+    nodes = pipeline_list_with_lists["nodes"]
+    pipeline = Pipeline(nodes)
+    return pipeline
+
+
 @pytest.fixture(
     params=[
         "branchless_pipeline",
@@ -280,43 +287,6 @@ class TestValidPipeline:
         # Check each grouped node matches with expected group
         assert all(g == e for g, e in zip(grouped, expected))
 
-    @pytest.mark.parametrize(
-        "target_node_names", [["node2", "node3", "node4", "node8"], ["node1"]]
-    )
-    def test_only_nodes(self, target_node_names, pipeline_list_with_lists):
-        full = Pipeline(pipeline_list_with_lists["nodes"])
-        partial = full.only_nodes(*target_node_names)
-        target_list = list(target_node_names)
-        names = map(lambda node_: node_.name, partial.nodes)
-        assert sorted(names) == sorted(target_list)
-
-    @pytest.mark.parametrize(
-        "target_namespace,expected_namespaces",
-        [
-            ("katie", ["katie", "katie.lisa", "katie.lisa.john"]),
-            ("lisa", ["lisa", "lisa.john"]),
-            ("john", ["john"]),
-            ("katie.lisa", ["katie.lisa", "katie.lisa.john"]),
-            ("katie.lisa.john", ["katie.lisa.john"]),
-        ],
-    )
-    def test_only_nodes_with_namespace(self, target_namespace, expected_namespaces):
-        pipeline = Pipeline(
-            [
-                node(identity, "A", "B", namespace="katie"),
-                node(identity, "B", "C", namespace="lisa"),
-                node(identity, "C", "D", namespace="john"),
-                node(identity, "D", "E", namespace="katie.lisa"),
-                node(identity, "E", "F", namespace="lisa.john"),
-                node(identity, "F", "G", namespace="katie.lisa.john"),
-            ]
-        )
-        resulting_pipeline = pipeline.only_nodes_with_namespace(target_namespace)
-        for actual_node, expected_namespace in zip(
-            sorted(resulting_pipeline.nodes), expected_namespaces
-        ):
-            assert actual_node.namespace == expected_namespace
-
     def test_free_input(self, input_data):
         nodes = input_data["nodes"]
         inputs = input_data["free_inputs"]
@@ -333,6 +303,161 @@ class TestValidPipeline:
 
         assert pipeline.outputs() == set(outputs)
 
+    def test_empty_case(self):
+        """Empty pipeline is possible"""
+        Pipeline([])
+
+    def test_initialized_with_tags(self):
+        pipeline = Pipeline(
+            [node(identity, "A", "B", tags=["node1", "p1"]), node(identity, "B", "C")],
+            tags=["p1", "p2"],
+        )
+
+        node1 = pipeline.grouped_nodes[0].pop()
+        node2 = pipeline.grouped_nodes[1].pop()
+        assert node1.tags == {"node1", "p1", "p2"}
+        assert node2.tags == {"p1", "p2"}
+
+    def test_node_dependencies(self, complex_pipeline):
+        expected = {
+            "node1": {"node2", "node3", "node4"},
+            "node2": {"node4"},
+            "node3": {"node4"},
+            "node4": {"node7"},
+            "node5": {"node6"},
+            "node6": {"node7"},
+            "node7": {"node8"},
+            "node8": {"node9"},
+            "node9": set(),
+        }
+        actual = {
+            child.name: {parent.name for parent in parents}
+            for child, parents in complex_pipeline.node_dependencies.items()
+        }
+        assert actual == expected
+
+
+@pytest.fixture
+def pipeline_with_circle():
+    return [
+        node(identity, "A", "B", name="node1"),
+        node(identity, "B", "C", name="node2"),
+        node(identity, "C", "A", name="node3"),  # circular dependency
+    ]
+
+
+@pytest.fixture
+def non_unique_node_outputs():
+    return [
+        node(identity, "A", ["B", "C"], name="node1"),
+        node(identity, "C", ["D", "E", "F"], name="node2"),
+        # D, E non-unique
+        node(identity, "B", dict(out1="D", out2="E"), name="node3"),
+        node(identity, "D", ["E"], name="node4"),  # E non-unique
+    ]
+
+
+class TestInvalidPipeline:
+    def test_circle_case(self, pipeline_with_circle):
+        pattern = "Circular dependencies"
+        with pytest.raises(CircularDependencyError, match=pattern):
+            Pipeline(pipeline_with_circle)
+
+    def test_unique_outputs(self, non_unique_node_outputs):
+        with pytest.raises(OutputNotUniqueError, match=r"\['D', 'E'\]"):
+            Pipeline(non_unique_node_outputs)
+
+    def test_none_case(self):
+        with pytest.raises(ValueError, match="is None"):
+            Pipeline(None)
+
+    def test_duplicate_free_nodes(self):
+        pattern = (
+            "Pipeline nodes must have unique names. The following node "
+            "names appear more than once:\n\nFree nodes:\n  - same_name"
+        )
+        with pytest.raises(ValueError, match=re.escape(pattern)):
+            Pipeline(
+                [
+                    node(identity, "in1", "out1", name="same_name"),
+                    node(identity, "in2", "out2", name="same_name"),
+                ]
+            )
+
+        pipeline = Pipeline([node(identity, "in1", "out1", name="same_name")])
+        another_node = node(identity, "in2", "out2", name="same_name")
+        with pytest.raises(ValueError, match=re.escape(pattern)):
+            # 'pipeline' passes the check, 'another_node' doesn't
+            Pipeline([pipeline, another_node])
+
+    def test_duplicate_nodes_in_pipelines(self):
+        pipeline = Pipeline(
+            [node(biconcat, ["input", "input1"], ["output", "output1"], name="node")]
+        )
+        pattern = (
+            r"Pipeline nodes must have unique names\. The following node "
+            r"names appear more than once\:\n\nPipeline\(\[.+\]\)\:\n  \- node"
+        )
+        with pytest.raises(ValueError, match=pattern):
+            # the first 'pipeline' passes the check, the second doesn't
+            Pipeline([pipeline, pipeline])
+
+        another_node = node(identity, "in1", "out1", name="node")
+        with pytest.raises(ValueError, match=pattern):
+            # 'another_node' passes the check, 'pipeline' doesn't
+            Pipeline([another_node, pipeline])
+
+    def test_bad_combine_node(self):
+        """Node cannot be combined to pipeline."""
+        fred = node(identity, "input", "output")
+        pipeline = Pipeline([fred])
+        with pytest.raises(TypeError):
+            pipeline + fred  # pylint: disable=pointless-statement
+
+    def test_bad_combine_int(self):
+        """int cannot be combined to pipeline, tests __radd__"""
+        fred = node(identity, "input", "output")
+        pipeline = Pipeline([fred])
+        with pytest.raises(TypeError):
+            _ = 1 + pipeline
+
+    def test_conflicting_names(self):
+        """Node names must be unique."""
+        pipeline1 = Pipeline(
+            [node(biconcat, ["input", "input1"], ["output1"], name="a")]
+        )
+        new_pipeline = Pipeline(
+            [node(biconcat, ["input", "input1"], ["output2"], name="a")]
+        )
+        pattern = (
+            "Pipeline nodes must have unique names. The following node names "
+            "appear more than once:\n\nFree nodes:\n  - a"
+        )
+        with pytest.raises(ValueError, match=re.escape(pattern)):
+            pipeline1 + new_pipeline  # pylint: disable=pointless-statement
+
+    def test_conflicting_outputs(self):
+        """Node outputs must be unique."""
+        pipeline1 = Pipeline(
+            [node(biconcat, ["input", "input1"], ["output", "output1"], name="a")]
+        )
+        new_pipeline = Pipeline(
+            [node(biconcat, ["input", "input2"], ["output", "output2"], name="b")]
+        )
+        with pytest.raises(OutputNotUniqueError, match=r"\['output'\]"):
+            pipeline1 + new_pipeline  # pylint: disable=pointless-statement
+
+    def test_duplicate_node_confirms(self):
+        """Test that non-unique dataset confirms break pipeline concatenation"""
+        pipeline1 = Pipeline([node(identity, "input1", "output1", confirms="other")])
+        pipeline2 = Pipeline(
+            [node(identity, "input2", "output2", confirms=["other", "output2"])]
+        )
+        with pytest.raises(ConfirmNotUniqueError, match=r"\['other'\]"):
+            pipeline1 + pipeline2  # pylint: disable=pointless-statement
+
+
+class TestPipelineOperators:
     def test_combine_add(self):
         pipeline1 = Pipeline([node(biconcat, ["input", "input1"], "output1", name="a")])
         pipeline2 = Pipeline([node(biconcat, ["input", "input2"], "output2", name="b")])
@@ -470,21 +595,6 @@ class TestValidPipeline:
         with pytest.raises(TypeError, match=pattern):
             p | "hello"  # pylint: disable=pointless-statement
 
-    def test_empty_case(self):
-        """Empty pipeline is possible"""
-        Pipeline([])
-
-    def test_initialized_with_tags(self):
-        pipeline = Pipeline(
-            [node(identity, "A", "B", tags=["node1", "p1"]), node(identity, "B", "C")],
-            tags=["p1", "p2"],
-        )
-
-        node1 = pipeline.grouped_nodes[0].pop()
-        node2 = pipeline.grouped_nodes[1].pop()
-        assert node1.tags == {"node1", "p1", "p2"}
-        assert node2.tags == {"p1", "p2"}
-
     def test_node_unique_confirms(self):
         """Test that unique dataset confirms don't break pipeline concatenation"""
         pipeline1 = Pipeline([node(identity, "input1", "output1", confirms="output1")])
@@ -492,224 +602,6 @@ class TestValidPipeline:
         pipeline3 = Pipeline([node(identity, "input3", "output3")])
         combined = pipeline1 + pipeline2 + pipeline3
         assert len(combined.nodes) == 3
-
-
-def pipeline_with_circle():
-    return [
-        node(identity, "A", "B", name="node1"),
-        node(identity, "B", "C", name="node2"),
-        node(identity, "C", "A", name="node3"),  # circular dependency
-    ]
-
-
-def non_unique_node_outputs():
-    return [
-        node(identity, "A", ["B", "C"], name="node1"),
-        node(identity, "C", ["D", "E", "F"], name="node2"),
-        # D, E non-unique
-        node(identity, "B", dict(out1="D", out2="E"), name="node3"),
-        node(identity, "D", ["E"], name="node4"),  # E non-unique
-    ]
-
-
-class TestInvalidPipeline:
-    def test_circle_case(self):
-        pattern = "Circular dependencies"
-        with pytest.raises(CircularDependencyError, match=pattern):
-            Pipeline(pipeline_with_circle())
-
-    def test_unique_outputs(self):
-        with pytest.raises(OutputNotUniqueError, match=r"\['D', 'E'\]"):
-            Pipeline(non_unique_node_outputs())
-
-    def test_none_case(self):
-        with pytest.raises(ValueError, match="is None"):
-            Pipeline(None)
-
-    @pytest.mark.parametrize(
-        "target_node_names", [["node2", "node3", "node4", "NaN"], ["invalid"]]
-    )
-    def test_only_nodes_missing(self, pipeline_list_with_lists, target_node_names):
-        pattern = r"Pipeline does not contain nodes"
-        full = Pipeline(pipeline_list_with_lists["nodes"])
-        with pytest.raises(ValueError, match=pattern):
-            full.only_nodes(*target_node_names)
-
-    @pytest.mark.parametrize("namespace", ["katie", None])
-    def test_only_nodes_with_namespace_empty(self, namespace):
-        pipeline = Pipeline([node(identity, "A", "B", namespace=namespace)])
-        pattern = r"Pipeline does not contain nodes"
-        with pytest.raises(ValueError, match=pattern):
-            pipeline.only_nodes_with_namespace("non_existent")
-
-    def test_duplicate_free_nodes(self):
-        pattern = (
-            "Pipeline nodes must have unique names. The following node "
-            "names appear more than once:\n\nFree nodes:\n  - same_name"
-        )
-        with pytest.raises(ValueError, match=re.escape(pattern)):
-            Pipeline(
-                [
-                    node(identity, "in1", "out1", name="same_name"),
-                    node(identity, "in2", "out2", name="same_name"),
-                ]
-            )
-
-        pipeline = Pipeline([node(identity, "in1", "out1", name="same_name")])
-        another_node = node(identity, "in2", "out2", name="same_name")
-        with pytest.raises(ValueError, match=re.escape(pattern)):
-            # 'pipeline' passes the check, 'another_node' doesn't
-            Pipeline([pipeline, another_node])
-
-    def test_duplicate_nodes_in_pipelines(self):
-        pipeline = Pipeline(
-            [node(biconcat, ["input", "input1"], ["output", "output1"], name="node")]
-        )
-        pattern = (
-            r"Pipeline nodes must have unique names\. The following node "
-            r"names appear more than once\:\n\nPipeline\(\[.+\]\)\:\n  \- node"
-        )
-        with pytest.raises(ValueError, match=pattern):
-            # the first 'pipeline' passes the check, the second doesn't
-            Pipeline([pipeline, pipeline])
-
-        another_node = node(identity, "in1", "out1", name="node")
-        with pytest.raises(ValueError, match=pattern):
-            # 'another_node' passes the check, 'pipeline' doesn't
-            Pipeline([another_node, pipeline])
-
-    def test_bad_combine_node(self):
-        """Node cannot be combined to pipeline."""
-        fred = node(identity, "input", "output")
-        pipeline = Pipeline([fred])
-        with pytest.raises(TypeError):
-            pipeline + fred  # pylint: disable=pointless-statement
-
-    def test_bad_combine_int(self):
-        """int cannot be combined to pipeline, tests __radd__"""
-        fred = node(identity, "input", "output")
-        pipeline = Pipeline([fred])
-        with pytest.raises(TypeError):
-            _ = 1 + pipeline
-
-    def test_conflicting_names(self):
-        """Node names must be unique."""
-        pipeline1 = Pipeline(
-            [node(biconcat, ["input", "input1"], ["output1"], name="a")]
-        )
-        new_pipeline = Pipeline(
-            [node(biconcat, ["input", "input1"], ["output2"], name="a")]
-        )
-        pattern = (
-            "Pipeline nodes must have unique names. The following node names "
-            "appear more than once:\n\nFree nodes:\n  - a"
-        )
-        with pytest.raises(ValueError, match=re.escape(pattern)):
-            pipeline1 + new_pipeline  # pylint: disable=pointless-statement
-
-    def test_conflicting_outputs(self):
-        """Node outputs must be unique."""
-        pipeline1 = Pipeline(
-            [node(biconcat, ["input", "input1"], ["output", "output1"], name="a")]
-        )
-        new_pipeline = Pipeline(
-            [node(biconcat, ["input", "input2"], ["output", "output2"], name="b")]
-        )
-        with pytest.raises(OutputNotUniqueError, match=r"\['output'\]"):
-            pipeline1 + new_pipeline  # pylint: disable=pointless-statement
-
-    def test_duplicate_node_confirms(self):
-        """Test that non-unique dataset confirms break pipeline concatenation"""
-        pipeline1 = Pipeline([node(identity, "input1", "output1", confirms="other")])
-        pipeline2 = Pipeline(
-            [node(identity, "input2", "output2", confirms=["other", "output2"])]
-        )
-        with pytest.raises(ConfirmNotUniqueError, match=r"\['other'\]"):
-            pipeline1 + pipeline2  # pylint: disable=pointless-statement
-
-
-@pytest.fixture
-def complex_pipeline(pipeline_list_with_lists):
-    nodes = pipeline_list_with_lists["nodes"]
-    pipeline = Pipeline(nodes)
-    return pipeline
-
-
-class TestComplexPipeline:
-    def test_from_inputs(self, complex_pipeline):
-        """F and H are inputs of node1, node2 and node3."""
-        new_pipeline = complex_pipeline.from_inputs("F", "H")
-        nodes = {node.name for node in new_pipeline.nodes}
-
-        assert len(new_pipeline.nodes) == 3
-        assert nodes == {"node1", "node2", "node3"}
-
-    def test_from_inputs_unknown(self, complex_pipeline):
-        """W and Z do not exist as inputs."""
-        with pytest.raises(ValueError, match=r"\['W', 'Z'\]"):
-            complex_pipeline.from_inputs("Z", "W", "E", "C")
-
-    def test_only_nodes_with_inputs(self, complex_pipeline):
-        """node1 and node2 require H as an input."""
-        new_pipeline = complex_pipeline.only_nodes_with_inputs("H")
-        nodes = {node.name for node in new_pipeline.nodes}
-
-        assert len(new_pipeline.nodes) == 2
-        assert nodes == {"node1", "node2"}
-
-    def test_only_nodes_with_inputs_unknown(self, complex_pipeline):
-        with pytest.raises(ValueError, match="['W', 'Z']"):
-            complex_pipeline.only_nodes_with_inputs("Z", "W", "E", "C")
-
-    def test_only_nodes_with_outputs(self, complex_pipeline):
-        """node4 require F and H as outputs."""
-        new_pipeline = complex_pipeline.only_nodes_with_outputs("F", "H")
-        nodes = {node.name for node in new_pipeline.nodes}
-
-        assert len(new_pipeline.nodes) == 1
-        assert nodes == {"node4"}
-
-    def test_only_nodes_with_outputs_unknown(self, complex_pipeline):
-        with pytest.raises(ValueError, match="['W', 'Z']"):
-            complex_pipeline.only_nodes_with_outputs("Z", "W", "E", "C")
-
-    def test_to_outputs(self, complex_pipeline):
-        """New pipeline contain all nodes to produce F and H outputs."""
-        new_pipeline = complex_pipeline.to_outputs("F", "H")
-        nodes = {node.name for node in new_pipeline.nodes}
-
-        assert len(new_pipeline.nodes) == 4
-        assert nodes == {"node4", "node7", "node8", "node9"}
-
-    def test_to_outputs_unknown(self, complex_pipeline):
-        with pytest.raises(ValueError, match=r"\['W', 'Z'\]"):
-            complex_pipeline.to_outputs("Z", "W", "E", "C")
-
-    def test_from_nodes(self, complex_pipeline):
-        """New pipeline contain all nodes that depend on node2 and node3."""
-        new_pipeline = complex_pipeline.from_nodes("node3", "node2")
-        nodes = {node.name for node in new_pipeline.nodes}
-
-        assert len(new_pipeline.nodes) == 3
-        assert nodes == {"node1", "node2", "node3"}
-
-    def test_from_node_unknown(self, complex_pipeline):
-        pattern = r"Pipeline does not contain nodes named \['missing_node'\]"
-        with pytest.raises(ValueError, match=pattern):
-            complex_pipeline.from_nodes("missing_node")
-
-    def test_to_nodes(self, complex_pipeline):
-        """New pipeline contain all nodes required by node4 and node6."""
-        new_pipeline = complex_pipeline.to_nodes("node4", "node6")
-        nodes = {node.name for node in new_pipeline.nodes}
-
-        assert len(new_pipeline.nodes) == 5
-        assert nodes == {"node4", "node6", "node7", "node8", "node9"}
-
-    def test_to_nodes_unknown(self, complex_pipeline):
-        pattern = r"Pipeline does not contain nodes named \['missing_node'\]"
-        with pytest.raises(ValueError, match=pattern):
-            complex_pipeline.to_nodes("missing_node")
 
     def test_connected_pipeline(self, disjoint_pipeline):
         """Connect two separate pipelines."""
@@ -726,24 +618,6 @@ class TestComplexPipeline:
         assert len(pipeline.nodes) == 1 + len(nodes)
         assert len(pipeline.inputs()) == 1
         assert len(pipeline.outputs()) == 1
-
-    def test_node_dependencies(self, complex_pipeline):
-        expected = {
-            "node1": {"node2", "node3", "node4"},
-            "node2": {"node4"},
-            "node3": {"node4"},
-            "node4": {"node7"},
-            "node5": {"node6"},
-            "node6": {"node7"},
-            "node7": {"node8"},
-            "node8": {"node9"},
-            "node9": set(),
-        }
-        actual = {
-            child.name: {parent.name for parent in parents}
-            for child, parents in complex_pipeline.node_dependencies.items()
-        }
-        assert actual == expected
 
 
 class TestPipelineDescribe:
@@ -852,26 +726,6 @@ def nodes_with_tags():
 
 
 class TestPipelineTags:
-    @pytest.mark.parametrize(
-        "tags,expected_nodes",
-        [
-            (["tag1"], ["node2", "node6"]),
-            (["tag2"], ["node2", "node4"]),
-            (["tag2", "tag1"], ["node2", "node4", "node6"]),
-            (["tag1", "tag2", "tag-missing"], ["node2", "node4", "node6"]),
-            (["tag-missing"], []),
-            ([], []),
-        ],
-    )
-    def test_from_tags(self, tags, expected_nodes, nodes_with_tags):
-        pipeline = Pipeline(nodes_with_tags)
-
-        def get_nodes_with_tags(*tags):
-            p = pipeline.only_nodes_with_tags(*tags)
-            return sorted(n.name for n in p.nodes)
-
-        assert get_nodes_with_tags(*tags) == expected_nodes
-
     def test_tag_existing_pipeline(self, branchless_pipeline):
         pipeline = Pipeline(branchless_pipeline["nodes"])
         pipeline = pipeline.tag(["new_tag"])
@@ -883,6 +737,221 @@ class TestPipelineTags:
 
         for pipeline in (p1, p2):
             assert all("single_tag" in n.tags for n in pipeline.nodes)
+
+
+@pytest.fixture
+def pipeline_with_namespaces():
+    return Pipeline(
+        [
+            node(identity, "A", "B", name="node1", namespace="katie"),
+            node(identity, "B", "C", name="node2", namespace="lisa"),
+            node(identity, "C", "D", name="node3", namespace="john"),
+            node(identity, "D", "E", name="node4", namespace="katie.lisa"),
+            node(identity, "E", "F", name="node5", namespace="lisa.john"),
+            node(identity, "F", "G", name="node6", namespace="katie.lisa.john"),
+        ]
+    )
+
+
+class TestPipelineFilter:
+    def test_no_filters(self, complex_pipeline):
+        filtered_pipeline = complex_pipeline.filter()
+        assert filtered_pipeline is not complex_pipeline
+        assert set(filtered_pipeline.nodes) == set(complex_pipeline.nodes)
+
+    @pytest.mark.parametrize(
+        "filter_method,expected_nodes",
+        [
+            ({"tags": ["foo"]}, {"node6", "node7"}),
+            ({"from_nodes": ["node4"]}, {"node1", "node2", "node3", "node4"}),
+            ({"to_nodes": ["node4"]}, {"node9", "node8", "node7", "node4"}),
+            ({"node_names": ["node4", "node5"]}, {"node4", "node5"}),
+            ({"from_inputs": ["F"]}, {"node1", "node3"}),
+            ({"to_outputs": ["F"]}, {"node4", "node7", "node8", "node9"}),
+        ],
+    )
+    def test_one_filter(self, filter_method, expected_nodes, complex_pipeline):
+        filtered_pipeline = complex_pipeline.filter(**filter_method)
+        nodes = {node.name for node in filtered_pipeline.nodes}
+        assert nodes == expected_nodes
+
+    def test_namespace_filter(self, pipeline_with_namespaces):
+        filtered_pipeline = pipeline_with_namespaces.filter(node_namespace="katie")
+        nodes = {node.name for node in filtered_pipeline.nodes}
+        assert nodes == {"katie.node1", "katie.lisa.node4", "katie.lisa.john.node6"}
+
+    def test_two_filters(self, complex_pipeline):
+        filtered_pipeline = complex_pipeline.filter(
+            from_nodes=["node4"], to_outputs=["M"]
+        )
+        nodes = {node.name for node in filtered_pipeline.nodes}
+        assert nodes == {"node3", "node4"}
+
+    def test_three_filters(self, complex_pipeline):
+        filtered_pipeline = complex_pipeline.filter(
+            from_nodes=["node4"], to_outputs=["M"], node_names=["node3"]
+        )
+        nodes = {node.name for node in filtered_pipeline.nodes}
+        assert nodes == {"node3"}
+
+    def test_filter_no_nodes(self, complex_pipeline):
+        with pytest.raises(ValueError, match="Pipeline contains no nodes"):
+            complex_pipeline.filter(
+                from_nodes=["node4"],
+                to_outputs=["M"],
+                node_names=["node3"],
+                to_nodes=["node4"],
+            )
+
+
+class TestPipelineFilterHelpers:
+    """Node selection functions called by Pipeline.filter."""
+
+    @pytest.mark.parametrize(
+        "tags,expected_nodes",
+        [
+            (["tag1"], ["node2", "node6"]),
+            (["tag2"], ["node2", "node4"]),
+            (["tag2", "tag1"], ["node2", "node4", "node6"]),
+            (["tag1", "tag2", "tag-missing"], ["node2", "node4", "node6"]),
+            (["tag-missing"], []),
+            ([], []),
+        ],
+    )
+    def test_only_nodes_with_tags(self, tags, expected_nodes, nodes_with_tags):
+        pipeline = Pipeline(nodes_with_tags)
+
+        def get_nodes_with_tags(*tags):
+            p = pipeline.only_nodes_with_tags(*tags)
+            return sorted(n.name for n in p.nodes)
+
+        assert get_nodes_with_tags(*tags) == expected_nodes
+
+    def test_from_nodes(self, complex_pipeline):
+        """New pipeline contain all nodes that depend on node2 and node3."""
+        new_pipeline = complex_pipeline.from_nodes("node3", "node2")
+        nodes = {node.name for node in new_pipeline.nodes}
+
+        assert len(new_pipeline.nodes) == 3
+        assert nodes == {"node1", "node2", "node3"}
+
+    def test_from_nodes_unknown(self, complex_pipeline):
+        pattern = r"Pipeline does not contain nodes named \['missing_node'\]"
+        with pytest.raises(ValueError, match=pattern):
+            complex_pipeline.from_nodes("missing_node")
+
+    def test_to_nodes(self, complex_pipeline):
+        """New pipeline contain all nodes required by node4 and node6."""
+        new_pipeline = complex_pipeline.to_nodes("node4", "node6")
+        nodes = {node.name for node in new_pipeline.nodes}
+
+        assert len(new_pipeline.nodes) == 5
+        assert nodes == {"node4", "node6", "node7", "node8", "node9"}
+
+    def test_to_nodes_unknown(self, complex_pipeline):
+        pattern = r"Pipeline does not contain nodes named \['missing_node'\]"
+        with pytest.raises(ValueError, match=pattern):
+            complex_pipeline.to_nodes("missing_node")
+
+    @pytest.mark.parametrize(
+        "target_node_names", [["node2", "node3", "node4", "node8"], ["node1"]]
+    )
+    def test_only_nodes(self, target_node_names, pipeline_list_with_lists):
+        full = Pipeline(pipeline_list_with_lists["nodes"])
+        partial = full.only_nodes(*target_node_names)
+        target_list = list(target_node_names)
+        names = map(lambda node_: node_.name, partial.nodes)
+        assert sorted(names) == sorted(target_list)
+
+    @pytest.mark.parametrize(
+        "target_node_names", [["node2", "node3", "node4", "NaN"], ["invalid"]]
+    )
+    def test_only_nodes_unknown(self, pipeline_list_with_lists, target_node_names):
+        pattern = r"Pipeline does not contain nodes"
+        full = Pipeline(pipeline_list_with_lists["nodes"])
+        with pytest.raises(ValueError, match=pattern):
+            full.only_nodes(*target_node_names)
+
+    def test_from_inputs(self, complex_pipeline):
+        """F and H are inputs of node1, node2 and node3."""
+        new_pipeline = complex_pipeline.from_inputs("F", "H")
+        nodes = {node.name for node in new_pipeline.nodes}
+
+        assert len(new_pipeline.nodes) == 3
+        assert nodes == {"node1", "node2", "node3"}
+
+    def test_from_inputs_unknown(self, complex_pipeline):
+        """W and Z do not exist as inputs."""
+        with pytest.raises(ValueError, match=r"\['W', 'Z'\]"):
+            complex_pipeline.from_inputs("Z", "W", "E", "C")
+
+    def test_to_outputs(self, complex_pipeline):
+        """New pipeline contain all nodes to produce F and H outputs."""
+        new_pipeline = complex_pipeline.to_outputs("F", "H")
+        nodes = {node.name for node in new_pipeline.nodes}
+
+        assert len(new_pipeline.nodes) == 4
+        assert nodes == {"node4", "node7", "node8", "node9"}
+
+    def test_to_outputs_unknown(self, complex_pipeline):
+        with pytest.raises(ValueError, match=r"\['W', 'Z'\]"):
+            complex_pipeline.to_outputs("Z", "W", "E", "C")
+
+    @pytest.mark.parametrize(
+        "target_namespace,expected_namespaces",
+        [
+            ("katie", ["katie.lisa.john", "katie.lisa", "katie"]),
+            ("lisa", ["lisa.john", "lisa"]),
+            ("john", ["john"]),
+            ("katie.lisa", ["katie.lisa.john", "katie.lisa"]),
+            ("katie.lisa.john", ["katie.lisa.john"]),
+        ],
+    )
+    def test_only_nodes_with_namespace(
+        self, target_namespace, expected_namespaces, pipeline_with_namespaces
+    ):
+        resulting_pipeline = pipeline_with_namespaces.only_nodes_with_namespace(
+            target_namespace
+        )
+        for actual_node, expected_namespace in zip(
+            sorted(resulting_pipeline.nodes), expected_namespaces
+        ):
+            assert actual_node.namespace == expected_namespace
+
+    @pytest.mark.parametrize("namespace", ["katie", None])
+    def test_only_nodes_with_namespace_unknown(self, namespace):
+        pipeline = Pipeline([node(identity, "A", "B", namespace=namespace)])
+        pattern = r"Pipeline does not contain nodes"
+        with pytest.raises(ValueError, match=pattern):
+            pipeline.only_nodes_with_namespace("non_existent")
+
+
+class TestPipelineRunnerHelpers:
+    """Node selection functions used in AbstractRunner."""
+
+    def test_only_nodes_with_inputs(self, complex_pipeline):
+        """node1 and node2 require H as an input."""
+        new_pipeline = complex_pipeline.only_nodes_with_inputs("H")
+        nodes = {node.name for node in new_pipeline.nodes}
+
+        assert len(new_pipeline.nodes) == 2
+        assert nodes == {"node1", "node2"}
+
+    def test_only_nodes_with_inputs_unknown(self, complex_pipeline):
+        with pytest.raises(ValueError, match="['W', 'Z']"):
+            complex_pipeline.only_nodes_with_inputs("Z", "W", "E", "C")
+
+    def test_only_nodes_with_outputs(self, complex_pipeline):
+        """node4 require F and H as outputs."""
+        new_pipeline = complex_pipeline.only_nodes_with_outputs("F", "H")
+        nodes = {node.name for node in new_pipeline.nodes}
+
+        assert len(new_pipeline.nodes) == 1
+        assert nodes == {"node4"}
+
+    def test_only_nodes_with_outputs_unknown(self, complex_pipeline):
+        with pytest.raises(ValueError, match="['W', 'Z']"):
+            complex_pipeline.only_nodes_with_outputs("Z", "W", "E", "C")
 
 
 def test_pipeline_to_json(input_data):

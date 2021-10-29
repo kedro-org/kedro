@@ -30,6 +30,6 @@
 project context.
 """
 
-from .context import KedroContext, KedroContextError, load_context
+from .context import KedroContext, KedroContextError
 
-__all__ = ["KedroContext", "KedroContextError", "load_context"]
+__all__ = ["KedroContext", "KedroContextError"]

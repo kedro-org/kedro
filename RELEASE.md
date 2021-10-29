@@ -12,8 +12,7 @@
 * Upgraded `pip-tools`, which is used by `kedro build-reqs`, to 6.4. This `pip-tools` version requires `pip>=21.2` while [adding support for `pip>=21.3`](https://github.com/jazzband/pip-tools/pull/1501). To upgrade `pip`, please refer to [their documentation](https://pip.pypa.io/en/stable/installing/#upgrading-pip).
 * Extended ``ExcelDataSet`` to support saving Excel files with multiple sheets.
 * `kedro pipeline package <pipeline>` now raises an error if the `<pipeline>` argument doesn't look like a valid Python module path (e.g. has `/` instead of `.`).
-* Deprecating the "Thanks for supporting contributions" section on Release notes to simplify the contribution
-  process, Kedro 0.17.6 will be the last release that supports this section
+* Deprecated the "Thanks for supporting contributions" section of release notes to simplify the contribution process; Kedro 0.17.6 is the last release that includes this.
 
 ## Minor breaking changes to the API
 

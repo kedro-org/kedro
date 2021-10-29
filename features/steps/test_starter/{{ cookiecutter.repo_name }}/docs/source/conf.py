@@ -250,7 +250,7 @@ def setup(app):
     app.connect("autodoc-skip-member", skip)
     # add Kedro stylesheets
     for stylesheet in find_stylesheets():
-        app.add_stylesheet(stylesheet)
+        app.add_css_file(stylesheet)
     # enable rendering RST tables in Markdown
     app.add_config_value("recommonmark_config", {"enable_eval_rst": True}, True)
     app.add_transform(AutoStructify)

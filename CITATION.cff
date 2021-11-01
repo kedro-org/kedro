@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it as below.
+authors:
+- family-names: Alam
+  given-names: Sajid
+- family-names: Bălan
+  given-names: Lorena
+- family-names: Comym
+  given-names: Gabriel
+- family-names: Dada
+  given-names: Yetunde
+- family-names: Danov
+  given-names: Ivan
+- family-names: Hoang
+  given-names: Lim
+- family-names: Kanchwala
+  given-names: Rashida
+- family-names: Klein
+  given-names: Jiri
+- family-names: Milne
+  given-names: Antony
+- family-names: Schwarzmann
+  given-names: Joel
+- family-names: Theisen
+  given-names: Merel
+- family-names: Wong
+  given-names: Susanna
+title: Kedro
+version: 0.17.5
+date-released: 2021-09-14
+url: https://github.com/quantumblacklabs/kedro

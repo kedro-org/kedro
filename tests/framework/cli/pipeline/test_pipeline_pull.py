@@ -239,6 +239,61 @@ class TestPipelinePullCommand:
             expected_stmt = f"import {fake_metadata.package_name}.{alias}.nodes"
             assert expected_stmt in file_content
 
+    def test_pipeline_pull_from_aliased_pipeline_conflicting_name(
+        self, fake_project_cli, fake_package_path, fake_repo_path, fake_metadata
+    ):
+        package_name = fake_metadata.package_name
+        call_pipeline_create(fake_project_cli, fake_metadata)
+        pipeline_file = fake_package_path / "pipelines" / PIPELINE_NAME / "pipeline.py"
+        import_stmt = f"import {package_name}.pipelines.{PIPELINE_NAME}.nodes"
+        with pipeline_file.open("a") as f:
+            f.write(import_stmt)
+
+        call_pipeline_package(
+            cli=fake_project_cli, metadata=fake_metadata, alias=package_name
+        )
+        sdist_file = (
+            fake_repo_path / "dist" / _get_sdist_name(name=package_name, version="0.1")
+        )
+        assert sdist_file.is_file()
+
+        result = CliRunner().invoke(
+            fake_project_cli, ["pipeline", "pull", str(sdist_file)], obj=fake_metadata
+        )
+        assert result.exit_code == 0, result.output
+
+        path = fake_package_path / package_name / "pipeline.py"
+        file_content = path.read_text()
+        expected_stmt = f"import {package_name}.{package_name}.nodes"
+        assert expected_stmt in file_content
+
+    def test_pipeline_pull_as_aliased_pipeline_conflicting_name(
+        self, fake_project_cli, fake_package_path, fake_repo_path, fake_metadata
+    ):
+        package_name = fake_metadata.package_name
+        call_pipeline_create(fake_project_cli, fake_metadata)
+        pipeline_file = fake_package_path / "pipelines" / PIPELINE_NAME / "pipeline.py"
+        import_stmt = f"import {package_name}.pipelines.{PIPELINE_NAME}.nodes"
+        with pipeline_file.open("a") as f:
+            f.write(import_stmt)
+
+        call_pipeline_package(cli=fake_project_cli, metadata=fake_metadata)
+        sdist_file = (
+            fake_repo_path / "dist" / _get_sdist_name(name=PIPELINE_NAME, version="0.1")
+        )
+        assert sdist_file.is_file()
+
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["pipeline", "pull", str(sdist_file), "--alias", package_name],
+            obj=fake_metadata,
+        )
+        assert result.exit_code == 0, result.output
+        path = fake_package_path / package_name / "pipeline.py"
+        file_content = path.read_text()
+        expected_stmt = f"import {package_name}.{package_name}.nodes"
+        assert expected_stmt in file_content
+
     def test_pull_sdist_fs_args(
         self, fake_project_cli, fake_repo_path, mocker, tmp_path, fake_metadata
     ):

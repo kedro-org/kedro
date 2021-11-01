@@ -516,6 +516,17 @@ def _refactor_code_for_unpacking(
             |__ <pipeline_name>
                 |__ __init__.py
     """
+
+    def _move_package_with_conflicting_name(
+        target: Path, original_name: str, desired_name: str = None
+    ) -> Path:
+        _rename_package(project, original_name, "tmp_name")
+        full_path = _create_nested_package(project, target)
+        _move_package(project, "tmp_name", target.as_posix())
+        desired_name = desired_name or original_name
+        _rename_package(project, (target / "tmp_name").as_posix(), desired_name)
+        return full_path
+
     pipeline_name = package_path.stem
     package_target = Path(project_metadata.package_name)
     tests_target = Path("tests")
@@ -529,8 +540,12 @@ def _refactor_code_for_unpacking(
         package_target = package_target / alias_path.parent
         tests_target = tests_target / alias_path.parent
 
-    full_path = _create_nested_package(project, package_target)
-    _move_package(project, pipeline_name, package_target.as_posix())
+    if pipeline_name == project_metadata.package_name:
+        full_path = _move_package_with_conflicting_name(package_target, pipeline_name)
+    else:
+        full_path = _create_nested_package(project, package_target)
+        _move_package(project, pipeline_name, package_target.as_posix())
+
     refactored_package_path = full_path / pipeline_name
 
     if not tests_path.exists():
@@ -541,10 +556,10 @@ def _refactor_code_for_unpacking(
     # hence we give it a temp name, create the expected
     # nested folder structure, move the contents there,
     # then rename the temp name to <pipeline_name>.
-    _rename_package(project, "tests", "tmp_name")
-    full_path = _create_nested_package(project, tests_target)
-    _move_package(project, "tmp_name", tests_target.as_posix())
-    _rename_package(project, (tests_target / "tmp_name").as_posix(), pipeline_name)
+    full_path = _move_package_with_conflicting_name(
+        tests_target, original_name="tests", desired_name=pipeline_name
+    )
+
     refactored_tests_path = full_path / pipeline_name
 
     return refactored_package_path, refactored_tests_path
@@ -780,6 +795,15 @@ def _refactor_code_for_package(
         |__ __init__.py
         |__ test_pipeline.py
     """
+
+    def _move_package_with_conflicting_name(target: Path, conflicting_name: str):
+        tmp_name = "tmp_name"
+        tmp_module = target.parent / tmp_name
+        _rename_package(project, target.as_posix(), tmp_name)
+        _move_package(project, tmp_module.as_posix(), "")
+        shutil.rmtree(Path(project.address) / conflicting_name)
+        _rename_package(project, tmp_name, conflicting_name)
+
     # Copy source in appropriate folder structure
     package_target = package_path.relative_to(project_metadata.source_dir)
     full_path = _create_nested_package(project, package_target)
@@ -794,10 +818,15 @@ def _refactor_code_for_package(
         _sync_dirs(tests_path, full_path, overwrite=True)
 
     # Refactor imports in src/package_name/pipelines/pipeline_name
-    # and imports of `pipeline_name` in tests
-    _move_package(project, package_target.as_posix(), "")
+    # and imports of `pipeline_name` in tests.
+    pipeline_name = package_target.stem
+    if pipeline_name == project_metadata.package_name:
+        _move_package_with_conflicting_name(package_target, pipeline_name)
+    else:
+        _move_package(project, package_target.as_posix(), "")
+        shutil.rmtree(Path(project.address) / project_metadata.package_name)
+
     if alias:
-        pipeline_name = package_target.stem
         _rename_package(project, pipeline_name, alias)
 
     if tests_path.exists():
@@ -807,14 +836,7 @@ def _refactor_code_for_package(
         # with the existing "tests" folder at top level;
         # hence we give it a temp name, move it, delete tests/ and
         # rename the temp name to tests.
-        tmp_name = "extracted_tests"
-        tmp_module = tests_target.parent / tmp_name
-        _rename_package(project, tests_target.as_posix(), tmp_name)
-        _move_package(project, tmp_module.as_posix(), "")
-        shutil.rmtree(Path(project.address) / "tests")
-        _rename_package(project, tmp_name, "tests")
-
-    shutil.rmtree(Path(project.address) / project_metadata.package_name)
+        _move_package_with_conflicting_name(tests_target, "tests")
 
 
 _SourcePathType = Union[Path, List[Tuple[Path, str]]]

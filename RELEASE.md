@@ -111,6 +111,13 @@
 ## Major features and improvements
 * Added `pipelines` global variable to IPython extension, allowing you to access the project's pipelines in `kedro ipython` or `kedro jupyter notebook`.
 * Enabled overriding nested parameters with `params` in CLI, i.e. `kedro run --params="model.model_tuning.booster:gbtree"` updates parameters to `{"model": {"model_tuning": {"booster": "gbtree"}}}`.
+* Added option to `pandas.SQLQueryDataSet` to specify a `filepath` with a SQL query, in addition to the current method of supplying the query itself in the `sql` argument.
+* Extended `ExcelDataSet` to support saving Excel files with multiple sheets.
+* Added the following new dataset (see ([Issue #839](https://github.com/quantumblacklabs/kedro/issues/839)):
+
+| Type                        | Description                                          | Location                          |
+| --------------------------- | ---------------------------------------------------- | --------------------------------- |
+| `plotly.JSONDataSet` | Works with plotly graph object Figures (saves as json file) | `kedro.extras.datasets.plotly` |
 
 ## Bug fixes and other changes
 * Fixed an issue where `kedro new --config config.yml` was ignoring the config file when `prompts.yml` didn't exist.
@@ -118,8 +125,10 @@
 * Added support for arbitrary backends (via importable module paths) that satisfy the `pickle` interface to `PickleDataSet`.
 * Added support for `sum` syntax for connecting pipeline objects.
 * Upgraded `pip-tools`, which is used by `kedro build-reqs`, to 6.4. This `pip-tools` version requires `pip>=21.2` while [adding support for `pip>=21.3`](https://github.com/jazzband/pip-tools/pull/1501). To upgrade `pip`, please refer to [their documentation](https://pip.pypa.io/en/stable/installing/#upgrading-pip).
-* Extended ``ExcelDataSet`` to support saving Excel files with multiple sheets.
+* Relaxed the bounds on the `plotly` requirement for `plotly.PlotlyDataSet`.
 * `kedro pipeline package <pipeline>` now raises an error if the `<pipeline>` argument doesn't look like a valid Python module path (e.g. has `/` instead of `.`).
+* Fixed slow startup because of catalog processing by reducing the exponential growth of extra processing during `_FrozenDatasets` creations.
+* Fixed a bug where packaging or pulling a modular pipeline with the same name as the project's package name would throw an error (or silently pass without including the pipeline source code in the wheel file).
 
 ## Minor breaking changes to the API
 
@@ -131,6 +140,8 @@
 [Manish Swami](https://github.com/ManishS6),
 [Zain Patel](https://github.com/mzjp2),
 [Simon Brugman](https://github.com/sbrugman),
+[Kiyo Kunii](https://github.com/921kiyo),
+[Benjamin Levy](https://github.com/BenjaminLevyQB),
 [Louis de Charsonville](https://github.com/louisdecharson)
 
 # Release 0.17.5
@@ -154,7 +165,6 @@
 * Bumped minimum required `fsspec` version to 2021.04.
 * Fixed the `kedro install` and `kedro build-reqs` flows when uninstalled dependencies are present in a project's `settings.py`, `context.py` or `hooks.py` ([Issue #829](https://github.com/quantumblacklabs/kedro/issues/829)).
 * Imports are now refactored at `kedro pipeline package` and `kedro pipeline pull` time, so that _aliasing_ a modular pipeline doesn't break it.
-* Added option to `pandas.SQLQueryDataSet` to specify a `filepath` with a SQL query, in addition to the current method of supplying the query itself in the `sql` argument.
 
 ## Minor breaking changes to the API
 * Pinned `dynaconf` to `<3.1.6` because the method signature for `_validate_items` changed which is used in Kedro.
@@ -165,8 +175,7 @@
 
 ## Thanks for supporting contributions
 [Moussa Taifi](https://github.com/moutai),
-[Deepyaman Datta](https://github.com/deepyaman),
-[Benjamin Levy](https://github.com/BenjaminLevyQB)
+[Deepyaman Datta](https://github.com/deepyaman)
 
 # Release 0.17.4
 

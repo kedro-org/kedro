@@ -120,4 +120,3 @@ Kedro has also won [Best Technical Tool or Framework for AI](https://awards.ai/t
 ## How can I cite Kedro?
 
 If you're an academic, Kedro can also help you, for example, as a tool to solve the problem of reproducible research. Use the "Cite this repository" button on [our repository](https://github.com/quantumblacklabs/kedro) to generate a citation from the [CITATION.cff file](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-citation-files#about-citation-filesat).
- 

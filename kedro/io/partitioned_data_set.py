@@ -102,10 +102,10 @@ class PartitionedDataSet(AbstractDataSet):
         dataset: Union[str, Type[AbstractDataSet], Dict[str, Any]],
         filepath_arg: str = "filepath",
         filename_suffix: str = "",
-        overwrite: bool = False,
         credentials: Dict[str, Any] = None,
         load_args: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        overwrite: bool = False,
     ):
         """Creates a new instance of ``PartitionedDataSet``.
 
@@ -132,7 +132,6 @@ class PartitionedDataSet(AbstractDataSet):
                 If unspecified, defaults to "filepath".
             filename_suffix: If specified, only partitions that end with this
                 string will be processed.
-            overwrite: If True, any existing partitions will be removed.
             credentials: Protocol-specific options that will be passed to
                 ``fsspec.filesystem``
                 https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.filesystem
@@ -144,6 +143,7 @@ class PartitionedDataSet(AbstractDataSet):
                 the filesystem implementation.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``)
+            overwrite: If True, any existing partitions will be removed.
 
         Raises:
             DataSetError: If versioning is enabled for the underlying dataset.

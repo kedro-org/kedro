@@ -42,7 +42,7 @@ from cookiecutter.exceptions import RepositoryCloneFailed
 from kedro import __version__ as version
 from kedro.framework.cli.starters import _STARTER_ALIASES, TEMPLATE_PATH
 
-FILES_IN_TEMPLATE = 36
+FILES_IN_TEMPLATE = 35
 
 
 @pytest.fixture

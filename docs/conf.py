@@ -199,8 +199,6 @@ linkcheck_ignore = [
     "https://github.com/jazzband/pip-tools#example-usage-for-pip-compile",
     "https://www.astronomer.io/docs/cloud/stable/get-started/quickstart#",
     "https://github.com/quantumblacklabs/private-kedro/blob/master/kedro/templates/project/*",
-    "https://zenodo.org/record/4336685",
-    "https://zenodo.org/badge/latestdoi/182067506",
     "https://eternallybored.org/misc/wget/",
     "https://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table.from_pandas",
     "https://www.oracle.com/java/technologies/javase-downloads.html",  # "forbidden" url

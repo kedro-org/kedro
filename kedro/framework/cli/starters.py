@@ -42,7 +42,6 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import click
-import git
 import yaml
 
 import kedro
@@ -410,6 +409,10 @@ class _Prompt:
 
 
 def _get_available_tags(template_path: str) -> List:
+    # Not at top level so that kedro CLI works without a working git executable.
+    # pylint: disable=import-outside-toplevel
+    import git
+
     try:
         tags = git.cmd.Git().ls_remote("--tags", template_path.replace("git+", ""))
 

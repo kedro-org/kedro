@@ -30,7 +30,6 @@ from kedro import __version__ as release
 # -- Project information -----------------------------------------------------
 
 project = "Kedro"
-copyright = "2021, QuantumBlack Visual Analytics Limited"
 author = "QuantumBlack"
 
 # The short X.Y version.
@@ -185,6 +184,9 @@ html_theme_options = {"collapse_navigation": False, "style_external_links": True
 # html_extra_path used to define a path to robots.txt which is used by webcrawlers
 # to ignore or allow certain links.
 html_extra_path = [str(here / "robots.txt")]
+
+# Removes, from all docs, the copyright footer.
+html_show_copyright = False
 
 # some of these complain that the sections don't exist (which is not true),
 # too many requests, or forbidden URL

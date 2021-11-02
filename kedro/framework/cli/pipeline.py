@@ -667,7 +667,7 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
     # config files not to confuse users and avoid useless file copies
     configs_to_package = _find_config_files(
         artifacts_to_package.pipeline_conf,
-        [f"parameters*/**/{pipeline_name}.yml", f"parameters*/**/{pipeline_name}/*"],
+        [f"parameters*/**/{pipeline_name}.yml", f"parameters*/**/{pipeline_name}/**/*"],
     )
 
     source_paths = (
@@ -901,8 +901,9 @@ def _generate_wheel_file(
             cls = exc.__class__
             raise KedroCliError(f"{cls.__module__}.{cls.__qualname__}: {exc}") from exc
 
+        config_files = [str(file) for file in conf_target.rglob("*") if file.is_file()]
         setup_file = _generate_setup_file(
-            package_name, version, install_requires, temp_dir_path
+            package_name, version, install_requires, temp_dir_path, config_files
         )
 
         package_file = destination / _get_wheel_name(name=package_name, version=version)
@@ -925,18 +926,15 @@ def _generate_wheel_file(
 
 
 def _generate_setup_file(
-    package_name: str, version: str, install_requires: List[str], output_dir: Path
+    package_name: str,
+    version: str,
+    install_requires: List[str],
+    output_dir: Path,
+    config_files: List[str],
 ) -> Path:
     setup_file = output_dir / "setup.py"
-    package_data = {
-        package_name: [
-            "README.md",
-            "config/parameters*",
-            "config/**/parameters*",
-            "config/parameters*/**",
-            "config/parameters*/**/*",
-        ]
-    }
+
+    package_data = {package_name: ["README.md"] + config_files}
     setup_file_context = dict(
         name=package_name,
         version=version,

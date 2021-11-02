@@ -68,11 +68,6 @@ repos:
             types: [file, python]
             exclude: ^features/steps/test_starter|^kedro/templates/
             entry: black
-          - id: legal
-            name: "Licence check"
-            language: system
-            pass_filenames: false
-            entry: make legal
           - id: imports
             name: "Import Linter"
             language: system

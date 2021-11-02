@@ -23,6 +23,7 @@
 * Removed `.coveragerc` from the Kedro project template. `coverage` settings are now given in `pyproject.toml`.
 * Fixed a bug where packaging or pulling a modular pipeline with the same name as the project's package name would throw an error (or silently pass without including the pipeline source code in the wheel file).
 * Removed unintentional dependency on `git`.
+* Fixed an issue where nested pipeline configuration was not included in the packaged pipeline.
 
 ## Minor breaking changes to the API
 

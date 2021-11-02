@@ -374,13 +374,14 @@ def parse_dataset_definition(
         raise DataSetError("`type` is missing from DataSet catalog configuration")
 
     class_obj = config.pop("type")
+    is_tracking_ds = False
     if isinstance(class_obj, str):
         if len(class_obj.strip(".")) != len(class_obj):
             raise DataSetError(
                 "`type` class path does not support relative "
                 "paths or paths ending with a dot."
             )
-
+        is_tracking_ds = class_obj.split(".")[0] == "tracking"
         class_paths = (prefix + class_obj for prefix in _DEFAULT_PACKAGES)
 
         trials = (_load_obj(class_path) for class_path in class_paths)
@@ -407,7 +408,9 @@ def parse_dataset_definition(
         )
         logging.getLogger(__name__).warning(message, VERSION_KEY)
         del config[VERSION_KEY]
-    if config.pop(VERSIONED_FLAG_KEY, False):  # data set is versioned
+    if config.pop(VERSIONED_FLAG_KEY, False):  # dataset is versioned
+        config[VERSION_KEY] = Version(load_version, save_version)
+    if is_tracking_ds:  # tracking datasets must be versioned by default
         config[VERSION_KEY] = Version(load_version, save_version)
 
     return class_obj, config

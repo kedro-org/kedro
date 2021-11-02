@@ -128,25 +128,27 @@ class TestMetricsDataSet:
         with pytest.raises(DataSetError, match=pattern):
             metrics_dataset.save(data)
 
-    def test_version_str_repr(self):
+    def test_version_str_repr(self, load_version, save_version):
         """Test that version is in string representation of the class instance
         when applicable."""
         filepath = "test.json"
-        ds_versioned = MetricsDataSet(filepath=filepath)
+        ds = MetricsDataSet(filepath=filepath)
+        ds_versioned = MetricsDataSet(
+            filepath=filepath, version=Version(load_version, save_version)
+        )
 
+        assert filepath in str(ds)
+        assert "version" not in str(ds)
         assert filepath in str(ds_versioned)
-        ver_str = "version=Version(load=None, save=None)"
+        ver_str = f"version=Version(load={load_version}, save='{save_version}')"
         assert ver_str in str(ds_versioned)
         assert "MetricsDataSet" in str(ds_versioned)
+        assert "MetricsDataSet" in str(ds)
         assert "protocol" in str(ds_versioned)
+        assert "protocol" in str(ds)
         # Default save_args
+        assert "save_args={'indent': 2}" in str(ds)
         assert "save_args={'indent': 2}" in str(ds_versioned)
-
-    def test_no_versions(self, metrics_dataset):
-        """Check the error if no versions are available for load."""
-        pattern = r"Did not find any versions for MetricsDataSet\(.+\)"
-        with pytest.raises(DataSetError, match=pattern):
-            metrics_dataset.load()
 
     def test_prevent_overwrite(self, explicit_versioned_metrics_dataset, dummy_data):
         """Check the error when attempting to override the data set if the
@@ -182,4 +184,6 @@ class TestMetricsDataSet:
         pattern = r"HTTP\(s\) DataSet doesn't support versioning\."
 
         with pytest.raises(DataSetError, match=pattern):
-            MetricsDataSet(filepath="https://example.com/file.json")
+            MetricsDataSet(
+                filepath="https://example.com/file.json", version=Version(None, None)
+            )

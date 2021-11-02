@@ -358,6 +358,19 @@ class TestPipelinePackageCommand:
         deep_nested_param_path3.mkdir(parents=True, exist_ok=True)
         (deep_nested_param_path3 / "retail.yml").touch()
 
+        super_deep_nested_param_path = Path(
+            fake_repo_path
+            / "conf"
+            / "base"
+            / "parameters"
+            / "a"
+            / "b"
+            / "c"
+            / "d"
+            / "retail"
+        )
+        super_deep_nested_param_path.mkdir(parents=True, exist_ok=True)
+        (super_deep_nested_param_path / "params3.yml").touch()
         result = CliRunner().invoke(
             fake_project_cli, ["pipeline", "package", "retail"], obj=fake_metadata
         )
@@ -379,6 +392,7 @@ class TestPipelinePackageCommand:
         assert "retail/config/parameters/retail/deep/params1.yml" in wheel_contents
         assert "retail/config/parameters/retail.yml" in wheel_contents
         assert "retail/config/parameters/deep/retail.yml" in wheel_contents
+        assert "retail/config/parameters/a/b/c/d/retail/params3.yml" in wheel_contents
 
     def test_pipeline_package_version(
         self, fake_repo_path, fake_package_path, fake_project_cli, fake_metadata

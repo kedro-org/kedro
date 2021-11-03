@@ -117,7 +117,6 @@ Welcome to Kedro's documentation!
    07_extend_kedro/04_plugins
    07_extend_kedro/05_create_kedro_starters
    07_extend_kedro/06_transformers
-   07_extend_kedro/07_decorators
 
 
 .. toctree::

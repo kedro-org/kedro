@@ -25,12 +25,6 @@ kedro.pipeline
 
 .. rubric:: Modules
 
-.. autosummary::
-   :toctree:
-   :recursive:
-
-   kedro.pipeline.decorators
-
 .. rubric:: Exceptions
 
 .. autosummary::

@@ -30,7 +30,6 @@ from kedro import __version__ as release
 # -- Project information -----------------------------------------------------
 
 project = "Kedro"
-copyright = "2021, QuantumBlack Visual Analytics Limited"
 author = "QuantumBlack"
 
 # The short X.Y version.
@@ -186,6 +185,9 @@ html_theme_options = {"collapse_navigation": False, "style_external_links": True
 # to ignore or allow certain links.
 html_extra_path = [str(here / "robots.txt")]
 
+# Removes, from all docs, the copyright footer.
+html_show_copyright = False
+
 # some of these complain that the sections don't exist (which is not true),
 # too many requests, or forbidden URL
 linkcheck_ignore = [
@@ -197,8 +199,6 @@ linkcheck_ignore = [
     "https://github.com/jazzband/pip-tools#example-usage-for-pip-compile",
     "https://www.astronomer.io/docs/cloud/stable/get-started/quickstart#",
     "https://github.com/quantumblacklabs/private-kedro/blob/master/kedro/templates/project/*",
-    "https://zenodo.org/record/4336685",
-    "https://zenodo.org/badge/latestdoi/182067506",
     "https://eternallybored.org/misc/wget/",
     "https://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table.from_pandas",
     "https://www.oracle.com/java/technologies/javase-downloads.html",  # "forbidden" url

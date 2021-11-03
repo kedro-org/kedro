@@ -437,6 +437,8 @@ def parse_dataset_definition(
         del config[VERSION_KEY]
     if config.pop(VERSIONED_FLAG_KEY, False):  # data set is versioned
         config[VERSION_KEY] = Version(load_version, save_version)
+    elif hasattr(class_obj, VERSIONED_FLAG_KEY):
+        config[VERSION_KEY] = Version(load_version, save_version)
 
     return class_obj, config
 

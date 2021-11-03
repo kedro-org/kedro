@@ -59,12 +59,14 @@ class MetricsDataSet(JSONDataSet):
 
     """
 
+    versioned = True
+
     # pylint: disable=too-many-arguments
     def __init__(
         self,
         filepath: str,
+        version: Version,
         save_args: Dict[str, Any] = None,
-        version: Version = Version(None, None),
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
     ) -> None:

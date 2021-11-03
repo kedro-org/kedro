@@ -1,15 +1,14 @@
-import pkg_resources
 import pytest
 from click.testing import CliRunner
 
-from kedro.framework.cli.pipeline import _get_wheel_name
+from kedro.framework.cli.pipeline import _get_wheel_name, _safe_parse_requirements
 
 PIPELINE_NAME = "my_pipeline"
 
 # Inspired by test cases given in https://www.python.org/dev/peps/pep-0508/.
 # These are all valid requirement specifications that can be used in both
 # requirements.txt and in METADATA Requires-Dist.
-VALID_REQUIREMENTS = """A
+SIMPLE_REQUIREMENTS = """A
 A.B-C_D
 aa
 name
@@ -25,6 +24,14 @@ name[quux, strange];python_version<'2.7' and platform_version=='2'
 name; os_name=='a' or os_name=='b'
 requests [security,tests] >= 2.8.1, == 2.8.* ; python_version < "2.7"
 pip @ https://github.com/pypa/pip/archive/1.3.1.zip#sha1=da9234ees
+"""
+
+# These requirements can be used in requirements.txt but not in METADATA Requires-Dist.
+# They cannot be parsed by pkg_resources.
+COMPLEX_REQUIREMENTS = """--extra-index-url https://this.wont.work
+-r other_requirements.txt
+./path/to/package.whl
+http://some.website.com/package.whl
 """
 
 
@@ -73,30 +80,94 @@ class TestPipelineRequirements:
         )
         assert result.exit_code == 0
 
-    def test_existing_project_requirements_txt(
+    def test_existing_complex_project_requirements_txt(
         self, fake_project_cli, fake_metadata, fake_package_path, fake_repo_path
     ):
         """Pipeline requirements.txt and project requirements.txt, but no project
         requirements.in."""
+        project_requirements_txt = fake_repo_path / "src" / "requirements.txt"
+        with open(project_requirements_txt, "a", encoding="utf-8") as file:
+            file.write(COMPLEX_REQUIREMENTS)
+        existing_requirements = _safe_parse_requirements(
+            project_requirements_txt.read_text()
+        )
+
         self.call_pipeline_create(fake_project_cli, fake_metadata)
         pipeline_requirements_txt = (
             fake_package_path / "pipelines" / PIPELINE_NAME / "requirements.txt"
         )
-        pipeline_requirements_txt.write_text(VALID_REQUIREMENTS)
+        pipeline_requirements_txt.write_text(SIMPLE_REQUIREMENTS)
 
         self.call_pipeline_package(fake_project_cli, fake_metadata)
         self.call_pipeline_delete(fake_project_cli, fake_metadata)
         self.call_pipeline_pull(fake_project_cli, fake_metadata, fake_repo_path)
 
-        packaged_requirements = pkg_resources.parse_requirements(VALID_REQUIREMENTS)
+        packaged_requirements = _safe_parse_requirements(SIMPLE_REQUIREMENTS)
         project_requirements_in = fake_repo_path / "src" / "requirements.in"
-        pulled_requirements = pkg_resources.parse_requirements(
+        pulled_requirements = _safe_parse_requirements(
             project_requirements_in.read_text()
         )
-        # Packaged requirements expected to be a subset of pulled requirements due to
-        # default project level requirements.txt (e.g. black, flake8), which should be
-        # preserved
-        assert set(packaged_requirements) <= set(pulled_requirements)
+        # requirements.in afterwards should be the requirements that already existed in
+        # project requirements.txt + those pulled in from pipeline requirements.txt.
+        # Unparseable COMPLEX_REQUIREMENTS should still be there.
+        assert pulled_requirements == existing_requirements | packaged_requirements
+        assert COMPLEX_REQUIREMENTS in project_requirements_in.read_text()
+
+    def test_existing_project_requirements_txt(
+        self, fake_project_cli, fake_metadata, fake_package_path, fake_repo_path
+    ):
+        """Pipeline requirements.txt and project requirements.txt, but no project
+        requirements.in."""
+        project_requirements_txt = fake_repo_path / "src" / "requirements.txt"
+        existing_requirements = _safe_parse_requirements(
+            project_requirements_txt.read_text()
+        )
+
+        self.call_pipeline_create(fake_project_cli, fake_metadata)
+        pipeline_requirements_txt = (
+            fake_package_path / "pipelines" / PIPELINE_NAME / "requirements.txt"
+        )
+        pipeline_requirements_txt.write_text(SIMPLE_REQUIREMENTS)
+
+        self.call_pipeline_package(fake_project_cli, fake_metadata)
+        self.call_pipeline_delete(fake_project_cli, fake_metadata)
+        self.call_pipeline_pull(fake_project_cli, fake_metadata, fake_repo_path)
+
+        packaged_requirements = _safe_parse_requirements(SIMPLE_REQUIREMENTS)
+        project_requirements_in = fake_repo_path / "src" / "requirements.in"
+        pulled_requirements = _safe_parse_requirements(
+            project_requirements_in.read_text()
+        )
+        # requirements.in afterwards should be the requirements that already existed in
+        # project requirements.txt + those pulled in from pipeline requirements.txt.
+        assert pulled_requirements == existing_requirements | packaged_requirements
+
+    def test_existing_complex_project_requirements_in(
+        self, fake_project_cli, fake_metadata, fake_package_path, fake_repo_path
+    ):
+        """Pipeline requirements.txt and a pre-existing project requirements.in."""
+        project_requirements_in = fake_repo_path / "src" / "requirements.in"
+        project_requirements_in.write_text(COMPLEX_REQUIREMENTS)
+        self.call_pipeline_create(fake_project_cli, fake_metadata)
+        pipeline_requirements_txt = (
+            fake_package_path / "pipelines" / PIPELINE_NAME / "requirements.txt"
+        )
+        pipeline_requirements_txt.write_text(SIMPLE_REQUIREMENTS)
+
+        self.call_pipeline_package(fake_project_cli, fake_metadata)
+        self.call_pipeline_delete(fake_project_cli, fake_metadata)
+        self.call_pipeline_pull(fake_project_cli, fake_metadata, fake_repo_path)
+
+        packaged_requirements = _safe_parse_requirements(SIMPLE_REQUIREMENTS)
+        existing_requirements = _safe_parse_requirements(COMPLEX_REQUIREMENTS)
+        pulled_requirements = _safe_parse_requirements(
+            project_requirements_in.read_text()
+        )
+        # requirements.in afterwards should be the requirements that already existed in
+        # project requirements.txt + those pulled in from pipeline requirements.txt.
+        # Unparseable COMPLEX_REQUIREMENTS should still be there.
+        assert pulled_requirements == existing_requirements | packaged_requirements
+        assert COMPLEX_REQUIREMENTS in project_requirements_in.read_text()
 
     def test_existing_project_requirements_in(
         self, fake_project_cli, fake_metadata, fake_package_path, fake_repo_path
@@ -109,22 +180,20 @@ class TestPipelineRequirements:
         pipeline_requirements_txt = (
             fake_package_path / "pipelines" / PIPELINE_NAME / "requirements.txt"
         )
-        pipeline_requirements_txt.write_text(VALID_REQUIREMENTS)
+        pipeline_requirements_txt.write_text(SIMPLE_REQUIREMENTS)
 
         self.call_pipeline_package(fake_project_cli, fake_metadata)
         self.call_pipeline_delete(fake_project_cli, fake_metadata)
         self.call_pipeline_pull(fake_project_cli, fake_metadata, fake_repo_path)
 
-        packaged_requirements = pkg_resources.parse_requirements(VALID_REQUIREMENTS)
-        existing_requirements = pkg_resources.parse_requirements(initial_dependency)
-        pulled_requirements = pkg_resources.parse_requirements(
+        packaged_requirements = _safe_parse_requirements(SIMPLE_REQUIREMENTS)
+        existing_requirements = _safe_parse_requirements(initial_dependency)
+        pulled_requirements = _safe_parse_requirements(
             project_requirements_in.read_text()
         )
-        # Requirements after pulling a pipeline expected to be the union of
-        # requirements packaged and requirements already existing at project level
-        assert set(pulled_requirements) == set(packaged_requirements) | set(
-            existing_requirements
-        )
+        # requirements.in afterwards should be the requirements that already existed in
+        # project requirements.txt + those pulled in from pipeline requirements.txt.
+        assert pulled_requirements == existing_requirements | packaged_requirements
 
     def test_missing_project_requirements_in_and_txt(
         self,
@@ -144,8 +213,8 @@ class TestPipelineRequirements:
             fake_package_path / "pipelines" / PIPELINE_NAME / "requirements.txt"
         )
 
-        pipeline_requirements_txt.write_text(VALID_REQUIREMENTS)
-        packaged_requirements = pkg_resources.parse_requirements(VALID_REQUIREMENTS)
+        pipeline_requirements_txt.write_text(SIMPLE_REQUIREMENTS)
+        packaged_requirements = _safe_parse_requirements(SIMPLE_REQUIREMENTS)
 
         self.call_pipeline_package(fake_project_cli, fake_metadata)
         self.call_pipeline_delete(fake_project_cli, fake_metadata)
@@ -155,10 +224,10 @@ class TestPipelineRequirements:
 
         assert not project_requirements_txt.exists()
         assert project_requirements_in.exists()
-        pulled_requirements = pkg_resources.parse_requirements(
+        pulled_requirements = _safe_parse_requirements(
             project_requirements_in.read_text()
         )
-        assert set(packaged_requirements) == set(pulled_requirements)
+        assert packaged_requirements == pulled_requirements
 
     def test_no_requirements(
         self,
@@ -192,8 +261,8 @@ class TestPipelineRequirements:
             fake_package_path / "pipelines" / PIPELINE_NAME / "requirements.txt"
         )
         project_requirements_txt = fake_repo_path / "src" / "requirements.txt"
-        pipeline_requirements_txt.write_text(VALID_REQUIREMENTS)
-        project_requirements_txt.write_text(VALID_REQUIREMENTS)
+        pipeline_requirements_txt.write_text(SIMPLE_REQUIREMENTS)
+        project_requirements_txt.write_text(SIMPLE_REQUIREMENTS)
 
         self.call_pipeline_package(fake_project_cli, fake_metadata)
         self.call_pipeline_delete(fake_project_cli, fake_metadata)
@@ -203,7 +272,7 @@ class TestPipelineRequirements:
         # addition
         project_requirements_in = fake_repo_path / "src" / "requirements.in"
         assert project_requirements_in.exists()
-        assert project_requirements_in.read_text() == VALID_REQUIREMENTS
+        assert project_requirements_in.read_text() == SIMPLE_REQUIREMENTS
 
     def test_no_pipeline_requirements_txt(
         self, fake_project_cli, fake_metadata, fake_repo_path
@@ -235,16 +304,8 @@ class TestPipelineRequirements:
         project_requirements_in = fake_repo_path / "src" / "requirements.in"
         assert not project_requirements_in.exists()
 
-    @pytest.mark.parametrize(
-        "requirement",
-        [
-            "--extra-index-url https://this.wont.work",
-            "-r other_requirements.txt",
-            "./path/to/package.whl",
-            "http://some.website.com/package.whl",
-        ],
-    )
-    def test_invalid_requirements(
+    @pytest.mark.parametrize("requirement", COMPLEX_REQUIREMENTS.splitlines())
+    def test_complex_requirements(
         self, requirement, fake_project_cli, fake_metadata, fake_package_path
     ):
         """Options that are valid in requirements.txt but cannot be packaged using

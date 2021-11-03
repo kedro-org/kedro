@@ -86,9 +86,6 @@ commands:
       - run:
           name: Run linters
           command: make lint
-      - run:
-          name: Check legal headers
-          command: make legal
 
   e2e_tests:
     description: Run all end to end tests

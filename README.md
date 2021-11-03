@@ -8,7 +8,6 @@
 ![CircleCI - Master Branch](https://img.shields.io/circleci/build/github/quantumblacklabs/kedro/master?label=master)
 ![Develop Branch Build](https://img.shields.io/circleci/build/github/quantumblacklabs/kedro/develop?label=develop)
 [![Documentation](https://readthedocs.org/projects/kedro/badge/?version=stable)](https://kedro.readthedocs.io/)
-[![DOI](https://zenodo.org/badge/182067506.svg)](https://zenodo.org/badge/latestdoi/182067506)
 
 
 ## What is Kedro?
@@ -120,4 +119,4 @@ Kedro has also won [Best Technical Tool or Framework for AI](https://awards.ai/t
 
 ## How can I cite Kedro?
 
-If you're an academic, Kedro can also help you, for example, as a tool to solve the problem of reproducible research. Find our citation reference on [Zenodo](https://zenodo.org/record/4336685).
+If you're an academic, Kedro can also help you, for example, as a tool to solve the problem of reproducible research. Use the "Cite this repository" button on [our repository](https://github.com/quantumblacklabs/kedro) to generate a citation from the [CITATION.cff file](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-citation-files).

@@ -58,6 +58,7 @@
 * Removed the `kedro install` command in favour of using `pip install -r src/requirements.txt` to install project dependencies.
 * The dataset `networkx.NetworkXDataSet` has been renamed to `networkx.JSONDataSet`.
 * Removed the `config_loader` property from `KedroContext`.
+* Removed decorator API from `Node` and `Pipeline`, as well as the modules `kedro.extras.decorators` and `kedro.pipeline.decorators`.
 
 ## Thanks for supporting contributions
 

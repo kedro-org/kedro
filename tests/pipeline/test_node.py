@@ -381,23 +381,7 @@ def decorated_identity(value):
     return value
 
 
-class TestTagDecorator:
-    def test_apply_decorators(self):
-        old_node = node(apply_g(decorated_identity), "input", "output", name="node")
-        pattern = (
-            "The node's `decorate` API will be deprecated in Kedro 0.18.0."
-            "Please use a node's Hooks to extend the node's behaviour in a pipeline."
-            "For more information, please visit"
-            "https://kedro.readthedocs.io/en/stable/07_extend_kedro/02_hooks.html"
-        )
-        with pytest.warns(DeprecationWarning, match=re.escape(pattern)):
-            new_node = old_node.decorate(apply_h, apply_ij)
-        result = new_node.run(dict(input=1))
-
-        assert old_node.name == new_node.name
-        assert "output" in result
-        assert result["output"] == "f(g(ij(h(1))))"
-
+class TestTag:
     def test_tag_nodes(self):
         tagged_node = node(identity, "input", "output", tags=["hello"]).tag(["world"])
         assert "hello" in tagged_node.tags
@@ -408,15 +392,6 @@ class TestTagDecorator:
         tagged_node = node(identity, "input", "output", tags="hello").tag("world")
         assert "hello" in tagged_node.tags
         assert "world" in tagged_node.tags
-        assert len(tagged_node.tags) == 2
-
-    def test_tag_and_decorate(self):
-        tagged_node = node(identity, "input", "output", tags=["hello"])
-        tagged_node = tagged_node.decorate(apply_f)
-        tagged_node = tagged_node.tag(["world"])
-        assert "hello" in tagged_node.tags
-        assert "world" in tagged_node.tags
-        assert tagged_node.run(dict(input=1))["output"] == "f(1)"
 
 
 class TestNames:

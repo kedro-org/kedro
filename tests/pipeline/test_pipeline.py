@@ -6,7 +6,6 @@ from typing import Callable
 import pytest
 
 import kedro
-from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline, node
 from kedro.pipeline.pipeline import (
     CircularDependencyError,
@@ -15,7 +14,6 @@ from kedro.pipeline.pipeline import (
     _strip_transcoding,
     _transcode_split,
 )
-from kedro.runner import SequentialRunner
 
 
 class TestTranscodeHelpers:
@@ -649,41 +647,6 @@ def apply_g(func: Callable) -> Callable:
         return func(*(f"g({a})" for a in args), **kwargs)
 
     return with_g
-
-
-class TestPipelineDecorator:
-    def test_apply(self):
-        nodes = sorted(
-            [
-                node(identity, "number", "output1", name="identity1"),
-                node(identity, "output1", "output2", name="biconcat"),
-                node(identity, "output2", "output", name="identity3"),
-            ],
-            key=lambda x: x.name,
-        )
-        pattern = (
-            "The pipeline's `decorate` API will be deprecated in Kedro 0.18.0."
-            "Please use a node's Hooks to extend the node's behaviour in a pipeline."
-            "For more information, please visit"
-            "https://kedro.readthedocs.io/en/stable/07_extend_kedro/02_hooks.html"
-        )
-        with pytest.warns(DeprecationWarning, match=re.escape(pattern)):
-            pipeline = Pipeline(nodes).decorate(apply_f, apply_g)
-        catalog = DataCatalog({}, dict(number=1))
-        result = SequentialRunner().run(pipeline, catalog)
-        decorated_nodes = sorted(pipeline.nodes, key=lambda x: x.name)
-
-        assert result["output"] == "g(f(g(f(g(f(1))))))"
-        assert len(pipeline.nodes) == 3
-        assert all(n1.name == n2.name for n1, n2 in zip(nodes, decorated_nodes))
-
-    def test_empty_apply(self):
-        """Applying no decorators is valid."""
-        identity_node = node(identity, "number", "output", name="identity")
-        pipeline = Pipeline([identity_node]).decorate()
-        catalog = DataCatalog({}, dict(number=1))
-        result = SequentialRunner().run(pipeline, catalog)
-        assert result["output"] == 1
 
 
 @pytest.fixture

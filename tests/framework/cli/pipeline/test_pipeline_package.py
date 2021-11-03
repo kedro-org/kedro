@@ -1,30 +1,3 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
 import textwrap
 from pathlib import Path
 from zipfile import ZipFile
@@ -113,6 +86,56 @@ class TestPipelinePackageCommand:
             wheel_location=wheel_location, package_name=package_name, version=version
         )
 
+    def test_pipeline_package_same_name_as_package_name(
+        self, fake_metadata, fake_project_cli, fake_repo_path
+    ):
+        """Create modular pipeline with the same name as the
+        package name, then package as is. The command should run
+        and the resulting wheel should have all expected contents.
+        """
+        pipeline_name = fake_metadata.package_name
+        result = CliRunner().invoke(
+            fake_project_cli, ["pipeline", "create", pipeline_name], obj=fake_metadata
+        )
+        assert result.exit_code == 0
+
+        result = CliRunner().invoke(
+            fake_project_cli, ["pipeline", "package", pipeline_name], obj=fake_metadata
+        )
+        wheel_location = fake_repo_path / "src" / "dist"
+
+        assert result.exit_code == 0
+        assert f"Location: {wheel_location}" in result.output
+        self.assert_wheel_contents_correct(
+            wheel_location=wheel_location, package_name=pipeline_name
+        )
+
+    def test_pipeline_package_same_name_as_package_name_alias(
+        self, fake_metadata, fake_project_cli, fake_repo_path
+    ):
+        """Create modular pipeline, then package under alias
+        the same name as the package name. The command should run
+        and the resulting wheel should have all expected contents.
+        """
+        alias = fake_metadata.package_name
+        result = CliRunner().invoke(
+            fake_project_cli, ["pipeline", "create", PIPELINE_NAME], obj=fake_metadata
+        )
+        assert result.exit_code == 0
+
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["pipeline", "package", PIPELINE_NAME, "--alias", alias],
+            obj=fake_metadata,
+        )
+        wheel_location = fake_repo_path / "src" / "dist"
+
+        assert result.exit_code == 0
+        assert f"Location: {wheel_location}" in result.output
+        self.assert_wheel_contents_correct(
+            wheel_location=wheel_location, package_name=alias
+        )
+
     @pytest.mark.parametrize("existing_dir", [True, False])
     def test_pipeline_package_to_destination(
         self, fake_project_cli, existing_dir, tmp_path, fake_metadata
@@ -188,8 +211,7 @@ class TestPipelinePackageCommand:
 
     def test_package_pipeline_invalid_module_path(self, fake_project_cli):
         result = CliRunner().invoke(
-            fake_project_cli,
-            ["pipeline", "package", f"pipelines/{PIPELINE_NAME}"],
+            fake_project_cli, ["pipeline", "package", f"pipelines/{PIPELINE_NAME}"]
         )
         error_message = (
             "The pipeline location you provided is not a valid Python module path"
@@ -311,6 +333,66 @@ class TestPipelinePackageCommand:
         assert "retail/config/parameters/retail/params1.yml" in wheel_contents
         assert "retail/config/parameters/retail.yml" in wheel_contents
         assert "retail/config/parameters/retail_banking.yml" not in wheel_contents
+
+    def test_package_pipeline_with_deep_nested_parameters(
+        self, fake_repo_path, fake_project_cli, fake_metadata
+    ):
+        CliRunner().invoke(
+            fake_project_cli, ["pipeline", "create", "retail"], obj=fake_metadata
+        )
+        deep_nested_param_path = Path(
+            fake_repo_path / "conf" / "base" / "parameters" / "deep" / "retail"
+        )
+        deep_nested_param_path.mkdir(parents=True, exist_ok=True)
+        (deep_nested_param_path / "params1.yml").touch()
+
+        deep_nested_param_path2 = Path(
+            fake_repo_path / "conf" / "base" / "parameters" / "retail" / "deep"
+        )
+        deep_nested_param_path2.mkdir(parents=True, exist_ok=True)
+        (deep_nested_param_path2 / "params1.yml").touch()
+
+        deep_nested_param_path3 = Path(
+            fake_repo_path / "conf" / "base" / "parameters" / "deep"
+        )
+        deep_nested_param_path3.mkdir(parents=True, exist_ok=True)
+        (deep_nested_param_path3 / "retail.yml").touch()
+
+        super_deep_nested_param_path = Path(
+            fake_repo_path
+            / "conf"
+            / "base"
+            / "parameters"
+            / "a"
+            / "b"
+            / "c"
+            / "d"
+            / "retail"
+        )
+        super_deep_nested_param_path.mkdir(parents=True, exist_ok=True)
+        (super_deep_nested_param_path / "params3.yml").touch()
+        result = CliRunner().invoke(
+            fake_project_cli, ["pipeline", "package", "retail"], obj=fake_metadata
+        )
+
+        assert result.exit_code == 0
+        assert "Pipeline `retail` packaged!" in result.output
+
+        wheel_location = fake_repo_path / "src" / "dist"
+        assert f"Location: {wheel_location}" in result.output
+
+        wheel_name = _get_wheel_name(name="retail", version="0.1")
+        wheel_file = wheel_location / wheel_name
+        assert wheel_file.is_file()
+        assert len(list(wheel_location.iterdir())) == 1
+
+        # pylint: disable=consider-using-with
+        wheel_contents = set(ZipFile(str(wheel_file)).namelist())
+        assert "retail/config/parameters/deep/retail/params1.yml" in wheel_contents
+        assert "retail/config/parameters/retail/deep/params1.yml" in wheel_contents
+        assert "retail/config/parameters/retail.yml" in wheel_contents
+        assert "retail/config/parameters/deep/retail.yml" in wheel_contents
+        assert "retail/config/parameters/a/b/c/d/retail/params3.yml" in wheel_contents
 
     def test_pipeline_package_version(
         self, fake_repo_path, fake_package_path, fake_project_cli, fake_metadata

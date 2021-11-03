@@ -42,7 +42,7 @@ class GenericDataSet(AbstractVersionedDataSet):
 
         >>> cars:
         >>>   type: pandas.GenericDataSet
-        >>>   kind: csv
+        >>>   file_format: csv
         >>>   filepath: s3://data/01_raw/company/cars.csv
         >>>   load_args:
         >>>     sep: ","
@@ -59,7 +59,7 @@ class GenericDataSet(AbstractVersionedDataSet):
 
         >>> flights:
         >>>    type: pandas.GenericDataSet
-        >>>    kind: sas
+        >>>    file_format: sas
         >>>    filepath: data/01_raw/airplanes.sas7bdat
         >>>    load_args:
         >>>       format: sas7bdat
@@ -73,8 +73,8 @@ class GenericDataSet(AbstractVersionedDataSet):
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
         >>>
-        >>> # data_set = GenericDataSet(kind='csv', filepath="s3://test.csv")
-        >>> data_set = GenericDataSet(kind='csv', filepath="test.csv")
+        >>> # data_set = GenericDataSet(file_format='csv', filepath="s3://test.csv")
+        >>> data_set = GenericDataSet(file_format='csv', filepath="test.csv")
         >>> data_set.save(data)
         >>> reloaded = data_set.load()
         >>> assert data.equals(reloaded)
@@ -87,7 +87,7 @@ class GenericDataSet(AbstractVersionedDataSet):
     # pylint: disable=too-many-arguments
     def __init__(
         self,
-        kind: str,
+        file_format: str,
         filepath: str,
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
@@ -100,10 +100,11 @@ class GenericDataSet(AbstractVersionedDataSet):
         dynamically identified by string matching on a best effort basis.
 
         Args:
-            kind: String which is used to match the appropriate load/save method on a best
+            file_format: String which is used to match the appropriate load/save method on a best
                 effort basis. For example if 'csv' is passed in the `pandas.read_csv` and
                 `pandas.DataFrame.to_csv` will be identified. An error will be raised unless
-                at least one matching `read_{kind}` or `to_{kind}` method is identified.
+                at least one matching `read_{file_format}` or `to_{file_format}` method is
+                identified.
             filepath: Filepath in POSIX format to a file prefixed with a protocol like `s3://`.
                 If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
@@ -139,7 +140,7 @@ class GenericDataSet(AbstractVersionedDataSet):
                 read or write methods are identified.
         """
 
-        self._kind = kind.lower()
+        self._file_format = file_format.lower()
 
         _fs_args = deepcopy(fs_args) or {}
         _fs_open_args_load = _fs_args.pop("open_args_load", {})
@@ -172,9 +173,9 @@ class GenericDataSet(AbstractVersionedDataSet):
 
     def _ensure_file_system_target(self) -> None:
         # Fail fast if provided a known non-filesystem target
-        if self._kind in NON_FILE_SYSTEM_TARGETS:
+        if self._file_format in NON_FILE_SYSTEM_TARGETS:
             raise DataSetError(
-                f"Cannot create a dataset of kind `{self._kind}` as it "
+                f"Cannot create a dataset of file_format `{self._file_format}` as it "
                 f"does not support a filepath target/source."
             )
 
@@ -183,13 +184,13 @@ class GenericDataSet(AbstractVersionedDataSet):
         self._ensure_file_system_target()
 
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        load_method = getattr(pd, f"read_{self._kind}", None)
+        load_method = getattr(pd, f"read_{self._file_format}", None)
         if load_method:
             with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
                 return load_method(fs_file, **self._load_args)
         raise DataSetError(
-            f"Unable to retrieve `pandas.read_{self._kind}` method, please ensure that your 'kind' "
-            "parameter has been defined correctly as per the Pandas API "
+            f"Unable to retrieve `pandas.read_{self._file_format}` method, please ensure that your "
+            "'file_format' parameter has been defined correctly as per the Pandas API "
             "https://pandas.pydata.org/docs/reference/io.html"
         )
 
@@ -198,7 +199,7 @@ class GenericDataSet(AbstractVersionedDataSet):
         self._ensure_file_system_target()
 
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
-        save_method = getattr(data, f"to_{self._kind}", None)
+        save_method = getattr(data, f"to_{self._file_format}", None)
         if save_method:
             with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
                 # KEY ASSUMPTION - first argument is path/buffer/io
@@ -206,8 +207,9 @@ class GenericDataSet(AbstractVersionedDataSet):
                 self._invalidate_cache()
         else:
             raise DataSetError(
-                f"Unable to retrieve `pandas.DataFrame.to_{self._kind}` method, please ensure "
-                "that your 'kind' parameter has been defined correctly as per the Pandas API "
+                f"Unable to retrieve `pandas.DataFrame.to_{self._file_format}` method, please "
+                "ensure  that your 'file_format' parameter has been defined correctly as "
+                "per the Pandas API "
                 "https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html"
             )
 
@@ -221,7 +223,7 @@ class GenericDataSet(AbstractVersionedDataSet):
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
-            kind=self._kind,
+            file_format=self._file_format,
             filepath=self._filepath,
             protocol=self._protocol,
             load_args=self._load_args,

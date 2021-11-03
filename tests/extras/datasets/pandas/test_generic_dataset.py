@@ -39,7 +39,7 @@ def sas_binary():
 @pytest.fixture
 def sas_data_set(filepath_sas, fs_args):
     return GenericDataSet(
-        kind="sas",
+        file_format="sas",
         filepath=filepath_sas.as_posix(),
         load_args={"format": "sas7bdat"},
         fs_args=fs_args,
@@ -49,7 +49,7 @@ def sas_data_set(filepath_sas, fs_args):
 @pytest.fixture
 def html_data_set(filepath_html, fs_args):
     return GenericDataSet(
-        kind="html",
+        file_format="html",
         filepath=filepath_html.as_posix(),
         fs_args=fs_args,
         save_args={"index": False},
@@ -59,7 +59,7 @@ def html_data_set(filepath_html, fs_args):
 @pytest.fixture
 def sas_data_set_bad_config(filepath_sas, fs_args):
     return GenericDataSet(
-        kind="sas",
+        file_format="sas",
         filepath=filepath_sas.as_posix(),
         load_args={},  # SAS reader requires a type param
         fs_args=fs_args,
@@ -69,7 +69,7 @@ def sas_data_set_bad_config(filepath_sas, fs_args):
 @pytest.fixture
 def versioned_csv_data_set(filepath_csv, load_version, save_version):
     return GenericDataSet(
-        kind="csv",
+        file_format="csv",
         filepath=filepath_csv.as_posix(),
         version=Version(load_version, save_version),
         save_args={"index": False},
@@ -79,7 +79,7 @@ def versioned_csv_data_set(filepath_csv, load_version, save_version):
 @pytest.fixture
 def csv_data_set(filepath_csv):
     return GenericDataSet(
-        kind="csv",
+        file_format="csv",
         filepath=filepath_csv.as_posix(),
         save_args={"index": False},
     )
@@ -102,7 +102,7 @@ class TestGenericSasDataSet:
         # Pandas does not implement a SAS writer
         assert (
             "Unable to retrieve `pandas.DataFrame.to_sas` method, please ensure that your "
-            "'kind' parameter has been defined correctly as per the Pandas API "
+            "'file_format' parameter has been defined correctly as per the Pandas API "
             "https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html"
             in str(e.value)
         )
@@ -131,7 +131,7 @@ class TestGenericSasDataSet:
     )
     def test_protocol_usage(self, filepath, instance_type, credentials):
         data_set = GenericDataSet(
-            kind="sas", filepath=filepath, credentials=credentials
+            file_format="sas", filepath=filepath, credentials=credentials
         )
         assert isinstance(data_set._fs, instance_type)
 
@@ -143,7 +143,7 @@ class TestGenericSasDataSet:
     def test_catalog_release(self, mocker):
         fs_mock = mocker.patch("fsspec.filesystem").return_value
         filepath = "test.csv"
-        data_set = GenericDataSet(kind="sas", filepath=filepath)
+        data_set = GenericDataSet(file_format="sas", filepath=filepath)
         assert data_set._version_cache.currsize == 0  # no cache if unversioned
         data_set.release()
         fs_mock.invalidate_cache.assert_called_once_with(filepath)
@@ -155,9 +155,11 @@ class TestGenericCSVDataSetVersioned:
         """Test that version is in string representation of the class instance
         when applicable."""
         filepath = "test.csv"
-        ds = GenericDataSet(kind="csv", filepath=filepath)
+        ds = GenericDataSet(file_format="csv", filepath=filepath)
         ds_versioned = GenericDataSet(
-            kind="csv", filepath=filepath, version=Version(load_version, save_version)
+            file_format="csv",
+            filepath=filepath,
+            version=Version(load_version, save_version),
         )
         assert filepath in str(ds)
         assert "version" not in str(ds)
@@ -190,7 +192,9 @@ class TestGenericCSVDataSetVersioned:
         # force-drop a newer version into the same location
         v_new = generate_timestamp()
         GenericDataSet(
-            kind="csv", filepath=filepath_csv.as_posix(), version=Version(v_new, v_new)
+            file_format="csv",
+            filepath=filepath_csv.as_posix(),
+            version=Version(v_new, v_new),
         ).save(dummy_dataframe)
 
         versioned_csv_data_set.load()
@@ -198,7 +202,9 @@ class TestGenericCSVDataSetVersioned:
 
         assert v2 == v1  # v2 should not be v_new!
         ds_new = GenericDataSet(
-            kind="csv", filepath=filepath_csv.as_posix(), version=Version(None, None)
+            file_format="csv",
+            filepath=filepath_csv.as_posix(),
+            version=Version(None, None),
         )
         assert (
             ds_new.resolve_load_version() == v_new
@@ -207,7 +213,9 @@ class TestGenericCSVDataSetVersioned:
     def test_multiple_saves(self, dummy_dataframe, filepath_csv):
         """Test multiple cycles of save followed by load for the same dataset"""
         ds_versioned = GenericDataSet(
-            kind="csv", filepath=filepath_csv.as_posix(), version=Version(None, None)
+            file_format="csv",
+            filepath=filepath_csv.as_posix(),
+            version=Version(None, None),
         )
 
         # first save
@@ -226,21 +234,27 @@ class TestGenericCSVDataSetVersioned:
 
         # another dataset
         ds_new = GenericDataSet(
-            kind="csv", filepath=filepath_csv.as_posix(), version=Version(None, None)
+            file_format="csv",
+            filepath=filepath_csv.as_posix(),
+            version=Version(None, None),
         )
         assert ds_new.resolve_load_version() == second_load_version
 
     def test_release_instance_cache(self, dummy_dataframe, filepath_csv):
         """Test that cache invalidation does not affect other instances"""
         ds_a = GenericDataSet(
-            kind="csv", filepath=filepath_csv.as_posix(), version=Version(None, None)
+            file_format="csv",
+            filepath=filepath_csv.as_posix(),
+            version=Version(None, None),
         )
         assert ds_a._version_cache.currsize == 0
         ds_a.save(dummy_dataframe)  # create a version
         assert ds_a._version_cache.currsize == 2
 
         ds_b = GenericDataSet(
-            kind="csv", filepath=filepath_csv.as_posix(), version=Version(None, None)
+            file_format="csv",
+            filepath=filepath_csv.as_posix(),
+            version=Version(None, None),
         )
         assert ds_b._version_cache.currsize == 0
         ds_b.resolve_save_version()
@@ -326,13 +340,13 @@ class TestGenericHtmlDataSet:
 
 
 class TestBadGenericDataSet:
-    def test_bad_kind_argument(self):
-        ds = GenericDataSet(kind="kedro", filepath="test.kedro")
+    def test_bad_file_format_argument(self):
+        ds = GenericDataSet(file_format="kedro", filepath="test.kedro")
 
         with pytest.raises(DataSetError) as e:
             _ = ds.load()
         msg = (
-            "Unable to retrieve `pandas.read_kedro` method, please ensure that your 'kind' "
+            "Unable to retrieve `pandas.read_kedro` method, please ensure that your 'file_format' "
             "parameter has been defined correctly as per the Pandas API https://pandas.pydata.org/docs/reference/io.html"
         )
         assert msg in str(e.value)
@@ -340,13 +354,13 @@ class TestBadGenericDataSet:
         with pytest.raises(DataSetError) as e:
             ds.save(pd.DataFrame([1]))
         msg = (
-            "Unable to retrieve `pandas.DataFrame.to_kedro` method, please ensure that your 'kind' "
+            "Unable to retrieve `pandas.DataFrame.to_kedro` method, please ensure that your 'file_format' "
             "parameter has been defined correctly as per the Pandas API https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html"
         )
         assert msg in str(e.value)
 
     @pytest.mark.parametrize(
-        "kind",
+        "file_format",
         [
             "clipboard",
             "sql_table",
@@ -355,16 +369,18 @@ class TestBadGenericDataSet:
             "records",
         ],
     )
-    def test_generic_no_filepaths(self, kind):
+    def test_generic_no_filepaths(self, file_format):
         error = (
-            "Cannot create a dataset of kind "
-            f"`{kind}` as it it does not support a filepath target/source"
+            "Cannot create a dataset of file_format "
+            f"`{file_format}` as it it does not support a filepath target/source"
         )
 
         with pytest.raises(DataSetError) as e:
-            _ = GenericDataSet(kind=kind, filepath="/file/thing.file").load()
+            _ = GenericDataSet(
+                file_format=file_format, filepath="/file/thing.file"
+            ).load()
         with pytest.raises(DataSetError) as e2:
-            GenericDataSet(kind=kind, filepath="/file/thing.file").save(
+            GenericDataSet(file_format=file_format, filepath="/file/thing.file").save(
                 pd.DataFrame([1])
             )
 

@@ -214,7 +214,7 @@ class GenericDataSet(AbstractVersionedDataSet):
         self._ensure_file_system_target()
 
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
-        load_method = getattr(pd, "read_" + self._kind, None)
+        load_method = getattr(pd, f"read_{self._kind}", None)
         if load_method:
             with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
                 return load_method(fs_file, **self._load_args)

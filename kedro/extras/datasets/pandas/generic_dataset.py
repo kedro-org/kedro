@@ -206,7 +206,7 @@ class GenericDataSet(AbstractVersionedDataSet):
         if self._kind in NON_FILE_SYSTEM_TARGETS:
             raise DataSetError(
                 f"Cannot create a dataset of kind `{self._kind}` as it "
-                f"it does not support a filepath target/source"
+                f"does not support a filepath target/source."
             )
 
     def _load(self) -> Any:

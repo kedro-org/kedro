@@ -2,17 +2,15 @@
 
 import functools
 import logging
-import os
 from copy import deepcopy
 from pathlib import Path, PurePosixPath, PureWindowsPath
-from typing import Any, Dict, Iterable, Union
+from typing import Any, Dict, Iterable, Optional, Union
 from urllib.parse import urlparse
 from warnings import warn
 
 from kedro.config import ConfigLoader, MissingConfigException
 from kedro.framework.hooks import get_hook_manager
-from kedro.framework.project import pipelines, settings
-from kedro.framework.startup import _get_project_metadata
+from kedro.framework.project import pipelines
 from kedro.io import DataCatalog
 from kedro.io.core import generate_timestamp
 from kedro.pipeline import Pipeline
@@ -190,19 +188,21 @@ class KedroContext:
     Kedro's main functionality.
     """
 
-    _CONF_ROOT = "conf"
-    """CONF_ROOT: Name of root directory containing project configuration.
+    _CONF_SOURCE = "conf"
+    """CONF_SOURCE: Name of root directory containing project configuration.
     Default name is "conf"."""
 
     def __init__(
         self,
         package_name: str,
         project_path: Union[Path, str],
+        config_loader: ConfigLoader,
         env: str = None,
         extra_params: Dict[str, Any] = None,
-    ):
+    ):  # pylint: disable=too-many-arguments
         """Create a context object by providing the root of a Kedro project and
-        the environment configuration subfolders (see ``kedro.config.ConfigLoader``)
+        the environment configuration subfolders
+        (see ``kedro.config.ConfigLoader``)
 
         Raises:
             KedroContextError: If there is a mismatch
@@ -220,33 +220,33 @@ class KedroContext:
         """
         self._project_path = Path(project_path).expanduser().resolve()
         self._package_name = package_name
-
-        self._env = env or "local"
+        self._config_loader = config_loader
+        self._env = env
         self._extra_params = deepcopy(extra_params)
 
     @property  # type: ignore
     @_deprecate(version="0.18.0")
-    def CONF_ROOT(self) -> str:  # pylint: disable=invalid-name
-        """Deprecated in favour of settings.CONF_ROOT
+    def CONF_SOURCE(self) -> str:  # pylint: disable=invalid-name
+        """Deprecated in favour of settings.CONF_SOURCE
 
         Returns:
             The root directory of the configuration directory of the project.
         Raises:
             DeprecationWarning
         """
-        return self._CONF_ROOT
+        return self._CONF_SOURCE
 
-    @CONF_ROOT.setter  # type: ignore
+    @CONF_SOURCE.setter  # type: ignore
     @_deprecate(version="0.18.0")
-    def CONF_ROOT(self, value: str) -> None:  # pylint: disable=invalid-name
-        """Deprecated in favour of settings.CONF_ROOT
+    def CONF_SOURCE(self, value: str) -> None:  # pylint: disable=invalid-name
+        """Deprecated in favour of settings.CONF_SOURCE
         Raises:
             DeprecationWarning
         """
-        self._CONF_ROOT = value  # pylint: disable=invalid-name
+        self._CONF_SOURCE = value  # pylint: disable=invalid-name
 
     @property  # type: ignore
-    def env(self) -> str:
+    def env(self) -> Optional[str]:
         """Property for the current Kedro environment.
 
         Returns:
@@ -329,7 +329,7 @@ class KedroContext:
         """
         try:
             # '**/parameters*' reads modular pipeline configs
-            params = self.config_loader.get(
+            params = self._config_loader.get(
                 "parameters*", "parameters*/**", "**/parameters*"
             )
         except MissingConfigException as exc:
@@ -353,7 +353,7 @@ class KedroContext:
 
         """
         # '**/catalog*' reads modular pipeline configs
-        conf_catalog = self.config_loader.get("catalog*", "catalog*/**", "**/catalog*")
+        conf_catalog = self._config_loader.get("catalog*", "catalog*/**", "**/catalog*")
         # turn relative paths in conf_catalog into absolute paths
         # before initializing the catalog
         conf_catalog = _convert_paths_to_absolute_posix(
@@ -406,48 +406,6 @@ class KedroContext:
         # pylint: disable=invalid-name
         return self.catalog
 
-    def _get_config_loader(self) -> ConfigLoader:
-        """A hook for changing the creation of a ConfigLoader instance.
-
-        Returns:
-            Instance of `ConfigLoader` created by `register_config_loader` hook.
-        Raises:
-            KedroContextError: Incorrect ``ConfigLoader`` registered for the project.
-
-        """
-        conf_root = settings.CONF_ROOT
-        conf_paths = [
-            str(self.project_path / conf_root / "base"),
-            str(self.project_path / conf_root / self.env),
-        ]
-        hook_manager = get_hook_manager()
-        config_loader = (
-            hook_manager.hook.register_config_loader(  # pylint: disable=no-member
-                conf_paths=conf_paths,
-                env=self.env,
-                extra_params=self._extra_params,
-            )
-        )
-        if not isinstance(config_loader, ConfigLoader):
-            raise KedroContextError(
-                f"Expected an instance of `ConfigLoader`, "
-                f"got `{type(config_loader).__name__}` instead."
-            )
-        return config_loader
-
-    @property
-    def config_loader(self) -> ConfigLoader:
-        """Read-only property referring to Kedro's ``ConfigLoader`` for this
-        context.
-
-        Returns:
-            Instance of `ConfigLoader`.
-        Raises:
-            KedroContextError: Incorrect ``ConfigLoader`` registered for the project.
-
-        """
-        return self._get_config_loader()
-
     def _get_feed_dict(self) -> Dict[str, Any]:
         """Get parameters and return the feed dictionary."""
         params = self.params
@@ -481,52 +439,13 @@ class KedroContext:
     def _get_config_credentials(self) -> Dict[str, Any]:
         """Getter for credentials specified in credentials directory."""
         try:
-            conf_creds = self.config_loader.get(
+            conf_creds = self._config_loader.get(
                 "credentials*", "credentials*/**", "**/credentials*"
             )
         except MissingConfigException as exc:
             warn(f"Credentials not found in your Kedro project config.\n{str(exc)}")
             conf_creds = {}
         return conf_creds
-
-    # pylint: disable=too-many-arguments, no-self-use
-    def _filter_pipeline(
-        self,
-        pipeline: Pipeline,
-        tags: Iterable[str] = None,
-        from_nodes: Iterable[str] = None,
-        to_nodes: Iterable[str] = None,
-        node_names: Iterable[str] = None,
-        from_inputs: Iterable[str] = None,
-        to_outputs: Iterable[str] = None,
-    ) -> Pipeline:
-        """Filter the pipeline as the intersection of all conditions."""
-        new_pipeline = pipeline
-        # We need to intersect with the pipeline because the order
-        # of operations matters, so we don't want to do it incrementally.
-        # As an example, with a pipeline of nodes 1,2,3, think of
-        # "from 1", and "only 1 and 3" - the order you do them in results in
-        # either 1 & 3, or just 1.
-        if tags:
-            new_pipeline &= pipeline.only_nodes_with_tags(*tags)
-            if not new_pipeline.nodes:
-                raise KedroContextError(
-                    f"Pipeline contains no nodes with tags: {str(tags)}"
-                )
-        if from_nodes:
-            new_pipeline &= pipeline.from_nodes(*from_nodes)
-        if to_nodes:
-            new_pipeline &= pipeline.to_nodes(*to_nodes)
-        if node_names:
-            new_pipeline &= pipeline.only_nodes(*node_names)
-        if from_inputs:
-            new_pipeline &= pipeline.from_inputs(*from_inputs)
-        if to_outputs:
-            new_pipeline &= pipeline.to_outputs(*to_outputs)
-
-        if not new_pipeline.nodes:
-            raise KedroContextError("Pipeline contains no nodes")
-        return new_pipeline
 
     @property
     def run_id(self) -> Union[None, str]:
@@ -599,8 +518,7 @@ class KedroContext:
                 f"by the 'register_pipelines' function."
             ) from exc
 
-        filtered_pipeline = self._filter_pipeline(
-            pipeline=pipeline,
+        filtered_pipeline = pipeline.filter(
             tags=tags,
             from_nodes=from_nodes,
             to_nodes=to_nodes,
@@ -658,7 +576,7 @@ class KedroContext:
         )
         return run_result
 
-    def _get_run_id(
+    def _get_run_id(  # pylint: disable=no-self-use
         self, *args, **kwargs  # pylint: disable=unused-argument
     ) -> Union[None, str]:
         """A hook for generating a unique identifier for a
@@ -667,7 +585,7 @@ class KedroContext:
         """
         return None
 
-    def _get_save_version(
+    def _get_save_version(  # pylint: disable=no-self-use
         self, *args, **kwargs  # pylint: disable=unused-argument
     ) -> str:
         """Generate unique ID for dataset versioning, defaults to timestamp.
@@ -675,51 +593,6 @@ class KedroContext:
         easily determine the latest version.
         """
         return generate_timestamp()
-
-
-def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
-    """Loads the KedroContext object of a Kedro Project.
-    This is the default way to load the KedroContext object for normal workflows such as
-    CLI, Jupyter Notebook, Plugins, etc. It assumes the following project structure
-    under the given project_path::
-
-       <project_path>
-           |__ <src_dir>
-           |__ pyproject.toml
-
-    The name of the <scr_dir> is `src` by default. The `pyproject.toml` file is used
-    for project metadata. Kedro configuration should be under `[tool.kedro]` section.
-
-    Args:
-        project_path: Path to the Kedro project.
-        kwargs: Optional kwargs for ``KedroContext`` class.
-
-    Returns:
-        Instance of ``KedroContext`` class defined in Kedro project.
-
-    Raises:
-        KedroContextError: `pyproject.toml` was not found or the `[tool.kedro]` section
-            is missing, or loaded context has package conflict.
-
-    """
-    warn(
-        "`kedro.framework.context.load_context` is now deprecated in favour of "
-        "`KedroSession.load_context` and will be removed in Kedro 0.18.0.",
-        DeprecationWarning,
-    )
-    project_path = Path(project_path).expanduser().resolve()
-    metadata = _get_project_metadata(project_path)
-
-    context_class = settings.CONTEXT_CLASS
-    # update kwargs with env from the environment variable
-    # (defaults to None if not set)
-    # need to do this because some CLI command (e.g `kedro run`) defaults to
-    # passing in `env=None`
-    kwargs["env"] = kwargs.get("env") or os.getenv("KEDRO_ENV")
-    context = context_class(
-        package_name=metadata.package_name, project_path=project_path, **kwargs
-    )
-    return context
 
 
 class KedroContextError(Exception):

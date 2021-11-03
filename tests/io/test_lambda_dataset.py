@@ -28,25 +28,25 @@ def test_data_set_describe():
     def _dummy_release():
         pass  # pragma: no cover
 
-    assert "LambdaDataSet(load=<tests.io.test_lambda_data_set._dummy_load>)" in str(
+    assert "LambdaDataSet(load=<tests.io.test_lambda_dataset._dummy_load>)" in str(
         LambdaDataSet(_dummy_load, None)
     )
-    assert "LambdaDataSet(save=<tests.io.test_lambda_data_set._dummy_save>)" in str(
+    assert "LambdaDataSet(save=<tests.io.test_lambda_dataset._dummy_save>)" in str(
         LambdaDataSet(None, _dummy_save)
     )
-    assert "LambdaDataSet(exists=<tests.io.test_lambda_data_set._dummy_exists>)" in str(
+    assert "LambdaDataSet(exists=<tests.io.test_lambda_dataset._dummy_exists>)" in str(
         LambdaDataSet(None, None, _dummy_exists)
     )
     assert (
-        "LambdaDataSet(release=<tests.io.test_lambda_data_set._dummy_release>)"
+        "LambdaDataSet(release=<tests.io.test_lambda_dataset._dummy_release>)"
         in str(LambdaDataSet(None, None, None, _dummy_release))
     )
 
     # __init__ keys alphabetically sorted, None values not shown
     expected = (
-        "LambdaDataSet(exists=<tests.io.test_lambda_data_set._dummy_exists>, "
-        "load=<tests.io.test_lambda_data_set._dummy_load>, "
-        "save=<tests.io.test_lambda_data_set._dummy_save>)"
+        "LambdaDataSet(exists=<tests.io.test_lambda_dataset._dummy_exists>, "
+        "load=<tests.io.test_lambda_dataset._dummy_load>, "
+        "save=<tests.io.test_lambda_dataset._dummy_save>)"
     )
     actual = str(LambdaDataSet(_dummy_load, _dummy_save, _dummy_exists, None))
     assert actual == expected

@@ -35,7 +35,7 @@ import json
 from typing import Any, Dict
 
 from kedro.extras.datasets.json import JSONDataSet
-from kedro.io.core import DataSetError, Version, get_filepath_str
+from kedro.io.core import VERSIONED_FLAG_KEY, DataSetError, Version, get_filepath_str
 
 
 class MetricsDataSet(JSONDataSet):
@@ -59,7 +59,7 @@ class MetricsDataSet(JSONDataSet):
 
     """
 
-    versioned = True
+    VERSIONED_FLAG_KEY = True
 
     # pylint: disable=too-many-arguments
     def __init__(

@@ -435,9 +435,11 @@ def parse_dataset_definition(
         )
         logging.getLogger(__name__).warning(message, VERSION_KEY)
         del config[VERSION_KEY]
-    if config.pop(VERSIONED_FLAG_KEY, False):  # data set is versioned
-        config[VERSION_KEY] = Version(load_version, save_version)
-    elif hasattr(class_obj, VERSIONED_FLAG_KEY):
+
+    # data set is either versioned explicitly by user or versioned is set to always on by the dataset
+    if config.pop(VERSIONED_FLAG_KEY, False) or getattr(
+        class_obj, VERSIONED_FLAG_KEY, False
+    ):
         config[VERSION_KEY] = Version(load_version, save_version)
 
     return class_obj, config

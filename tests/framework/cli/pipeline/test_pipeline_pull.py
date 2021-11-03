@@ -1,30 +1,3 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
 import filecmp
 import shutil
 import textwrap
@@ -243,6 +216,67 @@ class TestPipelinePullCommand:
                 f"import {fake_metadata.package_name}.pipelines.{alias}.nodes"
             )
             assert expected_stmt in file_content
+
+    def test_pipeline_pull_from_aliased_pipeline_conflicting_name(
+        self, fake_project_cli, fake_package_path, fake_repo_path, fake_metadata
+    ):
+        package_name = fake_metadata.package_name
+        call_pipeline_create(fake_project_cli, fake_metadata)
+        pipeline_file = fake_package_path / "pipelines" / PIPELINE_NAME / "pipeline.py"
+        import_stmt = f"import {package_name}.pipelines.{PIPELINE_NAME}.nodes"
+        with pipeline_file.open("a") as f:
+            f.write(import_stmt)
+
+        call_pipeline_package(
+            cli=fake_project_cli, metadata=fake_metadata, alias=package_name
+        )
+        wheel_file = (
+            fake_repo_path
+            / "src"
+            / "dist"
+            / _get_wheel_name(name=package_name, version="0.1")
+        )
+        assert wheel_file.is_file()
+
+        result = CliRunner().invoke(
+            fake_project_cli, ["pipeline", "pull", str(wheel_file)], obj=fake_metadata
+        )
+        assert result.exit_code == 0, result.output
+
+        path = fake_package_path / "pipelines" / package_name / "pipeline.py"
+        file_content = path.read_text()
+        expected_stmt = f"import {package_name}.pipelines.{package_name}.nodes"
+        assert expected_stmt in file_content
+
+    def test_pipeline_pull_as_aliased_pipeline_conflicting_name(
+        self, fake_project_cli, fake_package_path, fake_repo_path, fake_metadata
+    ):
+        package_name = fake_metadata.package_name
+        call_pipeline_create(fake_project_cli, fake_metadata)
+        pipeline_file = fake_package_path / "pipelines" / PIPELINE_NAME / "pipeline.py"
+        import_stmt = f"import {package_name}.pipelines.{PIPELINE_NAME}.nodes"
+        with pipeline_file.open("a") as f:
+            f.write(import_stmt)
+
+        call_pipeline_package(cli=fake_project_cli, metadata=fake_metadata)
+        wheel_file = (
+            fake_repo_path
+            / "src"
+            / "dist"
+            / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
+        )
+        assert wheel_file.is_file()
+
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["pipeline", "pull", str(wheel_file), "--alias", package_name],
+            obj=fake_metadata,
+        )
+        assert result.exit_code == 0, result.output
+        path = fake_package_path / "pipelines" / package_name / "pipeline.py"
+        file_content = path.read_text()
+        expected_stmt = f"import {package_name}.pipelines.{package_name}.nodes"
+        assert expected_stmt in file_content
 
     def test_pull_whl_fs_args(
         self, fake_project_cli, fake_repo_path, mocker, tmp_path, fake_metadata

@@ -1,30 +1,3 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
 # pylint: disable=too-many-lines
 
 """A collection of CLI commands for working with Kedro pipelines."""
@@ -36,7 +9,7 @@ import tempfile
 from importlib import import_module
 from pathlib import Path
 from textwrap import indent
-from typing import Any, List, NamedTuple, Optional, Tuple, Union
+from typing import Any, Iterable, List, NamedTuple, Optional, Set, Tuple, Union
 from zipfile import ZipFile
 
 import click
@@ -347,9 +320,6 @@ def _pull_package(
         package_name = dist_info_file[0].stem.split("-")[0]
         package_metadata = dist_info_file[0] / "METADATA"
 
-        _clean_pycache(temp_dir_path)
-        _install_files(metadata, package_name, temp_dir_path, env, alias)
-
         req_pattern = r"Requires-Dist: (.*?)\n"
         package_reqs = re.findall(req_pattern, package_metadata.read_text())
         if package_reqs:
@@ -357,6 +327,9 @@ def _pull_package(
                 metadata.source_dir, create_empty=True
             )
             _append_package_reqs(requirements_in, package_reqs, package_name)
+
+        _clean_pycache(temp_dir_path)
+        _install_files(metadata, package_name, temp_dir_path, env, alias)
 
 
 def _pull_packages_from_manifest(metadata: ProjectMetadata) -> None:
@@ -563,14 +536,28 @@ def _refactor_code_for_unpacking(
             |__ <pipeline_name>
                 |__ __init__.py
     """
+
+    def _move_package_with_conflicting_name(
+        target: Path, original_name: str, desired_name: str = None
+    ) -> Path:
+        _rename_package(project, original_name, "tmp_name")
+        full_path = _create_nested_package(project, target)
+        _move_package(project, "tmp_name", target.as_posix())
+        desired_name = desired_name or original_name
+        _rename_package(project, (target / "tmp_name").as_posix(), desired_name)
+        return full_path
+
     pipeline_name = package_path.stem
     if alias:
         _rename_package(project, pipeline_name, alias)
         pipeline_name = alias
 
     package_target = Path(project_metadata.package_name) / "pipelines"
-    full_path = _create_nested_package(project, package_target)
-    _move_package(project, pipeline_name, package_target.as_posix())
+    if pipeline_name == project_metadata.package_name:
+        full_path = _move_package_with_conflicting_name(package_target, pipeline_name)
+    else:
+        full_path = _create_nested_package(project, package_target)
+        _move_package(project, pipeline_name, package_target.as_posix())
     refactored_package_path = full_path / pipeline_name
 
     if not tests_path.exists():
@@ -581,11 +568,10 @@ def _refactor_code_for_unpacking(
     # hence we give it a temp name, create the expected
     # nested folder structure, move the contents there,
     # then rename the temp name to <pipeline_name>.
-    _rename_package(project, "tests", "tmp_name")
     tests_target = Path("tests") / "pipelines"
-    full_path = _create_nested_package(project, tests_target)
-    _move_package(project, "tmp_name", tests_target.as_posix())
-    _rename_package(project, (tests_target / "tmp_name").as_posix(), pipeline_name)
+    full_path = _move_package_with_conflicting_name(
+        tests_target, original_name="tests", desired_name=pipeline_name
+    )
     refactored_tests_path = full_path / pipeline_name
 
     return refactored_package_path, refactored_tests_path
@@ -681,7 +667,7 @@ def _package_pipeline(  # pylint: disable=too-many-arguments
     # config files not to confuse users and avoid useless file copies
     configs_to_package = _find_config_files(
         artifacts_to_package.pipeline_conf,
-        [f"parameters*/**/{pipeline_name}.yml", f"parameters*/**/{pipeline_name}/*"],
+        [f"parameters*/**/{pipeline_name}.yml", f"parameters*/**/{pipeline_name}/**/*"],
     )
 
     source_paths = (
@@ -831,6 +817,15 @@ def _refactor_code_for_package(
         |__ __init__.py
         |__ test_pipeline.py
     """
+
+    def _move_package_with_conflicting_name(target: Path, conflicting_name: str):
+        tmp_name = "tmp_name"
+        tmp_module = target.parent / tmp_name
+        _rename_package(project, target.as_posix(), tmp_name)
+        _move_package(project, tmp_module.as_posix(), "")
+        shutil.rmtree(Path(project.address) / conflicting_name)
+        _rename_package(project, tmp_name, conflicting_name)
+
     # Copy source in appropriate folder structure
     package_target = package_path.relative_to(project_metadata.source_dir)
     full_path = _create_nested_package(project, package_target)
@@ -845,10 +840,15 @@ def _refactor_code_for_package(
         _sync_dirs(tests_path, full_path, overwrite=True)
 
     # Refactor imports in src/package_name/pipelines/pipeline_name
-    # and imports of `pipeline_name` in tests
-    _move_package(project, package_target.as_posix(), "")
+    # and imports of `pipeline_name` in tests.
+    pipeline_name = package_target.stem
+    if pipeline_name == project_metadata.package_name:
+        _move_package_with_conflicting_name(package_target, pipeline_name)
+    else:
+        _move_package(project, package_target.as_posix(), "")
+        shutil.rmtree(Path(project.address) / project_metadata.package_name)
+
     if alias:
-        pipeline_name = package_target.stem
         _rename_package(project, pipeline_name, alias)
 
     if tests_path.exists():
@@ -858,14 +858,7 @@ def _refactor_code_for_package(
         # with the existing "tests" folder at top level;
         # hence we give it a temp name, move it, delete tests/ and
         # rename the temp name to tests.
-        tmp_name = "extracted_tests"
-        tmp_module = tests_target.parent / tmp_name
-        _rename_package(project, tests_target.as_posix(), tmp_name)
-        _move_package(project, tmp_module.as_posix(), "")
-        shutil.rmtree(Path(project.address) / "tests")
-        _rename_package(project, tmp_name, "tests")
-
-    shutil.rmtree(Path(project.address) / project_metadata.package_name)
+        _move_package_with_conflicting_name(tests_target, "tests")
 
 
 _SourcePathType = Union[Path, List[Tuple[Path, str]]]
@@ -908,8 +901,9 @@ def _generate_wheel_file(
             cls = exc.__class__
             raise KedroCliError(f"{cls.__module__}.{cls.__qualname__}: {exc}") from exc
 
+        config_files = [str(file) for file in conf_target.rglob("*") if file.is_file()]
         setup_file = _generate_setup_file(
-            package_name, version, install_requires, temp_dir_path
+            package_name, version, install_requires, temp_dir_path, config_files
         )
 
         package_file = destination / _get_wheel_name(name=package_name, version=version)
@@ -932,18 +926,15 @@ def _generate_wheel_file(
 
 
 def _generate_setup_file(
-    package_name: str, version: str, install_requires: List[str], output_dir: Path
+    package_name: str,
+    version: str,
+    install_requires: List[str],
+    output_dir: Path,
+    config_files: List[str],
 ) -> Path:
     setup_file = output_dir / "setup.py"
-    package_data = {
-        package_name: [
-            "README.md",
-            "config/parameters*",
-            "config/**/parameters*",
-            "config/parameters*/**",
-            "config/parameters*/**/*",
-        ]
-    }
+
+    package_data = {package_name: ["README.md"] + config_files}
     setup_file_context = dict(
         name=package_name,
         version=version,
@@ -1112,9 +1103,9 @@ def _append_package_reqs(
     requirements_in: Path, package_reqs: List[str], pipeline_name: str
 ) -> None:
     """Appends modular pipeline requirements to project level requirements.in"""
-    existing_reqs = pkg_resources.parse_requirements(requirements_in.read_text())
-    new_reqs = pkg_resources.parse_requirements(package_reqs)
-    reqs_to_add = set(new_reqs) - set(existing_reqs)
+    existing_reqs = _safe_parse_requirements(requirements_in.read_text())
+    incoming_reqs = _safe_parse_requirements(package_reqs)
+    reqs_to_add = set(incoming_reqs) - set(existing_reqs)
     if not reqs_to_add:
         return
 
@@ -1133,3 +1124,21 @@ def _append_package_reqs(
         "Use `kedro install --build-reqs` to compile and install the updated list of "
         "requirements."
     )
+
+
+def _safe_parse_requirements(
+    requirements: Union[str, Iterable[str]]
+) -> Set[pkg_resources.Requirement]:
+    """Safely parse a requirement or set of requirements. This effectively replaces
+    pkg_resources.parse_requirements, which blows up with a ValueError as soon as it
+    encounters a requirement it cannot parse (e.g. `-r requirements.txt`). This way
+    we can still extract all the parseable requirements out of a set containing some
+    unparseable requirements.
+    """
+    parseable_requirements = set()
+    for requirement in pkg_resources.yield_lines(requirements):
+        try:
+            parseable_requirements.add(pkg_resources.Requirement.parse(requirement))
+        except ValueError:
+            continue
+    return parseable_requirements

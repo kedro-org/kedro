@@ -1,30 +1,3 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """``DataCatalog`` stores instances of ``AbstractDataSet`` implementations to
 provide ``load`` and ``save`` capabilities from anywhere in the program. To
 use a ``DataCatalog``, you need to instantiate it with a dictionary of data
@@ -56,6 +29,7 @@ from kedro.versioning import Journal
 
 CATALOG_KEY = "catalog"
 CREDENTIALS_KEY = "credentials"
+WORDS_REGEX_PATTERN = re.compile(r"\W+")
 
 
 def _get_credentials(
@@ -120,17 +94,31 @@ def _sub_nonword_chars(data_set_name: str) -> str:
     Returns:
         The name used in `DataCatalog.datasets`.
     """
-    return re.sub(r"\W+", "__", data_set_name)
+    return re.sub(WORDS_REGEX_PATTERN, "__", data_set_name)
 
 
 class _FrozenDatasets:
     """Helper class to access underlying loaded datasets"""
 
-    def __init__(self, datasets):
-        # Non-word characters in dataset names are replaced with `__`
-        # for easy access to transcoded/prefixed datasets.
-        datasets = {_sub_nonword_chars(key): value for key, value in datasets.items()}
-        self.__dict__.update(**datasets)
+    def __init__(
+        self,
+        *datasets_collections: Union["_FrozenDatasets", Dict[str, AbstractDataSet]],
+    ):
+        """Return a _FrozenDatasets instance from some datasets collections.
+        Each collection could either be another _FrozenDatasets or a dictionary.
+        """
+        for collection in datasets_collections:
+            if isinstance(collection, _FrozenDatasets):
+                self.__dict__.update(collection.__dict__)
+            else:
+                # Non-word characters in dataset names are replaced with `__`
+                # for easy access to transcoded/prefixed datasets.
+                self.__dict__.update(
+                    {
+                        _sub_nonword_chars(dataset_name): dataset
+                        for dataset_name, dataset in collection.items()
+                    }
+                )
 
     # Don't allow users to add/change attributes on the fly
     def __setattr__(self, key, value):
@@ -524,7 +512,7 @@ class DataCatalog:
                 )
         self._data_sets[data_set_name] = data_set
         self._transformers[data_set_name] = list(self._default_transformers)
-        self.datasets = _FrozenDatasets(self._data_sets)
+        self.datasets = _FrozenDatasets(self.datasets, {data_set_name: data_set})
 
     def add_all(
         self, data_sets: Dict[str, AbstractDataSet], replace: bool = False

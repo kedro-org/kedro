@@ -114,6 +114,14 @@ You can add new work to `extras` if you do not need to create a new Kedro CLI co
 .. note::  We will work with you to complete your contribution but we reserve the right to take over abandoned PRs.
 ```
 
+```eval_rst
+.. note::  There are two special considerations when contributing a dataset:
+
+   1. Add the dataset to :code:`kedro.extras.datasets.rst` so it shows up in the API documentation.
+   2. Add the dataset to :code:`static/jsonschema/kedro-catalog-X.json` for IDE validation.
+
+```
+
 ## Create a pull request
 
 Create your pull request with a descriptive title. Before you submit it, consider the following:

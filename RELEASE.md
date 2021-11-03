@@ -25,6 +25,7 @@
 * Fixed a bug where packaging or pulling a modular pipeline with the same name as the project's package name would throw an error (or silently pass without including the pipeline source code in the wheel file).
 * Removed unintentional dependency on `git`.
 * Fixed an issue where nested pipeline configuration was not included in the packaged pipeline.
+* Deprecated the "Thanks for supporting contributions" section of release notes to simplify the contribution process; Kedro 0.17.6 is the last release that includes this. This process has been replaced with the [automatic GitHub feature](https://github.com/quantumblacklabs/kedro/graphs/contributors).
 
 ## Minor breaking changes to the API
 

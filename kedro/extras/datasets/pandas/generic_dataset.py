@@ -132,7 +132,7 @@ class GenericDataSet(AbstractVersionedDataSet):
             kind: String which is used to match the appropriate load/save method on a best
                 effort basis. For example if 'csv' is passed in the `pandas.read_csv` and
                 `pandas.DataFrame.to_csv` will be identified. An error will be raised unless
-                at least matching `read_{kind}` or `to_{kind}` method is identified.
+                at least one matching `read_{kind}` or `to_{kind}` method is identified.
             filepath: Filepath in POSIX format to a file prefixed with a protocol like `s3://`.
                 If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.

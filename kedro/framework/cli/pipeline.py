@@ -9,7 +9,7 @@ import tempfile
 from importlib import import_module
 from pathlib import Path
 from textwrap import indent
-from typing import Any, List, NamedTuple, Optional, Tuple, Union
+from typing import Any, Iterable, List, NamedTuple, Optional, Set, Tuple, Union
 from zipfile import ZipFile
 
 import click
@@ -320,9 +320,6 @@ def _pull_package(
         package_name = dist_info_file[0].stem.split("-")[0]
         package_metadata = dist_info_file[0] / "METADATA"
 
-        _clean_pycache(temp_dir_path)
-        _install_files(metadata, package_name, temp_dir_path, env, alias)
-
         req_pattern = r"Requires-Dist: (.*?)\n"
         package_reqs = re.findall(req_pattern, package_metadata.read_text())
         if package_reqs:
@@ -330,6 +327,9 @@ def _pull_package(
                 metadata.source_dir, create_empty=True
             )
             _append_package_reqs(requirements_in, package_reqs, package_name)
+
+        _clean_pycache(temp_dir_path)
+        _install_files(metadata, package_name, temp_dir_path, env, alias)
 
 
 def _pull_packages_from_manifest(metadata: ProjectMetadata) -> None:
@@ -1103,9 +1103,9 @@ def _append_package_reqs(
     requirements_in: Path, package_reqs: List[str], pipeline_name: str
 ) -> None:
     """Appends modular pipeline requirements to project level requirements.in"""
-    existing_reqs = pkg_resources.parse_requirements(requirements_in.read_text())
-    new_reqs = pkg_resources.parse_requirements(package_reqs)
-    reqs_to_add = set(new_reqs) - set(existing_reqs)
+    existing_reqs = _safe_parse_requirements(requirements_in.read_text())
+    incoming_reqs = _safe_parse_requirements(package_reqs)
+    reqs_to_add = set(incoming_reqs) - set(existing_reqs)
     if not reqs_to_add:
         return
 
@@ -1124,3 +1124,21 @@ def _append_package_reqs(
         "Use `kedro install --build-reqs` to compile and install the updated list of "
         "requirements."
     )
+
+
+def _safe_parse_requirements(
+    requirements: Union[str, Iterable[str]]
+) -> Set[pkg_resources.Requirement]:
+    """Safely parse a requirement or set of requirements. This effectively replaces
+    pkg_resources.parse_requirements, which blows up with a ValueError as soon as it
+    encounters a requirement it cannot parse (e.g. `-r requirements.txt`). This way
+    we can still extract all the parseable requirements out of a set containing some
+    unparseable requirements.
+    """
+    parseable_requirements = set()
+    for requirement in pkg_resources.yield_lines(requirements):
+        try:
+            parseable_requirements.add(pkg_resources.Requirement.parse(requirement))
+        except ValueError:
+            continue
+    return parseable_requirements

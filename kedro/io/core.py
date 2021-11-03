@@ -407,9 +407,11 @@ def parse_dataset_definition(
         logging.getLogger(__name__).warning(message, VERSION_KEY)
         del config[VERSION_KEY]
 
-    is_tracking_ds = "kedro.extras.datasets.tracking" in class_obj.__module__
-    # dataset is versioned or in case of the tracking datasets they must be versioned by default
-    if config.pop(VERSIONED_FLAG_KEY, False) or is_tracking_ds:
+    # dataset is either versioned explicitly by the user or versioned is set to true by default
+    # on the dataset
+    if config.pop(VERSIONED_FLAG_KEY, False) or getattr(
+        class_obj, VERSIONED_FLAG_KEY, False
+    ):
         config[VERSION_KEY] = Version(load_version, save_version)
 
     return class_obj, config

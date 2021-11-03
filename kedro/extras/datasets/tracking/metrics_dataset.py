@@ -31,6 +31,8 @@ class MetricsDataSet(JSONDataSet):
 
     """
 
+    versioned = True
+
     def _load(self) -> Dict:
         raise DataSetError(f"Loading not supported for `{self.__class__.__name__}`")
 

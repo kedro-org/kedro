@@ -177,7 +177,7 @@ class TestGenericSasDataSet:
         assert data_set._version_cache.currsize == 0
 
 
-class TestGenericCsvDataSetVersioned:
+class TestGenericCSVDataSetVersioned:
     def test_version_str_repr(self, load_version, save_version):
         """Test that version is in string representation of the class instance
         when applicable."""

@@ -229,7 +229,7 @@ class GenericDataSet(AbstractVersionedDataSet):
         self._ensure_file_system_target()
 
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
-        save_method = getattr(data, "to_" + self._kind, None)
+        save_method = getattr(data, f"to_{self._kind}", None)
         if save_method:
             with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
                 # KEY ASSUMPTION - first argument is path/buffer/io

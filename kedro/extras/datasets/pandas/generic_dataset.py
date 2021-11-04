@@ -168,6 +168,8 @@ class GenericDataSet(AbstractVersionedDataSet):
         if save_args is not None:
             self._save_args.update(save_args)
 
+        _fs_open_args_save.setdefault("mode", "w")
+        _fs_open_args_save.setdefault("newline", "")
         self._fs_open_args_load = _fs_open_args_load
         self._fs_open_args_save = _fs_open_args_save
 

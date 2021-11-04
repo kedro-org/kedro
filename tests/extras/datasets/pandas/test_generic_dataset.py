@@ -161,8 +161,6 @@ class TestGenericCSVDataSetVersioned:
             version=Version(load_version, save_version),
         )
         assert filepath in str(ds)
-        assert "version" not in str(ds)
-
         assert filepath in str(ds_versioned)
         ver_str = f"version=Version(load={load_version}, save='{save_version}')"
         assert ver_str in str(ds_versioned)

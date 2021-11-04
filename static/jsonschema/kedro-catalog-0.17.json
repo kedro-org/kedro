@@ -848,9 +848,9 @@
                 "type": "string",
                 "description": "Filepath in POSIX format to a file prefixed with a protocol like `s3://`.\nIf prefix is not provided, `file` protocol (local filesystem) will be used.\nThe prefix should be any protocol supported by ``fsspec``.\nNote: `http(s)` doesn't support versioning."
               },
-              "kind" : {
+              "file_format" : {
                 "type": "string",
-                "description": "The read/write methods to retrieve from pandas (`pandas.read_{kind}` or `pd.DataFrame.to_{kind}`) on a best effort basis."
+                "description": "The read/write methods to retrieve from pandas (`pandas.read_{file_format}` or `pd.DataFrame.to_{file_format}`) on a best effort basis."
               },
               "load_args": {
                 "type": "object",

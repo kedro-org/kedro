@@ -3,8 +3,17 @@
 
 import logging
 import time
+import warnings
 from functools import wraps
 from typing import Callable
+
+warnings.simplefilter("default", DeprecationWarning)
+
+warnings.warn(
+    "Support for decorators will be deprecated in Kedro 0.18.0. "
+    "Please use Hooks to extend the behaviour of a node or pipeline.",
+    DeprecationWarning,
+)
 
 
 def _func_full_name(func: Callable):

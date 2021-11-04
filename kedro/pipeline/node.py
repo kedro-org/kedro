@@ -108,6 +108,14 @@ class Node:  # pylint: disable=too-many-instance-attributes
         self._name = name
         self._namespace = namespace
         self._tags = set(_to_list(tags))
+        if decorators:
+            warn(
+                "The node's `decorators` API will be deprecated in Kedro 0.18.0."
+                "Please use a node's Hooks to extend the node's behaviour in a pipeline."
+                "For more information, please visit"
+                "https://kedro.readthedocs.io/en/stable/07_extend_kedro/02_hooks.html",
+                DeprecationWarning,
+            )
         self._decorators = list(decorators or [])
 
         self._validate_unique_outputs()

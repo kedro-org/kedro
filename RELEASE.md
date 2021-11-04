@@ -31,6 +31,7 @@
 ## Minor breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.18.0
+* `kedro.extras.decorators` is being deprecated in favour of Hooks.
 
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman),

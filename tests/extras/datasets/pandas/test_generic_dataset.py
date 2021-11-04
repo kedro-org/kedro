@@ -97,22 +97,21 @@ class TestGenericSasDataSet:
         assert df.shape == (32, 6)
 
     def test_save_fail(self, sas_data_set, dummy_dataframe):
-        with pytest.raises(DataSetError) as e:
-            sas_data_set.save(dummy_dataframe)
-        # Pandas does not implement a SAS writer
-        assert (
+        pattern = (
             "Unable to retrieve `pandas.DataFrame.to_sas` method, please ensure that your "
             "'file_format' parameter has been defined correctly as per the Pandas API "
             "https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html"
-            in str(e.value)
         )
+        with pytest.raises(DataSetError, match=pattern):
+            sas_data_set.save(dummy_dataframe)
+        # Pandas does not implement a SAS writer
 
     def test_bad_load(self, sas_data_set_bad_config, sas_binary, filepath_sas):
         # SAS reader requires a format param e.g. sas7bdat
         filepath_sas.write_bytes(sas_binary)
-        with pytest.raises(DataSetError) as e:
+        pattern = "you must specify a format string"
+        with pytest.raises(DataSetError, match=pattern):
             sas_data_set_bad_config.load()
-        assert "you must specify a format string" in str(e.value)
 
     @pytest.mark.parametrize(
         "filepath,instance_type,credentials",
@@ -151,10 +150,10 @@ class TestGenericSasDataSet:
 
 
 class TestGenericCSVDataSetVersioned:
-    def test_version_str_repr(self, load_version, save_version):
+    def test_version_str_repr(self, filepath_csv, load_version, save_version):
         """Test that version is in string representation of the class instance
         when applicable."""
-        filepath = "test.csv"
+        filepath = filepath_csv.as_posix()
         ds = GenericDataSet(file_format="csv", filepath=filepath)
         ds_versioned = GenericDataSet(
             file_format="csv",
@@ -343,21 +342,20 @@ class TestBadGenericDataSet:
     def test_bad_file_format_argument(self):
         ds = GenericDataSet(file_format="kedro", filepath="test.kedro")
 
-        with pytest.raises(DataSetError) as e:
-            _ = ds.load()
-        msg = (
+        pattern = (
             "Unable to retrieve `pandas.read_kedro` method, please ensure that your 'file_format' "
             "parameter has been defined correctly as per the Pandas API https://pandas.pydata.org/docs/reference/io.html"
         )
-        assert msg in str(e.value)
 
-        with pytest.raises(DataSetError) as e:
-            ds.save(pd.DataFrame([1]))
-        msg = (
+        with pytest.raises(DataSetError, match=pattern):
+            _ = ds.load()
+
+        pattern2 = (
             "Unable to retrieve `pandas.DataFrame.to_kedro` method, please ensure that your 'file_format' "
             "parameter has been defined correctly as per the Pandas API https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html"
         )
-        assert msg in str(e.value)
+        with pytest.raises(DataSetError, match=pattern2):
+            ds.save(pd.DataFrame([1]))
 
     @pytest.mark.parametrize(
         "file_format",
@@ -372,17 +370,14 @@ class TestBadGenericDataSet:
     def test_generic_no_filepaths(self, file_format):
         error = (
             "Cannot create a dataset of file_format "
-            f"`{file_format}` as it it does not support a filepath target/source"
+            f"`{file_format}` as it does not support a filepath target/source"
         )
 
-        with pytest.raises(DataSetError) as e:
+        with pytest.raises(DataSetError, match=error):
             _ = GenericDataSet(
                 file_format=file_format, filepath="/file/thing.file"
             ).load()
-        with pytest.raises(DataSetError) as e2:
+        with pytest.raises(DataSetError, match=error):
             GenericDataSet(file_format=file_format, filepath="/file/thing.file").save(
                 pd.DataFrame([1])
             )
-
-        assert error in str(e.value)
-        assert error in str(e2.value)

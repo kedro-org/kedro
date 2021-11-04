@@ -208,7 +208,7 @@ class GenericDataSet(AbstractVersionedDataSet):
         else:
             raise DataSetError(
                 f"Unable to retrieve `pandas.DataFrame.to_{self._file_format}` method, please "
-                "ensure  that your 'file_format' parameter has been defined correctly as "
+                "ensure that your 'file_format' parameter has been defined correctly as "
                 "per the Pandas API "
                 "https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html"
             )

@@ -76,6 +76,7 @@ pandas_require = {
     "pandas.ParquetDataSet": [PANDAS, "pyarrow>=0.12.0, <4.0"],
     "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy~=1.2"],
     "pandas.SQLQueryDataSet": [PANDAS, "SQLAlchemy~=1.2"],
+    "pandas.GenericDataSet": [PANDAS],
 }
 pillow_require = {"pillow.ImageDataSet": ["Pillow~=8.0"]}
 plotly_require = {

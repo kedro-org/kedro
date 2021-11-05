@@ -12,6 +12,7 @@ __all__ = [
     "ParquetDataSet",
     "SQLQueryDataSet",
     "SQLTableDataSet",
+    "GenericDataSet",
 ]
 
 from contextlib import suppress
@@ -34,3 +35,5 @@ with suppress(ImportError):
     from .parquet_dataset import ParquetDataSet
 with suppress(ImportError):
     from .sql_dataset import SQLQueryDataSet, SQLTableDataSet
+with suppress(ImportError):
+    from .generic_dataset import GenericDataSet

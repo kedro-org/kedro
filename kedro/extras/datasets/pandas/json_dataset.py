@@ -66,8 +66,6 @@ class JSONDataSet(AbstractVersionedDataSet):
         >>>   load_args:
         >>>     lines: True
 
-
-
     Example using Python API:
     ::
 

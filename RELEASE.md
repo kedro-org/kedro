@@ -19,7 +19,7 @@
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman),
 [Manish Swami](https://github.com/ManishS6),
-[Avaneesh Yembadi](https://github.com/avan-sh)
+[Avaneesh Yembadi](https://github.com/avan-sh),
 [Zain Patel](https://github.com/mzjp2)
 [Simon Brugman](https://github.com/sbrugman)
 [Louis de Charsonville](https://github.com/louisdecharson)

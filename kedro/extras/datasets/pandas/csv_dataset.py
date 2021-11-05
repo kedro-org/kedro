@@ -56,9 +56,9 @@ class CSVDataSet(AbstractVersionedDataSet):
 
     .. code-block:: yaml
 
-        >>> cars: # uses specified load and save arguments
+        >>> cars:
         >>>   type: pandas.CSVDataSet
-        >>>   filepath: data/01_raw/company/cars.csv #relative file path
+        >>>   filepath: data/01_raw/company/cars.csv
         >>>   load_args:
         >>>     sep: ","
         >>>     na_values: ["#NA", NA]
@@ -67,7 +67,7 @@ class CSVDataSet(AbstractVersionedDataSet):
         >>>     date_format: "%Y-%m-%d %H:%M"
         >>>     decimal: .
         >>>
-        >>> motorbikes: #uses credentials to access s3 path
+        >>> motorbikes:
         >>>   type: pandas.CSVDataSet
         >>>   filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.csv
         >>>   credentials: dev_s3

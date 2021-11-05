@@ -51,6 +51,7 @@ from kedro.io.core import (
 class ParquetDataSet(AbstractVersionedDataSet):
     """``ParquetDataSet`` loads/saves data from/to a Parquet file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Parquet file.
+
     Example adding a catalog entry with
     `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
         01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:

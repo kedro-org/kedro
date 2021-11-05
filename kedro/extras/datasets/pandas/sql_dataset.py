@@ -130,7 +130,7 @@ class SQLTableDataSet(AbstractDataSet):
 
         >>> shuttles_table_dataset:
         >>>   type: pandas.SQLTableDataSet
-        >>>   credentials: db_credentials #
+        >>>   credentials: db_credentials
         >>>   table_name: shuttles
         >>>   load_args:
         >>>     schema: dwschema
@@ -138,14 +138,12 @@ class SQLTableDataSet(AbstractDataSet):
         >>>     schema: dwschema
         >>>     if_exists: replace
 
-
     Sample database credentials entry in ``credentials.yml``:
 
     .. code-block:: yaml
 
             >>> db_creds:
             >>>     con: postgresql://scott:tiger@localhost/test
-
 
     Example using Python API:
     ::
@@ -293,7 +291,6 @@ class SQLQueryDataSet(AbstractDataSet):
         >>>   sql: "select shuttle, shuttle_id from spaceflights.shuttles;"
         >>>   credentials: db_credentials
         >>>   layer: raw
-
 
     Sample database credentials entry in ``credentials.yml``:
 

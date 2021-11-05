@@ -64,7 +64,7 @@ class ExcelDataSet(AbstractVersionedDataSet):
         >>>   credentials: my_gcp_credentials
         >>>   save_args:
         >>>     sheet_name: Sheet1
-        >>>   load_args: #Pandas options for loading Excel files
+        >>>   load_args:
         >>>     sheet_name: Sheet1
         >>>
         >>> shuttles:

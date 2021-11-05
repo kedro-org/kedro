@@ -9,8 +9,7 @@ import tempfile
 from importlib import import_module
 from pathlib import Path
 from textwrap import indent
-from typing import Any, Iterable, List, NamedTuple, Optional, Set, Tuple, Union
-from zipfile import ZipFile
+from typing import Iterable, List, NamedTuple, Optional, Set, Tuple, Union
 
 import click
 import pkg_resources
@@ -286,7 +285,9 @@ def _pull_package(
             _append_package_reqs(requirements_in, package_reqs, package_name)
 
         _clean_pycache(temp_dir_path)
-        _install_files(metadata, package_name, temp_dir_path / sdist_file_name, env, alias)
+        _install_files(
+            metadata, package_name, temp_dir_path / sdist_file_name, env, alias
+        )
 
 
 def _pull_packages_from_manifest(metadata: ProjectMetadata) -> None:

@@ -402,23 +402,24 @@ class TestPipelinePackageCommand:
         )
 
         assert result.exit_code == 0
-        assert "Pipeline `retail` packaged!" in result.output
+        assert "`dummy_package.pipelines.retail` packaged!" in result.output
 
-        wheel_location = fake_repo_path / "src" / "dist"
-        assert f"Location: {wheel_location}" in result.output
+        sdist_location = fake_repo_path / "dist"
+        assert f"Location: {sdist_location}" in result.output
 
-        wheel_name = _get_wheel_name(name="retail", version="0.1")
-        wheel_file = wheel_location / wheel_name
-        assert wheel_file.is_file()
-        assert len(list(wheel_location.iterdir())) == 1
+        sdist_name = _get_sdist_name(name="retail", version="0.1")
+        sdist_file = sdist_location / sdist_name
+        assert sdist_file.is_file()
+        assert len(list(sdist_location.iterdir())) == 1
 
         # pylint: disable=consider-using-with
-        wheel_contents = set(ZipFile(str(wheel_file)).namelist())
-        assert "retail/config/parameters/deep/retail/params1.yml" in wheel_contents
-        assert "retail/config/parameters/retail/deep/params1.yml" in wheel_contents
-        assert "retail/config/parameters/retail.yml" in wheel_contents
-        assert "retail/config/parameters/deep/retail.yml" in wheel_contents
-        assert "retail/config/parameters/a/b/c/d/retail/params3.yml" in wheel_contents
+        with tarfile.open(sdist_file, "r") as tar:
+            sdist_contents = set(tar.getnames())
+        assert "retail/config/parameters/deep/retail/params1.yml" in sdist_contents
+        assert "retail/config/parameters/retail/deep/params1.yml" in sdist_contents
+        assert "retail/config/parameters/retail.yml" in sdist_contents
+        assert "retail/config/parameters/deep/retail.yml" in sdist_contents
+        assert "retail/config/parameters/a/b/c/d/retail/params3.yml" in sdist_contents
 
     def test_pipeline_package_default(
         self, fake_repo_path, fake_package_path, fake_project_cli, fake_metadata

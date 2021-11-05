@@ -1,7 +1,9 @@
+import pkg_resources
 import pytest
 from click.testing import CliRunner
 
 from kedro.framework.cli.pipeline import _get_wheel_name, _safe_parse_requirements
+from kedro.framework.cli.pipeline import _get_sdist_name
 
 PIPELINE_NAME = "my_pipeline"
 
@@ -53,7 +55,7 @@ class TestPipelineRequirements:
     def call_pipeline_package(self, cli, metadata):
         result = CliRunner().invoke(
             cli,
-            ["pipeline", "package", PIPELINE_NAME],
+            ["pipeline", "package", f"pipelines.{PIPELINE_NAME}"],
             obj=metadata,
         )
         assert result.exit_code == 0
@@ -65,20 +67,20 @@ class TestPipelineRequirements:
         assert result.exit_code == 0
 
     def call_pipeline_pull(self, cli, metadata, repo_path):
-        wheel_file = (
-            repo_path
-            / "src"
-            / "dist"
-            / _get_wheel_name(name=PIPELINE_NAME, version="0.1")
+        sdist_file = (
+            repo_path / "dist" / _get_sdist_name(name=PIPELINE_NAME, version="0.1")
         )
-        assert wheel_file.is_file()
+        assert sdist_file.is_file()
 
         result = CliRunner().invoke(
             cli,
-            ["pipeline", "pull", str(wheel_file)],
+            ["pipeline", "pull", str(sdist_file)],
             obj=metadata,
         )
         assert result.exit_code == 0
+
+    def _remove_spaces_from_reqs(self, requirements_file):
+        return [str(r).replace(" ", "") for r in requirements_file]
 
     def test_existing_complex_project_requirements_txt(
         self, fake_project_cli, fake_metadata, fake_package_path, fake_repo_path
@@ -318,7 +320,7 @@ class TestPipelineRequirements:
 
         result = CliRunner().invoke(
             fake_project_cli,
-            ["pipeline", "package", PIPELINE_NAME],
+            ["pipeline", "package", f"pipelines.{PIPELINE_NAME}"],
             obj=fake_metadata,
         )
         assert result.exit_code == 1

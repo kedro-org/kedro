@@ -21,7 +21,32 @@ class CSVDataSet(AbstractVersionedDataSet):
     """``CSVDataSet`` loads/saves data from/to a CSV file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the CSV file.
 
-    Example:
+    Example adding a catalog entry with
+    `YAML API
+    <https://kedro.readthedocs.io/en/stable/05_data/\
+        01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+
+    .. code-block:: yaml
+
+        >>> cars:
+        >>>   type: pandas.CSVDataSet
+        >>>   filepath: data/01_raw/company/cars.csv
+        >>>   load_args:
+        >>>     sep: ","
+        >>>     na_values: ["#NA", NA]
+        >>>   save_args:
+        >>>     index: False
+        >>>     date_format: "%Y-%m-%d %H:%M"
+        >>>     decimal: .
+        >>>
+        >>> motorbikes:
+        >>>   type: pandas.CSVDataSet
+        >>>   filepath: s3://your_bucket/data/02_intermediate/company/motorbikes.csv
+        >>>   credentials: dev_s3
+        >>>
+
+
+    Example using Python API:
     ::
 
         >>> from kedro.extras.datasets.pandas import CSVDataSet

@@ -306,8 +306,8 @@ jobs:
       - setup_conda
       - setup_requirements
       - run:
-          name: Run unit tests without Spark
-          command: make test-no-spark
+          name: Run unit tests
+          command: make test
 
   linters_38:
     executor: py38

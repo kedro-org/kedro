@@ -362,5 +362,7 @@ class SparkDataSet(AbstractVersionedDataSet):
         write_mode = self._save_args.get("mode")
         if self._file_format == "delta" and write_mode.lower() in unsupported_modes:
             raise DataSetError(
-                f"It is not possible to perform `save()` for file format `delta` with mode `{write_mode}` on `SparkDataSet`. Please use `spark.DeltaTableDataSet` instead."
+                f"It is not possible to perform `save()` for file format `delta` "
+                f"with mode `{write_mode}` on `SparkDataSet`. "
+                f"Please use `spark.DeltaTableDataSet` instead."
             )

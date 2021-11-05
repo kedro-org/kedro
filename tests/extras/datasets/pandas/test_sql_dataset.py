@@ -1,33 +1,6 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 # pylint: disable=no-member
 
+from pathlib import PosixPath
 from typing import Any
 
 import pandas as pd
@@ -51,6 +24,13 @@ def dummy_dataframe():
     return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
 
 
+@pytest.fixture
+def sql_file(tmp_path: PosixPath):
+    file = tmp_path / "test.sql"
+    file.write_text(SQL_QUERY)
+    return file.as_posix()
+
+
 @pytest.fixture(params=[{}])
 def table_data_set(request):
     kwargs = dict(table_name=TABLE_NAME, credentials=dict(con=CONNECTION))
@@ -61,6 +41,13 @@ def table_data_set(request):
 @pytest.fixture(params=[{}])
 def query_data_set(request):
     kwargs = dict(sql=SQL_QUERY, credentials=dict(con=CONNECTION))
+    kwargs.update(request.param)
+    return SQLQueryDataSet(**kwargs)
+
+
+@pytest.fixture(params=[{}])
+def query_file_data_set(request, sql_file):
+    kwargs = dict(filepath=sql_file, credentials=dict(con=CONNECTION))
     kwargs.update(request.param)
     return SQLQueryDataSet(**kwargs)
 
@@ -244,10 +231,13 @@ class TestSQLQueryDataSet:
         _callable.assert_called_once_with(sql=SQL_QUERY, con=CONNECTION)
 
     def test_empty_query_error(self):
-        """Check the error when instantiating with empty query"""
-        pattern = r"`sql` argument cannot be empty\. Please provide a sql query"
+        """Check the error when instantiating with empty query or file"""
+        pattern = (
+            r"`sql` and `filepath` arguments cannot both be empty\."
+            r"Please provide a sql query or path to a sql query file\."
+        )
         with pytest.raises(DataSetError, match=pattern):
-            SQLQueryDataSet(sql="", credentials=dict(con=CONNECTION))
+            SQLQueryDataSet(sql="", filepath="", credentials=dict(con=CONNECTION))
 
     def test_empty_con_error(self):
         """Check the error when instantiating with empty connection string"""
@@ -262,6 +252,12 @@ class TestSQLQueryDataSet:
         """Test `load` method invocation"""
         mocker.patch("pandas.read_sql_query")
         query_data_set.load()
+        self._assert_pd_called_once()
+
+    def test_load_query_file(self, mocker, query_file_data_set):
+        """Test `load` method with a query file"""
+        mocker.patch("pandas.read_sql_query")
+        query_file_data_set.load()
         self._assert_pd_called_once()
 
     def test_load_driver_missing(self, mocker, query_data_set):
@@ -306,8 +302,31 @@ class TestSQLQueryDataSet:
         with pytest.raises(DataSetError, match=pattern):
             query_data_set.save(dummy_dataframe)
 
-    def test_str_representation_sql(self, query_data_set):
+    def test_str_representation_sql(self, query_data_set, sql_file):
         """Test the data set instance string representation"""
         str_repr = str(query_data_set)
-        assert f"SQLQueryDataSet(load_args={{}}, sql={SQL_QUERY})" in str_repr
+        assert (
+            f"SQLQueryDataSet(filepath=None, load_args={{}}, sql={SQL_QUERY})"
+            in str_repr
+        )
         assert CONNECTION not in str_repr
+        assert sql_file not in str_repr
+
+    def test_str_representation_filepath(self, query_file_data_set, sql_file):
+        """Test the data set instance string representation with filepath arg."""
+        str_repr = str(query_file_data_set)
+        assert (
+            f"SQLQueryDataSet(filepath={str(sql_file)}, load_args={{}}, sql=None)"
+            in str_repr
+        )
+        assert CONNECTION not in str_repr
+        assert SQL_QUERY not in str_repr
+
+    def test_sql_and_filepath_args(self, sql_file):
+        """Test that an error is raised when both `sql` and `filepath` args are given."""
+        pattern = (
+            r"`sql` and `filepath` arguments cannot both be provided."
+            r"Please only provide one."
+        )
+        with pytest.raises(DataSetError, match=pattern):
+            SQLQueryDataSet(sql=SQL_QUERY, filepath=sql_file)

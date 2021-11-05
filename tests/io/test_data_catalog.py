@@ -1,30 +1,3 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
 import logging
 import re
 from copy import deepcopy
@@ -301,6 +274,18 @@ class TestDataCatalog:
         pattern = r"Please use DataCatalog.add\(\) instead"
         with pytest.raises(AttributeError, match=pattern):
             data_catalog_from_config.datasets.new_dataset = None
+
+    def test_add_feed_dict_should_grow_linearly(self, mocker, data_catalog_from_config):
+        """Check number of calls to `_sub_nonword_chars` when adding feed dict
+        should grow linearly with the number of keys in the dict.
+        Simulate this issue: https://github.com/quantumblacklabs/kedro/issues/951
+        """
+        mock_sub_nonword_chars = mocker.patch(
+            "kedro.io.data_catalog._sub_nonword_chars"
+        )
+        feed_dict = {"key1": "val1", "key2": "val2", "key3": "val3", "key4": "val4"}
+        data_catalog_from_config.add_feed_dict(feed_dict)
+        assert mock_sub_nonword_chars.call_count == len(feed_dict)
 
     def test_mutating_datasets_not_allowed(self, data_catalog_from_config):
         """Check error if user tries to update the datasets attribute"""

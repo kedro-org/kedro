@@ -81,9 +81,6 @@ commands:
       - run:
           name: Run linters
           command: make lint
-      - run:
-          name: Check legal headers
-          command: make legal
 
   e2e_tests:
     description: Run all end to end tests
@@ -480,7 +477,8 @@ workflows:
             - win_pip_compile_38
             - win_unit_tests_36
             - win_unit_tests_37
-            - win_e2e_tests_36
+            # Skipped due to `pywin32 is in an unsupported or invalid wheel`
+            # - win_e2e_tests_36
             # Skipped due to Windows fatal exception: stack overflow
             # - win_unit_tests_38
             - win_e2e_tests_37

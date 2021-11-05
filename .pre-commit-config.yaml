@@ -20,6 +20,12 @@ repos:
           - id: requirements-txt-fixer # Sorts entries in requirements.txt
             exclude: "^kedro/templates/|^features/steps/test_starter/"
           - id: flake8
+            args:
+            - "--max-line-length=88"
+            - "--max-complexity=18"
+            - "--max-complexity=18"
+            - "--select=B,C,E,F,W,T4,B9"
+            - "--ignore=E203,E266,E501,W503"
             exclude: "^kedro/templates/|^features/steps/test_starter/"
 
     - repo: https://github.com/pre-commit/mirrors-mypy
@@ -62,11 +68,6 @@ repos:
             types: [file, python]
             exclude: ^features/steps/test_starter|^kedro/templates/
             entry: black
-          - id: legal
-            name: "Licence check"
-            language: system
-            pass_filenames: false
-            entry: make legal
           - id: imports
             name: "Import Linter"
             language: system

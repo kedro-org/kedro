@@ -1,41 +1,21 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
 """``SQLDataSet`` to load and save data to a SQL backend."""
 
 import copy
 import re
+from pathlib import PurePosixPath
 from typing import Any, Dict, Optional
 
+import fsspec
 import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy.exc import NoSuchModuleError
 
-from kedro.io.core import AbstractDataSet, DataSetError
+from kedro.io.core import (
+    AbstractDataSet,
+    DataSetError,
+    get_filepath_str,
+    get_protocol_and_path,
+)
 
 __all__ = ["SQLTableDataSet", "SQLQueryDataSet"]
 
@@ -319,8 +299,13 @@ class SQLQueryDataSet(AbstractDataSet):
 
     """
 
-    def __init__(
-        self, sql: str, credentials: Dict[str, Any], load_args: Dict[str, Any] = None
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        sql: str = None,
+        credentials: Dict[str, Any] = None,
+        load_args: Dict[str, Any] = None,
+        fs_args: Dict[str, Any] = None,
+        filepath: str = None,
     ) -> None:
         """Creates a new ``SQLQueryDataSet``.
 
@@ -338,14 +323,28 @@ class SQLQueryDataSet(AbstractDataSet):
                 https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_sql_query.html
                 To find all supported connection string formats, see here:
                 https://docs.sqlalchemy.org/en/13/core/engines.html#database-urls
+            fs_args: Extra arguments to pass into underlying filesystem class constructor
+                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``), as well as
+                to pass to the filesystem's `open` method through nested keys
+                `open_args_load` and `open_args_save`.
+                Here you can find all available arguments for `open`:
+                https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
+                All defaults are preserved, except `mode`, which is set to `r` when loading.
+            filepath: A path to a file with a sql query statement.
 
         Raises:
-            DataSetError: When either ``sql`` or ``con`` parameters is emtpy.
+            DataSetError: When either ``sql`` or ``con`` parameters is empty.
         """
-
-        if not sql:
+        if sql and filepath:
             raise DataSetError(
-                "`sql` argument cannot be empty. Please provide a sql query"
+                "`sql` and `filepath` arguments cannot both be provided."
+                "Please only provide one."
+            )
+
+        if not (sql or filepath):
+            raise DataSetError(
+                "`sql` and `filepath` arguments cannot both be empty."
+                "Please provide a sql query or path to a sql query file."
             )
 
         if not (credentials and "con" in credentials and credentials["con"]):
@@ -362,18 +361,41 @@ class SQLQueryDataSet(AbstractDataSet):
             else default_load_args
         )
 
-        self._load_args["sql"] = sql
+        # load sql query from file
+        if sql:
+            self._load_args["sql"] = sql
+            self._filepath = None
+        else:
+            # filesystem for loading sql file
+            _fs_args = copy.deepcopy(fs_args) or {}
+            _fs_credentials = _fs_args.pop("credentials", {})
+            protocol, path = get_protocol_and_path(str(filepath))
+
+            self._protocol = protocol
+            self._fs = fsspec.filesystem(self._protocol, **_fs_credentials, **_fs_args)
+            self._filepath = path
         self._load_args["con"] = credentials["con"]
 
     def _describe(self) -> Dict[str, Any]:
-        load_args = self._load_args.copy()
-        del load_args["sql"]
+        load_args = copy.deepcopy(self._load_args)
+        desc = {}
+        desc["sql"] = str(load_args.pop("sql", None))
+        desc["filepath"] = str(self._filepath)
         del load_args["con"]
-        return dict(sql=self._load_args["sql"], load_args=load_args)
+        desc["load_args"] = str(load_args)
+
+        return desc
 
     def _load(self) -> pd.DataFrame:
+        load_args = copy.deepcopy(self._load_args)
+
+        if self._filepath:
+            load_path = get_filepath_str(PurePosixPath(self._filepath), self._protocol)
+            with self._fs.open(load_path, mode="r") as fs_file:
+                load_args["sql"] = fs_file.read()
+
         try:
-            return pd.read_sql_query(**self._load_args)
+            return pd.read_sql_query(**load_args)
         except ImportError as import_error:
             raise _get_missing_module_error(import_error) from import_error
         except NoSuchModuleError as exc:

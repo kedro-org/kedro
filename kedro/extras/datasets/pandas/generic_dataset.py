@@ -73,8 +73,8 @@ class GenericDataSet(AbstractVersionedDataSet):
         >>> data = pd.DataFrame({'col1': [1, 2], 'col2': [4, 5],
         >>>                      'col3': [5, 6]})
         >>>
-        >>> # data_set = GenericDataSet(file_format='csv', filepath="s3://test.csv")
-        >>> data_set = GenericDataSet(file_format='csv', filepath="test.csv")
+        >>> # data_set = GenericDataSet(filepath="s3://test.csv", file_format='csv')
+        >>> data_set = GenericDataSet(filepath="test.csv", file_format='csv')
         >>> data_set.save(data)
         >>> reloaded = data_set.load()
         >>> assert data.equals(reloaded)
@@ -87,8 +87,8 @@ class GenericDataSet(AbstractVersionedDataSet):
     # pylint: disable=too-many-arguments
     def __init__(
         self,
-        file_format: str,
         filepath: str,
+        file_format: str,
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
         version: Version = None,
@@ -100,11 +100,6 @@ class GenericDataSet(AbstractVersionedDataSet):
         dynamically identified by string matching on a best effort basis.
 
         Args:
-            file_format: String which is used to match the appropriate load/save method on a best
-                effort basis. For example if 'csv' is passed in the `pandas.read_csv` and
-                `pandas.DataFrame.to_csv` will be identified. An error will be raised unless
-                at least one matching `read_{file_format}` or `to_{file_format}` method is
-                identified.
             filepath: Filepath in POSIX format to a file prefixed with a protocol like `s3://`.
                 If prefix is not provided, `file` protocol (local filesystem) will be used.
                 The prefix should be any protocol supported by ``fsspec``.
@@ -112,6 +107,11 @@ class GenericDataSet(AbstractVersionedDataSet):
                 filepath/buffer/io type location. There are some read/write targets such
                 as 'clipboard' or 'records' that will fail since they do not take a
                 filepath like argument.
+            file_format: String which is used to match the appropriate load/save method on a best
+                effort basis. For example if 'csv' is passed in the `pandas.read_csv` and
+                `pandas.DataFrame.to_csv` will be identified. An error will be raised unless
+                at least one matching `read_{file_format}` or `to_{file_format}` method is
+                identified.
             load_args: Pandas options for loading files.
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/reference/io.html

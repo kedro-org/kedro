@@ -36,6 +36,7 @@
 [Deepyaman Datta](https://github.com/deepyaman),
 [Brites](https://github.com/brites101),
 [Manish Swami](https://github.com/ManishS6),
+[Avaneesh Yembadi](https://github.com/avan-sh),
 [Zain Patel](https://github.com/mzjp2),
 [Simon Brugman](https://github.com/sbrugman),
 [Kiyo Kunii](https://github.com/921kiyo),
@@ -54,10 +55,10 @@
 * Imports are now refactored at `kedro pipeline package` and `kedro pipeline pull` time, so that _aliasing_ a modular pipeline doesn't break it.
 * Added the following new datasets to support basic Experiment Tracking:
 
-| Type                        | Description                                          | Location                          |
-| --------------------------- | ---------------------------------------------------- | --------------------------------- |
+| Type                      | Description                                              | Location                         |
+| ------------------------- | -------------------------------------------------------- | -------------------------------- |
 | `tracking.MetricsDataSet` | Dataset to track numeric metrics for experiment tracking | `kedro.extras.datasets.tracking` |
-| `tracking.JSONDataSet` | Dataset to track data for experiment tracking | `kedro.extras.datasets.tracking` |
+| `tracking.JSONDataSet`    | Dataset to track data for experiment tracking            | `kedro.extras.datasets.tracking` |
 
 ## Bug fixes and other changes
 * Bumped minimum required `fsspec` version to 2021.04.
@@ -80,8 +81,8 @@
 ## Major features and improvements
 * Added the following new datasets:
 
-| Type                        | Description                                          | Location                          |
-| --------------------------- | ---------------------------------------------------- | --------------------------------- |
+| Type                   | Description                                                 | Location                       |
+| ---------------------- | ----------------------------------------------------------- | ------------------------------ |
 | `plotly.PlotlyDataSet` | Works with plotly graph object Figures (saves as json file) | `kedro.extras.datasets.plotly` |
 
 ## Bug fixes and other changes

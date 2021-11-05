@@ -17,7 +17,25 @@ class GBQTableDataSet(AbstractDataSet):
     """``GBQTableDataSet`` loads and saves data from/to Google BigQuery.
     It uses pandas-gbq to read and write from/to BigQuery table.
 
-    Example:
+    Example adding a catalog entry with
+    `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
+        01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+
+    .. code-block:: yaml
+
+        >>> vehicles:
+        >>>   type: pandas.GBQTableDataSet
+        >>>   dataset: big_query_dataset
+        >>>   table_name: big_query_table
+        >>>   project: my-project
+        >>>   credentials: gbq-creds
+        >>>   load_args:
+        >>>     reauth: True
+        >>>   save_args:
+        >>>     chunk_size: 100
+
+
+    Example using Python API:
     ::
 
         >>> from kedro.extras.datasets.pandas import GBQTableDataSet

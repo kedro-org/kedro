@@ -24,7 +24,19 @@ class HDFDataSet(AbstractVersionedDataSet):
     """``HDFDataSet`` loads/saves data from/to a hdf file using an underlying
     filesystem (e.g. local, S3, GCS). It uses pandas.HDFStore to handle the hdf file.
 
-    Example:
+    Example adding a catalog entry with
+    `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
+        01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+
+    .. code-block:: yaml
+
+        >>> hdf_dataset:
+        >>>   type: pandas.HDFDataSet
+        >>>   filepath: s3://my_bucket/raw/sensor_reading.h5
+        >>>   credentials: aws_s3_creds
+        >>>   key: data
+
+    Example using Python API:
     ::
 
         >>> from kedro.extras.datasets.pandas import HDFDataSet

@@ -22,7 +22,28 @@ class ExcelDataSet(AbstractVersionedDataSet):
     """``ExcelDataSet`` loads/saves data from/to a Excel file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the Excel file.
 
-    Example:
+    Example adding a catalog entry with
+    `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
+        01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+
+    .. code-block:: yaml
+
+        >>> rockets:
+        >>>   type: pandas.ExcelDataSet
+        >>>   filepath: gcs://your_bucket/rockets.xlsx
+        >>>   fs_args:
+        >>>     project: my-project
+        >>>   credentials: my_gcp_credentials
+        >>>   save_args:
+        >>>     sheet_name: Sheet1
+        >>>   load_args:
+        >>>     sheet_name: Sheet1
+        >>>
+        >>> shuttles:
+        >>>   type: pandas.ExcelDataSet
+        >>>   filepath: data/01_raw/shuttles.xlsx
+
+    Example using Python API:
     ::
 
         >>> from kedro.extras.datasets.pandas import ExcelDataSet

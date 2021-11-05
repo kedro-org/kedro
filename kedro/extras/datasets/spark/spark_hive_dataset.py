@@ -69,7 +69,19 @@ class SparkHiveDataSet(AbstractDataSet):
     - Tables are not being externally modified during upserts. The upsert method is NOT ATOMIC
     to external changes to the target table while executing.
 
-    Example:
+    Example adding a catalog entry with
+    `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
+        01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+
+    .. code-block:: yaml
+
+        >>> hive_dataset:
+        >>>   type: spark.SparkHiveDataSet
+        >>>   database: hive_database
+        >>>   table: table_name
+        >>>   write_mode: overwrite
+
+    Example using Python API:
     ::
 
         >>> from pyspark.sql import SparkSession

@@ -14,7 +14,32 @@ class AppendableExcelDataSet(AbstractDataSet):
     """``AppendableExcelDataSet`` loads/saves data from/to a local Excel file opened in
     append mode. It uses pandas to handle the Excel file.
 
-    Example:
+    Example adding a catalog entry with
+    `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
+        01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+
+    .. code-block:: yaml
+
+        >>> # AppendableExcelDataSet creates a new sheet for every dataset
+        >>> # ExcelDataSet restricts one dataset per file as it is overwritten
+        >>>
+        >>> preprocessed_companies:
+        >>>   type: pandas.AppendableExcelDataSet
+        >>>   filepath: data/02_intermediate/preprocessed.xlsx # assumes file already exists
+        >>>   save_args:
+        >>>     sheet_name: preprocessed_companies
+        >>>   load_args:
+        >>>     sheet_name: preprocessed_companies
+        >>>
+        >>> preprocessed_shuttles:
+        >>>   type: pandas.AppendableExcelDataSet
+        >>>   filepath: data/02_intermediate/preprocessed.xlsx
+        >>>   save_args:
+        >>>     sheet_name: preprocessed_shuttles
+        >>>   load_args:
+        >>>     sheet_name: preprocessed_shuttles
+
+    Example using Python API:
     ::
 
         >>> from kedro.extras.datasets.pandas import AppendableExcelDataSet

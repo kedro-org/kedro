@@ -1,9 +1,7 @@
-import pkg_resources
 import pytest
 from click.testing import CliRunner
 
-from kedro.framework.cli.pipeline import _get_wheel_name, _safe_parse_requirements
-from kedro.framework.cli.pipeline import _get_sdist_name
+from kedro.framework.cli.pipeline import _get_sdist_name, _safe_parse_requirements
 
 PIPELINE_NAME = "my_pipeline"
 
@@ -78,9 +76,6 @@ class TestPipelineRequirements:
             obj=metadata,
         )
         assert result.exit_code == 0
-
-    def _remove_spaces_from_reqs(self, requirements_file):
-        return [str(r).replace(" ", "") for r in requirements_file]
 
     def test_existing_complex_project_requirements_txt(
         self, fake_project_cli, fake_metadata, fake_package_path, fake_repo_path

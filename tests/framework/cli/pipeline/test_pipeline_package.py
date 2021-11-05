@@ -420,7 +420,7 @@ class TestPipelinePackageCommand:
         assert "retail/config/parameters/deep/retail.yml" in wheel_contents
         assert "retail/config/parameters/a/b/c/d/retail/params3.yml" in wheel_contents
 
-    def test_pipeline_package_version(
+    def test_pipeline_package_default(
         self, fake_repo_path, fake_package_path, fake_project_cli, fake_metadata
     ):
         _pipeline_name = "data_engineering"

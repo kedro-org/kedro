@@ -286,7 +286,7 @@ def _pull_package(
             _append_package_reqs(requirements_in, package_reqs, package_name)
 
         _clean_pycache(temp_dir_path)
-        _install_files(metadata, package_name, temp_dir_path, env, alias)
+        _install_files(metadata, package_name, temp_dir_path / sdist_file_name, env, alias)
 
 
 def _pull_packages_from_manifest(metadata: ProjectMetadata) -> None:

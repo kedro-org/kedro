@@ -26,15 +26,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Databricks specific DataSets"""
-import functools
 import logging
 from typing import Any, Dict
 
 from delta.tables import DeltaTable
-from pyspark.sql import DataFrame, DataFrameWriter
 
 from kedro.extras.datasets.spark import SparkDataSet
-from kedro.io.core import DataSetError, NodeStatus, Version
+from kedro.io.core import Version
 
 logger = logging.getLogger(__name__)
 
@@ -63,26 +61,15 @@ class DeltaTableDataset(SparkDataSet):
         )
         self._delta_options = delta_options
 
-    def _add_options(self, df: DataFrame) -> DataFrameWriter:
-        # DeltaTable specific opts, such as `schemaValidation`
-        if self._delta_options:
-            df_writer = df.write
-            return functools.reduce(
-                lambda dfw, opt: df_writer.option(opt, self._delta_options[opt]),
-                self._delta_options,
-                df_writer,
-            )
-        return df.write
-
     def _load(self):
         load_path = self._fs_prefix + str(self._get_load_path())
         return DeltaTable.forPath(self._get_spark(), load_path)
 
-    def _save(self, io: NodeStatus):
-        if io == NodeStatus.SUCCESS:
-            logger.info(
-                "`NodeStatus` returned SUCCESS, `save` operation was performed"
-                "within the context of the node."
-            )
-        else:
-            raise DataSetError("`NodeStatus` returned something other than SUCCESS")
+    def _save(self, data: Any):
+        pass  # TBD
+
+    @staticmethod
+    def confirm():
+        logger.info(
+            "Saving was performed on `DeltaTable` object within the context of the node function"
+        )

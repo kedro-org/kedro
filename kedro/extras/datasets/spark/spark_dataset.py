@@ -3,17 +3,17 @@
 """
 from copy import deepcopy
 from fnmatch import fnmatch
-from functools import partial
+from functools import partial, reduce
 from pathlib import PurePosixPath
 from typing import Any, Dict, List, Optional, Tuple
 from warnings import warn
 
 from hdfs import HdfsError, InsecureClient
-from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql import DataFrame, DataFrameWriter, SparkSession
 from pyspark.sql.utils import AnalysisException
 from s3fs import S3FileSystem
 
-from kedro.io.core import AbstractVersionedDataSet, Version
+from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
 
 
 def _parse_glob_pattern(pattern: str) -> str:
@@ -296,6 +296,9 @@ class SparkDataSet(AbstractVersionedDataSet):
             glob_function=glob_function,
         )
 
+        # Handle `DataFrameWriter` options
+        self._dfwriter_options = save_args.pop("dfwriter_options", None)
+
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args is not None:
@@ -329,6 +332,7 @@ class SparkDataSet(AbstractVersionedDataSet):
 
     def _save(self, data: DataFrame) -> None:
         save_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_save_path()))
+        # handle dfwriter options here - UNDER CONSTRUCTION
         data.write.save(save_path, self._file_format, **self._save_args)
 
     def _exists(self) -> bool:
@@ -341,3 +345,22 @@ class SparkDataSet(AbstractVersionedDataSet):
                 return False
             raise
         return True
+
+    def _add_options(self, df: DataFrame) -> DataFrameWriter:
+        # DeltaTable specific opts, such as `schemaValidation`
+        if self._dfwriter_options:
+            df_writer = df.write
+            return reduce(
+                lambda dfw, opt: df_writer.option(opt, self._dfwriter_options[opt]),
+                self._dfwriter_options,
+                df_writer,
+            )
+        return df.write
+
+    def _handle_delta(self):
+        unsupported_modes = ["merge", "delete", "update"]
+        write_mode = self._save_args.get("mode")
+        if self._file_format == "delta" and write_mode.lower() in unsupported_modes:
+            raise DataSetError(
+                f"It is not possible to perform `save()` for file format `delta` with mode `{write_mode}` on `SparkDataSet`. Please use `spark.DeltaTableDataSet` instead."
+            )

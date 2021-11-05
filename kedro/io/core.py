@@ -67,11 +67,6 @@ class VersionNotFoundError(DataSetError):
     pass
 
 
-class NodeStatus(Enum):
-    SUCCESS = 0
-    FAILURE = 1
-
-
 class AbstractDataSet(abc.ABC):
     """``AbstractDataSet`` is the base class for all data set implementations.
     All data set implementations should extend this abstract class

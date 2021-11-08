@@ -71,7 +71,7 @@ class GeoJSONDataSet(AbstractVersionedDataSet):
                 https://geopandas.org/docs/reference/api/geopandas.read_file.html#geopandas.read_file
             save_args: GeoPandas options for saving geojson files.
                 Here you can find all available arguments:
-                https://geopandas.org/docs/reference/api/geopandas.GeoDataFrame.to_file.html
+                https://geopandas.org/en/stable/docs/reference/api/geopandas.GeoDataFrame.to_file.html
                 The default_save_arg driver is 'GeoJSON', all others preserved.
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is

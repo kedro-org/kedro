@@ -21,7 +21,24 @@ class JSONDataSet(AbstractVersionedDataSet):
     """``JSONDataSet`` loads/saves data from/to a JSON file using an underlying
     filesystem (e.g.: local, S3, GCS). It uses pandas to handle the json file.
 
-    Example:
+    Example adding a catalog entry with
+    `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
+        01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+
+    .. code-block:: yaml
+
+        >>> clickstream_dataset:
+        >>>   type: pandas.JSONDataSet
+        >>>   filepath: abfs://landing_area/primary/click_stream.json
+        >>>   credentials: abfs_creds
+        >>>
+        >>> json_dataset:
+        >>>   type: pandas.JSONDataSet
+        >>>   filepath: data/01_raw/Video_Games.json
+        >>>   load_args:
+        >>>     lines: True
+
+    Example using Python API:
     ::
 
         >>> from kedro.extras.datasets.pandas import JSONDataSet

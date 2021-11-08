@@ -347,14 +347,14 @@ def test_bad_input(func, expected):
 def apply_f(func: Callable) -> Callable:
     @wraps(func)
     def with_f(*args, **kwargs):
-        return func(*(f"f({a})" for a in args), **kwargs)
+        return func(*(f"f({a})" for a in args), **kwargs)  # pragma: no cover
 
     return with_f
 
 
 @apply_f
 def decorated_identity(value):
-    return value
+    return value  # pragma: no cover
 
 
 class TestTag:

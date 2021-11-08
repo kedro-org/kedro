@@ -9,7 +9,7 @@ import tempfile
 from importlib import import_module
 from pathlib import Path
 from textwrap import indent
-from typing import List, NamedTuple, Optional, Tuple, Union
+from typing import Iterable, List, NamedTuple, Optional, Set, Tuple, Union
 
 import click
 import pkg_resources
@@ -268,11 +268,6 @@ def _pull_package(
         package_name = egg_info_file[0].stem
         package_requirements = temp_dir_path / sdist_file_name / "setup.py"
 
-        _clean_pycache(temp_dir_path)
-        _install_files(
-            metadata, package_name, temp_dir_path / sdist_file_name, env, alias
-        )
-
         # Finds a string representation of 'install_requires' list from setup.py
         reqs_list_pattern = r"install_requires\=(.*?)\,\n"
         list_reqs = re.findall(
@@ -288,6 +283,11 @@ def _pull_package(
                 metadata.source_dir, create_empty=True
             )
             _append_package_reqs(requirements_in, package_reqs, package_name)
+
+        _clean_pycache(temp_dir_path)
+        _install_files(
+            metadata, package_name, temp_dir_path / sdist_file_name, env, alias
+        )
 
 
 def _pull_packages_from_manifest(metadata: ProjectMetadata) -> None:
@@ -629,7 +629,7 @@ def _package_pipeline(
     # config files not to confuse users and avoid useless file copies
     configs_to_package = _find_config_files(
         package_conf,
-        [f"parameters*/**/{pipeline_name}.yml", f"parameters*/**/{pipeline_name}/*"],
+        [f"parameters*/**/{pipeline_name}.yml", f"parameters*/**/{pipeline_name}/**/*"],
     )
 
     source_paths = (package_source, package_tests, configs_to_package)
@@ -1069,9 +1069,9 @@ def _append_package_reqs(
     requirements_in: Path, package_reqs: List[str], pipeline_name: str
 ) -> None:
     """Appends modular pipeline requirements to project level requirements.in"""
-    existing_reqs = pkg_resources.parse_requirements(requirements_in.read_text())
-    new_reqs = pkg_resources.parse_requirements(package_reqs)
-    reqs_to_add = set(new_reqs) - set(existing_reqs)
+    existing_reqs = _safe_parse_requirements(requirements_in.read_text())
+    incoming_reqs = _safe_parse_requirements(package_reqs)
+    reqs_to_add = set(incoming_reqs) - set(existing_reqs)
     if not reqs_to_add:
         return
 
@@ -1090,3 +1090,21 @@ def _append_package_reqs(
         "Use `kedro build-reqs` to compile and `pip install -r src/requirements.txt` to install "
         "the updated list of requirements."
     )
+
+
+def _safe_parse_requirements(
+    requirements: Union[str, Iterable[str]]
+) -> Set[pkg_resources.Requirement]:
+    """Safely parse a requirement or set of requirements. This effectively replaces
+    pkg_resources.parse_requirements, which blows up with a ValueError as soon as it
+    encounters a requirement it cannot parse (e.g. `-r requirements.txt`). This way
+    we can still extract all the parseable requirements out of a set containing some
+    unparseable requirements.
+    """
+    parseable_requirements = set()
+    for requirement in pkg_resources.yield_lines(requirements):
+        try:
+            parseable_requirements.add(pkg_resources.Requirement.parse(requirement))
+        except ValueError:
+            continue
+    return parseable_requirements

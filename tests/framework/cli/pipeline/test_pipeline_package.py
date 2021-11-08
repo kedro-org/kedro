@@ -351,7 +351,6 @@ class TestPipelinePackageCommand:
 
         with tarfile.open(sdist_file, "r") as tar:
             sdist_contents = set(tar.getnames())
-
         assert (
             "retail-0.1/retail/config/parameters/retail/params1.yml" in sdist_contents
         )
@@ -359,6 +358,78 @@ class TestPipelinePackageCommand:
         assert (
             "retail-0.1/retail/config/parameters/retail_banking.yml"
             not in sdist_contents
+        )
+
+    def test_package_pipeline_with_deep_nested_parameters(
+        self, fake_repo_path, fake_project_cli, fake_metadata
+    ):
+        CliRunner().invoke(
+            fake_project_cli, ["pipeline", "create", "retail"], obj=fake_metadata
+        )
+        deep_nested_param_path = Path(
+            fake_repo_path / "conf" / "base" / "parameters" / "deep" / "retail"
+        )
+        deep_nested_param_path.mkdir(parents=True, exist_ok=True)
+        (deep_nested_param_path / "params1.yml").touch()
+
+        deep_nested_param_path2 = Path(
+            fake_repo_path / "conf" / "base" / "parameters" / "retail" / "deep"
+        )
+        deep_nested_param_path2.mkdir(parents=True, exist_ok=True)
+        (deep_nested_param_path2 / "params1.yml").touch()
+
+        deep_nested_param_path3 = Path(
+            fake_repo_path / "conf" / "base" / "parameters" / "deep"
+        )
+        deep_nested_param_path3.mkdir(parents=True, exist_ok=True)
+        (deep_nested_param_path3 / "retail.yml").touch()
+
+        super_deep_nested_param_path = Path(
+            fake_repo_path
+            / "conf"
+            / "base"
+            / "parameters"
+            / "a"
+            / "b"
+            / "c"
+            / "d"
+            / "retail"
+        )
+        super_deep_nested_param_path.mkdir(parents=True, exist_ok=True)
+        (super_deep_nested_param_path / "params3.yml").touch()
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["pipeline", "package", "pipelines.retail"],
+            obj=fake_metadata,
+        )
+
+        assert result.exit_code == 0
+        assert "`dummy_package.pipelines.retail` packaged!" in result.output
+
+        sdist_location = fake_repo_path / "dist"
+        assert f"Location: {sdist_location}" in result.output
+
+        sdist_name = _get_sdist_name(name="retail", version="0.1")
+        sdist_file = sdist_location / sdist_name
+        assert sdist_file.is_file()
+        assert len(list(sdist_location.iterdir())) == 1
+
+        # pylint: disable=consider-using-with
+        with tarfile.open(sdist_file, "r") as tar:
+            sdist_contents = set(tar.getnames())
+        assert (
+            "retail-0.1/retail/config/parameters/deep/retail/params1.yml"
+            in sdist_contents
+        )
+        assert (
+            "retail-0.1/retail/config/parameters/retail/deep/params1.yml"
+            in sdist_contents
+        )
+        assert "retail-0.1/retail/config/parameters/retail.yml" in sdist_contents
+        assert "retail-0.1/retail/config/parameters/deep/retail.yml" in sdist_contents
+        assert (
+            "retail-0.1/retail/config/parameters/a/b/c/d/retail/params3.yml"
+            in sdist_contents
         )
 
     def test_pipeline_package_default(

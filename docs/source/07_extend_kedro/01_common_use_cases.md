@@ -8,9 +8,7 @@ The execution timeline of a Kedro pipeline can be thought of as a sequence of ac
 
 At different points in the lifecycle of these components, you may want to add extra behaviour. For example, you could add extra computation for profiling purposes _before_ and _after_ a node runs or _before_ and _after_ the I/O actions of a dataset, namely the `load` and `save` actions.
 
-Before Kedro 0.17.0, we added a few different APIs to allow you to extend Kedro's behaviour. For example, to allow extra behaviour _before_ and _after_ a node runs, we introduced the [decorators](07_decorators.md) API. Similarly, to allow extra behaviour _before_ and _after_ dataset I/O, we introduced the [transformers](06_transformers.md) API.
-
-While we addressed some immediate use cases, we have since decided to provide just one, single way to extend Kedro's execution timeline: Hooks. So, from Kedro version 0.17.0, we now deprecate decorators and transformers in favour of [Hooks](./02_hooks.md), which will be the recommended approach when you need to extend Kedro's execution timeline.
+This can now achieved by using [Hooks](./02_hooks.md), to define the extra behaviour and at which point in the execution timeline it should be injected.
 
 ## Use Case 2: How to integrate Kedro with additional data sources
 

@@ -7,8 +7,7 @@ import copy
 import json
 from collections import Counter, defaultdict
 from itertools import chain
-from typing import Callable, Dict, Iterable, List, Set, Tuple, Union
-from warnings import warn
+from typing import Dict, Iterable, List, Set, Tuple, Union
 
 from toposort import CircularDependencyError as ToposortCircleError
 from toposort import toposort
@@ -756,30 +755,6 @@ class Pipeline:  # pylint: disable=too-many-public-methods
                 "Pipeline contains no nodes after applying all provided filters"
             )
         return filtered_pipeline
-
-    def decorate(self, *decorators: Callable) -> "Pipeline":
-        """Create a new ``Pipeline`` by applying the provided decorators to
-        all the nodes in the pipeline. If no decorators are passed, it will
-        return a copy of the current ``Pipeline`` object.
-
-        Args:
-            decorators: Decorators to be applied on all node functions in
-                the pipeline, always applied from right to left.
-
-        Returns:
-            A new ``Pipeline`` object with all nodes decorated with the
-            provided decorators.
-
-        """
-        warn(
-            "The pipeline's `decorate` API will be deprecated in Kedro 0.18.0."
-            "Please use a node's Hooks to extend the node's behaviour in a pipeline."
-            "For more information, please visit"
-            "https://kedro.readthedocs.io/en/stable/07_extend_kedro/02_hooks.html",
-            DeprecationWarning,
-        )
-        nodes = [node.decorate(*decorators) for node in self.nodes]
-        return Pipeline(nodes)
 
     def tag(self, tags: Union[str, Iterable[str]]) -> "Pipeline":
         """Returns a copy of the pipeline, with each node tagged accordingly.

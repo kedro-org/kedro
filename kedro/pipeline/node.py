@@ -6,7 +6,6 @@ import inspect
 import logging
 import re
 from collections import Counter
-from functools import reduce
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Union
 from warnings import warn
 
@@ -24,7 +23,6 @@ class Node:  # pylint: disable=too-many-instance-attributes
         *,
         name: str = None,
         tags: Union[str, Iterable[str]] = None,
-        decorators: Iterable[Callable] = None,
         confirms: Union[str, List[str]] = None,
         namespace: str = None,
     ):
@@ -47,7 +45,6 @@ class Node:  # pylint: disable=too-many-instance-attributes
             name: Optional node name to be used when displaying the node in
                 logs or any other visualisations.
             tags: Optional set of tags to be applied to the node.
-            decorators: Optional list of decorators to be applied to the node.
             confirms: Optional name or the list of the names of the datasets
                 that should be confirmed. This will result in calling
                 ``confirm()`` method of the corresponding data set instance.
@@ -108,7 +105,6 @@ class Node:  # pylint: disable=too-many-instance-attributes
         self._name = name
         self._namespace = namespace
         self._tags = set(_to_list(tags))
-        self._decorators = list(decorators or [])
 
         self._validate_unique_outputs()
         self._validate_inputs_dif_than_outputs()
@@ -125,7 +121,6 @@ class Node:  # pylint: disable=too-many-instance-attributes
             "name": self._name,
             "namespace": self._namespace,
             "tags": self._tags,
-            "decorators": self._decorators,
             "confirms": self._confirms,
         }
         params.update(overwrite_params)
@@ -298,91 +293,6 @@ class Node:  # pylint: disable=too-many-instance-attributes
         """
         return _to_list(self._confirms)
 
-    @property
-    def _decorated_func(self):
-        return reduce(lambda g, f: f(g), self._decorators, self._func)
-
-    def decorate(self, *decorators: Callable) -> "Node":
-        """Create a new ``Node`` by applying the provided decorators to the
-        underlying function. If no decorators are passed, it will return a
-        new ``Node`` object, but with no changes to the function.
-
-        Args:
-            decorators: Decorators to be applied on the node function.
-                Decorators will be applied from right to left.
-
-        Returns:
-            A new ``Node`` object with the decorators applied to the function.
-
-        Example:
-        ::
-
-            >>>
-            >>> from functools import wraps
-            >>>
-            >>>
-            >>> def apply_f(func: Callable) -> Callable:
-            >>>     @wraps(func)
-            >>>     def with_f(*args, **kwargs):
-            >>>         args = ["f({})".format(a) for a in args]
-            >>>         return func(*args, **kwargs)
-            >>>     return with_f
-            >>>
-            >>>
-            >>> def apply_g(func: Callable) -> Callable:
-            >>>     @wraps(func)
-            >>>     def with_g(*args, **kwargs):
-            >>>         args = ["g({})".format(a) for a in args]
-            >>>         return func(*args, **kwargs)
-            >>>     return with_g
-            >>>
-            >>>
-            >>> def apply_h(func: Callable) -> Callable:
-            >>>     @wraps(func)
-            >>>     def with_h(*args, **kwargs):
-            >>>         args = ["h({})".format(a) for a in args]
-            >>>         return func(*args, **kwargs)
-            >>>     return with_h
-            >>>
-            >>>
-            >>> def apply_fg(func: Callable) -> Callable:
-            >>>     @wraps(func)
-            >>>     def with_fg(*args, **kwargs):
-            >>>         args = ["fg({})".format(a) for a in args]
-            >>>         return func(*args, **kwargs)
-            >>>     return with_fg
-            >>>
-            >>>
-            >>> def identity(value):
-            >>>     return value
-            >>>
-            >>>
-            >>> # using it as a regular python decorator
-            >>> @apply_f
-            >>> def decorated_identity(value):
-            >>>     return value
-            >>>
-            >>>
-            >>> # wrapping the node function
-            >>> old_node = node(apply_g(decorated_identity), 'input', 'output',
-            >>>                 name='node')
-            >>> # using the .decorate() method to apply multiple decorators
-            >>> new_node = old_node.decorate(apply_h, apply_fg)
-            >>> result = new_node.run(dict(input=1))
-            >>>
-            >>> assert old_node.name == new_node.name
-            >>> assert "output" in result
-            >>> assert result['output'] == "f(g(fg(h(1))))"
-        """
-        warn(
-            "The node's `decorate` API will be deprecated in Kedro 0.18.0."
-            "Please use a node's Hooks to extend the node's behaviour in a pipeline."
-            "For more information, please visit"
-            "https://kedro.readthedocs.io/en/stable/07_extend_kedro/02_hooks.html",
-            DeprecationWarning,
-        )
-        return self._copy(decorators=self._decorators + list(reversed(decorators)))
-
     def run(self, inputs: Dict[str, Any] = None) -> Dict[str, Any]:
         """Run this node using the provided inputs and return its results
         in a dictionary.
@@ -447,7 +357,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
                 f"{sorted(inputs.keys())}."
             )
 
-        return self._decorated_func()
+        return self._func()
 
     def _run_with_one_input(self, inputs: Dict[str, Any], node_input: str):
         if len(inputs) != 1 or node_input not in inputs:
@@ -457,7 +367,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
                 f"{sorted(inputs.keys())}."
             )
 
-        return self._decorated_func(inputs[node_input])
+        return self._func(inputs[node_input])
 
     def _run_with_list(self, inputs: Dict[str, Any], node_inputs: List[str]):
         # Node inputs and provided run inputs should completely overlap
@@ -468,7 +378,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
                 f"{sorted(inputs.keys())}."
             )
         # Ensure the function gets the inputs in the correct order
-        return self._decorated_func(*(inputs[item] for item in node_inputs))
+        return self._func(*(inputs[item] for item in node_inputs))
 
     def _run_with_dict(self, inputs: Dict[str, Any], node_inputs: Dict[str, str]):
         # Node inputs and provided run inputs should completely overlap
@@ -480,7 +390,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
                 f"{sorted(inputs.keys())}."
             )
         kwargs = {arg: inputs[alias] for arg, alias in node_inputs.items()}
-        return self._decorated_func(**kwargs)
+        return self._func(**kwargs)
 
     def _outputs_to_dictionary(self, outputs):
         def _from_dict():

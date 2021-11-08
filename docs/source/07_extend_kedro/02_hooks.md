@@ -137,9 +137,7 @@ where `<plugin_name>` is the name of an installed plugin for which the auto-regi
 
 ### Use Hooks to extend a node's behaviour
 
-Prior to Kedro 0.16, to add extra behaviour before and after a node's execution, we recommended using [decorators](07_decorators.md) on individual nodes. We also exposed a convenience method to apply decorators to [all nodes in a `Pipeline`](07_decorators.md#how-to-apply-a-decorator-to-nodes).
-
-However, after the introduction of Hooks in 0.16, this capability is readily available through the [`before_node_run` and `after_node_run` Hooks](/kedro.framework.hooks.specs.NodeSpecs). Furthermore, you can apply extra behaviour to not only an individual node or an entire Kedro pipeline, but also to a _subset_ of nodes based on their tags or namespaces. For example, let's say we want to add the following extra behaviours to a node:
+You can add extra behaviour before and after a node's execution by using the [`before_node_run` and `after_node_run` Hooks](/kedro.framework.hooks.specs.NodeSpecs). Furthermore, you can apply extra behaviour to not only an individual node or an entire Kedro pipeline, but also to a _subset_ of nodes based on their tags or namespaces. For example, let's say we want to add the following extra behaviours to a node:
 
 ```python
 from kedro.pipeline.node import Node

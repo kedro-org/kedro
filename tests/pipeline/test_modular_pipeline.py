@@ -231,12 +231,10 @@ class TestPipelineHelper:
         Also an explicitly defined name should get prefixed.
         """
         raw_pipeline = Pipeline([node(identity, "A", "B", name="node1", tags=["tag1"])])
-        raw_pipeline = raw_pipeline.decorate(lambda: None)
         resulting_pipeline = pipeline(raw_pipeline, namespace="PREFIX")
 
         assert resulting_pipeline.nodes[0].name == "PREFIX.node1"
         assert resulting_pipeline.nodes[0].tags == {"tag1"}
-        assert len(resulting_pipeline.nodes[0]._decorators) == 1
 
     def test_default_node_name_is_namespaced(self):
         """Check that auto-generated node names are also namespaced"""

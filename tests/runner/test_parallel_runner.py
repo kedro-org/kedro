@@ -12,7 +12,6 @@ from kedro.io import (
     MemoryDataSet,
 )
 from kedro.pipeline import Pipeline, node
-from kedro.pipeline.decorators import log_time
 from kedro.runner import ParallelRunner
 from kedro.runner.parallel_runner import (
     _MAX_WINDOWS_WORKERS,
@@ -243,48 +242,6 @@ class TestInvalidParallelRunner:
         pattern = "Unable to schedule new tasks although some nodes have not been run"
         with pytest.raises(RuntimeError, match=pattern):
             runner.run(fan_out_fan_in, catalog)
-
-
-@log_time
-def decorated_identity(*args, **kwargs):
-    return identity(*args, **kwargs)
-
-
-@pytest.fixture
-def decorated_fan_out_fan_in():
-    return Pipeline(
-        [
-            node(decorated_identity, "A", "B"),
-            node(decorated_identity, "B", "C"),
-            node(decorated_identity, "B", "D"),
-            node(decorated_identity, "B", "E"),
-            node(fan_in, ["C", "D", "E"], "Z"),
-        ]
-    )
-
-
-@pytest.mark.skipif(
-    sys.platform.startswith("win"), reason="Due to bug in parallel runner"
-)
-@pytest.mark.parametrize("is_async", [False, True])
-class TestParallelRunnerDecorator:
-    def test_decorate_pipeline(self, is_async, fan_out_fan_in, catalog):
-        catalog.add_feed_dict(dict(A=42))
-        result = ParallelRunner(is_async=is_async).run(
-            fan_out_fan_in.decorate(log_time), catalog
-        )
-        assert "Z" in result
-        assert len(result["Z"]) == 3
-        assert result["Z"] == (42, 42, 42)
-
-    def test_decorated_nodes(self, is_async, decorated_fan_out_fan_in, catalog):
-        catalog.add_feed_dict(dict(A=42))
-        result = ParallelRunner(is_async=is_async).run(
-            decorated_fan_out_fan_in, catalog
-        )
-        assert "Z" in result
-        assert len(result["Z"]) == 3
-        assert result["Z"] == (42, 42, 42)
 
 
 class LoggingDataSet(AbstractDataSet):

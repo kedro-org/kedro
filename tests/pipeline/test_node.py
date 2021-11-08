@@ -352,30 +352,6 @@ def apply_f(func: Callable) -> Callable:
     return with_f
 
 
-def apply_g(func: Callable) -> Callable:
-    @wraps(func)
-    def with_g(*args, **kwargs):
-        return func(*(f"g({a})" for a in args), **kwargs)
-
-    return with_g
-
-
-def apply_h(func: Callable) -> Callable:
-    @wraps(func)
-    def with_h(*args, **kwargs):
-        return func(*(f"h({a})" for a in args), **kwargs)
-
-    return with_h
-
-
-def apply_ij(func: Callable) -> Callable:
-    @wraps(func)
-    def with_ij(*args, **kwargs):
-        return func(*(f"ij({a})" for a in args), **kwargs)
-
-    return with_ij
-
-
 @apply_f
 def decorated_identity(value):
     return value

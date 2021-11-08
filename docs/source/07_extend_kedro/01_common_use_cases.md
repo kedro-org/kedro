@@ -8,7 +8,7 @@ The execution timeline of a Kedro pipeline can be thought of as a sequence of ac
 
 At different points in the lifecycle of these components, you may want to add extra behaviour. For example, you could add extra computation for profiling purposes _before_ and _after_ a node runs or _before_ and _after_ the I/O actions of a dataset, namely the `load` and `save` actions.
 
-This is now easily achieved by using [Hooks](./02_hooks.md), to define the extra behaviour and at which point in the execution timeline it should be injected.
+This can now achieved by using [Hooks](./02_hooks.md), to define the extra behaviour and at which point in the execution timeline it should be injected.
 
 ## Use Case 2: How to integrate Kedro with additional data sources
 

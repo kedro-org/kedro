@@ -181,10 +181,10 @@ def prepare_project_dir(tmp_path, base_config, local_config, local_logging_confi
 class RegistrationHooks:
     @hook_impl
     def register_catalog(
-        self, catalog, credentials, load_versions, save_version, journal
+        self, catalog, credentials, load_versions, save_version
     ) -> DataCatalog:
         return DataCatalog.from_config(
-            catalog, credentials, load_versions, save_version, journal
+            catalog, credentials, load_versions, save_version
         )
 
 
@@ -559,62 +559,6 @@ class TestKedroContextRun:
 
         with pytest.raises(KedroContextError, match="Failed to find the pipeline"):
             dummy_context.run(pipeline_name="invalid-name")
-
-    @pytest.mark.parametrize(
-        "extra_params",
-        [None, {}, {"foo": "bar", "baz": [1, 2], "qux": None}],
-        indirect=True,
-    )
-    def test_run_with_extra_params(
-        self, mocker, dummy_context, dummy_dataframe, extra_params
-    ):
-        mock_journal = mocker.patch("kedro.framework.context.context.Journal")
-        dummy_context.catalog.save("cars", dummy_dataframe)
-        dummy_context.run()
-
-        assert mock_journal.call_args[0][0]["extra_params"] == extra_params
-
-    def test_run_with_save_version_as_run_id(
-        self, mocker, dummy_context, dummy_dataframe, caplog
-    ):
-        """Test that the default behaviour, with run_id set to None,
-        creates a journal record with the run_id the same as save_version.
-        """
-        save_version = "2020-01-01T00.00.00.000Z"
-        mocked_get_save_version = mocker.patch.object(
-            dummy_context, "_get_save_version", return_value=save_version
-        )
-
-        dummy_context.catalog.save("cars", dummy_dataframe)
-        dummy_context.run(load_versions={"boats": save_version})
-
-        mocked_get_save_version.assert_called_once_with()
-        log_msg = next(
-            record.getMessage()
-            for record in caplog.records
-            if record.name == "kedro.journal"
-        )
-        assert json.loads(log_msg)["run_id"] == save_version
-
-    def test_run_with_custom_run_id(
-        self, mocker, dummy_context, dummy_dataframe, caplog
-    ):
-        run_id = "001"
-        mocked_get_run_id = mocker.patch.object(
-            dummy_context, "_get_run_id", return_value=run_id
-        )
-
-        dummy_context.catalog.save("cars", dummy_dataframe)
-        dummy_context.run()
-
-        # once during run, and twice for each `.catalog`
-        assert mocked_get_run_id.call_count == 3
-        log_msg = next(
-            record.getMessage()
-            for record in caplog.records
-            if record.name == "kedro.journal"
-        )
-        assert json.loads(log_msg)["run_id"] == run_id
 
 
 @pytest.mark.parametrize(

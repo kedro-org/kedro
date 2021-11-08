@@ -47,7 +47,6 @@ from kedro.io import (
     MemoryDataSet,
 )
 from kedro.io.core import VERSION_FORMAT, generate_timestamp
-from kedro.versioning import Journal
 
 
 @pytest.fixture
@@ -99,12 +98,11 @@ def data_set(filepath):
 
 
 @pytest.fixture
-def multi_catalog(mocker):
+def multi_catalog():
     csv = CSVDataSet(filepath="abc.csv")
     parq = ParquetDataSet(filepath="xyz.parq")
-    journal = mocker.Mock()
     layers = {"raw": {"abc.csv"}, "model": {"xyz.parq"}}
-    return DataCatalog({"abc": csv, "xyz": parq}, journal=journal, layers=layers)
+    return DataCatalog({"abc": csv, "xyz": parq}, layers=layers)
 
 
 @pytest.fixture
@@ -533,15 +531,11 @@ class TestDataCatalogVersioned:
         )
         version = fmt.format(d=current_ts, ms=current_ts.microsecond // 1000)
 
-        journal = Journal({"run_id": "fake-id", "project_path": "fake-path"})
         catalog = DataCatalog.from_config(
             **sane_config,
             load_versions={"boats": version},
             save_version=version,
-            journal=journal,
         )
-
-        assert catalog._journal == journal
 
         catalog.save("boats", dummy_dataframe)
         path = Path(sane_config["catalog"]["boats"]["filepath"])

@@ -52,7 +52,6 @@ from kedro.io.core import (
 )
 from kedro.io.memory_dataset import MemoryDataSet
 from kedro.io.transformers import AbstractTransformer
-from kedro.versioning import Journal
 
 CATALOG_KEY = "catalog"
 CREDENTIALS_KEY = "credentials"
@@ -158,7 +157,6 @@ class DataCatalog:
         feed_dict: Dict[str, Any] = None,
         transformers: Dict[str, List[AbstractTransformer]] = None,
         default_transformers: List[AbstractTransformer] = None,
-        journal: Journal = None,
         layers: Dict[str, Set[str]] = None,
     ) -> None:
         """``DataCatalog`` stores instances of ``AbstractDataSet``
@@ -175,7 +173,6 @@ class DataCatalog:
                 to the data sets.
             default_transformers: A list of transformers to be applied to any
                 new data sets.
-            journal: Instance of Journal.
             layers: A dictionary of data set layers. It maps a layer name
                 to a set of data set names, according to the
                 data engineering convention. For more details, see
@@ -201,7 +198,6 @@ class DataCatalog:
         self._transformers = {k: list(v) for k, v in (transformers or {}).items()}
         self._default_transformers = list(default_transformers or [])
         self._check_and_normalize_transformers()
-        self._journal = journal
         # import the feed dict
         if feed_dict:
             self.add_feed_dict(feed_dict)
@@ -232,7 +228,6 @@ class DataCatalog:
         credentials: Dict[str, Dict[str, Any]] = None,
         load_versions: Dict[str, str] = None,
         save_version: str = None,
-        journal: Journal = None,
     ) -> "DataCatalog":
         """Create a ``DataCatalog`` instance from configuration. This is a
         factory method used to provide developers with a way to instantiate
@@ -257,7 +252,6 @@ class DataCatalog:
                 case-insensitive string that conforms with operating system
                 filename limitations, b) always return the latest version when
                 sorted in lexicographical order.
-            journal: Instance of Journal.
 
         Returns:
             An instantiated ``DataCatalog`` containing all specified
@@ -305,8 +299,7 @@ class DataCatalog:
         data_sets = {}
         catalog = copy.deepcopy(catalog) or {}
         credentials = copy.deepcopy(credentials) or {}
-        run_id = journal.run_id if journal else None
-        save_version = save_version or run_id or generate_timestamp()
+        save_version = save_version or generate_timestamp()
         load_versions = copy.deepcopy(load_versions) or {}
 
         missing_keys = load_versions.keys() - catalog.keys()
@@ -328,7 +321,7 @@ class DataCatalog:
             )
 
         dataset_layers = layers or None
-        return cls(data_sets=data_sets, journal=journal, layers=dataset_layers)
+        return cls(data_sets=data_sets, layers=dataset_layers)
 
     def _get_dataset(
         self, data_set_name: str, version: Version = None
@@ -399,15 +392,6 @@ class DataCatalog:
         func = self._get_transformed_dataset_function(name, "load", dataset)
         result = func()
 
-        version = (
-            dataset.resolve_load_version()
-            if isinstance(dataset, AbstractVersionedDataSet)
-            else None
-        )
-
-        # Log only if versioning is enabled for the data set
-        if self._journal and version:
-            self._journal.log_catalog(name, "load", version)
         return result
 
     def save(self, name: str, data: Any) -> None:
@@ -445,16 +429,6 @@ class DataCatalog:
 
         func = self._get_transformed_dataset_function(name, "save", dataset)
         func(data)
-
-        version = (
-            dataset.resolve_save_version()
-            if isinstance(dataset, AbstractVersionedDataSet)
-            else None
-        )
-
-        # Log only if versioning is enabled for the data set
-        if self._journal and version:
-            self._journal.log_catalog(name, "save", version)
 
     def exists(self, name: str) -> bool:
         """Checks whether registered data set exists by calling its `exists()`
@@ -689,7 +663,6 @@ class DataCatalog:
             data_sets=self._data_sets,
             transformers=self._transformers,
             default_transformers=self._default_transformers,
-            journal=self._journal,
             layers=self.layers,
         )
 
@@ -698,13 +671,11 @@ class DataCatalog:
             self._data_sets,
             self._transformers,
             self._default_transformers,
-            self._journal,
             self.layers,
         ) == (
             other._data_sets,
             other._transformers,
             other._default_transformers,
-            other._journal,
             other.layers,
         )
 

@@ -1,9 +1,7 @@
 import configparser
 import json
 import re
-import sys
 from pathlib import Path, PurePath, PurePosixPath, PureWindowsPath
-from time import sleep
 from typing import Any, Dict
 
 import pandas as pd
@@ -14,8 +12,7 @@ from pandas.util.testing import assert_frame_equal
 
 from kedro import __version__ as kedro_version
 from kedro.config import ConfigLoader, MissingConfigException
-from kedro.extras.datasets.pandas import CSVDataSet
-from kedro.framework.context import KedroContext, KedroContextError
+from kedro.framework.context import KedroContext
 from kedro.framework.context.context import (
     _convert_paths_to_absolute_posix,
     _is_relative_path,
@@ -31,9 +28,7 @@ from kedro.framework.project import (
     pipelines,
 )
 from kedro.io import DataCatalog
-from kedro.io.core import Version, generate_timestamp
 from kedro.pipeline import Pipeline, node
-from kedro.runner import ParallelRunner, SequentialRunner
 
 MOCK_PACKAGE_NAME = "mock_package_name"
 
@@ -297,29 +292,7 @@ def clear_hook_manager():
 
 
 class TestKedroContext:
-    def test_deprecate_reading_conf_source_from_context(self, dummy_context):
-        pattern = (
-            "Accessing CONF_SOURCE via the context will be deprecated in Kedro 0.18.0."
-        )
-        with pytest.warns(DeprecationWarning, match=pattern):
-            assert dummy_context.CONF_SOURCE == "conf"
-
-    def test_deprecate_setting_conf_source_on_context(self, dummy_context):
-        pattern = (
-            "Accessing CONF_SOURCE via the context will be deprecated in Kedro 0.18.0."
-        )
-        with pytest.warns(DeprecationWarning, match=pattern):
-            dummy_context.CONF_SOURCE = "test_conf"
-
-    @pytest.mark.parametrize("property_name", ["io", "pipeline", "pipelines"])
-    def test_deprecate_properties_on_context(self, property_name, dummy_context):
-        pattern = f"Accessing {property_name} via the context will be deprecated in Kedro 0.18.0."
-        with pytest.warns(DeprecationWarning, match=pattern):
-            assert getattr(dummy_context, property_name)
-
     def test_attributes(self, tmp_path, dummy_context):
-        project_metadata = pyproject_toml_payload["tool"]["kedro"]
-        assert dummy_context.package_name == project_metadata["package_name"]
         assert isinstance(dummy_context.project_path, Path)
         assert dummy_context.project_path == tmp_path.resolve()
 
@@ -352,11 +325,6 @@ class TestKedroContext:
         assert dummy_context.catalog.layers == {"raw": {"boats"}}
         dummy_context.catalog.save("cars", dummy_dataframe)
         reloaded_df = dummy_context.catalog.load("cars")
-        assert_frame_equal(reloaded_df, dummy_dataframe)
-
-    def test_io(self, dummy_context, dummy_dataframe):
-        dummy_context.io.save("cars", dummy_dataframe)
-        reloaded_df = dummy_context.io.load("cars")
         assert_frame_equal(reloaded_df, dummy_dataframe)
 
     @pytest.mark.parametrize(
@@ -413,182 +381,6 @@ class TestKedroContext:
         pattern = "Credentials not found in your Kedro project config."
         with pytest.warns(UserWarning, match=re.escape(pattern)):
             _ = dummy_context.catalog
-
-    def test_pipeline(self, dummy_context):
-        assert dummy_context.pipeline.nodes[0].inputs == ["cars"]
-        assert dummy_context.pipeline.nodes[0].outputs == ["boats"]
-        assert dummy_context.pipeline.nodes[1].inputs == ["boats"]
-        assert dummy_context.pipeline.nodes[1].outputs == ["trains"]
-
-    def test_pipelines(self, dummy_context):
-        assert len(dummy_context.pipelines) == 5
-        assert len(dummy_context.pipelines["__default__"].nodes) == 4
-
-
-class TestKedroContextRun:
-    def test_deprecate_run(self, dummy_context, dummy_dataframe):
-        dummy_context.catalog.save("cars", dummy_dataframe)
-        pattern = (
-            "`kedro.framework.context.KedroContext.run` is now deprecated in favour of "
-            "`KedroSession.run` and will be removed in Kedro 0.18.0."
-        )
-        with pytest.warns(DeprecationWarning, match=pattern):
-            dummy_context.run()
-
-    def test_run_output(self, dummy_context, dummy_dataframe):
-        dummy_context.catalog.save("cars", dummy_dataframe)
-        outputs = dummy_context.run()
-        pd.testing.assert_frame_equal(outputs["planes"], dummy_dataframe)
-
-    def test_run_no_output(self, dummy_context, dummy_dataframe):
-        dummy_context.catalog.save("cars", dummy_dataframe)
-        outputs = dummy_context.run(node_names=["node1"])
-        assert not outputs
-
-    def test_default_run(self, dummy_context, dummy_dataframe, caplog):
-        dummy_context.catalog.save("cars", dummy_dataframe)
-        dummy_context.run()
-
-        log_msgs = [record.getMessage() for record in caplog.records]
-        log_names = [record.name for record in caplog.records]
-
-        assert "kedro.runner.sequential_runner" in log_names
-        assert "Pipeline execution completed successfully." in log_msgs
-
-    def test_sequential_run_arg(self, dummy_context, dummy_dataframe, caplog):
-        dummy_context.catalog.save("cars", dummy_dataframe)
-        dummy_context.run(runner=SequentialRunner())
-
-        log_msgs = [record.getMessage() for record in caplog.records]
-        log_names = [record.name for record in caplog.records]
-        assert "kedro.runner.sequential_runner" in log_names
-        assert "Pipeline execution completed successfully." in log_msgs
-
-    @pytest.mark.skipif(
-        sys.platform.startswith("win"), reason="Due to bug in parallel runner"
-    )
-    def test_parallel_run_arg(self, dummy_context, dummy_dataframe, caplog):
-        dummy_context.catalog.save("cars", dummy_dataframe)
-        dummy_context.run(runner=ParallelRunner())
-
-        log_msgs = [record.getMessage() for record in caplog.records]
-        log_names = [record.name for record in caplog.records]
-        assert "kedro.runner.parallel_runner" in log_names
-        assert "Pipeline execution completed successfully." in log_msgs
-
-    def test_run_load_versions(self, dummy_context, dummy_dataframe):
-        filepath = (dummy_context.project_path / "cars.csv").as_posix()
-
-        old_save_version = generate_timestamp()
-        old_df = pd.DataFrame({"col1": [0, 0], "col2": [0, 0], "col3": [0, 0]})
-        old_csv_data_set = CSVDataSet(
-            filepath=filepath,
-            save_args={"sep": ","},
-            version=Version(None, old_save_version),
-        )
-        old_csv_data_set.save(old_df)
-
-        sleep(0.5)
-        new_save_version = generate_timestamp()
-        new_csv_data_set = CSVDataSet(
-            filepath=filepath,
-            save_args={"sep": ","},
-            version=Version(None, new_save_version),
-        )
-        new_csv_data_set.save(dummy_dataframe)
-
-        load_versions = {"cars": old_save_version}
-        dummy_context.run(load_versions=load_versions, pipeline_name="simple")
-        assert not dummy_context.catalog.load("boats").equals(dummy_dataframe)
-        assert dummy_context.catalog.load("boats").equals(old_df)
-
-    def test_run_with_empty_pipeline(self, dummy_context):
-        with pytest.raises(ValueError, match="Pipeline contains no nodes"):
-            dummy_context.run(pipeline_name="empty")
-
-    @pytest.mark.parametrize(
-        "pipeline_name,expected_message",
-        [
-            ("bad_pipeline_middle", expected_message_middle),
-            ("bad_pipeline_head", expected_message_head),
-        ],  # pylint: disable=too-many-arguments
-    )
-    def test_run_failure_prompts_resume_command(
-        self, dummy_context, dummy_dataframe, caplog, pipeline_name, expected_message
-    ):
-        dummy_context.catalog.save("cars", dummy_dataframe)
-        with pytest.raises(ValueError, match="Oh no"):
-            dummy_context.run(pipeline_name=pipeline_name)
-
-        actual_messages = [
-            record.getMessage()
-            for record in caplog.records
-            if record.levelname == "WARNING"
-        ]
-
-        assert expected_message in actual_messages
-
-    def test_missing_pipeline_name(self, dummy_context, dummy_dataframe):
-        dummy_context.catalog.save("cars", dummy_dataframe)
-
-        with pytest.raises(KedroContextError, match="Failed to find the pipeline"):
-            dummy_context.run(pipeline_name="invalid-name")
-
-    @pytest.mark.parametrize(
-        "extra_params",
-        [None, {}, {"foo": "bar", "baz": [1, 2], "qux": None}],
-        indirect=True,
-    )
-    def test_run_with_extra_params(
-        self, mocker, dummy_context, dummy_dataframe, extra_params
-    ):
-        mock_journal = mocker.patch("kedro.framework.context.context.Journal")
-        dummy_context.catalog.save("cars", dummy_dataframe)
-        dummy_context.run()
-
-        assert mock_journal.call_args[0][0]["extra_params"] == extra_params
-
-    def test_run_with_save_version_as_run_id(
-        self, mocker, dummy_context, dummy_dataframe, caplog
-    ):
-        """Test that the default behaviour, with run_id set to None,
-        creates a journal record with the run_id the same as save_version.
-        """
-        save_version = "2020-01-01T00.00.00.000Z"
-        mocked_get_save_version = mocker.patch.object(
-            dummy_context, "_get_save_version", return_value=save_version
-        )
-
-        dummy_context.catalog.save("cars", dummy_dataframe)
-        dummy_context.run(load_versions={"boats": save_version})
-
-        mocked_get_save_version.assert_called_once_with()
-        log_msg = next(
-            record.getMessage()
-            for record in caplog.records
-            if record.name == "kedro.journal"
-        )
-        assert json.loads(log_msg)["run_id"] == save_version
-
-    def test_run_with_custom_run_id(
-        self, mocker, dummy_context, dummy_dataframe, caplog
-    ):
-        run_id = "001"
-        mocked_get_run_id = mocker.patch.object(
-            dummy_context, "_get_run_id", return_value=run_id
-        )
-
-        dummy_context.catalog.save("cars", dummy_dataframe)
-        dummy_context.run()
-
-        # once during run, and twice for each `.catalog`
-        assert mocked_get_run_id.call_count == 3
-        log_msg = next(
-            record.getMessage()
-            for record in caplog.records
-            if record.name == "kedro.journal"
-        )
-        assert json.loads(log_msg)["run_id"] == run_id
 
 
 @pytest.mark.parametrize(

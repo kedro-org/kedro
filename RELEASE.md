@@ -59,6 +59,7 @@
 * The dataset `networkx.NetworkXDataSet` has been renamed to `networkx.JSONDataSet`.
 * Removed the `config_loader` property from `KedroContext`.
 * Removed decorator API from `Node` and `Pipeline`, as well as the modules `kedro.extras.decorators` and `kedro.pipeline.decorators`.
+* Removed deprecated `CONF_SOURCE`, `package_name`, `pipeline`, `pipelines`, and `io` attributes from `KedroContext` as well as the deprecated `KedroContext` `run` method.
 
 ## Thanks for supporting contributions
 

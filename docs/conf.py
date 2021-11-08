@@ -117,7 +117,6 @@ type_targets = {
         "kedro.io.core.DataSetError",
         "kedro.io.core.Version",
         "kedro.io.data_catalog.DataCatalog",
-        "kedro.io.transformers.AbstractTransformer",
         "kedro.io.data_catalog_with_default.DataCatalogWithDefault",
         "kedro.io.partitioned_dataset.PartitionedDataSet",
         "kedro.pipeline.pipeline.Pipeline",
@@ -316,7 +315,6 @@ KEDRO_MODULES = [
     "kedro.config",
     "kedro.extras.datasets",
     "kedro.extras.logging",
-    "kedro.extras.transformers",
 ]
 
 

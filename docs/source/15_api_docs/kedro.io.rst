@@ -13,7 +13,6 @@ kedro.io
 
    kedro.io.AbstractDataSet
    kedro.io.AbstractVersionedDataSet
-   kedro.io.AbstractTransformer
    kedro.io.DataCatalog
    kedro.io.LambdaDataSet
    kedro.io.MemoryDataSet

@@ -116,7 +116,6 @@ Welcome to Kedro's documentation!
    07_extend_kedro/03_custom_datasets
    07_extend_kedro/04_plugins
    07_extend_kedro/05_create_kedro_starters
-   07_extend_kedro/06_transformers
 
 
 .. toctree::

@@ -8,10 +8,8 @@ import copy
 import difflib
 import logging
 import re
-import warnings
 from collections import defaultdict
-from functools import partial
-from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Type, Union
+from typing import Any, Dict, List, Optional, Set, Type, Union
 from warnings import warn
 
 from kedro.io.core import (
@@ -24,7 +22,6 @@ from kedro.io.core import (
     generate_timestamp,
 )
 from kedro.io.memory_dataset import MemoryDataSet
-from kedro.io.transformers import AbstractTransformer
 from kedro.versioning import Journal
 
 CATALOG_KEY = "catalog"
@@ -139,13 +136,10 @@ class DataCatalog:
     to the underlying data sets.
     """
 
-    # pylint: disable=too-many-arguments
     def __init__(
         self,
         data_sets: Dict[str, AbstractDataSet] = None,
         feed_dict: Dict[str, Any] = None,
-        transformers: Dict[str, List[AbstractTransformer]] = None,
-        default_transformers: List[AbstractTransformer] = None,
         journal: Journal = None,
         layers: Dict[str, Set[str]] = None,
     ) -> None:
@@ -159,18 +153,11 @@ class DataCatalog:
         Args:
             data_sets: A dictionary of data set names and data set instances.
             feed_dict: A feed dict with data to be added in memory.
-            transformers: A dictionary of lists of transformers to be applied
-                to the data sets.
-            default_transformers: A list of transformers to be applied to any
-                new data sets.
             journal: Instance of Journal.
             layers: A dictionary of data set layers. It maps a layer name
                 to a set of data set names, according to the
                 data engineering convention. For more details, see
                 https://kedro.readthedocs.io/en/stable/12_faq/01_faq.html#what-is-data-engineering-convention
-        Raises:
-            DataSetNotFoundError: When transformers are passed for a non
-                existent data set.
 
         Example:
         ::
@@ -186,9 +173,6 @@ class DataCatalog:
         self.datasets = _FrozenDatasets(self._data_sets)
         self.layers = layers
 
-        self._transformers = {k: list(v) for k, v in (transformers or {}).items()}
-        self._default_transformers = list(default_transformers or [])
-        self._check_and_normalize_transformers()
         self._journal = journal
         # import the feed dict
         if feed_dict:
@@ -197,20 +181,6 @@ class DataCatalog:
     @property
     def _logger(self):
         return logging.getLogger(__name__)
-
-    def _check_and_normalize_transformers(self):
-        data_sets = self._data_sets.keys()
-        transformers = self._transformers.keys()
-        excess_transformers = transformers - data_sets
-        missing_transformers = data_sets - transformers
-
-        if excess_transformers:
-            raise DataSetNotFoundError(
-                f"Unexpected transformers for missing data_sets {', '.join(excess_transformers)}"
-            )
-
-        for data_set_name in missing_transformers:
-            self._transformers[data_set_name] = list(self._default_transformers)
 
     # pylint: disable=too-many-arguments
     @classmethod
@@ -341,14 +311,6 @@ class DataCatalog:
 
         return data_set
 
-    def _get_transformed_dataset_function(
-        self, data_set_name: str, operation: str, data_set: AbstractDataSet
-    ) -> Callable:
-        func = getattr(data_set, operation)
-        for transformer in reversed(self._transformers[data_set_name]):
-            func = partial(getattr(transformer, operation), data_set_name, func)
-        return func
-
     def load(self, name: str, version: str = None) -> Any:
         """Loads a registered data set.
 
@@ -384,8 +346,7 @@ class DataCatalog:
             "Loading data from `%s` (%s)...", name, type(dataset).__name__
         )
 
-        func = self._get_transformed_dataset_function(name, "load", dataset)
-        result = func()
+        result = dataset.load()
 
         version = (
             dataset.resolve_load_version()
@@ -431,8 +392,7 @@ class DataCatalog:
 
         self._logger.info("Saving data to `%s` (%s)...", name, type(dataset).__name__)
 
-        func = self._get_transformed_dataset_function(name, "save", dataset)
-        func(data)
+        dataset.save(data)
 
         version = (
             dataset.resolve_save_version()
@@ -511,7 +471,6 @@ class DataCatalog:
                     f"DataSet '{data_set_name}' has already been registered"
                 )
         self._data_sets[data_set_name] = data_set
-        self._transformers[data_set_name] = list(self._default_transformers)
         self.datasets = _FrozenDatasets(self.datasets, {data_set_name: data_set})
 
     def add_all(
@@ -582,46 +541,6 @@ class DataCatalog:
 
             self.add(data_set_name, data_set, replace)
 
-    def add_transformer(
-        self,
-        transformer: AbstractTransformer,
-        data_set_names: Union[str, Iterable[str]] = None,
-    ):
-        """Add a ``DataSet`` Transformer to the``DataCatalog``.
-        Transformers can modify the way Data Sets are loaded and saved.
-
-        Args:
-            transformer: The transformer instance to add.
-            data_set_names: The Data Sets to add the transformer to.
-                Or None to add the transformer to all Data Sets.
-        Raises:
-            DataSetNotFoundError: When a transformer is being added to a non
-                existent data set.
-            TypeError: When transformer isn't an instance of ``AbstractTransformer``
-        """
-
-        warnings.warn(
-            "The transformer API will be deprecated in Kedro 0.18.0."
-            "Please use Dataset Hooks to customise the load and save methods."
-            "For more information, please visit"
-            "https://kedro.readthedocs.io/en/stable/07_extend_kedro/02_hooks.html",
-            DeprecationWarning,
-        )
-
-        if not isinstance(transformer, AbstractTransformer):
-            raise TypeError(
-                f"Object of type {type(transformer)} is not an instance of AbstractTransformer"
-            )
-        if data_set_names is None:
-            self._default_transformers.append(transformer)
-            data_set_names = self._transformers.keys()
-        elif isinstance(data_set_names, str):
-            data_set_names = [data_set_names]
-        for data_set_name in data_set_names:
-            if data_set_name not in self._data_sets:
-                raise DataSetNotFoundError(f"No data set called {data_set_name}")
-            self._transformers[data_set_name].append(transformer)
-
     def list(self, regex_search: Optional[str] = None) -> List[str]:
         """
         List of all ``DataSet`` names registered in the catalog.
@@ -675,23 +594,13 @@ class DataCatalog:
         """
         return DataCatalog(
             data_sets=self._data_sets,
-            transformers=self._transformers,
-            default_transformers=self._default_transformers,
             journal=self._journal,
             layers=self.layers,
         )
 
     def __eq__(self, other):
-        return (
-            self._data_sets,
-            self._transformers,
-            self._default_transformers,
-            self._journal,
-            self.layers,
-        ) == (
+        return (self._data_sets, self._journal, self.layers,) == (
             other._data_sets,
-            other._transformers,
-            other._default_transformers,
             other._journal,
             other.layers,
         )

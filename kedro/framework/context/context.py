@@ -17,7 +17,6 @@ from kedro.pipeline import Pipeline
 from kedro.pipeline.pipeline import _transcode_split
 from kedro.runner.runner import AbstractRunner
 from kedro.runner.sequential_runner import SequentialRunner
-from kedro.versioning import Journal
 
 
 def _deprecate(version):
@@ -341,7 +340,6 @@ class KedroContext:
     def _get_catalog(
         self,
         save_version: str = None,
-        journal: Journal = None,
         load_versions: Dict[str, str] = None,
     ) -> DataCatalog:
         """A hook for changing the creation of a DataCatalog instance.
@@ -367,7 +365,6 @@ class KedroContext:
             credentials=conf_creds,
             load_versions=load_versions,
             save_version=save_version,
-            journal=journal,
         )
         if not isinstance(catalog, DataCatalog):
             raise KedroContextError(
@@ -449,7 +446,7 @@ class KedroContext:
 
     @property
     def run_id(self) -> Union[None, str]:
-        """Unique identifier for a run / journal record, defaults to None.
+        """Unique identifier for a run, defaults to None.
         If `run_id` is None, `save_version` will be used instead.
         """
         return self._get_run_id()
@@ -544,10 +541,9 @@ class KedroContext:
             "pipeline_name": pipeline_name,
             "extra_params": self._extra_params,
         }
-        journal = Journal(record_data)
 
         catalog = self._get_catalog(
-            save_version=save_version, journal=journal, load_versions=load_versions
+            save_version=save_version, load_versions=load_versions
         )
 
         # Run the runner
@@ -580,7 +576,7 @@ class KedroContext:
         self, *args, **kwargs  # pylint: disable=unused-argument
     ) -> Union[None, str]:
         """A hook for generating a unique identifier for a
-        run / journal record, defaults to None.
+        run, defaults to None.
         If None, `save_version` will be used instead.
         """
         return None

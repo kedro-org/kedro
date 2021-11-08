@@ -594,9 +594,7 @@ class TestDataCatalogVersioned:
         """Test saving of tracking data sets from config results in the same
         save version as other versioned datasets."""
 
-        catalog = DataCatalog.from_config(
-            **sane_config_with_tracking_ds,
-        )
+        catalog = DataCatalog.from_config(**sane_config_with_tracking_ds)
 
         catalog.save("boats", dummy_dataframe)
         dummy_data = {"col1": 1, "col2": 2, "col3": 3}

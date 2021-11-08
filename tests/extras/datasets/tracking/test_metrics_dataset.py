@@ -128,26 +128,31 @@ class TestMetricsDataSet:
         with pytest.raises(DataSetError, match=pattern):
             metrics_dataset.save(data)
 
-    def test_version_str_repr(self, load_version, save_version):
-        """Test that version is in string representation of the class instance
-        when applicable."""
+    def test_not_version_str_repr(self):
+        """Test that version is not in string representation of the class instance."""
         filepath = "test.json"
         ds = MetricsDataSet(filepath=filepath)
+
+        assert filepath in str(ds)
+        assert "version" not in str(ds)
+        assert "MetricsDataSet" in str(ds)
+        assert "protocol" in str(ds)
+        # Default save_args
+        assert "save_args={'indent': 2}" in str(ds)
+
+    def test_version_str_repr(self, load_version, save_version):
+        """Test that version is in string representation of the class instance."""
+        filepath = "test.json"
         ds_versioned = MetricsDataSet(
             filepath=filepath, version=Version(load_version, save_version)
         )
 
-        assert filepath in str(ds)
-        assert "version" not in str(ds)
         assert filepath in str(ds_versioned)
         ver_str = f"version=Version(load={load_version}, save='{save_version}')"
         assert ver_str in str(ds_versioned)
         assert "MetricsDataSet" in str(ds_versioned)
-        assert "MetricsDataSet" in str(ds)
         assert "protocol" in str(ds_versioned)
-        assert "protocol" in str(ds)
         # Default save_args
-        assert "save_args={'indent': 2}" in str(ds)
         assert "save_args={'indent': 2}" in str(ds_versioned)
 
     def test_prevent_overwrite(self, explicit_versioned_metrics_dataset, dummy_data):

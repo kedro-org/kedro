@@ -76,6 +76,7 @@ pandas_require = {
     "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy~=1.2"],
     "pandas.SQLQueryDataSet": [PANDAS, "SQLAlchemy~=1.2"],
     "pandas.XMLDataSet": [PANDAS, "lxml~=4.6"],
+    "pandas.GenericDataSet": [PANDAS],
 }
 pillow_require = {"pillow.ImageDataSet": ["Pillow~=8.0"]}
 plotly_require = {

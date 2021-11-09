@@ -7,7 +7,6 @@ from typing import Any, Dict, Optional
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node
-from kedro.versioning import Journal
 
 from .markers import hook_spec
 
@@ -141,7 +140,7 @@ class PipelineSpecs:
 
         Args:
             run_params: The params used to run the pipeline.
-                Should be identical to the data logged by Journal with the following schema::
+                Should have the following schema::
 
                    {
                      "run_id": str
@@ -176,7 +175,7 @@ class PipelineSpecs:
 
         Args:
             run_params: The params used to run the pipeline.
-                Should be identical to the data logged by Journal with the following schema::
+                Should have the following schema::
 
                    {
                      "run_id": str
@@ -215,7 +214,7 @@ class PipelineSpecs:
         Args:
             error: The uncaught exception thrown during the pipeline run.
             run_params: The params used to run the pipeline.
-                Should be identical to the data logged by Journal with the following schema::
+                Should have the following schema::
 
                    {
                      "run_id": str
@@ -306,7 +305,6 @@ class RegistrationSpecs:
         credentials: Dict[str, Dict[str, Any]],
         load_versions: Dict[str, str],
         save_version: str,
-        journal: Journal,
     ) -> DataCatalog:
         """Hook to be invoked to register a project's data catalog.
 

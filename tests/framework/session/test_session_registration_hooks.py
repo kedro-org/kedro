@@ -1,14 +1,13 @@
 import logging
 import re
-from typing import Any, Dict, Iterable, Optional
+from typing import Any, Dict, Optional
 
 import pytest
 from dynaconf.validator import Validator
 
-from kedro.config import ConfigLoader
 from kedro.framework.context import KedroContextError
 from kedro.framework.hooks import hook_impl
-from kedro.framework.project import _ProjectSettings, settings
+from kedro.framework.project import _ProjectSettings
 from kedro.framework.session import KedroSession
 from kedro.io import DataCatalog
 from kedro.versioning import Journal
@@ -59,10 +58,6 @@ class RequiredRegistrationHooks:
     """Mandatory registration hooks"""
 
     @hook_impl
-    def register_config_loader(self, conf_paths: Iterable[str]) -> ConfigLoader:
-        return ConfigLoader(conf_paths)
-
-    @hook_impl
     def register_catalog(
         self,
         catalog: Optional[Dict[str, Dict[str, Any]]],
@@ -74,16 +69,6 @@ class RequiredRegistrationHooks:
         return DataCatalog.from_config(  # pragma: no cover
             catalog, credentials, load_versions, save_version, journal
         )
-
-
-@pytest.fixture
-def mock_settings_broken_config_loader_hooks(mocker):
-    class BrokenConfigLoaderHooks(RequiredRegistrationHooks):
-        @hook_impl
-        def register_config_loader(self):  # pylint: disable=arguments-differ
-            return None
-
-    return _mock_settings_with_hooks(mocker, hooks=(BrokenConfigLoaderHooks(),))
 
 
 @pytest.fixture
@@ -131,24 +116,6 @@ class TestRegistrationHooks:
         }
         assert context.pipelines == expected_pipelines
 
-    def test_register_config_loader_is_called(self, mock_session, caplog):
-        context = mock_session.load_context()
-        _ = context.config_loader
-
-        relevant_records = [
-            r for r in caplog.records if r.getMessage() == "Registering config loader"
-        ]
-        assert len(relevant_records) == 1
-
-        record = relevant_records[0]
-        expected_conf_paths = [
-            str(context.project_path / settings.CONF_ROOT / "base"),
-            str(context.project_path / settings.CONF_ROOT / "local"),
-        ]
-        assert record.conf_paths == expected_conf_paths
-        assert record.env == context.env
-        assert record.extra_params == {"params:key": "value"}
-
     def test_register_catalog_is_called(self, mock_session, caplog):
         context = mock_session.load_context()
         catalog = context.catalog
@@ -190,12 +157,6 @@ class TestDuplicatePipelineRegistration:
 
 
 class TestBrokenRegistrationHooks:
-    @pytest.mark.usefixtures("mock_settings_broken_config_loader_hooks")
-    def test_broken_register_config_loader_hook(self, tmp_path, mock_package_name):
-        pattern = "Expected an instance of `ConfigLoader`, got `NoneType` instead."
-        with pytest.raises(KedroContextError, match=re.escape(pattern)):
-            KedroSession.create(mock_package_name, tmp_path)
-
     @pytest.mark.usefixtures("mock_settings_broken_catalog_hooks")
     def test_broken_register_catalog_hook(self, tmp_path, mock_package_name):
         pattern = "Expected an instance of `DataCatalog`, got `NoneType` instead."

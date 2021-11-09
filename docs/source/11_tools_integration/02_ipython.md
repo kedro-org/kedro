@@ -29,7 +29,7 @@ exit()
 ```
 ### Load `DataCatalog` in IPython
 
-To test the IPython session, load the [Iris test example](https://archive.ics.uci.edu/ml/datasets/iris) data inside the IPython console as follows:
+To test the IPython session, load the [Iris test example](https://www.kaggle.com/uciml/iris) data inside the IPython console as follows:
 
 ```python
 catalog.load("example_iris_data").head()
@@ -103,9 +103,8 @@ The `context` variable allows you to interact with Kedro library components from
 With `context`, you can access the following variables and methods:
 
 - `context.project_path` (`Path`) - Root directory of the project
-- `context.project_name` (`str`) - Project folder name
+- `context.package_name` (`str`) - Project folder name
 - `context.catalog` (`DataCatalog`) - An instance of [DataCatalog](/kedro.io.DataCatalog)
-- `context.config_loader` (`ConfigLoader`) - An instance of [ConfigLoader](/kedro.config.ConfigLoader)
 - `context.pipeline` (`Pipeline`) - The `__default__` pipeline
 
 ### Run the pipeline

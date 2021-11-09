@@ -342,12 +342,12 @@ jobs:
     steps: [pip_compile]
 
   deploy_kedro_viz:
-    docker:
-      - image: spotify/alpine # for bash and curl
     filters:
       branches:
         only:
           - main
+    docker:
+      - image: spotify/alpine # for bash and curl
     steps: [deploy_viz]
 
   all_circleci_checks_succeeded:

@@ -8,7 +8,7 @@ jupyterlab~=3.0
 kedro=={{ cookiecutter.kedro_version }}
 kedro-telemetry~=0.1.0
 nbstripout~=0.4
-pytest-cov~=2.5
+pytest-cov~=3.0
 pytest-mock>=1.7.1, <2.0
 pytest~=6.2
 wheel>=0.35, <0.37

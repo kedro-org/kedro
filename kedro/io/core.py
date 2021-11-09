@@ -1,31 +1,3 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 """This module provides a set of classes which underpin the data loading and
 saving functionality provided by ``kedro.io``.
 """
@@ -408,7 +380,6 @@ def parse_dataset_definition(
                 "`type` class path does not support relative "
                 "paths or paths ending with a dot."
             )
-
         class_paths = (prefix + class_obj for prefix in _DEFAULT_PACKAGES)
 
         trials = (_load_obj(class_path) for class_path in class_paths)
@@ -435,7 +406,12 @@ def parse_dataset_definition(
         )
         logging.getLogger(__name__).warning(message, VERSION_KEY)
         del config[VERSION_KEY]
-    if config.pop(VERSIONED_FLAG_KEY, False):  # data set is versioned
+
+    # dataset is either versioned explicitly by the user or versioned is set to true by default
+    # on the dataset
+    if config.pop(VERSIONED_FLAG_KEY, False) or getattr(
+        class_obj, VERSIONED_FLAG_KEY, False
+    ):
         config[VERSION_KEY] = Version(load_version, save_version)
 
     return class_obj, config

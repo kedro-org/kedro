@@ -81,9 +81,6 @@ commands:
       - run:
           name: Run linters
           command: make lint
-      - run:
-          name: Check legal headers
-          command: make legal
 
   e2e_tests:
     description: Run all end to end tests
@@ -309,8 +306,8 @@ jobs:
       - setup_conda
       - setup_requirements
       - run:
-          name: Run unit tests without Spark
-          command: make test-no-spark
+          name: Run unit tests
+          command: make test
 
   linters_38:
     executor: py38

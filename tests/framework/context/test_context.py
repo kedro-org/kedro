@@ -150,10 +150,10 @@ def prepare_project_dir(tmp_path, base_config, local_config, local_logging_confi
 class RegistrationHooks:
     @hook_impl
     def register_catalog(
-        self, catalog, credentials, load_versions, save_version, journal
+        self, catalog, credentials, load_versions, save_version
     ) -> DataCatalog:
         return DataCatalog.from_config(
-            catalog, credentials, load_versions, save_version, journal
+            catalog, credentials, load_versions, save_version
         )
 
 

@@ -10,7 +10,6 @@ from kedro.framework.hooks import hook_impl
 from kedro.framework.project import _ProjectSettings, pipelines
 from kedro.framework.session import KedroSession
 from kedro.io import DataCatalog
-from kedro.versioning import Journal
 from tests.framework.session.conftest import (
     _assert_hook_call_record_has_expected_parameters,
     _mock_imported_settings_paths,
@@ -64,10 +63,9 @@ class RequiredRegistrationHooks:
         credentials: Dict[str, Dict[str, Any]],
         load_versions: Dict[str, str],
         save_version: str,
-        journal: Journal,
     ) -> DataCatalog:
         return DataCatalog.from_config(  # pragma: no cover
-            catalog, credentials, load_versions, save_version, journal
+            catalog, credentials, load_versions, save_version
         )
 
 
@@ -132,7 +130,6 @@ class TestRegistrationHooks:
         # save_version is only passed during a run, not on the property getter
         assert record.save_version is None
         assert record.load_versions is None
-        assert record.journal is None
 
 
 class TestDuplicatePipelineRegistration:

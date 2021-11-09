@@ -11,8 +11,6 @@ from kedro.config import ConfigLoader, MissingConfigException
 from kedro.framework.hooks import get_hook_manager
 from kedro.io import DataCatalog
 from kedro.pipeline.pipeline import _transcode_split
-from kedro.versioning import Journal
-
 
 def _deprecate(version):
     """Decorator to deprecate a few of the context's properties."""
@@ -268,7 +266,6 @@ class KedroContext:
     def _get_catalog(
         self,
         save_version: str = None,
-        journal: Journal = None,
         load_versions: Dict[str, str] = None,
     ) -> DataCatalog:
         """A hook for changing the creation of a DataCatalog instance.
@@ -294,7 +291,6 @@ class KedroContext:
             credentials=conf_creds,
             load_versions=load_versions,
             save_version=save_version,
-            journal=journal,
         )
         if not isinstance(catalog, DataCatalog):
             raise KedroContextError(
@@ -361,7 +357,7 @@ class KedroContext:
 
     @property
     def run_id(self) -> Union[None, str]:
-        """Unique identifier for a run / journal record, defaults to None.
+        """Unique identifier for a run, defaults to None.
         If `run_id` is None, `save_version` will be used instead.
         """
         return self._get_run_id()
@@ -370,7 +366,7 @@ class KedroContext:
         self, *args, **kwargs  # pylint: disable=unused-argument
     ) -> Union[None, str]:
         """A hook for generating a unique identifier for a
-        run / journal record, defaults to None.
+        run, defaults to None.
         If None, `save_version` will be used instead.
         """
         return None

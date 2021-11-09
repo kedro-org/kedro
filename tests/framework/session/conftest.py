@@ -18,7 +18,6 @@ from kedro.framework.session import KedroSession
 from kedro.io import DataCatalog
 from kedro.pipeline import Pipeline
 from kedro.pipeline.node import Node, node
-from kedro.versioning import Journal
 
 logger = logging.getLogger(__name__)
 
@@ -353,7 +352,6 @@ class LoggingHooks:
         credentials: Dict[str, Dict[str, Any]],
         load_versions: Dict[str, str],
         save_version: str,
-        journal: Journal,
     ) -> DataCatalog:
         logger.info(
             "Registering catalog",
@@ -362,11 +360,10 @@ class LoggingHooks:
                 "credentials": credentials,
                 "load_versions": load_versions,
                 "save_version": save_version,
-                "journal": journal,
             },
         )
         return DataCatalog.from_config(
-            catalog, credentials, load_versions, save_version, journal
+            catalog, credentials, load_versions, save_version
         )
 
 

@@ -26,6 +26,7 @@ kedro.extras.datasets
    kedro.extras.datasets.pandas.ExcelDataSet
    kedro.extras.datasets.pandas.FeatherDataSet
    kedro.extras.datasets.pandas.GBQTableDataSet
+   kedro.extras.datasets.pandas.GenericDataSet
    kedro.extras.datasets.pandas.HDFDataSet
    kedro.extras.datasets.pandas.JSONDataSet
    kedro.extras.datasets.pandas.ParquetDataSet

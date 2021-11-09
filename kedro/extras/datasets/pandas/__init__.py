@@ -12,6 +12,7 @@ __all__ = [
     "SQLQueryDataSet",
     "SQLTableDataSet",
     "XMLDataSet",
+    "GenericDataSet",
 ]
 
 from contextlib import suppress
@@ -34,3 +35,5 @@ with suppress(ImportError):
     from .sql_dataset import SQLQueryDataSet, SQLTableDataSet
 with suppress(ImportError):
     from .xml_dataset import XMLDataSet
+with suppress(ImportError):
+    from .generic_dataset import GenericDataSet

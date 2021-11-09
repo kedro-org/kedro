@@ -37,7 +37,8 @@
             "pandas.HDFDataSet",
             "pandas.CSVDataSet",
             "pandas.ExcelDataSet",
-            "pandas.GBQTableDataSet"
+            "pandas.GBQTableDataSet",
+            "pandas.GenericDataSet"
           ]
         }
       },
@@ -826,6 +827,38 @@
               "save_args": {
                 "type": "object",
                 "description": "Pandas options for saving CSV files.\nHere you can find all available arguments:\nhttps://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_csv.html\nAll defaults are preserved, but \"index\", which is set to False."
+              },
+              "credentials": {
+                "type": "object",
+                "description": "Credentials required to get access to the underlying filesystem.\nE.g. for ``GCSFileSystem`` it should look like `{\"token\": None}`."
+              },
+              "fs_args": {
+                "type": "object",
+                "description": "Extra arguments to pass into underlying filesystem class constructor\n(e.g. `{\"project\": \"my-project\"}` for ``GCSFileSystem``), as well as\nto pass to the filesystem's `open` method through nested keys\n`open_args_load` and `open_args_save`.\nHere you can find all available arguments for `open`:\nhttps://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open\nAll defaults are preserved, except `mode`, which is set to `r` when loading\nand to `w` when saving."
+              }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "type": { "const": "pandas.GenericDataSet" } } },
+          "then": {
+            "required": ["filepath"],
+            "properties": {
+              "filepath": {
+                "type": "string",
+                "description": "Filepath in POSIX format to a file prefixed with a protocol like `s3://`.\nIf prefix is not provided, `file` protocol (local filesystem) will be used.\nThe prefix should be any protocol supported by ``fsspec``.\nNote: `http(s)` doesn't support versioning."
+              },
+              "file_format" : {
+                "type": "string",
+                "description": "The read/write methods to retrieve from pandas (`pandas.read_{file_format}` or `pd.DataFrame.to_{file_format}`) on a best effort basis."
+              },
+              "load_args": {
+                "type": "object",
+                "description": "Pandas options for loading files.\nHere you can find all available arguments:\nhttps://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_csv.html\nAll defaults are preserved."
+              },
+              "save_args": {
+                "type": "object",
+                "description": "Pandas options for saving files.\nHere you can find all available arguments:\nhttps://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.to_csv.html\nAll defaults are preserved, but \"index\", which is set to False."
               },
               "credentials": {
                 "type": "object",

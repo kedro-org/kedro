@@ -59,6 +59,7 @@
 * The dataset `networkx.NetworkXDataSet` has been renamed to `networkx.JSONDataSet`.
 * Removed the `config_loader` property from `KedroContext`.
 * Removed decorator API from `Node` and `Pipeline`, as well as the modules `kedro.extras.decorators` and `kedro.pipeline.decorators`.
+* Removed transformer API from `DataCatalog`, as well as the modules `kedro.extras.transformers` and `kedro.io.transformers`.
 * Removed the `Journal`.
 
 ## Thanks for supporting contributions

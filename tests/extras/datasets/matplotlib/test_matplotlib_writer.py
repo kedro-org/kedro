@@ -126,15 +126,21 @@ def s3fs_cleanup():
     S3FileSystem.cachable = False
 
 
+@pytest.fixture(params=[False])
+def overwrite(request):
+    return request.param
+
+
 @pytest.fixture
 def plot_writer(
-    mocked_s3_bucket, fs_args, save_args
+    mocked_s3_bucket, fs_args, save_args, overwrite
 ):  # pylint: disable=unused-argument
     return MatplotlibWriter(
         filepath=FULL_PATH,
         credentials=AWS_CREDENTIALS,
         fs_args=fs_args,
         save_args=save_args,
+        overwrite=overwrite,
     )
 
 
@@ -205,8 +211,31 @@ class TestMatplotlibWriter:
 
             assert actual_filepath.read_bytes() == download_path.read_bytes()
 
+    @pytest.mark.parametrize(
+        "overwrite,expected_num_plots", [(False, 8), (True, 3)], indirect=["overwrite"]
+    )
+    def test_overwrite(
+        self,
+        tmp_path,
+        mock_list_plot,
+        mock_dict_plot,
+        plot_writer,
+        mocked_s3_bucket,
+        expected_num_plots,
+    ):
+        """Test saving dictionary of plots after list of plots to S3."""
+
+        plot_writer.save(mock_list_plot)
+        plot_writer.save(mock_dict_plot)
+
+        response = mocked_s3_bucket.list_objects(Bucket=BUCKET_NAME)
+        saved_plots = {obj["Key"] for obj in response["Contents"]}
+
+        assert {f"{KEY_PATH}/{colour}" for colour in COLOUR_LIST} <= saved_plots
+        assert len(saved_plots) == expected_num_plots
+
     def test_fs_args(self, tmp_path, mock_single_plot, mocked_encrypted_s3_bucket):
-        """Test writing to encrypted bucket"""
+        """Test writing to encrypted bucket."""
         normal_encryped_writer = MatplotlibWriter(
             fs_args={"s3_additional_kwargs": {"ServerSideEncryption": "AES256"}},
             filepath=FULL_PATH,

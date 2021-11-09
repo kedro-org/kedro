@@ -128,9 +128,11 @@ commands:
       - run:
           name: Trigger a kedro-viz build
           command: |
-            BUILD_INFO=$(curl -X POST -H -d \
-                "{}" \
-                "https://circleci.com/api/v1/project/quantumblacklabs/kedro-viz/tree/main?circle-token=$CIRCLE_TOKEN")
+            curl --location --request POST \
+              --url https://circleci.com/api/v2/project/github/quantumblacklabs/kedro-viz/pipeline \
+              --header "Circle-Token: $CIRCLE_TOKEN" \
+              --header 'content-type: application/json' \
+              --data '{"branch":"main"}'
 
   # Windows-related commands
   win_setup_conda:

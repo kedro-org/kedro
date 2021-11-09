@@ -1,6 +1,5 @@
 """This module provides context for Kedro project."""
 
-import functools
 from copy import deepcopy
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any, Dict, Optional, Union
@@ -11,23 +10,6 @@ from kedro.config import ConfigLoader, MissingConfigException
 from kedro.framework.hooks import get_hook_manager
 from kedro.io import DataCatalog
 from kedro.pipeline.pipeline import _transcode_split
-
-def _deprecate(version):
-    """Decorator to deprecate a few of the context's properties."""
-
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            property_name = func.__name__
-            warn(
-                f"Accessing {property_name} via the context will be deprecated in Kedro {version}.",
-                DeprecationWarning,
-            )
-            return func(*args, **kwargs)
-
-        return wrapper
-
-    return decorator
 
 
 def _is_relative_path(path_string: str) -> bool:

@@ -22,13 +22,11 @@ from kedro.framework.context.context import (
 from kedro.framework.hooks import get_hook_manager, hook_impl
 from kedro.framework.project import (
     Validator,
-    _ProjectPipelines,
     _ProjectSettings,
     configure_project,
     pipelines,
 )
 from kedro.io import DataCatalog
-from kedro.pipeline import Pipeline, node
 
 MOCK_PACKAGE_NAME = "mock_package_name"
 
@@ -168,26 +166,9 @@ def mock_settings(mocker):
     return mocker.patch("kedro.framework.project.settings", mocked_settings)
 
 
-@pytest.fixture(autouse=True)
-def mock_pipelines(mocker):
-    mocker.patch.object(
-        _ProjectPipelines,
-        "_get_pipelines_registry_callable",
-        return_value=_create_pipelines,
-    )
-
-
 @pytest.fixture
 def dummy_dataframe():
     return pd.DataFrame({"col1": [1, 2], "col2": [4, 5], "col3": [5, 6]})
-
-
-def identity(input1: str):
-    return input1  # pragma: no cover
-
-
-def bad_node(x):
-    raise ValueError("Oh no!")
 
 
 expected_message_middle = (
@@ -213,43 +194,6 @@ pyproject_toml_payload = {
         }
     }
 }
-
-
-def _create_pipelines():
-    bad_pipeline_middle = Pipeline(
-        [
-            node(identity, "cars", "boats", name="node1", tags=["tag1"]),
-            node(identity, "boats", "trains", name="node2"),
-            node(bad_node, "trains", "ships", name="nodes3"),
-            node(identity, "ships", "planes", name="node4"),
-        ],
-        tags="bad_pipeline",
-    )
-    bad_pipeline_head = Pipeline(
-        [
-            node(bad_node, "cars", "boats", name="node1", tags=["tag1"]),
-            node(identity, "boats", "trains", name="node2"),
-            node(identity, "trains", "ships", name="nodes3"),
-            node(identity, "ships", "planes", name="node4"),
-        ],
-        tags="bad_pipeline",
-    )
-    default_pipeline = Pipeline(
-        [
-            node(identity, "cars", "boats", name="node1", tags=["tag1"]),
-            node(identity, "boats", "trains", name="node2"),
-            node(identity, "trains", "ships", name="node3"),
-            node(identity, "ships", "planes", name="node4"),
-        ],
-        tags="pipeline",
-    )
-    return {
-        "__default__": default_pipeline,
-        "empty": Pipeline([]),
-        "simple": Pipeline([node(identity, "cars", "boats")]),
-        "bad_pipeline_middle": bad_pipeline_middle,
-        "bad_pipeline_head": bad_pipeline_head,
-    }
 
 
 @pytest.fixture(params=[None])

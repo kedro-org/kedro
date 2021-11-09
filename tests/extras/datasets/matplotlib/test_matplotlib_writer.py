@@ -187,7 +187,6 @@ class TestMatplotlibWriter:
     )
     def test_overwrite(
         self,
-        tmp_path,
         mock_list_plot,
         mock_dict_plot,
         plot_writer,

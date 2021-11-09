@@ -1,30 +1,3 @@
-# Copyright 2021 QuantumBlack Visual Analytics Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-# NONINFRINGEMENT. IN NO EVENT WILL THE LICENSOR OR OTHER CONTRIBUTORS
-# BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF, OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-# The QuantumBlack Visual Analytics Limited ("QuantumBlack") name and logo
-# (either separately or in combination, "QuantumBlack Trademarks") are
-# trademarks of QuantumBlack. The License does not grant you any right or
-# license to the QuantumBlack Trademarks. You may not use the QuantumBlack
-# Trademarks or any confusingly similar mark as a trademark for your product,
-# or use the QuantumBlack Trademarks in any other manner that might cause
-# confusion in the marketplace, including but not limited to in advertising,
-# on websites, or on software.
-#
-# See the License for the specific language governing permissions and
-# limitations under the License.
 import logging
 import re
 from copy import deepcopy
@@ -91,6 +64,22 @@ def sane_config_with_nested_creds(sane_config):
         }
     }
     return sane_config
+
+
+@pytest.fixture
+def sane_config_with_tracking_ds(tmp_path):
+    boat_path = (tmp_path / "some" / "dir" / "test.csv").as_posix()
+    plane_path = (tmp_path / "some" / "dir" / "metrics.json").as_posix()
+    return {
+        "catalog": {
+            "boats": {
+                "type": "pandas.CSVDataSet",
+                "filepath": boat_path,
+                "versioned": True,
+            },
+            "planes": {"type": "tracking.MetricsDataSet", "filepath": plane_path},
+        },
+    }
 
 
 @pytest.fixture
@@ -598,6 +587,30 @@ class TestDataCatalogVersioned:
         pattern = r"\`load_versions\` keys \[non-boart\] are not found in the catalog\."
         with pytest.warns(UserWarning, match=pattern):
             DataCatalog.from_config(**sane_config, load_versions=load_version)
+
+    def test_compare_tracking_and_other_dataset_versioned(
+        self, sane_config_with_tracking_ds, dummy_dataframe
+    ):
+        """Test saving of tracking data sets from config results in the same
+        save version as other versioned datasets."""
+
+        catalog = DataCatalog.from_config(**sane_config_with_tracking_ds)
+
+        catalog.save("boats", dummy_dataframe)
+        dummy_data = {"col1": 1, "col2": 2, "col3": 3}
+        catalog.save("planes", dummy_data)
+
+        # Verify that saved version on tracking dataset is the same as on the CSV dataset
+        csv_timestamp = datetime.strptime(
+            catalog.datasets.boats.resolve_save_version(),  # pylint: disable=no-member
+            VERSION_FORMAT,
+        )
+        tracking_timestamp = datetime.strptime(
+            catalog.datasets.planes.resolve_save_version(),  # pylint: disable=no-member
+            VERSION_FORMAT,
+        )
+
+        assert tracking_timestamp == csv_timestamp
 
     def test_load_version(self, sane_config, dummy_dataframe, mocker):
         """Test load versioned data sets from config"""

@@ -7,8 +7,7 @@ import copy
 import json
 from collections import Counter, defaultdict
 from itertools import chain
-from typing import Callable, Dict, Iterable, List, Set, Tuple, Union
-from warnings import warn
+from typing import Dict, Iterable, List, Set, Tuple, Union
 
 from toposort import CircularDependencyError as ToposortCircleError
 from toposort import toposort
@@ -389,18 +388,17 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         return Pipeline(nodes)
 
     def only_nodes_with_namespace(self, node_namespace: str) -> "Pipeline":
-        """Create a new ``Pipeline`` which will contain only the specified
-        nodes by namespace.
+        """Creates a new ``Pipeline`` containing only nodes with the specified
+        namespace.
 
         Args:
             node_namespace: One node namespace.
 
         Raises:
-            ValueError: When pipeline contains no pipeline with the specified namespace.
+            ValueError: When pipeline contains no nodes with the specified namespace.
 
         Returns:
-            A new ``Pipeline`` with nodes starting with a specified namespace.
-
+            A new ``Pipeline`` containing nodes with the specified namespace.
         """
         nodes = [
             n
@@ -409,8 +407,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         ]
         if not nodes:
             raise ValueError(
-                f"Pipeline does not contain nodes with namespace(s) "
-                f"{list(node_namespace)}."
+                f"Pipeline does not contain nodes with namespace `{node_namespace}`"
             )
         return Pipeline(nodes)
 
@@ -651,7 +648,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         return res
 
     def only_nodes_with_tags(self, *tags: str) -> "Pipeline":
-        """Create a new ``Pipeline`` object with the nodes which contain *any*
+        """Creates a new ``Pipeline`` object with the nodes which contain *any*
         of the provided tags. The resulting ``Pipeline`` is empty if no tags
         are provided.
 
@@ -667,35 +664,106 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         nodes = [node for node in self.nodes if tags & node.tags]
         return Pipeline(nodes)
 
-    def decorate(self, *decorators: Callable) -> "Pipeline":
-        """Create a new ``Pipeline`` by applying the provided decorators to
-        all the nodes in the pipeline. If no decorators are passed, it will
-        return a copy of the current ``Pipeline`` object.
+    # pylint: disable=too-many-arguments
+    def filter(
+        self,
+        tags: Iterable[str] = None,
+        from_nodes: Iterable[str] = None,
+        to_nodes: Iterable[str] = None,
+        node_names: Iterable[str] = None,
+        from_inputs: Iterable[str] = None,
+        to_outputs: Iterable[str] = None,
+        node_namespace: str = None,
+    ) -> "Pipeline":
+        """Creates a new ``Pipeline`` object with the nodes that meet all of the
+        specified filtering conditions.
+
+        The new pipeline object is the intersection of pipelines that meet each
+        filtering condition. This is distinct from chaining multiple filters together.
 
         Args:
-            decorators: Decorators to be applied on all node functions in
-                the pipeline, always applied from right to left.
+            tags: A list of node tags which should be used to lookup
+                the nodes of the new ``Pipeline``.
+            from_nodes: A list of node names which should be used as a
+                starting point of the new ``Pipeline``.
+            to_nodes:  A list of node names which should be used as an
+                end point of the new ``Pipeline``.
+            node_names: A list of node names which should be selected for the
+                new ``Pipeline``.
+            from_inputs: A list of inputs which should be used as a starting point
+                of the new ``Pipeline``
+            to_outputs: A list of outputs which should be the final outputs of
+                the new ``Pipeline``.
+            node_namespace: One node namespace which should be used to select
+                nodes in the new ``Pipeline``.
 
         Returns:
-            A new ``Pipeline`` object with all nodes decorated with the
-            provided decorators.
+            A new ``Pipeline`` object with nodes that meet all of the specified
+                filtering conditions.
 
+        Raises:
+            ValueError: The filtered ``Pipeline`` has no nodes.
+
+        Example:
+        ::
+
+            >>> pipeline = Pipeline(
+            >>>     [
+            >>>         node(func, "A", "B", name="node1"),
+            >>>         node(func, "B", "C", name="node2"),
+            >>>         node(func, "C", "D", name="node3"),
+            >>>     ]
+            >>> )
+            >>> pipeline.filter(node_names=["node1", "node3"], from_inputs=["A"])
+            >>> # Gives a new pipeline object containing node1 and node3.
         """
-        warn(
-            "The pipeline's `decorate` API will be deprecated in Kedro 0.18.0."
-            "Please use a node's Hooks to extend the node's behaviour in a pipeline."
-            "For more information, please visit"
-            "https://kedro.readthedocs.io/en/stable/07_extend_kedro/02_hooks.html",
-            DeprecationWarning,
-        )
-        nodes = [node.decorate(*decorators) for node in self.nodes]
-        return Pipeline(nodes)
+        # Use [node_namespace] so only_nodes_with_namespace can follow the same
+        # *filter_args pattern as the other filtering methods, which all take iterables.
+        node_namespace = [node_namespace] if node_namespace else None
+
+        filter_methods = {
+            self.only_nodes_with_tags: tags,
+            self.from_nodes: from_nodes,
+            self.to_nodes: to_nodes,
+            self.only_nodes: node_names,
+            self.from_inputs: from_inputs,
+            self.to_outputs: to_outputs,
+            self.only_nodes_with_namespace: node_namespace,
+        }
+
+        subset_pipelines = {
+            filter_method(*filter_args)  # type: ignore
+            for filter_method, filter_args in filter_methods.items()
+            if filter_args
+        }
+
+        # Intersect all the pipelines subsets. We apply each filter to the original
+        # pipeline object (self) rather than incrementally chaining filter methods
+        # together. Hence the order of filtering does not affect the outcome, and the
+        # resultant pipeline is unambiguously defined.
+        # If this were not the case then, for example,
+        # pipeline.filter(node_names=["node1", "node3"], from_inputs=["A"])
+        # would give different outcomes depending on the order of filter methods:
+        # only_nodes and then from_inputs would give node1, while only_nodes and then
+        # from_inputs would give node1 and node3.
+        filtered_pipeline = Pipeline(self.nodes)
+        for subset_pipeline in subset_pipelines:
+            filtered_pipeline &= subset_pipeline
+
+        if not filtered_pipeline.nodes:
+            raise ValueError(
+                "Pipeline contains no nodes after applying all provided filters"
+            )
+        return filtered_pipeline
 
     def tag(self, tags: Union[str, Iterable[str]]) -> "Pipeline":
-        """
-        Return a copy of the pipeline, with each node tagged accordingly.
-        :param tags: The tags to be added to the nodes.
-        :return: New `Pipeline` object.
+        """Returns a copy of the pipeline, with each node tagged accordingly.
+
+        Args:
+            tags: The tags to be added to the nodes.
+
+        Returns:
+            New `Pipeline` object.
         """
         nodes = [n.tag(tags) for n in self.nodes]
         return Pipeline(nodes)

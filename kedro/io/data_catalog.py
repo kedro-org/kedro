@@ -23,7 +23,7 @@ from kedro.io.core import (
     Version,
     generate_timestamp,
 )
-from kedro.io.memory_data_set import MemoryDataSet
+from kedro.io.memory_dataset import MemoryDataSet
 from kedro.io.transformers import AbstractTransformer
 from kedro.versioning import Journal
 

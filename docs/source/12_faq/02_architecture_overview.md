@@ -13,7 +13,6 @@ As a data pipeline developer, you will interact with a Kedro project, which cons
   * The **`pipelines`**  directory, which contains the source code for your pipelines.
   * **`settings.py`** file contains the settings for the project, such as library component registration, custom hooks registration, etc.
   * **`hooks.py`**, which contains custom [Hooks implementations](../07_extend_kedro/02_hooks) in the project, including both registration hooks and extension hooks.
-  * **`cli.py`** file contains project specific CLI commands (e.g., `kedro run`, `kedro test`, etc.).
   * **`pipeline_registry.py`** file defines the project pipelines, i.e. pipelines that can be run using `kedro run --pipeline`.
   * **`__main__.py`** file serves as the main entry point of the project in [package mode](../03_tutorial/05_package_a_project.md#package-your-project).
 * **`pyproject.toml`** identifies the project root by providing project metadata, including:

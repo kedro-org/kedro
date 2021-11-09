@@ -119,7 +119,7 @@ type_targets = {
         "kedro.io.data_catalog.DataCatalog",
         "kedro.io.transformers.AbstractTransformer",
         "kedro.io.data_catalog_with_default.DataCatalogWithDefault",
-        "kedro.io.partitioned_data_set.PartitionedDataSet",
+        "kedro.io.partitioned_dataset.PartitionedDataSet",
         "kedro.pipeline.pipeline.Pipeline",
         "kedro.runner.runner.AbstractRunner",
         "kedro.runner.parallel_runner._SharedMemoryDataSet",
@@ -132,7 +132,7 @@ type_targets = {
         "requests.auth.AuthBase",
         "google.oauth2.credentials.Credentials",
         "Exception",
-        "CONF_ROOT",
+        "CONF_SOURCE",
         "integer -- return number of occurrences of value",
         "integer -- return first index of value.",
         "kedro.extras.datasets.pandas.json_dataset.JSONDataSet",
@@ -201,6 +201,7 @@ linkcheck_ignore = [
     "https://github.com/quantumblacklabs/private-kedro/blob/master/kedro/templates/project/*",
     "https://eternallybored.org/misc/wget/",
     "https://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table.from_pandas",
+    "https://github.com/quantumblacklabs/kedro-starters/tree/master/standalone-datacatalog",  # temporary until 0.18
     "https://www.oracle.com/java/technologies/javase-downloads.html",  # "forbidden" url
     "https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71",
     "https://medium.com/quantumblack/beyond-the-notebook-and-into-the-data-science-framework-revolution-a7fd364ab9c4",
@@ -315,7 +316,6 @@ KEDRO_MODULES = [
     "kedro.config",
     "kedro.extras.datasets",
     "kedro.extras.logging",
-    "kedro.extras.decorators",
     "kedro.extras.transformers",
 ]
 

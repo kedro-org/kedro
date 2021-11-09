@@ -6,7 +6,7 @@ import logging
 from typing import Any, Dict, Union
 
 from kedro.io.core import VERSIONED_FLAG_KEY, AbstractDataSet, Version
-from kedro.io.memory_data_set import MemoryDataSet
+from kedro.io.memory_dataset import MemoryDataSet
 
 
 class CachedDataSet(AbstractDataSet):

@@ -472,7 +472,11 @@ workflows:
       - win_e2e_tests_36
       - win_e2e_tests_37
       - win_e2e_tests_38
-      - deploy_kedro_viz
+      - deploy_kedro_viz:
+          filters:
+            branches:
+              only:
+                - master
       - all_circleci_checks_succeeded:
           requires:
             - unit_tests_36

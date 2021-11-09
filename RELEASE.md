@@ -60,6 +60,7 @@
 * Removed the `config_loader` property from `KedroContext`.
 * Removed decorator API from `Node` and `Pipeline`, as well as the modules `kedro.extras.decorators` and `kedro.pipeline.decorators`.
 * Removed transformer API from `DataCatalog`, as well as the modules `kedro.extras.transformers` and `kedro.io.transformers`.
+* Removed the `Journal`.
 
 ## Thanks for supporting contributions
 
@@ -142,7 +143,8 @@
 ## Minor breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.18.0
-* `kedro.extras.decorators` is being deprecated in favour of Hooks.
+* `kedro.extras.decorators` and `kedro.pipeline.decorators` are being deprecated in favour of Hooks.
+* `kedro.extras.transformers` and `kedro.io.transformers` are being deprecated in favour of Hooks.
 
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman),

@@ -5,7 +5,6 @@ from typing import Any, Callable, Dict, Optional
 
 from kedro.io.core import AbstractDataSet
 from kedro.io.data_catalog import DataCatalog
-from kedro.versioning import Journal
 
 
 class DataCatalogWithDefault(DataCatalog):
@@ -115,7 +114,6 @@ class DataCatalogWithDefault(DataCatalog):
         credentials: Dict[str, Dict[str, Any]] = None,
         load_versions: Dict[str, str] = None,
         save_version: str = None,
-        journal: Journal = None,
     ):
         """To create a ``DataCatalogWithDefault`` from configuration, please
         use:
@@ -129,7 +127,6 @@ class DataCatalogWithDefault(DataCatalog):
             credentials: See ``DataCatalog.from_config``
             load_versions: See ``DataCatalog.from_config``
             save_version: See ``DataCatalog.from_config``
-            journal: See ``DataCatalog.from_config``
 
         Raises:
             ValueError: If you try to instantiate a ``DataCatalogWithDefault``
@@ -141,7 +138,7 @@ class DataCatalogWithDefault(DataCatalog):
             "directly from configuration files. Please use"
             "``DataCatalogWithDefault.from_data_catalog("
             "DataCatalog.from_config(catalog, "
-            "credentials, journal))"
+            "credentials))"
         )
 
     @classmethod

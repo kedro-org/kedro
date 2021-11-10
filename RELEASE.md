@@ -61,6 +61,7 @@
 * Removed decorator API from `Node` and `Pipeline`, as well as the modules `kedro.extras.decorators` and `kedro.pipeline.decorators`.
 * Removed transformer API from `DataCatalog`, as well as the modules `kedro.extras.transformers` and `kedro.io.transformers`.
 * Removed the `Journal`.
+* Removed deprecated `CONF_SOURCE`, `package_name`, `pipeline`, `pipelines`, and `io` attributes from `KedroContext` as well as the deprecated `KedroContext.run` method.
 
 ## Thanks for supporting contributions
 

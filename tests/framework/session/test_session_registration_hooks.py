@@ -7,7 +7,7 @@ from dynaconf.validator import Validator
 
 from kedro.framework.context import KedroContextError
 from kedro.framework.hooks import hook_impl
-from kedro.framework.project import _ProjectSettings
+from kedro.framework.project import _ProjectSettings, pipelines
 from kedro.framework.session import KedroSession
 from kedro.io import DataCatalog
 from tests.framework.session.conftest import (
@@ -112,7 +112,7 @@ class TestRegistrationHooks:
             "__default__": mock_pipeline,
             "pipe": mock_pipeline,
         }
-        assert context.pipelines == expected_pipelines
+        assert pipelines == expected_pipelines
 
     def test_register_catalog_is_called(self, mock_session, caplog):
         context = mock_session.load_context()
@@ -141,8 +141,7 @@ class TestDuplicatePipelineRegistration:
     def test_register_pipelines_with_duplicate_entries(
         self, tmp_path, mock_package_name, mock_pipeline
     ):
-        session = KedroSession.create(mock_package_name, tmp_path)
-        context = session.load_context()
+        KedroSession.create(mock_package_name, tmp_path)
         # check that all pipeline dictionaries merged together correctly
         expected_pipelines = {key: mock_pipeline for key in ("__default__", "pipe")}
         pattern = (
@@ -150,7 +149,7 @@ class TestDuplicatePipelineRegistration:
             "will be overwritten: __default__"
         )
         with pytest.warns(UserWarning, match=re.escape(pattern)):
-            assert context.pipelines == expected_pipelines
+            assert pipelines == expected_pipelines
 
 
 class TestBrokenRegistrationHooks:

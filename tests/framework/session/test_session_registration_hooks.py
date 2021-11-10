@@ -141,8 +141,7 @@ class TestDuplicatePipelineRegistration:
     def test_register_pipelines_with_duplicate_entries(
         self, tmp_path, mock_package_name, mock_pipeline
     ):
-        session = KedroSession.create(mock_package_name, tmp_path)
-        session.load_context()
+        KedroSession.create(mock_package_name, tmp_path)
         # check that all pipeline dictionaries merged together correctly
         expected_pipelines = {key: mock_pipeline for key in ("__default__", "pipe")}
         pattern = (

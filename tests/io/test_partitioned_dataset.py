@@ -121,6 +121,19 @@ class TestPartitionedDataSetLocal:
         assert new_partition not in first_load
         assert new_partition in second_load
 
+    @pytest.mark.parametrize("overwrite,expected_num_parts", [(False, 6), (True, 1)])
+    def test_overwrite(self, local_csvs, overwrite, expected_num_parts):
+        pds = PartitionedDataSet(
+            str(local_csvs), "pandas.CSVDataSet", overwrite=overwrite
+        )
+        original_data = pd.DataFrame({"foo": 42, "bar": ["a", "b", None]})
+        part_id = "new/data"
+        pds.save({part_id: original_data})
+        loaded_partitions = pds.load()
+
+        assert part_id in loaded_partitions
+        assert len(loaded_partitions.keys()) == expected_num_parts
+
     def test_release_instance_cache(self, local_csvs):
         """Test that cache invalidation does not affect other instances"""
         ds_a = PartitionedDataSet(str(local_csvs), "pandas.CSVDataSet")

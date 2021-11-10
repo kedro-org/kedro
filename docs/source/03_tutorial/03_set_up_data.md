@@ -100,7 +100,7 @@ reviews:
   filepath: data/01_raw/reviews.csv
 ```
 
-To check whether Kedro can load the data correctly, open a `kedro ipython` session and run:
+To check whether Kedro can load the data correctly, open a `kedro ipython` (you may have to install ipython: `pip install ipython') session and run:
 
 ```python
 companies = catalog.load("companies")

@@ -17,11 +17,9 @@ from .data_catalog_with_default import DataCatalogWithDefault
 from .lambda_dataset import LambdaDataSet
 from .memory_dataset import MemoryDataSet
 from .partitioned_dataset import IncrementalDataSet, PartitionedDataSet
-from .transformers import AbstractTransformer
 
 __all__ = [
     "AbstractDataSet",
-    "AbstractTransformer",
     "AbstractVersionedDataSet",
     "CachedDataSet",
     "DataCatalog",

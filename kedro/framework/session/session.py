@@ -245,6 +245,10 @@ class KedroSession:
         self._store["exception"] = exc_data
 
     @property
+    def _logger(self) -> logging.Logger:
+        return logging.getLogger(__name__)
+
+    @property
     def store(self) -> Dict[str, Any]:
         """Return a copy of internal store."""
         return dict(self._store)
@@ -329,7 +333,8 @@ class KedroSession:
         """
         # pylint: disable=protected-access,no-member
         # Report project name
-        logging.info("** Kedro project %s", self._project_path.name)
+
+        self._logger.info("** Kedro project %s", self._project_path.name)
 
         save_version = run_id = self.store["session_id"]
         extra_params = self.store.get("extra_params") or {}

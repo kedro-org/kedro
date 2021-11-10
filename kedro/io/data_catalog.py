@@ -655,7 +655,7 @@ class DataCatalog:
             return list(self._data_sets.keys())
 
         if not regex_search.strip():
-            logging.warning("The empty string will not match any data sets")
+            self._logger.warning("The empty string will not match any data sets")
             return []
 
         try:

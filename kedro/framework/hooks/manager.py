@@ -89,13 +89,13 @@ def _register_hooks_setuptools(
             plugin_names.add(f"{dist.project_name}-{dist.version}")
 
     if disabled_plugin_names:
-        logging.info(
+        logging.getLogger(__name__).info(
             "Hooks are disabled for plugin(s): %s",
             ", ".join(sorted(disabled_plugin_names)),
         )
 
     if plugin_names:
-        logging.info(
+        logging.getLogger(__name__).info(
             "Registered hooks from %d installed plugin(s): %s",
             found,
             ", ".join(sorted(plugin_names)),

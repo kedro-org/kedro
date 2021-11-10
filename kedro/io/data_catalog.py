@@ -12,7 +12,6 @@ import warnings
 from collections import defaultdict
 from functools import partial
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Type, Union
-from warnings import warn
 
 from kedro.io.core import (
     AbstractDataSet,
@@ -262,6 +261,8 @@ class DataCatalog:
         Raises:
             DataSetError: When the method fails to create any of the data
                 sets from their config.
+            DataSetNotFoundError: When `load_versions` refers to a dataset that doesn't
+                exist in the catalog.
 
         Example:
         ::
@@ -307,7 +308,7 @@ class DataCatalog:
 
         missing_keys = load_versions.keys() - catalog.keys()
         if missing_keys:
-            warn(
+            raise DataSetNotFoundError(
                 f"`load_versions` keys [{', '.join(sorted(missing_keys))}] "
                 f"are not found in the catalog."
             )

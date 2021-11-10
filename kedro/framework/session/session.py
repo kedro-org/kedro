@@ -333,7 +333,6 @@ class KedroSession:
         """
         # pylint: disable=protected-access,no-member
         # Report project name
-
         self._logger.info("** Kedro project %s", self._project_path.name)
 
         save_version = run_id = self.store["session_id"]

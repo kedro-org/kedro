@@ -20,6 +20,8 @@ _hook_manager = None
 
 _PLUGIN_HOOKS = "kedro.hooks"  # entry-point to load hooks from for installed plugins
 
+logger = logging.getLogger(__name__)
+
 
 def _create_hook_manager() -> PluginManager:
     """Create a new PluginManager instance and register Kedro's hook specs."""
@@ -89,13 +91,13 @@ def _register_hooks_setuptools(
             plugin_names.add(f"{dist.project_name}-{dist.version}")
 
     if disabled_plugin_names:
-        logging.getLogger(__name__).info(
+        logger.info(
             "Hooks are disabled for plugin(s): %s",
             ", ".join(sorted(disabled_plugin_names)),
         )
 
     if plugin_names:
-        logging.getLogger(__name__).info(
+        logger.info(
             "Registered hooks from %d installed plugin(s): %s",
             found,
             ", ".join(sorted(plugin_names)),

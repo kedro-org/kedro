@@ -186,6 +186,14 @@ class DataCatalog:
         self.datasets = _FrozenDatasets(self._data_sets)
         self.layers = layers
 
+        if transformers or default_transformers:
+            warnings.warn(
+                "The transformer API will be deprecated in Kedro 0.18.0."
+                "Please use Dataset Hooks to customise the load and save methods."
+                "For more information, please visit"
+                "https://kedro.readthedocs.io/en/stable/07_extend_kedro/02_hooks.html",
+                DeprecationWarning,
+            )
         self._transformers = {k: list(v) for k, v in (transformers or {}).items()}
         self._default_transformers = list(default_transformers or [])
         self._check_and_normalize_transformers()

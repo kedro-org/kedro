@@ -122,7 +122,7 @@ commands:
           name: Pip-compile requirements file
           command: make pip-compile
 
-  deploy_viz:
+  run_viz_build:
     description: Deploy kedro-viz to ensure tests in that project pass
     steps:
       - run:
@@ -341,10 +341,10 @@ jobs:
     executor: py38
     steps: [pip_compile]
 
-  deploy_kedro_viz:
+  run_kedro_viz:
     docker:
       - image: spotify/alpine # for bash and curl
-    steps: [deploy_viz]
+    steps: [run_viz_build]
 
   all_circleci_checks_succeeded:
     docker:
@@ -472,7 +472,7 @@ workflows:
       - win_e2e_tests_36
       - win_e2e_tests_37
       - win_e2e_tests_38
-      - deploy_kedro_viz:
+      - run_kedro_viz:
           filters:
             branches:
               only:

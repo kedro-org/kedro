@@ -11,15 +11,15 @@ kedro build-reqs
 
 The `build-reqs` command will:
 
-1. Generate `src/requirements.in` from the contents of `src/requirements.txt`
-2. [pip compile](https://github.com/jazzband/pip-tools#example-usage-for-pip-compile) the requirements listed in `src/requirements.in`
-3. Regenerate `src/requirements.txt` to specify a list of pinned project dependencies (those with a strict version)
+1. Generate `src/requirements.lock` from the contents of `src/requirements.txt`
+2. [pip compile](https://github.com/jazzband/pip-tools#example-usage-for-pip-compile) the requirements listed in `src/requirements.txt`
+3. Regenerate `src/requirements.lock` to specify a list of pinned project dependencies (those with a strict version)
 
 ```eval_rst
-.. note::  ``src/requirements.in`` contains "source" requirements, while ``src/requirements.txt`` contains the compiled version of those and requires no manual updates.
+.. note::  ``src/requirements.txt`` contains "source" requirements, while ``src/requirements.lock`` contains the compiled version of those and requires no manual updates.
 ```
 
-To further update the project requirements, you should modify `src/requirements.in` (not `src/requirements.txt`) and re-run `kedro build-reqs`.
+To further update the project requirements, you should modify `src/requirements.txt` (not `src/requirements.lock`) and re-run `kedro build-reqs`.
 
 
 ## Install project-specific dependencies

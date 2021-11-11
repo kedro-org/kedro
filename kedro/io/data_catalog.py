@@ -12,7 +12,6 @@ import warnings
 from collections import defaultdict
 from functools import partial
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Type, Union
-from warnings import warn
 
 from kedro.io.core import (
     AbstractDataSet,
@@ -186,6 +185,14 @@ class DataCatalog:
         self.datasets = _FrozenDatasets(self._data_sets)
         self.layers = layers
 
+        if transformers or default_transformers:
+            warnings.warn(
+                "The transformer API will be deprecated in Kedro 0.18.0."
+                "Please use Dataset Hooks to customise the load and save methods."
+                "For more information, please visit"
+                "https://kedro.readthedocs.io/en/stable/07_extend_kedro/02_hooks.html",
+                DeprecationWarning,
+            )
         self._transformers = {k: list(v) for k, v in (transformers or {}).items()}
         self._default_transformers = list(default_transformers or [])
         self._check_and_normalize_transformers()
@@ -254,6 +261,8 @@ class DataCatalog:
         Raises:
             DataSetError: When the method fails to create any of the data
                 sets from their config.
+            DataSetNotFoundError: When `load_versions` refers to a dataset that doesn't
+                exist in the catalog.
 
         Example:
         ::
@@ -299,7 +308,7 @@ class DataCatalog:
 
         missing_keys = load_versions.keys() - catalog.keys()
         if missing_keys:
-            warn(
+            raise DataSetNotFoundError(
                 f"`load_versions` keys [{', '.join(sorted(missing_keys))}] "
                 f"are not found in the catalog."
             )
@@ -655,7 +664,7 @@ class DataCatalog:
             return list(self._data_sets.keys())
 
         if not regex_search.strip():
-            logging.warning("The empty string will not match any data sets")
+            self._logger.warning("The empty string will not match any data sets")
             return []
 
         try:

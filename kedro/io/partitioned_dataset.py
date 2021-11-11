@@ -103,6 +103,7 @@ class PartitionedDataSet(AbstractDataSet):
         credentials: Dict[str, Any] = None,
         load_args: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        overwrite: bool = False,
     ):
         """Creates a new instance of ``PartitionedDataSet``.
 
@@ -140,6 +141,7 @@ class PartitionedDataSet(AbstractDataSet):
                 the filesystem implementation.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``)
+            overwrite: If True, any existing partitions will be removed.
 
         Raises:
             DataSetError: If versioning is enabled for the underlying dataset.
@@ -151,6 +153,7 @@ class PartitionedDataSet(AbstractDataSet):
 
         self._path = path
         self._filename_suffix = filename_suffix
+        self._overwrite = overwrite
         self._protocol = infer_storage_options(self._path)["protocol"]
         self._partition_cache = Cache(maxsize=1)  # type: Cache
 
@@ -255,6 +258,9 @@ class PartitionedDataSet(AbstractDataSet):
         return partitions
 
     def _save(self, data: Dict[str, Any]) -> None:
+        if self._overwrite and self._filesystem.exists(self._path):
+            self._filesystem.rm(self._path, recursive=True)
+
         for partition_id, partition_data in sorted(data.items()):
             kwargs = deepcopy(self._dataset_config)
             partition = self._partition_to_path(partition_id)

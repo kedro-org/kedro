@@ -157,8 +157,9 @@ kedro build-reqs
 
 This command runs [`pip-compile`](https://github.com/jazzband/pip-tools#example-usage-for-pip-compile) on the project's `src/requirements.txt` file and will create `src/requirements.lock` with the compiled requirements.
 
-`kedro build-reqs` has two optional arguments to specify which file to compile the requirements from and where to safe the compiled requirements to. These arguments are `--input-file` and `--output-file` respectively.
-`kedro build-reqs` also accepts and passes through CLI options accepted by `pip-compile`. For example, `kedro build-reqs --generate-hashes` will call `pip-compile --generate-hashes src/requirements.txt`.
+`kedro build-reqs` has two optional arguments to specify which file to compile the requirements from and where to save the compiled requirements to. These arguments are `--input-file` and `--output-file` respectively.
+
+`kedro build-reqs` also accepts and passes through CLI options accepted by `pip-compile`. For example, `kedro build-reqs --generate-hashes` will call `pip-compile --output-file=src/requirements.lock --generate-hashes src/requirements.txt`.
 
 #### Install all package dependencies
 

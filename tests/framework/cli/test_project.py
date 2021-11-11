@@ -436,7 +436,6 @@ class TestBuildReqsCommand:
             "piptools",
             [
                 "compile",
-                "-q",
                 str(fake_repo_path / "src" / "requirements.txt"),
                 "--output-file",
                 str(fake_repo_path / "src" / "requirements.lock"),
@@ -450,23 +449,29 @@ class TestBuildReqsCommand:
         fake_repo_path,
         fake_copyfile,
         fake_metadata,
-        mocker,
     ):
         # File exists:
-        mocker.patch.object(Path, "is_file", return_value=True)
         input_file = fake_repo_path / "src" / "dev-requirements.txt"
+        with open(input_file, "a", encoding="utf-8") as file:
+            file.write("")
         output_file = fake_repo_path / "src" / "dev-requirements.lock"
 
         result = CliRunner().invoke(
             fake_project_cli,
-            ["build-reqs", "--input-file", input_file, "--output-file", output_file],
+            [
+                "build-reqs",
+                "--input-file",
+                str(input_file),
+                "--output-file",
+                str(output_file),
+            ],
             obj=fake_metadata,
         )
         assert not result.exit_code, result.stdout
         assert "Requirements built!" in result.stdout
         python_call_mock.assert_called_once_with(
             "piptools",
-            ["compile", "-q", str(input_file), "--output-file", str(output_file)],
+            ["compile", str(input_file), "--output-file", str(output_file)],
         )
 
     @pytest.mark.parametrize(
@@ -490,7 +495,7 @@ class TestBuildReqsCommand:
         assert "Requirements built!" in result.stdout
 
         call_args = (
-            ["compile", "-q"]
+            ["compile"]
             + extra_args
             + [str(requirements_txt)]
             + ["--output-file", str(fake_repo_path / "src" / "requirements.lock")]
@@ -501,7 +506,7 @@ class TestBuildReqsCommand:
     def test_missing_requirements_txt(
         self, fake_project_cli, mocker, fake_metadata, os_name, fake_repo_path
     ):
-        """Test error when neither requirements.txt nor requirements.in exists."""
+        """Test error when input file requirements.txt doesn't exists."""
         requirements_txt = fake_repo_path / "src" / "requirements.txt"
 
         mocker.patch("kedro.framework.cli.project.os").name = os_name

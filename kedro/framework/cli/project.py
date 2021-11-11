@@ -6,7 +6,6 @@ import subprocess
 import sys
 import webbrowser
 from pathlib import Path
-from typing import Sequence
 
 import click
 from click import secho
@@ -67,43 +66,6 @@ To pass a nested dictionary as parameter, separate keys by '.', example:
 param_group.param1:value1."""
 INPUT_FILE_HELP = """Name of the requirements file to compile."""
 OUTPUT_FILE_HELP = """Name of the file where compiled requirements should be stored."""
-
-
-def _build_reqs(source_path: Path, input_file: Optional[Path] = None, output_file: Optional[Path] = None, args: Sequence[str] = ()):
-    """Run `pip-compile` on requirements.txt or the user defined input file and save
-    the compiled requirements to requirements.lock or the user defined output file.
-
-    Args:
-        source_path: Path to the project `src` folder.
-        input_file: Optional argument to specify which file to compile the requirements from.
-        output_file: Optional argument to specify which file to save the compiled requirements to.
-        args: Optional arguments for `pip-compile` call, e.g. `--generate-hashes`.
-
-    Raises:
-        FileNotFoundError: If requirements.txt or the specified input file is not found.
-
-    """
-    input_file = input_file or source_path / "requirements.txt"
-    output_file = output_file or source_path / "requirements.lock"
-
-    if input_file.is_file():
-        python_call(
-            "piptools",
-            [
-                "compile",
-                "-q",
-                *args,
-                str(input_file),
-                "--output-file",
-                str(output_file),
-            ],
-        )
-
-    else:
-        raise FileNotFoundError(
-            f"File `{input_file}` not found in the project. "
-            "Please specify another input or create the file and try again."
-        )
 
 
 # pylint: disable=missing-function-docstring
@@ -247,30 +209,50 @@ def build_docs(metadata: ProjectMetadata, open_docs):
 @click.option(
     "--input-file",
     "input_file",
+    type=click.Path(exists=True, dir_okay=False, resolve_path=True),
     multiple=False,
-    default=False,
     help=INPUT_FILE_HELP,
 )
 @click.option(
     "--output-file",
     "output_file",
     multiple=False,
-    default=False,
     help=OUTPUT_FILE_HELP,
 )
 @click.pass_obj  # this will pass the metadata as first argument
 def build_reqs(
     metadata: ProjectMetadata, input_file, output_file, args, **kwargs
 ):  # pylint: disable=unused-argument
-    """Build the project dependency requirements."""
+    """Run `pip-compile` on src/requirements.txt or the user defined input file and save
+    the compiled requirements to src/requirements.lock or the user defined output file.
+    """
+
     source_path = metadata.source_dir
-    _build_reqs(source_path, input_file, output_file, args)
-    _input = input_file if input_file else "requirements.txt"
-    _output = str(output_file) if output_file else "requirements.lock"
+    input_file = Path(input_file or source_path / "requirements.txt")
+    output_file = Path(output_file or source_path / "requirements.lock")
+
+    if input_file.is_file():
+        python_call(
+            "piptools",
+            [
+                "compile",
+                *args,
+                str(input_file),
+                "--output-file",
+                str(output_file),
+            ],
+        )
+
+    else:
+        raise FileNotFoundError(
+            f"File `{input_file}` not found in the project. "
+            "Please specify another input or create the file and try again."
+        )
+
     secho(
-        f"Requirements built! Please update {_input} "
+        f"Requirements built! Please update {input_file.name} "
         "if you'd like to make a change in your project's dependencies, "
-        f"and re-run build-reqs to generate the new {_output}.",
+        f"and re-run build-reqs to generate the new {output_file.name}.",
         fg="green",
     )
 

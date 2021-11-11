@@ -36,7 +36,33 @@ class PartitionedDataSet(AbstractDataSet):
     underlying dataset definition. For filesystem level operations it uses `fsspec`:
     https://github.com/intake/filesystem_spec.
 
-    Example:
+    Example adding a catalog entry with
+    `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
+        01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+
+    .. code-block:: yaml
+
+        >>> cv_results_partitioned: # example to save results to multiple partitions
+        >>>   type: PartitionedDataSet
+        >>>   dataset:
+        >>>     type: pandas.CSVDataSet
+        >>>     save_args:
+        >>>       index: False
+        >>>   path: data/04_cv/
+        >>>   filename_suffix: ".csv"
+        >>>
+        >>>   downloaded_data: # example with data available in multiple partitions
+        >>>     type: PartitionedDataSet
+        >>>     path: demo/01_raw/downloaded_station_data
+        >>>     dataset:
+        >>>       type: pandas.CSVDataSet
+        >>>       load_args:
+        >>>         sep: ','
+        >>>         index_col: 0
+        >>>     filename_suffix: '.csv'
+
+
+    Example using Python API:
     ::
 
         >>> import pandas as pd
@@ -77,6 +103,7 @@ class PartitionedDataSet(AbstractDataSet):
         credentials: Dict[str, Any] = None,
         load_args: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
+        overwrite: bool = False,
     ):
         """Creates a new instance of ``PartitionedDataSet``.
 
@@ -114,6 +141,7 @@ class PartitionedDataSet(AbstractDataSet):
                 the filesystem implementation.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
                 (e.g. `{"project": "my-project"}` for ``GCSFileSystem``)
+            overwrite: If True, any existing partitions will be removed.
 
         Raises:
             DataSetError: If versioning is enabled for the underlying dataset.
@@ -125,6 +153,7 @@ class PartitionedDataSet(AbstractDataSet):
 
         self._path = path
         self._filename_suffix = filename_suffix
+        self._overwrite = overwrite
         self._protocol = infer_storage_options(self._path)["protocol"]
         self._partition_cache = Cache(maxsize=1)
 
@@ -229,6 +258,9 @@ class PartitionedDataSet(AbstractDataSet):
         return partitions
 
     def _save(self, data: Dict[str, Any]) -> None:
+        if self._overwrite and self._filesystem.exists(self._path):
+            self._filesystem.rm(self._path, recursive=True)
+
         for partition_id, partition_data in sorted(data.items()):
             kwargs = deepcopy(self._dataset_config)
             partition = self._partition_to_path(partition_id)

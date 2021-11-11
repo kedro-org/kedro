@@ -58,7 +58,12 @@ def _collect_requirements(requires):
 
 api_require = {"api.APIDataSet": ["requests~=2.20"]}
 biosequence_require = {"biosequence.BioSequenceDataSet": ["biopython~=1.73"]}
-dask_require = {"dask.ParquetDataSet": ["dask[complete]~=2.6"]}
+dask_require = {
+    "dask.ParquetDataSet": [
+        "dask>=2021.10.0, <2022.01; python_version > '3.6'",
+        "dask[complete]~=2.6; python_version == '3.6'",
+    ]
+}
 geopandas_require = {
     "geopandas.GeoJSONDataSet": ["geopandas>=0.6.0, <1.0", "pyproj>=2.2.0, <3.0"]
 }
@@ -76,6 +81,7 @@ pandas_require = {
     "pandas.ParquetDataSet": [PANDAS, "pyarrow>=0.12.0, <4.0"],
     "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy~=1.2"],
     "pandas.SQLQueryDataSet": [PANDAS, "SQLAlchemy~=1.2"],
+    "pandas.GenericDataSet": [PANDAS],
 }
 pillow_require = {"pillow.ImageDataSet": ["Pillow~=8.0"]}
 plotly_require = {
@@ -91,7 +97,7 @@ tensorflow_required = {
     "tensorflow.TensorflowModelDataset": [
         # currently only TensorFlow V2 supported for saving and loading.
         # V1 requires HDF5 and serializes differently
-        "tensorflow~=2.0",
+        "tensorflow~=2.0"
     ]
 }
 yaml_require = {"yaml.YAMLDataSet": [PANDAS, "PyYAML>=4.2, <6.0"]}

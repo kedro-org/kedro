@@ -122,6 +122,18 @@ commands:
           name: Pip-compile requirements file
           command: make pip-compile
 
+  run_viz_build:
+    description: Deploy kedro-viz to ensure tests in that project pass
+    steps:
+      - run:
+          name: Trigger a kedro-viz build
+          command: |
+            curl --location --request POST \
+              --url https://circleci.com/api/v2/project/github/quantumblacklabs/kedro-viz/pipeline \
+              --header "Circle-Token: $CIRCLE_TOKEN" \
+              --header 'content-type: application/json' \
+              --data '{"branch":"main"}'
+
   # Windows-related commands
   win_setup_conda:
     description: Setup conda
@@ -306,8 +318,8 @@ jobs:
       - setup_conda
       - setup_requirements
       - run:
-          name: Run unit tests without Spark
-          command: make test-no-spark
+          name: Run unit tests
+          command: make test
 
   linters_38:
     executor: py38
@@ -328,6 +340,11 @@ jobs:
   pip_compile_38:
     executor: py38
     steps: [pip_compile]
+
+  run_kedro_viz:
+    docker:
+      - image: spotify/alpine # for bash and curl
+    steps: [run_viz_build]
 
   all_circleci_checks_succeeded:
     docker:
@@ -455,6 +472,11 @@ workflows:
       - win_e2e_tests_36
       - win_e2e_tests_37
       - win_e2e_tests_38
+      - run_kedro_viz:
+          filters:
+            branches:
+              only:
+                - master
       - all_circleci_checks_succeeded:
           requires:
             - unit_tests_36

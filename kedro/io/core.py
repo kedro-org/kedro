@@ -380,7 +380,6 @@ def parse_dataset_definition(
                 "`type` class path does not support relative "
                 "paths or paths ending with a dot."
             )
-
         class_paths = (prefix + class_obj for prefix in _DEFAULT_PACKAGES)
 
         trials = (_load_obj(class_path) for class_path in class_paths)
@@ -407,7 +406,12 @@ def parse_dataset_definition(
         )
         logging.getLogger(__name__).warning(message, VERSION_KEY)
         del config[VERSION_KEY]
-    if config.pop(VERSIONED_FLAG_KEY, False):  # data set is versioned
+
+    # dataset is either versioned explicitly by the user or versioned is set to true by default
+    # on the dataset
+    if config.pop(VERSIONED_FLAG_KEY, False) or getattr(
+        class_obj, VERSIONED_FLAG_KEY, False
+    ):
         config[VERSION_KEY] = Version(load_version, save_version)
 
     return class_obj, config

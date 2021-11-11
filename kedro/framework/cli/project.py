@@ -66,10 +66,10 @@ so parameter values are allowed to contain colons, parameter keys are not.
 To pass a nested dictionary as parameter, separate keys by '.', example:
 param_group.param1:value1."""
 INPUT_FILE_HELP = """Name of the requirements file to compile."""
-OUTPUT_FILE_HELP = """Name of the file to store the compiled requirements in."""
+OUTPUT_FILE_HELP = """Name of the file where compiled requirements should be stored."""
 
 
-def _build_reqs(source_path: Path, input_file, output_file, args: Sequence[str] = ()):
+def _build_reqs(source_path: Path, input_file: Optional[Path] = None, output_file: Optional[Path] = None, args: Sequence[str] = ()):
     """Run `pip-compile` on requirements.txt or the user defined input file and save
     the compiled requirements to requirements.lock or the user defined output file.
 
@@ -83,10 +83,8 @@ def _build_reqs(source_path: Path, input_file, output_file, args: Sequence[str] 
         FileNotFoundError: If requirements.txt or the specified input file is not found.
 
     """
-    if not input_file:
-        input_file = source_path / "requirements.txt"
-    if not output_file:
-        output_file = source_path / "requirements.lock"
+    input_file = input_file or source_path / "requirements.txt"
+    output_file = output_file or source_path / "requirements.lock"
 
     if input_file.is_file():
         python_call(

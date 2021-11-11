@@ -22,7 +22,7 @@ Declare any dependencies in `src/requirements.txt` for `pip` installation and `s
 To install them, run:
 
 ```
-kedro install
+pip install -r src/requirements.txt
 ```
 
 ## How to run your Kedro pipeline
@@ -61,7 +61,7 @@ After this, if you'd like to update your project requirements, please update `sr
 
 > Note: Using `kedro jupyter` or `kedro ipython` to run your notebook provides these variables in scope: `context`, `catalog`, and `startup_error`.
 >
-> Jupyter, JupyterLab, and IPython are already included in the project requirements by default, so once you have run `kedro install` you will not need to take any extra steps before you use them.
+> Jupyter, JupyterLab, and IPython are already included in the project requirements by default, so once you have run `pip install -r src/requirements.txt` you will not need to take any extra steps before you use them.
 
 ### Jupyter
 To use Jupyter notebooks in your Kedro project, you need to install Jupyter:

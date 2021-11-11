@@ -4,7 +4,7 @@
 
 Hooks are a mechanism to add extra behaviour to Kedro's main execution in an easy and consistent manner. Some examples may include:
 
-* Adding a transformer after the data catalog is loaded
+* Adding a log statement after the data catalog is loaded
 * Adding data validation to the inputs before a node runs, and to the outputs after a node has run. This makes it possible to integrate with other tools like [Great-Expectations](https://docs.greatexpectations.io/en/latest/)
 * Adding machine learning metrics tracking, e.g. using [MLflow](https://mlflow.org/), throughout a pipeline run
 
@@ -52,7 +52,6 @@ The naming convention for error hooks is `on_<noun>_error`, in which:
 In addition, Kedro defines Hook specifications to register certain library components to be used with the project. This is where users can define their custom class implementations. Currently, the following Hook specifications are provided:
 
 * `register_pipelines`
-* `register_config_loader`
 * `register_catalog`
 
 The naming convention for registration hooks is `register_<library_component>`.
@@ -79,19 +78,24 @@ def after_catalog_created(
     pass
 ```
 
-However, if you just want to use this Hook to add transformer for a data catalog after it is created, your Hook implementation can be as simple as:
+However, if you just want to use this Hook to list the contents of a data catalog after it is created, your Hook implementation can be as simple as:
 
 ```python
 # <your_project>/src/<your_project>/hooks.py
-from kedro.extras.transformers.time_profiler import ProfileTimeTransformer
+import logging
+
 from kedro.framework.hooks import hook_impl
 from kedro.io import DataCatalog
 
 
-class TransformerHooks:
+class DataCatalogHooks:
+    @property
+    def _logger(self):
+        return logging.getLogger(self.__class__.__name__)
+
     @hook_impl
     def after_catalog_created(self, catalog: DataCatalog) -> None:
-        catalog.add_transformer(ProfileTimeTransformer())
+        self._logger.info(catalog.list())
 ```
 
 ```eval_rst
@@ -110,9 +114,9 @@ The following example sets up a Hook so that the `after_data_catalog_created` im
 
 ```python
 # <your_project>/src/<your_project>/settings.py
-from <your_project>.hooks import ProjectHooks, TransformerHooks
+from <your_project>.hooks import ProjectHooks, DataCatalogHooks
 
-HOOKS = (ProjectHooks(), TransformerHooks())
+HOOKS = (ProjectHooks(), DataCatalogHooks())
 ```
 
 Kedro also has auto-discovery enabled by default. This means that any installed plugins that declare a Hooks entry-point will be registered. To learn more about how to enable this for your custom plugin, see our [plugin development guide](04_plugins.md#hooks).
@@ -138,9 +142,7 @@ where `<plugin_name>` is the name of an installed plugin for which the auto-regi
 
 ### Use Hooks to extend a node's behaviour
 
-Prior to Kedro 0.16, to add extra behaviour before and after a node's execution, we recommended using [decorators](07_decorators.md) on individual nodes. We also exposed a convenience method to apply decorators to [all nodes in a `Pipeline`](07_decorators.md#how-to-apply-a-decorator-to-nodes).
-
-However, after the introduction of Hooks in 0.16, this capability is readily available through the [`before_node_run` and `after_node_run` Hooks](/kedro.framework.hooks.specs.NodeSpecs). Furthermore, you can apply extra behaviour to not only an individual node or an entire Kedro pipeline, but also to a _subset_ of nodes based on their tags or namespaces. For example, let's say we want to add the following extra behaviours to a node:
+You can add extra behaviour before and after a node's execution by using the [`before_node_run` and `after_node_run` Hooks](/kedro.framework.hooks.specs.NodeSpecs). Furthermore, you can apply extra behaviour to not only an individual node or an entire Kedro pipeline, but also to a _subset_ of nodes based on their tags or namespaces. For example, let's say we want to add the following extra behaviours to a node:
 
 ```python
 from kedro.pipeline.node import Node
@@ -230,7 +232,7 @@ class ProjectHooks:
             node.func = retry(node.func)
 ```
 ### Use Hooks to customise the dataset load and save methods
-From Kedro 0.18.0 [Transformers](06_transformers.md) will be deprecated and we recommend using the `before_dataset_loaded`/`after_dataset_loaded` and `before_dataset_saved`/`after_dataset_saved` Hooks to customise the dataset `load` and `save` methods where appropriate.
+We recommend using the `before_dataset_loaded`/`after_dataset_loaded` and `before_dataset_saved`/`after_dataset_saved` Hooks to customise the dataset `load` and `save` methods where appropriate.
 
 For example, you can add logging about the dataset load runtime as follows:
 

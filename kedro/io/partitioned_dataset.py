@@ -155,7 +155,7 @@ class PartitionedDataSet(AbstractDataSet):
         self._filename_suffix = filename_suffix
         self._overwrite = overwrite
         self._protocol = infer_storage_options(self._path)["protocol"]
-        self._partition_cache = Cache(maxsize=1)
+        self._partition_cache = Cache(maxsize=1)  # type: Cache
 
         dataset = dataset if isinstance(dataset, dict) else {"type": dataset}
         self._dataset_type, self._dataset_config = parse_dataset_definition(dataset)

@@ -12,11 +12,9 @@ from typing import Any, Dict, Iterable, Optional, Union
 import click
 
 from kedro import __version__ as kedro_version
+from kedro.config import ConfigLoader
 from kedro.framework.context import KedroContext
-from kedro.framework.context.context import (
-    KedroContextError,
-    _convert_paths_to_absolute_posix,
-)
+from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import get_hook_manager
 from kedro.framework.project import (
     configure_project,
@@ -66,7 +64,7 @@ def _deactivate_session() -> None:
     _active_session = None
 
 
-def _describe_git(project_path: Path) -> Dict[str, Dict[str, str]]:
+def _describe_git(project_path: Path) -> Dict[str, Dict[str, Any]]:
     project_path = str(project_path)
 
     try:
@@ -78,7 +76,7 @@ def _describe_git(project_path: Path) -> Dict[str, Dict[str, str]]:
         logging.getLogger(__name__).warning("Unable to git describe %s", project_path)
         return {}
 
-    git_data = {"commit_sha": res.decode().strip()}
+    git_data = {"commit_sha": res.decode().strip()}  # type: Dict[str, Any]
 
     res = subprocess.check_output(["git", "status", "--short"], cwd=project_path)
     git_data["dirty"] = bool(res.decode().strip())
@@ -197,9 +195,7 @@ class KedroSession:
         return session
 
     def _get_logging_config(self) -> Dict[str, Any]:
-        context = self.load_context()
-
-        conf_logging = context.config_loader.get(
+        conf_logging = self._get_config_loader().get(
             "logging*", "logging*/**", "**/logging*"
         )
         # turn relative paths in logging config into absolute path
@@ -253,15 +249,38 @@ class KedroSession:
         """An instance of the project context."""
         env = self.store.get("env")
         extra_params = self.store.get("extra_params")
+        config_loader = self._get_config_loader()
 
         context_class = settings.CONTEXT_CLASS
         context = context_class(
             package_name=self._package_name,
             project_path=self._project_path,
+            config_loader=config_loader,
             env=env,
             extra_params=extra_params,
         )
         return context
+
+    def _get_config_loader(self) -> ConfigLoader:
+        """An instance of the config loader."""
+        env = self.store.get("env")
+        extra_params = self.store.get("extra_params")
+
+        config_loader_class = settings.CONFIG_LOADER_CLASS
+        try:
+            return config_loader_class(
+                conf_source=str(self._project_path / settings.CONF_SOURCE),
+                env=env,
+                runtime_params=extra_params,
+                **settings.CONFIG_LOADER_ARGS,
+            )
+        except TypeError as exc:
+            raise TypeError(
+                f"Expected an instance of `ConfigLoader`, "
+                f"got `{settings.CONFIG_LOADER_CLASS}` of class "
+                f"`{type(settings.CONFIG_LOADER_CLASS)}` instead.\n"
+                f"The provided `CONFIG_LOADER_ARGS were: {settings.CONFIG_LOADER_ARGS}"
+            ) from exc
 
     def close(self):
         """Close the current session and save its store to disk
@@ -318,7 +337,7 @@ class KedroSession:
             load_versions: An optional flag to specify a particular dataset
                 version timestamp to load.
         Raises:
-            KedroContextError: If the named or `__default__` pipeline is not
+            ValueError: If the named or `__default__` pipeline is not
                 defined by `register_pipelines`.
             Exception: Any uncaught exception during the run will be re-raised
                 after being passed to ``on_pipeline_error`` hook.
@@ -340,14 +359,13 @@ class KedroSession:
         try:
             pipeline = pipelines[name]
         except KeyError as exc:
-            raise KedroContextError(
+            raise ValueError(
                 f"Failed to find the pipeline named '{name}'. "
                 f"It needs to be generated and returned "
                 f"by the 'register_pipelines' function."
             ) from exc
 
-        filtered_pipeline = context._filter_pipeline(
-            pipeline=pipeline,
+        filtered_pipeline = pipeline.filter(
             tags=tags,
             from_nodes=from_nodes,
             to_nodes=to_nodes,

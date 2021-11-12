@@ -1,6 +1,6 @@
 tasks:
   - init: |
-      PIP_USER=false make install-pre-commit
+      pip install black
       pip install -e .
       cd /workspace
       yes spaceflights | kedro new -s spaceflights

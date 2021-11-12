@@ -34,15 +34,11 @@ class DeltaTableDataset(SparkDataSet):
         )
         self._delta_options = delta_options
 
-    def _load(self):
+    def _load(self) -> DeltaTable:
         load_path = self._fs_prefix + str(self._get_load_path())
         return DeltaTable.forPath(self._get_spark(), load_path)
 
-    def _save(self, data: Any):
-        pass  # TBD
-
-    @staticmethod
-    def confirm():
+    def _save(self, data: Any) -> None:
         logger.info(
             "Saving was performed on `DeltaTable` object within the context of the node function"
         )

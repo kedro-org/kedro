@@ -296,9 +296,6 @@ class SparkDataSet(AbstractVersionedDataSet):
             glob_function=glob_function,
         )
 
-        # Handle `DataFrameWriter` options
-        self._dfwriter_options = save_args.pop("dfwriter_options", None)
-
         # Handle default load and save arguments
         self._load_args = deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args is not None:
@@ -306,6 +303,9 @@ class SparkDataSet(AbstractVersionedDataSet):
         self._save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
         if save_args is not None:
             self._save_args.update(save_args)
+
+        # Handle `DataFrameWriter` options
+        self._dfwriter_options = self._save_args.pop("dfwriter_options", {})
 
         self._file_format = file_format
         self._fs_prefix = fs_prefix
@@ -346,19 +346,19 @@ class SparkDataSet(AbstractVersionedDataSet):
             raise
         return True
 
-    def _add_options(self, df: DataFrame) -> DataFrameWriter:
+    def _add_options(self, dataframe: DataFrame) -> DataFrameWriter:
         # DeltaTable specific opts, such as `schemaValidation`
         if self._dfwriter_options:
-            df_writer = df.write
+            df_writer = dataframe.write
             return reduce(
                 lambda dfw, opt: df_writer.option(opt, self._dfwriter_options[opt]),
                 self._dfwriter_options,
                 df_writer,
             )
-        return df.write
+        return dataframe.write
 
     def _handle_delta(self):
-        unsupported_modes = ["merge", "delete", "update"]
+        unsupported_modes = {"merge", "delete", "update"}
         write_mode = self._save_args.get("mode")
         if self._file_format == "delta" and write_mode.lower() in unsupported_modes:
             raise DataSetError(

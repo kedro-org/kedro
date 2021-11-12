@@ -1,13 +1,18 @@
 tasks:
-  - init: |
-      pip install black
+  - name: kedro
+    init: |
+      make install-test-requirements
       pip install -e .
+      PIP_USER=false pre-commit install --install-hooks
+      gp sync-done kedro
+  - name: spaceflights
+    init: |
+      gp sync-await kedro
       cd /workspace
       yes spaceflights | kedro new -s spaceflights
       cd spaceflights && echo "consent: false" > .telemetry
-    command: |
       kedro info
-  - command: echo "hi"
+    openMode: tab-before
 
 github:
   prebuilds:

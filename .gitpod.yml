@@ -1,10 +1,12 @@
 tasks:
   - init: |
+      export PIP_USER=false
       make install-pre-commit
       pip install --no-deps -e .
   - command: |
       cd ..
       yes spaceflights | kedro new -s spaceflights
+      kedro info
 
 github:
   prebuilds:

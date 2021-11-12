@@ -60,7 +60,7 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
 * Project-specific Kedro commands
   * [`kedro activate-nbstripout`](#strip-output-cells)
   * [`kedro build-docs`](#build-the-project-documentation)
-  * [`kedro build-reqs`](#build-the-project-s-dependency-tree)
+  * [`kedro build-reqs`](#build-the-projects-dependency-tree)
   * [`kedro catalog list`](#list-datasets-per-pipeline-per-type)
   * [`kedro catalog create`](#create-a-data-catalog-yaml-configuration-file)
   * [`kedro ipython`](#notebooks)
@@ -155,9 +155,11 @@ The commands a project supports are specified on the framework side. If you want
 kedro build-reqs
 ```
 
-This command runs [`pip-compile`](https://github.com/jazzband/pip-tools#example-usage-for-pip-compile) on the project's `src/requirements.in` file. If the file doesn't exist, Kedro will create it by copying from `src/requirements.txt`.
+This command runs [`pip-compile`](https://github.com/jazzband/pip-tools#example-usage-for-pip-compile) on the project's `src/requirements.txt` file and will create `src/requirements.lock` with the compiled requirements.
 
-`kedro build-reqs` also accepts and passes through CLI options accepted by `pip-compile`. For example, `kedro build-reqs --generate-hashes` will call `pip-compile --generate-hashes src/requirements.in`.
+`kedro build-reqs` has two optional arguments to specify which file to compile the requirements from and where to save the compiled requirements to. These arguments are `--input-file` and `--output-file` respectively.
+
+`kedro build-reqs` also accepts and passes through CLI options accepted by `pip-compile`. For example, `kedro build-reqs --generate-hashes` will call `pip-compile --output-file=src/requirements.lock --generate-hashes src/requirements.txt`.
 
 #### Install all package dependencies
 

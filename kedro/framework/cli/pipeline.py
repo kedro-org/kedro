@@ -23,7 +23,6 @@ from kedro.framework.cli.utils import (
     KedroCliError,
     _clean_pycache,
     _filter_deprecation_warnings,
-    _get_requirements_in,
     call,
     command_with_verbosity,
     env_option,
@@ -279,8 +278,8 @@ def _pull_package(
         package_reqs = re.findall(reqs_element_pattern, list_reqs[0])
 
         if package_reqs:
-            requirements_in = _get_requirements_in(metadata.source_dir)
-            _append_package_reqs(requirements_in, package_reqs, package_name)
+            requirements_txt = metadata.source_dir / "requirements.txt"
+            _append_package_reqs(requirements_txt, package_reqs, package_name)
 
         _clean_pycache(temp_dir_path)
         _install_files(
@@ -1064,28 +1063,38 @@ def _delete_artifacts(*artifacts: Path):
 
 
 def _append_package_reqs(
-    requirements_in: Path, package_reqs: List[str], pipeline_name: str
+    requirements_txt: Path, package_reqs: List[str], pipeline_name: str
 ) -> None:
-    """Appends modular pipeline requirements to project level requirements.in"""
-    existing_reqs = _safe_parse_requirements(requirements_in.read_text())
+    """Appends modular pipeline requirements to project level requirements.txt"""
     incoming_reqs = _safe_parse_requirements(package_reqs)
-    reqs_to_add = set(incoming_reqs) - set(existing_reqs)
-    if not reqs_to_add:
-        return
+    if requirements_txt.is_file():
+        existing_reqs = _safe_parse_requirements(requirements_txt.read_text())
+        reqs_to_add = set(incoming_reqs) - set(existing_reqs)
+        if not reqs_to_add:
+            return
 
-    sorted_reqs = sorted(str(req) for req in reqs_to_add)
-    sep = "\n"
-    with open(requirements_in, "a", encoding="utf-8") as file:
-        file.write(
-            f"\n\n# Additional requirements from modular pipeline `{pipeline_name}`:\n"
+        sorted_reqs = sorted(str(req) for req in reqs_to_add)
+        sep = "\n"
+        with open(requirements_txt, "a", encoding="utf-8") as file:
+            file.write(
+                f"\n\n# Additional requirements from modular pipeline `{pipeline_name}`:\n"
+            )
+            file.write(sep.join(sorted_reqs))
+        click.secho(
+            f"Added the following requirements from modular pipeline `{pipeline_name}` to "
+            f"requirements.txt:\n{sep.join(sorted_reqs)}"
         )
-        file.write(sep.join(sorted_reqs))
+    else:
+        click.secho(
+            "No project requirements.txt found. Copying contents from pipeline requirements.txt..."
+        )
+        sorted_reqs = sorted(str(req) for req in incoming_reqs)
+        sep = "\n"
+        with open(requirements_txt, "a", encoding="utf-8") as file:
+            file.write(sep.join(sorted_reqs))
+
     click.secho(
-        f"Added the following requirements from modular pipeline `{pipeline_name}` to "
-        f"requirements.in:\n{sep.join(sorted_reqs)}"
-    )
-    click.secho(
-        "Use `kedro build-reqs` to compile and `pip install -r src/requirements.txt` to install "
+        "Use `kedro build-reqs` to compile and `pip install -r src/requirements.lock` to install "
         "the updated list of requirements."
     )
 

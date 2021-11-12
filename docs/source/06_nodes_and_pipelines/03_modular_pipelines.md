@@ -155,11 +155,7 @@ You can pull a modular pipeline from a source distribution (sdist) file by execu
 *  Configuration files in `conf/<env>/parameters/<pipeline_name>.yml`, where `<env>` defaults to `base`. If you want to place the parameters from a different config environment, run `kedro pipeline pull <pipeline_name> --env <env_name>`
 *  Pipeline unit tests in `src/tests/<pipeline_name>`
 
-Kedro will also parse any requirements packaged with the modular pipeline and add them to project level `requirements.in`. It is advised to run `kedro build-reqs` to compile and `pip install -r src/requirements.txt` to install the updated list of requirements after pulling a modular pipeline.
-
-```eval_rst
-.. note::  If a modular pipeline has embedded requirements and a project `requirements.in` file does not already exist, it will be generated based on the project `requirements.txt` before appending the modular pipeline requirements.
-```
+Kedro will also parse any requirements packaged with the modular pipeline and add them to project level `requirements.txt`. It is advised to run `kedro build-reqs` to compile and `pip install -r src/requirements.lock` to install the updated list of requirements after pulling a modular pipeline.
 
 You can pull a modular pipeline from different locations, including local storage, PyPI and the cloud:
 

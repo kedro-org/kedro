@@ -416,7 +416,7 @@ class TestBuildDocsCommand:
 
 @pytest.mark.usefixtures("chdir_to_dummy_project", "patch_log", "fake_copyfile")
 class TestBuildReqsCommand:
-    def test_requirements_file_exists(
+    def test_compile_from_requirements_file(
         self,
         python_call_mock,
         fake_project_cli,
@@ -434,11 +434,15 @@ class TestBuildReqsCommand:
 
         python_call_mock.assert_called_once_with(
             "piptools",
-            ["compile", "-q", str(fake_repo_path / "src" / "requirements.in")],
+            [
+                "compile",
+                str(fake_repo_path / "src" / "requirements.txt"),
+                "--output-file",
+                str(fake_repo_path / "src" / "requirements.lock"),
+            ],
         )
-        fake_copyfile.assert_not_called()
 
-    def test_requirements_file_doesnt_exist(
+    def test_compile_from_input_and_to_output_file(
         self,
         python_call_mock,
         fake_project_cli,
@@ -446,18 +450,28 @@ class TestBuildReqsCommand:
         fake_copyfile,
         fake_metadata,
     ):
-        # File does not exist:
-        requirements_in = fake_repo_path / "src" / "requirements.in"
-        requirements_txt = fake_repo_path / "src" / "requirements.txt"
+        # File exists:
+        input_file = fake_repo_path / "src" / "dev-requirements.txt"
+        with open(input_file, "a", encoding="utf-8") as file:
+            file.write("")
+        output_file = fake_repo_path / "src" / "dev-requirements.lock"
 
-        result = CliRunner().invoke(fake_project_cli, ["build-reqs"], obj=fake_metadata)
+        result = CliRunner().invoke(
+            fake_project_cli,
+            [
+                "build-reqs",
+                "--input-file",
+                str(input_file),
+                "--output-file",
+                str(output_file),
+            ],
+            obj=fake_metadata,
+        )
         assert not result.exit_code, result.stdout
         assert "Requirements built!" in result.stdout
         python_call_mock.assert_called_once_with(
-            "piptools", ["compile", "-q", str(requirements_in)]
-        )
-        fake_copyfile.assert_called_once_with(
-            str(requirements_txt), str(requirements_in)
+            "piptools",
+            ["compile", str(input_file), "--output-file", str(output_file)],
         )
 
     @pytest.mark.parametrize(
@@ -471,7 +485,7 @@ class TestBuildReqsCommand:
         extra_args,
         fake_metadata,
     ):
-        requirements_in = fake_repo_path / "src" / "requirements.in"
+        requirements_txt = fake_repo_path / "src" / "requirements.txt"
 
         result = CliRunner().invoke(
             fake_project_cli, ["build-reqs"] + extra_args, obj=fake_metadata
@@ -480,19 +494,24 @@ class TestBuildReqsCommand:
         assert not result.exit_code, result.stdout
         assert "Requirements built!" in result.stdout
 
-        call_args = ["compile", "-q"] + extra_args + [str(requirements_in)]
+        call_args = (
+            ["compile"]
+            + extra_args
+            + [str(requirements_txt)]
+            + ["--output-file", str(fake_repo_path / "src" / "requirements.lock")]
+        )
         python_call_mock.assert_called_once_with("piptools", call_args)
 
     @pytest.mark.parametrize("os_name", ["posix", "nt"])
-    def test_missing_requirements_in_and_txt(
-        self, fake_project_cli, mocker, fake_metadata, os_name
+    def test_missing_requirements_txt(
+        self, fake_project_cli, mocker, fake_metadata, os_name, fake_repo_path
     ):
-        """Test error when neither requirements.txt nor requirements.in exists."""
+        """Test error when input file requirements.txt doesn't exists."""
+        requirements_txt = fake_repo_path / "src" / "requirements.txt"
+
         mocker.patch("kedro.framework.cli.project.os").name = os_name
         mocker.patch.object(Path, "is_file", return_value=False)
         result = CliRunner().invoke(fake_project_cli, ["build-reqs"], obj=fake_metadata)
         assert result.exit_code  # Error expected
         assert isinstance(result.exception, FileNotFoundError)
-        assert "No project requirements.in or requirements.txt found" in str(
-            result.exception
-        )
+        assert f"File `{requirements_txt}` not found" in str(result.exception)

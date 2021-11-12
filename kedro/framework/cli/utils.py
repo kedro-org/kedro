@@ -462,20 +462,14 @@ def _get_values_as_tuple(values: Iterable[str]) -> Tuple[str, ...]:
     return tuple(chain.from_iterable(value.split(",") for value in values))
 
 
-def _get_requirements_in(source_path: Path, create_empty: bool = False) -> Path:
+def _get_requirements_in(source_path: Path) -> Path:
     """Get path to project level requirements.in, creating it if required.
 
     Args:
         source_path: Path to the project `src` folder.
-        create_empty: Whether an empty requirements.in file should be created if
-            requirements.in does not exist and there is also no requirements.txt to
-            copy requirements from.
 
     Returns:
         Path to requirements.in.
-
-    Raises:
-        FileNotFoundError: If neither requirements.in nor requirements.txt is found.
 
     """
     requirements_in = source_path / "requirements.in"
@@ -490,12 +484,6 @@ def _get_requirements_in(source_path: Path, create_empty: bool = False) -> Path:
         shutil.copyfile(str(requirements_txt), str(requirements_in))
         return requirements_in
 
-    if create_empty:
-        click.secho("Creating empty requirements.in...")
-        requirements_in.touch()
-        return requirements_in
-
-    raise FileNotFoundError(
-        "No project requirements.in or requirements.txt found in `/src`. "
-        "Please create either and try again."
-    )
+    click.secho("Creating empty requirements.in...")
+    requirements_in.touch()
+    return requirements_in

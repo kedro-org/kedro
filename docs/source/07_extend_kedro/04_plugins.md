@@ -14,7 +14,7 @@ Here is a simple example of a plugin that prints the pipeline as JSON:
 
 ```python
 import click
-from kedro.framework.session import KedroSession
+from kedro.framework.project import pipelines
 
 
 @click.group(name="JSON")
@@ -27,9 +27,8 @@ def commands():
 @click.pass_obj
 def to_json(metadata):
     """Display the pipeline in JSON format"""
-    session = KedroSession.create(metadata.package_name)
-    context = session.load_context()
-    print(context.pipeline.to_json())
+    pipeline = pipelines["__default__"]
+    print(pipeline.to_json())
 ```
 
 The plugin provides the following `entry_points` config in `setup.py`:

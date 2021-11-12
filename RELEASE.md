@@ -59,8 +59,11 @@
 * The dataset `networkx.NetworkXDataSet` has been renamed to `networkx.JSONDataSet`.
 * Removed the `config_loader` property from `KedroContext`.
 * Removed decorator API from `Node` and `Pipeline`, as well as the modules `kedro.extras.decorators` and `kedro.pipeline.decorators`.
+* Removed transformer API from `DataCatalog`, as well as the modules `kedro.extras.transformers` and `kedro.io.transformers`.
 * Removed the `Journal`.
 * Removed the `--parallel` flag from `kedro run` in favour of `--runner=ParallelRunner`. The `-p` flag is now an alias for `--pipeline`.
+* Removed deprecated `CONF_SOURCE`, `package_name`, `pipeline`, `pipelines`, and `io` attributes from `KedroContext` as well as the deprecated `KedroContext.run` method.
+* Changed the behaviour of `kedro build-reqs` to compile requirements from `requirements.txt` instead of `requirements.in` and save them to `requirements.lock` instead of `requirements.txt`.
 
 ## Thanks for supporting contributions
 
@@ -132,6 +135,7 @@
 * Upgraded `pip-tools`, which is used by `kedro build-reqs`, to 6.4. This `pip-tools` version requires `pip>=21.2` while [adding support for `pip>=21.3`](https://github.com/jazzband/pip-tools/pull/1501). To upgrade `pip`, please refer to [their documentation](https://pip.pypa.io/en/stable/installing/#upgrading-pip).
 * Relaxed the bounds on the `plotly` requirement for `plotly.PlotlyDataSet`.
 * `kedro pipeline package <pipeline>` now raises an error if the `<pipeline>` argument doesn't look like a valid Python module path (e.g. has `/` instead of `.`).
+* Added new `overwrite` argument to `PartitionedDataSet` and `MatplotlibWriter` to enable deletion of existing partitions and plots on dataset `save`.
 * `kedro pipeline pull` now works when the project requirements contains entries such as `-r`, `--extra-index-url` and local wheel files ([Issue #913](https://github.com/quantumblacklabs/kedro/issues/913)).
 * Fixed slow startup because of catalog processing by reducing the exponential growth of extra processing during `_FrozenDatasets` creations.
 * Removed `.coveragerc` from the Kedro project template. `coverage` settings are now given in `pyproject.toml`.
@@ -144,7 +148,8 @@
 ## Minor breaking changes to the API
 
 ## Upcoming deprecations for Kedro 0.18.0
-* `kedro.extras.decorators` is being deprecated in favour of Hooks.
+* `kedro.extras.decorators` and `kedro.pipeline.decorators` are being deprecated in favour of Hooks.
+* `kedro.extras.transformers` and `kedro.io.transformers` are being deprecated in favour of Hooks.
 
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman),

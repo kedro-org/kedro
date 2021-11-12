@@ -10,7 +10,7 @@ from dynaconf.validator import Validator
 
 from kedro.framework.context.context import _convert_paths_to_absolute_posix
 from kedro.framework.hooks import hook_impl
-from kedro.framework.project import _ProjectPipelines, _ProjectSettings
+from kedro.framework.project import _ProjectPipelines, _ProjectSettings, pipelines
 from kedro.framework.session import KedroSession
 from kedro.io import DataCatalog, MemoryDataSet
 from kedro.pipeline import Pipeline, node
@@ -105,8 +105,14 @@ class TestCatalogHooks:
     ):
         context = mock_session.load_context()
         fake_save_version = mocker.sentinel.fake_save_version
-        mocker.patch.object(
-            context, "_get_save_version", return_value=fake_save_version
+
+        mocker.patch(
+            "kedro.framework.session.KedroSession.store",
+            new_callable=mocker.PropertyMock,
+            return_value={
+                "session_id": fake_save_version,
+                "save_version": fake_save_version,
+            },
         )
 
         catalog = context.catalog
@@ -115,7 +121,7 @@ class TestCatalogHooks:
 
         catalog.save("cars", dummy_dataframe)
         catalog.save("boats", dummy_dataframe)
-        context.run()
+        mock_session.run()
 
         relevant_records = [
             r for r in caplog.records if r.getMessage() == "Catalog created"
@@ -139,7 +145,7 @@ class TestPipelineHooks:
     ):
         context = mock_session.load_context()
         catalog = context.catalog
-        default_pipeline = context.pipeline
+        default_pipeline = pipelines["__default__"]
         catalog.save("cars", dummy_dataframe)
         catalog.save("boats", dummy_dataframe)
         mock_session.run()

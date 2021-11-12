@@ -10,7 +10,6 @@ import logging
 import re
 from collections import defaultdict
 from typing import Any, Dict, List, Optional, Set, Type, Union
-from warnings import warn
 
 from kedro.io.core import (
     AbstractDataSet,
@@ -218,6 +217,8 @@ class DataCatalog:
         Raises:
             DataSetError: When the method fails to create any of the data
                 sets from their config.
+            DataSetNotFoundError: When `load_versions` refers to a dataset that doesn't
+                exist in the catalog.
 
         Example:
         ::
@@ -262,7 +263,7 @@ class DataCatalog:
 
         missing_keys = load_versions.keys() - catalog.keys()
         if missing_keys:
-            warn(
+            raise DataSetNotFoundError(
                 f"`load_versions` keys [{', '.join(sorted(missing_keys))}] "
                 f"are not found in the catalog."
             )
@@ -548,7 +549,7 @@ class DataCatalog:
             return list(self._data_sets.keys())
 
         if not regex_search.strip():
-            logging.warning("The empty string will not match any data sets")
+            self._logger.warning("The empty string will not match any data sets")
             return []
 
         try:

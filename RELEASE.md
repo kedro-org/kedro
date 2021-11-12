@@ -60,6 +60,7 @@
 * Removed the `config_loader` property from `KedroContext`.
 * Removed decorator API from `Node` and `Pipeline`, as well as the modules `kedro.extras.decorators` and `kedro.pipeline.decorators`.
 * Removed the `Journal`.
+* Removed the `--parallel` flag from `kedro run` in favour of `--runner=ParallelRunner`. The `-p` flag is now an alias for `--pipeline`.
 
 ## Thanks for supporting contributions
 
@@ -107,6 +108,7 @@
 
 * If you had any `networkx.NetworkXDataSet` entries in your catalog, replace them with `networkx.JSONDataSet`.
 * If you were using the `KedroContext` to access `ConfigLoader`, please use `settings.CONFIG_LOADER_CLASS` to access the currently used `ConfigLoader` instead.
+* To run a pipeline in parallel, use `kedro run --runner=ParallelRunner` rather than `--parallel` or `-p`. 
 
 # Upcoming Release 0.17.6
 

@@ -4,7 +4,7 @@ tasks:
       pip install -e .
       cd /workspace
       yes spaceflights | kedro new -s spaceflights
-      echo "consent: false" > .telemetry
+      cd spaceflights && echo "consent: false" > .telemetry
     command: |
       kedro info
   - command: echo "hi"

@@ -195,10 +195,7 @@ Kedro has options to modify pipeline runs. Here is a list of CLI arguments suppo
 +---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
 | :code:`kedro run --node debug_me,debug_me_too`                            | Run only nodes with specified names                                             | Yes                       |
 +---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| :code:`kedro run --runner runner_name`                                    | Run the pipeline with a specific runner. Cannot be used together with --parallel| No                        |
-+---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
-| :code:`kedro run --parallel`                                              | Run the pipeline using the `ParallelRunner`. If not specified, use the          | No                        |
-|                                                                           | `SequentialRunner`. Cannot be used together with --runner                       |                           |
+| :code:`kedro run --runner runner_name`                                    | Run the pipeline with a specific runner                                         | No                        |
 +---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+
 | :code:`kedro run --env env_name`                                          | Run the pipeline in the env_name environment. Defaults to local if not provided | No                        |
 +---------------------------------------------------------------------------+---------------------------------------------------------------------------------+---------------------------+

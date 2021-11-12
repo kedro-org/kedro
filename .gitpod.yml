@@ -1,7 +1,7 @@
 tasks:
   - name: kedro
     init: |
-      make install-test-requirements
+      pip install -r test_requirements.txt
       pip install -e .
       PIP_USER=false pre-commit install --install-hooks
       gp sync-done kedro

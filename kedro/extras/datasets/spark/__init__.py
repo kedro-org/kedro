@@ -11,4 +11,4 @@ with suppress(ImportError):
 with suppress(ImportError):
     from .spark_jdbc_dataset import SparkJDBCDataSet
 with suppress(ImportError):
-    from .databricks_deltatable_dataset import DeltaTableDataset
+    from .deltatable_dataset import DeltaTableDataset

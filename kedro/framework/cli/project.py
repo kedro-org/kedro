@@ -46,9 +46,11 @@ NODE_ARG_HELP = """Run only nodes with specified names."""
 RUNNER_ARG_HELP = """Specify a runner that you want to run the pipeline with.
 Available runners: `SequentialRunner`, `ParallelRunner` and `ThreadRunner`.
 This option cannot be used together with --parallel."""
-PARALLEL_ARG_HELP = """Run the pipeline using the `ParallelRunner`.
+PARALLEL_ARG_HELP = """(DEPRECATED) Run the pipeline using the `ParallelRunner`.
 If not specified, use the `SequentialRunner`. This flag cannot be used together
-with --runner."""
+with --runner. In Kedro 0.18.0, `-p` will be an alias for `--pipeline` and the 
+`--parallel` flag will no longer exist. Instead, the parallel runner should be used by 
+specifying `--runner=ParallelRunner` (or `-r`)."""
 ASYNC_ARG_HELP = """Load and save node inputs and outputs asynchronously
 with threads. If not specified, load and save datasets synchronously."""
 TAG_ARG_HELP = """Construct the pipeline using only nodes which have this tag
@@ -372,6 +374,13 @@ def run(
         )
     runner = runner or "SequentialRunner"
     if parallel:
+        deprecation_message = (
+            "DeprecationWarning: The behaviour of --parallel and -p flags will change. "
+            "In Kedro 0.18.0, `-p` will be an alias for `--pipeline` and the "
+            "`--parallel` flag will no longer exist. Instead, the parallel runner "
+            "should be used by specifying `--runner=ParallelRunner` (or `-r`)."
+        )
+        click.secho(deprecation_message, fg="red")
         runner = "ParallelRunner"
     runner_class = load_obj(runner, "kedro.runner")
 

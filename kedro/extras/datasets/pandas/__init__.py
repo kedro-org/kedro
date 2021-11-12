@@ -6,12 +6,12 @@ __all__ = [
     "FeatherDataSet",
     "GBQTableDataSet",
     "ExcelDataSet",
-    "AppendableExcelDataSet",
     "HDFDataSet",
     "JSONDataSet",
     "ParquetDataSet",
     "SQLQueryDataSet",
     "SQLTableDataSet",
+    "XMLDataSet",
     "GenericDataSet",
 ]
 
@@ -21,8 +21,6 @@ with suppress(ImportError):
     from .csv_dataset import CSVDataSet
 with suppress(ImportError):
     from .excel_dataset import ExcelDataSet
-with suppress(ImportError):
-    from .appendable_excel_dataset import AppendableExcelDataSet
 with suppress(ImportError):
     from .feather_dataset import FeatherDataSet
 with suppress(ImportError):
@@ -35,5 +33,7 @@ with suppress(ImportError):
     from .parquet_dataset import ParquetDataSet
 with suppress(ImportError):
     from .sql_dataset import SQLQueryDataSet, SQLTableDataSet
+with suppress(ImportError):
+    from .xml_dataset import XMLDataSet
 with suppress(ImportError):
     from .generic_dataset import GenericDataSet

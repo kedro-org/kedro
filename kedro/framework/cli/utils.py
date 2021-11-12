@@ -328,7 +328,7 @@ def _check_module_importable(module_name: str) -> None:
     except ImportError as exc:
         raise KedroCliError(
             f"Module `{module_name}` not found. Make sure to install required project "
-            f"dependencies by running the `kedro install` command first."
+            f"dependencies by running the `pip install -r src/requirements.txt` command first."
         ) from exc
 
 
@@ -353,21 +353,6 @@ def load_entry_points(name: str) -> Sequence[click.MultiCommand]:
         except Exception as exc:
             raise KedroCliError(f"Loading {name} commands from {entry_point}") from exc
     return entry_point_commands
-
-
-def _add_src_to_path(source_dir: Path, project_path: Path) -> None:  # pragma: no cover
-    # for backwards compatibility with ipython & deployment scripts
-    # pylint: disable=import-outside-toplevel
-    from kedro.framework.startup import _add_src_to_path as real_add_src_to_path
-
-    msg = (
-        "kedro.framework.utils._add_src_to_path is deprecated. "
-        "Please import from new location kedro.framework.startup "
-        "or use `bootstrap_project()` instead for setting up "
-        "the Kedro project."
-    )
-    warnings.warn(msg, FutureWarning)
-    real_add_src_to_path(source_dir, project_path)
 
 
 def _config_file_callback(ctx, param, value):  # pylint: disable=unused-argument
@@ -473,6 +458,10 @@ def _update_value_nested_dict(
     return nested_dict
 
 
+def _get_values_as_tuple(values: Iterable[str]) -> Tuple[str, ...]:
+    return tuple(chain.from_iterable(value.split(",") for value in values))
+
+
 def _get_requirements_in(source_path: Path, create_empty: bool = False) -> Path:
     """Get path to project level requirements.in, creating it if required.
 
@@ -510,7 +499,3 @@ def _get_requirements_in(source_path: Path, create_empty: bool = False) -> Path:
         "No project requirements.in or requirements.txt found in `/src`. "
         "Please create either and try again."
     )
-
-
-def _get_values_as_tuple(values: Iterable[str]) -> Tuple[str, ...]:
-    return tuple(chain.from_iterable(value.split(",") for value in values))

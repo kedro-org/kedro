@@ -63,7 +63,6 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
   * [`kedro build-reqs`](#build-the-project-s-dependency-tree)
   * [`kedro catalog list`](#list-datasets-per-pipeline-per-type)
   * [`kedro catalog create`](#create-a-data-catalog-yaml-configuration-file)
-  * [`kedro install`](#install-all-package-dependencies)
   * [`kedro ipython`](#notebooks)
   * [`kedro jupyter convert`](#copy-tagged-cells)
   * [`kedro jupyter lab`](#notebooks)
@@ -72,10 +71,10 @@ Here is a list of Kedro CLI commands, as a shortcut to the descriptions below. P
   * [`kedro package`](#deploy-the-project)
   * [`kedro pipeline create <pipeline_name>`](#create-a-new-modular-pipeline-in-your-project)
   * [`kedro pipeline delete <pipeline_name>`](#delete-a-modular-pipeline)
-  * [`kedro pipeline describe <pipeline_name>`](#describe-a-pipeline)
-  * [`kedro pipeline list`](#list-all-pipelines-in-your-project)
   * [`kedro pipeline package <pipeline_name>`](#package-a-modular-pipeline)
   * [`kedro pipeline pull <package_name>`](#pull-a-modular-pipeline)
+  * [`kedro registry describe <pipeline_name>`](#describe-a-registered-pipeline)
+  * [`kedro registry list`](#list-all-registered-pipelines-in-your-project)
   * [`kedro run`](#run-the-project)
   * [`kedro test`](#test-your-project)
 
@@ -146,7 +145,7 @@ kedro docs
 
 Kedro's command line interface (CLI) allows you to associate a set of commands and dependencies with a target, which you can then execute from inside the project directory.
 
-The commands a project supports are specified in its `cli.py` file, which can be extended, either by modifying the file or by injecting commands into it via the [`plugin` framework](../07_extend_kedro/04_plugins.md).
+The commands a project supports are specified on the framework side. If you want to customise any of the Kedro commands you can do this either by adding a file called `cli.py` or by injecting commands into it via the [`plugin` framework](../07_extend_kedro/04_plugins.md). Find the template for the `cli.py` file [here](../07_extend_kedro/01_common_use_cases.md#use-case-3-how-to-add-or-modify-cli-commands).
 
 ### Project setup
 
@@ -165,10 +164,10 @@ This command runs [`pip-compile`](https://github.com/jazzband/pip-tools#example-
 The following runs [`pip`](https://github.com/pypa/pip) to install all package dependencies specified in `src/requirements.txt`:
 
 ```bash
-kedro install
+pip install -r src/requirements.txt
 ```
 
-For further information, see the [`kedro install` documentation](../04_kedro_project_setup/01_dependencies.md#kedro-install).
+For further information, see the [documentation on installing project-specific dependencies](../04_kedro_project_setup/01_dependencies.md#install-project-specific-dependencies).
 
 
 ### Run the project
@@ -230,7 +229,7 @@ A parameterised run is best used for dynamic parameters, i.e. running the same p
 
 ### Deploy the project
 
-The following packages your application as one `.egg` file  and one `.whl` file within the `src/dist/` folder of your project:
+The following packages your application as one `.egg` file  and one `.whl` file within the `dist/` folder of your project:
 
 ```bash
 kedro package
@@ -242,10 +241,10 @@ See the Python documentation for [further information about packaging](https://p
 Since Kedro 0.16.4 you can pull a modular pipeline into your Kedro project as follows:
 
 ```bash
-kedro pipeline pull <link-to-modular-pipeline-wheel-file>
+kedro pipeline pull <link-to-modular-pipeline-sdist-file>
 ```
 
-The above command will take the bundled `.whl` file and do the following:
+The above command will take the bundled `.tar.gz` file and do the following:
 
 * Place source code in `src/<package_name>/pipelines/<pipeline_name>`
 * Place parameters in `conf/base/parameters/<pipeline_name>.yml`
@@ -254,8 +253,8 @@ The above command will take the bundled `.whl` file and do the following:
 `kedro pipeline pull` works with PyPI, local and cloud storage:
 
 * PyPI: `kedro pipeline pull <my-pipeline>` with `<my-pipeline>` being a package on PyPI
-* Local storage: `kedro pipeline pull <path-to-your-project-root>/src/dist/<my-pipeline>-0.1-py3-none-any.whl`
-* Cloud storage: `kedro pipeline pull s3://<my-bucket>/<my-pipeline>-0.1-py3-none-any.whl`
+* Local storage: `kedro pipeline pull <path-to-your-project-root>/dist/<my-pipeline>-0.1.tar.gz`
+* Cloud storage: `kedro pipeline pull s3://<my-bucket>/<my-pipeline>-0.1.tar.gz`
 
 ### Project quality
 
@@ -274,7 +273,7 @@ The `build-docs` command builds [project documentation](../03_tutorial/05_packag
 kedro lint
 ```
 
-Your project is linted with [`black`](https://github.com/psf/black), [`flake8`](https://gitlab.com/pycqa/flake8) and [`isort`](https://github.com/PyCQA/isort). See our [documentation about `kedro lint`](../09_development/04_lint.md#linting-your-kedro-project) for further details.
+Your project is linted with [`black`](https://github.com/psf/black), [`flake8`](https://gitlab.com/pycqa/flake8) and [`isort`](https://github.com/PyCQA/isort).
 
 
 #### Test your project
@@ -290,23 +289,25 @@ kedro test
 #### Modular pipelines
 
 ##### Create a new [modular pipeline](../06_nodes_and_pipelines/03_modular_pipelines) in your project
+
 ```bash
 kedro pipeline create <pipeline_name>
 ```
 
 ##### Package a modular pipeline
-The following command packages all the files related to a modular pipeline into a [wheel file](https://pythonwheels.com/):
+The following command packages all the files related to a modular pipeline into a [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions):
 
 ```bash
-kedro pipeline package <pipeline_name>
+kedro pipeline package <pipeline_module_path>
 ```
 
 Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/03_modular_pipelines.md#package-a-modular-pipeline).
 
 ##### Pull a modular pipeline in your project
-The following command pulls all the files related to a modular pipeline from either [Pypi](https://pypi.org/) or a storage location of a [wheel file](https://pythonwheels.com/).
+The following command pulls all the files related to a modular pipeline from either [Pypi](https://pypi.org/) or a storage location of a [Python source distribution file](https://packaging.python.org/overview/#python-source-distributions).
+
 ```bash
-kedro pipeline pull <package_name> (or path to a wheel file)
+kedro pipeline pull <package_name> (or path to a sdist file)
 ```
 
 Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/03_modular_pipelines.md#pull-a-modular-pipeline).
@@ -320,22 +321,26 @@ kedro pipeline delete <pipeline_name>
 
 Further information is available in the [pipeline documentation](../06_nodes_and_pipelines/03_modular_pipelines.md#pull-a-modular-pipeline).
 
-##### Describe a pipeline
+
+#### Registered pipelines
+
+##### Describe a registered pipeline
 
 ```bash
-kedro pipeline describe <pipeline_name>
+kedro registry describe <pipeline_name>
 ```
 The output includes all the nodes in the pipeline. If no pipeline name is provided, this command returns all nodes in the `__default__` pipeline.
 
-##### List all pipelines in your project
+##### List all registered pipelines in your project
 
 ```bash
-kedro pipeline list
+kedro registry list
 ```
 
 #### Datasets
 
 ##### List datasets per pipeline per type
+
 ```bash
 kedro catalog list
 ```
@@ -389,10 +394,10 @@ Every time you start or restart a notebook kernel, a startup script (`<project-r
 
 To reload these variables at any point in your notebook (e.g. if you updated `catalog.yml`) use the [line magic](https://ipython.readthedocs.io/en/stable/interactive/magics.html#line-magics) `%reload_kedro`, which can be also used to see the error message if any of the variables above are undefined.
 
-If you get an error message `Module ``<module_name>`` not found. Make sure to install required project dependencies by running ``kedro install`` command first.` when running any of those commands, it indicates that some Jupyter or IPython dependencies are not installed in your environment. To resolve this you will need to do the following:
+If you get an error message `Module ``<module_name>`` not found. Make sure to install required project dependencies by running ``pip install -r requirements.txt`` first.` when running any of those commands, it indicates that some Jupyter or IPython dependencies are not installed in your environment. To resolve this you will need to do the following:
 
-1. Make sure the corresponding dependency is present in `src/requirements.in` (`src/requirements.txt` if not compiled)
-2. Run [`kedro install`](#install-all-package-dependencies) command from your terminal
+1. Make sure the corresponding dependency is present in `src/requirements.txt`
+2. Run [`pip install -r src/requirements.txt`](#install-all-package-dependencies) command from your terminal
 
 ##### Copy tagged cells
 To copy the code from cells [tagged](https://jupyter-notebook.readthedocs.io/en/stable/changelog.html#cell-tags) with `node` tag into Python files under `src/<package_name>/nodes/` in a Kedro project:

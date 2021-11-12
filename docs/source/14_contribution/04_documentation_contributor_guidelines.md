@@ -135,7 +135,7 @@ We use callout sections formatted in `.rst` to bring attention to key points. Fo
 ### Kedro lexicon
 * Name of our product: Kedro and Kedro-Viz (note capitalisation).
 * We are QuantumBlack Labs.
-* Use journal and pipeline as these aren't proper nouns. Tend to lower case except if there is a precedent (see next bullet).
+* Use pipeline as this isn't a proper noun. Tend to lower case except if there is a precedent (see next bullet).
 * Use Hooks (not hooks, except where it's a necessary part of your code example). We are taking our lead from React here, so capitalising despite it not seeming consistent with other rules.
 * Use dataset (not data set, or data-set) for a generic dataset.
  * Use capitalised DataSet when talking about a specific Kedro dataset class e.g. CSVDataSet.

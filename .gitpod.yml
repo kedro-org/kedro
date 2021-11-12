@@ -2,7 +2,7 @@ tasks:
   - name: kedro
     init: |
       pip install -r test_requirements.txt
-      pip install -e .
+      pip install -e . --no-deps
       PIP_USER=false pre-commit install --install-hooks
       gp sync-done kedro
   - name: spaceflights
@@ -19,7 +19,7 @@ github:
     # enable for the master/default branch (defaults to true)
     master: true
     # enable for all branches in this repo (defaults to false)
-    branches: true
+    branches: false
     # enable for pull requests coming from this repo (defaults to true)
     pullRequests: true
     # enable for pull requests coming from forks (defaults to false)
@@ -28,10 +28,5 @@ github:
     addComment: false
     # add a "Review in Gitpod" button to pull requests (defaults to false)
     addBadge: true
-    # add a label once the prebuild is ready to pull requests (defaults to false)
-    addLabel: prebuilt-in-gitpod
 
-# # List the ports to expose. Learn more https://www.gitpod.io/docs/config-ports/
-# ports:
-#   - port: 3000
-#     onOpen: open-preview
+# Add something to edit docs with live update and open window for it? Probs not.

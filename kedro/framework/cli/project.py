@@ -378,7 +378,8 @@ def run(
             "DeprecationWarning: The behaviour of --parallel and -p flags will change. "
             "In Kedro 0.18.0, `-p` will be an alias for `--pipeline` and the "
             "`--parallel` flag will no longer exist. Instead, the parallel runner "
-            "should be used by specifying `--runner=ParallelRunner` (or `-r`)."
+            "should be used by specifying `--runner=ParallelRunner` (or "
+            "`-r ParallelRunner`)."
         )
         click.secho(deprecation_message, fg="red")
         runner = "ParallelRunner"

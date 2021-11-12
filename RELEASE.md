@@ -111,7 +111,7 @@
 
 * If you had any `networkx.NetworkXDataSet` entries in your catalog, replace them with `networkx.JSONDataSet`.
 * If you were using the `KedroContext` to access `ConfigLoader`, please use `settings.CONFIG_LOADER_CLASS` to access the currently used `ConfigLoader` instead.
-* To run a pipeline in parallel, use `kedro run --runner=ParallelRunner` rather than `--parallel` or `-p`. 
+* To run a pipeline in parallel, use `kedro run --runner=ParallelRunner` rather than `--parallel` or `-p`.
 
 # Upcoming Release 0.17.6
 

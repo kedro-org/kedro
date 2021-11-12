@@ -304,6 +304,8 @@ class SparkDataSet(AbstractVersionedDataSet):
         if save_args is not None:
             self._save_args.update(save_args)
 
+        self._handle_delta_format()
+
         # Handle `DataFrameWriter` options
         self._dfwriter_options = self._save_args.pop("dfwriter_options", {})
 
@@ -332,8 +334,8 @@ class SparkDataSet(AbstractVersionedDataSet):
 
     def _save(self, data: DataFrame) -> None:
         save_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_save_path()))
-        # handle dfwriter options here - UNDER CONSTRUCTION
-        data.write.save(save_path, self._file_format, **self._save_args)
+        writer = self._add_options(data)
+        writer.save(save_path, self._file_format, **self._save_args)
 
     def _exists(self) -> bool:
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_load_path()))
@@ -348,16 +350,18 @@ class SparkDataSet(AbstractVersionedDataSet):
 
     def _add_options(self, dataframe: DataFrame) -> DataFrameWriter:
         # DeltaTable specific opts, such as `schemaValidation`
+        df_writer = dataframe.write
         if self._dfwriter_options:
-            df_writer = dataframe.write
             return reduce(
-                lambda dfw, opt: df_writer.option(opt, self._dfwriter_options[opt]),
-                self._dfwriter_options,
-                df_writer,
+                function=lambda dfw, opt: df_writer.option(
+                    opt, self._dfwriter_options[opt]
+                ),
+                sequence=self._dfwriter_options,
+                initial=df_writer,
             )
-        return dataframe.write
+        return df_writer
 
-    def _handle_delta(self):
+    def _handle_delta_format(self):
         unsupported_modes = {"merge", "delete", "update"}
         write_mode = self._save_args.get("mode")
         if self._file_format == "delta" and write_mode.lower() in unsupported_modes:

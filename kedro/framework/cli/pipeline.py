@@ -279,9 +279,7 @@ def _pull_package(
         package_reqs = re.findall(reqs_element_pattern, list_reqs[0])
 
         if package_reqs:
-            requirements_in = _get_requirements_in(
-                metadata.source_dir, create_empty=True
-            )
+            requirements_in = _get_requirements_in(metadata.source_dir)
             _append_package_reqs(requirements_in, package_reqs, package_name)
 
         _clean_pycache(temp_dir_path)

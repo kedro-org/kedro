@@ -1,5 +1,6 @@
 tasks:
   - init: |
+      export PIP_USER=false
       python -m venv /workspace/envs/kedro --copies --system-site-packages
       source /workspace/envs/kedro/bin/activate
       make install-pre-commit
@@ -11,6 +12,8 @@ tasks:
       cd spaceflights
       pip install -r src/requirements.txt
   - command: |
+      cd /workspace/spaceflights
+      echo "consent: false" > .telemetry
       kedro info
 
 github:

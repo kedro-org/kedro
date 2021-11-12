@@ -517,22 +517,11 @@ class TestRunCommand:
         assert isinstance(runner, SequentialRunner)
         assert not runner._is_async
 
-    def test_with_sequential_runner_and_parallel_flag(
-        self, fake_project_cli, fake_session
-    ):
-        result = CliRunner().invoke(
-            fake_project_cli, ["run", "--parallel", "--runner=SequentialRunner"]
-        )
-        assert result.exit_code
-        assert "Please use either --parallel or --runner" in result.stdout
-
-        fake_session.return_value.run.assert_not_called()
-
     def test_run_successfully_parallel_via_flag(
         self, fake_project_cli, fake_metadata, fake_session, mocker
     ):
         result = CliRunner().invoke(
-            fake_project_cli, ["run", "--parallel"], obj=fake_metadata
+            fake_project_cli, ["run", "--runner=ParallelRunner"], obj=fake_metadata
         )
         assert not result.exit_code
         fake_session.run.assert_called_once_with(

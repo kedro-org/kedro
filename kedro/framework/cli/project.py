@@ -50,7 +50,7 @@ PARALLEL_ARG_HELP = """(DEPRECATED) Run the pipeline using the `ParallelRunner`.
 If not specified, use the `SequentialRunner`. This flag cannot be used together
 with --runner. In Kedro 0.18.0, `-p` will be an alias for `--pipeline` and the 
 `--parallel` flag will no longer exist. Instead, the parallel runner should be used by 
-specifying `--runner=ParallelRunner` (or `-r`)."""
+specifying `--runner=ParallelRunner` (or `-r ParallelRunner`)."""
 ASYNC_ARG_HELP = """Load and save node inputs and outputs asynchronously
 with threads. If not specified, load and save datasets synchronously."""
 TAG_ARG_HELP = """Construct the pipeline using only nodes which have this tag

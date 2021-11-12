@@ -3,7 +3,7 @@
 """
 from copy import deepcopy
 from fnmatch import fnmatch
-from functools import partial, reduce
+from functools import partial
 from pathlib import PurePosixPath
 from typing import Any, Dict, List, Optional, Tuple
 from warnings import warn
@@ -307,7 +307,7 @@ class SparkDataSet(AbstractVersionedDataSet):
         self._handle_delta_format()
 
         # Handle `DataFrameWriter` options
-        self._dfwriter_options = self._save_args.pop("dfwriter_options", {})
+        self._dfwriter_options = self._save_args.pop("dfwriter_options", {}) or {}
 
         self._file_format = file_format
         self._fs_prefix = fs_prefix
@@ -351,14 +351,10 @@ class SparkDataSet(AbstractVersionedDataSet):
     def _add_options(self, dataframe: DataFrame) -> DataFrameWriter:
         # DeltaTable specific opts, such as `schemaValidation`
         df_writer = dataframe.write
-        if self._dfwriter_options:
-            return reduce(
-                function=lambda dfw, opt: df_writer.option(
-                    opt, self._dfwriter_options[opt]
-                ),
-                sequence=self._dfwriter_options,
-                initial=df_writer,
-            )
+
+        for key, value in self._dfwriter_options.items():
+            df_writer = df_writer.option(key, value)
+
         return df_writer
 
     def _handle_delta_format(self):

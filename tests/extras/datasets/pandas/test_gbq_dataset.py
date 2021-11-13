@@ -269,7 +269,7 @@ class TestGBQQueryDataSet:
         assert_frame_equal(dummy_dataframe, loaded_data)
 
     def test_load_query_file(self, mocker, gbq_sql_file_dataset, dummy_dataframe):
-        """Test `load` method invocation"""
+        """Test `load` method invocation using a file as input query"""
         mocked_read_gbq = mocker.patch(
             "kedro.extras.datasets.pandas.gbq_dataset.pd.read_gbq"
         )

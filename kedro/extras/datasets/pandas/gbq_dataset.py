@@ -246,8 +246,9 @@ class GBQQueryDataSet(AbstractDataSet):
             filepath: A path to a file with a sql query statement.
 
         Raises:
-            DataSetError: When either ``sql`` or ``con`` parameters is empty.
-            DataSetError: When trying to save the dataset
+            DataSetError: When ``sql`` and ``filepath`` parameters are both empty.
+            DataSetError: When ``sql`` and ``filepath`` parameters are both non-empty.
+            DataSetError: When trying to save the dataset.
         """
         if sql and filepath:
             raise DataSetError(

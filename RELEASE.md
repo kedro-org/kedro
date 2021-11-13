@@ -48,6 +48,7 @@
 [Kiyo Kunii](https://github.com/921kiyo),
 [Benjamin Levy](https://github.com/BenjaminLevyQB),
 [Louis de Charsonville](https://github.com/louisdecharson)
+[Simon Picard](https://github.com/simonpicard)
 
 # Release 0.17.5
 

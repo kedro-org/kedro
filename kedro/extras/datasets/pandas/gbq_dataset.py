@@ -3,14 +3,22 @@ to read and write from/to BigQuery table.
 """
 
 import copy
+from pathlib import PurePosixPath
 from typing import Any, Dict, Union
 
+import fsspec
 import pandas as pd
 from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
 from google.oauth2.credentials import Credentials
 
-from kedro.io.core import AbstractDataSet, DataSetError, validate_on_forbidden_chars
+from kedro.io.core import (
+    AbstractDataSet,
+    DataSetError,
+    get_filepath_str,
+    get_protocol_and_path,
+    validate_on_forbidden_chars,
+)
 
 
 class GBQTableDataSet(AbstractDataSet):
@@ -165,9 +173,9 @@ class GBQTableDataSet(AbstractDataSet):
 
 class GBQQueryDataSet(AbstractDataSet):
     """``GBQQueryDataSet`` loads data from a provided SQL query from Google
-    BigQuery. It uses ``pandas.read_gbq``which itself uses ``pandas-gbq`` 
-    internally to read from BigQuery table. Therefore it supports all allowed 
-    pandas options on ``read_gbq``. 
+    BigQuery. It uses ``pandas.read_gbq``which itself uses ``pandas-gbq``
+    internally to read from BigQuery table. Therefore it supports all allowed
+    pandas options on ``read_gbq``.
 
     Example adding a catalog entry with
     `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
@@ -195,20 +203,21 @@ class GBQQueryDataSet(AbstractDataSet):
         >>>
         >>> data_set = GBQTableDataSet(sql,
         >>>                            project='my-project')
-        >>> 
+        >>>
         >>> sql_data = data_set.load()
         >>>
     """
 
-    DEFAULT_SAVE_ARGS = {"progress_bar": False}  # type: Dict[str, Any]
+    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
-        sql: str,
+        sql: str = None,
         project: str = None,
         credentials: Union[Dict[str, Any], Credentials] = None,
         load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
+        fs_args: Dict[str, Any] = None,
         filepath: str = None,
     ) -> None:
         """Creates a new instance of ``GBQQueryDataSet``.
@@ -227,10 +236,13 @@ class GBQQueryDataSet(AbstractDataSet):
                 Here you can find all available arguments:
                 https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_gbq.html
                 All defaults are preserved.
-            save_args: Pandas options for saving DataFrame to BigQuery table.
-                Here you can find all available arguments:
-                https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_gbq.html
-                All defaults are preserved, but "progress_bar", which is set to False.
+            fs_args: Extra arguments to pass into underlying filesystem class constructor
+                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``), as well as
+                to pass to the filesystem's `open` method through nested keys
+                `open_args_load` and `open_args_save`.
+                Here you can find all available arguments for `open`:
+                https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
+                All defaults are preserved, except `mode`, which is set to `r` when loading.
             filepath: A path to a file with a sql query statement.
 
         Raises:
@@ -254,6 +266,8 @@ class GBQQueryDataSet(AbstractDataSet):
         if load_args is not None:
             self._load_args.update(load_args)
 
+        self._project_id = project
+
         if isinstance(credentials, dict):
             credentials = Credentials(**credentials)
 
@@ -261,7 +275,7 @@ class GBQQueryDataSet(AbstractDataSet):
         self._client = bigquery.Client(
             project=self._project_id,
             credentials=self._credentials,
-            location=self._save_args.get("location"),
+            location=self._load_args.get("location"),
         )
 
         # load sql query from arg or from file
@@ -295,14 +309,11 @@ class GBQQueryDataSet(AbstractDataSet):
             with self._fs.open(load_path, mode="r") as fs_file:
                 load_args["query"] = fs_file.read()
 
-        try:
-            return pd.read_gbq(
-                project_id=self._project_id, credentials=self._credentials, **load_args,
-            )
-        except ImportError as import_error:
-            raise _get_missing_module_error(import_error) from import_error
-        except NoSuchModuleError as exc:
-            raise _get_sql_alchemy_missing_error() from exc
+        return pd.read_gbq(
+            project_id=self._project_id,
+            credentials=self._credentials,
+            **load_args,
+        )
 
     def _save(self, data: pd.DataFrame) -> None:
         raise DataSetError("`save` is not supported on GBQQueryDataSet")

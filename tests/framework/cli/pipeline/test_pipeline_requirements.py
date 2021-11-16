@@ -184,7 +184,6 @@ class TestPipelineRequirements:
         self.call_pipeline_delete(fake_project_cli, fake_metadata)
         self.call_pipeline_pull(fake_project_cli, fake_metadata, fake_repo_path)
 
-        project_requirements_txt = fake_repo_path / "src" / "requirements.txt"
         assert not project_requirements_txt.exists()
 
     def test_all_requirements_already_covered(

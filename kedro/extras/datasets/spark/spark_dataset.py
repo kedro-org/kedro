@@ -304,13 +304,11 @@ class SparkDataSet(AbstractVersionedDataSet):
         if save_args is not None:
             self._save_args.update(save_args)
 
-        self._handle_delta_format()
-
-        # Handle `DataFrameWriter` options
         self._dfwriter_options = self._save_args.pop("dfwriter_options", {}) or {}
-
         self._file_format = file_format
         self._fs_prefix = fs_prefix
+
+        self._handle_delta_format()
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
@@ -357,9 +355,9 @@ class SparkDataSet(AbstractVersionedDataSet):
 
         return df_writer
 
-    def _handle_delta_format(self):
+    def _handle_delta_format(self) -> None:
         unsupported_modes = {"merge", "delete", "update"}
-        write_mode = self._save_args.get("mode")
+        write_mode = self._save_args.get("mode") or ""
         if self._file_format == "delta" and write_mode.lower() in unsupported_modes:
             raise DataSetError(
                 f"It is not possible to perform `save()` for file format `delta` "

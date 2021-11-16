@@ -69,10 +69,7 @@ def cleanup_pipelines(fake_repo_path, fake_package_path):
         if tests.is_dir():
             shutil.rmtree(str(tests))
 
-    # remove requirements.in and reset requirements.txt
-    requirements_in = fake_repo_path / "src" / "requirements.in"
-    if requirements_in.exists():
-        requirements_in.unlink()
+    # reset requirements.txt
     requirements_txt.write_text(requirements)
 
 

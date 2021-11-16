@@ -11,6 +11,6 @@ warnings.simplefilter("default", DeprecationWarning)
 warnings.warn(
     "Support for transformers will be deprecated in Kedro 0.18.0. "
     "Please use Hooks `before_dataset_loaded`/`after_dataset_loaded` or "
-    "`before_dataset_save`/`after_dataset_saved` instead.",
+    "`before_dataset_saved`/`after_dataset_saved` instead.",
     DeprecationWarning,
 )

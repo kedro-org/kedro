@@ -262,7 +262,7 @@ class GBQQueryDataSet(AbstractDataSet):
                 "Please provide a sql query or path to a sql query file."
             )
 
-        # Handle default load and save arguments
+        # Handle default load arguments
         self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
         if load_args is not None:
             self._load_args.update(load_args)

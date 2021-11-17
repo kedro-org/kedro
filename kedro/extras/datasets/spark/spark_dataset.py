@@ -1,4 +1,4 @@
-"""``AbstractDataSet`` implementation to access Spark dataframes using
+"""``AbstractVersionedDataSet`` implementation to access Spark dataframes using
 ``pyspark``
 """
 from copy import deepcopy

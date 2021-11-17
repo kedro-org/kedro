@@ -521,7 +521,7 @@ class TestRunCommand:
         self, fake_project_cli, fake_metadata, fake_session, mocker
     ):
         result = CliRunner().invoke(
-            fake_project_cli, ["run", "--parallel"], obj=fake_metadata
+            fake_project_cli, ["run", "--runner=ParallelRunner"], obj=fake_metadata
         )
         assert not result.exit_code
         fake_session.run.assert_called_once_with(

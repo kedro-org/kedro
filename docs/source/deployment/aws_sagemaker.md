@@ -87,7 +87,7 @@ y_train:
   filepath: ${s3.train_path}/y_train.pickle
 ```
 
-> *Node:* `@pickle` and `@path` in the dataset names above correspond to the [dataset transcoding](https://kedro.readthedocs.io/en/stable/data/data_catalog.html#transcoding-datasets) feature of Kedro. This allows to pass S3 path to the `X_train` dataset instead of the actual data itself to the `train_model_sagemaker` node that you will create shortly.
+> *Node:* `@pickle` and `@path` in the dataset names above correspond to the [dataset transcoding](../data/data_catalog.md#transcoding-datasets) feature of Kedro. This allows to pass S3 path to the `X_train` dataset instead of the actual data itself to the `train_model_sagemaker` node that you will create shortly.
 
 * `parameters.yml` - contains the configuration for [SageMaker Scikit Learn Estimator](https://sagemaker.readthedocs.io/en/stable/frameworks/sklearn/sagemaker.sklearn.html#scikit-learn-estimator):
 

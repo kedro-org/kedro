@@ -41,7 +41,7 @@ get-started
 ├── .coveragerc     # Configuration file for the coverage reporting when doing `kedro test`
 ├── .gitignore      # Prevent staging of unnecessary files to `git`
 ├── .ipython        # IPython startup scripts
-└── pyproject.toml  # Identifies the project root and [contains configuration information](https://kedro.readthedocs.io/en/latest/11_faq/architecture_overview.html#kedro-yml)
+└── pyproject.toml  # Identifies the project root and [contains configuration information](../faq/architecture_overview.md#kedro-yml)
 ```
 
 #### `conf/`

@@ -302,7 +302,7 @@ You're nearly there! Before you can use the new runner, you need to add a `cli.p
 ```python
 def run(tag, env, ...):
     """Run the pipeline."""
-    runner = load_obj(runner or "SequentialRunner", "kedro.runner")
+    runner = runner or "SequentialRunner"
 
     tag = _get_values_as_tuple(tag) if tag else tag
     node_names = _get_values_as_tuple(node_names) if node_names else node_names

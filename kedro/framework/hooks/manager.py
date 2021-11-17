@@ -71,6 +71,7 @@ def _register_hooks_setuptools(
 
     """
     already_registered = hook_manager.get_plugins()
+    hook_manager.load_setuptools_entrypoints(_PLUGIN_HOOKS)
     disabled_plugins = set(disabled_plugins)
 
     # Get list of plugin/distinfo tuples for all setuptools registered plugins.

@@ -173,7 +173,7 @@ class GBQTableDataSet(AbstractDataSet):
 
 class GBQQueryDataSet(AbstractDataSet):
     """``GBQQueryDataSet`` loads data from a provided SQL query from Google
-    BigQuery. It uses ``pandas.read_gbq``which itself uses ``pandas-gbq``
+    BigQuery. It uses ``pandas.read_gbq`` which itself uses ``pandas-gbq``
     internally to read from BigQuery table. Therefore it supports all allowed
     pandas options on ``read_gbq``.
 

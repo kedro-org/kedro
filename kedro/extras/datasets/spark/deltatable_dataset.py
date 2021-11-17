@@ -18,7 +18,6 @@ class DeltaTableDataset(SparkDataSet):
     def __init__(  # pylint: disable=too-many-arguments
         self,
         filepath: str,
-        delta_options: Dict[str, Any] = None,
         load_args: Dict[str, Any] = None,
         save_args: Dict[str, Any] = None,
         version: Version = None,
@@ -32,7 +31,6 @@ class DeltaTableDataset(SparkDataSet):
             version=version,
             credentials=credentials,
         )
-        self._delta_options = delta_options
 
     def _load(self) -> DeltaTable:
         load_path = self._fs_prefix + str(self._get_load_path())

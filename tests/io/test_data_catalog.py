@@ -579,7 +579,7 @@ class TestDataCatalogVersioned:
         version = generate_timestamp()
         load_version = {"non-boart": version}
         pattern = r"\`load_versions\` keys \[non-boart\] are not found in the catalog\."
-        with pytest.warns(UserWarning, match=pattern):
+        with pytest.raises(DataSetNotFoundError, match=pattern):
             DataCatalog.from_config(**sane_config, load_versions=load_version)
 
     def test_compare_tracking_and_other_dataset_versioned(

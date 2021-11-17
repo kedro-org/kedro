@@ -17,8 +17,3 @@ def test_cli_logging_setup():
     all_handlers = ["console", "info_file_handler", "error_file_handler"]
     intersection = set(root_handler_names).intersection(all_handlers)
     assert len(intersection) == 3
-
-    # check cli logger is set up correctly
-    cli_handlers = to_names(logging.getLogger("kedro.framework.cli").handlers)
-    assert len(cli_handlers) == 1
-    assert "console" in cli_handlers

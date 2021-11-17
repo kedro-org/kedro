@@ -518,12 +518,24 @@ class TestRunCommand:
         assert not runner._is_async
 
     def test_run_successfully_parallel(
-        self, fake_project_cli, fake_metadata, fake_session
+        self, fake_project_cli, fake_metadata, fake_session, mocker
     ):
         result = CliRunner().invoke(
-            fake_project_cli, ["run", "--runner=ParallelRunner"], obj=fake_metadata
+            fake_project_cli, ["run", "--parallel"], obj=fake_metadata
         )
         assert not result.exit_code
+        fake_session.run.assert_called_once_with(
+            tags=(),
+            runner=mocker.ANY,
+            node_names=(),
+            from_nodes=[],
+            to_nodes=[],
+            from_inputs=[],
+            to_outputs=[],
+            load_versions={},
+            pipeline_name=None,
+        )
+
         runner = fake_session.run.call_args_list[0][1]["runner"]
         assert isinstance(runner, ParallelRunner)
         assert not runner._is_async

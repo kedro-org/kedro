@@ -37,6 +37,7 @@ def catalog():
 @env_option
 @click.option(
     "--pipeline",
+    "-p",
     type=str,
     default="",
     help="Name of the modular pipeline to run. If not set, "
@@ -102,6 +103,7 @@ def _map_type_to_datasets(datasets, datasets_meta):
 @env_option(help="Environment to create Data Catalog YAML file in. Defaults to `base`.")
 @click.option(
     "--pipeline",
+    "-p",
     "pipeline_name",
     type=str,
     required=True,

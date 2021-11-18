@@ -111,7 +111,7 @@ s3:
 
 ### Update the project hooks
 
-Now you need to tell Kedro to use the [`TemplatedConfigLoader`](https://kedro.readthedocs.io/en/stable/kedro.config.TemplatedConfigLoader.html) instead of the default `ConfigLoader` class to read the project configuration. It is very easy to do via `settings.py` file - open `src/kedro_tutorial/settings.py` file and set the `CONFIG_LOADER_CLASS` constant:
+Now you need to tell Kedro to use the [`TemplatedConfigLoader`](/kedro.config.TemplatedConfigLoader) instead of the default `ConfigLoader` class to read the project configuration. It is very easy to do via `settings.py` file - open `src/kedro_tutorial/settings.py` file and set the `CONFIG_LOADER_CLASS` constant:
 
 ```python
 from kedro.config import TemplatedConfigLoader

@@ -59,7 +59,7 @@ Ask for help over on [GitHub discussions](https://github.com/quantumblacklabs/ke
 
 ## Kedro documentation style guide
 
-This is the style guide we have used to create [documentation about Kedro](https://kedro.readthedocs.io/en/stable/).
+This is the style guide we have used to create [documentation about Kedro](../index).
 
 When you are writing documentation for your own project, you may find it useful to follow these rules. We also ask anyone kind enough to contribute to the Kedro documentation to follow our preferred style to maintain consistency and simplicity.
 
@@ -83,19 +83,19 @@ Where it's not obvious what the style should be, it's worth consulting the [Micr
 * Make hyperlink descriptions as descriptive as you can. This is a good description:
 
 ```text
-Learn how to [update the project pipeline](https://kedro.readthedocs.io/en/stable/tutorial/create_pipelines.html#update-the-project-pipeline)
+Learn how to [update the project pipeline](../tutorial/create_pipelines.html#update-the-project-pipeline)
 ```
 
 This is less helpful:
 
 ```text
-Learn how to update the [project pipeline](https://kedro.readthedocs.io/en/stable/tutorial/create_pipelines.html#update-the-project-pipeline)
+Learn how to update the [project pipeline](../tutorial/create_pipelines.html#update-the-project-pipeline)
 ```
 
 Don't write this:
 
 ```text
-To learn how to update the project pipeline, see [here](https://kedro.readthedocs.io/en/stable/tutorial/create_pipelines.html#update-the-project-pipeline)
+To learn how to update the project pipeline, see [here](../tutorial/create_pipelines.html#update-the-project-pipeline)
 ```
 
 ### Capitalisation

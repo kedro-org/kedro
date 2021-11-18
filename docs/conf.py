@@ -214,7 +214,7 @@ linkcheck_ignore = [
     "https://kedro.readthedocs.io/en/stable/faq/faq.html#how-can-i-find-out-more-about-kedro",
     "https://kedro.readthedocs.io/en/stable/faq/faq.html#what-is-data-engineering-convention",
     "https://kedro.readthedocs.io/en/stable/kedro_project_setup/dependencies.html#project-specific-dependencies",
-    "ttps://kedro.readthedocs.io/en/stable/tutorial/package_a_project.html",
+    "https://kedro.readthedocs.io/en/stable/tutorial/package_a_project.html",
     "https://kedro.readthedocs.io/en/stable/kedro_project_setup/configuration.html#parameters",
     "https://kedro.readthedocs.io/en/stable/kedro_project_setup/dependencies.html",
     "https://kedro.readthedocs.io/en/stable/nodes_and_pipelines/modular_pipelines.html#package-a-modular-pipeline",

@@ -37,8 +37,8 @@ class PartitionedDataSet(AbstractDataSet):
     https://github.com/intake/filesystem_spec.
 
     Example adding a catalog entry with
-    `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
-        01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+        data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 
@@ -136,7 +136,7 @@ class PartitionedDataSet(AbstractDataSet):
                 and the dataset initializer. If the dataset config contains
                 explicit credentials spec, then such spec will take precedence.
                 All possible credentials management scenarios are documented here:
-                https://kedro.readthedocs.io/en/stable/05_data/02_kedro_io.html#partitioned-dataset-credentials
+                https://kedro.readthedocs.io/en/stable/data/kedro_io.html#partitioned-dataset-credentials
             load_args: Keyword arguments to be passed into ``find()`` method of
                 the filesystem implementation.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
@@ -372,7 +372,7 @@ class IncrementalDataSet(PartitionedDataSet):
                 with the corresponding dataset definition including ``filepath``
                 (unlike ``dataset`` argument). Checkpoint configuration is
                 described here:
-                https://kedro.readthedocs.io/en/stable/05_data/02_kedro_io.html#checkpoint-configuration
+                https://kedro.readthedocs.io/en/stable/data/kedro_io.html#checkpoint-configuration
                 Credentials for the checkpoint can be explicitly specified
                 in this configuration.
             filepath_arg: Underlying dataset initializer argument that will
@@ -387,7 +387,7 @@ class IncrementalDataSet(PartitionedDataSet):
                 the dataset or the checkpoint configuration contains explicit
                 credentials spec, then such spec will take precedence.
                 All possible credentials management scenarios are documented here:
-                https://kedro.readthedocs.io/en/stable/05_data/02_kedro_io.html#partitioned-dataset-credentials
+                https://kedro.readthedocs.io/en/stable/data/kedro_io.html#partitioned-dataset-credentials
             load_args: Keyword arguments to be passed into ``find()`` method of
                 the filesystem implementation.
             fs_args: Extra arguments to pass into underlying filesystem class constructor

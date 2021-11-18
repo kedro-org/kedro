@@ -204,6 +204,39 @@ linkcheck_ignore = [
     "https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71",
     "https://medium.com/quantumblack/beyond-the-notebook-and-into-the-data-science-framework-revolution-a7fd364ab9c4",
     "https://www.java.com/en/download/help/download_options.html",  # "403 Client Error: Forbidden for url"
+
+    # Number section removal, temporarily ignore until 0.18.0 release
+    "https://kedro.readthedocs.io/en/stable/get_started/prerequisites.html",
+    "https://kedro.readthedocs.io/en/stable/get_started/hello_kedro.html",
+    "https://kedro.readthedocs.io/en/stable/get_started/example_project.html",
+    "https://kedro.readthedocs.io/en/stable/tutorial/tutorial_template.html",
+    "https://kedro.readthedocs.io/en/stable/faq/faq.html",
+    "https://kedro.readthedocs.io/en/stable/faq/faq.html#how-can-i-find-out-more-about-kedro",
+    "https://kedro.readthedocs.io/en/stable/faq/faq.html#what-is-data-engineering-convention",
+    "https://kedro.readthedocs.io/en/stable/kedro_project_setup/dependencies.html#project-specific-dependencies",
+    "ttps://kedro.readthedocs.io/en/stable/tutorial/package_a_project.html",
+    "https://kedro.readthedocs.io/en/stable/kedro_project_setup/configuration.html#parameters",
+    "https://kedro.readthedocs.io/en/stable/kedro_project_setup/dependencies.html",
+    "https://kedro.readthedocs.io/en/stable/nodes_and_pipelines/modular_pipelines.html#package-a-modular-pipeline",
+    "https://kedro.readthedocs.io/en/stable/tools_integration/ipython.html#ipython-extension",
+    "https://kedro.readthedocs.io/en/stable/kedro_project_setup/session.html",
+    "https://kedro.readthedocs.io/en/stable/extend_kedro/hooks.html#registration-hooks",
+    "https://kedro.readthedocs.io/en/stable/faq/faq.html#how-do-i-upgrade-kedro",
+    "https://kedro.readthedocs.io/en/stable/faq/faq.html#how-can-i-find-out-more-about-kedro",
+    "https://kedro.readthedocs.io/en/stable/faq/faq.html#how-can-i-get-my-question-answered",
+    "https://kedro.readthedocs.io/en/stable/faq/faq.html#how-can-i-use-a-development-version-of-kedro",
+    "https://kedro.readthedocs.io/en/latest/user_guide/data_catalog.html#specifying-the-location-of-the-dataset",
+    "https://kedro.readthedocs.io/en/latest/user_guide/advanced_io.html#partitioned-dataset",
+    "https://kedro.readthedocs.io/en/stable/user_guide/advanced_io.html#incremental-loads-with-incrementaldataset",
+    "https://kedro.readthedocs.io/en/stable/faq/faq.html#what-is-data-engineering-convention",
+    "https://kedro.readthedocs.io/en/stable/user_guide/journal.html",
+    "https://kedro.readthedocs.io/en/stable/data/data_catalog.html",
+    "https://kedro.readthedocs.io/en/stable/extend_kedro/custom_datasets.html",
+    "https://kedro.readthedocs.io/en/stable/data/data_catalog.html",
+    "https://kedro.readthedocs.io/en/stable/contribution/developer_contributor_guidelines.html",
+    "https://kedro.readthedocs.io/en/stable/contribution/documentation_contributor_guidelines.html",
+    "https://kedro.readthedocs.io/en/stable/data/kedro_io.html#checkpoint-configuration",
+    "https://kedro.readthedocs.io/en/stable/data/kedro_io.html#partitioned-dataset-credentials"
 ]
 
 # retry before render a link broken (fix for "too many requests")

@@ -1,5 +1,4 @@
 ![Kedro Logo Banner](https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/static/img/kedro_banner.png)
-
 [![Python version](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue.svg)](https://pypi.org/project/kedro/)
 [![PyPI version](https://badge.fury.io/py/kedro.svg)](https://pypi.org/project/kedro/)
 [![Conda version](https://img.shields.io/conda/vn/conda-forge/kedro.svg)](https://anaconda.org/conda-forge/kedro)
@@ -67,7 +66,8 @@ Kedro is built upon our collective best-practice (and mistakes) trying to delive
 
 ## The humans behind Kedro
 
-Kedro is maintained by a [product team from QuantumBlack](https://kedro.readthedocs.io/en/stable/12_faq/01_faq.html) and a number of [contributors from across the world](https://github.com/quantumblacklabs/kedro/releases).
+Kedro is maintained by [a product team](https://kedro.readthedocs.io/en/stable/12_faq/01_faq.html) and a number of [contributors from across the world](https://github.
+com/quantumblacklabs/kedro/releases).
 
 
 ## Can I contribute?
@@ -87,6 +87,7 @@ There are Kedro users across the world, who work at start-ups, major enterprises
 [AI Singapore](https://makerspace.aisingapore.org/2020/08/leveraging-kedro-in-100e/),
 [AXA UK](https://www.axa.co.uk/),
 [Belfius](https://www.linkedin.com/posts/vangansen_mlops-machinelearning-kedro-activity-6772379995953238016-JUmo),
+[Beamery](https://medium.com/hacking-talent/production-code-for-data-science-and-our-experience-with-kedro-60bb69934d1f),
 [Caterpillar](https://www.caterpillar.com/),
 [CRIM](https://www.crim.ca/en/),
 [Dendra Systems](https://www.dendra.io/),
@@ -108,6 +109,7 @@ There are Kedro users across the world, who work at start-ups, major enterprises
 [QuantumBlack](https://medium.com/quantumblack/introducing-kedro-the-open-source-library-for-production-ready-machine-learning-code-d1c6d26ce2cf),
 [Retrieva](https://tech.retrieva.jp/entry/2020/07/28/181414), [Roche](https://www.roche.com/),
 [Sber](https://www.linkedin.com/posts/seleznev-artem_welcome-to-kedros-documentation-kedro-activity-6767523561109385216-woTt),
+[Société Générale](https://www.societegenerale.com/en),
 [Telkomsel](https://www.linkedin.com/feed/update/urn:li:activity:6749338226403766272/updateEntityUrn=urn%3Ali%3Afs_feedUpdate%3A%28V2%2Curn%3Ali%3Aactivity%3A6749338226403766272%29),
 [Universidad Rey Juan Carlos](https://github.com/vchaparro/MasterThesis-wind-power-forecasting/blob/master/thesis.pdf),
 [UrbanLogiq](https://urbanlogiq.com/),

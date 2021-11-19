@@ -460,30 +460,3 @@ def _update_value_nested_dict(
 
 def _get_values_as_tuple(values: Iterable[str]) -> Tuple[str, ...]:
     return tuple(chain.from_iterable(value.split(",") for value in values))
-
-
-def _get_requirements_in(source_path: Path) -> Path:
-    """Get path to project level requirements.in, creating it if required.
-
-    Args:
-        source_path: Path to the project `src` folder.
-
-    Returns:
-        Path to requirements.in.
-
-    """
-    requirements_in = source_path / "requirements.in"
-    if requirements_in.is_file():
-        return requirements_in
-
-    requirements_txt = source_path / "requirements.txt"
-    if requirements_txt.is_file():
-        click.secho(
-            "No requirements.in found. Copying contents from requirements.txt..."
-        )
-        shutil.copyfile(str(requirements_txt), str(requirements_in))
-        return requirements_in
-
-    click.secho("Creating empty requirements.in...")
-    requirements_in.touch()
-    return requirements_in

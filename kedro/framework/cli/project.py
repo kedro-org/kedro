@@ -42,11 +42,7 @@ FROM_NODES_HELP = """A list of node names which should be used as a starting poi
 TO_NODES_HELP = """A list of node names which should be used as an end point."""
 NODE_ARG_HELP = """Run only nodes with specified names."""
 RUNNER_ARG_HELP = """Specify a runner that you want to run the pipeline with.
-Available runners: `SequentialRunner`, `ParallelRunner` and `ThreadRunner`.
-This option cannot be used together with --parallel."""
-PARALLEL_ARG_HELP = """Run the pipeline using the `ParallelRunner`.
-If not specified, use the `SequentialRunner`. This flag cannot be used together
-with --runner."""
+Available runners: `SequentialRunner`, `ParallelRunner` and `ThreadRunner`."""
 ASYNC_ARG_HELP = """Load and save node inputs and outputs asynchronously
 with threads. If not specified, load and save datasets synchronously."""
 TAG_ARG_HELP = """Construct the pipeline using only nodes which have this tag
@@ -310,7 +306,6 @@ def activate_nbstripout(
 @click.option(
     "--runner", "-r", type=str, default=None, multiple=False, help=RUNNER_ARG_HELP
 )
-@click.option("--parallel", "-p", is_flag=True, multiple=False, help=PARALLEL_ARG_HELP)
 @click.option("--async", "is_async", is_flag=True, multiple=False, help=ASYNC_ARG_HELP)
 @env_option
 @click.option("--tag", "-t", type=str, multiple=True, help=TAG_ARG_HELP)
@@ -322,7 +317,7 @@ def activate_nbstripout(
     help=LOAD_VERSION_HELP,
     callback=_reformat_load_versions,
 )
-@click.option("--pipeline", type=str, default=None, help=PIPELINE_ARG_HELP)
+@click.option("--pipeline", "-p", type=str, default=None, help=PIPELINE_ARG_HELP)
 @click.option(
     "--config",
     "-c",
@@ -337,7 +332,6 @@ def activate_nbstripout(
 def run(
     tag,
     env,
-    parallel,
     runner,
     is_async,
     node_names,
@@ -351,15 +345,7 @@ def run(
     params,
 ):
     """Run the pipeline."""
-    if parallel and runner:
-        raise KedroCliError(
-            "Both --parallel and --runner options cannot be used together. "
-            "Please use either --parallel or --runner."
-        )
-    runner = runner or "SequentialRunner"
-    if parallel:
-        runner = "ParallelRunner"
-    runner_class = load_obj(runner, "kedro.runner")
+    runner = load_obj(runner or "SequentialRunner", "kedro.runner")
 
     tag = _get_values_as_tuple(tag) if tag else tag
     node_names = _get_values_as_tuple(node_names) if node_names else node_names
@@ -367,7 +353,7 @@ def run(
     with KedroSession.create(env=env, extra_params=params) as session:
         session.run(
             tags=tag,
-            runner=runner_class(is_async=is_async),
+            runner=runner(is_async=is_async),
             node_names=node_names,
             from_nodes=from_nodes,
             to_nodes=to_nodes,

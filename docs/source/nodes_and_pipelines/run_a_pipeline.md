@@ -30,20 +30,9 @@ kedro run --runner=SequentialRunner
 
 #### Multiprocessing
 
-You can alternatively run the nodes within the pipeline concurrently, using a `ParallelRunner`. To do so, add a flag as follows:
-
-```bash
-kedro run --parallel
-```
-
-or
-
+You can alternatively run the nodes within the pipeline concurrently, using a `ParallelRunner` as follows:
 ```bash
 kedro run --runner=ParallelRunner
-```
-
-```eval_rst
-.. note::  You cannot use both ``--parallel`` and ``--runner`` flags at the same time. (That is, ``kedro run --parallel --runner=SequentialRunner`` raises an exception).
 ```
 
 #### Multithreading

@@ -66,7 +66,7 @@
               },
               "credentials": {
                 "type": "object",
-                "description": "Protocol-specific options that will be passed to\n``fsspec.filesystem``\nhttps://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.filesystem\nand the dataset initializer. If the dataset config contains\nexplicit credentials spec, then such spec will take precedence.\nAll possible credentials management scenarios are documented here:\nhttps://kedro.readthedocs.io/en/stable/04_user_guide/08_advanced_io.html#partitioned-dataset-credentials"
+                "description": "Protocol-specific options that will be passed to\n``fsspec.filesystem``\nhttps://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.filesystem\nand the dataset initializer. If the dataset config contains\nexplicit credentials spec, then such spec will take precedence.\nAll possible credentials management scenarios are documented here:\nhttps://kedro.readthedocs.io/en/0.17.0/05_data/02_kedro_io.html#partitioned-dataset-credentials"
               },
               "load_args": {
                 "type": "object",

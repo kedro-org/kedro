@@ -43,7 +43,7 @@ Check the [Kedro repo to find open pull requests](https://github.com/quantumblac
 
 ## Contribute a fix or feature
 
-If you're interested in contributing fixes to code or documentation, first read our [guidelines for contributing developers](https://kedro.readthedocs.io/en/stable/14_contribution/02_developer_contributor_guidelines.html) for an explanation of how to get set up and the process you'll follow.
+If you're interested in contributing fixes to code or documentation, first read our [guidelines for contributing developers](https://kedro.readthedocs.io/en/stable/contribution/developer_contributor_guidelines.html) for an explanation of how to get set up and the process you'll follow.
 
 Once you are ready to contribute, a good place to start is to take a look at the `good first issues` and `help wanted issues` on [GitHub](https://github.com/quantumblacklabs/kedro/issues).
 
@@ -51,4 +51,4 @@ Once you are ready to contribute, a good place to start is to take a look at the
 
 You can help us improve the [Kedro documentation online](https://kedro.readthedocs.io/en/stable/). Send us feedback as a [GitHub issue](https://github.com/quantumblacklabs/kedro/issues) or start a documentation discussion on [GitHub](https://github.com/quantumblacklabs/kedro/discussions).
 
-You are also welcome to make a raise a PR with a bug fix or addition to the documentation. First read the guide [Contribute to the Kedro documentation](https://kedro.readthedocs.io/en/stable/14_contribution/04_documentation_contributor_guidelines.html).
+You are also welcome to make a raise a PR with a bug fix or addition to the documentation. First read the guide [Contribute to the Kedro documentation](https://kedro.readthedocs.io/en/stable/contribution/documentation_contributor_guidelines.html).

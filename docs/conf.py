@@ -204,6 +204,14 @@ linkcheck_ignore = [
     "https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71",
     "https://medium.com/quantumblack/beyond-the-notebook-and-into-the-data-science-framework-revolution-a7fd364ab9c4",
     "https://www.java.com/en/download/help/download_options.html",  # "403 Client Error: Forbidden for url"
+
+    # Number section removal, temporarily ignore until 0.18.0 release
+    "https://kedro.readthedocs.io/en/stable/data/data_catalog.html#using-the-data-catalog-with-the-yaml-api",
+    "https://kedro.readthedocs.io/en/stable/faq/faq.html#what-is-data-engineering-convention",
+    "https://kedro.readthedocs.io/en/stable/faq/faq.html",
+    "https://kedro.readthedocs.io/en/stable/data/kedro_io.html#partitioned-dataset-credentials",
+    "https://kedro.readthedocs.io/en/stable/data/kedro_io.html",
+    "https://kedro.readthedocs.io/en/stable/data/kedro_io.html#checkpoint-configuration",
 ]
 
 # retry before render a link broken (fix for "too many requests")
@@ -485,8 +493,8 @@ def _prepare_build_dir(app, config):
     build_root = Path(app.srcdir)
     build_out = Path(app.outdir)
     copy_tree(str(here / "source"), str(build_root))
-    copy_tree(str(build_root / "15_api_docs"), str(build_root))
-    shutil.rmtree(str(build_root / "15_api_docs"))
+    copy_tree(str(build_root / "api_docs"), str(build_root))
+    shutil.rmtree(str(build_root / "api_docs"))
     shutil.rmtree(str(build_out), ignore_errors=True)
     copy_tree(str(build_root / "css"), str(build_out / "_static" / "css"))
     shutil.rmtree(str(build_root / "css"))

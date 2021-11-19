@@ -13,10 +13,7 @@ For the source code, take a look at the [Kedro repository on Github](https://git
 
 ## Who maintains Kedro?
 
-Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) and [Nikolaos Tsaousis](https://github.com/tsanikgr) to solve challenges they faced in their project work.
-
-Their work was later turned into an internal product at QuantumBlack by [Peteris Erins](https://github.com/Pet3ris),
-[Ivan Danov](https://github.com/idanov), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae) and [Nikolaos Tsaousis](https://github.com/tsanikgr) before being donated to the Linux Foundation.
+Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) and [Nikolaos Tsaousis](https://github.com/tsanikgr) at QuantumBlack to solve challenges they faced in their project work. Their work was later turned into an internal product by [Peteris Erins](https://github.com/Pet3ris), [Ivan Danov](https://github.com/idanov), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae) and [Nikolaos Tsaousis](https://github.com/tsanikgr). In the project's latest iteration it is an incubating project within [LF AI & Data](https://lfaidata.foundation/). 
 
 Currently, the core Kedro team consists of
 [Ahdra Merali](https://github.com/AhdraMeraliQB),
@@ -26,7 +23,7 @@ Andrew Mackay,
 [Ivan Danov](https://github.com/idanov),
 [Joel Schwarzmann](https://github.com/datajoely),
 [Lim Hoang](https://github.com/limdauto),
-[Lorena Balan](https://github.com/lorenabalan),
+[Lorena Bălan](https://github.com/lorenabalan),
 [Merel Theisen](https://github.com/MerelTheisenQB),
 [Rashida Kanchwala](https://github.com/rashidakanchwala),
 [Sajid Alam](https://github.com/SajidAlamQB),

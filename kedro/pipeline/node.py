@@ -147,7 +147,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
     def _unique_key(self):
         def hashable(value):
             if isinstance(value, dict):
-                return tuple(sorted(value.items()))
+                return tuple(value.items())
             if isinstance(value, list):
                 return tuple(value)
             return value
@@ -686,7 +686,7 @@ def _to_list(element: Union[None, str, Iterable[str], Dict[str, str]]) -> List[s
     if isinstance(element, str):
         return [element]
     if isinstance(element, dict):
-        return sorted(element.values())
+        return list(element.values())
     return list(element)
 
 

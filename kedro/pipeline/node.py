@@ -168,11 +168,11 @@ class Node:  # pylint: disable=too-many-instance-attributes
         return hash(self._unique_key)
 
     def __str__(self):
-        def _sorted_set_to_str(xset):
+        def _set_to_str(xset):
             return f"[{','.join(xset)}]"
 
-        out_str = _sorted_set_to_str(self.outputs) if self._outputs else "None"
-        in_str = _sorted_set_to_str(self.inputs) if self._inputs else "None"
+        out_str = _set_to_str(self.outputs) if self._outputs else "None"
+        in_str = _set_to_str(self.inputs) if self._inputs else "None"
 
         prefix = self._name + ": " if self._name else ""
         return prefix + f"{self._func_name}({in_str}) -> {out_str}"

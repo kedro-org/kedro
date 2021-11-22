@@ -31,7 +31,7 @@ class CLIHooksManager(PluginManager):
     def _register_cli_hooks_setuptools(self) -> None:
         """Register CLI hook implementations from setuptools entrypoints"""
         already_registered = self.get_plugins()
-        num_cli_hooks_found = self.load_setuptools_entrypoints(_CLI_PLUGIN_HOOKS)
+        self.load_setuptools_entrypoints(_CLI_PLUGIN_HOOKS)
 
         # Get list of plugin/distinfo tuples for all setuptools registered plugins.
         plugininfo = self.list_plugin_distinfo()
@@ -44,6 +44,6 @@ class CLIHooksManager(PluginManager):
         if plugin_names:
             logging.getLogger(__name__).info(
                 "Registered CLI hooks from %d installed plugin(s): %s",
-                num_cli_hooks_found,
+                len(plugin_names),
                 ", ".join(sorted(plugin_names)),
             )

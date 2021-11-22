@@ -169,7 +169,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
 
     def __str__(self):
         def _sorted_set_to_str(xset):
-            return f"[{','.join(sorted(xset))}]"
+            return f"[{','.join(xset)}]"
 
         out_str = _sorted_set_to_str(self.outputs) if self._outputs else "None"
         in_str = _sorted_set_to_str(self.inputs) if self._inputs else "None"

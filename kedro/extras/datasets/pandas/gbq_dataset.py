@@ -236,12 +236,8 @@ class GBQQueryDataSet(AbstractDataSet):
                 https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_gbq.html
                 All defaults are preserved.
             fs_args: Extra arguments to pass into underlying filesystem class constructor
-                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``), as well as
-                to pass to the filesystem's `open` method through nested keys
-                `open_args_load` and `open_args_save`.
-                Here you can find all available arguments for `open`:
-                https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.spec.AbstractFileSystem.open
-                All defaults are preserved, except `mode`, which is set to `r` when loading.
+                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``) used for reading the
+                SQL query from filepath.
             filepath: A path to a file with a sql query statement.
 
         Raises:

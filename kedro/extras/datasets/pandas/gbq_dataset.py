@@ -18,8 +18,8 @@ class GBQTableDataSet(AbstractDataSet):
     It uses pandas-gbq to read and write from/to BigQuery table.
 
     Example adding a catalog entry with
-    `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
-        01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+    `YAML API <https://kedro.readthedocs.io/en/stable/data/\
+        data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
 
     .. code-block:: yaml
 

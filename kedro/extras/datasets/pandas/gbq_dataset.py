@@ -201,8 +201,7 @@ class GBQQueryDataSet(AbstractDataSet):
         >>>
         >>> sql = "SELECT * FROM dataset_1.table_a"
         >>>
-        >>> data_set = GBQQueryDataSet(sql,
-        >>>                            project='my-project')
+        >>> data_set = GBQQueryDataSet(sql, project='my-project')
         >>>
         >>> sql_data = data_set.load()
         >>>

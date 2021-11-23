@@ -301,7 +301,12 @@ class RegistrationSpecs:
         """
         pass
 
-    @hook_spec(firstresult=True)
+    @hook_spec(
+        firstresult=True,
+        warn_on_impl=DeprecationWarning(
+            "The `register_config_loader` hook is deprecated and will be removed in Kedro 0.18.0."
+        ),
+    )
     def register_config_loader(
         self, conf_paths: Iterable[str], env: str, extra_params: Dict[str, Any]
     ) -> ConfigLoader:
@@ -317,7 +322,12 @@ class RegistrationSpecs:
         """
         pass
 
-    @hook_spec(firstresult=True)
+    @hook_spec(
+        firstresult=True,
+        warn_on_impl=DeprecationWarning(
+            "The `register_catalog` hook is deprecated and will be removed in Kedro 0.18.0."
+        ),
+    )
     def register_catalog(
         self,
         catalog: Optional[Dict[str, Dict[str, Any]]],

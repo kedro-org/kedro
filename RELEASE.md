@@ -39,6 +39,7 @@
 * `kedro.extras.transformers` and `kedro.io.transformers` are being deprecated in favour of Hooks.
 * The `--parallel` flag on `kedro run` is being removed in favour of `--runner=ParallelRunner`. The `-p` flag will change to be an alias for `--pipeline`.
 * `kedro.io.DataCatalogWithDefault` is being deprecated, to be removed entirely in 0.18.0.
+* The registration hooks `register_config_loader` and `register_catalog` are being deprecated.
 
 ## Thanks for supporting contributions
 [Deepyaman Datta](https://github.com/deepyaman),

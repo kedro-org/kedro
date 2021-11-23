@@ -71,7 +71,7 @@ def _register_hooks_setuptools(
 
     """
     already_registered = hook_manager.get_plugins()
-    found = hook_manager.load_setuptools_entrypoints(_PLUGIN_HOOKS)
+    hook_manager.load_setuptools_entrypoints(_PLUGIN_HOOKS)
     disabled_plugins = set(disabled_plugins)
 
     # Get list of plugin/distinfo tuples for all setuptools registered plugins.
@@ -85,7 +85,6 @@ def _register_hooks_setuptools(
             # name and not `entry_point` name. Also, we log project names with
             # version for which hooks were registered.
             hook_manager.unregister(plugin=plugin)
-            found -= 1
             disabled_plugin_names.add(f"{dist.project_name}-{dist.version}")
         elif plugin not in already_registered:
             plugin_names.add(f"{dist.project_name}-{dist.version}")
@@ -99,6 +98,6 @@ def _register_hooks_setuptools(
     if plugin_names:
         logger.info(
             "Registered hooks from %d installed plugin(s): %s",
-            found,
+            len(plugin_names),
             ", ".join(sorted(plugin_names)),
         )

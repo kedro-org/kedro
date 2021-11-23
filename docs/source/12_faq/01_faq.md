@@ -2,6 +2,7 @@
 
 The following lists a set of questions that we have been asked about Kedro in the past. If you have a different
  question which isn't answered here, check out [GitHub Discussions](https://github.com/quantumblacklabs/kedro/discussions) or talk to the community on the [Discord Server](https://discord.gg/akJDeVaxnB).
+
 ## What is Kedro?
 
 Kedro is an open-source Python framework for creating reproducible, maintainable and modular data science code. It
@@ -12,38 +13,39 @@ For the source code, take a look at the [Kedro repository on Github](https://git
 
 ## Who maintains Kedro?
 
-Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) and [Nikolaos Tsaousis](https://github.com/tsanikgr) to solve challenges they faced in their project work.
-
-Their work was later turned into an internal product by [Peteris Erins](https://github.com/Pet3ris), [Ivan Danov](https://github.com/idanov), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae) and [Nikolaos Tsaousis](https://github.com/tsanikgr).
+Kedro was originally designed by [Aris Valtazanos](https://github.com/arisvqb) and [Nikolaos Tsaousis](https://github.com/tsanikgr) at QuantumBlack to solve challenges they faced in their project work. Their work was later turned into an internal product by [Peteris Erins](https://github.com/Pet3ris), [Ivan Danov](https://github.com/idanov), [Nikolaos Kaltsas](https://github.com/nikos-kal), [Meisam Emamjome](https://github.com/misamae) and [Nikolaos Tsaousis](https://github.com/tsanikgr). In the project's latest iteration it is an incubating project within [LF AI & Data](https://lfaidata.foundation/).
 
 Currently, the core Kedro team consists of
-[Yetunde Dada](https://github.com/yetudada),
-[Ivan Danov](https://github.com/idanov),
-[Richard Westenra](https://github.com/richardwestenra),
-[Lorena Balan](https://github.com/lorenabalan),
-[Lim Hoang](https://github.com/limdauto),
-[Jo Stichbury](https://github.com/stichbury),
-[Merel Theisen](https://github.com/MerelTheisenQB),
-[Gabriel Comym](https://github.com/GabrielComymQB),
-[Liam Brummitt](https://github.com/bru5),
-[Susanna Wong](https://github.com/studioswong),
-[Rashida Kanchwala](https://github.com/rashidakanchwala),
-[Joel Schwarzmann](https://github.com/datajoely),
+[Ahdra Merali](https://github.com/AhdraMeraliQB),
+Andrew Mackay,
 [Antony Milne](https://github.com/AntonyMilneQB),
-[Jiri Klein](https://github.com/jiriklein),
-[Hamza Oza](https://github.com/hamzaoza) and
-[Sajid Alam](https://github.com/SajidAlamQB).
+[Gabriel Comym](https://github.com/GabrielComymQB),
+[Ivan Danov](https://github.com/idanov),
+[Joel Schwarzmann](https://github.com/datajoely),
+[Lim Hoang](https://github.com/limdauto),
+[Lorena Bălan](https://github.com/lorenabalan),
+[Merel Theisen](https://github.com/MerelTheisenQB),
+[Rashida Kanchwala](https://github.com/rashidakanchwala),
+[Sajid Alam](https://github.com/SajidAlamQB),
+[Susanna Wong](https://github.com/studioswong),
+[Tynan DeBold](https://github.com/tynandebold) and
+[Yetunde Dada](https://github.com/yetudada).
 
 Former core team members with significant contributions include:
-[Gordon Wrigley](https://github.com/tolomea),
-[Nasef Khan](https://github.com/nakhan98),
-[Anton Kirilenko](https://github.com/Flid),
-[Zain Patel](https://github.com/mzjp2),
-[Laís Carvalho](https://github.com/laisbsc),
-[Kiyohito Kunii](https://github.com/921kiyo),
-[Dmitrii Deriabin](https://github.com/dmder),
 [Andrii Ivaniuk](https://github.com/andrii-ivaniuk),
-[Ignacio Paricio](https://github.com/ignacioparicio).
+[Anton Kirilenko](https://github.com/Flid),
+[Dmitrii Deriabin](https://github.com/dmder),
+[Gordon Wrigley](https://github.com/tolomea),
+[Hamza Oza](https://github.com/hamzaoza),
+[Ignacio Paricio](https://github.com/ignacioparicio),
+[Jiri Klein](https://github.com/jiriklein),
+[Jo Stichbury](https://github.com/stichbury),
+[Kiyohito Kunii](https://github.com/921kiyo),
+[Laís Carvalho](https://github.com/laisbsc),
+[Liam Brummitt](https://github.com/bru5),
+[Nasef Khan](https://github.com/nakhan98),
+[Richard Westenra](https://github.com/richardwestenra) and
+[Zain Patel](https://github.com/mzjp2).
 
 And last, but not least, all the open-source contributors whose work went into all Kedro [releases](https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md).
 
@@ -92,8 +94,8 @@ The responsibility of _"What time will this pipeline run?"_, _"How do I manage m
 
 ## What is data engineering convention?
 
-[Bruce Philp](https://github.com/bruceaphilp) and [Guilherme Braccialli](https://github.com/gbraccialli-qb) at
-[QuantumBlack](https://github.com/quantumblacklabs) are the brains behind a layered data-engineering convention as a model of managing data. You can find an [in-depth walk through of their convention](https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71) as a blog post on Medium.
+[Bruce Philp](https://github.com/bruceaphilp) and [Guilherme Braccialli](https://github.com/gbraccialli-qb) are the
+brains behind a layered data-engineering convention as a model of managing data. You can find an [in-depth walk through of their convention](https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71) as a blog post on Medium.
 
 Refer to the following table below for a high level guide to each layer's purpose
 

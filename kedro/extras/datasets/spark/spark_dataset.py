@@ -304,6 +304,7 @@ class SparkDataSet(AbstractVersionedDataSet):
         if save_args is not None:
             self._save_args.update(save_args)
 
+        ### would they be relevant on load_args / on read as well?
         self._dfwriter_options = self._save_args.pop("dfwriter_options", {}) or {}
         self._file_format = file_format
         self._fs_prefix = fs_prefix

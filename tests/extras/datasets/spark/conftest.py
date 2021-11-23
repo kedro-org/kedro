@@ -35,7 +35,20 @@ def replace_spark_default_getorcreate():
 @pytest.fixture(scope="module")
 def spark_session():  # SKIP_IF_NO_SPARK
     SparkSession.builder.getOrCreate = the_real_getOrCreate
-    spark = SparkSession.builder.getOrCreate()
+    spark = (
+        SparkSession.builder.config(
+            "spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension"
+        )
+        .config(
+            "spark.sql.catalog.spark_catalog",
+            "org.apache.spark.sql.delta.catalog.DeltaCatalog",
+        )
+        .config(
+            "spark.jars.packages",
+            "io.delta:delta-core_2.12:1.0.0",
+        )
+        .getOrCreate()
+    )
     yield spark
     spark.stop()
     SparkSession.builder.getOrCreate = UseTheSparkSessionFixtureOrMock

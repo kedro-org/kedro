@@ -35,7 +35,12 @@ class TestDeltaTableDataSet:
             filepath=filepath, file_format="delta", save_args={"mode": "overwrite"}
         )
         spark_delta_ds.save(sample_spark_df)
+
+        # csv content == delta content
+
         delta_ds = DeltaTableDataset(filepath=filepath)
         delta_table = delta_ds.load()
 
         assert isinstance(delta_table, DeltaTable)
+        loaded = delta_table.toDF()
+        assert loaded.exceptAll(sample_spark_df).count() == 0

@@ -25,12 +25,6 @@ class DeltaTableDataset(SparkDataSet):
             >>>   type: spark.SparkDataSet
             >>>   filepath: data/02_intermediate/data.parquet
             >>>   file_format: "delta"
-            >>>   load_args:
-            >>>     header: True
-            >>>     inferSchema: True
-            >>>   save_args:
-            >>>     sep: "|"
-            >>>     header: True
             >>>
             >>> weather_cleaned:
             >>>   type: spark.DeltaTableDataset
@@ -64,8 +58,6 @@ class DeltaTableDataset(SparkDataSet):
     def __init__(  # pylint: disable=too-many-arguments
         self,
         filepath: str,
-        load_args: Dict[str, Any] = None,
-        save_args: Dict[str, Any] = None,
         version: Version = None,
         credentials: Dict[str, Any] = None,
     ) -> None:
@@ -76,18 +68,6 @@ class DeltaTableDataset(SparkDataSet):
                 and working with data written to mount path points,
                 specify ``filepath``s for (versioned) ``SparkDataSet``s
                 starting with ``/dbfs/mnt``.
-            load_args: Load args passed to Spark DataFrameReader load method.
-                It is dependent on the selected file format. You can find
-                a list of read options for each supported format
-                in Spark DataFrame read documentation:
-                https://spark.apache.org/docs/latest/api/python/reference/api/pyspark.sql.DataFrame.html
-            save_args: Save args passed to Spark DataFrame write options.
-                Similar to load_args this is dependent on the selected file
-                format. You can pass ``mode`` and ``partitionBy`` to specify
-                your overwrite mode and partitioning respectively. You can find
-                a list of options for each format in Spark DataFrame
-                write documentation:
-                https://spark.apache.org/docs/latest/api/python/reference/api/pyspark.sql.DataFrame.html
             version: If specified, should be an instance of
                 ``kedro.io.core.Version``. If its ``load`` attribute is
                 None, the latest version will be loaded. If its ``save``
@@ -100,8 +80,6 @@ class DeltaTableDataset(SparkDataSet):
         super().__init__(
             filepath=filepath,
             file_format="delta",
-            load_args=load_args,
-            save_args=save_args,
             version=version,
             credentials=credentials,
         )

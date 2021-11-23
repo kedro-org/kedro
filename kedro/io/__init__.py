@@ -13,7 +13,6 @@ from .core import (
     Version,
 )
 from .data_catalog import DataCatalog
-from .data_catalog_with_default import DataCatalogWithDefault
 from .lambda_dataset import LambdaDataSet
 from .memory_dataset import MemoryDataSet
 from .partitioned_dataset import IncrementalDataSet, PartitionedDataSet
@@ -23,7 +22,6 @@ __all__ = [
     "AbstractVersionedDataSet",
     "CachedDataSet",
     "DataCatalog",
-    "DataCatalogWithDefault",
     "DataSetAlreadyExistsError",
     "DataSetError",
     "DataSetNotFoundError",

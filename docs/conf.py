@@ -117,7 +117,6 @@ type_targets = {
         "kedro.io.core.DataSetError",
         "kedro.io.core.Version",
         "kedro.io.data_catalog.DataCatalog",
-        "kedro.io.data_catalog_with_default.DataCatalogWithDefault",
         "kedro.io.partitioned_dataset.PartitionedDataSet",
         "kedro.pipeline.pipeline.Pipeline",
         "kedro.runner.runner.AbstractRunner",

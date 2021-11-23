@@ -19,7 +19,6 @@ kedro.io
    kedro.io.PartitionedDataSet
    kedro.io.IncrementalDataSet
    kedro.io.CachedDataSet
-   kedro.io.DataCatalogWithDefault
    kedro.io.Version
 
 .. rubric:: Exceptions

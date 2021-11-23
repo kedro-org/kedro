@@ -25,10 +25,7 @@ def delta_spark_session(replace_spark_default_getorcreate):
                 "spark.sql.catalog.spark_catalog",
                 "org.apache.spark.sql.delta.catalog.DeltaCatalog",
             )
-            .config(
-                "spark.jars.packages",
-                "io.delta:delta-core_2.12:1.0.0",
-            )
+            .config("spark.jars.packages", "io.delta:delta-core_2.12:1.0.0")
             .getOrCreate()
         )
         yield spark
@@ -75,20 +72,15 @@ def sample_spark_df():
 
 class TestDeltaTableDataSet:
     def test_load(self, tmp_path, sample_spark_df):
-        filepath = (tmp_path / "data.csv").as_posix()
-        spark_ds = SparkDataSet(filepath=filepath, file_format="csv")
-        spark_ds.save(sample_spark_df)
-
-        spark_delta_ds = SparkDataSet(
-            filepath=filepath, file_format="delta", save_args={"mode": "overwrite"}
-        )
+        filepath = (tmp_path / "data").as_posix()
+        spark_delta_ds = SparkDataSet(filepath=filepath, file_format="delta")
         spark_delta_ds.save(sample_spark_df)
-
-        # csv content == delta content
+        loaded_with_spark = spark_delta_ds.load()
+        assert loaded_with_spark.exceptAll(sample_spark_df).count() == 0
 
         delta_ds = DeltaTableDataset(filepath=filepath)
         delta_table = delta_ds.load()
 
         assert isinstance(delta_table, DeltaTable)
-        loaded = delta_table.toDF()
-        assert loaded.exceptAll(sample_spark_df).count() == 0
+        loaded_with_deltalake = delta_table.toDF()
+        assert loaded_with_deltalake.exceptAll(loaded_with_spark).count() == 0

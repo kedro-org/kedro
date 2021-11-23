@@ -223,7 +223,7 @@ class SparkDataSet(AbstractVersionedDataSet):
                 starting with ``/dbfs/mnt``.
             file_format: File format used during load and save
                 operations. These are formats supported by the running
-                SparkContext include parquet, csv. For a list of supported
+                SparkContext include parquet, csv, delta. For a list of supported
                 formats please refer to Apache Spark documentation at
                 https://spark.apache.org/docs/latest/sql-programming-guide.html
             load_args: Load args passed to Spark DataFrameReader load method.

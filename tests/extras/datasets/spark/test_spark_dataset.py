@@ -1,10 +1,11 @@
+import re
 import sys
 import tempfile
 from pathlib import Path, PurePosixPath
 
 import pandas as pd
 import pytest
-from pyspark.sql import SparkSession
+from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.functions import col
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
@@ -192,9 +193,7 @@ class TestSparkDataSet:
         with tempfile.NamedTemporaryFile() as temp_data_file:
             filepath = Path(temp_data_file.name).as_posix()
             spark_data_set = SparkDataSet(
-                filepath=filepath,
-                file_format="csv",
-                load_args={"header": True},
+                filepath=filepath, file_format="csv", load_args={"header": True}
             )
             assert "SparkDataSet" in str(spark_data_set)
             assert f"filepath={filepath}" in str(spark_data_set)
@@ -217,6 +216,49 @@ class TestSparkDataSet:
 
         spark_data_set.save(sample_spark_df)
         spark_data_set.save(sample_spark_df)
+
+    @pytest.mark.parametrize(
+        "save_args,expected_options",
+        [
+            ({"mode": "overwrite"}, {}),
+            ({"mode": "overwrite", "dfwriter_options": {}}, {}),
+            ({"mode": "overwrite", "dfwriter_options": None}, {}),
+            (
+                {"mode": "overwrite", "dfwriter_options": {"versionAsOf": 0}},
+                {"versionAsOf": 0},
+            ),
+        ],
+    )
+    def test_save_dfwriter_options(
+        self, tmp_path, save_args, expected_options, sample_spark_df, mocker
+    ):
+        filepath = (tmp_path / "test_data").as_posix()
+        spark_data_set = SparkDataSet(
+            filepath=filepath, file_format="delta", save_args=save_args
+        )
+
+        assert spark_data_set._dfwriter_options == expected_options
+
+        mock_writer = mocker.patch.object(DataFrame, "write")
+        spark_data_set._add_options(sample_spark_df)
+        if expected_options:
+            mock_writer.option.assert_called_once_with("versionAsOf", 0)
+        else:
+            assert mock_writer.option.call_count == 0
+
+    @pytest.mark.parametrize("mode", ["merge", "delete", "update"])
+    def test_file_format_delta_and_unsupported_mode(self, tmp_path, mode):
+        filepath = (tmp_path / "test_data").as_posix()
+        pattern = (
+            f"It is not possible to perform `save()` for file format `delta` "
+            f"with mode `{mode}` on `SparkDataSet`. "
+            f"Please use `spark.DeltaTableDataSet` instead."
+        )
+
+        with pytest.raises(DataSetError, match=re.escape(pattern)):
+            _ = SparkDataSet(
+                filepath=filepath, file_format="delta", save_args={"mode": mode}
+            )
 
     def test_save_partition(self, tmp_path, sample_spark_df):
         # To verify partitioning this test will partition the data by one

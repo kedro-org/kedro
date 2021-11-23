@@ -47,7 +47,7 @@ class DeltaTableDataset(SparkDataSet):
             >>> spark_df = SparkSession.builder.getOrCreate()\
             >>>                        .createDataFrame(data, schema)
             >>>
-            >>> data_set = SparkDataSet(filepath="test_data")
+            >>> data_set = SparkDataSet(filepath="test_data", file_format="delta")
             >>> data_set.save(spark_df)
             >>> deltatable_dataset = DeltaTableDataset(filepath="test_data")
             >>> delta_table = deltatable_dataset.load()

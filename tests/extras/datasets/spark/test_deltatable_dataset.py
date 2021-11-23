@@ -72,7 +72,7 @@ def sample_spark_df():
 
 class TestDeltaTableDataSet:
     def test_load(self, tmp_path, sample_spark_df):
-        filepath = (tmp_path / "data").as_posix()
+        filepath = (tmp_path / "test_data").as_posix()
         spark_delta_ds = SparkDataSet(filepath=filepath, file_format="delta")
         spark_delta_ds.save(sample_spark_df)
         loaded_with_spark = spark_delta_ds.load()
@@ -84,3 +84,30 @@ class TestDeltaTableDataSet:
         assert isinstance(delta_table, DeltaTable)
         loaded_with_deltalake = delta_table.toDF()
         assert loaded_with_deltalake.exceptAll(loaded_with_spark).count() == 0
+
+    def test_save(self, tmp_path, sample_spark_df, caplog):
+        filepath = (tmp_path / "test_data").as_posix()
+        delta_ds = DeltaTableDataset(filepath=filepath)
+        assert not delta_ds.exists()
+
+        delta_ds.save(sample_spark_df)
+        # save is a dummy operation, check that indeed nothing is written
+        assert not delta_ds.exists()
+
+        log_messages = [r.getMessage() for r in caplog.records]
+        expected_log_message = (
+            "Saving was performed on `DeltaTable` object "
+            "within the context of the node function"
+        )
+        assert expected_log_message in log_messages
+
+    def test_exists(self, tmp_path, sample_spark_df):
+        filepath = (tmp_path / "test_data").as_posix()
+        delta_ds = DeltaTableDataset(filepath=filepath)
+
+        assert not delta_ds.exists()
+
+        spark_delta_ds = SparkDataSet(filepath=filepath, file_format="delta")
+        spark_delta_ds.save(sample_spark_df)
+
+        assert delta_ds.exists()

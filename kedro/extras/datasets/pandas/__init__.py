@@ -5,6 +5,7 @@ __all__ = [
     "ExcelDataSet",
     "FeatherDataSet",
     "GBQTableDataSet",
+    "GBQQueryDataSet",
     "ExcelDataSet",
     "AppendableExcelDataSet",
     "HDFDataSet",
@@ -26,7 +27,7 @@ with suppress(ImportError):
 with suppress(ImportError):
     from .feather_dataset import FeatherDataSet
 with suppress(ImportError):
-    from .gbq_dataset import GBQTableDataSet
+    from .gbq_dataset import GBQQueryDataSet, GBQTableDataSet
 with suppress(ImportError):
     from .hdf_dataset import HDFDataSet
 with suppress(ImportError):

@@ -190,8 +190,6 @@ class GBQQueryDataSet(AbstractDataSet):
         >>>   credentials: gbq-creds
         >>>   load_args:
         >>>     reauth: True
-        >>>   save_args:
-        >>>     chunk_size: 100
 
 
     Example using Python API:

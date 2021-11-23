@@ -79,7 +79,7 @@ pandas_require = {
     "pandas.GBQQueryDataSet": [PANDAS, "pandas-gbq>=0.12.0, <1.0"],
     "pandas.HDFDataSet": [PANDAS, "tables~=3.6"],
     "pandas.JSONDataSet": [PANDAS],
-    "pandas.ParquetDataSet": [PANDAS, "pyarrow>=0.12.0, <4.0"],
+    "pandas.ParquetDataSet": [PANDAS, "pyarrow>=1.0, <7.0"],
     "pandas.SQLTableDataSet": [PANDAS, "SQLAlchemy~=1.2"],
     "pandas.SQLQueryDataSet": [PANDAS, "SQLAlchemy~=1.2"],
     "pandas.GenericDataSet": [PANDAS],

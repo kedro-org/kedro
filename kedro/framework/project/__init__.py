@@ -63,6 +63,9 @@ class _ProjectSettings(LazySettings):
         "CONFIG_LOADER_CLASS", default=_get_default_class("kedro.config.ConfigLoader")
     )
     _CONFIG_LOADER_ARGS = Validator("CONFIG_LOADER_ARGS", default={})
+    _DATA_CATALOG_CLASS = Validator(
+        "DATA_CATALOG_CLASS", default=_get_default_class("kedro.io.DataCatalog")
+    )
 
     def __init__(self, *args, **kwargs):
 
@@ -76,6 +79,7 @@ class _ProjectSettings(LazySettings):
                 self._DISABLE_HOOKS_FOR_PLUGINS,
                 self._CONFIG_LOADER_CLASS,
                 self._CONFIG_LOADER_ARGS,
+                self._DATA_CATALOG_CLASS,
             ]
         )
         super().__init__(*args, **kwargs)

@@ -14,19 +14,19 @@ from kedro import __version__ as kedro_version
 from kedro.config import ConfigLoader, MissingConfigException
 from kedro.framework.context import KedroContext
 from kedro.framework.context.context import (
+    KedroContextError,
     _convert_paths_to_absolute_posix,
     _is_relative_path,
     _update_nested_dict,
     _validate_layers_for_transcoding,
 )
-from kedro.framework.hooks import get_hook_manager, hook_impl
+from kedro.framework.hooks import get_hook_manager
 from kedro.framework.project import (
     Validator,
     _ProjectSettings,
     configure_project,
     pipelines,
 )
-from kedro.io import DataCatalog
 
 MOCK_PACKAGE_NAME = "mock_package_name"
 
@@ -145,23 +145,21 @@ def prepare_project_dir(tmp_path, base_config, local_config, local_logging_confi
     _write_toml(tmp_path / "pyproject.toml", pyproject_toml_payload)
 
 
-class RegistrationHooks:
-    @hook_impl
-    def register_catalog(
-        self, catalog, credentials, load_versions, save_version
-    ) -> DataCatalog:
-        return DataCatalog.from_config(
-            catalog, credentials, load_versions, save_version
-        )
+class BrokenSettings(_ProjectSettings):
+    _DATA_CATALOG_CLASS = Validator("DATA_CATALOG_CLASS", default="it breaks")
 
 
-class MockSettings(_ProjectSettings):
-    _HOOKS = Validator("HOOKS", default=(RegistrationHooks(),))
+@pytest.fixture
+def broken_settings(mocker):
+    mocked_settings = BrokenSettings()
+    mocker.patch("kedro.framework.session.session.settings", mocked_settings)
+    mocker.patch("kedro.framework.context.context.settings", mocked_settings)
+    return mocker.patch("kedro.framework.project.settings", mocked_settings)
 
 
 @pytest.fixture(autouse=True)
 def mock_settings(mocker):
-    mocked_settings = MockSettings()
+    mocked_settings = _ProjectSettings()
     mocker.patch("kedro.framework.session.session.settings", mocked_settings)
     return mocker.patch("kedro.framework.project.settings", mocked_settings)
 
@@ -270,6 +268,12 @@ class TestKedroContext:
         dummy_context.catalog.save("cars", dummy_dataframe)
         reloaded_df = dummy_context.catalog.load("cars")
         assert_frame_equal(reloaded_df, dummy_dataframe)
+
+    # pylint: disable=unused-argument
+    def test_broken_catalog(self, broken_settings, dummy_context):
+        pattern = f"Expected an instance of `DataCatalog`, got `{type('')}` instead."
+        with pytest.raises(KedroContextError, match=re.escape(pattern)):
+            _ = dummy_context.catalog
 
     @pytest.mark.parametrize(
         "extra_params",

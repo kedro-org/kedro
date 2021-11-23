@@ -1,5 +1,4 @@
 ![Kedro Logo Banner](https://raw.githubusercontent.com/quantumblacklabs/kedro/develop/static/img/kedro_banner.png)
-
 [![Python version](https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9-blue.svg)](https://pypi.org/project/kedro/)
 [![PyPI version](https://badge.fury.io/py/kedro.svg)](https://pypi.org/project/kedro/)
 [![Conda version](https://img.shields.io/conda/vn/conda-forge/kedro.svg)](https://anaconda.org/conda-forge/kedro)
@@ -67,7 +66,7 @@ Kedro is built upon our collective best-practice (and mistakes) trying to delive
 
 ## The humans behind Kedro
 
-Kedro is maintained by a [product team from QuantumBlack](https://kedro.readthedocs.io/en/stable/faq/faq.html) and a number of [contributors from across the world](https://github.com/quantumblacklabs/kedro/releases).
+Kedro is maintained by [a product team](https://kedro.readthedocs.io/en/stable/faq/faq.html) and a number of [contributors from across the world](https://github.com/quantumblacklabs/kedro/releases).
 
 
 ## Can I contribute?
@@ -84,14 +83,19 @@ There is a growing community around Kedro. Have a look at the [Kedro FAQs](https
 
 There are Kedro users across the world, who work at start-ups, major enterprises and academic institutions like [Absa](https://www.absa.co.za/),
 [Acensi](https://acensi.eu/page/home),
+[Advanced Programming Solutions SL](https://www.linkedin.com/feed/update/urn:li:activity:6863494681372721152/),
 [AI Singapore](https://makerspace.aisingapore.org/2020/08/leveraging-kedro-in-100e/),
+[Augment Partners](https://www.linkedin.com/posts/augment-partners_kedro-cheat-sheet-by-augment-activity-6858927624631283712-Ivqk),
 [AXA UK](https://www.axa.co.uk/),
 [Belfius](https://www.linkedin.com/posts/vangansen_mlops-machinelearning-kedro-activity-6772379995953238016-JUmo),
+[Beamery](https://medium.com/hacking-talent/production-code-for-data-science-and-our-experience-with-kedro-60bb69934d1f),
 [Caterpillar](https://www.caterpillar.com/),
 [CRIM](https://www.crim.ca/en/),
 [Dendra Systems](https://www.dendra.io/),
 [Element AI](https://www.elementai.com/),
+[GetInData](https://getindata.com/blog/running-machine-learning-pipelines-kedro-kubeflow-airflow),
 [GMO](https://recruit.gmo.jp/engineer/jisedai/engineer/jisedai/engineer/jisedai/engineer/jisedai/engineer/jisedai/blog/kedro_and_mlflow_tracking/),
+[Indicium](https://medium.com/indiciumtech/how-to-build-models-as-products-using-mlops-part-2-machine-learning-pipelines-with-kedro-10337c48de92),
 [Imperial College London](https://github.com/dssg/barefoot-winnie-public),
 [ING](https://www.ing.com),
 [Jungle Scout](https://junglescouteng.medium.com/jungle-scout-case-study-kedro-airflow-and-mlflow-use-on-production-code-150d7231d42e),
@@ -106,9 +110,11 @@ There are Kedro users across the world, who work at start-ups, major enterprises
 [Open Data Science LatAm](https://www.odesla.org/),
 [Prediqt](https://prediqt.co/),
 [QuantumBlack](https://medium.com/quantumblack/introducing-kedro-the-open-source-library-for-production-ready-machine-learning-code-d1c6d26ce2cf),
-[Retrieva](https://tech.retrieva.jp/entry/2020/07/28/181414), [Roche](https://www.roche.com/),
+[Retrieva](https://tech.retrieva.jp/entry/2020/07/28/181414),
+[Roche](https://www.roche.com/),
 [Sber](https://www.linkedin.com/posts/seleznev-artem_welcome-to-kedros-documentation-kedro-activity-6767523561109385216-woTt),
-[Telkomsel](https://www.linkedin.com/feed/update/urn:li:activity:6749338226403766272/updateEntityUrn=urn%3Ali%3Afs_feedUpdate%3A%28V2%2Curn%3Ali%3Aactivity%3A6749338226403766272%29),
+[Société Générale](https://www.societegenerale.com/en),
+[Telkomsel](https://medium.com/life-at-telkomsel/how-we-build-a-production-grade-data-pipeline-7004e56c8c98),
 [Universidad Rey Juan Carlos](https://github.com/vchaparro/MasterThesis-wind-power-forecasting/blob/master/thesis.pdf),
 [UrbanLogiq](https://urbanlogiq.com/),
 [Wildlife Studios](https://wildlifestudios.com),

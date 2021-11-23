@@ -1,6 +1,7 @@
 """A ``DataCatalog`` with a default ``DataSet`` implementation for any data set
 which is not registered in the catalog.
 """
+import warnings
 from typing import Any, Callable, Dict, Optional
 
 from kedro.io.core import AbstractDataSet
@@ -18,7 +19,8 @@ class DataCatalogWithDefault(DataCatalog):
         default: Callable[[str], AbstractDataSet] = None,
         remember: bool = False,
     ):
-        """A ``DataCatalog`` with a default ``DataSet`` implementation for any
+        """``DataCatalogWithDefault`` is deprecated and will be removed in Kedro 0.18.0.
+        A ``DataCatalog`` with a default ``DataSet`` implementation for any
         data set which is not registered in the catalog.
 
         Args:
@@ -53,6 +55,13 @@ class DataCatalogWithDefault(DataCatalog):
             >>> df = io.load("cars.csv")
         """
         super().__init__(data_sets)
+
+        warnings.warn(
+            "`DataCatalogWithDefault` is now deprecated and will be removed in Kedro 0.18.0."
+            "For more information, please visit "
+            "https://github.com/quantumblacklabs/kedro/blob/master/RELEASE.md",
+            DeprecationWarning,
+        )
 
         if not callable(default):
             raise TypeError(

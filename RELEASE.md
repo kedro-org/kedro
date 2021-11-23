@@ -11,6 +11,7 @@
 | --------------------------- | ---------------------------------------------------- | --------------------------------- |
 | `plotly.JSONDataSet` | Works with plotly graph object Figures (saves as json file) | `kedro.extras.datasets.plotly` |
 | `pandas.GenericDataSet` | Provides a 'best effort' facility to read / write any format provided by the `pandas` library | `kedro.extras.datasets.pandas` |
+| `pandas.GBQQueryDataSet` | Loads data from a Google Bigquery table using provided SQL query | `kedro.extras.datasets.pandas` |
 | `spark.DeltaTableDataSet` | Dataset designed to handle Delta Lake Tables and their CRUD-style operations, including `update`, `merge` and `delete` | `kedro.extras.datasets.spark` |
 
 ## Bug fixes and other changes
@@ -49,7 +50,8 @@
 [Simon Brugman](https://github.com/sbrugman),
 [Kiyo Kunii](https://github.com/921kiyo),
 [Benjamin Levy](https://github.com/BenjaminLevyQB),
-[Louis de Charsonville](https://github.com/louisdecharson)
+[Louis de Charsonville](https://github.com/louisdecharson),
+[Simon Picard](https://github.com/simonpicard)
 
 # Release 0.17.5
 

@@ -1,4 +1,5 @@
 import gc
+import re
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -36,6 +37,9 @@ def spark_hive_session(replace_spark_default_getorcreate):
                 )
                 .enableHiveSupport()
                 .getOrCreate()
+            )
+            spark.sparkContext.setCheckpointDir(
+                str((Path(tmpdir) / "spark_checkpoint").absolute())
             )
             yield spark
 
@@ -146,7 +150,7 @@ class TestSparkHiveDataSet:
 
     def test_read_existing_table(self):
         dataset = SparkHiveDataSet(
-            database="default_1", table="table_1", write_mode="overwrite"
+            database="default_1", table="table_1", write_mode="overwrite", save_args={}
         )
         assert_df_equal(_generate_spark_df_one(), dataset.load())
 
@@ -182,7 +186,7 @@ class TestSparkHiveDataSet:
         dataset = SparkHiveDataSet(
             database="default_1",
             table="test_insert_not_empty_table",
-            write_mode="insert",
+            write_mode="append",
         )
         dataset.save(_generate_spark_df_one())
         dataset.save(_generate_spark_df_one())
@@ -231,25 +235,29 @@ class TestSparkHiveDataSet:
         )
 
     def test_invalid_pk_provided(self):
+        _test_columns = ["column_doesnt_exist"]
         dataset = SparkHiveDataSet(
             database="default_1",
             table="table_1",
             write_mode="upsert",
-            table_pk=["column_doesnt_exist"],
+            table_pk=_test_columns,
         )
         with pytest.raises(
             DataSetError,
-            match=r"Columns \[column_doesnt_exist\] selected as primary key\(s\) not "
-            r"found in table default_1\.table_1",
+            match=re.escape(
+                f"Columns {str(_test_columns)} selected as primary key(s) "
+                f"not found in table default_1.table_1",
+            ),
         ):
             dataset.save(_generate_spark_df_one())
 
     def test_invalid_write_mode_provided(self):
         pattern = (
-            r"Invalid `write_mode` provided: not_a_write_mode\. "
-            r"`write_mode` must be one of: insert, upsert, overwrite"
+            "Invalid `write_mode` provided: not_a_write_mode. "
+            "`write_mode` must be one of: "
+            "append, error, errorifexists, upsert, overwrite"
         )
-        with pytest.raises(DataSetError, match=pattern):
+        with pytest.raises(DataSetError, match=re.escape(pattern)):
             SparkHiveDataSet(
                 database="default_1",
                 table="table_1",
@@ -265,7 +273,7 @@ class TestSparkHiveDataSet:
         dataset = SparkHiveDataSet(
             database="default_1",
             table="test_invalid_schema_insert",
-            write_mode="insert",
+            write_mode="append",
         )
         with pytest.raises(
             DataSetError,
@@ -277,7 +285,7 @@ class TestSparkHiveDataSet:
 
     def test_insert_to_non_existent_table(self):
         dataset = SparkHiveDataSet(
-            database="default_1", table="table_not_yet_created", write_mode="insert"
+            database="default_1", table="table_not_yet_created", write_mode="append"
         )
         dataset.save(_generate_spark_df_one())
         assert_df_equal(
@@ -286,10 +294,15 @@ class TestSparkHiveDataSet:
 
     def test_read_from_non_existent_table(self):
         dataset = SparkHiveDataSet(
-            database="default_1", table="table_doesnt_exist", write_mode="insert"
+            database="default_1", table="table_doesnt_exist", write_mode="append"
         )
         with pytest.raises(
             DataSetError,
-            match="Requested table not found: default_1.table_doesnt_exist",
+            match=r"Failed while loading data from data set "
+            r"SparkHiveDataSet\(database=default_1, format=hive, "
+            r"table=table_doesnt_exist, table_pk=\[\], write_mode=append\)\.\n"
+            r"Table or view not found: default_1.table_doesnt_exist;\n"
+            r"'UnresolvedRelation \[default_1, "
+            r"table_doesnt_exist\], \[\], false\n",
         ):
             dataset.load()

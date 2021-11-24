@@ -1,7 +1,7 @@
 import gc
 
 import pytest
-from delta import DeltaTable
+from delta import DeltaTable, configure_spark_with_delta_pip
 from psutil import Popen
 from pyspark import SparkContext
 from pyspark.sql import SparkSession
@@ -21,17 +21,18 @@ def delta_spark_session(replace_spark_default_getorcreate):
     SparkSession.builder.getOrCreate = replace_spark_default_getorcreate
 
     try:
-        spark = (
-            SparkSession.builder.config(
-                "spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension"
-            )
+        # As recommended in https://docs.delta.io/latest/quick-start.html#python
+        builder = (
+            SparkSession.builder.appName("MyApp")
+            .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
             .config(
                 "spark.sql.catalog.spark_catalog",
                 "org.apache.spark.sql.delta.catalog.DeltaCatalog",
             )
-            .config("spark.jars.packages", "io.delta:delta-core_2.12:1.0.0")
-            .getOrCreate()
         )
+
+        spark = configure_spark_with_delta_pip(builder).getOrCreate()
+
         yield spark
 
         # This fixture should be a dependency of other fixtures dealing with spark delta data
@@ -119,9 +120,7 @@ class TestDeltaTableDataSet:
     def test_exists_raises_error(self, mocker):
         delta_ds = DeltaTableDataset(filepath="")
         mocker.patch.object(
-            delta_ds,
-            "_get_spark",
-            side_effect=AnalysisException("Other Exception", []),
+            delta_ds, "_get_spark", side_effect=AnalysisException("Other Exception", [])
         )
 
         with pytest.raises(DataSetError, match="Other Exception"):

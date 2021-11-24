@@ -6,8 +6,12 @@ from psutil import Popen
 from pyspark import SparkContext
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
+from pyspark.sql.utils import AnalysisException
 
 from kedro.extras.datasets.spark import DeltaTableDataset, SparkDataSet
+from kedro.io import DataCatalog, DataSetError
+from kedro.pipeline import Pipeline, node
+from kedro.runner import ParallelRunner
 from tests.extras.datasets.spark.conftest import UseTheSparkSessionFixtureOrMock
 
 
@@ -30,7 +34,7 @@ def delta_spark_session(replace_spark_default_getorcreate):
         )
         yield spark
 
-        # This fixture should be a dependency of other fixtures dealing with spark hive data
+        # This fixture should be a dependency of other fixtures dealing with spark delta data
         # in this module so that it always exits last and stops the spark session
         # after tests are finished.
         spark.stop()
@@ -111,3 +115,31 @@ class TestDeltaTableDataSet:
         spark_delta_ds.save(sample_spark_df)
 
         assert delta_ds.exists()
+
+    def test_exists_raises_error(self, mocker):
+        delta_ds = DeltaTableDataset(filepath="")
+        mocker.patch.object(
+            delta_ds,
+            "_get_spark",
+            side_effect=AnalysisException("Other Exception", []),
+        )
+
+        with pytest.raises(DataSetError, match="Other Exception"):
+            delta_ds.exists()
+
+    @pytest.mark.parametrize("is_async", [False, True])
+    def test_parallel_runner(self, is_async):
+        """Test ParallelRunner with SparkDataSet fails."""
+
+        def no_output(x):
+            _ = x + 1
+
+        delta_ds = DeltaTableDataset(filepath="")
+        catalog = DataCatalog(data_sets={"delta_in": delta_ds})
+        pipeline = Pipeline([node(no_output, "delta_in", None)])
+        pattern = (
+            r"The following data sets cannot be used with "
+            r"multiprocessing: \['delta_in'\]"
+        )
+        with pytest.raises(AttributeError, match=pattern):
+            ParallelRunner(is_async=is_async).run(pipeline, catalog)

@@ -277,7 +277,7 @@ class TestSparkDataSet:
 
         assert expected_path.exists()
 
-    @pytest.mark.parametrize("file_format", ["csv", "parquet"])
+    @pytest.mark.parametrize("file_format", ["csv", "parquet", "delta"])
     def test_exists(self, file_format, tmp_path, sample_spark_df):
         filepath = (tmp_path / "test_data").as_posix()
         spark_data_set = SparkDataSet(filepath=filepath, file_format=file_format)

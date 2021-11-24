@@ -277,7 +277,7 @@ class TestSparkDataSet:
 
         assert expected_path.exists()
 
-    @pytest.mark.parametrize("file_format", ["csv", "parquet", "delta"])
+    @pytest.mark.parametrize("file_format", ["csv", "parquet"])
     def test_exists(self, file_format, tmp_path, sample_spark_df):
         filepath = (tmp_path / "test_data").as_posix()
         spark_data_set = SparkDataSet(filepath=filepath, file_format=file_format)
@@ -622,7 +622,7 @@ class TestSparkDataSetVersionedS3:
         )
 
         versioned_dataset_s3.save(mocked_spark_df)
-        mocked_spark_df.write.save.assert_called_once_with(
+        mocked_spark_df.write.options().save.assert_called_once_with(
             "s3a://{b}/{f}/{v}/{f}".format(b=BUCKET_NAME, f=FILENAME, v=version.save),
             "parquet",
         )
@@ -642,7 +642,7 @@ class TestSparkDataSetVersionedS3:
         )
         with pytest.warns(UserWarning, match=pattern):
             ds_s3.save(mocked_spark_df)
-        mocked_spark_df.write.save.assert_called_once_with(
+        mocked_spark_df.write.options().save.assert_called_once_with(
             "s3a://{b}/{f}/{v}/{f}".format(
                 b=BUCKET_NAME, f=FILENAME, v=exact_version.save
             ),
@@ -754,7 +754,7 @@ class TestSparkDataSetVersionedHdfs:
             "{fn}/{f}/{v}/{f}".format(fn=FOLDER_NAME, v=version.save, f=FILENAME),
             strict=False,
         )
-        mocked_spark_df.write.save.assert_called_once_with(
+        mocked_spark_df.write.options().save.assert_called_once_with(
             "hdfs://{fn}/{f}/{v}/{f}".format(
                 fn=FOLDER_NAME, v=version.save, f=FILENAME
             ),
@@ -776,7 +776,7 @@ class TestSparkDataSetVersionedHdfs:
 
         with pytest.warns(UserWarning, match=pattern):
             versioned_hdfs.save(mocked_spark_df)
-        mocked_spark_df.write.save.assert_called_once_with(
+        mocked_spark_df.write.options().save.assert_called_once_with(
             "hdfs://{fn}/{f}/{sv}/{f}".format(
                 fn=FOLDER_NAME, f=FILENAME, sv=exact_version.save
             ),

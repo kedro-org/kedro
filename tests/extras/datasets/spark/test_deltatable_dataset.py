@@ -61,7 +61,7 @@ def delta_spark_session(replace_spark_default_getorcreate):
 
 
 @pytest.fixture
-def sample_spark_df():
+def sample_spark_df(delta_spark_session):
     schema = StructType(
         [
             StructField("name", StringType(), True),
@@ -71,7 +71,7 @@ def sample_spark_df():
 
     data = [("Alex", 31), ("Bob", 12), ("Clarke", 65), ("Dave", 29)]
 
-    return SparkSession.builder.getOrCreate().createDataFrame(data, schema)
+    return delta_spark_session.createDataFrame(data, schema)
 
 
 class TestDeltaTableDataSet:
@@ -132,7 +132,7 @@ class TestDeltaTableDataSet:
         """Test ParallelRunner with SparkDataSet fails."""
 
         def no_output(x):
-            _ = x + 1
+            _ = x + 1  # pragma: no cover
 
         delta_ds = DeltaTableDataset(filepath="")
         catalog = DataCatalog(data_sets={"delta_in": delta_ds})
@@ -143,3 +143,16 @@ class TestDeltaTableDataSet:
         )
         with pytest.raises(AttributeError, match=pattern):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
+
+
+class TestSparkDataSetWithDeltaFormat:
+    def test_exists(self, tmp_path, sample_spark_df):
+        # testing SparkDataSet with delta here as we have a
+        # properly set-up SparkSession to work with Delta Lake
+        filepath = (tmp_path / "test_data").as_posix()
+        spark_data_set = SparkDataSet(filepath=filepath, file_format="delta")
+
+        assert not spark_data_set.exists()
+
+        spark_data_set.save(sample_spark_df)
+        assert spark_data_set.exists()

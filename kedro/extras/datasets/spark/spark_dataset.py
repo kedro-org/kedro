@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from warnings import warn
 
 from hdfs import HdfsError, InsecureClient
-from pyspark.sql import DataFrame, DataFrameWriter, SparkSession
+from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.utils import AnalysisException
 from s3fs import S3FileSystem
 
@@ -333,8 +333,9 @@ class SparkDataSet(AbstractVersionedDataSet):
 
     def _save(self, data: DataFrame) -> None:
         save_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_save_path()))
-        writer = self._add_options(data)
-        writer.save(save_path, self._file_format, **self._save_args)
+        data.write.options(**self._dfwriter_options).save(
+            save_path, self._file_format, **self._save_args
+        )
 
     def _exists(self) -> bool:
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_load_path()))
@@ -349,15 +350,6 @@ class SparkDataSet(AbstractVersionedDataSet):
                 return False
             raise
         return True
-
-    def _add_options(self, dataframe: DataFrame) -> DataFrameWriter:
-        # DeltaTable specific opts, such as `schemaValidation`
-        df_writer = dataframe.write
-
-        for key, value in self._dfwriter_options.items():
-            df_writer = df_writer.option(key, value)
-
-        return df_writer
 
     def _handle_delta_format(self) -> None:
         unsupported_modes = {"merge", "delete", "update"}

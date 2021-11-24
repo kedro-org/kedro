@@ -240,11 +240,11 @@ class TestSparkDataSet:
         assert spark_data_set._dfwriter_options == expected_options
 
         mock_writer = mocker.patch.object(DataFrame, "write")
-        spark_data_set._add_options(sample_spark_df)
+        spark_data_set.save(sample_spark_df)
         if expected_options:
-            mock_writer.option.assert_called_once_with("versionAsOf", 0)
+            mock_writer.options.assert_called_once_with(versionAsOf=0)
         else:
-            assert mock_writer.option.call_count == 0
+            mock_writer.options.assert_called_once_with()
 
     @pytest.mark.parametrize("mode", ["merge", "delete", "update"])
     def test_file_format_delta_and_unsupported_mode(self, tmp_path, mode):

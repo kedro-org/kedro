@@ -175,6 +175,64 @@ class TestPipelinePullCommand:
         assert not filecmp.dircmp(test_path, test_dest).diff_files
         assert source_params_config.read_bytes() == dest_params_config.read_bytes()
 
+    def test_pipeline_pull_same_alias_package_name(
+        self,
+        fake_project_cli,
+        fake_repo_path,
+        fake_package_path,
+        fake_metadata,
+    ):
+        call_pipeline_create(fake_project_cli, fake_metadata)
+        call_pipeline_package(fake_project_cli, fake_metadata)
+
+        source_path = fake_package_path / "pipelines" / PIPELINE_NAME
+        test_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+
+        sdist_file = (
+            fake_repo_path / "dist" / _get_sdist_name(name=PIPELINE_NAME, version="0.1")
+        )
+
+        result = CliRunner().invoke(
+            fake_project_cli,
+            [
+                "pipeline",
+                "pull",
+                str(sdist_file),
+                "--destination",
+                "tools",
+                "--alias",
+                f"{PIPELINE_NAME}",
+            ],
+            obj=fake_metadata,
+        )
+        assert result.exit_code == 0, result.stderr
+        assert "pulled and unpacked" in result.output
+
+    def test_pipeline_pull_with_destination_only(
+        self,
+        fake_project_cli,
+        fake_repo_path,
+        fake_package_path,
+        fake_metadata,
+    ):
+        call_pipeline_create(fake_project_cli, fake_metadata)
+        call_pipeline_package(fake_project_cli, fake_metadata)
+
+        source_path = fake_package_path / "pipelines" / PIPELINE_NAME
+        test_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
+
+        sdist_file = (
+            fake_repo_path / "dist" / _get_sdist_name(name=PIPELINE_NAME, version="0.1")
+        )
+
+        result = CliRunner().invoke(
+            fake_project_cli,
+            ["pipeline", "pull", str(sdist_file), "--destination", "tools"],
+            obj=fake_metadata,
+        )
+        assert result.exit_code == 0, result.stdout
+        assert "pulled and unpacked" in result.output
+
     def test_pipeline_alias_refactors_imports(  # pylint: disable=too-many-locals
         self, fake_project_cli, fake_package_path, fake_repo_path, fake_metadata
     ):

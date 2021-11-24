@@ -211,9 +211,14 @@ def delete_pipeline(
 @env_option(
     help="Environment to install the pipeline configuration to. Defaults to `base`."
 )
-@click.option(
-    "--alias", type=str, default="", help="Module location to unpackage under."
-)
+@click.option("--alias", type=str, default="", help="Rename the package.")
+@click.option("--destination", type=str, default="", help="Module location.")
+# @click.option(
+#     "-d",
+#     "--destination",
+#     type=click.Path(resolve_path=True, file_okay=False),
+#     help="Module location to unpackage under.",
+# )
 @click.option(
     "--fs-args",
     type=click.Path(
@@ -224,7 +229,14 @@ def delete_pipeline(
 )
 @click.pass_obj  # this will pass the metadata as first argument
 def pull_package(  # pylint:disable=unused-argument, too-many-arguments
-    metadata: ProjectMetadata, package_path, env, alias, fs_args, all_flag, **kwargs
+    metadata: ProjectMetadata,
+    package_path,
+    env,
+    alias,
+    destination,
+    fs_args,
+    all_flag,
+    **kwargs,
 ) -> None:
     """Pull and unpack a modular pipeline in your project."""
     if not package_path and not all_flag:
@@ -238,7 +250,14 @@ def pull_package(  # pylint:disable=unused-argument, too-many-arguments
         _pull_packages_from_manifest(metadata)
         return
 
-    _pull_package(package_path, metadata, env=env, alias=alias, fs_args=fs_args)
+    _pull_package(
+        package_path,
+        metadata,
+        env=env,
+        alias=alias,
+        destination=destination,
+        fs_args=fs_args,
+    )
     as_alias = f" as `{alias}`" if alias else ""
     message = f"Pipeline {package_path} pulled and unpacked{as_alias}!"
     click.secho(message, fg="green")
@@ -250,6 +269,7 @@ def _pull_package(
     metadata: ProjectMetadata,
     env: str = None,
     alias: str = None,
+    destination: str = None,
     fs_args: str = None,
 ):
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -283,7 +303,12 @@ def _pull_package(
 
         _clean_pycache(temp_dir_path)
         _install_files(
-            metadata, package_name, temp_dir_path / sdist_file_name, env, alias
+            metadata,
+            package_name,
+            temp_dir_path / sdist_file_name,
+            env,
+            alias,
+            destination,
         )
 
 
@@ -541,6 +566,7 @@ def _install_files(  # pylint: disable=too-many-locals
     source_path: Path,
     env: str = None,
     alias: str = None,
+    destination: str = None,
 ):
     env = env or "base"
 
@@ -548,11 +574,11 @@ def _install_files(  # pylint: disable=too-many-locals
         source_path, package_name
     )
 
-    if conf_source.is_dir() and alias:
-        alias_name = alias.split(".")[-1]
-        _rename_files(conf_source, package_name, alias_name)
+    if conf_source.is_dir() and alias and alias != package_name:
+        _rename_files(conf_source, package_name, alias)
 
-    module_path = alias or package_name
+    destination = destination or ""
+    module_path = f"{destination}.{alias or package_name}"
     package_dest, test_dest, conf_dest = _get_artifacts_to_package(
         project_metadata, module_path=module_path, env=env
     )
@@ -566,7 +592,7 @@ def _install_files(  # pylint: disable=too-many-locals
 
     project = Project(source_path)
     refactored_package_source, refactored_test_source = _refactor_code_for_unpacking(
-        project, package_source, test_source, alias, project_metadata
+        project, package_source, test_source, destination, project_metadata
     )
     project.close()
 

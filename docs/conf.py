@@ -117,13 +117,10 @@ type_targets = {
         "kedro.io.core.DataSetError",
         "kedro.io.core.Version",
         "kedro.io.data_catalog.DataCatalog",
-        "kedro.io.transformers.AbstractTransformer",
-        "kedro.io.data_catalog_with_default.DataCatalogWithDefault",
-        "kedro.io.partitioned_data_set.PartitionedDataSet",
+        "kedro.io.partitioned_dataset.PartitionedDataSet",
         "kedro.pipeline.pipeline.Pipeline",
         "kedro.runner.runner.AbstractRunner",
         "kedro.runner.parallel_runner._SharedMemoryDataSet",
-        "kedro.versioning.journal.Journal",
         "kedro.framework.context.context.KedroContext",
         "kedro.framework.startup.ProjectMetadata",
         "abc.ABC",
@@ -132,7 +129,7 @@ type_targets = {
         "requests.auth.AuthBase",
         "google.oauth2.credentials.Credentials",
         "Exception",
-        "CONF_ROOT",
+        "CONF_SOURCE",
         "integer -- return number of occurrences of value",
         "integer -- return first index of value.",
         "kedro.extras.datasets.pandas.json_dataset.JSONDataSet",
@@ -201,10 +198,19 @@ linkcheck_ignore = [
     "https://github.com/quantumblacklabs/private-kedro/blob/master/kedro/templates/project/*",
     "https://eternallybored.org/misc/wget/",
     "https://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table.from_pandas",
+    "https://github.com/quantumblacklabs/kedro-starters/tree/master/standalone-datacatalog",  # temporary until 0.18
     "https://www.oracle.com/java/technologies/javase-downloads.html",  # "forbidden" url
     "https://towardsdatascience.com/the-importance-of-layered-thinking-in-data-engineering-a09f685edc71",
     "https://medium.com/quantumblack/beyond-the-notebook-and-into-the-data-science-framework-revolution-a7fd364ab9c4",
     "https://www.java.com/en/download/help/download_options.html",  # "403 Client Error: Forbidden for url"
+
+    # Number section removal, temporarily ignore until 0.18.0 release
+    "https://kedro.readthedocs.io/en/stable/data/data_catalog.html#using-the-data-catalog-with-the-yaml-api",
+    "https://kedro.readthedocs.io/en/stable/faq/faq.html#what-is-data-engineering-convention",
+    "https://kedro.readthedocs.io/en/stable/faq/faq.html",
+    "https://kedro.readthedocs.io/en/stable/data/kedro_io.html#partitioned-dataset-credentials",
+    "https://kedro.readthedocs.io/en/stable/data/kedro_io.html",
+    "https://kedro.readthedocs.io/en/stable/data/kedro_io.html#checkpoint-configuration",
 ]
 
 # retry before render a link broken (fix for "too many requests")
@@ -315,8 +321,6 @@ KEDRO_MODULES = [
     "kedro.config",
     "kedro.extras.datasets",
     "kedro.extras.logging",
-    "kedro.extras.decorators",
-    "kedro.extras.transformers",
 ]
 
 
@@ -488,8 +492,8 @@ def _prepare_build_dir(app, config):
     build_root = Path(app.srcdir)
     build_out = Path(app.outdir)
     copy_tree(str(here / "source"), str(build_root))
-    copy_tree(str(build_root / "15_api_docs"), str(build_root))
-    shutil.rmtree(str(build_root / "15_api_docs"))
+    copy_tree(str(build_root / "api_docs"), str(build_root))
+    shutil.rmtree(str(build_root / "api_docs"))
     shutil.rmtree(str(build_out), ignore_errors=True)
     copy_tree(str(build_root / "css"), str(build_out / "_static" / "css"))
     shutil.rmtree(str(build_root / "css"))

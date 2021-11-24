@@ -36,6 +36,16 @@ class MatplotlibWriter(AbstractVersionedDataSet):
         >>> plt.close()
         >>> single_plot_writer.save(plt)
         >>>
+        >>> # MatplotlibWriter can output other formats as well, such as PDF files.
+        >>> # For this, we need to specify the format:
+        >>> plt.plot([1, 2, 3], [4, 5, 6])
+        >>> single_plot_writer = MatplotlibWriter(
+        >>>     filepath="matplot_lib_single_plot.pdf",
+        >>>     save_args={"format": "pdf"},
+        >>> )
+        >>> plt.close()
+        >>> single_plot_writer.save(plt)
+        >>>
         >>> # Saving dictionary of plots
         >>> plots_dict = dict()
         >>> for colour in ["blue", "green", "red"]:

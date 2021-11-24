@@ -3,14 +3,22 @@ to read and write from/to BigQuery table.
 """
 
 import copy
+from pathlib import PurePosixPath
 from typing import Any, Dict, Union
 
+import fsspec
 import pandas as pd
 from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
 from google.oauth2.credentials import Credentials
 
-from kedro.io.core import AbstractDataSet, DataSetError, validate_on_forbidden_chars
+from kedro.io.core import (
+    AbstractDataSet,
+    DataSetError,
+    get_filepath_str,
+    get_protocol_and_path,
+    validate_on_forbidden_chars,
+)
 
 
 class GBQTableDataSet(AbstractDataSet):
@@ -161,3 +169,144 @@ class GBQTableDataSet(AbstractDataSet):
                 "to be the same for save and load args. "
                 "Details: https://cloud.google.com/bigquery/docs/locations"
             )
+
+
+class GBQQueryDataSet(AbstractDataSet):
+    """``GBQQueryDataSet`` loads data from a provided SQL query from Google
+    BigQuery. It uses ``pandas.read_gbq`` which itself uses ``pandas-gbq``
+    internally to read from BigQuery table. Therefore it supports all allowed
+    pandas options on ``read_gbq``.
+
+    Example adding a catalog entry with
+    `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
+        01_data_catalog.html#using-the-data-catalog-with-the-yaml-api>`_:
+
+    .. code-block:: yaml
+
+        >>> vehicles:
+        >>>   type: pandas.GBQQueryDataSet
+        >>>   sql: "select shuttle, shuttle_id from spaceflights.shuttles;"
+        >>>   project: my-project
+        >>>   credentials: gbq-creds
+        >>>   load_args:
+        >>>     reauth: True
+
+
+    Example using Python API:
+    ::
+
+        >>> from kedro.extras.datasets.pandas import GBQQueryDataSet
+        >>>
+        >>> sql = "SELECT * FROM dataset_1.table_a"
+        >>>
+        >>> data_set = GBQQueryDataSet(sql, project='my-project')
+        >>>
+        >>> sql_data = data_set.load()
+        >>>
+    """
+
+    DEFAULT_LOAD_ARGS = {}  # type: Dict[str, Any]
+
+    # pylint: disable=too-many-arguments
+    def __init__(
+        self,
+        sql: str = None,
+        project: str = None,
+        credentials: Union[Dict[str, Any], Credentials] = None,
+        load_args: Dict[str, Any] = None,
+        fs_args: Dict[str, Any] = None,
+        filepath: str = None,
+    ) -> None:
+        """Creates a new instance of ``GBQQueryDataSet``.
+
+        Args:
+            sql: The sql query statement.
+            project: Google BigQuery Account project ID.
+                Optional when available from the environment.
+                https://cloud.google.com/resource-manager/docs/creating-managing-projects
+            credentials: Credentials for accessing Google APIs.
+                Either ``google.auth.credentials.Credentials`` object or dictionary with
+                parameters required to instantiate ``google.oauth2.credentials.Credentials``.
+                Here you can find all the arguments:
+                https://google-auth.readthedocs.io/en/latest/reference/google.oauth2.credentials.html
+            load_args: Pandas options for loading BigQuery table into DataFrame.
+                Here you can find all available arguments:
+                https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_gbq.html
+                All defaults are preserved.
+            fs_args: Extra arguments to pass into underlying filesystem class constructor
+                (e.g. `{"project": "my-project"}` for ``GCSFileSystem``) used for reading the
+                SQL query from filepath.
+            filepath: A path to a file with a sql query statement.
+
+        Raises:
+            DataSetError: When ``sql`` and ``filepath`` parameters are either both empty
+                or both provided, as well as when the `save()` method is invoked.
+        """
+        if sql and filepath:
+            raise DataSetError(
+                "`sql` and `filepath` arguments cannot both be provided."
+                "Please only provide one."
+            )
+
+        if not (sql or filepath):
+            raise DataSetError(
+                "`sql` and `filepath` arguments cannot both be empty."
+                "Please provide a sql query or path to a sql query file."
+            )
+
+        # Handle default load arguments
+        self._load_args = copy.deepcopy(self.DEFAULT_LOAD_ARGS)
+        if load_args is not None:
+            self._load_args.update(load_args)
+
+        self._project_id = project
+
+        if isinstance(credentials, dict):
+            credentials = Credentials(**credentials)
+
+        self._credentials = credentials
+        self._client = bigquery.Client(
+            project=self._project_id,
+            credentials=self._credentials,
+            location=self._load_args.get("location"),
+        )
+
+        # load sql query from arg or from file
+        if sql:
+            self._load_args["query"] = sql
+            self._filepath = None
+        else:
+            # filesystem for loading sql file
+            _fs_args = copy.deepcopy(fs_args) or {}
+            _fs_credentials = _fs_args.pop("credentials", {})
+            protocol, path = get_protocol_and_path(str(filepath))
+
+            self._protocol = protocol
+            self._fs = fsspec.filesystem(self._protocol, **_fs_credentials, **_fs_args)
+            self._filepath = path
+
+    def _describe(self) -> Dict[str, Any]:
+        load_args = copy.deepcopy(self._load_args)
+        desc = {}
+        desc["sql"] = str(load_args.pop("query", None))
+        desc["filepath"] = str(self._filepath)
+        desc["load_args"] = str(load_args)
+
+        return desc
+
+    def _load(self) -> pd.DataFrame:
+        load_args = copy.deepcopy(self._load_args)
+
+        if self._filepath:
+            load_path = get_filepath_str(PurePosixPath(self._filepath), self._protocol)
+            with self._fs.open(load_path, mode="r") as fs_file:
+                load_args["query"] = fs_file.read()
+
+        return pd.read_gbq(
+            project_id=self._project_id,
+            credentials=self._credentials,
+            **load_args,
+        )
+
+    def _save(self, data: pd.DataFrame) -> None:
+        raise DataSetError("`save` is not supported on GBQQueryDataSet")

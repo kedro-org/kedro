@@ -8,7 +8,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
 
-from kedro.extras.datasets.spark import DeltaTableDataset, SparkDataSet
+from kedro.extras.datasets.spark import DeltaTableDataSet, SparkDataSet
 from kedro.io import DataCatalog, DataSetError
 from kedro.pipeline import Pipeline, node
 from kedro.runner import ParallelRunner
@@ -83,7 +83,7 @@ class TestDeltaTableDataSet:
         loaded_with_spark = spark_delta_ds.load()
         assert loaded_with_spark.exceptAll(sample_spark_df).count() == 0
 
-        delta_ds = DeltaTableDataset(filepath=filepath)
+        delta_ds = DeltaTableDataSet(filepath=filepath)
         delta_table = delta_ds.load()
 
         assert isinstance(delta_table, DeltaTable)
@@ -92,7 +92,7 @@ class TestDeltaTableDataSet:
 
     def test_save(self, tmp_path, sample_spark_df, caplog):
         filepath = (tmp_path / "test_data").as_posix()
-        delta_ds = DeltaTableDataset(filepath=filepath)
+        delta_ds = DeltaTableDataSet(filepath=filepath)
         assert not delta_ds.exists()
 
         delta_ds.save(sample_spark_df)
@@ -108,7 +108,7 @@ class TestDeltaTableDataSet:
 
     def test_exists(self, tmp_path, sample_spark_df):
         filepath = (tmp_path / "test_data").as_posix()
-        delta_ds = DeltaTableDataset(filepath=filepath)
+        delta_ds = DeltaTableDataSet(filepath=filepath)
 
         assert not delta_ds.exists()
 
@@ -118,7 +118,7 @@ class TestDeltaTableDataSet:
         assert delta_ds.exists()
 
     def test_exists_raises_error(self, mocker):
-        delta_ds = DeltaTableDataset(filepath="")
+        delta_ds = DeltaTableDataSet(filepath="")
         mocker.patch.object(
             delta_ds, "_get_spark", side_effect=AnalysisException("Other Exception", [])
         )
@@ -133,7 +133,7 @@ class TestDeltaTableDataSet:
         def no_output(x):
             _ = x + 1  # pragma: no cover
 
-        delta_ds = DeltaTableDataset(filepath="")
+        delta_ds = DeltaTableDataSet(filepath="")
         catalog = DataCatalog(data_sets={"delta_in": delta_ds})
         pipeline = Pipeline([node(no_output, "delta_in", None)])
         pattern = (

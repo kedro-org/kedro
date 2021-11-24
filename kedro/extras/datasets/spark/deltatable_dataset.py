@@ -19,8 +19,8 @@ from kedro.io.core import AbstractDataSet
 logger = logging.getLogger(__name__)
 
 
-class DeltaTableDataset(AbstractDataSet):
-    """``DeltaTableDataset`` loads data into DeltaTable objects.
+class DeltaTableDataSet(AbstractDataSet):
+    """``DeltaTableDataSet`` loads data into DeltaTable objects.
 
         Example adding a catalog entry with
         `YAML API <https://kedro.readthedocs.io/en/stable/05_data/\
@@ -34,7 +34,7 @@ class DeltaTableDataset(AbstractDataSet):
             >>>   file_format: "delta"
             >>>
             >>> weather@delta:
-            >>>   type: spark.DeltaTableDataset
+            >>>   type: spark.DeltaTableDataSet
             >>>   filepath: data/02_intermediate/data.parquet
 
         Example using Python API:
@@ -44,7 +44,7 @@ class DeltaTableDataset(AbstractDataSet):
             >>> from pyspark.sql.types import (StructField, StringType,
             >>>                                IntegerType, StructType)
             >>>
-            >>> from kedro.extras.datasets.spark import DeltaTableDataset, SparkDataSet
+            >>> from kedro.extras.datasets.spark import DeltaTableDataSet, SparkDataSet
             >>>
             >>> schema = StructType([StructField("name", StringType(), True),
             >>>                      StructField("age", IntegerType(), True)])
@@ -55,7 +55,7 @@ class DeltaTableDataset(AbstractDataSet):
             >>>
             >>> data_set = SparkDataSet(filepath="test_data", file_format="delta")
             >>> data_set.save(spark_df)
-            >>> deltatable_dataset = DeltaTableDataset(filepath="test_data")
+            >>> deltatable_dataset = DeltaTableDataSet(filepath="test_data")
             >>> delta_table = deltatable_dataset.load()
             >>>
             >>> delta_table.update()
@@ -70,7 +70,7 @@ class DeltaTableDataset(AbstractDataSet):
     def __init__(  # pylint: disable=too-many-arguments
         self, filepath: str, credentials: Dict[str, Any] = None
     ) -> None:
-        """Creates a new instance of ``DeltaTableDataset``.
+        """Creates a new instance of ``DeltaTableDataSet``.
 
         Args:
             filepath: Filepath in POSIX format to a Spark dataframe. When using Databricks

@@ -1,6 +1,6 @@
 """Provides I/O modules for Apache Spark."""
 
-__all__ = ["SparkDataSet", "SparkHiveDataSet", "SparkJDBCDataSet", "DeltaTableDataset"]
+__all__ = ["SparkDataSet", "SparkHiveDataSet", "SparkJDBCDataSet", "DeltaTableDataSet"]
 
 from contextlib import suppress
 
@@ -11,4 +11,4 @@ with suppress(ImportError):
 with suppress(ImportError):
     from .spark_jdbc_dataset import SparkJDBCDataSet
 with suppress(ImportError):
-    from .deltatable_dataset import DeltaTableDataset
+    from .deltatable_dataset import DeltaTableDataSet

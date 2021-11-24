@@ -93,7 +93,7 @@ spark_require = {
     "spark.SparkDataSet": [SPARK, HDFS, S3FS],
     "spark.SparkHiveDataSet": [SPARK, HDFS, S3FS],
     "spark.SparkJDBCDataSet": [SPARK, HDFS, S3FS],
-    "spark.DeltaTableDataset": [SPARK, HDFS, S3FS, "delta-spark~=1.0"],
+    "spark.DeltaTableDataSet": [SPARK, HDFS, S3FS, "delta-spark~=1.0"],
 }
 tensorflow_required = {
     "tensorflow.TensorflowModelDataset": [

@@ -128,6 +128,7 @@
 | --------------------------- | ---------------------------------------------------- | --------------------------------- |
 | `plotly.JSONDataSet` | Works with plotly graph object Figures (saves as json file) | `kedro.extras.datasets.plotly` |
 | `pandas.GenericDataSet` | Provides a 'best effort' facility to read / write any format provided by the `pandas` library | `kedro.extras.datasets.pandas` |
+| `pandas.GBQQueryDataSet` | Loads data from a Google Bigquery table using provided SQL query | `kedro.extras.datasets.pandas` |
 
 ## Bug fixes and other changes
 * Fixed an issue where `kedro new --config config.yml` was ignoring the config file when `prompts.yml` didn't exist.
@@ -135,7 +136,7 @@
 * Added support for arbitrary backends (via importable module paths) that satisfy the `pickle` interface to `PickleDataSet`.
 * Added support for `sum` syntax for connecting pipeline objects.
 * Upgraded `pip-tools`, which is used by `kedro build-reqs`, to 6.4. This `pip-tools` version requires `pip>=21.2` while [adding support for `pip>=21.3`](https://github.com/jazzband/pip-tools/pull/1501). To upgrade `pip`, please refer to [their documentation](https://pip.pypa.io/en/stable/installing/#upgrading-pip).
-* Relaxed the bounds on the `plotly` requirement for `plotly.PlotlyDataSet`.
+* Relaxed the bounds on the `plotly` requirement for `plotly.PlotlyDataSet` and the `pyarrow` requirement for `pandas.ParquetDataSet`.
 * `kedro pipeline package <pipeline>` now raises an error if the `<pipeline>` argument doesn't look like a valid Python module path (e.g. has `/` instead of `.`).
 * Added new `overwrite` argument to `PartitionedDataSet` and `MatplotlibWriter` to enable deletion of existing partitions and plots on dataset `save`.
 * `kedro pipeline pull` now works when the project requirements contains entries such as `-r`, `--extra-index-url` and local wheel files ([Issue #913](https://github.com/quantumblacklabs/kedro/issues/913)).
@@ -165,7 +166,8 @@
 [Simon Brugman](https://github.com/sbrugman),
 [Kiyo Kunii](https://github.com/921kiyo),
 [Benjamin Levy](https://github.com/BenjaminLevyQB),
-[Louis de Charsonville](https://github.com/louisdecharson)
+[Louis de Charsonville](https://github.com/louisdecharson),
+[Simon Picard](https://github.com/simonpicard)
 
 # Release 0.17.5
 

@@ -213,12 +213,6 @@ def delete_pipeline(
 )
 @click.option("--alias", type=str, default="", help="Rename the package.")
 @click.option("--destination", type=str, default="", help="Module location.")
-# @click.option(
-#     "-d",
-#     "--destination",
-#     type=click.Path(resolve_path=True, file_okay=False),
-#     help="Module location to unpackage under.",
-# )
 @click.option(
     "--fs-args",
     type=click.Path(

@@ -268,18 +268,12 @@ class KedroContext:
         )
         conf_creds = self._get_config_credentials()
 
-        try:
-            catalog = settings.DATA_CATALOG_CLASS.from_config(
-                catalog=conf_catalog,
-                credentials=conf_creds,
-                load_versions=load_versions,
-                save_version=save_version,
-            )
-        except (TypeError, AttributeError) as exc:
-            raise KedroContextError(
-                f"Expected an instance of `DataCatalog`, "
-                f"got `{type(settings.DATA_CATALOG_CLASS)}` instead."
-            ) from exc
+        catalog = settings.DATA_CATALOG_CLASS.from_config(
+            catalog=conf_catalog,
+            credentials=conf_creds,
+            load_versions=load_versions,
+            save_version=save_version,
+        )
 
         feed_dict = self._get_feed_dict()
         catalog.add_feed_dict(feed_dict)

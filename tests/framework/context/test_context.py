@@ -1,6 +1,7 @@
 import configparser
 import json
 import re
+import textwrap
 from pathlib import Path, PurePath, PurePosixPath, PureWindowsPath
 from typing import Any, Dict
 
@@ -14,7 +15,6 @@ from kedro import __version__ as kedro_version
 from kedro.config import ConfigLoader, MissingConfigException
 from kedro.framework.context import KedroContext
 from kedro.framework.context.context import (
-    KedroContextError,
     _convert_paths_to_absolute_posix,
     _is_relative_path,
     _update_nested_dict,
@@ -22,13 +22,19 @@ from kedro.framework.context.context import (
 )
 from kedro.framework.hooks import get_hook_manager
 from kedro.framework.project import (
-    Validator,
+    ValidationError,
     _ProjectSettings,
     configure_project,
     pipelines,
 )
 
 MOCK_PACKAGE_NAME = "mock_package_name"
+
+
+class BadCatalog:  # pylint: disable=too-few-public-methods
+    """
+    Catalog class that doesn't subclass `DataCatalog`, for testing only.
+    """
 
 
 def _write_yaml(filepath: Path, config: Dict):
@@ -145,16 +151,18 @@ def prepare_project_dir(tmp_path, base_config, local_config, local_logging_confi
     _write_toml(tmp_path / "pyproject.toml", pyproject_toml_payload)
 
 
-class BrokenSettings(_ProjectSettings):
-    _DATA_CATALOG_CLASS = Validator("DATA_CATALOG_CLASS", default="it breaks")
-
-
 @pytest.fixture
-def broken_settings(mocker):
-    mocked_settings = BrokenSettings()
-    mocker.patch("kedro.framework.session.session.settings", mocked_settings)
-    mocker.patch("kedro.framework.context.context.settings", mocked_settings)
-    return mocker.patch("kedro.framework.project.settings", mocked_settings)
+def mock_settings_file_bad_data_catalog_class(tmpdir):
+    mock_settings_file = tmpdir.join("mock_settings_file.py")
+    mock_settings_file.write(
+        textwrap.dedent(
+            f"""
+            from {__name__} import BadCatalog
+            DATA_CATALOG_CLASS = BadCatalog
+            """
+        )
+    )
+    return mock_settings_file
 
 
 @pytest.fixture(autouse=True)
@@ -269,11 +277,17 @@ class TestKedroContext:
         reloaded_df = dummy_context.catalog.load("cars")
         assert_frame_equal(reloaded_df, dummy_dataframe)
 
-    # pylint: disable=unused-argument
-    def test_broken_catalog(self, broken_settings, dummy_context):
-        pattern = f"Expected an instance of `DataCatalog`, got `{type('')}` instead."
-        with pytest.raises(KedroContextError, match=re.escape(pattern)):
-            _ = dummy_context.catalog
+    def test_wrong_catalog_type(self, mock_settings_file_bad_data_catalog_class):
+        pattern = (
+            "Invalid value `tests.framework.context.test_context.BadCatalog` received "
+            "for setting `DATA_CATALOG_CLASS`. "
+            "It must be a subclass of `kedro.io.data_catalog.DataCatalog`."
+        )
+        mock_settings = _ProjectSettings(
+            settings_file=str(mock_settings_file_bad_data_catalog_class)
+        )
+        with pytest.raises(ValidationError, match=re.escape(pattern)):
+            assert mock_settings.DATA_CATALOG_CLASS
 
     @pytest.mark.parametrize(
         "extra_params",

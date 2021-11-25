@@ -53,7 +53,7 @@ class TestPipelinePullCommand:
         }
 
     @pytest.mark.parametrize("env", [None, "local"])
-    @pytest.mark.parametrize("alias", [None, "aliased", "pipelines.aliased"])
+    @pytest.mark.parametrize("alias, destination", [(None, None), ("aliased", None), ("aliased", "pipelines")])
     def test_pull_local_sdist(
         self,
         fake_project_cli,
@@ -61,6 +61,7 @@ class TestPipelinePullCommand:
         fake_package_path,
         env,
         alias,
+        destination,
         fake_metadata,
     ):
         """Test for pulling a valid sdist file locally."""
@@ -86,6 +87,7 @@ class TestPipelinePullCommand:
 
         options = ["-e", env] if env else []
         options += ["--alias", alias] if alias else []
+        options += ["--destination", destination] if destination else []
         result = CliRunner().invoke(
             fake_project_cli,
             ["pipeline", "pull", str(sdist_file), *options],
@@ -94,7 +96,8 @@ class TestPipelinePullCommand:
         assert result.exit_code == 0, result.output
         assert "pulled and unpacked" in result.output
 
-        alias_path = Path(*(alias.split("."))) if alias else Path(PIPELINE_NAME)
+        path = f"{destination}.{alias}" if destination else alias
+        alias_path = Path(*(path.split("."))) if alias else Path(PIPELINE_NAME)
         pipeline_name = alias_path.stem
         source_dest = fake_package_path / alias_path
         test_dest = fake_repo_path / "src" / "tests" / alias_path
@@ -114,7 +117,7 @@ class TestPipelinePullCommand:
         assert actual_test_files == expected_test_files
 
     @pytest.mark.parametrize("env", [None, "local"])
-    @pytest.mark.parametrize("alias", [None, "alias", "pipelines.aliased"])
+    @pytest.mark.parametrize("alias, destination", [(None, None), ("aliased", None), ("aliased", "pipelines")])
     def test_pull_local_sdist_compare(
         self,
         fake_project_cli,
@@ -122,6 +125,7 @@ class TestPipelinePullCommand:
         fake_package_path,
         env,
         alias,
+        destination,
         fake_metadata,
     ):
         """Test for pulling a valid sdist file locally, unpack it
@@ -150,6 +154,7 @@ class TestPipelinePullCommand:
 
         options = ["-e", env] if env else []
         options += ["--alias", alias] if alias else []
+        options += ["--destination", destination] if destination else []
         result = CliRunner().invoke(
             fake_project_cli,
             ["pipeline", "pull", str(sdist_file), *options],
@@ -158,7 +163,8 @@ class TestPipelinePullCommand:
         assert result.exit_code == 0, result.output
         assert "pulled and unpacked" in result.output
 
-        alias_path = Path(*(alias.split("."))) if alias else Path(pipeline_name)
+        path = f"{destination}.{alias}" if destination else alias
+        alias_path = Path(*(path.split("."))) if alias else Path(pipeline_name)
         pipeline_name = alias_path.stem
         source_dest = fake_package_path / alias_path
         test_dest = fake_repo_path / "src" / "tests" / alias_path

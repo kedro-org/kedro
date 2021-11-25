@@ -702,6 +702,7 @@ class TestPipelinePullFromManifest:
         self, fake_repo_path, fake_project_cli, fake_metadata, mocker
     ):
         # pylint: disable=import-outside-toplevel
+        # pylint: disable=line-too-long
         from kedro.framework.cli import pipeline
 
         spy = mocker.spy(pipeline, "_pull_package")
@@ -711,11 +712,7 @@ class TestPipelinePullFromManifest:
             f"""
             [tool.kedro.pipeline.pull]
             "{sdist_file.format("first")}" = {{alias = "dp", destination = "pipelines"}}
-            "{sdist_file.format("second")}" = {{
-                alias = "ds",
-                destination = "pipelines",
-                env = "local"
-                }}
+            "{sdist_file.format("second")}" = {{alias = "ds", destination = "pipelines", env = "local"}}
             "{sdist_file.format("third")}" = {{}}
             """
         )

@@ -38,6 +38,7 @@
             "pandas.CSVDataSet",
             "pandas.ExcelDataSet",
             "pandas.GBQTableDataSet",
+            "pandas.GBQQueryDataSet",
             "pandas.GenericDataSet"
           ]
         }

@@ -1,14 +1,17 @@
+from pathlib import PosixPath
+
 import pandas as pd
 import pytest
 from google.cloud.exceptions import NotFound
 from pandas.testing import assert_frame_equal
 
-from kedro.extras.datasets.pandas import GBQTableDataSet
+from kedro.extras.datasets.pandas import GBQQueryDataSet, GBQTableDataSet
 from kedro.io.core import DataSetError
 
 DATASET = "dataset"
 TABLE_NAME = "table_name"
 PROJECT = "project"
+SQL_QUERY = "SELECT * FROM table_a"
 
 
 @pytest.fixture
@@ -33,6 +36,35 @@ def gbq_dataset(
         credentials=None,
         load_args=load_args,
         save_args=save_args,
+    )
+
+
+@pytest.fixture(params=[{}])
+def gbq_sql_dataset(load_args, mock_bigquery_client):  # pylint: disable=unused-argument
+    return GBQQueryDataSet(
+        sql=SQL_QUERY,
+        project=PROJECT,
+        credentials=None,
+        load_args=load_args,
+    )
+
+
+@pytest.fixture
+def sql_file(tmp_path: PosixPath):
+    file = tmp_path / "test.sql"
+    file.write_text(SQL_QUERY)
+    return file.as_posix()
+
+
+@pytest.fixture(params=[{}])
+def gbq_sql_file_dataset(
+    load_args, sql_file, mock_bigquery_client
+):  # pylint: disable=unused-argument
+    return GBQQueryDataSet(
+        filepath=sql_file,
+        project=PROJECT,
+        credentials=None,
+        load_args=load_args,
     )
 
 
@@ -178,3 +210,108 @@ class TestGBQDataSet:
         mocked_bigquery.Client.assert_called_once_with(
             project=PROJECT, credentials=credentials_obj, location=None
         )
+
+
+class TestGBQQueryDataSet:
+    def test_empty_query_error(self):
+        """Check the error when instantiating with empty query or file"""
+        pattern = (
+            r"`sql` and `filepath` arguments cannot both be empty\."
+            r"Please provide a sql query or path to a sql query file\."
+        )
+        with pytest.raises(DataSetError, match=pattern):
+            GBQQueryDataSet(sql="", filepath="", credentials=None)
+
+    @pytest.mark.parametrize(
+        "load_args", [{"k1": "v1", "index": "value"}], indirect=True
+    )
+    def test_load_extra_params(self, gbq_sql_dataset, load_args):
+        """Test overriding the default load arguments."""
+        for key, value in load_args.items():
+            assert gbq_sql_dataset._load_args[key] == value
+
+    def test_credentials_propagation(self, mocker):
+        credentials = {"token": "my_token"}
+        credentials_obj = "credentials"
+        mocked_credentials = mocker.patch(
+            "kedro.extras.datasets.pandas.gbq_dataset.Credentials",
+            return_value=credentials_obj,
+        )
+        mocked_bigquery = mocker.patch(
+            "kedro.extras.datasets.pandas.gbq_dataset.bigquery"
+        )
+
+        data_set = GBQQueryDataSet(
+            sql=SQL_QUERY,
+            credentials=credentials,
+            project=PROJECT,
+        )
+
+        assert data_set._credentials == credentials_obj
+        mocked_credentials.assert_called_once_with(**credentials)
+        mocked_bigquery.Client.assert_called_once_with(
+            project=PROJECT, credentials=credentials_obj, location=None
+        )
+
+    def test_load(self, mocker, gbq_sql_dataset, dummy_dataframe):
+        """Test `load` method invocation"""
+        mocked_read_gbq = mocker.patch(
+            "kedro.extras.datasets.pandas.gbq_dataset.pd.read_gbq"
+        )
+        mocked_read_gbq.return_value = dummy_dataframe
+
+        loaded_data = gbq_sql_dataset.load()
+
+        mocked_read_gbq.assert_called_once_with(
+            project_id=PROJECT, credentials=None, query=SQL_QUERY
+        )
+
+        assert_frame_equal(dummy_dataframe, loaded_data)
+
+    def test_load_query_file(self, mocker, gbq_sql_file_dataset, dummy_dataframe):
+        """Test `load` method invocation using a file as input query"""
+        mocked_read_gbq = mocker.patch(
+            "kedro.extras.datasets.pandas.gbq_dataset.pd.read_gbq"
+        )
+        mocked_read_gbq.return_value = dummy_dataframe
+
+        loaded_data = gbq_sql_file_dataset.load()
+
+        mocked_read_gbq.assert_called_once_with(
+            project_id=PROJECT, credentials=None, query=SQL_QUERY
+        )
+
+        assert_frame_equal(dummy_dataframe, loaded_data)
+
+    def test_save_error(self, gbq_sql_dataset, dummy_dataframe):
+        """Check the error when trying to save to the data set"""
+        pattern = r"`save` is not supported on GBQQueryDataSet"
+        with pytest.raises(DataSetError, match=pattern):
+            gbq_sql_dataset.save(dummy_dataframe)
+
+    def test_str_representation_sql(self, gbq_sql_dataset, sql_file):
+        """Test the data set instance string representation"""
+        str_repr = str(gbq_sql_dataset)
+        assert (
+            f"GBQQueryDataSet(filepath=None, load_args={{}}, sql={SQL_QUERY})"
+            in str_repr
+        )
+        assert sql_file not in str_repr
+
+    def test_str_representation_filepath(self, gbq_sql_file_dataset, sql_file):
+        """Test the data set instance string representation with filepath arg."""
+        str_repr = str(gbq_sql_file_dataset)
+        assert (
+            f"GBQQueryDataSet(filepath={str(sql_file)}, load_args={{}}, sql=None)"
+            in str_repr
+        )
+        assert SQL_QUERY not in str_repr
+
+    def test_sql_and_filepath_args(self, sql_file):
+        """Test that an error is raised when both `sql` and `filepath` args are given."""
+        pattern = (
+            r"`sql` and `filepath` arguments cannot both be provided."
+            r"Please only provide one."
+        )
+        with pytest.raises(DataSetError, match=pattern):
+            GBQQueryDataSet(sql=SQL_QUERY, filepath=sql_file)

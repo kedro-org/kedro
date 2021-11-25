@@ -143,7 +143,7 @@ class PipelineSpecs:
 
         Args:
             run_params: The params used to run the pipeline.
-                Should be identical to the data logged by Journal with the following schema::
+            Should be identical to the data logged by Journal with the following schema::
 
                    {
                      "run_id": str
@@ -178,7 +178,7 @@ class PipelineSpecs:
 
         Args:
             run_params: The params used to run the pipeline.
-                Should be identical to the data logged by Journal with the following schema::
+            Should be identical to the data logged by Journal with the following schema:
 
                    {
                      "run_id": str
@@ -217,7 +217,7 @@ class PipelineSpecs:
         Args:
             error: The uncaught exception thrown during the pipeline run.
             run_params: The params used to run the pipeline.
-                Should be identical to the data logged by Journal with the following schema::
+            Should be identical to the data logged by Journal with the following schema:
 
                    {
                      "run_id": str

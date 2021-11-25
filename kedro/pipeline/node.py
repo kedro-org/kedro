@@ -319,7 +319,7 @@ class Node:  # pylint: disable=too-many-instance-attributes
         new ``Node`` object, but with no changes to the function.
 
         Args:
-            decorators: Decorators to be applied on the node function.
+            *decorators: Decorators to be applied on the node function.
                 Decorators will be applied from right to left.
 
         Returns:

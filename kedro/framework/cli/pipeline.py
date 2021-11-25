@@ -257,7 +257,7 @@ def pull_package(  # pylint:disable=unused-argument, too-many-arguments
     click.secho(message, fg="green")
 
 
-# pylint: disable=too-many-locals
+# pylint: disable=too-many-arguments, disable=too-many-locals
 def _pull_package(
     package_path: str,
     metadata: ProjectMetadata,
@@ -554,7 +554,7 @@ def _refactor_code_for_unpacking(
     return refactored_package_path, refactored_tests_path
 
 
-def _install_files(  # pylint: disable=too-many-locals
+def _install_files(  # pylint: disable=too-many-arguments, disable=too-many-locals
     project_metadata: ProjectMetadata,
     package_name: str,
     source_path: Path,
@@ -568,7 +568,7 @@ def _install_files(  # pylint: disable=too-many-locals
         source_path, package_name
     )
 
-    if conf_source.is_dir() and alias and alias != package_name:
+    if conf_source.is_dir() and alias:
         _rename_files(conf_source, package_name, alias)
 
     destination = destination or ""

@@ -179,14 +179,10 @@ class TestPipelinePullCommand:
         self,
         fake_project_cli,
         fake_repo_path,
-        fake_package_path,
         fake_metadata,
     ):
         call_pipeline_create(fake_project_cli, fake_metadata)
         call_pipeline_package(fake_project_cli, fake_metadata)
-
-        source_path = fake_package_path / "pipelines" / PIPELINE_NAME
-        test_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
 
         sdist_file = (
             fake_repo_path / "dist" / _get_sdist_name(name=PIPELINE_NAME, version="0.1")
@@ -212,14 +208,10 @@ class TestPipelinePullCommand:
         self,
         fake_project_cli,
         fake_repo_path,
-        fake_package_path,
         fake_metadata,
     ):
         call_pipeline_create(fake_project_cli, fake_metadata)
         call_pipeline_package(fake_project_cli, fake_metadata)
-
-        source_path = fake_package_path / "pipelines" / PIPELINE_NAME
-        test_path = fake_repo_path / "src" / "tests" / "pipelines" / PIPELINE_NAME
 
         sdist_file = (
             fake_repo_path / "dist" / _get_sdist_name(name=PIPELINE_NAME, version="0.1")

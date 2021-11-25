@@ -147,7 +147,10 @@ class Node:  # pylint: disable=too-many-instance-attributes
     def _unique_key(self):
         def hashable(value):
             if isinstance(value, dict):
-                return tuple(value.items())
+                # we sort it because a node with inputs/outputs
+                # {"arg1": "a", "arg2": "b"} is equivalent to
+                # a node with inputs/outputs {"arg2": "b", "arg1": "a"}
+                return tuple(sorted(value.items()))
             if isinstance(value, list):
                 return tuple(value)
             return value

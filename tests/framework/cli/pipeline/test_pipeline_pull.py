@@ -53,7 +53,10 @@ class TestPipelinePullCommand:
         }
 
     @pytest.mark.parametrize("env", [None, "local"])
-    @pytest.mark.parametrize("alias, destination", [(None, None), ("aliased", None), ("aliased", "pipelines")])
+    @pytest.mark.parametrize(
+        "alias, destination",
+        [(None, None), ("aliased", None), ("aliased", "pipelines")],
+    )
     def test_pull_local_sdist(
         self,
         fake_project_cli,
@@ -117,7 +120,10 @@ class TestPipelinePullCommand:
         assert actual_test_files == expected_test_files
 
     @pytest.mark.parametrize("env", [None, "local"])
-    @pytest.mark.parametrize("alias, destination", [(None, None), ("aliased", None), ("aliased", "pipelines")])
+    @pytest.mark.parametrize(
+        "alias, destination",
+        [(None, None), ("aliased", None), ("aliased", "pipelines")],
+    )
     def test_pull_local_sdist_compare(
         self,
         fake_project_cli,
@@ -243,7 +249,8 @@ class TestPipelinePullCommand:
             f.write(import_stmt)
 
         package_alias = "alpha"
-        pull_alias = "pipelines.lib.beta"
+        pull_alias = "beta"
+        pull_destination = "pipelines.lib"
 
         call_pipeline_package(
             cli=fake_project_cli, metadata=fake_metadata, alias=package_alias
@@ -257,11 +264,19 @@ class TestPipelinePullCommand:
         )
         CliRunner().invoke(
             fake_project_cli,
-            ["pipeline", "pull", str(sdist_file), "--alias", pull_alias],
+            [
+                "pipeline",
+                "pull",
+                str(sdist_file),
+                "--alias",
+                pull_alias,
+                "--destination",
+                pull_destination,
+            ],
             obj=fake_metadata,
         )
-
-        for alias in (package_alias, pull_alias):
+        pull = f"{pull_destination}.{pull_alias}"
+        for alias in (package_alias, pull):
             alias_path = Path(*alias.split("."))
             path = fake_package_path / alias_path / "pipeline.py"
             file_content = path.read_text()
@@ -695,8 +710,12 @@ class TestPipelinePullFromManifest:
         project_toml_str = textwrap.dedent(
             f"""
             [tool.kedro.pipeline.pull]
-            "{sdist_file.format("first")}" = {{alias = "pipelines.dp"}}
-            "{sdist_file.format("second")}" = {{alias = "pipelines.ds", env = "local"}}
+            "{sdist_file.format("first")}" = {{alias = "dp", destination = "pipelines"}}
+            "{sdist_file.format("second")}" = {{
+                alias = "ds",
+                destination = "pipelines",
+                env = "local"
+                }}
             "{sdist_file.format("third")}" = {{}}
             """
         )

@@ -479,6 +479,7 @@ def _refactor_code_for_unpacking(
     package_path: Path,
     tests_path: Path,
     alias: Optional[str],
+    destination: Optional[str],
     project_metadata: ProjectMetadata,
 ) -> Tuple[Path, Path]:
     """This is the reverse operation of `_refactor_code_for_package`, i.e
@@ -520,14 +521,14 @@ def _refactor_code_for_unpacking(
     package_target = Path(project_metadata.package_name)
     tests_target = Path("tests")
 
-    if alias:
-        alias_path = Path(*alias.split("."))
-        alias_name = alias_path.stem
-        _rename_package(project, pipeline_name, alias_name)
+    if destination:
+        destination_path = Path(*destination.split("."))
+        package_target = package_target / destination_path
+        tests_target = tests_target / destination_path
 
-        pipeline_name = alias_name
-        package_target = package_target / alias_path.parent
-        tests_target = tests_target / alias_path.parent
+    if alias and alias != pipeline_name:
+        _rename_package(project, pipeline_name, alias)
+        pipeline_name = alias
 
     if pipeline_name == project_metadata.package_name:
         full_path = _move_package_with_conflicting_name(package_target, pipeline_name)
@@ -586,7 +587,7 @@ def _install_files(  # pylint: disable=too-many-arguments, disable=too-many-loca
 
     project = Project(source_path)
     refactored_package_source, refactored_test_source = _refactor_code_for_unpacking(
-        project, package_source, test_source, destination, project_metadata
+        project, package_source, test_source, alias, destination, project_metadata
     )
     project.close()
 

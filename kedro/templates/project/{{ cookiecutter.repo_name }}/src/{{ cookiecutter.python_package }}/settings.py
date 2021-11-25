@@ -1,8 +1,7 @@
 """Project settings."""
-from {{cookiecutter.python_package}}.hooks import ProjectHooks
 
-# Instantiate and list your project hooks here
-HOOKS = (ProjectHooks(),)
+# Instantiate and list your custom project hooks here
+# HOOKS = (ProjectHooks(),)
 
 # List the installed plugins for which to disable auto-registry
 # DISABLE_HOOKS_FOR_PLUGINS = ("kedro-viz",)

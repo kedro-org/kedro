@@ -212,7 +212,9 @@ def delete_pipeline(
     help="Environment to install the pipeline configuration to. Defaults to `base`."
 )
 @click.option("--alias", type=str, default="", help="Rename the package.")
-@click.option("--destination", type=str, default="", help="Module location.")
+@click.option(
+    "--destination", type=str, default="", help="Module location to unpack under."
+)
 @click.option(
     "--fs-args",
     type=click.Path(
@@ -257,7 +259,7 @@ def pull_package(  # pylint:disable=unused-argument, too-many-arguments
     click.secho(message, fg="green")
 
 
-# pylint: disable=too-many-arguments, disable=too-many-locals
+# pylint: disable=too-many-arguments, too-many-locals
 def _pull_package(
     package_path: str,
     metadata: ProjectMetadata,
@@ -555,7 +557,7 @@ def _refactor_code_for_unpacking(
     return refactored_package_path, refactored_tests_path
 
 
-def _install_files(  # pylint: disable=too-many-arguments, disable=too-many-locals
+def _install_files(  # pylint: disable=too-many-arguments, too-many-locals
     project_metadata: ProjectMetadata,
     package_name: str,
     source_path: Path,

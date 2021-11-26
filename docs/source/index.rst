@@ -89,6 +89,7 @@ Welcome to Kedro's documentation!
    kedro_project_setup/dependencies
    kedro_project_setup/configuration
    kedro_project_setup/session
+   kedro_project_setup/settings
 
 .. toctree::
    :maxdepth: 2

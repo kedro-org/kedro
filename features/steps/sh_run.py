@@ -20,7 +20,7 @@ def run(
         print_output: If True will print previously captured stdout.
             Default is False.
 
-        kwargs: Extra options to pass to subprocess.
+        **kwargs: Extra options to pass to subprocess.
 
     Example:
     ::

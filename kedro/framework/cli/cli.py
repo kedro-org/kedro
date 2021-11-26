@@ -107,7 +107,7 @@ def get_project_context(
             Supported keys are "verbose" and "context", and it defaults to "context".
         project_path: Optional path to where the project root is to load the context.
             If omitted, the current working directory will be used.
-        kwargs: Optional custom arguments defined by users, which will be passed into
+        **kwargs: Optional custom arguments defined by users, which will be passed into
             the constructor of the projects KedroContext subclass.
 
     Returns:

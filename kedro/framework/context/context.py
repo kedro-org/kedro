@@ -692,7 +692,7 @@ def load_context(project_path: Union[str, Path], **kwargs) -> KedroContext:
 
     Args:
         project_path: Path to the Kedro project.
-        kwargs: Optional kwargs for ``KedroContext`` class.
+        **kwargs: Optional kwargs for ``KedroContext`` class.
 
     Returns:
         Instance of ``KedroContext`` class defined in Kedro project.

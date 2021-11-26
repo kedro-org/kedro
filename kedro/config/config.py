@@ -182,7 +182,7 @@ class ConfigLoader:
         return them in the form of a config dictionary.
 
         Args:
-            patterns: Glob patterns to match. Files, which names match
+            *patterns: Glob patterns to match. Files, which names match
                 any of the specified patterns, will be processed.
 
         Raises:

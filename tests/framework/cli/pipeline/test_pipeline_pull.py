@@ -122,7 +122,12 @@ class TestPipelinePullCommand:
     @pytest.mark.parametrize("env", [None, "local"])
     @pytest.mark.parametrize(
         "alias, destination",
-        [(None, None), ("aliased", None), ("aliased", "pipelines")],
+        [
+            (None, None),
+            ("aliased", None),
+            ("aliased", "pipelines"),
+            (None, "another_pipeline"),
+        ],
     )
     def test_pull_local_sdist_compare(
         self,
@@ -214,27 +219,6 @@ class TestPipelinePullCommand:
             obj=fake_metadata,
         )
         assert result.exit_code == 0, result.stderr
-        assert "pulled and unpacked" in result.output
-
-    def test_pipeline_pull_with_destination_only(
-        self,
-        fake_project_cli,
-        fake_repo_path,
-        fake_metadata,
-    ):
-        call_pipeline_create(fake_project_cli, fake_metadata)
-        call_pipeline_package(fake_project_cli, fake_metadata)
-
-        sdist_file = (
-            fake_repo_path / "dist" / _get_sdist_name(name=PIPELINE_NAME, version="0.1")
-        )
-
-        result = CliRunner().invoke(
-            fake_project_cli,
-            ["pipeline", "pull", str(sdist_file), "--destination", "tools"],
-            obj=fake_metadata,
-        )
-        assert result.exit_code == 0, result.stdout
         assert "pulled and unpacked" in result.output
 
     def test_pipeline_alias_refactors_imports(  # pylint: disable=too-many-locals

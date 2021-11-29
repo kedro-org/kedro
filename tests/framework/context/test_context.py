@@ -232,15 +232,6 @@ def dummy_context(
     pipelines._clear(MOCK_PACKAGE_NAME)
 
 
-@pytest.fixture(autouse=True)
-def clear_hook_manager():
-    yield
-    hook_manager = get_hook_manager()
-    plugins = hook_manager.get_plugins()
-    for plugin in plugins:
-        hook_manager.unregister(plugin)
-
-
 class TestKedroContext:
     def test_attributes(self, tmp_path, dummy_context):
         assert isinstance(dummy_context.project_path, Path)

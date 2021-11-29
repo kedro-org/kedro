@@ -685,7 +685,7 @@ class TestPipelinePullFromManifest:
     def test_pipeline_pull_all(  # pylint: disable=too-many-locals
         self, fake_repo_path, fake_project_cli, fake_metadata, mocker
     ):
-        # pylint: disable=import-outside-toplevel
+        # pylint: disable=import-outside-toplevel, line-too-long
         from kedro.framework.cli import pipeline
 
         spy = mocker.spy(pipeline, "_pull_package")

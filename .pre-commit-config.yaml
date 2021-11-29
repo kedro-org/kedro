@@ -132,4 +132,4 @@ repos:
             language: system
             pass_filenames: false
             stages: [manual]
-            entry: pylint -j 4 --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments,too-many-public-methods tests
+            entry: pylint -j 4 --disable=missing-docstring,redefined-outer-name,no-self-use,invalid-name,protected-access,too-many-arguments,too-many-public-methods,use-implicit-booleaness-not-comparison tests

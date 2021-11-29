@@ -53,7 +53,7 @@
 * The `settings.py` setting `CONF_ROOT` has been renamed to `CONF_SOURCE` to align the API. Default value of `conf` remains unchanged.
 * Renamed `extra_params` to `runtime_params` in `kedro.config.config.ConfigLoader` and `kedro.config.templated_config.TemplatedConfigLoader`.
 * Switched from packaging pipelines as wheel files to tar archive files compressed with gzip (`.tar.gz`)
-* `kedro pipeline package` and `kedro pipeline pull --alias --destination` now accept a module name and path to the pipeline or utility module to package, relative to the `src/<package_name>/`.
+* `kedro pipeline package` and `kedro pipeline pull --alias --destination` now accept a module name and path to the pipeline or utility module to package, relative to the `src/<package_name>/`. `--alias` can be used to rename the package, `--destination` can be used to provide a location on where to pull the package.
 * Renamed `lambda_data_set`, `memory_data_set`, and `partitioned_data_set` to `lambda_dataset`, `memory_dataset`, and `partitioned_dataset`, respectively, in `kedro.io`.
 * Removed the `kedro install` command in favour of using `pip install -r src/requirements.txt` to install project dependencies.
 * The dataset `networkx.NetworkXDataSet` has been renamed to `networkx.JSONDataSet`.

@@ -143,7 +143,7 @@ class TemplatedConfigLoader(AbstractConfigLoader):
         dictionary of replacement values obtained in the ``__init__`` method.
 
         Args:
-            patterns: Glob patterns to match. Files, which names match
+            *patterns: Glob patterns to match. Files, which names match
                 any of the specified patterns, will be processed.
 
         Returns:

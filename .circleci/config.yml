@@ -449,29 +449,29 @@ workflows:
   regular:
     jobs:
       - unit_tests_36
-      - linters_36
-      - e2e_tests_36
-      - docs_36
-      - docs_linkcheck_37
+#      - linters_36
+#      - e2e_tests_36
+#      - docs_36
+#      - docs_linkcheck_37
       - unit_tests_37
-      - linters_37
-      - e2e_tests_37
-      - docs_37
+#      - linters_37
+#      - e2e_tests_37
+#      - docs_37
       - unit_tests_38
-      - linters_38
-      - e2e_tests_38
-      - pip_compile_36
-      - pip_compile_37
-      - pip_compile_38
-      - win_unit_tests_36
-      - win_unit_tests_37
-      - win_unit_tests_38
-      - win_pip_compile_36
-      - win_pip_compile_37
-      - win_pip_compile_38
-      - win_e2e_tests_36
-      - win_e2e_tests_37
-      - win_e2e_tests_38
+#      - linters_38
+#      - e2e_tests_38
+#      - pip_compile_36
+#      - pip_compile_37
+#      - pip_compile_38
+#      - win_unit_tests_36
+#      - win_unit_tests_37
+#      - win_unit_tests_38
+#      - win_pip_compile_36
+#      - win_pip_compile_37
+#      - win_pip_compile_38
+#      - win_e2e_tests_36
+#      - win_e2e_tests_37
+#      - win_e2e_tests_38
       - run_kedro_viz:
           filters:
             branches:
@@ -480,28 +480,28 @@ workflows:
       - all_circleci_checks_succeeded:
           requires:
             - unit_tests_36
-            - linters_36
-            - e2e_tests_36
-            - docs_36
+#            - linters_36
+#            - e2e_tests_36
+#            - docs_36
             - unit_tests_37
-            - linters_37
-            - e2e_tests_37
-            - docs_37
-            - docs_linkcheck_37
+#            - linters_37
+#            - e2e_tests_37
+#            - docs_37
+#            - docs_linkcheck_37
             - unit_tests_38
-            - linters_38
-            - e2e_tests_38
-            - pip_compile_36
-            - pip_compile_37
-            - pip_compile_38
-            - win_pip_compile_36
-            - win_pip_compile_37
-            - win_pip_compile_38
-            - win_unit_tests_36
-            - win_unit_tests_37
+#            - linters_38
+#            - e2e_tests_38
+#            - pip_compile_36
+#            - pip_compile_37
+#            - pip_compile_38
+#            - win_pip_compile_36
+#            - win_pip_compile_37
+#            - win_pip_compile_38
+#            - win_unit_tests_36
+#            - win_unit_tests_37
             # Skipped due to `pywin32 is in an unsupported or invalid wheel`
             # - win_e2e_tests_36
             # Skipped due to Windows fatal exception: stack overflow
             # - win_unit_tests_38
-            - win_e2e_tests_37
-            - win_e2e_tests_38
+#            - win_e2e_tests_37
+#            - win_e2e_tests_38

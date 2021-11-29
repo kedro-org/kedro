@@ -8,6 +8,7 @@ import gc
 from subprocess import Popen
 
 import pytest
+from delta import configure_spark_with_delta_pip
 
 try:
     from pyspark import SparkContext
@@ -35,7 +36,17 @@ def replace_spark_default_getorcreate():
 @pytest.fixture(scope="module")
 def spark_session():  # SKIP_IF_NO_SPARK
     SparkSession.builder.getOrCreate = the_real_getOrCreate
-    spark = SparkSession.builder.getOrCreate()
+    builder = (
+        SparkSession.builder.appName("MyApp")
+        .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
+        .config(
+            "spark.sql.catalog.spark_catalog",
+            "org.apache.spark.sql.delta.catalog.DeltaCatalog",
+        )
+    )
+
+    spark = configure_spark_with_delta_pip(builder).getOrCreate()
+    # spark = SparkSession.builder.getOrCreate()
     yield spark
     spark.stop()
     SparkSession.builder.getOrCreate = UseTheSparkSessionFixtureOrMock

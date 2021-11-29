@@ -132,6 +132,7 @@ class NodeSpecs:
 class PipelineSpecs:
     """Namespace that defines all specifications for a pipeline's lifecycle hooks."""
 
+    # pylint: disable=missing-param-doc
     @hook_spec
     def before_pipeline_run(
         self, run_params: Dict[str, Any], pipeline: Pipeline, catalog: DataCatalog

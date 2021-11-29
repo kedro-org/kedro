@@ -368,7 +368,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         nodes by name.
 
         Args:
-            node_names: One or more node names. The returned ``Pipeline``
+            *node_names: One or more node names. The returned ``Pipeline``
                 will only contain these nodes.
 
         Raises:
@@ -483,7 +483,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         matches to the fully-qualified name only (i.e. name@format).
 
         Args:
-            inputs: A list of inputs which should be used as a starting
+            *inputs: A list of inputs which should be used as a starting
                 point of the new ``Pipeline``.
 
         Raises:
@@ -509,7 +509,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         matches to the fully-qualified name only (i.e. name@format).
 
         Args:
-            inputs: A list of inputs which should be used as a starting point
+            *inputs: A list of inputs which should be used as a starting point
                 of the new ``Pipeline``
 
         Raises:
@@ -549,7 +549,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         to the fully-qualified name only (i.e. name@format).
 
         Args:
-            outputs: A list of outputs which should be the final outputs
+            *outputs: A list of outputs which should be the final outputs
                 of the new ``Pipeline``.
 
         Raises:
@@ -574,7 +574,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         to the fully-qualified name only (i.e. name@format).
 
         Args:
-            outputs: A list of outputs which should be the final outputs of
+            *outputs: A list of outputs which should be the final outputs of
                 the new ``Pipeline``.
 
         Raises:
@@ -610,7 +610,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         directly or transitively on the provided nodes.
 
         Args:
-            node_names: A list of node_names which should be used as a
+            *node_names: A list of node_names which should be used as a
                 starting point of the new ``Pipeline``.
         Raises:
             ValueError: Raised when any of the given names do not exist in the
@@ -631,7 +631,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         or transitively by the provided nodes.
 
         Args:
-            node_names: A list of node_names which should be used as an
+            *node_names: A list of node_names which should be used as an
                 end point of the new ``Pipeline``.
         Raises:
             ValueError: Raised when any of the given names do not exist in the
@@ -653,7 +653,7 @@ class Pipeline:  # pylint: disable=too-many-public-methods
         are provided.
 
         Args:
-            tags: A list of node tags which should be used to lookup
+            *tags: A list of node tags which should be used to lookup
                 the nodes of the new ``Pipeline``.
         Returns:
             Pipeline: A new ``Pipeline`` object, containing a subset of the

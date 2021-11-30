@@ -55,7 +55,12 @@ class TestPipelinePullCommand:
     @pytest.mark.parametrize("env", [None, "local"])
     @pytest.mark.parametrize(
         "alias, destination",
-        [(None, None), ("aliased", None), ("aliased", "pipelines"), (None, "pipelines")],
+        [
+            (None, None),
+            ("aliased", None),
+            ("aliased", "pipelines"),
+            (None, "pipelines"),
+        ],
     )
     def test_pull_local_sdist(
         self,

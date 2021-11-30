@@ -146,8 +146,8 @@ If you visit the Airflow UI, you should now see the Kedro pipeline as an Airflow
 
 ## Final thought
 
-This tutorial walks you through the manual process of deploying an existing Kedro project on Apache Airflow with Astronomer. However, if you are starting out, consider using our `astro-iris` starter which provides all the aforementioned boilerplate out of the box:
+This tutorial walks you through the manual process of deploying an existing Kedro project on Apache Airflow with Astronomer. However, if you are starting out, consider using our `astro-airflow-iris` starter which provides all the aforementioned boilerplate out of the box:
 
 ```shell
-kedro new --starter=astro-iris
+kedro new --starter=astro-airflow-iris
 ```

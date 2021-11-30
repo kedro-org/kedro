@@ -29,7 +29,7 @@ KEDRO_PATH = Path(kedro.__file__).parent
 TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
 
 _STARTER_ALIASES = {
-    "astro-iris",
+    "astro-airflow-iris",
     "mini-kedro",
     "pandas-iris",
     "pyspark",

@@ -1,6 +1,6 @@
 # Project settings
 
-A Kedro project's `settings.py` file contains the settings for the project, such as library component registration, custom hooks registration, etc. This document explains how settings work and which settings are available.
+A Kedro project's `settings.py` file contains the runtime configuration for the project, including registration of hooks and library components. This page explains how settings work and which settings are available.
 
 ## Default settings
 A Kedro settings file doesn’t have to define any settings if it doesn’t need to. Each setting has a sensible default value. These defaults live in the module `src/<project_name>/settings.py`.

@@ -213,7 +213,11 @@ def delete_pipeline(
 )
 @click.option("--alias", type=str, default="", help="Rename the package.")
 @click.option(
-    "--destination", type=str, default="", help="Module location to unpack under."
+    "-d",
+    "--destination",
+    type=click.Path(file_okay=False, dir_okay=False),
+    default=None,
+    help="Module location where to unpack under.",
 )
 @click.option(
     "--fs-args",
@@ -524,7 +528,7 @@ def _refactor_code_for_unpacking(
     tests_target = Path("tests")
 
     if destination:
-        destination_path = Path(*destination.split("."))
+        destination_path = Path(destination)
         package_target = package_target / destination_path
         tests_target = tests_target / destination_path
 

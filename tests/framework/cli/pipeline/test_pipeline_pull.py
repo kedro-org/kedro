@@ -55,7 +55,7 @@ class TestPipelinePullCommand:
     @pytest.mark.parametrize("env", [None, "local"])
     @pytest.mark.parametrize(
         "alias, destination",
-        [(None, None), ("aliased", None), ("aliased", "pipelines")],
+        [(None, None), ("aliased", None), ("aliased", "pipelines"), (None, "pipelines")],
     )
     def test_pull_local_sdist(
         self,
@@ -99,11 +99,10 @@ class TestPipelinePullCommand:
         assert result.exit_code == 0, result.output
         assert "pulled and unpacked" in result.output
 
-        path = f"{destination}.{alias}" if destination else alias
-        alias_path = Path(*(path.split("."))) if alias else Path(PIPELINE_NAME)
-        pipeline_name = alias_path.stem
-        source_dest = fake_package_path / alias_path
-        test_dest = fake_repo_path / "src" / "tests" / alias_path
+        pipeline_name = alias or PIPELINE_NAME
+        destination = destination or Path()
+        source_dest = fake_package_path / destination / pipeline_name
+        test_dest = fake_repo_path / "src" / "tests" / destination / pipeline_name
         config_env = env or "base"
         params_config = (
             fake_repo_path
@@ -126,7 +125,7 @@ class TestPipelinePullCommand:
             (None, None),
             ("aliased", None),
             ("aliased", "pipelines"),
-            (None, "another_pipeline"),
+            (None, "pipelines"),
         ],
     )
     def test_pull_local_sdist_compare(
@@ -174,11 +173,10 @@ class TestPipelinePullCommand:
         assert result.exit_code == 0, result.output
         assert "pulled and unpacked" in result.output
 
-        path = f"{destination}.{alias}" if destination else alias
-        alias_path = Path(*(path.split("."))) if alias else Path(pipeline_name)
-        pipeline_name = alias_path.stem
-        source_dest = fake_package_path / alias_path
-        test_dest = fake_repo_path / "src" / "tests" / alias_path
+        pipeline_name = alias or pipeline_name
+        destination = destination or Path()
+        source_dest = fake_package_path / destination / pipeline_name
+        test_dest = fake_repo_path / "src" / "tests" / destination / pipeline_name
         config_env = env or "base"
         dest_params_config = (
             fake_repo_path
@@ -214,7 +212,7 @@ class TestPipelinePullCommand:
                 "--destination",
                 "tools",
                 "--alias",
-                f"{PIPELINE_NAME}",
+                PIPELINE_NAME,
             ],
             obj=fake_metadata,
         )
@@ -234,7 +232,7 @@ class TestPipelinePullCommand:
 
         package_alias = "alpha"
         pull_alias = "beta"
-        pull_destination = "pipelines.lib"
+        pull_destination = "pipelines/lib"
 
         call_pipeline_package(
             cli=fake_project_cli, metadata=fake_metadata, alias=package_alias
@@ -259,7 +257,7 @@ class TestPipelinePullCommand:
             ],
             obj=fake_metadata,
         )
-        pull = f"{pull_destination}.{pull_alias}"
+        pull = f"pipelines.lib.{pull_alias}"
         for alias in (package_alias, pull):
             alias_path = Path(*alias.split("."))
             path = fake_package_path / alias_path / "pipeline.py"

@@ -2,8 +2,7 @@
 
 A Kedro project's `settings.py` file contains the runtime configuration for the project, including registration of hooks and library components. This page explains how settings work and which settings are available.
 
-## Default settings
-A Kedro settings file doesn’t have to define any settings if it doesn’t need to. Each setting has a sensible default value. These defaults live in the module `src/<project_name>/settings.py`.
+A project does not _need_ to have a settings file – in fact, by default, all code in `settings.py` is commented out. In the case that settings are not supplied, Kedro chooses sensible default values. You only need to edit `settings.py` if you wish to change to values other than the defaults.
 
 ## Available settings
 

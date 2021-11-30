@@ -74,7 +74,7 @@
 * Please remove any existing `hook_impl` of the `register_config_loader` and `register_catalog` methods from `ProjectHooks` (or custom alternatives).
 * Populate `settings.py` with `CONFIG_LOADER_CLASS` set to your expected config loader class (for example `kedro.config.TemplatedConfigLoader` or custom implementation). If `CONFIG_LOADER_CLASS` value is not set, it will default to `kedro.config.ConfigLoader` at runtime.
 * Populate `settings.py` with `CONFIG_LOADER_ARGS` set to a dictionary with expected keyword arguments. If `CONFIG_LOADER_ARGS` is not set, it will default to an empty dictionary.
-* Populate `settings.py` with `DATA_CATALOG_CLASS` set to your expected data catalog class. If `DATA_CATALOG_CLASS` value is not set, it will default to `kedro.io.DataCatalog` at runtime.
+* Populate `settings.py` with `DATA_CATALOG_CLASS` set to your expected data catalog class. If `DATA_CATALOG_CLASS` is not set, it will default to `kedro.io.DataCatalog` at runtime.
 * Optional: You can now remove all `params:` prefix when supplying values to `parameters` argument in a `pipeline()` call.
 * If you're using `pandas.ExcelDataSet`, make sure you have `openpyxl` installed in your environment. Note that this is automatically pulled if you specify `kedro[pandas.ExcelDataSet]==0.18.0` in your `requirements.in`. You can uninstall `xlrd` if you were only using it for this dataset.
 * If you're using `pandas.ParquetDataSet`, please pass pandas saving arguments directly to `save_args` instead of nested in `from_pandas` (e.g. `save_args = {"preserve_index": False}` instead of `save_args = {"from_pandas": {"preserve_index": False}}`).

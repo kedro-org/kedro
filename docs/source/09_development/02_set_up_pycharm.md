@@ -169,4 +169,4 @@ Add the following file path pattern to the mapping: `conf/**/*catalog*`.
 
 ![](../meta/images/pycharm_catalog_schema_mapping.png)
 
-> Different schemas for different Kedro versions can be found [here](https://github.com/quantumblacklabs/kedro/tree/master/static/jsonschema).
+> Different schemas for different Kedro versions can be found [here](https://github.com/quantumblacklabs/kedro/tree/main/static/jsonschema).

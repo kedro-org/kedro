@@ -1,6 +1,7 @@
 """Project settings."""
 
-# Instantiate and list your project hooks here
+# Instantiate and list your custom project hooks here
+# from {{cookiecutter.python_package}}.hooks import ProjectHooks
 # HOOKS = (ProjectHooks(),)
 
 # List the installed plugins for which to disable auto-registry

@@ -13,7 +13,7 @@ Hooks are a mechanism to add extra behaviour to Kedro's main execution in an eas
 A Hook is comprised of a Hook specification and Hook implementation. To add Hooks to your project you will need to:
 
 * Provide a Hook implementation for an existing Kedro-defined Hook specification
-* Register your Hook implementation in the `src/<your_project>/settings.py` file under the `HOOKS` key
+* Register your Hook implementation in the [`src/<your_project>/settings.py`](../kedro_project_setup/settings.md) file under the `HOOKS` key
 
 ### Hook specification
 
@@ -93,11 +93,11 @@ class DataCatalogHooks:
 .. note::  The name of a module that contains Hooks implementation is arbitrary and is not restricted to ``hooks.py``.
 ```
 
-We recommend that you group related Hook implementations under a namespace, preferably a class, within a `hooks.py` file in your project.
+We recommend that you group related Hook implementations under a namespace, preferably a class, within a `hooks.py` file that you create in your project.
 
 #### Registering your Hook implementations with Kedro
 
-Hook implementations should be registered with Kedro using the `<your_project>/src/<package_name>/settings.py` file under the `HOOKS` key.
+Hook implementations should be registered with Kedro using the [`<your_project>/src/<package_name>/settings.py`](../kedro_project_setup/settings.md) file under the `HOOKS` key.
 
 You can register more than one implementation for the same specification. They will be called in LIFO (last-in, first-out) order.
 

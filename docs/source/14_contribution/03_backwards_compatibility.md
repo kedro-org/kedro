@@ -16,9 +16,9 @@ Before you contribute a breaking change, you should create a [Github Issue](http
 
 ## The Kedro release model
 
-All non-breaking changes go into `master`, from which a minor release can be deployed at any time.
+All non-breaking changes go into `main`, from which a minor release can be deployed at any time.
 
-All breaking changes go into `develop`, from which a major release can be deployed at any time. The `develop` branch contains all commits from the `master` branch, but the `master` branch does not contain all the commits from `develop` until the next major release.
+All breaking changes go into `develop`, from which a major release can be deployed at any time. The `develop` branch contains all commits from the `main` branch, but the `main` branch does not contain all the commits from `develop` until the next major release.
 
 ![Kedro Gitflow Diagram](../meta/images/kedro_gitflow.svg)
 

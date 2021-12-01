@@ -262,4 +262,4 @@ Enter the following in your `settings.json` file:
 
 and start editing your `catalog` files.
 
-> Different schemas for different Kedro versions can be found [here](https://github.com/quantumblacklabs/kedro/tree/master/static/jsonschema).
+> Different schemas for different Kedro versions can be found [here](https://github.com/quantumblacklabs/kedro/tree/main/static/jsonschema).

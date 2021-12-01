@@ -198,7 +198,7 @@ linkcheck_ignore = [
     "https://github.com/EbookFoundation/free-programming-books/blob/master/books/free-programming-books-langs.md#python",
     "https://github.com/jazzband/pip-tools#example-usage-for-pip-compile",
     "https://www.astronomer.io/docs/cloud/stable/get-started/quickstart#",
-    "https://github.com/quantumblacklabs/private-kedro/blob/master/kedro/templates/project/*",
+    "https://github.com/quantumblacklabs/private-kedro/blob/main/kedro/templates/project/*",
     "https://eternallybored.org/misc/wget/",
     "https://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table.from_pandas",
     "https://www.oracle.com/java/technologies/javase-downloads.html",  # "forbidden" url
@@ -213,7 +213,7 @@ linkcheck_rate_limit_timeout = 2.0
 
 html_context = {
     "display_github": True,
-    "github_url": "https://github.com/quantumblacklabs/kedro/tree/master/docs/source",
+    "github_url": "https://github.com/quantumblacklabs/kedro/tree/main/docs/source",
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,

@@ -54,6 +54,6 @@ $ kedro new --starter=mini-kedro
 The starter contains:
 
 * A `conf/` directory, which contains an example `DataCatalog` configuration (`catalog.yml`)
-* A `data/` directory, which contains an example dataset identical to the one used by the [`pandas-iris`](https://github.com/quantumblacklabs/kedro-starters/tree/master/pandas-iris) starter
+* A `data/` directory, which contains an example dataset identical to the one used by the [`pandas-iris`](https://github.com/quantumblacklabs/kedro-starters/tree/main/pandas-iris) starter
 * An example notebook showing how to instantiate the `DataCatalog` and interact with the example dataset
 * A `README.md`, which explains how to use the project created by the starter and how to transition to a full Kedro project afterwards

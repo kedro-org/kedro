@@ -281,19 +281,3 @@ class DatasetSpecs:
             data: the actual data that was saved to the catalog.
         """
         pass
-
-
-class RegistrationSpecs:
-    """Namespace that defines all specifications for hooks registering
-    library components with a Kedro project.
-    """
-
-    @hook_spec
-    def register_pipelines(self) -> Dict[str, Pipeline]:
-        """Hook to be invoked to register a project's pipelines.
-
-        Returns:
-            A mapping from a pipeline name to a ``Pipeline`` object.
-
-        """
-        pass

@@ -3,7 +3,7 @@
 We welcome any and all contributions to Kedro, at whatever level you can manage. For example, you could:
 
 - [Join the community](#join-the-community-and-help-it-grow)
-- [Get involved with the Kedro project](#get-involved-with-the-kedro-project)
+- [Contribute to the project](#contribute-to-the-project)
 - [Join our Technical Steering Committee](#join-our-technical-steering-committee)
 
 
@@ -13,13 +13,15 @@ You can also suggest anything else that you think improves the community for us 
 
 The Kedro team pledges to foster and maintain a friendly community. We enforce a [Code of Conduct](./CODE_OF_CONDUCT.md) to ensure every Kedroid is welcomed and treated with respect.
 
-## Join the community and help it grow!
+## Join the community
 
 You can find the Kedro community on our [Discord server](https://discord.gg/akJDeVaxnB), which is where we share news and announcements, and general chat. You're also welcome to post links here to any articles or videos about Kedro that you create, or find, such as how-tos, showcases, demos, blog posts or tutorials.
 
 We also curate a [Github repo that lists content created by the Kedro community](https://github.com/quantumblacklabs/kedro-community).
 
-# Get involved with the Kedro project
+## Contribute to the project
+
+There are quite a few ways to contribute to the project, find inspiration from the table below.
 
 |Activity|Description|
 |-|-|
@@ -31,7 +33,7 @@ We also curate a [Github repo that lists content created by the Kedro community]
 |Contribute to the documentation|You can help us improve the [Kedro documentation online](https://kedro.readthedocs.io/en/stable/). Send us feedback as a [GitHub issue](https://github.com/quantumblacklabs/kedro/issues) or start a documentation discussion on [GitHub](https://github.com/quantumblacklabs/kedro/discussions).You are also welcome to make a raise a PR with a bug fix or addition to the documentation. First read the guide [Contribute to the Kedro documentation](https://kedro.readthedocs.io/en/stable/14_contribution/04_documentation_contributor_guidelines.html).
 
 
-# Join our Technical Steering Committee (TSC)
+## Join our Technical Steering Committee
 
 Kedro is an incubating project in [LF AI & Data](https://lfaidata.foundation/), a sub-organisation within the Linux Foundation that focuses on open innovation within the data and AI space. The project is governed by a group of maintainers known as the Technical Steering Committee (TSC). You can read more about the structure of our TSC in our [Technical Charter](TODO).
 

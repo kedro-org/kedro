@@ -2,22 +2,16 @@
 
 ## Responsibilities
 
-- Be available for 1+ full day per week (summarized) on product development
-- Attendance at community meetings to discuss the project plans, roadmap and commitments
-- Screen [GitHub](https://github.com/quantumblacklabs/kedro) issues and perform pull request (PR) reviews
-  - The screening process includes applying suitable [labels](https://github.com/quantumblacklabs/kedro/labels) to each new issue. Labels are handy for future issue follow-up. A few of the most important labels that are:
-    - `good first issue` - Mark any issue that can reasonably be accomplished by a new contributor with this label
-    - `help wanted` - Unless it is immediately obvious that someone will work on a specific issue (and if so assign
-     it), mark it help wanted
-    - `status: to be verified` - If the reported bug needs to be reproduced before working on a fix
-    - `status: needs more info` - If the issue needs more information from the person who reported it
-  - See all the [labels](https://github.com/quantumblacklabs/kedro/labels). Try to maintain 3-5 labels per issue
-- Make sure that ongoing PRs are moving forward at the right pace or closing them
-- Guide the community to use the right channel: [Github](https://github.com/quantumblacklabs/kedro/) for Issues and Bug-reports; and forums and Discord for questions and discussions
-- Project maintenance including security, updates, CI/CD, builds, infrastructure
-- Prioritize the work following [Kedro Roadmap](https://github.com/quantumblacklabs/kedro/projects/1) to move the
- project forward
-- Follow-up by filing undocumented issues found in community channels
+* Product development:
+  * Be available for at least one full day per week to help with product development
+  * Attend community meetings to discuss the project plans and roadmap
+  * Project maintenance including security, updates, CI/CD, builds and infrastructure
+  * Prioritize the work following the product roadmap to move the project forward
+* Community management:
+  * Make sure that ongoing PRs are moving forward at the right pace or closing them
+  * Guide the community to use the right channel:
+    * [Github](https://github.com/quantumblacklabs/kedro/) for feature requests and bug reports
+    * [GitHub discussions](https://github.com/quantumblacklabs/kedro/discussions) or [Discord](https://discord.gg/akJDeVaxnB), but the former is often preferable since it will be picked up by search engines
 
 
 ## Application requirements
@@ -36,7 +30,7 @@ Quarterly, existing maintainers will curate a list of contributors that have sho
 ### How we integrate you into the team?
 - We may ask you to do some PRs from our backlog or roadmap; maintainers need to work towards a common goal
 - We will require a period of working with existing maintainers
-- After a vote, maintainers will be added to the Kedro GitHub organization and [OWNERS.md](todo)
+- After a vote, maintainers will be added to the Kedro GitHub organization
 
 
 # Removing a Maintainer

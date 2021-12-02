@@ -10,6 +10,7 @@ dask>=2021.10.0, <2022.01; python_version > '3.6' # not directly required, pinne
 dask[complete]~=2.6; python_version == '3.6'
 delta-spark~=1.0
 dill~=0.3.1
+filelock>=3.4.0, <4.0
 gcsfs>=2021.04, <2022.01  # Upper bound set arbitrarily, to be reassessed in early 2022
 geopandas>=0.6.0, <1.0
 hdfs>=2.5.8, <3.0

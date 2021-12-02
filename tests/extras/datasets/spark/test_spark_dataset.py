@@ -51,12 +51,6 @@ HDFS_FOLDER_STRUCTURE = [
 ]
 
 
-@pytest.fixture(autouse=True)
-def spark_session_autouse(spark_session):
-    # all the tests in this file require Spark
-    return spark_session
-
-
 @pytest.fixture
 def sample_pandas_df() -> pd.DataFrame:
     return pd.DataFrame(

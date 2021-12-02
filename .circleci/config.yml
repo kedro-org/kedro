@@ -7,12 +7,15 @@ executors:
   py36:
     docker:
       - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.6
+    resource_class: medium+
   py37:
     docker:
       - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.7
+    resource_class: medium+
   py38:
     docker:
       - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.8
+    resource_class: medium+
 
 commands:
   setup_conda:
@@ -38,6 +41,14 @@ commands:
       - run:
           name: Install requirements and test requirements
           command: pip install --upgrade -r test_requirements.txt
+      - run:
+          # this is needed to fix java cacerts so
+          # spark can automatically download packages from mvn
+          # https://stackoverflow.com/a/50103533/1684058
+          name: Fix cacerts
+          command: |
+            sudo rm /etc/ssl/certs/java/cacerts
+            sudo update-ca-certificates -f
       - run:
           # Since recently Spark installation for some reason does not have enough permissions to execute
           # /home/circleci/miniconda/envs/kedro_builder/lib/python3.X/site-packages/pyspark/bin/spark-class.
@@ -452,29 +463,29 @@ workflows:
   regular:
     jobs:
       - unit_tests_36
-#      - linters_36
-#      - e2e_tests_36
-#      - docs_36
-#      - docs_linkcheck_37
+      - linters_36
+      - e2e_tests_36
+      - docs_36
+      - docs_linkcheck_37
       - unit_tests_37
-#      - linters_37
-#      - e2e_tests_37
-#      - docs_37
+      - linters_37
+      - e2e_tests_37
+      - docs_37
       - unit_tests_38
-#      - linters_38
-#      - e2e_tests_38
-#      - pip_compile_36
-#      - pip_compile_37
-#      - pip_compile_38
-#      - win_unit_tests_36
-#      - win_unit_tests_37
-#      - win_unit_tests_38
-#      - win_pip_compile_36
-#      - win_pip_compile_37
-#      - win_pip_compile_38
-#      - win_e2e_tests_36
-#      - win_e2e_tests_37
-#      - win_e2e_tests_38
+      - linters_38
+      - e2e_tests_38
+      - pip_compile_36
+      - pip_compile_37
+      - pip_compile_38
+      - win_unit_tests_36
+      - win_unit_tests_37
+      - win_unit_tests_38
+      - win_pip_compile_36
+      - win_pip_compile_37
+      - win_pip_compile_38
+      - win_e2e_tests_36
+      - win_e2e_tests_37
+      - win_e2e_tests_38
       - run_kedro_viz:
           filters:
             branches:
@@ -483,28 +494,28 @@ workflows:
       - all_circleci_checks_succeeded:
           requires:
             - unit_tests_36
-#            - linters_36
-#            - e2e_tests_36
-#            - docs_36
+            - linters_36
+            - e2e_tests_36
+            - docs_36
             - unit_tests_37
-#            - linters_37
-#            - e2e_tests_37
-#            - docs_37
-#            - docs_linkcheck_37
+            - linters_37
+            - e2e_tests_37
+            - docs_37
+            - docs_linkcheck_37
             - unit_tests_38
-#            - linters_38
-#            - e2e_tests_38
-#            - pip_compile_36
-#            - pip_compile_37
-#            - pip_compile_38
-#            - win_pip_compile_36
-#            - win_pip_compile_37
-#            - win_pip_compile_38
-#            - win_unit_tests_36
-#            - win_unit_tests_37
+            - linters_38
+            - e2e_tests_38
+            - pip_compile_36
+            - pip_compile_37
+            - pip_compile_38
+            - win_pip_compile_36
+            - win_pip_compile_37
+            - win_pip_compile_38
+            - win_unit_tests_36
+            - win_unit_tests_37
             # Skipped due to `pywin32 is in an unsupported or invalid wheel`
             # - win_e2e_tests_36
             # Skipped due to Windows fatal exception: stack overflow
             # - win_unit_tests_38
-#            - win_e2e_tests_37
-#            - win_e2e_tests_38
+            - win_e2e_tests_37
+            - win_e2e_tests_38

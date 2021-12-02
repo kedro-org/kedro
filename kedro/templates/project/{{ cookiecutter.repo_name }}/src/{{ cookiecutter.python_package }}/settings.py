@@ -20,4 +20,18 @@ HOOKS = (ProjectHooks(),)
 # CONTEXT_CLASS = KedroContext
 
 # Define the configuration folder. Defaults to `conf`
-# CONF_ROOT = "conf"
+# CONF_SOURCE = "conf"
+
+# Select the project ConfigLoader class here.
+# Defaults to kedro.config.ConfigLoader
+# Define the config loader. Defaults to ConfigLoader.
+# from kedro.config import TemplatedConfigLoader
+# CONFIG_LOADER_CLASS = TemplatedConfigLoader
+
+# Define keyword arguments to be passed to `CONFIG_LOADER_CLASS` constructor.
+# These kwargs depend on the `ConfigLoader` class implementation.
+# CONFIG_LOADER_ARGS = {
+#     "globals_pattern": "*globals.yml",
+#     "base_env": "base",
+#     "default_run_env": "local",
+# }

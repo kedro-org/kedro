@@ -3,10 +3,9 @@ filesystem (e.g.: local, S3, GCS). It uses PyYAML to handle the YAML file.
 """
 from copy import deepcopy
 from pathlib import PurePosixPath
-from typing import Any, Dict, Union
+from typing import Any, Dict
 
 import fsspec
-import pandas as pd
 import yaml
 
 from kedro.io.core import (
@@ -117,12 +116,8 @@ class YAMLDataSet(AbstractVersionedDataSet):
         with self._fs.open(load_path, **self._fs_open_args_load) as fs_file:
             return yaml.safe_load(fs_file)
 
-    def _save(self, data: Union[Dict, pd.DataFrame]) -> None:
+    def _save(self, data: Dict) -> None:
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
-
-        if isinstance(data, pd.DataFrame):
-            data = data.to_dict()
-
         with self._fs.open(save_path, **self._fs_open_args_save) as fs_file:
             yaml.dump(data, fs_file, **self._save_args)
 

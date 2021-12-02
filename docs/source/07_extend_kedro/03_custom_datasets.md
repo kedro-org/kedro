@@ -36,7 +36,7 @@ Here is an example skeleton for `ImageDataSet`:
 <summary><b>Click to expand</b></summary>
 
 ```python
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 import numpy as np
 
@@ -99,12 +99,10 @@ Here is the implementation of the `_load` method using `fsspec` and `Pillow` to 
 
 ```python
 from pathlib import PurePosixPath
+from typing import Any, Dict
 
-from kedro.io.core import (
-    AbstractDataSet,
-    get_filepath_str,
-    get_protocol_and_path,
-)
+from kedro.io import AbstractDataSet
+from kedro.io.core import get_filepath_str, get_protocol_and_path
 
 import fsspec
 import numpy as np
@@ -133,10 +131,18 @@ class ImageDataSet(AbstractDataSet):
             Data from the image file as a numpy array
         """
         # using get_filepath_str ensures that the protocol and path are appended correctly for different filesystems
-        load_path = get_filepath_str(self._get_load_path(), self._protocol)
+        load_path = get_filepath_str(self._filepath, self._protocol)
         with self._fs.open(load_path) as f:
             image = Image.open(f).convert("RGBA")
             return np.asarray(image)
+
+    def _save(self, data: np.ndarray) -> None:
+        """Saves image data to the specified filepath"""
+        ...
+
+    def _describe(self) -> Dict[str, Any]:
+        """Returns a dict that describes the attributes of the dataset"""
+        ...
 ```
 </details>
 
@@ -177,7 +183,7 @@ class ImageDataSet(AbstractDataSet):
     def _save(self, data: np.ndarray) -> None:
         """Saves image data to the specified filepath."""
         # using get_filepath_str ensures that the protocol and path are appended correctly for different filesystems
-        save_path = get_filepath_str(self._get_save_path(), self._protocol)
+        save_path = get_filepath_str(self._filepath, self._protocol)
         with self._fs.open(save_path, "wb") as f:
             image = Image.fromarray(data)
             image.save(f)

@@ -439,7 +439,8 @@ class IncrementalDataSet(PartitionedDataSet):
         if self._credentials:
             default_config[CREDENTIALS_KEY] = deepcopy(self._credentials)
 
-        if CREDENTIALS_KEY in (default_config.keys() & checkpoint_config.keys()):
+        # pylint: disable=consider-iterating-dictionary
+        if CREDENTIALS_KEY in default_config.keys() & checkpoint_config.keys():
             self._logger.warning(
                 KEY_PROPAGATION_WARNING,
                 {"keys": CREDENTIALS_KEY, "target": "checkpoint"},

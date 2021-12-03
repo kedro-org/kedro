@@ -106,18 +106,13 @@ def _setup_minimal_env(context):
     # JupyterLab from running, hence the version is forcefully set to 225.
     # More details: https://github.com/mhammond/pywin32/issues/1431
     if sys.platform.startswith("win"):
-        call(
-            [
-                context.python,
-                "-m",
-                "pip",
-                "install",
-                "--force-reinstall",
-                "pywin32==225",
-            ],
-            env=context.env,
-        )
+        command = [context.python, "-m", "pip", "install"]
+        if sys.version_info.major == 3 and sys.version_info.minor == 6:
+            command.append("--user")
 
+        call(command + ["--force-reinstall", "pywin32==225"], env=context.env)
+
+    # Update environment tools
     call(
         [
             context.python,
@@ -131,16 +126,9 @@ def _setup_minimal_env(context):
         ],
         env=context.env,
     )
-    call(
-        [
-            context.python,
-            "-m",
-            "pip",
-            "install",
-            ".",
-        ],
-        env=context.env,
-    )
+
+    # Install development version of kedro-viz
+    call([context.python, "-m", "pip", "install", "."], env=context.env)
     return context
 
 

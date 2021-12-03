@@ -30,7 +30,7 @@ df_2 = catalog.save("example_dataset_2")
 
 ## Usage
 
-Create a new project using the [`standalone-datacatalog` starter](https://github.com/quantumblacklabs/kedro-starters/tree/master/standalone-datacatalog):
+Create a new project using the [`standalone-datacatalog` starter](https://github.com/quantumblacklabs/kedro-starters/tree/main/standalone-datacatalog):
 
 ```bash
 $ kedro new --starter=standalone-datacatalog
@@ -43,7 +43,7 @@ The starter comprises a minimal setup to use the traditional [Iris dataset](http
 The starter contains:
 
 * A `conf/` directory, which contains an example `DataCatalog` configuration (`catalog.yml`)
-* A `data/` directory, which contains an example dataset identical to the one used by the [`pandas-iris`](https://github.com/quantumblacklabs/kedro-starters/tree/master/pandas-iris) starter
+* A `data/` directory, which contains an example dataset identical to the one used by the [`pandas-iris`](https://github.com/quantumblacklabs/kedro-starters/tree/main/pandas-iris) starter
 * An example notebook showing how to instantiate the `DataCatalog` and interact with the example dataset
 * A blank `README.md` which points to this page of documentation
 

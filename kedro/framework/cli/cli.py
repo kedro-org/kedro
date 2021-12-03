@@ -132,7 +132,7 @@ class KedroCLI(CommandCollection):
         # This is how click's internals parse sys.argv, which include the command,
         # subcommand, arguments and options. click doesn't store this information anywhere
         # so we have to re-do it.
-        # https://github.com/pallets/click/blob/master/src/click/core.py#L942-L945
+        # https://github.com/pallets/click/blob/main/src/click/core.py#L942-L945
         args = get_os_args() if args is None else list(args)
         self._cli_hook_manager.hook.before_command_run(  # pylint: disable=no-member
             project_metadata=self._metadata, command_args=args

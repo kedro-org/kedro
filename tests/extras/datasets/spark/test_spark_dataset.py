@@ -1,10 +1,11 @@
+import re
 import sys
 import tempfile
 from pathlib import Path, PurePosixPath
 
 import pandas as pd
 import pytest
-from pyspark.sql import SparkSession
+from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.functions import col
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.sql.utils import AnalysisException
@@ -48,12 +49,6 @@ HDFS_FOLDER_STRUCTURE = [
     (HDFS_PREFIX + "/2019-01-02T01.00.00.000Z/" + FILENAME, [], ["part1"]),
     (HDFS_PREFIX + "/2019-02-01T00.00.00.000Z", [], ["other_file"]),
 ]
-
-
-@pytest.fixture(autouse=True)
-def spark_session_autouse(spark_session):
-    # all the tests in this file require Spark
-    return spark_session
 
 
 @pytest.fixture
@@ -192,9 +187,7 @@ class TestSparkDataSet:
         with tempfile.NamedTemporaryFile() as temp_data_file:
             filepath = Path(temp_data_file.name).as_posix()
             spark_data_set = SparkDataSet(
-                filepath=filepath,
-                file_format="csv",
-                load_args={"header": True},
+                filepath=filepath, file_format="csv", load_args={"header": True}
             )
             assert "SparkDataSet" in str(spark_data_set)
             assert f"filepath={filepath}" in str(spark_data_set)
@@ -218,6 +211,49 @@ class TestSparkDataSet:
         spark_data_set.save(sample_spark_df)
         spark_data_set.save(sample_spark_df)
 
+    @pytest.mark.parametrize(
+        "save_args,expected_options",
+        [
+            ({"mode": "overwrite"}, {}),
+            ({"mode": "overwrite", "dfwriter_options": {}}, {}),
+            ({"mode": "overwrite", "dfwriter_options": None}, {}),
+            (
+                {"mode": "overwrite", "dfwriter_options": {"versionAsOf": 0}},
+                {"versionAsOf": 0},
+            ),
+        ],
+    )
+    def test_save_dfwriter_options(
+        self, tmp_path, save_args, expected_options, sample_spark_df, mocker
+    ):
+        filepath = (tmp_path / "test_data").as_posix()
+        spark_data_set = SparkDataSet(
+            filepath=filepath, file_format="delta", save_args=save_args
+        )
+
+        assert spark_data_set._dfwriter_options == expected_options
+
+        mock_writer = mocker.patch.object(DataFrame, "write")
+        spark_data_set.save(sample_spark_df)
+        if expected_options:
+            mock_writer.options.assert_called_once_with(versionAsOf=0)
+        else:
+            mock_writer.options.assert_called_once_with()
+
+    @pytest.mark.parametrize("mode", ["merge", "delete", "update"])
+    def test_file_format_delta_and_unsupported_mode(self, tmp_path, mode):
+        filepath = (tmp_path / "test_data").as_posix()
+        pattern = (
+            f"It is not possible to perform `save()` for file format `delta` "
+            f"with mode `{mode}` on `SparkDataSet`. "
+            f"Please use `spark.DeltaTableDataSet` instead."
+        )
+
+        with pytest.raises(DataSetError, match=re.escape(pattern)):
+            _ = SparkDataSet(
+                filepath=filepath, file_format="delta", save_args={"mode": mode}
+            )
+
     def test_save_partition(self, tmp_path, sample_spark_df):
         # To verify partitioning this test will partition the data by one
         # of the columns and then check whether partitioned column is added
@@ -235,7 +271,7 @@ class TestSparkDataSet:
 
         assert expected_path.exists()
 
-    @pytest.mark.parametrize("file_format", ["csv", "parquet"])
+    @pytest.mark.parametrize("file_format", ["csv", "parquet", "delta"])
     def test_exists(self, file_format, tmp_path, sample_spark_df):
         filepath = (tmp_path / "test_data").as_posix()
         spark_data_set = SparkDataSet(filepath=filepath, file_format=file_format)
@@ -580,7 +616,7 @@ class TestSparkDataSetVersionedS3:
         )
 
         versioned_dataset_s3.save(mocked_spark_df)
-        mocked_spark_df.write.save.assert_called_once_with(
+        mocked_spark_df.write.options().save.assert_called_once_with(
             "s3a://{b}/{f}/{v}/{f}".format(b=BUCKET_NAME, f=FILENAME, v=version.save),
             "parquet",
         )
@@ -600,7 +636,7 @@ class TestSparkDataSetVersionedS3:
         )
         with pytest.warns(UserWarning, match=pattern):
             ds_s3.save(mocked_spark_df)
-        mocked_spark_df.write.save.assert_called_once_with(
+        mocked_spark_df.write.options().save.assert_called_once_with(
             "s3a://{b}/{f}/{v}/{f}".format(
                 b=BUCKET_NAME, f=FILENAME, v=exact_version.save
             ),
@@ -712,7 +748,7 @@ class TestSparkDataSetVersionedHdfs:
             "{fn}/{f}/{v}/{f}".format(fn=FOLDER_NAME, v=version.save, f=FILENAME),
             strict=False,
         )
-        mocked_spark_df.write.save.assert_called_once_with(
+        mocked_spark_df.write.options().save.assert_called_once_with(
             "hdfs://{fn}/{f}/{v}/{f}".format(
                 fn=FOLDER_NAME, v=version.save, f=FILENAME
             ),
@@ -734,7 +770,7 @@ class TestSparkDataSetVersionedHdfs:
 
         with pytest.warns(UserWarning, match=pattern):
             versioned_hdfs.save(mocked_spark_df)
-        mocked_spark_df.write.save.assert_called_once_with(
+        mocked_spark_df.write.options().save.assert_called_once_with(
             "hdfs://{fn}/{f}/{sv}/{f}".format(
                 fn=FOLDER_NAME, f=FILENAME, sv=exact_version.save
             ),

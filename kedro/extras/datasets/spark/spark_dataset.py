@@ -1,4 +1,4 @@
-"""``AbstractDataSet`` implementation to access Spark dataframes using
+"""``AbstractVersionedDataSet`` implementation to access Spark dataframes using
 ``pyspark``
 """
 from copy import deepcopy
@@ -13,7 +13,7 @@ from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.utils import AnalysisException
 from s3fs import S3FileSystem
 
-from kedro.io.core import AbstractVersionedDataSet, Version
+from kedro.io.core import AbstractVersionedDataSet, DataSetError, Version
 
 
 def _parse_glob_pattern(pattern: str) -> str:
@@ -223,7 +223,7 @@ class SparkDataSet(AbstractVersionedDataSet):
                 starting with ``/dbfs/mnt``.
             file_format: File format used during load and save
                 operations. These are formats supported by the running
-                SparkContext include parquet, csv. For a list of supported
+                SparkContext include parquet, csv, delta. For a list of supported
                 formats please refer to Apache Spark documentation at
                 https://spark.apache.org/docs/latest/sql-programming-guide.html
             load_args: Load args passed to Spark DataFrameReader load method.
@@ -304,8 +304,12 @@ class SparkDataSet(AbstractVersionedDataSet):
         if save_args is not None:
             self._save_args.update(save_args)
 
+        ### would they be relevant on load_args / on read as well?
+        self._dfwriter_options = self._save_args.pop("dfwriter_options", {}) or {}
         self._file_format = file_format
         self._fs_prefix = fs_prefix
+
+        self._handle_delta_format()
 
     def _describe(self) -> Dict[str, Any]:
         return dict(
@@ -329,7 +333,9 @@ class SparkDataSet(AbstractVersionedDataSet):
 
     def _save(self, data: DataFrame) -> None:
         save_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_save_path()))
-        data.write.save(save_path, self._file_format, **self._save_args)
+        data.write.options(**self._dfwriter_options).save(
+            save_path, self._file_format, **self._save_args
+        )
 
     def _exists(self) -> bool:
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._get_load_path()))
@@ -337,7 +343,20 @@ class SparkDataSet(AbstractVersionedDataSet):
         try:
             self._get_spark().read.load(load_path, self._file_format)
         except AnalysisException as exception:
-            if exception.desc.startswith("Path does not exist:"):
+            if (
+                exception.desc.startswith("Path does not exist:")
+                or "is not a Delta table" in exception.desc
+            ):
                 return False
             raise
         return True
+
+    def _handle_delta_format(self) -> None:
+        unsupported_modes = {"merge", "delete", "update"}
+        write_mode = self._save_args.get("mode") or ""
+        if self._file_format == "delta" and write_mode.lower() in unsupported_modes:
+            raise DataSetError(
+                f"It is not possible to perform `save()` for file format `delta` "
+                f"with mode `{write_mode}` on `SparkDataSet`. "
+                f"Please use `spark.DeltaTableDataSet` instead."
+            )

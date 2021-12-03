@@ -101,8 +101,10 @@ def _setup_minimal_env(context):
     context.kedro_install_venv_dir = kedro_install_venv_dir
     context = _setup_context_with_venv(context, kedro_install_venv_dir)
 
-    # For reinstall an older version of pywin32 because 302 wheel doesn't work with py36.
-    # Once we drop py36, this can go
+    # JupyterLab indirectly depends on pywin32 on Windows. Newer versions of pywin32
+    # (e.g. 3xx, to which jupyterlab~=3.0 defaults) have a bug that prevents
+    # JupyterLab from running, hence the version is forcefully set to 225.
+    # More details: https://github.com/mhammond/pywin32/issues/1431
     if sys.platform.startswith("win"):
         call(
             [
@@ -111,7 +113,7 @@ def _setup_minimal_env(context):
                 "pip",
                 "install",
                 "--force-reinstall",
-                "pywin32==300",
+                "pywin32==225",
             ],
             env=context.env,
         )

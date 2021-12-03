@@ -101,13 +101,15 @@ Here is the implementation of the `_load` method using `fsspec` and `Pillow` to 
 from pathlib import PurePosixPath
 from typing import Any, Dict
 
-from kedro.io.core import AbstractDataSet, get_filepath_str, get_protocol_and_path
-
 import fsspec
 import numpy as np
-
-# PIL is the package from Pillow
 from PIL import Image
+
+from kedro.io.core import (
+    AbstractDataSet,
+    get_filepath_str,
+    get_protocol_and_path,
+)
 
 
 class ImageDataSet(AbstractDataSet):
@@ -217,12 +219,16 @@ Here is the full implementation of our basic `ImageDataSet`:
 from pathlib import PurePosixPath
 from typing import Any, Dict
 
-from kedro.io.core import AbstractDataSet, get_filepath_str, get_protocol_and_path
-
 import fsspec
 import numpy as np
 from PIL import Image
 
+from kedro.io.core import (
+    AbstractDataSet,
+    get_filepath_str,
+    get_protocol_and_path,
+)
+ 
 
 class ImageDataSet(AbstractDataSet):
     """``ImageDataSet`` loads / save image data from a given filepath as `numpy` array using Pillow.
@@ -325,12 +331,16 @@ The following amends the full implementation of our basic `ImageDataSet`. It now
 from pathlib import PurePosixPath
 from typing import Any, Dict
 
-from kedro.io import 
-from kedro.io.core import AbstractVersionedDataSet, get_filepath_str, get_protocol_and_path, Version
-
 import fsspec
 import numpy as np
 from PIL import Image
+
+from kedro.io.core import (
+    AbstractVersionedDataSet,
+    get_filepath_str,
+    get_protocol_and_path,
+    Version,
+)
 
 
 class ImageDataSet(AbstractVersionedDataSet):

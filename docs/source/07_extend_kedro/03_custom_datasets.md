@@ -505,7 +505,7 @@ We provide additional examples of [how to use parameters through the data catalo
 
 ## How to contribute a custom dataset implementation
 
-One of the easiest ways to contribute back to Kedro is to share a custom dataset. Kedro has a :code:`kedro.extras.datasets` sub-package where you can add a new custom dataset implementation to share it with others. You can find out more in the [Kedro contribution guide](https://github.com/quantumblacklabs/kedro/blob/master/CONTRIBUTING.md) on Github.
+One of the easiest ways to contribute back to Kedro is to share a custom dataset. Kedro has a :code:`kedro.extras.datasets` sub-package where you can add a new custom dataset implementation to share it with others. You can find out more in the [Kedro contribution guide](https://github.com/quantumblacklabs/kedro/blob/main/CONTRIBUTING.md) on Github.
 
 To contribute your custom dataset:
 
@@ -523,4 +523,4 @@ kedro/extras/datasets/image
 
 3. The dataset should be accompanied by full test coverage in `tests/extras/datasets`.
 
-4. Make a pull request against the `master` branch of [Kedro's Github repository](https://github.com/quantumblacklabs/kedro).
+4. Make a pull request against the `main` branch of [Kedro's Github repository](https://github.com/quantumblacklabs/kedro).

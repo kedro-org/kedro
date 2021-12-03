@@ -10,15 +10,12 @@ from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 
 from kedro.extras.datasets.spark import SparkHiveDataSet
 from kedro.io import DataSetError
-from tests.extras.datasets.spark.conftest import UseTheSparkSessionFixtureOrMock
 
 TESTSPARKDIR = "test_spark_dir"
 
 
-# clean up pyspark after the test module finishes
 @pytest.fixture(scope="module")
-def spark_hive_session(replace_spark_default_getorcreate):
-    SparkSession.builder.getOrCreate = replace_spark_default_getorcreate
+def spark_session():
     try:
         with TemporaryDirectory(TESTSPARKDIR) as tmpdir:
             spark = (
@@ -48,8 +45,6 @@ def spark_hive_session(replace_spark_default_getorcreate):
         # files are still used by Java process.
         pass
 
-    SparkSession.builder.getOrCreate = UseTheSparkSessionFixtureOrMock
-
     # remove the cached JVM vars
     SparkContext._jvm = None  # pylint: disable=protected-access
     SparkContext._gateway = None  # pylint: disable=protected-access
@@ -66,7 +61,7 @@ def spark_hive_session(replace_spark_default_getorcreate):
 
 
 @pytest.fixture(scope="module", autouse=True)
-def spark_test_databases(spark_hive_session):
+def spark_test_databases(spark_session):
     """Setup spark test databases for all tests in this module."""
     dataset = _generate_spark_df_one()
     dataset.createOrReplaceTempView("tmp")
@@ -74,15 +69,15 @@ def spark_test_databases(spark_hive_session):
 
     # Setup the databases and test table before testing
     for database in databases:
-        spark_hive_session.sql(f"create database {database}")
-    spark_hive_session.sql("use default_1")
-    spark_hive_session.sql("create table table_1 as select * from tmp")
+        spark_session.sql(f"create database {database}")
+    spark_session.sql("use default_1")
+    spark_session.sql("create table table_1 as select * from tmp")
 
-    yield spark_hive_session
+    yield spark_session
 
     # Drop the databases after testing
     for database in databases:
-        spark_hive_session.sql(f"drop database {database} cascade")
+        spark_session.sql(f"drop database {database} cascade")
 
 
 def assert_df_equal(expected, result):
@@ -150,8 +145,8 @@ class TestSparkHiveDataSet:
         )
         assert_df_equal(_generate_spark_df_one(), dataset.load())
 
-    def test_overwrite_empty_table(self, spark_hive_session):
-        spark_hive_session.sql(
+    def test_overwrite_empty_table(self, spark_session):
+        spark_session.sql(
             "create table default_1.test_overwrite_empty_table (name string, age integer)"
         ).take(1)
         dataset = SparkHiveDataSet(
@@ -162,8 +157,8 @@ class TestSparkHiveDataSet:
         dataset.save(_generate_spark_df_one())
         assert_df_equal(dataset.load(), _generate_spark_df_one())
 
-    def test_overwrite_not_empty_table(self, spark_hive_session):
-        spark_hive_session.sql(
+    def test_overwrite_not_empty_table(self, spark_session):
+        spark_session.sql(
             "create table default_1.test_overwrite_full_table (name string, age integer)"
         ).take(1)
         dataset = SparkHiveDataSet(
@@ -175,8 +170,8 @@ class TestSparkHiveDataSet:
         dataset.save(_generate_spark_df_one())
         assert_df_equal(dataset.load(), _generate_spark_df_one())
 
-    def test_insert_not_empty_table(self, spark_hive_session):
-        spark_hive_session.sql(
+    def test_insert_not_empty_table(self, spark_session):
+        spark_session.sql(
             "create table default_1.test_insert_not_empty_table (name string, age integer)"
         ).take(1)
         dataset = SparkHiveDataSet(
@@ -197,8 +192,8 @@ class TestSparkHiveDataSet:
         ):
             SparkHiveDataSet(database="default_1", table="table_1", write_mode="upsert")
 
-    def test_upsert_empty_table(self, spark_hive_session):
-        spark_hive_session.sql(
+    def test_upsert_empty_table(self, spark_session):
+        spark_session.sql(
             "create table default_1.test_upsert_empty_table (name string, age integer)"
         ).take(1)
         dataset = SparkHiveDataSet(
@@ -212,8 +207,8 @@ class TestSparkHiveDataSet:
             dataset.load().sort("name"), _generate_spark_df_one().sort("name")
         )
 
-    def test_upsert_not_empty_table(self, spark_hive_session):
-        spark_hive_session.sql(
+    def test_upsert_not_empty_table(self, spark_session):
+        spark_session.sql(
             "create table default_1.test_upsert_not_empty_table (name string, age integer)"
         ).take(1)
         dataset = SparkHiveDataSet(
@@ -257,8 +252,8 @@ class TestSparkHiveDataSet:
                 table_pk=["name"],
             )
 
-    def test_invalid_schema_insert(self, spark_hive_session):
-        spark_hive_session.sql(
+    def test_invalid_schema_insert(self, spark_session):
+        spark_session.sql(
             "create table default_1.test_invalid_schema_insert "
             "(name string, additional_column_on_hive integer)"
         ).take(1)

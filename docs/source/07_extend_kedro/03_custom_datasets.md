@@ -205,7 +205,9 @@ from kedro.io import AbstractDataSet
 class ImageDataSet(AbstractDataSet):
     def _describe(self) -> Dict[str, Any]:
         """Returns a dict that describes the attributes of the dataset."""
-        return dict(filepath=self._filepath, protocol=self._protocol)
+        return dict(
+            filepath=self._filepath, protocol=self._protocol
+        )
 ```
 
 ## The complete example
@@ -228,7 +230,7 @@ from kedro.io.core import (
     get_filepath_str,
     get_protocol_and_path,
 )
- 
+
 
 class ImageDataSet(AbstractDataSet):
     """``ImageDataSet`` loads / save image data from a given filepath as `numpy` array using Pillow.
@@ -245,7 +247,6 @@ class ImageDataSet(AbstractDataSet):
         Args:
             filepath: The location of the image file to load / save data.
         """
-        # parse the path and protocol (e.g. file, http, s3, etc.)
         protocol, path = get_protocol_and_path(filepath)
         self._protocol = protocol
         self._filepath = PurePosixPath(path)
@@ -257,7 +258,6 @@ class ImageDataSet(AbstractDataSet):
         Returns:
             Data from the image file as a numpy array
         """
-        # using get_filepath_str ensures that the protocol and path are appended correctly for different filesystems
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
         with self._fs.open(load_path, mode="r") as f:
             image = Image.open(f).convert("RGBA")
@@ -265,7 +265,6 @@ class ImageDataSet(AbstractDataSet):
 
     def _save(self, data: np.ndarray) -> None:
         """Saves image data to the specified filepath."""
-        # using get_filepath_str ensures that the protocol and path are appended correctly for different filesystems
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
         with self._fs.open(save_path, mode="wb") as f:
             image = Image.fromarray(data)
@@ -273,7 +272,9 @@ class ImageDataSet(AbstractDataSet):
 
     def _describe(self) -> Dict[str, Any]:
         """Returns a dict that describes the attributes of the dataset."""
-        return dict(filepath=self._filepath, protocol=self._protocol)
+        return dict(
+            filepath=self._filepath, protocol=self._protocol
+        )
 ```
 </details>
 

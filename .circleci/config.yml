@@ -42,6 +42,14 @@ commands:
           name: Install requirements and test requirements
           command: pip install --upgrade -r test_requirements.txt
       - run:
+          # this is needed to fix java cacerts so
+          # spark can automatically download packages from mvn
+          # https://stackoverflow.com/a/50103533/1684058
+          name: Fix cacerts
+          command: |
+            sudo rm /etc/ssl/certs/java/cacerts
+            sudo update-ca-certificates -f
+      - run:
           # Since recently Spark installation for some reason does not have enough permissions to execute
           # /home/circleci/miniconda/envs/kedro_builder/lib/python3.X/site-packages/pyspark/bin/spark-class.
           # So fixing it manually here.

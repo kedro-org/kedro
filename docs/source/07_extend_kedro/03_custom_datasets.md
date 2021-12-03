@@ -40,7 +40,7 @@ from typing import Any, Dict
 
 import numpy as np
 
-from kedro.io import AbstractDataSet
+from kedro.io.core import AbstractDataSet
 
 
 class ImageDataSet(AbstractDataSet):
@@ -101,8 +101,7 @@ Here is the implementation of the `_load` method using `fsspec` and `Pillow` to 
 from pathlib import PurePosixPath
 from typing import Any, Dict
 
-from kedro.io import AbstractDataSet
-from kedro.io.core import get_filepath_str, get_protocol_and_path
+from kedro.io.core import AbstractDataSet, get_filepath_str, get_protocol_and_path
 
 import fsspec
 import numpy as np
@@ -174,11 +173,6 @@ Similarly, we can implement the `_save` method as follows:
 
 
 ```python
-import numpy as np
-from PIL import Image
-from kedro.io.core import AbstractDataSet, get_filepath_str
-
-
 class ImageDataSet(AbstractDataSet):
     def _save(self, data: np.ndarray) -> None:
         """Saves image data to the specified filepath."""
@@ -223,11 +217,7 @@ Here is the full implementation of our basic `ImageDataSet`:
 from pathlib import PurePosixPath
 from typing import Any, Dict
 
-from kedro.io.core import (
-    AbstractDataSet,
-    get_filepath_str,
-    get_protocol_and_path,
-)
+from kedro.io.core import AbstractDataSet, get_filepath_str, get_protocol_and_path
 
 import fsspec
 import numpy as np
@@ -335,8 +325,8 @@ The following amends the full implementation of our basic `ImageDataSet`. It now
 from pathlib import PurePosixPath
 from typing import Any, Dict
 
-from kedro.io import AbstractVersionedDataSet, Version
-from kedro.io.core import get_protocol_and_path
+from kedro.io import 
+from kedro.io.core import AbstractVersionedDataSet, get_filepath_str, get_protocol_and_path, Version
 
 import fsspec
 import numpy as np

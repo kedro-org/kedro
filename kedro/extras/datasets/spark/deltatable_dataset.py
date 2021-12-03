@@ -1,7 +1,6 @@
 """``AbstractVersionedDataSet`` implementation to access DeltaTables using
 ``delta-spark``
 """
-import logging
 from copy import deepcopy
 from pathlib import PurePosixPath
 from typing import Any, Dict
@@ -14,9 +13,7 @@ from kedro.extras.datasets.spark.spark_dataset import (
     _split_filepath,
     _strip_dbfs_prefix,
 )
-from kedro.io.core import AbstractDataSet
-
-logger = logging.getLogger(__name__)
+from kedro.io.core import AbstractDataSet, DataSetError
 
 
 class DeltaTableDataSet(AbstractDataSet):
@@ -64,7 +61,7 @@ class DeltaTableDataSet(AbstractDataSet):
     # this dataset cannot be used with ``ParallelRunner``,
     # therefore it has the attribute ``_SINGLE_PROCESS = True``
     # for parallelism within a Spark pipeline please consider
-    # ``ThreadRunner`` instead
+    # using ``ThreadRunner`` instead
     _SINGLE_PROCESS = True
 
     def __init__(self, filepath: str, credentials: Dict[str, Any] = None) -> None:
@@ -95,10 +92,7 @@ class DeltaTableDataSet(AbstractDataSet):
         return DeltaTable.forPath(self._get_spark(), load_path)
 
     def _save(self, data: Any) -> None:
-        logger.info(
-            "Saving was performed on `DeltaTable` object within the context of the node function"
-        )
-        # raise DataSetError(f"{self.__class__.__name__} is a read only dataset type")
+        raise DataSetError(f"{self.__class__.__name__} is a read only dataset type")
 
     def _exists(self) -> bool:
         load_path = _strip_dbfs_prefix(self._fs_prefix + str(self._filepath))

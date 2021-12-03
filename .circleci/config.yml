@@ -79,9 +79,6 @@ commands:
       - setup_conda
       - setup_requirements
       - run:
-          name: Set up SparkSession
-          command: echo """from pyspark.sql import SparkSession;spark = SparkSession.builder.appName('tmp').getOrCreate();""" | python
-      - run:
           name: Run unit tests
           command: make test
 

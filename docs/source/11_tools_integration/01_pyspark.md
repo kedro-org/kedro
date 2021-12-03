@@ -121,13 +121,18 @@ assert isinstance(df, pyspark.sql.DataFrame)
 [Delta Lake](https://delta.io/) is an open-source project that enables building a Lakehouse architecture on top of data lakes. It provides ACID transactions and unifies streaming and batch data processing on top of existing data lakes, such as S3, ADLS, GCS, and HDFS.
 To setup PySpark with Delta Lake, have a look at [the recommendations in Delta Lake's documentation](https://docs.delta.io/latest/quick-start.html#python).
 
-We recommend the following workflow, which makes use of the [Transcoding](../05_data/01_data_catalog.md) feature in Kedro.
+We recommend the following workflow, which makes use of the [Transcoding](../05_data/01_data_catalog.md) feature in Kedro:
+
+* To create a Delta table, use a `SparkDataSet` with `file_format="delta"`. You can also use this type of dataset to read from a Delta table and/or overwrite it.
+* To perform [Delta table deletes, updates, and merges](https://docs.delta.io/latest/delta-update.html#language-python), load the data using a `DeltaTableDataSet` and perform the write operations within the node function.
+
+As a result, we end up with a catalog that looks like this:
 
 ```yaml
 temperature:
   type: spark.SparkDataSet
   filepath: data/01_raw/data.csv
-  file_format: csv
+  file_format: "csv"
   load_args:
     header: True
     inferSchema: True
@@ -137,8 +142,8 @@ temperature:
 
 weather@spark:
   type: spark.SparkDataSet
-  filepath: s3a://my_bucket/03_primary/temperature
-  file_format: delta
+  filepath: s3a://my_bucket/03_primary/weather
+  file_format: "delta"
   save_args:
     mode: "overwrite"
     df_writer:
@@ -152,7 +157,7 @@ weather@delta:
 The `DeltaTableDataSet` does not support `save()` operation, as the updates happen in place inside the node function, i.e. through `DeltaTable.update()`, `DeltaTable.delete()`, `DeltaTable.merge()`.
 
 
-> Since the save operation happens within the `node` via the DeltaTable API, the Kedro `before_dataset_saved` hook will not be triggered.
+> Note: If you have defined an implementation for the Kedro `before_dataset_saved`/`after_dataset_saved` hook, the hook will not be triggered. This is because the save operation happens within the `node` itself, via the DeltaTable API.
 
 ```python
 Pipeline(

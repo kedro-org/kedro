@@ -39,21 +39,17 @@ class TestDeltaTableDataSet:
         loaded_with_deltalake = delta_table.toDF()
         assert loaded_with_deltalake.exceptAll(loaded_with_spark).count() == 0
 
-    def test_save(self, tmp_path, sample_spark_df, caplog):
+    def test_save(self, tmp_path, sample_spark_df):
         filepath = (tmp_path / "test_data").as_posix()
         delta_ds = DeltaTableDataSet(filepath=filepath)
         assert not delta_ds.exists()
 
-        delta_ds.save(sample_spark_df)
-        # save is a dummy operation, check that indeed nothing is written
-        assert not delta_ds.exists()
+        pattern = "DeltaTableDataSet is a read only dataset type"
+        with pytest.raises(DataSetError, match=pattern):
+            delta_ds.save(sample_spark_df)
 
-        log_messages = [r.getMessage() for r in caplog.records]
-        expected_log_message = (
-            "Saving was performed on `DeltaTable` object "
-            "within the context of the node function"
-        )
-        assert expected_log_message in log_messages
+        # check that indeed nothing is written
+        assert not delta_ds.exists()
 
     def test_exists(self, tmp_path, sample_spark_df):
         filepath = (tmp_path / "test_data").as_posix()
@@ -91,16 +87,3 @@ class TestDeltaTableDataSet:
         )
         with pytest.raises(AttributeError, match=pattern):
             ParallelRunner(is_async=is_async).run(pipeline, catalog)
-
-
-class TestSparkDataSetWithDeltaFormat:
-    def test_exists(self, tmp_path, sample_spark_df):
-        # testing SparkDataSet with delta here as we have a
-        # properly set-up SparkSession to work with Delta Lake
-        filepath = (tmp_path / "test_data").as_posix()
-        spark_data_set = SparkDataSet(filepath=filepath, file_format="delta")
-
-        assert not spark_data_set.exists()
-
-        spark_data_set.save(sample_spark_df)
-        assert spark_data_set.exists()

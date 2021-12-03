@@ -7,12 +7,15 @@ executors:
   py36:
     docker:
       - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.6
+    resource_class: medium+
   py37:
     docker:
       - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.7
+    resource_class: medium+
   py38:
     docker:
       - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.8
+    resource_class: medium+
 
 commands:
   setup_conda:
@@ -38,6 +41,14 @@ commands:
       - run:
           name: Install requirements and test requirements
           command: pip install --upgrade -r test_requirements.txt
+      - run:
+          # this is needed to fix java cacerts so
+          # spark can automatically download packages from mvn
+          # https://stackoverflow.com/a/50103533/1684058
+          name: Fix cacerts
+          command: |
+            sudo rm /etc/ssl/certs/java/cacerts
+            sudo update-ca-certificates -f
       - run:
           # Since recently Spark installation for some reason does not have enough permissions to execute
           # /home/circleci/miniconda/envs/kedro_builder/lib/python3.X/site-packages/pyspark/bin/spark-class.

@@ -8,7 +8,7 @@ Before you contribute any documentation changes, please read this page so you ar
 
 ## How do I rebuild the documentation after I make changes to it?
 
-Our documentation is written in Markdown and built from by Sphinx, coordinated by a [build script](https://github.com/quantumblacklabs/kedro/blob/master/docs/build-docs.sh).
+Our documentation is written in Markdown and built from by Sphinx, coordinated by a [build script](https://github.com/quantumblacklabs/kedro/blob/main/docs/build-docs.sh).
 
 If you make changes to the markdown for the Kedro documentation, you can rebuild it within a Unix-like environment (with `pandoc` installed).
 
@@ -37,7 +37,7 @@ The build will take a few minutes to finish, and a successful result is a set of
 
 ### Add new pages
 
-All Kedro documentation is collated and built from a single index file, [`index.rst`](https://github.com/quantumblacklabs/kedro/blob/master/docs/source/index.rst) found in the `docs/source` folder.
+All Kedro documentation is collated and built from a single index file, [`index.rst`](https://github.com/quantumblacklabs/kedro/blob/main/docs/source/index.rst) found in the `docs/source` folder.
 
 If you add extra pages of documentation, you should always include them within `index.rst` file to include them in the table of contents and let Sphinx know to build them alongside the rest of the documentation.
 

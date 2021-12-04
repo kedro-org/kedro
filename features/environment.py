@@ -100,19 +100,6 @@ def _setup_minimal_env(context):
     kedro_install_venv_dir = _create_new_venv()
     context.kedro_install_venv_dir = kedro_install_venv_dir
     context = _setup_context_with_venv(context, kedro_install_venv_dir)
-
-    # JupyterLab indirectly depends on pywin32 on Windows. Newer versions of pywin32
-    # (e.g. 3xx, to which jupyterlab~=3.0 defaults) have a bug that prevents
-    # JupyterLab from running, hence the version is forcefully set to 225.
-    # More details: https://github.com/mhammond/pywin32/issues/1431
-    if sys.platform.startswith("win"):
-        command = [context.python, "-m", "pip", "install"]
-        if sys.version_info.major == 3 and sys.version_info.minor == 6:
-            command.append("--user")
-
-        call(command + ["--force-reinstall", "pywin32==225"], env=context.env)
-
-    # Update environment tools
     call(
         [
             context.python,
@@ -126,9 +113,7 @@ def _setup_minimal_env(context):
         ],
         env=context.env,
     )
-
-    # Install development version of kedro-viz
-    call([context.python, "-m", "pip", "install", "."], env=context.env)
+    call([context.python, "-m", "pip", "install", "."])
     return context
 
 
@@ -142,6 +127,13 @@ def _install_project_requirements(context):
     )
     install_reqs = [req for req in install_reqs if "{" not in req]
     install_reqs.append(".[pandas.CSVDataSet]")
+
+    # JupyterLab indirectly depends on pywin32 on Windows. Newer versions of pywin32
+    # (e.g. 3xx, to which jupyterlab~=3.0 defaults) have a bug that prevents
+    # JupyterLab from running, hence the version is forcefully set to 225.
+    # More details: https://github.com/mhammond/pywin32/issues/1431
+    if sys.platform.startswith("win"):
+        install_reqs.append("pywin32==225")
 
     call([context.pip, "install", *install_reqs], env=context.env)
     return context

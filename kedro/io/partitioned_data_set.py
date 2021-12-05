@@ -258,8 +258,8 @@ class PartitionedDataSet(AbstractDataSet):
         return partitions
 
     def _save(self, data: Dict[str, Any]) -> None:
-        if self._overwrite and self._filesystem.exists(self._path):
-            self._filesystem.rm(self._path, recursive=True)
+        if self._overwrite and self._filesystem.exists(self._normalized_path):
+            self._filesystem.rm(self._normalized_path, recursive=True)
 
         for partition_id, partition_data in sorted(data.items()):
             kwargs = deepcopy(self._dataset_config)

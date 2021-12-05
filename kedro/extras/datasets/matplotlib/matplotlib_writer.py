@@ -146,7 +146,9 @@ class MatplotlibWriter(AbstractVersionedDataSet):
             and self._overwrite
             and self._fs.exists(self._filepath)
         ):
-            self._fs.rm(self._filepath, recursive=True)
+            self._fs.rm(
+                get_filepath_str(self._filepath, self._protocol), recursive=True
+            )
 
         if isinstance(data, list):
             for index, plot in enumerate(data):

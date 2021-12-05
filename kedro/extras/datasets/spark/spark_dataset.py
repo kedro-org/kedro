@@ -340,8 +340,7 @@ class SparkDataSet(AbstractVersionedDataSet):
         with file_system.open(load_path) as fs_file:
 
             try:
-                # TODO lazy load schema when loading dataframe?
-                # TODO Support other schema input formats?
+                # FUTURE: Support other schema input formats
                 return StructType.fromJson(json.loads(fs_file.read()))
             except Exception as exc:
                 raise DataSetError(

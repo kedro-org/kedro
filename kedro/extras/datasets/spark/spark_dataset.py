@@ -46,6 +46,7 @@ from s3fs import S3FileSystem
 
 from kedro.io.core import (
     AbstractVersionedDataSet,
+    DataSetError,
     Version,
     get_filepath_str,
     get_protocol_and_path,
@@ -338,10 +339,15 @@ class SparkDataSet(AbstractVersionedDataSet):
         # Open schema file
         with file_system.open(load_path) as fs_file:
 
-            # TODO lazy load schema when loading dataframe?
-            # TODO Support other schema input formats?
-            # TODO What if file is in the wrong format?
-            return StructType.fromJson(json.loads(fs_file.read()))
+            try:
+                # TODO lazy load schema when loading dataframe?
+                # TODO Support other schema input formats?
+                return StructType.fromJson(json.loads(fs_file.read()))
+            except Exception as exc:
+                raise DataSetError(
+                    "Contents of `schema_json_path` are invalid. Please"
+                    "provide a valid JSON serialized `pyspark.sql.types.StructType`."
+                ) from exc
 
     def _describe(self) -> Dict[str, Any]:
         return dict(

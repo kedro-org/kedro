@@ -52,7 +52,6 @@ install-pre-commit: install-test-requirements
 
 uninstall-pre-commit:
 	pre-commit uninstall
-	pre-commit uninstall --hook-type pre-push
 
 print-python-env:
 	@./tools/print_env.sh

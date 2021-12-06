@@ -32,8 +32,8 @@ def _recurse_cli(
         element_name = cli_element.name or "kedro"
         io_dict[element_name] = {}
         for command_name in cli_element.list_commands(ctx):
-            _recurse_cli(  # type: ignore
-                cli_element.get_command(ctx, command_name),
+            _recurse_cli(
+                cli_element.get_command(ctx, command_name),  # type: ignore
                 ctx,
                 io_dict[element_name],
                 get_help,

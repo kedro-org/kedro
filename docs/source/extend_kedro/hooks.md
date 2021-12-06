@@ -17,10 +17,6 @@ A Hook is comprised of a Hook specification and Hook implementation. To add Hook
 
 ### Hook specification
 
-Kedro distinguishes between 2 main types of Hooks: execution timeline and component registration.
-
-#### Execution timeline Hooks
-
 Kedro defines Hook specifications for particular execution points where users can inject additional behaviour. Currently, the following Hook specifications are provided in [kedro.framework.hooks](/kedro.framework.hooks):
 
 * `after_catalog_created`

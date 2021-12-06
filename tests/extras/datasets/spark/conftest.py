@@ -4,52 +4,38 @@ this directory. You don't need to import the fixtures as pytest will
 discover them automatically. More info here:
 https://docs.pytest.org/en/latest/fixture.html
 """
-import gc
-from subprocess import Popen
-
 import pytest
+from delta import configure_spark_with_delta_pip
+from filelock import FileLock
 
 try:
-    from pyspark import SparkContext
     from pyspark.sql import SparkSession
 except ImportError:  # pragma: no cover
     pass  # this is only for test discovery to succeed on Python 3.8, 3.9
 
-the_real_getOrCreate = None
+
+def _setup_spark_session():
+    return configure_spark_with_delta_pip(
+        SparkSession.builder.appName("MyApp")
+        .master("local[*]")
+        .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
+        .config(
+            "spark.sql.catalog.spark_catalog",
+            "org.apache.spark.sql.delta.catalog.DeltaCatalog",
+        )
+    ).getOrCreate()
 
 
-class UseTheSparkSessionFixtureOrMock:  # pylint: disable=too-few-public-methods
-    pass
-
-
-# prevent using spark without going through the spark_session fixture
-@pytest.fixture(scope="session", autouse=True)
-def replace_spark_default_getorcreate():
-    global the_real_getOrCreate  # pylint: disable=global-statement
-    the_real_getOrCreate = SparkSession.builder.getOrCreate
-    SparkSession.builder.getOrCreate = UseTheSparkSessionFixtureOrMock
-    return the_real_getOrCreate
-
-
-# clean up pyspark after the test module finishes
-@pytest.fixture(scope="module")
-def spark_session():  # SKIP_IF_NO_SPARK
-    SparkSession.builder.getOrCreate = the_real_getOrCreate
-    spark = SparkSession.builder.getOrCreate()
+@pytest.fixture(scope="module", autouse=True)
+def spark_session(tmp_path_factory):  # SKIP_IF_NO_SPARK
+    # When running these spark tests with pytest-xdist, we need to make sure
+    # that the spark session setup on each test process don't interfere with each other.
+    # Therefore, we block the process during the spark session setup.
+    # Locking procedure comes from pytest-xdist's own recommendation:
+    # https://github.com/pytest-dev/pytest-xdist#making-session-scoped-fixtures-execute-only-once
+    root_tmp_dir = tmp_path_factory.getbasetemp().parent
+    lock = root_tmp_dir / "semaphore.lock"
+    with FileLock(lock):  # pylint: disable=abstract-class-instantiated
+        spark = _setup_spark_session()
     yield spark
     spark.stop()
-    SparkSession.builder.getOrCreate = UseTheSparkSessionFixtureOrMock
-
-    # remove the cached JVM vars
-    SparkContext._jvm = None  # pylint: disable=protected-access
-    SparkContext._gateway = None  # pylint: disable=protected-access
-
-    # py4j doesn't shutdown properly so kill the actual JVM process
-    for obj in gc.get_objects():
-        try:
-            if isinstance(obj, Popen) and "pyspark" in obj.args[0]:
-                obj.terminate()
-        except ReferenceError:  # pragma: no cover
-            # gc.get_objects may return dead weak proxy objects that will raise
-            # ReferenceError when you isinstance them
-            pass

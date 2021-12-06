@@ -224,6 +224,35 @@ class TestPipelinePullCommand:
         assert result.exit_code == 0, result.stderr
         assert "pulled and unpacked" in result.output
 
+    def test_pipeline_pull_nested_destination(
+        self,
+        fake_project_cli,
+        fake_repo_path,
+        fake_metadata,
+    ):
+        call_pipeline_create(fake_project_cli, fake_metadata)
+        call_pipeline_package(fake_project_cli, fake_metadata)
+
+        sdist_file = (
+            fake_repo_path / "dist" / _get_sdist_name(name=PIPELINE_NAME, version="0.1")
+        )
+
+        result = CliRunner().invoke(
+            fake_project_cli,
+            [
+                "pipeline",
+                "pull",
+                str(sdist_file),
+                "--destination",
+                "pipelines/nested",
+                "--alias",
+                PIPELINE_NAME,
+            ],
+            obj=fake_metadata,
+        )
+        assert result.exit_code == 0, result.stderr
+        assert "pulled and unpacked" in result.output
+
     def test_pipeline_alias_refactors_imports(  # pylint: disable=too-many-locals
         self, fake_project_cli, fake_package_path, fake_repo_path, fake_metadata
     ):

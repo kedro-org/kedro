@@ -29,7 +29,7 @@ KEDRO_PATH = Path(kedro.__file__).parent
 TEMPLATE_PATH = KEDRO_PATH / "templates" / "project"
 
 _STARTER_ALIASES = {
-    "astro-iris",
+    "astro-airflow-iris",
     "mini-kedro",
     "pandas-iris",
     "pyspark",
@@ -143,9 +143,7 @@ def starter():
 @starter.command("list")
 def list_starters():
     """List all official project starters available."""
-    repo_url = _STARTERS_REPO.replace("git+", "").replace(
-        ".git", "/tree/master/{alias}"
-    )
+    repo_url = _STARTERS_REPO.replace("git+", "").replace(".git", "/tree/main/{alias}")
     output = [
         {alias: repo_url.format(alias=alias)} for alias in sorted(_STARTER_ALIASES)
     ]

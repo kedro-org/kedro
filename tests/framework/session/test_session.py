@@ -249,14 +249,12 @@ STORE_LOGGER_NAME = "kedro.framework.session.store"
 
 class TestKedroSession:
     @pytest.mark.usefixtures("mock_settings_context_class")
-    @pytest.mark.usefixtures("mock_settings_config_loader_class")
     @pytest.mark.parametrize("env", [None, "env1"])
     @pytest.mark.parametrize("extra_params", [None, {"key": "val"}])
     def test_create(
         self,
         fake_project,
         mock_context_class,
-        mock_config_loader_class,
         fake_session_id,
         mock_package_name,
         mocker,
@@ -264,6 +262,7 @@ class TestKedroSession:
         extra_params,
     ):
         mock_click_ctx = mocker.patch("click.get_current_context").return_value
+        mocker.patch("kedro.framework.session.KedroSession._get_logging_config")
         session = KedroSession.create(
             mock_package_name, fake_project, env=env, extra_params=extra_params
         )
@@ -287,15 +286,13 @@ class TestKedroSession:
 
         assert session.store == expected_store
         assert session.load_context() is mock_context_class.return_value
-        assert session._get_config_loader() is mock_config_loader_class.return_value
+        assert isinstance(session._get_config_loader(), ConfigLoader)
 
     @pytest.mark.usefixtures("mock_settings_context_class")
-    @pytest.mark.usefixtures("mock_settings_config_loader_class")
     def test_create_no_env_extra_params(
         self,
         fake_project,
         mock_context_class,
-        mock_config_loader_class,
         fake_session_id,
         mock_package_name,
         mocker,
@@ -318,7 +315,7 @@ class TestKedroSession:
 
         assert session.store == expected_store
         assert session.load_context() is mock_context_class.return_value
-        assert session._get_config_loader() is mock_config_loader_class.return_value
+        assert isinstance(session._get_config_loader(), ConfigLoader)
 
     @pytest.mark.usefixtures("mock_settings")
     def test_load_context_with_envvar(

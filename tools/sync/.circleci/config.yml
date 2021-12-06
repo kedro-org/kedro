@@ -1,0 +1,297 @@
+version: 2.1
+
+parameters:
+  release_kedro:
+    type: boolean
+    default: false
+
+executors:
+  generic:
+    docker:
+      # https://circleci.com/docs/2.0/circleci-images/#circleci-base-image
+      - image: cimg/base:2020.01
+  build_executor:
+    docker:
+      - image: cimg/python:3.8
+  py36:
+    docker:
+      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.6
+  py37:
+    docker:
+      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.7
+  py38:
+    docker:
+      - image: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder:3.8
+
+commands:
+  configure_ssh_keys:
+    description: Configure SSH keys
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "a0:3f:6a:d9:c3:c7:c2:56:e7:38:bc:ce:d2:dc:9e:be"
+            - "47:e5:59:20:85:dc:c6:13:de:c4:68:0f:a6:46:36:7e"
+  remove_ssh_config:
+    steps:
+      - run:
+          name: Remove SSH config
+          command: rm ~/.ssh/config
+  activate_conda:
+    steps:
+      - run:
+          name: Activate conda environment
+          command: |
+            echo ". /home/circleci/miniconda/etc/profile.d/conda.sh" >> $BASH_ENV
+            echo "conda deactivate; conda activate kedro_builder" >> $BASH_ENV
+  clone_repo:
+    steps:
+      - run:
+          name: Clone Kedro repo
+          command: |
+            mkdir -v ~/kedro/
+            ssh-add -D
+            ssh-add ~/.ssh/id_rsa_47e5592085dcc613dec4680fa646367e
+            git clone --single-branch --branch main git@github.com:quantumblacklabs/kedro.git ~/kedro/
+            echo "cd ~/kedro" >> $BASH_ENV
+  setup_pip:
+    steps:
+      - run:
+          name: Install PIP dependencies
+          command: |
+            # Install pip setuptools
+            make install-pip-setuptools
+
+            # Install requirements
+            pip install -r requirements.txt -U
+
+            # Install test requirements
+            pip install -r test_requirements.txt -U
+  build_kedro:
+    description: Build Kedro
+    steps:
+      - checkout
+      - configure_ssh_keys
+      - remove_ssh_config
+      - activate_conda
+      - clone_repo
+      - setup_pip
+      - run:
+          name: Run pylint and flake8
+          command: make lint
+      - run:
+          name: Run tests
+          command: |
+            make test
+      - run:
+          name: Run all end to end tests
+          command: make e2e-tests
+
+jobs:
+  sync:
+    executor: generic
+    steps:
+      - checkout
+      - configure_ssh_keys
+      - remove_ssh_config
+      - run:
+          name: Clone the public kedro repository
+          command: |
+            git config --global user.email "kedro@quantumblack.com"
+            git config --global user.name "QuantumBlack Labs"
+            mkdir -v ~/kedro/
+            ssh-add -D
+            ssh-add ~/.ssh/id_rsa_a03f6ad9c3c7c256e738bcced2dc9ebe
+            git clone --single-branch --branch master git@github.com:quantumblacklabs/kedro.git ~/kedro/
+      - run:
+          name: Trigger Read The Docs build
+          command: |
+            if [ -n "$MAIN_BRANCH_CHANGED" ]
+            then
+                ./rtd-build.sh ${RTD_TOKEN} latest
+            fi
+      - run:
+          name: Maybe trigger the release workflow
+          command: |
+            if [ -n "$MAIN_BRANCH_CHANGED" ]
+            then
+                KEDRO_VERSION=$(github_scripts/kedro_version.py "$MAIN_BRANCH_CHANGED/kedro")
+
+                if ./check-no-version-pypi.sh "${KEDRO_VERSION}"
+                then
+                    echo "Starting the release of Kedro ${KEDRO_VERSION}!"
+                    ./circle-release.sh github/quantumblacklabs/private-kedro-sync
+                else
+                    echo "Kedro version ${KEDRO_VERSION} already exists on PyPI, skipping..."
+                fi
+            fi
+      - run:
+          name: Maybe merge main into develop or raise a PR
+          command: |
+            ./github_scripts/merge.sh ~/kedro/ "main" "develop" "${GITHUB_TAGGING_TOKEN}"
+      - run:
+          name: Maybe merge an automatic PR into develop
+          command: ./github_scripts/attempt_merge_pr.sh "merge-main-to-develop" "develop" "${GITHUB_TAGGING_TOKEN}"
+
+  build_36:
+    executor: py36
+    steps: [build_kedro]
+    resource_class: medium+
+
+  build_37:
+    executor: py37
+    steps: [build_kedro]
+    resource_class: medium+
+
+  build_38:
+    executor: py38
+    steps: [build_kedro]
+    resource_class: medium+
+
+  build_docker_image:
+    executor: build_executor
+    environment:
+      ECR_IMAGE_URL: 350138855857.dkr.ecr.eu-west-2.amazonaws.com/kedro-builder
+      AWS_REGION: eu-west-2
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - checkout
+      - configure_ssh_keys
+      - remove_ssh_config
+      - clone_repo
+      - run:
+          name: Setup AWS CLI
+          command: pip install -U awscli
+      - run:
+          name: Login to AWS ECR
+          command: |
+            aws ecr get-login-password --region ${AWS_REGION} | \
+            docker login --username AWS --password-stdin "${ECR_IMAGE_URL}"
+      - run:
+          name: Build docker images
+          command: ~/project/docker_build_img/build.sh "${HOME}/kedro" "${ECR_IMAGE_URL}"
+          no_output_timeout: 20m
+      - run:
+          name: Logout from AWS ECR
+          command: docker logout "${ECR_IMAGE_URL}"
+          when: always  # logout even if the previous step has failed
+
+  check_package_updates:
+    executor: py36
+    steps:
+      - checkout
+      - configure_ssh_keys
+      - remove_ssh_config
+      - activate_conda
+      - clone_repo
+      - run:
+          name: Check package updates
+          command: ~/project/check_package_updates.py
+
+  publish_kedro:
+    executor: py36
+    steps:
+      - checkout
+      - configure_ssh_keys
+      - remove_ssh_config
+      - activate_conda
+      - clone_repo
+      - run:
+          name: Check Kedro version
+          command: |
+            KEDRO_VERSION=$(~/project/github_scripts/kedro_version.py ./kedro)
+
+            if ~/project/check-no-version-pypi.sh "${KEDRO_VERSION}"
+            then
+                echo "export KEDRO_VERSION=\"${KEDRO_VERSION}\"" >> $BASH_ENV
+            else
+                echo "Error: Kedro version ${KEDRO_VERSION} already exists on PyPI"
+                exit 1
+            fi
+      - run:
+          name: Tag and publish release on Github
+          command: |
+            ~/project/github_scripts/release.sh quantumblacklabs kedro \
+            ${GITHUB_TAGGING_TOKEN} ${KEDRO_VERSION}
+      - run:
+          name: Publish to PyPI
+          command: |
+            make package
+            python -m pip install twine -U
+            python -m twine upload --repository-url ${TWINE_REPOSITORY_URL} dist/*
+      - run:
+          name: Trigger Read The Docs build
+          command: |
+            ~/project/rtd-build.sh ${RTD_TOKEN} stable
+            # give some time for GitHub release to propagate
+            # otherwise RTD fails to build a new tag
+            sleep 120
+            ~/project/rtd-build.sh ${RTD_TOKEN} ${KEDRO_VERSION}
+
+workflows:
+  version: 2
+  scheduled:
+    triggers:
+      - schedule:
+          cron: "0 * * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - sync
+
+  nightly_build_run:
+    triggers:
+      - schedule:
+          cron: "30 2 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - build_docker_image
+      - build_36:
+          requires:
+            - build_docker_image
+      - build_37:
+          requires:
+            - build_docker_image
+      - build_38:
+          requires:
+            - build_docker_image
+
+  weekly_updates_checks:
+    triggers:
+      - schedule:
+          cron: "00 00 * * 0"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - check_package_updates
+
+  regular:
+    unless: << pipeline.parameters.release_kedro >>  # don't run if 'release_kedro' flag is set
+    jobs:
+      - sync:
+          filters:
+            branches:
+              only:
+                - master
+      - build_36
+      - build_37
+      - build_38
+
+  do_kedro_release:
+    when: << pipeline.parameters.release_kedro >>  # only run if 'release_kedro' flag is set
+    jobs:
+      - build_36
+      - build_37
+      - build_38
+      - publish_kedro:
+          requires:
+            - build_36
+            - build_37
+            - build_38
